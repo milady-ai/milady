@@ -579,80 +579,81 @@ async function ensureTelegramBotPolling(runtime: AgentRuntime): Promise<void> {
         reply: (t: string) => Promise<unknown>;
       }) => {
         try {
-        const text = ctx.message?.text;
-        if (!text) return;
-        const chatId = ctx.message.chat?.id ?? 0;
+          const text = ctx.message?.text;
+          if (!text) return;
+          const chatId = ctx.message.chat?.id ?? 0;
 
-        // Check allowed chats (reads live from process.env — no restart needed)
-        const allowedChats = process.env.TELEGRAM_ALLOWED_CHATS;
-        if (
-          allowedChats &&
-          allowedChats.trim() !== "" &&
-          allowedChats.trim() !== "[]"
-        ) {
-          try {
-            if (
-              !(JSON.parse(allowedChats) as string[]).includes(String(chatId))
-            )
+          // Check allowed chats (reads live from process.env — no restart needed)
+          const allowedChats = process.env.TELEGRAM_ALLOWED_CHATS;
+          if (
+            allowedChats &&
+            allowedChats.trim() !== "" &&
+            allowedChats.trim() !== "[]"
+          ) {
+            try {
+              if (
+                !(JSON.parse(allowedChats) as string[]).includes(String(chatId))
+              )
+                return;
+            } catch {
               return;
-          } catch {
-            return;
+            }
           }
-        }
 
-        const username =
-          ctx.message.from?.username ??
-          ctx.message.from?.first_name ??
-          "Unknown";
-        logger.info(
-          `[milady] Telegram message from @${username}: ${text.substring(0, 80)}`,
-        );
-
-        let history = chatHistories.get(chatId);
-        if (!history) {
-          history = [];
-          chatHistories.set(chatId, history);
-          // Evict oldest chat entry to prevent unbounded memory growth
-          if (chatHistories.size > 500) {
-            const oldest = chatHistories.keys().next().value;
-            if (oldest !== undefined) chatHistories.delete(oldest);
-          }
-        }
-        history.push({ role: "user", content: `@${username}: ${text}` });
-        if (history.length > 20) history.splice(0, history.length - 20);
-
-        try {
-          const conv = history
-            .map(
-              (m) => `${m.role === "user" ? "User" : char.name}: ${m.content}`,
-            )
-            .join("\n");
-          const modelRuntime = runtime as AgentRuntime & RuntimeModelCompat;
-          if (typeof modelRuntime.useModel !== "function") {
-            logger.warn("[milady] Telegram runtime missing useModel");
-            return;
-          }
-          // biome-ignore lint/correctness/useHookAtTopLevel: false positive, hook is at module level
-          const response = await modelRuntime.useModel(ModelType.TEXT_LARGE, {
-            prompt: `${systemPrompt}\n\nConversation:\n${conv}\n\n${char.name}:`,
-          });
-          const responseText =
-            typeof response === "string"
-              ? response
-              : ((response as { text?: string })?.text ?? "");
-          if (responseText) {
-            history.push({ role: "assistant", content: responseText });
-            await ctx.reply(responseText);
-            logger.info(`[milady] Telegram replied to @${username}`);
-          }
-        } catch (err) {
-          logger.warn(
-            `[milady] Telegram response error: ${err instanceof Error ? err.message : String(err)}`,
+          const username =
+            ctx.message.from?.username ??
+            ctx.message.from?.first_name ??
+            "Unknown";
+          logger.info(
+            `[milady] Telegram message from @${username}: ${text.substring(0, 80)}`,
           );
-          await ctx
-            .reply("Sorry, I encountered an error processing your message.")
-            .catch(() => {});
-        }
+
+          let history = chatHistories.get(chatId);
+          if (!history) {
+            history = [];
+            chatHistories.set(chatId, history);
+            // Evict oldest chat entry to prevent unbounded memory growth
+            if (chatHistories.size > 500) {
+              const oldest = chatHistories.keys().next().value;
+              if (oldest !== undefined) chatHistories.delete(oldest);
+            }
+          }
+          history.push({ role: "user", content: `@${username}: ${text}` });
+          if (history.length > 20) history.splice(0, history.length - 20);
+
+          try {
+            const conv = history
+              .map(
+                (m) =>
+                  `${m.role === "user" ? "User" : char.name}: ${m.content}`,
+              )
+              .join("\n");
+            const modelRuntime = runtime as AgentRuntime & RuntimeModelCompat;
+            if (typeof modelRuntime.useModel !== "function") {
+              logger.warn("[milady] Telegram runtime missing useModel");
+              return;
+            }
+            // biome-ignore lint/correctness/useHookAtTopLevel: false positive, hook is at module level
+            const response = await modelRuntime.useModel(ModelType.TEXT_LARGE, {
+              prompt: `${systemPrompt}\n\nConversation:\n${conv}\n\n${char.name}:`,
+            });
+            const responseText =
+              typeof response === "string"
+                ? response
+                : ((response as { text?: string })?.text ?? "");
+            if (responseText) {
+              history.push({ role: "assistant", content: responseText });
+              await ctx.reply(responseText);
+              logger.info(`[milady] Telegram replied to @${username}`);
+            }
+          } catch (err) {
+            logger.warn(
+              `[milady] Telegram response error: ${err instanceof Error ? err.message : String(err)}`,
+            );
+            await ctx
+              .reply("Sorry, I encountered an error processing your message.")
+              .catch(() => {});
+          }
         } catch (outerErr) {
           logger.warn(
             `[milady] Telegram handler error: ${outerErr instanceof Error ? outerErr.message : String(outerErr)}`,

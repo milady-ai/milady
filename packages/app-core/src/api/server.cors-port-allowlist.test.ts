@@ -86,9 +86,7 @@ describe("isAllowedLocalOrigin", () => {
   });
 
   it("allows [::1] on configured port", () => {
-    expect(isAllowedLocalOrigin("http://[::1]:18789", defaultPorts)).toBe(
-      true,
-    );
+    expect(isAllowedLocalOrigin("http://[::1]:18789", defaultPorts)).toBe(true);
   });
 
   it("rejects localhost on non-configured port", () => {

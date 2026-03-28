@@ -51,6 +51,7 @@ const ENV_KEYS_TO_SAVE = [
   "MILADY_CONFIG_PATH",
   "ELIZA_API_TOKEN",
   "MILADY_API_TOKEN",
+  "MILADY_DEV_AUTH_BYPASS",
   "EVM_PRIVATE_KEY",
   "SOLANA_PRIVATE_KEY",
 ] as const;
@@ -147,6 +148,7 @@ describe("GET /api/wallet/keys", () => {
 
   it("allows loopback development requests without a token during active onboarding", async () => {
     process.env.NODE_ENV = "development";
+    process.env.MILADY_DEV_AUTH_BYPASS = "1";
     await fs.writeFile(
       path.join(tempDir, "eliza.json"),
       JSON.stringify({

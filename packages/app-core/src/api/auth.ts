@@ -82,12 +82,15 @@ export function _resetAuthRateLimiter(): void {
   authAttempts.clear();
 }
 
-const authSweepTimer = setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of authAttempts) {
-    if (now > entry.resetAt) authAttempts.delete(key);
-  }
-}, 5 * 60 * 1000);
+const authSweepTimer = setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, entry] of authAttempts) {
+      if (now > entry.resetAt) authAttempts.delete(key);
+    }
+  },
+  5 * 60 * 1000,
+);
 if (typeof authSweepTimer === "object" && "unref" in authSweepTimer) {
   authSweepTimer.unref();
 }

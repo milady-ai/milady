@@ -1209,9 +1209,7 @@ function startVite() {
   });
 
   viteProcess.on("error", (err) => {
-    console.error(
-      `  ${green(logPrefix)} Failed to start vite: ${err.message}`,
-    );
+    console.error(`  ${green(logPrefix)} Failed to start vite: ${err.message}`);
     cleanup(1);
   });
 

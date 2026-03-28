@@ -8,7 +8,15 @@
  * auth on mutation routes.
  */
 
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { req } from "../../../../test/helpers/http";
 import { _resetAuthRateLimiter } from "./auth";
 import { startApiServer } from "./server";
