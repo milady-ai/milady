@@ -39,14 +39,10 @@ describe("buildCommands", () => {
       .find((command) => command.id === "desktop-open-workspace")
       ?.action();
     desktopCommands
-      .find((command) => command.id === "desktop-command-browser")
-      ?.action();
-    desktopCommands
       .find((command) => command.id === "desktop-focus-main-window")
       ?.action();
 
     expect(openDesktopSettingsWindow).toHaveBeenCalledWith("desktop");
-    expect(openDesktopSurfaceWindow).toHaveBeenCalledWith("browser");
     expect(focusDesktopMainWindow).toHaveBeenCalledTimes(1);
   });
 

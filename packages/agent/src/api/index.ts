@@ -51,8 +51,6 @@ export {
 } from "./signal-routes";
 export * from "./stream-route-state";
 export * from "./stream-routes";
-export type { StreamVoiceRouteContext } from "./stream-voice-routes";
-export { handleStreamVoiceRoute } from "./stream-voice-routes";
 export * from "./streaming-text";
 export * from "./subscription-routes";
 export * from "./terminal-run-limits";

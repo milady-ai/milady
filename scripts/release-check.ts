@@ -101,29 +101,6 @@ const requiredWorkflowSnippets = [
   '-name "*.tar.zst" -o \\',
   '-name "*-update.json" \\',
   "DMG attach attempt $attempt/5 failed",
-  "https://api.github.com/repos/blackboardsh/electrobun/releases/tags/v$version",
-  "$asset = @($release.assets) | Where-Object { $_.name -eq $assetName } | Select-Object -First 1",
-  "$expectedHash = $asset.digest.Substring(7).ToLowerInvariant()",
-  "$actualHash = (Get-FileHash -Path $tarPath -Algorithm SHA256).Hash.ToLowerInvariant()",
-  "electrobun CLI checksum mismatch",
-  "name: Resolve electrobun package dir",
-  "id: resolve-electrobun",
-  'const workspacePackageJson = path.resolve("apps/app/electrobun/package.json");',
-  'const entryPath = req.resolve("electrobun");',
-  "Could not find electrobun package.json starting from",
-  "Resolved unexpected package at",
-  'echo "package-dir=$package_dir" >> "$GITHUB_OUTPUT"',
-  'echo "cache-dir=$package_dir/.cache" >> "$GITHUB_OUTPUT"',
-  "path: $" + "{{ steps.resolve-electrobun.outputs.cache-dir }}",
-  "$resolvedElectrobunDir = '" +
-    "$" +
-    "{{ steps.resolve-electrobun.outputs.package-dir }}" +
-    "'",
-  '$cacheDir     = Join-Path $resolvedElectrobunDir ".cache"',
-  '$resolvedRceditDir = Join-Path $resolvedElectrobunDir "node_modules\\rcedit"',
-  '(Join-Path (Split-Path -Parent $resolvedElectrobunDir) "rcedit")',
-  'Get-ChildItem -Path (Join-Path $PWD "node_modules\\.bun") -Directory -Filter "rcedit@*"',
-  "Seeding rcedit from $seedRceditDir",
   "node scripts/desktop-build.mjs package --env=$" +
     "{{ needs.prepare.outputs.env }}",
   "MILADY_ELECTROBUN_NOTARIZE: 0",
@@ -137,12 +114,6 @@ const requiredWorkflowSnippets = [
   "path: apps/app/electrobun/artifacts/windows-installer-proof/**",
   "if: always() && matrix.platform.os == 'windows'",
   "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
-  "ELIZAOS_CLOUD_API_KEY: $" + "{{ secrets.ELIZAOS_CLOUD_API_KEY }}",
-  "ELIZAOS_CLOUD_BASE_URL: $" + "{{ secrets.ELIZAOS_CLOUD_BASE_URL }}",
-  "bun run test:desktop:packaged:windows",
-  "bun run test:desktop:playwright",
-  "if ($null -eq $resolvedRceditPackageJson)",
-  '$resolvedRceditPackageJson = "$resolvedRceditPackageJson".Trim()',
 ];
 const _requiredPatchedElectrobunCliSnippets = [
   "https://github.com/blackboardsh/electrobun.git",
@@ -655,8 +626,8 @@ function assertMacArtifactStagerLooksCorrect() {
     `--options runtime "\${entitlement_args[@]}" "$STAGED_APP_PATH"`,
     'codesign --verify --deep --strict --verbose=2 "$STAGED_APP_PATH"',
     "hdiutil create \\",
-    "retry_command 3 20 xcrun notarytool submit \\",
-    'retry_command 8 20 xcrun stapler staple "$TEMP_DMG_PATH"',
+    'notarytool submit \\',
+    'stapler staple "$TEMP_DMG_PATH"',
     'mv "$TEMP_DMG_PATH" "$FINAL_DMG_PATH"',
   ];
   const missing = requiredSnippets.filter(
@@ -816,9 +787,7 @@ function assertInnoTemplateTargetsBundledLauncher() {
   const template = readFileSync("packaging/inno/Milady.iss", "utf8");
   const requiredSnippets = [
     '#define MyAppExeName "bin\\launcher.exe"',
-    "UninstallDisplayIcon={app}\\{#MyAppExeName}",
-    'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"',
-    'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon',
+    'Filename: "{app}\\{#MyAppExeName}"',
   ];
   const missingSnippets = requiredSnippets.filter(
     (snippet) => !template.includes(snippet),

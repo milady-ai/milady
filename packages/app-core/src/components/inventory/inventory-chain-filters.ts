@@ -16,7 +16,9 @@ export const DEFAULT_INVENTORY_CHAIN_FILTERS: InventoryChainFilters = {
   solana: true,
 };
 
-function isPrimaryInventoryChainKey(k: ChainKey): k is PrimaryInventoryChainKey {
+function isPrimaryInventoryChainKey(
+  k: ChainKey,
+): k is PrimaryInventoryChainKey {
   return (PRIMARY_CHAIN_KEYS as readonly ChainKey[]).includes(k);
 }
 

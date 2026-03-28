@@ -34,7 +34,9 @@ describe("SelectItem checkmark spacing", () => {
     expect(selectSource).toContain('Check className="h-3 w-3"');
   });
 
-  it("uses gap between checkmark and text instead of padding hack", () => {
-    expect(selectSource).toMatch(/SelectPrimitive\.Item[\s\S]*?gap-1\.5/);
+  it("uses flex layout with proper spacing between text and checkmark", () => {
+    // The item uses flex with the text taking flex-1 and the checkmark shrink-0
+    expect(selectSource).toMatch(/SelectPrimitive\.Item[\s\S]*?flex/);
+    expect(selectSource).toContain("flex-1");
   });
 });

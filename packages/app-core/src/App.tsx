@@ -223,7 +223,6 @@ function ViewRouter({
       case "runtime":
       case "database":
       case "desktop":
-      case "lifo":
       case "logs":
       case "security":
         return (

@@ -48,7 +48,6 @@
     "packages/app-core/src/**/*.test.ts",
     "packages/app-core/src/**/*.test.tsx",
     "packages/app-core/src/**/test-helpers.ts",
-    "packages/app-core/src/services/training-service.ts",
-    "packages/app-core/src/plugins/retake/**"
+    "packages/app-core/src/services/training-service.ts"
   ]
 }

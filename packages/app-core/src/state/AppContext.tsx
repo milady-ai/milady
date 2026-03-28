@@ -7238,11 +7238,10 @@ function AppProviderInner({
             setUnreadConversations((prev) => new Set([...prev, convId]));
           }
 
-          // Synthesize agent_event for non-retake sources (e.g. discord)
+          // Synthesize agent_event for non-client_chat sources (e.g. discord)
           // so they appear in the StreamView activity feed
           if (
             msg.source &&
-            msg.source !== "retake" &&
             msg.source !== "client_chat" &&
             msg.role === "user"
           ) {

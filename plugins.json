@@ -4523,61 +4523,6 @@
       }
     },
     {
-      "id": "retake",
-      "dirName": "plugin-retake",
-      "name": "Retake.tv",
-      "npmName": "@elizaos/plugin-retake",
-      "description": "Live video streaming connector for retake.tv",
-      "category": "streaming",
-      "homepage": "https://retake.tv",
-      "repository": "https://github.com/elizaos-plugins/plugin-retake",
-      "setupGuideUrl": "https://docs.milady.ai/plugin-setup-guide#retaketv",
-      "envKey": "RETAKE_ACCESS_TOKEN",
-      "configKeys": [
-        "RETAKE_ACCESS_TOKEN",
-        "RETAKE_API_URL",
-        "RETAKE_CAPTURE_URL"
-      ],
-      "pluginParameters": {
-        "RETAKE_ACCESS_TOKEN": {
-          "type": "string",
-          "description": "Access token for retake.tv API",
-          "required": false,
-          "sensitive": true
-        },
-        "RETAKE_API_URL": {
-          "type": "string",
-          "description": "Retake.tv API base URL",
-          "required": false,
-          "sensitive": false
-        },
-        "RETAKE_CAPTURE_URL": {
-          "type": "string",
-          "description": "Capture URL for retake.tv stream",
-          "required": false,
-          "sensitive": false
-        }
-      },
-      "configUiHints": {
-        "RETAKE_ACCESS_TOKEN": {
-          "label": "Access Token",
-          "group": "Authentication",
-          "width": "full"
-        },
-        "RETAKE_API_URL": {
-          "label": "API URL",
-          "group": "Connection",
-          "width": "half"
-        },
-        "RETAKE_CAPTURE_URL": {
-          "label": "Capture URL",
-          "group": "Connection",
-          "width": "half"
-        }
-      },
-      "tags": ["streaming", "broadcast", "retake", "rtmp", "chat"]
-    },
-    {
       "id": "rlm",
       "dirName": "plugin-rlm",
       "name": "Rlm",

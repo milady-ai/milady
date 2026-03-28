@@ -1108,7 +1108,7 @@ export function CharacterEditor({
               defaultValue: "Character editor — tabbed sections",
             })}
           >
-            <div className="flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               <div
                 className={CHARACTER_EDITOR_TABLIST_CLASSNAME}
                 style={{ boxShadow: pageTabsBoxShadow }}

@@ -563,9 +563,8 @@ describe("KnowledgeView UI", () => {
     const searchForm = tree?.root.findAllByType("form")[0];
 
     expect(chooseFolderButton).toBeUndefined();
+    expect(chooseFilesButton).toBeUndefined();
     expect(searchForm?.props.className).toContain("max-w-[500px]");
-    expect(chooseFilesButton?.props.className).toContain("h-10");
-    expect(chooseFilesButton?.props.className).toContain("text-txt");
     expect(searchButton?.props.className).toContain("h-10");
     expect(searchButton?.props.className).toContain("text-txt");
   });

@@ -638,8 +638,6 @@ function cancelOnboarding(): never {
  * Eliza stores channel credentials under `config.channels.<name>.<field>`,
  * while elizaOS plugins read them from process.env.
  */
-const RETAKE_CHANNEL_ACCESS_TOKEN_ENV = "RETAKE_AGENT_TOKEN";
-
 const CHANNEL_ENV_MAP: Readonly<
   Record<string, Readonly<Record<string, string>>>
 > = {
@@ -680,10 +678,6 @@ const CHANNEL_ENV_MAP: Readonly<
     webhookUrl: "BLOOIO_WEBHOOK_URL",
     webhookPort: "BLOOIO_WEBHOOK_PORT",
   },
-  retake: {
-    accessToken: RETAKE_CHANNEL_ACCESS_TOKEN_ENV,
-    apiUrl: "RETAKE_API_URL",
-  },
 };
 
 // ---------------------------------------------------------------------------
@@ -723,7 +717,6 @@ export const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   feishu: "@elizaos/plugin-feishu",
   matrix: "@elizaos/plugin-matrix",
   nostr: "@elizaos/plugin-nostr",
-  retake: "@elizaos/plugin-retake",
   blooio: "@elizaos/plugin-blooio",
   twitch: "@elizaos/plugin-twitch",
 };
@@ -1250,7 +1243,6 @@ const WORKSPACE_PLUGIN_OVERRIDES = new Set<string>([
   // "@elizaos/plugin-media-generation",
   "@elizaos/plugin-twitch-streaming",
   "@elizaos/plugin-youtube-streaming",
-  "@elizaos/plugin-retake",
 ]);
 
 function getWorkspacePluginOverridePath(pluginName: string): string | null {

@@ -48,7 +48,7 @@ import {
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
-  APP_SIDEBAR_RAIL_CLASSNAME
+  APP_SIDEBAR_RAIL_CLASSNAME,
 } from "./sidebar-shell-styles";
 
 const MAX_UPLOAD_REQUEST_BYTES = 32 * 1_048_576; // Must match server knowledge route limit
@@ -253,10 +253,11 @@ function UploadZone({
         <span className="min-w-0">{t("knowledgeview.IncludeAIImageDes")}</span>
       </label>
       <div
-        className={`mt-3 rounded-2xl border px-3 py-3 transition-colors ${dragOver
-          ? "border-accent/50 bg-accent/8 shadow-sm"
-          : "border-dashed border-border/35 bg-card/62"
-          } ${uploading ? "opacity-60" : ""}`}
+        className={`mt-3 rounded-2xl border px-3 py-3 transition-colors ${
+          dragOver
+            ? "border-accent/50 bg-accent/8 shadow-sm"
+            : "border-dashed border-border/35 bg-card/62"
+        } ${uploading ? "opacity-60" : ""}`}
       >
         {(dragOver || uploading) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted/80">
@@ -333,16 +334,18 @@ function SearchResultListItem({
       type="button"
       onClick={() => onSelect(result.documentId || result.id)}
       aria-current={active ? "page" : undefined}
-      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} h-auto w-full ${active
-        ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
-        : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
-        }`}
+      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} h-auto w-full ${
+        active
+          ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
+          : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
+      }`}
     >
       <span
-        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[10px] font-semibold ${active
-          ? "border-accent/30 bg-accent/18 text-txt-strong"
-          : "border-border/50 bg-bg-accent/80 text-muted"
-          }`}
+        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[10px] font-semibold ${
+          active
+            ? "border-accent/30 bg-accent/18 text-txt-strong"
+            : "border-border/50 bg-bg-accent/80 text-muted"
+        }`}
       >
         {(result.similarity * 100).toFixed(0)}%
       </span>
@@ -378,16 +381,18 @@ function DocumentListItem({
 }) {
   return (
     <div
-      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} ${active
-        ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
-        : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
-        }`}
+      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} ${
+        active
+          ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
+          : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
+      }`}
     >
       <span
-        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[11px] font-semibold ${active
-          ? "border-accent/30 bg-accent/18 text-txt-strong"
-          : "border-border/50 bg-bg-accent/80 text-muted"
-          }`}
+        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[11px] font-semibold ${
+          active
+            ? "border-accent/30 bg-accent/18 text-txt-strong"
+            : "border-border/50 bg-bg-accent/80 text-muted"
+        }`}
       >
         {getKnowledgeTypeLabel(doc.contentType).slice(0, 3)}
       </span>
@@ -816,14 +821,14 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
           typeof window === "undefined"
             ? true
             : await confirmDesktopAction({
-              title: "Upload Large Files",
-              message: `${largeFiles.length} large file(s) detected.`,
-              detail:
-                "Uploading can take longer and may increase embedding or vision costs.",
-              confirmLabel: "Continue",
-              cancelLabel: "Cancel",
-              type: "warning",
-            });
+                title: "Upload Large Files",
+                message: `${largeFiles.length} large file(s) detected.`,
+                detail:
+                  "Uploading can take longer and may increase embedding or vision costs.",
+                confirmLabel: "Continue",
+                cancelLabel: "Cancel",
+                type: "warning",
+              });
         if (!shouldContinue) return;
       }
 
@@ -1207,25 +1212,25 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
 
                 {isShowingSearchResults
                   ? visibleSearchResults.map((result) => (
-                    <SearchResultListItem
-                      key={result.id}
-                      result={result}
-                      active={
-                        selectedDocId === (result.documentId || result.id)
-                      }
-                      onSelect={setSelectedDocId}
-                    />
-                  ))
+                      <SearchResultListItem
+                        key={result.id}
+                        result={result}
+                        active={
+                          selectedDocId === (result.documentId || result.id)
+                        }
+                        onSelect={setSelectedDocId}
+                      />
+                    ))
                   : documents.map((doc) => (
-                    <DocumentListItem
-                      key={doc.id}
-                      doc={doc}
-                      active={selectedDocId === doc.id}
-                      onSelect={setSelectedDocId}
-                      onDelete={handleDelete}
-                      deleting={deleting === doc.id}
-                    />
-                  ))}
+                      <DocumentListItem
+                        key={doc.id}
+                        doc={doc}
+                        active={selectedDocId === doc.id}
+                        onSelect={setSelectedDocId}
+                        onDelete={handleDelete}
+                        deleting={deleting === doc.id}
+                      />
+                    ))}
               </div>
             </div>
           </div>

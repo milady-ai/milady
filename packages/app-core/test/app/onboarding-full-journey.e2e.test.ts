@@ -106,7 +106,6 @@ const { companionOverlayTabs, mockUseApp } = vi.hoisted(() => ({
     "apps",
     "connectors",
     "knowledge",
-    "lifo",
     "stream",
     "wallets",
   ]),
@@ -148,7 +147,6 @@ vi.mock("@miladyai/app-core/components", async () => {
     Header: () => React.createElement("div", null, "Header"),
     InventoryView: () => React.createElement("div", null, "InventoryView"),
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-    LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
     OnboardingWizard: () => {
       const state = mockUseApp();
       if (state.onboardingStep === "cloud_login") {
@@ -443,9 +441,6 @@ vi.mock("@miladyai/app-core/src/components/InventoryView", () => ({
 }));
 vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-}));
-vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
 }));
 vi.mock("@miladyai/app-core/src/components/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),

@@ -708,7 +708,7 @@ export interface ConversationMessage {
   blocks?: ContentBlock[];
   /** Source channel when forwarded from another channel (e.g. "autonomy"). */
   source?: string;
-  /** Username of the sender (e.g. retake viewer username, discord username). */
+  /** Username of the sender (e.g. viewer username, discord username). */
   from?: string;
   /** True when the SSE stream was interrupted before receiving a "done" event. */
   interrupted?: boolean;

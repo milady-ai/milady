@@ -10,7 +10,6 @@ export * from "./log-level";
 export * from "./media";
 export * from "./reinject-plugin";
 export * from "./stream-control";
-export * from "./switch-stream-source";
 export * from "./sync-plugin";
 export * from "./terminal";
 export * from "./transfer-token";

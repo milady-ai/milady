@@ -42,7 +42,7 @@ import {
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
-  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
 } from "./sidebar-shell-styles";
 
 const DATABASE_SHELL_CLASS = APP_DESKTOP_SPLIT_SHELL_CLASSNAME;
@@ -521,10 +521,11 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
         size="sm"
         role="tab"
         aria-selected={view === "tables"}
-        className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${view === "tables"
-          ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
-          : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
-          }`}
+        className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${
+          view === "tables"
+            ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
+            : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
+        }`}
         onClick={() => setView("tables")}
       >
         {t("databaseview.TableEditor")}
@@ -534,10 +535,11 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
         size="sm"
         role="tab"
         aria-selected={view === "query"}
-        className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${view === "query"
-          ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
-          : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
-          }`}
+        className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${
+          view === "query"
+            ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
+            : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
+        }`}
         onClick={() => setView("query")}
       >
         {t("databaseview.SQLEditor")}
@@ -549,10 +551,11 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
     <DesktopRailSummaryCard className="mt-4">
       <div className="flex items-center gap-2 text-sm font-medium text-txt">
         <span
-          className={`h-2.5 w-2.5 rounded-full ${dbStatus?.connected
-            ? "bg-ok shadow-[0_0_8px_rgba(34,197,94,0.5)]"
-            : "bg-danger"
-            }`}
+          className={`h-2.5 w-2.5 rounded-full ${
+            dbStatus?.connected
+              ? "bg-ok shadow-[0_0_8px_rgba(34,197,94,0.5)]"
+              : "bg-danger"
+          }`}
         />
         <span>{dbStatus?.provider ?? t("onboarding.connecting")}</span>
       </div>
@@ -628,16 +631,18 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                         variant="ghost"
                         key={table.name}
                         onClick={() => handleSelectTable(table.name)}
-                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${selectedTable === table.name
-                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                          }`}
+                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${
+                          selectedTable === table.name
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                        }`}
                       >
                         <span
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${selectedTable === table.name
-                            ? "border-accent/30 bg-accent/18 text-txt-strong"
-                            : "border-border/50 bg-bg-accent/80 text-muted"
-                            }`}
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
+                            selectedTable === table.name
+                              ? "border-accent/30 bg-accent/18 text-txt-strong"
+                              : "border-border/50 bg-bg-accent/80 text-muted"
+                          }`}
                         >
                           {table.name.slice(0, 1).toUpperCase()}
                         </span>
@@ -855,8 +860,8 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                     {queryLoading
                       ? t("common.running", { defaultValue: "Running..." })
                       : t("databaseview.runQuery", {
-                        defaultValue: "Run Query",
-                      })}
+                          defaultValue: "Run Query",
+                        })}
                   </Button>
                   <kbd className="text-[10px] text-muted font-mono bg-bg/50 px-2 py-1 rounded-md border border-border/30 shadow-inner tracking-wider">
                     {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}{" "}
@@ -977,10 +982,11 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
         <div className="flex flex-1 min-h-0 gap-4">
           {(showExternalSidebar || !sidebarCollapsed) && (
             <aside
-              className={`overflow-hidden rounded-2xl border shadow-sm ${APP_SIDEBAR_RAIL_CLASSNAME} ${showExternalSidebar
-                ? "w-[21rem] max-w-[352px] shrink-0"
-                : "w-[220px] flex-shrink-0"
-                }`}
+              className={`overflow-hidden rounded-2xl border shadow-sm ${APP_SIDEBAR_RAIL_CLASSNAME} ${
+                showExternalSidebar
+                  ? "w-[21rem] max-w-[352px] shrink-0"
+                  : "w-[220px] flex-shrink-0"
+              }`}
             >
               <div
                 className={
@@ -1031,26 +1037,29 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                   </div>
                 ) : (
                   <div
-                    className={`flex flex-col gap-1 flex-1 overflow-auto pr-1 custom-scrollbar ${showExternalSidebar
-                      ? APP_SIDEBAR_SCROLL_REGION_CLASSNAME
-                      : ""
-                      }`}
+                    className={`flex flex-col gap-1 flex-1 overflow-auto pr-1 custom-scrollbar ${
+                      showExternalSidebar
+                        ? APP_SIDEBAR_SCROLL_REGION_CLASSNAME
+                        : ""
+                    }`}
                   >
                     {filteredTables.map((t) => (
                       <Button
                         variant="ghost"
                         key={t.name}
                         onClick={() => handleSelectTable(t.name)}
-                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${selectedTable === t.name
-                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                          }`}
+                        className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${
+                          selectedTable === t.name
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                        }`}
                       >
                         <span
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${selectedTable === t.name
-                            ? "border-accent/30 bg-accent/18 text-txt-strong"
-                            : "border-border/50 bg-bg-accent/80 text-muted"
-                            }`}
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
+                            selectedTable === t.name
+                              ? "border-accent/30 bg-accent/18 text-txt-strong"
+                              : "border-border/50 bg-bg-accent/80 text-muted"
+                          }`}
                         >
                           {t.name.slice(0, 1).toUpperCase()}
                         </span>
@@ -1080,11 +1089,11 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
               title={
                 sidebarCollapsed
                   ? t("databaseview.showSidebar", {
-                    defaultValue: "Show sidebar",
-                  })
+                      defaultValue: "Show sidebar",
+                    })
                   : t("databaseview.hideSidebar", {
-                    defaultValue: "Hide sidebar",
-                  })
+                      defaultValue: "Hide sidebar",
+                    })
               }
             >
               {sidebarCollapsed ? (

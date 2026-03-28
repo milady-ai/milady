@@ -59,7 +59,7 @@ import {
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
-  APP_SIDEBAR_SECTION_HEADING_CLASSNAME
+  APP_SIDEBAR_SECTION_HEADING_CLASSNAME,
 } from "./sidebar-shell-styles";
 import {
   formatTrajectoryDuration,
@@ -100,9 +100,9 @@ function renderInlineBadge(label: string, colors?: { bg: string; fg: string }) {
       style={
         colors
           ? {
-            background: colors.bg,
-            color: colors.fg,
-          }
+              background: colors.bg,
+              color: colors.fg,
+            }
           : undefined
       }
     >
@@ -296,19 +296,20 @@ export function TrajectoriesView({
                 <div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${loggingEnabled
-                        ? "bg-ok shadow-[0_0_12px_rgba(34,197,94,0.32)]"
-                        : "bg-warning"
-                        }`}
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        loggingEnabled
+                          ? "bg-ok shadow-[0_0_12px_rgba(34,197,94,0.32)]"
+                          : "bg-warning"
+                      }`}
                     />
                     <span className="text-[12px] font-semibold text-txt">
                       {loggingEnabled
                         ? t("trajectoriesview.LoggingEnabled", {
-                          defaultValue: "Logging enabled",
-                        })
+                            defaultValue: "Logging enabled",
+                          })
                         : t("trajectoriesview.LoggingDisabled", {
-                          defaultValue: "Logging disabled",
-                        })}
+                            defaultValue: "Logging disabled",
+                          })}
                     </span>
                   </div>
                   <p className="mt-0.5 text-[10px] leading-5 text-muted">
@@ -345,7 +346,7 @@ export function TrajectoriesView({
                 <div className={APP_SIDEBAR_COMPACT_PILL_CLASSNAME}>
                   {formatTrajectoryTokenCount(
                     (stats?.totalPromptTokens ?? 0) +
-                    (stats?.totalCompletionTokens ?? 0),
+                      (stats?.totalCompletionTokens ?? 0),
                     { emptyLabel: "0" },
                   )}{" "}
                   tokens
@@ -508,10 +509,11 @@ export function TrajectoriesView({
                   variant="ghost"
                   type="button"
                   onClick={() => onSelectTrajectory?.(null)}
-                  className={`${TRAJECTORY_LIST_ITEM_CLASSNAME} ${isOverviewSelected
-                    ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                    : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                    }`}
+                  className={`${TRAJECTORY_LIST_ITEM_CLASSNAME} ${
+                    isOverviewSelected
+                      ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                      : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                  }`}
                   aria-current={isOverviewSelected ? "page" : undefined}
                 >
                   <span
@@ -562,10 +564,11 @@ export function TrajectoriesView({
                         variant="ghost"
                         type="button"
                         onClick={() => onSelectTrajectory?.(trajectory.id)}
-                        className={`${TRAJECTORY_LIST_ITEM_CLASSNAME} ${selected
-                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                          }`}
+                        className={`${TRAJECTORY_LIST_ITEM_CLASSNAME} ${
+                          selected
+                            ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                            : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                        }`}
                         aria-current={selected ? "page" : undefined}
                       >
                         <span
@@ -595,7 +598,7 @@ export function TrajectoriesView({
                               <span>
                                 {formatTrajectoryTokenCount(
                                   trajectory.totalPromptTokens +
-                                  trajectory.totalCompletionTokens,
+                                    trajectory.totalCompletionTokens,
                                   { emptyLabel: "0" },
                                 )}{" "}
                                 tokens
@@ -723,7 +726,7 @@ export function TrajectoriesView({
                         <div className="mt-2 text-xl font-semibold text-txt">
                           {formatTrajectoryTokenCount(
                             (stats?.totalPromptTokens ?? 0) +
-                            (stats?.totalCompletionTokens ?? 0),
+                              (stats?.totalCompletionTokens ?? 0),
                             { emptyLabel: "0" },
                           )}
                         </div>
@@ -764,8 +767,8 @@ export function TrajectoriesView({
                         description={
                           hasActiveFilters
                             ? t(
-                              "trajectoriesview.NoTrajectoriesMatchingFilters",
-                            )
+                                "trajectoriesview.NoTrajectoriesMatchingFilters",
+                              )
                             : t("trajectoriesview.NoTrajectoriesYet")
                         }
                         title="No trajectory selected"
@@ -786,17 +789,17 @@ export function TrajectoriesView({
                         <div className="mt-3 flex flex-wrap gap-2">
                           {trajectories[0]
                             ? renderInlineBadge(
-                              trajectories[0].source,
-                              SOURCE_COLORS[trajectories[0].source] ??
-                              SOURCE_COLORS.api,
-                            )
+                                trajectories[0].source,
+                                SOURCE_COLORS[trajectories[0].source] ??
+                                  SOURCE_COLORS.api,
+                              )
                             : null}
                           {trajectories[0]
                             ? renderInlineBadge(
-                              trajectories[0].status,
-                              STATUS_COLORS[trajectories[0].status] ??
-                              STATUS_COLORS.completed,
-                            )
+                                trajectories[0].status,
+                                STATUS_COLORS[trajectories[0].status] ??
+                                  STATUS_COLORS.completed,
+                              )
                             : null}
                         </div>
                       </div>

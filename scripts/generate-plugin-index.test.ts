@@ -16,9 +16,6 @@ describe("generate-plugin-index", () => {
   });
 
   it("maps curated setup-guide URLs for streaming plugins", () => {
-    expect(resolveSetupGuideUrl("retake")).toMatch(
-      /^https:\/\/docs\.(?:milady|eliza)\.ai\/plugin-setup-guide#retaketv$/,
-    );
     expect(resolveSetupGuideUrl("x-streaming")).toMatch(
       /^https:\/\/docs\.(?:milady|eliza)\.ai\/plugin-setup-guide#x-streaming$/,
     );
@@ -47,9 +44,6 @@ describe("generate-plugin-index", () => {
   it("uses chat-first fallback descriptions for social connectors", () => {
     expect(inferDescription("telegram", "Telegram", "connector")).toBe(
       "Telegram connector for chatting with your agent.",
-    );
-    expect(inferDescription("retake", "Retake", "streaming")).toBe(
-      "Retake streaming destination for broadcasting live agent output.",
     );
   });
 });

@@ -969,10 +969,8 @@ export const AGENT_EVENT_ALLOWED_STREAMS = new Set([
   "game",
   "autonomy",
 
-  "retake",
   "stream",
   "system",
-  // Retake plugin event streams (chat-poll.ts emits these)
   "message",
   "new_viewer",
   "assistant",
@@ -1431,7 +1429,6 @@ function categorizePlugin(
   ];
   const streamingDests = [
     "streaming-base",
-    "retake",
     "custom-rtmp",
     "youtube",
     "youtube-streaming",
@@ -1551,7 +1548,6 @@ const PLUGIN_SETUP_GUIDE_ANCHORS: Record<string, string> = {
   mcp: "#mcp-model-context-protocol",
   iq: "#iq-solana-on-chain",
   "gmail-watch": "#gmail-watch",
-  retake: "#retaketv",
   "streaming-base": "#enable-streaming-streaming-base",
   "twitch-streaming": "#twitch-streaming",
   "youtube-streaming": "#youtube-streaming",
@@ -18016,7 +18012,7 @@ async function handleRequest(
 
   // ── POST /api/agent/event ──────────────────────────────────────────────
   // Push an event into the agent event stream (WebSocket + buffer).
-  // Used by plugins (e.g. retake) to surface activity in the StreamView.
+  // Used by plugins to surface activity in the StreamView.
   // Auth: protected by the isAuthorized(req) gate at L5631.
   if (method === "POST" && pathname === "/api/agent/event") {
     const body = await readJsonBody<{
@@ -18797,18 +18793,6 @@ export async function startApiServer(opts?: {
     connectorHealthMonitor: null,
   };
 
-  // Closure-captured refs for auto-TTS triggering in the event pipeline.
-  // Set when the streaming connector initializes its route state.
-  let streamRouteStateRef:
-    | import("./stream-routes.js").StreamRouteState
-    | null = null;
-  let onAgentMessageFn:
-    | ((
-        text: string,
-        state: import("./stream-routes.js").StreamRouteState,
-      ) => Promise<void>)
-    | null = null;
-
   const trainingServiceCtor = await resolveTrainingServiceCtor();
   const trainingServiceOptions = {
     getRuntime: () => state.runtime,
@@ -19087,24 +19071,6 @@ export async function startApiServer(opts?: {
         );
       });
 
-      // Auto-trigger TTS for assistant messages on the stream
-      const srs = streamRouteStateRef;
-      const ttsHandler = onAgentMessageFn;
-      if (event.stream === "assistant" && srs && ttsHandler) {
-        const payload =
-          event.data && typeof event.data === "object"
-            ? (event.data as Record<string, unknown>)
-            : null;
-        const text =
-          typeof payload?.text === "string" ? payload.text.trim() : "";
-        if (text) {
-          void ttsHandler(text, srs).catch((err) => {
-            logger.warn(
-              `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          });
-        }
-      }
     });
 
     const unsubHeartbeat = svc.subscribeHeartbeat((event) => {
@@ -19243,10 +19209,9 @@ export async function startApiServer(opts?: {
     // configured, inject it so /api/stream/live can fetch credentials.
     void (async () => {
       try {
-        const { handleStreamRoute, onAgentMessage } = await import(
+        const { handleStreamRoute } = await import(
           "./stream-routes.js"
         );
-        onAgentMessageFn = onAgentMessage;
         // Screen capture manager is injected by the desktop host via globalThis
         const screenCapture = (globalThis as Record<string, unknown>)
           .__elizaScreenCapture as
@@ -19269,26 +19234,6 @@ export async function startApiServer(opts?: {
           string,
           import("./stream-routes.js").StreamingDestination
         >();
-
-        // Retake (API-driven, full integration)
-        if (isConnectorConfigured("retake", connectors.retake)) {
-          try {
-            const retakeMod = "@elizaos/plugin-retake";
-            const { createRetakeDestination } = await import(retakeMod);
-            destinations.set(
-              "retake",
-              createRetakeDestination(
-                connectors.retake as
-                  | { accessToken?: string; apiUrl?: string }
-                  | undefined,
-              ),
-            );
-          } catch (err) {
-            logger.warn(
-              `[eliza-api] Failed to load retake destination: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          }
-        }
 
         // Custom RTMP
         if (
@@ -19397,8 +19342,7 @@ export async function startApiServer(opts?: {
           streamManager,
           port,
           screenCapture,
-          captureUrl: (connectors.retake as Record<string, unknown> | undefined)
-            ?.captureUrl as string | undefined,
+          captureUrl: undefined as string | undefined,
           destinations,
           activeDestinationId,
           activeStreamSource: { type: "stream-tab" as const },
@@ -19458,8 +19402,6 @@ export async function startApiServer(opts?: {
               : undefined;
           },
         };
-        // Capture streamState in closure for auto-TTS triggering and route handling
-        streamRouteStateRef = streamState;
         state.connectorRouteHandlers.push((req, res, pathname, method) =>
           handleStreamRoute(req, res, pathname, method, streamState),
         );
