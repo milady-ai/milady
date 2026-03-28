@@ -9305,6 +9305,8 @@ async function handleRequest(
   }
   const pathname = url.pathname;
   const isAuthEndpoint = pathname.startsWith("/api/auth/");
+  const isHealthEndpoint =
+    method === "GET" && pathname === "/api/health";
   const isCloudOnboardingStatusEndpoint =
     method === "GET" &&
     pathname === "/api/onboarding/status" &&
@@ -9457,6 +9459,7 @@ async function handleRequest(
     method !== "OPTIONS" &&
     isAuthProtectedPath &&
     !isAuthEndpoint &&
+    !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
     !isAuthorized(req)
   ) {
@@ -9468,6 +9471,7 @@ async function handleRequest(
     method !== "OPTIONS" &&
     isAuthProtectedPath &&
     !isAuthEndpoint &&
+    !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
     !isAuthorized(req)
   ) {
