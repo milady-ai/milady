@@ -1,4 +1,7 @@
-import { LanguageDropdown } from "@miladyai/app-core/components";
+import {
+  LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME,
+  LanguageDropdown,
+} from "@miladyai/app-core/components";
 import type { UiLanguage } from "@miladyai/app-core/i18n";
 import { normalizeLanguage } from "@miladyai/app-core/i18n";
 import {
@@ -23,7 +26,8 @@ import { IdentityStep } from "./onboarding/IdentityStep";
 import { OnboardingPanel } from "./onboarding/OnboardingPanel";
 import { OnboardingStepNav } from "./onboarding/OnboardingStepNav";
 import { PermissionsStep } from "./onboarding/PermissionsStep";
-import { WelcomeStep } from "./onboarding/WelcomeStep";
+import { CloudLoginStep } from "./onboarding/CloudLoginStep";
+import { VoiceProviderStep } from "./onboarding/VoiceProviderStep";
 
 const FORCE_VRM =
   typeof window !== "undefined" &&
@@ -53,8 +57,10 @@ export function OnboardingWizard() {
     onboardingUiRevealNonce,
   } = useApp();
   const revealWelcomeUiImmediately =
-    disableVrm || onboardingStep === "welcome" || onboardingUiRevealNonce > 0;
-  // After Reset Agent from chat/companion, nonce bumps: show welcome UI immediately instead
+    disableVrm ||
+    onboardingStep === "cloud_login" ||
+    onboardingUiRevealNonce > 0;
+  // After Reset Agent from chat/companion, nonce bumps: show cloud ui immediately instead
   // of waiting for VrmStage reveal (often missing when remounting after an active session).
   const [revealStarted, setRevealStarted] = useState(
     () => revealWelcomeUiImmediately,
@@ -139,11 +145,13 @@ export function OnboardingWizard() {
 
   function renderStep() {
     switch (onboardingStep) {
-      case "welcome":
-        return <WelcomeStep />;
+      case "cloud_login":
+        return <CloudLoginStep />;
       case "hosting":
       case "providers":
         return <ConnectionStep />;
+      case "voice":
+        return <VoiceProviderStep />;
       case "permissions":
         return <PermissionsStep />;
       case "identity":
@@ -210,6 +218,7 @@ export function OnboardingWizard() {
             setUiLanguage={setUiLanguage}
             t={t}
             variant="companion"
+            triggerClassName={LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME}
           />
         </div>
 

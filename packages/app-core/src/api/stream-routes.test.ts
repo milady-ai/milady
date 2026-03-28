@@ -76,13 +76,8 @@ describe("detectCaptureMode()", () => {
     Object.assign(process.env, savedEnv);
   });
 
-  it('returns "pipe" when RETAKE_STREAM_MODE=ui', () => {
-    process.env.RETAKE_STREAM_MODE = "ui";
-    expect(detectCaptureMode()).toBe("pipe");
-  });
-
-  it('returns "pipe" when RETAKE_STREAM_MODE=pipe', () => {
-    process.env.RETAKE_STREAM_MODE = "pipe";
+  it('returns "pipe" when STREAM_MODE=ui', () => {
+    process.env.STREAM_MODE = "ui";
     expect(detectCaptureMode()).toBe("pipe");
   });
 
@@ -91,59 +86,47 @@ describe("detectCaptureMode()", () => {
     expect(detectCaptureMode()).toBe("pipe");
   });
 
-  it("STREAM_MODE takes priority over RETAKE_STREAM_MODE", () => {
-    process.env.STREAM_MODE = "pipe";
-    process.env.RETAKE_STREAM_MODE = "x11grab";
-    expect(detectCaptureMode()).toBe("pipe");
-  });
-
-  it('returns "x11grab" when RETAKE_STREAM_MODE=x11grab', () => {
-    process.env.RETAKE_STREAM_MODE = "x11grab";
+  it('returns "x11grab" when STREAM_MODE=x11grab', () => {
+    process.env.STREAM_MODE = "x11grab";
     expect(detectCaptureMode()).toBe("x11grab");
   });
 
-  it('returns "avfoundation" when RETAKE_STREAM_MODE=avfoundation', () => {
-    process.env.RETAKE_STREAM_MODE = "avfoundation";
+  it('returns "avfoundation" when STREAM_MODE=avfoundation', () => {
+    process.env.STREAM_MODE = "avfoundation";
     expect(detectCaptureMode()).toBe("avfoundation");
   });
 
-  it('returns "avfoundation" when RETAKE_STREAM_MODE=screen', () => {
-    process.env.RETAKE_STREAM_MODE = "screen";
+  it('returns "avfoundation" when STREAM_MODE=screen', () => {
+    process.env.STREAM_MODE = "screen";
     expect(detectCaptureMode()).toBe("avfoundation");
   });
 
-  it('returns "file" when RETAKE_STREAM_MODE=file', () => {
-    process.env.RETAKE_STREAM_MODE = "file";
+  it('returns "file" when STREAM_MODE=file', () => {
+    process.env.STREAM_MODE = "file";
     expect(detectCaptureMode()).toBe("file");
   });
 
   it("env var overrides platform detection (pipe takes priority over platform)", () => {
-    // Confirm env-var path runs unconditionally regardless of platform.
-    process.env.RETAKE_STREAM_MODE = "pipe";
+    process.env.STREAM_MODE = "pipe";
     expect(detectCaptureMode()).toBe("pipe");
   });
 
   it('returns "avfoundation" on macOS without env var (platform-conditional)', () => {
-    delete process.env.RETAKE_STREAM_MODE;
     delete process.env.STREAM_MODE;
     if (process.platform === "darwin") {
       expect(detectCaptureMode()).toBe("avfoundation");
     }
-    // Non-darwin: platform path differs — no assertion required.
   });
 
   it('returns "x11grab" on Linux when DISPLAY is set (platform-conditional)', () => {
-    delete process.env.RETAKE_STREAM_MODE;
     delete process.env.STREAM_MODE;
     if (process.platform === "linux") {
       process.env.DISPLAY = ":0";
       expect(detectCaptureMode()).toBe("x11grab");
     }
-    // Not on Linux — no assertion required.
   });
 
   it('returns "file" as fallback on non-darwin non-linux without DISPLAY (platform-conditional)', () => {
-    delete process.env.RETAKE_STREAM_MODE;
     delete process.env.STREAM_MODE;
     if (
       process.platform !== "darwin" &&
@@ -153,7 +136,6 @@ describe("detectCaptureMode()", () => {
       delete process.env.DISPLAY;
       expect(detectCaptureMode()).toBe("file");
     }
-    // Platform-specific result on darwin/linux — no assertion required.
   });
 });
 
@@ -394,10 +376,7 @@ describe("handleStreamRoute", () => {
         url: "/api/stream/status",
       });
       const destinations = new Map([
-        [
-          "retake",
-          { id: "retake", name: "Retake.tv", getCredentials: vi.fn() },
-        ],
+        ["twitch", { id: "twitch", name: "Twitch", getCredentials: vi.fn() }],
       ]);
       const state = mockState({ destinations });
 
@@ -405,7 +384,7 @@ describe("handleStreamRoute", () => {
 
       expect(getJson()).toEqual(
         expect.objectContaining({
-          destination: { id: "retake", name: "Retake.tv" },
+          destination: { id: "twitch", name: "Twitch" },
         }),
       );
     });
@@ -830,10 +809,7 @@ describe("handleStreamRoute", () => {
         url: "/api/streaming/destinations",
       });
       const destinations = new Map([
-        [
-          "retake",
-          { id: "retake", name: "Retake.tv", getCredentials: vi.fn() },
-        ],
+        ["twitch", { id: "twitch", name: "Twitch", getCredentials: vi.fn() }],
       ]);
       const state = mockState({ destinations });
 
@@ -847,7 +823,7 @@ describe("handleStreamRoute", () => {
 
       expect(getJson()).toEqual({
         ok: true,
-        destinations: [{ id: "retake", name: "Retake.tv", active: true }],
+        destinations: [{ id: "twitch", name: "Twitch", active: true }],
       });
     });
   });
@@ -898,13 +874,10 @@ describe("handleStreamRoute", () => {
       const req = createMockIncomingMessage({
         method: "POST",
         url: "/api/streaming/destination",
-        body: JSON.stringify({ destinationId: "retake" }),
+        body: JSON.stringify({ destinationId: "twitch" }),
       });
       const destinations = new Map([
-        [
-          "retake",
-          { id: "retake", name: "Retake.tv", getCredentials: vi.fn() },
-        ],
+        ["twitch", { id: "twitch", name: "Twitch", getCredentials: vi.fn() }],
       ]);
       const state = mockState({ destinations });
 
@@ -920,7 +893,7 @@ describe("handleStreamRoute", () => {
       expect(getJson()).toEqual(
         expect.objectContaining({
           ok: true,
-          destination: { id: "retake", name: "Retake.tv" },
+          destination: { id: "twitch", name: "Twitch" },
         }),
       );
     });
@@ -932,14 +905,6 @@ describe("handleStreamRoute", () => {
 // be resolvable in all CI environments (e.g. when @elizaos/core dist misses
 // symbols the plugin dist depends on).
 // ---------------------------------------------------------------------------
-
-let hasRetakePlugin = false;
-try {
-  const mod = await import("@elizaos/plugin-retake");
-  hasRetakePlugin = typeof mod.createRetakeDestination === "function";
-} catch {
-  /* not available */
-}
 
 let hasTwitchPlugin = false;
 try {
@@ -964,57 +929,6 @@ try {
 } catch {
   /* not available */
 }
-
-// ---------------------------------------------------------------------------
-// createRetakeDestination() — destination adapter unit tests
-// ---------------------------------------------------------------------------
-
-describe.skipIf(!hasRetakePlugin)("createRetakeDestination()", () => {
-  it("returns a StreamingDestination with id and name", async () => {
-    const { createRetakeDestination } = await import("@elizaos/plugin-retake");
-    const dest = createRetakeDestination({ accessToken: "test-token" });
-    expect(dest.id).toBe("retake");
-    expect(dest.name).toBe("Retake.tv");
-  });
-
-  it("getCredentials throws when no token is configured", async () => {
-    const origToken = process.env.RETAKE_AGENT_TOKEN;
-    delete process.env.RETAKE_AGENT_TOKEN;
-
-    try {
-      const { createRetakeDestination } = await import(
-        "@elizaos/plugin-retake"
-      );
-      const dest = createRetakeDestination();
-      await expect(dest.getCredentials()).rejects.toThrow("not configured");
-    } finally {
-      if (origToken !== undefined) process.env.RETAKE_AGENT_TOKEN = origToken;
-    }
-  });
-
-  it("prefers config.accessToken over RETAKE_AGENT_TOKEN env var", async () => {
-    const origToken = process.env.RETAKE_AGENT_TOKEN;
-    process.env.RETAKE_AGENT_TOKEN = "env-token";
-
-    try {
-      const { createRetakeDestination } = await import(
-        "@elizaos/plugin-retake"
-      );
-      const dest = createRetakeDestination({ accessToken: "config-token" });
-
-      // getCredentials will try to fetch from retake.tv API with config-token.
-      // Without a mock server the fetch fails — but we verify it doesn't throw
-      // "not configured" (which would mean the token wasn't resolved).
-      await expect(dest.getCredentials()).rejects.not.toThrow("not configured");
-    } finally {
-      if (origToken !== undefined) {
-        process.env.RETAKE_AGENT_TOKEN = origToken;
-      } else {
-        delete process.env.RETAKE_AGENT_TOKEN;
-      }
-    }
-  });
-});
 
 // ---------------------------------------------------------------------------
 // createTwitchDestination() — destination adapter unit tests
@@ -1815,662 +1729,5 @@ describe("POST /api/stream/stop (backward-compat)", () => {
     expect(getJson()).toEqual(
       expect.objectContaining({ error: "FFmpeg already exited" }),
     );
-  });
-});
-
-// ===========================================================================
-// Settings merge tests (POST /api/stream/settings)
-// ===========================================================================
-
-describe("handleStreamRoute — POST /api/stream/settings merge", () => {
-  it("merges partial update with existing settings instead of overwriting", async () => {
-    // Seed existing settings with voice config
-    const { writeStreamSettings, readStreamSettings } = await import(
-      "./stream-persistence"
-    );
-    writeStreamSettings({
-      theme: "dark",
-      avatarIndex: 2,
-      voice: { enabled: true, autoSpeak: false },
-    });
-
-    // POST only avatarIndex — should NOT wipe theme or voice
-    const { res, getStatus, getJson } = createMockHttpResponse();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/settings",
-      body: { settings: { avatarIndex: 5 } },
-      json: true,
-    });
-    const state = mockState();
-
-    const handled = await handleStreamRoute(
-      req,
-      res,
-      "/api/stream/settings",
-      "POST",
-      state,
-    );
-
-    expect(handled).toBe(true);
-    expect(getStatus()).toBe(200);
-
-    const body = getJson();
-    expect(body.ok).toBe(true);
-    // avatarIndex updated
-    expect(body.settings.avatarIndex).toBe(5);
-    // theme preserved
-    expect(body.settings.theme).toBe("dark");
-    // voice preserved
-    expect(body.settings.voice).toEqual({ enabled: true, autoSpeak: false });
-
-    // Verify persisted state matches
-    const persisted = readStreamSettings();
-    expect(persisted.avatarIndex).toBe(5);
-    expect(persisted.theme).toBe("dark");
-    expect(persisted.voice).toEqual({ enabled: true, autoSpeak: false });
-  });
-
-  it("returns full merged settings in response", async () => {
-    const { writeStreamSettings } = await import("./stream-persistence");
-    writeStreamSettings({ theme: "eliza" });
-
-    const { res, getJson } = createMockHttpResponse();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/settings",
-      body: { settings: { avatarIndex: 3 } },
-      json: true,
-    });
-
-    await handleStreamRoute(
-      req,
-      res,
-      "/api/stream/settings",
-      "POST",
-      mockState(),
-    );
-
-    const body = getJson();
-    expect(body.settings).toEqual({ theme: "eliza", avatarIndex: 3 });
-  });
-});
-
-// ===========================================================================
-// Voice endpoint tests (GET/POST /api/stream/voice, POST /api/stream/voice/speak)
-// ===========================================================================
-
-describe("handleStreamRoute — voice endpoints", () => {
-  // ── GET /api/stream/voice ─────────────────────────────────────────────
-
-  describe("GET /api/stream/voice", () => {
-    it("returns voice status with ok:true and default disabled state", async () => {
-      const { res, getStatus, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "GET",
-        url: "/api/stream/voice",
-      });
-      const state = mockState();
-
-      const handled = await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice",
-        "GET",
-        state,
-      );
-
-      expect(handled).toBe(true);
-      expect(getStatus()).toBe(200);
-      const body = getJson();
-      expect(body).toEqual(
-        expect.objectContaining({
-          ok: true,
-          enabled: false,
-          isSpeaking: false,
-        }),
-      );
-    });
-
-    it("reports provider status when TTS config is available", async () => {
-      const { res, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "GET",
-        url: "/api/stream/voice",
-      });
-      const state = mockState({
-        config: {
-          messages: {
-            tts: {
-              provider: "elevenlabs",
-              elevenlabs: { apiKey: "test-key" },
-            },
-          },
-        },
-      });
-
-      await handleStreamRoute(req, res, "/api/stream/voice", "GET", state);
-
-      const body = getJson();
-      expect(body).toEqual(
-        expect.objectContaining({
-          ok: true,
-          provider: "elevenlabs",
-          configuredProvider: "elevenlabs",
-          hasApiKey: true,
-        }),
-      );
-    });
-  });
-
-  // ── POST /api/stream/voice ────────────────────────────────────────────
-
-  describe("POST /api/stream/voice", () => {
-    it("saves voice settings and returns ok:true with voice object", async () => {
-      const { res, getStatus, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice",
-        body: { enabled: true, autoSpeak: true },
-        json: true,
-      });
-      const state = mockState();
-
-      const handled = await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice",
-        "POST",
-        state,
-      );
-
-      expect(handled).toBe(true);
-      expect(getStatus()).toBe(200);
-      const body = getJson();
-      expect(body).toEqual(
-        expect.objectContaining({
-          ok: true,
-          voice: expect.objectContaining({
-            enabled: true,
-            autoSpeak: true,
-          }),
-        }),
-      );
-    });
-
-    it("disables voice when enabled:false is sent", async () => {
-      const { res, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice",
-        body: { enabled: false },
-        json: true,
-      });
-      const state = mockState();
-
-      await handleStreamRoute(req, res, "/api/stream/voice", "POST", state);
-
-      const body = getJson();
-      expect(body).toEqual(
-        expect.objectContaining({
-          ok: true,
-          voice: expect.objectContaining({
-            enabled: false,
-          }),
-        }),
-      );
-    });
-  });
-
-  // ── POST /api/stream/voice/speak ──────────────────────────────────────
-
-  describe("POST /api/stream/voice/speak", () => {
-    it("returns 400 when text is missing", async () => {
-      const { res, getStatus, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice/speak",
-        body: {},
-        json: true,
-      });
-      const state = mockState();
-
-      const handled = await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice/speak",
-        "POST",
-        state,
-      );
-
-      expect(handled).toBe(true);
-      expect(getStatus()).toBe(400);
-      expect(getJson()).toEqual(
-        expect.objectContaining({
-          error: "text must include speakable content",
-        }),
-      );
-    });
-
-    it("returns 400 when text is empty string", async () => {
-      const { res, getStatus } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice/speak",
-        body: { text: "   " },
-        json: true,
-      });
-      const state = mockState();
-
-      await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice/speak",
-        "POST",
-        state,
-      );
-
-      expect(getStatus()).toBe(400);
-    });
-
-    it("returns 400 when no TTS provider is available", async () => {
-      const { res, getStatus, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice/speak",
-        body: { text: "Hello" },
-        json: true,
-      });
-      // No TTS config — provider resolution will return null
-      const state = mockState();
-
-      await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice/speak",
-        "POST",
-        state,
-      );
-
-      expect(getStatus()).toBe(400);
-      expect(getJson()).toEqual(
-        expect.objectContaining({ error: expect.stringContaining("provider") }),
-      );
-    });
-
-    it("returns 400 when TTS bridge is not attached", async () => {
-      const { res, getStatus, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice/speak",
-        body: { text: "Hello" },
-        json: true,
-      });
-      // Provide valid TTS config so provider resolves, but bridge is not attached
-      const state = mockState({
-        config: {
-          messages: {
-            tts: {
-              provider: "elevenlabs",
-              elevenlabs: { apiKey: "test-key" },
-            },
-          },
-        },
-      });
-
-      await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice/speak",
-        "POST",
-        state,
-      );
-
-      expect(getStatus()).toBe(400);
-      expect(getJson()).toEqual(
-        expect.objectContaining({
-          error: expect.stringContaining("not attached"),
-        }),
-      );
-    });
-
-    it("returns 400 when text exceeds 2000 characters", async () => {
-      const { res, getStatus, getJson } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice/speak",
-        body: { text: "x".repeat(2001) },
-        json: true,
-      });
-      const state = mockState();
-
-      await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice/speak",
-        "POST",
-        state,
-      );
-
-      expect(getStatus()).toBe(400);
-      expect(getJson()).toEqual(
-        expect.objectContaining({
-          error: expect.stringContaining("maximum length"),
-        }),
-      );
-    });
-
-    it("accepts text at exactly 2000 characters (boundary)", async () => {
-      const { res, getStatus } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "POST",
-        url: "/api/stream/voice/speak",
-        body: { text: "x".repeat(2000) },
-        json: true,
-      });
-      // No TTS config — will hit provider check, proving we passed the length check
-      const state = mockState();
-
-      await handleStreamRoute(
-        req,
-        res,
-        "/api/stream/voice/speak",
-        "POST",
-        state,
-      );
-
-      // Should NOT be 400 with "maximum length" — instead it hits provider check
-      const status = getStatus();
-      // 400 for "no provider" is fine, but NOT for length
-      expect(status).toBe(400);
-    });
-  });
-
-  // ── Route dispatching ─────────────────────────────────────────────────
-
-  describe("voice route dispatching", () => {
-    it("returns false for non-stream voice routes", async () => {
-      const { res } = createMockHttpResponse();
-      const req = createMockIncomingMessage({
-        method: "GET",
-        url: "/api/other/voice",
-      });
-      const state = mockState();
-
-      const handled = await handleStreamRoute(
-        req,
-        res,
-        "/api/other/voice",
-        "GET",
-        state,
-      );
-
-      expect(handled).toBe(false);
-    });
-  });
-});
-
-// ===========================================================================
-// onAgentMessage() — auto-TTS trigger
-// ===========================================================================
-
-describe("onAgentMessage()", () => {
-  it("does nothing when text is empty", async () => {
-    const state = mockState();
-    // Should not throw
-    await onAgentMessage("", state);
-    await onAgentMessage("   ", state);
-  });
-
-  it("does nothing when stream is not running", async () => {
-    const state = mockState();
-    (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(
-      false,
-    );
-
-    await onAgentMessage("Hello world", state);
-    // If we got here without error, the guard worked
-  });
-
-  it("does nothing when voice is not enabled in settings", async () => {
-    const state = mockState();
-    (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(
-      true,
-    );
-    // voice.enabled defaults to false (no settings file)
-
-    await onAgentMessage("Hello world", state);
-    // Guard should exit early — no TTS generation attempted
-  });
-});
-
-// ---------------------------------------------------------------------------
-// GET /api/stream/source
-// ---------------------------------------------------------------------------
-
-describe("GET /api/stream/source", () => {
-  it("returns the current active stream source", async () => {
-    const state = mockState({
-      activeStreamSource: { type: "game", url: "http://localhost:3000" },
-    });
-    const req = createMockIncomingMessage({
-      method: "GET",
-      url: "/api/stream/source",
-    });
-    const { res, getJson } = createMockHttpResponse();
-
-    const handled = await handleStreamRoute(
-      req,
-      res,
-      "/api/stream/source",
-      "GET",
-      state,
-    );
-
-    expect(handled).toBe(true);
-    const body = getJson() as { source: { type: string; url?: string } };
-    expect(body.source).toEqual({
-      type: "game",
-      url: "http://localhost:3000",
-    });
-  });
-
-  it("returns default stream-tab source", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "GET",
-      url: "/api/stream/source",
-    });
-    const { res, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "GET", state);
-
-    const body = getJson() as { source: { type: string } };
-    expect(body.source.type).toBe("stream-tab");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// POST /api/stream/source
-// ---------------------------------------------------------------------------
-
-describe("POST /api/stream/source", () => {
-  it("switches to stream-tab source", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({ sourceType: "stream-tab" }),
-    });
-    const { res, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    const body = getJson() as { ok: boolean; source: { type: string } };
-    expect(body.ok).toBe(true);
-    expect(body.source.type).toBe("stream-tab");
-    expect(state.activeStreamSource.type).toBe("stream-tab");
-  });
-
-  it("switches to game source with URL", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({
-        sourceType: "game",
-        customUrl: "http://localhost:8080",
-      }),
-    });
-    const { res, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    const body = getJson() as {
-      ok: boolean;
-      source: { type: string; url?: string };
-    };
-    expect(body.ok).toBe(true);
-    expect(body.source.type).toBe("game");
-    expect(state.activeStreamSource.url).toBe("http://localhost:8080");
-  });
-
-  it("rejects invalid sourceType", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({ sourceType: "invalid" }),
-    });
-    const { res, getStatus } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(getStatus()).toBe(400);
-  });
-
-  it("rejects custom-url without customUrl", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({ sourceType: "custom-url" }),
-    });
-    const { res, getStatus, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(getStatus()).toBe(400);
-    const body = getJson() as { error: string };
-    expect(body.error).toContain("customUrl required");
-  });
-
-  it("rejects game without customUrl", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({ sourceType: "game" }),
-    });
-    const { res, getStatus, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(getStatus()).toBe(400);
-    const body = getJson() as { error: string };
-    expect(body.error).toContain("customUrl required");
-  });
-
-  it("rejects game source with file:// URL (scheme injection guard)", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({
-        sourceType: "game",
-        customUrl: "file:///etc/passwd",
-      }),
-    });
-    const { res, getStatus, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(getStatus()).toBe(400);
-    const body = getJson() as { error: string };
-    expect(body.error).toContain("http:// or https://");
-  });
-
-  it("rejects custom-url source with javascript: URI (scheme injection guard)", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({
-        sourceType: "custom-url",
-        customUrl: "javascript:alert(1)",
-      }),
-    });
-    const { res, getStatus, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(getStatus()).toBe(400);
-    const body = getJson() as { error: string };
-    expect(body.error).toContain("http:// or https://");
-  });
-
-  it("accepts custom-url with http:// scheme", async () => {
-    const state = mockState();
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({
-        sourceType: "custom-url",
-        customUrl: "http://localhost:3000",
-      }),
-    });
-    const { res, getStatus } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(getStatus()).toBe(200);
-    expect(state.activeStreamSource).toEqual({
-      type: "custom-url",
-      url: "http://localhost:3000",
-    });
-  });
-
-  it("stops frame capture and restarts when stream is running", async () => {
-    const stopCapture = vi.fn();
-    const startCapture = vi.fn(async () => {});
-    const state = mockState({
-      screenCapture: {
-        isFrameCaptureActive: vi.fn(() => true),
-        startFrameCapture: startCapture,
-        stopFrameCapture: stopCapture,
-      },
-    });
-    (state.streamManager.isRunning as ReturnType<typeof vi.fn>).mockReturnValue(
-      true,
-    );
-
-    const req = createMockIncomingMessage({
-      method: "POST",
-      url: "/api/stream/source",
-      body: JSON.stringify({
-        sourceType: "custom-url",
-        customUrl: "https://example.com",
-      }),
-    });
-    const { res, getJson } = createMockHttpResponse();
-
-    await handleStreamRoute(req, res, "/api/stream/source", "POST", state);
-
-    expect(stopCapture).toHaveBeenCalled();
-    expect(startCapture).toHaveBeenCalledWith(
-      expect.objectContaining({ gameUrl: "https://example.com" }),
-    );
-    const body = getJson() as { ok: boolean };
-    expect(body.ok).toBe(true);
   });
 });

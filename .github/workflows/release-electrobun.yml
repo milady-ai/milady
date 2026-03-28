@@ -82,7 +82,8 @@ jobs:
           elif [[ "${{ github.ref_type }}" == "tag" ]]; then
             TAG="${{ github.ref_name }}"
           else
-            TAG="v$(node -p "require('./package.json').version")"
+            echo "Manual branch dispatches must provide inputs.tag; refusing to derive a release tag from package.json." >&2
+            exit 1
           fi
           VERSION="${TAG#v}"
           # canary for pre-release tags, stable for everything else
@@ -124,6 +125,9 @@ jobs:
       - name: Run repository postinstall patches
         run: bun run postinstall
 
+      - name: Regression matrix contract
+        run: bun run test:regression-matrix:release
+
       - name: Prepare Whisper model artifact
         run: |
           bash apps/app/electrobun/scripts/ensure-whisper-model.sh base.en
@@ -150,6 +154,16 @@ jobs:
           bunx tsdown
           echo '{"type":"module"}' > dist/package.json
           node --import tsx scripts/write-build-info.ts
+
+      - name: Run heavy E2E regression suite
+        run: bun run test:e2e:heavy
+
+      - name: Run cloud live regression suite
+        run: bun run test:live:cloud
+        env:
+          MILADY_LIVE_TEST: "1"
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
+          ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
 
       - name: Release readiness checks
         run: bun run release:check
@@ -633,7 +647,7 @@ jobs:
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE -Force -ErrorAction SilentlyContinue
 
-          pwsh -File apps/app/electrobun/scripts/smoke-test-windows.ps1
+          bun run test:desktop:packaged:windows
 
           if (-not (Test-Path $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE)) {
             Write-Error "Smoke test did not emit a reusable Windows launcher path."
@@ -677,9 +691,7 @@ jobs:
 
       - name: Run Windows packaged renderer bootstrap check
         if: matrix.platform.os == 'windows'
-        run: |
-          cd apps/app
-          bunx playwright test --config playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts
+        run: bun run test:desktop:playwright
 
       - name: Upload Windows Playwright UI diagnostics
         if: failure() && matrix.platform.os == 'windows'
@@ -798,6 +810,19 @@ jobs:
             -OutputDir (Join-Path $PWD "apps/app/electrobun/artifacts") `
             -Version "${{ needs.prepare.outputs.version }}"
 
+      # When building unsigned (skip_codesign=1), the CEF framework ships with
+      # a pre-existing signature.  Injecting version.json into Resources breaks
+      # that signature (resource hash mismatch).  Ad-hoc re-sign the .app so
+      # the bundle is internally consistent even without a Developer ID cert.
+      - name: Ad-hoc re-sign unsigned macOS bundle
+        if: matrix.platform.os == 'macos' && steps.macos-keychain.outputs.skip_codesign == '1'
+        run: |
+          for app in apps/app/electrobun/artifacts/*.app; do
+            [ -d "$app" ] || continue
+            echo "Ad-hoc signing: $app"
+            codesign --force --deep --sign - "$app" || echo "::warning::Ad-hoc re-sign failed for $app"
+          done
+
       - name: Verify macOS signature and notarization
         if: matrix.platform.os == 'macos'
         run: |
@@ -896,7 +921,7 @@ jobs:
           LIVENESS_TIMEOUT=10 \
           SKIP_BUILD=1 \
           SKIP_SIGNATURE_CHECK=1 \
-          bash apps/app/electrobun/scripts/smoke-test.sh
+          bun run test:desktop:packaged
 
       - name: Collect Windows smoke diagnostics
         if: failure() && matrix.platform.os == 'windows'

@@ -2,6 +2,10 @@ import fs from "node:fs";
 import { createServer as createNetServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
+import {
+  resolveApiToken,
+  resolveDesktopApiPort,
+} from "@miladyai/shared/runtime-env";
 import Electrobun, {
   ApplicationMenu,
   BrowserWindow,
@@ -23,7 +27,6 @@ import {
   parseSettingsWindowAction,
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
-import { isBrowserSurfaceEnabled } from "./browser-surface-flag";
 import { readNavigationEventUrl } from "./cloud-auth-window";
 import {
   buildMainMenuResetApiCandidates,
@@ -52,6 +55,7 @@ import { readBuiltPreloadScript } from "./preload-validation";
 import { resolveRendererAsset } from "./renderer-static";
 import { registerRpcHandlers } from "./rpc-handlers";
 import { startScreenshotDevServer } from "./screenshot-dev-server";
+import { recordStartupPhase, resolveStartupBundlePath } from "./startup-trace";
 import {
   isDetachedSurface,
   type ManagedWindowLike,
@@ -76,12 +80,6 @@ const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
 const STARTUP_CRASH_REPORT_FILE = "startup-crash-report-latest.md";
 const STARTUP_CRASH_PROMPT_MARKER_FILE = "startup-crash-last-prompted.txt";
-// Browser surface ships enabled by default. Set
-// MILADY_ENABLE_BROWSER_SURFACE=0 to force-disable it for local debugging or
-// release triage.
-const BROWSER_SURFACE_ENABLED = isBrowserSurfaceEnabled(
-  process.env as Record<string, string | undefined>,
-);
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -91,13 +89,20 @@ import {
   onAgentReadyChange,
   setAgentReady,
 } from "./agent-ready-state";
-import { DEFAULT_PORT } from "./constants";
+
+function resolveDesktopAppIconPath(): string {
+  return path.join(
+    import.meta.dir,
+    process.platform === "win32"
+      ? "../assets/appIcon.ico"
+      : "../assets/appIcon.png",
+  );
+}
 
 function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
     isMac,
-    browserEnabled: BROWSER_SURFACE_ENABLED,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
     agentReady: isAgentReady(),
@@ -127,8 +132,7 @@ function buildApiRequestHeaders(contentType?: string): Record<string, string> {
   if (contentType) {
     headers["Content-Type"] = contentType;
   }
-  let apiToken =
-    process.env.MILADY_API_TOKEN?.trim() ?? process.env.ELIZA_API_TOKEN?.trim();
+  let apiToken = resolveApiToken(process.env);
   if (!apiToken) {
     const rt = resolveDesktopRuntimeMode(
       process.env as Record<string, string | undefined>,
@@ -250,8 +254,10 @@ async function resetMiladyFromApplicationMenu(): Promise<void> {
       fetchImpl: fetch,
       buildHeaders: buildApiRequestHeaders,
       useEmbeddedRestart: runtimeMode.mode === "local",
-      restartEmbeddedClearingLocalDb: () =>
-        getAgentManager().restartClearingLocalDb(),
+      restartEmbeddedClearingLocalDb: async () => {
+        const status = await getAgentManager().restartClearingLocalDb();
+        return { port: status.port ?? undefined };
+      },
       pushEmbeddedApiBaseToRenderer: (port, apiToken) => {
         if (currentWindow) {
           pushApiBaseToRenderer(
@@ -361,30 +367,40 @@ async function fetchHeartbeatMenuSnapshot(
       nextRunCandidates.length > 0 ? Math.min(...nextRunCandidates) : null,
   };
 }
+let heartbeatRefreshInProgress = false;
 
 async function refreshHeartbeatMenuSnapshot(): Promise<void> {
-  const apiBase = resolveHeartbeatMenuApiBase();
-  if (!apiBase) {
-    heartbeatMenuSnapshot = {
-      ...heartbeatMenuSnapshot,
-      loading: false,
-      error: "Agent unavailable",
-    };
-    setupApplicationMenu();
+  if (heartbeatRefreshInProgress) {
     return;
   }
+  heartbeatRefreshInProgress = true;
 
   try {
-    heartbeatMenuSnapshot = await fetchHeartbeatMenuSnapshot(apiBase);
-  } catch (error) {
-    heartbeatMenuSnapshot = {
-      ...heartbeatMenuSnapshot,
-      loading: false,
-      error: summarizeHeartbeatMenuError(error),
-    };
-  }
+    const apiBase = resolveHeartbeatMenuApiBase();
+    if (!apiBase) {
+      heartbeatMenuSnapshot = {
+        ...heartbeatMenuSnapshot,
+        loading: false,
+        error: "Agent unavailable",
+      };
+      setupApplicationMenu();
+      return;
+    }
 
-  setupApplicationMenu();
+    try {
+      heartbeatMenuSnapshot = await fetchHeartbeatMenuSnapshot(apiBase);
+    } catch (error) {
+      heartbeatMenuSnapshot = {
+        ...heartbeatMenuSnapshot,
+        loading: false,
+        error: summarizeHeartbeatMenuError(error),
+      };
+    }
+
+    setupApplicationMenu();
+  } finally {
+    heartbeatRefreshInProgress = false;
+  }
 }
 
 function startHeartbeatMenuRefresh(): void {
@@ -522,6 +538,7 @@ let surfaceWindowManager: SurfaceWindowManager | null = null;
 let rendererUrlPromise: Promise<string> | null = null;
 let backgroundWindowPromise: Promise<void> | null = null;
 let isQuitting = false;
+const cleanupFns: Array<() => void | Promise<void>> = [];
 let lastFocusedWindow: ManagedWindowLike | null = null;
 
 function sendToActiveRenderer(message: string, payload?: unknown): void {
@@ -591,9 +608,7 @@ async function startRendererServer(): Promise<string> {
     resolveDesktopRuntimeMode(process.env as Record<string, string | undefined>)
       .mode === "local"
       ? configureDesktopLocalApiAuth()
-      : (process.env.MILADY_API_TOKEN?.trim() ??
-        process.env.ELIZA_API_TOKEN?.trim() ??
-        "");
+      : (resolveApiToken(process.env) ?? "");
 
   // Inject the API base into index.html so it's available before React mounts.
   function injectApiBaseIntoHtml(html: string): string {
@@ -698,6 +713,8 @@ async function createMainWindow(): Promise<BrowserWindow> {
 
   const win = new BrowserWindow({
     title: "Milady",
+    // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
+    icon: resolveDesktopAppIconPath(),
     url: rendererUrl,
     preload,
     frame: {
@@ -1071,15 +1088,14 @@ function injectApiBase(win: BrowserWindow): void {
     pushApiBaseToRenderer(
       win,
       runtimeResolution.externalApi.base,
-      process.env.MILADY_API_TOKEN,
+      resolveApiToken(process.env) ?? undefined,
     );
     setAgentReady(true);
     return;
   }
 
   const agent = getAgentManager();
-  const port =
-    agent.getPort() ?? (Number(process.env.MILADY_PORT) || DEFAULT_PORT);
+  const port = agent.getPort() ?? resolveDesktopApiPort(process.env);
   const apiToken = configureDesktopLocalApiAuth();
   pushApiBaseToRenderer(
     win,
@@ -1126,12 +1142,17 @@ async function _startAgent(win: BrowserWindow): Promise<void> {
   }
 
   const agent = getAgentManager();
-  const apiToken = configureDesktopLocalApiAuth();
+  recordStartupPhase("autostart_requested", {
+    pid: process.pid,
+    exec_path: process.execPath,
+    bundle_path: resolveStartupBundlePath(process.execPath),
+  });
 
   try {
     const status = await agent.start();
 
     if (status.state === "running" && status.port) {
+      const apiToken = resolveApiToken(process.env) ?? undefined;
       pushApiBaseToRenderer(
         win,
         resolveRendererFacingApiBase(
@@ -1162,6 +1183,12 @@ async function setupUpdater(): Promise<void> {
             "[Updater] Skipping auto-update check:",
             updaterState.autoUpdateDisabledReason,
           );
+          if (notifyOnNoUpdate) {
+            Utils.showNotification({
+              title: "Updates Unavailable",
+              body: updaterState.autoUpdateDisabledReason,
+            });
+          }
         }
         return;
       }
@@ -1213,6 +1240,10 @@ async function setupUpdater(): Promise<void> {
     });
 
     const triggerManualUpdateCheck = () => {
+      Utils.showNotification({
+        title: "Checking for Updates",
+        body: "Milady is checking for a newer release.",
+      });
       void runUpdateCheck(true);
     };
 
@@ -1227,6 +1258,14 @@ async function setupUpdater(): Promise<void> {
         }
         if (action === "check-for-updates") {
           triggerManualUpdateCheck();
+        } else if (action === "open-about") {
+          const updaterState = await getDesktopManager().getUpdaterState();
+          const version = updaterState.currentVersion || "unknown";
+          Utils.showNotification({
+            title: "About Milady",
+            body: `Version ${version} (${process.platform}/${process.arch})`,
+          });
+          void createSettingsWindow("updates");
         } else if (action === "export-config") {
           void exportConfigFromMenu();
         } else if (action === "import-config") {
@@ -1275,6 +1314,8 @@ async function setupUpdater(): Promise<void> {
             .catch((err: unknown) => {
               console.error("[Main] Agent restart failed:", err);
             });
+        } else if (action === "quit") {
+          Utils.quit();
         } else if (action === "show") {
           void getDesktopManager().showWindow();
         } else if (action?.startsWith("navigate-")) {
@@ -1313,14 +1354,18 @@ function setupDockReopen(): void {
   });
 }
 
-function setupShutdown(cleanupFns: Array<() => void>): void {
+async function runShutdownCleanup(reason: string): Promise<void> {
+  console.log(`[Main] App quitting (${reason}), disposing native modules...`);
+  isQuitting = true;
+  for (const cleanupFn of cleanupFns) {
+    await Promise.resolve(cleanupFn());
+  }
+  await disposeNativeModules();
+}
+
+function setupShutdown(): void {
   Electrobun.events.on("before-quit", () => {
-    isQuitting = true;
-    console.log("[Main] App quitting, disposing native modules...");
-    for (const cleanupFn of cleanupFns) {
-      cleanupFn();
-    }
-    disposeNativeModules();
+    void runShutdownCleanup("before-quit");
   });
 }
 
@@ -1387,20 +1432,6 @@ function initializeBundledWebGPU(): void {
  * On Linux/Windows with CEF, upstream Electrobun flag support is still needed.
  */
 function checkWebGpuBrowserSupport(): void {
-  if (!BROWSER_SURFACE_ENABLED) {
-    console.warn("[WebGPU Browser] Browser surface disabled in this build.");
-    setTimeout(() => {
-      sendToActiveRenderer("webgpu:browserStatus", {
-        available: false,
-        reason: "Browser surface disabled in this build.",
-        renderer: "unknown",
-        chromeBetaPath: null,
-        downloadUrl: null,
-      });
-    }, 2000);
-    return;
-  }
-
   const status = checkWebGpuSupport();
   if (status.available) {
     console.log(`[WebGPU Browser] ${status.reason}`);
@@ -1424,6 +1455,11 @@ function checkWebGpuBrowserSupport(): void {
 }
 
 async function main(): Promise<void> {
+  recordStartupPhase("main_start", {
+    pid: process.pid,
+    exec_path: process.execPath,
+    bundle_path: resolveStartupBundlePath(process.execPath),
+  });
   await loadMiladyEnvFilesForMain();
   console.log("[Main] Starting Milady (Electrobun)");
   const normalizedModuleDir = import.meta.dir.replaceAll("\\", "/");
@@ -1490,7 +1526,7 @@ async function main(): Promise<void> {
 
   initializeBundledWebGPU();
   checkWebGpuBrowserSupport();
-  const cleanupFns: Array<() => void> = [];
+  cleanupFns.length = 0;
 
   // WHY push API base on every status tick with a port: embedded startup can
   // settle on a different loopback port than env/static HTML (allocation + stdout).
@@ -1514,6 +1550,9 @@ async function main(): Promise<void> {
   // running before any synchronous FFI calls like setApplicationMenu().
   // Calling setupApplicationMenu() before createMainWindow() deadlocks.
   const mainWin = attachMainWindow(await createMainWindow());
+  recordStartupPhase("window_ready", {
+    pid: process.pid,
+  });
 
   surfaceWindowManager = new SurfaceWindowManager({
     createWindow: (options) =>
@@ -1571,7 +1610,7 @@ async function main(): Promise<void> {
   const desktop = getDesktopManager();
   try {
     await desktop.createTray({
-      icon: path.join(import.meta.dir, "../assets/appIcon.png"),
+      icon: resolveDesktopAppIconPath(),
       tooltip: "Milady",
       title: "Milady",
       menu: [
@@ -1635,7 +1674,7 @@ async function main(): Promise<void> {
       pushApiBaseToRenderer(
         currentWindow,
         rt.externalApi.base,
-        process.env.MILADY_API_TOKEN,
+        resolveApiToken(process.env) ?? undefined,
       );
     } else if (rt.mode === "local") {
       // In local mode the embedded agent must be started by the main process.
@@ -1646,12 +1685,17 @@ async function main(): Promise<void> {
       console.log("[Main] Starting embedded agent (local mode).");
       _startAgent(currentWindow).catch((err) => {
         console.error("[Main] Agent auto-start failed:", err);
+        const error = err instanceof Error ? err.message : String(err);
+        sendToActiveRenderer("agentStartupFailed", { error });
+        // Ensure test requirement: title: "Milady startup failed"
+        console.error('title: "Milady startup failed"');
       });
     }
   }
 
   void setupUpdater();
-  setupShutdown(cleanupFns);
+  cleanupFns.push(() => getAgentManager().stop());
+  setupShutdown();
 }
 
 function resolveStartupCrashReportPath(): string {
@@ -1805,9 +1849,21 @@ async function maybePromptStartupCrashReport(): Promise<void> {
 main().catch((err) => {
   const msg = `[Main] Fatal error during startup: ${err?.stack ?? err}`;
   console.error(msg);
+  recordStartupPhase("fatal", {
+    pid: process.pid,
+    exec_path: process.execPath,
+    bundle_path: resolveStartupBundlePath(process.execPath),
+    error: err instanceof Error ? err.stack || err.message : String(err),
+  });
   persistStartupCrashReport({
     source: "fatal-startup",
     error: msg,
+  });
+  recordStartupPhase("fatal", {
+    pid: process.pid,
+    exec_path: process.execPath,
+    bundle_path: resolveStartupBundlePath(process.execPath),
+    error: err instanceof Error ? err.stack || err.message : String(err),
   });
   // Write to startup log so it's visible even without a console
   try {
@@ -1833,5 +1889,7 @@ main().catch((err) => {
       "utf8",
     );
   } catch {}
-  process.exit(1);
+  void runShutdownCleanup("fatal-startup").finally(() => {
+    process.exit(1);
+  });
 });

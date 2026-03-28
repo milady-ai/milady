@@ -19,9 +19,9 @@ function getRuntimeWindow(): RuntimeWindow | null {
   return g.window;
 }
 
-export function getElectrobunRendererRpc(): ElectrobunRendererRpc | null {
+export function getElectrobunRendererRpc(): ElectrobunRendererRpc | undefined {
   const runtimeWindow = getRuntimeWindow();
-  return runtimeWindow?.__MILADY_ELECTROBUN_RPC__ ?? null;
+  return runtimeWindow?.__MILADY_ELECTROBUN_RPC__ ?? undefined;
 }
 
 function hasElectrobunRendererBridge(): boolean {

@@ -17,6 +17,24 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
+  regression-matrix:
+    name: Regression Matrix Contract
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Validate regression matrix contract
+        run: bun run test:regression-matrix:pr
+
   unit-tests:
     name: Unit Tests
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -97,10 +115,7 @@ jobs:
         run: bun run build
 
       - name: Run E2E tests
-        run: >
-          bunx vitest run --config vitest.e2e.config.ts
-          --exclude test/anvil-contracts.e2e.test.ts
-          --exclude test/apps-e2e.e2e.test.ts
+        run: bun run test:e2e
 
   app-startup-e2e:
     name: App Startup E2E (Onboarding)
@@ -122,14 +137,61 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --frozen-lockfile --ignore-scripts
 
+      - name: Run startup E2E contract guard
+        run: bun run test:startup:contract
+
       - name: Run app startup/onboarding tests
-        run: >
-          bunx vitest run
-          --passWithNoTests
-          packages/app-core/test/app/startup-chat.e2e.test.ts
-          packages/app-core/test/app/startup-onboarding.e2e.test.ts
-          packages/app-core/test/app/startup-backend-missing.e2e.test.ts
-          packages/app-core/test/app/startup-token-401.e2e.test.ts
+        run: bun run test:startup:e2e
+
+  desktop-contract:
+    name: Electrobun Desktop Contract
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Setup Python (for node-gyp when native prebuilds missing)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install setuptools for distutils (Python 3.12+)
+        run: pip install setuptools
+
+      - name: Install canvas native dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache Bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+        env:
+          npm_config_python: ${{ env.pythonLocation }}/bin/python3
+
+      - name: Run repository postinstall patches
+        run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
+
+      - name: Run Electrobun contract tests
+        run: bun run test:desktop:contract
 
   # Pull requests only validate the release-workflow contract in
   # test-electrobun-release.yml. The full Electrobun packaging/signing matrix
@@ -170,9 +232,7 @@ jobs:
 
       - name: Run cloud live test
         if: steps.cloud.outputs.enabled == 'true'
-        run: >
-          bunx vitest run --config vitest.e2e.config.ts
-          test/cloud-providers.e2e.test.ts
+        run: bun run test:live:cloud
         env:
           MILADY_LIVE_TEST: "1"
           ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
@@ -196,23 +256,25 @@ jobs:
         run: bun run build
 
       - name: Run E2E Validation tests
-        run: bunx vitest run --config vitest.e2e.config.ts test/e2e-validation.e2e.test.ts
+        run: bun run test:e2e:validation
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
   test-status:
     name: All Tests Passed
     if: always()
-    needs: [unit-tests, db-check, e2e-tests, app-startup-e2e, cloud-live-e2e, validation-e2e]
+    needs: [regression-matrix, unit-tests, db-check, e2e-tests, app-startup-e2e, desktop-contract, cloud-live-e2e, validation-e2e]
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Check test results
         run: |
           # Note: electron jobs are optional (macOS packaging can have flaky deps)
-          if [[ "${{ needs.unit-tests.result }}" == "failure" || \
+          if [[ "${{ needs.regression-matrix.result }}" == "failure" || \
+                "${{ needs.unit-tests.result }}" == "failure" || \
                 "${{ needs.db-check.result }}" == "failure" || \
                 "${{ needs.e2e-tests.result }}" == "failure" || \
                 "${{ needs.app-startup-e2e.result }}" == "failure" || \
+                "${{ needs.desktop-contract.result }}" == "failure" || \
                 "${{ needs.cloud-live-e2e.result }}" == "failure" || \
                 "${{ needs.validation-e2e.result }}" == "failure" ]]; then
             echo "One or more test jobs failed"

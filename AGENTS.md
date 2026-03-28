@@ -28,7 +28,7 @@
 - **Tests:** colocated `*.test.ts` alongside source files
 - **Build output:** `dist/` (via `tsdown`)
 - **Entry points:** `packages/app-core/src/entry.ts` (CLI), `packages/app-core/src/index.ts` (library), `packages/agent/src/runtime/eliza.ts` (elizaOS runtime)
-- **Apps:** `apps/app/` (Capacitor mobile/desktop, includes React UI), `apps/chrome-extension/`
+- **Apps:** `apps/app/` (Capacitor mobile/desktop, includes React UI). The browser relay extension is not part of this release checkout.
 - **Internal packages:** `packages/ui/`, `packages/shared/`, `packages/vrm-utils/`, `packages/plugin-wechat/`
 - **Deployment:** `deploy/` (Docker configs)
 - **Scripts:** `scripts/` (build, dev, release tooling)
@@ -64,7 +64,7 @@
 
 ## Testing Guidelines
 
-- Framework: Vitest with V8 coverage thresholds (25% lines/functions/statements, 15% branches)
+- Framework: Vitest with V8 coverage thresholds (25% lines/functions/statements, 15% branches; canonical policy in `scripts/coverage-policy.mjs`)
 - Naming: match source names with `*.test.ts`; e2e in `*.e2e.test.ts`; live in `*.live.test.ts`
 - Run `bun run test` before pushing when you touch logic
 

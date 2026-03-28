@@ -12,6 +12,8 @@ import { getScreenCaptureManager } from "./screencapture";
 import { getSwabbleManager } from "./swabble";
 import { getTalkModeManager } from "./talkmode";
 
+const NATIVE_DISPOSE_TIMEOUT_MS = 10_000;
+
 export function initializeNativeModules(
   mainWindow: BrowserWindow,
   sendToWebview: SendToWebview,
@@ -34,16 +36,53 @@ export function initializeNativeModules(
   getTalkModeManager().setSendToWebview(sendToWebview);
 }
 
-export function disposeNativeModules(): void {
-  getAgentManager().dispose();
-  getCameraManager().dispose();
-  getCanvasManager().dispose();
-  getDesktopManager().dispose();
-  getGatewayDiscovery().dispose();
-  getGpuWindowManager().dispose();
-  getLocationManager().dispose();
-  getPermissionManager().dispose();
-  getScreenCaptureManager().dispose();
-  getSwabbleManager().dispose();
-  getTalkModeManager().dispose();
+export async function disposeNativeModules(): Promise<void> {
+  const managers = [
+    ["agent", getAgentManager()],
+    ["camera", getCameraManager()],
+    ["canvas", getCanvasManager()],
+    ["desktop", getDesktopManager()],
+    ["gateway", getGatewayDiscovery()],
+    ["gpu-window", getGpuWindowManager()],
+    ["location", getLocationManager()],
+    ["permissions", getPermissionManager()],
+    ["screencapture", getScreenCaptureManager()],
+    ["swabble", getSwabbleManager()],
+    ["talkmode", getTalkModeManager()],
+  ] as const;
+
+  const settleDisposals = Promise.allSettled(
+    managers.map(async ([name, manager]) => {
+      try {
+        await Promise.resolve(manager.dispose());
+      } catch (err) {
+        console.warn(
+          `[Native] ${name} dispose failed:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }),
+  );
+
+  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  const timedOut = await Promise.race([
+    settleDisposals.then(() => false),
+    new Promise<boolean>((resolve) => {
+      timeoutHandle = setTimeout(
+        () => resolve(true),
+        NATIVE_DISPOSE_TIMEOUT_MS,
+      );
+    }),
+  ]);
+  if (timeoutHandle) {
+    clearTimeout(timeoutHandle);
+  }
+
+  if (timedOut) {
+    console.warn(
+      `[Native] Timed out waiting ${NATIVE_DISPOSE_TIMEOUT_MS}ms for native module disposal`,
+    );
+  } else {
+    await settleDisposals;
+  }
 }

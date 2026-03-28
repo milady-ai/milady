@@ -19,20 +19,13 @@ function mockJsonResponse(response: {
 }
 
 describe("installPluginAction", () => {
-  const originalApiPort = process.env.API_PORT;
-  const originalServerPort = process.env.SERVER_PORT;
-
   beforeEach(() => {
     vi.resetAllMocks();
     vi.stubGlobal("fetch", vi.fn());
-    process.env.API_PORT = "2138";
-    process.env.SERVER_PORT = undefined;
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    process.env.API_PORT = originalApiPort;
-    process.env.SERVER_PORT = originalServerPort;
   });
 
   it("requires a plugin ID", async () => {
@@ -65,7 +58,7 @@ describe("installPluginAction", () => {
 
     expect(result.success).toBe(true);
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
-      "http://localhost:2138/api/plugins/install",
+      "http://localhost:31337/api/plugins/install",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({

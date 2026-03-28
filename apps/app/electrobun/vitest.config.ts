@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import { coverageThresholds } from "../../../scripts/coverage-policy.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,12 +20,7 @@ export default defineConfig({
     testTimeout: 30_000,
     globals: true,
     coverage: {
-      thresholds: {
-        lines: 25,
-        functions: 25,
-        statements: 25,
-        branches: 15,
-      },
+      thresholds: coverageThresholds,
     },
   },
 });

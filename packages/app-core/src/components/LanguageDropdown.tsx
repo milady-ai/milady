@@ -48,6 +48,9 @@ export interface LanguageDropdownProps {
   menuPlacement?: "bottom-end" | "top-end";
 }
 
+export const LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME =
+  "!h-11 !min-h-[44px] !min-w-[44px] !rounded-xl !px-3.5 sm:!px-3.5 leading-none";
+
 export function LanguageDropdown({
   uiLanguage,
   setUiLanguage,

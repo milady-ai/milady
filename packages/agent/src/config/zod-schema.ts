@@ -25,7 +25,6 @@ import {
   IMessageConfigSchema,
   MSTeamsConfigSchema,
   PumpfunStreamConfigSchema,
-  RetakeConfigSchema,
   SignalConfigSchema,
   SlackConfigSchema,
   TelegramConfigSchema,
@@ -150,7 +149,6 @@ const ConnectorsSchema = z
     imessage: IMessageConfigSchema.optional(),
     bluebubbles: BlueBubblesConfigSchema.optional(),
     msteams: MSTeamsConfigSchema.optional(),
-    retake: RetakeConfigSchema.optional(),
     twitch: TwitchConnectorConfigSchema.optional(),
   })
   .passthrough() // Allow extension connector configs (nostr, matrix, zalo, etc.)
@@ -161,7 +159,6 @@ const ConnectorsSchema = z
 const StreamingSchema = z
   .object({
     activeDestination: z.string().optional(),
-    retake: RetakeConfigSchema.optional(),
     twitch: TwitchStreamConfigSchema.optional(),
     youtube: YoutubeStreamConfigSchema.optional(),
     customRtmp: CustomRtmpConfigSchema.optional(),

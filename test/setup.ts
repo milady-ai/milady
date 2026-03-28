@@ -18,9 +18,9 @@ try {
     _require.resolve("react/package.json"),
   );
 
-  const origResolve = (Module as { _resolveFilename: Function })
+  const origResolve = (Module as unknown as { _resolveFilename: Function })
     ._resolveFilename;
-  (Module as { _resolveFilename: Function })._resolveFilename =
+  (Module as unknown as { _resolveFilename: Function })._resolveFilename =
     function patchedResolve(
       request: string,
       parent: unknown,
@@ -103,9 +103,12 @@ const sharedSessionStorage = ensureStorage(
 installCanvasMocks();
 
 if (typeof globalThis.window !== "undefined") {
-  const win = globalThis.window as Record<string, unknown>;
+  const win = globalThis.window as unknown as Record<string, unknown>;
   ensureStorage(win, "localStorage", sharedLocalStorage);
   ensureStorage(win, "sessionStorage", sharedSessionStorage);
+  if (!win.confirm) {
+    win.confirm = vi.fn().mockReturnValue(true);
+  }
 }
 
 import { withIsolatedTestHome } from "./test-env";

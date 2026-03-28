@@ -170,15 +170,8 @@ export function StartupFailureView({
               <h1 className="text-xl font-semibold leading-tight text-danger">
                 {t("startupfailureview.StartupFailed")} {reasonLabel}
               </h1>
-              <p className="max-w-[56ch] text-sm leading-relaxed text-txt-strong">
-                {error.message}
-              </p>
             </div>
-            {isBackendUnreachable ? (
-              <p className="max-w-[56ch] rounded-xl border border-border/50 bg-bg/35 px-4 py-3 text-sm leading-relaxed text-muted">
-                {t("startupfailureview.ThisOriginDoesNot")}
-              </p>
-            ) : null}
+            {isBackendUnreachable ? null : null}
           </div>
         </CardHeader>
 

@@ -51,6 +51,25 @@ function nowMs(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
 
+function mapUiLanguageToSpeechLocale(uiLanguage: string): string {
+  switch (uiLanguage) {
+    case "zh-CN":
+      return "zh-CN";
+    case "ko":
+      return "ko-KR";
+    case "es":
+      return "es-ES";
+    case "pt":
+      return "pt-BR";
+    case "vi":
+      return "vi-VN";
+    case "tl":
+      return "fil-PH";
+    default:
+      return "en-US";
+  }
+}
+
 const CHAT_INPUT_MIN_HEIGHT_PX = 46;
 const CHAT_INPUT_MAX_HEIGHT_PX = 200;
 const COMPANION_VISIBLE_MESSAGE_LIMIT = 2;
@@ -73,6 +92,8 @@ type ChatViewVariant = "default" | "game-modal";
 
 interface ChatViewProps {
   variant?: ChatViewVariant;
+  /** Override click handler for agent activity box sessions. */
+  onPtySessionClick?: (sessionId: string) => void;
 }
 
 interface CompanionCarryoverState {
@@ -329,7 +350,7 @@ function useChatVoiceController(options: {
   const voice = useVoiceChat({
     cloudConnected: cloudVoiceAvailable,
     interruptOnSpeech: isGameModal,
-    lang: uiLanguage === "zh-CN" ? "zh-CN" : "en-US",
+    lang: mapUiLanguageToSpeechLocale(uiLanguage),
     onPlaybackStart: handleVoicePlaybackStart,
     onTranscript: handleVoiceTranscript,
     onTranscriptPreview: handleVoiceTranscriptPreview,
@@ -639,7 +660,10 @@ function useGameModalMessages(options: {
   };
 }
 
-export function ChatView({ variant = "default" }: ChatViewProps) {
+export function ChatView({
+  variant = "default",
+  onPtySessionClick,
+}: ChatViewProps) {
   const isGameModal = variant === "game-modal";
   const showComposerVoiceToggle = false;
   const {
@@ -915,7 +939,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
       onDragLeave={() => setImageDragOver(false)}
       onDrop={handleImageDrop}
     >
-      {/* ── Messages ───────────────────────────────────────────────── */}
       <div
         ref={messagesRef}
         data-testid="chat-messages-scroll"
@@ -1086,8 +1109,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
           }
         />
       )}
-
-      {/* PTY console drawer */}
       {ptyDrawerSessionId && ptySessions.length > 0 && (
         <PtyConsoleDrawer
           activeSessionId={ptyDrawerSessionId}
@@ -1095,8 +1116,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
           onClose={() => setPtyDrawerSessionId(null)}
         />
       )}
-
-      {/* Share ingest notice */}
       {shareIngestNotice && (
         <div
           className={`text-xs text-ok py-1 relative${isGameModal ? " pointer-events-auto" : ""}`}
@@ -1105,8 +1124,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
           {shareIngestNotice}
         </div>
       )}
-
-      {/* Dropped files */}
       {droppedFiles.length > 0 && (
         <div
           className={`text-xs text-muted py-0.5 flex gap-2 relative${isGameModal ? " pointer-events-auto" : ""}`}
@@ -1117,8 +1134,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
           ))}
         </div>
       )}
-
-      {/* Pending image thumbnails */}
       {chatPendingImages.length > 0 && (
         <div
           className={`flex gap-2 flex-wrap py-1 relative${isGameModal ? " pointer-events-auto" : ""}`}
@@ -1167,8 +1182,6 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
               : "uncached"}
         </div>
       )}
-
-      {/* ── Input row: mic + paperclip + textarea + send ───────────── */}
       <input
         ref={fileInputRef}
         type="file"
@@ -1189,6 +1202,15 @@ export function ChatView({ variant = "default" }: ChatViewProps) {
               "calc(max(env(safe-area-inset-bottom, 0px), 0px) + 0.25rem)",
           }}
         >
+          {/* Agent activity box — above composer in companion dock */}
+          <AgentActivityBox
+            sessions={ptySessions}
+            onSessionClick={
+              onPtySessionClick ??
+              ((id) =>
+                setPtyDrawerSessionId((prev) => (prev === id ? null : id)))
+            }
+          />
           <div
             className="relative flex min-h-[84px] items-center px-4 py-3 max-[380px]:min-h-[78px] max-[380px]:px-3 max-[380px]:py-2.5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[34px] before:border before:border-white/8 before:bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] before:shadow-[0_20px_52px_rgba(0,0,0,0.17)] before:ring-1 before:ring-inset before:ring-white/6 before:backdrop-blur-[22px] before:content-['']"
             style={{ minHeight: `${COMPANION_COMPOSER_SHELL_MIN_HEIGHT_PX}px` }}

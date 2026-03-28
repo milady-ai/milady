@@ -214,13 +214,12 @@ describe("ConversationsSidebar", () => {
     const sidebar = tree.root.findByProps({
       "data-testid": "conversations-sidebar",
     });
-    expect(String(sidebar.props.className)).toContain("rounded-r-[26px]");
+    expect(String(sidebar.props.className)).toContain("rounded-tr-[26px]");
     expect(String(sidebar.props.className)).toContain("rounded-l-none");
     expect(
       tree.root.findAll(
         (node) =>
           typeof node.props.className === "string" &&
-          node.props.className.includes("bg-accent/10") &&
           node.children.includes("2"),
       ),
     ).toHaveLength(1);

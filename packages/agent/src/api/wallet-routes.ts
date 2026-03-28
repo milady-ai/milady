@@ -426,6 +426,7 @@ export async function handleWalletRoutes(
     const quickNodeSet = Boolean(process.env.QUICKNODE_BSC_RPC_URL?.trim());
     const configStatus: WalletConfigStatus = {
       selectedRpcProviders: rpcReadiness.selectedRpcProviders,
+      walletNetwork: resolveWalletNetworkMode(config),
       legacyCustomChains: rpcReadiness.legacyCustomChains,
       alchemyKeySet,
       infuraKeySet: Boolean(process.env.INFURA_API_KEY?.trim()),
@@ -456,7 +457,6 @@ export async function handleWalletRoutes(
       evmAddress: addresses.evmAddress,
       solanaAddress: addresses.solanaAddress,
       walletSource,
-      walletNetwork: rpcReadiness.walletNetwork,
       automationMode,
       pluginEvmLoaded,
       pluginEvmRequired,

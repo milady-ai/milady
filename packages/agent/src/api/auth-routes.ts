@@ -1,11 +1,10 @@
 import crypto from "node:crypto";
+import { resolveApiToken } from "../config/runtime-env.js";
 import { isCloudProvisionedContainer } from "./cloud-provisioning.js";
 import type { RouteRequestContext } from "./route-helpers";
 
 function getConfiguredApiToken(): string | undefined {
-  return (
-    process.env.ELIZA_API_TOKEN?.trim() || process.env.MILADY_API_TOKEN?.trim()
-  );
+  return resolveApiToken(process.env) ?? undefined;
 }
 
 export interface AuthRouteContext extends RouteRequestContext {
@@ -39,16 +38,18 @@ export async function handleAuthRoutes(
   if (!pathname.startsWith("/api/auth/")) return false;
 
   if (method === "GET" && pathname === "/api/auth/status") {
-    const required = Boolean(getConfiguredApiToken());
-
     if (isCloudProvisionedContainer()) {
+      // Steward-managed cloud containers enforce API auth upstream, but the
+      // local pairing flow is intentionally unavailable there. Reporting
+      // required=true would strand app-core clients in PairingView.
       json(res, {
-        required,
+        required: false,
         pairingEnabled: false,
         expiresAt: null,
       });
       return true;
     }
+    const required = Boolean(getConfiguredApiToken());
     const enabled = pairingEnabled();
     if (enabled) ensurePairingCode();
     json(res, {

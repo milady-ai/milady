@@ -68,11 +68,9 @@ describe("CI workflow audit regressions", () => {
     expect(content).not.toMatch(/^\s{2}update-homebrew:/m);
   });
 
-  it("nightly.yml delegates to reusable-npm-publish", () => {
+  it("nightly.yml publishes npm inline with the nightly dist-tag", () => {
     const content = readWorkflow("nightly.yml");
-    expect(content).toMatch(
-      /uses:\s*\.\/\.github\/workflows\/reusable-npm-publish\.yml/,
-    );
+    expect(content).toMatch(/npm publish --tag nightly/);
   });
 
   it("setup-bun-workspace composite action exists (supersedes setup-native-deps)", () => {

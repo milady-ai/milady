@@ -111,6 +111,15 @@ const { mockClient } = vi.hoisted(() => ({
       triggers: [],
       todos: [],
     })),
+    renameConversation: vi.fn(async (_id: string, _title: string) => ({
+      conversation: {
+        id: "conv-1",
+        title: "Chat",
+        roomId: "room-1",
+        createdAt: "2026-02-01T00:00:00.000Z",
+        updatedAt: "2026-02-01T00:00:00.000Z",
+      },
+    })),
     deleteConversation: vi.fn(async () => ({ ok: true })),
   },
 }));
@@ -302,6 +311,15 @@ function resetMockClient(): void {
     todos: [],
   });
   mockClient.getCodingAgentStatus.mockResolvedValue(null);
+  mockClient.renameConversation.mockResolvedValue({
+    conversation: {
+      id: "conv-1",
+      title: "Chat",
+      roomId: "room-1",
+      createdAt: "2026-02-01T00:00:00.000Z",
+      updatedAt: "2026-02-01T00:00:00.000Z",
+    },
+  });
   mockClient.deleteConversation.mockResolvedValue({ ok: true });
 }
 
@@ -665,6 +683,16 @@ describe("chat journey", () => {
           return deferred.promise;
         },
       );
+      mockClient.getConversationMessages.mockResolvedValue({
+        messages: [
+          {
+            id: "msg-final",
+            role: "assistant",
+            text: "Hello world",
+            timestamp: Date.now(),
+          },
+        ],
+      });
 
       let api: ProbeApi | null = null;
       let tree: TestRenderer.ReactTestRenderer;
@@ -725,6 +753,16 @@ describe("chat journey", () => {
       mockClient.sendConversationMessageStream.mockResolvedValue({
         text: "Final answer",
         agentName: "Milady",
+      });
+      mockClient.getConversationMessages.mockResolvedValue({
+        messages: [
+          {
+            id: "msg-final",
+            role: "assistant",
+            text: "Final answer",
+            timestamp: Date.now(),
+          },
+        ],
       });
 
       let api: ProbeApi | null = null;

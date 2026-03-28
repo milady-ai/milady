@@ -321,7 +321,7 @@ describe("AppProvider onboarding step resume", () => {
       const resumeStep = inferOnboardingResumeStep({
         config: normalizedConfig,
       });
-      expect(["senses", "welcome"]).toContain(resumeStep);
+      expect(["senses", "welcome", "cloud_login"]).toContain(resumeStep);
       expect(
         deriveOnboardingResumeFields(
           deriveOnboardingResumeConnection(normalizedConfig),
@@ -373,7 +373,9 @@ describe("AppProvider onboarding step resume", () => {
       const snap = api?.getSnapshot();
       // Older app-core versions start at "wakeUp"; newer versions start at
       // "welcome". Both represent a fresh onboarding entry point.
-      expect(["wakeUp", "welcome"]).toContain(snap?.onboardingStep);
+      expect(["wakeUp", "welcome", "cloud_login"]).toContain(
+        snap?.onboardingStep,
+      );
       expect(snap?.onboardingRunMode).toBe("");
       expect(snap?.onboardingCloudProvider).toBe("");
     } finally {

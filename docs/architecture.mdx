@@ -500,7 +500,7 @@ Milady uses a Zod-validated JSON configuration file (`milady.json`):
 
 - Token-based auth via `MILADY_API_TOKEN` (bearer token on all `/api/*` requests)
 - Auto-generated token when binding to non-loopback addresses
-- WebSocket connections validated against the same token
+- WebSocket connections authenticated via an `auth` message after connection (or via a bearer token in the upgrade handshake header)
 
 ### Sandbox System
 

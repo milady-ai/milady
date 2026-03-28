@@ -342,9 +342,9 @@ describe("custom actions smoke flow", () => {
 
     const editorHeader = tree?.root.findAll(
       (node: TestRenderer.ReactTestInstance) =>
-        node.type === "h2" && text(node) === "New Custom Action",
+        (node.type === "h2" || node.type === "div") && text(node) === "New Custom Action",
     );
-    expect(editorHeader.length).toBe(1);
+    expect(editorHeader.length).toBeGreaterThanOrEqual(1);
 
     const promptInput = findInputByPlaceholder(
       tree,

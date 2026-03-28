@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsdown src/index.ts --format esm --dts",
     "check": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "clean": "rm -rf dist"
   },

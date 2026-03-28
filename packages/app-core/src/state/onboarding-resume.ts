@@ -115,7 +115,7 @@ export function inferOnboardingResumeStep(args: {
     return args.persistedStep;
   }
 
-  return "welcome";
+  return "cloud_login";
 }
 
 export function deriveOnboardingResumeConnection(
@@ -195,6 +195,8 @@ export function deriveOnboardingResumeFields(
         onboardingRunMode: "cloud",
         onboardingCloudProvider: "elizacloud",
         onboardingApiKey: connection.apiKey ?? "",
+        onboardingVoiceProvider: "",
+        onboardingVoiceApiKey: "",
         onboardingSmallModel: connection.smallModel ?? "",
         onboardingLargeModel: connection.largeModel ?? "",
         onboardingRemoteConnected: false,
@@ -210,6 +212,8 @@ export function deriveOnboardingResumeFields(
         onboardingCloudProvider: "",
         onboardingProvider: connection.provider,
         onboardingApiKey: connection.apiKey ?? "",
+        onboardingVoiceProvider: "",
+        onboardingVoiceApiKey: "",
         onboardingPrimaryModel:
           connection.provider === "openrouter"
             ? ""
@@ -228,6 +232,8 @@ export function deriveOnboardingResumeFields(
         onboardingCloudProvider: "remote",
         onboardingProvider: connection.provider ?? "",
         onboardingApiKey: connection.apiKey ?? "",
+        onboardingVoiceProvider: "",
+        onboardingVoiceApiKey: "",
         onboardingPrimaryModel:
           connection.provider === "openrouter"
             ? ""

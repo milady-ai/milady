@@ -8,4 +8,5 @@ export {
   sanitizeForSettingsDebug,
   settingsDebugCloudSummary,
 } from "./settings-debug.js";
+export * from "./runtime-env.js";
 export { sanitizeSpeechText } from "./spoken-text.js";

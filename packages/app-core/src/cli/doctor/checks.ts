@@ -17,6 +17,10 @@ import { createConnection } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import {
+  resolveApiSecurityConfig,
+  resolveServerOnlyPort,
+} from "@miladyai/shared/runtime-env";
 import { getCloudSecret } from "../../api/cloud-secrets";
 
 // Inlined to avoid circular dependency with register.setup.ts
@@ -362,10 +366,11 @@ const LOOPBACK_BIND_RE =
 export function checkHostConfig(
   env: Record<string, string | undefined> = process.env,
 ): CheckResult {
-  const rawBind = env.ELIZA_API_BIND?.trim() ?? "127.0.0.1";
+  const config = resolveApiSecurityConfig(env);
+  const rawBind = config.bindHost;
   const bindHost = rawBind.replace(/:\d+$/, "").toLowerCase();
-  const token = env.ELIZA_API_TOKEN?.trim() ?? "";
-  const allowedHosts = env.ELIZA_ALLOWED_HOSTS?.trim() ?? "";
+  const token = config.token ?? "";
+  const allowedHosts = config.allowedHosts.join(",");
 
   const isWildcard = WILDCARD_BIND_RE.test(bindHost);
   const isLoopback = LOOPBACK_BIND_RE.test(bindHost);
@@ -377,8 +382,8 @@ export function checkHostConfig(
       label: "Host binding",
       category: "config",
       status: "warn",
-      detail: `ELIZA_API_BIND=${rawBind} — token is auto-generated each restart`,
-      fix: "Set a stable ELIZA_API_TOKEN=<secret> in your environment",
+      detail: `MILADY_API_BIND=${rawBind} — token is auto-generated each restart`,
+      fix: "Set a stable MILADY_API_TOKEN=<secret> in your environment",
     };
   }
 
@@ -389,8 +394,8 @@ export function checkHostConfig(
       label: "Host binding",
       category: "config",
       status: "warn",
-      detail: `ELIZA_API_BIND=${rawBind} without ELIZA_API_TOKEN — token auto-generated each restart`,
-      fix: "Set a stable ELIZA_API_TOKEN=<secret>",
+      detail: `MILADY_API_BIND=${rawBind} without MILADY_API_TOKEN — token auto-generated each restart`,
+      fix: "Set a stable MILADY_API_TOKEN=<secret>",
     };
   }
 
@@ -399,7 +404,7 @@ export function checkHostConfig(
       label: "Host binding",
       category: "config",
       status: "pass",
-      detail: `${rawBind} + ELIZA_ALLOWED_HOSTS=${allowedHosts}`,
+      detail: `${rawBind} + MILADY_ALLOWED_HOSTS=${allowedHosts}`,
     };
   }
 
@@ -483,7 +488,7 @@ export async function checkPort(port: number): Promise<CheckResult> {
     category: "network",
     status: "warn",
     detail: owner ? `In use by ${owner}` : "In use by another process",
-    fix: `ELIZA_PORT=<other> eliza start`,
+    fix: `MILADY_PORT=<other> milady start (current default ${resolveServerOnlyPort(process.env)})`,
   };
 }
 

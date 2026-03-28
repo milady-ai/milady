@@ -6,6 +6,7 @@
  * @module hooks/loader
  */
 
+import { lstat, realpath } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -36,11 +37,46 @@ function getSafeHookRoots(
  * roots.  Blocks absolute paths to arbitrary locations and path-traversal
  * attacks (e.g. "../../etc/malicious").
  */
-function isPathUnderRoots(modulePath: string, roots: string[]): boolean {
-  const resolved = resolve(modulePath);
+async function normalizeRootPath(root: string): Promise<string> {
+  const resolvedRoot = resolve(root);
+  try {
+    return await realpath(resolvedRoot);
+  } catch {
+    return resolvedRoot;
+  }
+}
+
+async function normalizeModulePath(modulePath: string): Promise<string | null> {
+  const resolvedModulePath = resolve(modulePath);
+  try {
+    const stats = await lstat(resolvedModulePath);
+    if (stats.isSymbolicLink()) {
+      return await realpath(resolvedModulePath).catch(() => null);
+    }
+    return await realpath(resolvedModulePath).catch(() => resolvedModulePath);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return resolvedModulePath;
+    }
+    return null;
+  }
+}
+
+async function isPathUnderRoots(
+  modulePath: string,
+  roots: string[],
+): Promise<boolean> {
+  const normalizedModulePath = await normalizeModulePath(modulePath);
+  if (!normalizedModulePath) {
+    return false;
+  }
+
   return roots.some((root) => {
-    const r = root.endsWith(sep) ? root : root + sep;
-    return resolved.startsWith(r) || resolved === root;
+    const normalizedRoot = root.endsWith(sep) ? root : root + sep;
+    return (
+      normalizedModulePath.startsWith(normalizedRoot) ||
+      normalizedModulePath === root
+    );
   });
 }
 
@@ -209,15 +245,16 @@ export async function loadHooks(
 
   // Load legacy config handlers (backwards compatibility)
   if (internalConfig?.handlers) {
-    const safeRoots = getSafeHookRoots(
-      options.workspacePath,
-      options.bundledDir,
+    const safeRoots = await Promise.all(
+      getSafeHookRoots(options.workspacePath, options.bundledDir).map(
+        normalizeRootPath,
+      ),
     );
 
     for (const legacyHandler of internalConfig.handlers) {
       // Validate module path is under a known hook directory to prevent
       // arbitrary code execution via config-injected module paths.
-      if (!isPathUnderRoots(legacyHandler.module, safeRoots)) {
+      if (!(await isPathUnderRoots(legacyHandler.module, safeRoots))) {
         logger.warn(
           `[hooks] Rejected legacy handler: module path "${legacyHandler.module}" is outside allowed hook directories`,
         );

@@ -136,18 +136,19 @@ export function CharacterRoster({
                 />
                 <div className="absolute inset-x-0 bottom-0">
                   <div
-                    className={`py-0.5 pr-9 pl-2.5 text-[clamp(8px,1.2vw,11px)] font-semibold whitespace-nowrap overflow-hidden text-ellipsis text-right ${
+                    className={`py-1 pr-9 pl-2.5 text-[clamp(9px,1.22vw,12px)] font-semibold whitespace-nowrap overflow-hidden text-ellipsis text-right tracking-[0.01em] ${
                       useWhiteBorders
                         ? "text-[var(--onboarding-text-strong)]"
                         : "text-white"
-                    }${isSelected ? (useWhiteBorders ? " bg-[rgba(12,18,26,0.78)]" : " bg-black/[0.78]") : useWhiteBorders ? " bg-[rgba(12,18,26,0.6)]" : " bg-black/60"}`}
+                    }${isSelected ? (useWhiteBorders ? " bg-[rgba(7,11,15,0.9)]" : " bg-black/[0.82]") : useWhiteBorders ? " bg-[rgba(7,11,15,0.8)]" : " bg-black/[0.72]"}`}
                     style={{
                       clipPath: INSET_CLIP,
+                      textShadow: "0 2px 10px rgba(3,5,10,0.72)",
                       ...(isSelected
                         ? {
                             boxShadow: useWhiteBorders
-                              ? "inset 0 1px 0 rgba(255,255,255,0.2)"
-                              : "inset 0 1px 0 rgba(255,255,255,0.08)",
+                              ? "inset 0 1px 0 rgba(255,255,255,0.22)"
+                              : "inset 0 1px 0 rgba(255,255,255,0.1)",
                           }
                         : {}),
                     }}

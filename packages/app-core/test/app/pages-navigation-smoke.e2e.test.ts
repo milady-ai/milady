@@ -26,7 +26,6 @@ const { companionOverlayTabs, mockUseApp, noop } = vi.hoisted(() => ({
     "apps",
     "connectors",
     "knowledge",
-    "lifo",
     "stream",
     "wallets",
   ]),
@@ -95,8 +94,6 @@ vi.mock("@miladyai/app-core/components", async () => {
     DatabasePageView: () =>
       React.createElement("section", null, "DatabasePageView Ready"),
     EmotePicker: () => React.createElement("div", null, "EmotePicker"),
-    LifoSandboxView: () =>
-      React.createElement("section", null, "LifoSandboxView Ready"),
     LogsPageView: () =>
       React.createElement("section", null, "LogsPageView Ready"),
     OnboardingWizard: () =>
@@ -309,10 +306,6 @@ vi.mock("@miladyai/app-core/src/components/TrajectoryDetailView", () => ({
     React.createElement("section", null, "TrajectoryDetailView Ready"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () =>
-    React.createElement("section", null, "LifoSandboxView Ready"),
-}));
 vi.mock("@miladyai/app-core/hooks", async () => {
   const actual = await vi.importActual<
     typeof import("@miladyai/app-core/hooks")
@@ -521,7 +514,6 @@ describe("pages navigation smoke (e2e)", () => {
       "voice",
       "runtime",
       "database",
-      "lifo",
       "settings",
       "logs",
     ];

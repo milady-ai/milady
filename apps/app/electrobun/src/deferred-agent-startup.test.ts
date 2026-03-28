@@ -22,6 +22,10 @@ describe("deferred agent startup (desktop)", () => {
     expect(source).toContain(
       'console.error("[Main] Agent auto-start failed:", err);',
     );
+    expect(source).toContain(
+      'sendToActiveRenderer("agentStartupFailed", { error });',
+    );
+    expect(source).toContain('title: "Milady startup failed"');
   });
   it("still injects external API base immediately when configured", () => {
     expect(source).toContain('rt.mode === "external"');

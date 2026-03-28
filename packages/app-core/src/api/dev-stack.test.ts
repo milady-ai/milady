@@ -22,6 +22,15 @@ describe("resolveDevStackFromEnv", () => {
     expect(resolveDevStackFromEnv({}).api.listenPort).toBe(31337);
   });
 
+  it("accepts ELIZA_API_PORT as the legacy dedicated API alias", () => {
+    const r = resolveDevStackFromEnv({
+      ELIZA_API_PORT: "4555",
+      MILADY_PORT: "2138",
+    });
+    expect(r.api.listenPort).toBe(4555);
+    expect(r.desktop.uiPort).toBe(2138);
+  });
+
   it("includes desktop fields when set", () => {
     const r = resolveDevStackFromEnv({
       MILADY_PORT: "2138",

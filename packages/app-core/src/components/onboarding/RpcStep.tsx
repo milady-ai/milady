@@ -2,40 +2,44 @@ import { useApp } from "@miladyai/app-core/state";
 import { Button, Input } from "@miladyai/ui";
 import { useState } from "react";
 import {
+  onboardingCardSurfaceClassName,
+  onboardingCardSurfaceHoverClassName,
+  onboardingFieldLabelClassName,
+  onboardingHelperTextClassName,
+  onboardingInputClassName,
+  onboardingReadableTextPrimaryClassName,
+  onboardingSubtleTextClassName,
+  onboardingRecommendedSurfaceClassName,
+  onboardingRecommendedSurfaceHoverClassName,
+} from "./onboarding-form-primitives";
+import {
+  OnboardingSecondaryActionButton,
   OnboardingStepHeader,
   onboardingBodyTextShadowStyle,
   onboardingFooterClass,
   onboardingPrimaryActionClass,
   onboardingPrimaryActionTextShadowStyle,
-  onboardingSecondaryActionClass,
-  onboardingSecondaryActionTextShadowStyle,
   spawnOnboardingRipple,
 } from "./onboarding-step-chrome";
 
 type RpcMode = "" | "cloud" | "byok";
 
 const rpcModeCardBaseClass =
-  "flex min-h-[76px] w-full items-center justify-center rounded-2xl border px-4 py-3 text-center backdrop-blur-[18px] backdrop-saturate-[1.2] transition-all duration-300";
+  "flex min-h-[76px] w-full items-center justify-center rounded-2xl px-4 py-3 text-center backdrop-blur-[18px] backdrop-saturate-[1.2] transition-all duration-300";
 
-const rpcModeTitleClass =
-  "text-sm font-semibold leading-tight text-[var(--onboarding-text-primary)]";
+const rpcModeTitleClass = `text-sm font-semibold leading-tight ${onboardingReadableTextPrimaryClassName}`;
 
-const rpcModeDescriptionClass =
-  "mt-1 text-xs leading-[1.45] text-[var(--onboarding-text-subtle)]";
+const rpcModeDescriptionClass = `mt-1 text-xs leading-[1.45] ${onboardingSubtleTextClassName}`;
 
-const rpcCalloutClass =
-  "mx-auto mt-4 flex w-full max-w-[25rem] items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm leading-relaxed shadow-[0_18px_50px_rgba(3,5,10,0.2)] backdrop-blur-sm";
+const rpcCalloutClass = `mx-auto mt-4 flex w-full max-w-[25rem] items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm leading-relaxed backdrop-blur-sm ${onboardingCardSurfaceClassName}`;
 
 const rpcFieldStackClass = "mx-auto w-full max-w-[27rem] space-y-4 text-left";
 
-const rpcFieldLabelClass =
-  "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--onboarding-text-muted)]";
+const rpcFieldLabelClass = `mb-1.5 block text-[11px] tracking-[0.14em] ${onboardingFieldLabelClassName}`;
 
-const rpcFieldHintClass =
-  "mb-2 text-xs leading-relaxed text-[var(--onboarding-text-subtle)]";
+const rpcFieldHintClass = `mb-2 ${onboardingSubtleTextClassName}`;
 
-const rpcInputClass =
-  "w-full rounded-xl border border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] px-4 py-3 text-left text-sm tracking-[0.01em] text-[var(--onboarding-text-primary)] outline-none transition-[border-color,box-shadow,background-color] duration-300 placeholder:text-[var(--onboarding-text-faint)] focus:border-[var(--onboarding-field-focus-border)] focus:shadow-[var(--onboarding-field-focus-shadow)]";
+const rpcInputClass = `${onboardingInputClassName} h-auto px-4 py-3 text-sm tracking-[0.01em]`;
 
 function RpcModeCard({
   title,
@@ -54,8 +58,8 @@ function RpcModeCard({
       variant={tone === "recommended" ? "default" : "outline"}
       className={`${rpcModeCardBaseClass} ${
         tone === "recommended"
-          ? "border-[var(--onboarding-recommended-border)] bg-[var(--onboarding-recommended-bg)] hover:border-[var(--onboarding-recommended-border-strong)] hover:bg-[var(--onboarding-recommended-bg-hover)]"
-          : "border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)] hover:border-[var(--onboarding-card-border-strong)] hover:bg-[var(--onboarding-card-bg-hover)]"
+          ? `${onboardingRecommendedSurfaceClassName} ${onboardingRecommendedSurfaceHoverClassName}`
+          : `${onboardingCardSurfaceClassName} ${onboardingCardSurfaceHoverClassName}`
       }`}
       onClick={onClick}
     >
@@ -115,7 +119,7 @@ function CloudLoginErrorMessage({ error }: { error: string }) {
   if (urlMatch) {
     return (
       <p
-        className="mt-3 text-sm text-[var(--onboarding-text-strong)]"
+        className={`mt-3 text-sm ${onboardingReadableTextPrimaryClassName}`}
         style={onboardingBodyTextShadowStyle}
       >
         Open this link to log in:{" "}
@@ -209,24 +213,18 @@ export function RpcStep() {
         </div>
 
         <div className={onboardingFooterClass}>
-          <Button
-            variant="ghost"
-            className={onboardingSecondaryActionClass}
-            style={onboardingSecondaryActionTextShadowStyle}
+          <OnboardingSecondaryActionButton
             onClick={handleOnboardingBack}
             type="button"
           >
             {t("onboarding.back")}
-          </Button>
-          <Button
-            variant="ghost"
-            className={onboardingSecondaryActionClass}
-            style={onboardingSecondaryActionTextShadowStyle}
+          </OnboardingSecondaryActionButton>
+          <OnboardingSecondaryActionButton
             onClick={() => void handleOnboardingNext()}
             type="button"
           >
             {t("onboarding.rpcSkip")}
-          </Button>
+          </OnboardingSecondaryActionButton>
         </div>
       </>
     );
@@ -289,7 +287,7 @@ export function RpcStep() {
                 <CloudLoginErrorMessage error={elizaCloudLoginError} />
               ) : null}
               <p
-                className="mt-3 text-sm leading-relaxed text-[var(--onboarding-text-muted)]"
+                className={`mt-3 ${onboardingHelperTextClassName}`}
                 style={onboardingBodyTextShadowStyle}
               >
                 {t("onboarding.freeCredits")}
@@ -299,15 +297,12 @@ export function RpcStep() {
         </div>
 
         <div className={onboardingFooterClass}>
-          <Button
-            variant="ghost"
-            className={onboardingSecondaryActionClass}
-            style={onboardingSecondaryActionTextShadowStyle}
+          <OnboardingSecondaryActionButton
             onClick={() => setMode("")}
             type="button"
           >
             {t("onboarding.back")}
-          </Button>
+          </OnboardingSecondaryActionButton>
           <Button
             className={onboardingPrimaryActionClass}
             style={onboardingPrimaryActionTextShadowStyle}
@@ -362,15 +357,12 @@ export function RpcStep() {
       </div>
 
       <div className={onboardingFooterClass}>
-        <Button
-          variant="ghost"
-          className={onboardingSecondaryActionClass}
-          style={onboardingSecondaryActionTextShadowStyle}
+        <OnboardingSecondaryActionButton
           onClick={() => setMode("")}
           type="button"
         >
           {t("onboarding.back")}
-        </Button>
+        </OnboardingSecondaryActionButton>
         <Button
           className={onboardingPrimaryActionClass}
           style={onboardingPrimaryActionTextShadowStyle}

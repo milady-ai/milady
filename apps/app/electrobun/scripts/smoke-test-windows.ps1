@@ -21,6 +21,10 @@ $selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady\\canary\\
 $tempExtractDir = Join-Path $env:RUNNER_TEMP ("milady-windows-smoke-" + [Guid]::NewGuid().ToString("N"))
 $persistLauncherDir = $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR
 $persistLauncherPathFile = $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE
+$startupSessionId = "milady-windows-smoke-" + [Guid]::NewGuid().ToString("N")
+$startupStateFile = Join-Path $env:RUNNER_TEMP ($startupSessionId + ".state.json")
+$startupEventsFile = Join-Path $env:RUNNER_TEMP ($startupSessionId + ".events.jsonl")
+$startupBootstrapFile = $null
 
 function Find-Launcher([string]$Root) {
   if (-not (Test-Path $Root)) {
@@ -84,29 +88,173 @@ function Stop-MiladyProcesses() {
     Stop-Process -Force
 }
 
+function Get-TarCommand() {
+  if (Test-Path "C:\\Windows\\System32\\tar.exe") {
+    return "C:\\Windows\\System32\\tar.exe"
+  }
+  return "tar"
+}
+
+function Assert-PackagedAssetVariants(
+  [string]$Description,
+  [int]$MinSizeBytes,
+  [string[]]$Candidates
+) {
+  foreach ($candidate in $Candidates) {
+    if (-not (Test-Path $candidate)) {
+      continue
+    }
+    $length = (Get-Item $candidate).Length
+    if ($length -ge $MinSizeBytes) {
+      return
+    }
+  }
+
+  throw "Missing packaged $Description. Checked: $($Candidates -join ', ')"
+}
+
+function Assert-PackagedArchiveAssetVariants(
+  [string]$ArchivePath,
+  [string]$Description,
+  [int]$MinSizeBytes,
+  [string[]]$Suffixes
+) {
+  $tarCommand = Get-TarCommand
+  $archiveList = & $tarCommand -tf $ArchivePath 2>$null
+
+  foreach ($suffix in $Suffixes) {
+    $normalizedSuffix = $suffix.Replace("\", "/")
+    $member = $archiveList |
+      Where-Object { ($_ -replace "\\", "/") -like "*$normalizedSuffix" } |
+      Select-Object -First 1
+
+    if (-not $member) {
+      continue
+    }
+
+    $extractDir = Join-Path $env:RUNNER_TEMP ("milady-archive-asset-check-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+    try {
+      & $tarCommand -xf $ArchivePath -C $extractDir $member 2>$null | Out-Null
+      $memberPath = Join-Path $extractDir ($member -replace "/", "\")
+      if (-not (Test-Path $memberPath)) {
+        continue
+      }
+      $length = (Get-Item $memberPath).Length
+      if ($length -ge $MinSizeBytes) {
+        return
+      }
+    } finally {
+      Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
+
+  throw "Missing packaged $Description in runtime archive. Checked suffixes: $($Suffixes -join ', ')"
+}
+
+function Verify-PackagedRendererAssets([string]$LauncherPath) {
+  $launcherDir = Split-Path -Parent $LauncherPath
+  $appRoot = Split-Path -Parent $launcherDir
+  $rendererDir = Join-Path $appRoot "resources\\app\\renderer"
+
+  if (Test-Path $rendererDir) {
+    Assert-PackagedAssetVariants -Description "renderer entrypoint" -MinSizeBytes 256 -Candidates @(
+      (Join-Path $rendererDir "index.html")
+    )
+    Assert-PackagedAssetVariants -Description "default avatar VRM" -MinSizeBytes 1024 -Candidates @(
+      (Join-Path $rendererDir "vrms\\milady-1.vrm.gz"),
+      (Join-Path $rendererDir "vrms\\milady-1.vrm")
+    )
+    Assert-PackagedAssetVariants -Description "default avatar preview" -MinSizeBytes 1024 -Candidates @(
+      (Join-Path $rendererDir "vrms\\previews\\milady-1.png")
+    )
+    Assert-PackagedAssetVariants -Description "default avatar background" -MinSizeBytes 1024 -Candidates @(
+      (Join-Path $rendererDir "vrms\\backgrounds\\milady-1.png")
+    )
+    Write-Host "Packaged renderer asset check PASSED (direct app bundle)."
+    return
+  }
+
+  $resourcesDir = Join-Path $appRoot "resources"
+  $runtimeArchive = Get-ChildItem -Path $resourcesDir -File -Filter "*.tar.zst" -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+
+  if (-not $runtimeArchive) {
+    throw "Packaged renderer directory missing and no runtime archive found under $resourcesDir"
+  }
+
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "renderer entrypoint" -MinSizeBytes 256 -Suffixes @(
+    "renderer/index.html"
+  )
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "default avatar VRM" -MinSizeBytes 1024 -Suffixes @(
+    "renderer/vrms/milady-1.vrm.gz",
+    "renderer/vrms/milady-1.vrm"
+  )
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "default avatar preview" -MinSizeBytes 1024 -Suffixes @(
+    "renderer/vrms/previews/milady-1.png"
+  )
+  Assert-PackagedArchiveAssetVariants -ArchivePath $runtimeArchive.FullName -Description "default avatar background" -MinSizeBytes 1024 -Suffixes @(
+    "renderer/vrms/backgrounds/milady-1.png"
+  )
+  Write-Host "Packaged renderer asset check PASSED (runtime archive)."
+}
+
 function Get-ObservedBackendPorts([int]$DefaultPort) {
   $ports = [System.Collections.Generic.List[int]]::new()
   $ports.Add($DefaultPort)
 
-  if (-not (Test-Path $startupLog)) {
+  if (-not (Test-Path $startupStateFile)) {
     return $ports.ToArray()
   }
 
-  $logLines = Get-Content $startupLog -Tail 200 -ErrorAction SilentlyContinue
-  foreach ($line in $logLines) {
-    if (
-      $line -match 'Runtime started -- agent: .* port: ([0-9]+), pid:' -or
-      $line -match 'Server bound to dynamic port ([0-9]+)' -or
-      $line -match 'Waiting for health endpoint at http://(?:localhost|127\.0\.0\.1):([0-9]+)/api/health'
-    ) {
-      $observedPort = [int]$Matches[1]
-      if (-not $ports.Contains($observedPort)) {
-        $ports.Add($observedPort)
-      }
+  try {
+    $state = Get-Content $startupStateFile -Raw -ErrorAction Stop | ConvertFrom-Json
+    if ($state.port -is [int] -and -not $ports.Contains([int]$state.port)) {
+      $ports.Add([int]$state.port)
     }
+  } catch {
+    return $ports.ToArray()
   }
 
   return $ports.ToArray()
+}
+
+function Get-StartupState() {
+  if (-not (Test-Path $startupStateFile)) {
+    return $null
+  }
+
+  try {
+    $state = Get-Content $startupStateFile -Raw -ErrorAction Stop | ConvertFrom-Json
+    if ($state.session_id -ne $startupSessionId) {
+      return $null
+    }
+    return $state
+  } catch {
+    return $null
+  }
+}
+
+function Write-StartupBootstrap() {
+  if ([string]::IsNullOrWhiteSpace($startupBootstrapFile)) {
+    throw "Startup bootstrap file path was not initialized."
+  }
+  $bootstrapDir = Split-Path -Parent $startupBootstrapFile
+  if ($bootstrapDir) {
+    New-Item -ItemType Directory -Force -Path $bootstrapDir | Out-Null
+  }
+
+  $bootstrap = @{
+    session_id = $startupSessionId
+    state_file = $startupStateFile
+    events_file = $startupEventsFile
+    expires_at = (Get-Date).ToUniversalTime().AddMinutes(15).ToString("o")
+  } | ConvertTo-Json
+
+  $tempBootstrapFile = $startupBootstrapFile + ".tmp"
+  Set-Content -Path $tempBootstrapFile -Value ($bootstrap + "`n") -Encoding utf8
+  Move-Item -Path $tempBootstrapFile -Destination $startupBootstrapFile -Force
 }
 
 Write-Host "Artifacts dir: $resolvedArtifactsDir"
@@ -117,6 +265,9 @@ if ($resolvedBuildDir) {
 Stop-MiladyProcesses
 $env:ELECTROBUN_CONSOLE = "1"
 $env:MILADY_FORCE_AUTOSTART_AGENT = "1"
+$env:MILADY_STARTUP_SESSION_ID = $startupSessionId
+$env:MILADY_STARTUP_STATE_FILE = $startupStateFile
+$env:MILADY_STARTUP_EVENTS_FILE = $startupEventsFile
 
 # Reset stale startup logs before launch so fatal classification only applies
 # to this run.
@@ -241,7 +392,14 @@ if (-not $launcher) {
 
 $launcher = Write-ReusableLauncherPath -Launcher $launcher -TemporaryRoot $tempExtractDir
 Write-Host "Using $launcherSource launcher: $($launcher.FullName)"
+Verify-PackagedRendererAssets -LauncherPath $launcher.FullName
 $launcherDir = Split-Path -Parent $launcher.FullName
+$startupBundleRoot = Split-Path -Parent $launcherDir
+$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"
+Remove-Item $startupStateFile -Force -ErrorAction SilentlyContinue
+Remove-Item $startupEventsFile -Force -ErrorAction SilentlyContinue
+Remove-Item $startupBootstrapFile -Force -ErrorAction SilentlyContinue
+Write-StartupBootstrap
 $launcherProcess = Start-Process -FilePath $launcher.FullName -WorkingDirectory $launcherDir -PassThru
 $launcherStarted = $true
 
@@ -270,48 +428,6 @@ function Test-BackendProbeStatus([int]$StatusCode) {
   return $StatusCode -eq 200 -or $StatusCode -eq 401
 }
 
-function Test-StartupLogFatalLine([string]$Line) {
-  if ([string]::IsNullOrWhiteSpace($Line)) {
-    return $false
-  }
-
-  $trimmedLine = $Line.Trim()
-
-  $knownBenignPatterns = @(
-    "optional plugin",
-    "optional provider",
-    "failed to load optional plugin",
-    "plugin not installed"
-  )
-
-  foreach ($pattern in $knownBenignPatterns) {
-    if ($trimmedLine -match [regex]::Escape($pattern)) {
-      return $false
-    }
-  }
-
-  if ($trimmedLine -match "Cannot find module" -and $trimmedLine -match "@elizaos/plugin-") {
-    return $false
-  }
-
-  $fatalPatterns = @(
-    "Failed to start:",
-    "Child process exited with code",
-    "Error: Cannot find module",
-    "UnhandledPromiseRejection",
-    "Unhandled Exception",
-    "Error: listen EADDRINUSE"
-  )
-
-  foreach ($pattern in $fatalPatterns) {
-    if ($trimmedLine -match [regex]::Escape($pattern)) {
-      return $true
-    }
-  }
-
-  return $false
-}
-
 function Dump-ProcessDiagnostics() {
   Write-Host "--- Bun/launcher processes ---"
   try {
@@ -330,6 +446,7 @@ function Dump-ProcessDiagnostics() {
 }
 
 function Dump-FailureDiagnostics([int]$Port) {
+  $startupState = Get-StartupState
   Write-Host ""
   Write-Host "========== FAILURE DIAGNOSTICS =========="
 
@@ -352,16 +469,31 @@ function Dump-FailureDiagnostics([int]$Port) {
   Write-Host "[3/6] Process tree:"
   Dump-ProcessDiagnostics
 
-  # 4. Full startup log (not just tail 200)
+  # 4. Session-scoped startup trace
   Write-Host ""
-  Write-Host "[4/6] Full startup log:"
-  if (Test-Path $startupLog) {
-    $fullLog = Get-Content $startupLog -ErrorAction SilentlyContinue
-    $lineCount = ($fullLog | Measure-Object).Count
-    Write-Host "(startup log: $lineCount lines total)"
-    $fullLog | ForEach-Object { Write-Host $_ }
+  Write-Host "[4/6] Startup trace state:"
+  Write-Host "  Session id: $startupSessionId"
+  Write-Host "  State file: $startupStateFile"
+  Write-Host "  Events file: $startupEventsFile"
+  Write-Host "  Bootstrap file: $startupBootstrapFile"
+  if ($startupState) {
+    $startupState | ConvertTo-Json -Depth 6 | Write-Host
   } else {
-    Write-Host "(startup log not found at $startupLog)"
+    Write-Host "(startup state file not found)"
+  }
+  Write-Host ""
+  Write-Host "[4a/6] Startup trace bootstrap:"
+  if (Test-Path $startupBootstrapFile) {
+    Get-Content $startupBootstrapFile -Raw -ErrorAction SilentlyContinue | Write-Host
+  } else {
+    Write-Host "(startup bootstrap file not found)"
+  }
+  Write-Host ""
+  Write-Host "[4b/6] Startup trace events:"
+  if (Test-Path $startupEventsFile) {
+    Get-Content $startupEventsFile -Tail 200 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
+  } else {
+    Write-Host "(startup events file not found)"
   }
 
   # 5. Firewall state for port
@@ -397,6 +529,8 @@ function Dump-FailureDiagnostics([int]$Port) {
 
 try {
   while ((Get-Date) -lt $deadline) {
+    $startupState = Get-StartupState
+
     if (-not $launcher) {
       $launcher = Find-Launcher $selfExtractionRoot
       if ($launcher) {
@@ -419,16 +553,10 @@ try {
       Write-Host "Started extracted launcher: $($launcher.FullName)"
     }
 
-    if (Test-Path $startupLog) {
-      $recentLog = Get-Content $startupLog -Tail 200 -ErrorAction SilentlyContinue
-      $fatalLines = @($recentLog | Where-Object { Test-StartupLogFatalLine $_ })
-      if ($fatalLines.Count -gt 0) {
-        Write-Host "Recent startup log:"
-        $recentLog
-        Write-Host "Fatal startup lines detected:"
-        $fatalLines
-        throw "Windows packaged app reported a startup failure."
-      }
+    if ($startupState -and $startupState.phase -eq "fatal") {
+      Write-Host "Startup trace entered fatal phase:"
+      $startupState | ConvertTo-Json -Depth 6 | Write-Host
+      throw "Windows packaged app reported a fatal startup phase."
     }
 
     # Periodic diagnostics: dump netstat + process list every 60s during the wait
@@ -499,6 +627,22 @@ try {
       }
     }
 
+    if (
+      $startupState -and
+      ($startupState.phase -eq "runtime_ready" -or $startupState.phase -eq "metadata_ready") -and
+      -not $startupState.port
+    ) {
+      throw "Windows packaged app reached $($startupState.phase) without recording a backend port."
+    }
+
+    if (
+      $startupState -and
+      ($startupState.phase -eq "runtime_ready" -or $startupState.phase -eq "metadata_ready") -and
+      -not $healthy
+    ) {
+      Write-Host "Startup trace reached $($startupState.phase) but /api/health has not responded yet."
+    }
+
     if ($healthy) {
       break
     }
@@ -507,6 +651,7 @@ try {
   }
 
   if (-not $healthy) {
+    $startupState = Get-StartupState
     if ($installerProcess) {
       Write-Host "Installer exited: $($installerProcess.HasExited)"
       if ($installerProcess.HasExited) {
@@ -519,9 +664,13 @@ try {
         Write-Host "Launcher exit code: $($launcherProcess.ExitCode)"
       }
     }
-    if (Test-Path $startupLog) {
-      Write-Host "Recent startup log (tail 200):"
-      Get-Content $startupLog -Tail 200
+    if ($startupState) {
+      Write-Host "Latest startup trace state:"
+      $startupState | ConvertTo-Json -Depth 6 | Write-Host
+    }
+    if (Test-Path $startupEventsFile) {
+      Write-Host "Recent startup trace events:"
+      Get-Content $startupEventsFile -Tail 200
     }
     if (Test-Path $selfExtractionRoot) {
       Write-Host "Self-extraction contents:"
@@ -535,6 +684,9 @@ try {
   }
 } finally {
   Stop-MiladyProcesses
+  if (-not [string]::IsNullOrWhiteSpace($startupBootstrapFile)) {
+    Remove-Item $startupBootstrapFile -Force -ErrorAction SilentlyContinue
+  }
   if (Test-Path $tempExtractDir) {
     Remove-Item $tempExtractDir -Recurse -Force -ErrorAction SilentlyContinue
   }

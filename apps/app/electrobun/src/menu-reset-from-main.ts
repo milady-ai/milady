@@ -20,6 +20,7 @@ export type FetchLike = (
 export const MAIN_RESET_API_PROBE_TIMEOUT_MS = 4000;
 export const MENU_RESET_STATUS_POLL_MS = 1000;
 export const MENU_RESET_STATUS_MAX_MS = 120_000;
+export const MENU_RESET_VERIFY_RETRIES = 1;
 
 export function buildMainMenuResetApiCandidates(options: {
   embeddedPort: number | null | undefined;
@@ -133,30 +134,66 @@ export type MainMenuResetPostConfirmDeps = {
 export async function runMainMenuResetAfterApiBaseResolved(
   d: MainMenuResetPostConfirmDeps,
 ): Promise<void> {
-  const resetRes = await d.fetchImpl(`${d.apiBase}/api/agent/reset`, {
-    method: "POST",
-    headers: d.buildHeaders(),
-  });
-  if (!resetRes.ok) {
-    throw new Error(`Reset API failed (${resetRes.status})`);
-  }
-
-  if (d.useEmbeddedRestart) {
-    const status = await d.restartEmbeddedClearingLocalDb();
-    const apiToken = d.getLocalApiAuthToken();
-    if (status.port) {
-      d.pushEmbeddedApiBaseToRenderer(status.port, apiToken);
+  const executeResetAndRestart = async (): Promise<Record<string, unknown>> => {
+    const resetRes = await d.fetchImpl(`${d.apiBase}/api/agent/reset`, {
+      method: "POST",
+      headers: d.buildHeaders(),
+    });
+    if (!resetRes.ok) {
+      throw new Error(`Reset API failed (${resetRes.status})`);
     }
-  } else {
-    await d.postExternalAgentRestart();
+
+    if (d.useEmbeddedRestart) {
+      const status = await d.restartEmbeddedClearingLocalDb();
+      const apiToken = d.getLocalApiAuthToken();
+      if (status.port) {
+        d.pushEmbeddedApiBaseToRenderer(status.port, apiToken);
+      }
+    } else {
+      await d.postExternalAgentRestart();
+    }
+
+    const pollBase = d.resolveApiBaseForStatusPoll();
+    return pollMenuResetAgentStatusJson({
+      apiBase: pollBase,
+      fetchImpl: d.fetchImpl,
+      buildHeaders: d.buildHeaders,
+    });
+  };
+
+  const readOnboardingComplete = async (): Promise<boolean | null> => {
+    try {
+      const res = await d.fetchImpl(`${d.apiBase}/api/onboarding/status`, {
+        method: "GET",
+        headers: d.buildHeaders(),
+      });
+      if (!res.ok) {
+        return null;
+      }
+      const payload = (await res.json()) as { complete?: unknown };
+      return typeof payload.complete === "boolean" ? payload.complete : null;
+    } catch {
+      return null;
+    }
+  };
+
+  let statusPayload = await executeResetAndRestart();
+  let onboardingComplete = await readOnboardingComplete();
+
+  for (
+    let attempt = 0;
+    onboardingComplete === true && attempt < MENU_RESET_VERIFY_RETRIES;
+    attempt += 1
+  ) {
+    statusPayload = await executeResetAndRestart();
+    onboardingComplete = await readOnboardingComplete();
   }
 
-  const pollBase = d.resolveApiBaseForStatusPoll();
-  const statusPayload = await pollMenuResetAgentStatusJson({
-    apiBase: pollBase,
-    fetchImpl: d.fetchImpl,
-    buildHeaders: d.buildHeaders,
-  });
+  if (onboardingComplete === true) {
+    throw new Error(
+      "Reset verification failed: onboarding still marked complete",
+    );
+  }
 
   d.sendMenuResetAppliedToRenderer({
     itemId: "menu-reset-milady-applied",

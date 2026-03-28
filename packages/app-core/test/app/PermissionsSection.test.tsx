@@ -8,7 +8,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── Hoisted mocks ─────────────────────────────────────────────────────
 
@@ -182,6 +182,8 @@ const BRIDGE_CHANNELS = {
   permissionsSetShellEnabled: "permissions:setShellEnabled",
 } as const;
 
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
+
 function installDesktopBridgeRpcMock(): void {
   const requestEntries = Object.entries(BRIDGE_CHANNELS).map(
     ([rpcMethod, ipcChannel]) => [
@@ -195,11 +197,7 @@ function installDesktopBridgeRpcMock(): void {
     ],
   );
 
-  (
-    window as typeof window & {
-      __MILADY_ELECTROBUN_RPC__?: Record<string, unknown>;
-    }
-  ).__MILADY_ELECTROBUN_RPC__ = {
+  vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
     request: Object.fromEntries(requestEntries),
     onMessage: (message: string, listener: (payload: unknown) => void) => {
       if (message === "permissionsChanged") {
@@ -214,7 +212,7 @@ function installDesktopBridgeRpcMock(): void {
         permissionBridgeListener.current = null;
       }
     },
-  };
+  });
 }
 
 // ====================================================================
@@ -285,6 +283,12 @@ describe("PermissionsSection", () => {
     vi.mocked(navigator.permissions.query).mockReset();
     vi.mocked(navigator.mediaDevices.getUserMedia).mockReset();
     vi.mocked(navigator.mediaDevices.enumerateDevices).mockReset();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (window as any).__MILADY_ELECTROBUN_RPC__;
+    delete (globalThis as any).__MILADY_ELECTROBUN_RPC__;
   });
 
   it("renders web informational message when isWebPlatform() is true", async () => {

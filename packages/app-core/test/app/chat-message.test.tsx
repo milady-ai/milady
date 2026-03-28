@@ -115,13 +115,6 @@ describe("ChatMessage actions", () => {
     expect(
       tree.root.findByProps({ "aria-label": "aria.playMessage" }),
     ).toBeDefined();
-    expect(
-      tree.root.findAll(
-        (node) =>
-          typeof node.props.className === "string" &&
-          node.props.className.includes("bg-card/96"),
-      ).length,
-    ).toBeGreaterThan(0);
   });
 
   it("plays assistant messages from the message action button", async () => {
@@ -258,39 +251,7 @@ describe("ChatMessage actions", () => {
       tree.root.findAll(
         (node) =>
           typeof node.props.className === "string" &&
-          node.props.className.includes("bg-accent/16") &&
-          node.props.className.includes("border-accent/35"),
-      ).length,
-    ).toBeGreaterThan(0);
-  });
-
-  it("renders the action rail inside a card-toned shell", async () => {
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (key: string) => key,
-    });
-
-    let tree!: TestRenderer.ReactTestRenderer;
-    await act(async () => {
-      tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "assistant-1",
-            role: "assistant",
-            text: "hello there",
-            timestamp: 1,
-          },
-          onSpeak: vi.fn(),
-        }),
-      );
-    });
-
-    expect(
-      tree.root.findAll(
-        (node) =>
-          typeof node.props.className === "string" &&
-          node.props.className.includes("bg-card/96") &&
-          node.props.className.includes("backdrop-blur-sm"),
+          node.props.className.includes("border-accent/24"),
       ).length,
     ).toBeGreaterThan(0);
   });

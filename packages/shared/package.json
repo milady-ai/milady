@@ -19,6 +19,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./runtime-env": "./src/runtime-env.ts",
     "./contracts": "./src/contracts/index.ts",
     "./contracts/apps": "./src/contracts/apps.ts",
     "./contracts/awareness": "./src/contracts/awareness.ts",

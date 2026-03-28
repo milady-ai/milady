@@ -5,6 +5,7 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { text, findButtonByText, flush } from "../../../../test/helpers/react-test";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 
 interface GameContextStub {
   t: (key: string) => string;
@@ -30,9 +31,6 @@ interface GameContextStub {
 }
 
 type TestWindow = Window & {
-  __MILADY_ELECTROBUN_RPC__?: {
-    request: Record<string, (params?: unknown) => Promise<unknown>>;
-  };
   __electrobunWindowId?: number;
 };
 
@@ -74,13 +72,18 @@ function createContext(overrides?: Partial<GameContextStub>): GameContextStub {
 
 describe("GameView", () => {
   beforeEach(() => {
+    delete (window as TestWindow & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
+      undefined,
+    );
     mockClientFns.stopApp.mockReset();
     mockUseApp.mockReset();
   });
 
   afterEach(() => {
-    delete (window as TestWindow).__MILADY_ELECTROBUN_RPC__;
+    vi.unstubAllGlobals();
     delete (window as TestWindow).__electrobunWindowId;
+    delete (window as TestWindow & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
     vi.restoreAllMocks();
   });
 
@@ -149,12 +152,16 @@ describe("GameView", () => {
     const gameOpenWindow = vi.fn(async () => ({ id: "game-window-1" }));
     mockUseApp.mockReturnValue(ctx);
     (window as TestWindow).__electrobunWindowId = 1;
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+
+    (window as TestWindow & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__ = {
       request: {
         desktopOpenExternal,
         gameOpenWindow,
       },
+      onMessage: vi.fn(),
+      offMessage: vi.fn(),
     };
+
     const openSpy = vi.spyOn(window, "open");
 
     let tree: TestRenderer.ReactTestRenderer;

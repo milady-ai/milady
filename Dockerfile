@@ -1,10 +1,21 @@
 # ==============================================================================
 # Stage 1: Builder — install all deps, resolve LFS assets, build
 # ==============================================================================
-FROM node:22-bookworm AS builder
+ARG NODE_VERSION=22
+ARG BUN_VERSION=1.3.10
+ARG OCI_SOURCE="https://github.com/milady-ai/milady"
+ARG OCI_TITLE="Milady Agent"
+ARG OCI_DESCRIPTION="Milady agent runtime and application shell"
+ARG OCI_LICENSES="MIT"
+ARG VERSION=""
+ARG VERSION_CLEAN=""
+ARG REVISION=""
+
+FROM node:${NODE_VERSION}-bookworm AS builder
+ARG BUN_VERSION
 
 # Install Bun (primary package manager and build tool)
-RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.10"
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}"
 ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /app
@@ -133,10 +144,25 @@ RUN rm -rf node_modules && bun install --frozen-lockfile --ignore-scripts --prod
 # ==============================================================================
 # Stage 2: Runtime — lean production image without dev deps, source, or build tools
 # ==============================================================================
-FROM node:22-bookworm AS runtime
+FROM node:${NODE_VERSION}-bookworm AS runtime
+ARG BUN_VERSION
+ARG OCI_SOURCE
+ARG OCI_TITLE
+ARG OCI_DESCRIPTION
+ARG OCI_LICENSES
+ARG VERSION
+ARG VERSION_CLEAN
+ARG REVISION
+LABEL org.opencontainers.image.title="${OCI_TITLE}" \
+      org.opencontainers.image.description="${OCI_DESCRIPTION}" \
+      org.opencontainers.image.source="${OCI_SOURCE}" \
+      org.opencontainers.image.url="${OCI_SOURCE}" \
+      org.opencontainers.image.version="${VERSION_CLEAN}" \
+      org.opencontainers.image.revision="${REVISION}" \
+      org.opencontainers.image.licenses="${OCI_LICENSES}"
 
 # Install Bun (needed at runtime for bun-native modules)
-RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.10"
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}"
 ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /app
@@ -170,6 +196,7 @@ COPY --from=builder /app/apps/app/package.json ./apps/app/package.json
 COPY --from=builder /app/apps/app/node_modules ./apps/app/node_modules
 
 ENV NODE_ENV=production
+ENV MILADY_PORT=2138
 ENV MILADY_API_BIND="0.0.0.0"
 ENV MILADY_STATE_DIR="/data/.milady"
 ENV MILADY_CONFIG_PATH="/data/.milady/milady.json"
@@ -179,5 +206,10 @@ ENV PGLITE_DATA_DIR="/data/.milady/workspace/.eliza/.elizadb"
 # onboarding/config/database survive redeploys.
 RUN mkdir -p /data/.milady/workspace/.eliza/.elizadb
 
-# Railway sets $PORT dynamically. Map it to MILADY_PORT at runtime.
-CMD ["sh", "-lc", "MILADY_PORT=${PORT:-2138} node milady.mjs start"]
+EXPOSE 2138
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD sh -lc 'port="${PORT:-${MILADY_PORT:-2138}}"; code="$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${port}/api/health")"; [ "$code" = "200" ] || [ "$code" = "401" ]'
+
+ENTRYPOINT ["sh", "./scripts/docker-entrypoint.sh"]
+CMD ["node", "milady.mjs", "start"]

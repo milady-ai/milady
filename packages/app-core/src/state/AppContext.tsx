@@ -114,6 +114,7 @@ import {
   type Tab,
   tabFromPath,
 } from "../navigation";
+import { getResetConnectionWizardToHostingStepPatch } from "../onboarding/connection-flow";
 import {
   canRevertOnboardingTo,
   getFlaminaTopicForOnboardingStep,
@@ -206,6 +207,7 @@ import {
   getTabForShellView,
   shouldStartAtCharacterSelectOnLaunch,
 } from "./shell-routing";
+import type { InventoryChainFilters } from "./types";
 import { TranslationProvider, useTranslation } from "./TranslationContext";
 import { useChatState } from "./useChatState";
 import { useLifecycleState } from "./useLifecycleState";
@@ -864,7 +866,17 @@ function AppProviderInner({
   const [inventorySort, setInventorySort] = useState<
     "chain" | "symbol" | "value"
   >("value");
-  const [inventoryChainFocus, setInventoryChainFocus] = useState<string>("all");
+  const [inventorySortDirection, setInventorySortDirection] = useState<
+    "asc" | "desc"
+  >("desc");
+  const [inventoryChainFilters, setInventoryChainFilters] =
+    useState<InventoryChainFilters>({
+      ethereum: true,
+      base: true,
+      bsc: true,
+      avax: true,
+      solana: true,
+    });
   const [walletError, setWalletError] = useState<string | null>(null);
 
   // --- ERC-8004 Registry ---
@@ -1036,6 +1048,8 @@ function AppProviderInner({
       cloudProvider: onboardingCloudProvider,
       provider: onboardingProvider,
       apiKey: onboardingApiKey,
+      voiceProvider: onboardingVoiceProvider,
+      voiceApiKey: onboardingVoiceApiKey,
       smallModel: onboardingSmallModel,
       largeModel: onboardingLargeModel,
       openRouterModel: onboardingOpenRouterModel,
@@ -1120,6 +1134,14 @@ function AppProviderInner({
   );
   const setOnboardingApiKey = useCallback(
     (v: string) => setOnboardingField("apiKey", v),
+    [setOnboardingField],
+  );
+  const setOnboardingVoiceProvider = useCallback(
+    (v: string) => setOnboardingField("voiceProvider", v),
+    [setOnboardingField],
+  );
+  const setOnboardingVoiceApiKey = useCallback(
+    (v: string) => setOnboardingField("voiceApiKey", v),
     [setOnboardingField],
   );
   const setOnboardingExistingInstallDetected = useCallback(
@@ -2857,7 +2879,7 @@ function AppProviderInner({
           setOnboardingLoading(false);
           setOnboardingComplete(false);
           onboardingResumeConnectionRef.current = null;
-          setOnboardingStep("welcome");
+          setOnboardingStep("cloud_login");
           setOnboardingMode("basic");
           setOnboardingActiveGuide(null);
           setOnboardingDeferredTasks([]);
@@ -2868,6 +2890,8 @@ function AppProviderInner({
           setOnboardingCloudProvider("");
           setOnboardingProvider("");
           setOnboardingApiKey("");
+          setOnboardingVoiceProvider("");
+          setOnboardingVoiceApiKey("");
           setOnboardingPrimaryModel("");
           setOnboardingOpenRouterModel("");
           setOnboardingRemoteConnected(false);
@@ -3731,6 +3755,12 @@ function AppProviderInner({
           );
         }
 
+        // Action callbacks can persist additional assistant turns that are not
+        // mirrored by the optimistic streaming placeholder in local state.
+        if (activeConversationIdRef.current === convId) {
+          await loadConversationMessages(convId);
+        }
+
         const userMessageCount = conversationMessagesRef.current.filter(
           (message) =>
             message.role === "user" && !message.id.startsWith("temp-"),
@@ -4054,6 +4084,12 @@ function AppProviderInner({
                   : message,
               ),
             );
+          }
+
+          // Keep the visible thread authoritative when the server stores
+          // additional action-generated messages during a successful send.
+          if (activeConversationIdRef.current === convId) {
+            await loadConversationMessages(convId);
           }
 
           void loadConversations();
@@ -5276,6 +5312,8 @@ function AppProviderInner({
           onboardingCloudProvider,
           onboardingProvider,
           onboardingApiKey,
+          onboardingVoiceProvider,
+          onboardingVoiceApiKey,
           onboardingPrimaryModel,
           onboardingOpenRouterModel,
           onboardingRemoteConnected,
@@ -5312,7 +5350,7 @@ function AppProviderInner({
         if (startOver) {
           clearPersistedOnboardingStep();
           onboardingResumeConnectionRef.current = null;
-          setOnboardingStep("welcome");
+          setOnboardingStep("cloud_login");
           setOnboardingMode("basic");
           setOnboardingActiveGuide(null);
           setOnboardingDeferredTasks([]);
@@ -5324,6 +5362,8 @@ function AppProviderInner({
           setOnboardingCloudProvider("");
           setOnboardingProvider("");
           setOnboardingApiKey("");
+          setOnboardingVoiceProvider("");
+          setOnboardingVoiceApiKey("");
           setOnboardingPrimaryModel("");
           setOnboardingOpenRouterModel("");
           setOnboardingRemoteConnected(false);
@@ -5498,7 +5538,7 @@ function AppProviderInner({
       if (startOver) {
         clearPersistedOnboardingStep();
         onboardingResumeConnectionRef.current = null;
-        setOnboardingStep("welcome");
+        setOnboardingStep("cloud_login");
         setOnboardingMode("basic");
         setOnboardingActiveGuide(null);
         setOnboardingDeferredTasks([]);
@@ -5510,6 +5550,8 @@ function AppProviderInner({
         setOnboardingCloudProvider("");
         setOnboardingProvider("");
         setOnboardingApiKey("");
+        setOnboardingVoiceProvider("");
+        setOnboardingVoiceApiKey("");
         setOnboardingPrimaryModel("");
         setOnboardingOpenRouterModel("");
         setOnboardingRemoteConnected(false);
@@ -5597,6 +5639,39 @@ function AppProviderInner({
     [onboardingMode, setOnboardingStep, setOnboardingActiveGuide],
   );
 
+  const applyResetConnectionWizardToHostingStep = useCallback(() => {
+    const patch = getResetConnectionWizardToHostingStepPatch();
+    if (patch.onboardingRunMode !== undefined) {
+      setOnboardingRunMode(patch.onboardingRunMode);
+    }
+    if (patch.onboardingCloudProvider !== undefined) {
+      setOnboardingCloudProvider(patch.onboardingCloudProvider);
+    }
+    if (patch.onboardingProvider !== undefined) {
+      setOnboardingProvider(patch.onboardingProvider);
+    }
+    if (patch.onboardingApiKey !== undefined) {
+      setOnboardingApiKey(patch.onboardingApiKey);
+    }
+    if (patch.onboardingPrimaryModel !== undefined) {
+      setOnboardingPrimaryModel(patch.onboardingPrimaryModel);
+    }
+    if (patch.onboardingRemoteError !== undefined) {
+      setOnboardingRemoteError(patch.onboardingRemoteError);
+    }
+    if (patch.onboardingRemoteConnecting !== undefined) {
+      setOnboardingRemoteConnecting(patch.onboardingRemoteConnecting);
+    }
+  }, [
+    setOnboardingApiKey,
+    setOnboardingCloudProvider,
+    setOnboardingPrimaryModel,
+    setOnboardingProvider,
+    setOnboardingRemoteConnecting,
+    setOnboardingRemoteError,
+    setOnboardingRunMode,
+  ]);
+
   const advanceOnboarding = useCallback(
     async (options?: OnboardingNextOptions) => {
       if (
@@ -5634,8 +5709,21 @@ function AppProviderInner({
         }
       }
 
-      const nextStep = resolveOnboardingNextStep(onboardingStep);
+      let nextStep = resolveOnboardingNextStep(onboardingStep);
+
+      // Skip voice provider selection if they set up Eliza Cloud
+      if (
+        nextStep === "voice" &&
+        onboardingRunMode === "cloud" &&
+        onboardingCloudProvider === "elizacloud"
+      ) {
+        nextStep = resolveOnboardingNextStep(nextStep);
+      }
+
       if (nextStep) {
+        if (nextStep === "hosting") {
+          applyResetConnectionWizardToHostingStep();
+        }
         setOnboardingStep(nextStep);
         setOnboardingActiveGuide(
           onboardingMode === "advanced"
@@ -5646,6 +5734,7 @@ function AppProviderInner({
     },
     [
       addDeferredOnboardingTask,
+      applyResetConnectionWizardToHostingStep,
       handleOnboardingFinish,
       onboardingDetectedProviders,
       onboardingMode,
@@ -5657,6 +5746,7 @@ function AppProviderInner({
       setOnboardingActiveGuide,
       setOnboardingApiKey,
       setOnboardingProvider,
+      onboardingCloudProvider,
     ],
   );
 
@@ -5666,8 +5756,21 @@ function AppProviderInner({
   );
 
   const revertOnboarding = useCallback(() => {
-    const previousStep = resolveOnboardingPreviousStep(onboardingStep);
+    let previousStep = resolveOnboardingPreviousStep(onboardingStep);
+
+    // Skip voice provider selection if they set up Eliza Cloud
+    if (
+      previousStep === "voice" &&
+      onboardingRunMode === "cloud" &&
+      onboardingCloudProvider === "elizacloud"
+    ) {
+      previousStep = resolveOnboardingPreviousStep(previousStep);
+    }
+
     if (!previousStep) return;
+    if (previousStep === "hosting") {
+      applyResetConnectionWizardToHostingStep();
+    }
     setOnboardingStep(previousStep);
     setOnboardingActiveGuide(
       onboardingMode === "advanced"
@@ -5675,10 +5778,12 @@ function AppProviderInner({
         : null,
     );
   }, [
+    applyResetConnectionWizardToHostingStep,
     onboardingMode,
     onboardingStep,
-    setOnboardingStep,
     setOnboardingActiveGuide,
+    onboardingRunMode,
+    onboardingCloudProvider,
   ]);
 
   const handleOnboardingBack = revertOnboarding;
@@ -5686,6 +5791,9 @@ function AppProviderInner({
   const handleOnboardingJumpToStep = useCallback(
     (target: OnboardingStep) => {
       if (!canRevertOnboardingTo({ current: onboardingStep, target })) return;
+      if (target === "hosting") {
+        applyResetConnectionWizardToHostingStep();
+      }
       setOnboardingStep(target);
       setOnboardingActiveGuide(
         onboardingMode === "advanced"
@@ -5694,6 +5802,7 @@ function AppProviderInner({
       );
     },
     [
+      applyResetConnectionWizardToHostingStep,
       onboardingMode,
       onboardingStep,
       setOnboardingStep,
@@ -6302,7 +6411,8 @@ function AppProviderInner({
         logSourceFilter: setLogSourceFilter,
         inventoryView: setInventoryView,
         inventorySort: setInventorySort,
-        inventoryChainFocus: setInventoryChainFocus,
+        inventorySortDirection: setInventorySortDirection,
+        inventoryChainFilters: setInventoryChainFilters,
         exportPassword: setExportPassword,
         exportIncludeLogs: setExportIncludeLogs,
         exportError: setExportError,
@@ -6320,6 +6430,8 @@ function AppProviderInner({
         onboardingLargeModel: setOnboardingLargeModel,
         onboardingProvider: setOnboardingProvider,
         onboardingApiKey: setOnboardingApiKey,
+        onboardingVoiceProvider: setOnboardingVoiceProvider,
+        onboardingVoiceApiKey: setOnboardingVoiceApiKey,
         onboardingExistingInstallDetected: setOnboardingExistingInstallDetected,
         onboardingDetectedProviders: setOnboardingDetectedProviders,
         onboardingRemoteApiBase: setOnboardingRemoteApiBase,
@@ -6455,6 +6567,11 @@ function AppProviderInner({
       setTabRaw,
     ],
   );
+
+  const requestGreetingWhenRunningRef = useRef(requestGreetingWhenRunning);
+  useEffect(() => {
+    requestGreetingWhenRunningRef.current = requestGreetingWhenRunning;
+  }, [requestGreetingWhenRunning]);
 
   // ── Initialization ─────────────────────────────────────────────────
 
@@ -6800,6 +6917,9 @@ function AppProviderInner({
             if (resumeFields.onboardingProvider !== undefined) {
               setOnboardingProvider(resumeFields.onboardingProvider);
             }
+            if (resumeFields.onboardingVoiceProvider !== undefined) {
+              setOnboardingVoiceProvider(resumeFields.onboardingVoiceProvider);
+            }
             if (resumeFields.onboardingApiKey !== undefined) {
               setOnboardingApiKey(resumeFields.onboardingApiKey);
             }
@@ -6946,7 +7066,9 @@ function AppProviderInner({
       setStartupPhase("ready");
       setOnboardingLoading(false);
       if (greetConvId) {
-        void requestGreetingWhenRunning(greetConvId, { showOverlay: true });
+        void requestGreetingWhenRunningRef.current(greetConvId, {
+          showOverlay: true,
+        });
       }
 
       void loadWorkbench();
@@ -7116,11 +7238,10 @@ function AppProviderInner({
             setUnreadConversations((prev) => new Set([...prev, convId]));
           }
 
-          // Synthesize agent_event for non-retake sources (e.g. discord)
+          // Synthesize agent_event for non-client_chat sources (e.g. discord)
           // so they appear in the StreamView activity feed
           if (
             msg.source &&
-            msg.source !== "retake" &&
             msg.source !== "client_chat" &&
             msg.role === "user"
           ) {
@@ -7487,11 +7608,15 @@ function AppProviderInner({
     loadWalletConfig,
     loadWorkbench, // Cloud polling
     pollCloudCredits,
-    requestGreetingWhenRunning,
     setSelectedVrmIndex,
     startupRetryNonce,
     uiLanguage,
   ]);
+
+  const requestGreetingWhenRunningRef2 = useRef(requestGreetingWhenRunning);
+  useEffect(() => {
+    requestGreetingWhenRunningRef2.current = requestGreetingWhenRunning;
+  }, [requestGreetingWhenRunning]);
 
   // When agent transitions to "running", send a greeting if conversation is empty
   useEffect(() => {
@@ -7696,7 +7821,8 @@ function AppProviderInner({
     walletExportVisible,
     walletApiKeySaving,
     inventorySort,
-    inventoryChainFocus,
+    inventorySortDirection,
+    inventoryChainFilters,
     walletError,
     registryStatus,
     registryLoading,
@@ -7792,6 +7918,8 @@ function AppProviderInner({
     onboardingLargeModel,
     onboardingProvider,
     onboardingApiKey,
+    onboardingVoiceProvider,
+    onboardingVoiceApiKey,
     onboardingExistingInstallDetected,
     onboardingDetectedProviders,
     onboardingRemoteApiBase,

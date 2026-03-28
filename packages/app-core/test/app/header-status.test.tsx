@@ -35,8 +35,29 @@ vi.mock("@miladyai/app-core/components", () => ({
 vi.mock("@miladyai/ui", () => ({
   Button: React.forwardRef(
     (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
-      React.createElement("button", { ...props, ref }),
+      React.createElement("button", { type: "button", ...props, ref }),
   ),
+  Dialog: ({
+    children,
+    open,
+  }: {
+    children: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+  }) => React.createElement("div", { "data-open": open }, children),
+  DialogContent: ({
+    children,
+    ...props
+  }: React.ComponentProps<"div"> & {
+    container?: HTMLElement | null;
+    showCloseButton?: boolean;
+  }) => React.createElement("div", props, children),
+  DialogDescription: ({ children, ...props }: React.ComponentProps<"div">) =>
+    React.createElement("div", props, children),
+  DialogHeader: ({ children, ...props }: React.ComponentProps<"div">) =>
+    React.createElement("div", props, children),
+  DialogTitle: ({ children, ...props }: React.ComponentProps<"div">) =>
+    React.createElement("div", props, children),
   IconTooltip: ({
     children,
   }: {
@@ -44,6 +65,12 @@ vi.mock("@miladyai/ui", () => ({
     content?: string;
     side?: string;
   }) => React.createElement("div", null, children),
+  Dialog: ({ children }: any) => React.createElement("div", null, children),
+  DialogContent: ({ children }: any) => React.createElement("div", null, children),
+  DialogHeader: ({ children }: any) => React.createElement("div", null, children),
+  DialogTitle: ({ children }: any) => React.createElement("div", null, children),
+  DialogDescription: ({ children }: any) => React.createElement("div", null, children),
+  DialogFooter: ({ children }: any) => React.createElement("div", null, children),
 }));
 
 vi.mock("lucide-react", () => ({
@@ -138,4 +165,34 @@ describe("header status", () => {
     expect(controls?.length).toBeGreaterThan(0);
   });
 
+  it("pins the mobile navigation drawer to the top portal layer", async () => {
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(Header));
+    });
+
+    const openMenuButton = tree?.root.findByProps({
+      "aria-label": "aria.openNavMenu",
+    });
+    expect(openMenuButton).toBeDefined();
+
+    await act(async () => {
+      openMenuButton?.props.onClick();
+    });
+
+    const drawer = tree?.root.findAll(
+      (node) =>
+        typeof node.props.className === "string" &&
+        node.props.className.includes("border-l border-border/60") &&
+        node.props.className.includes("bg-bg/98") &&
+        node.props.className.includes(
+          "shadow-[0_24px_70px_rgba(2,8,23,0.34)]",
+        ) &&
+        node.props.className.includes("z-[240]") &&
+        node.props.className.includes("max-sm:!top-0") &&
+        node.props.className.includes("max-sm:!bottom-0"),
+    );
+
+    expect(drawer && drawer.length > 0).toBe(true);
+  });
 });

@@ -31,4 +31,24 @@ describe("allocateFirstFreeLoopbackPort", () => {
     const p = await allocateFirstFreeLoopbackPort(45_210, { maxHops: 5 });
     expect(p).toBe(45_211);
   });
+
+  it("throws when no free port exists within maxHops", async () => {
+    const serverA = createServer();
+    const serverB = createServer();
+    servers.push(serverA, serverB);
+    await Promise.all([
+      new Promise<void>((resolve, reject) => {
+        serverA.once("error", reject);
+        serverA.listen({ port: 45_220, host: "127.0.0.1" }, () => resolve());
+      }),
+      new Promise<void>((resolve, reject) => {
+        serverB.once("error", reject);
+        serverB.listen({ port: 45_221, host: "127.0.0.1" }, () => resolve());
+      }),
+    ]);
+
+    await expect(
+      allocateFirstFreeLoopbackPort(45_220, { maxHops: 2 }),
+    ).rejects.toThrow(/No free TCP port/);
+  });
 });

@@ -14,6 +14,16 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
+function createPopupMock() {
+  const popupDocument = document.implementation.createHTMLDocument("popup");
+  return {
+    closed: false,
+    document: popupDocument,
+    location: { href: "" },
+    close: vi.fn(),
+  };
+}
+
 describe("open-web-ui", () => {
   it("rewrites waifu.fun URLs to milady.ai", () => {
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
@@ -51,15 +61,8 @@ describe("open-web-ui", () => {
   it("uses pairing token flow for remote agents when authenticated", async () => {
     vi.mocked(getToken).mockReturnValue("test-api-key");
 
-    const popup = {
-      closed: false,
-      document: {
-        title: "",
-        body: { style: { margin: "" }, innerHTML: "" },
-      },
-      location: { href: "" },
-      close: vi.fn(),
-    };
+    const popup = createPopupMock();
+    const innerHtmlSetter = vi.spyOn(popup.document.body, "innerHTML", "set");
     vi.spyOn(window, "open").mockImplementation(
       () => popup as unknown as Window,
     );
@@ -90,6 +93,9 @@ describe("open-web-ui", () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
+    expect(innerHtmlSetter).not.toHaveBeenCalled();
+    expect(popup.document.body.textContent).toContain("Connecting to agent");
+
     // Should have called the backend pairing-token endpoint
     const fetchUrl = fetchSpy.mock.calls[0]?.[0] as string;
     expect(fetchUrl).toContain(
@@ -110,14 +116,7 @@ describe("open-web-ui", () => {
   it("prefers the provided cloud agent id over parsing the URL", async () => {
     vi.mocked(getToken).mockReturnValue("test-api-key");
 
-    const popup = {
-      closed: false,
-      document: {
-        title: "",
-        body: { style: { margin: "" }, innerHTML: "" },
-      },
-      location: { href: "" },
-    };
+    const popup = createPopupMock();
     vi.spyOn(window, "open").mockImplementation(
       () => popup as unknown as Window,
     );

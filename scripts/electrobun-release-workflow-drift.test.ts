@@ -148,6 +148,38 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain("needs: [prepare, validate-release]");
   });
 
+  it("runs the release regression contract before release-check", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+    const regressionIndex = workflow.indexOf(
+      "run: bun run test:regression-matrix:release",
+    );
+    const heavyE2EIndex = workflow.indexOf("run: bun run test:e2e:heavy");
+    const liveCloudIndex = workflow.indexOf("run: bun run test:live:cloud");
+    const releaseCheckIndex = workflow.indexOf("run: bun run release:check");
+
+    expect(regressionIndex).toBeGreaterThan(-1);
+    expect(heavyE2EIndex).toBeGreaterThan(regressionIndex);
+    expect(liveCloudIndex).toBeGreaterThan(heavyE2EIndex);
+    expect(releaseCheckIndex).toBeGreaterThan(liveCloudIndex);
+  });
+
+  it("requires an explicit tag for manual non-tag runs", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+    expect(workflow).toContain('if [[ -n "${{ inputs.tag }}" ]]; then');
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+      'elif [[ "${{ github.ref_type }}" == "tag" ]]; then',
+    );
+    expect(workflow).toContain(
+      "Manual branch dispatches must provide inputs.tag; refusing to derive a release tag from package.json.",
+    );
+    expect(workflow).not.toContain(
+      `TAG="v$(node -p "require('./package.json').version")"`,
+    );
+  });
+
   it("retries bun install before failing the desktop build matrix", () => {
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
 
@@ -578,14 +610,23 @@ describe("Electrobun release workflow drift", () => {
     expect(smokeScript).toContain("ANTHROPIC_API_KEY");
   });
 
-  it("resets stale Windows startup logs and classifies only true fatal startup lines", () => {
+  it("resets stale Windows startup logs and uses session-scoped startup trace files", () => {
     const smokeScript = fs.readFileSync(WINDOWS_SMOKE_PATH, "utf8");
 
     expect(smokeScript).toContain("Cleared stale startup log:");
-    expect(smokeScript).toContain("function Test-StartupLogFatalLine");
-    expect(smokeScript).toContain("optional plugin");
-    expect(smokeScript).toContain("@elizaos/plugin-");
-    expect(smokeScript).toContain("Fatal startup lines detected:");
+    expect(smokeScript).toContain(
+      '$startupSessionId = "milady-windows-smoke-"',
+    );
+    expect(smokeScript).toContain(
+      "$startupStateFile = Join-Path $env:RUNNER_TEMP",
+    );
+    expect(smokeScript).toContain(
+      '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
+    );
+    expect(smokeScript).toContain("Write-StartupBootstrap");
+    expect(smokeScript).toContain(
+      "if ($state.session_id -ne $startupSessionId)",
+    );
   });
 
   it("bundles plugins.json and package.json into milady-dist for packaged builds", () => {
@@ -780,9 +821,7 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain(
       "name: Run Windows packaged renderer bootstrap check",
     );
-    expect(workflow).toContain(
-      "bunx playwright test --config playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts",
-    );
+    expect(workflow).toContain("bun run test:desktop:playwright");
     expect(workflow).toContain('MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"');
     expect(workflow).not.toContain(
       "name: Install Playwright Chromium (Windows)",

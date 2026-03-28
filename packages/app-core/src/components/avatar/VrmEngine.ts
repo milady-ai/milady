@@ -2670,7 +2670,7 @@ export class VrmEngine {
       return;
     }
     vrm.scene.visible = false;
-    vrm.scene.traverse((obj) => {
+    vrm.scene.traverse((obj: THREE.Object3D) => {
       obj.frustumCulled = false;
     });
     const avatarParent = this.avatarRoot ?? this.scene;

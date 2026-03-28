@@ -21,9 +21,10 @@ function getMenu(
     title: string;
     singleton: boolean;
   }> = [],
+  isMac = true,
 ) {
   const menu = buildApplicationMenu({
-    isMac: true,
+    isMac,
     browserEnabled,
     heartbeatSnapshot: EMPTY_HEARTBEAT_MENU_SNAPSHOT,
     detachedWindows,
@@ -356,5 +357,14 @@ describe("buildApplicationMenu", () => {
       .filter((i): i is { action: string } => typeof i.action === "string")
       .map((i) => i.action);
     expect(actions).toContain("reset-milady");
+  });
+
+  it("uses explicit About/Quit actions on Windows", () => {
+    const milady = getMenu("Milady", false, [], false);
+    const actions = (milady?.submenu ?? [])
+      .filter((i): i is { action: string } => typeof i.action === "string")
+      .map((i) => i.action);
+    expect(actions).toContain("open-about");
+    expect(actions).toContain("quit");
   });
 });

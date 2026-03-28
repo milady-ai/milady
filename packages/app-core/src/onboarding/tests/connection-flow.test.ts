@@ -9,6 +9,7 @@ import {
   computeShowProviderSelection,
   deriveConnectionScreen,
   getEffectiveRunMode,
+  getResetConnectionWizardToHostingStepPatch,
   isProviderConfirmDisabled,
   mergeConnectionSnapshot,
   resolveConnectionUiSpec,
@@ -91,6 +92,19 @@ describe("connection-flow", () => {
       ],
     ])("%s", (_name, snap, expected) => {
       expect(deriveConnectionScreen(snap)).toBe(expected);
+    });
+
+    it("wizard reset patch lands on hosting after Eliza Cloud pre-provider path", () => {
+      const stuck = baseSnap({
+        onboardingRunMode: "cloud",
+        onboardingCloudProvider: "elizacloud",
+      });
+      expect(deriveConnectionScreen(stuck)).toBe("elizaCloud_preProvider");
+      const after = mergeConnectionSnapshot(
+        stuck,
+        getResetConnectionWizardToHostingStepPatch(),
+      );
+      expect(deriveConnectionScreen(after)).toBe("hosting");
     });
   });
 

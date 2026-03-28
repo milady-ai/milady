@@ -8,7 +8,7 @@
  *   and forces side effects (cloud login, finish, provider fill) to stay in
  *   AppContext where they already close over the right state.
  *
- * Consolidated 6-step flow: welcome → identity → hosting → providers → permissions → launch
+ * Consolidated 7-step flow: cloud_login → identity → hosting → providers → voice → permissions → launch
  *
  * See: docs/guides/onboarding-ui-flow.md
  * Tests: tests/flow.test.ts
@@ -42,7 +42,7 @@ export function resolveOnboardingNextStep(
 
 /**
  * Previous step in the flow.
- * Returns null from the first step (welcome).
+ * Returns null from the first step (cloud_login).
  */
 export function resolveOnboardingPreviousStep(
   current: OnboardingStep,
@@ -85,6 +85,8 @@ export function getFlaminaTopicForOnboardingStep(
   switch (step) {
     case "providers":
       return "provider";
+    case "voice":
+      return "voice";
     case "permissions":
       return "permissions";
     default:

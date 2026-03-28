@@ -28,10 +28,9 @@ const runs = [
   },
   {
     name: "e2e",
-    args: ["vitest", "run", "--config", "vitest.e2e.config.ts"],
-    vitest: true,
+    cmd: "bun",
+    args: ["run", "test:e2e"],
     forceSerial: true,
-    maxWorkers: 1,
   },
 ];
 

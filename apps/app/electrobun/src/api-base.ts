@@ -1,3 +1,4 @@
+import { resolveDesktopApiPort } from "@miladyai/shared/runtime-env";
 import { DEFAULT_PORT } from "./constants";
 
 type ExternalApiBaseEnvKey =
@@ -91,7 +92,7 @@ export function resolveInitialApiBase(
     return resolution.externalApi.base;
   }
 
-  const agentPort = Number(env.MILADY_PORT) || DEFAULT_PORT;
+  const agentPort = resolveDesktopApiPort(env) || DEFAULT_PORT;
   return `http://127.0.0.1:${agentPort}`;
 }
 

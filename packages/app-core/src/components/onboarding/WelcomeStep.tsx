@@ -5,12 +5,11 @@ import {
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
 import {
+  OnboardingSecondaryActionButton,
   OnboardingStepHeader,
   onboardingFooterClass,
   onboardingPrimaryActionClass,
   onboardingPrimaryActionTextShadowStyle,
-  onboardingSecondaryActionClass,
-  onboardingSecondaryActionTextShadowStyle,
   spawnOnboardingRipple,
 } from "./onboarding-step-chrome";
 
@@ -56,25 +55,19 @@ export function WelcomeStep() {
       />
       <div className={onboardingFooterClass}>
         {onboardingExistingInstallDetected ? (
-          <Button
-            variant="ghost"
-            className={onboardingSecondaryActionClass}
-            style={onboardingSecondaryActionTextShadowStyle}
+          <OnboardingSecondaryActionButton
             onClick={handleGetStarted}
             type="button"
           >
             {t("onboarding.customSetup")}
-          </Button>
+          </OnboardingSecondaryActionButton>
         ) : (
-          <Button
-            variant="ghost"
-            className={onboardingSecondaryActionClass}
-            style={onboardingSecondaryActionTextShadowStyle}
+          <OnboardingSecondaryActionButton
             onClick={() => handleOnboardingUseLocalBackend()}
             type="button"
           >
             {t("onboarding.checkExistingSetup")}
-          </Button>
+          </OnboardingSecondaryActionButton>
         )}
         <Button
           className={onboardingPrimaryActionClass}

@@ -325,12 +325,13 @@ describe("path safety — legacy handlers", () => {
     mockDiscoverHooks.mockResolvedValue([]);
 
     // FAKE_HOME is the mocked homedir — managed hooks dir = FAKE_HOME/.eliza/hooks
-    const managedPath = resolve(
-      FAKE_HOME,
-      ".eliza",
-      "hooks",
-      "my-hook",
-      "handler.ts",
+    const managedDir = resolve(FAKE_HOME, ".eliza", "hooks", "my-hook");
+    const managedPath = resolve(managedDir, "handler.mjs");
+    await mkdir(managedDir, { recursive: true });
+    await writeFile(
+      managedPath,
+      "export default function legacySafeHandler() {}",
+      "utf-8",
     );
     const config: InternalHooksConfig = {
       handlers: [
@@ -341,11 +342,10 @@ describe("path safety — legacy handlers", () => {
       ],
     };
 
-    // The handler import will fail (file doesn't exist), but path validation passes
     const result = await loadHooks({ internalConfig: config });
 
-    // Should fail on import, not on path validation
-    expect(result.failed).toContain(managedPath);
+    expect(result.failed).not.toContain(managedPath);
+    expect(result.registered).toBeGreaterThan(0);
     // The warning should NOT mention "outside allowed"
     const { logger } = await import("@elizaos/core");
     const outsideCalls = (

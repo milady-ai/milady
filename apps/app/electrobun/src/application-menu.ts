@@ -255,7 +255,11 @@ export function buildApplicationMenu({
     {
       label: "Milady",
       submenu: [
-        { role: "about" },
+        ...(isMac
+          ? ([{ role: "about" }] as ApplicationMenuItem[])
+          : ([
+              { label: "About Milady", action: "open-about" },
+            ] as ApplicationMenuItem[])),
         { label: "Check for Updates", action: "check-for-updates" },
         { type: "separator" },
         {
@@ -265,7 +269,7 @@ export function buildApplicationMenu({
         },
         { label: "Restart Agent", action: "restart-agent" },
         { label: "Relaunch Milady", action: "relaunch" },
-        { label: "Reset Milady…", action: "reset-milady" },
+        { label: "Reset Milady...", action: "reset-milady" },
         { type: "separator" },
         ...(isMac
           ? [
@@ -277,7 +281,9 @@ export function buildApplicationMenu({
               { type: "separator" as const },
             ]
           : []),
-        { role: "quit" },
+        ...(isMac
+          ? ([{ role: "quit" }] as ApplicationMenuItem[])
+          : ([{ label: "Quit", action: "quit" }] as ApplicationMenuItem[])),
       ] as ApplicationMenuItem[],
     },
     {

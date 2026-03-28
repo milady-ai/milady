@@ -51,6 +51,44 @@ function extractUuidFromUrl(url: string): string | null {
   return match ? match[1] : null;
 }
 
+function renderPopupConnectingState(popup: Window): void {
+  const { document } = popup;
+  const { body } = document;
+  if (!body) return;
+
+  document.title = "Connecting\u2026";
+  body.style.margin = "0";
+  body.replaceChildren();
+
+  const container = document.createElement("div");
+  container.style.cssText =
+    "font-family:system-ui,-apple-system,sans-serif;background:#09090b;color:#a1a1aa;min-height:100vh;display:flex;align-items:center;justify-content:center";
+
+  const content = document.createElement("div");
+  content.style.textAlign = "center";
+
+  const spinner = document.createElement("div");
+  spinner.setAttribute("aria-hidden", "true");
+  spinner.style.cssText =
+    "width:24px;height:24px;border:2px solid #27272a;border-top-color:#a1a1aa;border-radius:50%;margin:0 auto 16px;animation:milady-popup-spinner 0.8s linear infinite";
+
+  const message = document.createElement("div");
+  message.style.cssText = "font-size:14px;letter-spacing:0.02em";
+  message.textContent = "Connecting to agent\u2026";
+
+  content.append(spinner, message);
+  container.append(content);
+  body.append(container);
+
+  if (!document.getElementById("milady-popup-spinner-style")) {
+    const style = document.createElement("style");
+    style.id = "milady-popup-spinner-style";
+    style.textContent =
+      "@keyframes milady-popup-spinner{to{transform:rotate(360deg)}}";
+    (document.head ?? body).append(style);
+  }
+}
+
 /**
  * Opens the Web UI for a remote/cloud agent with automatic authentication.
  *
@@ -75,15 +113,7 @@ async function openWebUIWithPairingToken(
   }
 
   try {
-    popup.document.title = "Connecting\u2026";
-    popup.document.body.style.margin = "0";
-    popup.document.body.innerHTML =
-      '<div style="font-family:system-ui,-apple-system,sans-serif;background:#09090b;color:#a1a1aa;min-height:100vh;display:flex;align-items:center;justify-content:center">' +
-      '<div style="text-align:center">' +
-      '<div style="width:24px;height:24px;border:2px solid #27272a;border-top-color:#a1a1aa;border-radius:50%;margin:0 auto 16px;animation:s 0.8s linear infinite"></div>' +
-      '<div style="font-size:14px;letter-spacing:0.02em">Connecting to agent\u2026</div>' +
-      "</div></div>" +
-      "<style>@keyframes s{to{transform:rotate(360deg)}}</style>";
+    renderPopupConnectingState(popup);
   } catch {
     // cross-origin write may fail
   }

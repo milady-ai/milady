@@ -55,21 +55,18 @@ import {
   APP_SIDEBAR_COMPACT_META_CLASSNAME,
   APP_SIDEBAR_COMPACT_PILL_CLASSNAME,
   APP_SIDEBAR_COMPACT_TITLE_CLASSNAME,
-  APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
   APP_SIDEBAR_SECTION_HEADING_CLASSNAME,
 } from "./sidebar-shell-styles";
-import { TrajectoryDetailView } from "./TrajectoryDetailView";
 import {
   formatTrajectoryDuration,
   formatTrajectoryTimestamp,
   formatTrajectoryTokenCount,
 } from "./trajectory-format";
+import { TrajectoryDetailView } from "./TrajectoryDetailView";
 
 type StatusFilter = "" | "active" | "completed" | "error";
 
@@ -292,17 +289,6 @@ export function TrajectoriesView({
       >
         <aside className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
-                {t("advanced.trajectories", { defaultValue: "Trajectories" })}
-              </div>
-              <div className={APP_SIDEBAR_META_CLASSNAME}>
-                {loading && !stats
-                  ? t("common.loading", { defaultValue: "Loading..." })
-                  : `${visibleCount.toLocaleString()} visible`}
-              </div>
-            </div>
-
             <DesktopRailSummaryCard
               className={`mt-3 ${DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME}`}
             >

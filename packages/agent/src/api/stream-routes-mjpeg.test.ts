@@ -8,7 +8,8 @@ describe("MJPEG subscriber cleanup pattern", () => {
   it("collects failed subscribers before deleting from Set", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const testDir = path.dirname(new URL(import.meta.url).pathname);
+    const { fileURLToPath } = await import("node:url");
+    const testDir = path.dirname(fileURLToPath(import.meta.url));
     const source = fs.readFileSync(
       path.resolve(testDir, "stream-routes.ts"),
       "utf-8",

@@ -47,6 +47,16 @@ const mockEngine = {
   healthCheck: vi.fn().mockResolvedValue(true),
 };
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
 vi.mock("@miladyai/agent/services/sandbox-engine", () => ({
   createEngine: () => mockEngine,
   detectBestEngine: () => mockEngine,
@@ -238,6 +248,24 @@ describe("SandboxManager", () => {
       await expect(mgr.start()).rejects.toThrow("not found");
       expect(mgr.getState()).toBe("degraded");
     });
+
+    it("serializes concurrent start calls", async () => {
+      const deferredContainer = createDeferred<string>();
+      mockEngine.runContainer.mockReturnValueOnce(deferredContainer.promise);
+
+      const mgr = new SandboxManager({ mode: "standard" });
+      const firstStart = mgr.start();
+      const secondStart = mgr.start();
+
+      await Promise.resolve();
+      expect(mockEngine.runContainer).toHaveBeenCalledTimes(1);
+
+      deferredContainer.resolve("container-serial");
+      await Promise.all([firstStart, secondStart]);
+
+      expect(mockEngine.runContainer).toHaveBeenCalledTimes(1);
+      expect(mgr.getState()).toBe("ready");
+    });
   });
 
   // ===================================================================
@@ -378,6 +406,31 @@ describe("SandboxManager", () => {
       await mgr.recover();
       // Should have cleaned up the old container
       expect(mockEngine.stopContainer).toHaveBeenCalledWith("container-abc123");
+    });
+
+    it("serializes concurrent recovery attempts", async () => {
+      mockEngine.healthCheck.mockResolvedValue(false);
+      const mgr = new SandboxManager({ mode: "standard" });
+      await mgr.start();
+      expect(mgr.getState()).toBe("degraded");
+
+      const deferredContainer = createDeferred<string>();
+      mockEngine.runContainer.mockReset();
+      mockEngine.runContainer.mockReturnValueOnce(deferredContainer.promise);
+      mockEngine.healthCheck.mockResolvedValue(true);
+
+      const firstRecover = mgr.recover();
+      const secondRecover = mgr.recover();
+
+      await vi.waitFor(() => {
+        expect(mockEngine.runContainer).toHaveBeenCalledTimes(1);
+      });
+
+      deferredContainer.resolve("container-recovered");
+      await Promise.all([firstRecover, secondRecover]);
+
+      expect(mockEngine.runContainer).toHaveBeenCalledTimes(1);
+      expect(mgr.getState()).toBe("ready");
     });
   });
 

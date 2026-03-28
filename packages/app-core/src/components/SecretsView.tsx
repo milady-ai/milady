@@ -239,7 +239,7 @@ export function SecretsView() {
   if (error) {
     return (
       <div className={`${VAULT_PANEL_CLASSNAME} px-4 py-8 text-center`}>
-        <p className="mb-2 text-[13px] text-danger">{error}</p>
+        <div className="mb-2 text-[13px] text-danger">{error}</div>
         <Button
           variant="outline"
           size="sm"
@@ -255,9 +255,7 @@ export function SecretsView() {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <p className="m-0 max-w-2xl text-[13px] leading-6 text-muted">
-          {t("secretsview.ManageAPIKeysAnd")}
-        </p>
+        <div className="m-0 max-w-2xl text-[13px] leading-6 text-muted" />
         <Button
           variant="default"
           size="sm"
@@ -528,9 +526,6 @@ function SecretCard({
               {secret.key}
             </span>
           </div>
-          <p className="mt-1 text-[12px] leading-snug text-muted">
-            {secret.description}
-          </p>
         </div>
         <div className="flex flex-shrink-0 items-center gap-1.5">
           {showRequired && (

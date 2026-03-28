@@ -16,7 +16,6 @@ import { useBranding } from "../config/branding";
 import {
   useDocumentVisibility,
   useIntervalWhenDocumentVisible,
-  useRetakeCapture,
   useTimeout,
 } from "../hooks";
 import { useApp } from "../state";
@@ -394,7 +393,6 @@ export function GameView() {
     activeGamePostMessageAuth,
     activeGamePostMessagePayload,
     gameOverlayEnabled,
-    plugins,
     logs,
     loadLogs,
     setState,
@@ -410,15 +408,11 @@ export function GameView() {
   >("connecting");
   const [chatInput, setChatInput] = useState("");
   const [sendingChat, setSendingChat] = useState(false);
-  const [retakeCapture, setRetakeCapture] = useState(false);
   const [gameWindowId, setGameWindowId] = useState<string | null>(null);
   const gameWindowIdRef = useRef<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const authSentRef = useRef(false);
   const viewerSessionRef = useRef<string>("");
-
-  // Stream iframe frames to retake.tv when capture is active
-  useRetakeCapture(iframeRef, retakeCapture);
 
   // Send command to the agent - routes through elizaOS which processes
   // the message and decides what game actions to take
@@ -466,12 +460,6 @@ export function GameView() {
     () =>
       `${activeGameViewerUrl}::${JSON.stringify(activeGamePostMessagePayload ?? null)}`,
     [activeGamePostMessagePayload, activeGameViewerUrl],
-  );
-
-  // Only show retake capture button when the retake connector is enabled
-  const retakeEnabled = useMemo(
-    () => plugins.some((p) => p.id === "retake" && p.enabled),
-    [plugins],
   );
 
   // Filter logs relevant to the current game
@@ -803,17 +791,6 @@ export function GameView() {
         </Button>
         {isElectrobun && (
           <DesktopGameWindowControls gameWindowId={gameWindowId} />
-        )}
-        {retakeEnabled && (
-          <Button
-            variant={retakeCapture ? "default" : "outline"}
-            size="sm"
-            className="h-7 text-xs shadow-sm hover:border-accent"
-            onClick={() => setRetakeCapture(!retakeCapture)}
-            title={t("game.retakeTitle")}
-          >
-            {retakeCapture ? t("game.stopCapture") : t("game.retakeCapture")}
-          </Button>
         )}
         <Button
           variant={gameOverlayEnabled ? "default" : "outline"}

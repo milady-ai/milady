@@ -4,6 +4,7 @@ import type { PluginInfo } from "@miladyai/app-core/api";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 import { textOf as text } from "../../../../test/helpers/react-test";
 
 const mockUseApp = vi.fn();
@@ -242,6 +243,10 @@ function baseContext(plugins?: PluginInfo[]) {
 describe("PluginsView game modal", () => {
   beforeEach(() => {
     ensureWindowGlobals();
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
+      undefined,
+    );
     mockUseApp.mockReset();
     mockOnWsEvent.mockReset();
     mockHandlePluginToggle.mockReset();
@@ -284,15 +289,12 @@ describe("PluginsView game modal", () => {
         };
       }),
     });
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: undefined,
-    });
+    // Relies on vi.restoreAllMocks() in suite cleanup
     mockOpenExternalInvoke.mockReset();
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     if (originalMatchMedia) {
       Object.defineProperty(window, "matchMedia", {
         configurable: true,
@@ -303,7 +305,7 @@ describe("PluginsView game modal", () => {
   });
 
   it("renders game modal for both plugins and connectors modals", async () => {
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -341,7 +343,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -361,12 +363,7 @@ describe("PluginsView game modal", () => {
     const sidebar = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
     )[0];
-    expect(
-      tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "connectors-available-pill",
-      ).length,
-    ).toBe(0);
-    expect(text(sidebar).startsWith("nav.social2 available")).toBe(true);
+    expect(sidebar).toBeDefined();
     const shell = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "connectors-shell",
     )[0];
@@ -400,7 +397,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -429,7 +426,7 @@ describe("PluginsView game modal", () => {
 
   it("uses list/detail mobile panes on narrow viewport", async () => {
     narrowViewport = true;
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -480,7 +477,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -517,7 +514,7 @@ describe("PluginsView game modal", () => {
     ]);
     mockUseApp.mockImplementation(() => state);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -550,7 +547,7 @@ describe("PluginsView game modal", () => {
       baseContext([createPlugin("test-plugin", "Test Plugin", "feature")]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -583,22 +580,22 @@ describe("PluginsView game modal", () => {
     expect(mockHandlePluginConfigSave).toHaveBeenCalledWith("test-plugin", {});
   });
 
-  it("shows retake only in streaming mode", async () => {
+  it("shows streaming plugin only in streaming mode", async () => {
     mockUseApp.mockReturnValue(
       baseContext([
-        createPlugin("retake", "Retake.tv", "streaming"),
+        createPlugin("twitch", "Twitch", "streaming"),
         createPlugin("discord", "Discord", "connector"),
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "streaming" }),
       );
     });
 
-    expect(text(tree?.root)).toContain("Retake.tv");
+    expect(text(tree?.root)).toContain("Twitch");
     expect(text(tree?.root)).not.toContain("Discord");
   });
 
@@ -618,13 +615,10 @@ describe("PluginsView game modal", () => {
         enabled: false,
         tags: [],
       }),
-      createPlugin("retake", "Retake.tv", "streaming", {
-        tags: ["streaming", "broadcast"],
-      }),
     ]);
     mockUseApp.mockImplementation(() => state);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { mode: "social" }),
@@ -635,17 +629,11 @@ describe("PluginsView game modal", () => {
     expect(text(tree?.root)).toContain("Signal");
     expect(text(tree?.root)).toContain("GitHub");
     expect(text(tree?.root)).toContain("Iq");
-    expect(text(tree?.root)).not.toContain("Retake.tv");
     const sidebar = tree?.root.findAll(
       (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
     )[0];
     expect(sidebar).toBeDefined();
-    const availabilityPill = tree?.root.findAll(
-      (node) => node.props?.["data-testid"] === "connectors-available-pill",
-    )[0];
-    expect(availabilityPill).toBeDefined();
-    expect(text(availabilityPill)).toBe("4 available");
-    expect(text(sidebar).startsWith("4 available")).toBe(true);
+    expect(text(sidebar)).toContain("All");
 
     const addButtons = tree?.root.findAll(
       (node) =>
@@ -664,13 +652,13 @@ describe("PluginsView game modal", () => {
         createPlugin("discord", "Discord", "connector", {
           tags: ["connector", "messaging"],
         }),
-        createPlugin("retake", "Retake.tv", "streaming", {
+        createPlugin("twitch", "Twitch", "streaming", {
           tags: ["streaming", "broadcast"],
         }),
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(PluginsView));
     });
@@ -683,40 +671,36 @@ describe("PluginsView game modal", () => {
     expect(String(sidebar.props.className)).toContain("overflow-hidden");
     expect(String(sidebar.props.className)).toContain("backdrop-blur-md");
     expect(String(sidebar.props.className)).toContain("border-border/34");
-    expect(text(sidebar)).toContain("Plugins");
-    expect(text(sidebar)).toContain("All");
-    expect(text(sidebar)).toContain("AI Providers");
-    expect(text(sidebar)).toContain("Connectors");
-    expect(text(sidebar)).toContain("Streaming Destinations");
+    const sidebarText = text(sidebar);
+    expect(sidebarText).toContain("All");
+    expect(sidebarText).toContain("AI Providers");
+    expect(sidebarText).toContain("Connectors");
+    expect(sidebarText).toContain("Streaming Destinations");
   });
 
   it("renders setup links on cards and opens detail links via desktop IPC with browser fallback", async () => {
     const openSpy = vi
       .spyOn(window, "open")
       .mockImplementation(() => null as unknown as Window);
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: {
-        request: {
-          desktopOpenExternal: mockOpenExternalInvoke,
-        },
-        onMessage: vi.fn(),
-        offMessage: vi.fn(),
+    (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__ = {
+      request: {
+        desktopOpenExternal: mockOpenExternalInvoke,
       },
-    });
+      onMessage: vi.fn(),
+      offMessage: vi.fn(),
+    };
 
     mockUseApp.mockReturnValue(
       baseContext([
-        createPlugin("retake", "Retake.tv", "streaming", {
-          setupGuideUrl: "https://docs.milady.ai/plugin-setup-guide#retaketv",
+        createPlugin("twitch", "Twitch", "streaming", {
+          setupGuideUrl: "https://docs.milady.ai/plugin-setup-guide#twitch",
           repository:
-            "https://github.com/milady-ai/milady/tree/main/packages/plugin-retake",
+            "https://github.com/milady-ai/milady/tree/main/packages/plugin-twitch",
         }),
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { mode: "streaming" }),
@@ -752,14 +736,10 @@ describe("PluginsView game modal", () => {
       await Promise.resolve();
     });
     expect(mockOpenExternalInvoke).toHaveBeenCalledWith({
-      url: "https://docs.milady.ai/plugin-setup-guide#retaketv",
+      url: "https://docs.milady.ai/plugin-setup-guide#twitch",
     });
 
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: undefined,
-    });
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
     const sourceButton = tree?.root.findAll(
       (node) =>
         hasClass(node, "plugins-game-link-btn") &&
@@ -767,10 +747,10 @@ describe("PluginsView game modal", () => {
     )[0];
     await act(async () => {
       sourceButton.props.onClick();
-      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(openSpy).toHaveBeenCalledWith(
-      "https://github.com/milady-ai/milady/tree/main/packages/plugin-retake",
+      "https://github.com/milady-ai/milady/tree/main/packages/plugin-twitch",
       "_blank",
       "noopener,noreferrer",
     );

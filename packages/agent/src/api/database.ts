@@ -19,6 +19,7 @@ import net from "node:net";
 import { promisify } from "node:util";
 import { type AgentRuntime, logger } from "@elizaos/core";
 import { loadElizaConfig, saveElizaConfig } from "../config/config";
+import { resolveApiBindHost } from "../config/runtime-env";
 import type {
   DatabaseConfig,
   DatabaseProviderType,
@@ -179,7 +180,7 @@ const PRIVATE_IP_PATTERNS: RegExp[] = [
  * since only local processes can reach the API.
  */
 function isApiLoopbackOnly(): boolean {
-  let bind = (process.env.ELIZA_API_BIND ?? "127.0.0.1").trim().toLowerCase();
+  let bind = resolveApiBindHost(process.env).trim().toLowerCase();
   if (!bind) bind = "127.0.0.1";
 
   // Accept accidental URL-shaped bind values.

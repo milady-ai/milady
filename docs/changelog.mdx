@@ -3,7 +3,47 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
-<Update label="2026-03-28" description="Electrobun VRM + Spark single-three fix; cloud login persist" tags={["Fix", "Docs", "Test"]}>
+<Update label="2026-03-28" description="Week of March 22–28; desktop VRM/Three/Spark and cloud login" tags={["Feature", "Update", "Fix", "Docs", "Test"]}>
+## Binance skills
+
+Your agent can now interact with Binance Smart Chain through 25 new skills — check trending tokens, run rug-pull checks, look up wallet balances, and execute trades using natural language. Six skills support live execution with built-in safety checks. A new Binance tab in the [skills UI](/plugins/skills) lets you browse and enable them individually.
+
+## Cloud TTS proxy and streaming voice
+
+Voice output in cloud mode now routes through a dedicated TTS proxy, so your agent speaks reliably without requiring local provider credentials. Streaming responses are batched before being sent to the TTS engine, eliminating garbled playback from partial chunks. ElevenLabs and Eliza Cloud are both supported as voice backends. See [talk mode](/apps/dashboard/talk-mode) for configuration details.
+
+## Remote bug reports
+
+You can now share bug reports and startup failure diagnostics remotely. If your agent fails to start, the error details can be submitted directly from the desktop app for faster troubleshooting.
+
+## Updates
+
+- **Character selection moved earlier in onboarding** — You now choose your agent's character right after the welcome screen instead of midway through setup, so your agent's personality is established before you configure providers. See the [onboarding guide](/guides/beginners-user-guide).
+- **Wallet routing and network mode** — Wallet transactions now support provider fallback routing and explicit network mode selection, making token transfers and trades more reliable across chains. See the [wallet guide](/guides/wallet).
+- **Cloud container configuration** — Cloud-provisioned containers now accept `ELIZAOS_CLOUD_BASE_URL`, `ENABLE_AUTONOMY`, and `CORS_ORIGINS` environment variables, removing the need for post-boot file patching. Server-side authentication is also enforced by default on all cloud container endpoints.
+- **Immediate language sync on desktop** — Changing your dashboard language now applies to chat responses immediately without a restart. Windows desktop menus also include working About, Quit, and Update Check actions.
+- **Activity indicator unified** — The swarm activity indicator is now a single status box above the chat composer with color-coded states, replacing scattered per-agent indicators.
+
+## Bug fixes
+
+- Fixed voice output ignoring the selected UI language and defaulting to English after switching locales
+- Fixed swarm actions dropping parameters and occasionally spawning duplicate agents
+- Fixed the model selector dropdown in cloud settings being invisible due to overflow clipping — dropdowns now show human-readable model names
+- Fixed the Windows installer requiring an extra extraction step and missing the Milady icon on Start Menu shortcuts
+- Fixed the Release Center crashing when a desktop bridge call fails, and missing preview images in packaged Windows builds
+- Fixed Railway deployments failing at startup due to missing GPU detection tools in slim Linux images
+- Fixed WebSocket connectivity breaking for clients that authenticate after the socket opens rather than during the HTTP upgrade
+- Fixed onboarding text being hard to read due to inconsistent panel styling — all screens now use a consistent glass treatment
+- Fixed timed-out backup imports during onboarding continuing to run in the background instead of aborting cleanly
+- Fixed a duplicate Save button appearing in the character editor header
+- Fixed a redundant "Connectors" title showing in the sidebar when the page is already selected
+- Fixed white-on-gold text contrast issues across buttons, toasts, and onboarding screens
+- Fixed checkmarks overlapping text in settings dropdowns and a one-frame flicker when opening searchable dropdowns
+- Fixed the wallet chain rail collapsing into unreadable icon pills instead of showing full chain cards
+- Fixed trajectory steps generating disconnected IDs, which caused incorrect data in the [trajectory view](/advanced/trajectories)
+- Fixed the desktop reset flow not verifying that onboarding actually restarted after a reset
+- Fixed a decorative gold border appearing permanently on the generation settings section
+
 ## Desktop: one `three` instance for VRM + Gaussian splats
 
 **Why:** Electrobun (and similar layouts) could resolve a **second** `three` package under nested `node_modules`. `@sparkjsdev/spark` then registered `ShaderChunk.splatDefines` on **one** instance while VRM / splat shaders used **another** → **`Can not resolve #include <splatDefines>`** and broken companion 3D.
@@ -35,6 +75,13 @@ description: What's new in Milady — features, improvements, and fixes.
 
 </Update>
 
+<Update label="2026-03-27" description="Prompt optimization, desktop background mode, heartbeat execution fix" tags={["Feature", "Update", "Fix"]}>
+## Smart prompt optimization
+
+Milady now automatically reduces prompt sizes by around 36% for general chat. The system detects what you're asking about — coding, emotes, terminal work — and only includes full action details for relevant actions, replacing the rest with compact stubs. This means faster responses and lower token costs with no configuration needed. Coding tasks keep full context. Set `PARALLAX_PROMPT_TRACE=1` to see compaction stats in the server log.
+
+</Update>
+
 <Update label="2026-03-27" description="OpenRouter plugin dependency pin (upstream bad publish)" tags={["Fix", "Docs"]}>
 ## Pin `@elizaos/plugin-openrouter` to `2.0.0-alpha.10`
 
@@ -57,18 +104,25 @@ Closing the desktop window no longer briefly flashes a replacement window. The a
 
 ## Updates
 
+- **Coding agents on Eliza Cloud** — [Coding agents](/guides/coding-swarms) (Claude Code, Codex) now route through Eliza Cloud proxy endpoints when cloud inference is active. Previously, switching to cloud mode wiped their API keys.
 - **Desktop shell consistency** — A broad layout and theme pass brings chat, skills, apps, heartbeats, stream, knowledge, onboarding, companion, and settings surfaces onto a shared chrome system. Spacing, hierarchy, and readability are improved across the board, and the companion composer uses a proper structural container instead of layered visual nudges.
 - **Wallet action feedback** — Wallet actions like balance checks and token transfers now reliably report success or failure in the [trajectory view](/advanced/trajectories), making it easier to trace what happened during a transaction.
 - **Cloud container access** — Cloud-provisioned containers no longer auto-generate an API token that locks out the web UI. Managed deployments are accessible immediately without browser auth until the pairing flow is configured.
+- **Workspace boilerplate excluded from prompts** — Default workspace template files (like `AGENTS.md`) are no longer injected into prompts due to a case-sensitivity mismatch. Only files you've actually customized are included.
 
 ## Bug fixes
 
+- Fixed heartbeats and triggers silently not executing — the autonomy loop was never enabled after startup, so scheduled tasks sat in the database unprocessed
+- Fixed 19 operations across cloud, wallet, knowledge, and runtime that reported success but silently failed — errors are now surfaced properly
 - Fixed cloud sign-in failing on the hosted homepage — a bare-domain redirect was dropping the POST body during authentication
 - Fixed homepage hero text clipping on mobile screens and the download dropdown closing when moving the cursor from the button to the list
+- Fixed wallet `CHECK_BALANCE` and `TRANSFER_TOKEN` actions not reporting success or failure back to the chat
+- Fixed the desktop companion header's glass blur effect bleeding into the standard desktop header
+- Fixed the Windows app icon only containing 16px and 32px sizes — taskbar, Start Menu, and desktop shortcuts now display crisp icons at all standard sizes
+- Fixed Eliza Cloud showing a generic error when the session is missing an account — it now explains whether an API key or login session is needed
 - Fixed onboarding character preview playing a single default voice instead of the voice associated with each character preset
 - Fixed onboarding voice preview failing entirely when switching characters rapidly
-- Fixed stale timers during embedding cleanup that could cause errors on shutdown
-
+- Fixed unhandled runtime errors and a timeout leak in the embedding manager that could cause issues during cleanup
 </Update>
 
 <Update label="2026-03-25" description="Coding agent terminals, onboarding identity step, security hardening" tags={["Feature", "Update", "Fix"]}>
@@ -495,7 +549,7 @@ You can now download and run AI models locally for fully offline inference. Five
 
 ## Chrome extension for browser control
 
-A new Chrome extension — Milady Browser Relay — lets your agent control browser tabs in real time via the Chrome DevTools Protocol. Your agent can read page content, execute JavaScript, navigate URLs, capture screenshots, and interact with elements programmatically. Install it from source using the CLI or by loading the unpacked extension directory. See the [Chrome extension guide](/apps/chrome-extension) for details.
+The Browser Relay extension remains documented as a separate or planned distribution. It is not part of the shipped `v2.0.0-alpha.125` repository surface, and its documentation now serves only as a release-status page plus architecture notes.
 
 ## Mobile app (iOS and Android)
 

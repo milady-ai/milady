@@ -14,6 +14,8 @@ vi.mock("@miladyai/app-core/hooks", () => ({
 }));
 
 vi.mock("@miladyai/app-core/components", () => ({
+  LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME:
+    "!h-11 !min-h-[44px] !min-w-[44px] !rounded-xl !px-3.5 sm:!px-3.5 leading-none",
   LanguageDropdown: () =>
     React.createElement("div", { "data-testid": "language-dropdown-stub" }),
   ThemeToggle: () =>

@@ -14,7 +14,7 @@ export interface TokensTableProps {
   walletBalances: unknown;
   visibleRows: TokenRow[];
   visibleChainErrors: EvmChainBalance[];
-  inventoryChainFocus: string;
+  showChainColumn: boolean;
   handleUntrackToken: (address: string) => void;
 }
 
@@ -24,7 +24,7 @@ export function TokensTable({
   walletBalances,
   visibleRows,
   visibleChainErrors,
-  inventoryChainFocus,
+  showChainColumn,
   handleUntrackToken,
 }: TokensTableProps) {
   const renderChainErrors = () =>
@@ -148,7 +148,7 @@ export function TokensTable({
                           )}
                         </div>
                       </div>
-                      {inventoryChainFocus === "all" && (
+                      {showChainColumn && (
                         <span className="shrink-0 rounded-full border border-border/50 px-1.5 py-0.5 text-[9px] font-mono text-muted">
                           {row.chain}
                         </span>

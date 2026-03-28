@@ -6,26 +6,24 @@ import {
   invokeDesktopBridgeRequestWithTimeout,
   subscribeDesktopBridgeEvent,
 } from "@miladyai/app-core/bridge";
-// @vitest-environment jsdom
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-type TestWindow = Window & {
-  __MILADY_ELECTROBUN_RPC__?: ElectrobunRendererRpc;
-};
+// No custom globals needed
 
 describe("electrobun rpc bridge", () => {
   afterEach(() => {
-    delete (window as TestWindow).__MILADY_ELECTROBUN_RPC__;
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
   it("prefers direct Electrobun RPC requests when available", async () => {
     const rpcRequest = vi.fn().mockResolvedValue({ ok: true });
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: { desktopOpenExternal: rpcRequest },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
 
     await expect(
       invokeDesktopBridgeRequest({
@@ -49,11 +47,11 @@ describe("electrobun rpc bridge", () => {
   });
 
   it("invokeDesktopBridgeRequestWithTimeout returns missing when RPC method absent", async () => {
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: {},
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
 
     await expect(
       invokeDesktopBridgeRequestWithTimeout({
@@ -69,13 +67,13 @@ describe("electrobun rpc bridge", () => {
     const hang = new Promise(() => {
       /* intentionally unresolved */
     });
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: {
         agentPostCloudDisconnect: () => hang,
       },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
 
     const pending = invokeDesktopBridgeRequestWithTimeout({
       rpcMethod: "agentPostCloudDisconnect",
@@ -88,7 +86,7 @@ describe("electrobun rpc bridge", () => {
   });
 
   it("invokeDesktopBridgeRequestWithTimeout returns ok when handler resolves", async () => {
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: {
         agentPostCloudDisconnect: vi
           .fn()
@@ -96,7 +94,7 @@ describe("electrobun rpc bridge", () => {
       },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
 
     await expect(
       invokeDesktopBridgeRequestWithTimeout<{ ok: boolean }>({
@@ -110,13 +108,13 @@ describe("electrobun rpc bridge", () => {
 
   it("invokeDesktopBridgeRequestWithTimeout returns rejected when handler throws", async () => {
     const boom = new Error("rpc failed");
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: {
         agentPostCloudDisconnect: vi.fn().mockRejectedValue(boom),
       },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
 
     await expect(
       invokeDesktopBridgeRequestWithTimeout({
@@ -129,7 +127,7 @@ describe("electrobun rpc bridge", () => {
 
   it("subscribes to direct Electrobun RPC messages when available", () => {
     const listeners = new Map<string, Set<(payload: unknown) => void>>();
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: {},
       onMessage: vi.fn(
         (messageName: string, listener: (payload: unknown) => void) => {
@@ -143,7 +141,7 @@ describe("electrobun rpc bridge", () => {
           listeners.get(messageName)?.delete(listener);
         },
       ),
-    };
+    });
 
     const listener = vi.fn();
     const unsubscribe = subscribeDesktopBridgeEvent({

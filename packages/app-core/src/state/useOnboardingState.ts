@@ -54,6 +54,8 @@ export interface OnboardingState {
   // Provider
   provider: string;
   apiKey: string;
+  voiceProvider: string;
+  voiceApiKey: string;
   smallModel: string;
   largeModel: string;
   openRouterModel: string;
@@ -117,7 +119,7 @@ const EMPTY_TOKENS: Record<ConnectorTokenKey, string> = {
 function createInitialState(cloudOnly?: boolean): OnboardingState {
   const savedApiBase = loadSessionApiBase();
   return {
-    step: loadPersistedOnboardingStep() ?? "welcome",
+    step: loadPersistedOnboardingStep() ?? "cloud_login",
     mode: "basic",
     activeGuide: null,
     deferredTasks: [],
@@ -131,6 +133,8 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     cloudProvider: cloudOnly ? "elizacloud" : "",
     provider: "",
     apiKey: "",
+    voiceProvider: "",
+    voiceApiKey: "",
     smallModel: "moonshotai/kimi-k2-turbo",
     largeModel: "moonshotai/kimi-k2-0905",
     openRouterModel: "",

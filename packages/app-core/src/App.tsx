@@ -223,7 +223,6 @@ function ViewRouter({
       case "runtime":
       case "database":
       case "desktop":
-      case "lifo":
       case "logs":
       case "security":
         return (
@@ -457,6 +456,24 @@ export function App() {
   const showLoaderRef = useRef(true);
   const [showLoader, setShowLoader] = useState(true);
 
+  // Crossfade state for onboarding -> chat
+  const [fadingOutOnboarding, setFadingOutOnboarding] = useState(false);
+  const prevOnboardingCompleteRef = useRef(onboardingComplete);
+
+  useEffect(() => {
+    if (!prevOnboardingCompleteRef.current && onboardingComplete) {
+      setFadingOutOnboarding(true);
+      const timer = setTimeout(() => {
+        setFadingOutOnboarding(false);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+    if (!onboardingComplete) {
+      setFadingOutOnboarding(false);
+    }
+    prevOnboardingCompleteRef.current = onboardingComplete;
+  }, [onboardingComplete]);
+
   useEffect(() => {
     if (showFullScreenLoader) {
       showLoaderRef.current = true;
@@ -494,7 +511,13 @@ export function App() {
   }
 
   if (authRequired && !blockOnboardingForShell) return <PairingView />;
-  if (!onboardingComplete && !blockOnboardingForShell) {
+  const showOnboarding =
+    (!onboardingComplete || fadingOutOnboarding) && !blockOnboardingForShell;
+
+  // We conditionally skip returning early for onboarding so we can mount the app shell
+  // behind it during the crossfade. If we are completely before the fade out, we can
+  // still return early to prevent the engine from paying the cost of the main shell.
+  if (showOnboarding && !fadingOutOnboarding) {
     return <OnboardingWizard />;
   }
 
@@ -614,7 +637,20 @@ export function App() {
 
   return (
     <BugReportProvider value={bugReport}>
+      {/* 
+        If we are in the crossfade phase, mount the shell but cover it with the fading onboarding layer.
+      */}
       {appShell}
+
+      {showOnboarding && (
+        <div
+          className="fixed inset-0 z-[100] transition-opacity duration-700"
+          style={{ opacity: fadingOutOnboarding ? 0 : 1 }}
+        >
+          <OnboardingWizard />
+        </div>
+      )}
+
       {/* Persistent game overlay — stays visible across all tabs */}
       {activeGameViewerUrl && gameOverlayEnabled && tab !== "apps" && (
         <GameViewOverlay />

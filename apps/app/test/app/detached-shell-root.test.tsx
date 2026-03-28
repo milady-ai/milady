@@ -12,7 +12,6 @@ vi.mock("@miladyai/app-core/state", () => ({
 }));
 
 vi.mock("@miladyai/app-core/components", () => ({
-  BrowserSurfaceWindow: () => <div data-testid="browser-surface-window" />,
   ChatView: () => <div data-testid="chat-view" />,
   CloudDashboard: () => <div data-testid="cloud-dashboard" />,
   CodingAgentSettingsSection: () => (
@@ -127,20 +126,6 @@ describe("DetachedShellRoot", () => {
     ).toBeTruthy();
   });
 
-  it("renders the dedicated browser surface without desktop shell chrome", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-
-    await act(async () => {
-      tree = TestRenderer.create(
-        <DetachedShellRoot route={{ mode: "surface", tab: "browser" }} />,
-      );
-    });
-
-    expect(
-      tree?.root.findByProps({ "data-testid": "browser-surface-window" }),
-    ).toBeTruthy();
-  });
-
   it("still shows auth and startup failures when detached shells cannot load", async () => {
     useAppMock.mockReturnValueOnce({
       authRequired: true,
@@ -173,45 +158,6 @@ describe("DetachedShellRoot", () => {
 
     expect(
       tree?.root.findByProps({ "data-testid": "startup-failure-view" }),
-    ).toBeTruthy();
-  });
-
-  it("lets browser windows render even when app auth or startup is unavailable", async () => {
-    useAppMock.mockReturnValueOnce({
-      authRequired: true,
-      onboardingComplete: true,
-      onboardingLoading: false,
-      retryStartup,
-      startupError: null,
-    });
-
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-    await act(async () => {
-      tree = TestRenderer.create(
-        <DetachedShellRoot route={{ mode: "surface", tab: "browser" }} />,
-      );
-    });
-
-    expect(
-      tree?.root.findByProps({ "data-testid": "browser-surface-window" }),
-    ).toBeTruthy();
-
-    useAppMock.mockReturnValueOnce({
-      authRequired: false,
-      onboardingComplete: true,
-      onboardingLoading: false,
-      retryStartup,
-      startupError: new Error("boom"),
-    });
-
-    await act(async () => {
-      tree = TestRenderer.create(
-        <DetachedShellRoot route={{ mode: "surface", tab: "browser" }} />,
-      );
-    });
-
-    expect(
-      tree?.root.findByProps({ "data-testid": "browser-surface-window" }),
     ).toBeTruthy();
   });
 
@@ -257,27 +203,6 @@ describe("DetachedShellRoot", () => {
 
     expect(
       tree?.root.findByProps({ "data-testid": "plugins-page-view" }),
-    ).toBeTruthy();
-  });
-
-  it("browser surface bypasses onboarding gate", async () => {
-    useAppMock.mockReturnValueOnce({
-      authRequired: false,
-      onboardingComplete: false,
-      onboardingLoading: false,
-      retryStartup,
-      startupError: null,
-    });
-
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-    await act(async () => {
-      tree = TestRenderer.create(
-        <DetachedShellRoot route={{ mode: "surface", tab: "browser" }} />,
-      );
-    });
-
-    expect(
-      tree?.root.findByProps({ "data-testid": "browser-surface-window" }),
     ).toBeTruthy();
   });
 

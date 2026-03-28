@@ -49,10 +49,6 @@ vi.mock("./FineTuningView", () => ({
   FineTuningView: () => React.createElement("div", null, "fine-tuning"),
 }));
 
-vi.mock("./LifoSandboxView", () => ({
-  LifoSandboxView: () => React.createElement("div", null, "lifo"),
-}));
-
 vi.mock("./TrajectoriesView", () => ({
   TrajectoriesView: () => React.createElement("div", null, "trajectories"),
 }));

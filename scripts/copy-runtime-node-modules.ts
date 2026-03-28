@@ -51,6 +51,9 @@ const TRACKED_PACKAGE_CACHE = path.join(
   os.tmpdir(),
   "milady-tracked-package-cache",
 );
+const PUBLISHED_PACKAGE_FETCH_TIMEOUT_MS = 10_000;
+const ALLOW_REGISTRY_FETCH =
+  process.env.MILADY_RUNTIME_COPY_ALLOW_REGISTRY_FETCH === "1";
 const DEP_SKIP = new Set(["typescript", "@types/node", "lucide-react"]);
 const ALWAYS_HOISTED_PACKAGES = new Set(["@elizaos/core"]);
 const PACKAGED_DEPENDENCY_SKIPS = new Map<string, Set<string>>([
@@ -481,6 +484,7 @@ function fetchPublishedPackage(
         cwd: cacheDir,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],
+        timeout: PUBLISHED_PACKAGE_FETCH_TIMEOUT_MS,
       },
     )
       .trim()
@@ -711,7 +715,7 @@ export function selectResolvedCandidate(
     }
   }
 
-  return null;
+  return candidates[0];
 }
 
 function resolvePackage(
@@ -723,7 +727,7 @@ function resolvePackage(
   const selected = selectResolvedCandidate(candidates, requestedSpec);
   if (selected) return selected;
 
-  if (canFetchPublishedPackage(requestedSpec)) {
+  if (ALLOW_REGISTRY_FETCH && canFetchPublishedPackage(requestedSpec)) {
     const fetched = fetchPublishedPackage(name, requestedSpec);
     if (fetched) return fetched;
   }
@@ -744,6 +748,10 @@ function resolvePackage(
       inferVersionFromBunEntryPath(realSourceDir) ??
       inferVersionFromBunEntryPath(sourceDir);
     if (!version) continue;
+
+    if (!ALLOW_REGISTRY_FETCH) {
+      continue;
+    }
 
     const fetched = fetchPublishedPackage(name, version);
     if (fetched) return fetched;

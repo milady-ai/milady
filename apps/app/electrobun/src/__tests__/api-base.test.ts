@@ -193,7 +193,7 @@ describe("resolveInitialApiBase", () => {
   });
 
   it("returns the local port in local mode", () => {
-    expect(resolveInitialApiBase({ MILADY_PORT: "4242" })).toBe(
+    expect(resolveInitialApiBase({ MILADY_API_PORT: "4242" })).toBe(
       "http://127.0.0.1:4242",
     );
   });
@@ -202,7 +202,7 @@ describe("resolveInitialApiBase", () => {
     expect(
       resolveInitialApiBase({
         MILADY_DESKTOP_SKIP_EMBEDDED_AGENT: "1",
-        MILADY_PORT: "5151",
+        ELIZA_API_PORT: "5151",
       }),
     ).toBe("http://127.0.0.1:5151");
   });

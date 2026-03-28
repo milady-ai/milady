@@ -1,4 +1,8 @@
-import { LanguageDropdown, ThemeToggle } from "@miladyai/app-core/components";
+import {
+  LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME,
+  LanguageDropdown,
+  ThemeToggle,
+} from "@miladyai/app-core/components";
 import { useMediaQuery } from "@miladyai/app-core/hooks";
 import type { UiLanguage } from "@miladyai/app-core/i18n";
 import type { ShellView, UiTheme } from "@miladyai/app-core/state";
@@ -340,7 +344,7 @@ export function ShellHeaderControls({
             setUiLanguage={setUiLanguage}
             t={t}
             variant={controlsVariant}
-            triggerClassName="!h-11 !min-h-[44px] !min-w-[44px] !rounded-xl !px-3.5 sm:!px-3.5 leading-none"
+            triggerClassName={LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME}
           />
         </div>
         <div

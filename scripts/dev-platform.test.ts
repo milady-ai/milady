@@ -9,14 +9,14 @@ describe("dev-platform.mjs", () => {
   it("points Electrobun at the sibling desktop dev API when it launches one", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
-    expect(script).toContain(
-      "const preferredApi = Number(process.env.MILADY_API_PORT) || 31337;",
-    );
+    expect(script).toContain("resolveDesktopApiPort(process.env)");
+    expect(script).toContain("resolveDesktopUiPort(process.env)");
     expect(script).toContain("const apiPort = String(resolvedApiPort);");
     expect(script).toContain(
       "MILADY_DESKTOP_API_BASE: `http://127.0.0.1:$" + "{apiPort}`",
     );
     expect(script).toContain("MILADY_API_PORT: apiPort");
+    expect(script).toContain("ELIZA_API_PORT: apiPort");
   });
 
   it("only injects the external desktop API base when the helper API is enabled", () => {

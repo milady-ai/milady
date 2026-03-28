@@ -101,7 +101,6 @@ vi.mock("@miladyai/app-core/components", async () => {
       React.createElement("div", null, "Header", mobileLeft),
     InventoryView: () => React.createElement("div", null, "InventoryView"),
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-    LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
     OnboardingWizard: () =>
       React.createElement("div", null, "OnboardingWizard"),
     PairingView: () => React.createElement("div", null, "PairingView"),
@@ -161,9 +160,6 @@ vi.mock("@miladyai/app-core/src/components/InventoryView", () => ({
 }));
 vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-}));
-vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
 }));
 vi.mock("../../src/components/AvatarLoader", () => ({
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),

@@ -1,3 +1,13 @@
+import { cn } from "@miladyai/ui";
+import type { ButtonHTMLAttributes, CSSProperties } from "react";
+import { useId } from "react";
+import {
+  onboardingReadableTextFaintClassName,
+  onboardingReadableTextMutedClassName,
+  onboardingReadableTextStrongClassName,
+  onboardingTextSupportClassName,
+} from "./onboarding-form-primitives";
+
 interface OnboardingStepHeaderProps {
   eyebrow: string;
   title?: string;
@@ -6,42 +16,85 @@ interface OnboardingStepHeaderProps {
   descriptionClassName?: string;
 }
 
-export const onboardingEyebrowClass =
-  "text-center text-xs font-semibold uppercase tracking-[0.3em] text-[var(--onboarding-text-muted)]";
+export const onboardingEyebrowClass = `text-center text-xs font-semibold uppercase tracking-[0.3em] ${onboardingReadableTextMutedClassName}`;
 
-export const onboardingTitleClass =
-  "text-center text-xl font-light leading-[1.4] text-[var(--onboarding-text-strong)]";
+export const onboardingTitleClass = `text-center text-xl font-light leading-[1.4] ${onboardingReadableTextStrongClassName}`;
 
-export const onboardingDescriptionClass =
-  "text-center text-sm leading-relaxed text-[var(--onboarding-text-muted)]";
+export const onboardingDescriptionClass = `mx-auto max-w-[36ch] text-center text-[13px] leading-relaxed ${onboardingReadableTextMutedClassName} ${onboardingTextSupportClassName}`;
+export const onboardingHeaderBlockClass = "mb-5 max-md:mb-4";
 
 export const onboardingFooterClass =
   "mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-[var(--onboarding-footer-border)] pt-4";
 
-export const onboardingSecondaryActionClass =
-  "p-0 text-[10px] uppercase tracking-[0.15em] text-[var(--onboarding-text-muted)] transition-colors duration-300 hover:text-[var(--onboarding-text-strong)]";
+export const onboardingSecondaryActionClass = `inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-md border border-transparent bg-transparent px-3 py-2 text-[11px] uppercase tracking-[0.14em] transition-[color,background-color,box-shadow] duration-300 hover:bg-[var(--onboarding-secondary-hover-bg)] hover:text-[var(--onboarding-text-strong)] active:bg-[var(--onboarding-secondary-pressed-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--onboarding-secondary-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:pointer-events-none disabled:opacity-50 ${onboardingReadableTextMutedClassName}`;
 
 export const onboardingPrimaryActionClass =
   "group relative inline-flex min-h-[44px] items-center justify-center gap-2 overflow-hidden rounded-[8px] border border-[var(--onboarding-accent-border)] bg-[var(--onboarding-accent-bg)] px-8 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--onboarding-accent-foreground)] transition-all duration-300 hover:border-[var(--onboarding-accent-border-hover)] hover:bg-[var(--onboarding-accent-bg-hover)] disabled:cursor-not-allowed disabled:opacity-40";
 
-export const onboardingLinkActionClass =
-  "rounded-md px-2 py-1 text-[11px] text-[var(--onboarding-text-faint)] transition-colors duration-300 hover:text-[var(--onboarding-link)]";
+export const onboardingLinkActionClass = `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-transparent bg-transparent px-3 py-2 text-[11px] transition-[color,background-color,box-shadow] duration-300 hover:bg-[var(--onboarding-secondary-hover-bg)] hover:text-[var(--onboarding-link)] active:bg-[var(--onboarding-secondary-pressed-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--onboarding-secondary-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:pointer-events-none disabled:opacity-50 ${onboardingReadableTextFaintClassName}`;
 
 export const onboardingTextShadowStyle = {
-  textShadow: "0 2px 10px rgba(3,5,10,0.55)",
+  textShadow: "var(--onboarding-text-shadow-strong)",
+  WebkitTextStroke: "0.35px var(--onboarding-text-stroke)",
 } as const;
 
 export const onboardingBodyTextShadowStyle = {
-  textShadow: "0 2px 10px rgba(3,5,10,0.45)",
+  textShadow: "var(--onboarding-text-shadow-muted)",
 } as const;
 
 export const onboardingPrimaryActionTextShadowStyle = {
-  textShadow: "0 1px 6px rgba(3,5,10,0.55)",
+  textShadow: "0 1px 5px rgba(3,5,10,0.38)",
 } as const;
 
 export const onboardingSecondaryActionTextShadowStyle = {
-  textShadow: "0 1px 8px rgba(3,5,10,0.45)",
+  textShadow: "var(--onboarding-text-shadow-muted)",
 } as const;
+
+function mergeOnboardingTextShadowStyle(
+  style?: CSSProperties,
+): CSSProperties | undefined {
+  if (!style) {
+    return onboardingSecondaryActionTextShadowStyle;
+  }
+  return {
+    ...onboardingSecondaryActionTextShadowStyle,
+    ...style,
+  };
+}
+
+type OnboardingActionButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
+
+export function OnboardingSecondaryActionButton({
+  className,
+  style,
+  type = "button",
+  ...props
+}: OnboardingActionButtonProps) {
+  return (
+    <button
+      type={type}
+      className={cn(onboardingSecondaryActionClass, className)}
+      style={mergeOnboardingTextShadowStyle(style)}
+      {...props}
+    />
+  );
+}
+
+export function OnboardingLinkActionButton({
+  className,
+  style,
+  type = "button",
+  ...props
+}: OnboardingActionButtonProps) {
+  return (
+    <button
+      type={type}
+      className={cn(onboardingLinkActionClass, className)}
+      style={mergeOnboardingTextShadowStyle(style)}
+      {...props}
+    />
+  );
+}
 
 export function OnboardingStepDivider() {
   return (
@@ -58,29 +111,56 @@ export function OnboardingStepHeader({
   titleClassName = "",
   descriptionClassName = "",
 }: OnboardingStepHeaderProps) {
+  const reactId = useId().replace(/:/g, "");
+  const headingId = `onboarding-step-heading-${reactId}`;
+  const descriptionId = `onboarding-step-description-${reactId}`;
+  const headingText = title || description || eyebrow;
+  const usesTitleHeading = Boolean(title);
+  const usesDescriptionHeading = !title && Boolean(description);
+  const hasBodyDescription = Boolean(title && description);
+  const headingClassName =
+    usesTitleHeading || usesDescriptionHeading
+      ? `${onboardingTitleClass} ${
+          usesDescriptionHeading ? descriptionClassName : titleClassName
+        }`.trim()
+      : onboardingEyebrowClass;
+
   return (
-    <>
-      <div className={onboardingEyebrowClass} style={onboardingTextShadowStyle}>
-        {eyebrow}
-      </div>
-      <OnboardingStepDivider />
-      {title ? (
-        <div
-          className={`${onboardingTitleClass} ${titleClassName}`.trim()}
-          style={onboardingTextShadowStyle}
-        >
-          {title}
-        </div>
-      ) : null}
-      {description ? (
+    <header
+      className={onboardingHeaderBlockClass}
+      aria-labelledby={headingId}
+      aria-describedby={hasBodyDescription ? descriptionId : undefined}
+    >
+      {usesTitleHeading || usesDescriptionHeading ? (
         <p
+          className={onboardingEyebrowClass}
+          style={onboardingBodyTextShadowStyle}
+        >
+          {eyebrow}
+        </p>
+      ) : null}
+      <OnboardingStepDivider />
+      <h1
+        id={headingId}
+        className={headingClassName}
+        style={
+          usesTitleHeading || usesDescriptionHeading
+            ? onboardingTextShadowStyle
+            : onboardingBodyTextShadowStyle
+        }
+      >
+        {headingText}
+      </h1>
+      {hasBodyDescription ? (
+        <p
+          id={descriptionId}
           className={`${onboardingDescriptionClass} ${descriptionClassName}`.trim()}
           style={onboardingBodyTextShadowStyle}
         >
           {description}
         </p>
       ) : null}
-    </>
+    </header>
   );
 }
 

@@ -1,19 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  coverageDocReferences,
+  coverageThresholds,
+} from "./coverage-policy.mjs";
 
 /**
  * MW-01: Coverage policy drift detection.
  *
- * Ensures the canonical coverage thresholds declared in vitest.config.ts
- * stay in sync with every documentation file that references them.
- * If you update a threshold, update ALL locations listed below.
+ * Ensures the canonical coverage policy declared in scripts/coverage-policy.mjs
+ * stays in sync with configs, docs, and workflow contract checks.
  */
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-
-/** Canonical thresholds — single source of truth lives in vitest.config.ts. */
-const EXPECTED = { lines: 25, functions: 25, statements: 25, branches: 15 };
 
 /** Compact notation used in most docs: "25% lines/functions/statements, 15% branches" */
 const COMPACT_RE = /(\d+)%\s*lines\/functions\/statements.*?(\d+)%\s*branches/;
@@ -30,35 +30,29 @@ function extractFromDoc(content: string): { lfs: number; br: number } | null {
   return null;
 }
 
-const DOCS_THAT_REFERENCE_THRESHOLDS = [
-  "CONTRIBUTING.md",
-  "AGENTS.md",
-  "docs/guides/contribution-guide.md",
-  "docs/guides/contributing.md",
-  "docs/plugins/publish.md",
-  ".github/workflows/agent-review.yml",
-];
-
 describe("MW-01 — coverage policy drift detection", () => {
-  it("vitest.config.ts thresholds match canonical values", async () => {
+  it("vitest.config.ts imports the shared coverage policy", () => {
     const configSrc = fs.readFileSync(
       path.join(ROOT, "vitest.config.ts"),
       "utf8",
     );
 
-    const linesMatch = configSrc.match(/lines:\s*(\d+)/);
-    const funcsMatch = configSrc.match(/functions:\s*(\d+)/);
-    const stmtsMatch = configSrc.match(/statements:\s*(\d+)/);
-    const branchMatch = configSrc.match(/branches:\s*(\d+)/);
-
-    expect(linesMatch).not.toBeNull();
-    expect(Number(linesMatch?.[1])).toBe(EXPECTED.lines);
-    expect(Number(funcsMatch?.[1])).toBe(EXPECTED.functions);
-    expect(Number(stmtsMatch?.[1])).toBe(EXPECTED.statements);
-    expect(Number(branchMatch?.[1])).toBe(EXPECTED.branches);
+    expect(configSrc).toContain("./scripts/coverage-policy.mjs");
+    expect(configSrc).toContain("coverageSummaryReporters");
+    expect(configSrc).toContain("coverageThresholds");
   });
 
-  for (const relPath of DOCS_THAT_REFERENCE_THRESHOLDS) {
+  it("apps/app/electrobun/vitest.config.ts imports the shared coverage policy", () => {
+    const configSrc = fs.readFileSync(
+      path.join(ROOT, "apps/app/electrobun/vitest.config.ts"),
+      "utf8",
+    );
+
+    expect(configSrc).toContain("../../../scripts/coverage-policy.mjs");
+    expect(configSrc).toContain("coverageThresholds");
+  });
+
+  for (const relPath of coverageDocReferences) {
     it(`${relPath} matches canonical thresholds`, () => {
       const absPath = path.join(ROOT, relPath);
       expect(fs.existsSync(absPath), `${relPath} must exist`).toBe(true);
@@ -69,8 +63,8 @@ describe("MW-01 — coverage policy drift detection", () => {
         extracted,
         `${relPath} must reference coverage thresholds`,
       ).not.toBeNull();
-      expect(extracted?.lfs).toBe(EXPECTED.lines);
-      expect(extracted?.br).toBe(EXPECTED.branches);
+      expect(extracted?.lfs).toBe(coverageThresholds.lines);
+      expect(extracted?.br).toBe(coverageThresholds.branches);
     });
   }
 
@@ -80,5 +74,17 @@ describe("MW-01 — coverage policy drift detection", () => {
       "utf8",
     );
     expect(workflow).toContain("bun run test:coverage");
+  });
+
+  it("test:coverage reports per-surface coverage after Vitest", () => {
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(ROOT, "package.json"), "utf8"),
+    ) as {
+      scripts?: Record<string, string>;
+    };
+
+    expect(packageJson.scripts?.["test:coverage"]).toContain(
+      "node scripts/report-coverage-surfaces.mjs",
+    );
   });
 });

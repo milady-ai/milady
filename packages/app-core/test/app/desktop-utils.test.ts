@@ -5,21 +5,10 @@ import {
   confirmDesktopAction,
   copyTextToClipboard,
 } from "@miladyai/app-core/utils";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-type TestWindow = Window & {
-  __MILADY_ELECTROBUN_RPC__?: {
-    request: Record<string, (params?: unknown) => Promise<unknown>>;
-    onMessage: (
-      messageName: string,
-      listener: (payload: unknown) => void,
-    ) => void;
-    offMessage: (
-      messageName: string,
-      listener: (payload: unknown) => void,
-    ) => void;
-  };
-};
+  // No custom globals needed
 
 describe("desktop dialog and clipboard helpers", () => {
   beforeEach(() => {
@@ -42,17 +31,17 @@ describe("desktop dialog and clipboard helpers", () => {
   });
 
   afterEach(() => {
-    delete (window as TestWindow).__MILADY_ELECTROBUN_RPC__;
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
   it("uses the Electrobun message-box RPC for confirm dialogs", async () => {
     const request = vi.fn().mockResolvedValue({ response: 0 });
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: { desktopShowMessageBox: request },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
     const confirmSpy = vi.spyOn(window, "confirm");
 
     await expect(
@@ -76,11 +65,11 @@ describe("desktop dialog and clipboard helpers", () => {
 
   it("treats bare numeric 0 from the message-box RPC as confirm (not falsy `if (response)`)", async () => {
     const request = vi.fn().mockResolvedValue(0);
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: { desktopShowMessageBox: request },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
     const confirmSpy = vi.spyOn(window, "confirm");
 
     await expect(
@@ -99,11 +88,11 @@ describe("desktop dialog and clipboard helpers", () => {
       .mockResolvedValueOnce({ data: { response: 0 } })
       .mockResolvedValueOnce({ result: { response: 1 } })
       .mockResolvedValueOnce({ payload: { response: 0 } });
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: { desktopShowMessageBox: request },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
     const confirmSpy = vi.spyOn(window, "confirm");
 
     await expect(
@@ -134,11 +123,11 @@ describe("desktop dialog and clipboard helpers", () => {
 
   it("uses the Electrobun message-box RPC for alerts", async () => {
     const request = vi.fn().mockResolvedValue({ response: 0 });
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: { desktopShowMessageBox: request },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
     const alertSpy = vi.spyOn(window, "alert");
 
     await expect(
@@ -163,11 +152,11 @@ describe("desktop dialog and clipboard helpers", () => {
 
   it("uses the Electrobun clipboard RPC when available", async () => {
     const request = vi.fn().mockResolvedValue(undefined);
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
       request: { desktopWriteToClipboard: request },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
-    };
+    });
     const clipboardSpy = vi.spyOn(navigator.clipboard, "writeText");
 
     await copyTextToClipboard("eliza");

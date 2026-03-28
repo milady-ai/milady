@@ -92,6 +92,7 @@ export {
   type CompanionHalfFramerateMode,
   type CompanionVrmPowerMode,
   type GamePostMessageAuthPayload,
+  type InventoryChainFilters,
   LIFECYCLE_MESSAGES,
   type LifecycleAction,
   type LoadConversationMessagesResult,

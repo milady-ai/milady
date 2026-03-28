@@ -385,6 +385,51 @@ describe("chat send locking", () => {
       },
     );
 
+    // After first stream: initial load (selecting conv-1) returns greeting,
+    // then after first stream completes return first exchange.
+    // After second stream completes return both exchanges.
+    const now = Date.now();
+    mockClient.getConversationMessages
+      .mockResolvedValueOnce({
+        messages: [
+          {
+            id: "msg-1",
+            role: "assistant",
+            text: "hello",
+            timestamp: now - 2000,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        messages: [
+          { id: "msg-u1", role: "user", text: "first", timestamp: now - 1500 },
+          {
+            id: "msg-a1",
+            role: "assistant",
+            text: "first reply",
+            timestamp: now - 1000,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        messages: [
+          { id: "msg-u1", role: "user", text: "first", timestamp: now - 1500 },
+          {
+            id: "msg-a1",
+            role: "assistant",
+            text: "first reply",
+            timestamp: now - 1000,
+          },
+          { id: "msg-u2", role: "user", text: "second", timestamp: now - 500 },
+          {
+            id: "msg-a2",
+            role: "assistant",
+            text: "second reply",
+            timestamp: now,
+          },
+        ],
+      });
+
     let api: ProbeApi | null = null;
     let tree: TestRenderer.ReactTestRenderer;
 
@@ -579,6 +624,17 @@ describe("chat send locking", () => {
         return deferred.promise;
       },
     );
+    // After stream completes, loadConversationMessages returns the final text.
+    mockClient.getConversationMessages.mockResolvedValue({
+      messages: [
+        {
+          id: "msg-final",
+          role: "assistant",
+          text: "Hello world",
+          timestamp: Date.now(),
+        },
+      ],
+    });
 
     let api: ProbeApi | null = null;
     let tree: TestRenderer.ReactTestRenderer;
@@ -657,6 +713,17 @@ describe("chat send locking", () => {
         return { text: "Hello world", agentName: "Eliza" };
       },
     );
+    // After stream completes, loadConversationMessages returns the final text.
+    mockClient.getConversationMessages.mockResolvedValue({
+      messages: [
+        {
+          id: "msg-final",
+          role: "assistant",
+          text: "Hello world",
+          timestamp: Date.now(),
+        },
+      ],
+    });
 
     let api: ProbeApi | null = null;
     let tree: TestRenderer.ReactTestRenderer;
@@ -705,6 +772,18 @@ describe("chat send locking", () => {
       text: "",
       agentName: "Eliza",
       completed: true,
+    });
+    // After the stream, loadConversationMessages is called. Return only the
+    // user message — no assistant placeholder since text was empty.
+    mockClient.getConversationMessages.mockResolvedValue({
+      messages: [
+        {
+          id: "msg-user-1",
+          role: "user",
+          text: "just emote",
+          timestamp: Date.now(),
+        },
+      ],
     });
 
     let api: ProbeApi | null = null;
