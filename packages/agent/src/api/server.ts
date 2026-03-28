@@ -8831,7 +8831,7 @@ function wireCoordinatorEventRouting(st: ServerState): boolean {
               entityId: adminId,
               roomId: st.chatRoomId,
               worldId,
-              userName: resolveAppUserName(state.config),
+              userName: resolveAppUserName(st.config),
               source: "client_chat",
               channelId: `${agentName}-web-chat`,
               type: ChannelType.DM,

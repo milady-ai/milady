@@ -281,6 +281,8 @@ export interface AppState {
   uiShellMode: UiShellMode;
   uiLanguage: UiLanguage;
   uiTheme: UiTheme;
+  ownerName: string | null;
+  showOwnerNamePrompt: boolean;
   /** VRM quality vs GPU use: always full quality, battery-aware (default), or always efficient. */
   companionVrmPowerMode: CompanionVrmPowerMode;
   /**
@@ -795,6 +797,7 @@ export interface AppActions {
   goToOnboardingStep: (step: OnboardingStep) => void;
   handleOnboardingRemoteConnect: () => Promise<void>;
   handleOnboardingUseLocalBackend: () => void;
+  handleOwnerNameSubmit: (name: string) => void;
 
   // Cloud
   handleCloudLogin: () => Promise<void>;

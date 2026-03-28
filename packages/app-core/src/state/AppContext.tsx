@@ -1573,11 +1573,7 @@ function AppProviderInner({
     (view: ShellView) => {
       const nextTab = getTabForShellView(view, lastNativeTab);
       // Gate: prompt for owner name the first time user enters desktop/native view
-      if (
-        view === "desktop" &&
-        !ownerName &&
-        !showOwnerNamePrompt
-      ) {
+      if (view === "desktop" && !ownerName && !showOwnerNamePrompt) {
         setShowOwnerNamePrompt(true);
       }
       console.log(
