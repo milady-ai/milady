@@ -556,12 +556,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     } finally {
       setPiAiSaving(false);
     }
-  }, [
-    enabledAiProviders,
-    handlePluginToggle,
-    piAiModelSpec,
-    setTimeout,
-  ]);
+  }, [enabledAiProviders, handlePluginToggle, piAiModelSpec, setTimeout]);
 
   const handleSelectPiAi = useCallback(async () => {
     hasManualSelection.current = true;

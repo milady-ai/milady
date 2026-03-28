@@ -14,6 +14,10 @@ tl;dr: local AI gf that's actually fast and doesn't phone home
 
 Milady is **not** a full IDE: the product bet is **fewer wasted GPU frames and wakeups** when you are not looking at the app—especially **on battery**—while keeping the **companion visually strong** when you are. Background polling, off-screen WebGL, and battery-aware render quality are tuned toward that (see [Desktop — battery and energy](docs/apps/desktop.md#battery-and-energy-use-macos)). Comparing to **Cursor** or other heavy dev tools is **workload-dependent**; the north star is **great UX per watt** for a local assistant, not matching an editor’s surface area.
 
+### Desktop 3D avatar (Electrobun / Vite)
+
+If the **VRM** or **Gaussian splat** background fails only in the **desktop** build, the usual cause is **two copies of `three`** in the bundle (nested `node_modules` vs repo root), which breaks Spark’s **`splatDefines`** shader chunk. Milady forces **one** Three resolution path in Vite and isolates world-load failures so the **avatar** can still load. **Why it matters:** the companion is an **agent surface** (visibility + voice sync), not decoration. See **[Desktop VRM, Three.js, and Spark — WHYs](docs/apps/desktop-vrm-three-and-spark.md)**.
+
 ---
 
 ## BSC / BNB Chain Integration

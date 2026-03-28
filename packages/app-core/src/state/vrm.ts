@@ -6,7 +6,11 @@ import type { UiTheme } from "./ui-preferences";
 // Bundled VRM asset roster
 // ---------------------------------------------------------------------------
 
-/** Shipped bundle uses `milady-1`…`milady-8`; there is no `default.*` on disk. */
+/**
+ * When the boot roster is empty, still point at a real bundled asset.
+ * WHY `"default"` was wrong: `public/vrms` ships `milady-1`…`milady-8` only;
+ * a `default.vrm.gz` URL 404s and breaks the companion in desktop/WebView.
+ */
 const BUNDLED_VRM_FALLBACK_SLUG = "milady-1";
 
 /**
@@ -55,9 +59,7 @@ export function getVrmUrl(index: number): string {
 export function getVrmPreviewUrl(index: number): string {
   const assets = getAssets();
   if (assets.length === 0)
-    return resolveAppAssetUrl(
-      `vrms/previews/${BUNDLED_VRM_FALLBACK_SLUG}.png`,
-    );
+    return resolveAppAssetUrl(`vrms/previews/${BUNDLED_VRM_FALLBACK_SLUG}.png`);
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
   const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";

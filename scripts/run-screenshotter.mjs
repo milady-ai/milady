@@ -110,7 +110,7 @@ async function main() {
         const dl = document.getElementById(`d${index}`);
         return dl?.href ?? null;
       }, i);
-      if (!dataUrl || !dataUrl.startsWith("data:image/png")) {
+      if (!dataUrl?.startsWith("data:image/png")) {
         console.warn(`[run-screenshotter] No preview for eliza-${i}`);
         continue;
       }

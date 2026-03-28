@@ -439,6 +439,12 @@ function nativeModuleStubPlugin(): Plugin {
  */
 const threeRootDir = path.resolve(miladyRoot, "node_modules/three");
 
+/**
+ * Spark + VRM need exactly one physical `three` package in the bundle.
+ * WHY resolveId (not only resolve.alias): a broad alias to an absolute
+ * `node_modules/three` path broke Rollup’s production path handling; a
+ * pre-hook re-resolve from non-root importers keeps dev + `vite build` stable.
+ */
 function sparkPatchPlugin(): Plugin {
   return {
     name: "spark-patch",

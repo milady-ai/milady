@@ -81,6 +81,7 @@
               "apps/overview",
               "apps/desktop",
               "apps/electrobun-darwin-macos-webgpu-version",
+              "apps/desktop-vrm-three-and-spark",
               "apps/desktop-local-development",
               "apps/desktop/native-modules",
               "apps/desktop/deep-linking",

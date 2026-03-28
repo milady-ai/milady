@@ -3,6 +3,38 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-28" description="Electrobun VRM + Spark single-three fix; cloud login persist" tags={["Fix", "Docs", "Test"]}>
+## Desktop: one `three` instance for VRM + Gaussian splats
+
+**Why:** Electrobun (and similar layouts) could resolve a **second** `three` package under nested `node_modules`. `@sparkjsdev/spark` then registered `ShaderChunk.splatDefines` on **one** instance while VRM / splat shaders used **another** → **`Can not resolve #include <splatDefines>`** and broken companion 3D.
+
+**What:** Vite **`sparkPatchPlugin`** uses a **`resolveId`** hook to force bare **`three`** imports to the **workspace root** copy; the plugin still **hoists** `splatDefines` registration in Spark’s module; **`optimizeDeps.include`** lists **`three`** plus the **`three/examples/jsm/*`** paths the avatar stack imports so pre-bundling shares one module identity. **`resolve.dedupe`** includes **`three`**.
+
+**Why not only `resolve.alias`:** an absolute alias for `three` **broke the production Rollup build** in practice; **`resolveId`** keeps dev and prod aligned.
+
+**Docs:** [Desktop VRM, Three.js, and Spark (WHYs)](/apps/desktop-vrm-three-and-spark).
+
+## VRM: lazy paths, real fallback slug, world errors isolated
+
+**Why:** Module-level **`resolveAppAssetUrl`** / default VRM paths could **cache wrong values** in bundled desktop builds. Fallback slug **`default`** did not exist on disk (**404**). A failing **splat world** could prevent **VRM** from loading.
+
+**What:** Lazy **`getDefaultVrmPath()`** / **`getDracoDecoderPath()`**, **`milady-1`** fallback when the bundled roster is empty, try/catch around Spark init and **`setWorldUrl`** from the viewer so the avatar still loads.
+
+## Cloud: login persist after poll (disconnect race only)
+
+**Why:** Skipping persist when **`cloud.enabled === false`** blocked **first-time** logins (same flag as “never enabled”). The intent was only to ignore a **stale** poll after **disconnect**.
+
+**What:** **`cloudDisconnectEpoch`** increments on **`POST /api/cloud/disconnect`**; the login poll snapshots the epoch before **`fetch`**; persist runs unless a disconnect happened **during** the poll.
+
+**Docs:** same page, section *Eliza Cloud login persistence*.
+
+## Tests and tooling
+
+- Vite / define coverage in **`apps/app/test/app/vite-config.test.ts`**; VRM roster edge case in **`packages/app-core/test/avatar/vrm-empty-roster.test.ts`**.
+- Shared **`settings-debug`** export and related API/settings wiring for diagnostics (see commit history).
+
+</Update>
+
 <Update label="2026-03-27" description="OpenRouter plugin dependency pin (upstream bad publish)" tags={["Fix", "Docs"]}>
 ## Pin `@elizaos/plugin-openrouter` to `2.0.0-alpha.10`
 

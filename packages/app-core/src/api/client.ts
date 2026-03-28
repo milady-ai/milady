@@ -2046,7 +2046,10 @@ function miladyClientSettingsDebug(): boolean {
   });
 }
 
-function logSettingsClient(phase: string, detail: Record<string, unknown>): void {
+function logSettingsClient(
+  phase: string,
+  detail: Record<string, unknown>,
+): void {
   if (!miladyClientSettingsDebug()) return;
   console.debug(
     `[milady][settings][client] ${phase}`,

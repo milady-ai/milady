@@ -30,9 +30,13 @@ type CloudRuntimeSecrets = Record<string, string | number | boolean>;
 const CLOUD_LOGIN_POLL_TIMEOUT_MS = 10_000;
 
 /**
- * Monotonic counter incremented on every cloud disconnect.
- * Used to detect a disconnect that happened while a login poll was in-flight,
- * without blocking fresh logins when cloud simply starts as disabled.
+ * Monotonic counter incremented on every `POST /api/cloud/disconnect`.
+ *
+ * WHY: We must not persist a stale "authenticated" poll after the user
+ * disconnects mid-flight. The previous guard (`cloud.enabled === false`)
+ * also matched **first-time** cloud (never enabled), so successful logins
+ * were discarded. Comparing epoch before/after the poll preserves the race
+ * fix without blocking legitimate first connect.
  */
 let cloudDisconnectEpoch = 0;
 
@@ -76,7 +80,11 @@ async function fetchCloudLoginStatus(
 async function persistCloudLoginStatus(args: {
   apiKey: string;
   state: CloudRouteState;
-  /** Snapshot of cloudDisconnectEpoch taken before the poll started. */
+  /**
+   * From GET `/api/cloud/login/status`: epoch captured before `fetch` so a
+   * disconnect during the poll invalidates this result. Omitted for POST
+   * `/api/cloud/login/persist` (direct client push) — no race window.
+   */
   epochAtPollStart?: number;
 }): Promise<void> {
   if (
@@ -164,6 +172,7 @@ export async function handleCloudRoute(
   state: CloudRouteState,
 ): Promise<boolean> {
   if (method === "POST" && pathname === "/api/cloud/disconnect") {
+    // Invalidate any in-flight login poll (see persistCloudLoginStatus).
     cloudDisconnectEpoch++;
     try {
       await disconnectUnifiedCloudConnection({

@@ -489,7 +489,11 @@ export function VrmViewer(props: VrmViewerProps) {
               try {
                 await engine.setWorldUrl(worldUrl);
               } catch (worldErr) {
-                console.warn("[VrmViewer] World load failed (avatar will still load):", worldErr);
+                // WHY: optional splat background must not block VRM (agent-visible avatar).
+                console.warn(
+                  "[VrmViewer] World load failed (avatar will still load):",
+                  worldErr,
+                );
               }
             })();
             worldLoadPromiseRef.current = worldLoadPromise;

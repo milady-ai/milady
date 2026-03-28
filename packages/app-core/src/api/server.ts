@@ -1996,7 +1996,11 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
       : undefined;
   if (isMiladySettingsDebugEnabled()) {
     logger.debug(
-      `[milady][settings][compat] resolveCloudConfig disk cloud=${JSON.stringify(settingsDebugCloudSummary(cloudRec))} topKeys=${Object.keys(config as object).sort().join(",")}`,
+      `[milady][settings][compat] resolveCloudConfig disk cloud=${JSON.stringify(settingsDebugCloudSummary(cloudRec))} topKeys=${Object.keys(
+        config as object,
+      )
+        .sort()
+        .join(",")}`,
     );
   }
   if (cloudRec?.enabled === false) {

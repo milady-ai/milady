@@ -67,6 +67,8 @@ describe("app vite config", () => {
     );
     const define = loaded?.config.define as Record<string, string> | undefined;
     expect(define?.["import.meta.env.MILADY_SETTINGS_DEBUG"]).toBeDefined();
-    expect(define?.["import.meta.env.VITE_MILADY_SETTINGS_DEBUG"]).toBeDefined();
+    expect(
+      define?.["import.meta.env.VITE_MILADY_SETTINGS_DEBUG"],
+    ).toBeDefined();
   });
 });

@@ -192,7 +192,7 @@ export function getElizaPackageLinks(
       try {
         const pkgJson = JSON.parse(readFileSync(pkgPath, "utf-8"));
         const name = pkgJson.name;
-        if (!name || !name.startsWith("@elizaos/")) continue;
+        if (!name?.startsWith("@elizaos/")) continue;
 
         const basename = name.slice("@elizaos/".length);
         const relativeTarget = path.relative(elizaRoot, targetPath);

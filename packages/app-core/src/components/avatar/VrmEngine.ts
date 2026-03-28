@@ -226,6 +226,7 @@ let teleportSparkleTexture: THREE.CanvasTexture | null = null;
  *  multiple instances cause "attempted to assign baselayer twice" errors. */
 let sharedLkgPolyfill: unknown = null;
 let _cachedDracoDecoderPath: string | null = null;
+/** Lazy + cached: module-load resolution can be wrong in bundled/desktop init order. */
 function getDracoDecoderPath(): string {
   _cachedDracoDecoderPath ??= resolveAppAssetUrl("vrm-decoders/draco/");
   return _cachedDracoDecoderPath;
@@ -927,6 +928,7 @@ export class VrmEngine {
     return VrmEngine.sparkModulePromise;
   }
 
+  /** After Spark init fails, skip world/splat work but keep VRM usable. */
   private sparkRendererFailed = false;
 
   private async ensureSparkRenderer(): Promise<void> {
@@ -975,7 +977,10 @@ export class VrmEngine {
       }
     } catch (err) {
       this.sparkRendererFailed = true;
-      console.warn("[VrmEngine] Spark renderer init failed (world background unavailable):", err);
+      console.warn(
+        "[VrmEngine] Spark renderer init failed (world background unavailable):",
+        err,
+      );
     }
   }
 
