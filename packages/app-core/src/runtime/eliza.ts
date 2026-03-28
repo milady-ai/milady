@@ -535,7 +535,7 @@ async function ensureTelegramBotPolling(runtime: AgentRuntime): Promise<void> {
     const bot = new Telegraf(botToken, { telegram: { apiRoot } });
 
     // Build character context for personality
-    const char = runtime.character;
+    const char = runtime.character ?? ({} as Record<string, unknown>);
     const bioText = Array.isArray(char.bio)
       ? char.bio.join(" ")
       : (char.bio ?? "");
@@ -578,6 +578,7 @@ async function ensureTelegramBotPolling(runtime: AgentRuntime): Promise<void> {
         };
         reply: (t: string) => Promise<unknown>;
       }) => {
+        try {
         const text = ctx.message?.text;
         if (!text) return;
         const chatId = ctx.message.chat?.id ?? 0;
@@ -611,6 +612,11 @@ async function ensureTelegramBotPolling(runtime: AgentRuntime): Promise<void> {
         if (!history) {
           history = [];
           chatHistories.set(chatId, history);
+          // Evict oldest chat entry to prevent unbounded memory growth
+          if (chatHistories.size > 500) {
+            const oldest = chatHistories.keys().next().value;
+            if (oldest !== undefined) chatHistories.delete(oldest);
+          }
         }
         history.push({ role: "user", content: `@${username}: ${text}` });
         if (history.length > 20) history.splice(0, history.length - 20);
@@ -646,6 +652,11 @@ async function ensureTelegramBotPolling(runtime: AgentRuntime): Promise<void> {
           await ctx
             .reply("Sorry, I encountered an error processing your message.")
             .catch(() => {});
+        }
+        } catch (outerErr) {
+          logger.warn(
+            `[milady] Telegram handler error: ${outerErr instanceof Error ? outerErr.message : String(outerErr)}`,
+          );
         }
       },
     );
