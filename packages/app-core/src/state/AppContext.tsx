@@ -133,6 +133,7 @@ import {
   yieldMiladyHttpAfterNativeMessageBox,
 } from "../utils";
 import { isMiladyTtsDebugEnabled } from "../utils/milady-tts-debug";
+import { normalizeOwnerName } from "../utils/owner-name";
 import { PREMADE_VOICES } from "../voice/types";
 import {
   computeAgentDeadlineExtensions,
@@ -1028,6 +1029,8 @@ function AppProviderInner({
     useState("/cloud/billing");
   const [elizaCloudUserId, setElizaCloudUserId] = useState<string | null>(null);
   const [ownerName, setOwnerNameState] = useState<string | null>(null);
+  const [ownerNameHydrated, setOwnerNameHydrated] = useState(false);
+  const [pendingOwnerNamePrompt, setPendingOwnerNamePrompt] = useState(false);
   const [showOwnerNamePrompt, setShowOwnerNamePrompt] = useState(false);
   const [elizaCloudStatusReason, setElizaCloudStatusReason] = useState<
     string | null
@@ -1574,14 +1577,24 @@ function AppProviderInner({
       const nextTab = getTabForShellView(view, lastNativeTab);
       // Gate: prompt for owner name the first time user enters desktop/native view
       if (view === "desktop" && !ownerName && !showOwnerNamePrompt) {
-        setShowOwnerNamePrompt(true);
+        if (ownerNameHydrated) {
+          setShowOwnerNamePrompt(true);
+        } else {
+          setPendingOwnerNamePrompt(true);
+        }
       }
       console.log(
         `[shell] switchShellView: ${view} → tab=${nextTab}, lastNativeTab=${lastNativeTab}`,
       );
       setTab(nextTab);
     },
-    [lastNativeTab, ownerName, showOwnerNamePrompt, setTab],
+    [
+      lastNativeTab,
+      ownerName,
+      ownerNameHydrated,
+      showOwnerNamePrompt,
+      setTab,
+    ],
   );
 
   const navigationHubRef = useRef(new NavigationEventHub());
@@ -2175,24 +2188,68 @@ function AppProviderInner({
 
   // Hydrate ownerName from config on startup
   useEffect(() => {
+    let cancelled = false;
     void client
       .getConfig()
       .then((cfg) => {
+        if (cancelled) {
+          return;
+        }
+
         const name = (cfg as Record<string, unknown>).ui as
           | Record<string, unknown>
           | undefined;
-        const persisted = name?.ownerName;
-        if (typeof persisted === "string" && persisted.trim()) {
-          setOwnerNameState(persisted.trim());
+        const persisted = normalizeOwnerName(name?.ownerName as string);
+        if (persisted) {
+          setOwnerNameState(persisted);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) {
+          setOwnerNameHydrated(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  useEffect(() => {
+    if (!ownerNameHydrated) {
+      return;
+    }
+
+    if (ownerName || showOwnerNamePrompt) {
+      if (pendingOwnerNamePrompt) {
+        setPendingOwnerNamePrompt(false);
+      }
+      return;
+    }
+
+    if (pendingOwnerNamePrompt && uiShellMode === "native") {
+      setShowOwnerNamePrompt(true);
+      setPendingOwnerNamePrompt(false);
+    }
+  }, [
+    ownerName,
+    ownerNameHydrated,
+    pendingOwnerNamePrompt,
+    showOwnerNamePrompt,
+    uiShellMode,
+  ]);
+
   const handleOwnerNameSubmit = useCallback((name: string) => {
-    setOwnerNameState(name);
+    const normalized = normalizeOwnerName(name);
+    if (!normalized) {
+      return;
+    }
+
+    setOwnerNameState(normalized);
     setShowOwnerNamePrompt(false);
-    void client.updateConfig({ ui: { ownerName: name } }).catch(() => {});
+    setPendingOwnerNamePrompt(false);
+    void client.updateConfig({ ui: { ownerName: normalized } }).catch(() => {});
   }, []);
 
   useEffect(() => {

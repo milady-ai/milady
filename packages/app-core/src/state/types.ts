@@ -621,10 +621,6 @@ export interface AppState {
   // Config text
   configRaw: Record<string, unknown>;
   configText: string;
-
-  // Owner name
-  ownerName: string | null;
-  showOwnerNamePrompt: boolean;
 }
 
 export type LoadConversationMessagesResult =
@@ -834,9 +830,6 @@ export interface AppActions {
     once?: boolean,
     busy?: boolean,
   ) => void;
-
-  // Owner name
-  handleOwnerNameSubmit: (name: string) => void;
 
   // Generic state setter
   setState: <K extends keyof AppState>(key: K, value: AppState[K]) => void;

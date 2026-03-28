@@ -9,6 +9,10 @@
 
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  normalizeOwnerName,
+  OWNER_NAME_MAX_LENGTH,
+} from "../utils/owner-name";
 
 const PROMPT_TEXT = "Sorry, I didn't get your name! What should I call you?";
 
@@ -75,8 +79,8 @@ export function OwnerNamePrompt({ open, onSubmit }: OwnerNamePromptProps) {
   }, [open]);
 
   const handleSubmit = useCallback(() => {
-    const trimmed = name.trim();
-    if (trimmed) onSubmit(trimmed);
+    const normalized = normalizeOwnerName(name);
+    if (normalized) onSubmit(normalized);
   }, [name, onSubmit]);
 
   if (!open) return null;
@@ -107,12 +111,13 @@ export function OwnerNamePrompt({ open, onSubmit }: OwnerNamePromptProps) {
             onChange={(e) => setName(e.target.value)}
             className="h-12 border-border/55 bg-bg/82 text-center text-base"
             autoComplete="given-name"
+            maxLength={OWNER_NAME_MAX_LENGTH}
           />
           <Button
             type="submit"
             variant="default"
             className="mt-4 h-11 w-full text-sm font-semibold"
-            disabled={!name.trim()}
+            disabled={!normalizeOwnerName(name)}
           >
             That&apos;s me!
           </Button>

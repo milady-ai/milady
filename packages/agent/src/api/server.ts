@@ -449,11 +449,14 @@ function hasPersistedOnboardingState(config: ElizaConfig): boolean {
   );
 }
 
+const APP_OWNER_NAME_MAX_LENGTH = 60;
+
 /** Resolve the app owner's display name from config, or fall back to "User". */
-function resolveAppUserName(config: ElizaConfig): string {
+export function resolveAppUserName(config: ElizaConfig): string {
   const ownerName = (config.ui as Record<string, unknown> | undefined)
     ?.ownerName as string | undefined;
-  return ownerName?.trim() || "User";
+  const normalized = ownerName?.trim().slice(0, APP_OWNER_NAME_MAX_LENGTH);
+  return normalized || "User";
 }
 
 function resolveConversationGreetingText(
