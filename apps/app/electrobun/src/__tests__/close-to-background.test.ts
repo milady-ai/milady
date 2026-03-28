@@ -71,8 +71,8 @@ describe("close-to-background behavior", () => {
 
   it("exitOnLastWindowClosed is false in electrobun config", () => {
     const candidates = [
-      path.resolve(import.meta.dirname, "..", "electrobun.config.ts"),
-      path.resolve("apps/app/electrobun/electrobun.config.ts"),
+      path.resolve(import.meta.dirname, "..", "..", "electrobun.config.ts"),
+      path.resolve(import.meta.dirname, "../../../../electrobun.config.ts"),
     ];
     let configSource = "";
     for (const p of candidates) {

@@ -217,7 +217,6 @@ export function Homepage() {
       <div className="fixed inset-0 z-0 bg-dark pointer-events-none" />
 
       <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Social icons — top center */}
         <div className="flex items-center justify-center gap-5 pt-[12vh] relative z-50">
           <a
             href={GITHUB_URL}
@@ -236,13 +235,9 @@ export function Homepage() {
             <DiscordIcon />
           </a>
         </div>
-
-        {/* Hero — centered typewriter */}
         <section className="flex-1 relative flex items-center justify-center overflow-hidden">
           <HeroBackground />
         </section>
-
-        {/* CTA buttons — bottom center */}
         <div className="relative z-50 flex items-center justify-center gap-4 pb-10 px-4">
           <DownloadDropdown />
           <a

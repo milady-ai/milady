@@ -12,6 +12,11 @@
  * desktop dev; embedded Electrobun also syncs env after bind.
  */
 
+import {
+  resolveDesktopApiPort,
+  resolveDesktopUiPort,
+} from "@miladyai/shared/runtime-env";
+
 export const MILADY_DEV_STACK_SCHEMA = "milady.dev.stack/v1" as const;
 
 export type MiladyDevStackPayload = {
@@ -57,12 +62,9 @@ function parsePositivePort(raw: string | undefined): number | null {
 export function resolveDevStackFromEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): MiladyDevStackPayload {
-  const apiPort =
-    parsePositivePort(env.MILADY_API_PORT) ??
-    parsePositivePort(env.ELIZA_PORT) ??
-    31337;
-
-  const uiPort = parsePositivePort(env.MILADY_PORT);
+  const apiPort = resolveDesktopApiPort(env);
+  const uiPort =
+    parsePositivePort(env.MILADY_PORT) ?? resolveDesktopUiPort(env);
 
   const rendererUrl = env.MILADY_RENDERER_URL?.trim() || null;
   const desktopApiBase = env.MILADY_DESKTOP_API_BASE?.trim() || null;

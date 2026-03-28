@@ -492,12 +492,9 @@ export function ConnectionProviderDetailScreen({
                     </div>
                   );
                 })()}
-              <p className={`${onboardingHelperTextClassName} text-center`}>
+              <div className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.freeCredits")}
-              </p>
-              <p className={`${onboardingSubtleTextClassName} text-center`}>
-                {t("onboarding.cloudProviderBehaviorHint")}
-              </p>
+              </div>
             </div>
           ) : (
             <div className={onboardingDetailStackClassName}>
@@ -581,9 +578,9 @@ export function ConnectionProviderDetailScreen({
                 <ConnectedIcon title={t("onboarding.connected")} />
                 {t("onboarding.connectedToClaude")}
               </OnboardingStatusBanner>
-              <p className={`${onboardingHelperTextClassName} text-center`}>
+              <div className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.claudeSubscriptionReady")}
-              </p>
+              </div>
             </div>
           ) : !anthropicOAuthStarted ? (
             <div className={onboardingCenteredStackClassName}>
@@ -601,9 +598,9 @@ export function ConnectionProviderDetailScreen({
               >
                 {t("onboarding.loginWithAnthropic")}
               </Button>
-              <p className={`${onboardingHelperTextClassName} text-center`}>
+              <div className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.requiresClaudeSub")}
-              </p>
+              </div>
               {anthropicError ? (
                 <OnboardingStatusBanner tone="error" live="assertive">
                   {anthropicError}
@@ -663,9 +660,9 @@ export function ConnectionProviderDetailScreen({
                 <ConnectedIcon title={t("onboarding.connected")} />
                 {t("onboarding.connectedToChatGPT")}
               </OnboardingStatusBanner>
-              <p className={`${onboardingHelperTextClassName} text-center`}>
+              <div className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.chatgptSubscriptionReady")}
-              </p>
+              </div>
             </div>
           ) : !openaiOAuthStarted ? (
             <div className={onboardingCenteredStackClassName}>
@@ -683,23 +680,23 @@ export function ConnectionProviderDetailScreen({
               >
                 {t("onboarding.loginWithOpenAI")}
               </Button>
-              <p className={`${onboardingHelperTextClassName} text-center`}>
+              <div className={`${onboardingHelperTextClassName} text-center`}>
                 {t("onboarding.requiresChatGPTSub")}
-              </p>
+              </div>
             </div>
           ) : (
             <div className={onboardingDetailStackClassName}>
               <div className={onboardingInfoPanelClassName}>
-                <p className="mb-1 text-sm font-semibold text-[var(--onboarding-text-primary)]">
+                <div className="mb-1 text-sm font-semibold text-[var(--onboarding-text-primary)]">
                   {t("onboarding.almostThere")}
-                </p>
-                <p className={onboardingHelperTextClassName}>
+                </div>
+                <div className={onboardingHelperTextClassName}>
                   {t("onboarding.redirectInstructions")}{" "}
                   <code className="rounded bg-[var(--bg-hover)] px-1 py-0.5 text-xs">
                     localhost:1455
                   </code>
                   {t("onboarding.copyEntireUrl")}
-                </p>
+                </div>
               </div>
               <OnboardingField
                 controlId="openai-callback-url"
@@ -791,12 +788,12 @@ export function ConnectionProviderDetailScreen({
         )}
 
       {onboardingProvider === "ollama" && (
-        <p
+        <div
           className={`${onboardingHelperTextClassName} text-center`}
           style={onboardingBodyTextShadowStyle}
         >
           {t("onboarding.ollamaNoConfig")}
-        </p>
+        </div>
       )}
 
       {onboardingProvider === "pi-ai" && (
@@ -966,9 +963,6 @@ export function ConnectionProviderDetailScreen({
           {t("onboarding.confirm")}
         </Button>
       </div>
-      <p className={`${onboardingSubtleTextClassName} mt-3 text-center`}>
-        {t("onboarding.restartAfterProviderChangeHint")}
-      </p>
     </>
   );
 }

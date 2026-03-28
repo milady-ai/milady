@@ -11,10 +11,10 @@
  */
 
 import type { Action, HandlerOptions } from "@elizaos/core";
+import { resolveDesktopApiPort } from "@miladyai/shared/runtime-env";
 
 /** API port for posting install requests. */
-const API_PORT =
-  process.env.MILADY_API_PORT || process.env.MILADY_PORT || "2138";
+const API_PORT = String(resolveDesktopApiPort(process.env));
 
 export const installPluginAction: Action = {
   name: "INSTALL_PLUGIN",

@@ -12,6 +12,7 @@ vi.mock("../state", () => ({
 }));
 
 import { HeartbeatsView } from "./HeartbeatsView";
+import { DesktopEmptyStatePanel } from "./desktop-surface-primitives";
 import { APP_PANEL_SHELL_CLASSNAME } from "./sidebar-shell-styles";
 
 function t(key: string): string {
@@ -20,6 +21,8 @@ function t(key: string): string {
     "appsview.Active": "Active",
     "heartbeatsview.heartbeatSingular": "Heartbeat",
     "heartbeatsview.newHeartbeat": "New Heartbeat",
+    "heartbeatsview.selectAHeartbeat": "Select a Heartbeat",
+    "heartbeatsview.createFirstHeartbeat": "Create your first heartbeat",
     "heartbeatsview.emptyStateDescription":
       "Use the sidebar to create a new heartbeat or select an existing one to view and edit its details.",
   };
@@ -62,9 +65,49 @@ describe("HeartbeatsView UI states", () => {
 
     const snapshot = JSON.stringify(tree?.toJSON());
     expect(snapshot).toContain("New Heartbeat");
+    expect(snapshot).toContain("Templates");
+    expect(snapshot).toContain("Create your first heartbeat");
+    expect(snapshot).not.toContain("Select a Heartbeat");
+    expect(snapshot).not.toContain(
+      "Use the sidebar to create a new heartbeat or select an existing one to view and edit its details.",
+    );
+    expect(tree?.root.findAllByType(DesktopEmptyStatePanel)).toHaveLength(1);
+  });
+
+  it("keeps a simplified selection state when heartbeats exist but none is selected", async () => {
+    mockUseApp.mockReturnValue(
+      makeAppState({
+        triggers: [
+          {
+            id: "hb_1",
+            displayName: "Daily Digest",
+            instructions: "Summarize the top crypto moves.",
+            triggerType: "interval",
+            wakeMode: "inject_now",
+            intervalMs: 3_600_000,
+            scheduledAtIso: null,
+            cronExpression: null,
+            maxRuns: null,
+            enabled: true,
+            lastStatus: null,
+          },
+        ],
+      }),
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<HeartbeatsView />);
+    });
+
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).toContain("Daily Digest");
+    expect(snapshot).toContain("Select a Heartbeat");
+    expect(snapshot).not.toContain("Create your first heartbeat");
     expect(snapshot).toContain(
       "Use the sidebar to create a new heartbeat or select an existing one to view and edit its details.",
     );
+    expect(tree?.root.findAllByType(DesktopEmptyStatePanel)).toHaveLength(1);
   });
 
   it("shows a rail loading state while heartbeats are being fetched", async () => {
@@ -81,6 +124,8 @@ describe("HeartbeatsView UI states", () => {
 
     const snapshot = JSON.stringify(tree?.toJSON());
     expect(snapshot).toContain("Loading");
+    expect(snapshot).toContain("Select a Heartbeat");
+    expect(snapshot).not.toContain("Create your first heartbeat");
   });
 
   it("renders the rounded shared shell without a nested detail panel wrapper", async () => {

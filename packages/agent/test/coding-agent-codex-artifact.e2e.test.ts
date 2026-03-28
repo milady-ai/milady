@@ -7,8 +7,17 @@ import { afterEach, describe, expect, it } from "vitest";
 const EXPECTED_FILES = ["game.js", "index.html", "styles.css"];
 const REAL_HOME_DIR = os.userInfo().homedir;
 const CODEX_AUTH_PATH = path.join(REAL_HOME_DIR, ".codex", "auth.json");
-const CODEX_AVAILABLE =
-  spawnSync("codex", ["--version"], { encoding: "utf8" }).status === 0;
+
+function isCodexCliAvailable(): boolean {
+  const probe = spawnSync("codex", ["--version"], {
+    encoding: "utf8",
+    stdio: "pipe",
+    timeout: 5_000,
+  });
+  return probe.status === 0;
+}
+
+const CODEX_AVAILABLE = isCodexCliAvailable();
 const CODEX_AUTH_AVAILABLE = fs.existsSync(CODEX_AUTH_PATH);
 const CODEX_UNAVAILABLE_OUTPUT_PATTERNS = [
   "usage_limit_reached",

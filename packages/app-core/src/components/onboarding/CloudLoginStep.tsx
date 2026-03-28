@@ -41,7 +41,7 @@ export function CloudLoginStep() {
   useEffect(() => {
     if (
       elizaCloudConnected &&
-      onboardingStep === "providers" &&
+      onboardingStep === "cloud_login" &&
       !advancedRef.current
     ) {
       advancedRef.current = true;
@@ -56,12 +56,6 @@ export function CloudLoginStep() {
         description={t("onboarding.cloudLoginDesc")}
         descriptionClassName="mx-auto mt-1 max-w-[34ch] text-balance"
       />
-      <p
-        className="mx-auto mt-3 max-w-[40ch] text-center text-xs leading-relaxed text-[var(--onboarding-text-muted)]"
-        style={onboardingBodyTextShadowStyle}
-      >
-        {t("onboarding.cloudProviderBehaviorHint")}
-      </p>
 
       {elizaCloudConnected ? (
         <div
@@ -118,12 +112,6 @@ export function CloudLoginStep() {
               ? t("onboarding.cloudLoginRetry")
               : t("onboarding.cloudLoginBtn")}
           </Button>
-          <p
-            className="mx-auto mt-3 max-w-[40ch] text-center text-xs leading-relaxed text-[var(--onboarding-text-subtle)]"
-            style={onboardingBodyTextShadowStyle}
-          >
-            {t("onboarding.restartAfterProviderChangeHint")}
-          </p>
         </>
       )}
 
@@ -132,10 +120,12 @@ export function CloudLoginStep() {
           variant="ghost"
           className={onboardingSecondaryActionClass}
           style={onboardingSecondaryActionTextShadowStyle}
-          onClick={() => handleOnboardingBack()}
+          onClick={() => handleOnboardingNext()}
           type="button"
         >
-          {t("onboarding.back")}
+          {branding.cloudOnly
+            ? t("onboarding.continueOffline")
+            : t("onboarding.skip")}
         </Button>
       </div>
     </>

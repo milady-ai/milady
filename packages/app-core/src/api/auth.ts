@@ -7,6 +7,7 @@
 
 import crypto from "node:crypto";
 import type http from "node:http";
+import { resolveApiToken } from "@miladyai/shared/runtime-env";
 import { sendJsonError } from "./response";
 
 /**
@@ -25,9 +26,7 @@ export function extractHeaderValue(
  * Returns `null` when no token is configured (open access).
  */
 export function getCompatApiToken(): string | null {
-  const token =
-    process.env.MILADY_API_TOKEN?.trim() ?? process.env.ELIZA_API_TOKEN?.trim();
-  return token || null;
+  return resolveApiToken(process.env);
 }
 
 /** Timing-safe token comparison (constant-time for equal-length inputs). */
@@ -44,7 +43,7 @@ export function tokenMatches(expected: string, provided: string): boolean {
  * Checks (in order):
  *   1. `Authorization: Bearer <token>`
  *   2. `x-eliza-token`
- *   3. `x-milady-token` / `x-milaidy-token`
+ *   3. `x-milady-token`
  *   4. `x-api-key` / `x-api-token`
  */
 export function getProvidedApiToken(
@@ -59,7 +58,6 @@ export function getProvidedApiToken(
   const headerToken =
     extractHeaderValue(req.headers["x-eliza-token"]) ??
     extractHeaderValue(req.headers["x-milady-token"]) ??
-    extractHeaderValue(req.headers["x-milaidy-token"]) ??
     extractHeaderValue(req.headers["x-api-key"]) ??
     extractHeaderValue(req.headers["x-api-token"]);
 

@@ -195,6 +195,22 @@ const resetHostingSelectionPatch = (): ConnectionStatePatch => ({
 });
 
 /**
+ * Clears connection subflow state so the outer wizard **`hosting`** step shows the hosting *choice*
+ * (`ConnectionHostingScreen`) instead of an inner screen (e.g. `elizaCloud_preProvider`) left over from
+ * a prior selection.
+ *
+ * **When:** `revertOnboarding` / sidebar jump from `providers` (or later) back to `hosting` — previously
+ * only `onboardingStep` changed, so `deriveConnectionScreen` still returned the Eliza Cloud pre-provider UI.
+ */
+export function getResetConnectionWizardToHostingStepPatch(): ConnectionStatePatch {
+  return {
+    ...resetHostingSelectionPatch(),
+    onboardingProvider: "",
+    onboardingPrimaryModel: "",
+  };
+}
+
+/**
  * Pure transition step. **Returns `null`** when the event is a no-op for this snapshot (e.g. bootstrap when not forced).
  * **Never** call `client` or async login here—return `effect` and let `ConnectionStep` invoke AppContext.
  */

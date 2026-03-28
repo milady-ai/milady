@@ -351,7 +351,7 @@ export class TalkModeManager {
         fs.unlinkSync(tmpPath);
       } catch {}
 
-      if (!result || !result.text.trim()) return;
+      if (!result?.text.trim()) return;
 
       // Emit transcript to renderer
       this.sendToWebview?.("talkmode:transcript", {

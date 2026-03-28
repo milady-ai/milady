@@ -18,6 +18,10 @@ import net from "node:net";
 import { Readable } from "node:stream";
 import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
 import { loadElizaConfig } from "../config/config";
+import {
+  resolveApiToken,
+  resolveServerOnlyPort,
+} from "../config/runtime-env";
 import type {
   CustomActionDef,
   CustomActionHandler,
@@ -49,9 +53,6 @@ export function registerCustomActionLive(def: CustomActionDef): Action | null {
   return action;
 }
 
-/** API port for shell handler requests. */
-const API_PORT = process.env.API_PORT || process.env.SERVER_PORT || "2138";
-
 /** Valid handler types that we actually support. */
 const VALID_HANDLER_TYPES = new Set(["http", "shell", "code"]);
 
@@ -66,6 +67,14 @@ type VmRunner = {
 let vmRunner: VmRunner | null = null;
 
 const CUSTOM_ACTION_FETCH_TIMEOUT_MS = 15_000;
+const CUSTOM_ACTION_SHELL_TIMEOUT_MS = 30_000;
+
+export class CustomActionTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CustomActionTimeoutError";
+  }
+}
 
 type ResolvedUrlTarget = {
   parsed: URL;
@@ -81,6 +90,50 @@ type PinnedFetchInput = {
 };
 
 type PinnedFetchImpl = (input: PinnedFetchInput) => Promise<Response>;
+
+function getApiPort(): string {
+  return String(resolveServerOnlyPort(process.env));
+}
+
+async function fetchWithTimeout(
+  input: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const timeoutMessage = `Terminal request timed out after ${timeoutMs}ms`;
+
+  return await new Promise<Response>((resolve, reject) => {
+    const controller = new AbortController();
+    let settled = false;
+    const timeoutHandle = setTimeout(() => {
+      controller.abort();
+      if (settled) return;
+      settled = true;
+      reject(new CustomActionTimeoutError(timeoutMessage));
+    }, timeoutMs);
+
+    const settle = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutHandle);
+      callback();
+    };
+
+    fetch(input, {
+      ...init,
+      signal: controller.signal,
+    }).then(
+      (response) => settle(() => resolve(response)),
+      (error) => {
+        if (controller.signal.aborted) {
+          settle(() => reject(new CustomActionTimeoutError(timeoutMessage)));
+          return;
+        }
+        settle(() => reject(error));
+      },
+    );
+  });
+}
 
 function resolveFetchInputUrl(input: RequestInfo | URL): string | null {
   if (typeof input === "string") return input;
@@ -312,7 +365,7 @@ async function resolveUrlSafety(url: string): Promise<{
       (hostname === "localhost" ||
         hostname === "127.0.0.1" ||
         hostname === "::1") &&
-      parsed.port === String(API_PORT)
+      parsed.port === getApiPort()
     ) {
       return { blocked: false, target: null };
     }
@@ -493,15 +546,15 @@ function buildHandler(
           command = command.replaceAll(`{{${p.name}}}`, shellEscape(value));
         }
 
-        const response = await fetch(
-          `http://localhost:${API_PORT}/api/terminal/run`,
+        const response = await fetchWithTimeout(
+          `http://localhost:${getApiPort()}/api/terminal/run`,
           {
             method: "POST",
             headers: (() => {
               const headers: Record<string, string> = {
                 "Content-Type": "application/json",
               };
-              const token = process.env.ELIZA_API_TOKEN?.trim();
+              const token = resolveApiToken(process.env);
               if (token) {
                 headers.Authorization = /^Bearer\s+/i.test(token)
                   ? token
@@ -509,8 +562,12 @@ function buildHandler(
               }
               return headers;
             })(),
-            body: JSON.stringify({ command, clientId: "runtime-shell-action" }),
+            body: JSON.stringify({
+              command,
+              clientId: "runtime-shell-action",
+            }),
           },
+          CUSTOM_ACTION_SHELL_TIMEOUT_MS,
         );
 
         if (!response.ok) {

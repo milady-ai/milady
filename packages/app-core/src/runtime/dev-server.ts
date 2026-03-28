@@ -23,6 +23,11 @@ console.log(`${getLogPrefix()} Script starting...`);
 import process from "node:process";
 import type { AgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
+import {
+  resolveApiToken,
+  resolveDesktopApiPort,
+  syncResolvedApiPort,
+} from "@miladyai/shared/runtime-env";
 import { setRestartHandler } from "@miladyai/agent/runtime/restart";
 import { startApiServer } from "../api/server";
 import { shutdownRuntime, startEliza } from "./eliza";
@@ -41,12 +46,7 @@ try {
 
 console.log(`${getLogPrefix()} dotenv loaded (${Date.now() - SCRIPT_START}ms)`);
 
-const port =
-  Number(
-    process.env.MILADY_API_PORT ||
-      process.env.MILADY_PORT ||
-      process.env.ELIZA_PORT,
-  ) || 31337;
+const port = resolveDesktopApiPort(process.env);
 
 /** The currently active runtime — swapped on restart. */
 let currentRuntime: AgentRuntime | null = null;
@@ -340,16 +340,14 @@ async function main() {
   // the **Vite** listen port for `/api/dev/stack` + static HTML hints, while
   // MILADY_API_PORT is the **Milady API**. Overwriting MILADY_PORT here would
   // collapse UI vs API in observability JSON and confuse tools that read env.
-  process.env.MILADY_API_PORT = String(actualPort);
-  process.env.ELIZA_PORT = String(actualPort);
+  syncResolvedApiPort(process.env, actualPort);
   // Use console.log for startup timing to bypass logger filtering
   console.log(
     `${getLogPrefix()} API server ready on port ${actualPort} (${apiReady - apiStart}ms)`,
   );
 
   // Print connection info
-  const apiToken =
-    process.env.MILADY_API_TOKEN?.trim() || process.env.ELIZA_API_TOKEN?.trim();
+  const apiToken = resolveApiToken(process.env);
   console.log("");
   console.log(`${getLogPrefix()} ╭──────────────────────────────────────────╮`);
   console.log(`${getLogPrefix()} │  Milady is running.                      │`);

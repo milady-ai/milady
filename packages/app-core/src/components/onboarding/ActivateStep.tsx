@@ -2,12 +2,11 @@ import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
 import { useBranding } from "../../config/branding";
 import {
+  OnboardingSecondaryActionButton,
   OnboardingStepHeader,
   onboardingFooterClass,
   onboardingPrimaryActionClass,
   onboardingPrimaryActionTextShadowStyle,
-  onboardingSecondaryActionClass,
-  onboardingSecondaryActionTextShadowStyle,
   spawnOnboardingRipple,
 } from "./onboarding-step-chrome";
 
@@ -31,15 +30,12 @@ export function ActivateStep() {
         description={t("onboarding.allConfigured")}
       />
       <div className={onboardingFooterClass}>
-        <Button
-          variant="ghost"
-          className={onboardingSecondaryActionClass}
-          style={onboardingSecondaryActionTextShadowStyle}
+        <OnboardingSecondaryActionButton
           onClick={() => handleOnboardingBack()}
           type="button"
         >
           {t("onboarding.back")}
-        </Button>
+        </OnboardingSecondaryActionButton>
         <Button
           className={onboardingPrimaryActionClass}
           style={onboardingPrimaryActionTextShadowStyle}

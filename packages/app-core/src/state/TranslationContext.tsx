@@ -50,6 +50,12 @@ export function TranslationProvider({
     (language: UiLanguage) => {
       const next = normalizeLanguage(language);
       setUiLanguageRaw(next);
+      if (
+        "setUiLanguage" in client &&
+        typeof client.setUiLanguage === "function"
+      ) {
+        (client.setUiLanguage as (lang: string) => void)(next);
+      }
       void client.updateConfig({ ui: { language: next } }).catch(() => {
         onLanguageSyncError?.(next);
       });

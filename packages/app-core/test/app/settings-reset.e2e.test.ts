@@ -4,7 +4,7 @@
  * Tests cover:
  * 1. API endpoint /api/agent/reset
  * 2. UI reset button in SettingsView triggers handleReset
- * 3. Post-reset state: onboarding resets to welcome, data cleared
+ * 3. Post-reset state: onboarding resets to cloud_login, data cleared
  */
 
 import http from "node:http";
@@ -232,7 +232,7 @@ describe("Agent Reset API", () => {
 // ---------------------------------------------------------------------------
 
 type OnboardingStep =
-  | "welcome"
+  | "cloud_login"
   | "name"
   | "avatar"
   | "style"
@@ -326,7 +326,7 @@ function createUIHarnessState(): AppHarnessState {
     onboardingComplete: true,
     tab: "settings",
     actionNotice: null,
-    onboardingStep: "welcome",
+    onboardingStep: "cloud_login",
     onboardingOptions: {
       names: ["Eliza"],
       styles: [{ catchphrase: "uwu~" }],
@@ -381,7 +381,7 @@ describe("Settings Reset UI", () => {
 
       handleResetCalled = true;
       state.onboardingComplete = false;
-      state.onboardingStep = "welcome";
+      state.onboardingStep = "cloud_login";
       state.onboardingName = "";
       state.onboardingStyle = "";
       state.conversations = [];
@@ -527,7 +527,7 @@ describe("Settings Reset UI", () => {
 
     // Verify post-reset state
     expect(state.onboardingComplete).toBe(false);
-    expect(state.onboardingStep).toBe("welcome");
+    expect(state.onboardingStep).toBe("cloud_login");
     expect(state.onboardingName).toBe("");
     expect(state.onboardingStyle).toBe("");
     expect(state.conversations.length).toBe(0);
@@ -594,7 +594,7 @@ describe("Reset to Onboarding Flow Integration", () => {
       if (!confirmed) return;
 
       state.onboardingComplete = false;
-      state.onboardingStep = "welcome";
+      state.onboardingStep = "cloud_login";
       state.onboardingName = "";
       state.onboardingStyle = "";
       state.conversations = [];
@@ -625,7 +625,7 @@ describe("Reset to Onboarding Flow Integration", () => {
     }));
   });
 
-  it("after reset, app should show onboarding wizard (welcome step)", async () => {
+  it("after reset, app should show onboarding wizard (cloud_login step)", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
@@ -651,7 +651,7 @@ describe("Reset to Onboarding Flow Integration", () => {
 
     // Verify state is ready for onboarding
     expect(state.onboardingComplete).toBe(false);
-    expect(state.onboardingStep).toBe("welcome");
+    expect(state.onboardingStep).toBe("cloud_login");
 
     // The App component would now render OnboardingWizard instead of main UI
     // This is verified by the onboardingComplete === false state

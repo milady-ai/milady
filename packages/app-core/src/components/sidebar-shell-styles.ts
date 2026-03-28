@@ -16,9 +16,6 @@ export const APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME = `flex min-h-0 w-full 
 export const APP_SIDEBAR_INNER_CLASSNAME =
   "flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3";
 
-export const APP_SIDEBAR_HEADER_CLASSNAME =
-  "border-b border-border/24 px-1 pb-3.5";
-
 export const APP_SIDEBAR_STICKY_HEADER_CLASSNAME =
   "sticky top-0 z-10 border-b border-border/24 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_94%,transparent),color-mix(in_srgb,var(--bg)_84%,transparent))] px-3 pb-3.5 pt-3 backdrop-blur-md";
 

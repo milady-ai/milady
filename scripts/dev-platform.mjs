@@ -2,7 +2,7 @@
 /**
  * dev:desktop — orchestrates Milady desktop local development (Vite, API, Electrobun).
  *
- * ## Why orchestrate instead of “just run electrbun”?
+ * ## Why orchestrate instead of "just run electrbun"?
  * Electrobun needs a renderer URL, usually the dashboard API, and (in dev) repo-root `dist/`
  * for the embedded runtime. One script keeps ports and env vars aligned and implements a
  * single shutdown policy so the terminal does not hang with stray children.
@@ -26,8 +26,8 @@
  * Before spawning API / Vite / Electrobun, `allocateFirstFreeLoopbackPort()` from
  * `scripts/lib/allocate-loopback-port.mjs` resolves **MILADY_API_PORT** (default
  * 31337) and, in Vite dev mode, **MILADY_PORT** (default 2138) if something else
- * already listens. **Why:** every child must agree on the same numbers; Vite’s
- * proxy is fixed at config load time, so “API picks a port later” desyncs the UI.
+ * already listens. **Why:** every child must agree on the same numbers; Vite's
+ * proxy is fixed at config load time, so "API picks a port later" desyncs the UI.
  *
  * ## Signals (Unix) — why `detached: true` on children
  * TTY Ctrl-C is sent to the **foreground process group**. Non-detached children share that
@@ -38,7 +38,7 @@
  *
  * ## Quit from the app
  * When Electrobun exits (user chose Quit), siblings would otherwise keep the orchestrator
- * alive. We detect electrbun’s `exit` and stop Vite/API the same way as signal shutdown.
+ * alive. We detect electrbun's `exit` and stop Vite/API the same way as signal shutdown.
  *
  * Docs: docs/apps/desktop-local-development.md
  *
@@ -59,6 +59,10 @@ import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createConnection } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  resolveDesktopApiPort,
+  resolveDesktopUiPort,
+} from "../packages/shared/src/runtime-env.ts";
 import { allocateFirstFreeLoopbackPort } from "./lib/allocate-loopback-port.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 import { killUiListenPort } from "./lib/kill-ui-listen-port.mjs";
@@ -226,7 +230,7 @@ function pushChild(name, cmd, args, cwd, extraEnv = {}) {
 }
 
 async function launch() {
-  const preferredApi = Number(process.env.MILADY_API_PORT) || 31337;
+  const preferredApi = resolveDesktopApiPort(process.env);
   const resolvedApiPort = await allocateFirstFreeLoopbackPort(preferredApi);
   if (resolvedApiPort !== preferredApi) {
     console.log(
@@ -235,7 +239,7 @@ async function launch() {
   }
   const apiPort = String(resolvedApiPort);
 
-  const preferredUi = Number(process.env.MILADY_PORT) || 2138;
+  const preferredUi = resolveDesktopUiPort(process.env);
   let uiDevPort = preferredUi;
   if (viteDevServer) {
     uiDevPort = await allocateFirstFreeLoopbackPort(preferredUi);
@@ -280,6 +284,7 @@ async function launch() {
         MILADY_PORT: String(uiDevPort),
         MILADY_API_PORT: apiPort,
         ELIZA_API_PORT: apiPort,
+        ELIZA_PORT: apiPort,
         ELIZA_NAMESPACE: process.env.ELIZA_NAMESPACE ?? "milady",
       },
     );
@@ -319,6 +324,7 @@ async function launch() {
       {
         NODE_ENV: "development",
         ELIZA_PORT: apiPort,
+        ELIZA_API_PORT: apiPort,
         ELIZA_HEADLESS: "1",
         MILADY_API_PORT: apiPort,
         MILADY_PORT: String(uiDevPort),
@@ -350,6 +356,8 @@ async function launch() {
       ? {}
       : {
           MILADY_API_PORT: apiPort,
+          ELIZA_API_PORT: apiPort,
+          ELIZA_PORT: apiPort,
           MILADY_DESKTOP_API_BASE: `http://127.0.0.1:${apiPort}`,
         }),
     ...screenshotEnvElectrobun,

@@ -11,8 +11,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  type ColumnInfo,
   client,
+  type ColumnInfo,
   type DatabaseStatus,
   type QueryResult,
   type TableInfo,
@@ -38,10 +38,7 @@ import {
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_RAIL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
@@ -119,8 +116,6 @@ function typeBadgeColor(type: string): string {
   return "text-muted-strong bg-bg-hover";
 }
 
-// ── Cell inspect popover ──────────────────────────────────────────────
-
 function CellPopover({
   value,
   onClose,
@@ -163,8 +158,6 @@ function CellPopover({
     </div>
   );
 }
-
-// ── Results grid (shared between table browser and SQL editor) ─────────
 
 function ResultsGrid({
   columns,
@@ -286,8 +279,6 @@ function ResultsGrid({
   );
 }
 
-// ── Pagination bar ────────────────────────────────────────────────────
-
 function PaginationBar({
   total,
   offset,
@@ -337,8 +328,6 @@ function PaginationBar({
     </div>
   );
 }
-
-// ── Main component ────────────────────────────────────────────────────
 
 export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
   const { t } = useApp();
@@ -593,13 +582,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
       <div className={DATABASE_SHELL_CLASS}>
         <aside className={DATABASE_SIDEBAR_CLASS}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-            <div className={`${APP_SIDEBAR_HEADER_CLASSNAME} border-b-0 pb-0`}>
-              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>Database</div>
-              <div className={APP_SIDEBAR_META_CLASSNAME}>
-                Inspect schemas, rows, media, vectors, and SQL in one workspace.
-              </div>
-            </div>
-
             <div className="space-y-3 pt-4">
               {leftNav}
               {viewToggle}
@@ -730,10 +712,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                 <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
                   Table Browser
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                  Review schemas, inspect rows, and switch into SQL when the
-                  database becomes available.
-                </p>
               </section>
 
               <div
@@ -759,10 +737,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                     <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
                       Table Browser
                     </h1>
-                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                      Choose a table from the sidebar to inspect columns, sort
-                      rows, and review the data structure.
-                    </p>
                   </section>
 
                   <div
@@ -794,10 +768,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                         <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
                           {selectedTable}
                         </h1>
-                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                          Inspect rows, sort columns, and review table structure
-                          in one place.
-                        </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {columnMeta.size > 0 && (
@@ -857,10 +827,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                 <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
                   SQL Workspace
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                  Run ad-hoc queries, inspect results, and reuse recent SQL from
-                  the sidebar.
-                </p>
               </section>
 
               <div
@@ -1031,14 +997,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
               >
                 {showExternalSidebar && (
                   <>
-                    <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-                      <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
-                        Database
-                      </div>
-                      <div className={APP_SIDEBAR_META_CLASSNAME}>
-                        Inspect schemas, rows, and queries in one workspace.
-                      </div>
-                    </div>
                     {sidebarSummary}
                     <div className="space-y-3 pt-4">
                       {viewToggle}
@@ -1170,13 +1128,13 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                       <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                         Database
                       </div>
-                      <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                      <div className="mt-1 text-2xl font-semibold text-txt-strong">
                         {selectedTable}
-                      </h1>
-                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                      </div>
+                      <div className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
                         Inspect rows, sort columns, and review table structure
                         in one place.
-                      </p>
+                      </div>
                     </div>
                     {columnMeta.size > 0 && (
                       <div className="flex flex-wrap gap-2">
@@ -1234,12 +1192,6 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
               className={`w-[21rem] max-w-[352px] shrink-0 overflow-hidden rounded-[24px] border border-border/34 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_20px_30px_-28px_rgba(15,23,42,0.18)] ${APP_SIDEBAR_RAIL_CLASSNAME}`}
             >
               <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-                <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-                  <div className={APP_SIDEBAR_KICKER_CLASSNAME}>Database</div>
-                  <div className={APP_SIDEBAR_META_CLASSNAME}>
-                    Write and run ad-hoc SQL against your connected database.
-                  </div>
-                </div>
                 {sidebarSummary}
                 <div className="space-y-3 pt-4">
                   {viewToggle}
@@ -1297,13 +1249,13 @@ export function DatabaseView({ leftNav }: { leftNav?: ReactNode }) {
                   <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                     Database
                   </div>
-                  <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
+                  <div className="mt-1 text-2xl font-semibold text-txt-strong">
                     SQL Workspace
-                  </h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                  </div>
+                  <div className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
                     Run ad-hoc queries, inspect results, and reuse recent SQL
                     from the sidebar.
-                  </p>
+                  </div>
                 </div>
               </div>
             </section>

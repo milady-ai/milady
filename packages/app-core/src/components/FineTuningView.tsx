@@ -561,9 +561,9 @@ export function FineTuningView() {
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-1">
             <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Overview</div>
-            <h3 className="text-lg font-semibold text-txt">
+            <div className="text-lg font-semibold text-txt">
               {t("finetuningview.Status")}
-            </h3>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3 xl:grid-cols-6">
@@ -622,9 +622,9 @@ export function FineTuningView() {
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-1">
             <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Data Review</div>
-            <h3 className="text-lg font-semibold text-txt">
+            <div className="text-lg font-semibold text-txt">
               {t("finetuningview.Trajectories")}
-            </h3>
+            </div>
           </div>
           <Button
             variant="outline"
@@ -737,9 +737,9 @@ export function FineTuningView() {
             <div className={FINE_TUNING_SECTION_KICKER_CLASS}>
               Dataset Build
             </div>
-            <h3 className="text-lg font-semibold text-txt">
+            <div className="text-lg font-semibold text-txt">
               {t("finetuningview.Datasets1")}
-            </h3>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-4 mb-3">
@@ -818,9 +818,9 @@ export function FineTuningView() {
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-1">
             <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Training</div>
-            <h3 className="text-lg font-semibold text-txt">
+            <div className="text-lg font-semibold text-txt">
               {t("finetuningview.TrainingJobs")}
-            </h3>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 mb-3 md:grid-cols-3">
@@ -1002,9 +1002,9 @@ export function FineTuningView() {
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-1">
             <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Model Ops</div>
-            <h3 className="text-lg font-semibold text-txt">
+            <div className="text-lg font-semibold text-txt">
               {t("finetuningview.TrainedModels")}
-            </h3>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -1165,9 +1165,9 @@ export function FineTuningView() {
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-1">
             <div className={FINE_TUNING_SECTION_KICKER_CLASS}>Streaming</div>
-            <h3 className="text-lg font-semibold text-txt">
+            <div className="text-lg font-semibold text-txt">
               {t("finetuningview.LiveTrainingEvents")}
-            </h3>
+            </div>
           </div>
         </div>
         <div className={`${FINE_TUNING_PANEL_CLASS} max-h-56 overflow-auto`}>

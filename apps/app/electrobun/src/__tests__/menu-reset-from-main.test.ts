@@ -236,4 +236,76 @@ describe("runMainMenuResetAfterApiBaseResolved", () => {
       }),
     ).rejects.toThrow(/Reset API failed \(403\)/);
   });
+
+  it("retries reset once when onboarding is still complete after restart", async () => {
+    const fetchImpl = vi.fn(async (input: string) => {
+      if (input.endsWith("/api/agent/reset")) return mockResponse(true);
+      if (input.endsWith("/api/onboarding/status")) {
+        if (
+          fetchImpl.mock.calls.filter((call) =>
+            String(call[0]).endsWith("/api/onboarding/status"),
+          ).length === 1
+        ) {
+          return mockResponse(true, { complete: true });
+        }
+        return mockResponse(true, { complete: false });
+      }
+      if (input.endsWith("/api/status")) {
+        return mockResponse(true, { state: "running", agentName: "Milady" });
+      }
+      return mockResponse(true, {});
+    });
+
+    const restartEmbeddedClearingLocalDb = vi
+      .fn()
+      .mockResolvedValue({ port: 42_000 });
+
+    await runMainMenuResetAfterApiBaseResolved({
+      apiBase: "http://127.0.0.1:1",
+      fetchImpl,
+      buildHeaders: () => ({}),
+      useEmbeddedRestart: true,
+      restartEmbeddedClearingLocalDb,
+      pushEmbeddedApiBaseToRenderer: vi.fn(),
+      getLocalApiAuthToken: () => "tok",
+      postExternalAgentRestart: vi.fn(),
+      resolveApiBaseForStatusPoll: () => "http://127.0.0.1:1",
+      sendMenuResetAppliedToRenderer: vi.fn(),
+    });
+
+    expect(restartEmbeddedClearingLocalDb).toHaveBeenCalledTimes(2);
+    expect(
+      fetchImpl.mock.calls.filter((call) =>
+        String(call[0]).endsWith("/api/agent/reset"),
+      ).length,
+    ).toBe(2);
+  });
+
+  it("throws when onboarding remains complete after retry", async () => {
+    const fetchImpl = vi.fn(async (input: string) => {
+      if (input.endsWith("/api/agent/reset")) return mockResponse(true);
+      if (input.endsWith("/api/onboarding/status")) {
+        return mockResponse(true, { complete: true });
+      }
+      if (input.endsWith("/api/status")) {
+        return mockResponse(true, { state: "running", agentName: "Milady" });
+      }
+      return mockResponse(true, {});
+    });
+
+    await expect(
+      runMainMenuResetAfterApiBaseResolved({
+        apiBase: "http://127.0.0.1:1",
+        fetchImpl,
+        buildHeaders: () => ({}),
+        useEmbeddedRestart: false,
+        restartEmbeddedClearingLocalDb: vi.fn(),
+        pushEmbeddedApiBaseToRenderer: vi.fn(),
+        getLocalApiAuthToken: () => "",
+        postExternalAgentRestart: vi.fn(),
+        resolveApiBaseForStatusPoll: () => "http://127.0.0.1:1",
+        sendMenuResetAppliedToRenderer: vi.fn(),
+      }),
+    ).rejects.toThrow(/onboarding still marked complete/);
+  });
 });

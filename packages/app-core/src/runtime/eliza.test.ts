@@ -2163,14 +2163,14 @@ describe.skipIf(!resolvePluginImportSpecifier)(
     it("prefers a bundled local plugin wrapper when one exists", async () => {
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-plugin-"));
       const runtimeDir = path.join(tmpDir, "runtime");
-      const pluginIndex = path.join(tmpDir, "plugins", "retake", "index.js");
+      const pluginIndex = path.join(tmpDir, "plugins", "twitch", "index.js");
 
       await fs.mkdir(runtimeDir, { recursive: true });
       await fs.mkdir(path.dirname(pluginIndex), { recursive: true });
       await fs.writeFile(pluginIndex, "export default {};\n");
 
       const specifier = resolvePluginImportSpecifier?.(
-        "@elizaos/plugin-retake",
+        "@elizaos/plugin-twitch",
         pathToFileURL(path.join(runtimeDir, "eliza.ts")).href,
       );
 

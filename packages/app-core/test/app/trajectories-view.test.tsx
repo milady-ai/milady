@@ -85,6 +85,9 @@ vi.mock("@miladyai/ui", () => ({
     React.createElement("div", null, children),
   SelectItem: ({ children }: { children: React.ReactNode; value: string }) =>
     React.createElement("div", null, children),
+  EmptyState: ({ children }: { children: React.ReactNode }) =>
+    React.createElement("div", null, children),
+  cn: (...args: any[]) => args.filter(Boolean).join(" "),
 }));
 
 import type {

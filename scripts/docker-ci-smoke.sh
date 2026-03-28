@@ -20,6 +20,7 @@ set -euo pipefail
 
 BUN_VERSION="${BUN_VERSION:-1.3.10}"
 SMOKE_PORT="${SMOKE_PORT:-32138}"
+CONTAINER_PORT="${CONTAINER_PORT:-42138}"
 SMOKE_TIMEOUT_SEC="${SMOKE_TIMEOUT_SEC:-420}"
 SKIP_SMOKE=false
 TAG="docker-smoke"
@@ -69,6 +70,7 @@ if [[ -z "$VERSION" ]]; then
   VERSION="v$(node -p "require('./package.json').version")-docker-smoke"
 fi
 VERSION_CLEAN="${VERSION#v}"
+SOURCE_SHA="$(git rev-parse HEAD)"
 DOCKER_IMAGE="${DOCKER_IMAGE:-miladyai/agent:${TAG}}"
 CONTAINER_NAME="milady-docker-smoke-${TAG//[^a-zA-Z0-9_.-]/-}"
 
@@ -76,6 +78,7 @@ log "Repo root: $REPO_ROOT"
 log "Version: $VERSION"
 log "Image: $DOCKER_IMAGE"
 log "Smoke port: $SMOKE_PORT"
+log "Container port override: $CONTAINER_PORT"
 
 command -v docker >/dev/null 2>&1 || fail "docker is required"
 command -v node >/dev/null 2>&1 || fail "node is required"
@@ -122,8 +125,10 @@ log "Building Docker image"
 docker build \
   --file Dockerfile.ci \
   --tag "$DOCKER_IMAGE" \
+  --build-arg "BUN_VERSION=$BUN_VERSION" \
   --build-arg "VERSION=$VERSION" \
   --build-arg "VERSION_CLEAN=$VERSION_CLEAN" \
+  --build-arg "REVISION=$SOURCE_SHA" \
   .
 
 if $SKIP_SMOKE; then
@@ -135,9 +140,10 @@ log "Starting container smoke boot"
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 docker run -d \
   --name "$CONTAINER_NAME" \
+  -e PORT="$CONTAINER_PORT" \
   -e MILADY_DISABLE_LOCAL_EMBEDDINGS=1 \
-  -e ELIZA_API_BIND=0.0.0.0 \
-  -p "${SMOKE_PORT}:${MILADY_PORT:-2138}" \
+  -e MILADY_API_BIND=0.0.0.0 \
+  -p "${SMOKE_PORT}:${CONTAINER_PORT}" \
   "$DOCKER_IMAGE" >/dev/null
 
 status_url="http://127.0.0.1:${SMOKE_PORT}/api/status"

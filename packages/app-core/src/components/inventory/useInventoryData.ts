@@ -13,12 +13,19 @@ import type {
   WalletConfigStatus,
   WalletNftsResponse,
 } from "@miladyai/app-core/api";
+import type { InventoryChainFilters } from "@miladyai/app-core/state";
 import { useMemo } from "react";
 import {
   CHAIN_CONFIGS,
   PRIMARY_CHAIN_KEYS,
   resolveChainKey,
+  type ChainKey,
 } from "../chainConfig";
+import {
+  computeSingleChainFocus,
+  matchesInventoryChainFilter,
+  type PrimaryInventoryChainKey,
+} from "./inventory-chain-filters";
 import {
   isBscChainName,
   type NftItem,
@@ -34,14 +41,18 @@ export interface InventoryDataInput {
   walletConfig: WalletConfigStatus | null;
   walletNfts: WalletNftsResponse | null;
   inventorySort: string;
-  inventoryChainFocus: string | null;
+  inventorySortDirection: "asc" | "desc";
+  inventoryChainFilters: InventoryChainFilters;
   trackedBscTokens: TrackedBscToken[];
   trackedTokens: TrackedToken[];
 }
 
 export interface InventoryDataOutput {
-  chainFocus: string;
+  /** When exactly one chain toggle is on, that key; otherwise null. */
+  singleChainFocus: PrimaryInventoryChainKey | null;
   tokenRows: TokenRow[];
+  /** Unfiltered rows (for sidebar per-chain asset counts). */
+  tokenRowsAllChains: TokenRow[];
   sortedRows: TokenRow[];
   chainErrors: EvmChainBalance[];
   focusChainHasError: boolean;
@@ -60,13 +71,6 @@ export interface InventoryDataOutput {
   primaryNativeBalance: string | null;
 }
 
-/** Returns true if a chain name matches the given focus key using chainConfig. */
-function matchesChainFocus(chainName: string, focus: string): boolean {
-  if (focus === "all") return true;
-  const resolved = resolveChainKey(chainName);
-  return resolved === focus;
-}
-
 function hasContractAddress(
   row: TokenRow,
 ): row is TokenRow & { contractAddress: string } {
@@ -77,17 +81,200 @@ function hasVisibleBalance(row: TokenRow): boolean {
   return Boolean(row.isTracked || row.balanceRaw > 0 || row.valueUsd > 0);
 }
 
+function matchesSingleChainFocus(chainName: string, focus: ChainKey): boolean {
+  const resolved = resolveChainKey(chainName);
+  return resolved === focus;
+}
+
+/** Builds token rows as if every primary chain were included (before per-toggle filter). */
+function buildTokenRowsAllChains({
+  walletBalances,
+  walletAddresses,
+  walletConfig,
+  trackedBscTokens,
+  trackedTokens,
+}: {
+  walletBalances: WalletBalancesResponse | null;
+  walletAddresses: WalletAddresses | null;
+  walletConfig: WalletConfigStatus | null;
+  trackedBscTokens: TrackedBscToken[];
+  trackedTokens: TrackedToken[];
+}): TokenRow[] {
+  const rows: TokenRow[] = [];
+  const knownEvmAddr = walletAddresses?.evmAddress ?? walletConfig?.evmAddress;
+  const knownSolAddr =
+    walletAddresses?.solanaAddress ?? walletConfig?.solanaAddress;
+
+  if (walletBalances?.evm) {
+    const seenChainKeys = new Set<string>();
+    for (const chain of walletBalances.evm.chains) {
+      const chainKey = resolveChainKey(chain.chain);
+      if (chainKey) seenChainKeys.add(chainKey);
+      rows.push({
+        chain: chain.chain,
+        symbol: chain.nativeSymbol,
+        name: `${chain.chain} native`,
+        contractAddress: null,
+        logoUrl: null,
+        balance: chain.nativeBalance,
+        valueUsd: Number.parseFloat(chain.nativeValueUsd) || 0,
+        balanceRaw: Number.parseFloat(chain.nativeBalance) || 0,
+        isNative: true,
+      });
+      if (chain.error) continue;
+      for (const tk of chain.tokens) {
+        rows.push({
+          chain: chain.chain,
+          symbol: tk.symbol,
+          name: tk.name,
+          contractAddress: tk.contractAddress ?? null,
+          logoUrl: tk.logoUrl ?? null,
+          balance: tk.balance,
+          valueUsd: Number.parseFloat(tk.valueUsd) || 0,
+          balanceRaw: Number.parseFloat(tk.balance) || 0,
+          isNative: false,
+          isTracked: false,
+        });
+      }
+    }
+    if (knownEvmAddr) {
+      for (const key of PRIMARY_CHAIN_KEYS) {
+        if (key === "solana") continue;
+        if (seenChainKeys.has(key)) continue;
+        const cfg = CHAIN_CONFIGS[key];
+        rows.unshift({
+          chain: cfg.name,
+          symbol: cfg.nativeSymbol,
+          name: `${cfg.name} native`,
+          contractAddress: null,
+          logoUrl: null,
+          balance: "0",
+          valueUsd: 0,
+          balanceRaw: 0,
+          isNative: true,
+        });
+      }
+    }
+  } else if (knownEvmAddr) {
+    for (const key of PRIMARY_CHAIN_KEYS) {
+      if (key === "solana") continue;
+      const cfg = CHAIN_CONFIGS[key];
+      rows.push({
+        chain: cfg.name,
+        symbol: cfg.nativeSymbol,
+        name: `${cfg.name} native`,
+        contractAddress: null,
+        logoUrl: null,
+        balance: "0",
+        valueUsd: 0,
+        balanceRaw: 0,
+        isNative: true,
+      });
+    }
+  }
+
+  if (walletBalances?.solana) {
+    rows.push({
+      chain: "Solana",
+      symbol: "SOL",
+      name: "Solana native",
+      contractAddress: null,
+      logoUrl: null,
+      balance: walletBalances.solana.solBalance,
+      valueUsd: Number.parseFloat(walletBalances.solana.solValueUsd) || 0,
+      balanceRaw: Number.parseFloat(walletBalances.solana.solBalance) || 0,
+      isNative: true,
+    });
+    for (const tk of walletBalances.solana.tokens) {
+      rows.push({
+        chain: "Solana",
+        symbol: tk.symbol,
+        name: tk.name,
+        contractAddress: tk.mint ?? null,
+        logoUrl: tk.logoUrl ?? null,
+        balance: tk.balance,
+        valueUsd: Number.parseFloat(tk.valueUsd) || 0,
+        balanceRaw: Number.parseFloat(tk.balance) || 0,
+        isNative: false,
+      });
+    }
+  }
+  if (knownSolAddr && !walletBalances?.solana) {
+    rows.push({
+      chain: "Solana",
+      symbol: "SOL",
+      name: "Solana native",
+      contractAddress: null,
+      logoUrl: null,
+      balance: "0",
+      valueUsd: 0,
+      balanceRaw: 0,
+      isNative: true,
+    });
+  }
+
+  const knownBscContracts = new Set(
+    rows
+      .filter(
+        (row): row is TokenRow & { contractAddress: string } =>
+          isBscChainName(row.chain) && hasContractAddress(row),
+      )
+      .map((row) => toNormalizedAddress(row.contractAddress)),
+  );
+  for (const tracked of trackedBscTokens) {
+    const normalized = toNormalizedAddress(tracked.contractAddress);
+    if (knownBscContracts.has(normalized)) continue;
+    rows.push({
+      chain: "BSC",
+      symbol: tracked.symbol,
+      name: tracked.name,
+      contractAddress: tracked.contractAddress,
+      logoUrl: tracked.logoUrl ?? null,
+      balance: "0",
+      valueUsd: 0,
+      balanceRaw: 0,
+      isNative: false,
+      isTracked: true,
+    });
+  }
+  for (const tracked of trackedTokens) {
+    const exists = rows.some(
+      (r) => r.contractAddress?.toLowerCase() === tracked.address.toLowerCase(),
+    );
+    if (!exists) {
+      rows.push({
+        chain: "BSC",
+        symbol: `TKN-${tracked.address.slice(2, 6)}`,
+        name: tracked.symbol || `Token ${tracked.address.slice(0, 10)}...`,
+        contractAddress: tracked.address,
+        logoUrl: null,
+        balance: "0",
+        valueUsd: 0,
+        balanceRaw: 0,
+        isNative: false,
+        isTracked: true,
+      });
+    }
+  }
+
+  return rows.filter(hasVisibleBalance);
+}
+
 export function useInventoryData({
   walletBalances,
   walletAddresses,
   walletConfig,
   walletNfts,
   inventorySort,
-  inventoryChainFocus,
+  inventorySortDirection,
+  inventoryChainFilters,
   trackedBscTokens,
   trackedTokens,
 }: InventoryDataInput): InventoryDataOutput {
-  const chainFocus = inventoryChainFocus ?? "all";
+  const singleChainFocus = useMemo(
+    () => computeSingleChainFocus(inventoryChainFilters),
+    [inventoryChainFilters],
+  );
   const knownEvmAddr = walletAddresses?.evmAddress ?? walletConfig?.evmAddress;
   const knownSolAddr =
     walletAddresses?.solanaAddress ?? walletConfig?.solanaAddress;
@@ -107,210 +294,60 @@ export function useInventoryData({
     return Number.parseFloat(primaryChain.nativeBalance) || 0;
   }, [primaryChain]);
 
-  // ── Flatten token rows ────────────────────────────────────────────
-  const tokenRows = useMemo((): TokenRow[] => {
-    const rows: TokenRow[] = [];
+  const tokenRowsAllChains = useMemo(
+    () =>
+      buildTokenRowsAllChains({
+        walletBalances,
+        walletAddresses,
+        walletConfig,
+        trackedBscTokens,
+        trackedTokens,
+      }),
+    [
+      walletBalances,
+      walletAddresses,
+      walletConfig,
+      trackedBscTokens,
+      trackedTokens,
+    ],
+  );
 
-    if (walletBalances?.evm) {
-      const seenChainKeys = new Set<string>();
-      for (const chain of walletBalances.evm.chains) {
-        const chainKey = resolveChainKey(chain.chain);
-        if (chainKey) seenChainKeys.add(chainKey);
-        // Filter by chain focus when not "all"
-        if (chainFocus !== "all" && !matchesChainFocus(chain.chain, chainFocus))
-          continue;
-        rows.push({
-          chain: chain.chain,
-          symbol: chain.nativeSymbol,
-          name: `${chain.chain} native`,
-          contractAddress: null,
-          logoUrl: null,
-          balance: chain.nativeBalance,
-          valueUsd: Number.parseFloat(chain.nativeValueUsd) || 0,
-          balanceRaw: Number.parseFloat(chain.nativeBalance) || 0,
-          isNative: true,
-        });
-        if (chain.error) continue;
-        for (const tk of chain.tokens) {
-          rows.push({
-            chain: chain.chain,
-            symbol: tk.symbol,
-            name: tk.name,
-            contractAddress: tk.contractAddress ?? null,
-            logoUrl: tk.logoUrl ?? null,
-            balance: tk.balance,
-            valueUsd: Number.parseFloat(tk.valueUsd) || 0,
-            balanceRaw: Number.parseFloat(tk.balance) || 0,
-            isNative: false,
-            isTracked: false,
-          });
-        }
-      }
-      // Insert fallback rows for primary chains not seen in API data
-      if (knownEvmAddr) {
-        for (const key of PRIMARY_CHAIN_KEYS) {
-          if (key === "solana") continue; // handled below
-          if (seenChainKeys.has(key)) continue;
-          if (chainFocus !== "all" && chainFocus !== key) continue;
-          const cfg = CHAIN_CONFIGS[key];
-          rows.unshift({
-            chain: cfg.name,
-            symbol: cfg.nativeSymbol,
-            name: `${cfg.name} native`,
-            contractAddress: null,
-            logoUrl: null,
-            balance: "0",
-            valueUsd: 0,
-            balanceRaw: 0,
-            isNative: true,
-          });
-        }
-      }
-    } else if (knownEvmAddr) {
-      // No EVM data at all — still expose the supported EVM chains.
-      for (const key of PRIMARY_CHAIN_KEYS) {
-        if (key === "solana") continue;
-        if (chainFocus !== "all" && chainFocus !== key) continue;
-        const cfg = CHAIN_CONFIGS[key];
-        rows.push({
-          chain: cfg.name,
-          symbol: cfg.nativeSymbol,
-          name: `${cfg.name} native`,
-          contractAddress: null,
-          logoUrl: null,
-          balance: "0",
-          valueUsd: 0,
-          balanceRaw: 0,
-          isNative: true,
-        });
-      }
-    }
-
-    // Solana tokens
-    if (
-      (chainFocus === "all" || chainFocus === "solana") &&
-      walletBalances?.solana
-    ) {
-      rows.push({
-        chain: "Solana",
-        symbol: "SOL",
-        name: "Solana native",
-        contractAddress: null,
-        logoUrl: null,
-        balance: walletBalances.solana.solBalance,
-        valueUsd: Number.parseFloat(walletBalances.solana.solValueUsd) || 0,
-        balanceRaw: Number.parseFloat(walletBalances.solana.solBalance) || 0,
-        isNative: true,
-      });
-      for (const tk of walletBalances.solana.tokens) {
-        rows.push({
-          chain: "Solana",
-          symbol: tk.symbol,
-          name: tk.name,
-          contractAddress: tk.mint ?? null,
-          logoUrl: tk.logoUrl ?? null,
-          balance: tk.balance,
-          valueUsd: Number.parseFloat(tk.valueUsd) || 0,
-          balanceRaw: Number.parseFloat(tk.balance) || 0,
-          isNative: false,
-        });
-      }
-    }
-    if (
-      (chainFocus === "all" || chainFocus === "solana") &&
-      knownSolAddr &&
-      !walletBalances?.solana
-    ) {
-      rows.push({
-        chain: "Solana",
-        symbol: "SOL",
-        name: "Solana native",
-        contractAddress: null,
-        logoUrl: null,
-        balance: "0",
-        valueUsd: 0,
-        balanceRaw: 0,
-        isNative: true,
-      });
-    }
-
-    // Add tracked tokens not already in the list
-    if (chainFocus === "bsc" || chainFocus === "all") {
-      const knownBscContracts = new Set(
-        rows
-          .filter(
-            (row): row is TokenRow & { contractAddress: string } =>
-              isBscChainName(row.chain) && hasContractAddress(row),
-          )
-          .map((row) => toNormalizedAddress(row.contractAddress)),
-      );
-      for (const tracked of trackedBscTokens) {
-        const normalized = toNormalizedAddress(tracked.contractAddress);
-        if (knownBscContracts.has(normalized)) continue;
-        rows.push({
-          chain: "BSC",
-          symbol: tracked.symbol,
-          name: tracked.name,
-          contractAddress: tracked.contractAddress,
-          logoUrl: tracked.logoUrl ?? null,
-          balance: "0",
-          valueUsd: 0,
-          balanceRaw: 0,
-          isNative: false,
-          isTracked: true,
-        });
-      }
-      for (const tracked of trackedTokens) {
-        const exists = rows.some(
-          (r) =>
-            r.contractAddress?.toLowerCase() === tracked.address.toLowerCase(),
-        );
-        if (!exists) {
-          rows.push({
-            chain: "BSC",
-            symbol: `TKN-${tracked.address.slice(2, 6)}`,
-            name: tracked.symbol || `Token ${tracked.address.slice(0, 10)}...`,
-            contractAddress: tracked.address,
-            logoUrl: null,
-            balance: "0",
-            valueUsd: 0,
-            balanceRaw: 0,
-            isNative: false,
-            isTracked: true,
-          });
-        }
-      }
-    }
-    return rows.filter(hasVisibleBalance);
-  }, [
-    walletBalances,
-    trackedBscTokens,
-    chainFocus,
-    trackedTokens,
-    knownEvmAddr,
-    knownSolAddr,
-  ]);
+  const tokenRows = useMemo(
+    () =>
+      tokenRowsAllChains.filter((row) =>
+        matchesInventoryChainFilter(row.chain, inventoryChainFilters),
+      ),
+    [tokenRowsAllChains, inventoryChainFilters],
+  );
 
   // ── Sort ──────────────────────────────────────────────────────────
   const sortedRows = useMemo(() => {
     const sorted = [...tokenRows];
+    const asc = inventorySortDirection === "asc";
     if (inventorySort === "value") {
-      sorted.sort(
-        (a, b) => b.valueUsd - a.valueUsd || b.balanceRaw - a.balanceRaw,
-      );
+      sorted.sort((a, b) => {
+        const diff = a.valueUsd - b.valueUsd;
+        if (diff !== 0) return asc ? diff : -diff;
+        const diff2 = a.balanceRaw - b.balanceRaw;
+        return asc ? diff2 : -diff2;
+      });
     } else if (inventorySort === "chain") {
-      sorted.sort(
-        (a, b) =>
-          a.chain.localeCompare(b.chain) || a.symbol.localeCompare(b.symbol),
-      );
+      sorted.sort((a, b) => {
+        const c = a.chain.localeCompare(b.chain);
+        if (c !== 0) return asc ? c : -c;
+        const s = a.symbol.localeCompare(b.symbol);
+        return asc ? s : -s;
+      });
     } else if (inventorySort === "symbol") {
-      sorted.sort(
-        (a, b) =>
-          a.symbol.localeCompare(b.symbol) || a.chain.localeCompare(b.chain),
-      );
+      sorted.sort((a, b) => {
+        const s = a.symbol.localeCompare(b.symbol);
+        if (s !== 0) return asc ? s : -s;
+        const c = a.chain.localeCompare(b.chain);
+        return asc ? c : -c;
+      });
     }
     return sorted;
-  }, [tokenRows, inventorySort]);
+  }, [tokenRows, inventorySort, inventorySortDirection]);
 
   // ── Chain errors ──────────────────────────────────────────────────
   const chainErrors = useMemo(
@@ -322,9 +359,10 @@ export function useInventoryData({
   );
 
   const focusChainHasError = useMemo(() => {
-    if (chainFocus === "all") return chainErrors.length > 0;
-    return chainErrors.some((c) => matchesChainFocus(c.chain, chainFocus));
-  }, [chainErrors, chainFocus]);
+    return chainErrors.some((c) =>
+      matchesInventoryChainFilter(c.chain, inventoryChainFilters),
+    );
+  }, [chainErrors, inventoryChainFilters]);
 
   // ── Flatten NFTs ──────────────────────────────────────────────────
   const allNfts = useMemo((): NftItem[] => {
@@ -350,13 +388,15 @@ export function useInventoryData({
         });
       }
     }
-    return items;
-  }, [walletNfts]);
+    return items.filter((nft) =>
+      matchesInventoryChainFilter(nft.chain, inventoryChainFilters),
+    );
+  }, [walletNfts, inventoryChainFilters]);
 
   // ── Derived values ────────────────────────────────────────────────
   const focusedChain = useMemo(() => {
-    if (chainFocus === "all") return null;
-    if (chainFocus === "solana") {
+    if (!singleChainFocus) return null;
+    if (singleChainFocus === "solana") {
       return {
         name: CHAIN_CONFIGS.solana.name,
         nativeSymbol: CHAIN_CONFIGS.solana.nativeSymbol,
@@ -366,21 +406,22 @@ export function useInventoryData({
       };
     }
 
-    const chainConfig = CHAIN_CONFIGS[chainFocus as keyof typeof CHAIN_CONFIGS];
+    const chainConfig =
+      CHAIN_CONFIGS[singleChainFocus as keyof typeof CHAIN_CONFIGS];
     const evmChain =
       walletBalances?.evm?.chains.find((chain) =>
-        matchesChainFocus(chain.chain, chainFocus),
+        matchesSingleChainFocus(chain.chain, singleChainFocus),
       ) ?? null;
 
     if (!chainConfig && !evmChain) return null;
 
     return {
-      name: evmChain?.chain ?? chainConfig?.name ?? chainFocus,
+      name: evmChain?.chain ?? chainConfig?.name ?? singleChainFocus,
       nativeSymbol: evmChain?.nativeSymbol ?? chainConfig?.nativeSymbol ?? null,
       nativeBalance: evmChain?.nativeBalance ?? (knownEvmAddr ? "0" : null),
       error: evmChain?.error ?? null,
     };
-  }, [chainFocus, knownEvmAddr, knownSolAddr, walletBalances]);
+  }, [singleChainFocus, knownEvmAddr, knownSolAddr, walletBalances]);
 
   const primaryChainError =
     primaryChain?.error ??
@@ -389,32 +430,24 @@ export function useInventoryData({
   const primaryNativeBalance: string | null =
     primaryChain?.nativeBalance ?? null;
 
-  const focusedRows = useMemo(() => {
-    if (chainFocus === "all") return sortedRows;
-    return sortedRows.filter((row) => matchesChainFocus(row.chain, chainFocus));
-  }, [sortedRows, chainFocus]);
-
-  const visibleRows = chainFocus === "all" ? sortedRows : focusedRows;
+  const focusedRows = sortedRows;
+  const visibleRows = sortedRows;
 
   const totalUsd = useMemo(
-    () =>
-      (chainFocus === "all" ? tokenRows : focusedRows).reduce(
-        (sum, r) => sum + r.valueUsd,
-        0,
-      ),
-    [tokenRows, focusedRows, chainFocus],
+    () => tokenRows.reduce((sum, r) => sum + r.valueUsd, 0),
+    [tokenRows],
   );
 
   const visibleChainErrors = useMemo(() => {
-    if (chainFocus === "all") return chainErrors;
     return chainErrors.filter((chain) =>
-      matchesChainFocus(chain.chain, chainFocus),
+      matchesInventoryChainFilter(chain.chain, inventoryChainFilters),
     );
-  }, [chainErrors, chainFocus]);
+  }, [chainErrors, inventoryChainFilters]);
 
   return {
-    chainFocus,
+    singleChainFocus,
     tokenRows,
+    tokenRowsAllChains,
     sortedRows,
     chainErrors,
     focusChainHasError,

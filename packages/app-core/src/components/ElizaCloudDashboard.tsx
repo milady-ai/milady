@@ -34,7 +34,7 @@ import {
 } from "../api";
 import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
 import { useApp } from "../state";
-import { openDesktopInAppBrowser, openExternalUrl } from "../utils";
+import { openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
 
 const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/eliza";
@@ -821,7 +821,6 @@ export function CloudDashboard() {
           "success",
         );
       } else if (result.mode === "steward" && !result.requiresUserSignature) {
-        // Steward pending approval or rejection
         const execStatus = result.execution?.status;
         if (execStatus === "pending_approval") {
           setCryptoPayResult(
@@ -874,10 +873,7 @@ export function CloudDashboard() {
   }, []);
 
   const handleLearnMoreElizaCloud = useCallback(async () => {
-    const opened = await openDesktopInAppBrowser(ELIZA_CLOUD_WEB_URL);
-    if (!opened) {
-      await openExternalUrl(ELIZA_CLOUD_WEB_URL);
-    }
+    await openExternalUrl(ELIZA_CLOUD_WEB_URL);
   }, []);
 
   useEffect(() => {
@@ -1097,7 +1093,6 @@ export function CloudDashboard() {
 
       {activeView === "billing" ? (
         <div className="mx-auto max-w-3xl space-y-0">
-          {/* ── Balance bar ───────────────────────────────────────── */}
           <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-baseline gap-3">
               <span
@@ -1137,8 +1132,6 @@ export function CloudDashboard() {
           )}
 
           <hr className="border-border/40" />
-
-          {/* ── Top Up ────────────────────────────────────────────── */}
           <div className="py-5">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-sm font-semibold text-txt-strong">
@@ -1158,7 +1151,6 @@ export function CloudDashboard() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {/* Card payment */}
               <div className={CLOUD_INSET_PANEL_CLASSNAME}>
                 <div className="flex items-center gap-2 mb-3">
                   <CreditCard className="h-4 w-4 text-muted" />
@@ -1210,8 +1202,6 @@ export function CloudDashboard() {
                   </Button>
                 </div>
               </div>
-
-              {/* Crypto payment */}
               <div className={CLOUD_INSET_PANEL_CLASSNAME}>
                 <div className="flex items-center gap-2 mb-3">
                   <Wallet className="h-4 w-4 text-muted" />
@@ -1304,8 +1294,6 @@ export function CloudDashboard() {
           </div>
 
           <hr className="border-border/40" />
-
-          {/* ── Auto Top-Up ───────────────────────────────────────── */}
           <div className="py-5">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -1390,8 +1378,6 @@ export function CloudDashboard() {
           </div>
 
           <hr className="border-border/40" />
-
-          {/* ── Account ───────────────────────────────────────────── */}
           <div className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <div className="flex items-center gap-2">
@@ -1423,7 +1409,6 @@ export function CloudDashboard() {
         </div>
       ) : (
         <div className="mx-auto max-w-3xl space-y-0">
-          {/* ── Cloud not ready ────────────────────────────── */}
           {cloudNotReady && (
             <div className="flex flex-col items-center justify-center py-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-4 border border-accent/20">
@@ -1438,16 +1423,12 @@ export function CloudDashboard() {
               </p>
             </div>
           )}
-
-          {/* ── Error ─────────────────────────────────────────── */}
           {agentsError && !cloudNotReady && (
             <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger mb-3">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               {agentsError}
             </div>
           )}
-
-          {/* ── Account bar ───────────────────────────────────── */}
           <div className="flex flex-col gap-3 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
               {cloudAccountIdDisplay.mono ? (
@@ -1483,8 +1464,6 @@ export function CloudDashboard() {
           </div>
 
           <hr className="border-border/40" />
-
-          {/* ── Agent list ────────────────────────────────────── */}
           {!cloudNotReady && (
             <div className="py-4">
               {agentsLoading && cloudAgents.length === 0 ? (
@@ -1557,8 +1536,6 @@ export function CloudDashboard() {
               )}
             </div>
           )}
-
-          {/* ── Agent detail ──────────────────────────────────── */}
           {selectedAgentId && selectedAgent && (
             <>
               <hr className="border-border/40" />

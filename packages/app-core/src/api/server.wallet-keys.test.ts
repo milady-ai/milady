@@ -145,7 +145,7 @@ describe("GET /api/wallet/keys", () => {
     }
   });
 
-  it("allows loopback requests without a token during active onboarding in development", async () => {
+  it("allows loopback development requests without a token during active onboarding", async () => {
     process.env.NODE_ENV = "development";
     await fs.writeFile(
       path.join(tempDir, "eliza.json"),
@@ -162,6 +162,21 @@ describe("GET /api/wallet/keys", () => {
     } finally {
       await server.close();
     }
+  });
+
+  it("includes an explicit loopback-only guard in the route handler", async () => {
+    const source = await fs.readFile(
+      path.resolve(import.meta.dirname, "server.ts"),
+      "utf-8",
+    );
+    const routeIdx = source.indexOf('"/api/wallet/keys"');
+    expect(routeIdx).toBeGreaterThan(-1);
+
+    const nearbyCode = source.slice(routeIdx, routeIdx + 300);
+    expect(nearbyCode).toContain(
+      "isLoopbackRemoteAddress(req.socket.remoteAddress)",
+    );
+    expect(nearbyCode).toContain('"loopback only"');
   });
 
   it("returns 200 with a valid auth token during onboarding", async () => {

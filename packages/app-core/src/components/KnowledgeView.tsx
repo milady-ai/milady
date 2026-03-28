@@ -45,7 +45,6 @@ import {
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
   APP_SIDEBAR_KICKER_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
@@ -219,12 +218,6 @@ function UploadZone({
         onChange={handleFileSelect}
       />
       <div className="flex items-start justify-between gap-3 px-1">
-        <div className="min-w-0">
-          <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Add Content</div>
-          <div className="mt-1 text-[11px] leading-relaxed text-muted">
-            Import files or paste a source URL.
-          </div>
-        </div>
         <div className={KNOWLEDGE_META_PILL_CLASS}>
           {SUPPORTED_UPLOAD_EXTENSIONS.size} formats
         </div>
@@ -494,34 +487,16 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
     <section
       className={`${KNOWLEDGE_PANEL_CLASS} min-h-[62vh] overflow-hidden`}
     >
-      <div className="border-b border-border/30 px-5 py-5 sm:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className={KNOWLEDGE_KICKER_CLASS}>Viewer</div>
-            <h2 className="mt-1 text-2xl font-semibold text-txt-strong">
-              {loading
-                ? "Loading..."
-                : doc?.filename || "Select a document to inspect"}
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-              {doc
-                ? "Review metadata, preview the source, and scan the indexed fragments without leaving the page."
-                : "Pick a document from the sidebar to review its metadata, preview text, and indexed fragments."}
-            </p>
-          </div>
-          {doc && (
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
-                {getKnowledgeTypeLabel(doc.contentType)}
-              </span>
-              <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-txt-strong">
-                {getKnowledgeSourceLabel(doc.source)}
-              </span>
-            </div>
-          )}
+      {doc && (
+        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+          <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
+            {getKnowledgeTypeLabel(doc.contentType)}
+          </span>
+          <span className="rounded-full border border-accent/25 bg-accent/8 px-3 py-1.5 text-[11px] font-semibold text-txt-strong">
+            {getKnowledgeSourceLabel(doc.source)}
+          </span>
         </div>
-      </div>
-
+      )}
       <div className="space-y-4 px-5 py-5 sm:px-6">
         {loading && (
           <div className="py-12 text-center font-bold tracking-wide text-muted animate-pulse">
@@ -722,8 +697,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
       setLoading(false);
     });
   }, [loadData]);
-
-  // Auto-retry with exponential backoff when knowledge service is still loading (503)
   useEffect(() => {
     if (!isServiceLoading) {
       serviceRetryRef.current = 0;
@@ -1145,37 +1118,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
       <div className={KNOWLEDGE_SHELL_CLASS}>
         <aside className={KNOWLEDGE_SIDEBAR_CLASS}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-              <div className={KNOWLEDGE_KICKER_CLASS}>Knowledge</div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2 px-1">
-              <span className={KNOWLEDGE_META_PILL_CLASS}>
-                {documents.length} {documents.length === 1 ? "doc" : "docs"}
-              </span>
-              <span className={KNOWLEDGE_META_PILL_CLASS}>
-                {totalFragments} fragments
-              </span>
-              {selectedDoc && (
-                <span className="rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong">
-                  {getKnowledgeTypeLabel(selectedDoc.contentType)}
-                </span>
-              )}
-            </div>
-
             <div className="mt-4 border-b border-border/25 pb-4">
-              <UploadZone
-                onFilesUpload={handleFilesUpload}
-                onUrlUpload={handleUrlUpload}
-                uploading={uploading}
-                uploadStatus={uploadStatus}
-              />
-            </div>
-
-            <div className="mt-4 border-b border-border/25 pb-4">
-              <div className="px-1">
-                <div className={KNOWLEDGE_SECTION_LABEL_CLASS}>Search</div>
-              </div>
               <form
                 className="mt-3 w-full max-w-[500px] flex-[1_1_500px]"
                 onSubmit={handleSearchSubmit}
@@ -1203,17 +1146,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                 </div>
               </form>
               <div className="mt-3 flex flex-wrap items-center gap-2 px-1">
-                <span
-                  className={
-                    isShowingSearchResults
-                      ? "rounded-full border border-accent/25 bg-accent/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-txt-strong"
-                      : KNOWLEDGE_META_PILL_CLASS
-                  }
-                >
-                  {isShowingSearchResults
-                    ? `${visibleSearchResults.length} result${visibleSearchResults.length === 1 ? "" : "s"}`
-                    : "Search idle"}
-                </span>
                 {isShowingSearchResults && (
                   <Button
                     variant="ghost"
@@ -1327,19 +1259,6 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
                   {t("common.retry")}
                 </Button>
               </div>
-            )}
-
-            {selectedDoc && (
-              <section className={`${KNOWLEDGE_PANEL_CLASS} px-5 py-4 sm:px-6`}>
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="min-w-0 truncate text-lg font-semibold text-txt-strong">
-                    {selectedDoc.filename}
-                  </h2>
-                  <span className="shrink-0 text-[11px] font-semibold text-muted">
-                    {getKnowledgeDocumentSummary(selectedDoc)}
-                  </span>
-                </div>
-              </section>
             )}
 
             <div className="mt-4">

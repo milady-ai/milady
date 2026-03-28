@@ -87,6 +87,7 @@ export class SandboxManager {
   private containerId: string | null = null;
   private browserContainerId: string | null = null;
   private eventLog: SandboxEvent[] = [];
+  private lifecycleQueue: Promise<void> = Promise.resolve();
 
   constructor(config: SandboxManagerConfig) {
     this.config = {
@@ -179,149 +180,185 @@ export class SandboxManager {
     });
   }
 
+  private queueLifecycle<T>(operation: () => Promise<T>): Promise<T> {
+    const run = this.lifecycleQueue.then(operation, operation);
+    this.lifecycleQueue = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  }
+
   async start(): Promise<void> {
-    if (this.config.mode === "off") {
-      this.setState("stopped");
-      return;
-    }
-
-    if (this.config.mode === "light") {
-      this.setState("ready");
-      return;
-    }
-
-    this.setState("initializing");
-
-    try {
-      const config = this.getMainContainerConfig();
-
-      if (!this.engine.isAvailable()) {
-        throw new Error(
-          `Container engine "${this.engine.engineType}" is not available. Install Docker or Apple Container.`,
-        );
+    return await this.queueLifecycle(async () => {
+      if (this.config.mode === "off") {
+        if (this.state !== "stopped") {
+          this.setState("stopped");
+        }
+        return;
       }
 
-      if (!this.engine.imageExists(config.image)) {
-        try {
-          await this.engine.pullImage(config.image);
-        } catch {
+      if (this.config.mode === "light") {
+        if (this.state !== "ready") {
+          this.setState("ready");
+        }
+        return;
+      }
+
+      if (
+        this.state === "ready" ||
+        this.state === "initializing" ||
+        this.state === "recovering"
+      ) {
+        return;
+      }
+
+      this.setState("initializing");
+
+      try {
+        const config = this.getMainContainerConfig();
+
+        if (!this.engine.isAvailable()) {
           throw new Error(
-            `Sandbox image "${config.image}" not found. Build with: scripts/sandbox-setup.sh`,
+            `Container engine "${this.engine.engineType}" is not available. Install Docker or Apple Container.`,
           );
         }
-      }
 
-      const orphans = this.engine.listContainers(config.containerPrefix);
-      for (const id of orphans) {
-        await this.engine.stopContainer(id);
-        await this.engine.removeContainer(id);
-      }
-
-      this.containerId = await this.createMainContainer();
-
-      this.emitEvent({
-        timestamp: Date.now(),
-        type: "container_start",
-        detail: `Container started: ${this.containerId}`,
-      });
-
-      if (this.config.browser?.enabled && this.config.browser?.autoStart) {
-        try {
-          this.browserContainerId = await this.createBrowserContainer();
-        } catch (err) {
-          this.emitEvent({
-            timestamp: Date.now(),
-            type: "error",
-            detail: `Browser container start failed: ${
-              err instanceof Error ? err.message : String(err)
-            }`,
-          });
+        if (!this.engine.imageExists(config.image)) {
+          try {
+            await this.engine.pullImage(config.image);
+          } catch {
+            throw new Error(
+              `Sandbox image "${config.image}" not found. Build with: scripts/sandbox-setup.sh`,
+            );
+          }
         }
-      }
 
-      const healthy = await this.healthCheck();
-      if (healthy) {
-        this.setState("ready");
-      } else {
+        const orphans = this.engine.listContainers(config.containerPrefix);
+        for (const id of orphans) {
+          await this.engine.stopContainer(id);
+          await this.engine.removeContainer(id);
+        }
+
+        this.containerId = await this.createMainContainer();
+
+        this.emitEvent({
+          timestamp: Date.now(),
+          type: "container_start",
+          detail: `Container started: ${this.containerId}`,
+        });
+
+        if (this.config.browser?.enabled && this.config.browser?.autoStart) {
+          try {
+            this.browserContainerId = await this.createBrowserContainer();
+          } catch (err) {
+            this.emitEvent({
+              timestamp: Date.now(),
+              type: "error",
+              detail: `Browser container start failed: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+            });
+          }
+        }
+
+        const healthy = await this.healthCheck();
+        if (healthy) {
+          this.setState("ready");
+        } else {
+          this.setState("degraded");
+        }
+      } catch (err) {
+        this.emitEvent({
+          timestamp: Date.now(),
+          type: "error",
+          detail: `Sandbox start failed: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        });
         this.setState("degraded");
+        throw err;
       }
-    } catch (err) {
-      this.emitEvent({
-        timestamp: Date.now(),
-        type: "error",
-        detail: `Sandbox start failed: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      });
-      this.setState("degraded");
-      throw err;
-    }
+    });
   }
 
   async recover(): Promise<void> {
-    if (this.state !== "degraded") {
-      return;
-    }
-
-    this.setState("recovering");
-    this.emitEvent({
-      timestamp: Date.now(),
-      type: "state_change",
-      detail: "Attempting recovery from degraded state",
-    });
-
-    try {
-      const config = this.getMainContainerConfig();
-      await this.cleanupContainer(this.containerId);
-      await this.cleanupContainer(this.browserContainerId);
-      this.containerId = null;
-      this.browserContainerId = null;
-
-      const orphans = this.engine.listContainers(config.containerPrefix);
-      for (const id of orphans) {
-        await this.engine.stopContainer(id);
-        await this.engine.removeContainer(id);
+    return await this.queueLifecycle(async () => {
+      if (this.state !== "degraded") {
+        return;
       }
 
-      this.containerId = await this.createMainContainer();
-
-      const healthy = await this.healthCheck();
-      if (healthy) {
-        this.setState("ready");
-      } else {
-        this.setState("degraded");
-      }
-    } catch (err) {
+      this.setState("recovering");
       this.emitEvent({
         timestamp: Date.now(),
-        type: "error",
-        detail: `Recovery failed: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
+        type: "state_change",
+        detail: "Attempting recovery from degraded state",
       });
-      this.setState("degraded");
-    }
+
+      try {
+        const config = this.getMainContainerConfig();
+        await this.cleanupContainer(this.containerId);
+        await this.cleanupContainer(this.browserContainerId);
+        this.containerId = null;
+        this.browserContainerId = null;
+
+        const orphans = this.engine.listContainers(config.containerPrefix);
+        for (const id of orphans) {
+          await this.engine.stopContainer(id);
+          await this.engine.removeContainer(id);
+        }
+
+        this.containerId = await this.createMainContainer();
+
+        const healthy = await this.healthCheck();
+        if (healthy) {
+          this.setState("ready");
+        } else {
+          this.setState("degraded");
+        }
+      } catch (err) {
+        this.emitEvent({
+          timestamp: Date.now(),
+          type: "error",
+          detail: `Recovery failed: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        });
+        this.setState("degraded");
+      }
+    });
   }
 
   async stop(): Promise<void> {
-    this.setState("stopping");
+    return await this.queueLifecycle(async () => {
+      if (this.state === "stopped") {
+        return;
+      }
 
-    try {
-      await this.cleanupContainer(this.browserContainerId);
-      await this.cleanupContainer(this.containerId);
-      this.browserContainerId = null;
-      this.containerId = null;
-    } catch (err) {
-      this.emitEvent({
-        timestamp: Date.now(),
-        type: "error",
-        detail: `Sandbox stop error: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      });
-    }
+      if (this.state === "uninitialized") {
+        this.setState("stopped");
+        return;
+      }
 
-    this.setState("stopped");
+      this.setState("stopping");
+
+      try {
+        await this.cleanupContainer(this.browserContainerId);
+        await this.cleanupContainer(this.containerId);
+        this.browserContainerId = null;
+        this.containerId = null;
+      } catch (err) {
+        this.emitEvent({
+          timestamp: Date.now(),
+          type: "error",
+          detail: `Sandbox stop error: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        });
+      }
+
+      this.setState("stopped");
+    });
   }
 
   async exec(options: SandboxExecOptions): Promise<SandboxExecResult> {

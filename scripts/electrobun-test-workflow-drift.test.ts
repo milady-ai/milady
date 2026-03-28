@@ -14,6 +14,24 @@ describe("Electrobun test workflow drift", () => {
   // smoke test) was moved to release-electrobun.yml. The old desktop-ui-e2e
   // and desktop-packaged-dmg-e2e jobs were removed from test.yml.
 
+  it("routes PR-required suites through named scripts", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+
+    expect(workflow).toContain("bun run test:regression-matrix:pr");
+    expect(workflow).toContain("bun run test:e2e");
+    expect(workflow).toContain("bun run test:startup:contract");
+    expect(workflow).toContain("bun run test:startup:e2e");
+    expect(workflow).toContain("bun run test:desktop:contract");
+    expect(workflow).toContain("bun run test:live:cloud");
+    expect(workflow).toContain("bun run test:e2e:validation");
+    expect(workflow).not.toContain(
+      "--exclude packages/agent/test/anvil-contracts.e2e.test.ts",
+    );
+    expect(workflow).not.toContain(
+      "--exclude packages/agent/test/apps-e2e.e2e.test.ts",
+    );
+  });
+
   it("does not rerun postinstall in jobs that already use plain bun install", () => {
     const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
 
@@ -49,18 +67,10 @@ describe("Electrobun test workflow drift", () => {
       "bun install --frozen-lockfile --ignore-scripts",
     );
     expect(workflow).toContain("bun run postinstall");
-    expect(workflow).toContain("bunx vitest run");
     expect(workflow).toContain(
-      "scripts/electrobun-release-workflow-drift.test.ts",
+      "bun run test:regression-matrix:release-contract",
     );
-    expect(workflow).toContain(
-      "scripts/electrobun-test-workflow-drift.test.ts",
-    );
-    expect(workflow).toContain("scripts/whisper-build-script-drift.test.ts");
-    expect(workflow).toContain("scripts/release-check.test.ts");
-    expect(workflow).toContain("bunx tsdown");
-    expect(workflow).toContain("node --import tsx scripts/write-build-info.ts");
-    expect(workflow).toContain("bun run release:check");
+    expect(workflow).toContain("bun run test:release:contract");
     expect(workflow).not.toContain(
       "uses: ./.github/workflows/release-electrobun.yml",
     );

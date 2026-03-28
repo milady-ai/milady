@@ -14,6 +14,23 @@ const DEFAULT_API_PORT = 31337;
 const CONNECT_TIMEOUT_MS = 800;
 const FETCH_TIMEOUT_MS = 2500;
 
+function parsePositivePort(value) {
+  if (!value) return NaN;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 && parsed < 65536
+    ? parsed
+    : NaN;
+}
+
+function resolveDesktopApiPort(env) {
+  return (
+    parsePositivePort(env.MILADY_API_PORT) ||
+    parsePositivePort(env.ELIZA_API_PORT) ||
+    parsePositivePort(env.ELIZA_PORT) ||
+    DEFAULT_API_PORT
+  );
+}
+
 /**
  * @param {number} port
  * @param {string} [host]
@@ -86,7 +103,7 @@ export async function gatherDesktopStackStatus(
   deps,
 ) {
   const checkPort = deps?.isPortOpen ?? isPortOpen;
-  const apiPort = Number(env.MILADY_API_PORT) || DEFAULT_API_PORT;
+  const apiPort = resolveDesktopApiPort(env);
   const fetchFn = fetchImpl ?? globalThis.fetch;
   const apiBase = `http://127.0.0.1:${apiPort}`;
 
@@ -100,7 +117,7 @@ export async function gatherDesktopStackStatus(
     }
   }
 
-  const uiFromEnv = env.MILADY_PORT ? Number(env.MILADY_PORT) : NaN;
+  const uiFromEnv = parsePositivePort(env.MILADY_PORT);
   const uiFromApi =
     devStack?.desktop &&
     typeof devStack.desktop.uiPort === "number" &&
@@ -108,7 +125,7 @@ export async function gatherDesktopStackStatus(
       ? devStack.desktop.uiPort
       : NaN;
   const uiPort =
-    (Number.isFinite(uiFromEnv) && uiFromEnv > 0 ? uiFromEnv : NaN) ||
+    (Number.isFinite(uiFromEnv) ? uiFromEnv : NaN) ||
     (Number.isFinite(uiFromApi) ? uiFromApi : NaN) ||
     DEFAULT_UI_PORT;
 

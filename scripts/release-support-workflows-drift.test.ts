@@ -102,15 +102,10 @@ describe("release support workflow drift", () => {
     const dockerfile = fs.readFileSync(CANONICAL_IMAGE_DOCKERFILE, "utf8");
 
     expect(dockerfile).toContain(
-      'CMD ["node", "scripts/container-entrypoint.mjs"]',
+      'CMD ["node", "--import", "tsx", "milady.mjs", "start"]',
     );
-    expect(dockerfile).toContain("EXPOSE 18790");
-    expect(dockerfile).toContain(
-      "http://localhost:$" + "{PORT:-$MILADY_PORT}/health",
-    );
-    expect(dockerfile).toContain(
-      "http://localhost:$" + "{MILADY_PORT}/api/health",
-    );
+    expect(dockerfile).toContain("EXPOSE 2138");
+    expect(dockerfile).toContain("http://127.0.0.1:$" + "{port}/api/health");
   });
 
   it("keeps deploy runtime files in the canonical docker build context", () => {

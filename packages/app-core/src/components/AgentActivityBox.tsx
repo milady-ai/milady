@@ -23,7 +23,7 @@ export function AgentActivityBox({
   if (!sessions || sessions.length === 0) return null;
 
   return (
-    <div className="border-t border-border px-3 py-1.5 space-y-0.5 z-[1]">
+    <div className="px-3 py-2 space-y-1 z-[1] mb-2 relative rounded-[22px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_12px_36px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/6 backdrop-blur-[22px]">
       {sessions.map((s) => (
         <button
           key={s.sessionId}
@@ -39,7 +39,17 @@ export function AgentActivityBox({
           <span className="text-[11px] font-medium text-txt max-w-[120px] truncate shrink-0">
             {s.label}
           </span>
-          <span className="text-[11px] text-muted truncate min-w-0 flex-1">
+          <span
+            className={`text-[11px] truncate min-w-0 flex-1 ${
+              s.status === "error"
+                ? "text-danger"
+                : s.status === "blocked"
+                  ? "text-warn"
+                  : s.status === "active" || s.status === "tool_running"
+                    ? "text-ok"
+                    : "text-muted"
+            }`}
+          >
             {s.lastActivity ?? deriveActivity(s)}
           </span>
           {/* Chevron-up icon */}

@@ -34,10 +34,7 @@ import {
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
@@ -423,8 +420,6 @@ function VectorGraph({
     ctx.rotate(-Math.PI / 2);
     ctx.fillText("PC2", 0, 0);
     ctx.restore();
-
-    // Draw points
     for (let i = 0; i < graph.points.length; i++) {
       const sx = toVectorGraph2DScreenX(
         graph.points[i][0],
@@ -910,8 +905,6 @@ function VectorGraph3D({
           targetTheta -= e.movementX * 0.01;
           targetPhi -= e.movementY * 0.01;
         }
-
-        // Raycasting for hover
         const rect = updatePointerFromEvent(e);
         raycaster.setFromCamera(pointer, camera);
         const intersects = raycaster.intersectObjects(spheres);
@@ -920,7 +913,6 @@ function VectorGraph3D({
           const idx = intersects[0].object.userData.index;
           setHoveredIdx(idx);
           setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-          // Highlight hovered sphere
           spheres.forEach((s, i) => {
             const mat = s.material as THREE.MeshBasicMaterial;
             mat.opacity = i === idx ? 1 : 0.5;
@@ -1491,12 +1483,6 @@ export function VectorBrowserView({ leftNav }: { leftNav?: ReactNode }) {
     <div className={APP_DESKTOP_SPLIT_SHELL_CLASSNAME}>
       <aside className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}>
         <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-          <div className={`${APP_SIDEBAR_HEADER_CLASSNAME} border-b-0 pb-0`}>
-            <div className={APP_SIDEBAR_KICKER_CLASSNAME}>Database</div>
-            <div className={APP_SIDEBAR_META_CLASSNAME}>
-              Explore memories, embeddings, and vector projections.
-            </div>
-          </div>
           <div className="space-y-3 pt-4">
             {leftNav}
             <DesktopRailSummaryCard>

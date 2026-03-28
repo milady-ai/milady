@@ -151,6 +151,20 @@ function syncElizaEnvToMilady(): void {
   if (aliases) syncElizaEnvToBrand(aliases);
 }
 
+export function isLoopbackRemoteAddress(
+  remoteAddress: string | null | undefined,
+): boolean {
+  if (!remoteAddress) return false;
+  const normalized = remoteAddress.trim().toLowerCase();
+  return (
+    normalized === "127.0.0.1" ||
+    normalized === "::1" ||
+    normalized === "0:0:0:0:0:0:0:1" ||
+    normalized === "::ffff:127.0.0.1" ||
+    normalized === "::ffff:0:127.0.0.1"
+  );
+}
+
 function resolveWalletExecutionMode(
   canSign: boolean,
   canExecuteLocally: boolean,
@@ -977,233 +991,254 @@ async function handleTaskBackedWorkbenchTodoRoute(
     return true;
   }
 
-  const getTaskList = async () =>
-    (
-      (await runtime.getTasks({})) as unknown as Array<Record<string, unknown>>
-    ).map((task) => task as Record<string, unknown>);
+  let operation = "route";
+  try {
+    const getTaskList = async () =>
+      (
+        (await runtime.getTasks({})) as unknown as Array<
+          Record<string, unknown>
+        >
+      ).map((task) => task as Record<string, unknown>);
 
-  if (method === "GET" && pathname === "/api/workbench/todos") {
-    const todos = (await getTaskList())
-      .map((task) => toTaskBackedWorkbenchTodo(task))
-      .filter((todo): todo is WorkbenchTodoResponse => todo !== null)
-      .sort((left, right) => left.name.localeCompare(right.name));
+    if (method === "GET" && pathname === "/api/workbench/todos") {
+      operation = "list todos";
+      const todos = (await getTaskList())
+        .map((task) => toTaskBackedWorkbenchTodo(task))
+        .filter((todo): todo is WorkbenchTodoResponse => todo !== null)
+        .sort((left, right) => left.name.localeCompare(right.name));
 
-    sendJsonResponse(res, 200, { todos });
-    return true;
-  }
-
-  if (method === "POST" && pathname === "/api/workbench/todos") {
-    const body = await readCompatJsonBody(req, res);
-    if (body == null) {
+      sendJsonResponse(res, 200, { todos });
       return true;
     }
 
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    if (!name) {
-      sendJsonErrorResponse(res, 400, "name is required");
-      return true;
-    }
+    if (method === "POST" && pathname === "/api/workbench/todos") {
+      const body = await readCompatJsonBody(req, res);
+      if (body == null) {
+        return true;
+      }
 
-    const description =
-      typeof body.description === "string" ? body.description : "";
-    const type =
-      typeof body.type === "string" && body.type.trim().length > 0
-        ? body.type.trim()
-        : "task";
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      if (!name) {
+        sendJsonErrorResponse(res, 400, "name is required");
+        return true;
+      }
 
-    const taskId = await runtime.createTask({
-      name,
-      description,
-      tags: normalizeCompatTodoTags(body.tags, [WORKBENCH_TODO_TAG, "todo"]),
-      metadata: {
-        isCompleted: false,
-        workbenchTodo: {
-          description,
-          priority: parseCompatNullableNumber(body.priority),
-          isUrgent: body.isUrgent === true,
+      const description =
+        typeof body.description === "string" ? body.description : "";
+      const type =
+        typeof body.type === "string" && body.type.trim().length > 0
+          ? body.type.trim()
+          : "task";
+
+      operation = "create todo";
+      const taskId = await runtime.createTask({
+        name,
+        description,
+        tags: normalizeCompatTodoTags(body.tags, [WORKBENCH_TODO_TAG, "todo"]),
+        metadata: {
           isCompleted: false,
-          type,
+          workbenchTodo: {
+            description,
+            priority: parseCompatNullableNumber(body.priority),
+            isUrgent: body.isUrgent === true,
+            isCompleted: false,
+            type,
+          },
         },
-      },
-    });
+      });
 
-    const created = await runtime.getTask(taskId);
-    const todo = toTaskBackedWorkbenchTodo(
-      created as Record<string, unknown> | null,
-    );
-    if (!todo) {
-      sendJsonErrorResponse(res, 500, "Todo created but unavailable");
+      operation = "load created todo";
+      const created = await runtime.getTask(taskId);
+      const todo = toTaskBackedWorkbenchTodo(
+        created as Record<string, unknown> | null,
+      );
+      if (!todo) {
+        sendJsonErrorResponse(res, 500, "Todo created but unavailable");
+        return true;
+      }
+
+      sendJsonResponse(res, 201, { todo });
       return true;
     }
 
-    sendJsonResponse(res, 201, { todo });
-    return true;
-  }
+    const todoCompleteMatch =
+      /^\/api\/workbench\/todos\/([^/]+)\/complete$/.exec(pathname);
+    if (method === "POST" && todoCompleteMatch) {
+      const todoId = decodeCompatTodoId(todoCompleteMatch[1], res);
+      if (!todoId) {
+        return true;
+      }
 
-  const todoCompleteMatch = /^\/api\/workbench\/todos\/([^/]+)\/complete$/.exec(
-    pathname,
-  );
-  if (method === "POST" && todoCompleteMatch) {
-    const todoId = decodeCompatTodoId(todoCompleteMatch[1], res);
+      const body = await readCompatJsonBody(req, res);
+      if (body == null) {
+        return true;
+      }
+
+      operation = "load todo for completion";
+      const todoTask = (await runtime.getTask(todoId)) as Record<
+        string,
+        unknown
+      > | null;
+      const todo = toTaskBackedWorkbenchTodo(todoTask);
+      if (!todoTask || !todo) {
+        sendJsonErrorResponse(res, 404, "Todo not found");
+        return true;
+      }
+
+      const metadata = readCompatTaskMetadata(todoTask);
+      const todoMeta =
+        asCompatObject(metadata.workbenchTodo) ?? asCompatObject(metadata.todo);
+      const isCompleted = body.isCompleted === true;
+
+      operation = "update todo completion";
+      await runtime.updateTask(todoId, {
+        metadata: {
+          ...metadata,
+          isCompleted,
+          workbenchTodo: {
+            ...(todoMeta ?? {}),
+            isCompleted,
+          },
+        },
+      });
+
+      sendJsonResponse(res, 200, { ok: true });
+      return true;
+    }
+
+    const todoItemMatch = /^\/api\/workbench\/todos\/([^/]+)$/.exec(pathname);
+    if (!todoItemMatch) {
+      return false;
+    }
+
+    const todoId = decodeCompatTodoId(todoItemMatch[1], res);
     if (!todoId) {
       return true;
     }
 
-    const body = await readCompatJsonBody(req, res);
-    if (body == null) {
+    if (method === "GET") {
+      operation = "load todo";
+      const todoTask = (await runtime.getTask(todoId)) as Record<
+        string,
+        unknown
+      > | null;
+      const todo = toTaskBackedWorkbenchTodo(todoTask);
+      if (!todoTask || !todo) {
+        sendJsonErrorResponse(res, 404, "Todo not found");
+        return true;
+      }
+
+      sendJsonResponse(res, 200, { todo });
       return true;
     }
 
-    const todoTask = (await runtime.getTask(todoId)) as Record<
-      string,
-      unknown
-    > | null;
-    const todo = toTaskBackedWorkbenchTodo(todoTask);
-    if (!todoTask || !todo) {
-      sendJsonErrorResponse(res, 404, "Todo not found");
+    if (method === "DELETE") {
+      operation = "load todo for deletion";
+      const todoTask = (await runtime.getTask(todoId)) as Record<
+        string,
+        unknown
+      > | null;
+      if (!todoTask || !toTaskBackedWorkbenchTodo(todoTask)) {
+        sendJsonErrorResponse(res, 404, "Todo not found");
+        return true;
+      }
+
+      operation = "delete todo";
+      await runtime.deleteTask(todoId);
+      sendJsonResponse(res, 200, { ok: true });
       return true;
     }
 
-    const metadata = readCompatTaskMetadata(todoTask);
-    const todoMeta =
-      asCompatObject(metadata.workbenchTodo) ?? asCompatObject(metadata.todo);
-    const isCompleted = body.isCompleted === true;
+    if (method === "PUT") {
+      const body = await readCompatJsonBody(req, res);
+      if (body == null) {
+        return true;
+      }
 
-    await runtime.updateTask(todoId, {
-      metadata: {
+      operation = "load todo for update";
+      const todoTask = (await runtime.getTask(todoId)) as Record<
+        string,
+        unknown
+      > | null;
+      const existingTodo = toTaskBackedWorkbenchTodo(todoTask);
+      if (!todoTask || !existingTodo) {
+        sendJsonErrorResponse(res, 404, "Todo not found");
+        return true;
+      }
+
+      if (typeof body.name === "string" && body.name.trim().length === 0) {
+        sendJsonErrorResponse(res, 400, "name cannot be empty");
+        return true;
+      }
+
+      const metadata = readCompatTaskMetadata(todoTask);
+      const todoMeta =
+        asCompatObject(metadata.workbenchTodo) ?? asCompatObject(metadata.todo);
+      const nextTodoMeta: Record<string, unknown> = {
+        ...(todoMeta ?? {}),
+      };
+      const update: Record<string, unknown> = {};
+
+      if (typeof body.name === "string") {
+        update.name = body.name.trim();
+      }
+      if (typeof body.description === "string") {
+        update.description = body.description;
+        nextTodoMeta.description = body.description;
+      }
+      if (body.priority !== undefined) {
+        nextTodoMeta.priority = parseCompatNullableNumber(body.priority);
+      }
+      if (typeof body.isUrgent === "boolean") {
+        nextTodoMeta.isUrgent = body.isUrgent;
+      }
+      if (typeof body.type === "string" && body.type.trim().length > 0) {
+        nextTodoMeta.type = body.type.trim();
+      }
+      if (body.tags !== undefined) {
+        update.tags = normalizeCompatTodoTags(body.tags, [
+          WORKBENCH_TODO_TAG,
+          "todo",
+        ]);
+      }
+
+      const isCompleted =
+        typeof body.isCompleted === "boolean"
+          ? body.isCompleted
+          : existingTodo.isCompleted;
+      nextTodoMeta.isCompleted = isCompleted;
+
+      update.metadata = {
         ...metadata,
         isCompleted,
-        workbenchTodo: {
-          ...(todoMeta ?? {}),
-          isCompleted,
-        },
-      },
-    });
+        workbenchTodo: nextTodoMeta,
+      };
 
-    sendJsonResponse(res, 200, { ok: true });
-    return true;
-  }
+      operation = "update todo";
+      await runtime.updateTask(todoId, update);
 
-  const todoItemMatch = /^\/api\/workbench\/todos\/([^/]+)$/.exec(pathname);
-  if (!todoItemMatch) {
+      operation = "load updated todo";
+      const refreshed = await runtime.getTask(todoId);
+      const todo = toTaskBackedWorkbenchTodo(
+        refreshed as Record<string, unknown> | null,
+      );
+      if (!todo) {
+        sendJsonErrorResponse(res, 500, "Todo updated but unavailable");
+        return true;
+      }
+
+      sendJsonResponse(res, 200, { todo });
+      return true;
+    }
+
     return false;
-  }
-
-  const todoId = decodeCompatTodoId(todoItemMatch[1], res);
-  if (!todoId) {
-    return true;
-  }
-
-  if (method === "GET") {
-    const todoTask = (await runtime.getTask(todoId)) as Record<
-      string,
-      unknown
-    > | null;
-    const todo = toTaskBackedWorkbenchTodo(todoTask);
-    if (!todoTask || !todo) {
-      sendJsonErrorResponse(res, 404, "Todo not found");
-      return true;
-    }
-
-    sendJsonResponse(res, 200, { todo });
-    return true;
-  }
-
-  if (method === "DELETE") {
-    const todoTask = (await runtime.getTask(todoId)) as Record<
-      string,
-      unknown
-    > | null;
-    if (!todoTask || !toTaskBackedWorkbenchTodo(todoTask)) {
-      sendJsonErrorResponse(res, 404, "Todo not found");
-      return true;
-    }
-
-    await runtime.deleteTask(todoId);
-    sendJsonResponse(res, 200, { ok: true });
-    return true;
-  }
-
-  if (method === "PUT") {
-    const body = await readCompatJsonBody(req, res);
-    if (body == null) {
-      return true;
-    }
-
-    const todoTask = (await runtime.getTask(todoId)) as Record<
-      string,
-      unknown
-    > | null;
-    const existingTodo = toTaskBackedWorkbenchTodo(todoTask);
-    if (!todoTask || !existingTodo) {
-      sendJsonErrorResponse(res, 404, "Todo not found");
-      return true;
-    }
-
-    if (typeof body.name === "string" && body.name.trim().length === 0) {
-      sendJsonErrorResponse(res, 400, "name cannot be empty");
-      return true;
-    }
-
-    const metadata = readCompatTaskMetadata(todoTask);
-    const todoMeta =
-      asCompatObject(metadata.workbenchTodo) ?? asCompatObject(metadata.todo);
-    const nextTodoMeta: Record<string, unknown> = {
-      ...(todoMeta ?? {}),
-    };
-    const update: Record<string, unknown> = {};
-
-    if (typeof body.name === "string") {
-      update.name = body.name.trim();
-    }
-    if (typeof body.description === "string") {
-      update.description = body.description;
-      nextTodoMeta.description = body.description;
-    }
-    if (body.priority !== undefined) {
-      nextTodoMeta.priority = parseCompatNullableNumber(body.priority);
-    }
-    if (typeof body.isUrgent === "boolean") {
-      nextTodoMeta.isUrgent = body.isUrgent;
-    }
-    if (typeof body.type === "string" && body.type.trim().length > 0) {
-      nextTodoMeta.type = body.type.trim();
-    }
-    if (body.tags !== undefined) {
-      update.tags = normalizeCompatTodoTags(body.tags, [
-        WORKBENCH_TODO_TAG,
-        "todo",
-      ]);
-    }
-
-    const isCompleted =
-      typeof body.isCompleted === "boolean"
-        ? body.isCompleted
-        : existingTodo.isCompleted;
-    nextTodoMeta.isCompleted = isCompleted;
-
-    update.metadata = {
-      ...metadata,
-      isCompleted,
-      workbenchTodo: nextTodoMeta,
-    };
-
-    await runtime.updateTask(todoId, update);
-
-    const refreshed = await runtime.getTask(todoId);
-    const todo = toTaskBackedWorkbenchTodo(
-      refreshed as Record<string, unknown> | null,
+  } catch (err) {
+    logger.error(
+      `[workbench/todos] ${operation} failed: ${err instanceof Error ? err.message : String(err)}`,
     );
-    if (!todo) {
-      sendJsonErrorResponse(res, 500, "Todo updated but unavailable");
-      return true;
-    }
-
-    sendJsonResponse(res, 200, { todo });
+    sendJsonErrorResponse(res, 500, `Failed to ${operation}`);
     return true;
   }
-
-  return false;
 }
 
 async function _getTableColumnNames(
@@ -2080,7 +2115,18 @@ async function handleMiladyCompatRoute(
   // Milady dev observability routes (loopback where noted). WHY: agents cannot see the Electrobun
   // window; these endpoints mirror orchestrator state (stack JSON), proxied screenshot, and log
   // tail — see docs/apps/desktop-local-development.md and dev-stack.ts / dev-console-log.ts.
+  if (url.pathname.startsWith("/api/dev/")) {
+    if (process.env.NODE_ENV === "production") {
+      sendJsonErrorResponse(res, 404, "Not found");
+      return true;
+    }
+  }
+
   if (method === "GET" && url.pathname === "/api/dev/stack") {
+    if (!isLoopbackRemoteAddress(req.socket.remoteAddress)) {
+      sendJsonErrorResponse(res, 403, "loopback only");
+      return true;
+    }
     if (!ensureCompatApiAuthorized(req, res)) {
       return true;
     }
@@ -2096,10 +2142,7 @@ async function handleMiladyCompatRoute(
 
   // Proxies Electrobun dev screenshot server (full-screen PNG via OS capture tools).
   if (method === "GET" && url.pathname === "/api/dev/cursor-screenshot") {
-    const ra = req.socket.remoteAddress;
-    const loopback =
-      ra === "127.0.0.1" || ra === "::1" || ra === "::ffff:127.0.0.1";
-    if (!loopback) {
+    if (!isLoopbackRemoteAddress(req.socket.remoteAddress)) {
       sendJsonErrorResponse(res, 403, "loopback only");
       return true;
     }
@@ -2167,10 +2210,7 @@ async function handleMiladyCompatRoute(
 
   // Tail of desktop dev orchestrator log (vite / api / electrobun), loopback only.
   if (method === "GET" && url.pathname === "/api/dev/console-log") {
-    const ra = req.socket.remoteAddress;
-    const loopback =
-      ra === "127.0.0.1" || ra === "::1" || ra === "::ffff:127.0.0.1";
-    if (!loopback) {
+    if (!isLoopbackRemoteAddress(req.socket.remoteAddress)) {
       sendJsonErrorResponse(res, 403, "loopback only");
       return true;
     }
@@ -2257,7 +2297,12 @@ async function handleMiladyCompatRoute(
       sendJsonErrorResponse(res, 403, "Pairing disabled");
       return true;
     }
-    if (!rateLimitPairing(req.socket.remoteAddress ?? null)) {
+    const remoteAddress = req.socket.remoteAddress;
+    if (!remoteAddress) {
+      sendJsonErrorResponse(res, 403, "Cannot determine client address");
+      return true;
+    }
+    if (!rateLimitPairing(remoteAddress)) {
       sendJsonErrorResponse(res, 429, "Too many attempts. Try again later.");
       return true;
     }
@@ -2512,6 +2557,11 @@ async function handleMiladyCompatRoute(
   // general-purpose key export endpoint.
 
   if (method === "GET" && url.pathname === "/api/wallet/keys") {
+    if (!isLoopbackRemoteAddress(req.socket.remoteAddress)) {
+      sendJsonErrorResponse(res, 403, "loopback only");
+      return true;
+    }
+
     if (!ensureCompatSensitiveRouteAuthorized(req, res)) {
       return true;
     }
@@ -3653,7 +3703,14 @@ export function patchHttpCreateServerForMiladyCompat(
         }
       }
 
-      listener(req, res);
+      Promise.resolve(listener(req, res)).catch((err) => {
+        console.error("[milady-compat] upstream listener error", err);
+        if (!res.headersSent) {
+          res.statusCode = 500;
+          res.setHeader("content-type", "application/json; charset=utf-8");
+          res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+      });
     };
 
     if (typeof firstArg === "function") {

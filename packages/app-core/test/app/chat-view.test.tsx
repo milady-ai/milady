@@ -35,7 +35,7 @@ interface ChatViewContextStub {
           prev: Array<{ data: string; mimeType: string; name: string }>,
         ) => Array<{ data: string; mimeType: string; name: string }>),
   ) => void;
-  uiLanguage: "en" | "zh-CN";
+  uiLanguage: "en" | "zh-CN" | "ko" | "es" | "pt" | "vi" | "tl";
   chatMode: "simple" | "power";
   chatAgentVoiceMuted: boolean;
   elizaCloudConnected: boolean;
@@ -227,6 +227,22 @@ describe("ChatView", () => {
       (node) => node.type === "span" && text(node) === "stream me",
     );
     expect(userTextNodes.length).toBe(1);
+  });
+
+  it("maps ui language to matching voice locale", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        uiLanguage: "es",
+      }),
+    );
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(ChatView));
+    });
+
+    expect(mockUseVoiceChat).toHaveBeenCalledWith(
+      expect.objectContaining({ lang: "es-ES" }),
+    );
   });
 
   it("does not auto-play assistant speech while stream is active in default chat", async () => {

@@ -90,11 +90,12 @@ export interface NavigationEventsApi {
 }
 
 export type OnboardingStep =
-  | "welcome"
+  | "cloud_login"
+  | "identity"
   | "hosting"
   | "providers"
+  | "voice"
   | "permissions"
-  | "identity"
   | "launch";
 
 export interface OnboardingStepMeta {
@@ -103,12 +104,12 @@ export interface OnboardingStepMeta {
   subtitle: string;
 }
 
-/** Unified 6-step onboarding flow — identity (character select) is first. */
+/** Unified 7-step onboarding flow — cloud check is first, identity is second. */
 export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
   {
-    id: "welcome",
-    name: "onboarding.stepName.welcome",
-    subtitle: "onboarding.stepSub.welcome",
+    id: "cloud_login",
+    name: "onboarding.stepName.cloudLogin",
+    subtitle: "onboarding.stepSub.cloudLogin",
   },
   {
     id: "identity",
@@ -124,6 +125,11 @@ export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
     id: "providers",
     name: "onboarding.stepName.providers",
     subtitle: "onboarding.stepSub.providers",
+  },
+  {
+    id: "voice",
+    name: "onboarding.stepName.voice",
+    subtitle: "onboarding.stepSub.voice",
   },
   {
     id: "permissions",
@@ -247,6 +253,15 @@ export interface ChatTurnUsage extends ChatTokenUsage {
 }
 
 // ── Context value type ─────────────────────────────────────────────────
+
+/** One toggle per primary chain in the wallet inventory filter strip. */
+export type InventoryChainFilters = {
+  ethereum: boolean;
+  base: boolean;
+  bsc: boolean;
+  avax: boolean;
+  solana: boolean;
+};
 
 export interface AppState {
   // Core
@@ -379,7 +394,9 @@ export interface AppState {
   walletExportVisible: boolean;
   walletApiKeySaving: boolean;
   inventorySort: "chain" | "symbol" | "value";
-  inventoryChainFocus: string;
+  /** Ascending vs descending for the active `inventorySort` key. */
+  inventorySortDirection: "asc" | "desc";
+  inventoryChainFilters: InventoryChainFilters;
   walletError: string | null;
 
   // ERC-8004 Registry
@@ -506,6 +523,8 @@ export interface AppState {
   onboardingLargeModel: string;
   onboardingProvider: string;
   onboardingApiKey: string;
+  onboardingVoiceProvider: string;
+  onboardingVoiceApiKey: string;
   onboardingExistingInstallDetected: boolean;
   onboardingDetectedProviders: Array<{
     id: string;

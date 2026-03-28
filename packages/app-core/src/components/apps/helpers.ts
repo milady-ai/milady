@@ -14,7 +14,9 @@ export const CATEGORY_LABELS: Record<string, string> = {
 
 export function shouldShowAppInAppsView(
   app: Pick<RegistryAppInfo, "name">,
-  isProd = import.meta.env.PROD,
+  isProd: boolean = typeof import.meta.env.PROD === "boolean"
+    ? import.meta.env.PROD
+    : Boolean(import.meta.env.PROD),
 ): boolean {
   if (!isProd) return true;
   return PROD_ALLOWED_APPS.has(app.name);

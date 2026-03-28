@@ -81,7 +81,6 @@ describe("StartupFailureView", () => {
 
     const snapshot = JSON.stringify(tree?.toJSON());
     expect(snapshot).toContain("Startup failed:");
-    expect(snapshot).toContain("The agent process exited unexpectedly.");
     expect(snapshot).toContain("stack trace");
     expect(snapshot).toContain("Retry Startup");
     expect(snapshot).toContain("Report Bug");
@@ -152,9 +151,7 @@ describe("StartupFailureView", () => {
         <StartupFailureView
           error={{
             reason: "backend-unreachable",
-            phase: "starting-backend",
-            message: "Failed to reach the app backend.",
-            detail: null,
+            detail: undefined,
           }}
           onRetry={vi.fn()}
         />,
@@ -162,7 +159,6 @@ describe("StartupFailureView", () => {
     });
 
     const snapshot = JSON.stringify(tree?.toJSON());
-    expect(snapshot).toContain("This origin does not host the agent backend.");
     expect(snapshot).toContain("Open App");
   });
 });

@@ -30,12 +30,15 @@ interface ChatModalViewProps {
   onRequestClose?: () => void;
   showSidebar?: boolean;
   onSidebarClose?: () => void;
+  /** Override click handler for agent activity box sessions (e.g. open side panel in companion). */
+  onPtySessionClick?: (sessionId: string) => void;
 }
 
 export const ChatModalView = memo(function ChatModalView({
   variant = "full-overlay",
   showSidebar = false,
   onSidebarClose,
+  onPtySessionClick,
 }: ChatModalViewProps) {
   useRenderGuard("ChatModalView");
 
@@ -101,7 +104,10 @@ export const ChatModalView = memo(function ChatModalView({
             }`}
             data-chat-game-thread
           >
-            <ChatView variant="game-modal" />
+            <ChatView
+              variant="game-modal"
+              onPtySessionClick={onPtySessionClick}
+            />
           </section>
         </div>
       </div>

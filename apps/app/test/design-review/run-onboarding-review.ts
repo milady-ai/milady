@@ -175,8 +175,8 @@ const steps: StepSpec[] = [
     setup: null, // First step, just navigate
   },
   {
-    id: "02-identity",
-    label: "Identity — Choose Agent",
+    id: "02-connection-hosting",
+    label: "Connection — Hosting Selection",
     setup: async (page) => {
       // The welcome CTA has shifted to "Get Started"; keep the old copy as a fallback.
       await clickVisibleTextFallback(page, ["Get Started", "Create New Agent"]);
@@ -184,65 +184,62 @@ const steps: StepSpec[] = [
     },
   },
   {
-    id: "03-connection-hosting",
-    label: "Connection — Hosting Selection",
-    setup: async (page) => {
-      // Click "Continue" on identity step → connection
-      await page.getByText("Continue").first().click();
-      await page.waitForTimeout(600);
-    },
-  },
-  {
-    id: "04-connection-provider",
+    id: "03-connection-provider",
     label: "Connection — Provider Selection",
     setup: async (page) => {
-      // Select "Local" hosting option — reveals provider list
+      // Select local hosting to advance into the provider list.
       await page.getByText("Local").first().click();
       await page.waitForTimeout(600);
     },
   },
   {
-    id: "05-connection-config",
+    id: "04-connection-config",
     label: "Connection — Provider Config",
     setup: async (page) => {
-      // Select Ollama provider — shows config + Confirm button
+      // Select a stable provider so the detail/config panel renders.
       await page.getByText("Ollama").first().click();
       await page.waitForTimeout(600);
     },
   },
   {
-    id: "06-rpc",
-    label: "RPC — Chain Configuration",
+    id: "05-permissions",
+    label: "Permissions — System Access",
     setup: async (page) => {
-      // Click Confirm to advance from connection to rpc
-      await page.getByText("Confirm").click();
+      // Confirm the provider choice to advance to permissions.
+      await page.getByText("Confirm").first().click();
       await page.waitForTimeout(600);
     },
   },
   {
-    id: "07-senses",
-    label: "Senses — Permissions",
-    setup: async (page) => {
-      // Keep the current RPC skip copy and preserve the older capitalization fallback.
-      await clickVisibleTextFallback(page, ["Skip for now", "Skip for Now"]);
-      await page.waitForTimeout(600);
-    },
-  },
-  {
-    id: "08-activate",
-    label: "Activate — Ready",
+    id: "06-identity",
+    label: "Identity — Choose Agent",
     setup: async (page) => {
       // Default to the stable skip path. Grant-path captures can be enabled via
       // MILADY_DESIGN_REVIEW_PERMISSIONS_PATH=grant when needed.
       if (ONBOARDING_PERMISSION_FLOW === "grant") {
         await clickVisibleTextFallback(page, [
+          "Grant Permissions",
           "Grant",
           "Allow All Permissions",
           "Allow All",
+          "Continue",
         ]);
       } else {
-        await clickVisibleTextFallback(page, ["Skip for Now", "Skip for now"]);
+        await clickVisibleTextFallback(page, [
+          "Skip for Now",
+          "Skip for now",
+          "Continue",
+        ]);
       }
+      await page.waitForTimeout(600);
+    },
+  },
+  {
+    id: "07-activate",
+    label: "Activate — Ready",
+    setup: async (page) => {
+      // Continue from identity into the final ready screen.
+      await page.getByText("Continue").first().click();
       await page.waitForTimeout(600);
     },
   },

@@ -325,7 +325,7 @@ Use this staged path so you do not get overwhelmed.
 3. **App/platform specialization**
    - `/apps/desktop`
    - `/apps/mobile`
-   - `/apps/chrome-extension`
+   - Browser Relay release-status documentation when browser automation is relevant
 4. **Cloud and deployment**
    - `/guides/cloud`
    - `/deployment`

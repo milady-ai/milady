@@ -1,31 +1,30 @@
 // @vitest-environment jsdom
 
 import { openExternalUrl } from "@miladyai/app-core/utils";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-type TestWindow = Window & {
-  __MILADY_ELECTROBUN_RPC__?: {
-    request: Record<string, (params?: unknown) => Promise<unknown>>;
-    onMessage: (
-      messageName: string,
-      listener: (payload: unknown) => void,
-    ) => void;
-    offMessage: (
-      messageName: string,
-      listener: (payload: unknown) => void,
-    ) => void;
-  };
-};
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
+
+type BridgeWindow = Window & { __MILADY_ELECTROBUN_RPC__?: unknown };
 
 describe("openExternalUrl", () => {
+  beforeEach(() => {
+    // Ensure no desktop bridge is present by default (web environment)
+    delete (window as BridgeWindow).__MILADY_ELECTROBUN_RPC__;
+    vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
+      undefined,
+    );
+  });
+
   afterEach(() => {
-    delete (window as TestWindow).__MILADY_ELECTROBUN_RPC__;
+    vi.unstubAllGlobals();
+    delete (window as BridgeWindow).__MILADY_ELECTROBUN_RPC__;
     vi.restoreAllMocks();
   });
 
   it("uses the Electrobun desktop bridge when available", async () => {
     const request = vi.fn().mockResolvedValue(undefined);
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+    (window as BridgeWindow).__MILADY_ELECTROBUN_RPC__ = {
       request: { desktopOpenExternal: request },
       onMessage: vi.fn(),
       offMessage: vi.fn(),
@@ -41,6 +40,8 @@ describe("openExternalUrl", () => {
   });
 
   it("falls back to window.open on web", async () => {
+    // No RPC bridge → invokeDesktopBridgeRequest returns null,
+    // getElectrobunRendererRpc returns undefined → web fallback path.
     const popup = {} as Window;
     const openSpy = vi.spyOn(window, "open").mockReturnValue(popup);
 
@@ -63,3 +64,4 @@ describe("openExternalUrl", () => {
     );
   });
 });
+

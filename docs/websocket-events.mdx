@@ -24,21 +24,35 @@ The WebSocket endpoint is available at `/ws` on the API server (port 2138) or th
 
 ### Authentication
 
-When `MILADY_API_TOKEN` is configured, the WebSocket upgrade request must include the token as a `?token=` query parameter. The server calls `resolveWebSocketUpgradeRejection()` to validate credentials before accepting the connection.
+When `MILADY_API_TOKEN` is configured, the WebSocket connection requires authentication. The client connects to the `/ws` endpoint without credentials in the URL, then authenticates by sending an `auth` message immediately after the connection opens:
 
-```text
-ws://localhost:2138/ws?token=YOUR_API_TOKEN
+```json
+{ "type": "auth", "token": "YOUR_API_TOKEN" }
 ```
 
+The server validates the token and responds with:
+
+```json
+{ "type": "auth-ok" }
+```
+
+If the token is valid, the server activates the connection and sends the initial `status` event and event replay. If the token is missing or invalid, the server closes the connection with status code `1008` (Policy Violation).
+
+<Note>
+Messages sent before authentication (other than the `auth` message itself) are rejected and the connection is closed.
+</Note>
+
+You can also authenticate during the HTTP upgrade handshake by including the token in an `Authorization: Bearer <token>` header. If the handshake includes a valid token, the connection is activated immediately without needing to send an `auth` message.
+
 <Warning>
-If token auth is enabled and the WebSocket upgrade request lacks valid credentials, the connection will be rejected with a standard HTTP error before the WebSocket handshake completes (401 Unauthorized or 403 Forbidden). Requests to paths other than `/ws` receive a 404 rejection.
+Passing the token as a `?token=` query parameter is **deprecated** and disabled by default. Query-parameter tokens are rejected with a `401 Unauthorized` response. To temporarily re-enable query-parameter authentication during migration, set the environment variable `ELIZA_ALLOW_WS_QUERY_TOKEN=1`. Requests to paths other than `/ws` receive a 404 rejection.
 </Warning>
 
 ## Connection Lifecycle
 
 ### On Connect
 
-When a WebSocket client connects, the server immediately sends:
+When a WebSocket client connects and is authenticated (either via a handshake header or an `auth` message), the server immediately sends:
 
 1. A `status` event with the current agent state
 2. A replay of the last 120 buffered stream events (agent events + heartbeat events + training events)
@@ -84,6 +98,8 @@ All WebSocket event types at a glance:
 
 | Event Type | Direction | Buffered | Description |
 |------------|-----------|----------|-------------|
+| `auth` | Client → Server | No | Authenticate the connection with an API token |
+| `auth-ok` | Server → Client | No | Confirms successful authentication |
 | `ping` | Client → Server | No | Keepalive ping |
 | `pong` | Server → Client | No | Keepalive response |
 | `active-conversation` | Client → Server | No | Set active conversation in the UI |
@@ -102,8 +118,22 @@ All WebSocket event types at a glance:
 
 | Message Type | Payload | Description |
 |-------------|---------|-------------|
+| `auth` | `{ token: string }` | Authenticate the connection; server responds with `auth-ok` on success |
 | `ping` | `{}` | Keepalive ping; server responds with `pong` |
 | `active-conversation` | `{ conversationId: string }` | Inform the server which conversation is currently active in the UI |
+
+### Authentication
+
+When `MILADY_API_TOKEN` is configured, the first message sent after connecting must be an `auth` message:
+
+```json
+{
+  "type": "auth",
+  "token": "your-api-token"
+}
+```
+
+On success, the server responds with `{ "type": "auth-ok" }` and activates the connection (sending the initial `status` event and event replay). On failure, the server closes the connection with code `1008`.
 
 ### Active Conversation Tracking
 
@@ -579,16 +609,17 @@ Sent if the runtime is unavailable or an error occurs during generation.
 
 ## Reconnection Behavior
 
-The frontend API client (`apps/app/src/api-client.ts`) handles reconnection automatically via its `connectWs()` method. The reconnection strategy uses exponential backoff with these hardcoded parameters:
+The frontend API client handles reconnection automatically. The reconnection strategy uses exponential backoff with these parameters:
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
 | Initial delay | 500ms | Delay before first reconnection attempt |
 | Backoff factor | 1.5x | Multiplier applied after each failed attempt |
 | Max delay | 10,000ms | Maximum delay between reconnection attempts |
-| Max attempts | unlimited | Reconnection never stops trying |
+| Max attempts | 15 | Fast-backoff reconnection attempts |
+| Slow probe interval | 30,000ms | After max attempts are exhausted, the client continues probing every 30 seconds |
 
-On successful reconnect, the `backoffMs` resets to 500ms.
+On successful reconnect, the `backoffMs` resets to 500ms. After the initial 15 fast-backoff attempts are exhausted, the client switches to a low-frequency 30-second probe interval so the UI can recover automatically without requiring a full page refresh.
 
 <Tip>
 On reconnect, the server replays the last 120 buffered events, so clients can catch up on missed events without a full page refresh.
@@ -629,6 +660,6 @@ interface StreamEventEnvelope {
 The frontend API client maintains a send queue for messages that cannot be delivered while the WebSocket is disconnected:
 
 - Queue capacity: 32 messages
-- When full, the oldest message is dropped
+- When full, the oldest message is dropped (a warning is logged with the dropped message type)
 - `active-conversation` messages are deduplicated (only the latest is kept)
 - The queue is flushed on successful reconnection

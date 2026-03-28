@@ -22,10 +22,7 @@ import {
   APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
   APP_SIDEBAR_CARD_BASE_CLASSNAME,
   APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
@@ -285,12 +282,6 @@ export function MediaGalleryView({ leftNav }: { leftNav?: ReactNode }) {
     <div className={APP_DESKTOP_SPLIT_SHELL_CLASSNAME}>
       <aside className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}>
         <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-          <div className={`${APP_SIDEBAR_HEADER_CLASSNAME} border-b-0 pb-0`}>
-            <div className={APP_SIDEBAR_KICKER_CLASSNAME}>Database</div>
-            <div className={APP_SIDEBAR_META_CLASSNAME}>
-              Browse stored images, video, and audio from your workspace.
-            </div>
-          </div>
           <div className="space-y-3 pt-4">
             {leftNav}
             <DesktopRailSummaryCard>

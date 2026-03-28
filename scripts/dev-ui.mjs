@@ -28,6 +28,10 @@ import process from "node:process";
 import { ethers } from "ethers";
 import * as JSON5Module from "json5";
 import { CAPACITOR_PLUGIN_NAMES } from "../apps/app/scripts/capacitor-plugin-names.mjs";
+import {
+  resolveDesktopApiPort,
+  resolveDesktopUiPort,
+} from "../packages/shared/src/runtime-env.ts";
 import { getBunVersionAdvisory } from "./lib/bun-version-guard.mjs";
 import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
 import {
@@ -37,14 +41,14 @@ import {
 import { buildVisionDepsFailureMessage } from "./lib/dev-ui-vision.mjs";
 import { signalSpawnedProcessTree } from "./lib/kill-process-tree.mjs";
 
-const API_PORT = Number(process.env.MILADY_API_PORT) || 31337;
+const API_PORT = resolveDesktopApiPort(process.env);
 const JSON5 = JSON5Module.default ?? JSON5Module;
 
 // --app=<name> selects which app to serve (default: "app" → apps/app)
 const appArgMatch = process.argv.find((a) => a.startsWith("--app="));
 const appName = appArgMatch ? appArgMatch.split("=")[1] : "app";
 const APP_UI_PORTS = {
-  app: 2138,
+  app: resolveDesktopUiPort(process.env),
   home: Number(process.env.MILADY_HOME_PORT) || 2142,
 };
 const UI_PORT = APP_UI_PORTS[appName] ?? 2138;
@@ -1185,8 +1189,10 @@ function startVite() {
       ...process.env,
       NODE_ENV: "development",
       ELIZA_NAMESPACE: cliName,
+      MILADY_PORT: String(UI_PORT),
       ELIZA_API_PORT: String(API_PORT),
       MILADY_API_PORT: String(API_PORT),
+      ELIZA_PORT: String(API_PORT),
       ELIZA_HOME_API_PORT: String(API_PORT),
     },
     stdio: ["inherit", "pipe", "pipe"],
@@ -1325,7 +1331,10 @@ if (uiOnly) {
       NODE_ENV: "development",
       ...chainEnv,
       ELIZA_NAMESPACE: cliName,
+      MILADY_API_PORT: String(API_PORT),
+      ELIZA_API_PORT: String(API_PORT),
       ELIZA_PORT: String(API_PORT),
+      MILADY_PORT: String(UI_PORT),
       ELIZA_HEADLESS: "1",
       LOG_LEVEL: devLogLevel,
     },

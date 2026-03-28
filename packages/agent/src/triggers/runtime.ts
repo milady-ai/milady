@@ -36,6 +36,7 @@ export interface TriggerExecutionResult {
   error?: string;
   taskDeleted: boolean;
   runRecord?: TriggerRunRecord;
+  trigger?: TriggerSummary | null;
 }
 
 const metricsByAgent = new Map<UUID, TriggerMetricsState>();
@@ -252,7 +253,11 @@ export async function executeTriggerTask(
   ) {
     await runtime.deleteTask(task.id);
     recordExecutionMetric(runtime.agentId, "skipped", Date.now());
-    return { status: "skipped", taskDeleted: true };
+    return {
+      status: "skipped",
+      taskDeleted: true,
+      trigger: taskToTriggerSummary(task),
+    };
   }
 
   if (
@@ -327,21 +332,11 @@ export async function executeTriggerTask(
     lastError: errorMessage || undefined,
   };
 
-  if (
+  const shouldDeleteTask =
     updatedTrigger.triggerType === "once" ||
     (typeof updatedTrigger.maxRuns === "number" &&
       updatedTrigger.maxRuns > 0 &&
-      updatedTrigger.runCount >= updatedTrigger.maxRuns)
-  ) {
-    await runtime.deleteTask(task.id);
-    recordExecutionMetric(runtime.agentId, status, finishedAt);
-    return {
-      status,
-      error: errorMessage || undefined,
-      runRecord,
-      taskDeleted: true,
-    };
-  }
+      updatedTrigger.runCount >= updatedTrigger.maxRuns);
 
   const existingMetadata = taskMetadata(task);
   const nextMetadata = buildTriggerMetadata({
@@ -377,12 +372,32 @@ export async function executeTriggerTask(
     metadata: metadataToPersist,
   });
 
+  const updatedTask: Task = {
+    ...task,
+    description: metadataToPersist.trigger?.displayName ?? task.description,
+    metadata: metadataToPersist,
+  };
+  const triggerSummary = taskToTriggerSummary(updatedTask);
+
+  if (shouldDeleteTask) {
+    await runtime.deleteTask(task.id);
+    recordExecutionMetric(runtime.agentId, status, finishedAt);
+    return {
+      status,
+      error: errorMessage || undefined,
+      runRecord,
+      taskDeleted: true,
+      trigger: triggerSummary,
+    };
+  }
+
   recordExecutionMetric(runtime.agentId, status, finishedAt);
   return {
     status,
     error: errorMessage || undefined,
     runRecord,
     taskDeleted: false,
+    trigger: triggerSummary,
   };
 }
 
@@ -393,11 +408,13 @@ export function registerTriggerTaskWorker(runtime: IAgentRuntime): void {
     name: TRIGGER_TASK_NAME,
     validate: async () => true,
     execute: async (rt, options, task) => {
-      await executeTriggerTask(rt, task, {
+      // Return the full result so callers (tests, dashboards) can inspect
+      // trigger-specific fields like taskDeleted and runRecord.
+      return await executeTriggerTask(rt, task, {
         source: options.source === "manual" ? "manual" : "scheduler",
         force: options.force === true,
-      });
-      return {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any;
     },
   });
 }

@@ -510,7 +510,7 @@ export function applyPatchToPackageJson(pkgPath) {
   const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
   const dot = pkg.exports?.["."];
   if (!dot || typeof dot !== "object") return false;
-  if (!dot.bun || !dot.bun.endsWith("/src/index.ts")) return false;
+  if (!dot.bun?.endsWith("/src/index.ts")) return false;
 
   const dir = dirname(pkgPath);
   if (existsSync(resolve(dir, dot.bun))) return false; // src exists — no patch

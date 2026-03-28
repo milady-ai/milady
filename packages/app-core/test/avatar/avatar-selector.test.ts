@@ -202,7 +202,7 @@ describe("Avatar Selection State", () => {
 describe("Onboarding Avatar Step", () => {
   it("avatar step comes after name and before style", () => {
     const steps = [
-      "welcome",
+      "cloud_login",
       "name",
       "avatar",
       "style",

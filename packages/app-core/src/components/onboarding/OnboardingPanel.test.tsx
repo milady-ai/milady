@@ -19,5 +19,11 @@ describe("OnboardingPanel", () => {
       "absolute right-0 top-0 bottom-0",
     );
     expect(String(inner?.props.className)).toContain("max-h-full");
+    expect(String(inner?.props.className)).toContain(
+      "bg-[var(--onboarding-panel-bg)]",
+    );
+    expect(String(inner?.props.className)).toContain(
+      "var(--onboarding-panel-shadow)",
+    );
   });
 });

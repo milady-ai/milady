@@ -13,7 +13,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { textOf } from "../../../../test/helpers/react-test";
 
 type OnboardingStep =
-  | "welcome"
+  | "cloud_login"
   | "identity"
   | "connection"
   | "rpc"
@@ -106,7 +106,6 @@ const { companionOverlayTabs, mockUseApp } = vi.hoisted(() => ({
     "apps",
     "connectors",
     "knowledge",
-    "lifo",
     "stream",
     "wallets",
   ]),
@@ -148,10 +147,9 @@ vi.mock("@miladyai/app-core/components", async () => {
     Header: () => React.createElement("div", null, "Header"),
     InventoryView: () => React.createElement("div", null, "InventoryView"),
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-    LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
     OnboardingWizard: () => {
       const state = mockUseApp();
-      if (state.onboardingStep === "welcome") {
+      if (state.onboardingStep === "cloud_login") {
         return React.createElement(
           "button",
           {
@@ -289,7 +287,7 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
   OnboardingWizard: () => {
     const state = mockUseApp();
-    if (state.onboardingStep === "welcome") {
+    if (state.onboardingStep === "cloud_login") {
       return React.createElement(
         "button",
         {
@@ -443,9 +441,6 @@ vi.mock("@miladyai/app-core/src/components/InventoryView", () => ({
 }));
 vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-}));
-vi.mock("@miladyai/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
 }));
 vi.mock("@miladyai/app-core/src/components/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),
@@ -963,10 +958,12 @@ describe("agent reset and re-onboarding (e2e)", () => {
     expect(state.conversations).toEqual([]);
     expect(state.plugins).toEqual([]);
 
-    // UI should show onboarding again
+    // UI should show onboarding again (the shell may render behind the
+    // onboarding overlay during the crossfade transition, so check for
+    // positive onboarding presence rather than negative ChatView absence)
     const renderedText = textOf(tree.root);
     expect(renderedText).not.toContain("CharacterEditor");
-    expect(renderedText).not.toContain("ChatView");
+    expect(renderedText).toContain("onboarding.chooseAgent");
 
     tree.unmount();
   });

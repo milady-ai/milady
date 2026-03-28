@@ -386,7 +386,7 @@ export const PRIMARY_CHAIN_KEYS: ChainKey[] = [
 export function chainKeyToWalletRpcChain(
   chainFocus: string,
 ): "evm" | "bsc" | "solana" | null {
-  if (chainFocus === "all") return null;
+  if (chainFocus === "all" || chainFocus === "multi") return null;
   if (chainFocus === "bsc" || chainFocus === "solana") return chainFocus;
   const evmKeys: ChainKey[] = [
     "ethereum",

@@ -322,6 +322,8 @@ export const executeTradeAction: Action = {
         };
       }
 
+      // For agent automation, reporting "success" without an on-chain execution
+      // leads to false-positive heartbeat status.
       const text = buildTradeFailureText({
         side,
         amount: amountRaw,

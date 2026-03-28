@@ -13,6 +13,7 @@ import {
   flush,
   text,
 } from "../../../../test/helpers/react-test";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 
 interface AppsContextStub {
   setState: (
@@ -156,6 +157,11 @@ async function _waitFor(
 
 describe("AppsView", () => {
   beforeEach(() => {
+    // Prevent jsdom mock leakages between files
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
+      undefined,
+    );
     mockClientFns.listApps.mockReset();
     mockClientFns.listInstalledApps.mockReset();
     mockClientFns.launchApp.mockReset();
@@ -208,6 +214,8 @@ describe("AppsView", () => {
   const tStub = (k: string) => k;
 
   afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
     vi.restoreAllMocks();
   });
 
@@ -275,7 +283,7 @@ describe("AppsView", () => {
       }),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -330,7 +338,7 @@ describe("AppsView", () => {
       }),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -370,7 +378,7 @@ describe("AppsView", () => {
 
     const popupSpy = vi.spyOn(window, "open").mockReturnValue({} as Window);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -417,7 +425,7 @@ describe("AppsView", () => {
 
     vi.spyOn(window, "open").mockReturnValue(null);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -461,18 +469,14 @@ describe("AppsView", () => {
         viewer: null,
       }),
     );
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: {
-        request: { desktopOpenExternal: request },
-        onMessage: vi.fn(),
-        offMessage: vi.fn(),
-      },
-    });
+    (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__ = {
+      request: { desktopOpenExternal: request },
+      onMessage: vi.fn(),
+      offMessage: vi.fn(),
+    };
     const popupSpy = vi.spyOn(window, "open");
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -491,6 +495,8 @@ describe("AppsView", () => {
       "success",
       2600,
     );
+    delete (window as any).__MILADY_ELECTROBUN_RPC__;
+    delete (globalThis as any).__MILADY_ELECTROBUN_RPC__;
   });
 
   it("refreshes list and applies search filtering", async () => {
@@ -516,7 +522,7 @@ describe("AppsView", () => {
       },
     ]);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -592,7 +598,7 @@ describe("AppsView", () => {
     });
     mockClientFns.listApps.mockResolvedValue([app]);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -638,7 +644,7 @@ describe("AppsView", () => {
       },
     ]);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });
@@ -667,7 +673,7 @@ describe("AppsView", () => {
     const appTwo = createApp("@elizaos/app-babylon", "Babylon", "Wallet");
     mockClientFns.listApps.mockResolvedValue([appOne, appTwo]);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AppsView));
     });

@@ -351,10 +351,44 @@ describe("Companion chat queue e2e", () => {
     const secondReply = createDeferred<{ text: string; agentName: string }>();
     const sentTexts: string[] = [];
 
+    // Track accumulated messages so loadConversationMessages (called after
+    // each successful send) returns the correct server-side state.
+    const serverMessages: Array<{
+      id: string;
+      role: string;
+      text: string;
+      timestamp: number;
+    }> = [
+      {
+        id: "msg-1",
+        role: "assistant",
+        text: "hello",
+        timestamp: Date.now(),
+      },
+    ];
+
+    vi.mocked(client.getConversationMessages).mockImplementation(async () => ({
+      messages: [...serverMessages],
+    }));
+
     vi.mocked(client.sendConversationMessageStream).mockImplementation(
       async (_conversationId: string, text: string) => {
         sentTexts.push(text);
-        return sentTexts.length === 1 ? firstReply.promise : secondReply.promise;
+        const reply =
+          sentTexts.length === 1 ? firstReply.promise : secondReply.promise;
+        const data = await reply;
+        // Simulate server persisting the user + assistant turn
+        const now = Date.now();
+        serverMessages.push(
+          { id: `srv-user-${now}`, role: "user", text, timestamp: now },
+          {
+            id: `srv-asst-${now}`,
+            role: "assistant",
+            text: data.text,
+            timestamp: now,
+          },
+        );
+        return data;
       },
     );
 
@@ -431,17 +465,25 @@ describe("Companion chat queue e2e", () => {
       await secondReply.promise;
     });
 
-    expect(api?.snapshot()).toEqual(
-      expect.objectContaining({
-        chatSending: false,
-        conversationMessages: expect.arrayContaining([
-          expect.objectContaining({ role: "user", text: "first message" }),
-          expect.objectContaining({ role: "assistant", text: "first reply" }),
-          expect.objectContaining({ role: "user", text: "second message" }),
-          expect.objectContaining({ role: "assistant", text: "second reply" }),
-        ]),
-      }),
-    );
+    await vi.waitFor(() => {
+      expect(api?.snapshot()).toEqual(
+        expect.objectContaining({
+          chatSending: false,
+          conversationMessages: expect.arrayContaining([
+            expect.objectContaining({ role: "user", text: "first message" }),
+            expect.objectContaining({
+              role: "assistant",
+              text: "first reply",
+            }),
+            expect.objectContaining({ role: "user", text: "second message" }),
+            expect.objectContaining({
+              role: "assistant",
+              text: "second reply",
+            }),
+          ]),
+        }),
+      );
+    });
 
     await act(async () => {
       tree.unmount();

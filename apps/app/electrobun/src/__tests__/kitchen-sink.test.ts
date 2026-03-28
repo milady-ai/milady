@@ -8,6 +8,7 @@
  * Test environment: Vitest (Node), electrobun/bun is always vi.mocked().
  */
 
+import path from "node:path";
 import {
   afterEach,
   beforeEach,
@@ -17,6 +18,31 @@ import {
   type Mock,
   vi,
 } from "vitest";
+
+const REPO_ROOT = path.resolve(__dirname, "../../../../..");
+const REGRESSION_MATRIX_PATH = path.join(
+  REPO_ROOT,
+  "test",
+  "regression-matrix.json",
+);
+const DESKTOP_RELEASE_CHECKLIST_PATH = path.join(
+  REPO_ROOT,
+  "docs",
+  "apps",
+  "desktop",
+  "release-regression-checklist.md",
+);
+
+const desktopHeavyRegressionInventory = new Set<string>();
+const desktopManualReleaseChecklist = new Set<string>();
+
+function documentHeavyDesktopRegression(description: string): void {
+  desktopHeavyRegressionInventory.add(description);
+}
+
+function documentManualDesktopRegression(description: string): void {
+  desktopManualReleaseChecklist.add(description);
+}
 
 // ---------------------------------------------------------------------------
 // Top-level vi.mock calls — ALL hoisted before imports.
@@ -3129,16 +3155,41 @@ describe("PermissionManager — checkFeaturePermissions", () => {
 // ============================================================================
 // INTERACTIVE CHECKLIST — Human-in-the-loop verification
 //
-// These tests document behaviors that require a running app instance and
-// human judgment to verify. They are marked as `it.todo` so they appear in
-// the test report as pending items but never block CI.
+// These behaviors still require either a heavier packaged regression tier or
+// human judgment to verify. Keep them in the explicit regression inventory and
+// manual release checklist instead of leaving them behind as non-blocking
+// pending tests.
 //
 // To verify manually:
 //   1. Run `bun run start` (or `bun run dev`) in apps/app/electrobun/
 //   2. Work through each checklist item below
-//   3. Mark as passing by converting `it.todo` → `it.skip` with a note
+//   3. Update `test/regression-matrix.json` and
+//      `docs/apps/desktop/release-regression-checklist.md` as coverage lands
 // INTERACTIVE: Game windows (isolated BrowserWindow for game clients)
 // ============================================================================
+
+describe("Desktop regression inventory", () => {
+  it("keeps heavy and manual desktop coverage explicitly tracked", async () => {
+    const nodeFs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const manifestText = nodeFs.readFileSync(REGRESSION_MATRIX_PATH, "utf8");
+    const checklistText = nodeFs.readFileSync(
+      DESKTOP_RELEASE_CHECKLIST_PATH,
+      "utf8",
+    );
+
+    expect(desktopHeavyRegressionInventory.size).toBeGreaterThan(0);
+    expect(desktopManualReleaseChecklist.size).toBeGreaterThan(0);
+
+    for (const description of desktopHeavyRegressionInventory) {
+      expect(manifestText).toContain(description);
+    }
+
+    for (const description of desktopManualReleaseChecklist) {
+      expect(manifestText).toContain(description);
+      expect(checklistText).toContain(description);
+    }
+  });
+});
 
 describe("Game windows (automated)", () => {
   it("gameOpenWindow handler exists in RPC schema", async () => {
@@ -3153,7 +3204,7 @@ describe("Game windows (automated)", () => {
     expect(typeof canvas.createWindow).toBe("function");
   });
 
-  it.todo(
+  documentHeavyDesktopRegression(
     "gameOpenWindow — full round-trip with openGameWindow mock (needs canvas mock update)",
   );
 });
@@ -3217,11 +3268,21 @@ describe("Tray icon and menu (automated)", () => {
     expect(() => manager.destroyTray()).not.toThrow();
   });
 
-  it.todo("Tray icon appears in the macOS menu bar after app launch (visual)");
-  it.todo("Left-clicking the tray icon opens the companion window (visual)");
-  it.todo("Right-clicking the tray icon shows the tray context menu (visual)");
-  it.todo("Tray icon persists after main window is closed (visual)");
-  it.todo("Tray icon is removed when the app quits (visual)");
+  documentManualDesktopRegression(
+    "Tray icon appears in the macOS menu bar after app launch (visual)",
+  );
+  documentManualDesktopRegression(
+    "Left-clicking the tray icon opens the companion window (visual)",
+  );
+  documentManualDesktopRegression(
+    "Right-clicking the tray icon shows the tray context menu (visual)",
+  );
+  documentManualDesktopRegression(
+    "Tray icon persists after main window is closed (visual)",
+  );
+  documentManualDesktopRegression(
+    "Tray icon is removed when the app quits (visual)",
+  );
 });
 
 describe("Window vibrancy and macOS effects (automated)", () => {
@@ -3256,11 +3317,15 @@ describe("Window vibrancy and macOS effects (automated)", () => {
     expect(source).toContain("MAC_NATIVE_DRAG_REGION_HEIGHT = 0");
   });
 
-  it.todo(
+  documentManualDesktopRegression(
     "Main window has native vibrancy effect (frosted glass) on macOS (visual)",
   );
-  it.todo("Window can be dragged by clicking the header region (visual)");
-  it.todo("Window retains vibrancy when resized (visual)");
+  documentManualDesktopRegression(
+    "Window can be dragged by clicking the header region (visual)",
+  );
+  documentManualDesktopRegression(
+    "Window retains vibrancy when resized (visual)",
+  );
 });
 
 describe("Window state persistence (automated)", () => {
@@ -3298,7 +3363,7 @@ describe("Window state persistence (automated)", () => {
     expect(source).toContain("saveTimer");
   });
 
-  it.todo(
+  documentHeavyDesktopRegression(
     "Abnormal window position (off-screen) is corrected to safe defaults (e2e)",
   );
 });
@@ -3326,11 +3391,13 @@ describe("Audio and microphone (automated)", () => {
     await expect(handlers.swabbleStop()).resolves.not.toThrow();
   });
 
-  it.todo("Microphone input works after permission is granted (hardware)");
-  it.todo(
+  documentHeavyDesktopRegression(
+    "Microphone input works after permission is granted (hardware)",
+  );
+  documentHeavyDesktopRegression(
     "Swabble fires 'wakeWordDetected' event when wake word is spoken (hardware)",
   );
-  it.todo(
+  documentHeavyDesktopRegression(
     "Audio transcription produces non-empty text for clear speech (hardware)",
   );
 });
@@ -3367,9 +3434,15 @@ describe("Camera (automated)", () => {
     expect(result).toHaveProperty("status");
   });
 
-  it.todo("Camera preview renders in the UI when stream is started (hardware)");
-  it.todo("Photo quality is acceptable at default settings (hardware)");
-  it.todo("Switching between front/rear camera works (hardware)");
+  documentHeavyDesktopRegression(
+    "Camera preview renders in the UI when stream is started (hardware)",
+  );
+  documentManualDesktopRegression(
+    "Photo quality is acceptable at default settings (hardware)",
+  );
+  documentHeavyDesktopRegression(
+    "Switching between front/rear camera works (hardware)",
+  );
 });
 
 describe("Screen capture (automated)", () => {
@@ -3418,8 +3491,10 @@ describe("Screen capture (automated)", () => {
     expect(state).toHaveProperty("duration");
   });
 
-  it.todo("takeScreenshot returns a non-empty base64 PNG (hardware)");
-  it.todo(
+  documentHeavyDesktopRegression(
+    "takeScreenshot returns a non-empty base64 PNG (hardware)",
+  );
+  documentHeavyDesktopRegression(
     "Frame capture mode streams frames at configured interval (hardware)",
   );
 });
@@ -3466,8 +3541,12 @@ describe("System permissions (automated)", () => {
     await expect(handlers.permissionsClearCache()).resolves.not.toThrow();
   });
 
-  it.todo("Requesting accessibility opens System Preferences (OS interaction)");
-  it.todo("Permission status reflects actual system state (OS interaction)");
+  documentManualDesktopRegression(
+    "Requesting accessibility opens System Preferences (OS interaction)",
+  );
+  documentManualDesktopRegression(
+    "Permission status reflects actual system state (OS interaction)",
+  );
 });
 
 describe("Desktop background notice (automated)", () => {
@@ -3517,8 +3596,10 @@ describe("Deep links and URL schemes (automated)", () => {
     expect(mainSource).toContain("Invalid gateway URL protocol");
   });
 
-  it.todo("Deep link received while app is closed causes app to launch (e2e)");
-  it.todo(
+  documentHeavyDesktopRegression(
+    "Deep link received while app is closed causes app to launch (e2e)",
+  );
+  documentHeavyDesktopRegression(
     "Deep link received while app is open does not launch second instance (e2e)",
   );
 });
@@ -3552,8 +3633,12 @@ describe("Context menu (automated)", () => {
     ).resolves.not.toThrow();
   });
 
-  it.todo("Context menu appears at cursor position (visual)");
-  it.todo("Context menu closes when clicking elsewhere (visual)");
+  documentManualDesktopRegression(
+    "Context menu appears at cursor position (visual)",
+  );
+  documentManualDesktopRegression(
+    "Context menu closes when clicking elsewhere (visual)",
+  );
 });
 
 describe("Global keyboard shortcuts (automated)", () => {
@@ -3597,7 +3682,9 @@ describe("Global keyboard shortcuts (automated)", () => {
     expect(typeof result.registered).toBe("boolean");
   });
 
-  it.todo("Shortcuts survive window focus changes (e2e)");
+  documentHeavyDesktopRegression(
+    "Shortcuts survive window focus changes (e2e)",
+  );
 });
 
 describe("Auto-launch (automated)", () => {
@@ -3626,8 +3713,10 @@ describe("Auto-launch (automated)", () => {
     expect(typeof result.enabled).toBe("boolean");
   });
 
-  it.todo("App launches automatically after system restart (e2e)");
-  it.todo("Auto-launch survives app updates (e2e)");
+  documentHeavyDesktopRegression(
+    "App launches automatically after system restart (e2e)",
+  );
+  documentHeavyDesktopRegression("Auto-launch survives app updates (e2e)");
 });
 
 describe("Clipboard round-trip (automated)", () => {
@@ -3679,7 +3768,9 @@ describe("Power state and battery (automated)", () => {
     expect(typeof state).toBe("object");
   });
 
-  it.todo("Power state reflects actual battery status (hardware)");
+  documentManualDesktopRegression(
+    "Power state reflects actual battery status (hardware)",
+  );
 });
 
 describe("Application menu (automated)", () => {
@@ -3755,9 +3846,13 @@ describe("Application menu (automated)", () => {
     expect(indexSource).toContain("menu-reset-milady-applied");
   });
 
-  it.todo("Keyboard shortcut Cmd+Q triggers quit (e2e)");
-  it.todo("Keyboard shortcut Cmd+R triggers reload (e2e)");
-  it.todo("Keyboard shortcut Cmd+Option+I opens devtools (e2e)");
+  documentHeavyDesktopRegression("Keyboard shortcut Cmd+Q triggers quit (e2e)");
+  documentHeavyDesktopRegression(
+    "Keyboard shortcut Cmd+R triggers reload (e2e)",
+  );
+  documentHeavyDesktopRegression(
+    "Keyboard shortcut Cmd+Option+I opens devtools (e2e)",
+  );
 });
 
 describe("Gateway discovery — mDNS (automated)", () => {
@@ -3802,7 +3897,7 @@ describe("Gateway discovery — mDNS (automated)", () => {
     expect(result.gateways).toEqual([]);
   });
 
-  it.todo(
+  documentHeavyDesktopRegression(
     "Gateway discovery sends gatewayDiscovery push event to renderer (integration)",
   );
 });
@@ -3883,10 +3978,12 @@ describe("Canvas windows — computer-use / A2UI (automated)", () => {
     expect(result).toMatchObject({ windows: [] });
   });
 
-  it.todo(
+  documentHeavyDesktopRegression(
     "Canvas window is sandboxed — cannot access main app origin (integration)",
   );
-  it.todo("Canvas navigate blocks external URLs (integration)");
+  documentHeavyDesktopRegression(
+    "Canvas navigate blocks external URLs (integration)",
+  );
 });
 
 describe("Agent lifecycle (automated)", () => {
@@ -3952,11 +4049,13 @@ describe("Agent lifecycle (automated)", () => {
     expect(typeof unsub).toBe("function");
   });
 
-  it.todo(
+  documentHeavyDesktopRegression(
     "Agent port is reachable via HTTP after status reaches 'running' (integration)",
   );
-  it.todo("Agent crash triggers automatic restart (integration)");
-  it.todo(
+  documentHeavyDesktopRegression(
+    "Agent crash triggers automatic restart (integration)",
+  );
+  documentHeavyDesktopRegression(
     "Stopping agent while starting does not leave zombie process (integration)",
   );
 });
@@ -3985,9 +4084,13 @@ describe("Updater (automated)", () => {
     expect(source).toContain("Updater");
   });
 
-  it.todo("Check for updates contacts the release server (network)");
-  it.todo("Applying update relaunches the app (e2e)");
-  it.todo("Update check works on both canary and stable channels (network)");
+  documentHeavyDesktopRegression(
+    "Check for updates contacts the release server (network)",
+  );
+  documentHeavyDesktopRegression("Applying update relaunches the app (e2e)");
+  documentHeavyDesktopRegression(
+    "Update check works on both canary and stable channels (network)",
+  );
 });
 
 describe("RPC handler delegation — desktop", () => {

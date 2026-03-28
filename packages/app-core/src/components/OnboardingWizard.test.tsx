@@ -4,10 +4,19 @@ import React from "react";
 import type { ReactTestRenderer } from "react-test-renderer";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { LanguageDropdownProps } from "./LanguageDropdown";
+import { LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME } from "./LanguageDropdown";
 
-const { mockUseApp, mockVrmStage } = vi.hoisted(() => ({
+const { mockUseApp, mockVrmStage, mockLanguageDropdown } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
   mockVrmStage: vi.fn(() => React.createElement("div", null, "VrmStage")),
+  mockLanguageDropdown: vi.fn((props: LanguageDropdownProps) =>
+    React.createElement("div", {
+      "data-testid": "language-dropdown-stub",
+      "data-trigger-class": props.triggerClassName,
+      "data-variant": props.variant,
+    }),
+  ),
 }));
 
 vi.mock("@miladyai/app-core/state", () => ({
@@ -25,7 +34,9 @@ vi.mock("@miladyai/app-core/state", () => ({
 }));
 
 vi.mock("@miladyai/app-core/components", () => ({
-  LanguageDropdown: () => React.createElement("div", null, "LanguageDropdown"),
+  LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME,
+  LanguageDropdown: (props: LanguageDropdownProps) =>
+    mockLanguageDropdown(props),
 }));
 
 vi.mock("@miladyai/app-core/utils", () => ({
@@ -82,6 +93,7 @@ describe("OnboardingWizard", () => {
   beforeEach(() => {
     mockUseApp.mockReset();
     mockVrmStage.mockClear();
+    mockLanguageDropdown.mockClear();
   });
 
   it("keeps the day scene and light tokens when the UI theme is light", async () => {
@@ -165,6 +177,37 @@ describe("OnboardingWizard", () => {
     expect(svgs?.length ?? 0).toBe(0);
   });
 
+  it("uses the shared header language trigger class in onboarding", async () => {
+    mockUseApp.mockReturnValue({
+      onboardingStep: "hosting",
+      selectedVrmIndex: 1,
+      customVrmUrl: "",
+      uiLanguage: "en",
+      uiTheme: "light",
+      setState: vi.fn(),
+      t: (key: string) => key,
+      onboardingUiRevealNonce: 0,
+      companionVrmPowerMode: "balanced",
+      companionHalfFramerateMode: "when_saving_power",
+      companionAnimateWhenHidden: false,
+    });
+
+    let tree: ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<OnboardingWizard />);
+    });
+
+    const dropdown = tree?.root.findByProps({
+      "data-testid": "language-dropdown-stub",
+    });
+
+    expect(mockLanguageDropdown).toHaveBeenCalled();
+    expect(dropdown?.props["data-variant"]).toBe("companion");
+    expect(dropdown?.props["data-trigger-class"]).toBe(
+      LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME,
+    );
+  });
+
   describe("onboarding overlay reveal fallback", () => {
     beforeEach(() => {
       vi.useFakeTimers();
@@ -176,7 +219,7 @@ describe("OnboardingWizard", () => {
 
     it("fades in the UI overlay when VrmStage never calls onRevealStart", async () => {
       mockUseApp.mockReturnValue({
-        onboardingStep: "welcome",
+        onboardingStep: "cloud_login",
         selectedVrmIndex: 1,
         customVrmUrl: "",
         uiLanguage: "en",
@@ -242,7 +285,7 @@ describe("OnboardingWizard", () => {
 
     it("shows the overlay immediately when opening onboarding after agent reset", async () => {
       mockUseApp.mockReturnValue({
-        onboardingStep: "welcome",
+        onboardingStep: "cloud_login",
         selectedVrmIndex: 1,
         customVrmUrl: "",
         uiLanguage: "en",
@@ -273,7 +316,7 @@ describe("OnboardingWizard", () => {
 
   it("locks document/body scroll while mounted and restores on unmount", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "welcome",
+      onboardingStep: "cloud_login",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",

@@ -24,7 +24,7 @@ import {
   APP_SIDEBAR_RAIL_CLASSNAME,
 } from "./sidebar-shell-styles";
 
-const DEFAULT_SIDEBAR_CLASS = "flex flex-col overflow-hidden text-[13px]";
+const DEFAULT_SIDEBAR_CLASS = "flex flex-col overflow-hidden text-[13px] mt-4";
 const DEFAULT_SIDEBAR_DESKTOP_CLASS = `relative isolate h-full !w-[18.5rem] !min-w-[18.5rem] rounded-l-none rounded-tr-[26px] rounded-br-none border-y-0 border-l-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),inset_-1px_0_0_rgba(255,255,255,0.05),0_20px_40px_-26px_rgba(15,23,42,0.18),12px_0_24px_-20px_rgba(15,23,42,0.1)] ring-1 ring-border/12 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.26),transparent)] after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:top-[1.25rem] after:w-[2px] after:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_24%,transparent)] dark:ring-white/5 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_-1px_0_0_rgba(255,255,255,0.03),0_22px_42px_-28px_rgba(0,0,0,0.58),14px_0_24px_-18px_rgba(0,0,0,0.28),8px_-8px_16px_-24px_rgba(var(--accent-rgb),0.04)] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)] dark:after:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_22%,transparent)] xl:!w-[20rem] xl:!min-w-[20rem] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const DEFAULT_SIDEBAR_DESKTOP_COLLAPSED_CLASS = `relative isolate h-full !w-[4.75rem] !min-w-[4.75rem] rounded-l-none rounded-tr-[24px] rounded-br-none border-y-0 border-l-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_-1px_0_0_rgba(255,255,255,0.04),0_16px_30px_-24px_rgba(15,23,42,0.16),9px_0_18px_-16px_rgba(15,23,42,0.08)] ring-1 ring-border/12 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)] after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:top-[1rem] after:w-[2px] after:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_24%,transparent)] dark:ring-white/5 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_-1px_0_0_rgba(255,255,255,0.025),0_18px_32px_-24px_rgba(0,0,0,0.5),10px_0_18px_-16px_rgba(0,0,0,0.24),6px_-6px_12px_-22px_rgba(var(--accent-rgb),0.035)] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] dark:after:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_22%,transparent)] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
 const DEFAULT_SIDEBAR_MOBILE_CLASS =
@@ -304,36 +304,6 @@ export function ConversationsSidebar({
             </div>
           ) : (
             <>
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div className="space-y-1.5">
-                  <div className={SECTION_EYEBROW_CLASS}>
-                    {t("conversations.chats")}
-                  </div>
-                  <div
-                    className={`${APP_SIDEBAR_META_CLASSNAME} max-w-[19ch] text-[13px] leading-[1.55] text-muted/84`}
-                  >
-                    Recent threads and unread replies.
-                  </div>
-                </div>
-                <div className={DEFAULT_HEADER_ACTIONS_CLASS}>
-                  <div className={COUNT_BADGE_CLASS}>{conversationCount}</div>
-                  {unreadCount > 0 ? (
-                    <div className={UNREAD_BADGE_CLASS}>{unreadCount}</div>
-                  ) : null}
-                  {canCollapse ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      data-testid="chat-sidebar-collapse-toggle"
-                      className={`h-9 w-9 rounded-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
-                      aria-label={t("conversations.closePanel")}
-                      onClick={() => setCollapsed(true)}
-                    >
-                      <PanelLeftClose className="h-4 w-4" />
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
               <Button
                 variant="outline"
                 className={
@@ -353,50 +323,66 @@ export function ConversationsSidebar({
         </div>
 
         {!isCollapsed ? (
-          <div className={listRegionClassName}>
-            <div className={listPanelClassName}>
-              {sortedConversations.length === 0 ? (
-                <div
-                  className={`${EMPTY_STATE_CLASS} ${
-                    isGameModal
-                      ? "border-white/10 bg-black/15 font-medium italic text-[color:var(--onboarding-text-muted)]"
-                      : "border-border/50 bg-bg/35 text-muted"
-                  }`}
-                >
-                  {t("conversations.none")}
-                </div>
-              ) : (
-                sortedConversations.map((conv) => (
-                  <ConversationListItem
-                    key={conv.id}
-                    conv={conv}
-                    isActive={conv.id === activeConversationId}
-                    isUnread={unreadConversations.has(conv.id)}
-                    isGameModal={isGameModal}
-                    confirmDeleteId={confirmDeleteId}
-                    deletingId={deletingId}
-                    t={t}
-                    mobile={mobile}
-                    onSelect={(id) => {
-                      setConfirmDeleteId(null);
-                      setMenuConversation(null);
-                      void handleSelectConversation(id);
-                      onClose?.();
-                    }}
-                    onConfirmDelete={(id) => void handleConfirmDelete(id)}
-                    onCancelDelete={() => setConfirmDeleteId(null)}
-                    onRequestDeleteConfirm={(id) => {
-                      setMenuConversation(null);
-                      setRenameTarget(null);
-                      setConfirmDeleteId(id);
-                    }}
-                    onRequestRename={(c) => openRenameDialog(c)}
-                    onOpenActions={openActionsMenu}
-                  />
-                ))
-              )}
+          <>
+            <div className={listRegionClassName}>
+              <div className={listPanelClassName}>
+                {sortedConversations.length === 0 ? (
+                  <div
+                    className={`${EMPTY_STATE_CLASS} ${
+                      isGameModal
+                        ? "border-white/10 bg-black/15 font-medium italic text-[color:var(--onboarding-text-muted)]"
+                        : "border-border/50 bg-bg/35 text-muted"
+                    }`}
+                  >
+                    {t("conversations.none")}
+                  </div>
+                ) : (
+                  sortedConversations.map((conv) => (
+                    <ConversationListItem
+                      key={conv.id}
+                      conv={conv}
+                      isActive={conv.id === activeConversationId}
+                      isUnread={unreadConversations.has(conv.id)}
+                      isGameModal={isGameModal}
+                      confirmDeleteId={confirmDeleteId}
+                      deletingId={deletingId}
+                      t={t}
+                      mobile={mobile}
+                      onSelect={(id) => {
+                        setConfirmDeleteId(null);
+                        setMenuConversation(null);
+                        void handleSelectConversation(id);
+                        onClose?.();
+                      }}
+                      onConfirmDelete={(id) => void handleConfirmDelete(id)}
+                      onCancelDelete={() => setConfirmDeleteId(null)}
+                      onRequestDeleteConfirm={(id) => {
+                        setMenuConversation(null);
+                        setRenameTarget(null);
+                        setConfirmDeleteId(id);
+                      }}
+                      onRequestRename={(c) => openRenameDialog(c)}
+                      onOpenActions={openActionsMenu}
+                    />
+                  ))
+                )}
+              </div>
             </div>
-          </div>
+            {canCollapse ? (
+              <div className="relative z-10 shrink-0 border-t border-border/25 bg-[linear-gradient(0deg,color-mix(in_srgb,var(--card)_34%,transparent),transparent)] px-3.5 pb-3.5 pt-2 shadow-[inset_0_-1px_0_rgba(255,255,255,0.03)] flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-testid="chat-sidebar-collapse-toggle"
+                  className={`h-9 w-9 rounded-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
+                  aria-label={t("conversations.closePanel")}
+                  onClick={() => setCollapsed(true)}
+                >
+                  <PanelLeftClose className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : null}
+          </>
         ) : null}
       </TooltipProvider>
     </aside>

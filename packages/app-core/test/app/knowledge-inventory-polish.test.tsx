@@ -173,7 +173,9 @@ vi.mock("../../src/components/inventory/TokensTable", async () => {
 
 vi.mock("../../src/components/inventory/useInventoryData", () => ({
   useInventoryData: () => ({
-    chainFocus: "all",
+    singleChainFocus: null,
+    tokenRows: [],
+    tokenRowsAllChains: [],
     allNfts: [],
     focusedChainError: null,
     focusedChainName: null,
@@ -235,14 +237,14 @@ describe("Knowledge and inventory polish", () => {
       (node) =>
         typeof node.props.className === "string" &&
         node.props.className.includes("rounded-[28px]") &&
-        node.props.className.includes("bg-bg/20") &&
-        node.props.className.includes("ring-1 ring-border/10"),
+        node.props.className.includes("border-border/34") &&
+        node.props.className.includes("ring-border/8"),
     );
     const sidebars = tree.root.findAll(
       (node) =>
         typeof node.props.className === "string" &&
-        node.props.className.includes("backdrop-blur-sm") &&
-        node.props.className.includes("border-b border-border/40"),
+        node.props.className.includes("backdrop-blur-md") &&
+        node.props.className.includes("border-border/34"),
     );
 
     expect(tokenPanels.length).toBeGreaterThan(0);
@@ -265,7 +267,14 @@ describe("Knowledge and inventory polish", () => {
       walletNftsLoading: false,
       inventoryView: "tokens",
       inventorySort: "value",
-      inventoryChainFocus: "all",
+      inventorySortDirection: "desc",
+      inventoryChainFilters: {
+        ethereum: true,
+        base: true,
+        bsc: true,
+        avax: true,
+        solana: true,
+      },
       walletError: null,
       loadBalances: vi.fn(),
       loadNfts: vi.fn(),
@@ -298,7 +307,7 @@ describe("Knowledge and inventory polish", () => {
 
     expect(stewardBadge.props.className).toContain("bg-accent/10");
     expect(stewardBadge.props.className).toContain("text-accent-fg");
-    expect(String(sidebar.props.className)).toContain("border-b border-border/40");
-    expect(String(sidebar.props.className)).toContain("backdrop-blur-sm");
+    expect(String(sidebar.props.className)).toContain("border-b border-border/34");
+    expect(String(sidebar.props.className)).toContain("backdrop-blur-md");
   });
 });

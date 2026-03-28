@@ -31,7 +31,7 @@ describe("CloudLoginStep", () => {
   it("shows a retry action when cloud login fails", async () => {
     const handleCloudLogin = vi.fn();
     useAppMock.mockReturnValue({
-      onboardingStep: "providers",
+      onboardingStep: "cloud_login",
       elizaCloudConnected: false,
       elizaCloudLoginBusy: false,
       elizaCloudLoginError: "Login failed",
@@ -78,7 +78,7 @@ describe("CloudLoginStep", () => {
   it("auto-advances once when cloud login is already connected", async () => {
     const handleOnboardingNext = vi.fn();
     useAppMock.mockReturnValue({
-      onboardingStep: "providers",
+      onboardingStep: "cloud_login",
       elizaCloudConnected: true,
       elizaCloudLoginBusy: false,
       elizaCloudLoginError: "",
@@ -93,5 +93,72 @@ describe("CloudLoginStep", () => {
     });
 
     expect(handleOnboardingNext).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the connected state with the shared compact success banner", async () => {
+    useAppMock.mockReturnValue({
+      onboardingStep: "cloud_login",
+      elizaCloudConnected: true,
+      elizaCloudLoginBusy: false,
+      elizaCloudLoginError: "",
+      handleCloudLogin: vi.fn(),
+      handleOnboardingNext: vi.fn(),
+      handleOnboardingBack: vi.fn(),
+      t: (key: string) =>
+        key === "onboarding.cloudLoginConnected"
+          ? "Connected to Eliza Cloud"
+          : key === "onboarding.connected"
+            ? "Connected"
+            : key,
+    });
+
+    let renderer: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      renderer = TestRenderer.create(<CloudLoginStep />);
+    });
+
+    if (!renderer) {
+      throw new Error("CloudLoginStep did not render");
+    }
+
+    const statusDiv = renderer.root.findByProps({ role: "status" });
+    expect(statusDiv.props.className).toContain("max-w-[25rem]");
+    expect(statusDiv.children).toContain("Connected to Eliza Cloud");
+  });
+
+  it("renders the back action with onboarding-owned secondary styling", async () => {
+    useAppMock.mockReturnValue({
+      onboardingStep: "cloud_login",
+      elizaCloudConnected: false,
+      elizaCloudLoginBusy: false,
+      elizaCloudLoginError: "",
+      handleCloudLogin: vi.fn(),
+      handleOnboardingNext: vi.fn(),
+      handleOnboardingBack: vi.fn(),
+      t: (key: string) => key,
+    });
+
+    let renderer: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      renderer = TestRenderer.create(<CloudLoginStep />);
+    });
+
+    if (!renderer) {
+      throw new Error("CloudLoginStep did not render");
+    }
+
+    const buttons = renderer.root.findAllByType("button");
+    const skipButton = buttons.find((button) =>
+      button.children.includes("onboarding.skip"),
+    );
+    expect(skipButton).toBeDefined();
+    expect(String(skipButton?.props.className)).toContain("min-h-[44px]");
+    expect(String(skipButton?.props.className)).toContain(
+      "hover:bg-[var(--onboarding-secondary-hover-bg)]",
+    );
+    expect(String(skipButton?.props.className)).not.toContain(
+      "-webkit-text-stroke",
+    );
+    expect(String(skipButton?.props.className)).not.toContain("bg-bg-accent");
   });
 });

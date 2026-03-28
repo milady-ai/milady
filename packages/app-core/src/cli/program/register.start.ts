@@ -1,5 +1,13 @@
 import crypto from "node:crypto";
 import type { Command } from "commander";
+import {
+  isLoopbackBindHost,
+  resolveApiBindHost,
+  resolveApiSecurityConfig,
+  resolveApiToken,
+  resolveServerOnlyPort,
+  setApiToken,
+} from "@miladyai/shared/runtime-env";
 import { formatDocsLink } from "../../terminal/links";
 import { theme } from "../../terminal/theme";
 import { runCommandWithRuntime } from "../cli-utils";
@@ -13,8 +21,7 @@ const defaultRuntime = { error: console.error, exit: process.exit };
  */
 function generateConnectionKey(): string {
   const generated = crypto.randomBytes(16).toString("hex");
-  process.env.MILADY_API_TOKEN = generated;
-  process.env.ELIZA_API_TOKEN = generated;
+  setApiToken(process.env, generated);
   return generated;
 }
 
@@ -23,31 +30,23 @@ function generateConnectionKey(): string {
  * (not localhost), which requires a connection key for security.
  */
 function isNetworkBind(): boolean {
-  const bind =
-    process.env.MILADY_API_BIND?.trim() || process.env.ELIZA_API_BIND?.trim();
-  if (!bind) return false;
-  return bind !== "127.0.0.1" && bind !== "localhost" && bind !== "::1";
+  return !isLoopbackBindHost(resolveApiBindHost(process.env));
 }
 
 function shouldDisableAutoConnectionKey(): boolean {
-  return (
-    process.env.MILADY_DISABLE_AUTO_API_TOKEN === "1" ||
-    process.env.ELIZA_DISABLE_AUTO_API_TOKEN === "1"
-  );
+  return resolveApiSecurityConfig(process.env).disableAutoApiToken;
 }
 
 async function startAction() {
   // Auto-generate a connection key only when binding to a network address
   // and no token is already configured. Localhost access stays open.
-  const existingToken =
-    process.env.MILADY_API_TOKEN?.trim() || process.env.ELIZA_API_TOKEN?.trim();
+  const existingToken = resolveApiToken(process.env);
 
   if (!existingToken && isNetworkBind() && !shouldDisableAutoConnectionKey()) {
     generateConnectionKey();
   }
 
-  const connectionKey =
-    process.env.MILADY_API_TOKEN?.trim() || process.env.ELIZA_API_TOKEN?.trim();
+  const connectionKey = resolveApiToken(process.env);
 
   await runCommandWithRuntime(defaultRuntime, async () => {
     const { startEliza } = await import("../../runtime/eliza");
@@ -63,7 +62,7 @@ async function startAction() {
       },
     });
 
-    const port = process.env.MILADY_PORT || process.env.ELIZA_PORT || "2138";
+    const port = String(resolveServerOnlyPort(process.env));
     console.log("");
     console.log("╭──────────────────────────────────────────╮");
     console.log("│  Milady is running.                      │");
@@ -95,8 +94,7 @@ export function registerStartCommand(program: Command) {
     .action(async (opts: { connectionKey?: string | boolean }) => {
       if (typeof opts.connectionKey === "string" && opts.connectionKey) {
         // Explicit key provided
-        process.env.MILADY_API_TOKEN = opts.connectionKey;
-        process.env.ELIZA_API_TOKEN = opts.connectionKey;
+        setApiToken(process.env, opts.connectionKey);
       } else if (opts.connectionKey === true) {
         // Flag passed without value — auto-generate
         generateConnectionKey();
@@ -113,8 +111,7 @@ export function registerStartCommand(program: Command) {
     )
     .action(async (opts: { connectionKey?: string | boolean }) => {
       if (typeof opts.connectionKey === "string" && opts.connectionKey) {
-        process.env.MILADY_API_TOKEN = opts.connectionKey;
-        process.env.ELIZA_API_TOKEN = opts.connectionKey;
+        setApiToken(process.env, opts.connectionKey);
       } else if (opts.connectionKey === true) {
         generateConnectionKey();
       }

@@ -344,4 +344,33 @@ describe("custom action SSRF guard", () => {
       }
     }
   });
+
+  it("times out shell terminal runs after 30000ms", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const fetchSpy = vi
+        .spyOn(globalThis, "fetch")
+        .mockImplementation(
+          () => new Promise<Response>(() => {}) as Promise<Response>,
+        );
+      const handler = buildTestHandler(makeShellAction("sleep 30"));
+
+      const pending = handler({});
+      const timeoutAssertion = expect(pending).rejects.toThrow(
+        "Terminal request timed out after 30000ms",
+      );
+      await vi.advanceTimersByTimeAsync(30_000);
+
+      await timeoutAssertion;
+      expect(fetchSpy).toHaveBeenCalledWith(
+        "http://localhost:2138/api/terminal/run",
+        expect.objectContaining({
+          signal: expect.any(AbortSignal),
+        }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

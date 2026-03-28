@@ -6,8 +6,8 @@ import {
   type UUID,
 } from "@elizaos/core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { startApiServer } from "../src/api/server";
 import { req } from "../../../test/helpers/http";
+import { startApiServer } from "../src/api/server";
 
 interface TriggerRuntimeHarness {
   runtime: AgentRuntime;
@@ -27,8 +27,7 @@ function createTriggerRuntimeHarness(): TriggerRuntimeHarness {
       return {
         getAutonomousRoomId: () =>
           "00000000-0000-0000-0000-000000000201" as UUID,
-        getTargetRoomId: () =>
-          "00000000-0000-0000-0000-000000000201" as UUID,
+        getTargetRoomId: () => "00000000-0000-0000-0000-000000000201" as UUID,
       } as {
         getAutonomousRoomId: () => UUID;
         getTargetRoomId: () => UUID;
@@ -109,18 +108,13 @@ describe("Trigger runtime E2E", () => {
       throw new Error("Server was not initialized");
     }
 
-    const createResponse = await req(
-      server.port,
-      "POST",
-      "/api/triggers",
-      {
-        displayName: "Heartbeat runtime e2e",
-        instructions: "Send a runtime heartbeat update",
-        triggerType: "interval",
-        intervalMs: 60_000,
-        wakeMode: "inject_now",
-      },
-    );
+    const createResponse = await req(server.port, "POST", "/api/triggers", {
+      displayName: "Heartbeat runtime e2e",
+      instructions: "Send a runtime heartbeat update",
+      triggerType: "interval",
+      intervalMs: 60_000,
+      wakeMode: "inject_now",
+    });
 
     expect(createResponse.status).toBe(201);
     const createBody = createResponse.data as Record<string, unknown>;
@@ -140,7 +134,9 @@ describe("Trigger runtime E2E", () => {
     expect(harness.createMemoryMock).toHaveBeenCalledTimes(1);
     // Verify the memory payload contains the trigger instruction
     const memoryCall = harness.createMemoryMock.mock.calls[0];
-    expect(memoryCall[0].content.text).toContain("Send a runtime heartbeat update");
+    expect(memoryCall[0].content.text).toContain(
+      "Send a runtime heartbeat update",
+    );
     expect(memoryCall[0].content.source).toBe("trigger-runtime");
     expect(memoryCall[0].content.metadata.isAutonomousInstruction).toBe(true);
 

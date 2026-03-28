@@ -32,7 +32,6 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/triggers")).toBe("triggers");
     expect(tabFromPath("/fine-tuning")).toBe("fine-tuning");
     expect(tabFromPath("/trajectories")).toBe("trajectories");
-    expect(tabFromPath("/lifo")).toBe("lifo");
     expect(tabFromPath("/runtime")).toBe("runtime");
     expect(tabFromPath("/database")).toBe("database");
     expect(tabFromPath("/logs")).toBe("logs");
@@ -76,7 +75,6 @@ describe("pathForTab", () => {
     "advanced",
     "fine-tuning",
     "trajectories",
-    "lifo",
     "runtime",
     "database",
     "settings",
@@ -127,7 +125,6 @@ describe("tab groups", () => {
       "actions",
       "fine-tuning",
       "trajectories",
-      "lifo",
       "runtime",
       "database",
       "logs",
@@ -151,7 +148,6 @@ describe("tab groups", () => {
       "advanced",
       "fine-tuning",
       "trajectories",
-      "lifo",
       "runtime",
       "database",
       "logs",

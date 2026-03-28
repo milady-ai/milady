@@ -40,10 +40,7 @@ import {
   APP_SIDEBAR_COMPACT_META_CLASSNAME,
   APP_SIDEBAR_COMPACT_PILL_CLASSNAME,
   APP_SIDEBAR_COMPACT_TITLE_CLASSNAME,
-  APP_SIDEBAR_HEADER_CLASSNAME,
   APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
   APP_SIDEBAR_PILL_CLASSNAME,
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SECTION_HEADING_CLASSNAME,
@@ -507,19 +504,6 @@ export function RuntimeView() {
       <div data-testid="runtime-view" className={RUNTIME_SHELL_CLASSNAME}>
         <aside className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}>
           <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-            <div className={APP_SIDEBAR_HEADER_CLASSNAME}>
-              <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
-                {t("runtimeview.runtime", { defaultValue: "Runtime" })}
-              </div>
-              <div className={APP_SIDEBAR_META_CLASSNAME}>
-                {snapshot
-                  ? runtimeAvailable
-                    ? t("runtimeview.available")
-                    : t("runtimeview.offline")
-                  : t("runtimeview.loadingSnapshot")}
-              </div>
-            </div>
-
             <DesktopRailSummaryCard
               className={`mt-3 ${DESKTOP_RAIL_SUMMARY_CARD_COMPACT_CLASSNAME}`}
             >

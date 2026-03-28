@@ -170,12 +170,12 @@ export function BugReportModal() {
           );
         });
     }
+    setTimeout(() => descRef.current?.focus(), 50);
 
     return () => {
       cancelled = true;
     };
   }, [desktopRuntime, isOpen]);
-
   useEffect(() => {
     if (!isOpen || !draft) return;
     setForm((f) => ({
@@ -356,6 +356,18 @@ export function BugReportModal() {
     }
   }, [buildReportPayload, formatMarkdown]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, close]);
   if (!isOpen) return null;
   const canSubmit =
     form.description.trim() && form.stepsToReproduce.trim() && !submitting;
@@ -452,7 +464,6 @@ export function BugReportModal() {
                 {bundlePath}
               </FieldMessage>
             )}
-
             <Field>
               <FieldLabel htmlFor="bug-report-description">
                 {t("skillsview.Description")}{" "}

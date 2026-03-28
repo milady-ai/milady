@@ -99,6 +99,7 @@ import {
   saveElizaConfig,
 } from "../config/config";
 import { collectConfigEnvVars } from "../config/env-vars";
+import { resolveServerOnlyPort } from "../config/runtime-env";
 import { resolveStateDir, resolveUserPath } from "../config/paths";
 import {
   type ApplyPluginAutoEnableParams,
@@ -123,6 +124,78 @@ import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
 import { createElizaPlugin } from "./eliza-plugin";
 import { detectEmbeddingPreset } from "./embedding-presets";
 import { shouldEnableTrajectoryLoggingByDefault } from "./trajectory-persistence";
+
+type SignalShutdownContext = {
+  getRuntime: () => AgentRuntime;
+  getSandboxManager: () => SandboxManager | null;
+  beforeShutdown?: () => void | Promise<void>;
+};
+
+let activeSignalShutdownContext: SignalShutdownContext | null = null;
+let signalHandlersRegistered = false;
+let signalShutdownPromise: Promise<void> | null = null;
+
+function registerSignalShutdownHandlers(
+  context: SignalShutdownContext,
+): void {
+  activeSignalShutdownContext = context;
+  if (signalHandlersRegistered) {
+    return;
+  }
+
+  const shutdown = async (): Promise<void> => {
+    if (signalShutdownPromise) {
+      await signalShutdownPromise;
+      return;
+    }
+
+    signalShutdownPromise = (async () => {
+      const current = activeSignalShutdownContext;
+      if (!current) {
+        process.exit(0);
+      }
+
+      try {
+        await current?.beforeShutdown?.();
+      } catch (err) {
+        logger.warn(`[eliza] Pre-shutdown cleanup error: ${formatError(err)}`);
+      }
+
+      try {
+        const sandboxManager = current?.getSandboxManager();
+        if (sandboxManager) {
+          try {
+            await sandboxManager.stop();
+            logger.info("[eliza] Sandbox manager stopped");
+          } catch (err) {
+            logger.warn(
+              `[eliza] Sandbox stop error: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
+        }
+      } catch (err) {
+        logger.warn(`[eliza] Sandbox shutdown error: ${formatError(err)}`);
+      }
+
+      try {
+        const runtime = current?.getRuntime();
+        if (runtime) {
+          await shutdownRuntime(runtime, "signal shutdown");
+        }
+      } catch (err) {
+        logger.warn(`[eliza] Error during shutdown: ${formatError(err)}`);
+      }
+
+      process.exit(0);
+    })();
+
+    await signalShutdownPromise;
+  };
+
+  process.on("SIGINT", () => void shutdown());
+  process.on("SIGTERM", () => void shutdown());
+  signalHandlersRegistered = true;
+}
 
 /**
  * Map of baseline bundled @elizaos plugin names to their statically imported
@@ -569,8 +642,6 @@ function cancelOnboarding(): never {
  * Eliza stores channel credentials under `config.channels.<name>.<field>`,
  * while elizaOS plugins read them from process.env.
  */
-const RETAKE_CHANNEL_ACCESS_TOKEN_ENV = "RETAKE_AGENT_TOKEN";
-
 const CHANNEL_ENV_MAP: Readonly<
   Record<string, Readonly<Record<string, string>>>
 > = {
@@ -611,10 +682,6 @@ const CHANNEL_ENV_MAP: Readonly<
     webhookUrl: "BLOOIO_WEBHOOK_URL",
     webhookPort: "BLOOIO_WEBHOOK_PORT",
   },
-  retake: {
-    accessToken: RETAKE_CHANNEL_ACCESS_TOKEN_ENV,
-    apiUrl: "RETAKE_API_URL",
-  },
 };
 
 // ---------------------------------------------------------------------------
@@ -654,7 +721,6 @@ export const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   feishu: "@elizaos/plugin-feishu",
   matrix: "@elizaos/plugin-matrix",
   nostr: "@elizaos/plugin-nostr",
-  retake: "@elizaos/plugin-retake",
   blooio: "@elizaos/plugin-blooio",
   twitch: "@elizaos/plugin-twitch",
 };
@@ -1181,7 +1247,6 @@ const WORKSPACE_PLUGIN_OVERRIDES = new Set<string>([
   // "@elizaos/plugin-media-generation",
   "@elizaos/plugin-twitch-streaming",
   "@elizaos/plugin-youtube-streaming",
-  "@elizaos/plugin-retake",
 ]);
 
 function getWorkspacePluginOverridePath(pluginName: string): string | null {
@@ -4506,38 +4571,10 @@ export async function startEliza(
   // stack on every hot-restart, close over stale runtime references, and
   // race with bun --watch's own process teardown.
   if (!opts?.headless) {
-    let isShuttingDown = false;
-
-    const shutdown = async (): Promise<void> => {
-      if (isShuttingDown) return;
-      isShuttingDown = true;
-
-      try {
-        // Stop sandbox manager before runtime
-        if (sandboxManager) {
-          try {
-            await sandboxManager.stop();
-            logger.info("[eliza] Sandbox manager stopped");
-          } catch (err) {
-            logger.warn(
-              `[eliza] Sandbox stop error: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          }
-        }
-      } catch (err) {
-        logger.warn(`[eliza] Sandbox shutdown error: ${formatError(err)}`);
-      }
-
-      try {
-        await shutdownRuntime(runtime, "signal shutdown");
-      } catch (err) {
-        logger.warn(`[eliza] Error during shutdown: ${formatError(err)}`);
-      }
-      process.exit(0);
-    };
-
-    process.on("SIGINT", () => void shutdown());
-    process.on("SIGTERM", () => void shutdown());
+    registerSignalShutdownHandlers({
+      getRuntime: () => runtime,
+      getSandboxManager: () => sandboxManager,
+    });
   }
 
   const loadHooksSystem = async (): Promise<void> => {
@@ -4582,8 +4619,7 @@ export async function startEliza(
   // surface.
   try {
     const { startApiServer } = await import("../api/server");
-    const apiPort =
-      Number(process.env.ELIZA_PORT || process.env.ELIZA_PORT) || 2138;
+    const apiPort = resolveServerOnlyPort(process.env);
     const { port: actualApiPort } = await startApiServer({
       port: apiPort,
       runtime,
@@ -4808,19 +4844,13 @@ export async function startEliza(
     // Keep process alive — the API server handles all interaction
     const keepAlive = setInterval(() => {}, 1 << 30); // ~12 days
 
-    // Cleanup on exit
-    const cleanup = async () => {
-      clearInterval(keepAlive);
-      try {
-        await shutdownRuntime(runtime, "server-only shutdown");
-      } catch (err) {
-        logger.warn(`[eliza] Error stopping runtime: ${formatError(err)}`);
-      }
-      process.exit(0);
-    };
-
-    process.on("SIGINT", () => void cleanup());
-    process.on("SIGTERM", () => void cleanup());
+    registerSignalShutdownHandlers({
+      getRuntime: () => runtime,
+      getSandboxManager: () => sandboxManager,
+      beforeShutdown: () => {
+        clearInterval(keepAlive);
+      },
+    });
 
     return runtime;
   }

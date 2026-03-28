@@ -107,7 +107,7 @@ milady/
 │   └── ...
 ├── apps/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
-│   └── chrome-extension/    # Browser extension
+│   └── ...                  # No shipped chrome-extension app in this release checkout
 ├── src/                     # Milady runtime
 │   ├── runtime/             # ElizaOS runtime bootstrap
 │   ├── plugins/             # Built-in Milady plugins
@@ -195,7 +195,7 @@ bun run dev:desktop
 
 ### Testing
 
-Coverage thresholds are enforced in `vitest.config.ts`: 25% lines/functions/statements, 15% branches. CI fails when coverage falls below these floors.
+Coverage thresholds are enforced from `scripts/coverage-policy.mjs`: 25% lines/functions/statements, 15% branches. CI fails when coverage falls below these floors.
 
 ```bash
 # Run all tests (parallel)

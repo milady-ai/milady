@@ -134,8 +134,8 @@ describe("ChatComposer mic controls", () => {
       agentVoiceEnabled: true,
     });
 
-    expect(speakerButton?.props.className).toContain("bg-accent/16");
-    expect(speakerButton?.props.className).toContain("text-accent");
+    expect(speakerButton?.props.className).toContain("bg-[linear-gradient");
+    expect(speakerButton?.props.className).toContain("text-txt-strong");
   });
 
   it("shows Listening... in an empty default chat input while listening", () => {
@@ -161,8 +161,8 @@ describe("ChatComposer mic controls", () => {
     });
 
     expect(sendButton.props.disabled).toBe(true);
-    expect(sendButton.props.className).toContain("disabled:bg-bg-accent");
-    expect(sendButton.props.className).toContain("disabled:text-muted-strong");
+    expect(sendButton.props.className).toContain("border-accent/26");
+    expect(sendButton.props.className).toContain("disabled:ring-0");
   });
 
   it("uses the accent-tinted primary action styling when a draft is ready", () => {
@@ -174,8 +174,7 @@ describe("ChatComposer mic controls", () => {
     });
 
     expect(sendButton.props.disabled).toBe(false);
-    expect(sendButton.props.className).toContain("bg-accent/22");
-    expect(sendButton.props.className).toContain("border-accent/55");
+    expect(sendButton.props.className).toContain("border-accent/26");
   });
 
   it("uses the themed companion action styling in game-modal", () => {
@@ -188,9 +187,9 @@ describe("ChatComposer mic controls", () => {
     });
     const textarea = findTextarea(renderer);
 
-    expect(sendButton.props.className).toContain("var(--onboarding-accent-bg)");
+    expect(sendButton.props.className).toContain("border-transparent");
     expect(sendButton.props.className).toContain(
-      "var(--onboarding-accent-border)",
+      "text-[color:var(--onboarding-text-strong)]",
     );
     expect(String(textarea.props.className)).toContain(
       "var(--onboarding-text-strong)",

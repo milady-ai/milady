@@ -1,15 +1,11 @@
-// @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
 import { ShellOverlays } from "./ShellOverlays";
 
 vi.mock("@miladyai/ui", () => ({
-  Spinner: ({ className }: { className?: string }) =>
-    React.createElement("span", {
-      "data-testid": "spinner",
-      className,
-    }),
+  Spinner: (props: Record<string, unknown>) =>
+    React.createElement("div", { "data-testid": "spinner", ...props }),
 }));
 
 vi.mock("./BugReportModal", () => ({
@@ -33,46 +29,40 @@ vi.mock("./ShortcutsOverlay", () => ({
 }));
 
 describe("ShellOverlays", () => {
-  it("uses readable text tokens for each notice tone", () => {
-    const notice = {
-      text: "Heads up",
-      tone: "info",
-      busy: false,
-    };
-
-    let renderer: TestRenderer.ReactTestRenderer;
+  it("uses accent foreground text for accent action notices", () => {
+    let tree: TestRenderer.ReactTestRenderer;
     act(() => {
-      renderer = TestRenderer.create(
-        React.createElement(ShellOverlays, { actionNotice: notice }),
+      tree = TestRenderer.create(
+        <ShellOverlays
+          actionNotice={{ tone: "info", text: "Cloud login ready" }}
+        />,
       );
     });
 
-    const infoBanner = renderer!.root.findByProps({ role: "status" });
-    expect(String(infoBanner.props.className)).toContain("bg-accent");
-    expect(String(infoBanner.props.className)).toContain("text-accent-fg");
+    const status = tree!.root.findByProps({ role: "status" });
+    const className = String(status.props.className);
 
+    expect(className).toContain("bg-accent text-accent-fg");
+    expect(className).not.toContain("text-white");
+  });
+
+  it.each([
+    ["error", "bg-danger text-white"],
+    ["success", "bg-ok text-white"],
+  ] as const)("keeps white text on %s notices", (tone, expectedClass) => {
+    let tree: TestRenderer.ReactTestRenderer;
     act(() => {
-      renderer!.update(
-        React.createElement(ShellOverlays, {
-          actionNotice: { ...notice, tone: "success" },
-        }),
+      tree = TestRenderer.create(
+        <ShellOverlays
+          actionNotice={{ tone, text: `${tone} message`, busy: true }}
+        />,
       );
     });
 
-    const successBanner = renderer!.root.findByProps({ role: "status" });
-    expect(String(successBanner.props.className)).toContain("bg-ok");
-    expect(String(successBanner.props.className)).toContain("text-white");
+    const status = tree!.root.findByProps({ role: "status" });
+    const className = String(status.props.className);
 
-    act(() => {
-      renderer!.update(
-        React.createElement(ShellOverlays, {
-          actionNotice: { ...notice, tone: "error" },
-        }),
-      );
-    });
-
-    const errorBanner = renderer!.root.findByProps({ role: "status" });
-    expect(String(errorBanner.props.className)).toContain("bg-danger");
-    expect(String(errorBanner.props.className)).toContain("text-white");
+    expect(className).toContain(expectedClass);
+    expect(tree!.root.findByProps({ "data-testid": "spinner" })).toBeTruthy();
   });
 });

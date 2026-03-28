@@ -174,7 +174,7 @@ The `PermissionsSection` component manages system permission grants for native p
 
 - **Relay server status** -- shows whether the WebSocket relay at `ws://127.0.0.1:{port}/extension` is reachable, with a green/red indicator.
 - **Check Connection** button to re-test relay status.
-- **Installation instructions** -- step-by-step guide to load the unpacked Chrome extension from `apps/chrome-extension/` in Developer mode.
+- **Release status** -- links to the Browser Relay status page, which explains that the extension is not shipped in release `v2.0.0-alpha.125` and must be sourced separately if needed.
 - **Extension path** display when available.
 
 #### 9. Agent Export / Import

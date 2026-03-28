@@ -103,6 +103,24 @@ function runCodesign(
   );
 }
 
+export function collectMacCodeSignTargets(appBundlePath: string): string[] {
+  const binaryDir = path.join(appBundlePath, "Contents", "MacOS");
+  return [
+    path.join(binaryDir, "launcher"),
+    path.join(binaryDir, "bun"),
+    path.join(binaryDir, "libNativeWrapper.dylib"),
+    path.join(binaryDir, "libwebgpu_dawn.dylib"),
+    path.join(binaryDir, "libasar.dylib"),
+    path.join(binaryDir, "extractor"),
+    path.join(binaryDir, "process_helper"),
+    path.join(binaryDir, "zig-zstd"),
+    path.join(binaryDir, "zig-asar"),
+    path.join(binaryDir, "bspatch"),
+    path.join(binaryDir, "bsdiff"),
+    appBundlePath,
+  ].filter((target, index, targets) => targets.indexOf(target) === index);
+}
+
 export function signLocalAppBundle(args: {
   appBundlePath: string;
   entitlements: Record<string, boolean | string>;
@@ -119,7 +137,6 @@ export function signLocalAppBundle(args: {
     "MacOS",
     "launcher",
   );
-  const bunPath = path.join(appBundlePath, "Contents", "MacOS", "bun");
 
   if (!fs.existsSync(appBundlePath)) {
     throw new Error(`[local-sign] app bundle not found: ${appBundlePath}`);
@@ -140,7 +157,7 @@ export function signLocalAppBundle(args: {
   );
 
   try {
-    const signTargets = [launcherPath, bunPath, appBundlePath].filter(
+    const signTargets = collectMacCodeSignTargets(appBundlePath).filter(
       (target) => fs.existsSync(target),
     );
 

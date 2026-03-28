@@ -667,12 +667,8 @@ describe("CONNECTOR_PLUGINS", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("contains 20 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(20);
-  });
-
-  it("maps retake to @elizaos/plugin-retake", () => {
-    expect(CONNECTOR_PLUGINS.retake).toBe("@elizaos/plugin-retake");
+  it("contains 19 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
   });
 
   it("has keys matching CONNECTOR_IDS from schema", () => {
@@ -817,56 +813,6 @@ describe("WhatsApp connector auto-enable", () => {
   });
 });
 
-// ============================================================================
-//  Retake connector auto-enable
-// ============================================================================
-
-describe("Retake connector auto-enable", () => {
-  it("auto-enables when accessToken is set", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: { retake: { accessToken: "rtk-test-token" } },
-        },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("retake");
-  });
-
-  it("auto-enables when enabled is true", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: { retake: { enabled: true } },
-        },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("retake");
-  });
-
-  it("does not auto-enable when config is empty", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: { connectors: { retake: {} } },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("retake");
-  });
-
-  it("does not auto-enable when enabled is explicitly false", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: {
-            retake: { enabled: false, accessToken: "rtk-test" },
-          },
-        },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("retake");
-  });
-});
-
 describe("Blooio connector auto-enable", () => {
   it("auto-enables when apiKey is set", () => {
     const { config } = applyPluginAutoEnable(
@@ -906,7 +852,6 @@ describe("Blooio connector auto-enable", () => {
 
 describe("STREAMING_PLUGINS mapping", () => {
   it("maps known streaming destinations to plugin packages", () => {
-    expect(STREAMING_PLUGINS.retake).toBe("@elizaos/plugin-retake");
     expect(STREAMING_PLUGINS.twitch).toBe("@elizaos/plugin-twitch-streaming");
     expect(STREAMING_PLUGINS.youtube).toBe("@elizaos/plugin-youtube-streaming");
     expect(STREAMING_PLUGINS.customRtmp).toBe("@elizaos/plugin-custom-rtmp");
@@ -915,44 +860,22 @@ describe("STREAMING_PLUGINS mapping", () => {
 
 describe("isStreamingDestinationConfigured", () => {
   it("returns false for null/undefined config", () => {
-    expect(isStreamingDestinationConfigured("retake", null)).toBe(false);
+    expect(isStreamingDestinationConfigured("twitch", null)).toBe(false);
     expect(isStreamingDestinationConfigured("twitch", undefined)).toBe(false);
   });
 
   it("returns false for non-object config", () => {
-    expect(isStreamingDestinationConfigured("retake", "string")).toBe(false);
+    expect(isStreamingDestinationConfigured("twitch", "string")).toBe(false);
     expect(isStreamingDestinationConfigured("twitch", 42)).toBe(false);
   });
 
   it("returns false when enabled is explicitly false", () => {
-    expect(
-      isStreamingDestinationConfigured("retake", {
-        enabled: false,
-        accessToken: "tok",
-      }),
-    ).toBe(false);
     expect(
       isStreamingDestinationConfigured("twitch", {
         enabled: false,
         streamKey: "sk",
       }),
     ).toBe(false);
-  });
-
-  it("detects retake via accessToken", () => {
-    expect(
-      isStreamingDestinationConfigured("retake", { accessToken: "rtk-abc" }),
-    ).toBe(true);
-  });
-
-  it("detects retake via enabled: true (no accessToken)", () => {
-    expect(isStreamingDestinationConfigured("retake", { enabled: true })).toBe(
-      true,
-    );
-  });
-
-  it("rejects retake with empty config", () => {
-    expect(isStreamingDestinationConfigured("retake", {})).toBe(false);
   });
 
   it("detects twitch via streamKey", () => {
@@ -998,18 +921,6 @@ describe("isStreamingDestinationConfigured", () => {
 });
 
 describe("applyPluginAutoEnable — streaming destinations", () => {
-  it("auto-enables retake-streaming plugin when retake accessToken is set", () => {
-    const { config, changes } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          streaming: { retake: { accessToken: "rtk-test" } },
-        } as never,
-      }),
-    );
-    expect(config.plugins?.allow).toContain("retake");
-    expect(changes.some((c) => c.includes("streaming: retake"))).toBe(true);
-  });
-
   it("auto-enables twitch-streaming plugin when twitch streamKey is set", () => {
     const { config, changes } = applyPluginAutoEnable(
       makeParams({
@@ -1105,7 +1016,6 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: {
-            retake: { accessToken: "rtk-test" },
             twitch: { streamKey: "live_abc" },
             youtube: { streamKey: "xxxx-xxxx" },
           },
@@ -1113,9 +1023,8 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       }),
     );
     const allow = config.plugins?.allow ?? [];
-    expect(allow).toContain("retake");
     expect(allow).toContain("twitch-streaming");
     expect(allow).toContain("youtube-streaming");
-    expect(changes.length).toBeGreaterThanOrEqual(3);
+    expect(changes.length).toBeGreaterThanOrEqual(2);
   });
 });

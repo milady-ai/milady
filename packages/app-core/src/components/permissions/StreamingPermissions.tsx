@@ -310,7 +310,7 @@ export function StreamingPermissionsOnboardingView({
   if (checking) {
     return (
       <div className="text-center py-8">
-        <div className="text-[var(--muted)] text-sm">
+        <div className="text-sm text-[var(--onboarding-text-primary)]">
           {translateWithFallback(
             t,
             "permissionssection.CheckingPermissions",
@@ -323,12 +323,16 @@ export function StreamingPermissionsOnboardingView({
 
   return (
     <div data-testid={testId}>
-      <div className="text-center mb-6">
-        <div className="text-xl font-bold mb-2">{title}</div>
-        <div className="text-[var(--muted)] text-sm">{description}</div>
+      <div className="mb-5 text-center">
+        <div className="mb-2 text-xl font-bold text-[var(--onboarding-text-strong)]">
+          {title}
+        </div>
+        <div className="text-sm text-[var(--onboarding-text-primary)]">
+          {description}
+        </div>
       </div>
 
-      <div className="space-y-3 mb-6">
+      <div className="mb-6 space-y-2.5">
         {MEDIA_PERMISSIONS.map((def) => {
           const isGranted = permStates[def.id] === "granted";
 
@@ -336,16 +340,18 @@ export function StreamingPermissionsOnboardingView({
             <div
               key={def.id}
               data-permission-id={def.id}
-              className={`flex items-center gap-4 p-4 border ${
+              className={`flex items-center gap-4 rounded-[16px] border px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
                 isGranted
-                  ? "border-[var(--ok)] bg-[var(--ok)]/10"
-                  : "border-[var(--border)] bg-[var(--card)]"
+                  ? "border-[var(--ok)] bg-[color:color-mix(in_srgb,var(--ok)_16%,var(--onboarding-card-bg)_84%)]"
+                  : "border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)]"
               }`}
             >
               <PermissionIcon icon={def.icon} />
               <div className="flex-1">
-                <div className="font-semibold text-sm">{def.name}</div>
-                <div className="text-[11px] text-[var(--muted)]">
+                <div className="text-sm font-semibold text-[var(--onboarding-text-strong)]">
+                  {def.name}
+                </div>
+                <div className="text-[11px] text-[var(--onboarding-text-subtle)]">
                   {def.description}
                 </div>
               </div>
@@ -388,7 +394,7 @@ export function StreamingPermissionsOnboardingView({
         <Button
           variant="default"
           data-testid="permissions-onboarding-continue"
-          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[rgba(240,185,11,0.18)] border border-[rgba(240,185,11,0.35)] rounded-[6px] text-accent-fg text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 overflow-hidden hover:bg-[rgba(240,185,11,0.28)] hover:border-[rgba(240,185,11,0.6)] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[rgba(240,185,11,0.18)] border border-[rgba(240,185,11,0.35)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 overflow-hidden hover:bg-[rgba(240,185,11,0.28)] hover:border-[rgba(240,185,11,0.6)] disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={(e) => {
             if (e?.currentTarget) {
               const rect = e.currentTarget.getBoundingClientRect();

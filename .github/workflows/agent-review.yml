@@ -237,7 +237,7 @@ jobs:
             ### 4. Test Requirements
             - Bug fixes MUST include a regression test
             - New features MUST include unit tests
-            - Coverage thresholds: 25% lines/functions/statements, 15% branches (enforced in vitest.config.ts)
+            - Coverage thresholds: 25% lines/functions/statements, 15% branches (enforced from scripts/coverage-policy.mjs)
             - Database changes (routes, adapters, query logic): `bun run db:check` must pass (verifies security hardening and read-only query guards)
 
             ### 5. Dark Forest Awareness
@@ -346,7 +346,7 @@ jobs:
             ### 4. Test Requirements
             - Bug fixes MUST include a regression test
             - New features MUST include unit tests
-            - Coverage thresholds: 25% lines/functions/statements, 15% branches (enforced in vitest.config.ts)
+            - Coverage thresholds: 25% lines/functions/statements, 15% branches (enforced from scripts/coverage-policy.mjs)
 
             ### 5. Dark Forest Awareness
             Assume adversarial intent until proven otherwise. Ask yourself:

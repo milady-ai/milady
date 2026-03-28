@@ -43,16 +43,16 @@ describe("hasPartialOnboardingConnectionConfig", () => {
 });
 
 describe("inferOnboardingResumeStep", () => {
-  it("defaults to welcome with no persisted step and no config", () => {
-    expect(inferOnboardingResumeStep({})).toBe("welcome");
+  it("defaults to cloud_login with no persisted step and no config", () => {
+    expect(inferOnboardingResumeStep({})).toBe("cloud_login");
   });
 
-  it("defaults to welcome with empty config and no persisted step", () => {
-    expect(inferOnboardingResumeStep({ config: {} })).toBe("welcome");
+  it("defaults to cloud_login with empty config and no persisted step", () => {
+    expect(inferOnboardingResumeStep({ config: {} })).toBe("cloud_login");
   });
 
-  it("defaults to welcome with null config and no persisted step", () => {
-    expect(inferOnboardingResumeStep({ config: null })).toBe("welcome");
+  it("defaults to cloud_login with null config and no persisted step", () => {
+    expect(inferOnboardingResumeStep({ config: null })).toBe("cloud_login");
   });
 
   it("returns the persisted step when available", () => {
@@ -90,7 +90,7 @@ describe("inferOnboardingResumeStep", () => {
 
   it("does not return old step names as defaults", () => {
     const result = inferOnboardingResumeStep({ config: {} });
-    expect(result).toBe("welcome");
+    expect(result).toBe("cloud_login");
   });
 
   it("falls back to welcome when nothing is persisted yet", () => {
@@ -98,7 +98,7 @@ describe("inferOnboardingResumeStep", () => {
       inferOnboardingResumeStep({
         config: {},
       }),
-    ).toBe("welcome");
+    ).toBe("cloud_login");
   });
 });
 
@@ -163,6 +163,8 @@ describe("deriveOnboardingResumeFields", () => {
       onboardingRemoteConnected: false,
       onboardingRemoteApiBase: "",
       onboardingRemoteToken: "",
+      onboardingVoiceProvider: "",
+      onboardingVoiceApiKey: "",
     });
   });
 });

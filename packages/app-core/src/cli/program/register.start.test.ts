@@ -1,5 +1,12 @@
 import crypto from "node:crypto";
 import { beforeEach, describe, expect, it } from "vitest";
+import {
+  isLoopbackBindHost,
+  resolveApiBindHost,
+  resolveApiSecurityConfig,
+  resolveApiToken,
+  setApiToken,
+} from "@miladyai/shared/runtime-env";
 
 /**
  * Tests for connection key generation in the CLI start command.
@@ -19,8 +26,7 @@ describe("generateConnectionKey", () => {
   // Inline the function for isolated testing
   function generateConnectionKey(): string {
     const generated = crypto.randomBytes(16).toString("hex");
-    process.env.MILADY_API_TOKEN = generated;
-    process.env.ELIZA_API_TOKEN = generated;
+    setApiToken(process.env, generated);
     return generated;
   }
 
@@ -51,10 +57,7 @@ describe("isNetworkBind", () => {
   });
 
   function isNetworkBind(): boolean {
-    const bind =
-      process.env.MILADY_API_BIND?.trim() || process.env.ELIZA_API_BIND?.trim();
-    if (!bind) return false;
-    return bind !== "127.0.0.1" && bind !== "localhost" && bind !== "::1";
+    return !isLoopbackBindHost(resolveApiBindHost(process.env));
   }
 
   it("returns false when no bind is set (default localhost)", () => {
@@ -89,10 +92,7 @@ describe("shouldDisableAutoConnectionKey", () => {
   });
 
   function shouldDisableAutoConnectionKey(): boolean {
-    return (
-      process.env.MILADY_DISABLE_AUTO_API_TOKEN === "1" ||
-      process.env.ELIZA_DISABLE_AUTO_API_TOKEN === "1"
-    );
+    return resolveApiSecurityConfig(process.env).disableAutoApiToken;
   }
 
   it("returns true when MILADY_DISABLE_AUTO_API_TOKEN=1", () => {
@@ -120,12 +120,8 @@ describe("connection key is NOT auto-generated for localhost", () => {
 
   it("no token is set when running on default localhost bind", () => {
     // Simulate startAction logic: only generate when isNetworkBind
-    const existingToken =
-      process.env.MILADY_API_TOKEN?.trim() ||
-      process.env.ELIZA_API_TOKEN?.trim();
-    const bind =
-      process.env.MILADY_API_BIND?.trim() || process.env.ELIZA_API_BIND?.trim();
-    const isNetwork = bind && bind !== "127.0.0.1" && bind !== "localhost";
+    const existingToken = resolveApiToken(process.env);
+    const isNetwork = !isLoopbackBindHost(resolveApiBindHost(process.env));
 
     if (!existingToken && isNetwork) {
       // Would generate key — but isNetwork is false for localhost

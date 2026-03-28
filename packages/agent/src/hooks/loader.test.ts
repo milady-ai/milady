@@ -7,7 +7,7 @@
  * - Config extraDirs safety (must be under ~/.eliza/)
  */
 
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -75,6 +75,7 @@ beforeAll(async () => {
     `loader-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   await mkdir(tempRoot, { recursive: true });
+  await mkdir(resolve(FAKE_HOME, ".eliza", "hooks"), { recursive: true });
 
   // Create a reusable dummy handler module
   dummyHandlerPath = join(tempRoot, "handler.mjs");
@@ -325,12 +326,13 @@ describe("path safety — legacy handlers", () => {
     mockDiscoverHooks.mockResolvedValue([]);
 
     // FAKE_HOME is the mocked homedir — managed hooks dir = FAKE_HOME/.eliza/hooks
-    const managedPath = resolve(
-      FAKE_HOME,
-      ".eliza",
-      "hooks",
-      "my-hook",
-      "handler.ts",
+    const safeDir = resolve(FAKE_HOME, ".eliza", "hooks", "my-hook");
+    const managedPath = resolve(safeDir, "handler.mjs");
+    await mkdir(safeDir, { recursive: true });
+    await writeFile(
+      managedPath,
+      "export default function managedHandler() {}",
+      "utf-8",
     );
     const config: InternalHooksConfig = {
       handlers: [
@@ -341,20 +343,82 @@ describe("path safety — legacy handlers", () => {
       ],
     };
 
-    // The handler import will fail (file doesn't exist), but path validation passes
-    const result = await loadHooks({ internalConfig: config });
+    try {
+      const result = await loadHooks({ internalConfig: config });
 
-    // Should fail on import, not on path validation
-    expect(result.failed).toContain(managedPath);
-    // The warning should NOT mention "outside allowed"
+      expect(result.failed).not.toContain(managedPath);
+      expect(result.registered).toBe(1);
+
+      const { logger } = await import("@elizaos/core");
+      const outsideCalls = (
+        logger.warn as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        (call: unknown[]) =>
+          typeof call[0] === "string" && call[0].includes("outside allowed"),
+      );
+      expect(outsideCalls).toHaveLength(0);
+    } finally {
+      await unlink(managedPath).catch(() => {});
+    }
+  });
+
+  it("rejects symlinked legacy handlers that escape allowed roots", async () => {
     const { logger } = await import("@elizaos/core");
-    const outsideCalls = (
-      logger.warn as ReturnType<typeof vi.fn>
-    ).mock.calls.filter(
-      (call: unknown[]) =>
-        typeof call[0] === "string" && call[0].includes("outside allowed"),
+    const loadHooks = await getLoadHooks();
+    mockDiscoverHooks.mockResolvedValue([]);
+
+    const safeDir = resolve(FAKE_HOME, ".eliza", "hooks", "escaped-hook");
+    const escapedTarget = join(tempRoot, "escaped-handler.mjs");
+    const symlinkPath = join(safeDir, "handler.mjs");
+    await mkdir(safeDir, { recursive: true });
+    await writeFile(
+      escapedTarget,
+      "export default function escapedHandler() {}",
+      "utf-8",
     );
-    expect(outsideCalls).toHaveLength(0);
+    await symlink(escapedTarget, symlinkPath);
+
+    try {
+      const result = await loadHooks({
+        internalConfig: {
+          handlers: [{ event: "command:new", module: symlinkPath }],
+        },
+      });
+
+      expect(result.failed).toContain(symlinkPath);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("outside allowed hook directories"),
+      );
+    } finally {
+      await unlink(symlinkPath).catch(() => {});
+    }
+  });
+
+  it("rejects broken legacy handler symlinks", async () => {
+    const { logger } = await import("@elizaos/core");
+    const loadHooks = await getLoadHooks();
+    mockDiscoverHooks.mockResolvedValue([]);
+
+    const safeDir = resolve(FAKE_HOME, ".eliza", "hooks", "broken-hook");
+    const brokenTarget = join(tempRoot, "missing-handler.mjs");
+    const symlinkPath = join(safeDir, "handler.mjs");
+    await mkdir(safeDir, { recursive: true });
+    await symlink(brokenTarget, symlinkPath);
+
+    try {
+      const result = await loadHooks({
+        internalConfig: {
+          handlers: [{ event: "command:new", module: symlinkPath }],
+        },
+      });
+
+      expect(result.failed).toContain(symlinkPath);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("outside allowed hook directories"),
+      );
+    } finally {
+      await unlink(symlinkPath).catch(() => {});
+    }
   });
 });
 

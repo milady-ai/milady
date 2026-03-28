@@ -69,32 +69,44 @@ export function ReleaseCenterView() {
       return;
     }
 
-    const [updater, build, dock, gpuStatus, ...sessionResults] =
-      await Promise.all([
-        invokeDesktopBridgeRequest<DesktopUpdaterSnapshot>({
-          rpcMethod: "desktopGetUpdaterState",
-          ipcChannel: "desktop:getUpdaterState",
+    const [
+      updaterResult,
+      buildResult,
+      dockResult,
+      gpuStatusResult,
+      ...sessionResults
+    ] = await Promise.allSettled([
+      invokeDesktopBridgeRequest<DesktopUpdaterSnapshot>({
+        rpcMethod: "desktopGetUpdaterState",
+        ipcChannel: "desktop:getUpdaterState",
+      }),
+      invokeDesktopBridgeRequest<DesktopBuildInfo>({
+        rpcMethod: "desktopGetBuildInfo",
+        ipcChannel: "desktop:getBuildInfo",
+      }),
+      invokeDesktopBridgeRequest<{ visible: boolean }>({
+        rpcMethod: "desktopGetDockIconVisibility",
+        ipcChannel: "desktop:getDockIconVisibility",
+      }),
+      invokeDesktopBridgeRequest<WebGpuBrowserStatus>({
+        rpcMethod: "desktopGetWebGpuBrowserStatus",
+        ipcChannel: "desktop:getWebGpuBrowserStatus",
+      }),
+      ...SESSION_PARTITIONS.map(({ partition }) =>
+        invokeDesktopBridgeRequest<DesktopSessionSnapshot>({
+          rpcMethod: "desktopGetSessionSnapshot",
+          ipcChannel: "desktop:getSessionSnapshot",
+          params: { partition },
         }),
-        invokeDesktopBridgeRequest<DesktopBuildInfo>({
-          rpcMethod: "desktopGetBuildInfo",
-          ipcChannel: "desktop:getBuildInfo",
-        }),
-        invokeDesktopBridgeRequest<{ visible: boolean }>({
-          rpcMethod: "desktopGetDockIconVisibility",
-          ipcChannel: "desktop:getDockIconVisibility",
-        }),
-        invokeDesktopBridgeRequest<WebGpuBrowserStatus>({
-          rpcMethod: "desktopGetWebGpuBrowserStatus",
-          ipcChannel: "desktop:getWebGpuBrowserStatus",
-        }),
-        ...SESSION_PARTITIONS.map(({ partition }) =>
-          invokeDesktopBridgeRequest<DesktopSessionSnapshot>({
-            rpcMethod: "desktopGetSessionSnapshot",
-            ipcChannel: "desktop:getSessionSnapshot",
-            params: { partition },
-          }),
-        ),
-      ]);
+      ),
+    ]);
+
+    const updater =
+      updaterResult.status === "fulfilled" ? updaterResult.value : null;
+    const build = buildResult.status === "fulfilled" ? buildResult.value : null;
+    const dock = dockResult.status === "fulfilled" ? dockResult.value : null;
+    const gpuStatus =
+      gpuStatusResult.status === "fulfilled" ? gpuStatusResult.value : null;
 
     setNativeUpdater(updater);
     setBuildInfo(build);
@@ -104,7 +116,9 @@ export function ReleaseCenterView() {
       Object.fromEntries(
         SESSION_PARTITIONS.map((entry, index) => [
           entry.partition,
-          sessionResults[index] ?? undefined,
+          sessionResults[index]?.status === "fulfilled"
+            ? (sessionResults[index].value ?? undefined)
+            : undefined,
         ]),
       ),
     );
@@ -113,6 +127,18 @@ export function ReleaseCenterView() {
         ? current
         : normalizeReleaseNotesUrl(updater?.baseUrl ?? current),
     );
+
+    if (
+      updaterResult.status === "rejected" ||
+      buildResult.status === "rejected" ||
+      dockResult.status === "rejected" ||
+      gpuStatusResult.status === "rejected" ||
+      sessionResults.some((result) => result.status === "rejected")
+    ) {
+      console.warn(
+        "[ReleaseCenter] One or more desktop runtime requests failed during refresh.",
+      );
+    }
   }, [desktopRuntime, releaseNotesUrlDirty]);
 
   useEffect(() => {
@@ -213,10 +239,6 @@ export function ReleaseCenterView() {
       <section className={`${RELEASE_PANEL_CLASSNAME} space-y-3 p-4`}>
         <div className="space-y-1">
           <h2 className="text-sm font-semibold text-txt">Release Center</h2>
-          <p className="max-w-2xl text-xs leading-5 text-muted">
-            Update actions and detached release tooling are only available in
-            the Electrobun desktop runtime.
-          </p>
         </div>
         <div className="rounded-xl border border-border/40 bg-bg-hover/60 px-3 py-3 text-xs leading-5 text-muted">
           This web session is read-only for release management. Open Milady in
@@ -375,10 +397,6 @@ export function ReleaseCenterView() {
       <section className={`${RELEASE_PANEL_CLASSNAME} space-y-3 p-4`}>
         <div className="space-y-1">
           <h2 className="text-sm font-semibold text-txt">Update Actions</h2>
-          <p className="max-w-2xl text-xs leading-5 text-muted">
-            Refresh the desktop updater state, download available updates, and
-            open the detached release tooling without leaving the app shell.
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -451,15 +469,7 @@ export function ReleaseCenterView() {
       {/* ── Release Notes ─────────────────────────────────────── */}
       <section className={`${RELEASE_PANEL_CLASSNAME} space-y-3 p-4`}>
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-txt">
-              Release Notes
-            </span>
-          </div>
-          <p className="max-w-2xl text-xs leading-5 text-muted">
-            Review the release notes source URL, open it in the desktop
-            BrowserView, or reset back to the updater-provided default.
-          </p>
+          <span className="text-sm font-semibold text-txt">Release Notes</span>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input

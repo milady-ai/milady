@@ -82,7 +82,7 @@ describe("auth-routes", () => {
       expect(payload.expiresAt).toBeNull();
     });
 
-    test("bypasses auth entirely for steward-managed cloud containers", async () => {
+    test("suppresses local auth for steward-managed cloud containers", async () => {
       process.env.MILADY_CLOUD_PROVISIONED = "1";
       process.env.STEWARD_AGENT_TOKEN = "steward-token";
       delete process.env.ELIZA_API_TOKEN;
@@ -98,7 +98,7 @@ describe("auth-routes", () => {
       });
     });
 
-    test("preserves required=true for steward-managed cloud containers with an API token", async () => {
+    test("still suppresses local auth for steward-managed cloud containers with an API token", async () => {
       process.env.MILADY_CLOUD_PROVISIONED = "1";
       process.env.STEWARD_AGENT_TOKEN = "steward-token";
       process.env.ELIZA_API_TOKEN = "test-token-secret";
@@ -108,7 +108,7 @@ describe("auth-routes", () => {
       const payload = (ctx.json as ReturnType<typeof vi.fn>).mock.calls[0][1];
 
       expect(payload).toEqual({
-        required: true,
+        required: false,
         pairingEnabled: false,
         expiresAt: null,
       });

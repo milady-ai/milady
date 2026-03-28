@@ -270,7 +270,7 @@ Treat this as a curriculum. Finish each layer before moving deeper.
 2. **Platform-specific app behavior**
    - `/apps/desktop`
    - `/apps/mobile`
-   - `/apps/chrome-extension`
+   - Browser Relay release-status documentation when browser automation work is in scope
 
 ### Layer 4 — Systems and operations fluency
 
@@ -298,7 +298,7 @@ These documents are long-form design dossiers. Read only the sections relevant t
 
 - **Runtime track:** runtime lifecycle + services + providers + memory docs
 - **Plugin track:** plugin architecture + local plugins + registry + schemas
-- **Platform track:** desktop/mobile/chrome-extension docs + release/build docs
+- **Platform track:** desktop/mobile docs + release/build docs, plus the Browser Relay status page when relevant
 - **API track:** REST docs + contracts + integration/e2e tests
 
 ### What “advanced-ready” looks like

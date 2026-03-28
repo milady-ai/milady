@@ -88,14 +88,18 @@ describe("ensureApiTokenForBindHost", () => {
 describe("resolveCorsOrigin", () => {
   let previousBind: string | undefined;
   let previousAllowedOrigins: string | undefined;
+  let previousAllowNullOrigin: string | undefined;
   let previousMiladyBind: string | undefined;
   let previousMiladyAllowedOrigins: string | undefined;
+  let previousMiladyAllowNullOrigin: string | undefined;
 
   beforeEach(() => {
     previousBind = process.env.ELIZA_API_BIND;
     previousAllowedOrigins = process.env.ELIZA_ALLOWED_ORIGINS;
+    previousAllowNullOrigin = process.env.ELIZA_ALLOW_NULL_ORIGIN;
     previousMiladyBind = process.env.MILADY_API_BIND;
     previousMiladyAllowedOrigins = process.env.MILADY_ALLOWED_ORIGINS;
+    previousMiladyAllowNullOrigin = process.env.MILADY_ALLOW_NULL_ORIGIN;
   });
 
   afterEach(() => {
@@ -109,6 +113,11 @@ describe("resolveCorsOrigin", () => {
     } else {
       process.env.ELIZA_ALLOWED_ORIGINS = previousAllowedOrigins;
     }
+    if (previousAllowNullOrigin === undefined) {
+      delete process.env.ELIZA_ALLOW_NULL_ORIGIN;
+    } else {
+      process.env.ELIZA_ALLOW_NULL_ORIGIN = previousAllowNullOrigin;
+    }
     if (previousMiladyBind === undefined) {
       delete process.env.MILADY_API_BIND;
     } else {
@@ -118,6 +127,11 @@ describe("resolveCorsOrigin", () => {
       delete process.env.MILADY_ALLOWED_ORIGINS;
     } else {
       process.env.MILADY_ALLOWED_ORIGINS = previousMiladyAllowedOrigins;
+    }
+    if (previousMiladyAllowNullOrigin === undefined) {
+      delete process.env.MILADY_ALLOW_NULL_ORIGIN;
+    } else {
+      process.env.MILADY_ALLOW_NULL_ORIGIN = previousMiladyAllowNullOrigin;
     }
   });
 
@@ -139,5 +153,20 @@ describe("resolveCorsOrigin", () => {
       "https://proxy.example.com",
     );
     expect(resolveCorsOrigin("https://blocked.example.com")).toBeNull();
+  });
+
+  it("prefers MILADY allowlisted origins over ELIZA aliases", () => {
+    process.env.MILADY_ALLOWED_ORIGINS = "https://milady.example.com";
+    process.env.ELIZA_ALLOWED_ORIGINS = "https://legacy.example.com";
+
+    expect(resolveCorsOrigin("https://milady.example.com")).toBe(
+      "https://milady.example.com",
+    );
+    expect(resolveCorsOrigin("https://legacy.example.com")).toBeNull();
+  });
+
+  it("accepts null origin when MILADY_ALLOW_NULL_ORIGIN=1", () => {
+    process.env.MILADY_ALLOW_NULL_ORIGIN = "1";
+    expect(resolveCorsOrigin("null")).toBe("null");
   });
 });

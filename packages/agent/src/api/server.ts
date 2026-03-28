@@ -42,6 +42,17 @@ import {
   loadElizaConfig,
   saveElizaConfig,
 } from "../config/config.js";
+import {
+  isNullOriginAllowed,
+  resolveAllowedHosts,
+  resolveAllowedOrigins,
+  resolveApiBindHost,
+  resolveApiSecurityConfig,
+  resolveApiToken,
+  resolveServerOnlyPort,
+  setApiToken,
+  stripOptionalHostPort,
+} from "../config/runtime-env.js";
 import { resolveModelsCacheDir, resolveStateDir } from "../config/paths.js";
 import {
   isConnectorConfigured,
@@ -889,10 +900,11 @@ const BLOCKED_ENV_KEYS = new Set([
   "HOME",
   "SHELL",
   // Auth / step-up tokens — writable via API would grant privilege escalation
+  "MILADY_API_TOKEN",
   "ELIZA_API_TOKEN",
-  "ELIZA_API_TOKEN",
-  "ELIZA_WALLET_EXPORT_TOKEN",
   "MILADY_WALLET_EXPORT_TOKEN",
+  "ELIZA_WALLET_EXPORT_TOKEN",
+  "MILADY_TERMINAL_RUN_TOKEN",
   "ELIZA_TERMINAL_RUN_TOKEN",
   "HYPERSCAPE_AUTH_TOKEN",
   // Wallet private keys — writable via API would enable key theft / replacement
@@ -963,10 +975,8 @@ export const AGENT_EVENT_ALLOWED_STREAMS = new Set([
   "game",
   "autonomy",
 
-  "retake",
   "stream",
   "system",
-  // Retake plugin event streams (chat-poll.ts emits these)
   "message",
   "new_viewer",
   "assistant",
@@ -1425,7 +1435,6 @@ function categorizePlugin(
   ];
   const streamingDests = [
     "streaming-base",
-    "retake",
     "custom-rtmp",
     "youtube",
     "youtube-streaming",
@@ -1545,7 +1554,6 @@ const PLUGIN_SETUP_GUIDE_ANCHORS: Record<string, string> = {
   mcp: "#mcp-model-context-protocol",
   iq: "#iq-solana-on-chain",
   "gmail-watch": "#gmail-watch",
-  retake: "#retaketv",
   "streaming-base": "#enable-streaming-streaming-base",
   "twitch-streaming": "#twitch-streaming",
   "youtube-streaming": "#youtube-streaming",
@@ -1939,6 +1947,32 @@ function parseSkillDirsSetting(raw: unknown): string[] {
     .filter((dir) => dir.length > 0);
 }
 
+const EXPOSED_BINANCE_SKILL_IDS = new Set([
+  "binance-crypto-market-rank",
+  "binance-meme-rush",
+  "binance-query-address-info",
+  "binance-query-token-audit",
+  "binance-query-token-info",
+  "binance-trading-signal",
+]);
+
+function shouldExposeBinanceSkillId(skillId: string): boolean {
+  const normalized = skillId.trim();
+  if (!normalized.startsWith("binance-")) return true;
+  return EXPOSED_BINANCE_SKILL_IDS.has(normalized);
+}
+
+function shouldExposeBinanceSkillRecord(skill: {
+  id?: unknown;
+  slug?: unknown;
+}): boolean {
+  const slug = typeof skill.slug === "string" ? skill.slug.trim() : "";
+  if (slug) return shouldExposeBinanceSkillId(slug);
+  const id = typeof skill.id === "string" ? skill.id.trim() : "";
+  if (id) return shouldExposeBinanceSkillId(id);
+  return true;
+}
+
 /**
  * Discover skills from @elizaos/skills and workspace, applying
  * database preferences and config filtering.
@@ -1979,40 +2013,42 @@ async function discoverSkills(
         const loadedSkills = svc.getLoadedSkills();
 
         if (loadedSkills.length > 0) {
-          const skills: SkillEntry[] = loadedSkills.map((s) => {
-            // Get scan status from in-memory map (fast) or from disk report
-            let scanStatus: SkillEntry["scanStatus"] = null;
-            if (svc.getSkillScanStatus) {
-              scanStatus = svc.getSkillScanStatus(s.slug);
-            }
-            if (!scanStatus) {
-              // Check for .scan-results.json on disk
-              const reportPath = path.join(s.path, ".scan-results.json");
-              if (fs.existsSync(reportPath)) {
-                const raw = fs.readFileSync(reportPath, "utf-8");
-                try {
-                  const parsed = JSON.parse(raw) as { status?: string };
-                  if (parsed.status) {
-                    scanStatus = parsed.status as
-                      | "clean"
-                      | "warning"
-                      | "critical"
-                      | "blocked";
+          const skills: SkillEntry[] = loadedSkills
+            .filter((s) => shouldExposeBinanceSkillId(s.slug))
+            .map((s) => {
+              // Get scan status from in-memory map (fast) or from disk report
+              let scanStatus: SkillEntry["scanStatus"] = null;
+              if (svc.getSkillScanStatus) {
+                scanStatus = svc.getSkillScanStatus(s.slug);
+              }
+              if (!scanStatus) {
+                // Check for .scan-results.json on disk
+                const reportPath = path.join(s.path, ".scan-results.json");
+                if (fs.existsSync(reportPath)) {
+                  const raw = fs.readFileSync(reportPath, "utf-8");
+                  try {
+                    const parsed = JSON.parse(raw) as { status?: string };
+                    if (parsed.status) {
+                      scanStatus = parsed.status as
+                        | "clean"
+                        | "warning"
+                        | "critical"
+                        | "blocked";
+                    }
+                  } catch {
+                    // Malformed scan report — treat as unscanned.
                   }
-                } catch {
-                  // Malformed scan report — treat as unscanned.
                 }
               }
-            }
 
-            return {
-              id: s.slug,
-              name: s.name || s.slug,
-              description: (s.description || "").slice(0, 200),
-              enabled: resolveSkillEnabled(s.slug, config, dbPrefs),
-              scanStatus,
-            };
-          });
+              return {
+                id: s.slug,
+                name: s.name || s.slug,
+                description: (s.description || "").slice(0, 200),
+                enabled: resolveSkillEnabled(s.slug, config, dbPrefs),
+                scanStatus,
+              };
+            });
 
           return skills.sort((a, b) => a.name.localeCompare(b.name));
         }
@@ -2095,7 +2131,9 @@ async function discoverSkills(
     scanSkillsDir(dir, skills, seen, config, dbPrefs);
   }
 
-  return skills.sort((a, b) => a.name.localeCompare(b.name));
+  return skills
+    .filter((skill) => shouldExposeBinanceSkillId(skill.id))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -2560,9 +2598,7 @@ function serveStaticUi(
   if (!root) return false;
 
   // Keep API and WebSocket namespaces exclusively owned by server handlers.
-  if (pathname === "/api" || pathname.startsWith("/api/")) return false;
-  if (pathname === "/v1" || pathname.startsWith("/v1/")) return false;
-  if (pathname === "/ws") return false;
+  if (isAuthProtectedRoute(pathname)) return false;
 
   let decodedPath: string;
   try {
@@ -2637,6 +2673,17 @@ function serveStaticUi(
   return true;
 }
 
+function isAuthProtectedRoute(pathname: string): boolean {
+  return (
+    pathname === "/api" ||
+    pathname.startsWith("/api/") ||
+    pathname === "/v1" ||
+    pathname.startsWith("/v1/") ||
+    pathname === "/ws" ||
+    pathname.startsWith("/ws/")
+  );
+}
+
 interface ChatGenerationResult {
   text: string;
   agentName: string;
@@ -2653,6 +2700,38 @@ interface ChatGenerateOptions {
   onSnapshot?: (text: string) => void;
   isAborted?: () => boolean;
   resolveNoResponseText?: () => string;
+  preferredLanguage?: string;
+}
+
+const CHAT_LANGUAGE_INSTRUCTION: Record<string, string> = {
+  en: "Reply in natural English unless the user explicitly requests another language.",
+  "zh-CN":
+    "Reply in natural Simplified Chinese unless the user explicitly requests another language.",
+  ko: "Reply in natural Korean unless the user explicitly requests another language.",
+  es: "Reply in natural Spanish unless the user explicitly requests another language.",
+  pt: "Reply in natural Brazilian Portuguese unless the user explicitly requests another language.",
+  vi: "Reply in natural Vietnamese unless the user explicitly requests another language.",
+  tl: "Reply in natural Tagalog unless the user explicitly requests another language.",
+};
+
+function maybeAugmentChatMessageWithLanguage(
+  message: ReturnType<typeof createMessageMemory>,
+  preferredLanguage?: string,
+): ReturnType<typeof createMessageMemory> {
+  if (!preferredLanguage) return message;
+  const instruction =
+    CHAT_LANGUAGE_INSTRUCTION[normalizeCharacterLanguage(preferredLanguage)];
+  if (!instruction) return message;
+  const originalText = extractCompatTextContent(message.content);
+  if (!originalText) return message;
+
+  return {
+    ...message,
+    content: {
+      ...(message.content as Content),
+      text: `${originalText}\n\n[Language instruction: ${instruction}]`,
+    },
+  };
 }
 
 const PROVIDER_ISSUE_CHAT_REPLY = "Sorry, I'm having a provider issue";
@@ -2973,7 +3052,25 @@ function isBalanceIntent(input: string): boolean {
   );
 }
 
-function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
+/**
+ * Extract key-value params from the inside of an XML block.
+ * Matches `<key>value</key>` pairs, skipping nested XML.
+ */
+export function extractXmlParams(block: string): Record<string, string> {
+  const params: Record<string, string> = {};
+  const pairs = block.matchAll(
+    /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
+  );
+  for (const [, key, val] of pairs) {
+    params[key] = val.trim();
+  }
+  return params;
+}
+
+export function parseFallbackActionBlocks(
+  value: unknown,
+  responseText?: string,
+): FallbackParsedAction[] {
   const rawValues: string[] = [];
   if (typeof value === "string") {
     rawValues.push(value);
@@ -2993,7 +3090,20 @@ function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
     if (xmlActionMatches.length === 0) {
       const normalized = raw.trim().toUpperCase();
       if (/^[A-Z0-9_]+$/.test(normalized)) {
-        parsed.push({ name: normalized, parameters: {} });
+        // Plain action name — try to extract params from the response
+        // text where the LLM writes `<ACTION_NAME>..params..</ACTION_NAME>`
+        let params: Record<string, string> = {};
+        if (responseText) {
+          const actionBlockRe = new RegExp(
+            `<${normalized}>([\\s\\S]*?)<\\/${normalized}>`,
+            "i",
+          );
+          const actionBlock = responseText.match(actionBlockRe);
+          if (actionBlock?.[1]) {
+            params = extractXmlParams(actionBlock[1]);
+          }
+        }
+        parsed.push({ name: normalized, parameters: params });
       }
       continue;
     }
@@ -3004,12 +3114,7 @@ function parseFallbackActionBlocks(value: unknown): FallbackParsedAction[] {
       const params: Record<string, string> = {};
       const paramsMatch = block.match(/<params>([\s\S]*?)<\/params>/i);
       if (paramsMatch?.[1]) {
-        const paramPairs = paramsMatch[1].matchAll(
-          /<([A-Za-z_][A-Za-z0-9_-]*)>\s*([^<]+?)\s*<\/\1>/g,
-        );
-        for (const [, key, val] of paramPairs) {
-          params[key] = val.trim();
-        }
+        Object.assign(params, extractXmlParams(paramsMatch[1]));
       }
       parsed.push({
         name: nameMatch[1].trim().toUpperCase(),
@@ -3106,6 +3211,744 @@ async function executeFallbackParsedActions(
       }
     }
   }
+}
+
+/**
+ * Keyword-to-slug mapping for implicit Binance skill dispatch.
+ * Users don't need to type "binance-meme-rush" — natural language triggers work.
+ * Order matters: first match wins, so more specific patterns go first.
+ */
+const BINANCE_SKILL_KEYWORD_MAP: Array<{
+  pattern: RegExp;
+  slug: string;
+}> = [
+  // meme-rush: meme tokens, pump.fun, bonding curve, launchpad tokens
+  {
+    pattern:
+      /\b(?:meme\s*(?:token|coin|rush)?|pump\.?fun|four\.?meme|bonding\s*curve|launchpad\s*token|new\s*(?:token|coin)s?\s*on|trending\s*(?:token|coin))/i,
+    slug: "binance-meme-rush",
+  },
+  // trading-signal: smart money signals, whale signals
+  {
+    pattern: /\b(?:(?:trading|smart\s*money|whale)\s*signal|signal\s*(?:list|data))/i,
+    slug: "binance-trading-signal",
+  },
+  // crypto-market-rank: market rankings, trending, alpha, leaderboard
+  {
+    pattern:
+      /\b(?:(?:market|crypto)\s*rank|leader\s*board|top\s*(?:trader|search|token)|alpha\s*(?:token|rank)|smart\s*money\s*(?:rank|inflow))/i,
+    slug: "binance-crypto-market-rank",
+  },
+  // query-token-audit: token/contract audit, rug check, security scan
+  {
+    pattern:
+      /\b(?:(?:token|contract)\s*audit|audit\s*(?:this\s*)?(?:token|contract)|(?:rug|security|safety)\s*(?:check|scan)|check\s*(?:this\s*)?contract)/i,
+    slug: "binance-query-token-audit",
+  },
+  // query-token-info: token info, token price, token detail, search token
+  {
+    pattern:
+      /\b(?:(?:token|coin)\s*(?:info|detail|price|data|search)|search\s*(?:token|coin)|look\s*up\s*(?:token|coin))/i,
+    slug: "binance-query-token-info",
+  },
+  // query-address-info: wallet balance, address info, check wallet
+  {
+    pattern:
+      /\b(?:(?:wallet|address)\s*(?:balance|info|detail|holding)|check\s*(?:this\s*)?(?:wallet|address)|(?:wallet|address)\s*check)/i,
+    slug: "binance-query-address-info",
+  },
+];
+
+function extractDirectBinanceSkillSlug(userText: string): string | null {
+  const normalized = userText.toLowerCase();
+
+  // 1. Explicit slug mention: "use binance-meme-rush ..."
+  const skillMatch = normalized.match(/\b(binance-[a-z0-9-]+)\b/);
+  if (skillMatch) {
+    // Still require an action verb for explicit slugs to avoid false positives
+    if (/\b(use|run|show|fetch|pull|get)\b/.test(normalized)) {
+      return skillMatch[1];
+    }
+  }
+
+  // 2. Implicit keyword matching: "show me trending meme tokens on BSC"
+  for (const { pattern, slug } of BINANCE_SKILL_KEYWORD_MAP) {
+    if (pattern.test(normalized)) {
+      return slug;
+    }
+  }
+
+  return null;
+}
+
+function pickDirectBinanceLimit(
+  userText: string,
+  fallback: number,
+  max: number,
+): string {
+  const matches = userText.match(/\b([1-9]\d{0,2})\b/g);
+  if (!matches) return String(fallback);
+  for (const raw of matches) {
+    const value = Number(raw);
+    if (value >= 1 && value <= max) {
+      return String(value);
+    }
+  }
+  return String(fallback);
+}
+
+function extractExplicitDirectBinanceCount(
+  userText: string,
+  max: number,
+): number | null {
+  const matches = userText.match(/\b([1-9]\d{0,2})\b/g);
+  if (!matches) return null;
+  for (const raw of matches) {
+    const value = Number(raw);
+    if (value >= 1 && value <= max) {
+      return value;
+    }
+  }
+  return null;
+}
+
+function pickDirectBinanceChain(
+  userText: string,
+  allowed: string[],
+  fallback: string,
+): string {
+  const normalized = userText.toLowerCase();
+  const candidates: Array<[string, RegExp]> = [
+    ["solana", /\bsolana\b|\bsol\b|pump\.fun/],
+    ["bsc", /\bbsc\b|\bbnb\b|four\.meme/],
+    ["base", /\bbase\b/],
+    ["eth", /\beth\b|\bethereum\b/],
+  ];
+  for (const [chain, pattern] of candidates) {
+    if (allowed.includes(chain) && pattern.test(normalized)) {
+      return chain;
+    }
+  }
+  return fallback;
+}
+
+function resolveDirectBinanceMemeRushCommand(userText: string): {
+  script: string;
+  args: string[];
+} {
+  const normalized = userText.toLowerCase();
+  const chain = pickDirectBinanceChain(normalized, ["solana", "bsc"], "solana");
+  if (
+    /topic|topics|narrative|narratives|social rush|hot topic|hot topics/.test(
+      normalized,
+    )
+  ) {
+    const type = /rising|inflow/.test(normalized) ? "rising" : "latest";
+    const sort = /inflow/.test(normalized) ? "inflow" : "time";
+    const explicitCount = extractExplicitDirectBinanceCount(normalized, 50);
+    return {
+      script: "fetch-topics.sh",
+      args: explicitCount ? [chain, type, sort, String(explicitCount)] : [chain, type, sort],
+    };
+  }
+  const stage = /migrat/.test(normalized)
+    ? "migrated"
+    : /finaliz|about to migrate/.test(normalized)
+      ? "finalizing"
+      : "new";
+  const limit = pickDirectBinanceLimit(normalized, 20, 200);
+  return { script: "fetch-trending.sh", args: [chain, stage, limit] };
+}
+
+type DirectBinanceScriptResolution =
+  | {
+      kind: "run";
+      script: string;
+      args: string[];
+    }
+  | {
+      kind: "ask";
+      text: string;
+    };
+
+function extractQuotedUserText(userText: string): string | null {
+  const quotedMatch = userText.match(/["'`“”]([^"'`“”]{2,120})["'`“”]/);
+  return quotedMatch?.[1]?.trim() || null;
+}
+
+function extractFirstEvmAddress(userText: string): string | null {
+  return userText.match(/\b0x[a-fA-F0-9]{40}\b/)?.[0] ?? null;
+}
+
+function extractFirstSolanaAddress(userText: string): string | null {
+  const candidates = userText.match(/\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g) ?? [];
+  for (const candidate of candidates) {
+    if (
+      candidate.toLowerCase().startsWith("binance") ||
+      candidate.toLowerCase().startsWith("signal")
+    ) {
+      continue;
+    }
+    return candidate;
+  }
+  return null;
+}
+
+function extractDirectBinanceSearchKeyword(userText: string): string | null {
+  const quoted = extractQuotedUserText(userText);
+  if (quoted) return quoted;
+
+  const patterns = [
+    /\bsearch(?: for)?\s+(.+?)(?:\s+on\s+(?:bsc|bnb|solana|sol|base|eth|ethereum)\b|$)/i,
+    /\bfind\s+(.+?)(?:\s+on\s+(?:bsc|bnb|solana|sol|base|eth|ethereum)\b|$)/i,
+    /\blook up\s+(.+?)(?:\s+on\s+(?:bsc|bnb|solana|sol|base|eth|ethereum)\b|$)/i,
+    /\bfor\s+(.+?)(?:\s+on\s+(?:bsc|bnb|solana|sol|base|eth|ethereum)\b|$)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = userText.match(pattern);
+    const value = match?.[1]?.trim();
+    if (value) return value.replace(/\s+/g, " ").trim();
+  }
+
+  const cleaned = userText
+    .replace(/\b(binance-[a-z0-9-]+)\b/gi, " ")
+    .replace(
+      /\b(use|run|show|tell|give|fetch|pull|get|search|find|lookup|look up|query|token|info|market|data|detail|details|price|please|me|and)\b/gi,
+      " ",
+    )
+    .replace(/\b(on|in)\s+(bsc|bnb|solana|sol|base|eth|ethereum)\b/gi, " ")
+    .replace(/\b0x[a-fA-F0-9]{40}\b/g, " ")
+    .replace(/\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned || null;
+}
+
+function extractDirectBinanceAddressTarget(userText: string): {
+  address: string;
+  chain: string | null;
+} | null {
+  const solanaAddress = extractFirstSolanaAddress(userText);
+  if (solanaAddress) {
+    return {
+      address: solanaAddress,
+      chain: "solana",
+    };
+  }
+
+  const evmAddress = extractFirstEvmAddress(userText);
+  if (!evmAddress) return null;
+
+  const chain = pickDirectBinanceChain(userText, ["bsc", "base", "eth"], "");
+  return {
+    address: evmAddress,
+    chain: chain || null,
+  };
+}
+
+function resolveDirectBinanceTradingSignalCommand(
+  userText: string,
+): DirectBinanceScriptResolution {
+  const chain = pickDirectBinanceChain(userText, ["solana", "bsc"], "solana");
+  const limit = pickDirectBinanceLimit(userText, 20, 100);
+  return {
+    kind: "run",
+    script: "signals.sh",
+    args: [chain, limit],
+  };
+}
+
+function resolveDirectBinanceCryptoMarketRankCommand(
+  userText: string,
+): DirectBinanceScriptResolution {
+  const normalized = userText.toLowerCase();
+  let type = "trending";
+  if (/smart money|inflow/.test(normalized)) type = "smart-money";
+  else if (/trader|leaderboard|pnl|kol/.test(normalized)) type = "traders";
+  else if (/top search|searched|search ranking/.test(normalized))
+    type = "top-search";
+  else if (/\balpha\b/.test(normalized)) type = "alpha";
+  else if (/stock|tokenized/.test(normalized)) type = "stock";
+  else if (/meme/.test(normalized)) type = "meme";
+
+  const chain = pickDirectBinanceChain(
+    userText,
+    ["solana", "bsc", "base", "eth"],
+    "",
+  );
+  const limit = pickDirectBinanceLimit(userText, 20, 200);
+
+  return {
+    kind: "run",
+    script: "rankings.sh",
+    args: [type, chain || "all", limit],
+  };
+}
+
+function resolveDirectBinanceTokenInfoCommand(
+  userText: string,
+): DirectBinanceScriptResolution {
+  const chain = pickDirectBinanceChain(
+    userText,
+    ["solana", "bsc", "base", "eth"],
+    "",
+  );
+  const target = extractDirectBinanceAddressTarget(userText);
+  if (target?.address) {
+    const targetChain = target.chain ?? (chain || null);
+    if (targetChain) {
+      return {
+        kind: "run",
+        script: "token-detail.sh",
+        args: [target.address, targetChain],
+      };
+    }
+    return {
+      kind: "run",
+      script: "search.sh",
+      args: [target.address],
+    };
+  }
+
+  const keyword = extractDirectBinanceSearchKeyword(userText);
+  if (!keyword) {
+    return {
+      kind: "ask",
+      text: "Please provide a token keyword, symbol, or contract address for binance-query-token-info.",
+    };
+  }
+  return {
+    kind: "run",
+    script: "search.sh",
+    args: chain ? [keyword, chain] : [keyword],
+  };
+}
+
+function resolveDirectBinanceTokenAuditCommand(
+  userText: string,
+): DirectBinanceScriptResolution {
+  const target = extractDirectBinanceAddressTarget(userText);
+  if (!target?.address) {
+    return {
+      kind: "ask",
+      text: "Please provide a token contract address for binance-query-token-audit.",
+    };
+  }
+  if (!target.chain) {
+    return {
+      kind: "ask",
+      text: "Please specify the chain for that contract address: BSC, Base, Ethereum, or Solana.",
+    };
+  }
+  return {
+    kind: "run",
+    script: "audit.sh",
+    args: [target.address, target.chain],
+  };
+}
+
+function resolveDirectBinanceAddressInfoCommand(
+  userText: string,
+): DirectBinanceScriptResolution {
+  const target = extractDirectBinanceAddressTarget(userText);
+  if (!target?.address) {
+    return {
+      kind: "ask",
+      text: "Please provide a wallet address for binance-query-address-info.",
+    };
+  }
+  if (!target.chain) {
+    return {
+      kind: "ask",
+      text: "Please specify the chain for that wallet address: BSC, Base, Ethereum, or Solana.",
+    };
+  }
+  return {
+    kind: "run",
+    script: "balances.sh",
+    args: [target.address, target.chain],
+  };
+}
+
+function resolveDirectBinanceScriptCommand(
+  skillSlug: string,
+  userText: string,
+): DirectBinanceScriptResolution | null {
+  switch (skillSlug) {
+    case "binance-meme-rush":
+      return {
+        kind: "run",
+        ...resolveDirectBinanceMemeRushCommand(userText),
+      };
+    case "binance-trading-signal":
+      return resolveDirectBinanceTradingSignalCommand(userText);
+    case "binance-crypto-market-rank":
+      return resolveDirectBinanceCryptoMarketRankCommand(userText);
+    case "binance-query-token-info":
+      return resolveDirectBinanceTokenInfoCommand(userText);
+    case "binance-query-token-audit":
+      return resolveDirectBinanceTokenAuditCommand(userText);
+    case "binance-query-address-info":
+      return resolveDirectBinanceAddressInfoCommand(userText);
+    default:
+      return null;
+  }
+}
+
+const DIRECT_BINANCE_SUMMARY_INPUT_MAX_CHARS = 12_000;
+const DIRECT_BINANCE_SUMMARY_DEFAULT_ITEMS = 5;
+const DIRECT_BINANCE_SUMMARY_MAX_DEPTH = 4;
+
+function shouldOmitDirectBinanceSummaryKey(key: string): boolean {
+  return /^(?:icon|iconUrl|image|imageUrl|logo|logoUrl|avatar|avatarUrl|cover|coverUrl)$/i.test(
+    key,
+  ) ||
+    /^(?:website|websites|twitter|telegram|discord|medium|social|socials|links?|x)$/i.test(
+      key,
+    );
+}
+
+function compactDirectBinanceSummaryValue(
+  value: unknown,
+  itemLimit: number,
+  depth = 0,
+): unknown {
+  if (
+    value === null ||
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return value;
+  }
+
+  if (depth >= DIRECT_BINANCE_SUMMARY_MAX_DEPTH) {
+    if (Array.isArray(value)) {
+      return value
+        .slice(0, Math.min(itemLimit, 3))
+        .map((item) => compactDirectBinanceSummaryValue(item, itemLimit, depth + 1));
+    }
+    if (typeof value === "object") {
+      const objectValue = value as Record<string, unknown>;
+      const compactObject: Record<string, unknown> = {};
+      for (const [key, entry] of Object.entries(objectValue).slice(0, 8)) {
+        if (shouldOmitDirectBinanceSummaryKey(key)) continue;
+        if (
+          entry === null ||
+          typeof entry === "string" ||
+          typeof entry === "number" ||
+          typeof entry === "boolean"
+        ) {
+          compactObject[key] = entry;
+        }
+      }
+      return compactObject;
+    }
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, itemLimit)
+      .map((item) => compactDirectBinanceSummaryValue(item, itemLimit, depth + 1))
+      .filter((item) => item !== undefined);
+  }
+
+  if (typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+    const scalarEntries: Array<[string, unknown]> = [];
+    const complexEntries: Array<[string, unknown]> = [];
+    for (const [key, entry] of Object.entries(objectValue)) {
+      if (shouldOmitDirectBinanceSummaryKey(key)) continue;
+      if (
+        entry === null ||
+        typeof entry === "string" ||
+        typeof entry === "number" ||
+        typeof entry === "boolean"
+      ) {
+        scalarEntries.push([key, entry]);
+      } else {
+        complexEntries.push([key, entry]);
+      }
+    }
+
+    const maxKeys = depth === 0 ? 24 : depth === 1 ? 16 : 10;
+    const compactObject: Record<string, unknown> = {};
+    for (const [key, entry] of [...scalarEntries, ...complexEntries].slice(0, maxKeys)) {
+      const compactEntry = compactDirectBinanceSummaryValue(
+        entry,
+        key === "data" ? itemLimit : Math.min(itemLimit, 6),
+        depth + 1,
+      );
+      if (compactEntry === undefined) continue;
+      if (Array.isArray(compactEntry) && compactEntry.length === 0) continue;
+      if (
+        compactEntry &&
+        typeof compactEntry === "object" &&
+        !Array.isArray(compactEntry) &&
+        Object.keys(compactEntry as Record<string, unknown>).length === 0
+      ) {
+        continue;
+      }
+      compactObject[key] = compactEntry;
+    }
+    return compactObject;
+  }
+
+  return String(value);
+}
+
+function buildDirectBinanceSummaryInput(
+  unwrapped: string,
+  explicitCount: number | null,
+): string {
+  const itemLimit = explicitCount ?? DIRECT_BINANCE_SUMMARY_DEFAULT_ITEMS;
+  try {
+    const parsed = JSON.parse(unwrapped) as unknown;
+    const compact = compactDirectBinanceSummaryValue(parsed, itemLimit);
+    if (compact !== undefined) {
+      const compactText = JSON.stringify(compact, null, 2);
+      if (compactText.trim()) {
+        return compactText;
+      }
+    }
+  } catch {
+    // Fall back to raw text for non-JSON outputs.
+  }
+  return unwrapped;
+}
+
+function wantsRawBinanceSkillResult(userText: string): boolean {
+  const normalized = userText.toLowerCase();
+  return (
+    /\braw\b/.test(normalized) ||
+    /\bjson\b/.test(normalized) ||
+    /\bverbatim\b/.test(normalized) ||
+    /\bfull (?:response|result|output)\b/.test(normalized) ||
+    /\bexact (?:response|result|output)\b/.test(normalized)
+  );
+}
+
+const FENCED_JSON_RE_SERVER = /```(?:json)?\s*\n([\s\S]*?)```/;
+
+function unwrapDirectBinanceSkillResult(rawText: string): string {
+  const fencedBlocks = Array.from(
+    rawText.matchAll(new RegExp(FENCED_JSON_RE_SERVER.source, "g")),
+  )
+    .map((match) => match[1]?.trim() ?? "")
+    .filter((block) => block.length > 0);
+  if (fencedBlocks.length > 0) {
+    return fencedBlocks.join("\n\n");
+  }
+  return rawText
+    .replace(/^Script executed successfully:\s*/i, "")
+    .replace(/^Script execution failed:\s*/i, "")
+    .trim();
+}
+
+function normalizeDirectBinanceSummaryText(summary: string): string {
+  return summary
+    .replace(/\*\*/g, "")
+    .replace(/^[ \t]*[-*][ \t]+/gm, "")
+    .replace(/^[ \t]*\d+\.\s+/gm, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(
+      /\n?(?:For more details or the raw JSON, feel free to ask\.?|You can ask for the raw JSON if you want it\.?|If you need the raw JSON details, feel free to ask\.?)\s*$/i,
+      "",
+    )
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+async function summarizeDirectBinanceSkillResult(
+  runtime: AgentRuntime,
+  skillSlug: string,
+  userText: string,
+  rawText: string,
+): Promise<string> {
+  const unwrapped = unwrapDirectBinanceSkillResult(rawText);
+  if (!unwrapped) return rawText;
+  const explicitCount = extractExplicitDirectBinanceCount(userText, 50);
+  const compactInput = buildDirectBinanceSummaryInput(unwrapped, explicitCount);
+
+  const resultSnippet =
+    compactInput.length > DIRECT_BINANCE_SUMMARY_INPUT_MAX_CHARS
+      ? `${compactInput.slice(0, DIRECT_BINANCE_SUMMARY_INPUT_MAX_CHARS)}\n\n[truncated]`
+      : compactInput;
+  const prompt = [
+    "You are formatting the result of a Binance skill for the end user.",
+    "The official skill instructions say to run the skill first and then summarize the results.",
+    "",
+    `User request: ${userText}`,
+    `Skill: ${skillSlug}`,
+    explicitCount
+      ? `The user explicitly requested ${explicitCount} items. Return ${explicitCount} distinct items if the result contains that many.`
+      : "If the user did not request a count, choose a sensible concise amount.",
+    "",
+    "Rules:",
+    "- Answer the user's request directly using only the result below.",
+    "- Default to a concise summary, not raw JSON.",
+    "- If the result is a ranking or list, show at most 5 items unless the user explicitly requested a different count.",
+    "- Output plain text only.",
+    "- Do not use markdown, bullets, numbered lists, bold markers, or code fences.",
+    "- Prefer a clean title line followed by compact 'Label: value' lines, with blank lines between items when listing multiple entries.",
+    "- Do not prefix lines with generic labels like 'Label:' or 'Item:'. Use the actual field name directly.",
+    "- Mention the chain when it is present in the result.",
+    "- Ignore icon URLs, image links, and social links unless the user explicitly asked for them.",
+    "- Do not mention scripts, stdout, code fences, or internal tooling.",
+    "- Do not invent missing fields. If a field is unavailable, omit it.",
+    "- If the result is an error, explain it briefly and suggest one next step.",
+    "- Do not append any follow-up sentence about raw JSON, more details, or next questions.",
+    "",
+    "Skill result:",
+    resultSnippet,
+  ].join("\n");
+
+  try {
+    const summary = await runtime.useModel(ModelType.TEXT_SMALL, {
+      prompt,
+      maxTokens: 700,
+      temperature: 0.2,
+    });
+    const clean = summary?.trim()
+      ? normalizeDirectBinanceSummaryText(summary.trim())
+      : "";
+    return clean || rawText;
+  } catch (err) {
+    runtime.logger?.warn(
+      {
+        src: "eliza-api",
+        skillSlug,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      "[eliza-api] Binance skill summarization failed; falling back to raw output",
+    );
+    return rawText;
+  }
+}
+
+async function maybeHandleDirectBinanceSkillRequest(
+  runtime: AgentRuntime,
+  message: ReturnType<typeof createMessageMemory>,
+  appendIncomingText: (incoming: string) => void,
+  replaceText?: (text: string) => void,
+): Promise<string | null> {
+  const userText = extractCompatTextContent(message.content)?.trim();
+  if (!userText) return null;
+
+  const skillSlug = extractDirectBinanceSkillSlug(userText);
+  if (!skillSlug) return null;
+  if (!shouldExposeBinanceSkillId(skillSlug)) {
+    const visibleSkills = Array.from(EXPOSED_BINANCE_SKILL_IDS).sort().join(", ");
+    return `The Binance skill "${skillSlug}" is currently hidden in this build. Available Binance skills: ${visibleSkills}.`;
+  }
+
+  const service = runtime.getService("AGENT_SKILLS_SERVICE") as
+    | {
+        getLoadedSkill?: (slug: string) => unknown;
+        getLoadedSkills?: () => Array<{ slug?: string }>;
+      }
+    | undefined;
+  const hasSkill =
+    typeof service?.getLoadedSkill === "function"
+      ? Boolean(service.getLoadedSkill(skillSlug))
+      : typeof service?.getLoadedSkills === "function"
+        ? service
+            .getLoadedSkills()
+            .some((skill) => typeof skill.slug === "string" && skill.slug === skillSlug)
+        : false;
+  if (!hasSkill) return null;
+
+  const runtimeActions = Array.isArray((runtime as { actions?: unknown[] }).actions)
+    ? ((runtime as { actions: unknown[] }).actions as Array<{
+        name?: string;
+        handler?: (...args: unknown[]) => unknown;
+      }>)
+    : [];
+  const runSkillAction = runtimeActions.find(
+    (action) => action.name === "RUN_SKILL_SCRIPT",
+  );
+  const command = resolveDirectBinanceScriptCommand(skillSlug, userText);
+  if (!command) {
+    return null;
+  }
+  if (command.kind === "ask") {
+    appendIncomingText(command.text);
+    return command.text;
+  }
+  if (typeof runSkillAction?.handler === "function") {
+    // Stream a loading hint so the user sees immediate feedback
+    const loadingHints: Record<string, string> = {
+      "binance-meme-rush": "Fetching meme tokens from Binance...",
+      "binance-trading-signal": "Fetching trading signals...",
+      "binance-crypto-market-rank": "Fetching market rankings...",
+      "binance-query-token-info": "Looking up token info...",
+      "binance-query-token-audit": "Running token audit...",
+      "binance-query-address-info": "Checking wallet balances...",
+    };
+    appendIncomingText(loadingHints[skillSlug] ?? "Fetching Binance data...");
+
+    let directRunText = "";
+    runtime.logger?.info(
+      {
+        src: "eliza-api",
+        action: "RUN_SKILL_SCRIPT",
+        skillSlug,
+        script: command.script,
+        args: command.args,
+      },
+      `[eliza-api] Direct Binance script dispatch: ${skillSlug}/${command.script}`,
+    );
+    const runResult = await Promise.resolve(
+      runSkillAction.handler(
+        runtime,
+        message,
+        undefined,
+        {
+          skillSlug,
+          script: command.script,
+          args: command.args,
+        },
+        async (content: unknown) => {
+          const chunk =
+            content && typeof content === "object"
+              ? extractCompatTextContent(content as Content)
+              : "";
+          if (!chunk) return [];
+          directRunText = chunk;
+          return [];
+        },
+        [],
+      ),
+    );
+    const rawDirectText =
+      directRunText.trim().length > 0
+        ? directRunText
+        : runResult &&
+            typeof runResult === "object" &&
+            "text" in runResult &&
+            typeof (runResult as { text?: unknown }).text === "string"
+          ? (runResult as { text: string }).text
+          : "";
+    if (rawDirectText.trim().length > 0) {
+      const finalText = wantsRawBinanceSkillResult(userText)
+        ? rawDirectText
+        : await summarizeDirectBinanceSkillResult(
+            runtime,
+            skillSlug,
+            userText,
+            rawDirectText,
+          );
+      // Replace the loading hint with the actual result via snapshot
+      if (replaceText) {
+        replaceText(finalText);
+      } else {
+        appendIncomingText(finalText);
+      }
+      return finalText;
+    }
+  }
+  return null;
 }
 
 const CHAT_KNOWLEDGE_MIN_SIMILARITY = 0.2;
@@ -3404,6 +4247,31 @@ async function generateChatResponse(
     ? inferWalletExecutionFallback(originalUserText)
     : null;
   try {
+    // Binance skill direct dispatch — check first, short-circuit if matched
+    const directSkillText = await maybeHandleDirectBinanceSkillRequest(
+      runtime,
+      message,
+      appendIncomingText,
+      emitSnapshot,
+    );
+    if (directSkillText) {
+      const finalText = isClientVisibleNoResponse(directSkillText)
+        ? directSkillText || "(no response)"
+        : directSkillText;
+      const promptText = extractCompatTextContent(message.content) ?? "";
+      const estPromptTokens = Math.ceil(promptText.length / 4);
+      const estCompletionTokens = Math.ceil(finalText.length / 4);
+      return {
+        text: finalText,
+        agentName,
+        usage: {
+          promptTokens: estPromptTokens,
+          completionTokens: estCompletionTokens,
+          totalTokens: estPromptTokens + estCompletionTokens,
+        },
+      };
+    }
+
     if (directWalletExecutionFallback?.errorText) {
       forcedWalletExecutionText = true;
       responseText = directWalletExecutionFallback.errorText;
@@ -3444,9 +4312,13 @@ async function generateChatResponse(
         responseMessages: [],
       };
     } else {
+      const languageAugmentedMessage = maybeAugmentChatMessageWithLanguage(
+        message,
+        opts?.preferredLanguage,
+      );
       const walletAugmentedMessage = maybeAugmentChatMessageWithWalletContext(
         runtime,
-        message,
+        languageAugmentedMessage,
       );
       const generationMessage = await maybeAugmentChatMessageWithKnowledge(
         runtime,
@@ -3551,11 +4423,14 @@ async function generateChatResponse(
     );
 
     const rawActionsPayload = rc?.actions ?? resultRecord.actions;
-    const parsedFallbackActions = parseFallbackActionBlocks(rawActionsPayload);
-    const userText = String(extractCompatTextContent(message.content) ?? "");
     const modelText = String(
       extractCompatTextContent(result.responseContent) ?? "",
     );
+    const parsedFallbackActions = parseFallbackActionBlocks(
+      rawActionsPayload,
+      modelText,
+    );
+    const userText = String(extractCompatTextContent(message.content) ?? "");
     const fallbackActionsToRun = [...parsedFallbackActions];
     const inferredBalanceChain = inferBalanceChainFromText(userText);
 
@@ -3634,7 +4509,17 @@ async function generateChatResponse(
       }
     }
 
-    if (actionCallbacksSeen === 0 && fallbackActionsToRun.length > 0) {
+    // Only run fallback execution when the core did NOT dispatch actions itself.
+    // When mode === "actions", processActions already invoked the handlers —
+    // their callbacks may still be pending (async work like cloning repos,
+    // spawning PTY sessions) so actionCallbacksSeen can be 0 even though
+    // the handlers ARE running. Re-executing them would double-spawn agents.
+    const coreHandledActions = resultRecord.mode === "actions";
+    if (
+      actionCallbacksSeen === 0 &&
+      !coreHandledActions &&
+      fallbackActionsToRun.length > 0
+    ) {
       runtime.logger?.warn(
         {
           src: "eliza-api",
@@ -4112,12 +4997,14 @@ async function readChatRequestPayload(
   channelType: ChannelType;
   images?: ChatImageAttachment[];
   conversationMode?: "simple" | "power";
+  preferredLanguage?: string;
 } | null> {
   const body = await helpers.readJsonBody<{
     text?: string;
     channelType?: string;
     images?: ChatImageAttachment[];
     conversationMode?: string;
+    language?: string;
   }>(req, res, { maxBytes });
   if (!body) return null;
   const normalizedPrompt = normalizeIncomingChatPrompt(body.text, body.images);
@@ -4149,11 +5036,19 @@ async function readChatRequestPayload(
         mimeType: img.mimeType.toLowerCase(),
       }))
     : undefined;
+  const rawPreferredLanguage =
+    (typeof body.language === "string" && body.language.trim()
+      ? body.language
+      : undefined) ?? readUiLanguageHeader(req);
+  const preferredLanguage = rawPreferredLanguage
+    ? normalizeCharacterLanguage(rawPreferredLanguage)
+    : undefined;
   return {
     prompt: normalizedPrompt,
     channelType,
     images,
     ...(conversationMode ? { conversationMode } : {}),
+    ...(preferredLanguage ? { preferredLanguage } : {}),
   };
 }
 
@@ -6366,11 +7261,6 @@ const LOCAL_HOST_RE =
 /** Wildcard bind addresses that listen on all interfaces. */
 const WILDCARD_BIND_RE = /^(0\.0\.0\.0|::|0:0:0:0:0:0:0:0)$/;
 
-/** Strip an optional port suffix from a hostname string. */
-function stripPort(host: string): string {
-  return host.replace(/:\d+$/, "");
-}
-
 export function isAllowedHost(req: http.IncomingMessage): boolean {
   const raw = req.headers.host;
   if (!raw) return true; // No Host header → non-browser client (e.g. curl)
@@ -6388,40 +7278,28 @@ export function isAllowedHost(req: http.IncomingMessage): boolean {
     hostname = trimmed;
   } else {
     // IPv4 or hostname: localhost:31337 → localhost
-    hostname = stripPort(trimmed);
+    hostname = stripOptionalHostPort(trimmed);
   }
 
   if (!hostname) return true;
 
-  const bindHost = (
-    process.env.ELIZA_API_BIND ??
-    process.env.MILADY_API_BIND ??
-    ""
-  )
-    .trim()
-    .toLowerCase();
+  const bindHost = resolveApiBindHost(process.env).toLowerCase();
 
   // When binding on all interfaces (0.0.0.0 / ::), any Host is acceptable —
   // ensureApiTokenForBindHost already enforces a token for non-loopback binds.
-  if (WILDCARD_BIND_RE.test(stripPort(bindHost))) {
+  if (WILDCARD_BIND_RE.test(stripOptionalHostPort(bindHost))) {
     return true;
   }
 
   // Allow the exact configured bind hostname.
-  if (bindHost && hostname === stripPort(bindHost)) {
+  if (bindHost && hostname === stripOptionalHostPort(bindHost)) {
     return true;
   }
 
-  // Allow explicitly listed extra hostnames via ELIZA_ALLOWED_HOSTS / ELIZA_ALLOWED_HOSTS
-  // (comma-separated, e.g. "myserver.local,192.168.1.10").
-  const extra =
-    process.env.ELIZA_ALLOWED_HOSTS ?? process.env.ELIZA_ALLOWED_HOSTS;
-  if (extra) {
-    const allowed = extra
-      .split(",")
-      .map((h) => stripPort(h.trim().toLowerCase()))
-      .filter(Boolean);
-    if (allowed.includes(hostname)) return true;
+  for (const allowedHost of resolveAllowedHosts(process.env)) {
+    if (stripOptionalHostPort(allowedHost).toLowerCase() === hostname) {
+      return true;
+    }
   }
 
   return LOCAL_HOST_RE.test(hostname);
@@ -6443,29 +7321,19 @@ export function resolveCorsOrigin(origin?: string): string | null {
 
   // When bound to a wildcard address, allow any origin. Non-loopback binds still
   // require an explicit token, so this only relaxes the browser origin check.
-  const bindHost = (
-    process.env.ELIZA_API_BIND ??
-    process.env.MILADY_API_BIND ??
-    ""
-  )
-    .trim()
-    .toLowerCase();
-  if (WILDCARD_BIND_RE.test(stripPort(bindHost))) return trimmed;
+  const bindHost = resolveApiBindHost(process.env).toLowerCase();
+  if (WILDCARD_BIND_RE.test(stripOptionalHostPort(bindHost))) return trimmed;
 
   // Explicit allowlist via env (comma-separated)
-  const extra = process.env.ELIZA_ALLOWED_ORIGINS ?? process.env.CORS_ORIGINS;
-  if (extra) {
-    const allow = extra
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean);
-    if (allow.includes(trimmed)) return trimmed;
+  const allow = resolveAllowedOrigins(process.env);
+  if (allow.includes(trimmed)) {
+    return trimmed;
   }
 
   if (LOCAL_ORIGIN_RE.test(trimmed)) return trimmed;
   if (APP_ORIGIN_RE.test(trimmed)) return trimmed;
   if (trimmed === "null" || trimmed === "file://") {
-    if (process.env.ELIZA_ALLOW_NULL_ORIGIN === "1") {
+    if (isNullOriginAllowed(process.env)) {
       return "null";
     }
   }
@@ -6646,9 +7514,7 @@ function tokenMatches(expected: string, provided: string): boolean {
 }
 
 function getConfiguredApiToken(): string | undefined {
-  return (
-    process.env.ELIZA_API_TOKEN?.trim() || process.env.MILADY_API_TOKEN?.trim()
-  );
+  return resolveApiToken(process.env) ?? undefined;
 }
 
 function isLoopbackBindHost(host: string): boolean {
@@ -6693,24 +7559,27 @@ function isLoopbackBindHost(host: string): boolean {
 }
 
 export function ensureApiTokenForBindHost(host: string): void {
-  if (
-    process.env.MILADY_DISABLE_AUTO_API_TOKEN === "1" ||
-    process.env.ELIZA_DISABLE_AUTO_API_TOKEN === "1"
-  ) {
+  if (resolveApiSecurityConfig(process.env).disableAutoApiToken) {
     return;
   }
 
   const token = getConfiguredApiToken();
   if (token) return;
-  if (isLoopbackBindHost(host)) return;
+  const cloudProvisioned = isCloudProvisionedContainer();
+  if (!cloudProvisioned && isLoopbackBindHost(host)) return;
 
   const generated = crypto.randomBytes(32).toString("hex");
-  process.env.MILADY_API_TOKEN = generated;
-  process.env.ELIZA_API_TOKEN = generated;
+  setApiToken(process.env, generated);
 
-  logger.warn(
-    `[eliza-api] MILADY_API_BIND/ELIZA_API_BIND=${host} is non-loopback and MILADY_API_TOKEN/ELIZA_API_TOKEN is unset.`,
-  );
+  if (cloudProvisioned) {
+    logger.warn(
+      "[eliza-api] Steward-managed cloud container started without MILADY_API_TOKEN/ELIZA_API_TOKEN; generated a temporary inbound API token for this process.",
+    );
+  } else {
+    logger.warn(
+      `[eliza-api] MILADY_API_BIND/ELIZA_API_BIND=${host} is non-loopback and MILADY_API_TOKEN/ELIZA_API_TOKEN is unset.`,
+    );
+  }
   const tokenFingerprint = `${generated.slice(0, 4)}...${generated.slice(-4)}`;
   logger.warn(
     `[eliza-api] Generated temporary API token (${tokenFingerprint}) for this process. Set MILADY_API_TOKEN or ELIZA_API_TOKEN explicitly to override.`,
@@ -6719,7 +7588,7 @@ export function ensureApiTokenForBindHost(host: string): void {
 
 export function isAuthorized(req: http.IncomingMessage): boolean {
   const expected = getConfiguredApiToken();
-  if (!expected) return true;
+  if (!expected) return !isCloudProvisionedContainer();
   const provided = extractAuthToken(req);
   if (!provided) return false;
   return tokenMatches(expected, provided);
@@ -6906,7 +7775,7 @@ function isWebSocketAuthorized(
   url: URL,
 ): boolean {
   const expected = getConfiguredApiToken();
-  if (!expected) return true;
+  if (!expected) return !isCloudProvisionedContainer();
 
   const handshakeToken = extractWebSocketHandshakeToken(request, url);
   if (!handshakeToken) return false;
@@ -6935,7 +7804,9 @@ export function resolveWebSocketUpgradeRejection(
 
   const expected = getConfiguredApiToken();
   if (!expected) {
-    return null;
+    return isCloudProvisionedContainer()
+      ? { status: 401, reason: "Unauthorized" }
+      : null;
   }
 
   if (
@@ -6947,6 +7818,12 @@ export function resolveWebSocketUpgradeRejection(
 
   const handshakeToken = extractWebSocketHandshakeToken(req, wsUrl);
   if (handshakeToken && !tokenMatches(expected, handshakeToken)) {
+    return { status: 401, reason: "Unauthorized" };
+  }
+
+  // Cloud containers must authenticate at the handshake level because there is
+  // no trusted upstream proxy handling auth for the WebSocket path.
+  if (!handshakeToken && isCloudProvisionedContainer()) {
     return { status: 401, reason: "Unauthorized" };
   }
 
@@ -8450,10 +9327,13 @@ async function handleRequest(
   }
   const pathname = url.pathname;
   const isAuthEndpoint = pathname.startsWith("/api/auth/");
+  const isHealthEndpoint =
+    method === "GET" && pathname === "/api/health";
   const isCloudOnboardingStatusEndpoint =
     method === "GET" &&
     pathname === "/api/onboarding/status" &&
     isCloudProvisionedContainer();
+  const isAuthProtectedPath = isAuthProtectedRoute(pathname);
   const registryService = state.registryService;
   const dropService = state.dropService;
 
@@ -8589,16 +9469,31 @@ async function handleRequest(
     return;
   }
 
-  // Serve dashboard static assets before the auth gate.  serveStaticUi
-  // already refuses /api/, /v1/, and /ws paths, so API endpoints remain
-  // fully protected by the token check below.
+  // Serve dashboard static assets before the auth gates. serveStaticUi already
+  // refuses /api/, /v1/, and /ws paths, so API endpoints remain protected
+  // while steward-managed containers can still reach the built-in dashboard.
   if (method === "GET" || method === "HEAD") {
     if (serveStaticUi(req, res, pathname)) return;
   }
 
   if (
+    isCloudProvisionedContainer() &&
     method !== "OPTIONS" &&
+    isAuthProtectedPath &&
     !isAuthEndpoint &&
+    !isHealthEndpoint &&
+    !isCloudOnboardingStatusEndpoint &&
+    !isAuthorized(req)
+  ) {
+    json(res, { error: "Unauthorized" }, 401);
+    return;
+  }
+
+  if (
+    method !== "OPTIONS" &&
+    isAuthProtectedPath &&
+    !isAuthEndpoint &&
+    !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
     !isAuthorized(req)
   ) {
@@ -10944,7 +11839,9 @@ async function handleRequest(
       const { getCatalogSkills } = await import(
         "../services/skill-catalog-client.js"
       );
-      const all = await getCatalogSkills();
+      const all = (await getCatalogSkills()).filter((skill) =>
+        shouldExposeBinanceSkillRecord(skill),
+      );
       const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
       const perPage = Math.min(
         100,
@@ -10979,6 +11876,7 @@ async function handleRequest(
             | undefined;
           if (svc && typeof svc.getLoadedSkills === "function") {
             for (const s of svc.getLoadedSkills()) {
+              if (!shouldExposeBinanceSkillId(s.slug)) continue;
               installedSlugs.add(s.slug);
             }
           }
@@ -11031,7 +11929,9 @@ async function handleRequest(
         100,
         Math.max(1, Number(url.searchParams.get("limit")) || 30),
       );
-      const results = await searchCatalogSkills(q, limit);
+      const results = (await searchCatalogSkills(q, limit)).filter((skill) =>
+        shouldExposeBinanceSkillRecord(skill),
+      );
       json(res, { query: q, count: results.length, results });
     } catch (err) {
       error(
@@ -11050,6 +11950,10 @@ async function handleRequest(
     );
     // Exclude "search" which is handled above
     if (slug && slug !== "search") {
+      if (!shouldExposeBinanceSkillId(slug)) {
+        error(res, `Skill "${slug}" not found in catalog`, 404);
+        return;
+      }
       try {
         const { getCatalogSkill } = await import(
           "../services/skill-catalog-client.js"
@@ -11777,7 +12681,9 @@ async function handleRequest(
       const limit = limitStr
         ? parseClampedInteger(limitStr, { min: 1, max: 50, fallback: 20 })
         : 20;
-      const results = await searchSkillsMarketplace(query, { limit });
+      const results = (await searchSkillsMarketplace(query, { limit })).filter(
+        (skill) => shouldExposeBinanceSkillRecord(skill),
+      );
       json(res, { ok: true, results });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -13112,9 +14018,11 @@ async function handleRequest(
       // merge, even though BLOCKED_ENV_KEYS also blocks them during process.env
       // sync below. Keeping both guards prevents accidental persistence if one
       // path changes in future refactors.
+      delete envPatch.MILADY_API_TOKEN;
       delete envPatch.ELIZA_API_TOKEN;
-      delete envPatch.ELIZA_WALLET_EXPORT_TOKEN;
       delete envPatch.MILADY_WALLET_EXPORT_TOKEN;
+      delete envPatch.ELIZA_WALLET_EXPORT_TOKEN;
+      delete envPatch.MILADY_TERMINAL_RUN_TOKEN;
       delete envPatch.ELIZA_TERMINAL_RUN_TOKEN;
       delete envPatch.HYPERSCAPE_AUTH_TOKEN;
       delete envPatch.EVM_PRIVATE_KEY;
@@ -13126,9 +14034,11 @@ async function handleRequest(
         !Array.isArray(envPatch.vars)
       ) {
         const vars = envPatch.vars as Record<string, unknown>;
+        delete vars.MILADY_API_TOKEN;
         delete vars.ELIZA_API_TOKEN;
-        delete vars.ELIZA_WALLET_EXPORT_TOKEN;
         delete vars.MILADY_WALLET_EXPORT_TOKEN;
+        delete vars.ELIZA_WALLET_EXPORT_TOKEN;
+        delete vars.MILADY_TERMINAL_RUN_TOKEN;
         delete vars.ELIZA_TERMINAL_RUN_TOKEN;
         delete vars.HYPERSCAPE_AUTH_TOKEN;
         delete vars.EVM_PRIVATE_KEY;
@@ -15335,7 +16245,8 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType, images, conversationMode } = chatPayload;
+    const { prompt, channelType, images, conversationMode, preferredLanguage } =
+      chatPayload;
 
     const runtime = state.runtime;
     if (!runtime) {
@@ -15449,6 +16360,7 @@ async function handleRequest(
           },
           resolveNoResponseText: () =>
             resolveNoResponseFallback(state.logBuffer, runtime),
+          preferredLanguage,
         },
       );
 
@@ -15517,7 +16429,8 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType, images, conversationMode } = chatPayload;
+    const { prompt, channelType, images, conversationMode, preferredLanguage } =
+      chatPayload;
     const runtime = state.runtime;
     if (!runtime) {
       error(res, "Agent is not running", 503);
@@ -15583,6 +16496,7 @@ async function handleRequest(
         {
           resolveNoResponseText: () =>
             resolveNoResponseFallback(state.logBuffer, runtime),
+          preferredLanguage,
         },
       );
 
@@ -15787,7 +16701,8 @@ async function handleRequest(
       MAX_BODY_BYTES,
     );
     if (!chatPayload) return;
-    const { prompt, channelType, conversationMode } = chatPayload;
+    const { prompt, channelType, conversationMode, preferredLanguage } =
+      chatPayload;
 
     // Cloud proxy path
 
@@ -15867,6 +16782,7 @@ async function handleRequest(
           },
           resolveNoResponseText: () =>
             resolveNoResponseFallback(state.logBuffer, runtime),
+          preferredLanguage,
         },
       );
 
@@ -15914,7 +16830,8 @@ async function handleRequest(
       MAX_BODY_BYTES,
     );
     if (!chatPayload) return;
-    const { prompt, channelType, conversationMode } = chatPayload;
+    const { prompt, channelType, conversationMode, preferredLanguage } =
+      chatPayload;
 
     if (!state.runtime) {
       error(res, "Agent is not running", 503);
@@ -15969,6 +16886,7 @@ async function handleRequest(
         {
           resolveNoResponseText: () =>
             resolveNoResponseFallback(state.logBuffer, runtime),
+          preferredLanguage,
         },
       );
 
@@ -17179,7 +18097,7 @@ async function handleRequest(
 
   // ── POST /api/agent/event ──────────────────────────────────────────────
   // Push an event into the agent event stream (WebSocket + buffer).
-  // Used by plugins (e.g. retake) to surface activity in the StreamView.
+  // Used by plugins to surface activity in the StreamView.
   // Auth: protected by the isAuthorized(req) gate at L5631.
   if (method === "POST" && pathname === "/api/agent/event") {
     const body = await readJsonBody<{
@@ -17812,13 +18730,8 @@ export async function startApiServer(opts?: {
   const apiStartTime = Date.now();
   console.log(`[eliza-api] startApiServer called`);
 
-  const port = opts?.port ?? 2138;
-  const host =
-    (
-      process.env.ELIZA_API_BIND ??
-      process.env.MILADY_API_BIND ??
-      "127.0.0.1"
-    ).trim() || "127.0.0.1";
+  const port = opts?.port ?? resolveServerOnlyPort(process.env);
+  const host = resolveApiBindHost(process.env);
   ensureApiTokenForBindHost(host);
   console.log(`[eliza-api] Token check done (${Date.now() - apiStartTime}ms)`);
 
@@ -17855,8 +18768,9 @@ export async function startApiServer(opts?: {
 
   // Optional auto-provision mode for legacy environments. Disabled by default
   // so startup does not silently create new wallets when keys are missing.
-  const walletAutoProvisionRaw =
-    process.env.MILADY_WALLET_AUTO_PROVISION?.trim().toLowerCase();
+  const walletAutoProvisionRaw = process.env.MILADY_WALLET_AUTO_PROVISION
+    ?.trim()
+    .toLowerCase();
   const walletAutoProvisionEnabled =
     walletAutoProvisionRaw === "1" ||
     walletAutoProvisionRaw === "true" ||
@@ -17963,18 +18877,6 @@ export async function startApiServer(opts?: {
     connectorRouteHandlers: [],
     connectorHealthMonitor: null,
   };
-
-  // Closure-captured refs for auto-TTS triggering in the event pipeline.
-  // Set when the streaming connector initializes its route state.
-  let streamRouteStateRef:
-    | import("./stream-routes.js").StreamRouteState
-    | null = null;
-  let onAgentMessageFn:
-    | ((
-        text: string,
-        state: import("./stream-routes.js").StreamRouteState,
-      ) => Promise<void>)
-    | null = null;
 
   const trainingServiceCtor = await resolveTrainingServiceCtor();
   const trainingServiceOptions = {
@@ -18254,24 +19156,6 @@ export async function startApiServer(opts?: {
         );
       });
 
-      // Auto-trigger TTS for assistant messages on the stream
-      const srs = streamRouteStateRef;
-      const ttsHandler = onAgentMessageFn;
-      if (event.stream === "assistant" && srs && ttsHandler) {
-        const payload =
-          event.data && typeof event.data === "object"
-            ? (event.data as Record<string, unknown>)
-            : null;
-        const text =
-          typeof payload?.text === "string" ? payload.text.trim() : "";
-        if (text) {
-          void ttsHandler(text, srs).catch((err) => {
-            logger.warn(
-              `[stream-voice] Auto-TTS trigger failed: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          });
-        }
-      }
     });
 
     const unsubHeartbeat = svc.subscribeHeartbeat((event) => {
@@ -18410,10 +19294,9 @@ export async function startApiServer(opts?: {
     // configured, inject it so /api/stream/live can fetch credentials.
     void (async () => {
       try {
-        const { handleStreamRoute, onAgentMessage } = await import(
+        const { handleStreamRoute } = await import(
           "./stream-routes.js"
         );
-        onAgentMessageFn = onAgentMessage;
         // Screen capture manager is injected by the desktop host via globalThis
         const screenCapture = (globalThis as Record<string, unknown>)
           .__elizaScreenCapture as
@@ -18436,26 +19319,6 @@ export async function startApiServer(opts?: {
           string,
           import("./stream-routes.js").StreamingDestination
         >();
-
-        // Retake (API-driven, full integration)
-        if (isConnectorConfigured("retake", connectors.retake)) {
-          try {
-            const retakeMod = "@elizaos/plugin-retake";
-            const { createRetakeDestination } = await import(retakeMod);
-            destinations.set(
-              "retake",
-              createRetakeDestination(
-                connectors.retake as
-                  | { accessToken?: string; apiUrl?: string }
-                  | undefined,
-              ),
-            );
-          } catch (err) {
-            logger.warn(
-              `[eliza-api] Failed to load retake destination: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          }
-        }
 
         // Custom RTMP
         if (
@@ -18564,8 +19427,7 @@ export async function startApiServer(opts?: {
           streamManager,
           port,
           screenCapture,
-          captureUrl: (connectors.retake as Record<string, unknown> | undefined)
-            ?.captureUrl as string | undefined,
+          captureUrl: undefined as string | undefined,
           destinations,
           activeDestinationId,
           activeStreamSource: { type: "stream-tab" as const },
@@ -18575,12 +19437,8 @@ export async function startApiServer(opts?: {
                 return;
               }
               const diskCfg = loadElizaConfig();
-              const lang =
-                state.config.ui?.language ?? diskCfg.ui?.language;
-              const preset = resolveStylePresetByAvatarIndex(
-                avatarIndex,
-                lang,
-              );
+              const lang = state.config.ui?.language ?? diskCfg.ui?.language;
+              const preset = resolveStylePresetByAvatarIndex(avatarIndex, lang);
               const nextUi: ElizaConfig["ui"] = {
                 ...(state.config.ui ?? {}),
                 avatarIndex,
@@ -18629,8 +19487,6 @@ export async function startApiServer(opts?: {
               : undefined;
           },
         };
-        // Capture streamState in closure for auto-TTS triggering and route handling
-        streamRouteStateRef = streamState;
         state.connectorRouteHandlers.push((req, res, pathname, method) =>
           handleStreamRoute(req, res, pathname, method, streamState),
         );

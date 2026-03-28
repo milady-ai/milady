@@ -89,6 +89,8 @@ export function Header({
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuPortalContainer =
+    typeof document !== "undefined" ? document.body : undefined;
 
   useEffect(() => {
     void loadDropStatus();
@@ -140,10 +142,9 @@ export function Header({
   const useMinimalHeaderChrome = transparent || !isDesktopShell;
   const showNavigationMenu = isDesktopShell;
   const showCloudStatus = isDesktopShell && !hideCloudCredits;
-  const headerFrameClassName = isDesktopShell ? "" : "max-w-5xl";
-  const headerShellClassName = isDesktopShell
-    ? "border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none"
-    : "border-[rgba(255,255,255,0.12)] bg-[image:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)),linear-gradient(180deg,rgba(8,11,18,0.52),rgba(5,7,12,0.3))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(255,255,255,0.04),0_24px_50px_rgba(2,4,8,0.28)] ring-1 ring-inset ring-white/10 backdrop-blur-2xl";
+  const headerFrameClassName = "";
+  const headerShellClassName =
+    "border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none";
 
   const handleShellViewChange = (
     view: "companion" | "character" | "desktop",
@@ -234,7 +235,6 @@ export function Header({
         data-no-camera-drag="true"
       >
         <div
-          className={`px-1.5 sm:px-4 ${useMinimalHeaderChrome ? "" : "pb-1.5 sm:pb-3"}`}
           style={{
             paddingTop: `calc(var(--safe-area-top, 0px) + var(--milady-macos-frame-top-inset, 0px) + ${
               isDesktopShell ? "0.875rem" : "0.375rem"
@@ -366,8 +366,9 @@ export function Header({
       {showNavigationMenu ? (
         <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <DialogContent
+            container={mobileMenuPortalContainer}
             showCloseButton={false}
-            className="fixed right-0 top-0 left-auto flex h-[100dvh] w-[min(22rem,88vw)] max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-l border-border/60 bg-bg/92 p-0 shadow-2xl backdrop-blur-xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:hidden"
+            className="fixed left-auto right-0 top-0 z-[240] flex h-[100dvh] w-[min(22rem,88vw)] max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-l border-border/60 bg-bg/98 p-0 shadow-[0_24px_70px_rgba(2,8,23,0.34)] backdrop-blur-2xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right max-sm:!bottom-0 max-sm:!left-auto max-sm:!right-0 max-sm:!top-0 max-sm:!max-h-[100dvh] max-sm:!w-[min(22rem,88vw)] max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:!rounded-none max-sm:data-[state=closed]:slide-out-to-right max-sm:data-[state=open]:slide-in-from-right sm:hidden"
           >
             <DialogHeader className="border-b border-border/50 px-4 py-3 text-left">
               <div className="flex items-center justify-between gap-3">

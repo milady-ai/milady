@@ -1184,7 +1184,7 @@ export function MediaSettingsSection() {
 
       {/* biome-ignore lint/a11y/useSemanticElements: existing pattern */}
       <div
-        className="flex flex-col gap-4 rounded-xl border border-border/70 border-l-[3px] border-l-accent bg-card/85 px-3 py-3 shadow-sm"
+        className="flex flex-col gap-4 rounded-xl border border-border/70 bg-card/85 px-3 py-3 shadow-sm"
         data-testid="settings-media-generate-group"
         role="region"
         aria-label={t("mediasettingssection.GenerateGroupRegionLabel", {

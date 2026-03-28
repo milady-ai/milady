@@ -4,6 +4,7 @@
  * so disconnect appeared to do nothing.
  */
 
+import { resolveApiToken } from "@miladyai/shared/runtime-env";
 import {
   normalizeApiBase,
   resolveDesktopRuntimeMode,
@@ -33,8 +34,7 @@ export function buildMiladyMainApiHeaders(
     headers.Authorization = `Bearer ${override}`;
     return headers;
   }
-  let apiToken =
-    process.env.MILADY_API_TOKEN?.trim() ?? process.env.ELIZA_API_TOKEN?.trim();
+  let apiToken = resolveApiToken(process.env);
   if (!apiToken) {
     const rt = resolveDesktopRuntimeMode(
       process.env as Record<string, string | undefined>,

@@ -15,7 +15,6 @@ vi.mock("../bridge/electrobun-rpc", () => ({
 import {
   formatDesktopWorkspaceSummary,
   loadDesktopWorkspaceSnapshot,
-  openDesktopInAppBrowser,
   openDesktopSettingsWindow,
   openDesktopSurfaceWindow,
 } from "./desktop-workspace";
@@ -122,52 +121,5 @@ describe("desktop-workspace utilities", () => {
         params: { surface: "release" },
       }),
     );
-  });
-
-  it("includes browse when opening the browser surface with a seed URL", async () => {
-    isElectrobunRuntimeMock.mockReturnValue(true);
-    await openDesktopSurfaceWindow("browser", {
-      browse: "https://elizacloud.ai",
-    });
-    expect(invokeDesktopBridgeRequestMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        rpcMethod: "desktopOpenSurfaceWindow",
-        ipcChannel: "desktop:openSurfaceWindow",
-        params: {
-          surface: "browser",
-          browse: "https://elizacloud.ai",
-        },
-      }),
-    );
-  });
-
-  it("openDesktopInAppBrowser opens allowed https URLs on the desktop bridge", async () => {
-    isElectrobunRuntimeMock.mockReturnValue(true);
-    const ok = await openDesktopInAppBrowser("https://docs.example.com/path");
-    expect(ok).toBe(true);
-    expect(invokeDesktopBridgeRequestMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        rpcMethod: "desktopOpenSurfaceWindow",
-        ipcChannel: "desktop:openSurfaceWindow",
-        params: {
-          surface: "browser",
-          browse: "https://docs.example.com/path",
-        },
-      }),
-    );
-  });
-
-  it("openDesktopInAppBrowser is a no-op outside the desktop runtime", async () => {
-    isElectrobunRuntimeMock.mockReturnValue(false);
-    const ok = await openDesktopInAppBrowser("https://example.com");
-    expect(ok).toBe(false);
-    expect(invokeDesktopBridgeRequestMock).not.toHaveBeenCalled();
-  });
-
-  it("openDesktopInAppBrowser rejects disallowed URLs without calling the bridge", async () => {
-    isElectrobunRuntimeMock.mockReturnValue(true);
-    const ok = await openDesktopInAppBrowser("http://malicious.test");
-    expect(ok).toBe(false);
-    expect(invokeDesktopBridgeRequestMock).not.toHaveBeenCalled();
   });
 });

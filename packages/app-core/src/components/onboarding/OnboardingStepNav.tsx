@@ -27,7 +27,7 @@ export function OnboardingStepNav() {
 
   return (
     <div className="absolute left-0 top-0 bottom-0 z-10 flex min-h-0 w-full max-w-[18.75rem] flex-col justify-center py-[clamp(1rem,5vh,3rem)] pl-[clamp(1rem,4vw,2.5rem)] pr-0 max-lg:max-w-[16rem] max-lg:pl-6 max-md:relative max-md:max-w-none max-md:items-stretch max-md:px-4 max-md:pb-2 max-md:pt-4">
-      <div className="w-full rounded-[28px] border border-[var(--onboarding-nav-border,rgba(201,204,209,0.12))] [background:linear-gradient(180deg,rgba(12,13,18,0.84),rgba(15,16,22,0.7)),var(--onboarding-nav-scrim,rgba(18,18,20,0.72))] px-[26px] py-[30px] shadow-[var(--onboarding-nav-shadow,0_16px_40px_rgba(0,0,0,0.24))] backdrop-blur-[20px] backdrop-saturate-[1.16] max-md:max-w-[calc(100vw-32px)] max-md:overflow-x-auto max-md:rounded-[22px] max-md:px-3 max-md:py-3">
+      <div className="w-full relative isolate rounded-[28px] border border-[var(--onboarding-nav-border,rgba(201,204,209,0.12))] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.012)_26%,transparent_52%),linear-gradient(180deg,rgba(11,14,20,0.18),rgba(11,14,20,0.04)),var(--onboarding-panel-bg)] ring-1 ring-white/6 px-[26px] py-[30px] shadow-[var(--onboarding-nav-shadow,0_16px_40px_rgba(0,0,0,0.24))] backdrop-blur-[30px] backdrop-saturate-[1.18] before:pointer-events-none before:absolute before:inset-[1px] before:rounded-[calc(28px-1px)] before:bg-[linear-gradient(180deg,rgba(255,255,255,0.025),transparent_22%)] before:content-[''] max-md:max-w-[calc(100vw-32px)] max-md:overflow-x-auto max-md:rounded-[22px] max-md:before:rounded-[calc(22px-1px)] max-md:px-3 max-md:py-3">
         <ul
           aria-label={t("onboarding.stepNavigation")}
           style={

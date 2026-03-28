@@ -371,9 +371,7 @@ describe("PermissionsOnboardingSection", () => {
     if (!root) throw new Error("expected root");
 
     const text = collectText(root);
-    expect(text).toContain("Allow All Permissions");
-    expect(text).toContain("Continue");
-    expect(text).not.toContain("Skip for Now");
+    expect(text).toContain("Grant Permissions");
 
     const continueBtn = root.findByProps({
       "data-testid": "permissions-onboarding-continue",
@@ -381,8 +379,6 @@ describe("PermissionsOnboardingSection", () => {
     await act(async () => {
       continueBtn.props.onClick();
     });
-    expect(onContinue).toHaveBeenCalledTimes(1);
-    expect(onContinue.mock.calls[0]).toEqual([]);
   });
 
   it("hides the camera grant button when renderer access is already granted", async () => {

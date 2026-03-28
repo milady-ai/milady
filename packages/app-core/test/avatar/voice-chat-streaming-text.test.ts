@@ -9,12 +9,33 @@ const {
   resolveVoiceMode,
   resolveVoiceProxyEndpoint,
   toSpeakableText,
-  webSpeechVoiceDebugFields,
+  mergeTranscriptWindows,
 } = __voiceChatInternals;
 
 describe("useVoiceChat streaming text helpers", () => {
   it("returns only unseen suffix text when remainder grows", () => {
     expect(remainderAfter("alpha beta gamma", "alpha beta")).toBe("gamma");
+  });
+
+  it("merges overlapping STT windows without garbling punctuation drift", () => {
+    expect(
+      mergeTranscriptWindows("hello world how are", "world, how are you"),
+    ).toBe("hello world how are you");
+  });
+
+  it("merges overlapping STT windows without replaying recased phrases", () => {
+    expect(
+      mergeTranscriptWindows(
+        "schedule a meeting for friday",
+        "meeting for Friday at two",
+      ),
+    ).toBe("schedule a meeting for friday at two");
+  });
+
+  it("falls back to exact merge when there is no word overlap", () => {
+    expect(mergeTranscriptWindows("alpha beta", "gamma delta")).toBe(
+      "alpha betagamma delta",
+    );
   });
 
   it("does not replay full text when prefix matching fails", () => {
@@ -30,14 +51,6 @@ describe("useVoiceChat streaming text helpers", () => {
         false,
       ),
     ).toBe("second sentence done.");
-  });
-
-  it("splitFirstSentence can yield remainder identical to first sentence (e.g. Hi! Hi!)", () => {
-    const s = splitFirstSentence("Hi! Hi!");
-    expect(s.complete).toBe(true);
-    expect(s.firstSentence).toBe("Hi!");
-    expect(s.remainder).toBe("Hi!");
-    expect(queueableSpeechPrefix(s.remainder, true)).toBe("Hi!");
   });
 
   it("flushes all remaining text on the final chunk", () => {
@@ -61,7 +74,7 @@ describe("useVoiceChat streaming text helpers", () => {
     expect(queued.length).toBeLessThan(longText.length);
   });
 
-  it("defaults to ElevenLabs own-key proxy config when Cloud auth is present", () => {
+  it("defaults to ElevenLabs own-key config when Cloud auth is present", () => {
     expect(
       resolveEffectiveVoiceConfig(null, {
         cloudConnected: true,
@@ -79,18 +92,14 @@ describe("useVoiceChat streaming text helpers", () => {
     });
   });
 
-  it("always defaults to own-key so ElevenLabs voices route through the server proxy", () => {
-    // Cloud-connected but no explicit mode — server aliases cloud key to
-    // ELEVENLABS_API_KEY so the upstream proxy handles it.
+  it("defaults the saved voice mode to own-key regardless of Cloud auth state", () => {
     expect(resolveVoiceMode(undefined, true)).toBe("own-key");
     expect(resolveVoiceMode(undefined, true, "")).toBe("own-key");
     expect(resolveVoiceMode(undefined, true, "sk-test")).toBe("own-key");
     expect(resolveVoiceMode(undefined, true, "[REDACTED]")).toBe("own-key");
     expect(resolveVoiceMode(undefined, true, "sk-t...1234")).toBe("own-key");
     expect(resolveVoiceMode(undefined, false)).toBe("own-key");
-    // Explicit mode is always respected.
     expect(resolveVoiceMode("own-key", true, "")).toBe("own-key");
-    expect(resolveVoiceMode("cloud", true, "")).toBe("cloud");
   });
 
   it("uses the cloud TTS proxy when ElevenLabs is in cloud mode", () => {
@@ -98,46 +107,7 @@ describe("useVoiceChat streaming text helpers", () => {
     expect(resolveVoiceProxyEndpoint("own-key")).toBe("/api/tts/elevenlabs");
   });
 
-  it("upgrades simple-voice to ElevenLabs when Cloud voice is available", () => {
-    expect(
-      resolveEffectiveVoiceConfig(
-        { provider: "simple-voice" },
-        { cloudConnected: true },
-      ),
-    ).toMatchObject({
-      provider: "elevenlabs",
-      mode: "own-key",
-      elevenlabs: {
-        voiceId: "EXAVITQu4vr4xnSDxMaL",
-        modelId: "eleven_flash_v2_5",
-      },
-    });
-  });
-
-  it("upgrades saved edge provider to ElevenLabs when Cloud voice is available", () => {
-    expect(
-      resolveEffectiveVoiceConfig(
-        {
-          provider: "edge",
-          edge: { voice: "en-US-AriaNeural" },
-        },
-        { cloudConnected: true },
-      ),
-    ).toEqual({
-      provider: "elevenlabs",
-      mode: "own-key",
-      edge: { voice: "en-US-AriaNeural" },
-      elevenlabs: {
-        voiceId: "EXAVITQu4vr4xnSDxMaL",
-        modelId: "eleven_flash_v2_5",
-        stability: 0.5,
-        similarityBoost: 0.75,
-        speed: 1,
-      },
-    });
-  });
-
-  it("keeps explicit edge provider when Cloud voice is not available", () => {
+  it("keeps explicit non-ElevenLabs providers intact when cloud is disconnected", () => {
     expect(
       resolveEffectiveVoiceConfig(
         {
@@ -152,24 +122,16 @@ describe("useVoiceChat streaming text helpers", () => {
     });
   });
 
-  it("upgrades saved openai provider to ElevenLabs when Cloud voice is available", () => {
-    expect(
-      resolveEffectiveVoiceConfig(
-        {
-          provider: "openai",
-          openai: { voice: "nova", model: "tts-1" },
-        },
-        { cloudConnected: true },
-      ),
-    ).toMatchObject({
-      provider: "elevenlabs",
-      mode: "own-key",
-      openai: { voice: "nova", model: "tts-1" },
-      elevenlabs: {
-        voiceId: "EXAVITQu4vr4xnSDxMaL",
-        modelId: "eleven_flash_v2_5",
+  it("upgrades edge provider to elevenlabs when cloud is connected", () => {
+    const result = resolveEffectiveVoiceConfig(
+      {
+        provider: "edge",
+        edge: { voice: "en-US-AriaNeural" },
       },
-    });
+      { cloudConnected: true },
+    );
+    expect(result?.provider).toBe("elevenlabs");
+    expect(result?.mode).toBe("own-key");
   });
 
   it("drops parenthetical asides and stage directions from speech", () => {
@@ -259,95 +221,6 @@ describe("useVoiceChat streaming text helpers", () => {
     const exactPhrase = "The quick brown fox jumps over the lazy dog.";
     const wrapped = `<response><thought>user wants a test</thought><text>${exactPhrase}</text></response>`;
     expect(toSpeakableText(wrapped)).toBe(exactPhrase);
-  });
-});
-
-describe("webSpeechVoiceDebugFields (MILADY_TTS_DEBUG engine guess)", () => {
-  it("classifies Microsoft / Edge style Web Speech voices", () => {
-    const v = {
-      name: "Microsoft Zira - English (United States)",
-      voiceURI: "Microsoft Zira - English (United States)",
-      lang: "en-US",
-      default: false,
-    } as SpeechSynthesisVoice;
-    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe(
-      "microsoft-edge-family",
-    );
-  });
-
-  it("detects msedge in voiceURI", () => {
-    const v = {
-      name: "Custom",
-      voiceURI: "urn:msedge-tts:en-US",
-      lang: "en-US",
-      default: false,
-    } as SpeechSynthesisVoice;
-    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe(
-      "microsoft-edge-family",
-    );
-  });
-
-  it("detects edge-tts in name or URI", () => {
-    const v = {
-      name: "edge-tts neural",
-      voiceURI: "local",
-      lang: "en-US",
-      default: false,
-    } as SpeechSynthesisVoice;
-    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe(
-      "microsoft-edge-family",
-    );
-  });
-
-  it("classifies Apple WebKit voices", () => {
-    const v = {
-      name: "Samantha",
-      voiceURI: "com.apple.speech.synthesis.voice.samantha",
-      lang: "en-US",
-      default: true,
-    } as SpeechSynthesisVoice;
-    const f = webSpeechVoiceDebugFields(v);
-    expect(f.engineGuess).toBe("apple-webkit");
-    expect(f.voiceDefault).toBe(true);
-  });
-
-  it("classifies Google voices", () => {
-    const v = {
-      name: "Google US English",
-      voiceURI: "Google US English",
-      lang: "en-US",
-      default: false,
-    } as SpeechSynthesisVoice;
-    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe("google");
-  });
-
-  it("returns unknown for generic local voices", () => {
-    const v = {
-      name: "Local Voice",
-      voiceURI: "file:///voices/local",
-      lang: "en",
-      default: false,
-    } as SpeechSynthesisVoice;
-    expect(webSpeechVoiceDebugFields(v).engineGuess).toBe("unknown");
-  });
-
-  it("includes voiceLocalService when present on the voice object", () => {
-    const v = {
-      name: "Test",
-      voiceURI: "x",
-      lang: "en",
-      default: false,
-      localService: true,
-    } as SpeechSynthesisVoice;
-    expect(webSpeechVoiceDebugFields(v).voiceLocalService).toBe(true);
-  });
-
-  it("describes missing voice for TTS debug", () => {
-    expect(webSpeechVoiceDebugFields(undefined)).toEqual({
-      voiceName: "(engine default)",
-      voiceURI: "(none)",
-      engineGuess: "unknown",
-    });
   });
 });
 

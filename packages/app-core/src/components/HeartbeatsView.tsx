@@ -334,7 +334,9 @@ function toneForLastStatus(
 function localizedExecutionStatus(status: string, t: TranslateFn): string {
   switch (status) {
     case "success":
-      return t("heartbeatsview.statusSuccess");
+      // Trigger "success" currently means the instruction was queued into the
+      // autonomy room, not that the autonomous action already completed.
+      return t("heartbeatsview.statusQueued");
     case "completed":
       return t("trajectoriesview.Completed");
     case "skipped":
@@ -532,6 +534,9 @@ export function HeartbeatsView() {
       ? (triggers.find((trigger) => trigger.id === editingId)?.enabled ??
         form.enabled)
       : form.enabled;
+  const hasHeartbeats = triggers.length > 0;
+  const showFirstRunEmptyState =
+    !triggersLoading && !triggerError && !hasHeartbeats;
 
   return (
     <DesktopPageFrame>
@@ -541,22 +546,6 @@ export function HeartbeatsView() {
           className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:w-[21rem] md:max-w-[352px] lg:w-[23rem] ${APP_SIDEBAR_RAIL_CLASSNAME}`}
         >
           <div className={APP_SIDEBAR_STICKY_HEADER_CLASSNAME}>
-            <div className="mb-3 flex items-end justify-between gap-3 px-1">
-              <div className="space-y-1">
-                <div className={SIDEBAR_SECTION_LABEL_CLASS}>Heartbeats</div>
-                <div className={APP_SIDEBAR_META_CLASSNAME}>
-                  {t("heartbeatsview.newHeartbeat")}
-                </div>
-              </div>
-              <StatusBadge
-                label={
-                  triggersLoading
-                    ? t("common.loading")
-                    : String(triggers.length)
-                }
-                tone={triggersLoading ? "warning" : "muted"}
-              />
-            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -582,13 +571,6 @@ export function HeartbeatsView() {
                 <div className="h-4 w-4 rounded-full border-2 border-muted/30 border-t-muted/80 animate-spin" />
                 {t("common.loading")}
               </div>
-            )}
-            {!triggersLoading && triggers.length === 0 && (
-              <DesktopEmptyStatePanel
-                className="min-h-[11rem] px-4 py-6"
-                description={t("heartbeatsview.emptyStateDescription")}
-                title="No heartbeats yet"
-              />
             )}
             {triggers.map((trigger) => {
               const isActive = selectedTriggerId === trigger.id;
@@ -744,11 +726,6 @@ export function HeartbeatsView() {
                   <h2 className="text-2xl font-semibold text-txt">
                     {modalTitle}
                   </h2>
-                  <p className="max-w-2xl text-sm leading-relaxed text-muted">
-                    {editingId
-                      ? t("heartbeatsview.emptyStateDescription")
-                      : t("heartbeatsview.emptyStateDescription")}
-                  </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 lg:justify-end">
@@ -1085,9 +1062,9 @@ export function HeartbeatsView() {
 
                     <div className={`${HEARTBEATS_PANEL_CLASS} space-y-4`}>
                       <div className="flex items-center justify-between gap-3 border-b border-border/30 pb-3">
-                        <h3 className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted">
+                        <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted">
                           {t("triggersview.RunHistory")}
-                        </h3>
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"
@@ -1327,9 +1304,9 @@ export function HeartbeatsView() {
 
                     <div className={`${HEARTBEATS_PANEL_CLASS} space-y-4`}>
                       <div className="flex items-center justify-between gap-3">
-                        <h3 className="text-[12px] font-semibold uppercase tracking-wider text-muted">
+                        <div className="text-[12px] font-semibold uppercase tracking-wider text-muted">
                           {t("triggersview.RunHistory")}
-                        </h3>
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"
@@ -1389,24 +1366,19 @@ export function HeartbeatsView() {
                   </div>
                 );
               })()) || (
-              <div className="flex h-full flex-col items-center justify-center p-8 text-center bg-bg/5">
+              <div className="flex h-full flex-col items-center justify-center bg-bg/5 p-8 text-center">
                 <DesktopEmptyStatePanel
                   className="h-full min-h-[22rem]"
-                  description={t("heartbeatsview.emptyStateDescription")}
+                  description={
+                    showFirstRunEmptyState
+                      ? undefined
+                      : t("heartbeatsview.emptyStateDescription")
+                  }
                   icon={<Clock3 className="h-7 w-7" />}
-                  title={t("heartbeatsview.selectAHeartbeat")}
-                  action={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-10 rounded-xl px-5 text-sm"
-                      onClick={() => {
-                        openCreateEditor();
-                        setSelectedTriggerId(null);
-                      }}
-                    >
-                      {t("heartbeatsview.newHeartbeat")}
-                    </Button>
+                  title={
+                    showFirstRunEmptyState
+                      ? t("heartbeatsview.createFirstHeartbeat")
+                      : t("heartbeatsview.selectAHeartbeat")
                   }
                 />
               </div>

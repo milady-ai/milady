@@ -194,6 +194,14 @@ const ASSISTANT_TTS_FIRST_FLUSH_CHARS = 24;
 const ASSISTANT_TTS_MIN_CHUNK_CHARS = 88;
 /** Merge rapid stream deltas into one request after a short pause. */
 const ASSISTANT_TTS_DEBOUNCE_MS = 170;
+/**
+ * Temporary safety switch:
+ * only speak assistant replies once the final text has arrived.
+ *
+ * This avoids garbled overlap when cloud text streaming and speech playback
+ * race each other on partial chunks.
+ */
+const ASSISTANT_TTS_FINAL_ONLY = true;
 const TALKMODE_STOP_SETTLE_MS = 120;
 const REDACTED_SECRET = "[REDACTED]";
 const MOUTH_OPEN_STEP = 0.02;
@@ -243,6 +251,54 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 
 function collapseWhitespace(input: string): string {
   return input.replace(/\s+/g, " ").trim();
+}
+
+function normalizeTranscriptWord(word: string): string {
+  return word
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+}
+
+function mergeTranscriptWindows(existing: string, incoming: string): string {
+  const left = collapseWhitespace(existing);
+  const right = collapseWhitespace(incoming);
+
+  if (!left) return right;
+  if (!right) return left;
+
+  const exactMerged = mergeStreamingText(left, right);
+  if (
+    exactMerged === right ||
+    exactMerged === left ||
+    exactMerged === `${left}${right}`
+  ) {
+    const leftWords = left.split(" ");
+    const rightWords = right.split(" ");
+    const maxOverlap = Math.min(leftWords.length, rightWords.length);
+
+    for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
+      let matches = true;
+      for (let index = 0; index < overlap; index += 1) {
+        const leftWord = normalizeTranscriptWord(
+          leftWords[leftWords.length - overlap + index] ?? "",
+        );
+        const rightWord = normalizeTranscriptWord(rightWords[index] ?? "");
+        if (!leftWord || !rightWord || leftWord !== rightWord) {
+          matches = false;
+          break;
+        }
+      }
+      if (!matches) continue;
+
+      if (overlap === rightWords.length) {
+        return left;
+      }
+      return [...leftWords, ...rightWords.slice(overlap)].join(" ");
+    }
+  }
+
+  return exactMerged;
 }
 
 function normalizeMouthOpen(value: number): number {
@@ -625,7 +681,9 @@ export const __voiceChatInternals = {
   resolveVoiceMode,
   resolveVoiceProxyEndpoint,
   toSpeakableText,
+  mergeTranscriptWindows,
   webSpeechVoiceDebugFields,
+  ASSISTANT_TTS_FINAL_ONLY,
   ASSISTANT_TTS_FIRST_FLUSH_CHARS,
   ASSISTANT_TTS_MIN_CHUNK_CHARS,
 };
@@ -678,6 +736,26 @@ function webSpeechVoiceDebugFields(
         : undefined,
     engineGuess,
   };
+}
+
+function normalizeSpeechLocale(input: string | undefined): string {
+  const trimmed = input?.trim();
+  return trimmed || "en-US";
+}
+
+function localePrefix(locale: string): string {
+  return locale.toLowerCase().split("-")[0] || "en";
+}
+
+function matchesVoiceLocale(
+  voice: SpeechSynthesisVoice,
+  targetLocale: string,
+): boolean {
+  const target = targetLocale.toLowerCase();
+  const voiceLang = voice.lang.toLowerCase();
+  if (voiceLang === target) return true;
+  const base = localePrefix(targetLocale);
+  return voiceLang.startsWith(`${base}-`) || voiceLang === base;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────
@@ -946,7 +1024,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
       const normalized = collapseWhitespace(transcript);
       if (!normalized) return;
 
-      const nextText = mergeStreamingText(
+      const nextText = mergeTranscriptWindows(
         transcriptBufferRef.current,
         normalized,
       );
@@ -1509,6 +1587,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
     (text: string, task: SpeakTask, generation: number) => {
       const config = voiceConfigRef.current;
       const synth = synthRef.current;
+      const requestedLocale = normalizeSpeechLocale(options.lang);
       const words = text.trim().split(/\s+/).length;
       const estimatedMs = Math.max(1200, (words / 3) * 1000);
       const useTalkModeTts = !synth && Boolean(getElectrobunRendererRpc());
@@ -1590,6 +1669,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         }
 
         const utterance = new SpeechSynthesisUtterance(text.trim());
+        utterance.lang = requestedLocale;
         utteranceRef.current = utterance;
 
         let selectedVoice: SpeechSynthesisVoice | undefined;
@@ -1607,7 +1687,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
                 edgeVoiceName.toLowerCase().includes("guy") ||
                 edgeVoiceName.toLowerCase().includes("male");
               selectedVoice = voices.find((v) => {
-                if (!v.lang.startsWith("en")) return false;
+                if (!matchesVoiceLocale(v, requestedLocale)) return false;
                 const nameLower = v.name.toLowerCase();
                 if (isMale) {
                   return (
@@ -1630,17 +1710,24 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           }
 
           if (!selectedVoice) {
-            selectedVoice =
-              voices.find(
-                (v) =>
-                  v.lang === "en-US" &&
-                  !v.name.toLowerCase().includes("alex") &&
-                  !v.name.toLowerCase().includes("david"),
-              ) || voices.find((v) => v.lang.startsWith("en"));
+            if (localePrefix(requestedLocale) === "en") {
+              selectedVoice =
+                voices.find(
+                  (v) =>
+                    matchesVoiceLocale(v, requestedLocale) &&
+                    !v.name.toLowerCase().includes("alex") &&
+                    !v.name.toLowerCase().includes("david"),
+                ) || voices.find((v) => matchesVoiceLocale(v, requestedLocale));
+            } else {
+              selectedVoice = voices.find((v) =>
+                matchesVoiceLocale(v, requestedLocale),
+              );
+            }
           }
 
           if (selectedVoice) {
             utterance.voice = selectedVoice;
+            utterance.lang = selectedVoice.lang || requestedLocale;
           }
         }
 
@@ -1652,6 +1739,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           append: task.append,
           textChars: text.trim().length,
           preview: miladyTtsDebugTextPreview(text),
+          requestedLocale,
           engine: "speechSynthesis",
           ...webSpeechVoiceDebugFields(selectedVoice),
         });
@@ -1665,6 +1753,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             append: task.append,
             textChars: text.trim().length,
             preview: miladyTtsDebugTextPreview(text),
+            requestedLocale,
             engine: "speechSynthesis-utterance-onstart",
             ...webSpeechVoiceDebugFields(selectedVoice),
           });
@@ -1694,6 +1783,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
             segment: task.segment,
             synthesisError: errEv.error ?? "unknown",
             preview: miladyTtsDebugTextPreview(text),
+            requestedLocale,
             ...webSpeechVoiceDebugFields(selectedVoice),
           });
           endBrowserUtterance();
@@ -1703,7 +1793,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
         speechTimeoutRef.current = setTimeout(finish, estimatedMs + 5000);
       });
     },
-    [clearSpeechTimers],
+    [clearSpeechTimers, options.lang],
   );
 
   const processQueue = useCallback(() => {
@@ -1919,6 +2009,40 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
       if (!state) return;
 
       state.latestSpeakable = speakable;
+
+      if (ASSISTANT_TTS_FINAL_ONLY && !isFinal) {
+        // Band-aid mode: never speak partial stream chunks.
+        return;
+      }
+
+      if (ASSISTANT_TTS_FINAL_ONLY) {
+        if (state.finalQueued) return;
+        clearAssistantTtsDebounce();
+
+        const elConfig = voiceConfigRef.current?.elevenlabs;
+        const cacheKey =
+          voiceConfigRef.current?.provider === "elevenlabs" && elConfig
+            ? makeElevenCacheKey(speakable, elConfig)
+            : undefined;
+        const dbgUtterance = isMiladyTtsDebugEnabled()
+          ? {
+              messageId,
+              fullAssistTextPreview: miladyTtsDebugTextPreview(speakable, 220),
+            }
+          : undefined;
+
+        // Final-only means one utterance per assistant message.
+        enqueueSpeech({
+          text: speakable,
+          append: false,
+          segment: "full",
+          cacheKey,
+          debugUtteranceContext: dbgUtterance,
+        });
+        state.queuedSpeakablePrefix = speakable;
+        state.finalQueued = true;
+        return;
+      }
 
       if (
         speakable === state.queuedSpeakablePrefix &&

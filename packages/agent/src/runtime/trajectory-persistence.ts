@@ -2468,7 +2468,8 @@ export class DatabaseTrajectoryLogger extends Service {
    */
   startStep(trajectoryId: string): string {
     // Return the trajectory ID so LLM calls logged with this step ID attach
-    // to the same trajectory row that startTrajectory created.
+    // to the same trajectory row that startTrajectory created. Generating a
+    // separate step-xxx ID would create a disconnected trajectory row.
     return trajectoryId;
   }
 

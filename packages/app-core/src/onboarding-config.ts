@@ -10,6 +10,8 @@ export interface BuildOnboardingConnectionArgs {
   onboardingCloudProvider: string;
   onboardingProvider: string;
   onboardingApiKey: string;
+  onboardingVoiceProvider: string;
+  onboardingVoiceApiKey: string;
   onboardingPrimaryModel: string;
   onboardingOpenRouterModel: string;
   onboardingRemoteConnected: boolean;
