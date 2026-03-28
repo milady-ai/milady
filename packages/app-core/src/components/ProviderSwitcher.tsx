@@ -467,8 +467,6 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
           env: { vars: { ELIZA_USE_PI_AI: "" } },
         });
         await client.switchProvider(getStoredSubscriptionProvider(providerId));
-        setCloudHandlesInference(false);
-        setPiAiEnabled(false);
 
         // Persist plugin toggles after successful switch to avoid inconsistent
         // UI state if switchProvider fails.
@@ -480,6 +478,10 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             await handlePluginToggle(p.id, false);
           }
         }
+
+        // Only update UI state after all operations succeed
+        setCloudHandlesInference(false);
+        setPiAiEnabled(false);
       } catch (err) {
         console.warn("[eliza] Provider switch failed", err);
       }
