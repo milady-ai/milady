@@ -504,10 +504,26 @@ export function CharacterEditor({
     }
   }, [onboardingPresetStyles, uiLanguage]);
 
-  const characterRoster = useMemo(
+  const baseRosterEntries = useMemo(
     () => resolveRosterEntries(rosterStyles),
     [rosterStyles],
   );
+
+  // If the user renamed the selected character, reflect it in the roster
+  const characterRoster = useMemo(() => {
+    const activeId = selectedCharacterId ?? savedCharacterId;
+    const draftName =
+      typeof characterDraft.name === "string" ? characterDraft.name.trim() : "";
+    if (!activeId || !draftName) return baseRosterEntries;
+    return baseRosterEntries.map((entry) =>
+      entry.id === activeId ? { ...entry, name: draftName } : entry,
+    );
+  }, [
+    baseRosterEntries,
+    selectedCharacterId,
+    savedCharacterId,
+    characterDraft.name,
+  ]);
 
   const d = characterDraft;
   const fallbackCharacterName =

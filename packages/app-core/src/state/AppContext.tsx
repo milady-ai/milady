@@ -1027,6 +1027,8 @@ function AppProviderInner({
   const [elizaCloudTopUpUrl, setElizaCloudTopUpUrl] =
     useState("/cloud/billing");
   const [elizaCloudUserId, setElizaCloudUserId] = useState<string | null>(null);
+  const [ownerName, setOwnerNameState] = useState<string | null>(null);
+  const [showOwnerNamePrompt, setShowOwnerNamePrompt] = useState(false);
   const [elizaCloudStatusReason, setElizaCloudStatusReason] = useState<
     string | null
   >(null);
@@ -1570,12 +1572,20 @@ function AppProviderInner({
   const switchShellView = useCallback(
     (view: ShellView) => {
       const nextTab = getTabForShellView(view, lastNativeTab);
+      // Gate: prompt for owner name the first time user enters desktop/native view
+      if (
+        view === "desktop" &&
+        !ownerName &&
+        !showOwnerNamePrompt
+      ) {
+        setShowOwnerNamePrompt(true);
+      }
       console.log(
         `[shell] switchShellView: ${view} → tab=${nextTab}, lastNativeTab=${lastNativeTab}`,
       );
       setTab(nextTab);
     },
-    [lastNativeTab, setTab],
+    [lastNativeTab, ownerName, showOwnerNamePrompt, setTab],
   );
 
   const navigationHubRef = useRef(new NavigationEventHub());
@@ -2165,6 +2175,28 @@ function AppProviderInner({
       setCharacterDraft({});
     }
     setCharacterLoading(false);
+  }, []);
+
+  // Hydrate ownerName from config on startup
+  useEffect(() => {
+    void client
+      .getConfig()
+      .then((cfg) => {
+        const name = (cfg as Record<string, unknown>).ui as
+          | Record<string, unknown>
+          | undefined;
+        const persisted = name?.ownerName;
+        if (typeof persisted === "string" && persisted.trim()) {
+          setOwnerNameState(persisted.trim());
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleOwnerNameSubmit = useCallback((name: string) => {
+    setOwnerNameState(name);
+    setShowOwnerNamePrompt(false);
+    void client.updateConfig({ ui: { ownerName: name } }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -8027,6 +8059,9 @@ function AppProviderInner({
     elizaCloudTopUpUrl,
     elizaCloudUserId,
     elizaCloudStatusReason,
+    ownerName,
+    showOwnerNamePrompt,
+    handleOwnerNameSubmit,
     cloudDashboardView,
     elizaCloudLoginBusy,
     elizaCloudLoginError,

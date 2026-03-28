@@ -40,6 +40,7 @@ import {
   InventoryView,
   KnowledgeView,
   OnboardingWizard,
+  OwnerNamePrompt,
   PairingView,
   SaveCommandModal,
   SettingsView,
@@ -316,6 +317,8 @@ export function App() {
     activeGameViewerUrl,
     gameOverlayEnabled,
     retryOnboardingHandoff,
+    showOwnerNamePrompt,
+    handleOwnerNameSubmit,
     t,
   } = useApp();
 
@@ -789,6 +792,10 @@ export function App() {
           setCustomActionsEditorOpen(false);
           setEditingAction(null);
         }}
+      />
+      <OwnerNamePrompt
+        open={showOwnerNamePrompt}
+        onSubmit={handleOwnerNameSubmit}
       />
       <ConnectionFailedBanner />
       <SystemWarningBanner />

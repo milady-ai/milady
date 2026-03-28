@@ -86,6 +86,7 @@ export * from "./MediaGalleryView";
 export * from "./MediaSettingsSection";
 export * from "./MessageContent";
 export * from "./OnboardingWizard";
+export * from "./OwnerNamePrompt";
 export * from "./PairingView";
 export * from "./PermissionsSection";
 export * from "./PolicyControlsView";
