@@ -501,7 +501,7 @@ function PermissionRow({
           </div>
           <StatusBadge
             label={badge.label}
-            tone={badge.tone}
+            variant={badge.tone}
             withDot
             className="rounded-full font-semibold"
           />

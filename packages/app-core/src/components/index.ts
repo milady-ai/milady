@@ -18,7 +18,7 @@ export {
   StatCard,
   StatusBadge,
   StatusDot,
-  type StatusTone,
+  type StatusVariant,
   Switch,
   statusToneForBoolean,
   useConfirm,

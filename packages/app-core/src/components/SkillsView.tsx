@@ -1341,7 +1341,7 @@ function SkillsFullView() {
                                 ? t("skillsview.statusActive")
                                 : t("skillsview.statusInactive")
                         }
-                        tone={
+                        variant={
                           selectedSkill.scanStatus === "warning"
                             ? "warning"
                             : selectedSkill.scanStatus === "blocked" ||

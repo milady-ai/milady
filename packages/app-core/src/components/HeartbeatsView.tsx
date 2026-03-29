@@ -632,7 +632,7 @@ export function HeartbeatsView() {
                             ? t("appsview.Active")
                             : t("heartbeatsview.statusPaused")
                         }
-                        tone={trigger.enabled ? "success" : "muted"}
+                        variant={trigger.enabled ? "success" : "muted"}
                         withDot
                       />
                     </div>
@@ -646,7 +646,7 @@ export function HeartbeatsView() {
                             trigger.lastStatus,
                             t,
                           )}
-                          tone={toneForLastStatus(trigger.lastStatus)}
+                          variant={toneForLastStatus(trigger.lastStatus)}
                         />
                       )}
                     </div>
@@ -1233,7 +1233,7 @@ export function HeartbeatsView() {
                                 ? t("appsview.Active")
                                 : t("heartbeatsview.statusPaused")
                             }
-                            tone={trigger.enabled ? "success" : "muted"}
+                            variant={trigger.enabled ? "success" : "muted"}
                             withDot
                           />
                         </div>
@@ -1392,7 +1392,7 @@ export function HeartbeatsView() {
                                     run.status,
                                     t,
                                   )}
-                                  tone={toneForLastStatus(run.status)}
+                                  variant={toneForLastStatus(run.status)}
                                 />
                                 <span className="text-[11px] text-muted/70 font-mono">
                                   {formatDateTime(run.startedAt)}

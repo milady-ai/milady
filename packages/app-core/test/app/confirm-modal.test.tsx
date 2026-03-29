@@ -59,7 +59,7 @@ describe("ConfirmModal", () => {
         message="Delete this item?"
         confirmLabel="Delete"
         cancelLabel="Keep"
-        tone="danger"
+        variant="danger"
         onConfirm={onConfirm}
         onCancel={onCancel}
       />,
@@ -75,7 +75,7 @@ describe("ConfirmModal", () => {
         message="Delete this item?"
         confirmLabel="Delete"
         cancelLabel="Keep"
-        tone="danger"
+        variant="danger"
         onConfirm={onConfirm}
         onCancel={onCancel}
       />,
@@ -94,7 +94,7 @@ describe("ConfirmModal", () => {
         title: "Delete item",
         message: "Delete this item?",
         confirmLabel: "Delete",
-        tone: "danger",
+        variant: "danger",
       });
     });
 
