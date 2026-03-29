@@ -15,6 +15,8 @@ function resolveDefaultCloudBase(): string {
 
   const hostname = normalizeCloudHost(window.location.hostname);
   if (hostname === "localhost" || hostname === "127.0.0.1") {
+    // Default to production cloud API for local dev.
+    // Override with VITE_ELIZA_CLOUD_BASE env var for local backend dev.
     return "https://www.elizacloud.ai";
   }
 

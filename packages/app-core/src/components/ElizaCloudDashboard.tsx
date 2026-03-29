@@ -136,7 +136,7 @@ function CloudAgentCard({
               (agentName
                 .split("")
                 .reduce((acc, c) => acc + c.charCodeAt(0), 0) %
-                4) +
+                8) +
               1;
             return (
               <img

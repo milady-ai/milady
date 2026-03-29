@@ -40,7 +40,12 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative z-10 w-[min(100%-2rem,28rem)] border border-border bg-[#0c0c0e] shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="connect-modal-title"
+        className="relative z-10 w-[min(100%-2rem,28rem)] border border-border bg-[#0c0c0e] shadow-2xl"
+      >
         <form
           className="space-y-5 p-6"
           onSubmit={(event) => {
@@ -55,7 +60,7 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
         >
           {/* Header */}
           <div className="space-y-1">
-            <h2 className="font-mono text-sm font-medium text-text-light tracking-wide">
+            <h2 id="connect-modal-title" className="font-mono text-sm font-medium text-text-light tracking-wide">
               CONNECT REMOTE AGENT
             </h2>
             <p className="font-mono text-xs text-text-muted">

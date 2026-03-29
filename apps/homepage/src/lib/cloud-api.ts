@@ -185,6 +185,8 @@ export class CloudClient {
     clearAuthOnFailure = false,
   ): Promise<T> {
     const headers = new Headers(opts.headers);
+    // Send both X-Api-Key and Authorization: Bearer for cross-origin
+    // compatibility. The cloud backend accepts either header format.
     headers.set("X-Api-Key", this.apiKey);
     headers.set("Authorization", `Bearer ${this.apiKey}`);
     if (opts.body && typeof opts.body === "string") {
@@ -427,24 +429,6 @@ export class CloudClient {
         success_url: `${redirectBase}/dashboard/billing/success`,
         cancel_url: `${redirectBase}/dashboard/settings?tab=billing&canceled=1`,
       }),
-    });
-  }
-
-  // Crypto payment — creates a crypto payment via OxaPay, returns { payLink, ... }
-  async createBillingCryptoQuote(amountUsd: number): Promise<{
-    paymentUrl?: string;
-    payLink?: string;
-    address?: string;
-    amount?: string;
-    currency?: string;
-    paymentId?: string;
-    trackId?: string;
-    expiresAt?: string;
-    creditsToAdd?: number;
-  }> {
-    return this.request("/api/crypto/payments", {
-      method: "POST",
-      body: JSON.stringify({ amount: amountUsd }),
     });
   }
 
