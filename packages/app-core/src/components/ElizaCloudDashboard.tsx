@@ -132,7 +132,12 @@ function CloudAgentCard({
         <div className="flex min-w-0 items-center gap-2">
           {(() => {
             const agentName = agent.agent_name ?? "";
-            const avatarIndex = (agentName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 4) + 1;
+            const avatarIndex =
+              (agentName
+                .split("")
+                .reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+                4) +
+              1;
             return (
               <img
                 src={getVrmPreviewUrl(avatarIndex)}
@@ -455,7 +460,9 @@ export function CloudDashboard() {
   const [cloudNotReady, setCloudNotReady] = useState(false);
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
   const [launchingAgentId, setLaunchingAgentId] = useState<string | null>(null);
-  const [openingWebUiAgentId, setOpeningWebUiAgentId] = useState<string | null>(null);
+  const [openingWebUiAgentId, setOpeningWebUiAgentId] = useState<string | null>(
+    null,
+  );
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const selectedAgent = cloudAgents.find((a) => a.agent_id === selectedAgentId);
   const [showDeployForm, setShowDeployForm] = useState(false);
@@ -843,7 +850,8 @@ export function CloudDashboard() {
 
       throw new Error(
         t("elizaclouddashboard.CheckoutSessionMissing", {
-          defaultValue: "Checkout unavailable. Try again or use the billing portal.",
+          defaultValue:
+            "Checkout unavailable. Try again or use the billing portal.",
         }),
       );
     } catch (err) {
@@ -1206,7 +1214,7 @@ export function CloudDashboard() {
           <h2 className="text-lg font-bold text-txt-strong tracking-tight">
             {t("elizaclouddashboard.CloudDashboard")}
           </h2>
-          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex flex-wrap items-center gap-0.5 rounded-lg border border-border/50 bg-bg/50 p-0.5">
@@ -1398,18 +1406,24 @@ export function CloudDashboard() {
                     hasWalletFunds ? (
                       <>
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-ok flex-shrink-0" />
-                        {t("elizaclouddashboard.AgentWalletFunded", { defaultValue: "Wallet ready" })}
+                        {t("elizaclouddashboard.AgentWalletFunded", {
+                          defaultValue: "Wallet ready",
+                        })}
                       </>
                     ) : (
                       <>
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-warn flex-shrink-0" />
-                        {t("elizaclouddashboard.AgentWalletDetected", { defaultValue: "Wallet empty" })}
+                        {t("elizaclouddashboard.AgentWalletDetected", {
+                          defaultValue: "Wallet empty",
+                        })}
                       </>
                     )
                   ) : (
                     <>
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-muted flex-shrink-0" />
-                      {t("elizaclouddashboard.NoAgentWalletDetected", { defaultValue: "No wallet" })}
+                      {t("elizaclouddashboard.NoAgentWalletDetected", {
+                        defaultValue: "No wallet",
+                      })}
                     </>
                   )}
                 </p>
@@ -1506,8 +1520,12 @@ export function CloudDashboard() {
                 </h3>
                 <p className="text-[11px] text-muted mt-0.5">
                   {autoTopUpHasPaymentMethod
-                    ? t("elizaclouddashboard.AutoTopUpPaymentReady", { defaultValue: "Card saved" })
-                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod", { defaultValue: "Add a card first" })}
+                    ? t("elizaclouddashboard.AutoTopUpPaymentReady", {
+                        defaultValue: "Card saved",
+                      })
+                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod", {
+                        defaultValue: "Add a card first",
+                      })}
                 </p>
               </div>
               <Switch

@@ -443,8 +443,7 @@ function CloudServicesSection() {
       </div>
       <p className="text-xs text-muted mb-4 leading-snug">
         {t("configpageview.CloudServicesDesc", {
-          defaultValue:
-            "Toggle Eliza Cloud services",
+          defaultValue: "Toggle Eliza Cloud services",
         })}
       </p>
       <div className="flex flex-col gap-2">
@@ -815,8 +814,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
         </div>
         <div className="text-[11px] text-muted mb-2">
           {t("configpageview.WalletNetworkDesc", {
-            defaultValue:
-              "Mainnet for live funds, Testnet for practice",
+            defaultValue: "Mainnet for live funds, Testnet for practice",
           })}
         </div>
         <div className="flex flex-wrap gap-1.5">

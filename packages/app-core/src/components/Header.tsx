@@ -382,8 +382,7 @@ export function Header({
                   </DialogTitle>
                   <DialogDescription className="sr-only">
                     {t("header.MobileNavigationDescription", {
-                      defaultValue:
-                        "Navigate between sections",
+                      defaultValue: "Navigate between sections",
                     })}
                   </DialogDescription>
                 </div>

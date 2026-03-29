@@ -826,8 +826,7 @@ function StewardWalletInfo({
             <div className="mb-2 flex items-center gap-2 text-[11px] text-warn">
               <AlertTriangle className="h-3.5 w-3.5" />
               {t("settings.advancedKeyWarning", {
-                defaultValue:
-                  "Not needed with Steward. Use with caution.",
+                defaultValue: "Not needed with Steward. Use with caution.",
               })}
             </div>
           </div>
