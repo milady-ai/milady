@@ -87,9 +87,7 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
   --radius: 0.5rem;
-  --duration-fast: 100ms;
   --duration-normal: 150ms;
-  --duration-slow: 250ms;
 
   /* Plugin UI Design Tokens */
   --plugin-field-gap: 1rem;
@@ -191,9 +189,7 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
   --radius: 0.5rem;
-  --duration-fast: 150ms;
   --duration-normal: 200ms;
-  --duration-slow: 300ms;
 
   /* Plugin UI */
   --plugin-field-gap: 1rem;

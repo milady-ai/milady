@@ -79,14 +79,6 @@ body {
   }
 }
 
-@keyframes marquee-vertical {
-  0% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(-100%);
-  }
-}
 
 @keyframes clock-blink {
   0%,
@@ -128,16 +120,6 @@ body {
   }
 }
 
-@keyframes slide-in-left {
-  from {
-    transform: translateX(-100%) scaleY(0.5);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0) scaleY(1);
-    opacity: 1;
-  }
-}
 
 /* ── Custom Scrollbars ─────────────────────────────────────────────── */
 
