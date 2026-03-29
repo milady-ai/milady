@@ -646,11 +646,17 @@ export function CloudDashboard() {
       try {
         // Try local backend proxy first, then direct cloud call
         let redirectUrl: string | undefined;
+
+        // Try local backend proxy first
         try {
           const response = await client.getCloudCompatPairingToken(agentId);
           redirectUrl = response?.data?.redirectUrl;
-        } catch {
-          // Local backend not available, try direct cloud call
+        } catch (proxyErr) {
+          console.warn("[CloudDashboard] Proxy pairing failed:", proxyErr);
+        }
+
+        // If proxy failed, try direct cloud call
+        if (!redirectUrl) {
           const cloudBase = "https://www.elizacloud.ai";
           const token =
             (typeof window !== "undefined" &&
@@ -658,22 +664,31 @@ export function CloudDashboard() {
                 .__ELIZA_CLOUD_AUTH_TOKEN__ as string)) ||
             client.getRestAuthToken?.() ||
             "";
-          const directRes = await fetch(
-            `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "X-Api-Key": token,
+          console.log("[CloudDashboard] Direct call, token:", token ? `${token.slice(0, 15)}...` : "EMPTY");
+          try {
+            const directRes = await fetch(
+              `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "X-Api-Key": token,
+                },
               },
-            },
-          );
-          if (directRes.ok) {
-            const json = await directRes.json();
-            redirectUrl = json?.data?.redirectUrl ?? json?.redirectUrl;
+            );
+            if (directRes.ok) {
+              const json = await directRes.json();
+              redirectUrl = json?.data?.redirectUrl ?? json?.redirectUrl;
+              console.log("[CloudDashboard] Got redirectUrl:", redirectUrl);
+            } else {
+              console.error("[CloudDashboard] Direct call failed:", directRes.status, await directRes.text().catch(() => ""));
+            }
+          } catch (fetchErr) {
+            console.error("[CloudDashboard] Direct fetch error:", fetchErr);
           }
         }
-        if (!redirectUrl) throw new Error("No redirectUrl");
+
+        if (!redirectUrl) throw new Error("No redirectUrl from proxy or direct call");
         if (!tab.closed) tab.location.href = redirectUrl;
       } catch {
         // Fallback: open the agent's web UI URL directly
