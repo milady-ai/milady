@@ -2,24 +2,9 @@ import { VERSION } from "../runtime/version";
 
 /** Known connector IDs for config schema generation. Keep in sync with runtime/plugin maps. */
 export const CONNECTOR_IDS = [
-  "telegram",
-  "discord",
-  "slack",
   "twitter",
-  "whatsapp",
-  "signal",
-  "bluebubbles",
-  "imessage",
-  "farcaster",
-  "lens",
-  "msteams",
-  "mattermost",
-  "googlechat",
-  "feishu",
-  "matrix",
-  "nostr",
-  "blooio",
-  "twitch",
+  "linkedin",
+  "reddit",
 ] as const;
 
 import { ElizaSchema } from "./zod-schema";
@@ -428,62 +413,9 @@ const FIELD_LABELS: Record<string, string> = {
   "messages.ackReactionScope": "Ack Reaction Scope",
   "messages.inbound.debounceMs": "Inbound Message Debounce (ms)",
   "talk.apiKey": "Talk API Key",
-  "connectors.whatsapp": "WhatsApp",
-  "connectors.telegram": "Telegram",
-  "connectors.telegram.customCommands": "Telegram Custom Commands",
-  "connectors.discord": "Discord",
-  "connectors.slack": "Slack",
-  "connectors.mattermost": "Mattermost",
-  "connectors.signal": "Signal",
-  "connectors.imessage": "iMessage",
-  "connectors.bluebubbles": "BlueBubbles",
-  "connectors.msteams": "MS Teams",
-  "connectors.telegram.botToken": "Telegram Bot Token",
-  "connectors.telegram.dmPolicy": "Telegram DM Policy",
-  "connectors.telegram.streamMode": "Telegram Draft Stream Mode",
-  "connectors.telegram.draftChunk.minChars": "Telegram Draft Chunk Min Chars",
-  "connectors.telegram.draftChunk.maxChars": "Telegram Draft Chunk Max Chars",
-  "connectors.telegram.draftChunk.breakPreference":
-    "Telegram Draft Chunk Break Preference",
-  "connectors.telegram.retry.attempts": "Telegram Retry Attempts",
-  "connectors.telegram.retry.minDelayMs": "Telegram Retry Min Delay (ms)",
-  "connectors.telegram.retry.maxDelayMs": "Telegram Retry Max Delay (ms)",
-  "connectors.telegram.retry.jitter": "Telegram Retry Jitter",
-  "connectors.telegram.network.autoSelectFamily": "Telegram autoSelectFamily",
-  "connectors.telegram.timeoutSeconds": "Telegram API Timeout (seconds)",
-  "connectors.telegram.capabilities.inlineButtons": "Telegram Inline Buttons",
-  "connectors.whatsapp.dmPolicy": "WhatsApp DM Policy",
-  "connectors.whatsapp.selfChatMode": "WhatsApp Self-Phone Mode",
-  "connectors.whatsapp.debounceMs": "WhatsApp Message Debounce (ms)",
-  "connectors.signal.dmPolicy": "Signal DM Policy",
-  "connectors.imessage.dmPolicy": "iMessage DM Policy",
-  "connectors.bluebubbles.dmPolicy": "BlueBubbles DM Policy",
-  "connectors.discord.dm.policy": "Discord DM Policy",
-  "connectors.discord.retry.attempts": "Discord Retry Attempts",
-  "connectors.discord.retry.minDelayMs": "Discord Retry Min Delay (ms)",
-  "connectors.discord.retry.maxDelayMs": "Discord Retry Max Delay (ms)",
-  "connectors.discord.retry.jitter": "Discord Retry Jitter",
-  "connectors.discord.maxLinesPerMessage": "Discord Max Lines Per Message",
-  "connectors.discord.intents.presence": "Discord Presence Intent",
-  "connectors.discord.intents.guildMembers": "Discord Guild Members Intent",
-  "connectors.discord.pluralkit.enabled": "Discord PluralKit Enabled",
-  "connectors.discord.pluralkit.token": "Discord PluralKit Token",
-  "connectors.slack.dm.policy": "Slack DM Policy",
-  "connectors.slack.allowBots": "Slack Allow Bot Messages",
-  "connectors.discord.token": "Discord Bot Token",
-  "connectors.slack.botToken": "Slack Bot Token",
-  "connectors.slack.appToken": "Slack App Token",
-  "connectors.slack.userToken": "Slack User Token",
-  "connectors.slack.userTokenReadOnly": "Slack User Token Read Only",
-  "connectors.slack.thread.historyScope": "Slack Thread History Scope",
-  "connectors.slack.thread.inheritParent": "Slack Thread Parent Inheritance",
-  "connectors.mattermost.botToken": "Mattermost Bot Token",
-  "connectors.mattermost.baseUrl": "Mattermost Base URL",
-  "connectors.mattermost.chatmode": "Mattermost Chat Mode",
-  "connectors.mattermost.oncharPrefixes": "Mattermost Onchar Prefixes",
-  "connectors.mattermost.requireMention": "Mattermost Require Mention",
-  "connectors.signal.account": "Signal Account",
-  "connectors.imessage.cliPath": "iMessage CLI Path",
+  "connectors.twitter": "Twitter / X",
+  "connectors.linkedin": "LinkedIn",
+  "connectors.reddit": "Reddit",
   "agents.list[].skills": "Agent Skill Filter",
   "agents.list[].identity.avatar": "Agent Avatar",
   "discovery.mdns.mode": "mDNS Discovery Mode",
@@ -561,7 +493,7 @@ const FIELD_HELP: Record<string, string> = {
   "nodeHost.browserProxy.allowProfiles":
     "Optional allowlist of browser profile names exposed via the node proxy.",
   "diagnostics.flags":
-    'Enable targeted diagnostics logs by flag (e.g. ["telegram.http"]). Supports wildcards like "telegram.*" or "*".',
+    'Enable targeted diagnostics logs by flag (e.g. ["twitter.http"]). Supports wildcards like "twitter.*" or "*".',
   "diagnostics.cacheTrace.enabled":
     "Log cache trace snapshots for embedded agent runs (default: false).",
   "diagnostics.cacheTrace.filePath":
@@ -639,22 +571,9 @@ const FIELD_HELP: Record<string, string> = {
     "Firecrawl maxAge (ms) for cached results when supported by the API.",
   "tools.web.fetch.firecrawl.timeoutSeconds":
     "Timeout in seconds for Firecrawl requests.",
-  "connectors.slack.allowBots":
-    "Allow bot-authored messages to trigger Slack replies (default: false).",
-  "connectors.slack.thread.historyScope":
-    'Scope for Slack thread history context ("thread" isolates per thread; "channel" reuses channel history).',
-  "connectors.slack.thread.inheritParent":
-    "If true, Slack thread sessions inherit the parent channel transcript (default: false).",
-  "connectors.mattermost.botToken":
-    "Bot token from Mattermost System Console -> Integrations -> Bot Accounts.",
-  "connectors.mattermost.baseUrl":
-    "Base URL for your Mattermost server (e.g., https://chat.example.com).",
-  "connectors.mattermost.chatmode":
-    'Reply to channel messages on mention ("oncall"), on trigger chars (">" or "!") ("onchar"), or on every message ("onmessage").',
-  "connectors.mattermost.oncharPrefixes":
-    'Trigger prefixes for onchar mode (default: [">", "!"]).',
-  "connectors.mattermost.requireMention":
-    "Require @mention in channels before responding (default: true).",
+  "connectors.twitter": "Twitter / X connector settings.",
+  "connectors.linkedin": "LinkedIn connector settings.",
+  "connectors.reddit": "Reddit connector settings.",
   "auth.profiles": "Named auth profiles (provider + mode + optional email).",
   "auth.order":
     "Ordered auth profile IDs per provider (used for automatic failover).",
@@ -849,101 +768,15 @@ const FIELD_HELP: Record<string, string> = {
   "session.dmScope":
     'DM session scoping: "main" keeps continuity; "per-peer", "per-channel-peer", or "per-account-channel-peer" isolates DM history (recommended for shared inboxes/multi-account).',
   "session.identityLinks":
-    "Map canonical identities to provider-prefixed peer IDs for DM session linking (example: telegram:123456).",
-  "connectors.telegram.configWrites":
-    "Allow Telegram to write config in response to channel events/commands (default: true).",
-  "connectors.slack.configWrites":
-    "Allow Slack to write config in response to channel events/commands (default: true).",
-  "connectors.mattermost.configWrites":
-    "Allow Mattermost to write config in response to channel events/commands (default: true).",
-  "connectors.discord.configWrites":
-    "Allow Discord to write config in response to channel events/commands (default: true).",
-  "connectors.whatsapp.configWrites":
-    "Allow WhatsApp to write config in response to channel events/commands (default: true).",
-  "connectors.signal.configWrites":
-    "Allow Signal to write config in response to channel events/commands (default: true).",
-  "connectors.imessage.configWrites":
-    "Allow iMessage to write config in response to channel events/commands (default: true).",
-  "connectors.msteams.configWrites":
-    "Allow Microsoft Teams to write config in response to channel events/commands (default: true).",
-  "connectors.discord.commands.native":
-    'Override native commands for Discord (bool or "auto").',
-  "connectors.discord.commands.nativeSkills":
-    'Override native skill commands for Discord (bool or "auto").',
-  "connectors.telegram.commands.native":
-    'Override native commands for Telegram (bool or "auto").',
-  "connectors.telegram.commands.nativeSkills":
-    'Override native skill commands for Telegram (bool or "auto").',
-  "connectors.slack.commands.native":
-    'Override native commands for Slack (bool or "auto").',
-  "connectors.slack.commands.nativeSkills":
-    'Override native skill commands for Slack (bool or "auto").',
-  "session.agentToAgent.maxPingPongTurns":
-    "Max reply-back turns between requester and target (0–5).",
-  "connectors.telegram.customCommands":
-    "Additional Telegram bot menu commands (merged with native; conflicts ignored).",
+    "Map canonical identities to provider-prefixed peer IDs for DM session linking (example: twitter:123456).",
   "messages.ackReaction":
     "Emoji reaction used to acknowledge inbound messages (empty disables).",
   "messages.ackReactionScope":
     'When to send ack reactions ("group-mentions", "group-all", "direct", "all").',
   "messages.inbound.debounceMs":
     "Debounce window (ms) for batching rapid inbound messages from the same sender (0 to disable).",
-  "connectors.telegram.dmPolicy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.telegram.allowFrom=["*"].',
-  "connectors.telegram.streamMode":
-    "Draft streaming mode for Telegram replies (off | partial | block). Separate from block streaming; requires private topics + sendMessageDraft.",
-  "connectors.telegram.draftChunk.minChars":
-    'Minimum chars before emitting a Telegram draft update when connectors.telegram.streamMode="block" (default: 200).',
-  "connectors.telegram.draftChunk.maxChars":
-    'Target max size for a Telegram draft update chunk when connectors.telegram.streamMode="block" (default: 800; clamped to connectors.telegram.textChunkLimit).',
-  "connectors.telegram.draftChunk.breakPreference":
-    "Preferred breakpoints for Telegram draft chunks (paragraph | newline | sentence). Default: paragraph.",
-  "connectors.telegram.retry.attempts":
-    "Max retry attempts for outbound Telegram API calls (default: 3).",
-  "connectors.telegram.retry.minDelayMs":
-    "Minimum retry delay in ms for Telegram outbound calls.",
-  "connectors.telegram.retry.maxDelayMs":
-    "Maximum retry delay cap in ms for Telegram outbound calls.",
-  "connectors.telegram.retry.jitter":
-    "Jitter factor (0-1) applied to Telegram retry delays.",
-  "connectors.telegram.network.autoSelectFamily":
-    "Override Node autoSelectFamily for Telegram (true=enable, false=disable).",
-  "connectors.telegram.timeoutSeconds":
-    "Max seconds before Telegram API requests are aborted (default: 500 per grammY).",
-  "connectors.whatsapp.dmPolicy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.whatsapp.allowFrom=["*"].',
-  "connectors.whatsapp.selfChatMode":
-    "Same-phone setup (bot uses your personal WhatsApp number).",
-  "connectors.whatsapp.debounceMs":
-    "Debounce window (ms) for batching rapid consecutive messages from the same sender (0 to disable).",
-  "connectors.signal.dmPolicy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.signal.allowFrom=["*"].',
-  "connectors.imessage.dmPolicy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.imessage.allowFrom=["*"].',
-  "connectors.bluebubbles.dmPolicy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.bluebubbles.allowFrom=["*"].',
-  "connectors.discord.dm.policy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.discord.dm.allowFrom=["*"].',
-  "connectors.discord.retry.attempts":
-    "Max retry attempts for outbound Discord API calls (default: 3).",
-  "connectors.discord.retry.minDelayMs":
-    "Minimum retry delay in ms for Discord outbound calls.",
-  "connectors.discord.retry.maxDelayMs":
-    "Maximum retry delay cap in ms for Discord outbound calls.",
-  "connectors.discord.retry.jitter":
-    "Jitter factor (0-1) applied to Discord retry delays.",
-  "connectors.discord.maxLinesPerMessage":
-    "Soft max line count per Discord message (default: 17).",
-  "connectors.discord.intents.presence":
-    "Enable the Guild Presences privileged intent. Must also be enabled in the Discord Developer Portal. Allows tracking user activities (e.g. Spotify). Default: false.",
-  "connectors.discord.intents.guildMembers":
-    "Enable the Guild Members privileged intent. Must also be enabled in the Discord Developer Portal. Default: false.",
-  "connectors.discord.pluralkit.enabled":
-    "Resolve PluralKit proxied messages and treat system members as distinct senders.",
-  "connectors.discord.pluralkit.token":
-    "Optional PluralKit token for resolving private systems or members.",
-  "connectors.slack.dm.policy":
-    'Direct message access control ("pairing" recommended). "open" requires connectors.slack.dm.allowFrom=["*"].',
+  "session.agentToAgent.maxPingPongTurns":
+    "Max reply-back turns between requester and target (0–5).",
 };
 
 const FIELD_PLACEHOLDERS: Record<string, string> = {
@@ -953,7 +786,6 @@ const FIELD_PLACEHOLDERS: Record<string, string> = {
   "gateway.controlUi.basePath": "/eliza",
   "gateway.controlUi.root": "dist/control-ui",
   "gateway.controlUi.allowedOrigins": "https://control.example.com",
-  "connectors.mattermost.baseUrl": "https://chat.example.com",
   "agents.list[].identity.avatar": "avatars/eliza.png",
 };
 

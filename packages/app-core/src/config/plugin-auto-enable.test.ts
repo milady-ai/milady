@@ -17,7 +17,6 @@ vi.mock("@elizaos/plugin-cli", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-coding-agent", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-computeruse", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-cron", () => ({ default: {} }));
-vi.mock("@elizaos/plugin-discord", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-edge-tts", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-elevenlabs", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-elizacloud", () => ({ default: {} }));
@@ -36,13 +35,9 @@ vi.mock("@elizaos/plugin-plugin-manager", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-rolodex", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-secrets-manager", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-shell", () => ({ default: {} }));
-vi.mock("@elizaos/plugin-telegram", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trajectory-logger", () => ({ default: {} }));
 vi.mock("@elizaos/plugin-trust", () => ({ default: {} }));
-vi.mock("@elizaos/plugin-twitch", () => ({ default: {} }));
-vi.mock("@miladyai/plugin-wechat", () => ({ default: {} }));
 
-import { CHANNEL_PLUGIN_MAP } from "../runtime/eliza";
 import {
   type ApplyPluginAutoEnableParams,
   AUTH_PROVIDER_PLUGINS,
@@ -102,138 +97,123 @@ describe("applyPluginAutoEnable", () => {
 // ============================================================================
 
 describe("applyPluginAutoEnable — connectors", () => {
-  it("enables plugin for a connector with a botToken", () => {
+  it("enables plugin for a connector with an apiKey", () => {
     const params = makeParams({
       config: {
         connectors: {
-          telegram: { botToken: "123:ABC" },
+          twitter: { apiKey: "key-123" },
         },
       },
     });
     const { config, changes } = applyPluginAutoEnable(params);
 
-    expect(config.plugins?.allow).toContain("telegram");
-    expect(changes.some((c) => c.includes("telegram"))).toBe(true);
+    expect(config.plugins?.allow).toContain("twitter");
+    expect(changes.some((c) => c.includes("twitter"))).toBe(true);
+  });
+
+  it("enables plugin for a connector with a token", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          twitter: { token: "tok-123" },
+        },
+      },
+    });
+    const { config, changes } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("twitter");
+    expect(changes.some((c) => c.includes("twitter"))).toBe(true);
   });
 
   it("skips connector when explicitly disabled", () => {
     const params = makeParams({
       config: {
         connectors: {
-          discord: { enabled: false, botToken: "abc" },
+          twitter: { enabled: false, apiKey: "key-123" },
         },
       },
     });
     const { config } = applyPluginAutoEnable(params);
 
-    expect(config.plugins?.allow ?? []).not.toContain("discord");
+    expect(config.plugins?.allow ?? []).not.toContain("twitter");
   });
 
   it("skips connector without authentication credentials", () => {
     const params = makeParams({
       config: {
         connectors: {
-          slack: { someOtherField: "value" },
+          twitter: { someOtherField: "value" },
         },
       },
     });
     const { config } = applyPluginAutoEnable(params);
 
-    expect(config.plugins?.allow ?? []).not.toContain("slack");
-  });
-
-  it("enables bluebubbles when serverUrl and password are set", () => {
-    const params = makeParams({
-      config: {
-        connectors: {
-          bluebubbles: { serverUrl: "http://localhost:1234", password: "pass" },
-        },
-      },
-    });
-    const { config } = applyPluginAutoEnable(params);
-
-    expect(config.plugins?.allow).toContain("bluebubbles");
-  });
-
-  it("enables imessage when cliPath is set", () => {
-    const params = makeParams({
-      config: {
-        connectors: {
-          imessage: { cliPath: "/usr/local/bin/imessage" },
-        },
-      },
-    });
-    const { config } = applyPluginAutoEnable(params);
-
-    expect(config.plugins?.allow).toContain("imessage");
-  });
-
-  it("enables signal when account is set", () => {
-    const params = makeParams({
-      config: {
-        connectors: {
-          signal: { account: "+15551234567" },
-        },
-      },
-    });
-    const { config } = applyPluginAutoEnable(params);
-
-    expect(config.plugins?.allow).toContain("signal");
-  });
-
-  it("enables signal when any enabled account entry is configured", () => {
-    const params = makeParams({
-      config: {
-        connectors: {
-          signal: {
-            accounts: {
-              primary: { enabled: true, cliPath: "/usr/local/bin/signal-cli" },
-              disabled: { enabled: false, account: "+15550000000" },
-            },
-          },
-        },
-      },
-    });
-    const { config } = applyPluginAutoEnable(params);
-
-    expect(config.plugins?.allow).toContain("signal");
+    expect(config.plugins?.allow ?? []).not.toContain("twitter");
   });
 
   it("supports legacy channels key for backward compat", () => {
     const params = makeParams({
       config: {
         channels: {
-          telegram: { botToken: "legacy-tok" },
+          twitter: { apiKey: "legacy-tok" },
         },
       },
     });
     const { config } = applyPluginAutoEnable(params);
 
-    expect(config.plugins?.allow).toContain("telegram");
+    expect(config.plugins?.allow).toContain("twitter");
   });
 
-  it("enables wechat plugin when apiKey is configured", () => {
+  it("enables twitter when consumerKey is set", () => {
     const params = makeParams({
       config: {
         connectors: {
-          wechat: { apiKey: "key" },
+          twitter: { consumerKey: "ck-123" },
         },
       },
     });
     const { config } = applyPluginAutoEnable(params);
-    expect(config.plugins?.allow).toContain("wechat");
+
+    expect(config.plugins?.allow).toContain("twitter");
   });
 
-  it("does not enable wechat when disabled", () => {
+  it("enables twitter when bearerToken is set", () => {
     const params = makeParams({
       config: {
         connectors: {
-          wechat: { enabled: false, apiKey: "key" },
+          twitter: { bearerToken: "bt-123" },
         },
       },
     });
     const { config } = applyPluginAutoEnable(params);
-    expect(config.plugins?.allow ?? []).not.toContain("wechat");
+
+    expect(config.plugins?.allow).toContain("twitter");
+  });
+
+  it("enables linkedin when apiKey is set", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          linkedin: { apiKey: "li-key-123" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("linkedin");
+  });
+
+  it("enables reddit when apiKey is set", () => {
+    const params = makeParams({
+      config: {
+        connectors: {
+          reddit: { apiKey: "reddit-key-123" },
+        },
+      },
+    });
+    const { config } = applyPluginAutoEnable(params);
+
+    expect(config.plugins?.allow).toContain("reddit");
   });
 });
 
@@ -659,32 +639,26 @@ describe("applyPluginAutoEnable — subscription provider", () => {
 // ============================================================================
 
 describe("CONNECTOR_PLUGINS", () => {
-  it("maps telegram to @elizaos/plugin-telegram", () => {
-    expect(CONNECTOR_PLUGINS.telegram).toBe("@elizaos/plugin-telegram");
+  it("maps twitter to @elizaos/plugin-twitter", () => {
+    expect(CONNECTOR_PLUGINS.twitter).toBe("@elizaos/plugin-twitter");
   });
 
-  it("maps discord to @elizaos/plugin-discord", () => {
-    expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
+  it("maps linkedin to @elizaos/plugin-linkedin", () => {
+    expect(CONNECTOR_PLUGINS.linkedin).toBe("@elizaos/plugin-linkedin");
   });
 
-  it("contains 19 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
+  it("maps reddit to @elizaos/plugin-reddit", () => {
+    expect(CONNECTOR_PLUGINS.reddit).toBe("@elizaos/plugin-reddit");
+  });
+
+  it("contains 3 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(3);
   });
 
   it("has keys matching CONNECTOR_IDS from schema", () => {
     expect([...Object.keys(CONNECTOR_PLUGINS)].sort()).toEqual(
       [...CONNECTOR_IDS].sort(),
     );
-  });
-
-  it("CONNECTOR_PLUGINS values match CHANNEL_PLUGIN_MAP for every connector", () => {
-    for (const id of Object.keys(CONNECTOR_PLUGINS)) {
-      expect(CONNECTOR_PLUGINS[id]).toBe(CHANNEL_PLUGIN_MAP[id]);
-    }
-  });
-
-  it("maps blooio to @elizaos/plugin-blooio", () => {
-    expect(CONNECTOR_PLUGINS.blooio).toBe("@elizaos/plugin-blooio");
   });
 });
 
@@ -718,170 +692,34 @@ describe("AUTH_PROVIDER_PLUGINS", () => {
 });
 
 // ============================================================================
-//  WhatsApp connector auto-enable — Baileys auth fields
-// ============================================================================
-
-describe("WhatsApp connector auto-enable", () => {
-  it("auto-enables via legacy authState field", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: { connectors: { whatsapp: { authState: "./auth" } } },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("whatsapp");
-  });
-
-  it("auto-enables via legacy sessionPath field", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: { connectors: { whatsapp: { sessionPath: "./auth" } } },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("whatsapp");
-  });
-
-  it("auto-enables via authDir (Baileys WhatsAppAccountSchema field)", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: { connectors: { whatsapp: { authDir: "./auth/whatsapp" } } },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("whatsapp");
-  });
-
-  it("auto-enables when accounts object is configured", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: {
-            whatsapp: {
-              accounts: { default: { enabled: true, authDir: "./auth" } },
-            },
-          },
-        },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("whatsapp");
-  });
-
-  it("does not auto-enable when whatsapp config is empty", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({ config: { connectors: { whatsapp: {} } } }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
-  });
-
-  it("does not auto-enable when accounts object has no valid authDir", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: {
-            whatsapp: { accounts: { default: {} } },
-          },
-        },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
-  });
-
-  it("does not auto-enable when all accounts are explicitly disabled", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: {
-            whatsapp: {
-              accounts: { main: { enabled: false, authDir: "./auth" } },
-            },
-          },
-        },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
-  });
-
-  it("does not auto-enable when enabled is explicitly false", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: {
-            whatsapp: { enabled: false, authDir: "./auth/whatsapp" },
-          },
-        },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("whatsapp");
-  });
-});
-
-describe("Blooio connector auto-enable", () => {
-  it("auto-enables when apiKey is set", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: { connectors: { blooio: { apiKey: "blk-test-key" } } },
-      }),
-    );
-    expect(config.plugins?.allow).toContain("blooio");
-  });
-
-  it("does not auto-enable when config is empty", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: { connectors: { blooio: {} } },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("blooio");
-  });
-
-  it("does not auto-enable when enabled is explicitly false", () => {
-    const { config } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          connectors: {
-            blooio: { enabled: false, apiKey: "blk-test-key" },
-          },
-        },
-      }),
-    );
-    expect(config.plugins?.allow ?? []).not.toContain("blooio");
-  });
-});
-
-// ============================================================================
 //  Streaming destination auto-enable
 // ============================================================================
 
 describe("STREAMING_PLUGINS mapping", () => {
   it("maps known streaming destinations to plugin packages", () => {
-    expect(STREAMING_PLUGINS.twitch).toBe("@elizaos/plugin-twitch-streaming");
     expect(STREAMING_PLUGINS.youtube).toBe("@elizaos/plugin-youtube-streaming");
-    expect(STREAMING_PLUGINS.customRtmp).toBe("@elizaos/plugin-custom-rtmp");
+    expect(STREAMING_PLUGINS.x).toBe("@elizaos/plugin-x-streaming");
   });
 });
 
 describe("isStreamingDestinationConfigured", () => {
   it("returns false for null/undefined config", () => {
-    expect(isStreamingDestinationConfigured("twitch", null)).toBe(false);
-    expect(isStreamingDestinationConfigured("twitch", undefined)).toBe(false);
+    expect(isStreamingDestinationConfigured("youtube", null)).toBe(false);
+    expect(isStreamingDestinationConfigured("youtube", undefined)).toBe(false);
   });
 
   it("returns false for non-object config", () => {
-    expect(isStreamingDestinationConfigured("twitch", "string")).toBe(false);
-    expect(isStreamingDestinationConfigured("twitch", 42)).toBe(false);
+    expect(isStreamingDestinationConfigured("youtube", "string")).toBe(false);
+    expect(isStreamingDestinationConfigured("youtube", 42)).toBe(false);
   });
 
   it("returns false when enabled is explicitly false", () => {
     expect(
-      isStreamingDestinationConfigured("twitch", {
+      isStreamingDestinationConfigured("youtube", {
         enabled: false,
         streamKey: "sk",
       }),
     ).toBe(false);
-  });
-
-  it("detects twitch via streamKey", () => {
-    expect(
-      isStreamingDestinationConfigured("twitch", { streamKey: "live_abc" }),
-    ).toBe(true);
   });
 
   it("detects youtube via streamKey", () => {
@@ -890,26 +728,20 @@ describe("isStreamingDestinationConfigured", () => {
     ).toBe(true);
   });
 
-  it("detects customRtmp when both rtmpUrl and rtmpKey are present", () => {
+  it("detects X when both streamKey and rtmpUrl are present", () => {
     expect(
-      isStreamingDestinationConfigured("customRtmp", {
+      isStreamingDestinationConfigured("x", {
+        streamKey: "live_abc",
         rtmpUrl: "rtmp://example.com/live",
-        rtmpKey: "key123",
       }),
     ).toBe(true);
   });
 
-  it("rejects customRtmp when only rtmpUrl is present (missing rtmpKey)", () => {
+  it("rejects X when only streamKey is present (missing rtmpUrl)", () => {
     expect(
-      isStreamingDestinationConfigured("customRtmp", {
-        rtmpUrl: "rtmp://example.com/live",
+      isStreamingDestinationConfigured("x", {
+        streamKey: "live_abc",
       }),
-    ).toBe(false);
-  });
-
-  it("rejects customRtmp when only rtmpKey is present (missing rtmpUrl)", () => {
-    expect(
-      isStreamingDestinationConfigured("customRtmp", { rtmpKey: "key123" }),
     ).toBe(false);
   });
 
@@ -921,18 +753,6 @@ describe("isStreamingDestinationConfigured", () => {
 });
 
 describe("applyPluginAutoEnable — streaming destinations", () => {
-  it("auto-enables twitch-streaming plugin when twitch streamKey is set", () => {
-    const { config, changes } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          streaming: { twitch: { streamKey: "live_abc" } },
-        } as never,
-      }),
-    );
-    expect(config.plugins?.allow).toContain("twitch-streaming");
-    expect(changes.some((c) => c.includes("streaming: twitch"))).toBe(true);
-  });
-
   it("auto-enables youtube-streaming plugin when youtube streamKey is set", () => {
     const { config, changes } = applyPluginAutoEnable(
       makeParams({
@@ -945,21 +765,21 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
     expect(changes.some((c) => c.includes("streaming: youtube"))).toBe(true);
   });
 
-  it("auto-enables custom-rtmp plugin when customRtmp has rtmpUrl and rtmpKey", () => {
+  it("auto-enables x-streaming plugin when x has streamKey and rtmpUrl", () => {
     const { config, changes } = applyPluginAutoEnable(
       makeParams({
         config: {
           streaming: {
-            customRtmp: {
-              rtmpUrl: "rtmp://example.com/live",
-              rtmpKey: "key123",
+            x: {
+              streamKey: "live_abc",
+              rtmpUrl: "rtmp://x.com/live",
             },
           },
         } as never,
       }),
     );
-    expect(config.plugins?.allow).toContain("custom-rtmp");
-    expect(changes.some((c) => c.includes("streaming: customRtmp"))).toBe(true);
+    expect(config.plugins?.allow).toContain("x-streaming");
+    expect(changes.some((c) => c.includes("streaming: x"))).toBe(true);
   });
 
   it("skips activeDestination meta field", () => {
@@ -967,15 +787,15 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       makeParams({
         config: {
           streaming: {
-            activeDestination: "twitch",
-            twitch: { streamKey: "live_abc" },
+            activeDestination: "youtube",
+            youtube: { streamKey: "xxxx-xxxx" },
           },
         } as never,
       }),
     );
-    // activeDestination should not result in any plugin — only twitch should be added
+    // activeDestination should not result in any plugin — only youtube should be added
     const allow = config.plugins?.allow ?? [];
-    expect(allow).toContain("twitch-streaming");
+    expect(allow).toContain("youtube-streaming");
     expect(allow).not.toContain("activeDestination");
   });
 
@@ -983,23 +803,23 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
     const { config } = applyPluginAutoEnable(
       makeParams({
         config: {
-          streaming: { twitch: { enabled: false, streamKey: "live_abc" } },
+          streaming: { youtube: { enabled: false, streamKey: "xxxx-xxxx" } },
         } as never,
       }),
     );
-    expect(config.plugins?.allow ?? []).not.toContain("twitch-streaming");
+    expect(config.plugins?.allow ?? []).not.toContain("youtube-streaming");
   });
 
   it("does not auto-enable streaming plugin when shortId is disabled in plugins.entries", () => {
     const { config } = applyPluginAutoEnable(
       makeParams({
         config: {
-          streaming: { twitch: { streamKey: "live_abc" } },
-          plugins: { entries: { "twitch-streaming": { enabled: false } } },
+          streaming: { youtube: { streamKey: "xxxx-xxxx" } },
+          plugins: { entries: { "youtube-streaming": { enabled: false } } },
         } as never,
       }),
     );
-    expect(config.plugins?.allow ?? []).not.toContain("twitch-streaming");
+    expect(config.plugins?.allow ?? []).not.toContain("youtube-streaming");
   });
 
   it("does not auto-enable when streaming config is empty", () => {
@@ -1009,22 +829,5 @@ describe("applyPluginAutoEnable — streaming destinations", () => {
       }),
     );
     expect(changes.filter((c) => c.includes("streaming:"))).toHaveLength(0);
-  });
-
-  it("enables multiple streaming plugins simultaneously", () => {
-    const { config, changes } = applyPluginAutoEnable(
-      makeParams({
-        config: {
-          streaming: {
-            twitch: { streamKey: "live_abc" },
-            youtube: { streamKey: "xxxx-xxxx" },
-          },
-        } as never,
-      }),
-    );
-    const allow = config.plugins?.allow ?? [];
-    expect(allow).toContain("twitch-streaming");
-    expect(allow).toContain("youtube-streaming");
-    expect(changes.length).toBeGreaterThanOrEqual(2);
   });
 });

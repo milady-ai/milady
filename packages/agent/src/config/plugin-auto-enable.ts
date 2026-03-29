@@ -12,33 +12,13 @@ export interface ApplyPluginAutoEnableParams {
 }
 
 export const CONNECTOR_PLUGINS: Record<string, string> = {
-  telegram: "@elizaos/plugin-telegram",
-  discord: "@elizaos/plugin-discord",
-  slack: "@elizaos/plugin-slack",
   twitter: "@elizaos/plugin-twitter",
-  // Internal connector built from src/plugins/whatsapp (not an npm package).
-  whatsapp: "@elizaos/plugin-whatsapp",
-  // Internal connector built from src/plugins/signal (not an npm package).
-  signal: "@elizaos/plugin-signal",
-  bluebubbles: "@elizaos/plugin-bluebubbles",
-  imessage: "@elizaos/plugin-imessage",
-  farcaster: "@elizaos/plugin-farcaster",
-  lens: "@elizaos/plugin-lens",
-  msteams: "@elizaos/plugin-msteams",
-  mattermost: "@elizaos/plugin-mattermost",
-  googlechat: "@elizaos/plugin-google-chat",
-  feishu: "@elizaos/plugin-feishu",
-  matrix: "@elizaos/plugin-matrix",
-  nostr: "@elizaos/plugin-nostr",
-  blooio: "@elizaos/plugin-blooio",
-  twitch: "@elizaos/plugin-twitch",
+  linkedin: "@elizaos/plugin-linkedin",
+  reddit: "@elizaos/plugin-reddit",
 };
 
 export const STREAMING_PLUGINS: Record<string, string> = {
-  twitch: "@elizaos/plugin-twitch-streaming",
   youtube: "@elizaos/plugin-youtube-streaming",
-  customRtmp: "@elizaos/plugin-custom-rtmp",
-  pumpfun: "@elizaos/plugin-pumpfun-streaming",
   x: "@elizaos/plugin-x-streaming",
 };
 
@@ -96,6 +76,8 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
 
 const FEATURE_PLUGINS: Record<string, string> = {
   browser: "@elizaos/plugin-browser",
+  rss: "@elizaos/plugin-rss",
+  github: "@elizaos/plugin-github",
   cua: "@elizaos/plugin-cua",
   obsidian: "@elizaos/plugin-obsidian",
   cron: "@elizaos/plugin-cron",
@@ -133,70 +115,18 @@ export function isConnectorConfigured(
   if (config.enabled === false) {
     return false;
   }
+  // Check for a token or API key. Each connector (twitter, linkedin, reddit)
+  // uses one of these standard credential fields.
   if (config.botToken || config.token || config.apiKey) {
     return true;
   }
-
-  const hasEnabledSignalAccount =
-    connectorName === "signal" &&
-    typeof config.accounts === "object" &&
-    config.accounts !== null &&
-    Object.values(config.accounts as Record<string, unknown>).some(
-      (account) => {
-        if (!account || typeof account !== "object") return false;
-        const accountConfig = account as Record<string, unknown>;
-        if (accountConfig.enabled === false) return false;
-        return Boolean(
-          accountConfig.authDir ||
-            accountConfig.account ||
-            accountConfig.httpUrl ||
-            accountConfig.httpHost ||
-            accountConfig.httpPort ||
-            accountConfig.cliPath,
-        );
-      },
-    );
-
-  if (hasEnabledSignalAccount) {
-    return true;
-  }
-
+  // Connector-specific credential checks
   switch (connectorName) {
-    case "bluebubbles":
-      return Boolean(config.serverUrl && config.password);
-    case "imessage":
-      return Boolean(config.cliPath);
-    case "signal":
+    case "twitter":
       return Boolean(
-        config.authDir ||
-          config.account ||
-          config.httpUrl ||
-          config.httpHost ||
-          config.httpPort ||
-          config.cliPath,
-      );
-    case "whatsapp":
-      // authState/sessionPath: legacy field names
-      // authDir: Baileys multi-file auth state directory (WhatsAppAccountSchema)
-      // accounts: at least one account with authDir set and not explicitly disabled
-      return Boolean(
-        config.authState ||
-          config.sessionPath ||
-          config.authDir ||
-          (config.accounts &&
-            typeof config.accounts === "object" &&
-            Object.values(config.accounts as Record<string, unknown>).some(
-              (account) => {
-                if (!account || typeof account !== "object") return false;
-                const acc = account as Record<string, unknown>;
-                if (acc.enabled === false) return false;
-                return Boolean(acc.authDir);
-              },
-            )),
-      );
-    case "twitch":
-      return Boolean(
-        config.accessToken || config.clientId || config.enabled === true,
+        config.username ||
+          config.consumerKey ||
+          config.bearerToken,
       );
     default:
       return false;
@@ -212,14 +142,8 @@ export function isStreamingDestinationConfigured(
   if (config.enabled === false) return false;
 
   switch (destName) {
-    case "twitch":
-      return Boolean(config.streamKey || config.enabled === true);
     case "youtube":
       return Boolean(config.streamKey || config.enabled === true);
-    case "customRtmp":
-      return Boolean(config.rtmpUrl && config.rtmpKey);
-    case "pumpfun":
-      return Boolean(config.streamKey && config.rtmpUrl);
     case "x":
       return Boolean(config.streamKey && config.rtmpUrl);
     default:
@@ -295,7 +219,7 @@ export function applyPluginAutoEnable(
       const pluginName = STREAMING_PLUGINS[destName];
       if (!pluginName) continue;
       if (!isStreamingDestinationConfigured(destName, destConfig)) continue;
-      // Derive short ID from the package name (e.g. "@elizaos/plugin-twitch-streaming" → "twitch-streaming")
+      // Derive short ID from the package name (e.g. "@elizaos/plugin-youtube-streaming" → "youtube-streaming")
       const shortId = pluginName.includes("/plugin-")
         ? pluginName.slice(
             pluginName.lastIndexOf("/plugin-") + "/plugin-".length,

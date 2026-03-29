@@ -69,11 +69,7 @@ const AUTONOMY_ENTITY_ID = stringToUuid("00000000-0000-0000-0000-000000000002");
 const AUTONOMY_MESSAGE_SERVER_ID = stringToUuid(
   "00000000-0000-0000-0000-000000000000",
 );
-const INTERNAL_CHANNEL_PLUGIN_OVERRIDES = {
-  signal: "@elizaos/plugin-signal",
-  whatsapp: "@elizaos/plugin-whatsapp",
-  wechat: "@miladyai/plugin-wechat",
-} as const;
+const INTERNAL_CHANNEL_PLUGIN_OVERRIDES = {} as const;
 
 /** Swarm / PTY paths call TEXT_TO_SPEECH; Edge TTS supplies that model with no API key. */
 const AGENT_ORCHESTRATOR_PLUGIN = "@elizaos/plugin-agent-orchestrator";

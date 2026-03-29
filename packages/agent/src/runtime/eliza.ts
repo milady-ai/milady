@@ -913,26 +913,9 @@ const _OPTIONAL_NATIVE_PLUGINS: readonly string[] = [
 
 /** Maps Eliza channel names to plugin package names. */
 export const CHANNEL_PLUGIN_MAP: Readonly<Record<string, string>> = {
-  discord: "@elizaos/plugin-discord",
-  telegram: "@elizaos/plugin-telegram",
-  slack: "@elizaos/plugin-slack",
   twitter: "@elizaos/plugin-twitter",
-  // Internal connector built from src/plugins/whatsapp (not an npm package).
-  whatsapp: "@elizaos/plugin-whatsapp",
-  // Internal connector built from src/plugins/signal (not an npm package).
-  signal: "@elizaos/plugin-signal",
-  imessage: "@elizaos/plugin-imessage",
-  bluebubbles: "@elizaos/plugin-bluebubbles",
-  farcaster: "@elizaos/plugin-farcaster",
-  lens: "@elizaos/plugin-lens",
-  msteams: "@elizaos/plugin-msteams",
-  mattermost: "@elizaos/plugin-mattermost",
-  googlechat: "@elizaos/plugin-google-chat",
-  feishu: "@elizaos/plugin-feishu",
-  matrix: "@elizaos/plugin-matrix",
-  nostr: "@elizaos/plugin-nostr",
-  blooio: "@elizaos/plugin-blooio",
-  twitch: "@elizaos/plugin-twitch",
+  linkedin: "@elizaos/plugin-linkedin",
+  reddit: "@elizaos/plugin-reddit",
 };
 
 const PI_AI_PLUGIN_PACKAGE = "@elizaos/plugin-pi-ai";
@@ -972,6 +955,8 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
  */
 const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   browser: "@elizaos/plugin-browser",
+  rss: "@elizaos/plugin-rss",
+  github: "@elizaos/plugin-github",
   vision: "@elizaos/plugin-vision",
   cron: "@elizaos/plugin-cron",
   cua: "@elizaos/plugin-cua",
@@ -984,10 +969,7 @@ const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   x402: "@elizaos/plugin-x402",
   "coding-agent": "@elizaos/plugin-agent-orchestrator",
   "streaming-base": "@elizaos/plugin-streaming-base",
-  "twitch-streaming": "@elizaos/plugin-twitch-streaming",
   "youtube-streaming": "@elizaos/plugin-youtube-streaming",
-  "custom-rtmp": "@elizaos/plugin-custom-rtmp",
-  "pumpfun-streaming": "@elizaos/plugin-pumpfun-streaming",
   "x-streaming": "@elizaos/plugin-x-streaming",
 };
 

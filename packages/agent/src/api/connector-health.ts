@@ -20,11 +20,9 @@ export interface ConnectorHealthMonitorOptions {
 const DEFAULT_INTERVAL_MS = 60_000;
 
 const CONNECTOR_PLUGIN_MAP: Record<string, string> = {
-  discord: "discord",
-  telegram: "telegram",
   twitter: "twitter",
-  slack: "slack",
-  farcaster: "farcaster",
+  linkedin: "linkedin",
+  reddit: "reddit",
 };
 
 export class ConnectorHealthMonitor {

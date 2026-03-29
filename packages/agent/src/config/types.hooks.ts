@@ -22,14 +22,9 @@ export type HookMappingConfig = {
   allowUnsafeExternalContent?: boolean;
   channel?:
     | "last"
-    | "whatsapp"
-    | "telegram"
-    | "discord"
-    | "googlechat"
-    | "slack"
-    | "signal"
-    | "imessage"
-    | "msteams";
+    | "twitter"
+    | "linkedin"
+    | "reddit";
   to?: string;
   /** Override model for this hook (provider/model or alias). */
   model?: string;

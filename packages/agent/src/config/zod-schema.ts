@@ -18,20 +18,7 @@ import {
   InternalHooksSchema,
 } from "./zod-schema.hooks";
 import {
-  BlueBubblesConfigSchema,
-  CustomRtmpConfigSchema,
-  DiscordConfigSchema,
-  GoogleChatConfigSchema,
-  IMessageConfigSchema,
-  MSTeamsConfigSchema,
-  PumpfunStreamConfigSchema,
-  SignalConfigSchema,
-  SlackConfigSchema,
-  TelegramConfigSchema,
-  TwitchConnectorConfigSchema,
-  TwitchStreamConfigSchema,
   TwitterConfigSchema,
-  WhatsAppConfigSchema,
   XStreamConfigSchema,
   YoutubeStreamConfigSchema,
 } from "./zod-schema.providers-core";
@@ -139,19 +126,9 @@ const ConnectorsSchema = z
       })
       .strict()
       .optional(),
-    whatsapp: WhatsAppConfigSchema.optional(),
-    telegram: TelegramConfigSchema.optional(),
-    discord: DiscordConfigSchema.optional(),
     twitter: TwitterConfigSchema.optional(),
-    googlechat: GoogleChatConfigSchema.optional(),
-    slack: SlackConfigSchema.optional(),
-    signal: SignalConfigSchema.optional(),
-    imessage: IMessageConfigSchema.optional(),
-    bluebubbles: BlueBubblesConfigSchema.optional(),
-    msteams: MSTeamsConfigSchema.optional(),
-    twitch: TwitchConnectorConfigSchema.optional(),
   })
-  .passthrough() // Allow extension connector configs (nostr, matrix, zalo, etc.)
+  .passthrough() // Allow extension connector configs (linkedin, reddit, etc.)
   .optional();
 
 // --- Streaming destinations ---
@@ -159,10 +136,7 @@ const ConnectorsSchema = z
 const StreamingSchema = z
   .object({
     activeDestination: z.string().optional(),
-    twitch: TwitchStreamConfigSchema.optional(),
     youtube: YoutubeStreamConfigSchema.optional(),
-    customRtmp: CustomRtmpConfigSchema.optional(),
-    pumpfun: PumpfunStreamConfigSchema.optional(),
     x: XStreamConfigSchema.optional(),
   })
   .passthrough() // Allow extension streaming destination configs

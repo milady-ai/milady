@@ -40,28 +40,20 @@ import {
   Command,
   Construction,
   CreditCard,
-  Diamond,
   Dna,
-  Droplets,
   Eye,
-  Feather,
   FileKey,
   FileText,
-  Fingerprint,
   Gamepad,
   Gamepad2,
   Github,
   Handshake,
   Hash,
   Layers,
-  Leaf,
   Link,
-  Lock,
   LockKeyhole,
   Mail,
   MessageCircle,
-  MessageSquare,
-  MessagesSquare,
   Mic,
   Monitor,
   MousePointer2,
@@ -73,19 +65,16 @@ import {
   RefreshCw,
   Rss,
   ScrollText,
-  Send,
   Server,
   Settings,
   Shell,
   Shuffle,
-  Smartphone,
   Sparkle,
   Sparkles,
   Square,
   Star,
   StickyNote,
   Target,
-  Tornado,
   TrendingDown,
   Triangle,
   Twitter,
@@ -137,7 +126,6 @@ import {
   APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
   APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
 } from "./sidebar-shell-styles";
-import { WhatsAppQrOverlay } from "./WhatsAppQrOverlay";
 
 const PLUGINS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
 
@@ -185,9 +173,6 @@ const ALWAYS_ON_PLUGIN_IDS = new Set([
   "vision",
   "computeruse",
 ]);
-
-/** Keys to hide when Telegram "Allow all chats" mode is active. */
-const TELEGRAM_ALLOW_ALL_HIDDEN = new Set(["TELEGRAM_ALLOWED_CHATS"]);
 
 /* ── Helpers ────────────────────────────────────────────────────────── */
 
@@ -543,118 +528,6 @@ export function paramsToSchema(
   };
 }
 
-/* ── Telegram chat mode ─────────────────────────────────────────────── */
-
-/**
- * Hook that manages the "allow all / specific chats" toggle state.
- * Mode is explicit (not derived from field value) so clearing the field
- * doesn't flip the toggle. Returns the mode, a toggle handler, and
- * hiddenKeys for PluginConfigForm.
- */
-function useTelegramChatMode(
-  plugin: PluginInfo,
-  pluginConfigs: Record<string, Record<string, string>>,
-  onParamChange: (pluginId: string, paramKey: string, value: string) => void,
-) {
-  const localValue = pluginConfigs.telegram?.TELEGRAM_ALLOWED_CHATS;
-  const serverValue =
-    plugin.parameters?.find((p) => p.key === "TELEGRAM_ALLOWED_CHATS")
-      ?.currentValue ?? "";
-  const currentValue = localValue ?? serverValue;
-
-  // Explicit mode state — initialized from current value, then user-controlled
-  const [allowAll, setAllowAll] = useState(() => !currentValue.trim());
-
-  // Stash the last non-empty value so toggling back restores it
-  const stashedChats = useRef(currentValue);
-  if (currentValue.trim()) {
-    stashedChats.current = currentValue;
-  }
-
-  const toggle = useCallback(
-    (next: boolean) => {
-      setAllowAll(next);
-      if (next) {
-        onParamChange("telegram", "TELEGRAM_ALLOWED_CHATS", "");
-      } else {
-        const restore = stashedChats.current?.trim() || "[]";
-        onParamChange("telegram", "TELEGRAM_ALLOWED_CHATS", restore);
-      }
-    },
-    [onParamChange],
-  );
-
-  return {
-    allowAll,
-    toggle,
-    hiddenKeys: allowAll ? TELEGRAM_ALLOW_ALL_HIDDEN : undefined,
-  };
-}
-
-function TelegramChatModeToggle({
-  allowAll,
-  onToggle,
-}: {
-  allowAll: boolean;
-  onToggle: (next: boolean) => void;
-}) {
-  const { t } = useApp();
-  return (
-    <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card,rgba(255,255,255,0.03))] px-4 py-3 mb-4">
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[13px] font-semibold text-[var(--text)]">
-          {allowAll
-            ? t("pluginsview.AllowAllChats", {
-                defaultValue: "Allow all chats",
-              })
-            : t("pluginsview.AllowSpecificChatsOnly", {
-                defaultValue: "Allow only specific chats",
-              })}
-        </span>
-        <span className="text-[11px] text-[var(--muted)]">
-          {allowAll
-            ? t("pluginsview.BotRespondsAnyChat", {
-                defaultValue: "Bot will respond in any chat",
-              })
-            : t("pluginsview.BotRespondsListedChatIds", {
-                defaultValue: "Bot will only respond in listed chat IDs",
-              })}
-        </span>
-      </div>
-      <Switch checked={allowAll} onCheckedChange={onToggle} />
-    </div>
-  );
-}
-
-/** Wraps PluginConfigForm with the Telegram chat mode toggle + hidden keys. */
-function TelegramPluginConfig({
-  plugin,
-  pluginConfigs,
-  onParamChange,
-}: {
-  plugin: PluginInfo;
-  pluginConfigs: Record<string, Record<string, string>>;
-  onParamChange: (pluginId: string, paramKey: string, value: string) => void;
-}) {
-  const { allowAll, toggle, hiddenKeys } = useTelegramChatMode(
-    plugin,
-    pluginConfigs,
-    onParamChange,
-  );
-
-  return (
-    <>
-      <TelegramChatModeToggle allowAll={allowAll} onToggle={toggle} />
-      <PluginConfigForm
-        plugin={plugin}
-        pluginConfigs={pluginConfigs}
-        onParamChange={onParamChange}
-        hiddenKeys={hiddenKeys}
-      />
-    </>
-  );
-}
-
 /* ── PluginConfigForm bridge ─────────────────────────────────────────── */
 
 function PluginConfigForm({
@@ -778,31 +651,10 @@ const DEFAULT_ICONS: Record<string, LucideIcon> = {
   openrouter: Shuffle,
   "vercel-ai-gateway": Triangle,
   xai: Hash,
-  // Connectors — chat & social
-  discord: MessageCircle,
-  telegram: Send,
-  slack: Briefcase,
+  // Connectors — social & web content
   twitter: Twitter,
-  whatsapp: Smartphone,
-  signal: Lock,
-  imessage: MessageSquare,
-  bluebubbles: Droplets,
-  bluesky: Leaf,
-  farcaster: Circle,
-  instagram: Video,
-  nostr: Fingerprint,
-  twitch: Gamepad2,
-  matrix: Link,
-  mattermost: Diamond,
-  msteams: Square,
-  "google-chat": MessagesSquare,
-  feishu: Feather,
-  line: Circle,
-  "nextcloud-talk": Cloud,
-  tlon: Tornado,
-  zalo: Circle,
-  zalouser: Circle,
-  wechat: Phone,
+  linkedin: Briefcase,
+  reddit: MessageCircle,
   // Features — voice & audio
   "edge-tts": Volume2,
   elevenlabs: Mic,
@@ -2693,22 +2545,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                               <div
                                 className={`space-y-4 p-4 sm:p-5 ${DESKTOP_INSET_PANEL_CLASSNAME}`}
                               >
-                                {plugin.id === "telegram" ? (
-                                  <TelegramPluginConfig
-                                    plugin={plugin}
-                                    pluginConfigs={pluginConfigs}
-                                    onParamChange={handleParamChange}
-                                  />
-                                ) : (
-                                  <PluginConfigForm
-                                    plugin={plugin}
-                                    pluginConfigs={pluginConfigs}
-                                    onParamChange={handleParamChange}
-                                  />
-                                )}
-                                {plugin.id === "whatsapp" && (
-                                  <WhatsAppQrOverlay accountId="default" />
-                                )}
+                                <PluginConfigForm
+                                  plugin={plugin}
+                                  pluginConfigs={pluginConfigs}
+                                  onParamChange={handleParamChange}
+                                />
                               </div>
                             ) : (
                               <div className="rounded-2xl border border-border/40 bg-card/30 px-4 py-3 text-sm text-muted">
@@ -3331,22 +3172,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                     )}
 
                     <div className="px-5 py-3">
-                      {p.id === "telegram" ? (
-                        <TelegramPluginConfig
-                          plugin={p}
-                          pluginConfigs={pluginConfigs}
-                          onParamChange={handleParamChange}
-                        />
-                      ) : (
-                        <PluginConfigForm
-                          plugin={p}
-                          pluginConfigs={pluginConfigs}
-                          onParamChange={handleParamChange}
-                        />
-                      )}
-                      {p.id === "whatsapp" && (
-                        <WhatsAppQrOverlay accountId="default" />
-                      )}
+                      <PluginConfigForm
+                        plugin={p}
+                        pluginConfigs={pluginConfigs}
+                        onParamChange={handleParamChange}
+                      />
                     </div>
                   </div>
                   {!isShowcase && (
