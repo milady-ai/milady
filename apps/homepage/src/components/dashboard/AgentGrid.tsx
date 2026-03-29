@@ -426,11 +426,9 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
           NO AGENTS FOUND
         </h3>
         <p className="font-mono text-xs text-text-muted max-w-sm mx-auto leading-relaxed mb-4">
-          {authed ? (
-            "Run Milady locally or create a cloud agent."
-          ) : (
-            "Run Milady locally or sign in for cloud hosting."
-          )}
+          {authed
+            ? "Run Milady locally or create a cloud agent."
+            : "Run Milady locally or sign in for cloud hosting."}
         </p>
 
         {/* Pricing preview */}

@@ -22,7 +22,6 @@ function levelColor(level: string): string {
       return "text-yellow-400/90";
     case "debug":
       return "text-text-subtle";
-    case "info":
     default:
       return "text-emerald-400/70";
   }
@@ -129,7 +128,7 @@ export function LogsPanel() {
     setLines([]);
     setError(null);
     fetchLogs();
-  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchLogs, selectedAgent]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh
   useEffect(() => {
@@ -144,7 +143,7 @@ export function LogsPanel() {
 
   // Auto-scroll to bottom when new lines arrive
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && lines.length > 0) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [lines]);
@@ -179,8 +178,11 @@ export function LogsPanel() {
 
             {/* Auto-refresh toggle */}
             <button
+              type="button"
               onClick={() => setAutoRefresh((v) => !v)}
-              title={autoRefresh ? "Disable auto-refresh" : "Enable auto-refresh"}
+              title={
+                autoRefresh ? "Disable auto-refresh" : "Enable auto-refresh"
+              }
               className={`font-mono text-[9px] tracking-wider px-2 py-1 border transition-colors ${
                 autoRefresh
                   ? "border-emerald-400/40 text-emerald-400/80 bg-emerald-400/5"
@@ -192,6 +194,7 @@ export function LogsPanel() {
 
             {/* Manual refresh */}
             <button
+              type="button"
               onClick={fetchLogs}
               disabled={fetching || !selectedAgent}
               className="font-mono text-[9px] tracking-wider px-2 py-1 border border-border text-text-subtle hover:text-text-muted hover:border-text-muted/40 disabled:opacity-40 transition-colors"

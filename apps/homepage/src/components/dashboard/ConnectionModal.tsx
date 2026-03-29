@@ -29,14 +29,15 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
   return createPortal(
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={() => {}}
       role="presentation"
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      {/* Overlay — click outside to close */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        role="none"
+        onClick={onClose}
+        onKeyDown={() => {}}
+      />
 
       {/* Modal */}
       <div className="relative z-10 w-[min(100%-2rem,28rem)] border border-border bg-[#0c0c0e] shadow-2xl">
@@ -76,7 +77,6 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
               onChange={(e) => setName(e.target.value)}
               placeholder="My Remote Agent"
               autoComplete="off"
-              autoFocus
               className="w-full h-10 px-3 font-mono text-sm bg-dark border border-border text-text-light placeholder:text-text-muted/50 focus:outline-none focus:border-brand/50"
             />
           </div>
@@ -106,8 +106,7 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
               htmlFor="connect-token"
               className="font-mono text-[10px] tracking-wider text-text-subtle"
             >
-              ACCESS KEY{" "}
-              <span className="text-text-muted/50">(optional)</span>
+              ACCESS KEY <span className="text-text-muted/50">(optional)</span>
             </label>
             <input
               id="connect-token"

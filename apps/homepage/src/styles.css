@@ -117,8 +117,7 @@ body {
 @keyframes enter {
   from {
     opacity: var(--tw-enter-opacity, 1);
-    transform:
-      translate3d(
+    transform: translate3d(
         var(--tw-enter-translate-x, 0),
         var(--tw-enter-translate-y, 0),
         0
@@ -135,8 +134,7 @@ body {
 @keyframes exit {
   to {
     opacity: var(--tw-exit-opacity, 1);
-    transform:
-      translate3d(
+    transform: translate3d(
         var(--tw-exit-translate-x, 0),
         var(--tw-exit-translate-y, 0),
         0
@@ -171,19 +169,39 @@ body {
 }
 
 /* Enter/exit variant helpers used by Radix Dialog */
-.fade-in-0    { --tw-enter-opacity: 0; }
-.fade-out-0   { --tw-exit-opacity: 0; }
-.zoom-in-95   { --tw-enter-scale: 0.95; }
-.zoom-out-95  { --tw-exit-scale: 0.95; }
+.fade-in-0 {
+  --tw-enter-opacity: 0;
+}
+.fade-out-0 {
+  --tw-exit-opacity: 0;
+}
+.zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+.zoom-out-95 {
+  --tw-exit-scale: 0.95;
+}
 
 /* Slide variants for dialog (centers from left-1/2 / top-[48%]) */
-.slide-in-from-left-1\/2     { --tw-enter-translate-x: -50%; }
-.slide-out-to-left-1\/2      { --tw-exit-translate-x: -50%; }
-.slide-in-from-top-\[48\%\]  { --tw-enter-translate-y: -48%; }
-.slide-out-to-top-\[48\%\]   { --tw-exit-translate-y: -48%; }
+.slide-in-from-left-1\/2 {
+  --tw-enter-translate-x: -50%;
+}
+.slide-out-to-left-1\/2 {
+  --tw-exit-translate-x: -50%;
+}
+.slide-in-from-top-\[48\%\] {
+  --tw-enter-translate-y: -48%;
+}
+.slide-out-to-top-\[48\%\] {
+  --tw-exit-translate-y: -48%;
+}
 /* Mobile bottom-sheet variants */
-.slide-in-from-bottom-6      { --tw-enter-translate-y: 1.5rem; }
-.slide-out-to-bottom-6       { --tw-exit-translate-y: 1.5rem; }
+.slide-in-from-bottom-6 {
+  --tw-enter-translate-y: 1.5rem;
+}
+.slide-out-to-bottom-6 {
+  --tw-exit-translate-y: 1.5rem;
+}
 
 /* ── Keyframes ────────────────────────────────────────────────────── */
 

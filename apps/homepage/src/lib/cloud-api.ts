@@ -411,7 +411,13 @@ export class CloudClient {
   }
 
   // Billing checkout — creates a Stripe checkout session, returns { url, sessionId }
-  async createBillingCheckout(amountUsd: number): Promise<{ checkoutUrl?: string; url?: string; clientSecret?: string; publishableKey?: string; sessionId?: string }> {
+  async createBillingCheckout(amountUsd: number): Promise<{
+    checkoutUrl?: string;
+    url?: string;
+    clientSecret?: string;
+    publishableKey?: string;
+    sessionId?: string;
+  }> {
     // Use the cloud base URL for redirects since the cloud validates redirect origins
     const redirectBase = CLOUD_BASE;
     return this.request("/api/v1/credits/checkout", {
@@ -425,7 +431,17 @@ export class CloudClient {
   }
 
   // Crypto payment — creates a crypto payment via OxaPay, returns { payLink, ... }
-  async createBillingCryptoQuote(amountUsd: number): Promise<{ paymentUrl?: string; payLink?: string; address?: string; amount?: string; currency?: string; paymentId?: string; trackId?: string; expiresAt?: string; creditsToAdd?: number }> {
+  async createBillingCryptoQuote(amountUsd: number): Promise<{
+    paymentUrl?: string;
+    payLink?: string;
+    address?: string;
+    amount?: string;
+    currency?: string;
+    paymentId?: string;
+    trackId?: string;
+    expiresAt?: string;
+    creditsToAdd?: number;
+  }> {
     return this.request("/api/crypto/payments", {
       method: "POST",
       body: JSON.stringify({ amount: amountUsd }),
@@ -588,7 +604,10 @@ export class CloudApiClient {
     throw new Error(`API ${primary.status}: /api/health`);
   }
 
-  async getStreamSettings(): Promise<{ ok: boolean; settings: { theme?: string; avatarIndex?: number } }> {
+  async getStreamSettings(): Promise<{
+    ok: boolean;
+    settings: { theme?: string; avatarIndex?: number };
+  }> {
     const res = await this.rawFetch("/api/stream/settings");
     if (!res.ok) return { ok: false, settings: {} };
     return res.json();

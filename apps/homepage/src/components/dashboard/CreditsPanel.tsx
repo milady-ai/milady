@@ -189,7 +189,6 @@ export function CreditsPanel() {
 
   return (
     <div className="space-y-6 max-w-5xl animate-[fade-up_0.4s_ease-out_both]">
-
       {/* ── Balance Hero ────────────────────────────────────────── */}
       <div
         className={`p-6 border ${
@@ -369,7 +368,11 @@ export function CreditsPanel() {
             <button
               type="button"
               onClick={() => {
-                window.open("https://www.elizacloud.ai/dashboard/settings?tab=billing", "_blank", "noopener,noreferrer");
+                window.open(
+                  "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
               }}
               className="px-5 py-2 font-mono text-xs tracking-wider border border-border-subtle bg-dark
                 text-text-muted hover:border-text-muted/40 hover:text-text-light transition-all"
@@ -450,24 +453,34 @@ export function CreditsPanel() {
             </div>
             <div className="p-5 space-y-3">
               <div className="flex items-baseline justify-between">
-                <span className="font-mono text-xs text-text-muted">Hourly</span>
+                <span className="font-mono text-xs text-text-muted">
+                  Hourly
+                </span>
                 <span className="font-mono text-lg font-semibold text-text-light tabular-nums">
                   ${hourlyBurn.toFixed(4)}
-                  <span className="text-xs font-normal text-text-muted">/hr</span>
+                  <span className="text-xs font-normal text-text-muted">
+                    /hr
+                  </span>
                 </span>
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="font-mono text-xs text-text-muted">Daily</span>
                 <span className="font-mono text-sm text-text-light tabular-nums">
                   ${dailyBurn.toFixed(2)}
-                  <span className="text-xs font-normal text-text-muted">/day</span>
+                  <span className="text-xs font-normal text-text-muted">
+                    /day
+                  </span>
                 </span>
               </div>
               <div className="flex items-baseline justify-between">
-                <span className="font-mono text-xs text-text-muted">Monthly (est.)</span>
+                <span className="font-mono text-xs text-text-muted">
+                  Monthly (est.)
+                </span>
                 <span className="font-mono text-sm text-text-light tabular-nums">
                   ${monthlyBurn.toFixed(2)}
-                  <span className="text-xs font-normal text-text-muted">/mo</span>
+                  <span className="text-xs font-normal text-text-muted">
+                    /mo
+                  </span>
                 </span>
               </div>
               <div className="pt-3 border-t border-border-subtle space-y-1">
@@ -476,7 +489,8 @@ export function CreditsPanel() {
                     {runningAgents.length} running × {PRICE_RUNNING_PER_HR}/hr
                   </span>
                   <span>
-                    ${(runningAgents.length * PRICE_RUNNING_HR_VALUE).toFixed(4)}
+                    $
+                    {(runningAgents.length * PRICE_RUNNING_HR_VALUE).toFixed(4)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[10px] font-mono text-text-subtle">
@@ -512,7 +526,9 @@ export function CreditsPanel() {
                   </div>
                   <p className="font-mono text-xl font-semibold text-brand tabular-nums">
                     {PRICE_RUNNING_PER_HR}
-                    <span className="text-xs font-normal text-text-muted">/hr</span>
+                    <span className="text-xs font-normal text-text-muted">
+                      /hr
+                    </span>
                   </p>
                   <p className="font-mono text-[10px] text-text-subtle mt-1">
                     ≈ ${(PRICE_RUNNING_HR_VALUE * 24 * 30).toFixed(2)}/month
@@ -527,7 +543,9 @@ export function CreditsPanel() {
                   </div>
                   <p className="font-mono text-xl font-semibold text-text-light tabular-nums">
                     {PRICE_IDLE_PER_HR}
-                    <span className="text-xs font-normal text-text-muted">/hr</span>
+                    <span className="text-xs font-normal text-text-muted">
+                      /hr
+                    </span>
                   </p>
                   <p className="font-mono text-[10px] text-text-subtle mt-1">
                     ≈ ${(PRICE_IDLE_HR_VALUE * 24 * 30).toFixed(2)}/month

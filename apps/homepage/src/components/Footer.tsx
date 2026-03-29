@@ -47,7 +47,10 @@ export function Footer() {
         {/* Right: Social links + version */}
         <div className="flex flex-col gap-4 md:items-end">
           <div className="flex items-center gap-5">
-            <SocialLink href="https://github.com/milady-ai/milady" label="GitHub">
+            <SocialLink
+              href="https://github.com/milady-ai/milady"
+              label="GitHub"
+            >
               <svg
                 aria-hidden="true"
                 className="w-4 h-4"
@@ -89,9 +92,13 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-3 font-mono text-[10px] text-text-subtle">
             <span className="w-1 h-1 rounded-full bg-brand/50" />
-            <span className="tracking-wider uppercase">{releaseData.release.tagName}</span>
+            <span className="tracking-wider uppercase">
+              {releaseData.release.tagName}
+            </span>
             <span className="text-border">|</span>
-            <span className="tracking-wider uppercase">&copy; {new Date().getFullYear()} Milady</span>
+            <span className="tracking-wider uppercase">
+              &copy; {new Date().getFullYear()} Milady
+            </span>
           </div>
         </div>
       </div>

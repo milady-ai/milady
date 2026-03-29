@@ -165,7 +165,8 @@ export function AgentCard({
   const stateConfig = STATE_CONFIG[agent.state] ?? STATE_CONFIG.unknown;
   const canOpenUI = agent.state === "running" || source === "cloud";
   const uiUrl = webUiUrl || sourceUrl;
-  const resolvedAvatarIndex = avatarIndexProp ?? getAvatarIndex(agent.agentName);
+  const resolvedAvatarIndex =
+    avatarIndexProp ?? getAvatarIndex(agent.agentName);
   const avatarUrl = `/vrms/previews/milady-${resolvedAvatarIndex}.png`;
   const isLive = agent.state === "running";
   const isProvisioning = agent.state === "provisioning";

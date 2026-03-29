@@ -532,8 +532,15 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     // Apply probe results to their respective agents
     for (const result of probeResults) {
       if (result.status === "fulfilled" && result.value) {
-        const { index, status, model, uptime, memories, agentName, avatarIndex } =
-          result.value;
+        const {
+          index,
+          status,
+          model,
+          uptime,
+          memories,
+          agentName,
+          avatarIndex,
+        } = result.value;
         if (index < enrichedResults.length) {
           const agent = enrichedResults[index];
           if (status) agent.status = status;

@@ -365,9 +365,13 @@ export function CreateAgentForm({
                   onClick={() => {
                     onCancel();
                     // Navigate to credits section
-                    window.dispatchEvent(new CustomEvent("navigate-section", { detail: "credits" }));
+                    window.dispatchEvent(
+                      new CustomEvent("navigate-section", {
+                        detail: "credits",
+                      }),
+                    );
                   }}
-                  className={terminalPrimaryButtonClassName + " px-6"}
+                  className={`${terminalPrimaryButtonClassName} px-6`}
                 >
                   Add Credits
                 </Button>
