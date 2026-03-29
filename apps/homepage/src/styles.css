@@ -75,7 +75,6 @@ body {
   }
 }
 
-
 @keyframes clock-blink {
   0%,
   100% {
@@ -115,7 +114,6 @@ body {
     opacity: 0;
   }
 }
-
 
 /* ── Custom Scrollbars ─────────────────────────────────────────────── */
 

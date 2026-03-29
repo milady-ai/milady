@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
 import { Z_MODAL } from "@miladyai/ui";
+import { useRef, useState } from "react";
 import { HeroBackground } from "./components/Hero";
 import { releaseData } from "./generated/release-data";
 

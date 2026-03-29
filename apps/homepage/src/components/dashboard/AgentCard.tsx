@@ -428,9 +428,11 @@ function ActionBtn({
   disabled?: boolean;
 }) {
   const colors = {
-    success: "text-status-running hover:bg-status-running/10 border-status-running/20",
+    success:
+      "text-status-running hover:bg-status-running/10 border-status-running/20",
     warn: "text-brand hover:bg-brand/10 border-brand/20",
-    danger: "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
+    danger:
+      "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
   };
 
   return (

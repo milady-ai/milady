@@ -248,7 +248,9 @@ export function TransactionHistory({ client }: TransactionHistoryProps) {
         {/* Error state */}
         {!loading && error && (
           <div className="p-6 text-center">
-            <p className="font-mono text-xs text-status-stopped mb-2">{error}</p>
+            <p className="font-mono text-xs text-status-stopped mb-2">
+              {error}
+            </p>
             <button
               type="button"
               onClick={() => fetchRecords(0, false)}

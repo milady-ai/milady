@@ -4,8 +4,14 @@ export function Footer() {
   return (
     <footer className="relative pt-16 sm:pt-20 lg:pt-24 pb-10 sm:pb-12 px-4 sm:px-6 md:px-12 bg-dark border-t border-border overflow-hidden">
       {/* Background watermark */}
-      <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <span aria-hidden="true" className="block text-[24vw] sm:text-[18vw] font-black leading-none tracking-tighter text-white/[0.02] uppercase whitespace-nowrap select-none">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+      >
+        <span
+          aria-hidden="true"
+          className="block text-[24vw] sm:text-[18vw] font-black leading-none tracking-tighter text-white/[0.02] uppercase whitespace-nowrap select-none"
+        >
           MILADY APP
         </span>
       </div>

@@ -153,7 +153,9 @@ export function AgentGrid() {
         >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-status-stopped" />
-            <span className="font-mono text-xs text-status-stopped">{error}</span>
+            <span className="font-mono text-xs text-status-stopped">
+              {error}
+            </span>
           </div>
           <button
             type="button"

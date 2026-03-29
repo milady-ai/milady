@@ -224,7 +224,9 @@ export function ApprovalQueue({ client }: ApprovalQueueProps) {
       {/* Action-level error */}
       {actionError && (
         <div className="mb-3 px-3 py-2 border border-status-stopped/20 bg-status-stopped/5">
-          <p className="font-mono text-[11px] text-status-stopped">{actionError}</p>
+          <p className="font-mono text-[11px] text-status-stopped">
+            {actionError}
+          </p>
         </div>
       )}
 

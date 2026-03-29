@@ -227,7 +227,9 @@ export function PolicyControls({ client }: PolicyControlsProps) {
       {/* Save error */}
       {saveError && (
         <div className="px-3 py-2 border border-status-stopped/20 bg-status-stopped/5">
-          <p className="font-mono text-[11px] text-status-stopped">{saveError}</p>
+          <p className="font-mono text-[11px] text-status-stopped">
+            {saveError}
+          </p>
         </div>
       )}
 

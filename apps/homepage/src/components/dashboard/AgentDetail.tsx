@@ -404,7 +404,9 @@ function OverviewTab({
             />
           </div>
           {actionError && (
-            <p className="mt-3 font-mono text-xs text-status-stopped">{actionError}</p>
+            <p className="mt-3 font-mono text-xs text-status-stopped">
+              {actionError}
+            </p>
           )}
         </div>
       )}
@@ -444,9 +446,11 @@ function CloudActionButton({
 }) {
   const isLoading = loading === action;
   const colors = {
-    success: "text-status-running hover:bg-status-running/10 border-status-running/20",
+    success:
+      "text-status-running hover:bg-status-running/10 border-status-running/20",
     warn: "text-brand hover:bg-brand/10 border-brand/20",
-    danger: "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
+    danger:
+      "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
     default:
       "text-text-muted hover:text-text-light hover:bg-surface-elevated border-border",
   };

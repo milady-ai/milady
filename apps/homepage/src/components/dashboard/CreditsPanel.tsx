@@ -727,7 +727,9 @@ export function CreditsPanel() {
                         </span>
                         <span
                           className={`font-mono text-[10px] tabular-nums text-right ${
-                            isRunning ? "text-status-running" : "text-text-muted"
+                            isRunning
+                              ? "text-status-running"
+                              : "text-text-muted"
                           }`}
                         >
                           {isRunning
