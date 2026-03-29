@@ -38,7 +38,7 @@ interface EnvVarRow {
 }
 
 const terminalPrimaryButtonClassName =
-  "h-11 border-brand/70 bg-brand text-dark font-mono text-xs font-semibold uppercase tracking-[0.18em] hover:border-brand hover:bg-brand-hover";
+  "h-11 border-brand/70 bg-brand !text-[#08080a] font-mono text-xs font-semibold uppercase tracking-[0.18em] hover:border-brand hover:bg-brand-hover";
 
 const terminalSecondaryButtonClassName =
   "h-11 border-border bg-dark/55 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:border-brand/30 hover:bg-dark-secondary";
@@ -346,36 +346,74 @@ export function CreateAgentForm({
             {createdName || name}
           </div>
 
-          <div
-            className="text-red-400 mb-6"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <span className="text-red-500">ERROR:</span> {error}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setStep("form");
-                setError(null);
-              }}
-              className={terminalSecondaryButtonClassName}
-            >
-              Retry
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onCancel}
-              className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
-            >
-              Cancel
-            </Button>
-          </div>
+          {error?.includes("nsufficient") || error?.includes("402") ? (
+            <>
+              <div
+                className="text-red-400 mb-4"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+              >
+                <span className="text-red-500">INSUFFICIENT BALANCE</span>
+              </div>
+              <p className="text-text-muted text-xs mb-6">
+                A minimum balance of $5.00 is required to deploy agents.
+              </p>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    onCancel();
+                    // Navigate to credits section
+                    window.dispatchEvent(new CustomEvent("navigate-section", { detail: "credits" }));
+                  }}
+                  className={terminalPrimaryButtonClassName + " px-6"}
+                >
+                  Add Credits
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onCancel}
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="text-red-400 mb-6"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+              >
+                <span className="text-red-500">ERROR:</span> {error}
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setStep("form");
+                    setError(null);
+                  }}
+                  className={terminalSecondaryButtonClassName}
+                >
+                  Retry
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onCancel}
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
