@@ -738,7 +738,7 @@ function StewardWalletInfo({
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-txt">
             {t("settings.stewardWalletManaged", {
-              defaultValue: "Your agent's wallet is managed by Steward",
+              defaultValue: "Wallet managed by Steward",
             })}
           </div>
           <div className="mt-0.5 text-[11px] text-muted">
@@ -777,8 +777,7 @@ function StewardWalletInfo({
         {!evmAddress && !solanaAddress && (
           <div className="rounded-lg border border-border/50 bg-bg/50 px-3 py-2.5 text-xs text-muted">
             {t("settings.stewardNoAddresses", {
-              defaultValue:
-                "No vault addresses available yet. Check steward configuration.",
+              defaultValue: "No vault addresses yet",
             })}
           </div>
         )}
@@ -828,7 +827,7 @@ function StewardWalletInfo({
               <AlertTriangle className="h-3.5 w-3.5" />
               {t("settings.advancedKeyWarning", {
                 defaultValue:
-                  "Local keys are not needed when Steward manages your wallet. Only use this if you know what you're doing.",
+                  "Not needed with Steward. Use with caution.",
               })}
             </div>
           </div>
@@ -1068,8 +1067,7 @@ export function SettingsView({
             defaultValue: "Wallet Policies",
           })}
           description={t("settings.sections.walletpolicies.desc", {
-            defaultValue:
-              "Spending limits, address controls, rate limits, and transaction safety rules",
+            defaultValue: "Spending limits and transaction rules",
           })}
           className={SETTINGS_SECTION_CARD_CLASS}
         >

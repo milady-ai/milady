@@ -4,10 +4,10 @@ import { CloudClient, type CreditBalance } from "../../lib/cloud-api";
 import { useAuth } from "../../lib/useAuth";
 
 const SECTIONS = [
-  { id: "agents", label: "Agents", shortcut: "1" },
-  { id: "metrics", label: "Metrics", shortcut: "2", requiresAgents: true },
-  { id: "logs", label: "Logs", shortcut: "3", requiresAgents: true },
-  { id: "credits", label: "Credits", shortcut: "4", requiresAuth: true },
+  { id: "agents", label: "Agents" },
+  { id: "metrics", label: "Metrics", requiresAgents: true },
+  { id: "logs", label: "Logs", requiresAgents: true },
+  { id: "credits", label: "Credits", requiresAuth: true },
 ] as const;
 
 export type DashboardSection = (typeof SECTIONS)[number]["id"] | "billing";
@@ -45,44 +45,31 @@ export function Sidebar({ active, onChange }: SidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-52 border-r border-border flex-shrink-0 bg-dark-secondary">
-        {/* Brand header */}
-        <div className="px-4 py-4 border-b border-border">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-brand/10 border border-brand/20 flex items-center justify-center">
-              <span className="font-mono text-brand text-sm font-bold">M</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-mono text-xs font-medium text-text-light tracking-wide">
-                MILADY
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    authed
-                      ? "bg-emerald-400 animate-[status-pulse_2s_ease-in-out_infinite]"
-                      : "bg-text-muted/40"
-                  }`}
-                />
-                <span className="font-mono text-[10px] text-text-subtle tracking-wide">
-                  {authed ? "CLOUD CONNECTED" : "LOCAL MODE"}
-                </span>
-              </div>
-            </div>
+        {/* Connection status */}
+        <div className="px-4 py-3 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                authed
+                  ? "bg-emerald-400 animate-[status-pulse_2s_ease-in-out_infinite]"
+                  : "bg-text-muted/40"
+              }`}
+            />
+            <span className="font-mono text-[10px] text-text-subtle tracking-wide">
+              {authed ? "Connected" : "Local"}
+            </span>
           </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-2">
-          <p className="px-2 mb-3 font-mono text-[9px] font-medium text-text-subtle tracking-[0.15em]">
-            WORKSPACE
-          </p>
           <div className="space-y-0.5">
             {visibleSections.map((s) => (
               <button
                 type="button"
                 key={s.id}
                 onClick={() => onChange(s.id)}
-                className={`group w-full flex items-center justify-between gap-2 text-left px-3 py-2.5 
+                className={`group w-full flex items-center gap-2 text-left px-3 py-2.5 
                   font-mono text-xs tracking-wide transition-all duration-150 relative
                   ${
                     active === s.id
@@ -95,11 +82,6 @@ export function Sidebar({ active, onChange }: SidebarProps) {
                   <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-brand" />
                 )}
                 <span>{s.label.toUpperCase()}</span>
-                <span
-                  className={`text-[10px] ${active === s.id ? "text-brand" : "text-text-subtle"}`}
-                >
-                  {s.shortcut}
-                </span>
               </button>
             ))}
           </div>

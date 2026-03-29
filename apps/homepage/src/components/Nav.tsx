@@ -18,7 +18,7 @@ export function Nav() {
           to="/dashboard"
           className="group flex items-center gap-3 transition-opacity hover:opacity-80"
         >
-          <div className="w-10 h-10 rounded-sm overflow-hidden bg-surface flex items-center justify-center">
+          <div className="w-10 h-10 overflow-hidden bg-surface flex items-center justify-center">
             <img
               src="/logo.png"
               alt="Milady"
@@ -34,21 +34,24 @@ export function Nav() {
         <div className="hidden md:flex items-center gap-1">
           <Link
             to="/dashboard"
-            className={`px-4 py-2 font-mono text-[11px] tracking-wide transition-all duration-150
+            className={`relative self-stretch flex items-center px-4 font-mono text-[11px] tracking-wide transition-colors duration-150
               ${
                 isOnDashboard
-                  ? "text-brand bg-brand/10 border border-brand/30"
-                  : "text-text-muted border border-transparent hover:text-text-light hover:border-border"
+                  ? "text-brand"
+                  : "text-text-muted hover:text-text-light"
               }`}
           >
             DASHBOARD
+            {isOnDashboard && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand" />
+            )}
           </Link>
 
           <a
             href={releaseData.release.url}
             target="_blank"
             rel="noreferrer"
-            className="ml-2 px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase text-brand border border-brand/40 rounded-sm
+            className="ml-2 px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase text-brand border border-brand/40
               hover:bg-brand hover:text-dark hover:border-brand transition-all duration-150"
           >
             RELEASES
@@ -104,10 +107,10 @@ export function Nav() {
         <div className="md:hidden border-t border-border bg-dark-secondary px-4 py-4 space-y-1">
           <Link
             to="/dashboard"
-            className={`block w-full px-4 py-3 font-mono text-xs tracking-wide transition-colors ${
+            className={`block w-full pr-4 py-3 font-mono text-xs tracking-wide transition-colors ${
               isOnDashboard
-                ? "text-brand bg-brand/5"
-                : "text-text-muted hover:text-text-light hover:bg-surface"
+                ? "text-brand pl-[14px] border-l-2 border-brand"
+                : "text-text-muted pl-[14px] border-l-2 border-transparent hover:text-text-light"
             }`}
             onClick={() => setMobileOpen(false)}
           >

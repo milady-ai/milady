@@ -444,7 +444,7 @@ function CloudServicesSection() {
       <p className="text-xs text-muted mb-4 leading-snug">
         {t("configpageview.CloudServicesDesc", {
           defaultValue:
-            "Choose which services to use from Eliza Cloud. Disable inference to use your own API keys instead.",
+            "Toggle Eliza Cloud services",
         })}
       </p>
       <div className="flex flex-col gap-2">
@@ -816,7 +816,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
         <div className="text-[11px] text-muted mb-2">
           {t("configpageview.WalletNetworkDesc", {
             defaultValue:
-              "Choose Mainnet for live funds or Testnet for practice.",
+              "Mainnet for live funds, Testnet for practice",
           })}
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -959,7 +959,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
                 <p className="text-xs text-muted max-w-sm">
                   {t("configpageview.ManagedRpcDesc", {
                     defaultValue:
-                      "Get managed RPC endpoints for EVM, BSC, and Solana with no API keys required.",
+                      "Managed RPC for all chains, no API keys needed",
                   })}
                 </p>
               </div>

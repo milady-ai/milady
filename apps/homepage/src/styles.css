@@ -2,6 +2,10 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Scan @miladyai/ui source so Tailwind generates CSS for all UI package classes
+   (z-[160], z-[170], bg-black/80, bg-bg, text-muted, ring-ring, etc.) */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
 @theme inline {
   --font-sans: "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
@@ -36,6 +40,54 @@
   --color-status-paused: #f0b90b;
   --color-status-stopped: #ef4444;
   --color-status-provisioning: #f0b90b;
+
+  /* ── @miladyai/ui bridge tokens ──────────────────────────────────────
+     Map the UI package's design tokens to this homepage's palette so
+     components like Dialog, Button, Input render correctly.         */
+
+  /* Backgrounds */
+  --color-bg: #08080a;
+  --color-bg-accent: #131316;
+  --color-bg-elevated: #1a1a1f;
+  --color-bg-hover: #1e1e24;
+  --color-bg-muted: #0e0e11;
+  --color-card: #131316;
+  --color-card-fg: #e8e8ec;
+
+  /* Text */
+  --color-txt: #e8e8ec;
+  --color-txt-strong: #f4f4f6;
+  --color-txt-chat: #e8e8ec;
+  --color-muted: #9494a2;
+  --color-muted-strong: #b0b0bc;
+
+  /* Borders / inputs / focus */
+  --color-border-strong: #2f2f3c;
+  --color-border-hover: #353542;
+  --color-input: #252530;
+  --color-ring: #f0b90b;
+
+  /* Accent foreground (text on brand/yellow backgrounds) */
+  --color-accent-fg: #08080a;
+  --color-accent-hover: #f3ba2f;
+  --color-accent-muted: #d8a000;
+  --color-accent-subtle: #2a2000;
+
+  /* Primary */
+  --color-primary: #f0b90b;
+  --color-primary-fg: #08080a;
+
+  /* Status */
+  --color-ok: #22c55e;
+  --color-ok-muted: #16a34a;
+  --color-ok-subtle: #052e16;
+  --color-warn: #f0b90b;
+  --color-warn-muted: #d8a000;
+  --color-warn-subtle: #2a2000;
+  --color-danger: #ef4444;
+  --color-destructive: #ef4444;
+  --color-destructive-fg: #fef2f2;
+  --color-destructive-subtle: #2a0a0a;
 }
 
 html {
@@ -56,6 +108,82 @@ body {
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgb(240 185 11 / 18%);
 }
+
+/* ── Radix / tailwindcss-animate compatibility ────────────────────── */
+/* The @miladyai/ui Dialog uses data-[state=open]:animate-in, fade-in-0,
+   zoom-in-95, etc. These come from tailwindcss-animate which isn't
+   installed here, so we provide the keyframes and base classes manually. */
+
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform:
+      translate3d(
+        var(--tw-enter-translate-x, 0),
+        var(--tw-enter-translate-y, 0),
+        0
+      )
+      scale3d(
+        var(--tw-enter-scale, 1),
+        var(--tw-enter-scale, 1),
+        var(--tw-enter-scale, 1)
+      )
+      rotate(var(--tw-enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity, 1);
+    transform:
+      translate3d(
+        var(--tw-exit-translate-x, 0),
+        var(--tw-exit-translate-y, 0),
+        0
+      )
+      scale3d(
+        var(--tw-exit-scale, 1),
+        var(--tw-exit-scale, 1),
+        var(--tw-exit-scale, 1)
+      )
+      rotate(var(--tw-exit-rotate, 0));
+  }
+}
+
+.animate-in {
+  animation-name: enter;
+  animation-duration: 150ms;
+  --tw-enter-opacity: initial;
+  --tw-enter-scale: initial;
+  --tw-enter-rotate: initial;
+  --tw-enter-translate-x: initial;
+  --tw-enter-translate-y: initial;
+}
+
+.animate-out {
+  animation-name: exit;
+  animation-duration: 150ms;
+  --tw-exit-opacity: initial;
+  --tw-exit-scale: initial;
+  --tw-exit-rotate: initial;
+  --tw-exit-translate-x: initial;
+  --tw-exit-translate-y: initial;
+}
+
+/* Enter/exit variant helpers used by Radix Dialog */
+.fade-in-0    { --tw-enter-opacity: 0; }
+.fade-out-0   { --tw-exit-opacity: 0; }
+.zoom-in-95   { --tw-enter-scale: 0.95; }
+.zoom-out-95  { --tw-exit-scale: 0.95; }
+
+/* Slide variants for dialog (centers from left-1/2 / top-[48%]) */
+.slide-in-from-left-1\/2     { --tw-enter-translate-x: -50%; }
+.slide-out-to-left-1\/2      { --tw-exit-translate-x: -50%; }
+.slide-in-from-top-\[48\%\]  { --tw-enter-translate-y: -48%; }
+.slide-out-to-top-\[48\%\]   { --tw-exit-translate-y: -48%; }
+/* Mobile bottom-sheet variants */
+.slide-in-from-bottom-6      { --tw-enter-translate-y: 1.5rem; }
+.slide-out-to-bottom-6       { --tw-exit-translate-y: 1.5rem; }
 
 /* ── Keyframes ────────────────────────────────────────────────────── */
 

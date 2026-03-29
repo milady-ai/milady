@@ -15,7 +15,7 @@ function resolveDefaultCloudBase(): string {
 
   const hostname = normalizeCloudHost(window.location.hostname);
   if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return "http://localhost:3000";
+    return "https://www.elizacloud.ai";
   }
 
   if (ELIZA_CLOUD_HOSTS.has(hostname)) {

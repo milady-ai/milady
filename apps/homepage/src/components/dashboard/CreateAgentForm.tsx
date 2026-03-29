@@ -38,13 +38,13 @@ interface EnvVarRow {
 }
 
 const terminalPrimaryButtonClassName =
-  "h-11 rounded-xl border-brand/70 bg-brand text-dark font-mono text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_16px_40px_rgba(240,185,11,0.16)] hover:border-brand hover:bg-brand-hover";
+  "h-11 border-brand/70 bg-brand text-dark font-mono text-xs font-semibold uppercase tracking-[0.18em] hover:border-brand hover:bg-brand-hover";
 
 const terminalSecondaryButtonClassName =
-  "h-11 rounded-xl border-border bg-dark/55 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:border-brand/30 hover:bg-dark-secondary";
+  "h-11 border-border bg-dark/55 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:border-brand/30 hover:bg-dark-secondary";
 
 const terminalInputClassName =
-  "h-11 rounded-xl border-border bg-dark/80 px-4 font-mono text-sm text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35";
+  "h-11 border-border bg-dark/80 px-4 font-mono text-sm text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35";
 
 export function CreateAgentForm({
   onAuthenticated,
@@ -371,7 +371,7 @@ export function CreateAgentForm({
               type="button"
               variant="ghost"
               onClick={onCancel}
-              className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+              className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
             >
               Cancel
             </Button>
@@ -406,7 +406,7 @@ export function CreateAgentForm({
               AUTHENTICATION REQUIRED
             </p>
             <FieldDescription className="text-sm text-text-muted">
-              Sign in to Eliza Cloud to deploy agents.
+              Sign in to deploy.
             </FieldDescription>
             {loginError && (
               <FieldMessage
@@ -456,7 +456,7 @@ export function CreateAgentForm({
                   type="button"
                   variant="ghost"
                   onClick={onCancel}
-                  className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
                 >
                   Cancel
                 </Button>
@@ -515,8 +515,7 @@ export function CreateAgentForm({
             className={terminalInputClassName}
           />
           <FieldDescription className="font-mono text-[11px] text-text-subtle">
-            Lowercase letters, numbers, and hyphens work best for cloud agent
-            names.
+            Use lowercase, numbers, hyphens.
           </FieldDescription>
         </Field>
 
@@ -528,7 +527,7 @@ export function CreateAgentForm({
                 Environment
               </FieldLabel>
               <FieldDescription className="font-mono text-[11px] text-text-subtle">
-                Optional secrets and runtime config for your agent.
+                Runtime secrets and config.
               </FieldDescription>
             </div>
             <Button
@@ -559,7 +558,7 @@ export function CreateAgentForm({
           {showEnvVars && (
             <div
               id="homepage-agent-env-vars"
-              className="mt-3 rounded-2xl border border-border-subtle bg-dark/95"
+              className="mt-3 border border-border-subtle bg-dark/95"
             >
               {/* Config file header */}
               <div className="px-3 py-2 border-b border-border-subtle bg-dark-secondary">
@@ -588,7 +587,7 @@ export function CreateAgentForm({
                       }}
                       aria-label={`Environment variable ${i + 1} key`}
                       placeholder="KEY"
-                      className="h-10 rounded-xl border-border/60 bg-transparent px-3 font-mono text-sm uppercase text-brand placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
+                      className="h-10 border-border/60 bg-transparent px-3 font-mono text-sm uppercase text-brand placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
                     />
                     <div className="hidden items-center justify-center text-text-subtle md:flex">
                       =
@@ -602,7 +601,7 @@ export function CreateAgentForm({
                       }}
                       aria-label={`Environment variable ${i + 1} value`}
                       placeholder="value"
-                      className="h-10 rounded-xl border-border/60 bg-transparent px-3 font-mono text-sm text-text-light placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
+                      className="h-10 border-border/60 bg-transparent px-3 font-mono text-sm text-text-light placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
                     />
                     <Button
                       type="button"
@@ -610,7 +609,7 @@ export function CreateAgentForm({
                       size="icon"
                       onClick={() => removeEnvVar(i)}
                       aria-label={`Remove environment variable ${i + 1}`}
-                      className="h-10 w-10 rounded-xl border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-400"
+                      className="h-10 w-10 border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-400"
                     >
                       ×
                     </Button>
@@ -621,7 +620,7 @@ export function CreateAgentForm({
                   variant="ghost"
                   size="sm"
                   onClick={addEnvVar}
-                  className="w-fit rounded-lg border border-transparent px-2 text-text-subtle hover:border-brand/20 hover:bg-brand/5 hover:text-brand"
+                  className="w-fit border border-transparent px-2 text-text-subtle hover:border-brand/20 hover:bg-brand/5 hover:text-brand"
                 >
                   <span>+</span> add
                 </Button>
@@ -632,7 +631,7 @@ export function CreateAgentForm({
 
         {/* Pricing note */}
         <div
-          className="mb-5 rounded-xl border border-brand/15 bg-brand/5 px-3 py-2.5"
+          className="mb-5 border-l-2 border-brand/30 pl-3 py-1.5 bg-brand/[4%]"
           id="homepage-hosting-note"
         >
           <p className="font-mono text-[10px] text-text-muted leading-relaxed">
@@ -684,7 +683,7 @@ export function CreateAgentForm({
             type="button"
             variant="ghost"
             onClick={onCancel}
-            className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+            className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
           >
             Cancel
           </Button>

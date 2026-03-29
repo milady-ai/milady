@@ -33,7 +33,7 @@ import {
   client,
 } from "../api";
 import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
-import { useApp } from "../state";
+import { getVrmPreviewUrl, useApp } from "../state";
 import { openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
 
@@ -125,7 +125,17 @@ function CloudAgentCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Server className="w-4 h-4 text-txt shrink-0" />
+          {(() => {
+            const agentName = agent.agent_name ?? "";
+            const avatarIndex = (agentName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 4) + 1;
+            return (
+              <img
+                src={getVrmPreviewUrl(avatarIndex)}
+                alt={agentName}
+                className="w-7 h-7 rounded-full object-cover shrink-0 border border-border/40"
+              />
+            );
+          })()}
           <span className="max-w-[16rem] truncate text-sm font-bold text-txt-strong">
             {agent.agent_name || t("elizaclouddashboard.unnamedAgent")}
           </span>
@@ -664,8 +674,7 @@ export function CloudDashboard() {
     if (autoTopUpEnabled && !hasPaymentMethod) {
       setActionNotice(
         t("elizaclouddashboard.SavePaymentMethodBeforeAutoTopUp", {
-          defaultValue:
-            "Save a payment method through card checkout before enabling auto top-up.",
+          defaultValue: "Add a card first",
         }),
         "info",
         4200,
@@ -1128,11 +1137,7 @@ export function CloudDashboard() {
           <h2 className="text-lg font-bold text-txt-strong tracking-tight">
             {t("elizaclouddashboard.CloudDashboard")}
           </h2>
-          <span className="text-xs text-muted">·</span>
-          <span className="text-xs text-muted">
-            {t("elizaclouddashboard.ManageInstance")}
-          </span>
-        </div>
+          </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex flex-wrap items-center gap-0.5 rounded-lg border border-border/50 bg-bg/50 p-0.5">
@@ -1319,12 +1324,25 @@ export function CloudDashboard() {
                     {t("elizaclouddashboard.PayWithCrypto")}
                   </span>
                 </div>
-                <p className="text-[11px] text-muted mb-3">
-                  {hasAgentWallet
-                    ? hasWalletFunds
-                      ? t("elizaclouddashboard.AgentWalletFunded")
-                      : t("elizaclouddashboard.AgentWalletDetected")
-                    : t("elizaclouddashboard.NoAgentWalletDetected")}
+                <p className="text-[11px] text-muted mb-3 flex items-center gap-1.5">
+                  {hasAgentWallet ? (
+                    hasWalletFunds ? (
+                      <>
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-ok flex-shrink-0" />
+                        {t("elizaclouddashboard.AgentWalletFunded", { defaultValue: "Wallet ready" })}
+                      </>
+                    ) : (
+                      <>
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-warn flex-shrink-0" />
+                        {t("elizaclouddashboard.AgentWalletDetected", { defaultValue: "Wallet empty" })}
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-muted flex-shrink-0" />
+                      {t("elizaclouddashboard.NoAgentWalletDetected", { defaultValue: "No wallet" })}
+                    </>
+                  )}
                 </p>
                 {cryptoQuote ? (
                   <div className="space-y-2">
@@ -1419,8 +1437,8 @@ export function CloudDashboard() {
                 </h3>
                 <p className="text-[11px] text-muted mt-0.5">
                   {autoTopUpHasPaymentMethod
-                    ? t("elizaclouddashboard.AutoTopUpPaymentReady")
-                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod")}
+                    ? t("elizaclouddashboard.AutoTopUpPaymentReady", { defaultValue: "Card saved" })
+                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod", { defaultValue: "Add a card first" })}
                 </p>
               </div>
               <Switch
@@ -1541,10 +1559,7 @@ export function CloudDashboard() {
                 })}
               </p>
               <p className="text-xs text-muted text-center max-w-xs leading-relaxed">
-                {t("elizaclouddashboard.CloudAgentsComingSoonDesc", {
-                  defaultValue:
-                    "Eliza Cloud is being prepared for production. You'll be able to deploy and manage cloud agents here shortly.",
-                })}
+                Coming soon.
               </p>
             </div>
           )}

@@ -68,14 +68,24 @@ export function AgentDetail({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Build a CloudApiClient for steward proxy endpoints (tx history, approvals)
+  // Build a CloudApiClient for steward proxy endpoints (tx history, approvals).
+  // For cloud agents that have been matched with a running sandbox, managedAgent.client
+  // is already set (pointing directly to the sandbox URL) and takes priority.
+  // For cloud agents without a sandbox match, we construct a client pointing at the
+  // cloud management URL and authenticate with the user's cloud API token so the
+  // cloud backend can proxy wallet/steward requests to the agent.
   const stewardClient = useMemo(() => {
     if (!managedAgent.sourceUrl && !managedAgent.client) return null;
     if (managedAgent.client) return managedAgent.client;
+    // Fall back to cloud token when no direct-agent apiToken is available.
+    // This covers cloud agents that are running but haven't been discovered
+    // via sandbox discovery yet — requests go through the cloud proxy.
+    const authToken =
+      managedAgent.apiToken ?? managedAgent.cloudClient?.getToken();
     return new CloudApiClient({
       url: managedAgent.sourceUrl ?? "",
       type: managedAgent.source === "cloud" ? "cloud" : "remote",
-      authToken: managedAgent.apiToken,
+      authToken,
     });
   }, [managedAgent]);
 
@@ -223,9 +233,9 @@ export function AgentDetail({
           <PolicyControls client={stewardClient} />
         )}
         {tab === "Policies" && !stewardClient && (
-          <div className="border border-border bg-surface p-8 text-center">
+          <div className="py-8 text-center">
             <p className="font-mono text-xs text-text-muted">
-              Connect an agent to manage transaction policies.
+              Connect an agent to manage policies.
             </p>
           </div>
         )}
@@ -233,7 +243,7 @@ export function AgentDetail({
           <TransactionHistory client={stewardClient} />
         )}
         {tab === "Transactions" && !stewardClient && (
-          <div className="border border-border bg-surface p-8 text-center">
+          <div className="py-8 text-center">
             <p className="font-mono text-xs text-text-muted">
               Connect an agent to view transaction history.
             </p>
@@ -243,7 +253,7 @@ export function AgentDetail({
           <ApprovalQueue client={stewardClient} />
         )}
         {tab === "Approvals" && !stewardClient && (
-          <div className="border border-border bg-surface p-8 text-center">
+          <div className="py-8 text-center">
             <p className="font-mono text-xs text-text-muted">
               Connect an agent to view pending approvals.
             </p>
