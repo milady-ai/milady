@@ -76,6 +76,11 @@ const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   },
 };
 
+function getCloudAuthToken(): string {
+  if (typeof window === "undefined") return "";
+  return ((window as unknown as Record<string, unknown>).__ELIZA_CLOUD_AUTH_TOKEN__ as string) || "";
+}
+
 function AgentStatusBadge({ status }: { status: string }) {
   const { t } = useApp();
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.stopped;
@@ -651,20 +656,14 @@ export function CloudDashboard() {
         try {
           const response = await client.getCloudCompatPairingToken(agentId);
           redirectUrl = response?.data?.redirectUrl;
-        } catch (proxyErr) {
-          console.warn("[CloudDashboard] Proxy pairing failed:", proxyErr);
+        } catch {
+          // proxy failed, fall through to direct call
         }
 
         // If proxy failed, try direct cloud call
         if (!redirectUrl) {
           const cloudBase = "https://www.elizacloud.ai";
-          const token =
-            (typeof window !== "undefined" &&
-              ((window as unknown as Record<string, unknown>)
-                .__ELIZA_CLOUD_AUTH_TOKEN__ as string)) ||
-            client.getRestAuthToken?.() ||
-            "";
-          console.log("[CloudDashboard] Direct call, token:", token ? `${token.slice(0, 15)}...` : "EMPTY");
+          const token = getCloudAuthToken() || client.getRestAuthToken?.() || "";
           try {
             const directRes = await fetch(
               `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
@@ -679,12 +678,9 @@ export function CloudDashboard() {
             if (directRes.ok) {
               const json = await directRes.json();
               redirectUrl = json?.data?.redirectUrl ?? json?.redirectUrl;
-              console.log("[CloudDashboard] Got redirectUrl:", redirectUrl);
-            } else {
-              console.error("[CloudDashboard] Direct call failed:", directRes.status, await directRes.text().catch(() => ""));
             }
-          } catch (fetchErr) {
-            console.error("[CloudDashboard] Direct fetch error:", fetchErr);
+          } catch {
+            // direct fetch failed, redirectUrl remains unset
           }
         }
 
