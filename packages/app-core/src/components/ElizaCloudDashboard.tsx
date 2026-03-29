@@ -13,7 +13,6 @@ import {
   CircleDollarSign,
   CreditCard,
   ExternalLink,
-  Globe,
   Loader2,
   Plus,
   RefreshCw,
@@ -78,7 +77,10 @@ const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
 
 function getCloudAuthToken(): string {
   if (typeof window === "undefined") return "";
-  return ((window as unknown as Record<string, unknown>).__ELIZA_CLOUD_AUTH_TOKEN__ as string) || "";
+  return (
+    ((window as unknown as Record<string, unknown>)
+      .__ELIZA_CLOUD_AUTH_TOKEN__ as string) || ""
+  );
 }
 
 function AgentStatusBadge({ status }: { status: string }) {
@@ -434,13 +436,13 @@ export function CloudDashboard() {
   const [checkoutSession, setCheckoutSession] =
     useState<CloudBillingCheckoutResponse | null>(null);
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
-  const [cryptoBusy, setCryptoBusy] = useState(false);
+  const [_cryptoBusy, setCryptoBusy] = useState(false);
   const [cryptoQuote, setCryptoQuote] = useState<Record<
     string,
     unknown
   > | null>(null);
-  const [cryptoPayBusy, setCryptoPayBusy] = useState(false);
-  const [cryptoPayResult, setCryptoPayResult] = useState<string | null>(null);
+  const [_cryptoPayBusy, setCryptoPayBusy] = useState(false);
+  const [_cryptoPayResult, setCryptoPayResult] = useState<string | null>(null);
   const [cloudAgents, setCloudAgents] = useState<CloudCompatAgent[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(false);
   const [agentsError, setAgentsError] = useState<string | null>(null);
@@ -485,7 +487,7 @@ export function CloudDashboard() {
     } finally {
       if (mountedRef.current) setAgentsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchBillingData = useCallback(async () => {
     setBillingLoading(true);
@@ -534,7 +536,7 @@ export function CloudDashboard() {
         setBillingLoading(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     dispatchAutoTopUpForm({
@@ -580,7 +582,7 @@ export function CloudDashboard() {
     }
   }, [deployAgentName, fetchCloudAgents]);
 
-  const handleLaunchAgent = useCallback(
+  const _handleLaunchAgent = useCallback(
     async (agentId: string) => {
       setLaunchingAgentId(agentId);
       try {
@@ -629,7 +631,7 @@ export function CloudDashboard() {
         }
       }
     },
-    [retryStartup, setActionNotice, setState, setTab],
+    [retryStartup, setActionNotice, setState, setTab, t],
   );
 
   const handleOpenWebUI = useCallback(
@@ -663,7 +665,8 @@ export function CloudDashboard() {
         // If proxy failed, try direct cloud call
         if (!redirectUrl) {
           const cloudBase = "https://www.elizacloud.ai";
-          const token = getCloudAuthToken() || client.getRestAuthToken?.() || "";
+          const token =
+            getCloudAuthToken() || client.getRestAuthToken?.() || "";
           try {
             const directRes = await fetch(
               `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
@@ -684,7 +687,8 @@ export function CloudDashboard() {
           }
         }
 
-        if (!redirectUrl) throw new Error("No redirectUrl from proxy or direct call");
+        if (!redirectUrl)
+          throw new Error("No redirectUrl from proxy or direct call");
         if (!tab.closed) tab.location.href = redirectUrl;
       } catch {
         // Fallback: open the agent's web UI URL directly
@@ -827,6 +831,7 @@ export function CloudDashboard() {
     billingSummary,
     fetchBillingData,
     setActionNotice,
+    t,
   ]);
 
   const handleStartCheckout = useCallback(async () => {
@@ -887,9 +892,9 @@ export function CloudDashboard() {
     } finally {
       setCheckoutBusy(false);
     }
-  }, [billingAmount, billingSummary, setActionNotice]);
+  }, [billingAmount, billingSummary, setActionNotice, t]);
 
-  const handleCreateCryptoQuote = useCallback(async () => {
+  const _handleCreateCryptoQuote = useCallback(async () => {
     const minimumTopUp =
       readNumber(
         (billingSummary as Record<string, unknown> | null)?.minimumTopUp,
@@ -932,9 +937,9 @@ export function CloudDashboard() {
     } finally {
       setCryptoBusy(false);
     }
-  }, [billingAmount, billingSummary, setActionNotice, walletAddresses]);
+  }, [billingAmount, billingSummary, setActionNotice, walletAddresses, t]);
 
-  const handlePayCryptoFromAgentWallet = useCallback(async () => {
+  const _handlePayCryptoFromAgentWallet = useCallback(async () => {
     if (!cryptoQuote) return;
 
     const network = readString(cryptoQuote.network)?.toLowerCase();
@@ -1068,7 +1073,7 @@ export function CloudDashboard() {
     } finally {
       setCryptoPayBusy(false);
     }
-  }, [cryptoQuote, setActionNotice]);
+  }, [cryptoQuote, setActionNotice, t]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -1163,10 +1168,10 @@ export function CloudDashboard() {
     elizaCloudStatusReason,
     t,
   );
-  const hasAgentWallet = Boolean(
+  const _hasAgentWallet = Boolean(
     walletAddresses?.evmAddress || walletAddresses?.solanaAddress,
   );
-  const hasWalletFunds = Boolean(
+  const _hasWalletFunds = Boolean(
     walletBalances?.evm?.chains.some(
       (chain) =>
         Number(chain.nativeBalance) > 0 ||
