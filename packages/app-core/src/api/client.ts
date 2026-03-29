@@ -3854,6 +3854,17 @@ export class MiladyClient {
     );
   }
 
+  /** Fetch a pairing token for a cloud agent (for opening Web UI in a new tab). */
+  async getCloudCompatPairingToken(agentId: string): Promise<{
+    success: boolean;
+    data: { token: string; redirectUrl: string; expiresIn: number };
+  }> {
+    return this.fetch(
+      `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+      { method: "POST" },
+    );
+  }
+
   /** Get cloud availability (capacity info). */
   async getCloudCompatAvailability(): Promise<{
     success: boolean;

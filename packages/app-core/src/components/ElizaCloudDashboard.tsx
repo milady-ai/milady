@@ -13,6 +13,7 @@ import {
   CircleDollarSign,
   CreditCard,
   ExternalLink,
+  Globe,
   Loader2,
   Plus,
   RefreshCw,
@@ -93,6 +94,8 @@ function CloudAgentCard({
   deleting,
   launching,
   onLaunch,
+  onOpenUI,
+  openingUI,
   onSelect,
   selected = false,
 }: {
@@ -101,6 +104,8 @@ function CloudAgentCard({
   deleting: boolean;
   launching: boolean;
   onLaunch: (id: string) => void;
+  onOpenUI: (id: string) => void;
+  openingUI: boolean;
   onSelect?: (id: string) => void;
   selected?: boolean;
 }) {
@@ -175,6 +180,24 @@ function CloudAgentCard({
             <ExternalLink className="w-3 h-3 mr-1" />
           )}
           {t("elizaclouddashboard.open")}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9 flex-1 rounded-xl border-border/40 text-xs"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenUI(agent.agent_id);
+          }}
+          disabled={openingUI || launching}
+        >
+          {openingUI ? (
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+          ) : (
+            <Globe className="w-3 h-3 mr-1" />
+          )}
+          {t("elizaclouddashboard.openWebUI", { defaultValue: "Web UI" })}
         </Button>
 
         <Button
@@ -432,6 +455,7 @@ export function CloudDashboard() {
   const [cloudNotReady, setCloudNotReady] = useState(false);
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
   const [launchingAgentId, setLaunchingAgentId] = useState<string | null>(null);
+  const [openingWebUiAgentId, setOpeningWebUiAgentId] = useState<string | null>(null);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const selectedAgent = cloudAgents.find((a) => a.agent_id === selectedAgentId);
   const [showDeployForm, setShowDeployForm] = useState(false);
@@ -614,6 +638,52 @@ export function CloudDashboard() {
     [retryStartup, setActionNotice, setState, setTab],
   );
 
+  const handleOpenWebUI = useCallback(
+    async (agentId: string) => {
+      // Open a blank tab immediately (must be synchronous to avoid popup blockers)
+      const tab = window.open("", "_blank");
+      if (!tab) {
+        setActionNotice(
+          t("elizaclouddashboard.PopupBlocked", {
+            defaultValue: "Popup blocked. Please allow popups and try again.",
+          }),
+          "error",
+          4200,
+        );
+        return;
+      }
+
+      setOpeningWebUiAgentId(agentId);
+      try {
+        const response = await client.getCloudCompatPairingToken(agentId);
+        const redirectUrl = response?.data?.redirectUrl;
+        if (!redirectUrl) throw new Error("No redirectUrl in pairing response");
+        if (!tab.closed) tab.location.href = redirectUrl;
+      } catch {
+        // Fallback: open the agent's web UI URL directly
+        const agent = cloudAgents.find((a) => a.agent_id === agentId);
+        const fallbackUrl = agent?.webUiUrl ?? agent?.web_ui_url;
+        if (fallbackUrl) {
+          if (!tab.closed) tab.location.href = fallbackUrl;
+        } else {
+          tab.close();
+          setActionNotice(
+            t("elizaclouddashboard.FailedToOpenWebUI", {
+              defaultValue: "Failed to open Web UI for this agent.",
+            }),
+            "error",
+            4200,
+          );
+        }
+      } finally {
+        if (mountedRef.current) {
+          setOpeningWebUiAgentId(null);
+        }
+      }
+    },
+    [cloudAgents, setActionNotice, t],
+  );
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
@@ -772,10 +842,9 @@ export function CloudDashboard() {
       }
 
       throw new Error(
-        readString(response.message) ??
-          t("elizaclouddashboard.CheckoutSessionMissing", {
-            defaultValue: "Eliza Cloud did not return a checkout session.",
-          }),
+        t("elizaclouddashboard.CheckoutSessionMissing", {
+          defaultValue: "Checkout unavailable. Try again or use the billing portal.",
+        }),
       );
     } catch (err) {
       setActionNotice(
@@ -1622,6 +1691,8 @@ export function CloudDashboard() {
                       deleting={deletingAgentId === agent.agent_id}
                       launching={launchingAgentId === agent.agent_id}
                       onLaunch={handleLaunchAgent}
+                      onOpenUI={handleOpenWebUI}
+                      openingUI={openingWebUiAgentId === agent.agent_id}
                       onSelect={(id) => setSelectedAgentId(id)}
                       selected={selectedAgentId === agent.agent_id}
                     />
