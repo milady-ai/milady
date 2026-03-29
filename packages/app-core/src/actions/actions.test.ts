@@ -8,8 +8,17 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const { loggerWarnMock } = vi.hoisted(() => ({
+  loggerWarnMock: vi.fn(),
+}));
+
 vi.mock("@elizaos/core", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
+  logger: {
+    info: vi.fn(),
+    warn: loggerWarnMock,
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 vi.mock("@miladyai/agent/config/config", () => {
@@ -166,6 +175,9 @@ describe("loadCustomActions", () => {
     });
     const actions = loadCustomActions();
     expect(actions).toEqual([]);
+    expect(loggerWarnMock).toHaveBeenCalledWith(
+      "[custom-actions] Failed to load custom actions from config: config corrupted",
+    );
   });
 });
 

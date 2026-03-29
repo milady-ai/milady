@@ -350,7 +350,18 @@ async function readInstallRecords(
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
       return {};
     return parsed;
-  } catch {
+  } catch (err) {
+    const isMissingFile =
+      err instanceof Error &&
+      "code" in err &&
+      (err as NodeJS.ErrnoException).code === "ENOENT";
+    if (!isMissingFile) {
+      logger.warn(
+        `[skill-marketplace] Failed to read install records: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
     return {};
   }
 }

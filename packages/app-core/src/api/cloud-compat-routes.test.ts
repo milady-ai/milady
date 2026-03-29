@@ -287,6 +287,30 @@ describe("cloud-compat-routes", () => {
       );
     });
 
+    it("preserves upstream 404 bodies for resource-specific compat routes", async () => {
+      const mockBody = {
+        success: false,
+        error: "Agent not found",
+        code: "AGENT_NOT_FOUND",
+      };
+      const mockResponse = new Response(JSON.stringify(mockBody), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+      vi.mocked(fetch).mockResolvedValue(mockResponse);
+
+      const result = await handleCloudCompatRoute(
+        makeReq({ url: "/api/cloud/compat/agents/abc-123/status" }),
+        makeRes(),
+        "/api/cloud/compat/agents/abc-123/status",
+        "GET",
+        makeState(),
+      );
+
+      expect(result).toBe(true);
+      expect(sendJson).toHaveBeenCalledWith(expect.anything(), mockBody, 404);
+    });
+
     it("retries once on 503 response", async () => {
       const response503 = new Response(
         JSON.stringify({ success: false, error: "Service Unavailable" }),

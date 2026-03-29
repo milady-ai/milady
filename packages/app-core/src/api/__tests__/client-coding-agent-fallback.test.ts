@@ -4,8 +4,9 @@
  * the CodingAgentSession format consumed by the UI.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
+  MiladyClient,
   type RawPtySession,
   mapPtySessionsToCodingAgentSessions,
 } from "../client";
@@ -121,5 +122,27 @@ describe("mapPtySessionsToCodingAgentSessions", () => {
     expect(result[0].originalTask).toBe("");
     expect(result[0].decisionCount).toBe(0);
     expect(result[0].autoResolvedCount).toBe(0);
+  });
+});
+
+describe("MiladyClient.listCodingAgentScratchWorkspaces", () => {
+  it("warns and falls back to an empty list when the request fails", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const client = new MiladyClient("http://127.0.0.1:31337");
+    const fetchSpy = vi.spyOn(
+      client as unknown as {
+        fetch: (path: string, init?: RequestInit) => Promise<unknown>;
+      },
+      "fetch",
+    );
+    fetchSpy.mockRejectedValueOnce(new Error("network down"));
+
+    await expect(client.listCodingAgentScratchWorkspaces()).resolves.toEqual(
+      [],
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[api-client] Failed to list coding agent scratch workspaces:",
+      expect.objectContaining({ message: "network down" }),
+    );
   });
 });

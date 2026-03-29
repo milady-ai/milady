@@ -148,7 +148,12 @@ export function getConfiguredEndpoints(): RegistryEndpoint[] {
   try {
     const cfg = loadElizaConfig();
     return cfg.plugins?.registryEndpoints ?? [];
-  } catch {
+  } catch (err) {
+    logger.warn(
+      `[registry-client] Failed to load config for custom endpoints: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
     return [];
   }
 }

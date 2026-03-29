@@ -13,6 +13,10 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const { loggerWarnMock } = vi.hoisted(() => ({
+  loggerWarnMock: vi.fn(),
+}));
+
 import {
   type InstalledMarketplaceSkill,
   installMarketplaceSkill,
@@ -26,7 +30,12 @@ import {
 // ---------------------------------------------------------------------------
 
 vi.mock("@elizaos/core", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
+  logger: {
+    info: vi.fn(),
+    warn: loggerWarnMock,
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -99,6 +108,7 @@ beforeEach(async () => {
   tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "skill-mp-test-"));
   delete process.env.SKILLSMP_API_KEY;
   delete process.env.SKILLS_REGISTRY;
+  loggerWarnMock.mockReset();
 });
 
 afterEach(async () => {
@@ -572,6 +582,7 @@ describe("listInstalledMarketplaceSkills", () => {
     const result = await listInstalledMarketplaceSkills(tmpDir);
 
     expect(result).toEqual([]);
+    expect(loggerWarnMock).not.toHaveBeenCalled();
   });
 
   it("returns skills sorted by installedAt descending", async () => {
@@ -604,6 +615,11 @@ describe("listInstalledMarketplaceSkills", () => {
     const result = await listInstalledMarketplaceSkills(tmpDir);
 
     expect(result).toEqual([]);
+    expect(loggerWarnMock).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "[skill-marketplace] Failed to read install records:",
+      ),
+    );
   });
 
   it("returns empty array when records file contains an array instead of an object", async () => {

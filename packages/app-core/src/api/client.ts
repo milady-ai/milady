@@ -5614,7 +5614,11 @@ export class MiladyClient {
       return await this.fetch<CodingAgentScratchWorkspace[]>(
         "/api/coding-agents/scratch",
       );
-    } catch {
+    } catch (err) {
+      console.warn(
+        "[api-client] Failed to list coding agent scratch workspaces:",
+        err,
+      );
       return [];
     }
   }

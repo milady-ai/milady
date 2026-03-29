@@ -659,7 +659,9 @@ export function CharacterEditor({
             setSelectedVoicePresetId(preset?.id ?? null);
           }
         }
-      } catch {}
+      } catch (err) {
+        console.warn("[CharacterEditor] Failed to load voice config:", err);
+      }
       setVoiceLoading(false);
     })();
   }, []);
@@ -1077,7 +1079,12 @@ export function CharacterEditor({
               if (parsed.chat) handleStyleEdit("chat", parsed.chat.join("\n"));
               if (parsed.post) handleStyleEdit("post", parsed.post.join("\n"));
             }
-          } catch {}
+          } catch (err) {
+            console.warn(
+              "[CharacterEditor] Failed to parse AI-generated style JSON:",
+              err,
+            );
+          }
         } else if (field === "chatExamples") {
           const formatted = normalizeCharacterMessageExamples(
             generated,
@@ -1099,7 +1106,12 @@ export function CharacterEditor({
                 handleCharacterArrayInput("postExamples", parsed.join("\n"));
               }
             }
-          } catch {}
+          } catch (err) {
+            console.warn(
+              "[CharacterEditor] Failed to parse AI-generated postExamples JSON:",
+              err,
+            );
+          }
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Generation failed";

@@ -16,7 +16,7 @@ import {
 import { request as requestHttps } from "node:https";
 import net from "node:net";
 import { Readable } from "node:stream";
-import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
+import { type Action, type HandlerOptions, type IAgentRuntime, logger } from "@elizaos/core";
 import { loadElizaConfig } from "../config/config";
 import {
   resolveApiToken,
@@ -648,7 +648,12 @@ export function loadCustomActions(): Action[] {
     const config = loadElizaConfig();
     const defs = config.customActions ?? [];
     return defs.filter((d) => d.enabled).map(defToAction);
-  } catch {
+  } catch (err) {
+    logger.warn(
+      `[custom-actions] Failed to load custom actions from config: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
     return [];
   }
 }

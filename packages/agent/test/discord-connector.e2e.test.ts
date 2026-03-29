@@ -192,24 +192,22 @@ describeIfPluginAvailable("Discord Connector - Setup & Authentication", () => {
     });
 
     it(
-      "successfully authenticates with Discord bot token",
+      "initializes the Discord runtime from the live bot token",
       async () => {
         expect(runtime).not.toBeNull();
         expect(process.env.DISCORD_BOT_TOKEN).toBeDefined();
-        // If runtime was created without throwing, authentication was successful
-        expect(true).toBe(true);
+        expect(runtime!.agentId).toBe(stringToUuid("discord-test-agent"));
+        expect(runtime!.character.name).toBe("TestBot");
       },
       TEST_TIMEOUT,
     );
 
     it(
-      "bot goes online after connection",
+      "retains the live test character after startup",
       async () => {
-        // This test validates that the bot successfully connects to Discord gateway
-        // In a real scenario, we would check the bot's online status
-        // For now, we verify that the runtime is initialized
         expect(runtime).not.toBeNull();
-        logger.info("[discord-connector] Bot connection test passed");
+        expect(runtime!.character).toBeDefined();
+        expect(runtime!.character.name).toBe("TestBot");
       },
       TEST_TIMEOUT,
     );
@@ -318,23 +316,18 @@ describe("Discord Connector - Integration", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("Discord uses DISCORD_BOT_TOKEN environment variable", () => {
-    // Discord connector expects DISCORD_BOT_TOKEN env var
-    // This is documented in src/runtime/eliza.ts:135
-    const expectedEnvVar = "DISCORD_BOT_TOKEN";
-    expect(expectedEnvVar).toBe("DISCORD_BOT_TOKEN");
+  it("Discord auto-enable requires a token in config", async () => {
+    const { isConnectorConfigured } = await import(
+      "../src/config/plugin-auto-enable"
+    );
 
-    // Verify env var can be set and read
-    const originalValue = process.env.DISCORD_BOT_TOKEN;
-    process.env.DISCORD_BOT_TOKEN = "test-token-value";
-    expect(process.env.DISCORD_BOT_TOKEN).toBe("test-token-value");
-
-    // Restore original value
-    if (originalValue === undefined) {
-      delete process.env.DISCORD_BOT_TOKEN;
-    } else {
-      process.env.DISCORD_BOT_TOKEN = originalValue;
-    }
+    expect(isConnectorConfigured("discord", { enabled: true })).toBe(false);
+    expect(
+      isConnectorConfigured("discord", {
+        enabled: true,
+        token: "test-token-value",
+      }),
+    ).toBe(true);
   });
 
   it("Discord is included in connector list", async () => {
@@ -345,43 +338,40 @@ describe("Discord Connector - Integration", () => {
     expect(connectors).toContain("discord");
   });
 
-  it("Discord connector can be enabled/disabled via config", () => {
-    const config1 = { connectors: { discord: { enabled: true } } };
-    const config2 = { connectors: { discord: { enabled: false } } };
+  it("Discord connector can be enabled/disabled via config", async () => {
+    const { isConnectorConfigured } = await import(
+      "../src/config/plugin-auto-enable"
+    );
 
-    expect(config1.connectors.discord.enabled).toBe(true);
-    expect(config2.connectors.discord.enabled).toBe(false);
+    expect(
+      isConnectorConfigured("discord", { enabled: true, token: "t" }),
+    ).toBe(true);
+    expect(
+      isConnectorConfigured("discord", { enabled: false, token: "t" }),
+    ).toBe(false);
   });
 
-  it("Discord auto-enables when token is present in config", () => {
-    // Documented in src/config/plugin-auto-enable.ts
-    // Discord auto-enables when connectors.discord.token is set
-    const configWithToken = {
-      connectors: {
-        discord: {
-          enabled: true,
-          token: "test-token-123",
-        },
-      },
-    };
+  it("Discord auto-enables when token is present in config", async () => {
+    const { isConnectorConfigured } = await import(
+      "../src/config/plugin-auto-enable"
+    );
 
-    expect(configWithToken.connectors.discord.token).toBeDefined();
-    expect(configWithToken.connectors.discord.enabled).toBe(true);
+    expect(
+      isConnectorConfigured("discord", { token: "test-token-123" }),
+    ).toBe(true);
   });
 
-  it("Discord respects explicit disable even with token present", () => {
-    // Even if token exists, enabled: false should disable
-    const configDisabled = {
-      connectors: {
-        discord: {
-          enabled: false,
-          token: "test-token-123",
-        },
-      },
-    };
+  it("Discord respects explicit disable even with token present", async () => {
+    const { isConnectorConfigured } = await import(
+      "../src/config/plugin-auto-enable"
+    );
 
-    expect(configDisabled.connectors.discord.token).toBeDefined();
-    expect(configDisabled.connectors.discord.enabled).toBe(false);
+    expect(
+      isConnectorConfigured("discord", {
+        enabled: false,
+        token: "test-token-123",
+      }),
+    ).toBe(false);
   });
 });
 
@@ -390,74 +380,71 @@ describe("Discord Connector - Integration", () => {
 // ---------------------------------------------------------------------------
 
 describe("Discord Connector - Configuration", () => {
-  it("validates Discord configuration schema", async () => {
-    // Test configuration structure from zod-schema.providers-core.ts
-    const validConfig = {
+  it("validates Discord DM config via the real Zod schema", async () => {
+    const { DiscordDmSchema } = await import(
+      "../src/config/zod-schema.providers-core"
+    );
+    const result = DiscordDmSchema.safeParse({
       enabled: true,
-      token: "test-token",
-      dm: {
-        enabled: true,
-        policy: "pairing" as const,
-      },
-      guilds: {},
-      actions: {
-        reactions: true,
-        messages: true,
-      },
-    };
+      policy: "pairing",
+    });
 
-    expect(validConfig.enabled).toBe(true);
-    expect(validConfig.dm.policy).toBe("pairing");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.policy).toBe("pairing");
+    }
   });
 
-  it("supports multi-account configuration", async () => {
-    const multiAccountConfig = {
+  it("rejects invalid DM policy via the real Zod schema", async () => {
+    const { DiscordDmSchema } = await import(
+      "../src/config/zod-schema.providers-core"
+    );
+    const result = DiscordDmSchema.safeParse({
+      policy: "invalid-policy",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("validates Discord account config via the real Zod schema", async () => {
+    const { DiscordAccountSchema } = await import(
+      "../src/config/zod-schema.providers-core"
+    );
+    const result = DiscordAccountSchema.safeParse({
       token: "main-token",
-      accounts: {
-        "main-bot": {
-          token: "bot-1-token",
-        },
-        "secondary-bot": {
-          token: "bot-2-token",
-        },
-      },
-    };
-
-    expect(multiAccountConfig.accounts).toBeDefined();
-    expect(Object.keys(multiAccountConfig.accounts)).toHaveLength(2);
-  });
-
-  it("validates message chunking configuration", async () => {
-    const chunkConfig = {
       maxLinesPerMessage: 17,
       textChunkLimit: 2000,
-      chunkMode: "length" as const,
-    };
+      chunkMode: "length",
+    });
 
-    expect(chunkConfig.maxLinesPerMessage).toBe(17);
-    expect(chunkConfig.textChunkLimit).toBe(2000);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.textChunkLimit).toBe(2000);
+      expect(result.data.chunkMode).toBe("length");
+    }
   });
 
-  it("validates PluralKit integration config", async () => {
-    const pluralkitConfig = {
-      pluralkit: {
-        enabled: true,
-        token: "pk-token-123",
-      },
-    };
+  it("validates Discord guild config via the real Zod schema", async () => {
+    const { DiscordGuildSchema } = await import(
+      "../src/config/zod-schema.providers-core"
+    );
+    const result = DiscordGuildSchema.safeParse({
+      requireMention: true,
+      reactionNotifications: "own",
+    });
 
-    expect(pluralkitConfig.pluralkit.enabled).toBe(true);
+    expect(result.success).toBe(true);
   });
 
-  it("validates privileged intents configuration", async () => {
-    const intentsConfig = {
-      intents: {
-        presence: true,
-        guildMembers: true,
-      },
-    };
+  it("rejects unknown fields in the strict guild channel schema", async () => {
+    const { DiscordGuildChannelSchema } = await import(
+      "../src/config/zod-schema.providers-core"
+    );
+    const result = DiscordGuildChannelSchema.safeParse({
+      allow: true,
+      bogusField: 123,
+    });
 
-    expect(intentsConfig.intents.presence).toBe(true);
-    expect(intentsConfig.intents.guildMembers).toBe(true);
+    expect(result.success).toBe(false);
   });
 });

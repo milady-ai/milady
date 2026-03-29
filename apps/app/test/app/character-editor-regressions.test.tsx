@@ -328,6 +328,88 @@ describe("CharacterEditor regressions", () => {
     expect(JSON.stringify(tree.toJSON())).toContain("Generation exploded");
   });
 
+  it("logs voice config load failures instead of swallowing them", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    clientMock.getConfig.mockRejectedValueOnce(new Error("config unavailable"));
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(CharacterEditor));
+    });
+
+    await flushEffects();
+
+    expect(tree).not.toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[CharacterEditor] Failed to load voice config:",
+      expect.objectContaining({ message: "config unavailable" }),
+    );
+  });
+
+  it("logs malformed style JSON instead of failing silently", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    clientMock.generateCharacterField.mockResolvedValue({
+      generated: "{not json",
+    });
+
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(CharacterEditor));
+    });
+
+    await flushEffects();
+    expect(tree).not.toBeNull();
+    if (!tree) {
+      throw new Error("expected CharacterEditor to render");
+    }
+
+    const root = tree.root;
+    const customizeBtn = root.find(
+      (node: TestRenderer.ReactTestInstance) =>
+        node.type === "button" &&
+        Array.isArray(node.children) &&
+        node.children.includes("Customize"),
+    );
+    await act(async () => {
+      customizeBtn.props.onClick();
+    });
+    await flushEffects();
+
+    const styleTab = root.find(
+      (node: TestRenderer.ReactTestInstance) =>
+        node.type === "button" &&
+        Array.isArray(node.children) &&
+        node.children.includes("Styles"),
+    );
+    await act(async () => {
+      styleTab.props.onClick();
+    });
+    await flushEffects();
+
+    const regenerateButtons = root.findAll(
+      (node: TestRenderer.ReactTestInstance) =>
+        node.type === "button" &&
+        Array.isArray(node.children) &&
+        (node.children.includes("Regenerate") ||
+          node.children.includes("charactereditor.Regenerate")),
+    );
+    const styleRegenerateButton = regenerateButtons.at(-1);
+    expect(styleRegenerateButton).toBeDefined();
+    if (!styleRegenerateButton) {
+      throw new Error("expected a style regenerate button");
+    }
+
+    await act(async () => {
+      await styleRegenerateButton.props.onClick();
+    });
+    await flushEffects();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[CharacterEditor] Failed to parse AI-generated style JSON:",
+      expect.any(Error),
+    );
+  });
+
   it("uses cached preview audio instead of triggering TTS generation", async () => {
     let createdAudio: {
       currentTime: number;

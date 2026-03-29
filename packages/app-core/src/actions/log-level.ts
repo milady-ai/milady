@@ -18,8 +18,19 @@ export const logLevelAction: Action = {
   ],
   description:
     "Set the log level for the current session (trace, debug, info, warn, error).",
-  validate: async (_runtime: IAgentRuntime, _message: Memory) => {
-    return true;
+  validate: async (_runtime: IAgentRuntime, message: Memory) => {
+    const text = (message.content.text || "").toLowerCase();
+    const hasLevel = /\b(trace|debug|info|warn|error)\b/.test(text);
+    if (!hasLevel) {
+      return false;
+    }
+
+    return (
+      /\/loglevel\b/.test(text) ||
+      /\blog(?:ging)?\s+level\b/.test(text) ||
+      (/\b(set|change|switch)\b/.test(text) &&
+        /\b(log(?:ging)?|verbosity)\b/.test(text))
+    );
   },
   handler: async (
     runtime: IAgentRuntime,
@@ -29,10 +40,12 @@ export const logLevelAction: Action = {
     callback?: HandlerCallback,
   ): Promise<import("@elizaos/core").ActionResult> => {
     const text = (message.content.text || "").toLowerCase();
-    const levels = ["trace", "debug", "info", "warn", "error"];
+    const levels = ["trace", "debug", "info", "warn", "error"] as const;
 
     // Extract level from text
-    const level = levels.find((l) => text.includes(l));
+    const level = levels.find((candidate) =>
+      new RegExp(`\\b${candidate}\\b`).test(text),
+    );
 
     if (!level) {
       if (callback) {

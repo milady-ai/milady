@@ -53,6 +53,22 @@ describe("logLevelAction", () => {
     );
   });
 
+  it("validate accepts explicit log level commands", async () => {
+    mockMessage.content.text = "Set log level to trace";
+
+    await expect(
+      logLevelAction.validate(mockRuntime as never, mockMessage as never),
+    ).resolves.toBe(true);
+  });
+
+  it("validate rejects unrelated messages that merely mention errors", async () => {
+    mockMessage.content.text = "I hit an error while syncing";
+
+    await expect(
+      logLevelAction.validate(mockRuntime as never, mockMessage as never),
+    ).resolves.toBe(false);
+  });
+
   it("should fail gracefully when invalid level provided", async () => {
     mockMessage.content.text = "/logLevel invalid_level";
 
@@ -71,6 +87,21 @@ describe("logLevelAction", () => {
         action: "LOG_LEVEL_FAILED",
       }),
     );
+  });
+
+  it("should not match partial words when extracting levels", async () => {
+    mockMessage.content.text = "Set log level to informational";
+
+    const result = await logLevelAction.handler(
+      mockRuntime,
+      mockMessage,
+      undefined,
+      undefined,
+      mockCallback,
+    );
+
+    expect(result.success).toBe(false);
+    expect(mockRuntime.logLevelOverrides.has("test-room-id")).toBe(false);
   });
 
   it("should fail if runtime does not support overrides (missing map)", async () => {
