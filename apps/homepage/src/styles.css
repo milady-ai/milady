@@ -1,41 +1,37 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
+@import "@miladyai/app-core/styles/base.css";
 @plugin "@tailwindcss/typography";
 
 @theme inline {
+  /* Fonts — homepage uses DM Sans (branded); app uses system stack */
   --font-sans: "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
   --font-display: "DM Sans", "Helvetica Neue", Arial, sans-serif;
 
-  /* Core palette - tinted darks, never pure black */
-  --color-dark: #08080a;
-  --color-dark-secondary: #0e0e11;
-  --color-light: #f4f4f6;
+  /* Map to shared tokens */
+  --color-dark: var(--bg);
+  --color-dark-secondary: var(--bg-elevated);
+  --color-light: var(--text);
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accent-hover);
+  --color-brand-muted: var(--accent-muted);
+  --color-accent: var(--accent);
+  --color-text-light: var(--text);
+  --color-text-dark: var(--text-strong);
+  --color-text-muted: var(--muted);
+  --color-text-subtle: var(--muted-strong);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-surface-hover: var(--bg-hover);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border);
 
-  /* Shared Binance-inspired yellow accent */
-  --color-brand: #f0b90b;
-  --color-brand-hover: #f3ba2f;
-  --color-brand-muted: #d8a000;
-  --color-accent: #f0b90b;
-
-  /* Text hierarchy */
-  --color-text-light: #e8e8ec;
-  --color-text-dark: #08080a;
-  --color-text-muted: #9494a2;
-  --color-text-subtle: #7a7a89;
-
-  /* Surfaces - layered depth */
-  --color-surface: #131316;
-  --color-surface-elevated: #1a1a1f;
-  --color-surface-hover: #1e1e24;
-  --color-border: #252530;
-  --color-border-subtle: #1c1c24;
-
-  /* Status colors - refined */
-  --color-status-running: #22c55e;
-  --color-status-paused: #f0b90b;
-  --color-status-stopped: #ef4444;
-  --color-status-provisioning: #f0b90b;
+  /* Homepage-only status tokens */
+  --color-status-running: var(--ok);
+  --color-status-paused: var(--warn);
+  --color-status-stopped: var(--danger);
+  --color-status-provisioning: var(--warn);
 }
 
 html {
