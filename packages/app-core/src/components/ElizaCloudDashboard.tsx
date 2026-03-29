@@ -190,24 +190,6 @@ function CloudAgentCard({
         <Button
           variant="outline"
           size="sm"
-          className="h-9 flex-1 rounded-xl border-border/40 text-xs"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenUI(agent.agent_id);
-          }}
-          disabled={openingUI || launching}
-        >
-          {openingUI ? (
-            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-          ) : (
-            <Globe className="w-3 h-3 mr-1" />
-          )}
-          {t("elizaclouddashboard.openWebUI", { defaultValue: "Web UI" })}
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
           className="h-9 rounded-xl border-danger/30 px-0 text-xs text-danger hover:bg-danger/10 sm:w-10"
           onClick={(event) => {
             event.stopPropagation();
@@ -1614,7 +1596,7 @@ export function CloudDashboard() {
                       onDelete={handleDeleteAgent}
                       deleting={deletingAgentId === agent.agent_id}
                       launching={launchingAgentId === agent.agent_id}
-                      onLaunch={handleLaunchAgent}
+                      onLaunch={handleOpenWebUI}
                       onOpenUI={handleOpenWebUI}
                       openingUI={openingWebUiAgentId === agent.agent_id}
                       onSelect={(id) => setSelectedAgentId(id)}
