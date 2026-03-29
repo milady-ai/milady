@@ -1401,112 +1401,18 @@ export function CloudDashboard() {
                     {t("elizaclouddashboard.PayWithCrypto")}
                   </span>
                 </div>
-                <p className="text-[11px] text-muted mb-3 flex items-center gap-1.5">
-                  {hasAgentWallet ? (
-                    hasWalletFunds ? (
-                      <>
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-ok flex-shrink-0" />
-                        {t("elizaclouddashboard.AgentWalletFunded", {
-                          defaultValue: "Wallet ready",
-                        })}
-                      </>
-                    ) : (
-                      <>
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-warn flex-shrink-0" />
-                        {t("elizaclouddashboard.AgentWalletDetected", {
-                          defaultValue: "Wallet empty",
-                        })}
-                      </>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-lg h-9"
+                  onClick={() =>
+                    void openExternalUrl(
+                      "https://www.elizacloud.ai/dashboard/settings?tab=billing",
                     )
-                  ) : (
-                    <>
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-muted flex-shrink-0" />
-                      {t("elizaclouddashboard.NoAgentWalletDetected", {
-                        defaultValue: "No wallet",
-                      })}
-                    </>
-                  )}
-                </p>
-                {cryptoQuote ? (
-                  <div className="space-y-2">
-                    <div className="text-xs">
-                      <span className="font-semibold text-txt-strong">
-                        {readString(cryptoQuote.currency) ?? "USDC"}{" "}
-                        {readString(cryptoQuote.amount) ?? "0"}
-                      </span>{" "}
-                      <span className="text-muted">
-                        {t("elizaclouddashboard.OnNetwork", {
-                          defaultValue: "on {{network}}",
-                          network: readString(cryptoQuote.network) ?? "—",
-                        })}
-                      </span>
-                    </div>
-                    {readString(cryptoQuote.payToAddress) && (
-                      <code className="block rounded-lg border border-border/40 bg-bg/30 px-2 py-1.5 text-[10px] text-txt-strong break-all">
-                        {readString(cryptoQuote.payToAddress)}
-                      </code>
-                    )}
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      {readString(cryptoQuote.paymentLinkUrl) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-lg text-xs h-8 flex-1"
-                          onClick={() =>
-                            void openExternalUrl(
-                              readString(cryptoQuote.paymentLinkUrl) ?? "",
-                            )
-                          }
-                        >
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          {t("elizaclouddashboard.Hosted", {
-                            defaultValue: "Hosted",
-                          })}
-                        </Button>
-                      )}
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className={`rounded-lg text-xs h-8 flex-1 ${CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME}`}
-                        disabled={
-                          cryptoPayBusy ||
-                          !hasAgentWallet ||
-                          !hasWalletFunds ||
-                          readString(cryptoQuote.network)?.toLowerCase() !==
-                            "bsc" ||
-                          !readString(cryptoQuote.payToAddress) ||
-                          !readString(cryptoQuote.amount)
-                        }
-                        onClick={() => void handlePayCryptoFromAgentWallet()}
-                      >
-                        {cryptoPayBusy ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          t("elizaclouddashboard.PayFromWallet", {
-                            defaultValue: "Pay from wallet",
-                          })
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-lg h-9"
-                    disabled={cryptoBusy || billingLoading}
-                    onClick={() => void handleCreateCryptoQuote()}
-                  >
-                    {cryptoBusy ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    {t("elizaclouddashboard.PayWithCrypto")}
-                  </Button>
-                )}
-                {cryptoPayResult && (
-                  <div className="mt-2 rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-xs text-ok">
-                    {cryptoPayResult}
-                  </div>
-                )}
+                  }
+                >
+                  <ExternalLink className="mr-1.5 h-3 w-3" />
+                  {t("elizaclouddashboard.PayWithCrypto")}
+                </Button>
               </div>
             </div>
           </div>
