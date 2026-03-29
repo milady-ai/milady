@@ -97,13 +97,3 @@ export function getVrmTitle(index: number): string {
   const safe = n > 0 ? n : 1;
   return assets[safe - 1]?.title ?? assets[0]?.title ?? "Avatar";
 }
-
-/** @deprecated Stub — always returns false. Retained for API compatibility. */
-export function isOfficialVrmIndex(_index: number): boolean {
-  return false;
-}
-
-/** @deprecated Stub — always returns false. Retained for API compatibility. */
-export function getVrmNeedsFlip(_index: number): boolean {
-  return false;
-}

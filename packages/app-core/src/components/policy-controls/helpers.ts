@@ -13,11 +13,6 @@ export function parseAmount(value: string): number {
   return Number.isNaN(n) ? 0 : n;
 }
 
-/**
- * @deprecated Use parseAmount instead.
- */
-export const ethToNumber = parseAmount;
-
 export function formatHour(h: number): string {
   if (h === 0) return "12:00 AM";
   if (h === 12) return "12:00 PM";
