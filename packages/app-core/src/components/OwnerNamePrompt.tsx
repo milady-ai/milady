@@ -7,7 +7,7 @@
  * Silently skips TTS if cloud is not connected.
  */
 
-import { Button, Input } from "@miladyai/ui";
+import { Button, Input, Z_OVERLAY } from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeOwnerName, OWNER_NAME_MAX_LENGTH } from "../utils/owner-name";
 
@@ -83,7 +83,7 @@ export function OwnerNamePrompt({ open, onSubmit }: OwnerNamePromptProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className={`fixed inset-0 z-[${Z_OVERLAY}] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300`}>
       <div className="mx-4 w-full max-w-sm rounded-3xl border border-border/40 bg-card/95 px-6 py-8 shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-4 duration-500">
         <div className="text-center">
           <p className="text-lg font-semibold text-txt-strong">

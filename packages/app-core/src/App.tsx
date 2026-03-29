@@ -11,6 +11,7 @@ import {
   DrawerSheetHeader,
   DrawerSheetTitle,
   ErrorBoundary,
+  Z_MODAL,
 } from "@miladyai/ui";
 import {
   type ReactNode,
@@ -721,7 +722,7 @@ export function App() {
 
       {showOnboarding && (
         <div
-          className="fixed inset-0 z-[100] transition-opacity duration-700"
+          className={`fixed inset-0 z-[${Z_MODAL}] transition-opacity duration-700`}
           style={{ opacity: fadingOutOnboarding ? 0 : 1 }}
         >
           <OnboardingWizard />

@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
+import { Z_DIALOG, Z_DIALOG_OVERLAY } from "../../lib/floating-layers";
 
 const DrawerSheet = DialogPrimitive.Root;
 
@@ -19,7 +20,7 @@ const DrawerSheetOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[160] bg-black/72 backdrop-blur-[2px] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      `fixed inset-0 z-[${Z_DIALOG_OVERLAY}] bg-black/72 backdrop-blur-[2px] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`,
       className,
     )}
     {...props}
@@ -43,7 +44,7 @@ const DrawerSheetContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed left-[max(0.5rem,var(--safe-area-left,0px))] right-[max(0.5rem,var(--safe-area-right,0px))] bottom-[max(0.5rem,var(--safe-area-bottom,0px))] z-[170] flex max-h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),44rem)] flex-col overflow-hidden rounded-[1.25rem] border border-border/70 bg-bg shadow-[0_24px_70px_rgba(2,8,23,0.28)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-6 data-[state=open]:slide-in-from-bottom-6",
+          `fixed left-[max(0.5rem,var(--safe-area-left,0px))] right-[max(0.5rem,var(--safe-area-right,0px))] bottom-[max(0.5rem,var(--safe-area-bottom,0px))] z-[${Z_DIALOG}] flex max-h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),44rem)] flex-col overflow-hidden rounded-[1.25rem] border border-border/70 bg-bg shadow-[0_24px_70px_rgba(2,8,23,0.28)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-6 data-[state=open]:slide-in-from-bottom-6`,
           className,
         )}
         {...props}

@@ -1,4 +1,4 @@
-import { Spinner } from "@miladyai/ui";
+import { Spinner, Z_SHELL_OVERLAY } from "@miladyai/ui";
 import type { ActionNotice } from "../state/types";
 import { BugReportModal } from "./BugReportModal";
 import { CommandPalette } from "./CommandPalette";
@@ -20,7 +20,7 @@ export function ShellOverlays({
       <GlobalEmoteOverlay />
       {actionNotice && (
         <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-lg text-[13px] font-medium z-[10000] flex items-center gap-2.5 max-w-[min(92vw,28rem)] ${
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-lg text-[13px] font-medium z-[${Z_SHELL_OVERLAY}] flex items-center gap-2.5 max-w-[min(92vw,28rem)] ${
             actionNotice.tone === "error"
               ? "bg-danger text-white"
               : actionNotice.tone === "success"

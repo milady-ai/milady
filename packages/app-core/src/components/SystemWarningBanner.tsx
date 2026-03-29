@@ -1,4 +1,4 @@
-import { Button } from "@miladyai/ui";
+import { Button, Z_SYSTEM_BANNER } from "@miladyai/ui";
 import { useEffect, useRef } from "react";
 import { useApp } from "../state";
 
@@ -56,7 +56,7 @@ export function SystemWarningBanner() {
           key={message}
           role="alert"
           aria-live="assertive"
-          className="fixed left-0 right-0 z-[9998] flex items-center justify-between gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg"
+          className={`fixed left-0 right-0 z-[${Z_SYSTEM_BANNER}] flex items-center justify-between gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg`}
           style={{ top: `${baseTop + index * 36}px` }}
         >
           <span className="truncate">{message}</span>

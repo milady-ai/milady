@@ -1,4 +1,5 @@
 import type { CodingAgentSession } from "../api";
+import { Z_OVERLAY } from "@miladyai/ui";
 import { PtyConsoleBase } from "./PtyConsoleBase";
 
 interface PtyConsoleSidePanelProps {
@@ -14,7 +15,7 @@ export function PtyConsoleSidePanel({
 }: PtyConsoleSidePanelProps) {
   return (
     <div
-      className="fixed top-0 right-0 bottom-0 z-[200] flex flex-col bg-bg border-l border-border shadow-2xl"
+      className={`fixed top-0 right-0 bottom-0 z-[${Z_OVERLAY}] flex flex-col bg-bg border-l border-border shadow-2xl`}
       style={{ width: "min(480px, 40vw)" }}
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}

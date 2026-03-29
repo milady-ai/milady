@@ -1,4 +1,4 @@
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@miladyai/ui";
+import { Button, Tooltip, TooltipContent, TooltipTrigger, Z_OVERLAY } from "@miladyai/ui";
 import { PencilLine, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
@@ -127,7 +127,7 @@ function TruncatingConversationTitle({
         align="start"
         sideOffset={10}
         collisionPadding={12}
-        className="z-[200] max-w-[min(90vw,22rem)] whitespace-normal break-words px-3 py-2 text-[13px] leading-snug"
+        className={`z-[${Z_OVERLAY}] max-w-[min(90vw,22rem)] whitespace-normal break-words px-3 py-2 text-[13px] leading-snug`}
       >
         {displayTitle}
       </TooltipContent>
