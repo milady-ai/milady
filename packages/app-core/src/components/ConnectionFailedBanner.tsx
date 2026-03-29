@@ -69,7 +69,7 @@ export function ConnectionFailedBanner() {
             variant="secondary"
             size="sm"
             onClick={retryBackendConnection}
-            className="rounded bg-white px-3 py-1 text-[12px] font-semibold text-red-700 hover:bg-red-50 border-transparent"
+            className="rounded bg-[var(--card)] px-3 py-1 text-[12px] font-semibold text-[var(--destructive)] hover:bg-[var(--bg-hover)] border-transparent"
           >
             {t("vectorbrowserview.RetryConnection")}
           </Button>

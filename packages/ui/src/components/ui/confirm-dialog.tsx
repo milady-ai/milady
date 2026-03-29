@@ -28,7 +28,7 @@ export interface ConfirmDialogProps {
 const TONE_CLASSES: Record<ConfirmTone, string> = {
   danger:
     "border-destructive/70 bg-destructive text-destructive-fg hover:border-destructive hover:bg-destructive",
-  warn: "border-warn/55 bg-warn/92 text-black hover:border-warn hover:bg-warn",
+  warn: "border-warn/55 bg-warn/92 text-[var(--accent-foreground)] hover:border-warn hover:bg-warn",
   default:
     "border-accent/55 bg-accent/22 text-accent-fg hover:border-accent/75 hover:bg-accent/32",
 };
