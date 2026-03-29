@@ -203,21 +203,21 @@ export async function handleCloudCompatRoute(
     }
 
     if (parsed.kind === "json") {
-      // Cloud API may not have all routes deployed yet. Return a friendlier
-      // message instead of a raw 404 so the dashboard can show "coming soon".
-      // TODO: Remove or refine this unconditional 404 intercept when Cloud
-      // goes to production — legitimate 404s (e.g. agent not found) will be
-      // incorrectly masked as "coming soon".
       if (upstreamRes.status === 404) {
-        sendJson(
-          res,
-          {
-            success: false,
-            error: "This Cloud feature is not available yet.",
-            code: "CLOUD_NOT_READY",
-          },
-          404,
-        );
+        const isResourcePath = /\/compat\/api\/v\d+\/\w+\/[^/]+/.test(pathname);
+        if (isResourcePath) {
+          sendJson(res, parsed.body, 404);
+        } else {
+          sendJson(
+            res,
+            {
+              success: false,
+              error: "This Cloud feature is not available yet.",
+              code: "CLOUD_NOT_READY",
+            },
+            404,
+          );
+        }
         return true;
       }
       sendJson(res, parsed.body, upstreamRes.status);

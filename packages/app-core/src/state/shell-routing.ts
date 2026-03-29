@@ -25,6 +25,10 @@ export function getTabForShellView(view: ShellView, lastNativeTab: Tab): Tab {
   return lastNativeTab;
 }
 
+/**
+ * Character-select auto-redirect on launch is currently disabled.
+ * The parameter shape is retained so callers stay wired for re-enablement.
+ */
 export function shouldStartAtCharacterSelectOnLaunch(_params: {
   onboardingNeedsOptions: boolean;
   onboardingMode: OnboardingMode;

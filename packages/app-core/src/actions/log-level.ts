@@ -18,8 +18,14 @@ export const logLevelAction: Action = {
   ],
   description:
     "Set the log level for the current session (trace, debug, info, warn, error).",
-  validate: async (_runtime: IAgentRuntime, _message: Memory) => {
-    return true;
+  validate: async (_runtime: IAgentRuntime, message: Memory) => {
+    const text = (message.content.text || "").toLowerCase();
+    const levels = ["trace", "debug", "info", "warn", "error"];
+    return (
+      levels.some((l) => text.includes(l)) ||
+      /log\s*level/i.test(text) ||
+      /set\s*(debug|verbose|logging)/i.test(text)
+    );
   },
   handler: async (
     runtime: IAgentRuntime,
