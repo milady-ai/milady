@@ -316,22 +316,12 @@ describe("Discord Connector - Integration", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("Discord auto-enable checks DISCORD_BOT_TOKEN env var", async () => {
+  it("Discord auto-enable requires token in config", async () => {
     const { isConnectorConfigured } = await import(
       "../src/config/plugin-auto-enable"
     );
-    const originalValue = process.env.DISCORD_BOT_TOKEN;
-    try {
-      process.env.DISCORD_BOT_TOKEN = "test-token-value";
-      const configured = isConnectorConfigured("discord", { enabled: true });
-      expect(configured).toBe(true);
-    } finally {
-      if (originalValue === undefined) {
-        delete process.env.DISCORD_BOT_TOKEN;
-      } else {
-        process.env.DISCORD_BOT_TOKEN = originalValue;
-      }
-    }
+    expect(isConnectorConfigured("discord", { enabled: true })).toBe(false);
+    expect(isConnectorConfigured("discord", { enabled: true, token: "test-token-value" })).toBe(true);
   });
 
   it("Discord is included in connector list", async () => {
