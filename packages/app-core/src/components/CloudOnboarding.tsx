@@ -37,7 +37,7 @@ export function CloudOnboarding() {
           <div className="text-4xl font-bold tracking-tight">eliza</div>
           <p className="text-muted text-sm text-center">
             {t("cloudonboarding.ConnectToElizaCloud", {
-              defaultValue: "Connect to Eliza Cloud to get started",
+              defaultValue: "Sign in to get started",
             })}
           </p>
         </div>
@@ -76,7 +76,7 @@ export function CloudOnboarding() {
                       onClick={() => void openExternalUrl(urlMatch[1])}
                     >
                       {t("cloudonboarding.ClickToOpenLogin", {
-                        defaultValue: "Click here to open the login page",
+                        defaultValue: "Open login page",
                       })}
                     </Button>
                   ) : (

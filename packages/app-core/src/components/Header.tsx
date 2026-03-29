@@ -382,8 +382,7 @@ export function Header({
                   </DialogTitle>
                   <DialogDescription className="sr-only">
                     {t("header.MobileNavigationDescription", {
-                      defaultValue:
-                        "Switch between Milady sections from the mobile navigation drawer.",
+                      defaultValue: "Navigate between sections",
                     })}
                   </DialogDescription>
                 </div>

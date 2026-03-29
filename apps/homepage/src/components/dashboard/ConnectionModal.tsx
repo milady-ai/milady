@@ -1,17 +1,5 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Field,
-  FieldDescription,
-  FieldLabel,
-  Input,
-} from "@miladyai/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ConnectionModalProps {
   onSubmit: (data: {
@@ -29,14 +17,35 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
   const [token, setToken] = useState("");
   const connectDisabled = !name.trim() || !url.trim();
 
-  return (
-    <Dialog
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center"
+      role="presentation"
     >
-      <DialogContent className="w-[min(100%-2rem,32rem)] rounded-2xl border-border bg-surface/98 p-0 shadow-2xl backdrop-blur-xl">
+      {/* Overlay — click outside to close */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        role="none"
+        onClick={onClose}
+        onKeyDown={() => {}}
+      />
+
+      {/* Modal */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="connect-modal-title"
+        className="relative z-10 w-[min(100%-2rem,28rem)] border border-border bg-[#0c0c0e] shadow-2xl"
+      >
         <form
           className="space-y-5 p-6"
           onSubmit={(event) => {
@@ -49,78 +58,96 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
             });
           }}
         >
-          <DialogHeader className="space-y-2 text-left">
-            <DialogTitle className="font-sans text-xl font-semibold tracking-tight text-text-light">
-              Connect Remote Agent
-            </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed text-text-muted">
-              Connect to a self-hosted Milady backend without leaving the
-              dashboard.
-            </DialogDescription>
-          </DialogHeader>
+          {/* Header */}
+          <div className="space-y-1">
+            <h2
+              id="connect-modal-title"
+              className="font-mono text-sm font-medium text-text-light tracking-wide"
+            >
+              CONNECT REMOTE AGENT
+            </h2>
+            <p className="font-mono text-xs text-text-muted">
+              Connect to a self-hosted Milady backend.
+            </p>
+          </div>
 
-          <Field>
-            <FieldLabel htmlFor="homepage-remote-name">Name</FieldLabel>
-            <Input
-              id="homepage-remote-name"
+          {/* Name */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="connect-name"
+              className="font-mono text-[10px] tracking-wider text-text-subtle"
+            >
+              NAME
+            </label>
+            <input
+              id="connect-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Remote Agent"
               autoComplete="off"
-              className="h-11 rounded-xl border-border bg-dark/80 text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35"
+              className="w-full h-10 px-3 font-mono text-sm bg-dark border border-border text-text-light placeholder:text-text-muted/50 focus:outline-none focus:border-brand/50"
             />
-          </Field>
+          </div>
 
-          <Field>
-            <FieldLabel htmlFor="homepage-remote-url">URL</FieldLabel>
-            <Input
-              id="homepage-remote-url"
+          {/* URL */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="connect-url"
+              className="font-mono text-[10px] tracking-wider text-text-subtle"
+            >
+              URL
+            </label>
+            <input
+              id="connect-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               type="url"
               placeholder="https://my-agent.example.com"
               autoComplete="url"
-              className="h-11 rounded-xl border-border bg-dark/80 text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35"
+              className="w-full h-10 px-3 font-mono text-sm bg-dark border border-border text-text-light placeholder:text-text-muted/50 focus:outline-none focus:border-brand/50"
             />
-            <FieldDescription>
-              Use the public Milady backend URL exposed by the remote agent.
-            </FieldDescription>
-          </Field>
+          </div>
 
-          <Field>
-            <FieldLabel htmlFor="homepage-remote-token">
-              Access Key <span className="text-text-muted/70">(optional)</span>
-            </FieldLabel>
-            <Input
-              id="homepage-remote-token"
+          {/* Token */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="connect-token"
+              className="font-mono text-[10px] tracking-wider text-text-subtle"
+            >
+              ACCESS KEY <span className="text-text-muted/50">(optional)</span>
+            </label>
+            <input
+              id="connect-token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="milady_xxx..."
               type="password"
               autoComplete="off"
-              className="h-11 rounded-xl border-border bg-dark/80 text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35"
+              className="w-full h-10 px-3 font-mono text-sm bg-dark border border-border text-text-light placeholder:text-text-muted/50 focus:outline-none focus:border-brand/50"
             />
-          </Field>
+          </div>
 
-          <DialogFooter className="gap-3 sm:gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="h-11 rounded-xl border-border bg-dark/50 text-text-light hover:bg-dark/80"
-            >
-              Cancel
-            </Button>
-            <Button
+          {/* Actions */}
+          <div className="flex items-center gap-3 pt-2">
+            <button
               type="submit"
               disabled={connectDisabled}
-              className="h-11 flex-1 rounded-xl border-brand/70 bg-brand text-dark hover:bg-brand-hover sm:flex-none"
+              className="px-5 py-2.5 font-mono text-xs tracking-wider bg-brand text-dark font-medium
+                hover:bg-brand/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Connect
-            </Button>
-          </DialogFooter>
+              CONNECT
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 font-mono text-xs tracking-wider text-text-muted hover:text-text-light transition-colors"
+            >
+              CANCEL
+            </button>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body,
   );
 }

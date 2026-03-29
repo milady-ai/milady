@@ -46,12 +46,16 @@ export function WalletsPanel({ managedAgent }: WalletsPanelProps) {
   const fetchWalletData = useCallback(async () => {
     if (!managedAgent.sourceUrl && !managedAgent.client) return;
 
+    // For cloud agents without a matched sandbox, fall back to the cloud API
+    // token so requests can be authenticated through the cloud proxy.
+    const authToken =
+      managedAgent.apiToken ?? managedAgent.cloudClient?.getToken();
     const client =
       managedAgent.client ??
       new CloudApiClient({
         url: managedAgent.sourceUrl ?? "",
         type: managedAgent.source === "cloud" ? "cloud" : "remote",
-        authToken: managedAgent.apiToken,
+        authToken,
       });
 
     try {

@@ -154,6 +154,9 @@ function handleUpstreamError(error: unknown, res: http.ServerResponse): void {
   sendJsonError(res, "Failed to reach Eliza Cloud.", 502);
 }
 
+/** Paths under /api/cloud/v1/ are forwarded directly as /api/v1/ on the cloud backend. */
+const CLOUD_V1_PREFIX = "/api/cloud/v1/";
+
 export async function handleCloudCompatRoute(
   req: http.IncomingMessage,
   res: http.ServerResponse,
@@ -161,7 +164,9 @@ export async function handleCloudCompatRoute(
   method: string,
   state: CloudCompatRouteState,
 ): Promise<boolean> {
-  if (!pathname.startsWith("/api/cloud/compat/")) return false;
+  const isCompatRoute = pathname.startsWith("/api/cloud/compat/");
+  const isV1Route = pathname.startsWith(CLOUD_V1_PREFIX);
+  if (!isCompatRoute && !isV1Route) return false;
 
   const apiKey = state.config.cloud?.apiKey?.trim();
   if (!apiKey || apiKey.toUpperCase() === "[REDACTED]") {
@@ -180,7 +185,11 @@ export async function handleCloudCompatRoute(
     return true;
   }
 
-  const compatPath = pathname.replace("/api/cloud", "/api");
+  // /api/cloud/compat/* → /api/compat/*  (existing mapping)
+  // /api/cloud/v1/*    → /api/v1/*       (milady v1 endpoints, e.g. pairing-token)
+  const compatPath = isV1Route
+    ? pathname.slice("/api/cloud".length)
+    : pathname.replace("/api/cloud", "/api");
   const fullUrl = req.url ?? pathname;
   const qsIndex = fullUrl.indexOf("?");
   const queryString = qsIndex >= 0 ? fullUrl.slice(qsIndex) : "";
