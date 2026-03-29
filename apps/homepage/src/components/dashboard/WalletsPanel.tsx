@@ -123,9 +123,9 @@ export function WalletsPanel({ managedAgent }: WalletsPanelProps) {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="flex items-center gap-3 px-4 py-3 border border-red-500/30 bg-red-500/5">
-          <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-          <span className="font-mono text-xs text-red-400">{error}</span>
+        <div className="flex items-center gap-3 px-4 py-3 border border-status-stopped/30 bg-status-stopped/5">
+          <span className="w-2 h-2 rounded-full bg-status-stopped shrink-0" />
+          <span className="font-mono text-xs text-status-stopped">{error}</span>
         </div>
       )}
 
@@ -155,7 +155,7 @@ export function WalletsPanel({ managedAgent }: WalletsPanelProps) {
 
       {/* Auto-refresh indicator */}
       <div className="flex items-center gap-2 pt-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-[status-pulse_2s_ease-in-out_infinite]" />
+        <div className="w-1.5 h-1.5 rounded-full bg-status-running animate-[status-pulse_2s_ease-in-out_infinite]" />
         <span className="font-mono text-[10px] text-text-subtle tracking-wide">
           LIVE · 30S
         </span>

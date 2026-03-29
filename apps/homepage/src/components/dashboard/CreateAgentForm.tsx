@@ -246,7 +246,7 @@ export function CreateAgentForm({
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
           <div className="flex items-center gap-1.5">
             <span
-              className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-emerald-500" : "bg-brand animate-[status-pulse_2s_ease-in-out_infinite]"}`}
+              className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-status-running" : "bg-brand animate-[status-pulse_2s_ease-in-out_infinite]"}`}
             />
           </div>
           <span
@@ -279,7 +279,7 @@ export function CreateAgentForm({
             {deploySteps.map((s) => (
               <li key={s.id} className="flex items-center gap-3">
                 {s.status === "done" && (
-                  <span className="text-emerald-400 w-4 text-center">✓</span>
+                  <span className="text-status-running w-4 text-center">✓</span>
                 )}
                 {s.status === "active" && (
                   <span className="text-brand w-4 text-center animate-pulse">
@@ -290,7 +290,7 @@ export function CreateAgentForm({
                   <span className="text-text-subtle w-4 text-center">○</span>
                 )}
                 {s.status === "error" && (
-                  <span className="text-red-400 w-4 text-center">✗</span>
+                  <span className="text-status-stopped w-4 text-center">✗</span>
                 )}
                 <span
                   className={
@@ -311,7 +311,7 @@ export function CreateAgentForm({
           {/* Done state — brief flash */}
           {step === "done" && (
             <div className="mt-6 pt-4 border-t border-border-subtle">
-              <div className="flex items-center gap-2 text-emerald-400">
+              <div className="flex items-center gap-2 text-status-running">
                 <span>→</span>
                 <span className="text-text-light">{createdName}</span>
                 <span className="text-text-subtle">is live</span>
@@ -329,7 +329,7 @@ export function CreateAgentForm({
       <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         {/* Terminal header bar */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+          <span className="w-2.5 h-2.5 rounded-full bg-status-stopped" />
           <span
             ref={errorHeadingRef}
             tabIndex={-1}
@@ -347,7 +347,7 @@ export function CreateAgentForm({
           </div>
 
           <div
-            className="text-red-400 mb-6"
+            className="text-status-stopped mb-6"
             role="alert"
             aria-live="assertive"
             aria-atomic="true"
@@ -474,7 +474,7 @@ export function CreateAgentForm({
       {/* Terminal header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-dark-secondary border-b border-border">
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span className="w-2.5 h-2.5 rounded-full bg-status-running" />
           <span className="font-mono text-xs text-text-muted">new agent</span>
         </div>
         <span className="font-mono text-[10px] text-text-subtle tracking-wide">
@@ -610,7 +610,7 @@ export function CreateAgentForm({
                       size="icon"
                       onClick={() => removeEnvVar(i)}
                       aria-label={`Remove environment variable ${i + 1}`}
-                      className="h-10 w-10 rounded-xl border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-400"
+                      className="h-10 w-10 rounded-xl border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-status-stopped/10 hover:text-status-stopped"
                     >
                       ×
                     </Button>

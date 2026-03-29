@@ -146,7 +146,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
               type="button"
               onClick={() => signOut()}
               className="w-full flex items-center gap-2 px-4 py-3 
-                font-mono text-[11px] text-text-subtle hover:text-red-400 
+                font-mono text-[11px] text-text-subtle hover:text-status-stopped 
                 border-t border-border-subtle transition-colors"
             >
               <svg
@@ -196,7 +196,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
             <button
               type="button"
               onClick={() => signOut()}
-              className="flex-shrink-0 px-3 py-2 font-mono text-[11px] text-text-subtle hover:text-red-400 transition-colors"
+              className="flex-shrink-0 px-3 py-2 font-mono text-[11px] text-text-subtle hover:text-status-stopped transition-colors"
             >
               EXIT
             </button>

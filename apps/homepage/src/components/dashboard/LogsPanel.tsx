@@ -38,7 +38,7 @@ export function LogsPanel() {
                   className={
                     line.level === "DEBUG"
                       ? "text-text-subtle"
-                      : "text-emerald-400/70"
+                      : "text-status-running/70"
                   }
                 >
                   [{line.level}]

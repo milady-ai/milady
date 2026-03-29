@@ -33,10 +33,10 @@ const STATE_CONFIG: Record<
   { color: string; bg: string; bgLight: string; label: string; border: string }
 > = {
   running: {
-    color: "text-emerald-400",
-    bg: "bg-emerald-500",
-    bgLight: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
+    color: "text-status-running",
+    bg: "bg-status-running",
+    bgLight: "bg-status-running/10",
+    border: "border-status-running/20",
     label: "LIVE",
   },
   paused: {
@@ -47,10 +47,10 @@ const STATE_CONFIG: Record<
     label: "PAUSED",
   },
   stopped: {
-    color: "text-red-400",
-    bg: "bg-red-500",
-    bgLight: "bg-red-500/10",
-    border: "border-red-500/20",
+    color: "text-status-stopped",
+    bg: "bg-status-stopped",
+    bgLight: "bg-status-stopped/10",
+    border: "border-status-stopped/20",
     label: "STOPPED",
   },
   provisioning: {
@@ -428,9 +428,9 @@ function ActionBtn({
   disabled?: boolean;
 }) {
   const colors = {
-    success: "text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20",
+    success: "text-status-running hover:bg-status-running/10 border-status-running/20",
     warn: "text-brand hover:bg-brand/10 border-brand/20",
-    danger: "text-red-400 hover:bg-red-500/10 border-red-500/20",
+    danger: "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
   };
 
   return (

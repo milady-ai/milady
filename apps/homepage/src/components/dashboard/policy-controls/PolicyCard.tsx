@@ -65,7 +65,7 @@ export function PolicyCard({
           <button
             type="button"
             onClick={onRemove}
-            className="p-1 text-text-subtle hover:text-red-400 transition-colors"
+            className="p-1 text-text-subtle hover:text-status-stopped transition-colors"
             title="Remove policy"
           >
             <svg

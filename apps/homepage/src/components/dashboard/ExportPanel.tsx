@@ -102,7 +102,7 @@ export function ExportPanel({ connectionId }: ExportPanelProps) {
         <div
           className={`px-4 py-2 border font-mono text-xs ${
             status.startsWith("Error") || status.startsWith("Restore failed")
-              ? "border-red-500/30 bg-red-500/5 text-red-400"
+              ? "border-status-stopped/30 bg-status-stopped/5 text-status-stopped"
               : "border-brand/30 bg-brand/5 text-brand"
           }`}
         >

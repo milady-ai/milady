@@ -180,12 +180,12 @@ export function CreditsPanel() {
     return (
       <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         <div className="px-4 py-2.5 bg-dark-secondary border-b border-border">
-          <span className="font-mono text-xs text-red-400">
+          <span className="font-mono text-xs text-status-stopped">
             $ credits --status [FAILED]
           </span>
         </div>
         <div className="p-6 text-center">
-          <p className="font-mono text-xs text-red-400 mb-3">{error}</p>
+          <p className="font-mono text-xs text-status-stopped mb-3">{error}</p>
           <button
             type="button"
             onClick={() => window.location.reload()}
@@ -218,7 +218,7 @@ export function CreditsPanel() {
         <div
           className={`p-6 ${
             isCriticalBalance
-              ? "bg-red-500/5 border-r border-red-500/20"
+              ? "bg-status-stopped/5 border-r border-status-stopped/20"
               : isLowBalance
                 ? "bg-brand/5 border-r border-brand/20"
                 : "bg-brand/5 border-r border-brand/20"
@@ -229,7 +229,7 @@ export function CreditsPanel() {
               CURRENT BALANCE
             </p>
             {isCriticalBalance && (
-              <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20">
+              <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-status-stopped/10 text-status-stopped border border-status-stopped/20">
                 CRITICAL
               </span>
             )}
@@ -242,7 +242,7 @@ export function CreditsPanel() {
           <p
             className={`font-mono text-4xl font-semibold tabular-nums tracking-tight ${
               isCriticalBalance
-                ? "text-red-400"
+                ? "text-status-stopped"
                 : isLowBalance
                   ? "text-brand"
                   : "text-brand"
@@ -266,10 +266,10 @@ export function CreditsPanel() {
               <p
                 className={`font-mono text-sm font-medium mt-0.5 ${
                   daysRemaining < 1
-                    ? "text-red-400"
+                    ? "text-status-stopped"
                     : daysRemaining < 7
                       ? "text-brand"
-                      : "text-emerald-400"
+                      : "text-status-running"
                 }`}
               >
                 {daysRemaining < 1
@@ -342,15 +342,15 @@ export function CreditsPanel() {
         <div
           className={`flex items-center gap-3 px-4 py-3 border ${
             isCriticalBalance
-              ? "border-red-500/30 bg-red-500/5"
+              ? "border-status-stopped/30 bg-status-stopped/5"
               : "border-brand/30 bg-brand/5"
           }`}
         >
           <span
-            className={`w-2 h-2 rounded-full ${isCriticalBalance ? "bg-red-500 animate-pulse" : "bg-brand"}`}
+            className={`w-2 h-2 rounded-full ${isCriticalBalance ? "bg-status-stopped animate-pulse" : "bg-brand"}`}
           />
           <p
-            className={`font-mono text-xs ${isCriticalBalance ? "text-red-400" : "text-brand"}`}
+            className={`font-mono text-xs ${isCriticalBalance ? "text-status-stopped" : "text-brand"}`}
           >
             {isCriticalBalance
               ? "Balance critically low — agents may be suspended soon. Top up now."
@@ -445,7 +445,7 @@ export function CreditsPanel() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="border border-border-subtle bg-dark p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="w-2 h-2 rounded-full bg-status-running" />
                     <p className="font-mono text-[9px] tracking-wider text-text-subtle">
                       RUNNING AGENT
                     </p>
@@ -491,7 +491,7 @@ export function CreditsPanel() {
                 <span
                   className={`font-mono text-[10px] tracking-wider px-2 py-0.5 ${
                     autoTopUp?.enabled || org?.autoTopUpEnabled
-                      ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                      ? "text-status-running bg-status-running/10 border border-status-running/20"
                       : "text-text-subtle bg-dark border border-border-subtle"
                   }`}
                 >
@@ -509,7 +509,7 @@ export function CreditsPanel() {
                     className={`font-mono text-xs ${
                       autoTopUp?.hasPaymentMethod || org?.hasPaymentMethod
                         ? "text-brand"
-                        : "text-red-400"
+                        : "text-status-stopped"
                     }`}
                   >
                     {autoTopUp?.hasPaymentMethod || org?.hasPaymentMethod
@@ -727,7 +727,7 @@ export function CreditsPanel() {
                         </span>
                         <span
                           className={`font-mono text-[10px] tabular-nums text-right ${
-                            isRunning ? "text-emerald-400" : "text-text-muted"
+                            isRunning ? "text-status-running" : "text-text-muted"
                           }`}
                         >
                           {isRunning
@@ -777,7 +777,7 @@ function CreditPackCard({ pack }: { pack: CreditPack }) {
         <div className="absolute -top-px left-0 right-0 h-px bg-brand" />
       )}
       {pack.bonus > 0 && (
-        <span className="absolute top-3 right-3 font-mono text-[9px] tracking-wider px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span className="absolute top-3 right-3 font-mono text-[9px] tracking-wider px-1.5 py-0.5 bg-status-running/10 text-status-running border border-status-running/20">
           +{pack.bonus}%
         </span>
       )}

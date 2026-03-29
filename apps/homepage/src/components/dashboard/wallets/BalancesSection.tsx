@@ -145,8 +145,8 @@ function EvmChainCard({
 
       {/* Chain error */}
       {chain.error && (
-        <div className="px-4 py-2 bg-red-500/5 border-t border-red-500/20">
-          <span className="font-mono text-[10px] text-red-400">
+        <div className="px-4 py-2 bg-status-stopped/5 border-t border-status-stopped/20">
+          <span className="font-mono text-[10px] text-status-stopped">
             {chain.error}
           </span>
         </div>

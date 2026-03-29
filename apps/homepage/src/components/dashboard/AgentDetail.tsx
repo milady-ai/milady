@@ -51,9 +51,9 @@ function formatDate(dateStr?: string): string {
 }
 
 const STATE_COLORS: Record<string, { text: string; bg: string }> = {
-  running: { text: "text-emerald-400", bg: "bg-emerald-500" },
+  running: { text: "text-status-running", bg: "bg-status-running" },
   paused: { text: "text-brand", bg: "bg-brand" },
-  stopped: { text: "text-red-400", bg: "bg-red-500" },
+  stopped: { text: "text-status-stopped", bg: "bg-status-stopped" },
   provisioning: { text: "text-brand", bg: "bg-brand" },
   unknown: { text: "text-text-muted", bg: "bg-text-muted" },
 };
@@ -404,7 +404,7 @@ function OverviewTab({
             />
           </div>
           {actionError && (
-            <p className="mt-3 font-mono text-xs text-red-400">{actionError}</p>
+            <p className="mt-3 font-mono text-xs text-status-stopped">{actionError}</p>
           )}
         </div>
       )}
@@ -444,9 +444,9 @@ function CloudActionButton({
 }) {
   const isLoading = loading === action;
   const colors = {
-    success: "text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20",
+    success: "text-status-running hover:bg-status-running/10 border-status-running/20",
     warn: "text-brand hover:bg-brand/10 border-brand/20",
-    danger: "text-red-400 hover:bg-red-500/10 border-red-500/20",
+    danger: "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
     default:
       "text-text-muted hover:text-text-light hover:bg-surface-elevated border-border",
   };

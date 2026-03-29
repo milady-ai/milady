@@ -147,18 +147,18 @@ export function AgentGrid() {
       {error && (
         <div
           className="flex items-center justify-between gap-4 px-4 py-3 
-          border border-red-500/30 bg-red-500/5 animate-[fade-up_0.4s_ease-out_both]"
+          border border-status-stopped/30 bg-status-stopped/5 animate-[fade-up_0.4s_ease-out_both]"
           role="alert"
           aria-live="assertive"
         >
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="font-mono text-xs text-red-400">{error}</span>
+            <span className="w-2 h-2 rounded-full bg-status-stopped" />
+            <span className="font-mono text-xs text-status-stopped">{error}</span>
           </div>
           <button
             type="button"
             onClick={clearError}
-            className="text-red-400/60 hover:text-red-400 transition-colors p-1"
+            className="text-status-stopped/60 hover:text-status-stopped transition-colors p-1"
             aria-label="Dismiss error"
           >
             <svg
@@ -183,9 +183,9 @@ export function AgentGrid() {
         <div
           className={`flex items-start justify-between gap-4 px-4 py-3 border animate-[fade-up_0.4s_ease-out_both] ${
             actionNotice.tone === "error"
-              ? "border-red-500/30 bg-red-500/5 text-red-300"
+              ? "border-status-stopped/30 bg-status-stopped/5 text-status-stopped"
               : actionNotice.tone === "success"
-                ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-300"
+                ? "border-status-running/30 bg-status-running/5 text-status-running"
                 : "border-brand/30 bg-brand/8 text-text-light"
           }`}
           role={actionNotice.tone === "error" ? "alert" : "status"}
