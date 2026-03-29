@@ -298,7 +298,7 @@ export function ApprovalQueue({
                       {reasons.map((reason) => (
                         <p
                           key={reason}
-                          className="rounded-lg border border-yellow-500/15 bg-yellow-500/5 px-2.5 py-1.5 text-xs text-yellow-300"
+                          className="rounded-lg border border-status-warning/15 bg-status-warning-bg px-2.5 py-1.5 text-xs text-status-warning"
                         >
                           {reason}
                         </p>
@@ -325,7 +325,7 @@ export function ApprovalQueue({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-9 rounded-xl border-red-500/30 px-4 text-xs font-semibold text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                        className="h-9 rounded-xl border-status-danger/30 px-4 text-xs font-semibold text-status-danger hover:bg-status-danger-bg hover:text-status-danger"
                         onClick={() => setRejectDialogTxId(tx.id)}
                       >
                         <X className="h-3.5 w-3.5" />
@@ -354,7 +354,7 @@ export function ApprovalQueue({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-9 rounded-lg border-red-500/30 px-3 text-xs text-red-400 hover:bg-red-500/10"
+                    className="h-9 rounded-lg border-status-danger/30 px-3 text-xs text-status-danger hover:bg-status-danger-bg"
                     onClick={() =>
                       void handleReject(tx.id, rejectReason || undefined)
                     }

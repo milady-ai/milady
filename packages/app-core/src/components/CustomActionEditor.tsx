@@ -1146,7 +1146,7 @@ export function CustomActionEditor({
                 {testResult && (
                   <div className="bg-surface border border-border p-2 text-xs font-mono">
                     {testResult.error && (
-                      <div className="text-red-400">
+                      <div className="text-status-danger">
                         {t("customactioneditor.Error")} {testResult.error}
                       </div>
                     )}

@@ -1257,9 +1257,9 @@ const MetricComponent: ComponentFn = (props) => {
   const trend = props.trend as string | undefined;
   const trendColor =
     trend === "up"
-      ? "text-green-400"
+      ? "text-status-success"
       : trend === "down"
-        ? "text-red-400"
+        ? "text-status-danger"
         : "text-[var(--muted)]";
   return (
     <div className="flex flex-col gap-0.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--card)]">

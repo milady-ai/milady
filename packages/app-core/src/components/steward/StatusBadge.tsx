@@ -9,23 +9,23 @@ const STATUS_STYLES: Record<
   { bg: string; text: string; label: string }
 > = {
   pending: {
-    bg: "bg-yellow-500/15 border-yellow-500/25",
-    text: "text-yellow-400",
+    bg: "bg-status-warning-bg border-status-warning/25",
+    text: "text-status-warning",
     label: "Pending",
   },
   approved: {
-    bg: "bg-blue-500/15 border-blue-500/25",
-    text: "text-blue-400",
+    bg: "bg-status-info-bg border-status-info/25",
+    text: "text-status-info",
     label: "Approved",
   },
   rejected: {
-    bg: "bg-red-500/15 border-red-500/25",
-    text: "text-red-400",
+    bg: "bg-status-danger-bg border-status-danger/25",
+    text: "text-status-danger",
     label: "Rejected",
   },
   signed: {
-    bg: "bg-emerald-500/15 border-emerald-500/25",
-    text: "text-emerald-400",
+    bg: "bg-status-success-bg border-status-success/25",
+    text: "text-status-success",
     label: "Signed",
   },
   broadcast: {
@@ -34,13 +34,13 @@ const STATUS_STYLES: Record<
     label: "Broadcast",
   },
   confirmed: {
-    bg: "bg-green-500/15 border-green-500/25",
-    text: "text-green-400",
+    bg: "bg-status-success-bg border-status-success/25",
+    text: "text-status-success",
     label: "Confirmed",
   },
   failed: {
-    bg: "bg-red-500/15 border-red-500/25",
-    text: "text-red-400",
+    bg: "bg-status-danger-bg border-status-danger/25",
+    text: "text-status-danger",
     label: "Failed",
   },
 };
