@@ -142,12 +142,7 @@ describe("@miladyai/capacitor-swabble", () => {
     // (a) exporting it, or (b) mocking SpeechRecognition so start() succeeds.
     // We document this gap here rather than pretending it's tested.
 
-    it("DOCUMENTED GAP: WakeWordGate.match() is pure logic that should be tested but requires either export or SpeechRecognition mock", () => {
-      // The gate normalizes triggers to lowercase, checks substring match,
-      // extracts command text after trigger, enforces minCommandLength,
-      // returns postGap=-1 on web. All untested.
-      expect(true).toBe(true); // placeholder acknowledging the gap
-    });
+    it.todo("WakeWordGate.match() — requires exporting the class or mocking SpeechRecognition (triggers, substring match, minCommandLength, postGap)");
   });
 
   // -- setAudioDevice --
