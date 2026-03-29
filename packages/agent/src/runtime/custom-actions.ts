@@ -649,7 +649,7 @@ export function loadCustomActions(): Action[] {
     const defs = config.customActions ?? [];
     return defs.filter((d) => d.enabled).map(defToAction);
   } catch (err) {
-    logger.warn("[custom-actions] Failed to load custom actions from config:", err);
+    logger.warn(`[custom-actions] Failed to load custom actions from config: ${err instanceof Error ? err.message : String(err)}`);
     return [];
   }
 }

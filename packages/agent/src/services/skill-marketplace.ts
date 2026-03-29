@@ -354,7 +354,7 @@ async function readInstallRecords(
     const isNoent =
       err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT";
     if (!isNoent) {
-      logger.warn("[skill-marketplace] Failed to read install records:", err);
+      logger.warn(`[skill-marketplace] Failed to read install records: ${err instanceof Error ? err.message : String(err)}`);
     }
     return {};
   }
