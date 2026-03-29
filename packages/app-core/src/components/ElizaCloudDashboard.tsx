@@ -644,9 +644,31 @@ export function CloudDashboard() {
 
       setOpeningWebUiAgentId(agentId);
       try {
-        const response = await client.getCloudCompatPairingToken(agentId);
-        const redirectUrl = response?.data?.redirectUrl;
-        if (!redirectUrl) throw new Error("No redirectUrl in pairing response");
+        // Try local backend proxy first, then direct cloud call
+        let redirectUrl: string | undefined;
+        try {
+          const response = await client.getCloudCompatPairingToken(agentId);
+          redirectUrl = response?.data?.redirectUrl;
+        } catch {
+          // Local backend not available, try direct cloud call
+          const cloudBase = "https://www.elizacloud.ai";
+          const token = client.getRestAuthToken?.() ?? "";
+          const directRes = await fetch(
+            `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "X-Api-Key": token,
+              },
+            },
+          );
+          if (directRes.ok) {
+            const json = await directRes.json();
+            redirectUrl = json?.data?.redirectUrl ?? json?.redirectUrl;
+          }
+        }
+        if (!redirectUrl) throw new Error("No redirectUrl");
         if (!tab.closed) tab.location.href = redirectUrl;
       } catch {
         // Fallback: open the agent's web UI URL directly
