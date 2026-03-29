@@ -9,6 +9,7 @@ export function Nav() {
 
   return (
     <nav
+      aria-label="Main navigation"
       className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-dark/95 backdrop-blur-md"
       style={{ paddingTop: "var(--safe-area-top, 0px)" }}
     >

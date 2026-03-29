@@ -217,7 +217,7 @@ export function Homepage() {
     >
       <div className="fixed inset-0 z-0 bg-dark pointer-events-none" />
 
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <main className="relative z-10 min-h-screen flex flex-col">
         <div className="flex items-center justify-center gap-5 pt-[12vh] relative z-50">
           <a
             href={GITHUB_URL}
@@ -249,7 +249,7 @@ export function Homepage() {
             Try Cloud
           </a>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
