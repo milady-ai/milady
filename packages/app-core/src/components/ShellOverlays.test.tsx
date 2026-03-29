@@ -3,10 +3,14 @@ import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
 import { ShellOverlays } from "./ShellOverlays";
 
-vi.mock("@miladyai/ui", () => ({
-  Spinner: (props: Record<string, unknown>) =>
-    React.createElement("div", { "data-testid": "spinner", ...props }),
-}));
+vi.mock("@miladyai/ui", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    Spinner: (props: Record<string, unknown>) =>
+      React.createElement("div", { "data-testid": "spinner", ...props }),
+  };
+});
 
 vi.mock("./BugReportModal", () => ({
   BugReportModal: () => null,
