@@ -652,7 +652,7 @@ export function CloudDashboard() {
         } catch {
           // Local backend not available, try direct cloud call
           const cloudBase = "https://www.elizacloud.ai";
-          const token = client.getRestAuthToken?.() ?? "";
+          const token = (typeof window !== "undefined" && (window as unknown as Record<string, unknown>).__ELIZA_CLOUD_AUTH_TOKEN__ as string) || client.getRestAuthToken?.() || "";
           const directRes = await fetch(
             `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
             {
