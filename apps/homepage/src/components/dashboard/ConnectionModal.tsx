@@ -60,7 +60,10 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
         >
           {/* Header */}
           <div className="space-y-1">
-            <h2 id="connect-modal-title" className="font-mono text-sm font-medium text-text-light tracking-wide">
+            <h2
+              id="connect-modal-title"
+              className="font-mono text-sm font-medium text-text-light tracking-wide"
+            >
               CONNECT REMOTE AGENT
             </h2>
             <p className="font-mono text-xs text-text-muted">

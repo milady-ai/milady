@@ -343,7 +343,8 @@ export function CreditsPanel() {
                 }
                 setCheckoutBusy(true);
                 try {
-                  const cc = new CloudClient(token!);
+                  if (!token) return;
+                  const cc = new CloudClient(token);
                   const res = await cc.createBillingCheckout(amountUsd);
                   const url = res.checkoutUrl ?? res.url;
                   if (url) {
