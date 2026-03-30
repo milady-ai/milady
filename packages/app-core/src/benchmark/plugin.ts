@@ -355,7 +355,7 @@ export function createBenchmarkPlugin(): Plugin {
             }
           }
 
-          console.log("[BENCHMARK_ACTION] params:", JSON.stringify(params));
+          logger.debug("[BENCHMARK_ACTION] params:", JSON.stringify(params));
 
           _capturedAction = {
             command:

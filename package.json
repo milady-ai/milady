@@ -125,7 +125,7 @@
     "test:desktop:playwright:windows": "cd apps/app && bunx playwright test --config playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts",
     "test:e2e": "bunx vitest run --config vitest.e2e.config.ts --exclude packages/agent/test/anvil-contracts.e2e.test.ts --exclude packages/agent/test/apps-e2e.e2e.test.ts",
     "test:e2e:heavy": "bunx vitest run --config vitest.e2e.config.ts packages/agent/test/anvil-contracts.e2e.test.ts packages/agent/test/apps-e2e.e2e.test.ts",
-    "test:e2e:validation": "bunx vitest run --config vitest.e2e.config.ts test/e2e-validation.e2e.test.ts",
+    "test:e2e:validation": "bunx vitest run --config vitest.e2e.config.ts packages/agent/test/e2e-validation.e2e.test.ts",
     "test:e2e:coding-agents": "bunx vitest run --config vitest.e2e.config.ts packages/agent/test/agent-orchestration.e2e.test.ts packages/agent/test/coding-agent-route-readiness.e2e.test.ts packages/agent/test/coding-agent-codex-artifact.e2e.test.ts packages/agent/test/coding-agent-chat-roundtrip.e2e.test.ts",
     "test:force": "node --import tsx test/scripts/test-force.ts",
     "test:live:cloud": "node scripts/run-with-env.mjs MILADY_LIVE_TEST=1 -- bunx vitest run --config vitest.live-e2e.config.ts packages/agent/test/cloud-providers.e2e.test.ts",

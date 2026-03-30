@@ -1,6 +1,6 @@
 # Milady Benchmark Testing Protocol
 
-This protocol defines benchmark-focused tests for Milady's benchmark bridge (`src/benchmark/`).
+This protocol defines benchmark-focused tests for Milady's benchmark bridge (`packages/app-core/src/benchmark/`).
 
 ## Scope
 
@@ -16,10 +16,10 @@ Covers:
 From the repository root:
 
 ```bash
-bunx vitest run src/benchmark/*.test.ts
+bunx vitest run packages/app-core/src/benchmark/*.test.ts
 ```
 
-This runs all benchmark unit tests in `src/benchmark/*.test.ts`.
+This runs all benchmark unit tests in `packages/app-core/src/benchmark/*.test.ts`.
 
 For a watchable execution run:
 
@@ -64,7 +64,7 @@ These validate the underlying benchmark action/runner contracts we align Milady 
 Run Milady benchmark server with deterministic mock behavior:
 
 ```bash
-MILADY_BENCH_MOCK=true node --import tsx src/benchmark/server.ts
+MILADY_BENCH_MOCK=true node --import tsx packages/app-core/src/benchmark/server.ts
 ```
 
 Then probe:

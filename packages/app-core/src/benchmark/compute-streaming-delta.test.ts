@@ -80,7 +80,9 @@ describe("computeStreamingDelta benchmark coverage", () => {
       };
     });
 
-    console.info("[benchmark] computeStreamingDelta", results);
+    if (process.env.MILADY_PERF_TEST === "1") {
+      console.info("[benchmark] computeStreamingDelta", results);
+    }
 
     for (const result of results) {
       expect(result.legacyMs).toBeGreaterThan(0);

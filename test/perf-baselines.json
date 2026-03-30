@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "description": "Performance budget baselines for benchmark bridge components. All durations in milliseconds. Thresholds are intentionally generous (3-5x expected p95) to avoid flaky failures across different CI runners while still catching severe regressions.",
+  "baselines": {
+    "session-create": {
+      "p95_ms": 5,
+      "description": "createSession() — UUID generation + session struct allocation"
+    },
+    "context-normalize": {
+      "p95_ms": 5,
+      "description": "normalizeBenchmarkContext() — field normalization for benchmark context"
+    },
+    "prompt-compose": {
+      "p95_ms": 10,
+      "description": "composeBenchmarkPrompt() — text + context + image segment assembly"
+    },
+    "params-coerce-json": {
+      "p95_ms": 5,
+      "description": "coerceParams() — JSON object passthrough"
+    },
+    "params-coerce-xml": {
+      "p95_ms": 20,
+      "description": "coerceParams() — XML string parsing with regex extraction"
+    },
+    "plugin-create": {
+      "p95_ms": 10,
+      "description": "createBenchmarkPlugin() — plugin factory"
+    },
+    "plugin-provider-get": {
+      "p95_ms": 10,
+      "description": "ELIZA_BENCHMARK provider.get() — context formatting"
+    },
+    "plugin-action-handler": {
+      "p95_ms": 10,
+      "description": "BENCHMARK_ACTION handler() — action capture and parameter extraction"
+    },
+    "action-to-params": {
+      "p95_ms": 5,
+      "description": "capturedActionToParams() — captured action to response params conversion"
+    }
+  }
+}

@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   coverageSurfaceGlobs,
   coverageThresholds,
+  getThresholdsForSurface,
 } from "./coverage-policy.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -102,11 +103,12 @@ for (const surface of surfaces) {
 
   console.log(line);
 
-  for (const [metric, threshold] of Object.entries(coverageThresholds)) {
+  const effectiveThresholds = getThresholdsForSurface(surface.surface);
+  for (const [metric, threshold] of Object.entries(effectiveThresholds)) {
     const actual = percentage(surface.metrics[metric]);
     if (actual < threshold) {
       failures.push(
-        `${surface.surface} ${metric} coverage ${actual}% is below ${threshold}%`,
+        `${surface.surface} ${metric} coverage ${actual}% is below ${threshold}% (${effectiveThresholds === coverageThresholds ? "global" : "surface override"})`,
       );
     }
   }

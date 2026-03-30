@@ -204,6 +204,8 @@ export default defineConfig({
       "apps/chrome-extension/**/*.test.ts",
       "apps/chrome-extension/**/*.test.tsx",
       "test/format-error.test.ts",
+      "test/perf-budget.test.ts",
+      "test/eval/**/*.test.ts",
     ],
     setupFiles: ["test/setup.ts"],
     exclude: [

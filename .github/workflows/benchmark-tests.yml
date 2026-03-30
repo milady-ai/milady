@@ -8,12 +8,18 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - "src/benchmark/**"
+      - "packages/app-core/src/benchmark/**"
+      - "test/eval/**"
+      - "test/perf-budget.test.ts"
+      - "test/perf-baselines.json"
       - ".github/workflows/benchmark-tests.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - "src/benchmark/**"
+      - "packages/app-core/src/benchmark/**"
+      - "test/eval/**"
+      - "test/perf-budget.test.ts"
+      - "test/perf-baselines.json"
       - ".github/workflows/benchmark-tests.yml"
   workflow_dispatch:
 
@@ -29,9 +35,13 @@ jobs:
       matrix:
         include:
           - lane: benchmark-tests
-            command: bunx vitest run src/benchmark/*.test.ts
+            command: bunx vitest run packages/app-core/src/benchmark/*.test.ts
+          - lane: benchmark-eval
+            command: MILADY_EVAL_TEST=1 bunx vitest run test/eval/**/*.test.ts
+          - lane: benchmark-perf
+            command: MILADY_PERF_TEST=1 bunx vitest run test/perf-budget.test.ts
           - lane: benchmark-lint
-            command: bunx @biomejs/biome check src/benchmark
+            command: bunx @biomejs/biome check packages/app-core/src/benchmark
 
     steps:
       - name: Checkout repository

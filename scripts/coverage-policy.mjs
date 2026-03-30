@@ -5,6 +5,26 @@ export const coverageThresholds = Object.freeze({
   branches: 15,
 });
 
+/**
+ * Per-surface overrides. Surfaces listed here are held to stricter thresholds
+ * than the global defaults. Any metric key not specified falls back to
+ * `coverageThresholds`.
+ */
+export const coverageSurfaceOverrides = Object.freeze({
+  "packages/agent": Object.freeze({
+    lines: 35,
+    functions: 35,
+    statements: 35,
+    branches: 20,
+  }),
+  "packages/app-core": Object.freeze({
+    lines: 30,
+    functions: 30,
+    statements: 30,
+    branches: 18,
+  }),
+});
+
 export const coverageSummaryReporters = Object.freeze([
   "text",
   "json-summary",
@@ -26,6 +46,16 @@ export const coverageSurfaceGlobs = Object.freeze({
   "apps/app/electrobun": ["apps/app/electrobun/src/**/*.ts"],
   "packages/shared": ["packages/shared/src/**/*.ts"],
 });
+
+/**
+ * Returns the effective thresholds for a given surface, merging any
+ * per-surface overrides on top of the global defaults.
+ */
+export function getThresholdsForSurface(surface) {
+  const override = coverageSurfaceOverrides[surface];
+  if (!override) return coverageThresholds;
+  return { ...coverageThresholds, ...override };
+}
 
 export function formatCompactCoverageThresholds() {
   return `${coverageThresholds.lines}% lines/functions/statements, ${coverageThresholds.branches}% branches`;

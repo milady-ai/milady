@@ -138,3 +138,5 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 | `MILADY_CAPTURE_PROMPTS` | Dump raw prompts to `.tmp/prompt-captures/` (dev-only, contains user messages) | `0` |
 | `MILADY_ACTION_COMPACTION` | Context-aware action param stripping | `1` (enabled) |
 | `MILADY_PROMPT_OPT_MODE` | Prompt optimization mode (`baseline` or `compact`) | `baseline` |
+| `MILADY_EVAL_TEST` | Run benchmark eval harness tests (`test/eval/`). Set to `1` to enable. Also runs in the `benchmark-eval` CI lane. | `0` |
+| `MILADY_PERF_TEST` | Run benchmark performance budget tests (`test/perf-budget.test.ts`). Set to `1` to enable. Also runs in the `benchmark-perf` CI lane. | `0` |

@@ -32,7 +32,7 @@ The Python client side can live in a local adapter directory such as `benchmarks
 npm run benchmark:server
 
 # or directly
-node --import tsx src/benchmark/server.ts
+node --import tsx packages/app-core/src/benchmark/server.ts
 ```
 
 The server prints `MILADY_BENCH_READY port=<port>` when ready.
@@ -40,8 +40,8 @@ The server prints `MILADY_BENCH_READY port=<port>` when ready.
 ## Testing
 
 ```bash
-# benchmark-focused unit tests
-bunx vitest run src/benchmark/*.test.ts
+# benchmark-focused unit tests (from repo root)
+bunx vitest run packages/app-core/src/benchmark/*.test.ts
 
 # watch a live benchmark smoke run end-to-end
 bun run benchmark:watch
@@ -50,7 +50,7 @@ bun run benchmark:watch
 CUA_HOST=localhost:8000 OPENAI_API_KEY=sk-... CUA_COMPUTER_USE_MODEL=computer-use-preview bun run benchmark:cua:watch
 
 # see the full benchmark testing/checklist protocol
-cat src/benchmark/TESTING_PROTOCOL.md
+cat packages/app-core/src/benchmark/TESTING_PROTOCOL.md
 ```
 
 ## HTTP API

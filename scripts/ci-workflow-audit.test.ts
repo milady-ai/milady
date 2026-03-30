@@ -98,4 +98,35 @@ describe("CI workflow audit regressions", () => {
     expect(content).toMatch(/trust-scoring\.cjs/);
     expect(content).toMatch(/release-tracker/);
   });
+
+  it("benchmark-tests.yml targets packages/app-core/src/benchmark (not root src/benchmark)", () => {
+    const content = readWorkflow("benchmark-tests.yml");
+    expect(content).toContain("packages/app-core/src/benchmark/");
+    expect(content).toMatch(
+      /bunx vitest run packages\/app-core\/src\/benchmark\/\*\.test\.ts/,
+    );
+    expect(content).toMatch(
+      /bunx @biomejs\/biome check packages\/app-core\/src\/benchmark/,
+    );
+    expect(content).not.toMatch(/paths:\s*\n\s*- "src\/benchmark/);
+  });
+
+  it("benchmark-tests.yml runs eval and perf test lanes with env vars", () => {
+    const content = readWorkflow("benchmark-tests.yml");
+    expect(content).toContain("MILADY_EVAL_TEST=1");
+    expect(content).toMatch(
+      /MILADY_EVAL_TEST=1 bunx vitest run test\/eval\/\*\*\/\*\.test\.ts/,
+    );
+    expect(content).toContain("MILADY_PERF_TEST=1");
+    expect(content).toMatch(
+      /MILADY_PERF_TEST=1 bunx vitest run test\/perf-budget\.test\.ts/,
+    );
+  });
+
+  it("benchmark-tests.yml triggers on test/eval and test/perf changes", () => {
+    const content = readWorkflow("benchmark-tests.yml");
+    expect(content).toContain('"test/eval/**"');
+    expect(content).toContain('"test/perf-budget.test.ts"');
+    expect(content).toContain('"test/perf-baselines.json"');
+  });
 });

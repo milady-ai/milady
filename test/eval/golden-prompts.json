@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "description": "Golden prompts for benchmark bridge structural evaluation. Each prompt exercises a specific benchmark type and validates that the plugin + server-utils pipeline produces correctly shaped responses. These do NOT test LLM quality — they test the harness contract using the deterministic mock plugin.",
+  "prompts": [
+    {
+      "id": "agentbench-search",
+      "benchmark": "agentbench",
+      "taskId": "webshop-42",
+      "input": "Find a laptop under $500 with good reviews",
+      "context": {
+        "goal": "Buy a laptop under $500",
+        "observation": { "page": "search results", "items": 25 },
+        "action_space": ["search[query]", "click[id]", "buy[id]"]
+      },
+      "expectations": {
+        "provider_contains": ["# Benchmark Task", "agentbench", "webshop-42", "Buy a laptop", "action_space"],
+        "provider_values": { "hasBenchmark": true, "benchmark": "agentbench", "taskId": "webshop-42" },
+        "prompt_contains": ["Find a laptop under $500", "BENCHMARK CONTEXT"],
+        "action_validates": true
+      }
+    },
+    {
+      "id": "tau-bench-tool-call",
+      "benchmark": "tau-bench",
+      "taskId": "customer-service-1",
+      "input": "I need to check my order status",
+      "context": {
+        "goal": "Find order status for customer",
+        "tools": [
+          {
+            "name": "lookup_order",
+            "description": "Look up a customer order by ID",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "order_id": { "type": "string", "description": "The order identifier" }
+              },
+              "required": ["order_id"]
+            }
+          },
+          {
+            "name": "cancel_order",
+            "description": "Cancel an existing order",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "order_id": { "type": "string" },
+                "reason": { "type": "string" }
+              }
+            }
+          }
+        ]
+      },
+      "expectations": {
+        "provider_contains": ["# Benchmark Task", "tau-bench", "Available Tools", "lookup_order", "cancel_order", "BENCHMARK_ACTION"],
+        "provider_values": { "hasBenchmark": true, "benchmark": "tau-bench", "taskId": "customer-service-1" },
+        "prompt_contains": ["I need to check my order status", "BENCHMARK CONTEXT"],
+        "action_validates": true
+      }
+    },
+    {
+      "id": "mind2web-navigation",
+      "benchmark": "mind2web",
+      "taskId": "nav-checkout-1",
+      "input": "Click the checkout button to proceed",
+      "context": {
+        "goal": "Complete the checkout process",
+        "html": "<div id='cart'><button id='checkout-btn' class='primary'>Checkout</button></div>",
+        "elements": [
+          {
+            "backend_node_id": "42",
+            "tag": "button",
+            "attributes": { "id": "checkout-btn", "class": "primary" },
+            "text_content": "Checkout"
+          }
+        ]
+      },
+      "expectations": {
+        "provider_contains": ["# Benchmark Task", "mind2web", "Page HTML", "Available Elements", "checkout-btn", "Checkout"],
+        "provider_values": { "hasBenchmark": true, "benchmark": "mind2web", "taskId": "nav-checkout-1" },
+        "prompt_contains": ["Click the checkout button", "BENCHMARK CONTEXT"],
+        "action_validates": true
+      }
+    },
+    {
+      "id": "context-bench-qa",
+      "benchmark": "context-bench",
+      "taskId": "qa-comprehension-1",
+      "input": "Based on the passages, what is the capital of France?",
+      "context": {
+        "question": "What is the capital of France?",
+        "passages": [
+          "France is a country in Western Europe. Its capital city is Paris, which is known for the Eiffel Tower.",
+          "Paris has been the capital since the 10th century and is the most populous city in France."
+        ]
+      },
+      "expectations": {
+        "provider_contains": ["# Benchmark Task", "context-bench", "Question", "Context Passages", "Passage 1", "Passage 2", "Paris"],
+        "provider_values": { "hasBenchmark": true, "benchmark": "context-bench", "taskId": "qa-comprehension-1" },
+        "prompt_contains": ["Based on the passages", "BENCHMARK CONTEXT"],
+        "action_validates": true
+      }
+    },
+    {
+      "id": "no-context-baseline",
+      "benchmark": "none",
+      "taskId": "baseline-1",
+      "input": "Hello, how are you?",
+      "context": {},
+      "expectations": {
+        "provider_empty": true,
+        "prompt_contains": ["Hello, how are you?"],
+        "action_validates": false
+      }
+    },
+    {
+      "id": "agentbench-with-extra-fields",
+      "benchmark": "agentbench",
+      "taskId": "db-task-7",
+      "input": "List all users in the database",
+      "context": {
+        "goal": "Execute a SQL query to list users",
+        "observation": "mysql> ",
+        "action_space": ["SQL[query]", "EXIT"],
+        "difficulty": "easy",
+        "domain": "database"
+      },
+      "expectations": {
+        "provider_contains": ["# Benchmark Task", "agentbench", "Additional Context", "difficulty", "easy", "domain", "database"],
+        "provider_values": { "hasBenchmark": true, "benchmark": "agentbench", "taskId": "db-task-7" },
+        "prompt_contains": ["List all users", "BENCHMARK CONTEXT"],
+        "action_validates": true
+      }
+    }
+  ]
+}
