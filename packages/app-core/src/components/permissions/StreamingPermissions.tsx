@@ -418,7 +418,7 @@ export function StreamingPermissionsOnboardingView({
         <Button
           variant="default"
           data-testid="permissions-onboarding-continue"
-          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[rgba(240,185,11,0.18)] border border-[rgba(240,185,11,0.35)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 overflow-hidden hover:bg-[rgba(240,185,11,0.28)] hover:border-[rgba(240,185,11,0.6)] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[rgba(122,154,58,0.18)] border border-[rgba(122,154,58,0.35)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 overflow-hidden hover:bg-[rgba(122,154,58,0.28)] hover:border-[rgba(122,154,58,0.6)] disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={(e) => {
             if (e?.currentTarget) {
               const rect = e.currentTarget.getBoundingClientRect();
@@ -428,7 +428,7 @@ export function StreamingPermissionsOnboardingView({
               circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
               circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
               circle.className =
-                "absolute rounded-full bg-[rgba(240,185,11,0.3)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
+                "absolute rounded-full bg-[rgba(122,154,58,0.3)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
               e.currentTarget.appendChild(circle);
               setTimeout(() => circle.remove(), 600);
             }

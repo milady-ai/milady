@@ -4,9 +4,9 @@ import type { ConnectionEvent } from "../../../onboarding/connection-flow";
 import { useApp } from "../../../state";
 import {
   getOnboardingChoiceCardClassName,
-  onboardingChoiceCardBadgeClassName,
   onboardingChoiceCardDescriptionClassName,
   onboardingChoiceCardTitleClassName,
+  onboardingDifficultyBadgeClassName,
 } from "../onboarding-form-primitives";
 import {
   OnboardingSecondaryActionButton,
@@ -34,12 +34,29 @@ export function ConnectionHostingScreen({
         )}
       />
       <div className="flex flex-col gap-2">
+        <Button
+          type="button"
+          className={getOnboardingChoiceCardClassName({
+            recommended: true,
+          })}
+          onClick={() => dispatch({ type: "selectElizaCloudHosting" })}
+        >
+          <div className="min-w-0 flex-1">
+            <div className={onboardingChoiceCardTitleClassName}>
+              {t("header.Cloud")}
+            </div>
+            <div
+              className={`${onboardingChoiceCardDescriptionClassName} line-clamp-2`}
+            >
+              {t("onboarding.hostingElizaCloudDesc")}
+            </div>
+          </div>
+          <span className={onboardingDifficultyBadgeClassName}>Easiest</span>
+        </Button>
         {showHostingLocalCard ? (
           <Button
             type="button"
-            className={getOnboardingChoiceCardClassName({
-              recommended: true,
-            })}
+            className={getOnboardingChoiceCardClassName({})}
             onClick={() => dispatch({ type: "selectLocalHosting" })}
           >
             <div className="min-w-0 flex-1">
@@ -52,9 +69,7 @@ export function ConnectionHostingScreen({
                 {t("onboarding.hostingLocalDesc")}
               </div>
             </div>
-            <span className={onboardingChoiceCardBadgeClassName}>
-              {t("onboarding.recommended") ?? "Recommended"}
-            </span>
+            <span className={onboardingDifficultyBadgeClassName}>Medium</span>
           </Button>
         ) : null}
         <Button
@@ -72,22 +87,7 @@ export function ConnectionHostingScreen({
               {t("onboarding.hostingRemoteDesc")}
             </div>
           </div>
-        </Button>
-        <Button
-          type="button"
-          className={getOnboardingChoiceCardClassName({})}
-          onClick={() => dispatch({ type: "selectElizaCloudHosting" })}
-        >
-          <div className="min-w-0 flex-1">
-            <div className={onboardingChoiceCardTitleClassName}>
-              {t("header.Cloud")}
-            </div>
-            <div
-              className={`${onboardingChoiceCardDescriptionClassName} line-clamp-2`}
-            >
-              {t("onboarding.hostingElizaCloudDesc")}
-            </div>
-          </div>
+          <span className={onboardingDifficultyBadgeClassName}>Expert</span>
         </Button>
       </div>
       <div className={onboardingFooterClass}>

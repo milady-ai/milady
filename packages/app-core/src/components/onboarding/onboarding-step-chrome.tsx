@@ -33,22 +33,13 @@ export const onboardingPrimaryActionClass =
 
 export const onboardingLinkActionClass = `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-transparent bg-transparent px-3 py-2 text-[11px] transition-[color,background-color,box-shadow] duration-300 hover:bg-[var(--onboarding-secondary-hover-bg)] hover:text-[var(--onboarding-link)] active:bg-[var(--onboarding-secondary-pressed-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--onboarding-secondary-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:pointer-events-none disabled:opacity-50 ${onboardingReadableTextFaintClassName}`;
 
-export const onboardingTextShadowStyle = {
-  textShadow: "var(--onboarding-text-shadow-strong)",
-  WebkitTextStroke: "0.35px var(--onboarding-text-stroke)",
-} as const;
+export const onboardingTextShadowStyle = {} as const;
 
-export const onboardingBodyTextShadowStyle = {
-  textShadow: "var(--onboarding-text-shadow-muted)",
-} as const;
+export const onboardingBodyTextShadowStyle = {} as const;
 
-export const onboardingPrimaryActionTextShadowStyle = {
-  textShadow: "0 1px 5px rgba(3,5,10,0.38)",
-} as const;
+export const onboardingPrimaryActionTextShadowStyle = {} as const;
 
-export const onboardingSecondaryActionTextShadowStyle = {
-  textShadow: "var(--onboarding-text-shadow-muted)",
-} as const;
+export const onboardingSecondaryActionTextShadowStyle = {} as const;
 
 function mergeOnboardingTextShadowStyle(
   style?: CSSProperties,
@@ -99,7 +90,7 @@ export function OnboardingLinkActionButton({
 export function OnboardingStepDivider() {
   return (
     <div className="my-4 flex items-center gap-3 before:h-px before:flex-1 before:bg-gradient-to-r before:from-transparent before:via-[var(--onboarding-divider)] before:to-transparent after:h-px after:flex-1 after:bg-gradient-to-r after:from-transparent after:via-[var(--onboarding-divider)] after:to-transparent">
-      <div className="h-1.5 w-1.5 shrink-0 rotate-45 bg-[rgba(240,185,11,0.4)]" />
+      <div className="h-1.5 w-1.5 shrink-0 rotate-45 bg-[rgba(122,154,58,0.4)]" />
     </div>
   );
 }

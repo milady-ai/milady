@@ -1,5 +1,6 @@
 import { Button, Textarea } from "@miladyai/ui";
-import { Mic, Paperclip, Send, Square, Volume2, VolumeX } from "lucide-react";
+import { Mic, Paperclip, Square, Volume2, VolumeX } from "lucide-react";
+import { IoArrowRedoSharp } from "react-icons/io5";
 import { CreateTaskPopover } from "./CreateTaskPopover";
 import {
   type KeyboardEvent,
@@ -388,7 +389,7 @@ export function ChatComposer({
           aria-label={actionButtonLabel}
           title={actionButtonLabel}
         >
-          <Send className="w-5 h-5" />
+          <IoArrowRedoSharp className="w-5 h-5" />
         </Button>
       )}
     </div>

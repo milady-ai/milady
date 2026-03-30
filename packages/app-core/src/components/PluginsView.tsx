@@ -1214,9 +1214,11 @@ interface PluginListViewProps {
   mode?: PluginsViewMode;
   /** Whether the view is rendered in a full-screen gamified modal. */
   inModal?: boolean;
+  /** Optional content rendered above the plugin list inside the main content area. */
+  headerSlot?: React.ReactNode;
 }
 
-function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
+function PluginListView({ label, mode = "all", inModal, headerSlot }: PluginListViewProps) {
   const {
     plugins,
     pluginStatusFilter,
@@ -2439,6 +2441,12 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 
           <div className={DESKTOP_PAGE_CONTENT_CLASSNAME}>
             <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+              {headerSlot && (
+                <>
+                  {headerSlot}
+                  <hr className="my-4 border-border/40" />
+                </>
+              )}
               {hasPluginToggleInFlight && (
                 <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
                   {t("pluginsview.ApplyingPluginChan")}
@@ -3518,9 +3526,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 export function PluginsView({
   mode = "all",
   inModal,
+  headerSlot,
 }: {
   mode?: PluginsViewMode;
   inModal?: boolean;
+  headerSlot?: React.ReactNode;
 }) {
   const label =
     mode === "social"
@@ -3532,5 +3542,5 @@ export function PluginsView({
           : mode === "all-social"
             ? "Plugins"
             : "Plugins";
-  return <PluginListView label={label} mode={mode} inModal={inModal} />;
+  return <PluginListView label={label} mode={mode} inModal={inModal} headerSlot={headerSlot} />;
 }
