@@ -41,7 +41,6 @@ import {
   InventoryView,
   KnowledgeView,
   OnboardingWizard,
-
   PairingView,
   SaveCommandModal,
   SettingsView,

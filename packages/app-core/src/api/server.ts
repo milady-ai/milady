@@ -29,7 +29,7 @@ import {
   startApiServer as upstreamStartApiServer,
   validateMcpServerConfig,
 } from "@miladyai/agent/api/server";
-import { type PolicyResult, StewardApiError } from "@stwd/sdk";
+import type { PolicyResult } from "@stwd/sdk";
 import {
   ensureCompatApiAuthorized,
   ensureCompatSensitiveRouteAuthorized,
@@ -702,21 +702,47 @@ function maskValue(value: string): string {
 
 // sendJsonResponse, sendJsonErrorResponse — now imported from ./response
 
-function getStewardPolicyResults(error: StewardApiError): PolicyResult[] {
+interface StewardErrorLike {
+  data?: unknown;
+  message: string;
+  status?: number;
+}
+
+function isStewardErrorLike(error: unknown): error is StewardErrorLike {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  );
+}
+
+function getStewardPolicyResults(error: unknown): PolicyResult[] {
+  const data = isStewardErrorLike(error) ? error.data : undefined;
   if (
-    error.data &&
-    typeof error.data === "object" &&
-    "results" in error.data &&
-    Array.isArray(error.data.results)
+    data &&
+    typeof data === "object" &&
+    "results" in data &&
+    Array.isArray(data.results)
   ) {
-    return error.data.results as PolicyResult[];
+    return data.results as PolicyResult[];
   }
 
   return [];
 }
 
-function isStewardPolicyRejection(error: unknown): error is StewardApiError {
-  return error instanceof StewardApiError && error.status === 403;
+function isStewardPolicyRejection(error: unknown): error is StewardErrorLike {
+  return isStewardErrorLike(error) && error.status === 403;
+}
+
+function formatCompatStewardError(error: unknown): string {
+  if (isStewardErrorLike(error)) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "unknown error";
 }
 
 function getConfiguredCompatAgentName(): string | null {
@@ -3473,7 +3499,7 @@ async function handleMiladyCompatRoute(
       sendJsonErrorResponse(
         res,
         500,
-        `Trade execution failed: ${err instanceof Error ? err.message : "unknown error"}`,
+        `Trade execution failed: ${formatCompatStewardError(err)}`,
       );
     }
     return true;
@@ -3701,7 +3727,7 @@ async function handleMiladyCompatRoute(
       sendJsonErrorResponse(
         res,
         500,
-        `Transfer failed: ${err instanceof Error ? err.message : "unknown error"}`,
+        `Transfer failed: ${formatCompatStewardError(err)}`,
       );
     }
     return true;
