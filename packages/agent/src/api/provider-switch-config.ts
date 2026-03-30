@@ -208,6 +208,15 @@ function persistConnectionSelection(
   config.connection = stripOnboardingConnectionSecrets(connection);
 }
 
+function clearElizaCloudCliProxyBaseUrls(): void {
+  for (const key of ["OPENAI_BASE_URL", "ANTHROPIC_BASE_URL"] as const) {
+    const v = process.env[key];
+    if (v && /elizacloud/i.test(v)) {
+      delete process.env[key];
+    }
+  }
+}
+
 function applyLocalProviderCapabilities(
   config: MutableElizaConfig,
   connection: Extract<OnboardingConnection, { kind: "local-provider" }>,
@@ -218,6 +227,7 @@ function applyLocalProviderCapabilities(
   }
 
   disableCloudInference(config);
+  clearElizaCloudCliProxyBaseUrls();
   clearRemoteProviderConfig(config);
   clearCloudModelSelections(config);
 

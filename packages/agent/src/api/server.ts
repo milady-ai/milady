@@ -9462,23 +9462,6 @@ async function handleRequest(
     return;
   }
 
-  // ── Provider inference helpers ────────────────────────────────────────
-  const disableCloudInference = (): void => {
-    delete process.env.ANTHROPIC_BASE_URL;
-    delete process.env.OPENAI_BASE_URL;
-    delete process.env.ANTHROPIC_API_KEY;
-    delete process.env.OPENAI_API_KEY;
-  };
-
-  const enableCloudInference = (cloudApiKey: string, baseUrl: string): void => {
-    // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
-    process.env.ANTHROPIC_BASE_URL = `${baseUrl}/api/v1`;
-    process.env.ANTHROPIC_API_KEY = cloudApiKey;
-    process.env.OPENAI_BASE_URL = `${baseUrl}/api/v1`;
-    process.env.OPENAI_API_KEY = cloudApiKey;
-    // Gemini CLI and Aider — no proxy support via ElizaCloud inference
-  };
-
   // ── POST /api/provider/switch ─────────────────────────────────────────
   // Atomically switch the active AI provider selection while preserving
   // previously configured credentials and cloud auth as capability state.
@@ -9547,7 +9530,6 @@ async function handleRequest(
               ? body.primaryModel.trim()
               : undefined,
         });
-        disableCloudInference();
       } else {
         connection = null;
       }
