@@ -389,7 +389,7 @@ async function runTasksServerMode(
     child.on("close", () => {
       clearTimeout(totalTimeout);
 
-      // Process any remaining buffer
+      // Process remaining buffered output
       if (stdoutBuffer.trim().startsWith("{")) {
         try {
           results.push(JSON.parse(stdoutBuffer.trim()));
@@ -684,7 +684,7 @@ async function main(): Promise<void> {
   console.log(`[orchestrator] Results written to ${runDir}`);
   console.log(`[orchestrator] Run evaluator: python3 benchmarks/evaluate.py ${runDir}`);
 
-  // Exit with non-zero if any tasks failed
+  // Exit non-zero when tasks failed or timed out
   process.exit(summary.failed > 0 || summary.timed_out > 0 ? 1 : 0);
 }
 

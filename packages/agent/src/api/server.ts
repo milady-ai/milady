@@ -307,6 +307,20 @@ type ConnectorRouteHandler = (
   method: string,
 ) => Promise<boolean>;
 
+type OrchestratorFallbackRouteHandler = (
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  pathname: string,
+) => Promise<boolean>;
+
+interface OrchestratorPluginFallbackModule {
+  createCodingAgentRouteHandler?: (
+    runtime: AgentRuntime,
+    coordinator?: unknown,
+  ) => OrchestratorFallbackRouteHandler;
+  getCoordinator?: (runtime: AgentRuntime) => unknown;
+}
+
 function getAgentEventSvc(
   runtime: AgentRuntime | null,
 ): AgentEventServiceLike | null {
@@ -16915,10 +16929,10 @@ async function handleRequest(
     // Fallback to @elizaos/plugin-agent-orchestrator (npm)
     if (!handled) {
       try {
-        // biome-ignore lint/suspicious/noExplicitAny: legacy route handler may not exist in 2.x
-        const orchestratorPlugin: any = await import(
-          "@elizaos/plugin-agent-orchestrator"
-        );
+        const orchestratorPlugin =
+          (await import(
+            "@elizaos/plugin-agent-orchestrator"
+          )) as OrchestratorPluginFallbackModule;
         if (orchestratorPlugin.createCodingAgentRouteHandler) {
           const coordinator = orchestratorPlugin.getCoordinator?.(
             state.runtime,
