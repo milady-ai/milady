@@ -16,21 +16,25 @@ The Discord connector is an external elizaOS plugin that bridges your agent to D
 |-------|-------|
 | Package | `@elizaos/plugin-discord` |
 | Config key | `connectors.discord` |
-| Auto-enable trigger | `botToken`, `token`, or `apiKey` is truthy in connector config |
+| Auto-enable trigger | `token`, `botToken`, or `apiKey` is truthy in connector config |
 
 ## Minimal Configuration
 
-In your character file:
+In `~/.milady/milady.json`:
 
 ```json
 {
   "connectors": {
     "discord": {
-      "botToken": "your-discord-bot-token"
+      "token": "your-discord-bot-token"
     }
   }
 }
 ```
+
+<Warning>
+Use the `token` field — the Discord config schema uses strict validation and `botToken` is not a recognized schema field. While `botToken` triggers auto-enable detection, only `token` passes schema validation.
+</Warning>
 
 ## Disabling the Connector
 
@@ -40,7 +44,7 @@ To explicitly disable the connector even when a token is present:
 {
   "connectors": {
     "discord": {
-      "botToken": "your-discord-bot-token",
+      "token": "your-discord-bot-token",
       "enabled": false
     }
   }
@@ -49,9 +53,9 @@ To explicitly disable the connector even when a token is present:
 
 ## Auto-Enable Mechanism
 
-The `plugin-auto-enable.ts` module checks `connectors.discord` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-discord`.
+The `plugin-auto-enable.ts` module checks `connectors.discord` in your config. If `token` (or `botToken` / `apiKey`) is truthy and `enabled` is not explicitly `false`, the runtime automatically loads `@elizaos/plugin-discord`.
 
-No environment variable is required to trigger auto-enable -- it is driven entirely by the connector config object.
+No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
 
 ## Environment Variables
 
@@ -59,15 +63,15 @@ When loaded, secrets are pushed to `process.env` for the plugin to consume:
 
 | Variable | Source | Description |
 |----------|--------|-------------|
-| `DISCORD_API_TOKEN` | `botToken` or `token` | Primary bot token (always set) |
-| `DISCORD_BOT_TOKEN` | `botToken` or `token` | Mirror of `DISCORD_API_TOKEN` (both always set) |
+| `DISCORD_API_TOKEN` | `token` | Primary bot token (always set) |
+| `DISCORD_BOT_TOKEN` | `token` | Mirror of `DISCORD_API_TOKEN` (both always set) |
 | `DISCORD_APPLICATION_ID` | `applicationId` | Application ID. Auto-resolved via Discord OAuth2 API if not set |
 
 Note: If `DISCORD_APPLICATION_ID` is not configured, the runtime automatically resolves it by calling `https://discord.com/api/v10/oauth2/applications/@me` with the bot token.
 
 ## Full Configuration Reference
 
-All fields are set under `connectors.discord` in the character config.
+All fields are set under `connectors.discord` in `milady.json`.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|

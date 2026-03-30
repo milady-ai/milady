@@ -41,6 +41,37 @@ type WrapperDiagnostics = {
 };
 
 const WINDOWS_ABS_PATH_RE = /^[A-Za-z]:[\\/]/;
+const RUNTIME_BINARY_NAMES: Record<string, string[]> = {
+  linux: [
+    "bun",
+    "libwebgpu_dawn.so",
+    "libNativeWrapper.so",
+    "bspatch",
+    "extractor",
+    "process_helper",
+    "libasar.so",
+  ],
+  macos: [
+    "bun",
+    "libwebgpu_dawn.dylib",
+    "libNativeWrapper.dylib",
+    "zig-zstd",
+    "bspatch",
+    "extractor",
+    "process_helper",
+    "zig-asar",
+    "bsdiff",
+    "libasar.dylib",
+  ],
+  win: [
+    "bun.exe",
+    "libwebgpu_dawn.dll",
+    "bspatch.exe",
+    "extractor.exe",
+    "process_helper.exe",
+    "libNativeWrapper.dll",
+  ],
+};
 
 function isPosixAbsolutePath(value: string): boolean {
   return value.startsWith("/") && !WINDOWS_ABS_PATH_RE.test(value);
@@ -69,6 +100,55 @@ function execText(command: string, args: string[]): string {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   }).trim();
+}
+
+export function resolveRequiredRuntimeBinaryNames(osName: string): string[] {
+  return RUNTIME_BINARY_NAMES[osName] ?? [];
+}
+
+function resolveElectrobunRuntimeDir(osName: string, arch: string): string {
+  const packageRoot = path.resolve(
+    fileURLToPath(new URL("..", import.meta.url)),
+    "node_modules",
+    "electrobun",
+  );
+  const runtimeDirName =
+    osName === "macos"
+      ? `dist-macos-${arch}`
+      : osName === "win"
+        ? `dist-win-${arch}`
+        : `dist-linux-${arch}`;
+  return joinPortable(packageRoot, runtimeDirName);
+}
+
+function copyFileWithMode(sourcePath: string, destinationPath: string): void {
+  fs.mkdirSync(dirnamePortable(destinationPath), { recursive: true });
+  fs.copyFileSync(sourcePath, destinationPath);
+  const sourceMode = fs.statSync(sourcePath).mode;
+  fs.chmodSync(destinationPath, sourceMode);
+}
+
+export function ensureWrapperRuntimeFiles(args: {
+  arch: string;
+  binaryDir: string;
+  osName: string;
+}): string[] {
+  const runtimeDir = resolveElectrobunRuntimeDir(args.osName, args.arch);
+  if (!fs.existsSync(runtimeDir)) {
+    return [];
+  }
+
+  const copied: string[] = [];
+  for (const fileName of resolveRequiredRuntimeBinaryNames(args.osName)) {
+    const sourcePath = joinPortable(runtimeDir, fileName);
+    const destinationPath = joinPortable(args.binaryDir, fileName);
+    if (!fs.existsSync(sourcePath) || fs.existsSync(destinationPath)) {
+      continue;
+    }
+    copyFileWithMode(sourcePath, destinationPath);
+    copied.push(fileName);
+  }
+  return copied;
 }
 
 function normalizeBundleStem(value: string): string {
@@ -264,6 +344,17 @@ export function main(
   );
   const outputPath = resolveDiagnosticsOutputPath(wrapperBundlePath, env);
 
+  const repairedFiles = ensureWrapperRuntimeFiles({
+    arch,
+    binaryDir,
+    osName,
+  });
+  if (repairedFiles.length > 0) {
+    console.log(
+      `[postwrap-diagnostics] restored wrapper runtime files: ${repairedFiles.join(", ")}`,
+    );
+  }
+
   if (shouldApplyLocalAdhocSigning(env)) {
     signLocalAppBundle({
       appBundlePath: wrapperBundlePath,
@@ -275,25 +366,10 @@ export function main(
     );
   }
 
-  const binaryNames =
-    osName === "macos"
-      ? [
-          "launcher",
-          "bun",
-          "libwebgpu_dawn.dylib",
-          "libNativeWrapper.dylib",
-          "zig-zstd",
-          "bspatch",
-        ]
-      : osName === "win"
-        ? ["launcher.exe", "bun.exe", "libwebgpu_dawn.dll", "bspatch.exe"]
-        : [
-            "launcher",
-            "bun",
-            "libwebgpu_dawn.so",
-            "libNativeWrapper.so",
-            "bspatch",
-          ];
+  const binaryNames = [
+    osName === "win" ? "launcher.exe" : "launcher",
+    ...resolveRequiredRuntimeBinaryNames(osName),
+  ];
 
   const diagnostics: WrapperDiagnostics = {
     appName:

@@ -1,3 +1,26 @@
+import { Spinner } from "@miladyai/ui";
+import { useEffect, useState } from "react";
+
+function useLinearProgress(durationMs: number) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const start = Date.now();
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(elapsed / durationMs, 1) * 100;
+      setProgress(pct);
+      if (pct < 100) {
+        requestAnimationFrame(tick);
+      }
+    };
+    const raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [durationMs]);
+
+  return Math.round(progress);
+}
+
 interface AvatarLoaderProps {
   /** Sub-label text below the progress bar */
   label?: string;
@@ -5,13 +28,18 @@ interface AvatarLoaderProps {
   fullScreen?: boolean;
   /** When true, fades the loader out (use before unmounting) */
   fadingOut?: boolean;
+  /** Optional progress value from 0 to 100. If provided, overrides the default linear loading animation. */
+  progress?: number;
 }
 
 export function AvatarLoader({
   label = "Initializing entity",
   fullScreen = false,
   fadingOut = false,
+  progress,
 }: AvatarLoaderProps) {
+  const linearProgress = useLinearProgress(3000);
+
   return (
     <div
       style={{
@@ -20,7 +48,7 @@ export function AvatarLoader({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: fullScreen ? "#0c0e14" : "transparent",
+        background: fullScreen ? "var(--bg)" : "transparent",
         zIndex: 10,
         opacity: fadingOut ? 0 : 1,
         transition: "opacity 0.8s ease-out",
@@ -36,38 +64,56 @@ export function AvatarLoader({
           width: 280,
         }}
       >
-        {/* LOADING label */}
+        {/* LOADING label + spinner (long startup / embedding download) */}
         <div
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
             fontFamily: "var(--mono, monospace)",
             fontSize: 12,
             fontWeight: 400,
             letterSpacing: "0.35em",
             textTransform: "uppercase",
-            color: "rgba(255, 255, 255, 0.7)",
+            color: "var(--text)",
             userSelect: "none",
           }}
         >
-          LOADING
-          <span className="loading-screen__dots" />
+          <Spinner
+            size={16}
+            className="shrink-0 text-[var(--text)] opacity-90"
+            aria-hidden
+          />
+          <span>
+            LOADING
+            <span className="loading-screen__dots" />
+          </span>
         </div>
 
         {/* Progress bar */}
         <div
+          data-testid="avatar-loader-progress"
           style={{
             width: "100%",
             height: 3,
-            background: "rgba(255, 255, 255, 0.1)",
+            background: "var(--bg-accent)",
             overflow: "hidden",
           }}
         >
           <div
             style={{
-              width: "60%",
+              width:
+                typeof progress === "number"
+                  ? `${Math.max(0, Math.min(100, progress))}%`
+                  : `${linearProgress}%`,
               height: "100%",
-              background: "rgba(255, 255, 255, 0.85)",
+              background: "var(--text-strong)",
               boxShadow: "0 0 8px rgba(255, 255, 255, 0.3)",
-              animation: "avatar-loader-progress 2s ease-in-out infinite",
+              transition:
+                typeof progress === "number"
+                  ? "width 0.3s ease-out"
+                  : "width 0.1s linear",
+              animation: "none",
             }}
           />
         </div>
@@ -80,7 +126,7 @@ export function AvatarLoader({
             fontWeight: 400,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "rgba(255, 255, 255, 0.3)",
+            color: "var(--muted)",
             userSelect: "none",
           }}
         >

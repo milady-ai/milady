@@ -1,13 +1,35 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
+    "types": [
+      "node",
+      "vite/client"
+    ],
     "declaration": false,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": "../../",
+    "paths": {
+      "@miladyai/ui": [
+        "./packages/ui/src/index.ts"
+      ],
+      "@miladyai/ui/*": [
+        "./packages/ui/src/*"
+      ],
+      "@miladyai/agent/*": [
+        "./packages/agent/src/*"
+      ],
+      "@elizaos/core": [
+        "./node_modules/@elizaos/core"
+      ],
+      "@elizaos/*": [
+        "./node_modules/@elizaos/*"
+      ]
+    }
   },
   "exclude": [
     "src/**/*.stories.ts",
@@ -15,5 +37,7 @@
     "src/**/*.test.ts",
     "src/**/*.test.tsx"
   ],
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

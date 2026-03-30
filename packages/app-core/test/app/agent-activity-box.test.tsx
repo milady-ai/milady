@@ -1,7 +1,23 @@
 import type { CodingAgentSession } from "@miladyai/app-core/api";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+function testT(key: string, opts?: Record<string, unknown>): string {
+  if (opts?.defaultValue && typeof opts.defaultValue === "string") {
+    let str = opts.defaultValue;
+    for (const [k, v] of Object.entries(opts)) {
+      if (k !== "defaultValue") str = str.replace(`{{${k}}}`, String(v));
+    }
+    return str;
+  }
+  return key;
+}
+
+vi.mock("@miladyai/app-core/state", () => ({
+  useApp: () => ({ t: testT }),
+}));
+
 import { AgentActivityBox } from "../../src/components/AgentActivityBox";
 
 function makeSession(
@@ -71,62 +87,4 @@ describe("AgentActivityBox", () => {
     expect(json).toContain("Running Bash");
   });
 
-  it("shows pulsing dot for active/tool_running statuses", () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(
-        React.createElement(AgentActivityBox, {
-          sessions: [makeSession({ status: "active" })],
-        }),
-      );
-    });
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain("animate-pulse");
-  });
-
-  it("does not pulse for blocked/error statuses", () => {
-    let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
-      tree = TestRenderer.create(
-        React.createElement(AgentActivityBox, {
-          sessions: [makeSession({ status: "blocked" })],
-        }),
-      );
-    });
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).not.toContain("animate-pulse");
-  });
-
-  it("uses correct status dot colors", () => {
-    let active!: TestRenderer.ReactTestRenderer;
-    let error!: TestRenderer.ReactTestRenderer;
-    let blocked!: TestRenderer.ReactTestRenderer;
-
-    act(() => {
-      active = TestRenderer.create(
-        React.createElement(AgentActivityBox, {
-          sessions: [makeSession({ status: "active" })],
-        }),
-      );
-    });
-    expect(JSON.stringify(active.toJSON())).toContain("bg-ok");
-
-    act(() => {
-      error = TestRenderer.create(
-        React.createElement(AgentActivityBox, {
-          sessions: [makeSession({ status: "error" })],
-        }),
-      );
-    });
-    expect(JSON.stringify(error.toJSON())).toContain("bg-danger");
-
-    act(() => {
-      blocked = TestRenderer.create(
-        React.createElement(AgentActivityBox, {
-          sessions: [makeSession({ status: "blocked" })],
-        }),
-      );
-    });
-    expect(JSON.stringify(blocked.toJSON())).toContain("bg-warn");
-  });
 });

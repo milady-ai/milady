@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # elizaOS Cloud Agent Container
 #
-# Pre-built image for deploying elizaOS agents to ElizaCloud (AWS ECS).
+# Pre-built image for deploying Eliza agents to ElizaCloud (AWS ECS).
 # Runs an elizaOS agent runtime with the ElizaCloud plugin for inference,
 # exposes a health endpoint on $PORT (default 2138), and a bridge HTTP
 # server on $BRIDGE_PORT (default 18790) for communication with milady.
@@ -37,6 +37,7 @@ COPY deploy/cloud-agent-entrypoint.ts ./entrypoint.ts
 RUN npm install -g tsx@4
 
 ENV NODE_ENV=production
+# PORT is used by cloud platforms (Railway, Fly.io); maps to MILADY_PORT locally
 ENV PORT=2138
 ENV BRIDGE_PORT=18790
 

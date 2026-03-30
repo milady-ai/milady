@@ -9,9 +9,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AgentCard } from "../components/dashboard/AgentCard";
 import { AgentDetail } from "../components/dashboard/AgentDetail";
 import { ConnectionModal } from "../components/dashboard/ConnectionModal";
+import { CreateAgentForm } from "../components/dashboard/CreateAgentForm";
 import { LogsPanel } from "../components/dashboard/LogsPanel";
 import { MetricsPanel } from "../components/dashboard/MetricsPanel";
 import { Sidebar } from "../components/dashboard/Sidebar";
+import * as auth from "../lib/auth";
 import type { AgentStatus } from "../lib/cloud-api";
 
 vi.mock("../lib/AgentProvider", () => ({
@@ -42,24 +44,19 @@ beforeEach(() => localStorage.clear());
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  vi.useRealTimers();
 });
 
 /* ------------------------------------------------------------------ */
 /*  Sidebar                                                           */
 /* ------------------------------------------------------------------ */
 describe("Sidebar", () => {
-  it("renders all 6 section buttons", () => {
+  it("renders section buttons", () => {
     const onChange = vi.fn();
     render(<Sidebar active="agents" onChange={onChange} />);
 
-    for (const label of [
-      "Agents",
-      "Metrics",
-      "Logs",
-      "Snapshots",
-      "Credits",
-      "Billing",
-    ]) {
+    // Labels are now uppercase in the new design
+    for (const label of ["AGENTS", "METRICS", "LOGS"]) {
       const buttons = screen.getAllByText(
         (_content, el) =>
           !!(el?.textContent?.includes(label) && el?.tagName === "BUTTON"),
@@ -72,17 +69,17 @@ describe("Sidebar", () => {
     const onChange = vi.fn();
     render(<Sidebar active="agents" onChange={onChange} />);
 
-    // Click the first "Metrics" button (desktop sidebar)
+    // Labels are now uppercase in the new design
     const metricsButtons = screen.getAllByText(
       (_content, el) =>
-        !!(el?.textContent?.includes("Metrics") && el?.tagName === "BUTTON"),
+        !!(el?.textContent?.includes("METRICS") && el?.tagName === "BUTTON"),
     );
     fireEvent.click(metricsButtons[0]);
     expect(onChange).toHaveBeenCalledWith("metrics");
 
     const logsButtons = screen.getAllByText(
       (_content, el) =>
-        !!(el?.textContent?.includes("Logs") && el?.tagName === "BUTTON"),
+        !!(el?.textContent?.includes("LOGS") && el?.tagName === "BUTTON"),
     );
     fireEvent.click(logsButtons[0]);
     expect(onChange).toHaveBeenCalledWith("logs");
@@ -99,7 +96,9 @@ describe("ConnectionModal", () => {
     render(<ConnectionModal onSubmit={onSubmit} onClose={onClose} />);
 
     expect(screen.getByPlaceholderText("My Remote Agent")).toBeTruthy();
-    expect(screen.getByPlaceholderText("http://10.0.0.5:2138")).toBeTruthy();
+    expect(
+      screen.getByPlaceholderText("https://my-agent.example.com"),
+    ).toBeTruthy();
   });
 
   it("Connect button is disabled when name is empty", () => {
@@ -114,7 +113,6 @@ describe("ConnectionModal", () => {
     const onSubmit = vi.fn();
     render(<ConnectionModal onSubmit={onSubmit} onClose={() => {}} />);
 
-    // Fill name but leave url empty (url starts empty now)
     fireEvent.change(screen.getByPlaceholderText("My Remote Agent"), {
       target: { value: "Test" },
     });
@@ -130,9 +128,12 @@ describe("ConnectionModal", () => {
     fireEvent.change(screen.getByPlaceholderText("My Remote Agent"), {
       target: { value: "Test Agent" },
     });
-    fireEvent.change(screen.getByPlaceholderText("http://10.0.0.5:2138"), {
-      target: { value: "http://10.0.0.5:2138" },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("https://my-agent.example.com"),
+      {
+        target: { value: "http://10.0.0.5:2138" },
+      },
+    );
 
     const connectBtn = screen.getByText("Connect");
     expect(connectBtn).not.toBeDisabled();
@@ -151,7 +152,7 @@ describe("ConnectionModal", () => {
 /* ------------------------------------------------------------------ */
 describe("AgentCard", () => {
   const baseProps = {
-    connectionName: "Local",
+    source: "local" as const,
     onPlay: vi.fn(),
     onResume: vi.fn(),
     onPause: vi.fn(),
@@ -176,14 +177,13 @@ describe("AgentCard", () => {
     );
     expect(container.textContent).toContain("TestAgent");
     expect(container.textContent).toContain("gpt-4");
-    expect(container.textContent).toContain("running");
   });
 
-  it("shows Play button when stopped", () => {
+  it("shows Start button when stopped", () => {
     render(
       <AgentCard {...baseProps} agent={makeAgent({ state: "stopped" })} />,
     );
-    expect(screen.getByText("Play")).toBeTruthy();
+    expect(screen.getByText("Start")).toBeTruthy();
     expect(screen.queryByText("Resume")).toBeNull();
     expect(screen.queryByText("Pause")).toBeNull();
   });
@@ -191,7 +191,7 @@ describe("AgentCard", () => {
   it("shows Resume button when paused", () => {
     render(<AgentCard {...baseProps} agent={makeAgent({ state: "paused" })} />);
     expect(screen.getByText("Resume")).toBeTruthy();
-    expect(screen.queryByText("Play")).toBeNull();
+    expect(screen.queryByText("Start")).toBeNull();
   });
 
   it("shows Pause button when running", () => {
@@ -199,8 +199,19 @@ describe("AgentCard", () => {
       <AgentCard {...baseProps} agent={makeAgent({ state: "running" })} />,
     );
     expect(screen.getByText("Pause")).toBeTruthy();
-    expect(screen.queryByText("Play")).toBeNull();
+    expect(screen.queryByText("Start")).toBeNull();
     expect(screen.queryByText("Resume")).toBeNull();
+  });
+
+  it("renders svg icons for pause and stop controls", () => {
+    const { container } = render(
+      <AgentCard {...baseProps} agent={makeAgent({ state: "running" })} />,
+    );
+    const pauseButton = screen.getByText("Pause").closest("button");
+    const stopButton = screen.getByText("Stop").closest("button");
+    expect(pauseButton?.querySelector("svg")).toBeTruthy();
+    expect(stopButton?.querySelector("svg")).toBeTruthy();
+    expect(container.querySelectorAll("button svg").length).toBeGreaterThan(0);
   });
 
   it("calls onStop when Stop is clicked", () => {
@@ -221,11 +232,12 @@ describe("AgentCard", () => {
 /*  MetricsPanel                                                      */
 /* ------------------------------------------------------------------ */
 describe("MetricsPanel", () => {
-  it("renders CPU, Memory, and Disk metric bars", () => {
+  it("renders CPU, MEM, and REQ/S metric bars", () => {
     const { container } = render(<MetricsPanel />);
+    // New design uses abbreviated labels: CPU, MEM, REQ/S
     expect(container.textContent).toContain("CPU");
-    expect(container.textContent).toContain("Memory");
-    expect(container.textContent).toContain("Disk");
+    expect(container.textContent).toContain("MEM");
+    expect(container.textContent).toContain("REQ/S");
   });
 });
 
@@ -235,43 +247,35 @@ describe("MetricsPanel", () => {
 describe("LogsPanel", () => {
   it("renders log entries with timestamps and severity levels", () => {
     const { container } = render(<LogsPanel />);
-    // Mock data generates 30 entries, so we should see level text
     const text = container.textContent ?? "";
+    // New design uses uppercase levels in brackets: [INFO], [DEBUG], [WARN]
     const hasLevel =
-      text.includes("info") || text.includes("warn") || text.includes("error");
+      text.includes("INFO") || text.includes("WARN") || text.includes("DEBUG");
     expect(hasLevel).toBe(true);
-    // Timestamps rendered via toLocaleTimeString — check for colon-separated time
     expect(text).toMatch(/\d{1,2}:\d{2}:\d{2}/);
   });
 });
 
 /* ------------------------------------------------------------------ */
-/*  ExportPanel (rendered with mocked useAgents)                      */
+/*  ExportPanel                                                       */
 /* ------------------------------------------------------------------ */
 describe("ExportPanel", () => {
-  it("renders password input and export/import buttons", async () => {
+  it("renders snapshot actions and empty state", async () => {
     const { ExportPanel } = await import("../components/dashboard/ExportPanel");
     const { container } = render(<ExportPanel connectionId="local-default" />);
     const text = container.textContent ?? "";
-    expect(text).toContain("Password");
-    expect(screen.getByText("Export Agent")).toBeTruthy();
-    expect(screen.getByText("Import Agent")).toBeTruthy();
+    // New design uses lowercase "snapshots" and different text
+    expect(text).toContain("Cloud snapshots");
+    expect(screen.getByText("+ TAKE SNAPSHOT")).toBeTruthy();
+    expect(screen.getByText("No snapshots yet")).toBeTruthy();
   });
 
-  it("Export button is disabled when password < 4 chars", async () => {
+  it("shows the snapshot action button exists", async () => {
     const { ExportPanel } = await import("../components/dashboard/ExportPanel");
     render(<ExportPanel connectionId="local-default" />);
-    const exportBtn = screen.getByText("Export Agent");
-    expect(exportBtn).toBeDisabled();
-
-    // Type 3 chars — still disabled
-    const pwInput = screen.getByLabelText("Password (min 4 chars)");
-    fireEvent.change(pwInput, { target: { value: "abc" } });
-    expect(screen.getByText("Export Agent")).toBeDisabled();
-
-    // Type 4 chars — enabled
-    fireEvent.change(pwInput, { target: { value: "abcd" } });
-    expect(screen.getByText("Export Agent")).not.toBeDisabled();
+    // Button now says "+ TAKE SNAPSHOT" and may be disabled for non-cloud agents
+    const snapshotBtn = screen.getByText("+ TAKE SNAPSHOT");
+    expect(snapshotBtn).toBeTruthy();
   });
 });
 
@@ -286,45 +290,81 @@ describe("AgentDetail", () => {
     uptime: 7200,
   };
 
-  it("renders Metrics tab by default", () => {
+  const managedAgent = {
+    id: "local-default",
+    name: "Detail Agent",
+    source: "local" as const,
+    status: "running" as const,
+    model: "claude-3",
+    uptime: 7200,
+  };
+
+  it("renders Overview tab by default", () => {
     const { container } = render(
-      <AgentDetail agent={agent} connectionId="local-default" />,
+      <AgentDetail
+        agent={agent}
+        managedAgent={managedAgent}
+        connectionId="local-default"
+      />,
     );
-    expect(container.textContent).toContain("CPU");
-    expect(container.textContent).toContain("Memory");
+    // New design uses uppercase labels: STATUS, MODEL
+    expect(container.textContent).toContain("STATUS");
+    expect(container.textContent).toContain("MODEL");
   });
 
   it("shows agent name in header", () => {
     const { container } = render(
-      <AgentDetail agent={agent} connectionId="local-default" />,
+      <AgentDetail
+        agent={agent}
+        managedAgent={managedAgent}
+        connectionId="local-default"
+      />,
     );
     expect(container.textContent).toContain("Detail Agent");
   });
 
-  it("renders all three tab buttons", () => {
-    render(<AgentDetail agent={agent} connectionId="local-default" />);
-    expect(screen.getByText("Metrics")).toBeTruthy();
-    expect(screen.getByText("Logs")).toBeTruthy();
-    expect(screen.getByText("Snapshots")).toBeTruthy();
+  it("renders all tab buttons", () => {
+    render(
+      <AgentDetail
+        agent={agent}
+        managedAgent={managedAgent}
+        connectionId="local-default"
+      />,
+    );
+    // Tabs are now uppercase in the new design
+    expect(screen.getByText("OVERVIEW")).toBeTruthy();
+    expect(screen.getByText("WALLETS")).toBeTruthy();
+    expect(screen.getByText("METRICS")).toBeTruthy();
+    expect(screen.getByText("LOGS")).toBeTruthy();
+    expect(screen.getByText("SNAPSHOTS")).toBeTruthy();
   });
 
   it("switches to Logs tab", () => {
     const { container } = render(
-      <AgentDetail agent={agent} connectionId="local-default" />,
+      <AgentDetail
+        agent={agent}
+        managedAgent={managedAgent}
+        connectionId="local-default"
+      />,
     );
-    fireEvent.click(screen.getByText("Logs"));
+    fireEvent.click(screen.getByText("LOGS"));
     const text = container.textContent ?? "";
-    // Logs tab shows log entries with level indicators
+    // New design uses uppercase levels: INFO, WARN, DEBUG
     const hasLevel =
-      text.includes("info") || text.includes("warn") || text.includes("error");
+      text.includes("INFO") || text.includes("WARN") || text.includes("DEBUG");
     expect(hasLevel).toBe(true);
   });
 
   it("switches to Snapshots tab", () => {
-    render(<AgentDetail agent={agent} connectionId="local-default" />);
-    fireEvent.click(screen.getByText("Snapshots"));
-    // Snapshots tab renders ExportPanel which has "Export Agent" button
-    expect(screen.getByText("Export Agent")).toBeTruthy();
+    render(
+      <AgentDetail
+        agent={agent}
+        managedAgent={managedAgent}
+        connectionId="local-default"
+      />,
+    );
+    fireEvent.click(screen.getByText("SNAPSHOTS"));
+    expect(screen.getByText("+ TAKE SNAPSHOT")).toBeTruthy();
   });
 });
 
@@ -333,7 +373,7 @@ describe("AgentDetail", () => {
 /* ------------------------------------------------------------------ */
 describe("AgentCard regression", () => {
   const baseProps = {
-    connectionName: "Local",
+    source: "local" as const,
     onPlay: vi.fn(),
     onResume: vi.fn(),
     onPause: vi.fn(),
@@ -376,7 +416,6 @@ describe("AgentCard regression", () => {
     const { container } = render(
       <AgentCard {...baseProps} agent={makeAgent({ uptime: 3660 })} />,
     );
-    // 3660s = 1h 1m
     expect(container.textContent).toContain("1h 1m");
   });
 
@@ -384,7 +423,6 @@ describe("AgentCard regression", () => {
     const { container } = render(
       <AgentCard {...baseProps} agent={makeAgent({ uptime: 300 })} />,
     );
-    // 300s = 5m
     expect(container.textContent).toContain("5m");
   });
 
@@ -399,37 +437,30 @@ describe("AgentCard regression", () => {
     const { container } = render(
       <AgentCard {...baseProps} agent={makeAgent({ memories: 42 })} />,
     );
-    expect(container.textContent).toContain("42 memories");
+    expect(container.textContent).toContain("42");
   });
 
-  it("hides memory count when undefined", () => {
+  it("shows source icon", () => {
     const { container } = render(
-      <AgentCard {...baseProps} agent={makeAgent()} />,
+      <AgentCard {...baseProps} source="cloud" agent={makeAgent()} />,
     );
-    expect(container.textContent).not.toContain("memories");
-  });
-
-  it("shows connection source label", () => {
-    const { container } = render(
-      <AgentCard
-        {...baseProps}
-        connectionName="Cloud-Prod"
-        agent={makeAgent()}
-      />,
-    );
-    expect(container.textContent).toContain("Cloud-Prod");
+    // New design uses icon symbols: ☁ for cloud, ◉ for local, ⬡ for remote
+    expect(container.textContent).toContain("☁");
   });
 
   it("calls onSelect when card is clicked", () => {
     const onSelect = vi.fn();
-    const { container } = render(
+    render(
       <AgentCard {...baseProps} onSelect={onSelect} agent={makeAgent()} />,
     );
-    fireEvent.click(container.firstChild as HTMLElement);
+    const cardButton = screen.getByRole("button", {
+      name: /open details for testagent/i,
+    });
+    fireEvent.click(cardButton);
     expect(onSelect).toHaveBeenCalled();
   });
 
-  it("calls onPlay when Play button is clicked on stopped agent", () => {
+  it("calls onPlay when Start button is clicked on stopped agent", () => {
     const onPlay = vi.fn();
     render(
       <AgentCard
@@ -438,7 +469,7 @@ describe("AgentCard regression", () => {
         agent={makeAgent({ state: "stopped" })}
       />,
     );
-    fireEvent.click(screen.getByText("Play"));
+    fireEvent.click(screen.getByText("Start"));
     expect(onPlay).toHaveBeenCalled();
   });
 
@@ -473,69 +504,56 @@ describe("AgentCard regression", () => {
       <AgentCard {...baseProps} selected={true} agent={makeAgent()} />,
     );
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain("border-brand");
+    // New design uses ring-1 ring-brand/50 for selected state
+    expect(card.className).toContain("ring-1");
+    expect(card.className).toContain("ring-brand/50");
   });
 });
 
-/* ------------------------------------------------------------------ */
-/*  AuthGate                                                           */
-/* ------------------------------------------------------------------ */
-describe("AuthGate", () => {
-  it("renders children when authenticated", async () => {
-    localStorage.setItem("milady-cloud-token", "test-key");
-    let result: ReturnType<typeof render>;
-    await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>Dashboard Content</div>
-        </AuthGate>,
-      );
-    });
-    expect(result?.getByText("Dashboard Content")).toBeTruthy();
+describe("CreateAgentForm", () => {
+  it("shows a Sign In button for unauthenticated users", () => {
+    vi.spyOn(auth, "isAuthenticated").mockReturnValue(false);
+
+    render(<CreateAgentForm onCreated={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(screen.getByRole("button", { name: "Sign In" })).toBeTruthy();
+    expect(screen.queryByLabelText("Agent Name")).toBeNull();
   });
 
-  it("shows login UI when not authenticated", async () => {
-    let result: ReturnType<typeof render>;
-    await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>Dashboard Content</div>
-        </AuthGate>,
-      );
+  it("reuses the cloud sign-in flow and completes auth polling", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(auth, "isAuthenticated").mockReturnValue(false);
+    const loginSpy = vi.spyOn(auth, "cloudLogin").mockResolvedValue({
+      sessionId: "test-session",
+      browserUrl: "https://cloud.example/auth",
     });
-    expect(result?.getByText("Login with Eliza Cloud")).toBeTruthy();
-    expect(result?.getByText("Skip (local only)")).toBeTruthy();
-  });
+    const pollSpy = vi.spyOn(auth, "cloudLoginPoll").mockResolvedValue({
+      status: "authenticated",
+      apiKey: "test-key",
+    });
+    const openSpy = vi
+      .spyOn(window, "open")
+      .mockImplementation(() => ({ closed: false }) as Window);
 
-  it("renders children after clicking Skip", async () => {
-    let result: ReturnType<typeof render>;
-    await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>Dashboard Content</div>
-        </AuthGate>,
-      );
-    });
-    const skipBtn = result?.getByText("Skip (local only)");
-    await act(async () => {
-      fireEvent.click(skipBtn);
-    });
-    expect(result?.getByText("Dashboard Content")).toBeTruthy();
-  });
+    render(<CreateAgentForm onCreated={vi.fn()} onCancel={vi.fn()} />);
 
-  it("shows Milady Cloud heading in login view", async () => {
-    let result: ReturnType<typeof render>;
     await act(async () => {
-      const { AuthGate } = await import("../components/dashboard/AuthGate");
-      result = render(
-        <AuthGate>
-          <div>child</div>
-        </AuthGate>,
-      );
+      fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
+      await Promise.resolve();
     });
-    expect(result?.getByText("Milady Cloud")).toBeTruthy();
+
+    expect(loginSpy).toHaveBeenCalledTimes(1);
+    expect(openSpy).toHaveBeenCalledWith(
+      "https://cloud.example/auth",
+      "_blank",
+      "noopener,noreferrer",
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+
+    expect(pollSpy).toHaveBeenCalledWith("test-session");
+    expect(auth.getToken()).toBe("test-key");
   });
 });

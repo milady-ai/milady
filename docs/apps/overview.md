@@ -1,10 +1,10 @@
 ---
 title: Apps Overview
 sidebarTitle: Overview
-description: Milady ships as a cross-platform suite — desktop, mobile, browser extension, web dashboard, and terminal UI.
+description: Milady ships as a cross-platform suite for desktop, mobile, and web dashboard workflows.
 ---
 
-Milady is available on every platform you work on. Each app connects to the same agent runtime, giving you a consistent experience whether you're at your desk or on your phone.
+Milady is available across all primary platforms. Each app connects to the same agent runtime, giving you a consistent experience whether you're at your desk or on your phone.
 
 ## Available Apps
 
@@ -18,17 +18,10 @@ Milady is available on every platform you work on. Each app connects to the same
   iOS and Android app built with Capacitor, featuring native plugins and push notifications.
 </Card>
 
-<Card title="Chrome Extension" icon="chrome" href="/apps/chrome-extension">
-  Browser relay extension that lets your agent control and observe browser tabs.
-</Card>
-
 <Card title="Dashboard" icon="browser" href="/apps/dashboard">
   Web-based management interface for agent configuration, monitoring, and analytics.
 </Card>
 
-<Card title="TUI" icon="terminal" href="/apps/tui">
-  Terminal user interface for keyboard-driven agent interaction and management.
-</Card>
 
 </CardGroup>
 
@@ -38,26 +31,20 @@ All apps share a common connection pattern:
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  Desktop App │     │  Mobile App  │     │  Chrome Ext  │
+│  Desktop App │     │  Mobile App  │     │   Dashboard  │
 └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
        │                    │                    │
-       └────────────┬───────┘────────────────────┘
-                    │
-              ┌─────▼──────┐
-              │  Agent API  │
-              │  (REST/WS)  │
-              └─────┬───────┘
-                    │
-              ┌─────▼──────┐
-              │   Runtime   │
-              └─────────────┘
+       └────────────┬───────┴──────────────┬─────┘
+                    │                      │
+              ┌─────▼──────┐         ┌────▼──────┐
+              │  Agent API  │         │  Runtime  │
+              │  (REST/WS)  │         │  Services │
+              └─────────────┘         └───────────┘
 ```
 
 - **Desktop** embeds the runtime directly (offline-capable)
 - **Mobile** connects via REST API
-- **Chrome Extension** communicates via WebSocket
 - **Dashboard** uses REST + WebSocket for real-time updates
-- **TUI** embeds the runtime directly (like desktop)
 
 ## Standalone Apps vs. Plugin Apps
 
@@ -65,7 +52,7 @@ Milady has two distinct types of "apps" — understanding the difference prevent
 
 ### Standalone Apps (Platforms)
 
-These are the five independent applications listed above. Each is a complete, pre-built application that connects to the agent runtime. You install them once and they provide the UI for interacting with your agent.
+These are the independent applications listed above. Each is a complete, pre-built application that connects to the agent runtime. You install them once and they provide the UI for interacting with your agent.
 
 ### Plugin Apps (Game/Experience Apps)
 
@@ -106,7 +93,7 @@ Plugins do **not** inject custom UI components into the Dashboard. Plugin config
 | **How you get them** | Install once (binary/extension) | Install from Apps browser in Dashboard |
 | **UI location** | Independent window/app | Embedded iframe in Dashboard |
 | **Runtime relationship** | Connects to runtime via API | Runs inside the runtime as a plugin |
-| **Examples** | Desktop, Mobile, Chrome Ext | Hyperscape, 2004scape |
+| **Examples** | Desktop, Mobile, Dashboard | Hyperscape, 2004scape |
 | **Package naming** | N/A | `@elizaos/app-*` |
 
 ## Choosing a Standalone App
@@ -115,9 +102,8 @@ Plugins do **not** inject custom UI components into the Dashboard. Plugin config
 |------|----------|
 | Full offline capability | Desktop |
 | On-the-go access | Mobile |
-| Browser automation | Chrome Extension |
+| Browser automation | Desktop or Dashboard with browser-capable plugins |
 | Team management | Dashboard |
-| Keyboard-driven workflow | TUI |
 
 ## Related
 

@@ -1,6 +1,6 @@
 # Build and release (CI, desktop binaries)
 
-`.github/workflows/release-electrobun.yml` is the canonical desktop release workflow. `.github/workflows/release.yml` remains a manual legacy desktop fallback only.
+`.github/workflows/release-electrobun.yml` is the canonical desktop release workflow and reusable desktop release-build graph. `.github/workflows/test-electrobun-release.yml` calls that same graph on pull requests in build-only mode, and `.github/workflows/release.yml` remains a manual legacy desktop fallback only.
 
 Why the release pipeline and desktop bundle work the way they do.
 
@@ -14,6 +14,8 @@ We ship **separate** `Milady-arm64.dmg` and `Milady-x64.dmg` because:
 - **Why this still matters on the Intel runner:** our workflow shares the same commands and staging logic across all jobs, and the explicit x64 path avoids accidental host/translation drift in the install and packaging steps.
 
 See `.github/workflows/release-electrobun.yml`: the platform jobs run `arch -x86_64` for the macOS Intel leg during "Install root dependencies", `scripts/desktop-build.mjs stage`, and `scripts/desktop-build.mjs package`.
+
+**Runner hygiene:** When GitHub **renames, updates, or retires** labels such as `macos-14` or `macos-15-intel`, update the matrix in `.github/workflows/release-electrobun.yml` (and any callers) and run **`.github/workflows/test-electrobun-release.yml`** on a branch to confirm the desktop build graph still passes before relying on it for a release.
 
 ## Desktop bundle: why we copy plugins and deps
 
@@ -42,7 +44,6 @@ The release workflow (`.github/workflows/release.yml`) is designed for **reprodu
 - **Remove node-gyp build artifacts before packaging** — We delete `build-tmp*` and `node_gyp_bins` under `node_modules` (root and milady-dist). **Why:** @tensorflow/tfjs-node and other native addons leave symlinks to system Python there; the packager refuses to pack symlinks to paths outside the app (security), so the pack step would fail without removal.
 - **Size report includes `milady-dist`** — We report sizes of both `app.asar.unpacked/node_modules` and `app.asar.unpacked/milady-dist` (and its node_modules when present). **Why:** Both regions contribute to artifact size; reporting both makes it obvious where bloat comes from.
 - **Size report `du | sort | head` pipelines** — We run each pipeline in a subshell and capture exit code with `( pipeline ) || r=$?`, then allow 0 or 141; we also redirect `sort` stderr to `/dev/null`. **Why:** Under `bash -euo pipefail`, when `head` closes the pipe after N lines, `sort` gets SIGPIPE and exits 141; the step would exit before `r=$?` ran. The subshell + `||` lets us treat 141 as success. Silencing `sort` avoids noisy "Broken pipe" in logs.
-- **Windows: plugin prepare script uses `npx -p typescript tsc`** — In `packages/plugin-bnb-identity/build.ts` we invoke `npx -p typescript tsc` instead of `npx tsc`. **Why:** On Windows (and some CI environments), `npx tsc` can resolve to the npm package `tsc` (a joke package that prints "This is not the tsc command you are looking for") instead of the TypeScript compiler. Explicitly using the `typescript` package avoids that and makes the release Windows build succeed.
 - **Single Capacitor build step** — One "Build Capacitor app" step runs `npx vite build` on all platforms. **Why:** The previous split (non-Windows vs Windows) was redundant; vite build works everywhere, so one step reduces drift and confusion.
 - **Packaged DMG E2E: 240s CDP timeout in CI, stdout/stderr dump on timeout** — In CI we use a longer CDP wait and on timeout we log app stdout/stderr before failing. **Why:** CI can be slower; a longer timeout reduces flaky failures. Dumping logs makes CDP timeouts debuggable instead of silent.
 
@@ -58,7 +59,8 @@ CI workflows that need Node (for node-gyp / native modules or npm registry) were
 
 ## Where this runs
 
-- **Electrobun release:** `.github/workflows/release-electrobun.yml` — on version tag push; builds macOS arm64, macOS x64, Windows x64, and Linux x64 Electrobun artifacts plus update channel files.
+- **Electrobun PR release validation:** `.github/workflows/test-electrobun-release.yml` — on pull requests; runs the same Electrobun release build matrix in build-only mode without creating a GitHub release.
+- **Electrobun release:** `.github/workflows/release-electrobun.yml` — on version tag push or manual dispatch; builds macOS arm64, macOS x64, Windows x64, and Linux x64 Electrobun artifacts plus update channel files.
 - **Legacy desktop compatibility stub:** `.github/workflows/release.yml` — manual workflow that only points maintainers at the Electrobun release path.
 - **Local desktop build:** From repo root, use the Electrobun path: `bun run build:desktop` for a local bundle build, then `bash apps/app/electrobun/scripts/smoke-test.sh` for packaged desktop verification.
 
@@ -87,7 +89,25 @@ The official Electrobun docs expect the CLI to come from the project dependency 
 We still keep two Windows-specific guards around that documented flow:
 
 - **Pre-extract the Electrobun CLI tarball:** `electrobun@1.16.0` still shells out to plain `tar -xzf ...` on Windows. On GitHub runners that can resolve to GNU tar and fail on `C:` paths, so the workflow downloads the official `electrobun-cli-win-x64.tar.gz`, verifies its SHA256 from the GitHub release metadata, and extracts it with `C:\\Windows\\System32\\tar.exe` before the build runs.
-- **Seed `rcedit` when needed:** the CLI still imports `rcedit` dynamically during Windows packaging, so the workflow ensures a known-good `rcedit-x64.exe` is present under the installed Electrobun package before invoking `bun run build`.
+- **Seed `rcedit` when needed:** the CLI still imports `rcedit` dynamically during Windows packaging, so the workflow copies a known-good `rcedit-x64.exe` from the already-installed workspace Bun packages into the Electrobun package before invoking `bun run build`. This avoids relying on a separate global registry fetch during release time.
+
+## Windows preload EACCES recovery
+
+`scripts/desktop-build.mjs` now runs a desktop preflight before preload bundling. It verifies:
+
+- Bun version is a supported stable version.
+- `apps/app/electrobun/node_modules/electrobun/package.json` contains `exports["./view"]`.
+- Bun can resolve/import `electrobun/view` from `apps/app/electrobun`.
+
+If preload build fails with `EACCES` around `electrobun/view`, use this exact repair flow:
+
+1. Stop all Bun/Electrobun/Milady processes.
+2. Delete `apps/app/electrobun/node_modules`.
+3. Delete root `node_modules/.bun`.
+4. From repo root run `bun install --frozen-lockfile`.
+5. Retry `bun run start:desktop`.
+
+You can run the preflight alone with `bun run desktop:preflight`.
 
 ## Desktop WebGPU: browser + native
 

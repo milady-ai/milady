@@ -1,4 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Input,
+} from "@miladyai/ui";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
+import { isElectrobunRuntime } from "../bridge";
 import {
   buildCommands as buildCommandPaletteCommands,
   type CommandItem,
@@ -6,6 +22,11 @@ import {
 import { COMMAND_PALETTE_EVENT } from "../events";
 import { useBugReport } from "../hooks";
 import { useApp } from "../state";
+import {
+  openDesktopSettingsWindow,
+  openDesktopSurfaceWindow,
+  requestDesktopBridge,
+} from "../utils";
 
 export function CommandPalette() {
   const {
@@ -14,7 +35,7 @@ export function CommandPalette() {
     commandActiveIndex,
     agentStatus,
     handleStart,
-
+    handleStop,
     handleRestart,
     setTab,
     loadPlugins,
@@ -33,17 +54,19 @@ export function CommandPalette() {
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = "command-palette-results";
 
   const agentState = agentStatus?.state ?? "stopped";
   const currentGameViewerUrl =
     typeof activeGameViewerUrl === "string" ? activeGameViewerUrl : "";
+  const desktopRuntime = isElectrobunRuntime();
 
   const allCommands = useMemo<CommandItem[]>(() => {
     return buildCommandPaletteCommands({
       agentState,
       activeGameViewerUrl: currentGameViewerUrl,
       handleStart,
-
+      handleStop,
       handleRestart,
       setTab,
       setAppsSubTab: () => setState("appsSubTab", "games"),
@@ -53,12 +76,25 @@ export function CommandPalette() {
       loadWorkbench,
       handleChatClear,
       openBugReport,
+      desktopRuntime,
+      focusDesktopMainWindow: () => {
+        void requestDesktopBridge<void>(
+          "desktopFocusWindow",
+          "desktop:focusWindow",
+        );
+      },
+      openDesktopSettingsWindow: (tabHint?: string) => {
+        void openDesktopSettingsWindow(tabHint);
+      },
+      openDesktopSurfaceWindow: (surface, options) => {
+        void openDesktopSurfaceWindow(surface, options);
+      },
     });
   }, [
     agentState,
     currentGameViewerUrl,
     handleStart,
-
+    handleStop,
     handleRestart,
     setTab,
     setState,
@@ -68,6 +104,7 @@ export function CommandPalette() {
     loadWorkbench,
     handleChatClear,
     openBugReport,
+    desktopRuntime,
   ]);
 
   // Filter commands by query
@@ -113,11 +150,50 @@ export function CommandPalette() {
     }
   }, [commandPaletteOpen]);
 
-  // Keyboard handling
   useEffect(() => {
-    if (!commandPaletteOpen) return;
+    if (filteredCommands.length === 0) {
+      if (commandActiveIndex !== 0) {
+        setState("commandActiveIndex", 0);
+      }
+      return;
+    }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const maxIndex = filteredCommands.length - 1;
+    if (commandActiveIndex < 0 || commandActiveIndex > maxIndex) {
+      setState(
+        "commandActiveIndex",
+        Math.min(Math.max(commandActiveIndex, 0), maxIndex),
+      );
+    }
+  }, [commandActiveIndex, filteredCommands.length, setState]);
+
+  // Reset active index when query changes
+  useEffect(() => {
+    if (commandQuery !== "") {
+      setState("commandActiveIndex", 0);
+    }
+  }, [commandQuery, setState]);
+
+  const commandPaletteTitle = t("commandpalette.Title", {
+    defaultValue: "Command palette",
+  });
+  const commandPaletteDescription = t("commandpalette.Description", {
+    defaultValue: "Search commands and jump straight to actions.",
+  });
+  const commandSearchLabel = t("commandpalette.SearchLabel", {
+    defaultValue: "Search commands",
+  });
+  const commandResultsLabel = t("commandpalette.ResultsLabel", {
+    defaultValue: "Command results",
+  });
+  const activeCommand =
+    filteredCommands.length > 0 ? filteredCommands[commandActiveIndex] : null;
+  const activeOptionId = activeCommand
+    ? `command-palette-option-${activeCommand.id}`
+    : undefined;
+
+  const handlePaletteKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
       if (e.key === "Escape") {
         e.preventDefault();
         closeCommandPalette();
@@ -156,81 +232,29 @@ export function CommandPalette() {
           cmd.action();
           closeCommandPalette();
         }
-        return;
       }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    commandPaletteOpen,
-    commandActiveIndex,
-    filteredCommands,
-    setState,
-    closeCommandPalette,
-  ]);
-
-  useEffect(() => {
-    if (filteredCommands.length === 0) {
-      if (commandActiveIndex !== 0) {
-        setState("commandActiveIndex", 0);
-      }
-      return;
-    }
-
-    const maxIndex = filteredCommands.length - 1;
-    if (commandActiveIndex < 0 || commandActiveIndex > maxIndex) {
-      setState(
-        "commandActiveIndex",
-        Math.min(Math.max(commandActiveIndex, 0), maxIndex),
-      );
-    }
-  }, [commandActiveIndex, filteredCommands.length, setState]);
-
-  // Reset active index when query changes
-  useEffect(() => {
-    if (commandQuery !== "") {
-      setState("commandActiveIndex", 0);
-    }
-  }, [commandQuery, setState]);
-
-  if (!commandPaletteOpen) return null;
+    },
+    [closeCommandPalette, commandActiveIndex, filteredCommands, setState],
+  );
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-30"
-      style={{
-        background: "color-mix(in srgb, var(--bg) 50%, transparent)",
-        backdropFilter: "blur(4px)",
+    <Dialog
+      open={commandPaletteOpen}
+      onOpenChange={(v) => {
+        if (!v) closeCommandPalette();
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          closeCommandPalette();
-        }
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          closeCommandPalette();
-        }
-      }}
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
     >
-      <div
-        className="w-[520px] max-h-[420px] flex flex-col rounded-xl"
-        style={{
-          background: "color-mix(in srgb, var(--bg) 96%, transparent)",
-          border:
-            "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
-          borderRadius: "16px",
-          boxShadow: "var(--shadow-lg)",
-        }}
-        role="document"
+      <DialogContent
+        className="flex max-h-[420px] w-[520px] max-w-[520px] flex-col rounded-xl p-0 top-[30%] translate-y-0"
+        onKeyDown={handlePaletteKeyDown}
       >
-        <input
+        <DialogHeader className="sr-only">
+          <DialogTitle>{commandPaletteTitle}</DialogTitle>
+          <DialogDescription>{commandPaletteDescription}</DialogDescription>
+        </DialogHeader>
+        <Input
           ref={inputRef}
+          id="command-palette-search"
           type="text"
           className="w-full px-4 py-3.5 bg-transparent text-[15px] outline-none font-body"
           style={{
@@ -238,12 +262,25 @@ export function CommandPalette() {
             color: "var(--text)",
           }}
           placeholder={t("commandpalette.TypeToSearchComma")}
+          aria-label={commandSearchLabel}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={commandPaletteOpen}
+          aria-controls={listboxId}
+          aria-activedescendant={activeOptionId}
           value={commandQuery}
           onChange={(e) => setState("commandQuery", e.target.value)}
         />
-        <div className="flex-1 overflow-y-auto py-1">
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-label={commandResultsLabel}
+          className="flex-1 overflow-y-auto py-1"
+        >
           {filteredCommands.length === 0 ? (
             <div
+              role="status"
+              aria-live="polite"
               className="py-5 text-center text-[13px]"
               style={{ color: "var(--muted)" }}
             >
@@ -251,10 +288,13 @@ export function CommandPalette() {
             </div>
           ) : (
             filteredCommands.map((cmd, idx) => (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 key={cmd.id}
-                className="w-full px-4 py-2.5 cursor-pointer flex justify-between items-center text-left text-sm font-body border-0"
+                id={`command-palette-option-${cmd.id}`}
+                role="option"
+                aria-selected={idx === commandActiveIndex}
+                className="w-full px-4 py-2.5 cursor-pointer flex justify-between items-center text-left text-sm font-body border-0 rounded-none h-auto"
                 style={{
                   background:
                     idx === commandActiveIndex
@@ -274,11 +314,11 @@ export function CommandPalette() {
                     {cmd.hint}
                   </span>
                 )}
-              </button>
+              </Button>
             ))
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

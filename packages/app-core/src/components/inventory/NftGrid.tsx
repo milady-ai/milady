@@ -24,28 +24,28 @@ export function NftGrid({
 
   if (walletNftsLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-center text-muted italic text-xs">
+      <div className="flex min-h-[24rem] flex-1 items-center justify-center px-6 text-center text-sm text-muted">
         {t("wallet.loadingNfts")}
       </div>
     );
   }
   if (!walletNfts) {
     return (
-      <div className="flex flex-1 items-center justify-center text-center text-muted italic text-xs">
+      <div className="flex min-h-[24rem] flex-1 items-center justify-center px-6 text-center text-sm text-muted">
         {t("wallet.noNftData")}
       </div>
     );
   }
   if (allNfts.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-center text-muted italic text-xs">
+      <div className="flex min-h-[24rem] flex-1 items-center justify-center px-6 text-center text-sm text-muted">
         {t("wallet.noNftsFound")}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5 overflow-y-auto">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 p-4 sm:p-5">
       {allNfts.map((nft, idx) => {
         const icon = chainIcon(nft.chain);
         const key = `${nft.chain}-${nft.name}-${idx}`;
@@ -54,14 +54,14 @@ export function NftGrid({
         return (
           <div
             key={key}
-            className="border border-border bg-card overflow-hidden"
+            className="overflow-hidden rounded-[1.35rem] border border-border/40 bg-card/88 shadow-sm transition-transform hover:-translate-y-0.5"
           >
             {showImage ? (
               <img
                 src={normalizedImageUrl ?? ""}
                 alt={nft.name}
                 loading="lazy"
-                className="w-full h-[150px] object-cover block bg-bg-muted"
+                className="block h-[180px] w-full bg-bg-muted object-cover"
                 onError={() => {
                   setFailedImages((prev) => {
                     const next = new Set(prev);
@@ -71,18 +71,18 @@ export function NftGrid({
                 }}
               />
             ) : (
-              <div className="w-full h-[150px] bg-bg-muted flex items-center justify-center text-[11px] text-muted">
+              <div className="flex h-[180px] w-full items-center justify-center bg-bg-muted text-[11px] text-muted">
                 {t("wallet.noImage")}
               </div>
             )}
-            <div className="px-2 py-1.5">
-              <div className="text-[11px] font-bold overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="px-3 py-3">
+              <div className="truncate text-[12px] font-semibold text-txt-strong">
                 {nft.name}
               </div>
-              <div className="text-[10px] text-muted overflow-hidden text-ellipsis whitespace-nowrap">
+              <div className="mt-1 truncate text-[10px] text-muted">
                 {nft.collectionName}
               </div>
-              <div className="inline-flex items-center gap-1 text-[10px] text-muted mt-0.5">
+              <div className="mt-2 inline-flex items-center gap-1 rounded-full border border-border/45 bg-bg/25 px-2 py-1 text-[10px] text-muted">
                 <span
                   className={`inline-block w-3 h-3 rounded-full text-center leading-3 text-[7px] font-bold font-mono text-white ${icon.cls}`}
                 >

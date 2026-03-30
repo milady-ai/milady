@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
+
+import { BscTradePanel } from "../../src/components/BscTradePanel";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
-import { BscTradePanel } from "../../src/components/BscTradePanel";
 
 const VALID_TOKEN = "0x1234567890abcdef1234567890abcdef12345678";
 

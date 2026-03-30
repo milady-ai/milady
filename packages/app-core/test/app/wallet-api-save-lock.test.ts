@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
+
+import type { WalletConfigUpdateRequest } from "@miladyai/agent/contracts/wallet";
 import React, { useEffect } from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { WalletConfigUpdateRequest } from "@miladyai/autonomous/contracts/wallet";
 
 const { mockClient } = vi.hoisted(() => ({
   mockClient: {
@@ -41,7 +42,7 @@ const { mockClient } = vi.hoisted(() => ({
     getAgentEvents: vi.fn(async () => ({ events: [], latestEventId: null })),
     getStatus: vi.fn(async () => ({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -58,7 +59,7 @@ const { mockClient } = vi.hoisted(() => ({
     updateWalletConfig: vi.fn(async () => ({ ok: true })),
     restartAgent: vi.fn(async () => ({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -81,14 +82,7 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 type ProbeApi = {
   handleWalletApiKeySave: (config: WalletConfigUpdateRequest) => Promise<void>;
@@ -160,7 +154,7 @@ describe("wallet api key save locking", () => {
     });
     mockClient.getStatus.mockResolvedValue({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -180,7 +174,7 @@ describe("wallet api key save locking", () => {
     mockClient.updateWalletConfig.mockResolvedValue({ ok: true });
     mockClient.restartAgent.mockResolvedValue({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,

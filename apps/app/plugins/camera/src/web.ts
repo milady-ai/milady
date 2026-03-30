@@ -55,7 +55,10 @@ export class CameraWeb extends WebPlugin {
   }> = [];
 
   async getDevices(): Promise<{ devices: CameraDevice[] }> {
-    await navigator.mediaDevices.getUserMedia({ video: true });
+    // enumerateDevices() returns device stubs without labels unless the user
+    // has already granted camera permission via a prior getUserMedia() call.
+    // We intentionally do NOT call getUserMedia() here because it requires a
+    // user gesture and would throw NotAllowedError if called programmatically.
     const allDevices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = allDevices.filter((d) => d.kind === "videoinput");
 

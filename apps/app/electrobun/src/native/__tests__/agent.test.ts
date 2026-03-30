@@ -6,10 +6,17 @@
  *  - getMiladyDistFallbackCandidates: path resolution fallback list
  */
 
+import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { getMiladyDistFallbackCandidates, resolveConfigDir } from "../agent";
+import {
+  configureDesktopLocalApiAuth,
+  ensureDesktopApiToken,
+  getMiladyDistFallbackCandidates,
+  inspectExistingElizaInstall,
+  resolveConfigDir,
+} from "../agent";
 
 // ---------------------------------------------------------------------------
 // resolveConfigDir
@@ -118,5 +125,110 @@ describe("getMiladyDistFallbackCandidates", () => {
       "resources/app/milady-dist",
     );
     expect(candidates).toContain(winResourcesPath);
+  });
+});
+
+describe("ensureDesktopApiToken", () => {
+  it("reuses an existing token and mirrors both env aliases", () => {
+    const env: NodeJS.ProcessEnv = {
+      MILADY_API_TOKEN: "desktop-token",
+    };
+
+    expect(ensureDesktopApiToken(env)).toBe("desktop-token");
+    expect(env.MILADY_API_TOKEN).toBe("desktop-token");
+    expect(env.ELIZA_API_TOKEN).toBe("desktop-token");
+  });
+
+  it("generates a token when neither alias is configured", () => {
+    const env: NodeJS.ProcessEnv = {};
+
+    const token = ensureDesktopApiToken(env);
+
+    expect(token).toMatch(/^[a-f0-9]{32}$/);
+    expect(env.MILADY_API_TOKEN).toBe(token);
+    expect(env.ELIZA_API_TOKEN).toBe(token);
+  });
+});
+
+describe("configureDesktopLocalApiAuth", () => {
+  it("disables pairing while keeping the mirrored desktop token aliases", () => {
+    const env: NodeJS.ProcessEnv = {
+      MILADY_API_TOKEN: "desktop-token",
+    };
+
+    expect(configureDesktopLocalApiAuth(env)).toBe("desktop-token");
+    expect(env.MILADY_API_TOKEN).toBe("desktop-token");
+    expect(env.ELIZA_API_TOKEN).toBe("desktop-token");
+    expect(env.MILADY_PAIRING_DISABLED).toBe("1");
+    expect(env.ELIZA_PAIRING_DISABLED).toBe("1");
+  });
+});
+
+describe("inspectExistingElizaInstall", () => {
+  it("detects the default ~/.eliza config when it exists", async () => {
+    const homeDir = path.join(process.cwd(), "tmp-home-default");
+    const stateDir = path.join(homeDir, ".eliza");
+    fs.mkdirSync(stateDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(stateDir, "eliza.json"),
+      JSON.stringify({ agents: { list: [{ id: "main" }] } }),
+    );
+
+    const result = inspectExistingElizaInstall({
+      env: {},
+      homedir: homeDir,
+    });
+
+    expect(result.detected).toBe(true);
+    expect(result.stateDir).toBe(stateDir);
+    expect(result.configPath).toBe(path.join(stateDir, "eliza.json"));
+    expect(result.configExists).toBe(true);
+    expect(result.source).toBe("default-state-dir");
+
+    fs.rmSync(homeDir, { recursive: true, force: true });
+  });
+
+  it("detects an env-overridden state dir even without eliza.json when it has state entries", async () => {
+    const homeDir = path.join(process.cwd(), "tmp-home-env-state");
+    const stateDir = path.join(homeDir, "custom-state");
+    fs.mkdirSync(stateDir, { recursive: true });
+    fs.writeFileSync(path.join(stateDir, "skills.json"), JSON.stringify({}));
+
+    const result = inspectExistingElizaInstall({
+      env: {
+        ELIZA_STATE_DIR: stateDir,
+      },
+      homedir: homeDir,
+    });
+
+    expect(result.detected).toBe(true);
+    expect(result.stateDir).toBe(stateDir);
+    expect(result.configPath).toBe(path.join(stateDir, "eliza.json"));
+    expect(result.configExists).toBe(false);
+    expect(result.hasStateEntries).toBe(true);
+    expect(result.source).toBe("state-dir-env");
+
+    fs.rmSync(homeDir, { recursive: true, force: true });
+  });
+
+  it("prefers an explicit config path when provided", async () => {
+    const homeDir = path.join(process.cwd(), "tmp-home-config-path");
+    const configPath = path.join(homeDir, "profiles", "legacy.json");
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(configPath, JSON.stringify({}));
+
+    const result = inspectExistingElizaInstall({
+      env: {
+        MILADY_CONFIG_PATH: configPath,
+      },
+      homedir: homeDir,
+    });
+
+    expect(result.detected).toBe(true);
+    expect(result.configPath).toBe(configPath);
+    expect(result.stateDir).toBe(path.dirname(configPath));
+    expect(result.source).toBe("config-path-env");
+
+    fs.rmSync(homeDir, { recursive: true, force: true });
   });
 });

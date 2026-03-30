@@ -5,8 +5,16 @@
  * the `mouthOpen` prop. Sized to fill its parent container.
  */
 
-import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import { useEffect, useEffectEvent, useRef } from "react";
+import {
+  CHAT_AVATAR_VOICE_EVENT,
+  type ChatAvatarVoiceEventDetail,
+} from "../../events";
+import type {
+  CompanionHalfFramerateMode,
+  CompanionVrmPowerMode,
+} from "../../state/types";
+import { getVrmCount, getVrmUrl } from "../../state/vrm";
 import {
   type CameraProfile,
   type InteractionMode,
@@ -14,17 +22,21 @@ import {
   type VrmEngineDebugInfo,
   type VrmEngineState,
 } from "./VrmEngine";
+import {
+  refreshVrmDesktopBatteryPixelPolicy,
+  VRM_DESKTOP_BATTERY_POLL_MS,
+} from "./vrm-desktop-energy";
 
-const DEFAULT_VRM_PATH = resolveAppAssetUrl("vrms/milady-1.vrm.gz");
+/** Resolved lazily — boot config may not be set at module-load time (bundled builds). */
+function getDefaultVrmPath(): string {
+  return getVrmUrl(1);
+}
 
 export type VrmViewerProps = {
   /** When false the loaded scene stays resident but the render loop is paused */
   active?: boolean;
   /** Path to the VRM file to load (default: bundled Miwaifus #1) */
   vrmPath?: string;
-  mouthOpen: number;
-  /** When true the engine generates mouth animation internally */
-  isSpeaking?: boolean;
   /** Enable drag-rotate + wheel/pinch zoom camera controls */
   interactive?: boolean;
   /** Camera profile preset (chat default, companion for hero-stage framing) */
@@ -33,6 +45,15 @@ export type VrmViewerProps = {
   interactiveMode?: InteractionMode;
   /** Optional Gaussian splat world behind the avatar */
   worldUrl?: string;
+  /** User Settings: quality / balanced / efficiency for VRM power policy. */
+  companionVrmPowerMode?: CompanionVrmPowerMode;
+  /** When to apply ~half display FPS (independent of DPR/shadows/Spark). */
+  companionHalfFramerateMode?: CompanionHalfFramerateMode;
+  /**
+   * When true and the document is hidden, keep the loop running and hide only
+   * the splat world + Spark backdrop (see `VrmEngine.setMinimalBackgroundMode`).
+   */
+  companionAnimateWhenHidden?: boolean;
   /** Enable springy drag/touch camera offset instead of orbit controls */
   pointerParallax?: boolean;
   onEngineState?: (state: VrmEngineState) => void;
@@ -51,16 +72,96 @@ type VrmEngineDebugRegistryEntry = {
 
 declare global {
   interface Window {
-    __MILADY_VRM_ENGINES__?: VrmEngineDebugRegistryEntry[];
+    __ELIZA_VRM_ENGINES__?: VrmEngineDebugRegistryEntry[];
+    __captureVrmPreviews__?: typeof captureVrmPreviews;
   }
+}
+
+/**
+ * Dev utility: capture preview PNGs for all bundled VRM avatars with spring bone
+ * physics disabled (hair/cloth in rest pose). Call from the browser console:
+ *
+ *   await window.__captureVrmPreviews__()
+ *
+ * Each VRM is loaded in sequence, a snapshot is taken with physics frozen, and
+ * the resulting PNG is downloaded. The existing world-stage engine is reused
+ * if available; otherwise a temporary offscreen engine is created.
+ */
+async function captureVrmPreviews(options?: {
+  width?: number;
+  height?: number;
+}): Promise<void> {
+  const width = options?.width ?? 512;
+  const height = options?.height ?? 768;
+
+  // Try to reuse the existing world-stage engine, fall back to any available engine
+  const registry = window.__ELIZA_VRM_ENGINES__ ?? [];
+  const registryEntry =
+    registry.find((e) => e.role === "world-stage") ?? registry[0] ?? null;
+  const engine = registryEntry?.engine ?? null;
+  if (!engine) {
+    console.error(
+      "[captureVrmPreviews] No active VRM engine found. Navigate to the character view first.",
+    );
+    return;
+  }
+
+  const count = getVrmCount();
+  console.log(
+    `[captureVrmPreviews] Capturing ${count} VRM previews at ${width}×${height} with physics disabled...`,
+  );
+
+  for (let i = 1; i <= count; i++) {
+    const vrmUrl = getVrmUrl(i);
+    const slug =
+      vrmUrl
+        .split("/")
+        .pop()
+        ?.replace(/\.vrm(\.gz)?$/, "") ?? `vrm-${i}`;
+
+    console.log(`[captureVrmPreviews] Loading VRM ${i}/${count}: ${slug}...`);
+    try {
+      await engine.loadVrmFromUrl(vrmUrl, slug);
+      // Let the idle animation settle
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const blob = await engine.snapshot({
+        width,
+        height,
+        disablePhysics: true,
+      });
+      if (!blob) {
+        console.warn(`[captureVrmPreviews] Failed to capture ${slug}`);
+        continue;
+      }
+
+      // Download the PNG
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slug}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log(`[captureVrmPreviews] Saved ${slug}.png`);
+    } catch (err) {
+      console.error(`[captureVrmPreviews] Error capturing ${slug}:`, err);
+    }
+  }
+
+  console.log("[captureVrmPreviews] Done!");
+}
+
+// Expose globally in dev mode
+if (typeof window !== "undefined") {
+  window.__captureVrmPreviews__ = captureVrmPreviews;
 }
 
 export function VrmViewer(props: VrmViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<VrmEngine | null>(null);
-  const mouthOpenRef = useRef<number>(props.mouthOpen);
+  const mouthOpenRef = useRef<number>(0);
   const activeRef = useRef<boolean>(props.active ?? true);
-  const isSpeakingRef = useRef<boolean>(props.isSpeaking ?? false);
+  const isSpeakingRef = useRef<boolean>(false);
   const interactiveRef = useRef<boolean>(props.interactive ?? false);
   const cameraProfileRef = useRef<CameraProfile>(props.cameraProfile ?? "chat");
   const interactionModeRef = useRef<InteractionMode>(
@@ -74,6 +175,7 @@ export function VrmViewer(props: VrmViewerProps) {
   const currentVrmPathRef = useRef<string>("");
   const currentWorldPathRef = useRef<string>("");
   const worldLoadPromiseRef = useRef<Promise<void> | null>(null);
+  const rendererInitFailedRef = useRef(false);
   const pointerStateRef = useRef<{
     active: boolean;
     id: number | null;
@@ -88,14 +190,21 @@ export function VrmViewer(props: VrmViewerProps) {
   const onEngineReadyRef = useRef(props.onEngineReady);
   const onEngineStateRef = useRef(props.onEngineState);
   const onRevealStartRef = useRef(props.onRevealStart);
+  const companionVrmPowerModeRef = useRef<CompanionVrmPowerMode>(
+    props.companionVrmPowerMode ?? "balanced",
+  );
+  const companionAnimateWhenHiddenRef = useRef<boolean>(
+    props.companionAnimateWhenHidden ?? false,
+  );
+  const companionHalfFramerateModeRef = useRef<CompanionHalfFramerateMode>(
+    props.companionHalfFramerateMode ?? "when_saving_power",
+  );
   const revealStartedRef = useRef(false);
   const debugRegistryIdRef = useRef(
     `vrm-viewer-${Math.random().toString(36).slice(2, 10)}`,
   );
 
-  mouthOpenRef.current = props.mouthOpen;
   activeRef.current = props.active ?? true;
-  isSpeakingRef.current = props.isSpeaking ?? false;
   interactiveRef.current = props.interactive ?? false;
   cameraProfileRef.current = props.cameraProfile ?? "chat";
   interactionModeRef.current = props.interactiveMode ?? "free";
@@ -105,25 +214,82 @@ export function VrmViewer(props: VrmViewerProps) {
   onEngineReadyRef.current = props.onEngineReady;
   onEngineStateRef.current = props.onEngineState;
   onRevealStartRef.current = props.onRevealStart;
+  companionVrmPowerModeRef.current = props.companionVrmPowerMode ?? "balanced";
+  companionAnimateWhenHiddenRef.current =
+    props.companionAnimateWhenHidden ?? false;
+  companionHalfFramerateModeRef.current =
+    props.companionHalfFramerateMode ?? "when_saving_power";
+
+  const applyVisibilityAndBackgroundPolicy = useEffectEvent(() => {
+    const engine = engineRef.current;
+    if (!engine || rendererInitFailedRef.current) return;
+    const docVisible =
+      typeof document === "undefined" || document.visibilityState === "visible";
+    const active = activeRef.current;
+    const animateHidden = companionAnimateWhenHiddenRef.current;
+    const shouldPause = !active || (!docVisible && !animateHidden);
+    const minimalWhileRunning = Boolean(animateHidden) && !docVisible && active;
+    engine.setPaused(shouldPause);
+    engine.setMinimalBackgroundMode(minimalWhileRunning);
+    if (docVisible) {
+      void refreshVrmDesktopBatteryPixelPolicy(engine, {
+        companionVrmPowerMode: companionVrmPowerModeRef.current,
+        companionHalfFramerateMode: companionHalfFramerateModeRef.current,
+      });
+    }
+  });
+
+  const reportRendererInitFailure = useEffectEvent((error: unknown) => {
+    rendererInitFailedRef.current = true;
+    currentVrmPathRef.current = "";
+    currentWorldPathRef.current = "";
+    worldLoadPromiseRef.current = null;
+    revealStartedRef.current = false;
+
+    const fallbackMessage =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : "Failed to initialize VRM renderer.";
+    const currentState = engineRef.current?.getState();
+
+    onEngineStateRef.current?.(
+      currentState
+        ? {
+            ...currentState,
+            vrmLoaded: false,
+            revealStarted: false,
+            loadError: currentState.loadError ?? fallbackMessage,
+          }
+        : {
+            vrmLoaded: false,
+            vrmName: null,
+            loadError: fallbackMessage,
+            idlePlaying: false,
+            idleTime: 0,
+            idleTracks: 0,
+            revealStarted: false,
+          },
+    );
+  });
 
   const syncDebugRegistry = useEffectEvent(() => {
     if (!import.meta.env.DEV) return;
     if (typeof window === "undefined") return;
     const engine = engineRef.current;
-    const registry = window.__MILADY_VRM_ENGINES__ ?? [];
+    const registry = window.__ELIZA_VRM_ENGINES__ ?? [];
     const id = debugRegistryIdRef.current;
     const nextEntry: VrmEngineDebugRegistryEntry | null = engine
       ? {
           id,
           role: props.worldUrl ? "world-stage" : "chat-avatar",
-          vrmPath: props.vrmPath ?? DEFAULT_VRM_PATH,
+          vrmPath: props.vrmPath ?? getDefaultVrmPath(),
           worldUrl: props.worldUrl ?? null,
           engine,
           getDebugInfo: () => engine.getDebugInfo(),
         }
       : null;
 
-    window.__MILADY_VRM_ENGINES__ = nextEntry
+    window.__ELIZA_VRM_ENGINES__ = nextEntry
       ? [...registry.filter((entry) => entry.id !== id), nextEntry]
       : registry.filter((entry) => entry.id !== id);
   });
@@ -140,6 +306,17 @@ export function VrmViewer(props: VrmViewerProps) {
       engine = new VrmEngine();
       engineRef.current = engine;
     }
+
+    const applyDesktopBatteryPolicy = () => {
+      void refreshVrmDesktopBatteryPixelPolicy(engineRef.current, {
+        companionVrmPowerMode: companionVrmPowerModeRef.current,
+        companionHalfFramerateMode: companionHalfFramerateModeRef.current,
+      });
+    };
+
+    const syncPauseForVisibilityAndActive = () => {
+      applyVisibilityAndBackgroundPolicy();
+    };
 
     engine.setup(
       canvas,
@@ -164,7 +341,19 @@ export function VrmViewer(props: VrmViewerProps) {
         sparkOptimized: prefersWorldRendererRef.current,
       },
     );
-    engine.setPaused(!activeRef.current);
+    syncPauseForVisibilityAndActive();
+
+    if (typeof document !== "undefined") {
+      document.addEventListener(
+        "visibilitychange",
+        syncPauseForVisibilityAndActive,
+      );
+    }
+
+    const batteryTimer = window.setInterval(() => {
+      applyDesktopBatteryPolicy();
+    }, VRM_DESKTOP_BATTERY_POLL_MS);
+    applyDesktopBatteryPolicy();
 
     // One-time initial camera/control setup (subsequent changes handled by effects).
     engine.setCameraProfile(cameraProfileRef.current);
@@ -188,16 +377,38 @@ export function VrmViewer(props: VrmViewerProps) {
       () => {
         if (!mountedRef.current) return;
         resize();
+        applyDesktopBatteryPolicy();
+        applyVisibilityAndBackgroundPolicy();
         syncDebugRegistry();
         onEngineReadyRef.current?.(engine);
       },
       (error) => {
+        if (!mountedRef.current) return;
+        reportRendererInitFailure(error);
         console.warn("Failed to initialize VRM renderer:", error);
       },
     );
 
+    // Listen for voice events imperatively — updates refs without React re-renders.
+    const handleVoiceEvent = (event: Event) => {
+      const detail = (event as CustomEvent<ChatAvatarVoiceEventDetail>).detail;
+      if (detail) {
+        mouthOpenRef.current = detail.mouthOpen ?? 0;
+        isSpeakingRef.current = detail.isSpeaking ?? false;
+      }
+    };
+    window.addEventListener(CHAT_AVATAR_VOICE_EVENT, handleVoiceEvent);
+
     return () => {
       mountedRef.current = false;
+      window.removeEventListener(CHAT_AVATAR_VOICE_EVENT, handleVoiceEvent);
+      if (typeof document !== "undefined") {
+        document.removeEventListener(
+          "visibilitychange",
+          syncPauseForVisibilityAndActive,
+        );
+      }
+      window.clearInterval(batteryTimer);
       window.removeEventListener("resize", resize);
       resizeObserver?.disconnect();
 
@@ -210,14 +421,22 @@ export function VrmViewer(props: VrmViewerProps) {
   }, []);
 
   useEffect(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    void refreshVrmDesktopBatteryPixelPolicy(engine, {
+      companionVrmPowerMode: props.companionVrmPowerMode ?? "balanced",
+      companionHalfFramerateMode:
+        props.companionHalfFramerateMode ?? "when_saving_power",
+    });
+  }, [props.companionVrmPowerMode, props.companionHalfFramerateMode]);
+
+  useEffect(() => {
     syncDebugRegistry();
   });
 
   useEffect(() => {
-    const engine = engineRef.current;
-    if (!engine) return;
-    engine.setPaused(!(props.active ?? true));
-  }, [props.active]);
+    applyVisibilityAndBackgroundPolicy();
+  }, []);
 
   useEffect(() => {
     const engine = engineRef.current;
@@ -251,7 +470,7 @@ export function VrmViewer(props: VrmViewerProps) {
     const engine = engineRef.current;
     if (!engine) return;
 
-    const vrmUrl = props.vrmPath ?? DEFAULT_VRM_PATH;
+    const vrmUrl = props.vrmPath ?? getDefaultVrmPath();
     if (vrmUrl === currentVrmPathRef.current) return;
     currentVrmPathRef.current = vrmUrl;
     revealStartedRef.current = false;
@@ -267,7 +486,15 @@ export function VrmViewer(props: VrmViewerProps) {
           if (worldUrl !== currentWorldPathRef.current) {
             currentWorldPathRef.current = worldUrl;
             const worldLoadPromise = (async () => {
-              await engine.setWorldUrl(worldUrl);
+              try {
+                await engine.setWorldUrl(worldUrl);
+              } catch (worldErr) {
+                // WHY: optional splat background must not block VRM (agent-visible avatar).
+                console.warn(
+                  "[VrmViewer] World load failed (avatar will still load):",
+                  worldErr,
+                );
+              }
             })();
             worldLoadPromiseRef.current = worldLoadPromise;
             try {
@@ -295,6 +522,7 @@ export function VrmViewer(props: VrmViewerProps) {
         onEngineStateRef.current?.(state);
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") return;
+        if (rendererInitFailedRef.current) return;
         if (currentVrmPathRef.current === vrmUrl) {
           currentVrmPathRef.current = "";
         }
@@ -312,7 +540,7 @@ export function VrmViewer(props: VrmViewerProps) {
 
   useEffect(() => {
     const engine = engineRef.current;
-    if (!engine) return;
+    if (!engine || rendererInitFailedRef.current) return;
 
     const worldUrl = props.worldUrl ?? "";
     if (worldUrl === currentWorldPathRef.current) return;
@@ -326,6 +554,7 @@ export function VrmViewer(props: VrmViewerProps) {
         if (!mountedRef.current || abortController.signal.aborted) return;
         await engine.setWorldUrl(worldUrl || null);
       } catch (err) {
+        if (rendererInitFailedRef.current) return;
         console.warn("Failed to load splat world:", err);
       } finally {
         if (worldLoadPromiseRef.current === worldLoadPromise) {

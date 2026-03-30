@@ -14,14 +14,13 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { SendToWebview } from "../types.js";
 import type { WhisperResult } from "./whisper";
 import {
   isWhisperBinaryAvailable,
   transcribeBunSpawn,
   writeWavFile,
 } from "./whisper";
-
-type SendToWebview = (message: string, payload?: unknown) => void;
 
 // ============================================================================
 // Types

@@ -1,27 +1,8 @@
-/**
- * Extended tooltip components for contextual help, icon buttons, guided
- * tours, and spotlight onboarding overlays.
- *
- * All exports here are framework-agnostic (no app context dependency).
- *
- * Note: The Radix-based `Tooltip` is exported from `./tooltip`. This file
- * exports a custom CSS-only hover tooltip (`HoverTooltip`), `IconTooltip`,
- * `Spotlight`, and `useGuidedTour`.
- */
-
 import { X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "./button";
+import { Z_OVERLAY, Z_TOOLTIP } from "../../lib/floating-layers";
 
-/* ── HoverTooltip ────────────────────────────────────────────────────── */
-
-/**
- * CSS-only hover tooltip that wraps any element in a `<button>` and shows
- * a floating content panel on hover/focus. Supports controlled `visible`
- * mode and an optional dismiss button.
- *
- * Use `IconTooltip` for a div-based (non-button) variant that is safe to
- * wrap interactive children.
- */
 export interface HoverTooltipProps {
   children: React.ReactNode;
   content: React.ReactNode;
@@ -45,7 +26,7 @@ export function HoverTooltip({
 }: HoverTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const containerRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const isVisibleState =
     controlledVisible !== undefined ? controlledVisible : isVisible;
 
@@ -82,10 +63,9 @@ export function HoverTooltip({
   };
 
   return (
-    <button
-      type="button"
+    <div
       ref={containerRef}
-      className="relative inline-flex bg-transparent border-0 p-0 cursor-default"
+      className="relative inline-flex cursor-default"
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}
@@ -99,14 +79,15 @@ export function HoverTooltip({
         >
           <div className="relative bg-bg-elevated border border-border rounded-lg shadow-xl p-3 max-w-xs">
             {onDismiss && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={onDismiss}
-                className="absolute top-1 right-1 p-1 text-muted hover:text-txt rounded"
+                className="absolute top-1 right-1 h-6 w-6 text-muted hover:text-txt rounded"
                 aria-label="Dismiss tooltip"
               >
                 <X className="w-3 h-3" />
-              </button>
+              </Button>
             )}
             {content}
 
@@ -118,28 +99,23 @@ export function HoverTooltip({
           </div>
         </div>
       )}
-    </button>
+    </div>
   );
 }
 
-/* ── IconTooltip ─────────────────────────────────────────────────────── */
-
-/**
- * Lightweight tooltip for icon buttons.
- *
- * Uses a `<div>` wrapper (not `<button>`) so it can safely wrap interactive
- * elements like icon buttons without nesting buttons.
- */
 export function IconTooltip({
   children,
   label,
   shortcut,
   position = "top",
+  multiline = false,
 }: {
   children: React.ReactNode;
   label: string;
   shortcut?: string;
   position?: "top" | "bottom";
+  /** Long labels: wrap and cap width. */
+  multiline?: boolean;
 }) {
   const posClass =
     position === "top"
@@ -150,11 +126,15 @@ export function IconTooltip({
       ? "top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-bg-elevated"
       : "bottom-full left-1/2 -translate-x-1/2 -mb-1 border-4 border-transparent border-b-bg-elevated";
 
+  const bodyClass = multiline
+    ? "max-w-[min(22rem,calc(100vw-1.5rem))] whitespace-normal text-left leading-snug"
+    : "whitespace-nowrap";
+
   return (
-    <div className="relative group">
+    <div className="relative isolate group">
       {children}
       <div
-        className={`absolute ${posClass} px-2 py-1 bg-bg-elevated border border-border text-[11px] text-txt-strong rounded-md whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-lg pointer-events-none`}
+        className={`absolute ${posClass} px-2 py-1.5 bg-bg-elevated border border-border text-[11px] text-txt-strong rounded-md ${bodyClass} opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-opacity duration-200 z-[${Z_OVERLAY}] shadow-lg pointer-events-none`}
         role="tooltip"
       >
         <div className="font-medium">{label}</div>
@@ -164,8 +144,6 @@ export function IconTooltip({
     </div>
   );
 }
-
-/* ── Spotlight ───────────────────────────────────────────────────────── */
 
 export interface SpotlightProps {
   target: string;
@@ -212,8 +190,7 @@ export function Spotlight({
   const padding = 8;
 
   return (
-    <div className="fixed inset-0 z-[300] pointer-events-none">
-      {/* Backdrop with cutout */}
+    <div className={`fixed inset-0 z-[${Z_TOOLTIP}] pointer-events-none`}>
       <div
         className="absolute inset-0 bg-black/60 pointer-events-auto"
         style={{
@@ -232,7 +209,6 @@ export function Spotlight({
         }}
       />
 
-      {/* Tooltip card */}
       <div
         className="absolute bg-card border border-border rounded-xl shadow-2xl p-5 max-w-sm pointer-events-auto"
         style={{
@@ -244,27 +220,27 @@ export function Spotlight({
           <span className="text-xs text-muted font-medium">
             {labels.stepOf ?? "Step"} {step} of {totalSteps}
           </span>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onSkip}
-            className="text-xs text-muted hover:text-txt"
+            className="h-auto px-1 py-0 text-xs text-muted hover:text-txt"
           >
             {labels.skipTour ?? "Skip Tour"}
-          </button>
+          </Button>
         </div>
 
         <h3 className="text-lg font-bold text-txt-strong mb-2">{title}</h3>
         <p className="text-sm text-muted mb-4">{description}</p>
 
         <div className="flex items-center justify-between">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={onPrev}
             disabled={step === 1}
-            className="px-4 py-2 text-sm border border-border rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-bg-hover transition-colors"
           >
             {labels.previous ?? "Previous"}
-          </button>
+          </Button>
 
           <div className="flex gap-1">
             {Array.from({ length: totalSteps }, (_, idx) => idx).map(
@@ -279,22 +255,18 @@ export function Spotlight({
             )}
           </div>
 
-          <button
-            type="button"
+          <Button
             onClick={onNext}
-            className="px-4 py-2 text-sm bg-accent text-accent-fg rounded-lg hover:opacity-90 transition-opacity"
           >
             {step === totalSteps
               ? (labels.finish ?? "Finish")
               : (labels.next ?? "Next")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
   );
 }
-
-/* ── useGuidedTour ───────────────────────────────────────────────────── */
 
 export interface TourStep {
   target: string;

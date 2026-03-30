@@ -22,6 +22,15 @@ import {
   it,
   vi,
 } from "vitest";
+import { req } from "../../../../test/helpers/http";
+
+import { createInlineUiMock } from "./mockInlineUi";
+
+vi.mock("@miladyai/ui", async () => {
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return createInlineUiMock(actual);
+});
 
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
@@ -38,46 +47,6 @@ vi.mock("@miladyai/app-core/components", async () => {
 // Part 1: API Tests for Export/Import Endpoints
 // ---------------------------------------------------------------------------
 
-async function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (payload) r.write(payload);
-    r.end();
-  });
-}
-
 function createExportImportTestServer(): Promise<{
   port: number;
   close: () => Promise<void>;
@@ -92,7 +61,7 @@ function createExportImportTestServer(): Promise<{
       system: "System prompt",
     },
     settings: {
-      theme: "milady",
+      theme: "eliza",
       provider: "openai",
     },
     memories: [
@@ -369,7 +338,7 @@ vi.mock("@miladyai/app-core/state", async () => {
   return {
     ...actual,
     useApp: () => mockUseApp(),
-    THEMES: [{ id: "milady", label: "Milady" }],
+    THEMES: [{ id: "eliza", label: "Eliza" }],
   };
 });
 
@@ -382,38 +351,38 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
-vi.mock("@miladyai/app-core/components/ConfigPageView", () => ({
+vi.mock("../../src/components/ConfigPageView", () => ({
   ConfigPageView: () => React.createElement("div", null, "ConfigPageView"),
 }));
 
-vi.mock("@miladyai/app-core/components/CodingAgentSettingsSection", () => ({
+vi.mock("../../src/components/CodingAgentSettingsSection", () => ({
   CodingAgentSettingsSection: () =>
     React.createElement("div", null, "CodingAgentSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/MediaSettingsSection", () => ({
+vi.mock("../../src/components/MediaSettingsSection", () => ({
   MediaSettingsSection: () =>
     React.createElement("div", null, "MediaSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/ElizaCloudDashboard", () => ({
+vi.mock("../../src/components/ElizaCloudDashboard", () => ({
   CloudDashboard: () => React.createElement("div", null, "ElizaCloudDashboard"),
 }));
 
-vi.mock("@miladyai/app-core/components/PermissionsSection", () => ({
+vi.mock("../../src/components/PermissionsSection", () => ({
   PermissionsSection: () =>
     React.createElement("div", null, "PermissionsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/ProviderSwitcher", () => ({
+vi.mock("../../src/components/ProviderSwitcher", () => ({
   ProviderSwitcher: () => React.createElement("div", null, "ProviderSwitcher"),
 }));
 
-vi.mock("@miladyai/app-core/components/VoiceConfigView", () => ({
+vi.mock("../../src/components/VoiceConfigView", () => ({
   VoiceConfigView: () => React.createElement("div", null, "VoiceConfigView"),
 }));
 
-import { SettingsView } from "@miladyai/app-core/components/SettingsView";
+import { SettingsView } from "../../src/components/SettingsView";
 
 type ExportImportState = {
   currentTheme: string;
@@ -434,7 +403,7 @@ type ExportImportState = {
 
 function createExportImportUIState(): ExportImportState {
   return {
-    currentTheme: "milady",
+    currentTheme: "eliza",
     plugins: [],
     pluginSaving: false,
     pluginSaveSuccess: false,
@@ -562,7 +531,7 @@ describe("Export Integration", () => {
       handleExport: async () => {
         exportedData = {
           character: { name: "TestAgent" },
-          settings: { theme: "milady" },
+          settings: { theme: "eliza" },
           memories: [],
           conversations: [],
           exportedAt: new Date().toISOString(),
@@ -662,7 +631,7 @@ describe("Export File Format", () => {
   it("export data is valid JSON", () => {
     const exportData = {
       character: { name: "TestAgent" },
-      settings: { theme: "milady" },
+      settings: { theme: "eliza" },
       memories: [],
       conversations: [],
       exportedAt: new Date().toISOString(),

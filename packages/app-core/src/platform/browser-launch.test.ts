@@ -69,6 +69,54 @@ describe("applyLaunchConnectionFromUrl", () => {
     expect(window.location.search).toBe("");
   });
 
+  it("falls back to the legacy eliza launch-session path when milady path is unavailable", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ error: "not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              connection: {
+                apiBase: "https://agent-legacy.containers.elizacloud.ai",
+                token: "legacy-token",
+              },
+            },
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        ),
+      );
+
+    setUrl(
+      "/?cloudLaunchSession=session-legacy&cloudLaunchBase=https%3A%2F%2Felizacloud.ai",
+    );
+
+    await expect(applyLaunchConnectionFromUrl()).resolves.toBe(true);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://elizacloud.ai/api/v1/milady/launch-sessions/session-legacy",
+      expect.objectContaining({ method: "GET", redirect: "manual" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://elizacloud.ai/api/v1/eliza/launch-sessions/session-legacy",
+      expect.objectContaining({ method: "GET", redirect: "manual" }),
+    );
+    expect(mockClient.setBaseUrl).toHaveBeenCalledWith(
+      "https://agent-legacy.containers.elizacloud.ai",
+    );
+    expect(mockClient.setToken).toHaveBeenCalledWith("legacy-token");
+  });
+
   it("falls back to direct launch params and strips them after applying", async () => {
     setUrl(
       "/?apiBase=https%3A%2F%2Fagent-456.containers.elizacloud.ai&token=backend-token",

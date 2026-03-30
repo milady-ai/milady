@@ -1,4 +1,5 @@
 export * from "./AppContext";
+export * from "./CompanionSceneConfigContext";
 export * from "./parsers";
 export * from "./persistence";
 export * from "./types";

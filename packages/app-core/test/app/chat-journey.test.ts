@@ -111,6 +111,15 @@ const { mockClient } = vi.hoisted(() => ({
       triggers: [],
       todos: [],
     })),
+    renameConversation: vi.fn(async (_id: string, _title: string) => ({
+      conversation: {
+        id: "conv-1",
+        title: "Chat",
+        roomId: "room-1",
+        createdAt: "2026-02-01T00:00:00.000Z",
+        updatedAt: "2026-02-01T00:00:00.000Z",
+      },
+    })),
     deleteConversation: vi.fn(async () => ({ ok: true })),
   },
 }));
@@ -121,16 +130,7 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 type ProbeApi = {
   setChatInput: (text: string) => void;
@@ -311,6 +311,15 @@ function resetMockClient(): void {
     todos: [],
   });
   mockClient.getCodingAgentStatus.mockResolvedValue(null);
+  mockClient.renameConversation.mockResolvedValue({
+    conversation: {
+      id: "conv-1",
+      title: "Chat",
+      roomId: "room-1",
+      createdAt: "2026-02-01T00:00:00.000Z",
+      updatedAt: "2026-02-01T00:00:00.000Z",
+    },
+  });
   mockClient.deleteConversation.mockResolvedValue({ ok: true });
 }
 
@@ -351,14 +360,18 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
       });
 
       expect(api).not.toBeNull();
-      expect(mockClient.listConversations).toHaveBeenCalled();
+      // listConversations is only called after the startup hydration flow
+      // completes (requires persisted connection mode). With a cleared
+      // localStorage the provider enters onboarding and skips hydration.
 
       await act(async () => {
         tree!.unmount();
@@ -375,7 +388,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -427,7 +442,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -475,7 +492,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -500,6 +519,7 @@ describe("chat journey", () => {
         expect.any(AbortSignal),
         undefined,
         "simple",
+        undefined,
       );
 
       await act(async () => {
@@ -509,7 +529,9 @@ describe("chat journey", () => {
 
     it("shows optimistic user message immediately on send", async () => {
       const deferred = createDeferred<{ text: string; agentName: string }>();
-      mockClient.sendConversationMessageStream.mockReturnValue(deferred.promise);
+      mockClient.sendConversationMessageStream.mockReturnValue(
+        deferred.promise,
+      );
 
       let api: ProbeApi | null = null;
       let tree: TestRenderer.ReactTestRenderer;
@@ -520,7 +542,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -559,7 +583,9 @@ describe("chat journey", () => {
 
     it("disables sending while message is in flight (send lock)", async () => {
       const deferred = createDeferred<{ text: string; agentName: string }>();
-      mockClient.sendConversationMessageStream.mockReturnValue(deferred.promise);
+      mockClient.sendConversationMessageStream.mockReturnValue(
+        deferred.promise,
+      );
 
       let api: ProbeApi | null = null;
       let tree: TestRenderer.ReactTestRenderer;
@@ -570,7 +596,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -611,7 +639,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -654,6 +684,16 @@ describe("chat journey", () => {
           return deferred.promise;
         },
       );
+      mockClient.getConversationMessages.mockResolvedValue({
+        messages: [
+          {
+            id: "msg-final",
+            role: "assistant",
+            text: "Hello world",
+            timestamp: Date.now(),
+          },
+        ],
+      });
 
       let api: ProbeApi | null = null;
       let tree: TestRenderer.ReactTestRenderer;
@@ -664,7 +704,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -713,6 +755,16 @@ describe("chat journey", () => {
         text: "Final answer",
         agentName: "Milady",
       });
+      mockClient.getConversationMessages.mockResolvedValue({
+        messages: [
+          {
+            id: "msg-final",
+            role: "assistant",
+            text: "Final answer",
+            timestamp: Date.now(),
+          },
+        ],
+      });
 
       let api: ProbeApi | null = null;
       let tree: TestRenderer.ReactTestRenderer;
@@ -723,7 +775,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -766,7 +820,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -812,7 +868,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -834,20 +892,23 @@ describe("chat journey", () => {
       });
     });
 
-    it("switches conversations and loads messages for selected conversation", async () => {
-      // First call returns conv-1 messages with a user message (prevents deletion)
-      mockClient.getConversationMessages
-        .mockResolvedValueOnce({
-          messages: [
-            { id: "msg-u1", role: "user", text: "user said something", timestamp: 1 },
-            { id: "msg-1", role: "assistant", text: "hello from conv-1", timestamp: 2 },
-          ],
-        })
-        .mockResolvedValueOnce({
-          messages: [
-            { id: "msg-2", role: "assistant", text: "hello from conv-2", timestamp: 3 },
-          ],
-        });
+    it("falls back to requestGreeting when inline greeting is missing", async () => {
+      mockClient.createConversation.mockResolvedValueOnce({
+        conversation: {
+          id: "conv-no-greeting",
+          title: "New Chat",
+          roomId: "room-no-greeting",
+          createdAt: "2026-02-01T00:00:00.000Z",
+          updatedAt: "2026-02-01T00:00:00.000Z",
+        },
+        // No greeting field — simulates older server or agent not running
+      });
+      mockClient.requestGreeting.mockResolvedValueOnce({
+        text: "hey there!",
+        agentName: "Milady",
+        generated: true,
+        persisted: false,
+      });
 
       let api: ProbeApi | null = null;
       let tree: TestRenderer.ReactTestRenderer;
@@ -858,7 +919,95 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
+            }),
+          ),
+        );
+      });
+
+      expect(api).not.toBeNull();
+
+      // Select a conversation first so handleNewConversation has something to transition from.
+      await act(async () => {
+        await api!.handleSelectConversation("conv-1");
+      });
+
+      await act(async () => {
+        await api!.handleNewConversation();
+      });
+
+      // The fallback should have called requestGreeting since inline was missing
+      expect(mockClient.requestGreeting).toHaveBeenCalledWith(
+        "conv-no-greeting",
+        "en",
+      );
+
+      // Wait for the async fallback to populate messages
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      const snapshot = api!.snapshot();
+      expect(snapshot.activeConversationId).toBe("conv-no-greeting");
+      expect(snapshot.conversationMessages).toEqual([
+        expect.objectContaining({
+          role: "assistant",
+          text: "hey there!",
+          source: "agent_greeting",
+        }),
+      ]);
+
+      await act(async () => {
+        tree!.unmount();
+      });
+    });
+
+    it("switches conversations and loads messages for selected conversation", async () => {
+      // Use current timestamps so shouldStartFreshCompanionConversation does not
+      // treat these as "stale" conversations (which would trigger a new-conversation
+      // refresh and overwrite the active conversation ID).
+      const now = Date.now();
+      mockClient.getConversationMessages
+        .mockResolvedValueOnce({
+          messages: [
+            {
+              id: "msg-u1",
+              role: "user",
+              text: "user said something",
+              timestamp: now - 1000,
+            },
+            {
+              id: "msg-1",
+              role: "assistant",
+              text: "hello from conv-1",
+              timestamp: now - 500,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          messages: [
+            {
+              id: "msg-2",
+              role: "assistant",
+              text: "hello from conv-2",
+              timestamp: now - 200,
+            },
+          ],
+        });
+      let api: ProbeApi | null = null;
+      let tree: TestRenderer.ReactTestRenderer;
+
+      await act(async () => {
+        tree = TestRenderer.create(
+          React.createElement(
+            AppProvider,
+            null,
+            React.createElement(Probe, {
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -871,7 +1020,9 @@ describe("chat journey", () => {
       });
 
       expect(api!.snapshot().activeConversationId).toBe("conv-1");
-      expect(api!.snapshot().conversationMessages[0].text).toBe("user said something");
+      expect(api!.snapshot().conversationMessages[0].text).toBe(
+        "user said something",
+      );
 
       await act(async () => {
         await api!.handleSelectConversation("conv-2");
@@ -879,7 +1030,9 @@ describe("chat journey", () => {
 
       expect(api!.snapshot().activeConversationId).toBe("conv-2");
       expect(mockClient.getConversationMessages).toHaveBeenCalledWith("conv-2");
-      expect(api!.snapshot().conversationMessages[0].text).toBe("hello from conv-2");
+      expect(api!.snapshot().conversationMessages[0].text).toBe(
+        "hello from conv-2",
+      );
 
       await act(async () => {
         tree!.unmount();
@@ -896,7 +1049,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -940,7 +1095,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -995,7 +1152,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );
@@ -1021,7 +1180,9 @@ describe("chat journey", () => {
       ).toBe(false);
       // Temp response IDs should be cleaned up
       expect(
-        snapshot.conversationMessages.some((m) => m.id.startsWith("temp-resp-")),
+        snapshot.conversationMessages.some((m) =>
+          m.id.startsWith("temp-resp-"),
+        ),
       ).toBe(false);
 
       await act(async () => {
@@ -1043,7 +1204,9 @@ describe("chat journey", () => {
             AppProvider,
             null,
             React.createElement(Probe, {
-              onReady: (nextApi) => { api = nextApi; },
+              onReady: (nextApi) => {
+                api = nextApi;
+              },
             }),
           ),
         );

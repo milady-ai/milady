@@ -5,6 +5,7 @@
  * away from the Apps tab. Provides drag, resize, and close controls.
  */
 
+import { Button } from "@miladyai/ui";
 import { useCallback, useRef, useState } from "react";
 import { useApp } from "../state";
 
@@ -84,18 +85,19 @@ export function GameViewOverlay() {
             borderBottom: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          <button
-            type="button"
-            className="font-bold text-[11px] truncate flex-1 text-left cursor-inherit bg-transparent border-0"
+          <Button
+            variant="ghost"
+            className="font-bold text-[11px] truncate flex-1 text-left cursor-inherit h-auto p-0"
             style={{ color: "rgba(240,238,250,0.92)" }}
             onMouseDown={handleDragStart}
-            aria-label="Drag overlay"
+            aria-label={t("aria.dragOverlay")}
           >
             {activeGameDisplayName || "Game"}
-          </button>
-          <button
-            type="button"
-            className="text-[10px] px-2 py-0.5 cursor-pointer transition-colors"
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-[10px] px-2 py-0.5 h-auto"
             style={{
               border: "1px solid rgba(255,255,255,0.1)",
               background: "rgba(255,255,255,0.04)",
@@ -105,10 +107,11 @@ export function GameViewOverlay() {
             title={t("gameviewoverlay.ExpandBackToApps")}
           >
             {t("gameviewoverlay.Expand")}
-          </button>
-          <button
-            type="button"
-            className="text-[10px] px-2 py-0.5 cursor-pointer transition-colors"
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-[10px] px-2 py-0.5 h-auto"
             style={{
               border: "1px solid rgba(255,255,255,0.1)",
               background: "rgba(255,255,255,0.04)",
@@ -118,7 +121,7 @@ export function GameViewOverlay() {
             title={t("gameviewoverlay.CloseOverlay")}
           >
             {t("bugreportmodal.Close")}
-          </button>
+          </Button>
         </div>
         {/* Iframe */}
         <iframe

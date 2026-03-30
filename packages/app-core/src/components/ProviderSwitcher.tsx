@@ -5,28 +5,44 @@
  * Composes SubscriptionStatus and ApiKeyConfig sub-components.
  */
 
-import { Button, Input } from "@miladyai/ui";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client, type OnboardingOptions, type PluginParamDef } from "../api";
 import {
   ConfigRenderer,
   defaultRegistry,
   type JsonSchemaObject,
 } from "../config";
+import { useBranding } from "../config/branding";
 import { useTimeout } from "../hooks";
+import { inferOnboardingConnectionFromConfig } from "@miladyai/shared/contracts/onboarding";
 import {
   getOnboardingProviderOption,
-  getStoredSubscriptionProvider,
-  getSubscriptionProviderFamily,
   isSubscriptionProviderSelectionId,
-  normalizeSubscriptionProviderSelectionId,
   SUBSCRIPTION_PROVIDER_SELECTIONS,
   type SubscriptionProviderSelectionId,
 } from "../providers";
 import { useApp } from "../state";
 import type { ConfigUiHint } from "../types";
+import { openExternalUrl } from "../utils";
 import { ApiKeyConfig } from "./ApiKeyConfig";
 import { SubscriptionStatus } from "./SubscriptionStatus";
+
+const SUBSCRIPTION_PROVIDER_LABEL_FALLBACKS: Record<
+  SubscriptionProviderSelectionId,
+  string
+> = {
+  "anthropic-subscription": "Claude Subscription",
+  "openai-subscription": "ChatGPT Subscription",
+};
 
 interface PluginInfo {
   id: string;
@@ -71,12 +87,26 @@ interface ProviderSwitcherProps {
   setTab?: (tab: string) => void;
 }
 
+function getSubscriptionProviderLabel(
+  provider: {
+    id: SubscriptionProviderSelectionId;
+    labelKey: string;
+  },
+  t: (key: string) => string,
+): string {
+  const translated = t(provider.labelKey);
+  if (translated !== provider.labelKey) {
+    return translated;
+  }
+
+  return SUBSCRIPTION_PROVIDER_LABEL_FALLBACKS[provider.id] ?? provider.id;
+}
+
 export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const { setTimeout } = useTimeout();
   const app = useApp();
+  const branding = useBranding();
   const t = app.t;
-  const elizaCloudEnabled =
-    props.elizaCloudEnabled ?? Boolean(app.elizaCloudEnabled);
   const elizaCloudConnected =
     props.elizaCloudConnected ?? Boolean(app.elizaCloudConnected);
   const elizaCloudCredits = props.elizaCloudCredits ?? app.elizaCloudCredits;
@@ -84,9 +114,6 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     props.elizaCloudCreditsLow ?? Boolean(app.elizaCloudCreditsLow);
   const elizaCloudCreditsCritical =
     props.elizaCloudCreditsCritical ?? Boolean(app.elizaCloudCreditsCritical);
-  const _elizaCloudTopUpUrl =
-    props.elizaCloudTopUpUrl ??
-    (typeof app.elizaCloudTopUpUrl === "string" ? app.elizaCloudTopUpUrl : "");
   const elizaCloudUserId =
     props.elizaCloudUserId ??
     (typeof app.elizaCloudUserId === "string" ? app.elizaCloudUserId : null);
@@ -113,7 +140,6 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       ? app.pluginSaveSuccess
       : new Set<string>());
   const loadPlugins = props.loadPlugins ?? app.loadPlugins;
-  const handlePluginToggle = props.handlePluginToggle ?? app.handlePluginToggle;
   const handlePluginConfigSave =
     props.handlePluginConfigSave ?? app.handlePluginConfigSave;
   const handleCloudLogin = props.handleCloudLogin ?? app.handleCloudLogin;
@@ -142,11 +168,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const [anthropicConnected, setAnthropicConnected] = useState(false);
   const [openaiConnected, setOpenaiConnected] = useState(false);
 
-  /* ── Cloud inference state ─────────────────────────────────────── */
-  const [cloudHandlesInference, setCloudHandlesInference] = useState(false);
-
   /* ── pi-ai state ──────────────────────────────────────────────── */
-  const [piAiEnabled, setPiAiEnabled] = useState(false);
   const [piAiModelSpec, setPiAiModelSpec] = useState("");
   const [piAiModelOptions, setPiAiModelOptions] = useState<
     OnboardingOptions["piAiModels"]
@@ -155,12 +177,37 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const [piAiSaving, setPiAiSaving] = useState(false);
   const [piAiSaveSuccess, setPiAiSaveSuccess] = useState(false);
 
+  const syncSelectionFromConfig = useCallback(
+    (cfg: Record<string, unknown>) => {
+      const connection = inferOnboardingConnectionFromConfig(cfg);
+      const nextSelectedId =
+        connection?.kind === "cloud-managed"
+          ? "__cloud__"
+          : connection?.kind === "local-provider"
+            ? connection.provider
+            : connection?.kind === "remote-provider"
+              ? (connection.provider ?? null)
+              : null;
+
+      if (!hasManualSelection.current) {
+        setSelectedProviderId(nextSelectedId);
+      }
+      const piAiSelected =
+        connection?.kind === "local-provider" &&
+        connection.provider === "pi-ai";
+      if (piAiSelected) {
+        setPiAiModelSpec(connection.primaryModel ?? "");
+      }
+    },
+    [],
+  );
+
   const loadSubscriptionStatus = useCallback(async () => {
     try {
       const res = await client.getSubscriptionStatus();
       setSubscriptionStatus(res.providers ?? []);
     } catch (err) {
-      console.warn("[milady] Failed to load subscription status", err);
+      console.warn("[eliza] Failed to load subscription status", err);
     }
   }, []);
 
@@ -177,13 +224,15 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             : "",
         );
       } catch (err) {
-        console.warn("[milady] Failed to load onboarding options", err);
+        console.warn("[eliza] Failed to load onboarding options", err);
       }
       try {
         const cfg = await client.getConfig();
         const models = cfg.models as Record<string, string> | undefined;
-        const cloud = cfg.cloud as Record<string, unknown> | undefined;
-        const elizaCloudEnabledCfg = cloud?.enabled === true;
+        const connection = inferOnboardingConnectionFromConfig(
+          cfg as Record<string, unknown>,
+        );
+        const elizaCloudEnabledCfg = connection?.kind === "cloud-managed";
         const defaultSmall = "moonshotai/kimi-k2-turbo";
         const defaultLarge = "moonshotai/kimi-k2-0905";
 
@@ -208,56 +257,26 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             envLarge ||
             (elizaCloudEnabledCfg ? defaultLarge : ""),
         );
-        const rawPiAi =
-          (typeof vars.MILADY_USE_PI_AI === "string"
-            ? vars.MILADY_USE_PI_AI
-            : undefined) ||
-          (typeof env?.MILADY_USE_PI_AI === "string"
-            ? env.MILADY_USE_PI_AI
-            : "");
-        const piAiOn = ["1", "true", "yes"].includes(
-          rawPiAi.trim().toLowerCase(),
-        );
-        setPiAiEnabled(piAiOn);
-
-        // Check if cloud handles inference or user has own keys
-        const cloudServices = cloud?.services as
-          | Record<string, unknown>
-          | undefined;
-        const inferenceMode =
-          typeof cloud?.inferenceMode === "string"
-            ? cloud.inferenceMode
-            : "cloud";
-        const inferenceToggle = cloudServices?.inference !== false;
-        const cloudHandlesInferenceCfg =
-          elizaCloudEnabledCfg && inferenceMode === "cloud" && inferenceToggle;
-        setCloudHandlesInference(cloudHandlesInferenceCfg);
+        syncSelectionFromConfig(cfg as Record<string, unknown>);
 
         const agents = cfg.agents as Record<string, unknown> | undefined;
         const defaults = agents?.defaults as
           | Record<string, unknown>
           | undefined;
         const model = defaults?.model as Record<string, unknown> | undefined;
-        const savedSubscriptionProvider =
-          normalizeSubscriptionProviderSelectionId(
-            defaults?.subscriptionProvider,
-          );
-        setPiAiModelSpec(
-          typeof model?.primary === "string" ? model.primary : "",
-        );
         if (
-          !hasManualSelection.current &&
-          savedSubscriptionProvider &&
-          !piAiOn &&
-          !cloudHandlesInferenceCfg
+          connection?.kind !== "local-provider" ||
+          connection.provider !== "pi-ai"
         ) {
-          setSelectedProviderId(savedSubscriptionProvider);
+          setPiAiModelSpec(
+            typeof model?.primary === "string" ? model.primary : "",
+          );
         }
       } catch (err) {
-        console.warn("[milady] Failed to load config", err);
+        console.warn("[eliza] Failed to load config", err);
       }
     })();
-  }, [loadSubscriptionStatus]);
+  }, [loadSubscriptionStatus, syncSelectionFromConfig]);
 
   useEffect(() => {
     const anthStatus = subscriptionStatus.find(
@@ -272,218 +291,147 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   }, [subscriptionStatus]);
 
   /* ── Derived ──────────────────────────────────────────────────── */
-  const allAiProviders = [
-    ...plugins.filter((p) => p.category === "ai-provider"),
-  ].sort((left, right) => {
-    const leftCatalog = getOnboardingProviderOption(
-      normalizeAiProviderPluginId(left.id),
-    );
-    const rightCatalog = getOnboardingProviderOption(
-      normalizeAiProviderPluginId(right.id),
-    );
-    if (leftCatalog && rightCatalog) {
-      return leftCatalog.order - rightCatalog.order;
-    }
-    if (leftCatalog) return -1;
-    if (rightCatalog) return 1;
-    return left.name.localeCompare(right.name);
-  });
-  const enabledAiProviders = allAiProviders.filter((p) => p.enabled);
+  const allAiProviders = useMemo(
+    () =>
+      [...plugins.filter((p) => p.category === "ai-provider")].sort(
+        (left, right) => {
+          const leftCatalog = getOnboardingProviderOption(
+            normalizeAiProviderPluginId(left.id),
+          );
+          const rightCatalog = getOnboardingProviderOption(
+            normalizeAiProviderPluginId(right.id),
+          );
+          if (leftCatalog && rightCatalog) {
+            return leftCatalog.order - rightCatalog.order;
+          }
+          if (leftCatalog) return -1;
+          if (rightCatalog) return 1;
+          return left.name.localeCompare(right.name);
+        },
+      ),
+    [plugins],
+  );
+  const availableProviderIds = useMemo(
+    () =>
+      new Set(
+        allAiProviders.map(
+          (provider) =>
+            getOnboardingProviderOption(
+              normalizeAiProviderPluginId(provider.id),
+            )?.id ?? normalizeAiProviderPluginId(provider.id),
+        ),
+      ),
+    [allAiProviders],
+  );
 
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
-    () => (elizaCloudEnabled ? "__cloud__" : null),
+    null,
   );
   const hasManualSelection = useRef(false);
 
-  useEffect(() => {
-    if (hasManualSelection.current) return;
-    if (piAiEnabled) {
-      if (selectedProviderId !== "pi-ai") setSelectedProviderId("pi-ai");
-      return;
-    }
-    // Only auto-select cloud if cloud handles inference (not just enabled)
-    if (cloudHandlesInference) {
-      if (selectedProviderId !== "__cloud__")
-        setSelectedProviderId("__cloud__");
-    }
-  }, [cloudHandlesInference, piAiEnabled, selectedProviderId]);
+  const resolvedSelectedId = useMemo(
+    () =>
+      selectedProviderId === "__cloud__"
+        ? "__cloud__"
+        : selectedProviderId === "pi-ai"
+          ? "pi-ai"
+          : selectedProviderId &&
+              (availableProviderIds.has(selectedProviderId) ||
+                isSubscriptionProviderSelectionId(selectedProviderId))
+            ? selectedProviderId
+            : null,
+    [availableProviderIds, selectedProviderId],
+  );
 
-  const resolvedSelectedId =
-    selectedProviderId === "__cloud__"
-      ? "__cloud__"
-      : selectedProviderId === "pi-ai"
-        ? "pi-ai"
-        : selectedProviderId &&
-            (allAiProviders.some((p) => p.id === selectedProviderId) ||
-              isSubscriptionProviderSelectionId(selectedProviderId))
-          ? selectedProviderId
-          : cloudHandlesInference
-            ? "__cloud__"
-            : piAiEnabled
-              ? "pi-ai"
-              : anthropicConnected
-                ? "anthropic-subscription"
-                : openaiConnected
-                  ? "openai-subscription"
-                  : (enabledAiProviders[0]?.id ?? null);
+  const selectedProvider = useMemo(() => {
+    if (
+      !resolvedSelectedId ||
+      resolvedSelectedId === "__cloud__" ||
+      resolvedSelectedId === "pi-ai" ||
+      isSubscriptionProviderSelectionId(resolvedSelectedId)
+    ) {
+      return null;
+    }
 
-  const selectedProvider =
-    resolvedSelectedId &&
-    resolvedSelectedId !== "__cloud__" &&
-    resolvedSelectedId !== "pi-ai" &&
-    !isSubscriptionProviderSelectionId(resolvedSelectedId)
-      ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
-      : null;
+    return (
+      allAiProviders.find(
+        (provider) =>
+          (getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+            ?.id ?? normalizeAiProviderPluginId(provider.id)) ===
+          resolvedSelectedId,
+      ) ?? null
+    );
+  }, [allAiProviders, resolvedSelectedId]);
 
   /* ── Handlers ─────────────────────────────────────────────────── */
   const handleSwitchProvider = useCallback(
     async (newId: string) => {
       hasManualSelection.current = true;
       setSelectedProviderId(newId);
-      const target = allAiProviders.find((p) => p.id === newId);
-      if (!target) return;
+      const target =
+        allAiProviders.find(
+          (provider) =>
+            (getOnboardingProviderOption(
+              normalizeAiProviderPluginId(provider.id),
+            )?.id ?? normalizeAiProviderPluginId(provider.id)) === newId,
+        ) ?? null;
+      const providerId =
+        getOnboardingProviderOption(
+          normalizeAiProviderPluginId(target?.id ?? newId),
+        )?.id ?? newId;
 
-      // Direct providers require API keys. The UI does not have access to stored
-      // secrets, so we avoid calling /api/provider/switch here and instead rely
-      // on enabling/disabling provider plugins + saving provider config.
-      const willTogglePlugins =
-        !target.enabled || enabledAiProviders.some((p) => p.id !== newId);
-      if (elizaCloudEnabled || piAiEnabled) {
-        try {
-          // Disable cloud inference and explicitly mark cloud as disabled
-          // so the cloud-status check doesn't re-enable it on restart.
-          await client.updateConfig({
-            cloud: {
-              enabled: false,
-              services: { inference: false },
-              inferenceMode: "byok",
-            },
-            env: { vars: { MILADY_USE_PI_AI: "" } },
-          });
-          setPiAiEnabled(false);
-          setCloudHandlesInference(false);
-          if (!willTogglePlugins) {
-            await client.restartAgent();
-          }
-        } catch (err) {
-          console.warn(
-            "[milady] Failed to update cloud inference config during provider switch",
-            err,
-          );
-        }
-      }
-      if (!target.enabled) {
-        await handlePluginToggle(newId, true);
-      }
-      for (const p of enabledAiProviders) {
-        if (p.id !== newId) {
-          await handlePluginToggle(p.id, false);
-        }
+      try {
+        await client.switchProvider(providerId);
+      } catch (err) {
+        console.warn("[eliza] Provider switch failed", err);
       }
     },
-    [
-      allAiProviders,
-      enabledAiProviders,
-      handlePluginToggle,
-      elizaCloudEnabled,
-      piAiEnabled,
-    ],
+    [allAiProviders],
   );
 
   const handleSelectSubscription = useCallback(
     async (providerId: SubscriptionProviderSelectionId) => {
       hasManualSelection.current = true;
       setSelectedProviderId(providerId);
-      const providerFamily = getSubscriptionProviderFamily(providerId);
-      const target =
-        allAiProviders.find((plugin) => {
-          const normalizedId = normalizeAiProviderPluginId(plugin.id);
-          const normalizedName = plugin.name.toLowerCase();
-          return (
-            normalizedId === providerFamily ||
-            normalizedId.startsWith(`${providerFamily}-`) ||
-            normalizedName.includes(providerFamily)
-          );
-        }) ?? null;
 
       try {
-        // Disable cloud inference but keep cloud connected for RPC/services
-        await client.updateConfig({
-          cloud: {
-            services: { inference: false },
-            inferenceMode: "byok",
-          },
-          env: { vars: { MILADY_USE_PI_AI: "" } },
-        });
-        await client.switchProvider(getStoredSubscriptionProvider(providerId));
-        setCloudHandlesInference(false);
-        setPiAiEnabled(false);
+        await client.switchProvider(providerId);
       } catch (err) {
-        console.warn("[milady] Provider switch failed", err);
-      }
-      if (target && !target.enabled) {
-        await handlePluginToggle(target.id, true);
-      }
-      for (const p of enabledAiProviders) {
-        if (!target || p.id !== target.id) {
-          await handlePluginToggle(p.id, false);
-        }
+        console.warn("[eliza] Provider switch failed", err);
       }
     },
-    [allAiProviders, enabledAiProviders, handlePluginToggle],
+    [],
   );
 
   const handleSelectCloud = useCallback(async () => {
     hasManualSelection.current = true;
     setSelectedProviderId("__cloud__");
     try {
-      await client.updateConfig({
-        cloud: {
-          enabled: true,
-          services: { inference: true },
-          inferenceMode: "cloud",
-        },
-        env: { vars: { MILADY_USE_PI_AI: "" } },
-        agents: { defaults: { model: { primary: null } } },
-        models: {
-          small: currentSmallModel || "moonshotai/kimi-k2-turbo",
-          large: currentLargeModel || "moonshotai/kimi-k2-0905",
-        },
-      });
+      await client.switchProvider("elizacloud");
       setState("elizaCloudEnabled", true);
-      setCloudHandlesInference(true);
-      setPiAiEnabled(false);
-      await client.restartAgent();
     } catch (err) {
-      console.warn("[milady] Failed to select cloud provider", err);
+      console.warn("[eliza] Failed to select cloud provider", err);
     }
-  }, [currentSmallModel, currentLargeModel, setState]);
+  }, [setState]);
 
   const handlePiAiSave = useCallback(async () => {
     setPiAiSaving(true);
     setPiAiSaveSuccess(false);
     try {
       await client.updateConfig({
-        cloud: {
-          enabled: false,
-          services: { inference: false },
-          inferenceMode: "byok",
-        },
-        env: { vars: { MILADY_USE_PI_AI: "1" } },
-        agents: {
-          defaults: {
-            model: {
-              primary: piAiModelSpec.trim() || null,
-            },
-          },
+        connection: {
+          kind: "local-provider",
+          provider: "pi-ai",
+          ...(piAiModelSpec.trim()
+            ? { primaryModel: piAiModelSpec.trim() }
+            : {}),
         },
       });
-      setPiAiEnabled(true);
       setPiAiSaveSuccess(true);
       setTimeout(() => setPiAiSaveSuccess(false), 2000);
       await client.restartAgent();
     } catch (err) {
-      console.warn("[milady] Failed to enable pi-ai", err);
+      console.warn("[eliza] Failed to enable pi-ai", err);
     } finally {
       setPiAiSaving(false);
     }
@@ -522,11 +470,13 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     { id: "pi-ai", label: t("providerswitcher.piAi"), disabled: false },
     ...SUBSCRIPTION_PROVIDER_SELECTIONS.map((provider) => ({
       id: provider.id,
-      label: t(provider.labelKey),
+      label: getSubscriptionProviderLabel(provider, t),
       disabled: false,
     })),
     ...allAiProviders.map((provider) => ({
-      id: provider.id,
+      id:
+        getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+          ?.id ?? normalizeAiProviderPluginId(provider.id),
       label:
         getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
           ?.name ?? provider.name,
@@ -536,18 +486,18 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
 
   if (totalCols === 0) {
     return (
-      <div className="p-4 border border-[var(--warning,#f39c12)] bg-[var(--card)]">
-        <div className="text-xs text-[var(--warning,#f39c12)]">
+      <div className="p-4 border border-[var(--warning)] bg-[var(--card)]">
+        <div className="text-xs text-[var(--warning)]">
           {t("providerswitcher.noAiProvidersAvailable")}{" "}
           <Button
             variant="link"
             size="sm"
-            className="settings-compact-button text-txt underline p-0 h-auto"
+            className="min-h-[auto] px-0 text-txt underline p-0 h-auto"
             onClick={() => {
               setTab("plugins");
             }}
           >
-            {t("providerswitcher.plugins")}
+            {t("runtimeview.Plugins")}
           </Button>{" "}
           {t("providerswitcher.page")}
         </div>
@@ -565,12 +515,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         >
           {t("providerswitcher.selectAIProvider")}
         </label>
-        <select
-          id="provider-switcher-select"
-          className="w-full px-3 pr-8 py-2.5 border border-[var(--border)] bg-[var(--card)] text-[13px] rounded-lg transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 focus:outline-none hover:border-[var(--border-hover)]"
+        <Select
           value={resolvedSelectedId ?? "__cloud__"}
-          onChange={(e) => {
-            const nextId = e.target.value;
+          onValueChange={(nextId) => {
             if (nextId === "__cloud__") {
               void handleSelectCloud();
               return;
@@ -586,18 +533,29 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             void handleSwitchProvider(nextId);
           }}
         >
-          {providerChoices.map((choice) => (
-            <option
-              key={choice.id}
-              value={choice.id}
-              disabled={choice.disabled}
-            >
-              {choice.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            id="provider-switcher-select"
+            className="w-full px-3 py-2.5 border border-[var(--border)] bg-[var(--card)] text-[13px] rounded-lg transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 focus:outline-none hover:border-[var(--border-hover)]"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {providerChoices.map((choice) => (
+              <SelectItem
+                key={choice.id}
+                value={choice.id}
+                disabled={choice.disabled}
+              >
+                {choice.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <p className="text-[11px] text-[var(--muted)] mt-1.5">
           {t("providerswitcher.chooseYourPreferredProvider")}
+        </p>
+        <p className="text-[11px] text-[var(--muted)] mt-1">
+          {t("providerswitcher.cloudInferenceToggleHint")}
         </p>
       </div>
 
@@ -608,12 +566,13 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             <div>
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok,#16a34a)]" />
+                  <span className="inline-block w-2 h-2 rounded-full bg-[var(--ok)]" />
                   <span className="text-xs font-semibold">
                     {t("providerswitcher.loggedIntoElizaCloud")}
                   </span>
                 </div>
                 <Button
+                  type="button"
                   variant="outline"
                   size="sm"
                   className="!mt-0"
@@ -637,12 +596,12 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                 {elizaCloudCredits !== null && (
                   <span>
                     <span className="text-[var(--muted)]">
-                      {t("providerswitcher.credits")}
+                      {t("configpageview.Credits")}
                     </span>{" "}
                     <span
                       className={
                         elizaCloudCreditsCritical
-                          ? "text-[var(--danger,#e74c3c)] font-bold"
+                          ? "text-[var(--danger)] font-bold"
                           : elizaCloudCreditsLow
                             ? "rounded-md bg-[var(--warn-subtle)] px-1.5 py-0.5 text-[var(--text)] font-bold"
                             : ""
@@ -650,16 +609,18 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                     >
                       ${elizaCloudCredits.toFixed(2)}
                     </span>
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       type="button"
                       onClick={() => {
                         setState("cloudDashboardView", "billing");
                         setTab("settings");
                       }}
-                      className="ml-2 bg-transparent border-0 p-0 cursor-pointer text-[11px] text-[var(--text)] underline decoration-[var(--accent)] underline-offset-2 hover:opacity-80"
+                      className="ml-2 bg-transparent border-0 p-0 cursor-pointer text-[11px] text-[var(--text)] underline decoration-[var(--accent)] underline-offset-2 hover:opacity-80 h-auto min-h-0"
                     >
-                      {t("providerswitcher.topUp")}
-                    </button>
+                      {t("configpageview.TopUp")}
+                    </Button>
                   </span>
                 )}
               </div>
@@ -690,10 +651,20 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                     small: {
                       label: t("providerswitcher.smallModelLabel"),
                       width: "half",
+                      options: modelOptions.small.map((m) => ({
+                        value: m.id,
+                        label: m.name,
+                        description: `${m.provider} — ${m.description}`,
+                      })),
                     },
                     large: {
                       label: t("providerswitcher.largeModelLabel"),
                       width: "half",
+                      options: modelOptions.large.map((m) => ({
+                        value: m.id,
+                        label: m.name,
+                        description: `${m.provider} — ${m.description}`,
+                      })),
                     },
                   };
                   const modelValues: Record<string, unknown> = {};
@@ -716,12 +687,13 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                       registry={defaultRegistry}
                       onChange={(key, value) => {
                         const val = String(value);
+                        const nextSmall =
+                          key === "small" ? val : currentSmallModel;
+                        const nextLarge =
+                          key === "large" ? val : currentLargeModel;
                         if (key === "small") setCurrentSmallModel(val);
                         if (key === "large") setCurrentLargeModel(val);
-                        const updated = {
-                          small: key === "small" ? val : currentSmallModel,
-                          large: key === "large" ? val : currentLargeModel,
-                        };
+                        const updated = { small: nextSmall, large: nextLarge };
                         void (async () => {
                           setModelSaving(true);
                           try {
@@ -731,7 +703,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                             await client.restartAgent();
                           } catch (err) {
                             console.warn(
-                              "[milady] Failed to save cloud model config",
+                              "[eliza] Failed to save cloud model config",
                               err,
                             );
                           }
@@ -749,11 +721,14 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                   </span>
                 )}
                 {modelSaveSuccess && (
-                  <span className="text-[11px] text-[var(--ok,#16a34a)]">
+                  <span className="text-[11px] text-[var(--ok)]">
                     {t("providerswitcher.savedRestartingAgent")}
                   </span>
                 )}
               </div>
+              <p className="mt-2 text-[11px] text-[var(--muted)]">
+                {t("providerswitcher.restartRequiredHint")}
+              </p>
             </div>
           ) : (
             <div>
@@ -764,9 +739,20 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
               ) : (
                 <>
                   {elizaCloudLoginError && (
-                    <div className="text-xs text-[var(--danger,#e74c3c)] mb-2">
+                    <div className="text-xs text-[var(--danger)] mb-2">
                       {elizaCloudLoginError}
                     </div>
+                  )}
+                  {elizaCloudLoginError && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      type="button"
+                      className="!mt-0 !px-0 text-[11px]"
+                      onClick={() => openExternalUrl(branding.bugReportUrl)}
+                    >
+                      {t("providerswitcher.reportIssueWithTemplate")}
+                    </Button>
                   )}
                   <Button
                     variant="default"
@@ -807,7 +793,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             {t("providerswitcher.piSettings")}
           </div>
           <div className="text-[11px] text-[var(--muted)] mb-2">
-            {t("providerswitcher.usesLocalCredentials")}
+            {t("onboarding.piCredentialsHint")}
           </div>
           <label
             htmlFor="pi-ai-model-override"
@@ -818,11 +804,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
 
           {piAiModelOptions && piAiModelOptions.length > 0 ? (
             <>
-              <select
-                id="pi-ai-model-override"
+              <Select
                 value={piAiModelSelectValue}
-                onChange={(e) => {
-                  const next = e.target.value;
+                onValueChange={(next) => {
                   if (next === "__custom__") {
                     if (piAiModelSelectValue !== "__custom__") {
                       setPiAiModelSpec("");
@@ -831,21 +815,28 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                   }
                   setPiAiModelSpec(next);
                 }}
-                className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
               >
-                <option value="">
-                  {t("providerswitcher.usePiDefaultModel")}
-                  {piAiDefaultModelSpec ? ` (${piAiDefaultModelSpec})` : ""}
-                </option>
-                {piAiModelOptions.map((model) => (
-                  <option key={model.id} value={model.id}>
-                    {model.name} ({model.provider})
-                  </option>
-                ))}
-                <option value="__custom__">
-                  {t("providerswitcher.customModelSpec")}
-                </option>
-              </select>
+                <SelectTrigger
+                  id="pi-ai-model-override"
+                  className="w-full px-2.5 py-[8px] border border-[var(--border)] bg-[var(--card)] text-[13px] transition-colors focus:border-[var(--accent)] focus:outline-none"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__default__">
+                    {t("providerswitcher.usePiDefaultModel")}
+                    {piAiDefaultModelSpec ? ` (${piAiDefaultModelSpec})` : ""}
+                  </SelectItem>
+                  {piAiModelOptions.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>
+                      {model.name} ({model.provider})
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="__custom__">
+                    {t("providerswitcher.customModelSpec")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
 
               {piAiModelSelectValue === "__custom__" && (
                 <Input
@@ -874,7 +865,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
               </span>
             )}
             {piAiSaveSuccess && (
-              <span className="text-[11px] text-[var(--ok,#16a34a)]">
+              <span className="text-[11px] text-[var(--ok)]">
                 {t("providerswitcher.savedRestartingAgent")}
               </span>
             )}
@@ -885,9 +876,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
               onClick={() => void handlePiAiSave()}
               disabled={piAiSaving}
             >
-              {piAiSaving
-                ? t("providerswitcher.saveInProgress")
-                : t("providerswitcher.save")}
+              {piAiSaving ? t("apikeyconfig.saving") : t("apikeyconfig.save")}
             </Button>
           </div>
         </div>

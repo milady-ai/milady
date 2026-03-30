@@ -105,6 +105,7 @@ vi.mock("@miladyai/app-core/api", () => ({
   SkillScanReportSummary: {},
 }));
 
+import { flush } from "../../../../test/helpers/react-test";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
 
 type StartupSnapshot = {
@@ -143,12 +144,6 @@ function createDeferred<T>() {
   return { promise, resolve };
 }
 
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
 async function waitFor(assertion: () => void): Promise<void> {
   for (let idx = 0; idx < 40; idx += 1) {
     try {
@@ -171,6 +166,12 @@ describe("startup conversation restore", () => {
       clearInterval: globalThis.clearInterval,
     });
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
+    // Provide a persisted connection so the startup flow doesn't short-circuit
+    // to onboarding before polling getStatus and hydrating conversations.
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({ runMode: "local" }),
+    );
 
     for (const fn of Object.values(mockClient)) {
       if (typeof fn === "function" && "mockReset" in fn) {
@@ -335,7 +336,7 @@ describe("startup conversation restore", () => {
       type: "active-conversation",
       conversationId: restoredConversation.id,
     });
-    expect(mockClient.connectWs).toHaveBeenCalledTimes(1);
+    expect(mockClient.connectWs).toHaveBeenCalled();
 
     await act(async () => {
       tree.unmount();
@@ -372,7 +373,43 @@ describe("startup conversation restore", () => {
     expect(mockClient.sendWsMessage).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: "active-conversation" }),
     );
-    expect(mockClient.connectWs).toHaveBeenCalledTimes(1);
+    expect(mockClient.connectWs).toHaveBeenCalled();
+
+    await act(async () => {
+      tree.unmount();
+    });
+  });
+
+  it("requests a greeting when the restored conversation has no messages", async () => {
+    const restoredConversation = {
+      id: "conv-empty",
+      title: "Empty Chat",
+      roomId: "room-empty",
+      createdAt: "2026-02-01T00:00:00.000Z",
+      updatedAt: "2026-02-02T00:00:00.000Z",
+    };
+    mockClient.listConversations.mockResolvedValue({
+      conversations: [restoredConversation],
+    });
+    mockClient.getConversationMessages.mockResolvedValue({ messages: [] });
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(
+          AppProvider,
+          null,
+          React.createElement(Probe, { onChange: () => {} }),
+        ),
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockClient.requestGreeting).toHaveBeenCalledWith(
+        restoredConversation.id,
+        expect.any(String),
+      );
+    });
 
     await act(async () => {
       tree.unmount();

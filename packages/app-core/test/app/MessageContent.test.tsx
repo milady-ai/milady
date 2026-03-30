@@ -8,10 +8,11 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => ({
-    agentStatus: { agentName: "Milady" },
+    agentStatus: { agentName: "Eliza" },
     setState: vi.fn(),
   }),
   getVrmPreviewUrl: () => null,
+  CUSTOM_ONBOARDING_STEPS: [],
 }));
 
 vi.mock("@miladyai/app-core/api", () => ({
@@ -345,9 +346,7 @@ describe("XML tag stripping during streaming", () => {
   });
 
   it("extracts text from <response><text> wrapper", () => {
-    const output = renderText(
-      "<response><text>Hello world</text></response>",
-    );
+    const output = renderText("<response><text>Hello world</text></response>");
     expect(output).toContain("Hello world");
     expect(output).not.toContain("<response>");
     expect(output).not.toContain("<text>");
@@ -364,5 +363,34 @@ describe("XML tag stripping during streaming", () => {
     );
     expect(output).not.toContain("actions");
     expect(output).not.toContain("save");
+  });
+
+  it("strips a partial opening tag at the end of a streaming chunk", () => {
+    const output = renderText("Hello world<thi");
+    expect(output).toBe("Hello world");
+    expect(output).not.toContain("<");
+  });
+
+  it("strips a partial closing tag at the end of a streaming chunk", () => {
+    const output = renderText("Hello world</respon");
+    expect(output).toBe("Hello world");
+    expect(output).not.toContain("<");
+  });
+
+  it("strips a partial tag with attributes mid-stream", () => {
+    const output = renderText('Hello<action name="te');
+    expect(output).toBe("Hello");
+    expect(output).not.toContain("<action");
+  });
+
+  it("does not strip complete tags (only partials at end)", () => {
+    const output = renderText("<think>reasoning</think>Visible text");
+    expect(output).toContain("Visible text");
+    expect(output).not.toContain("reasoning");
+  });
+
+  it("handles chunk ending right after opening angle bracket", () => {
+    const output = renderText("Almost done<");
+    expect(output).not.toContain("<");
   });
 });

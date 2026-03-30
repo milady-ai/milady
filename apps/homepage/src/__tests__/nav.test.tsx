@@ -6,63 +6,41 @@ import { releaseData } from "../generated/release-data";
 
 afterEach(cleanup);
 
-function renderNav() {
+function renderNav(initialEntries = ["/dashboard"]) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <Nav />
     </MemoryRouter>,
   );
 }
 
 describe("Nav", () => {
-  it("version clock element exists with version-clock class", () => {
+  it("shows the simplified dashboard nav without removed landing anchors", () => {
     const { container } = renderNav();
-    const clock = container.querySelector(".version-clock");
-    expect(clock).toBeTruthy();
-  });
-
-  it("version clock displays the tag name from release data", () => {
-    const { container } = renderNav();
-    const clock = container.querySelector(".version-clock");
-    expect(clock?.textContent).toContain(releaseData.release.tagName);
-  });
-
-  it('version clock shows "canary" when prerelease is true', () => {
-    const { container } = renderNav();
-    const clock = container.querySelector(".version-clock");
-    const expected = releaseData.release.prerelease ? "canary" : "stable";
-    expect(clock?.textContent).toContain(expected);
+    expect(container.textContent).toContain("MILADY");
+    expect(container.textContent).toContain("DASHBOARD");
+    expect(container.textContent).not.toContain("INSTALL");
+    expect(container.textContent).not.toContain("PRIVACY");
+    expect(container.textContent).not.toContain("FEATURES");
+    expect(container.textContent).not.toContain("COMPARE");
   });
 
   it("releases button links to the release page URL", () => {
     const { container } = renderNav();
     const releasesLink = Array.from(container.querySelectorAll("a")).find(
-      (a) => a.textContent?.trim() === "Releases",
+      (a) => a.textContent?.trim() === "RELEASES",
     );
     expect(releasesLink).toBeTruthy();
     expect(releasesLink?.getAttribute("href")).toBe(releaseData.release.url);
   });
 
-  it("version clock is positioned after the Releases button in DOM order", () => {
-    const { container } = renderNav();
-    const nav = container.querySelector("nav");
-    expect(nav).toBeTruthy();
-    if (!nav) throw new Error("Expected nav element to render");
-    const html = nav.innerHTML;
-    const releasesIdx = html.indexOf("Releases");
-    const clockIdx = html.indexOf("version-clock");
-    expect(releasesIdx).toBeGreaterThan(-1);
-    expect(clockIdx).toBeGreaterThan(-1);
-    expect(clockIdx).toBeGreaterThan(releasesIdx);
-  });
-
-  it("Cloud link navigates to /dashboard (not external)", () => {
-    const { container } = renderNav();
-    const cloudLink = Array.from(container.querySelectorAll("a")).find(
-      (a) => a.textContent?.trim() === "Cloud",
+  it("Dashboard link navigates to /dashboard (not external)", () => {
+    const { container } = renderNav(["/onboard"]);
+    const dashboardLink = Array.from(container.querySelectorAll("a")).find(
+      (a) => a.textContent?.trim() === "DASHBOARD",
     );
-    expect(cloudLink).toBeTruthy();
-    expect(cloudLink?.getAttribute("href")).toBe("/dashboard");
-    expect(cloudLink?.getAttribute("target")).toBeNull();
+    expect(dashboardLink).toBeTruthy();
+    expect(dashboardLink?.getAttribute("href")).toBe("/dashboard");
+    expect(dashboardLink?.getAttribute("target")).toBeNull();
   });
 });

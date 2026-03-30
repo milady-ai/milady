@@ -9,9 +9,41 @@ ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /app
 
-# Copy dependency manifests first for better layer caching
-COPY package.json bun.lock* .npmrc ./
+# Copy dependency manifests first for better layer caching.
+# Do not require a checked-in .npmrc; CI and open-source builds run without one.
+COPY package.json bun.lock* ./
+
+# Workspace package.json files — must exist before `bun install` resolves workspaces.
+# apps/
 COPY apps/app/package.json ./apps/app/package.json
+COPY apps/app/electrobun/package.json ./apps/app/electrobun/package.json
+COPY apps/homepage/package.json ./apps/homepage/package.json
+
+# apps/app/plugins/
+COPY apps/app/plugins/agent/package.json ./apps/app/plugins/agent/package.json
+COPY apps/app/plugins/camera/package.json ./apps/app/plugins/camera/package.json
+COPY apps/app/plugins/canvas/package.json ./apps/app/plugins/canvas/package.json
+COPY apps/app/plugins/desktop/package.json ./apps/app/plugins/desktop/package.json
+COPY apps/app/plugins/gateway/package.json ./apps/app/plugins/gateway/package.json
+COPY apps/app/plugins/location/package.json ./apps/app/plugins/location/package.json
+COPY apps/app/plugins/screencapture/package.json ./apps/app/plugins/screencapture/package.json
+COPY apps/app/plugins/swabble/package.json ./apps/app/plugins/swabble/package.json
+COPY apps/app/plugins/talkmode/package.json ./apps/app/plugins/talkmode/package.json
+
+# packages/
+COPY packages/agent/package.json ./packages/agent/package.json
+COPY packages/app-core/package.json ./packages/app-core/package.json
+COPY packages/plugin-wechat/package.json ./packages/plugin-wechat/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+COPY packages/ui/package.json ./packages/ui/package.json
+COPY packages/vrm-utils/package.json ./packages/vrm-utils/package.json
+
+# deploy/
+COPY deploy/cloud-agent-template/package.json ./deploy/cloud-agent-template/package.json
+
+# Bun patchedDependencies need their patch files available during install.
+COPY patches ./patches
+
 COPY scripts ./scripts
 
 # Install ALL dependencies (dev + prod) for the build step.
@@ -73,6 +105,9 @@ USER node
 # Default: bind to 0.0.0.0 in containers so the service is reachable.
 # Set MILADY_API_TOKEN in production to require auth.
 ENV MILADY_API_BIND="0.0.0.0"
+
+ENV MILADY_PORT=2138
+EXPOSE 2138
 
 # Start the API server + dashboard UI on port 2138.
 CMD ["node", "milady.mjs", "start"]

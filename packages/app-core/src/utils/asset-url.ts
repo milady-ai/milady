@@ -6,6 +6,8 @@
  * resolve to file:///vrms/1.vrm and fail. We lock the asset base URL once from
  * initial startup and resolve assets against that stable base.
  */
+import { getBootConfig } from "../config/boot-config";
+import { getElizaApiBase } from "./eliza-globals";
 
 type AssetUrlResolveOptions = {
   currentUrl?: string;
@@ -94,17 +96,41 @@ export function resolveAppAssetUrl(
   return new URL(normalized, baseHref).toString();
 }
 
+/** Keep in sync with `MiladyClient` SESSION_STORAGE_API_BASE_KEY. */
+const MILADY_API_BASE_SESSION_KEY = "milady_api_base";
+
+function readSessionStorageApiBase(): string | undefined {
+  try {
+    if (typeof window === "undefined") return undefined;
+    const raw = window.sessionStorage.getItem(MILADY_API_BASE_SESSION_KEY);
+    const trimmed = raw?.trim();
+    return trimmed && trimmed.length > 0 ? trimmed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Resolve an API path (e.g. "/api/avatar/vrm") to a full URL reachable from
  * the renderer. In desktop shells the page origin is electrobun:// or
  * file://, so bare /api/... paths resolve to the SPA instead of the backend.
- * This helper prefixes with window.__MILADY_API_BASE__ when available.
+ *
+ * Resolution order: `sessionStorage` (user/session override) → shell-injected
+ * `__MILADY_API_BASE__` → boot `apiBase`. Injected is preferred over boot so
+ * Electrobun/desktop dev is not stuck on a stale UI-only boot URL (e.g. Vite
+ * :2138) after `setBootConfig` omitted `apiBase` or set it wrong — otherwise
+ * `/api/tts/cloud` hits the wrong host and TTS falls back to Web Speech.
  */
 export function resolveApiUrl(apiPath: string): string {
-  if (typeof window !== "undefined") {
-    const base = (window as unknown as Record<string, unknown>)
-      .__MILADY_API_BASE__ as string | undefined;
-    if (base) return `${base}${apiPath}`;
-  }
-  return apiPath;
+  const stored = readSessionStorageApiBase();
+  const bootRaw = getBootConfig().apiBase?.trim();
+  const boot = bootRaw && bootRaw.length > 0 ? bootRaw : undefined;
+  const injectedRaw = getElizaApiBase()?.trim();
+  const injected =
+    injectedRaw && injectedRaw.length > 0 ? injectedRaw : undefined;
+  const base = stored ?? injected ?? boot;
+  if (!base) return apiPath;
+  const normalized = base.replace(/\/+$/, "");
+  const suffix = apiPath.startsWith("/") ? apiPath : `/${apiPath}`;
+  return `${normalized}${suffix}`;
 }

@@ -19,7 +19,8 @@ import type { PluginListenerHandle } from "@capacitor/core";
 import {
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@miladyai/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
+import type { EventCallback } from "../../../shared-types.js";
 import type {
   AutoLaunchOptions,
   DesktopPlugin,
@@ -60,11 +61,10 @@ type DesktopEventPayloads = {
 
 type DesktopEventName = keyof DesktopEventPayloads;
 type DesktopEventData = DesktopEventPayloads[DesktopEventName];
-type EventCallback<T = DesktopEventData> = (event: T) => void;
 
 interface ListenerEntry {
   eventName: DesktopEventName;
-  callback: EventCallback;
+  callback: EventCallback<DesktopEventData>;
 }
 
 type AlwaysOnTopLevel = Parameters<DesktopPlugin["setAlwaysOnTop"]>[0]["level"];

@@ -74,7 +74,7 @@ describe("MiladyClient streaming chat endpoints", () => {
       buildSseResponse([
         'data: {"type":"token","text":"Hello "}\n\n',
         'data: {"type":"token","text":"world"}\n\n',
-        'data: {"type":"done","fullText":"Hello world","agentName":"Milady"}\n\n',
+        'data: {"type":"done","fullText":"Hello world","agentName":"Eliza"}\n\n',
       ]),
     );
 
@@ -98,7 +98,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     expect(fullTexts).toEqual(["Hello ", "Hello world"]);
     expect(result).toEqual({
       text: "Hello world",
-      agentName: "Milady",
+      agentName: "Eliza",
       completed: true,
     });
 
@@ -251,7 +251,7 @@ describe("MiladyClient streaming chat endpoints", () => {
       buildSseResponse([
         'data: {"type":"token","text":"Hey! Yes, I\\u0027m working perfectly!  p\\ud83d\\udc4der Everythingfectly! \\ud83d\\udc4d ","fullText":"Hey! Yes, I\\u0027m working perfectly! \\ud83d\\udc4d Everything\\u0027s up and running smoothly. "}\n\n',
         'data: {"type":"token","text":"What can I help you w Iit canh to assist with","fullText":"Hey! Yes, I\\u0027m working perfectly! \\ud83d\\udc4d Everything\\u0027s up and running smoothly. What can I help you with today? I can assist with"}\n\n',
-        'data: {"type":"done","fullText":"Hey! Yes, I\\u0027m working perfectly! \\ud83d\\udc4d Everything\\u0027s up and running smoothly. What can I help you with today? I can assist with coding tasks, run commands, manage GitHub issues, help with streaming, or pretty much anything else you need!","agentName":"Milady"}\n\n',
+        'data: {"type":"done","fullText":"Hey! Yes, I\\u0027m working perfectly! \\ud83d\\udc4d Everything\\u0027s up and running smoothly. What can I help you with today? I can assist with coding tasks, run commands, manage GitHub issues, help with streaming, or pretty much anything else you need!","agentName":"Eliza"}\n\n',
       ]),
     );
 
@@ -270,7 +270,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     ]);
     expect(result).toEqual({
       text: "Hey! Yes, I'm working perfectly! \u{1F44D} Everything's up and running smoothly. What can I help you with today? I can assist with coding tasks, run commands, manage GitHub issues, help with streaming, or pretty much anything else you need!",
-      agentName: "Milady",
+      agentName: "Eliza",
       completed: true,
     });
   });
@@ -292,18 +292,21 @@ describe("MiladyClient streaming chat endpoints", () => {
       },
     );
 
-    await vi.waitFor(() => {
-      expect(tokens).toEqual(["Hello"]);
-    });
+    let attempts = 0;
+    while (tokens.length === 0 && attempts < 50) {
+      await new Promise((r) => setTimeout(r, 10));
+      attempts++;
+    }
+    expect(tokens).toEqual(["Hello"]);
 
     controlled.push(
-      'data: {"type":"done","fullText":"Hello","agentName":"Milady"}\r\n\r\n',
+      'data: {"type":"done","fullText":"Hello","agentName":"Eliza"}\r\n\r\n',
     );
     controlled.close();
 
     await expect(pending).resolves.toEqual({
       text: "Hello",
-      agentName: "Milady",
+      agentName: "Eliza",
       completed: true,
     });
   });
@@ -312,7 +315,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     fetchMock.mockResolvedValue(
       buildSseResponse([
         'data: {"type":"token","text":"*waves warmly* Hello there"}\n\n',
-        'data: {"type":"done","fullText":"*waves warmly* Hello there","agentName":"Milady"}\n\n',
+        'data: {"type":"done","fullText":"*waves warmly* Hello there","agentName":"Eliza"}\n\n',
       ]),
     );
 
@@ -329,7 +332,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     expect(tokens).toEqual(["*waves warmly* Hello there"]);
     expect(result).toEqual({
       text: "Hello there",
-      agentName: "Milady",
+      agentName: "Eliza",
       completed: true,
     });
   });
@@ -375,7 +378,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     fetchMock.mockResolvedValue(
       buildJsonResponse({
         text: "",
-        agentName: "Milady",
+        agentName: "Eliza",
         generated: false,
       }),
     );
@@ -383,7 +386,7 @@ describe("MiladyClient streaming chat endpoints", () => {
     const client = new MiladyClient("http://localhost:2138");
     await expect(client.requestGreeting("conv-empty")).resolves.toEqual({
       text: "",
-      agentName: "Milady",
+      agentName: "Eliza",
       generated: false,
     });
   });

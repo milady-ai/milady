@@ -36,7 +36,7 @@ The Milady mobile app brings the full dashboard experience to iOS and Android de
 
 ### Shared
 
-- **Node.js 18+** and the project's package manager (check `scripts/rt.sh` for the runtime wrapper)
+- **Node.js 22+** and the project's package manager (check `scripts/rt.sh` for the runtime wrapper)
 - The monorepo cloned and dependencies installed at the root level
 
 ## Building the App
@@ -257,7 +257,7 @@ Native haptic feedback for touch interactions (core Capacitor plugin, not custom
 
 ## Plugin Bridge Layer
 
-The plugin bridge (`src/bridge/plugin-bridge.ts`) provides a unified interface to all plugins with automatic platform detection and error handling.
+The plugin bridge provides a unified interface to all plugins with automatic platform detection and error handling.
 
 ### Capability Detection
 
@@ -341,7 +341,7 @@ Key behaviors:
 
 ## Storage Bridge
 
-The storage bridge (`src/bridge/storage-bridge.ts`) ensures persistent data survives across app sessions on native platforms.
+The storage bridge ensures persistent data survives across app sessions on native platforms.
 
 ### How It Works
 

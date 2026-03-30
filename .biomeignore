@@ -6,3 +6,5 @@ plugins
 .git
 src/benchmark/mock-plugin.ts
 apps/app/src/styles.css
+.ruff_cache
+cache/voice

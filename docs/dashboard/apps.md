@@ -55,7 +55,6 @@ When an app with a viewer URL is launched, it opens in the **Game View** — a f
 | **App name** | Display name of the running app |
 | **Connection status** | `Connecting` (yellow), `Connected` (green), or `Disconnected` (red) |
 | **Show/Hide Logs** | Toggle the agent logs panel |
-| **Retake Capture** | Stream iframe frames to retake.tv (when retake plugin is enabled) |
 | **Keep on Top** | Pin app as a floating overlay when navigating other tabs |
 | **Open in New Tab** | Open the app viewer URL in a separate browser tab |
 | **Stop** | Stop the app and return to the browser |

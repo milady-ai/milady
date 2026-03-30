@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
 
 import { type MockApiServer, startMockApiServer } from "./mock-api";
+import { hasPackagedRendererBootstrapRequests } from "./windows-bootstrap";
 
 const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -151,7 +152,7 @@ async function waitForRendererBootstrap(
       );
     }
 
-    if (api.requests.some((request) => request.includes("/api/status"))) {
+    if (hasPackagedRendererBootstrapRequests(api.requests)) {
       return;
     }
 
@@ -226,30 +227,33 @@ test("packaged Windows app bootstraps the renderer against the external API over
     await expect
       .poll(
         () =>
-          api?.requests.filter((request) => request.includes("/api/status"))
-            .length ?? 0,
+          api ? hasPackagedRendererBootstrapRequests(api.requests) : false,
         {
           timeout: 30_000,
-          message: "Expected the packaged renderer to poll /api/status",
+          message:
+            "Expected the packaged renderer to reach the external API bootstrap requests",
         },
       )
-      .toBeGreaterThan(0);
+      .toBe(true);
 
     await expect
       .poll(
         () =>
           appProcess && appProcess.exitCode === null ? "running" : "exited",
         {
-          timeout: 5_000,
+          timeout: 15_000,
           message:
             "Expected the packaged Windows app to stay alive after bootstrap",
         },
       )
       .toBe("running");
 
-    expect(
-      api.requests.some((request) => request.includes("/api/status")),
-    ).toBe(true);
+    // Keep the process alive long enough to catch immediate post-bootstrap
+    // startup regressions that can happen after the first renderer requests.
+    await new Promise((resolve) => setTimeout(resolve, 8_000));
+    expect(appProcess.exitCode).toBeNull();
+
+    expect(hasPackagedRendererBootstrapRequests(api.requests)).toBe(true);
     expect(api.requests.length).toBeGreaterThan(0);
 
     const stdoutText = processLogs?.stdout.join("") ?? "";

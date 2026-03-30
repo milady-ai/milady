@@ -52,18 +52,18 @@ vi.stubGlobal(
 );
 
 // Mock contract modules that api-client.ts imports from autonomous.
-vi.mock("@miladyai/autonomous/contracts/drop", () => ({}));
-vi.mock("@miladyai/autonomous/contracts/onboarding", () => ({}));
-vi.mock("@miladyai/autonomous/contracts/verification", () => ({}));
-vi.mock("@miladyai/autonomous/contracts/wallet", () => ({}));
-vi.mock("@miladyai/autonomous/contracts/permissions", () => ({}));
+vi.mock("@miladyai/agent/contracts/drop", () => ({}));
+vi.mock("@miladyai/agent/contracts/onboarding", () => ({}));
+vi.mock("@miladyai/agent/contracts/verification", () => ({}));
+vi.mock("@miladyai/agent/contracts/wallet", () => ({}));
+vi.mock("@miladyai/agent/contracts/permissions", () => ({}));
 
 // Provide window.location so connectWs() can build a WS URL
 vi.stubGlobal("window", {
   location: { protocol: "http:", host: "localhost:2138" },
   sessionStorage: { getItem: () => null, setItem: () => {} },
   navigator: { userAgent: "" },
-  __MILADY_API_BASE__: undefined,
+  __ELIZA_API_BASE__: undefined,
 });
 
 // ---------------------------------------------------------------------------

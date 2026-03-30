@@ -12,10 +12,10 @@
     "test:watch": "vitest --config vitest.config.ts",
     "plugin:build": "bun scripts/plugin-build.mjs",
     "build": "bun scripts/build.mjs",
-    "build:ios": "bun ../../scripts/rt.mjs run build && capacitor sync ios",
-    "build:android": "bun ../../scripts/rt.mjs run build && capacitor sync android",
-    "ios": "bun ../../scripts/rt.mjs run build:ios && capacitor open ios",
-    "android": "bun ../../scripts/rt.mjs run build:android && capacitor open android",
+    "build:ios": "bun ../../scripts/rt.sh run build && capacitor sync ios",
+    "build:android": "bun ../../scripts/rt.sh run build && capacitor sync android",
+    "ios": "bun ../../scripts/rt.sh run build:ios && capacitor open ios",
+    "android": "bun ../../scripts/rt.sh run build:android && capacitor open android",
     "cap:sync": "capacitor sync",
     "cap:sync:ios": "capacitor sync ios",
     "cap:sync:android": "capacitor sync android",
@@ -26,13 +26,12 @@
   "dependencies": {
     "@capacitor/android": "^8.0.2",
     "@capacitor/app": "^8.0.1",
-    "@capacitor/core": "8.0.2",
-    "@capacitor/haptics": "8.0.0",
+    "@capacitor/core": "8.2.0",
     "@capacitor/ios": "^8.0.2",
     "@capacitor/keyboard": "8.0.0",
-    "@capacitor/preferences": "^8.0.1",
     "@capacitor/status-bar": "^8.0.1",
     "@miladyai/app-core": "workspace:*",
+    "@miladyai/shared": "workspace:*",
     "@miladyai/capacitor-agent": "workspace:*",
     "@miladyai/capacitor-camera": "workspace:*",
     "@miladyai/capacitor-canvas": "workspace:*",
@@ -43,7 +42,6 @@
     "@miladyai/capacitor-swabble": "workspace:*",
     "@miladyai/capacitor-talkmode": "workspace:*",
     "@miladyai/ui": "workspace:*",
-    "@noble/curves": "^2.0.1",
     "@pixiv/three-vrm": "^3.4.5",
     "@sparkjsdev/spark": "^0.1.10",
     "react": "^19.0.0",
@@ -52,7 +50,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.0.2",
+    "@capacitor/cli": "8.2.0",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.0.0",
@@ -62,8 +60,10 @@
     "jsdom": "^28.1.0",
     "react-test-renderer": "^19.2.4",
     "tailwindcss": "^4.1.18",
+    "testcafe": "^3.7.4",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
+    "vite-plugin-node-polyfills": "^0.25.0",
     "vitest": "^2.1.9"
   }
 }

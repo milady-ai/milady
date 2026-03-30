@@ -13,6 +13,7 @@ vi.mock("@miladyai/app-core/state", () => ({
 
 vi.mock("@miladyai/app-core/hooks", () => ({
   useBugReport: () => ({ isOpen: false, open: vi.fn(), close: vi.fn() }),
+  useMediaQuery: () => false,
 }));
 
 vi.mock("@miladyai/app-core/navigation", () => ({
@@ -27,11 +28,38 @@ vi.mock("@miladyai/app-core/navigation", () => ({
 }));
 
 vi.mock("@miladyai/app-core/components", () => ({
+  LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME:
+    "!h-11 !min-h-[44px] !min-w-[44px] !rounded-xl !px-3.5 sm:!px-3.5 leading-none",
   LanguageDropdown: () => React.createElement("div", null, "LanguageDropdown"),
   ThemeToggle: () => React.createElement("div", null, "ThemeToggle"),
 }));
 
 vi.mock("@miladyai/ui", () => ({
+  Button: React.forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props, ref }),
+  ),
+  Dialog: ({
+    children,
+    open,
+  }: {
+    children: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+  }) => React.createElement("div", { "data-open": open }, children),
+  DialogContent: ({
+    children,
+    ...props
+  }: React.ComponentProps<"div"> & {
+    container?: HTMLElement | null;
+    showCloseButton?: boolean;
+  }) => React.createElement("div", props, children),
+  DialogDescription: ({ children, ...props }: React.ComponentProps<"div">) =>
+    React.createElement("div", props, children),
+  DialogHeader: ({ children, ...props }: React.ComponentProps<"div">) =>
+    React.createElement("div", props, children),
+  DialogTitle: ({ children, ...props }: React.ComponentProps<"div">) =>
+    React.createElement("div", props, children),
   IconTooltip: ({
     children,
   }: {
@@ -39,19 +67,24 @@ vi.mock("@miladyai/ui", () => ({
     content?: string;
     side?: string;
   }) => React.createElement("div", null, children),
+  DialogFooter: ({ children }: any) => React.createElement("div", null, children),
 }));
 
 vi.mock("lucide-react", () => ({
-  AlertTriangle: () => React.createElement("span", null, "⚠"),
-  CircleUserRound: () => React.createElement("span", null, "👤"),
-  Bug: () => React.createElement("span", null, "🐛"),
-  CircleDollarSign: () => React.createElement("span", null, "💰"),
-  Menu: () => React.createElement("span", null, "☰"),
-  Monitor: () => React.createElement("span", null, "🖥"),
-  Smartphone: () => React.createElement("span", null, "📱"),
-  UserRound: () => React.createElement("span", null, "👤"),
-  Users: () => React.createElement("span", null, "👥"),
-  X: () => React.createElement("span", null, "✕"),
+  AlertTriangle: () => React.createElement("span", null, "alert"),
+  CircleUserRound: () => React.createElement("span", null, "user"),
+  Bug: () => React.createElement("span", null, "bug"),
+  CircleDollarSign: () => React.createElement("span", null, "dollar"),
+  Menu: () => React.createElement("span", null, "menu"),
+  MessageCirclePlus: () => React.createElement("span", null, "msg"),
+  Monitor: () => React.createElement("span", null, "monitor"),
+  PencilLine: () => React.createElement("span", null, "pencil"),
+  Smartphone: () => React.createElement("span", null, "phone"),
+  UserRound: () => React.createElement("span", null, "user"),
+  Users: () => React.createElement("span", null, "users"),
+  Volume2: () => React.createElement("span", null, "vol"),
+  VolumeX: () => React.createElement("span", null, "mute"),
+  X: () => React.createElement("span", null, "x"),
 }));
 
 import { Header } from "../../src/components/Header";
@@ -65,7 +98,7 @@ describe("header status", () => {
       t: (k: string) => k,
       agentStatus: {
         state: "running",
-        agentName: "Milady",
+        agentName: "Eliza",
         model: undefined,
         startedAt: undefined,
         uptime: undefined,
@@ -75,6 +108,8 @@ describe("header status", () => {
       elizaCloudCredits: null,
       elizaCloudCreditsCritical: false,
       elizaCloudCreditsLow: false,
+      elizaCloudAuthRejected: false,
+      elizaCloudCreditsError: null,
       elizaCloudTopUpUrl: "",
       walletAddresses: null,
       lifecycleBusy: false,
@@ -92,11 +127,19 @@ describe("header status", () => {
       registryStatus: null,
       plugins: [],
       uiShellMode: "native",
+      switchShellView: vi.fn(),
       setUiShellMode: vi.fn(),
       uiLanguage: "en",
       setUiLanguage: vi.fn(),
       uiTheme: "dark",
       setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      handleNewConversation: vi.fn(async () => {}),
+      handleSaveCharacter: vi.fn(async () => {}),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      conversationMessages: [],
+      chatLastUsage: null,
     };
     mockUseApp.mockReturnValue(baseAppState);
   });
@@ -129,21 +172,34 @@ describe("header status", () => {
     expect(controls?.length).toBeGreaterThan(0);
   });
 
-  it("uses accent classes for the active native tab", async () => {
+  it("pins the mobile navigation drawer to the top portal layer", async () => {
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(Header));
     });
-    expect(tree).toBeDefined();
 
-    const activeTabButton = tree?.root.find(
+    const openMenuButton = tree?.root.findByProps({
+      "aria-label": "aria.openNavMenu",
+    });
+    expect(openMenuButton).toBeDefined();
+
+    await act(async () => {
+      openMenuButton?.props.onClick();
+    });
+
+    const drawer = tree?.root.findAll(
       (node) =>
-        node.type === "button" &&
-        node.props.title === "Chat" &&
-        typeof node.props.className === "string",
+        typeof node.props.className === "string" &&
+        node.props.className.includes("border-l border-border/60") &&
+        node.props.className.includes("bg-bg/98") &&
+        node.props.className.includes(
+          "shadow-[0_24px_70px_rgba(2,8,23,0.34)]",
+        ) &&
+        node.props.className.includes("z-[240]") &&
+        node.props.className.includes("max-sm:!top-0") &&
+        node.props.className.includes("max-sm:!bottom-0"),
     );
 
-    expect(String(activeTabButton?.props.className)).toContain("text-accent");
-    expect(String(activeTabButton?.props.className)).toContain("bg-accent/15");
+    expect(drawer && drawer.length > 0).toBe(true);
   });
 });

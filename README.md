@@ -1,5 +1,7 @@
 # Milady
 
+<!-- TODO: add badges (npm, CI, license) once public -->
+
 > *your schizo AI waifu that actually respects your privacy*
 
 **Milady** is a personal AI assistant that is **local-first by default** and can also connect to **Eliza Cloud** or a **remote self-hosted backend** when you want hosted runtime access. Built on [elizaOS](https://github.com/elizaOS)
@@ -7,6 +9,55 @@
 manages your sessions, tools, and vibes through a Gateway control plane. Connects to Telegram, Discord, whatever normie platform you use. Has a cute WebChat UI too.
 
 tl;dr: local AI gf that's actually fast and doesn't phone home
+
+### Energy and polish (desktop)
+
+Milady is **not** a full IDE: the product bet is **fewer wasted GPU frames and wakeups** when you are not looking at the app—especially **on battery**—while keeping the **companion visually strong** when you are. Background polling, off-screen WebGL, and battery-aware render quality are tuned toward that (see [Desktop — battery and energy](docs/apps/desktop.md#battery-and-energy-use-macos)). Comparing to **Cursor** or other heavy dev tools is **workload-dependent**; the north star is **great UX per watt** for a local assistant, not matching an editor’s surface area.
+
+### Desktop 3D avatar (Electrobun / Vite)
+
+If the **VRM** or **Gaussian splat** background fails only in the **desktop** build, the usual cause is **two copies of `three`** in the bundle (nested `node_modules` vs repo root), which breaks Spark’s **`splatDefines`** shader chunk. Milady forces **one** Three resolution path in Vite and isolates world-load failures so the **avatar** can still load. **Why it matters:** the companion is an **agent surface** (visibility + voice sync), not decoration. See **[Desktop VRM, Three.js, and Spark — WHYs](docs/apps/desktop-vrm-three-and-spark.md)**.
+
+---
+
+## BSC / BNB Chain Integration
+
+Milady ships with native **BNB Smart Chain (BSC)** support — your agent can trade tokens, track meme launches, and interact with DeFi on BSC out of the box.
+
+### Trading (PancakeSwap)
+
+The built-in `EXECUTE_TRADE` action lets your agent swap tokens on BSC via PancakeSwap. Supports buy/sell with configurable slippage.
+
+To enable BSC trading, add to your `.env` or `~/.milady/.env`:
+
+```bash
+EVM_PRIVATE_KEY=0x...                    # wallet private key (hex, 0x-prefixed)
+ELIZA_TRADE_PERMISSION_MODE=agent        # "agent" for autonomous, "user" for manual confirm
+```
+
+Optional RPC configuration (defaults to public BSC RPC):
+
+```bash
+ALCHEMY_API_KEY=...                      # or use ANKR_API_KEY / INFURA_API_KEY
+EVM_RPC_PROVIDER=alchemy                 # alchemy | infura | ankr | elizacloud
+```
+
+Once configured, just tell your agent: *"buy 0.1 BNB of \<token address\>"* or *"sell all my \<token\>"*.
+
+### Meme Token Discovery (Binance Skills Hub)
+
+Install the **meme-rush** skill from [Binance Skills Hub](https://github.com/binance/binance-skills-hub) to track meme token launches across BSC and Solana:
+
+- **Meme Rush** — real-time token lists from Pump.fun, Four.meme across new, finalizing, and migrated stages
+- **Topic Rush** — AI-powered market hot topics with tokens ranked by net inflow
+
+Install from the Skills Marketplace in the app, or ask your agent to install it.
+
+### Wallet
+
+Milady auto-generates EVM and Solana wallet addresses on startup. For BSC trading you need to import your own private key (see above). If connected to **Eliza Cloud**, managed wallets via Privy are available without local key management.
+
+View your agent's wallet addresses in the Settings tab or ask: *"what's my wallet address?"*
 
 ---
 
@@ -35,6 +86,13 @@ curl -fsSLO https://github.com/milady-ai/milady/releases/latest/download/SHA256S
 shasum -a 256 --check --ignore-missing SHA256SUMS.txt
 ```
 
+### Desktop: reset app data
+
+**Milady → Reset Milady…** (menu bar) confirms in the **native** dialog, then the **main process** calls **`POST /api/agent/reset`**, restarts the agent (embedded or external API), and tells the renderer to apply the **same local state wipe** as the end of Settings reset (onboarding, API client, cloud UI, conversations). **Why main does HTTP:** on macOS/WKWebView, the webview can fail to run **`fetch`** immediately after a native dialog, so a renderer-only reset looked stuck. **Why the renderer still runs teardown:** one implementation of “clear UI + `MiladyClient`” avoids duplicating logic in TypeScript main vs React.
+
+- **Docs:** [Desktop app](docs/apps/desktop.md) (native application menu section), [Main-process reset — WHYs](docs/apps/desktop-main-process-reset.md)
+- **Optional network / TTS:** with the agent orchestrator loaded, Edge TTS may call **Microsoft’s cloud** unless you set **`MILADY_DISABLE_EDGE_TTS=1`** — see [Environment variables](docs/cli/environment.md#runtime-behavior) and [TTS plugin](docs/plugin-registry/tts.md)
+
 ---
 
 ## Getting Started
@@ -55,21 +113,28 @@ milady
 First run walks you through onboarding:
 
 ```
-┌  milady
+┌  WELCOME TO MILADY!
 │
-◇  What should I call your agent?
-│  mila
-│
-◇  Pick a vibe
-│  ● Helpful & friendly
-│  ○ Tsundere
-│  ○ Unhinged
+◇  ♡♡milady♡♡: Hey there, I'm.... err, what was my name again?
+│  ● Sakuya
+│  ○ Reimu
+│  ○ Koishi
+│  ○ Marisa
 │  ○ Custom...
 │
+◇  Sakuya: Now... how do I like to talk again?
+│  ● uwu~       (soft & sweet)
+│  ○ hell yeah   (bold & fearless)
+│  ○ lol k       (terminally online)
+│  ○ Noted.      (composed & precise)
+│  ○ hehe~       (playful trickster)
+│  ○ ...         (quiet intensity)
+│  ○ lmao kms    (unhinged & dark)
+│
 ◇  Connect a brain
-│  ● Anthropic (Claude) ← recommended, actually smart
+│  ● Anthropic (Claude)
 │  ○ OpenAI (GPT)
-│  ○ Ollama (local, free, full schizo mode)
+│  ○ Ollama (local, no key)
 │  ○ Skip for now
 │
 ◇  API key?
@@ -181,7 +246,7 @@ Recommended server environment:
 export MILADY_API_BIND=0.0.0.0
 export MILADY_API_TOKEN="$(openssl rand -hex 32)"
 export MILADY_ALLOWED_ORIGINS="https://app.milady.ai,https://milady.ai,https://elizacloud.ai,https://www.elizacloud.ai"
-milady start --headless
+milady start
 ```
 
 The access key the user enters in onboarding is the value of `MILADY_API_TOKEN`.
@@ -232,10 +297,10 @@ The implementation and proxy runbook lives in [docs/eliza-cloud-deployment.md](d
 ## Terminal Commands
 
 ```bash
-milady                    # start (default)
-milady start              # same thing
-milady start --headless   # no browser popup
-milady start --verbose    # debug mode for when things break
+milady                    # start (interactive, opens dashboard)
+milady start              # server-only mode (API server, no interactive chat loop)
+milady --verbose          # enable informational runtime logs
+milady --debug            # enable debug-level runtime logs
 ```
 
 ### Setup & Config
@@ -244,7 +309,8 @@ milady start --verbose    # debug mode for when things break
 milady setup              # first-time setup / refresh workspace after update
 milady configure          # interactive config wizard
 milady config get <key>   # read a config value
-milady config set <k> <v> # set a config value
+milady config path        # print resolved config file path
+milady config show        # display all config values grouped by section
 ```
 
 ### Dashboard & UI
@@ -258,16 +324,16 @@ milady dashboard --port 3000  # custom port
 
 ```bash
 milady models             # list configured model providers
-milady models add         # add a new provider
-milady models test        # test if your API keys work
 ```
 
 ### Plugins
 
 ```bash
-milady plugins list       # what's installed
-milady plugins add <name> # install a plugin
-milady plugins remove <name>
+milady plugins list            # browse registry plugins
+milady plugins installed       # what's installed
+milady plugins install <name>  # install a plugin
+milady plugins uninstall <name>
+milady plugins search <query>  # search by keyword
 ```
 
 ### Misc
@@ -286,7 +352,7 @@ When running, milady shows a live terminal interface:
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  milady v0.1.0                              ▲ running      │
+│  milady v2.0.0                              ▲ running      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  Agent: mila                                                │
@@ -319,15 +385,15 @@ When running, milady shows a live terminal interface:
 | `?` | show help |
 | `↑/↓` | scroll activity |
 
-### Headless mode
+### Server-only mode
 
-Don't want the TUI? Run headless:
+Don't want the interactive TUI? Use the `start` command, which runs in server-only mode (API server, no interactive chat loop):
 
 ```bash
-milady start --headless
+milady start
 ```
 
-Logs go to `~/.milady/logs/`. Daemonize with your favorite process manager.
+Logs go to `stdout/stderr`. Daemonize with your favorite process manager.
 
 ---
 
@@ -349,10 +415,24 @@ Logs go to `~/.milady/logs/`. Daemonize with your favorite process manager.
 
 ## Ports
 
+**Production** (`milady start`):
+
 | Service | Default | Env Override |
 |---------|---------|--------------|
-| Gateway (API + WebSocket) | `18789` | `MILADY_GATEWAY_PORT` |
-| Dashboard (Web UI) | `2138` | `MILADY_PORT` |
+| Dashboard + API | `2138` | `MILADY_PORT` |
+| Gateway (WebSocket + HTTP) | `18789` | `MILADY_GATEWAY_PORT` |
+| Home Dashboard | `2142` | `MILADY_HOME_PORT` |
+| WeChat Webhook | `18790` | `MILADY_WECHAT_WEBHOOK_PORT` |
+
+**Development** (`bun run dev`):
+
+| Service | Default | Env Override |
+|---------|---------|--------------|
+| API + WebSocket | `31337` | `MILADY_API_PORT` |
+| Dashboard UI (Vite) | `2138` | `MILADY_PORT` |
+| Gateway | `19001` | `MILADY_GATEWAY_PORT` (set by `--profile dev`) |
+
+**If a default port is already in use:** `bun run dev` / `dev-server.ts` can bind to a different port and then **sync `MILADY_API_PORT` / `ELIZA_PORT`** to match. **`dev:desktop` / `dev:desktop:watch`** resolve **free** loopback ports **before** spawning Vite + API + Electrobun so proxy, `MILADY_RENDERER_URL`, and `MILADY_DESKTOP_API_BASE` stay aligned—**why:** Vite reads `vite.config.ts` once; guessing the API port only inside the API process would desync the UI proxy. The **packaged Electrobun** shell picks the next free port from `MILADY_PORT` for the embedded child instead of `lsof`+SIGKILL by default—**why:** two Milady installs (separate state dirs) should coexist. Opt-in old reclaim: **`MILADY_AGENT_RECLAIM_STALE_PORT=1`**. See [Desktop local development](docs/apps/desktop-local-development.md#when-default-ports-are-busy) and [Desktop — Port configuration](docs/apps/desktop.md#port-configuration).
 
 ```bash
 # custom ports
@@ -363,7 +443,7 @@ MILADY_GATEWAY_PORT=19000 MILADY_PORT=3000 milady start
 
 ## Config
 
-Lives at `~/.milady/milady.json`
+Lives at `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`)
 
 ```json5
 {
@@ -388,10 +468,23 @@ Or use `~/.milady/.env` for secrets.
 | [Anthropic](https://anthropic.com) | `ANTHROPIC_API_KEY` | **recommended** — claude is cracked |
 | [OpenAI](https://openai.com) | `OPENAI_API_KEY` | gpt-4o, o1, the classics |
 | [OpenRouter](https://openrouter.ai) | `OPENROUTER_API_KEY` | 100+ models one API |
+| [Google Gemini](https://ai.google.dev) | `GOOGLE_API_KEY` | gemini pro, flash, ultra |
+| [Google Antigravity](https://cloud.google.com/vertex-ai) | `GOOGLE_CLOUD_API_KEY` | vertex AI / cloud models |
 | [Ollama](https://ollama.ai) | — | local, free, no API key, full privacy |
 | [Groq](https://groq.com) | `GROQ_API_KEY` | fast af |
 | [xAI](https://x.ai) | `XAI_API_KEY` | grok, based |
 | [DeepSeek](https://deepseek.com) | `DEEPSEEK_API_KEY` | reasoning arc |
+| [Mistral](https://mistral.ai) | `MISTRAL_API_KEY` | mistral + mixtral |
+| [Together AI](https://together.ai) | `TOGETHER_API_KEY` | open-source model hosting |
+| [Cohere](https://cohere.com) | `COHERE_API_KEY` | command R+ and embed |
+| [Perplexity](https://perplexity.ai) | `PERPLEXITY_API_KEY` | search-augmented gen |
+| [Qwen](https://qwen.ai) | — | alibaba's qwen models (configure via plugin entry) |
+| [MiniMax](https://minimaxi.com) | — | minimax language models (configure via plugin entry) |
+| [Pi AI](https://pi.ai) | `ELIZA_USE_PI_AI` | inflection pi, conversational |
+| [Zai](https://homunculuslabs.com) | `ZAI_API_KEY` | homunculus labs zai |
+| [Vercel AI Gateway](https://sdk.vercel.ai) | `AI_GATEWAY_API_KEY` | unified gateway |
+
+See [Model Providers](docs/model-providers.mdx) for the full provider reference with configuration details. The `milady models` command checks which providers are configured.
 
 ### Using Ollama (local models)
 
@@ -422,6 +515,8 @@ Edit `~/.milady/milady.json`:
 
 This routes through the OpenAI plugin instead of the broken Ollama plugin. Works with any Ollama model — just make sure `ollama serve` is running.
 
+> **OpenRouter (`@elizaos/plugin-openrouter`):** Milady pins the dependency to **`2.0.0-alpha.10`**. **Why:** npm **`2.0.0-alpha.12`** published **truncated** JavaScript bundles: the files export `openrouterPlugin` / default but never define them (the main plugin chunk is missing), so Bun fails when loading the plugin. A caret range would allow that broken version again. See [Plugin resolution — pinned OpenRouter](docs/plugin-resolution-and-node-path.md#pinned-elizaosplugin-openrouter) and [OpenRouter plugin doc](docs/plugin-registry/llm/openrouter.md#milady-pinned-version-and-upstream-bundle-bug).
+
 **Recommended models for local use:**
 
 | Model | Size | Vibe |
@@ -435,32 +530,65 @@ This routes through the OpenAI plugin instead of the broken Ollama plugin. Works
 
 ## Prerequisites
 
-| | Version | Notes |
-|---|---------|-------|
-| **Node.js** | >= 22 | `node --version` to check |
-| **bun** | latest | for building and running. `curl -fsSL https://bun.sh/install \| bash` |
+| | Version | Check | Install |
+|---|---------|-------|---------|
+| **Node.js** | >= 22 | `node --version` | [nodejs.org](https://nodejs.org) |
+| **Bun** | latest | `bun --version` | `curl -fsSL https://bun.sh/install \| bash` |
+| **Git** | any | `git --version` | system package manager |
+
+**Optional** (for vision/TTS plugins with native deps):
+- macOS: `xcode-select --install`
+- Linux: `sudo apt install build-essential python3 libcairo2-dev libjpeg-dev libpango1.0-dev`
 
 ## Build from Source
 
 ```bash
 git clone https://github.com/milady-ai/milady.git
 cd milady
-bun install
+bun install          # runs postinstall hooks (patches deps, seeds skills, etc.)
 bun run build
 bun run milady start
 ```
 
 > `scripts/rt.sh` prefers bun but falls back to npm automatically. If you want to be explicit: `bun run build:node` uses only Node.
 
-Dev mode with hot reload:
+### Dev mode (recommended for development)
+
 ```bash
-bun run dev
+bun run dev          # starts API (:31337) + Vite UI (:2138) with hot reload (defaults; see Ports if busy)
 ```
+
+The dev orchestrator frees the UI listen port when needed, waits for the API to be healthy, then starts Vite with an `/api` proxy to **`MILADY_API_PORT`**.
+
+### Desktop shell (Electrobun)
+
+```bash
+bun run dev:desktop        # API + Electrobun; skips vite build when apps/app/dist is fresh
+bun run dev:desktop:watch  # + Vite dev server and MILADY_RENDERER_URL (HMR for UI work)
+```
+
+**Why a separate flow:** the desktop stack runs **multiple processes** (orchestrator, Vite and/or built assets, API, Electrobun). The orchestrator **pre-allocates** free **API** and **Vite** ports when defaults are taken so every child gets consistent env—**why:** misaligned ports cause blank UI or 502s on `/api`. See **[docs/apps/desktop-local-development.md](docs/apps/desktop-local-development.md)** (including [when default ports are busy](docs/apps/desktop-local-development.md#when-default-ports-are-busy)) for signals, shutdown when you quit the app, and env vars.
+
+**IDE / agent hooks** — Editors and agents do not see the native window or auto-discover localhost. **Why we added hooks:** with desktop dev running, the API exposes **`GET /api/dev/stack`** (JSON: ports, renderer URL, which features are on). **`bun run desktop:stack-status -- --json`** probes ports and merges stack + health + status. By default, **`.milady/desktop-dev-console.log`** mirrors prefixed child logs and **`GET /api/dev/cursor-screenshot`** (loopback) returns a full-screen PNG via OS capture — both are opt-out via env (see doc). Cursor uses **`.cursor/rules/milady-desktop-dev-observability.mdc`** plus that guide.
+
+```bash
+bun run check        # typecheck + lint (run before committing)
+bun run test         # parallel test suite
+bun run doctor       # diagnose environment issues
+bun run repair       # re-run postinstall hooks
+```
+
+See **[Architecture](docs/architecture.mdx)** for the full development guide including architecture overview and config reference. See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for contribution guidelines.
 
 ### Documentation (with WHYs)
 
-- **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun).
+- **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun). Includes **pinned `@elizaos/plugin-openrouter`** and **why** `alpha.12` must not be resolved until upstream fixes the published bundle.
 - **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, setup-node v3/Blacksmith, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
+- **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children; **IDE/agent observability** (`/api/dev/stack`, aggregated console, screenshot proxy, WHY loopback and opt-out).
+- **[Desktop main-process reset](docs/apps/desktop-main-process-reset.md)** — Why **Reset Milady…** runs HTTP in the Electrobun main process after native confirm, how the renderer syncs UI state, reachable API probing (`res.ok`), and where tests live.
+- **[Darwin vs macOS version (Electrobun WebGPU)](docs/apps/electrobun-darwin-macos-webgpu-version.md)** — Why **`uname -r` / `os.release()`** is not the macOS marketing major after Tahoe, how we map **Darwin 25 → macOS 26**, and why the WebGPU gate used to print “macOS 16.”
+- **[Changelog](docs/changelog.mdx)** — Shipped features and fixes with rationale (**WHY** bullets in each update).
+- **[Roadmap](docs/ROADMAP.md)** — Direction and follow-ups; points to changelog for what already landed.
 
 ---
 
@@ -476,9 +604,9 @@ Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the full details.
 
 ## License
 
-**Viral Public License**
+**MIT License**
 
-free to use, free to modify, free to distribute. if you build on this, keep it open. that's the deal.
+free to use, free to modify, free to distribute. see [LICENSE](LICENSE) for details.
 
 ---
 

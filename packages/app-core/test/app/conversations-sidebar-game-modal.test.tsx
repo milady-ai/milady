@@ -20,6 +20,7 @@ type SidebarContextStub = {
   handleSelectConversation: (id: string) => Promise<void>;
   handleDeleteConversation: (id: string) => Promise<void>;
   handleRenameConversation: (id: string, title: string) => Promise<void>;
+  suggestConversationTitle: (id: string) => Promise<string | null>;
   uiLanguage: "en" | "zh-CN";
   t: (k: string) => string;
 };
@@ -41,6 +42,51 @@ vi.mock("@miladyai/ui", async () => {
 
   return {
     ...actual,
+    Dialog: ({
+      open,
+      children,
+    }: {
+      open?: boolean;
+      children?: React.ReactNode;
+    }) =>
+      open
+        ? React.createElement(
+            "div",
+            { "data-testid": "radix-dialog-stub" },
+            children,
+          )
+        : null,
+    DialogContent: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    DialogHeader: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement("div", null, children),
+    DialogTitle: ({ children, ...props }: React.ComponentProps<"h2">) =>
+      React.createElement("h2", props, children),
+    DialogFooter: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement("div", null, children),
+    DialogDescription: ({ children, ...props }: React.ComponentProps<"p">) =>
+      React.createElement("p", props, children),
+    Input: React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+      (props, ref) => React.createElement("input", { ...props, ref }),
+    ),
+    Label: ({ children, ...props }: React.ComponentProps<"label">) =>
+      React.createElement("label", props, children),
+    TooltipProvider: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    Tooltip: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    TooltipTrigger: ({
+      children,
+      asChild,
+      ...props
+    }: { children?: React.ReactNode; asChild?: boolean } & Record<
+      string,
+      unknown
+    >) =>
+      asChild
+        ? (children as React.ReactElement)
+        : React.createElement("span", props, children),
+    TooltipContent: () => null,
     DropdownMenu: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
     DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) =>
@@ -66,6 +112,7 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
+import { textOf } from "../../../../test/helpers/react-test";
 import { ConversationsSidebar } from "../../src/components/ConversationsSidebar";
 
 function createContext(
@@ -97,15 +144,10 @@ function createContext(
     handleSelectConversation: vi.fn(async () => {}),
     handleDeleteConversation: vi.fn(async () => {}),
     handleRenameConversation: vi.fn(async () => {}),
+    suggestConversationTitle: vi.fn(async () => null),
     uiLanguage: "en",
     ...overrides,
   };
-}
-
-function textOf(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : textOf(child)))
-    .join("");
 }
 
 describe("ConversationsSidebar game-modal variant", () => {
@@ -152,8 +194,8 @@ describe("ConversationsSidebar game-modal variant", () => {
     await act(async () => {
       newChatButtons[0].props.onClick();
     });
-    expect(handleStartDraftConversation).toHaveBeenCalledTimes(1);
-    expect(handleNewConversation).not.toHaveBeenCalled();
+    expect(handleNewConversation).toHaveBeenCalledTimes(1);
+    expect(handleStartDraftConversation).not.toHaveBeenCalled();
 
     const convItems = tree?.root.findAll(
       (node) =>
@@ -210,6 +252,47 @@ describe("ConversationsSidebar game-modal variant", () => {
     expect(handleDeleteConversation).toHaveBeenCalledWith("conv-2");
   });
 
+  it("opens delete confirm from row X control then deletes", async () => {
+    const handleDeleteConversation = vi.fn(async () => {});
+    mockUseApp.mockReturnValue(
+      createContext({
+        handleDeleteConversation,
+      }),
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, { variant: "game-modal" }),
+      );
+    });
+
+    const deleteControls = tree?.root.findAll(
+      (node) =>
+        node.props["data-testid"] === "conv-delete" &&
+        typeof node.type === "string",
+    );
+    expect(deleteControls?.length).toBe(2);
+
+    await act(async () => {
+      deleteControls?.[0].props.onClick({
+        preventDefault: () => {},
+        stopPropagation: () => {},
+      });
+    });
+
+    const confirmYes = tree?.root.findAll(
+      (node) =>
+        node.type === "button" &&
+        textOf(node).trim() === "conversations.deleteYes",
+    );
+    expect(confirmYes.length).toBe(1);
+    await act(async () => {
+      confirmYes[0].props.onClick();
+    });
+    expect(handleDeleteConversation).toHaveBeenCalledWith("conv-2");
+  });
+
   it("supports inline rename in game-modal variant", async () => {
     const handleRenameConversation = vi.fn(async () => {});
     mockUseApp.mockReturnValue(
@@ -244,22 +327,100 @@ describe("ConversationsSidebar game-modal variant", () => {
       editMenuItem.props.onClick();
     });
 
-    const input = tree?.root.findAll((node) => node.type === "input")[0];
+    const input = tree?.root.findByProps({
+      "data-testid": "conv-rename-input",
+    });
     expect(input).toBeTruthy();
 
     await act(async () => {
       input?.props.onChange({ target: { value: "Renamed room" } });
     });
+    const saveBtn = tree?.root.findByProps({
+      "data-testid": "conv-rename-save",
+    });
     await act(async () => {
-      input?.props.onKeyDown({
-        key: "Enter",
-        preventDefault: () => {},
-      });
+      saveBtn.props.onClick();
+      await Promise.resolve();
     });
 
     expect(handleRenameConversation).toHaveBeenCalledWith(
       "conv-2",
       "Renamed room",
     );
+  });
+
+  it("fills title from suggest then saves", async () => {
+    const handleRenameConversation = vi.fn(async () => {});
+    const suggestConversationTitle = vi.fn(async () => "LLM suggested title");
+    mockUseApp.mockReturnValue(
+      createContext({
+        handleRenameConversation,
+        suggestConversationTitle,
+      }),
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, { variant: "game-modal" }),
+      );
+    });
+
+    const renameBtn = tree?.root.findAllByProps({
+      "data-testid": "conv-rename",
+    })[0];
+    await act(async () => {
+      renameBtn.props.onClick({
+        preventDefault: () => {},
+        stopPropagation: () => {},
+      });
+    });
+
+    const suggestBtn = tree?.root.findByProps({
+      "data-testid": "conv-rename-suggest",
+    });
+    await act(async () => {
+      suggestBtn.props.onClick();
+      await Promise.resolve();
+    });
+
+    expect(suggestConversationTitle).toHaveBeenCalledWith("conv-2");
+
+    const saveBtn = tree?.root.findByProps({
+      "data-testid": "conv-rename-save",
+    });
+    await act(async () => {
+      saveBtn.props.onClick();
+      await Promise.resolve();
+    });
+
+    expect(handleRenameConversation).toHaveBeenCalledWith(
+      "conv-2",
+      "LLM suggested title",
+    );
+  });
+
+  it("shows the unread count badge in game-modal when conversations are unread", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, { variant: "game-modal" }),
+      );
+    });
+
+    const content = textOf(tree?.root);
+    expect(content).toContain("Newest room");
+    expect(content).toContain("First room");
+    expect(
+      tree?.root.findAll(
+        (node) =>
+          node.type === "span" &&
+          typeof node.props.className === "string" &&
+          node.props.className.includes("bg-accent") &&
+          node.props.className.includes("animate-pulse"),
+      ),
+    ).toHaveLength(1);
   });
 });

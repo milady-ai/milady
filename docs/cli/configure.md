@@ -52,7 +52,7 @@ Common environment variables:
 
 ## Common Environment Variables
 
-The following environment variables configure AI model provider access. Set them in your shell profile (e.g. `~/.zshrc` or `~/.bashrc`) or in a `.env` file in your working directory.
+The following environment variables configure AI model provider access. Set them in your shell profile (e.g. `~/.zshrc` or `~/.bashrc`), in `~/.milady/.env`, or in a `.env` file in your working directory.
 
 | Environment Variable | Provider |
 |---------------------|----------|
@@ -60,6 +60,15 @@ The following environment variables configure AI model provider access. Set them
 | `OPENAI_API_KEY` | OpenAI (GPT) |
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway |
 | `GOOGLE_API_KEY` | Google (Gemini) |
+| `GROQ_API_KEY` | Groq |
+| `XAI_API_KEY` | xAI (Grok) |
+| `OPENROUTER_API_KEY` | OpenRouter |
+| `DEEPSEEK_API_KEY` | DeepSeek |
+| `TOGETHER_API_KEY` | Together AI |
+| `MISTRAL_API_KEY` | Mistral |
+| `COHERE_API_KEY` | Cohere |
+| `PERPLEXITY_API_KEY` | Perplexity |
+| `OLLAMA_BASE_URL` | Ollama (local, no API key) |
 
 For a complete list of supported providers and their environment variables, see [milady models](/cli/models) and [Environment Variables](/cli/environment).
 

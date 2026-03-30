@@ -28,9 +28,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Anthropic
 **Get credentials:** https://console.anthropic.com/settings/keys
-**Minimum required:** `ANTHROPIC_API_KEY` (starts with `sk-ant-`)
+**Minimum required:** `ANTHROPIC_API_KEY` (starts with `sk-ant-`) or `CLAUDE_API_KEY`
 **Variables:**
-- `ANTHROPIC_API_KEY` — Your secret key from console.anthropic.com
+- `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY` — Your secret key from console.anthropic.com (either works for auto-enable)
 - `ANTHROPIC_SMALL_MODEL` — e.g. `claude-haiku-4-5-20251001`
 - `ANTHROPIC_LARGE_MODEL` — e.g. `claude-sonnet-4-6`
 - `ANTHROPIC_BROWSER_BASE_URL` — (Advanced) Proxy URL for browser-side requests
@@ -38,9 +38,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Google Gemini
 **Get credentials:** https://aistudio.google.com/app/apikey
-**Minimum required:** `GOOGLE_GENERATIVE_AI_API_KEY`
+**Minimum required:** `GOOGLE_GENERATIVE_AI_API_KEY` or `GOOGLE_API_KEY`
 **Variables:**
-- `GOOGLE_GENERATIVE_AI_API_KEY` — From AI Studio or Google Cloud
+- `GOOGLE_GENERATIVE_AI_API_KEY` / `GOOGLE_API_KEY` — From AI Studio or Google Cloud (either works for auto-enable)
 - `GOOGLE_SMALL_MODEL` — e.g. `gemini-2.0-flash`
 - `GOOGLE_LARGE_MODEL` — e.g. `gemini-2.0-pro`
 - `GOOGLE_EMBEDDING_MODEL` — e.g. `text-embedding-004`
@@ -72,9 +72,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### xAI (Grok)
 **Get credentials:** https://console.x.ai/
-**Minimum required:** `XAI_API_KEY`
+**Minimum required:** `XAI_API_KEY` or `GROK_API_KEY`
 **Variables:**
-- `XAI_API_KEY` — From console.x.ai
+- `XAI_API_KEY` / `GROK_API_KEY` — From console.x.ai (either works for auto-enable)
 - `XAI_MODEL` — e.g. `grok-2-1212` (overrides small/large)
 - `XAI_SMALL_MODEL` / `XAI_LARGE_MODEL` — Specific model slots
 - `XAI_EMBEDDING_MODEL` — e.g. `v1`
@@ -86,9 +86,10 @@ where to get the credentials, minimum required fields, and tips for optional fie
 ### Ollama (Local Models)
 **Get credentials:** No API key needed — install Ollama locally
 **Setup:** https://ollama.ai — run `ollama pull llama3.2` to download a model
-**Minimum required:** `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
+**Minimum required:** `OLLAMA_BASE_URL` = `http://localhost:11434` (auto-enable trigger) or `OLLAMA_API_ENDPOINT` = `http://localhost:11434/api`
 **Variables:**
-- `OLLAMA_API_ENDPOINT` — Default: `http://localhost:11434/api`
+- `OLLAMA_BASE_URL` — Auto-enable trigger. Default: `http://localhost:11434`
+- `OLLAMA_API_ENDPOINT` — Plugin endpoint. Default: `http://localhost:11434/api`
 - `OLLAMA_SMALL_MODEL` — e.g. `llama3.2:3b`
 - `OLLAMA_MEDIUM_MODEL` — e.g. `llama3.2`
 - `OLLAMA_LARGE_MODEL` — e.g. `llama3.3:70b`
@@ -116,6 +117,95 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `AI_GATEWAY_IMAGE_MODEL` — For image generation
 - `AI_GATEWAY_TIMEOUT_MS` — Request timeout, default 30000ms
 **Tips:** Routes model calls through Vercel's AI gateway for caching, rate limiting, and observability. Useful if you're already on Vercel.
+
+### DeepSeek
+**Get credentials:** https://platform.deepseek.com/api_keys
+**Minimum required:** `DEEPSEEK_API_KEY`
+**Variables:**
+- `DEEPSEEK_API_KEY` — Your API key from platform.deepseek.com
+- `DEEPSEEK_SMALL_MODEL` — e.g. `deepseek-chat`
+- `DEEPSEEK_LARGE_MODEL` — e.g. `deepseek-reasoner`
+**Tips:** DeepSeek offers competitive pricing and strong reasoning models. The `deepseek-reasoner` model supports chain-of-thought reasoning.
+
+### Together AI
+**Get credentials:** https://api.together.xyz/settings/api-keys
+**Minimum required:** `TOGETHER_API_KEY`
+**Variables:**
+- `TOGETHER_API_KEY` — From api.together.xyz
+- `TOGETHER_SMALL_MODEL` — e.g. `meta-llama/Llama-3.2-3B-Instruct-Turbo`
+- `TOGETHER_LARGE_MODEL` — e.g. `meta-llama/Llama-3.3-70B-Instruct-Turbo`
+- `TOGETHER_EMBEDDING_MODEL` — e.g. `togethercomputer/m2-bert-80M-8k-retrieval`
+- `TOGETHER_IMAGE_MODEL` — e.g. `black-forest-labs/FLUX.1-schnell`
+**Tips:** Together AI hosts a wide range of open-source models. Great for accessing Llama, Mixtral, and other open models via API.
+
+### Mistral
+**Get credentials:** https://console.mistral.ai/api-keys
+**Minimum required:** `MISTRAL_API_KEY`
+**Variables:**
+- `MISTRAL_API_KEY` — From console.mistral.ai
+- `MISTRAL_SMALL_MODEL` — e.g. `mistral-small-latest`
+- `MISTRAL_LARGE_MODEL` — e.g. `mistral-large-latest`
+- `MISTRAL_EMBEDDING_MODEL` — e.g. `mistral-embed`
+**Tips:** Mistral models are fast and cost-effective. Good for European data residency requirements.
+
+### Cohere
+**Get credentials:** https://dashboard.cohere.com/api-keys
+**Minimum required:** `COHERE_API_KEY`
+**Variables:**
+- `COHERE_API_KEY` — From dashboard.cohere.com
+- `COHERE_SMALL_MODEL` — e.g. `command-r`
+- `COHERE_LARGE_MODEL` — e.g. `command-r-plus`
+- `COHERE_EMBEDDING_MODEL` — e.g. `embed-english-v3.0`
+**Tips:** Cohere excels at RAG (retrieval-augmented generation) and multilingual tasks. Their embedding models are production-grade.
+
+### Perplexity
+**Get credentials:** https://www.perplexity.ai/settings/api
+**Minimum required:** `PERPLEXITY_API_KEY`
+**Variables:**
+- `PERPLEXITY_API_KEY` — From perplexity.ai settings
+- `PERPLEXITY_SMALL_MODEL` — e.g. `llama-3.1-sonar-small-128k-online`
+- `PERPLEXITY_LARGE_MODEL` — e.g. `llama-3.1-sonar-large-128k-online`
+**Tips:** Perplexity models have built-in web search — ideal for tasks requiring up-to-date information.
+
+### Google Antigravity
+**Get credentials:** Google Cloud API key with Antigravity access
+**Minimum required:** `GOOGLE_CLOUD_API_KEY`
+**Variables:**
+- `GOOGLE_CLOUD_API_KEY` — Google Cloud API key
+**Tips:** Google Antigravity is a specialized Google model provider. Requires separate Google Cloud credentials from Google Gemini.
+
+### Qwen
+**Minimum required:** Configure via provider plugins config in `milady.json`
+**Variables:**
+- Set model IDs via the `providers.qwen` config block in `milady.json`
+**Tips:** Qwen models from Alibaba Cloud. Configure through the providers section of your config.
+
+### Minimax
+**Minimum required:** Configure via provider plugins config in `milady.json`
+**Variables:**
+- Set model IDs via the `providers.minimax` config block in `milady.json`
+**Tips:** Minimax provides Chinese and multilingual AI models.
+
+### Pi AI
+**Minimum required:** `ELIZA_USE_PI_AI=true`
+**Variables:**
+- `ELIZA_USE_PI_AI` — Set to `true` to enable Pi AI as a model provider
+**Tips:** Pi AI provides conversational models optimized for friendly, helpful dialogue.
+
+### Zai
+**Get credentials:** From Homunculus Labs
+**Minimum required:** `ZAI_API_KEY`
+**Variables:**
+- `ZAI_API_KEY` — Your Zai API key from Homunculus Labs
+**Tips:** Zai is a model provider from Homunculus Labs. Plugin package: `@homunculuslabs/plugin-zai`.
+
+### Eliza Cloud
+**Get credentials:** From the elizaOS Cloud service
+**Minimum required:** `ELIZAOS_CLOUD_API_KEY` or `ELIZAOS_CLOUD_ENABLED=true`
+**Variables:**
+- `ELIZAOS_CLOUD_API_KEY` — Your Eliza Cloud API key
+- `ELIZAOS_CLOUD_ENABLED` — Set to `true` to enable cloud features
+**Tips:** Eliza Cloud provides hosted infrastructure for running Eliza agents with managed scaling and monitoring.
 
 ---
 
@@ -259,6 +349,23 @@ where to get the credentials, minimum required fields, and tips for optional fie
 3. Get your API key from Neynar dashboard
 **Tips:** Neynar is required — it's the indexer that makes Farcaster data accessible via API.
 
+### WeChat
+**Get credentials:** From your WeChat proxy service provider
+**Minimum required:** `WECHAT_API_KEY` + proxy URL in config
+**Variables:**
+- `WECHAT_API_KEY` — Proxy service API key
+**Config-only fields** (set in `connectors.wechat`, not env vars):
+- `proxyUrl` — **Required** — Your WeChat proxy service URL
+- `webhookPort` — Webhook listener port (default: 18790)
+- `deviceType` — Device emulation: `ipad` (default) or `mac`
+- `features.images` — Enable image send/receive (default: false)
+- `features.groups` — Enable group chat support (default: false)
+**Setup steps:**
+1. Get API key from your WeChat proxy service
+2. Configure `connectors.wechat` in milady.json with `apiKey` and `proxyUrl`
+3. Start Milady — scan the QR code displayed in terminal with WeChat
+**Tips:** WeChat uses a third-party proxy service, not an official API. Only use a proxy you trust — it sees all message traffic. Multi-account supported via `accounts` map. Package: `@miladyai/plugin-wechat`.
+
 ### GitHub
 **Get credentials:** https://github.com/settings/tokens → Fine-grained or Classic
 **Minimum required:** `GITHUB_API_TOKEN`
@@ -340,8 +447,8 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Get credentials:** https://console.cloud.google.com → APIs → Google Chat API
 **Minimum required:** Service account JSON or `GOOGLE_APPLICATION_CREDENTIALS` path
 **Variables:**
-- `GOOGLE_CHAT_SERVICE_ACCOUNT` — Full service account JSON (paste the entire JSON)
-- `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` — Path to service account JSON file
+- `GOOGLE_CHAT_SERVICE_ACCOUNT_KEY` — Full service account JSON (paste the entire JSON)
+- `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` — Alternative: path to service account JSON file
 - `GOOGLE_APPLICATION_CREDENTIALS` — Alternative: path to credentials file
 - `GOOGLE_CHAT_SPACES` — Comma-separated space names (e.g. `spaces/AAAA_space_id`)
 - `GOOGLE_CHAT_AUDIENCE_TYPE` — `PUBLISHED` or `DOMAIN_INSTALL`
@@ -394,7 +501,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 - `BLOOIO_WEBHOOK_URL` — Your public URL for incoming SMS webhooks
 - `BLOOIO_WEBHOOK_SECRET` — Secret for webhook signature verification
 - `BLOOIO_BASE_URL` — bloo.io API base URL (leave as default)
-- `BLOOIO_FROM_NUMBER` — Phone number to send from
+- `BLOOIO_PHONE_NUMBER` — Phone number to send from
 - `BLOOIO_WEBHOOK_PORT` — Port for webhook listener
 **Tips:** Blooio bridges iMessage/SMS. Requires a Mac running the Blooio app.
 
@@ -437,9 +544,9 @@ where to get the credentials, minimum required fields, and tips for optional fie
 
 ### Mattermost
 **Get credentials:** Your Mattermost instance → System Console → Integrations → Bot Accounts
-**Minimum required:** `MATTERMOST_SERVER_URL` + `MATTERMOST_BOT_TOKEN`
+**Minimum required:** `MATTERMOST_BASE_URL` + `MATTERMOST_BOT_TOKEN`
 **Variables:**
-- `MATTERMOST_SERVER_URL` — e.g. `https://mattermost.yourcompany.com`
+- `MATTERMOST_BASE_URL` — e.g. `https://mattermost.yourcompany.com`
 - `MATTERMOST_BOT_TOKEN` — From System Console → Bot Accounts → Add Bot Account
 - `MATTERMOST_TEAM_ID` — Your team ID (from team URL or API)
 - `MATTERMOST_DM_POLICY` / `MATTERMOST_GROUP_POLICY` — `allow-all` or `allow-from`
@@ -519,14 +626,6 @@ On-chain chat via Solana blockchain.
 Monitors Gmail via Google Pub/Sub push notifications.
 **Setup:** Requires Google Cloud service account with Gmail API access.
 **Tips:** Uses `gog gmail watch serve` internally. Requires Google Cloud project with Gmail API enabled and Pub/Sub configured.
-
-### Retake.tv
-Live video streaming connector.
-**Minimum required:** `RETAKE_ACCESS_TOKEN`
-**Variables:**
-- `RETAKE_ACCESS_TOKEN` — From your retake.tv account
-- `RETAKE_API_URL` — API endpoint (default provided)
-- `RETAKE_CAPTURE_URL` — Screen capture endpoint
 
 ---
 

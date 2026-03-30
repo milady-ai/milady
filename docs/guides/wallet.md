@@ -463,6 +463,8 @@ Private keys are stored in two places:
 1. **Runtime memory** — `process.env.EVM_PRIVATE_KEY` and `process.env.SOLANA_PRIVATE_KEY` are set when keys are generated or imported.
 2. **Config file** — the `env` section of `milady.json` persists keys to disk. The config file is written with `0o600` permissions (owner read/write only) and the config directory is created with `0o700` permissions.
 
+**Planned:** optional storage in the OS secret store (macOS Keychain, Windows Credential Manager, Linux Secret Service) with a **per–state-directory vault id**, so keys are not persisted in plaintext config when enabled. See [Platform secure store (design)](./platform-secure-store.md).
+
 ### Key Isolation for Sandboxed Agents
 
 Private keys stay on the host process. Sandboxed agent code never has direct access to key material. Instead, agents submit unsigned transactions to the `RemoteSigningService`, which:

@@ -1,22 +1,33 @@
-const TOKEN_KEY = "milady-cloud-token";
+import { CLOUD_BASE, getCloudTokenStorageKey } from "./runtime-config";
+
+export const CLOUD_AUTH_CHANGED_EVENT = "milady-cloud-auth-changed";
+
+function emitAuthChanged(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(CLOUD_AUTH_CHANGED_EVENT));
+}
+
+function getActiveTokenStorageKey(): string {
+  return getCloudTokenStorageKey();
+}
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(getActiveTokenStorageKey());
 }
 
 export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(getActiveTokenStorageKey(), token);
+  emitAuthChanged();
 }
 
 export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(getActiveTokenStorageKey());
+  emitAuthChanged();
 }
 
 export function isAuthenticated(): boolean {
   return getToken() !== null;
 }
-
-const CLOUD_BASE = "https://www.elizacloud.ai";
 
 export async function cloudLogin(): Promise<{
   sessionId: string;
@@ -53,25 +64,11 @@ export async function cloudLoginPoll(
 export interface CloudAgent {
   id: string;
   name: string;
+  agentName?: string;
   status: string;
   model?: string;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export async function fetchCloudAgents(): Promise<CloudAgent[]> {
-  const token = getToken();
-  if (!token) return [];
-  try {
-    const res = await fetch(`${CLOUD_BASE}/api/v1/milady/agents`, {
-      headers: { "X-Api-Key": token },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return Array.isArray(data) ? data : (data.agents ?? data.data ?? []);
-  } catch {
-    return [];
-  }
 }
 
 export async function fetchWithAuth(
@@ -88,4 +85,22 @@ export async function fetchWithAuth(
     clearToken();
   }
   return res;
+}
+
+/**
+ * Extracts the API token from the URL (e.g. ?token=...) and stores it,
+ * then strips it from the URL to prevent leaking in screenshots/sharing.
+ */
+export function consumeUrlToken(): void {
+  try {
+    const currentUrl = new URL(window.location.href);
+    const tokenParam = currentUrl.searchParams.get("token");
+    if (tokenParam) {
+      setToken(tokenParam);
+      currentUrl.searchParams.delete("token");
+      window.history.replaceState({}, "", currentUrl.toString());
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
 }

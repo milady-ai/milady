@@ -11,6 +11,7 @@
  *   - Prompt generation: registry.catalog.prompt() for AI system prompts
  */
 
+import { Button } from "@miladyai/ui";
 import React, {
   forwardRef,
   useCallback,
@@ -219,16 +220,17 @@ function ValidationSummary({
       <ul className="list-none m-0 p-0 flex flex-col gap-1">
         {errorEntries.map(([key]) => (
           <li key={key}>
-            <button
+            <Button
               type="button"
-              className="text-[12px] text-[var(--destructive)] cursor-pointer bg-transparent border-none p-0 hover:underline transition-all text-left flex items-center gap-1.5"
+              variant="link"
+              className="text-[12px] text-[var(--destructive)] p-0 h-auto hover:underline transition-all text-left flex items-center gap-1.5"
               onClick={() => handleFieldClick(key)}
             >
               <span className="opacity-60">
                 {t("config-renderer.Rarr", { defaultValue: "→" })}
               </span>
               <span>{fieldLabels.get(key) ?? key}</span>
-            </button>
+            </Button>
           </li>
         ))}
       </ul>
@@ -472,7 +474,10 @@ export const ConfigRenderer = forwardRef<
     const generalFields = visibleFields.filter((f) => !f.advanced);
     const advancedFields = visibleFields.filter((f) => f.advanced);
 
-    // Group general fields, sort required-unconfigured to the top within each group
+    // Group general fields, sort required-unconfigured to the top within each group.
+    // Use setKeys (server-persisted state) instead of live `values` to decide
+    // emptiness — otherwise typing into a field causes it to jump position
+    // mid-keystroke as it transitions from "empty required" to "filled required".
     const fieldGroups = new Map<string, ResolvedField[]>();
     for (const f of generalFields) {
       const g = fieldGroups.get(f.group) ?? [];
@@ -481,10 +486,8 @@ export const ConfigRenderer = forwardRef<
     }
     for (const [, fields] of fieldGroups) {
       fields.sort((a, b) => {
-        const aEmpty =
-          a.required && (values[a.key] == null || values[a.key] === "");
-        const bEmpty =
-          b.required && (values[b.key] == null || values[b.key] === "");
+        const aEmpty = a.required && !setKeys.has(a.key);
+        const bEmpty = b.required && !setKeys.has(b.key);
         if (aEmpty && !bEmpty) return -1;
         if (!aEmpty && bEmpty) return 1;
         return (a.hint.order ?? 999) - (b.hint.order ?? 999);
@@ -497,7 +500,7 @@ export const ConfigRenderer = forwardRef<
       showHeaders: fieldGroups.size > 1,
       allVisibleFields: visibleFields,
     };
-  }, [schema, hints, registry, isFieldVisible, values]);
+  }, [schema, hints, registry, isFieldVisible, setKeys]);
 
   // ── Field labels for validation summary ────────────────────────────
 
@@ -674,9 +677,10 @@ function AdvancedSectionToggle({
 }) {
   const { t } = useApp();
   return (
-    <button
+    <Button
       type="button"
-      className="flex items-center gap-2 cursor-pointer select-none group mb-3"
+      variant="ghost"
+      className="flex items-center gap-2 cursor-pointer select-none group mb-3 p-0 h-auto"
       onClick={() => setAdvancedOpen((prev) => !prev)}
     >
       <span
@@ -692,7 +696,7 @@ function AdvancedSectionToggle({
         {advanced.length}
       </span>
       <span className="flex-1 h-px bg-[var(--border)] opacity-50 ml-1" />
-    </button>
+    </Button>
   );
 }
 

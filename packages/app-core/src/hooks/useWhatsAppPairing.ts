@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { client } from "../api/client";
 
-export type WhatsAppPairingStatus =
-  | "idle"
-  | "initializing"
-  | "waiting_for_qr"
-  | "connected"
-  | "disconnected"
-  | "timeout"
-  | "error";
+export type { WhatsAppPairingStatus } from "@miladyai/agent/services/whatsapp-pairing";
+
+import type { WhatsAppPairingStatus } from "@miladyai/agent/services/whatsapp-pairing";
 
 interface WhatsAppPairingState {
   status: WhatsAppPairingStatus;

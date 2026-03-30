@@ -2,8 +2,9 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
 
-type OnboardingStep = "wakeUp" | "connection" | "rpc" | "senses" | "activate";
+type OnboardingStep = "identity" | "connection" | "rpc" | "senses" | "activate";
 
 type AppHarnessState = {
   onboardingLoading: boolean;
@@ -16,14 +17,14 @@ type AppHarnessState = {
   startupError: null;
   authRequired: boolean;
   onboardingComplete: boolean;
+  onboardingHandoffError: string | null;
+  onboardingHandoffPhase: string;
   tab: string;
   actionNotice: null;
   onboardingStep: OnboardingStep;
   onboardingMode: "basic" | "advanced";
   onboardingActiveGuide: "provider" | "rpc" | "permissions" | "voice" | null;
-  onboardingDeferredTasks: Array<
-    "provider" | "rpc" | "permissions" | "voice"
-  >;
+  onboardingDeferredTasks: Array<"provider" | "rpc" | "permissions" | "voice">;
   postOnboardingChecklistDismissed: boolean;
   onboardingOptions: {
     names: string[];
@@ -133,7 +134,6 @@ const { companionOverlayTabs, mockUseApp } = vi.hoisted(() => ({
     "apps",
     "connectors",
     "knowledge",
-    "lifo",
     "stream",
     "wallets",
   ]),
@@ -142,6 +142,16 @@ const { companionOverlayTabs, mockUseApp } = vi.hoisted(() => ({
 
 vi.mock("@miladyai/app-core/state", async () => {
   const actual = await vi.importActual("@miladyai/app-core/state");
+  return {
+    ...actual,
+    useApp: () => mockUseApp(),
+  };
+});
+
+vi.mock("../../src/state", async () => {
+  const actual = await vi.importActual<typeof import("../../src/state")>(
+    "../../src/state",
+  );
   return {
     ...actual,
     useApp: () => mockUseApp(),
@@ -157,6 +167,7 @@ vi.mock("@miladyai/app-core/components", async () => {
     AdvancedPageView: () =>
       React.createElement("div", null, "AdvancedPageView"),
     AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+    CharacterEditor: () => React.createElement("div", null, "CharacterView"),
     CharacterView: () => React.createElement("div", null, "CharacterView"),
     ChatView: () => React.createElement("div", null, "ChatView"),
     ConnectorsPageView: () =>
@@ -175,17 +186,16 @@ vi.mock("@miladyai/app-core/components", async () => {
     Header: () => React.createElement("div", null, "Header"),
     InventoryView: () => React.createElement("div", null, "InventoryView"),
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
-    LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
     OnboardingWizard: () => {
       const state = mockUseApp();
-      if (state.onboardingStep === "wakeUp") {
+      if (state.onboardingStep === "identity") {
         return React.createElement(
           "button",
           {
             onClick: () => state.handleOnboardingNext(),
             type: "button",
           },
-          "onboarding.createNewAgent",
+          "onboarding.chooseAgent",
         );
       }
       if (state.onboardingStep === "connection") {
@@ -280,94 +290,323 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
-vi.mock("../../../packages/app-core/src/components/Header", () => ({
+vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
+  AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () => React.createElement("div", null, "CharacterView"),
+  ChatView: () => React.createElement("div", null, "ChatView"),
+  CompanionShell: ({ tab }: { tab: string }) =>
+    React.createElement("main", null, `CompanionShell:${tab}`),
+  CompanionView: () => React.createElement("div", null, "CompanionView"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("div", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("div", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("div", null, "Header"),
+  HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
+  InventoryView: () => React.createElement("div", null, "InventoryView"),
+  KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+  OnboardingWizard: () => {
+    const state = mockUseApp();
+    if (state.onboardingStep === "identity") {
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.chooseAgent",
+      );
+    }
+    if (state.onboardingStep === "connection") {
+      if (!state.onboardingRunMode) {
+        return React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(
+            "button",
+            {
+              onClick: () => {
+                state.setState?.("onboardingRunMode", "local");
+              },
+              type: "button",
+            },
+            "onboarding.hostingLocal",
+          ),
+          React.createElement(
+            "button",
+            {
+              onClick: () => {
+                state.setState?.("onboardingMode", "advanced");
+                state.setState?.("onboardingActiveGuide", "provider");
+              },
+              type: "button",
+            },
+            "advanced-configuration",
+          ),
+          state.onboardingMode === "advanced"
+            ? React.createElement("div", null, "Flamina guidance")
+            : null,
+        );
+      }
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.confirm",
+      );
+    }
+    if (state.onboardingStep === "rpc") {
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.rpcSkip",
+      );
+    }
+    if (state.onboardingStep === "senses") {
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "permissions-continue",
+      );
+    }
+    return React.createElement(
+      "button",
+      {
+        onClick: () => state.handleOnboardingNext(),
+        type: "button",
+      },
+      "onboarding.enter",
+    );
+  },
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () => React.createElement("div", null, "SettingsView"),
+  SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  ShellOverlays: () => null,
+  StartupFailureView: ({ error }: { error: { message: string } }) =>
+    React.createElement("div", null, error.message),
+  StreamView: () => React.createElement("div", null, "StreamView"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
+}));
+
+vi.mock("../../src/app-shell-components", () => ({
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
+  AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () => React.createElement("div", null, "CharacterView"),
+  ChatView: () => React.createElement("div", null, "ChatView"),
+  CompanionShell: ({ tab }: { tab: string }) =>
+    React.createElement("main", null, `CompanionShell:${tab}`),
+  CompanionView: () => React.createElement("div", null, "CompanionView"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("div", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("div", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("div", null, "Header"),
+  HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
+  InventoryView: () => React.createElement("div", null, "InventoryView"),
+  KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+  OnboardingWizard: () => {
+    const state = mockUseApp();
+    if (state.onboardingStep === "identity") {
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.chooseAgent",
+      );
+    }
+    if (state.onboardingStep === "connection") {
+      if (!state.onboardingRunMode) {
+        return React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(
+            "button",
+            {
+              onClick: () => {
+                state.setState?.("onboardingRunMode", "local");
+              },
+              type: "button",
+            },
+            "onboarding.hostingLocal",
+          ),
+          React.createElement(
+            "button",
+            {
+              onClick: () => {
+                state.setState?.("onboardingMode", "advanced");
+                state.setState?.("onboardingActiveGuide", "provider");
+              },
+              type: "button",
+            },
+            "advanced-configuration",
+          ),
+          state.onboardingMode === "advanced"
+            ? React.createElement("div", null, "Flamina guidance")
+            : null,
+        );
+      }
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.confirm",
+      );
+    }
+    if (state.onboardingStep === "rpc") {
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding.rpcSkip",
+      );
+    }
+    if (state.onboardingStep === "senses") {
+      return React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "permissions-continue",
+      );
+    }
+    return React.createElement(
+      "button",
+      {
+        onClick: () => state.handleOnboardingNext(),
+        type: "button",
+      },
+      "onboarding.enter",
+    );
+  },
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () => React.createElement("div", null, "SettingsView"),
+  SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  ShellOverlays: () => null,
+  StartupFailureView: ({ error }: { error: { message: string } }) =>
+    React.createElement("div", null, error.message),
+  StreamView: () => React.createElement("div", null, "StreamView"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
+}));
+
+vi.mock("@miladyai/app-core/src/components/Header", () => ({
   Header: () => React.createElement("div", null, "Header"),
 }));
-vi.mock("../../../packages/app-core/src/components/Nav", () => ({
+vi.mock("@miladyai/app-core/src/components/Nav", () => ({
   Nav: () => React.createElement("div", null, "Nav"),
 }));
-vi.mock("../../../packages/app-core/src/components/CommandPalette", () => ({
+vi.mock("@miladyai/app-core/src/components/CommandPalette", () => ({
   CommandPalette: () => React.createElement("div", null, "CommandPalette"),
 }));
-vi.mock("../../../packages/app-core/src/components/EmotePicker", () => ({
+vi.mock("@miladyai/app-core/src/components/EmotePicker", () => ({
   EmotePicker: () => React.createElement("div", null, "EmotePicker"),
 }));
-vi.mock(
-  "../../../packages/app-core/src/components/onboarding/PermissionsStep",
-  () => ({
-    PermissionsStep: () =>
-      React.createElement(
-        "button",
-        { onClick: () => mockUseApp().handleOnboardingNext(), type: "button" },
-        "permissions-continue",
-      ),
-  }),
-);
-vi.mock(
-  "../../../packages/app-core/src/components/ConversationsSidebar",
-  () => ({
-    ConversationsSidebar: () =>
-      React.createElement("div", null, "ConversationsSidebar"),
-  }),
-);
-vi.mock("../../../packages/app-core/src/components/CustomActionsPanel", () => ({
+vi.mock("@miladyai/app-core/src/components/onboarding/PermissionsStep", () => ({
+  PermissionsStep: () =>
+    React.createElement(
+      "button",
+      { onClick: () => mockUseApp().handleOnboardingNext(), type: "button" },
+      "permissions-continue",
+    ),
+}));
+vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+}));
+vi.mock("@miladyai/app-core/src/components/CustomActionsPanel", () => ({
   CustomActionsPanel: () =>
     React.createElement("div", null, "CustomActionsPanel"),
 }));
-vi.mock("../../../packages/app-core/src/components/CustomActionEditor", () => ({
+vi.mock("@miladyai/app-core/src/components/CustomActionEditor", () => ({
   CustomActionEditor: () =>
     React.createElement("div", null, "CustomActionEditor"),
 }));
-vi.mock("../../../packages/app-core/src/components/AppsPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/AppsPageView", () => ({
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
 }));
-vi.mock("../../../packages/app-core/src/components/AdvancedPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/AdvancedPageView", () => ({
   AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
 }));
-vi.mock("../../../packages/app-core/src/components/CharacterView", () => ({
+vi.mock("@miladyai/app-core/src/components/CharacterView", () => ({
   CharacterView: () => React.createElement("div", null, "CharacterView"),
 }));
-vi.mock("../../../packages/app-core/src/components/TriggersView", () => ({
+vi.mock("@miladyai/app-core/src/components/TriggersView", () => ({
   TriggersView: () => React.createElement("div", null, "TriggersView"),
 }));
-vi.mock("../../../packages/app-core/src/components/ConnectorsPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/ConnectorsPageView", () => ({
   ConnectorsPageView: () =>
     React.createElement("div", null, "ConnectorsPageView"),
 }));
-vi.mock("../../../packages/app-core/src/components/InventoryView", () => ({
+vi.mock("@miladyai/app-core/src/components/InventoryView", () => ({
   InventoryView: () => React.createElement("div", null, "InventoryView"),
 }));
-vi.mock("../../../packages/app-core/src/components/KnowledgeView", () => ({
+vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
 }));
-vi.mock("../../../packages/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () => React.createElement("div", null, "LifoSandboxView"),
-}));
-vi.mock("../../../packages/app-core/src/components/PairingView", () => ({
+vi.mock("@miladyai/app-core/src/components/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),
 }));
-vi.mock("../../../packages/app-core/src/components/ChatView", () => ({
+vi.mock("@miladyai/app-core/src/components/ChatView", () => ({
   ChatView: () => React.createElement("div", null, "ChatView"),
 }));
-vi.mock("@miladyai/app-core/components/AvatarLoader", () => ({
+vi.mock("../../src/components/AvatarLoader", () => ({
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
 }));
-vi.mock("../../../packages/app-core/src/components/CompanionView", () => ({
+vi.mock("@miladyai/app-core/src/components/CompanionView", () => ({
   CompanionView: () => React.createElement("div", null, "CompanionView"),
 }));
-vi.mock("../../../packages/app-core/src/components/ChatModalView.js", () => ({
+vi.mock("@miladyai/app-core/src/components/ChatModalView.js", () => ({
   ChatModalView: () => React.createElement("div", null, "ChatModalView"),
 }));
-vi.mock("../../../packages/app-core/src/components/AvatarSelector", () => ({
+vi.mock("@miladyai/app-core/src/components/AvatarSelector", () => ({
   AvatarSelector: () => React.createElement("div", null, "AvatarSelector"),
 }));
-vi.mock("../../../packages/app-core/src/components/companion/VrmStage", () => ({
+vi.mock("@miladyai/app-core/src/components/companion/VrmStage", () => ({
   VrmStage: () => React.createElement("div", null, "VrmStage"),
 }));
-vi.mock("../../../packages/app-core/src/components/StreamView", () => ({
+vi.mock("@miladyai/app-core/src/components/StreamView", () => ({
   StreamView: () => React.createElement("div", null, "StreamView"),
 }));
-vi.mock("../../../packages/app-core/src/components/CompanionShell", () => ({
+vi.mock("@miladyai/app-core/src/components/CompanionShell", () => ({
   COMPANION_OVERLAY_TABS: companionOverlayTabs,
   CompanionShell: ({ tab }: { tab: string }) =>
     React.createElement("main", null, `CompanionShell:${tab}`),
@@ -375,7 +614,7 @@ vi.mock("../../../packages/app-core/src/components/CompanionShell", () => ({
 }));
 
 vi.mock(
-  "../../../packages/app-core/src/components/companion/CompanionSceneHost",
+  "@miladyai/app-core/src/components/companion/CompanionSceneHost",
   async () => {
     const React = await vi.importActual<typeof import("react")>("react");
     return {
@@ -392,10 +631,11 @@ vi.mock(
 );
 
 import { App } from "../../src/App";
+import { AppContext } from "../../src/state/useApp";
 
 function onboardingOptions() {
   return {
-    names: ["Milady"],
+    names: ["Eliza"],
     styles: [
       {
         catchphrase: "chaotic",
@@ -466,17 +706,19 @@ function createHarnessState(): AppHarnessState {
     startupError: null,
     authRequired: false,
     onboardingComplete: false,
+    onboardingHandoffError: null,
+    onboardingHandoffPhase: "idle",
     tab: "chat",
     actionNotice: null,
-    onboardingStep: "wakeUp",
+    onboardingStep: "identity",
     onboardingMode: "basic",
     onboardingActiveGuide: null,
     onboardingDeferredTasks: [],
     postOnboardingChecklistDismissed: false,
     onboardingOptions: onboardingOptions(),
-    onboardingName: "Milady",
+    onboardingName: "Eliza",
     onboardingStyle: "",
-    onboardingTheme: "milady",
+    onboardingTheme: "eliza",
     onboardingRunMode: "",
     onboardingCloudProvider: "",
     onboardingSmallModel: "small-model",
@@ -509,15 +751,20 @@ function createHarnessState(): AppHarnessState {
     elizaCloudLoginBusy: false,
     elizaCloudLoginError: "",
     elizaCloudUserId: "",
-    uiShellMode: "companion",
+    plugins: [],
+    conversations: [],
+    elizaCloudCredits: null,
+    uiShellMode: "native",
   };
 }
 
-function textOf(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : textOf(child)))
-    .join("");
-}
+const TRANSLATIONS: Record<string, string> = {
+  "flaminaguide.FinishSetupLater": "Finish setup later",
+  "flaminaguide.FinishSetupLaterDescription":
+    "You can come back and complete these later.",
+  "flaminaguide.tasks.rpc.label": "RPC setup",
+  "flaminaguide.tasks.permissions.label": "Permissions",
+};
 
 function hasText(
   node: TestRenderer.ReactTestInstance,
@@ -539,10 +786,27 @@ function clickButton(
   button.props.onClick();
 }
 
-async function rerender(tree: TestRenderer.ReactTestRenderer): Promise<void> {
+async function rerender(
+  tree: TestRenderer.ReactTestRenderer,
+  state: AppHarnessState,
+): Promise<void> {
   await act(async () => {
-    tree.update(React.createElement(App));
+    tree.update(
+      React.createElement(
+        AppContext.Provider,
+        { value: state as never },
+        React.createElement(App),
+      ),
+    );
   });
+}
+
+function renderApp(state: AppHarnessState): React.ReactElement {
+  return React.createElement(
+    AppContext.Provider,
+    { value: state as never },
+    React.createElement(App),
+  );
 }
 
 describe("app startup onboarding flow (e2e)", () => {
@@ -552,7 +816,7 @@ describe("app startup onboarding flow (e2e)", () => {
     state = createHarnessState();
 
     const STEP_ORDER: OnboardingStep[] = [
-      "wakeUp",
+      "identity",
       "connection",
       "rpc",
       "senses",
@@ -563,8 +827,8 @@ describe("app startup onboarding flow (e2e)", () => {
       if (state.onboardingStep === "activate") {
         state.onboardingComplete = true;
         state.startupStatus = "ready";
-        state.uiShellMode = "native";
-        state.tab = "chat";
+        state.uiShellMode = "companion";
+        state.tab = "companion";
         return;
       }
       const idx = STEP_ORDER.indexOf(state.onboardingStep);
@@ -582,8 +846,9 @@ describe("app startup onboarding flow (e2e)", () => {
 
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
-      t: (k: string) => k,
+      t: (k: string) => TRANSLATIONS[k] ?? k,
       ...state,
+      cancelOnboardingHandoff: vi.fn(),
       setState: (key: string, value: unknown) => {
         state[key] = value;
       },
@@ -592,20 +857,38 @@ describe("app startup onboarding flow (e2e)", () => {
       },
       handleOnboardingNext,
       handleOnboardingBack,
+      handleOnboardingJumpToStep: vi.fn(),
+      goToOnboardingStep: vi.fn(),
       handleCloudLogin: async () => {
         state.elizaCloudConnected = true;
         state.elizaCloudUserId = "test-user";
       },
       handleOnboardingRemoteConnect: async () => {},
       handleOnboardingUseLocalBackend: () => {},
+      requestGreeting: vi.fn(async () => ({
+        text: "hello",
+        agentName: "Eliza",
+        generated: true,
+        persisted: false,
+      })),
+      retryOnboardingHandoff: vi.fn(async () => {}),
+      retryStartup: vi.fn(),
+      startupPhase:
+        state.startupStatus === "ready" ? "ready" : "starting-backend",
     }));
   });
 
-  it("progresses through onboarding and lands in character select", async () => {
+  it("progresses through onboarding and lands in companion mode", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(App));
+      tree = TestRenderer.create(
+        React.createElement(
+          AppContext.Provider,
+          { value: state as never },
+          React.createElement(App),
+        ),
+      );
     });
     if (!tree) throw new Error("failed to render App");
     const renderedTree = tree;
@@ -617,13 +900,13 @@ describe("app startup onboarding flow (e2e)", () => {
         !state.onboardingProvider
       ) {
         state.onboardingProvider = "ollama";
-        await rerender(renderedTree);
+        await rerender(renderedTree, state);
       }
 
       if (state.onboardingStep === "senses") {
         clickButton(renderedTree, "permissions-continue");
-      } else if (state.onboardingStep === "wakeUp") {
-        clickButton(renderedTree, "onboarding.createNewAgent");
+      } else if (state.onboardingStep === "identity") {
+        clickButton(renderedTree, "onboarding.chooseAgent");
       } else if (state.onboardingStep === "connection") {
         if (!state.onboardingRunMode) {
           clickButton(renderedTree, "onboarding.hostingLocal");
@@ -635,14 +918,14 @@ describe("app startup onboarding flow (e2e)", () => {
       } else if (state.onboardingStep === "activate") {
         clickButton(renderedTree, "onboarding.enter");
       }
-      await rerender(renderedTree);
+      await rerender(renderedTree, state);
     }
 
     expect(state.onboardingComplete).toBe(true);
 
     const renderedText = textOf(renderedTree.root);
 
-    expect(renderedText).toContain("ChatView");
+    expect(renderedText).toContain("CompanionShell:companion");
     expect(renderedText).not.toContain("OnboardingWizard");
   });
 
@@ -655,12 +938,11 @@ describe("app startup onboarding flow (e2e)", () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(App));
+      tree = TestRenderer.create(renderApp(state));
     });
     if (!tree) throw new Error("failed to render App");
 
     const renderedText = textOf(tree.root);
-
     expect(renderedText).toContain("CharacterView");
     expect(renderedText).not.toContain("CompanionView");
   });
@@ -669,14 +951,14 @@ describe("app startup onboarding flow (e2e)", () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(App));
+      tree = TestRenderer.create(renderApp(state));
     });
     if (!tree) throw new Error("failed to render App");
 
-    clickButton(tree, "onboarding.createNewAgent");
-    await rerender(tree);
+    clickButton(tree, "onboarding.chooseAgent");
+    await rerender(tree, state);
     clickButton(tree, "advanced-configuration");
-    await rerender(tree);
+    await rerender(tree, state);
 
     expect(textOf(tree.root)).toContain("Flamina guidance");
   });
@@ -691,7 +973,7 @@ describe("app startup onboarding flow (e2e)", () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(App));
+      tree = TestRenderer.create(renderApp(state));
     });
     if (!tree) throw new Error("failed to render App");
 

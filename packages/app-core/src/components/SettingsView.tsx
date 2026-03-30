@@ -2,106 +2,188 @@
  * Settings view — two-panel layout with section navigator and active section.
  */
 
+import type { StewardStatusResponse } from "@miladyai/shared/contracts/wallet";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   Input,
+  Label,
   SectionCard,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Spinner,
 } from "@miladyai/ui";
 import {
   AlertTriangle,
-  Bot,
-  Cloud,
+  ChevronDown,
+  Copy,
   Download,
-  Image,
-  Loader2,
-  Mic,
-  RefreshCw,
-  Search,
   Shield,
-  Sliders,
-  Terminal,
   Upload,
-  Wallet,
-  X,
 } from "lucide-react";
-import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { client } from "../api";
 import { useApp } from "../state";
-import type { FlaminaGuideTopic } from "../state/types";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
 import { ConfigPageView } from "./ConfigPageView";
+import {
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { CloudDashboard } from "./ElizaCloudDashboard";
-import { DeferredSetupChecklist, FlaminaGuideCard } from "./FlaminaGuide";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
+import { PolicyControlsView } from "./PolicyControlsView";
 import { ProviderSwitcher } from "./ProviderSwitcher";
-import { VoiceConfigView } from "./VoiceConfigView";
+import { ReleaseCenterView } from "./ReleaseCenterView";
+import { SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME } from "./settings-control-primitives";
+import {
+  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 interface SettingsSectionDef {
   id: string;
   label: string;
-  icon: React.ElementType;
   description?: string;
+  keywords?: string[];
 }
+
+const SETTINGS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
+const SETTINGS_SIDEBAR_RAIL_CLASS = `hidden lg:flex ${APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}`;
+const SETTINGS_CONTENT_CLASS =
+  "settings-page-content flex-1 min-w-0 overflow-y-auto scroll-smooth bg-bg/10 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-7 lg:pb-10 lg:pt-6";
+const SETTINGS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[82rem]";
+const SETTINGS_SECTION_STACK_CLASS = "space-y-6 pb-14 sm:space-y-8 sm:pb-16";
+const SETTINGS_SECTION_CARD_CLASS = `overflow-visible ${DESKTOP_SURFACE_PANEL_CLASSNAME}`;
 
 const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
-    id: "ai-model",
-    label: "settings.sections.aimodel.label",
-    icon: Bot,
-    description: "settings.sections.aimodel.desc",
+    id: "cloud",
+    label: "providerswitcher.elizaCloud",
+    description: "settings.sections.cloud.desc",
+    keywords: ["cloud", "billing", "credits", "auth", "subscription"],
   },
   {
-    id: "cloud",
-    label: "elizaclouddashboard.ElizaCloud",
-    icon: Cloud,
-    description: "settings.sections.cloud.desc",
+    id: "ai-model",
+    label: "settings.sections.aimodel.label",
+    description: "settings.sections.aimodel.desc",
+    keywords: [
+      "model",
+      "provider",
+      "openai",
+      "anthropic",
+      "grok",
+      "gemini",
+      "api key",
+      "inference",
+      "llm",
+    ],
   },
   {
     id: "coding-agents",
     label: "settings.sections.codingagents.label",
-    icon: Terminal,
     description: "settings.sections.codingagents.desc",
+    keywords: ["codex", "agent", "reasoning", "parallel", "approval"],
   },
   {
     id: "wallet-rpc",
     label: "settings.sections.walletrpc.label",
-    icon: Wallet,
     description: "settings.sections.walletrpc.desc",
+    keywords: [
+      "wallet",
+      "rpc",
+      "chain",
+      "solana",
+      "ethereum",
+      "base",
+      "private key",
+      "address",
+      "network",
+    ],
+  },
+  {
+    id: "wallet-policies",
+    label: "settings.sections.walletpolicies.label",
+    description: "settings.sections.walletpolicies.desc",
+    keywords: [
+      "policy",
+      "policies",
+      "spending",
+      "limit",
+      "approved",
+      "addresses",
+      "rate limit",
+      "time window",
+      "auto approve",
+      "steward",
+      "safety",
+      "guardrails",
+    ],
   },
   {
     id: "media",
     label: "settings.sections.media.label",
-    icon: Image,
     description: "settings.sections.media.desc",
-  },
-  {
-    id: "voice",
-    label: "settings.sections.voice.label",
-    icon: Mic,
-    description: "settings.sections.voice.desc",
+    keywords: [
+      "audio",
+      "voice",
+      "video",
+      "camera",
+      "microphone",
+      "speech",
+      "tts",
+      "avatar",
+    ],
   },
   {
     id: "permissions",
     label: "settings.sections.permissions.label",
-    icon: Shield,
     description: "settings.sections.permissions.desc",
+    keywords: [
+      "permissions",
+      "desktop",
+      "filesystem",
+      "security",
+      "microphone permission",
+      "camera permission",
+      "file access",
+    ],
   },
   {
     id: "updates",
     label: "settings.sections.updates.label",
-    icon: RefreshCw,
     description: "settings.sections.updates.desc",
+    keywords: ["updates", "release", "version", "download"],
   },
   {
     id: "advanced",
     label: "nav.advanced",
-    icon: Sliders,
     description: "settings.sections.advanced.desc",
+    keywords: [
+      "advanced",
+      "export",
+      "import",
+      "reset",
+      "debug",
+      "backup",
+      "restore",
+      "danger zone",
+    ],
   },
 ];
 
@@ -116,7 +198,72 @@ function matchesSettingsSection(
     t(section.label).toLowerCase().includes(normalized) ||
     (section.description
       ? t(section.description).toLowerCase().includes(normalized)
-      : false)
+      : false) ||
+    (section.keywords ?? []).some((keyword) =>
+      keyword.toLowerCase().includes(normalized),
+    )
+  );
+}
+
+function SettingsMobileToolbar({
+  sections,
+  activeSection,
+  onSectionChange,
+  searchQuery,
+  onSearchChange,
+}: {
+  sections: SettingsSectionDef[];
+  activeSection: string;
+  onSectionChange: (id: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+}) {
+  const { t } = useApp();
+  const active = sections.find((section) => section.id === activeSection);
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
+
+  return (
+    <div
+      className="sticky z-20 mb-4 space-y-3 rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/88 p-3 shadow-lg backdrop-blur-xl lg:hidden"
+      style={{ top: "calc(var(--safe-area-top, 0px) + 0.5rem)" }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+            {t("nav.settings")}
+          </div>
+          <div className="truncate text-sm font-medium text-txt">
+            {active ? t(active.label) : t("nav.settings")}
+          </div>
+        </div>
+        <div className="min-w-[10rem] flex-1 max-w-[14rem]">
+          <Select value={activeSection} onValueChange={onSectionChange}>
+            <SelectTrigger
+              className={SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sections.map((section) => (
+                <SelectItem key={section.id} value={section.id}>
+                  {t(section.label)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <Input
+        type="search"
+        value={searchQuery}
+        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder={searchLabel}
+        aria-label={searchLabel}
+        className={`h-11 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+      />
+    </div>
   );
 }
 
@@ -126,51 +273,70 @@ function SettingsSidebar({
   sections,
   activeSection,
   onSectionChange,
+  searchQuery,
+  onSearchChange,
+  onClose: _onClose,
 }: {
   sections: SettingsSectionDef[];
   activeSection: string;
   onSectionChange: (id: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  onClose: () => void;
 }) {
   const { t } = useApp();
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
 
   return (
-    <aside className="hidden w-80 shrink-0 self-start border-r border-border/50 bg-bg/35 backdrop-blur-xl xl:sticky xl:top-0 xl:flex">
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted/80">
-          {t("settingsview.JumpToSection")}
-        </div>
+    <aside
+      className="hidden lg:flex lg:min-h-0 lg:flex-col"
+      data-testid="settings-sidebar"
+    >
+      <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={searchLabel}
+          aria-label={searchLabel}
+          className={`w-full ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+        />
 
-        <nav className="flex flex-col gap-2 pr-1">
+        <nav
+          className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+          aria-label={t("nav.settings")}
+        >
           {sections.map((section) => {
-            const Icon = section.icon;
             const isActive = activeSection === section.id;
             return (
-              <button
+              <Button
                 key={section.id}
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={() => onSectionChange(section.id)}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
+                className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} ${
                   isActive
-                    ? "border-accent/40 bg-accent/12 text-txt shadow-[0_10px_30px_rgba(var(--accent),0.08)]"
-                    : "border-transparent text-muted hover:border-border/60 hover:bg-card/55 hover:text-txt"
+                    ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                    : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
                 }`}
               >
-                <span
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border p-2 ${
-                    isActive
-                      ? "border-accent/30 bg-accent/18 text-txt-strong"
-                      : "border-border/50 bg-bg-accent/80 text-muted"
-                  }`}
-                >
-                  <Icon className="w-4 h-4 shrink-0" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold leading-snug text-current">
+                <div className="min-w-0 flex-1 text-left">
+                  <div
+                    className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}
+                  >
                     {t(section.label)}
                   </div>
+                  {section.description ? (
+                    <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+                      {t(section.description)}
+                    </div>
+                  ) : null}
                 </div>
-              </button>
+              </Button>
             );
           })}
         </nav>
@@ -182,65 +348,12 @@ function SettingsSidebar({
 /* ── Updates Section ─────────────────────────────────────────────────── */
 
 function UpdatesSection() {
-  const { t } = useApp();
-  const { updateStatus, updateLoading, loadUpdateStatus } = useApp();
-
-  useEffect(() => {
-    void loadUpdateStatus();
-  }, [loadUpdateStatus]);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between p-5 bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl shadow-sm">
-        <div>
-          <div className="font-medium text-sm">
-            {t("settings.versionPrefix")}
-          </div>
-          <div className="text-2xl font-bold text-txt-strong mt-1">
-            {updateStatus?.currentVersion || `${t("common.loading")}...`}
-          </div>
-        </div>
-        <Button
-          variant="default"
-          size="sm"
-          className="rounded-xl shadow-sm whitespace-normal text-left"
-          onClick={() => void loadUpdateStatus(true)}
-          disabled={updateLoading}
-        >
-          {updateLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {updateLoading ? t("settings.checking") : t("settings.checkNow")}
-        </Button>
-      </div>
-
-      {updateStatus?.updateAvailable && (
-        <div className="p-4 bg-ok/10 border border-ok/30 rounded-2xl">
-          <div className="font-bold text-ok mb-1">
-            {t("settings.updateAvailable")}
-          </div>
-          <p className="text-sm text-txt-strong">
-            {updateStatus.currentVersion} {t("ui-renderer.Rarr")}{" "}
-            {updateStatus.latestVersion}
-          </p>
-        </div>
-      )}
-
-      {updateStatus?.lastCheckAt && (
-        <div className="text-[11px] text-muted">
-          {t("settings.lastChecked")}{" "}
-          {new Date(updateStatus.lastCheckAt).toLocaleString()}
-        </div>
-      )}
-    </div>
-  );
+  return <ReleaseCenterView />;
 }
 
 /* ── Advanced Section ─────────────────────────────────────────────────── */
 
-function AdvancedSection({
-  onJumpToSection,
-}: {
-  onJumpToSection: (sectionId: string) => void;
-}) {
+function AdvancedSection() {
   const { t } = useApp();
   const {
     handleReset,
@@ -260,21 +373,7 @@ function AdvancedSection({
   } = useApp();
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [guideTopic, setGuideTopic] = useState<FlaminaGuideTopic>("provider");
   const importFileInputRef = useRef<HTMLInputElement>(null);
-  const jumpToTask = useCallback(
-    (task: FlaminaGuideTopic) => {
-      setGuideTopic(task);
-      const targetSection: Record<FlaminaGuideTopic, string> = {
-        provider: "ai-model",
-        rpc: "wallet-rpc",
-        permissions: "permissions",
-        voice: "voice",
-      };
-      onJumpToSection(targetSection[task]);
-    },
-    [onJumpToSection],
-  );
 
   const resetExportState = useCallback(() => {
     setState("exportPassword", "");
@@ -316,52 +415,12 @@ function AdvancedSection({
   return (
     <>
       <div className="space-y-6">
-        <div className="space-y-4 rounded-2xl border border-border/50 bg-card/40 p-4 backdrop-blur-sm">
-          <div>
-            <div className="text-sm font-semibold text-txt-strong">
-              Flamina walkthrough
-            </div>
-            <p className="mt-1 text-xs text-muted">
-              Advanced configuration stays explainable and deferrable. Open a
-              topic to see what it changes about the character before you touch
-              the setting.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                ["provider", "Provider"],
-                ["rpc", "RPC"],
-                ["permissions", "Permissions"],
-                ["voice", "Voice"],
-              ] as Array<[FlaminaGuideTopic, string]>
-            ).map(([topic, label]) => (
-              <button
-                key={topic}
-                type="button"
-                className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors ${
-                  guideTopic === topic
-                    ? "border-accent/40 bg-accent/10 text-txt"
-                    : "border-border/60 bg-bg/50 text-muted hover:text-txt"
-                }`}
-                onClick={() => setGuideTopic(topic)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <FlaminaGuideCard topic={guideTopic} />
-          <DeferredSetupChecklist onOpenTask={jumpToTask} />
-        </div>
-
-        {/* Export/Import */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
+          <Button
+            variant="outline"
             type="button"
             onClick={openExportModal}
-            className="settings-card-button flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)]"
+            className="min-h-[5.5rem] h-auto rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/60 p-5 text-left backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent-rgb),0.1)]"
             aria-haspopup="dialog"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-bg-accent p-3 shadow-sm transition-all group-hover:border-accent group-hover:bg-accent">
@@ -375,12 +434,13 @@ function AdvancedSection({
                 {t("settings.exportAgentShort")}
               </div>
             </div>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="outline"
             type="button"
             onClick={openImportModal}
-            className="settings-card-button flex items-center gap-4 border border-border/50 bg-card/60 text-left backdrop-blur-md transition-all group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent),0.1)]"
+            className="min-h-[5.5rem] h-auto rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/60 p-5 text-left backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] group hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_20px_rgba(var(--accent-rgb),0.1)]"
             aria-haspopup="dialog"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-bg-accent p-3 shadow-sm transition-all group-hover:border-accent group-hover:bg-accent">
@@ -394,10 +454,8 @@ function AdvancedSection({
                 {t("settings.importAgentShort")}
               </div>
             </div>
-          </button>
+          </Button>
         </div>
-
-        {/* Danger Zone */}
         <div className="border border-danger/30 rounded-2xl overflow-hidden bg-bg/40 backdrop-blur-sm">
           <div className="bg-danger/10 px-5 py-3 border-b border-danger/20 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-danger" />
@@ -418,7 +476,7 @@ function AdvancedSection({
               <Button
                 variant="destructive"
                 size="sm"
-                className="rounded-xl shadow-sm whitespace-normal text-left"
+                className="rounded-xl shadow-sm whitespace-nowrap"
                 onClick={() => {
                   void handleReset();
                 }}
@@ -442,12 +500,12 @@ function AdvancedSection({
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label
+              <Label
                 htmlFor="settings-export-password"
-                className="text-sm font-medium text-txt-strong"
+                className="text-txt-strong"
               >
                 {t("settingsview.Password")}
-              </label>
+              </Label>
               <Input
                 id="settings-export-password"
                 type="password"
@@ -456,26 +514,33 @@ function AdvancedSection({
                 placeholder={t("settingsview.EnterExportPasswor")}
                 className="rounded-lg bg-bg"
               />
-              <label className="flex items-center gap-2 text-sm text-muted">
-                <input
-                  type="checkbox"
+              <Label className="flex items-center gap-2 font-normal text-muted">
+                <Checkbox
                   checked={exportIncludeLogs}
-                  onChange={(e) =>
-                    setState("exportIncludeLogs", e.target.checked)
+                  onCheckedChange={(checked) =>
+                    setState("exportIncludeLogs", !!checked)
                   }
                 />
 
                 {t("settingsview.IncludeRecentLogs")}
-              </label>
+              </Label>
             </div>
 
             {exportError && (
-              <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+              <div
+                className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+                role="alert"
+                aria-live="assertive"
+              >
                 {exportError}
               </div>
             )}
             {exportSuccess && (
-              <div className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok">
+              <div
+                className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok"
+                role="status"
+                aria-live="polite"
+              >
                 {exportSuccess}
               </div>
             )}
@@ -484,20 +549,20 @@ function AdvancedSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 onClick={closeExportModal}
               >
-                {t("onboarding.cancel")}
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="default"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 disabled={exportBusy}
                 onClick={() => void handleAgentExport()}
               >
-                {exportBusy && <Loader2 className="w-4 h-4 animate-spin" />}
-                {t("settings.export")}
+                {exportBusy && <Spinner size={16} />}
+                {t("common.export")}
               </Button>
             </div>
           </div>
@@ -529,9 +594,9 @@ function AdvancedSection({
               <div className="text-sm font-medium text-txt-strong">
                 {t("settingsview.BackupFile")}
               </div>
-              <button
-                type="button"
-                className="settings-button flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-bg text-left transition-colors hover:bg-bg-hover"
+              <Button
+                variant="outline"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)] flex w-full items-center justify-between gap-3 text-left"
                 onClick={() => importFileInputRef.current?.click()}
               >
                 <span className="min-w-0 flex-1 truncate text-sm text-txt">
@@ -542,16 +607,16 @@ function AdvancedSection({
                     ? t("settings.change", { defaultValue: "Change" })
                     : t("settings.browse", { defaultValue: "Browse" })}
                 </span>
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-2">
-              <label
+              <Label
                 htmlFor="settings-import-password"
-                className="text-sm font-medium text-txt-strong"
+                className="text-txt-strong"
               >
                 {t("settingsview.Password")}
-              </label>
+              </Label>
               <Input
                 id="settings-import-password"
                 type="password"
@@ -563,12 +628,20 @@ function AdvancedSection({
             </div>
 
             {importError && (
-              <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+              <div
+                className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+                role="alert"
+                aria-live="assertive"
+              >
                 {importError}
               </div>
             )}
             {importSuccess && (
-              <div className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok">
+              <div
+                className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok"
+                role="status"
+                aria-live="polite"
+              >
                 {importSuccess}
               </div>
             )}
@@ -577,19 +650,19 @@ function AdvancedSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 onClick={closeImportModal}
               >
-                {t("onboarding.cancel")}
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="default"
                 size="sm"
-                className="settings-button rounded-lg"
+                className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
                 disabled={importBusy}
                 onClick={() => void handleAgentImport()}
               >
-                {importBusy && <Loader2 className="w-4 h-4 animate-spin" />}
+                {importBusy && <Spinner size={16} />}
                 {t("settings.import")}
               </Button>
             </div>
@@ -597,6 +670,169 @@ function AdvancedSection({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+/* ── Steward Wallet Section ───────────────────────────────────────────── */
+
+function CopyableAddress({
+  label,
+  address,
+}: {
+  label: string;
+  address: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(address).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [address]);
+
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-bg/50 px-3 py-2.5">
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] font-medium text-muted">{label}</div>
+        <div className="mt-0.5 truncate font-mono text-xs text-txt">
+          {address}
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0 text-muted hover:text-txt"
+        onClick={handleCopy}
+        aria-label={`Copy ${label} address`}
+      >
+        {copied ? (
+          <span className="text-ok text-xs">✓</span>
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </Button>
+    </div>
+  );
+}
+
+function StewardWalletInfo({
+  stewardStatus,
+  onScrollToPolicies,
+}: {
+  stewardStatus: StewardStatusResponse;
+  onScrollToPolicies: () => void;
+}) {
+  const { t } = useApp();
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const evmAddress =
+    stewardStatus.walletAddresses?.evm ?? stewardStatus.evmAddress ?? null;
+  const solanaAddress = stewardStatus.walletAddresses?.solana ?? null;
+
+  return (
+    <div className="space-y-4">
+      {/* Steward status banner */}
+      <div className="flex items-center gap-3 rounded-lg border border-accent/20 bg-accent/5 p-3">
+        <Shield className="h-5 w-5 shrink-0 text-accent" />
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-semibold text-txt">
+            {t("settings.stewardWalletManaged", {
+              defaultValue: "Wallet managed by Steward",
+            })}
+          </div>
+          <div className="mt-0.5 text-[11px] text-muted">
+            {stewardStatus.vaultHealth === "ok"
+              ? t("settings.stewardVaultHealthy", {
+                  defaultValue: "Vault connected and healthy",
+                })
+              : stewardStatus.vaultHealth === "degraded"
+                ? t("settings.stewardVaultDegraded", {
+                    defaultValue: "Vault connected — degraded",
+                  })
+                : t("settings.stewardVaultError", {
+                    defaultValue: "Vault connected — error state",
+                  })}
+          </div>
+        </div>
+        <span
+          className={`h-2 w-2 shrink-0 rounded-full ${
+            stewardStatus.vaultHealth === "ok"
+              ? "bg-ok"
+              : stewardStatus.vaultHealth === "degraded"
+                ? "bg-warn"
+                : "bg-danger"
+          }`}
+        />
+      </div>
+
+      {/* Wallet addresses */}
+      <div className="space-y-2">
+        {evmAddress && (
+          <CopyableAddress label="EVM Address" address={evmAddress} />
+        )}
+        {solanaAddress && (
+          <CopyableAddress label="Solana Address" address={solanaAddress} />
+        )}
+        {!evmAddress && !solanaAddress && (
+          <div className="rounded-lg border border-border/50 bg-bg/50 px-3 py-2.5 text-xs text-muted">
+            {t("settings.stewardNoAddresses", {
+              defaultValue: "No vault addresses yet",
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Link to Wallet Policies */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-center gap-2 text-xs"
+        onClick={onScrollToPolicies}
+      >
+        <Shield className="h-3.5 w-3.5" />
+        {t("settings.viewWalletPolicies", {
+          defaultValue: "View Wallet Policies",
+        })}
+      </Button>
+
+      {/* RPC configuration — always visible */}
+      <div className="border-t border-border/50 pt-4">
+        <div className="text-xs font-semibold text-txt mb-2">
+          {t("settings.rpcConfiguration", {
+            defaultValue: "RPC Configuration",
+          })}
+        </div>
+        <ConfigPageView embedded />
+      </div>
+
+      {/* Advanced: show local key import */}
+      <div className="border-t border-border/50 pt-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-between text-xs text-muted hover:text-txt"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+        >
+          {t("settings.showAdvancedKeyManagement", {
+            defaultValue: "Advanced key management",
+          })}
+          <ChevronDown
+            className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
+          />
+        </Button>
+        {showAdvanced && (
+          <div className="mt-3 rounded-lg border border-warn/20 bg-warn/5 p-3">
+            <div className="mb-2 flex items-center gap-2 text-[11px] text-warn">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {t("settings.advancedKeyWarning", {
+                defaultValue: "Not needed with Steward. Use with caution.",
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -612,19 +848,52 @@ export function SettingsView({
   initialSection?: string;
 } = {}) {
   const { t, loadPlugins, setTab } = useApp();
-  const [activeSection, setActiveSection] = useState(
-    initialSection ?? "ai-model",
-  );
+  const [activeSection, setActiveSection] = useState(initialSection ?? "cloud");
   const [searchQuery, setSearchQuery] = useState("");
   const shellRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLElement | null>(null);
+
+  /* ── Steward status ─────────────────────────────────────────────────── */
+  const [stewardStatus, setStewardStatus] =
+    useState<StewardStatusResponse | null>(null);
+  const stewardConnected = stewardStatus?.connected === true;
+
+  useEffect(() => {
+    let cancelled = false;
+    client
+      .getStewardStatus()
+      .then((status) => {
+        if (!cancelled) setStewardStatus(status);
+      })
+      .catch(() => {
+        /* steward not available — leave null */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* Dynamic section definitions based on steward status */
+  const effectiveSections = useMemo(() => {
+    if (!stewardConnected) return SETTINGS_SECTIONS;
+    return SETTINGS_SECTIONS.map((section) =>
+      section.id === "wallet-rpc"
+        ? {
+            ...section,
+            label: "settings.sections.wallet.label" as const,
+            description: "settings.sections.wallet.stewardDesc" as const,
+          }
+        : section,
+    );
+  }, [stewardConnected]);
 
   const visibleSections = useMemo(
     () =>
-      SETTINGS_SECTIONS.filter((section) =>
+      effectiveSections.filter((section) =>
         matchesSettingsSection(section, searchQuery, t),
       ),
-    [searchQuery, t],
+    [effectiveSections, searchQuery, t],
   );
   const visibleSectionIds = useMemo(
     () => new Set(visibleSections.map((section) => section.id)),
@@ -636,7 +905,12 @@ export function SettingsView({
   }, [loadPlugins]);
 
   useEffect(() => {
+    const content = contentRef.current;
     const shell = shellRef.current;
+    if (content) {
+      scrollContainerRef.current = content;
+      return;
+    }
     if (!shell) return;
 
     scrollContainerRef.current = inModal
@@ -658,6 +932,10 @@ export function SettingsView({
       }
     }
   }, []);
+
+  const scrollToPolicies = useCallback(() => {
+    handleSectionChange("wallet-policies");
+  }, [handleSectionChange]);
 
   useEffect(() => {
     if (visibleSections.length === 0) return;
@@ -720,12 +998,21 @@ export function SettingsView({
 
   const sectionsContent = (
     <>
+      {visibleSectionIds.has("cloud") && (
+        <section
+          id="cloud"
+          className={`${SETTINGS_SECTION_CARD_CLASS} relative`}
+        >
+          <CloudDashboard />
+        </section>
+      )}
+
       {visibleSectionIds.has("ai-model") && (
         <SectionCard
           id="ai-model"
-          title={t("settings.aiModel")}
-          description={t("settings.aiModelDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          title={t("settings.sections.aimodel.label")}
+          description={t("settings.sections.aimodel.desc")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <ProviderSwitcher />
         </SectionCard>
@@ -734,62 +1021,76 @@ export function SettingsView({
       {visibleSectionIds.has("coding-agents") && (
         <SectionCard
           id="coding-agents"
-          title={t("settings.codingAgents")}
+          title={t("settings.sections.codingagents.label")}
           description={t("settings.codingAgentsDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <CodingAgentSettingsSection />
         </SectionCard>
       )}
 
-      {visibleSectionIds.has("cloud") && (
-        <section
-          id="cloud"
-          className="bg-bg rounded-2xl border border-border/50 overflow-hidden relative"
-        >
-          <CloudDashboard />
-        </section>
-      )}
-
       {visibleSectionIds.has("wallet-rpc") && (
         <SectionCard
           id="wallet-rpc"
-          title={t("settings.walletRpc")}
-          description={t("settings.walletRpcDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          title={
+            stewardConnected
+              ? t("settings.sections.wallet.label", {
+                  defaultValue: "Wallet",
+                })
+              : t("settings.sections.walletrpc.label")
+          }
+          description={
+            stewardConnected
+              ? t("settings.sections.wallet.stewardDesc", {
+                  defaultValue: "Managed by Steward vault",
+                })
+              : t("settings.walletRpcDescription")
+          }
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
-          <ConfigPageView embedded />
+          {stewardConnected && stewardStatus ? (
+            <StewardWalletInfo
+              stewardStatus={stewardStatus}
+              onScrollToPolicies={scrollToPolicies}
+            />
+          ) : (
+            <ConfigPageView embedded />
+          )}
+        </SectionCard>
+      )}
+
+      {visibleSectionIds.has("wallet-policies") && (
+        <SectionCard
+          id="wallet-policies"
+          title={t("settings.sections.walletpolicies.label", {
+            defaultValue: "Wallet Policies",
+          })}
+          description={t("settings.sections.walletpolicies.desc", {
+            defaultValue: "Spending limits and transaction rules",
+          })}
+          className={SETTINGS_SECTION_CARD_CLASS}
+        >
+          <PolicyControlsView />
         </SectionCard>
       )}
 
       {visibleSectionIds.has("media") && (
         <SectionCard
           id="media"
-          title={t("settings.mediaGeneration")}
-          description={t("settings.mediaDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          title={t("settings.sections.media.label")}
+          description={t("settings.sections.media.desc")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <MediaSettingsSection />
-        </SectionCard>
-      )}
-
-      {visibleSectionIds.has("voice") && (
-        <SectionCard
-          id="voice"
-          title={t("settings.speechInterface")}
-          description={t("settings.speechDescription")}
-          className="p-4 sm:p-5 lg:p-6"
-        >
-          <VoiceConfigView />
         </SectionCard>
       )}
 
       {visibleSectionIds.has("permissions") && (
         <SectionCard
           id="permissions"
-          title={t("settings.permissionsCapabilities")}
-          description={t("settings.permissionsDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          title={t("settings.sections.permissions.label")}
+          description={t("settings.sections.permissions.desc")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <PermissionsSection />
         </SectionCard>
@@ -798,9 +1099,9 @@ export function SettingsView({
       {visibleSectionIds.has("updates") && (
         <SectionCard
           id="updates"
-          title={t("settings.softwareUpdates")}
-          description={t("settings.updatesDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          title={t("settings.sections.updates.label")}
+          description={t("settings.sections.updates.desc")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <UpdatesSection />
         </SectionCard>
@@ -809,11 +1110,11 @@ export function SettingsView({
       {visibleSectionIds.has("advanced") && (
         <SectionCard
           id="advanced"
-          title={t("settings.advancedSettings")}
-          description={t("settings.advancedDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          title={t("nav.advanced")}
+          description={t("settings.sections.advanced.desc")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
-          <AdvancedSection onJumpToSection={handleSectionChange} />
+          <AdvancedSection />
         </SectionCard>
       )}
 
@@ -822,64 +1123,53 @@ export function SettingsView({
           id="settings-empty"
           title={t("settingsview.NoMatchingSettings")}
           description={t("settings.noMatchingSettingsDescription")}
-          className="p-4 sm:p-5 lg:p-6"
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
-          <button
-            type="button"
-            className="settings-button inline-flex items-center rounded-lg border border-border text-sm font-medium text-txt transition-colors hover:bg-bg-hover"
+          <Button
+            variant="outline"
+            className="min-h-[2.625rem] px-4 rounded-[calc(var(--radius-lg)+2px)]"
             onClick={() => setSearchQuery("")}
           >
             {t("settingsview.ClearSearch")}
-          </button>
+          </Button>
         </SectionCard>
       )}
     </>
   );
 
   return (
-    <div
-      ref={shellRef}
-      className={`settings-shell flex min-h-full min-w-0 w-full flex-row items-start ${inModal ? "h-full min-h-0 overflow-y-auto bg-transparent" : "bg-bg"}`}
-    >
-      <SettingsSidebar
-        sections={visibleSections}
-        activeSection={activeSection}
-        onSectionChange={handleSectionChange}
-      />
-
+    <DesktopPageFrame>
       <div
-        className={`settings-page-content flex-1 min-w-0 scroll-smooth ${inModal ? "px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6" : "px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8"}`}
+        ref={shellRef}
+        className={SETTINGS_SHELL_CLASS}
+        data-testid="settings-shell"
       >
-        <div className="mx-auto max-w-5xl">
-          <div className="sticky top-0 z-20 mb-5 rounded-[1.35rem] border border-border/50 bg-bg/80 px-3 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.2)] backdrop-blur-xl">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-xl border border-border/60 bg-card/70 px-3 focus-within:ring-2 focus-within:ring-accent/40 focus-within:border-accent/50">
-                <Search className="h-4 w-4 shrink-0 text-muted" aria-hidden />
-                <Input
-                  type="text"
-                  placeholder={t("settings.searchPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-9 min-w-0 flex-1 border-0 bg-transparent py-0 pr-0 pl-0 text-sm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
-              </div>
-              <button
-                type="button"
-                className="settings-icon-button inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted transition-all hover:border-accent hover:text-txt hover:shadow-sm"
-                onClick={handleClose}
-                aria-label="Close settings"
-                title={t("settingsview.CloseSettings")}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        <div className={SETTINGS_SIDEBAR_RAIL_CLASS}>
+          <SettingsSidebar
+            sections={visibleSections}
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClose={handleClose}
+          />
+        </div>
 
-          <div className="space-y-6 pb-20 pt-1 sm:space-y-8 sm:pt-2">
-            {sectionsContent}
+        <div ref={contentRef} className={SETTINGS_CONTENT_CLASS}>
+          <div className={SETTINGS_CONTENT_WIDTH_CLASS}>
+            <SettingsMobileToolbar
+              sections={visibleSections}
+              activeSection={activeSection}
+              onSectionChange={handleSectionChange}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+            <div className={SETTINGS_SECTION_STACK_CLASS}>
+              {sectionsContent}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </DesktopPageFrame>
   );
 }

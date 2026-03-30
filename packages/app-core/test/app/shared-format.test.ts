@@ -21,7 +21,8 @@ describe("shared format helpers", () => {
     expect(formatDurationMs(90_000)).toBe("2m");
     expect(formatDurationMs(3_600_000)).toBe("1h");
     expect(formatDurationMs(90_000_000)).toBe("1.0d");
-    expect(formatDurationMs(0, { fallback: "n/a" })).toBe("n/a");
+    expect(formatDurationMs(0, { fallback: "n/a" })).toBe("0s");
+    expect(formatDurationMs(null, { fallback: "n/a" })).toBe("n/a");
   });
 
   it("formats date and short-date values", () => {

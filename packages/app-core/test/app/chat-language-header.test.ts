@@ -7,7 +7,7 @@ function buildSseDoneResponse(): Response {
     start(controller) {
       controller.enqueue(
         encoder.encode(
-          'data: {"type":"done","fullText":"ok","agentName":"Milady"}\n\n',
+          'data: {"type":"done","fullText":"ok","agentName":"Eliza"}\n\n',
         ),
       );
       controller.close();
@@ -34,7 +34,7 @@ describe("MiladyClient language header propagation", () => {
 
   it("adds X-Milady-UI-Language to normal chat requests", async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ text: "ok", agentName: "Milady" }), {
+      new Response(JSON.stringify({ text: "ok", agentName: "Eliza" }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }),

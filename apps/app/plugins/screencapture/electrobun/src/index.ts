@@ -5,7 +5,7 @@
  * fast-path through the shared desktop bridge when available.
  */
 
-import { invokeDesktopBridgeRequest } from "@miladyai/app-core/bridge/electrobun-rpc";
+import { invokeDesktopBridgeRequest } from "@miladyai/app-core/bridge/electrobun-rpc.js";
 import type {
   ScreenCapturePlugin,
   ScreenshotOptions,

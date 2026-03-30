@@ -4,7 +4,7 @@
  * Tests cover:
  * 1. API endpoint /api/agent/reset
  * 2. UI reset button in SettingsView triggers handleReset
- * 3. Post-reset state: onboarding resets to welcome, data cleared
+ * 3. Post-reset state: onboarding resets to cloud_login, data cleared
  */
 
 import http from "node:http";
@@ -20,6 +20,15 @@ import {
   it,
   vi,
 } from "vitest";
+import { req } from "../../../../test/helpers/http";
+
+import { createInlineUiMock } from "./mockInlineUi";
+
+vi.mock("@miladyai/ui", async () => {
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return createInlineUiMock(actual);
+});
 
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
@@ -35,46 +44,6 @@ vi.mock("@miladyai/app-core/components", async () => {
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for /api/agent/reset
 // ---------------------------------------------------------------------------
-
-async function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (payload) r.write(payload);
-    r.end();
-  });
-}
 
 function createResetTestServer(): Promise<{
   port: number;
@@ -143,7 +112,7 @@ function createResetTestServer(): Promise<{
     },
     "GET /api/onboarding/options": (_r, res) =>
       json(res, {
-        names: ["Milady"],
+        names: ["Eliza"],
         styles: [{ catchphrase: "uwu~", hint: "chaotic good" }],
         providers: [{ id: "ollama", name: "Ollama" }],
         cloudProviders: [],
@@ -263,7 +232,7 @@ describe("Agent Reset API", () => {
 // ---------------------------------------------------------------------------
 
 type OnboardingStep =
-  | "welcome"
+  | "cloud_login"
   | "name"
   | "avatar"
   | "style"
@@ -302,7 +271,7 @@ vi.mock("@miladyai/app-core/state", async () => {
     ...actual,
     useApp: () => mockUseApp(),
     THEMES: [
-      { id: "milady", label: "Milady" },
+      { id: "eliza", label: "Eliza" },
       { id: "dark", label: "Dark" },
     ],
   };
@@ -317,38 +286,38 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
-vi.mock("@miladyai/app-core/components/ConfigPageView", () => ({
+vi.mock("../../src/components/ConfigPageView", () => ({
   ConfigPageView: () => React.createElement("div", null, "ConfigPageView"),
 }));
 
-vi.mock("@miladyai/app-core/components/CodingAgentSettingsSection", () => ({
+vi.mock("../../src/components/CodingAgentSettingsSection", () => ({
   CodingAgentSettingsSection: () =>
     React.createElement("div", null, "CodingAgentSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/MediaSettingsSection", () => ({
+vi.mock("../../src/components/MediaSettingsSection", () => ({
   MediaSettingsSection: () =>
     React.createElement("div", null, "MediaSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/ElizaCloudDashboard", () => ({
+vi.mock("../../src/components/ElizaCloudDashboard", () => ({
   CloudDashboard: () => React.createElement("div", null, "ElizaCloudDashboard"),
 }));
 
-vi.mock("@miladyai/app-core/components/PermissionsSection", () => ({
+vi.mock("../../src/components/PermissionsSection", () => ({
   PermissionsSection: () =>
     React.createElement("div", null, "PermissionsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/ProviderSwitcher", () => ({
+vi.mock("../../src/components/ProviderSwitcher", () => ({
   ProviderSwitcher: () => React.createElement("div", null, "ProviderSwitcher"),
 }));
 
-vi.mock("@miladyai/app-core/components/VoiceConfigView", () => ({
+vi.mock("../../src/components/VoiceConfigView", () => ({
   VoiceConfigView: () => React.createElement("div", null, "VoiceConfigView"),
 }));
 
-import { SettingsView } from "@miladyai/app-core/components/SettingsView";
+import { SettingsView } from "../../src/components/SettingsView";
 
 function createUIHarnessState(): AppHarnessState {
   return {
@@ -357,9 +326,9 @@ function createUIHarnessState(): AppHarnessState {
     onboardingComplete: true,
     tab: "settings",
     actionNotice: null,
-    onboardingStep: "welcome",
+    onboardingStep: "cloud_login",
     onboardingOptions: {
-      names: ["Milady"],
+      names: ["Eliza"],
       styles: [{ catchphrase: "uwu~" }],
       providers: [],
       cloudProviders: [],
@@ -372,7 +341,7 @@ function createUIHarnessState(): AppHarnessState {
     plugins: [{ name: "plugin-1" }],
     skills: [],
     logs: [],
-    currentTheme: "milady",
+    currentTheme: "eliza",
     elizaCloudEnabled: false,
     elizaCloudConnected: false,
     elizaCloudCredits: 0,
@@ -412,7 +381,7 @@ describe("Settings Reset UI", () => {
 
       handleResetCalled = true;
       state.onboardingComplete = false;
-      state.onboardingStep = "welcome";
+      state.onboardingStep = "cloud_login";
       state.onboardingName = "";
       state.onboardingStyle = "";
       state.conversations = [];
@@ -558,7 +527,7 @@ describe("Settings Reset UI", () => {
 
     // Verify post-reset state
     expect(state.onboardingComplete).toBe(false);
-    expect(state.onboardingStep).toBe("welcome");
+    expect(state.onboardingStep).toBe("cloud_login");
     expect(state.onboardingName).toBe("");
     expect(state.onboardingStyle).toBe("");
     expect(state.conversations.length).toBe(0);
@@ -625,7 +594,7 @@ describe("Reset to Onboarding Flow Integration", () => {
       if (!confirmed) return;
 
       state.onboardingComplete = false;
-      state.onboardingStep = "welcome";
+      state.onboardingStep = "cloud_login";
       state.onboardingName = "";
       state.onboardingStyle = "";
       state.conversations = [];
@@ -656,7 +625,7 @@ describe("Reset to Onboarding Flow Integration", () => {
     }));
   });
 
-  it("after reset, app should show onboarding wizard (welcome step)", async () => {
+  it("after reset, app should show onboarding wizard (cloud_login step)", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
@@ -682,7 +651,7 @@ describe("Reset to Onboarding Flow Integration", () => {
 
     // Verify state is ready for onboarding
     expect(state.onboardingComplete).toBe(false);
-    expect(state.onboardingStep).toBe("welcome");
+    expect(state.onboardingStep).toBe("cloud_login");
 
     // The App component would now render OnboardingWizard instead of main UI
     // This is verified by the onboardingComplete === false state

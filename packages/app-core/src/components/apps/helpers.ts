@@ -14,7 +14,9 @@ export const CATEGORY_LABELS: Record<string, string> = {
 
 export function shouldShowAppInAppsView(
   app: Pick<RegistryAppInfo, "name">,
-  isProd = import.meta.env.PROD,
+  isProd: boolean = typeof import.meta.env.PROD === "boolean"
+    ? import.meta.env.PROD
+    : Boolean(import.meta.env.PROD),
 ): boolean {
   if (!isProd) return true;
   return PROD_ALLOWED_APPS.has(app.name);
@@ -30,7 +32,6 @@ export function getAppEmoji(app: RegistryAppInfo): string {
   const name = (app.name ?? "").toLowerCase();
   if (name.includes("2004") || name.includes("runescape")) return "⚔️";
   if (name.includes("town")) return "🏘️";
-  if (name.includes("hyperscape")) return "🌐";
   if (name.includes("babylon")) return "🏛️";
   if (name.includes("clawbal")) return "🎯";
   if (name.includes("minecraft")) return "⛏️";

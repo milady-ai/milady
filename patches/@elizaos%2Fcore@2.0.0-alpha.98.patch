@@ -1,0 +1,61 @@
+diff --git a/Users/shawwalters/eliza-workspace/milady/node_modules/@elizaos/core/.bun-tag-86296154cb733b b/.bun-tag-86296154cb733b
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/browser/index.browser.js b/dist/browser/index.browser.js
+index c85ccebcd6e1c8a77ccc7edc61a63b804bda6ab6..94c919cc039a64bbca6bc13fe1a7406a1a048e34 100644
+--- a/dist/browser/index.browser.js
++++ b/dist/browser/index.browser.js
+@@ -3071,7 +3071,7 @@ Additional instructions: ${q}`;return K+=`
+ Summary:`,K}async function OZ$($,q,K){let P=await $.getMemories({tableName:"messages",roomId:q,count:200});if(!P?.length)return"No conversation history to compact.";let _=P.sort((O,Y)=>(O.createdAt??0)-(Y.createdAt??0)).map((O)=>{let Y=O.entityId===$.agentId?"Assistant":"User",j=O.content?.text??"";return`${Y}: ${j}`}).join(`
+ `);return $.useModel(M$.TEXT_LARGE,{prompt:PZ$(_,K)})}var HV={name:"COMPACT_SESSION",similes:["COMPACT","COMPRESS","SUMMARIZE_SESSION"],description:"Summarize conversation history and set a compaction point. Messages before the compaction point will not be included in future context. The summary is stored so key decisions and context are preserved.",validate:async($,q)=>{if(!q.roomId)return!1;if(!await $.getRoom(q.roomId))return!1;return((await $.getMemories({tableName:"messages",roomId:q.roomId,count:1}))?.length??0)>0},handler:async($,q,K,P,_,O)=>{let{roomId:Y}=q,W=(q.content?.text??"").replace(/^\/?compact\s*/i,"").trim()||void 0;try{let z=await OZ$($,Y,W),X=Date.now();await $.createMemory({id:vO.randomUUID(),entityId:$.agentId,roomId:Y,content:{text:`[Compaction Summary]
+ 
+-${z}`,source:"compaction"},createdAt:X,metadata:{type:T8.CUSTOM}},"messages");let Z=await $.getRoom(Y);if(Z){let G=Array.isArray(Z.metadata?.compactionHistory)?Z.metadata.compactionHistory:[],k={timestamp:X,triggeredBy:q.entityId},S=[...G,k].slice(-10);await $.updateRoom({...Z,metadata:{...Z.metadata,lastCompactionAt:X,compactionHistory:S}})}if(O$.info({src:"action:compact-session",roomId:Y,entityId:q.entityId,compactionAt:X},"Session compacted with summary"),_)await _({text:"Session compacted.",actions:["COMPACT_SESSION"],source:q.content.source});return{text:"Session compacted",success:!0,values:{compactedAt:X},data:{actionName:"COMPACT_SESSION",compactedAt:X}}}catch(z){let X=z instanceof Error?z.message:String(z);if(O$.error({src:"action:compact-session",roomId:Y,error:X},"Compaction failed"),_)await _({text:`Compaction failed: ${X}`,actions:["COMPACT_SESSION_FAILED"],source:q.content.source});return{text:`Compaction failed: ${X}`,success:!1,values:{error:X},data:{actionName:"COMPACT_SESSION"}}}},examples:[[{name:"{{name1}}",content:{text:"/compact"}},{name:"{{agentName}}",content:{text:"Session compacted.",actions:["COMPACT_SESSION"]}}],[{name:"{{name1}}",content:{text:"/compact Focus on decisions"}},{name:"{{agentName}}",content:{text:"Session compacted.",actions:["COMPACT_SESSION"]}}],[{name:"{{name1}}",content:{text:"Compress the conversation history"}},{name:"{{agentName}}",content:{text:"Session compacted.",actions:["COMPACT_SESSION"]}}]]};N6();var BY=F6("IGNORE"),zV={name:BY.name,similes:BY.similes?[...BY.similes]:[],validate:async($,q)=>{return!0},description:BY.description,handler:async($,q,K,P,_,O)=>{if(_&&O?.[0]?.content)await _(O[0].content);return{text:"Ignoring message",values:{success:!0,ignored:!0},data:{actionName:"IGNORE"},success:!0}},examples:BY.examples??[]};N6();var nY=F6("NONE"),ZV={name:nY.name,similes:nY.similes?[...nY.similes]:[],validate:async($,q)=>{return!0},description:nY.description,handler:async($,q)=>{return{text:"No additional action taken",values:{success:!0,actionType:"NONE"},data:{actionName:"NONE",description:"Response without additional action"},success:!0}},examples:nY.examples??[]};N6();c6();y6();G6();var UY=F6("REPLY"),wV={name:UY.name,similes:UY.similes?[...UY.similes]:[],description:UY.description,validate:async($)=>{return!0},handler:async($,q,K,P,_,O)=>{let j=P?.actionContext?.previousResults||[];if(j.length>0)O$.debug({src:"plugin:basic-capabilities:action:reply",agentId:$.agentId,count:j.length},"Found previous action results");let W=[];if(O)for(let I of O){let b=I.content?.providers;if(b&&b.length>0)W.push(...b)}K=await $.composeState(q,[...W??[],"RECENT_MESSAGES","ACTION_STATE"]);let z=d6({state:K,template:$.character.templates?.replyTemplate||Kn}),X=await $.useModel(M$.TEXT_LARGE,{prompt:z}),Z=l6(X),G=Z?.thought,k=Z?.text,S=typeof G==="string"?G:"",C=typeof k==="string"?k:"",E={thought:S,text:C,actions:["REPLY"]};if(_)await _(E);let R=Date.now();return{text:`Generated reply: ${E.text}`,values:{success:!0,responded:!0,lastReply:E.text,lastReplyTime:R,thoughtProcess:S},data:{actionName:"REPLY",responseThought:S,responseText:C,thought:S,messageGenerated:!0},success:!0}},examples:UY.examples??[]};N6();function oY($,q,K,P){if($.length===0)return[];if(K<=0)return[];let _=P?.fromEnd??!1,O=0,Y=0,j=$.map(q);if(_){for(let z=$.length-1;z>=0;z--){if(O+j[z]>K)break;O+=j[z],Y++}let W=Y>0?Y:0;return $.slice($.length-W)}for(;Y<$.length;Y++){if(O+j[Y]>K)break;O+=j[Y]}return $.slice(0,Y)}G6();var TV=u6("ACTION_STATE"),jZ$=2600,JZ$=2400,XV={name:TV.name,description:TV.description,position:TV.position??150,get:async($,q,K)=>{let P=K.data.actionResults??[],_=K.data.actionPlan,O=K.data.workingMemory,Y="";if(_&&_.totalSteps>1){let k=_.steps.filter((C)=>C.status==="completed").length,S=_.steps.filter((C)=>C.status==="failed").length;Y=B6("# Action Execution Plan",[`**Plan:** ${_.thought}`,`**Progress:** Step ${_.currentStep} of ${_.totalSteps}`,`**Status:** ${k} completed, ${S} failed`,"","## Steps:",..._.steps.map((C,E)=>{let R=C.status==="completed"?"✓":C.status==="failed"?"✗":E<_.currentStep-1?"○":E===_.currentStep-1?"→":"○",I=C.status==="pending"&&E===_.currentStep-1?"in progress":C.status,b=`${R} **Step ${E+1}:** ${C.action} (${I})`;if(C.error)b+=`
++${z}`,source:"compaction"},createdAt:X,metadata:{type:T8.CUSTOM}},"messages");let Z=await $.getRoom(Y);if(Z){let G=Array.isArray(Z.metadata?.compactionHistory)?Z.metadata.compactionHistory:[],k={timestamp:X,triggeredBy:q.entityId},S=[...G,k].slice(-10);await $.updateRoom({...Z,metadata:{...Z.metadata,lastCompactionAt:X,compactionHistory:S}})}if(O$.info({src:"action:compact-session",roomId:Y,entityId:q.entityId,compactionAt:X},"Session compacted with summary"),_)await _({text:"Session compacted.",actions:["COMPACT_SESSION"],source:q.content.source});return{text:"Session compacted",success:!0,values:{compactedAt:X},data:{actionName:"COMPACT_SESSION",compactedAt:X}}}catch(z){let X=z instanceof Error?z.message:String(z);if(O$.error({src:"action:compact-session",roomId:Y,error:X},"Compaction failed"),_)await _({text:`Compaction failed: ${X}`,actions:["COMPACT_SESSION_FAILED"],source:q.content.source});return{text:`Compaction failed: ${X}`,success:!1,values:{error:X},data:{actionName:"COMPACT_SESSION"}}}},examples:[[{name:"{{name1}}",content:{text:"/compact"}},{name:"{{agentName}}",content:{text:"Session compacted.",actions:["COMPACT_SESSION"]}}],[{name:"{{name1}}",content:{text:"/compact Focus on decisions"}},{name:"{{agentName}}",content:{text:"Session compacted.",actions:["COMPACT_SESSION"]}}],[{name:"{{name1}}",content:{text:"Compress the conversation history"}},{name:"{{agentName}}",content:{text:"Session compacted.",actions:["COMPACT_SESSION"]}}]]};N6();var BY=F6("IGNORE"),zV={name:BY.name,similes:BY.similes?[...BY.similes]:[],validate:async($,q)=>{return!0},description:BY.description,handler:async($,q,K,P,_,O)=>{if(_&&O?.[0]?.content)await _(O[0].content);return{text:"Ignoring message",values:{success:!0,ignored:!0},data:{actionName:"IGNORE"},success:!0}},examples:BY.examples??[]};N6();var nY=F6("NONE"),ZV={name:nY.name,similes:nY.similes?[...nY.similes]:[],validate:async($,q)=>{return!0},description:nY.description,handler:async($,q)=>{return{text:"No additional action taken",values:{success:!0,actionType:"NONE"},data:{actionName:"NONE",description:"Response without additional action"},success:!0}},examples:nY.examples??[]};N6();c6();y6();G6();var UY=F6("REPLY"),wV={name:UY.name,similes:UY.similes?[...UY.similes]:[],description:UY.description,validate:async($)=>{return!0},handler:async($,q,K,P,_,O)=>{let j=P?.actionContext?.previousResults||[];if(j.length>0)O$.debug({src:"plugin:basic-capabilities:action:reply",agentId:$.agentId,count:j.length},"Found previous action results");let W=[];if(O)for(let I of O){let b=I.content?.providers;if(b&&b.length>0)W.push(...b)}K=await $.composeState(q,[...W??[],"RECENT_MESSAGES","ACTION_STATE"]);let z=d6({state:K,template:$.character.templates?.replyTemplate||Kn}),X=await $.useModel(M$.TEXT_LARGE,{prompt:z}),Z=l6(X),G=Z?.thought,k=Z?.text,S=typeof G==="string"?G:"",C=typeof k==="string"?k:"",E={thought:S,text:C,actions:["REPLY"]};if(_)await _(E);let R=Date.now();return{text: "",values:{success:!0,responded:!0,lastReply:E.text,lastReplyTime:R,thoughtProcess:S},data:{actionName:"REPLY",responseThought:S,responseText:C,thought:S,messageGenerated:!0},success:!0}},examples:UY.examples??[]};N6();function oY($,q,K,P){if($.length===0)return[];if(K<=0)return[];let _=P?.fromEnd??!1,O=0,Y=0,j=$.map(q);if(_){for(let z=$.length-1;z>=0;z--){if(O+j[z]>K)break;O+=j[z],Y++}let W=Y>0?Y:0;return $.slice($.length-W)}for(;Y<$.length;Y++){if(O+j[Y]>K)break;O+=j[Y]}return $.slice(0,Y)}G6();var TV=u6("ACTION_STATE"),jZ$=2600,JZ$=2400,XV={name:TV.name,description:TV.description,position:TV.position??150,get:async($,q,K)=>{let P=K.data.actionResults??[],_=K.data.actionPlan,O=K.data.workingMemory,Y="";if(_&&_.totalSteps>1){let k=_.steps.filter((C)=>C.status==="completed").length,S=_.steps.filter((C)=>C.status==="failed").length;Y=B6("# Action Execution Plan",[`**Plan:** ${_.thought}`,`**Progress:** Step ${_.currentStep} of ${_.totalSteps}`,`**Status:** ${k} completed, ${S} failed`,"","## Steps:",..._.steps.map((C,E)=>{let R=C.status==="completed"?"✓":C.status==="failed"?"✗":E<_.currentStep-1?"○":E===_.currentStep-1?"→":"○",I=C.status==="pending"&&E===_.currentStep-1?"in progress":C.status,b=`${R} **Step ${E+1}:** ${C.action} (${I})`;if(C.error)b+=`
+    Error: ${C.error}`;if(C.result?.text)b+=`
+    Result: ${C.result.text}`;return b}),""].join(`
+ `))}let j="";if(P.length>0){let S=oY(P,(C)=>String(C.text||"").length+String(C.error||"").length+(()=>{try{return JSON.stringify(C.values||{}).length}catch{return 0}})()+80,jZ$).map((C,E)=>{let R=C.data?.actionName,I=typeof R==="string"?R:"Unknown Action",L=C.success?"Success":"Failed",g=`**${E+1}. ${I}** - ${L}`;if(C.text)g+=`
+diff --git a/dist/node/index.node.js b/dist/node/index.node.js
+index e4dc2e7dcd0ed687efa2bfa7a4b8bcd08f5e84a7..59d025c22a65d622632c4dc5bab8fb9d4b98a694 100644
+--- a/dist/node/index.node.js
++++ b/dist/node/index.node.js
+@@ -75305,7 +75305,7 @@ var replyAction = {
+     }
+     const now = Date.now();
+     return {
+-      text: `Generated reply: ${responseContent.text}`,
++      text: "",
+       values: {
+         success: true,
+         responded: true,
+@@ -98238,17 +98238,20 @@ class AgentRuntime {
+             await callback(content);
+           }
+         }
+-        const actionMemory = {
+-          id: actionId,
+-          entityId: this.agentId,
+-          roomId: message2.roomId,
+-          worldId: message2.worldId,
+-          content: {
+-            text: actionResult?.text || `Executed action: ${action.name}`,
+-            source: "action"
+-          }
+-        };
+-        await this.createMemory(actionMemory, "messages");
++        const actionText = typeof actionResult?.text === "string" ? actionResult.text.trim() : "";
++        if (actionText) {
++          const actionMemory = {
++            id: actionId,
++            entityId: this.agentId,
++            roomId: message2.roomId,
++            worldId: message2.worldId,
++            content: {
++              text: actionText,
++              source: "action"
++            }
++          };
++          await this.createMemory(actionMemory, "messages");
++        }
+         this.logger.debug({ src: "agent", agentId: this.agentId, action: action.name }, "Action completed");
+         const logResult = actionResult ? {
+           success: actionResult.success,

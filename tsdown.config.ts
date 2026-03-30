@@ -15,6 +15,12 @@ const nativeExternals = [
   "@reflink/reflink-linux-arm64-gnu",
   "@reflink/reflink-linux-x64-gnu",
   "fsevents",
+  // React is a browser-only dependency pulled in transitively through
+  // boot-config.ts (createContext/useContext).  Bundling it into Node
+  // server builds creates CJS/ESM interop wrappers (require_react) that
+  // fail at runtime in Docker where only the ESM entry is available.
+  "react",
+  "react-dom",
 ];
 
 // @elizaos/plugin-* are loaded at runtime via dynamic import(); every entry that
@@ -25,14 +31,14 @@ const allExternals = [...nativeExternals, pluginExternal];
 
 export default [
   {
-    entry: "src/index.ts",
+    entry: "packages/app-core/src/index.ts",
     env,
     fixedExtension: false,
     platform: "node",
     external: nativeExternals,
   },
   {
-    entry: "src/entry.ts",
+    entry: "packages/app-core/src/entry.ts",
     env,
     fixedExtension: false,
     platform: "node",
@@ -41,7 +47,7 @@ export default [
     external: allExternals,
   },
   {
-    entry: "src/runtime/eliza.ts",
+    entry: "packages/app-core/src/runtime/eliza.ts",
     env,
     fixedExtension: false,
     platform: "node",
@@ -50,7 +56,7 @@ export default [
     outputOptions: { codeSplitting: false },
   },
   {
-    entry: "src/api/server.ts",
+    entry: "packages/app-core/src/api/server.ts",
     env,
     fixedExtension: false,
     platform: "node",
@@ -61,15 +67,5 @@ export default [
     // entry chunk and shared chunks import it back, creating a circular
     // import that fails when the desktop runtime loads server.js via dynamic import().
     outputOptions: { codeSplitting: false },
-  },
-  {
-    entry: "src/plugins/whatsapp/index.ts",
-    outDir: "dist/plugins/whatsapp",
-    env,
-    fixedExtension: false,
-    platform: "node",
-    unbundle: true,
-    inlineOnly: false,
-    external: nativeExternals,
   },
 ];

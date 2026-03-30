@@ -76,6 +76,8 @@ describe("SurfaceWindowManager", () => {
 
     await manager.openSurfaceWindow("chat");
     await manager.openSurfaceWindow("chat");
+    await manager.openSurfaceWindow("browser");
+    await manager.openSurfaceWindow("release");
     await manager.openSurfaceWindow("plugins");
     await manager.openSurfaceWindow("cloud");
 
@@ -83,11 +85,17 @@ describe("SurfaceWindowManager", () => {
       "Milady Chat",
       "Milady Chat 2",
     ]);
+    expect(manager.listWindows("browser").map((entry) => entry.title)).toEqual([
+      "Milady Browser",
+    ]);
+    expect(manager.listWindows("release").map((entry) => entry.title)).toEqual([
+      "Milady Release Center",
+    ]);
     expect(manager.listWindows("plugins").map((entry) => entry.title)).toEqual([
       "Milady Plugins",
     ]);
     expect(manager.listWindows("cloud").map((entry) => entry.title)).toEqual([
-      "Milady Cloud",
+      "Eliza Cloud",
     ]);
   });
 
@@ -132,9 +140,24 @@ describe("buildSurfaceShellQuery", () => {
     expect(buildSurfaceShellQuery("plugins")).toBe(
       "?shell=surface&tab=plugins",
     );
+    expect(buildSurfaceShellQuery("browser")).toBe(
+      "?shell=surface&tab=browser",
+    );
+    expect(buildSurfaceShellQuery("release")).toBe(
+      "?shell=surface&tab=release",
+    );
     expect(buildSurfaceShellQuery("triggers")).toBe(
       "?shell=surface&tab=triggers",
     );
     expect(buildSurfaceShellQuery("cloud")).toBe("?shell=surface&tab=cloud");
+  });
+
+  it("appends browse for browser surface only", () => {
+    expect(
+      buildSurfaceShellQuery("browser", undefined, "https://elizacloud.ai"),
+    ).toBe("?shell=surface&tab=browser&browse=https%3A%2F%2Felizacloud.ai");
+    expect(buildSurfaceShellQuery("chat", undefined, "https://evil.test")).toBe(
+      "?shell=surface&tab=chat",
+    );
   });
 });

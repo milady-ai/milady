@@ -29,12 +29,28 @@ const {
   mockSubscribeDesktopBridgeEvent: vi.fn(),
 }));
 
+/** Mirrors `hasRequiredOnboardingPermissions` without importing `platform` (avoids bridge/init). */
+const { hasRequiredOnboardingPermissionsForTest } = vi.hoisted(() => {
+  const REQUIRED = ["accessibility", "screen-recording", "microphone"] as const;
+  function isGranted(status: string | undefined): boolean {
+    return status === "granted" || status === "not-applicable";
+  }
+  return {
+    hasRequiredOnboardingPermissionsForTest(
+      permissions: Record<string, { status: string }> | null | undefined,
+    ): boolean {
+      if (!permissions) return false;
+      return REQUIRED.every((id) => isGranted(permissions[id]?.status));
+    },
+  };
+});
+
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
 vi.mock("@miladyai/app-core/platform", () => ({
-  hasRequiredOnboardingPermissions: vi.fn(() => true),
+  hasRequiredOnboardingPermissions: hasRequiredOnboardingPermissionsForTest,
   isWebPlatform: () => mockIsWeb(),
   isDesktopPlatform: () => mockIsDesktop(),
   get isNative() {
@@ -56,18 +72,9 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-vi.mock("@miladyai/app-core/bridge", () => ({
+vi.mock("../../src/bridge", () => ({
   invokeDesktopBridgeRequest: mockInvokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent: mockSubscribeDesktopBridgeEvent,
-}));
-
-vi.mock("@miladyai/app-core/components/ui-badges", () => ({
-  StatusBadge: ({ label }: { label: string }) =>
-    React.createElement("span", { "data-testid": "status-badge" }, label),
-}));
-
-vi.mock("@miladyai/app-core/components/ui-switch", () => ({
-  Switch: () => React.createElement("span", null, "switch"),
 }));
 
 vi.mock("@miladyai/ui", () => ({
@@ -84,6 +91,9 @@ vi.mock("@miladyai/ui", () => ({
       { type: "button", onClick, ...rest },
       children,
     ),
+  StatusBadge: ({ label }: { label: string }) =>
+    React.createElement("span", { "data-testid": "status-badge" }, label),
+  Switch: () => React.createElement("span", null, "switch"),
 }));
 
 vi.mock("lucide-react", () => ({
@@ -99,7 +109,7 @@ vi.mock("lucide-react", () => ({
   Terminal: () => React.createElement("span", null, "💻"),
 }));
 
-import { PermissionsOnboardingSection } from "@miladyai/app-core/components/PermissionsSection";
+import { PermissionsOnboardingSection } from "../../src/components/PermissionsSection";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -238,21 +248,19 @@ describe("PermissionsOnboardingSection", () => {
     expect(text).toContain("Camera");
     expect(text).toContain("Microphone");
 
-    // Should have a skip button
-    const buttons = findButtons(root);
-    const skipBtn = buttons.find((b) =>
-      collectText(b).includes("Skip for Now"),
-    );
-    expect(skipBtn).toBeDefined();
-    await act(async () => {
-      skipBtn?.props.onClick();
+    expect(collectText(root)).not.toContain("Skip for Now");
+    const continueBtn = root.findByProps({
+      "data-testid": "permissions-onboarding-continue",
     });
-    expect(onContinue).toHaveBeenCalledWith({ allowPermissionBypass: true });
+    expect(continueBtn).toBeDefined();
+    await act(async () => {
+      continueBtn.props.onClick();
+    });
+    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(onContinue.mock.calls[0]).toEqual([]);
   });
 
-  it(
-    "renders mobile streaming permissions when isNative and not running in the desktop app",
-    async () => {
+  it("renders mobile streaming permissions when isNative and not running in the desktop app", async () => {
     mockIsWeb.mockReturnValue(false);
     mockIsDesktop.mockReturnValue(false);
     mockIsNative.value = true;
@@ -276,8 +284,16 @@ describe("PermissionsOnboardingSection", () => {
     expect(text).toContain("Camera");
     expect(text).toContain("Microphone");
 
-    // Should have a skip button
-    expect(text).toContain("Skip for Now");
+    expect(text).not.toContain("Skip for Now");
+    expect(text).toContain("Continue");
+    const continueBtn = root.findByProps({
+      "data-testid": "permissions-onboarding-continue",
+    });
+    await act(async () => {
+      continueBtn.props.onClick();
+    });
+    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(onContinue.mock.calls[0]).toEqual([]);
   });
 
   it("renders desktop permissions in the desktop app", async () => {
@@ -305,6 +321,64 @@ describe("PermissionsOnboardingSection", () => {
       params: undefined,
     });
     expect(mockGetPermissions).not.toHaveBeenCalled();
+
+    const continueBtn = root.findByProps({
+      "data-testid": "permissions-onboarding-continue",
+    });
+    await act(async () => {
+      continueBtn.props.onClick();
+    });
+    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(onContinue.mock.calls[0]).toEqual([]);
+  });
+
+  it("desktop: shows Continue when required permissions are not all granted", async () => {
+    mockIsWeb.mockReturnValue(false);
+    mockIsDesktop.mockReturnValue(true);
+    mockIsNative.value = false;
+    const onContinue = vi.fn();
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            accessibility: { status: "denied", canRequest: false },
+            "screen-recording": { status: "granted", canRequest: false },
+            microphone: { status: "granted", canRequest: false },
+            camera: { status: "granted", canRequest: false },
+            shell: { status: "granted", canRequest: false },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "darwin";
+        }
+        return null;
+      },
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(PermissionsOnboardingSection, { onContinue }),
+      );
+    });
+
+    const root = tree?.root;
+    expect(root).toBeDefined();
+    if (!root) throw new Error("expected root");
+
+    const text = collectText(root);
+    expect(text).toContain("Grant Permissions");
+
+    const continueBtn = root.findByProps({
+      "data-testid": "permissions-onboarding-continue",
+    });
+    await act(async () => {
+      continueBtn.props.onClick();
+    });
   });
 
   it("hides the camera grant button when renderer access is already granted", async () => {

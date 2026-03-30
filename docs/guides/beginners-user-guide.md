@@ -27,7 +27,7 @@ You can use it for:
 
 Main interfaces:
 
-- `milady` command (CLI/TUI)
+- `milady` command (CLI)
 - Dashboard in browser
 - Desktop/mobile app builds (platform dependent)
 
@@ -123,12 +123,13 @@ If these work, your base install is healthy.
 
 ```bash
 milady                    # start interactive mode (default)
-milady start              # run server-only, no TUI
+milady start              # run server-only, headless
 milady dashboard          # open dashboard in browser
 milady configure          # configuration guidance
 milady config get <key>   # read config value
 milady models             # show model provider status
-milady plugins list       # list installed plugins
+milady plugins installed   # list installed plugins
+milady plugins list       # browse registry plugins
 ```
 
 Tip: Use `milady <command> --help` any time you feel stuck.
@@ -140,7 +141,7 @@ Tip: Use `milady <command> --help` any time you feel stuck.
 ### Interactive mode (`milady`)
 
 - Good for active local usage
-- Includes terminal UI (status, activity, quick controls)
+- Includes status display and quick controls
 
 ### Service mode (`milady start`)
 
@@ -265,7 +266,7 @@ Good routine:
 
 - **Provider**: the LLM backend (Anthropic/OpenAI/Ollama/etc.)
 - **Plugin**: adds capabilities/integrations
-- **Headless**: no interactive terminal UI; service-style runtime
+- **Headless**: no interactive UI; service-style runtime
 - **Workspace**: local files Milady uses for agent context and tasks
 - **Gateway**: service layer used by dashboard and interfaces
 
@@ -283,10 +284,9 @@ Use this staged path so you do not get overwhelmed.
 2. **Core configuration**
    - `/configuration`
    - `/config-schema`
-   - `/model-providers`
+   - `/runtime/models`
 3. **Everyday commands and interfaces**
    - `/chat-commands`
-   - `/apps/tui`
    - `/apps/dashboard`
 4. **Safety basics**
    - `/guides/sandbox`
@@ -325,7 +325,7 @@ Use this staged path so you do not get overwhelmed.
 3. **App/platform specialization**
    - `/apps/desktop`
    - `/apps/mobile`
-   - `/apps/chrome-extension`
+   - Browser Relay release-status documentation when browser automation is relevant
 4. **Cloud and deployment**
    - `/guides/cloud`
    - `/deployment`

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -7,16 +8,16 @@ const { mockUseApp } = vi.hoisted(() => ({
 }));
 
 vi.mock("@miladyai/app-core/state", async () => {
-  const actual = await vi.importActual<typeof import("@miladyai/app-core/state")>(
-    "@miladyai/app-core/state",
-  );
+  const actual = await vi.importActual<
+    typeof import("@miladyai/app-core/state")
+  >("@miladyai/app-core/state");
   return {
     ...actual,
     useApp: () => mockUseApp(),
-    THEMES: [{ id: "milady", label: "Milady", hint: "default" }],
-    getVrmPreviewUrl: () => "/vrms/previews/milady-1.png",
-    getVrmUrl: () => "/vrms/milady-1.vrm.gz",
-    getVrmBackgroundUrl: () => "/vrms/backgrounds/milady-1.png",
+    THEMES: [{ id: "eliza", label: "Eliza", hint: "default" }],
+    getVrmPreviewUrl: () => "/vrms/previews/eliza-1.png",
+    getVrmUrl: () => "/vrms/eliza-1.vrm.gz",
+    getVrmBackgroundUrl: () => "/vrms/backgrounds/eliza-1.png",
   };
 });
 
@@ -54,11 +55,11 @@ function createOnboardingContext(
 ): Record<string, unknown> {
   return {
     t: (k: string) => k,
-    onboardingStep: "wakeUp",
+    onboardingStep: "identity",
     selectedVrmIndex: 1,
     customBackgroundUrl: "",
     onboardingOptions: {
-      names: ["Milady"],
+      names: ["Eliza"],
       styles: [],
       cloudProviders: [],
       providers: [],
@@ -67,10 +68,10 @@ function createOnboardingContext(
       piModels: [],
       piDefaultModel: "",
     },
-    onboardingName: "Milady",
+    onboardingName: "Eliza",
     onboardingOwnerName: "anon",
     onboardingStyle: "default",
-    onboardingTheme: "milady",
+    onboardingTheme: "eliza",
     onboardingRunMode: "",
     onboardingCloudProvider: "",
     onboardingSmallModel: "",
@@ -104,6 +105,8 @@ function createOnboardingContext(
     elizaCloudLoginError: "",
     handleOnboardingNext: vi.fn(async () => {}),
     handleOnboardingBack: vi.fn(),
+    handleOnboardingJumpToStep: vi.fn(),
+    goToOnboardingStep: vi.fn(),
     handleOnboardingRemoteConnect: vi.fn(async () => {}),
     handleOnboardingUseLocalBackend: vi.fn(),
     setState: vi.fn(),
@@ -125,7 +128,9 @@ describe("Onboarding language mode", () => {
   });
 
   it("shows english copy by default", async () => {
-    mockUseApp.mockReturnValue(createOnboardingContext({ uiLanguage: "en" }));
+    mockUseApp.mockReturnValue(
+      createOnboardingContext({ uiLanguage: "en", onboardingStep: "hosting" }),
+    );
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(OnboardingWizard));
@@ -136,12 +141,15 @@ describe("Onboarding language mode", () => {
       );
     }
 
-    expect(collectText(tree.root)).toContain("onboarding.welcomeTitle");
+    expect(collectText(tree.root)).toContain("onboarding.stepName.cloudLogin");
   });
 
   it("shows chinese copy when uiLanguage is zh-CN", async () => {
     mockUseApp.mockReturnValue(
-      createOnboardingContext({ uiLanguage: "zh-CN" }),
+      createOnboardingContext({
+        uiLanguage: "zh-CN",
+        onboardingStep: "hosting",
+      }),
     );
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
@@ -154,7 +162,7 @@ describe("Onboarding language mode", () => {
     }
 
     const text = collectText(tree.root);
-    expect(text).toContain("onboarding.welcomeTitle");
-    expect(text).toContain("onboarding.createNewAgent");
+    expect(text).toContain("onboarding.stepName.cloudLogin");
+    expect(text).toContain("onboarding.stepName.hosting");
   });
 });

@@ -21,14 +21,6 @@ vi.mock("node:os", () => {
   };
 });
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return {
-    default: actual,
-    ...actual,
-  };
-});
-
 import {
   scanAndValidateProviderCredentials,
   scanProviderCredentials,
@@ -120,7 +112,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "codex-auth",
-        apiKey: "sk-openai",
+        apiKey: "****enai",
         authMode: "chatgpt",
         cliInstalled: true,
         status: "unchecked",
@@ -146,7 +138,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "claude-credentials",
-        apiKey: "claude-oauth-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -182,7 +174,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "codex-auth",
-        apiKey: "file-openai",
+        apiKey: "****enai",
         authMode: "api-key",
         cliInstalled: true,
         status: "unchecked",
@@ -190,7 +182,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "claude-credentials",
-        apiKey: "file-anthropic",
+        apiKey: "****opic",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -198,7 +190,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic",
         source: "env",
-        apiKey: "env-anthropic",
+        apiKey: "****opic",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -226,7 +218,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "keychain",
-        apiKey: "keychain-oauth-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -234,7 +226,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "env",
-        apiKey: "env-openai",
+        apiKey: "****enai",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -265,7 +257,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "keychain",
-        apiKey: "raw-keychain-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: false,
         status: "unchecked",
@@ -293,7 +285,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic-subscription",
         source: "keychain",
-        apiKey: "nested-keychain-token",
+        apiKey: "****oken",
         authMode: "oauth",
         cliInstalled: true,
         status: "unchecked",
@@ -330,7 +322,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "openai",
         source: "env",
-        apiKey: "env-openai",
+        apiKey: "****enai",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -338,7 +330,7 @@ describe("scanProviderCredentials", () => {
       {
         id: "anthropic",
         source: "env",
-        apiKey: "env-anthropic",
+        apiKey: "****opic",
         authMode: "api-key",
         cliInstalled: false,
         status: "unchecked",
@@ -349,6 +341,27 @@ describe("scanProviderCredentials", () => {
         ([cmd]) => Array.isArray(cmd) && cmd[0] === "security",
       ),
     ).toBe(false);
+  });
+
+  it("treats pi-ai env aliases as truthy flags instead of masked api keys", async () => {
+    vi.stubEnv("MILADY_USE_PI_AI", "1");
+
+    const providers = await scanProviderCredentials();
+
+    expect(providers).toContainEqual({
+      id: "pi-ai",
+      source: "env",
+      apiKey: undefined,
+      authMode: "credentials",
+      cliInstalled: false,
+      status: "unchecked",
+    });
+  });
+
+  it("ignores falsey pi-ai env flags", async () => {
+    vi.stubEnv("ELIZA_USE_PI_AI", "0");
+
+    await expect(scanProviderCredentials()).resolves.toEqual([]);
   });
 
   it("swallows malformed json and returns an empty result when no fallbacks exist", async () => {
@@ -521,17 +534,17 @@ describe("scanProviderCredentials — env var detection", () => {
     const groq = providers.find((p) => p.id === "groq");
     expect(groq).toBeDefined();
     expect(groq?.source).toBe("env");
-    expect(groq?.apiKey).toBe("gsk-test-groq");
+    expect(groq?.apiKey).toBe("****groq");
     expect(groq?.authMode).toBe("api-key");
   });
 
-  it("detects GOOGLE_GENERATIVE_AI_API_KEY as provider 'google-genai'", async () => {
+  it("detects GOOGLE_GENERATIVE_AI_API_KEY as provider 'gemini'", async () => {
     vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "AIza-test-google");
     const providers = await scanProviderCredentials();
-    const google = providers.find((p) => p.id === "google-genai");
+    const google = providers.find((p) => p.id === "gemini");
     expect(google).toBeDefined();
     expect(google?.source).toBe("env");
-    expect(google?.apiKey).toBe("AIza-test-google");
+    expect(google?.apiKey).toBe("****ogle");
   });
 
   it("detects OPENROUTER_API_KEY as provider 'openrouter'", async () => {
@@ -540,16 +553,47 @@ describe("scanProviderCredentials — env var detection", () => {
     const openrouter = providers.find((p) => p.id === "openrouter");
     expect(openrouter).toBeDefined();
     expect(openrouter?.source).toBe("env");
-    expect(openrouter?.apiKey).toBe("sk-or-test-openrouter");
+    expect(openrouter?.apiKey).toBe("****uter");
   });
 
-  it("detects XAI_API_KEY as provider 'xai'", async () => {
+  it("detects XAI_API_KEY as provider 'grok'", async () => {
     vi.stubEnv("XAI_API_KEY", "xai-test-key");
     const providers = await scanProviderCredentials();
-    const xai = providers.find((p) => p.id === "xai");
+    const xai = providers.find((p) => p.id === "grok");
     expect(xai).toBeDefined();
     expect(xai?.source).toBe("env");
-    expect(xai?.apiKey).toBe("xai-test-key");
+    expect(xai?.apiKey).toBe("****-key");
+  });
+
+  it("detects OLLAMA_BASE_URL as provider 'ollama'", async () => {
+    vi.stubEnv("OLLAMA_BASE_URL", "http://localhost:11434");
+    const providers = await scanProviderCredentials();
+    const ollama = providers.find((p) => p.id === "ollama");
+    expect(ollama).toBeDefined();
+    expect(ollama?.source).toBe("env");
+    expect(ollama?.apiKey).toBe("****1434");
+    expect(ollama?.authMode).toBe("local");
+  });
+
+  it("detects ELIZAOS_CLOUD_API_KEY as provider 'elizacloud'", async () => {
+    vi.stubEnv("ELIZAOS_CLOUD_API_KEY", "ck-cloud-key");
+    const providers = await scanProviderCredentials();
+    const cloud = providers.find((p) => p.id === "elizacloud");
+    expect(cloud).toBeDefined();
+    expect(cloud?.source).toBe("env");
+    expect(cloud?.apiKey).toBe("****-key");
+    expect(cloud?.authMode).toBe("cloud");
+  });
+
+  it("detects MISTRAL_API_KEY, TOGETHER_API_KEY, and ZAI_API_KEY", async () => {
+    vi.stubEnv("MISTRAL_API_KEY", "mistral-key");
+    vi.stubEnv("TOGETHER_API_KEY", "together-key");
+    vi.stubEnv("ZAI_API_KEY", "zai-key");
+    const providers = await scanProviderCredentials();
+    const ids = providers.map((p) => p.id);
+    expect(ids).toContain("mistral");
+    expect(ids).toContain("together");
+    expect(ids).toContain("zai");
   });
 
   it("detects AI_GATEWAY_API_KEY as provider 'vercel-ai-gateway'", async () => {
@@ -558,7 +602,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const gateway = providers.find((p) => p.id === "vercel-ai-gateway");
     expect(gateway).toBeDefined();
     expect(gateway?.source).toBe("env");
-    expect(gateway?.apiKey).toBe("ag-test-key");
+    expect(gateway?.apiKey).toBe("****-key");
   });
 
   it("detects AIGATEWAY_API_KEY as provider 'vercel-ai-gateway' (alias)", async () => {
@@ -567,7 +611,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const gateway = providers.find((p) => p.id === "vercel-ai-gateway");
     expect(gateway).toBeDefined();
     expect(gateway?.source).toBe("env");
-    expect(gateway?.apiKey).toBe("aig-alias-key");
+    expect(gateway?.apiKey).toBe("****-key");
   });
 
   it("deduplicates provider IDs from different env vars (first wins)", async () => {
@@ -576,7 +620,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const providers = await scanProviderCredentials();
     const gateways = providers.filter((p) => p.id === "vercel-ai-gateway");
     expect(gateways).toHaveLength(1);
-    expect(gateways[0].apiKey).toBe("first-gateway-key");
+    expect(gateways[0].apiKey).toBe("****-key");
   });
 
   it("detects multiple env providers simultaneously", async () => {
@@ -586,7 +630,7 @@ describe("scanProviderCredentials — env var detection", () => {
     const providers = await scanProviderCredentials();
     const ids = providers.map((p) => p.id);
     expect(ids).toContain("groq");
-    expect(ids).toContain("xai");
+    expect(ids).toContain("grok");
     expect(ids).toContain("openrouter");
   });
 });
@@ -643,7 +687,7 @@ describe("scanAndValidateProviderCredentials — endpoint validation", () => {
     );
   });
 
-  it("google-genai validation uses generativelanguage.googleapis.com with x-goog-api-key", async () => {
+  it("gemini validation uses generativelanguage.googleapis.com with x-goog-api-key", async () => {
     vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "AIza-google-key");
     mockFetch.mockResolvedValue({ ok: true, status: 200 });
     await scanAndValidateProviderCredentials();
@@ -667,7 +711,7 @@ describe("scanAndValidateProviderCredentials — endpoint validation", () => {
     );
   });
 
-  it("xai validation uses api.x.ai with Bearer auth", async () => {
+  it("grok validation uses api.x.ai with Bearer auth", async () => {
     vi.stubEnv("XAI_API_KEY", "xai-test-key");
     mockFetch.mockResolvedValue({ ok: true, status: 200 });
     await scanAndValidateProviderCredentials();
@@ -757,7 +801,7 @@ describe("scanAndValidateProviderCredentials — integration", () => {
     const providers = await scanAndValidateProviderCredentials();
 
     const groq = providers.find((p) => p.id === "groq");
-    const xai = providers.find((p) => p.id === "xai");
+    const xai = providers.find((p) => p.id === "grok");
     const gateway = providers.find((p) => p.id === "vercel-ai-gateway");
 
     expect(groq?.status).toBe("valid");
@@ -780,7 +824,7 @@ describe("scanAndValidateProviderCredentials — integration", () => {
     const providers = await scanAndValidateProviderCredentials();
 
     const groq = providers.find((p) => p.id === "groq");
-    const xai = providers.find((p) => p.id === "xai");
+    const xai = providers.find((p) => p.id === "grok");
 
     expect(groq?.status).toBe("error");
     expect(groq?.statusDetail).toBe("The operation timed out");

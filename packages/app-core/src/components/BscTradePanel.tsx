@@ -1,9 +1,6 @@
 /**
  * Quick-trade panel — token address input, amount presets, buy/sell,
  * quote display, execution confirmation, and tx status tracking.
- *
- * Extracted from InventoryView to keep that component focused on
- * portfolio display and chain navigation.
  */
 
 import type {
@@ -13,12 +10,14 @@ import type {
   BscTradeQuoteRequest,
   BscTradeQuoteResponse,
   BscTradeTxStatusResponse,
+  StewardPolicyResult,
 } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
 import { Button, Input } from "@miladyai/ui";
 import { useCallback, useState } from "react";
 import { HEX_ADDRESS_RE } from "./companion/walletUtils";
 import { formatBalance, type TrackedToken } from "./inventory/constants";
+import { StewardLogo } from "./steward/StewardLogo";
 
 /* ── Constants ─────────────────────────────────────────────────────── */
 
@@ -39,6 +38,8 @@ export interface TradePanelProps {
     request: BscTradeExecuteRequest,
   ) => Promise<BscTradeExecuteResponse>;
   getBscTradeTxStatus?: (hash: string) => Promise<BscTradeTxStatusResponse>;
+  /** When true, trades are routed through Steward vault for policy enforcement. */
+  stewardConnected?: boolean;
 }
 
 /* ── Component ─────────────────────────────────────────────────────── */
@@ -51,6 +52,7 @@ export function TradePanel({
   getBscTradeQuote,
   executeBscTrade,
   getBscTradeTxStatus,
+  stewardConnected,
 }: TradePanelProps) {
   const { t, copyToClipboard, setActionNotice } = useApp();
   const [quickTokenAddress, setQuickTokenAddress] = useState("");
@@ -82,23 +84,23 @@ export function TradePanel({
       const tokenAddress = quickTokenAddress.trim();
       if (!HEX_ADDRESS_RE.test(tokenAddress)) {
         setActionNotice(
-          "Enter a valid token contract address first.",
+          t("bsctradepanel.EnterValidTokenAddress"),
           "error",
           3200,
         );
         setTradeFeedback({
           tone: "error",
-          text: "Enter a valid token contract address first.",
+          text: t("bsctradepanel.EnterValidTokenAddress"),
         });
         return;
       }
       const amount = quickAmount.trim() || DEFAULT_QUICK_AMOUNT;
       const amountNum = Number.parseFloat(amount);
       if (!Number.isFinite(amountNum) || amountNum <= 0) {
-        setActionNotice("Enter a valid BNB amount first.", "error", 3200);
+        setActionNotice(t("bsctradepanel.EnterValidBnbAmount"), "error", 3200);
         setTradeFeedback({
           tone: "error",
-          text: "Enter a valid BNB amount first.",
+          text: t("bsctradepanel.EnterValidBnbAmount"),
         });
         return;
       }
@@ -113,13 +115,15 @@ export function TradePanel({
             setTxStatus(null);
             setPendingTrade(null);
             setActionNotice(
-              preflight.reasons[0] ?? "Preflight checks failed.",
+              preflight.reasons[0] ?? t("bsctradepanel.PreflightChecksFailed"),
               "error",
               3600,
             );
             setTradeFeedback({
               tone: "error",
-              text: preflight.reasons[0] ?? "Preflight checks failed.",
+              text:
+                preflight.reasons[0] ??
+                t("bsctradepanel.PreflightChecksFailed"),
             });
             return;
           }
@@ -134,14 +138,19 @@ export function TradePanel({
         setLatestExecution(null);
         setTxStatus(null);
         setPendingTrade(null);
-        setActionNotice(
-          `${side === "buy" ? "Quote ready" : "Sell quote ready"}: ${result.quoteOut?.amount ?? ""} ${result.quoteOut?.symbol ?? ""}`.trim(),
-          "success",
-          3200,
-        );
+        const quoteMessage = t(
+          side === "buy"
+            ? "bsctradepanel.QuoteReady"
+            : "bsctradepanel.SellQuoteReady",
+          {
+            amount: result.quoteOut?.amount ?? "",
+            symbol: result.quoteOut?.symbol ?? "",
+          },
+        ).trim();
+        setActionNotice(quoteMessage, "success", 3200);
         setTradeFeedback({
           tone: "success",
-          text: `${side === "buy" ? "Quote ready" : "Sell quote ready"}: ${result.quoteOut?.amount ?? ""} ${result.quoteOut?.symbol ?? ""}`.trim(),
+          text: quoteMessage,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -165,14 +174,10 @@ export function TradePanel({
     if (!getBscTradePreflight) return;
     const tokenAddress = quickTokenAddress.trim();
     if (tokenAddress && !HEX_ADDRESS_RE.test(tokenAddress)) {
-      setActionNotice(
-        "Enter a valid token contract address first.",
-        "error",
-        3200,
-      );
+      setActionNotice(t("bsctradepanel.EnterValidTokenAddress"), "error", 3200);
       setTradeFeedback({
         tone: "error",
-        text: "Enter a valid token contract address first.",
+        text: t("bsctradepanel.EnterValidTokenAddress"),
       });
       return;
     }
@@ -180,19 +185,19 @@ export function TradePanel({
       const result = await getBscTradePreflight(tokenAddress || undefined);
       if (!result.ok) {
         setActionNotice(
-          result.reasons[0] ?? "Preflight checks failed.",
+          result.reasons[0] ?? t("bsctradepanel.PreflightChecksFailed"),
           "error",
           3600,
         );
         setTradeFeedback({
           tone: "error",
-          text: result.reasons[0] ?? "Preflight checks failed.",
+          text: result.reasons[0] ?? t("bsctradepanel.PreflightChecksFailed"),
         });
         return;
       }
       const message = tokenAddress
-        ? "Preflight checks passed."
-        : "Wallet is ready for BSC trading checks.";
+        ? t("bsctradepanel.PreflightChecksPassed")
+        : t("bsctradepanel.WalletReadyForBscTradingChecks");
       setActionNotice(message, "success", 2600);
       setTradeFeedback({
         tone: "success",
@@ -242,10 +247,39 @@ export function TradePanel({
       });
       setLatestExecution(result);
       if (result?.executed && result?.execution) {
-        // Already executed on-chain
+        if (result.mode === "steward") {
+          setActionNotice(
+            t("bsctradepanel.TradeSignedViaStewardVault"),
+            "success",
+            4600,
+          );
+        }
+      } else if (result?.mode === "steward" && !result?.requiresUserSignature) {
+        // Steward pending approval or rejection
+        const execStatus = result.execution?.status;
+        if (
+          result.approval?.status === "pending_approval" ||
+          execStatus === "pending_approval"
+        ) {
+          setActionNotice(
+            t("bsctradepanel.WaitingForStewardApproval"),
+            "info",
+            6000,
+          );
+        } else if (!result.ok || execStatus === "rejected") {
+          const reason =
+            result.execution?.policyResults?.find((p) => p.reason)?.reason ??
+            result.error ??
+            t("bsctradepanel.PolicyRejected");
+          setActionNotice(
+            t("bsctradepanel.StewardPolicyRejected", { reason }),
+            "error",
+            6000,
+          );
+        }
       } else if (result?.requiresUserSignature) {
         setActionNotice(
-          "Sign swap transaction in your wallet to complete the trade.",
+          t("bsctradepanel.SignSwapTransactionInWallet"),
           "info",
           4600,
         );
@@ -279,10 +313,36 @@ export function TradePanel({
       addedAt: Date.now(),
     };
     onAddToken(newToken);
-    setActionNotice("Token added to watchlist.", "success", 2600);
+    setActionNotice(t("bsctradepanel.TokenAddedToWatchlist"), "success", 2600);
   }, [quickTokenAddress, onAddToken, setActionNotice]);
 
   // ── Render helpers ──────────────────────────────────────────────────
+
+  function renderPolicyResults(policyResults?: StewardPolicyResult[]) {
+    if (!policyResults?.length) return null;
+    return (
+      <div className="mt-1 space-y-0.5">
+        {policyResults.map((p) => (
+          <div
+            key={p.policyId ?? p.name ?? p.status}
+            className="text-muted text-[10px]"
+          >
+            {p.name && <span className="font-mono">{p.name}: </span>}
+            <span
+              className={
+                p.status === "rejected"
+                  ? "text-status-danger"
+                  : "text-[color:var(--warn,var(--accent))]"
+              }
+            >
+              {p.status}
+            </span>
+            {p.reason && <span> — {p.reason}</span>}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   function renderExecutionResult() {
     if (!latestExecution) return null;
@@ -293,7 +353,7 @@ export function TradePanel({
 
       return (
         <div className="border border-border p-2 text-xs space-y-1">
-          <div>
+          <div className="flex items-center gap-1">
             <a
               href={explorerUrl}
               target="_blank"
@@ -302,10 +362,15 @@ export function TradePanel({
             >
               {t("bsctradepanel.ViewTx")} {shortHash}
             </a>
+            {latestExecution.mode === "steward" && (
+              <span className="text-[10px] text-purple-400 ml-1">
+                🔐 Steward
+              </span>
+            )}
           </div>
           {status === "pending" && (
             <div className="flex items-center gap-2">
-              <span className="text-yellow-500">
+              <span className="text-[color:var(--warn,var(--accent))]">
                 {t("bsctradepanel.Pending")}
               </span>
               <Button
@@ -328,10 +393,53 @@ export function TradePanel({
       );
     }
 
+    // Steward: pending approval
+    if (
+      latestExecution.mode === "steward" &&
+      !latestExecution.requiresUserSignature &&
+      !latestExecution.executed
+    ) {
+      const execStatus = latestExecution.execution?.status;
+      const isPending =
+        latestExecution.approval?.status === "pending_approval" ||
+        execStatus === "pending_approval";
+      const isRejected = !latestExecution.ok || execStatus === "rejected";
+
+      if (isPending) {
+        return (
+          <div className="border border-border p-2 text-xs space-y-1">
+            <div className="flex items-center gap-1 text-[color:var(--warn,var(--accent))]">
+              <span>🔐</span>
+              <span>{t("bsctradepanel.WaitingForStewardPolicyApproval")}</span>
+            </div>
+            {renderPolicyResults(
+              latestExecution.approval?.policyResults ??
+                latestExecution.execution?.policyResults,
+            )}
+          </div>
+        );
+      }
+
+      if (isRejected) {
+        return (
+          <div className="border border-border p-2 text-xs space-y-1">
+            <div className="flex items-center gap-1 text-status-danger">
+              <span>🚫</span>
+              <span>{t("bsctradepanel.StewardPolicyRejectedTransaction")}</span>
+            </div>
+            {latestExecution.error && (
+              <div className="text-muted">{latestExecution.error}</div>
+            )}
+            {renderPolicyResults(latestExecution.execution?.policyResults)}
+          </div>
+        );
+      }
+    }
+
     if (latestExecution.requiresUserSignature) {
       return (
         <div className="border border-border p-2 text-xs space-y-1">
-          <div className="text-yellow-500">
+          <div className="text-[color:var(--warn,var(--accent))]">
             {t("bsctradepanel.RequiresWalletSign")}
           </div>
           {latestExecution.unsignedApprovalTx && (
@@ -375,9 +483,26 @@ export function TradePanel({
     <>
       {/* Status bar */}
       <div className="flex items-center gap-2 text-xs">
-        <span className={tradeReady ? "text-green-500" : "text-yellow-500"}>
-          {tradeReady ? "Trade Ready" : "Trade Not Ready"}
+        <span
+          className={
+            tradeReady
+              ? "text-status-success"
+              : "text-[color:var(--warn,var(--accent))]"
+          }
+        >
+          {tradeReady
+            ? t("bsctradepanel.TradeReady")
+            : t("bsctradepanel.TradeNotReady")}
         </span>
+        {stewardConnected && (
+          <span
+            data-testid="steward-trade-indicator"
+            className="text-purple-400 flex items-center gap-0.5"
+            title="Trades routed through Steward vault policy enforcement"
+          >
+            <StewardLogo size={14} className="inline-block" /> Steward
+          </span>
+        )}
         <span className="text-muted">
           {t("bsctradepanel.BNB")} {formatBalance(String(bnbBalance))}
         </span>
@@ -414,10 +539,10 @@ export function TradePanel({
           data-testid="wallet-trade-feedback"
           className={`border px-2 py-1.5 text-xs ${
             tradeFeedback.tone === "success"
-              ? "border-green-500/40 text-green-400"
+              ? "border-status-success/40 text-status-success"
               : tradeFeedback.tone === "info"
                 ? "border-accent/40 text-txt"
-                : "border-red-500/40 text-red-400"
+                : "border-status-danger/40 text-status-danger"
           }`}
         >
           {tradeFeedback.text}
@@ -447,11 +572,12 @@ export function TradePanel({
 
         <div className="flex items-center gap-1.5">
           {AMOUNT_PRESETS.map((amt) => (
-            <button
+            <Button
               key={amt}
-              type="button"
+              variant="outline"
+              size="sm"
               data-testid={`wallet-quick-amount-${amt}`}
-              className={`px-2 py-0.5 border text-[10px] font-mono cursor-pointer ${
+              className={`px-2 py-0.5 text-[10px] font-mono cursor-pointer ${
                 quickAmount === String(amt)
                   ? "border-accent text-txt"
                   : "border-border bg-bg hover:border-accent"
@@ -459,7 +585,7 @@ export function TradePanel({
               onClick={() => setQuickAmount(String(amt))}
             >
               {amt} {t("bsctradepanel.BNB1")}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -495,15 +621,21 @@ export function TradePanel({
               {t("bsctradepanel.LatestQuote")}
             </div>
             <div className="text-muted">
-              {latestQuote.side === "buy" ? "Buy" : "Sell"}{" "}
+              {latestQuote.side === "buy"
+                ? t("bsctradepanel.Buy")
+                : t("bsctradepanel.Sell")}{" "}
               {latestQuote.quoteOut?.amount ?? ""}{" "}
               {latestQuote.quoteOut?.symbol ?? ""}
             </div>
             {pendingTrade ? (
               <div className="mt-1 flex items-center gap-2">
-                <span className="text-yellow-500 font-bold">
-                  {t("onboarding.confirm")} {pendingTrade.side}{" "}
-                  {t("bsctradepanel.trade")}
+                <span className="font-bold text-[color:var(--warn,var(--accent))]">
+                  {t("bsctradepanel.ConfirmTrade", {
+                    side:
+                      pendingTrade.side === "buy"
+                        ? t("bsctradepanel.Buy")
+                        : t("bsctradepanel.Sell"),
+                  })}
                 </span>
                 <Button
                   variant="outline"
@@ -521,7 +653,7 @@ export function TradePanel({
                   className="h-7 px-3 py-1 text-[10px] font-mono text-muted border-border hover:border-danger hover:text-danger shadow-sm"
                   onClick={handleCancelExecute}
                 >
-                  {t("onboarding.cancel")}
+                  {t("common.cancel")}
                 </Button>
               </div>
             ) : (
@@ -545,5 +677,5 @@ export function TradePanel({
   );
 }
 
-export { TradePanel as BscTradePanel };
 export type { TradePanelProps as BscTradePanelProps };
+export { TradePanel as BscTradePanel };

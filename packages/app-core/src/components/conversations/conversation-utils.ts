@@ -7,13 +7,9 @@ export function getLocalizedConversationTitle(
     vars?: Record<string, string | number | boolean | null | undefined>,
   ) => string,
 ): string {
-  if (
-    !title ||
-    title === "New Chat" ||
-    title === "conversations.newChatTitle"
-  ) {
-    const localized = t("conversations.newChatTitle");
-    return localized === "conversations.newChatTitle" ? "New Chat" : localized;
+  if (!title || title === "New Chat" || title === "companion.newChat") {
+    const localized = t("companion.newChat");
+    return localized === "companion.newChat" ? "New Chat" : localized;
   }
   return title;
 }

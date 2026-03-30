@@ -52,7 +52,21 @@ export function retargetMixamoGltfToVrm(
     throw new Error("GLB contains no animation clips");
   }
 
-  const tracks: Array<THREE.QuaternionKeyframeTrack> = [];
+  const motionHipsNode = findNode(
+    animation.scene,
+    "mixamorigHips",
+    "mixamorigHips",
+  );
+  const motionHipsHeight = Math.abs(motionHipsNode?.position.y ?? 0);
+  const vrmHipsHeight = Math.abs(
+    vrm.humanoid?.normalizedRestPose.hips?.position?.[1] ?? 0,
+  );
+  const hipsPositionScale =
+    motionHipsHeight > 1e-6 && vrmHipsHeight > 1e-6
+      ? vrmHipsHeight / motionHipsHeight
+      : 1;
+
+  const tracks: Array<THREE.KeyframeTrack> = [];
   const restRotationInverse = new THREE.Quaternion();
   const parentRestWorldRotation = new THREE.Quaternion();
   const q = new THREE.Quaternion();
@@ -62,8 +76,6 @@ export function retargetMixamoGltfToVrm(
     const rawRigName = parts[0];
     const propertyName = parts[1];
     if (!rawRigName || !propertyName) continue;
-    if (propertyName !== "quaternion") continue;
-    if (!(track instanceof THREE.QuaternionKeyframeTrack)) continue;
 
     const normalizedRigName = normalizeMixamoRigName(rawRigName);
     const vrmBoneName = mixamoVRMRigMap[normalizedRigName];
@@ -81,23 +93,51 @@ export function retargetMixamoGltfToVrm(
     );
     if (!mixamoRigNode || !mixamoRigNode.parent) continue;
 
-    mixamoRigNode.getWorldQuaternion(restRotationInverse).invert();
-    mixamoRigNode.parent.getWorldQuaternion(parentRestWorldRotation);
+    if (
+      propertyName === "quaternion" &&
+      track instanceof THREE.QuaternionKeyframeTrack
+    ) {
+      mixamoRigNode.getWorldQuaternion(restRotationInverse).invert();
+      mixamoRigNode.parent.getWorldQuaternion(parentRestWorldRotation);
 
-    const values = track.values.slice();
-    for (let i = 0; i < values.length; i += 4) {
-      q.fromArray(values, i);
-      q.premultiply(parentRestWorldRotation).multiply(restRotationInverse);
-      q.toArray(values, i);
+      const values = track.values.slice();
+      for (let i = 0; i < values.length; i += 4) {
+        q.fromArray(values, i);
+        q.premultiply(parentRestWorldRotation).multiply(restRotationInverse);
+        q.toArray(values, i);
+      }
+
+      tracks.push(
+        new THREE.QuaternionKeyframeTrack(
+          `${vrmNode.name}.quaternion`,
+          track.times,
+          values.map((v, i) => (isVrm0(vrm) && i % 2 === 0 ? -v : v)),
+        ),
+      );
+      continue;
     }
 
-    tracks.push(
-      new THREE.QuaternionKeyframeTrack(
-        `${vrmNode.name}.quaternion`,
-        track.times,
-        values.map((v, i) => (isVrm0(vrm) && i % 2 === 0 ? -v : v)),
-      ),
-    );
+    if (
+      propertyName === "position" &&
+      track instanceof THREE.VectorKeyframeTrack
+    ) {
+      const isHips =
+        vrmNode ===
+        vrm.humanoid?.getNormalizedBoneNode("hips" as VRMHumanBoneName);
+
+      if (!isHips) continue;
+
+      const values = track.values.map((v, i) => {
+        return (isVrm0(vrm) && i % 3 !== 1 ? -v : v) * hipsPositionScale;
+      });
+      tracks.push(
+        new THREE.VectorKeyframeTrack(
+          `${vrmNode.name}.position`,
+          track.times,
+          values,
+        ),
+      );
+    }
   }
 
   const hasHipsTrack = tracks.some((track) =>

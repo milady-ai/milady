@@ -1,0 +1,123 @@
+diff --git a/Users/shawwalters/eliza-workspace/milady/node_modules/@elizaos/plugin-agent-skills/.bun-tag-7cc5bc2a3346002f b/.bun-tag-7cc5bc2a3346002f
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/index.js b/dist/index.js
+index c917dc10a01ec1232d9ef200e1b650341833a9d4..82c7646917ba6a3dcf423b3f4382fbc31da170a1 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2335,6 +2335,9 @@ var AgentSkillsService = class _AgentSkillsService extends Service {
+   lockfilePath = null;
+   // Tracks the last catalog fetch failure timestamp for backoff.
+   lastFetchErrorAt = 0;
++  // Coalesce concurrent catalog refreshes and track absolute cooldowns for 429s.
++  catalogFetchInFlight = null;
++  catalogFetchCooldownUntil = 0;
+   /**
+    * Parse a directory list from config (string or array).
+    */
+@@ -3473,6 +3476,16 @@ var AgentSkillsService = class _AgentSkillsService extends Service {
+    * Get the full skill catalog from ClawHub.
+    */
+   async getCatalog(options = {}) {
++    const parseRetryAfterMs = (value) => {
++      if (typeof value !== "string" || value.trim().length === 0) return null;
++      const seconds = Number(value);
++      if (Number.isFinite(seconds) && seconds >= 0) {
++        return Math.ceil(seconds * 1e3);
++      }
++      const retryAt = Date.parse(value);
++      if (Number.isNaN(retryAt)) return null;
++      return Math.max(0, retryAt - Date.now());
++    };
+     const ttl = options.notOlderThan ?? CACHE_TTL.CATALOG;
+     if (!options.forceRefresh && this.catalogCache) {
+       const age = Date.now() - this.catalogCache.cachedAt;
+@@ -3480,39 +3493,59 @@ var AgentSkillsService = class _AgentSkillsService extends Service {
+         return this.catalogCache.data;
+       }
+     }
+-    const sinceLastError = Date.now() - this.lastFetchErrorAt;
+-    if (this.lastFetchErrorAt > 0 && sinceLastError < FETCH_ERROR_COOLDOWN) {
++    if (this.catalogFetchCooldownUntil > Date.now()) {
+       return this.catalogCache?.data ?? [];
+     }
+-    try {
+-      const entries = [];
+-      let cursor;
+-      do {
+-        const url = `${this.apiBase}/api/v1/skills?limit=100${cursor ? `&cursor=${cursor}` : ""}`;
+-        const response = await fetch(url, {
+-          headers: { Accept: "application/json" }
+-        });
+-        if (!response.ok) {
+-          throw new Error(`Catalog fetch failed: ${response.status}`);
++    if (this.catalogFetchInFlight) {
++      return this.catalogFetchInFlight;
++    }
++    this.catalogFetchInFlight = (async () => {
++      try {
++        const entries = [];
++        let cursor;
++        do {
++          const url = `${this.apiBase}/api/v1/skills?limit=100${cursor ? `&cursor=${cursor}` : ""}`;
++          const response = await fetch(url, {
++            headers: { Accept: "application/json" }
++          });
++          if (!response.ok) {
++            const statusError = new Error(`Catalog fetch failed: ${response.status}`);
++            statusError.status = response.status;
++            statusError.retryAfter = response.headers.get("retry-after");
++            throw statusError;
++          }
++          const data = await response.json();
++          entries.push(...data.items);
++          cursor = data.nextCursor;
++        } while (cursor);
++        this.catalogCache = { data: entries, cachedAt: Date.now() };
++        this.lastFetchErrorAt = 0;
++        this.catalogFetchCooldownUntil = 0;
++        if (this.storage.type === "filesystem") {
++          await this.saveCatalogToDisk();
+         }
+-        const data = await response.json();
+-        entries.push(...data.items);
+-        cursor = data.nextCursor;
+-      } while (cursor);
+-      this.catalogCache = { data: entries, cachedAt: Date.now() };
+-      this.lastFetchErrorAt = 0;
+-      if (this.storage.type === "filesystem") {
+-        await this.saveCatalogToDisk();
+-      }
+-      return entries;
+-    } catch (error) {
+-      this.lastFetchErrorAt = Date.now();
+-      this.runtime.logger.warn(`AgentSkills: Catalog fetch failed (will retry after cooldown): ${error}`);
+-      if (!this.catalogCache) {
+-        this.catalogCache = { data: [], cachedAt: Date.now() };
++        return entries;
++      } catch (error) {
++        const status = typeof error === "object" && error !== null && "status" in error ? Number(error.status) : null;
++        const retryAfter = typeof error === "object" && error !== null && "retryAfter" in error ? error.retryAfter : null;
++        const retryAfterMs = parseRetryAfterMs(retryAfter);
++        const cooldownMs = Math.max(30000, retryAfterMs ?? 0); // 30s min
++        this.lastFetchErrorAt = Date.now();
++        this.catalogFetchCooldownUntil = Date.now() + cooldownMs;
++        if (status === 429) {
++          const cachedCount = this.catalogCache?.data.length ?? 0;
++          this.runtime.logger.info(
++            `AgentSkills: Catalog rate limited (429); backing off for ${Math.ceil(cooldownMs / 1e3)}s`
++          );
++        } else {
++          this.runtime.logger.warn(`AgentSkills: Catalog fetch failed: ${error}`);
++        }
++        return this.catalogCache?.data ?? [];
++      } finally {
++        this.catalogFetchInFlight = null;
+       }
+-      return this.catalogCache.data;
+-    }
++    })();
++    return this.catalogFetchInFlight;
+   }
+   /**
+    * Search ClawHub for skills.

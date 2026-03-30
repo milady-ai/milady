@@ -14,16 +14,14 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
+import { DEFAULT_BRANDING } from "../config/branding";
 
 /** Apps are only enabled in dev mode; production builds hide this feature. */
 export const APPS_ENABLED = false; // import.meta.env.DEV;
 
 /** Stream routes stay addressable; the nav hides the tab unless streaming is enabled. */
 export const STREAM_ENABLED = true;
-/**
- * Companion tab — enabled by default since the VRM companion UI launch.
- * Previously opt-in; now opt-out via VITE_ENABLE_COMPANION_MODE=false.
- */
+/** Companion tab — enabled by default; opt-out via VITE_ENABLE_COMPANION_MODE=false. */
 export const COMPANION_ENABLED =
   String(import.meta.env.VITE_ENABLE_COMPANION_MODE ?? "true").toLowerCase() !==
   "false";
@@ -45,10 +43,10 @@ export type Tab =
   | "advanced"
   | "fine-tuning"
   | "trajectories"
-  | "lifo"
   | "voice"
   | "runtime"
   | "database"
+  | "desktop"
   | "settings"
   | "logs"
   | "security";
@@ -119,7 +117,6 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
       "actions",
       "fine-tuning",
       "trajectories",
-      "lifo",
       "runtime",
       "database",
       "logs",
@@ -156,10 +153,10 @@ const TAB_PATHS: Record<Tab, string> = {
   advanced: "/advanced",
   "fine-tuning": "/fine-tuning",
   trajectories: "/trajectories",
-  lifo: "/lifo",
   voice: "/voice",
   runtime: "/runtime",
   database: "/database",
+  desktop: "/desktop",
   settings: "/settings",
   logs: "/logs",
   security: "/security",
@@ -180,13 +177,7 @@ const PATH_TO_TAB = new Map(
   Object.entries(TAB_PATHS).map(([tab, p]) => [p, tab as Tab]),
 );
 
-export function pathForTab(tab: Tab, basePath = ""): string {
-  const base = normalizeBasePath(basePath);
-  const p = TAB_PATHS[tab];
-  return base ? `${base}${p}` : p;
-}
-
-export function tabFromPath(pathname: string, basePath = ""): Tab | null {
+function normalizePathForLookup(pathname: string, basePath = ""): string {
   const base = normalizeBasePath(basePath);
   let p = pathname || "/";
   if (base) {
@@ -195,10 +186,39 @@ export function tabFromPath(pathname: string, basePath = ""): Tab | null {
   }
   let normalized = normalizePath(p).toLowerCase();
   if (normalized.endsWith("/index.html")) normalized = "/";
+  return normalized;
+}
+
+export function pathForTab(tab: Tab, basePath = ""): string {
+  const base = normalizeBasePath(basePath);
+  const p = TAB_PATHS[tab];
+  return base ? `${base}${p}` : p;
+}
+
+export function isRouteRootPath(pathname: string, basePath = ""): boolean {
+  return normalizePathForLookup(pathname, basePath) === "/";
+}
+
+export function resolveInitialTabForPath(
+  pathname: string,
+  fallbackTab: Tab,
+  basePath = "",
+): Tab {
+  if (isRouteRootPath(pathname, basePath)) {
+    return fallbackTab;
+  }
+  return tabFromPath(pathname, basePath) ?? fallbackTab;
+}
+
+export function tabFromPath(pathname: string, basePath = ""): Tab | null {
+  const normalized = normalizePathForLookup(pathname, basePath);
   if (normalized === "/") return "chat";
   if (normalized === "/voice") return "settings";
   // Companion disabled unless explicitly feature-flagged
-  if (!COMPANION_ENABLED && normalized === "/companion") {
+  if (
+    !COMPANION_ENABLED &&
+    (normalized === "/companion" || normalized === "/character-select")
+  ) {
     return "chat";
   }
   // Apps disabled in production builds — redirect to chat
@@ -260,8 +280,6 @@ export function titleForTab(tab: Tab): string {
       return "Fine-Tuning";
     case "trajectories":
       return "Trajectories";
-    case "lifo":
-      return "Lifo";
     case "voice":
       return "Voice";
     case "runtime":
@@ -277,6 +295,6 @@ export function titleForTab(tab: Tab): string {
     case "security":
       return "Security";
     default:
-      return "Milady";
+      return DEFAULT_BRANDING.appName;
   }
 }

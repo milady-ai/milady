@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@miladyai/ui";
 import { useEffect, useState } from "react";
 import { COMMON_SHORTCUTS } from "../hooks";
 import { useApp } from "../state";
@@ -49,10 +49,6 @@ export function ShortcutsOverlay() {
     return () => window.removeEventListener("keydown", handler);
   }, [open]);
 
-  if (!open) {
-    return null;
-  }
-
   const grouped: Record<string, typeof COMMON_SHORTCUTS> = {};
   for (const shortcut of COMMON_SHORTCUTS) {
     const scope = shortcut.scope ?? "global";
@@ -63,58 +59,16 @@ export function ShortcutsOverlay() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center"
-      style={{
-        background: "color-mix(in srgb, var(--bg) 50%, transparent)",
-        backdropFilter: "blur(4px)",
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          setOpen(false);
-        }
-      }}
-      onKeyDown={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          (event.key === "Enter" || event.key === " ")
-        ) {
-          event.preventDefault();
-          setOpen(false);
-        }
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Keyboard shortcuts"
-      tabIndex={-1}
-    >
-      <div
-        className="rounded-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
-        style={{
-          background: "color-mix(in srgb, var(--bg) 96%, transparent)",
-          border:
-            "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
-          backdropFilter: "blur(24px)",
-          boxShadow: "var(--shadow-lg)",
-        }}
-      >
-        <div
-          className="flex items-center justify-between px-5 py-4"
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="max-w-lg rounded-xl max-h-[80vh] overflow-y-auto p-0">
+        <DialogHeader
+          className="px-5 py-4"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
-          <h2 className="text-base font-bold" style={{ color: "var(--text)" }}>
+          <DialogTitle className="text-base font-bold">
             {t("shortcutsoverlay.KeyboardShortcuts")}
-          </h2>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="p-1 rounded transition-colors"
-            style={{ color: "var(--muted)" }}
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
         <div className="p-5 space-y-5">
           {Object.entries(grouped).map(([scope, shortcuts]) => (
             <div key={scope}>
@@ -149,7 +103,7 @@ export function ShortcutsOverlay() {
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -14,6 +14,7 @@ import type { Tab } from "@miladyai/app-core/navigation";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
 
 const { mockKeyboardSetScroll, mockUseApp, noop, sceneHostState } = vi.hoisted(
   () => ({
@@ -72,6 +73,8 @@ vi.mock("@miladyai/app-core/components", async () => {
     AppsPageView: () =>
       React.createElement("section", null, "AppsPageView Ready"),
     BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+    CharacterEditor: () =>
+      React.createElement("section", null, "CharacterView Ready"),
     CharacterView: () =>
       React.createElement("section", null, "CharacterView Ready"),
     ChatView: () => React.createElement("section", null, "ChatView Ready"),
@@ -141,74 +144,136 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
-vi.mock("../../../packages/app-core/src/components/Header", () => ({
+vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
+  AdvancedPageView: () =>
+    React.createElement("section", null, "AdvancedPageView Ready"),
+  AppsPageView: () =>
+    React.createElement("section", null, "AppsPageView Ready"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () =>
+    React.createElement("section", null, "CharacterView Ready"),
+  ChatView: () => React.createElement("section", null, "ChatView Ready"),
+  CompanionShell: ({ tab }: { tab: string }) =>
+    React.createElement("main", null, `CompanionShell Ready: ${tab}`),
+  CompanionView: () =>
+    React.createElement("section", null, "CompanionView Ready"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("section", null, "ConnectorsPageView Ready"),
+  ConversationsSidebar: () =>
+    React.createElement("aside", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("aside", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("aside", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("header", null, "Header"),
+  HeartbeatsView: () =>
+    React.createElement("section", null, "HeartbeatsView Ready"),
+  InventoryView: () =>
+    React.createElement("section", null, "InventoryView Ready"),
+  KnowledgeView: () =>
+    React.createElement("section", null, "KnowledgeView Ready"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () =>
+    React.createElement("section", null, "SettingsView Ready"),
+  SharedCompanionScene: ({
+    active,
+    interactive,
+    children,
+  }: {
+    active: boolean;
+    interactive?: boolean;
+    children: React.ReactNode;
+  }) => {
+    const { useEffect } = React;
+    useEffect(() => {
+      sceneHostState.mounts += 1;
+      return () => {
+        sceneHostState.unmounts += 1;
+      };
+    }, []);
+    sceneHostState.activeHistory.push(active);
+    sceneHostState.interactiveHistory.push(Boolean(interactive));
+    return React.createElement(React.Fragment, null, children);
+  },
+  ShellOverlays: () => null,
+  StartupFailureView: ({ error }: { error: { message: string } }) =>
+    React.createElement("div", null, error.message),
+  StreamView: () => React.createElement("section", null, "StreamView Ready"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
+}));
+
+vi.mock("@miladyai/app-core/src/components/Header", () => ({
   Header: () => React.createElement("header", null, "Header"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/CommandPalette", () => ({
+vi.mock("@miladyai/app-core/src/components/CommandPalette", () => ({
   CommandPalette: () => React.createElement("div", null, "CommandPalette"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/EmotePicker", () => ({
+vi.mock("@miladyai/app-core/src/components/EmotePicker", () => ({
   EmotePicker: () => React.createElement("div", null, "EmotePicker"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/PairingView", () => ({
+vi.mock("@miladyai/app-core/src/components/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/OnboardingWizard", () => ({
+vi.mock("@miladyai/app-core/src/components/OnboardingWizard", () => ({
   OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/ChatView", () => ({
+vi.mock("@miladyai/app-core/src/components/ChatView", () => ({
   ChatView: () => React.createElement("section", null, "ChatView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/StreamView", () => ({
+vi.mock("@miladyai/app-core/src/components/StreamView", () => ({
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
 }));
 
-vi.mock(
-  "../../../packages/app-core/src/components/ConversationsSidebar",
-  () => ({
-    ConversationsSidebar: () =>
-      React.createElement("aside", null, "ConversationsSidebar"),
-  }),
-);
+vi.mock("@miladyai/app-core/src/components/ConversationsSidebar", () => ({
+  ConversationsSidebar: () =>
+    React.createElement("aside", null, "ConversationsSidebar"),
+}));
 
-vi.mock("../../../packages/app-core/src/components/CustomActionsPanel", () => ({
+vi.mock("@miladyai/app-core/src/components/CustomActionsPanel", () => ({
   CustomActionsPanel: () =>
     React.createElement("aside", null, "CustomActionsPanel"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/CustomActionEditor", () => ({
+vi.mock("@miladyai/app-core/src/components/CustomActionEditor", () => ({
   CustomActionEditor: () =>
     React.createElement("aside", null, "CustomActionEditor"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/AppsPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/AppsPageView", () => ({
   AppsPageView: () =>
     React.createElement("section", null, "AppsPageView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/CharacterView", () => ({
+vi.mock("@miladyai/app-core/src/components/CharacterView", () => ({
   CharacterView: () =>
     React.createElement("section", null, "CharacterView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/AdvancedPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/AdvancedPageView", () => ({
   AdvancedPageView: () =>
     React.createElement("section", null, "AdvancedPageView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/CompanionView", () => ({
+vi.mock("@miladyai/app-core/src/components/CompanionView", () => ({
   CompanionView: () =>
     React.createElement("section", null, "CompanionView Ready"),
 }));
 
 vi.mock(
-  "../../../packages/app-core/src/components/companion/CompanionSceneHost",
+  "@miladyai/app-core/src/components/companion/CompanionSceneHost",
   async () => {
     const React = await vi.importActual<typeof import("react")>("react");
     return {
@@ -238,73 +303,65 @@ vi.mock(
   },
 );
 
-vi.mock("../../../packages/app-core/src/components/companion/VrmStage", () => ({
+vi.mock("@miladyai/app-core/src/components/companion/VrmStage", () => ({
   VrmStage: () => React.createElement("div", null, "VrmStage Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/TriggersView", () => ({
+vi.mock("@miladyai/app-core/src/components/TriggersView", () => ({
   TriggersView: () =>
     React.createElement("section", null, "TriggersView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/ConnectorsPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/ConnectorsPageView", () => ({
   ConnectorsPageView: () =>
     React.createElement("section", null, "ConnectorsPageView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/InventoryView", () => ({
+vi.mock("@miladyai/app-core/src/components/InventoryView", () => ({
   InventoryView: () =>
     React.createElement("section", null, "InventoryView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/KnowledgeView", () => ({
+vi.mock("@miladyai/app-core/src/components/KnowledgeView", () => ({
   KnowledgeView: () =>
     React.createElement("section", null, "KnowledgeView Ready"),
 }));
 
-vi.mock("@miladyai/app-core/components/AvatarLoader", () => ({
+vi.mock("../../src/components/AvatarLoader", () => ({
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/PluginsPageView", () => ({
+vi.mock("@miladyai/app-core/src/components/PluginsPageView", () => ({
   PluginsPageView: () =>
     React.createElement("section", null, "PluginsPageView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/PluginsView", () => ({
+vi.mock("@miladyai/app-core/src/components/PluginsView", () => ({
   PluginsView: () => React.createElement("section", null, "PluginsView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/SkillsView", () => ({
+vi.mock("@miladyai/app-core/src/components/SkillsView", () => ({
   SkillsView: () => React.createElement("section", null, "SkillsView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/CustomActionsView", () => ({
+vi.mock("@miladyai/app-core/src/components/CustomActionsView", () => ({
   CustomActionsView: () =>
     React.createElement("section", null, "CustomActionsView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/FineTuningView", () => ({
+vi.mock("@miladyai/app-core/src/components/FineTuningView", () => ({
   FineTuningView: () =>
     React.createElement("section", null, "FineTuningView Ready"),
 }));
 
-vi.mock("../../../packages/app-core/src/components/TrajectoriesView", () => ({
+vi.mock("@miladyai/app-core/src/components/TrajectoriesView", () => ({
   TrajectoriesView: () =>
     React.createElement("section", null, "TrajectoriesView Ready"),
 }));
 
-vi.mock(
-  "../../../packages/app-core/src/components/TrajectoryDetailView",
-  () => ({
-    TrajectoryDetailView: () =>
-      React.createElement("section", null, "TrajectoryDetailView Ready"),
-  }),
-);
-
-vi.mock("../../../packages/app-core/src/components/LifoSandboxView", () => ({
-  LifoSandboxView: () =>
-    React.createElement("section", null, "LifoSandboxView Ready"),
+vi.mock("@miladyai/app-core/src/components/TrajectoryDetailView", () => ({
+  TrajectoryDetailView: () =>
+    React.createElement("section", null, "TrajectoryDetailView Ready"),
 }));
 
 vi.mock("@miladyai/app-core/hooks", async () => {
@@ -322,7 +379,7 @@ vi.mock("@miladyai/app-core/hooks", async () => {
   };
 });
 
-import { App } from "../../src/App";
+import { App } from "@miladyai/app-core/App";
 
 /* ── Harness state ────────────────────────────────────────────────── */
 
@@ -405,12 +462,6 @@ function makeState(overrides?: Partial<HarnessState>): HarnessState {
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
-function textOf(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : textOf(child)))
-    .join("");
-}
-
 function expectValidContent(content: string): void {
   expect(content.trim().length).toBeGreaterThan(0);
   const invalidPatterns = [
@@ -479,7 +530,6 @@ function expectShellForTab(text: string, tab: Tab): void {
       case "trajectories":
       case "runtime":
       case "database":
-      case "lifo":
       case "logs":
       case "security":
         return "AdvancedPageView Ready";
@@ -489,8 +539,15 @@ function expectShellForTab(text: string, tab: Tab): void {
   })();
 
   expect(text).toContain(expectedToken);
-  if (tab === "companion") {
+  if (
+    tab === "companion" ||
+    tab === "character" ||
+    tab === "character-select"
+  ) {
     expect(text).not.toContain("Header");
+  } else if (tab === "character" || tab === "character-select") {
+    expect(text).not.toContain("Header");
+    expect(text).toContain("Save");
   } else {
     expect(text).toContain("Header");
   }
@@ -533,7 +590,6 @@ describe("shell mode switching (e2e)", () => {
       "trajectories",
       "runtime",
       "database",
-      "lifo",
       "logs",
     ];
 
@@ -794,7 +850,9 @@ describe("shell mode switching (e2e)", () => {
     text = textOf(requireTree(tree).root);
     expectShellForTab(text, "character");
     expect(sceneHostState.activeHistory.at(-1)).toBe(true);
-    expect(sceneHostState.interactiveHistory.at(-1)).toBe(false);
+    // Character tabs use native shell with the scene overlay visible,
+    // so interactive is true (characterSceneVisible is true).
+    expect(sceneHostState.interactiveHistory.at(-1)).toBe(true);
   });
 
   it("disables iOS native scrolling only while the companion shell is visible", async () => {

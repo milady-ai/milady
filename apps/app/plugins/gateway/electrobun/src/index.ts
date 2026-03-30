@@ -12,7 +12,7 @@ import type { PluginListenerHandle } from "@capacitor/core";
 import {
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@miladyai/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
 import type {
   GatewayConnectOptions,
   GatewayConnectResult,
@@ -23,14 +23,13 @@ import type {
   GatewayErrorEvent,
   GatewayEvent,
   GatewayPlugin,
-  GatewaySendOptions,
   GatewaySendResult,
   GatewayStateEvent,
   JsonObject,
   JsonValue,
 } from "../../src/definitions";
+import type { EventCallback } from "../../../shared-types.js";
 
-type EventCallback<T> = (event: T) => void;
 type GatewayEventData =
   | GatewayEvent
   | GatewayStateEvent
@@ -391,67 +390,6 @@ export class GatewayElectrobun implements GatewayPlugin {
     this.protocol = null;
     this.role = null;
     this.notifyStateChange("disconnected", "Client disconnect");
-  }
-
-  async isConnected(): Promise<{ connected: boolean }> {
-    return {
-      connected: this.ws !== null && this.ws.readyState === WebSocket.OPEN,
-    };
-  }
-
-  async send(options: GatewaySendOptions): Promise<GatewaySendResult> {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      return {
-        ok: false,
-        error: {
-          code: "NOT_CONNECTED",
-          message: "Not connected to gateway",
-        },
-      };
-    }
-
-    const id = generateUUID();
-    const frame = {
-      type: "req",
-      id,
-      method: options.method,
-      params: options.params ?? {},
-    };
-
-    return new Promise<GatewaySendResult>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        this.pending.delete(id);
-        resolve({
-          ok: false,
-          error: {
-            code: "TIMEOUT",
-            message: "Request timed out",
-          },
-        });
-      }, 60000);
-
-      this.pending.set(id, {
-        resolve,
-        reject,
-        timeout,
-      });
-
-      this.ws?.send(JSON.stringify(frame));
-    });
-  }
-
-  async getConnectionInfo(): Promise<{
-    url: string | null;
-    sessionId: string | null;
-    protocol: number | null;
-    role: string | null;
-  }> {
-    return {
-      url: this.options?.url || null,
-      sessionId: this.sessionId,
-      protocol: this.protocol,
-      role: this.role,
-    };
   }
 
   // MARK: - Discovery Methods

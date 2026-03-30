@@ -99,7 +99,7 @@ milady/
 │   ├── skills/              # Skills system and bundled skills
 │   ├── docs/                # Documentation site (Mintlify)
 │   ├── schemas/             # Protobuf schemas
-│   └── tui/                 # Terminal UI
+│   └── tui/                 # Terminal UI (disabled)
 ├── plugins/                 # Official plugins (100+)
 │   ├── plugin-anthropic/    # Anthropic model provider
 │   ├── plugin-telegram/     # Telegram connector
@@ -107,9 +107,9 @@ milady/
 │   └── ...
 ├── apps/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
-│   └── chrome-extension/    # Browser extension
+│   └── ...                  # No shipped chrome-extension app in this release checkout
 ├── src/                     # Milady runtime
-│   ├── runtime/             # ElizaOS runtime bootstrap
+│   ├── runtime/             # elizaOS runtime bootstrap
 │   ├── plugins/             # Built-in Milady plugins
 │   ├── config/              # Configuration loading
 │   ├── services/            # Registry client, plugin manager
@@ -191,14 +191,11 @@ bun run dev:ui
 
 # Desktop app development
 bun run dev:desktop
-
-# Terminal UI
-bun run tui
 ```
 
 ### Testing
 
-Coverage thresholds are enforced in `vitest.config.ts`: 25% lines/functions/statements, 15% branches. CI fails when coverage falls below these floors.
+Coverage thresholds are enforced from `scripts/coverage-policy.mjs`: 25% lines/functions/statements, 15% branches. CI fails when coverage falls below these floors.
 
 ```bash
 # Run all tests (parallel)
@@ -236,6 +233,15 @@ MILADY_RUNTIME=node bun run milady start
 | `*.e2e.test.ts` | End-to-end tests |
 | `*.live.test.ts` | Live API tests |
 | `test/**/*.test.ts` | Integration tests |
+
+### `packages/app-core` in the root Vitest config
+
+The repo root **`vitest.config.ts`** (used by **`bun run test`** → unit shard) includes:
+
+- **`packages/app-core/src/**/*.test.ts`** and **`packages/app-core/src/**/*.test.tsx`** — colocated tests, including TSX, without listing each file.
+- **`packages/app-core/test/**/*.test.ts`** and **`.../test/**/*.test.tsx`** — shared harness tests (e.g. `test/state`, `test/runtime`).
+
+**Why:** those directories were previously omitted, so new suites never ran in CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** is excluded from this job so e2e stays on **`vitest.e2e.config.ts`**. **`vitest.unit.config.ts`** still omits **`packages/app-core/test/app/**`** (heavy renderer harness) from the coverage-focused unit pass—**why:** those are run in targeted app workspaces or separate jobs.
 
 ---
 

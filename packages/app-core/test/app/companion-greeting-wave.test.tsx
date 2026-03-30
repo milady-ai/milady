@@ -54,6 +54,9 @@ const { mockClient } = vi.hoisted(() => ({
         },
       ],
     })),
+    getStreamSettings: vi.fn(async () => ({
+      settings: { avatarIndex: 1 },
+    })),
     requestGreeting: vi.fn(async () => ({
       text: "hello there",
       agentName: "Milady",
@@ -127,10 +130,12 @@ vi.mock("@miladyai/app-core/api", () => ({
   SkillScanReportSummary: {},
 }));
 
+import { flush } from "../../../../test/helpers/react-test";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
 
 type ProbeApi = {
   handleNewConversation: () => Promise<void>;
+  switchShellView: ReturnType<typeof useApp>["switchShellView"];
 };
 
 type Snapshot = {
@@ -147,8 +152,9 @@ function Probe(props: {
   useEffect(() => {
     props.onReady({
       handleNewConversation: () => app.handleNewConversation(),
+      switchShellView: app.switchShellView,
     });
-  }, [app.handleNewConversation, props]);
+  }, [app.handleNewConversation, app.switchShellView, props]);
 
   useEffect(() => {
     props.onChange({
@@ -158,12 +164,6 @@ function Probe(props: {
   }, [app.tab, app.uiShellMode, props]);
 
   return null;
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
 }
 
 async function waitFor(assertion: () => void): Promise<void> {
@@ -183,6 +183,12 @@ describe("companion greeting wave", () => {
     vi.useFakeTimers();
     localStorage.clear();
     sessionStorage.clear();
+    // Persist a connection mode so the init flow proceeds past onboarding gate
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({ runMode: "local" }),
+    );
+    localStorage.setItem("eliza:ui-shell-mode", "companion");
     window.history.replaceState({}, "", "/chat");
     Object.assign(window, {
       setTimeout: globalThis.setTimeout,
@@ -215,6 +221,9 @@ describe("companion greeting wave", () => {
           updatedAt: "2026-02-02T00:00:00.000Z",
         },
       ],
+    });
+    mockClient.getStreamSettings.mockResolvedValue({
+      settings: { avatarIndex: 1 },
     });
     mockClient.createConversation.mockResolvedValue({
       conversation: {
@@ -353,26 +362,27 @@ describe("companion greeting wave", () => {
 
     await waitFor(() => {
       expect(api).not.toBeNull();
-      if (options?.bootstrapConversation) {
-        expect(mockClient.createConversation).not.toHaveBeenCalled();
-        expect(snapshot).toMatchObject({
-          tab: "character-select",
-          uiShellMode: "native",
-        });
-        return;
-      }
-      expect(mockClient.getConversationMessages).toHaveBeenCalledWith(
-        "conv-existing",
-      );
-      expect(snapshot).toMatchObject({
-        tab: "character-select",
-        uiShellMode: "native",
-      });
     });
 
     const resolvedApi = api;
     if (!resolvedApi) {
       throw new Error("App probe did not initialize");
+    }
+
+    if (!options?.bootstrapConversation) {
+      await act(async () => {
+        resolvedApi.switchShellView("companion");
+      });
+
+      await waitFor(() => {
+        expect(mockClient.getConversationMessages).toHaveBeenCalledWith(
+          "conv-existing",
+        );
+        expect(snapshot).toMatchObject({
+          tab: "companion",
+          uiShellMode: "companion",
+        });
+      });
     }
 
     const originalUnmount = tree.unmount.bind(tree);
@@ -411,7 +421,23 @@ describe("companion greeting wave", () => {
     });
   });
 
-  it("does not wave after creating a new chat outside companion mode", async () => {
+  it("does not wave when creating a new chat without a teleport", async () => {
+    mockClient.createConversation.mockResolvedValue({
+      conversation: {
+        id: "conv-created",
+        title: "New Chat",
+        roomId: "room-created",
+        createdAt: "2026-02-03T00:00:00.000Z",
+        updatedAt: "2026-02-03T00:00:00.000Z",
+      },
+      greeting: {
+        text: "hello there",
+        agentName: "Milady",
+        generated: true,
+        persisted: false,
+      },
+    });
+
     const { api, tree, events } = await renderApp();
 
     await act(async () => {

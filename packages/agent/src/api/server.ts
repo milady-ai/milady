@@ -42,6 +42,11 @@ import {
   loadElizaConfig,
   saveElizaConfig,
 } from "../config/config.js";
+import { resolveModelsCacheDir, resolveStateDir } from "../config/paths.js";
+import {
+  isConnectorConfigured,
+  isStreamingDestinationConfigured,
+} from "../config/plugin-auto-enable.js";
 import {
   isNullOriginAllowed,
   resolveAllowedHosts,
@@ -53,15 +58,18 @@ import {
   setApiToken,
   stripOptionalHostPort,
 } from "../config/runtime-env.js";
-import { resolveModelsCacheDir, resolveStateDir } from "../config/paths.js";
-import {
-  isConnectorConfigured,
-  isStreamingDestinationConfigured,
-} from "../config/plugin-auto-enable.js";
 import type {
   ConnectorConfig,
   CustomActionDef,
 } from "../config/types.eliza.js";
+import {
+  isOnboardingConnectionComplete,
+  normalizeOnboardingProviderId,
+  normalizePersistedOnboardingConnection,
+  ONBOARDING_CLOUD_PROVIDER_OPTIONS,
+  ONBOARDING_PROVIDER_CATALOG,
+  stripOnboardingConnectionSecrets,
+} from "../contracts/onboarding.js";
 import { createIntegrationTelemetrySpan } from "../diagnostics/integration-observability.js";
 import { EMOTE_BY_ID, EMOTE_CATALOG } from "../emotes/catalog.js";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace.js";
@@ -130,7 +138,6 @@ import {
   uninstallMarketplaceSkill,
 } from "../services/skill-marketplace.js";
 import { streamManager } from "../services/stream-manager.js";
-import { isFatalTodoDbError, TodoDbCircuitBreaker } from "./todo-db-circuit.js";
 import {
   sanitizeAccountId as sanitizeWhatsAppAccountId,
   WhatsAppPairingSession,
@@ -157,14 +164,6 @@ import {
 } from "../triggers/scheduling.js";
 import { parseClampedInteger } from "../utils/number-parsing.js";
 import { sanitizeSpeechText } from "../utils/spoken-text.js";
-import {
-  ONBOARDING_CLOUD_PROVIDER_OPTIONS,
-  ONBOARDING_PROVIDER_CATALOG,
-  isOnboardingConnectionComplete,
-  normalizeOnboardingProviderId,
-  normalizePersistedOnboardingConnection,
-  stripOnboardingConnectionSecrets,
-} from "../contracts/onboarding.js";
 import { handleAgentAdminRoutes } from "./agent-admin-routes.js";
 import { handleAgentLifecycleRoutes } from "./agent-lifecycle-routes.js";
 import { detectRuntimeModel, resolveProviderFromModel } from "./agent-model.js";
@@ -194,6 +193,11 @@ import {
   resolveCompatRoomKey,
 } from "./compat-utils.js";
 import { ConnectorHealthMonitor } from "./connector-health.js";
+import type {
+  SwarmEvent,
+  TaskCompletionSummary,
+  TaskContext,
+} from "./coordinator-types.js";
 import { wireCoordinatorBridgesWhenReady } from "./coordinator-wiring.js";
 import {
   isInsufficientCreditsError,
@@ -210,8 +214,8 @@ import {
   sendJson,
   sendJsonError,
 } from "./http-helpers.js";
-import { getKnowledgeService } from "./knowledge-service-loader.js";
 import { handleKnowledgeRoutes } from "./knowledge-routes.js";
+import { getKnowledgeService } from "./knowledge-service-loader.js";
 import {
   evictOldestConversation,
   getOrReadCachedFile,
@@ -245,6 +249,7 @@ import { applySignalQrOverride, handleSignalRoute } from "./signal-routes.js";
 import { resolveStreamingUpdate } from "./streaming-text.js";
 import { handleSubscriptionRoutes } from "./subscription-routes.js";
 import { resolveTerminalRunLimits } from "./terminal-run-limits.js";
+import { isFatalTodoDbError, TodoDbCircuitBreaker } from "./todo-db-circuit.js";
 import { handleTrainingRoutes } from "./training-routes.js";
 import type { TrainingServiceWithRuntime } from "./training-service-like.js";
 import { handleTrajectoryRoute } from "./trajectory-routes.js";
@@ -268,29 +273,23 @@ import {
 } from "./wallet.js";
 import { handleWalletRoutes } from "./wallet-routes.js";
 import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
+import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
 import {
   loadWalletTradingProfile,
   recordWalletTradeLedgerEntry,
   updateWalletTradeLedgerEntryStatus,
 } from "./wallet-trading-profile.js";
-import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
 import {
   applyWhatsAppQrOverride,
   handleWhatsAppRoute,
 } from "./whatsapp-routes.js";
 
-import type {
-  SwarmEvent,
-  TaskCompletionSummary,
-  TaskContext,
-} from "./coordinator-types.js";
-
-// @ts-ignore
+// @ts-expect-error
 type PiAiPluginModule = typeof import("@elizaos/plugin-pi-ai");
 let _piAiPluginModule: PiAiPluginModule | null = null;
 async function loadPiAiPluginModule(): Promise<PiAiPluginModule> {
   if (!_piAiPluginModule) {
-    // @ts-ignore
+    // @ts-expect-error
     _piAiPluginModule = await import("@elizaos/plugin-pi-ai");
   }
   return _piAiPluginModule;
@@ -462,15 +461,17 @@ function patchTouchesProviderSelection(
   patch: Record<string, unknown>,
 ): boolean {
   if (
-    Object.prototype.hasOwnProperty.call(patch, "cloud") ||
-    Object.prototype.hasOwnProperty.call(patch, "env") ||
-    Object.prototype.hasOwnProperty.call(patch, "models")
+    Object.hasOwn(patch, "cloud") ||
+    Object.hasOwn(patch, "env") ||
+    Object.hasOwn(patch, "models")
   ) {
     return true;
   }
 
   const agents =
-    patch.agents && typeof patch.agents === "object" && !Array.isArray(patch.agents)
+    patch.agents &&
+    typeof patch.agents === "object" &&
+    !Array.isArray(patch.agents)
       ? (patch.agents as Record<string, unknown>)
       : null;
   const defaults =
@@ -484,8 +485,8 @@ function patchTouchesProviderSelection(
   }
 
   return (
-    Object.prototype.hasOwnProperty.call(defaults, "subscriptionProvider") ||
-    Object.prototype.hasOwnProperty.call(defaults, "model")
+    Object.hasOwn(defaults, "subscriptionProvider") ||
+    Object.hasOwn(defaults, "model")
   );
 }
 
@@ -3304,7 +3305,8 @@ const BINANCE_SKILL_KEYWORD_MAP: Array<{
   },
   // trading-signal: smart money signals, whale signals
   {
-    pattern: /\b(?:(?:trading|smart\s*money|whale)\s*signal|signal\s*(?:list|data))/i,
+    pattern:
+      /\b(?:(?:trading|smart\s*money|whale)\s*signal|signal\s*(?:list|data))/i,
     slug: "binance-trading-signal",
   },
   // crypto-market-rank: market rankings, trending, alpha, leaderboard
@@ -3422,7 +3424,9 @@ function resolveDirectBinanceMemeRushCommand(userText: string): {
     const explicitCount = extractExplicitDirectBinanceCount(normalized, 50);
     return {
       script: "fetch-topics.sh",
-      args: explicitCount ? [chain, type, sort, String(explicitCount)] : [chain, type, sort],
+      args: explicitCount
+        ? [chain, type, sort, String(explicitCount)]
+        : [chain, type, sort],
     };
   }
   const stage = /migrat/.test(normalized)
@@ -3674,12 +3678,14 @@ const DIRECT_BINANCE_SUMMARY_DEFAULT_ITEMS = 5;
 const DIRECT_BINANCE_SUMMARY_MAX_DEPTH = 4;
 
 function shouldOmitDirectBinanceSummaryKey(key: string): boolean {
-  return /^(?:icon|iconUrl|image|imageUrl|logo|logoUrl|avatar|avatarUrl|cover|coverUrl)$/i.test(
-    key,
-  ) ||
+  return (
+    /^(?:icon|iconUrl|image|imageUrl|logo|logoUrl|avatar|avatarUrl|cover|coverUrl)$/i.test(
+      key,
+    ) ||
     /^(?:website|websites|twitter|telegram|discord|medium|social|socials|links?|x)$/i.test(
       key,
-    );
+    )
+  );
 }
 
 function compactDirectBinanceSummaryValue(
@@ -3700,7 +3706,9 @@ function compactDirectBinanceSummaryValue(
     if (Array.isArray(value)) {
       return value
         .slice(0, Math.min(itemLimit, 3))
-        .map((item) => compactDirectBinanceSummaryValue(item, itemLimit, depth + 1));
+        .map((item) =>
+          compactDirectBinanceSummaryValue(item, itemLimit, depth + 1),
+        );
     }
     if (typeof value === "object") {
       const objectValue = value as Record<string, unknown>;
@@ -3724,7 +3732,9 @@ function compactDirectBinanceSummaryValue(
   if (Array.isArray(value)) {
     return value
       .slice(0, itemLimit)
-      .map((item) => compactDirectBinanceSummaryValue(item, itemLimit, depth + 1))
+      .map((item) =>
+        compactDirectBinanceSummaryValue(item, itemLimit, depth + 1),
+      )
       .filter((item) => item !== undefined);
   }
 
@@ -3748,7 +3758,10 @@ function compactDirectBinanceSummaryValue(
 
     const maxKeys = depth === 0 ? 24 : depth === 1 ? 16 : 10;
     const compactObject: Record<string, unknown> = {};
-    for (const [key, entry] of [...scalarEntries, ...complexEntries].slice(0, maxKeys)) {
+    for (const [key, entry] of [...scalarEntries, ...complexEntries].slice(
+      0,
+      maxKeys,
+    )) {
       const compactEntry = compactDirectBinanceSummaryValue(
         entry,
         key === "data" ? itemLimit : Math.min(itemLimit, 6),
@@ -3913,7 +3926,9 @@ async function maybeHandleDirectBinanceSkillRequest(
   const skillSlug = extractDirectBinanceSkillSlug(userText);
   if (!skillSlug) return null;
   if (!shouldExposeBinanceSkillId(skillSlug)) {
-    const visibleSkills = Array.from(EXPOSED_BINANCE_SKILL_IDS).sort().join(", ");
+    const visibleSkills = Array.from(EXPOSED_BINANCE_SKILL_IDS)
+      .sort()
+      .join(", ");
     return `The Binance skill "${skillSlug}" is currently hidden in this build. Available Binance skills: ${visibleSkills}.`;
   }
 
@@ -3929,11 +3944,16 @@ async function maybeHandleDirectBinanceSkillRequest(
       : typeof service?.getLoadedSkills === "function"
         ? service
             .getLoadedSkills()
-            .some((skill) => typeof skill.slug === "string" && skill.slug === skillSlug)
+            .some(
+              (skill) =>
+                typeof skill.slug === "string" && skill.slug === skillSlug,
+            )
         : false;
   if (!hasSkill) return null;
 
-  const runtimeActions = Array.isArray((runtime as { actions?: unknown[] }).actions)
+  const runtimeActions = Array.isArray(
+    (runtime as { actions?: unknown[] }).actions,
+  )
     ? ((runtime as { actions: unknown[] }).actions as Array<{
         name?: string;
         handler?: (...args: unknown[]) => unknown;
@@ -4380,7 +4400,8 @@ async function generateChatResponse(
               return [];
             },
           );
-          const finalText = actionResponseText || responseText || "Task created.";
+          const finalText =
+            actionResponseText || responseText || "Task created.";
           const promptText = originalUserText;
           const estPromptTokens = Math.ceil(promptText.length / 4);
           const estCompletionTokens = Math.ceil(finalText.length / 4);
@@ -5176,7 +5197,9 @@ async function readChatRequestPayload(
     ? normalizeCharacterLanguage(rawPreferredLanguage)
     : undefined;
   const metadata =
-    body.metadata && typeof body.metadata === "object" && !Array.isArray(body.metadata)
+    body.metadata &&
+    typeof body.metadata === "object" &&
+    !Array.isArray(body.metadata)
       ? body.metadata
       : undefined;
   return {
@@ -6637,21 +6660,21 @@ export function resolveTradePermissionMode(
  */
 // Trade safety utilities (defined in trade-safety.ts for testability)
 import {
-  type TradePermissionMode,
   assertQuoteFresh,
   canUseLocalTradeExecution,
   recordAgentAutoTrade,
+  type TradePermissionMode,
 } from "./trade-safety.js";
 
 export {
   AGENT_AUTO_MAX_DAILY_TRADES,
-  QUOTE_MAX_AGE_MS,
-  type TradePermissionMode,
   agentAutoDailyTrades,
   assertQuoteFresh,
   canUseLocalTradeExecution,
   getAgentAutoTradeDate,
+  QUOTE_MAX_AGE_MS,
   recordAgentAutoTrade,
+  type TradePermissionMode,
 } from "./trade-safety.js";
 
 // ---------------------------------------------------------------------------
@@ -6855,10 +6878,10 @@ function buildPluginEvmDiagnosticEntry(
 // "send" alone is too broad — "send a slack message" shouldn't trigger wallet
 // mode.  Require "send" to appear near a crypto/wallet keyword within 40 chars.
 const WALLET_CHAT_INTENT_RE =
-  /\b(wallet|privy|onchain|on-chain|address|balance|swap|trade|transfer|token|bnb|eth|sol)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|bnb|wallet|crypto|coin)\b))/i;
+  /\b(wallet|privy|onchain|on-chain|address|balance|swap|trade|transfer|token|bnb|t?bnb|eth|sol)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|t?bnb|wallet|crypto|coin)\b))/i;
 
 const WALLET_EXECUTION_INTENT_RE =
-  /\b(swap|trade|transfer|buy|sell|execute|approve)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|bnb|wallet|crypto|coin)\b))/i;
+  /\b(swap|trade|transfer|buy|sell|execute|approve)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|t?bnb|wallet|crypto|coin)\b))/i;
 
 const WALLET_IDENTITY_INTENT_RE = /\b(wallet\s*address|address)\b/i;
 
@@ -9346,8 +9369,7 @@ async function handleRequest(
   }
   const pathname = url.pathname;
   const isAuthEndpoint = pathname.startsWith("/api/auth/");
-  const isHealthEndpoint =
-    method === "GET" && pathname === "/api/health";
+  const isHealthEndpoint = method === "GET" && pathname === "/api/health";
   const isCloudOnboardingStatusEndpoint =
     method === "GET" &&
     pathname === "/api/onboarding/status" &&
@@ -9527,37 +9549,6 @@ async function handleRequest(
     return;
   }
 
-  // ── Provider inference helpers ────────────────────────────────────────
-  const disableCloudInference = (): void => {
-    const configuredCloudApiKey =
-      typeof state.config?.cloud?.apiKey === "string"
-        ? state.config.cloud.apiKey.trim()
-        : "";
-
-    delete process.env.ANTHROPIC_BASE_URL;
-    delete process.env.OPENAI_BASE_URL;
-
-    // Only clear proxied cloud credentials. Preserve direct provider keys so
-    // switching local providers does not discard previously configured BYOK state.
-    if (configuredCloudApiKey) {
-      if (process.env.ANTHROPIC_API_KEY === configuredCloudApiKey) {
-        delete process.env.ANTHROPIC_API_KEY;
-      }
-      if (process.env.OPENAI_API_KEY === configuredCloudApiKey) {
-        delete process.env.OPENAI_API_KEY;
-      }
-    }
-  };
-
-  const enableCloudInference = (cloudApiKey: string, baseUrl: string): void => {
-    // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
-    process.env.ANTHROPIC_BASE_URL = `${baseUrl}/api/v1`;
-    process.env.ANTHROPIC_API_KEY = cloudApiKey;
-    process.env.OPENAI_BASE_URL = `${baseUrl}/api/v1`;
-    process.env.OPENAI_API_KEY = cloudApiKey;
-    // Gemini CLI and Aider — no proxy support via ElizaCloud inference
-  };
-
   // ── POST /api/provider/switch ─────────────────────────────────────────
   // Atomically switch the active AI provider selection while preserving
   // previously configured credentials and cloud auth as capability state.
@@ -9596,11 +9587,14 @@ async function handleRequest(
       }
 
       const config = state.config;
-      let connection: ReturnType<typeof createProviderSwitchConnection> | {
-        kind: "cloud-managed";
-        cloudProvider: "elizacloud";
-        apiKey?: string;
-      } | null;
+      let connection:
+        | ReturnType<typeof createProviderSwitchConnection>
+        | {
+            kind: "cloud-managed";
+            cloudProvider: "elizacloud";
+            apiKey?: string;
+          }
+        | null;
       if (normalizedProvider === "elizacloud") {
         connection = {
           kind: "cloud-managed" as const,
@@ -9608,7 +9602,11 @@ async function handleRequest(
           apiKey: trimmedApiKey,
         };
         if (trimmedApiKey) {
-          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
+          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1.
+          // Persisted cloud.* + ELIZAOS_* come from applyOnboardingConnectionConfig
+          // (enableCloudInference there); this block is process-only for SDK-compatible CLIs.
+          // Omitting trimmedApiKey leaves existing direct keys (E2E: switch to elizacloud
+          // without apiKey preserves OPENAI_API_KEY).
           const cloudApiKey = trimmedApiKey;
           const cloudBaseUrl = "https://www.elizacloud.ai";
           process.env.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;
@@ -9626,7 +9624,6 @@ async function handleRequest(
               ? body.primaryModel.trim()
               : undefined,
         });
-        disableCloudInference();
       } else {
         connection = null;
       }
@@ -10159,10 +10156,7 @@ async function handleRequest(
         | "psycho";
     }
 
-    const explicitConnectionRequested = Object.prototype.hasOwnProperty.call(
-      body,
-      "connection",
-    );
+    const explicitConnectionRequested = Object.hasOwn(body, "connection");
     const explicitConnection = explicitConnectionRequested
       ? normalizePersistedOnboardingConnection(body.connection)
       : null;
@@ -10290,8 +10284,9 @@ async function handleRequest(
       ) {
         if (!config.agents) config.agents = {};
         if (!config.agents.defaults) config.agents.defaults = {};
-        (config.agents.defaults as Record<string, unknown>)
-          .subscriptionProvider = body.provider;
+        (
+          config.agents.defaults as Record<string, unknown>
+        ).subscriptionProvider = body.provider;
         logger.info(
           `[eliza-api] Subscription provider selected: ${body.provider} — complete OAuth via /api/subscription/ endpoints`,
         );
@@ -13958,20 +13953,22 @@ async function handleRequest(
     // Strip "[REDACTED]" from the whole patch (GET → PUT round-trips).
     stripRedactedPlaceholderValuesDeep(filtered);
 
-    const explicitConnectionRequested = Object.prototype.hasOwnProperty.call(
-      filtered,
-      "connection",
-    );
+    const explicitConnectionRequested = Object.hasOwn(filtered, "connection");
     const normalizedConnectionPatch = explicitConnectionRequested
       ? normalizePersistedOnboardingConnection(filtered.connection)
       : null;
     if (explicitConnectionRequested && !normalizedConnectionPatch) {
-      error(res, "connection must be a valid onboarding connection object", 400);
+      error(
+        res,
+        "connection must be a valid onboarding connection object",
+        400,
+      );
       return;
     }
     if (normalizedConnectionPatch) {
-      filtered.connection =
-        stripOnboardingConnectionSecrets(normalizedConnectionPatch);
+      filtered.connection = stripOnboardingConnectionSecrets(
+        normalizedConnectionPatch,
+      );
     }
 
     if (isMiladySettingsDebugEnabled()) {
@@ -14033,7 +14030,10 @@ async function handleRequest(
     }
 
     if (normalizedConnectionPatch) {
-      await applyOnboardingConnectionConfig(state.config, normalizedConnectionPatch);
+      await applyOnboardingConnectionConfig(
+        state.config,
+        normalizedConnectionPatch,
+      );
     } else if (patchTouchesProviderSelection(filtered)) {
       reconcilePersistedOnboardingConnection(state.config);
     }
@@ -18647,9 +18647,8 @@ export async function startApiServer(opts?: {
 
   // Optional auto-provision mode for legacy environments. Disabled by default
   // so startup does not silently create new wallets when keys are missing.
-  const walletAutoProvisionRaw = process.env.MILADY_WALLET_AUTO_PROVISION
-    ?.trim()
-    .toLowerCase();
+  const walletAutoProvisionRaw =
+    process.env.MILADY_WALLET_AUTO_PROVISION?.trim().toLowerCase();
   const walletAutoProvisionEnabled =
     walletAutoProvisionRaw === "1" ||
     walletAutoProvisionRaw === "true" ||
@@ -19034,7 +19033,6 @@ export async function startApiServer(opts?: {
           `[autonomy-route] Failed to route proactive event: ${err instanceof Error ? err.message : String(err)}`,
         );
       });
-
     });
 
     const unsubHeartbeat = svc.subscribeHeartbeat((event) => {
@@ -19173,9 +19171,7 @@ export async function startApiServer(opts?: {
     // configured, inject it so /api/stream/live can fetch credentials.
     void (async () => {
       try {
-        const { handleStreamRoute } = await import(
-          "./stream-routes.js"
-        );
+        const { handleStreamRoute } = await import("./stream-routes.js");
         // Screen capture manager is injected by the desktop host via globalThis
         const screenCapture = (globalThis as Record<string, unknown>)
           .__elizaScreenCapture as

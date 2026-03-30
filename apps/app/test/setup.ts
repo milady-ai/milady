@@ -4,33 +4,174 @@
  * All navigator sub-objects (mediaDevices, geolocation, permissions, clipboard)
  * are created here with vi.fn() stubs so tests can vi.spyOn() them freely.
  */
+
+import React from "react";
 import { vi } from "vitest";
+import {
+  createMockStorage,
+  hasStorageApi,
+  installCanvasMocks,
+  suppressReactTestConsoleErrors,
+} from "../../../test/helpers/browser-mocks";
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
 }
 
+globalThis.React = React;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-const originalConsoleError = console.error.bind(console);
+suppressReactTestConsoleErrors();
 
-function shouldIgnoreTestConsoleError(args: unknown[]): boolean {
-  const first = args[0];
+// ---------------------------------------------------------------------------
+// Mock @miladyai/app-core bridge modules — the real electrobun RPC module
+// relies on native Electrobun bindings that are unavailable in the test
+// environment.
+// ---------------------------------------------------------------------------
+
+type RpcMessageHandler = (
+  message: string,
+  listener: (payload: unknown) => void,
+) => void;
+type RpcRequestMap = Record<string, (params?: unknown) => unknown>;
+
+interface ElectrobunTestWindow {
+  __electrobunWindowId?: number;
+  __electrobunWebviewId?: number;
+  __ELIZA_ELECTROBUN_RPC__?: unknown;
+  __MILADY_ELECTROBUN_RPC__?: unknown;
+}
+
+function isInjectedElectrobunRuntime(): boolean {
+  if (typeof window === "undefined") return false;
+  const w = window as ElectrobunTestWindow;
   return (
-    typeof first === "string" &&
-    (first.includes("react-test-renderer is deprecated") ||
-      first.includes(
-        "The current testing environment is not configured to support act(...)",
-      ))
+    typeof w.__electrobunWindowId === "number" ||
+    typeof w.__electrobunWebviewId === "number"
   );
 }
 
-console.error = (...args: unknown[]) => {
-  if (shouldIgnoreTestConsoleError(args)) {
-    return;
+// Shared bridge mock implementation — used by both module paths
+function createBridgeMock(extraExports: Record<string, unknown> = {}) {
+  function getElectrobunRendererRpc() {
+    if (typeof window === "undefined") return null;
+    const w = window as ElectrobunTestWindow;
+    return w.__ELIZA_ELECTROBUN_RPC__ ?? w.__MILADY_ELECTROBUN_RPC__ ?? null;
   }
-  originalConsoleError(...args);
-};
+
+  return {
+    getElectrobunRendererRpc,
+    isElectrobunRuntime: isInjectedElectrobunRuntime,
+    getBackendStartupTimeoutMs: () =>
+      isInjectedElectrobunRuntime() ? 180_000 : 30_000,
+    invokeDesktopBridgeRequest: async (options: {
+      rpcMethod: string;
+      params?: unknown;
+    }) => {
+      const rpc = getElectrobunRendererRpc() as Record<string, unknown> | null;
+      const request = (rpc?.request as RpcRequestMap)?.[options.rpcMethod];
+      if (request) return await request(options.params);
+      return null;
+    },
+    subscribeDesktopBridgeEvent: (options: {
+      rpcMessage: string;
+      listener: (payload: unknown) => void;
+    }) => {
+      const rpc = getElectrobunRendererRpc() as Record<string, unknown> | null;
+      if (rpc) {
+        (rpc.onMessage as RpcMessageHandler)(
+          options.rpcMessage,
+          options.listener,
+        );
+        return () => {
+          (rpc.offMessage as RpcMessageHandler)(
+            options.rpcMessage,
+            options.listener,
+          );
+        };
+      }
+      return () => {};
+    },
+    invokeDesktopBridgeRequestWithTimeout: async (options: {
+      rpcMethod: string;
+      ipcChannel?: string;
+      params?: unknown;
+      timeoutMs: number;
+    }) => {
+      const rpc = getElectrobunRendererRpc() as Record<string, unknown> | null;
+      const request = (rpc?.request as RpcRequestMap)?.[options.rpcMethod];
+      if (!request) return { status: "missing" as const };
+      const call = request(options.params) as Promise<unknown>;
+      type RaceWinner =
+        | { tag: "done"; value: unknown }
+        | { tag: "reject"; error: unknown }
+        | { tag: "timeout" };
+      let tid: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<RaceWinner>((resolve) => {
+        tid = setTimeout(() => resolve({ tag: "timeout" }), options.timeoutMs);
+      });
+      const settledPromise: Promise<RaceWinner> = call.then(
+        (value) => ({ tag: "done" as const, value }),
+        (error: unknown) => ({ tag: "reject" as const, error }),
+      );
+      try {
+        const winner = await Promise.race([settledPromise, timeoutPromise]);
+        if (tid !== undefined) clearTimeout(tid);
+        if (winner.tag === "timeout") return { status: "timeout" as const };
+        if (winner.tag === "reject")
+          return { status: "rejected" as const, error: winner.error };
+        return { status: "ok" as const, value: winner.value };
+      } catch (error: unknown) {
+        if (tid !== undefined) clearTimeout(tid);
+        return { status: "rejected" as const, error };
+      }
+    },
+    initializeCapacitorBridge: () => {},
+    initializeStorageBridge: async () => {},
+    ElectrobunRendererRpc: {},
+    ...extraExports,
+  };
+}
+
+vi.mock("@miladyai/app-core/bridge/electrobun-rpc.js", () =>
+  createBridgeMock(),
+);
+
+vi.mock("@miladyai/app-core/bridge", () =>
+  createBridgeMock({
+    platform: "web",
+    isWeb: () => true,
+    isNative: false,
+    isIOS: false,
+    isAndroid: false,
+    isDesktop: () => false,
+    isMacOS: () => false,
+    getPluginCapabilities: () => ({
+      gateway: { available: true, websocket: true, discovery: false },
+      voiceWake: { available: false },
+      talkMode: { available: false, elevenlabs: true },
+      camera: { available: false },
+      location: { available: false, gps: false, background: false },
+      screenCapture: { available: false },
+      canvas: { available: true },
+      desktop: { available: false, tray: false, shortcuts: false, menu: false },
+    }),
+    isFeatureAvailable: (feature: string) => {
+      const map: Record<string, boolean> = {
+        gatewayDiscovery: false,
+        voiceWake: false,
+        talkMode: false,
+        elevenlabs: true,
+        camera: false,
+        location: false,
+        backgroundLocation: false,
+        screenCapture: false,
+        desktopTray: false,
+      };
+      return map[feature] ?? false;
+    },
+  }),
+);
 
 // ---------------------------------------------------------------------------
 // Mock @capacitor/core
@@ -93,7 +234,7 @@ function ensureObj(
 
 const nav: Record<string, unknown> =
   typeof globalThis.navigator !== "undefined"
-    ? (globalThis.navigator as unknown as Record<string, unknown>)
+    ? (globalThis.navigator as Record<string, unknown>)
     : {};
 
 if (typeof globalThis.navigator === "undefined") {
@@ -172,38 +313,6 @@ if (typeof globalThis.document === "undefined") {
   });
 }
 
-// Simple in-memory storage mock
-function createMockStorage(): Storage {
-  const store = new Map<string, string>();
-  return {
-    getItem: vi.fn((key: string) => store.get(key) ?? null),
-    setItem: vi.fn((key: string, value: string) => {
-      store.set(key, value);
-    }),
-    removeItem: vi.fn((key: string) => {
-      store.delete(key);
-    }),
-    clear: vi.fn(() => {
-      store.clear();
-    }),
-    get length() {
-      return store.size;
-    },
-    key: vi.fn((index: number) => [...store.keys()][index] ?? null),
-  } as Storage;
-}
-
-function hasStorageApi(value: unknown): value is Storage {
-  return Boolean(
-    value &&
-      typeof value === "object" &&
-      typeof (value as Storage).getItem === "function" &&
-      typeof (value as Storage).setItem === "function" &&
-      typeof (value as Storage).removeItem === "function" &&
-      typeof (value as Storage).clear === "function",
-  );
-}
-
 if (!hasStorageApi(globalThis.localStorage)) {
   Object.defineProperty(globalThis, "localStorage", {
     value: createMockStorage(),
@@ -240,7 +349,7 @@ if (typeof globalThis.window === "undefined") {
     configurable: true,
   });
 } else {
-  const win = globalThis.window as unknown as Record<string, unknown>;
+  const win = globalThis.window as Record<string, unknown>;
   if (!hasStorageApi(win.sessionStorage)) {
     Object.defineProperty(win, "sessionStorage", {
       value: globalThis.sessionStorage,
@@ -264,61 +373,7 @@ if (typeof globalThis.window === "undefined") {
   }
 }
 
-if (typeof globalThis.HTMLCanvasElement !== "undefined") {
-  const createCanvas2DContext = (): CanvasRenderingContext2D =>
-    ({
-      fillRect: vi.fn(),
-      clearRect: vi.fn(),
-      getImageData: vi.fn(() => ({
-        data: new Uint8ClampedArray(0),
-        width: 0,
-        height: 0,
-      })),
-      putImageData: vi.fn(),
-      drawImage: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      stroke: vi.fn(),
-      fill: vi.fn(),
-      arc: vi.fn(),
-      rect: vi.fn(),
-      save: vi.fn(),
-      restore: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      scale: vi.fn(),
-      transform: vi.fn(),
-      setTransform: vi.fn(),
-      resetTransform: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      measureText: vi.fn(() => ({ width: 0 })),
-      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      createPattern: vi.fn(() => null),
-      canvas: document.createElement("canvas"),
-      lineWidth: 1,
-      globalAlpha: 1,
-      fillStyle: "#000",
-      strokeStyle: "#000",
-    }) as unknown as CanvasRenderingContext2D;
-
-  Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "getContext", {
-    value: vi.fn((contextType: string) =>
-      contextType === "2d" ? createCanvas2DContext() : null,
-    ),
-    writable: true,
-    configurable: true,
-  });
-
-  Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "toDataURL", {
-    value: vi.fn(() => "data:image/png;base64,dGVzdA=="),
-    writable: true,
-    configurable: true,
-  });
-}
+installCanvasMocks();
 
 if (typeof globalThis.WebSocket === "undefined") {
   class MockWebSocket {

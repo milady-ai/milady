@@ -1,8 +1,9 @@
+import { Button, Spinner, Z_SYSTEM_CRITICAL } from "@miladyai/ui";
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
 
 /**
- * Banner shown during WebSocket reconnection attempts (amber) and
+ * Banner shown during WebSocket reconnection attempts (yellow) and
  * after all attempts are exhausted (red). Offers Retry when failed.
  */
 export function ConnectionFailedBanner() {
@@ -20,30 +21,16 @@ export function ConnectionFailedBanner() {
   if (backendConnection.state === "reconnecting") {
     return (
       <div
-        className="fixed left-0 right-0 z-[9999] flex items-center gap-3 bg-amber-500 px-4 py-2 text-[13px] font-medium text-white shadow-lg"
+        role="status"
+        aria-live="polite"
+        className={`fixed left-0 right-0 z-[${Z_SYSTEM_CRITICAL}] flex items-center gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg`}
         style={{ top: bannerTop }}
       >
-        <svg
-          className="h-4 w-4 shrink-0 animate-spin"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-label="Reconnecting"
-          role="img"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
+        <Spinner
+          size={16}
+          className="shrink-0 text-[color:var(--accent-foreground)]"
+          aria-label={t("aria.reconnecting")}
+        />
         <span className="truncate">
           {t("connectionfailedbanner.ReconnectingAtt")}{" "}
           {backendConnection.reconnectAttempt}/
@@ -59,7 +46,9 @@ export function ConnectionFailedBanner() {
   ) {
     return (
       <div
-        className="fixed left-0 right-0 z-[9999] flex items-center justify-between gap-3 bg-danger px-4 py-2 text-[13px] font-medium text-white shadow-lg"
+        role="alert"
+        aria-live="assertive"
+        className={`fixed left-0 right-0 z-[${Z_SYSTEM_CRITICAL}] flex items-center justify-between gap-3 bg-danger px-4 py-2 text-[13px] font-medium text-white shadow-lg`}
         style={{ top: bannerTop }}
       >
         <span className="truncate">
@@ -68,20 +57,22 @@ export function ConnectionFailedBanner() {
           {t("connectionfailedbanner.attemptsRealTime")}
         </span>
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={dismissBackendDisconnectedBanner}
-            className="rounded px-3 py-1 text-[12px] text-red-100 hover:bg-red-700 transition-colors cursor-pointer"
+            className="rounded px-3 py-1 text-[12px] text-red-100 hover:bg-red-700 hover:text-white"
           >
             {t("skillsview.Dismiss")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={retryBackendConnection}
-            className="rounded bg-white px-3 py-1 text-[12px] font-semibold text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+            className="rounded bg-[var(--card)] px-3 py-1 text-[12px] font-semibold text-[var(--destructive)] hover:bg-[var(--bg-hover)] border-transparent"
           >
             {t("vectorbrowserview.RetryConnection")}
-          </button>
+          </Button>
         </div>
       </div>
     );

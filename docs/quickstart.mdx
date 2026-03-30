@@ -107,15 +107,12 @@ The onboarding wizard only runs when stdin is a TTY (interactive terminal). In h
     ◇  Sakuya: One more thing — which AI provider should I use?
     │  ● Anthropic (Claude)
     │  ○ OpenAI (GPT)
-    │  ○ OpenRouter
-    │  ○ Vercel AI Gateway
-    │  ○ Google Gemini
-    │  ○ xAI (Grok)
+    │  ○ Google (Gemini)
     │  ○ Groq
-    │  ○ DeepSeek
+    │  ○ xAI (Grok)
+    │  ○ OpenRouter
     │  ○ Mistral
-    │  ○ Together AI
-    │  ○ Ollama (local, free)
+    │  ○ Ollama (local, no key)
     │  ○ Skip for now
     ```
 
@@ -168,7 +165,7 @@ Once onboarding completes, Milady starts the following services:
 | Web Dashboard | `http://localhost:2138` | Chat UI, session management, agent configuration |
 | Gateway | `ws://localhost:18789` | WebSocket + HTTP API for all clients and connectors |
 
-The desktop app opens the dashboard automatically. The CLI version prints the URLs and enters the interactive chat loop or TUI.
+The desktop app opens the dashboard automatically. The CLI version prints the URLs and enters the interactive chat loop.
 
 ## Your First Conversation
 
@@ -245,34 +242,6 @@ you: explain how transformers work
     </Warning>
   </Tab>
 
-  <Tab title="TUI (Terminal Interface)">
-    The TUI provides a rich terminal interface with live activity feed, hotkeys, and token tracking:
-
-    ```bash
-    milady tui
-    ```
-
-    Or during development:
-
-    ```bash
-    bun run tui
-    ```
-
-    The TUI expects an existing `~/.milady/milady.json` config file. Run `milady` first to go through onboarding, then switch to TUI mode.
-
-    **TUI Hotkeys:**
-
-    | Key | Action |
-    |-----|--------|
-    | `q` | Quit gracefully |
-    | `r` | Restart gateway |
-    | `d` | Open dashboard in browser |
-    | `l` | Toggle log view |
-    | `c` | Compact/clear activity |
-    | `?` | Show help |
-    | Arrow keys | Scroll activity |
-  </Tab>
-
   <Tab title="Existing elizaOS Users">
     Milady is built on elizaOS, so the plugin system, action/provider/evaluator patterns, and character format are all compatible. Key differences:
 
@@ -305,6 +274,6 @@ you: explain how transformers work
     Learn the web UI features and session management
   </Card>
   <Card title="Model Providers" icon="microchip" href="/model-providers">
-    Detailed setup for each of the 11 supported providers
+    Detailed setup for each supported LLM provider
   </Card>
 </CardGroup>

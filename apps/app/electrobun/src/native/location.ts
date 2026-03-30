@@ -1,12 +1,4 @@
-/**
- * Location Native Module for Electrobun
- *
- * Primary: Renderer uses navigator.geolocation directly (WebKit supports it).
- * Fallback: IP-based geolocation via public APIs for environments where
- * navigator.geolocation is unavailable.
- */
-
-type SendToWebview = (message: string, payload?: unknown) => void;
+import type { SendToWebview } from "../types.js";
 
 interface GeoPosition {
   latitude: number;

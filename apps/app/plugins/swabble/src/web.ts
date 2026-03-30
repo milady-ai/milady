@@ -43,6 +43,11 @@ interface SpeechRecognitionResultList {
 
 type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
 
+interface SpeechRecognitionWindow {
+  SpeechRecognition?: SpeechRecognitionCtor;
+  webkitSpeechRecognition?: SpeechRecognitionCtor;
+}
+
 type ElectrobunRequestHandler = (params?: unknown) => Promise<unknown>;
 type ElectrobunMessageListener = (payload: unknown) => void;
 
@@ -56,7 +61,7 @@ interface ElectrobunRendererRpc {
 }
 
 type DesktopBridgeWindow = Window & {
-  __MILADY_ELECTROBUN_RPC__?: ElectrobunRendererRpc;
+  __ELIZA_ELECTROBUN_RPC__?: ElectrobunRendererRpc;
 };
 
 function getDesktopBridgeWindow(): DesktopBridgeWindow | null {
@@ -68,7 +73,8 @@ function getDesktopBridgeWindow(): DesktopBridgeWindow | null {
 }
 
 function getElectrobunRendererRpc(): ElectrobunRendererRpc | null {
-  return getDesktopBridgeWindow()?.__MILADY_ELECTROBUN_RPC__ ?? null;
+  const w = getDesktopBridgeWindow();
+  return w?.__ELIZA_ELECTROBUN_RPC__ ?? null;
 }
 
 async function invokeDesktopBridgeRequest<T>(options: {
@@ -102,10 +108,8 @@ function subscribeDesktopBridgeEvent(options: {
 }
 
 const getSpeechRecognition = (): SpeechRecognitionCtor | null =>
-  ((window as unknown as Record<string, unknown>)
-    .SpeechRecognition as SpeechRecognitionCtor) ||
-  ((window as unknown as Record<string, unknown>)
-    .webkitSpeechRecognition as SpeechRecognitionCtor) ||
+  (window as SpeechRecognitionWindow).SpeechRecognition ||
+  (window as SpeechRecognitionWindow).webkitSpeechRecognition ||
   null;
 
 /**

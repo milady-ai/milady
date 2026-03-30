@@ -43,19 +43,21 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
-import { GameView } from "@miladyai/app-core/components/GameView";
+import { flush } from "../../../../test/helpers/react-test";
+import { GameView } from "../../src/components/GameView";
 
 function createContext(overrides?: Partial<GameContextStub>): GameContextStub {
   return {
     t: (k: string) => k,
-    activeGameApp: "@elizaos/app-hyperscape",
-    activeGameDisplayName: "Hyperscape",
+    activeGameApp: "@elizaos/app-2004scape",
+    activeGameDisplayName: "2004scape",
     activeGameViewerUrl: "http://localhost:5175/viewer",
     activeGameSandbox: "allow-scripts allow-same-origin",
     activeGamePostMessageAuth: true,
     activeGamePostMessagePayload: {
-      type: "HYPERSCAPE_AUTH",
-      authToken: "token-default",
+      type: "RS_2004SCAPE_AUTH",
+      authToken: "testbot",
+      sessionToken: "password",
     },
     gameOverlayEnabled: false,
     plugins: [],
@@ -65,12 +67,6 @@ function createContext(overrides?: Partial<GameContextStub>): GameContextStub {
     setActionNotice: vi.fn<GameContextStub["setActionNotice"]>(),
     ...overrides,
   };
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
 }
 
 describe("GameView auth session reset", () => {

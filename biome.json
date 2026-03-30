@@ -12,8 +12,8 @@
       "**",
       "!assets",
       "!dist",
-      "!apps/app/public/**",
-      "!apps/app/electrobun/build/**",
+      "!apps/app/public",
+      "!apps/app/electrobun/build",
       "!**/tsc-out",
       "!**/dist-tsc",
       "!docs/_layouts",
@@ -28,7 +28,10 @@
       "!test/contracts/lib",
       "!test/contracts/out",
       "!test/contracts/cache",
-      "!**/vrms/imported-avatars.json"
+      "!**/vrms/imported-avatars.json",
+      "!collision-report.json",
+      "!scripts/type-audit-report.json",
+      "!scripts/type-audit-report.md"
     ]
   },
   "assist": {
@@ -81,6 +84,19 @@
         "rules": {
           "suspicious": {
             "noDuplicateProperties": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/app/src/main.tsx",
+        "packages/app-core/src/styles/styles.css"
+      ],
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": "off"
           }
         }
       }

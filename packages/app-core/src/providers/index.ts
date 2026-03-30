@@ -1,8 +1,4 @@
-/**
- * Provider logo mapping — maps AI provider IDs to their logo image paths.
- *
- * Migrated from apps/app/src/provider-logos.ts.
- */
+/** Provider logo mapping — maps AI provider IDs to their logo image paths. */
 
 export {
   getOnboardingProviderFamily,
@@ -19,7 +15,7 @@ export {
   SUBSCRIPTION_PROVIDER_SELECTIONS,
   type SubscriptionProviderSelectionId,
   sortOnboardingProviders,
-} from "@miladyai/autonomous/contracts/onboarding";
+} from "@miladyai/shared/contracts/onboarding";
 
 import { resolveAppAssetUrl } from "../utils/asset-url";
 
@@ -66,15 +62,24 @@ const PROVIDER_LOGO_MAP_LIGHT: Record<string, string> = {
 };
 
 /**
- * Get the logo path for a provider based on theme
+ * Get the logo path for a provider based on theme.
+ *
  * @param providerId - The provider ID (e.g., "openai", "anthropic")
  * @param isDarkMode - Whether dark mode is active (default: true)
+ * @param customLogo - Optional custom logo paths (from CustomProviderOption)
  * @returns The logo image path or a fallback SVG data URI
  */
 export function getProviderLogo(
   providerId: string,
   isDarkMode: boolean = true,
+  customLogo?: { logoDark?: string; logoLight?: string },
 ): string {
+  // Check custom logo first (from app-injected providers)
+  const custom = isDarkMode ? customLogo?.logoDark : customLogo?.logoLight;
+  if (custom) {
+    return resolveAppAssetUrl(custom);
+  }
+
   const logoMap = isDarkMode ? PROVIDER_LOGO_MAP_DARK : PROVIDER_LOGO_MAP_LIGHT;
   const logo = logoMap[providerId.toLowerCase()];
   if (logo) {

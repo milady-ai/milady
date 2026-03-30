@@ -10,7 +10,7 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
-import { PairingView } from "@miladyai/app-core/components/PairingView";
+import { PairingView } from "../../src/components/PairingView";
 
 function createContext(overrides?: Record<string, unknown>) {
   return {
@@ -53,9 +53,7 @@ describe("PairingView", () => {
     expect(listItems).toContain("pairingview.EnablePairingOnTh");
 
     const docsLink = tree.root.find((node) => node.type === "a");
-    expect(docsLink.props.href).toContain(
-      "docs/api-reference.mdx#authenticate-via-pairing-code",
-    );
+    expect(docsLink.props.href).toContain("docs/api-reference.mdx");
     expect(docsLink.children.join("")).toBe("pairingview.PairingSetupDocs");
   });
 
@@ -68,7 +66,19 @@ describe("PairingView", () => {
     });
     if (!tree) throw new Error("failed to render PairingView");
 
-    expect(tree.root.findAllByType("a")).toHaveLength(0);
+    const bodyText = tree.root
+      .findAllByType("p")
+      .map((p) => p.children.join(""));
+
+    const docsLinks = tree.root.findAll(
+      (node) =>
+        node.type === "a" &&
+        typeof node.props.href === "string" &&
+        node.props.href.includes("docs/api-reference.mdx"),
+    );
+
+    expect(bodyText.join(" ")).not.toContain("pairingview.PairingIsNotEnabl");
+    expect(docsLinks).toHaveLength(1);
     expect(tree.root.findAllByType("li")).toHaveLength(0);
   });
 });

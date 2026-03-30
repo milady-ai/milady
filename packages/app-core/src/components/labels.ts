@@ -37,6 +37,7 @@ export function autoLabel(key: string, pluginId: string): string {
 
   return remainder
     .split("_")
+    .filter(Boolean)
     .map((word) =>
       ENV_KEY_ACRONYMS.has(word)
         ? word

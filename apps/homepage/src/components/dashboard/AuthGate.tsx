@@ -1,150 +1,46 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  clearToken,
-  cloudLogin,
-  cloudLoginPoll,
-  isAuthenticated,
-  setToken,
-} from "../../lib/auth";
+import { useCloudLogin } from "./useCloudLogin";
 
-type AuthState =
-  | "checking"
-  | "unauthenticated"
-  | "polling"
-  | "authenticated"
-  | "error";
+interface CloudLoginBannerProps {
+  onAuthenticated?: () => void;
+}
 
-export function AuthGate({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>("checking");
-  const [error, setError] = useState<string | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+export function CloudLoginBanner({ onAuthenticated }: CloudLoginBannerProps) {
+  const { state, error, manualLoginUrl, signIn } = useCloudLogin({
+    onAuthenticated,
+  });
 
-  useEffect(() => {
-    setState(isAuthenticated() ? "authenticated" : "unauthenticated");
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, []);
-
-  const handleLogin = useCallback(async () => {
-    setState("polling");
-    setError(null);
-    try {
-      const { sessionId, browserUrl } = await cloudLogin();
-      window.open(browserUrl, "_blank", "noopener,noreferrer");
-
-      const deadline = Date.now() + 5 * 60 * 1000;
-      pollRef.current = setInterval(async () => {
-        try {
-          if (Date.now() > deadline) {
-            clearInterval(pollRef.current);
-            setState("error");
-            setError("Login timed out. Please try again.");
-            return;
-          }
-          const result = await cloudLoginPoll(sessionId);
-          if (result.status === "authenticated" && result.apiKey) {
-            clearInterval(pollRef.current);
-            setToken(result.apiKey);
-            setState("authenticated");
-          }
-        } catch (err) {
-          if (String(err).includes("expired")) {
-            clearInterval(pollRef.current);
-            setState("error");
-            setError("Session expired. Please try again.");
-          }
-          // Otherwise keep polling
-        }
-      }, 2000);
-    } catch (err) {
-      setState("error");
-      setError(`Failed to start login: ${err}`);
-    }
-  }, []);
-
-  const _handleLogout = useCallback(() => {
-    clearToken();
-    setState("unauthenticated");
-  }, []);
-
-  const handleSkip = useCallback(() => {
-    setState("authenticated");
-  }, []);
-
-  if (state === "checking") {
-    return (
-      <div className="min-h-screen bg-dark flex items-center justify-center">
-        <div className="text-text-muted font-mono text-sm">Loading...</div>
-      </div>
-    );
-  }
-
-  if (state === "authenticated") {
-    return <>{children}</>;
-  }
+  if (state === "authenticated") return null;
 
   return (
-    <div className="min-h-screen bg-dark flex items-center justify-center pt-20">
-      <div className="max-w-sm w-full space-y-6 p-6">
-        <div className="text-center">
-          <h2 className="text-xl font-medium text-text-light mb-2">
-            Milady Cloud
-          </h2>
-          <p className="text-text-muted text-sm">
-            Sign in with your Eliza Cloud account to manage your agents.
-          </p>
-        </div>
-
-        {state === "polling" ? (
-          <div className="text-center space-y-3">
-            <div className="text-brand font-mono text-sm animate-pulse">
-              Waiting for authentication...
-            </div>
-            <p className="text-text-muted text-xs">
-              Complete the login in the browser tab that opened.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={handleLogin}
-              className="w-full px-4 py-2 bg-brand text-dark font-mono text-xs uppercase tracking-widest rounded hover:bg-brand-hover transition-colors"
-            >
-              Login with Eliza Cloud
-            </button>
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="w-full px-4 py-2 border border-white/10 text-text-muted font-mono text-xs uppercase tracking-widest rounded hover:border-white/30 transition-colors"
-            >
-              Skip (local only)
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div className="space-y-2">
-            <div className="text-red-500 font-mono text-xs text-center">
-              {error}
-            </div>
-            <button
-              type="button"
-              onClick={() => setState("unauthenticated")}
-              className="w-full px-4 py-2 border border-white/10 text-text-muted font-mono text-xs uppercase tracking-widest rounded hover:border-white/30 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+    <div className="mx-4 sm:mx-5 md:mx-8 mt-4 rounded-sm border border-border bg-surface p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-text-light">
+          Sign in to Eliza Cloud
+        </p>
+        <p className="text-xs text-text-muted mt-0.5">
+          Connect your cloud account to manage remote agents and access premium
+          features.
+        </p>
+        {error && <p className="text-xs text-status-stopped mt-1">{error}</p>}
+        {manualLoginUrl && (
+          <a
+            href={manualLoginUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-brand hover:underline mt-1 inline-block"
+          >
+            Open sign-in page manually
+          </a>
         )}
       </div>
+      <button
+        type="button"
+        onClick={() => void signIn()}
+        disabled={state === "polling" || state === "checking"}
+        className="shrink-0 px-4 py-2 text-sm font-medium rounded-sm bg-brand text-text-dark hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+      >
+        {state === "polling" ? "Waiting..." : "Sign In"}
+      </button>
     </div>
   );
 }

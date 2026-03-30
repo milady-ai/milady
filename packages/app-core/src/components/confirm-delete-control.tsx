@@ -1,4 +1,6 @@
+import { Button } from "@miladyai/ui";
 import { useState } from "react";
+import { useApp } from "../state";
 
 type ConfirmDeleteControlProps = {
   onConfirm: () => void;
@@ -17,35 +19,51 @@ type ConfirmDeleteControlProps = {
 export function ConfirmDeleteControl({
   onConfirm,
   disabled = false,
-  triggerLabel = "Delete",
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  triggerLabel,
+  confirmLabel,
+  cancelLabel,
   busyLabel,
-  promptText = "Delete?",
+  promptText,
   triggerClassName,
   confirmClassName,
   cancelClassName,
   promptClassName = "text-[11px] text-[#e74c3c] ml-1",
 }: ConfirmDeleteControlProps) {
+  const { t } = useApp();
   const [confirming, setConfirming] = useState(false);
+  const resolvedTriggerLabel =
+    triggerLabel ??
+    t("confirmdeletecontrol.Delete", { defaultValue: "Delete" });
+  const resolvedConfirmLabel =
+    confirmLabel ??
+    t("confirmdeletecontrol.Confirm", { defaultValue: "Confirm" });
+  const resolvedCancelLabel =
+    cancelLabel ?? t("confirmdeletecontrol.Cancel", { defaultValue: "Cancel" });
+  const resolvedPromptText =
+    promptText ??
+    t("confirmdeletecontrol.DeletePrompt", { defaultValue: "Delete?" });
 
   if (!confirming) {
     return (
-      <button
+      <Button
+        variant="destructive"
+        size="sm"
         type="button"
         className={triggerClassName}
         onClick={() => setConfirming(true)}
         disabled={disabled}
       >
-        {triggerLabel}
-      </button>
+        {resolvedTriggerLabel}
+      </Button>
     );
   }
 
   return (
     <>
-      <span className={promptClassName}>{promptText}</span>
-      <button
+      <span className={promptClassName}>{resolvedPromptText}</span>
+      <Button
+        variant="destructive"
+        size="sm"
         type="button"
         className={confirmClassName}
         onClick={() => {
@@ -54,16 +72,18 @@ export function ConfirmDeleteControl({
         }}
         disabled={disabled}
       >
-        {disabled && busyLabel ? busyLabel : confirmLabel}
-      </button>
-      <button
+        {disabled && busyLabel ? busyLabel : resolvedConfirmLabel}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
         type="button"
         className={cancelClassName}
         onClick={() => setConfirming(false)}
         disabled={disabled}
       >
-        {cancelLabel}
-      </button>
+        {resolvedCancelLabel}
+      </Button>
     </>
   );
 }

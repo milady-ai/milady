@@ -5,6 +5,10 @@ export interface ErrorBoundaryProps {
   children: React.ReactNode;
   /** Custom fallback UI — receives the error and a reset callback */
   fallback?: (error: Error, resetErrorBoundary: () => void) => React.ReactNode;
+  /** Label for the error heading (default: "Something went wrong") */
+  errorLabel?: string;
+  /** Label for the retry button (default: "Try Again") */
+  retryLabel?: string;
 }
 
 interface ErrorBoundaryState {
@@ -40,7 +44,7 @@ export class ErrorBoundary extends React.Component<
       return (
         <div className="flex flex-col items-center justify-center gap-3 p-6 text-center border border-destructive/30 bg-destructive/5 rounded-md">
           <p className="text-sm font-semibold text-destructive">
-            Something went wrong
+            {this.props.errorLabel ?? "Something went wrong"}
           </p>
           <p className="text-xs text-muted max-w-sm">
             {this.state.error.message}
@@ -52,7 +56,7 @@ export class ErrorBoundary extends React.Component<
             className="rounded-md text-xs"
             onClick={this.resetErrorBoundary}
           >
-            Try Again
+            {this.props.retryLabel ?? "Try Again"}
           </Button>
         </div>
       );

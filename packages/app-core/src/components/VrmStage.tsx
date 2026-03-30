@@ -3,12 +3,14 @@ import {
   type AppEmoteEventDetail,
   STOP_EMOTE_EVENT,
 } from "@miladyai/app-core/events";
-import {
-  useChatAvatarVoiceState,
-  useRenderGuard,
-} from "@miladyai/app-core/hooks";
+import { useRenderGuard } from "@miladyai/app-core/hooks";
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import type {
+  CompanionHalfFramerateMode,
+  CompanionVrmPowerMode,
+} from "../state/types";
+import type { TranslateFn } from "../types";
 import { AvatarLoader } from "./AvatarLoader";
 import type {
   CameraProfile,
@@ -17,137 +19,20 @@ import type {
 } from "./avatar/VrmEngine";
 import { VrmViewer } from "./avatar/VrmViewer";
 
-type TranslateFn = (key: string) => string;
-
 const AVATAR_CHANGE_WAVE_DELAY_MS = 650;
-const AVATAR_SWITCH_FADE_DURATION_MS = 650;
 const AVATAR_CHANGE_WAVE_EMOTE: AppEmoteEventDetail = {
   emoteId: "wave",
-  path: "/animations/emotes/waving-both-hands.glb",
+  path: "/animations/emotes/greeting.fbx",
   duration: 2.5,
   loop: false,
   showOverlay: false,
 };
 
-export type VrmStageAvatarEntry = {
-  vrmPath: string;
-  fallbackPreviewUrl: string;
-};
-
-const VrmStageLayer = memo(function VrmStageLayer({
-  active,
-  visible,
-  opacity,
-  zIndex,
-  vrmPath,
-  worldUrl,
-  fallbackPreviewUrl,
-  cameraProfile,
-  initialCompanionZoomNormalized,
-  onEngineReady,
-  onRevealStart,
-  t,
-}: {
-  active: boolean;
-  visible: boolean;
-  opacity: number;
-  zIndex: number;
-  vrmPath: string;
-  worldUrl?: string;
-  fallbackPreviewUrl: string;
-  cameraProfile: CameraProfile;
-  initialCompanionZoomNormalized?: number;
-  onEngineReady?: (vrmPath: string, engine: VrmEngine) => void;
-  onRevealStart?: (vrmPath: string) => void;
-  t: TranslateFn;
-}) {
-  const [vrmLoaded, setVrmLoaded] = useState(false);
-  const [showVrmFallback, setShowVrmFallback] = useState(false);
-  const chatAvatarVoice = useChatAvatarVoiceState();
-
-  const handleVrmEngineReady = useCallback(
-    (engine: VrmEngine) => {
-      engine.setPaused(!active);
-      engine.setCameraAnimation({
-        enabled: true,
-        swayAmplitude: cameraProfile === "companion_close" ? 0.028 : 0.04,
-        bobAmplitude: cameraProfile === "companion_close" ? 0.016 : 0.022,
-        rotationAmplitude: cameraProfile === "companion_close" ? 0.008 : 0.012,
-        speed: cameraProfile === "companion_close" ? 0.48 : 0.42,
-      });
-      engine.setPointerParallaxEnabled(false);
-      if (typeof initialCompanionZoomNormalized === "number") {
-        engine.setCompanionZoomNormalized(initialCompanionZoomNormalized);
-      }
-      onEngineReady?.(vrmPath, engine);
-    },
-    [
-      active,
-      cameraProfile,
-      initialCompanionZoomNormalized,
-      onEngineReady,
-      vrmPath,
-    ],
-  );
-
-  const handleVrmEngineState = useCallback((state: VrmEngineState) => {
-    if (state.vrmLoaded) {
-      setVrmLoaded(true);
-      setShowVrmFallback(false);
-      return;
-    }
-    if (state.loadError) {
-      setVrmLoaded(false);
-      setShowVrmFallback(true);
-    }
-  }, []);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset the layer UI when the requested VRM changes.
-  useEffect(() => {
-    setVrmLoaded(false);
-    setShowVrmFallback(false);
-  }, [vrmPath]);
-
-  return (
-    <>
-      <div
-        className="absolute inset-0 z-10"
-        style={{
-          opacity,
-          zIndex,
-          visibility: visible ? "visible" : "hidden",
-          transition: `opacity ${AVATAR_SWITCH_FADE_DURATION_MS}ms ease`,
-        }}
-      >
-        <VrmViewer
-          active={active}
-          vrmPath={vrmPath}
-          worldUrl={worldUrl}
-          mouthOpen={chatAvatarVoice.mouthOpen}
-          isSpeaking={chatAvatarVoice.isSpeaking}
-          cameraProfile={cameraProfile}
-          onEngineReady={handleVrmEngineReady}
-          onEngineState={handleVrmEngineState}
-          onRevealStart={() => onRevealStart?.(vrmPath)}
-        />
-      </div>
-      {visible && showVrmFallback && !vrmLoaded && (
-        <img
-          src={fallbackPreviewUrl}
-          alt={t("companion.avatarPreviewAlt")}
-          className="absolute left-1/2 top-[52%] -translate-x-1/2 -translate-y-1/2 h-[90%] object-contain opacity-70"
-          style={{ zIndex }}
-        />
-      )}
-      {visible && !vrmLoaded && !showVrmFallback && (
-        <div className="absolute inset-0" style={{ zIndex }}>
-          <AvatarLoader />
-        </div>
-      )}
-    </>
-  );
-});
-
+/**
+ * VrmStage — single persistent VRM engine that swaps only the character model
+ * when `vrmPath` changes. The world background (Gaussian splat) stays
+ * continuously rendered, completely decoupled from character selection.
+ */
 export const VrmStage = memo(function VrmStage({
   active = true,
   vrmPath,
@@ -156,9 +41,12 @@ export const VrmStage = memo(function VrmStage({
   cameraProfile = "companion",
   initialCompanionZoomNormalized,
   onEngineReady,
-  onLayerEngineReady,
+  onRevealStart,
   playWaveOnAvatarChange = false,
-  preloadAvatars = [],
+  onLayerEngineReady: _onLayerEngineReady,
+  companionVrmPowerMode = "balanced",
+  companionHalfFramerateMode = "when_saving_power",
+  companionAnimateWhenHidden = false,
   t,
 }: {
   active?: boolean;
@@ -169,39 +57,32 @@ export const VrmStage = memo(function VrmStage({
   initialCompanionZoomNormalized?: number;
   onEngineReady?: (engine: VrmEngine) => void;
   onLayerEngineReady?: (vrmPath: string, engine: VrmEngine) => void;
+  onRevealStart?: () => void;
   playWaveOnAvatarChange?: boolean;
-  preloadAvatars?: readonly VrmStageAvatarEntry[];
+  companionVrmPowerMode?: CompanionVrmPowerMode;
+  companionHalfFramerateMode?: CompanionHalfFramerateMode;
+  companionAnimateWhenHidden?: boolean;
   t: TranslateFn;
 }) {
   useRenderGuard("VrmStage");
-  const [currentPath, setCurrentPath] = useState(vrmPath);
-  const [outgoingPath, setOutgoingPath] = useState<string | null>(null);
-  const [outgoingOpacity, setOutgoingOpacity] = useState(1);
-  const currentPathRef = useRef(vrmPath);
-  const currentEngineRef = useRef<VrmEngine | null>(null);
-  const enginesRef = useRef(new Map<string, VrmEngine>());
+
+  const engineRef = useRef<VrmEngine | null>(null);
   const avatarChangeWaveTimerRef = useRef<number | null>(null);
-  const transitionTimerRef = useRef<number | null>(null);
-  const transitionFrameRef = useRef<number | null>(null);
-  const pendingWavePathRef = useRef<string | null>(null);
   const hasMountedRef = useRef(false);
-  const fallbackPreviewByPathRef = useRef(new Map<string, string>());
+  const prevVrmPathRef = useRef(vrmPath);
 
-  fallbackPreviewByPathRef.current.set(vrmPath, fallbackPreviewUrl);
-  for (const avatar of preloadAvatars) {
-    fallbackPreviewByPathRef.current.set(
-      avatar.vrmPath,
-      avatar.fallbackPreviewUrl,
-    );
-  }
+  const [vrmLoaded, setVrmLoaded] = useState(false);
+  const [showVrmFallback, setShowVrmFallback] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<number | undefined>(
+    undefined,
+  );
+  const [loaderFading, setLoaderFading] = useState(false);
+  const [loaderHidden, setLoaderHidden] = useState(false);
+  const loaderFadingStartedRef = useRef(false);
+  /** After the first successful VRM load, suppress the loader on subsequent swaps. */
+  const hasLoadedFirstVrmRef = useRef(false);
 
-  useEffect(() => {
-    const currentEngine = enginesRef.current.get(currentPath) ?? null;
-    currentEngineRef.current = currentEngine;
-    if (currentEngine) {
-      onEngineReady?.(currentEngine);
-    }
-  }, [currentPath, onEngineReady]);
+  /* ── Greeting wave ──────────────────────────────────────────────── */
 
   const playGreetingWave = useCallback((engine: VrmEngine | null) => {
     if (!engine) return;
@@ -213,98 +94,109 @@ export const VrmStage = memo(function VrmStage({
     );
   }, []);
 
-  const scheduleGreetingWave = useCallback(() => {
-    if (!active || !playWaveOnAvatarChange) return;
-    if (pendingWavePathRef.current !== currentPath) return;
-    const engine = enginesRef.current.get(currentPath) ?? null;
-    if (!engine) return;
-    if (avatarChangeWaveTimerRef.current != null) {
-      window.clearTimeout(avatarChangeWaveTimerRef.current);
-    }
-    avatarChangeWaveTimerRef.current = window.setTimeout(() => {
-      playGreetingWave(engine);
-      avatarChangeWaveTimerRef.current = null;
-    }, AVATAR_CHANGE_WAVE_DELAY_MS);
-    pendingWavePathRef.current = null;
-  }, [active, currentPath, playGreetingWave, playWaveOnAvatarChange]);
-
-  const handleLayerEngineReady = useCallback(
-    (layerPath: string, engine: VrmEngine) => {
-      enginesRef.current.set(layerPath, engine);
-      onLayerEngineReady?.(layerPath, engine);
-      if (layerPath === currentPathRef.current) {
-        currentEngineRef.current = engine;
-        onEngineReady?.(engine);
+  const scheduleGreetingWave = useCallback(
+    (engine: VrmEngine | null) => {
+      if (!active || !playWaveOnAvatarChange || !engine) return;
+      if (avatarChangeWaveTimerRef.current != null) {
+        window.clearTimeout(avatarChangeWaveTimerRef.current);
       }
-      scheduleGreetingWave();
+      avatarChangeWaveTimerRef.current = window.setTimeout(() => {
+        playGreetingWave(engine);
+        avatarChangeWaveTimerRef.current = null;
+      }, AVATAR_CHANGE_WAVE_DELAY_MS);
     },
-    [onEngineReady, onLayerEngineReady, scheduleGreetingWave],
+    [active, playGreetingWave, playWaveOnAvatarChange],
   );
 
-  const handleRevealStart = useCallback(
-    (layerPath: string) => {
-      if (layerPath !== currentPathRef.current) return;
-      scheduleGreetingWave();
+  /* ── Engine callbacks ───────────────────────────────────────────── */
+
+  const handleEngineReady = useCallback(
+    (engine: VrmEngine) => {
+      engineRef.current = engine;
+      engine.setCameraAnimation({
+        enabled: true,
+        swayAmplitude: 0.04,
+        bobAmplitude: 0.022,
+        rotationAmplitude: 0.012,
+        speed: 0.42,
+      });
+      engine.setPointerParallaxEnabled(false);
+      if (typeof initialCompanionZoomNormalized === "number") {
+        engine.setCompanionZoomNormalized(initialCompanionZoomNormalized);
+      }
+      onEngineReady?.(engine);
+    },
+    [initialCompanionZoomNormalized, onEngineReady],
+  );
+
+  const handleEngineState = useCallback(
+    (state: VrmEngineState) => {
+      if (state.loadingProgress !== undefined) {
+        setLoadingProgress(Math.round(state.loadingProgress * 100));
+      }
+      if (state.vrmLoaded) {
+        setVrmLoaded(true);
+        setShowVrmFallback(false);
+        hasLoadedFirstVrmRef.current = true;
+        if (!loaderFadingStartedRef.current) {
+          loaderFadingStartedRef.current = true;
+          setLoaderFading(true);
+          setTimeout(() => setLoaderHidden(true), 800);
+        }
+        // Schedule greeting wave after VRM loads on avatar change
+        if (hasMountedRef.current) {
+          scheduleGreetingWave(engineRef.current);
+        }
+        return;
+      }
+      if (state.loadError) {
+        setLoaderHidden(true);
+        setVrmLoaded(false);
+        setShowVrmFallback(true);
+      }
     },
     [scheduleGreetingWave],
   );
 
+  const handleRevealStart = useCallback(() => {
+    onRevealStart?.();
+  }, [onRevealStart]);
+
+  /* ── Reset loading UI when avatar path changes ──────────────────── */
+
   useEffect(() => {
-    currentEngineRef.current?.setPaused(!active);
-  }, [active]);
+    if (vrmPath === prevVrmPathRef.current && hasMountedRef.current) return;
+    prevVrmPathRef.current = vrmPath;
+    if (hasMountedRef.current) {
+      // Avatar changed — reset loading state but NOT the world.
+      // After the first successful VRM load, keep the loader hidden so
+      // subsequent character swaps feel instant (no flash of loading bar).
+      if (!hasLoadedFirstVrmRef.current) {
+        setVrmLoaded(false);
+        setShowVrmFallback(false);
+        setLoadingProgress(undefined);
+        setLoaderFading(false);
+        setLoaderHidden(false);
+        loaderFadingStartedRef.current = false;
+      }
+    }
+    hasMountedRef.current = true;
+  }, [vrmPath]);
+
+  /* ── Companion zoom ─────────────────────────────────────────────── */
 
   useEffect(() => {
     if (typeof initialCompanionZoomNormalized !== "number") return;
-    currentEngineRef.current?.setCompanionZoomNormalized(
+    engineRef.current?.setCompanionZoomNormalized(
       initialCompanionZoomNormalized,
     );
   }, [initialCompanionZoomNormalized]);
 
-  useEffect(() => {
-    if (vrmPath === currentPathRef.current) {
-      if (!hasMountedRef.current) {
-        pendingWavePathRef.current = vrmPath;
-      }
-      hasMountedRef.current = true;
-      scheduleGreetingWave();
-      return;
-    }
-
-    const previousPath = currentPathRef.current;
-    currentPathRef.current = vrmPath;
-    setCurrentPath(vrmPath);
-    setOutgoingPath(previousPath);
-    setOutgoingOpacity(1);
-
-    if (transitionTimerRef.current != null) {
-      window.clearTimeout(transitionTimerRef.current);
-    }
-    if (transitionFrameRef.current != null) {
-      window.cancelAnimationFrame(transitionFrameRef.current);
-    }
-
-    transitionFrameRef.current = window.requestAnimationFrame(() => {
-      setOutgoingOpacity(0);
-      transitionFrameRef.current = null;
-    });
-
-    transitionTimerRef.current = window.setTimeout(() => {
-      setOutgoingPath((candidate) =>
-        candidate === previousPath ? null : candidate,
-      );
-      setOutgoingOpacity(1);
-      transitionTimerRef.current = null;
-    }, AVATAR_SWITCH_FADE_DURATION_MS);
-
-    if (hasMountedRef.current) {
-      pendingWavePathRef.current = vrmPath;
-    }
-    hasMountedRef.current = true;
-  }, [vrmPath, scheduleGreetingWave]);
+  /* ── Emote event listeners ──────────────────────────────────────── */
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const engine = currentEngineRef.current;
+      const engine = engineRef.current;
       if (!engine) return;
       if (typeof engine.playEmote !== "function") return;
       const detail = (event as CustomEvent<AppEmoteEventDetail>).detail;
@@ -321,14 +213,15 @@ export const VrmStage = memo(function VrmStage({
     return () => window.removeEventListener(APP_EMOTE_EVENT, handler);
   }, []);
 
-  // Listen for stop-emote events from the EmotePicker "Stop" button.
   useEffect(() => {
     const handler = () => {
-      currentEngineRef.current?.stopEmote();
+      engineRef.current?.stopEmote();
     };
     document.addEventListener(STOP_EMOTE_EVENT, handler);
     return () => document.removeEventListener(STOP_EMOTE_EVENT, handler);
   }, []);
+
+  /* ── Cleanup ────────────────────────────────────────────────────── */
 
   useEffect(() => {
     return () => {
@@ -336,39 +229,14 @@ export const VrmStage = memo(function VrmStage({
         window.clearTimeout(avatarChangeWaveTimerRef.current);
         avatarChangeWaveTimerRef.current = null;
       }
-      if (transitionTimerRef.current != null) {
-        window.clearTimeout(transitionTimerRef.current);
-        transitionTimerRef.current = null;
-      }
-      if (transitionFrameRef.current != null) {
-        window.cancelAnimationFrame(transitionFrameRef.current);
-        transitionFrameRef.current = null;
-      }
     };
   }, []);
 
-  const layerEntries = useMemo(() => {
-    const orderedPaths = [
-      currentPath,
-      outgoingPath,
-      ...preloadAvatars.map((avatar) => avatar.vrmPath),
-    ];
-    const seen = new Set<string>();
-    return orderedPaths.flatMap((path) => {
-      if (!path || seen.has(path)) return [];
-      seen.add(path);
-      return [
-        {
-          vrmPath: path,
-          fallbackPreviewUrl:
-            fallbackPreviewByPathRef.current.get(path) ?? fallbackPreviewUrl,
-        },
-      ];
-    });
-  }, [currentPath, fallbackPreviewUrl, outgoingPath, preloadAvatars]);
+  /* ── Render ─────────────────────────────────────────────────────── */
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-[#030711]">
+    <div className="fixed inset-0 z-0 overflow-hidden bg-[var(--bg)]">
+      {/* Static CSS fallback background */}
       <div className="pointer-events-none absolute inset-0">
         <div
           className="absolute inset-0"
@@ -388,45 +256,39 @@ export const VrmStage = memo(function VrmStage({
             boxShadow: "0 -24px 90px rgba(40, 184, 255, 0.14)",
           }}
         />
-        <div
-          className="absolute inset-x-0 top-[39%] h-px opacity-55"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, rgba(118, 232, 255, 0.12) 18%, rgba(118, 232, 255, 0.58) 50%, rgba(118, 232, 255, 0.12) 82%, transparent 100%)",
-            boxShadow: "0 0 20px rgba(118, 232, 255, 0.18)",
-          }}
+      </div>
+
+      {/* Single persistent VrmViewer — world stays loaded, only character swaps */}
+      <div className="absolute inset-0 z-10">
+        <VrmViewer
+          active={active}
+          vrmPath={vrmPath}
+          worldUrl={worldUrl}
+          cameraProfile={cameraProfile}
+          companionVrmPowerMode={companionVrmPowerMode}
+          companionHalfFramerateMode={companionHalfFramerateMode}
+          companionAnimateWhenHidden={companionAnimateWhenHidden}
+          onEngineReady={handleEngineReady}
+          onEngineState={handleEngineState}
+          onRevealStart={handleRevealStart}
         />
       </div>
-      <div
-        className="absolute inset-0 z-10"
-        style={{
-          opacity: 1,
-          transition: "opacity 400ms ease",
-        }}
-      >
-        {layerEntries.map((entry) => {
-          const isCurrent = entry.vrmPath === currentPath;
-          const isOutgoing = entry.vrmPath === outgoingPath;
-          const visible = isCurrent || isOutgoing;
-          return (
-            <VrmStageLayer
-              key={entry.vrmPath}
-              active={active && visible}
-              visible={visible}
-              opacity={isOutgoing ? outgoingOpacity : 1}
-              zIndex={isCurrent ? 2 : isOutgoing ? 1 : 0}
-              vrmPath={entry.vrmPath}
-              worldUrl={worldUrl}
-              fallbackPreviewUrl={entry.fallbackPreviewUrl}
-              cameraProfile={cameraProfile}
-              initialCompanionZoomNormalized={initialCompanionZoomNormalized}
-              onEngineReady={handleLayerEngineReady}
-              onRevealStart={handleRevealStart}
-              t={t}
-            />
-          );
-        })}
-      </div>
+
+      {/* Fallback preview on VRM load error */}
+      {showVrmFallback && !vrmLoaded && (
+        <img
+          src={fallbackPreviewUrl}
+          alt={t("companion.avatarPreviewAlt")}
+          className="absolute left-1/2 top-[52%] z-20 -translate-x-1/2 -translate-y-1/2 h-[90%] object-contain opacity-70"
+        />
+      )}
+
+      {/* Loading spinner while VRM loads */}
+      {!loaderHidden && !showVrmFallback && (
+        <div className="absolute inset-0 z-20">
+          <AvatarLoader progress={loadingProgress} fadingOut={loaderFading} />
+        </div>
+      )}
     </div>
   );
 });

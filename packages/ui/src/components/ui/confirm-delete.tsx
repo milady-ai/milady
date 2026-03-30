@@ -10,7 +10,23 @@ export interface ConfirmDeleteProps {
   busyLabel?: string;
   promptText?: string;
   className?: string;
+  /** Override the trigger button class (replaces default). */
+  triggerClassName?: string;
+  /** Override the confirm button class (replaces default). */
+  confirmClassName?: string;
+  /** Override the cancel button class (replaces default). */
+  cancelClassName?: string;
+  /** Override the prompt text class (replaces default). */
+  promptClassName?: string;
 }
+
+const DEFAULT_TRIGGER =
+  "rounded-md border border-border px-2 py-1 text-xs text-muted transition-colors hover:border-destructive hover:text-destructive";
+const DEFAULT_CONFIRM =
+  "rounded-md border border-destructive bg-destructive px-2 py-0.5 text-[10px] font-medium text-destructive-fg transition-opacity hover:opacity-90 disabled:opacity-50";
+const DEFAULT_CANCEL =
+  "rounded-md border border-border px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50";
+const DEFAULT_PROMPT = "text-[11px] text-destructive";
 
 export function ConfirmDelete({
   onConfirm,
@@ -21,6 +37,10 @@ export function ConfirmDelete({
   busyLabel,
   promptText = "Delete?",
   className,
+  triggerClassName,
+  confirmClassName,
+  cancelClassName,
+  promptClassName,
 }: ConfirmDeleteProps) {
   const [confirming, setConfirming] = React.useState(false);
 
@@ -28,10 +48,7 @@ export function ConfirmDelete({
     return (
       <button
         type="button"
-        className={cn(
-          "rounded-md border border-border px-2 py-1 text-xs text-muted transition-colors hover:border-destructive hover:text-destructive",
-          className,
-        )}
+        className={triggerClassName ?? cn(DEFAULT_TRIGGER, className)}
         onClick={() => setConfirming(true)}
         disabled={disabled}
       >
@@ -42,10 +59,10 @@ export function ConfirmDelete({
 
   return (
     <span className={cn("inline-flex items-center gap-1.5", className)}>
-      <span className="text-[11px] text-destructive">{promptText}</span>
+      <span className={promptClassName ?? DEFAULT_PROMPT}>{promptText}</span>
       <button
         type="button"
-        className="rounded-md border border-destructive bg-destructive px-2 py-0.5 text-[10px] font-medium text-destructive-fg transition-opacity hover:opacity-90 disabled:opacity-50"
+        className={confirmClassName ?? DEFAULT_CONFIRM}
         onClick={() => {
           onConfirm();
           setConfirming(false);
@@ -56,7 +73,7 @@ export function ConfirmDelete({
       </button>
       <button
         type="button"
-        className="rounded-md border border-border px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+        className={cancelClassName ?? DEFAULT_CANCEL}
         onClick={() => setConfirming(false)}
         disabled={disabled}
       >

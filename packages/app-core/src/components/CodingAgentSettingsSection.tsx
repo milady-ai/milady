@@ -1,10 +1,25 @@
-import { Button } from "@miladyai/ui";
+import {
+  Button,
+  SaveFooter,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import type { AgentPreflightResult } from "../api";
 import { client } from "../api";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
-import { ConfigSaveFooter } from "./ConfigSaveFooter";
+import {
+  SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME,
+  SETTINGS_MUTED_TEXT_CLASSNAME,
+  SETTINGS_SEGMENTED_GROUP_CLASSNAME,
+  SettingsField,
+  SettingsFieldDescription,
+  SettingsFieldLabel,
+} from "./settings-control-primitives";
 
 type AgentTab = "claude" | "gemini" | "codex" | "aider";
 type AiderProvider = "anthropic" | "openai" | "google";
@@ -25,7 +40,7 @@ const APPROVAL_PRESETS: {
   },
   {
     value: "standard",
-    labelKey: "codingagentsettingssection.PresetStandard",
+    labelKey: "mediasettingssection.Standard",
     descKey: "codingagentsettingssection.PresetStandardDesc",
   },
   {
@@ -82,12 +97,16 @@ const AGENT_LABELS: Record<AgentTab, string> = {
   aider: "Aider",
 };
 
-const KNOWN_AGENT_ADAPTERS = new Set<AgentTab>([
-  "claude",
-  "gemini",
-  "codex",
-  "aider",
-]);
+/** Map full adapter names from the preflight API to short tab keys. */
+export const ADAPTER_NAME_TO_TAB: Record<string, AgentTab> = {
+  "claude code": "claude",
+  "google gemini": "gemini",
+  "openai codex": "codex",
+  aider: "aider",
+  claude: "claude",
+  gemini: "gemini",
+  codex: "codex",
+};
 
 const ENV_PREFIX: Record<AgentTab, string> = {
   claude: "PARALLAX_CLAUDE",
@@ -192,10 +211,7 @@ export function CodingAgentSettingsSection() {
           const mapped: Partial<Record<AgentTab, AgentPreflightResult>> = {};
           for (const item of preflightRes as AgentPreflightResult[]) {
             const raw = item.adapter?.toLowerCase();
-            const key =
-              raw && KNOWN_AGENT_ADAPTERS.has(raw as AgentTab)
-                ? (raw as AgentTab)
-                : undefined;
+            const key = raw ? ADAPTER_NAME_TO_TAB[raw] : undefined;
             if (key) {
               mapped[key] = item;
             }
@@ -327,71 +343,87 @@ export function CodingAgentSettingsSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold">
+      <SettingsField>
+        <SettingsFieldLabel>
           {t("codingagentsettingssection.AgentSelectionStra")}
-        </span>
-        <select
-          className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg"
+        </SettingsFieldLabel>
+        <Select
           value={selectionStrategy}
-          onChange={(event) =>
-            setPref("PARALLAX_AGENT_SELECTION_STRATEGY", event.target.value)
+          onValueChange={(value) =>
+            setPref("PARALLAX_AGENT_SELECTION_STRATEGY", value)
           }
         >
-          <option value="fixed">{t("codingagentsettingssection.Fixed")}</option>
-          <option value="ranked">
-            {t("codingagentsettingssection.RankedAutoSelect")}
-          </option>
-        </select>
-        <div className="text-[11px] text-[var(--muted)] mt-1.5">
+          <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="fixed">
+              {t("codingagentsettingssection.Fixed")}
+            </SelectItem>
+            <SelectItem value="ranked">
+              {t("codingagentsettingssection.RankedAutoSelect")}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <SettingsFieldDescription className="mt-1.5">
           {selectionStrategy === "fixed"
             ? t("codingagentsettingssection.AgentUsedWhenNoEStrategyFixed")
             : t("codingagentsettingssection.AgentUsedWhenNoEStrategyRanked")}
-        </div>
-      </div>
+        </SettingsFieldDescription>
+      </SettingsField>
 
       {selectionStrategy === "fixed" && (
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold">
+        <SettingsField>
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.DefaultAgentType")}
-          </span>
-          <select
-            className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg"
+          </SettingsFieldLabel>
+          <Select
             value={effectiveDefaultAgentType}
-            onChange={(event) =>
-              setPref("PARALLAX_DEFAULT_AGENT_TYPE", event.target.value)
+            onValueChange={(value) =>
+              setPref("PARALLAX_DEFAULT_AGENT_TYPE", value)
             }
           >
-            {availableAgents.map((agent) => (
-              <option key={agent} value={agent}>
-                {AGENT_LABELS[agent]}
-              </option>
-            ))}
-          </select>
-          <div className="text-[11px] text-[var(--muted)]">
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableAgents.map((agent) => (
+                <SelectItem key={agent} value={agent}>
+                  {AGENT_LABELS[agent]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <SettingsFieldDescription>
             {t("codingagentsettingssection.AgentUsedWhenNoE")}
-          </div>
-        </div>
+          </SettingsFieldDescription>
+        </SettingsField>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold">
+      <SettingsField>
+        <SettingsFieldLabel>
           {t("codingagentsettingssection.DefaultPermissionL")}
-        </span>
-        <select
-          className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg"
+        </SettingsFieldLabel>
+        <Select
           value={approvalPreset}
-          onChange={(event) =>
-            setPref("PARALLAX_DEFAULT_APPROVAL_PRESET", event.target.value)
+          onValueChange={(value) =>
+            setPref("PARALLAX_DEFAULT_APPROVAL_PRESET", value)
           }
         >
-          {APPROVAL_PRESETS.map((preset) => (
-            <option key={preset.value} value={preset.value}>
-              {t(preset.labelKey)}
-            </option>
-          ))}
-        </select>
-        <div className="text-[11px] text-[var(--muted)] mt-1.5">
+          <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {APPROVAL_PRESETS.map((preset) => (
+              <SelectItem key={preset.value} value={preset.value}>
+                {t(preset.labelKey)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <SettingsFieldDescription className="mt-1.5">
           {APPROVAL_PRESETS.find((preset) => preset.value === approvalPreset)
             ?.descKey
             ? t(
@@ -401,10 +433,10 @@ export function CodingAgentSettingsSection() {
               )
             : ""}
           {t("codingagentsettingssection.AppliesToAllNewlySpawned")}
-        </div>
-      </div>
+        </SettingsFieldDescription>
+      </SettingsField>
 
-      <div className="flex gap-1 rounded-xl border border-border bg-card/50 p-1 shrink-0">
+      <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
         {availableAgents.map((agent) => {
           const active = activeTab === agent;
           const installState = getInstallState(agent);
@@ -415,7 +447,7 @@ export function CodingAgentSettingsSection() {
               size="sm"
               className={`flex-1 h-9 rounded-lg border border-transparent px-3 py-2 text-xs font-semibold ${
                 active
-                  ? "bg-accent text-accent-foreground shadow-sm"
+                  ? "bg-accent text-accent-fg shadow-sm"
                   : "text-muted hover:bg-bg-hover hover:text-txt"
               }`}
               onClick={() => setActiveTab(agent)}
@@ -439,7 +471,7 @@ export function CodingAgentSettingsSection() {
       </div>
 
       {preflightLoaded && (
-        <div className="text-[11px] text-[var(--muted)] mt-1.5">
+        <div className={`${SETTINGS_MUTED_TEXT_CLASSNAME} mt-1.5`}>
           {t("codingagentsettingssection.Availability")}{" "}
           {AGENT_TABS.map((agent) => {
             const installState = getInstallState(agent);
@@ -455,78 +487,100 @@ export function CodingAgentSettingsSection() {
       )}
 
       {activeTab === "aider" && (
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold">
+        <SettingsField>
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.Provider")}
-          </span>
-          <select
-            className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg"
+          </SettingsFieldLabel>
+          <Select
             value={aiderProvider}
-            onChange={(event) =>
-              setPref("PARALLAX_AIDER_PROVIDER", event.target.value)
-            }
+            onValueChange={(value) => setPref("PARALLAX_AIDER_PROVIDER", value)}
           >
-            <option value="anthropic">
-              {t("codingagentsettingssection.Anthropic")}
-            </option>
-            <option value="openai">
-              {t("codingagentsettingssection.OpenAI")}
-            </option>
-            <option value="google">
-              {t("codingagentsettingssection.Google")}
-            </option>
-          </select>
-        </div>
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="anthropic">
+                {t("codingagentsettingssection.Anthropic")}
+              </SelectItem>
+              <SelectItem value="openai">
+                {t("codingagentsettingssection.OpenAI")}
+              </SelectItem>
+              <SelectItem value="google">
+                {t("codingagentsettingssection.Google")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </SettingsField>
       )}
 
       <div className="flex gap-3">
-        <div className="flex-1 flex flex-col gap-1.5">
-          <span className="text-xs font-semibold">
+        <SettingsField className="flex-1">
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.PowerfulModel")}
-          </span>
-          <select
-            className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg"
+          </SettingsFieldLabel>
+          <Select
             value={powerfulValue}
-            onChange={(event) =>
-              setPref(`${prefix}_MODEL_POWERFUL`, event.target.value)
+            onValueChange={(value) =>
+              setPref(`${prefix}_MODEL_POWERFUL`, value)
             }
           >
-            <option value="">{t("codingagentsettingssection.Default")}</option>
-            {modelOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex-1 flex flex-col gap-1.5">
-          <span className="text-xs font-semibold">
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue
+                placeholder={t("codingagentsettingssection.Default")}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__default__">
+                {t("codingagentsettingssection.Default")}
+              </SelectItem>
+              {modelOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SettingsField>
+        <SettingsField className="flex-1">
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.FastModel")}
-          </span>
-          <select
-            className="px-2.5 py-1.5 border border-border bg-card text-xs focus:border-accent focus:outline-none shadow-sm rounded-lg"
+          </SettingsFieldLabel>
+          <Select
             value={fastValue}
-            onChange={(event) =>
-              setPref(`${prefix}_MODEL_FAST`, event.target.value)
-            }
+            onValueChange={(value) => setPref(`${prefix}_MODEL_FAST`, value)}
           >
-            <option value="">{t("codingagentsettingssection.Default")}</option>
-            {modelOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue
+                placeholder={t("codingagentsettingssection.Default")}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__default__">
+                {t("codingagentsettingssection.Default")}
+              </SelectItem>
+              {modelOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SettingsField>
       </div>
 
-      <div className="text-[11px] text-[var(--muted)] mt-1.5">
+      <div className={`${SETTINGS_MUTED_TEXT_CLASSNAME} mt-1.5`}>
         {isDynamic
           ? t("codingagentsettingssection.ModelsFetched")
           : t("codingagentsettingssection.UsingFallback")}
       </div>
 
-      <ConfigSaveFooter
+      <SaveFooter
         dirty={dirty}
         saving={saving}
         saveError={saveError}

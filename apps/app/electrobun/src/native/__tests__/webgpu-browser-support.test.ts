@@ -85,16 +85,36 @@ describe("getWebGpuChromiumFlags", () => {
 });
 
 describe("getMacOSMajorVersion", () => {
-  it("returns macOS version from Darwin kernel version on darwin", () => {
-    // Only test if current platform happens to be darwin, otherwise skip
+  it("maps Darwin 25 to macOS 26 on darwin", () => {
     if (process.platform !== "darwin") return;
-    vi.mocked(osModule.release).mockReturnValue("25.0.0"); // Darwin 25 = macOS 16... actually let's just test arithmetic
-    const version = getMacOSMajorVersion();
-    // Darwin 25 - 9 = 16... wait, the mapping says Darwin 25 = macOS 26?
-    // Let me re-check: Darwin 20=macOS 11, so offset is darwinMajor - 9
-    // Darwin 25 - 9 = 16. But the code says Darwin 25 = macOS 26.
-    // This is a known ambiguity — the test validates the function returns a number.
-    expect(version).toBeTypeOf("number");
+    vi.mocked(osModule.release).mockReturnValue("25.2.0");
+    expect(getMacOSMajorVersion()).toBe(26);
+  });
+
+  it("maps Darwin 24 to macOS 15 on darwin", () => {
+    if (process.platform !== "darwin") return;
+    vi.mocked(osModule.release).mockReturnValue("24.0.0");
+    expect(getMacOSMajorVersion()).toBe(15);
+  });
+
+  it("maps Darwin 20–23 to macOS 11–14 on darwin", () => {
+    if (process.platform !== "darwin") return;
+    const pairs: [string, number][] = [
+      ["20.6.0", 11],
+      ["21.6.0", 12],
+      ["22.6.0", 13],
+      ["23.5.0", 14],
+    ];
+    for (const [release, expected] of pairs) {
+      vi.mocked(osModule.release).mockReturnValue(release);
+      expect(getMacOSMajorVersion()).toBe(expected);
+    }
+  });
+
+  it("maps Darwin 26 to macOS 27 on darwin (continued N+1 pattern)", () => {
+    if (process.platform !== "darwin") return;
+    vi.mocked(osModule.release).mockReturnValue("26.0.0");
+    expect(getMacOSMajorVersion()).toBe(27);
   });
 
   it("returns null on non-darwin platforms", () => {
@@ -121,7 +141,7 @@ describe("checkWebGpuSupport", () => {
 
   it("returns available: true for macOS native renderer on macOS 26+", () => {
     if (process.platform !== "darwin") return;
-    vi.mocked(osModule.release).mockReturnValue("35.0.0"); // Darwin 35 = macOS 26
+    vi.mocked(osModule.release).mockReturnValue("25.0.0"); // Darwin 25 = macOS 26 (Tahoe)
     const status = checkWebGpuSupport("native");
     expect(status.available).toBe(true);
     expect(status.renderer).toBe("native");
@@ -132,5 +152,17 @@ describe("checkWebGpuSupport", () => {
     expect(status.available).toBe(false);
     expect(status.renderer).toBe("cef");
     expect(status.reason).toContain("enable-unsafe-webgpu");
+    expect(status.reason).toContain("WebGL");
+  });
+
+  it("macOS native < 26 explains WebGL fallback (not app blocking)", () => {
+    if (process.platform !== "darwin") return;
+    vi.mocked(osModule.release).mockReturnValue("24.0.0"); // macOS 15
+    const status = checkWebGpuSupport("native");
+    expect(status.available).toBe(false);
+    expect(status.renderer).toBe("native");
+    expect(status.reason).toContain("WebGL");
+    expect(status.reason).toContain("navigator.gpu");
+    expect(status.reason).not.toMatch(/is required\.?$/);
   });
 });

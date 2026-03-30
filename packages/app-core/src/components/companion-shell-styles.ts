@@ -13,23 +13,21 @@ export const COMPANION_OVERLAY_TABS = new Set<Tab>(["companion"]);
 /* ── Per-tab accent / color config ─────────────────────────────────── */
 
 export const ACCENT_COLORS: Record<string, string> = {
-  skills: "#f0b232",
+  skills: "#f0b90b",
   apps: "#10b981",
-  plugins: "#f0b232",
-  connectors: "#f0b232",
+  plugins: "#f0b90b",
+  connectors: "#f0b90b",
   knowledge: "#a78bfa",
   wallets: "#f0b90b",
   stream: "#ef4444",
-  lifo: "#8b5cf6",
 };
 
 export const TOP_BAR_COLORS: Record<string, string> = {
-  skills: "#f0b232",
+  skills: "#f0b90b",
   wallets: "rgba(240, 185, 11, 0.7)",
-  lifo: "rgba(139, 92, 246, 0.7)",
   stream: "rgba(239, 68, 68, 0.7)",
-  plugins: "#f0b232",
-  connectors: "#f0b232",
+  plugins: "#f0b90b",
+  connectors: "#f0b90b",
   apps: "rgba(16, 185, 129, 0.7)",
   knowledge: "rgba(167, 139, 250, 0.7)",
 };
@@ -40,7 +38,6 @@ export function tabFlags(tab: Tab) {
   const isSkills = tab === "skills";
   const isSettings = tab === "settings" || tab === "triggers";
   const isPlugins = tab === "plugins";
-  const isLifo = tab === "lifo";
   const isStream = tab === "stream";
   const isWallets = tab === "wallets";
   const isApps = tab === "apps";
@@ -54,8 +51,7 @@ export function tabFlags(tab: Tab) {
     tab === "runtime" ||
     tab === "database" ||
     tab === "logs" ||
-    tab === "security" ||
-    isLifo;
+    tab === "security";
   const isPluginsLike = isPlugins || isConnectors || isSkills;
   const isCentered =
     isSkills ||
@@ -65,7 +61,6 @@ export function tabFlags(tab: Tab) {
     isApps ||
     isConnectors ||
     isKnowledge ||
-    isLifo ||
     isStream ||
     isWallets;
   const isCharacter = tab === "character" || tab === "character-select";
@@ -74,7 +69,6 @@ export function tabFlags(tab: Tab) {
     isSkills,
     isSettings,
     isPlugins,
-    isLifo,
     isStream,
     isWallets,
     isApps,
@@ -99,7 +93,6 @@ export function overlayBackdropClass(f: TabFlags) {
     f.isAdvancedOverlay ||
     f.isApps ||
     f.isKnowledge ||
-    f.isLifo ||
     f.isStream ||
     f.isWallets
   )
@@ -127,7 +120,7 @@ export function cardBackground(f: TabFlags) {
     f.isKnowledge ||
     f.isWallets
   )
-    return "rgba(18, 22, 32, 0.92)";
+    return "rgba(14, 14, 17, 0.94)";
   return "linear-gradient(to left, rgba(6, 8, 12, 0.95) 40%, rgba(6, 8, 12, 0.7) 80%, rgba(6, 8, 12, 0.2) 100%)";
 }
 
@@ -160,33 +153,30 @@ export function cardBoxShadow(f: TabFlags, _shadowFx: string) {
 /* ── Accent color helpers ──────────────────────────────────────────── */
 
 export function accentVar(f: TabFlags) {
-  if (f.isPluginsLike) return "#f0b232";
+  if (f.isPluginsLike) return "#f0b90b";
   if (f.isApps) return "#10b981";
   if (f.isKnowledge) return "#a78bfa";
   if (f.isWallets) return "#f0b90b";
-  if (f.isLifo) return "#8b5cf6";
   if (f.isStream) return "#ef4444";
-  return "#7b8fb5";
+  return "#f0b90b";
 }
 
 export function accentSubtleVar(f: TabFlags) {
-  if (f.isPluginsLike) return "rgba(240, 178, 50, 0.12)";
+  if (f.isPluginsLike) return "rgba(240, 185, 11, 0.12)";
   if (f.isApps) return "rgba(16, 185, 129, 0.12)";
   if (f.isKnowledge) return "rgba(167, 139, 250, 0.12)";
   if (f.isWallets) return "rgba(240, 185, 11, 0.12)";
-  if (f.isLifo) return "rgba(139, 92, 246, 0.12)";
   if (f.isStream) return "rgba(239, 68, 68, 0.12)";
-  return "rgba(123, 143, 181, 0.12)";
+  return "rgba(240, 185, 11, 0.12)";
 }
 
 export function accentRgbVar(f: TabFlags) {
-  if (f.isPluginsLike) return "240, 178, 50";
+  if (f.isPluginsLike) return "240, 185, 11";
   if (f.isApps) return "16, 185, 129";
   if (f.isKnowledge) return "167, 139, 250";
   if (f.isWallets) return "240, 185, 11";
-  if (f.isLifo) return "139, 92, 246";
   if (f.isStream) return "239, 68, 68";
-  return "123, 143, 181";
+  return "240, 185, 11";
 }
 
 export function accentForegroundVar(f: TabFlags) {

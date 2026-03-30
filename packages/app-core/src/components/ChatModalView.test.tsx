@@ -8,7 +8,31 @@ import { ChatModalView } from "./ChatModalView";
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: vi.fn(),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
+
+vi.mock("@miladyai/ui", async () => {
+  const React = await import("react");
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+
+  return {
+    ...actual,
+    DrawerSheet: ({
+      children,
+      open,
+    }: {
+      children?: React.ReactNode;
+      open?: boolean;
+    }) => (open ? React.createElement(React.Fragment, null, children) : null),
+    DrawerSheetContent: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    DrawerSheetHeader: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    DrawerSheetTitle: ({ children, ...props }: React.ComponentProps<"h2">) =>
+      React.createElement("h2", props, children),
+  };
+});
 
 vi.mock("./ChatView.js", () => ({
   ChatView: ({ variant }: { variant?: string }) =>
@@ -76,6 +100,18 @@ describe("ChatModalView", () => {
       "data-chat-game-sidebar": true,
     });
     expect(String(sidebarShell.props.className)).toContain("md:flex");
+
+    const shell = testRenderer.root.findByProps({
+      "data-chat-game-shell": true,
+    });
+    expect(String(shell.props.className)).toContain("rounded-[28px]");
+    expect(String(shell.props.className)).toContain("bg-transparent");
+    expect(String(shell.props.className)).toContain("pointer-events-none");
+
+    const thread = testRenderer.root.findByProps({
+      "data-chat-game-thread": true,
+    });
+    expect(String(thread.props.className)).toContain("pointer-events-auto");
   });
 
   it("renders a mobile conversations overlay when the companion rail is toggled on a narrow viewport", async () => {
@@ -114,5 +150,13 @@ describe("ChatModalView", () => {
     expect(
       sidebarInstances.some((node) => node.props["data-mobile"] === true),
     ).toBe(true);
+
+    const mobileOverlay = testRenderer.root.findByProps({
+      "data-chat-game-sidebar-overlay": true,
+    });
+    expect(String(mobileOverlay.props.className)).toContain(
+      "h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),36rem)]",
+    );
+    expect(String(mobileOverlay.props.className)).toContain("p-0");
   });
 });

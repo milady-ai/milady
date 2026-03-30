@@ -1,4 +1,4 @@
-import { Button } from "@miladyai/ui";
+import { Button, ConnectionStatus } from "@miladyai/ui";
 import { useApp } from "../state";
 
 export type CloudSourceMode = "cloud" | "own-key";
@@ -14,26 +14,27 @@ export function CloudSourceModeToggle({
   cloudLabel?: string;
   ownKeyLabel?: string;
 }) {
+  const resolvedCloudLabel = cloudLabel;
   return (
-    <div className="inline-flex overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--card)] shadow-sm">
+    <div className="inline-flex overflow-hidden rounded-lg bg-[var(--bg-muted)] shadow-sm">
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className={`first:rounded-l-lg first:rounded-r-none last:rounded-l-none last:rounded-r-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
           mode === "cloud"
             ? "bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)]/90 hover:text-[var(--accent-foreground)]"
             : "bg-transparent text-[var(--muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
         }`}
         onClick={() => onChange("cloud")}
       >
-        {cloudLabel}
+        {resolvedCloudLabel}
       </Button>
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className={`first:rounded-l-lg first:rounded-r-none last:rounded-l-none last:rounded-r-lg border-l border-[var(--border)] px-3 py-1.5 text-xs font-semibold transition-colors ${
+        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
           mode === "own-key"
             ? "bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent)]/90 hover:text-[var(--accent-foreground)]"
             : "bg-transparent text-[var(--muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
@@ -48,7 +49,7 @@ export function CloudSourceModeToggle({
 
 export function CloudConnectionStatus({
   connected,
-  connectedText = "Connected to Eliza Cloud",
+  connectedText,
   disconnectedText,
 }: {
   connected: boolean;
@@ -56,25 +57,27 @@ export function CloudConnectionStatus({
   disconnectedText: string;
 }) {
   const { t } = useApp();
+  const resolvedConnectedText = connectedText ?? "Connected to Eliza Cloud";
   return (
-    <div className="flex items-center justify-between py-2.5 px-3 border border-[var(--border)] bg-[var(--bg-muted)]">
-      {connected ? (
-        <>
-          <span className="text-xs text-[var(--text)]">{connectedText}</span>
-          <span className="rounded-full border border-green-600 bg-green-600/10 px-1.5 py-0.5 text-[10px] text-[var(--text)]">
-            {t("appsview.Active")}
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="text-xs text-[var(--muted)]">
-            {disconnectedText}
-          </span>
-          <span className="rounded-full border border-[var(--warn)] bg-[var(--warn-subtle)] px-1.5 py-0.5 text-[10px] text-[var(--text)]">
-            {t("cloudsourcecontrols.Offline")}
-          </span>
-        </>
-      )}
+    <div
+      className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-bg-muted/90 px-3 py-2.5"
+      role="status"
+      aria-live="polite"
+    >
+      <ConnectionStatus
+        state={connected ? "connected" : "disconnected"}
+        label={connected ? resolvedConnectedText : disconnectedText}
+        className="border-0 bg-transparent px-0 py-0 shadow-none"
+      />
+      <span
+        className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${
+          connected
+            ? "border-ok/30 bg-ok-subtle text-txt"
+            : "border-warn/35 bg-warn-subtle text-txt"
+        }`}
+      >
+        {connected ? t("appsview.Active") : t("cloudsourcecontrols.Offline")}
+      </span>
     </div>
   );
 }

@@ -61,3 +61,7 @@ declare module "@miladyai/capacitor-talkmode" {
   export type { TalkModePlugin } from "../plugins/talkmode/src/definitions";
   export const TalkMode: TalkModePluginType;
 }
+
+declare module "@elizaos/plugin-coding-agent";
+declare module "@elizaos/signal-native";
+declare module "qrcode";

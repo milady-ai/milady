@@ -24,50 +24,11 @@ import {
   it,
   vi,
 } from "vitest";
+import { req } from "../../../../test/helpers/http";
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Knowledge Endpoints
 // ---------------------------------------------------------------------------
-
-async function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (payload) r.write(payload);
-    r.end();
-  });
-}
 
 function createKnowledgeTestServer(): Promise<{
   port: number;
@@ -380,20 +341,50 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-vi.mock("../../src/components/shared/confirm-delete-control", () => ({
-  ConfirmDeleteControl: ({
-    onConfirm,
-    children,
-  }: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-  }) =>
-    React.createElement(
-      "button",
-      { type: "button", onClick: onConfirm, "data-testid": "delete-btn" },
+vi.mock("@miladyai/ui", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    Button: ({
       children,
-    ),
-}));
+      className,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement(
+        "button",
+        { type: "button", className, ...props },
+        children,
+      ),
+    ConfirmDelete: ({
+      onConfirm,
+      children,
+    }: {
+      onConfirm: () => void;
+      children: React.ReactNode;
+    }) =>
+      React.createElement(
+        "button",
+        { type: "button", onClick: onConfirm, "data-testid": "delete-btn" },
+        children,
+      ),
+    Dialog: ({
+      open,
+      children,
+    }: {
+      open?: boolean;
+      children: React.ReactNode;
+    }) =>
+      open
+        ? React.createElement("div", { "data-testid": "dialog" }, children)
+        : null,
+    DialogContent: ({ children }: { children: React.ReactNode }) =>
+      React.createElement("div", { "data-testid": "dialog-content" }, children),
+    DialogHeader: ({ children }: { children: React.ReactNode }) =>
+      React.createElement("div", null, children),
+    DialogTitle: ({ children }: { children: React.ReactNode }) =>
+      React.createElement("div", null, children),
+  };
+});
 
 import { KnowledgeView } from "../../src/components/KnowledgeView";
 
@@ -416,6 +407,24 @@ type KnowledgeState = {
     score: number;
   }>;
 };
+
+function translate(
+  key: string,
+  vars?: {
+    defaultValue?: string;
+    [key: string]: unknown;
+  },
+): string {
+  if (typeof vars?.defaultValue === "string") {
+    let value = vars.defaultValue;
+    for (const [token, raw] of Object.entries(vars)) {
+      if (token === "defaultValue") continue;
+      value = value.replace(`{{${token}}}`, String(raw));
+    }
+    return value;
+  }
+  return key;
+}
 
 function createKnowledgeUIState(): KnowledgeState {
   return {
@@ -447,20 +456,31 @@ function createKnowledgeUIState(): KnowledgeState {
 
 describe("KnowledgeView UI", () => {
   let state: KnowledgeState;
+  let appActions: {
+    loadKnowledgeStats: ReturnType<typeof vi.fn>;
+    loadKnowledgeDocuments: ReturnType<typeof vi.fn>;
+    uploadKnowledgeDocument: ReturnType<typeof vi.fn>;
+    searchKnowledge: ReturnType<typeof vi.fn>;
+    deleteKnowledgeDocument: ReturnType<typeof vi.fn>;
+    setActionNotice: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     state = createKnowledgeUIState();
-
-    mockUseApp.mockReset();
-    mockUseApp.mockImplementation(() => ({
-      t: (k: string) => k,
-      ...state,
+    appActions = {
       loadKnowledgeStats: vi.fn(),
       loadKnowledgeDocuments: vi.fn(),
       uploadKnowledgeDocument: vi.fn(),
       searchKnowledge: vi.fn(),
       deleteKnowledgeDocument: vi.fn(),
       setActionNotice: vi.fn(),
+    };
+
+    mockUseApp.mockReset();
+    mockUseApp.mockImplementation(() => ({
+      t: translate,
+      ...state,
+      ...appActions,
     }));
   });
 
@@ -474,7 +494,7 @@ describe("KnowledgeView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("displays document count in stats", async () => {
+  it("renders the loaded knowledge documents in the rail", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
@@ -482,7 +502,7 @@ describe("KnowledgeView UI", () => {
     });
 
     const allText = JSON.stringify(tree?.toJSON());
-    expect(allText).toContain("Documents");
+    expect(allText).toContain("README.md");
   });
 
   it("loads fragment details when opening a document", async () => {
@@ -532,6 +552,9 @@ describe("KnowledgeView UI", () => {
       await Promise.resolve();
     });
 
+    expect(client.getKnowledgeDocument).toHaveBeenCalledWith("doc-1");
+    expect(client.getKnowledgeFragments).toHaveBeenCalledWith("doc-1");
+
     const allText = JSON.stringify(tree?.toJSON());
     expect(allText).toContain("knowledgeview.Fragments1");
     expect(allText).toContain("fragment body");
@@ -564,22 +587,6 @@ describe("KnowledgeView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("renders search input", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(KnowledgeView));
-    });
-
-    const searchInputs = tree?.root.findAll(
-      (node) =>
-        node.type === "input" &&
-        (node.props.placeholder?.toLowerCase().includes("search") ||
-          node.props.type === "search"),
-    );
-    expect(searchInputs.length).toBeGreaterThanOrEqual(0);
-  });
-
   it("keeps yellow knowledge action buttons on a dark foreground", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
@@ -587,26 +594,32 @@ describe("KnowledgeView UI", () => {
       tree = TestRenderer.create(React.createElement(KnowledgeView));
     });
 
-    const findButton = (label: string) =>
-      tree?.root
-        .findAllByType("button")
-        .find((node) => node.props.children === label);
-
-    const chooseFilesButton = findButton("knowledgeview.ChooseFiles");
-    const chooseFolderButton = findButton("knowledgeview.ChooseFolder");
-    const searchButton = findButton("knowledge.ui.search");
     const searchForm = tree?.root.findAllByType("form")[0];
-
-    expect(chooseFolderButton).toBeUndefined();
+    const allText = JSON.stringify(tree?.toJSON());
+    const flattenText = (value: React.ReactNode): string => {
+      if (typeof value === "string" || typeof value === "number") {
+        return String(value);
+      }
+      if (Array.isArray(value)) {
+        return value.map(flattenText).join("");
+      }
+      if (React.isValidElement(value)) {
+        return flattenText(value.props.children);
+      }
+      return "";
+    };
+    const buttons = tree?.root.findAllByType("button") ?? [];
+    const searchButton = buttons.find(
+      (node) =>
+        flattenText(node.props.children) === "knowledge.ui.search" &&
+        typeof node.props.className === "string",
+    );
+    expect(allText).not.toContain("knowledgeview.ChooseFolder");
+    expect(allText).not.toContain("knowledgeview.ChooseFiles");
+    expect(allText).toContain("knowledge.ui.search");
     expect(searchForm?.props.className).toContain("max-w-[500px]");
-    expect(chooseFilesButton?.props.className).toContain("h-10");
-    expect(chooseFilesButton?.props.className).toContain(
-      "text-[var(--primary-foreground,#1a1f26)]",
-    );
     expect(searchButton?.props.className).toContain("h-10");
-    expect(searchButton?.props.className).toContain(
-      "text-[var(--primary-foreground,#1a1f26)]",
-    );
+    expect(searchButton?.props.className).toContain("text-txt");
   });
 
   it("shows loading state when knowledgeLoading is true", async () => {

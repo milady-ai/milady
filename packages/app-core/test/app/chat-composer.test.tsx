@@ -58,7 +58,7 @@ function renderComposer(
       typeof button.props.onPointerUp === "function",
   );
   const speakerButton = buttons.find(
-    (button) => button.props["aria-label"] === "Agent voice on",
+    (button) => button.props["aria-label"] === "aria.agentVoiceOn",
   );
 
   if (!micButton) {
@@ -129,41 +129,13 @@ describe("ChatComposer mic controls", () => {
     expect(speakerButton).toBeUndefined();
   });
 
-  it("renders the default mic button like the paperclip button when idle", () => {
-    const { micButton } = renderComposer();
-    const icon = micButton.findByType("svg" as React.ElementType);
-
-    expect(String(micButton.props.className)).not.toContain("border");
-    expect(String(micButton.props.className)).toContain("text-muted");
-    expect(String(micButton.props.className)).toContain("hover:bg-black/5");
-    expect(String(icon.props.className)).toContain("w-4 h-4");
-  });
-
-  it("turns the default mic button solid red when active", () => {
-    const { micButton } = renderComposer({
-      voice: {
-        isListening: true,
-      },
+  it("uses emphasized surface styling when agent voice output is enabled", () => {
+    const { speakerButton } = renderComposer({
+      agentVoiceEnabled: true,
     });
 
-    expect(String(micButton.props.className)).toContain("bg-[#ff6b70]");
-    expect(String(micButton.props.className)).toContain("text-white");
-    expect(String(micButton.props.className)).not.toContain("shadow-[0_0_");
-  });
-
-  it("keeps the default chat input neutral while listening", () => {
-    const { renderer } = renderComposer({
-      voice: {
-        isListening: true,
-      },
-    });
-    const textarea = findTextarea(renderer);
-    const container = textarea.parent;
-
-    expect(String(container.props.className)).toContain("border-border/40");
-    expect(String(container.props.className)).toContain("bg-card/60");
-    expect(String(container.props.className)).not.toContain("border-[#ff5a5f]");
-    expect(String(container.props.className)).not.toContain("bg-[#2a0f13]");
+    expect(speakerButton?.props.className).toContain("bg-[linear-gradient");
+    expect(speakerButton?.props.className).toContain("text-txt-strong");
   });
 
   it("shows Listening... in an empty default chat input while listening", () => {
@@ -176,6 +148,49 @@ describe("ChatComposer mic controls", () => {
     });
     const textarea = findTextarea(renderer);
 
-    expect(textarea.props.placeholder).toBe("Listening...");
+    expect(textarea.props.placeholder).toBe("chat.listening");
+  });
+
+  it("uses muted disabled send styling until there is a draft", () => {
+    const { renderer } = renderComposer({
+      chatInput: "",
+      chatPendingImagesCount: 0,
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+
+    expect(sendButton.props.disabled).toBe(true);
+    expect(sendButton.props.className).toContain("border-accent/26");
+    expect(sendButton.props.className).toContain("disabled:ring-0");
+  });
+
+  it("uses the accent-tinted primary action styling when a draft is ready", () => {
+    const { renderer } = renderComposer({
+      chatInput: "Ship it",
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+
+    expect(sendButton.props.disabled).toBe(false);
+    expect(sendButton.props.className).toContain("border-accent/26");
+  });
+
+  it("uses the themed companion action styling in game-modal", () => {
+    const { renderer } = renderComposer({
+      variant: "game-modal",
+      chatInput: "Hey",
+    });
+    const sendButton = renderer.root.findByProps({
+      "data-testid": "chat-composer-action",
+    });
+    const textarea = findTextarea(renderer);
+
+    expect(sendButton.props.className).toContain("border-border/28");
+    expect(sendButton.props.className).toContain("bg-[linear-gradient");
+    expect(sendButton.props.className).toContain("text-txt");
+    expect(String(textarea.props.className)).toContain("text-txt-strong");
+    expect(String(textarea.props.className)).toContain("placeholder:text-muted");
   });
 });

@@ -17,6 +17,8 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createInlineUiMock } from "./mockInlineUi";
+
 // ---------------------------------------------------------------------------
 // Part 2: UI Tests for Cloud Login
 // ---------------------------------------------------------------------------
@@ -27,8 +29,14 @@ const { mockUseApp } = vi.hoisted(() => ({
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
-  THEMES: [{ id: "milady", label: "Milady" }],
+  THEMES: [{ id: "eliza", label: "Eliza" }],
 }));
+
+vi.mock("@miladyai/ui", async () => {
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return createInlineUiMock(actual);
+});
 
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
@@ -39,38 +47,38 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
-vi.mock("@miladyai/app-core/components/ConfigPageView", () => ({
+vi.mock("../../src/components/ConfigPageView", () => ({
   ConfigPageView: () => React.createElement("div", null, "ConfigPageView"),
 }));
 
-vi.mock("@miladyai/app-core/components/CodingAgentSettingsSection", () => ({
+vi.mock("../../src/components/CodingAgentSettingsSection", () => ({
   CodingAgentSettingsSection: () =>
     React.createElement("div", null, "CodingAgentSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/MediaSettingsSection", () => ({
+vi.mock("../../src/components/MediaSettingsSection", () => ({
   MediaSettingsSection: () =>
     React.createElement("div", null, "MediaSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/ElizaCloudDashboard", () => ({
+vi.mock("../../src/components/ElizaCloudDashboard", () => ({
   CloudDashboard: () => React.createElement("div", null, "ElizaCloudDashboard"),
 }));
 
-vi.mock("@miladyai/app-core/components/PermissionsSection", () => ({
+vi.mock("../../src/components/PermissionsSection", () => ({
   PermissionsSection: () =>
     React.createElement("div", null, "PermissionsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/ProviderSwitcher", () => ({
+vi.mock("../../src/components/ProviderSwitcher", () => ({
   ProviderSwitcher: () => React.createElement("div", null, "ProviderSwitcher"),
 }));
 
-vi.mock("@miladyai/app-core/components/VoiceConfigView", () => ({
+vi.mock("../../src/components/VoiceConfigView", () => ({
   VoiceConfigView: () => React.createElement("div", null, "VoiceConfigView"),
 }));
 
-import { SettingsView } from "@miladyai/app-core/components/SettingsView";
+import { SettingsView } from "../../src/components/SettingsView";
 
 type CloudState = {
   elizaCloudEnabled: boolean;
@@ -101,7 +109,7 @@ function createCloudUIState(): CloudState {
     elizaCloudLoginBusy: false,
     elizaCloudLoginError: "",
     cloudDisconnecting: false,
-    currentTheme: "milady",
+    currentTheme: "eliza",
     plugins: [],
     pluginSaving: false,
     pluginSaveSuccess: false,

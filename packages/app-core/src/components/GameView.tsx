@@ -12,9 +12,15 @@ import { Button, Input } from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client, type LogEntry } from "../api";
 import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../bridge";
-import { useRetakeCapture, useTimeout } from "../hooks";
+import { useBranding } from "../config/branding";
+import {
+  useDocumentVisibility,
+  useIntervalWhenDocumentVisible,
+  useTimeout,
+} from "../hooks";
 import { useApp } from "../state";
 import { openExternalUrl } from "../utils";
+import type { DesktopClickAuditItem } from "../utils/desktop-workspace";
 import { formatTime } from "./format";
 
 const DEFAULT_VIEWER_SANDBOX = "allow-scripts allow-same-origin allow-popups";
@@ -32,11 +38,405 @@ function resolvePostMessageTargetOrigin(viewerUrl: string): string {
 /** Tag badge colors for logs panel. */
 const TAG_COLORS: Record<string, { bg: string; fg: string }> = {
   agent: { bg: "rgba(99, 102, 241, 0.15)", fg: "rgb(99, 102, 241)" },
-  hyperscape: { bg: "rgba(245, 158, 11, 0.15)", fg: "rgb(245, 158, 11)" },
   game: { bg: "rgba(34, 197, 94, 0.15)", fg: "rgb(34, 197, 94)" },
   autonomy: { bg: "rgba(245, 158, 11, 0.15)", fg: "rgb(245, 158, 11)" },
   websocket: { bg: "rgba(20, 184, 166, 0.15)", fg: "rgb(20, 184, 166)" },
 };
+
+export const DESKTOP_GAME_CLICK_AUDIT: readonly DesktopClickAuditItem[] = [
+  {
+    id: "game-native-refresh",
+    entryPoint: "game",
+    label: "Refresh Native Window State",
+    expectedAction: "Refresh canvas bounds and GPU window state.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "game-native-focus",
+    entryPoint: "game",
+    label: "Focus Game Window",
+    expectedAction: "Focus the native game canvas window.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "game-native-visibility",
+    entryPoint: "game",
+    label: "Show/Hide Game Window",
+    expectedAction: "Show or hide the native game canvas window.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "game-native-snapshot",
+    entryPoint: "game",
+    label: "Snapshot Game Window",
+    expectedAction: "Capture a native snapshot of the game canvas window.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "game-gpu-window",
+    entryPoint: "game",
+    label: "Launch GPU Diagnostics",
+    expectedAction: "Create or focus a safe GPU diagnostics window.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+] as const;
+
+export function DesktopGameWindowControls({
+  gameWindowId,
+}: {
+  gameWindowId: string | null;
+}) {
+  const { t } = useApp();
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [boundsLabel, setBoundsLabel] = useState(
+    t("gameview.BoundsUnavailable", { defaultValue: "Bounds unavailable." }),
+  );
+  const [gpuWindowId, setGpuWindowId] = useState<string | null>(null);
+  const branding = useBranding();
+
+  const refresh = useCallback(async () => {
+    if (!gameWindowId) {
+      setBoundsLabel(
+        t("gameview.WaitingForNativeGameWindow", {
+          defaultValue: "Waiting for native game window.",
+        }),
+      );
+    } else {
+      const bounds = await invokeDesktopBridgeRequest<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }>({
+        rpcMethod: "canvasGetBounds",
+        ipcChannel: "canvas:getBounds",
+        params: { id: gameWindowId },
+      });
+      if (bounds) {
+        setBoundsLabel(
+          `${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y}`,
+        );
+      }
+    }
+
+    const gpuWindows = await invokeDesktopBridgeRequest<{
+      windows: Array<{ id: string }>;
+    }>({
+      rpcMethod: "gpuWindowList",
+      ipcChannel: "gpuWindow:list",
+    });
+    setGpuWindowId(gpuWindows?.windows[0]?.id ?? null);
+  }, [gameWindowId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const runAction = useCallback(
+    async (
+      id: string,
+      action: () => Promise<void>,
+      successMessage?: string,
+      refreshAfter = true,
+    ) => {
+      setBusyAction(id);
+      setError(null);
+      setMessage(null);
+      try {
+        await action();
+        if (refreshAfter) {
+          await refresh();
+        }
+        if (successMessage) {
+          setMessage(successMessage);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : t("gameview.NativeGameActionFailed", {
+                defaultValue: "Native game action failed.",
+              }),
+        );
+      } finally {
+        setBusyAction(null);
+      }
+    },
+    [refresh, t],
+  );
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="rounded border border-border px-2 py-1 text-[10px] text-muted">
+        {boundsLabel}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs shadow-sm hover:border-accent"
+        onClick={() =>
+          void runAction(
+            "game-native-refresh",
+            async () => {},
+            t("gameview.NativeGameStateRefreshed", {
+              defaultValue: "Native game state refreshed.",
+            }),
+          )
+        }
+        disabled={busyAction === "game-native-refresh"}
+      >
+        {t("gameview.RefreshNativeState", {
+          defaultValue: "Refresh Native State",
+        })}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs shadow-sm hover:border-accent"
+        onClick={() =>
+          void runAction(
+            "game-native-focus",
+            async () => {
+              if (!gameWindowId) {
+                throw new Error(
+                  t("gameview.GameWindowNotReadyYet", {
+                    defaultValue: "Game window not ready yet.",
+                  }),
+                );
+              }
+              await invokeDesktopBridgeRequest<void>({
+                rpcMethod: "canvasFocus",
+                ipcChannel: "canvas:focus",
+                params: { id: gameWindowId },
+              });
+            },
+            t("gameview.FocusedNativeGameWindow", {
+              defaultValue: "Focused native game window.",
+            }),
+            false,
+          )
+        }
+        disabled={!gameWindowId || busyAction === "game-native-focus"}
+      >
+        {t("gameview.FocusWindow", { defaultValue: "Focus Window" })}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs shadow-sm hover:border-accent"
+        onClick={() =>
+          void runAction(
+            "game-native-show",
+            async () => {
+              if (!gameWindowId) {
+                throw new Error(
+                  t("gameview.GameWindowNotReadyYet", {
+                    defaultValue: "Game window not ready yet.",
+                  }),
+                );
+              }
+              await invokeDesktopBridgeRequest<void>({
+                rpcMethod: "canvasShow",
+                ipcChannel: "canvas:show",
+                params: { id: gameWindowId },
+              });
+            },
+            t("gameview.ShownNativeGameWindow", {
+              defaultValue: "Shown native game window.",
+            }),
+            false,
+          )
+        }
+        disabled={!gameWindowId || busyAction === "game-native-show"}
+      >
+        {t("gameview.ShowWindow", { defaultValue: "Show Window" })}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs shadow-sm hover:border-accent"
+        onClick={() =>
+          void runAction(
+            "game-native-hide",
+            async () => {
+              if (!gameWindowId) {
+                throw new Error(
+                  t("gameview.GameWindowNotReadyYet", {
+                    defaultValue: "Game window not ready yet.",
+                  }),
+                );
+              }
+              await invokeDesktopBridgeRequest<void>({
+                rpcMethod: "canvasHide",
+                ipcChannel: "canvas:hide",
+                params: { id: gameWindowId },
+              });
+            },
+            t("gameview.HidNativeGameWindow", {
+              defaultValue: "Hid native game window.",
+            }),
+            false,
+          )
+        }
+        disabled={!gameWindowId || busyAction === "game-native-hide"}
+      >
+        {t("gameview.HideWindow", { defaultValue: "Hide Window" })}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs shadow-sm hover:border-accent"
+        onClick={() =>
+          void runAction(
+            "game-native-snapshot",
+            async () => {
+              if (!gameWindowId) {
+                throw new Error(
+                  t("gameview.GameWindowNotReadyYet", {
+                    defaultValue: "Game window not ready yet.",
+                  }),
+                );
+              }
+              const snapshot = await invokeDesktopBridgeRequest<{
+                data: string;
+              } | null>({
+                rpcMethod: "canvasSnapshot",
+                ipcChannel: "canvas:snapshot",
+                params: { id: gameWindowId, format: "png" },
+              });
+              if (!snapshot?.data) {
+                throw new Error(
+                  t("gameview.SnapshotUnavailable", {
+                    defaultValue: "Snapshot unavailable.",
+                  }),
+                );
+              }
+            },
+            t("gameview.CapturedNativeGameSnapshot", {
+              defaultValue: "Captured native game snapshot.",
+            }),
+            false,
+          )
+        }
+        disabled={!gameWindowId || busyAction === "game-native-snapshot"}
+      >
+        {t("gameview.SnapshotWindow", { defaultValue: "Snapshot Window" })}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs shadow-sm hover:border-accent"
+        onClick={() =>
+          void runAction(
+            "game-gpu-window",
+            async () => {
+              const created = await invokeDesktopBridgeRequest<{ id: string }>({
+                rpcMethod: "gpuWindowCreate",
+                ipcChannel: "gpuWindow:create",
+                params: {
+                  id: "gpu-diagnostics",
+                  title: `${branding.appName} GPU Diagnostics`,
+                  width: 640,
+                  height: 360,
+                },
+              });
+              const nextGpuWindowId = created?.id ?? gpuWindowId;
+              if (nextGpuWindowId) {
+                await invokeDesktopBridgeRequest<void>({
+                  rpcMethod: "gpuWindowShow",
+                  ipcChannel: "gpuWindow:show",
+                  params: { id: nextGpuWindowId },
+                });
+                await invokeDesktopBridgeRequest<void>({
+                  rpcMethod: "gpuWindowGetInfo",
+                  ipcChannel: "gpuWindow:getInfo",
+                  params: { id: nextGpuWindowId },
+                });
+                setGpuWindowId(nextGpuWindowId);
+              }
+            },
+            t("gameview.GpuDiagnosticsWindowReady", {
+              defaultValue: "GPU diagnostics window ready.",
+            }),
+          )
+        }
+        disabled={busyAction === "game-gpu-window"}
+      >
+        {t("gameview.LaunchGpuDiagnostics", {
+          defaultValue: "Launch GPU Diagnostics",
+        })}
+      </Button>
+      {gpuWindowId && (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs shadow-sm hover:border-accent"
+            onClick={() =>
+              void runAction(
+                "game-gpu-show",
+                async () => {
+                  await invokeDesktopBridgeRequest<void>({
+                    rpcMethod: "gpuWindowShow",
+                    ipcChannel: "gpuWindow:show",
+                    params: { id: gpuWindowId },
+                  });
+                },
+                t("gameview.GpuDiagnosticsWindowShown", {
+                  defaultValue: "GPU diagnostics window shown.",
+                }),
+                false,
+              )
+            }
+            disabled={busyAction === "game-gpu-show"}
+          >
+            {t("gameview.ShowGpuWindow", {
+              defaultValue: "Show GPU Window",
+            })}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs shadow-sm hover:border-accent"
+            onClick={() =>
+              void runAction(
+                "game-gpu-hide",
+                async () => {
+                  await invokeDesktopBridgeRequest<void>({
+                    rpcMethod: "gpuWindowHide",
+                    ipcChannel: "gpuWindow:hide",
+                    params: { id: gpuWindowId },
+                  });
+                },
+                t("gameview.GpuDiagnosticsWindowHidden", {
+                  defaultValue: "GPU diagnostics window hidden.",
+                }),
+                false,
+              )
+            }
+            disabled={busyAction === "game-gpu-hide"}
+          >
+            {t("gameview.HideGpuWindow", {
+              defaultValue: "Hide GPU Window",
+            })}
+          </Button>
+        </>
+      )}
+      {(message || error) && (
+        <span className={`text-[10px] ${error ? "text-danger" : "text-ok"}`}>
+          {error ?? message}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export function GameView() {
   const { setTimeout } = useTimeout();
@@ -48,7 +448,6 @@ export function GameView() {
     activeGamePostMessageAuth,
     activeGamePostMessagePayload,
     gameOverlayEnabled,
-    plugins,
     logs,
     loadLogs,
     setState,
@@ -58,48 +457,56 @@ export function GameView() {
   const isElectrobun = isElectrobunRuntime();
   const [stopping, setStopping] = useState(false);
   const [showLogsPanel, setShowLogsPanel] = useState(false);
+  const docVisible = useDocumentVisibility();
   const [connectionStatus, setConnectionStatus] = useState<
     "connecting" | "connected" | "disconnected"
   >("connecting");
   const [chatInput, setChatInput] = useState("");
   const [sendingChat, setSendingChat] = useState(false);
-  const [retakeCapture, setRetakeCapture] = useState(false);
   const [gameWindowId, setGameWindowId] = useState<string | null>(null);
   const gameWindowIdRef = useRef<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const authSentRef = useRef(false);
   const viewerSessionRef = useRef<string>("");
-  const logsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Stream iframe frames to retake.tv when capture is active
-  useRetakeCapture(iframeRef, retakeCapture);
 
   // Send command to the agent - routes through elizaOS which processes
-  // the message and decides what hyperscape actions to take
+  // the message and decides what game actions to take
   const handleSendChat = useCallback(async () => {
     const content = chatInput.trim();
     if (!content) return;
     setSendingChat(true);
     try {
-      // Send message to elizaOS agent - it will process and execute hyperscape actions
+      // Send message to elizaOS agent - it will process and execute game actions
       // Examples: "go chop some wood", "attack the goblin", "go to the bank"
       const response = await client.sendChatRest(content, "DM");
       setChatInput("");
       // Show agent's response
       if (response.text) {
         setActionNotice(
-          `Agent: ${response.text.slice(0, 100)}${response.text.length > 100 ? "..." : ""}`,
+          t("gameview.AgentResponseNotice", {
+            defaultValue: "Agent: {{response}}",
+            response: `${response.text.slice(0, 100)}${response.text.length > 100 ? "..." : ""}`,
+          }),
           "success",
           4000,
         );
       } else {
-        setActionNotice("Command sent to agent.", "success", 2000);
+        setActionNotice(
+          t("gameview.CommandSentToAgent", {
+            defaultValue: "Command sent to agent.",
+          }),
+          "success",
+          2000,
+        );
       }
       // Refresh logs to show activity
       setTimeout(() => void loadLogs(), 1500);
     } catch (err) {
       setActionNotice(
-        `Failed to send: ${err instanceof Error ? err.message : "error"}`,
+        t("gameview.FailedToSend", {
+          defaultValue: "Failed to send: {{message}}",
+          message: err instanceof Error ? err.message : "error",
+        }),
         "error",
         3000,
       );
@@ -122,12 +529,6 @@ export function GameView() {
     [activeGamePostMessagePayload, activeGameViewerUrl],
   );
 
-  // Only show retake capture button when the retake connector is enabled
-  const retakeEnabled = useMemo(
-    () => plugins.some((p) => p.id === "retake" && p.enabled),
-    [plugins],
-  );
-
   // Filter logs relevant to the current game
   const gameLogs = useMemo(() => {
     if (!activeGameApp) return [];
@@ -147,24 +548,19 @@ export function GameView() {
     });
   }, [activeGameApp, logs]);
 
-  // Auto-refresh logs when panel is open
+  // Auto-refresh logs when panel is open and tab is visible (catch-up on focus).
   useEffect(() => {
-    if (!showLogsPanel) {
-      if (logsIntervalRef.current) {
-        clearInterval(logsIntervalRef.current);
-        logsIntervalRef.current = null;
-      }
-      return;
-    }
+    if (!showLogsPanel || !docVisible) return;
     void loadLogs();
-    logsIntervalRef.current = setInterval(() => void loadLogs(), 3000);
-    return () => {
-      if (logsIntervalRef.current) {
-        clearInterval(logsIntervalRef.current);
-        logsIntervalRef.current = null;
-      }
-    };
-  }, [showLogsPanel, loadLogs]);
+  }, [showLogsPanel, docVisible, loadLogs]);
+
+  useIntervalWhenDocumentVisible(
+    () => {
+      void loadLogs();
+    },
+    3000,
+    showLogsPanel,
+  );
 
   // Open the game URL in an isolated Electrobun BrowserWindow.
   // Runs whenever the viewer URL or game title changes and we're inside the desktop app.
@@ -178,7 +574,10 @@ export function GameView() {
       ipcChannel: "game:openWindow",
       params: {
         url: activeGameViewerUrl,
-        title: activeGameDisplayName || activeGameApp || "Game",
+        title:
+          activeGameDisplayName ||
+          activeGameApp ||
+          t("gameview.Game", { defaultValue: "Game" }),
       },
     })
       .then((result) => {
@@ -256,7 +655,11 @@ export function GameView() {
       );
       authSentRef.current = true;
       setConnectionStatus("connected");
-      setActionNotice("Viewer auth sent.", "info", 1800);
+      setActionNotice(
+        t("gameview.ViewerAuthSent", { defaultValue: "Viewer auth sent." }),
+        "info",
+        1800,
+      );
     };
 
     window.addEventListener("message", onMessage);
@@ -275,7 +678,9 @@ export function GameView() {
       await openExternalUrl(activeGameViewerUrl);
     } catch {
       setActionNotice(
-        "Popup blocked. Allow popups and try again.",
+        t("gameview.PopupBlocked", {
+          defaultValue: "Popup blocked. Allow popups and try again.",
+        }),
         "error",
         3600,
       );
@@ -296,7 +701,10 @@ export function GameView() {
       );
     } catch (err) {
       setActionNotice(
-        `Failed to stop: ${err instanceof Error ? err.message : "error"}`,
+        t("gameview.FailedToStop", {
+          defaultValue: "Failed to stop: {{message}}",
+          message: err instanceof Error ? err.message : "error",
+        }),
         "error",
       );
     } finally {
@@ -460,16 +868,8 @@ export function GameView() {
         >
           {showLogsPanel ? t("game.hideLogs") : t("game.showLogs")}
         </Button>
-        {retakeEnabled && (
-          <Button
-            variant={retakeCapture ? "default" : "outline"}
-            size="sm"
-            className="h-7 text-xs shadow-sm hover:border-accent"
-            onClick={() => setRetakeCapture(!retakeCapture)}
-            title={t("game.retakeTitle")}
-          >
-            {retakeCapture ? t("game.stopCapture") : t("game.retakeCapture")}
-          </Button>
+        {isElectrobun && (
+          <DesktopGameWindowControls gameWindowId={gameWindowId} />
         )}
         <Button
           variant={gameOverlayEnabled ? "default" : "outline"}
@@ -541,7 +941,10 @@ export function GameView() {
               src={activeGameViewerUrl}
               sandbox={activeGameSandbox}
               className="w-full h-full border-none"
-              title={activeGameDisplayName || "Game"}
+              title={
+                activeGameDisplayName ||
+                t("gameview.Game", { defaultValue: "Game" })
+              }
             />
           )}
         </div>

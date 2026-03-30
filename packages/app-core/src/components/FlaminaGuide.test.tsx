@@ -1,61 +1,80 @@
 // @vitest-environment jsdom
 import React from "react";
-import TestRenderer from "react-test-renderer";
-import { describe, expect, it } from "vitest";
+import TestRenderer, { act } from "react-test-renderer";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
 import { FlaminaGuideCard } from "./FlaminaGuide";
 
-function textOf(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : textOf(child)))
-    .join("");
-}
+const { mockUseApp } = vi.hoisted(() => ({
+  mockUseApp: vi.fn(),
+}));
+
+vi.mock("../state", () => ({
+  useApp: () => mockUseApp(),
+}));
+
+beforeEach(() => {
+  mockUseApp.mockReturnValue({ t: (k: string) => k });
+});
 
 describe("FlaminaGuideCard", () => {
   it("explains provider impact on character behavior", () => {
-    const tree = TestRenderer.create(
-      React.createElement(FlaminaGuideCard, { topic: "provider" }),
-    );
+    let tree: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        React.createElement(FlaminaGuideCard, { topic: "provider" }),
+      );
+    });
 
-    const renderedText = textOf(tree.root);
+    const renderedText = textOf(tree?.root);
 
-    expect(renderedText).toContain("reasons");
-    expect(renderedText).toContain("latency");
-    expect(renderedText).toContain("output quality");
+    expect(renderedText).toContain("flaminaguide.provider.whenToUse");
+    expect(renderedText).toContain("flaminaguide.provider.characterImpact");
+    expect(renderedText).toContain("flaminaguide.provider.description");
   });
 
   it("explains rpc impact on external capabilities", () => {
-    const tree = TestRenderer.create(
-      React.createElement(FlaminaGuideCard, { topic: "rpc" }),
-    );
+    let tree: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        React.createElement(FlaminaGuideCard, { topic: "rpc" }),
+      );
+    });
 
-    const renderedText = textOf(tree.root);
+    const renderedText = textOf(tree?.root);
 
-    expect(renderedText).toContain("wallets");
-    expect(renderedText).toContain("chains");
-    expect(renderedText).toContain("external execution");
+    expect(renderedText).toContain("flaminaguide.rpc.characterImpact");
+    expect(renderedText).toContain("flaminaguide.rpc.description");
+    expect(renderedText).toContain("flaminaguide.rpc.whenToUse");
   });
 
   it("explains permissions impact on local access", () => {
-    const tree = TestRenderer.create(
-      React.createElement(FlaminaGuideCard, { topic: "permissions" }),
-    );
+    let tree: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        React.createElement(FlaminaGuideCard, { topic: "permissions" }),
+      );
+    });
 
-    const renderedText = textOf(tree.root);
+    const renderedText = textOf(tree?.root);
 
-    expect(renderedText).toContain("see");
-    expect(renderedText).toContain("control");
-    expect(renderedText).toContain("locally");
+    expect(renderedText).toContain("flaminaguide.permissions.characterImpact");
+    expect(renderedText).toContain("flaminaguide.permissions.description");
+    expect(renderedText).toContain("flaminaguide.permissions.whenToUse");
   });
 
   it("explains voice impact on presentation", () => {
-    const tree = TestRenderer.create(
-      React.createElement(FlaminaGuideCard, { topic: "voice" }),
-    );
+    let tree: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        React.createElement(FlaminaGuideCard, { topic: "voice" }),
+      );
+    });
 
-    const renderedText = textOf(tree.root);
+    const renderedText = textOf(tree?.root);
 
-    expect(renderedText).toContain("sounds");
-    expect(renderedText).toContain("spoken interactions");
-    expect(renderedText).toContain("saved");
+    expect(renderedText).toContain("flaminaguide.voice.characterImpact");
+    expect(renderedText).toContain("flaminaguide.voice.description");
+    expect(renderedText).toContain("flaminaguide.voice.whenToUse");
   });
 });

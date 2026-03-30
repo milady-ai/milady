@@ -1,6 +1,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { text, flush } from "../../../../test/helpers/react-test";
 
 interface AppsPageContextStub {
   appsSubTab: "browse" | "games";
@@ -16,15 +17,15 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
-vi.mock("@miladyai/app-core/components/AppsView", () => ({
+vi.mock("../../src/components/AppsView", () => ({
   AppsView: () => React.createElement("div", null, "APPS_VIEW"),
 }));
 
-vi.mock("@miladyai/app-core/components/GameView", () => ({
+vi.mock("../../src/components/GameView", () => ({
   GameView: () => React.createElement("div", null, "GAME_VIEW"),
 }));
 
-import { AppsPageView } from "@miladyai/app-core/components/AppsPageView";
+import { AppsPageView } from "../../src/components/AppsPageView";
 
 function createContext(
   overrides?: Partial<AppsPageContextStub>,
@@ -35,19 +36,6 @@ function createContext(
     setState: vi.fn<AppsPageContextStub["setState"]>(),
     ...overrides,
   };
-}
-
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : ""))
-    .join("")
-    .trim();
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
 }
 
 describe("AppsPageView", () => {

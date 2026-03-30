@@ -2,8 +2,17 @@
  * Databases page — wrapper with Tables / Media / Vectors sub-tabs.
  */
 
+import { Button } from "@miladyai/ui";
 import { useApp } from "../state";
 import { DatabaseView } from "./DatabaseView";
+import {
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_SEGMENTED_GROUP_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME,
+  DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { MediaGalleryView } from "./MediaGalleryView";
 import { VectorBrowserView } from "./VectorBrowserView";
 
@@ -12,11 +21,11 @@ export function DatabasePageView() {
   const dbTabs = [
     {
       id: "tables" as const,
-      label: t("databasepageview.Tables"),
+      label: t("databaseview.Tables"),
     },
     {
       id: "media" as const,
-      label: t("databasepageview.Media"),
+      label: t("settings.sections.media.label"),
     },
     {
       id: "vectors" as const,
@@ -24,32 +33,48 @@ export function DatabasePageView() {
     },
   ];
 
-  return (
-    <div className="flex flex-col h-full">
-      {/* Sub-tab bar */}
-      <div className="flex gap-1 border-b border-[var(--border)] mb-5">
-        {dbTabs.map((tab) => (
-          <button
+  const leftNav = (
+    <div
+      className={DESKTOP_SEGMENTED_GROUP_CLASSNAME}
+      role="tablist"
+      aria-label={t("aria.databaseViews")}
+    >
+      {dbTabs.map((tab) => {
+        const isActive = databaseSubTab === tab.id;
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
             key={tab.id}
-            className={`px-4 py-2 text-[13px] bg-transparent border-0 border-b-2 cursor-pointer transition-colors ${
-              databaseSubTab === tab.id
-                ? "text-[var(--accent)] font-medium border-b-[var(--accent)]"
-                : "text-[var(--muted)] border-b-transparent hover:text-[var(--txt)]"
+            role="tab"
+            aria-selected={isActive}
+            aria-current={isActive ? "page" : undefined}
+            className={`${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} h-10 flex-1 ${
+              isActive
+                ? DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME
+                : DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME
             }`}
             onClick={() => setState("databaseSubTab", tab.id)}
           >
             {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Sub-tab content */}
-      <div className="flex-1 min-h-0">
-        {databaseSubTab === "tables" && <DatabaseView />}
-        {databaseSubTab === "media" && <MediaGalleryView />}
-        {databaseSubTab === "vectors" && <VectorBrowserView />}
-      </div>
+          </Button>
+        );
+      })}
     </div>
+  );
+
+  return (
+    <DesktopPageFrame>
+      <div
+        className={`${DESKTOP_PAGE_CONTENT_CLASSNAME} flex h-full w-full min-h-0 flex-col`}
+      >
+        {databaseSubTab === "tables" && <DatabaseView leftNav={leftNav} />}
+        {databaseSubTab === "media" && <MediaGalleryView leftNav={leftNav} />}
+        {databaseSubTab === "vectors" && (
+          <VectorBrowserView leftNav={leftNav} />
+        )}
+      </div>
+    </DesktopPageFrame>
   );
 }

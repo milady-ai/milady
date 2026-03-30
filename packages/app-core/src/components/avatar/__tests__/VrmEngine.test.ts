@@ -92,6 +92,8 @@ const hoisted = vi.hoisted(() => {
     toneMapping: 0,
     toneMappingExposure: 1.0,
     outputColorSpace: "",
+    xr: { enabled: false },
+    setAnimationLoop: vi.fn(),
   };
   const mockWebGpuRendererInstance = {
     setPixelRatio: vi.fn(),
@@ -202,6 +204,8 @@ vi.mock("three", () => {
     toneMapping = hoisted.mockRendererInstance.toneMapping;
     toneMappingExposure = hoisted.mockRendererInstance.toneMappingExposure;
     outputColorSpace = hoisted.mockRendererInstance.outputColorSpace;
+    xr = hoisted.mockRendererInstance.xr;
+    setAnimationLoop = hoisted.mockRendererInstance.setAnimationLoop;
   }
 
   class MockScene {
@@ -515,6 +519,22 @@ vi.mock("three/examples/jsm/controls/OrbitControls.js", () => ({
   },
 }));
 
+vi.mock("three/examples/jsm/webxr/VRButton.js", () => ({
+  VRButton: {
+    createButton: vi.fn(() => ({
+      id: "",
+      style: { cssText: "", display: "" },
+      dataset: {},
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  },
+}));
+
+vi.mock("@lookingglass/webxr", () => ({
+  LookingGlassWebXRPolyfill: class MockLookingGlassWebXRPolyfill {},
+}));
+
 vi.mock("@miladyai/app-core/utils", () => ({
   resolveAppAssetUrl: vi.fn((p: string) => `/mock/${p}`),
 }));
@@ -559,6 +579,20 @@ const mockCanvas2d = {
   fill: vi.fn(),
   beginPath: vi.fn(),
   arc: vi.fn(),
+  scale: vi.fn(),
+  clearRect: vi.fn(),
+  drawImage: vi.fn(),
+  save: vi.fn(),
+  restore: vi.fn(),
+  translate: vi.fn(),
+  rotate: vi.fn(),
+  measureText: vi.fn(() => ({ width: 0 })),
+  font: "",
+  textAlign: "",
+  textBaseline: "",
+  fillText: vi.fn(),
+  strokeText: vi.fn(),
+  globalAlpha: 1,
 };
 Object.assign(globalThis, {
   document: {
@@ -566,7 +600,19 @@ Object.assign(globalThis, {
       width: 0,
       height: 0,
       getContext: vi.fn(() => mockCanvas2d),
+      style: { cssText: "", display: "" },
     })),
+    getElementById: vi.fn(() => null),
+    body: {
+      appendChild: vi.fn(),
+      removeChild: vi.fn(),
+      style: { background: "" },
+    },
+  },
+  MutationObserver: class MockMutationObserver {
+    observe = vi.fn();
+    disconnect = vi.fn();
+    takeRecords = vi.fn(() => []);
   },
 });
 
@@ -630,11 +676,15 @@ describe("VrmEngine", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     hoisted.mixerListeners.clear();
+    (
+      globalThis as { window: { devicePixelRatio: number } }
+    ).window.devicePixelRatio = 1;
     hoisted.navigatorMock.gpu = undefined;
     hoisted.fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
       arrayBuffer: hoisted.responseArrayBufferMock,
+      headers: { get: vi.fn(() => "0") },
     });
     hoisted.responseArrayBufferMock.mockResolvedValue(new ArrayBuffer(8));
     delete (window as Window & { __electrobunWindowId?: number })
@@ -711,14 +761,25 @@ describe("VrmEngine", () => {
       engine.setup(canvas, vi.fn());
       await waitForEngineReady(engine);
 
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledTimes(1);
+      // The engine uses renderer.setAnimationLoop when available.
+      // setupLookingGlass also calls setAnimationLoop on a separate LKG
+      // renderer — but both share the same mock, so the count is 2.
+      expect(
+        hoisted.mockRendererInstance.setAnimationLoop,
+      ).toHaveBeenCalledTimes(1);
 
       engine.setPaused(true);
-      expect(globalThis.cancelAnimationFrame).toHaveBeenCalledTimes(1);
+      // Pausing calls setAnimationLoop(null) to stop the loop
+      expect(
+        hoisted.mockRendererInstance.setAnimationLoop,
+      ).toHaveBeenLastCalledWith(null);
       expect(hoisted.mockRendererInstance.dispose).not.toHaveBeenCalled();
 
       engine.setPaused(false);
-      expect(globalThis.requestAnimationFrame).toHaveBeenCalledTimes(2);
+      // Resuming calls setAnimationLoop again with a callback
+      expect(
+        hoisted.mockRendererInstance.setAnimationLoop,
+      ).toHaveBeenCalledTimes(3);
     });
 
     it("waits for the renderer to finish initializing", async () => {
@@ -742,6 +803,63 @@ describe("VrmEngine", () => {
       expect(hoisted.mockRendererInstance.setPixelRatio).toHaveBeenCalledWith(
         1,
       );
+    });
+
+    it("setLowPowerRenderMode caps pixel ratio at 1 on high-DPR displays", async () => {
+      (
+        globalThis as { window: { devicePixelRatio: number } }
+      ).window.devicePixelRatio = 2;
+      hoisted.mockRendererInstance.setPixelRatio.mockClear();
+      const canvas = createMockCanvas();
+      engine.setup(canvas, vi.fn());
+      await waitForEngineReady(engine);
+
+      expect(hoisted.mockRendererInstance.setPixelRatio).toHaveBeenCalledWith(
+        2,
+      );
+      hoisted.mockRendererInstance.setPixelRatio.mockClear();
+      engine.setLowPowerRenderMode(true);
+      expect(hoisted.mockRendererInstance.setPixelRatio).toHaveBeenCalledWith(
+        1,
+      );
+      hoisted.mockRendererInstance.setPixelRatio.mockClear();
+      engine.setLowPowerRenderMode(false);
+      expect(hoisted.mockRendererInstance.setPixelRatio).toHaveBeenCalledWith(
+        2,
+      );
+    });
+
+    it("setHalfFramerateMode halves animation-loop work (skip alternate ticks)", async () => {
+      const canvas = createMockCanvas();
+      engine.setup(canvas, vi.fn());
+      await waitForEngineReady(engine);
+
+      const extractLoopCallback = (): (() => void) => {
+        const calls = hoisted.mockRendererInstance.setAnimationLoop.mock.calls;
+        const withFn = [...calls]
+          .reverse()
+          .find((c) => typeof c[0] === "function");
+        expect(withFn?.[0]).toBeTypeOf("function");
+        return withFn?.[0] as () => void;
+      };
+
+      const loopCb = extractLoopCallback();
+      hoisted.mockRendererInstance.render.mockClear();
+
+      for (let i = 0; i < 10; i += 1) loopCb();
+      const rendersFullRate =
+        hoisted.mockRendererInstance.render.mock.calls.length;
+      expect(rendersFullRate).toBe(10);
+
+      hoisted.mockRendererInstance.render.mockClear();
+      engine.setHalfFramerateMode(true);
+      for (let i = 0; i < 10; i += 1) loopCb();
+      expect(hoisted.mockRendererInstance.render.mock.calls.length).toBe(5);
+
+      hoisted.mockRendererInstance.render.mockClear();
+      engine.setHalfFramerateMode(false);
+      for (let i = 0; i < 10; i += 1) loopCb();
+      expect(hoisted.mockRendererInstance.render.mock.calls.length).toBe(10);
     });
 
     it("uses WebGPURenderer when navigator.gpu is available and opted in", async () => {
@@ -775,6 +893,19 @@ describe("VrmEngine", () => {
       const engineAny = engine as unknown as { rendererBackend: string };
       expect(engineAny.rendererBackend).toBe("webgpu");
       expect(hoisted.mockWebGpuRendererInstance.init).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps Looking Glass disabled by default on Electrobun WebGL startup", async () => {
+      (
+        window as Window & { __electrobunWindowId?: number }
+      ).__electrobunWindowId = 1;
+      const canvas = createMockCanvas();
+
+      engine.setup(canvas, vi.fn(), { rendererPreference: "webgl" });
+      await waitForEngineReady(engine);
+
+      expect(engine.isInitialized()).toBe(true);
+      expect(hoisted.mockRendererInstance.setAnimationLoop).toHaveBeenCalled();
     });
 
     it("cleans up WebGL resources during dispose()", async () => {
@@ -848,6 +979,7 @@ describe("VrmEngine", () => {
           "idleTime",
           "idleTracks",
           "loadError",
+          "loadingProgress",
           "revealStarted",
           "vrmLoaded",
           "vrmName",
@@ -885,6 +1017,70 @@ describe("VrmEngine", () => {
 
       engine.setCompanionZoomNormalized(1.4);
       expect(engineAny.companionZoomTarget).toBe(1);
+    });
+
+    it("setDragOrbitTarget clamps yaw and pitch within bounds", () => {
+      const engineAny = engine as unknown as {
+        dragOrbitTarget: {
+          x: number;
+          y: number;
+          set: ReturnType<typeof vi.fn>;
+        };
+      };
+
+      engine.setDragOrbitTarget(0.3, -0.2);
+      // The mock Vector2.set should have been called with clamped values
+      expect(engineAny.dragOrbitTarget.set).toHaveBeenCalledWith(0.3, -0.2);
+
+      engine.setDragOrbitTarget(1.0, -1.0);
+      // yaw clamped to [-0.6, 0.6], pitch to [-0.35, 0.35]
+      expect(engineAny.dragOrbitTarget.set).toHaveBeenCalledWith(0.6, -0.35);
+    });
+
+    it("resetDragOrbit sets target back to zero", () => {
+      const engineAny = engine as unknown as {
+        dragOrbitTarget: {
+          x: number;
+          y: number;
+          set: ReturnType<typeof vi.fn>;
+        };
+      };
+
+      engine.setDragOrbitTarget(0.3, 0.2);
+      engine.resetDragOrbit();
+      expect(engineAny.dragOrbitTarget.set).toHaveBeenLastCalledWith(0, 0);
+    });
+
+    it("baseCameraPosition is initialized from camera profile after setup", async () => {
+      const canvas = createMockCanvas();
+      engine.setCameraProfile("companion");
+      engine.setup(canvas, vi.fn());
+      await waitForEngineReady(engine);
+
+      const engineAny = engine as unknown as {
+        baseCameraPosition: {
+          copy: ReturnType<typeof vi.fn>;
+          lengthSq: ReturnType<typeof vi.fn>;
+        };
+      };
+
+      // baseCameraPosition.copy should have been called during async init
+      // (after applyCameraProfileToCamera sets camera.position)
+      expect(engineAny.baseCameraPosition.copy).toHaveBeenCalled();
+    });
+
+    it("baseCameraPosition is non-zero after setup so drag orbit is not skipped", async () => {
+      const canvas = createMockCanvas();
+      engine.setCameraProfile("companion");
+      engine.setup(canvas, vi.fn());
+      await waitForEngineReady(engine);
+
+      const engineAny = engine as unknown as {
+        baseCameraPosition: { lengthSq: ReturnType<typeof vi.fn> };
+      };
+
+      // The mock returns 1 for lengthSq which is > 1e-6
+      expect(engineAny.baseCameraPosition.lengthSq()).toBeGreaterThan(1e-6);
     });
 
     it("queues the first world reveal until the VRM is ready", async () => {
@@ -998,10 +1194,10 @@ describe("VrmEngine", () => {
       const nightPosition = nightSplat.position.set.mock.calls.at(-1) ?? [];
 
       expect(dayPosition[0]).toBeCloseTo(0, 5);
-      expect(dayPosition[1]).toBeCloseTo(-0.35, 5);
+      expect(dayPosition[1]).toBeCloseTo(-0.3, 5);
       expect(dayPosition[2]).toBeCloseTo(0, 5);
       expect(nightPosition[0]).toBeCloseTo(0, 5);
-      expect(nightPosition[1]).toBeCloseTo(-0.95, 5);
+      expect(nightPosition[1]).toBeCloseTo(-0.85, 5);
       expect(nightPosition[2]).toBeCloseTo(0, 5);
     });
 
@@ -1083,6 +1279,7 @@ describe("VrmEngine", () => {
             progressUniform: { value: number };
             mesh: {
               opacity: number;
+              visible: boolean;
               objectModifier: unknown;
               dispose: ReturnType<typeof vi.fn>;
             };
@@ -1128,7 +1325,10 @@ describe("VrmEngine", () => {
         engineAny.updateWorldReveal(0.4);
       }
       expect(engineAny.worldReveal).toBeNull();
-      expect(firstWorld?.dispose).toHaveBeenCalled();
+      // The old world mesh is hidden (not disposed) — the engine caches splat meshes
+      // for reuse on subsequent world switches. True dispose only happens on engine teardown.
+      expect(firstWorld?.visible).toBe(false);
+      expect(firstWorld?.dispose).not.toHaveBeenCalled();
       expect(secondWorld?.opacity).toBe(1);
     });
   });
@@ -1158,7 +1358,7 @@ describe("VrmEngine", () => {
       expect(engineAny.emoteAction).toBeNull();
     });
 
-    it("playEmote crossfades from the current emote instead of bouncing through idle", async () => {
+    it("playEmote fades out the current emote and idle instead of bouncing through idle", async () => {
       const engineAny = engine as unknown as {
         vrm: object | null;
         mixer: {
@@ -1190,12 +1390,11 @@ describe("VrmEngine", () => {
 
       await engine.playEmote("/mock/emote.glb", 2, false);
 
-      expect(nextEmoteAction.crossFadeFrom).toHaveBeenCalledWith(
-        currentEmoteAction,
-        0.4,
-        false,
-      );
-      expect(idleAction.fadeIn).not.toHaveBeenCalled();
+      // Previous emote and idle should both be faded out
+      expect(currentEmoteAction.fadeOut).toHaveBeenCalledWith(0.4);
+      expect(idleAction.fadeOut).toHaveBeenCalledWith(0.4);
+      // New emote should be faded in (not crossFadeFrom)
+      expect(nextEmoteAction.fadeIn).toHaveBeenCalledWith(0.4);
       expect(engineAny.emoteAction).toBe(nextEmoteAction);
     });
 
@@ -1523,13 +1722,18 @@ describe("VrmEngine", () => {
       expect(engineAny.transitionDuration).toBe(0.8);
     });
 
-    it("smoothly transitions the camera when switching avatars", async () => {
+    it("preserves the outgoing avatar until the reveal path runs when switching avatars", async () => {
       const canvas = createMockCanvas();
       engine.setup(canvas, vi.fn());
       await waitForEngineReady(engine);
 
       const engineAny = engine as unknown as {
         vrm: {
+          scene: {
+            parent: { remove: ReturnType<typeof vi.fn> } | null;
+          };
+        } | null;
+        outgoingVrm: {
           scene: {
             parent: { remove: ReturnType<typeof vi.fn> } | null;
           };
@@ -1565,10 +1769,64 @@ describe("VrmEngine", () => {
 
       await engine.loadVrmFromUrl("http://example.com/model.vrm");
 
-      expect(previousParent.remove).toHaveBeenCalledTimes(1);
-      expect(engineAny.cameraManager.centerAndFrame).toHaveBeenCalledTimes(1);
-      expect(engineAny.isCameraTransitioning).toBe(true);
-      expect(engineAny.transitionDuration).toBe(3);
+      expect(previousParent.remove).not.toHaveBeenCalled();
+      expect(engineAny.outgoingVrm?.scene.parent).toBe(previousParent);
+      expect(engineAny.playTeleportReveal).toHaveBeenCalledTimes(1);
+      expect(engineAny.startPendingWorldReveal).toHaveBeenCalledWith(true);
+    });
+
+    it("dispatches teleport-complete when reveal falls back after load failure", async () => {
+      const canvas = createMockCanvas();
+      engine.setup(canvas, vi.fn());
+      await waitForEngineReady(engine);
+
+      const engineAny = engine as unknown as {
+        cameraManager: {
+          centerAndFrame: ReturnType<typeof vi.fn>;
+          ensureFacingCamera: ReturnType<typeof vi.fn>;
+        };
+        configureAvatarLookTracking: ReturnType<typeof vi.fn>;
+        loadAndPlayIdle: ReturnType<typeof vi.fn>;
+        playTeleportReveal: ReturnType<typeof vi.fn>;
+        startPendingWorldReveal: ReturnType<typeof vi.fn>;
+      };
+      const onTeleportComplete = vi.fn();
+      const originalDispatchEvent = window.dispatchEvent;
+      const vrm = createMockLoadedVrm();
+      window.addEventListener(
+        "eliza:vrm-teleport-complete",
+        onTeleportComplete,
+      );
+      Object.defineProperty(window, "dispatchEvent", {
+        configurable: true,
+        value: (event: Event) => {
+          onTeleportComplete(event);
+          return true;
+        },
+      });
+
+      engineAny.cameraManager.centerAndFrame = vi.fn();
+      engineAny.cameraManager.ensureFacingCamera = vi.fn();
+      engineAny.configureAvatarLookTracking = vi.fn();
+      engineAny.loadAndPlayIdle = vi
+        .fn()
+        .mockRejectedValue(new Error("teleport unavailable"));
+      engineAny.playTeleportReveal = vi.fn().mockResolvedValue(undefined);
+      engineAny.startPendingWorldReveal = vi.fn();
+      hoisted.mockLoaderLoadAsync.mockResolvedValueOnce({ userData: { vrm } });
+
+      await engine.loadVrmFromUrl("http://example.com/model.vrm");
+
+      expect(engineAny.startPendingWorldReveal).toHaveBeenCalledWith(false);
+      expect(onTeleportComplete).toHaveBeenCalledTimes(1);
+      window.removeEventListener(
+        "eliza:vrm-teleport-complete",
+        onTeleportComplete,
+      );
+      Object.defineProperty(window, "dispatchEvent", {
+        configurable: true,
+        value: originalDispatchEvent,
+      });
     });
   });
 });

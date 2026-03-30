@@ -18,37 +18,49 @@ AgentRuntime
 └── Local            (from plugins/ directory)
 ```
 
-The source of truth for which plugins are always loaded lives in `src/runtime/core-plugins.ts`:
+The source of truth for which plugins are always loaded lives in `packages/agent/src/runtime/core-plugins.ts` (re-exported by `packages/app-core/src/runtime/core-plugins.ts`):
 
 ```typescript
 export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-sql",               // database adapter — required
   "@elizaos/plugin-local-embedding",   // local embeddings — required for memory
-  "@elizaos/plugin-secrets-manager",   // secrets — load early, others depend on it
-  "@elizaos/plugin-form",              // form handling
-  "@elizaos/plugin-knowledge",         // RAG knowledge management
-  "@elizaos/plugin-rolodex",           // contact graph and relationship memory
-  "@elizaos/plugin-trajectory-logger", // trajectory logging for debugging/RL
-  "@elizaos/plugin-agent-orchestrator",// multi-agent orchestration
-  "@elizaos/plugin-cron",              // scheduled jobs
+  "@elizaos/plugin-form",              // form handling for guided user journeys
+  "@elizaos/plugin-knowledge",         // RAG knowledge management — required for knowledge tab
+  "@elizaos/plugin-trajectory-logger", // trajectory logging for debugging and RL training
+  "@elizaos/plugin-agent-orchestrator",// multi-agent orchestration (PTY, SwarmCoordinator, workspace provisioning)
+  "@elizaos/plugin-cron",              // scheduled jobs and automation
   "@elizaos/plugin-shell",             // shell command execution
-  "@elizaos/plugin-plugin-manager",    // dynamic plugin management
   "@elizaos/plugin-agent-skills",      // skill execution and marketplace runtime
-  "@elizaos/plugin-pdf",               // PDF processing
 ];
 ```
+
+> **Note:** `@elizaos/plugin-secrets-manager`, `@elizaos/plugin-rolodex`, `@elizaos/plugin-plugin-manager`, `@elizaos/plugin-trust`, `@elizaos/plugin-todo`, `@elizaos/plugin-personality`, and `@elizaos/plugin-experience` are statically imported for fast resolution but commented out of the core list. They may be re-enabled in a future release.
 
 ### Optional Core Plugins
 
-A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `src/runtime/core-plugins.ts`:
+A separate list of optional core plugins can be enabled from the admin panel. These are not loaded by default due to packaging or specification constraints. The list lives in `packages/agent/src/runtime/core-plugins.ts`:
 
 ```typescript
 export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
-  "@elizaos/plugin-code",  // code writing and file operations
+  "@elizaos/plugin-pdf",                   // PDF processing
+  "@elizaos/plugin-cua",                   // CUA computer-use agent (cloud sandbox automation)
+  "@elizaos/plugin-obsidian",              // Obsidian vault CLI integration
+  "@elizaos/plugin-code",                  // code writing and file operations
+  "@elizaos/plugin-repoprompt",            // RepoPrompt CLI integration
+  "@elizaos/plugin-claude-code-workbench", // Claude Code companion workflows
+  "@elizaos/plugin-computeruse",           // computer use automation (platform-specific)
+  "@elizaos/plugin-browser",              // browser automation (requires stagehand-server)
+  "@elizaos/plugin-vision",               // vision/image understanding (feature-gated)
+  "@elizaos/plugin-cli",                  // CLI interface
+  "@elizaos/plugin-discord",              // Discord bot integration
+  "@elizaos/plugin-telegram",             // Telegram bot integration
+  "@elizaos/plugin-twitch",               // Twitch integration
+  "@elizaos/plugin-edge-tts",             // text-to-speech (Microsoft Edge TTS)
+  "@elizaos/plugin-elevenlabs",           // ElevenLabs text-to-speech
 ];
 ```
 
-Other plugins such as `@elizaos/plugin-directives`, `@elizaos/plugin-commands`, `@elizaos/plugin-mcp`, `@elizaos/plugin-computeruse`, and `@elizaos/plugin-personality` are commented out in the source and may be activated in future releases.
+Plugins such as `@elizaos/plugin-directives`, `@elizaos/plugin-commands`, `@elizaos/plugin-mcp`, and `@elizaos/plugin-scheduling` are commented out in the source and may be activated in future releases.
 
 ## Plugin Hook Points
 
@@ -105,7 +117,7 @@ interface Plugin {
 
 ## Auto-Enable Mechanism
 
-Plugins are automatically enabled when their required configuration is detected. This logic lives in `src/config/plugin-auto-enable.ts` and runs before runtime initialization.
+Plugins are automatically enabled when their required configuration is detected. This logic lives in `packages/agent/src/config/plugin-auto-enable.ts` (extended by `packages/app-core/src/config/plugin-auto-enable.ts` for Milady-specific connectors like WeChat) and runs before runtime initialization.
 
 ### Trigger Sources
 
@@ -134,6 +146,12 @@ const AUTH_PROVIDER_PLUGINS = {
   PERPLEXITY_API_KEY:             "@elizaos/plugin-perplexity",
   ELIZAOS_CLOUD_API_KEY:          "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED:          "@elizaos/plugin-elizacloud",
+  ELIZA_USE_PI_AI:                "@elizaos/plugin-pi-ai",
+  CUA_API_KEY:                    "@elizaos/plugin-cua",
+  CUA_HOST:                       "@elizaos/plugin-cua",
+  OBSIDIAN_VAULT_PATH:            "@elizaos/plugin-obsidian",
+  REPOPROMPT_CLI_PATH:            "@elizaos/plugin-repoprompt",
+  CLAUDE_CODE_WORKBENCH_ENABLED:  "@elizaos/plugin-claude-code-workbench",
 };
 ```
 
@@ -157,8 +175,13 @@ const CONNECTOR_PLUGINS = {
   feishu:      "@elizaos/plugin-feishu",
   matrix:      "@elizaos/plugin-matrix",
   nostr:       "@elizaos/plugin-nostr",
+  blooio:      "@elizaos/plugin-blooio",
+  twitch:      "@elizaos/plugin-twitch",
+  wechat:      "@miladyai/plugin-wechat",  // Milady-specific (added in app-core)
 };
 ```
+
+> **Note:** The upstream `packages/agent` defines all `@elizaos/*` connectors. Milady's `packages/app-core` extends this map with the `wechat` entry pointing to `@miladyai/plugin-wechat`.
 
 **Feature flags** — The `features` section of `milady.json` auto-enables feature plugins. A feature can be enabled with `features.<name>: true` or `features.<name>.enabled: true`:
 
@@ -176,26 +199,41 @@ The complete `FEATURE_PLUGINS` map:
 
 ```typescript
 const FEATURE_PLUGINS = {
-  browser:          "@elizaos/plugin-browser",
-  cron:             "@elizaos/plugin-cron",
-  shell:            "@elizaos/plugin-shell",
-  imageGen:         "@elizaos/plugin-image-generation",
-  tts:              "@elizaos/plugin-tts",
-  stt:              "@elizaos/plugin-stt",
-  agentSkills:      "@elizaos/plugin-agent-skills",
-  directives:       "@elizaos/plugin-directives",
-  commands:         "@elizaos/plugin-commands",
-  diagnosticsOtel:  "@elizaos/plugin-diagnostics-otel",
-  webhooks:         "@elizaos/plugin-webhooks",
-  gmailWatch:       "@elizaos/plugin-gmail-watch",
-  personality:      "@elizaos/plugin-personality",
-  experience:       "@elizaos/plugin-experience",
-  form:             "@elizaos/plugin-form",
-  x402:             "@elizaos/plugin-x402",
-  fal:              "@elizaos/plugin-fal",
-  suno:             "@elizaos/plugin-suno",
-  vision:           "@elizaos/plugin-vision",
-  computeruse:      "@elizaos/plugin-computeruse",
+  browser:              "@elizaos/plugin-browser",
+  cua:                  "@elizaos/plugin-cua",
+  obsidian:             "@elizaos/plugin-obsidian",
+  cron:                 "@elizaos/plugin-cron",
+  shell:                "@elizaos/plugin-shell",
+  imageGen:             "@elizaos/plugin-image-generation",
+  tts:                  "@elizaos/plugin-tts",
+  stt:                  "@elizaos/plugin-stt",
+  agentSkills:          "@elizaos/plugin-agent-skills",
+  commands:             "@elizaos/plugin-commands",
+  diagnosticsOtel:      "@elizaos/plugin-diagnostics-otel",
+  webhooks:             "@elizaos/plugin-webhooks",
+  gmailWatch:           "@elizaos/plugin-gmail-watch",
+  personality:          "@elizaos/plugin-personality",
+  experience:           "@elizaos/plugin-experience",
+  form:                 "@elizaos/plugin-form",
+  x402:                 "@elizaos/plugin-x402",
+  fal:                  "@elizaos/plugin-fal",
+  suno:                 "@elizaos/plugin-suno",
+  vision:               "@elizaos/plugin-vision",
+  computeruse:          "@elizaos/plugin-computeruse",
+  repoprompt:           "@elizaos/plugin-repoprompt",
+  claudeCodeWorkbench:  "@elizaos/plugin-claude-code-workbench",
+};
+```
+
+**Streaming destinations** — The `streaming` section of config auto-enables streaming plugins for live video platforms:
+
+```typescript
+const STREAMING_PLUGINS = {
+  twitch:     "@elizaos/plugin-twitch-streaming",
+  youtube:    "@elizaos/plugin-youtube-streaming",
+  customRtmp: "@elizaos/plugin-custom-rtmp",
+  pumpfun:    "@elizaos/plugin-pumpfun-streaming",
+  x:          "@elizaos/plugin-x-streaming",
 };
 ```
 
@@ -254,4 +292,4 @@ interface PluginModuleShape {
 - [Create a Plugin](/plugins/create-a-plugin) — Build a plugin from scratch
 - [Plugin Patterns](/plugins/patterns) — Common implementation patterns
 - [Plugin Schemas](/plugins/schemas) — Full schema reference
-- [Plugin Registry](/plugin-registry/bootstrap) — Core plugin documentation
+- [Plugin Registry](/plugins/registry) — Browse available plugins

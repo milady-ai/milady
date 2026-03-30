@@ -55,14 +55,14 @@ export function TokenLogo({
         alt={symbol}
         width={size}
         height={size}
-        className="wt__token-logo"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full object-cover font-mono font-bold text-white"
         onError={() => setErrored(true)}
       />
     );
   }
   return (
     <span
-      className={`wt__token-logo is-letter ${icon.cls}`}
+      className={`inline-flex items-center justify-center shrink-0 rounded-full font-mono font-bold bg-bg-muted ${icon.cls}`}
       style={{ width: size, height: size, fontSize: size * 0.38 }}
     >
       {symbol.charAt(0).toUpperCase()}

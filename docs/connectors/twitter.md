@@ -20,7 +20,7 @@ The Twitter connector is an external elizaOS plugin that bridges your agent to T
 
 ## Minimal Configuration
 
-In your character file:
+In `~/.milady/milady.json`:
 
 ```json
 {
@@ -49,7 +49,7 @@ To explicitly disable the connector even when a token is present:
 
 ## Auto-Enable Mechanism
 
-The `plugin-auto-enable.ts` module checks `connectors.twitter` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitter`.
+The `plugin-auto-enable.ts` module checks `connectors.twitter` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-twitter`.
 
 No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
 
@@ -59,7 +59,7 @@ Unlike Discord, Telegram, and Slack, the Twitter connector does **not** inject s
 
 ## Full Configuration Reference
 
-All fields are nested under `connectors.twitter` in your character file.
+All fields are nested under `connectors.twitter` in `milady.json`.
 
 Note: Twitter does **not** support multi-account configuration or the `accounts` array pattern used by some other connectors. Only a single Twitter account can be configured per agent.
 

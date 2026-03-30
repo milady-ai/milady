@@ -23,50 +23,20 @@ import {
   it,
   vi,
 } from "vitest";
+import { req } from "../../../../test/helpers/http";
+
+function translateTest(
+  key: string,
+  vars?: {
+    defaultValue?: string;
+  },
+): string {
+  return vars?.defaultValue ?? key;
+}
 
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Plugin Endpoints
 // ---------------------------------------------------------------------------
-
-async function req(
-  port: number,
-  method: string,
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ status: number; data: Record<string, unknown> }> {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : undefined;
-    const r = http.request(
-      {
-        hostname: "127.0.0.1",
-        port,
-        path,
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (c: Buffer) => chunks.push(c));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf-8");
-          let data: Record<string, unknown> = {};
-          try {
-            data = JSON.parse(raw) as Record<string, unknown>;
-          } catch {
-            data = { _raw: raw };
-          }
-          resolve({ status: res.statusCode ?? 0, data });
-        });
-      },
-    );
-    r.on("error", reject);
-    if (payload) r.write(payload);
-    r.end();
-  });
-}
 
 function createPluginTestServer(): Promise<{
   port: number;
@@ -304,6 +274,16 @@ vi.mock("@miladyai/app-core/state", async () => {
   };
 });
 
+vi.mock("../../src/state", async () => {
+  const actual = await vi.importActual<typeof import("../../src/state")>(
+    "../../src/state",
+  );
+  return {
+    ...actual,
+    useApp: () => mockUseApp(),
+  };
+});
+
 vi.mock("@miladyai/app-core/api", () => ({
   client: {
     getPlugins: vi.fn().mockResolvedValue([]),
@@ -321,12 +301,12 @@ vi.mock("@miladyai/app-core/config", () => ({
   defaultRegistry: {},
 }));
 
-vi.mock("@miladyai/app-core/components/WhatsAppQrOverlay", () => ({
+vi.mock("../../src/components/WhatsAppQrOverlay", () => ({
   WhatsAppQrOverlay: () =>
     React.createElement("div", null, "WhatsAppQrOverlay"),
 }));
 
-import { PluginsView } from "@miladyai/app-core/components/PluginsView";
+import { PluginsView } from "../../src/components/PluginsView";
 
 type PluginInfo = {
   id: string;
@@ -343,8 +323,8 @@ type PluginState = {
   pluginStatusFilter: string;
   pluginSearch: string;
   pluginSettingsOpen: Set<string>;
-  pluginSaving: boolean;
-  pluginSaveSuccess: boolean;
+  pluginSaving: Set<string>;
+  pluginSaveSuccess: Set<string>;
 };
 
 function createPluginUIState(): PluginState {
@@ -375,8 +355,8 @@ function createPluginUIState(): PluginState {
     pluginStatusFilter: "all",
     pluginSearch: "",
     pluginSettingsOpen: new Set<string>(),
-    pluginSaving: false,
-    pluginSaveSuccess: false,
+    pluginSaving: new Set<string>(),
+    pluginSaveSuccess: new Set<string>(),
   };
 }
 
@@ -388,8 +368,8 @@ describe("PluginsView UI", () => {
 
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
-      t: (k: string) => k,
       ...state,
+      t: translateTest,
       loadPlugins: vi.fn(),
       handlePluginToggle: vi.fn().mockImplementation((name: string) => {
         const plugin = state.plugins.find((p) => p.name === name);
@@ -423,24 +403,8 @@ describe("PluginsView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("renders search/filter input", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(PluginsView));
-    });
-
-    const inputs = tree?.root.findAll(
-      (node) =>
-        node.type === "input" &&
-        (node.props.placeholder?.toLowerCase().includes("search") ||
-          node.props.placeholder?.toLowerCase().includes("filter")),
-    );
-    expect(inputs.length).toBeGreaterThanOrEqual(0);
-  });
-
   it("shows saving state when pluginSaving is true", async () => {
-    state.pluginSaving = true;
+    state.pluginSaving = new Set(["plugin-openai"]);
 
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
@@ -465,6 +429,7 @@ describe("Plugin Toggle Integration", () => {
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
       ...state,
+      t: translateTest,
       loadPlugins: vi.fn(),
       handlePluginToggle: (name: string) => {
         const plugin = state.plugins.find((p) => p.name === name);
@@ -521,6 +486,7 @@ describe("Plugin Filter Integration", () => {
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
       ...state,
+      t: translateTest,
       loadPlugins: vi.fn(),
       handlePluginToggle: vi.fn(),
       handlePluginConfigSave: vi.fn(),
@@ -540,14 +506,6 @@ describe("Plugin Filter Integration", () => {
 
     expect(results.length).toBe(1);
     expect(results[0].name).toContain("openai");
-  });
-
-  it("filtering by tag returns matching plugins", () => {
-    const filterFn = mockUseApp().filterPlugins;
-    const results = filterFn("llm");
-
-    // LLM doesn't match name but would match tags
-    expect(results.length).toBeGreaterThanOrEqual(0);
   });
 
   it("filtering with no match returns empty", () => {
@@ -573,6 +531,7 @@ describe("Plugin Configuration", () => {
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => ({
       ...state,
+      t: translateTest,
       loadPlugins: vi.fn(),
       handlePluginToggle: vi.fn(),
       handlePluginConfigSave: async (
@@ -580,8 +539,10 @@ describe("Plugin Configuration", () => {
         config: Record<string, unknown>,
       ) => {
         configSaved = { name, config };
-        state.pluginSaving = false;
-        state.pluginSaveSuccess = true;
+        const pluginId =
+          state.plugins.find((plugin) => plugin.name === name)?.id ?? name;
+        state.pluginSaving = new Set<string>();
+        state.pluginSaveSuccess = new Set([pluginId]);
       },
     }));
   });
@@ -600,6 +561,6 @@ describe("Plugin Configuration", () => {
 
     await saveFn("@elizaos/plugin-anthropic", { model: "claude-3" });
 
-    expect(state.pluginSaveSuccess).toBe(true);
+    expect(state.pluginSaveSuccess.has("plugin-anthropic")).toBe(true);
   });
 });

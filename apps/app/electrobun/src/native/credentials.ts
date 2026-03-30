@@ -1,18 +1,3 @@
-/**
- * Credential Auto-Detection for AI Providers
- *
- * Scans well-known file locations, environment variables, and the macOS
- * Keychain to detect installed AI CLI credentials. Used during onboarding
- * to pre-fill the connection step.
- *
- * Sources checked:
- * - ~/.codex/auth.json (OpenAI via Codex CLI)
- * - ~/.claude/.credentials.json (Anthropic via Claude Code)
- * - macOS Keychain: "Claude Code-credentials" (Anthropic OAuth)
- * - Environment variables: OPENAI_API_KEY, ANTHROPIC_API_KEY
- * - CLI availability: `which claude`, `which codex`
- */
-
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -80,6 +65,17 @@ function readJsonFile<T>(filePath: string): T | null {
   } catch {
     return null;
   }
+}
+
+function isTruthyFlag(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized.length > 0 &&
+    normalized !== "0" &&
+    normalized !== "false" &&
+    normalized !== "no"
+  );
 }
 
 async function isCliInstalled(name: string): Promise<boolean> {
@@ -186,31 +182,103 @@ async function scanClaudeKeychainCredentials(): Promise<DetectedProvider | null>
  * Environment variable → provider ID mapping for all Eliza AI providers.
  * Each entry maps an env var name to its provider plugin ID.
  */
-const ENV_PROVIDER_MAP: Array<{ envVar: string; providerId: string }> = [
-  { envVar: "OPENAI_API_KEY", providerId: "openai" },
-  { envVar: "ANTHROPIC_API_KEY", providerId: "anthropic" },
-  { envVar: "GROQ_API_KEY", providerId: "groq" },
-  { envVar: "GOOGLE_GENERATIVE_AI_API_KEY", providerId: "google-genai" },
-  { envVar: "OPENROUTER_API_KEY", providerId: "openrouter" },
-  { envVar: "XAI_API_KEY", providerId: "xai" },
-  { envVar: "AI_GATEWAY_API_KEY", providerId: "vercel-ai-gateway" },
-  { envVar: "AIGATEWAY_API_KEY", providerId: "vercel-ai-gateway" },
+const ENV_PROVIDER_MAP: Array<{
+  envVar: string;
+  providerId: string;
+  authMode: string;
+  includeValue?: boolean;
+}> = [
+  { envVar: "OPENAI_API_KEY", providerId: "openai", authMode: "api-key" },
+  {
+    envVar: "ANTHROPIC_API_KEY",
+    providerId: "anthropic",
+    authMode: "api-key",
+  },
+  { envVar: "GROQ_API_KEY", providerId: "groq", authMode: "api-key" },
+  {
+    envVar: "GOOGLE_GENERATIVE_AI_API_KEY",
+    providerId: "gemini",
+    authMode: "api-key",
+  },
+  { envVar: "GOOGLE_API_KEY", providerId: "gemini", authMode: "api-key" },
+  {
+    envVar: "OPENROUTER_API_KEY",
+    providerId: "openrouter",
+    authMode: "api-key",
+  },
+  { envVar: "XAI_API_KEY", providerId: "grok", authMode: "api-key" },
+  {
+    envVar: "DEEPSEEK_API_KEY",
+    providerId: "deepseek",
+    authMode: "api-key",
+  },
+  {
+    envVar: "MISTRAL_API_KEY",
+    providerId: "mistral",
+    authMode: "api-key",
+  },
+  {
+    envVar: "TOGETHER_API_KEY",
+    providerId: "together",
+    authMode: "api-key",
+  },
+  { envVar: "ZAI_API_KEY", providerId: "zai", authMode: "api-key" },
+  {
+    envVar: "OLLAMA_BASE_URL",
+    providerId: "ollama",
+    authMode: "local",
+    includeValue: true,
+  },
+  {
+    envVar: "ELIZA_USE_PI_AI",
+    providerId: "pi-ai",
+    authMode: "credentials",
+    includeValue: false,
+  },
+  {
+    envVar: "MILADY_USE_PI_AI",
+    providerId: "pi-ai",
+    authMode: "credentials",
+    includeValue: false,
+  },
+  {
+    envVar: "ELIZAOS_CLOUD_API_KEY",
+    providerId: "elizacloud",
+    authMode: "cloud",
+  },
+  {
+    envVar: "AI_GATEWAY_API_KEY",
+    providerId: "vercel-ai-gateway",
+    authMode: "api-key",
+  },
+  {
+    envVar: "AIGATEWAY_API_KEY",
+    providerId: "vercel-ai-gateway",
+    authMode: "api-key",
+  },
 ];
 
 function scanEnvCredentials(): DetectedProvider[] {
   const results: DetectedProvider[] = [];
   const seen = new Set<string>();
 
-  for (const { envVar, providerId } of ENV_PROVIDER_MAP) {
+  for (const {
+    envVar,
+    providerId,
+    authMode,
+    includeValue,
+  } of ENV_PROVIDER_MAP) {
     if (seen.has(providerId)) continue;
     const value = process.env[envVar];
-    if (value && value.trim().length > 0) {
+    const hasValue =
+      includeValue === false ? isTruthyFlag(value) : Boolean(value?.trim());
+    if (hasValue) {
       seen.add(providerId);
       results.push({
         id: providerId,
         source: "env",
-        apiKey: value.trim(),
-        authMode: "api-key",
+        apiKey: includeValue === false ? undefined : value.trim(),
+        authMode,
         cliInstalled: false,
         status: "unchecked",
       });
@@ -220,12 +288,23 @@ function scanEnvCredentials(): DetectedProvider[] {
   return results;
 }
 
+/** Mask a credential string, showing only the last 4 characters. */
+function maskApiKey(key: string | undefined): string | undefined {
+  if (!key) return key;
+  if (key.length <= 4) return "****";
+  return `****${key.slice(-4)}`;
+}
+
+/** Mask API keys in provider results before returning over IPC. */
+function maskProviders(providers: DetectedProvider[]): DetectedProvider[] {
+  return providers.map((p) => ({ ...p, apiKey: maskApiKey(p.apiKey) }));
+}
+
 /**
- * Scan all known credential sources and return detected providers.
- * Checks files → keychain → env vars, deduplicating by provider ID
- * (first match wins per provider).
+ * Internal: collect raw providers with full API keys.
+ * Only used within this module for validation; never exported.
  */
-export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
+async function scanProviderCredentialsRaw(): Promise<DetectedProvider[]> {
   const home = os.homedir();
   const detected = new Map<string, DetectedProvider>();
 
@@ -254,11 +333,25 @@ export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
   return Array.from(detected.values());
 }
 
+/**
+ * Scan all known credential sources and return detected providers.
+ * Checks files → keychain → env vars, deduplicating by provider ID
+ * (first match wins per provider).
+ *
+ * API keys are masked in the returned results (last 4 chars only) to
+ * prevent accidental exposure via IPC or logging.
+ */
+export async function scanProviderCredentials(): Promise<DetectedProvider[]> {
+  return maskProviders(await scanProviderCredentialsRaw());
+}
+
 export async function scanAndValidateProviderCredentials(): Promise<
   DetectedProvider[]
 > {
-  const providers = await scanProviderCredentials();
-  return Promise.all(providers.map(validateProvider));
+  // Validate with full keys, then mask before returning
+  const raw = await scanProviderCredentialsRaw();
+  const validated = await Promise.all(raw.map(validateProvider));
+  return maskProviders(validated);
 }
 
 /**
@@ -284,7 +377,7 @@ const VALIDATION_ENDPOINTS: Record<
     url: "https://api.groq.com/openai/v1/models",
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
   },
-  "google-genai": {
+  gemini: {
     url: "https://generativelanguage.googleapis.com/v1beta/models",
     authHeader: (key) => ({ "x-goog-api-key": key }),
   },
@@ -292,8 +385,24 @@ const VALIDATION_ENDPOINTS: Record<
     url: "https://openrouter.ai/api/v1/models",
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
   },
-  xai: {
+  grok: {
     url: "https://api.x.ai/v1/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  deepseek: {
+    url: "https://api.deepseek.com/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  mistral: {
+    url: "https://api.mistral.ai/v1/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  together: {
+    url: "https://api.together.xyz/v1/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  zai: {
+    url: "https://api.z.ai/api/paas/v4/models",
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
   },
 };

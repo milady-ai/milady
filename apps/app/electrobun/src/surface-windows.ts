@@ -1,5 +1,7 @@
 export type DetachedSurface =
   | "chat"
+  | "browser"
+  | "release"
   | "triggers"
   | "plugins"
   | "connectors"
@@ -55,6 +57,8 @@ interface SurfaceWindowManagerOptions {
 
 const SURFACE_LABELS: Record<ManagedSurface, string> = {
   chat: "Chat",
+  browser: "Browser",
+  release: "Release Center",
   triggers: "Heartbeats",
   plugins: "Plugins",
   connectors: "Connectors",
@@ -64,6 +68,8 @@ const SURFACE_LABELS: Record<ManagedSurface, string> = {
 
 const SURFACE_FRAMES: Record<ManagedSurface, ManagedWindowFrame> = {
   chat: { x: 120, y: 110, width: 1180, height: 840 },
+  browser: { x: 140, y: 100, width: 1320, height: 900 },
+  release: { x: 160, y: 100, width: 1260, height: 920 },
   triggers: { x: 160, y: 140, width: 1080, height: 780 },
   plugins: { x: 180, y: 160, width: 1180, height: 860 },
   connectors: { x: 200, y: 180, width: 1180, height: 860 },
@@ -74,6 +80,8 @@ const SURFACE_FRAMES: Record<ManagedSurface, ManagedWindowFrame> = {
 export function isDetachedSurface(value: string): value is DetachedSurface {
   return (
     value === "chat" ||
+    value === "browser" ||
+    value === "release" ||
     value === "triggers" ||
     value === "plugins" ||
     value === "connectors" ||
@@ -86,7 +94,9 @@ function isManagedSurface(value: string): value is ManagedSurface {
 }
 
 function ordinalTitle(surface: ManagedSurface, ordinal: number): string {
-  const base = `Milady ${SURFACE_LABELS[surface]}`;
+  // Cloud windows reference "Eliza Cloud" (the service), not "Milady Cloud".
+  const base =
+    surface === "cloud" ? "Eliza Cloud" : `Milady ${SURFACE_LABELS[surface]}`;
   return ordinal <= 1 ? base : `${base} ${ordinal}`;
 }
 
@@ -98,6 +108,7 @@ function normalizeSettingsTabHint(tabHint?: string): string | undefined {
 export function buildSurfaceShellQuery(
   surface: ManagedSurface,
   tabHint?: string,
+  browse?: string,
 ): string {
   if (surface === "settings") {
     const normalizedTab = normalizeSettingsTabHint(tabHint);
@@ -105,7 +116,11 @@ export function buildSurfaceShellQuery(
       ? `?shell=settings&tab=${encodeURIComponent(normalizedTab)}`
       : "?shell=settings";
   }
-  return `?shell=surface&tab=${encodeURIComponent(surface)}`;
+  const base = `?shell=surface&tab=${encodeURIComponent(surface)}`;
+  if (surface === "browser" && browse?.trim()) {
+    return `${base}&browse=${encodeURIComponent(browse.trim())}`;
+  }
+  return base;
 }
 
 export class SurfaceWindowManager {
@@ -160,8 +175,10 @@ export class SurfaceWindowManager {
 
   async openSurfaceWindow(
     surface: DetachedSurface,
+    browse?: string,
   ): Promise<ManagedWindowSnapshot> {
-    return this.createManagedWindow(surface, undefined, false);
+    const seed = surface === "browser" ? browse : undefined;
+    return this.createManagedWindow(surface, undefined, false, seed);
   }
 
   focusWindow(id: string): boolean {
@@ -170,6 +187,17 @@ export class SurfaceWindowManager {
     existing.window.focus();
     this.notifyRegistryChanged();
     return true;
+  }
+
+  /**
+   * Invoke `fn` for every open managed window (settings + detached surfaces).
+   * WHY: when the embedded API port changes, `injectApiBase` must reach each
+   * webview—not only `BrowserWindow`—so RPC and `fetch` targets stay consistent.
+   */
+  forEachWindow(fn: (window: ManagedWindowLike) => void): void {
+    for (const { window } of this.windows.values()) {
+      fn(window);
+    }
   }
 
   private toSnapshot(entry: ManagedWindowRecord): ManagedWindowSnapshot {
@@ -185,6 +213,7 @@ export class SurfaceWindowManager {
     surface: ManagedSurface,
     tabHint: string | undefined,
     singleton: boolean,
+    browse?: string,
   ): Promise<ManagedWindowSnapshot> {
     if (!isManagedSurface(surface)) {
       throw new Error(`Unsupported surface: ${surface}`);
@@ -196,7 +225,7 @@ export class SurfaceWindowManager {
     const title = singleton
       ? ordinalTitle(surface, 1)
       : ordinalTitle(surface, existingCount + 1);
-    const query = buildSurfaceShellQuery(surface, tabHint);
+    const query = buildSurfaceShellQuery(surface, tabHint, browse);
     const id = `${surface}_${++this.counter}`;
 
     const window = this.createWindowFn({

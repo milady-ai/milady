@@ -23,8 +23,7 @@ Outcome: you can install Milady and run a basic conversation loop.
 ### Phase 2: Daily productivity
 
 - `/configuration`
-- `/model-providers`
-- `/apps/tui`
+- `/runtime/models`
 - `/apps/dashboard/settings`
 
 Outcome: you can tune model/provider behavior and navigate day-to-day controls.

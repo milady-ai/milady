@@ -13,7 +13,8 @@ import type { PluginListenerHandle } from "@capacitor/core";
 import {
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@miladyai/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
+import type { EventCallback } from "../../../shared-types.js";
 import type {
   LocationErrorEvent,
   LocationOptions,
@@ -23,7 +24,6 @@ import type {
   WatchLocationOptions,
 } from "../../src/definitions";
 
-type EventCallback<T> = (event: T) => void;
 type LocationEventData = LocationResult | LocationErrorEvent;
 
 interface ListenerEntry {

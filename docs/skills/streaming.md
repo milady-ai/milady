@@ -1,3 +1,7 @@
+---
+title: Streaming Integration
+---
+
 # Streaming Integration — Agent Skill Reference
 
 Milady agents can autonomously control live streaming: go live, switch channels, manage stream overlays, speak via TTS, and switch what content is being captured — all through built-in actions.
@@ -88,9 +92,9 @@ Parameters: { "destinationName": "Twitch" }
 **Configured destinations depend on installed streaming plugins:**
 - `twitch-streaming` → Twitch
 - `youtube-streaming` → YouTube Live
-- `retake` → Retake.tv
 - `x-streaming` → X (Twitter)
 - `custom-rtmp` → Any RTMP endpoint
+- `pumpfun-streaming` → Pump.fun
 
 **Workflow to switch channels:**
 1. `GO_OFFLINE`

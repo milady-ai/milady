@@ -6,8 +6,11 @@
  * visual variants.
  */
 
+import { Button } from "@miladyai/ui";
+import { Moon, Sun } from "lucide-react";
 import { useCallback } from "react";
 import type { UiTheme } from "../state/persistence";
+import { SHELL_ICON_BUTTON_CLASSNAME } from "./companion/shell-control-styles";
 
 /** Minimal translator function type. */
 export type ThemeTranslatorFn = (key: string) => string;
@@ -20,54 +23,6 @@ export interface ThemeToggleProps {
   /** Optional extra className on the root */
   className?: string;
   variant?: "native" | "companion";
-}
-
-/** Sun icon SVG for light mode indicator */
-function SunIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="5" />
-      <line x1="12" y1="1" x2="12" y2="3" />
-      <line x1="12" y1="21" x2="12" y2="23" />
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-      <line x1="1" y1="12" x2="3" y2="12" />
-      <line x1="21" y1="12" x2="23" y2="12" />
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-    </svg>
-  );
-}
-
-/** Moon icon SVG for dark mode indicator */
-function MoonIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  );
 }
 
 export function ThemeToggle({
@@ -84,20 +39,21 @@ export function ThemeToggle({
   }, [isDark, setUiTheme]);
 
   return (
-    <button
-      type="button"
-      aria-label="Toggle theme"
+    <Button
+      size="icon"
+      variant="outline"
+      aria-label={_t ? _t("aria.toggleTheme") : "Toggle theme"}
       onClick={handleToggle}
       onPointerDown={(event) => event.stopPropagation()}
-      className={`inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] border border-border/50 bg-bg/50 backdrop-blur-md cursor-pointer text-sm leading-none hover:border-accent hover:text-txt font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(var(--accent),0.5)] active:scale-95 rounded-xl text-txt shadow-sm ${className ?? ""}`}
+      className={`${SHELL_ICON_BUTTON_CLASSNAME} text-sm leading-none ${className ?? ""}`}
       data-testid="theme-toggle"
       data-no-camera-drag="true"
     >
       {isDark ? (
-        <SunIcon className="w-5 h-5" />
+        <Moon className="w-5 h-5" aria-hidden />
       ) : (
-        <MoonIcon className="w-5 h-5" />
+        <Sun className="w-5 h-5" aria-hidden />
       )}
-    </button>
+    </Button>
   );
 }

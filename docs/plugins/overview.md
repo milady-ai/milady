@@ -19,16 +19,16 @@ A plugin is a self-contained module that registers one or more of:
 
 <CardGroup cols={2}>
 
-<Card title="Core Plugins" icon="cube" href="/plugin-registry/bootstrap">
-  Essential plugins that ship with every Milady installation — message processing, knowledge, database, and secrets.
+<Card title="Core Plugins" icon="cube" href="/plugin-registry/knowledge">
+  Essential plugins that ship with every Milady installation — sql, local-embedding, form, knowledge, trajectory-logger, agent-orchestrator, cron, shell, and agent-skills.
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
-  LLM integrations for OpenAI, Anthropic, Google, Groq, Ollama, OpenRouter, and DeepSeek.
+  LLM integrations for OpenAI, Anthropic, Google Gemini, Google Antigravity, Groq, Ollama, OpenRouter, DeepSeek, xAI, Mistral, Cohere, Together, Qwen, Minimax, Pi AI, Perplexity, Zai, and Vercel AI Gateway. Eliza Cloud auto-enables separately via `ELIZAOS_CLOUD_API_KEY`.
 </Card>
 
 <Card title="Platform Connectors" icon="plug" href="/plugin-registry/platform/discord">
-  Bridges to messaging platforms — Discord, Telegram, Twitter, Slack, WhatsApp, and Farcaster.
+  Bridges to 19 messaging platforms via auto-enable (Discord, Telegram, Twitter, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Mattermost, Farcaster, Twitch, Feishu, Matrix, Nostr, Lens, WeChat). Additional connectors (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon) are available in the elizaOS registry.
 </Card>
 
 <Card title="DeFi & Blockchain" icon="wallet" href="/plugin-registry/defi/evm">
@@ -36,7 +36,7 @@ A plugin is a self-contained module that registers one or more of:
 </Card>
 
 <Card title="Feature Plugins" icon="wand-magic-sparkles" href="/plugin-registry/browser">
-  Extended capabilities — browser control, image generation, text-to-speech, computer use, and cron scheduling.
+  Extended capabilities — browser control, image generation, text-to-speech, speech-to-text, computer use, cron scheduling, vision, shell, webhooks, FAL media generation, Suno music, OpenTelemetry diagnostics, x402 payments, Obsidian vault sync, Gmail Watch, personality tuning, experience tracking, agent skills, Claude Code workbench, RepoPrompt, and more.
 </Card>
 
 </CardGroup>
@@ -45,15 +45,13 @@ A plugin is a self-contained module that registers one or more of:
 
 Plugins are loaded during runtime initialization in this order:
 
-1. **Milady plugin** — The bridge plugin (`createMiladyPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
+1. **Milady plugin** — The bridge plugin (`createElizaPlugin()`) providing workspace context, session keys, emotes, custom actions, and lifecycle actions. Always first in the plugins array.
 2. **Pre-registered plugins** — `@elizaos/plugin-sql` and `@elizaos/plugin-local-embedding` are pre-registered before `runtime.initialize()` to prevent race conditions.
-3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `secrets-manager`, `form`, `knowledge`, `rolodex`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `plugin-manager`, `agent-skills`, `pdf` (see `src/runtime/core-plugins.ts`).
-4. **Connector plugins** — Loaded when channel config is present in `connectors` (e.g., Discord, Telegram, Slack).
-5. **Provider plugins** — Loaded when the corresponding API key env var is set (e.g., `ANTHROPIC_API_KEY` enables `@elizaos/plugin-anthropic`).
-6. **Feature plugins** — Loaded when feature flags or `plugins.entries` are enabled in `milady.json`.
-7. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`.
-8. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/`.
-9. **Ejected plugins** — Local overrides from `~/.milady/plugins/ejected/`.
+3. **Core plugins** — Always loaded: `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (see `packages/agent/src/runtime/core-plugins.ts`). Additional plugins like `pdf`, `cua`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, `elevenlabs`, `discord`, `telegram`, and `twitch` are optional and loaded when their feature flags or environment variables are configured.
+4. **Auto-enabled plugins** — Connector, provider, feature, streaming, subscription, hooks (webhooks + Gmail Watch), and media generation plugins are auto-enabled based on config and environment variables (see [Architecture](/plugins/architecture) for the full maps).
+5. **Ejected plugins** — Local overrides discovered from `~/.milady/plugins/ejected/`. When an ejected copy exists, it takes priority over the npm-published version.
+6. **User-installed plugins** — Tracked in `plugins.installs` in `milady.json`. Collected before drop-in plugins; any plugin name already present here takes precedence.
+7. **Custom/drop-in plugins** — Scanned from `~/.milady/plugins/custom/` and any extra paths in `plugins.load.paths`. Plugins whose names already exist in `plugins.installs` are skipped (`mergeDropInPlugins` precedence rule).
 
 ```json
 // milady.json plugin configuration
@@ -98,18 +96,33 @@ milady plugins list
 
 ### Enable/Disable
 
+Enable or disable a plugin by setting its `enabled` flag in `milady.json`:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "plugin-name": { "enabled": false }
+    }
+  }
+}
+```
+
+Or edit the config file directly (`milady config path` shows the file location):
+
 ```bash
-milady plugins enable plugin-name
-milady plugins disable plugin-name
+$EDITOR "$(milady config path)"
 ```
 
 ### Eject (Copy to Local)
 
-```bash
-milady plugins eject plugin-name
+Eject a plugin via agent chat to clone its source for local editing:
+
+```
+eject the telegram plugin so I can edit its source
 ```
 
-See [Plugin Eject](/plugins/plugin-eject) for details on customizing ejected plugins.
+See [Plugin Eject](/plugins/plugin-eject) for the full eject/sync/reinject workflow.
 
 ## Related
 

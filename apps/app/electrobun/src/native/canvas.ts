@@ -16,19 +16,7 @@ import type {
   CanvasWindowOptions,
   WindowBounds,
 } from "../rpc-schema";
-
-/**
- * Structural type for accessing evaluateJavascriptWithResponse via requestProxy.
- * `requestProxy` is present at runtime on every createRPC result but is not
- * reflected in the base RPCWithTransport interface exported by electrobun.
- */
-type WebviewEvalRpc = {
-  requestProxy?: {
-    evaluateJavascriptWithResponse?: (params: {
-      script: string;
-    }) => Promise<unknown>;
-  };
-};
+import type { SendToWebview, WebviewEvalRpc } from "../types.js";
 
 /**
  * Returns true only for local canvas origins.
@@ -45,8 +33,9 @@ function isLocalCanvasOrigin(url: string): boolean {
 
 /**
  * Returns true only for URLs that are safe for privileged canvas eval.
- * This intentionally permits local web content, local files, and blank
- * initialization pages. It does not rely on prefix matching.
+ * Only permits localhost/127.0.0.1 web content and blank initialization
+ * pages. file:// URLs are rejected to prevent local filesystem access.
+ * It does not rely on prefix matching.
  */
 function isInternalCanvasEvalUrl(url: string): boolean {
   if (url === "" || url === "about:blank") {
@@ -55,17 +44,11 @@ function isInternalCanvasEvalUrl(url: string): boolean {
 
   try {
     const parsed = new URL(url);
-    return (
-      parsed.protocol === "file:" ||
-      parsed.hostname === "localhost" ||
-      parsed.hostname === "127.0.0.1"
-    );
+    return parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
   } catch {
     return false;
   }
 }
-
-type SendToWebview = (message: string, payload?: unknown) => void;
 
 interface CanvasWindow {
   id: string;
@@ -143,9 +126,9 @@ export class CanvasManager {
   async navigate(options: {
     id: string;
     url: string;
-  }): Promise<{ available: boolean }> {
+  }): Promise<{ available: boolean; reason?: string }> {
     const canvas = this.windows.get(options.id);
-    if (!canvas) return { available: false };
+    if (!canvas) return { available: false, reason: "window_not_found" };
 
     const url = options.url ?? "";
     // Validate URL scheme and host before loading to prevent open redirect
@@ -163,7 +146,7 @@ export class CanvasManager {
 
     if (!allowed) {
       console.warn(`[Canvas] Blocked navigation to disallowed URL: ${url}`);
-      return { available: false };
+      return { available: false, reason: "url_not_allowed" };
     }
 
     canvas.window.webview.loadURL(url);
@@ -194,7 +177,7 @@ export class CanvasManager {
     }
 
     try {
-      const evalRpc = canvas.window.webview.rpc as unknown as WebviewEvalRpc;
+      const evalRpc = canvas.window.webview.rpc as WebviewEvalRpc;
       return await evalRpc?.requestProxy?.evaluateJavascriptWithResponse?.({
         script: options.script,
       });
@@ -295,7 +278,7 @@ $bmp.Dispose()`;
       }
     `;
     try {
-      const pushRpc = canvas.window.webview.rpc as unknown as WebviewEvalRpc;
+      const pushRpc = canvas.window.webview.rpc as WebviewEvalRpc;
       await pushRpc?.requestProxy?.evaluateJavascriptWithResponse?.({ script });
     } catch {
       // Window may have been destroyed
@@ -312,7 +295,7 @@ $bmp.Dispose()`;
       }
     `;
     try {
-      const resetRpc = canvas.window.webview.rpc as unknown as WebviewEvalRpc;
+      const resetRpc = canvas.window.webview.rpc as WebviewEvalRpc;
       await resetRpc?.requestProxy?.evaluateJavascriptWithResponse?.({
         script,
       });

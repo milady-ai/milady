@@ -295,7 +295,7 @@ function patchPluginElizaCloudResponsesCompat() {
   }
   if (!response.ok) {
     const errorBody = typeof data === "object" && data ? data.error : undefined;
-    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`ElizaOS Cloud error \${response.status}\`;
+    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`elizaOS Cloud error \${response.status}\`;
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     if (errorBody) {
@@ -409,7 +409,7 @@ function patchPluginElizaCloudResponsesCompat() {
   }
   if (!response.ok) {
     const errorBody = typeof data === "object" && data ? data.error : undefined;
-    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`ElizaOS Cloud error \${response.status}\`;
+    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`elizaOS Cloud error \${response.status}\`;
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     if (errorBody) {
@@ -429,7 +429,7 @@ function patchPluginElizaCloudResponsesCompat() {
     text = data.output.flatMap((item) => Array.isArray(item?.content) ? item.content : []).map((part) => typeof part?.text === "string" ? part.text : "").join("");
   }
   if (!text.trim()) {
-    throw new Error("ElizaOS Cloud returned no text response");
+    throw new Error("elizaOS Cloud returned no text response");
   }
   return text;
 }`
@@ -486,7 +486,7 @@ patchPluginElizaCloudResponsesCompat();
 /**
  * Patch @elizaos/plugin-sql UUID validation regex.
  *
- * The upstream plugin strictly checks for UUID versions 1-5, but ElizaOS
+ * The upstream plugin strictly checks for UUID versions 1-5, but elizaOS
  * generates custom version 0 UUIDs. We patch the regex to allow version 0.
  * Remove once upstream fixes its isValidUUID method.
  */
@@ -1201,9 +1201,9 @@ function patchTestCafeBunCompat() {
     const newStackFrame =
       "function getCallsiteStackFrameString(callsite) {\n    if (!callsite || !callsite.stackFrames) return '<unknown>';\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
     const oldGetId =
-      "function getCallsiteId(callsite) {\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
+      "function getCallsiteId(callsite) {\n    return `\u0024{callsite.filename}:\u0024{callsite.lineNum}`;\n}";
     const newGetId =
-      "function getCallsiteId(callsite) {\n    if (!callsite) return '<unknown>:0';\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
+      "function getCallsiteId(callsite) {\n    if (!callsite) return '<unknown>:0';\n    return `\u0024{callsite.filename}:\u0024{callsite.lineNum}`;\n}";
 
     if (!existsSync(callsitePath)) {
       console.warn(
@@ -1260,10 +1260,10 @@ patchTestCafeBunCompat();
  *    so the plugin uses the compatible version.
  */
 function patchGroqSdkVersion() {
-  const rootGroq = resolve(ROOT, "node_modules", "@ai-sdk", "groq");
+  const rootGroq = resolve(root, "node_modules", "@ai-sdk", "groq");
   if (!existsSync(rootGroq)) return;
 
-  const bunDir = resolve(ROOT, "node_modules", ".bun");
+  const bunDir = resolve(root, "node_modules", ".bun");
   if (!existsSync(bunDir)) return;
 
   let patched = 0;

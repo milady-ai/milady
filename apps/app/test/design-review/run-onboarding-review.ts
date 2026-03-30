@@ -26,7 +26,11 @@ import { startMockApiServer } from "../electrobun-packaged/mock-api";
 // Types
 // ---------------------------------------------------------------------------
 
-type ViewportId = "mobile-portrait" | "desktop-landscape" | "ipad-portrait";
+type ViewportId =
+  | "mobile-portrait"
+  | "mobile-landscape"
+  | "desktop-landscape"
+  | "ipad-portrait";
 
 interface ViewportSpec {
   id: ViewportId;
@@ -42,6 +46,7 @@ interface StepSpec {
   label: string;
   /** Action to take BEFORE screenshotting this step. null = first step. */
   setup: ((page: Page) => Promise<void>) | null;
+  expectedContent: readonly (string | RegExp)[];
 }
 
 interface CaptureRecord {
@@ -101,6 +106,14 @@ const viewports: ViewportSpec[] = [
     hasTouch: true,
   },
   {
+    id: "mobile-landscape",
+    label: "Mobile Landscape",
+    width: 844,
+    height: 390,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
     id: "desktop-landscape",
     label: "Desktop Landscape",
     width: 1440,
@@ -118,78 +131,156 @@ const viewports: ViewportSpec[] = [
   },
 ];
 
+const ONBOARDING_PERMISSION_FLOW =
+  process.env.MILADY_DESIGN_REVIEW_PERMISSIONS_PATH === "grant"
+    ? "grant"
+    : "skip";
+
+async function waitForVisibleTextFallback(
+  page: Page,
+  labels: readonly (string | RegExp)[],
+  options?: { exact?: boolean },
+): Promise<void> {
+  for (const label of labels) {
+    const locator =
+      typeof label === "string"
+        ? page.getByText(label, { exact: options?.exact ?? true }).first()
+        : page.getByText(label).first();
+    if (await locator.isVisible().catch(() => false)) {
+      await locator.waitFor({ state: "visible", timeout: READY_TIMEOUT_MS });
+      return;
+    }
+  }
+  throw new Error(
+    `Could not find any of: ${labels.map((label) => String(label)).join(", ")}`,
+  );
+}
+
+async function clickVisibleTextFallback(
+  page: Page,
+  labels: readonly (string | RegExp)[],
+): Promise<void> {
+  for (const label of labels) {
+    const locator =
+      typeof label === "string"
+        ? page.getByText(label, { exact: true }).first()
+        : page.getByText(label).first();
+    if (!(await locator.isVisible().catch(() => false))) {
+      continue;
+    }
+    await locator.click();
+    return;
+  }
+  throw new Error(
+    `Could not find any of: ${labels.map((label) => String(label)).join(", ")}`,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Onboarding step definitions
 // ---------------------------------------------------------------------------
 
 const steps: StepSpec[] = [
   {
-    id: "01-wakeUp",
-    label: "Wake Up — Welcome",
+    id: "01-cloud-login",
+    label: "Eliza Cloud — Account",
     setup: null, // First step, just navigate
+    expectedContent: [/Log in with Eliza Cloud/i, /^Skip$/i],
   },
   {
     id: "02-identity",
     label: "Identity — Choose Agent",
     setup: async (page) => {
-      // Click "Create New Agent" to advance from wakeUp → identity
-      await page.getByText("Create New Agent").click();
+      // Use the stable offline path so the full onboarding flow stays local.
+      const skipButton = page
+        .getByRole("button", { name: /^(Skip|Continue Offline)$/i })
+        .first();
+      await skipButton.click();
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Continue/i, /Chen/i],
   },
   {
     id: "03-connection-hosting",
     label: "Connection — Hosting Selection",
     setup: async (page) => {
-      // Click "Continue" on identity step → connection
-      await page.getByText("Continue").first().click();
+      await page
+        .getByRole("button", { name: /Continue/i })
+        .first()
+        .click();
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Where should .* run\?/i, /^Local$/i],
   },
   {
     id: "04-connection-provider",
     label: "Connection — Provider Selection",
     setup: async (page) => {
-      // Select "Local" hosting option — reveals provider list
-      await page.getByText("Local").first().click();
+      // Select local hosting to advance into the provider list.
+      await page.getByRole("button", { name: /Local/i }).first().click();
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Choose your AI provider/i, /Ollama/i],
   },
   {
     id: "05-connection-config",
     label: "Connection — Provider Config",
     setup: async (page) => {
-      // Select Ollama provider — shows config + Confirm button
-      await page.getByText("Ollama").first().click();
+      // Select a stable provider so the detail/config panel renders.
+      await page
+        .getByRole("button", { name: /Ollama/i })
+        .first()
+        .click();
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Local models/i, /Confirm/i],
   },
   {
-    id: "06-rpc",
-    label: "RPC — Chain Configuration",
+    id: "06-voice",
+    label: "Voice — Provider",
     setup: async (page) => {
-      // Click Confirm to advance from connection to rpc
-      await page.getByText("Confirm").click();
+      // Confirm the provider choice to advance to voice setup.
+      await page
+        .getByRole("button", { name: /Confirm/i })
+        .first()
+        .click();
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Choose your preferred voice provider/i, /^Skip$/i],
   },
   {
-    id: "07-senses",
-    label: "Senses — Permissions",
+    id: "07-permissions",
+    label: "Permissions — System Access",
     setup: async (page) => {
-      // Click "Skip for now" on RPC step to advance
-      await page.getByText("Skip for now").click();
+      await clickVisibleTextFallback(page, ["Skip", "Next"]);
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Browser Permissions/i, /Continue/i],
   },
   {
     id: "08-activate",
     label: "Activate — Ready",
     setup: async (page) => {
-      // Click "Skip for Now" on permissions step to advance
-      await page.getByText("Skip for Now").click();
+      // Default to the stable skip path. Grant-path captures can be enabled via
+      // MILADY_DESIGN_REVIEW_PERMISSIONS_PATH=grant when needed.
+      if (ONBOARDING_PERMISSION_FLOW === "grant") {
+        await clickVisibleTextFallback(page, [
+          "Grant Permissions",
+          "Grant",
+          "Allow All Permissions",
+          "Allow All",
+          "Continue",
+        ]);
+      } else {
+        await clickVisibleTextFallback(page, [
+          "Skip for Now",
+          "Skip for now",
+          "Continue",
+        ]);
+      }
       await page.waitForTimeout(600);
     },
+    expectedContent: [/Setup is complete/i, /^Enter$/i],
   },
 ];
 
@@ -224,7 +315,13 @@ async function startAppServer(apiBaseUrl: string): Promise<{
   const port = await getFreePort();
   const server = await createViteServer({
     configFile: path.join(appRoot, "vite.config.ts"),
-    server: { host: "127.0.0.1", port, strictPort: true },
+    server: {
+      host: "127.0.0.1",
+      port,
+      strictPort: true,
+      hmr: false,
+      watch: null,
+    },
   });
   await server.listen();
   return { server, baseUrl: `http://127.0.0.1:${port}` };
@@ -254,12 +351,14 @@ async function createPage(
       try {
         window.localStorage.clear();
         window.sessionStorage.clear();
+        window.localStorage.setItem("eliza:ui-language", "en");
+        window.localStorage.setItem("eliza:ui-theme", "dark");
+        window.localStorage.setItem("eliza:ui-shell-mode", "native");
         window.localStorage.setItem("milady:ui-language", "en");
         window.localStorage.setItem("milady:ui-theme", "dark");
         window.localStorage.setItem("milady:ui-shell-mode", "native");
         window.sessionStorage.setItem("milady_api_base", init.apiBaseUrl);
-        (window as unknown as Record<string, unknown>).__MILADY_API_BASE__ =
-          init.apiBaseUrl;
+        Object.assign(window, { __MILADY_API_BASE__: init.apiBaseUrl });
       } catch {
         // Ignore storage setup failures on intermediate documents
       }
@@ -290,6 +389,27 @@ async function createPage(
     return route.continue();
   });
 
+  // Always report onboarding as not complete so each viewport run starts fresh.
+  await page.route("**/api/onboarding/status", (route) => {
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ complete: false }),
+    });
+  });
+
+  // Swallow the onboarding submit POST so the mock doesn't flip its state.
+  await page.route("**/api/onboarding", (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true }),
+      });
+    }
+    return route.continue();
+  });
+
   return { context, page, consoleLines };
 }
 
@@ -305,22 +425,22 @@ async function waitForPageLoaded(page: Page): Promise<void> {
 }
 
 async function waitForTransientUi(page: Page): Promise<void> {
-  const deadline = Date.now() + 15_000;
+  const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
-    // Check for the AvatarLoader's loading dots class
-    const loadingDotsVisible = await page
-      .locator(".loading-screen__dots")
+    // The AvatarLoader renders "LOADING" text in a fixed overlay.
+    // Check for both the LOADING text and loading-screen class.
+    const loadingTextVisible = await page
+      .locator("text=LOADING")
       .first()
       .isVisible()
       .catch(() => false);
-    // Also check for the legacy .loading-screen class
     const loadingScreenVisible = await page
       .locator(".loading-screen")
       .first()
       .isVisible()
       .catch(() => false);
-    if (!loadingDotsVisible && !loadingScreenVisible) return;
-    await page.waitForTimeout(200);
+    if (!loadingTextVisible && !loadingScreenVisible) return;
+    await page.waitForTimeout(300);
   }
 }
 
@@ -472,12 +592,15 @@ async function captureOnboardingFlow(
     await waitForPageLoaded(page);
     await waitForSettled(page);
 
-    // Wait for loading screen to disappear and welcome screen to appear
+    // Wait for loading screen to disappear and the first onboarding screen to appear.
+    // The flow now opens directly on Eliza Cloud login instead of a welcome CTA.
     await waitForSettled(page);
     try {
-      await page
-        .getByText("Welcome to Milady")
-        .waitFor({ state: "visible", timeout: READY_TIMEOUT_MS });
+      await waitForVisibleTextFallback(page, [
+        "Log in with Eliza Cloud",
+        "Continue Offline",
+        "Skip",
+      ]);
     } catch {
       // If Welcome text not found, take diagnostic screenshot
       await mkdir(diagnosticsRoot, { recursive: true });
@@ -499,9 +622,20 @@ async function captureOnboardingFlow(
         consoleLines.join("\n"),
         "utf8",
       );
-      throw new Error(
-        `Welcome screen did not appear for ${viewport.id}. See diagnostics.`,
+      failures.push({
+        stepId: "initial-load",
+        viewportId: viewport.id,
+        message: `Welcome screen did not appear for ${viewport.id}. See diagnostics.`,
+        screenshotPath: path.relative(outputRoot, diagPath),
+        consolePath: path.relative(
+          outputRoot,
+          path.join(diagnosticsRoot, `initial-load--${viewport.id}.log`),
+        ),
+      });
+      console.error(
+        `  ✗ initial-load · ${viewport.id}: Welcome screen did not appear`,
       );
+      return { captures, failures };
     }
     await page.waitForTimeout(800);
 
@@ -512,6 +646,10 @@ async function captureOnboardingFlow(
           await step.setup(page);
           await waitForSettled(page);
         }
+
+        await waitForVisibleTextFallback(page, step.expectedContent, {
+          exact: false,
+        });
 
         // Take the screenshot
         const relativePath = path.posix.join(

@@ -50,6 +50,8 @@
               "guides/beginners-development-guide",
               "guides/learning-paths",
               "guides/developer-playbook",
+              "guides/onboarding-ui-flow",
+              "guides/electrobun-mac-window-chrome",
               "guides/first-extension-walkthrough",
               "guides/autonomous-mode",
               "guides/hooks",
@@ -78,13 +80,14 @@
             "pages": [
               "apps/overview",
               "apps/desktop",
+              "apps/electrobun-darwin-macos-webgpu-version",
+              "apps/desktop-vrm-three-and-spark",
+              "apps/desktop-local-development",
               "apps/desktop/native-modules",
               "apps/desktop/deep-linking",
               "apps/mobile",
               "apps/mobile/capacitor-plugins",
-              "apps/mobile/build-guide",
-              "apps/chrome-extension",
-              "apps/tui"
+              "apps/mobile/build-guide"
             ]
           },
           {
@@ -122,7 +125,7 @@
           },
           {
             "group": "Wallets",
-            "pages": ["guides/wallet"]
+            "pages": ["guides/wallet", "guides/platform-secure-store"]
           },
           {
             "group": "Knowledge",
@@ -132,11 +135,35 @@
             "group": "Social",
             "pages": [
               "guides/connectors",
-              "guides/whatsapp",
               "connectors/discord",
               "connectors/telegram",
               "connectors/twitter",
-              "connectors/slack"
+              "connectors/slack",
+              "guides/whatsapp",
+              "connectors/whatsapp",
+              "connectors/signal",
+              "connectors/imessage",
+              "connectors/bluebubbles",
+              "connectors/blooio",
+              "connectors/msteams",
+              "connectors/googlechat",
+              "connectors/farcaster",
+              "connectors/twitch",
+              "connectors/mattermost",
+              "connectors/wechat",
+              "connectors/matrix",
+              "connectors/feishu",
+              "connectors/nostr",
+              "connectors/lens",
+              "connectors/bluesky",
+              "connectors/instagram",
+              "connectors/line",
+              "connectors/zalo",
+              "connectors/twilio",
+              "connectors/github",
+              "connectors/gmail-watch",
+              "connectors/nextcloud-talk",
+              "connectors/tlon"
             ]
           },
           {
@@ -172,7 +199,7 @@
           },
           {
             "group": "Skills",
-            "pages": ["plugins/skills"]
+            "pages": ["plugins/skills", "skills/streaming"]
           },
           {
             "group": "Actions",
@@ -192,10 +219,7 @@
           },
           {
             "group": "Runtime",
-            "pages": [
-              "agents/runtime-and-lifecycle",
-              "guides/coding-swarms"
-            ]
+            "pages": ["agents/runtime-and-lifecycle", "guides/coding-swarms"]
           },
           {
             "group": "Database",
@@ -208,6 +232,10 @@
           {
             "group": "Security",
             "pages": ["guides/sandbox"]
+          },
+          {
+            "group": "Stability",
+            "pages": ["stability/known-failure-modes"]
           }
         ]
       },
@@ -217,7 +245,6 @@
           {
             "group": "Core Plugins",
             "pages": [
-              "plugin-registry/bootstrap",
               "plugin-registry/knowledge",
               "plugin-registry/sql",
               "plugin-registry/secrets-manager"
@@ -229,10 +256,21 @@
               "plugin-registry/llm/openai",
               "plugin-registry/llm/anthropic",
               "plugin-registry/llm/google-genai",
+              "plugin-registry/llm/google-antigravity",
               "plugin-registry/llm/groq",
               "plugin-registry/llm/ollama",
               "plugin-registry/llm/openrouter",
-              "plugin-registry/llm/deepseek"
+              "plugin-registry/llm/deepseek",
+              "plugin-registry/llm/xai",
+              "plugin-registry/llm/mistral",
+              "plugin-registry/llm/cohere",
+              "plugin-registry/llm/together",
+              "plugin-registry/llm/perplexity",
+              "plugin-registry/llm/vercel-ai-gateway",
+              "plugin-registry/llm/qwen",
+              "plugin-registry/llm/minimax",
+              "plugin-registry/llm/pi-ai",
+              "plugin-registry/llm/zai"
             ]
           },
           {
@@ -247,9 +285,25 @@
               "plugin-registry/platform/signal",
               "plugin-registry/platform/imessage",
               "plugin-registry/platform/bluebubbles",
+              "plugin-registry/platform/blooio",
               "plugin-registry/platform/msteams",
               "plugin-registry/platform/googlechat",
-              "plugin-registry/platform/mattermost"
+              "plugin-registry/platform/mattermost",
+              "plugin-registry/platform/twitch",
+              "plugin-registry/platform/wechat",
+              "plugin-registry/platform/matrix",
+              "plugin-registry/platform/feishu",
+              "plugin-registry/platform/nostr",
+              "plugin-registry/platform/lens",
+              "plugin-registry/platform/bluesky",
+              "plugin-registry/platform/instagram",
+              "plugin-registry/platform/line",
+              "plugin-registry/platform/zalo",
+              "plugin-registry/platform/twilio",
+              "plugin-registry/platform/github",
+              "plugin-registry/platform/gmail-watch",
+              "plugin-registry/platform/nextcloud-talk",
+              "plugin-registry/platform/tlon"
             ]
           },
           {
@@ -262,8 +316,15 @@
               "plugin-registry/browser",
               "plugin-registry/image-generation",
               "plugin-registry/tts",
+              "plugin-registry/stt",
+              "plugin-registry/vision",
               "plugin-registry/computeruse",
-              "plugin-registry/cron"
+              "plugin-registry/cron",
+              "plugin-registry/obsidian",
+              "plugin-registry/webhooks",
+              "plugin-registry/fal",
+              "plugin-registry/suno",
+              "plugin-registry/x402"
             ]
           }
         ]
@@ -345,7 +406,6 @@
             "group": "Commands",
             "pages": [
               "cli/start",
-              "cli/tui",
               "cli/setup",
               "cli/configure",
               "cli/config",

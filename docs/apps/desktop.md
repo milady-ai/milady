@@ -12,6 +12,7 @@ The Milady desktop app wraps the companion UI in a native Electrobun shell, addi
 
 Download the `.dmg` file from the [GitHub releases page](https://github.com/milady-ai/milady/releases). Open the DMG and drag Milady to your Applications folder.
 
+- **Which file:** On Apple Silicon (M1/M2/M3/M4 and later), use **Milady-arm64.dmg**. On Intel Macs, use **Milady-x64.dmg**. If you pick the wrong architecture, the app may not run correctly; see [Build & release — why two DMGs](../build-and-release.md#macos-why-two-dmgs-arm64-and-x64).
 - **Build targets:** DMG and ZIP.
 - **Category:** Productivity (`public.app-category.productivity`).
 - **Code signed and notarized** -- hardened runtime with Apple notarization enabled.
@@ -39,7 +40,51 @@ bun install && bun run build
 bun run dev:desktop
 ```
 
+For **why** the desktop dev commands spawn multiple processes, how **Ctrl-C** and **Quit** behave, **environment variables** (`MILADY_DESKTOP_VITE_WATCH`, `MILADY_RENDERER_URL`, etc.), and **IDE/agent observability** (`GET /api/dev/stack`, aggregated console log, screenshot proxy — *why* loopback, defaults, and opt-out), see **[Desktop local development](./desktop-local-development)**.
+
 In development mode, the Electrobun app resolves the Milady distribution from the repository root's `dist/` directory. In packaged builds, assets are copied into the app bundle under `Resources/app/milady-dist/`.
+
+## macOS frameless window chrome (hiddenInset)
+
+On **macOS**, the main window uses **`hiddenInset`** (no classic title bar; traffic lights inset). The WKWebView fills the client area, so **window move** and **inner-edge resize** are implemented with **native `NSView` overlays** above the web view — not with CSS resize cursors alone. **Why:** WebKit owns the pointer over page pixels; tracking areas on the `contentView` underneath led to unreliable cursors and flicker when AppKit and WebKit both tried to set `NSCursor`.
+
+Strip **thickness** can track the current **`NSScreen`** when the host passes `height: 0` into native layout (see main-process `applyMacOSWindowEffects` and FFI `setNativeDragRegion`). Full architecture, z-order, and file map: [Electrobun macOS window chrome](/guides/electrobun-mac-window-chrome).
+
+### WebGPU log line vs macOS version (Tahoe+)
+
+Electrobun may log **`[WebGPU Browser] macOS …`** using **`os.release()`** (Darwin). **Why document:** on **macOS 26**, Darwin is still **25.x**; a naive `Darwin − 9` mapping shows **16** and mis-gates WKWebView WebGPU. Milady maps Darwin to the **marketing** major in code; rationale and table: [Darwin vs macOS version (Electrobun WebGPU)](./electrobun-darwin-macos-webgpu-version.md).
+
+### Battery and energy use (macOS)
+
+**Product framing:** Milady targets **strong visuals when you are engaged** and **quiet hardware when you are not**—especially on battery—without pretending every workload beats a full IDE shell. See [Roadmap — Principles: energy and experience (desktop)](../ROADMAP.md#principles-energy-and-experience-desktop).
+
+**What drives usage**
+
+- **Continuous GPU work:** the companion **VRM** scene (WebGL or WebGPU) runs an animation/render loop while the scene is **active**. **Why it matters:** macOS attributes GPU time to the app even when you are not interacting; idle VRM + lighting + (optional) Spark/world effects are not free.
+- **Multiple processes in dev:** `dev:desktop` / `dev:desktop:watch` run API + Vite + Electrobun (+ optional screenshot helper). **Why:** each process has its own baseline CPU wakeups; this is a dev convenience, not the same as a minimal shipped shell.
+- **Dev screenshot proxy:** default-on **`GET /api/dev/cursor-screenshot`** path uses **full-screen capture** when agents poll it. **Why:** `screencapture` and compositor work are noticeable if something hits that endpoint often — turn it off when you do not need it (`MILADY_DESKTOP_SCREENSHOT_SERVER=0`); see [Desktop local development](./desktop-local-development).
+
+**What Milady already does**
+
+- **Pauses the avatar engine** when the companion scene is not active (`VrmEngine.setPaused` / `VrmViewer`), e.g. when you leave companion mode for native tabs (settings, chat shell) so the 3D loop is not running in the background for those routes. **Why:** `requestAnimationFrame` / `setAnimationLoop` at display refresh is the main avoidable steady-state cost.
+- **Page Visibility:** `VrmViewer` also pauses when **`document.visibilityState !== "visible"`** (background tab / hidden document). **Why:** WKWebView can keep scheduling frames for a visible canvas; aligning with visibility avoids burning GPU when the user is not looking at Milady.
+- **Background tab polling:** dashboard/stream/game/fine-tuning views use **`useIntervalWhenDocumentVisible`** (or equivalent) so **5s / 3s** refresh timers do not hit the API while the document is hidden. Eliza Cloud **credits** polling (**60s**) skips work when hidden. **Why:** same battery/thermal story as the VRM loop, for network + React wakeups.
+- **Vector memory 3D graph:** the Three.js **`requestAnimationFrame`** loop **stops while the tab is hidden** and resumes on **visible**. **Why:** second WebGL context should not animate off-screen.
+- **Battery → lower pixel ratio (Electrobun):** the UI calls **`desktop:getPowerState`** on a **60s** timer, when the renderer becomes ready, and when **`document.visibilityState`** returns to **visible** (so plugging in is noticed without waiting for the next interval). When **`onBattery`** is true, `VrmEngine.setLowPowerRenderMode` caps effective DPR at **1×** on top of the usual `MAX_RENDERER_PIXEL_RATIO` clamp. **Why:** fewer shaded pixels when unplugged (e.g. HiDPI laptops). The main process resolves AC vs battery using **`pmset`** on **macOS**, **`/sys/class/power_supply`** (Battery + `Discharging`) on **Linux**, and **`SystemInformation.PowerStatus.PowerLineStatus`** on **Windows** (`Offline` = on battery). **Opt-out:** set **localStorage** **`milady.vrmBatteryPixelCap`** to **`"0"`** to keep full resolution on battery (user **Companion efficiency** in Settings → Media can still request low-power on AC).
+- **Companion rendering (Settings → Media):** persisted **`eliza:companion-vrm-power`** is **`quality`** (never battery low-power), **`balanced`** (low-power on battery when the cap is on), or **`efficiency`** (always low-power). Legacy boolean keys migrate once.
+- **Animate in background** (opt-in, **`eliza:companion-animate-when-hidden`**): when the window or tab is hidden but companion is still the active scene, the engine stays unpaused and **only the world + Spark are hidden** so the VRM can idle with lower cost than drawing the full splat scene.
+- **Battery → Spark + shadows:** on battery, **`setLowPowerRenderMode`** also **disables directional shadow maps** on the avatar key light and applies **tighter Spark splat limits** (`maxPixelRadius`, `minAlpha`, sort distance, etc.). **Why:** shadows and splat sorting are a large share of GPU time in companion/world mode.
+- **Half framerate:** **`VrmEngine.setHalfFramerateMode`** skips every other main-loop tick (skipped ticks do not advance `Clock`, so the next tick’s delta is doubled). **`setLowPowerRenderMode`** is separate (DPR / shadows / Spark). Default policy ties half-FPS to “saving power” moments; Settings → Media can set **full speed**, **when saving power**, or **always half**.
+- **Lazy-mounts** the 3D stack the first time the companion scene is needed, and defers it while the agent is still **`starting`** / onboarding is loading. **Why:** avoids paying WebGL/WebGPU init during the boot path when the UI only needs status and loaders.
+- **Caps renderer pixel ratio** (see `MAX_RENDERER_PIXEL_RATIO` in `VrmEngine`) so Retina does not always mean **2×** shader cost at **3×** physical pixels.
+
+**What you can do today**
+
+- Use **native shell** (non-companion) when you mostly want chat/settings without the full-screen avatar. **Why:** `companionSceneActive` stays tied to shell/tab state, so the heavy scene is off when you are not in companion or character flows.
+- If WebGPU is hotter on your Mac than WebGL for this workload, set the renderer override in **localStorage** key **`eliza.avatarRenderer`** to **`webgl`** (or **`webgpu`** to experiment the other way). **Why:** path differs by machine and OS version; the desktop webview defaults WebGPU in the Electrobun runtime — sometimes the fallback is kinder to thermals.
+- In dev, disable the **screenshot** and **aggregated console** hooks if you do not use them (`MILADY_DESKTOP_SCREENSHOT_SERVER`, `MILADY_DESKTOP_DEV_LOG`).
+
+**Code:** `packages/app-core/src/hooks/useDocumentVisibility.ts`, `VectorBrowserView.tsx` (3D graph), `ElizaCloudDashboard.tsx`, `StreamView.tsx`, `stream/StreamVoiceConfig.tsx`, `GameView.tsx`, `ChatView.tsx` (game-modal carryover timer), `FineTuningView.tsx`, `state/AppContext.tsx` (cloud credits interval), `VrmViewer.tsx`, `VrmEngine.ts`, `vrm-desktop-energy.ts`.
 
 ## Desktop Runtime Modes
 
@@ -64,7 +109,28 @@ On startup, the Electrobun shell and `AgentManager` coordinate these steps:
 
 ### Port Configuration
 
-The expected local API port is determined by `MILADY_PORT` (default: **2138**). In `local` mode the child runtime is started with that port request, but if the runtime binds a different port Electrobun detects it from stdout and updates the renderer API base dynamically. In `disabled` mode, the same expected local port is used for a separately managed local server.
+**Embedded `local` mode (packaged or dev without external API):** the Electrobun main process chooses a **listen port** for the child **`milady start`** process as follows:
+
+1. **Preferred port** — `MILADY_PORT` (default **2138**). The shell probes **127.0.0.1** and, if that port is busy, uses the **next free** port (same idea as `dev-platform`, implemented in `loopback-port.ts`). **Why:** two Milady instances or another service may legitimately hold **2138**; we should not SIGKILL unrelated processes by default (see **`MILADY_AGENT_RECLAIM_STALE_PORT`** in [Desktop local development](./desktop-local-development.md#when-default-ports-are-busy) to opt back into reclaim).
+2. **Child env** — the spawned process receives the chosen port via **`MILADY_PORT`** so `entry.js start` binds there when possible.
+3. **Stdout + health** — if the runtime still reports a different bind (legacy / upstream behavior), stdout parsing and **`waitForHealthy`** follow the **actual** port before marking the agent running.
+4. **Renderer + surfaces** — `pushApiBaseToRenderer` / `injectApiBase` use **`AgentManager`’s resolved port**; status listeners refresh **main and detached** windows. **Why:** the dashboard must not keep using a stale loopback URL after a dynamic bind.
+
+**`external` mode:** no embedded child; the UI uses **`MILADY_DESKTOP_API_BASE`** / related env (e.g. dev-platform sets this to **`http://127.0.0.1:<resolved API port>`**). **Why:** the API may already be running under **`bun run dev`** with its own port policy.
+
+**`disabled` mode:** no auto-start; the renderer still targets the **expected** local API base for a process you manage yourself—set **`MILADY_PORT`** / **`MILADY_API_PORT`** to match that server.
+
+**CLI `milady start` (non-Electrobun):** after `startApiServer` returns, Milady syncs **`MILADY_PORT`**, **`MILADY_API_PORT`**, and **`ELIZA_PORT`** to the **actual** bound port. **Why:** if the HTTP stack falls forward to another port, shells and scripts reading env see the same port as **`/api/health`**.
+
+### Native application menu (e.g. macOS **Milady** menu)
+
+The OS menu bar template is built in **`apps/app/electrobun/src/application-menu.ts`** and wired in **`index.ts`** (`application-menu-clicked`). **Why a data file:** the same structure is validated by tests and stays free of platform branches scattered through the main process.
+
+| Item (example) | Action id | Behavior |
+|----------------|-----------|----------|
+| **Reset Milady…** | `reset-milady` | **Main process:** shows the window, native confirm, then **`POST /api/agent/reset`**, embedded restart or **`POST /api/agent/restart`**, poll **`/api/status`**, and pushes **`desktopTrayMenuClick`** with **`itemId: "menu-reset-milady-applied"`** + **`agentStatus`**. **Renderer:** **`handleResetAppliedFromMain`** runs the same **local UI wipe** as the end of Settings **`handleReset`** (`completeResetLocalStateAfterServerWipe`). **Why main owns HTTP:** after native dialogs, WKWebView can defer renderer **`fetch`/bridge** work, so reset looked hung; **why renderer still wipes UI:** one place for onboarding, `MiladyClient` base URL, cloud flags, and conversation lists so the menu cannot drift from Settings. |
+
+**Settings** still uses **`handleReset`** (webview confirm + full flow). **Legacy:** tray may still emit **`menu-reset-milady`** for older paths; see [Desktop main-process reset](./desktop-main-process-reset.md) for sequence, probes, and tests.
 
 ### Agent Status States
 

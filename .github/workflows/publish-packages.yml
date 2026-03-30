@@ -19,10 +19,6 @@ on:
         description: "Publish to Snap Store"
         type: boolean
         default: true
-      homebrew:
-        description: "Update Homebrew tap"
-        type: boolean
-        default: true
       flatpak:
         description: "Publish Flatpak"
         type: boolean
@@ -150,52 +146,8 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
   # ── Homebrew ───────────────────────────────────────────────────────────
-  update-homebrew:
-    name: Update Homebrew Tap
-    needs: prepare
-    if: |
-      (github.event_name == 'release' && needs.prepare.outputs.is_prerelease == 'false') ||
-      (github.event_name == 'workflow_dispatch' && inputs.homebrew)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Update Homebrew formula
-        env:
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-        run: |
-          VERSION="${{ needs.prepare.outputs.npm_version }}"
-          URL="https://registry.npmjs.org/miladyai/-/miladyai-${VERSION}.tgz"
-
-          echo "Fetching tarball SHA256 for $URL ..."
-          SHA256=$(curl -fsSL "$URL" | sha256sum | cut -d' ' -f1)
-          echo "SHA256: $SHA256"
-
-          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/milady-ai/homebrew-tap.git" /tmp/homebrew-tap
-          cd /tmp/homebrew-tap
-
-          # Ensure Formula directory exists
-          mkdir -p Formula
-
-          # Copy base formula if Formula/milady.rb doesn't exist yet
-          if [[ ! -f Formula/milady.rb ]]; then
-            cp "$GITHUB_WORKSPACE/packaging/homebrew/milady.rb" Formula/milady.rb
-          fi
-
-          # Update version, URL, and SHA256
-          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/milady.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/milady.rb
-
-          echo "Updated formula:"
-          grep -E "url|sha256" Formula/milady.rb
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/milady.rb
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "Update milady to ${VERSION}"
-          git push
+  # NOTE: Homebrew tap updates are handled by the standalone update-homebrew.yml
+  # workflow, which triggers via repository_dispatch. Do not duplicate here.
 
   # ── Snap ───────────────────────────────────────────────────────────────
   publish-snap:
@@ -397,7 +349,7 @@ jobs:
   # ── Summary ────────────────────────────────────────────────────────────
   publish-summary:
     name: Publish Summary
-    needs: [prepare, publish-pypi, update-homebrew, publish-snap, build-deb, build-flatpak]
+    needs: [prepare, publish-pypi, publish-snap, build-deb, build-flatpak]
     if: always()
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
@@ -410,7 +362,7 @@ jobs:
           echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| PyPI (milady ${{ needs.prepare.outputs.pypi_version }}) | ${{ needs.publish-pypi.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Homebrew | ${{ needs.update-homebrew.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Homebrew | handled by update-homebrew.yml |" >> $GITHUB_STEP_SUMMARY
           echo "| Snap | ${{ needs.publish-snap.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Debian (.deb) | ${{ needs.build-deb.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Flatpak | ${{ needs.build-flatpak.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY

@@ -93,8 +93,8 @@ describe("derived style helpers", () => {
 
   it("uses the default accent for generic advanced overlays", () => {
     const flags = tabFlags("actions");
-    expect(accentVar(flags)).toBe("#7b8fb5");
-    expect(accentSubtleVar(flags)).toBe("rgba(123, 143, 181, 0.12)");
+    expect(accentVar(flags)).toBe("#f0b90b");
+    expect(accentSubtleVar(flags)).toBe("rgba(240, 185, 11, 0.12)");
   });
 
   it("keeps special-case accents for stream and wallets", () => {
@@ -136,7 +136,7 @@ describe("App.tsx advanced-tab parity", () => {
 describe("accent palettes", () => {
   it("keeps stable accent constants", () => {
     expect(ACCENT_COLORS.stream).toBe("#ef4444");
-    expect(ACCENT_COLORS.skills).toBe("#f0b232");
+    expect(ACCENT_COLORS.skills).toBe("#f0b90b");
     expect(TOP_BAR_COLORS.stream).toContain("239, 68, 68");
   });
 });

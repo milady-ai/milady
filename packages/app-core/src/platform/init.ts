@@ -1,10 +1,7 @@
-/**
- * Platform detection and initialization utilities.
- *
- * Extracted from apps/app/src/main.tsx to be reusable across app shells.
- */
+/** Platform detection and initialization utilities. */
 
 import { isElectrobunRuntime } from "../bridge";
+import { getBootConfig, setBootConfig } from "../config/boot-config";
 
 // ── Platform detection ──────────────────────────────────────────────
 
@@ -59,7 +56,6 @@ export interface ShareTargetPayload {
 
 declare global {
   interface Window {
-    __MILADY_API_BASE__?: string;
     __MILADY_SHARE_QUEUE__?: ShareTargetPayload[];
   }
 }
@@ -224,13 +220,13 @@ export function injectPopoutApiBase(): void {
         parsed.protocol === "https:" ||
         (parsed.protocol === "http:" && allowPrivateHttp)
       ) {
-        window.__MILADY_API_BASE__ = apiBase;
+        setBootConfig({ ...getBootConfig(), apiBase });
       } else {
         console.warn("[app-core] Rejected non-local apiBase:", host);
       }
     } catch {
       if (apiBase.startsWith("/") && !apiBase.startsWith("//")) {
-        window.__MILADY_API_BASE__ = apiBase;
+        setBootConfig({ ...getBootConfig(), apiBase });
       } else {
         console.warn("[app-core] Rejected invalid relative apiBase:", apiBase);
       }

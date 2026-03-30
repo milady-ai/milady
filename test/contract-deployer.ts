@@ -43,7 +43,7 @@ function loadCompiledContract(
 
   if (!artifactPath) {
     throw new Error(
-      `Contract artifact not found for any of: ${candidates.join(", ")}. Did you run 'forge build' in test/contracts?`,
+      `Contract artifact not found for any of: ${candidates.join(", ")}. Did you run 'forge build --skip Harness' in test/contracts?`,
     );
   }
 
@@ -76,20 +76,11 @@ export interface DeployedContracts {
 export async function deployContracts(
   wallet: ethers.Wallet,
 ): Promise<DeployedContracts> {
-  // Load compiled artifacts
-  const registryArtifact = loadCompiledContract([
-    "MockMiladyAgentRegistry",
-    "MockMilaidyAgentRegistry",
-  ]);
-  const collectionArtifact = loadCompiledContract([
-    "MockMiladyCollection",
-    "MockMilaidyCollection",
-  ]);
+  const registryArtifact = loadCompiledContract(["MockMiladyAgentRegistry"]);
+  const collectionArtifact = loadCompiledContract(["MockMiladyCollection"]);
 
-  // Get current nonce explicitly to avoid race conditions
   let currentNonce = await wallet.getNonce("pending");
 
-  // Deploy Registry with explicit nonce
   const registryFactory = new ethers.ContractFactory(
     registryArtifact.abi,
     registryArtifact.bytecode,
@@ -102,7 +93,6 @@ export async function deployContracts(
   const registryAddress = await registryContract.getAddress();
   currentNonce++;
 
-  // Deploy Collection with explicit nonce
   const collectionFactory = new ethers.ContractFactory(
     collectionArtifact.abi,
     collectionArtifact.bytecode,
@@ -135,14 +125,8 @@ export function getContractABIs(): {
   registryABI: ethers.InterfaceAbi;
   collectionABI: ethers.InterfaceAbi;
 } {
-  const registryArtifact = loadCompiledContract([
-    "MockMiladyAgentRegistry",
-    "MockMilaidyAgentRegistry",
-  ]);
-  const collectionArtifact = loadCompiledContract([
-    "MockMiladyCollection",
-    "MockMilaidyCollection",
-  ]);
+  const registryArtifact = loadCompiledContract(["MockMiladyAgentRegistry"]);
+  const collectionArtifact = loadCompiledContract(["MockMiladyCollection"]);
 
   return {
     registryABI: registryArtifact.abi,

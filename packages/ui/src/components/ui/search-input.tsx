@@ -1,6 +1,7 @@
 import { Search, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
+import { Button } from "./button";
 
 export interface SearchInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
@@ -37,14 +38,15 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           {...props}
         />
         {hasValue && onClear && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClear}
-            className="absolute right-2 rounded-sm p-0.5 text-muted hover:text-txt transition-colors"
+            className="absolute right-2 h-5 w-5 rounded-sm text-muted hover:text-txt transition-colors"
             aria-label={clearLabel}
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         )}
         {loading && (
           <div className="absolute right-2 h-3 w-3 animate-spin rounded-full border-2 border-muted border-t-accent" />

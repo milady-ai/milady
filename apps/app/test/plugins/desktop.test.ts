@@ -51,36 +51,40 @@ describe("@miladyai/capacitor-desktop", () => {
     };
     gainNode.connect.mockReturnValue(gainNode);
     const dest = {};
-    (globalThis as Record<string, unknown>).AudioContext = class {
-      createOscillator() {
-        const osc = {
-          type: "sine",
-          frequency: { value: 0, setValueAtTime: vi.fn() },
-          connect: vi.fn().mockReturnValue(gainNode),
-          start: vi.fn(),
-          stop: vi.fn(),
-        };
-        return osc;
-      }
-      createGain() {
-        return gainNode;
-      }
-      get destination() {
-        return dest;
-      }
-      get currentTime() {
-        return 0;
-      }
-    };
+    Object.assign(globalThis, {
+      AudioContext: class {
+        createOscillator() {
+          const osc = {
+            type: "sine",
+            frequency: { value: 0, setValueAtTime: vi.fn() },
+            connect: vi.fn().mockReturnValue(gainNode),
+            start: vi.fn(),
+            stop: vi.fn(),
+          };
+          return osc;
+        }
+        createGain() {
+          return gainNode;
+        }
+        get destination() {
+          return dest;
+        }
+        get currentTime() {
+          return 0;
+        }
+      },
+    });
 
     // jsdom location.reload is read-only; replace location entirely
-    (window as unknown as Record<string, unknown>).location = new URL(
-      "http://localhost/",
-    ) as unknown as Location;
-    (window as unknown as Record<string, unknown>).location = {
-      ...(window as unknown as Record<string, unknown>).location,
-      reload: vi.fn(),
-    };
+    Object.assign(window, {
+      location: new URL("http://localhost/") as Location,
+    });
+    Object.assign(window, {
+      location: {
+        ...window.location,
+        reload: vi.fn(),
+      },
+    });
 
     d = new DesktopWeb();
   });
@@ -148,7 +152,9 @@ describe("@miladyai/capacitor-desktop", () => {
 
     it("closeWindow/showWindow/focusWindow call window methods", async () => {
       const closeSpy = vi.spyOn(window, "close");
-      const focusSpy = vi.spyOn(window, "focus");
+      const focusSpy = vi
+        .spyOn(window, "focus")
+        .mockImplementation(() => {}); /* avoid jsdom "Not implemented" */
       await d.closeWindow();
       await d.showWindow();
       await d.focusWindow();
@@ -269,7 +275,9 @@ describe("@miladyai/capacitor-desktop", () => {
   // -- Shell --
 
   it("openExternal opens URL in new tab", async () => {
-    const spy = vi.spyOn(window, "open");
+    const spy = vi
+      .spyOn(window, "open")
+      .mockImplementation(() => null); /* avoid jsdom "Not implemented" */
     await d.openExternal({ url: "https://example.com" });
     expect(spy).toHaveBeenCalledWith("https://example.com", "_blank");
   });

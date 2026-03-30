@@ -4,7 +4,23 @@ import {
   client,
 } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
+import {
+  Banner,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from "@miladyai/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -43,6 +59,16 @@ const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"] as const;
 const METHODS_SET = new Set<string>(HTTP_METHODS);
 
 const HTTP_METHODS_LIST = HTTP_METHODS;
+
+const editorDialogContentClassName =
+  "w-[min(100%-2rem,48rem)] max-h-[min(90vh,56rem)] overflow-hidden rounded-2xl border border-border/70 bg-card/96 p-0 shadow-2xl backdrop-blur-xl";
+const editorFieldLabelClassName = "text-xs text-muted";
+const editorInputClassName =
+  "rounded-xl border-border bg-surface text-txt placeholder:text-muted/50 focus-visible:ring-accent/25";
+const editorTextareaClassName = `${editorInputClassName} resize-none`;
+const editorMonoTextareaClassName = `${editorTextareaClassName} font-mono`;
+const editorSectionCardClassName =
+  "flex flex-col gap-3 rounded-xl border border-border/70 bg-bg/20 p-3";
 
 function toNonEmptyString(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -678,20 +704,41 @@ export function CustomActionEditor({
   };
 
   const handleTest = async () => {
-    if (!action?.id) {
-      setTestResult({ error: "Save the action first to test it." });
-      return;
-    }
-
     setTesting(true);
     setTestResult(null);
+
+    // Auto-save if the action hasn't been saved yet
+    let actionId = action?.id;
+    if (!actionId) {
+      try {
+        await handleSave();
+        // After save, the action should have an ID
+        actionId = action?.id;
+        if (!actionId) {
+          setTestResult({
+            error:
+              "Failed to save action before testing. Please save manually first.",
+          });
+          setTesting(false);
+          return;
+        }
+      } catch (err) {
+        setTestResult({
+          error: `Save failed: ${err instanceof Error ? err.message : String(err)}`,
+        });
+        setTesting(false);
+        return;
+      }
+    }
+
     const startTime = Date.now();
 
     try {
-      const result = await client.testCustomAction(action.id, testParams);
+      const result = await client.testCustomAction(actionId, testParams);
       const duration = Date.now() - startTime;
       setTestResult({
-        output: JSON.stringify(result, null, 2),
+        output: result.error ? undefined : JSON.stringify(result, null, 2),
+        error: result.error || undefined,
         duration,
       });
     } catch (err: unknown) {
@@ -708,39 +755,48 @@ export function CustomActionEditor({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-2xl border border-border bg-card shadow-lg flex flex-col overflow-hidden">
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onClose();
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
+        className={editorDialogContentClassName}
+      >
         {/* Header */}
-        <div className="flex items-center px-5 py-3 border-b border-border shrink-0">
-          <h2 className="flex-1 text-sm font-medium text-txt">
+        <DialogHeader className="flex flex-row items-center border-b border-border/70 px-5 py-4">
+          <DialogTitle className="flex-1 text-sm font-medium text-txt">
             {action ? "Edit Custom Action" : "New Custom Action"}
-          </h2>
+          </DialogTitle>
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted text-xl leading-none"
+            className="h-8 w-8 rounded-lg text-xl leading-none text-muted hover:bg-transparent hover:text-txt"
             onClick={onClose}
+            aria-label={t("common.close")}
           >
             {t("bugreportmodal.Times")}
           </Button>
-        </div>
+        </DialogHeader>
 
         {/* Body */}
-        <div className="px-5 py-4 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+        <div className="flex max-h-[min(72vh,44rem)] flex-col gap-4 overflow-y-auto px-5 py-4">
           {formError && (
-            <div className="border border-danger/30 bg-danger/10 text-danger px-3 py-2 text-xs rounded">
+            <Banner variant="error" className="rounded-xl text-xs">
               {formError}
-            </div>
+            </Banner>
           )}
 
           {/* AI Generate */}
           {!action && (
-            <div className="flex flex-col gap-1 border border-accent/30 bg-accent/5 p-3">
+            <div className="flex flex-col gap-2 rounded-xl border border-accent/30 bg-accent/5 p-3">
               <span className="text-xs text-txt font-medium">
                 {t("customactioneditor.DescribeWhatYouWa")}
               </span>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="text"
                   value={aiPrompt}
                   onChange={(e) => {
@@ -753,7 +809,7 @@ export function CustomActionEditor({
                     }
                   }}
                   placeholder={t("customactioneditor.eGCheckIfAWebs")}
-                  className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                  className={`flex-1 ${editorInputClassName}`}
                 />
                 <Button
                   variant="default"
@@ -773,36 +829,38 @@ export function CustomActionEditor({
 
           {/* Name */}
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted">{t("triggersview.Name")}</span>
-            <input
+            <span className={editorFieldLabelClassName}>
+              {t("wallet.name")}
+            </span>
+            <Input
               type="text"
               value={name}
               onChange={(e) => setNormalizedName(e.target.value)}
               placeholder={t("customactioneditor.MYACTION")}
-              className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+              className={`flex-1 ${editorInputClassName}`}
             />
           </div>
 
           {/* Description */}
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted">
+            <span className={editorFieldLabelClassName}>
               {t("skillsview.Description")}
             </span>
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescriptionValue(e.target.value)}
               placeholder={t("customactioneditor.WhatDoesThisActio")}
               rows={2}
-              className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent resize-none"
+              className={`flex-1 ${editorTextareaClassName}`}
             />
           </div>
 
           {/* Similes */}
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted">
+            <span className={editorFieldLabelClassName}>
               {t("customactioneditor.AliasesOptional")}
             </span>
-            <input
+            <Input
               type="text"
               value={similesInput}
               onChange={(e) => {
@@ -810,7 +868,7 @@ export function CustomActionEditor({
                 setFormError("");
               }}
               placeholder={t("customactioneditor.SYNONYMONESYNONYM")}
-              className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+              className={`flex-1 ${editorInputClassName}`}
             />
             <span className="text-xs text-muted/70">
               {t("customactioneditor.CommaSeparatedAlte")}
@@ -819,21 +877,22 @@ export function CustomActionEditor({
 
           {/* Handler Type Tabs */}
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted">
+            <span className={editorFieldLabelClassName}>
               {t("customactioneditor.HandlerType")}
             </span>
             <div className="flex gap-2">
               {(["http", "shell", "code"] as const).map((type) => (
-                <button
-                  type="button"
+                <Button
+                  variant={handlerType === type ? "default" : "outline"}
+                  size="sm"
                   key={type}
                   onClick={() => {
                     setHandlerType(type);
                     setFormError("");
                   }}
-                  className={`px-3 py-1.5 text-xs border cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs ${
                     handlerType === type
-                      ? "border-accent bg-accent text-[var(--accent-foreground,#1a1f26)]"
+                      ? ""
                       : "border-border text-muted hover:text-txt"
                   }`}
                 >
@@ -842,27 +901,33 @@ export function CustomActionEditor({
                     : type === "shell"
                       ? "Shell Command"
                       : "JavaScript"}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           {/* Handler Config */}
           {handlerType === "http" && (
-            <div className="flex flex-col gap-3 border border-border p-3">
+            <div className={editorSectionCardClassName}>
               <div className="flex gap-2">
-                <select
+                <Select
                   value={httpMethod}
-                  onChange={(e) => setHttpMethod(e.target.value as HttpMethod)}
-                  className="bg-surface border border-border px-2 py-1.5 text-sm text-txt outline-none focus:border-accent"
+                  onValueChange={(value) => setHttpMethod(value as HttpMethod)}
                 >
-                  {HTTP_METHODS_LIST.map((method) => (
-                    <option key={method} value={method}>
-                      {method}
-                    </option>
-                  ))}
-                </select>
-                <input
+                  <SelectTrigger
+                    className={`w-auto min-w-[6.5rem] ${editorInputClassName}`}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {HTTP_METHODS_LIST.map((method) => (
+                      <SelectItem key={method} value={method}>
+                        {method}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
                   type="text"
                   value={httpUrl}
                   onChange={(e) => {
@@ -870,58 +935,61 @@ export function CustomActionEditor({
                     setFormError("");
                   }}
                   placeholder={t("customactioneditor.httpsApiExample")}
-                  className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                  className={`flex-1 ${editorInputClassName}`}
                 />
               </div>
 
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted">
+                  <span className={editorFieldLabelClassName}>
                     {t("customactioneditor.HeadersOptional")}
                   </span>
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-xs"
                     onClick={addHeader}
-                    className="text-xs text-txt hover:opacity-80 cursor-pointer"
                   >
                     {t("customactioneditor.Add")}
-                  </button>
+                  </Button>
                 </div>
                 {httpHeaders.map((header, i) => (
                   <div
                     key={`${header.key}:${header.value}`}
                     className="flex gap-2"
                   >
-                    <input
+                    <Input
                       type="text"
                       value={header.key}
                       onChange={(e) => updateHeader(i, "key", e.target.value)}
                       placeholder={t("customactioneditor.HeaderName")}
-                      className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                      className={`flex-1 ${editorInputClassName}`}
                     />
-                    <input
+                    <Input
                       type="text"
                       value={header.value}
                       onChange={(e) => updateHeader(i, "value", e.target.value)}
                       placeholder={t("customactioneditor.valueOrParam")}
-                      className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                      className={`flex-1 ${editorInputClassName}`}
                     />
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="px-2 text-muted hover:text-txt h-auto"
                       onClick={() => removeHeader(i)}
-                      className="px-2 text-muted hover:text-txt cursor-pointer"
+                      aria-label={`Remove header ${i + 1}`}
                     >
                       {t("bugreportmodal.Times")}
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
 
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted">
+                <span className={editorFieldLabelClassName}>
                   {t("customactioneditor.BodyTemplateOptio")}
                 </span>
-                <textarea
+                <Textarea
                   value={httpBody}
                   onChange={(e) => {
                     setHttpBody(e.target.value);
@@ -929,7 +997,7 @@ export function CustomActionEditor({
                   }}
                   placeholder={'{"key": "{{param}}"}'}
                   rows={3}
-                  className="bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent resize-none font-mono"
+                  className={editorMonoTextareaClassName}
                 />
               </div>
             </div>
@@ -937,10 +1005,10 @@ export function CustomActionEditor({
 
           {handlerType === "shell" && (
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted">
+              <span className={editorFieldLabelClassName}>
                 {t("customactioneditor.CommandTemplate")}
               </span>
-              <textarea
+              <Textarea
                 value={shellCommand}
                 onChange={(e) => {
                   setShellCommand(e.target.value);
@@ -948,7 +1016,7 @@ export function CustomActionEditor({
                 }}
                 placeholder={t("customactioneditor.echoMessage")}
                 rows={4}
-                className="bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent resize-none font-mono"
+                className={editorMonoTextareaClassName}
               />
               <span className="text-xs text-muted/70">
                 {t("streamsettings.Use")} {`{{paramName}}`}{" "}
@@ -959,10 +1027,10 @@ export function CustomActionEditor({
 
           {handlerType === "code" && (
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted">
+              <span className={editorFieldLabelClassName}>
                 {t("customactioneditor.JavaScriptCode")}
               </span>
-              <textarea
+              <Textarea
                 value={code}
                 onChange={(e) => {
                   setCode(e.target.value);
@@ -970,7 +1038,7 @@ export function CustomActionEditor({
                 }}
                 placeholder={t("customactioneditor.AvailableParams")}
                 rows={6}
-                className="bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent resize-none font-mono"
+                className={editorMonoTextareaClassName}
               />
             </div>
           )}
@@ -978,67 +1046,70 @@ export function CustomActionEditor({
           {/* Parameters */}
           <div className="flex flex-col gap-2 border-t border-border pt-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted">
+              <span className={editorFieldLabelClassName}>
                 {t("customactioneditor.Parameters")}
               </span>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs h-auto p-0"
                 onClick={addParameter}
-                className="text-xs text-txt hover:opacity-80 cursor-pointer"
               >
                 {t("customactioneditor.AddParameter")}
-              </button>
+              </Button>
             </div>
-            {parameters.map((param, i) => (
+            {parameters.map((param, paramIdx) => (
               <div
-                key={`${param.name}-${i}`}
+                key={`${param.name}-${param.description ?? ""}`}
                 className="flex gap-2 items-start"
               >
-                <input
+                <Input
                   type="text"
                   value={param.name}
-                  onChange={(e) => updateParameter(i, "name", e.target.value)}
+                  onChange={(e) =>
+                    updateParameter(paramIdx, "name", e.target.value)
+                  }
                   placeholder={t("customactioneditor.paramName")}
-                  className="w-32 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                  className={`w-32 ${editorInputClassName}`}
                 />
-                <input
+                <Input
                   type="text"
                   value={param.description}
                   onChange={(e) =>
-                    updateParameter(i, "description", e.target.value)
+                    updateParameter(paramIdx, "description", e.target.value)
                   }
                   placeholder={t("skillsview.Description")}
-                  className="flex-1 bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                  className={`flex-1 ${editorInputClassName}`}
                 />
                 <span className="flex items-center gap-1 text-xs text-muted cursor-pointer">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={param.required}
-                    onChange={(e) =>
-                      updateParameter(i, "required", e.target.checked)
+                    onCheckedChange={(checked) =>
+                      updateParameter(paramIdx, "required", !!checked)
                     }
-                    className="cursor-pointer"
                   />
 
-                  {t("customactioneditor.Required")}
+                  {t("secretsview.Required")}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => removeParameter(i)}
-                  className="px-2 text-muted hover:text-txt cursor-pointer"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-2 text-muted hover:text-txt h-auto"
+                  onClick={() => removeParameter(paramIdx)}
+                  aria-label={`Remove parameter ${param.name || paramIdx + 1}`}
                 >
                   {t("bugreportmodal.Times")}
-                </button>
+                </Button>
               </div>
             ))}
           </div>
 
           {/* Test Section */}
           <div className="flex flex-col gap-2 border-t border-border pt-3">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              className="flex items-center justify-between text-xs text-muted hover:text-txt h-auto p-0 w-full"
               onClick={() => setTestExpanded((expanded) => !expanded)}
-              className="flex items-center justify-between text-xs text-muted hover:text-txt cursor-pointer"
             >
               <span>{t("customactioneditor.TestAction")}</span>
               <span>
@@ -1048,15 +1119,17 @@ export function CustomActionEditor({
                   <ChevronRight className="w-3 h-3" />
                 )}
               </span>
-            </button>
+            </Button>
             {testExpanded && (
               <div className="flex flex-col gap-2 pl-2 border-l-2 border-border">
                 {parameters
                   .filter((p) => p.name.trim())
                   .map((param) => (
                     <div key={param.name} className="flex flex-col gap-1">
-                      <span className="text-xs text-muted">{param.name}</span>
-                      <input
+                      <span className={editorFieldLabelClassName}>
+                        {param.name}
+                      </span>
+                      <Input
                         type="text"
                         value={testParams[param.name] || ""}
                         onChange={(e) =>
@@ -1066,14 +1139,14 @@ export function CustomActionEditor({
                           })
                         }
                         placeholder={param.description || "value"}
-                        className="bg-surface border border-border px-2 py-1.5 text-sm text-txt placeholder:text-muted/50 outline-none focus:border-accent"
+                        className={editorInputClassName}
                       />
                     </div>
                   ))}
                 {testResult && (
                   <div className="bg-surface border border-border p-2 text-xs font-mono">
                     {testResult.error && (
-                      <div className="text-red-400">
+                      <div className="text-status-danger">
                         {t("customactioneditor.Error")} {testResult.error}
                       </div>
                     )}
@@ -1096,19 +1169,25 @@ export function CustomActionEditor({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-5 py-3 border-t border-border">
+        <DialogFooter className="border-t border-border/70 px-5 py-4 sm:justify-end sm:space-x-2">
           {testExpanded && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleTest}
-              disabled={testing || !action?.id}
+              disabled={testing || saving}
             >
-              {testing ? "Testing..." : "Test"}
+              {testing
+                ? t("customactioneditor.Testing", {
+                    defaultValue: "Testing...",
+                  })
+                : t("customactioneditor.Test", {
+                    defaultValue: "Test",
+                  })}
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={onClose}>
-            {t("onboarding.cancel")}
+            {t("common.cancel")}
           </Button>
           <Button
             variant="default"
@@ -1116,10 +1195,14 @@ export function CustomActionEditor({
             onClick={() => void handleSave()}
             disabled={saving}
           >
-            {saving ? "Saving..." : "Save"}
+            {saving
+              ? t("customactioneditor.Saving", {
+                  defaultValue: "Saving...",
+                })
+              : t("common.save")}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

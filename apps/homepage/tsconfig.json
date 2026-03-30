@@ -11,6 +11,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@miladyai/ui": ["../../packages/ui/src/index.ts"]
+    },
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

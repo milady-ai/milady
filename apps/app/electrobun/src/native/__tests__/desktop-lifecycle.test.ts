@@ -36,6 +36,10 @@ vi.mock("electrobun/bun", () => ({
   default: { events: mockEvents },
   Electrobun: { events: mockEvents },
   Tray: MockTray,
+  ContextMenu: {
+    on: vi.fn(),
+    showContextMenu: vi.fn(),
+  },
   GlobalShortcut: {
     register: vi.fn(),
     unregister: vi.fn(),
@@ -90,7 +94,7 @@ vi.mock("electrobun/bun", () => ({
   },
 }));
 
-import { DesktopManager } from "../desktop";
+import { DesktopManager, resetDesktopManagerForTesting } from "../desktop";
 
 function setPlatform(value: string): void {
   Object.defineProperty(process, "platform", {
@@ -113,10 +117,12 @@ function createWindow() {
 describe("DesktopManager lifecycle cleanup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetDesktopManagerForTesting();
     setPlatform("linux");
   });
 
   afterEach(() => {
+    resetDesktopManagerForTesting();
     setPlatform("darwin");
   });
 
@@ -128,10 +134,6 @@ describe("DesktopManager lifecycle cleanup", () => {
 
     expect(mockTrayInstance.off).toHaveBeenCalledWith(
       "tray-clicked",
-      expect.any(Function),
-    );
-    expect(mockEvents.off).toHaveBeenCalledWith(
-      "application-menu-clicked",
       expect.any(Function),
     );
     expect(mockEvents.off).toHaveBeenCalledWith(
@@ -171,10 +173,6 @@ describe("DesktopManager lifecycle cleanup", () => {
     expect(window.off).toHaveBeenCalledWith("close", expect.any(Function));
     expect(window.off).toHaveBeenCalledWith("resize", expect.any(Function));
     expect(window.off).toHaveBeenCalledWith("move", expect.any(Function));
-    expect(mockEvents.off).toHaveBeenCalledWith(
-      "application-menu-clicked",
-      expect.any(Function),
-    );
     expect(mockEvents.off).toHaveBeenCalledWith(
       "tray-clicked",
       expect.any(Function),

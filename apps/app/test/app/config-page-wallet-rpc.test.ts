@@ -74,6 +74,7 @@ describe("ConfigPageView wallet RPC helpers", () => {
         HELIUS_API_KEY: "",
         BIRDEYE_API_KEY: "",
       },
+      walletNetwork: "mainnet",
     });
   });
 });

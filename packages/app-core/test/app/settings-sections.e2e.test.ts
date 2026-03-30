@@ -1,16 +1,15 @@
 /**
  * E2E tests for Settings Sections.
  *
- * Tests cover all 14 settings sections:
+ * Tests cover the settings shell sections and navigation:
  * 1. Appearance (theme selection)
  * 2. AI Model (provider, model selection)
  * 3. Integrations (GitHub, coding agents)
- * 4. Media (image, video, audio providers)
- * 5. Voice (TTS/STT configuration)
- * 6. Permissions
- * 7. Updates
- * 8. Cloud integration
- * 9-14. Advanced options
+ * 4. Media (image, video, audio, and voice providers)
+ * 5. Permissions
+ * 6. Updates
+ * 7. Cloud integration
+ * 8+. Advanced options
  */
 
 // @vitest-environment jsdom
@@ -18,17 +17,25 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createInlineUiMock } from "./mockInlineUi";
+
 const mockUseApp = vi.fn();
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
   THEMES: [
-    { id: "milady", label: "Milady" },
+    { id: "eliza", label: "Eliza" },
     { id: "dark", label: "Dark" },
     { id: "light", label: "Light" },
     { id: "solarized", label: "Solarized" },
   ],
 }));
+
+vi.mock("@miladyai/ui", async () => {
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return createInlineUiMock(actual);
+});
 
 vi.mock("@miladyai/app-core/components", async () => {
   const actual = await vi.importActual<
@@ -39,17 +46,17 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
-vi.mock("@miladyai/app-core/components/ConfigPageView", () => ({
+vi.mock("../../src/components/ConfigPageView", () => ({
   ConfigPageView: () =>
     React.createElement("div", { "data-testid": "config-page" }, "ConfigPage"),
 }));
 
-vi.mock("@miladyai/app-core/components/CodingAgentSettingsSection", () => ({
+vi.mock("../../src/components/CodingAgentSettingsSection", () => ({
   CodingAgentSettingsSection: () =>
     React.createElement("div", null, "CodingAgentSettingsSection"),
 }));
 
-vi.mock("@miladyai/app-core/components/MediaSettingsSection", () => ({
+vi.mock("../../src/components/MediaSettingsSection", () => ({
   MediaSettingsSection: () =>
     React.createElement(
       "div",
@@ -58,11 +65,11 @@ vi.mock("@miladyai/app-core/components/MediaSettingsSection", () => ({
     ),
 }));
 
-vi.mock("@miladyai/app-core/components/ElizaCloudDashboard", () => ({
+vi.mock("../../src/components/ElizaCloudDashboard", () => ({
   CloudDashboard: () => React.createElement("div", null, "ElizaCloudDashboard"),
 }));
 
-vi.mock("@miladyai/app-core/components/PermissionsSection", () => ({
+vi.mock("../../src/components/PermissionsSection", () => ({
   PermissionsSection: () =>
     React.createElement(
       "div",
@@ -71,7 +78,7 @@ vi.mock("@miladyai/app-core/components/PermissionsSection", () => ({
     ),
 }));
 
-vi.mock("@miladyai/app-core/components/ProviderSwitcher", () => ({
+vi.mock("../../src/components/ProviderSwitcher", () => ({
   ProviderSwitcher: () =>
     React.createElement(
       "div",
@@ -80,7 +87,7 @@ vi.mock("@miladyai/app-core/components/ProviderSwitcher", () => ({
     ),
 }));
 
-vi.mock("@miladyai/app-core/components/VoiceConfigView", () => ({
+vi.mock("../../src/components/VoiceConfigView", () => ({
   VoiceConfigView: () =>
     React.createElement(
       "div",
@@ -89,7 +96,25 @@ vi.mock("@miladyai/app-core/components/VoiceConfigView", () => ({
     ),
 }));
 
-import { SettingsView } from "@miladyai/app-core/components/SettingsView";
+vi.mock("../../src/components/ReleaseCenterView", () => ({
+  ReleaseCenterView: () =>
+    React.createElement(
+      "div",
+      { "data-testid": "release-center" },
+      "ReleaseCenterView",
+    ),
+}));
+
+vi.mock("../../src/components/DesktopWorkspaceSection", () => ({
+  DesktopWorkspaceSection: () =>
+    React.createElement(
+      "div",
+      { "data-testid": "desktop-workspace" },
+      "DesktopWorkspaceSection",
+    ),
+}));
+
+import { SettingsView } from "../../src/components/SettingsView";
 
 type SettingsState = {
   // Cloud
@@ -140,7 +165,7 @@ function createSettingsState(): SettingsState {
     ],
     pluginSaving: false,
     pluginSaveSuccess: false,
-    currentTheme: "milady",
+    currentTheme: "eliza",
     uiLanguage: "en",
   };
 }
@@ -152,7 +177,8 @@ function createUseAppMock(
   overrides: Record<string, unknown> = {},
 ) {
   return {
-    t: (k: string) => k,
+    t: (k: string, options?: { defaultValue?: string }) =>
+      options?.defaultValue ?? k,
     ...state,
     exportBusy: false,
     exportPassword: "",
@@ -242,151 +268,35 @@ describe("SettingsView Sections", () => {
     mockUseApp.mockImplementation(() => cachedMock);
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 2: AI Model / Provider
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("AI Model Section", () => {
-    it("renders provider switcher section", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const providerSection = tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "provider-switcher",
-      );
-      expect(providerSection.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 3: Media Settings
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Media Settings Section", () => {
-    it("renders media settings section", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const mediaSection = tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "media-settings",
-      );
-      expect(mediaSection.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 4: Voice Settings
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Voice Settings Section", () => {
-    it("renders voice config section", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const voiceSection = tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "voice-config",
-      );
-      expect(voiceSection.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 5: Permissions
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Permissions Section", () => {
-    it("renders permissions section", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const permSection = tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "permissions",
-      );
-      expect(permSection.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 6: Cloud Integration
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Cloud Integration Section", () => {
-    it("shows login button when not connected", async () => {
-      state.elizaCloudConnected = false;
-
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const _loginButtons = tree?.root.findAll(
-        (node) =>
-          node.type === "button" &&
-          node.children.some(
-            (c) =>
-              typeof c === "string" &&
-              (c.toLowerCase().includes("login") ||
-                c.toLowerCase().includes("connect")),
-          ),
-      );
-      // May or may not have login button depending on cloud state
-      expect(tree).not.toBeNull();
-    });
-
-    it("shows disconnect button when connected", async () => {
-      state.elizaCloudConnected = true;
-      state.elizaCloudUserId = "user-123";
-
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const _disconnectButtons = tree?.root.findAll(
-        (node) =>
-          node.type === "button" &&
-          node.children.some(
-            (c) =>
-              typeof c === "string" && c.toLowerCase().includes("disconnect"),
-          ),
-      );
-      expect(tree).not.toBeNull();
-    });
-
-    it("shows credits when connected", async () => {
-      state.elizaCloudConnected = true;
-      state.elizaCloudCredits = 500;
-
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      // Credits should be displayed somewhere
-      expect(tree).not.toBeNull();
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 7: Danger Zone (already tested in settings-reset.e2e.test.ts)
-  // ─────────────────────────────────────────────────────────────────────────
-
   describe("Danger Zone Section", () => {
+    it("renders a searchable settings sidebar and filters sections", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const sidebar = tree?.root.findByProps({
+        "data-testid": "settings-sidebar",
+      });
+      const searchInput = tree?.root
+        .findAllByType("input")
+        .find((node) =>
+          String(node.props["aria-label"] ?? "").includes("Search settings"),
+        );
+
+      expect(sidebar).toBeDefined();
+      expect(searchInput).toBeDefined();
+
+      await act(async () => {
+        searchInput?.props.onChange({ target: { value: "media" } });
+      });
+
+      const renderedTree = JSON.stringify(tree?.toJSON());
+      expect(renderedTree).toContain("settings.sections.media.label");
+      expect(renderedTree).not.toContain("settings.sections.permissions.label");
+    });
+
     it("renders danger zone with reset button", async () => {
       let tree: TestRenderer.ReactTestRenderer | null = null;
 
@@ -421,160 +331,6 @@ describe("SettingsView Sections", () => {
         });
         expect(handleResetCalled).toBe(true);
       }
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 8: Navigation / Sidebar
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Settings Navigation", () => {
-    it("renders settings sidebar with section links", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      // Should have navigation buttons/links
-      const navButtons = tree?.root.findAll((node) => node.type === "button");
-      expect(navButtons.length).toBeGreaterThan(0);
-    });
-
-    it("keeps the jump rail large-screen only and uses a single shared search field", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const shell = tree?.root
-        .findAllByType("div")
-        .find((node) => node.props.className?.includes("settings-shell"));
-      expect(shell?.props.className).toContain("min-h-full");
-      expect(shell?.props.className).not.toContain("overflow-y-auto");
-      expect(shell?.props.className).not.toContain("overflow-x-hidden");
-
-      const aside = tree?.root.findByType("aside");
-      expect(aside?.props.className).toContain("hidden");
-      expect(aside?.props.className).toContain("xl:flex");
-      expect(aside?.props.className).toContain("xl:sticky");
-      expect(aside?.props.className).toContain("xl:top-0");
-
-      const nav = tree?.root.findByType("nav");
-      expect(nav?.props.className).not.toContain("overflow-y-auto");
-
-      const searchInputs = tree?.root.findAll(
-        (node) =>
-          node.type === "input" &&
-          node.props?.placeholder === "settings.searchPlaceholder",
-      );
-      expect(searchInputs).toHaveLength(1);
-    });
-
-    it("does not render a redundant settings heading", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const allText = JSON.stringify(tree?.toJSON());
-
-      expect(allText).not.toContain("nav.settings");
-      expect(allText).not.toContain("settings.customizeExperience");
-    });
-
-    it("renders all expected section labels", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const expectedSections = [
-        "settings.sections.voice.label",
-        "nav.advanced",
-      ];
-      const allText = JSON.stringify(tree?.toJSON());
-
-      for (const section of expectedSections) {
-        expect(allText).toContain(section);
-      }
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Section 9: Export/Import (Advanced)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Export/Import Section", () => {
-    it("renders export button in advanced section", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const exportButtons = tree?.root.findAll(
-        (node) =>
-          node.type === "button" &&
-          node.children.some(
-            (c) =>
-              (typeof c === "object" &&
-                c?.children?.some(
-                  (cc: unknown) =>
-                    typeof cc === "string" && cc.includes("Export"),
-                )) ||
-              (typeof c === "string" && c.includes("Export")),
-          ),
-      );
-      expect(exportButtons.length).toBeGreaterThanOrEqual(0);
-    });
-
-    it("renders import button in advanced section", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const importButtons = tree?.root.findAll(
-        (node) =>
-          node.type === "button" &&
-          node.children.some(
-            (c) =>
-              (typeof c === "object" &&
-                c?.children?.some(
-                  (cc: unknown) =>
-                    typeof cc === "string" && cc.includes("Import"),
-                )) ||
-              (typeof c === "string" && c.includes("Import")),
-          ),
-      );
-      expect(importButtons.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Search functionality
-  // ─────────────────────────────────────────────────────────────────────────
-
-  describe("Settings Search", () => {
-    it("renders search input", async () => {
-      let tree: TestRenderer.ReactTestRenderer | null = null;
-
-      await act(async () => {
-        tree = TestRenderer.create(React.createElement(SettingsView));
-      });
-
-      const searchInputs = tree?.root.findAll(
-        (node) =>
-          node.type === "input" &&
-          (node.props.placeholder?.toLowerCase().includes("search") ||
-            node.props.type === "search"),
-      );
-      expect(searchInputs.length).toBeGreaterThanOrEqual(0);
     });
   });
 });

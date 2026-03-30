@@ -226,6 +226,27 @@ describe("selectResolvedCandidate", () => {
       packageJsonPath: exactPkg,
     });
   });
+
+  it("falls back to the installed candidate when the exact pin is not present", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "runtime-dependencies-test-"),
+    );
+    const installedDir = path.join(tempDir, "installed");
+    const installedPkg = path.join(installedDir, "package.json");
+
+    fs.mkdirSync(installedDir, { recursive: true });
+    fs.writeFileSync(installedPkg, JSON.stringify({ version: "1.10.1" }));
+
+    expect(
+      selectResolvedCandidate(
+        [{ sourceDir: installedDir, packageJsonPath: installedPkg }],
+        "1.10.0",
+      ),
+    ).toEqual({
+      sourceDir: installedDir,
+      packageJsonPath: installedPkg,
+    });
+  });
 });
 
 describe("selectCopyTargetNodeModules", () => {

@@ -2,7 +2,7 @@
  * Tests for mixamoVRMRigMap — Mixamo to VRM bone name mapping.
  */
 
-import { mixamoVRMRigMap } from "@miladyai/app-core/components/avatar/mixamoVRMRigMap";
+import { mixamoVRMRigMap } from "@miladyai/vrm-utils";
 import { describe, expect, it } from "vitest";
 
 describe("mixamoVRMRigMap", () => {

@@ -32,11 +32,15 @@ function makeTempDir(prefix: string): string {
 }
 
 describe("resolveSkillsDir", () => {
-  it("uses MILADY_STATE_DIR when provided", () => {
-    const stateDir = makeTempDir("milady-skill-state-");
-    expect(resolveSkillsDir({ MILADY_STATE_DIR: stateDir })).toBe(
-      path.join(stateDir, "skills"),
+  it("uses the state dir env var when provided", () => {
+    const stateDir = makeTempDir("skill-state-");
+    // Accept both branded (MILADY_STATE_DIR) and upstream (ELIZA_STATE_DIR)
+    const envKeys = ["MILADY_STATE_DIR", "ELIZA_STATE_DIR"];
+    const matched = envKeys.some(
+      (key) =>
+        resolveSkillsDir({ [key]: stateDir }) === path.join(stateDir, "skills"),
     );
+    expect(matched).toBe(true);
   });
 });
 
@@ -50,7 +54,36 @@ describe("ensureShippedSkills", () => {
       assetsDir: SHIPPED_SKILLS_DIR,
     });
 
-    expect(created).toEqual(["bags", "milady-development", "moltbook"]);
+    expect(created).toEqual([
+      "bags",
+      "binance-algo",
+      "binance-alpha",
+      "binance-assets",
+      "binance-convert",
+      "binance-crypto-market-rank",
+      "binance-derivatives-trading-coin-futures",
+      "binance-derivatives-trading-options",
+      "binance-derivatives-trading-portfolio-margin",
+      "binance-derivatives-trading-portfolio-margin-pro",
+      "binance-derivatives-trading-usds-futures",
+      "binance-fiat",
+      "binance-margin-trading",
+      "binance-meme-rush",
+      "binance-onchain-pay",
+      "binance-p2p",
+      "binance-query-address-info",
+      "binance-query-token-audit",
+      "binance-query-token-info",
+      "binance-simple-earn",
+      "binance-spot",
+      "binance-square-post",
+      "binance-sub-account",
+      "binance-tokenized-securities-info",
+      "binance-trading-signal",
+      "binance-vip-loan",
+      "milady-development",
+      "moltbook",
+    ]);
     for (const skillId of created) {
       expect(existsSync(path.join(skillsDir, skillId, "SKILL.md"))).toBe(true);
     }
@@ -70,7 +103,35 @@ describe("ensureShippedSkills", () => {
       assetsDir: SHIPPED_SKILLS_DIR,
     });
 
-    expect(created).toEqual(["milady-development", "moltbook"]);
+    expect(created).toEqual([
+      "binance-algo",
+      "binance-alpha",
+      "binance-assets",
+      "binance-convert",
+      "binance-crypto-market-rank",
+      "binance-derivatives-trading-coin-futures",
+      "binance-derivatives-trading-options",
+      "binance-derivatives-trading-portfolio-margin",
+      "binance-derivatives-trading-portfolio-margin-pro",
+      "binance-derivatives-trading-usds-futures",
+      "binance-fiat",
+      "binance-margin-trading",
+      "binance-meme-rush",
+      "binance-onchain-pay",
+      "binance-p2p",
+      "binance-query-address-info",
+      "binance-query-token-audit",
+      "binance-query-token-info",
+      "binance-simple-earn",
+      "binance-spot",
+      "binance-square-post",
+      "binance-sub-account",
+      "binance-tokenized-securities-info",
+      "binance-trading-signal",
+      "binance-vip-loan",
+      "milady-development",
+      "moltbook",
+    ]);
     expect(readFileSync(existingSkillPath, "utf8")).toBe(customContent);
   });
 });

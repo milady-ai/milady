@@ -200,7 +200,12 @@ export function useCanvasWindow(
               rpcMethod: "canvasDestroyWindow",
               ipcChannel: "canvas:destroyWindow",
               params: { id },
-            }).catch(() => {});
+            }).catch((err: unknown) => {
+              console.warn(
+                "[useCanvasWindow] canvas:destroyWindow cleanup failed",
+                err,
+              );
+            });
           }
           return;
         }
@@ -322,7 +327,12 @@ export function useCanvasWindow(
           rpcMethod: "canvasDestroyWindow",
           ipcChannel: "canvas:destroyWindow",
           params: { id },
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          console.warn(
+            "[useCanvasWindow] canvas:destroyWindow teardown failed",
+            err,
+          );
+        });
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

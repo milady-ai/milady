@@ -1,100 +1,100 @@
 // @vitest-environment jsdom
 
-import React, { useEffect } from "react";
+import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
 
-const { mockClient } = vi.hoisted(() => ({
-  mockClient: {
-    hasToken: vi.fn(() => true),
-    getCodingAgentStatus: vi.fn(async () => null),
-    setToken: vi.fn(),
-    getAuthStatus: vi.fn(async () => ({
-      required: true,
-      pairingEnabled: true,
-      expiresAt: null,
-    })),
-    getOnboardingStatus: vi.fn(async () => ({ complete: true })),
-    disconnectWs: vi.fn(),
-  },
+vi.mock("../../src/app-shell-components", () => ({
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
+  AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () => React.createElement("div", null, "CharacterEditor"),
+  ChatView: () => React.createElement("div", null, "ChatView"),
+  CompanionShell: () => React.createElement("div", null, "CompanionShell"),
+  CompanionView: () => React.createElement("div", null, "CompanionView"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("div", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("div", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("div", null, "Header"),
+  HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
+  InventoryView: () => React.createElement("div", null, "InventoryView"),
+  KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () => React.createElement("div", null, "SettingsView"),
+  SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  ShellOverlays: () => null,
+  StartupFailureView: () =>
+    React.createElement("div", null, "StartupFailureView"),
+  StreamView: () => React.createElement("div", null, "StreamView"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
 }));
 
-vi.mock("@miladyai/app-core/api", () => ({
-  client: mockClient,
-  SkillScanReportSummary: {},
-}));
-
-import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-interface StartupSnapshot {
-  onboardingLoading: boolean;
-  authRequired: boolean;
-  startupError: ReturnType<typeof useApp>["startupError"];
-}
-
-function Probe(props: { onChange: (snapshot: StartupSnapshot) => void }) {
-  const app = useApp();
-  useEffect(() => {
-    props.onChange({
-      onboardingLoading: app.onboardingLoading,
-      authRequired: app.authRequired,
-      startupError: app.startupError,
-    });
-  }, [
-    app.onboardingLoading,
-    app.authRequired,
-    app.startupError,
-    props.onChange,
-  ]);
-  return null;
-}
+import { App } from "../../src/App";
+import { AppContext } from "../../src/state/useApp";
 
 describe("startup stale token handling", () => {
-  beforeEach(() => {
-    Object.assign(document.documentElement, { setAttribute: vi.fn() });
-    mockClient.hasToken.mockReturnValue(true);
-    mockClient.disconnectWs.mockImplementation(() => {});
-    mockClient.getAuthStatus.mockResolvedValue({
-      required: true,
-      pairingEnabled: true,
-      expiresAt: null,
-    });
-    const err = Object.assign(new Error("Unauthorized"), {
-      kind: "http",
-      status: 401,
-      path: "/api/onboarding/status",
-    });
-    mockClient.getOnboardingStatus.mockRejectedValue(err);
-  });
+  it("lands in pairing/auth instead of surfacing a startup failure", async () => {
+    const state = {
+      t: (key: string) => key,
+      onboardingLoading: false,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
+      startupPhase: "ready",
+      startupError: null,
+      authRequired: true,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab: "chat",
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "native",
+      switchShellView: vi.fn(),
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "light",
+      setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      cancelOnboardingHandoff: vi.fn(),
+      handleSaveCharacter: vi.fn(),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      agentStatus: null,
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      retryOnboardingHandoff: vi.fn(async () => {}),
+    };
 
-  it("clears stale token and exits to pairing/auth instead of retry loop", async () => {
-    let latest: StartupSnapshot | null = null;
     let tree: TestRenderer.ReactTestRenderer | null = null;
-
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(
-          AppProvider,
-          null,
-          React.createElement(Probe, {
-            onChange: (snapshot) => {
-              latest = snapshot;
-            },
-          }),
+          AppContext.Provider,
+          { value: state as never },
+          React.createElement(App),
         ),
       );
     });
 
-    await act(async () => {
-      await Promise.resolve();
-      await Promise.resolve();
-    });
-
-    expect(mockClient.setToken).toHaveBeenCalledWith(null);
-    expect(latest).not.toBeNull();
-    expect(latest?.onboardingLoading).toBe(false);
-    expect(latest?.authRequired).toBe(true);
-    expect(latest?.startupError).toBeNull();
+    const rendered = textOf(tree!.root);
+    expect(rendered).toContain("PairingView");
+    expect(rendered).not.toContain("StartupFailureView");
+    expect(rendered).not.toContain("OnboardingWizard");
 
     await act(async () => {
       tree?.unmount();

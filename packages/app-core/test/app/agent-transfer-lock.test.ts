@@ -40,7 +40,7 @@ const { mockClient } = vi.hoisted(() => ({
     getAgentEvents: vi.fn(async () => ({ events: [], latestEventId: null })),
     getStatus: vi.fn(async () => ({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -61,7 +61,7 @@ const { mockClient } = vi.hoisted(() => ({
       },
     })),
     importAgent: vi.fn(async () => ({
-      agentName: "Milady",
+      agentName: "Eliza",
       counts: {
         memories: 1,
         entities: 0,
@@ -76,15 +76,9 @@ vi.mock("@miladyai/app-core/api", () => ({
   SkillScanReportSummary: {},
 }));
 
+import type { AppState } from "@miladyai/app-core/state";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 type ProbeApi = {
   setState: (
@@ -101,7 +95,11 @@ function Probe(props: { onReady: (api: ProbeApi) => void }) {
 
   useEffect(() => {
     onReady({
-      setState: (key, value) => app.setState(key, value as never),
+      setState: (key, value) =>
+        app.setState(
+          key,
+          value as AppState["exportPassword" | "importPassword" | "importFile"],
+        ),
       handleAgentExport: app.handleAgentExport,
       handleAgentImport: app.handleAgentImport,
     });
@@ -165,7 +163,7 @@ describe("agent transfer locking", () => {
     });
     mockClient.getStatus.mockResolvedValue({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -253,7 +251,7 @@ describe("agent transfer locking", () => {
     const fakeFile = {
       name: "agent-export.eliza-agent",
       arrayBuffer: async () => new ArrayBuffer(8),
-    } as unknown as File;
+    } as File;
 
     await act(async () => {
       api?.setState("importPassword", "abcd");

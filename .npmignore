@@ -21,3 +21,8 @@ vitest.*.config.ts
 # Build artifacts not needed in tarball
 *.tgz
 coverage/
+
+# Ignored caches
+skills/.cache/
+.ruff_cache/
+cache/voice/

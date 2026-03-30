@@ -1,9 +1,6 @@
-/**
- * ApiKeyConfig — Local AI provider settings (API key input forms).
- *
- * Extracted from SettingsView.tsx for decomposition (P2 §10).
- */
+/** ApiKeyConfig — Local AI provider settings (API key input forms). */
 
+import { Button } from "@miladyai/ui";
 import { useCallback, useState } from "react";
 import { client, type PluginParamDef } from "../api";
 import {
@@ -160,15 +157,13 @@ export function ApiKeyConfig({
             className="text-[11px] px-2 py-[3px] border"
             style={{
               borderColor: selectedProvider.configured
-                ? "#2d8a4e"
-                : "var(--warning,#f39c12)",
-              color: selectedProvider.configured
-                ? "#2d8a4e"
-                : "var(--warning,#f39c12)",
+                ? "var(--ok)"
+                : "var(--warn)",
+              color: selectedProvider.configured ? "var(--ok)" : "var(--warn)",
             }}
           >
             {selectedProvider.configured
-              ? t("mediasettingssection.Configured")
+              ? t("config-field.Configured")
               : t("mediasettingssection.NeedsSetup")}
           </span>
         </div>
@@ -187,37 +182,43 @@ export function ApiKeyConfig({
       />
 
       <div className="flex justify-between items-center mt-3">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="btn text-xs py-[5px] px-3.5 !mt-0 !bg-transparent !border-[var(--border)] !text-[var(--muted)] hover:!text-[var(--text)] hover:!border-[var(--accent)]"
+        <div className="flex items-center gap-2 min-h-8">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => void handleFetchModels(selectedProvider.id)}
             disabled={modelsFetching}
           >
             {modelsFetching
               ? t("apikeyconfig.fetching")
               : t("apikeyconfig.fetchModels")}
-          </button>
-          {modelsFetchResult && (
-            <span
-              className={`text-[11px] ${modelsFetchResult.tone === "error" ? "text-[var(--danger,#e74c3c)]" : "text-[var(--ok,#16a34a)]"}`}
-            >
-              {modelsFetchResult.message}
-            </span>
-          )}
+          </Button>
+          <span
+            className={`text-[11px] min-h-4 flex items-center max-w-[min(100%,16rem)] ${
+              modelsFetchResult
+                ? modelsFetchResult.tone === "error"
+                  ? "text-[var(--danger)]"
+                  : "text-[var(--ok)]"
+                : "text-transparent select-none"
+            }`}
+            aria-live="polite"
+          >
+            {modelsFetchResult?.message ?? "\u00a0"}
+          </span>
         </div>
-        <button
-          type="button"
-          className={`btn text-xs py-[5px] px-4 !mt-0 ${saveSuccess ? "!bg-[var(--ok,#16a34a)] !border-[var(--ok,#16a34a)]" : ""}`}
+        <Button
+          variant="default"
+          size="sm"
           onClick={() => handlePluginSave(selectedProvider.id)}
           disabled={isSaving}
+          className={saveSuccess ? "bg-[var(--ok)] border-[var(--ok)]" : ""}
         >
           {isSaving
             ? t("apikeyconfig.saving")
             : saveSuccess
               ? t("apikeyconfig.saved")
               : t("apikeyconfig.save")}
-        </button>
+        </Button>
       </div>
     </div>
   );

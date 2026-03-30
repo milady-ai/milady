@@ -8,6 +8,7 @@ import {
   isAuthenticated,
   setToken,
 } from "../lib/auth";
+import { getCloudTokenStorageKey } from "../lib/runtime-config";
 
 beforeEach(() => {
   localStorage.clear();
@@ -24,6 +25,13 @@ describe("auth", () => {
     expect(getToken()).toBe("test-api-key");
   });
 
+  it("stores token under a cloud-scoped storage key", () => {
+    setToken("test-api-key");
+    expect(localStorage.getItem(getCloudTokenStorageKey())).toBe(
+      "test-api-key",
+    );
+  });
+
   it("clears token", () => {
     setToken("test-api-key");
     clearToken();
@@ -37,12 +45,6 @@ describe("auth", () => {
   it("isAuthenticated returns true when token exists", () => {
     setToken("test-api-key");
     expect(isAuthenticated()).toBe(true);
-  });
-
-  it("cloudLogin and cloudLoginPoll are exported", async () => {
-    const auth = await import("../lib/auth");
-    expect(typeof auth.cloudLogin).toBe("function");
-    expect(typeof auth.cloudLoginPoll).toBe("function");
   });
 });
 
@@ -113,9 +115,7 @@ describe("cloudLogin", () => {
     vi.stubGlobal("crypto", { randomUUID: () => "mock-uuid" });
     const result = await cloudLogin();
     expect(result.sessionId).toBe("mock-uuid");
-    expect(result.browserUrl).toContain(
-      "elizacloud.ai/auth/cli-login?session=mock-uuid",
-    );
+    expect(result.browserUrl).toContain("/auth/cli-login?session=mock-uuid");
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/auth/cli-session"),
       expect.objectContaining({ method: "POST" }),

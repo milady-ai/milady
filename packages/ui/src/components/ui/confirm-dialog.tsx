@@ -1,9 +1,18 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
 
-/* ── ConfirmDialog ───────────────────────────────────────────────────── */
+import { Button } from "./button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./dialog";
+import { Field, FieldLabel } from "./field";
+import { Input } from "./input";
 
-export type ConfirmTone = "danger" | "warn" | "default";
+export type ConfirmVariant = "danger" | "warn" | "default";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -11,15 +20,17 @@ export interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  tone?: ConfirmTone;
+  variant?: ConfirmVariant;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-const TONE_STYLES: Record<ConfirmTone, string> = {
-  danger: "bg-destructive text-destructive-fg hover:opacity-90",
-  warn: "bg-warn text-white hover:opacity-90",
-  default: "bg-primary text-primary-fg hover:opacity-90",
+const VARIANT_CLASSES: Record<ConfirmVariant, string> = {
+  danger:
+    "border-destructive/70 bg-destructive text-destructive-fg hover:border-destructive hover:bg-destructive",
+  warn: "border-warn/55 bg-warn/92 text-[var(--accent-foreground)] hover:border-warn hover:bg-warn",
+  default:
+    "border-accent/55 bg-accent/22 text-accent-fg hover:border-accent/75 hover:bg-accent/32",
 };
 
 export function ConfirmDialog({
@@ -28,80 +39,119 @@ export function ConfirmDialog({
   message,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  tone = "default",
+  variant = "default",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const confirmRef = React.useRef<HTMLButtonElement>(null);
-
-  React.useEffect(() => {
-    if (open) {
-      const t = setTimeout(() => confirmRef.current?.focus(), 50);
-      return () => clearTimeout(t);
-    }
-  }, [open]);
-
-  const handleKeyDown = React.useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onCancel();
-      }
-    },
-    [onCancel],
-  );
-
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/40"
-      style={{ zIndex: 10001 }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onCancel();
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onCancel();
       }}
-      onKeyDown={handleKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      tabIndex={-1}
     >
-      <div className="mx-4 w-full max-w-md rounded-lg border border-border bg-bg p-6 shadow-2xl">
-        <h2 className="mb-3 text-base font-bold">{title}</h2>
-        <p className="mb-6 whitespace-pre-line text-sm text-muted">{message}</p>
-        <div className="flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-bg-hover"
-          >
+      <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/96 shadow-[var(--shadow-lg)] backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="whitespace-pre-line text-muted-strong">
+            {message}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" onClick={onCancel}>
             {cancelLabel}
-          </button>
-          <button
-            ref={confirmRef}
-            type="button"
-            onClick={onConfirm}
-            className={cn(
-              "rounded-md px-4 py-2 text-sm font-medium transition-opacity",
-              TONE_STYLES[tone],
-            )}
-          >
+          </Button>
+          <Button className={VARIANT_CLASSES[variant]} onClick={onConfirm}>
             {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-/* ── useConfirm hook ─────────────────────────────────────────────────── */
+export interface PromptDialogProps {
+  open: boolean;
+  title?: string;
+  message: string;
+  placeholder?: string;
+  defaultValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: (value: string) => void;
+  onCancel: () => void;
+}
+
+export function PromptDialog({
+  open,
+  title = "Enter Value",
+  message,
+  placeholder,
+  defaultValue = "",
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  onConfirm,
+  onCancel,
+}: PromptDialogProps) {
+  const inputId = React.useId();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [value, setValue] = React.useState(defaultValue);
+
+  React.useEffect(() => {
+    if (!open) return;
+    setValue(defaultValue);
+    const focusTimer = window.setTimeout(() => inputRef.current?.focus(), 0);
+    return () => window.clearTimeout(focusTimer);
+  }, [defaultValue, open]);
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onCancel();
+      }}
+    >
+      <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/96 shadow-[var(--shadow-lg)] backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="whitespace-pre-line text-muted-strong">
+            {message}
+          </DialogDescription>
+        </DialogHeader>
+        <Field>
+          <FieldLabel htmlFor={inputId}>Value</FieldLabel>
+          <Input
+            id={inputId}
+            ref={inputRef}
+            type="text"
+            value={value}
+            placeholder={placeholder}
+            onChange={(event) => setValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                onConfirm(value);
+              }
+            }}
+          />
+        </Field>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" onClick={onCancel}>
+            {cancelLabel}
+          </Button>
+          <Button onClick={() => onConfirm(value)}>{confirmLabel}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export interface ConfirmOptions {
   title?: string;
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  tone?: ConfirmTone;
+  variant?: ConfirmVariant;
 }
 
 export function useConfirm() {
@@ -139,4 +189,50 @@ export function useConfirm() {
       };
 
   return { confirm, modalProps };
+}
+
+export interface PromptOptions {
+  title?: string;
+  message: string;
+  placeholder?: string;
+  defaultValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+}
+
+export function usePrompt() {
+  const [state, setState] = React.useState<{
+    opts: PromptOptions;
+    resolve: (value: string | null) => void;
+  } | null>(null);
+
+  const prompt = React.useCallback(
+    (opts: PromptOptions): Promise<string | null> =>
+      new Promise((resolve) => {
+        setState({ opts, resolve });
+      }),
+    [],
+  );
+
+  const modalProps: PromptDialogProps = state
+    ? {
+        open: true,
+        ...state.opts,
+        onConfirm: (value) => {
+          state.resolve(value);
+          setState(null);
+        },
+        onCancel: () => {
+          state.resolve(null);
+          setState(null);
+        },
+      }
+    : {
+        open: false,
+        message: "",
+        onConfirm: () => {},
+        onCancel: () => {},
+      };
+
+  return { prompt, modalProps };
 }

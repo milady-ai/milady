@@ -5,11 +5,27 @@
 
 import { useEffect, useState } from "react";
 import type { StartupPhase } from "../state";
+import { useApp } from "../state";
 
-const PHASE_META: Record<StartupPhase, { label: string; progress: number }> = {
-  "starting-backend": { label: "Initializing systems", progress: 20 },
-  "initializing-agent": { label: "Loading neural network", progress: 50 },
-  ready: { label: "Systems online", progress: 100 },
+const PHASE_META: Record<
+  StartupPhase,
+  { labelKey: string; defaultLabel: string; progress: number }
+> = {
+  "starting-backend": {
+    labelKey: "loadingscreen.InitializingSystems",
+    defaultLabel: "Initializing systems",
+    progress: 20,
+  },
+  "initializing-agent": {
+    labelKey: "loadingscreen.LoadingNeuralNetwork",
+    defaultLabel: "Loading neural network",
+    progress: 50,
+  },
+  ready: {
+    labelKey: "loadingscreen.SystemsOnline",
+    defaultLabel: "Systems online",
+    progress: 100,
+  },
 };
 
 interface LoadingScreenProps {
@@ -23,6 +39,7 @@ export function LoadingScreen({
   elapsedSeconds,
   vrmUrl,
 }: LoadingScreenProps) {
+  const { t } = useApp();
   const [vrmCached, setVrmCached] = useState(false);
   const [fetchProgress, setFetchProgress] = useState(0);
   const [, setRuntimeElapsedSeconds] = useState(0);
@@ -45,7 +62,9 @@ export function LoadingScreen({
     (async () => {
       try {
         const response = await fetch(vrmUrl, { signal: controller.signal });
-        const contentLength = Number(response.headers.get("content-length") || 0);
+        const contentLength = Number(
+          response.headers.get("content-length") || 0,
+        );
 
         if (!contentLength || !response.body) {
           setVrmCached(true);
@@ -80,30 +99,37 @@ export function LoadingScreen({
   } else {
     progress = meta.progress;
   }
-  const label = vrmCached && phase !== "ready" ? "Loading avatar" : meta.label;
+  const label =
+    vrmCached && phase !== "ready"
+      ? t("loadingscreen.LoadingAvatar", { defaultValue: "Loading avatar" })
+      : t(meta.labelKey, { defaultValue: meta.defaultLabel });
 
   return (
-    <div className="loading-screen">
-      <div className="loading-screen__center">
-        <div className="loading-screen__title">
-          LOADING
+    <div className="flex items-center justify-center h-dvh bg-[var(--bg)] relative overflow-hidden">
+      <div className="flex flex-col items-start gap-3.5 w-[420px] max-w-[90vw]">
+        <div className="font-mono text-[13px] font-normal tracking-[0.35em] uppercase text-[var(--text)]/70 select-none">
+          {t("loadingscreen.Loading", { defaultValue: "Loading" })}
           <span className="loading-screen__dots" />
         </div>
 
-        <div className="loading-screen__bar-row">
-          <div className="loading-screen__progress-track">
+        <div className="flex items-center gap-4 w-full">
+          <div className="flex-1 h-1 bg-[var(--bg-accent)] overflow-hidden relative">
             <div
-              className="loading-screen__progress-fill"
+              className="h-full bg-[var(--accent)] relative shadow-[0_0_8px_var(--accent-subtle)]"
               style={{
                 width: `${progress}%`,
                 transition: "width 1.5s ease-out",
               }}
             />
           </div>
-          <div className="loading-screen__percent">{progress} %</div>
+          <div className="font-mono text-[13px] font-normal tracking-[0.15em] text-white/60 min-w-[48px] text-right select-none">
+            {progress} %
+          </div>
         </div>
 
-        <div className="loading-screen__phase">{label}</div>
+        <div className="font-mono text-[11px] font-normal tracking-[0.12em] uppercase text-white/35 select-none">
+          {label}
+        </div>
       </div>
     </div>
   );

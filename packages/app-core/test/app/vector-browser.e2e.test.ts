@@ -268,7 +268,7 @@ vi.mock("@miladyai/app-core/state", () => ({
 }));
 
 // Mock renderer wrapper to avoid WebGL issues in tests.
-vi.mock("@miladyai/app-core/components/vector-browser-three", () => {
+vi.mock("../../src/components/vector-browser-three", () => {
   const mockVector2 = class {
     x = 0;
     y = 0;
@@ -368,7 +368,8 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 import { client } from "@miladyai/app-core/api";
-import { VectorBrowserView } from "@miladyai/app-core/components/VectorBrowserView";
+import { flush } from "../../../../test/helpers/react-test";
+import { VectorBrowserView } from "../../src/components/VectorBrowserView";
 
 // ── Component Tests ────────────────────────────────────────────────────
 
@@ -389,15 +390,6 @@ function findButtonByText(
   return matches[0] ?? null;
 }
 
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
 describe("VectorBrowserView Component", () => {
   beforeEach(() => {
     mockUseApp.mockReset();
@@ -411,6 +403,13 @@ describe("VectorBrowserView Component", () => {
   });
 
   it("shows connection error when database is unavailable", async () => {
+    mockUseApp.mockReturnValue({
+      uiLanguage: "en",
+      t: (k: string, opts?: Record<string, unknown>) =>
+        opts?.defaultValue && typeof opts.defaultValue === "string"
+          ? opts.defaultValue
+          : k,
+    });
     vi.mocked(client.getDatabaseTables).mockRejectedValue(
       new Error("Failed to fetch"),
     );
@@ -425,7 +424,7 @@ describe("VectorBrowserView Component", () => {
     const errorText = root.findAll(
       (node) =>
         typeof node.children[0] === "string" &&
-        node.children[0].includes("vectorbrowserview.DatabaseNotAvailab"),
+        node.children[0].includes("databaseview.DatabaseNotAvailab"),
     );
     expect(errorText.length).toBeGreaterThan(0);
 
@@ -460,8 +459,8 @@ describe("VectorBrowserView Component", () => {
 
     // Should have List, 2D, and 3D buttons
     const listButton = findButtonByText(root, "vectorbrowserview.List");
-    const graph2DButton = findButtonByText(root, "2D");
-    const graph3DButton = findButtonByText(root, "3D");
+    const graph2DButton = findButtonByText(root, "vectorbrowserview.2D");
+    const graph3DButton = findButtonByText(root, "vectorbrowserview.3D");
 
     expect(listButton).not.toBeNull();
     expect(graph2DButton).not.toBeNull();
@@ -492,7 +491,7 @@ describe("VectorBrowserView Component", () => {
     await flush();
 
     const root = tree?.root;
-    const graph3DButton = findButtonByText(root, "3D");
+    const graph3DButton = findButtonByText(root, "vectorbrowserview.3D");
     expect(graph3DButton).not.toBeNull();
 
     // Click the 3D button
@@ -501,9 +500,9 @@ describe("VectorBrowserView Component", () => {
     });
     await flush();
 
-    // 3D button should now be active (has default variant styling, bg-primary)
-    const updatedButton = findButtonByText(root, "3D");
-    expect(updatedButton?.props.className).toContain("bg-primary");
+    // 3D button should now be active (has default variant styling, bg-accent)
+    const updatedButton = findButtonByText(root, "vectorbrowserview.3D");
+    expect(updatedButton?.props.className).toContain("bg-accent");
   });
 
   it("displays empty state when no memories found", async () => {
@@ -529,7 +528,7 @@ describe("VectorBrowserView Component", () => {
     const noMemoriesText = root.findAll(
       (node) =>
         typeof node.children[0] === "string" &&
-        node.children[0].includes("vectorbrowserview.NoMemoriesFound"),
+        node.children[0].includes("vectorbrowserview.NoMemoryRecordsDetected"),
     );
     expect(noMemoriesText.length).toBeGreaterThan(0);
   });

@@ -43,7 +43,7 @@ The SQL plugin manages the following tables:
 Memories are stored with:
 
 - `content` — The memory text and metadata
-- `embedding` — Vector embedding (768 dimensions by default)
+- `embedding` — Vector embedding (384 dimensions by default — Milady caps `EMBEDDING_DIMENSION` to 384)
 - `type` — `message`, `knowledge`, `reflection`, `fact`, etc.
 - `roomId` — The room this memory belongs to
 - `entityId` — The entity (user/agent) associated with the memory
@@ -147,4 +147,4 @@ await runtime.setComponent(userId, "userPreferences", {
 
 - [Knowledge Plugin](/plugin-registry/knowledge) — Uses SQL for embedding storage
 - [Secrets Manager Plugin](/plugin-registry/secrets-manager) — Persists secrets via SQL
-- [Bootstrap Plugin](/plugin-registry/bootstrap) — Reads/writes conversation memory
+- [Cron Plugin](/plugin-registry/cron) — Core message processing

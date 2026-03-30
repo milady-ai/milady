@@ -2,6 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { AlertTriangle, Info, X, XCircle } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
+import { Button } from "./button";
 
 const bannerVariants = cva(
   "flex items-center gap-3 border px-4 py-2.5 text-xs",
@@ -52,7 +53,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(
     },
     ref,
   ) => {
-    const Icon = ICONS[variant ?? "info"];
+    const Icon = ICONS[variant!];
 
     return (
       <div
@@ -65,14 +66,15 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(
         <span className="flex-1">{children}</span>
         {action}
         {dismissible && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onDismiss}
-            className="rounded-sm p-0.5 opacity-70 hover:opacity-100 transition-opacity"
+            className="h-6 w-6 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
             aria-label={dismissLabel}
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         )}
       </div>
     );

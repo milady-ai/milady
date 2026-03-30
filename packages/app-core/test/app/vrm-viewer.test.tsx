@@ -7,14 +7,14 @@ vi.mock("@miladyai/app-core/utils", () => ({
   resolveAppAssetUrl: (path: string) => path,
 }));
 
-vi.mock("@miladyai/app-core/components/avatar/VrmEngine", () => {
+vi.mock("../../src/components/avatar/VrmEngine", () => {
   class MockVrmEngine {
     static instances: MockVrmEngine[] = [];
 
     loadVrmFromUrl = vi.fn(async () => {});
     getState = vi.fn(() => ({
       vrmLoaded: true,
-      vrmName: "milady-1.vrm.gz",
+      vrmName: "eliza-1.vrm.gz",
       loadError: null,
       idlePlaying: false,
       idleTime: 0,
@@ -24,6 +24,9 @@ vi.mock("@miladyai/app-core/components/avatar/VrmEngine", () => {
     setCameraProfile = vi.fn();
     setInteractionMode = vi.fn();
     setPaused = vi.fn();
+    setMinimalBackgroundMode = vi.fn();
+    setLowPowerRenderMode = vi.fn();
+    setHalfFramerateMode = vi.fn();
     setPointerParallaxEnabled = vi.fn();
     setPointerParallaxTarget = vi.fn();
     resetPointerParallax = vi.fn();
@@ -34,10 +37,12 @@ vi.mock("@miladyai/app-core/components/avatar/VrmEngine", () => {
 
     private readyPromise: Promise<void>;
     private resolveReadyPromise: () => void = () => {};
+    private rejectReadyPromise: (error?: unknown) => void = () => {};
 
     constructor() {
-      this.readyPromise = new Promise<void>((resolve) => {
+      this.readyPromise = new Promise<void>((resolve, reject) => {
         this.resolveReadyPromise = resolve;
+        this.rejectReadyPromise = reject;
       });
       MockVrmEngine.instances.push(this);
     }
@@ -49,33 +54,38 @@ vi.mock("@miladyai/app-core/components/avatar/VrmEngine", () => {
     resolveReady(): void {
       this.resolveReadyPromise();
     }
+
+    rejectReady(error: unknown): void {
+      this.rejectReadyPromise(error);
+    }
   }
 
   (
     globalThis as {
-      __miladyVrmViewerMock?: { instances: MockVrmEngine[] };
+      __elizaVrmViewerMock?: { instances: MockVrmEngine[] };
     }
-  ).__miladyVrmViewerMock = { instances: MockVrmEngine.instances };
+  ).__elizaVrmViewerMock = { instances: MockVrmEngine.instances };
 
   return {
     VrmEngine: MockVrmEngine,
   };
 });
 
-import { VrmViewer } from "@miladyai/app-core/components/avatar/VrmViewer";
+import { VrmViewer } from "../../src/components/avatar/VrmViewer";
 
 type MockVrmEngineInstance = {
   setWorldUrl: ReturnType<typeof vi.fn>;
   loadVrmFromUrl: ReturnType<typeof vi.fn>;
   resolveReady: () => void;
+  rejectReady: (error: unknown) => void;
 };
 
 function getMockInstances(): MockVrmEngineInstance[] {
   const store = (
     globalThis as {
-      __miladyVrmViewerMock?: { instances: MockVrmEngineInstance[] };
+      __elizaVrmViewerMock?: { instances: MockVrmEngineInstance[] };
     }
-  ).__miladyVrmViewerMock;
+  ).__elizaVrmViewerMock;
 
   if (!store) {
     throw new Error("Expected VRM viewer mock store to be initialized.");
@@ -90,6 +100,8 @@ describe("VrmViewer", () => {
     const mockWindow = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
+      setInterval: vi.fn(() => 42),
+      clearInterval: vi.fn(),
     } as unknown as Window & typeof globalThis;
     globalThis.window = mockWindow;
 
@@ -114,7 +126,7 @@ describe("VrmViewer", () => {
     await act(async () => {
       renderer = TestRenderer.create(
         <StrictMode>
-          <VrmViewer vrmPath="/vrms/milady-1.vrm.gz" mouthOpen={0} />
+          <VrmViewer vrmPath="/vrms/eliza-1.vrm.gz" />
         </StrictMode>,
         {
           createNodeMock: (element) => {
@@ -157,8 +169,8 @@ describe("VrmViewer", () => {
     );
     expect(totalLoadCalls).toBe(1);
     expect(instances.at(-1)?.loadVrmFromUrl).toHaveBeenCalledWith(
-      "/vrms/milady-1.vrm.gz",
-      "milady-1.vrm.gz",
+      "/vrms/eliza-1.vrm.gz",
+      "eliza-1.vrm.gz",
     );
 
     await act(async () => {
@@ -172,10 +184,9 @@ describe("VrmViewer", () => {
     await act(async () => {
       renderer = TestRenderer.create(
         <VrmViewer
-          vrmPath="/vrms/milady-1.vrm.gz"
+          vrmPath="/vrms/eliza-1.vrm.gz"
           worldUrl="/worlds/companion-day.spz"
-          mouthOpen={0}
-        />,
+                  />,
         {
           createNodeMock: (element) => {
             if (element.type === "canvas") {
@@ -212,8 +223,8 @@ describe("VrmViewer", () => {
       "/worlds/companion-day.spz",
     );
     expect(instance?.loadVrmFromUrl).toHaveBeenCalledWith(
-      "/vrms/milady-1.vrm.gz",
-      "milady-1.vrm.gz",
+      "/vrms/eliza-1.vrm.gz",
+      "eliza-1.vrm.gz",
     );
 
     const worldCallOrder =
@@ -233,10 +244,9 @@ describe("VrmViewer", () => {
     await act(async () => {
       renderer = TestRenderer.create(
         <VrmViewer
-          vrmPath="/vrms/milady-1.vrm.gz"
+          vrmPath="/vrms/eliza-1.vrm.gz"
           worldUrl="/worlds/companion-day.spz"
-          mouthOpen={0}
-        />,
+                  />,
         {
           createNodeMock: (element) => {
             if (element.type === "canvas") {
@@ -277,10 +287,9 @@ describe("VrmViewer", () => {
     await act(async () => {
       renderer?.update(
         <VrmViewer
-          vrmPath="/vrms/milady-1.vrm.gz"
+          vrmPath="/vrms/eliza-1.vrm.gz"
           worldUrl="/worlds/companion-night.spz"
-          mouthOpen={0}
-        />,
+                  />,
       );
       await Promise.resolve();
       await Promise.resolve();
@@ -290,6 +299,70 @@ describe("VrmViewer", () => {
     expect(instance?.setWorldUrl).toHaveBeenLastCalledWith(
       "/worlds/companion-night.spz",
     );
+
+    await act(async () => {
+      renderer?.unmount();
+    });
+  });
+
+  it("surfaces renderer init failures as load errors without retrying VRM or world loads", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const onEngineState = vi.fn();
+    let renderer: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      renderer = TestRenderer.create(
+        <VrmViewer
+          vrmPath="/vrms/eliza-1.vrm.gz"
+          worldUrl="/worlds/companion-day.spz"
+                    onEngineState={onEngineState}
+        />,
+        {
+          createNodeMock: (element) => {
+            if (element.type === "canvas") {
+              return {
+                getBoundingClientRect: () => ({
+                  width: 640,
+                  height: 480,
+                  top: 0,
+                  left: 0,
+                  bottom: 480,
+                  right: 640,
+                  x: 0,
+                  y: 0,
+                  toJSON: () => ({}),
+                }),
+              };
+            }
+            return null;
+          },
+        },
+      );
+    });
+
+    const [instance] = getMockInstances();
+
+    await act(async () => {
+      instance?.rejectReady(new Error("Error creating WebGL context."));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(onEngineState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        vrmLoaded: false,
+        loadError: "Error creating WebGL context.",
+      }),
+    );
+    expect(instance?.setWorldUrl).not.toHaveBeenCalled();
+    expect(instance?.loadVrmFromUrl).not.toHaveBeenCalled();
+
+    const warningLabels = warnSpy.mock.calls.map((call) => call[0]);
+    expect(warningLabels).toContain("Failed to initialize VRM renderer:");
+    expect(warningLabels).not.toContain("Failed to load VRM:");
+    expect(warningLabels).not.toContain("Failed to load splat world:");
+
+    warnSpy.mockRestore();
 
     await act(async () => {
       renderer?.unmount();

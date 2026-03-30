@@ -1,8 +1,4 @@
-/**
- * PTY session hydration — maps server task data to CodingAgentSession objects.
- *
- * Migrated from apps/app/src/pty-session-hydrate.ts.
- */
+/** PTY session hydration — maps server task data to CodingAgentSession objects. */
 
 import type { CodingAgentSession } from "../api/client";
 
@@ -21,10 +17,7 @@ export interface ServerTask {
   autoResolvedCount?: number;
 }
 
-/**
- * Filters out terminal sessions and maps server task data to CodingAgentSession objects.
- * Extracted from AppContext so it can be tested independently.
- */
+/** Filters out terminal sessions and maps server task data to CodingAgentSession objects. */
 export function mapServerTasksToSessions(
   tasks: ServerTask[],
 ): CodingAgentSession[] {

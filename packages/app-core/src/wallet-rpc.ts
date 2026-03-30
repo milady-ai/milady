@@ -4,11 +4,11 @@ import type {
   WalletRpcChain,
   WalletRpcCredentialKey,
   WalletRpcSelections,
-} from "@miladyai/autonomous/contracts/wallet";
+} from "@miladyai/agent/contracts/wallet";
 import {
   DEFAULT_WALLET_RPC_SELECTIONS,
   normalizeWalletRpcSelections,
-} from "@miladyai/autonomous/contracts/wallet";
+} from "@miladyai/agent/contracts/wallet";
 
 const PROVIDER_CREDENTIAL_KEYS: Record<
   WalletRpcChain,
@@ -123,8 +123,10 @@ export function buildWalletRpcUpdateRequest(args: {
   selectedProviders:
     | WalletRpcSelections
     | Partial<Record<WalletRpcChain, string | null | undefined>>;
+  selectedNetwork?: "mainnet" | "testnet";
 }): WalletConfigUpdateRequest {
-  const { walletConfig, rpcFieldValues, selectedProviders } = args;
+  const { walletConfig, rpcFieldValues, selectedProviders, selectedNetwork } =
+    args;
   const credentials: Partial<Record<WalletRpcCredentialKey, string>> = {};
   const normalizedSelections = normalizeWalletRpcSelections(selectedProviders);
   const selectedKeys = collectSelectedCredentialKeys(normalizedSelections);
@@ -171,6 +173,9 @@ export function buildWalletRpcUpdateRequest(args: {
 
   return {
     selections: normalizedSelections,
+    walletNetwork:
+      selectedNetwork ??
+      (walletConfig?.walletNetwork === "testnet" ? "testnet" : "mainnet"),
     credentials,
   };
 }

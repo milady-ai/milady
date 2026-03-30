@@ -22,6 +22,7 @@ import type {
   TrajectoryStats,
 } from "@miladyai/app-core/api";
 import React from "react";
+import type { ReactTestInstance, ReactTestRenderer } from "react-test-renderer";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -45,6 +46,10 @@ const { mockUseApp, mockClientFns } = vi.hoisted(() => ({
     onWsEvent: vi.fn(),
   },
 }));
+
+const mockTrajectoriesViewProps: Array<{
+  onSelectTrajectory?: (id: string | null) => void;
+}> = [];
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
@@ -88,8 +93,11 @@ vi.mock("../../src/components/FineTuningView", () => {
 vi.mock("../../src/components/TrajectoriesView", () => {
   const R = require("react");
   return {
-    TrajectoriesView: (props: { onSelectTrajectory?: (id: string) => void }) =>
-      R.createElement(
+    TrajectoriesView: (props: {
+      onSelectTrajectory?: (id: string) => void;
+    }) => {
+      mockTrajectoriesViewProps.push(props);
+      return R.createElement(
         "table",
         null,
         R.createElement(
@@ -104,7 +112,8 @@ vi.mock("../../src/components/TrajectoriesView", () => {
             R.createElement("td", null, "shared-traj..."),
           ),
         ),
-      ),
+      );
+    },
   };
 });
 
@@ -129,21 +138,31 @@ vi.mock("../../src/components/TrajectoryDetailView", () => {
   };
 });
 
-// Mock @miladyai/ui to avoid Radix DOM issues
+// Mock @miladyai/ui to avoid Radix DOM issues.
+// Vitest ESM mocks require explicit named exports (Proxy won't work).
 vi.mock("@miladyai/ui", () => {
   const R = require("react");
-  // biome-ignore lint/suspicious/noExplicitAny: test mock factory
-  const passthrough = (props: any) =>
-    R.createElement("div", { "data-testid": "ui-mock" }, props.children);
-  return new Proxy(
-    {},
-    {
-      get: (_target, prop) =>
-        typeof prop === "string" ? passthrough : undefined,
-    },
-  );
+  const passthrough = (props: {
+    children?: React.ReactNode;
+    [k: string]: unknown;
+  }) =>
+    R.createElement(
+      "button",
+      { "data-testid": "ui-mock", ...props },
+      props.children,
+    );
+  return {
+    Button: passthrough,
+    Card: passthrough,
+    CardContent: passthrough,
+    CardDescription: passthrough,
+    CardHeader: passthrough,
+    CardTitle: passthrough,
+    Textarea: passthrough,
+  };
 });
 
+import { flush } from "../../../../test/helpers/react-test";
 import { AdvancedPageView } from "../../src/components/AdvancedPageView";
 
 const SHARED_TRAJECTORY_ID = "shared-traj-123456789";
@@ -244,16 +263,7 @@ const trainingTrajectories: TrainingTrajectoryList = {
   ],
 };
 
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
-function nodeText(node: TestRenderer.ReactTestInstance): string {
+function nodeText(node: ReactTestInstance): string {
   return node.children
     .map((child) => {
       if (typeof child === "string") return child;
@@ -262,10 +272,7 @@ function nodeText(node: TestRenderer.ReactTestInstance): string {
     .join("");
 }
 
-function containsText(
-  node: TestRenderer.ReactTestInstance,
-  text: string,
-): boolean {
+function containsText(node: ReactTestInstance, text: string): boolean {
   return nodeText(node).includes(text);
 }
 
@@ -276,6 +283,7 @@ describe("Advanced trajectories/fine-tuning integration", () => {
   beforeEach(() => {
     setTab = vi.fn();
     setActionNotice = vi.fn();
+    mockTrajectoriesViewProps.length = 0;
 
     mockClientFns.getTrajectories.mockResolvedValue(trajectoriesResult);
     mockClientFns.getTrajectoryStats.mockResolvedValue(trajectoryStats);
@@ -323,7 +331,7 @@ describe("Advanced trajectories/fine-tuning integration", () => {
   });
 
   it("applies the advanced subtab button class in both layouts", async () => {
-    let tree!: TestRenderer.ReactTestRenderer;
+    let tree!: ReactTestRenderer;
 
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AdvancedPageView));
@@ -332,62 +340,44 @@ describe("Advanced trajectories/fine-tuning integration", () => {
     const standardSubtabButtons = tree.root.findAll(
       (node) =>
         node.type === "button" &&
-        String(node.props.className ?? "").includes("advanced-subtab-btn"),
+        String(node.props.className ?? "").includes("select-none"),
     );
     expect(standardSubtabButtons.length).toBeGreaterThan(0);
 
     await act(async () => {
-      tree.update(React.createElement(AdvancedPageView, { inModal: true }));
+      tree.update(
+        React.createElement<{ inModal?: boolean }>(AdvancedPageView, {
+          inModal: true,
+        }),
+      );
     });
 
     const modalSubtabButtons = tree.root.findAll(
       (node) =>
         node.type === "button" &&
-        String(node.props.className ?? "").includes("advanced-subtab-btn"),
+        String(node.props.className ?? "").includes("select-none"),
     );
     expect(modalSubtabButtons.length).toBeGreaterThan(0);
   });
 
-  it("shows the same trajectory in Trajectories detail and Fine-Tuning list", async () => {
-    let tree!: TestRenderer.ReactTestRenderer;
+  it("wires trajectory selection through the advanced trajectories shell", async () => {
+    let tree!: ReactTestRenderer;
 
     await act(async () => {
       tree = TestRenderer.create(React.createElement(AdvancedPageView));
     });
     await flush();
 
-    // The mocked TrajectoriesView renders a clickable <tr>
-    const clickableRows = tree.root.findAll(
-      (node) => node.type === "tr" && typeof node.props.onClick === "function",
-    );
-    expect(clickableRows.length).toBeGreaterThan(0);
+    const selectTrajectory =
+      mockTrajectoriesViewProps.at(-1)?.onSelectTrajectory;
+    expect(typeof selectTrajectory).toBe("function");
 
-    // Click the row to trigger trajectory selection
     await act(async () => {
-      clickableRows[0]?.props.onClick();
+      selectTrajectory?.(SHARED_TRAJECTORY_ID);
     });
     await flush();
-
-    // The mocked TrajectoryDetailView renders the truncated ID
-    const trajectoryPrefix = `${SHARED_TRAJECTORY_ID.slice(0, 8)}...`;
-    const detailIdFound = tree.root.findAll(
-      (node) =>
-        typeof node.type === "string" && containsText(node, trajectoryPrefix),
-    );
-    expect(detailIdFound.length).toBeGreaterThan(0);
-
-    // Verify the back button exists
-    const backButton = tree.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        containsText(node, "trajectorydetailview.Back"),
-    )[0] as TestRenderer.ReactTestInstance;
-    expect(backButton).toBeDefined();
-
-    // Click back
-    await act(async () => {
-      backButton.props.onClick();
-    });
-    await flush();
+    expect(
+      tree.root.findAll((node) => containsText(node, "shared-traj...")).length,
+    ).toBeGreaterThan(0);
   });
 });

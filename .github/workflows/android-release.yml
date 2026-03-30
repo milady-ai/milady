@@ -22,6 +22,9 @@ concurrency:
   group: android-release-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 env:
   JAVA_VERSION: "21"
   NODE_VERSION: "22"
@@ -50,6 +53,8 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
 
       - name: Determine version
         id: version
@@ -85,7 +90,7 @@ jobs:
 
       - name: Sync Capacitor
         working-directory: apps/app
-        run: npx cap sync android
+        run: bun run cap:sync:android
 
       - name: Decode keystore
         run: |

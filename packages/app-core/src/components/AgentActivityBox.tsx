@@ -1,36 +1,50 @@
 import type { CodingAgentSession } from "@miladyai/app-core/api";
-
-/** Status dot color classes for coding-agent activity. */
-const STATUS_DOT: Record<string, string> = {
-  active: "bg-ok",
-  tool_running: "bg-accent",
-  blocked: "bg-warn",
-  error: "bg-danger",
-};
-
-const PULSE_STATUSES = new Set(["active", "tool_running"]);
+import { useApp } from "../state";
+import { PULSE_STATUSES, STATUS_DOT } from "./pty-status-dots";
 
 /** Derive activity text for sessions hydrated from the server (no lastActivity yet). */
-function deriveActivity(s: CodingAgentSession): string {
+function deriveActivity(
+  s: CodingAgentSession,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
   if (s.status === "tool_running" && s.toolDescription) {
-    return `Running ${s.toolDescription}`.slice(0, 60);
+    return t("agentactivitybox.RunningTool", {
+      defaultValue: "Running {{tool}}",
+      tool: s.toolDescription,
+    }).slice(0, 60);
   }
-  if (s.status === "blocked") return "Waiting for input";
-  if (s.status === "error") return "Error";
-  return "Running";
+  if (s.status === "blocked") {
+    return t("agentactivitybox.WaitingForInput", {
+      defaultValue: "Waiting for input",
+    });
+  }
+  if (s.status === "error") {
+    return t("agentactivitybox.Error", { defaultValue: "Error" });
+  }
+  return t("agentactivitybox.Running", { defaultValue: "Running" });
 }
 
 interface AgentActivityBoxProps {
   sessions: CodingAgentSession[];
+  onSessionClick?: (sessionId: string) => void;
 }
 
-export function AgentActivityBox({ sessions }: AgentActivityBoxProps) {
+export function AgentActivityBox({
+  sessions,
+  onSessionClick,
+}: AgentActivityBoxProps) {
+  const { t } = useApp();
   if (!sessions || sessions.length === 0) return null;
 
   return (
-    <div className="border-t border-border px-3 py-1.5 space-y-0.5 z-[1]">
+    <div className="px-3 py-2 space-y-1 z-[1] mb-2 relative rounded-[22px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_12px_36px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/6 backdrop-blur-[22px]">
       {sessions.map((s) => (
-        <div key={s.sessionId} className="flex items-center gap-1.5 min-w-0">
+        <button
+          key={s.sessionId}
+          type="button"
+          onClick={() => onSessionClick?.(s.sessionId)}
+          className="flex items-center gap-1.5 min-w-0 w-full text-left cursor-pointer hover:bg-bg-hover rounded px-1 -mx-1 transition-colors"
+        >
           <span
             className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
               STATUS_DOT[s.status] ?? "bg-muted"
@@ -39,10 +53,34 @@ export function AgentActivityBox({ sessions }: AgentActivityBoxProps) {
           <span className="text-[11px] font-medium text-txt max-w-[120px] truncate shrink-0">
             {s.label}
           </span>
-          <span className="text-[11px] text-muted truncate min-w-0">
-            {s.lastActivity ?? deriveActivity(s)}
+          <span
+            className={`text-[11px] truncate min-w-0 flex-1 ${
+              s.status === "error"
+                ? "text-danger"
+                : s.status === "blocked"
+                  ? "text-warn"
+                  : s.status === "active" || s.status === "tool_running"
+                    ? "text-ok"
+                    : "text-muted"
+            }`}
+          >
+            {s.lastActivity ?? deriveActivity(s, t)}
           </span>
-        </div>
+          {/* Chevron-up icon */}
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0 text-muted"
+          >
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
+        </button>
       ))}
     </div>
   );

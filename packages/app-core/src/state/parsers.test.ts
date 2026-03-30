@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { computeStreamingDelta, mergeStreamingText } from "./parsers";
+import {
+  computeStreamingDelta,
+  mergeStreamingText,
+  parseAgentStatusFromMainMenuResetPayload,
+} from "./parsers";
 
 describe("computeStreamingDelta", () => {
   it.each([
@@ -120,5 +124,44 @@ describe("mergeStreamingText", () => {
     },
   ])("$name", ({ existing, incoming, expected }) => {
     expect(mergeStreamingText(existing, incoming)).toBe(expected);
+  });
+});
+
+describe("parseAgentStatusFromMainMenuResetPayload", () => {
+  it("returns null for non-objects and payloads without agentStatus", () => {
+    expect(parseAgentStatusFromMainMenuResetPayload(null)).toBeNull();
+    expect(parseAgentStatusFromMainMenuResetPayload(undefined)).toBeNull();
+    expect(parseAgentStatusFromMainMenuResetPayload([])).toBeNull();
+    expect(
+      parseAgentStatusFromMainMenuResetPayload({ itemId: "x" }),
+    ).toBeNull();
+  });
+
+  it("returns null when agentStatus is null or not a record", () => {
+    expect(
+      parseAgentStatusFromMainMenuResetPayload({
+        agentStatus: null,
+      }),
+    ).toBeNull();
+    expect(
+      parseAgentStatusFromMainMenuResetPayload({
+        agentStatus: "nope",
+      }),
+    ).toBeNull();
+  });
+
+  it("parses a valid tray menu reset snapshot", () => {
+    const status = parseAgentStatusFromMainMenuResetPayload({
+      itemId: "menu-reset-milady-applied",
+      agentStatus: { state: "running", agentName: "Milady" },
+    });
+    expect(status).toEqual({
+      state: "running",
+      agentName: "Milady",
+      model: undefined,
+      startedAt: undefined,
+      uptime: undefined,
+      startup: undefined,
+    });
   });
 });

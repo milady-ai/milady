@@ -19,7 +19,8 @@ import {
   getElectrobunRendererRpc,
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@miladyai/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
+import type { EventCallback } from "../../../shared-types.js";
 import type {
   SpeakOptions,
   SpeakResult,
@@ -34,7 +35,6 @@ import type {
   TTSSpeakingEvent,
 } from "../../src/definitions";
 
-type EventCallback<T> = (event: T) => void;
 type TalkModeEvent =
   | TalkModeStateEvent
   | TalkModeTranscriptEvent

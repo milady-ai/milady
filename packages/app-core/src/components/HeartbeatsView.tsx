@@ -1,18 +1,45 @@
-import { Button, Input } from "@miladyai/ui";
-import { ChevronDown, Clock3, PencilLine, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatusBadge,
+  StatusDot,
+  Switch,
+  Textarea,
+} from "@miladyai/ui";
+import { Clock3, Plus } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import type {
   CreateTriggerRequest,
   TriggerSummary,
+  TriggerType,
+  TriggerWakeMode,
   UpdateTriggerRequest,
 } from "../api/client";
 import { useApp } from "../state";
 import { confirmDesktopAction } from "../utils";
+import {
+  DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME,
+  DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { formatDateTime, formatDurationMs } from "./format";
-import { StatusBadge, StatusDot } from "./ui-badges";
+import {
+  APP_PANEL_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_META_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_STICKY_HEADER_CLASSNAME,
+} from "./sidebar-shell-styles";
 
-type TriggerType = "interval" | "once" | "cron";
-type TriggerWakeMode = "inject_now" | "next_autonomy_cycle";
 type TranslateFn = (
   key: string,
   vars?: Record<string, string | number | boolean | null | undefined>,
@@ -43,13 +70,25 @@ const DURATION_UNITS = [
 
 type DurationUnit = (typeof DURATION_UNITS)[number]["unit"];
 
-const FIELD_LABEL_CLASS = "mb-1.5 block text-xs font-medium text-muted";
+const FIELD_LABEL_CLASS =
+  "mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted/80";
 const INPUT_CLASS =
-  "h-10 w-full rounded-xl border-border/60 bg-bg/70 px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent";
+  "h-11 w-full rounded-2xl border border-border/60 bg-bg/70 px-4 py-2 text-sm shadow-sm transition-[border-color,box-shadow,background-color] focus-visible:ring-1 focus-visible:ring-accent";
 const SELECT_CLASS =
-  "h-10 w-full rounded-xl border border-border/60 bg-bg/70 px-3 py-2 text-sm outline-none focus:border-accent";
+  "h-11 w-full rounded-2xl border border-border/60 bg-bg/70 px-4 py-2 text-sm outline-none transition-[border-color,box-shadow,background-color] focus:border-accent";
 const TEXTAREA_CLASS =
-  "min-h-[120px] w-full resize-y rounded-xl border border-border/60 bg-bg/70 px-3 py-2 text-sm outline-none focus:border-accent";
+  "min-h-[132px] w-full resize-y rounded-2xl border border-border/60 bg-bg/70 px-4 py-3 text-sm outline-none transition-[border-color,box-shadow,background-color] focus:border-accent";
+const SIDEBAR_SECTION_LABEL_CLASS = APP_SIDEBAR_KICKER_CLASSNAME;
+const SIDEBAR_CARD_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
+const HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
+const HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS =
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
+const HEARTBEATS_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
+const HEARTBEATS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[80rem]";
+const HEARTBEATS_PANEL_CLASS = DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME;
+const HEARTBEATS_STAT_CARD_CLASS = `${DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME} px-4 py-4`;
+const HEARTBEATS_SECTION_KICKER_CLASS =
+  "text-[11px] font-semibold uppercase tracking-[0.16em] text-muted";
 
 function bestFitUnit(ms: number): { value: number; unit: DurationUnit } {
   for (let i = DURATION_UNITS.length - 1; i >= 0; i -= 1) {
@@ -96,6 +135,103 @@ const emptyForm: TriggerFormState = {
   durationValue: "1",
   durationUnit: "hours",
 };
+
+// ── User-saved templates (localStorage) ─────────────────────────────
+
+interface HeartbeatTemplate {
+  id: string;
+  name: string;
+  instructions: string;
+  interval: string;
+  unit: DurationUnit;
+  nameKey?: string;
+  instructionsKey?: string;
+}
+
+const TEMPLATES_STORAGE_KEY = "milady:heartbeat-templates";
+
+const BUILT_IN_TEMPLATES: HeartbeatTemplate[] = [
+  {
+    id: "__builtin_crypto",
+    name: "Check crypto prices",
+    nameKey: "heartbeatsview.template.crypto.name",
+    instructions:
+      "Check the current prices of BTC, ETH, and SOL. Summarize any significant moves in the last hour.",
+    instructionsKey: "heartbeatsview.template.crypto.instructions",
+    interval: "30",
+    unit: "minutes",
+  },
+  {
+    id: "__builtin_journal",
+    name: "Daily journal prompt",
+    nameKey: "heartbeatsview.template.journal.name",
+    instructions:
+      "Write a brief, thoughtful journal prompt for the user based on current events or seasonal themes. Keep it under 2 sentences.",
+    instructionsKey: "heartbeatsview.template.journal.instructions",
+    interval: "24",
+    unit: "hours",
+  },
+  {
+    id: "__builtin_trending",
+    name: "Trending topics digest",
+    nameKey: "heartbeatsview.template.trending.name",
+    instructions:
+      "Scan for trending topics on crypto Twitter and tech news. Give a 3-bullet summary of what's worth paying attention to.",
+    instructionsKey: "heartbeatsview.template.trending.instructions",
+    interval: "4",
+    unit: "hours",
+  },
+];
+
+function isValidTemplate(v: unknown): v is HeartbeatTemplate {
+  if (typeof v !== "object" || v == null) return false;
+  const t = v as Record<string, unknown>;
+  return (
+    typeof t.id === "string" &&
+    typeof t.name === "string" &&
+    typeof t.instructions === "string" &&
+    typeof t.interval === "string" &&
+    typeof t.unit === "string"
+  );
+}
+
+function loadUserTemplates(): HeartbeatTemplate[] {
+  try {
+    const raw = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidTemplate);
+  } catch {
+    return [];
+  }
+}
+
+function saveUserTemplates(templates: HeartbeatTemplate[]): void {
+  try {
+    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+  } catch {
+    // localStorage full or unavailable
+  }
+}
+
+function getTemplateName(
+  template: HeartbeatTemplate,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  return template.nameKey
+    ? t(template.nameKey, { defaultValue: template.name })
+    : template.name;
+}
+
+function getTemplateInstructions(
+  template: HeartbeatTemplate,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  return template.instructionsKey
+    ? t(template.instructionsKey, { defaultValue: template.instructions })
+    : template.instructions;
+}
 
 function parsePositiveInteger(value: string): number | undefined {
   const trimmed = value.trim();
@@ -221,38 +357,25 @@ function toneForLastStatus(
   return "muted";
 }
 
-function wakeModeLabel(
-  wakeMode: TriggerWakeMode,
-  t: (key: string) => string,
-): string {
-  return wakeMode === "inject_now"
-    ? t("triggersview.InjectAmpWakeIm")
-    : t("triggersview.QueueForNextCycle");
-}
-
 function localizedExecutionStatus(status: string, t: TranslateFn): string {
   switch (status) {
     case "success":
-      return t("heartbeatsview.statusSuccess");
+      // Trigger "success" currently means the instruction was queued into the
+      // autonomy room, not that the autonomous action already completed.
+      return t("heartbeatsview.statusQueued");
     case "completed":
-      return t("heartbeatsview.statusCompleted");
+      return t("trajectoriesview.Completed");
     case "skipped":
       return t("heartbeatsview.statusSkipped");
     case "queued":
       return t("heartbeatsview.statusQueued");
     case "error":
-      return t("heartbeatsview.statusError");
+      return t("logsview.Error");
     case "failed":
       return t("heartbeatsview.statusFailed");
     default:
       return status;
   }
-}
-
-function runCountLabel(count: number, t: TranslateFn): string {
-  return count === 1
-    ? t("heartbeatsview.runCountSingle", { count })
-    : t("heartbeatsview.runCountPlural", { count });
 }
 
 export function HeartbeatsView() {
@@ -261,7 +384,7 @@ export function HeartbeatsView() {
     triggersLoading = false,
     triggersSaving = false,
     triggerRunsById = {},
-    triggerHealth = null,
+    triggerHealth: _triggerHealth = null,
     triggerError = null,
     loadTriggers = async () => {},
     createTrigger = async () => null,
@@ -280,11 +403,34 @@ export function HeartbeatsView() {
   );
   const [formError, setFormError] = useState<string | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [userTemplates, setUserTemplates] =
+    useState<HeartbeatTemplate[]>(loadUserTemplates);
+  const [templateNotice, setTemplateNotice] = useState<string | null>(null);
 
-  const selectedRuns = useMemo(() => {
-    if (!selectedTriggerId) return [];
-    return triggerRunsById[selectedTriggerId] ?? [];
-  }, [selectedTriggerId, triggerRunsById]);
+  const saveFormAsTemplate = useCallback(() => {
+    const name = form.displayName.trim();
+    if (!name) return;
+    const template: HeartbeatTemplate = {
+      id: `user_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      name,
+      instructions: form.instructions.trim(),
+      interval: form.durationValue || "1",
+      unit: form.durationUnit,
+    };
+    setUserTemplates((prev) => {
+      const next = [...prev, template];
+      saveUserTemplates(next);
+      return next;
+    });
+  }, [form]);
+
+  const deleteUserTemplate = useCallback((id: string) => {
+    setUserTemplates((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      saveUserTemplates(next);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     void loadTriggerHealth();
@@ -341,14 +487,6 @@ export function HeartbeatsView() {
     value: TriggerFormState[K],
   ) => setForm((previous) => ({ ...previous, [key]: value }));
 
-  const toggleExpandedTrigger = (triggerId: string) => {
-    const nextTriggerId = selectedTriggerId === triggerId ? null : triggerId;
-    setSelectedTriggerId(nextTriggerId);
-    if (nextTriggerId) {
-      void loadTriggerRuns(nextTriggerId);
-    }
-  };
-
   const onSubmit = async () => {
     const error = validateForm(form, t);
     if (error) {
@@ -381,7 +519,7 @@ export function HeartbeatsView() {
       title: t("heartbeatsview.deleteTitle"),
       message: t("heartbeatsview.deleteMessage", { name: form.displayName }),
       confirmLabel: t("triggersview.Delete"),
-      cancelLabel: t("onboarding.cancel"),
+      cancelLabel: t("common.cancel"),
       type: "warning",
     });
     if (!confirmed) return;
@@ -422,582 +560,883 @@ export function HeartbeatsView() {
       ? (triggers.find((trigger) => trigger.id === editingId)?.enabled ??
         form.enabled)
       : form.enabled;
+  const hasHeartbeats = triggers.length > 0;
+  const showFirstRunEmptyState =
+    !triggersLoading && !triggerError && !hasHeartbeats;
 
   return (
-    <>
-      <div className="flex min-h-[calc(100vh-9rem)] w-full flex-col gap-5 pb-6 sm:gap-6">
-        <div className="flex flex-col gap-4 px-1 lg:flex-row lg:items-end lg:justify-between">
-          <Button
-            variant="default"
-            size="sm"
-            className="h-10 px-4 text-sm shadow-sm"
-            onClick={openCreateEditor}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {t("heartbeatsview.newHeartbeat")}
-          </Button>
-        </div>
+    <DesktopPageFrame>
+      <div className={HEARTBEATS_SHELL_CLASS} data-testid="heartbeats-shell">
+        {/* Sidebar — full-width on mobile when no detail is shown, fixed-width on md+ */}
+        <aside
+          className={`${selectedTriggerId || editorOpen || editingId ? "hidden md:flex" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:w-[21rem] md:max-w-[352px] lg:w-[23rem] ${APP_SIDEBAR_RAIL_CLASSNAME}`}
+        >
+          <div className={APP_SIDEBAR_STICKY_HEADER_CLASSNAME}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-11 w-full justify-start rounded-xl border border-accent/20 bg-accent/5 px-4 text-sm font-medium text-txt shadow-sm hover:border-accent/35 hover:bg-accent/10"
+              onClick={() => {
+                openCreateEditor();
+                setSelectedTriggerId(null);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t("heartbeatsview.newHeartbeat")}
+            </Button>
+          </div>
 
-        <div className="flex min-h-[60vh] flex-1 flex-col overflow-hidden rounded-[1.35rem] border border-border/60 bg-card/80 shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
-          {triggerError && (
-            <div className="mx-4 mt-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger sm:mx-6">
-              {triggerError}
+          <div className="custom-scrollbar flex-1 overflow-y-auto px-3 pb-4 pr-4 pt-4">
+            {triggerError && (
+              <div className="mb-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+                {triggerError}
+              </div>
+            )}
+            {triggersLoading && (
+              <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-bg/35 px-3 py-3 text-sm text-muted">
+                <div className="h-4 w-4 rounded-full border-2 border-muted/30 border-t-muted/80 animate-spin" />
+                {t("common.loading")}
+              </div>
+            )}
+            {triggers.map((trigger) => {
+              const isActive = selectedTriggerId === trigger.id;
+
+              return (
+                <Button
+                  key={trigger.id}
+                  variant="ghost"
+                  onClick={() => {
+                    setSelectedTriggerId(trigger.id);
+                    setEditorOpen(false);
+                    setEditingId(null);
+                    void loadTriggerRuns(trigger.id);
+                  }}
+                  onDoubleClick={() => {
+                    openEditEditor(trigger);
+                    void loadTriggerRuns(trigger.id);
+                  }}
+                  className={`${SIDEBAR_CARD_BASE_CLASS} h-auto ${
+                    isActive
+                      ? HEARTBEAT_SIDEBAR_CARD_ACTIVE_CLASS
+                      : HEARTBEAT_SIDEBAR_CARD_INACTIVE_CLASS
+                  }`}
+                >
+                  <div className="flex min-w-0 flex-col gap-1.5">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="truncate text-sm font-semibold text-txt">
+                        {trigger.displayName}
+                      </span>
+                      <StatusBadge
+                        label={
+                          trigger.enabled
+                            ? t("appsview.Active")
+                            : t("heartbeatsview.statusPaused")
+                        }
+                        variant={trigger.enabled ? "success" : "muted"}
+                        withDot
+                      />
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2 text-[11px] text-muted">
+                      <span className="truncate">
+                        {scheduleLabel(trigger, t)}
+                      </span>
+                      {trigger.lastStatus && (
+                        <StatusBadge
+                          label={localizedExecutionStatus(
+                            trigger.lastStatus,
+                            t,
+                          )}
+                          variant={toneForLastStatus(trigger.lastStatus)}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </Button>
+              );
+            })}
+
+            {/* Templates */}
+            <div className="mt-3 border-t border-border/30 px-1 pb-1 pt-4">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className={SIDEBAR_SECTION_LABEL_CLASS}>
+                  {t("heartbeatsview.Templates", { defaultValue: "Templates" })}
+                </div>
+                <span className="text-[10px] text-muted/50">
+                  {userTemplates.length + BUILT_IN_TEMPLATES.length}
+                </span>
+              </div>
+              {[...userTemplates, ...BUILT_IN_TEMPLATES].map((template) => {
+                const isUserTemplate = !template.id.startsWith("__builtin_");
+                const templateName = getTemplateName(template, t);
+                const templateInstructions = getTemplateInstructions(
+                  template,
+                  t,
+                );
+                return (
+                  <div key={template.id} className="relative mb-1.5 group">
+                    <button
+                      type="button"
+                      className={`${SIDEBAR_CARD_BASE_CLASS} ${
+                        isUserTemplate
+                          ? "border-accent/20 bg-accent/5 hover:border-accent/30 hover:bg-accent/10"
+                          : "border-dashed border-border/40 hover:border-border hover:bg-bg-hover"
+                      }`}
+                      onClick={() => {
+                        setForm({
+                          ...emptyForm,
+                          displayName: templateName,
+                          instructions: templateInstructions,
+                          durationValue: template.interval,
+                          durationUnit: template.unit,
+                        });
+                        setEditorOpen(true);
+                        setEditingId(null);
+                        setSelectedTriggerId(null);
+                        setTemplateNotice(
+                          t("heartbeatsview.TemplateLoadedNotice", {
+                            defaultValue:
+                              'Template "{{name}}" loaded. Customize and create.',
+                            name: templateName,
+                          }),
+                        );
+                        setTimeout(() => setTemplateNotice(null), 3000);
+                      }}
+                    >
+                      <div className="text-xs font-medium text-txt">
+                        {templateName}
+                      </div>
+                      <div className="mt-0.5 text-[10px] text-muted/60">
+                        {t("heartbeatsview.EveryIntervalUnit", {
+                          defaultValue: "Every {{interval}} {{unit}}",
+                          interval: template.interval,
+                          unit: template.unit,
+                        })}
+                      </div>
+                    </button>
+                    {isUserTemplate && (
+                      <button
+                        type="button"
+                        className="absolute right-1.5 top-1.5 rounded bg-bg/80 px-1.5 py-0.5 text-[10px] text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteUserTemplate(template.id);
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+        </aside>
 
-          {triggers.length === 0 && !triggersLoading ? (
-            <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-bg/70">
-                <Clock3 className="h-7 w-7 text-muted" />
+        {/* Main Content Area — hidden on mobile when sidebar is showing */}
+        <main
+          className={`${selectedTriggerId || editorOpen || editingId ? "flex" : "hidden md:flex"} relative flex-1 min-w-0 flex-col overflow-y-auto bg-bg/10 px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-3 lg:px-7 lg:pb-7 lg:pt-4 custom-scrollbar`}
+        >
+          {/* Mobile back button */}
+          <button
+            type="button"
+            className="mb-3 flex items-center gap-2 rounded-2xl border border-border/30 bg-bg/25 px-4 py-3 text-base font-medium text-muted hover:text-txt md:hidden"
+            onClick={() => {
+              setSelectedTriggerId(null);
+              setEditorOpen(false);
+              setEditingId(null);
+            }}
+          >
+            {t("heartbeatsview.BackToList", {
+              defaultValue: "← Back",
+            })}
+          </button>
+          {editorOpen || editingId ? (
+            <div
+              className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} px-4 pb-8 pt-0 sm:px-5 sm:pb-8 sm:pt-1 lg:px-7 lg:pb-8 lg:pt-1 xl:px-8`}
+            >
+              {templateNotice && (
+                <div className="mb-4 px-4 py-2.5 rounded-lg border border-accent/30 bg-accent/5 text-xs text-accent font-medium animate-[fadeIn_0.2s_ease]">
+                  {templateNotice}
+                </div>
+              )}
+              <div className="mb-3 flex flex-col justify-between gap-2 lg:flex-row lg:items-start">
+                <div className="max-w-3xl space-y-1">
+                  <div className={HEARTBEATS_SECTION_KICKER_CLASS}>
+                    {editingId
+                      ? t("heartbeatsview.editHeartbeat")
+                      : t("heartbeatsview.createHeartbeat")}
+                  </div>
+                  <h2 className="text-2xl font-semibold text-txt">
+                    {modalTitle}
+                  </h2>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                  {editingId && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-3 text-xs"
+                        disabled={triggersSaving}
+                        onClick={() => void onRunSelectedTrigger(editingId)}
+                      >
+                        {t("triggersview.RunNow")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-3 text-xs"
+                        onClick={() =>
+                          void onToggleTriggerEnabled(editingId, editorEnabled)
+                        }
+                      >
+                        {editorEnabled
+                          ? t("heartbeatsview.disable")
+                          : t("heartbeatsview.enable")}
+                      </Button>
+                      <div className="w-px h-6 bg-border/50 mx-1 hidden sm:block" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-3 text-xs text-danger hover:border-danger hover:bg-danger/10 hover:text-danger"
+                        onClick={() => void onDelete()}
+                      >
+                        {t("triggersview.Delete")}
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="mt-5 text-base font-medium text-txt">
-                {t("triggersview.NoTriggersConfigur")}
-              </div>
-              <div className="mt-2 max-w-md text-sm leading-6 text-muted">
-                {t("heartbeatsview.emptyStateDescription")}
+
+              <div className="space-y-6">
+                {formError && (
+                  <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger shadow-sm">
+                    {formError}
+                  </div>
+                )}
+
+                <div
+                  className={`${HEARTBEATS_PANEL_CLASS} grid gap-5`}
+                  data-testid="heartbeats-editor-panel"
+                >
+                  <div>
+                    <span className={FIELD_LABEL_CLASS}>
+                      {t("wallet.name")}
+                    </span>
+                    <Input
+                      className={INPUT_CLASS}
+                      value={form.displayName}
+                      onChange={(event) =>
+                        setField("displayName", event.target.value)
+                      }
+                      placeholder={t("triggersview.eGDailyDigestH")}
+                    />
+                  </div>
+
+                  <div>
+                    <span className={FIELD_LABEL_CLASS}>
+                      {t("triggersview.Instructions")}
+                    </span>
+                    <Textarea
+                      className={TEXTAREA_CLASS}
+                      value={form.instructions}
+                      onChange={(event) =>
+                        setField("instructions", event.target.value)
+                      }
+                      placeholder={t("triggersview.WhatShouldTheAgen")}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <div>
+                      <span className={FIELD_LABEL_CLASS}>
+                        {t("triggersview.ScheduleType")}
+                      </span>
+                      <Select
+                        value={form.triggerType}
+                        onValueChange={(value) =>
+                          setField("triggerType", value as TriggerType)
+                        }
+                      >
+                        <SelectTrigger className={SELECT_CLASS}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="interval">
+                            {t("triggersview.RepeatingInterval")}
+                          </SelectItem>
+                          <SelectItem value="once">
+                            {t("triggersview.OneTime")}
+                          </SelectItem>
+                          <SelectItem value="cron">
+                            {t("triggersview.CronSchedule")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <span className={FIELD_LABEL_CLASS}>
+                        {t("triggersview.WakeMode")}
+                      </span>
+                      <Select
+                        value={form.wakeMode}
+                        onValueChange={(value) =>
+                          setField("wakeMode", value as TriggerWakeMode)
+                        }
+                      >
+                        <SelectTrigger className={SELECT_CLASS}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="inject_now">
+                            {t("triggersview.InjectAmpWakeIm")}
+                          </SelectItem>
+                          <SelectItem value="next_autonomy_cycle">
+                            {t("triggersview.QueueForNextCycle")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {form.triggerType === "interval" && (
+                    <div>
+                      <span className={FIELD_LABEL_CLASS}>
+                        {t("heartbeatsview.interval")}
+                      </span>
+                      <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-3">
+                        <Input
+                          type="number"
+                          min="1"
+                          className={INPUT_CLASS}
+                          value={form.durationValue}
+                          onChange={(event) =>
+                            setField("durationValue", event.target.value)
+                          }
+                          placeholder="1"
+                        />
+                        <Select
+                          value={form.durationUnit}
+                          onValueChange={(value) =>
+                            setField("durationUnit", value as DurationUnit)
+                          }
+                        >
+                          <SelectTrigger className={SELECT_CLASS}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {DURATION_UNITS.map((unit) => (
+                              <SelectItem key={unit.unit} value={unit.unit}>
+                                {durationUnitLabel(unit.unit, t)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {form.triggerType === "once" && (
+                    <div>
+                      <span className={FIELD_LABEL_CLASS}>
+                        {t("triggersview.ScheduledTimeISO")}
+                      </span>
+                      <Input
+                        type="datetime-local"
+                        className={INPUT_CLASS}
+                        value={form.scheduledAtIso}
+                        onChange={(event) =>
+                          setField("scheduledAtIso", event.target.value)
+                        }
+                      />
+                    </div>
+                  )}
+
+                  {form.triggerType === "cron" && (
+                    <div>
+                      <span className={FIELD_LABEL_CLASS}>
+                        {t("triggersview.CronExpression5F")}
+                      </span>
+                      <Input
+                        className={`${INPUT_CLASS} font-mono`}
+                        value={form.cronExpression}
+                        onChange={(event) =>
+                          setField("cronExpression", event.target.value)
+                        }
+                        placeholder="*/15 * * * *"
+                      />
+                      <div className="mt-2 text-[11px] text-muted">
+                        {t("triggersview.minuteHourDayMont")}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <div>
+                      <span className={FIELD_LABEL_CLASS}>
+                        {t("triggersview.MaxRunsOptional")}
+                      </span>
+                      <Input
+                        className={INPUT_CLASS}
+                        value={form.maxRuns}
+                        onChange={(event) =>
+                          setField("maxRuns", event.target.value)
+                        }
+                        placeholder="∞"
+                      />
+                    </div>
+
+                    <div className="flex items-end">
+                      {/* biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically */}
+                      <label className="inline-flex cursor-pointer select-none flex-1 items-center gap-3 rounded-xl bg-bg/50 px-4 py-2 border border-border/50 hover:border-accent/50 text-sm text-txt transition-colors h-10">
+                        <Switch
+                          checked={form.enabled}
+                          onCheckedChange={(checked) =>
+                            setField("enabled", !!checked)
+                          }
+                        />
+                        {t("triggersview.StartEnabled")}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  {form.displayName.trim() && (
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-muted transition-colors hover:text-accent underline-offset-2 hover:underline"
+                      onClick={saveFormAsTemplate}
+                    >
+                      {t("heartbeatsview.SaveAsTemplate", {
+                        defaultValue: "Save as template",
+                      })}
+                    </button>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-10 px-6 text-sm shadow-sm"
+                      disabled={triggersSaving}
+                      onClick={() => void onSubmit()}
+                    >
+                      {triggersSaving
+                        ? t("apikeyconfig.saving")
+                        : editingId
+                          ? t("heartbeatsview.saveChanges")
+                          : t("heartbeatsview.createHeartbeat")}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-10 px-6 text-sm"
+                      onClick={() => {
+                        if (editingId && selectedTriggerId === editingId) {
+                          const trigger = triggers.find(
+                            (t) => t.id === editingId,
+                          );
+                          if (trigger) {
+                            setForm(formFromTrigger(trigger));
+                            setFormError(null);
+                          }
+                        } else {
+                          closeEditor();
+                        }
+                      }}
+                    >
+                      {editingId ? t("common.cancel") : t("common.cancel")}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Detailed run info and metadata when editing */}
+                {editingId && (
+                  <div className="mt-10 grid gap-8 border-t border-border/40 pt-8">
+                    <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                        <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                          {t("heartbeatsview.maxRuns")}
+                        </dt>
+                        <dd className="mt-1.5 text-txt font-medium">
+                          {(() => {
+                            const trigger = triggers.find(
+                              (t) => t.id === editingId,
+                            );
+                            return trigger?.maxRuns
+                              ? trigger.maxRuns
+                              : t("heartbeatsview.unlimited");
+                          })()}
+                        </dd>
+                      </div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                        <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                          {t("triggersview.LastRun")}
+                        </dt>
+                        <dd className="mt-1.5 text-txt font-medium">
+                          {(() => {
+                            const trigger = triggers.find(
+                              (t) => t.id === editingId,
+                            );
+                            return formatDateTime(trigger?.lastRunAtIso, {
+                              fallback: t("heartbeatsview.notYetRun"),
+                            });
+                          })()}
+                        </dd>
+                      </div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                        <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                          {t("heartbeatsview.nextRun")}
+                        </dt>
+                        <dd className="mt-1.5 text-txt font-medium">
+                          {(() => {
+                            const trigger = triggers.find(
+                              (t) => t.id === editingId,
+                            );
+                            return formatDateTime(trigger?.nextRunAtMs, {
+                              fallback: t("heartbeatsview.notScheduled"),
+                            });
+                          })()}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <div className={`${HEARTBEATS_PANEL_CLASS} space-y-4`}>
+                      <div className="flex items-center justify-between gap-3 border-b border-border/30 pb-3">
+                        <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted">
+                          {t("triggersview.RunHistory")}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-3 text-[11px]"
+                          onClick={() => void loadTriggerRuns(editingId)}
+                        >
+                          {t("common.refresh")}
+                        </Button>
+                      </div>
+
+                      {(() => {
+                        const hasLoadedRuns = Object.hasOwn(
+                          triggerRunsById,
+                          editingId,
+                        );
+                        const runs = triggerRunsById[editingId] ?? [];
+
+                        if (!hasLoadedRuns) {
+                          return (
+                            <div className="py-6 text-sm text-muted/70 flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-muted/30 border-t-muted/80 rounded-full animate-spin" />{" "}
+                              {t("databaseview.Loading")}
+                            </div>
+                          );
+                        }
+                        if (runs.length === 0) {
+                          return (
+                            <div className="py-6 text-sm text-muted/70 italic">
+                              {t("triggersview.NoRunsRecordedYet")}
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-3">
+                            {runs
+                              .slice()
+                              .reverse()
+                              .map((run) => (
+                                <div
+                                  key={run.triggerRunId}
+                                  className="rounded-xl bg-bg/30 border border-border/20 px-4 py-3 text-sm transition-colors hover:bg-bg/50"
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <StatusDot
+                                      status={run.status}
+                                      className="mt-1 flex-shrink-0"
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                        <span className="font-medium text-txt">
+                                          {localizedExecutionStatus(
+                                            run.status,
+                                            t,
+                                          )}
+                                        </span>
+                                        <span className="text-xs text-muted">
+                                          {formatDateTime(run.finishedAt, {
+                                            fallback: t(
+                                              "heartbeatsview.emDash",
+                                            ),
+                                          })}
+                                        </span>
+                                      </div>
+                                      <div className="text-[11px] text-muted/80">
+                                        {formatDurationMs(run.latencyMs)}{" "}
+                                        &middot;{" "}
+                                        <span className="font-mono text-muted/60 bg-bg/40 px-1 py-0.5 rounded">
+                                          {run.source}
+                                        </span>
+                                      </div>
+                                      {run.error && (
+                                        <div className="mt-2.5 text-xs text-danger/90 bg-danger/10 border border-danger/20 p-2.5 rounded-lg whitespace-pre-wrap font-mono leading-relaxed">
+                                          {run.error}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              {triggers.map((trigger, index) => {
-                const isExpanded = selectedTriggerId === trigger.id;
+            (selectedTriggerId &&
+              (() => {
+                const trigger = triggers.find(
+                  (tr) => tr.id === selectedTriggerId,
+                );
+                if (!trigger) return null;
+                const runs = triggerRunsById[selectedTriggerId] ?? [];
                 const hasLoadedRuns = Object.hasOwn(
                   triggerRunsById,
-                  trigger.id,
+                  selectedTriggerId,
                 );
-                const runs = isExpanded ? selectedRuns : [];
-
+                const successCount = runs.filter(
+                  (r) => toneForLastStatus(r.status) === "success",
+                ).length;
+                const failureCount = runs.filter(
+                  (r) => toneForLastStatus(r.status) === "danger",
+                ).length;
+                const totalRuns = runs.length;
                 return (
                   <div
-                    key={trigger.id}
-                    className={index === 0 ? "" : "border-t border-border/50"}
+                    className={`${HEARTBEATS_CONTENT_WIDTH_CLASS} p-4 sm:p-6 lg:p-8 xl:p-10`}
                   >
-                    <div className="px-4 py-4 sm:px-6 sm:py-5">
-                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                        <button
-                          type="button"
-                          onClick={() => toggleExpandedTrigger(trigger.id)}
-                          className="group flex min-w-0 flex-1 items-start gap-3 text-left"
-                        >
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg/65 text-muted transition-colors group-hover:text-txt">
-                            <Clock3 className="h-4 w-4" />
+                    <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="max-w-3xl space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className={HEARTBEATS_SECTION_KICKER_CLASS}>
+                            {t("heartbeatsview.heartbeatSingular")}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="truncate text-sm font-semibold text-txt">
-                                {trigger.displayName}
-                              </span>
-                              <StatusBadge
-                                label={
-                                  trigger.enabled
-                                    ? t("heartbeatsview.statusActive")
-                                    : t("heartbeatsview.statusPaused")
-                                }
-                                tone={trigger.enabled ? "success" : "muted"}
-                                withDot
-                              />
-                              {trigger.lastStatus && (
-                                <StatusBadge
-                                  label={localizedExecutionStatus(
-                                    trigger.lastStatus,
-                                    t,
-                                  )}
-                                  tone={toneForLastStatus(trigger.lastStatus)}
-                                />
-                              )}
-                            </div>
-                            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
-                              <span>{scheduleLabel(trigger, t)}</span>
-                              {trigger.nextRunAtMs && (
-                                <span>
-                                  {t("heartbeatsview.nextInline", {
-                                    time: formatDateTime(trigger.nextRunAtMs),
-                                  })}
-                                </span>
-                              )}
-                              {trigger.runCount > 0 && (
-                                <span>
-                                  {runCountLabel(trigger.runCount, t)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <ChevronDown
-                            className={`mt-1 h-4 w-4 shrink-0 text-muted transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                          />
-                        </button>
-
-                        <div className="flex items-center gap-2 pl-[52px] lg:pl-0">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-3 text-xs"
-                            disabled={triggersSaving}
-                            onClick={() =>
-                              void onRunSelectedTrigger(trigger.id)
+                          <StatusBadge
+                            label={
+                              trigger.enabled
+                                ? t("appsview.Active")
+                                : t("heartbeatsview.statusPaused")
                             }
-                          >
-                            {t("triggersview.RunNow")}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-3 text-xs"
-                            onClick={() => openEditEditor(trigger)}
-                          >
-                            <PencilLine className="mr-1.5 h-3.5 w-3.5" />
-                            {t("triggersview.Edit")}
-                          </Button>
+                            variant={trigger.enabled ? "success" : "muted"}
+                            withDot
+                          />
                         </div>
+                        <h2 className="text-2xl font-semibold text-txt sm:text-[2rem]">
+                          {trigger.displayName}
+                        </h2>
+                        <p className="text-sm leading-relaxed text-muted sm:text-[15px]">
+                          {trigger.instructions}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
+                        {/* Pause / Resume toggle */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`h-8 px-3 text-xs ${trigger.enabled ? "text-warning border-warning/30 hover:bg-warning/10" : "text-ok border-ok/30 hover:bg-ok/10"}`}
+                          onClick={() =>
+                            void onToggleTriggerEnabled(
+                              selectedTriggerId,
+                              trigger.enabled,
+                            )
+                          }
+                        >
+                          {trigger.enabled
+                            ? t("heartbeatsview.pause")
+                            : t("heartbeatsview.resume")}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => openEditEditor(trigger)}
+                        >
+                          {t("triggersview.Edit")}
+                        </Button>
+                        {/* Duplicate */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => {
+                            setForm({
+                              ...formFromTrigger(trigger),
+                              displayName: `${trigger.displayName} (copy)`,
+                            });
+                            setEditorOpen(true);
+                            setEditingId(null);
+                            setSelectedTriggerId(null);
+                          }}
+                        >
+                          {t("heartbeatsview.duplicate")}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          onClick={() =>
+                            void onRunSelectedTrigger(selectedTriggerId)
+                          }
+                        >
+                          {t("triggersview.RunNow")}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <dl className="mb-8 grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                        <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                          {t("heartbeatsview.schedule")}
+                        </dt>
+                        <dd className="mt-1 text-txt font-medium">
+                          {scheduleLabel(trigger, t)}
+                        </dd>
+                      </div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                        <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                          {t("triggersview.LastRun")}
+                        </dt>
+                        <dd className="mt-1 text-txt font-medium">
+                          {formatDateTime(trigger.lastRunAtIso, {
+                            fallback: t("heartbeatsview.notYetRun"),
+                          })}
+                        </dd>
+                      </div>
+                      <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                        <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                          {t("heartbeatsview.nextRun")}
+                        </dt>
+                        <dd className="mt-1 text-txt font-medium">
+                          {formatDateTime(trigger.nextRunAtMs, {
+                            fallback: t("heartbeatsview.notScheduled"),
+                          })}
+                        </dd>
+                      </div>
+                      {/* Success/failure counts */}
+                      {hasLoadedRuns && totalRuns > 0 && (
+                        <div className={HEARTBEATS_STAT_CARD_CLASS}>
+                          <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                            {t("heartbeatsview.runStats")}
+                          </dt>
+                          <dd className="mt-1 flex items-center gap-2 text-sm font-medium">
+                            <span className="text-txt">
+                              {t("heartbeatsview.runCountPlural", {
+                                count: totalRuns,
+                              })}
+                            </span>
+                            {successCount > 0 && (
+                              <span className="text-ok">{successCount} ✓</span>
+                            )}
+                            {failureCount > 0 && (
+                              <span className="text-danger">
+                                {failureCount} ✗
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+
+                    <div className={`${HEARTBEATS_PANEL_CLASS} space-y-4`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[12px] font-semibold uppercase tracking-wider text-muted">
+                          {t("triggersview.RunHistory")}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-3 text-[11px]"
+                          onClick={() =>
+                            void loadTriggerRuns(selectedTriggerId)
+                          }
+                        >
+                          {t("common.refresh")}
+                        </Button>
                       </div>
 
-                      {isExpanded && (
-                        <div className="mt-4 grid gap-5 border-t border-border/50 pt-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-                          <div className="space-y-4">
-                            <div>
-                              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                                {t("triggersview.Instructions")}
+                      {!hasLoadedRuns ? (
+                        <div className="py-6 text-sm text-muted/70 flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-muted/30 border-t-muted/80 rounded-full animate-spin" />
+                          {t("databaseview.Loading")}
+                        </div>
+                      ) : runs.length === 0 ? (
+                        <div className="py-8 text-center text-sm text-muted/60">
+                          {t("heartbeatsview.noRunsYetMessage")}
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {runs.map((run) => (
+                            <div
+                              key={run.triggerRunId}
+                              className="border border-border/30 rounded-lg px-4 py-3 bg-bg/30"
+                            >
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <StatusBadge
+                                  label={localizedExecutionStatus(
+                                    run.status,
+                                    t,
+                                  )}
+                                  variant={toneForLastStatus(run.status)}
+                                />
+                                <span className="text-[11px] text-muted/70 font-mono">
+                                  {formatDateTime(run.startedAt)}
+                                </span>
                               </div>
-                              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-txt/90">
-                                {trigger.instructions}
-                              </p>
+                              <div className="text-[11px] text-muted/80">
+                                {formatDurationMs(run.latencyMs)} &middot;{" "}
+                                <span className="font-mono text-muted/60 bg-bg/40 px-1 py-0.5 rounded">
+                                  {run.source}
+                                </span>
+                              </div>
+                              {run.error && (
+                                <div className="mt-2 text-xs text-danger/90 bg-danger/10 border border-danger/20 p-2 rounded-lg whitespace-pre-wrap font-mono">
+                                  {run.error}
+                                </div>
+                              )}
                             </div>
-
-                            <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
-                              <div>
-                                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                                  {t("triggersview.WakeMode")}
-                                </dt>
-                                <dd className="mt-1 text-txt">
-                                  {wakeModeLabel(trigger.wakeMode, t)}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                                  {t("heartbeatsview.maxRuns")}
-                                </dt>
-                                <dd className="mt-1 text-txt">
-                                  {trigger.maxRuns
-                                    ? trigger.maxRuns
-                                    : t("heartbeatsview.unlimited")}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                                  {t("triggersview.LastRun")}
-                                </dt>
-                                <dd className="mt-1 text-txt">
-                                  {formatDateTime(trigger.lastRunAtIso, {
-                                    fallback: t("heartbeatsview.notYetRun"),
-                                  })}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                                  {t("heartbeatsview.nextRun")}
-                                </dt>
-                                <dd className="mt-1 text-txt">
-                                  {formatDateTime(trigger.nextRunAtMs, {
-                                    fallback: t("heartbeatsview.notScheduled"),
-                                  })}
-                                </dd>
-                              </div>
-                            </dl>
-
-                            <div className="flex flex-wrap gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-xs"
-                                disabled={triggersSaving}
-                                onClick={() =>
-                                  void onToggleTriggerEnabled(
-                                    trigger.id,
-                                    trigger.enabled,
-                                  )
-                                }
-                              >
-                                {trigger.enabled
-                                  ? t("heartbeatsview.disable")
-                                  : t("heartbeatsview.enable")}
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="space-y-3 rounded-2xl bg-bg/45 p-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                                {t("triggersview.RunHistory")}
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-xs"
-                                onClick={() => void loadTriggerRuns(trigger.id)}
-                              >
-                                {t("heartbeatsview.refresh")}
-                              </Button>
-                            </div>
-
-                            {!hasLoadedRuns ? (
-                              <div className="py-2 text-sm text-muted">
-                                {t("heartbeatsview.loading")}
-                              </div>
-                            ) : runs.length === 0 ? (
-                              <div className="py-2 text-sm text-muted">
-                                {t("triggersview.NoRunsRecordedYet")}
-                              </div>
-                            ) : (
-                              <div className="space-y-2">
-                                {runs
-                                  .slice()
-                                  .reverse()
-                                  .map((run) => (
-                                    <div
-                                      key={run.triggerRunId}
-                                      className="rounded-xl bg-card/70 px-3 py-3 text-sm"
-                                    >
-                                      <div className="flex items-start gap-2">
-                                        <StatusDot
-                                          status={run.status}
-                                          className="mt-1"
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                          <div className="flex flex-wrap items-center gap-2">
-                                            <span className="font-medium text-txt">
-                                              {localizedExecutionStatus(
-                                                run.status,
-                                                t,
-                                              )}
-                                            </span>
-                                            <span className="text-xs text-muted">
-                                              {formatDateTime(run.finishedAt, {
-                                                fallback: t(
-                                                  "heartbeatsview.emDash",
-                                                ),
-                                              })}
-                                            </span>
-                                          </div>
-                                          <div className="mt-1 text-xs text-muted">
-                                            {formatDurationMs(run.latencyMs)} ·{" "}
-                                            {run.source}
-                                          </div>
-                                          {run.error && (
-                                            <div className="mt-2 text-xs text-danger">
-                                              {run.error}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                              </div>
-                            )}
-                          </div>
+                          ))}
                         </div>
                       )}
                     </div>
                   </div>
                 );
-              })}
-            </div>
+              })()) || (
+              <div className="flex h-full flex-col items-center justify-center bg-bg/5 p-8 text-center">
+                <DesktopEmptyStatePanel
+                  className="h-full min-h-[22rem]"
+                  description={
+                    showFirstRunEmptyState
+                      ? undefined
+                      : t("heartbeatsview.emptyStateDescription")
+                  }
+                  icon={<Clock3 className="h-7 w-7" />}
+                  title={
+                    showFirstRunEmptyState
+                      ? t("heartbeatsview.createFirstHeartbeat")
+                      : t("heartbeatsview.selectAHeartbeat")
+                  }
+                />
+              </div>
+            )
           )}
-        </div>
+        </main>
       </div>
-
-      {editorOpen && (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 py-6"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              closeEditor();
-            }
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              closeEditor();
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label={modalTitle}
-          tabIndex={-1}
-        >
-          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[1.5rem] border border-border/60 bg-card shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
-            <div className="flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4 sm:px-6">
-              <div className="space-y-1">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                  {editingId
-                    ? t("heartbeatsview.editHeartbeat")
-                    : t("heartbeatsview.createHeartbeat")}
-                </div>
-                <h2 className="text-lg font-semibold text-txt">{modalTitle}</h2>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-3 text-xs"
-                onClick={closeEditor}
-              >
-                {t("heartbeatsview.close")}
-              </Button>
-            </div>
-
-            <div className="min-h-0 overflow-y-auto px-5 py-5 sm:px-6">
-              {triggerError && (
-                <div className="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                  {triggerError}
-                </div>
-              )}
-
-              <div className="grid gap-4">
-                <div>
-                  <span className={FIELD_LABEL_CLASS}>
-                    {t("triggersview.Name")}
-                  </span>
-                  <Input
-                    className={INPUT_CLASS}
-                    value={form.displayName}
-                    onChange={(event) =>
-                      setField("displayName", event.target.value)
-                    }
-                    placeholder={t("triggersview.eGDailyDigestH")}
-                  />
-                </div>
-
-                <div>
-                  <span className={FIELD_LABEL_CLASS}>
-                    {t("triggersview.Instructions")}
-                  </span>
-                  <textarea
-                    className={TEXTAREA_CLASS}
-                    value={form.instructions}
-                    onChange={(event) =>
-                      setField("instructions", event.target.value)
-                    }
-                    placeholder={t("triggersview.WhatShouldTheAgen")}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                  <div>
-                    <span className={FIELD_LABEL_CLASS}>
-                      {t("triggersview.ScheduleType")}
-                    </span>
-                    <select
-                      className={SELECT_CLASS}
-                      value={form.triggerType}
-                      onChange={(event) =>
-                        setField(
-                          "triggerType",
-                          event.target.value as TriggerType,
-                        )
-                      }
-                    >
-                      <option value="interval">
-                        {t("triggersview.RepeatingInterval")}
-                      </option>
-                      <option value="once">{t("triggersview.OneTime")}</option>
-                      <option value="cron">
-                        {t("triggersview.CronSchedule")}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <span className={FIELD_LABEL_CLASS}>
-                      {t("triggersview.WakeMode")}
-                    </span>
-                    <select
-                      className={SELECT_CLASS}
-                      value={form.wakeMode}
-                      onChange={(event) =>
-                        setField(
-                          "wakeMode",
-                          event.target.value as TriggerWakeMode,
-                        )
-                      }
-                    >
-                      <option value="inject_now">
-                        {t("triggersview.InjectAmpWakeIm")}
-                      </option>
-                      <option value="next_autonomy_cycle">
-                        {t("triggersview.QueueForNextCycle")}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                {form.triggerType === "interval" && (
-                  <div>
-                    <span className={FIELD_LABEL_CLASS}>
-                      {t("heartbeatsview.interval")}
-                    </span>
-                    <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-3">
-                      <Input
-                        type="number"
-                        min="1"
-                        className={INPUT_CLASS}
-                        value={form.durationValue}
-                        onChange={(event) =>
-                          setField("durationValue", event.target.value)
-                        }
-                        placeholder="1"
-                      />
-                      <select
-                        className={SELECT_CLASS}
-                        value={form.durationUnit}
-                        onChange={(event) =>
-                          setField(
-                            "durationUnit",
-                            event.target.value as DurationUnit,
-                          )
-                        }
-                      >
-                        {DURATION_UNITS.map((unit) => (
-                          <option key={unit.unit} value={unit.unit}>
-                            {durationUnitLabel(unit.unit, t)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {form.triggerType === "once" && (
-                  <div>
-                    <span className={FIELD_LABEL_CLASS}>
-                      {t("triggersview.ScheduledTimeISO")}
-                    </span>
-                    <Input
-                      type="datetime-local"
-                      className={INPUT_CLASS}
-                      value={form.scheduledAtIso}
-                      onChange={(event) =>
-                        setField("scheduledAtIso", event.target.value)
-                      }
-                    />
-                  </div>
-                )}
-
-                {form.triggerType === "cron" && (
-                  <div>
-                    <span className={FIELD_LABEL_CLASS}>
-                      {t("triggersview.CronExpression5F")}
-                    </span>
-                    <Input
-                      className={`${INPUT_CLASS} font-mono`}
-                      value={form.cronExpression}
-                      onChange={(event) =>
-                        setField("cronExpression", event.target.value)
-                      }
-                      placeholder="*/15 * * * *"
-                    />
-                    <div className="mt-2 text-[11px] text-muted">
-                      {t("triggersview.minuteHourDayMont")}
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                  <div>
-                    <span className={FIELD_LABEL_CLASS}>
-                      {t("triggersview.MaxRunsOptional")}
-                    </span>
-                    <Input
-                      className={INPUT_CLASS}
-                      value={form.maxRuns}
-                      onChange={(event) =>
-                        setField("maxRuns", event.target.value)
-                      }
-                      placeholder="∞"
-                    />
-                  </div>
-
-                  <div className="flex items-end">
-                    <label className="inline-flex cursor-pointer select-none items-center gap-2 rounded-xl bg-bg/55 px-3 py-3 text-sm text-txt">
-                      <input
-                        type="checkbox"
-                        checked={form.enabled}
-                        onChange={(event) =>
-                          setField("enabled", event.target.checked)
-                        }
-                      />
-                      {t("triggersview.StartEnabled")}
-                    </label>
-                  </div>
-                </div>
-
-                {formError && (
-                  <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                    {formError}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 border-t border-border/50 px-5 py-4 sm:px-6">
-              <Button
-                variant="default"
-                size="sm"
-                className="h-10 px-4 text-sm shadow-sm"
-                disabled={triggersSaving}
-                onClick={() => void onSubmit()}
-              >
-                {triggersSaving
-                  ? t("heartbeatsview.saving")
-                  : editingId
-                    ? t("heartbeatsview.saveChanges")
-                    : t("heartbeatsview.createHeartbeat")}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-10 px-4 text-sm"
-                onClick={closeEditor}
-              >
-                {t("onboarding.cancel")}
-              </Button>
-
-              {editingId && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 px-4 text-sm"
-                    disabled={triggersSaving}
-                    onClick={() => void onRunSelectedTrigger(editingId)}
-                  >
-                    {t("triggersview.RunNow")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 px-4 text-sm"
-                    onClick={() =>
-                      void onToggleTriggerEnabled(editingId, editorEnabled)
-                    }
-                  >
-                    {editorEnabled
-                      ? t("heartbeatsview.disable")
-                      : t("heartbeatsview.enable")}
-                  </Button>
-                  <span className="flex-1" />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 px-4 text-sm text-danger hover:border-danger"
-                    onClick={() => void onDelete()}
-                  >
-                    {t("triggersview.Delete")}
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </DesktopPageFrame>
   );
 }

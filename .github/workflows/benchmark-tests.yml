@@ -9,15 +9,16 @@ on:
     branches: [main, develop]
     paths:
       - "src/benchmark/**"
-      - "package.json"
       - ".github/workflows/benchmark-tests.yml"
   pull_request:
     branches: [main, develop]
     paths:
       - "src/benchmark/**"
-      - "package.json"
       - ".github/workflows/benchmark-tests.yml"
   workflow_dispatch:
+
+env:
+  NODE_NO_WARNINGS: "1"
 
 jobs:
   benchmark:

@@ -10,13 +10,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-[var(--primary-foreground,#1a1f26)] border border-transparent hover:border-[var(--accent-hover,#d8a108)] hover:shadow-[0_0_0_1px_var(--accent-hover,#d8a108)]",
+          // Solid accent surfaces use text-accent-fg; translucent accent buttons
+          // switch to text-accent in dark mode to preserve contrast.
+          "border border-accent/45 bg-accent/18 text-accent-fg dark:text-accent shadow-sm hover:border-accent/70 hover:bg-accent/28",
         destructive:
-          "bg-destructive text-destructive-fg border border-transparent hover:border-destructive/70 hover:shadow-[0_0_0_1px_rgba(239,68,68,0.3)]",
+          "border border-destructive/45 bg-destructive/92 text-destructive-fg shadow-sm hover:border-destructive/75 hover:bg-destructive",
         outline:
-          "border border-input bg-bg hover:border-[var(--accent,#f0b90b)] hover:shadow-[0_0_0_1px_var(--accent,#f0b90b)]",
-        secondary: "bg-secondary text-secondary-fg border border-transparent hover:border-secondary/70",
-        ghost: "hover:bg-bg-accent hover:text-accent-fg",
+          "border border-border bg-card/92 text-txt shadow-sm hover:border-border-strong hover:bg-bg-hover",
+        secondary:
+          "border border-border bg-bg-accent text-txt shadow-sm hover:border-border-strong hover:bg-bg-hover",
+        ghost: "text-muted-strong hover:bg-bg-accent hover:text-txt",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -42,16 +45,11 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, style, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    const isDefault = variant === "default" || variant === undefined;
-    const resolvedStyle =
-      isDefault && !style?.color
-        ? { ...style, color: "var(--primary-foreground, #1a1f26)" }
-        : style;
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        style={resolvedStyle}
+        style={style}
         {...props}
       />
     );

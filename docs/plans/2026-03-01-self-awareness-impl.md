@@ -4,9 +4,9 @@
 
 **Goal:** Give the Milady agent runtime perception of its own wallet, permissions, plugins, provider, connectors, cloud, and feature state via a layered lazy-load system with declarative contributor registration.
 
-**Architecture:** A new `AwarenessRegistry` collects `AwarenessContributor` implementations (one per module), composes their summaries into ~300 tokens injected every LLM turn via a new ElizaOS provider, and exposes detail via a `GET_SELF_STATUS` action. Six P0 guardrails enforce sanitization, token budgets, failure isolation, event invalidation, versioned contracts, and trust boundaries.
+**Architecture:** A new `AwarenessRegistry` collects `AwarenessContributor` implementations (one per module), composes their summaries into ~300 tokens injected every LLM turn via a new elizaOS provider, and exposes detail via a `GET_SELF_STATUS` action. Six P0 guardrails enforce sanitization, token budgets, failure isolation, event invalidation, versioned contracts, and trust boundaries.
 
-**Tech Stack:** TypeScript, ElizaOS `@elizaos/core` (Provider, Action, IAgentRuntime), vitest
+**Tech Stack:** TypeScript, elizaOS `@elizaos/core` (Provider, Action, IAgentRuntime), vitest
 
 **Design doc:** `docs/plans/2026-03-01-self-awareness-design.md`
 
@@ -743,7 +743,7 @@ Expected: All tests PASS
 
 ```bash
 git add src/providers/self-status.ts src/providers/self-status.test.ts
-git commit -m "feat(awareness): add self-status ElizaOS provider"
+git commit -m "feat(awareness): add self-status elizaOS provider"
 ```
 
 ---
@@ -1007,7 +1007,7 @@ init: async (_pluginConfig, runtime) => {
 },
 ```
 
-Note: The exact mechanism for service registration depends on ElizaOS's `runtime.registerService` pattern. If the runtime supports `getService`/`registerService`, use that. Otherwise attach to the runtime object and have the action access it from there. Determine the best pattern during implementation by checking how existing services (like CLOUD_AUTH) are registered.
+Note: The exact mechanism for service registration depends on elizaOS's `runtime.registerService` pattern. If the runtime supports `getService`/`registerService`, use that. Otherwise attach to the runtime object and have the action access it from there. Determine the best pattern during implementation by checking how existing services (like CLOUD_AUTH) are registered.
 
 **Step 4: Run tests to verify they pass**
 

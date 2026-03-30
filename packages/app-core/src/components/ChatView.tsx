@@ -1086,7 +1086,7 @@ export function ChatView({
         data-no-camera-zoom={false}
         className={
           isGameModal
-            ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-none opacity-0"
+            ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-auto opacity-0"
             : "chat-native-scrollbar relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 xl:px-5"
         }
         style={

@@ -1,5 +1,5 @@
 import type { Tab } from "../navigation";
-import type { ShellView } from "./types";
+import type { OnboardingMode, ShellView } from "./types";
 import type { UiShellMode } from "./ui-preferences";
 
 export function deriveUiShellModeForTab(tab: Tab): UiShellMode {
@@ -12,21 +12,24 @@ export function getTabForShellView(view: ShellView, lastNativeTab: Tab): Tab {
   }
 
   if (view === "character") {
-    return "character-select";
+    return "character";
+  }
+
+  // Guard against companion-only tabs leaking into native/desktop mode.
+  // lastNativeTab should already be sanitized by normalizeLastNativeTab,
+  // but be defensive: character-select and companion are never valid here.
+  if (lastNativeTab === "character-select" || lastNativeTab === "companion") {
+    return "chat";
   }
 
   return lastNativeTab;
 }
 
-export function shouldStartAtCharacterSelectOnLaunch(params: {
+export function shouldStartAtCharacterSelectOnLaunch(_params: {
   onboardingNeedsOptions: boolean;
+  onboardingMode: OnboardingMode;
   navPath: string;
   urlTab: Tab | null;
 }): boolean {
-  const { onboardingNeedsOptions, navPath, urlTab } = params;
-  if (onboardingNeedsOptions) {
-    return false;
-  }
-
-  return navPath === "/" || urlTab === "chat" || urlTab === "companion";
+  return false;
 }

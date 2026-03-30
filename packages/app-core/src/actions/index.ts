@@ -1,12 +1,16 @@
-/**
- * Domain action modules — barrel export.
- *
- * Re-exports all action helpers for use by providers and components.
- */
-
 export * from "./character";
-export * from "./chat-helpers";
-export * from "./cloud";
-export * from "./lifecycle";
-export * from "./onboarding";
-export * from "./triggers";
+export * from "./check-balance";
+export * from "./eject-plugin";
+export * from "./emote";
+export * from "./execute-trade";
+export * from "./get-self-status";
+export * from "./install-plugin";
+export * from "./list-ejected";
+export * from "./log-level";
+export * from "./media";
+export * from "./reinject-plugin";
+export * from "./stream-control";
+export * from "./sync-plugin";
+export * from "./terminal";
+export * from "./transfer-token";
+export * from "./wallet-action-shared";

@@ -3,13 +3,15 @@ import {
   normalizeOnboardingProviderId,
   type OnboardingConnection,
   type OnboardingLocalProviderId,
-} from "@miladyai/autonomous/contracts/onboarding";
+} from "@miladyai/shared/contracts/onboarding";
 
 export interface BuildOnboardingConnectionArgs {
   onboardingRunMode: "local" | "cloud" | "";
   onboardingCloudProvider: string;
   onboardingProvider: string;
   onboardingApiKey: string;
+  onboardingVoiceProvider: string;
+  onboardingVoiceApiKey: string;
   onboardingPrimaryModel: string;
   onboardingOpenRouterModel: string;
   onboardingRemoteConnected: boolean;
@@ -56,6 +58,14 @@ export function buildOnboardingConnectionConfig(
       apiKey: trimToUndefined(args.onboardingApiKey),
       smallModel: trimToUndefined(args.onboardingSmallModel),
       largeModel: trimToUndefined(args.onboardingLargeModel),
+    };
+  }
+
+  if (args.onboardingProvider === "elizacloud") {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      apiKey: trimToUndefined(args.onboardingApiKey),
     };
   }
 

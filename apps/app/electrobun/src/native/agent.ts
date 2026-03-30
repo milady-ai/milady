@@ -1,7 +1,7 @@
 /**
  * Agent Native Module for Electrobun
  *
- * Embeds the Milady agent runtime (ElizaOS) as an isolated child process
+ * Embeds the Milady agent runtime (elizaOS) as an isolated child process
  * using Bun.spawn() and exposes it to the webview via RPC messages.
  *
  * Instead of dynamically importing the runtime into the main process
@@ -15,13 +15,30 @@
  *
  * The renderer never needs to know whether the API server is embedded or
  * remote -- it simply connects to `http://localhost:{port}`.
+ *
+ * **Port policy (WHY):** we resolve a **free** loopback desktop API port from
+ * `MILADY_API_PORT`, `ELIZA_API_PORT`, or `ELIZA_PORT` (see
+ * `findFirstAvailableLoopbackPort`) instead of SIGKILL-ing listeners by
+ * default, so two Milady apps can run side by side. Optional
+ * `MILADY_AGENT_RECLAIM_STALE_PORT=1` restores lsof-based reclaim for
+ * single-instance dev.
  */
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  resolveApiToken,
+  resolveDesktopApiPort,
+  setApiToken,
+} from "@miladyai/shared/runtime-env";
 
 import { resolveDesktopRuntimeMode } from "../api-base";
+import { DEFAULT_PORT } from "../constants";
+import { recordStartupPhase, resolveStartupBundlePath } from "../startup-trace";
+import type { SendToWebview } from "../types.js";
+import { findFirstAvailableLoopbackPort } from "./loopback-port";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,7 +52,43 @@ interface AgentStatus {
   error: string | null;
 }
 
-type SendToWebview = (message: string, payload?: unknown) => void;
+export interface StartupDiagnosticsSnapshot {
+  state: AgentStatus["state"];
+  phase: string;
+  updatedAt: string;
+  lastError: string | null;
+  agentName: string | null;
+  port: number | null;
+  startedAt: number | null;
+  platform: string;
+  arch: string;
+  configDir: string;
+  logPath: string;
+  statusPath: string;
+}
+
+export interface BugReportBundleResult {
+  directory: string;
+  reportMarkdownPath: string;
+  reportJsonPath: string;
+  startupLogPath: string | null;
+  startupStatusPath: string | null;
+}
+
+type ExistingElizaInstallSource =
+  | "config-path-env"
+  | "state-dir-env"
+  | "default-state-dir";
+
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: ExistingElizaInstallSource;
+}
 
 // Subprocess type from Bun.spawn
 type BunSubprocess = ReturnType<typeof Bun.spawn>;
@@ -44,10 +97,11 @@ type BunSubprocess = ReturnType<typeof Bun.spawn>;
 // Constants
 // ---------------------------------------------------------------------------
 
-const DEFAULT_PORT = 2138;
 const HEALTH_POLL_INTERVAL_MS = 500;
 const SIGTERM_GRACE_MS = 5_000;
+const AGENT_NAME_FETCH_TIMEOUT_MS = 5_000;
 const WINDOWS_ABS_PATH_RE = /^[A-Za-z]:[\\/]/;
+const ELIZA_CONFIG_FILENAME = "eliza.json";
 
 export function getHealthPollTimeoutMs(
   env: NodeJS.ProcessEnv = process.env,
@@ -95,6 +149,124 @@ function resolveRelativePortable(base: string, relativePath: string): string {
     : path.resolve(base, relativePath);
 }
 
+function getDefaultModuleDir(): string {
+  return import.meta.dir ?? path.join(process.cwd(), "src");
+}
+
+function normalizeEnvPath(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? resolvePortablePath(trimmed) : null;
+}
+
+function listStateEntries(stateDir: string): string[] {
+  try {
+    return fs
+      .readdirSync(stateDir)
+      .filter(
+        (entry) => entry !== "." && entry !== ".." && entry !== ".DS_Store",
+      );
+  } catch {
+    return [];
+  }
+}
+
+function buildExistingElizaInstallCandidates(opts?: {
+  env?: NodeJS.ProcessEnv;
+  homedir?: string;
+}): Array<{
+  source: ExistingElizaInstallSource;
+  stateDir: string;
+  configPath: string;
+}> {
+  const env = opts?.env ?? process.env;
+  const homedir = opts?.homedir ?? os.homedir();
+  const configPathFromEnv =
+    normalizeEnvPath(env.MILADY_CONFIG_PATH) ??
+    normalizeEnvPath(env.ELIZA_CONFIG_PATH);
+  const stateDirFromEnv =
+    normalizeEnvPath(env.MILADY_STATE_DIR) ??
+    normalizeEnvPath(env.ELIZA_STATE_DIR);
+  const defaultStateDir = joinPortable(homedir, ".eliza");
+
+  const candidates = [
+    configPathFromEnv
+      ? {
+          source: "config-path-env" as const,
+          stateDir: dirnamePortable(configPathFromEnv),
+          configPath: configPathFromEnv,
+        }
+      : null,
+    stateDirFromEnv
+      ? {
+          source: "state-dir-env" as const,
+          stateDir: stateDirFromEnv,
+          configPath: joinPortable(stateDirFromEnv, ELIZA_CONFIG_FILENAME),
+        }
+      : null,
+    {
+      source: "default-state-dir" as const,
+      stateDir: defaultStateDir,
+      configPath: joinPortable(defaultStateDir, ELIZA_CONFIG_FILENAME),
+    },
+  ].filter((candidate): candidate is NonNullable<typeof candidate> =>
+    Boolean(candidate),
+  );
+
+  return candidates.filter(
+    (candidate, index, all) =>
+      all.findIndex(
+        (other) =>
+          other.stateDir === candidate.stateDir &&
+          other.configPath === candidate.configPath,
+      ) === index,
+  );
+}
+
+export function inspectExistingElizaInstall(opts?: {
+  env?: NodeJS.ProcessEnv;
+  homedir?: string;
+}): ExistingElizaInstallInfo {
+  const candidates = buildExistingElizaInstallCandidates(opts);
+
+  for (const candidate of candidates) {
+    const configExists = fs.existsSync(candidate.configPath);
+    const stateDirExists = fs.existsSync(candidate.stateDir);
+    const hasStateEntries =
+      stateDirExists && listStateEntries(candidate.stateDir).length > 0;
+
+    if (configExists || hasStateEntries) {
+      return {
+        detected: true,
+        stateDir: candidate.stateDir,
+        configPath: candidate.configPath,
+        configExists,
+        stateDirExists,
+        hasStateEntries,
+        source: candidate.source,
+      };
+    }
+  }
+
+  const fallback = candidates[0] ?? {
+    source: "default-state-dir" as const,
+    stateDir: joinPortable(opts?.homedir ?? os.homedir(), ".eliza"),
+    configPath: joinPortable(
+      joinPortable(opts?.homedir ?? os.homedir(), ".eliza"),
+      ELIZA_CONFIG_FILENAME,
+    ),
+  };
+
+  return {
+    detected: false,
+    stateDir: fallback.stateDir,
+    configPath: fallback.configPath,
+    configExists: false,
+    stateDirExists: fs.existsSync(fallback.stateDir),
+    hasStateEntries: false,
+    source: fallback.source,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Diagnostic logging
 // ---------------------------------------------------------------------------
@@ -124,9 +296,54 @@ export function resolveConfigDir(opts?: {
   return joinPortable(homedir, ".config", "Milady");
 }
 
-let diagnosticLogPath: string | null = null;
+export function ensureDesktopApiToken(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const existing = getDesktopApiToken(env);
+  if (existing) {
+    setApiToken(env, existing);
+    return existing;
+  }
 
-function getDiagnosticLogPath(): string {
+  const generated = crypto.randomBytes(16).toString("hex");
+  setApiToken(env, generated);
+  diagnosticLog(
+    "[Agent] Generated local API token for embedded desktop runtime",
+  );
+  return generated;
+}
+
+export function configureDesktopLocalApiAuth(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const token = ensureDesktopApiToken(env);
+  env.MILADY_PAIRING_DISABLED = "1";
+  env.ELIZA_PAIRING_DISABLED = "1";
+  return token;
+}
+
+function getDesktopApiToken(
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  return resolveApiToken(env);
+}
+
+function getDesktopApiHeaders(
+  env: NodeJS.ProcessEnv = process.env,
+): Record<string, string> | undefined {
+  const token = getDesktopApiToken(env);
+  if (!token) return undefined;
+  return {
+    Authorization: `Bearer ${token}`,
+    "X-Api-Key": token,
+    "X-Api-Token": token,
+  };
+}
+
+let diagnosticLogPath: string | null = null;
+let startupStatusPath: string | null = null;
+
+export function getDiagnosticLogPath(): string {
   if (diagnosticLogPath !== null) return diagnosticLogPath;
   try {
     const configDir = resolveConfigDir();
@@ -139,6 +356,20 @@ function getDiagnosticLogPath(): string {
     diagnosticLogPath = path.join(os.tmpdir(), "milady-startup.log");
   }
   return diagnosticLogPath;
+}
+
+export function getStartupStatusPath(): string {
+  if (startupStatusPath !== null) return startupStatusPath;
+  try {
+    const configDir = resolveConfigDir();
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    startupStatusPath = path.join(configDir, "startup-status.json");
+  } catch {
+    startupStatusPath = path.join(os.tmpdir(), "startup-status.json");
+  }
+  return startupStatusPath;
 }
 
 function diagnosticLog(message: string): void {
@@ -161,7 +392,146 @@ function shortError(err: unknown, maxLen = 280): string {
       : String(err);
   const oneLine = raw.replace(/\s+/g, " ").trim();
   if (oneLine.length <= maxLen) return oneLine;
-  return `${oneLine.slice(0, maxLen)}...`;
+  return `${oneLine.slice(0, maxLen)}... (see logs for full details)`;
+}
+
+function redactSensitiveDiagnostics(input: string): string {
+  return input
+    .replace(
+      /(authorization\s*[:=]\s*bearer\s+)([a-z0-9._-]+)/gi,
+      "$1[REDACTED]",
+    )
+    .replace(
+      /((?:x-api-key|x-api-token|api[_-]?key|bearer[_-]?token|access[_-]?token|secret|password)\s*[:=]\s*)([^\s]+)/gi,
+      "$1[REDACTED]",
+    );
+}
+
+function readFileTail(filePath: string, maxChars = 16_000): string {
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    return redactSensitiveDiagnostics(content.slice(-maxChars));
+  } catch {
+    return "";
+  }
+}
+
+function writeStartupDiagnosticsSnapshot(
+  snapshot: StartupDiagnosticsSnapshot,
+): void {
+  try {
+    fs.writeFileSync(
+      getStartupStatusPath(),
+      `${JSON.stringify(snapshot, null, 2)}\n`,
+      "utf8",
+    );
+  } catch {
+    // Ignore write errors
+  }
+}
+
+export function getStartupDiagnosticsSnapshot(): StartupDiagnosticsSnapshot {
+  let parsed: Partial<StartupDiagnosticsSnapshot> | null = null;
+  try {
+    parsed = JSON.parse(
+      fs.readFileSync(getStartupStatusPath(), "utf8"),
+    ) as Partial<StartupDiagnosticsSnapshot> | null;
+  } catch {
+    parsed = null;
+  }
+
+  return {
+    state: parsed?.state ?? "not_started",
+    phase: parsed?.phase ?? "unknown",
+    updatedAt: parsed?.updatedAt ?? new Date().toISOString(),
+    lastError: parsed?.lastError ?? null,
+    agentName: parsed?.agentName ?? null,
+    port: parsed?.port ?? null,
+    startedAt: parsed?.startedAt ?? null,
+    platform: parsed?.platform ?? process.platform,
+    arch: parsed?.arch ?? process.arch,
+    configDir: parsed?.configDir ?? resolveConfigDir(),
+    logPath: parsed?.logPath ?? getDiagnosticLogPath(),
+    statusPath: parsed?.statusPath ?? getStartupStatusPath(),
+  };
+}
+
+export function getStartupDiagnosticLogTail(maxChars = 16_000): string {
+  return readFileTail(getDiagnosticLogPath(), maxChars);
+}
+
+function sanitizeBugReportPrefix(prefix: string | undefined): string {
+  const trimmed = prefix?.trim();
+  if (!trimmed) return "bug-report";
+
+  const sanitized = trimmed
+    .replace(/[\\/]+/g, "-")
+    .replace(/\.\.+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[._-]+|[._-]+$/g, "")
+    .slice(0, 64);
+
+  return sanitized || "bug-report";
+}
+export function createBugReportBundle(options: {
+  reportMarkdown: string;
+  reportJson: Record<string, unknown>;
+  prefix?: string;
+}): BugReportBundleResult {
+  const configDir = resolveConfigDir();
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const prefix = sanitizeBugReportPrefix(options.prefix);
+  const directory = path.join(
+    configDir,
+    "bug-reports",
+    `${prefix}-${timestamp}`,
+  );
+  const reportMarkdownPath = path.join(directory, "report.md");
+  const reportJsonPath = path.join(directory, "report.json");
+  const logPath = getDiagnosticLogPath();
+  const statusPath = getStartupStatusPath();
+  const startupLogTarget = path.join(directory, "milady-startup.log");
+  const startupStatusTarget = path.join(directory, "startup-status.json");
+  const startupDiagnostics = getStartupDiagnosticsSnapshot();
+  const includeLogTail =
+    typeof options.reportJson.attachLogs === "boolean"
+      ? options.reportJson.attachLogs
+      : true;
+  const startupLogTail = includeLogTail ? getStartupDiagnosticLogTail() : "";
+  const normalizedReportJson = {
+    ...options.reportJson,
+    startupDiagnostics,
+    startupLogTail,
+  };
+
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(reportMarkdownPath, options.reportMarkdown, "utf8");
+  fs.writeFileSync(
+    reportJsonPath,
+    `${JSON.stringify(normalizedReportJson, null, 2)}\n`,
+    "utf8",
+  );
+
+  let copiedLogPath: string | null = null;
+  let copiedStatusPath: string | null = null;
+
+  if (fs.existsSync(logPath)) {
+    fs.copyFileSync(logPath, startupLogTarget);
+    copiedLogPath = startupLogTarget;
+  }
+  if (fs.existsSync(statusPath)) {
+    fs.copyFileSync(statusPath, startupStatusTarget);
+    copiedStatusPath = startupStatusTarget;
+  }
+
+  return {
+    directory,
+    reportMarkdownPath,
+    reportJsonPath,
+    startupLogPath: copiedLogPath,
+    startupStatusPath: copiedStatusPath,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -176,7 +546,7 @@ function shortError(err: unknown, maxLen = 280): string {
  *   2. Walk up from import.meta.dir to find milady-dist as a sibling
  */
 export function getMiladyDistFallbackCandidates(
-  moduleDir: string = import.meta.dir,
+  moduleDir: string = getDefaultModuleDir(),
   execPath: string = process.execPath,
 ): string[] {
   const execDir = execPath ? dirnamePortable(execPath) : moduleDir;
@@ -194,17 +564,66 @@ export function getMiladyDistFallbackCandidates(
   ].filter((candidate, index, all) => all.indexOf(candidate) === index);
 }
 
-function resolveBunExecutablePath(execPath: string = process.execPath): string {
+export function isPackagedDesktopRuntime(
+  moduleDir: string = getDefaultModuleDir(),
+  execPath: string = process.execPath,
+): boolean {
+  const normalizedModuleDir = moduleDir.replaceAll("\\", "/");
+  const normalizedExecPath = execPath.replaceAll("\\", "/").toLowerCase();
+  const looksLikePackagedExec =
+    normalizedExecPath.includes(".app/contents/") ||
+    normalizedExecPath.includes("/self-extraction/") ||
+    normalizedExecPath.endsWith("/launcher") ||
+    normalizedExecPath.endsWith("/launcher.exe");
+  if (process.env.MILADY_DIST_PATH?.trim() && !looksLikePackagedExec) {
+    return false;
+  }
+  if (!normalizedModuleDir.includes("/src/")) {
+    return true;
+  }
+
+  return looksLikePackagedExec;
+}
+
+export function resolveBunExecutablePath(opts?: {
+  execPath?: string;
+  moduleDir?: string;
+  platform?: string;
+}): string {
+  const execPath = opts?.execPath ?? process.execPath;
+  const moduleDir = opts?.moduleDir ?? getDefaultModuleDir();
+  const platform = opts?.platform ?? process.platform;
+  const packagedRuntime = isPackagedDesktopRuntime(moduleDir, execPath);
   const looksLikeMacBundleExec = execPath.includes(".app/Contents/MacOS/");
   const executableName =
-    process.platform === "win32" && !looksLikeMacBundleExec ? "bun.exe" : "bun";
+    platform === "win32" && !looksLikeMacBundleExec ? "bun.exe" : "bun";
   const execDir = execPath ? dirnamePortable(execPath) : "";
-  const candidates = [
+  const packagedCandidates = [
     execPath,
     execDir ? joinPortable(execDir, executableName) : "",
+    execDir
+      ? resolveRelativePortable(
+          execDir,
+          `../Resources/app/bun/${executableName}`,
+        )
+      : "",
+    execDir
+      ? resolveRelativePortable(
+          execDir,
+          `../Resources/app/bun/bin/${executableName}`,
+        )
+      : "",
+    moduleDir ? joinPortable(moduleDir, executableName) : "",
+    moduleDir ? joinPortable(moduleDir, "bin", executableName) : "",
+    moduleDir
+      ? resolveRelativePortable(moduleDir, `../bun/${executableName}`)
+      : "",
+    moduleDir
+      ? resolveRelativePortable(moduleDir, `../bun/bin/${executableName}`)
+      : "",
   ].filter(Boolean);
 
-  for (const candidate of candidates) {
+  for (const candidate of packagedCandidates) {
     if (!fs.existsSync(candidate)) continue;
     if (
       path.basename(candidate).toLowerCase() === executableName.toLowerCase()
@@ -212,6 +631,21 @@ function resolveBunExecutablePath(execPath: string = process.execPath): string {
       return candidate;
     }
   }
+
+  if (packagedRuntime) {
+    return (
+      packagedCandidates.find(
+        (candidate) =>
+          path.basename(candidate).toLowerCase() ===
+          executableName.toLowerCase(),
+      ) ?? executableName
+    );
+  }
+
+  const _candidates = [
+    execPath,
+    execDir ? joinPortable(execDir, executableName) : "",
+  ].filter(Boolean);
 
   const bunGlobal = Bun as { which?: (binary: string) => string | null };
   const whichCandidate =
@@ -237,9 +671,35 @@ function resolveBunExecutablePath(execPath: string = process.execPath): string {
   return "bun";
 }
 
-function resolveMiladyDistPath(): string {
+export function resolveMiladyDistPath(opts?: {
+  env?: NodeJS.ProcessEnv;
+  moduleDir?: string;
+  execPath?: string;
+}): string {
+  const env = opts?.env ?? process.env;
+  const moduleDir = opts?.moduleDir ?? getDefaultModuleDir();
+  const execPath = opts?.execPath ?? process.execPath;
+  const packagedRuntime = isPackagedDesktopRuntime(moduleDir, execPath);
+  const fallbackCandidates = getMiladyDistFallbackCandidates(
+    moduleDir,
+    execPath,
+  );
+
+  if (packagedRuntime) {
+    for (const candidate of fallbackCandidates) {
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+    }
+    const fallback = fallbackCandidates[0];
+    diagnosticLog(
+      `[Agent] Could not find packaged milady-dist; using fallback: ${fallback}`,
+    );
+    return fallback;
+  }
+
   // 1. Env override
-  const envPath = process.env.MILADY_DIST_PATH;
+  const envPath = env.MILADY_DIST_PATH;
   if (envPath) {
     const resolved = resolvePortablePath(envPath);
     if (fs.existsSync(resolved)) {
@@ -251,7 +711,7 @@ function resolveMiladyDistPath(): string {
   }
 
   // 2. Walk up from import.meta.dir looking for milady-dist or dist
-  let dir = import.meta.dir;
+  let dir = moduleDir;
   const maxDepth = 15;
   for (let i = 0; i < maxDepth; i++) {
     // Packaged: milady-dist sibling
@@ -270,7 +730,7 @@ function resolveMiladyDistPath(): string {
   }
 
   // 3. Packaged/dev fallbacks derived from the launcher path and module dir.
-  for (const candidate of getMiladyDistFallbackCandidates()) {
+  for (const candidate of fallbackCandidates) {
     if (fs.existsSync(candidate)) {
       diagnosticLog(
         `[Agent] Could not find milady-dist by walking up; using fallback: ${candidate}`,
@@ -279,11 +739,38 @@ function resolveMiladyDistPath(): string {
     }
   }
 
-  const fallback = getMiladyDistFallbackCandidates()[0];
+  const fallback = fallbackCandidates[0];
   diagnosticLog(
     `[Agent] Could not find milady-dist by walking up; using fallback: ${fallback}`,
   );
   return fallback;
+}
+
+export function buildChildNodePaths(
+  miladyDistPath: string,
+  opts?: { packagedRuntime?: boolean },
+): string[] {
+  const nodePaths = new Set<string>();
+  const distModules = joinPortable(miladyDistPath, "node_modules");
+  if (fs.existsSync(distModules)) {
+    nodePaths.add(distModules);
+  }
+
+  if (opts?.packagedRuntime) {
+    return [...nodePaths];
+  }
+
+  let searchDir = miladyDistPath;
+  while (searchDir !== dirnamePortable(searchDir)) {
+    const candidate = joinPortable(searchDir, "node_modules");
+    if (fs.existsSync(candidate) && candidate !== distModules) {
+      nodePaths.add(candidate);
+      break;
+    }
+    searchDir = dirnamePortable(searchDir);
+  }
+
+  return [...nodePaths];
 }
 
 function resolveRuntimeEntryPath(miladyDistPath: string): string | null {
@@ -305,14 +792,22 @@ function resolveRuntimeEntryPath(miladyDistPath: string): string | null {
 async function waitForHealthy(
   getPort: () => number,
   timeoutMs: number = getHealthPollTimeoutMs(),
+  childProcess?: BunSubprocess | null,
 ): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
+  const headers = getDesktopApiHeaders();
 
   while (Date.now() < deadline) {
+    // Bail early if the child process has already exited
+    if (childProcess && childProcess.exitCode !== null) {
+      return false;
+    }
+
     const port = getPort();
     const url = `http://127.0.0.1:${port}/api/health`;
     try {
       const response = await fetch(url, {
+        headers,
         signal: AbortSignal.timeout(2_000),
       });
       if (response.ok) {
@@ -440,6 +935,44 @@ function shouldAutoRecoverPgliteFailure(line: string): boolean {
   );
 }
 
+/**
+ * Opt-in: kill processes listening on `port` (lsof + SIGKILL). Default off so a
+ * second Milady instance can coexist on the same machine when ports differ.
+ * Set MILADY_AGENT_RECLAIM_STALE_PORT=1 to restore the old “take over default port” behavior.
+ */
+async function maybeReclaimPortWithSigkill(port: number): Promise<void> {
+  const raw = process.env.MILADY_AGENT_RECLAIM_STALE_PORT?.trim().toLowerCase();
+  if (raw !== "1" && raw !== "true" && raw !== "yes") {
+    return;
+  }
+  try {
+    const lsofResult = Bun.spawnSync(["lsof", "-ti", `tcp:${port}`]);
+    const pids = new TextDecoder()
+      .decode(lsofResult.stdout)
+      .trim()
+      .split("\n")
+      .filter(Boolean);
+    for (const pid of pids) {
+      const numPid = parseInt(pid, 10);
+      if (!Number.isNaN(numPid) && numPid !== process.pid) {
+        diagnosticLog(
+          `[Agent] Reclaim: killing process ${numPid} on port ${port} (MILADY_AGENT_RECLAIM_STALE_PORT)`,
+        );
+        try {
+          process.kill(numPid, "SIGKILL");
+        } catch {
+          // Process may have already exited
+        }
+      }
+    }
+    if (pids.length > 0) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  } catch {
+    // lsof missing — ignore
+  }
+}
+
 function resolvePgliteDataDir(): string {
   return joinPortable(
     os.homedir(),
@@ -450,12 +983,24 @@ function resolvePgliteDataDir(): string {
   );
 }
 
+/**
+ * Removes only the PGLite database folder (agent memory / conversations).
+ * GGUF embedding weights live under `MODELS_DIR` / `~/.eliza/models` by default — never deleted here.
+ */
 function deletePgliteDataDir(): void {
   const dir = resolvePgliteDataDir();
+  if (path.basename(dir) !== ".elizadb") {
+    diagnosticLog(
+      `[Agent] deletePgliteDataDir: refused — basename must be .elizadb, got: ${dir}`,
+    );
+    return;
+  }
   try {
     if (fs.existsSync(dir)) {
       fs.rmSync(dir, { recursive: true, force: true });
-      diagnosticLog(`[Agent] Deleted corrupt PGLite data dir: ${dir}`);
+      diagnosticLog(
+        `[Agent] Deleted PGLite data dir (GGUF model cache elsewhere): ${dir}`,
+      );
     }
   } catch (err) {
     diagnosticLog(
@@ -484,6 +1029,11 @@ export class AgentManager {
   private stdioAbortController: AbortController | null = null;
   private hasPgliteError = false;
   private pgliteRecoveryDone = false;
+  private startupPhase = "not_started";
+
+  constructor() {
+    this.persistStartupDiagnostics();
+  }
 
   setSendToWebview(fn: SendToWebview): void {
     this.sendToWebview = fn;
@@ -500,6 +1050,17 @@ export class AgentManager {
 
   /** Start the agent runtime as a child process. Idempotent. */
   async start(): Promise<AgentStatus> {
+    recordStartupPhase("agent_start_entered", {
+      pid: process.pid,
+      exec_path: process.execPath,
+      bundle_path: resolveStartupBundlePath(process.execPath),
+    });
+    this.setStartupPhase("start_requested");
+    recordStartupPhase("agent_start_entered", {
+      pid: process.pid,
+      exec_path: process.execPath,
+      bundle_path: resolveStartupBundlePath(process.execPath),
+    });
     diagnosticLog(
       `[Agent] start() called, current state: ${this.status.state}`,
     );
@@ -518,8 +1079,12 @@ export class AgentManager {
           ? `Embedded desktop runtime is disabled because ${runtimeMode.externalApi.source} points at ${runtimeMode.externalApi.base}.`
           : "Embedded desktop runtime is disabled by MILADY_DESKTOP_SKIP_EMBEDDED_AGENT=1.";
       diagnosticLog(`[Agent] ${reason}`);
+      this.setStartupPhase("startup_disabled", reason);
       throw new Error(reason);
     }
+
+    configureDesktopLocalApiAuth();
+    const packagedRuntime = isPackagedDesktopRuntime();
 
     // Reset per-startup flags
     this.pgliteRecoveryDone = false;
@@ -529,37 +1094,44 @@ export class AgentManager {
       await this.killChildProcess();
     }
 
-    // Kill any stale bun process holding the target port from a previous
-    // crash or unclean shutdown.  Without this, the server falls back to a
-    // dynamic port and agent.ts may not detect the change.
-    const targetPort = Number(process.env.MILADY_PORT) || DEFAULT_PORT;
-    try {
-      const lsofResult = Bun.spawnSync(["lsof", "-ti", `tcp:${targetPort}`]);
-      const pids = new TextDecoder()
-        .decode(lsofResult.stdout)
-        .trim()
-        .split("\n")
-        .filter(Boolean);
-      for (const pid of pids) {
-        const numPid = parseInt(pid, 10);
-        if (!Number.isNaN(numPid) && numPid !== process.pid) {
-          diagnosticLog(
-            `[Agent] Killing stale process ${numPid} on port ${targetPort}`,
-          );
-          try {
-            process.kill(numPid, "SIGKILL");
-          } catch {
-            // Process may have already exited
-          }
-        }
-      }
-      if (pids.length > 0) {
-        // Brief pause for the OS to release the port
-        await new Promise((r) => setTimeout(r, 500));
-      }
-    } catch {
-      // lsof not available or failed — proceed and let the port fallback handle it
+    const preferredPort = resolveDesktopApiPort(process.env) || DEFAULT_PORT;
+    if (!packagedRuntime) {
+      await maybeReclaimPortWithSigkill(preferredPort);
     }
+    let apiPort: number;
+    try {
+      apiPort = await findFirstAvailableLoopbackPort(preferredPort);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to allocate loopback port";
+      diagnosticLog(`[Agent] ${msg}`);
+      this.status = {
+        state: "error",
+        agentName: null,
+        port: null,
+        startedAt: null,
+        error: msg,
+      };
+      recordStartupPhase("fatal", {
+        port: null,
+        error: msg,
+      });
+      this.setStartupPhase("port_allocation_failed", msg);
+      recordStartupPhase("fatal", {
+        port: null,
+        error: msg,
+      });
+      this.emitStatus();
+      return this.status;
+    }
+    if (apiPort !== preferredPort) {
+      diagnosticLog(
+        `[Agent] Port ${preferredPort} busy — using ${apiPort} for embedded API (set MILADY_AGENT_RECLAIM_STALE_PORT=1 to try reclaiming the preferred port first)`,
+      );
+    }
+    recordStartupPhase("port_selected", {
+      port: apiPort,
+    });
 
     this.status = {
       state: "starting",
@@ -568,10 +1140,12 @@ export class AgentManager {
       startedAt: null,
       error: null,
     };
+    this.setStartupPhase("starting_runtime");
     this.emitStatus();
 
     try {
       // Resolve milady-dist path
+      this.setStartupPhase("resolving_runtime");
       const miladyDistPath = resolveMiladyDistPath();
       diagnosticLog(`[Agent] Resolved milady dist: ${miladyDistPath}`);
 
@@ -597,46 +1171,59 @@ export class AgentManager {
           startedAt: null,
           error: errMsg,
         };
+        recordStartupPhase("fatal", {
+          port: apiPort,
+          error: errMsg,
+        });
+        this.setStartupPhase("runtime_entry_missing", errMsg);
+        recordStartupPhase("fatal", {
+          port: apiPort,
+          error: errMsg,
+        });
         this.emitStatus();
         return this.status;
       }
 
       diagnosticLog(`[Agent] runtime entry: exists (${runtimeEntryPath})`);
+      recordStartupPhase("runtime_path_resolved", {
+        port: apiPort,
+      });
 
-      // Resolve port
-      let apiPort = Number(process.env.MILADY_PORT) || DEFAULT_PORT;
       diagnosticLog(`[Agent] Starting child process on port ${apiPort}...`);
+      this.setStartupPhase("spawning_runtime");
 
       // Build NODE_PATH so the child can find node_modules
-      const nodePaths: string[] = [];
-
-      // milady-dist/node_modules for native binaries (sharp, llama-cpp, etc.)
-      const distModules = joinPortable(miladyDistPath, "node_modules");
-      if (fs.existsSync(distModules)) {
-        nodePaths.push(distModules);
-      }
-
-      // Walk up from milady-dist to find monorepo root node_modules
-      let searchDir = miladyDistPath;
-      while (searchDir !== path.dirname(searchDir)) {
-        const candidate = joinPortable(searchDir, "node_modules");
-        if (fs.existsSync(candidate) && candidate !== distModules) {
-          nodePaths.push(candidate);
-          break;
-        }
-        searchDir = dirnamePortable(searchDir);
-      }
-
-      // Preserve existing NODE_PATH
-      const existingNodePath = process.env.NODE_PATH;
-      if (existingNodePath) {
-        nodePaths.push(existingNodePath);
+      const nodePaths = buildChildNodePaths(miladyDistPath, {
+        packagedRuntime,
+      });
+      if (packagedRuntime && nodePaths.length === 0) {
+        const errMsg =
+          `Packaged runtime is missing bundle-local node_modules under ${miladyDistPath}; ` +
+          "refusing to inherit the parent NODE_PATH";
+        diagnosticLog(`[Agent] ${errMsg}`);
+        this.status = {
+          state: "error",
+          agentName: null,
+          port: apiPort,
+          startedAt: null,
+          error: errMsg,
+        };
+        recordStartupPhase("fatal", {
+          port: apiPort,
+          error: errMsg,
+        });
+        this.emitStatus();
+        return this.status;
       }
 
       const childEnv: Record<string, string> = {
         ...(process.env as Record<string, string>),
-        MILADY_PORT: String(apiPort),
+        MILADY_API_PORT: String(apiPort),
+        ELIZA_API_PORT: String(apiPort),
+        ELIZA_PORT: String(apiPort),
       };
+      delete childEnv.MILADY_PORT;
+      delete childEnv.NODE_PATH;
 
       // node-llama-cpp crashes Bun on Windows during packaged startup.
       // Disable local embeddings until upstream fix lands.
@@ -671,6 +1258,10 @@ export class AgentManager {
       diagnosticLog(
         `[Agent] Child spawned pid=${proc.pid} elapsed=${Date.now() - spawnTime}ms`,
       );
+      recordStartupPhase("child_spawned", {
+        port: apiPort,
+        child_pid: proc.pid,
+      });
 
       // Set up abort controller for stdio watchers
       this.stdioAbortController = new AbortController();
@@ -745,8 +1336,13 @@ export class AgentManager {
       diagnosticLog(
         `[Agent] Waiting for health endpoint at http://127.0.0.1:${apiPort}/api/health ...`,
       );
+      this.setStartupPhase("waiting_for_health");
       const healthPollTimeoutMs = getHealthPollTimeoutMs();
-      const healthy = await waitForHealthy(() => apiPort, healthPollTimeoutMs);
+      const healthy = await waitForHealthy(
+        () => apiPort,
+        healthPollTimeoutMs,
+        proc,
+      );
 
       if (!healthy) {
         // Check if process already exited
@@ -761,6 +1357,19 @@ export class AgentManager {
             startedAt: null,
             error: errMsg,
           };
+          recordStartupPhase("fatal", {
+            port: apiPort,
+            child_pid: proc.pid,
+            error: errMsg,
+            exit_code: proc.exitCode,
+          });
+          this.setStartupPhase("startup_failed", errMsg);
+          recordStartupPhase("fatal", {
+            port: apiPort,
+            child_pid: proc.pid,
+            error: errMsg,
+            exit_code: proc.exitCode,
+          });
           this.emitStatus();
           return this.status;
         }
@@ -776,29 +1385,55 @@ export class AgentManager {
           startedAt: null,
           error: errMsg,
         };
+        recordStartupPhase("fatal", {
+          port: apiPort,
+          child_pid: proc.pid,
+          error: errMsg,
+        });
+        this.setStartupPhase("startup_failed", errMsg);
+        recordStartupPhase("fatal", {
+          port: apiPort,
+          child_pid: proc.pid,
+          error: errMsg,
+        });
         this.emitStatus();
         return this.status;
       }
+      recordStartupPhase("health_ready", {
+        port: apiPort,
+        child_pid: proc.pid,
+      });
 
-      // Fetch agent name from the running server
-      const agentName = await this.fetchAgentName(apiPort);
+      this.setStartupPhase("fetching_agent_metadata");
+      const startedAt = Date.now();
+      const startupMs = startedAt - spawnTime;
 
       this.status = {
         state: "running",
-        agentName,
+        agentName: "Milady",
         port: apiPort,
-        startedAt: Date.now(),
+        startedAt,
         error: null,
       };
+      this.setStartupPhase("ready", null);
       this.emitStatus();
       diagnosticLog(
-        `[Agent] Runtime started -- agent: ${agentName}, port: ${apiPort}, pid: ${proc.pid}, startup_ms: ${Date.now() - spawnTime}`,
+        `[Agent] Runtime ready -- port: ${apiPort}, pid: ${proc.pid}, startup_ms: ${startupMs}`,
       );
+      recordStartupPhase("runtime_ready", {
+        port: apiPort,
+        child_pid: proc.pid,
+      });
+      void this.refreshAgentMetadata(proc, apiPort, startupMs);
       return this.status;
     } catch (err) {
       const errMsg =
         err instanceof Error ? err.stack || err.message : String(err);
       diagnosticLog(`[Agent] Failed to start: ${errMsg}`);
+      recordStartupPhase("fatal", {
+        port: this.status.port,
+        error: errMsg,
+      });
 
       // Clean up child if it was spawned
       if (this.childProcess) {
@@ -812,6 +1447,7 @@ export class AgentManager {
         startedAt: null,
         error: shortError(err),
       };
+      this.setStartupPhase("startup_failed", shortError(err));
       this.emitStatus();
       return this.status;
     }
@@ -824,6 +1460,7 @@ export class AgentManager {
     }
 
     diagnosticLog("[Agent] Stopping...");
+    this.setStartupPhase("stopping");
 
     // Abort stdio watchers
     if (this.stdioAbortController) {
@@ -840,6 +1477,7 @@ export class AgentManager {
       startedAt: null,
       error: null,
     };
+    this.setStartupPhase("stopped", null);
     this.emitStatus();
     diagnosticLog("[Agent] Runtime stopped");
   }
@@ -850,13 +1488,54 @@ export class AgentManager {
    */
   async restart(): Promise<AgentStatus> {
     diagnosticLog("[Agent] Restart requested -- stopping current runtime...");
+    this.setStartupPhase("restart_requested");
     await this.stop();
     diagnosticLog("[Agent] Restarting...");
     return this.start();
   }
 
+  /**
+   * Used after `POST /api/agent/reset`: stop the child, delete local PGLite
+   * (conversations / agent memory under ~/.milady/workspace/.eliza/.elizadb),
+   * then start fresh. Does not remove downloaded **GGUF** models (`MODELS_DIR`,
+   * default ~/.eliza/models), env-backed wallet keys, or eliza.json (the API
+   * reset already rewrote config on disk).
+   *
+   * When `MILADY_DESKTOP_API_BASE` points at an external dev API (e.g. :31337),
+   * the embedded child is never used — this is a no-op so the renderer can
+   * bounce the real API via `POST /api/agent/restart` instead.
+   */
+  async restartClearingLocalDb(): Promise<AgentStatus> {
+    const runtimeMode = resolveDesktopRuntimeMode(
+      process.env as Record<string, string | undefined>,
+    );
+    if (runtimeMode.mode !== "local") {
+      diagnosticLog(
+        `[Agent] restartClearingLocalDb skipped — mode=${runtimeMode.mode} externalBase=${runtimeMode.externalApi.base ?? "n/a"} source=${runtimeMode.externalApi.source ?? "n/a"} (renderer uses POST /api/agent/restart)`,
+      );
+      return this.getStatus();
+    }
+
+    diagnosticLog(
+      `[Agent] restartClearingLocalDb: local mode — stop → rm PGLite (${resolvePgliteDataDir()}) → start`,
+    );
+    await this.stop();
+    this.hasPgliteError = false;
+    this.pgliteRecoveryDone = false;
+    deletePgliteDataDir();
+    const next = await this.start();
+    diagnosticLog(
+      `[Agent] restartClearingLocalDb: start() finished state=${next.state} port=${next.port ?? "null"}`,
+    );
+    return next;
+  }
+
   getStatus(): AgentStatus {
     return { ...this.status };
+  }
+
+  inspectExistingInstall(): ExistingElizaInstallInfo {
+    return inspectExistingElizaInstall();
   }
 
   getPort(): number | null {
@@ -864,17 +1543,19 @@ export class AgentManager {
   }
 
   /** Clean up on app quit. */
-  dispose(): void {
+  async dispose(): Promise<void> {
     if (this.stdioAbortController) {
       this.stdioAbortController.abort();
       this.stdioAbortController = null;
     }
-    this.killChildProcess().catch((err) =>
+    try {
+      await this.killChildProcess();
+    } catch (err) {
       console.warn(
         "[Agent] dispose error:",
         err instanceof Error ? err.message : err,
-      ),
-    );
+      );
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -882,6 +1563,7 @@ export class AgentManager {
   // -----------------------------------------------------------------------
 
   private emitStatus(): void {
+    this.persistStartupDiagnostics();
     if (this.sendToWebview) {
       this.sendToWebview("agentStatusUpdate", this.status);
     }
@@ -893,6 +1575,58 @@ export class AgentManager {
         console.warn("[Agent] status listener failed:", err);
       }
     }
+  }
+
+  private async refreshAgentMetadata(
+    proc: BunSubprocess,
+    port: number,
+    startupMs: number,
+  ): Promise<void> {
+    const agentName = await this.fetchAgentName(port);
+    if (
+      this.childProcess !== proc ||
+      this.status.state !== "running" ||
+      this.status.port !== port
+    ) {
+      return;
+    }
+
+    if (this.status.agentName !== agentName) {
+      this.status = {
+        ...this.status,
+        agentName,
+      };
+      this.emitStatus();
+    }
+
+    diagnosticLog(
+      `[Agent] Runtime started -- agent: ${agentName}, port: ${port}, pid: ${proc.pid}, startup_ms: ${startupMs}`,
+    );
+    recordStartupPhase("metadata_ready", {
+      port,
+      child_pid: proc.pid,
+    });
+  }
+  private setStartupPhase(phase: string, lastError?: string | null): void {
+    this.startupPhase = phase;
+    this.persistStartupDiagnostics(lastError);
+  }
+
+  private persistStartupDiagnostics(lastError?: string | null): void {
+    writeStartupDiagnosticsSnapshot({
+      state: this.status.state,
+      phase: this.startupPhase,
+      updatedAt: new Date().toISOString(),
+      lastError: lastError ?? this.status.error,
+      agentName: this.status.agentName,
+      port: this.status.port,
+      startedAt: this.status.startedAt,
+      platform: process.platform,
+      arch: process.arch,
+      configDir: resolveConfigDir(),
+      logPath: getDiagnosticLogPath(),
+      statusPath: getStartupStatusPath(),
+    });
   }
 
   /**
@@ -912,6 +1646,12 @@ export class AgentManager {
           diagnosticLog(
             `[Agent] Child process exited unexpectedly with code ${exitCode} (pid: ${proc.pid})`,
           );
+          recordStartupPhase("fatal", {
+            port: this.status.port,
+            child_pid: proc.pid,
+            error: `Process exited unexpectedly with code ${exitCode}`,
+            exit_code: exitCode,
+          });
           this.childProcess = null;
 
           // Auto-recover from PGLite migration failures by deleting the DB
@@ -929,6 +1669,7 @@ export class AgentManager {
               startedAt: null,
               error: null,
             };
+            this.setStartupPhase("recovering_pglite");
             // Delay slightly so OS releases file handles before respawn
             setTimeout(() => void this.start(), 500);
             return;
@@ -941,6 +1682,10 @@ export class AgentManager {
             startedAt: null,
             error: `Process exited unexpectedly with code ${exitCode}`,
           };
+          this.setStartupPhase(
+            "process_exited_unexpectedly",
+            `Process exited unexpectedly with code ${exitCode}`,
+          );
           this.emitStatus();
         } else {
           // Expected exit (we called stop)
@@ -952,6 +1697,11 @@ export class AgentManager {
         diagnosticLog(
           `[Agent] Child process exited with error: ${err instanceof Error ? err.message : String(err)}`,
         );
+        recordStartupPhase("fatal", {
+          port: this.status.port,
+          child_pid: proc.pid,
+          error: err instanceof Error ? err.message : String(err),
+        });
         this.childProcess = null;
         if (
           this.status.state === "running" ||
@@ -964,6 +1714,7 @@ export class AgentManager {
             startedAt: null,
             error: shortError(err),
           };
+          this.setStartupPhase("process_exit_error", shortError(err));
           this.emitStatus();
         }
       });
@@ -1013,8 +1764,10 @@ export class AgentManager {
    */
   private async fetchAgentName(port: number): Promise<string> {
     try {
+      const headers = getDesktopApiHeaders();
       const response = await fetch(`http://127.0.0.1:${port}/api/agents`, {
-        signal: AbortSignal.timeout(5_000),
+        headers,
+        signal: AbortSignal.timeout(AGENT_NAME_FETCH_TIMEOUT_MS),
       });
       if (response.ok) {
         const data = (await response.json()) as {

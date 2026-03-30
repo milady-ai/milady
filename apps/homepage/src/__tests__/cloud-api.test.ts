@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getToken, setToken } from "../lib/auth";
 import { CloudApiClient, CloudClient } from "../lib/cloud-api";
 
 const mockFetch = vi.fn();
@@ -28,6 +29,36 @@ describe("CloudApiClient", () => {
       expect.objectContaining({ method: "GET" }),
     );
     expect(result.status).toBe("ok");
+  });
+
+  it("health() returns a running probe response when /api/health is unauthorized", async () => {
+    // With no authToken, a 401 immediately returns a synthetic "running" response.
+    // No additional probes are made — a 401 proves the agent is alive.
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+    await expect(client.health()).resolves.toEqual({
+      status: "ok",
+      ready: true,
+      uptime: 0,
+      agentState: "running",
+      _synthetic: true,
+    });
+
+    // Only one request made (no fallback probe)
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("health() preserves invalid-token failures when auth is provided", async () => {
+    const remoteClient = new CloudApiClient({
+      url: "https://agent.example.com",
+      type: "remote",
+      authToken: "bad-token",
+    });
+
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+    await expect(remoteClient.health()).rejects.toThrow("API 401: /api/health");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("startAgent() calls POST /api/agent/start", async () => {
@@ -79,6 +110,25 @@ describe("CloudApiClient", () => {
     expect(result).toBeInstanceOf(Blob);
   });
 
+  it("exportAgent() forwards Authorization for remote agents", async () => {
+    const remoteClient = new CloudApiClient({
+      url: "https://agent.example.com",
+      type: "remote",
+      authToken: "secret-token",
+    });
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      blob: () => Promise.resolve(new Blob(["data"])),
+    });
+
+    await remoteClient.exportAgent("mypass");
+
+    const headers = mockFetch.mock.calls[0][1].headers as Headers;
+    expect(headers.get("Authorization")).toBe("Bearer secret-token");
+  });
+
   it("stopAgent() calls POST /api/agent/stop", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -117,7 +167,7 @@ describe("CloudApiClient", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("getAgentStatus() calls GET /api/agent/status", async () => {
+  it("getAgentStatus() reads /api/status first", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -129,8 +179,87 @@ describe("CloudApiClient", () => {
         }),
     });
     const result = await client.getAgentStatus();
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:2138/api/status",
+      expect.objectContaining({ method: "GET" }),
+    );
     expect(result.agentName).toBe("Test");
     expect(result.state).toBe("running");
+  });
+
+  it("getAgentStatus() returns running immediately when /api/status is unauthorized (no token)", async () => {
+    // With no authToken, a 401 immediately returns a synthetic "running" response.
+    // No additional probes are made — the agent is alive but auth-protected.
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+    await expect(client.getAgentStatus()).resolves.toEqual({
+      state: "running",
+      agentName: "",
+      model: "—",
+      uptime: 0,
+    });
+
+    // Only one request made (no legacy fallback)
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("getAgentStatus() throws on unauthorized when auth token is provided", async () => {
+    // When a token is provided but rejected (401), that's a real auth failure.
+    // We don't fall back — the token should have worked.
+    const remoteClient = new CloudApiClient({
+      url: "https://agent.example.com",
+      type: "remote",
+      authToken: "bad-token",
+    });
+
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+    await expect(remoteClient.getAgentStatus()).rejects.toThrow(
+      "API 401: /api/status",
+    );
+
+    // Only one request made (no fallback when auth is provided)
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("getAgentStatus() throws on 404", async () => {
+    const miladyClient = new CloudApiClient({
+      url: "https://abc123.milady.ai",
+      type: "remote",
+    });
+
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 });
+
+    await expect(miladyClient.getAgentStatus()).rejects.toThrow(
+      "API 404: /api/status",
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("getAgentStatus() throws immediately on server error (no fallback)", async () => {
+    // For server errors (500), we throw immediately without trying legacy.
+    // Legacy fallback is only for 404 (endpoint not implemented).
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+
+    await expect(client.getAgentStatus()).rejects.toThrow(
+      "API 500: /api/status",
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("health() throws on 404", async () => {
+    const miladyClient = new CloudApiClient({
+      url: "https://abc123.milady.ai",
+      type: "remote",
+    });
+
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 });
+
+    await expect(miladyClient.health()).rejects.toThrow("API 404: /api/health");
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("getMetrics() calls GET /api/metrics", async () => {
@@ -206,6 +335,26 @@ describe("CloudApiClient", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("importAgent() forwards Authorization for remote agents", async () => {
+    const remoteClient = new CloudApiClient({
+      url: "https://agent.example.com",
+      type: "remote",
+      authToken: "secret-token",
+    });
+    const mockFile = new File(["file-content"], "test.bin");
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ ok: true }),
+    });
+
+    await remoteClient.importAgent(mockFile, "pass");
+
+    const headers = mockFetch.mock.calls[0][1].headers as Headers;
+    expect(headers.get("Authorization")).toBe("Bearer secret-token");
+  });
+
   it("getBilling() calls GET /api/billing", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -248,7 +397,7 @@ describe("CloudClient", () => {
     });
     const agents = await cc.listAgents();
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://www.elizacloud.ai/api/v1/milady/agents",
+      expect.stringContaining("/api/v1/milady/agents"),
       expect.objectContaining({ method: "GET" }),
     );
     // Verify X-Api-Key header
@@ -267,7 +416,7 @@ describe("CloudClient", () => {
     });
     await cc.suspendAgent("agent-123");
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://www.elizacloud.ai/api/v1/milady/agents/agent-123/suspend",
+      expect.stringContaining("/api/v1/milady/agents/agent-123/suspend"),
       expect.objectContaining({ method: "POST" }),
     );
   });
@@ -280,7 +429,7 @@ describe("CloudClient", () => {
     });
     const result = await cc.resumeAgent("agent-123");
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://www.elizacloud.ai/api/v1/milady/agents/agent-123/resume",
+      expect.stringContaining("/api/v1/milady/agents/agent-123/resume"),
       expect.objectContaining({ method: "POST" }),
     );
     expect(result.jobId).toBe("job-1");
@@ -294,7 +443,7 @@ describe("CloudClient", () => {
     });
     const balance = await cc.getCreditsBalance();
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://www.elizacloud.ai/api/credits/balance",
+      expect.stringContaining("/api/credits/balance"),
       expect.objectContaining({ method: "GET" }),
     );
     expect(balance.balance).toBe(5000);
@@ -308,7 +457,7 @@ describe("CloudClient", () => {
     });
     await cc.takeSnapshot("agent-123");
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://www.elizacloud.ai/api/v1/milady/agents/agent-123/snapshot",
+      expect.stringContaining("/api/v1/milady/agents/agent-123/snapshot"),
       expect.objectContaining({ method: "POST" }),
     );
   });
@@ -331,6 +480,50 @@ describe("CloudClient", () => {
       json: () => Promise.resolve({ error: "forbidden" }),
     });
     await expect(cc.listAgents()).rejects.toThrow("Cloud API 403");
+  });
+
+  it("clears stored token when listAgents returns auth failure", async () => {
+    setToken("stale-key");
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({ error: "Invalid or expired API key" }),
+      text: () => Promise.resolve("Invalid or expired API key"),
+    });
+
+    await expect(cc.listAgents()).rejects.toThrow("Invalid or expired API key");
+    expect(getToken()).toBeNull();
+  });
+
+  it("does NOT clear token when secondary endpoints fail with auth error", async () => {
+    // Secondary endpoints (credits, billing, sessions) should fail gracefully
+    // without nuking the auth state — they may not exist on the backend yet
+    setToken("valid-key");
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({ error: "Unauthorized" }),
+      text: () => Promise.resolve("Unauthorized"),
+    });
+
+    await expect(cc.getCreditsBalance()).rejects.toThrow("401");
+    // Token should still be present
+    expect(getToken()).toBe("valid-key");
+  });
+
+  it("does NOT clear token on generic 500 Internal Server Error", async () => {
+    // A generic 500 shouldn't be treated as an auth failure
+    setToken("valid-key");
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({ error: "Internal Server Error" }),
+      text: () => Promise.resolve("Internal Server Error"),
+    });
+
+    await expect(cc.listAgents()).rejects.toThrow("500");
+    // Token should still be present since it's a server error, not auth error
+    expect(getToken()).toBe("valid-key");
   });
 
   it("deleteAgent() calls DELETE", async () => {
@@ -363,8 +556,10 @@ describe("CloudClient", () => {
       status: 200,
       json: () => Promise.resolve({ result: { state: "running" } }),
     });
-    const result = await cc.bridge("agent-1", "status.get");
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const result = (await cc.bridge("agent-1", "status.get")) as {
+      result: { state: string };
+    };
+    const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
     expect(body.method).toBe("status.get");
     expect(body.jsonrpc).toBe("2.0");
     expect(body.id).toBeDefined();
@@ -426,12 +621,12 @@ describe("CloudClient", () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ id: "new-agent" }),
+      json: () => Promise.resolve({ success: true, data: { id: "new-agent" } }),
     });
     const result = await cc.createAgent({ name: "Test Agent" });
     expect(result.id).toBe("new-agent");
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.name).toBe("Test Agent");
+    expect(body.agentName).toBe("Test Agent");
   });
 
   it("getAgent() calls GET /api/v1/milady/agents/:id", async () => {

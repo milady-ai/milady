@@ -1,10 +1,6 @@
-/**
- * SubscriptionStatus — Anthropic and OpenAI subscription connection panels.
- *
- * Extracted from SettingsView.tsx for decomposition (P2 §10).
- */
+/** SubscriptionStatus — Anthropic and OpenAI subscription connection panels. */
 
-import { Button, Input } from "@miladyai/ui";
+import { Button, Input, Label } from "@miladyai/ui";
 import { useCallback, useRef, useState } from "react";
 import { client } from "../api";
 import { useTimeout } from "../hooks";
@@ -314,7 +310,7 @@ export function SubscriptionStatus({
           : msg,
       );
     } catch (err) {
-      console.warn("[milady] OpenAI exchange failed", err);
+      console.warn("[eliza] OpenAI exchange failed", err);
       setOpenaiError(t("onboarding.networkError"));
     } finally {
       openaiExchangeBusyRef.current = false;
@@ -355,8 +351,8 @@ export function SubscriptionStatus({
                 }
               >
                 {subscriptionDisconnecting === "anthropic-subscription"
-                  ? t("subscriptionstatus.Disconnecting")
-                  : t("subscriptionstatus.Disconnect")}
+                  ? t("providerswitcher.disconnecting")
+                  : t("providerswitcher.disconnect")}
               </Button>
             )}
           </div>
@@ -368,38 +364,42 @@ export function SubscriptionStatus({
           )}
 
           <div className="flex items-center gap-4 border-b border-[var(--border)] mb-3">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               type="button"
-              className={`text-xs pb-2 border-b-2 ${
+              className={`text-xs pb-2 border-b-2 rounded-none ${
                 subscriptionTab === "token"
                   ? "border-[var(--accent)] text-[var(--accent)]"
                   : "border-transparent text-[var(--muted)] hover:text-[var(--text)]"
               }`}
               onClick={() => setSubscriptionTab("token")}
             >
-              {t("subscriptionstatus.SetupToken")}
-            </button>
-            <button
+              {t("onboarding.setupToken")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               type="button"
-              className={`text-xs pb-2 border-b-2 ${
+              className={`text-xs pb-2 border-b-2 rounded-none ${
                 subscriptionTab === "oauth"
                   ? "border-[var(--accent)] text-[var(--accent)]"
                   : "border-transparent text-[var(--muted)] hover:text-[var(--text)]"
               }`}
               onClick={() => setSubscriptionTab("oauth")}
             >
-              {t("subscriptionstatus.OAuthLogin")}
-            </button>
+              {t("onboarding.oauthLogin")}
+            </Button>
           </div>
 
           {subscriptionTab === "token" ? (
             <div>
-              <label
+              <Label
                 htmlFor="subscription-setup-token-input"
                 className="text-xs font-semibold mb-1.5 block"
               >
-                {t("subscriptionstatus.SetupToken")}
-              </label>
+                {t("onboarding.setupToken")}
+              </Label>
               <Input
                 id="subscription-setup-token-input"
                 type="password"
@@ -429,7 +429,7 @@ export function SubscriptionStatus({
                   onClick={() => void handleSaveSetupToken()}
                 >
                   {setupTokenSaving
-                    ? t("subscriptionstatus.Saving")
+                    ? t("apikeyconfig.saving")
                     : t("subscriptionstatus.SaveToken")}
                 </Button>
                 <div className="flex items-center gap-2">
@@ -440,7 +440,7 @@ export function SubscriptionStatus({
                   )}
                   {setupTokenSuccess && (
                     <span className="text-[11px] text-[var(--ok,#16a34a)]">
-                      {t("messagecontent.Saved")}
+                      {t("apikeyconfig.saved")}
                     </span>
                   )}
                 </div>
@@ -547,8 +547,8 @@ export function SubscriptionStatus({
                 disabled={subscriptionDisconnecting === "openai-subscription"}
               >
                 {subscriptionDisconnecting === "openai-subscription"
-                  ? t("subscriptionstatus.Disconnecting")
-                  : t("subscriptionstatus.Disconnect")}
+                  ? t("providerswitcher.disconnecting")
+                  : t("providerswitcher.disconnect")}
               </Button>
             )}
           </div>
@@ -571,7 +571,7 @@ export function SubscriptionStatus({
                 className="!mt-0"
                 onClick={() => void handleOpenAIStart()}
               >
-                {t("subscriptionstatus.LoginWithOpenAI")}
+                {t("onboarding.loginWithOpenAI")}
               </Button>
               <div className="text-[11px] text-[var(--muted)] mt-1.5">
                 {t("subscriptionstatus.RequiresChatGPTPlu")}

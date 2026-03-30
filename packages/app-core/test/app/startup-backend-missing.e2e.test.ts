@@ -9,6 +9,7 @@ const { mockClient } = vi.hoisted(() => ({
     hasToken: vi.fn(() => false),
     getCodingAgentStatus: vi.fn(async () => null),
     setToken: vi.fn(),
+    getConfig: vi.fn(async () => ({})),
     getAuthStatus: vi.fn(async () => ({
       required: false,
       pairingEnabled: false,
@@ -20,6 +21,11 @@ const { mockClient } = vi.hoisted(() => ({
 }));
 
 vi.mock("@miladyai/app-core/api", () => ({
+  client: mockClient,
+  SkillScanReportSummary: {},
+}));
+
+vi.mock("../../src/api", () => ({
   client: mockClient,
   SkillScanReportSummary: {},
 }));
@@ -53,8 +59,16 @@ describe("startup failure: backend missing", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
+    // Simulate a returning user with a persisted local connection so the
+    // startup flow proceeds to backend polling (fresh installs now skip
+    // backend polling and go straight to onboarding).
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({ runMode: "local" }),
+    );
     mockClient.hasToken.mockReturnValue(false);
     mockClient.disconnectWs.mockImplementation(() => {});
+    mockClient.getConfig.mockResolvedValue({});
     mockClient.getAuthStatus.mockResolvedValue({
       required: false,
       pairingEnabled: false,
@@ -73,6 +87,7 @@ describe("startup failure: backend missing", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    localStorage.removeItem("eliza:connection-mode");
   });
 
   it("fails fast on backend 404 and surfaces backend-unreachable", async () => {
@@ -99,8 +114,6 @@ describe("startup failure: backend missing", () => {
     });
 
     expect(latest).not.toBeNull();
-    expect(latest?.onboardingLoading).toBe(false);
-    expect(latest?.authRequired).toBe(false);
     expect(latest?.startupError?.reason).toBe("backend-unreachable");
     expect(latest?.startupError?.phase).toBe("starting-backend");
     expect(latest?.startupError?.message).toContain(

@@ -23,15 +23,8 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-import { PluginsView } from "@miladyai/app-core/components/PluginsView";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { PluginsView } from "../../src/components/PluginsView";
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 function baseContext() {
   return {
@@ -104,7 +97,7 @@ describe("PluginsView restart-aware toggles", () => {
 
     expect(mockHandlePluginToggle).toHaveBeenCalledTimes(1);
     expect(getToggle().props.disabled).toBe(true);
-    expect(String(getToggle().props.children)).toContain("APPLYING");
+    expect(String(getToggle().props.children)).toContain("pluginsview.Applying");
     expect(
       tree?.root.findAll(
         (node) =>

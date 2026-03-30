@@ -6,13 +6,13 @@ import {
   DialogTitle,
   Input,
   SectionCard,
+  Switch,
 } from "@miladyai/ui";
 import {
   AlertCircle,
   CircleDollarSign,
   CreditCard,
   ExternalLink,
-  LayoutDashboard,
   Loader2,
   Plus,
   RefreshCw,
@@ -32,45 +32,65 @@ import {
   type CloudCompatAgent,
   client,
 } from "../api";
-import { useApp } from "../state";
+import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
+import { getVrmPreviewUrl, useApp } from "../state";
 import { openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
 
-const ELIZA_CLOUD_LOGIN_URL =
-  "https://www.elizacloud.ai/login?returnTo=%2Fdashboard%2Fmilady";
-const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/milady";
+const ELIZA_CLOUD_INSTANCES_URL = "https://www.elizacloud.ai/dashboard/eliza";
+/** Marketing / docs site — “Learn more” when not connected (in-app browser on desktop). */
+const ELIZA_CLOUD_WEB_URL = "https://elizacloud.ai";
 const BILLING_PRESET_AMOUNTS = [10, 25, 100];
+const CLOUD_PANEL_CLASSNAME =
+  "rounded-2xl border border-border/60 bg-card/88 p-4 shadow-sm";
+const CLOUD_INSET_PANEL_CLASSNAME =
+  "rounded-xl border border-border/50 bg-bg/30 p-4";
+const CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME =
+  "text-txt-strong hover:text-txt-strong";
+const CLOUD_STATUS_API_KEY_ONLY_REASONS: ReadonlySet<string> = new Set([
+  "api_key_present_not_authenticated",
+  "api_key_present_runtime_not_started",
+]);
 
-const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   running: {
-    label: "Running",
+    i18nKey: "elizaclouddashboard.statusRunning",
     className: "bg-ok/10 text-ok border-ok/20",
   },
   queued: {
-    label: "Queued",
+    i18nKey: "elizaclouddashboard.statusQueued",
     className: "bg-warn/10 text-warn border-warn/20",
   },
   provisioning: {
-    label: "Provisioning",
+    i18nKey: "elizaclouddashboard.statusProvisioning",
     className: "bg-accent/10 text-txt border-accent/20",
   },
   stopped: {
-    label: "Stopped",
+    i18nKey: "elizaclouddashboard.statusStopped",
     className: "bg-muted/10 text-muted border-border/40",
   },
   failed: {
-    label: "Failed",
+    i18nKey: "elizaclouddashboard.statusFailed",
     className: "bg-danger/10 text-danger border-danger/20",
   },
 };
 
+function getCloudAuthToken(): string {
+  if (typeof window === "undefined") return "";
+  return (
+    ((window as unknown as Record<string, unknown>)
+      .__ELIZA_CLOUD_AUTH_TOKEN__ as string) || ""
+  );
+}
+
 function AgentStatusBadge({ status }: { status: string }) {
+  const { t } = useApp();
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.stopped;
   return (
     <span
       className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${badge?.className}`}
     >
-      {badge?.label}
+      {t(badge?.i18nKey)}
     </span>
   );
 }
@@ -81,19 +101,30 @@ function CloudAgentCard({
   deleting,
   launching,
   onLaunch,
+  onOpenUI,
+  openingUI,
   onSelect,
+  selected = false,
 }: {
   agent: CloudCompatAgent;
   onDelete: (id: string) => void;
   deleting: boolean;
   launching: boolean;
   onLaunch: (id: string) => void;
+  onOpenUI: (id: string) => void;
+  openingUI: boolean;
   onSelect?: (id: string) => void;
+  selected?: boolean;
 }) {
+  const { t } = useApp();
   return (
     // biome-ignore lint/a11y/useSemanticElements: cannot use button due to nested buttons
     <div
-      className="rounded-2xl border border-border/50 bg-bg/30 p-5 flex flex-col justify-between gap-4 hover:border-accent/30 transition-all duration-200 cursor-pointer"
+      className={`flex cursor-pointer flex-col justify-between gap-4 rounded-2xl border p-5 transition-all duration-200 ${
+        selected
+          ? "border-accent/45 bg-accent/8 shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.12),0_14px_30px_rgba(0,0,0,0.12)]"
+          : "border-border/60 bg-card/88 shadow-sm hover:border-accent/30"
+      }`}
       onClick={() => onSelect?.(agent.agent_id)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -104,36 +135,51 @@ function CloudAgentCard({
       role="button"
       tabIndex={0}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Server className="w-4 h-4 text-txt shrink-0" />
-          <span className="font-bold text-sm text-txt-strong truncate max-w-[140px]">
-            {agent.agent_name || "Unnamed Agent"}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {(() => {
+            const agentName = agent.agent_name ?? "";
+            const avatarIndex =
+              (agentName
+                .split("")
+                .reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+                8) +
+              1;
+            return (
+              <img
+                src={getVrmPreviewUrl(avatarIndex)}
+                alt={agentName}
+                className="w-7 h-7 rounded-full object-cover shrink-0 border border-border/40"
+              />
+            );
+          })()}
+          <span className="max-w-[16rem] truncate text-sm font-bold text-txt-strong">
+            {agent.agent_name || t("elizaclouddashboard.unnamedAgent")}
           </span>
         </div>
         <AgentStatusBadge status={agent.status} />
       </div>
 
-      <div className="text-[11px] text-muted space-y-1">
-        <div className="flex justify-between">
-          <span>Node</span>
-          <span className="font-mono text-txt-strong/70">
+      <div className="space-y-1 text-[11px] text-muted">
+        <div className="flex items-center justify-between gap-3">
+          <span>{t("elizaclouddashboard.node")}</span>
+          <span className="truncate font-mono text-txt-strong/70">
             {agent.node_id?.slice(0, 8) ?? "—"}
           </span>
         </div>
-        <div className="flex justify-between">
-          <span>Created</span>
-          <span className="text-txt-strong/70">
+        <div className="flex items-center justify-between gap-3">
+          <span>{t("elizaclouddashboard.created")}</span>
+          <span className="text-right text-txt-strong/70">
             {new Date(agent.created_at).toLocaleDateString()}
           </span>
         </div>
       </div>
 
-      <div className="flex gap-2 mt-1">
+      <div className="mt-1 flex flex-col gap-2 sm:flex-row">
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 rounded-xl h-8 text-xs border-border/40"
+          className="h-9 flex-1 rounded-xl border-border/40 text-xs"
           onClick={(event) => {
             event.stopPropagation();
             onLaunch(agent.agent_id);
@@ -145,13 +191,13 @@ function CloudAgentCard({
           ) : (
             <ExternalLink className="w-3 h-3 mr-1" />
           )}
-          Open
+          {t("elizaclouddashboard.open")}
         </Button>
 
         <Button
           variant="outline"
           size="sm"
-          className="settings-icon-button rounded-xl h-8 text-xs border-danger/30 text-danger hover:bg-danger/10"
+          className="h-9 rounded-xl border-danger/30 px-0 text-xs text-danger hover:bg-danger/10 sm:w-10"
           onClick={(event) => {
             event.stopPropagation();
             onDelete(agent.agent_id);
@@ -171,6 +217,31 @@ function CloudAgentCard({
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isCloudStatusReasonApiKeyOnly(
+  reason: string | null | undefined,
+): boolean {
+  return (
+    typeof reason === "string" && CLOUD_STATUS_API_KEY_ONLY_REASONS.has(reason)
+  );
+}
+
+function resolveCloudAccountIdDisplay(
+  userId: string | null,
+  statusReason: string | null,
+  t: (key: string) => string,
+): { mono: boolean; text: string } {
+  if (userId) {
+    return { mono: true, text: userId };
+  }
+  if (isCloudStatusReasonApiKeyOnly(statusReason)) {
+    return { mono: false, text: t("elizaclouddashboard.AccountIdApiKeyOnly") };
+  }
+  return {
+    mono: false,
+    text: t("elizaclouddashboard.AccountIdSessionNoUserId"),
+  };
 }
 
 function unwrapBillingData<T extends Record<string, unknown>>(value: T): T {
@@ -330,8 +401,10 @@ export function CloudDashboard() {
     elizaCloudCredits,
     elizaCloudCreditsLow,
     elizaCloudCreditsCritical,
+    elizaCloudAuthRejected,
     elizaCloudTopUpUrl,
     elizaCloudUserId,
+    elizaCloudStatusReason,
     cloudDashboardView,
     elizaCloudLoginBusy,
     handleCloudLogin,
@@ -363,18 +436,22 @@ export function CloudDashboard() {
   const [checkoutSession, setCheckoutSession] =
     useState<CloudBillingCheckoutResponse | null>(null);
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
-  const [cryptoBusy, setCryptoBusy] = useState(false);
+  const [_cryptoBusy, setCryptoBusy] = useState(false);
   const [cryptoQuote, setCryptoQuote] = useState<Record<
     string,
     unknown
   > | null>(null);
-  const [cryptoPayBusy, setCryptoPayBusy] = useState(false);
-  const [cryptoPayResult, setCryptoPayResult] = useState<string | null>(null);
+  const [_cryptoPayBusy, setCryptoPayBusy] = useState(false);
+  const [_cryptoPayResult, setCryptoPayResult] = useState<string | null>(null);
   const [cloudAgents, setCloudAgents] = useState<CloudCompatAgent[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(false);
   const [agentsError, setAgentsError] = useState<string | null>(null);
+  const [cloudNotReady, setCloudNotReady] = useState(false);
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
   const [launchingAgentId, setLaunchingAgentId] = useState<string | null>(null);
+  const [openingWebUiAgentId, setOpeningWebUiAgentId] = useState<string | null>(
+    null,
+  );
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const selectedAgent = cloudAgents.find((a) => a.agent_id === selectedAgentId);
   const [showDeployForm, setShowDeployForm] = useState(false);
@@ -388,20 +465,29 @@ export function CloudDashboard() {
   const fetchCloudAgents = useCallback(async () => {
     setAgentsLoading(true);
     setAgentsError(null);
+    setCloudNotReady(false);
     try {
       const data = await client.getCloudCompatAgents();
       if (!mountedRef.current) return;
       setCloudAgents(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
       if (!mountedRef.current) return;
-      setAgentsError(
-        err instanceof Error ? err.message : "Failed to load cloud agents",
-      );
+      const msg =
+        err instanceof Error
+          ? err.message
+          : t("elizaclouddashboard.FailedToLoadCloudAgents", {
+              defaultValue: "Failed to load cloud agents",
+            });
+      if (msg.includes("not available yet")) {
+        setCloudNotReady(true);
+      } else {
+        setAgentsError(msg);
+      }
       setCloudAgents([]);
     } finally {
       if (mountedRef.current) setAgentsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchBillingData = useCallback(async () => {
     setBillingLoading(true);
@@ -420,7 +506,11 @@ export function CloudDashboard() {
         const err = summaryResponse.__error;
         throw err instanceof Error
           ? err
-          : new Error("Billing summary unavailable.");
+          : new Error(
+              t("elizaclouddashboard.BillingSummaryUnavailable", {
+                defaultValue: "Billing summary unavailable.",
+              }),
+            );
       }
 
       setBillingSummary(normalizeBillingSummary(summaryResponse));
@@ -435,14 +525,18 @@ export function CloudDashboard() {
       setBillingSummary(null);
       setBillingSettings(null);
       setBillingError(
-        err instanceof Error ? err.message : "Failed to load billing data.",
+        err instanceof Error
+          ? err.message
+          : t("elizaclouddashboard.FailedToLoadBillingData", {
+              defaultValue: "Failed to load billing data.",
+            }),
       );
     } finally {
       if (mountedRef.current) {
         setBillingLoading(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     dispatchAutoTopUpForm({
@@ -488,13 +582,17 @@ export function CloudDashboard() {
     }
   }, [deployAgentName, fetchCloudAgents]);
 
-  const handleLaunchAgent = useCallback(
+  const _handleLaunchAgent = useCallback(
     async (agentId: string) => {
       setLaunchingAgentId(agentId);
       try {
         const response = await client.launchCloudCompatAgent(agentId);
         if (!response.success || !response.data?.connection?.apiBase) {
-          throw new Error("Eliza Cloud did not return a launch connection.");
+          throw new Error(
+            t("elizaclouddashboard.LaunchConnectionMissing", {
+              defaultValue: "Eliza Cloud did not return a launch connection.",
+            }),
+          );
         }
 
         const { connection } = response.data;
@@ -509,7 +607,9 @@ export function CloudDashboard() {
         setState("onboardingRemoteConnecting", false);
         setState("onboardingRemoteConnected", false);
         setActionNotice(
-          "Opened managed Eliza Cloud instance.",
+          t("elizaclouddashboard.OpenedManagedInstance", {
+            defaultValue: "Opened managed Eliza Cloud instance.",
+          }),
           "success",
           3000,
         );
@@ -519,7 +619,9 @@ export function CloudDashboard() {
         setActionNotice(
           err instanceof Error
             ? err.message
-            : "Failed to open Eliza Cloud instance.",
+            : t("elizaclouddashboard.FailedToOpenInstance", {
+                defaultValue: "Failed to open Eliza Cloud instance.",
+              }),
           "error",
           4200,
         );
@@ -529,7 +631,88 @@ export function CloudDashboard() {
         }
       }
     },
-    [retryStartup, setActionNotice, setState, setTab],
+    [retryStartup, setActionNotice, setState, setTab, t],
+  );
+
+  const handleOpenWebUI = useCallback(
+    async (agentId: string) => {
+      // Open a blank tab immediately (must be synchronous to avoid popup blockers)
+      const tab = window.open("", "_blank");
+      if (!tab) {
+        setActionNotice(
+          t("elizaclouddashboard.PopupBlocked", {
+            defaultValue: "Popup blocked. Please allow popups and try again.",
+          }),
+          "error",
+          4200,
+        );
+        return;
+      }
+
+      setOpeningWebUiAgentId(agentId);
+      try {
+        // Try local backend proxy first, then direct cloud call
+        let redirectUrl: string | undefined;
+
+        // Try local backend proxy first
+        try {
+          const response = await client.getCloudCompatPairingToken(agentId);
+          redirectUrl = response?.data?.redirectUrl;
+        } catch {
+          // proxy failed, fall through to direct call
+        }
+
+        // If proxy failed, try direct cloud call
+        if (!redirectUrl) {
+          const cloudBase = "https://www.elizacloud.ai";
+          const token =
+            getCloudAuthToken() || client.getRestAuthToken?.() || "";
+          try {
+            const directRes = await fetch(
+              `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "X-Api-Key": token,
+                },
+              },
+            );
+            if (directRes.ok) {
+              const json = await directRes.json();
+              redirectUrl = json?.data?.redirectUrl ?? json?.redirectUrl;
+            }
+          } catch {
+            // direct fetch failed, redirectUrl remains unset
+          }
+        }
+
+        if (!redirectUrl)
+          throw new Error("No redirectUrl from proxy or direct call");
+        if (!tab.closed) tab.location.href = redirectUrl;
+      } catch {
+        // Fallback: open the agent's web UI URL directly
+        const agent = cloudAgents.find((a) => a.agent_id === agentId);
+        const fallbackUrl = agent?.webUiUrl ?? agent?.web_ui_url;
+        if (fallbackUrl) {
+          if (!tab.closed) tab.location.href = fallbackUrl;
+        } else {
+          tab.close();
+          setActionNotice(
+            t("elizaclouddashboard.FailedToOpenWebUI", {
+              defaultValue: "Failed to open Web UI for this agent.",
+            }),
+            "error",
+            4200,
+          );
+        }
+      } finally {
+        if (mountedRef.current) {
+          setOpeningWebUiAgentId(null);
+        }
+      }
+    },
+    [cloudAgents, setActionNotice, t],
   );
 
   const handleRefresh = useCallback(async () => {
@@ -559,7 +742,12 @@ export function CloudDashboard() {
 
     if (!Number.isFinite(amount) || amount < minAmount || amount > maxAmount) {
       setActionNotice(
-        `Auto top-up amount must be between $${minAmount} and $${maxAmount}.`,
+        t("elizaclouddashboard.AutoTopUpAmountRange", {
+          defaultValue:
+            "Auto top-up amount must be between ${{min}} and ${{max}}.",
+          min: minAmount,
+          max: maxAmount,
+        }),
         "error",
         3600,
       );
@@ -572,7 +760,12 @@ export function CloudDashboard() {
       threshold > maxThreshold
     ) {
       setActionNotice(
-        `Auto top-up threshold must be between $${minThreshold} and $${maxThreshold}.`,
+        t("elizaclouddashboard.AutoTopUpThresholdRange", {
+          defaultValue:
+            "Auto top-up threshold must be between ${{min}} and ${{max}}.",
+          min: minThreshold,
+          max: maxThreshold,
+        }),
         "error",
         3600,
       );
@@ -581,7 +774,9 @@ export function CloudDashboard() {
 
     if (autoTopUpEnabled && !hasPaymentMethod) {
       setActionNotice(
-        "Save a payment method through card checkout before enabling auto top-up.",
+        t("elizaclouddashboard.SavePaymentMethodBeforeAutoTopUp", {
+          defaultValue: "Add a card first",
+        }),
         "info",
         4200,
       );
@@ -606,12 +801,20 @@ export function CloudDashboard() {
         force: true,
       });
       await fetchBillingData();
-      setActionNotice("Billing settings updated.", "success", 3200);
+      setActionNotice(
+        t("elizaclouddashboard.BillingSettingsUpdated", {
+          defaultValue: "Billing settings updated.",
+        }),
+        "success",
+        3200,
+      );
     } catch (err) {
       setActionNotice(
         err instanceof Error
           ? err.message
-          : "Failed to update billing settings.",
+          : t("elizaclouddashboard.FailedToUpdateBillingSettings", {
+              defaultValue: "Failed to update billing settings.",
+            }),
         "error",
         4200,
       );
@@ -628,6 +831,7 @@ export function CloudDashboard() {
     billingSummary,
     fetchBillingData,
     setActionNotice,
+    t,
   ]);
 
   const handleStartCheckout = useCallback(async () => {
@@ -638,7 +842,10 @@ export function CloudDashboard() {
     const amountUsd = Number(billingAmount);
     if (!Number.isFinite(amountUsd) || amountUsd < minimumTopUp) {
       setActionNotice(
-        `Enter a top-up amount of at least $${minimumTopUp}.`,
+        t("elizaclouddashboard.EnterTopUpAmountMinimum", {
+          defaultValue: "Enter a top-up amount of at least ${{amount}}.",
+          amount: minimumTopUp,
+        }),
         "error",
         3200,
       );
@@ -667,21 +874,27 @@ export function CloudDashboard() {
       }
 
       throw new Error(
-        readString(response.message) ??
-          "Eliza Cloud did not return a checkout session.",
+        t("elizaclouddashboard.CheckoutSessionMissing", {
+          defaultValue:
+            "Checkout unavailable. Try again or use the billing portal.",
+        }),
       );
     } catch (err) {
       setActionNotice(
-        err instanceof Error ? err.message : "Failed to start checkout.",
+        err instanceof Error
+          ? err.message
+          : t("elizaclouddashboard.FailedToStartCheckout", {
+              defaultValue: "Failed to start checkout.",
+            }),
         "error",
         4200,
       );
     } finally {
       setCheckoutBusy(false);
     }
-  }, [billingAmount, billingSummary, setActionNotice]);
+  }, [billingAmount, billingSummary, setActionNotice, t]);
 
-  const handleCreateCryptoQuote = useCallback(async () => {
+  const _handleCreateCryptoQuote = useCallback(async () => {
     const minimumTopUp =
       readNumber(
         (billingSummary as Record<string, unknown> | null)?.minimumTopUp,
@@ -689,7 +902,10 @@ export function CloudDashboard() {
     const amountUsd = Number(billingAmount);
     if (!Number.isFinite(amountUsd) || amountUsd < minimumTopUp) {
       setActionNotice(
-        `Enter a top-up amount of at least $${minimumTopUp}.`,
+        t("elizaclouddashboard.EnterTopUpAmountMinimum", {
+          defaultValue: "Enter a top-up amount of at least ${{amount}}.",
+          amount: minimumTopUp,
+        }),
         "error",
         3200,
       );
@@ -710,16 +926,20 @@ export function CloudDashboard() {
     } catch (err) {
       setCryptoQuote(null);
       setActionNotice(
-        err instanceof Error ? err.message : "Failed to request crypto quote.",
+        err instanceof Error
+          ? err.message
+          : t("elizaclouddashboard.FailedToRequestCryptoQuote", {
+              defaultValue: "Failed to request crypto quote.",
+            }),
         "error",
         4200,
       );
     } finally {
       setCryptoBusy(false);
     }
-  }, [billingAmount, billingSummary, setActionNotice, walletAddresses]);
+  }, [billingAmount, billingSummary, setActionNotice, walletAddresses, t]);
 
-  const handlePayCryptoFromAgentWallet = useCallback(async () => {
+  const _handlePayCryptoFromAgentWallet = useCallback(async () => {
     if (!cryptoQuote) return;
 
     const network = readString(cryptoQuote.network)?.toLowerCase();
@@ -732,7 +952,10 @@ export function CloudDashboard() {
 
     if (!network || network !== "bsc") {
       setActionNotice(
-        "Agent-wallet payment is currently wired for BSC quotes only.",
+        t("elizaclouddashboard.BscOnlyAgentWalletPayment", {
+          defaultValue:
+            "Agent-wallet payment is currently wired for BSC quotes only.",
+        }),
         "info",
         4200,
       );
@@ -741,7 +964,9 @@ export function CloudDashboard() {
 
     if (!payToAddress || !amount) {
       setActionNotice(
-        "Crypto quote is missing transfer details.",
+        t("elizaclouddashboard.CryptoQuoteMissingTransferDetails", {
+          defaultValue: "Crypto quote is missing transfer details.",
+        }),
         "error",
         4200,
       );
@@ -759,19 +984,77 @@ export function CloudDashboard() {
       });
 
       if (result.executed && result.execution?.hash) {
+        const stewardNote =
+          result.mode === "steward"
+            ? t("elizaclouddashboard.ViaStewardVault", {
+                defaultValue: " (via Steward vault)",
+              })
+            : "";
         setCryptoPayResult(
-          `Submitted ${currency} payment: ${result.execution.hash}`,
+          t("elizaclouddashboard.SubmittedPayment", {
+            defaultValue: "Submitted {{currency}} payment: {{hash}}{{note}}",
+            currency,
+            hash: result.execution.hash,
+            note: stewardNote,
+          }),
         );
         setActionNotice(
-          "Crypto payment submitted from the agent wallet.",
+          t("elizaclouddashboard.CryptoPaymentSubmitted", {
+            defaultValue:
+              "Crypto payment submitted from the agent wallet{{note}}.",
+            note: stewardNote,
+          }),
           "success",
         );
+      } else if (result.mode === "steward" && !result.requiresUserSignature) {
+        const execStatus = result.execution?.status;
+        if (execStatus === "pending_approval") {
+          setCryptoPayResult(
+            t("elizaclouddashboard.TransferAwaitingApproval", {
+              defaultValue: "Transfer is waiting for Steward policy approval.",
+            }),
+          );
+          setActionNotice(
+            t("elizaclouddashboard.TransactionPendingApproval", {
+              defaultValue: "Transaction pending Steward policy approval.",
+            }),
+            "info",
+            6000,
+          );
+        } else if (!result.ok || execStatus === "rejected") {
+          const reason =
+            result.execution?.policyResults?.find((p) => p.reason)?.reason ??
+            result.error ??
+            t("elizaclouddashboard.PolicyRejected", {
+              defaultValue: "Policy rejected",
+            });
+          setCryptoPayResult(
+            t("elizaclouddashboard.StewardPolicyRejected", {
+              defaultValue: "Steward policy rejected: {{reason}}",
+              reason,
+            }),
+          );
+          setActionNotice(
+            t("elizaclouddashboard.StewardPolicyRejectedTransfer", {
+              defaultValue: "Steward policy rejected the transfer: {{reason}}",
+              reason,
+            }),
+            "error",
+            6000,
+          );
+        }
       } else if (result.requiresUserSignature) {
         setCryptoPayResult(
-          "Cloud returned an unsigned payment request. Sign it from the wallet flow to complete payment.",
+          t("elizaclouddashboard.UnsignedPaymentRequest", {
+            defaultValue:
+              "Cloud returned an unsigned payment request. Sign it from the wallet flow to complete payment.",
+          }),
         );
         setActionNotice(
-          "This wallet requires user-sign mode for crypto payment.",
+          t("elizaclouddashboard.RequiresUserSignMode", {
+            defaultValue:
+              "This wallet requires user-sign mode for crypto payment.",
+          }),
           "info",
           4200,
         );
@@ -779,20 +1062,28 @@ export function CloudDashboard() {
     } catch (err) {
       setCryptoPayResult(null);
       setActionNotice(
-        err instanceof Error ? err.message : "Crypto payment failed.",
+        err instanceof Error
+          ? err.message
+          : t("elizaclouddashboard.CryptoPaymentFailed", {
+              defaultValue: "Crypto payment failed.",
+            }),
         "error",
         4200,
       );
     } finally {
       setCryptoPayBusy(false);
     }
-  }, [cryptoQuote, setActionNotice]);
+  }, [cryptoQuote, setActionNotice, t]);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
+  }, []);
+
+  const handleLearnMoreElizaCloud = useCallback(async () => {
+    await openExternalUrl(ELIZA_CLOUD_WEB_URL);
   }, []);
 
   useEffect(() => {
@@ -803,8 +1094,35 @@ export function CloudDashboard() {
     }
   }, [fetchBillingData, fetchCloudAgents, loadDropStatus, elizaCloudConnected]);
 
+  // Drop cached billing / agents when disconnected so we never show stale balances
+  // after context clears credits (local state would otherwise outlive AppContext).
+  useEffect(() => {
+    if (elizaCloudConnected) return;
+    setBillingSummary(null);
+    setBillingSettings(null);
+    setBillingError(null);
+    setCloudAgents([]);
+    setAgentsError(null);
+    setAgentsLoading(false);
+    setDeletingAgentId(null);
+    setLaunchingAgentId(null);
+    setSelectedAgentId(null);
+    setShowDeployForm(false);
+    setDeployAgentName("");
+    setCheckoutSession(null);
+    setCheckoutDialogOpen(false);
+    setCryptoQuote(null);
+    setCryptoPayResult(null);
+    dispatchAutoTopUpForm({
+      type: "hydrate",
+      next: buildAutoTopUpFormState(null, null),
+      force: true,
+    });
+  }, [elizaCloudConnected]);
+
   const summaryCritical =
-    billingSummary?.critical ?? elizaCloudCreditsCritical ?? false;
+    elizaCloudAuthRejected ||
+    (billingSummary?.critical ?? elizaCloudCreditsCritical ?? false);
   const summaryLow = billingSummary?.low ?? elizaCloudCreditsLow ?? false;
   const creditStatusColor = summaryCritical
     ? "text-danger"
@@ -812,7 +1130,12 @@ export function CloudDashboard() {
       ? "text-warn"
       : "text-ok";
   const activeView = cloudDashboardView;
-  const cloudBalance = billingSummary?.balance ?? elizaCloudCredits ?? 0;
+  const cloudBalanceNumber =
+    typeof elizaCloudCredits === "number"
+      ? elizaCloudCredits
+      : typeof billingSummary?.balance === "number"
+        ? billingSummary.balance
+        : null;
   const cloudCurrency = billingSummary?.currency ?? "USD";
   const fallbackBillingUrl =
     billingSummary?.topUpUrl ?? elizaCloudTopUpUrl ?? null;
@@ -833,15 +1156,22 @@ export function CloudDashboard() {
   const autoTopUpMaxAmount = readNumber(billingLimits.maxAmount) ?? 1000;
   const autoTopUpMinThreshold = readNumber(billingLimits.minThreshold) ?? 0;
   const autoTopUpMaxThreshold = readNumber(billingLimits.maxThreshold) ?? 1000;
-  const creditStatusTone = summaryCritical
-    ? t("elizaclouddashboard.CreditsCritical")
-    : summaryLow
-      ? t("elizaclouddashboard.CreditsLow")
-      : t("elizaclouddashboard.CreditsHealthy");
-  const hasAgentWallet = Boolean(
+  const creditStatusTone = elizaCloudAuthRejected
+    ? t("notice.elizaCloudAuthRejected")
+    : summaryCritical
+      ? t("elizaclouddashboard.CreditsCritical")
+      : summaryLow
+        ? t("elizaclouddashboard.CreditsLow")
+        : t("elizaclouddashboard.CreditsHealthy");
+  const cloudAccountIdDisplay = resolveCloudAccountIdDisplay(
+    elizaCloudUserId,
+    elizaCloudStatusReason,
+    t,
+  );
+  const _hasAgentWallet = Boolean(
     walletAddresses?.evmAddress || walletAddresses?.solanaAddress,
   );
-  const hasWalletFunds = Boolean(
+  const _hasWalletFunds = Boolean(
     walletBalances?.evm?.chains.some(
       (chain) =>
         Number(chain.nativeBalance) > 0 ||
@@ -877,678 +1207,506 @@ export function CloudDashboard() {
             <Zap className="w-4 h-4 mr-2" />
           )}
           {elizaCloudLoginBusy
-            ? t("elizaclouddashboard.Connecting")
+            ? t("onboarding.connecting")
             : t("elizaclouddashboard.ConnectElizaCloud")}
         </Button>
         <p className="mt-4 text-xs text-muted/60">
           {t("elizaclouddashboard.NewToElizaCloud")}{" "}
-          <a
-            href={ELIZA_CLOUD_LOGIN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-txt underline hover:text-txt-hover transition-colors"
+          <Button
+            variant="link"
+            className="p-0 h-auto font-inherit text-xs align-baseline"
+            onClick={() => void handleLearnMoreElizaCloud()}
           >
             {t("elizaclouddashboard.LearnMore")}
-          </a>
+          </Button>
         </p>
       </div>
     );
   }
 
   return (
-    <div className="custom-scrollbar p-6 lg:p-10 space-y-10 max-w-7xl mx-auto animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-4 mb-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent p-2.5 shadow-lg shadow-accent/20">
-              <LayoutDashboard className="h-5 w-5 shrink-0 text-accent-fg" />
-            </div>
-            <h1 className="text-3xl font-bold text-txt-strong tracking-tight">
-              {t("elizaclouddashboard.CloudDashboard")}
-            </h1>
-          </div>
-          <p className="text-muted mt-1">
-            {t("elizaclouddashboard.ManageInstance")}
-          </p>
+    <div className="custom-scrollbar p-4 lg:p-6 space-y-4 max-w-7xl mx-auto animate-in fade-in duration-500">
+      {elizaCloudAuthRejected ? (
+        <div
+          className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger"
+          role="alert"
+        >
+          {t("notice.elizaCloudAuthRejected")}
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <h2 className="text-lg font-bold text-txt-strong tracking-tight">
+            {t("elizaclouddashboard.CloudDashboard")}
+          </h2>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="inline-flex items-center gap-1 rounded-2xl border border-border/50 bg-bg/50 p-1">
-            <button
-              type="button"
-              className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                activeView === "billing"
-                  ? "bg-accent text-accent-fg"
-                  : "text-muted hover:text-txt"
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex flex-wrap items-center gap-0.5 rounded-lg border border-border/50 bg-bg/50 p-0.5">
+            <Button
+              variant={activeView === "billing" ? "default" : "ghost"}
+              size="sm"
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
+                activeView !== "billing"
+                  ? "text-muted-strong hover:text-txt"
+                  : CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME
               }`}
               onClick={() => setState("cloudDashboardView", "billing")}
             >
-              <CircleDollarSign className="w-4 h-4" />
-              {t("elizaclouddashboard.CloudBilling")}
-            </button>
-            <button
-              type="button"
-              className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                activeView === "agents"
-                  ? "bg-accent text-accent-fg"
-                  : "text-muted hover:text-txt"
+              <CircleDollarSign className="w-3.5 h-3.5" />
+              {t("elizaclouddashboard.Billing", {
+                defaultValue: "Billing",
+              })}
+            </Button>
+            <Button
+              variant={activeView === "agents" ? "default" : "ghost"}
+              size="sm"
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
+                activeView !== "agents"
+                  ? "text-muted-strong hover:text-txt"
+                  : CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME
               }`}
               onClick={() => setState("cloudDashboardView", "agents")}
             >
-              <Server className="w-4 h-4" />
-              {t("elizaclouddashboard.CloudAgents")}
-            </button>
+              <Server className="w-3.5 h-3.5" />
+              {t("elizaclouddashboard.Agents", {
+                defaultValue: "Agents",
+              })}
+            </Button>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="rounded-xl border-border/50 bg-bg/50 backdrop-blur-sm"
+            className="rounded-lg border-border/50 h-8 text-xs"
             onClick={handleRefresh}
             disabled={refreshing}
           >
             <RefreshCw
-              className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`}
             />
-            {t("elizaclouddashboard.Refresh")}
+            {t("common.refresh")}
           </Button>
           <Button
+            type="button"
             variant="outline"
             size="sm"
-            className="rounded-xl border-danger/30 text-danger hover:bg-danger/10"
-            onClick={handleCloudDisconnect}
+            className="rounded-lg border-danger/30 text-danger hover:bg-danger/10 h-8 text-xs"
+            onClick={() => void handleCloudDisconnect()}
             disabled={cloudDisconnecting}
           >
             {cloudDisconnecting
-              ? t("elizaclouddashboard.Disconnecting")
-              : t("elizaclouddashboard.Disconnect")}
+              ? t("providerswitcher.disconnecting")
+              : t("providerswitcher.disconnect")}
           </Button>
         </div>
       </div>
 
       {activeView === "billing" ? (
-        <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-8">
-          <div className="space-y-8">
-            <SectionCard
-              title={t("elizaclouddashboard.CloudBilling")}
-              description={t("elizaclouddashboard.CloudBillingDesc")}
-              className="border-border/50 bg-bg/40 backdrop-blur-xl rounded-3xl shadow-sm"
-            >
-              {billingError && (
-                <div className="mt-4 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                  {billingError}
-                </div>
+        <div className="mx-auto max-w-3xl space-y-0">
+          <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-baseline gap-3">
+              <span
+                className={`text-3xl font-bold tracking-tight ${creditStatusColor}`}
+              >
+                {cloudCurrency === "USD" ? "$" : `${cloudCurrency} `}
+                {cloudBalanceNumber !== null ? (
+                  cloudBalanceNumber.toFixed(2)
+                ) : (
+                  <span className="text-muted">
+                    {billingLoading ? "…" : "—"}
+                  </span>
+                )}
+              </span>
+              <span className="text-sm text-muted">
+                {t("elizaclouddashboard.CreditsLabel", {
+                  defaultValue: "credits",
+                })}
+              </span>
+              {billingLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted" />
               )}
-
-              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="rounded-[28px] border border-accent/20 bg-[linear-gradient(160deg,rgba(var(--accent),0.16),rgba(255,255,255,0.02))] p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-muted">
-                        {t("elizaclouddashboard.AvailableBalance")}
-                      </div>
-                      <div
-                        className={`mt-3 text-4xl font-bold tracking-tight sm:text-5xl ${creditStatusColor}`}
-                      >
-                        {cloudCurrency === "USD" ? "$" : `${cloudCurrency} `}
-                        {cloudBalance.toFixed(2)}
-                      </div>
-                      <div className="mt-3 text-sm text-muted">
-                        {t("elizaclouddashboard.InAppBillingReady")}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {billingLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-muted" />
-                      ) : null}
-                      <span
-                        className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
-                          summaryCritical
-                            ? "border-danger/30 bg-danger/10 text-danger"
-                            : summaryLow
-                              ? "border-warn/30 bg-warn/10 text-warn"
-                              : "border-ok/30 bg-ok/10 text-ok"
-                        }`}
-                      >
-                        {creditStatusTone}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-border/40 bg-bg/30 px-4 py-3">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-muted">
-                        {t("elizaclouddashboard.TopUpCredits")}
-                      </div>
-                      <div className="mt-2 text-sm text-txt-strong">
-                        {t("elizaclouddashboard.MinimumTopUp", {
-                          amount: minimumTopUp.toFixed(2),
-                        })}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-border/40 bg-bg/30 px-4 py-3">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-muted">
-                        {t("elizaclouddashboard.AutoTopUp")}
-                      </div>
-                      <div className="mt-2 text-sm text-txt-strong">
-                        {autoTopUpEnabled
-                          ? t("elizaclouddashboard.Enabled")
-                          : t("elizaclouddashboard.Disabled")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-[28px] border border-border/50 bg-bg/25 p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-sm font-semibold text-txt-strong">
-                        {t("elizaclouddashboard.AutoTopUp")}
-                      </div>
-                      <div className="mt-1 text-sm text-muted">
-                        {t("elizaclouddashboard.AutoTopUpDesc")}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        dispatchAutoTopUpForm({
-                          type: "setEnabled",
-                          value: !autoTopUpEnabled,
-                        })
-                      }
-                      className={`relative inline-flex h-7 w-12 items-center rounded-full border transition-colors ${
-                        autoTopUpEnabled
-                          ? "border-accent bg-accent"
-                          : "border-border/60 bg-bg/50"
-                      }`}
-                      aria-label={t("elizaclouddashboard.ToggleAutoTopUp")}
-                    >
-                      <span
-                        className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${
-                          autoTopUpEnabled ? "translate-x-6" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="mt-4 rounded-2xl border border-border/40 bg-bg/20 px-4 py-3 text-sm text-muted">
-                    {autoTopUpHasPaymentMethod
-                      ? t("elizaclouddashboard.AutoTopUpPaymentReady")
-                      : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod")}
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="cloud-auto-topup-threshold"
-                        className="text-xs font-medium text-muted"
-                      >
-                        {t("elizaclouddashboard.AutoTopUpThreshold")}
-                      </label>
-                      <Input
-                        id="cloud-auto-topup-threshold"
-                        type="number"
-                        min={String(autoTopUpMinThreshold)}
-                        max={String(autoTopUpMaxThreshold)}
-                        step="1"
-                        value={autoTopUpThreshold}
-                        onChange={(event) =>
-                          dispatchAutoTopUpForm({
-                            type: "setThreshold",
-                            value: event.target.value,
-                          })
-                        }
-                        className="rounded-xl bg-bg"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="cloud-auto-topup-amount"
-                        className="text-xs font-medium text-muted"
-                      >
-                        {t("elizaclouddashboard.AutoTopUpAmount")}
-                      </label>
-                      <Input
-                        id="cloud-auto-topup-amount"
-                        type="number"
-                        min={String(autoTopUpMinAmount)}
-                        max={String(autoTopUpMaxAmount)}
-                        step="1"
-                        value={autoTopUpAmount}
-                        onChange={(event) =>
-                          dispatchAutoTopUpForm({
-                            type: "setAmount",
-                            value: event.target.value,
-                          })
-                        }
-                        className="rounded-xl bg-bg"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-xs text-muted">
-                      {t("elizaclouddashboard.AutoTopUpLimits", {
-                        minAmount: autoTopUpMinAmount,
-                        maxAmount: autoTopUpMaxAmount,
-                        minThreshold: autoTopUpMinThreshold,
-                        maxThreshold: autoTopUpMaxThreshold,
-                      })}
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="rounded-2xl border-border/50"
-                      disabled={
-                        billingSettingsBusy ||
-                        billingLoading ||
-                        !autoTopUpForm.dirty
-                      }
-                      onClick={() => void handleSaveBillingSettings()}
-                    >
-                      {billingSettingsBusy ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      {t("elizaclouddashboard.SaveBillingSettings")}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-[28px] border border-border/50 bg-bg/25 p-5 sm:p-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <div className="text-sm font-semibold text-txt-strong">
-                      {t("elizaclouddashboard.TopUpCredits")}
-                    </div>
-                    <div className="mt-1 text-sm text-muted">
-                      {t("elizaclouddashboard.TopUpCreditsDesc")}
-                    </div>
-                  </div>
-
-                  {fallbackBillingUrl ? (
-                    <Button
-                      variant="ghost"
-                      className="justify-start rounded-2xl px-0 text-sm text-muted hover:text-txt"
-                      onClick={() => void openExternalUrl(fallbackBillingUrl)}
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      {t("elizaclouddashboard.OpenBrowserBilling")}
-                    </Button>
-                  ) : null}
-                </div>
-
-                <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)]">
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      {BILLING_PRESET_AMOUNTS.map((amount) => (
-                        <button
-                          key={amount}
-                          type="button"
-                          className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                            billingAmount === String(amount)
-                              ? "border-accent bg-accent text-accent-fg"
-                              : "border-border/50 bg-bg/30 text-txt hover:border-accent/40"
-                          }`}
-                          onClick={() => setBillingAmount(String(amount))}
-                        >
-                          ${amount}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="cloud-billing-amount"
-                          className="text-xs font-medium text-muted"
-                        >
-                          {t("elizaclouddashboard.CustomAmount")}
-                        </label>
-                        <Input
-                          id="cloud-billing-amount"
-                          type="number"
-                          min={String(minimumTopUp)}
-                          step="1"
-                          value={billingAmount}
-                          onChange={(event) =>
-                            setBillingAmount(event.target.value)
-                          }
-                          className="rounded-xl bg-bg"
-                        />
-                      </div>
-                      <div className="rounded-2xl border border-border/40 bg-bg/20 px-4 py-3 text-sm text-muted">
-                        {t("elizaclouddashboard.MinimumTopUp", {
-                          amount: minimumTopUp.toFixed(2),
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <Button
-                      variant="default"
-                      className="h-12 rounded-2xl font-semibold"
-                      disabled={checkoutBusy || billingLoading}
-                      onClick={() => void handleStartCheckout()}
-                    >
-                      {checkoutBusy ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <CreditCard className="mr-2 h-4 w-4" />
-                      )}
-                      {t("elizaclouddashboard.PayWithCard")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-12 rounded-2xl border-border/50"
-                      disabled={cryptoBusy || billingLoading}
-                      onClick={() => void handleCreateCryptoQuote()}
-                    >
-                      {cryptoBusy ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Wallet className="mr-2 h-4 w-4" />
-                      )}
-                      {t("elizaclouddashboard.PayWithCrypto")}
-                    </Button>
-                    <div className="rounded-2xl border border-border/40 bg-bg/20 px-4 py-3 text-xs text-muted">
-                      {t("elizaclouddashboard.CheckoutProviderNote")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SectionCard>
+            </div>
+            <span
+              className={`w-fit rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                summaryCritical
+                  ? "border-danger/30 bg-danger/10 text-danger"
+                  : summaryLow
+                    ? "border-warn/30 bg-warn/10 text-warn"
+                    : "border-ok/30 bg-ok/10 text-ok"
+              }`}
+            >
+              {creditStatusTone}
+            </span>
           </div>
 
-          <div className="space-y-8">
-            <SectionCard
-              title={t("elizaclouddashboard.CryptoTopUp")}
-              description={t("elizaclouddashboard.CryptoTopUpDesc")}
-              className="border-border/50 bg-bg/40 backdrop-blur-xl rounded-3xl shadow-sm"
-            >
-              <div className="mt-2 space-y-4">
-                <div className="rounded-2xl border border-border/40 bg-bg/25 px-4 py-3 text-sm text-muted">
-                  {hasAgentWallet
-                    ? hasWalletFunds
-                      ? t("elizaclouddashboard.AgentWalletFunded")
-                      : t("elizaclouddashboard.AgentWalletDetected")
-                    : t("elizaclouddashboard.NoAgentWalletDetected")}
-                </div>
+          {billingError && (
+            <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger mb-4">
+              {billingError}
+            </div>
+          )}
 
-                {cryptoQuote ? (
-                  <div className="rounded-2xl border border-border/40 bg-bg/25 p-4">
-                    <div className="space-y-2 text-sm">
-                      <div className="font-semibold text-txt-strong">
-                        {readString(cryptoQuote.provider) ??
-                          t("elizaclouddashboard.CryptoQuoteReady")}
-                      </div>
-                      <div className="text-muted">
-                        {readString(cryptoQuote.currency) ?? "USDC"}{" "}
-                        {readString(cryptoQuote.amount) ?? "0"} on{" "}
-                        {readString(cryptoQuote.network) ?? "selected network"}
-                      </div>
-                      {readString(cryptoQuote.payToAddress) && (
-                        <code className="block rounded-xl border border-border/40 bg-bg/30 px-3 py-2 text-xs text-txt-strong break-all">
-                          {readString(cryptoQuote.payToAddress)}
-                        </code>
-                      )}
-                      {readString(cryptoQuote.expiresAt) && (
-                        <div className="text-xs text-muted">
-                          Expires{" "}
-                          {new Date(
-                            readString(cryptoQuote.expiresAt) ?? "",
-                          ).toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex flex-col gap-3">
-                      {readString(cryptoQuote.paymentLinkUrl) ? (
-                        <Button
-                          variant="outline"
-                          className="rounded-2xl"
-                          onClick={() =>
-                            void openExternalUrl(
-                              readString(cryptoQuote.paymentLinkUrl) ?? "",
-                            )
-                          }
-                        >
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          {t("elizaclouddashboard.OpenHostedCryptoCheckout")}
-                        </Button>
-                      ) : null}
-
-                      <Button
-                        variant="default"
-                        className="rounded-2xl"
-                        disabled={
-                          cryptoPayBusy ||
-                          !hasAgentWallet ||
-                          !hasWalletFunds ||
-                          readString(cryptoQuote.network)?.toLowerCase() !==
-                            "bsc" ||
-                          !readString(cryptoQuote.payToAddress) ||
-                          !readString(cryptoQuote.amount)
-                        }
-                        onClick={() => void handlePayCryptoFromAgentWallet()}
-                      >
-                        {cryptoPayBusy ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Wallet className="mr-2 h-4 w-4" />
-                        )}
-                        {t("elizaclouddashboard.PayFromAgentWallet")}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-border/50 bg-bg/20 px-4 py-5 text-sm text-muted">
-                    {t("elizaclouddashboard.CryptoQuoteHint")}
-                  </div>
-                )}
-
-                {cryptoPayResult && (
-                  <div className="rounded-2xl border border-ok/30 bg-ok/10 px-4 py-3 text-sm text-ok">
-                    {cryptoPayResult}
-                  </div>
-                )}
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              title={t("elizaclouddashboard.AccountDetails")}
-              className="border-border/50 bg-bg/40 backdrop-blur-xl rounded-3xl shadow-sm"
-            >
-              <div className="space-y-5 mt-4">
-                <div className="p-4 rounded-2xl bg-bg/30 border border-border/30">
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-2 block">
-                    {t("elizaclouddashboard.CloudUserID")}
-                  </span>
-                  <code className="text-xs text-txt-strong break-all font-mono">
-                    {elizaCloudUserId || t("elizaclouddashboard.NotAvailable")}
-                  </code>
-                </div>
-
-                <div className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-ok" />
-                    <span className="text-xs font-medium">
-                      {t("elizaclouddashboard.SecurityStatus")}
-                    </span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-ok/10 text-ok font-bold uppercase tracking-wider border border-ok/20">
-                    {t("elizaclouddashboard.Secure")}
-                  </span>
-                </div>
-
+          <hr className="border-border/40" />
+          <div className="py-5">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-sm font-semibold text-txt-strong">
+                {t("elizaclouddashboard.TopUpCredits")}
+              </h3>
+              {fallbackBillingUrl ? (
                 <Button
-                  variant="link"
-                  className="settings-compact-button w-full text-xs text-txt justify-start px-3 h-auto"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted hover:text-txt h-auto p-0"
+                  onClick={() => void openExternalUrl(fallbackBillingUrl)}
+                >
+                  <ExternalLink className="mr-1.5 h-3 w-3" />
+                  {t("elizaclouddashboard.OpenBrowserBilling")}
+                </Button>
+              ) : null}
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className={CLOUD_INSET_PANEL_CLASSNAME}>
+                <div className="flex items-center gap-2 mb-3">
+                  <CreditCard className="h-4 w-4 text-muted" />
+                  <span className="text-xs font-semibold">
+                    {t("elizaclouddashboard.PayWithCard")}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {BILLING_PRESET_AMOUNTS.map((amount) => (
+                    <Button
+                      key={amount}
+                      variant={
+                        billingAmount === String(amount) ? "default" : "outline"
+                      }
+                      size="sm"
+                      className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
+                        billingAmount !== String(amount)
+                          ? "border-border/50 bg-bg/40 text-txt hover:border-accent/40"
+                          : CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME
+                      }`}
+                      onClick={() => setBillingAmount(String(amount))}
+                    >
+                      ${amount}
+                    </Button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    id="cloud-billing-amount"
+                    type="number"
+                    min={String(minimumTopUp)}
+                    step="1"
+                    value={billingAmount}
+                    onChange={(e) => setBillingAmount(e.target.value)}
+                    className="rounded-lg bg-bg text-sm h-9 flex-1"
+                    placeholder={t("elizaclouddashboard.MinAmountPlaceholder", {
+                      defaultValue: "Min ${{amount}}",
+                      amount: minimumTopUp.toFixed(2),
+                    })}
+                  />
+                  <Button
+                    variant="default"
+                    className={`rounded-lg font-semibold h-9 px-4 ${CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME}`}
+                    disabled={checkoutBusy || billingLoading}
+                    onClick={() => void handleStartCheckout()}
+                  >
+                    {checkoutBusy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t("elizaclouddashboard.Pay", { defaultValue: "Pay" })
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <div className={CLOUD_INSET_PANEL_CLASSNAME}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Wallet className="h-4 w-4 text-muted" />
+                  <span className="text-xs font-semibold">
+                    {t("elizaclouddashboard.PayWithCrypto")}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-lg h-9"
                   onClick={() =>
-                    void openExternalUrl(ELIZA_CLOUD_INSTANCES_URL)
+                    void openExternalUrl(
+                      "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+                    )
                   }
                 >
-                  {t("elizaclouddashboard.AdvancedDashboard")}
-                  <ExternalLink className="w-3 h-3 ml-2" />
+                  <ExternalLink className="mr-1.5 h-3 w-3" />
+                  {t("elizaclouddashboard.PayWithCrypto")}
                 </Button>
               </div>
-            </SectionCard>
+            </div>
+          </div>
+
+          <hr className="border-border/40" />
+          <div className="py-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-txt-strong">
+                  {t("elizaclouddashboard.AutoTopUp")}
+                </h3>
+                <p className="text-[11px] text-muted mt-0.5">
+                  {autoTopUpHasPaymentMethod
+                    ? t("elizaclouddashboard.AutoTopUpPaymentReady", {
+                        defaultValue: "Card saved",
+                      })
+                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod", {
+                        defaultValue: "Add a card first",
+                      })}
+                </p>
+              </div>
+              <Switch
+                checked={autoTopUpEnabled}
+                onCheckedChange={(v) =>
+                  dispatchAutoTopUpForm({ type: "setEnabled", value: v })
+                }
+                aria-label={t("elizaclouddashboard.ToggleAutoTopUp")}
+              />
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-1">
+                <label
+                  htmlFor="cloud-auto-topup-threshold"
+                  className="text-[11px] text-muted"
+                >
+                  {t("elizaclouddashboard.RefillWhenBelow", {
+                    defaultValue: "Refill when below",
+                  })}
+                </label>
+                <Input
+                  id="cloud-auto-topup-threshold"
+                  type="number"
+                  min={String(autoTopUpMinThreshold)}
+                  max={String(autoTopUpMaxThreshold)}
+                  step="1"
+                  value={autoTopUpThreshold}
+                  onChange={(e) =>
+                    dispatchAutoTopUpForm({
+                      type: "setThreshold",
+                      value: e.target.value,
+                    })
+                  }
+                  className="rounded-lg bg-bg h-9"
+                />
+              </div>
+              <div className="flex-1 space-y-1">
+                <label
+                  htmlFor="cloud-auto-topup-amount"
+                  className="text-[11px] text-muted"
+                >
+                  {t("elizaclouddashboard.TopUpAmount", {
+                    defaultValue: "Top-up amount",
+                  })}
+                </label>
+                <Input
+                  id="cloud-auto-topup-amount"
+                  type="number"
+                  min={String(autoTopUpMinAmount)}
+                  max={String(autoTopUpMaxAmount)}
+                  step="1"
+                  value={autoTopUpAmount}
+                  onChange={(e) =>
+                    dispatchAutoTopUpForm({
+                      type: "setAmount",
+                      value: e.target.value,
+                    })
+                  }
+                  className="rounded-lg bg-bg h-9"
+                />
+              </div>
+              <Button
+                variant="outline"
+                className="h-9 rounded-lg px-4 sm:self-end"
+                disabled={
+                  billingSettingsBusy || billingLoading || !autoTopUpForm.dirty
+                }
+                onClick={() => void handleSaveBillingSettings()}
+              >
+                {billingSettingsBusy ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : null}
+                {t("apikeyconfig.save")}
+              </Button>
+            </div>
+          </div>
+
+          <hr className="border-border/40" />
+          <div className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-ok shrink-0" />
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-ok/10 text-ok font-bold uppercase tracking-wider border border-ok/20">
+                  {t("elizaclouddashboard.Secure")}
+                </span>
+              </div>
+              {cloudAccountIdDisplay.mono ? (
+                <code className="break-all font-mono text-[11px] text-muted">
+                  {cloudAccountIdDisplay.text}
+                </code>
+              ) : (
+                <span className="break-words text-[11px] text-muted leading-snug">
+                  {cloudAccountIdDisplay.text}
+                </span>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted hover:text-txt h-auto p-0 shrink-0"
+              onClick={() => void openExternalUrl(ELIZA_CLOUD_INSTANCES_URL)}
+            >
+              {t("elizaclouddashboard.AdvancedDashboard")}
+              <ExternalLink className="w-3 h-3 ml-1.5" />
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <SectionCard
-              title={t("elizaclouddashboard.CloudAgents")}
-              description={t("elizaclouddashboard.CloudAgentsDesc")}
-              className="border-border/50 bg-bg/40 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm"
-            >
-              {agentsError && (
-                <div className="mt-6 flex items-center gap-3 text-sm text-danger bg-danger/10 rounded-xl p-4 border border-danger/20">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {agentsError}
-                </div>
+        <div className="mx-auto max-w-3xl space-y-0">
+          {cloudNotReady && (
+            <div className="flex flex-col items-center justify-center py-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-4 border border-accent/20">
+                <Server className="w-5 h-5 text-accent" />
+              </div>
+              <p className="text-sm font-medium text-txt mb-1.5">
+                {t("elizaclouddashboard.CloudAgentsComingSoon", {
+                  defaultValue: "Cloud Agents Coming Soon",
+                })}
+              </p>
+              <p className="text-xs text-muted text-center max-w-xs leading-relaxed">
+                Coming soon.
+              </p>
+            </div>
+          )}
+          {agentsError && !cloudNotReady && (
+            <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger mb-3">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              {agentsError}
+            </div>
+          )}
+          <div className="flex flex-col gap-3 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              {cloudAccountIdDisplay.mono ? (
+                <code className="max-w-full break-all font-mono text-muted sm:max-w-[200px] sm:truncate">
+                  {cloudAccountIdDisplay.text}
+                </code>
+              ) : (
+                <span className="max-w-full break-words text-muted text-[11px] leading-snug sm:max-w-[min(100%,280px)]">
+                  {cloudAccountIdDisplay.text}
+                </span>
               )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
-                {agentsLoading && cloudAgents.length === 0 ? (
-                  <div className="col-span-full flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 text-txt animate-spin" />
-                  </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={`font-semibold ${creditStatusColor}`}>
+                {cloudBalanceNumber !== null ? (
+                  `$${cloudBalanceNumber.toFixed(2)}`
                 ) : (
-                  <>
-                    {cloudAgents.map((agent) => (
-                      <CloudAgentCard
-                        key={agent.agent_id}
-                        agent={agent}
-                        onDelete={handleDeleteAgent}
-                        deleting={deletingAgentId === agent.agent_id}
-                        launching={launchingAgentId === agent.agent_id}
-                        onLaunch={handleLaunchAgent}
-                        onSelect={(id) => setSelectedAgentId(id)}
-                      />
-                    ))}
-                    {showDeployForm ? (
-                      <div className="aspect-[4/3] rounded-2xl border border-border/50 bg-bg/30 p-8 flex flex-col items-center justify-center text-center">
-                        <div className="w-full space-y-3">
-                          <input
-                            placeholder={t("elizaclouddashboard.AgentName")}
-                            value={deployAgentName}
-                            onChange={(e) => setDeployAgentName(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") void handleDeployAgent();
-                              if (e.key === "Escape") setShowDeployForm(false);
-                            }}
-                            disabled={deploying}
-                            className="w-full h-8 px-3 rounded-xl bg-bg/50 border border-border/40 text-xs text-center focus:outline-none focus:border-accent"
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex-1 rounded-xl h-8 text-xs text-muted hover:text-txt-strong flex items-center justify-center p-0"
-                              onClick={() => setShowDeployForm(false)}
-                              disabled={deploying}
-                            >
-                              {t("onboarding.cancel")}
-                            </Button>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="flex-1 rounded-xl h-8 text-xs font-bold"
-                              onClick={handleDeployAgent}
-                              disabled={deploying || !deployAgentName.trim()}
-                            >
-                              {deploying ? (
-                                <Loader2 className="w-3 h-3 animate-spin mx-auto" />
-                              ) : (
-                                t("elizaclouddashboard.Deploy")
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        className="aspect-[4/3] rounded-2xl border border-dashed border-border/60 flex flex-col items-center justify-center p-8 lg:p-12 text-center group hover:border-accent/50 hover:bg-accent/5 transition-all duration-300 cursor-pointer"
-                        onClick={() => setShowDeployForm(true)}
-                      >
-                        <div className="w-12 h-12 lg:w-10 lg:h-10 rounded-full bg-bg-accent flex items-center justify-center mb-5 lg:mb-6 group-hover:scale-110 transition-transform">
-                          <Plus className="w-6 h-6 lg:w-5 lg:h-5 text-muted group-hover:text-txt" />
-                        </div>
-                        <h3 className="font-bold text-txt-strong mb-2">
-                          {t("elizaclouddashboard.DeployNewAgent")}
-                        </h3>
-                        <p className="text-xs text-muted max-w-[16rem]">
-                          {t("elizaclouddashboard.InitializeInstance")}
-                        </p>
-                      </button>
-                    )}
-                  </>
+                  <span className="text-muted">
+                    {billingLoading ? "…" : "—"}
+                  </span>
                 )}
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              title={t("elizaclouddashboard.UsageMetrics")}
-              description={t("elizaclouddashboard.UsageMetricsDesc")}
-              className="border-border/50 bg-bg/40 backdrop-blur-xl rounded-3xl shadow-sm"
-            >
-              <div className="h-48 flex items-center justify-center text-muted italic text-sm border border-border/30 rounded-2xl bg-bg/20 mt-6 p-6">
-                {t("elizaclouddashboard.MetricsPlaceholder")}
-              </div>
-            </SectionCard>
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted hover:text-txt h-auto p-0"
+                onClick={() => setState("cloudDashboardView", "billing")}
+              >
+                <CircleDollarSign className="mr-1 h-3 w-3" />
+                {t("elizaclouddashboard.Billing", {
+                  defaultValue: "Billing",
+                })}
+              </Button>
+            </div>
           </div>
 
-          <div className="space-y-8">
-            {selectedAgentId && selectedAgent ? (
+          <hr className="border-border/40" />
+          {!cloudNotReady && (
+            <div className="py-4">
+              {agentsLoading && cloudAgents.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-5 h-5 text-muted animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {cloudAgents.map((agent) => (
+                    <CloudAgentCard
+                      key={agent.agent_id}
+                      agent={agent}
+                      onDelete={handleDeleteAgent}
+                      deleting={deletingAgentId === agent.agent_id}
+                      launching={launchingAgentId === agent.agent_id}
+                      onLaunch={handleOpenWebUI}
+                      onOpenUI={handleOpenWebUI}
+                      openingUI={openingWebUiAgentId === agent.agent_id}
+                      onSelect={(id) => setSelectedAgentId(id)}
+                      selected={selectedAgentId === agent.agent_id}
+                    />
+                  ))}
+
+                  {showDeployForm ? (
+                    <div
+                      className={`${CLOUD_PANEL_CLASSNAME} flex flex-col gap-2 py-2 sm:flex-row sm:items-center`}
+                    >
+                      <Input
+                        placeholder={t("elizaclouddashboard.AgentName")}
+                        value={deployAgentName}
+                        onChange={(e) => setDeployAgentName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") void handleDeployAgent();
+                          if (e.key === "Escape") setShowDeployForm(false);
+                        }}
+                        disabled={deploying}
+                        className="h-9 flex-1 rounded-lg bg-bg text-xs"
+                      />
+                      <Button
+                        size="sm"
+                        className="h-9 rounded-lg text-xs"
+                        onClick={handleDeployAgent}
+                        disabled={deploying || !deployAgentName.trim()}
+                      >
+                        {deploying ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          t("elizaclouddashboard.Deploy")
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 rounded-lg text-xs text-muted-strong"
+                        onClick={() => setShowDeployForm(false)}
+                        disabled={deploying}
+                      >
+                        {t("common.cancel")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className={`${CLOUD_PANEL_CLASSNAME} h-auto w-full justify-start gap-2 py-3 text-xs text-muted-strong hover:text-txt`}
+                      onClick={() => setShowDeployForm(true)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t("elizaclouddashboard.DeployNewAgent")}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          {selectedAgentId && selectedAgent && (
+            <>
+              <hr className="border-border/40" />
               <AgentDetailSidebar
                 agent={selectedAgent}
                 onClose={() => setSelectedAgentId(null)}
               />
-            ) : (
-              <SectionCard
-                title={t("elizaclouddashboard.AccountDetails")}
-                className="border-border/50 bg-bg/40 backdrop-blur-xl rounded-3xl shadow-sm"
-              >
-                <div className="space-y-5 mt-4">
-                  <div className="p-4 rounded-2xl bg-bg/30 border border-border/30">
-                    <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-2 block">
-                      {t("elizaclouddashboard.CloudUserID")}
-                    </span>
-                    <code className="text-xs text-txt-strong break-all font-mono">
-                      {elizaCloudUserId ||
-                        t("elizaclouddashboard.NotAvailable")}
-                    </code>
-                  </div>
-
-                  <div className="rounded-2xl border border-accent/20 bg-accent/8 p-5">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-muted">
-                      {t("elizaclouddashboard.AvailableBalance")}
-                    </div>
-                    <div
-                      className={`mt-3 text-3xl font-bold ${creditStatusColor}`}
-                    >
-                      ${cloudBalance.toFixed(2)}
-                    </div>
-                    <div className="mt-2 text-xs text-muted">
-                      {creditStatusTone}
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start rounded-2xl border-border/40 bg-bg/30 px-5 py-4 text-sm"
-                    onClick={() => setState("cloudDashboardView", "billing")}
-                  >
-                    <CircleDollarSign className="mr-2 h-4 w-4" />
-                    {t("elizaclouddashboard.CloudBilling")}
-                  </Button>
-                </div>
-              </SectionCard>
-            )}
-          </div>
+            </>
+          )}
         </div>
       )}
 
@@ -1594,36 +1752,46 @@ function AgentDetailSidebar({
   agent: CloudCompatAgent | undefined;
   onClose: () => void;
 }) {
+  const { t } = useApp();
   const [logs, setLogs] = useState<string>("");
   const [statusDetail, setStatusDetail] = useState<StatusDetail | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const aliveRef = useRef(true);
 
   useEffect(() => {
-    if (!agent) return;
-    let mounted = true;
-
-    const fetchDetails = async () => {
-      try {
-        const [statusRes, logsRes] = await Promise.all([
-          client.getCloudCompatAgentStatus(agent.agent_id),
-          client.getCloudCompatAgentLogs(agent.agent_id, 100),
-        ]);
-
-        if (!mounted) return;
-        setStatusDetail(statusRes.data);
-        setLogs(typeof logsRes.data === "string" ? logsRes.data : "");
-      } catch {
-        // Silently retry next tick
-      }
-    };
-
-    void fetchDetails();
-    const intId = setInterval(fetchDetails, 5000);
+    aliveRef.current = true;
     return () => {
-      mounted = false;
-      clearInterval(intId);
+      aliveRef.current = false;
     };
+  }, []);
+
+  const fetchDetails = useCallback(async () => {
+    if (!agent) return;
+    try {
+      const [statusRes, logsRes] = await Promise.all([
+        client.getCloudCompatAgentStatus(agent.agent_id),
+        client.getCloudCompatAgentLogs(agent.agent_id, 100),
+      ]);
+
+      if (!aliveRef.current) return;
+      setStatusDetail(statusRes.data);
+      setLogs(typeof logsRes.data === "string" ? logsRes.data : "");
+    } catch {
+      // Silently retry next tick
+    }
   }, [agent]);
+
+  useEffect(() => {
+    void fetchDetails();
+  }, [fetchDetails]);
+
+  useIntervalWhenDocumentVisible(
+    () => {
+      void fetchDetails();
+    },
+    5000,
+    Boolean(agent),
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: rerun when logs update
   useEffect(() => {
@@ -1637,54 +1805,69 @@ function AgentDetailSidebar({
   return (
     <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
       <SectionCard
-        title="Agent Details"
-        className="border-accent/40 bg-accent/5 backdrop-blur-xl rounded-3xl shadow-sm relative overflow-hidden"
+        title={t("elizaclouddashboard.agentDetails")}
+        className="relative overflow-hidden rounded-3xl border-accent/30 bg-card/92 shadow-sm backdrop-blur-xl"
       >
-        <button
-          type="button"
-          className="absolute top-4 right-4 p-1 rounded-full hover:bg-bg/50 transition-colors text-muted hover:text-txt-strong"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 p-1 rounded-full text-muted hover:text-txt-strong"
           onClick={onClose}
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
 
         <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 rounded-xl bg-bg/40 border border-border/40">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-border/40 bg-bg/40 p-3">
               <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1 block">
-                Status
+                {t("elizaclouddashboard.Status", {
+                  defaultValue: "Status",
+                })}
               </span>
               <AgentStatusBadge status={statusDetail?.status || agent.status} />
             </div>
-            <div className="p-3 rounded-xl bg-bg/40 border border-border/40">
+            <div className="rounded-xl border border-border/40 bg-bg/40 p-3">
               <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1 block">
-                DB Status
+                {t("elizaclouddashboard.DatabaseStatus", {
+                  defaultValue: "DB Status",
+                })}
               </span>
               <span className="text-xs font-mono">
                 {statusDetail?.databaseStatus || agent.database_status || "—"}
               </span>
             </div>
-            <div className="p-3 rounded-xl bg-bg/40 border border-border/40 col-span-2">
+            <div className="rounded-xl border border-border/40 bg-bg/40 p-3 sm:col-span-2">
               <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1 block">
-                Heartbeat
+                {t("elizaclouddashboard.Heartbeat", {
+                  defaultValue: "Heartbeat",
+                })}
               </span>
               <span className="text-xs font-mono">
                 {statusDetail?.lastHeartbeat
                   ? new Date(statusDetail.lastHeartbeat).toLocaleString()
                   : agent.last_heartbeat_at
                     ? new Date(agent.last_heartbeat_at).toLocaleString()
-                    : "No heartbeat yet"}
+                    : t("elizaclouddashboard.NoHeartbeatYet", {
+                        defaultValue: "No heartbeat yet",
+                      })}
               </span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-bg/80 border border-border/40">
+          <div className="rounded-xl border border-border/40 bg-bg/80 p-3">
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-2 flex items-center gap-2">
-              <Terminal className="w-3 h-3" /> Live Logs
+              <Terminal className="w-3 h-3" />{" "}
+              {t("elizaclouddashboard.LiveLogs", {
+                defaultValue: "Live Logs",
+              })}
             </span>
-            <div className="h-64 overflow-y-auto custom-scrollbar bg-black/50 rounded-lg p-3 border border-border/20">
-              <pre className="text-[10px] font-mono text-txt-strong/80 whitespace-pre-wrap break-all">
-                {logs || "No logs available. Deploying..."}
+            <div className="custom-scrollbar h-64 overflow-y-auto rounded-lg border border-border/30 bg-bg/65 p-3">
+              <pre className="text-[10px] font-mono text-txt-strong/85 whitespace-pre-wrap break-all">
+                {logs ||
+                  t("elizaclouddashboard.NoLogsAvailableDeploying", {
+                    defaultValue: "No logs available. Deploying...",
+                  })}
                 <div ref={logsEndRef} />
               </pre>
             </div>

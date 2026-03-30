@@ -20,7 +20,7 @@ The Telegram connector is an external elizaOS plugin that bridges your agent to 
 
 ## Minimal Configuration
 
-In your character file:
+In `~/.milady/milady.json`:
 
 ```json
 {
@@ -49,7 +49,7 @@ To explicitly disable the connector even when a token is present:
 
 ## Auto-Enable Mechanism
 
-The `plugin-auto-enable.ts` module checks `connectors.telegram` in your character config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-telegram`.
+The `plugin-auto-enable.ts` module checks `connectors.telegram` in your config. If any of the fields `botToken`, `token`, or `apiKey` is truthy (and `enabled` is not explicitly `false`), the runtime automatically loads `@elizaos/plugin-telegram`.
 
 No environment variable is required to trigger auto-enable — it is driven entirely by the connector config object.
 
@@ -63,7 +63,7 @@ When the connector is loaded, the runtime pushes the following secret from your 
 
 ## Full Configuration Reference
 
-All fields are defined under `connectors.telegram` in your character file.
+All fields are defined under `connectors.telegram` in `milady.json`.
 
 ### Core Fields
 

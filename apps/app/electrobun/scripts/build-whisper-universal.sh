@@ -21,6 +21,38 @@ WHISPER_MODEL_PATH="$WHISPER_MODEL_DIR/$WHISPER_MODEL_FILENAME"
 WHISPER_MODEL_CACHE_DIR="${MILADY_WHISPER_MODEL_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/milady/whisper}"
 WHISPER_MODEL_CACHE_PATH="$WHISPER_MODEL_CACHE_DIR/$WHISPER_MODEL_FILENAME"
 
+patch_whisper_makefile() {
+  local makefile_path="$WHISPER_CPP_DIR/Makefile"
+
+  if [ ! -f "$makefile_path" ]; then
+    return
+  fi
+
+  MAKEFILE_PATH="$makefile_path" node <<'NODE'
+const fs = require("node:fs");
+
+const makefilePath = process.env.MAKEFILE_PATH;
+if (!makefilePath) {
+  process.exit(0);
+}
+
+const original = fs.readFileSync(makefilePath, "utf8");
+const patched = original
+  .replace(
+    "SYSCTL_M := $(shell sysctl -n hw.optional.arm64)",
+    "SYSCTL_M := $(shell sysctl -n hw.optional.arm64 2>/dev/null || echo 0)",
+  )
+  .replace(
+    "CFLAGS  += -DGGML_USE_ACCELERATE",
+    "CFLAGS  += -DGGML_USE_ACCELERATE -Wno-deprecated-declarations",
+  );
+
+if (patched !== original) {
+  fs.writeFileSync(makefilePath, patched, "utf8");
+}
+NODE
+}
+
 if [ ! -d "$WHISPER_CPP_DIR" ]; then
   echo "[whisper-universal] whisper.cpp directory not found at $WHISPER_CPP_DIR"
   echo "[whisper-universal] Run 'bun install' first."
@@ -29,6 +61,7 @@ fi
 
 cd "$WHISPER_CPP_DIR"
 NCPU=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
+patch_whisper_makefile
 
 echo "[whisper-universal] Building whisper.cpp universal binary (arm64 + x86_64)..."
 echo "[whisper-universal] Directory: $WHISPER_CPP_DIR"
@@ -60,23 +93,8 @@ echo "[whisper-universal] Result: $(file main)"
 lipo -detailed_info main
 echo ""
 
-# --- Download model if not already present ---
-mkdir -p "$WHISPER_MODEL_DIR"
-mkdir -p "$WHISPER_MODEL_CACHE_DIR"
-
-if [ -f "$WHISPER_MODEL_PATH" ]; then
-  echo "[whisper-universal] === Whisper model already present: $WHISPER_MODEL_PATH ==="
-elif [ -f "$WHISPER_MODEL_CACHE_PATH" ]; then
-  echo "[whisper-universal] === Restoring whisper model from cache: $WHISPER_MODEL_CACHE_PATH ==="
-  cp "$WHISPER_MODEL_CACHE_PATH" "$WHISPER_MODEL_PATH"
-else
-  echo "[whisper-universal] === Downloading model: $WHISPER_MODEL_FILENAME ==="
-  bash models/download-ggml-model.sh "$MODEL"
-fi
-
-if [ -f "$WHISPER_MODEL_PATH" ]; then
-  cp "$WHISPER_MODEL_PATH" "$WHISPER_MODEL_CACHE_PATH"
-fi
+# --- Ensure model is available ---
+bash "$SCRIPT_DIR/ensure-whisper-model.sh" "$MODEL"
 
 # --- Verify both slices execute ---
 echo "[whisper-universal] === Verifying arm64 execution ==="

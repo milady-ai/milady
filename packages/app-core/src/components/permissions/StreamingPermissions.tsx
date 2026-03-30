@@ -1,8 +1,7 @@
-import { Button } from "@miladyai/ui";
+import { Button, StatusBadge } from "@miladyai/ui";
 import { Check, Cloud } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useApp } from "../../state";
-import { StatusBadge } from "../ui-badges";
 import { PermissionIcon } from "./PermissionIcon";
 
 type MediaPermissionState = "granted" | "denied" | "prompt" | "unknown";
@@ -11,7 +10,9 @@ type StreamingPermissionMode = "mobile" | "web";
 interface MediaPermissionDef {
   id: string;
   name: string;
+  nameKey: string;
   description: string;
+  descriptionKey: string;
   icon: string;
 }
 
@@ -30,13 +31,17 @@ const MEDIA_PERMISSIONS: MediaPermissionDef[] = [
   {
     id: "camera",
     name: "Camera",
+    nameKey: "permissionssection.streaming.camera.name",
     description: "Stream video to your agent for vision tasks",
+    descriptionKey: "permissionssection.streaming.camera.description",
     icon: "camera",
   },
   {
     id: "microphone",
     name: "Microphone",
+    nameKey: "permissionssection.streaming.microphone.name",
     description: "Stream audio for voice interaction with your agent",
+    descriptionKey: "permissionssection.streaming.microphone.description",
     icon: "mic",
   },
 ];
@@ -56,7 +61,7 @@ function getCameraPermissionPlugin(): CameraPermissionPlugin | null {
     | undefined;
   if (!cap?.Plugins) return null;
   return (
-    (cap.Plugins.MiladyCamera as CameraPermissionPlugin | undefined) ?? null
+    (cap.Plugins.ElizaCamera as CameraPermissionPlugin | undefined) ?? null
   );
 }
 
@@ -194,15 +199,6 @@ function getBadgeLabel(state: MediaPermissionState): string {
   return "Not Set";
 }
 
-function useAllPermissionsGranted(
-  permStates: Record<string, MediaPermissionState>,
-): boolean {
-  return useMemo(
-    () => MEDIA_PERMISSIONS.every((def) => permStates[def.id] === "granted"),
-    [permStates],
-  );
-}
-
 interface StreamingPermissionsSettingsViewProps {
   description: string;
   mode: StreamingPermissionMode;
@@ -246,6 +242,12 @@ export function StreamingPermissionsSettingsView({
           {MEDIA_PERMISSIONS.map((def) => {
             const status = permStates[def.id] ?? "unknown";
             const isGranted = status === "granted";
+            const name = translateWithFallback(t, def.nameKey, def.name);
+            const description = translateWithFallback(
+              t,
+              def.descriptionKey,
+              def.description,
+            );
 
             return (
               <div
@@ -256,18 +258,24 @@ export function StreamingPermissionsSettingsView({
                 <PermissionIcon icon={def.icon} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[13px]">
-                      {def.name}
-                    </span>
+                    <span className="font-semibold text-[13px]">{name}</span>
                     <StatusBadge
-                      label={getBadgeLabel(status)}
-                      tone={getBadgeTone(status)}
+                      label={translateWithFallback(
+                        t,
+                        status === "granted"
+                          ? "permissionssection.badge.granted"
+                          : status === "denied"
+                            ? "permissionssection.badge.denied"
+                            : "permissionssection.badge.notDetermined",
+                        getBadgeLabel(status),
+                      )}
+                      variant={getBadgeTone(status)}
                       withDot
                       className="rounded-full font-semibold"
                     />
                   </div>
                   <div className="text-[11px] text-[var(--muted)] mt-0.5 truncate">
-                    {def.description}
+                    {description}
                   </div>
                 </div>
                 {!isGranted ? (
@@ -276,7 +284,7 @@ export function StreamingPermissionsSettingsView({
                     size="sm"
                     className="h-auto text-[11px] py-1 px-2.5"
                     onClick={() => void requestPermission(def.id)}
-                    aria-label={`${translateWithFallback(t, "permissionssection.Grant", "Grant")} ${def.name}`}
+                    aria-label={`${translateWithFallback(t, "permissionssection.Grant", "Grant")} ${name}`}
                   >
                     {translateWithFallback(
                       t,
@@ -300,6 +308,7 @@ interface StreamingPermissionsOnboardingViewProps {
   description: string;
   mode: StreamingPermissionMode;
   onContinue: (options?: { allowPermissionBypass?: boolean }) => void;
+  onBack?: () => void;
   testId: string;
   title: string;
 }
@@ -308,18 +317,18 @@ export function StreamingPermissionsOnboardingView({
   description,
   mode,
   onContinue,
+  onBack,
   testId,
   title,
 }: StreamingPermissionsOnboardingViewProps) {
   const { t } = useApp();
   const { checking, permStates, requestPermission } =
     useStreamingPermissions(mode);
-  const allGranted = useAllPermissionsGranted(permStates);
 
   if (checking) {
     return (
       <div className="text-center py-8">
-        <div className="text-[var(--muted)] text-sm">
+        <div className="text-sm text-[var(--onboarding-text-primary)]">
           {translateWithFallback(
             t,
             "permissionssection.CheckingPermissions",
@@ -332,30 +341,42 @@ export function StreamingPermissionsOnboardingView({
 
   return (
     <div data-testid={testId}>
-      <div className="text-center mb-6">
-        <div className="text-xl font-bold mb-2">{title}</div>
-        <div className="text-[var(--muted)] text-sm">{description}</div>
+      <div className="mb-5 text-center">
+        <div className="mb-2 text-xl font-bold text-[var(--onboarding-text-strong)]">
+          {title}
+        </div>
+        <div className="text-sm text-[var(--onboarding-text-primary)]">
+          {description}
+        </div>
       </div>
 
-      <div className="space-y-3 mb-6">
+      <div className="mb-6 space-y-2.5">
         {MEDIA_PERMISSIONS.map((def) => {
           const isGranted = permStates[def.id] === "granted";
+          const name = translateWithFallback(t, def.nameKey, def.name);
+          const description = translateWithFallback(
+            t,
+            def.descriptionKey,
+            def.description,
+          );
 
           return (
             <div
               key={def.id}
               data-permission-id={def.id}
-              className={`flex items-center gap-4 p-4 border ${
+              className={`flex items-center gap-4 rounded-[16px] border px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
                 isGranted
-                  ? "border-[var(--ok)] bg-[var(--ok)]/10"
-                  : "border-[var(--border)] bg-[var(--card)]"
+                  ? "border-[var(--ok)] bg-[color:color-mix(in_srgb,var(--ok)_16%,var(--onboarding-card-bg)_84%)]"
+                  : "border-[var(--onboarding-card-border)] bg-[var(--onboarding-card-bg)]"
               }`}
             >
               <PermissionIcon icon={def.icon} />
               <div className="flex-1">
-                <div className="font-semibold text-sm">{def.name}</div>
-                <div className="text-[11px] text-[var(--muted)]">
-                  {def.description}
+                <div className="text-sm font-semibold text-[var(--onboarding-text-strong)]">
+                  {name}
+                </div>
+                <div className="text-[11px] text-[var(--onboarding-text-subtle)]">
+                  {description}
                 </div>
               </div>
               {isGranted ? (
@@ -366,7 +387,7 @@ export function StreamingPermissionsOnboardingView({
                   size="sm"
                   className="h-auto text-xs py-1.5 px-3"
                   onClick={() => void requestPermission(def.id)}
-                  aria-label={`${translateWithFallback(t, "permissionssection.Grant", "Grant")} ${def.name}`}
+                  aria-label={`${translateWithFallback(t, "permissionssection.Grant", "Grant")} ${name}`}
                 >
                   {translateWithFallback(
                     t,
@@ -380,30 +401,41 @@ export function StreamingPermissionsOnboardingView({
         })}
       </div>
 
-      <div className="flex flex-wrap justify-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-auto min-w-[8.5rem] px-4 py-2 text-[11px] leading-tight opacity-70"
-          onClick={() => onContinue({ allowPermissionBypass: true })}
-        >
-          {translateWithFallback(
-            t,
-            "permissionssection.SkipForNow",
-            "Skip for Now",
-          )}
-        </Button>
+      <div className="flex justify-between items-center gap-6 mt-[18px] pt-3.5 border-t border-white/[0.08]">
+        {onBack ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] text-[rgba(240,238,250,0.62)] tracking-[0.15em] uppercase cursor-pointer no-underline transition-colors duration-300 p-0 hover:text-[rgba(240,238,250,0.9)]"
+            style={{ textShadow: "0 1px 8px rgba(3,5,10,0.45)" }}
+            onClick={() => onBack()}
+          >
+            {translateWithFallback(t, "onboarding.back", "Back")}
+          </Button>
+        ) : (
+          <span />
+        )}
         <Button
           variant="default"
-          size="sm"
-          className="h-auto min-w-[8.5rem] bg-accent border-accent px-4 py-2 text-[11px] leading-tight text-accent-foreground"
-          onClick={() => onContinue()}
+          data-testid="permissions-onboarding-continue"
+          className="group relative inline-flex items-center justify-center gap-[8px] px-[32px] py-[12px] min-h-[44px] bg-[rgba(240,185,11,0.18)] border border-[rgba(240,185,11,0.35)] rounded-[6px] text-[var(--onboarding-accent-foreground)] text-[11px] font-semibold tracking-[0.18em] uppercase cursor-pointer transition-all duration-300 overflow-hidden hover:bg-[rgba(240,185,11,0.28)] hover:border-[rgba(240,185,11,0.6)] disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={(e) => {
+            if (e?.currentTarget) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const circle = document.createElement("span");
+              const diameter = Math.max(rect.width, rect.height);
+              circle.style.width = circle.style.height = `${diameter}px`;
+              circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
+              circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
+              circle.className =
+                "absolute rounded-full bg-[rgba(240,185,11,0.3)] transform scale-0 animate-[onboarding-ripple-expand_0.6s_ease-out_forwards] pointer-events-none";
+              e.currentTarget.appendChild(circle);
+              setTimeout(() => circle.remove(), 600);
+            }
+            onContinue();
+          }}
         >
-          {translateWithFallback(
-            t,
-            "permissionssection.Continue",
-            "Continue",
-          )}
+          {translateWithFallback(t, "onboarding.savedMyKeys", "Continue")}
         </Button>
       </div>
     </div>

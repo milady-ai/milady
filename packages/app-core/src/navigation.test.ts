@@ -2,7 +2,9 @@ import {
   ALL_TAB_GROUPS,
   APPS_ENABLED,
   getTabGroups,
+  isRouteRootPath,
   pathForTab,
+  resolveInitialTabForPath,
   type Tab,
   tabFromPath,
   titleForTab,
@@ -32,7 +34,6 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/triggers")).toBe("triggers");
     expect(tabFromPath("/fine-tuning")).toBe("fine-tuning");
     expect(tabFromPath("/trajectories")).toBe("trajectories");
-    expect(tabFromPath("/lifo")).toBe("lifo");
     expect(tabFromPath("/runtime")).toBe("runtime");
     expect(tabFromPath("/database")).toBe("database");
     expect(tabFromPath("/logs")).toBe("logs");
@@ -59,6 +60,28 @@ describe("tabFromPath", () => {
   });
 });
 
+describe("route roots", () => {
+  it("treats only slash-root paths as the default landing route", () => {
+    expect(isRouteRootPath("/")).toBe(true);
+    expect(isRouteRootPath("/index.html")).toBe(true);
+    expect(isRouteRootPath("/character")).toBe(false);
+    expect(isRouteRootPath("/plugins")).toBe(false);
+  });
+
+  it("preserves explicit routed paths when resolving the initial tab", () => {
+    expect(resolveInitialTabForPath("/", "companion")).toBe("companion");
+    expect(resolveInitialTabForPath("/chat", "companion")).toBe("chat");
+    expect(resolveInitialTabForPath("/character", "companion")).toBe(
+      "character",
+    );
+    expect(resolveInitialTabForPath("/plugins", "companion")).toBe("plugins");
+    expect(resolveInitialTabForPath("/runtime", "companion")).toBe("runtime");
+    expect(resolveInitialTabForPath("/nonexistent", "companion")).toBe(
+      "companion",
+    );
+  });
+});
+
 describe("pathForTab", () => {
   const roundTripTabs: Tab[] = [
     "chat",
@@ -76,9 +99,9 @@ describe("pathForTab", () => {
     "advanced",
     "fine-tuning",
     "trajectories",
-    "lifo",
     "runtime",
     "database",
+    "desktop",
     "settings",
     "logs",
     "security",
@@ -127,7 +150,6 @@ describe("tab groups", () => {
       "actions",
       "fine-tuning",
       "trajectories",
-      "lifo",
       "runtime",
       "database",
       "logs",
@@ -151,7 +173,6 @@ describe("tab groups", () => {
       "advanced",
       "fine-tuning",
       "trajectories",
-      "lifo",
       "runtime",
       "database",
       "logs",

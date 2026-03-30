@@ -4,7 +4,7 @@ sidebarTitle: "start"
 description: "Start the Milady agent runtime in server-only mode."
 ---
 
-Start the elizaOS agent runtime without an interactive terminal UI. The runtime boots in `serverOnly` mode, which means the API server and agent loop start but no TUI or interactive chat interface is launched. The `run` command is a direct alias for `start`.
+Start the elizaOS agent runtime in headless server mode. The runtime boots in `serverOnly` mode, which means the API server and agent loop start but no interactive chat interface is launched. The `run` command is a direct alias for `start`.
 
 ## Usage
 
@@ -15,9 +15,11 @@ milady run     # alias for start
 
 ## Options
 
-`milady start` has no command-specific flags. All behavior is controlled through the configuration file (`~/.milady/milady.json`) and environment variables.
+| Flag | Description |
+|------|-------------|
+| `--connection-key [key]` | Set or auto-generate a connection key for remote access. Pass a value to use a specific key, or pass the flag without a value to auto-generate one. The key is set as `MILADY_API_TOKEN` for the session. When binding to a non-localhost address (e.g., `MILADY_API_BIND=0.0.0.0`), a key is auto-generated if none is configured. |
 
-Global flags that apply to this command:
+Global flags that also apply:
 
 | Flag | Description |
 |------|-------------|
@@ -43,6 +45,12 @@ milady --profile production start
 
 # Start with the dev profile
 milady --dev start
+
+# Start with an auto-generated connection key (for remote access)
+milady start --connection-key
+
+# Start with a specific connection key
+milady start --connection-key my-secret-key
 ```
 
 ## Behavior
@@ -50,9 +58,9 @@ milady --dev start
 When you run `milady start`:
 
 1. The CLI calls `startEliza({ serverOnly: true })` from the elizaOS runtime.
-2. The API server starts on port `2138` by default (override with `MILADY_PORT`).
+2. In production (`milady start`), the API server starts on port `2138` by default (override with `MILADY_PORT` or `ELIZA_PORT`). In dev mode (`bun run dev`), the API runs on port `31337` (`MILADY_API_PORT`) while the dashboard UI uses `2138` (`MILADY_PORT`).
 3. The agent loop begins processing messages from connected clients and messaging platforms.
-4. No interactive terminal UI is launched -- the process runs headlessly.
+4. No interactive interface is launched -- the process runs headlessly.
 
 The `run` command is a direct alias that calls the exact same `startEliza({ serverOnly: true })` function.
 
@@ -60,7 +68,7 @@ The `run` command is a direct alias that calls the exact same `startEliza({ serv
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MILADY_PORT` | API server port | `2138` |
+| `MILADY_PORT` | API server port (also accepts `ELIZA_PORT` as fallback) | `2138` |
 | `MILADY_STATE_DIR` | State directory override | `~/.milady/` |
 | `MILADY_CONFIG_PATH` | Config file path override | `~/.milady/milady.json` |
 
@@ -90,7 +98,6 @@ The API server supports hot-restart via `POST /api/agent/restart` when `commands
 
 ## Related
 
-- [milady tui](/cli/tui) -- start with the interactive terminal UI
 - [milady setup](/cli/setup) -- initialize the config and workspace before starting
 - [Environment Variables](/cli/environment) -- all environment variables
 - [Configuration](/configuration) -- full config file reference

@@ -2,6 +2,8 @@
 
 Automated evaluation suite for the Milady AI agent. Measures response quality across research and coding tasks using deterministic scoring (no LLM-based evaluation).
 
+Scores are heuristic proxies based on keyword coverage and response structure. They are useful for regression tracking, not as a ground-truth correctness metric.
+
 ## Quick Start
 
 ```bash

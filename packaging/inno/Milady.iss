@@ -2,13 +2,14 @@
 #define MyAppName "__APP_NAME__"
 #define MyAppVersion "__APP_VERSION__"
 #define MyAppPublisher "Milady AI"
-#define MyAppExeName "launcher.exe"
+#define MyAppExeName "bin\launcher.exe"
 #define MyDefaultDirName "__DEFAULT_DIR_NAME__"
 #define MyDefaultGroupName "__DEFAULT_GROUP_NAME__"
 #define MyOutputDir "__OUTPUT_DIR__"
 #define MyOutputBaseFilename "__OUTPUT_BASE_FILENAME__"
 #define MySourceDir "__SOURCE_DIR__"
 #define MySetupIconFile "__ICON_FILE__"
+#define MyAppIconFile "Milady.ico"
 
 [Setup]
 AppId={#MyAppId}
@@ -24,7 +25,7 @@ DisableProgramGroupPage=yes
 OutputDir={#MyOutputDir}
 OutputBaseFilename={#MyOutputBaseFilename}
 SetupIconFile={#MySetupIconFile}
-UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayIcon={app}\{#MyAppIconFile}
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesAllowed=x64compatible
@@ -40,12 +41,13 @@ __SIGN_SETUP_LINES__
 Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
+Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
 
 [Files]
 Source: "{#MySourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MySetupIconFile}"; DestDir: "{app}"; DestName: "{#MyAppIconFile}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\{#MyDefaultGroupName}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{autoprograms}\{#MyDefaultGroupName}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppIconFile}"
 Name: "{autoprograms}\{#MyDefaultGroupName}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\{#MyAppIconFile}"

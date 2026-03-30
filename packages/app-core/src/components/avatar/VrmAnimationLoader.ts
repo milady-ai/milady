@@ -66,7 +66,7 @@ export async function loadIdleClip(
   idleGlbUrl: string,
   ctx: AnimationLoaderContext,
 ): Promise<THREE.AnimationClip | null> {
-  const { retargetMixamoGltfToVrm } = await import("./retargetMixamoGltfToVrm");
+  const { retargetMixamoGltfToVrm } = await import("@miladyai/vrm-utils");
   if (ctx.isAborted() || !ctx.isCurrentVrm(vrm)) return null;
 
   const gltfLoader = new GLTFLoader();
@@ -78,9 +78,12 @@ export async function loadIdleClip(
 
   gltf.scene.updateMatrixWorld(true);
   vrm.scene.updateMatrixWorld(true);
+  // Cast vrm to satisfy @miladyai/vrm-utils' VRM type which may resolve
+  // to a different @pixiv/three-vrm version than the one used here.
   const clip = retargetMixamoGltfToVrm(
     { scene: gltf.scene, animations: gltf.animations },
-    vrm,
+    // biome-ignore lint/suspicious/noExplicitAny: complex type
+    vrm as any,
   );
 
   if (!clip) {
@@ -125,7 +128,8 @@ export async function loadEmoteClip(
         console.warn(`[VrmEngine] FBX has no animations: ${path}`);
         return null;
       }
-      return retargetMixamoFbxToVrm(fbx, sourceClip, vrm);
+      const retargeted = retargetMixamoFbxToVrm(fbx, sourceClip, vrm);
+      return retargeted;
     }
 
     const { retargetMixamoGltfToVrm } = await import(

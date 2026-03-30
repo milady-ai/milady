@@ -12,6 +12,10 @@ on:
       - 'packaging/**'
   workflow_dispatch:
 
+concurrency:
+  group: test-packaging-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: Validate Packaging Configs

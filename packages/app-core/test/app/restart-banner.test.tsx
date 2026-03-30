@@ -1,9 +1,10 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { testT } from "../../../../test/helpers/i18n";
 
 interface RestartBannerContextStub {
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, unknown>) => string;
   pendingRestart: boolean;
   pendingRestartReasons: string[];
   restartBannerDismissed: boolean;
@@ -16,9 +17,9 @@ interface RestartBannerContextStub {
 const mockUseApp = vi.fn<() => RestartBannerContextStub>();
 
 vi.mock("@miladyai/app-core/state", async () => {
-  const actual = await vi.importActual<typeof import("@miladyai/app-core/state")>(
-    "@miladyai/app-core/state",
-  );
+  const actual = await vi.importActual<
+    typeof import("@miladyai/app-core/state")
+  >("@miladyai/app-core/state");
   return {
     ...actual,
     useApp: () => mockUseApp(),
@@ -31,7 +32,7 @@ function makeContext(
   overrides: Partial<RestartBannerContextStub> = {},
 ): RestartBannerContextStub {
   return {
-    t: (k: string) => k,
+    t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
     pendingRestart: false,
     pendingRestartReasons: [],
     restartBannerDismissed: false,
@@ -63,7 +64,7 @@ describe("RestartBanner", () => {
     expect(markup).toBe("");
   });
 
-  it("renders compact reminder when banner is dismissed", () => {
+  it("renders nothing when banner is dismissed", () => {
     mockUseApp.mockReturnValue(
       makeContext({
         pendingRestart: true,
@@ -73,10 +74,8 @@ describe("RestartBanner", () => {
     );
 
     const markup = renderToStaticMarkup(React.createElement(RestartBanner));
-    const text = readAllText(markup);
-    expect(text).toContain("Configuration updated");
-    expect(text).toContain("Electrobun still has restart-required changes queued");
-    expect(markup).toContain("Review");
+    // When dismissed, the component returns null — no compact reminder.
+    expect(markup).toBe("");
   });
 
   it("renders banner with single reason text", () => {
@@ -137,21 +136,6 @@ describe("RestartBanner", () => {
     expect(markup).toContain("Restart Now");
   });
 
-  it("renders with amber background styling", () => {
-    mockUseApp.mockReturnValue(
-      makeContext({
-        pendingRestart: true,
-        pendingRestartReasons: ["Configuration updated"],
-      }),
-    );
-
-    const markup = renderToStaticMarkup(React.createElement(RestartBanner));
-    expect(markup).toContain(
-      "color-mix(in srgb, var(--accent) 15%, var(--bg) 85%)",
-    );
-    expect(markup).toContain("z-[9998]");
-  });
-
   it("renders with zero reasons gracefully (edge case: pendingRestart true but empty reasons)", () => {
     mockUseApp.mockReturnValue(
       makeContext({
@@ -167,8 +151,8 @@ describe("RestartBanner", () => {
     expect(text).toContain("Restart required to apply changes");
   });
 
-  it("dismiss-then-re-show: compact when dismissed, expands with new reasons", () => {
-    // Step 1: Banner is compact after user clicks "Later"
+  it("dismiss-then-re-show: hidden when dismissed, expands with new reasons", () => {
+    // Step 1: Banner is hidden after user clicks "Later"
     mockUseApp.mockReturnValue(
       makeContext({
         pendingRestart: true,
@@ -180,8 +164,7 @@ describe("RestartBanner", () => {
     const dismissedMarkup = renderToStaticMarkup(
       React.createElement(RestartBanner),
     );
-    expect(dismissedMarkup).not.toBe("");
-    expect(readAllText(dismissedMarkup)).toContain("Review");
+    expect(dismissedMarkup).toBe("");
 
     // Step 2: A new config change arrives — restartBannerDismissed is reset
     // to false by the WS handler (simulating AppContext behavior)

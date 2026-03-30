@@ -1,19 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+@import "@miladyai/app-core/styles/base.css";
+
+/* Scan @miladyai/ui source so Tailwind generates CSS for all UI package classes
+   (z-[160], z-[170], bg-black/80, bg-bg, text-muted, ring-ring, etc.) */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 @theme inline {
-  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  /* Fonts — homepage uses DM Sans (branded); app uses system stack */
+  --font-sans: "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
+  --font-display: "DM Sans", "Helvetica Neue", Arial, sans-serif;
 
-  --color-dark: #000000;
-  --color-dark-secondary: #0a0a0a;
-  --color-light: #f5f5f5;
-  --color-brand: #f0b90b;
-  --color-brand-hover: #d4a30a;
-  --color-accent: #0b35f1;
-  --color-text-light: #ffffff;
-  --color-text-dark: #000000;
-  --color-text-muted: #9ca3af;
+  /* Map to shared tokens */
+  --color-dark: var(--bg);
+  --color-dark-secondary: var(--bg-elevated);
+  --color-light: var(--text);
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accent-hover);
+  --color-brand-muted: var(--accent-muted);
+  --color-accent: var(--accent);
+  --color-text-light: var(--text);
+  --color-text-dark: var(--text-strong);
+  --color-text-muted: var(--muted);
+  --color-text-subtle: var(--muted-strong);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-surface-hover: var(--bg-hover);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border);
+
+  /* Homepage-only status tokens */
+  --color-status-running: var(--ok);
+  --color-status-paused: var(--warn);
+  --color-status-stopped: var(--danger);
+  --color-status-provisioning: var(--warn);
 }
 
 html {
@@ -24,49 +45,175 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-dark);
   color: var(--color-text-light);
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(240 185 11 / 18%);
+}
+
+/* ── Radix / tailwindcss-animate compatibility ────────────────────── */
+/* The @miladyai/ui Dialog uses data-[state=open]:animate-in, fade-in-0,
+   zoom-in-95, etc. These come from tailwindcss-animate which isn't
+   installed here, so we provide the keyframes and base classes manually. */
+
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(
+        var(--tw-enter-translate-x, 0),
+        var(--tw-enter-translate-y, 0),
+        0
+      )
+      scale3d(
+        var(--tw-enter-scale, 1),
+        var(--tw-enter-scale, 1),
+        var(--tw-enter-scale, 1)
+      )
+      rotate(var(--tw-enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity, 1);
+    transform: translate3d(
+        var(--tw-exit-translate-x, 0),
+        var(--tw-exit-translate-y, 0),
+        0
+      )
+      scale3d(
+        var(--tw-exit-scale, 1),
+        var(--tw-exit-scale, 1),
+        var(--tw-exit-scale, 1)
+      )
+      rotate(var(--tw-exit-rotate, 0));
+  }
+}
+
+.animate-in {
+  animation-name: enter;
+  animation-duration: 150ms;
+  --tw-enter-opacity: initial;
+  --tw-enter-scale: initial;
+  --tw-enter-rotate: initial;
+  --tw-enter-translate-x: initial;
+  --tw-enter-translate-y: initial;
+}
+
+.animate-out {
+  animation-name: exit;
+  animation-duration: 150ms;
+  --tw-exit-opacity: initial;
+  --tw-exit-scale: initial;
+  --tw-exit-rotate: initial;
+  --tw-exit-translate-x: initial;
+  --tw-exit-translate-y: initial;
+}
+
+/* Enter/exit variant helpers used by Radix Dialog */
+.fade-in-0 {
+  --tw-enter-opacity: 0;
+}
+.fade-out-0 {
+  --tw-exit-opacity: 0;
+}
+.zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+.zoom-out-95 {
+  --tw-exit-scale: 0.95;
+}
+
+/* Slide variants for dialog (centers from left-1/2 / top-[48%]) */
+.slide-in-from-left-1\/2 {
+  --tw-enter-translate-x: -50%;
+}
+.slide-out-to-left-1\/2 {
+  --tw-exit-translate-x: -50%;
+}
+.slide-in-from-top-\[48\%\] {
+  --tw-enter-translate-y: -48%;
+}
+.slide-out-to-top-\[48\%\] {
+  --tw-exit-translate-y: -48%;
+}
+/* Mobile bottom-sheet variants */
+.slide-in-from-bottom-6 {
+  --tw-enter-translate-y: 1.5rem;
+}
+.slide-out-to-bottom-6 {
+  --tw-exit-translate-y: 1.5rem;
+}
+
+/* ── Keyframes ────────────────────────────────────────────────────── */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes marquee {
   0% {
     transform: translateX(0%);
   }
-
   100% {
     transform: translateX(-100%);
   }
 }
 
-@keyframes marquee-vertical {
-  0% {
-    transform: translateY(0%);
-  }
-
+@keyframes clock-blink {
+  0%,
   100% {
-    transform: translateY(-100%);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
   }
 }
 
-.animate-marquee {
-  animation: marquee 25s linear infinite;
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-.animate-marquee-vertical {
-  animation: marquee-vertical 25s linear infinite;
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-.border-sharp {
-  border: 1px solid var(--color-text-light);
-  border-radius: 2px;
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
-.border-sharp-dark {
-  border: 1px solid var(--color-dark);
-  border-radius: 2px;
-}
+/* ── Custom Scrollbars ─────────────────────────────────────────────── */
 
-/* Custom Scrollbars */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -94,219 +241,19 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #222;
+  background: color-mix(in srgb, var(--color-surface-elevated) 88%, black 12%);
   border-left: 1px solid var(--color-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333;
-}
-
-/* Peekaboo — all animation driven by inline styles in Comparison.tsx */
-
-/* ── Version Clock ─────────────────────────────────────────────── */
-
-.version-clock {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-brand);
-  opacity: 0.7;
-  padding: 0;
-  line-height: 1;
-}
-
-.version-clock-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--color-brand);
-  animation: clock-blink 1.5s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes clock-blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.2;
-  }
-}
-
-/* ── Hero Download Dock ──────────────────────────────────────────── */
-
-.hero-dock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 48px 16px;
-  border-radius: 28px;
-  background: rgba(120, 120, 130, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(32px) saturate(140%);
-  -webkit-backdrop-filter: blur(32px) saturate(140%);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.hero-dock-title {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.06em;
-  text-align: center;
-  margin: 0;
-}
-
-.hero-dock-icons {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-@media (max-width: 640px) {
-  .hero-dock {
-    padding: 10px 14px;
-    gap: 6px;
-    transform: scale(0.75);
-    transform-origin: center bottom;
-  }
-}
-
-.hero-dock-item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  color: white;
-  transition: transform 0.2s ease;
-}
-
-.hero-dock-item:hover {
-  transform: translateY(-6px) scale(1.1);
-}
-
-.hero-dock-item:active {
-  transform: translateY(-2px) scale(0.95);
-}
-
-.hero-dock-item.is-disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.hero-dock-item.is-disabled:hover {
-  transform: none;
-}
-
-.hero-dock-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.hero-dock-item:hover .hero-dock-icon {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.hero-dock-label {
-  font-size: 9px;
-  font-weight: 500;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-  max-width: 56px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Tooltip on hover */
-.hero-dock-tooltip {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  color: white;
-  font-size: 10px;
-  line-height: 1.4;
-  text-align: center;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-
-.hero-dock-item:hover .hero-dock-tooltip {
-  opacity: 1;
-}
-
-/* ── Reveal Mask (cursor spotlight) ───────────────────────────────── */
-
-.reveal-mask {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: white;
-  transition: mask-image 0.05s ease;
-  mask-image: radial-gradient(
-    circle 120px at var(--mx) var(--my),
-    transparent 0%,
-    transparent 40%,
-    black 70%
+  background: color-mix(
+    in srgb,
+    var(--color-brand) 24%,
+    var(--color-surface-hover) 76%
   );
-  -webkit-mask-image: radial-gradient(
-    circle 120px at var(--mx) var(--my),
-    transparent 0%,
-    transparent 40%,
-    black 70%
-  );
-  opacity: var(--reveal-opacity, 0);
-  pointer-events: none;
 }
 
-/* When cursor is not hovering, show full white */
-.reveal-mask[style*="--reveal-opacity: 0"] {
-  mask-image: none;
-  -webkit-mask-image: none;
-  opacity: 1;
-}
-
-.hero-dock-divider {
-  width: 1px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 0 4px;
-  flex-shrink: 0;
-}
-
-/* ── Download Icons (black & white squares) ────────────────────────── */
+/* ── Download Icons (complex hover/responsive states) ──────────────── */
 
 .download-icons {
   display: flex;
@@ -324,6 +271,15 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .download-icons {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: min(100%, 20rem);
+  }
+}
+
 .download-icons li {
   margin: 0;
 }
@@ -335,12 +291,21 @@ body {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid
+    color-mix(in srgb, var(--color-brand) 22%, var(--color-border) 78%);
+  background: color-mix(
+    in srgb,
+    var(--color-dark-secondary) 86%,
+    rgba(255, 255, 255, 0.08)
+  );
+  color: var(--color-text-light);
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
   position: relative;
   overflow: hidden;
 }
@@ -352,6 +317,16 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .download-icons .download {
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    padding: 6px 4px;
+    gap: 3px;
+  }
+}
+
 .download-icons .download i {
   font-size: 18px;
   transition: transform 0.2s ease;
@@ -360,6 +335,46 @@ body {
 @media (min-width: 640px) {
   .download-icons .download i {
     font-size: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .download-icons .download .df,
+  .download-icons .download .dfn {
+    font-size: 9px;
+    line-height: 1.25;
+    opacity: 1;
+    height: auto;
+  }
+
+  .download-icons .download .df {
+    opacity: 0.55;
+  }
+
+  .download-icons .download .dfn {
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .download-icons .download:hover {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 8px;
+    background: color-mix(
+      in srgb,
+      var(--color-brand) 12%,
+      var(--color-surface) 88%
+    );
+    color: var(--color-text-light);
+    border-color: color-mix(
+      in srgb,
+      var(--color-brand) 36%,
+      var(--color-border) 64%
+    );
+  }
+
+  .download-icons .download:hover i {
+    transform: none;
   }
 }
 
@@ -381,9 +396,9 @@ body {
   width: auto;
   min-width: 44px;
   padding: 6px 10px;
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: var(--color-brand);
+  color: var(--color-text-dark);
+  border-color: var(--color-brand);
 }
 
 @media (min-width: 640px) {
@@ -428,4 +443,18 @@ body {
 .download-icons .download.is-disabled:hover .df,
 .download-icons .download.is-disabled:hover .dfn {
   color: var(--color-brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+  }
 }

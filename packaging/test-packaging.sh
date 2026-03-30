@@ -115,19 +115,21 @@ fi
 
 echo ""
 
-# ── 2. Homebrew Formula ──────────────────────────────────────────────────────
-bold "2. Homebrew Formula"
+# ── 2. Homebrew Formula & Cask ─────────────────────────────────────────────────
+bold "2. Homebrew Formula & Cask"
 check_file "milady.rb" "$SCRIPT_DIR/homebrew/milady.rb"
+check_file "milady.cask.rb" "$SCRIPT_DIR/homebrew/milady.cask.rb"
 
 # Validate Ruby syntax
 if command -v ruby &>/dev/null; then
-  check "Ruby syntax valid" ruby -c "$SCRIPT_DIR/homebrew/milady.rb"
+  check "Formula Ruby syntax valid" ruby -c "$SCRIPT_DIR/homebrew/milady.rb"
+  check "Cask Ruby syntax valid" ruby -c "$SCRIPT_DIR/homebrew/milady.cask.rb"
 else
   skip "Ruby syntax check" "ruby not available"
 fi
 
 # Check formula has real SHA256 (not placeholder)
-check "SHA256 is not placeholder" bash -c "! grep -q PLACEHOLDER '$SCRIPT_DIR/homebrew/milady.rb'"
+check "Formula SHA256 is not placeholder" bash -c "! grep -q PLACEHOLDER '$SCRIPT_DIR/homebrew/milady.rb'"
 check "Has url field" grep -q 'url "https://' "$SCRIPT_DIR/homebrew/milady.rb"
 check "Has sha256 field" grep -q 'sha256 "' "$SCRIPT_DIR/homebrew/milady.rb"
 check "Depends on node" grep -q 'depends_on "node' "$SCRIPT_DIR/homebrew/milady.rb"
@@ -140,7 +142,6 @@ bold "3. Debian/apt Packaging"
 check_file "debian/control" "$SCRIPT_DIR/debian/control"
 check_file "debian/rules" "$SCRIPT_DIR/debian/rules"
 check_file "debian/changelog" "$SCRIPT_DIR/debian/changelog"
-check_file "debian/compat" "$SCRIPT_DIR/debian/compat"
 check_file "debian/copyright" "$SCRIPT_DIR/debian/copyright"
 check_file "debian/install" "$SCRIPT_DIR/debian/install"
 check_file "debian/postinst" "$SCRIPT_DIR/debian/postinst"
@@ -151,7 +152,7 @@ check "postinst is executable" test -x "$SCRIPT_DIR/debian/postinst"
 check "Control has Package field" grep -q "^Package: milady" "$SCRIPT_DIR/debian/control"
 check "Control has Depends" grep -q "Depends:" "$SCRIPT_DIR/debian/control"
 check "Changelog has version" grep -q "milady (" "$SCRIPT_DIR/debian/changelog"
-check "Compat level 13" grep -q "^13$" "$SCRIPT_DIR/debian/compat"
+check "Compat level 13" grep -q "debhelper-compat (= 13)" "$SCRIPT_DIR/debian/control"
 check "Source format 3.0 quilt" grep -q "3.0 (quilt)" "$SCRIPT_DIR/debian/source/format"
 
 echo ""
@@ -216,7 +217,8 @@ fi
 check "Has release trigger" grep -q "release:" "$WORKFLOW"
 check "Has workflow_dispatch" grep -q "workflow_dispatch:" "$WORKFLOW"
 check "Has PyPI job" grep -q "publish-pypi:" "$WORKFLOW"
-check "Has Homebrew job" grep -q "update-homebrew:" "$WORKFLOW"
+# Homebrew is handled by the standalone update-homebrew.yml workflow
+check "Has Homebrew job" test -f ".github/workflows/update-homebrew.yml"
 check "Has Snap job" grep -q "publish-snap:" "$WORKFLOW"
 check "Has Debian job" grep -q "build-deb:" "$WORKFLOW"
 check "Has Flatpak job" grep -q "build-flatpak:" "$WORKFLOW"

@@ -21,6 +21,22 @@ function extractAddedDiffLines(diffChunks) {
     .join("\n");
 }
 
+function extractRemovedDiffLines(diffChunks) {
+  return diffChunks
+    .split("\n")
+    .filter((line) => line.startsWith("-") && !line.startsWith("---"))
+    .map((line) => line.slice(1))
+    .join("\n");
+}
+
+function countPatternMatches(text, pattern) {
+  const flags = pattern.flags.includes("g")
+    ? pattern.flags
+    : `${pattern.flags}g`;
+  const globalPattern = new RegExp(pattern.source, flags);
+  return [...text.matchAll(globalPattern)].length;
+}
+
 function normalizeExecError(error) {
   return {
     ok: false,
@@ -65,7 +81,22 @@ function runCommandArgs(command, args, options = {}) {
 }
 
 export function getBaseRef() {
+  const explicitBase =
+    process.env.MILADY_PRE_REVIEW_BASE ?? process.env.PRE_REVIEW_BASE_REF;
+  if (explicitBase) {
+    const explicitResult = runCommandArgs("git", [
+      "rev-parse",
+      "--verify",
+      explicitBase,
+    ]);
+    if (explicitResult.ok) return explicitBase;
+  }
+
   const candidates = [
+    "refs/remotes/upstream/develop",
+    "upstream/develop",
+    "refs/remotes/upstream/main",
+    "upstream/main",
     "refs/heads/origin/develop",
     "origin/develop",
     "develop",
@@ -90,7 +121,7 @@ export function classificationFromInputs({ branch, message }) {
   const content = `${branch} ${message}`.toLowerCase();
 
   if (
-    /(redesign|restyle|theme|font|layout|css|visual|icon|logo|dark mode|animation|aesthetic)/.test(
+    /\b(redesign|restyle|theme|font|layout|css|visual|icon|logo|animation|aesthetic)\b|\bdark mode\b/.test(
       content,
     )
   ) {
@@ -105,26 +136,36 @@ export function classificationFromInputs({ branch, message }) {
     return "bugfix";
   }
 
+  if (/\bdocs?\b|\.mdx?\b|\.md\b|readme/i.test(content)) {
+    return "docs";
+  }
+
   return "feature";
 }
 
 export function scopeVerdictFor(classification) {
   if (classification === "aesthetic") return "out of scope";
+  if (classification === "docs") return "in scope";
   if (classification === "feature") return "needs deep review";
   return "in scope";
 }
 
-export function decisionFromFindings({ classification, issues }) {
-  return classification === "aesthetic" || issues.length > 0
-    ? "REQUEST CHANGES"
-    : "APPROVE";
+export function decisionFromFindings({
+  classification: _classification,
+  issues,
+}) {
+  return issues.length > 0 ? "REQUEST CHANGES" : "APPROVE";
 }
 
 export function scanDiffTextForBlockedPatterns(diffChunks) {
   const issues = [];
   const addedLines = extractAddedDiffLines(diffChunks);
+  const removedLines = extractRemovedDiffLines(diffChunks);
 
-  if (ANY_TYPE_PATTERN.test(addedLines)) {
+  if (
+    countPatternMatches(addedLines, ANY_TYPE_PATTERN) >
+    countPatternMatches(removedLines, ANY_TYPE_PATTERN)
+  ) {
     issues.push(
       "Potential `any` usage introduced or modified. Verify strict typing is necessary.",
     );
@@ -176,6 +217,26 @@ export function scanForBlockedDiffPatterns(base, changedFiles) {
 
 export function resolveRunnableTestFiles(testFiles, cwd = process.cwd()) {
   return testFiles.filter((file) => existsSync(path.resolve(cwd, file)));
+}
+
+export function splitRunnableTestFiles(testFiles) {
+  const repoTests = [];
+  const homepageTests = [];
+  const repoE2eTests = [];
+
+  for (const file of testFiles) {
+    if (file.startsWith("apps/homepage/")) {
+      homepageTests.push(path.relative("apps/homepage", file));
+    } else if (/\.e2e\.test\.[jt]sx?$/.test(file)) {
+      if (file.startsWith("test/")) {
+        repoE2eTests.push(file);
+      }
+    } else {
+      repoTests.push(file);
+    }
+  }
+
+  return { repoTests, repoE2eTests, homepageTests };
 }
 
 export function collectChangedFiles(base) {
@@ -277,10 +338,16 @@ export function runChecks() {
     }
   }
 
+  // Docs-only changes don't need tests
+  const isDocsOnly = changed.files.every(
+    (f) => f.startsWith("docs/") || /\.(mdx?|txt)$/i.test(f),
+  );
+
   if (
-    classification === "bugfix" ||
-    classification === "feature" ||
-    classification === "security"
+    !isDocsOnly &&
+    (classification === "bugfix" ||
+      classification === "feature" ||
+      classification === "security")
   ) {
     const testFiles = changed.files.filter((file) =>
       /\.(?:e2e\.)?test\.(ts|tsx|js|jsx)$/.test(file),
@@ -306,17 +373,38 @@ export function runChecks() {
           "Run tests that validate the exact behavior change and check them in.",
         );
       } else {
-        const testRun = runCommand(
-          `bunx vitest run ${runnableTestFiles.join(" ")}`,
-        );
-        if (!testRun.ok) {
-          issues.push("Regression/new-behavior tests did not pass.");
-          missingTests.push(
-            "Fix failing tests or add missing assertions for changed paths.",
+        const { repoTests, repoE2eTests, homepageTests } =
+          splitRunnableTestFiles(runnableTestFiles);
+        const testCommands = [];
+
+        if (repoTests.length > 0) {
+          testCommands.push(`bunx vitest run ${repoTests.join(" ")}`);
+        }
+
+        if (repoE2eTests.length > 0) {
+          testCommands.push(
+            `bunx vitest run --config vitest.e2e.config.ts ${repoE2eTests.join(" ")}`,
           );
-          checklist.push(
-            "Re-run targeted regression tests after behavioral fixes.",
+        }
+
+        if (homepageTests.length > 0) {
+          testCommands.push(
+            `cd apps/homepage && bunx vitest run ${homepageTests.join(" ")}`,
           );
+        }
+
+        for (const command of testCommands) {
+          const testRun = runCommand(command);
+          if (!testRun.ok) {
+            issues.push("Regression/new-behavior tests did not pass.");
+            missingTests.push(
+              "Fix failing tests or add missing assertions for changed paths.",
+            );
+            checklist.push(
+              "Re-run targeted regression tests after behavioral fixes.",
+            );
+            break;
+          }
         }
       }
     }

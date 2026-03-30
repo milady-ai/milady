@@ -8,9 +8,14 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: here,
-  base: "./",
+  base: "/",
   publicDir: path.resolve(here, "public"),
   plugins: [tailwindcss(), react()],
+  resolve: {
+    alias: {
+      "@miladyai/ui": path.resolve(here, "../../packages/ui/src/index.ts"),
+    },
+  },
   build: {
     outDir: path.resolve(here, "dist"),
     emptyOutDir: true,

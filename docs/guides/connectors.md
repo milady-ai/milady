@@ -1,7 +1,7 @@
 ---
 title: "Platform Connectors"
 sidebarTitle: "Connectors"
-description: "Platform bridges for Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, MS Teams, Google Chat, and Twitter."
+description: "Platform bridges for 28 messaging platforms — 19 auto-enabled from config (Discord, Telegram, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, Matrix, Feishu, Nostr, Lens, WeChat) plus 9 installable from the registry (Bluesky, Instagram, LINE, Zalo, Twilio, GitHub, Gmail Watch, Nextcloud Talk, Tlon)."
 ---
 
 Connectors are platform bridges that allow your agent to communicate across messaging platforms and social networks. Each connector handles authentication, message routing, session management, and platform-specific features.
@@ -17,29 +17,67 @@ Connectors are platform bridges that allow your agent to communicate across mess
 7. [Signal](#signal)
 8. [iMessage](#imessage)
 9. [BlueBubbles](#bluebubbles)
-10. [Microsoft Teams](#microsoft-teams)
-11. [Google Chat](#google-chat)
-12. [Twitter](#twitter)
-13. [Connector Lifecycle](#connector-lifecycle)
-14. [Multi-Account Support](#multi-account-support)
-15. [Session Management](#session-management)
+10. [Blooio](#blooio)
+11. [Microsoft Teams](#microsoft-teams)
+12. [Google Chat](#google-chat)
+13. [Twitter](#twitter)
+14. [Farcaster](#farcaster)
+15. [Twitch](#twitch)
+16. [Mattermost](#mattermost)
+17. [WeChat](#wechat)
+18. [Matrix](#matrix)
+19. [Feishu / Lark](#feishu--lark)
+20. [Nostr](#nostr)
+21. [Lens](#lens)
+22. [Bluesky](#bluesky)
+23. [Instagram](#instagram)
+24. [LINE](#line)
+25. [Zalo](#zalo)
+26. [Twilio](#twilio)
+27. [GitHub](#github)
+28. [Gmail Watch](#gmail-watch)
+29. [Nextcloud Talk](#nextcloud-talk)
+30. [Tlon](#tlon)
+31. [Connector Lifecycle](#connector-lifecycle)
+32. [Multi-Account Support](#multi-account-support)
+33. [Session Management](#session-management)
 
 ---
 
 ## Supported Platforms
 
-| Platform | Auth Method | DM Support | Group Support | Multi-Account |
-|----------|------------|------------|---------------|---------------|
-| Discord | Bot token | Yes | Yes (guilds/channels) | Yes |
-| Telegram | Bot token | Yes | Yes (groups/topics) | Yes |
-| Slack | Bot + App tokens | Yes | Yes (channels/threads) | Yes |
-| WhatsApp | QR code (Baileys) or Cloud API | Yes | Yes | Yes |
-| Signal | signal-cli HTTP API | Yes | Yes | Yes |
-| iMessage | Native CLI (macOS) | Yes | Yes | Yes |
-| BlueBubbles | Server URL + password | Yes | Yes | Yes |
-| Microsoft Teams | App ID + password | Yes | Yes (teams/channels) | No |
-| Google Chat | Service account | Yes | Yes (spaces) | Yes |
-| Twitter | API keys + tokens | DMs | N/A | No |
+Connectors marked **Auto** load automatically when their config is present in `milady.json`. Connectors marked **Registry** must be installed first with `milady plugins install <package>`.
+
+| Platform | Auth Method | DM Support | Group Support | Multi-Account | Availability |
+|----------|------------|------------|---------------|---------------|-------------|
+| Discord | Bot token | Yes | Yes (guilds/channels) | Yes | Auto |
+| Telegram | Bot token | Yes | Yes (groups/topics) | Yes | Auto |
+| Slack | Bot + App tokens | Yes | Yes (channels/threads) | Yes | Auto |
+| WhatsApp | QR code (Baileys) or Cloud API | Yes | Yes | Yes | Auto |
+| Signal | signal-cli HTTP API | Yes | Yes | Yes | Auto |
+| iMessage | Native CLI (macOS) | Yes | Yes | Yes | Auto |
+| BlueBubbles | Server URL + password | Yes | Yes | Yes | Auto |
+| Blooio | API key + webhook | Yes | Yes | No | Auto |
+| Microsoft Teams | App ID + password | Yes | Yes (teams/channels) | No | Auto |
+| Google Chat | Service account | Yes | Yes (spaces) | Yes | Auto |
+| Twitter | API keys + tokens | DMs | N/A | No | Auto |
+| Farcaster | Neynar API key + signer | Casts | Yes (channels) | No | Auto |
+| Twitch | Client ID + access token | Yes (chat) | Yes (channels) | No | Auto |
+| Mattermost | Bot token | Yes | Yes (channels) | No | Auto |
+| WeChat | Proxy API key + QR code | Yes | Yes | Yes | Auto |
+| Matrix | Access token | Yes | Yes (rooms) | No | Auto |
+| Feishu / Lark | App ID + secret | Yes | Yes (group chats) | No | Auto |
+| Nostr | Private key (nsec/hex) | Yes (NIP-04) | N/A | No | Auto |
+| Lens | API key | Yes | N/A | No | Auto |
+| Bluesky | Account credentials | Posts | N/A | No | Registry |
+| Instagram | Username + password | DMs | N/A | No | Registry |
+| LINE | Channel access token + secret | Yes | Yes | No | Registry |
+| Zalo | Access token | Yes | Yes | No | Registry |
+| Twilio | Account SID + auth token | SMS/Voice | N/A | No | Registry |
+| GitHub | API token | Issues/PRs | Yes (repos) | No | Registry |
+| Gmail Watch | Service account / OAuth | N/A | N/A | No | Registry |
+| Nextcloud Talk | Server credentials | Yes | Yes (rooms) | No | Registry |
+| Tlon | Ship credentials | Yes | Yes (Urbit chats) | No | Registry |
 
 ---
 
@@ -293,12 +331,15 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
   "connectors": {
     "imessage": {
       "enabled": true,
+      "cliPath": "/usr/local/bin/imessage-exporter",
       "service": "auto",
       "dmPolicy": "pairing"
     }
   }
 }
 ```
+
+> **Auto-enable note:** The connector auto-enables when `cliPath` is set. Without it, the plugin will not load.
 
 ### Features
 
@@ -342,6 +383,40 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 
 ---
 
+## Blooio
+
+Connects to iMessage and SMS messaging via the Blooio service with signed webhooks.
+
+### Setup Requirements
+
+- Blooio API key
+- Webhook URL for receiving messages
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "blooio": {
+      "enabled": true,
+      "apiKey": "YOUR_BLOOIO_API_KEY",
+      "webhookUrl": "https://your-domain.com/blooio/webhook"
+    }
+  }
+}
+```
+
+**Environment variables:** `BLOOIO_API_KEY`, `BLOOIO_WEBHOOK_URL`
+
+### Features
+
+- iMessage and SMS messaging via Blooio bridge
+- Signed webhook verification for inbound messages
+- Outbound message sending
+- Auto-enabled when `apiKey` is configured
+
+---
+
 ## Microsoft Teams
 
 ### Setup Requirements
@@ -356,6 +431,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
   "connectors": {
     "msteams": {
       "enabled": true,
+      "botToken": "APP_PASSWORD",
       "appId": "APP_ID",
       "appPassword": "APP_PASSWORD",
       "tenantId": "TENANT_ID",
@@ -364,6 +440,8 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
   }
 }
 ```
+
+> **Auto-enable note:** The connector auto-enables when `botToken`, `token`, or `apiKey` is present in the config. Set `botToken` to the app password to trigger auto-enable.
 
 ### Features
 
@@ -390,6 +468,7 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
   "connectors": {
     "googlechat": {
       "enabled": true,
+      "apiKey": "placeholder",
       "serviceAccountFile": "./service-account.json",
       "audienceType": "project-number",
       "audience": "123456789",
@@ -398,6 +477,8 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
   }
 }
 ```
+
+> **Auto-enable note:** Google Chat uses service-account auth, not a traditional API key. Include `"apiKey": "placeholder"` to trigger auto-enable — the actual authentication uses the service account file.
 
 ### Features
 
@@ -445,6 +526,568 @@ See the [WhatsApp Integration Guide](/guides/whatsapp) for detailed setup instru
 - Action processing toggle
 - Dry run mode for testing
 - Configurable max tweet length (default: 4000)
+
+---
+
+## Farcaster
+
+### Setup Requirements
+
+- Neynar API key (from [neynar.com](https://neynar.com))
+- Farcaster account with a Neynar signer UUID
+- Farcaster ID (FID) of the agent account
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "farcaster": {
+      "enabled": true,
+      "apiKey": "YOUR_NEYNAR_API_KEY",
+      "signerUuid": "YOUR_SIGNER_UUID",
+      "fid": 12345,
+      "channels": ["ai", "agents"],
+      "castIntervalMin": 120,
+      "castIntervalMax": 240
+    }
+  }
+}
+```
+
+### Features
+
+- Autonomous casting (posting) at configurable intervals
+- Reply to @mentions and cast replies
+- Channel monitoring and participation
+- Reactions (likes and recasts)
+- Direct casts (private messages)
+- On-chain identity tied to Ethereum address
+- Cast thread splitting for messages over 320 characters
+
+---
+
+## Bluesky
+
+### Setup Requirements
+
+- Bluesky account credentials (handle and app password)
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "bluesky": {
+      "enabled": true,
+      "postEnable": true,
+      "postIntervalMin": 90,
+      "postIntervalMax": 180
+    }
+  }
+}
+```
+
+**Environment variables:** `BLUESKY_ENABLED`, `BLUESKY_DRY_RUN`, `BLUESKY_USERNAME`, `BLUESKY_PASSWORD`, `BLUESKY_HANDLE`
+
+### Features
+
+- Post creation at configurable intervals
+- Mention and reply monitoring
+- Dry run mode for testing
+- AT Protocol-based decentralized social networking
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-bluesky`.
+
+---
+
+## Instagram
+
+### Setup Requirements
+
+- Instagram account credentials (username and password)
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "instagram": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `INSTAGRAM_USERNAME`, `INSTAGRAM_PASSWORD`, `INSTAGRAM_DRY_RUN`, `INSTAGRAM_POLL_INTERVAL`, `INSTAGRAM_POST_INTERVAL_MIN`, `INSTAGRAM_POST_INTERVAL_MAX`
+
+### Features
+
+- Media posting with caption generation
+- Comment monitoring and response
+- DM handling
+- Dry run mode for testing
+- Configurable posting and polling intervals
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-instagram`.
+
+---
+
+## Twitch
+
+### Setup Requirements
+
+- Twitch application Client ID and access token
+- Twitch channel to connect to
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "twitch": {
+      "enabled": true,
+      "clientId": "YOUR_CLIENT_ID",
+      "accessToken": "YOUR_ACCESS_TOKEN"
+    }
+  }
+}
+```
+
+### Features
+
+- Live chat monitoring and response
+- Channel event handling
+- Audience interaction management
+- Auto-enabled when `clientId` or `accessToken` is configured
+
+---
+
+## Mattermost
+
+### Setup Requirements
+
+- Mattermost bot token (from System Console > Integrations > Bot Accounts)
+- Mattermost server URL
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "mattermost": {
+      "enabled": true,
+      "botToken": "YOUR_BOT_TOKEN",
+      "baseUrl": "https://chat.example.com",
+      "chatmode": "all",
+      "requireMention": false
+    }
+  }
+}
+```
+
+**Environment variables:** `MATTERMOST_BOT_TOKEN`, `MATTERMOST_BASE_URL`
+
+### Features
+
+- Channel and DM messaging
+- Chat mode restriction (`dm-only`, `channel-only`, or `all`)
+- Mention filtering (optionally require @mentions)
+- Custom command prefix triggers
+- Self-hosted server support
+
+---
+
+## WeChat
+
+Connects to WeChat via a third-party proxy service using personal account login.
+
+### Setup Requirements
+
+1. Obtain an API key from the WeChat proxy service
+2. Configure the proxy URL and webhook port
+3. Scan QR code displayed in terminal on first startup
+
+### Privacy Notice
+
+The WeChat connector depends on a user-supplied proxy service. That proxy receives
+your connector API key plus the message payloads and metadata needed to relay
+incoming and outgoing WeChat traffic. Only point `proxyUrl` at infrastructure you
+operate yourself or explicitly trust for that message flow.
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "wechat": {
+      "apiKey": "<key>",
+      "proxyUrl": "https://...",
+      "webhookPort": 18790,
+      "deviceType": "ipad"
+    }
+  }
+}
+```
+
+| Field | Description |
+|-------|------------|
+| `apiKey` | **Required** -- Proxy service API key |
+| `proxyUrl` | **Required** -- Proxy service URL |
+| `webhookPort` | Webhook listener port (default: 18790) |
+| `deviceType` | Device emulation type: `ipad` or `mac` (default: `ipad`) |
+
+**Environment variables:** `WECHAT_API_KEY`
+
+**Multi-account:** Supported via `accounts` map (same pattern as WhatsApp).
+
+### Features
+
+- Text messaging in DMs (enabled by default)
+- Group chat support (enable with `features.groups: true`)
+- Image send/receive (enable with `features.images: true`)
+- QR code login with automatic session persistence
+- Multi-account support via accounts map
+
+---
+
+## Matrix
+
+### Setup Requirements
+
+- Matrix account on any homeserver (e.g., matrix.org or self-hosted)
+- Access token for the bot account
+
+### Key Configuration
+
+```json
+{
+  "env": {
+    "MATRIX_ACCESS_TOKEN": "syt_your_access_token"
+  },
+  "connectors": {
+    "matrix": {
+      "enabled": true,
+      "token": "syt_your_access_token"
+    }
+  }
+}
+```
+
+> **Auto-enable note:** The connector auto-enables when `token`, `botToken`, or `apiKey` is present in the connector config. Setting `"enabled": true` alone is not sufficient — include the `token` field.
+
+**Environment variables:** `MATRIX_ACCESS_TOKEN`, `MATRIX_HOMESERVER`, `MATRIX_USER_ID`, `MATRIX_DEVICE_ID`, `MATRIX_ROOMS`, `MATRIX_AUTO_JOIN`, `MATRIX_ENCRYPTION`, `MATRIX_REQUIRE_MENTION`
+
+### Features
+
+- Room and DM messaging on any spec-compliant homeserver
+- Auto-join on room invitations
+- End-to-end encryption (Olm) support
+- Mention filtering in rooms
+- Federation support across homeservers
+
+---
+
+## Feishu / Lark
+
+### Setup Requirements
+
+- Feishu/Lark Custom App with App ID and App Secret
+- Bot capability enabled on the app
+
+### Key Configuration
+
+```json
+{
+  "env": {
+    "FEISHU_APP_ID": "cli_your_app_id",
+    "FEISHU_APP_SECRET": "your_app_secret"
+  },
+  "connectors": {
+    "feishu": {
+      "enabled": true,
+      "apiKey": "your_app_secret"
+    }
+  }
+}
+```
+
+> **Auto-enable note:** The connector auto-enables when `apiKey`, `token`, or `botToken` is present in the connector config. Set `apiKey` to the app secret to trigger auto-enable.
+
+**Environment variables:** `FEISHU_APP_ID`, `FEISHU_APP_SECRET`, `FEISHU_DOMAIN`, `FEISHU_ALLOWED_CHATS`
+
+### Features
+
+- Direct bot messaging and group chats
+- Chat allowlist for access control
+- China (`feishu.cn`) and global (`larksuite.com`) domain support
+- Event subscription for real-time messages
+
+---
+
+## Nostr
+
+### Setup Requirements
+
+- Nostr private key (nsec or hex format)
+
+### Key Configuration
+
+```json
+{
+  "env": {
+    "NOSTR_PRIVATE_KEY": "nsec1your_private_key"
+  },
+  "connectors": {
+    "nostr": {
+      "enabled": true,
+      "token": "placeholder"
+    }
+  }
+}
+```
+
+> **Auto-enable note:** Nostr uses key-based auth, not a traditional token. Include `"token": "placeholder"` in the connector config to trigger auto-enable — the actual authentication uses the `NOSTR_PRIVATE_KEY` environment variable.
+
+**Environment variables:** `NOSTR_PRIVATE_KEY`, `NOSTR_RELAYS`, `NOSTR_DM_POLICY`, `NOSTR_ALLOW_FROM`, `NOSTR_ENABLED`
+
+### Features
+
+- Multi-relay connectivity
+- Note publishing (kind 1 events)
+- NIP-04 encrypted direct messages
+- DM access policies (allow, deny, allowlist)
+- Fully decentralized via relay network
+
+---
+
+## LINE
+
+### Setup Requirements
+
+- LINE Channel access token
+- LINE Channel secret
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "line": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`, `LINE_CUSTOM_GREETING`
+
+### Features
+
+- Bot messaging and customer conversations
+- Rich message types (text, sticker, image, video)
+- Group chat support
+- Webhook-based event handling
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-line`.
+
+---
+
+## Zalo
+
+### Setup Requirements
+
+- Zalo Official Account (OA) access token
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "zalo": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `ZALO_ACCESS_TOKEN`, `ZALO_REFRESH_TOKEN`, `ZALO_APP_ID`, `ZALO_APP_SECRET`
+
+### Features
+
+- Official account messaging and support workflows
+- Webhook-based message handling
+- Customer interaction management
+
+A personal-account variant is also available as `@elizaos/plugin-zalouser` for one-to-one messaging outside of the Official Account system.
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-zalo`.
+
+---
+
+## Twilio
+
+### Setup Requirements
+
+- Twilio Account SID and Auth Token
+- A Twilio phone number
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "twilio": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`
+
+### Features
+
+- SMS messaging (send and receive)
+- Voice call capabilities
+- Webhook-based inbound message handling
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-twilio`.
+
+---
+
+## GitHub
+
+### Setup Requirements
+
+- GitHub API token (personal access token or fine-grained token)
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "github": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `GITHUB_API_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`
+
+### Features
+
+- Repository management
+- Issue tracking and creation
+- Pull request workflows (create, review, merge)
+- Code search and file access
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-github`.
+
+---
+
+## Gmail Watch
+
+### Setup Requirements
+
+- Google Cloud service account or OAuth credentials with Gmail API access
+
+### Key Configuration
+
+Gmail Watch is enabled via the `features.gmailWatch` flag or environment variables rather than the `connectors` section.
+
+### Features
+
+- Gmail Pub/Sub message watching
+- Auto-renewal of watch subscriptions
+- Inbound email event handling
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-gmail-watch`.
+
+---
+
+## Nextcloud Talk
+
+### Setup Requirements
+
+- Nextcloud server URL and credentials
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "nextcloud-talk": {
+      "enabled": true
+    }
+  }
+}
+```
+
+### Features
+
+- Room-based messaging
+- DM and group conversation support
+- Self-hosted collaboration platform integration
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-nextcloud-talk`.
+
+---
+
+## Tlon
+
+### Setup Requirements
+
+- Tlon ship credentials (Urbit ship name and access code)
+
+### Key Configuration
+
+```json
+{
+  "connectors": {
+    "tlon": {
+      "enabled": true
+    }
+  }
+}
+```
+
+**Environment variables:** `TLON_SHIP`, `TLON_CODE`, `TLON_URL`
+
+### Features
+
+- Urbit-based chat and social interactions
+- Ship-to-ship messaging
+- Group chat participation
+
+**Note:** This connector is available from the plugin registry. Install it with `milady plugins install @elizaos/plugin-tlon`.
+
+---
+
+## Lens
+
+**Plugin:** `@elizaos/plugin-lens`
+
+```json5
+{
+  connectors: {
+    lens: {
+      apiKey: "your-lens-api-key",
+    }
+  }
+}
+```
+
+| Env Variable | Config Path |
+|-------------|-------------|
+| `LENS_API_KEY` | `connectors.lens.apiKey` |
+
+**Auto-enable triggers:** `apiKey`, `token`, or `botToken`.
+
+**Features:**
+- Lens Protocol social interactions
+- Post publishing and engagement
 
 ---
 
@@ -628,10 +1271,40 @@ The `dmPolicy` options are:
 - Relay connection fails:
   Nostr connectors communicate via relays. Confirm relay URLs are configured and reachable. API key authentication varies by relay.
 
-**Retake / Blooio:**
+**Twitch:**
 
 - Authentication fails:
-  Retake uses `accessToken` or `enabled: true` for configuration detection. Blooio uses `apiKey`. Confirm credentials are set under the respective connector config.
+  Confirm `connectors.twitch.accessToken` or `connectors.twitch.clientId` is set. Alternatively, set `enabled: true` to force-enable. Ensure the access token has the required chat scopes.
+
+**Blooio:**
+
+- Authentication fails:
+  Blooio uses `apiKey`. Confirm credentials are set under the connector config.
+
+**Bluesky:**
+
+- Authentication fails:
+  Confirm `BLUESKY_USERNAME` and `BLUESKY_PASSWORD` environment variables are set. Bluesky uses app passwords, not your main account password.
+
+**Instagram:**
+
+- Login fails or account locked:
+  Instagram may require verification for automated logins. Use an app-specific password if available. Avoid frequent login attempts which can trigger account locks.
+
+**LINE:**
+
+- Webhook not receiving messages:
+  Confirm `LINE_CHANNEL_ACCESS_TOKEN` and `LINE_CHANNEL_SECRET` are set. The webhook URL must be publicly reachable with HTTPS.
+
+**Twilio:**
+
+- SMS not sending:
+  Confirm `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER` are set. Check that the phone number is SMS-capable and the account has sufficient balance.
+
+**GitHub:**
+
+- API token rejected:
+  Confirm `GITHUB_API_TOKEN` is a valid personal access token or fine-grained token with the required repository permissions.
 
 ### Recovery Procedures
 

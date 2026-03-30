@@ -1,7 +1,34 @@
-import { ConfirmDeleteControl } from "@miladyai/app-core/components";
+// @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@miladyai/app-core/state", () => ({
+  useApp: () => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts?.defaultValue && typeof opts.defaultValue === "string"
+        ? opts.defaultValue
+        : key,
+  }),
+}));
+
+// Mock @miladyai/ui's Button as a plain <button> that passes props through,
+// so className values are preserved exactly as passed by ConfirmDeleteControl.
+vi.mock("@miladyai/ui", () => ({
+  Button: React.forwardRef(
+    (
+      {
+        variant: _variant,
+        size: _size,
+        asChild: _asChild,
+        ...props
+      }: Record<string, unknown>,
+      ref: React.Ref<HTMLButtonElement>,
+    ) => React.createElement("button", { ...props, ref }),
+  ),
+}));
+
+import { ConfirmDeleteControl } from "@miladyai/app-core/components/confirm-delete-control";
 
 function createSubject(
   overrides: Partial<React.ComponentProps<typeof ConfirmDeleteControl>> = {},

@@ -10,6 +10,15 @@
  *   - Event bindings via on.press / on.change
  */
 
+import {
+  Button,
+  Checkbox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@miladyai/ui";
 import React, {
   createContext,
   useCallback,
@@ -20,6 +29,12 @@ import React, {
 import { useApp } from "../state";
 import { confirmDesktopAction, resolveAppAssetUrl } from "../utils";
 import { getByPath, setByPath } from "./config-catalog";
+import {
+  CONFIG_FIELD_LABEL_CLASSNAME,
+  ConfigFieldErrors,
+  getConfigInputClassName,
+  getConfigTextareaClassName,
+} from "./config-control-primitives";
 import type {
   AuthState,
   CondExpr,
@@ -343,11 +358,6 @@ const JUSTIFY: Record<string, string> = {
   around: "justify-around",
 };
 
-// ── Tailwind class constants ────────────────────────────────────────
-
-const INPUT_CLS =
-  "w-full px-2 py-[5px] border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none box-border h-[30px]";
-
 // ══════════════════════════════════════════════════════════════════════
 // COMPONENT REGISTRY
 // ══════════════════════════════════════════════════════════════════════
@@ -462,10 +472,15 @@ const InputComponent: ComponentFn = (props, _children, ctx, el) => {
   return (
     <div className="flex flex-col gap-1">
       {props.label ? (
-        <span className="text-xs font-semibold">{String(props.label)}</span>
+        <span className={CONFIG_FIELD_LABEL_CLASSNAME}>
+          {String(props.label)}
+        </span>
       ) : null}
       <input
-        className={`${INPUT_CLS}${errors?.length ? " border-[var(--destructive)]" : ""}`}
+        className={getConfigInputClassName({
+          density: "compact",
+          hasError: !!errors?.length,
+        })}
         type={String(props.type ?? "text")}
         name={String(props.name ?? "")}
         placeholder={String(props.placeholder ?? "")}
@@ -473,15 +488,7 @@ const InputComponent: ComponentFn = (props, _children, ctx, el) => {
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
       />
-      {errors?.length ? (
-        <div className="flex flex-col gap-0.5">
-          {errors.map((err) => (
-            <span key={err} className="text-[10px] text-[var(--destructive)]">
-              {err}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <ConfigFieldErrors errors={errors} />
     </div>
   );
 };
@@ -507,10 +514,15 @@ const TextareaComponent: ComponentFn = (props, _children, ctx, el) => {
   return (
     <div className="flex flex-col gap-1">
       {props.label ? (
-        <span className="text-xs font-semibold">{String(props.label)}</span>
+        <span className={CONFIG_FIELD_LABEL_CLASSNAME}>
+          {String(props.label)}
+        </span>
       ) : null}
       <textarea
-        className={`w-full px-2 py-[5px] border border-[var(--border)] bg-[var(--card)] text-xs font-[var(--mono)] transition-colors focus:border-[var(--accent)] focus:outline-none box-border min-h-[64px] resize-y${errors?.length ? " border-[var(--destructive)]" : ""}`}
+        className={getConfigTextareaClassName({
+          density: "compact",
+          hasError: !!errors?.length,
+        })}
         name={String(props.name ?? "")}
         placeholder={String(props.placeholder ?? "")}
         rows={Number(props.rows ?? 3)}
@@ -518,15 +530,7 @@ const TextareaComponent: ComponentFn = (props, _children, ctx, el) => {
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
       />
-      {errors?.length ? (
-        <div className="flex flex-col gap-0.5">
-          {errors.map((err) => (
-            <span key={err} className="text-[10px] text-[var(--destructive)]">
-              {err}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <ConfigFieldErrors errors={errors} />
     </div>
   );
 };
@@ -554,32 +558,45 @@ const SelectComponent: ComponentFn = (props, _children, ctx, el) => {
   return (
     <div className="flex flex-col gap-1">
       {props.label ? (
-        <span className="text-xs font-semibold">{String(props.label)}</span>
+        <span className={CONFIG_FIELD_LABEL_CLASSNAME}>
+          {String(props.label)}
+        </span>
       ) : null}
-      <select
-        className={`${INPUT_CLS} appearance-auto${errors?.length ? " border-[var(--destructive)]" : ""}`}
-        value={String(value ?? "")}
-        onChange={(e) => handleChange(e.target.value)}
-        onBlur={handleBlur}
+      <Select
+        value={String(value ?? "") || "__none__"}
+        onValueChange={(v) => {
+          handleChange(v === "__none__" ? "" : v);
+          handleBlur();
+        }}
       >
-        {props.placeholder ? (
-          <option value="">{String(props.placeholder)}</option>
-        ) : null}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      {errors?.length ? (
-        <div className="flex flex-col gap-0.5">
-          {errors.map((err) => (
-            <span key={err} className="text-[10px] text-[var(--destructive)]">
-              {err}
-            </span>
-          ))}
-        </div>
-      ) : null}
+        <SelectTrigger
+          className={getConfigInputClassName({
+            density: "compact",
+            hasError: !!errors?.length,
+          })}
+        >
+          <SelectValue
+            placeholder={
+              props.placeholder ? String(props.placeholder) : undefined
+            }
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {props.placeholder ? (
+            <SelectItem value="__none__">
+              {String(props.placeholder)}
+            </SelectItem>
+          ) : null}
+          {options
+            .filter((o) => o.value !== "")
+            .map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+        </SelectContent>
+      </Select>
+      <ConfigFieldErrors errors={errors} />
     </div>
   );
 };
@@ -589,15 +606,15 @@ const CheckboxComponent: ComponentFn = (props, _children, ctx) => {
     props.statePath as string | undefined,
     ctx,
   );
+  // biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically
   return (
-    <span className="flex items-center gap-2 text-xs cursor-pointer">
-      <input
-        type="checkbox"
+    <label className="flex items-center gap-2 text-xs cursor-pointer">
+      <Checkbox
         checked={!!value}
-        onChange={(e) => setValue(e.target.checked)}
+        onCheckedChange={(checked) => setValue(!!checked)}
       />
       <span className="font-semibold">{String(props.label ?? "")}</span>
-    </span>
+    </label>
   );
 };
 
@@ -642,15 +659,16 @@ const SwitchComponent: ComponentFn = (props, _children, ctx) => {
   const checked = !!value;
   return (
     <span className="flex items-center gap-2 cursor-pointer">
-      <button
+      <Button
         type="button"
-        className={`relative w-9 h-[18px] transition-colors ${checked ? "bg-[var(--accent)]" : "bg-[var(--muted)]"}`}
+        variant="ghost"
+        className={`relative w-9 h-[18px] p-0 transition-colors rounded-none ${checked ? "bg-[var(--accent)]" : "bg-[var(--muted)]"}`}
         onClick={() => setValue(!checked)}
       >
         <div
-          className={`absolute top-0.5 w-[14px] h-[14px] bg-white transition-all ${checked ? "left-5" : "left-0.5"}`}
+          className={`absolute top-0.5 w-[14px] h-[14px] bg-[var(--card)] transition-all ${checked ? "left-5" : "left-0.5"}`}
         />
-      </button>
+      </Button>
       <span className="text-xs font-semibold">{String(props.label ?? "")}</span>
     </span>
   );
@@ -692,12 +710,13 @@ const ToggleComponent: ComponentFn = (props, _children, ctx, el) => {
   );
   const pressed = !!value;
   return (
-    <button
+    <Button
       type="button"
-      className={`px-3 py-1.5 text-xs border cursor-pointer transition-colors ${
+      variant={pressed ? "default" : "outline"}
+      className={`px-3 py-1.5 text-xs transition-colors ${
         pressed
           ? "bg-[var(--accent)] text-[var(--accent-foreground,#1a1f26)] border-[var(--accent)]"
-          : "bg-[var(--card)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--bg-hover)]"
+          : "bg-[var(--card)] text-[var(--text)] hover:bg-[var(--bg-hover)]"
       }`}
       onClick={() => {
         setValue(!pressed);
@@ -705,7 +724,7 @@ const ToggleComponent: ComponentFn = (props, _children, ctx, el) => {
       }}
     >
       {String(props.label ?? "Toggle")}
-    </button>
+    </Button>
   );
 };
 
@@ -736,18 +755,19 @@ const ToggleGroupComponent: ComponentFn = (props, _children, ctx) => {
           ? selected.has(item.value)
           : value === item.value;
         return (
-          <button
+          <Button
             key={item.value}
             type="button"
-            className={`px-2.5 py-1 text-xs border cursor-pointer transition-colors ${
+            variant={active ? "default" : "outline"}
+            className={`px-2.5 py-1 text-xs transition-colors ${
               active
                 ? "bg-[var(--accent)] text-[var(--accent-foreground,#1a1f26)] border-[var(--accent)]"
-                : "bg-[var(--card)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--bg-hover)]"
+                : "bg-[var(--card)] text-[var(--text)] hover:bg-[var(--bg-hover)]"
             }`}
             onClick={() => toggle(item.value)}
           >
             {item.label}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -766,18 +786,19 @@ const ButtonGroupComponent: ComponentFn = (props, _children, ctx) => {
       {buttons.map((btn) => {
         const active = value === btn.value;
         return (
-          <button
+          <Button
             key={btn.value}
             type="button"
-            className={`px-3 py-1.5 text-xs border cursor-pointer transition-colors ${
+            variant={active ? "default" : "outline"}
+            className={`px-3 py-1.5 text-xs transition-colors ${
               active
                 ? "bg-[var(--accent)] text-[var(--accent-foreground,#1a1f26)] border-[var(--accent)]"
-                : "bg-[var(--card)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--bg-hover)]"
+                : "bg-[var(--card)] text-[var(--text)] hover:bg-[var(--bg-hover)]"
             }`}
             onClick={() => setValue(btn.value)}
           >
             {btn.label}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -846,25 +867,29 @@ const CarouselComponent: ComponentFn = (props) => {
         )}
       </div>
       <div className="flex justify-center gap-2 mt-2">
-        <button
+        <Button
           type="button"
-          className="text-xs px-2 py-0.5 border border-[var(--border)] bg-[var(--card)] cursor-pointer hover:bg-[var(--bg-hover)]"
+          variant="outline"
+          size="sm"
+          className="text-xs px-2 py-0.5"
           onClick={() => setCurrent((p) => Math.max(0, p - 1))}
           disabled={current === 0}
         >
           {t("ui-renderer.Larr")}
-        </button>
+        </Button>
         <span className="text-[10px] text-[var(--muted)] self-center">
           {current + 1} / {items.length}
         </span>
-        <button
+        <Button
           type="button"
-          className="text-xs px-2 py-0.5 border border-[var(--border)] bg-[var(--card)] cursor-pointer hover:bg-[var(--bg-hover)]"
+          variant="outline"
+          size="sm"
+          className="text-xs px-2 py-0.5"
           onClick={() => setCurrent((p) => Math.min(items.length - 1, p + 1))}
           disabled={current === items.length - 1}
         >
           {t("ui-renderer.Rarr")}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1062,14 +1087,23 @@ const ButtonComponent: ComponentFn = (props, _children, ctx, el) => {
       "bg-transparent text-[var(--text)] border-transparent hover:bg-[var(--bg-hover)]",
   };
   return (
-    <button
+    <Button
       type="button"
-      className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors ${cls[variant] ?? cls.primary}`}
+      variant={
+        variant === "danger"
+          ? "destructive"
+          : variant === "ghost"
+            ? "ghost"
+            : variant === "secondary"
+              ? "outline"
+              : "default"
+      }
+      className={`px-3 py-1.5 text-xs font-medium transition-colors ${cls[variant] ?? cls.primary}`}
       disabled={!!props.disabled}
       onClick={() => fireEvent(el.on?.press, ctx)}
     >
       {String(props.label ?? "Button")}
-    </button>
+    </Button>
   );
 };
 
@@ -1099,20 +1133,23 @@ const DropdownMenuComponent: ComponentFn = (props, _children, ctx) => {
   const items = (props.items as Array<{ label: string; value: string }>) ?? [];
   return (
     <div className="relative inline-block">
-      <button
+      <Button
         type="button"
-        className="px-3 py-1.5 text-xs border border-[var(--border)] bg-[var(--card)] cursor-pointer hover:bg-[var(--bg-hover)]"
+        variant="outline"
+        size="sm"
+        className="px-3 py-1.5 text-xs"
         onClick={() => setOpen(!open)}
       >
         {String(props.label ?? "Menu")} ▾
-      </button>
+      </Button>
       {open && (
         <div className="absolute top-full left-0 mt-1 min-w-[120px] border border-[var(--border)] bg-[var(--card)] shadow-md z-10">
           {items.map((item) => (
-            <button
+            <Button
               key={item.value}
               type="button"
-              className="block w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--bg-hover)] cursor-pointer"
+              variant="ghost"
+              className="block w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--bg-hover)] rounded-none justify-start h-auto"
               onClick={() => {
                 setOpen(false);
                 if (ctx.onAction)
@@ -1123,7 +1160,7 @@ const DropdownMenuComponent: ComponentFn = (props, _children, ctx) => {
               }}
             >
               {item.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -1145,10 +1182,11 @@ const TabsComponent: ComponentFn = (props, _children, ctx) => {
     <div>
       <div className="flex border-b border-[var(--border)]">
         {tabs.map((tab) => (
-          <button
+          <Button
             key={tab.value}
             type="button"
-            className={`px-3 py-1.5 text-xs cursor-pointer transition-colors ${
+            variant="ghost"
+            className={`px-3 py-1.5 text-xs rounded-none transition-colors h-auto ${
               tab.value === active
                 ? "border-b-2 border-[var(--accent)] text-[var(--accent)] font-semibold"
                 : "text-[var(--muted)] hover:text-[var(--text)]"
@@ -1156,7 +1194,7 @@ const TabsComponent: ComponentFn = (props, _children, ctx) => {
             onClick={() => setValue(tab.value)}
           >
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
       {activeTab && <div className="py-3 text-xs">{activeTab.content}</div>}
@@ -1173,36 +1211,42 @@ const PaginationComponent: ComponentFn = (props, _children, ctx) => {
   const current = Number(value ?? 1);
   return (
     <div className="flex items-center gap-1">
-      <button
+      <Button
         type="button"
-        className="px-2 py-1 text-xs border border-[var(--border)] bg-[var(--card)] cursor-pointer hover:bg-[var(--bg-hover)] disabled:opacity-40"
+        variant="outline"
+        size="sm"
+        className="px-2 py-1 text-xs disabled:opacity-40"
         disabled={current <= 1}
         onClick={() => setValue(current - 1)}
       >
         ←
-      </button>
+      </Button>
       {Array.from({ length: total }, (_, i) => i + 1).map((page) => (
-        <button
+        <Button
           key={page}
           type="button"
-          className={`px-2 py-1 text-xs border cursor-pointer ${
+          variant={page === current ? "default" : "outline"}
+          size="sm"
+          className={`px-2 py-1 text-xs ${
             page === current
               ? "bg-[var(--accent)] text-[var(--accent-foreground,#1a1f26)] border-[var(--accent)]"
-              : "border-[var(--border)] bg-[var(--card)] hover:bg-[var(--bg-hover)]"
+              : "hover:bg-[var(--bg-hover)]"
           }`}
           onClick={() => setValue(page)}
         >
           {page}
-        </button>
+        </Button>
       ))}
-      <button
+      <Button
         type="button"
-        className="px-2 py-1 text-xs border border-[var(--border)] bg-[var(--card)] cursor-pointer hover:bg-[var(--bg-hover)] disabled:opacity-40"
+        variant="outline"
+        size="sm"
+        className="px-2 py-1 text-xs disabled:opacity-40"
         disabled={current >= total}
         onClick={() => setValue(current + 1)}
       >
         →
-      </button>
+      </Button>
     </div>
   );
 };
@@ -1213,9 +1257,9 @@ const MetricComponent: ComponentFn = (props) => {
   const trend = props.trend as string | undefined;
   const trendColor =
     trend === "up"
-      ? "text-green-400"
+      ? "text-status-success"
       : trend === "down"
-        ? "text-red-400"
+        ? "text-status-danger"
         : "text-[var(--muted)]";
   return (
     <div className="flex flex-col gap-0.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--card)]">
@@ -1334,9 +1378,10 @@ const LineGraphComponent: ComponentFn = (props) => {
 const TooltipComponent: ComponentFn = (props) => {
   const [show, setShow] = useState(false);
   return (
-    <button
+    <Button
       type="button"
-      className="relative inline-block"
+      variant="ghost"
+      className="relative inline-block p-0 h-auto"
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
       onFocus={() => setShow(true)}
@@ -1351,7 +1396,7 @@ const TooltipComponent: ComponentFn = (props) => {
           {String(props.content ?? "")}
         </div>
       )}
-    </button>
+    </Button>
   );
 };
 
@@ -1359,23 +1404,26 @@ const PopoverComponent: ComponentFn = (props) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative inline-block">
-      <button
+      <Button
         type="button"
-        className="text-xs text-[var(--accent)] underline cursor-pointer"
+        variant="link"
+        className="text-xs text-[var(--accent)] underline p-0 h-auto"
         onClick={() => setOpen(!open)}
       >
         {String(props.trigger ?? "Click")}
-      </button>
+      </Button>
       {open && (
         <div className="absolute top-full left-0 mt-1 p-3 border border-[var(--border)] bg-[var(--card)] shadow-md z-10 min-w-[150px]">
           <div className="text-xs">{String(props.content ?? "")}</div>
-          <button
+          <Button
             type="button"
-            className="text-[10px] text-[var(--muted)] mt-1 cursor-pointer hover:text-[var(--text)]"
+            variant="ghost"
+            size="sm"
+            className="text-[10px] text-[var(--muted)] mt-1 hover:text-[var(--text)] p-0 h-auto"
             onClick={() => setOpen(false)}
           >
             Close
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -1386,9 +1434,10 @@ const CollapsibleComponent: ComponentFn = (props, children) => {
   const [open, setOpen] = useState(!!props.defaultOpen);
   return (
     <div className="border border-[var(--border)]">
-      <button
+      <Button
         type="button"
-        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
+        variant="ghost"
+        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold hover:bg-[var(--bg-hover)] transition-colors rounded-none justify-start h-auto"
         onClick={() => setOpen(!open)}
       >
         <span
@@ -1398,7 +1447,7 @@ const CollapsibleComponent: ComponentFn = (props, children) => {
           &#9654;
         </span>
         {String(props.title ?? "Collapsible")}
-      </button>
+      </Button>
       {open && <div className="px-3 pb-3">{children}</div>}
     </div>
   );
@@ -1423,9 +1472,10 @@ const AccordionComponent: ComponentFn = (props) => {
     <div className="border border-[var(--border)] divide-y divide-[var(--border)]">
       {items.map((item, i) => (
         <div key={`${item.title}:${item.content}`}>
-          <button
+          <Button
             type="button"
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold cursor-pointer hover:bg-[var(--bg-hover)]"
+            variant="ghost"
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold hover:bg-[var(--bg-hover)] rounded-none justify-start h-auto"
             onClick={() => toggle(i)}
           >
             <span
@@ -1435,7 +1485,7 @@ const AccordionComponent: ComponentFn = (props) => {
               &#9654;
             </span>
             {item.title}
-          </button>
+          </Button>
           {openSet.has(i) && (
             <div className="px-3 pb-3 text-xs">{item.content}</div>
           )}
@@ -1479,13 +1529,15 @@ const DialogComponent: ComponentFn = (props, children, ctx) => {
               </div>
             ) : null}
           </div>
-          <button
+          <Button
             type="button"
-            className="text-[var(--muted)] hover:text-[var(--text)] text-lg leading-none px-1 cursor-pointer"
+            variant="ghost"
+            size="icon"
+            className="text-[var(--muted)] hover:text-[var(--text)] text-lg leading-none px-1 h-auto w-auto"
             onClick={close}
           >
             ×
-          </button>
+          </Button>
         </div>
         {children}
       </div>

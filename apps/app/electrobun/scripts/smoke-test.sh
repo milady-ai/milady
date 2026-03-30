@@ -40,6 +40,23 @@ EXPECTED_BUNDLE_IDENTIFIER="${EXPECTED_BUNDLE_IDENTIFIER:-com.miladyai.milady}"
 MOUNT_POINT=""
 LAUNCH_APP_BUNDLE=""
 STARTUP_LOG="$HOME/.config/Milady/milady-startup.log"
+STARTUP_SESSION_ID=""
+STARTUP_STATE_FILE=""
+STARTUP_EVENTS_FILE=""
+STARTUP_BOOTSTRAP_FILE=""
+MAC_DIRECT_EXEC_PROBE_RC=""
+MAC_LAUNCH_MODE="${MILADY_SMOKE_MAC_LAUNCH_MODE:-auto}"
+OPEN_LAUNCH_OUTPUT=""
+OPEN_LAUNCH_ATTEMPTED="0"
+OPEN_LAUNCH_EXIT_CODE=""
+STATE_PHASE=""
+STATE_PORT=""
+STATE_PID=""
+STATE_CHILD_PID=""
+STATE_ERROR=""
+STATE_EXIT_CODE=""
+STATE_UPDATED_AT=""
+STATE_SOURCE_FILE=""
 
 if [[ "$SKIP_SIGNATURE_CHECK" == "1" && -z "$BUILD_SKIP_CODESIGN" ]]; then
   BUILD_SKIP_CODESIGN="1"
@@ -52,10 +69,24 @@ if [[ "$(uname)" == "Darwin" && "$BUILD_SKIP_CODESIGN" != "1" && -z "$BUILD_DEVE
       | head -1 \
       | sed 's/.*"\(.*\)"/\1/' || true
   )"
+  if [[ -z "$BUILD_DEVELOPER_ID" && -z "${CI:-}" && -z "${GITHUB_ACTIONS:-}" ]]; then
+    echo "ERROR: No Developer ID Application identity found."
+    echo "       \`bun run test:desktop:packaged\` is the strict signed-packaged gate."
+    echo "       Use \`bun run test:desktop:packaged:unsigned\` for ad-hoc local smoke,"
+    echo "       or set ELECTROBUN_DEVELOPER_ID / ELECTROBUN_SKIP_CODESIGN explicitly."
+    exit 1
+  fi
+fi
+
+if [[ "$BUILD_SKIP_CODESIGN" == "1" || "$SKIP_SIGNATURE_CHECK" == "1" ]]; then
+  echo "WARNING: Running unsigned/ad-hoc packaged smoke. This is not a release-grade signing/notarization check."
 fi
 
 cleanup() {
   kill_stale_processes
+  if [[ -n "$STARTUP_BOOTSTRAP_FILE" ]]; then
+    rm -f "$STARTUP_BOOTSTRAP_FILE"
+  fi
   if [[ -n "$LAUNCH_APP_BUNDLE" && "$LAUNCH_APP_BUNDLE" == /tmp/* && -d "$LAUNCH_APP_BUNDLE" ]]; then
     rm -rf "$LAUNCH_APP_BUNDLE"
   fi
@@ -94,11 +125,112 @@ attach_dmg_with_retry() {
   return 1
 }
 
+backend_health_probe_status() {
+  local url="$1"
+  curl -sS -o /dev/null -w "%{http_code}" --connect-timeout 3 "$url" 2>/dev/null || printf "000"
+}
+
+backend_health_probe_satisfied() {
+  local url="$1"
+  local status
+  status="$(backend_health_probe_status "$url")"
+  # A 401 still proves the packaged backend is running and enforcing auth.
+  [[ "$status" == "200" || "$status" == "401" ]]
+}
+
 ensure_diagnostics_dir() {
   if [[ -z "$SMOKE_DIAGNOSTICS_DIR" ]]; then
     SMOKE_DIAGNOSTICS_DIR="$(mktemp -d /tmp/milady-smoke-diagnostics.XXXXXX)"
   fi
   mkdir -p "$SMOKE_DIAGNOSTICS_DIR"
+}
+
+init_startup_session() {
+  ensure_diagnostics_dir
+  STARTUP_SESSION_ID="${MILADY_STARTUP_SESSION_ID:-milady-smoke-${BUILD_ENV}-$$-${RANDOM:-0}-$(date +%s)}"
+  STARTUP_STATE_FILE="$SMOKE_DIAGNOSTICS_DIR/startup-state.json"
+  STARTUP_EVENTS_FILE="$SMOKE_DIAGNOSTICS_DIR/startup-events.jsonl"
+  STARTUP_BOOTSTRAP_FILE="$LAUNCH_APP_BUNDLE/Contents/Resources/startup-session.json"
+  rm -f "$STARTUP_STATE_FILE" "$STARTUP_EVENTS_FILE"
+  mkdir -p "$(dirname "$STARTUP_BOOTSTRAP_FILE")"
+  local bootstrap_temp="${STARTUP_BOOTSTRAP_FILE}.tmp.$$"
+  node -e '
+    const fs = require("node:fs");
+    const [filePath, sessionId, stateFile, eventsFile] = process.argv.slice(1);
+    const expiresAt = new Date(Date.now() + 15 * 60_000).toISOString();
+    fs.writeFileSync(
+      filePath,
+      `${JSON.stringify(
+        {
+          session_id: sessionId,
+          state_file: stateFile,
+          events_file: eventsFile,
+          expires_at: expiresAt,
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
+    );
+  ' "$bootstrap_temp" "$STARTUP_SESSION_ID" "$STARTUP_STATE_FILE" "$STARTUP_EVENTS_FILE"
+  mv "$bootstrap_temp" "$STARTUP_BOOTSTRAP_FILE"
+}
+
+load_startup_state() {
+  STATE_PHASE=""
+  STATE_PORT=""
+  STATE_PID=""
+  STATE_CHILD_PID=""
+  STATE_ERROR=""
+  STATE_EXIT_CODE=""
+  STATE_UPDATED_AT=""
+  STATE_SOURCE_FILE=""
+
+  local startup_state_file="$STARTUP_STATE_FILE"
+  if [[ ! -f "$startup_state_file" ]]; then
+    return 1
+  fi
+
+  local -a startup_state_parts=()
+  local startup_state_line=""
+  # macOS runners still default to Bash 3.2, so avoid Bash-4-only mapfile.
+  while IFS= read -r startup_state_line; do
+    startup_state_parts+=("$startup_state_line")
+  done < <(
+    node -e '
+      const fs = require("node:fs");
+      const [filePath, expectedSession] = process.argv.slice(1);
+      const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      if ((data.session_id ?? "") !== expectedSession) {
+        process.exit(2);
+      }
+      const fields = [
+        data.phase ?? "",
+        data.port ?? "",
+        data.pid ?? "",
+        data.child_pid ?? "",
+        String(data.error ?? "").replace(/\r?\n/g, " "),
+        data.exit_code ?? "",
+        data.updated_at ?? "",
+      ];
+      for (const field of fields) {
+        console.log(String(field));
+      }
+    ' "$startup_state_file" "$STARTUP_SESSION_ID" 2>/dev/null || true
+  )
+  if [[ "${#startup_state_parts[@]}" -eq 0 ]]; then
+    return 1
+  fi
+
+  STATE_SOURCE_FILE="$startup_state_file"
+  STATE_PHASE="${startup_state_parts[0]:-}"
+  STATE_PORT="${startup_state_parts[1]:-}"
+  STATE_PID="${startup_state_parts[2]:-}"
+  STATE_CHILD_PID="${startup_state_parts[3]:-}"
+  STATE_ERROR="${startup_state_parts[4]:-}"
+  STATE_EXIT_CODE="${startup_state_parts[5]:-}"
+  STATE_UPDATED_AT="${startup_state_parts[6]:-}"
+  return 0
 }
 
 collect_recent_crash_reports() {
@@ -122,6 +254,18 @@ copy_supporting_diagnostics() {
 
   if [[ -f "$STARTUP_LOG" ]]; then
     cp "$STARTUP_LOG" "$SMOKE_DIAGNOSTICS_DIR/milady-startup.log" 2>/dev/null || true
+  fi
+  if [[ -f "$STARTUP_STATE_FILE" ]]; then
+    cp "$STARTUP_STATE_FILE" "$SMOKE_DIAGNOSTICS_DIR/startup-state.json" 2>/dev/null || true
+  fi
+  if [[ -f "$STARTUP_EVENTS_FILE" ]]; then
+    cp "$STARTUP_EVENTS_FILE" "$SMOKE_DIAGNOSTICS_DIR/startup-events.jsonl" 2>/dev/null || true
+  fi
+  if [[ -f "$STARTUP_BOOTSTRAP_FILE" ]]; then
+    cp "$STARTUP_BOOTSTRAP_FILE" "$SMOKE_DIAGNOSTICS_DIR/startup-session.json" 2>/dev/null || true
+  fi
+  if [[ -n "$OPEN_LAUNCH_OUTPUT" && -f "$OPEN_LAUNCH_OUTPUT" ]]; then
+    cp "$OPEN_LAUNCH_OUTPUT" "$SMOKE_DIAGNOSTICS_DIR/open.stderr" 2>/dev/null || true
   fi
 
   while IFS= read -r wrapper_file; do
@@ -197,6 +341,7 @@ dump_failure_diagnostics() {
   local reason="$1"
   local launcher_stdout="${LAUNCHER_STDOUT:-}"
   local launcher_stderr="${LAUNCHER_STDERR:-}"
+  load_startup_state || true
   ensure_diagnostics_dir
   write_bundle_diagnostics
   collect_recent_crash_reports
@@ -208,10 +353,26 @@ dump_failure_diagnostics() {
     echo "Startup timeout: $STARTUP_TIMEOUT"
     echo "Liveness timeout: $LIVENESS_TIMEOUT"
     echo "Packaged handoff grace: $PACKAGED_HANDOFF_GRACE_SECONDS"
+    echo "Startup session: ${STARTUP_SESSION_ID:-<none>}"
+    echo "Startup state file: ${STARTUP_STATE_FILE:-<unset>}"
+    echo "Startup events file: ${STARTUP_EVENTS_FILE:-<unset>}"
+    echo "Startup bootstrap file: ${STARTUP_BOOTSTRAP_FILE:-<unset>}"
+    echo "Loaded startup state source: ${STATE_SOURCE_FILE:-<none>}"
+    echo "Mac launch mode: ${MAC_LAUNCH_MODE:-<unset>}"
+    echo "open(1) attempted: ${OPEN_LAUNCH_ATTEMPTED:-0}"
+    echo "open(1) exit code: ${OPEN_LAUNCH_EXIT_CODE:-<unset>}"
+    echo "Mac direct bundle exec probe rc: ${MAC_DIRECT_EXEC_PROBE_RC:-<unset>}"
     echo "Mounted volume: ${MOUNT_POINT:-<none>}"
     echo "Launch bundle: ${LAUNCH_APP_BUNDLE:-<none>}"
     echo "Launcher path: ${LAUNCHER_PATH:-<none>}"
-    echo "Current packaged PID: $(find_live_packaged_pid)"
+    echo "Launcher pid: ${PID:-<none>}"
+    echo "Observed main pid: ${STATE_PID:-<none>}"
+    echo "Observed child pid: ${STATE_CHILD_PID:-<none>}"
+    echo "Observed phase: ${STATE_PHASE:-<none>}"
+    echo "Observed port: ${STATE_PORT:-<none>}"
+    echo "Observed exit code: ${STATE_EXIT_CODE:-<none>}"
+    echo "Observed error: ${STATE_ERROR:-<none>}"
+    echo "Fallback packaged PID: $(find_live_packaged_pid)"
     echo ""
     echo "Launcher stdout:"
     if [[ -n "$launcher_stdout" && -f "$launcher_stdout" ]]; then
@@ -223,8 +384,25 @@ dump_failure_diagnostics() {
       cat "$launcher_stderr" 2>/dev/null || true
     fi
     echo ""
-    echo "Startup log tail:"
-    tail -n 200 "$STARTUP_LOG" 2>/dev/null || true
+    echo "open(1) stderr:"
+    if [[ -n "$OPEN_LAUNCH_OUTPUT" && -f "$OPEN_LAUNCH_OUTPUT" ]]; then
+      cat "$OPEN_LAUNCH_OUTPUT" 2>/dev/null || true
+    fi
+    echo ""
+    echo "Startup state snapshot:"
+    if [[ -f "$STARTUP_STATE_FILE" ]]; then
+      cat "$STARTUP_STATE_FILE" 2>/dev/null || true
+    fi
+    echo ""
+    echo "Startup bootstrap snapshot:"
+    if [[ -f "$STARTUP_BOOTSTRAP_FILE" ]]; then
+      cat "$STARTUP_BOOTSTRAP_FILE" 2>/dev/null || true
+    fi
+    echo ""
+    echo "Startup session events:"
+    if [[ -f "$STARTUP_EVENTS_FILE" ]]; then
+      tail -n 200 "$STARTUP_EVENTS_FILE" 2>/dev/null || true
+    fi
   } >"$SMOKE_DIAGNOSTICS_DIR/failure-summary.txt"
 
   echo "Diagnostics written to: $SMOKE_DIAGNOSTICS_DIR"
@@ -269,11 +447,10 @@ build_launcher_command() {
   LAUNCH_COMMAND=("$LAUNCHER_PATH")
 
   # The Electrobun macOS launcher copies the inherited environment before it
-  # spawns Bun. GitHub Actions runners inject a very large env block, and the
-  # x64 launcher can segfault in std.process.getEnvMap() before our app starts.
-  # Launch the packaged app with a small user-like environment in CI so the
-  # smoke test reflects end-user startup instead of runner-specific env noise.
-  if [[ "$(uname)" == "Darwin" && -n "${GITHUB_ACTIONS:-}" ]]; then
+  # spawns Bun. Large shell env blocks can crash the launcher in
+  # std.process.getEnvMap() before our app code runs, so always launch macOS
+  # smoke runs with a small user-like environment.
+  if [[ "$(uname)" == "Darwin" ]]; then
     local launch_user=""
     local launch_path=""
     local launch_shell=""
@@ -298,12 +475,109 @@ build_launcher_command() {
       LANG="$launch_lang"
       LC_ALL="$launch_lc_all"
       TERM="${TERM:-dumb}"
+      MILADY_STARTUP_SESSION_ID="$STARTUP_SESSION_ID"
+      MILADY_STARTUP_STATE_FILE="$STARTUP_STATE_FILE"
+      MILADY_STARTUP_EVENTS_FILE="$STARTUP_EVENTS_FILE"
+      MILADY_FORCE_AUTOSTART_AGENT=1
+      "$LAUNCHER_PATH"
+    )
+  else
+    LAUNCH_COMMAND=(
+      /usr/bin/env
+      MILADY_STARTUP_SESSION_ID="$STARTUP_SESSION_ID"
+      MILADY_STARTUP_STATE_FILE="$STARTUP_STATE_FILE"
+      MILADY_STARTUP_EVENTS_FILE="$STARTUP_EVENTS_FILE"
+      MILADY_FORCE_AUTOSTART_AGENT=1
       "$LAUNCHER_PATH"
     )
   fi
 }
 
+probe_macos_bundle_exec_support() {
+  MAC_DIRECT_EXEC_PROBE_RC=""
+
+  if [[ "$(uname)" != "Darwin" ]]; then
+    return 0
+  fi
+
+  local probe_root=""
+  local probe_exec=""
+  probe_root="$(mktemp -d /tmp/milady-smoke-probe.XXXXXX)"
+  probe_exec="$probe_root/Probe.app/Contents/MacOS/hello"
+  mkdir -p "$(dirname "$probe_exec")"
+  cat >"$probe_exec" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+  chmod +x "$probe_exec"
+
+  MAC_DIRECT_EXEC_PROBE_RC="$(
+    node -e '
+      const { spawnSync } = require("node:child_process");
+      const { constants } = require("node:os");
+      const result = spawnSync(process.argv[1], [], { stdio: "ignore" });
+      if (typeof result.status === "number") {
+        process.stdout.write(String(result.status));
+        process.exit(0);
+      }
+      if (typeof result.signal === "string") {
+        const signalCode = constants.signals?.[result.signal] ?? 0;
+        process.stdout.write(String(128 + signalCode));
+        process.exit(0);
+      }
+      process.stdout.write("1");
+    ' "$probe_exec"
+  )"
+  rm -rf "$probe_root"
+
+  [[ "$MAC_DIRECT_EXEC_PROBE_RC" == "0" ]]
+}
+
+launch_packaged_app_with_open() {
+  OPEN_LAUNCH_ATTEMPTED="1"
+  OPEN_LAUNCH_OUTPUT="$(mktemp /tmp/milady-smoke-open.stderr.XXXXXX)"
+  if /usr/bin/open -n "$LAUNCH_APP_BUNDLE" >"$LAUNCHER_STDOUT" 2>"$OPEN_LAUNCH_OUTPUT"; then
+    OPEN_LAUNCH_EXIT_CODE="0"
+  else
+    OPEN_LAUNCH_EXIT_CODE="$?"
+  fi
+  PID=""
+}
+
+launch_packaged_app() {
+  LAUNCHER_STDOUT="$(mktemp /tmp/milady-smoke-launcher.stdout.XXXXXX)"
+  LAUNCHER_STDERR="$(mktemp /tmp/milady-smoke-launcher.stderr.XXXXXX)"
+
+  if [[ "$(uname)" == "Darwin" ]]; then
+    local requested_launch_mode="$MAC_LAUNCH_MODE"
+    local effective_launch_mode="$requested_launch_mode"
+
+    if [[ "$requested_launch_mode" == "auto" ]]; then
+      if probe_macos_bundle_exec_support; then
+        effective_launch_mode="direct"
+      else
+        effective_launch_mode="open"
+      fi
+    fi
+
+    MAC_LAUNCH_MODE="$effective_launch_mode"
+    if [[ "$MAC_LAUNCH_MODE" == "open" ]]; then
+      launch_packaged_app_with_open
+      return 0
+    fi
+  fi
+
+  build_launcher_command
+  "${LAUNCH_COMMAND[@]}" >"$LAUNCHER_STDOUT" 2>"$LAUNCHER_STDERR" &
+  PID="$!"
+}
+
 find_live_packaged_pid() {
+  if load_startup_state && [[ -n "$STATE_PID" ]] && kill -0 "$STATE_PID" >/dev/null 2>&1; then
+    printf '%s\n' "$STATE_PID"
+    return 0
+  fi
+
   if [[ -z "$LAUNCH_APP_BUNDLE" ]]; then
     return 0
   fi
@@ -358,15 +632,74 @@ assert_packaged_archive_asset() {
   fi
 }
 
+assert_packaged_asset_variants() {
+  local description="$1"
+  local min_size="${2:-1}"
+  shift 2
+
+  local candidate=""
+  local size_bytes=""
+  local checked=()
+  for candidate in "$@"; do
+    checked+=("$candidate")
+    if [[ ! -f "$candidate" ]]; then
+      continue
+    fi
+
+    size_bytes="$(wc -c < "$candidate" | tr -d ' ')"
+    if [[ -n "$size_bytes" && "$size_bytes" -ge "$min_size" ]]; then
+      return 0
+    fi
+  done
+
+  echo "ERROR: Missing packaged ${description}: ${checked[*]}"
+  dump_failure_diagnostics "missing packaged ${description}"
+  exit 1
+}
+
+assert_packaged_archive_asset_variants() {
+  local archive_path="$1"
+  local description="$2"
+  local min_size="${3:-1}"
+  shift 3
+
+  local archive_member=""
+  local size_bytes=""
+  local checked=()
+  for archive_member in "$@"; do
+    checked+=("$archive_member")
+    if ! tar --zstd -tf "$archive_path" | grep -Fxq "$archive_member"; then
+      continue
+    fi
+
+    size_bytes="$(
+      tar --zstd -xOf "$archive_path" "$archive_member" 2>/dev/null \
+        | wc -c \
+        | tr -d ' '
+    )"
+    if [[ -n "$size_bytes" && "$size_bytes" -ge "$min_size" ]]; then
+      return 0
+    fi
+  done
+
+  echo "ERROR: Missing packaged ${description} in wrapper archive: ${checked[*]}"
+  dump_failure_diagnostics "missing packaged ${description} in wrapper archive"
+  exit 1
+}
+
 verify_packaged_renderer_assets() {
   local renderer_dir="$LAUNCH_APP_BUNDLE/Contents/Resources/app/renderer"
   local archive_bundle_root=""
 
   if [[ -d "$renderer_dir" ]]; then
     assert_packaged_asset "$renderer_dir/index.html" "renderer entrypoint" 256
-    assert_packaged_asset "$renderer_dir/vrms/milady-1.vrm.gz" "default avatar VRM" 1024
+    assert_packaged_asset_variants "default avatar VRM" 1024 \
+      "$renderer_dir/vrms/milady-1.vrm.gz" \
+      "$renderer_dir/vrms/milady-1.vrm"
     assert_packaged_asset "$renderer_dir/vrms/backgrounds/milady-1.png" "default avatar background" 1024
-    assert_packaged_asset "$renderer_dir/animations/idle.glb.gz" "default idle animation" 1024
+    assert_packaged_asset_variants "default idle animation" 1024 \
+      "$renderer_dir/animations/idle.glb.gz" \
+      "$renderer_dir/animations/idle.glb"
 
     echo "Packaged renderer asset check PASSED (direct app bundle)."
     return 0
@@ -375,9 +708,13 @@ verify_packaged_renderer_assets() {
   if [[ -n "${RUNTIME_ARCHIVE:-}" && -f "$RUNTIME_ARCHIVE" ]]; then
     archive_bundle_root="$(basename "$LAUNCH_APP_BUNDLE")/Contents/Resources/app/renderer"
     assert_packaged_archive_asset "$RUNTIME_ARCHIVE" "$archive_bundle_root/index.html" "renderer entrypoint" 256
-    assert_packaged_archive_asset "$RUNTIME_ARCHIVE" "$archive_bundle_root/vrms/milady-1.vrm.gz" "default avatar VRM" 1024
+    assert_packaged_archive_asset_variants "$RUNTIME_ARCHIVE" "default avatar VRM" 1024 \
+      "$archive_bundle_root/vrms/milady-1.vrm.gz" \
+      "$archive_bundle_root/vrms/milady-1.vrm"
     assert_packaged_archive_asset "$RUNTIME_ARCHIVE" "$archive_bundle_root/vrms/backgrounds/milady-1.png" "default avatar background" 1024
-    assert_packaged_archive_asset "$RUNTIME_ARCHIVE" "$archive_bundle_root/animations/idle.glb.gz" "default idle animation" 1024
+    assert_packaged_archive_asset_variants "$RUNTIME_ARCHIVE" "default idle animation" 1024 \
+      "$archive_bundle_root/animations/idle.glb.gz" \
+      "$archive_bundle_root/animations/idle.glb"
 
     echo "Packaged renderer asset check PASSED (wrapper archive)."
     return 0
@@ -386,43 +723,6 @@ verify_packaged_renderer_assets() {
   echo "ERROR: Packaged renderer directory missing and no wrapper archive was available: $renderer_dir"
   dump_failure_diagnostics "packaged renderer directory missing"
   exit 1
-}
-
-assert_packaged_asset() {
-  local asset_path="$1"
-  local description="$2"
-  local min_size="${3:-1}"
-  local size_bytes=""
-
-  if [[ ! -f "$asset_path" ]]; then
-    echo "ERROR: Missing packaged ${description}: $asset_path"
-    dump_failure_diagnostics "missing packaged ${description}"
-    exit 1
-  fi
-
-  size_bytes="$(wc -c < "$asset_path" | tr -d ' ')"
-  if [[ -z "$size_bytes" || "$size_bytes" -lt "$min_size" ]]; then
-    echo "ERROR: Packaged ${description} looks truncated (${size_bytes:-0} bytes): $asset_path"
-    dump_failure_diagnostics "packaged ${description} failed size check"
-    exit 1
-  fi
-}
-
-verify_packaged_renderer_assets() {
-  local renderer_dir="$LAUNCH_APP_BUNDLE/Contents/Resources/app/renderer"
-
-  if [[ ! -d "$renderer_dir" ]]; then
-    echo "ERROR: Packaged renderer directory missing: $renderer_dir"
-    dump_failure_diagnostics "packaged renderer directory missing"
-    exit 1
-  fi
-
-  assert_packaged_asset "$renderer_dir/index.html" "renderer entrypoint" 256
-  assert_packaged_asset "$renderer_dir/vrms/milady-1.vrm.gz" "default avatar VRM" 1024
-  assert_packaged_asset "$renderer_dir/vrms/backgrounds/milady-1.png" "default avatar background" 1024
-  assert_packaged_asset "$renderer_dir/animations/idle.glb.gz" "default idle animation" 1024
-
-  echo "Packaged renderer asset check PASSED."
 }
 
 trap cleanup EXIT
@@ -586,6 +886,13 @@ if [[ -n "$MOUNT_POINT" ]]; then
   LAUNCH_APP_DIR="$(mktemp -d /tmp/milady-smoke-app.XXXXXX)"
   LAUNCH_APP_BUNDLE="$LAUNCH_APP_DIR/$(basename "$APP_BUNDLE")"
   ditto "$APP_BUNDLE" "$LAUNCH_APP_BUNDLE"
+  if [[ "$(uname)" == "Darwin" ]]; then
+    # Local ad-hoc smoke runs execute the copied bundle directly from /tmp.
+    # Preserve the signed bits, but strip provenance/quarantine xattrs so
+    # macOS does not kill the unsigned local launcher before Bun starts.
+    xattr -dr com.apple.provenance "$LAUNCH_APP_BUNDLE" 2>/dev/null || true
+    xattr -dr com.apple.quarantine "$LAUNCH_APP_BUNDLE" 2>/dev/null || true
+  fi
 else
   LAUNCH_APP_BUNDLE="$APP_BUNDLE"
 fi
@@ -593,6 +900,7 @@ LAUNCHER_PATH="$LAUNCH_APP_BUNDLE/Contents/MacOS/launcher"
 verify_packaged_renderer_assets
 
 kill_stale_processes
+init_startup_session
 
 LOG_OFFSET=0
 if [[ -f "$STARTUP_LOG" ]]; then
@@ -604,11 +912,12 @@ if [[ ! -x "$LAUNCHER_PATH" ]]; then
   exit 1
 fi
 
-LAUNCHER_STDOUT="$(mktemp /tmp/milady-smoke-launcher.stdout.XXXXXX)"
-LAUNCHER_STDERR="$(mktemp /tmp/milady-smoke-launcher.stderr.XXXXXX)"
-build_launcher_command
-"${LAUNCH_COMMAND[@]}" >"$LAUNCHER_STDOUT" 2>"$LAUNCHER_STDERR" &
-PID="$!"
+launch_packaged_app
+if [[ "$OPEN_LAUNCH_ATTEMPTED" == "1" && "${OPEN_LAUNCH_EXIT_CODE:-1}" != "0" ]]; then
+  echo "ERROR: open(1) failed to launch the packaged app (exit ${OPEN_LAUNCH_EXIT_CODE})."
+  dump_failure_diagnostics "open(1) failed to launch packaged app"
+  exit 1
+fi
 sleep 2
 
 BACKEND_PORT=""
@@ -616,8 +925,12 @@ HANDOFF_PID=""
 LAUNCHER_EXIT_OBSERVED_AT=""
 
 if [[ -z "$PID" ]]; then
-  echo "WARNING: Could not start packaged launcher. App may have exited immediately."
-  echo "         Check Console.app or crash logs in ~/Library/Logs/DiagnosticReports/"
+  if [[ "$(uname)" == "Darwin" && "$MAC_LAUNCH_MODE" == "open" ]]; then
+    echo "Launcher direct exec is unavailable on this macOS host; falling back to open(1)."
+  else
+    echo "WARNING: Could not start packaged launcher. App may have exited immediately."
+    echo "         Check Console.app or crash logs in ~/Library/Logs/DiagnosticReports/"
+  fi
   LAUNCHER_EXIT_OBSERVED_AT="$SECONDS"
 elif ! kill -0 "$PID" >/dev/null 2>&1; then
   wait "$PID" || true
@@ -630,21 +943,21 @@ fi
 DEADLINE=$((SECONDS + STARTUP_TIMEOUT))
 while [[ $SECONDS -lt $DEADLINE ]]; do
   LIVE_PID="$(find_live_packaged_pid)"
+  load_startup_state || true
 
-  if [[ -f "$STARTUP_LOG" ]]; then
-    LOG_SLICE="$(tail -c +"$((LOG_OFFSET + 1))" "$STARTUP_LOG" 2>/dev/null || true)"
-    if [[ -z "$BACKEND_PORT" ]]; then
-      BACKEND_PORT="$(printf '%s\n' "$LOG_SLICE" | sed -n 's/.*Runtime started -- agent: .* port: \([0-9][0-9]*\), pid: .*/\1/p' | tail -1)"
-    fi
-    if printf '%s\n' "$LOG_SLICE" | grep -Eq 'Cannot find module|Child process exited with code|Failed to start:'; then
-      echo "ERROR: Backend startup failed. Recent startup log:"
-      printf '%s\n' "$LOG_SLICE" | tail -n 120
-      echo ""
-      echo "Launcher stderr:"
-      cat "$LAUNCHER_STDERR" 2>/dev/null || true
-      dump_failure_diagnostics "backend startup log reported a failure"
-      exit 1
-    fi
+  if [[ -n "$STATE_PID" && "$STATE_PID" != "$PID" && "$STATE_PID" != "$HANDOFF_PID" ]]; then
+    echo "Launcher handoff detected; following packaged app process $STATE_PID."
+    HANDOFF_PID="$STATE_PID"
+  fi
+
+  if [[ -n "$STATE_PORT" ]]; then
+    BACKEND_PORT="$STATE_PORT"
+  fi
+
+  if [[ "$STATE_PHASE" == "fatal" ]]; then
+    echo "ERROR: Packaged startup entered fatal phase."
+    dump_failure_diagnostics "startup trace recorded fatal phase"
+    exit 1
   fi
 
   if [[ -n "$LIVE_PID" ]] && kill -0 "$LIVE_PID" >/dev/null 2>&1; then
@@ -668,8 +981,14 @@ while [[ $SECONDS -lt $DEADLINE ]]; do
       fi
     fi
   fi
-  if [[ -n "$BACKEND_PORT" ]]; then
-    if curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+
+  if [[ "$STATE_PHASE" == "runtime_ready" || "$STATE_PHASE" == "metadata_ready" ]]; then
+    if [[ -z "$BACKEND_PORT" ]]; then
+      echo "ERROR: Startup trace reached $STATE_PHASE without a backend port."
+      dump_failure_diagnostics "startup trace missing backend port"
+      exit 1
+    fi
+    if backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
       echo "Backend health check PASSED on port $BACKEND_PORT."
       break
     fi
@@ -678,21 +997,19 @@ while [[ $SECONDS -lt $DEADLINE ]]; do
 done
 
 if [[ -z "$BACKEND_PORT" ]]; then
-  echo "ERROR: Backend never reported a started port in $STARTUP_LOG"
-  [[ -f "$STARTUP_LOG" ]] && tail -n 120 "$STARTUP_LOG"
-  echo ""
-  echo "Launcher stderr:"
-  cat "$LAUNCHER_STDERR" 2>/dev/null || true
-  dump_failure_diagnostics "backend never reported a started port"
+  echo "ERROR: Packaged startup never reached runtime_ready with a backend port."
+  FAILURE_REASON="startup trace never reached runtime_ready"
+  if [[ "$OPEN_LAUNCH_ATTEMPTED" == "1" ]]; then
+    FAILURE_REASON="open(1) launch produced no startup trace"
+  elif [[ "$(uname)" == "Darwin" && -z "$STATE_PHASE" && "$MAC_DIRECT_EXEC_PROBE_RC" == "137" ]]; then
+    FAILURE_REASON="macOS direct app-bundle exec probe returned SIGKILL (137) before startup trace began"
+  fi
+  dump_failure_diagnostics "$FAILURE_REASON"
   exit 1
 fi
 
-if ! curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+if ! backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
   echo "ERROR: Backend did not answer /api/health on port $BACKEND_PORT"
-  [[ -f "$STARTUP_LOG" ]] && tail -n 120 "$STARTUP_LOG"
-  echo ""
-  echo "Launcher stderr:"
-  cat "$LAUNCHER_STDERR" 2>/dev/null || true
   dump_failure_diagnostics "backend health endpoint never became reachable"
   exit 1
 fi
@@ -711,7 +1028,7 @@ if printf '%s\n' "$LOG_SLICE" | grep -Eq "Failed plugins:.*(${STREAMING_FAILURE_
   dump_failure_diagnostics "streaming plugins reported failed"
   exit 1
 fi
-if printf '%s\n' "$LOG_SLICE" | grep -Eq "Plugin @miladyai/plugin-streaming-base did not export a valid Plugin object"; then
+if printf '%s\n' "$LOG_SLICE" | grep -Eq "Plugin @elizaos/plugin-streaming-base did not export a valid Plugin object"; then
   echo "ERROR: Streaming helper package was treated as a real plugin."
   printf '%s\n' "$LOG_SLICE" | grep -E "plugin-streaming-base|Plugin resolution complete|Failed plugins:" | tail -n 20
   dump_failure_diagnostics "streaming helper package treated as a plugin"
@@ -729,18 +1046,14 @@ echo "Waiting ${LIVENESS_TIMEOUT}s for liveness..."
 sleep "$LIVENESS_TIMEOUT"
 LIVE_PID="$(find_live_packaged_pid)"
 if [[ -n "$LIVE_PID" ]] && kill -0 "$LIVE_PID" 2>/dev/null; then
-  if curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+  if backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
     echo "App process ($LIVE_PID) and backend still healthy after ${LIVENESS_TIMEOUT}s — liveness check PASSED."
   else
     echo "ERROR: App stayed open but backend health check failed after ${LIVENESS_TIMEOUT}s."
-    [[ -f "$STARTUP_LOG" ]] && tail -n 120 "$STARTUP_LOG"
-    echo ""
-    echo "Launcher stderr:"
-    cat "$LAUNCHER_STDERR" 2>/dev/null || true
     dump_failure_diagnostics "backend liveness check failed after startup"
     exit 1
   fi
-elif curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/health" >/dev/null; then
+elif backend_health_probe_satisfied "http://127.0.0.1:${BACKEND_PORT}/api/health"; then
   echo "WARNING: No packaged app process was detected after ${LIVENESS_TIMEOUT}s, but the packaged backend remained healthy."
   echo "         Treating backend liveness as the release gate for this launcher path."
 else

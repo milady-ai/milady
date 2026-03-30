@@ -1,6 +1,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { textOf as text } from "../../../../test/helpers/react-test";
 
 const { mockUseApp } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
@@ -10,7 +11,61 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
+vi.mock("@miladyai/ui", () => {
+  const passthrough = ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    cn: (...classes: Array<string | false | null | undefined>) =>
+      classes.filter(Boolean).join(" "),
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    Select: passthrough,
+    SelectContent: passthrough,
+    SelectItem: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("option", props, children),
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
+    Tooltip: passthrough,
+    TooltipContent: passthrough,
+    TooltipProvider: passthrough,
+    TooltipTrigger: passthrough,
+    Tabs: passthrough,
+    TabsList: passthrough,
+    TabsTrigger: passthrough,
+    TabsContent: passthrough,
+    DropdownMenuShortcut: "DropdownMenuShortcut",
+    Badge: passthrough,
+  };
+});
+
 import { InventoryView } from "../../src/components/InventoryView";
+
+const INVENTORY_FILTERS_ALL_ON = {
+  ethereum: true,
+  base: true,
+  bsc: true,
+  avax: true,
+  solana: true,
+};
+
+const INVENTORY_FILTERS_BSC_ONLY = {
+  ethereum: false,
+  base: false,
+  bsc: true,
+  avax: false,
+  solana: false,
+};
 
 function createWalletBalances(
   bnbBalance = "0.006",
@@ -234,7 +289,10 @@ function createContext(
   overrides?: Partial<{
     inventoryView: "tokens" | "nfts";
     inventorySort: "chain" | "symbol" | "value";
-    inventoryChainFocus: "bsc" | "all";
+    inventorySortDirection: "asc" | "desc";
+    inventoryChainFilters:
+      | typeof INVENTORY_FILTERS_ALL_ON
+      | typeof INVENTORY_FILTERS_BSC_ONLY;
     walletBalances: ReturnType<typeof createWalletBalances> | null;
     walletConfig: ReturnType<typeof createWalletConfig> | null;
     elizaCloudConnected: boolean;
@@ -254,7 +312,8 @@ function createContext(
     walletNftsLoading: false,
     inventoryView: "tokens",
     inventorySort: "value",
-    inventoryChainFocus: "all",
+    inventorySortDirection: "desc",
+    inventoryChainFilters: { ...INVENTORY_FILTERS_ALL_ON },
     inventoryCollapseOtherEvm: true,
     inventoryCollapseSolana: true,
     walletError: null,
@@ -297,12 +356,6 @@ function createContext(
   return ctx;
 }
 
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : text(child)))
-    .join("");
-}
-
 async function flushAsync() {
   await Promise.resolve();
   await Promise.resolve();
@@ -329,9 +382,10 @@ describe("InventoryView unified wallets", () => {
     const content = text(tree?.root);
     expect(content).not.toContain("wallet.portfolio");
     expect(content).not.toContain("All Chains");
+    expect(content).not.toContain("WALLET");
     expect(content).toContain("wallet.tokens");
     expect(content).toContain("wallet.nfts");
-    expect(content).toContain("wallet.all");
+    expect(content).not.toContain("wallet.all");
     expect(content).toContain("tokenstable.nativeGasEthereum");
     expect(content).toContain("tokenstable.nativeGasSolana");
     expect(
@@ -339,6 +393,27 @@ describe("InventoryView unified wallets", () => {
         (node) =>
           node.type === "button" &&
           node.props["data-testid"] === "wallet-token-preflight",
+      ),
+    ).toHaveLength(0);
+  });
+
+  it("hides wallet sort chrome in NFT view", async () => {
+    const ctx = createContext({ inventoryView: "nfts" });
+    mockUseApp.mockImplementation(() => ctx);
+
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(InventoryView));
+    });
+
+    expect(
+      tree?.root.findAll(
+        (node) => node.props?.["data-testid"] === "wallet-sidebar-sort-block",
+      ),
+    ).toHaveLength(0);
+    expect(
+      tree?.root.findAll(
+        (node) => node.props?.["data-testid"] === "wallet-sort-select",
       ),
     ).toHaveLength(0);
   });
@@ -372,7 +447,7 @@ describe("InventoryView unified wallets", () => {
     expect(content).not.toContain("tokenstable.nativeGasSolana");
   });
 
-  it("switches focus with chain controls", async () => {
+  it("toggles BSC chain visibility with chain controls", async () => {
     const ctx = createContext();
     mockUseApp.mockImplementation(() => ctx);
 
@@ -381,17 +456,24 @@ describe("InventoryView unified wallets", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const chainSelect = tree?.root.findAll(
+    const bscButton = tree?.root.findAll(
       (node) =>
-        node.type === "select" &&
-        node.props["data-testid"] === "wallet-chain-select",
+        node.type === "button" &&
+        typeof node.props["aria-label"] === "string" &&
+        node.props["aria-label"].startsWith("BSC —"),
     )[0];
-    expect(chainSelect).toBeDefined();
+    expect(bscButton).toBeDefined();
 
     await act(async () => {
-      chainSelect.props.onChange({ target: { value: "bsc" } });
+      bscButton.props.onClick();
     });
-    expect(ctx.setState).toHaveBeenCalledWith("inventoryChainFocus", "bsc");
+    expect(ctx.setState).toHaveBeenCalledWith("inventoryChainFilters", {
+      ethereum: true,
+      base: true,
+      bsc: false,
+      avax: true,
+      solana: true,
+    });
 
     await act(async () => {
       tree?.update(React.createElement(InventoryView));
@@ -399,19 +481,12 @@ describe("InventoryView unified wallets", () => {
 
     const content = text(tree?.root);
     expect(content).not.toContain("All Chains");
-    expect(content).not.toContain("Ethereum native");
-    expect(
-      tree?.root.findAll(
-        (node) =>
-          node.type === "button" &&
-          node.props["data-testid"] === "wallet-token-preflight",
-      ),
-    ).toHaveLength(1);
+    expect(content).not.toContain("CAKE");
   });
 
   it("applies BNB gas readiness threshold at 0.005", async () => {
     const lowCtx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.0049"),
     });
     mockUseApp.mockImplementation(() => lowCtx);
@@ -421,10 +496,10 @@ describe("InventoryView unified wallets", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
     let content = text(tree?.root);
-    expect(content).toContain("Trade Not Ready");
+    expect(content).toContain("bsctradepanel.TradeNotReady");
 
     const readyCtx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.005"),
     });
     mockUseApp.mockImplementation(() => readyCtx);
@@ -432,12 +507,12 @@ describe("InventoryView unified wallets", () => {
       tree?.update(React.createElement(InventoryView));
     });
     content = text(tree?.root);
-    expect(content).toContain("Trade Ready");
+    expect(content).toContain("bsctradepanel.TradeReady");
   });
 
   it("renders BSC chain errors and token preflight/quote actions", async () => {
     const errorCtx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.006", "BSC RPC timeout"),
     });
     mockUseApp.mockImplementation(() => errorCtx);
@@ -451,7 +526,7 @@ describe("InventoryView unified wallets", () => {
     expect(content).toContain("BSC: BSC RPC timeout");
 
     const normalCtx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.006", null),
     });
     mockUseApp.mockImplementation(() => normalCtx);
@@ -526,7 +601,7 @@ describe("InventoryView unified wallets", () => {
       (chain) => chain.chain !== "BSC",
     );
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       elizaCloudConnected: false,
       walletBalances: balances,
       walletConfig: {
@@ -554,7 +629,7 @@ describe("InventoryView unified wallets", () => {
 
   it("supports quick trade input and preset actions", async () => {
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.006", null),
     });
     mockUseApp.mockImplementation(() => ctx);
@@ -617,7 +692,7 @@ describe("InventoryView unified wallets", () => {
 
   it("supports manually adding a token contract to wallet rows", async () => {
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.006", null),
     });
     mockUseApp.mockImplementation(() => ctx);
@@ -658,7 +733,7 @@ describe("InventoryView unified wallets", () => {
     });
 
     expect(ctx.setActionNotice).toHaveBeenCalledWith(
-      "Token added to watchlist.",
+      "bsctradepanel.TokenAddedToWatchlist",
       "success",
       2600,
     );
@@ -681,7 +756,7 @@ describe("InventoryView unified wallets", () => {
 
   it("executes latest quote via inline confirmation", async () => {
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.02", null),
     });
     mockUseApp.mockImplementation(() => ctx);
@@ -748,7 +823,7 @@ describe("InventoryView unified wallets", () => {
 
   it("shows two-step notice for sell in user-sign mode", async () => {
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.02", null),
     });
     ctx.executeBscTrade = vi.fn(async () =>
@@ -809,7 +884,12 @@ describe("InventoryView unified wallets", () => {
       expect.objectContaining({ side: "sell" }),
     );
     expect(ctx.setActionNotice).toHaveBeenCalledWith(
-      expect.stringContaining("Sign swap transaction"),
+      "bsctradepanel.SellQuoteReady",
+      "success",
+      3200,
+    );
+    expect(ctx.setActionNotice).toHaveBeenCalledWith(
+      "bsctradepanel.SignSwapTransactionInWallet",
       "info",
       4600,
     );
@@ -837,7 +917,7 @@ describe("InventoryView unified wallets", () => {
 
   it("refreshes pending tx status after execute", async () => {
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletBalances: createWalletBalances("0.02", null),
     });
     ctx.executeBscTrade = vi.fn(async () =>
@@ -914,7 +994,7 @@ describe("InventoryView unified wallets", () => {
 
   it("shows legacy raw RPC guidance when a focused chain is on legacy config", async () => {
     const ctx = createContext({
-      inventoryChainFocus: "bsc",
+      inventoryChainFilters: { ...INVENTORY_FILTERS_BSC_ONLY },
       walletConfig: {
         ...createWalletConfig(),
         selectedRpcProviders: {
@@ -934,7 +1014,7 @@ describe("InventoryView unified wallets", () => {
     });
 
     const content = text(tree?.root);
-    expect(content).toContain("BSC is using legacy raw RPC config.");
-    expect(content).toContain("Re-save a supported provider in Settings");
+    expect(content).toContain("is using legacy raw RPC config.");
+    expect(content).toContain("Re-save a supported provider in Settings to migrate fully.");
   });
 });

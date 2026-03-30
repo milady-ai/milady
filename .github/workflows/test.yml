@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 concurrency:
@@ -14,9 +14,28 @@ concurrency:
 env:
   CI: "true"
   BUN_VERSION: "1.3.10"
+  NODE_NO_WARNINGS: "1"
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
+  regression-matrix:
+    name: Regression Matrix Contract
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Validate regression matrix contract
+        run: bun run test:regression-matrix:pr
+
   unit-tests:
     name: Unit Tests
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -31,39 +50,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+          install-command: bun install --ignore-scripts
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
 
       - name: Run unit tests with coverage
         run: bun run test:coverage
@@ -88,39 +81,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Python (for node-gyp when native prebuilds missing)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
-
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+          install-command: bun install --ignore-scripts
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
 
       - name: Run database security and query-guard tests
         run: bun run db:check
@@ -138,6 +105,58 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          install-command: bun install
+          run-postinstall: "false"
+
+      - name: Build
+        run: bun run build
+
+      - name: Run E2E tests
+        run: bun run test:e2e
+
+  app-startup-e2e:
+    name: App Startup E2E (Onboarding)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # WHY useblacksmith: colocated cache avoids nodejs.org download timeouts on Blacksmith runners.
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          install-command: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Run startup E2E contract guard
+        run: bun run test:startup:contract
+
+      - name: Run app startup/onboarding tests
+        run: bun run test:startup:e2e
+
+  desktop-contract:
+    name: Electrobun Desktop Contract
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version: 22
+
       - name: Setup Python (for node-gyp when native prebuilds missing)
         uses: actions/setup-python@v5
         with:
@@ -148,57 +167,6 @@ jobs:
 
       - name: Install canvas native dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install
-        env:
-          npm_config_python: ${{ env.pythonLocation }}/bin/python3
-
-      - name: Build
-        run: bun run build
-
-      - name: Run E2E tests
-        run: >
-          bunx vitest run --config vitest.e2e.config.ts
-          --exclude test/anvil-contracts.e2e.test.ts
-          --exclude test/apps-e2e.e2e.test.ts
-
-  app-startup-e2e:
-    name: App Startup E2E (Onboarding)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      # WHY useblacksmith: colocated cache avoids nodejs.org download timeouts on Blacksmith runners.
-      - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
-        with:
-          node-version: 22
-
-      - name: Setup Python (for node-gyp)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install setuptools for distutils (Python 3.12+)
-        run: pip install setuptools
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -219,19 +187,18 @@ jobs:
 
       - name: Run repository postinstall patches
         run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
 
-      - name: Run app startup/onboarding tests
-        run: >
-          bunx vitest run
-          packages/app-core/test/app/startup-chat.e2e.test.ts
-          packages/app-core/test/app/startup-onboarding.e2e.test.ts
-          packages/app-core/test/app/startup-backend-missing.e2e.test.ts
-          packages/app-core/test/app/startup-token-401.e2e.test.ts
+      - name: Run Electrobun contract tests
+        run: bun run test:desktop:contract
 
-  # Desktop build/packaging validation lives in release-electrobun.yml.
-  # The old electron-ui-e2e and electron-packaged-dmg-e2e jobs were removed
-  # after the Electrobun migration — they were always-skipped on PRs
-  # (gated on refs/tags/v) and duplicated work the release workflow does.
+  # Pull requests only validate the release-workflow contract in
+  # test-electrobun-release.yml. The full Electrobun packaging/signing matrix
+  # runs from release-electrobun.yml for tagged or manually dispatched releases.
+  # The old electron-ui-e2e and electron-packaged-dmg-e2e jobs remain removed
+  # after the Electrobun migration.
 
   cloud-live-e2e:
     name: Cloud Live E2E (Eliza Cloud)
@@ -252,42 +219,21 @@ jobs:
         if: steps.cloud.outputs.enabled == 'true'
         uses: actions/checkout@v4
 
-      - name: Install canvas native dependencies
+      - name: Setup workspace dependencies
         if: steps.cloud.outputs.enabled == 'true'
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        if: steps.cloud.outputs.enabled == 'true'
-        uses: oven-sh/setup-bun@v2
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        if: steps.cloud.outputs.enabled == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        if: steps.cloud.outputs.enabled == 'true'
-        run: |
-          for i in 1 2 3 4 5; do
-            bun install --frozen-lockfile --ignore-scripts && break
-            echo "Attempt $i failed, retrying in $((i * 15))s..."
-            sleep $((i * 15))
-          done
-
-      - name: Run repository postinstall patches
-        if: steps.cloud.outputs.enabled == 'true'
-        run: bun run postinstall
+          install-command: |
+            for i in 1 2 3 4 5; do
+              bun install --frozen-lockfile --ignore-scripts && break
+              echo "Attempt $i failed, retrying in $((i * 15))s..."
+              sleep $((i * 15))
+            done
 
       - name: Run cloud live test
         if: steps.cloud.outputs.enabled == 'true'
-        run: >
-          bunx vitest run --config vitest.e2e.config.ts
-          test/cloud-providers.e2e.test.ts
+        run: bun run test:live:cloud
         env:
           MILADY_LIVE_TEST: "1"
           ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
@@ -301,51 +247,60 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install canvas native dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Cache Bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: bun install --ignore-scripts
-
-      - name: Run repository postinstall patches
-        run: bun run postinstall
+          install-command: bun install --ignore-scripts
 
       - name: Build
         run: bun run build
 
       - name: Run E2E Validation tests
-        run: bunx vitest run --config vitest.e2e.config.ts test/e2e-validation.e2e.test.ts
+        run: bun run test:e2e:validation
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
   test-status:
     name: All Tests Passed
     if: always()
-    needs: [unit-tests, db-check, e2e-tests, app-startup-e2e, cloud-live-e2e, validation-e2e]
+    needs: [regression-matrix, unit-tests, db-check, e2e-tests, app-startup-e2e, desktop-contract, cloud-live-e2e, validation-e2e]
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Check test results
+        shell: bash
         run: |
-          # Note: electron jobs are optional (macOS packaging can have flaky deps)
-          if [[ "${{ needs.unit-tests.result }}" == "failure" || \
-                "${{ needs.db-check.result }}" == "failure" || \
-                "${{ needs.e2e-tests.result }}" == "failure" || \
-                "${{ needs.app-startup-e2e.result }}" == "failure" || \
-                "${{ needs.cloud-live-e2e.result }}" == "failure" || \
-                "${{ needs.validation-e2e.result }}" == "failure" ]]; then
-            echo "One or more test jobs failed"
+          set -u
+          # Gate job: surface which dependency failed (logs are easy to miss otherwise).
+          echo "=== Required test job results ==="
+          echo "regression-matrix:  ${{ needs.regression-matrix.result }}"
+          echo "unit-tests:         ${{ needs.unit-tests.result }}"
+          echo "db-check:           ${{ needs.db-check.result }}"
+          echo "e2e-tests:          ${{ needs.e2e-tests.result }}"
+          echo "app-startup-e2e:    ${{ needs.app-startup-e2e.result }}"
+          echo "desktop-contract:   ${{ needs.desktop-contract.result }}"
+          echo "cloud-live-e2e:     ${{ needs.cloud-live-e2e.result }}"
+          echo "validation-e2e:     ${{ needs.validation-e2e.result }}"
+          echo "==================================="
+          bad=0
+          for pair in \
+            "regression-matrix:${{ needs.regression-matrix.result }}" \
+            "unit-tests:${{ needs.unit-tests.result }}" \
+            "db-check:${{ needs.db-check.result }}" \
+            "e2e-tests:${{ needs.e2e-tests.result }}" \
+            "app-startup-e2e:${{ needs.app-startup-e2e.result }}" \
+            "desktop-contract:${{ needs.desktop-contract.result }}" \
+            "cloud-live-e2e:${{ needs.cloud-live-e2e.result }}" \
+            "validation-e2e:${{ needs.validation-e2e.result }}"; do
+            name="${pair%%:*}"
+            result="${pair##*:}"
+            if [[ "$result" != "success" ]]; then
+              echo "::error title=Test gate::Required job '${name}' finished with '${result}' (expected success)"
+              bad=1
+            fi
+          done
+          if [[ "$bad" -ne 0 ]]; then
+            echo "One or more required jobs did not succeed; see rows above and the failing job logs."
             exit 1
           fi
-          echo "All test jobs passed"
+          echo "All required test jobs succeeded"

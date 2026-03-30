@@ -1,0 +1,122 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { logLevelAction } from "../../actions/log-level";
+
+// Mock @elizaos/core
+vi.mock("@elizaos/core", () => {
+  return {
+    elizaLogger: {
+      info: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+      warn: vi.fn(),
+    },
+    loggerScope: {
+      getStore: vi.fn(),
+    },
+  };
+});
+
+describe("logLevelAction", () => {
+  let mockRuntime: { logLevelOverrides: Map<string, string> };
+  let mockMessage: { roomId: string; content: { text: string } };
+  let mockCallback: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    mockRuntime = {
+      logLevelOverrides: new Map(),
+    };
+    mockMessage = {
+      roomId: "test-room-id",
+      content: { text: "" },
+    };
+    mockCallback = vi.fn();
+  });
+
+  it("should set log level override when valid level provided", async () => {
+    mockMessage.content.text = "/logLevel debug";
+
+    const result = await logLevelAction.handler(
+      mockRuntime,
+      mockMessage,
+      undefined,
+      undefined,
+      mockCallback,
+    );
+
+    expect(result.success).toBe(true);
+    expect(mockRuntime.logLevelOverrides.get("test-room-id")).toBe("debug");
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining("DEBUG"),
+        action: "LOG_LEVEL_SET",
+      }),
+    );
+  });
+
+  it("validate accepts explicit log level commands", async () => {
+    mockMessage.content.text = "Set log level to trace";
+
+    await expect(
+      logLevelAction.validate(mockRuntime as never, mockMessage as never),
+    ).resolves.toBe(true);
+  });
+
+  it("validate rejects unrelated messages that merely mention errors", async () => {
+    mockMessage.content.text = "I hit an error while syncing";
+
+    await expect(
+      logLevelAction.validate(mockRuntime as never, mockMessage as never),
+    ).resolves.toBe(false);
+  });
+
+  it("should fail gracefully when invalid level provided", async () => {
+    mockMessage.content.text = "/logLevel invalid_level";
+
+    const result = await logLevelAction.handler(
+      mockRuntime,
+      mockMessage,
+      undefined,
+      undefined,
+      mockCallback,
+    );
+
+    expect(result.success).toBe(false);
+    expect(mockRuntime.logLevelOverrides.has("test-room-id")).toBe(false);
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "LOG_LEVEL_FAILED",
+      }),
+    );
+  });
+
+  it("should not match partial words when extracting levels", async () => {
+    mockMessage.content.text = "Set log level to informational";
+
+    const result = await logLevelAction.handler(
+      mockRuntime,
+      mockMessage,
+      undefined,
+      undefined,
+      mockCallback,
+    );
+
+    expect(result.success).toBe(false);
+    expect(mockRuntime.logLevelOverrides.has("test-room-id")).toBe(false);
+  });
+
+  it("should fail if runtime does not support overrides (missing map)", async () => {
+    const legacyRuntime = {};
+    mockMessage.content.text = "/logLevel debug";
+
+    const result = await logLevelAction.handler(
+      legacyRuntime,
+      mockMessage,
+      undefined,
+      undefined,
+      mockCallback,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Not supported");
+  });
+});

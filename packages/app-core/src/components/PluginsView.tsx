@@ -4,7 +4,22 @@
  * Renders a unified plugin list with searchable/filterable cards and per-plugin settings.
  */
 
-import { Button, Input } from "@miladyai/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+} from "@miladyai/ui";
 import type { LucideIcon } from "lucide-react";
 import {
   Binary,
@@ -92,9 +107,39 @@ import {
 import { useApp } from "../state";
 import type { ConfigUiHint } from "../types";
 import { openExternalUrl, resolveAppAssetUrl } from "../utils";
+import {
+  ADMIN_DIALOG_CONTENT_CLASSNAME,
+  ADMIN_DIALOG_FOOTER_CLASSNAME,
+  ADMIN_DIALOG_HEADER_CLASSNAME,
+  ADMIN_DIALOG_INPUT_CLASSNAME,
+  ADMIN_DIALOG_META_BADGE_CLASSNAME,
+  ADMIN_DIALOG_MONO_META_CLASSNAME,
+} from "./admin-surface-primitives";
+import {
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DESKTOP_PAGE_CONTENT_CLASSNAME,
+  DESKTOP_SECTION_SHELL_CLASSNAME,
+  DesktopEmptyStatePanel,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { autoLabel } from "./labels";
 import { SHOWCASE_PLUGIN } from "./plugins/showcase-data";
+import { SETTINGS_FILTER_CONTROL_CLASSNAME } from "./settings-control-primitives";
+import {
+  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
+  APP_DESKTOP_SPLIT_SHELL_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_RAIL_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 import { WhatsAppQrOverlay } from "./WhatsAppQrOverlay";
+
+const PLUGINS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
 
 /* ── Always-on plugins (hidden from all views) ────────────────────────── */
 
@@ -140,6 +185,9 @@ const ALWAYS_ON_PLUGIN_IDS = new Set([
   "vision",
   "computeruse",
 ]);
+
+/** Keys to hide when Telegram "Allow all chats" mode is active. */
+const TELEGRAM_ALLOW_ALL_HIDDEN = new Set(["TELEGRAM_ALLOWED_CHATS"]);
 
 /* ── Helpers ────────────────────────────────────────────────────────── */
 
@@ -495,9 +543,91 @@ export function paramsToSchema(
   };
 }
 
-/* ── PluginConfigForm bridge ─────────────────────────────────────────── */
+/* ── Telegram chat mode ─────────────────────────────────────────────── */
 
-function PluginConfigForm({
+/**
+ * Hook that manages the "allow all / specific chats" toggle state.
+ * Mode is explicit (not derived from field value) so clearing the field
+ * doesn't flip the toggle. Returns the mode, a toggle handler, and
+ * hiddenKeys for PluginConfigForm.
+ */
+function useTelegramChatMode(
+  plugin: PluginInfo,
+  pluginConfigs: Record<string, Record<string, string>>,
+  onParamChange: (pluginId: string, paramKey: string, value: string) => void,
+) {
+  const localValue = pluginConfigs.telegram?.TELEGRAM_ALLOWED_CHATS;
+  const serverValue =
+    plugin.parameters?.find((p) => p.key === "TELEGRAM_ALLOWED_CHATS")
+      ?.currentValue ?? "";
+  const currentValue = localValue ?? serverValue;
+
+  // Explicit mode state — initialized from current value, then user-controlled
+  const [allowAll, setAllowAll] = useState(() => !currentValue.trim());
+
+  // Stash the last non-empty value so toggling back restores it
+  const stashedChats = useRef(currentValue);
+  if (currentValue.trim()) {
+    stashedChats.current = currentValue;
+  }
+
+  const toggle = useCallback(
+    (next: boolean) => {
+      setAllowAll(next);
+      if (next) {
+        onParamChange("telegram", "TELEGRAM_ALLOWED_CHATS", "");
+      } else {
+        const restore = stashedChats.current?.trim() || "[]";
+        onParamChange("telegram", "TELEGRAM_ALLOWED_CHATS", restore);
+      }
+    },
+    [onParamChange],
+  );
+
+  return {
+    allowAll,
+    toggle,
+    hiddenKeys: allowAll ? TELEGRAM_ALLOW_ALL_HIDDEN : undefined,
+  };
+}
+
+function TelegramChatModeToggle({
+  allowAll,
+  onToggle,
+}: {
+  allowAll: boolean;
+  onToggle: (next: boolean) => void;
+}) {
+  const { t } = useApp();
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card,rgba(255,255,255,0.03))] px-4 py-3 mb-4">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[13px] font-semibold text-[var(--text)]">
+          {allowAll
+            ? t("pluginsview.AllowAllChats", {
+                defaultValue: "Allow all chats",
+              })
+            : t("pluginsview.AllowSpecificChatsOnly", {
+                defaultValue: "Allow only specific chats",
+              })}
+        </span>
+        <span className="text-[11px] text-[var(--muted)]">
+          {allowAll
+            ? t("pluginsview.BotRespondsAnyChat", {
+                defaultValue: "Bot will respond in any chat",
+              })
+            : t("pluginsview.BotRespondsListedChatIds", {
+                defaultValue: "Bot will only respond in listed chat IDs",
+              })}
+        </span>
+      </div>
+      <Switch checked={allowAll} onCheckedChange={onToggle} />
+    </div>
+  );
+}
+
+/** Wraps PluginConfigForm with the Telegram chat mode toggle + hidden keys. */
+function TelegramPluginConfig({
   plugin,
   pluginConfigs,
   onParamChange,
@@ -505,6 +635,38 @@ function PluginConfigForm({
   plugin: PluginInfo;
   pluginConfigs: Record<string, Record<string, string>>;
   onParamChange: (pluginId: string, paramKey: string, value: string) => void;
+}) {
+  const { allowAll, toggle, hiddenKeys } = useTelegramChatMode(
+    plugin,
+    pluginConfigs,
+    onParamChange,
+  );
+
+  return (
+    <>
+      <TelegramChatModeToggle allowAll={allowAll} onToggle={toggle} />
+      <PluginConfigForm
+        plugin={plugin}
+        pluginConfigs={pluginConfigs}
+        onParamChange={onParamChange}
+        hiddenKeys={hiddenKeys}
+      />
+    </>
+  );
+}
+
+/* ── PluginConfigForm bridge ─────────────────────────────────────────── */
+
+function PluginConfigForm({
+  plugin,
+  pluginConfigs,
+  onParamChange,
+  hiddenKeys,
+}: {
+  plugin: PluginInfo;
+  pluginConfigs: Record<string, Record<string, string>>;
+  onParamChange: (pluginId: string, paramKey: string, value: string) => void;
+  hiddenKeys?: Set<string>;
 }) {
   const params = plugin.parameters ?? [];
   const { schema, hints: autoHints } = useMemo(
@@ -514,15 +676,22 @@ function PluginConfigForm({
 
   // Merge server-provided configUiHints over auto-generated hints.
   // Server hints take priority (override auto-generated ones).
+  // Also apply hiddenKeys from parent (e.g. Telegram chat mode toggle).
   const hints = useMemo(() => {
-    const serverHints = plugin.configUiHints;
-    if (!serverHints || Object.keys(serverHints).length === 0) return autoHints;
     const merged: Record<string, ConfigUiHint> = { ...autoHints };
-    for (const [key, serverHint] of Object.entries(serverHints)) {
-      merged[key] = { ...merged[key], ...serverHint };
+    const serverHints = plugin.configUiHints;
+    if (serverHints) {
+      for (const [key, serverHint] of Object.entries(serverHints)) {
+        merged[key] = { ...merged[key], ...serverHint };
+      }
+    }
+    if (hiddenKeys) {
+      for (const key of hiddenKeys) {
+        merged[key] = { ...merged[key], hidden: true };
+      }
     }
     return merged;
-  }, [autoHints, plugin.configUiHints]);
+  }, [autoHints, plugin.configUiHints, hiddenKeys]);
 
   // Build values from current config state + existing server values.
   // Array-typed fields need comma-separated strings parsed into arrays.
@@ -633,6 +802,7 @@ const DEFAULT_ICONS: Record<string, LucideIcon> = {
   tlon: Tornado,
   zalo: Circle,
   zalouser: Circle,
+  wechat: Phone,
   // Features — voice & audio
   "edge-tts": Volume2,
   elevenlabs: Mic,
@@ -724,21 +894,33 @@ function iconImageSource(icon: string): string | null {
   return null;
 }
 
+type TranslateFn = ReturnType<typeof useApp>["t"];
+
 function getPluginResourceLinks(
   plugin: Pick<PluginInfo, "setupGuideUrl" | "homepage" | "repository">,
-): Array<{ key: string; label: string; url: string }> {
+): Array<{ key: string; url: string }> {
   const seen = new Set<string>();
   const ordered = [
-    { key: "guide", label: "Setup guide", url: plugin.setupGuideUrl },
-    { key: "official", label: "Official", url: plugin.homepage },
-    { key: "source", label: "Source", url: plugin.repository },
+    { key: "guide", url: plugin.setupGuideUrl },
+    { key: "official", url: plugin.homepage },
+    { key: "source", url: plugin.repository },
   ];
   return ordered.flatMap((item) => {
     const url = item.url?.trim();
     if (!url || seen.has(url)) return [];
     seen.add(url);
-    return [{ key: item.key, label: item.label, url }];
+    return [{ key: item.key, url }];
   });
+}
+
+function pluginResourceLinkLabel(t: TranslateFn, key: string): string {
+  if (key === "guide") {
+    return t("pluginsview.SetupGuide", { defaultValue: "Setup guide" });
+  }
+  if (key === "official") {
+    return t("pluginsview.Official", { defaultValue: "Official" });
+  }
+  return t("pluginsview.Source", { defaultValue: "Source" });
 }
 
 /* ── Sub-group Classification ──────────────────────────────────────── */
@@ -873,7 +1055,12 @@ function subgroupForPlugin(plugin: PluginInfo): string {
 }
 
 type StatusFilter = "all" | "enabled" | "disabled";
-type PluginsViewMode = "all" | "connectors" | "streaming" | "social";
+type PluginsViewMode =
+  | "all"
+  | "all-social"
+  | "connectors"
+  | "streaming"
+  | "social";
 type SubgroupTag = { id: string; label: string; count: number };
 
 function comparePlugins(left: PluginInfo, right: PluginInfo): number {
@@ -1069,12 +1256,107 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
   const [installProgress, setInstallProgress] = useState<
     Map<string, { phase: string; message: string }>
   >(new Map());
+  const pluginDescriptionFallback = t("pluginsview.NoDescriptionAvailable", {
+    defaultValue: "No description available",
+  });
+  const installProgressLabel = (message?: string) =>
+    message ||
+    t("pluginsview.Installing", {
+      defaultValue: "Installing...",
+    });
+  const installPluginLabel = t("pluginsview.InstallPlugin", {
+    defaultValue: "Install Plugin",
+  });
+  const installLabel = t("pluginsview.Install", {
+    defaultValue: "Install",
+  });
+  const testingLabel = t("pluginsview.Testing", {
+    defaultValue: "Testing...",
+  });
+  const saveSettingsLabel = t("pluginsview.SaveSettings", {
+    defaultValue: "Save Settings",
+  });
+  const saveLabel = t("common.save", { defaultValue: "Save" });
+  const savingLabel = t("apikeyconfig.saving", {
+    defaultValue: "Saving...",
+  });
+  const savedLabel = t("pluginsview.Saved", {
+    defaultValue: "Saved",
+  });
+  const savedWithBangLabel = t("pluginsview.SavedWithBang", {
+    defaultValue: "Saved!",
+  });
+  const readyLabel = t("pluginsview.Ready", { defaultValue: "Ready" });
+  const needsSetupLabel = t("pluginsview.NeedsSetup", {
+    defaultValue: "Needs setup",
+  });
+  const loadFailedLabel = t("pluginsview.LoadFailed", {
+    defaultValue: "Load failed",
+  });
+  const notInstalledLabel = t("pluginsview.NotInstalled", {
+    defaultValue: "Not installed",
+  });
+  const expandLabel = t("pluginsview.Expand", { defaultValue: "Expand" });
+  const collapseLabel = t("pluginsview.Collapse", {
+    defaultValue: "Collapse",
+  });
+  const noConfigurationNeededLabel = t("pluginsview.NoConfigurationNeeded", {
+    defaultValue: "No configuration needed.",
+  });
+  const connectorInstallPrompt = t("pluginsview.InstallConnectorPrompt", {
+    defaultValue: "Install this connector to activate it in the runtime.",
+  });
+  const formatTestConnectionLabel = (result?: {
+    success: boolean;
+    error?: string;
+    durationMs: number;
+    loading: boolean;
+  }) => {
+    if (result?.loading) return testingLabel;
+    if (result?.success) {
+      return t("pluginsview.ConnectionTestPassed", {
+        durationMs: result.durationMs,
+        defaultValue: "OK ({{durationMs}}ms)",
+      });
+    }
+    if (result?.error) {
+      return t("pluginsview.ConnectionTestFailed", {
+        error: result.error,
+        defaultValue: "Failed: {{error}}",
+      });
+    }
+    return t("pluginsview.TestConnection");
+  };
+  const formatDialogTestConnectionLabel = (result?: {
+    success: boolean;
+    error?: string;
+    durationMs: number;
+    loading: boolean;
+  }) => {
+    if (result?.loading) return testingLabel;
+    if (result?.success) {
+      return t("pluginsview.ConnectionTestPassedDialog", {
+        durationMs: result.durationMs,
+        defaultValue: "✓ OK ({{durationMs}}ms)",
+      });
+    }
+    if (result?.error) {
+      return t("pluginsview.ConnectionTestFailedDialog", {
+        error: result.error,
+        defaultValue: "✕ {{error}}",
+      });
+    }
+    return t("pluginsview.TestConnection");
+  };
+  const formatSaveSettingsLabel = (isSaving: boolean, didSave: boolean) => {
+    if (isSaving) return savingLabel;
+    if (didSave) return savedLabel;
+    return saveSettingsLabel;
+  };
   const [togglingPlugins, setTogglingPlugins] = useState<Set<string>>(
     new Set(),
   );
   const hasPluginToggleInFlight = togglingPlugins.size > 0;
-
-  // ── Drag-to-reorder state ────────────────────────────────────────
   const [pluginOrder, setPluginOrder] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem("pluginOrder");
@@ -1086,18 +1368,16 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const dragRef = useRef<string | null>(null);
-  const isSocialMode = mode === "social";
+  const isConnectorShellMode = mode === "social";
+  const isSocialMode = mode === "social" || mode === "all-social";
+  const isSidebarEditorShellMode = mode === "social" || mode === "all-social";
   const isConnectorLikeMode = mode === "connectors" || mode === "social";
-  const resultLabel = isSocialMode ? "connectors" : label.toLowerCase();
-  const searchPlaceholder = isSocialMode
-    ? "Search..."
-    : `Search ${label.toLowerCase()}...`;
-  const effectiveStatusFilter: StatusFilter =
-    isSocialMode && pluginStatusFilter === "disabled"
-      ? "all"
-      : pluginStatusFilter;
-  const effectiveSearch = pluginSearch;
-  const showToolbar = true;
+  const resultLabel = mode === "social" ? "connectors" : label.toLowerCase();
+  const effectiveStatusFilter: StatusFilter = isSidebarEditorShellMode
+    ? pluginStatusFilter
+    : "all";
+  const effectiveSearch = isSidebarEditorShellMode ? pluginSearch : "";
+
   const allowCustomOrder = !isSocialMode;
   const showPluginManagementActions = !isSocialMode;
 
@@ -1143,8 +1423,8 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     mode !== "connectors" && mode !== "streaming" && mode !== "social";
   const showDesktopSubgroupSidebar = showSubgroupFilters;
   const {
-    categoryPlugins,
-    enabledCount,
+    categoryPlugins: _categoryPlugins,
+    enabledCount: _enabledCount,
     nonDbPlugins,
     sorted,
     subgroupTags,
@@ -1192,41 +1472,47 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
       if (options?.sidebar) {
         const Icon = SUBGROUP_NAV_ICONS[tag.id] ?? Package;
         return (
-          <button
+          <Button
             key={tag.id}
-            type="button"
+            variant="ghost"
             onClick={() => setSubgroupFilter(tag.id)}
             aria-current={isActive ? "page" : undefined}
-            className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
+            className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} items-center ${
               isActive
-                ? "border-accent/40 bg-accent/12 text-txt shadow-[0_10px_30px_rgba(var(--accent),0.08)]"
-                : "border-transparent text-muted hover:border-border/60 hover:bg-card/55 hover:text-txt"
+                ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
             }`}
           >
             <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${
                 isActive
                   ? "border-accent/30 bg-accent/18 text-txt-strong"
                   : "border-border/50 bg-bg-accent/80 text-muted"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="h-4 w-4" />
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold leading-snug text-current">
+            <span className="min-w-0 flex-1 text-left">
+              <span className="block text-sm font-semibold leading-snug text-inherit">
                 {tag.label}
+              </span>
+              <span className="mt-1 block text-[11px] leading-relaxed text-muted/85">
+                {t("pluginsview.AvailableCount", {
+                  count: tag.count,
+                  defaultValue: "{{count}} available",
+                })}
               </span>
             </span>
             <span
-              className={`rounded-full border px-2 py-0.5 text-[10px] font-mono leading-none ${
+              className={`rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] ${
                 isActive
-                  ? "border-accent/20 bg-accent/20 text-txt"
-                  : "border-border/50 bg-black/10 text-muted"
+                  ? "border-accent bg-accent text-accent-fg"
+                  : "border-border bg-transparent text-muted"
               }`}
             >
               {tag.count}
             </span>
-          </button>
+          </Button>
         );
       }
 
@@ -1237,14 +1523,18 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
           size="sm"
           className={`h-7 px-3 text-[11px] font-bold tracking-wide rounded-lg transition-all ${
             isActive
-              ? "shadow-[0_0_10px_rgba(var(--accent),0.2)] border-accent"
+              ? "border-accent/55 bg-accent/16 text-txt-strong shadow-sm"
               : "bg-card/40 backdrop-blur-sm border-border/40 text-muted hover:text-txt shadow-sm hover:border-accent/30"
           }`}
           onClick={() => setSubgroupFilter(tag.id)}
         >
           {tag.label}
           <span
-            className={`ml-1.5 px-1.5 py-0.5 rounded border text-[9px] font-mono leading-none ${isActive ? "bg-black/20 border-black/10" : "bg-black/10 border-white/5"}`}
+            className={`ml-1.5 rounded border px-1.5 py-0.5 text-[9px] font-mono leading-none ${
+              isActive
+                ? "border-accent/30 bg-accent/12 text-txt-strong"
+                : "border-border/50 bg-bg-accent/80 text-muted-strong"
+            }`}
           >
             {tag.count}
           </span>
@@ -1253,8 +1543,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     },
     [subgroupFilter],
   );
-
-  // ── Handlers ───────────────────────────────────────────────────────
 
   const toggleSettings = (pluginId: string) => {
     const next = new Set<string>();
@@ -1274,7 +1562,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
   };
 
   const handleConfigSave = async (pluginId: string) => {
-    // Showcase plugin: no-op save (it's not a real plugin)
     if (pluginId === "__ui-showcase__") return;
     const config = pluginConfigs[pluginId] ?? {};
     await handlePluginConfigSave(pluginId, config);
@@ -1326,12 +1613,19 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
       await client.installRegistryPlugin(npmName);
       await loadPlugins();
       setActionNotice(
-        `${npmName} installed. Restart required to activate.`,
+        t("pluginsview.PluginInstalledRestartRequired", {
+          plugin: npmName,
+          defaultValue: "{{plugin}} installed. Restart required to activate.",
+        }),
         "success",
       );
     } catch (err) {
       setActionNotice(
-        `Failed to install ${npmName}: ${err instanceof Error ? err.message : "unknown error"}`,
+        t("pluginsview.PluginInstallFailed", {
+          plugin: npmName,
+          message: err instanceof Error ? err.message : "unknown error",
+          defaultValue: "Failed to install {{plugin}}: {{message}}",
+        }),
         "error",
         3800,
       );
@@ -1388,8 +1682,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     [setActionNotice],
   );
 
-  // ── Add from directory ──────────────────────────────────────────────
-
   const handleAddFromDirectory = async () => {
     const trimmed = addDirPath.trim();
     if (!trimmed) return;
@@ -1409,8 +1701,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     }
     setAddDirLoading(false);
   };
-
-  // ── Drag-to-reorder handlers ─────────────────────────────────────
 
   const handleDragStart = useCallback(
     (e: React.DragEvent, pluginId: string) => {
@@ -1517,16 +1807,24 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     [],
   );
 
-  // ── Card renderers ────────────────────────────────────────────────
-
   const renderPluginCard = (p: PluginInfo) => {
     const hasParams = p.parameters && p.parameters.length > 0;
     const isOpen = pluginSettingsOpen.has(p.id);
+    const requiredParams = hasParams
+      ? p.parameters.filter((param: PluginParamDef) => param.required)
+      : [];
+    const requiredSetCount = requiredParams.filter(
+      (param: PluginParamDef) => param.isSet,
+    ).length;
     const setCount = hasParams
       ? p.parameters.filter((param: PluginParamDef) => param.isSet).length
       : 0;
     const totalCount = hasParams ? p.parameters.length : 0;
-    const allParamsSet = !hasParams || setCount === totalCount;
+    const allParamsSet =
+      !hasParams ||
+      (requiredParams.length > 0
+        ? requiredSetCount === requiredParams.length
+        : setCount === totalCount);
     const isShowcase = p.id === "__ui-showcase__";
     const categoryLabel = isShowcase
       ? "showcase"
@@ -1566,7 +1864,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
         } ${isDragging ? "opacity-30" : ""} ${isDragOver ? "ring-2 ring-accent/60" : ""}`}
         data-plugin-id={p.id}
       >
-        {/* Top: drag handle + icon + name + toggle */}
         <div className="flex items-center gap-2 px-3 pt-3 pb-1">
           {allowCustomOrder && (
             <span
@@ -1606,10 +1903,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               {t("pluginsview.DEMO")}
             </span>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               data-plugin-toggle={p.id}
-              className={`text-[10px] font-bold tracking-wider px-2.5 py-[2px] border transition-colors duration-150 shrink-0 ${
+              className={`text-[10px] font-bold tracking-wider px-2.5 py-[2px] h-auto rounded-none border transition-colors duration-150 shrink-0 ${
                 p.enabled
                   ? "bg-accent text-accent-fg border-accent"
                   : "bg-transparent text-muted border-border hover:text-txt"
@@ -1624,12 +1922,16 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               }}
               disabled={toggleDisabled}
             >
-              {isToggleBusy ? "APPLYING" : p.enabled ? "ON" : "OFF"}
-            </button>
+              {isToggleBusy
+                ? t("pluginsview.Applying", {
+                    defaultValue: "Applying",
+                  })
+                : p.enabled
+                  ? t("common.on")
+                  : t("common.off")}
+            </Button>
           )}
         </div>
-
-        {/* Badges: category + version + loaded status */}
         <div className="flex items-center gap-1.5 px-3 pb-1.5">
           <span className="text-[10px] px-1.5 py-px border border-border bg-surface text-muted lowercase tracking-wide whitespace-nowrap">
             {categoryLabel}
@@ -1650,7 +1952,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                 p.loadError || "Plugin is enabled but not loaded in the runtime"
               }
             >
-              {p.loadError ? "load failed" : "not installed"}
+              {p.loadError ? loadFailedLabel : notInstalledLabel}
             </span>
           )}
           {isToggleBusy && (
@@ -1659,8 +1961,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             </span>
           )}
         </div>
-
-        {/* Description — clamped to 3 lines */}
         <p
           className="text-xs text-muted px-3 pb-2 flex-1"
           style={{
@@ -1670,7 +1970,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             overflow: "hidden",
           }}
         >
-          {p.description || "No description available"}
+          {p.description || pluginDescriptionFallback}
         </p>
 
         {(p.tags?.length ?? 0) > 0 && (
@@ -1678,7 +1978,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             {p.tags?.slice(0, 4).map((tag) => (
               <span
                 key={`${p.id}:${tag}`}
-                className="text-[10px] px-1.5 py-px border border-border/50 bg-black/10 text-muted lowercase tracking-wide whitespace-nowrap"
+                className="whitespace-nowrap border border-border/50 bg-bg-accent/80 px-1.5 py-px text-[10px] lowercase tracking-wide text-muted-strong"
               >
                 {tag}
               </span>
@@ -1698,16 +1998,14 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                   e.stopPropagation();
                   void handleOpenPluginExternalUrl(link.url);
                 }}
-                title={`${link.label}: ${link.url}`}
+                title={`${pluginResourceLinkLabel(t, link.key)}: ${link.url}`}
               >
-                {link.label}
+                {pluginResourceLinkLabel(t, link.key)}
               </Button>
             ))}
           </div>
         )}
-
-        {/* Bottom bar: config status + settings button */}
-        <div className="flex items-center gap-3 px-4 py-3 border-t border-border/40 mt-auto bg-black/5">
+        <div className="mt-auto flex items-center gap-3 border-t border-border/40 bg-card/55 px-4 py-3">
           {hasParams && !isShowcase ? (
             <>
               <span
@@ -1747,9 +2045,10 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                 }}
               >
                 {installingPlugins.has(p.id)
-                  ? installProgress.get(p.npmName ?? "")?.message ||
-                    "Installing..."
-                  : "Install"}
+                  ? installProgressLabel(
+                      installProgress.get(p.npmName ?? "")?.message,
+                    )
+                  : installLabel}
               </Button>
             )}
           {hasParams && (
@@ -1759,7 +2058,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               className={`h-7 px-2.5 text-[11px] font-bold transition-all flex items-center gap-1.5 ${
                 isOpen
                   ? "text-txt bg-accent/10 hover:bg-accent/20"
-                  : "text-muted hover:text-txt hover:bg-white/5"
+                  : "text-muted hover:bg-bg-hover hover:text-txt"
               }`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -1776,8 +2075,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             </Button>
           )}
         </div>
-
-        {/* Validation errors */}
         {p.enabled && p.validationErrors && p.validationErrors.length > 0 && (
           <div className="px-3 py-1.5 border-t border-destructive bg-[rgba(153,27,27,0.04)] text-xs">
             {p.validationErrors.map(
@@ -1792,8 +2089,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             )}
           </div>
         )}
-
-        {/* Validation warnings */}
         {p.enabled &&
           p.validationWarnings &&
           p.validationWarnings.length > 0 && (
@@ -1827,8 +2122,6 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     Array.from(pluginSettingsOpen)
       .map((id) => nonDbPlugins.find((plugin) => plugin.id === id) ?? null)
       .find((plugin) => (plugin?.parameters?.length ?? 0) > 0) ?? null;
-
-  // ── Game-modal state ──────────────────────────────────────────────
   const [gameSelectedId, setGameSelectedId] = useState<string | null>(null);
   const [gameMobileDetail, setGameMobileDetail] = useState(false);
   const gameNarrow =
@@ -1866,13 +2159,13 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     : [];
 
   useEffect(() => {
-    if (!isSocialMode || !inModal) return;
+    if (!isConnectorShellMode) return;
     if (pluginStatusFilter !== "disabled") return;
     setState("pluginStatusFilter", "all");
-  }, [inModal, isSocialMode, pluginStatusFilter, setState]);
+  }, [isConnectorShellMode, pluginStatusFilter, setState]);
 
   useEffect(() => {
-    if (!isSocialMode || !inModal) return;
+    if (!isSidebarEditorShellMode) return;
     if (
       typeof window === "undefined" ||
       typeof window.matchMedia !== "function"
@@ -1892,10 +2185,10 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
 
     media.addListener(syncLayout);
     return () => media.removeListener(syncLayout);
-  }, [inModal, isSocialMode]);
+  }, [isSidebarEditorShellMode]);
 
   useEffect(() => {
-    if (!isSocialMode || !inModal) return;
+    if (!isSidebarEditorShellMode) return;
     if (visiblePlugins.length === 0) {
       setConnectorSelectedId(null);
       setConnectorExpandedIds(new Set());
@@ -1908,18 +2201,18 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
       }
       return desktopConnectorLayout ? (visiblePlugins[0]?.id ?? null) : null;
     });
-  }, [desktopConnectorLayout, inModal, isSocialMode, visiblePlugins]);
+  }, [desktopConnectorLayout, isSidebarEditorShellMode, visiblePlugins]);
 
   useEffect(() => {
-    if (!isSocialMode || !inModal || !desktopConnectorLayout) return;
+    if (!isSidebarEditorShellMode || !desktopConnectorLayout) return;
     if (!connectorSelectedId) return;
     setConnectorExpandedIds(new Set([connectorSelectedId]));
-  }, [connectorSelectedId, desktopConnectorLayout, inModal, isSocialMode]);
+  }, [connectorSelectedId, desktopConnectorLayout, isSidebarEditorShellMode]);
 
   useEffect(() => {
-    if (!isSocialMode || !inModal || desktopConnectorLayout) return;
+    if (!isSidebarEditorShellMode || desktopConnectorLayout) return;
     setConnectorExpandedIds(new Set());
-  }, [desktopConnectorLayout, inModal, isSocialMode]);
+  }, [desktopConnectorLayout, isSidebarEditorShellMode]);
 
   const scrollConnectorIntoView = useCallback((pluginId: string) => {
     const element = connectorSectionRefs.current[pluginId];
@@ -1966,271 +2259,146 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     },
     [desktopConnectorLayout, scrollConnectorIntoView],
   );
-
-  // ── Game-modal render ─────────────────────────────────────────────
-  if (inModal && isSocialMode) {
+  if (isSidebarEditorShellMode) {
+    const connectorsShellClassName = APP_DESKTOP_SPLIT_SHELL_CLASSNAME;
+    const shellTitle =
+      mode === "social"
+        ? t("nav.social", { defaultValue: "Connectors" })
+        : label;
+    const showSidebarKicker = mode !== "social" || inModal;
+    const showSidebarAvailabilityPill = mode === "social" && !inModal;
+    const shellEmptyTitle =
+      mode === "social" ? "No connectors available" : "No plugins available";
+    const shellEmptyDescription =
+      mode === "social"
+        ? "This workspace will list connector integrations as they become available."
+        : "This workspace will list plugins here as they become available.";
+    const filterSelectLabel =
+      subgroupTags.find((tag) => tag.id === subgroupFilter)?.label ?? "All";
+    const hasActivePluginFilters =
+      pluginSearch.trim().length > 0 || subgroupFilter !== "all";
     return (
-      <div
+      <DesktopPageFrame
         data-testid="plugins-view-social"
-        className={`flex min-h-full min-w-0 w-full flex-col bg-bg ${
-          desktopConnectorLayout ? "md:flex-row" : ""
-        }`}
+        className={inModal ? "p-0 lg:p-0" : undefined}
       >
-        {desktopConnectorLayout && (
-          <aside
-            data-testid="connectors-settings-sidebar"
-            className="flex w-[22rem] shrink-0 border-r border-border/50 bg-bg/35 backdrop-blur-xl"
-          >
-            <div className="flex min-h-full flex-1 flex-col sticky top-0 max-h-screen">
-              <div className="border-b border-border/40 px-5 py-5 text-center">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted/80">
-                  Connectors
-                </div>
-                <div className="mt-2 text-sm text-muted">
-                  {enabledCount} enabled of {categoryPlugins.length}
-                </div>
-              </div>
-              <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-4">
-                {(desktopConnectorLayout
-                  ? visiblePlugins.filter((plugin) => {
-                      return plugin.id === connectorSelectedId;
-                    })
-                  : visiblePlugins
-                ).map((plugin) => {
-                  const isSelected = connectorSelectedId === plugin.id;
-                  const isExpanded = connectorExpandedIds.has(plugin.id);
-                  const isToggleBusy = togglingPlugins.has(plugin.id);
-                  const toggleDisabled =
-                    isToggleBusy || (hasPluginToggleInFlight && !isToggleBusy);
-
-                  return (
-                    <div
-                      key={plugin.id}
-                      className={`flex items-center gap-2 rounded-2xl border px-3 py-2 transition-all ${
-                        isSelected
-                          ? "border-accent/40 bg-accent/10 text-txt shadow-[0_10px_30px_rgba(var(--accent),0.08)]"
-                          : "border-transparent bg-transparent text-muted hover:border-border/60 hover:bg-card/55 hover:text-txt"
-                      }`}
+        <div
+          data-testid="connectors-shell"
+          className={`${connectorsShellClassName} ${
+            desktopConnectorLayout ? "md:flex-row" : "flex-col"
+          }`}
+        >
+          {desktopConnectorLayout && (
+            <aside
+              data-testid="connectors-settings-sidebar"
+              className={`flex min-h-0 w-[21rem] max-w-[352px] shrink-0 flex-col ${APP_SIDEBAR_RAIL_CLASSNAME}`}
+            >
+              <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+                <div
+                  className={`grid grid-cols-[minmax(0,1fr)_8.75rem] items-center gap-2 ${
+                    showSidebarKicker ? "mt-4" : ""
+                  }`}
+                >
+                  <Input
+                    type="search"
+                    value={pluginSearch}
+                    onChange={(event) =>
+                      setState("pluginSearch", event.target.value)
+                    }
+                    placeholder={
+                      mode === "social" ? "Search connectors" : "Search plugins"
+                    }
+                    aria-label={
+                      mode === "social" ? "Search connectors" : "Search plugins"
+                    }
+                    className={`h-10 min-w-0 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+                  />
+                  <Select
+                    value={subgroupFilter}
+                    onValueChange={(value) => setSubgroupFilter(value)}
+                  >
+                    <SelectTrigger
+                      aria-label={
+                        mode === "social"
+                          ? "Filter connector category"
+                          : "Filter plugin category"
+                      }
+                      className={`w-full ${SETTINGS_FILTER_CONTROL_CLASSNAME}`}
                     >
-                      <button
-                        type="button"
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                        onClick={() => handleConnectorSelect(plugin.id)}
-                        aria-current={isSelected ? "page" : undefined}
-                      >
-                        <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border p-1.5 ${
+                      <SelectValue>{filterSelectLabel}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subgroupTags.map((tag) => (
+                        <SelectItem key={tag.id} value={tag.id}>
+                          {tag.label} ({tag.count})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <nav
+                  className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+                >
+                  {visiblePlugins.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
+                      {hasActivePluginFilters
+                        ? `No ${resultLabel} match the current filters.`
+                        : `No ${resultLabel} available.`}
+                    </div>
+                  ) : (
+                    visiblePlugins.map((plugin) => {
+                      const isSelected = connectorSelectedId === plugin.id;
+                      const isExpanded = connectorExpandedIds.has(plugin.id);
+                      const isToggleBusy = togglingPlugins.has(plugin.id);
+                      const toggleDisabled =
+                        isToggleBusy ||
+                        (hasPluginToggleInFlight && !isToggleBusy);
+
+                      return (
+                        <div
+                          key={plugin.id}
+                          className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} gap-2 ${
                             isSelected
-                              ? "border-accent/30 bg-accent/18 text-txt-strong"
-                              : "border-border/50 bg-bg-accent/80 text-muted"
+                              ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                              : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
                           }`}
                         >
-                          {renderResolvedIcon(plugin, {
-                            className:
-                              "h-4 w-4 shrink-0 rounded-sm object-contain",
-                            emojiClassName: "text-sm",
-                          })}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-sm font-semibold leading-none">
-                          {plugin.name}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] transition-colors ${
-                          plugin.enabled
-                            ? "border-accent bg-accent text-accent-fg"
-                            : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
-                        } ${
-                          toggleDisabled
-                            ? "cursor-not-allowed opacity-60"
-                            : "cursor-pointer"
-                        }`}
-                        onClick={() =>
-                          void handleTogglePlugin(plugin.id, !plugin.enabled)
-                        }
-                        disabled={toggleDisabled}
-                      >
-                        {isToggleBusy ? "..." : plugin.enabled ? "ON" : "OFF"}
-                      </button>
-                      <span
-                        className={`shrink-0 text-muted transition-transform ${
-                          isExpanded ? "rotate-90" : ""
-                        }`}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </span>
-                    </div>
-                  );
-                })}
-              </nav>
-            </div>
-          </aside>
-        )}
-
-        <div className="min-w-0 flex-1">
-          <div className="sticky top-0 z-20 border-b border-border/50 bg-bg/85 px-4 py-4 shadow-[0_12px_30px_rgba(0,0,0,0.14)] backdrop-blur-xl sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-5xl">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Input
-                  type="text"
-                  className="h-11 w-full rounded-xl border-border/60 bg-card/70 text-sm shadow-sm"
-                  placeholder="Search connectors..."
-                  value={pluginSearch}
-                  onChange={(e) => setState("pluginSearch", e.target.value)}
-                />
-                <div className="flex shrink-0 gap-1.5 rounded-xl border border-white/5 bg-black/10 p-1">
-                  {(["all", "enabled"] as const).map((status) => (
-                    <Button
-                      key={status}
-                      variant={
-                        effectiveStatusFilter === status ? "default" : "ghost"
-                      }
-                      size="sm"
-                      className={`h-8 px-3 text-[11px] font-bold tracking-wide transition-all ${
-                        effectiveStatusFilter === status
-                          ? "shadow-sm"
-                          : "text-muted hover:bg-white/5 hover:text-txt"
-                      }`}
-                      onClick={() =>
-                        setState("pluginStatusFilter", status as StatusFilter)
-                      }
-                    >
-                      {status === "all"
-                        ? `All (${categoryPlugins.length})`
-                        : `Enabled (${enabledCount})`}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-            {hasPluginToggleInFlight && (
-              <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
-                {t("pluginsview.ApplyingPluginChan")}
-              </div>
-            )}
-
-            {visiblePlugins.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border px-5 py-10 text-center text-muted">
-                {effectiveSearch
-                  ? "No connectors match your search."
-                  : "No connectors match your filters."}
-              </div>
-            ) : (
-              <div
-                data-testid="connectors-settings-content"
-                className="space-y-4"
-              >
-                {(desktopConnectorLayout
-                  ? visiblePlugins.filter((p) => p.id === connectorSelectedId)
-                  : visiblePlugins
-                ).map((plugin) => {
-                  const hasParams =
-                    (plugin.parameters?.length ?? 0) > 0 &&
-                    plugin.id !== "__ui-showcase__";
-                  const isExpanded = connectorExpandedIds.has(plugin.id);
-                  const isSelected = connectorSelectedId === plugin.id;
-                  const setCount = hasParams
-                    ? plugin.parameters.filter((param) => param.isSet).length
-                    : 0;
-                  const totalCount = hasParams ? plugin.parameters.length : 0;
-                  const allParamsSet = !hasParams || setCount === totalCount;
-                  const isToggleBusy = togglingPlugins.has(plugin.id);
-                  const toggleDisabled =
-                    isToggleBusy || (hasPluginToggleInFlight && !isToggleBusy);
-                  const isSaving = pluginSaving.has(plugin.id);
-                  const saveSuccess = pluginSaveSuccess.has(plugin.id);
-                  const testResult = testResults.get(plugin.id);
-                  const pluginLinks = getPluginResourceLinks(plugin);
-
-                  return (
-                    <section
-                      key={plugin.id}
-                      ref={(element) => {
-                        connectorSectionRefs.current[plugin.id] = element;
-                      }}
-                      data-testid={`connector-section-${plugin.id}`}
-                      className={`overflow-hidden rounded-[1.4rem] border bg-card/90 shadow-sm transition-all ${
-                        isSelected
-                          ? "border-accent/35 shadow-[0_18px_40px_rgba(var(--accent),0.08)]"
-                          : "border-border/50"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
-                        <button
-                          type="button"
-                          data-testid={`connector-header-${plugin.id}`}
-                          className="flex min-w-0 flex-1 items-start gap-3 text-left"
-                          onClick={() =>
-                            handleConnectorSectionToggle(plugin.id)
-                          }
-                        >
-                          <span
-                            className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border p-2.5 ${
-                              isSelected
-                                ? "border-accent/30 bg-accent/18 text-txt-strong"
-                                : "border-border/50 bg-bg-accent/80 text-muted"
-                            }`}
+                          <Button
+                            variant="ghost"
+                            role="option"
+                            aria-selected={isSelected}
+                            className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
+                            onClick={() => handleConnectorSelect(plugin.id)}
+                            aria-current={isSelected ? "page" : undefined}
                           >
-                            {renderResolvedIcon(plugin, {
-                              className:
-                                "h-4 w-4 shrink-0 rounded-sm object-contain",
-                              emojiClassName: "text-base",
-                            })}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="flex min-w-0 flex-wrap items-center gap-2">
-                              <span className="truncate text-sm font-semibold text-txt">
+                            <span
+                              className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 ${
+                                isSelected
+                                  ? "border-accent/30 bg-accent/18 text-txt-strong"
+                                  : "border-border/50 bg-bg-accent/80 text-muted"
+                              }`}
+                            >
+                              {renderResolvedIcon(plugin, {
+                                className:
+                                  "h-4 w-4 shrink-0 rounded-sm object-contain",
+                                emojiClassName: "text-sm",
+                              })}
+                            </span>
+                            <span className="min-w-0 flex-1 text-left">
+                              <span className="block whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug">
                                 {plugin.name}
                               </span>
-                              <span
-                                className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
-                                  allParamsSet
-                                    ? "border-ok/30 bg-ok/10 text-ok"
-                                    : "border-warn/30 bg-warn/10 text-warn"
-                                }`}
-                              >
-                                {allParamsSet ? "Ready" : "Needs setup"}
+                              <span className="mt-1 block whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-muted/85">
+                                {plugin.description ||
+                                  pluginDescriptionFallback}
                               </span>
-                              {plugin.version && (
-                                <span className="text-[11px] font-mono text-muted/80">
-                                  v{plugin.version}
-                                </span>
-                              )}
                             </span>
-                            <span className="mt-1 block text-sm text-muted">
-                              {plugin.description || "No description available"}
-                            </span>
-                            <span className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted">
-                              <span>
-                                {hasParams
-                                  ? `${setCount}/${totalCount} configured`
-                                  : "No configuration needed"}
-                              </span>
-                              {plugin.enabled && !plugin.isActive && (
-                                <span
-                                  className={`rounded-full border px-2 py-0.5 ${
-                                    plugin.loadError
-                                      ? "border-danger/30 bg-danger/10 text-danger"
-                                      : "border-warn/30 bg-warn/10 text-warn"
-                                  }`}
-                                >
-                                  {plugin.loadError
-                                    ? "Load failed"
-                                    : "Not installed"}
-                                </span>
-                              )}
-                            </span>
-                          </span>
-                        </button>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                          <button
-                            type="button"
-                            className={`rounded-full border px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`shrink-0 rounded-full border px-2.5 py-1 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
                               plugin.enabled
                                 ? "border-accent bg-accent text-accent-fg"
                                 : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
@@ -2250,216 +2418,410 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                             {isToggleBusy
                               ? "..."
                               : plugin.enabled
-                                ? "ON"
-                                : "OFF"}
-                          </button>
-                          <button
-                            type="button"
-                            className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
-                              isExpanded
-                                ? "border-accent/40 bg-accent/10 text-txt"
-                                : "border-border/50 text-muted hover:border-accent/40 hover:text-txt"
+                                ? t("common.on")
+                                : t("common.off")}
+                          </Button>
+                          <span
+                            className={`shrink-0 text-muted transition-transform ${
+                              isExpanded ? "rotate-90" : ""
                             }`}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </nav>
+              </div>
+            </aside>
+          )}
+
+          <div className={DESKTOP_PAGE_CONTENT_CLASSNAME}>
+            <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+              {hasPluginToggleInFlight && (
+                <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
+                  {t("pluginsview.ApplyingPluginChan")}
+                </div>
+              )}
+
+              {visiblePlugins.length === 0 ? (
+                <DesktopEmptyStatePanel
+                  className="min-h-[18rem] rounded-[1.6rem] px-5 py-10"
+                  description={
+                    hasActivePluginFilters
+                      ? `Try a different search or category filter for ${resultLabel}.`
+                      : shellEmptyDescription
+                  }
+                  title={
+                    hasActivePluginFilters
+                      ? `No ${resultLabel} match your filters`
+                      : shellEmptyTitle
+                  }
+                />
+              ) : (
+                <div
+                  data-testid="connectors-settings-content"
+                  className="space-y-4"
+                >
+                  {(desktopConnectorLayout
+                    ? visiblePlugins.filter((p) => p.id === connectorSelectedId)
+                    : visiblePlugins
+                  ).map((plugin) => {
+                    const hasParams =
+                      (plugin.parameters?.length ?? 0) > 0 &&
+                      plugin.id !== "__ui-showcase__";
+                    const isExpanded = connectorExpandedIds.has(plugin.id);
+                    const isSelected = connectorSelectedId === plugin.id;
+                    const requiredParams = hasParams
+                      ? plugin.parameters.filter((param) => param.required)
+                      : [];
+                    const requiredSetCount = requiredParams.filter(
+                      (param) => param.isSet,
+                    ).length;
+                    const setCount = hasParams
+                      ? plugin.parameters.filter((param) => param.isSet).length
+                      : 0;
+                    const totalCount = hasParams ? plugin.parameters.length : 0;
+                    const allParamsSet =
+                      !hasParams ||
+                      (requiredParams.length > 0
+                        ? requiredSetCount === requiredParams.length
+                        : setCount === totalCount);
+                    const isToggleBusy = togglingPlugins.has(plugin.id);
+                    const toggleDisabled =
+                      isToggleBusy ||
+                      (hasPluginToggleInFlight && !isToggleBusy);
+                    const isSaving = pluginSaving.has(plugin.id);
+                    const saveSuccess = pluginSaveSuccess.has(plugin.id);
+                    const testResult = testResults.get(plugin.id);
+                    const pluginLinks = getPluginResourceLinks(plugin);
+
+                    return (
+                      <section
+                        key={plugin.id}
+                        ref={(element) => {
+                          connectorSectionRefs.current[plugin.id] = element;
+                        }}
+                        data-testid={`connector-section-${plugin.id}`}
+                        className={`${DESKTOP_SECTION_SHELL_CLASSNAME} transition-all ${
+                          isSelected
+                            ? "border-border/45 shadow-[0_18px_40px_rgba(3,5,10,0.16)]"
+                            : "border-border/50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
+                          <Button
+                            variant="ghost"
+                            data-testid={`connector-header-${plugin.id}`}
+                            className="flex min-w-0 flex-1 items-start gap-3 text-left h-auto p-0 rounded-none"
                             onClick={() =>
                               handleConnectorSectionToggle(plugin.id)
                             }
-                            aria-expanded={isExpanded}
-                            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${plugin.name}`}
                           >
-                            <span>{isExpanded ? "Collapse" : "Expand"}</span>
-                            <ChevronRight
-                              className={`h-4 w-4 transition-transform ${
-                                isExpanded ? "rotate-90" : ""
+                            <span
+                              className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border p-2.5 ${
+                                isSelected
+                                  ? "border-accent/30 bg-accent/18 text-txt-strong"
+                                  : "border-border/50 bg-bg-accent/80 text-muted"
                               }`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-
-                      {isExpanded && (
-                        <div className="border-t border-border/40 bg-black/5 px-4 py-4 sm:px-5">
-                          {plugin.validationErrors &&
-                            plugin.validationErrors.length > 0 && (
-                              <div className="mb-4 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                                {plugin.validationErrors.map((error) => (
-                                  <div
-                                    key={`${plugin.id}:${error.field}:${error.message}`}
-                                  >
-                                    {error.field}: {error.message}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                          {plugin.validationWarnings &&
-                            plugin.validationWarnings.length > 0 && (
-                              <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-                                {plugin.validationWarnings.map((warning) => (
-                                  <div
-                                    key={`${plugin.id}:${warning.field}:${warning.message}`}
-                                  >
-                                    {warning.message}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                          {pluginLinks.length > 0 && (
-                            <div className="mb-4 flex flex-wrap gap-2">
-                              {pluginLinks.map((link) => (
-                                <Button
-                                  key={`${plugin.id}:${link.key}`}
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 rounded-xl border-border/40 bg-card/40 px-3 text-[11px] font-semibold text-muted transition-all hover:border-accent hover:bg-accent/5 hover:text-txt"
-                                  onClick={() => {
-                                    void handleOpenPluginExternalUrl(link.url);
-                                  }}
-                                  title={`${link.label}: ${link.url}`}
+                            >
+                              {renderResolvedIcon(plugin, {
+                                className:
+                                  "h-4 w-4 shrink-0 rounded-sm object-contain",
+                                emojiClassName: "text-base",
+                              })}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="flex min-w-0 flex-wrap items-center gap-2">
+                                <span className="whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug text-txt">
+                                  {plugin.name}
+                                </span>
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
+                                    allParamsSet
+                                      ? "border-ok/30 bg-ok/10 text-ok"
+                                      : "border-warn/30 bg-warn/10 text-warn"
+                                  }`}
                                 >
-                                  {link.label}
-                                </Button>
-                              ))}
-                            </div>
-                          )}
+                                  {allParamsSet ? readyLabel : needsSetupLabel}
+                                </span>
+                                {plugin.version && (
+                                  <span className="text-[11px] font-mono text-muted/80">
+                                    v{plugin.version}
+                                  </span>
+                                )}
+                              </span>
+                            </span>
+                          </Button>
 
-                          {plugin.enabled &&
-                            !plugin.isActive &&
-                            plugin.npmName &&
-                            !plugin.loadError && (
-                              <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-txt">
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                  <div>
-                                    Install this connector to activate it in the
-                                    runtime.
-                                  </div>
-                                  <Button
-                                    variant="default"
-                                    size="sm"
-                                    className="h-8 rounded-xl px-4 text-[11px] font-bold"
-                                    disabled={installingPlugins.has(plugin.id)}
-                                    onClick={() =>
-                                      handleInstallPlugin(
-                                        plugin.id,
-                                        plugin.npmName ?? "",
-                                      )
-                                    }
-                                  >
-                                    {installingPlugins.has(plugin.id)
-                                      ? installProgress.get(
-                                          plugin.npmName ?? "",
-                                        )?.message || "Installing..."
-                                      : "Install Plugin"}
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-
-                          {hasParams ? (
-                            <div className="space-y-4">
-                              <PluginConfigForm
-                                plugin={plugin}
-                                pluginConfigs={pluginConfigs}
-                                onParamChange={handleParamChange}
-                              />
-                              {plugin.id === "whatsapp" && (
-                                <WhatsAppQrOverlay accountId="default" />
-                              )}
-                            </div>
-                          ) : (
-                            <div className="rounded-2xl border border-border/40 bg-card/40 px-4 py-3 text-sm text-muted">
-                              No configuration needed.
-                            </div>
-                          )}
-
-                          <div className="mt-4 flex flex-wrap items-center gap-2">
-                            {plugin.isActive && (
-                              <Button
-                                variant={
-                                  testResult?.success
-                                    ? "default"
-                                    : testResult?.error
-                                      ? "destructive"
-                                      : "outline"
-                                }
-                                size="sm"
-                                className={`h-8 rounded-xl px-4 text-[11px] font-bold transition-all ${
-                                  testResult?.loading
-                                    ? "cursor-wait opacity-70"
-                                    : testResult?.success
-                                      ? "border-ok bg-ok text-ok-fg hover:bg-ok/90"
-                                      : testResult?.error
-                                        ? "border-danger bg-danger text-danger-fg hover:bg-danger/90"
-                                        : "border-border/40 bg-card/40 hover:border-accent/40"
+                          <div className="flex shrink-0 items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`rounded-full border px-3 py-1.5 h-auto text-[10px] font-bold tracking-[0.16em] transition-colors ${
+                                plugin.enabled
+                                  ? "border-accent bg-accent text-accent-fg"
+                                  : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-txt"
+                              } ${
+                                toggleDisabled
+                                  ? "cursor-not-allowed opacity-60"
+                                  : "cursor-pointer"
+                              }`}
+                              onClick={() =>
+                                void handleTogglePlugin(
+                                  plugin.id,
+                                  !plugin.enabled,
+                                )
+                              }
+                              disabled={toggleDisabled}
+                            >
+                              {isToggleBusy
+                                ? "..."
+                                : plugin.enabled
+                                  ? t("common.on")
+                                  : t("common.off")}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`flex items-center gap-1 rounded-full border px-3 py-1.5 h-auto text-[11px] font-semibold transition-colors ${
+                                isExpanded
+                                  ? "border-border/50 bg-bg/25 text-txt"
+                                  : "border-border/50 text-muted hover:border-accent/40 hover:text-txt"
+                              }`}
+                              onClick={() =>
+                                handleConnectorSectionToggle(plugin.id)
+                              }
+                              aria-expanded={isExpanded}
+                              aria-label={`${isExpanded ? collapseLabel : expandLabel} ${plugin.name}`}
+                            >
+                              <span>
+                                {isExpanded ? collapseLabel : expandLabel}
+                              </span>
+                              <ChevronRight
+                                className={`h-4 w-4 transition-transform ${
+                                  isExpanded ? "rotate-90" : ""
                                 }`}
-                                disabled={testResult?.loading}
-                                onClick={() =>
-                                  void handleTestConnection(plugin.id)
-                                }
+                              />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="px-4 pb-3 sm:px-5">
+                          <p className="text-sm text-muted">
+                            {plugin.description || pluginDescriptionFallback}
+                          </p>
+                          <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted">
+                            <span>
+                              {hasParams
+                                ? `${setCount}/${totalCount} ${t("pluginsview.configured")}`
+                                : noConfigurationNeededLabel}
+                            </span>
+                            {plugin.enabled && !plugin.isActive && (
+                              <span
+                                className={`rounded-full border px-2 py-0.5 ${
+                                  plugin.loadError
+                                    ? "border-danger/30 bg-danger/10 text-danger"
+                                    : "border-warn/30 bg-warn/10 text-warn"
+                                }`}
                               >
-                                {testResult?.loading
-                                  ? "Testing..."
-                                  : testResult?.success
-                                    ? `OK (${testResult.durationMs}ms)`
-                                    : testResult?.error
-                                      ? `Failed: ${testResult.error}`
-                                      : "Test Connection"}
-                              </Button>
+                                {plugin.loadError
+                                  ? loadFailedLabel
+                                  : notInstalledLabel}
+                              </span>
                             )}
-                            {hasParams && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 rounded-xl px-4 text-[11px] font-semibold text-muted hover:text-txt"
-                                  onClick={() => handleConfigReset(plugin.id)}
-                                >
-                                  Reset
-                                </Button>
+                          </span>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="border-t border-border/40 bg-bg/18 px-4 py-4 sm:px-5">
+                            {pluginLinks.length > 0 && (
+                              <div className="mb-4 flex flex-wrap gap-2">
+                                {pluginLinks.map((link) => (
+                                  <Button
+                                    key={`${plugin.id}:${link.key}`}
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-xl border-border/40 bg-card/40 px-3 text-[11px] font-semibold text-muted transition-all hover:border-accent hover:bg-accent/5 hover:text-txt"
+                                    onClick={() => {
+                                      void handleOpenPluginExternalUrl(
+                                        link.url,
+                                      );
+                                    }}
+                                    title={`${pluginResourceLinkLabel(t, link.key)}: ${link.url}`}
+                                  >
+                                    {pluginResourceLinkLabel(t, link.key)}
+                                  </Button>
+                                ))}
+                              </div>
+                            )}
+
+                            {plugin.enabled &&
+                              !plugin.isActive &&
+                              plugin.npmName &&
+                              !plugin.loadError && (
+                                <div className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-txt">
+                                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>{connectorInstallPrompt}</div>
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className="h-8 rounded-xl px-4 text-[11px] font-bold"
+                                      disabled={installingPlugins.has(
+                                        plugin.id,
+                                      )}
+                                      onClick={() =>
+                                        handleInstallPlugin(
+                                          plugin.id,
+                                          plugin.npmName ?? "",
+                                        )
+                                      }
+                                    >
+                                      {installingPlugins.has(plugin.id)
+                                        ? installProgressLabel(
+                                            installProgress.get(
+                                              plugin.npmName ?? "",
+                                            )?.message,
+                                          )
+                                        : installPluginLabel}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+
+                            {hasParams ? (
+                              <div
+                                className={`space-y-4 p-4 sm:p-5 ${DESKTOP_INSET_PANEL_CLASSNAME}`}
+                              >
+                                {plugin.id === "telegram" ? (
+                                  <TelegramPluginConfig
+                                    plugin={plugin}
+                                    pluginConfigs={pluginConfigs}
+                                    onParamChange={handleParamChange}
+                                  />
+                                ) : (
+                                  <PluginConfigForm
+                                    plugin={plugin}
+                                    pluginConfigs={pluginConfigs}
+                                    onParamChange={handleParamChange}
+                                  />
+                                )}
+                                {plugin.id === "whatsapp" && (
+                                  <WhatsAppQrOverlay accountId="default" />
+                                )}
+                              </div>
+                            ) : (
+                              <div className="rounded-2xl border border-border/40 bg-card/30 px-4 py-3 text-sm text-muted">
+                                {noConfigurationNeededLabel}
+                              </div>
+                            )}
+
+                            {plugin.validationErrors &&
+                              plugin.validationErrors.length > 0 && (
+                                <div className="mt-3 rounded-xl border border-border/40 bg-card/30 px-4 py-3 text-xs text-muted">
+                                  {plugin.validationErrors.map((error) => (
+                                    <div
+                                      key={`${plugin.id}:${error.field}:${error.message}`}
+                                    >
+                                      <span className="font-medium text-warn">
+                                        {error.field}
+                                      </span>
+                                      : {error.message}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                            {plugin.validationWarnings &&
+                              plugin.validationWarnings.length > 0 && (
+                                <div className="mt-3 rounded-xl border border-border/40 bg-card/30 px-4 py-3 text-xs text-muted">
+                                  {plugin.validationWarnings.map((warning) => (
+                                    <div
+                                      key={`${plugin.id}:${warning.field}:${warning.message}`}
+                                    >
+                                      {warning.message}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                            <div className="mt-4 flex flex-wrap items-center gap-2">
+                              {plugin.isActive && (
                                 <Button
                                   variant={
-                                    saveSuccess ? "default" : "secondary"
+                                    testResult?.success
+                                      ? "default"
+                                      : testResult?.error
+                                        ? "destructive"
+                                        : "outline"
                                   }
                                   size="sm"
                                   className={`h-8 rounded-xl px-4 text-[11px] font-bold transition-all ${
-                                    saveSuccess
-                                      ? "bg-ok text-ok-fg hover:bg-ok/90"
-                                      : "bg-accent text-accent-fg hover:bg-accent/90"
+                                    testResult?.loading
+                                      ? "cursor-wait opacity-70"
+                                      : testResult?.success
+                                        ? "border-ok bg-ok text-ok-fg hover:bg-ok/90"
+                                        : testResult?.error
+                                          ? "border-danger bg-danger text-danger-fg hover:bg-danger/90"
+                                          : "border-border/40 bg-card/40 hover:border-accent/40"
                                   }`}
+                                  disabled={testResult?.loading}
                                   onClick={() =>
-                                    void handleConfigSave(plugin.id)
+                                    void handleTestConnection(plugin.id)
                                   }
-                                  disabled={isSaving}
                                 >
-                                  {isSaving
-                                    ? "Saving..."
-                                    : saveSuccess
-                                      ? "Saved"
-                                      : "Save Settings"}
+                                  {formatTestConnectionLabel(testResult)}
                                 </Button>
-                              </>
-                            )}
+                              )}
+                              {hasParams && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 rounded-xl px-4 text-[11px] font-semibold text-muted hover:text-txt"
+                                    onClick={() => handleConfigReset(plugin.id)}
+                                  >
+                                    {t("pluginsview.Reset")}
+                                  </Button>
+                                  <Button
+                                    variant={
+                                      saveSuccess ? "default" : "secondary"
+                                    }
+                                    size="sm"
+                                    className={`h-8 rounded-xl px-4 text-[11px] font-bold transition-all ${
+                                      saveSuccess
+                                        ? "bg-ok text-ok-fg hover:bg-ok/90"
+                                        : "bg-accent text-accent-fg hover:bg-accent/90"
+                                    }`}
+                                    onClick={() =>
+                                      void handleConfigSave(plugin.id)
+                                    }
+                                    disabled={isSaving}
+                                  >
+                                    {formatSaveSettingsLabel(
+                                      isSaving,
+                                      saveSuccess,
+                                    )}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </section>
-                  );
-                })}
-              </div>
-            )}
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </DesktopPageFrame>
     );
   }
 
   if (inModal) {
-    const sectionTitle =
-      mode === "social"
-        ? "Connectors"
-        : mode === "connectors"
-          ? "Connectors"
-          : label;
+    const sectionTitle = mode === "connectors" ? "Connectors" : label;
     return (
       <div className="plugins-game-modal plugins-game-modal--inline">
         <div
@@ -2470,19 +2832,29 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
           <div className="plugins-game-list-head">
             <div className="plugins-game-section-title">{sectionTitle}</div>
           </div>
-          <div className="plugins-game-list-scroll">
+          <div
+            className="plugins-game-list-scroll"
+            role="listbox"
+            aria-label={`${sectionTitle} list`}
+          >
             {gameVisiblePlugins.length === 0 ? (
               <div className="plugins-game-list-empty">
-                No {resultLabel} {t("pluginsview.found")}
+                {t("pluginsview.NoResultsFound", {
+                  label: resultLabel,
+                  defaultValue: "No {{label}} found",
+                })}
               </div>
             ) : (
               gameVisiblePlugins.map((p: PluginInfo) => (
-                <button
+                <Button
+                  variant="ghost"
                   key={p.id}
                   type="button"
+                  role="option"
+                  aria-selected={effectiveGameSelected === p.id}
                   className={`plugins-game-card${
                     effectiveGameSelected === p.id ? " is-selected" : ""
-                  }${!p.enabled ? " is-disabled" : ""}`}
+                  }${!p.enabled ? " is-disabled" : ""} h-auto`}
                   onClick={() => {
                     setGameSelectedId(p.id);
                     if (gameNarrow) setGameMobileDetail(true);
@@ -2519,11 +2891,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                           p.enabled ? "is-on" : "is-off"
                         }`}
                       >
-                        {p.enabled ? "ON" : "OFF"}
+                        {p.enabled ? t("common.on") : t("common.off")}
                       </span>
                     </div>
                   </div>
-                </button>
+                </Button>
               ))
             )}
           </div>
@@ -2537,13 +2909,15 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
             <>
               <div className="plugins-game-detail-head">
                 {gameNarrow && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     type="button"
                     className="plugins-game-back-btn"
                     onClick={() => setGameMobileDetail(false)}
                   >
                     {t("pluginsview.Back")}
-                  </button>
+                  </Button>
                 )}
                 <div className="plugins-game-detail-title-row">
                   <div className="plugins-game-detail-icon-shell">
@@ -2578,7 +2952,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                       </span>
                     )}
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     type="button"
                     className={`plugins-game-toggle ${
                       selectedPlugin.enabled ? "is-on" : "is-off"
@@ -2591,8 +2967,8 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                     }
                     disabled={togglingPlugins.has(selectedPlugin.id)}
                   >
-                    {selectedPlugin.enabled ? "ON" : "OFF"}
-                  </button>
+                    {selectedPlugin.enabled ? t("common.on") : t("common.off")}
+                  </Button>
                 </div>
               </div>
               <div className="plugins-game-detail-description">
@@ -2613,7 +2989,9 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
               {selectedPluginLinks.length > 0 && (
                 <div className="plugins-game-detail-links flex flex-wrap gap-2 px-3 pb-3">
                   {selectedPluginLinks.map((link) => (
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
                       key={`${selectedPlugin.id}:${link.key}`}
                       type="button"
                       className="plugins-game-link-btn border border-border bg-transparent px-2.5 py-1 text-[11px] text-muted transition-colors hover:border-accent hover:text-txt"
@@ -2621,8 +2999,8 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                         void handleOpenPluginExternalUrl(link.url);
                       }}
                     >
-                      {link.label}
-                    </button>
+                      {pluginResourceLinkLabel(t, link.key)}
+                    </Button>
                   ))}
                 </div>
               )}
@@ -2637,7 +3015,7 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                         >
                           {param.key}
                         </label>
-                        <input
+                        <Input
                           id={`input-${param.key}`}
                           type={param.sensitive ? "password" : "text"}
                           className="w-full px-2 py-1 text-[12px]"
@@ -2660,14 +3038,18 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                   </div>
                 )}
               <div className="plugins-game-detail-actions">
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   type="button"
                   className="plugins-game-action-btn"
                   onClick={() => void handleTestConnection(selectedPlugin.id)}
                 >
                   {t("pluginsview.TestConnection")}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
                   type="button"
                   className={`plugins-game-action-btn plugins-game-save-btn${
                     pluginSaveSuccess.has(selectedPlugin.id) ? " is-saved" : ""
@@ -2676,11 +3058,11 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
                   disabled={pluginSaving.has(selectedPlugin.id)}
                 >
                   {pluginSaving.has(selectedPlugin.id)
-                    ? "Saving..."
+                    ? savingLabel
                     : pluginSaveSuccess.has(selectedPlugin.id)
-                      ? "Saved!"
-                      : "Save"}
-                </button>
+                      ? savedWithBangLabel
+                      : saveLabel}
+                </Button>
               </div>
             </>
           ) : (
@@ -2698,448 +3080,435 @@ function PluginListView({ label, mode = "all", inModal }: PluginListViewProps) {
     );
   }
 
-  // ── Main render ────────────────────────────────────────────────────
+  const selectedSubgroupTag =
+    subgroupTags.find((tag) => tag.id === subgroupFilter) ?? subgroupTags[0];
+  const pluginSectionTitle =
+    selectedSubgroupTag?.id === "all"
+      ? t("pluginsview.PluginCatalog", { defaultValue: "Plugin Catalog" })
+      : (selectedSubgroupTag?.label ??
+        t("pluginsview.PluginCatalog", { defaultValue: "Plugin Catalog" }));
 
   return (
-    <div
-      data-testid={mode === "social" ? "plugins-view-social" : undefined}
-      className={`relative min-h-0 ${showDesktopSubgroupSidebar ? "md:pl-[18rem]" : ""}`}
-    >
-      {showDesktopSubgroupSidebar && (
-        <aside
-          className="hidden md:absolute md:left-0 md:top-0 md:block md:w-64"
-          data-testid="plugins-subgroup-sidebar"
-        >
-          <div className="sticky top-0 rounded-[28px] border border-border/50 bg-bg/35 p-5 backdrop-blur-xl shadow-sm">
-            <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted/80">
-              Plugin Types
-            </div>
-            <nav className="flex flex-col gap-2">
-              {subgroupTags.map((tag) =>
-                renderSubgroupFilterButton(tag, { sidebar: true }),
-              )}
-            </nav>
-          </div>
-        </aside>
-      )}
-
-      <div className="min-w-0">
-        {showToolbar && (
-          <div className="flex items-center gap-3 mb-4 flex-wrap">
-            <div className="relative flex-1 min-w-[220px]">
-              <Input
-                type="text"
-                name="plugin-search"
-                autoComplete="off"
-                data-1p-ignore
-                data-lpignore="true"
-                className="w-full bg-card/60 backdrop-blur-md shadow-inner pr-8 h-9 rounded-xl focus-visible:ring-accent border-border/40"
-                placeholder={searchPlaceholder}
-                value={pluginSearch}
-                onChange={(e) => setState("pluginSearch", e.target.value)}
-              />
-              {pluginSearch && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 text-muted hover:text-txt rounded-full"
-                  onClick={() => setState("pluginSearch", "")}
-                  title={t("pluginsview.ClearSearch")}
-                >
-                  ✕
-                </Button>
-              )}
-            </div>
-
-            <div className="flex gap-1.5 shrink-0 bg-black/10 p-1 rounded-xl border border-white/5">
-              {(["all", "enabled"] as const).map((s) => (
-                <Button
-                  key={s}
-                  variant={pluginStatusFilter === s ? "default" : "ghost"}
-                  size="sm"
-                  className={`h-7 px-3 text-[11px] font-bold tracking-wide rounded-lg transition-all ${
-                    pluginStatusFilter === s
-                      ? "shadow-sm"
-                      : "text-muted hover:text-txt hover:bg-white/5"
-                  }`}
-                  onClick={() =>
-                    setState("pluginStatusFilter", s as StatusFilter)
-                  }
-                >
-                  {s === "all"
-                    ? `All (${categoryPlugins.length})`
-                    : `Enabled (${enabledCount})`}
-                </Button>
-              ))}
-            </div>
-
-            {allowCustomOrder && pluginOrder.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-3 text-[11px] font-bold border-border/40 bg-card/40 backdrop-blur-md shadow-sm rounded-xl shrink-0"
-                onClick={handleResetOrder}
-                title={t("pluginsview.ResetToDefaultSor")}
-              >
-                {t("pluginsview.ResetOrder")}
-              </Button>
-            )}
-
-            {showPluginManagementActions && (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 px-4 text-[11px] font-bold tracking-wide border border-accent/30 text-txt bg-accent/10 hover:bg-accent/20 hover:border-accent/50 shadow-sm rounded-xl shrink-0 transition-all"
-                onClick={() => setAddDirOpen(true)}
-              >
-                {t("pluginsview.AddPlugin")}
-              </Button>
-            )}
-          </div>
-        )}
-
-        {hasPluginToggleInFlight && (
-          <div className="mb-3 px-3 py-2 border border-accent bg-accent-subtle text-[11px] text-txt">
-            {t("pluginsview.ApplyingPluginChan")}
-          </div>
-        )}
-
-        {showSubgroupFilters && (
-          <div
-            className="flex items-center gap-2 mb-5 flex-wrap md:hidden"
-            data-testid="plugins-subgroup-chips"
+    <DesktopPageFrame data-testid="plugins-view-page">
+      <div className={PLUGINS_SHELL_CLASS} data-testid="plugins-shell">
+        {showDesktopSubgroupSidebar && (
+          <aside
+            className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}
+            data-testid="plugins-subgroup-sidebar"
+            aria-label={t("pluginsview.PluginTypes", {
+              defaultValue: "Plugin types",
+            })}
           >
-            {subgroupTags.map((tag) => renderSubgroupFilterButton(tag))}
-          </div>
+            <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+              <div
+                className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+              >
+                {subgroupTags.map((tag) =>
+                  renderSubgroupFilterButton(tag, { sidebar: true }),
+                )}
+              </div>
+            </div>
+          </aside>
         )}
 
-        {/* Plugin grid */}
-        <div className="overflow-y-auto">
-          {sorted.length === 0 ? (
-            <div className="text-center py-10 px-5 text-muted border border-dashed border-border">
-              {effectiveSearch
-                ? `No ${resultLabel} match your search.`
-                : `No ${resultLabel} available.`}
-            </div>
-          ) : visiblePlugins.length === 0 ? (
-            <div className="text-center py-10 px-5 text-muted border border-dashed border-border">
-              {showSubgroupFilters
-                ? "No plugins match this tag filter."
-                : `No ${resultLabel} match your filters.`}
-            </div>
-          ) : (
-            renderPluginGrid(visiblePlugins)
-          )}
-        </div>
-      </div>
-
-      {/* Settings dialog */}
-      {settingsDialogPlugin &&
-        (() => {
-          const p = settingsDialogPlugin;
-          const isShowcase = p.id === "__ui-showcase__";
-          const isSaving = pluginSaving.has(p.id);
-          const saveSuccess = pluginSaveSuccess.has(p.id);
-          const categoryLabel = isShowcase
-            ? "showcase"
-            : p.category === "ai-provider"
-              ? "ai provider"
-              : p.category;
-          return (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6 animate-in fade-in duration-200"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) toggleSettings(p.id);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  toggleSettings(p.id);
-                }
-              }}
-              role="dialog"
-              aria-modal="true"
-            >
-              <div className="w-full max-w-2xl max-h-[85vh] border border-border/50 bg-card/90 shadow-2xl flex flex-col overflow-hidden rounded-2xl backdrop-blur-xl">
-                {/* Dialog header */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-border/30 bg-black/10 shrink-0">
-                  <span className="font-bold text-base flex items-center gap-2 flex-1 min-w-0 tracking-wide text-txt">
-                    {(() => {
-                      const icon = resolveIcon(p);
-                      if (!icon) return null;
-                      if (typeof icon === "string") {
-                        const imageSrc = iconImageSource(icon);
-                        return imageSrc ? (
-                          <img
-                            src={imageSrc}
-                            alt=""
-                            className="w-6 h-6 rounded-md object-contain"
-                            onError={(e) => {
-                              (
-                                e.currentTarget as HTMLImageElement
-                              ).style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <span className="text-base">{icon}</span>
-                        );
-                      }
-                      const IconComponent = icon;
-                      return <IconComponent className="w-6 h-6 text-txt" />;
-                    })()}
-                    {p.name}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full border border-border/40 bg-black/20 text-muted lowercase tracking-widest font-bold">
-                    {categoryLabel}
-                  </span>
-                  {p.version && (
-                    <span className="text-[10px] font-mono text-muted/70">
-                      v{p.version}
-                    </span>
-                  )}
-                  {isShowcase && (
-                    <span className="text-[10px] font-bold tracking-widest px-2.5 py-[2px] border border-accent/30 text-txt bg-accent/10 rounded-full">
-                      {t("pluginsview.DEMO")}
-                    </span>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted hover:bg-white/10 hover:text-txt rounded-full transition-all shrink-0 ml-2"
-                    onClick={() => toggleSettings(p.id)}
-                  >
-                    ✕
-                  </Button>
+        <div className={DESKTOP_PAGE_CONTENT_CLASSNAME}>
+          <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+            <section className={DESKTOP_SECTION_SHELL_CLASSNAME}>
+              <div className="border-b border-border/35 px-5 py-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                  {t("nav.advanced")}
                 </div>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <div className="text-sm font-semibold text-txt">
+                    {pluginSectionTitle}
+                  </div>
+                  <span className="rounded-full border border-border/45 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] text-muted">
+                    {t("pluginsview.VisibleCount", {
+                      defaultValue: "{{count}} shown",
+                      count: visiblePlugins.length,
+                    })}
+                  </span>
+                </div>
+              </div>
 
-                {/* Dialog body — scrollable */}
-                <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                  {/* Plugin details */}
-                  <div className="px-5 pt-4 pb-1 flex items-center gap-3 flex-wrap text-xs text-muted">
-                    {p.description && (
-                      <span className="text-[12px] text-muted leading-relaxed">
-                        {p.description}
-                      </span>
+              <div className="bg-bg/18 px-4 py-4 sm:px-5">
+                {(allowCustomOrder && pluginOrder.length > 0) ||
+                showPluginManagementActions ? (
+                  <div className="mb-4 flex flex-wrap items-center gap-3">
+                    {allowCustomOrder && pluginOrder.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                        onClick={handleResetOrder}
+                        title={t("pluginsview.ResetToDefaultSor")}
+                      >
+                        {t("pluginsview.ResetOrder")}
+                      </Button>
                     )}
-                    {(p.tags?.length ?? 0) > 0 && (
-                      <span className="flex items-center gap-1.5 flex-wrap">
-                        {p.tags?.map((tag) => (
-                          <span
-                            key={`${p.id}:${tag}:settings`}
-                            className="text-[10px] px-1.5 py-px border border-border/40 bg-black/10 text-muted lowercase tracking-wide whitespace-nowrap"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </span>
+                    {showPluginManagementActions && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                        onClick={() => setAddDirOpen(true)}
+                      >
+                        {t("pluginsview.AddPlugin")}
+                      </Button>
                     )}
                   </div>
-                  {(p.npmName || (p.pluginDeps && p.pluginDeps.length > 0)) && (
-                    <div className="px-5 pb-2 flex items-center gap-3 flex-wrap">
-                      {p.npmName && (
-                        <span className="font-mono text-[10px] text-muted opacity-50">
-                          {p.npmName}
+                ) : null}
+
+                {hasPluginToggleInFlight && (
+                  <div className="mb-4 rounded-2xl border border-accent bg-accent-subtle px-4 py-3 text-[11px] text-txt">
+                    {t("pluginsview.ApplyingPluginChan")}
+                  </div>
+                )}
+
+                {showSubgroupFilters && (
+                  <div
+                    className="mb-5 flex items-center gap-2 flex-wrap lg:hidden"
+                    data-testid="plugins-subgroup-chips"
+                  >
+                    {subgroupTags.map((tag) => renderSubgroupFilterButton(tag))}
+                  </div>
+                )}
+
+                <div className="overflow-y-auto">
+                  {sorted.length === 0 ? (
+                    <DesktopEmptyStatePanel
+                      className="min-h-[18rem] rounded-[1.6rem] px-5 py-10"
+                      description={t("pluginsview.NoneAvailableDesc", {
+                        defaultValue: "No {{label}} are available right now.",
+                        label: resultLabel,
+                      })}
+                      title={t("pluginsview.NoneAvailableTitle", {
+                        defaultValue: "No {{label}} available",
+                        label: label.toLowerCase(),
+                      })}
+                    />
+                  ) : visiblePlugins.length === 0 ? (
+                    <DesktopEmptyStatePanel
+                      className="min-h-[16rem] rounded-[1.6rem] px-5 py-10"
+                      description={
+                        showSubgroupFilters
+                          ? t("pluginsview.NoPluginsMatchCategory", {
+                              defaultValue:
+                                "No plugins match the selected category.",
+                            })
+                          : t("pluginsview.NoPluginsMatchFilters", {
+                              defaultValue: "No {{label}} match your filters.",
+                              label: resultLabel,
+                            })
+                      }
+                      title={t("pluginsview.NothingToShow", {
+                        defaultValue: "Nothing to show",
+                      })}
+                    />
+                  ) : (
+                    renderPluginGrid(visiblePlugins)
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+        {settingsDialogPlugin &&
+          (() => {
+            const p = settingsDialogPlugin;
+            const isShowcase = p.id === "__ui-showcase__";
+            const isSaving = pluginSaving.has(p.id);
+            const saveSuccess = pluginSaveSuccess.has(p.id);
+            const categoryLabel = isShowcase
+              ? "showcase"
+              : p.category === "ai-provider"
+                ? "ai provider"
+                : p.category;
+            return (
+              <Dialog
+                open
+                onOpenChange={(v) => {
+                  if (!v) toggleSettings(p.id);
+                }}
+              >
+                <DialogContent
+                  className={`${ADMIN_DIALOG_CONTENT_CLASSNAME} max-h-[85vh] max-w-2xl`}
+                >
+                  <DialogHeader
+                    className={`${ADMIN_DIALOG_HEADER_CLASSNAME} flex flex-row items-center gap-3`}
+                  >
+                    <DialogTitle className="font-bold text-base flex items-center gap-2 flex-1 min-w-0 tracking-wide text-txt">
+                      {(() => {
+                        const icon = resolveIcon(p);
+                        if (!icon) return null;
+                        if (typeof icon === "string") {
+                          const imageSrc = iconImageSource(icon);
+                          return imageSrc ? (
+                            <img
+                              src={imageSrc}
+                              alt=""
+                              className="w-6 h-6 rounded-md object-contain"
+                              onError={(e) => {
+                                (
+                                  e.currentTarget as HTMLImageElement
+                                ).style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <span className="text-base">{icon}</span>
+                          );
+                        }
+                        const IconComponent = icon;
+                        return <IconComponent className="w-6 h-6 text-txt" />;
+                      })()}
+                      {p.name}
+                    </DialogTitle>
+                    <DialogDescription className="sr-only">
+                      {t("pluginsview.PluginDialogDescription", {
+                        plugin: p.name,
+                        defaultValue:
+                          "Review plugin metadata, adjust settings, and save changes for {{plugin}}.",
+                      })}
+                    </DialogDescription>
+                    <span className={ADMIN_DIALOG_META_BADGE_CLASSNAME}>
+                      {categoryLabel}
+                    </span>
+                    {p.version && (
+                      <span className={ADMIN_DIALOG_MONO_META_CLASSNAME}>
+                        v{p.version}
+                      </span>
+                    )}
+                    {isShowcase && (
+                      <span className="text-[10px] font-bold tracking-widest px-2.5 py-[2px] border border-accent/30 text-txt bg-accent/10 rounded-full">
+                        {t("pluginsview.DEMO")}
+                      </span>
+                    )}
+                  </DialogHeader>
+                  <div className="custom-scrollbar overflow-y-auto flex-1">
+                    <div className="px-5 pt-4 pb-1 flex items-center gap-3 flex-wrap text-xs text-muted">
+                      {p.description && (
+                        <span className="text-[12px] text-muted leading-relaxed">
+                          {p.description}
                         </span>
                       )}
-                      {p.pluginDeps && p.pluginDeps.length > 0 && (
-                        <span className="flex items-center gap-1 flex-wrap">
-                          <span className="text-[10px] text-muted opacity-60">
-                            {t("pluginsview.dependsOn")}
-                          </span>
-                          {p.pluginDeps.map((dep: string) => (
+                      {(p.tags?.length ?? 0) > 0 && (
+                        <span className="flex items-center gap-1.5 flex-wrap">
+                          {p.tags?.map((tag) => (
                             <span
-                              key={dep}
-                              className="text-[10px] px-1.5 py-px border border-border bg-accent-subtle text-muted rounded-sm"
+                              key={`${p.id}:${tag}:settings`}
+                              className="whitespace-nowrap border border-border/40 bg-bg-accent/80 px-1.5 py-px text-[10px] lowercase tracking-wide text-muted-strong"
                             >
-                              {dep}
+                              {tag}
                             </span>
                           ))}
                         </span>
                       )}
                     </div>
-                  )}
-
-                  <div className="px-5 py-3">
-                    <PluginConfigForm
-                      plugin={p}
-                      pluginConfigs={pluginConfigs}
-                      onParamChange={handleParamChange}
-                    />
-                    {p.id === "whatsapp" && (
-                      <WhatsAppQrOverlay accountId="default" />
+                    {(p.npmName ||
+                      (p.pluginDeps && p.pluginDeps.length > 0)) && (
+                      <div className="px-5 pb-2 flex items-center gap-3 flex-wrap">
+                        {p.npmName && (
+                          <span className="font-mono text-[10px] text-muted opacity-50">
+                            {p.npmName}
+                          </span>
+                        )}
+                        {p.pluginDeps && p.pluginDeps.length > 0 && (
+                          <span className="flex items-center gap-1 flex-wrap">
+                            <span className="text-[10px] text-muted opacity-60">
+                              {t("pluginsview.dependsOn")}
+                            </span>
+                            {p.pluginDeps.map((dep: string) => (
+                              <span
+                                key={dep}
+                                className="text-[10px] px-1.5 py-px border border-border bg-accent-subtle text-muted rounded-sm"
+                              >
+                                {dep}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </div>
                     )}
+
+                    <div className="px-5 py-3">
+                      {p.id === "telegram" ? (
+                        <TelegramPluginConfig
+                          plugin={p}
+                          pluginConfigs={pluginConfigs}
+                          onParamChange={handleParamChange}
+                        />
+                      ) : (
+                        <PluginConfigForm
+                          plugin={p}
+                          pluginConfigs={pluginConfigs}
+                          onParamChange={handleParamChange}
+                        />
+                      )}
+                      {p.id === "whatsapp" && (
+                        <WhatsAppQrOverlay accountId="default" />
+                      )}
+                    </div>
                   </div>
-                </div>
-
-                {/* Dialog footer — actions (hidden for showcase) */}
-                {!isShowcase && (
-                  <div className="flex justify-end gap-3 px-5 py-4 border-t border-border/30 shrink-0 bg-black/10">
-                    {p.enabled && !p.isActive && p.npmName && !p.loadError && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="h-8 px-4 text-[11px] font-bold tracking-wide shadow-sm"
-                        disabled={installingPlugins.has(p.id)}
-                        onClick={() =>
-                          handleInstallPlugin(p.id, p.npmName ?? "")
-                        }
-                      >
-                        {installingPlugins.has(p.id)
-                          ? installProgress.get(p.npmName ?? "")?.message ||
-                            "Installing..."
-                          : "Install Plugin"}
-                      </Button>
-                    )}
-                    {p.loadError && (
-                      <span
-                        className="px-3 py-1.5 text-[11px] text-danger font-bold tracking-wide"
-                        title={p.loadError}
-                      >
-                        {t("pluginsview.PackageBrokenMis")}
-                      </span>
-                    )}
-                    {p.isActive && (
-                      <Button
-                        variant={
-                          testResults.get(p.id)?.success
-                            ? "default"
-                            : testResults.get(p.id)?.error
-                              ? "destructive"
-                              : "outline"
-                        }
-                        size="sm"
-                        className={`h-8 px-4 text-[11px] font-bold tracking-wide transition-all ${
-                          testResults.get(p.id)?.loading
-                            ? "opacity-70 cursor-wait"
-                            : testResults.get(p.id)?.success
-                              ? "bg-ok text-ok-fg border-ok hover:bg-ok/90"
+                  {!isShowcase && (
+                    <div
+                      className={`${ADMIN_DIALOG_FOOTER_CLASSNAME} flex justify-end gap-3`}
+                    >
+                      {p.enabled &&
+                        !p.isActive &&
+                        p.npmName &&
+                        !p.loadError && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="h-8 px-4 text-[11px] font-bold tracking-wide shadow-sm"
+                            disabled={installingPlugins.has(p.id)}
+                            onClick={() =>
+                              handleInstallPlugin(p.id, p.npmName ?? "")
+                            }
+                          >
+                            {installingPlugins.has(p.id)
+                              ? installProgressLabel(
+                                  installProgress.get(p.npmName ?? "")?.message,
+                                )
+                              : installPluginLabel}
+                          </Button>
+                        )}
+                      {p.loadError && (
+                        <span
+                          className="px-3 py-1.5 text-[11px] text-danger font-bold tracking-wide"
+                          title={p.loadError}
+                        >
+                          {t("pluginsview.PackageBrokenMis")}
+                        </span>
+                      )}
+                      {p.isActive && (
+                        <Button
+                          variant={
+                            testResults.get(p.id)?.success
+                              ? "default"
                               : testResults.get(p.id)?.error
-                                ? "bg-danger text-danger-fg border-danger hover:bg-danger/90"
-                                : "border-border/40 bg-card/40 backdrop-blur-md shadow-sm hover:border-accent/40"
-                        }`}
-                        disabled={testResults.get(p.id)?.loading}
-                        onClick={() => handleTestConnection(p.id)}
+                                ? "destructive"
+                                : "outline"
+                          }
+                          size="sm"
+                          className={`h-8 px-4 text-[11px] font-bold tracking-wide transition-all ${
+                            testResults.get(p.id)?.loading
+                              ? "opacity-70 cursor-wait"
+                              : testResults.get(p.id)?.success
+                                ? "bg-ok text-ok-fg border-ok hover:bg-ok/90"
+                                : testResults.get(p.id)?.error
+                                  ? "bg-danger text-danger-fg border-danger hover:bg-danger/90"
+                                  : "border-border/40 bg-card/40 backdrop-blur-md shadow-sm hover:border-accent/40"
+                          }`}
+                          disabled={testResults.get(p.id)?.loading}
+                          onClick={() => handleTestConnection(p.id)}
+                        >
+                          {formatDialogTestConnectionLabel(
+                            testResults.get(p.id),
+                          )}
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-4 text-[12px] font-bold text-muted hover:text-txt transition-all"
+                        onClick={() => handleConfigReset(p.id)}
                       >
-                        {testResults.get(p.id)?.loading
-                          ? "Testing..."
-                          : testResults.get(p.id)?.success
-                            ? `\u2713 OK (${testResults.get(p.id)?.durationMs}ms)`
-                            : testResults.get(p.id)?.error
-                              ? `\u2715 ${testResults.get(p.id)?.error}`
-                              : "Test Connection"}
+                        {t("pluginsview.Reset")}
                       </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-4 text-[12px] font-bold text-muted hover:text-txt transition-all"
-                      onClick={() => handleConfigReset(p.id)}
-                    >
-                      {t("pluginsview.Reset")}
-                    </Button>
-                    <Button
-                      variant={saveSuccess ? "default" : "secondary"}
-                      size="sm"
-                      className={`h-8 px-5 text-[12px] font-bold tracking-wide transition-all ${
-                        saveSuccess
-                          ? "bg-ok text-ok-fg hover:bg-ok/90"
-                          : "bg-accent text-accent-fg hover:bg-accent/90 shadow-lg shadow-accent/20"
-                      }`}
-                      onClick={() => handleConfigSave(p.id)}
-                      disabled={isSaving}
-                    >
-                      {isSaving
-                        ? "Saving..."
-                        : saveSuccess
-                          ? "\u2713 Saved"
-                          : "Save Settings"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })()}
+                      <Button
+                        variant={saveSuccess ? "default" : "secondary"}
+                        size="sm"
+                        className={`h-8 px-5 text-[12px] font-bold tracking-wide transition-all ${
+                          saveSuccess
+                            ? "bg-ok text-ok-fg hover:bg-ok/90"
+                            : "bg-accent text-accent-fg hover:bg-accent/90 shadow-lg shadow-accent/20"
+                        }`}
+                        onClick={() => handleConfigSave(p.id)}
+                        disabled={isSaving}
+                      >
+                        {isSaving
+                          ? savingLabel
+                          : saveSuccess
+                            ? t("pluginsview.SavedWithCheck", {
+                                defaultValue: "✓ Saved",
+                              })
+                            : saveSettingsLabel}
+                      </Button>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            );
+          })()}
+      </div>
+      <Dialog
+        open={addDirOpen}
+        onOpenChange={(v) => {
+          if (!v) {
+            setAddDirOpen(false);
+            setAddDirPath("");
+          }
+        }}
+      >
+        <DialogContent className={`${ADMIN_DIALOG_CONTENT_CLASSNAME} max-w-md`}>
+          <DialogHeader className={`${ADMIN_DIALOG_HEADER_CLASSNAME} mb-0`}>
+            <DialogTitle className="font-bold text-base tracking-wide text-txt">
+              {t("pluginsview.AddPlugin1")}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted">
+              {t("pluginsview.AddPluginDescription", {
+                defaultValue:
+                  "Enter a local directory path that contains a plugin package and Milady will register it.",
+              })}
+            </DialogDescription>
+          </DialogHeader>
 
-      {/* Add from directory modal */}
-      {addDirOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6 duration-200 animate-in fade-in"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setAddDirOpen(false);
-              setAddDirPath("");
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setAddDirOpen(false);
-              setAddDirPath("");
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="w-full max-w-md border border-border/50 bg-card/90 backdrop-blur-xl p-6 rounded-2xl shadow-2xl">
-            <div className="flex items-center justify-between mb-5">
-              <div className="font-bold text-base tracking-wide text-txt">
-                {t("pluginsview.AddPlugin1")}
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted hover:bg-white/10 hover:text-txt rounded-full transition-all shrink-0 ml-2"
-                onClick={() => {
-                  setAddDirOpen(false);
-                  setAddDirPath("");
-                }}
-              >
-                ✕
-              </Button>
-            </div>
-
+          <div className="px-6 py-5">
             <p className="text-sm font-medium tracking-wide text-muted mb-4">
               {t("pluginsview.EnterThePathToA")}
             </p>
 
             <Input
               type="text"
-              className="w-full h-10 px-3 border border-border/40 bg-black/20 text-txt text-[13px] font-mono transition-all duration-150 focus-visible:ring-accent rounded-xl shadow-inner placeholder:text-muted/50"
+              className={ADMIN_DIALOG_INPUT_CLASSNAME}
               placeholder={t("pluginsview.PathToPluginOrP")}
+              aria-label={t("pluginsview.PathToPluginOrP")}
               value={addDirPath}
               onChange={(e) => setAddDirPath(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") void handleAddFromDirectory();
               }}
             />
-
-            <div className="flex justify-end gap-3 mt-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-4 text-[12px] font-bold text-muted hover:text-txt transition-all"
-                onClick={() => {
-                  setAddDirOpen(false);
-                  setAddDirPath("");
-                }}
-              >
-                {t("pluginsview.Cancel")}
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                className="h-8 px-6 text-[12px] font-bold tracking-wide shadow-sm"
-                onClick={handleAddFromDirectory}
-                disabled={addDirLoading || !addDirPath.trim()}
-              >
-                {addDirLoading ? "Adding..." : "Add"}
-              </Button>
-            </div>
           </div>
-        </div>
-      )}
-    </div>
+
+          <DialogFooter
+            className={`${ADMIN_DIALOG_FOOTER_CLASSNAME} mt-0 flex justify-end gap-3`}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-4 text-[12px] font-bold text-muted hover:text-txt transition-all"
+              onClick={() => {
+                setAddDirOpen(false);
+                setAddDirPath("");
+              }}
+            >
+              {t("pluginsview.Cancel")}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-8 px-6 text-[12px] font-bold tracking-wide shadow-sm"
+              onClick={handleAddFromDirectory}
+              disabled={addDirLoading || !addDirPath.trim()}
+            >
+              {addDirLoading ? "Adding..." : "Add"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </DesktopPageFrame>
   );
 }
 
@@ -3160,6 +3529,8 @@ export function PluginsView({
         ? "Connectors"
         : mode === "streaming"
           ? "Streaming"
-          : "Plugins";
+          : mode === "all-social"
+            ? "Plugins"
+            : "Plugins";
   return <PluginListView label={label} mode={mode} inModal={inModal} />;
 }

@@ -132,21 +132,131 @@ describe("@miladyai/capacitor-swabble", () => {
   // by accessing the private wakeGate after a failed start stores the config.
 
   describe("WakeWordGate (pure logic)", () => {
-    // We need to reach the WakeWordGate. Since start() fails without SpeechRecognition,
-    // but still sets config and wakeGate before the API check, we can test it if we
-    // access the private field. Actually, looking at the source: start() returns early
-    // BEFORE setting wakeGate if SpeechRecognition is unavailable. So we export the
-    // class for testing... but it's not exported.
-    //
-    // The honest answer: WakeWordGate cannot be tested without either:
-    // (a) exporting it, or (b) mocking SpeechRecognition so start() succeeds.
-    // We document this gap here rather than pretending it's tested.
+    it("emits wakeWord events when final speech matches a configured trigger", async () => {
+      const originalSpeechRecognition = (
+        window as Window & { SpeechRecognition?: unknown }
+      ).SpeechRecognition;
+      const originalAudioContext = globalThis.AudioContext;
 
-    it("DOCUMENTED GAP: WakeWordGate.match() is pure logic that should be tested but requires either export or SpeechRecognition mock", () => {
-      // The gate normalizes triggers to lowercase, checks substring match,
-      // extracts command text after trigger, enforces minCommandLength,
-      // returns postGap=-1 on web. All untested.
-      expect(true).toBe(true); // placeholder acknowledging the gap
+      class MockSpeechRecognition extends EventTarget {
+        static instance: MockSpeechRecognition | null = null;
+
+        continuous = false;
+        interimResults = false;
+        lang = "en-US";
+        onstart: (() => void) | null = null;
+        onend: (() => void) | null = null;
+        onerror: ((event: { error: string }) => void) | null = null;
+        onresult:
+          | ((event: {
+              resultIndex: number;
+              results: {
+                length: number;
+                [index: number]: {
+                  isFinal: boolean;
+                  0: { transcript: string; confidence: number };
+                };
+              };
+            }) => void)
+          | null = null;
+
+        constructor() {
+          super();
+          MockSpeechRecognition.instance = this;
+        }
+
+        start() {
+          this.onstart?.();
+        }
+
+        stop() {
+          this.onend?.();
+        }
+
+        abort() {}
+      }
+
+      class MockAudioContext {
+        createAnalyser = vi.fn(() => ({
+          fftSize: 0,
+          frequencyBinCount: 32,
+          getByteFrequencyData: vi.fn((arr: Uint8Array) => arr.fill(0)),
+        }));
+
+        createMediaStreamSource = vi.fn(() => ({
+          connect: vi.fn(),
+        }));
+
+        close = vi.fn(async () => {});
+      }
+
+      Object.defineProperty(window, "SpeechRecognition", {
+        configurable: true,
+        value: MockSpeechRecognition,
+      });
+      Object.defineProperty(globalThis, "AudioContext", {
+        configurable: true,
+        value: MockAudioContext,
+      });
+      vi.spyOn(navigator.mediaDevices, "getUserMedia").mockResolvedValue({
+        getTracks: () => [],
+      } as unknown as MediaStream);
+
+      const notifySpy = vi.spyOn(
+        sw as unknown as {
+          notifyListeners: (eventName: string, payload: unknown) => void;
+        },
+        "notifyListeners",
+      );
+
+      const result = await sw.start({
+        config: {
+          triggers: ["hey milady"],
+          minCommandLength: 3,
+        },
+      });
+
+      expect(result.started).toBe(true);
+      expect(MockSpeechRecognition.instance).not.toBeNull();
+      MockSpeechRecognition.instance?.onresult?.({
+        resultIndex: 0,
+        results: {
+          length: 1,
+          0: {
+            isFinal: true,
+            0: {
+              transcript: "hey milady open settings",
+              confidence: 0.91,
+            },
+          },
+        },
+      });
+
+      expect(notifySpy).toHaveBeenCalledWith(
+        "wakeWord",
+        expect.objectContaining({
+          wakeWord: "hey milady",
+          command: "open settings",
+          postGap: -1,
+          transcript: "hey milady open settings",
+          confidence: 0.91,
+        }),
+      );
+
+      await sw.stop();
+
+      if (originalSpeechRecognition === undefined) {
+        Reflect.deleteProperty(window, "SpeechRecognition");
+      } else {
+        Object.defineProperty(window, "SpeechRecognition", {
+          configurable: true,
+          value: originalSpeechRecognition,
+        });
+      }
+      Object.defineProperty(globalThis, "AudioContext", {
+        configurable: true,
+        value: originalAudioContext,
+      });
     });
   });
 

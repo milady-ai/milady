@@ -1,14 +1,7 @@
-/**
- * Chat sub-components that have no app-level context dependency.
- *
- * These complement the full `ChatMessage` component (which stays in
- * `apps/app` because it uses `useApp()` for i18n and the `MessageContent`
- * renderer). Extracted here so they can be reused by any app.
- */
+import type * as React from "react";
 
+import { cn } from "../../lib/utils";
 import { Button } from "./button";
-
-/* ── TypingIndicator ─────────────────────────────────────────────────── */
 
 export function TypingIndicator({
   agentName,
@@ -41,18 +34,9 @@ export function TypingIndicator({
         </div>
         <div className="px-4 py-3 bg-bg-accent border border-border rounded-2xl rounded-bl-md">
           <div className="flex gap-1">
-            <span
-              className="w-2 h-2 rounded-full bg-muted-strong animate-[typing-bounce_1.2s_ease-in-out_infinite]"
-              style={{ animationDelay: "0ms" }}
-            />
-            <span
-              className="w-2 h-2 rounded-full bg-muted-strong animate-[typing-bounce_1.2s_ease-in-out_infinite]"
-              style={{ animationDelay: "200ms" }}
-            />
-            <span
-              className="w-2 h-2 rounded-full bg-muted-strong animate-[typing-bounce_1.2s_ease-in-out_infinite]"
-              style={{ animationDelay: "400ms" }}
-            />
+            <span className="h-2 w-2 rounded-full bg-muted-strong [animation-delay:0ms] animate-[typing-bounce_1.2s_ease-in-out_infinite]" />
+            <span className="h-2 w-2 rounded-full bg-muted-strong [animation-delay:200ms] animate-[typing-bounce_1.2s_ease-in-out_infinite]" />
+            <span className="h-2 w-2 rounded-full bg-muted-strong [animation-delay:400ms] animate-[typing-bounce_1.2s_ease-in-out_infinite]" />
           </div>
         </div>
       </div>
@@ -60,13 +44,14 @@ export function TypingIndicator({
   );
 }
 
-/* ── ChatEmptyState ──────────────────────────────────────────────────── */
-
 export interface ChatEmptyStateProps {
   agentName: string;
   /** Starter suggestions shown as quick-reply chips. */
   suggestions?: string[];
   onSuggestionClick?: (suggestion: string) => void;
+  action?: React.ReactNode;
+  hint?: React.ReactNode;
+  className?: string;
   /** i18n labels — all have sensible English defaults. */
   labels?: {
     startConversation?: string;
@@ -80,10 +65,18 @@ export function ChatEmptyState({
   agentName,
   suggestions = ["Hello!", "How are you?", "Tell me a joke", "Help me with..."],
   onSuggestionClick,
+  action,
+  hint,
+  className,
   labels = {},
 }: ChatEmptyStateProps) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+    <div
+      className={cn(
+        "flex flex-1 flex-col items-center justify-center p-6 text-center",
+        className,
+      )}
+    >
       <div className="w-16 h-16 rounded-2xl bg-accent-subtle flex items-center justify-center mb-4">
         <svg
           width="32"
@@ -104,13 +97,11 @@ export function ChatEmptyState({
       <h3 className="text-lg font-semibold text-txt-strong mb-2">
         {labels.startConversation ?? "Start a Conversation"}
       </h3>
-      <p
-        className="text-sm text-muted max-w-sm mb-6"
-        style={{ fontFamily: "var(--font-chat)" }}
-      >
+      <p className="mb-6 max-w-sm text-sm text-muted font-[var(--font-chat)]">
         {labels.sendMessageTo ?? "Send a message to"} {agentName}{" "}
         {labels.toBeginChatting ?? "to begin chatting."}
       </p>
+      {action ? <div className="mb-4 flex justify-center">{action}</div> : null}
       <div className="flex flex-wrap justify-center gap-2">
         {suggestions.map((suggestion) => (
           <Button
@@ -124,6 +115,11 @@ export function ChatEmptyState({
           </Button>
         ))}
       </div>
+      {hint ? (
+        <div className="mt-4 max-w-sm text-[11px] uppercase tracking-[0.16em] text-muted/74">
+          {hint}
+        </div>
+      ) : null}
     </div>
   );
 }

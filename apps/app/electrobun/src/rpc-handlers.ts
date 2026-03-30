@@ -1,3 +1,4 @@
+import fs from "node:fs";
 /**
  * RPC Handler Registration for Electrobun
  *
@@ -8,7 +9,10 @@
  * Called once during app startup after the BrowserView is created.
  */
 
-import { Updater } from "electrobun/bun";
+import { Utils } from "electrobun/bun";
+import { setAgentReady } from "./agent-ready-state";
+import { showBackgroundNoticeOnce } from "./background-notice";
+import { postCloudDisconnectFromMain } from "./cloud-disconnect-from-main";
 import { getAgentManager } from "./native/agent";
 import { getCameraManager } from "./native/camera";
 import { getCanvasManager } from "./native/canvas";
@@ -22,8 +26,17 @@ import { getGpuWindowManager } from "./native/gpu-window";
 import { getLocationManager } from "./native/location";
 import { getPermissionManager } from "./native/permissions";
 import { getScreenCaptureManager } from "./native/screencapture";
+import {
+  getStewardStatus,
+  isStewardLocalEnabled,
+  resetSteward,
+  restartSteward,
+  startSteward,
+} from "./native/steward";
 import { getSwabbleManager } from "./native/swabble";
 import { getTalkModeManager } from "./native/talkmode";
+import { isDetachedSurface } from "./surface-windows";
+import type { SendToWebview } from "./types.js";
 
 /** Push current OS permission states to the agent REST API in-process. */
 async function syncPermissionsToRestApi(): Promise<void> {
@@ -40,8 +53,6 @@ async function syncPermissionsToRestApi(): Promise<void> {
     // non-fatal — renderer will still get data via IPC response
   }
 }
-
-type SendToWebview = (message: string, payload?: unknown) => void;
 
 /**
  * Structural type for the Electrobun RPC instance used in rpc-handlers.
@@ -86,13 +97,89 @@ export function registerRpcHandlers(
 
   rpc?.setRequestHandler?.({
     // ---- Agent ----
-    agentStart: async () => agent.start(),
+    agentStart: async () => {
+      const status = await agent.start();
+      if (status.state === "running") {
+        setAgentReady(true);
+      }
+      return status;
+    },
     agentStop: async () => {
       await agent.stop();
+      setAgentReady(false);
       return { ok: true };
     },
-    agentRestart: async () => agent.restart(),
+    agentRestart: async () => {
+      const status = await agent.restart();
+      setAgentReady(status.state === "running");
+      return status;
+    },
+    agentRestartClearLocalDb: async () => {
+      console.log("[RPC][reset] agentRestartClearLocalDb invoked");
+      try {
+        const status = await agent.restartClearingLocalDb();
+        console.log("[RPC][reset] agentRestartClearLocalDb done", {
+          state: status.state,
+          port: status.port,
+        });
+        setAgentReady(status.state === "running");
+        return status;
+      } catch (err) {
+        console.error("[RPC][reset] agentRestartClearLocalDb failed", err);
+        throw err;
+      }
+    },
     agentStatus: async () => agent.getStatus(),
+    agentInspectExistingInstall: async () => agent.inspectExistingInstall(),
+    /** Renderer `fetch` after native dialogs can stall; main POST matches menu reset pattern. */
+    agentPostCloudDisconnect: async (
+      params?: { apiBase?: string; bearerToken?: string } | null,
+    ) => {
+      try {
+        return await postCloudDisconnectFromMain({
+          apiBaseOverride: params?.apiBase ?? null,
+          bearerTokenOverride: params?.bearerToken ?? null,
+        });
+      } catch (err) {
+        console.error("[RPC] agentPostCloudDisconnect failed", err);
+        throw err;
+      }
+    },
+    /** Native confirm + main-process POST (renderer bridge/fetch can stall after a sheet). */
+    agentCloudDisconnectWithConfirm: async (
+      params?: { apiBase?: string; bearerToken?: string } | null,
+    ) => {
+      const box = await desktop.showMessageBox({
+        type: "warning",
+        title: "Disconnect from Eliza Cloud",
+        message: "The agent will need a local AI provider to continue working.",
+        buttons: ["Disconnect", "Cancel"],
+        defaultId: 0,
+        cancelId: 1,
+      });
+      const raw =
+        box && typeof box === "object" && "response" in box
+          ? (box as { response: unknown }).response
+          : box;
+      const response =
+        typeof raw === "number" && Number.isFinite(raw)
+          ? raw
+          : typeof raw === "bigint"
+            ? Number(raw)
+            : 1;
+      if (response !== 0) {
+        return { cancelled: true as const };
+      }
+      try {
+        return await postCloudDisconnectFromMain({
+          apiBaseOverride: params?.apiBase ?? null,
+          bearerTokenOverride: params?.bearerToken ?? null,
+        });
+      } catch (err) {
+        console.error("[RPC] agentCloudDisconnectWithConfirm failed", err);
+        throw err;
+      }
+    },
 
     // ---- Desktop: Tray ----
     desktopCreateTray: async (
@@ -161,6 +248,15 @@ export function registerRpcHandlers(
     desktopCloseNotification: async (
       params: Parameters<typeof desktop.closeNotification>[0],
     ) => desktop.closeNotification(params),
+    desktopShowBackgroundNotice: async () => ({
+      shown: showBackgroundNoticeOnce({
+        fileSystem: fs,
+        userDataDir: Utils.paths.userData,
+        showNotification: (options) => {
+          Utils.showNotification(options);
+        },
+      }),
+    }),
 
     // ---- Desktop: Power ----
     desktopGetPowerState: async () => desktop.getPowerState(),
@@ -168,16 +264,60 @@ export function registerRpcHandlers(
     // ---- Desktop: App ----
     desktopQuit: async () => desktop.quit(),
     desktopRelaunch: async () => desktop.relaunch(),
-    desktopApplyUpdate: async () => {
-      Updater.applyUpdate();
-    },
+    desktopApplyUpdate: async () => desktop.applyUpdate(),
+    desktopCheckForUpdates: async () => desktop.checkForUpdates(),
+    desktopGetUpdaterState: async () => desktop.getUpdaterState(),
     desktopGetVersion: async () => desktop.getVersion(),
+    desktopGetBuildInfo: async () => desktop.getBuildInfo(),
     desktopIsPackaged: async () => desktop.isPackaged(),
+    desktopGetDockIconVisibility: async () => desktop.getDockIconVisibility(),
+    desktopSetDockIconVisibility: async (
+      params: Parameters<typeof desktop.setDockIconVisibility>[0],
+    ) => desktop.setDockIconVisibility(params),
     desktopGetPath: async (params: Parameters<typeof desktop.getPath>[0]) =>
       desktop.getPath(params),
+    desktopGetStartupDiagnostics: async () => desktop.getStartupDiagnostics(),
+    desktopOpenLogsFolder: async () => desktop.openLogsFolder(),
+    desktopCreateBugReportBundle: async (
+      params: Parameters<typeof desktop.createBugReportBundle>[0],
+    ) => desktop.createBugReportBundle(params),
     desktopBeep: async () => desktop.beep(),
-    desktopOpenSettingsWindow: async () => {
-      desktop.openSettings();
+    desktopShowSelectionContextMenu: async (
+      params: Parameters<typeof desktop.showSelectionContextMenu>[0],
+    ) => desktop.showSelectionContextMenu(params),
+    desktopGetSessionSnapshot: async (
+      params: Parameters<typeof desktop.getSessionSnapshot>[0],
+    ) => desktop.getSessionSnapshot(params),
+    desktopClearSessionData: async (
+      params: Parameters<typeof desktop.clearSessionData>[0],
+    ) => desktop.clearSessionData(params),
+    desktopGetWebGpuBrowserStatus: async () => desktop.getWebGpuBrowserStatus(),
+    desktopOpenReleaseNotesWindow: async (
+      params: Parameters<typeof desktop.openReleaseNotesWindow>[0],
+    ) => desktop.openReleaseNotesWindow(params),
+    desktopOpenSettingsWindow: async (
+      params: { tabHint?: string } | undefined,
+    ) => {
+      desktop.openSettings(params?.tabHint);
+    },
+    desktopOpenSurfaceWindow: async (params: {
+      surface:
+        | "chat"
+        | "browser"
+        | "release"
+        | "triggers"
+        | "plugins"
+        | "connectors"
+        | "cloud";
+      browse?: string;
+    }) => {
+      if (!isDetachedSurface(params.surface)) {
+        return;
+      }
+      desktop.openSurfaceWindow(
+        params.surface,
+        params.surface === "browser" ? params.browse : undefined,
+      );
     },
 
     // ---- Desktop: Screen ----
@@ -461,6 +601,37 @@ export function registerRpcHandlers(
       params: Parameters<typeof gpuWindow.getViewNativeHandle>[0],
     ) => gpuWindow.getViewNativeHandle(params),
     gpuViewList: async () => gpuWindow.listViews(),
+
+    // ---- Steward Sidecar ----
+    stewardGetStatus: async () => getStewardStatus(),
+    stewardIsLocalEnabled: async () => ({ enabled: isStewardLocalEnabled() }),
+    stewardStart: async () => {
+      if (!isStewardLocalEnabled()) {
+        return {
+          state: "stopped" as const,
+          error: "STEWARD_LOCAL not enabled",
+        };
+      }
+      return startSteward();
+    },
+    stewardRestart: async () => {
+      if (!isStewardLocalEnabled()) {
+        return {
+          state: "stopped" as const,
+          error: "STEWARD_LOCAL not enabled",
+        };
+      }
+      return restartSteward();
+    },
+    stewardReset: async () => {
+      if (!isStewardLocalEnabled()) {
+        return {
+          state: "stopped" as const,
+          error: "STEWARD_LOCAL not enabled",
+        };
+      }
+      return resetSteward();
+    },
   });
 
   console.log("[RPC] All handlers registered");

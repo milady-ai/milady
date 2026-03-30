@@ -1,8 +1,4 @@
-/**
- * Platform utilities — onboarding permissions and platform initialization helpers.
- *
- * Migrated from apps/app/src/onboarding-permissions.ts and main.tsx.
- */
+/** Platform utilities — onboarding permissions and platform initialization helpers. */
 
 import type {
   AllPermissionsState,
@@ -39,6 +35,8 @@ export function hasRequiredOnboardingPermissions(
 // ── Platform init ───────────────────────────────────────────────────────
 
 export { applyLaunchConnectionFromUrl } from "./browser-launch";
+export * from "./cloud-preference-patch";
+export * from "./desktop-permissions-client";
 export {
   type DeepLinkHandlers,
   dispatchShareTarget,
@@ -55,4 +53,5 @@ export {
   type ShareTargetPayload,
   setupPlatformStyles,
 } from "./init";
-export * from "./lifo";
+export * from "./onboarding-reset";
+export * from "./window-shell";

@@ -44,20 +44,20 @@ export function readBuiltPreloadScript(
 
   if (!status.preloadExists) {
     throw new Error(
-      `[Main] preload.js is missing at ${status.preloadPath}. Run \`bun run build:preload\` before launching Milady.`,
+      `[Main] preload.js is missing at ${status.preloadPath}. From the repo root run \`bun run build:preload\` (or \`cd apps/app/electrobun && bun run build:preload\`).`,
     );
   }
 
   if (status.stale) {
     throw new Error(
-      `[Main] preload.js is stale relative to ${status.sourcePath}. Run \`bun run build:preload\` before launching Milady.`,
+      `[Main] preload.js is stale relative to ${status.sourcePath}. From the repo root run \`bun run build:preload\` (or \`cd apps/app/electrobun && bun run build:preload\`).`,
     );
   }
 
   const preload = fileSystem.readFileSync(status.preloadPath, "utf8");
   if (!preload.trim()) {
     throw new Error(
-      `[Main] preload.js is empty at ${status.preloadPath}. Run \`bun run build:preload\` before launching Milady.`,
+      `[Main] preload.js is empty at ${status.preloadPath}. From the repo root run \`bun run build:preload\` (or \`cd apps/app/electrobun && bun run build:preload\`).`,
     );
   }
 

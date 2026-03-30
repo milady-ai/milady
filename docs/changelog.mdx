@@ -3,6 +3,524 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-30" description="Week of March 29–30; cloud dashboard polish, live metrics, billing" tags={["Update"]}>
+## Cloud dashboard overhaul
+
+The cloud [dashboard](/apps/dashboard) has been significantly cleaned up. Agent cards now show VRM character previews instead of initials, pulled from each agent's stream settings. The metrics panel displays live per-agent stats with auto-refresh, and the logs panel streams real agent logs with manual and automatic refresh — both were previously empty placeholders.
+
+## Real billing and credits
+
+The credits and billing section on the cloud dashboard now connects to real payment infrastructure. You can add funds via Stripe checkout or crypto, and your balance is always visible. Placeholder credit packs have been removed.
+
+## Updates
+
+- **Dashboard design pass** — Sharp corners, accent bars, reduced visual noise, and consistent spacing across the cloud dashboard and homepage. Filler copy has been removed from onboarding, settings, and the cloud config views.
+- **Compact wallet indicators** — Wallet status on cloud agent cards now uses compact indicators, making it easier to scan multiple agents at a glance.
+
+</Update>
+
+<Update label="2026-03-29" description="Week of March 28–29; Steward wallet, owner name prompt, security hardening" tags={["Feature", "Update", "Fix"]}>
+## Personalized agent greeting
+
+The first time you open the desktop app, your agent now asks "What should I call you?" and remembers your name across all conversations. Your name appears in chat and the character editor, so the agent addresses you personally instead of as a generic user.
+
+## Steward wallet integration
+
+Wallet transactions can now route through [Steward](https://steward.fi) for policy-enforced signing. When connected, all trades and transfers pass through a vault that evaluates USD-based spending limits, rate limits, and address allowlists before signing — so you stay in control of what your agent can spend. The [wallet tab](/guides/wallet) shows balances, transaction history, and a pending approvals queue in one place. Configure spending policies in [settings](/apps/dashboard/settings) with per-transaction, daily, and weekly caps denominated in USD.
+
+## Knowledge view redesign
+
+The [knowledge](/guides/knowledge) sidebar now shows filenames prominently with inline type and source tags. A live search box filters documents by filename as you type, with semantic vector search still available on Enter. Hover any document to reveal the upload date and a quick-delete button.
+
+## Updates
+
+- **Security hardening** — Authentication now uses timing-safe token comparison with rate limiting on failed attempts (20/min per IP). CORS rules are tightened to a port-specific allowlist instead of a broad localhost wildcard. Telegram chat history is capped to prevent unbounded memory growth, and the pairing rate limiter cleans up expired entries automatically.
+- **Plugin validation layout** — Plugin configuration errors now appear below the form fields instead of a large red banner at the top, making it less alarming to configure plugins.
+- **Cleaned up unused features** — Several features that were never surfaced to users have been removed from the codebase, including an experimental browser surface, a prototype stream overlay widget system, and the deprecated Retake connector. The core streaming pipeline is unaffected.
+
+## Bug fixes
+
+- Fixed the settings model picker dropdown being clipped behind panels — dropdowns now float above all shell surfaces reliably
+- Fixed the wallet empty-state button being nearly invisible on dark backgrounds — it now has a visible gold outline
+- Fixed the cloud credits badge amount being hard to read due to low text contrast
+- Fixed returning users being sent back to onboarding after a temporary backend connection loss — previously onboarded users now see a retryable error instead
+- Fixed the heartbeats page showing "select a heartbeat" copy on first run when no heartbeats exist yet
+- Fixed the onboarding language selector using a different size and style from the in-app header dropdown
+- Fixed duplicate token sort controls appearing in the wallet view
+- Fixed an unnecessary "log in with Privy" prompt appearing when a Steward wallet is already connected
+- Fixed the `/api/health` endpoint returning 401 behind the cloud auth gate, which could cause cloud container provisioning to time out
+
+</Update>
+
+<Update label="2026-03-28" description="Week of March 22–28; desktop VRM/Three/Spark and cloud login" tags={["Feature", "Update", "Fix", "Docs", "Test"]}>
+## Binance skills
+
+Your agent can now interact with Binance Smart Chain through 25 new skills — check trending tokens, run rug-pull checks, look up wallet balances, and execute trades using natural language. Six skills support live execution with built-in safety checks. A new Binance tab in the [skills UI](/plugins/skills) lets you browse and enable them individually.
+
+## Cloud TTS proxy and streaming voice
+
+Voice output in cloud mode now routes through a dedicated TTS proxy, so your agent speaks reliably without requiring local provider credentials. Streaming responses are batched before being sent to the TTS engine, eliminating garbled playback from partial chunks. ElevenLabs and Eliza Cloud are both supported as voice backends. See [talk mode](/apps/dashboard/talk-mode) for configuration details.
+
+## Remote bug reports
+
+You can now share bug reports and startup failure diagnostics remotely. If your agent fails to start, the error details can be submitted directly from the desktop app for faster troubleshooting.
+
+## Updates
+
+- **Character selection moved earlier in onboarding** — You now choose your agent's character right after the welcome screen instead of midway through setup, so your agent's personality is established before you configure providers. See the [onboarding guide](/guides/beginners-user-guide).
+- **Wallet routing and network mode** — Wallet transactions now support provider fallback routing and explicit network mode selection, making token transfers and trades more reliable across chains. See the [wallet guide](/guides/wallet).
+- **Cloud container configuration** — Cloud-provisioned containers now accept `ELIZAOS_CLOUD_BASE_URL`, `ENABLE_AUTONOMY`, and `CORS_ORIGINS` environment variables, removing the need for post-boot file patching. Server-side authentication is also enforced by default on all cloud container endpoints.
+- **Immediate language sync on desktop** — Changing your dashboard language now applies to chat responses immediately without a restart. Windows desktop menus also include working About, Quit, and Update Check actions.
+- **Activity indicator unified** — The swarm activity indicator is now a single status box above the chat composer with color-coded states, replacing scattered per-agent indicators.
+
+## Bug fixes
+
+- Fixed voice output ignoring the selected UI language and defaulting to English after switching locales
+- Fixed swarm actions dropping parameters and occasionally spawning duplicate agents
+- Fixed the model selector dropdown in cloud settings being invisible due to overflow clipping — dropdowns now show human-readable model names
+- Fixed the Windows installer requiring an extra extraction step and missing the Milady icon on Start Menu shortcuts
+- Fixed the Release Center crashing when a desktop bridge call fails, and missing preview images in packaged Windows builds
+- Fixed Railway deployments failing at startup due to missing GPU detection tools in slim Linux images
+- Fixed WebSocket connectivity breaking for clients that authenticate after the socket opens rather than during the HTTP upgrade
+- Fixed onboarding text being hard to read due to inconsistent panel styling — all screens now use a consistent glass treatment
+- Fixed timed-out backup imports during onboarding continuing to run in the background instead of aborting cleanly
+- Fixed a duplicate Save button appearing in the character editor header
+- Fixed a redundant "Connectors" title showing in the sidebar when the page is already selected
+- Fixed white-on-gold text contrast issues across buttons, toasts, and onboarding screens
+- Fixed checkmarks overlapping text in settings dropdowns and a one-frame flicker when opening searchable dropdowns
+- Fixed the wallet chain rail collapsing into unreadable icon pills instead of showing full chain cards
+- Fixed trajectory steps generating disconnected IDs, which caused incorrect data in the [trajectory view](/advanced/trajectories)
+- Fixed the desktop reset flow not verifying that onboarding actually restarted after a reset
+- Fixed a decorative gold border appearing permanently on the generation settings section
+
+## Desktop: one `three` instance for VRM + Gaussian splats
+
+**Why:** Electrobun (and similar layouts) could resolve a **second** `three` package under nested `node_modules`. `@sparkjsdev/spark` then registered `ShaderChunk.splatDefines` on **one** instance while VRM / splat shaders used **another** → **`Can not resolve #include <splatDefines>`** and broken companion 3D.
+
+**What:** Vite **`sparkPatchPlugin`** uses a **`resolveId`** hook to force bare **`three`** imports to the **workspace root** copy; the plugin still **hoists** `splatDefines` registration in Spark’s module; **`optimizeDeps.include`** lists **`three`** plus the **`three/examples/jsm/*`** paths the avatar stack imports so pre-bundling shares one module identity. **`resolve.dedupe`** includes **`three`**.
+
+**Why not only `resolve.alias`:** an absolute alias for `three` **broke the production Rollup build** in practice; **`resolveId`** keeps dev and prod aligned.
+
+**Docs:** [Desktop VRM, Three.js, and Spark (WHYs)](/apps/desktop-vrm-three-and-spark).
+
+## VRM: lazy paths, real fallback slug, world errors isolated
+
+**Why:** Module-level **`resolveAppAssetUrl`** / default VRM paths could **cache wrong values** in bundled desktop builds. Fallback slug **`default`** did not exist on disk (**404**). A failing **splat world** could prevent **VRM** from loading.
+
+**What:** Lazy **`getDefaultVrmPath()`** / **`getDracoDecoderPath()`**, **`milady-1`** fallback when the bundled roster is empty, try/catch around Spark init and **`setWorldUrl`** from the viewer so the avatar still loads.
+
+## Cloud: login persist after poll (disconnect race only)
+
+**Why:** Skipping persist when **`cloud.enabled === false`** blocked **first-time** logins (same flag as “never enabled”). The intent was only to ignore a **stale** poll after **disconnect**.
+
+**What:** **`cloudDisconnectEpoch`** increments on **`POST /api/cloud/disconnect`**; the login poll snapshots the epoch before **`fetch`**; persist runs unless a disconnect happened **during** the poll.
+
+**Docs:** same page, section *Eliza Cloud login persistence*.
+
+## Tests and tooling
+
+- Vite / define coverage in **`apps/app/test/app/vite-config.test.ts`**; VRM roster edge case in **`packages/app-core/test/avatar/vrm-empty-roster.test.ts`**.
+- Shared **`settings-debug`** export and related API/settings wiring for diagnostics (see commit history).
+
+</Update>
+
+<Update label="2026-03-27" description="Prompt optimization, desktop background mode, heartbeat execution fix" tags={["Feature", "Update", "Fix"]}>
+## Smart prompt optimization
+
+Milady now automatically reduces prompt sizes by around 36% for general chat. The system detects what you're asking about — coding, emotes, terminal work — and only includes full action details for relevant actions, replacing the rest with compact stubs. This means faster responses and lower token costs with no configuration needed. Coding tasks keep full context. Set `PARALLAX_PROMPT_TRACE=1` to see compaction stats in the server log.
+
+</Update>
+
+<Update label="2026-03-27" description="OpenRouter plugin dependency pin (upstream bad publish)" tags={["Fix", "Docs"]}>
+## Pin `@elizaos/plugin-openrouter` to `2.0.0-alpha.10`
+
+**Why:** npm **`2.0.0-alpha.12`** shipped **truncated** plugin bundles: `dist/node/index.node.js` (and the browser ESM build) contain only config helpers but still **export** `openrouterPlugin` / default — symbols that are **never defined** in the file. Bun then fails while loading the plugin (*not declared in this file*). **`2.0.0-alpha.10`** has a complete bundle.
+
+**Why a hard pin in `package.json`:** A caret range (`^2.0.0-alpha.10`) allowed the resolver to pick **`alpha.12`**, breaking fresh installs and lockfile updates. The fix is version selection, not a small dist patch (the plugin body is missing entirely).
+
+**Docs:** [Plugin resolution — pinned OpenRouter](/plugin-resolution-and-node-path#pinned-elizaosplugin-openrouter), [OpenRouter registry page](/plugin-registry/llm/openrouter#milady-pinned-version-and-upstream-bundle-bug), root `README.md` (upstream note), and `docs/ROADMAP.md` (done item).
+
+</Update>
+
+<Update label="2026-03-26" description="Dashboard pricing, background mode, desktop UI polish" tags={["Feature", "Update", "Fix"]}>
+## Dashboard pricing info
+
+The cloud [dashboard](/guides/cloud) now shows pricing information before you create an agent. Hosting rates, credit pack options with volume discounts, and minimum deposit requirements are visible on the credits page, the create-agent form, and the empty-agents landing view — so you know what to expect before committing.
+
+## Desktop background mode
+
+Closing the desktop window no longer briefly flashes a replacement window. The agent keeps running in the background and a system notification confirms it. Click the dock icon or any menu/tray action to restore the window instantly.
+
+## Updates
+
+- **Coding agents on Eliza Cloud** — [Coding agents](/guides/coding-swarms) (Claude Code, Codex) now route through Eliza Cloud proxy endpoints when cloud inference is active. Previously, switching to cloud mode wiped their API keys.
+- **Desktop shell consistency** — A broad layout and theme pass brings chat, skills, apps, heartbeats, stream, knowledge, onboarding, companion, and settings surfaces onto a shared chrome system. Spacing, hierarchy, and readability are improved across the board, and the companion composer uses a proper structural container instead of layered visual nudges.
+- **Wallet action feedback** — Wallet actions like balance checks and token transfers now reliably report success or failure in the [trajectory view](/advanced/trajectories), making it easier to trace what happened during a transaction.
+- **Cloud container access** — Cloud-provisioned containers no longer auto-generate an API token that locks out the web UI. Managed deployments are accessible immediately without browser auth until the pairing flow is configured.
+- **Workspace boilerplate excluded from prompts** — Default workspace template files (like `AGENTS.md`) are no longer injected into prompts due to a case-sensitivity mismatch. Only files you've actually customized are included.
+
+## Bug fixes
+
+- Fixed heartbeats and triggers silently not executing — the autonomy loop was never enabled after startup, so scheduled tasks sat in the database unprocessed
+- Fixed 19 operations across cloud, wallet, knowledge, and runtime that reported success but silently failed — errors are now surfaced properly
+- Fixed cloud sign-in failing on the hosted homepage — a bare-domain redirect was dropping the POST body during authentication
+- Fixed homepage hero text clipping on mobile screens and the download dropdown closing when moving the cursor from the button to the list
+- Fixed wallet `CHECK_BALANCE` and `TRANSFER_TOKEN` actions not reporting success or failure back to the chat
+- Fixed the desktop companion header's glass blur effect bleeding into the standard desktop header
+- Fixed the Windows app icon only containing 16px and 32px sizes — taskbar, Start Menu, and desktop shortcuts now display crisp icons at all standard sizes
+- Fixed Eliza Cloud showing a generic error when the session is missing an account — it now explains whether an API key or login session is needed
+- Fixed onboarding character preview playing a single default voice instead of the voice associated with each character preset
+- Fixed onboarding voice preview failing entirely when switching characters rapidly
+- Fixed unhandled runtime errors and a timeout leak in the embedding manager that could cause issues during cleanup
+</Update>
+
+<Update label="2026-03-25" description="Coding agent terminals, onboarding identity step, security hardening" tags={["Feature", "Update", "Fix"]}>
+## Coding agent terminal drawer
+
+Coding agent sessions now have an inline terminal right in the chat view. Click any active agent in the status bar to open a tabbed xterm.js drawer showing live terminal output, with keyboard input forwarding and buffered history. In companion mode, the terminal opens as a side panel instead. See the [coding swarms guide](/guides/coding-swarms) for details.
+
+## Onboarding identity step
+
+The [onboarding wizard](/guides/beginners-user-guide) now includes an identity step where you choose your agent's avatar and persona before launch. Browse available characters, preview their VRM model, and start with the right personality from the first conversation.
+
+## Homepage redesign
+
+The homepage has been simplified to a minimal single-page layout with a centered hero, platform-specific download dropdown showing file sizes, and a Try Cloud call-to-action — replacing the previous multi-section design.
+
+## Security and reliability hardening
+
+A broad audit addressed 54 issues across the stack. Highlights that affect your experience:
+
+- **Wallet safety** — Trades now verify approval receipt status before broadcasting, quotes expire after 60 seconds, and slippage is capped at 10%. A daily trade limit (25/day) is enforced by default.
+- **Stronger pairing codes** — Dashboard pairing codes now use 60-bit entropy (up from 40-bit) for better security.
+- **Browser sandbox** — The in-app browser surface now runs with a restrictive sandbox policy, limiting what embedded content can do.
+- **Credential masking** — API keys and wallet keys are masked in API responses, showing only the last four characters.
+
+## Updates
+
+- **Companion scene performance** — The 3D VRM scene no longer re-renders on every keystroke in the chat input. Typing is noticeably smoother when the companion view is active.
+- **Modals and mobile layout** — Knowledge detail, skills install, and skills edit modals now open reliably instead of rendering blank. Several views are now usable on mobile-width screens with proper overflow handling and responsive grids.
+- **Onboarding credential guard** — The Connect button in onboarding is now disabled until you've entered the required credentials for your chosen provider, preventing empty submissions.
+- **Accessibility improvements** — Focus indicators are now visible in light mode, the detached shell has proper ARIA landmarks and a skip-to-content link, and onboarding step dots include screen reader labels.
+- **Bun version advisory** — Milady now warns at startup if you're running a Bun canary build or a version outside the tested 1.3.x range, so you know upfront if compatibility issues are likely.
+- **Cloud API clarity** — When Eliza Cloud features aren't available yet, the dashboard now shows a friendly "coming soon" message instead of a raw 404 error.
+
+## Bug fixes
+
+- Fixed the VRM avatar being invisible due to a shader compilation error in the teleport effect — avatars now render correctly on all platforms
+- Fixed the Looking Glass WebSocket connecting eagerly on every page load even when no display is configured — the connection now only opens when explicitly enabled
+- Fixed startup flooding the console with auth polling errors by switching to exponential backoff
+- Fixed the character editor showing the wrong name, bio, and system prompt when selecting a different avatar preset
+- Fixed `{{name}}` tokens appearing literally in character bios instead of being replaced with the agent's actual name
+- Fixed PostgreSQL foreign key migrations failing on re-run — migrations are now idempotent
+- Fixed the "Clear All" button on the trajectories page silently doing nothing
+- Fixed trajectory schema migrations dropping and recreating the table instead of adding missing columns
+- Fixed the VRM camera zoom hijacking scroll on the character editor — customization panels are now scrollable
+- Fixed WeChat voice, video, and file messages being incorrectly treated as images
+- Fixed the Windows desktop app failing to package correctly due to a variable mismatch in the release workflow
+- Fixed the MSIX installer missing resources outside the `bin/` directory
+- Fixed the desktop app crashing on Windows when Electrobun view modules couldn't be resolved — the app now shows actionable recovery steps
+- Fixed a WeChat response body leak under sustained rate limiting that could accumulate open connections
+- Fixed the streaming service not resetting its state after a failed FFmpeg start, which could leave it in an inconsistent state
+
+</Update>
+
+<Update label="2026-03-24" description="Heartbeat templates, Steward bridge, dashboard performance" tags={["Feature", "Update", "Fix"]}>
+## Heartbeat templates and detail view
+
+The [heartbeats](/guides/triggers) page now includes starter templates and the ability to save your own, so you can create new triggers from proven patterns instead of starting from scratch. A new detail view lets you click any heartbeat to see its schedule, run history, and success/failure statistics at a glance. You can also pause, resume, and duplicate heartbeats directly from the detail view without opening the editor.
+
+## Steward bridge for wallet transactions
+
+Wallet trade and transfer endpoints now support delegated signing through the Steward bridge. When configured, your agent routes transactions through an external policy service that can approve, reject, or hold them for review before they are broadcast. A new status endpoint lets you check whether Steward is connected and which agent identity is in use. See the [wallet API reference](/rest/wallet) for details.
+
+## Updates
+
+- **Dashboard performance** — The dashboard UI is significantly faster. State management has been restructured so that typing in chat, polling agent status, and browsing settings no longer cause unrelated parts of the UI to re-render. Navigation, translation, and lifecycle updates are now isolated, which means smoother interactions across the board.
+- **Onboarding visual polish** — The [onboarding wizard](/guides/beginners-user-guide) has refreshed button styling with improved contrast, a cleaner provider grid layout with proper dark mode support, and new pill-style tabs replacing the previous underline design.
+
+## Bug fixes
+
+- Fixed the desktop app briefly flashing the wrong chat UI on startup before switching to companion mode — the app now opens directly to the correct view
+
+</Update>
+
+<Update label="2026-03-23" description="WeChat connector, settings redesign, Windows fixes" tags={["Feature", "Update", "Fix"]}>
+## WeChat connector
+
+Your agent can now connect to WeChat, the 21st supported messaging platform. The connector supports text and image messaging in both direct messages and group chats, multi-account management, and QR code login. Install it with `milady plugins install wechat` and configure it in your [social settings](/guides/connectors).
+
+## Tagalog language support
+
+The dashboard is now available in Tagalog (Filipino), bringing the total to seven supported languages. All 1,150 UI strings are translated, with technical terms kept in English. Your browser language is auto-detected — or switch manually from the language dropdown.
+
+## Settings redesign
+
+The [settings](/apps/dashboard/settings) page has been overhauled with a cleaner sidebar layout, consolidated Media and Voice into a single section, and moved Desktop Workspace under Advanced. Toggle switches are now unified to a consistent iOS-style design across the dashboard. The wallet and RPC section adds a cloud-vs-custom mode selector so you can switch between Eliza Cloud RPCs and your own endpoints in one click.
+
+## Telegram connector improvements
+
+The [Telegram connector](/connectors/telegram) now includes an "Allow all chats" toggle so you don't need to manually list every chat ID. Advanced settings like API Root and Test Chat ID are collapsed by default to reduce clutter, and the status indicator no longer shows a false "needs setup" warning when only optional fields are empty.
+
+## Plugins sidebar layout
+
+The [plugins](/plugins/overview) view now uses the same sidebar list layout as connectors — icon, name, ON/OFF badge, and chevron — making it easier to browse and configure plugins without switching between different UI patterns.
+
+## Updates
+
+- **Onboarding flow rewrite** — The [onboarding wizard](/guides/beginners-user-guide) now derives step order, back navigation, and the sidebar step list from a single source of truth. Back navigation works reliably (including connection → welcome), completed steps are clickable to jump backward, and forward sidebar jumps are blocked so login/finish validation can't be skipped.
+- **Cloud dashboard streamlined** — The [cloud dashboard](/guides/cloud) billing view is now a compact single-page layout with flat agent lists and simplified card nesting, making it faster to scan your agents and credits at a glance.
+- **Voice streaming quality** — Streaming text merge now handles Unicode normalization, abbreviations, decimal numbers, URLs, and ellipses correctly, so text-to-speech no longer splits sentences at unexpected points.
+- **i18n completeness** — Added 88+ missing translation keys across all non-English locales and replaced 29 hardcoded English strings with translatable calls. A regression test now enforces key parity across all locales.
+- **Browser surface stability** — The in-app browser window no longer crashes on mount in the desktop app. URL entry in the address bar now drives the webview reliably.
+- **Companion scrolling restored** — The companion transcript is scrollable again without hijacking camera zoom, and header navigation buttons have larger hit targets.
+
+## Bug fixes
+
+- Fixed the Windows desktop app crashing on startup due to a GPU sandbox initialization failure — the UI now renders correctly with hardware acceleration preserved
+- Fixed Windows desktop app getting stuck in a launch loop when window position was saved while minimized (coordinates like -32000, -32000)
+- Fixed stale browser engine profile data from previous versions causing startup errors on Windows — profile data is now cleared automatically on upgrade
+- Fixed the VRM avatar loader hanging on Windows by disabling the new WebGL rendering path unless explicitly opted in
+- Fixed a crash on macOS when building against older SDKs due to an unguarded resize cursor API call
+- Fixed the desktop "Reset Milady" menu action not completing reliably — reset now runs in the main process with proper API reachability probing and renderer sync
+- Fixed wallet private key export being accessible without authentication in development environments
+
+</Update>
+
+<Update label="2026-03-22" description="Energy: visibility polling, battery Spark/shadows" tags={["Update", "Desktop", "macOS"]}>
+## Companion VRM: visibility pause + battery-aware pixel ratio (Electrobun)
+
+**Problem:** The avatar **WebGL/WebGPU** loop could keep running when the document was **hidden** (background surface / tab) or when the Mac was on **battery**, wasting GPU time users do not see.
+
+**What shipped**
+
+- **`VrmViewer`** listens for **`visibilitychange`** and pauses **`VrmEngine`** whenever **`document.visibilityState !== "visible"`**, in addition to the existing **`active`** prop. **Why:** `rAF` / `setAnimationLoop` should not run at full rate when the user is not viewing the canvas.
+- **`desktop:getPowerState`** (existing main-process bridge) drives **`VrmEngine.setLowPowerRenderMode`**: on **`onBattery`**, effective **device pixel ratio** is capped at **1×** (still respects world **`sparkOptimized`** and **`MAX_RENDERER_PIXEL_RATIO`**). Polled every **60s**, when the document becomes **visible** again, and once when the engine finishes init. **Why:** unplugged laptops pay a large per-pixel shader cost on Retina; full quality returns on AC. **Opt-out:** **localStorage** **`milady.vrmBatteryPixelCap`** = **`"0"`**.
+- **Battery → Spark + shadows:** **`setLowPowerRenderMode`** disables **directional shadow casting** on the avatar key light and applies **tighter Spark splat tuning** (radius, alpha floor, sort distance, clip). **Why:** shadows and splats dominate GPU cost beside raw DPR.
+- **Half display framerate (split from pixel low-power):** **`VrmEngine.setHalfFramerateMode`** drives **skip-every-other-tick** rendering; **`setLowPowerRenderMode`** only affects **1× DPR, shadows, and Spark**. **`refreshVrmDesktopBatteryPixelPolicy`** sets both. Default **Companion frame rate** = **When saving power** (half-FPS whenever pixel low-power is active). Settings → Media also offers **Full speed** and **Always half** so you can mix and match (e.g. full fps + battery pixels, or half fps + full quality).
+- **`snapshot()`** restore uses the same pixel-ratio policy instead of raw **`window.devicePixelRatio`** alone. **Why:** low-power mode stays consistent after preview capture.
+- **Settings → Media — Companion rendering:** single choice among **Always quality**, **Depends on battery** (default), and **Always efficient**, persisted as **`localStorage`** **`eliza:companion-vrm-power`** = **`quality`** | **`balanced`** | **`efficiency`**. **Why:** one control replaces paired toggles. **Balanced** uses **`desktop:getPowerState`** when the battery pixel cap is on (Electrobun); **efficiency** forces low-power everywhere; **quality** never applies battery-driven downshift. Legacy **`eliza:companion-efficiency`** / **`eliza:companion-quality-on-battery`** migrate once on read.
+- **Animate in background** (opt-in): **`eliza:companion-animate-when-hidden`** = **`"1"`** / **`"0"`**. When the document is hidden but the companion scene is still active, **`VrmEngine`** keeps the loop running and **hides the Gaussian splat world + Spark** so the avatar can keep idling with less GPU than the full scene.
+
+## Dashboard UI: pause background polling + 3D vector graph
+
+- **`useDocumentVisibility` / `useIntervalWhenDocumentVisible`** — Stream, game logs (panel open), fine-tuning, Eliza Cloud agent detail sidebar, and stream voice config only run their **multi-second** `setInterval` loops while the document is **visible**. **`AppContext`** Eliza Cloud **credits** timer skips **`pollCloudCredits`** when hidden. **Why:** background tabs should not keep waking the main thread and API.
+- **`VectorBrowserView` 3D graph** — cancels **`requestAnimationFrame`** while hidden; restarts when **visible**. **Why:** avoid animating a second WebGL scene off-screen.
+- **`ChatView`** game-modal **carryover fade** timer runs only while **visible** (time syncs on focus). **Why:** opacity animation does not need 250ms ticks in a background tab.
+
+Docs: [Desktop app — battery and energy (macOS)](/apps/desktop#battery-and-energy-use-macos).
+
+</Update>
+
+<Update label="2026-03-22" description="Automatic free ports when defaults are busy" tags={["Update", "Desktop", "DevEx"]}>
+## Port collisions: allocate free loopback ports and sync the stack
+
+**Problem:** Default **API** (**31337** in `bun run dev` / dev-server) and **UI** (**2138** for Vite / embedded child **`MILADY_PORT`**) assume nothing else is listening. A second Milady, another tool, or a stuck process caused **EADDRINUSE**, **wrong `MILADY_DESKTOP_API_BASE`**, or the old embedded-agent behavior of **`lsof` + SIGKILL** on the preferred port—which breaks the legitimate case of **two instances** (separate state dirs).
+
+**What shipped**
+
+- **`scripts/dev-platform.mjs`** ( **`dev:desktop` / `dev:desktop:watch`** ) — Before spawning children, probes **`MILADY_API_PORT`** (default **31337**) and, in Vite dev mode, **`MILADY_PORT`** (default **2138**), advancing to the next free **127.0.0.1** TCP port when needed. **Why:** Vite’s `server.port` + proxy target and Electrobun’s **`MILADY_RENDERER_URL` / `MILADY_DESKTOP_API_BASE`** must match the **same** numbers the API process binds; pre-allocating in the orchestrator avoids a race where Vite loads config before the API picks a dynamic port. **Implementation:** `scripts/lib/allocate-loopback-port.mjs` (brief bind test per candidate).
+- **`apps/app/vite.config.ts`** — Dev server **`port`** reads **`MILADY_PORT`** (default **2138**) so the Vite child started by dev-platform listens where the orchestrator chose. **Why:** the config file used to hard-code **2138**, ignoring env when the orchestrator moved the UI port.
+- **Embedded desktop agent (`apps/app/electrobun/src/native/agent.ts`)** — Resolves a free port from the preferred **`MILADY_PORT`** via **`findFirstAvailableLoopbackPort`** (`loopback-port.ts`) instead of killing foreign PIDs by default. **Why:** coexistence with another Milady (or any server) on the default port should not require root or surprise SIGKILL. After a healthy start, the **Electrobun main process** sets **`process.env.MILADY_PORT` / `MILADY_API_PORT` / `ELIZA_PORT`** to the real API port so late readers and tooling stay consistent. **Opt-in legacy reclaim:** **`MILADY_AGENT_RECLAIM_STALE_PORT=1`** restores **`lsof` + SIGKILL** on the preferred port first (single-instance / “take over” dev workflows).
+- **`packages/app-core/src/runtime/eliza.ts`** ( **`milady start`** server-only path) — After **`startApiServer`**, syncs **`MILADY_PORT`**, **`MILADY_API_PORT`**, and **`ELIZA_PORT`** to the **actual** bound port. **Why:** upstream may fall back if the requested port is busy; the CLI banner and anything reading env must match **`/api/health`**.
+- **`packages/app-core/src/runtime/dev-server.ts`** — Syncs **`MILADY_API_PORT`** and **`ELIZA_PORT`** to the actual bind; **does not** overwrite **`MILADY_PORT`** when it carries the **Vite UI** port from dev-platform. **Why:** one process serves both “logical” roles in desktop dev; conflating UI and API env vars would break **`GET /api/dev/stack`** `desktop.uiPort` and proxy assumptions.
+- **Electrobun `index.ts` + `surface-windows.ts`** — On **`agent:status`** updates with a port, **`injectApiBase`** runs for the **main** window and **every** detached surface window. **Why:** dynamic API ports must reach Settings / Chat / etc. without a full reload.
+
+**Docs:** [Desktop local development — when default ports are busy](/apps/desktop-local-development#when-default-ports-are-busy); [Desktop app — port configuration](/apps/desktop#port-configuration).
+
+</Update>
+
+<Update label="2026-03-22" description="Desktop dev observability for IDEs and agents" tags={["Update", "Docs", "Desktop"]}>
+## Desktop dev: stack probe, screenshot proxy, aggregated console (IDE / Cursor)
+
+**Problem:** The desktop stack is **several processes** (Vite, API, Electrobun). Coding agents and headless tools cannot see the native window and do not automatically discover localhost. Guessing ports from chat logs is fragile.
+
+**What shipped**
+
+- **`GET /api/dev/stack`** — JSON index: real API listen port (from socket when possible), desktop renderer URL/ports from env, whether **screenshot** and **aggregated console** hooks are active, plus hints (e.g. Electrobun’s internal RPC port in launcher logs). **Why on the API:** one host agents already probe; avoids parsing Electrobun’s ephemeral port.
+- **`bun run desktop:stack-status -- --json`** — CLI that checks ports and merges `/api/dev/stack`, `/api/health`, `/api/status`. **Why:** scripts and CI do not need the dashboard.
+- **Screenshot (default on for `dev:desktop` / `dev:desktop:watch`)** — Electrobun serves a loopback PNG; the API proxies **`GET /api/dev/cursor-screenshot`** (loopback, session token between children). Uses existing **full-screen OS capture** (`screencapture` on macOS). **Why proxy:** single URL on the API port; **why full screen first:** reuses `ScreenCaptureManager.takeScreenshot()` instead of unproven webview-only capture. Opt-out: **`MILADY_DESKTOP_SCREENSHOT_SERVER=0`**.
+- **Aggregated console (default on)** — Prefixed vite/api/electrobun lines append to **`.milady/desktop-dev-console.log`**; **`GET /api/dev/console-log`** (loopback) returns a capped tail (`maxLines` / `maxBytes`). **Why file:** agents can read the path from stack JSON; **why HTTP tail:** avoids loading huge files into context; **why basename allow-list on path env:** prevents arbitrary file read via mis-set env. Opt-out: **`MILADY_DESKTOP_DEV_LOG=0`**.
+- **Cursor** — `.cursor/rules/milady-desktop-dev-observability.mdc` documents the workflow (**why:** Cursor does not auto-poll localhost; rules carry discovery).
+
+Docs: [Desktop local development — IDE and agent observability](/apps/desktop-local-development#ide-and-agent-observability-cursor-scripts).
+
+</Update>
+
+<Update label="2026-03-22" description="Electrobun Darwin → macOS mapping for WebGPU" tags={["Fix", "Docs"]}>
+## Electrobun: Darwin kernel major vs macOS marketing major (WebGPU)
+
+**`getMacOSMajorVersion()`** in **`webgpu-browser-support.ts`** now maps **Darwin 25** (`os.release()` / `uname -r`) to **macOS 26** (Tahoe), not **16**. **Why:** through Sequoia, `Darwin − 9` matched macOS 11–15; from Tahoe onward the **product** major is **Darwin + 1** while Darwin stays one lower (build numbers still start with Darwin). A single `− 9` rule mis-logged “macOS 16” and blocked the **WKWebView WebGPU** path for real Tahoe machines.
+
+- **Tests** cover Darwin **20–25** and **26 → 27** (expected continuation). **Why:** this is numeric policy, not UI—regressions are silent until someone reads logs.
+- **Doc:** [Darwin vs macOS version (Electrobun WebGPU)](/apps/electrobun-darwin-macos-webgpu-version) (`docs/apps/electrobun-darwin-macos-webgpu-version.md` in-repo).
+
+</Update>
+
+<Update label="2026-03-22" description="Desktop reset reliability, tests, disclosures" tags={["Update", "Fix", "Docs"]}>
+## Main-process menu reset + renderer sync (Electrobun)
+
+**Reset Milady…** now runs **confirm + `POST /api/agent/reset` + restart + status poll** in the **main process**, then pushes **`desktopTrayMenuClick`** with **`menu-reset-milady-applied`** so the renderer runs the same **local UI wipe** as after Settings reset (`completeResetLocalStateAfterServerWipe`). **Why:** native dialogs on WKWebView could leave the webview not processing `fetch`/RPC on the same turn, so reset appeared to hang after confirm.
+
+- **Reachable API base:** main probes candidates (embedded loopback port first, then configured base) with **`GET /api/status`** and only accepts **`res.ok`**—not arbitrary HTTP status—so a 403/500 URL is not chosen for reset. **Why:** external dev API and embedded agent can disagree on port; blind env URL POSTs failed silently.
+- **Testable core** lives in **`menu-reset-from-main.ts`** with Vitest coverage; **`handleResetAppliedFromMainCore`** and **`completeResetLocalStateAfterServerWipe`** are extracted for renderer unit tests. **Why:** 100+ lines of critical logic cannot rely on “string contained in `index.ts`” alone.
+
+Guide: [Desktop main-process reset](/apps/desktop-main-process-reset).
+
+## Edge TTS disclosure (`MILADY_DISABLE_EDGE_TTS`)
+
+`@elizaos/plugin-edge-tts` (via `node-edge-tts`) contacts **Microsoft’s Edge TTS cloud** when loaded; Milady **auto-loads** it with **`@elizaos/plugin-agent-orchestrator`** for swarm `TEXT_TO_SPEECH`. **Why document:** no API key does not mean “no network.” Opt-out: **`MILADY_DISABLE_EDGE_TTS=1`** (alias **`ELIZA_DISABLE_EDGE_TTS`**) or `plugins.entries["edge-tts"].enabled: false`; mirrored in **`brand-env.ts`**. Registry **`plugins.json`** description and env table updated.
+
+Docs: [Environment variables](/cli/environment#runtime-behavior), [TTS plugin](/plugin-registry/tts).
+
+## Vitest: `packages/app-core/test/**` and `*.test.tsx` under `src/`
+
+Root **`vitest.config.ts`** now includes **`packages/app-core/test/**/*.test.ts(x)`** and **`packages/app-core/src/**/*.test.tsx`**, and excludes **`packages/app-core/test/**/*.e2e.test.*`** from the default unit job (e2e still uses **`vitest.e2e.config.ts`**). **Why:** harness tests under `test/state`, `test/runtime`, etc. were skipped; a single explicit `OnboardingWizard.test.tsx` path was brittle for future colocated TSX tests.
+
+See [Contributing — Testing](/guides/contributing) (subsection *`packages/app-core` in the root Vitest config*).
+
+## Desktop tray: RPC wait timeout cleanup
+
+**`DesktopTrayRuntime`** stores the 10s “RPC not ready” timer and clears it on effect teardown and when attach succeeds. **Why:** avoid post-unmount `clearInterval` / warn after fast navigation.
+
+</Update>
+
+<Update label="2026-03-21" description="App onboarding architecture" tags={["Update"]}>
+## Data-driven onboarding UI (app-core)
+
+The dashboard onboarding wizard now derives **step order**, **back navigation**, and the **sidebar step list** from a small pure module (`@miladyai/app-core/onboarding/flow`) instead of duplicating arrays in `AppContext` and the nav component. **Why:** duplicate lists drifted and made “go back” hard to keep consistent.
+
+- **Forward motion** is still orchestrated in `AppProvider` as `advanceOnboarding` (wrapped by `handleOnboardingNext`) so cloud login, `handleOnboardingFinish`, and provider auto-fill run in the correct order before the step index changes.
+- **Back** uses `resolveOnboardingPreviousStep` (including **connection → welcome**, even though `welcome` is not listed in the custom-flow sidebar).
+- **Sidebar:** completed steps are **clickable** to jump backward only (`handleOnboardingJumpToStep`), validated with the same rules as repeated Back—**forward** sidebar jumps are intentionally disallowed so finish/login validation cannot be skipped.
+- **Welcome “Get Started”** uses `goToOnboardingStep("connection")` so advanced mode can sync the Flamina guide in one place instead of raw `setState` on the step alone.
+
+Developer guide: [Onboarding UI flow](/guides/onboarding-ui-flow).
+
+## Connection step: pure subflow + view registry
+
+Inside the **`connection`** wizard step (hosting, remote backend, Eliza Cloud, neural link, provider detail), routing and navigation patches now live in **`@miladyai/app-core/onboarding/connection-flow`** — still **pure** (no React), with Vitest table coverage. **Why:** the old single file mixed a large `if` tree with OAuth and API calls, so branch order and `setState` clusters were hard to test and easy to break.
+
+- **`deriveConnectionScreen`** and **`resolveConnectionUiSpec`** answer “which shell to show” from a snapshot (including steady-state **`forceCloud`** routing so tests match post-bootstrap UI).
+- **`applyConnectionTransition`** returns either a **patch** (applied via `setState` in `ConnectionStep`) or an **effect** token for **`useLocalBackend`** — **why:** disconnecting the remote client and `retryStartup` are not pure and must stay in `AppContext`.
+- **React** is split into `ConnectionStep` (snapshot + dispatch + bootstrap `useEffect`) and `components/onboarding/connection/*` (one component per screen). **Why:** keeps the pure module importable from tests without jsdom, and shrinks review surface when changing one path.
+
+See the same guide: [Onboarding UI flow](/guides/onboarding-ui-flow) (section *Connection step subflow*).
+
+## Desktop dev orchestrator (`dev-platform`)
+
+`scripts/dev-platform.mjs` (used by `bun run dev:desktop` / `dev:desktop:watch`) was tightened so local desktop development matches how people actually work. **Why:** the stack is multiple processes (Vite, API, Electrobun); without explicit rules, Ctrl-C, app quit, and port reuse felt broken or “stuck.”
+
+- **`dev:desktop:watch` defaults to the Vite dev server + `MILADY_RENDERER_URL`** so the UI gets **HMR** instead of paying for a full Rollup `vite build --watch` on every save (still opt-in via `MILADY_DESKTOP_VITE_BUILD_WATCH=1` when you need production watch output).
+- **Unix children are spawned `detached`** so **TTY Ctrl-C hits the orchestrator only** — Electrobun no longer eats the first SIGINT while Vite/API keep the parent alive on open pipes.
+- **Quitting from the app** (Electrobun exits) now **stops Vite and the API** and exits the script; previously the terminal could hang after “App quitting…” because siblings kept running.
+- **Shutdown** exits as soon as all children are gone (short **SIGKILL** fallback), and a **second Ctrl-C** force-exits; **Windows** UI port cleanup uses `netstat`/`taskkill` when `lsof` is unavailable.
+- **Renderer skip / stale `dist`** logic lives in `scripts/lib/vite-renderer-dist-stale.mjs` with tests; **scoped process kill** remains in `scripts/lib/kill-process-tree.mjs` so unrelated Bun processes are not targeted.
+
+Guide (with rationale): [Desktop local development](/apps/desktop-local-development).
+
+## Branding and `{{appName}}` in i18n (app-core)
+
+Locale strings that mention the product name use **`{{appName}}`** in JSON templates. **`appNameInterpolationVars(branding)`** in `config/branding.ts` supplies the value (default **`Eliza`**; shells override via `BrandingContext`, e.g. Milady). **Why:** one interpolation key matches all locales; missing vars left raw `{{appName}}` in the UI. **Why a helper:** every `t(key, …)` site stays consistent and picks the same fallback when `appName` is empty.
+
+## System access (permissions) onboarding: single Continue
+
+The **senses** / system-access step no longer shows separate **Skip** and **Continue** actions. One **Continue** always advances the wizard to the next step (`activate`). **Why:** two buttons implied different outcomes but both were easy to misread; grant state is still visible per permission. **`allowPermissionBypass`** remains on `handleOnboardingNext` for tests and edge tooling, but the permissions UI does not send it.
+
+## Eliza Cloud OAuth: auto-advance in the connection step
+
+After browser/OAuth login succeeds on the **Login** tab (pre-provider and provider-detail Eliza Cloud panels), the app calls **`handleOnboardingNext()`** once—same idea as **`CloudLoginStep`**. **Why:** an extra Confirm click added no value once “connected” is shown. **Why only on the Login tab:** API-key entry still requires an explicit Confirm so we do not advance on partial input. Implementation: **`useAdvanceOnboardingWhenElizaCloudOAuthConnected`** (`components/onboarding/connection/`).
+
+## Desktop: Reset Milady (app menu) + reliable post-reset onboarding
+
+- **Milady** application menu includes **Reset Milady…** (`reset-milady`). An early iteration pushed **`menu-reset-milady`** to the renderer so **`handleReset()`** owned confirm + API—**why:** one `MiladyClient` and the same teardown as Settings. **Update (changelog **2026-03-22**):** confirm + **`POST /api/agent/reset`** + restart now run in the **main process** (WKWebView could stall renderer `fetch` after native dialogs); the renderer syncs via **`menu-reset-milady-applied`**. Deep dive: [Desktop main-process reset](/apps/desktop-main-process-reset).
+- **`handleReset`** / **`completeResetLocalStateAfterServerWipe`** clear **persisted connection mode**, **API base/token**, and **Eliza Cloud** UI flags after a server wipe. **Why:** otherwise the UI stayed pointed at cloud/remote after config reset, so onboarding looked “stuck.”
+- **`App` shell:** onboarding is no longer blocked by **`agentStatus === "starting"`**. **Why:** right after a reset the agent often returns to `starting`; the old gate kept the main shell (or loader) visible instead of **`OnboardingWizard`**, so reset looked like it did nothing after confirm.
+
+Docs: [Desktop app](/apps/desktop) (application menu), [Onboarding UI flow](/guides/onboarding-ui-flow).
+</Update>
+
+<Update label="2026-06-25" description="Week of June 19–25" tags={["Feature", "Update", "Fix"]}>
+## Browser surface on by default
+
+The desktop app now enables the native browser surface by default, giving you in-app browsing without any extra configuration. If you prefer to disable it, set `MILADY_ENABLE_BROWSER_SURFACE=0` in your environment.
+
+## Release center
+
+A new Release Center view in the [desktop app](/apps/desktop) gives you a dedicated surface for managing updates, viewing release notes, and inspecting your current build — all in one place instead of scattered across menus.
+
+## Updates
+
+- **Desktop menus fully wired** — The native application menu and system tray now connect to all available desktop actions, including chat, cloud, voice, media, and window controls. Previously, some menu items were stale or partially functional.
+
+## Bug fixes
+
+- Fixed agent name reverting to the default after restarting — your chosen name, bio, and system prompt now persist correctly across restarts
+- Fixed Eliza Cloud not activating after selecting it during [onboarding](/guides/beginners-user-guide) — cloud mode is now detected reliably regardless of how the onboarding payload is structured
+- Fixed a desktop startup crash caused by a React hook-order error
+- Fixed legacy local installs being forced back into onboarding — existing configurations are now recognized during startup
+- Fixed macOS desktop self-update failing when the app is launched from outside `/Applications`, which previously triggered App Management permission prompts
+</Update>
+
+<Update label="2026-06-18" description="Week of June 12–18" tags={["Feature", "Update", "Fix"]}>
+## Simplified cloud onboarding
+
+First-run setup for cloud users is now a streamlined three-step flow — welcome, cloud login, and companion chat — replacing the previous six-step wizard. Cloud-provisioned containers also skip pairing and onboarding entirely when a platform API token is configured, so managed deployments start instantly.
+
+## Cloud dashboard with local-first agent management
+
+The cloud [dashboard](/apps/dashboard) now discovers and manages both local and cloud agents in a unified view. Authentication is reactive — switching agents or environments no longer requires a page refresh. Agent health probes run in parallel in the background, so the dashboard loads quickly even when managing multiple agents. A new credits and billing section shows your balance, budgets, and usage at a glance.
+
+## Knowledge image and MDX uploads
+
+The [knowledge base](/guides/knowledge) now accepts image files and `.mdx` documents. Image uploads are automatically described using your agent's vision model (or stored as a reference entry if vision is unavailable) instead of failing with a "binary data" error. MDX files are processed as markdown, making it easy to import documentation directly.
+
+## Homepage redesign
+
+The homepage has been simplified to a single-page layout with a download dropdown for all platforms, a Try Cloud call-to-action, and a cleaner mobile experience. Install command pills are now readable on phone-sized screens, and deep links work reliably on the hosted dashboard.
+
+## Updates
+
+- **Eliza Cloud as a first-class TTS provider** — Eliza Cloud now appears as its own voice provider in [settings](/apps/dashboard/settings) instead of being nested under ElevenLabs. This eliminates the confusing provider-plus-source selection and ensures the correct voice catalog loads for your chosen provider.
+- **All coding agents visible in settings** — The [coding agents](/guides/coding-swarms) settings section now correctly displays all installed agents (Claude, Gemini, Codex, Aider). Previously, only Aider appeared because the settings UI wasn't matching full adapter names from the preflight API.
+- **Coding agent settings load without flicker** — Revisiting the coding agents settings page no longer shows a loading skeleton. The preflight data is cached after the first visit so subsequent navigations render immediately.
+- **Mobile dashboard improvements** — Navigation spacing, content responsiveness, and layout on phone-sized screens have been tightened across both the homepage and dashboard.
+
+## Bug fixes
+
+- Fixed plugin services not starting during registration — services declared by plugins (like the PTY service for coding agents) are now eagerly started, resolving 503 errors on coding agent preflight
+- Fixed cloud auth endpoints returning 401 by updating to the current session-based login flow
+- Fixed hosted auth flow silently falling back to public sandbox discovery when tokens were stale — credentials are now scoped per cloud host and cleared properly on expiry
+</Update>
+
+<Update label="2026-04-16" description="Week of April 10–16" tags={["Feature", "Update", "Fix"]}>
+## Keyboard shortcuts overlay
+
+Press `Shift+?` from anywhere in the app to see all available keyboard shortcuts. The overlay groups shortcuts by category — agent, navigation, refresh, and utility — so you can discover commands without leaving the keyboard.
+
+## Training backend detection
+
+Before starting a fine-tuning job, Milady now automatically detects available compute backends (MLX, CUDA, CPU) and validates your selection. If you request a backend that isn't available, you get a clear error instead of a silent failure. The detected backends are also available via the [training API](/rest/training).
+
+## Orchestrator trajectory view
+
+LLM calls made by the swarm orchestrator are now tagged with source metadata and displayed with purple badges in the [trajectory view](/advanced/trajectories). You can see which decisions the orchestrator made, which session and task they relate to, and how they differ from individual agent calls.
+
+## Updates
+
+- **Stream interruption recovery** — If an LLM response stream breaks mid-message, the chat now marks it as "(Response interrupted)" and shows a Retry button so you can regenerate without retyping. Previously, broken streams left a partial message with no way to recover.
+- **Terminal session persistence** — Coding agent terminals now stay alive when you switch between tabs and automatically reconnect after a WebSocket drop. You no longer lose terminal context when navigating the dashboard.
+- **Voice rate limiting** — The voice speak endpoint now enforces a 2,000-character text cap and a per-session rate limit to prevent rapid-fire TTS abuse. Requests that exceed either limit receive a clear error response.
+- **Reconnection progress indicator** — When the dashboard loses its WebSocket connection, you now see an amber "Reconnecting (attempt X/15)..." banner with a spinner before the failure banner appears, giving you visibility into the retry process.
+
+## Bug fixes
+
+- Fixed the coding agent stop button not working — clicking stop now correctly terminates the active session
+- Fixed duplicate terminal output when opening a coding agent panel
+- Fixed VRM avatars and 3D assets silently failing to load when the server returned HTML instead of binary data
+- Fixed memory monitoring — a new debug panel is available for tracking heap usage during long-running sessions
+</Update>
+
 <Update label="2026-06-11" description="Week of June 5–11" tags={["Update", "Fix"]}>
 ## Unified provider configuration
 
@@ -80,7 +598,7 @@ You can now download and run AI models locally for fully offline inference. Five
 
 ## Chrome extension for browser control
 
-A new Chrome extension — Milady Browser Relay — lets your agent control browser tabs in real time via the Chrome DevTools Protocol. Your agent can read page content, execute JavaScript, navigate URLs, capture screenshots, and interact with elements programmatically. Install it from source using the CLI or by loading the unpacked extension directory. See the [Chrome extension guide](/apps/chrome-extension) for details.
+The Browser Relay extension remains documented as a separate or planned distribution. It is not part of the shipped `the current release` repository surface, and its documentation now serves only as a release-status page plus architecture notes.
 
 ## Mobile app (iOS and Android)
 
@@ -97,7 +615,6 @@ The dashboard now requires a pairing code for initial authentication. When you f
 ## Updates
 
 - **Native desktop modules** — The Electrobun desktop app now exposes 10 native modules with 118+ RPC methods covering agent lifecycle, network discovery, voice I/O, wake-word detection, screen capture, camera, canvas windows, geolocation, and system permissions. See the [native modules reference](/apps/desktop/native-modules).
-- **Terminal UI (TUI)** — A keyboard-driven terminal interface for chatting with your agent and managing the runtime without a browser. Includes a split conversation list and chat pane, real-time streaming, slash commands, and Markdown rendering. See the [TUI guide](/apps/tui).
 </Update>
 
 <Update label="2026-05-14" description="Week of May 8–14" tags={["Feature", "Update"]}>

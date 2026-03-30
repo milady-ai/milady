@@ -81,7 +81,7 @@ export interface ChainConfig {
 
   /* ── Branding ──────────────────────────────── */
 
-  /** Brand color for the chain (hex string, e.g. `"#627eea"`). */
+  /** Brand color for the chain. CSS variable reference (e.g. `"var(--color-chain-eth)"`). */
   color: string;
 }
 
@@ -112,7 +112,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: HEX_ADDRESS_RE,
     dexScreenerChainId: "bsc",
     nameVariants: ["bsc", "bnb chain", "bnb smart chain"],
-    color: "#f3ba2f",
+    color: "var(--color-chain-bsc)",
   },
 
   avax: {
@@ -162,7 +162,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: SOLANA_ADDRESS_RE,
     dexScreenerChainId: "solana",
     nameVariants: ["solana", "sol"],
-    color: "#9945ff",
+    color: "var(--color-chain-sol)",
   },
 
   ethereum: {
@@ -186,7 +186,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: HEX_ADDRESS_RE,
     dexScreenerChainId: "ethereum",
     nameVariants: ["ethereum", "mainnet", "eth"],
-    color: "#627eea",
+    color: "var(--color-chain-eth)",
   },
 
   base: {
@@ -209,7 +209,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: HEX_ADDRESS_RE,
     dexScreenerChainId: "base",
     nameVariants: ["base"],
-    color: "#0052ff",
+    color: "var(--color-chain-base)",
   },
 
   arbitrum: {
@@ -232,7 +232,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: HEX_ADDRESS_RE,
     dexScreenerChainId: "arbitrum",
     nameVariants: ["arbitrum"],
-    color: "#12aaff",
+    color: "var(--color-chain-arb)",
   },
 
   optimism: {
@@ -255,7 +255,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: HEX_ADDRESS_RE,
     dexScreenerChainId: "optimism",
     nameVariants: ["optimism"],
-    color: "#ff0420",
+    color: "var(--color-chain-op)",
   },
 
   polygon: {
@@ -279,7 +279,7 @@ export const CHAIN_CONFIGS: Record<ChainKey, ChainConfig> = {
     addressRegex: HEX_ADDRESS_RE,
     dexScreenerChainId: "polygon",
     nameVariants: ["polygon"],
-    color: "#8247e5",
+    color: "var(--color-chain-pol)",
   },
 };
 
@@ -378,3 +378,23 @@ export const PRIMARY_CHAIN_KEYS: ChainKey[] = [
   "avax",
   "solana",
 ];
+
+/**
+ * Map a chain focus key (ChainKey or "all") to the legacy WalletRpcChain used
+ * by legacyCustomChains. Returns null for "all" or unknown chains.
+ */
+export function chainKeyToWalletRpcChain(
+  chainFocus: string,
+): "evm" | "bsc" | "solana" | null {
+  if (chainFocus === "all" || chainFocus === "multi") return null;
+  if (chainFocus === "bsc" || chainFocus === "solana") return chainFocus;
+  const evmKeys: ChainKey[] = [
+    "ethereum",
+    "base",
+    "avax",
+    "arbitrum",
+    "optimism",
+    "polygon",
+  ];
+  return evmKeys.includes(chainFocus as ChainKey) ? "evm" : null;
+}

@@ -17,7 +17,44 @@ vi.mock("@miladyai/app-core/hooks", () => ({
   BugReportProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import { CommandPalette } from "@miladyai/app-core/components/CommandPalette";
+// Mock @miladyai/ui Dialog components to render inline (no Radix portals)
+// so react-test-renderer does not crash with parentInstance.children.indexOf.
+vi.mock("@miladyai/ui", () => {
+  const passthrough = ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    Dialog: ({
+      children,
+      open,
+    }: React.PropsWithChildren<{ open?: boolean; onOpenChange?: unknown }>) =>
+      open !== false ? React.createElement(React.Fragment, null, children) : null,
+    DialogContent: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", { role: "dialog", ...props }, children),
+    DialogHeader: passthrough,
+    DialogTitle: passthrough,
+    DialogDescription: passthrough,
+    DialogFooter: passthrough,
+    DialogTrigger: passthrough,
+    DialogClose: passthrough,
+    DialogOverlay: passthrough,
+    DialogPortal: passthrough,
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+  };
+});
+
+import { CommandPalette } from "../../src/components/CommandPalette";
 
 type PaletteContext = {
   commandPaletteOpen: boolean;
@@ -123,11 +160,11 @@ describe("CommandPalette keyboard behavior", () => {
       keydown({
         key: "ArrowUp",
         preventDefault: preventDefaultUp,
-      } as unknown as KeyboardEvent);
+      } as KeyboardEvent);
       keydown({
         key: "ArrowDown",
         preventDefault: preventDefaultDown,
-      } as unknown as KeyboardEvent);
+      } as KeyboardEvent);
     });
 
     // When no commands match, arrow keys return early without preventDefault
@@ -173,7 +210,7 @@ describe("CommandPalette keyboard behavior", () => {
     const preventDefault = vi.fn();
 
     act(() => {
-      keydown({ key: "Enter", preventDefault } as unknown as KeyboardEvent);
+      keydown({ key: "Enter", preventDefault } as KeyboardEvent);
     });
 
     // When no commands match, Enter returns early without preventDefault

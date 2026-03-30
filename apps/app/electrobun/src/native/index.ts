@@ -1,11 +1,5 @@
-/**
- * Native Module Registry for Electrobun
- *
- * Initializes all native modules, wires up sendToWebview callbacks,
- * and provides centralized dispose for clean shutdown.
- */
-
 import type { BrowserWindow } from "electrobun/bun";
+import type { SendToWebview } from "../types.js";
 import { getAgentManager } from "./agent";
 import { getCameraManager } from "./camera";
 import { getCanvasManager } from "./canvas";
@@ -15,14 +9,12 @@ import { getGpuWindowManager } from "./gpu-window";
 import { getLocationManager } from "./location";
 import { getPermissionManager } from "./permissions";
 import { getScreenCaptureManager } from "./screencapture";
+import { isStewardLocalEnabled, stopSteward } from "./steward";
 import { getSwabbleManager } from "./swabble";
 import { getTalkModeManager } from "./talkmode";
 
-type SendToWebview = (message: string, payload?: unknown) => void;
+const NATIVE_DISPOSE_TIMEOUT_MS = 10_000;
 
-/**
- * Initialize all native modules with the main window and sendToWebview callback.
- */
 export function initializeNativeModules(
   mainWindow: BrowserWindow,
   sendToWebview: SendToWebview,
@@ -45,19 +37,65 @@ export function initializeNativeModules(
   getTalkModeManager().setSendToWebview(sendToWebview);
 }
 
-/**
- * Dispose all native modules. Called on app quit.
- */
-export function disposeNativeModules(): void {
-  getAgentManager().dispose();
-  getCameraManager().dispose();
-  getCanvasManager().dispose();
-  getDesktopManager().dispose();
-  getGatewayDiscovery().dispose();
-  getGpuWindowManager().dispose();
-  getLocationManager().dispose();
-  getPermissionManager().dispose();
-  getScreenCaptureManager().dispose();
-  getSwabbleManager().dispose();
-  getTalkModeManager().dispose();
+export async function disposeNativeModules(): Promise<void> {
+  const managers = [
+    ["agent", getAgentManager()],
+    ["camera", getCameraManager()],
+    ["canvas", getCanvasManager()],
+    ["desktop", getDesktopManager()],
+    ["gateway", getGatewayDiscovery()],
+    ["gpu-window", getGpuWindowManager()],
+    ["location", getLocationManager()],
+    ["permissions", getPermissionManager()],
+    ["screencapture", getScreenCaptureManager()],
+    ["swabble", getSwabbleManager()],
+    ["talkmode", getTalkModeManager()],
+  ] as const;
+
+  // Stop steward sidecar if it was running
+  if (isStewardLocalEnabled()) {
+    try {
+      await stopSteward();
+    } catch (err) {
+      console.warn(
+        "[Native] steward dispose failed:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  const settleDisposals = Promise.allSettled(
+    managers.map(async ([name, manager]) => {
+      try {
+        await Promise.resolve(manager.dispose());
+      } catch (err) {
+        console.warn(
+          `[Native] ${name} dispose failed:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }),
+  );
+
+  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  const timedOut = await Promise.race([
+    settleDisposals.then(() => false),
+    new Promise<boolean>((resolve) => {
+      timeoutHandle = setTimeout(
+        () => resolve(true),
+        NATIVE_DISPOSE_TIMEOUT_MS,
+      );
+    }),
+  ]);
+  if (timeoutHandle) {
+    clearTimeout(timeoutHandle);
+  }
+
+  if (timedOut) {
+    console.warn(
+      `[Native] Timed out waiting ${NATIVE_DISPOSE_TIMEOUT_MS}ms for native module disposal`,
+    );
+  } else {
+    await settleDisposals;
+  }
 }

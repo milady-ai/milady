@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Milady Cloud Agent — Slim Image
+# Eliza Cloud Agent — Slim Image
 #
 # Multi-stage build:
 #   1. builder  — full monorepo install + tsdown build
@@ -7,7 +7,7 @@
 #   3. runtime  — slim base with only what's needed
 #
 # The real Milady agent runtime runs via milady.mjs → dist/entry.js which
-# imports from @miladyai/autonomous (workspace package). The workspace packages
+# imports from @miladyai/agent (workspace package). The workspace packages
 # reference src/ via relative imports, so we keep src/ + packages/ alongside
 # dist/ and use tsx for TS resolution at runtime.
 #
@@ -24,7 +24,7 @@
 FROM node:22-bookworm AS builder
 
 # Install bun for fast dependency resolution
-RUN curl -fsSL https://bun.sh/install | bash
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
 ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /build
@@ -33,7 +33,7 @@ COPY . .
 # Skip native addon downloads during install
 ENV NODE_LLAMA_CPP_SKIP_DOWNLOAD="true"
 
-RUN bun install --ignore-scripts 2>&1 | tail -5
+RUN bun install --frozen-lockfile --ignore-scripts 2>&1 | tail -5
 
 # Run repo setup scripts (non-critical)
 RUN node ./scripts/link-browser-server.mjs 2>/dev/null || true
@@ -56,54 +56,54 @@ WORKDIR /build
 # - Whisper/STT (not needed headless)
 # - Browser automation (not needed headless)
 RUN rm -rf \
-    node_modules/@node-llama-cpp \
-    node_modules/node-llama-cpp \
-    node_modules/@tensorflow \
-    node_modules/onnxruntime-node \
-    node_modules/onnxruntime-web \
-    node_modules/@biomejs \
-    node_modules/koffi \
-    node_modules/@capacitor \
-    node_modules/@babylonjs \
-    node_modules/three \
-    node_modules/@mediapipe \
-    node_modules/face-api.js \
-    node_modules/tesseract.js-core \
-    node_modules/tesseract.js \
-    node_modules/nodejs-whisper \
-    node_modules/whisper-node \
-    node_modules/electrobun \
-    node_modules/@rolldown \
-    node_modules/@storybook \
-    node_modules/lucide-react \
-    node_modules/@img \
-    node_modules/puppeteer-core \
-    node_modules/chromium-bidi \
-    node_modules/@anthropic-ai/claude-agent-sdk \
-    node_modules/@napi-rs \
-    node_modules/unrun \
-    node_modules/miladyai \
-    node_modules/@electric-sql \
-    node_modules/pdfjs-dist \
-    node_modules/sharp \
-    node_modules/react \
-    node_modules/react-dom \
-    node_modules/@react-* \
-    node_modules/canvas \
-    node_modules/playwright* \
-    node_modules/@playwright \
-    node_modules/esbuild \
-    node_modules/@esbuild \
-    node_modules/vite \
-    node_modules/@vitejs \
-    node_modules/vitest \
-    node_modules/typescript \
-    node_modules/tsdown \
-    node_modules/@swc \
-    node_modules/jsdom \
-    node_modules/ink* \
-    node_modules/yoga-wasm-web \
-    2>/dev/null || true
+  node_modules/@node-llama-cpp \
+  node_modules/node-llama-cpp \
+  node_modules/@tensorflow \
+  node_modules/onnxruntime-node \
+  node_modules/onnxruntime-web \
+  node_modules/@biomejs \
+  node_modules/koffi \
+  node_modules/@capacitor \
+  node_modules/@babylonjs \
+  node_modules/three \
+  node_modules/@mediapipe \
+  node_modules/face-api.js \
+  node_modules/tesseract.js-core \
+  node_modules/tesseract.js \
+  node_modules/nodejs-whisper \
+  node_modules/whisper-node \
+  node_modules/electrobun \
+  node_modules/@rolldown \
+  node_modules/@storybook \
+  node_modules/lucide-react \
+  node_modules/@img \
+  node_modules/puppeteer-core \
+  node_modules/chromium-bidi \
+  node_modules/@anthropic-ai/claude-agent-sdk \
+  node_modules/@napi-rs \
+  node_modules/unrun \
+  node_modules/miladyai \
+  node_modules/@electric-sql \
+  node_modules/pdfjs-dist \
+  node_modules/sharp \
+  node_modules/react \
+  node_modules/react-dom \
+  node_modules/@react-* \
+  node_modules/canvas \
+  node_modules/playwright* \
+  node_modules/@playwright \
+  node_modules/esbuild \
+  node_modules/@esbuild \
+  node_modules/vite \
+  node_modules/@vitejs \
+  node_modules/vitest \
+  node_modules/typescript \
+  node_modules/tsdown \
+  node_modules/@swc \
+  node_modules/jsdom \
+  node_modules/ink* \
+  node_modules/yoga-wasm-web \
+  2>/dev/null || true
 
 # Remove .cache, .tsbuildinfo, source maps
 RUN find node_modules -name '.cache' -type d -exec rm -rf {} + 2>/dev/null || true
@@ -121,15 +121,18 @@ RUN rm -rf apps/app/electrobun apps/app/android apps/app/ios apps/app/dist apps/
 FROM node:22-bookworm-slim AS runtime
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+  apt-get install -y --no-install-recommends curl ca-certificates && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 # Install tsx globally for TypeScript resolution at runtime
 # (workspace packages export .ts source files, not compiled JS)
 RUN npm install -g tsx@4 && npm cache clean --force
 
 WORKDIR /app
+
+# Create the runtime user before any chowned COPY steps.
+RUN groupadd -r agent && useradd -r -g agent -m agent
 
 # Copy built dist (thin JS wrappers ~800KB)
 COPY --from=pruner --chown=agent:agent /build/dist ./dist
@@ -138,12 +141,7 @@ COPY --from=pruner --chown=agent:agent /build/dist ./dist
 COPY --from=pruner --chown=agent:agent /build/milady.mjs ./milady.mjs
 COPY --from=pruner --chown=agent:agent /build/package.json ./package.json
 
-# Copy source code (needed because workspace packages have relative imports
-# back to src/ — e.g. packages/autonomous/src/runtime/eliza.ts imports
-# from ../../../../src/runtime/milady-plugin.ts)
-COPY --from=pruner --chown=agent:agent /build/src ./src
-
-# Copy workspace packages (especially @miladyai/autonomous which IS the runtime)
+# Copy workspace packages (especially @miladyai/agent which IS the runtime)
 COPY --from=pruner --chown=agent:agent /build/packages ./packages
 
 # Copy apps dir structure (some workspace links reference it)
@@ -160,6 +158,7 @@ COPY --from=pruner --chown=agent:agent /build/scripts ./scripts
 
 ENV NODE_ENV=production
 ENV MILADY_API_BIND="0.0.0.0"
+# PORT is used by cloud platforms (Railway, Fly.io); maps to MILADY_PORT locally
 ENV PORT=2138
 ENV BRIDGE_PORT=18790
 # Skip local model downloads
@@ -174,7 +173,6 @@ EXPOSE ${PORT}
 EXPOSE ${BRIDGE_PORT}
 
 # Security: run as non-root
-RUN useradd -m agent
 USER agent
 
 # Start the real Milady runtime in headless/server-only mode

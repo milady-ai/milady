@@ -2,6 +2,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { text, flush } from "../../../../test/helpers/react-test";
 
 interface ChatViewContextStub {
   agentStatus: {
@@ -34,10 +35,12 @@ interface ChatViewContextStub {
           prev: Array<{ data: string; mimeType: string; name: string }>,
         ) => Array<{ data: string; mimeType: string; name: string }>),
   ) => void;
-  uiLanguage: "en" | "zh-CN";
+  uiLanguage: "en" | "zh-CN" | "ko" | "es" | "pt" | "vi" | "tl";
   chatMode: "simple" | "power";
   chatAgentVoiceMuted: boolean;
   elizaCloudConnected: boolean;
+  elizaCloudEnabled: boolean;
+  elizaCloudHasPersistedKey: boolean;
   t: (k: string) => string;
   handleStart: () => Promise<void>;
 
@@ -73,9 +76,9 @@ vi.mock("@miladyai/app-core/platform", () => ({
 }));
 
 vi.mock("@miladyai/app-core/hooks", async () => {
-  const actual = await vi.importActual<typeof import("@miladyai/app-core/hooks")>(
-    "@miladyai/app-core/hooks",
-  );
+  const actual = await vi.importActual<
+    typeof import("@miladyai/app-core/hooks")
+  >("@miladyai/app-core/hooks");
   return {
     ...actual,
     useVoiceChat: (...args: unknown[]) => mockUseVoiceChat(...args),
@@ -119,6 +122,8 @@ function createContext(
     chatMode: "simple",
     chatAgentVoiceMuted: false,
     elizaCloudConnected: false,
+    elizaCloudEnabled: false,
+    elizaCloudHasPersistedKey: false,
     handleStart: vi.fn(async () => {}),
 
     handleRestart: vi.fn(async () => {}),
@@ -134,19 +139,6 @@ function createContext(
     t: (k: string) => k,
     ...overrides,
   };
-}
-
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : ""))
-    .join("")
-    .trim();
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
 }
 
 describe("ChatView", () => {
@@ -176,6 +168,8 @@ describe("ChatView", () => {
       speak: vi.fn(),
       queueAssistantSpeech,
       stopSpeaking: vi.fn(),
+      voiceUnlockedGeneration: 0,
+      assistantTtsQuality: "standard",
     });
     mockClient.getConfig.mockResolvedValue({});
     mockIsDesktopPlatform.mockReturnValue(false);
@@ -233,6 +227,22 @@ describe("ChatView", () => {
       (node) => node.type === "span" && text(node) === "stream me",
     );
     expect(userTextNodes.length).toBe(1);
+  });
+
+  it("maps ui language to matching voice locale", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        uiLanguage: "es",
+      }),
+    );
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(ChatView));
+    });
+
+    expect(mockUseVoiceChat).toHaveBeenCalledWith(
+      expect.objectContaining({ lang: "es-ES" }),
+    );
   });
 
   it("does not auto-play assistant speech while stream is active in default chat", async () => {
@@ -374,7 +384,10 @@ describe("ChatView", () => {
     );
     const newChatButtons = tree?.root.findAll(
       (node) =>
-        node.type === "button" && node.props["aria-label"] === "+ New Chat",
+        node.type === "button" &&
+        (node.props["aria-label"] === "+ New Chat" ||
+          node.props["aria-label"] === "companion.newChat" ||
+          node.props["aria-label"] === "conversations.newChat"),
     );
 
     expect(voiceButtons?.length ?? 0).toBe(0);
@@ -674,7 +687,7 @@ describe("ChatView", () => {
     const buttons = tree?.root.findAllByType("button" as React.ElementType);
 
     const attachButton = buttons.find(
-      (node) => node.props["aria-label"] === "Attach image",
+      (node) => node.props["aria-label"] === "aria.attachImage",
     );
     expect(attachButton).toBeDefined();
 

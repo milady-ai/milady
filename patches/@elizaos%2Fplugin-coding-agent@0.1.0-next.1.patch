@@ -1,0 +1,21 @@
+diff --git a/Users/shawwalters/eliza-workspace/milady/node_modules/@elizaos/plugin-coding-agent/.bun-tag-382009ea4b173d55 b/.bun-tag-382009ea4b173d55
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/package.json b/package.json
+index 5822b64f2690da5dbbd4a1bd95e207f49d3f718e..a7f6b645c8e2f78e63d905c2a047104fed212cba 100644
+--- a/package.json
++++ b/package.json
+@@ -9,12 +9,10 @@
+   "exports": {
+     "./package.json": "./package.json",
+     ".": {
+-      "bun": "./src/index.ts",
+       "import": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+-      },
+-      "default": "./src/index.ts"
++      }
+     }
+   },
+   "files": [

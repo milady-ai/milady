@@ -1,8 +1,4 @@
-/**
- * Character action helpers — extracted from AppContext.
- *
- * Pure functions for character CRUD and draft management.
- */
+/** Character action helpers — CRUD and draft management. */
 
 import type { CharacterData, MiladyClient } from "../api/client";
 
@@ -126,9 +122,7 @@ function normalizeConversation(
     ? conversation
     : conversation &&
         typeof conversation === "object" &&
-        Array.isArray(
-          (conversation as { examples?: unknown[] }).examples,
-        )
+        Array.isArray((conversation as { examples?: unknown[] }).examples)
       ? (conversation as { examples: unknown[] }).examples
       : null;
 
@@ -160,11 +154,8 @@ function normalizeConversation(
         content: { text },
       };
     })
-    .filter(
-      (
-        message,
-      ): message is { name: string; content: { text: string } } =>
-        Boolean(message?.name && message.content.text),
+    .filter((message): message is { name: string; content: { text: string } } =>
+      Boolean(message?.name && message.content.text),
     );
 
   if (examples.length === 0) return null;
@@ -190,9 +181,7 @@ export function normalizeGeneratedMessageExamples(
   const source =
     parsed &&
     typeof parsed === "object" &&
-    Array.isArray(
-      (parsed as { messageExamples?: unknown[] }).messageExamples,
-    )
+    Array.isArray((parsed as { messageExamples?: unknown[] }).messageExamples)
       ? (parsed as { messageExamples: unknown[] }).messageExamples
       : parsed;
 
@@ -202,7 +191,9 @@ export function normalizeGeneratedMessageExamples(
     source.length > 0 &&
     source.every(
       (entry) =>
-        entry && typeof entry === "object" && Array.isArray((entry as { examples?: unknown[] }).examples),
+        entry &&
+        typeof entry === "object" &&
+        Array.isArray((entry as { examples?: unknown[] }).examples),
     )
       ? source
       : source.every((entry) => Array.isArray(entry))

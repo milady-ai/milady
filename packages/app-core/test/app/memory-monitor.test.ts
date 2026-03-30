@@ -7,18 +7,8 @@ import { startMemoryLeakDetector } from "@miladyai/app-core/hooks";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let mockDateNow = 1000000;
-vi.spyOn(Date, "now").mockImplementation(() => mockDateNow);
 
 let intervalCallbacks: (() => void)[] = [];
-vi.stubGlobal("setInterval", (cb: () => void) => {
-  intervalCallbacks.push(cb);
-  return intervalCallbacks.length;
-});
-vi.stubGlobal("clearInterval", (_id: number) => {
-  // Simple mock: just clear all for these tests since we only test one thing per block
-  // or we could remove by index if needed.
-  intervalCallbacks = [];
-});
 
 // Mock the Performance API memory interface
 const mockMemory = {
@@ -29,6 +19,9 @@ const mockMemory = {
 
 // Store original performance object
 const originalPerformance = globalThis.performance;
+const originalSetInterval = globalThis.setInterval;
+const originalClearInterval = globalThis.clearInterval;
+const originalDateNow = Date.now;
 
 function setupPerformanceMock() {
   const perfToken = { ...mockMemory };
@@ -48,16 +41,35 @@ function restorePerformanceMock() {
   });
 }
 
+function setupTimerMocks() {
+  Date.now = () => mockDateNow;
+  globalThis.setInterval = ((cb: () => void) => {
+    intervalCallbacks.push(cb);
+    return intervalCallbacks.length;
+  }) as unknown as typeof globalThis.setInterval;
+  globalThis.clearInterval = ((_id: unknown) => {
+    intervalCallbacks = [];
+  }) as unknown as typeof globalThis.clearInterval;
+}
+
+function restoreTimerMocks() {
+  Date.now = originalDateNow;
+  globalThis.setInterval = originalSetInterval;
+  globalThis.clearInterval = originalClearInterval;
+}
+
 describe("startMemoryLeakDetector", () => {
   let perfToken: typeof mockMemory;
   beforeEach(() => {
     perfToken = setupPerformanceMock();
     mockDateNow = 1000000;
     intervalCallbacks = [];
+    setupTimerMocks();
   });
 
   afterEach(() => {
     restorePerformanceMock();
+    restoreTimerMocks();
   });
 
   it("returns a cleanup function", async () => {
@@ -239,10 +251,12 @@ describe("memory leak detection edge cases", () => {
     perfToken = setupPerformanceMock();
     mockDateNow = 1000000;
     intervalCallbacks = [];
+    setupTimerMocks();
   });
 
   afterEach(() => {
     restorePerformanceMock();
+    restoreTimerMocks();
   });
 
   it("handles stable memory (no growth)", async () => {

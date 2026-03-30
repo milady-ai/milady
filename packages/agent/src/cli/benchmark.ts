@@ -14,14 +14,14 @@
  */
 import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
-import * as readline from "node:readline";
 import process from "node:process";
+import * as readline from "node:readline";
 import {
+  type AgentRuntime,
   ChannelType,
   createMessageMemory,
   logger,
   stringToUuid,
-  type AgentRuntime,
   type UUID,
 } from "@elizaos/core";
 
@@ -95,9 +95,7 @@ async function runTask(
   const userId = crypto.randomUUID() as UUID;
   const roomId = stringToUuid(`benchmark-${task.id}`);
   const worldId = stringToUuid(`benchmark-world-${task.id}`);
-  const messageServerId = stringToUuid(
-    `benchmark-server-${task.id}`,
-  ) as UUID;
+  const messageServerId = stringToUuid(`benchmark-server-${task.id}`) as UUID;
 
   try {
     await runtime.ensureConnection({
@@ -146,39 +144,34 @@ async function runTask(
     //   2. onStreamChunk — streamed LLM tokens
     //   3. result.responseContent — final composed response
     // We capture all three and deduplicate.
-    const result = await Promise.race([
+    const result = (await Promise.race([
       (async () => {
-        const handleResult =
-          await runtime.messageService!.handleMessage(
-            runtime,
-            message,
-            async (content) => {
-              if (content?.text) {
-                callbackText += content.text;
-              }
-              // Track actions taken
-              const action = (content as Record<string, unknown>)
-                ?.action;
-              if (
-                typeof action === "string" &&
-                !actionsTaken.includes(action)
-              ) {
-                actionsTaken.push(action);
-              }
-              return [];
+        const handleResult = await runtime.messageService!.handleMessage(
+          runtime,
+          message,
+          async (content) => {
+            if (content?.text) {
+              callbackText += content.text;
+            }
+            // Track actions taken
+            const action = (content as Record<string, unknown>)?.action;
+            if (typeof action === "string" && !actionsTaken.includes(action)) {
+              actionsTaken.push(action);
+            }
+            return [];
+          },
+          {
+            onStreamChunk: async (chunk: string) => {
+              if (chunk) streamText += chunk;
             },
-            {
-              onStreamChunk: async (chunk: string) => {
-                if (chunk) streamText += chunk;
-              },
-            },
-          );
+          },
+        );
         return handleResult;
       })(),
       new Promise<"timeout">((resolve) =>
         setTimeout(() => resolve("timeout"), timeoutMs),
       ),
-    ]);
+    ])) as unknown;
 
     if (result === "timeout") {
       const responseText = streamText || callbackText;
@@ -194,12 +187,19 @@ async function runTask(
 
     // Extract text from all channels, preferring the richest source.
     // result.responseContent has the final composed text from the LLM.
-    const resultRecord = result as Record<string, unknown> | null;
-    const responseContent = resultRecord?.responseContent as
-      | Record<string, unknown>
-      | null
-      | undefined;
-    const resultText = (responseContent?.text as string) ?? "";
+    const resultRecord =
+      typeof result === "object" && result !== null
+        ? (result as Record<string, unknown>)
+        : null;
+    const responseContent =
+      resultRecord?.responseContent &&
+      typeof resultRecord.responseContent === "object"
+        ? (resultRecord.responseContent as Record<string, unknown>)
+        : null;
+    const resultText =
+      responseContent && typeof responseContent.text === "string"
+        ? responseContent.text
+        : "";
 
     // Also check responseMessages for additional text
     const responseMessages = Array.isArray(resultRecord?.responseMessages)
@@ -220,9 +220,8 @@ async function runTask(
       streamText,
       callbackText,
     ].filter(Boolean);
-    const responseText = candidates.sort(
-      (a, b) => b.length - a.length,
-    )[0] ?? "";
+    const responseText =
+      candidates.sort((a, b) => b.length - a.length)[0] ?? "";
 
     return {
       id: task.id,

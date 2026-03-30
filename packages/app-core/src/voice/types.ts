@@ -26,6 +26,28 @@ export function sanitizeApiKey(apiKey: string | undefined): string | undefined {
   return apiKey;
 }
 
+/**
+ * Treat only non-redacted, non-masked values as usable API keys. Persisted
+ * placeholder values like "[REDACTED]" or "abcd...wxyz" are display-only.
+ */
+export function hasConfiguredApiKey(
+  apiKey: string | null | undefined,
+): boolean {
+  const trimmed = typeof apiKey === "string" ? apiKey.trim() : "";
+  if (!trimmed) return false;
+  if (
+    trimmed === "REDACTED" ||
+    trimmed === "[REDACTED]" ||
+    /^\*+$/.test(trimmed)
+  ) {
+    return false;
+  }
+  if (/^.{4}\.\.\..{4}$/.test(trimmed)) {
+    return false;
+  }
+  return true;
+}
+
 export const PREMADE_VOICES: VoicePreset[] = [
   // Female
   {
@@ -174,6 +196,63 @@ export const PREMADE_VOICES: VoicePreset[] = [
     previewUrl:
       "https://storage.googleapis.com/eleven-public-prod/premade/voices/N2lVS1w4EtoT3dr4eOWO/ac833bd8-ffda-4938-9ebc-b0f99ca25481.mp3",
   },
+  // Custom Character Voices
+  {
+    id: "momo",
+    name: "Momo",
+    voiceId: "n7Wi4g1bhpw4Bs8HK5ph",
+    gender: "female",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
+  {
+    id: "yuki",
+    name: "Yuki",
+    voiceId: "4tRn1lSkEn13EVTuqb0g",
+    gender: "female",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
+  {
+    id: "rin",
+    name: "Rin",
+    voiceId: "cNYrMw9glwJZXR8RwbuR",
+    gender: "female",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
+  {
+    id: "kei",
+    name: "Kei",
+    voiceId: "eadgjmk4R4uojdsheG9t",
+    gender: "male",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
+  {
+    id: "jin",
+    name: "Jin",
+    voiceId: "6IwYbsNENZgAB1dtBZDp",
+    gender: "male",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
+  {
+    id: "satoshi",
+    name: "Satoshi",
+    voiceId: "7cOBG34AiHrAzs842Rdi",
+    gender: "male",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
+  {
+    id: "ryu",
+    name: "Ryu",
+    voiceId: "QzTKubutNn9TjrB7Xb2Q",
+    gender: "male",
+    hint: "Custom Voice",
+    previewUrl: "",
+  },
 ];
 
 export const VOICE_PROVIDERS: Array<{
@@ -193,5 +272,29 @@ export const VOICE_PROVIDERS: Array<{
     label: "Microsoft Edge",
     hint: "Free, Microsoft voices",
     needsKey: false,
+  },
+];
+
+/**
+ * Minimal backup voices for non-ElevenLabs providers (Edge TTS / OpenAI).
+ * Only a male and female option — keeps the UI uncluttered when premium
+ * voices aren't available.
+ */
+export const EDGE_BACKUP_VOICES: VoicePreset[] = [
+  {
+    id: "edge-female",
+    name: "Female",
+    voiceId: "en-US-AriaNeural",
+    gender: "female",
+    hint: "Clear, natural",
+    previewUrl: "",
+  },
+  {
+    id: "edge-male",
+    name: "Male",
+    voiceId: "en-US-GuyNeural",
+    gender: "male",
+    hint: "Deep, natural",
+    previewUrl: "",
   },
 ];

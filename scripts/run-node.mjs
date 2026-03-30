@@ -11,6 +11,9 @@ import {
 const args = process.argv.slice(2);
 const cwd = process.cwd();
 const env = { ...process.env };
+if (!env.ELIZA_NAMESPACE) {
+  env.ELIZA_NAMESPACE = "milady";
+}
 // WHY: The child runs dist/eliza.js, which dynamic-imports @elizaos/plugin-*. Node does not
 // use cwd to resolve package names for import("pkg"); we must set NODE_PATH to repo root
 // node_modules so those imports succeed. See docs/plugin-resolution-and-node-path.md.
@@ -88,7 +91,7 @@ const findLatestMtime = (dirPath, shouldSkip) => {
 };
 
 const shouldBuild = () => {
-  if (env.MILADY_FORCE_BUILD === "1") {
+  if (env.ELIZA_FORCE_BUILD === "1") {
     return true;
   }
   const stampMtime = statMtime(buildStampPath);
@@ -114,34 +117,44 @@ const shouldBuild = () => {
 };
 
 const logRunner = (message) => {
-  if (env.MILADY_RUNNER_LOG === "0") {
+  if (env.ELIZA_RUNNER_LOG === "0") {
     return;
   }
-  process.stderr.write(`[milady] ${message}\n`);
+  process.stderr.write(`[eliza] ${message}\n`);
 };
 
 /** Exit code used by the restart action to signal "restart requested". */
 const RESTART_EXIT_CODE = 75;
 
+/** Guard against infinite restart loops. */
+const MAX_RESTARTS_IN_WINDOW = 5;
+const RESTART_WINDOW_MS = 60_000;
+const restartTimestamps = [];
+
 const runNode = () => {
   const { runtime, warning } = chooseMiladyRuntime({
-    requestedRuntime: process.env.MILADY_RUNTIME,
+    requestedRuntime: process.env.ELIZA_RUNTIME,
     platform: process.platform,
     bunVersion: process.versions?.bun,
   });
   if (warning) {
-    logRunner(`${warning} Set MILADY_RUNTIME=bun to force Bun runtime.`);
+    logRunner(`${warning} Set ELIZA_RUNTIME=bun to force Bun runtime.`);
   }
   const execPath = resolveRuntimeExecPath({
     runtime,
     currentExecPath: process.execPath,
     platform: process.platform,
-    explicitNodePath: process.env.MILADY_NODE_PATH,
+    explicitNodePath: process.env.ELIZA_NODE_PATH,
   });
   const nodeProcess = spawn(execPath, ["milady.mjs", ...args], {
     cwd,
     env,
     stdio: "inherit",
+  });
+
+  nodeProcess.on("error", (err) => {
+    logRunner(`Failed to spawn ${execPath}: ${err.message}`);
+    process.exit(1);
   });
 
   nodeProcess.on("exit", (exitCode, exitSignal) => {
@@ -153,6 +166,23 @@ const runNode = () => {
     // Re-run the full runner (including the build-staleness check) so any
     // source changes are compiled before the new process starts.
     if (exitCode === RESTART_EXIT_CODE) {
+      // Guard against rapid restart loops.
+      const now = Date.now();
+      restartTimestamps.push(now);
+      // Trim timestamps outside the window.
+      while (
+        restartTimestamps.length > 0 &&
+        restartTimestamps[0] < now - RESTART_WINDOW_MS
+      ) {
+        restartTimestamps.shift();
+      }
+      if (restartTimestamps.length > MAX_RESTARTS_IN_WINDOW) {
+        logRunner(
+          `Restart loop detected: ${restartTimestamps.length} restarts in ${RESTART_WINDOW_MS / 1000}s — aborting.`,
+        );
+        process.exit(1);
+      }
+
       logRunner("Restart requested — relaunching...");
 
       // Re-check whether a rebuild is needed (source files may have changed).
@@ -168,6 +198,10 @@ const runNode = () => {
           cwd,
           env,
           stdio: "inherit",
+        });
+        build.on("error", (err) => {
+          logRunner(`Failed to spawn ${buildCmd}: ${err.message}`);
+          process.exit(1);
         });
         build.on("exit", (code, signal) => {
           if (signal || (code !== 0 && code !== null)) {
@@ -203,7 +237,6 @@ if (!shouldBuild()) {
   runNode();
 } else {
   logRunner("Building TypeScript (dist is stale).");
-  // Eliza MIGRATION: Use bunx for faster builds
   const bunxArgs = [compiler];
   const buildCmd = process.platform === "win32" ? "cmd.exe" : "bunx";
   const buildArgs =
@@ -214,6 +247,11 @@ if (!shouldBuild()) {
     cwd,
     env,
     stdio: "inherit",
+  });
+
+  build.on("error", (err) => {
+    logRunner(`Failed to spawn ${buildCmd}: ${err.message}`);
+    process.exit(1);
   });
 
   build.on("exit", (code, signal) => {

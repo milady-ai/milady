@@ -8,13 +8,11 @@ const Skeleton = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("animate-pulse rounded-md bg-secondary", className)}
+    className={cn("animate-pulse rounded-md bg-bg-accent", className)}
     {...props}
   />
 ));
 Skeleton.displayName = "Skeleton";
-
-/* ── Skeleton Variants ───────────────────────────────────────────────── */
 
 function SkeletonLine({
   width = "100%",

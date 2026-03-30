@@ -109,7 +109,7 @@ interface NetworkTracker {
   lastActivityAt: number;
 }
 
-const MOBILE_NAV_BREAKPOINT_PX = 640;
+const CHAT_MOBILE_BREAKPOINT_PX = 820;
 const READY_TIMEOUT_MS = 30_000;
 const TRANSIENT_UI_TIMEOUT_MS = 10_000;
 const NETWORK_QUIET_TIMEOUT_MS = 10_000;
@@ -156,6 +156,14 @@ const viewports: ViewportSpec[] = [
     id: "ipad-portrait",
     label: "iPad Portrait",
     width: 820,
+    height: 1180,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
+    id: "chat-shell-breakpoint",
+    label: "Chat Shell Breakpoint",
+    width: 819,
     height: 1180,
     isMobile: true,
     hasTouch: true,
@@ -290,7 +298,7 @@ function buildCaptureSpecs(filters: CliFilters): CaptureSpec[] {
       if (
         view.shellMode === "native" &&
         view.id !== "character" &&
-        viewport.width < MOBILE_NAV_BREAKPOINT_PX
+        viewport.width < CHAT_MOBILE_BREAKPOINT_PX
       ) {
         captures.push({
           view,
@@ -299,7 +307,7 @@ function buildCaptureSpecs(filters: CliFilters): CaptureSpec[] {
           stateLabel: "Navigation Open",
         });
       }
-      if (view.id === "chat" && viewport.width < MOBILE_NAV_BREAKPOINT_PX) {
+      if (view.id === "chat" && viewport.width < CHAT_MOBILE_BREAKPOINT_PX) {
         captures.push({
           view,
           viewport,
@@ -457,6 +465,13 @@ async function createPage(
       try {
         window.localStorage.clear();
         window.sessionStorage.clear();
+        window.localStorage.setItem("eliza:ui-language", "en");
+        window.localStorage.setItem("eliza:ui-theme", "dark");
+        window.localStorage.setItem("eliza:ui-shell-mode", init.shellMode);
+        window.localStorage.setItem(
+          "eliza:last-native-tab",
+          init.lastNativeTab,
+        );
         window.localStorage.setItem("milady:ui-language", "en");
         window.localStorage.setItem("milady:ui-theme", "dark");
         window.localStorage.setItem("milady:ui-shell-mode", init.shellMode);

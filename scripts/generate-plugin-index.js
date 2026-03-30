@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * Generate plugins.json — a static manifest of all available plugins
- * that ships with the milady package.
+ * that ships with the eliza package.
  *
  * Fetches plugin metadata from the elizaos-plugins registry and writes
- * plugins.json to the milady package root.
+ * plugins.json to the eliza package root.
  *
- * Run from the milady package directory:
+ * Run from the eliza package directory:
  *   node scripts/generate-plugin-index.js
  */
 import fs from "node:fs";
@@ -50,7 +50,6 @@ const AI_PROVIDERS = new Set([
 
 export const STREAMING_DESTINATIONS = new Set([
   "streaming-base",
-  "retake",
   "custom-rtmp",
   "youtube-streaming",
   "twitch-streaming",
@@ -82,6 +81,7 @@ const CONNECTORS = new Set([
   "twitch",
   "nextcloud-talk",
   "instagram",
+  "wechat",
 ]);
 
 const SOCIAL_CHAT_CONNECTORS = new Set([
@@ -118,7 +118,7 @@ const SOCIAL_FEED_CONNECTORS = new Set([
 const DATABASES = new Set(["sql", "localdb", "inmemorydb"]);
 
 export const PLUGIN_SETUP_GUIDE_ROOT =
-  "https://docs.milady.ai/plugin-setup-guide";
+  "https://docs.eliza.ai/plugin-setup-guide";
 
 const SETUP_GUIDE_ANCHORS = {
   openai: "#openai",
@@ -131,7 +131,7 @@ const SETUP_GUIDE_ANCHORS = {
   "local-ai": "#local-ai",
   "vercel-ai-gateway": "#vercel-ai-gateway",
   discord: "#discord",
-  telegram: "#telegram",
+  telegram: "https://docs.milady.ai/guides/tutorial-telegram-bot",
   twitter: "#twitter--x",
   slack: "#slack",
   whatsapp: "#whatsapp",
@@ -156,11 +156,11 @@ const SETUP_GUIDE_ANCHORS = {
   tlon: "#tlon-urbit",
   zalo: "#zalo-vietnam-messaging",
   zalouser: "#zalo-user-personal",
+  wechat: "#wechat",
   acp: "#acp-agent-communication-protocol",
   mcp: "#mcp-model-context-protocol",
   iq: "#iq-solana-on-chain",
   "gmail-watch": "#gmail-watch",
-  retake: "#retaketv",
   "streaming-base": "#enable-streaming-streaming-base",
   "twitch-streaming": "#twitch-streaming",
   "youtube-streaming": "#youtube-streaming",
@@ -219,7 +219,11 @@ export function categorize(id) {
 
 export function resolveSetupGuideUrl(id) {
   const anchor = SETUP_GUIDE_ANCHORS[id];
-  return anchor ? `${PLUGIN_SETUP_GUIDE_ROOT}${anchor}` : undefined;
+  if (!anchor) return undefined;
+  // Full URLs are used as-is; anchors are appended to the default root
+  return anchor.startsWith("http")
+    ? anchor
+    : `${PLUGIN_SETUP_GUIDE_ROOT}${anchor}`;
 }
 
 export function normalizeRepositoryUrl(repository) {
@@ -242,7 +246,9 @@ export function normalizeRepositoryUrl(repository) {
 }
 
 function deriveMiladyRepositoryUrl(npmName, dirName) {
-  if (!npmName?.startsWith("@miladyai/")) return undefined;
+  if (!npmName?.startsWith("@elizaai/") && !npmName?.startsWith("@miladyai/")) {
+    return undefined;
+  }
   if (!dirName?.startsWith("plugin-")) return undefined;
   return `${MILADY_REPO_ROOT}/tree/main/packages/${dirName}`;
 }

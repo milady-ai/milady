@@ -13,6 +13,7 @@ import {
   VRM_COUNT,
 } from "@miladyai/app-core/state";
 import { alertDesktopMessage } from "@miladyai/app-core/utils";
+import { Button, Spinner } from "@miladyai/ui";
 import { useCallback, useRef, useState } from "react";
 
 export interface AvatarSelectorProps {
@@ -34,13 +35,24 @@ function isVrmFile(file: File): boolean {
   return file.name.toLowerCase().endsWith(".vrm");
 }
 
-async function validateVrmFile(file: File): Promise<string | null> {
+type TranslateFn = (
+  key: string,
+  options?: Record<string, string | number>,
+) => string;
+
+async function validateVrmFile(
+  file: File,
+  t: TranslateFn,
+): Promise<string | null> {
   try {
     const buffer = await file.arrayBuffer();
     const bytes = new Uint8Array(buffer.slice(0, 32));
     const textHeader = new TextDecoder().decode(bytes);
     if (textHeader.startsWith("version https://git-lfs.github.com/spec/v1")) {
-      return "This .vrm is a Git LFS pointer, not the real model file. Export/download the actual VRM binary.";
+      return t("avatarselector.GitLfsPointer", {
+        defaultValue:
+          "This .vrm is a Git LFS pointer, not the real model file. Download the actual VRM file first.",
+      });
     }
     const isGlbMagic =
       bytes.length >= 4 &&
@@ -49,11 +61,15 @@ async function validateVrmFile(file: File): Promise<string | null> {
       bytes[2] === 0x54 && // T
       bytes[3] === 0x46; // F
     if (!isGlbMagic) {
-      return "Invalid VRM file. Please select a valid .vrm binary.";
+      return t("avatarselector.InvalidVrmBinary", {
+        defaultValue: "Invalid VRM file. Pick a real .vrm binary.",
+      });
     }
     return null;
   } catch {
-    return "Could not read the selected file. Please try another .vrm.";
+    return t("avatarselector.ReadSelectedFile", {
+      defaultValue: "Couldn't read that file. Try a different .vrm.",
+    });
   }
 }
 
@@ -73,17 +89,23 @@ export function AvatarSelector({
     (file: File) => {
       if (!isVrmFile(file)) {
         void alertDesktopMessage({
-          title: "Invalid Avatar File",
-          message: "Please select a .vrm file.",
+          title: t("avatarselector.InvalidAvatarFile", {
+            defaultValue: "Invalid avatar file",
+          }),
+          message: t("avatarselector.SelectVrmFile", {
+            defaultValue: "Please pick a .vrm file.",
+          }),
           type: "error",
         });
         return;
       }
       void (async () => {
-        const validationError = await validateVrmFile(file);
+        const validationError = await validateVrmFile(file, t);
         if (validationError) {
           await alertDesktopMessage({
-            title: "Invalid Avatar File",
+            title: t("avatarselector.InvalidAvatarFile", {
+              defaultValue: "Invalid avatar file",
+            }),
             message: validationError,
             type: "error",
           });
@@ -93,7 +115,7 @@ export function AvatarSelector({
         onSelect(0);
       })();
     },
-    [onUpload, onSelect],
+    [onUpload, onSelect, t],
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,16 +162,16 @@ export function AvatarSelector({
     <div className={fullWidth ? "w-full" : undefined}>
       <div className={containerClass} style={containerStyle}>
         {avatarIndices.map((i) => (
-          <button
+          <Button
             key={i}
+            variant="ghost"
             className={`${avatarButtonClass} ${
               selected === i
                 ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--card)] scale-105"
                 : "opacity-60 hover:opacity-100 hover:scale-105"
-            } ${loading ? "cursor-wait pointer-events-none" : ""}`}
+            } ${loading ? "cursor-wait pointer-events-none" : ""} p-0`}
             onClick={() => !loading && onSelect(i)}
             disabled={loading}
-            type="button"
           >
             <img
               src={getVrmPreviewUrl(i)}
@@ -159,10 +181,10 @@ export function AvatarSelector({
             />
             {loading && selected === i && (
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <Spinner size={24} className="text-white" />
               </div>
             )}
-          </button>
+          </Button>
         ))}
 
         {/* Upload custom VRM — click or drag-and-drop */}
@@ -175,7 +197,8 @@ export function AvatarSelector({
               className="hidden"
               onChange={handleFileChange}
             />
-            <button
+            <Button
+              variant="outline"
               className={`${uploadButtonClass} ${
                 dragOver
                   ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)] scale-105 border-solid"
@@ -189,7 +212,6 @@ export function AvatarSelector({
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               title={t("avatarselector.UploadCustomVrm")}
-              type="button"
             >
               <svg
                 width="20"
@@ -200,7 +222,7 @@ export function AvatarSelector({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                aria-label="Upload VRM"
+                aria-label={t("aria.upload")}
               >
                 <title>{t("avatarselector.UploadVRM")}</title>
                 {dragOver ? (
@@ -214,7 +236,7 @@ export function AvatarSelector({
                   {t("avatarselector.dropVrm")}
                 </span>
               )}
-            </button>
+            </Button>
           </>
         )}
       </div>

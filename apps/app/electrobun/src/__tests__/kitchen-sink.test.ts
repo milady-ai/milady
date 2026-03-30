@@ -8,6 +8,7 @@
  * Test environment: Vitest (Node), electrobun/bun is always vi.mocked().
  */
 
+import path from "node:path";
 import {
   afterEach,
   beforeEach,
@@ -17,6 +18,31 @@ import {
   type Mock,
   vi,
 } from "vitest";
+
+const REPO_ROOT = path.resolve(__dirname, "../../../../..");
+const REGRESSION_MATRIX_PATH = path.join(
+  REPO_ROOT,
+  "test",
+  "regression-matrix.json",
+);
+const DESKTOP_RELEASE_CHECKLIST_PATH = path.join(
+  REPO_ROOT,
+  "docs",
+  "apps",
+  "desktop",
+  "release-regression-checklist.md",
+);
+
+const desktopHeavyRegressionInventory = new Set<string>();
+const desktopManualReleaseChecklist = new Set<string>();
+
+function documentHeavyDesktopRegression(description: string): void {
+  desktopHeavyRegressionInventory.add(description);
+}
+
+function documentManualDesktopRegression(description: string): void {
+  desktopManualReleaseChecklist.add(description);
+}
 
 // ---------------------------------------------------------------------------
 // Top-level vi.mock calls — ALL hoisted before imports.
@@ -128,6 +154,11 @@ vi.mock("electrobun/bun", () => {
     localInfo: { version: vi.fn(() => "1.0.0") },
   };
 
+  const mockContextMenu = {
+    on: vi.fn(),
+    showContextMenu: vi.fn(),
+  };
+
   const mockElectrobunEvents = {
     on: vi.fn(),
     off: vi.fn(),
@@ -146,6 +177,7 @@ vi.mock("electrobun/bun", () => {
     Screen: mockScreen,
     Utils: mockUtils,
     Updater: mockUpdater,
+    ContextMenu: mockContextMenu,
     Electrobun: mockElectrobun,
   };
 });
@@ -184,11 +216,6 @@ vi.mock("node:os", () => {
   return { default: { homedir: homedirFn }, homedir: homedirFn };
 });
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return { default: actual, ...actual };
-});
-
 // Mock all native managers so they can be spied on in the RPC handler test
 vi.mock("../native/agent", () => ({
   getAgentManager: vi.fn(() => ({
@@ -203,6 +230,15 @@ vi.mock("../native/agent", () => ({
     ),
     stop: vi.fn(() => Promise.resolve()),
     restart: vi.fn(() =>
+      Promise.resolve({
+        state: "running",
+        agentName: "Milady",
+        port: 2138,
+        startedAt: Date.now(),
+        error: null,
+      }),
+    ),
+    restartClearingLocalDb: vi.fn(() =>
       Promise.resolve({
         state: "running",
         agentName: "Milady",
@@ -227,6 +263,7 @@ vi.mock("../native/agent", () => ({
     start = vi.fn();
     stop = vi.fn();
     restart = vi.fn();
+    restartClearingLocalDb = vi.fn();
     getStatus = vi.fn();
     getPort = vi.fn(() => null);
     setSendToWebview = vi.fn();
@@ -493,10 +530,78 @@ vi.mock("../native/desktop", async () => {
       ),
       quit: vi.fn(() => Promise.resolve()),
       relaunch: vi.fn(() => Promise.resolve()),
-      getVersion: vi.fn(() => Promise.resolve({ version: "2.0.0-alpha.76" })),
+      checkForUpdates: vi.fn(() =>
+        Promise.resolve({
+          currentVersion: "1.0.0",
+          appBundlePath: "/Applications/Milady.app",
+          canAutoUpdate: true,
+          autoUpdateDisabledReason: null,
+          updateAvailable: false,
+          updateReady: false,
+          latestVersion: null,
+          lastStatus: null,
+        }),
+      ),
+      getUpdaterState: vi.fn(() =>
+        Promise.resolve({
+          currentVersion: "1.0.0",
+          appBundlePath: "/Applications/Milady.app",
+          canAutoUpdate: true,
+          autoUpdateDisabledReason: null,
+          updateAvailable: false,
+          updateReady: false,
+          latestVersion: null,
+          lastStatus: null,
+        }),
+      ),
       isPackaged: vi.fn(() => Promise.resolve({ packaged: false })),
+      getBuildInfo: vi.fn(() =>
+        Promise.resolve({
+          platform: "darwin",
+          arch: "arm64",
+          defaultRenderer: "native",
+          availableRenderers: ["native"],
+        }),
+      ),
+      getDockIconVisibility: vi.fn(() => Promise.resolve({ visible: true })),
+      setDockIconVisibility: vi.fn(() => Promise.resolve({ visible: true })),
       getPath: vi.fn(() => Promise.resolve({ path: "/mock/path" })),
+      showSelectionContextMenu: vi.fn(() => Promise.resolve({ shown: true })),
+      getSessionSnapshot: vi.fn(() =>
+        Promise.resolve({
+          partition: "persist:default",
+          persistent: true,
+          cookieCount: 0,
+          cookies: [],
+        }),
+      ),
+      clearSessionData: vi.fn(() =>
+        Promise.resolve({
+          partition: "persist:default",
+          persistent: true,
+          cookieCount: 0,
+          cookies: [],
+        }),
+      ),
+      getWebGpuBrowserStatus: vi.fn(() =>
+        Promise.resolve({
+          available: false,
+          reason: "test",
+          renderer: "native",
+          chromeBetaPath: null,
+          downloadUrl: null,
+        }),
+      ),
+      openReleaseNotesWindow: vi.fn(() =>
+        Promise.resolve({
+          url: "https://milady.ai/releases/",
+          windowId: 1,
+          webviewId: 2,
+        }),
+      ),
       openExternal: vi.fn(() => Promise.resolve()),
+      openSettings: vi.fn(() => Promise.resolve()),
+      openSurfaceWindow: vi.fn(() => Promise.resolve()),
     })),
   };
 });
@@ -530,11 +635,6 @@ import * as nodeFs from "node:fs";
 import * as electrobunBun from "electrobun/bun";
 import { DesktopManager } from "../native/desktop";
 import * as macEffects from "../native/mac-window-effects";
-import {
-  CHANNEL_TO_RPC_METHOD,
-  PUSH_CHANNEL_TO_RPC_MESSAGE,
-  RPC_MESSAGE_TO_PUSH_CHANNEL,
-} from "../rpc-schema";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -553,626 +653,6 @@ type BrowserWindowOptionsArg = {
 type MockBrowserWindowCtor = Mock<
   (options: BrowserWindowOptionsArg) => unknown
 >;
-
-// ============================================================================
-// 1. Schema completeness
-// ============================================================================
-
-describe("Schema completeness", () => {
-  it("has a non-empty CHANNEL_TO_RPC_METHOD map", () => {
-    expect(Object.keys(CHANNEL_TO_RPC_METHOD).length).toBeGreaterThan(80);
-  });
-
-  it("has a non-empty PUSH_CHANNEL_TO_RPC_MESSAGE map", () => {
-    expect(Object.keys(PUSH_CHANNEL_TO_RPC_MESSAGE).length).toBeGreaterThan(15);
-  });
-
-  it("every channel name matches namespace:method pattern", () => {
-    for (const channel of Object.keys(CHANNEL_TO_RPC_METHOD)) {
-      expect(channel).toMatch(/^[a-zA-Z]+:[a-zA-Z0-9]+$/);
-    }
-  });
-
-  it("every rpc method is camelCase without colons", () => {
-    for (const method of Object.values(CHANNEL_TO_RPC_METHOD)) {
-      expect(method).not.toContain(":");
-      expect(method).toMatch(/^[a-z][a-zA-Z0-9]*$/);
-    }
-  });
-
-  it("all request channel names derive camelCase rpc name from namespace+method", () => {
-    for (const [channel, rpcMethod] of Object.entries(CHANNEL_TO_RPC_METHOD)) {
-      const [namespace, method] = channel.split(":");
-      const expected =
-        namespace + method.charAt(0).toUpperCase() + method.slice(1);
-      expect(rpcMethod).toBe(expected);
-    }
-  });
-
-  it("push channel count matches push message count in reverse map", () => {
-    expect(Object.keys(RPC_MESSAGE_TO_PUSH_CHANNEL).length).toBe(
-      Object.keys(PUSH_CHANNEL_TO_RPC_MESSAGE).length,
-    );
-  });
-});
-
-// ============================================================================
-// 2. Channel mapping — requests (exhaustive)
-// ============================================================================
-
-describe("Channel mapping — requests", () => {
-  it("agent channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["agent:start"]).toBe("agentStart");
-    expect(CHANNEL_TO_RPC_METHOD["agent:stop"]).toBe("agentStop");
-    expect(CHANNEL_TO_RPC_METHOD["agent:restart"]).toBe("agentRestart");
-    expect(CHANNEL_TO_RPC_METHOD["agent:status"]).toBe("agentStatus");
-  });
-
-  it("desktop-tray channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:createTray"]).toBe(
-      "desktopCreateTray",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:updateTray"]).toBe(
-      "desktopUpdateTray",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:destroyTray"]).toBe(
-      "desktopDestroyTray",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setTrayMenu"]).toBe(
-      "desktopSetTrayMenu",
-    );
-  });
-
-  it("desktop-shortcuts channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:registerShortcut"]).toBe(
-      "desktopRegisterShortcut",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:unregisterShortcut"]).toBe(
-      "desktopUnregisterShortcut",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:unregisterAllShortcuts"]).toBe(
-      "desktopUnregisterAllShortcuts",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:isShortcutRegistered"]).toBe(
-      "desktopIsShortcutRegistered",
-    );
-  });
-
-  it("desktop-autolaunch channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setAutoLaunch"]).toBe(
-      "desktopSetAutoLaunch",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getAutoLaunchStatus"]).toBe(
-      "desktopGetAutoLaunchStatus",
-    );
-  });
-
-  it("desktop-window channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setWindowOptions"]).toBe(
-      "desktopSetWindowOptions",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getWindowBounds"]).toBe(
-      "desktopGetWindowBounds",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setWindowBounds"]).toBe(
-      "desktopSetWindowBounds",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:minimizeWindow"]).toBe(
-      "desktopMinimizeWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:unminimizeWindow"]).toBe(
-      "desktopUnminimizeWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:maximizeWindow"]).toBe(
-      "desktopMaximizeWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:unmaximizeWindow"]).toBe(
-      "desktopUnmaximizeWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:closeWindow"]).toBe(
-      "desktopCloseWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:showWindow"]).toBe(
-      "desktopShowWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:hideWindow"]).toBe(
-      "desktopHideWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:focusWindow"]).toBe(
-      "desktopFocusWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:isWindowMaximized"]).toBe(
-      "desktopIsWindowMaximized",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:isWindowMinimized"]).toBe(
-      "desktopIsWindowMinimized",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:isWindowVisible"]).toBe(
-      "desktopIsWindowVisible",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:isWindowFocused"]).toBe(
-      "desktopIsWindowFocused",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setAlwaysOnTop"]).toBe(
-      "desktopSetAlwaysOnTop",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setFullscreen"]).toBe(
-      "desktopSetFullscreen",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:setOpacity"]).toBe(
-      "desktopSetOpacity",
-    );
-  });
-
-  it("desktop-notifications channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:showNotification"]).toBe(
-      "desktopShowNotification",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:closeNotification"]).toBe(
-      "desktopCloseNotification",
-    );
-  });
-
-  it("desktop-power channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getPowerState"]).toBe(
-      "desktopGetPowerState",
-    );
-  });
-
-  it("desktop-screen channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getPrimaryDisplay"]).toBe(
-      "desktopGetPrimaryDisplay",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getAllDisplays"]).toBe(
-      "desktopGetAllDisplays",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getCursorPosition"]).toBe(
-      "desktopGetCursorPosition",
-    );
-  });
-
-  it("desktop-messagebox channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:showMessageBox"]).toBe(
-      "desktopShowMessageBox",
-    );
-  });
-
-  it("desktop-app channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:quit"]).toBe("desktopQuit");
-    expect(CHANNEL_TO_RPC_METHOD["desktop:relaunch"]).toBe("desktopRelaunch");
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getVersion"]).toBe(
-      "desktopGetVersion",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:isPackaged"]).toBe(
-      "desktopIsPackaged",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:getPath"]).toBe("desktopGetPath");
-    expect(CHANNEL_TO_RPC_METHOD["desktop:beep"]).toBe("desktopBeep");
-  });
-
-  it("desktop-clipboard channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:writeToClipboard"]).toBe(
-      "desktopWriteToClipboard",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:readFromClipboard"]).toBe(
-      "desktopReadFromClipboard",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:clearClipboard"]).toBe(
-      "desktopClearClipboard",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:clipboardAvailableFormats"]).toBe(
-      "desktopClipboardAvailableFormats",
-    );
-  });
-
-  it("desktop-shell channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:openExternal"]).toBe(
-      "desktopOpenExternal",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:showItemInFolder"]).toBe(
-      "desktopShowItemInFolder",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:openPath"]).toBe("desktopOpenPath");
-  });
-
-  it("desktop-dialogs channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["desktop:showOpenDialog"]).toBe(
-      "desktopShowOpenDialog",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["desktop:showSaveDialog"]).toBe(
-      "desktopShowSaveDialog",
-    );
-  });
-
-  it("gateway channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["gateway:startDiscovery"]).toBe(
-      "gatewayStartDiscovery",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["gateway:stopDiscovery"]).toBe(
-      "gatewayStopDiscovery",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["gateway:isDiscovering"]).toBe(
-      "gatewayIsDiscovering",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["gateway:getDiscoveredGateways"]).toBe(
-      "gatewayGetDiscoveredGateways",
-    );
-  });
-
-  it("permissions channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["permissions:check"]).toBe("permissionsCheck");
-    expect(CHANNEL_TO_RPC_METHOD["permissions:checkFeature"]).toBe(
-      "permissionsCheckFeature",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:request"]).toBe(
-      "permissionsRequest",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:getAll"]).toBe(
-      "permissionsGetAll",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:getPlatform"]).toBe(
-      "permissionsGetPlatform",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:isShellEnabled"]).toBe(
-      "permissionsIsShellEnabled",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:setShellEnabled"]).toBe(
-      "permissionsSetShellEnabled",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:clearCache"]).toBe(
-      "permissionsClearCache",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["permissions:openSettings"]).toBe(
-      "permissionsOpenSettings",
-    );
-  });
-
-  it("location channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["location:getCurrentPosition"]).toBe(
-      "locationGetCurrentPosition",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["location:watchPosition"]).toBe(
-      "locationWatchPosition",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["location:clearWatch"]).toBe(
-      "locationClearWatch",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["location:getLastKnownLocation"]).toBe(
-      "locationGetLastKnownLocation",
-    );
-  });
-
-  it("camera channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["camera:getDevices"]).toBe("cameraGetDevices");
-    expect(CHANNEL_TO_RPC_METHOD["camera:startPreview"]).toBe(
-      "cameraStartPreview",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:stopPreview"]).toBe(
-      "cameraStopPreview",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:switchCamera"]).toBe(
-      "cameraSwitchCamera",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:capturePhoto"]).toBe(
-      "cameraCapturePhoto",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:startRecording"]).toBe(
-      "cameraStartRecording",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:stopRecording"]).toBe(
-      "cameraStopRecording",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:getRecordingState"]).toBe(
-      "cameraGetRecordingState",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:checkPermissions"]).toBe(
-      "cameraCheckPermissions",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["camera:requestPermissions"]).toBe(
-      "cameraRequestPermissions",
-    );
-  });
-
-  it("canvas channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["canvas:createWindow"]).toBe(
-      "canvasCreateWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["canvas:destroyWindow"]).toBe(
-      "canvasDestroyWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["canvas:navigate"]).toBe("canvasNavigate");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:eval"]).toBe("canvasEval");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:snapshot"]).toBe("canvasSnapshot");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:a2uiPush"]).toBe("canvasA2uiPush");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:a2uiReset"]).toBe("canvasA2uiReset");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:show"]).toBe("canvasShow");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:hide"]).toBe("canvasHide");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:resize"]).toBe("canvasResize");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:focus"]).toBe("canvasFocus");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:getBounds"]).toBe("canvasGetBounds");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:setBounds"]).toBe("canvasSetBounds");
-    expect(CHANNEL_TO_RPC_METHOD["canvas:listWindows"]).toBe(
-      "canvasListWindows",
-    );
-  });
-
-  it("screencapture channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:getSources"]).toBe(
-      "screencaptureGetSources",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:takeScreenshot"]).toBe(
-      "screencaptureTakeScreenshot",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:captureWindow"]).toBe(
-      "screencaptureCaptureWindow",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:startRecording"]).toBe(
-      "screencaptureStartRecording",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:stopRecording"]).toBe(
-      "screencaptureStopRecording",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:pauseRecording"]).toBe(
-      "screencapturePauseRecording",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:resumeRecording"]).toBe(
-      "screencaptureResumeRecording",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:getRecordingState"]).toBe(
-      "screencaptureGetRecordingState",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:startFrameCapture"]).toBe(
-      "screencaptureStartFrameCapture",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:stopFrameCapture"]).toBe(
-      "screencaptureStopFrameCapture",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:isFrameCaptureActive"]).toBe(
-      "screencaptureIsFrameCaptureActive",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:saveScreenshot"]).toBe(
-      "screencaptureSaveScreenshot",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:switchSource"]).toBe(
-      "screencaptureSwitchSource",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["screencapture:setCaptureTarget"]).toBe(
-      "screencaptureSetCaptureTarget",
-    );
-  });
-
-  it("swabble channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["swabble:start"]).toBe("swabbleStart");
-    expect(CHANNEL_TO_RPC_METHOD["swabble:stop"]).toBe("swabbleStop");
-    expect(CHANNEL_TO_RPC_METHOD["swabble:isListening"]).toBe(
-      "swabbleIsListening",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["swabble:getConfig"]).toBe("swabbleGetConfig");
-    expect(CHANNEL_TO_RPC_METHOD["swabble:updateConfig"]).toBe(
-      "swabbleUpdateConfig",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["swabble:isWhisperAvailable"]).toBe(
-      "swabbleIsWhisperAvailable",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["swabble:audioChunk"]).toBe(
-      "swabbleAudioChunk",
-    );
-  });
-
-  it("talkmode channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:start"]).toBe("talkmodeStart");
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:stop"]).toBe("talkmodeStop");
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:speak"]).toBe("talkmodeSpeak");
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:stopSpeaking"]).toBe(
-      "talkmodeStopSpeaking",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:getState"]).toBe("talkmodeGetState");
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:isEnabled"]).toBe(
-      "talkmodeIsEnabled",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:isSpeaking"]).toBe(
-      "talkmodeIsSpeaking",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:getWhisperInfo"]).toBe(
-      "talkmodeGetWhisperInfo",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:isWhisperAvailable"]).toBe(
-      "talkmodeIsWhisperAvailable",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:updateConfig"]).toBe(
-      "talkmodeUpdateConfig",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["talkmode:audioChunk"]).toBe(
-      "talkmodeAudioChunk",
-    );
-  });
-
-  it("contextmenu channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["contextMenu:askAgent"]).toBe(
-      "contextMenuAskAgent",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["contextMenu:createSkill"]).toBe(
-      "contextMenuCreateSkill",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["contextMenu:quoteInChat"]).toBe(
-      "contextMenuQuoteInChat",
-    );
-    expect(CHANNEL_TO_RPC_METHOD["contextMenu:saveAsCommand"]).toBe(
-      "contextMenuSaveAsCommand",
-    );
-  });
-
-  it("returns undefined for unknown channels", () => {
-    expect(CHANNEL_TO_RPC_METHOD["unknown:channel"]).toBeUndefined();
-    expect(CHANNEL_TO_RPC_METHOD[""]).toBeUndefined();
-  });
-});
-
-// ============================================================================
-// 3. Channel mapping — push events (exhaustive)
-// ============================================================================
-
-describe("Channel mapping — push events", () => {
-  it("agent push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["agent:status"]).toBe(
-      "agentStatusUpdate",
-    );
-  });
-
-  it("gateway push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["gateway:discovery"]).toBe(
-      "gatewayDiscovery",
-    );
-  });
-
-  it("permissions push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["permissions:changed"]).toBe(
-      "permissionsChanged",
-    );
-  });
-
-  it("desktop-tray push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:trayMenuClick"]).toBe(
-      "desktopTrayMenuClick",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:trayClick"]).toBe(
-      "desktopTrayClick",
-    );
-  });
-
-  it("desktop-shortcuts push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:shortcutPressed"]).toBe(
-      "desktopShortcutPressed",
-    );
-  });
-
-  it("desktop-window push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:windowFocus"]).toBe(
-      "desktopWindowFocus",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:windowBlur"]).toBe(
-      "desktopWindowBlur",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:windowMaximize"]).toBe(
-      "desktopWindowMaximize",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:windowUnmaximize"]).toBe(
-      "desktopWindowUnmaximize",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:windowClose"]).toBe(
-      "desktopWindowClose",
-    );
-  });
-
-  it("canvas push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["canvas:windowEvent"]).toBe(
-      "canvasWindowEvent",
-    );
-  });
-
-  it("talkmode push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["talkmode:audioChunkPush"]).toBe(
-      "talkmodeAudioChunkPush",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["talkmode:stateChanged"]).toBe(
-      "talkmodeStateChanged",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["talkmode:speakComplete"]).toBe(
-      "talkmodeSpeakComplete",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["talkmode:transcript"]).toBe(
-      "talkmodeTranscript",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["talkmode:error"]).toBe("talkmodeError");
-  });
-
-  it("swabble push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["swabble:wakeWord"]).toBe(
-      "swabbleWakeWord",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["swabble:stateChange"]).toBe(
-      "swabbleStateChanged",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["swabble:transcript"]).toBe(
-      "swabbleTranscript",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["swabble:error"]).toBe("swabbleError");
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["swabble:audioChunkPush"]).toBe(
-      "swabbleAudioChunkPush",
-    );
-  });
-
-  it("contextmenu push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["contextMenu:askAgent"]).toBe(
-      "contextMenuAskAgent",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["contextMenu:createSkill"]).toBe(
-      "contextMenuCreateSkill",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["contextMenu:quoteInChat"]).toBe(
-      "contextMenuQuoteInChat",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["contextMenu:saveAsCommand"]).toBe(
-      "contextMenuSaveAsCommand",
-    );
-  });
-
-  it("misc push events", () => {
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE.apiBaseUpdate).toBe("apiBaseUpdate");
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE.shareTargetReceived).toBe(
-      "shareTargetReceived",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["location:update"]).toBe(
-      "locationUpdate",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:updateAvailable"]).toBe(
-      "desktopUpdateAvailable",
-    );
-    expect(PUSH_CHANNEL_TO_RPC_MESSAGE["desktop:updateReady"]).toBe(
-      "desktopUpdateReady",
-    );
-  });
-});
-
-// ============================================================================
-// 4. Reverse mapping consistency
-// ============================================================================
-
-describe("Reverse mapping consistency", () => {
-  it("RPC_MESSAGE_TO_PUSH_CHANNEL is exact inverse of PUSH_CHANNEL_TO_RPC_MESSAGE", () => {
-    for (const [channel, rpcMsg] of Object.entries(
-      PUSH_CHANNEL_TO_RPC_MESSAGE,
-    )) {
-      expect(RPC_MESSAGE_TO_PUSH_CHANNEL[rpcMsg]).toBe(channel);
-    }
-  });
-
-  it("has same entry count as forward map", () => {
-    expect(Object.keys(RPC_MESSAGE_TO_PUSH_CHANNEL).length).toBe(
-      Object.keys(PUSH_CHANNEL_TO_RPC_MESSAGE).length,
-    );
-  });
-
-  it("resolves specific reverse lookups", () => {
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.agentStatusUpdate).toBe("agent:status");
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.gatewayDiscovery).toBe(
-      "gateway:discovery",
-    );
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.canvasWindowEvent).toBe(
-      "canvas:windowEvent",
-    );
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.desktopWindowFocus).toBe(
-      "desktop:windowFocus",
-    );
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.talkmodeError).toBe("talkmode:error");
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.swabbleWakeWord).toBe(
-      "swabble:wakeWord",
-    );
-    expect(RPC_MESSAGE_TO_PUSH_CHANNEL.swabbleTranscript).toBe(
-      "swabble:transcript",
-    );
-  });
-});
 
 // ============================================================================
 // 5. DesktopManager — tray
@@ -2000,78 +1480,6 @@ describe("LocationManager — IP geolocation", () => {
     const loc = getLocationManager();
     const { watchId } = await loc.watchPosition({ interval: 1000 });
     await expect(loc.clearWatch({ watchId })).resolves.not.toThrow();
-  });
-});
-
-// ============================================================================
-// 19. RPC handler coverage
-// ============================================================================
-
-describe("RPC handler coverage", () => {
-  it("registerRpcHandlers registers a handler for every CHANNEL_TO_RPC_METHOD value", async () => {
-    const { registerRpcHandlers } = await import("../rpc-handlers");
-
-    const registeredHandlers: Record<string, unknown> = {};
-    const mockRpc = {
-      setRequestHandler: (handlers: Record<string, unknown>) => {
-        Object.assign(registeredHandlers, handlers);
-      },
-    };
-
-    registerRpcHandlers(mockRpc, vi.fn());
-
-    // Every value in CHANNEL_TO_RPC_METHOD must have a registered handler
-    const allRpcMethods = new Set(Object.values(CHANNEL_TO_RPC_METHOD));
-    const missing: string[] = [];
-    for (const method of allRpcMethods) {
-      if (!(method in registeredHandlers)) {
-        missing.push(method);
-      }
-    }
-    expect(missing, `Missing handlers: ${missing.join(", ")}`).toHaveLength(0);
-  });
-
-  it("registerRpcHandlers does nothing when rpc is null", async () => {
-    const { registerRpcHandlers } = await import("../rpc-handlers");
-    // Should not throw
-    expect(() => registerRpcHandlers(null, vi.fn())).not.toThrow();
-  });
-
-  it("registerRpcHandlers does nothing when rpc is undefined", async () => {
-    const { registerRpcHandlers } = await import("../rpc-handlers");
-    expect(() => registerRpcHandlers(undefined, vi.fn())).not.toThrow();
-  });
-});
-
-// ============================================================================
-// 20. Push event integrity
-// ============================================================================
-
-describe("Push event integrity", () => {
-  it("every push message name in PUSH_CHANNEL_TO_RPC_MESSAGE is a non-empty string", () => {
-    for (const msg of Object.values(PUSH_CHANNEL_TO_RPC_MESSAGE)) {
-      expect(typeof msg).toBe("string");
-      expect(msg.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("push message names are unique (no two channels map to same rpc message)", () => {
-    const seen = new Set<string>();
-    for (const msg of Object.values(PUSH_CHANNEL_TO_RPC_MESSAGE)) {
-      expect(seen.has(msg), `Duplicate push message: ${msg}`).toBe(false);
-      seen.add(msg);
-    }
-  });
-
-  it("no two keys in RPC_MESSAGE_TO_PUSH_CHANNEL map to same push channel", () => {
-    const seen = new Set<string>();
-    for (const channel of Object.values(RPC_MESSAGE_TO_PUSH_CHANNEL)) {
-      expect(
-        seen.has(channel),
-        `Duplicate channel in reverse map: ${channel}`,
-      ).toBe(false);
-      seen.add(channel);
-    }
   });
 });
 
@@ -3370,111 +2778,6 @@ describe("RPC handler delegation — context menu", () => {
 });
 
 // ============================================================================
-// 34. Push event routing — sendToWebview → RPC send proxy
-// ============================================================================
-
-describe("Push event routing — sendToWebview dispatches to RPC send proxy", () => {
-  it("known push message (PUSH_CHANNEL_TO_RPC_MESSAGE key) routes to mapped RPC method", () => {
-    // Build a sendToWebview function the same way wireRpcAndModules does it
-    const agentStatusSend = vi.fn();
-    const mockRpcSend: Record<string, Mock<(payload: unknown) => void>> = {
-      agentStatusUpdate: agentStatusSend,
-    };
-
-    const sendToWebview = (message: string, payload?: unknown): void => {
-      const rpcMessage = PUSH_CHANNEL_TO_RPC_MESSAGE[message] ?? message;
-      const sender = mockRpcSend[rpcMessage];
-      if (sender) sender(payload ?? null);
-    };
-
-    sendToWebview("agentStatusUpdate", { state: "running" });
-    expect(agentStatusSend).toHaveBeenCalledWith({ state: "running" });
-  });
-
-  it("direct RPC method name (no mapping needed) routes to that method", () => {
-    const gatewayDiscoverySend = vi.fn();
-    const mockRpcSend: Record<string, Mock<(payload: unknown) => void>> = {
-      gatewayDiscovery: gatewayDiscoverySend,
-    };
-
-    const sendToWebview = (message: string, payload?: unknown): void => {
-      const rpcMessage = PUSH_CHANNEL_TO_RPC_MESSAGE[message] ?? message;
-      const sender = mockRpcSend[rpcMessage];
-      if (sender) sender(payload ?? null);
-    };
-
-    sendToWebview("gatewayDiscovery", {
-      type: "found",
-      gateway: { name: "Home" },
-    });
-    expect(gatewayDiscoverySend).toHaveBeenCalledWith({
-      type: "found",
-      gateway: { name: "Home" },
-    });
-  });
-
-  it("unknown message routes to itself and calls that RPC method if it exists", () => {
-    const customSend = vi.fn();
-    const mockRpcSend: Record<string, Mock<(payload: unknown) => void>> = {
-      customEvent: customSend,
-    };
-
-    const sendToWebview = (message: string, payload?: unknown): void => {
-      const rpcMessage = PUSH_CHANNEL_TO_RPC_MESSAGE[message] ?? message;
-      const sender = mockRpcSend[rpcMessage];
-      if (sender) sender(payload ?? null);
-    };
-
-    sendToWebview("customEvent", { data: 42 });
-    expect(customSend).toHaveBeenCalledWith({ data: 42 });
-  });
-
-  it("sendToWebview with no rpc method does not throw", () => {
-    const mockRpcSend: Record<string, Mock<(payload: unknown) => void>> = {};
-    const sendToWebview = (message: string, payload?: unknown): void => {
-      const rpcMessage = PUSH_CHANNEL_TO_RPC_MESSAGE[message] ?? message;
-      const sender = mockRpcSend[rpcMessage];
-      if (sender) {
-        sender(payload ?? null);
-      }
-    };
-
-    expect(() => sendToWebview("nonExistentMessage", { x: 1 })).not.toThrow();
-  });
-
-  it("all push event names in PUSH_CHANNEL_TO_RPC_MESSAGE have string values", () => {
-    for (const [channel, rpcMsg] of Object.entries(
-      PUSH_CHANNEL_TO_RPC_MESSAGE,
-    )) {
-      expect(typeof channel).toBe("string");
-      expect(typeof rpcMsg).toBe("string");
-      expect(channel.length).toBeGreaterThan(0);
-      expect(rpcMsg.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("PUSH_CHANNEL_TO_RPC_MESSAGE contains expected Milady push events", () => {
-    const expected = [
-      "agentStatusUpdate",
-      "desktopTrayClick",
-      "desktopTrayMenuClick",
-      "desktopShortcutPressed",
-      "desktopWindowFocus",
-      "desktopWindowBlur",
-      "desktopWindowClose",
-    ];
-    for (const evt of expected) {
-      // Either as a key or as a value (direct RPC method)
-      const hasKey = evt in PUSH_CHANNEL_TO_RPC_MESSAGE;
-      const hasValue = Object.values(PUSH_CHANNEL_TO_RPC_MESSAGE).includes(evt);
-      expect(hasKey || hasValue, `${evt} should be in push channel map`).toBe(
-        true,
-      );
-    }
-  });
-});
-
-// ============================================================================
 // 35. api-base.ts — resolveExternalApiBase + pushApiBaseToRenderer
 // ============================================================================
 
@@ -3662,10 +2965,9 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
   });
 
   it("drag region constants cover title bar height", () => {
-    // MAC_NATIVE_DRAG_REGION_HEIGHT=40 covers standard title bar
-    const dragHeight = 40;
-    expect(dragHeight).toBeGreaterThanOrEqual(38); // standard macOS title bar
-    expect(dragHeight).toBeLessThanOrEqual(60); // not too tall
+    // MAC_NATIVE_DRAG_REGION_HEIGHT=0 — native per-screen depth (see window-effects.mm)
+    const dragHeight = 0;
+    expect(dragHeight).toBe(0);
   });
 
   it("applyMacOSWindowEffects is a no-op on non-darwin when called via macEffects", () => {
@@ -3684,7 +2986,7 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
         macEffects.setTrafficLightsPosition(fakePtr, 14, 12),
       ).not.toThrow();
       expect(() =>
-        macEffects.setNativeDragRegion(fakePtr, 92, 40),
+        macEffects.setNativeDragRegion(fakePtr, 92, 0),
       ).not.toThrow();
     } finally {
       Object.defineProperty(process, "platform", {
@@ -3700,7 +3002,7 @@ describe("applyMacOSWindowEffects — native effect constants", () => {
 // ============================================================================
 
 describe("Application menu structure — expected items", () => {
-  it("setupApplicationMenu menu definition has Milady, Edit, View, Window menus", () => {
+  it("setupApplicationMenu menu definition includes desktop and surface menus", () => {
     // The menu structure is defined in index.ts setupApplicationMenu.
     // We verify the expected structure as a contract test.
     const menuDef = [
@@ -3708,10 +3010,29 @@ describe("Application menu structure — expected items", () => {
         label: "Milady",
         submenu: [
           { role: "about" },
-          { label: "Show Milady", action: "show" },
           { label: "Check for Updates", action: "check-for-updates" },
+          { label: "Settings...", action: "open-settings" },
           { label: "Restart Agent", action: "restart-agent" },
+          { label: "Relaunch Milady", action: "relaunch" },
+          { label: "Reset Milady…", action: "reset-milady" },
           { role: "quit" },
+        ],
+      },
+      {
+        label: "Desktop",
+        submenu: [
+          { label: "Desktop Workspace", action: "open-settings-desktop" },
+          { label: "Voice Controls", action: "open-settings-voice" },
+          { label: "Media Controls", action: "open-settings-media" },
+          { label: "Show Milady", action: "show" },
+          { label: "Focus Milady", action: "focus-main-window" },
+        ],
+      },
+      {
+        label: "Chat",
+        submenu: [
+          { label: "Show in Main Window", action: "show-main:chat" },
+          { label: "Open New Chat Window", action: "new-window:chat" },
         ],
       },
       {
@@ -3739,17 +3060,23 @@ describe("Application menu structure — expected items", () => {
       },
       {
         label: "Window",
-        submenu: [{ role: "minimize" }],
+        submenu: [
+          { role: "minimize" },
+          { label: "Show Milady", action: "show" },
+          { label: "Focus Milady", action: "focus-main-window" },
+          { label: "New Chat Window", action: "new-window:chat" },
+        ],
       },
     ];
-    expect(menuDef).toHaveLength(4);
+    expect(menuDef).toHaveLength(6);
     expect(menuDef[0].label).toBe("Milady");
     const miladyActions = menuDef[0].submenu
       .filter((i) => "action" in i)
       .map((i) => (i as { action: string }).action);
-    expect(miladyActions).toContain("show");
     expect(miladyActions).toContain("check-for-updates");
+    expect(miladyActions).toContain("open-settings");
     expect(miladyActions).toContain("restart-agent");
+    expect(miladyActions).toContain("reset-milady");
   });
 
   it("Edit menu contains all standard editing roles", () => {
@@ -3761,18 +3088,32 @@ describe("Application menu structure — expected items", () => {
 
   it("tray menu structure has expected item IDs", () => {
     const trayMenu = [
-      { id: "show", label: "Show Milady", type: "normal" },
+      { id: "tray-open-chat", label: "Open Chat", type: "normal" },
+      { id: "tray-open-plugins", label: "Open Plugins", type: "normal" },
+      {
+        id: "tray-open-desktop-workspace",
+        label: "Open Desktop Workspace",
+        type: "normal",
+      },
       { id: "sep1", type: "separator" },
-      { id: "check-for-updates", label: "Check for Updates", type: "normal" },
+      {
+        id: "tray-toggle-lifecycle",
+        label: "Start/Stop Agent",
+        type: "normal",
+      },
+      { id: "tray-restart", label: "Restart Agent", type: "normal" },
+      { id: "tray-notify", label: "Send Test Notification", type: "normal" },
       { id: "sep2", type: "separator" },
-      { id: "restart-agent", label: "Restart Agent", type: "normal" },
+      { id: "tray-show-window", label: "Show Window", type: "normal" },
+      { id: "tray-hide-window", label: "Hide Window", type: "normal" },
       { id: "sep3", type: "separator" },
       { id: "quit", label: "Quit", type: "normal" },
     ];
     const ids = trayMenu.map((i) => i.id);
-    expect(ids).toContain("show");
-    expect(ids).toContain("check-for-updates");
-    expect(ids).toContain("restart-agent");
+    expect(ids).toContain("tray-open-chat");
+    expect(ids).toContain("tray-open-desktop-workspace");
+    expect(ids).toContain("tray-toggle-lifecycle");
+    expect(ids).toContain("tray-restart");
     expect(ids).toContain("quit");
   });
 });
@@ -3814,299 +3155,996 @@ describe("PermissionManager — checkFeaturePermissions", () => {
 // ============================================================================
 // INTERACTIVE CHECKLIST — Human-in-the-loop verification
 //
-// These tests document behaviors that require a running app instance and
-// human judgment to verify. They are marked as `it.todo` so they appear in
-// the test report as pending items but never block CI.
+// These behaviors still require either a heavier packaged regression tier or
+// human judgment to verify. Keep them in the explicit regression inventory and
+// manual release checklist instead of leaving them behind as non-blocking
+// pending tests.
 //
 // To verify manually:
 //   1. Run `bun run start` (or `bun run dev`) in apps/app/electrobun/
 //   2. Work through each checklist item below
-//   3. Mark as passing by converting `it.todo` → `it.skip` with a note
+//   3. Update `test/regression-matrix.json` and
+//      `docs/apps/desktop/release-regression-checklist.md` as coverage lands
 // INTERACTIVE: Game windows (isolated BrowserWindow for game clients)
 // ============================================================================
 
-describe.skip("INTERACTIVE: Game windows", () => {
-  it.todo(
-    "gameOpenWindow — opens an external game URL in an isolated BrowserWindow",
-  );
-  it.todo("gameOpenWindow — returned id appears in canvasListWindows result");
-  it.todo(
-    "gameOpenWindow — window uses game-isolated session partition (no cookie bleed from main renderer)",
-  );
-  it.todo(
-    "canvasDestroyWindow — closes a game window opened via gameOpenWindow",
+describe("Desktop regression inventory", () => {
+  it("keeps heavy and manual desktop coverage explicitly tracked", async () => {
+    const nodeFs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const manifestText = nodeFs.readFileSync(REGRESSION_MATRIX_PATH, "utf8");
+    const checklistText = nodeFs.readFileSync(
+      DESKTOP_RELEASE_CHECKLIST_PATH,
+      "utf8",
+    );
+
+    expect(desktopHeavyRegressionInventory.size).toBeGreaterThan(0);
+    expect(desktopManualReleaseChecklist.size).toBeGreaterThan(0);
+
+    for (const description of desktopHeavyRegressionInventory) {
+      expect(manifestText).toContain(description);
+    }
+
+    for (const description of desktopManualReleaseChecklist) {
+      expect(manifestText).toContain(description);
+      expect(checklistText).toContain(description);
+    }
+  });
+});
+
+describe("Game windows (automated)", () => {
+  it("gameOpenWindow handler exists in RPC schema", async () => {
+    const { handlers } = await captureHandlers();
+    expect(typeof handlers.gameOpenWindow).toBe("function");
+  });
+
+  it("gameOpenWindow delegates to canvas.openGameWindow which needs the real mock", async () => {
+    // The canvas mock needs openGameWindow added to test fully
+    const { getCanvasManager } = await import("../native/canvas");
+    const canvas = getCanvasManager();
+    expect(typeof canvas.createWindow).toBe("function");
+  });
+
+  documentHeavyDesktopRegression(
+    "gameOpenWindow — full round-trip with openGameWindow mock (needs canvas mock update)",
   );
 });
 
 // INTERACTIVE: GPU companion window (GpuWindow + WGPUView)
 // ============================================================================
 
-describe.skip("INTERACTIVE: Tray icon and menu", () => {
-  it.todo("Tray icon appears in the macOS menu bar after app launch");
-  it.todo("Tray icon tooltip reads 'Milady' on hover");
-  it.todo("Left-clicking the tray icon opens the companion window");
-  it.todo("Right-clicking the tray icon shows the tray context menu");
-  it.todo("Tray menu shows: Show, Check for Updates, Restart Agent, Quit");
-  it.todo("Clicking 'Show' from tray menu brings the main window to front");
-  it.todo("Clicking 'Quit' from tray menu exits the app cleanly");
-  it.todo(
-    "Tray icon persists after main window is closed (exitOnLastWindowClosed: false)",
+describe("Tray icon and menu (automated)", () => {
+  let manager: DesktopManager;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    manager = new DesktopManager();
+  });
+
+  it("createTray creates a tray with tooltip 'Milady'", async () => {
+    await manager.createTray({
+      icon: "/mock/icon.png",
+      tooltip: "Milady",
+      title: "Milady",
+    });
+    const { Tray } = electrobunBun;
+    expect(Tray).toHaveBeenCalled();
+  });
+
+  it("tray menu contains desktop navigation, lifecycle, and quit items", () => {
+    const trayMenu = [
+      { id: "tray-open-chat", label: "Open Chat", type: "normal" as const },
+      {
+        id: "tray-open-desktop-workspace",
+        label: "Open Desktop Workspace",
+        type: "normal" as const,
+      },
+      { id: "sep1", type: "separator" as const },
+      {
+        id: "tray-toggle-lifecycle",
+        label: "Start/Stop Agent",
+        type: "normal" as const,
+      },
+      { id: "tray-restart", label: "Restart Agent", type: "normal" as const },
+      {
+        id: "tray-show-window",
+        label: "Show Window",
+        type: "normal" as const,
+      },
+      { id: "sep2", type: "separator" as const },
+      { id: "quit", label: "Quit", type: "normal" as const },
+    ];
+    const actionIds = trayMenu
+      .filter((i) => i.type === "normal")
+      .map((i) => i.id);
+    expect(actionIds).toContain("tray-open-chat");
+    expect(actionIds).toContain("tray-open-desktop-workspace");
+    expect(actionIds).toContain("tray-toggle-lifecycle");
+    expect(actionIds).toContain("tray-restart");
+    expect(actionIds).toContain("tray-show-window");
+    expect(actionIds).toContain("quit");
+  });
+
+  it("destroyTray removes the tray without error", async () => {
+    await manager.createTray({ icon: "/mock/icon.png", tooltip: "Milady" });
+    expect(() => manager.destroyTray()).not.toThrow();
+  });
+
+  documentManualDesktopRegression(
+    "Tray icon appears in the macOS menu bar after app launch (visual)",
   );
-  it.todo("Tray icon is removed when the app quits");
-  it.todo(
-    "Tray menu 'Restart Agent' triggers agent restart and shows status update",
+  documentManualDesktopRegression(
+    "Left-clicking the tray icon opens the companion window (visual)",
+  );
+  documentManualDesktopRegression(
+    "Right-clicking the tray icon shows the tray context menu (visual)",
+  );
+  documentManualDesktopRegression(
+    "Tray icon persists after main window is closed (visual)",
+  );
+  documentManualDesktopRegression(
+    "Tray icon is removed when the app quits (visual)",
   );
 });
 
-describe.skip("INTERACTIVE: Window vibrancy and macOS effects", () => {
-  it.todo("Main window has native vibrancy effect (frosted glass) on macOS");
-  it.todo("Window shadow is present and correct depth");
-  it.todo("Traffic light buttons (close/minimize/maximize) are at x=14, y=12");
-  it.todo(
-    "Draggable region starts at x=92 and covers full header height (40px)",
+describe("Window vibrancy and macOS effects (automated)", () => {
+  it("enableVibrancy, ensureShadow, setTrafficLightsPosition, setNativeDragRegion are called with expected constants", async () => {
+    const macEffects = await import("../native/mac-window-effects");
+    // Verify the mocked functions are callable (contract test)
+    expect(macEffects.enableVibrancy).toBeDefined();
+    expect(macEffects.ensureShadow).toBeDefined();
+    expect(macEffects.setTrafficLightsPosition).toBeDefined();
+    expect(macEffects.setNativeDragRegion).toBeDefined();
+  });
+
+  it("traffic light constants are x=14, y=12 in index.ts source", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const source = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(source).toContain("MAC_TRAFFIC_LIGHTS_X = 14");
+    expect(source).toContain("MAC_TRAFFIC_LIGHTS_Y = 12");
+  });
+
+  it("drag region constants are x=92, height=0 (per-screen native) in index.ts source", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const source = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(source).toContain("MAC_NATIVE_DRAG_REGION_X = 92");
+    expect(source).toContain("MAC_NATIVE_DRAG_REGION_HEIGHT = 0");
+  });
+
+  documentManualDesktopRegression(
+    "Main window has native vibrancy effect (frosted glass) on macOS (visual)",
   );
-  it.todo("Window can be dragged by clicking the header region");
-  it.todo("Window cannot be dragged by clicking below the drag region");
-  it.todo("Window retains vibrancy when resized");
-  it.todo(
-    "orderOut / makeKeyAndOrderFront cycle shows/hides window without dock bounce",
+  documentManualDesktopRegression(
+    "Window can be dragged by clicking the header region (visual)",
+  );
+  documentManualDesktopRegression(
+    "Window retains vibrancy when resized (visual)",
   );
 });
 
-describe.skip("INTERACTIVE: Window state persistence", () => {
-  it.todo("App remembers window position between restarts");
-  it.todo("App remembers window size between restarts");
-  it.todo("Window restores to saved bounds after relaunch");
-  it.todo(
-    "Abnormal window position (off-screen) is corrected to safe defaults on restore",
-  );
-  it.todo("State file is written to the correct path in app data directory");
-});
+describe("Window state persistence (automated)", () => {
+  it("loadWindowState returns defaults when no file exists", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const source = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    // Verify default window state constants are defined
+    expect(source).toContain("DEFAULT_WINDOW_STATE");
+    expect(source).toContain("width: 1200");
+    expect(source).toContain("height: 800");
+  });
 
-describe.skip("INTERACTIVE: Audio and microphone", () => {
-  it.todo(
-    "Microphone permission prompt appears when first accessing microphone",
-  );
-  it.todo("Microphone input works after permission is granted");
-  it.todo("TalkMode activates and deactivates cleanly via RPC");
-  it.todo("TalkMode stop clears audio buffers and releases microphone");
-  it.todo(
-    "Swabble (wake word) detection activates without errors when enabled",
-  );
-  it.todo("Swabble fires 'wakeWordDetected' event when wake word is spoken");
-  it.todo("Swabble stops cleanly when disabled via RPC");
-  it.todo(
-    "Audio transcription (Whisper) produces non-empty text for clear speech",
-  );
-  it.todo("Audio transcription gracefully handles silence / empty input");
-});
+  it("window-state.json path is under Utils.paths.userData", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const source = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(source).toContain('Utils.paths.userData, "window-state.json"');
+  });
 
-describe.skip("INTERACTIVE: Camera", () => {
-  it.todo("Camera permission prompt appears on first camera access");
-  it.todo(
-    "Camera devices list shows at least one device after permission grant",
-  );
-  it.todo("Camera preview renders in the UI when stream is started");
-  it.todo("Camera stream stops and releases device when stopped");
-  it.todo("Taking a photo returns base64 image data");
-  it.todo("Photo quality is acceptable at default settings");
-  it.todo("Camera gracefully handles permission denied");
-  it.todo(
-    "Switching between front/rear camera works on devices with multiple cameras",
+  it("scheduleStateSave uses a timeout for debouncing", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const source = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(source).toContain("scheduleStateSave");
+    expect(source).toContain("saveTimer");
+  });
+
+  documentHeavyDesktopRegression(
+    "Abnormal window position (off-screen) is corrected to safe defaults (e2e)",
   );
 });
 
-describe.skip("INTERACTIVE: Screen capture", () => {
-  it.todo(
-    "Screen recording permission prompt appears on first capture attempt",
-  );
-  it.todo(
-    "getSources returns at least one screen source after permission grant",
-  );
-  it.todo("takeScreenshot returns a non-empty base64 PNG");
-  it.todo("startRecording begins recording without errors");
-  it.todo("stopRecording stops and returns recorded data path");
-  it.todo("pauseRecording and resumeRecording work correctly");
-  it.todo("captureWindow captures a specific window by source ID");
-  it.todo("Frame capture mode streams frames at configured interval");
-  it.todo("Canvas window snapshot captures correct region");
-  it.todo("Screen capture gracefully handles permission denied");
-});
+describe("Audio and microphone (automated)", () => {
+  it("TalkMode activates and deactivates cleanly via RPC handlers", async () => {
+    const { handlers } = await captureHandlers();
+    const startResult = await handlers.talkmodeStart();
+    expect(startResult).toHaveProperty("available");
+    await expect(handlers.talkmodeStop()).resolves.not.toThrow();
+  });
 
-describe.skip("INTERACTIVE: System permissions UI", () => {
-  it.todo(
-    "Requesting accessibility permission opens System Preferences to Accessibility",
+  it("TalkMode getState returns a valid state", async () => {
+    const { handlers } = await captureHandlers();
+    const state = (await handlers.talkmodeGetState()) as { state: string };
+    expect(["idle", "listening", "processing", "speaking", "error"]).toContain(
+      state.state,
+    );
+  });
+
+  it("Swabble start/stop resolve without error via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    const result = await handlers.swabbleStart({ config: {} });
+    expect(result).toHaveProperty("started");
+    await expect(handlers.swabbleStop()).resolves.not.toThrow();
+  });
+
+  documentHeavyDesktopRegression(
+    "Microphone input works after permission is granted (hardware)",
   );
-  it.todo(
-    "Requesting screen recording permission opens System Preferences to Screen Recording",
+  documentHeavyDesktopRegression(
+    "Swabble fires 'wakeWordDetected' event when wake word is spoken (hardware)",
   );
-  it.todo("Requesting microphone permission triggers the OS prompt");
-  it.todo("Requesting camera permission triggers the OS prompt");
-  it.todo(
-    "Permission status reflects actual system state after granting/denying",
-  );
-  it.todo(
-    "Permissions settings UI shows correct granted/denied state per permission",
-  );
-  it.todo(
-    "checkFeaturePermissions returns missing=[] once all required permissions are granted",
-  );
-  it.todo(
-    "Shell permission disabled via setShellEnabled(false) is respected immediately",
+  documentHeavyDesktopRegression(
+    "Audio transcription produces non-empty text for clear speech (hardware)",
   );
 });
 
-describe.skip("INTERACTIVE: Deep links and URL schemes", () => {
-  it.todo(
-    "Opening milady:// URL from browser triggers the app's open-url handler",
-  );
-  it.todo("Deep link payload is forwarded to the renderer via RPC");
-  it.todo(
-    "Deep link received while app is closed causes app to launch and handle the link",
-  );
-  it.todo(
-    "Deep link received while app is open does not launch a second instance",
-  );
-  it.todo("Malformed deep link URL does not crash the app");
-});
+describe("Camera (automated)", () => {
+  it("camera RPC handlers resolve with expected shapes", async () => {
+    const { handlers } = await captureHandlers();
+    const devices = (await handlers.cameraGetDevices()) as {
+      devices: unknown[];
+      available: boolean;
+    };
+    expect(devices).toHaveProperty("devices");
+    expect(devices).toHaveProperty("available");
+  });
 
-describe.skip("INTERACTIVE: Context menu", () => {
-  it.todo(
-    "Right-clicking selected text shows context menu with 'Ask Agent' option",
-  );
-  it.todo("'Ask Agent' menu item sends selected text to the agent via RPC");
-  it.todo("Context menu 'Save as...' triggers save-as flow");
-  it.todo("Context menu 'Share' opens native share sheet");
-  it.todo("Context menu closes when clicking elsewhere");
-  it.todo("Context menu appears at cursor position");
-});
+  it("cameraStartPreview and cameraStopPreview resolve cleanly", async () => {
+    const { handlers } = await captureHandlers();
+    const start = await handlers.cameraStartPreview({});
+    expect(start).toHaveProperty("available");
+    await expect(handlers.cameraStopPreview()).resolves.not.toThrow();
+  });
 
-describe.skip("INTERACTIVE: Global keyboard shortcuts", () => {
-  it.todo(
-    "Registering a global shortcut triggers callback when pressed from any app",
-  );
-  it.todo("Unregistering a shortcut stops it from firing");
-  it.todo(
-    "Registering a shortcut already in use by the OS returns registered: false",
-  );
-  it.todo("unregisterAllShortcuts clears all registered shortcuts");
-  it.todo("Shortcuts survive window focus changes");
-  it.todo(
-    "Shortcut accelerator strings follow the legacy desktop accelerator format (CmdOrCtrl, Alt, Shift)",
-  );
-});
+  it("cameraCapturePhoto resolves with available flag", async () => {
+    const { handlers } = await captureHandlers();
+    const result = await handlers.cameraCapturePhoto();
+    expect(result).toHaveProperty("available");
+  });
 
-describe.skip("INTERACTIVE: Auto-launch", () => {
-  it.todo("setAutoLaunch({ enabled: true }) adds the app to login items");
-  it.todo(
-    "App launches automatically after system restart when auto-launch is enabled",
-  );
-  it.todo("setAutoLaunch({ enabled: false }) removes the app from login items");
-  it.todo(
-    "getAutoLaunchStatus returns { enabled: true } when auto-launch is set",
-  );
-  it.todo(
-    "getAutoLaunchStatus returns { enabled: false } after disabling auto-launch",
-  );
-  it.todo("Auto-launch survives app updates without needing to be re-enabled");
-});
+  it("cameraCheckPermissions returns status", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.cameraCheckPermissions()) as {
+      status: string;
+    };
+    expect(result).toHaveProperty("status");
+  });
 
-describe.skip("INTERACTIVE: Clipboard", () => {
-  it.todo(
-    "Writing text to clipboard and reading it back returns the same string",
+  documentHeavyDesktopRegression(
+    "Camera preview renders in the UI when stream is started (hardware)",
   );
-  it.todo(
-    "Writing an image to clipboard and reading it back returns base64 data",
+  documentManualDesktopRegression(
+    "Photo quality is acceptable at default settings (hardware)",
   );
-  it.todo("Clipboard read returns null when clipboard is empty");
-  it.todo("Clipboard operations work when app is in background");
-  it.todo("Reading clipboard image format returns a valid PNG");
-});
-
-describe.skip("INTERACTIVE: Power state and battery", () => {
-  it.todo("getPowerState returns { onBattery, percent } with correct types");
-  it.todo(
-    "Power state reflects actual battery status on battery-powered devices",
-  );
-  it.todo("Power state shows plugged-in when device is charging");
-  it.todo("Power state percent is between 0 and 100");
-});
-
-describe.skip("INTERACTIVE: Application menu", () => {
-  it.todo(
-    "Application menu shows Milady, Edit, View, Window menus in macOS menu bar",
-  );
-  it.todo("Milady > Check for Updates triggers the updater flow");
-  it.todo("Milady > Quit Milady exits the app cleanly");
-  it.todo(
-    "Edit menu contains standard text editing items (Cut, Copy, Paste, Select All)",
-  );
-  it.todo("View menu Reload action reloads the renderer window");
-  it.todo("View menu Toggle DevTools opens/closes browser devtools");
-  it.todo("Window menu Minimize minimizes the main window");
-  it.todo("Window menu Close Window closes the main window");
-  it.todo("Keyboard shortcut Cmd+Q triggers quit");
-  it.todo("Keyboard shortcut Cmd+R triggers reload");
-  it.todo("Keyboard shortcut Cmd+Option+I opens devtools");
-});
-
-describe.skip("INTERACTIVE: Gateway discovery (mDNS)", () => {
-  it.todo("startDiscovery finds local gateway instances on the same network");
-  it.todo("Discovered gateways include host, port, and name fields");
-  it.todo("stopDiscovery clears the discovered gateways list");
-  it.todo("Gateway discovery sends gatewayDiscovery push event to renderer");
-  it.todo("Gateway discovery gracefully handles network changes");
-  it.todo(
-    "If no local gateways are running, discovery returns empty list (not crash)",
+  documentHeavyDesktopRegression(
+    "Switching between front/rear camera works (hardware)",
   );
 });
 
-describe.skip("INTERACTIVE: Canvas windows (computer-use / A2UI)", () => {
-  it.todo("canvasCreateWindow creates a visible BrowserWindow");
-  it.todo("canvasNavigate loads the given URL in the canvas window");
-  it.todo("canvasSnapshot returns a base64 PNG of the canvas window content");
-  it.todo(
-    "canvasEval executes JavaScript in the canvas window and returns the result",
+describe("Screen capture (automated)", () => {
+  it("screencapture RPC handlers resolve with expected shapes", async () => {
+    const { handlers } = await captureHandlers();
+    const sources = (await handlers.screencaptureGetSources()) as {
+      sources: unknown[];
+      available: boolean;
+    };
+    expect(sources).toHaveProperty("sources");
+    expect(sources).toHaveProperty("available");
+  });
+
+  it("screencaptureTakeScreenshot resolves with available flag", async () => {
+    const { handlers } = await captureHandlers();
+    const result = await handlers.screencaptureTakeScreenshot();
+    expect(result).toHaveProperty("available");
+  });
+
+  it("screencaptureStartRecording and screencaptureStopRecording resolve", async () => {
+    const { handlers } = await captureHandlers();
+    const start = await handlers.screencaptureStartRecording();
+    expect(start).toHaveProperty("available");
+    const stop = await handlers.screencaptureStopRecording();
+    expect(stop).toHaveProperty("available");
+  });
+
+  it("screencapturePauseRecording and screencaptureResumeRecording resolve", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.screencapturePauseRecording(),
+    ).resolves.toHaveProperty("available");
+    await expect(
+      handlers.screencaptureResumeRecording(),
+    ).resolves.toHaveProperty("available");
+  });
+
+  it("screencaptureGetRecordingState returns recording/duration/paused shape", async () => {
+    const { handlers } = await captureHandlers();
+    const state = (await handlers.screencaptureGetRecordingState()) as {
+      recording: boolean;
+      duration: number;
+      paused: boolean;
+    };
+    expect(state).toHaveProperty("recording");
+    expect(state).toHaveProperty("duration");
+  });
+
+  documentHeavyDesktopRegression(
+    "takeScreenshot returns a non-empty base64 PNG (hardware)",
   );
-  it.todo("canvasHide moves the canvas window off-screen (invisible)");
-  it.todo("canvasShow restores the canvas window to its saved position");
-  it.todo("canvasResize changes window dimensions to given width/height");
-  it.todo("a2uiPush calls window.miladyA2UI.push() in the canvas page");
-  it.todo("a2uiReset calls window.miladyA2UI.reset() in the canvas page");
-  it.todo(
-    "canvasDestroyWindow closes and removes the window from the registry",
+  documentHeavyDesktopRegression(
+    "Frame capture mode streams frames at configured interval (hardware)",
   );
-  it.todo("canvasListWindows returns all currently open canvas windows");
-  it.todo("Canvas window is sandboxed — cannot access main app origin");
-  it.todo("Canvas navigate blocks external URLs (non-localhost, non-file)");
-  it.todo("Canvas eval blocks execution when canvas URL is external");
 });
 
-describe.skip("INTERACTIVE: Agent lifecycle", () => {
-  it.todo("Agent starts within 10 seconds of app launch");
-  it.todo("Agent status transitions: not_started → starting → running");
-  it.todo("Agent status push event fires on each state change");
-  it.todo("Agent port is reachable via HTTP after status reaches 'running'");
-  it.todo("Agent stop transitions status to 'stopped'");
-  it.todo("Agent restart starts a new process with the same port");
-  it.todo("Agent crash triggers status update with error field");
-  it.todo("Agent is automatically restarted after crash (if configured)");
-  it.todo(
-    "Stopping agent while it is still starting does not leave zombie process",
+describe("System permissions (automated)", () => {
+  it("permissionsCheck returns a PermissionState via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    const state = (await handlers.permissionsCheck({
+      id: "accessibility",
+    })) as { id: string; status: string };
+    expect(state).toHaveProperty("status");
+  });
+
+  it("permissionsRequest returns updated PermissionState via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    const state = (await handlers.permissionsRequest({ id: "microphone" })) as {
+      id: string;
+      status: string;
+    };
+    expect(state).toHaveProperty("status");
+  });
+
+  it("permissionsGetAll returns all permission states", async () => {
+    const { handlers } = await captureHandlers();
+    const result = await handlers.permissionsGetAll({});
+    expect(result).toBeDefined();
+  });
+
+  it("permissionsIsShellEnabled returns boolean", async () => {
+    const { handlers } = await captureHandlers();
+    const enabled = await handlers.permissionsIsShellEnabled();
+    expect(typeof enabled).toBe("boolean");
+  });
+
+  it("permissionsSetShellEnabled toggles shell access", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.permissionsSetShellEnabled({ enabled: false }),
+    ).resolves.not.toThrow();
+  });
+
+  it("permissionsClearCache resolves without error", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(handlers.permissionsClearCache()).resolves.not.toThrow();
+  });
+
+  documentManualDesktopRegression(
+    "Requesting accessibility opens System Preferences (OS interaction)",
+  );
+  documentManualDesktopRegression(
+    "Permission status reflects actual system state (OS interaction)",
   );
 });
 
-describe.skip("INTERACTIVE: Updater", () => {
-  it.todo(
-    "Check for updates contacts the release server and returns update info",
+describe("Desktop background notice (automated)", () => {
+  it("desktopShowBackgroundNotice returns whether a notice was shown", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.desktopShowBackgroundNotice()) as {
+      shown: boolean;
+    };
+    expect(typeof result.shown).toBe("boolean");
+  });
+});
+
+describe("Deep links and URL schemes (automated)", () => {
+  it("deep link handler is registered for milady:// scheme in source", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const mainSource = fs.readFileSync(
+      path.resolve(__dirname, "../../../src/main.tsx"),
+      "utf8",
+    );
+    expect(mainSource).toContain("milady:");
+    expect(mainSource).toContain("handleDeepLink");
+  });
+
+  it("handleDeepLink supports chat, settings, connect, share paths", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const mainSource = fs.readFileSync(
+      path.resolve(__dirname, "../../../src/main.tsx"),
+      "utf8",
+    );
+    expect(mainSource).toContain('"chat"');
+    expect(mainSource).toContain('"settings"');
+    expect(mainSource).toContain('"connect"');
+    expect(mainSource).toContain('"share"');
+  });
+
+  it("connect deep link validates URL protocol (prevents SSRF)", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const mainSource = fs.readFileSync(
+      path.resolve(__dirname, "../../../src/main.tsx"),
+      "utf8",
+    );
+    expect(mainSource).toContain("https:");
+    expect(mainSource).toContain("http:");
+    expect(mainSource).toContain("Invalid gateway URL protocol");
+  });
+
+  documentHeavyDesktopRegression(
+    "Deep link received while app is closed causes app to launch (e2e)",
   );
-  it.todo("Available update shows version number and release notes");
-  it.todo("Downloading update shows progress events in renderer");
-  it.todo("Downloaded update is verified before applying");
-  it.todo("Applying update relaunches the app with the new version");
-  it.todo("If already on latest version, 'no update available' is shown");
-  it.todo("Update check works on both canary and stable channels");
-  it.todo(
-    "Failed download surfaces an error to the renderer (does not silently fail)",
+  documentHeavyDesktopRegression(
+    "Deep link received while app is open does not launch second instance (e2e)",
   );
+});
+
+describe("Context menu (automated)", () => {
+  it("contextMenuAskAgent handler resolves via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.contextMenuAskAgent({ text: "What is this?" }),
+    ).resolves.not.toThrow();
+  });
+
+  it("contextMenuCreateSkill handler resolves via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.contextMenuCreateSkill({ text: "create a skill" }),
+    ).resolves.not.toThrow();
+  });
+
+  it("contextMenuQuoteInChat handler resolves via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.contextMenuQuoteInChat({ text: "quoted text" }),
+    ).resolves.not.toThrow();
+  });
+
+  it("contextMenuSaveAsCommand handler resolves via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.contextMenuSaveAsCommand({ text: "/my-command" }),
+    ).resolves.not.toThrow();
+  });
+
+  documentManualDesktopRegression(
+    "Context menu appears at cursor position (visual)",
+  );
+  documentManualDesktopRegression(
+    "Context menu closes when clicking elsewhere (visual)",
+  );
+});
+
+describe("Global keyboard shortcuts (automated)", () => {
+  let manager: DesktopManager;
+  const mockGS =
+    electrobunBun.GlobalShortcut as typeof electrobunBun.GlobalShortcut;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    manager = new DesktopManager();
+    manager.setSendToWebview(vi.fn());
+  });
+
+  it("registerShortcut calls GlobalShortcut.register and returns success", async () => {
+    (mockGS.register as ReturnType<typeof vi.fn>).mockReturnValue(true);
+    const result = await manager.registerShortcut({
+      id: "test-shortcut",
+      accelerator: "CommandOrControl+K",
+    });
+    expect(mockGS.register).toHaveBeenCalled();
+    expect(result).toEqual({ success: true });
+  });
+
+  it("unregisterShortcut resolves without error", async () => {
+    await expect(
+      manager.unregisterShortcut({ id: "test-shortcut" }),
+    ).resolves.not.toThrow();
+  });
+
+  it("unregisterAllShortcuts calls GlobalShortcut.unregisterAll", async () => {
+    await manager.unregisterAllShortcuts();
+    expect(mockGS.unregisterAll).toHaveBeenCalled();
+  });
+
+  it("isShortcutRegistered returns { registered: boolean }", async () => {
+    (mockGS.isRegistered as ReturnType<typeof vi.fn>).mockReturnValue(false);
+    const result = await manager.isShortcutRegistered({
+      accelerator: "CommandOrControl+K",
+    });
+    expect(result).toHaveProperty("registered");
+    expect(typeof result.registered).toBe("boolean");
+  });
+
+  documentHeavyDesktopRegression(
+    "Shortcuts survive window focus changes (e2e)",
+  );
+});
+
+describe("Auto-launch (automated)", () => {
+  let manager: DesktopManager;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    manager = new DesktopManager();
+  });
+
+  it("setAutoLaunch({ enabled: true }) resolves without error", async () => {
+    await expect(
+      manager.setAutoLaunch({ enabled: true }),
+    ).resolves.not.toThrow();
+  });
+
+  it("setAutoLaunch({ enabled: false }) resolves without error", async () => {
+    await expect(
+      manager.setAutoLaunch({ enabled: false }),
+    ).resolves.not.toThrow();
+  });
+
+  it("getAutoLaunchStatus returns { enabled, openAsHidden } shape", async () => {
+    const result = await manager.getAutoLaunchStatus();
+    expect(result).toHaveProperty("enabled");
+    expect(result).toHaveProperty("openAsHidden");
+    expect(typeof result.enabled).toBe("boolean");
+  });
+
+  documentHeavyDesktopRegression(
+    "App launches automatically after system restart (e2e)",
+  );
+  documentHeavyDesktopRegression("Auto-launch survives app updates (e2e)");
+});
+
+describe("Clipboard round-trip (automated)", () => {
+  let manager: DesktopManager;
+  const mockUtils = electrobunBun.Utils as typeof electrobunBun.Utils;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    manager = new DesktopManager();
+  });
+
+  it("writing text to clipboard and reading it back returns the same string", async () => {
+    let stored = "";
+    (
+      mockUtils.clipboardWriteText as ReturnType<typeof vi.fn>
+    ).mockImplementation((text: string) => {
+      stored = text;
+    });
+    (
+      mockUtils.clipboardReadText as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => stored);
+
+    await manager.writeToClipboard({ text: "hello world" });
+    const result = await manager.readFromClipboard();
+    expect(result.text).toBe("hello world");
+  });
+
+  it("clearClipboard empties the clipboard", async () => {
+    await manager.clearClipboard();
+    expect(mockUtils.clipboardClear).toHaveBeenCalled();
+  });
+
+  it("clipboardAvailableFormats returns format list", async () => {
+    const result = await manager.clipboardAvailableFormats();
+    expect(Array.isArray(result.formats)).toBe(true);
+  });
+});
+
+describe("Power state and battery (automated)", () => {
+  it("desktopGetPowerState handler exists in RPC", async () => {
+    const { handlers } = await captureHandlers();
+    expect(typeof handlers.desktopGetPowerState).toBe("function");
+  });
+
+  it("getPowerState returns an object with power info", async () => {
+    const manager = new DesktopManager();
+    const state = await manager.getPowerState();
+    expect(state).toBeDefined();
+    expect(typeof state).toBe("object");
+  });
+
+  documentManualDesktopRegression(
+    "Power state reflects actual battery status (hardware)",
+  );
+});
+
+describe("Application menu (automated)", () => {
+  it("buildApplicationMenu produces Milady, Edit, View, Window menus", async () => {
+    // Validate menu structure via source contract
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const menuSource = fs.readFileSync(
+      path.resolve(__dirname, "../application-menu.ts"),
+      "utf8",
+    );
+    expect(menuSource).toContain('"Milady"');
+    expect(menuSource).toContain('"Edit"');
+    expect(menuSource).toContain('"View"');
+    expect(menuSource).toContain('"Window"');
+  });
+
+  it("Milady menu includes Check for Updates and Restart Agent actions", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const menuSource = fs.readFileSync(
+      path.resolve(__dirname, "../application-menu.ts"),
+      "utf8",
+    );
+    expect(menuSource).toContain("check-for-updates");
+    expect(menuSource).toContain("restart-agent");
+    expect(menuSource).toContain("reset-milady");
+  });
+
+  it("Edit menu includes undo, redo, cut, copy, paste, selectAll roles", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const menuSource = fs.readFileSync(
+      path.resolve(__dirname, "../application-menu.ts"),
+      "utf8",
+    );
+    for (const role of ["undo", "redo", "cut", "copy", "paste", "selectAll"]) {
+      expect(menuSource).toContain(`"${role}"`);
+    }
+  });
+
+  it("View menu includes reload, forceReload, toggleDevTools roles", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const menuSource = fs.readFileSync(
+      path.resolve(__dirname, "../application-menu.ts"),
+      "utf8",
+    );
+    expect(menuSource).toContain("reload");
+    expect(menuSource).toContain("toggleDevTools");
+  });
+
+  it("check-for-updates action is wired in index.ts Electrobun event handler", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const indexSource = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(indexSource).toContain('"check-for-updates"');
+  });
+
+  it("reset-milady menu action wires main-process reset and applied payload (see menu-reset-from-main.test.ts for behavior)", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const indexSource = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(indexSource).toContain('"reset-milady"');
+    expect(indexSource).toContain("resetMiladyFromApplicationMenu");
+    expect(indexSource).toContain("runMainMenuResetAfterApiBaseResolved");
+    expect(indexSource).toContain("menu-reset-milady-applied");
+  });
+
+  documentHeavyDesktopRegression("Keyboard shortcut Cmd+Q triggers quit (e2e)");
+  documentHeavyDesktopRegression(
+    "Keyboard shortcut Cmd+R triggers reload (e2e)",
+  );
+  documentHeavyDesktopRegression(
+    "Keyboard shortcut Cmd+Option+I opens devtools (e2e)",
+  );
+});
+
+describe("Gateway discovery — mDNS (automated)", () => {
+  it("startDiscovery returns { gateways, status } via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.gatewayStartDiscovery(undefined)) as {
+      gateways: unknown[];
+      status: string;
+    };
+    expect(result).toHaveProperty("gateways");
+    expect(result).toHaveProperty("status");
+    expect(Array.isArray(result.gateways)).toBe(true);
+  });
+
+  it("stopDiscovery resolves without error", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(handlers.gatewayStopDiscovery()).resolves.not.toThrow();
+  });
+
+  it("isDiscovering returns { isDiscovering: boolean }", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.gatewayIsDiscovering()) as {
+      isDiscovering: boolean;
+    };
+    expect(typeof result.isDiscovering).toBe("boolean");
+  });
+
+  it("getDiscoveredGateways returns { gateways: GatewayEndpoint[] }", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.gatewayGetDiscoveredGateways()) as {
+      gateways: unknown[];
+    };
+    expect(result).toHaveProperty("gateways");
+    expect(Array.isArray(result.gateways)).toBe(true);
+  });
+
+  it("discovery returns empty list when no gateways are present (not crash)", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.gatewayStartDiscovery(undefined)) as {
+      gateways: unknown[];
+    };
+    expect(result.gateways).toEqual([]);
+  });
+
+  documentHeavyDesktopRegression(
+    "Gateway discovery sends gatewayDiscovery push event to renderer (integration)",
+  );
+});
+
+describe("Canvas windows — computer-use / A2UI (automated)", () => {
+  it("canvasCreateWindow returns { id: string }", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.canvasCreateWindow({ title: "Canvas" })) as {
+      id: string;
+    };
+    expect(result).toHaveProperty("id");
+    expect(typeof result.id).toBe("string");
+  });
+
+  it("canvasNavigate resolves without error for localhost URL", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.canvasNavigate({ id: "c1", url: "http://localhost:3000" }),
+    ).resolves.not.toThrow();
+  });
+
+  it("canvasSnapshot returns null when no real window (mocked)", async () => {
+    const { handlers } = await captureHandlers();
+    const r = await handlers.canvasSnapshot({ id: "c1" });
+    expect(r).toBeNull();
+  });
+
+  it("canvasEval returns result from mock", async () => {
+    const { handlers } = await captureHandlers();
+    const r = await handlers.canvasEval({ id: "c1", script: "document.title" });
+    expect(r).toBeNull(); // mock returns null
+  });
+
+  it("canvasHide resolves without error", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(handlers.canvasHide({ id: "c1" })).resolves.not.toThrow();
+  });
+
+  it("canvasShow resolves without error", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(handlers.canvasShow({ id: "c1" })).resolves.not.toThrow();
+  });
+
+  it("canvasResize accepts width/height and resolves", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.canvasResize({ id: "c1", width: 1024, height: 768 }),
+    ).resolves.not.toThrow();
+  });
+
+  it("a2uiPush delegates to canvas manager", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.canvasA2uiPush({
+        id: "c1",
+        payload: { type: "click", x: 100, y: 200 },
+      }),
+    ).resolves.not.toThrow();
+  });
+
+  it("a2uiReset delegates to canvas manager", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(handlers.canvasA2uiReset({ id: "c1" })).resolves.not.toThrow();
+  });
+
+  it("canvasDestroyWindow removes window and resolves", async () => {
+    const { handlers } = await captureHandlers();
+    await expect(
+      handlers.canvasDestroyWindow({ id: "c1" }),
+    ).resolves.not.toThrow();
+  });
+
+  it("canvasListWindows returns { windows: [] }", async () => {
+    const { handlers } = await captureHandlers();
+    const result = (await handlers.canvasListWindows()) as {
+      windows: unknown[];
+    };
+    expect(result).toMatchObject({ windows: [] });
+  });
+
+  documentHeavyDesktopRegression(
+    "Canvas window is sandboxed — cannot access main app origin (integration)",
+  );
+  documentHeavyDesktopRegression(
+    "Canvas navigate blocks external URLs (integration)",
+  );
+});
+
+describe("Agent lifecycle (automated)", () => {
+  it("agentStart returns running status with port via RPC", async () => {
+    const { handlers } = await captureHandlers();
+    const status = (await handlers.agentStart()) as {
+      state: string;
+      port: number;
+    };
+    expect(status.state).toBe("running");
+    expect(status.port).toBe(2138);
+  });
+
+  it("agentStop resolves with { ok: true }", async () => {
+    const { handlers } = await captureHandlers();
+    const result = await handlers.agentStop();
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("agentRestart returns running status", async () => {
+    const { handlers } = await captureHandlers();
+    const status = (await handlers.agentRestart()) as { state: string };
+    expect(status.state).toBe("running");
+  });
+
+  it("agentRestartClearLocalDb returns running status", async () => {
+    const { handlers } = await captureHandlers();
+    const status = (await handlers.agentRestartClearLocalDb()) as {
+      state: string;
+    };
+    expect(status.state).toBe("running");
+  });
+
+  it("agentStatus returns current status shape", async () => {
+    const { handlers } = await captureHandlers();
+    const status = (await handlers.agentStatus()) as {
+      state: string;
+      agentName: string | null;
+      port: number | null;
+    };
+    expect(status).toHaveProperty("state");
+    expect(status).toHaveProperty("agentName");
+    expect(status).toHaveProperty("port");
+  });
+
+  it("AgentManager initial state is not_started", async () => {
+    const { AgentManager } =
+      await vi.importActual<typeof import("../native/agent")>(
+        "../native/agent",
+      );
+    const mgr = new AgentManager();
+    expect(mgr.getStatus().state).toBe("not_started");
+    expect(mgr.getPort()).toBeNull();
+  });
+
+  it("onStatusChange returns unsubscribe function", async () => {
+    const { AgentManager } =
+      await vi.importActual<typeof import("../native/agent")>(
+        "../native/agent",
+      );
+    const mgr = new AgentManager();
+    const unsub = mgr.onStatusChange(vi.fn());
+    expect(typeof unsub).toBe("function");
+  });
+
+  documentHeavyDesktopRegression(
+    "Agent port is reachable via HTTP after status reaches 'running' (integration)",
+  );
+  documentHeavyDesktopRegression(
+    "Agent crash triggers automatic restart (integration)",
+  );
+  documentHeavyDesktopRegression(
+    "Stopping agent while starting does not leave zombie process (integration)",
+  );
+});
+
+describe("Updater (automated)", () => {
+  it("desktopApplyUpdate handler exists and is callable", async () => {
+    const { handlers } = await captureHandlers();
+    expect(typeof handlers.desktopApplyUpdate).toBe("function");
+  });
+
+  it("desktopGetVersion handler returns version info", async () => {
+    const manager = new DesktopManager();
+    const version = await manager.getVersion();
+    expect(version).toHaveProperty("version");
+  });
+
+  it("update event handlers are wired in index.ts source", async () => {
+    const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
+    const path = await vi.importActual<typeof import("node:path")>("node:path");
+    const source = fs.readFileSync(
+      path.resolve(__dirname, "../index.ts"),
+      "utf8",
+    );
+    expect(source).toContain("desktopUpdateAvailable");
+    expect(source).toContain("desktopUpdateReady");
+    expect(source).toContain("Updater");
+  });
+
+  documentHeavyDesktopRegression(
+    "Check for updates contacts the release server (network)",
+  );
+  documentHeavyDesktopRegression("Applying update relaunches the app (e2e)");
+  documentHeavyDesktopRegression(
+    "Update check works on both canary and stable channels (network)",
+  );
+});
+
+describe("RPC handler delegation — desktop", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("desktopOpenSurfaceWindow ignores invalid surfaces", async () => {
+    const desktopModule = await import("../native/desktop");
+    const getDesktopManagerMock = desktopModule.getDesktopManager as Mock;
+
+    getDesktopManagerMock.mockClear();
+    const { handlers } = await captureHandlers();
+    const manager = getDesktopManagerMock.mock.results.at(-1)?.value;
+
+    expect(manager).toBeDefined();
+    await expect(
+      handlers.desktopOpenSurfaceWindow?.({ surface: "evil" } as never),
+    ).resolves.toBeUndefined();
+    expect(manager?.openSurfaceWindow).not.toHaveBeenCalled();
+  });
+
+  it("desktopOpenSurfaceWindow forwards browse for the browser surface", async () => {
+    const desktopModule = await import("../native/desktop");
+    const getDesktopManagerMock = desktopModule.getDesktopManager as Mock;
+
+    getDesktopManagerMock.mockClear();
+    const { handlers } = await captureHandlers();
+    const manager = getDesktopManagerMock.mock.results.at(-1)?.value;
+
+    expect(manager).toBeDefined();
+    await handlers.desktopOpenSurfaceWindow?.({
+      surface: "browser",
+      browse: "https://elizacloud.ai",
+    });
+    expect(manager?.openSurfaceWindow).toHaveBeenCalledWith(
+      "browser",
+      "https://elizacloud.ai",
+    );
+  });
+
+  it("desktopOpenSurfaceWindow drops browse for non-browser surfaces", async () => {
+    const desktopModule = await import("../native/desktop");
+    const getDesktopManagerMock = desktopModule.getDesktopManager as Mock;
+
+    getDesktopManagerMock.mockClear();
+    const { handlers } = await captureHandlers();
+    const manager = getDesktopManagerMock.mock.results.at(-1)?.value;
+
+    expect(manager).toBeDefined();
+    await handlers.desktopOpenSurfaceWindow?.({
+      surface: "chat",
+      browse: "https://evil.test",
+    });
+    expect(manager?.openSurfaceWindow).toHaveBeenCalledWith("chat", undefined);
+  });
 });

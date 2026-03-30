@@ -9,6 +9,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { TalkModeConfig, TalkModeState } from "../rpc-schema";
+import type { SendToWebview } from "../types.js";
 import {
   isWhisperAvailable,
   transcribeBunSpawn,
@@ -26,8 +27,6 @@ const TALKMODE_AUDIO_BUFFER_THRESHOLD =
   FLOAT32_BYTES_PER_SAMPLE;
 const TALKMODE_MIN_FLUSH_BYTES =
   TALKMODE_SAMPLE_RATE * TALKMODE_MIN_FLUSH_SECONDS * FLOAT32_BYTES_PER_SAMPLE;
-
-type SendToWebview = (message: string, payload?: unknown) => void;
 
 export class TalkModeManager {
   private sendToWebview: SendToWebview | null = null;
@@ -189,9 +188,12 @@ export class TalkModeManager {
       );
 
       if (!resp.ok) {
-        console.error(
-          `[TalkMode] ElevenLabs API error: ${resp.status} ${resp.statusText}`,
-        );
+        const errorMsg = `ElevenLabs API error: ${resp.status} ${resp.statusText}`;
+        console.error(`[TalkMode] ${errorMsg}`);
+        this.sendToWebview?.("talkmodeError", {
+          source: "elevenlabs",
+          message: errorMsg,
+        });
         this.setState("error");
         return;
       }
@@ -212,7 +214,12 @@ export class TalkModeManager {
       if (err instanceof Error && err.name === "AbortError") {
         console.log("[TalkMode] ElevenLabs TTS aborted by stopSpeaking()");
       } else {
+        const errorMsg = err instanceof Error ? err.message : String(err);
         console.error("[TalkMode] ElevenLabs TTS error:", err);
+        this.sendToWebview?.("talkmodeError", {
+          source: "elevenlabs",
+          message: errorMsg,
+        });
         this.setState("error");
       }
     } finally {
@@ -344,7 +351,7 @@ export class TalkModeManager {
         fs.unlinkSync(tmpPath);
       } catch {}
 
-      if (!result || !result.text.trim()) return;
+      if (!result?.text?.trim()) return;
 
       // Emit transcript to renderer
       this.sendToWebview?.("talkmode:transcript", {

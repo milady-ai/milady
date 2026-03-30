@@ -9,9 +9,11 @@ import type {
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { text, findButtonByText, flush } from "../../../../test/helpers/react-test";
+import { testT } from "../../../../test/helpers/i18n";
 
 interface FineTuningContextStub {
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, unknown>) => string;
   setState: (key: string, value: unknown) => void;
   handleRestart: () => Promise<void>;
   setActionNotice: (
@@ -52,7 +54,70 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
+  CUSTOM_ONBOARDING_STEPS: [],
 }));
+
+vi.mock("@miladyai/app-core/hooks", () => ({
+  useIntervalWhenDocumentVisible: vi.fn(),
+}));
+
+// Mock @miladyai/ui components to render inline (no Radix portals)
+// so react-test-renderer does not crash with parentInstance.children.indexOf.
+vi.mock("@miladyai/ui", () => {
+  const passthrough = ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
+      React.createElement("textarea", props),
+    Select: passthrough,
+    SelectContent: passthrough,
+    SelectItem: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("option", props, children),
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
+    ConfirmDelete: passthrough,
+    Dialog: ({
+      children,
+      open,
+    }: React.PropsWithChildren<{ open?: boolean }>) =>
+      open !== false ? React.createElement(React.Fragment, null, children) : null,
+    DialogContent: passthrough,
+    DialogHeader: passthrough,
+    DialogTitle: passthrough,
+    DialogDescription: passthrough,
+    DialogFooter: passthrough,
+    Z_BASE: 0,
+    Z_DROPDOWN: 10,
+    Z_STICKY: 20,
+    Z_MODAL_BACKDROP: 50,
+    Z_MODAL: 100,
+    Z_DIALOG_OVERLAY: 160,
+    Z_DIALOG: 170,
+    Z_OVERLAY: 200,
+    Z_TOOLTIP: 300,
+    Z_SYSTEM_BANNER: 9998,
+    Z_SYSTEM_CRITICAL: 9999,
+    Z_SHELL_OVERLAY: 10000,
+    Z_GLOBAL_EMOTE: 11000,
+    Z_SELECT_FLOAT: 12000,
+    SELECT_FLOATING_LAYER_NAME: "config-select",
+    SELECT_FLOATING_LAYER_Z_INDEX: 12000,
+    SELECT_FLOATING_LAYER_CLASSNAME: "z-[12000]",
+  };
+});
 
 import { FineTuningView } from "../../src/components/FineTuningView";
 
@@ -134,24 +199,6 @@ function baseModel(): TrainingModelRecord {
   };
 }
 
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : ""))
-    .join("")
-    .trim();
-}
-
-function findButtonByText(
-  root: TestRenderer.ReactTestInstance,
-  label: string,
-): TestRenderer.ReactTestInstance {
-  const matches = root.findAll(
-    (node) => node.type === "button" && text(node) === label,
-  );
-  if (!matches[0]) throw new Error(`Button "${label}" not found`);
-  return matches[0];
-}
-
 function findInputByPlaceholder(
   root: TestRenderer.ReactTestInstance,
   placeholder: string,
@@ -164,15 +211,6 @@ function findInputByPlaceholder(
   );
   if (!matches[0]) throw new Error(`Input "${placeholder}" not found`);
   return matches[matches.length - 1];
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
-  await act(async () => {
-    await Promise.resolve();
-  });
 }
 
 describe("FineTuningView", () => {
@@ -201,19 +239,7 @@ describe("FineTuningView", () => {
     mockClientFns.onWsEvent.mockReset();
 
     appContext = {
-      t: (k: string) => {
-        if (k === "finetuningview.LimitTrajectories")
-          return "Limit trajectories";
-        if (k === "finetuningview.MinLLMCallsPerTr")
-          return "Min LLM calls per trajectory";
-        if (k === "finetuningview.OllamaModelNameO")
-          return "Ollama model name (optional)";
-        if (k === "finetuningview.BaseModelForOllam")
-          return "Base model for Ollama (optional)";
-        if (k === "finetuningview.ProviderModelEG")
-          return 'Provider model (e.g. "ollama/my-model")';
-        return k;
-      },
+      t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
       setState: vi.fn((_key, _value) => {
         // Mock implementation if needed, otherwise a no-op
       }),
@@ -254,11 +280,11 @@ describe("FineTuningView", () => {
     mockClientFns.startTrainingJob.mockResolvedValue({ job: baseJob() });
     mockClientFns.cancelTrainingJob.mockResolvedValue({ job: baseJob() });
     mockClientFns.importTrainingModelToOllama.mockResolvedValue({
-      model: { ...baseModel(), ollamaModel: "milady-ft-model" },
+      model: { ...baseModel(), ollamaModel: "eliza-ft-model" },
     });
     mockClientFns.activateTrainingModel.mockResolvedValue({
       modelId: "model-1",
-      providerModel: "ollama/milady-ft-model",
+      providerModel: "ollama/eliza-ft-model",
       needsRestart: false,
     });
     mockClientFns.benchmarkTrainingModel.mockResolvedValue({
@@ -267,7 +293,7 @@ describe("FineTuningView", () => {
     });
     mockClientFns.sendChatRest.mockResolvedValue({
       text: "MODEL_OK",
-      agentName: "Milady",
+      agentName: "Eliza",
     });
     mockClientFns.onWsEvent.mockImplementation(
       (_type: string, handler: (data: WsPayload) => void) => {
@@ -297,7 +323,7 @@ describe("FineTuningView", () => {
       tree?.root.findAll(
         (node) =>
           typeof node.type === "string" &&
-          node.children.includes("finetuningview.FineTuning"),
+          node.children.includes(testT("finetuningview.FineTuning")),
       ).length,
     ).toBeGreaterThan(0);
   });
@@ -425,12 +451,12 @@ describe("FineTuningView", () => {
     const providerModelInput = findInputByPlaceholder(root, "Provider model");
 
     await act(async () => {
-      ollamaNameInput.props.onChange({ target: { value: "milady-ft-model" } });
+      ollamaNameInput.props.onChange({ target: { value: "eliza-ft-model" } });
       baseModelInput.props.onChange({
         target: { value: "qwen2.5:7b-instruct" },
       });
       providerModelInput.props.onChange({
-        target: { value: "ollama/milady-ft-model" },
+        target: { value: "ollama/eliza-ft-model" },
       });
     });
 
@@ -440,7 +466,7 @@ describe("FineTuningView", () => {
     expect(mockClientFns.importTrainingModelToOllama).toHaveBeenCalledWith(
       "model-1",
       {
-        modelName: "milady-ft-model",
+        modelName: "eliza-ft-model",
         baseModel: "qwen2.5:7b-instruct",
         ollamaUrl: "http://localhost:11434",
       },
@@ -451,7 +477,7 @@ describe("FineTuningView", () => {
     });
     expect(mockClientFns.activateTrainingModel).toHaveBeenCalledWith(
       "model-1",
-      "ollama/milady-ft-model",
+      "ollama/eliza-ft-model",
     );
 
     await act(async () => {

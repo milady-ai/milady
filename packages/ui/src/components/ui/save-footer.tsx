@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
+import { Button } from "./button";
 
 export interface SaveFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   dirty: boolean;
@@ -43,14 +44,14 @@ export const SaveFooter = React.forwardRef<HTMLDivElement, SaveFooterProps>(
           <span className="text-xs text-destructive">{saveError}</span>
         )}
         {saveSuccess && <span className="text-xs text-ok">{savedLabel}</span>}
-        <button
-          type="button"
-          className="rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-primary-fg transition-opacity hover:opacity-90 disabled:opacity-50"
+        <Button
+          size="sm"
+          className="text-txt-strong hover:text-txt-strong"
           disabled={saving}
           onClick={onSave}
         >
           {saving ? savingLabel : saveLabel}
-        </button>
+        </Button>
       </div>
     );
   },

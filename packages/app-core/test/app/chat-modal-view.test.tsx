@@ -1,6 +1,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
 
 const { mockUseApp } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
@@ -20,13 +21,14 @@ const {
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock("../../src/components/ChatView.js", () => ({
+vi.mock("../../src/components/ChatView", () => ({
   ChatView: () => React.createElement("section", null, "ChatView Ready"),
 }));
 
-vi.mock("../../src/components/ConversationsSidebar.js", () => ({
+vi.mock("../../src/components/ConversationsSidebar", () => ({
   ConversationsSidebar: () =>
     React.createElement("aside", null, "ConversationsSidebar Ready"),
 }));
@@ -65,12 +67,6 @@ function createContext() {
     setTab: vi.fn(),
     uiLanguage: "en",
   };
-}
-
-function textOf(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : textOf(child)))
-    .join("");
 }
 
 describe("ChatModalView", () => {
@@ -146,6 +142,7 @@ describe("ChatModalView", () => {
     const thread = tree?.root.find(
       (node) => node.props["data-chat-game-thread"] === true,
     );
+    expect(String(shell.props.className)).toContain("rounded-[28px]");
     expect(String(shell.props.className)).toContain("overflow-visible");
     expect(String(thread.props.className)).toContain("overflow-visible");
   });

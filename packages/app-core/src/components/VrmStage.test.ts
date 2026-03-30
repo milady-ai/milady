@@ -1,13 +1,11 @@
 // @vitest-environment jsdom
 import React from "react";
+import type { ReactTestRenderer } from "react-test-renderer";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const AVATAR_SWAP_SETTLE_MS = 650;
-
 const testState = vi.hoisted(() => ({
-  viewerStatusByPath: new Map<string, { active: boolean }>(),
-  viewerPropsByPath: new Map<string, Record<string, unknown>>(),
+  viewerProps: null as Record<string, unknown> | null,
 }));
 
 vi.mock("@miladyai/app-core/hooks", () => ({
@@ -25,44 +23,28 @@ vi.mock("./AvatarLoader", () => ({
 
 vi.mock("./avatar/VrmViewer", () => ({
   VrmViewer: (props: Record<string, unknown>) => {
-    const vrmPath = props.vrmPath ?? "";
-    testState.viewerStatusByPath.set(vrmPath, {
-      active: (props.active as boolean | undefined) ?? true,
-    });
-    testState.viewerPropsByPath.set(vrmPath, props);
+    testState.viewerProps = props;
     return React.createElement("div", {
       "data-testid": "vrm-viewer",
-      "data-vrm-path": vrmPath,
+      "data-vrm-path": props.vrmPath ?? "",
+      "data-world-url": props.worldUrl ?? "",
       "data-active": String((props.active as boolean | undefined) ?? true),
     });
   },
 }));
 
-import { VrmStage, type VrmStageAvatarEntry } from "./VrmStage";
+import { VrmStage } from "./VrmStage";
 
-function getViewerNodes(
-  renderer: TestRenderer.ReactTestRenderer,
-): TestRenderer.ReactTestInstance[] {
+function getViewerNode(renderer: ReactTestRenderer) {
   return renderer.root.findAll(
     (node) => node.props["data-testid"] === "vrm-viewer",
   );
 }
 
-function getActiveMap(
-  renderer: TestRenderer.ReactTestRenderer,
-): Record<string, string> {
-  return Object.fromEntries(
-    getViewerNodes(renderer).map((node) => [
-      String(node.props["data-vrm-path"]),
-      String(node.props["data-active"]),
-    ]),
-  );
-}
-
 function renderStage(props: {
   vrmPath: string;
+  worldUrl?: string;
   fallbackPreviewUrl: string;
-  preloadAvatars: readonly VrmStageAvatarEntry[];
 }): React.ReactElement {
   return React.createElement(VrmStage, {
     ...props,
@@ -71,11 +53,10 @@ function renderStage(props: {
 }
 
 describe("VrmStage", () => {
-  let renderer: TestRenderer.ReactTestRenderer | null = null;
+  let renderer: ReactTestRenderer | null = null;
 
   beforeEach(() => {
-    testState.viewerStatusByPath.clear();
-    testState.viewerPropsByPath.clear();
+    testState.viewerProps = null;
     renderer = null;
     vi.useFakeTimers();
   });
@@ -93,84 +74,62 @@ describe("VrmStage", () => {
     vi.useRealTimers();
   });
 
-  it("preloads additional avatars without activating them", async () => {
-    const preloadAvatars: readonly VrmStageAvatarEntry[] = [
-      {
-        vrmPath: "/vrms/milady-4.vrm.gz",
-        fallbackPreviewUrl: "/vrms/previews/milady-4.png",
-      },
-      {
-        vrmPath: "/vrms/milady-5.vrm.gz",
-        fallbackPreviewUrl: "/vrms/previews/milady-5.png",
-      },
-    ];
-
+  it("renders a single VrmViewer with vrmPath and worldUrl", async () => {
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
-          preloadAvatars,
+          vrmPath: "/vrms/eliza-1.vrm.gz",
+          worldUrl: "/worlds/companion-day.spz",
+          fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
         }),
       );
     });
 
-    expect(getActiveMap(renderer)).toEqual({
-      "/vrms/milady-1.vrm.gz": "true",
-      "/vrms/milady-4.vrm.gz": "false",
-      "/vrms/milady-5.vrm.gz": "false",
-    });
+    const viewers = getViewerNode(renderer!);
+    expect(viewers).toHaveLength(1);
+    expect(viewers[0]?.props["data-vrm-path"]).toBe("/vrms/eliza-1.vrm.gz");
+    expect(viewers[0]?.props["data-world-url"]).toBe(
+      "/worlds/companion-day.spz",
+    );
   });
 
-  it("keeps the outgoing avatar alive until the synced swap finishes", async () => {
-    const preloadAvatars: readonly VrmStageAvatarEntry[] = [
-      {
-        vrmPath: "/vrms/milady-4.vrm.gz",
-        fallbackPreviewUrl: "/vrms/previews/milady-4.png",
-      },
-    ];
-
+  it("keeps the same single VrmViewer when vrmPath changes (world stays stable)", async () => {
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
-          preloadAvatars,
+          vrmPath: "/vrms/eliza-1.vrm.gz",
+          worldUrl: "/worlds/companion-day.spz",
+          fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
         }),
       );
     });
 
     await act(async () => {
-      renderer.update(
+      renderer?.update(
         renderStage({
-          vrmPath: "/vrms/milady-4.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-4.png",
-          preloadAvatars,
+          vrmPath: "/vrms/eliza-4.vrm.gz",
+          worldUrl: "/worlds/companion-day.spz",
+          fallbackPreviewUrl: "/vrms/previews/eliza-4.png",
         }),
       );
     });
 
-    expect(getActiveMap(renderer)).toEqual({
-      "/vrms/milady-1.vrm.gz": "true",
-      "/vrms/milady-4.vrm.gz": "true",
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(AVATAR_SWAP_SETTLE_MS);
-    });
-
-    expect(getActiveMap(renderer)).toEqual({
-      "/vrms/milady-4.vrm.gz": "true",
-    });
+    // Still only one VrmViewer — same engine, just different vrmPath
+    const viewers = getViewerNode(renderer!);
+    expect(viewers).toHaveLength(1);
+    expect(viewers[0]?.props["data-vrm-path"]).toBe("/vrms/eliza-4.vrm.gz");
+    // worldUrl stays the same — background is decoupled from character
+    expect(viewers[0]?.props["data-world-url"]).toBe(
+      "/worlds/companion-day.spz",
+    );
   });
 
   it("keeps the loader visible when avatar loading exceeds four seconds", async () => {
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
-          preloadAvatars: [],
+          vrmPath: "/vrms/eliza-1.vrm.gz",
+          fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
         }),
       );
     });
@@ -191,22 +150,20 @@ describe("VrmStage", () => {
   });
 
   it("shows the static preview only after a real avatar load error", async () => {
-    const vrmPath = "/vrms/milady-1.vrm.gz";
-    const fallbackPreviewUrl = "/vrms/previews/milady-1.png";
+    const vrmPath = "/vrms/eliza-1.vrm.gz";
+    const fallbackPreviewUrl = "/vrms/previews/eliza-1.png";
 
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
           vrmPath,
           fallbackPreviewUrl,
-          preloadAvatars: [],
         }),
       );
     });
 
     await act(async () => {
-      const onEngineState = testState.viewerPropsByPath.get(vrmPath)
-        ?.onEngineState as
+      const onEngineState = testState.viewerProps?.onEngineState as
         | ((state: Record<string, unknown>) => void)
         | undefined;
       onEngineState?.({ vrmLoaded: false, loadError: "failed to load" });

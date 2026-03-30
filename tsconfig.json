@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2023", "ScriptHost"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2023",
+      "ScriptHost"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -16,21 +22,32 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
-      "@elizaos/app-hyperscape/routes": [
-        "../plugins/app-hyperscape/src/routes.ts"
+      "@miladyai/ui": [
+        "./packages/ui/src/index.ts"
+      ],
+      "@miladyai/ui/*": [
+        "./packages/ui/src/*"
+      ],
+      "@miladyai/agent/*": [
+        "./packages/agent/src/*"
+      ],
+      "@elizaos/core": [
+        "./node_modules/@elizaos/core"
       ]
     }
   },
-  "include": ["src/**/*"],
+  "include": [
+    "packages/app-core/src/**/*",
+    "packages/agent/src/external-modules.d.ts"
+  ],
   "exclude": [
     "node_modules",
+    "node_modules/.bun",
     "dist",
-    "packages",
     "plugins",
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/**/test-helpers.ts",
-    "src/services/training-service.ts",
-    "src/plugins/retake/**"
+    "packages/app-core/src/**/*.test.ts",
+    "packages/app-core/src/**/*.test.tsx",
+    "packages/app-core/src/**/test-helpers.ts",
+    "packages/app-core/src/services/training-service.ts"
   ]
 }

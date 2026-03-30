@@ -15,11 +15,18 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@ui/*": ["./src/*"]
     }
   },
+  "exclude": [
+    "src/**/*.stories.ts",
+    "src/**/*.stories.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ],
   "include": ["src"],
   "references": []
 }

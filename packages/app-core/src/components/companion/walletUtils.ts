@@ -1,5 +1,18 @@
 import type { BscTradeTxStatusResponse } from "@miladyai/app-core/api";
 import { getExplorerTokenUrl } from "../chainConfig";
+import {
+  BSC_GAS_READY_THRESHOLD,
+  HEX_ADDRESS_RE,
+  isAvaxChainName,
+  isBscChainName,
+} from "../inventory/constants";
+
+export {
+  BSC_GAS_READY_THRESHOLD,
+  HEX_ADDRESS_RE,
+  isAvaxChainName,
+  isBscChainName,
+};
 
 export type TranslatorFn = (
   key: string,
@@ -25,10 +38,8 @@ export function mapWalletTradeError(
   return t(fallbackKey);
 }
 
-export const BSC_GAS_READY_THRESHOLD = 0.005;
 export const BSC_SWAP_GAS_RESERVE = 0.002;
-export const HEX_ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
-export const MILADY_BSC_TOKEN_ADDRESS =
+export const ELIZA_BSC_TOKEN_ADDRESS =
   "0xc20e45e49e0e79f0fc81e71f05fd2772d6587777";
 export const BSC_USDT_TOKEN_ADDRESS =
   "0x55d398326f99059fF775485246999027B3197955";
@@ -95,25 +106,6 @@ export type TokenMetadata = {
   name: string;
   logoUrl: string | null;
 };
-
-export function isBscChainName(chain: string): boolean {
-  const normalized = chain.trim().toLowerCase();
-  return (
-    normalized === "bsc" ||
-    normalized === "bnb chain" ||
-    normalized === "bnb smart chain"
-  );
-}
-
-export function isAvaxChainName(chain: string): boolean {
-  const normalized = chain.trim().toLowerCase();
-  return (
-    normalized === "avax" ||
-    normalized === "avalanche" ||
-    normalized === "c-chain" ||
-    normalized === "avalanche c-chain"
-  );
-}
 
 export function resolvePortfolioChainKey(
   chain: string,
@@ -283,8 +275,3 @@ export async function fetchTokenMetadata(
     clearTimeout(timeout);
   }
 }
-
-/** @deprecated Use `fetchTokenMetadata(address, "bsc")` instead. */
-export const fetchBscTokenMetadata = (
-  contractAddress: string,
-): Promise<TokenMetadata | null> => fetchTokenMetadata(contractAddress, "bsc");

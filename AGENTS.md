@@ -2,7 +2,7 @@
 
 > **This is an agents-only codebase.** All PRs are reviewed and merged by agents. Humans contribute as QA testers. See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-- Monorepo: `packages/milady` within eliza-ok
+- Monorepo: `milady-ai/milady` — core logic in `packages/app-core`, upstream agent in `packages/agent`
 - Runtime baseline: Node **22+** (keep Node + Bun paths working)
 
 ## Contribution Scope
@@ -23,11 +23,13 @@
 
 ## Project Structure
 
-- **Source code:** `src/` — runtime in `src/runtime/`, CLI wiring in `src/cli/`, config in `src/config/`, providers in `src/providers/`, hooks in `src/hooks/`, utils in `src/utils/`, types in `src/types/`
+- **Source code:** `packages/app-core/src/` — runtime in `src/runtime/`, CLI wiring in `src/cli/`, config in `src/config/`, API in `src/api/`, connectors in `src/connectors/`, providers in `src/providers/`, hooks in `src/hooks/`, utils in `src/utils/`, types in `src/types/`
+- **Agent upstream:** `packages/agent/` — elizaOS agent runtime, core plugins, plugin auto-enable maps
 - **Tests:** colocated `*.test.ts` alongside source files
 - **Build output:** `dist/` (via `tsdown`)
-- **Entry points:** `src/entry.ts` (CLI), `src/index.ts` (library), `src/runtime/eliza.ts` (elizaOS runtime)
-- **Apps:** `apps/app/` (Capacitor mobile/desktop, includes React UI), `apps/chrome-extension/`
+- **Entry points:** `packages/app-core/src/entry.ts` (CLI), `packages/app-core/src/index.ts` (library), `packages/agent/src/runtime/eliza.ts` (elizaOS runtime)
+- **Apps:** `apps/app/` (Capacitor mobile/desktop, includes React UI). The browser relay extension is not part of this release checkout.
+- **Internal packages:** `packages/ui/`, `packages/shared/`, `packages/vrm-utils/`, `packages/plugin-wechat/`
 - **Deployment:** `deploy/` (Docker configs)
 - **Scripts:** `scripts/` (build, dev, release tooling)
 - **Tests:** `test/` (setup, helpers, mocks, e2e scripts)
@@ -39,6 +41,7 @@
 - Type-check/build: `bun run build` (runs tsdown + UI build)
 - Lint/format: `bun run check`
 - Run CLI in dev: `bun run milady ...` or `bun run dev:cli`
+- Desktop (Electrobun): `bun run dev:desktop` skips a full Vite build when `apps/app/dist` is fresh; `bun run dev:desktop:watch` runs the Vite dev server and sets `MILADY_RENDERER_URL` for HMR (Rollup `vite build --watch`: add `MILADY_DESKTOP_VITE_BUILD_WATCH=1`). **Busy default ports:** orchestrator and embedded runtime probe loopback for the next free API/UI ports and sync `MILADY_API_PORT` / `ELIZA_PORT` / `MILADY_PORT` so proxies and the UI agree (**why:** fixed defaults collide with other stacks or tools). Rationale: `docs/apps/desktop-local-development.md`. **Observability for agents:** same doc describes `GET /api/dev/stack`, `desktop:stack-status`, aggregated console + screenshot hooks (**why:** multi-process dev is opaque without them); `.cursor/rules/milady-desktop-dev-observability.mdc` nudges Cursor to use them.
 - Tests: `bun run test` (parallel unit + playwright), `bun run test:e2e`, `bun run test:live`
 - Coverage: `bun run test:coverage`
 
@@ -49,7 +52,7 @@
 - Add brief code comments for tricky or non-obvious logic.
 - Aim to keep files under ~500 LOC; split/refactor when it improves clarity or testability.
 - **Do not remove exception-handling guards** in `apps/app/electrobun/src/native/agent.ts` as "excess" or during deslop/cleanup. The try/catch and `.catch()` there keep the desktop app usable when the runtime fails to load (API server stays up, UI can show error). See `docs/electrobun-startup.md`.
-- **Do not remove NODE_PATH setup code** in `src/runtime/eliza.ts`, `scripts/run-node.mjs`, or `apps/app/electrobun/src/native/agent.ts`. Without it, dynamic plugin imports fail with "Cannot find module". See `docs/plugin-resolution-and-node-path.md`.
+- **Do not remove NODE_PATH setup code** in `packages/agent/src/runtime/eliza.ts`, `scripts/run-node.mjs`, or `apps/app/electrobun/src/native/agent.ts`. Without it, dynamic plugin imports fail with "Cannot find module". See `docs/plugin-resolution-and-node-path.md`.
 - **Do not remove the Bun exports patch** in `scripts/patch-deps.mjs` (patchBunExports). It fixes "Cannot find module" for plugins whose published package.json points `exports["."].bun` at missing `./src/index.ts`. See "Bun and published package exports" in `docs/plugin-resolution-and-node-path.md`.
 - Naming: use **Milady** for product/app/docs headings; use `milady` for CLI command, package/binary, paths, and config keys.
 
@@ -61,7 +64,7 @@
 
 ## Testing Guidelines
 
-- Framework: Vitest with V8 coverage thresholds (25% lines/functions/statements, 15% branches)
+- Framework: Vitest with V8 coverage thresholds (25% lines/functions/statements, 15% branches; canonical policy in `scripts/coverage-policy.mjs`)
 - Naming: match source names with `*.test.ts`; e2e in `*.e2e.test.ts`; live in `*.live.test.ts`
 - Run `bun run test` before pushing when you touch logic
 

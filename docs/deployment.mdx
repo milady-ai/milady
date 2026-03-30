@@ -20,7 +20,7 @@ The setup script performs the following steps:
 1. Builds the Docker image (`milady:local` by default)
 2. Generates a random gateway token (via `openssl rand -hex 32`, or Python `secrets.token_hex(32)` as fallback)
 3. Writes environment variables to `deploy/.env`
-4. Runs interactive onboarding (`milady-cli onboard --no-install-daemon`)
+4. Runs interactive setup (`milady-cli setup`)
 5. Starts the gateway service in detached mode
 
 <Warning>

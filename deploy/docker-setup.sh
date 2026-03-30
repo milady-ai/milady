@@ -186,7 +186,7 @@ echo "  - Gateway token: $MILADY_GATEWAY_TOKEN"
 echo "  - Tailscale exposure: Off"
 echo "  - Install Gateway daemon: No"
 echo ""
-docker compose "${COMPOSE_ARGS[@]}" run --rm milady-cli onboard --no-install-daemon
+docker compose "${COMPOSE_ARGS[@]}" run --rm milady-cli setup
 
 echo ""
 echo "==> Provider setup (optional)"

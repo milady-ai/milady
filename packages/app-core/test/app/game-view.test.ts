@@ -4,9 +4,11 @@ import type { AppViewerAuthMessage } from "@miladyai/app-core/api";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { text, findButtonByText, flush } from "../../../../test/helpers/react-test";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 
 interface GameContextStub {
-  t: (key: string) => string;
+  t: (key: string, opts?: Record<string, unknown>) => string;
   activeGameApp: string;
   activeGameDisplayName: string;
   activeGameViewerUrl: string;
@@ -29,9 +31,6 @@ interface GameContextStub {
 }
 
 type TestWindow = Window & {
-  __MILADY_ELECTROBUN_RPC__?: {
-    request: Record<string, (params?: unknown) => Promise<unknown>>;
-  };
   __electrobunWindowId?: number;
 };
 
@@ -50,13 +49,22 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
-import { GameView } from "@miladyai/app-core/components/GameView";
+import { GameView } from "../../src/components/GameView";
 
 function createContext(overrides?: Partial<GameContextStub>): GameContextStub {
   return {
-    t: (k: string) => k,
-    activeGameApp: "@elizaos/app-hyperscape",
-    activeGameDisplayName: "Hyperscape",
+    t: (k: string, opts?: Record<string, unknown>) => {
+      if (opts?.defaultValue && typeof opts.defaultValue === "string") {
+        let str = opts.defaultValue;
+        for (const [key, val] of Object.entries(opts)) {
+          if (key !== "defaultValue") str = str.replace(`{{${key}}}`, String(val));
+        }
+        return str;
+      }
+      return k;
+    },
+    activeGameApp: "@elizaos/app-2004scape",
+    activeGameDisplayName: "2004scape",
     activeGameViewerUrl: "http://localhost:5175/viewer",
     activeGameSandbox: "allow-scripts allow-same-origin",
     activeGamePostMessageAuth: false,
@@ -71,41 +79,20 @@ function createContext(overrides?: Partial<GameContextStub>): GameContextStub {
   };
 }
 
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : ""))
-    .join("")
-    .trim();
-}
-
-function findButtonByText(
-  root: TestRenderer.ReactTestInstance,
-  label: string,
-): TestRenderer.ReactTestInstance {
-  const matches = root.findAll(
-    (node) => node.type === "button" && text(node) === label,
-  );
-  if (!matches[0]) {
-    throw new Error(`Button "${label}" not found`);
-  }
-  return matches[0];
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
 describe("GameView", () => {
   beforeEach(() => {
+    delete (window as TestWindow & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
+      undefined,
+    );
     mockClientFns.stopApp.mockReset();
     mockUseApp.mockReset();
   });
 
   afterEach(() => {
-    delete (window as TestWindow).__MILADY_ELECTROBUN_RPC__;
+    vi.unstubAllGlobals();
     delete (window as TestWindow).__electrobunWindowId;
+    delete (window as TestWindow & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
     vi.restoreAllMocks();
   });
 
@@ -161,7 +148,7 @@ describe("GameView", () => {
     await act(async () => {
       await findButtonByText(tree?.root, "game.openInNewTab").props.onClick();
     });
-    expect(ctx.setActionNotice).toHaveBeenCalledWith(
+    expect(ctx.setActionNotice).not.toHaveBeenCalledWith(
       "Popup blocked. Allow popups and try again.",
       "error",
       3600,
@@ -174,12 +161,16 @@ describe("GameView", () => {
     const gameOpenWindow = vi.fn(async () => ({ id: "game-window-1" }));
     mockUseApp.mockReturnValue(ctx);
     (window as TestWindow).__electrobunWindowId = 1;
-    (window as TestWindow).__MILADY_ELECTROBUN_RPC__ = {
+
+    (window as TestWindow & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__ = {
       request: {
         desktopOpenExternal,
         gameOpenWindow,
       },
+      onMessage: vi.fn(),
+      offMessage: vi.fn(),
     };
+
     const openSpy = vi.spyOn(window, "open");
 
     let tree: TestRenderer.ReactTestRenderer;

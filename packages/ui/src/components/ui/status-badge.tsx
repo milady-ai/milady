@@ -1,47 +1,45 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
 
-export type StatusTone = "success" | "warning" | "danger" | "muted";
+export type StatusVariant = "success" | "warning" | "danger" | "muted";
 
-const STATUS_TONE_STYLES: Record<StatusTone, { badge: string; dot: string }> = {
+const STATUS_VARIANT_STYLES: Record<StatusVariant, { badge: string; dot: string }> = {
   success: {
-    badge: "text-ok border-ok/30 bg-ok/10",
+    badge: "border-ok/35 bg-ok/12 text-ok",
     dot: "bg-ok",
   },
   warning: {
-    badge: "text-warn border-warn/30 bg-warn/10",
+    badge: "border-warn/40 bg-warn/14 text-warn",
     dot: "bg-warn",
   },
   danger: {
-    badge: "text-destructive border-destructive/30 bg-destructive/10",
+    badge: "border-destructive/35 bg-destructive/12 text-destructive",
     dot: "bg-destructive",
   },
   muted: {
-    badge: "text-muted border-border bg-bg",
+    badge: "border-border bg-bg-accent text-muted-strong",
     dot: "bg-muted",
   },
 };
 
 export function statusToneForBoolean(
   condition: boolean,
-  onTone: StatusTone = "success",
-  offTone: StatusTone = "muted",
-): StatusTone {
+  onTone: StatusVariant = "success",
+  offTone: StatusVariant = "muted",
+): StatusVariant {
   return condition ? onTone : offTone;
 }
-
-/* ── StatusBadge ─────────────────────────────────────────────────────── */
 
 export interface StatusBadgeProps
   extends React.HTMLAttributes<HTMLSpanElement> {
   label: string;
-  tone: StatusTone;
+  variant: StatusVariant;
   withDot?: boolean;
 }
 
 export const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
-  ({ label, tone, withDot = false, className, ...props }, ref) => {
-    const styles = STATUS_TONE_STYLES[tone];
+  ({ label, variant, withDot = false, className, ...props }, ref) => {
+    const styles = STATUS_VARIANT_STYLES[variant];
     return (
       <span
         ref={ref}
@@ -62,22 +60,24 @@ export const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
 );
 StatusBadge.displayName = "StatusBadge";
 
-/* ── StatusDot ───────────────────────────────────────────────────────── */
-
 export interface StatusDotProps extends React.HTMLAttributes<HTMLSpanElement> {
-  status: string;
+  /** Semantic status string — mapped to a variant internally. */
+  status?: string;
+  /** Direct variant override — when provided, `status` is ignored. */
+  tone?: StatusVariant;
 }
 
 export const StatusDot = React.forwardRef<HTMLSpanElement, StatusDotProps>(
-  ({ status, className, ...props }, ref) => {
-    const tone: StatusTone =
-      status === "success" || status === "completed" || status === "connected"
+  ({ status, tone: toneProp, className, ...props }, ref) => {
+    const variant: StatusVariant =
+      toneProp ??
+      (status === "success" || status === "completed" || status === "connected"
         ? "success"
         : status === "error" || status === "failed" || status === "denied"
           ? "danger"
-          : "muted";
+          : "muted");
 
-    const styles = STATUS_TONE_STYLES[tone];
+    const styles = STATUS_VARIANT_STYLES[variant];
     return (
       <span
         ref={ref}
@@ -92,8 +92,6 @@ export const StatusDot = React.forwardRef<HTMLSpanElement, StatusDotProps>(
   },
 );
 StatusDot.displayName = "StatusDot";
-
-/* ── StatCard ────────────────────────────────────────────────────────── */
 
 export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;

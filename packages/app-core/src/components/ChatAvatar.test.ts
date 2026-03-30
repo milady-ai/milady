@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
+import type { ReactTestRenderer } from "react-test-renderer";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,13 +9,13 @@ const testState = vi.hoisted(() => ({
 }));
 
 vi.mock("@miladyai/app-core/events", () => ({
-  APP_EMOTE_EVENT: "milady:app-emote",
+  APP_EMOTE_EVENT: "eliza:app-emote",
   STOP_EMOTE_EVENT: "stop-emote",
 }));
 
 vi.mock("@miladyai/app-core/state", () => ({
-  getVrmPreviewUrl: vi.fn(() => "/vrms/previews/milady-1.png"),
-  getVrmUrl: vi.fn(() => "/vrms/milady-1.vrm.gz"),
+  getVrmPreviewUrl: vi.fn(() => "/vrms/previews/eliza-1.png"),
+  getVrmUrl: vi.fn(() => "/vrms/eliza-1.vrm.gz"),
   useApp: () => ({
     selectedVrmIndex: 1,
     customVrmUrl: null,
@@ -39,7 +40,7 @@ vi.mock("./avatar/VrmViewer", () => ({
 import { ChatAvatar } from "./ChatAvatar";
 
 describe("ChatAvatar", () => {
-  let renderer: TestRenderer.ReactTestRenderer | null = null;
+  let renderer: ReactTestRenderer | null = null;
 
   beforeEach(() => {
     testState.viewerProps = null;
@@ -91,6 +92,6 @@ describe("ChatAvatar", () => {
 
     const previewImages = renderer?.root.findAllByType("img") ?? [];
     expect(previewImages).toHaveLength(1);
-    expect(previewImages[0]?.props.src).toBe("/vrms/previews/milady-1.png");
+    expect(previewImages[0]?.props.src).toBe("/vrms/previews/eliza-1.png");
   });
 });

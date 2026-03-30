@@ -13,8 +13,9 @@
  */
 
 import { Electroview } from "electrobun/view";
+import type { RpcMessageListener } from "../types.js";
+import { ensureElectrobunGlobal } from "./electrobun-stub.js";
 
-type RpcMessageListener = (payload: unknown) => void;
 type RendererRequestHandler = (params: unknown) => Promise<unknown>;
 type RendererBridgeRpc = {
   request: Record<string, RendererRequestHandler>;
@@ -25,26 +26,19 @@ const listenersByRpcMessage: Record<string, Set<RpcMessageListener>> = {};
 // Electrobun's native layer sets these globals before preloads run.
 // __electrobun must exist before Electroview.init() tries to write to it.
 // If the built-in preload hasn't fired yet (rare edge case), stub it.
-if (typeof window.__electrobun === "undefined") {
-  (
-    window as unknown as {
-      __electrobun: {
-        receiveMessageFromBun: (m: unknown) => void;
-        receiveInternalMessageFromBun: (m: unknown) => void;
-      };
-    }
-  ).__electrobun = {
-    receiveMessageFromBun: (_m: unknown) => {},
-    receiveInternalMessageFromBun: (_m: unknown) => {},
-  };
-}
+ensureElectrobunGlobal();
 
 function dispatchMessage(messageName: string, payload: unknown): void {
   if (messageName === "apiBaseUpdate") {
     const apiBaseUpdate = payload as { base: string; token?: string };
     window.__MILADY_API_BASE__ = apiBaseUpdate.base;
     if (apiBaseUpdate.token) {
-      window.__MILADY_API_TOKEN__ = apiBaseUpdate.token;
+      Object.defineProperty(window, "__MILADY_API_TOKEN__", {
+        value: apiBaseUpdate.token,
+        configurable: true,
+        writable: true,
+        enumerable: false,
+      });
     }
   }
 
@@ -71,14 +65,18 @@ function handleWildcardMessage(messageName: unknown, payload: unknown): void {
   }
 }
 
+// Electrobun defaults maxRequestTime to 1000ms (see node_modules/electrobun/.../rpc.ts).
+// Native sheets + main-process HTTP (disconnect, reset, file pickers) exceed that and
+// surface as "RPC request timed out." in the renderer.
 const rpc = Electroview.defineRPC({
+  maxRequestTime: 600_000,
   handlers: {
     requests: {},
     messages: {
       "*": handleWildcardMessage,
     },
   },
-}) as unknown as RendererBridgeRpc;
+}) as RendererBridgeRpc;
 
 new Electroview({ rpc });
 

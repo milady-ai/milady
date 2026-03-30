@@ -1,5 +1,16 @@
 import type { ManagedWindowSnapshot } from "./surface-windows";
 
+/**
+ * OS menu bar structure for Electrobun. Each **`action`** is emitted as
+ * `application-menu-clicked` and handled in `index.ts`. **Why a pure builder:**
+ * tests and reviewers can diff menu shape without reading IPC wiring.
+ *
+ * **`reset-milady`** is handled in `index.ts` (`resetMiladyFromApplicationMenu`):
+ * native confirm + `POST /api/agent/reset` + embedded or HTTP restart, then
+ * `desktopTrayMenuClick` with `menu-reset-milady-applied` so the renderer runs
+ * **`handleResetAppliedFromMain`** (same local UI sync as Settings **`handleReset`**).
+ */
+
 type ApplicationMenuRole =
   | "about"
   | "services"
@@ -57,6 +68,8 @@ export const EMPTY_HEARTBEAT_MENU_SNAPSHOT: HeartbeatMenuSnapshot = {
   nextRunAtMs: null,
 };
 
+const SETTINGS_ACTION_PREFIX = "open-settings-";
+
 function formatHeartbeatTimestamp(
   value: number | null,
   fallback: string,
@@ -87,11 +100,26 @@ function buildOpenWindowItems(
   }));
 }
 
+export function parseSettingsWindowAction(
+  action: string | undefined,
+): string | undefined {
+  if (action === "open-settings") {
+    return undefined;
+  }
+
+  if (!action?.startsWith(SETTINGS_ACTION_PREFIX)) {
+    return undefined;
+  }
+
+  const tabHint = action.slice(SETTINGS_ACTION_PREFIX.length).trim();
+  return tabHint || undefined;
+}
+
 function buildSurfaceMenu(
   label: string,
   surface: Extract<
     ManagedWindowSnapshot["surface"],
-    "plugins" | "connectors" | "triggers"
+    "chat" | "plugins" | "connectors" | "triggers"
   >,
   windows: ManagedWindowSnapshot[],
   heartbeatSnapshot?: HeartbeatMenuSnapshot,
@@ -138,10 +166,36 @@ function buildSurfaceMenu(
   };
 }
 
+function buildDesktopMenu(): ApplicationMenuItem {
+  return {
+    label: "Desktop",
+    submenu: [
+      { label: "Desktop Workspace", action: "open-settings-desktop" },
+      { label: "Voice Controls", action: "open-settings-voice" },
+      { label: "Media Controls", action: "open-settings-media" },
+      { label: "Permissions", action: "open-settings-permissions" },
+      { label: "Cloud Settings", action: "open-settings-cloud" },
+      { label: "Settings Window", action: "open-settings" },
+      { type: "separator" },
+      { label: "Show Milady", action: "show" },
+      { label: "Focus Milady", action: "focus-main-window" },
+      { label: "Hide Milady", action: "hide-main-window" },
+      { label: "Maximize Milady", action: "maximize-main-window" },
+      { label: "Restore Milady Size", action: "restore-main-window" },
+      { type: "separator" },
+      { label: "Send Test Notification", action: "desktop-notify" },
+      { label: "Restart Agent", action: "restart-agent" },
+      { label: "Relaunch Milady", action: "relaunch" },
+    ],
+  };
+}
+
 function buildCloudMenu(windows: ManagedWindowSnapshot[]): ApplicationMenuItem {
   return {
     label: "Cloud",
     submenu: [
+      { label: "Open Cloud Settings", action: "open-settings-cloud" },
+      { type: "separator" },
       { label: "Open Cloud Window", action: "new-window:cloud" },
       { type: "separator" },
       ...buildOpenWindowItems(windows, "No open cloud windows"),
@@ -149,25 +203,51 @@ function buildCloudMenu(windows: ManagedWindowSnapshot[]): ApplicationMenuItem {
   };
 }
 
+function buildBrowserMenu(
+  windows: ManagedWindowSnapshot[],
+): ApplicationMenuItem {
+  return {
+    label: "Browser",
+    submenu: [
+      { label: "Open Browser Window", action: "new-window:browser" },
+      { type: "separator" },
+      ...buildOpenWindowItems(windows, "No open browser windows"),
+    ],
+  };
+}
+
 export function buildApplicationMenu({
   isMac,
+  browserEnabled,
   heartbeatSnapshot,
   detachedWindows,
+  agentReady = true,
 }: {
   isMac: boolean;
+  browserEnabled: boolean;
   heartbeatSnapshot: HeartbeatMenuSnapshot;
   detachedWindows: ManagedWindowSnapshot[];
+  agentReady?: boolean;
 }): ApplicationMenuItem[] {
-  const pluginsWindows = detachedWindows.filter(
+  const visibleDetachedWindows = browserEnabled
+    ? detachedWindows
+    : detachedWindows.filter((window) => window.surface !== "browser");
+  const pluginsWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "plugins",
   );
-  const connectorsWindows = detachedWindows.filter(
+  const chatWindows = visibleDetachedWindows.filter(
+    (window) => window.surface === "chat",
+  );
+  const connectorsWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "connectors",
   );
-  const heartbeatWindows = detachedWindows.filter(
+  const heartbeatWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "triggers",
   );
-  const cloudWindows = detachedWindows.filter(
+  const browserWindows = visibleDetachedWindows.filter(
+    (window) => window.surface === "browser",
+  );
+  const cloudWindows = visibleDetachedWindows.filter(
     (window) => window.surface === "cloud",
   );
 
@@ -175,12 +255,21 @@ export function buildApplicationMenu({
     {
       label: "Milady",
       submenu: [
-        { role: "about" },
+        ...(isMac
+          ? ([{ role: "about" }] as ApplicationMenuItem[])
+          : ([
+              { label: "About Milady", action: "open-about" },
+            ] as ApplicationMenuItem[])),
         { label: "Check for Updates", action: "check-for-updates" },
         { type: "separator" },
-        { label: "Settings...", action: "open-settings" },
+        {
+          label: "Settings...",
+          action: "open-settings",
+          accelerator: isMac ? "Command+," : "Ctrl+,",
+        },
         { label: "Restart Agent", action: "restart-agent" },
         { label: "Relaunch Milady", action: "relaunch" },
+        { label: "Reset Milady...", action: "reset-milady" },
         { type: "separator" },
         ...(isMac
           ? [
@@ -192,7 +281,9 @@ export function buildApplicationMenu({
               { type: "separator" as const },
             ]
           : []),
-        { role: "quit" },
+        ...(isMac
+          ? ([{ role: "quit" }] as ApplicationMenuItem[])
+          : ([{ label: "Quit", action: "quit" }] as ApplicationMenuItem[])),
       ] as ApplicationMenuItem[],
     },
     {
@@ -232,15 +323,22 @@ export function buildApplicationMenu({
         { label: "Toggle Full Screen", role: "togglefullscreen" },
       ],
     },
-    buildCloudMenu(cloudWindows),
-    buildSurfaceMenu("Plugins", "plugins", pluginsWindows),
-    buildSurfaceMenu("Connectors", "connectors", connectorsWindows),
-    buildSurfaceMenu(
-      "Heartbeats",
-      "triggers",
-      heartbeatWindows,
-      heartbeatSnapshot,
-    ),
+    buildDesktopMenu(),
+    ...(agentReady
+      ? [
+          buildSurfaceMenu("Chat", "chat", chatWindows),
+          buildCloudMenu(cloudWindows),
+          ...(browserEnabled ? [buildBrowserMenu(browserWindows)] : []),
+          buildSurfaceMenu("Plugins", "plugins", pluginsWindows),
+          buildSurfaceMenu("Connectors", "connectors", connectorsWindows),
+          buildSurfaceMenu(
+            "Heartbeats",
+            "triggers",
+            heartbeatWindows,
+            heartbeatSnapshot,
+          ),
+        ]
+      : []),
     {
       label: "Window",
       submenu: [
@@ -255,14 +353,43 @@ export function buildApplicationMenu({
           : []),
         { type: "separator" },
         { label: "Show Milady", action: "show" },
-        { label: "New Chat Window", action: "new-window:chat" },
-        { label: "New Heartbeats Window", action: "new-window:triggers" },
-        { label: "New Plugins Window", action: "new-window:plugins" },
-        { label: "New Connectors Window", action: "new-window:connectors" },
-        { label: "New Cloud Window", action: "new-window:cloud" },
-        { label: "Settings Window", action: "open-settings" },
-        { type: "separator" },
-        ...buildOpenWindowItems(detachedWindows, "No open detached windows"),
+        { label: "Focus Milady", action: "focus-main-window" },
+        { label: "Hide Milady", action: "hide-main-window" },
+        { label: "Maximize Milady", action: "maximize-main-window" },
+        {
+          label: "Restore Milady Size",
+          action: "restore-main-window",
+        },
+        ...(agentReady
+          ? [
+              { type: "separator" as const },
+              ...(browserEnabled
+                ? [
+                    {
+                      label: "New Browser Window",
+                      action: "new-window:browser",
+                    } satisfies ApplicationMenuItem,
+                  ]
+                : []),
+              { label: "New Chat Window", action: "new-window:chat" },
+              {
+                label: "New Heartbeats Window",
+                action: "new-window:triggers",
+              },
+              { label: "New Plugins Window", action: "new-window:plugins" },
+              {
+                label: "New Connectors Window",
+                action: "new-window:connectors",
+              },
+              { label: "New Cloud Window", action: "new-window:cloud" },
+              { label: "Settings Window", action: "open-settings" },
+              { type: "separator" as const },
+              ...buildOpenWindowItems(
+                visibleDetachedWindows,
+                "No open detached windows",
+              ),
+            ]
+          : []),
       ] as ApplicationMenuItem[],
     },
   ];

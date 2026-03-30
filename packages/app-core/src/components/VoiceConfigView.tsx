@@ -8,7 +8,17 @@
  *   - Test functionality
  */
 
-import { Button, Input } from "@miladyai/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  SaveFooter,
+  Switch,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   client,
@@ -16,32 +26,375 @@ import {
   type VoiceMode,
   type VoiceProvider,
 } from "../api";
-import {
-  getSwabblePlugin,
-  type SwabbleConfig,
-} from "../bridge/native-plugins";
+import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../bridge";
+import { getSwabblePlugin, type SwabbleConfig } from "../bridge/native-plugins";
 import { dispatchWindowEvent, VOICE_CONFIG_UPDATED_EVENT } from "../events";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
-import { PREMADE_VOICES, sanitizeApiKey, VOICE_PROVIDERS } from "../voice";
+import type { DesktopClickAuditItem } from "../utils";
+import {
+  hasConfiguredApiKey,
+  PREMADE_VOICES,
+  sanitizeApiKey,
+  VOICE_PROVIDERS,
+} from "../voice";
 import {
   CloudConnectionStatus,
   CloudSourceModeToggle,
 } from "./CloudSourceControls";
-import { ConfigSaveFooter } from "./ConfigSaveFooter";
 
 const DEFAULT_ELEVEN_FAST_MODEL = "eleven_flash_v2_5";
 
 const MODEL_SIZES: Array<{
   id: NonNullable<SwabbleConfig["modelSize"]>;
-  hint: string;
+  hintKey: string;
 }> = [
-  { id: "tiny", hint: "(faster)" },
-  { id: "base", hint: "(recommended)" },
-  { id: "small", hint: "" },
-  { id: "medium", hint: "(accurate)" },
-  { id: "large", hint: "(accurate)" },
+  { id: "tiny", hintKey: "voiceconfigview.hintFaster" },
+  { id: "base", hintKey: "voiceconfigview.hintRecommended" },
+  { id: "small", hintKey: "" },
+  { id: "medium", hintKey: "voiceconfigview.hintAccurate" },
+  { id: "large", hintKey: "voiceconfigview.hintAccurate" },
 ];
+
+const VOICE_CARD_CLASSNAME = "border-border/60 bg-card/92 shadow-sm";
+const VOICE_SUBSECTION_CLASSNAME =
+  "rounded-2xl border border-border/60 bg-card/92 p-4 shadow-sm";
+
+export const DESKTOP_TALKMODE_CLICK_AUDIT: readonly DesktopClickAuditItem[] = [
+  {
+    id: "voice-talkmode-refresh",
+    entryPoint: "settings:voice",
+    label: "Refresh Talk Mode",
+    expectedAction:
+      "Refresh talk mode state, speaking status, and whisper availability.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "voice-talkmode-start-stop",
+    entryPoint: "settings:voice",
+    label: "Start/Stop Talk Mode",
+    expectedAction: "Start or stop desktop talk mode.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "voice-talkmode-speak",
+    entryPoint: "settings:voice",
+    label: "Speak Test Phrase",
+    expectedAction: "Send a test phrase to talk mode speech output.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+  {
+    id: "voice-talkmode-stop-speaking",
+    entryPoint: "settings:voice",
+    label: "Stop Speaking",
+    expectedAction: "Stop current desktop speech output.",
+    runtimeRequirement: "desktop",
+    coverage: "automated",
+  },
+] as const;
+
+export function DesktopTalkModePanel() {
+  const desktopRuntime = isElectrobunRuntime();
+  const [loading, setLoading] = useState(desktopRuntime);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const { t } = useApp();
+  const [phrase, setPhrase] = useState(t("voiceconfigview.testPhrase"));
+  const [panelState, setPanelState] = useState<{
+    state: string;
+    enabled: boolean;
+    speaking: boolean;
+    whisperAvailable: boolean;
+    whisperModel?: string;
+  }>({
+    state: "idle",
+    enabled: false,
+    speaking: false,
+    whisperAvailable: false,
+  });
+
+  const refresh = useCallback(async () => {
+    if (!desktopRuntime) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const [state, enabled, speaking, whisperInfo] = await Promise.all([
+        invokeDesktopBridgeRequest<{ state: string }>({
+          rpcMethod: "talkmodeGetState",
+          ipcChannel: "talkmode:getState",
+        }),
+        invokeDesktopBridgeRequest<{ enabled: boolean }>({
+          rpcMethod: "talkmodeIsEnabled",
+          ipcChannel: "talkmode:isEnabled",
+        }),
+        invokeDesktopBridgeRequest<{ speaking: boolean }>({
+          rpcMethod: "talkmodeIsSpeaking",
+          ipcChannel: "talkmode:isSpeaking",
+        }),
+        invokeDesktopBridgeRequest<{ available: boolean; modelSize?: string }>({
+          rpcMethod: "talkmodeGetWhisperInfo",
+          ipcChannel: "talkmode:getWhisperInfo",
+        }),
+      ]);
+      setPanelState({
+        state: state?.state ?? "idle",
+        enabled: enabled?.enabled ?? false,
+        speaking: speaking?.speaking ?? false,
+        whisperAvailable: whisperInfo?.available ?? false,
+        whisperModel: whisperInfo?.modelSize,
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : t("voiceconfigview.TalkModeStatusUnavailable", {
+              defaultValue: "Talk mode status unavailable.",
+            }),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [desktopRuntime]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const runAction = useCallback(
+    async (
+      id: string,
+      action: () => Promise<void>,
+      successMessage?: string,
+      refreshAfter = true,
+    ) => {
+      setBusyAction(id);
+      setError(null);
+      setMessage(null);
+      try {
+        await action();
+        if (refreshAfter) {
+          await refresh();
+        }
+        if (successMessage) {
+          setMessage(successMessage);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : t("voiceconfigview.ActionFailed"),
+        );
+      } finally {
+        setBusyAction(null);
+      }
+    },
+    [refresh],
+  );
+
+  if (!desktopRuntime) {
+    return (
+      <Card className={VOICE_CARD_CLASSNAME}>
+        <CardContent className="px-4 py-4 text-xs leading-5 text-muted">
+          {t("voiceconfigview.DesktopTalkModeDesktopOnly")}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className={VOICE_CARD_CLASSNAME}>
+      <CardHeader className="px-4 py-4 pb-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle className="text-sm">
+              {t("voiceconfigview.DesktopTalkMode")}
+            </CardTitle>
+            <CardDescription className="mt-1 text-[11px] leading-5">
+              {t("voiceconfigview.TalkModeDescription")}
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
+            onClick={() =>
+              void runAction(
+                "voice-talkmode-refresh",
+                async () => {},
+                t("voiceconfigview.TalkModeStateRefreshed"),
+              )
+            }
+            disabled={loading || busyAction === "voice-talkmode-refresh"}
+          >
+            {t("common.refresh")}
+          </Button>
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex flex-col gap-4 px-4 pb-4">
+        {(error || message) && (
+          <div
+            className={`rounded-xl border px-3 py-2.5 text-[11px] leading-5 ${
+              error
+                ? "border-danger/40 bg-danger/10 text-danger"
+                : "border-ok/40 bg-ok/10 text-ok"
+            }`}
+          >
+            {error ?? message}
+          </div>
+        )}
+
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="border-border/50 bg-bg-hover/60 shadow-none">
+            <CardContent className="px-2.5 py-2 text-[11px]">
+              <div className="text-[10px] text-muted">
+                {t("voiceconfigview.State")}
+              </div>
+              <div className="font-semibold text-txt">{panelState.state}</div>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-bg-hover/60 shadow-none">
+            <CardContent className="px-2.5 py-2 text-[11px]">
+              <div className="text-[10px] text-muted">
+                {t("voiceconfigview.Enabled")}
+              </div>
+              <div className="font-semibold text-txt">
+                {panelState.enabled
+                  ? t("voiceconfigview.Yes")
+                  : t("voiceconfigview.No")}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-bg-hover/60 shadow-none">
+            <CardContent className="px-2.5 py-2 text-[11px]">
+              <div className="text-[10px] text-muted">
+                {t("voiceconfigview.Speaking")}
+              </div>
+              <div className="font-semibold text-txt">
+                {panelState.speaking
+                  ? t("voiceconfigview.Yes")
+                  : t("voiceconfigview.No")}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-bg-hover/60 shadow-none">
+            <CardContent className="px-2.5 py-2 text-[11px]">
+              <div className="text-[10px] text-muted">
+                {t("voiceconfigview.Whisper")}
+              </div>
+              <div className="font-semibold text-txt">
+                {panelState.whisperAvailable
+                  ? panelState.whisperModel || t("voiceconfigview.Available")
+                  : t("voiceconfigview.Unavailable")}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Input
+          type="text"
+          className="min-h-10 rounded-xl bg-bg text-xs"
+          value={phrase}
+          onChange={(event) => setPhrase(event.target.value)}
+          placeholder={t("voiceconfigview.testPhrase")}
+        />
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
+            onClick={() =>
+              void runAction(
+                "voice-talkmode-start-stop",
+                async () => {
+                  if (panelState.enabled) {
+                    await invokeDesktopBridgeRequest<void>({
+                      rpcMethod: "talkmodeStop",
+                      ipcChannel: "talkmode:stop",
+                    });
+                    return;
+                  }
+
+                  const result = await invokeDesktopBridgeRequest<{
+                    available: boolean;
+                    reason?: string;
+                  }>({
+                    rpcMethod: "talkmodeStart",
+                    ipcChannel: "talkmode:start",
+                  });
+                  if (result?.available === false) {
+                    throw new Error(
+                      result.reason || t("voiceconfigview.TalkModeUnavailable"),
+                    );
+                  }
+                },
+                panelState.enabled
+                  ? t("voiceconfigview.TalkModeStopped")
+                  : t("voiceconfigview.TalkModeStarted"),
+              )
+            }
+            disabled={busyAction === "voice-talkmode-start-stop" || loading}
+          >
+            {panelState.enabled
+              ? t("voiceconfigview.StopTalkMode")
+              : t("voiceconfigview.StartTalkMode")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
+            onClick={() =>
+              void runAction(
+                "voice-talkmode-speak",
+                async () => {
+                  await invokeDesktopBridgeRequest<void>({
+                    rpcMethod: "talkmodeSpeak",
+                    ipcChannel: "talkmode:speak",
+                    params: { text: phrase },
+                  });
+                },
+                t("voiceconfigview.SpeechRequested"),
+                false,
+              )
+            }
+            disabled={!phrase.trim() || busyAction === "voice-talkmode-speak"}
+          >
+            {t("voiceconfigview.SpeakTestPhrase")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
+            onClick={() =>
+              void runAction(
+                "voice-talkmode-stop-speaking",
+                async () => {
+                  await invokeDesktopBridgeRequest<void>({
+                    rpcMethod: "talkmodeStopSpeaking",
+                    ipcChannel: "talkmode:stopSpeaking",
+                  });
+                },
+                t("voiceconfigview.StoppedCurrentSpeechOutput"),
+              )
+            }
+            disabled={busyAction === "voice-talkmode-stop-speaking"}
+          >
+            {t("voiceconfigview.StopSpeaking")}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function WakeWordSection({
   serverConfig,
@@ -49,7 +402,7 @@ function WakeWordSection({
   serverConfig?: Partial<SwabbleConfig> | null;
 }) {
   const { t } = useApp();
-  const [triggers, setTriggers] = useState<string[]>(["milady"]);
+  const [triggers, setTriggers] = useState<string[]>(["eliza"]);
   const [triggerInput, setTriggerInput] = useState("");
   const [sensitivity, setSensitivity] = useState(0.45);
   const [modelSize, setModelSize] =
@@ -165,7 +518,9 @@ function WakeWordSection({
         await getSwabblePlugin().stop();
         setEnabled(false);
       } else {
-        const result = await getSwabblePlugin().start({ config: buildConfig() });
+        const result = await getSwabblePlugin().start({
+          config: buildConfig(),
+        });
         if (result.started) setEnabled(true);
       }
     } catch {
@@ -174,47 +529,53 @@ function WakeWordSection({
   }, [enabled, buildConfig]);
 
   return (
-    <div className="flex flex-col gap-3 pt-4 border-t border-[var(--border)]">
-      {/* Subsection header + enable toggle */}
-      <div className="flex items-center justify-between">
-        <div className="text-xs font-semibold text-[var(--muted)]">
+    <div className="flex flex-col gap-4 border-t border-border/50 pt-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-xs font-semibold text-muted">
           {t("voiceconfigview.WakeWord")}
         </div>
-        <button
-          type="button"
-          onClick={() => void handleToggle()}
-          className={`relative inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors ${
-            enabled ? "bg-[var(--accent)]" : "bg-[var(--border)]"
-          }`}
-          aria-label={enabled ? "Disable wake word" : "Enable wake word"}
-        >
-          <span
-            className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-              enabled ? "translate-x-4" : "translate-x-0.5"
-            }`}
+        <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border/50 bg-bg-hover px-3">
+          <span className="text-[11px] font-medium text-muted-strong">
+            {enabled
+              ? t("voiceconfigview.Enabled", { defaultValue: "Enabled" })
+              : t("voiceconfigview.Disabled", { defaultValue: "Disabled" })}
+          </span>
+          <Switch
+            checked={enabled}
+            onCheckedChange={() => void handleToggle()}
+            aria-label={
+              enabled
+                ? t("voiceconfigview.DisableWakeWord", {
+                    defaultValue: "Disable wake word",
+                  })
+                : t("voiceconfigview.EnableWakeWord", {
+                    defaultValue: "Enable wake word",
+                  })
+            }
           />
-        </button>
+        </div>
       </div>
-
-      {/* Trigger tag input */}
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-semibold">
           {t("voiceconfigview.Triggers")}
         </span>
-        <div className="flex flex-wrap gap-1 p-1.5 border border-[var(--border)] bg-[var(--card)] min-h-[2rem]">
-          {triggers.map((t) => (
+        <div className="flex min-h-10 flex-wrap gap-1.5 rounded-xl border border-border/60 bg-bg px-2 py-2">
+          {triggers.map((trigger) => (
             <span
-              key={t}
-              className="flex items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 text-[10px] text-[var(--text)]"
+              key={trigger}
+              className="flex min-h-7 items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2 py-1 text-[10px] text-txt"
             >
-              {t}
+              {trigger}
               {triggers.length > 1 && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="settings-compact-button settings-icon-button leading-none hover:bg-transparent hover:opacity-70 cursor-pointer h-4 w-4 ml-1"
-                  onClick={() => removeTrigger(t)}
-                  aria-label={`Remove trigger "${t}"`}
+                  className="ml-1 h-5 w-5 rounded-full p-0 leading-none text-muted-strong hover:bg-bg-hover hover:text-txt"
+                  onClick={() => removeTrigger(trigger)}
+                  aria-label={t("voiceconfigview.RemoveTrigger", {
+                    defaultValue: 'Remove trigger "{{trigger}}"',
+                    trigger,
+                  })}
                 >
                   ×
                 </Button>
@@ -223,7 +584,7 @@ function WakeWordSection({
           ))}
           <Input
             type="text"
-            className="flex-1 min-w-[80px] h-6 px-1 text-xs bg-transparent border-0 focus-visible:ring-0 shadow-none"
+            className="h-7 min-w-[120px] flex-1 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"
             placeholder={t("voiceconfigview.AddTrigger")}
             value={triggerInput}
             onChange={(e) => setTriggerInput(e.target.value)}
@@ -236,18 +597,16 @@ function WakeWordSection({
             }}
           />
         </div>
-        <div className="text-[10px] text-[var(--muted)]">
+        <div className="text-[10px] text-muted">
           {t("voiceconfigview.PressEnterOrComma")}
         </div>
       </div>
-
-      {/* Sensitivity slider */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold">
             {t("voiceconfigview.WakeSensitivity")}
           </span>
-          <span className="text-[10px] text-[var(--muted)]">
+          <span className="text-[10px] text-muted">
             {sensitivity.toFixed(2)}s
           </span>
         </div>
@@ -257,23 +616,20 @@ function WakeWordSection({
           max={2.0}
           step={0.05}
           value={sensitivity}
-          className="w-full"
-          style={{ accentColor: "var(--accent)" }}
+          className="w-full accent-accent"
           onChange={(e) =>
             void handleSensitivityChange(parseFloat(e.target.value))
           }
         />
-        <div className="text-[10px] text-[var(--muted)]">
+        <div className="text-[10px] text-muted">
           {t("voiceconfigview.LowerMoreSensiti")}
         </div>
       </div>
-
-      {/* Model size buttons */}
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-semibold">
           {t("voiceconfigview.ModelSize")}
         </span>
-        <div className="flex gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-5">
           {MODEL_SIZES.map((m) => {
             const active = modelSize === m.id;
             return (
@@ -281,27 +637,27 @@ function WakeWordSection({
                 key={m.id}
                 variant={active ? "default" : "outline"}
                 size="sm"
-                className="flex-1 h-auto flex-col py-1.5"
+                className="h-auto min-h-12 flex-col rounded-xl py-2"
                 onClick={() => void handleModelSizeChange(m.id)}
               >
                 <div className="font-semibold">{m.id}</div>
-                {m.hint && (
-                  <div className="text-[10px] opacity-70 mt-0.5">{m.hint}</div>
+                {m.hintKey && (
+                  <div className="text-[10px] opacity-70 mt-0.5">
+                    {t(m.hintKey)}
+                  </div>
                 )}
               </Button>
             );
           })}
         </div>
       </div>
-
-      {/* Audio level meter */}
       <div className="flex flex-col gap-1">
         <span className="text-xs font-semibold">
           {t("voiceconfigview.Microphone")}
         </span>
-        <div className="h-1.5 w-full bg-[var(--border)] overflow-hidden">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-border/70">
           <div
-            className="h-full bg-green-500 transition-all duration-75"
+            className="h-full rounded-full bg-ok transition-all duration-75"
             style={{ width: `${Math.min(audioLevel * 100, 100)}%` }}
           />
         </div>
@@ -313,8 +669,7 @@ function WakeWordSection({
 export function VoiceConfigView() {
   const { setTimeout } = useTimeout();
 
-  const { t } = useApp();
-  const { elizaCloudConnected } = useApp();
+  const { t, elizaCloudConnected, elizaCloudEnabled } = useApp();
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({});
   const [swabbleServerConfig, setSwabbleServerConfig] =
     useState<Partial<SwabbleConfig> | null>(null);
@@ -361,14 +716,24 @@ export function VoiceConfigView() {
   }, []);
 
   const currentProvider = voiceConfig.provider ?? "elevenlabs";
-  const currentMode: VoiceMode = voiceConfig.mode ?? "own-key";
+  const cloudVoiceAvailable = elizaCloudConnected || elizaCloudEnabled;
+  const hasElevenLabsApiKey = hasConfiguredApiKey(
+    voiceConfig.elevenlabs?.apiKey,
+  );
+  const defaultVoiceMode: VoiceMode = cloudVoiceAvailable
+    ? hasElevenLabsApiKey
+      ? "own-key"
+      : "cloud"
+    : "own-key";
+  const currentMode: VoiceMode = voiceConfig.mode ?? defaultVoiceMode;
   const providerInfo = VOICE_PROVIDERS.find((p) => p.id === currentProvider);
-  const isConfigured =
-    currentMode === "cloud"
-      ? elizaCloudConnected
-      : currentProvider !== "elevenlabs"
-        ? true
-        : Boolean(voiceConfig.elevenlabs?.apiKey);
+  // Cloud vs own-key only applies to providers that need credentials. Edge TTS
+  // has no API key — do not gate "Configured" on Eliza Cloud when Edge is selected.
+  const isConfigured = (() => {
+    if (!providerInfo?.needsKey) return true;
+    if (currentMode === "cloud") return cloudVoiceAvailable;
+    return hasConfiguredApiKey(voiceConfig.elevenlabs?.apiKey);
+  })();
 
   const handleProviderChange = useCallback((provider: VoiceProvider) => {
     setVoiceConfig((prev) => ({ ...prev, provider }));
@@ -432,10 +797,7 @@ export function VoiceConfigView() {
       const normalizedVoiceConfig: VoiceConfig = {
         ...voiceConfig,
         provider,
-        mode:
-          provider === "elevenlabs"
-            ? (voiceConfig.mode ?? "own-key")
-            : undefined,
+        mode: provider === "elevenlabs" ? currentMode : undefined,
         elevenlabs: normalizedElevenLabs,
       };
       // Also persist swabble (wake word) config — fall back to server config
@@ -463,14 +825,20 @@ export function VoiceConfigView() {
       setDirty(false);
       setTimeout(() => setSaveSuccess(false), 2500);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save");
+      setSaveError(
+        err instanceof Error
+          ? err.message
+          : t("voiceconfigview.FailedToSave", {
+              defaultValue: "Failed to save",
+            }),
+      );
     }
     setSaving(false);
-  }, [swabbleServerConfig, voiceConfig, setTimeout]);
+  }, [currentMode, swabbleServerConfig, voiceConfig, setTimeout]);
 
   if (loading) {
     return (
-      <div className="py-4 text-center text-[var(--muted)] text-xs">
+      <div className="rounded-2xl border border-border/60 bg-card/92 px-4 py-6 text-center text-xs text-muted shadow-sm">
         {t("voiceconfigview.LoadingVoiceConfig")}
       </div>
     );
@@ -483,12 +851,11 @@ export function VoiceConfigView() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Provider selection */}
-      <div className="flex flex-col gap-2">
-        <div className="text-xs font-semibold text-[var(--muted)]">
+      <div className={VOICE_SUBSECTION_CLASSNAME}>
+        <div className="text-xs font-semibold text-muted">
           {t("voiceconfigview.TTSProvider")}
         </div>
-        <div className="flex gap-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           {VOICE_PROVIDERS.map((p) => {
             const active = currentProvider === p.id;
             return (
@@ -496,7 +863,7 @@ export function VoiceConfigView() {
                 key={p.id}
                 variant={active ? "default" : "outline"}
                 size="sm"
-                className="flex-1 h-auto flex-col py-2"
+                className="h-auto min-h-14 flex-col rounded-xl py-2"
                 onClick={() => handleProviderChange(p.id)}
               >
                 <div className="font-semibold">{p.label}</div>
@@ -506,33 +873,28 @@ export function VoiceConfigView() {
           })}
         </div>
       </div>
-
-      {/* Status */}
-      <div className="flex items-center justify-between py-2 px-3 border border-[var(--border)] bg-[var(--bg-muted)]">
-        <span className="text-xs">
+      <div className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-card/92 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-xs leading-5 text-txt">
           {currentProvider === "elevenlabs"
             ? `ElevenLabs — ${currentMode === "cloud" ? t("voiceconfigview.ServedViaElizaCloud") : t("voiceconfigview.RequiresApiKey")}`
             : `${providerInfo?.label} — ${t("voiceconfigview.NoApiKeyNeeded")}`}
         </span>
         <span
-          className={`rounded-full border px-1.5 py-0.5 text-[10px] ${
+          className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-medium ${
             isConfigured
-              ? "border-green-600 bg-green-600/10 text-[var(--text)]"
-              : "border-[var(--warn)] bg-[var(--warn-subtle)] text-[var(--text)]"
+              ? "border-ok/35 bg-ok/10 text-ok"
+              : "border-warn/35 bg-warn/10 text-warn"
           }`}
         >
           {isConfigured
-            ? t("mediasettingssection.Configured")
+            ? t("config-field.Configured")
             : t("mediasettingssection.NeedsSetup")}
         </span>
       </div>
-
-      {/* ElevenLabs settings */}
       {currentProvider === "elevenlabs" && (
-        <div className="flex flex-col gap-3">
-          {/* API source mode */}
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-[var(--muted)]">
+        <div className={`${VOICE_SUBSECTION_CLASSNAME} flex flex-col gap-4`}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs font-semibold text-muted">
               {t("voiceconfigview.APISource")}
             </span>
             <CloudSourceModeToggle
@@ -540,16 +902,12 @@ export function VoiceConfigView() {
               onChange={handleModeChange}
             />
           </div>
-
-          {/* Cloud mode status */}
           {currentMode === "cloud" && (
             <CloudConnectionStatus
-              connected={elizaCloudConnected}
+              connected={cloudVoiceAvailable}
               disconnectedText={t("elizaclouddashboard.ElizaCloudNotConnected")}
             />
           )}
-
-          {/* API Key */}
           {currentMode === "own-key" && (
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-semibold">
@@ -557,7 +915,7 @@ export function VoiceConfigView() {
               </span>
               <Input
                 type="password"
-                className="bg-card text-xs"
+                className="min-h-10 rounded-xl bg-bg text-xs"
                 placeholder={
                   voiceConfig.elevenlabs?.apiKey
                     ? t("mediasettingssection.ApiKeySetLeaveBlank")
@@ -565,44 +923,45 @@ export function VoiceConfigView() {
                 }
                 onChange={(e) => handleApiKeyChange(e.target.value)}
               />
-              <div className="text-[10px] text-[var(--muted)]">
+              <div className="text-[10px] text-muted">
                 {t("voiceconfigview.GetYourKeyAt")}{" "}
                 <a
                   href="https://elevenlabs.io"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--text)] underline decoration-[var(--accent)] underline-offset-2 hover:opacity-80"
+                  className="text-txt underline decoration-accent underline-offset-2 hover:opacity-80"
                 >
                   {t("voiceconfigview.elevenlabsIo")}
                 </a>
               </div>
-              <div className="text-[10px] text-[var(--muted)]">
+              <div className="text-[10px] text-muted">
                 {t("voiceconfigview.FastPathDefaultE")}
                 {DEFAULT_ELEVEN_FAST_MODEL}`).
               </div>
             </div>
           )}
-
-          {/* Voice presets */}
           <div className="flex flex-col gap-2">
             <div className="text-xs font-semibold">
-              {t("voiceconfigview.Voice")}
+              {t("settings.sections.voice.label")}
             </div>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
               {PREMADE_VOICES.map((preset) => {
                 const active = selectedVoiceId === preset.voiceId;
                 return (
                   <Button
                     key={preset.id}
                     variant={active ? "default" : "outline"}
-                    size="sm"
-                    className="h-auto flex-col items-start py-1.5 px-2 text-left"
+                    className={`h-auto min-h-16 flex-col items-start rounded-xl px-3 py-2.5 text-left transition-all ${
+                      active
+                        ? "border-accent/45 bg-accent/12 text-txt shadow-sm"
+                        : "border-border/60 bg-bg text-txt hover:border-border-strong hover:bg-bg-hover"
+                    }`}
                     onClick={() => handleVoiceSelect(preset.voiceId)}
                   >
-                    <div className="font-semibold truncate w-full">
+                    <div className="font-semibold text-xs truncate w-full">
                       {preset.name}
                     </div>
-                    <div className="text-[10px] opacity-70 truncate w-full">
+                    <div className="text-[10px] text-muted truncate w-full">
                       {preset.hint}
                     </div>
                   </Button>
@@ -610,14 +969,12 @@ export function VoiceConfigView() {
               })}
             </div>
           </div>
-
-          {/* Test voice */}
           {selectedPreset && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Button
                 variant="outline"
                 size="sm"
-                className="font-semibold"
+                className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
                 disabled={testing}
                 onClick={() => handleTestVoice(selectedPreset.previewUrl)}
               >
@@ -631,6 +988,7 @@ export function VoiceConfigView() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="min-h-10 rounded-xl px-3 text-[11px] font-semibold"
                   onClick={() => {
                     if (audioRef.current) {
                       audioRef.current.pause();
@@ -638,32 +996,28 @@ export function VoiceConfigView() {
                     }
                   }}
                 >
-                  {t("voiceconfigview.Stop")}
+                  {t("game.stop")}
                 </Button>
               )}
             </div>
           )}
         </div>
       )}
-
-      {/* Edge TTS settings */}
       {currentProvider === "edge" && (
-        <div className="py-2 px-3 border border-[var(--border)] bg-[var(--bg-muted)] text-xs text-[var(--muted)]">
+        <div className="rounded-2xl border border-border/60 bg-card/92 px-4 py-3 text-xs leading-5 text-muted shadow-sm">
           {t("voiceconfigview.EdgeTTSUsesMicros")}
         </div>
       )}
-
-      {/* Simple voice settings */}
       {currentProvider === "simple-voice" && (
-        <div className="py-2 px-3 border border-[var(--border)] bg-[var(--bg-muted)] text-xs text-[var(--muted)]">
+        <div className="rounded-2xl border border-border/60 bg-card/92 px-4 py-3 text-xs leading-5 text-muted shadow-sm">
           {t("voiceconfigview.SimpleVoiceUsesYo")}
         </div>
       )}
-
-      {/* Wake Word subsection */}
       <WakeWordSection serverConfig={swabbleServerConfig} />
 
-      <ConfigSaveFooter
+      <DesktopTalkModePanel />
+
+      <SaveFooter
         dirty={dirty}
         saving={saving}
         saveError={saveError}

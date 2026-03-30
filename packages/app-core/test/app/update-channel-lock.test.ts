@@ -40,7 +40,7 @@ const { mockClient } = vi.hoisted(() => ({
     getAgentEvents: vi.fn(async () => ({ events: [], latestEventId: null })),
     getStatus: vi.fn(async () => ({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -90,13 +90,7 @@ function Probe(props: { onReady: (api: ProbeApi) => void }) {
   return null;
 }
 
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 describe("update channel locking", () => {
   beforeEach(() => {
@@ -153,7 +147,7 @@ describe("update channel locking", () => {
     });
     mockClient.getStatus.mockResolvedValue({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,

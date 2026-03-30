@@ -4,7 +4,8 @@ import {
   getElectrobunRendererRpc,
   invokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent,
-} from "@miladyai/app-core/bridge/electrobun-rpc";
+} from "@miladyai/app-core/bridge/electrobun-rpc.js";
+import type { EventCallback } from "../../../shared-types.js";
 import type {
   SwabbleAudioLevelEvent,
   SwabbleConfig,
@@ -19,7 +20,6 @@ import type {
   SwabbleWakeWordEvent,
 } from "../../src/definitions";
 
-type EventCallback<T> = (event: T) => void;
 type SwabbleEvent =
   | SwabbleWakeWordEvent
   | SwabbleTranscriptEvent
@@ -295,13 +295,13 @@ export class SwabbleElectrobun implements SwabblePlugin {
         eventName: "transcript" as const,
         rpcMessage: "swabbleTranscript",
         ipcChannel: "swabble:transcript",
-        normalize: (data: unknown) => data as unknown as SwabbleTranscriptEvent,
+        normalize: (data: unknown) => data as SwabbleTranscriptEvent,
       },
       {
         eventName: "error" as const,
         rpcMessage: "swabbleError",
         ipcChannel: "swabble:error",
-        normalize: (data: unknown) => data as unknown as SwabbleErrorEvent,
+        normalize: (data: unknown) => data as SwabbleErrorEvent,
       },
     ];
 
@@ -606,7 +606,7 @@ export class SwabbleElectrobun implements SwabblePlugin {
       "swabble:getConfig",
     );
     if (nativeConfig && isObjectRecord(nativeConfig)) {
-      return { config: nativeConfig as unknown as SwabbleConfig };
+      return { config: nativeConfig as SwabbleConfig };
     }
     return { config: this.config };
   }

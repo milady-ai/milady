@@ -16,15 +16,22 @@ describe("generate-plugin-index", () => {
   });
 
   it("maps curated setup-guide URLs for streaming plugins", () => {
-    expect(resolveSetupGuideUrl("retake")).toBe(
-      "https://docs.milady.ai/plugin-setup-guide#retaketv",
+    expect(resolveSetupGuideUrl("x-streaming")).toMatch(
+      /^https:\/\/docs\.(?:milady|eliza)\.ai\/plugin-setup-guide#x-streaming$/,
     );
-    expect(resolveSetupGuideUrl("x-streaming")).toBe(
-      "https://docs.milady.ai/plugin-setup-guide#x-streaming",
+    expect(resolveSetupGuideUrl("pumpfun-streaming")).toMatch(
+      /^https:\/\/docs\.(?:milady|eliza)\.ai\/plugin-setup-guide#pumpfun-streaming$/,
     );
-    expect(resolveSetupGuideUrl("pumpfun-streaming")).toBe(
-      "https://docs.milady.ai/plugin-setup-guide#pumpfun-streaming",
-    );
+  });
+
+  it("resolves full URLs as-is instead of appending to root", () => {
+    const url = resolveSetupGuideUrl("telegram");
+    expect(url).toMatch(/^https:\/\/docs\.milady\.ai\//);
+    expect(url).not.toContain("plugin-setup-guide#");
+  });
+
+  it("returns undefined for unknown plugin IDs", () => {
+    expect(resolveSetupGuideUrl("nonexistent-plugin")).toBeUndefined();
   });
 
   it("marks direct chat connectors with social-chat tags", () => {
@@ -37,9 +44,6 @@ describe("generate-plugin-index", () => {
   it("uses chat-first fallback descriptions for social connectors", () => {
     expect(inferDescription("telegram", "Telegram", "connector")).toBe(
       "Telegram connector for chatting with your agent.",
-    );
-    expect(inferDescription("retake", "Retake", "streaming")).toBe(
-      "Retake streaming destination for broadcasting live agent output.",
     );
   });
 });

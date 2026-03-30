@@ -1,3 +1,10 @@
+// Looking Glass WebXR polyfill — loaded dynamically in setupLookingGlass()
+// to avoid an eager WebSocket connection to ws://localhost:11222/driver on
+// every page load (the module connects on import).
+type LookingGlassWebXRPolyfillType = new (
+  opts: Record<string, unknown>,
+) => unknown;
+
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import {
   MToonMaterialLoaderPlugin,
@@ -10,10 +17,38 @@ import type {
   SplatMesh as SparkSplatMesh,
 } from "@sparkjsdev/spark";
 import * as THREE from "three";
+import { SceneOverlayManager } from "./SceneOverlayManager";
+import type {
+  TeleportSparkleParticle,
+  TeleportSparkleSystem,
+} from "./VrmTeleportEffect";
+
+/**
+ * TSL node for MeshStandardMaterial - not in public @types/three.
+ * Used for emissiveNode/opacityNode in NodeMaterial (three/tsl).
+ */
+interface TslMaterialNode {
+  mul?(v: unknown): unknown;
+  add?(v: unknown): unknown;
+}
+
+/** Three.js NodeMaterial exposes emissiveNode/opacityNode but they are not in public MeshStandardMaterial types. */
+interface MeshStandardMaterialWithNodeProps {
+  emissiveNode?: TslMaterialNode | null;
+  opacityNode?: TslMaterialNode | null;
+}
+
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+
+// biome-ignore lint/suspicious/noExplicitAny: Three.js TSL shader nodes are opaque chainable objects with no exported types.
+type TslNode = any;
+type TslMathFn = (...args: TslNode[]) => TslNode;
+type TslMathLib = Record<string, TslMathFn | undefined>;
+
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import {
   type AnimationLoaderContext,
   loadEmoteClip,
@@ -37,6 +72,7 @@ export type VrmEngineState = {
   idleTime: number;
   idleTracks: number;
   revealStarted: boolean;
+  loadingProgress?: number;
 };
 
 type DebugVector3 = {
@@ -117,12 +153,10 @@ type RendererLike = Pick<
   };
   toneMapping?: THREE.ToneMapping;
   toneMappingExposure?: number;
-};
-
-type TeleportFallbackShader = {
-  uniforms: {
-    uTeleportProgress: { value: number };
-  };
+  xr?: THREE.WebGLRenderer["xr"];
+  setAnimationLoop?: (
+    callback: ((time: number, frame?: XRFrame) => void) | null,
+  ) => void;
 };
 
 type WorldRevealController = {
@@ -142,25 +176,6 @@ type WorldRevealState = {
   syncToTeleport: boolean;
 };
 
-type TeleportSparkleParticle = {
-  sprite: THREE.Sprite;
-  material: THREE.SpriteMaterial;
-  baseAngle: number;
-  baseRadius: number;
-  height: number;
-  start: number;
-  duration: number;
-  spin: number;
-  wobble: number;
-  wobbleSpeed: number;
-  baseSize: number;
-};
-
-type TeleportSparkleSystem = {
-  group: THREE.Group;
-  particles: TeleportSparkleParticle[];
-};
-
 const DEFAULT_CAMERA_ANIMATION: CameraAnimationConfig = {
   enabled: false,
   swayAmplitude: 0.06,
@@ -171,18 +186,14 @@ const DEFAULT_CAMERA_ANIMATION: CameraAnimationConfig = {
 const CAMERA_PROFILE_TRANSITION_DURATION_SECONDS = 0.8;
 const AVATAR_SWITCH_CAMERA_TRANSITION_DURATION_SECONDS = 3;
 const COMPANION_WORLD_SCALE = 2.5;
-const COMPANION_DARK_WORLD_FLOOR_OFFSET_Y = -0.95;
-const COMPANION_LIGHT_WORLD_FLOOR_OFFSET_Y = -0.35;
+const COMPANION_DARK_WORLD_FLOOR_OFFSET_Y = -0.85;
+const COMPANION_LIGHT_WORLD_FLOOR_OFFSET_Y = -0.3;
 const COMPANION_WORLD_REVEAL_DURATION = 5.4;
 const COMPANION_WORLD_REVEAL_EDGE = 0.28;
 const COMPANION_WORLD_REVEAL_EASE_EXPONENT = 2;
 const COMPANION_WORLD_REVEAL_START_OFFSET = 0.7;
 const TELEPORT_DISSOLVE_START_Y = -1.2;
 const TELEPORT_DISSOLVE_END_Y = 1.0;
-const TELEPORT_SPARKLE_PARTICLE_COUNT = 28;
-const TELEPORT_SPARKLE_RING_RADIUS = 0.52;
-const TELEPORT_SPARKLE_MIN_SIZE = 0.055;
-const TELEPORT_SPARKLE_MAX_SIZE = 0.13;
 const COMPANION_DOF_APERTURE_SIZE = 0.028;
 const COMPANION_DOF_NEAR_ZOOM_APERTURE_FACTOR = 0.4;
 const COMPANION_ZOOM_NEAR_FACTOR = 0.25;
@@ -196,8 +207,15 @@ const SPARK_SORT_DISTANCE = 0.035;
 const SPARK_SORT_DISTANCE_NEAR = 0.05;
 const SPARK_MAX_PIXEL_RADIUS = 96;
 const SPARK_MAX_PIXEL_RADIUS_NEAR = 28;
+/** Extra clamp when `lowPowerRenderMode` (battery): cheaper splat sorting / coverage. */
+const SPARK_LOW_POWER_MAX_PIXEL_RADIUS = 44;
+const SPARK_LOW_POWER_MAX_STD_DEV = 1.45;
+const SPARK_LOW_POWER_MIN_ALPHA = 0.0028;
+const SPARK_LOW_POWER_CLIP_XY = 1.02;
+const SPARK_LOW_POWER_SORT_DISTANCE = 0.022;
 const MAX_RENDERER_PIXEL_RATIO = 2;
-const AVATAR_RENDERER_OVERRIDE_KEY = "milady.avatarRenderer";
+const AVATAR_RENDERER_OVERRIDE_KEY = "eliza.avatarRenderer";
+const LOOKING_GLASS_ENABLED_KEY = "eliza.avatarLookingGlass";
 const KNOWN_VRM_WEBGPU_WARNING =
   'TSL: "transformedNormalView" is deprecated. Use "normalView" instead.';
 
@@ -205,7 +223,15 @@ let knownVrmWebGpuWarningFilterRefs = 0;
 let releaseKnownVrmWebGpuWarningFilterGlobal: (() => void) | null = null;
 let sharedDracoLoader: DRACOLoader | null = null;
 let teleportSparkleTexture: THREE.CanvasTexture | null = null;
-const DRACO_DECODER_PATH = resolveAppAssetUrl("vrm-decoders/draco/");
+/** Module-level singleton: the polyfill overrides navigator.xr globally so
+ *  multiple instances cause "attempted to assign baselayer twice" errors. */
+let sharedLkgPolyfill: unknown = null;
+let _cachedDracoDecoderPath: string | null = null;
+/** Lazy + cached: module-load resolution can be wrong in bundled/desktop init order. */
+function getDracoDecoderPath(): string {
+  _cachedDracoDecoderPath ??= resolveAppAssetUrl("vrm-decoders/draco/");
+  return _cachedDracoDecoderPath;
+}
 
 function getRendererPixelRatio(sparkOptimized = false): number {
   if (typeof window === "undefined") return 1;
@@ -239,6 +265,20 @@ function getPreferredAvatarRendererBackend(): RendererBackend {
     return normalizedOverride;
   }
   return isElectrobunAvatarRuntime() ? "webgpu" : "webgl";
+}
+
+function isLookingGlassEnabled(): boolean {
+  if (typeof window === "undefined" || !isElectrobunAvatarRuntime()) {
+    return false;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(LOOKING_GLASS_ENABLED_KEY);
+    const normalized = raw?.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "on";
+  } catch {
+    return false;
+  }
 }
 
 function installKnownVrmWebGpuWarningFilter(): () => void {
@@ -276,7 +316,7 @@ function getSharedDracoLoader(): DRACOLoader {
   if (!sharedDracoLoader) {
     sharedDracoLoader = new DRACOLoader();
     sharedDracoLoader.setDecoderConfig({ type: "wasm" });
-    sharedDracoLoader.setDecoderPath(DRACO_DECODER_PATH);
+    sharedDracoLoader.setDecoderPath(getDracoDecoderPath());
     sharedDracoLoader.preload();
   }
   return sharedDracoLoader;
@@ -356,13 +396,14 @@ function getRobustPackedSplatAnchor(splatSource: {
   );
 }
 
+/** SparkSplatMesh may have packedSplats; types not fully exported from @sparkjsdev/spark. */
+interface SparkSplatWithPacked {
+  packedSplats?: { numSplats?: number };
+}
+
 function getRobustSplatAnchor(splat: SparkSplatMesh): THREE.Vector3 {
   return getRobustPackedSplatAnchor({
-    numSplats: (
-      splat as unknown as {
-        packedSplats?: { numSplats?: number };
-      }
-    ).packedSplats?.numSplats,
+    numSplats: (splat as SparkSplatWithPacked).packedSplats?.numSplats,
     forEachSplat: splat.forEachSplat.bind(splat),
   });
 }
@@ -401,11 +442,7 @@ function getRobustSplatRadialExtent(
 ): number {
   return getRobustPackedSplatRadialExtent(
     {
-      numSplats: (
-        splat as unknown as {
-          packedSplats?: { numSplats?: number };
-        }
-      ).packedSplats?.numSplats,
+      numSplats: (splat as SparkSplatWithPacked).packedSplats?.numSplats,
       forEachSplat: splat.forEachSplat.bind(splat),
     },
     anchor,
@@ -442,15 +479,52 @@ async function decompressGzipBuffer(buffer: ArrayBuffer): Promise<ArrayBuffer> {
 async function loadGltfAsset(
   loader: GLTFLoader,
   url: string,
+  onProgress?: (progress: number) => void,
 ): Promise<Awaited<ReturnType<GLTFLoader["loadAsync"]>>> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch VRM asset: ${response.status}`);
   }
-  let buffer = await response.arrayBuffer();
-  if (!isGzipBuffer(buffer)) {
-    return await loader.loadAsync(url);
+
+  const contentLength = Number(response.headers.get("content-length") || 0);
+
+  let buffer: ArrayBuffer;
+  if (!contentLength || !response.body || !onProgress) {
+    buffer = await response.arrayBuffer();
+    onProgress?.(1);
+  } else {
+    const reader = response.body.getReader();
+    let received = 0;
+    const chunks: Uint8Array[] = [];
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+        received += value.length;
+        onProgress(Math.min(received / contentLength, 1));
+      }
+    }
+    const combined = new Uint8Array(received);
+    let offset = 0;
+    for (const chunk of chunks) {
+      combined.set(chunk, offset);
+      offset += chunk.length;
+    }
+    buffer = combined.buffer;
   }
+
+  if (!isGzipBuffer(buffer)) {
+    const objectUrl = URL.createObjectURL(
+      new Blob([buffer], { type: "model/gltf-binary" }),
+    );
+    try {
+      return await loader.loadAsync(objectUrl);
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   buffer = await decompressGzipBuffer(buffer);
   const objectUrl = URL.createObjectURL(
     new Blob([buffer], { type: "model/gltf-binary" }),
@@ -463,11 +537,11 @@ async function loadGltfAsset(
 }
 
 /**
- * Create the best available renderer for the current platform.
- * Electrobun's CEF desktop shell expects WebGPU for the avatar stage, while the
- * browser dev shell stays on WebGL by default to avoid upstream TSL noise.
- * A localStorage override can force either backend for debugging.
- * THREE.WebGPURenderer is async-init and requires await renderer.init().
+ * Create the best available renderer for the canvas.
+ * Tries WebGPURenderer only when preference allows, Electrobun defaults prefer
+ * webgpu, and `navigator.gpu` exists; otherwise uses WebGL (also on WebGPU init failure).
+ * Non-Electrobun (e.g. browser dev) defaults preference to WebGL to reduce TSL noise.
+ * `localStorage` can force `webgpu` or `webgl`. WebGPURenderer is async; await `init()` when present.
  */
 async function createRenderer(
   canvas: HTMLCanvasElement,
@@ -502,7 +576,7 @@ async function createRenderer(
     alpha: true,
     antialias: !sparkOptimized,
     powerPreference: sparkOptimized ? "high-performance" : "default",
-  }) as unknown as RendererLike;
+  }) as RendererLike;
   console.info("[VrmEngine] Using WebGLRenderer");
   return { backend: "webgl", renderer };
 }
@@ -515,6 +589,7 @@ export class VrmEngine {
   private rendererBackend: RendererBackend = "webgl";
   private rendererPreference: RendererPreference = "auto";
   private scene: THREE.Scene | null = null;
+  private overlayManager: SceneOverlayManager | null = null;
   private avatarRoot: THREE.Group | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
   private clock = new THREE.Clock();
@@ -530,9 +605,15 @@ export class VrmEngine {
   private vrmReady = false;
   private lastLoadError: string | null = null;
   private teleportProgress = 1.0;
+  private loadingProgress = 0;
+  /** Timestamp (from elapsedTime) when the teleport dissolve finished. */
+  private teleportCompleteTime = -Infinity;
   private teleportProgressUniform: { value: number } | null = null;
   private teleportDissolvedMaterials: THREE.Material[] = [];
-  private teleportFallbackShaders: TeleportFallbackShader[] = [];
+  private teleportFallbackShaders: {
+    uniforms: { uTeleportProgress: { value: number } };
+    isOutgoing?: boolean;
+  }[] = [];
   private teleportSparkles: TeleportSparkleSystem | null = null;
   private revealStarted = false;
   private mouthValue = 0;
@@ -540,6 +621,9 @@ export class VrmEngine {
   private vrmName: string | null = null;
   private lookAtTarget = new THREE.Vector3(0, 0.5, 0);
   private readonly idleGlbUrl = resolveAppAssetUrl("animations/idle.glb.gz");
+
+  private outgoingVrm: VRM | null = null;
+  private outgoingMixer: THREE.AnimationMixer | null = null;
   private cameraAnimation: CameraAnimationConfig = {
     ...DEFAULT_CAMERA_ANIMATION,
   };
@@ -548,6 +632,15 @@ export class VrmEngine {
   private speaking = false;
   private speakingStartTime = 0;
   private readonly blinkController = new VrmBlinkController();
+
+  private splatCache = new Map<
+    string,
+    {
+      mesh: SparkSplatMesh;
+      worldAnchor: THREE.Vector3;
+      worldRevealRadius: number;
+    }
+  >();
   private readonly cameraManager = new VrmCameraManager();
   private emoteAction: THREE.AnimationAction | null = null;
   private emoteTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -555,7 +648,26 @@ export class VrmEngine {
   private emoteClipCache = new Map<string, THREE.AnimationClip>();
   private emoteRequestId = 0;
   private controls: OrbitControls | null = null;
+  /** Key light used for avatar shadows — toggled in low-power mode. */
+  private keyDirectionalLight: THREE.DirectionalLight | null = null;
+  /** When true, cap effective `devicePixelRatio` at 1 (fewer shaded pixels on Retina). */
+  private lowPowerRenderMode = false;
+  /**
+   * When true, skip every other animation tick (~half display rate). Independent
+   * of {@link lowPowerRenderMode}; `Clock.getDelta()` on active ticks absorbs skips.
+   */
+  private halfFramerateMode = false;
+  private halfFramerateSkipNext = false;
+  /** Mirrors `setup({ sparkOptimized })` — used when re-applying pixel ratio. */
+  private worldStageSparkOptimized = false;
   private paused = false;
+  /**
+   * When true, splat world + Spark backdrop are hidden so the loop can keep
+   * driving VRM idle/physics only (document hidden + user opt-in).
+   */
+  private minimalBackgroundMode = false;
+  private worldVisibleBeforeMinimalBackground = true;
+  private sparkVisibleBeforeMinimalBackground = true;
   private interactionEnabled = false;
   private interactionMode: InteractionMode = "free";
   private cameraProfile: CameraProfile = "chat";
@@ -573,10 +685,17 @@ export class VrmEngine {
   private dragOrbitCurrent = new THREE.Vector2();
   private companionZoomTarget = 0;
   private companionZoomCurrent = 0;
+  private cameraXOffsetTarget = 0;
+  private cameraXOffsetCurrent = 0;
+  /** Orbital yaw offset applied by the editor camera shift. */
+  private cameraYawOffsetTarget = 0;
+  private cameraYawOffsetCurrent = 0;
   private avatarLookTarget: THREE.Group | null = null;
   private headLookTarget = new THREE.Vector2();
   private headLookCurrent = new THREE.Vector2();
-
+  private lkgVrButton: HTMLElement | null = null;
+  private lkgRenderer: THREE.WebGLRenderer | null = null;
+  private lkgKeyListener: ((e: KeyboardEvent) => void) | null = null;
   private clearEmoteTimeout(): void {
     if (this.emoteTimeout !== null) {
       clearTimeout(this.emoteTimeout);
@@ -636,21 +755,6 @@ export class VrmEngine {
     action.setEffectiveTimeScale(1);
     action.setEffectiveWeight(1);
     action.play();
-  }
-
-  private playActionWithBlend(
-    action: THREE.AnimationAction,
-    fromAction: THREE.AnimationAction | null,
-    fadeDuration: number,
-  ): void {
-    action.reset();
-    this.activateAction(action);
-    if (fromAction && fromAction !== action) {
-      this.activateAction(fromAction);
-      action.crossFadeFrom(fromAction, fadeDuration, false);
-      return;
-    }
-    action.fadeIn(fadeDuration);
   }
 
   private async ensureIdleAction(
@@ -742,9 +846,6 @@ export class VrmEngine {
   };
   private handleControlEnd = (): void => {
     if (!this.interactionEnabled) return;
-    if (this.camera) {
-      this.baseCameraPosition.copy(this.camera.position);
-    }
     if (this.controls) {
       this.lookAtTarget.copy(this.controls.target);
     }
@@ -754,18 +855,66 @@ export class VrmEngine {
     if (!this.initialized || this.paused || this.animationFrameId !== null) {
       return;
     }
-    this.animationFrameId = requestAnimationFrame(() => {
-      this.animationFrameId = null;
-      this.loop();
-    });
+    if (this.renderer?.setAnimationLoop) {
+      this.animationFrameId = 1;
+      this.renderer.setAnimationLoop(() => {
+        this.loop();
+      });
+    } else {
+      this.animationFrameId = requestAnimationFrame(() => {
+        this.animationFrameId = null;
+        this.loop();
+      });
+    }
   }
 
   private stopLoop(): void {
     if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
+      if (this.renderer?.setAnimationLoop) {
+        this.renderer.setAnimationLoop(null);
+      } else {
+        cancelAnimationFrame(this.animationFrameId);
+      }
       this.animationFrameId = null;
     }
     this.clock.stop();
+  }
+
+  /**
+   * Re-applies `setPixelRatio` from DPR, spark mode, and battery policy, then
+   * resizes the drawing buffer to match the canvas CSS size.
+   *
+   * **WHY:** `setPixelRatio` alone does not always refit the buffer after
+   * snapshot capture or when toggling low-power mode mid-session.
+   */
+  private applyRendererPixelRatio(): void {
+    if (!this.renderer || !this.camera) return;
+    const base = getRendererPixelRatio(this.worldStageSparkOptimized);
+    const ratio = this.lowPowerRenderMode ? Math.min(base, 1) : base;
+    this.renderer.setPixelRatio(ratio);
+    const canvas = this.renderer.domElement as HTMLCanvasElement | undefined;
+    if (!canvas) return;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (w > 0 && h > 0) {
+      this.resize(w, h);
+    }
+  }
+
+  /** Disable expensive directional shadow maps on battery — big GPU savings. */
+  private applyLowPowerShadowPolicy(): void {
+    const light = this.keyDirectionalLight;
+    if (!light) return;
+    if (this.lowPowerRenderMode) {
+      light.castShadow = false;
+    } else {
+      light.castShadow = true;
+      light.shadow.mapSize.setScalar(1024);
+    }
+    const r = this.renderer as THREE.WebGLRenderer | null;
+    if (r?.shadowMap) {
+      r.shadowMap.needsUpdate = true;
+    }
   }
 
   private resumeLoop(): void {
@@ -781,30 +930,61 @@ export class VrmEngine {
     return VrmEngine.sparkModulePromise;
   }
 
+  /** After Spark init fails, skip world/splat work but keep VRM usable. */
+  private sparkRendererFailed = false;
+
   private async ensureSparkRenderer(): Promise<void> {
-    if (this.sparkRenderer || this.rendererBackend !== "webgl") return;
+    if (this.sparkRenderer || this.sparkRendererFailed) return;
+    if (this.rendererBackend !== "webgl") return;
     if (!this.scene || !this.renderer) return;
 
-    const { SparkRenderer } = await this.loadSparkModule();
-    const sparkRenderer = new SparkRenderer({
-      renderer: this.renderer as THREE.WebGLRenderer,
-      apertureAngle: 0.0,
-      focalDistance: 5.0,
-      originDistance: 1,
-      clipXY: SPARK_CLIP_XY,
-      maxStdDev: SPARK_MAX_STD_DEV,
-      maxPixelRadius: SPARK_MAX_PIXEL_RADIUS,
-      minAlpha: SPARK_MIN_ALPHA,
-      view: {
-        depthBias: 1,
-        sortDistance: SPARK_SORT_DISTANCE,
-        sortRadial: true,
-        sort360: false,
-      },
-    });
-    sparkRenderer.renderOrder = 9998;
-    this.scene.add(sparkRenderer);
-    this.sparkRenderer = sparkRenderer;
+    try {
+      const { SparkRenderer } = await this.loadSparkModule();
+      // Re-check after async import — the engine may have been disposed during
+      // the await (e.g. React StrictMode double-mount).
+      if (!this.scene || !this.renderer) return;
+      const sparkRenderer = new SparkRenderer({
+        renderer: this.renderer as THREE.WebGLRenderer,
+        apertureAngle: 0.0,
+        focalDistance: 5.0,
+        originDistance: 1,
+        clipXY: SPARK_CLIP_XY,
+        maxStdDev: SPARK_MAX_STD_DEV,
+        maxPixelRadius: SPARK_MAX_PIXEL_RADIUS,
+        minAlpha: SPARK_MIN_ALPHA,
+        view: {
+          depthBias: 1,
+          sortDistance: SPARK_SORT_DISTANCE,
+          sortRadial: true,
+          sort360: false,
+        },
+      });
+      // Render the Gaussian splat world behind everything else.
+      sparkRenderer.renderOrder = -100;
+      this.scene.add(sparkRenderer);
+      this.sparkRenderer = sparkRenderer;
+      if (this.minimalBackgroundMode) {
+        sparkRenderer.visible = false;
+      }
+
+      if (
+        sparkRenderer.material &&
+        typeof sparkRenderer.material.vertexShader === "string"
+      ) {
+        sparkRenderer.material.vertexShader =
+          sparkRenderer.material.vertexShader.replace(
+            "if (viewCenter.z >= 0.0) {",
+            "if (viewCenter.z > -6.0) {",
+          );
+        sparkRenderer.material.needsUpdate = true;
+      }
+    } catch (err) {
+      this.sparkRendererFailed = true;
+      console.warn(
+        "[VrmEngine] Spark renderer init failed (world background unavailable):",
+        err,
+      );
+    }
   }
 
   private updateSparkPerformanceProfile(): void {
@@ -816,89 +996,93 @@ export class VrmEngine {
       sparkRenderer.minAlpha = SPARK_MIN_ALPHA;
       sparkRenderer.clipXY = SPARK_CLIP_XY;
       sparkRenderer.defaultView.sortDistance = SPARK_SORT_DISTANCE;
-      return;
-    }
-    const isCompanionProfile =
-      this.cameraProfile === "companion" ||
-      this.cameraProfile === "companion_close";
-    const closeZoomFactor = isCompanionProfile
-      ? THREE.MathUtils.smoothstep(this.companionZoomCurrent, 0.3, 1)
-      : 0;
+    } else {
+      const isCompanionProfile = this.cameraProfile === "companion";
+      const closeZoomFactor = isCompanionProfile
+        ? THREE.MathUtils.smoothstep(this.companionZoomCurrent, 0.3, 1)
+        : 0;
 
-    sparkRenderer.maxPixelRadius = THREE.MathUtils.lerp(
-      SPARK_MAX_PIXEL_RADIUS,
-      SPARK_MAX_PIXEL_RADIUS_NEAR,
-      closeZoomFactor,
-    );
-    sparkRenderer.maxStdDev = THREE.MathUtils.lerp(
-      SPARK_MAX_STD_DEV,
-      SPARK_MAX_STD_DEV_NEAR,
-      closeZoomFactor,
-    );
-    sparkRenderer.minAlpha = THREE.MathUtils.lerp(
-      SPARK_MIN_ALPHA,
-      SPARK_MIN_ALPHA_NEAR,
-      closeZoomFactor,
-    );
-    sparkRenderer.clipXY = THREE.MathUtils.lerp(
-      SPARK_CLIP_XY,
-      1.03,
-      closeZoomFactor,
-    );
-    sparkRenderer.defaultView.sortDistance = THREE.MathUtils.lerp(
-      SPARK_SORT_DISTANCE,
-      SPARK_SORT_DISTANCE_NEAR,
-      closeZoomFactor,
-    );
+      sparkRenderer.maxPixelRadius = THREE.MathUtils.lerp(
+        SPARK_MAX_PIXEL_RADIUS,
+        SPARK_MAX_PIXEL_RADIUS_NEAR,
+        closeZoomFactor,
+      );
+      sparkRenderer.maxStdDev = THREE.MathUtils.lerp(
+        SPARK_MAX_STD_DEV,
+        SPARK_MAX_STD_DEV_NEAR,
+        closeZoomFactor,
+      );
+      sparkRenderer.minAlpha = THREE.MathUtils.lerp(
+        SPARK_MIN_ALPHA,
+        SPARK_MIN_ALPHA_NEAR,
+        closeZoomFactor,
+      );
+      sparkRenderer.clipXY = THREE.MathUtils.lerp(
+        SPARK_CLIP_XY,
+        1.03,
+        closeZoomFactor,
+      );
+      sparkRenderer.defaultView.sortDistance = THREE.MathUtils.lerp(
+        SPARK_SORT_DISTANCE,
+        SPARK_SORT_DISTANCE_NEAR,
+        closeZoomFactor,
+      );
+    }
+
+    if (this.lowPowerRenderMode) {
+      sparkRenderer.maxPixelRadius = Math.min(
+        sparkRenderer.maxPixelRadius,
+        SPARK_LOW_POWER_MAX_PIXEL_RADIUS,
+      );
+      sparkRenderer.maxStdDev = Math.min(
+        sparkRenderer.maxStdDev,
+        SPARK_LOW_POWER_MAX_STD_DEV,
+      );
+      sparkRenderer.minAlpha = Math.max(
+        sparkRenderer.minAlpha,
+        SPARK_LOW_POWER_MIN_ALPHA,
+      );
+      sparkRenderer.clipXY = Math.min(
+        sparkRenderer.clipXY,
+        SPARK_LOW_POWER_CLIP_XY,
+      );
+      sparkRenderer.defaultView.sortDistance = Math.min(
+        sparkRenderer.defaultView.sortDistance,
+        SPARK_LOW_POWER_SORT_DISTANCE,
+      );
+    }
   }
 
-  private createWorldRevealController(
+  private async createWorldRevealController(
     spark: typeof import("@sparkjsdev/spark"),
     mesh: SparkSplatMesh,
     reveal: { origin: THREE.Vector3; radius: number },
     mode: "reveal" | "hide",
-  ): WorldRevealController | null {
+  ): Promise<WorldRevealController | null> {
     const dyno = (
       "dyno" in spark ? Reflect.get(spark as object, "dyno") : undefined
-    ) as
-      | {
-          Gsplat: unknown;
-          dynoBlock: (
-            inTypes: Record<string, unknown>,
-            outTypes: Record<string, unknown>,
-            construct: (
-              inputs: Record<string, unknown>,
-            ) => Record<string, unknown>,
-          ) => unknown;
-          dynoFloat: (value?: number, key?: string) => { value: number };
-          dynoVec3: (
-            value?: THREE.Vector3,
-            key?: string,
-          ) => { value: THREE.Vector3 };
-          dynoConst: (type: string, value: number) => unknown;
-          splitGsplat: (gsplat: unknown) => {
-            outputs: {
-              center: unknown;
-              scales: unknown;
-              rgb: unknown;
-              opacity: unknown;
-            };
-          };
-          combineGsplat: (value: Record<string, unknown>) => unknown;
-          add: (a: unknown, b: unknown) => unknown;
-          sub: (a: unknown, b: unknown) => unknown;
-          mul: (a: unknown, b: unknown) => unknown;
-          div: (a: unknown, b: unknown) => unknown;
-          abs: (a: unknown) => unknown;
-          clamp: (a: unknown, min: unknown, max: unknown) => unknown;
-          max: (a: unknown, b: unknown) => unknown;
-          mix: (a: unknown, b: unknown, t: unknown) => unknown;
-          smoothstep: (edge0: unknown, edge1: unknown, x: unknown) => unknown;
-          pow: (a: unknown, b: unknown) => unknown;
-          length: (a: unknown) => unknown;
-          swizzle: (a: unknown, select: string) => unknown;
-        }
-      | undefined;
+    ) as TslMathLib | undefined;
+
+    const tsl = (await import("three/tsl").catch(
+      () => null,
+    )) as TslMathLib | null;
+
+    const math = {
+      add: dyno?.add || tsl?.add,
+      sub: dyno?.sub || tsl?.sub,
+      mul: dyno?.mul || tsl?.mul,
+      div: dyno?.div || tsl?.div,
+      abs: dyno?.abs || tsl?.abs,
+      clamp: dyno?.clamp || tsl?.clamp,
+      max: dyno?.max || tsl?.max,
+      mix: dyno?.mix || tsl?.mix,
+      smoothstep: dyno?.smoothstep || tsl?.smoothstep,
+      pow: dyno?.pow || tsl?.pow,
+      length: dyno?.length || tsl?.length,
+      swizzle:
+        dyno?.swizzle || ((a: Record<string, unknown>, s: string) => a[s] || a), // fallback to property access
+    };
+
     if (
       !dyno?.Gsplat ||
       !dyno.dynoBlock ||
@@ -907,21 +1091,50 @@ export class VrmEngine {
       !dyno.dynoConst ||
       !dyno.splitGsplat ||
       !dyno.combineGsplat ||
-      !dyno.add ||
-      !dyno.sub ||
-      !dyno.mul ||
-      !dyno.div ||
-      !dyno.abs ||
-      !dyno.clamp ||
-      !dyno.max ||
-      !dyno.mix ||
-      !dyno.smoothstep ||
-      !dyno.pow ||
-      !dyno.length ||
-      !dyno.swizzle
+      !math.add ||
+      !math.sub ||
+      !math.mul ||
+      !math.div ||
+      !math.abs ||
+      !math.clamp ||
+      !math.max ||
+      !math.mix ||
+      !math.smoothstep ||
+      !math.pow ||
+      !math.length ||
+      !math.swizzle
     ) {
+      console.error(
+        "[VrmEngine] createWorldRevealController failed missing dyno/tsl props:",
+        {
+          Gsplat: !!dyno?.Gsplat,
+          dynoBlock: !!dyno?.dynoBlock,
+          dynoFloat: !!dyno?.dynoFloat,
+          dynoVec3: !!dyno?.dynoVec3,
+          dynoConst: !!dyno?.dynoConst,
+          splitGsplat: !!dyno?.splitGsplat,
+          combineGsplat: !!dyno?.combineGsplat,
+          add: !!math.add,
+          sub: !!math.sub,
+          mul: !!math.mul,
+          div: !!math.div,
+          abs: !!math.abs,
+          clamp: !!math.clamp,
+          max: !!math.max,
+          mix: !!math.mix,
+          smoothstep: !!math.smoothstep,
+          pow: !!math.pow,
+          length: !!math.length,
+          swizzle: !!math.swizzle,
+        },
+      );
       return null;
     }
+    console.log(
+      "[VrmEngine] createWorldRevealController SUCCESS, dyno/tsl checked ok",
+    );
+
+    const validatedMath = math as Record<keyof typeof math, TslMathFn>;
 
     const originUniform = dyno.dynoVec3(reveal.origin, "uWorldRevealOrigin");
     const resolvedRadius = Math.max(
@@ -951,52 +1164,64 @@ export class VrmEngine {
     const modifier = dyno.dynoBlock(
       { gsplat: dyno.Gsplat },
       { gsplat: dyno.Gsplat },
-      ({ gsplat }) => {
+      ({ gsplat }: { gsplat: unknown }) => {
         if (!gsplat) {
           throw new Error("Missing gsplat input for world reveal");
         }
-        const { center, scales, rgb, opacity } =
-          dyno.splitGsplat(gsplat).outputs;
-        const radialDistance = dyno.length(
-          dyno.swizzle(dyno.sub(center, originUniform), "xz"),
+        const splitResult = dyno?.splitGsplat?.(gsplat);
+        if (!splitResult) {
+          throw new Error("splitGsplat returned undefined");
+        }
+        const { center, scales, rgb, opacity } = splitResult.outputs;
+        const radialDistance = validatedMath.length(
+          validatedMath.swizzle(validatedMath.sub(center, originUniform), "xz"),
         );
-        const currentRadius = dyno.add(
-          dyno.mul(radiusUniform, progressUniform),
+        const currentRadius = validatedMath.add(
+          validatedMath.mul(radiusUniform, progressUniform),
           startOffset,
         );
-        const bodyMask = dyno.sub(
+        const bodyMask = validatedMath.sub(
           one,
-          dyno.smoothstep(
-            dyno.sub(currentRadius, edgeUniform),
-            dyno.add(currentRadius, edgeUniform),
+          validatedMath.smoothstep(
+            validatedMath.sub(currentRadius, edgeUniform),
+            validatedMath.add(currentRadius, edgeUniform),
             radialDistance,
           ),
         );
-        const ringDistance = dyno.abs(dyno.sub(radialDistance, currentRadius));
-        const ringMask = dyno.pow(
-          dyno.sub(
+        const ringDistance = validatedMath.abs(
+          validatedMath.sub(radialDistance, currentRadius),
+        );
+        const ringMask = validatedMath.pow(
+          validatedMath.sub(
             one,
-            dyno.smoothstep(zero, dyno.mul(edgeUniform, two), ringDistance),
+            validatedMath.smoothstep(
+              zero,
+              validatedMath.mul(edgeUniform, two),
+              ringDistance,
+            ),
           ),
           two,
         );
         const visibleMask =
-          mode === "hide" ? dyno.sub(one, bodyMask) : bodyMask;
-        const wireFactor = dyno.clamp(
-          dyno.max(visibleMask, dyno.mul(ringMask, wireAlphaUniform)),
+          mode === "hide" ? validatedMath.sub(one, bodyMask) : bodyMask;
+        const wireFactor = validatedMath.clamp(
+          validatedMath.max(
+            visibleMask,
+            validatedMath.mul(ringMask, wireAlphaUniform),
+          ),
           zero,
           one,
         );
-        const brightenedRgb = dyno.mul(
+        const brightenedRgb = validatedMath.mul(
           rgb,
-          dyno.add(one, dyno.mul(ringMask, wireBoostUniform)),
+          validatedMath.add(one, validatedMath.mul(ringMask, wireBoostUniform)),
         );
         return {
-          gsplat: dyno.combineGsplat({
+          gsplat: dyno?.combineGsplat?.({
             gsplat,
-            scales: dyno.mix(wireScaleUniform, scales, wireFactor),
-            rgb: dyno.mix(brightenedRgb, rgb, visibleMask),
-            opacity: dyno.mul(opacity, wireFactor),
+            scales: validatedMath.mix(wireScaleUniform, scales, wireFactor),
+            rgb: validatedMath.mix(brightenedRgb, rgb, visibleMask),
+            opacity: validatedMath.mul(opacity, wireFactor),
           }),
         };
       },
@@ -1074,8 +1299,13 @@ export class VrmEngine {
     reveal.incoming.mesh.objectModifier = undefined;
     this.refreshSplatMesh(reveal.incoming.mesh);
     if (reveal.outgoing) {
+      // Clear the modifier and refresh before hiding so the cached mesh is in a
+      // clean baseline state when it is next reused as the incoming world.
+      // Without this, stale dyno graph references on the modifier cause the
+      // second toggle to render as invisible.
       reveal.outgoing.mesh.objectModifier = undefined;
-      this.disposeSplatMesh(reveal.outgoing.mesh);
+      this.refreshSplatMesh(reveal.outgoing.mesh);
+      reveal.outgoing.mesh.visible = false;
     }
     if (this.worldReveal === reveal) {
       this.worldReveal = null;
@@ -1137,9 +1367,7 @@ export class VrmEngine {
       0.5,
       camera.position.distanceTo(this.pointerParallaxLookAt),
     );
-    const isCompanionProfile =
-      this.cameraProfile === "companion" ||
-      this.cameraProfile === "companion_close";
+    const isCompanionProfile = this.cameraProfile === "companion";
     const closeZoomFactor = isCompanionProfile
       ? THREE.MathUtils.smoothstep(this.companionZoomCurrent, 0.3, 1)
       : 0;
@@ -1157,9 +1385,7 @@ export class VrmEngine {
     camera: THREE.PerspectiveCamera,
     stableDelta: number,
   ): void {
-    const isCompanionProfile =
-      this.cameraProfile === "companion" ||
-      this.cameraProfile === "companion_close";
+    const isCompanionProfile = this.cameraProfile === "companion";
     const follow = Math.min(1, stableDelta * 10);
     const targetZoom = isCompanionProfile ? this.companionZoomTarget : 0;
     this.companionZoomCurrent = THREE.MathUtils.lerp(
@@ -1495,21 +1721,33 @@ export class VrmEngine {
   ): void {
     if (!this.camera) return;
 
-    const startPos = new THREE.Vector3().copy(this.camera.position);
+    const startPos = new THREE.Vector3().copy(this.baseCameraPosition);
     const startLookAt = new THREE.Vector3().copy(this.lookAtTarget);
     const startFov = this.camera.fov;
     const targetLookAt = new THREE.Vector3();
-    const targetPos = new THREE.Vector3();
+    const defaultProfileTargetPos = new THREE.Vector3();
+
+    const dummyCamera = this.camera.clone();
 
     this.cameraManager.centerAndFrame(
       vrm,
-      this.camera,
+      dummyCamera,
       this.controls,
       this.cameraProfile,
       targetLookAt,
-      targetPos,
+      defaultProfileTargetPos,
       (c) => this.cameraManager.applyInteractionMode(c, this.interactionMode),
+      true, // skipControlUpdate
     );
+
+    // To prevent frame-based dynamic offsets (yaw, sway, zoom) from accumulating and causing camera spin,
+    // compute the pristine tracking offset from baseCameraPosition, which is unaffected by post-process
+    // modifiers in applyCameraMotion. We do NOT use OrbitControls' getDistance/getAzimuthalAngle because
+    // OrbitControls reads from `camera.position` which has the temporary view shifts applied to it every frame.
+    const currentOffset = new THREE.Vector3();
+    currentOffset.copy(this.baseCameraPosition).sub(startLookAt);
+
+    const targetPos = new THREE.Vector3().copy(targetLookAt).add(currentOffset);
 
     this.startCameraTransition(
       startPos,
@@ -1517,7 +1755,7 @@ export class VrmEngine {
       startFov,
       targetPos,
       targetLookAt,
-      this.camera.fov,
+      dummyCamera.fov,
       durationSeconds,
     );
   }
@@ -1559,6 +1797,7 @@ export class VrmEngine {
     this.onUpdate = onUpdate;
     this.loadingAborted = false;
     this.rendererPreference = options?.rendererPreference ?? "auto";
+    this.worldStageSparkOptimized = options?.sparkOptimized ?? false;
     this.resetReadyPromise();
     // Async renderer creation: tries WebGPU, falls back to WebGL.
     // setup() remains synchronous for callers; the loop starts after init resolves.
@@ -1579,9 +1818,7 @@ export class VrmEngine {
           return;
         }
         this.releaseKnownWebGpuWarningFilter = releaseKnownWebGpuWarningFilter;
-        renderer.setPixelRatio(
-          getRendererPixelRatio(options?.sparkOptimized ?? false),
-        );
+        this.renderer = renderer;
         renderer.setClearColor(0x000000, 0);
         if (backend === "webgl") {
           const webglRenderer = renderer as THREE.WebGLRenderer;
@@ -1591,8 +1828,12 @@ export class VrmEngine {
           webglRenderer.toneMappingExposure = 1.0;
           webglRenderer.outputColorSpace = THREE.SRGBColorSpace;
         }
-        this.renderer = renderer;
         this.rendererBackend = backend;
+        if (backend === "webgl" && isLookingGlassEnabled()) {
+          // Looking Glass: create a SEPARATE hidden renderer so the main
+          // canvas and camera are never affected by the XR polyfill.
+          this.setupLookingGlass();
+        }
         const scene = new THREE.Scene();
         this.scene = scene;
         const avatarRoot = new THREE.Group();
@@ -1619,6 +1860,17 @@ export class VrmEngine {
         controls.update();
         this.controls = controls;
         this.setInteractionEnabled(this.interactionEnabled);
+        // Apply deferred camera profile (setCameraProfile may have been called
+        // before the camera existed) and initialize baseCameraPosition so that
+        // drag-orbit and companion-zoom have a valid reference point from the
+        // very first frame.
+        this.cameraManager.applyCameraProfileToCamera(
+          camera,
+          controls,
+          this.cameraProfile,
+        );
+        this.baseCameraPosition.copy(camera.position);
+        this.lookAtTarget.copy(controls.target);
         const ambient = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambient);
         const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -1626,10 +1878,24 @@ export class VrmEngine {
         keyLight.castShadow = true;
         keyLight.shadow.mapSize.setScalar(1024);
         scene.add(keyLight);
+        this.keyDirectionalLight = keyLight;
         const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
         fillLight.position.set(-1, 0.5, -1).normalize();
         scene.add(fillLight);
-        this.resize(canvas.clientWidth, canvas.clientHeight);
+        this.applyRendererPixelRatio();
+        if (this.lowPowerRenderMode) {
+          this.applyLowPowerShadowPolicy();
+        }
+        // Auto-create the scene overlay manager for floating HUD panels.
+        if (!this.overlayManager && this.scene) {
+          try {
+            this.overlayManager = new SceneOverlayManager();
+            this.overlayManager.attach(this.scene);
+          } catch {
+            // Overlay panels require a full 2D canvas context; gracefully
+            // skip when running in headless / test environments.
+          }
+        }
         this.initialized = true;
         this.resumeLoop();
         this.settleReady();
@@ -1642,6 +1908,7 @@ export class VrmEngine {
         this.scene = null;
         this.camera = null;
         this.controls = null;
+        this.keyDirectionalLight = null;
         console.error("[VrmEngine] Failed to initialize renderer:", error);
         this.settleReady(error);
       }
@@ -1652,9 +1919,16 @@ export class VrmEngine {
     return this.initialized && this.renderer !== null;
   }
   dispose(): void {
+    this.overlayManager?.dispose();
+    this.overlayManager = null;
     this.loadingAborted = true;
     this.initialized = false;
     this.settleReady();
+    // Flush the world splat cache — dispose all meshes so GPU memory is freed.
+    for (const cached of this.splatCache.values()) {
+      this.disposeSplatMesh(cached.mesh);
+    }
+    this.splatCache.clear();
     this.releaseKnownWebGpuWarningFilter?.();
     this.releaseKnownWebGpuWarningFilter = null;
     if (this.animationFrameId !== null) {
@@ -1699,17 +1973,156 @@ export class VrmEngine {
       this.sparkRenderer.removeFromParent();
       this.sparkRenderer = null;
     }
+    this.sparkRendererFailed = false;
     if (this.renderer) {
       this.renderer.dispose();
     }
     this.renderer = null;
     this.rendererBackend = "webgl";
+    this.disposeLookingGlass();
+    this.keyDirectionalLight = null;
     this.scene = null;
     this.avatarRoot = null;
     this.camera = null;
     this.onUpdate = null;
     this.paused = false;
   }
+
+  /**
+   * Create a separate hidden WebGLRenderer dedicated to the Looking Glass.
+   * This runs independently from the main renderer so the app's canvas and
+   * camera are never affected by the XR polyfill.
+   */
+  private async setupLookingGlass(): Promise<void> {
+    // Remove any stale button / renderer from a previous mount
+    document.getElementById("VRButton")?.remove();
+    this.lkgRenderer?.dispose();
+
+    // Polyfill singleton (overrides navigator.xr globally once).
+    // Dynamic import so the module's WebSocket to localhost:11222 only
+    // opens when Looking Glass is actually enabled.
+    if (!sharedLkgPolyfill) {
+      try {
+        // @ts-expect-error - No type definitions available for lookingglass/webxr yet
+        const mod = await import("@lookingglass/webxr");
+        const Ctor =
+          mod.LookingGlassWebXRPolyfill as LookingGlassWebXRPolyfillType;
+        sharedLkgPolyfill = new Ctor({
+          inlineView: 1,
+          targetY: 1.0,
+          targetZ: 0,
+          targetDiam: 3,
+          fovy: (40 * Math.PI) / 180,
+        });
+      } catch (err) {
+        console.warn("[vrm] Looking Glass WebXR polyfill failed to load:", err);
+        return;
+      }
+    }
+    // Separate hidden canvas + renderer — the polyfill will resize/take over
+    // this canvas, NOT the main app canvas.
+    const lkgCanvas = document.createElement("canvas");
+    lkgCanvas.width = 1;
+    lkgCanvas.height = 1;
+    lkgCanvas.style.cssText =
+      "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;";
+    document.body.appendChild(lkgCanvas);
+
+    const lkgR = new THREE.WebGLRenderer({
+      canvas: lkgCanvas,
+      alpha: true,
+      antialias: false,
+    });
+    lkgR.xr.enabled = true;
+    this.lkgRenderer = lkgR;
+
+    // LKG render loop: share the scene and camera from the main engine
+    lkgR.setAnimationLoop(() => {
+      const scene = this.scene;
+      const camera = this.camera;
+      if (!scene || !camera) return;
+      lkgR.render(scene, camera);
+    });
+
+    // VRButton creates the Enter VR flow on the LKG renderer
+    const vrBtn = VRButton.createButton(lkgR);
+    vrBtn.id = "VRButton";
+    // Override VRButton's default styles, then force hidden
+    vrBtn.style.cssText =
+      "position:fixed;top:50%;left:20px;transform:translateY(-50%);" +
+      "padding:12px 24px;border:1px solid rgba(255,255,255,0.4);" +
+      "border-radius:8px;background:rgba(0,0,0,0.6);" +
+      "color:#fff;font:13px sans-serif;cursor:pointer;z-index:2147483647;" +
+      "pointer-events:auto;";
+    // Force hidden — must be set after cssText and re-applied if VRButton
+    // resets its style (it uses a timeout to update button text/style).
+    vrBtn.style.display = "none";
+    const lkgBtnObserver = new MutationObserver(() => {
+      if (!this.lkgVrButton) return;
+      if (
+        this.lkgVrButton.dataset.lkgVisible !== "1" &&
+        this.lkgVrButton.style.display !== "none"
+      ) {
+        this.lkgVrButton.style.display = "none";
+      }
+    });
+    lkgBtnObserver.observe(vrBtn, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
+
+    // Pre-open popup synchronously in user gesture context
+    vrBtn.addEventListener(
+      "click",
+      () => {
+        const popup = window.open("", "new", "width=640,height=360");
+        if (popup) {
+          popup.document.title = "Looking Glass Window (fullscreen me on LKG!)";
+          popup.document.body.style.background = "black";
+        }
+      },
+      true,
+    );
+
+    document.body.appendChild(vrBtn);
+    this.lkgVrButton = vrBtn;
+
+    // Shift+F5 toggles the button visibility
+    const keyListener = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === "F5") {
+        e.preventDefault();
+        const btn = this.lkgVrButton;
+        if (btn instanceof HTMLElement) {
+          const show = btn.dataset.lkgVisible !== "1";
+          btn.dataset.lkgVisible = show ? "1" : "0";
+          btn.style.display = show ? "block" : "none";
+        }
+      }
+    };
+    window.addEventListener("keydown", keyListener);
+    this.lkgKeyListener = keyListener;
+  }
+
+  /** Clean up the dedicated Looking Glass renderer and UI. */
+  private disposeLookingGlass(): void {
+    if (this.lkgKeyListener) {
+      window.removeEventListener("keydown", this.lkgKeyListener);
+      this.lkgKeyListener = null;
+    }
+    if (this.lkgVrButton) {
+      this.lkgVrButton.parentElement?.removeChild(this.lkgVrButton);
+      this.lkgVrButton = null;
+    }
+    if (this.lkgRenderer) {
+      this.lkgRenderer.setAnimationLoop(null);
+      this.lkgRenderer.dispose();
+      this.lkgRenderer.domElement.parentElement?.removeChild(
+        this.lkgRenderer.domElement,
+      );
+      this.lkgRenderer = null;
+    }
+  }
+
   setPaused(paused: boolean): void {
     if (this.paused === paused) return;
     this.paused = paused;
@@ -1719,6 +2132,66 @@ export class VrmEngine {
     }
     this.resumeLoop();
   }
+
+  /**
+   * Hides the Gaussian world + Spark layer while keeping the animation/render
+   * loop alive so the avatar keeps idling. Restores prior mesh visibility when
+   * disabled.
+   */
+  setMinimalBackgroundMode(enabled: boolean): void {
+    if (this.minimalBackgroundMode === enabled) return;
+    if (enabled) {
+      this.worldVisibleBeforeMinimalBackground =
+        this.worldMesh?.visible ?? false;
+      this.sparkVisibleBeforeMinimalBackground =
+        this.sparkRenderer?.visible ?? true;
+      if (this.worldMesh) this.worldMesh.visible = false;
+      if (this.sparkRenderer) this.sparkRenderer.visible = false;
+    } else {
+      if (this.worldMesh) {
+        this.worldMesh.visible = this.worldVisibleBeforeMinimalBackground;
+      }
+      if (this.sparkRenderer) {
+        this.sparkRenderer.visible = this.sparkVisibleBeforeMinimalBackground;
+      }
+    }
+    this.minimalBackgroundMode = enabled;
+  }
+
+  private applyMinimalBackgroundHidingToAttachedWorld(): void {
+    if (!this.minimalBackgroundMode) return;
+    if (this.worldMesh) this.worldMesh.visible = false;
+    if (this.sparkRenderer) this.sparkRenderer.visible = false;
+  }
+
+  /**
+   * When true, caps the WebGL/WebGPU pixel ratio at **1** on top of the usual
+   * DPR clamp and applies cheaper shadows + Spark tuning — primarily for
+   * **battery** on Retina. Does **not** change frame cadence; use
+   * {@link setHalfFramerateMode} for ~half refresh rate.
+   *
+   * **WHY:** shader cost scales with physical pixels; `desktopGetPowerState`
+   * → `onBattery` toggles this from the Electrobun shell without a full reload.
+   */
+  setLowPowerRenderMode(enabled: boolean): void {
+    if (this.lowPowerRenderMode === enabled) return;
+    this.lowPowerRenderMode = enabled;
+    this.applyRendererPixelRatio();
+    this.applyLowPowerShadowPolicy();
+    this.updateSparkPerformanceProfile();
+  }
+
+  /**
+   * When true, the main loop skips every other tick so `renderer.render` runs at
+   * roughly half the display refresh rate; skipped ticks do not call
+   * `clock.getDelta()`, so the next tick’s delta spans two intervals.
+   */
+  setHalfFramerateMode(enabled: boolean): void {
+    if (this.halfFramerateMode === enabled) return;
+    this.halfFramerateMode = enabled;
+    this.halfFramerateSkipNext = false;
+  }
+
   setInteractionEnabled(enabled: boolean): void {
     this.interactionEnabled = enabled;
     if (this.controls) {
@@ -1745,25 +2218,34 @@ export class VrmEngine {
       const targetLookAt = new THREE.Vector3().copy(this.lookAtTarget);
       const targetPos = new THREE.Vector3().copy(this.camera.position);
 
+      let targetFov = this.camera.fov;
+
       if (this.vrm) {
+        const dummyCamera = this.camera.clone();
         this.cameraManager.centerAndFrame(
           this.vrm,
-          this.camera,
+          dummyCamera,
           this.controls,
           this.cameraProfile,
           targetLookAt,
           targetPos,
           (c) =>
             this.cameraManager.applyInteractionMode(c, this.interactionMode),
+          true, // skipControlUpdate
         );
+        targetFov = dummyCamera.fov;
       } else {
+        const dummyCamera = this.camera.clone();
         this.cameraManager.applyCameraProfileToCamera(
-          this.camera,
+          dummyCamera,
           this.controls,
           this.cameraProfile,
         );
-        targetPos.copy(this.camera.position);
+        targetPos.copy(dummyCamera.position);
+        targetFov = dummyCamera.fov;
+        // controls.target handles lookAt internally or we just leap
         if (this.controls) {
+          // Skipping instant snap of controls.target, we let transition handle it
           targetLookAt.copy(this.controls.target);
         }
       }
@@ -1774,7 +2256,7 @@ export class VrmEngine {
         startFov,
         targetPos,
         targetLookAt,
-        this.camera.fov,
+        targetFov,
         CAMERA_PROFILE_TRANSITION_DURATION_SECONDS,
       );
     } else {
@@ -1800,6 +2282,7 @@ export class VrmEngine {
       idleTime: this.idleAction?.time ?? 0,
       idleTracks: this.idleAction?.getClip()?.tracks.length ?? 0,
       revealStarted: this.revealStarted,
+      loadingProgress: this.loadingProgress,
     };
   }
   setMouthOpen(value: number): void {
@@ -1810,6 +2293,13 @@ export class VrmEngine {
       this.speakingStartTime = this.elapsedTime;
     }
     this.speaking = speaking;
+  }
+  attachOverlayManager(manager: SceneOverlayManager): void {
+    this.overlayManager = manager;
+    if (this.scene) manager.attach(this.scene);
+  }
+  getOverlayManager(): SceneOverlayManager | null {
+    return this.overlayManager;
   }
   setCameraAnimation(config: Partial<CameraAnimationConfig>): void {
     this.cameraAnimation = { ...this.cameraAnimation, ...config };
@@ -1841,6 +2331,13 @@ export class VrmEngine {
   setCompanionZoomNormalized(value: number): void {
     this.companionZoomTarget = THREE.MathUtils.clamp(value, 0, 1);
   }
+  setCameraXOffset(offset: number): void {
+    this.cameraXOffsetTarget = THREE.MathUtils.clamp(offset, -3, 3);
+    // Map the X offset to an orbital yaw offset (radians).
+    // Positive X offset → negative theta (orbit camera to the right so
+    // character appears on the left).
+    this.cameraYawOffsetTarget = -offset * 0.7;
+  }
 
   async setWorldUrl(url: string | null): Promise<void> {
     await this.whenReady();
@@ -1858,35 +2355,77 @@ export class VrmEngine {
     }
 
     await this.ensureSparkRenderer();
+    if (this.sparkRendererFailed) return;
+    // Re-check after async — the engine may have been disposed during the
+    // await (e.g. React StrictMode double-mount or rapid navigation).
+    if (
+      !this.scene ||
+      this.loadingAborted ||
+      requestId !== this.worldLoadRequestId
+    )
+      return;
     const spark = await this.loadSparkModule();
+    if (
+      !this.scene ||
+      this.loadingAborted ||
+      requestId !== this.worldLoadRequestId
+    )
+      return;
     const { SplatMesh } = spark;
+    const cached = this.splatCache.get(normalizedUrl);
     let worldAnchor = new THREE.Vector3(0, 0, 0);
     let worldRevealRadius = 1;
-    const splat = new SplatMesh({
-      url: normalizedUrl,
-      constructSplats: (packedSplats) => {
-        worldAnchor = getRobustPackedSplatAnchor(packedSplats);
-        worldRevealRadius = getRobustPackedSplatRadialExtent(
-          packedSplats,
-          worldAnchor,
-        );
-      },
-    });
-    splat.frustumCulled = false;
-    splat.quaternion.identity();
-    splat.position.set(0, 0, 0);
-    splat.scale.setScalar(COMPANION_WORLD_SCALE);
-    this.scene.add(splat);
+    let splat: SparkSplatMesh;
 
-    await splat.initialized;
+    if (cached) {
+      splat = cached.mesh;
+      worldAnchor = cached.worldAnchor;
+      worldRevealRadius = cached.worldRevealRadius;
+      splat.visible = false;
+    } else {
+      try {
+        splat = new SplatMesh({
+          url: normalizedUrl,
+          constructSplats: (packedSplats) => {
+            worldAnchor = getRobustPackedSplatAnchor(packedSplats);
+            worldRevealRadius = getRobustPackedSplatRadialExtent(
+              packedSplats,
+              worldAnchor,
+            );
+          },
+        });
+      } catch (splatErr) {
+        console.warn("[VrmEngine] SplatMesh construction failed:", splatErr);
+        return;
+      }
+      splat.frustumCulled = false;
+      splat.quaternion.identity();
+      splat.position.set(0, 0, 0);
+      splat.scale.setScalar(COMPANION_WORLD_SCALE);
+      splat.visible = false;
+      this.scene.add(splat);
+    }
+
+    if (!cached) {
+      try {
+        await splat.initialized;
+      } catch (initErr) {
+        console.warn("[VrmEngine] SplatMesh initialization failed:", initErr);
+        splat.parent?.remove(splat);
+        splat.dispose();
+        return;
+      }
+    }
 
     if (
       this.loadingAborted ||
       !this.scene ||
       requestId !== this.worldLoadRequestId
     ) {
-      splat.parent?.remove(splat);
-      splat.dispose();
+      if (!cached) {
+        splat.parent?.remove(splat);
+        splat.dispose();
+      }
       return;
     }
 
@@ -1898,6 +2437,15 @@ export class VrmEngine {
       -worldCenterBottom.y * COMPANION_WORLD_SCALE + worldFloorOffsetY,
       -worldCenterBottom.z * COMPANION_WORLD_SCALE,
     );
+
+    if (!cached) {
+      this.splatCache.set(normalizedUrl, {
+        mesh: splat,
+        worldAnchor,
+        worldRevealRadius,
+      });
+    }
+
     const syncToTeleport = this.revealStarted && this.teleportProgress < 0.999;
     const waitingForVrm = !outgoingWorld && !this.vrmReady;
     const incomingRevealRadius = Math.max(
@@ -1916,7 +2464,7 @@ export class VrmEngine {
       );
     }
 
-    const worldReveal = this.createWorldRevealController(
+    const worldReveal = await this.createWorldRevealController(
       spark,
       splat,
       {
@@ -1929,7 +2477,7 @@ export class VrmEngine {
     if (worldReveal) {
       let outgoingReveal: WorldRevealController | null = null;
       if (outgoingWorld && outgoingAnchor && !waitingForVrm) {
-        outgoingReveal = this.createWorldRevealController(
+        outgoingReveal = await this.createWorldRevealController(
           spark,
           outgoingWorld,
           {
@@ -1939,9 +2487,10 @@ export class VrmEngine {
           "hide",
         );
         if (!outgoingReveal) {
-          this.disposeSplatMesh(outgoingWorld);
+          outgoingWorld.visible = false;
         }
       }
+      splat.visible = true;
       this.queueWorldReveal(worldReveal, {
         outgoing: outgoingReveal,
         duration: COMPANION_WORLD_REVEAL_DURATION,
@@ -1950,8 +2499,12 @@ export class VrmEngine {
         initialProgress: syncToTeleport ? this.teleportProgress : 0,
       });
     } else {
-      this.disposeSplatMesh(outgoingWorld);
+      if (outgoingWorld) {
+        outgoingWorld.visible = false;
+      }
+      splat.visible = true;
     }
+    this.applyMinimalBackgroundHidingToAttachedWorld();
   }
   async playEmote(
     path: string,
@@ -1961,11 +2514,20 @@ export class VrmEngine {
     const vrm = this.vrm;
     const mixer = this.mixer;
     if (!vrm || !mixer) return;
+    // Don't start emotes while the teleport dissolve is still running or
+    // within a short cooldown afterwards — the idle animation needs time
+    // to settle into a stable pose before we can cross-fade from it.
+    const POST_TELEPORT_COOLDOWN = 0.3; // seconds
+    if (
+      this.teleportProgress < 1.0 ||
+      this.elapsedTime - this.teleportCompleteTime < POST_TELEPORT_COOLDOWN
+    ) {
+      return;
+    }
     this.clearPendingEmoteCompletion();
     this.emoteRequestId++;
     const requestId = this.emoteRequestId;
-    const currentAction = this.emoteAction;
-    const blendSource = currentAction ?? this.idleAction;
+    const currentEmote = this.emoteAction;
     const clip = await this.loadEmoteClipCached(path, vrm);
     if (!clip || this.vrm !== vrm || this.mixer !== mixer) return;
     if (this.emoteRequestId !== requestId) return;
@@ -1976,7 +2538,21 @@ export class VrmEngine {
     );
     action.clampWhenFinished = !loop;
     const fadeDuration = 0.4;
-    this.playActionWithBlend(action, blendSource, fadeDuration);
+    // Use explicit fadeOut + fadeIn instead of crossFadeFrom. crossFadeFrom
+    // only blends tracks that exist in BOTH clips — emotes exported with
+    // non-uniform keyframes (sparse Mixamo optimization) leave body/leg
+    // bones without tracks, so idle's tracks for those bones continue at
+    // full weight, creating visible overlap. Fading out the source
+    // explicitly ensures ALL its tracks fade away cleanly.
+    if (currentEmote && currentEmote !== action) {
+      currentEmote.fadeOut(fadeDuration);
+    }
+    if (this.idleAction && this.idleAction !== action) {
+      this.idleAction.fadeOut(fadeDuration);
+    }
+    action.reset();
+    this.activateAction(action);
+    action.fadeIn(fadeDuration);
     this.emoteAction = action;
     if (!loop) {
       const clipDuration =
@@ -2012,7 +2588,7 @@ export class VrmEngine {
 
   /** Play a one-shot wave greeting after the VRM becomes visible. */
   playWaveGreeting(): void {
-    this.playEmote("animations/emotes/waving-both-hands.glb.gz", 3, false);
+    this.playEmote("animations/emotes/greeting.fbx", 3, false);
   }
 
   async loadVrmFromUrl(url: string, name?: string): Promise<void> {
@@ -2023,8 +2599,12 @@ export class VrmEngine {
     const requestId = ++this.vrmLoadRequestId;
     const hadPreviousVrm = this.vrm !== null;
     if (this.vrm) {
-      this.vrm.scene.parent?.remove(this.vrm.scene);
-      VRMUtils.deepDispose(this.vrm.scene);
+      if (this.outgoingVrm) {
+        this.outgoingVrm.scene.parent?.remove(this.outgoingVrm.scene);
+        VRMUtils.deepDispose(this.outgoingVrm.scene);
+      }
+      this.outgoingVrm = this.vrm;
+      this.outgoingMixer = this.mixer;
       this.vrm = null;
       this.vrmReady = false;
       this.vrmName = null;
@@ -2032,11 +2612,13 @@ export class VrmEngine {
       this.idleAction = null;
       this.idleLoadPromise = null;
       this.revealStarted = false;
-      this.cleanupTeleportSparkles();
-      this.stopEmote();
+      this.clearPendingEmoteCompletion();
+      this.emoteAction = null;
       this.emoteClipCache.clear();
     }
     this.lastLoadError = null;
+    this.loadingProgress = 0;
+    this.onUpdate?.();
     const loader = new GLTFLoader();
     configureVrmGltfLoader(loader);
     const webGpuNodes =
@@ -2054,7 +2636,12 @@ export class VrmEngine {
     });
     let gltf: Awaited<ReturnType<GLTFLoader["loadAsync"]>>;
     try {
-      gltf = await loadGltfAsset(loader, url);
+      gltf = await loadGltfAsset(loader, url, (progress) => {
+        if (this.vrmLoadRequestId === requestId && !this.loadingAborted) {
+          this.loadingProgress = progress;
+          this.onUpdate?.();
+        }
+      });
     } catch (error) {
       if (!this.loadingAborted && requestId === this.vrmLoadRequestId) {
         this.lastLoadError =
@@ -2076,12 +2663,7 @@ export class VrmEngine {
     if (!vrm) throw new Error("Loaded asset is not a VRM");
     VRMUtils.removeUnnecessaryVertices(vrm.scene);
     if (this.camera) {
-      if (hadPreviousVrm) {
-        this.transitionCameraToFramedAvatar(
-          vrm,
-          AVATAR_SWITCH_CAMERA_TRANSITION_DURATION_SECONDS,
-        );
-      } else {
+      if (!hadPreviousVrm) {
         this.cameraManager.centerAndFrame(
           vrm,
           this.camera,
@@ -2110,7 +2692,7 @@ export class VrmEngine {
       return;
     }
     vrm.scene.visible = false;
-    vrm.scene.traverse((obj) => {
+    vrm.scene.traverse((obj: THREE.Object3D) => {
       obj.frustumCulled = false;
     });
     const avatarParent = this.avatarRoot ?? this.scene;
@@ -2131,22 +2713,32 @@ export class VrmEngine {
         await this.playTeleportReveal(vrm);
         vrm.scene.visible = true;
         this.startPendingWorldReveal(true);
-        this.playWaveGreeting();
+        // Greeting animation is handled by CharacterEditor via vrm-teleport-complete event
       }
     } catch {
       if (!this.loadingAborted && this.vrm === vrm) {
         this.vrmReady = true;
         vrm.scene.visible = true;
         this.startPendingWorldReveal(false);
+        // Teleport animation failed (e.g. WebGPU unavailable) — still notify
+        // the app so companion UI (header, chat) becomes visible.
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("eliza:vrm-teleport-complete"));
+        }
       }
     }
   }
 
   private async playTeleportReveal(vrm: VRM): Promise<void> {
+    if (this.outgoingVrm && this.camera) {
+      this.transitionCameraToFramedAvatar(
+        vrm,
+        AVATAR_SWITCH_CAMERA_TRANSITION_DURATION_SECONDS,
+      );
+    }
+
     this.teleportProgress = 0.0;
-    this.revealStarted = true;
     this.cleanupTeleportDissolve();
-    this.startTeleportSparkles(vrm);
     let appliedNodeDissolve = false;
 
     try {
@@ -2155,95 +2747,92 @@ export class VrmEngine {
       const uProgress = tsl.uniform(0.0);
       this.teleportProgressUniform = uProgress;
 
-      vrm.scene.traverse((obj: THREE.Object3D) => {
-        if (!(obj instanceof THREE.Mesh)) return;
-        const mats = Array.isArray(obj.material)
-          ? obj.material
-          : [obj.material];
-        for (const mat of mats) {
-          if (!mat.isNodeMaterial || mat.userData._dissolveApplied) continue;
-          appliedNodeDissolve = true;
-          mat.userData._dissolveApplied = true;
-          mat.userData._origOpacityNode = mat.opacityNode ?? null;
-          // biome-ignore lint/suspicious/noExplicitAny: Three.js NodeMaterial emissiveNode is not in public types
-          mat.userData._origEmissiveNode = (mat as any).emissiveNode ?? null;
-          mat.userData._origAlphaTest = mat.alphaTest;
+      const applyTslDissolve = (targetVrm: VRM, isOutgoing: boolean) => {
+        targetVrm.scene.traverse((obj: THREE.Object3D) => {
+          if (!(obj instanceof THREE.Mesh)) return;
+          const mats = Array.isArray(obj.material)
+            ? obj.material
+            : [obj.material];
+          for (const mat of mats) {
+            if (!mat.isNodeMaterial || mat.userData._dissolveApplied) continue;
+            appliedNodeDissolve = true;
+            mat.userData._dissolveApplied = true;
+            mat.userData._origOpacityNode = mat.opacityNode ?? null;
+            mat.userData._origEmissiveNode =
+              (mat as MeshStandardMaterialWithNodeProps).emissiveNode ?? null;
+            mat.userData._origAlphaTest = mat.alphaTest;
 
-          // World-space Y from TSL
-          const worldY = tsl.positionWorld.y;
+            const worldY = tsl.positionWorld.y;
+            const threshold = uProgress
+              .mul(TELEPORT_DISSOLVE_END_Y - TELEPORT_DISSOLVE_START_Y)
+              .add(TELEPORT_DISSOLVE_START_Y);
+            const diff = worldY.sub(threshold);
 
-          // Sweep threshold starts 1m lower than before.
-          const threshold = uProgress
-            .mul(TELEPORT_DISSOLVE_END_Y - TELEPORT_DISSOLVE_START_Y)
-            .add(TELEPORT_DISSOLVE_START_Y);
+            const nx = tsl.sin(
+              tsl.positionWorld.x.mul(18.0).add(worldY.mul(12.0)),
+            );
+            const ny = tsl.cos(
+              worldY.mul(15.0).add(tsl.positionWorld.z.mul(10.0)),
+            );
+            const nz = tsl.sin(
+              tsl.positionWorld.z.mul(18.0).add(tsl.positionWorld.x.mul(10.0)),
+            );
+            const noise = nx.add(ny).add(nz).div(3.0).add(1.0).mul(0.5);
+            const ratio = diff.div(0.3).clamp(0.0, 1.0);
 
-          // Distance above dissolve line
-          const diff = worldY.sub(threshold);
+            const baseAlpha = tsl.step(ratio, noise);
+            const dissolveAlpha = isOutgoing
+              ? tsl.float(1.0).sub(baseAlpha)
+              : baseAlpha;
 
-          // Dither noise using a hash of world position
-          const noiseCoord = tsl.vec2(
-            worldY.mul(40.0),
-            tsl.positionWorld.x.add(tsl.positionWorld.z).mul(30.0),
-          );
-          const noise = tsl.fract(
-            tsl
-              .sin(tsl.dot(noiseCoord, tsl.vec2(12.9898, 78.233)))
-              .mul(43758.5453),
-          );
+            const edgeDist = diff.abs();
+            const glowWidth = tsl.float(0.08);
+            const glowIntensity = tsl
+              .float(1.0)
+              .sub(edgeDist.div(glowWidth).clamp(0.0, 1.0));
+            const hueShift = tsl.fract(worldY.mul(3.0).add(uProgress.mul(2.0)));
+            const holoR = tsl
+              .smoothstep(tsl.float(0.3), tsl.float(0.7), hueShift)
+              .mul(0.8)
+              .add(0.2);
+            const holoG = tsl.float(0.9);
+            const holoB = tsl
+              .smoothstep(tsl.float(0.7), tsl.float(0.3), hueShift)
+              .mul(0.8)
+              .add(0.2);
+            const holoColor = tsl.vec3(holoR, holoG, holoB);
 
-          // Ratio: 0 = fully visible, 1 = fully hidden (wider zone = 0.3)
-          const ratio = diff.div(0.3).clamp(0.0, 1.0);
+            const glowActive = tsl
+              .step(tsl.float(0.001), uProgress)
+              .mul(tsl.float(1.0).sub(tsl.step(tsl.float(0.999), uProgress)));
+            const emissiveBoost = holoColor.mul(
+              glowIntensity.mul(10.0).mul(glowActive).mul(dissolveAlpha),
+            );
 
-          // Dithered alpha: visible when noise >= ratio
-          const dissolveAlpha = tsl.step(ratio, noise);
+            const origOpacity = mat.opacityNode as TslNode;
+            mat.opacityNode = origOpacity
+              ? (origOpacity.mul(dissolveAlpha) ?? dissolveAlpha)
+              : dissolveAlpha;
 
-          // --- Holographic glow at the dissolve edge ---
-          // Glow is strongest right at the dissolve boundary
-          const edgeDist = diff.abs();
-          const glowWidth = tsl.float(0.15);
-          const glowIntensity = tsl
-            .float(1.0)
-            .sub(edgeDist.div(glowWidth).clamp(0.0, 1.0));
-          // Holographic color: cyan-magenta shift based on world position
-          const hueShift = tsl.fract(worldY.mul(3.0).add(uProgress.mul(2.0)));
-          const holoR = tsl
-            .smoothstep(tsl.float(0.3), tsl.float(0.7), hueShift)
-            .mul(0.8)
-            .add(0.2);
-          const holoG = tsl.float(0.9);
-          const holoB = tsl
-            .smoothstep(tsl.float(0.7), tsl.float(0.3), hueShift)
-            .mul(0.8)
-            .add(0.2);
-          const holoColor = tsl.vec3(holoR, holoG, holoB);
+            const matWithEmissive = mat as THREE.Material & {
+              emissiveNode?: TslNode;
+            };
+            const origEmissive = matWithEmissive.emissiveNode;
+            matWithEmissive.emissiveNode = origEmissive
+              ? origEmissive.add(emissiveBoost)
+              : emissiveBoost;
 
-          // Only show glow when dissolve is active and fragment is visible
-          const glowActive = tsl
-            .step(tsl.float(0.001), uProgress)
-            .mul(tsl.float(1.0).sub(tsl.step(tsl.float(0.999), uProgress)));
-          const emissiveBoost = holoColor.mul(
-            glowIntensity.mul(3.0).mul(glowActive).mul(dissolveAlpha),
-          );
+            mat.alphaTest = 0.01;
+            mat.needsUpdate = true;
+            this.teleportDissolvedMaterials.push(mat);
+          }
+        });
+      };
 
-          // Compose with existing nodes
-          const origOpacity = mat.opacityNode;
-          mat.opacityNode = origOpacity
-            ? origOpacity.mul(dissolveAlpha)
-            : dissolveAlpha;
-
-          // biome-ignore lint/suspicious/noExplicitAny: Three.js NodeMaterial emissiveNode is not in public types
-          const origEmissive = (mat as any).emissiveNode;
-          // biome-ignore lint/suspicious/noExplicitAny: Three.js NodeMaterial emissiveNode is not in public types
-          (mat as any).emissiveNode = origEmissive
-            ? origEmissive.add(emissiveBoost)
-            : emissiveBoost;
-
-          mat.alphaTest = 0.01;
-          mat.transparent = true;
-          mat.needsUpdate = true;
-          this.teleportDissolvedMaterials.push(mat);
-        }
-      });
+      applyTslDissolve(vrm, false);
+      if (this.outgoingVrm) {
+        applyTslDissolve(this.outgoingVrm, true);
+      }
     } catch (err) {
       console.warn(
         "[VrmEngine] TSL dissolve unavailable, showing instantly:",
@@ -2252,28 +2841,43 @@ export class VrmEngine {
     }
 
     if (!appliedNodeDissolve) {
-      this.applyTeleportFallbackDissolve(vrm);
+      this.applyTeleportFallbackDissolve(vrm, false);
+      if (this.outgoingVrm) {
+        this.applyTeleportFallbackDissolve(this.outgoingVrm, true);
+      }
     }
+
+    // Force shader compilation by rendering invisible frames before displaying particles
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (typeof window !== "undefined") {
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
+    }
+
+    if (this.loadingAborted || this.vrm !== vrm) return;
+
+    this.revealStarted = true;
+    this.startTeleportSparkles(vrm);
   }
 
-  private applyTeleportFallbackDissolve(vrm: VRM): void {
+  private applyTeleportFallbackDissolve(vrm: VRM, isOutgoing: boolean): void {
     vrm.scene.traverse((obj: THREE.Object3D) => {
       if (!(obj instanceof THREE.Mesh)) return;
       const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
       for (const mat of mats) {
         if (mat.userData._dissolveApplied) continue;
         mat.userData._dissolveApplied = true;
-        mat.userData._origTransparent = mat.transparent;
         mat.userData._origAlphaTest = mat.alphaTest;
         mat.userData._origOnBeforeCompile = mat.onBeforeCompile;
         mat.userData._origCustomProgramCacheKey = mat.customProgramCacheKey;
 
-        const shaderRef: TeleportFallbackShader = {
+        const shaderRef = {
           uniforms: { uTeleportProgress: { value: this.teleportProgress } },
+          isOutgoing,
         };
         this.teleportFallbackShaders.push(shaderRef);
 
-        mat.transparent = true;
         mat.alphaTest = Math.max(mat.alphaTest ?? 0, 0.01);
         mat.onBeforeCompile = (
           shader: Parameters<THREE.Material["onBeforeCompile"]>[0],
@@ -2284,37 +2888,60 @@ export class VrmEngine {
 varying vec3 vTeleportWorldPosition;
 ${shader.vertexShader}
 `.replace(
-            "#include <worldpos_vertex>",
-            `#include <worldpos_vertex>
-vTeleportWorldPosition = worldPosition.xyz;`,
+            "#include <project_vertex>",
+            `vec4 teleportWorldPosTemp = vec4( transformed, 1.0 );
+#ifdef USE_INSTANCING
+teleportWorldPosTemp = instanceMatrix * teleportWorldPosTemp;
+#endif
+teleportWorldPosTemp = modelMatrix * teleportWorldPosTemp;
+vTeleportWorldPosition = teleportWorldPosTemp.xyz;
+#include <project_vertex>`,
           );
           shader.fragmentShader = `
 uniform float uTeleportProgress;
 varying vec3 vTeleportWorldPosition;
-float teleportNoiseHash(vec2 p) {
-  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+float teleportSmoothNoise(vec3 p) {
+  float nx = sin(p.x * 18.0 + p.y * 12.0);
+  float ny = cos(p.y * 15.0 + p.z * 10.0);
+  float nz = sin(p.z * 18.0 + p.x * 10.0);
+  return (nx + ny + nz) / 3.0 * 0.5 + 0.5;
 }
 ${shader.fragmentShader}
-`.replace(
-            "#include <alphatest_fragment>",
-            `float teleportThreshold = mix(${TELEPORT_DISSOLVE_START_Y.toFixed(1)}, ${TELEPORT_DISSOLVE_END_Y.toFixed(1)}, uTeleportProgress);
+`
+            .replace(
+              "#include <alphatest_fragment>",
+              `float teleportThreshold = mix(${TELEPORT_DISSOLVE_START_Y.toFixed(1)}, ${TELEPORT_DISSOLVE_END_Y.toFixed(1)}, uTeleportProgress);
 float teleportDiff = vTeleportWorldPosition.y - teleportThreshold;
 float teleportRatio = clamp(teleportDiff / 0.3, 0.0, 1.0);
-float teleportNoise = teleportNoiseHash(vec2(
-  vTeleportWorldPosition.y * 40.0,
-  (vTeleportWorldPosition.x + vTeleportWorldPosition.z) * 30.0
-));
-if (teleportNoise < teleportRatio) discard;
+float teleportNoise = teleportSmoothNoise(vTeleportWorldPosition);
+${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoise < teleportRatio) discard;"}
 #include <alphatest_fragment>`,
-          );
+            )
+            .replace(
+              "#include <emissivemap_fragment>",
+              `#include <emissivemap_fragment>
+            float teleportGlowDist = abs(teleportDiff);
+            float teleportGlowIntensity = 1.0 - clamp(teleportGlowDist / 0.08, 0.0, 1.0);
+            vec3 teleportHoloColor = vec3(0.3, 0.9, 0.8);
+            float teleportGlowActive = step(0.001, uTeleportProgress) * (1.0 - step(0.999, uTeleportProgress));
+            float teleportDissolveAlpha = ${isOutgoing ? "1.0 - step(teleportRatio, teleportNoise)" : "step(teleportRatio, teleportNoise)"};
+            totalEmissiveRadiance += teleportHoloColor * (teleportGlowIntensity * 10.0 * teleportGlowActive * teleportDissolveAlpha);`,
+            );
 
           const originalOnBeforeCompile = mat.userData._origOnBeforeCompile;
           if (typeof originalOnBeforeCompile === "function") {
-            originalOnBeforeCompile(shader, this.renderer as never);
+            originalOnBeforeCompile(
+              shader,
+              this.renderer as THREE.WebGLRenderer,
+            );
           }
         };
-        mat.customProgramCacheKey = () =>
-          `${mat.type}:teleport-dissolve-fallback`;
+        const origCacheKey = mat.userData._origCustomProgramCacheKey;
+        mat.customProgramCacheKey = () => {
+          const baseKey =
+            typeof origCacheKey === "function" ? origCacheKey.call(mat) : "";
+          return `${baseKey}:${mat.type}:teleport-dissolve-fallback:${isOutgoing ? "out" : "in"}`;
+        };
         mat.needsUpdate = true;
         this.teleportDissolvedMaterials.push(mat);
       }
@@ -2338,40 +2965,63 @@ if (teleportNoise < teleportRatio) discard;
     const particleHeight = THREE.MathUtils.clamp(size.y * 0.82, 0.95, 1.75);
     const particles: TeleportSparkleParticle[] = [];
 
-    for (let index = 0; index < TELEPORT_SPARKLE_PARTICLE_COUNT; index += 1) {
+    // Central high-energy flash
+    const flashMaterial = new THREE.SpriteMaterial({
+      map: texture,
+      color: new THREE.Color().setHSL(0.55, 0.95, 0.65),
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const flashSprite = new THREE.Sprite(flashMaterial);
+    flashSprite.visible = false;
+    flashSprite.renderOrder = 9999;
+    sparkleGroup.add(flashSprite);
+    particles.push({
+      sprite: flashSprite,
+      material: flashMaterial,
+      baseAngle: 0,
+      baseRadius: 0,
+      height: size.y * 0.5,
+      start: 0,
+      duration: 0.3,
+      spin: 0,
+      wobble: 0,
+      wobbleSpeed: 0,
+      baseSize: 1.8, // Massive size marks it as the central flash
+    });
+
+    // Vertical streaks
+    for (let index = 0; index < 60; index += 1) {
       const hue = 0.52 + Math.random() * 0.08;
       const material = new THREE.SpriteMaterial({
         map: texture,
-        color: new THREE.Color().setHSL(hue, 0.85, 0.72),
+        color: new THREE.Color().setHSL(hue, 0.95, 0.8),
         transparent: true,
         opacity: 0,
         depthWrite: false,
+        depthTest: false,
         blending: THREE.AdditiveBlending,
       });
       const sprite = new THREE.Sprite(material);
       sprite.visible = false;
+      sprite.renderOrder = 9999;
       sparkleGroup.add(sprite);
 
-      const duration = 0.3 + Math.random() * 0.32;
-      const maxStart = Math.max(0.02, 0.92 - duration);
       particles.push({
         sprite,
         material,
-        baseAngle:
-          (index / TELEPORT_SPARKLE_PARTICLE_COUNT) * Math.PI * 2 +
-          (Math.random() - 0.5) * 0.55,
-        baseRadius:
-          (0.18 + Math.random() * 0.82) * TELEPORT_SPARKLE_RING_RADIUS,
-        height: particleHeight * (0.55 + Math.random() * 0.55),
-        start: Math.random() * maxStart,
-        duration,
-        spin: (1.8 + Math.random() * 3.6) * (Math.random() > 0.5 ? 1 : -1),
-        wobble: 0.02 + Math.random() * 0.08,
-        wobbleSpeed: 8 + Math.random() * 12,
-        baseSize:
-          TELEPORT_SPARKLE_MIN_SIZE +
-          Math.random() *
-            (TELEPORT_SPARKLE_MAX_SIZE - TELEPORT_SPARKLE_MIN_SIZE),
+        baseAngle: Math.random() * Math.PI * 2,
+        baseRadius: Math.random() * 0.4 + 0.05,
+        height: particleHeight * (1.1 + Math.random() * 0.5),
+        start: Math.random() * 0.3, // Fast start
+        duration: 0.2 + Math.random() * 0.25, // Snappy duration
+        spin: (Math.random() - 0.5) * 0.5,
+        wobble: 0,
+        wobbleSpeed: 0,
+        baseSize: 0.02 + Math.random() * 0.05, // Thin width
       });
     }
 
@@ -2403,27 +3053,32 @@ if (teleportNoise < teleportRatio) discard;
       }
 
       anyVisible = true;
-      const rise = 1 - (1 - localProgress) ** 2;
-      const angle = particle.baseAngle + progress * Math.PI * 2 * particle.spin;
-      const wobblePhase = progress * particle.wobbleSpeed + particle.baseAngle;
-      const wobbleOffset = Math.sin(wobblePhase) * particle.wobble;
-      const radial = particle.baseRadius * (1 - 0.48 * rise);
-      const x = Math.cos(angle) * radial + wobbleOffset;
-      const z =
-        Math.sin(angle) * radial + Math.cos(wobblePhase) * particle.wobble;
-      const y =
-        0.08 +
-        particle.height * rise +
-        Math.sin(progress * 10 + particle.baseAngle * 3) * 0.04;
-      const opacity =
-        Math.sin(localProgress * Math.PI) *
-        (0.72 + 0.28 * Math.sin(progress * 22 + particle.baseAngle * 5));
-      const scale = particle.baseSize * (0.7 + (1 - localProgress) * 1.15);
+      const opacity = Math.sin(localProgress * Math.PI) * 1.5;
 
-      particle.sprite.visible = opacity > 0.01;
-      particle.sprite.position.set(x, y, z);
-      particle.sprite.scale.setScalar(scale);
-      particle.material.opacity = opacity;
+      if (particle.baseSize > 1.0) {
+        // Central flash
+        const scale = particle.baseSize * (1.0 + localProgress * 2.0);
+        particle.sprite.position.set(0, particle.height, 0);
+        particle.sprite.scale.setScalar(scale);
+        particle.sprite.visible = opacity > 0.01;
+        particle.material.opacity = Math.min(opacity, 1.0) * 0.45;
+      } else {
+        // Vertical streaks
+        const rise = localProgress ** 1.5;
+        const angle = particle.baseAngle + progress * particle.spin;
+        const radial = particle.baseRadius * (1.0 + rise * 0.6);
+        const x = Math.cos(angle) * radial;
+        const z = Math.sin(angle) * radial;
+        const y = particle.height * rise;
+
+        const width = particle.baseSize * 0.6;
+        const height = particle.baseSize * (8.0 + localProgress * 6.0);
+
+        particle.sprite.position.set(x, y, z);
+        particle.sprite.scale.set(width, height, 1);
+        particle.sprite.visible = opacity > 0.01;
+        particle.material.opacity = Math.min(opacity, 1.0);
+      }
     }
 
     if (!anyVisible && progress >= 1) {
@@ -2435,15 +3090,14 @@ if (teleportNoise < teleportRatio) discard;
     for (const mat of this.teleportDissolvedMaterials) {
       if (mat.userData._dissolveApplied) {
         if (mat.userData._origOpacityNode !== undefined) {
-          (mat as unknown as Record<string, unknown>).opacityNode =
+          (mat as MeshStandardMaterialWithNodeProps).opacityNode =
             mat.userData._origOpacityNode ?? null;
         }
         if (mat.userData._origEmissiveNode !== undefined) {
-          (mat as unknown as Record<string, unknown>).emissiveNode =
+          (mat as MeshStandardMaterialWithNodeProps).emissiveNode =
             mat.userData._origEmissiveNode ?? null;
         }
         mat.alphaTest = mat.userData._origAlphaTest ?? 0;
-        mat.transparent = mat.userData._origTransparent ?? mat.transparent;
         mat.onBeforeCompile =
           mat.userData._origOnBeforeCompile ?? mat.onBeforeCompile;
         mat.customProgramCacheKey =
@@ -2452,7 +3106,6 @@ if (teleportNoise < teleportRatio) discard;
         delete mat.userData._origOpacityNode;
         delete mat.userData._origEmissiveNode;
         delete mat.userData._origAlphaTest;
-        delete mat.userData._origTransparent;
         delete mat.userData._origOnBeforeCompile;
         delete mat.userData._origCustomProgramCacheKey;
         mat.needsUpdate = true;
@@ -2485,13 +3138,36 @@ if (teleportNoise < teleportRatio) discard;
     const scene = this.scene;
     const camera = this.camera;
     if (!renderer || !scene || !camera) return;
+
+    if (this.halfFramerateMode) {
+      if (this.halfFramerateSkipNext) {
+        this.halfFramerateSkipNext = false;
+        return;
+      }
+      this.halfFramerateSkipNext = true;
+    } else {
+      this.halfFramerateSkipNext = false;
+    }
+
+    // Reset camera to the pristine tracking base before processing this frame's
+    // motion and offsets. This ensures OrbitControls and transitions never see
+    // the temporary frame-based dynamic offsets (zoom, yaw, parallax),
+    // which prevents them from being doubled or accumulated into the state.
+    if (this.baseCameraPosition.lengthSq() > 1e-6) {
+      camera.position.copy(this.baseCameraPosition);
+    }
     const rawDelta = this.clock.getDelta();
     const stableDelta = Math.min(rawDelta, 1 / 30);
     this.elapsedTime += rawDelta;
     this.mixer?.update(rawDelta);
+    this.outgoingMixer?.update(rawDelta);
+    if (this.outgoingVrm) {
+      this.applyMouthToVrm(this.outgoingVrm);
+      this.outgoingVrm.update(stableDelta);
+    }
     if (this.vrm) {
       if (this.teleportProgress < 1.0) {
-        this.teleportProgress += stableDelta * 2.0; // ~0.5 seconds duration
+        this.teleportProgress += stableDelta * 2.8; // ~0.35 seconds duration
         if (this.teleportProgress > 1.0) this.teleportProgress = 1.0;
 
         if (this.teleportProgressUniform) {
@@ -2502,8 +3178,21 @@ if (teleportNoise < teleportRatio) discard;
         }
 
         if (this.teleportProgress >= 1.0) {
+          if (this.outgoingVrm) {
+            this.outgoingVrm.scene.parent?.remove(this.outgoingVrm.scene);
+            VRMUtils.deepDispose(this.outgoingVrm.scene);
+            this.outgoingVrm = null;
+            this.outgoingMixer = null;
+          }
           this.cleanupTeleportDissolve();
           this.cleanupTeleportSparkles();
+          this.teleportCompleteTime = this.elapsedTime;
+          // Notify the app that the teleport-in animation has finished
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("eliza:vrm-teleport-complete"),
+            );
+          }
         }
       }
       this.updateTeleportSparkles();
@@ -2560,8 +3249,7 @@ if (teleportNoise < teleportRatio) discard;
     if (
       !manualCameraActive &&
       this.cameraAnimation.enabled &&
-      this.baseCameraPosition.length() > 0 &&
-      !this.isCameraTransitioning
+      this.baseCameraPosition.length() > 0
     ) {
       this.cameraManager.applyCameraMotion(
         camera,
@@ -2593,6 +3281,37 @@ if (teleportNoise < teleportRatio) discard;
       }
     }
     this.applyCompanionZoom(camera, stableDelta);
+    // Smoothly lerp camera orbital yaw offset (used by CharacterEditor to
+    // rotate around the character so she appears on the left side).
+    const editorFollow = Math.min(1, stableDelta * 5);
+    this.cameraXOffsetCurrent = THREE.MathUtils.lerp(
+      this.cameraXOffsetCurrent,
+      this.cameraXOffsetTarget,
+      editorFollow,
+    );
+    this.cameraYawOffsetCurrent = THREE.MathUtils.lerp(
+      this.cameraYawOffsetCurrent,
+      this.cameraYawOffsetTarget,
+      editorFollow,
+    );
+    // Scale offset by inverse zoom: more shift when zoomed out, less when in
+    const zoomScale = 1 - this.companionZoomCurrent * 0.8;
+    if (Math.abs(this.cameraYawOffsetCurrent) > 1e-5) {
+      const orbitVec = this.tempCameraOrbitOffset
+        .copy(camera.position)
+        .sub(this.lookAtTarget);
+      if (orbitVec.lengthSq() > 1e-6) {
+        const sph = this.tempCameraSpherical.setFromVector3(orbitVec);
+        sph.theta += this.cameraYawOffsetCurrent * zoomScale;
+        orbitVec.setFromSpherical(sph);
+        camera.position.copy(this.lookAtTarget).add(orbitVec);
+      }
+    }
+    // Also translate camera on X for the positional shift
+    const scaledXOffset = this.cameraXOffsetCurrent * zoomScale;
+    if (Math.abs(scaledXOffset) > 1e-4) {
+      camera.position.x += scaledXOffset;
+    }
     this.updateSparkPerformanceProfile();
     if (this.pointerParallaxEnabled) {
       const follow = Math.min(1, stableDelta * 7.5);
@@ -2607,7 +3326,7 @@ if (teleportNoise < teleportRatio) discard;
         .copy(this.lookAtTarget)
         .add(
           new THREE.Vector3(
-            this.pointerParallaxCurrent.x * 0.08,
+            this.pointerParallaxCurrent.x * 0.08 + scaledXOffset,
             this.pointerParallaxCurrent.y * 0.05,
             0,
           ),
@@ -2615,11 +3334,16 @@ if (teleportNoise < teleportRatio) discard;
     } else {
       this.pointerParallaxCurrent.lerp(this.pointerParallaxTarget, 0.12);
       this.pointerParallaxLookAt.copy(this.lookAtTarget);
+      if (Math.abs(scaledXOffset) > 1e-4) {
+        this.pointerParallaxLookAt.x += scaledXOffset;
+      }
     }
     if (this.controls) {
       if (manualCameraActive && !this.isCameraTransitioning) {
         this.controls.update();
         this.lookAtTarget.copy(this.controls.target);
+        // Track the manual move in our clean base position
+        this.baseCameraPosition.copy(camera.position);
       } else if (!this.isCameraTransitioning) {
         this.controls.target.copy(this.lookAtTarget);
       }
@@ -2634,6 +3358,7 @@ if (teleportNoise < teleportRatio) discard;
       this.refreshAvatarEyeTracking();
     }
     this.updateSparkDepthOfField(camera);
+    this.overlayManager?.update(camera, stableDelta);
     renderer.render(scene, camera);
     this.onUpdate?.();
   }
@@ -2642,7 +3367,13 @@ if (teleportNoise < teleportRatio) discard;
       this.sparkRenderer.apertureAngle = 0;
     }
     this.cancelWorldReveal();
-    this.disposeSplatMesh(this.worldMesh);
+    // Don't permanently dispose the worldMesh here — it may be held in
+    // splatCache and reused on the next world switch. Just hide it so it
+    // doesn't render. The cache is flushed (and meshes truly disposed) only
+    // when the engine itself is torn down via dispose().
+    if (this.worldMesh) {
+      this.worldMesh.visible = false;
+    }
     this.worldMesh = null;
   }
   private async loadAndPlayIdle(vrm: VRM): Promise<void> {
@@ -2684,5 +3415,80 @@ if (teleportNoise < teleportRatio) discard;
     const alpha = next > this.mouthSmoothed ? 0.3 : 0.2;
     this.mouthSmoothed = this.mouthSmoothed * (1 - alpha) + next * alpha;
     manager.setValue("aa", this.mouthSmoothed);
+  }
+
+  /**
+   * Capture a single-frame snapshot of the current VRM as a PNG Blob.
+   *
+   * When `disablePhysics` is true (the default), spring bone simulation is
+   * frozen for the capture frame so hair and cloth render in their rest pose,
+   * then restored afterwards. The render loop is paused during capture to
+   * prevent physics from re-running between reset and canvas capture.
+   */
+  async snapshot(options?: {
+    width?: number;
+    height?: number;
+    disablePhysics?: boolean;
+  }): Promise<Blob | null> {
+    const renderer = this.renderer;
+    const scene = this.scene;
+    const camera = this.camera;
+    if (!renderer || !scene || !camera) return null;
+
+    const canvas = renderer.domElement as HTMLCanvasElement;
+    if (!canvas) return null;
+
+    const disablePhysics = options?.disablePhysics ?? true;
+    const width = options?.width ?? canvas.width;
+    const height = options?.height ?? canvas.height;
+
+    // Pause the render loop so physics doesn't re-run between reset and capture
+    const wasPaused = this.paused;
+    this.setPaused(true);
+    // Cancel any pending animation frame to ensure the loop truly stops
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
+    // Reset spring bones to rest pose (hair/cloth at initial position)
+    const springBoneManager = this.vrm?.springBoneManager ?? null;
+    if (disablePhysics && springBoneManager) {
+      springBoneManager.reset?.();
+    }
+
+    // Resize renderer for the capture resolution
+    renderer.setPixelRatio(1);
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+
+    // Update VRM transforms without physics
+    if (this.vrm) {
+      if (disablePhysics && springBoneManager) {
+        // Update only the humanoid/expression without spring bones
+        this.vrm.humanoid?.update?.();
+        this.vrm.expressionManager?.update?.();
+      } else {
+        this.vrm.update(0);
+      }
+    }
+
+    // Render the frame (synchronous — captures immediately to canvas)
+    renderer.render(scene, camera);
+
+    // Capture the canvas
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), "image/png");
+    });
+
+    // Restore drawing buffer + DPR policy (matches normal display, including
+    // low-power cap) instead of raw `devicePixelRatio` alone.
+    this.applyRendererPixelRatio();
+
+    // Restore paused state — resume the render loop
+    this.setPaused(wasPaused);
+
+    return blob;
   }
 }

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
-
-/* ── SectionCard ─────────────────────────────────────────────────────── */
+import { Button } from "./button";
 
 export interface SectionCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Section title shown in the header */
@@ -42,10 +41,10 @@ export const SectionCard = React.forwardRef<HTMLDivElement, SectionCardProps>(
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <div className="flex flex-col gap-1.5">
               {title && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
                   className={cn(
-                    "text-sm font-semibold text-left",
+                    "h-auto px-0 text-sm font-semibold text-left justify-start",
                     collapsible &&
                       "cursor-pointer hover:text-accent transition-colors",
                     !collapsible && "cursor-default",
@@ -66,7 +65,7 @@ export const SectionCard = React.forwardRef<HTMLDivElement, SectionCardProps>(
                     </span>
                   )}
                   {title}
-                </button>
+                </Button>
               )}
               {description && (
                 <span className="text-[11px] text-muted">{description}</span>

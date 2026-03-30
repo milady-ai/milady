@@ -4,10 +4,13 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const REPOSITORY = "milady-ai/milady";
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
 const OUTPUT_PATH = path.resolve(
-  process.cwd(),
+  REPO_ROOT,
   "apps/homepage/src/generated/release-data.ts",
 );
 const RELEASES_URL = `https://api.github.com/repos/${REPOSITORY}/releases?per_page=20`;
@@ -74,13 +77,18 @@ function noteForAsset(name) {
   return "Release asset";
 }
 
+function sortReleasesByRecency(releases) {
+  return [...releases]
+    .filter((release) => !release.draft)
+    .sort((a, b) => {
+      const aTime = Date.parse(a.published_at ?? a.created_at ?? 0);
+      const bTime = Date.parse(b.published_at ?? b.created_at ?? 0);
+      return bTime - aTime;
+    });
+}
+
 function pickRelease(releases) {
-  const published = releases.filter((release) => !release.draft);
-  published.sort((a, b) => {
-    const aTime = Date.parse(a.published_at ?? a.created_at ?? 0);
-    const bTime = Date.parse(b.published_at ?? b.created_at ?? 0);
-    return bTime - aTime;
-  });
+  const published = sortReleasesByRecency(releases);
   // Pick the most recent release that has downloadable assets
   return (
     published.find((r) => Array.isArray(r.assets) && r.assets.length > 0) ??
@@ -110,7 +118,18 @@ function serializeDownload(id, label, asset) {
   };
 }
 
-function buildRelease(release) {
+function pickAssetFromReleases(releases, matchers) {
+  for (const release of releases) {
+    const assets = Array.isArray(release.assets) ? release.assets : [];
+    const asset = pickAsset(assets, matchers);
+    if (asset) {
+      return asset;
+    }
+  }
+  return null;
+}
+
+function buildRelease(release, allReleases = []) {
   if (!release) {
     return {
       tagName: "unavailable",
@@ -123,39 +142,46 @@ function buildRelease(release) {
   }
 
   const assets = Array.isArray(release.assets) ? release.assets : [];
+  const releasesByRecency = sortReleasesByRecency(allReleases);
+  const prioritizedReleases = [
+    release,
+    ...releasesByRecency.filter((candidate) => candidate !== release),
+  ].filter(Boolean);
+
   const downloads = [
     {
       id: "macos-arm64",
       label: "macOS (Apple Silicon)",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) =>
           /macos-arm64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
+        (asset) => /arm64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
       ]),
     },
     {
       id: "macos-x64",
       label: "macOS (Intel)",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /macos-x64/i.test(asset.name) && /\.dmg$/i.test(asset.name),
+        (asset) =>
+          /mac/i.test(asset.name) &&
+          !/arm64/i.test(asset.name) &&
+          /\.dmg$/i.test(asset.name),
       ]),
     },
     {
       id: "windows-x64",
       label: "Windows",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /setup/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.exe$/i.test(asset.name),
         (asset) => /win/i.test(asset.name) && /\.msix$/i.test(asset.name),
-        (asset) =>
-          /win/i.test(asset.name) &&
-          /setup/i.test(asset.name) &&
-          /\.zip$/i.test(asset.name),
       ]),
     },
     {
       id: "linux-x64",
       label: "Linux",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /linux/i.test(asset.name) && /\.appimage$/i.test(asset.name),
         (asset) => /linux/i.test(asset.name) && /\.tar\.gz$/i.test(asset.name),
       ]),
@@ -163,8 +189,9 @@ function buildRelease(release) {
     {
       id: "linux-deb",
       label: "Ubuntu / Debian",
-      asset: pickAsset(assets, [
+      asset: pickAssetFromReleases(prioritizedReleases, [
         (asset) => /linux/i.test(asset.name) && /\.deb$/i.test(asset.name),
+        (asset) => /\.deb$/i.test(asset.name),
       ]),
     },
   ]
@@ -191,11 +218,11 @@ function buildRelease(release) {
   };
 }
 
-function buildPayload(release) {
+function buildPayload(release, allReleases = []) {
   return {
     generatedAt: new Date().toISOString(),
     scripts,
-    release: buildRelease(release),
+    release: buildRelease(release, allReleases),
   };
 }
 
@@ -206,7 +233,7 @@ function toModule(payload) {
 async function fetchReleases() {
   const headers = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "milady-homepage-release-data",
+    "User-Agent": "eliza-homepage-release-data",
   };
 
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
@@ -238,7 +265,7 @@ async function main() {
   try {
     const releases = await fetchReleases();
     const release = pickRelease(releases);
-    await writePayload(buildPayload(release));
+    await writePayload(buildPayload(release, releases));
     const tag = release?.tag_name ?? "no published release";
     console.log(`homepage release data: ${tag}`);
   } catch (error) {

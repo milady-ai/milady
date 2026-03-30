@@ -46,6 +46,29 @@ export function parseAgentStatusEvent(
   };
 }
 
+/**
+ * Parses `agentStatus` from a `desktopTrayMenuClick` payload when the main
+ * process finishes menu reset (`itemId === "menu-reset-milady-applied"`).
+ */
+export function parseAgentStatusFromMainMenuResetPayload(
+  payload: unknown,
+): AgentStatus | null {
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    Array.isArray(payload) ||
+    !("agentStatus" in payload)
+  ) {
+    return null;
+  }
+  const as = (payload as { agentStatus?: Record<string, unknown> | null })
+    .agentStatus;
+  if (!as || typeof as !== "object" || Array.isArray(as)) {
+    return null;
+  }
+  return parseAgentStatusEvent(as);
+}
+
 export function parseAgentStartupDiagnostics(
   value: unknown,
 ): AgentStartupDiagnostics | undefined {
@@ -61,6 +84,22 @@ export function parseAgentStartupDiagnostics(
     startup.lastErrorAt = value.lastErrorAt;
   if (typeof value.nextRetryAt === "number")
     startup.nextRetryAt = value.nextRetryAt;
+  const embPhase = value.embeddingPhase;
+  if (
+    embPhase === "checking" ||
+    embPhase === "downloading" ||
+    embPhase === "loading" ||
+    embPhase === "ready"
+  ) {
+    startup.embeddingPhase = embPhase;
+  }
+  if (typeof value.embeddingDetail === "string") {
+    startup.embeddingDetail = value.embeddingDetail;
+  }
+  const embPct = value.embeddingProgressPct;
+  if (typeof embPct === "number" && Number.isFinite(embPct)) {
+    startup.embeddingProgressPct = Math.max(0, Math.min(100, embPct));
+  }
   return startup;
 }
 
@@ -171,11 +210,12 @@ function normalizeSlashCommandName(name: string): string {
 
 // A simple utility to split command arguments, equivalent to chat-commands splitCommandArgs
 function splitCommandArgs(text: string): string[] {
-  const parts = [];
+  const parts: string[] = [];
   const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
+  let match: RegExpExecArray | null = regex.exec(text);
+  while (match !== null) {
     parts.push(match[1] || match[2] || match[0]);
+    match = regex.exec(text);
   }
   return parts;
 }
@@ -268,6 +308,7 @@ export function parseCustomActionParams(
   return { params, missingRequired };
 }
 
+/** Plain-text variant of formatSearchBullet (uses `- ` bullets, no bold). */
 export function formatSearchBullet(label: string, items: string[]): string {
   if (items.length === 0) return `${label}: none`;
   return `${label}:\n${items.map((item) => `- ${item}`).join("\n")}`;
@@ -292,6 +333,7 @@ export function asApiLikeError(err: unknown): ApiLikeError | null {
   };
 }
 
+/** API-error-aware variant that extracts path/status/message from structured errors. */
 export function formatStartupErrorDetail(err: unknown): string | undefined {
   const apiErr = asApiLikeError(err);
   if (apiErr) {

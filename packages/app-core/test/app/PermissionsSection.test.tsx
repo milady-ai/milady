@@ -8,7 +8,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── Hoisted mocks ─────────────────────────────────────────────────────
 
@@ -71,18 +71,9 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-vi.mock("@miladyai/app-core/bridge", () => ({
+vi.mock("../../src/bridge", () => ({
   invokeDesktopBridgeRequest: mockInvokeDesktopBridgeRequest,
   subscribeDesktopBridgeEvent: mockSubscribeDesktopBridgeEvent,
-}));
-
-vi.mock("@miladyai/app-core/components/ui-badges", () => ({
-  StatusBadge: ({ label }: { label: string }) =>
-    React.createElement("span", { "data-testid": "status-badge" }, label),
-}));
-
-vi.mock("@miladyai/app-core/components/ui-switch", () => ({
-  Switch: () => React.createElement("span", null, "switch"),
 }));
 
 vi.mock("@miladyai/ui", () => ({
@@ -99,6 +90,9 @@ vi.mock("@miladyai/ui", () => ({
       { type: "button", onClick, ...rest },
       children,
     ),
+  StatusBadge: ({ label }: { label: string }) =>
+    React.createElement("span", { "data-testid": "status-badge" }, label),
+  Switch: () => React.createElement("span", null, "switch"),
 }));
 
 vi.mock("lucide-react", () => ({
@@ -114,7 +108,7 @@ vi.mock("lucide-react", () => ({
   Terminal: () => React.createElement("span", null, "💻"),
 }));
 
-import { PermissionsSection } from "@miladyai/app-core/components/PermissionsSection";
+import { PermissionsSection } from "../../src/components/PermissionsSection";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -179,6 +173,48 @@ function ensureNavigatorPermissionMocks(): void {
   }
 }
 
+const BRIDGE_CHANNELS = {
+  permissionsGetAll: "permissions:getAll",
+  permissionsIsShellEnabled: "permissions:isShellEnabled",
+  permissionsGetPlatform: "permissions:getPlatform",
+  permissionsRequest: "permissions:request",
+  permissionsOpenSettings: "permissions:openSettings",
+  permissionsSetShellEnabled: "permissions:setShellEnabled",
+} as const;
+
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
+
+function installDesktopBridgeRpcMock(): void {
+  const requestEntries = Object.entries(BRIDGE_CHANNELS).map(
+    ([rpcMethod, ipcChannel]) => [
+      rpcMethod,
+      (params?: unknown) =>
+        mockInvokeDesktopBridgeRequest({
+          rpcMethod,
+          ipcChannel,
+          params,
+        }),
+    ],
+  );
+
+  vi.stubGlobal("__MILADY_ELECTROBUN_RPC__", {
+    request: Object.fromEntries(requestEntries),
+    onMessage: (message: string, listener: (payload: unknown) => void) => {
+      if (message === "permissionsChanged") {
+        permissionBridgeListener.current = listener;
+      }
+    },
+    offMessage: (message: string, listener: (payload: unknown) => void) => {
+      if (
+        message === "permissionsChanged" &&
+        permissionBridgeListener.current === listener
+      ) {
+        permissionBridgeListener.current = null;
+      }
+    },
+  });
+}
+
 // ====================================================================
 
 describe("PermissionsSection", () => {
@@ -204,6 +240,7 @@ describe("PermissionsSection", () => {
 
   beforeEach(() => {
     ensureNavigatorPermissionMocks();
+    installDesktopBridgeRpcMock();
     mockUseApp.mockReset();
     mockIsWeb.mockReturnValue(false);
     mockIsDesktop.mockReturnValue(true);
@@ -248,6 +285,12 @@ describe("PermissionsSection", () => {
     vi.mocked(navigator.mediaDevices.enumerateDevices).mockReset();
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (window as any).__MILADY_ELECTROBUN_RPC__;
+    delete (globalThis as any).__MILADY_ELECTROBUN_RPC__;
+  });
+
   it("renders web informational message when isWebPlatform() is true", async () => {
     mockIsWeb.mockReturnValue(true);
     mockIsDesktop.mockReturnValue(false);
@@ -267,9 +310,7 @@ describe("PermissionsSection", () => {
     expect(text).toContain("Microphone");
   });
 
-  it(
-    "renders mobile streaming permissions when isNative and not running in the desktop app",
-    async () => {
+  it("renders mobile streaming permissions when isNative and not running in the desktop app", async () => {
     mockIsWeb.mockReturnValue(false);
     mockIsDesktop.mockReturnValue(false);
     mockIsNative.value = true;
@@ -383,6 +424,42 @@ describe("PermissionsSection", () => {
     const text = collectText(tree?.root);
     expect(text).toContain("Open Settings");
     expect(text).not.toContain("permissionssection.OpenSettings");
+  });
+
+  it("shows plain-English permission badges in desktop settings", async () => {
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            ...defaultPermissions,
+            "screen-recording": {
+              id: "screen-recording",
+              status: "denied",
+              canRequest: false,
+            },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "darwin";
+        }
+        return null;
+      },
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(PermissionsSection));
+    });
+
+    const text = collectText(tree?.root);
+    expect(text).toContain("Off in Settings");
+    expect(text).toContain("Not Asked");
+    expect(text).not.toContain("Denied");
+    expect(text).not.toContain("Not Set");
   });
 
   it("reconciles camera status from renderer permissions when already granted", async () => {
@@ -549,6 +626,80 @@ describe("PermissionsSection", () => {
       params: { forceRefresh: true },
     });
     expect(mockRefreshPermissions).not.toHaveBeenCalled();
+  });
+
+  it("rechecks permissions after opening settings", async () => {
+    vi.useFakeTimers();
+
+    try {
+      mockUseApp.mockReturnValue(baseContext());
+      mockInvokeDesktopBridgeRequest.mockImplementation(
+        async (options: { rpcMethod: string }) => {
+          if (options.rpcMethod === "permissionsGetAll") {
+            return {
+              ...defaultPermissions,
+              camera: {
+                id: "camera",
+                status: "denied",
+                canRequest: false,
+              },
+            };
+          }
+          if (options.rpcMethod === "permissionsIsShellEnabled") {
+            return true;
+          }
+          if (options.rpcMethod === "permissionsGetPlatform") {
+            return "darwin";
+          }
+          return null;
+        },
+      );
+
+      let tree: TestRenderer.ReactTestRenderer | undefined;
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(PermissionsSection));
+      });
+
+      const root = tree?.root;
+      expect(root).toBeDefined();
+      if (!root) {
+        throw new Error("PermissionsSection root not rendered");
+      }
+
+      const openSettingsButton = findButtonsByAriaLabel(
+        root,
+        "Open Settings Camera",
+      )[0];
+      expect(openSettingsButton).toBeDefined();
+
+      mockInvokeDesktopBridgeRequest.mockClear();
+
+      await act(async () => {
+        openSettingsButton.props.onClick();
+        await Promise.resolve();
+      });
+
+      const countRefreshCalls = () =>
+        mockInvokeDesktopBridgeRequest.mock.calls.filter(
+          ([options]) => options.rpcMethod === "permissionsGetAll",
+        ).length;
+
+      expect(countRefreshCalls()).toBe(1);
+
+      await act(async () => {
+        vi.advanceTimersByTime(1500);
+        await Promise.resolve();
+      });
+      expect(countRefreshCalls()).toBe(2);
+
+      await act(async () => {
+        vi.advanceTimersByTime(2500);
+        await Promise.resolve();
+      });
+      expect(countRefreshCalls()).toBe(3);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("refreshes from the bridge when permissionsChanged fires", async () => {

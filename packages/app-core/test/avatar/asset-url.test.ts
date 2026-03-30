@@ -42,49 +42,36 @@ describe("resolveAppAssetUrl", () => {
 // ---------------------------------------------------------------------------
 // resolveApiUrl()
 // ---------------------------------------------------------------------------
+import { setBootConfig } from "@miladyai/app-core/config";
+import { beforeEach } from "vitest";
 
 describe("resolveApiUrl", () => {
-  // resolveApiUrl checks `typeof window !== "undefined"`, so we must
-  // define a minimal `window` on globalThis for the duration of each test.
-  const g = globalThis as Record<string, unknown>;
-
-  function withWindow(props: Record<string, unknown>, fn: () => void): void {
-    const hadWindow = "window" in g;
-    const savedWindow = g.window;
-    g.window = { ...props };
+  beforeEach(() => {
+    setBootConfig({ branding: {} });
     try {
-      fn();
-    } finally {
-      if (hadWindow) {
-        g.window = savedWindow;
-      } else {
-        delete g.window;
-      }
+      window.sessionStorage.removeItem("milady_api_base");
+    } catch {
+      /* no window */
     }
-  }
-
-  it("returns the path unchanged when window exists but __MILADY_API_BASE__ is not set", () => {
-    withWindow({}, () => {
-      expect(resolveApiUrl("/api/avatar/vrm")).toBe("/api/avatar/vrm");
-    });
   });
 
-  it("returns the path unchanged when window is undefined (SSR/Node)", () => {
-    // In Node test env, window is already undefined — just call directly
+  it("returns the path unchanged when apiBase is not set", () => {
     expect(resolveApiUrl("/api/avatar/vrm")).toBe("/api/avatar/vrm");
   });
 
-  it("prefixes with __MILADY_API_BASE__ when set", () => {
-    withWindow({ __MILADY_API_BASE__: "http://localhost:2138" }, () => {
-      expect(resolveApiUrl("/api/avatar/vrm")).toBe(
-        "http://localhost:2138/api/avatar/vrm",
-      );
-    });
+  it("returns the path unchanged when window is undefined (SSR/Node)", () => {
+    expect(resolveApiUrl("/api/avatar/vrm")).toBe("/api/avatar/vrm");
+  });
+
+  it("prefixes with apiBase when set", () => {
+    setBootConfig({ branding: {}, apiBase: "http://localhost:2138" });
+    expect(resolveApiUrl("/api/avatar/vrm")).toBe(
+      "http://localhost:2138/api/avatar/vrm",
+    );
   });
 
   it("handles empty string base gracefully (falsy → passthrough)", () => {
-    withWindow({ __MILADY_API_BASE__: "" }, () => {
-      expect(resolveApiUrl("/api/tts/elevenlabs")).toBe("/api/tts/elevenlabs");
-    });
+    setBootConfig({ branding: {}, apiBase: "" });
+    expect(resolveApiUrl("/api/tts/elevenlabs")).toBe("/api/tts/elevenlabs");
   });
 });

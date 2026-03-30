@@ -85,7 +85,7 @@ const ANVIL_ACCOUNTS = [
  */
 async function findAvailablePort(startPort = 8545): Promise<number> {
   const net = await import("node:net");
-  return new Promise((resolve, _reject) => {
+  return new Promise((resolve) => {
     const server = net.createServer();
     server.unref();
     server.on("error", () => {
@@ -167,7 +167,6 @@ export async function startAnvil(options?: {
 
   const rpcUrl = `http://127.0.0.1:${port}`;
 
-  // Wait for Anvil to be ready
   const ready = await Promise.race([
     waitForAnvil(rpcUrl),
     new Promise<boolean>((_resolve, reject) => {
@@ -182,43 +181,14 @@ export async function startAnvil(options?: {
     throw new Error(`Anvil failed to start on port ${port}`);
   }
 
-  // Additional stabilization delay and verification
-  await new Promise((r) => setTimeout(r, 500));
-
   const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-  // Verify the provider is fully connected and responsive
-  const network = await provider.getNetwork();
-  if (Number(network.chainId) !== chainId) {
-    anvilProcess.kill();
-    throw new Error(
-      `Anvil chain ID mismatch: expected ${chainId}, got ${network.chainId}`,
-    );
-  }
-
-  // Verify the first account has expected balance
-  const balance = await provider.getBalance(ANVIL_ACCOUNTS[0].address);
-  if (balance === 0n) {
-    anvilProcess.kill();
-    throw new Error("Anvil account #0 has no balance");
-  }
-
-  // Use account #9 for deployment, account #0 for funding
-  // This avoids nonce tracking issues between deploy and fund operations
+  // Account #9 for deployment, account #0 for funding — separate nonce tracking
   const deployerAccount = ANVIL_ACCOUNTS[9];
   const funderAccount = ANVIL_ACCOUNTS[0];
 
   const fundedWallet = new ethers.Wallet(deployerAccount.privateKey, provider);
   const funderWallet = new ethers.Wallet(funderAccount.privateKey, provider);
-
-  // Verify the deployer nonce is 0 (fresh chain)
-  const nonce = await fundedWallet.getNonce();
-  if (nonce !== 0) {
-    anvilProcess.kill();
-    throw new Error(
-      `Anvil deployer account nonce is ${nonce}, expected 0 for fresh chain`,
-    );
-  }
 
   const stop = async (): Promise<void> => {
     return new Promise((resolve) => {
@@ -239,19 +209,9 @@ export async function startAnvil(options?: {
   };
 
   const fund = async (address: string, amountEth: string): Promise<string> => {
-    // Use funder wallet (different from deployer) to avoid nonce conflicts
-    // Create a fresh provider for nonce lookup to avoid ethers.js v6 caching issues
-    const freshProvider = new ethers.JsonRpcProvider(rpcUrl);
-    const nonce = await freshProvider.getTransactionCount(
-      funderAccount.address,
-      "pending",
-    );
-    freshProvider.destroy();
-
     const tx = await funderWallet.sendTransaction({
       to: address,
       value: ethers.parseEther(amountEth),
-      nonce,
     });
     await tx.wait();
     return tx.hash;

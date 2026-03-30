@@ -5,16 +5,24 @@
 import type { ConversationMessage } from "@miladyai/app-core/api";
 import { useTimeout } from "@miladyai/app-core/hooks";
 import { useApp } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
+import { Button, Textarea } from "@miladyai/ui";
 import { Check, Copy, Pencil, Trash2, Volume2 } from "lucide-react";
 import {
   type KeyboardEvent,
+  memo,
   type TouchEvent,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
+import {
+  DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME,
+  DESKTOP_CHAT_BUBBLE_USER_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME,
+  DESKTOP_CONTROL_SURFACE_CLASSNAME,
+  DESKTOP_FLOATING_ACTION_RAIL_CLASSNAME,
+} from "./desktop-surface-primitives";
 import { MessageContent } from "./MessageContent";
 
 interface ChatMessageProps {
@@ -28,7 +36,7 @@ interface ChatMessageProps {
   onDelete?: (messageId: string) => void;
 }
 
-export function ChatMessage({
+export const ChatMessage = memo(function ChatMessage({
   message,
   isGrouped = false,
   agentName = "Agent",
@@ -189,6 +197,11 @@ export function ChatMessage({
   }, [showActions, supportsHover]);
 
   const actionsVisible = showActions;
+  const bubbleClassName = isUser
+    ? `rounded-[18px] rounded-br-[6px] ${DESKTOP_CHAT_BUBBLE_USER_CLASSNAME}`
+    : `rounded-[18px] rounded-bl-[6px] ${DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME}`;
+  const actionRailClassName = `top-1 rounded-[12px] p-1 ${DESKTOP_FLOATING_ACTION_RAIL_CLASSNAME}`;
+  const actionButtonClassName = `h-8 w-8 rounded-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`;
 
   return (
     <article
@@ -207,23 +220,19 @@ export function ChatMessage({
       >
         {/* Message Content */}
         <div
-          className={`relative group px-4 py-2.5 text-[15px] leading-[1.7] whitespace-pre-wrap break-words rounded-2xl ${
-            isUser
-              ? "bg-accent text-accent-fg rounded-br-md"
-              : "bg-bg-accent border border-border text-txt rounded-bl-md"
-          }`}
+          className={`relative group px-4 py-3 text-[15px] leading-[1.7] whitespace-pre-wrap break-words ${bubbleClassName}`}
           style={{ fontFamily: "var(--font-chat)" }}
         >
           {isEditing ? (
             <div className="space-y-3">
-              <textarea
+              <Textarea
                 ref={editTextareaRef}
                 value={draftText}
                 onChange={(event) => setDraftText(event.target.value)}
                 onKeyDown={handleEditKeyDown}
-                className="w-full min-h-[110px] rounded-xl border border-white/20 bg-black/10 px-3 py-2 text-[15px] leading-[1.7] text-inherit outline-none focus:border-white/40"
+                className="min-h-[110px] w-full rounded-[14px] border border-border/28 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_86%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] px-3 py-2.5 text-[15px] leading-[1.7] text-txt outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_20px_-20px_rgba(15,23,42,0.1)] focus-visible:border-accent/28 focus-visible:ring-2 focus-visible:ring-accent/12"
                 style={{ fontFamily: "var(--font-chat)" }}
-                aria-label="Edit message"
+                aria-label={t("aria.editMessage")}
                 disabled={savingEdit}
               />
               <div className="flex items-center justify-end gap-2">
@@ -232,9 +241,9 @@ export function ChatMessage({
                   size="sm"
                   onClick={handleCancelEditing}
                   disabled={savingEdit}
-                  className="h-8 px-3 text-xs text-inherit/80 hover:bg-black/10"
+                  className={`h-8 rounded-[11px] px-3 text-xs ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="outline"
@@ -245,9 +254,15 @@ export function ChatMessage({
                     !draftText.trim() ||
                     draftText.trim() === message.text.trim()
                   }
-                  className="h-8 px-3 text-xs border-white/25 bg-black/10 hover:bg-black/15"
+                  className={`h-8 rounded-[11px] px-3 text-xs ${DESKTOP_CONTROL_SURFACE_ACCENT_CLASSNAME} disabled:border-border/20 disabled:bg-bg-accent disabled:text-muted-strong`}
                 >
-                  {savingEdit ? "Saving..." : "Save and resend"}
+                  {savingEdit
+                    ? t("chatmessage.Saving", {
+                        defaultValue: "Saving...",
+                      })
+                    : t("chatmessage.SaveAndResend", {
+                        defaultValue: "Save and resend",
+                      })}
                 </Button>
               </div>
             </div>
@@ -257,8 +272,8 @@ export function ChatMessage({
 
           {/* Stream interruption indicator */}
           {!isUser && message.interrupted && (
-            <div className="mt-2 pt-2 border-t border-danger/30">
-              <span className="text-xs text-danger">
+            <div className="mt-2 border-t border-danger/30 pt-2">
+              <span className="inline-flex rounded-full border border-danger/30 bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
                 {t("chatmessage.ResponseInterrupte")}
               </span>
             </div>
@@ -267,9 +282,9 @@ export function ChatMessage({
           {/* Message Actions */}
           {!isEditing && (
             <div
-              className={`absolute ${isUser ? "left-0 -translate-x-full" : "right-0 translate-x-full"} top-0 flex items-center gap-1 p-1 transition-opacity duration-200 ${
+              className={`absolute ${isUser ? "left-0 -translate-x-full" : "right-0 translate-x-full"} top-0 flex items-center gap-1 transition-opacity duration-200 ${
                 actionsVisible ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
+              } ${actionRailClassName}`}
             >
               <Button
                 variant="ghost"
@@ -278,7 +293,7 @@ export function ChatMessage({
                   event?.stopPropagation?.();
                   handleCopy();
                 }}
-                className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
+                className={actionButtonClassName}
                 title={copied ? "Copied!" : "Copy message"}
                 aria-label={copied ? "Copied to clipboard" : "Copy message"}
               >
@@ -297,9 +312,9 @@ export function ChatMessage({
                     event?.stopPropagation?.();
                     onSpeak?.(message.id, message.text);
                   }}
-                  className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
-                  title="Play message"
-                  aria-label="Play message"
+                  className={actionButtonClassName}
+                  title={t("aria.playMessage")}
+                  aria-label={t("aria.playMessage")}
                 >
                   <Volume2 className="w-3.5 h-3.5" />
                 </Button>
@@ -313,9 +328,9 @@ export function ChatMessage({
                     event?.stopPropagation?.();
                     handleStartEditing();
                   }}
-                  className="w-7 h-7 rounded-md text-muted hover:text-txt hover:bg-bg-hover transition-colors"
-                  title="Edit message"
-                  aria-label="Edit message"
+                  className={actionButtonClassName}
+                  title={t("aria.editMessage")}
+                  aria-label={t("aria.editMessage")}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </Button>
@@ -329,9 +344,9 @@ export function ChatMessage({
                     event?.stopPropagation?.();
                     onDelete(message.id);
                   }}
-                  className="w-7 h-7 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors"
+                  className={`${actionButtonClassName} hover:border-danger/45 hover:bg-danger/10 hover:text-danger`}
                   title={t("chatmessage.DeleteMessage")}
-                  aria-label="Delete message"
+                  aria-label={t("aria.deleteMessage")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
@@ -342,11 +357,11 @@ export function ChatMessage({
       </div>
     </article>
   );
-}
+});
 
 /* ── Typing Indicator ────────────────────────────────────────────────── */
 
-export function TypingIndicator({
+export const TypingIndicator = memo(function TypingIndicator({
   agentName,
   agentAvatarSrc,
 }: {
@@ -375,7 +390,7 @@ export function TypingIndicator({
         <div className="text-[12px] font-semibold text-txt mb-1">
           {agentName}
         </div>
-        <div className="px-4 py-3 bg-bg-accent border border-border rounded-2xl rounded-bl-md">
+        <div className="rounded-[20px] rounded-bl-[8px] border border-border/32 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_90%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_16px_24px_-22px_rgba(15,23,42,0.1)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_26px_-24px_rgba(0,0,0,0.2)]">
           <div className="flex gap-1">
             <span
               className="w-2 h-2 rounded-full bg-muted-strong animate-[typing-bounce_1.2s_ease-in-out_infinite]"
@@ -394,55 +409,6 @@ export function TypingIndicator({
       </div>
     </div>
   );
-}
+});
 
-/* ── Empty State ─────────────────────────────────────────────────────── */
-
-export function ChatEmptyState({ agentName }: { agentName: string }) {
-  const { t } = useApp();
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-      <div className="w-16 h-16 rounded-2xl bg-accent-subtle flex items-center justify-center mb-4">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-txt"
-          aria-label="Chat icon"
-        >
-          <title>{t("nav.chat")}</title>
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      </div>
-      <h3 className="text-lg font-semibold text-txt-strong mb-2">
-        {t("chatmessage.StartAConversation")}
-      </h3>
-      <p
-        className="text-sm text-muted max-w-sm mb-6"
-        style={{ fontFamily: "var(--font-chat)" }}
-      >
-        {t("chatmessage.SendAMessageTo")} {agentName}{" "}
-        {t("chatmessage.toBeginChattingY")}
-      </p>
-      <div className="flex flex-wrap justify-center gap-2">
-        {["Hello!", "How are you?", "Tell me a joke", "Help me with..."].map(
-          (suggestion) => (
-            <Button
-              key={suggestion}
-              variant="outline"
-              size="sm"
-              className="px-3 py-1.5 h-7 text-xs rounded-full text-muted border-border bg-bg hover:border-accent hover:text-txt transition-colors"
-            >
-              {suggestion}
-            </Button>
-          ),
-        )}
-      </div>
-    </div>
-  );
-}
+// ChatEmptyState removed

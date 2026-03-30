@@ -60,16 +60,13 @@ bun run dev:ui
 # Desktop app (Electrobun) development
 bun run dev:desktop
 
-# Terminal UI
-bun run tui
-
 # Run the CLI directly
 bun run milady start
 ```
 
 ### Testing
 
-The project uses **Vitest 4.x** with V8 coverage. Coverage thresholds are set at **25%** for lines, functions, and statements, and **15%** for branches.
+The project uses **Vitest 4.x** with V8 coverage. Coverage thresholds are set in `scripts/coverage-policy.mjs` at **25%** for lines, functions, and statements, and **15%** for branches.
 
 ```bash
 # Run all tests (parallel runner)
@@ -315,7 +312,6 @@ milady/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
 │   │   ├── electrobun/      # Electrobun desktop wrapper
 │   │   └── src/             # React UI components
-│   └── chrome-extension/    # Browser extension
 ├── deploy/                  # Docker deployment configs
 ├── docs/                    # Documentation site
 ├── packages/                # Workspace packages
@@ -334,7 +330,7 @@ milady/
 │   ├── security/            # Security utilities
 │   ├── services/            # Background services
 │   ├── triggers/            # Trigger system
-│   ├── tui/                 # Terminal UI
+│   ├── tui/                 # Terminal UI (disabled)
 │   └── utils/               # Helper utilities
 ├── test/                    # Test setup, helpers, e2e scripts
 ├── AGENTS.md                # Repository guidelines for agents

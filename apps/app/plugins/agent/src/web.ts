@@ -1,6 +1,11 @@
 import { WebPlugin } from "@capacitor/core";
 import type { AgentPlugin, AgentStatus, ChatResult } from "./definitions";
 
+interface MiladyWindow extends Window {
+  __MILADY_API_BASE__?: string;
+  __MILADY_API_TOKEN__?: string;
+}
+
 /**
  * Web fallback implementation.
  *
@@ -14,28 +19,20 @@ import type { AgentPlugin, AgentStatus, ChatResult } from "./definitions";
  * app shell HTML, so we bail early.
  */
 export class AgentWeb extends WebPlugin implements AgentPlugin {
-  private desktopLocalFallbackBase(): string {
-    if (typeof window === "undefined") return "";
-    const proto = window.location.protocol;
-    if (proto === "electrobun:" || proto === "file:") {
-      return "http://localhost:2138";
-    }
-    return "";
-  }
-
   private apiBase(): string {
     const global =
       typeof window !== "undefined"
-        ? (window as unknown as Record<string, unknown>).__MILADY_API_BASE__
+        ? (window as MiladyWindow).__MILADY_API_BASE__
         : undefined;
     if (typeof global === "string" && global.trim().length > 0) return global;
-    return this.desktopLocalFallbackBase();
+    // No explicit base — use relative URLs (works on http/https origins).
+    return "";
   }
 
   private apiToken(): string | null {
     const global =
       typeof window !== "undefined"
-        ? (window as unknown as Record<string, unknown>).__MILADY_API_TOKEN__
+        ? (window as MiladyWindow).__MILADY_API_TOKEN__
         : undefined;
     if (typeof global === "string" && global.trim()) return global.trim();
     if (typeof window === "undefined") return null;
@@ -50,8 +47,11 @@ export class AgentWeb extends WebPlugin implements AgentPlugin {
 
   /** True when we can reach the API via HTTP. */
   private canReachApi(): boolean {
-    const base = this.apiBase();
-    if (base) return true;
+    const global =
+      typeof window !== "undefined"
+        ? (window as MiladyWindow).__MILADY_API_BASE__
+        : undefined;
+    if (typeof global === "string" && global.trim().length > 0) return true;
     // No explicit base — relative fetches only work on http(s) origins.
     if (typeof window === "undefined") return false;
     const proto = window.location.protocol;

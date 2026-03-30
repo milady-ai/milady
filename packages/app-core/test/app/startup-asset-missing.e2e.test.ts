@@ -1,123 +1,116 @@
 // @vitest-environment jsdom
 
-import React, { useEffect } from "react";
+import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { textOf } from "../../../../test/helpers/react-test";
 
-const { mockClient } = vi.hoisted(() => ({
-  mockClient: {
-    hasToken: vi.fn(() => false),
-    getCodingAgentStatus: vi.fn(async () => null),
-    setToken: vi.fn(),
-    getAuthStatus: vi.fn(async () => ({
-      required: false,
-      pairingEnabled: false,
-      expiresAt: null,
-    })),
-    getOnboardingStatus: vi.fn(async () => ({ complete: true })),
-    getStatus: vi.fn(async () => ({
-      state: "error",
-      startup: {
-        phase: "initializing-agent",
-        attempt: 1,
-        lastError: "Bundled avatar MILADY-01 could not be loaded.",
-      },
-      pendingRestart: false,
-      pendingRestartReasons: [],
-    })),
-    getConfig: vi.fn(async () => ({ ui: { avatarIndex: 1 } })),
-    disconnectWs: vi.fn(),
-  },
+vi.mock("../../src/app-shell-components", () => ({
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
+  AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () => React.createElement("div", null, "CharacterEditor"),
+  ChatView: () => React.createElement("div", null, "ChatView"),
+  CompanionShell: () => React.createElement("div", null, "CompanionShell"),
+  CompanionView: () => React.createElement("div", null, "CompanionView"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("div", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("div", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("div", null, "Header"),
+  HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
+  InventoryView: () => React.createElement("div", null, "InventoryView"),
+  KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () => React.createElement("div", null, "SettingsView"),
+  SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  ShellOverlays: () => null,
+  StartupFailureView: ({
+    error,
+  }: {
+    error: { detail?: string; message: string; reason: string };
+  }) =>
+    React.createElement(
+      "div",
+      null,
+      `StartupFailureView:${error.reason}:${error.message}:${error.detail ?? ""}`,
+    ),
+  StreamView: () => React.createElement("div", null, "StreamView"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
 }));
 
-vi.mock("@miladyai/app-core/api", () => ({
-  client: mockClient,
-  SkillScanReportSummary: {},
-}));
-
-import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-interface StartupSnapshot {
-  onboardingLoading: boolean;
-  startupPhase: ReturnType<typeof useApp>["startupPhase"];
-  startupError: ReturnType<typeof useApp>["startupError"];
-}
-
-function Probe(props: { onChange: (snapshot: StartupSnapshot) => void }) {
-  const app = useApp();
-  useEffect(() => {
-    props.onChange({
-      onboardingLoading: app.onboardingLoading,
-      startupPhase: app.startupPhase,
-      startupError: app.startupError,
-    });
-  }, [
-    app.onboardingLoading,
-    app.startupPhase,
-    app.startupError,
-    props.onChange,
-  ]);
-  return null;
-}
+import { App } from "../../src/App";
+import { AppContext } from "../../src/state/useApp";
 
 describe("startup failure: bundled assets missing", () => {
-  beforeEach(() => {
-    Object.assign(document.documentElement, { setAttribute: vi.fn() });
-    mockClient.hasToken.mockReturnValue(false);
-    mockClient.disconnectWs.mockImplementation(() => {});
-    mockClient.getAuthStatus.mockResolvedValue({
-      required: false,
-      pairingEnabled: false,
-      expiresAt: null,
-    });
-    mockClient.getOnboardingStatus.mockResolvedValue({ complete: true });
-    mockClient.getStatus.mockResolvedValue({
-      state: "error",
-      startup: {
+  it("surfaces the startup failure view for asset-missing errors", async () => {
+    const state = {
+      t: (key: string) => key,
+      onboardingLoading: false,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
+      startupPhase: "initializing-agent",
+      startupError: {
+        reason: "asset-missing",
         phase: "initializing-agent",
-        attempt: 1,
-        lastError: "Bundled avatar MILADY-01 could not be loaded.",
+        message: "Required companion assets could not be loaded.",
+        detail: "Bundled avatar ELIZA-01 could not be loaded.",
       },
-      pendingRestart: false,
-      pendingRestartReasons: [],
-    });
-    mockClient.getConfig.mockResolvedValue({ ui: { avatarIndex: 1 } });
-  });
-  it("surfaces asset-missing before startup reaches ready", async () => {
-    let latest: StartupSnapshot | null = null;
-    let tree: TestRenderer.ReactTestRenderer | null = null;
+      authRequired: false,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab: "companion",
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "companion",
+      switchShellView: vi.fn(),
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "light",
+      setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      cancelOnboardingHandoff: vi.fn(),
+      handleSaveCharacter: vi.fn(),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      agentStatus: null,
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      retryOnboardingHandoff: vi.fn(async () => {}),
+    };
 
+    let tree: TestRenderer.ReactTestRenderer | null = null;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(
-          AppProvider,
-          null,
-          React.createElement(Probe, {
-            onChange: (snapshot) => {
-              latest = snapshot;
-            },
-          }),
+          AppContext.Provider,
+          { value: state as never },
+          React.createElement(App),
         ),
       );
     });
 
-    await act(async () => {
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
-    });
-
-    expect(latest).not.toBeNull();
-    expect(latest?.onboardingLoading).toBe(false);
-    expect(latest?.startupPhase).toBe("initializing-agent");
-    expect(latest?.startupError?.reason).toBe("asset-missing");
-    expect(latest?.startupError?.phase).toBe("initializing-agent");
-    expect(latest?.startupError?.message).toContain(
-      "Required companion assets could not be loaded",
+    const rendered = textOf(tree!.root);
+    expect(rendered).toContain("StartupFailureView:asset-missing");
+    expect(rendered).toContain(
+      "Required companion assets could not be loaded.",
     );
-    expect(latest?.startupError?.detail).toContain(
-      "Bundled avatar MILADY-01 could not be loaded",
-    );
+    expect(rendered).toContain("Bundled avatar ELIZA-01 could not be loaded.");
+    expect(rendered).not.toContain("PairingView");
 
     await act(async () => {
       tree?.unmount();

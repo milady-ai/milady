@@ -7,122 +7,197 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { fetchMock, mockClient, wsHandlers, invokeDesktopBridgeRequestMock } =
   vi.hoisted(() => {
-  const handlers = new Map<string, (data: Record<string, unknown>) => void>();
+    const handlers = new Map<string, (data: Record<string, unknown>) => void>();
 
-  return {
-    fetchMock: vi.fn(),
-    wsHandlers: handlers,
-    invokeDesktopBridgeRequestMock: vi.fn(async () => ({ id: "notif-1" })),
-    mockClient: {
-      hasToken: vi.fn(() => false),
-      getAuthStatus: vi.fn(async () => ({
-        required: false,
-        pairingEnabled: false,
-        expiresAt: null,
-      })),
-      getOnboardingStatus: vi.fn(async () => ({ complete: true })),
-      listConversations: vi.fn(async () => ({
-        conversations: [
-          {
-            id: "conv-1",
+    return {
+      fetchMock: vi.fn(),
+      wsHandlers: handlers,
+      invokeDesktopBridgeRequestMock: vi.fn(async () => ({ id: "notif-1" })),
+      mockClient: {
+        hasToken: vi.fn(() => false),
+        getAuthStatus: vi.fn(async () => ({
+          required: false,
+          pairingEnabled: false,
+          expiresAt: null,
+        })),
+        getOnboardingStatus: vi.fn(async () => ({ complete: true })),
+        listConversations: vi.fn(async () => ({
+          conversations: [
+            {
+              id: "conv-1",
+              title: "Chat",
+              roomId: "room-1",
+              createdAt: "2026-02-01T00:00:00.000Z",
+              updatedAt: "2026-02-01T00:00:00.000Z",
+            },
+          ],
+        })),
+        createConversation: vi.fn(async () => ({
+          conversation: {
+            id: "conv-created",
             title: "Chat",
-            roomId: "room-1",
+            roomId: "room-created",
             createdAt: "2026-02-01T00:00:00.000Z",
             updatedAt: "2026-02-01T00:00:00.000Z",
           },
-        ],
-      })),
-      createConversation: vi.fn(async () => ({
-        conversation: {
-          id: "conv-created",
-          title: "Chat",
-          roomId: "room-created",
-          createdAt: "2026-02-01T00:00:00.000Z",
-          updatedAt: "2026-02-01T00:00:00.000Z",
-        },
-      })),
-      getConversationMessages: vi.fn(async () => ({ messages: [] })),
-      sendConversationMessage: vi.fn(async () => ({
-        text: "ok",
-        agentName: "Milady",
-      })),
-      sendConversationMessageStream: vi.fn(async () => ({
-        text: "ok",
-        agentName: "Milady",
-      })),
-      requestGreeting: vi.fn(async () => ({
-        text: "hi",
-        agentName: "Milady",
-        generated: true,
-      })),
-      listCustomActions: vi.fn(async () => []),
-      testCustomAction: vi.fn(async () => ({
-        ok: true,
-        output: "ok",
-        durationMs: 5,
-      })),
-      rememberMemory: vi.fn(async () => ({
-        ok: true,
-        id: "mem-1",
-        text: "saved",
-        createdAt: Date.now(),
-      })),
-      searchMemory: vi.fn(async () => ({
-        query: "q",
-        results: [],
-        count: 0,
-        limit: 6,
-      })),
-      searchKnowledge: vi.fn(async () => ({
-        query: "q",
-        threshold: 0.2,
-        results: [],
-        count: 0,
-      })),
-      quickContext: vi.fn(async () => ({
-        query: "q",
-        answer: "quick answer",
-        memories: [],
-        knowledge: [],
-      })),
-      sendWsMessage: vi.fn(),
-      connectWs: vi.fn(),
-      disconnectWs: vi.fn(),
-      saveStreamSettings: vi.fn(async () => undefined),
-      onWsEvent: vi.fn(
-        (type: string, handler: (data: Record<string, unknown>) => void) => {
-          handlers.set(type, handler);
-          return () => {
-            handlers.delete(type);
-          };
-        },
-      ),
-      getAgentEvents: vi.fn(async () => ({
-        events: [],
-        latestEventId: null,
-        totalBuffered: 0,
-        replayed: true,
-      })),
-      getStatus: vi.fn(async () => ({
-        state: "running",
-        agentName: "Milady",
-        model: undefined,
-        startedAt: undefined,
-        uptime: undefined,
-      })),
-      getWalletAddresses: vi.fn(async () => null),
-      getConfig: vi.fn(async () => ({})),
-      getCloudStatus: vi.fn(async () => ({ enabled: false, connected: false })),
-      getCodingAgentStatus: vi.fn(async () => null),
-      getWorkbenchOverview: vi.fn(async () => ({
-        tasks: [],
-        triggers: [],
-        todos: [],
-      })),
-      hasCustomVrm: vi.fn(async () => false),
-      hasCustomBackground: vi.fn(async () => false),
-    },
-  };
+        })),
+        getConversationMessages: vi.fn(async () => ({ messages: [] })),
+        sendConversationMessage: vi.fn(async () => ({
+          text: "ok",
+          agentName: "Eliza",
+        })),
+        sendConversationMessageStream: vi.fn(async () => ({
+          text: "ok",
+          agentName: "Eliza",
+        })),
+        requestGreeting: vi.fn(async () => ({
+          text: "hi",
+          agentName: "Eliza",
+          generated: true,
+        })),
+        listCustomActions: vi.fn(async () => []),
+        testCustomAction: vi.fn(async () => ({
+          ok: true,
+          output: "ok",
+          durationMs: 5,
+        })),
+        rememberMemory: vi.fn(async () => ({
+          ok: true,
+          id: "mem-1",
+          text: "saved",
+          createdAt: Date.now(),
+        })),
+        searchMemory: vi.fn(async () => ({
+          query: "q",
+          results: [],
+          count: 0,
+          limit: 6,
+        })),
+        searchKnowledge: vi.fn(async () => ({
+          query: "q",
+          threshold: 0.2,
+          results: [],
+          count: 0,
+        })),
+        quickContext: vi.fn(async () => ({
+          query: "q",
+          answer: "quick answer",
+          memories: [],
+          knowledge: [],
+        })),
+        sendWsMessage: vi.fn(),
+        connectWs: vi.fn(),
+        disconnectWs: vi.fn(),
+        saveStreamSettings: vi.fn(async () => undefined),
+        onWsEvent: vi.fn(
+          (type: string, handler: (data: Record<string, unknown>) => void) => {
+            handlers.set(type, handler);
+            return () => {
+              handlers.delete(type);
+            };
+          },
+        ),
+        getAgentEvents: vi.fn(async () => ({
+          events: [],
+          latestEventId: null,
+          totalBuffered: 0,
+          replayed: true,
+        })),
+        getStatus: vi.fn(async () => ({
+          state: "running",
+          agentName: "Eliza",
+          model: undefined,
+          startedAt: undefined,
+          uptime: undefined,
+        })),
+        getWalletAddresses: vi.fn(async () => null),
+        getConfig: vi.fn(async () => ({})),
+        getCloudStatus: vi.fn(async () => ({
+          enabled: false,
+          connected: false,
+        })),
+        getCodingAgentStatus: vi.fn(async () => null),
+        getWorkbenchOverview: vi.fn(async () => ({
+          tasks: [],
+          triggers: [],
+          todos: [],
+        })),
+        hasCustomVrm: vi.fn(async () => false),
+        hasCustomBackground: vi.fn(async () => false),
+        getPermissions: vi.fn(async () => ({
+          accessibility: {
+            id: "accessibility",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          "screen-recording": {
+            id: "screen-recording",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          microphone: {
+            id: "microphone",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          camera: {
+            id: "camera",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+          shell: {
+            id: "shell",
+            status: "granted",
+            lastChecked: Date.now(),
+            canRequest: false,
+          },
+        })),
+        getOnboardingOptions: vi.fn(async () => ({
+          names: ["Milady"],
+          styles: [],
+          providers: [],
+          cloudProviders: [],
+          models: { small: [], large: [] },
+          sharedStyleRules: "",
+        })),
+        submitOnboarding: vi.fn(async () => ({ ok: true })),
+        restartAgent: vi.fn(async () => ({
+          state: "running",
+          agentName: "Eliza",
+          model: undefined,
+          startedAt: undefined,
+          uptime: undefined,
+        })),
+        getBaseUrl: vi.fn(() => "http://localhost:2138"),
+        setBaseUrl: vi.fn(),
+        setToken: vi.fn(),
+        resetConnection: vi.fn(),
+        cloudLogin: vi.fn(async () => ({
+          ok: false,
+          browserUrl: "",
+          sessionId: "",
+        })),
+        cloudLoginPoll: vi.fn(async () => ({ status: "pending" as const })),
+        cloudLoginDirect: vi.fn(async () => ({
+          ok: false,
+          browserUrl: "",
+          sessionId: "",
+        })),
+        cloudLoginPollDirect: vi.fn(async () => ({
+          status: "pending" as const,
+        })),
+        getCloudCredits: vi.fn(async () => ({
+          balance: 0,
+          low: false,
+          critical: false,
+        })),
+        getAgentSelfStatus: vi.fn(async () => null),
+      },
+    };
   });
 
 vi.mock("@miladyai/app-core/api", () => ({
@@ -130,8 +205,9 @@ vi.mock("@miladyai/app-core/api", () => ({
   SkillScanReportSummary: {},
 }));
 
-vi.mock("../../src/bridge", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../src/bridge")>();
+vi.mock("@miladyai/app-core/bridge", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@miladyai/app-core/bridge")>();
   return {
     ...actual,
     getBackendStartupTimeoutMs: () => 1000,
@@ -140,6 +216,20 @@ vi.mock("../../src/bridge", async (importOriginal) => {
   };
 });
 
+// AppContext imports the bridge via a relative path ("../bridge") which
+// resolves to the real source, NOT the test stub alias.  Mock it too so
+// invokeDesktopBridgeRequest calls inside AppContext are intercepted.
+vi.mock("../../src/bridge/index", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    getBackendStartupTimeoutMs: () => 1000,
+    invokeDesktopBridgeRequest: invokeDesktopBridgeRequestMock,
+    scanProviderCredentials: vi.fn(async () => []),
+  };
+});
+
+import { flush } from "../../../../test/helpers/react-test";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
 
 type ProbeApi = {
@@ -200,12 +290,6 @@ function emitWs(type: string, payload: Record<string, unknown>): void {
   }
 }
 
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
 async function waitFor(assertion: () => void): Promise<void> {
   for (let idx = 0; idx < 30; idx += 1) {
     try {
@@ -222,6 +306,10 @@ describe("AppContext autonomy replay", () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({ runMode: "local" }),
+    );
     window.history.replaceState({}, "", "/chat");
     Object.assign(window, {
       setTimeout: globalThis.setTimeout,
@@ -230,6 +318,7 @@ describe("AppContext autonomy replay", () => {
       clearInterval: globalThis.clearInterval,
     });
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
+
     Object.defineProperty(globalThis, "fetch", {
       value: fetchMock,
       writable: true,
@@ -282,15 +371,15 @@ describe("AppContext autonomy replay", () => {
     mockClient.getConversationMessages.mockResolvedValue({ messages: [] });
     mockClient.sendConversationMessage.mockResolvedValue({
       text: "ok",
-      agentName: "Milady",
+      agentName: "Eliza",
     });
     mockClient.sendConversationMessageStream.mockResolvedValue({
       text: "ok",
-      agentName: "Milady",
+      agentName: "Eliza",
     });
     mockClient.requestGreeting.mockResolvedValue({
       text: "hi",
-      agentName: "Milady",
+      agentName: "Eliza",
       generated: true,
     });
     mockClient.listCustomActions.mockResolvedValue([]);
@@ -337,7 +426,7 @@ describe("AppContext autonomy replay", () => {
     );
     mockClient.getStatus.mockResolvedValue({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -356,6 +445,83 @@ describe("AppContext autonomy replay", () => {
     });
     mockClient.hasCustomVrm.mockResolvedValue(false);
     mockClient.hasCustomBackground.mockResolvedValue(false);
+    mockClient.getPermissions.mockResolvedValue({
+      accessibility: {
+        id: "accessibility",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      "screen-recording": {
+        id: "screen-recording",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      microphone: {
+        id: "microphone",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      camera: {
+        id: "camera",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+      shell: {
+        id: "shell",
+        status: "granted",
+        lastChecked: Date.now(),
+        canRequest: false,
+      },
+    });
+    mockClient.getOnboardingOptions.mockResolvedValue({
+      names: ["Milady"],
+      styles: [],
+      providers: [],
+      cloudProviders: [],
+      models: { small: [], large: [] },
+      sharedStyleRules: "",
+    });
+    mockClient.submitOnboarding.mockResolvedValue({ ok: true });
+    mockClient.restartAgent.mockResolvedValue({
+      state: "running",
+      agentName: "Eliza",
+      model: undefined,
+      startedAt: undefined,
+      uptime: undefined,
+    });
+    mockClient.getBaseUrl.mockReturnValue("http://localhost:2138");
+    mockClient.setBaseUrl.mockImplementation(() => {});
+    mockClient.setToken.mockImplementation(() => {});
+    mockClient.resetConnection.mockImplementation(() => {});
+    mockClient.cloudLogin.mockResolvedValue({
+      ok: false,
+      browserUrl: "",
+      sessionId: "",
+    });
+    mockClient.cloudLoginPoll.mockResolvedValue({ status: "pending" });
+    mockClient.cloudLoginDirect.mockResolvedValue({
+      ok: false,
+      browserUrl: "",
+      sessionId: "",
+    });
+    mockClient.cloudLoginPollDirect.mockResolvedValue({ status: "pending" });
+    mockClient.getCloudCredits.mockResolvedValue({
+      balance: 0,
+      low: false,
+      critical: false,
+    });
+    mockClient.getAgentSelfStatus.mockResolvedValue(null);
+    mockClient.saveStreamSettings.mockResolvedValue(undefined);
+    mockClient.getAgentEvents.mockResolvedValue({
+      events: [],
+      latestEventId: null,
+      totalBuffered: 0,
+      replayed: true,
+    });
   });
 
   afterEach(() => {

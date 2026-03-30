@@ -4,7 +4,7 @@ sidebarTitle: "Decision Guide"
 description: "When to use Actions, Providers, Services, Skills, Routes, Event Handlers, or Evaluators"
 ---
 
-ElizaOS provides multiple ways to extend agent behavior. This guide helps you pick the right one.
+elizaOS provides multiple ways to extend agent behavior. This guide helps you pick the right one.
 
 ## Quick Decision Tree
 

@@ -35,11 +35,6 @@ vi.mock("node:os", () => ({
   tmpdir: vi.fn(() => "/tmp"),
 }));
 
-vi.mock("node:path", async () => {
-  const actual = await vi.importActual<typeof import("node:path")>("node:path");
-  return { default: actual, ...actual };
-});
-
 vi.stubGlobal("fetch", vi.fn());
 
 // Mock the rpc-schema so TalkModeConfig / TalkModeState resolve without
@@ -61,7 +56,7 @@ const mockTranscribeBunSpawn = whisperMod.transcribeBunSpawn as ReturnType<
   typeof vi.fn
 >;
 const mockWriteWavFile = whisperMod.writeWavFile as ReturnType<typeof vi.fn>;
-const mockFetch = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
 
 // ---------------------------------------------------------------------------
 // Helpers

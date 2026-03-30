@@ -46,6 +46,11 @@ interface SpeechRecognitionResultList {
 
 type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
 
+interface SpeechRecognitionWindow {
+  SpeechRecognition?: SpeechRecognitionCtor;
+  webkitSpeechRecognition?: SpeechRecognitionCtor;
+}
+
 /**
  * Web implementation of TalkMode plugin
  *
@@ -77,10 +82,10 @@ export class TalkModeWeb extends WebPlugin {
 
     // Check for Web Speech API support
     const SpeechRecognitionAPI: SpeechRecognitionCtor | undefined =
-      ((window as unknown as Record<string, unknown>).SpeechRecognition as
+      ((window as SpeechRecognitionWindow).SpeechRecognition as
         | SpeechRecognitionCtor
         | undefined) ||
-      ((window as unknown as Record<string, unknown>).webkitSpeechRecognition as
+      ((window as SpeechRecognitionWindow).webkitSpeechRecognition as
         | SpeechRecognitionCtor
         | undefined);
 
@@ -254,10 +259,10 @@ export class TalkModeWeb extends WebPlugin {
 
     // Check if speech recognition is supported
     const SpeechRecognitionAPI: SpeechRecognitionCtor | undefined =
-      ((window as unknown as Record<string, unknown>).SpeechRecognition as
+      ((window as SpeechRecognitionWindow).SpeechRecognition as
         | SpeechRecognitionCtor
         | undefined) ||
-      ((window as unknown as Record<string, unknown>).webkitSpeechRecognition as
+      ((window as SpeechRecognitionWindow).webkitSpeechRecognition as
         | SpeechRecognitionCtor
         | undefined);
 

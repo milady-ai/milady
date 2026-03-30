@@ -1,0 +1,243 @@
+diff --git a/node_modules/@elizaos/plugin-sql/.bun-tag-3d6ba92380393598 b/.bun-tag-3d6ba92380393598
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/browser/index.browser.js b/dist/browser/index.browser.js
+index d2a9b42534b2aac933a0c5842849b21ae2488e41..178527fec213a13aca0bcc27050e28d9f7a709e6 100644
+--- a/dist/browser/index.browser.js
++++ b/dist/browser/index.browser.js
+@@ -1776,8 +1776,8 @@ function generateCreateTableSQL(fullTableName, table) {
+   const foreignKeys = table.foreignKeys || {};
+   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
+     const fk = fkDef;
+-    const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""};`;
+-    fkSQLs.push(fkSQL);
++    const fkBody = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""}`;
++    fkSQLs.push(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fkName.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`);
+   }
+   return { tableSQL, fkSQLs };
+ }
+@@ -1960,14 +1960,14 @@ function generateCreateForeignKeySQL(fk) {
+   const tableFrom = fk.tableFrom;
+   const columnsFrom = fk.columnsFrom.map((c) => `"${c}"`).join(", ");
+   const columnsTo = fk.columnsTo.map((c) => `"${c}"`).join(", ");
+-  let sql21 = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
++  let fkBody = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+   if (fk.onDelete) {
+-    sql21 += ` ON DELETE ${fk.onDelete}`;
++    fkBody += ` ON DELETE ${fk.onDelete}`;
+   }
+   if (fk.onUpdate) {
+-    sql21 += ` ON UPDATE ${fk.onUpdate}`;
++    fkBody += ` ON UPDATE ${fk.onUpdate}`;
+   }
+-  return `${sql21};`;
++  return `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fk.name.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`;
+ }
+ function generateDropForeignKeySQL(fk) {
+   const [schema, tableName] = fk.tableFrom ? fk.tableFrom.includes(".") ? fk.tableFrom.split(".") : ["public", fk.tableFrom] : ["public", ""];
+@@ -3688,7 +3688,7 @@ class BaseDrizzleAdapter extends DatabaseAdapter {
+     return [String(names)];
+   }
+   isValidUUID(value) {
+-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
++    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+   }
+   normalizeWorldData(world) {
+     const worldData = {
+@@ -4510,10 +4510,28 @@ class BaseDrizzleAdapter extends DatabaseAdapter {
+   }
+   async log(params) {
+     return this.withDatabase(async () => {
++      const warnMissingRoom = () => {
++        logger9.warn({
++          src: "plugin:sql",
++          type: params.type,
++          roomId: params.roomId,
++          entityId: params.entityId
++        }, "Skipping log entry for deleted room");
++      };
++      const isMissingRoomForeignKey = (error) => {
++        const errorCode = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
++        const errorMessage = error instanceof Error ? error.message : String(error);
++        return errorCode === "23503" && errorMessage.includes("logs_room_id_rooms_id_fk") || errorMessage.includes('violates foreign key constraint "logs_room_id_rooms_id_fk"') || errorMessage.includes("Key (room_id)=") && errorMessage.includes('is not present in table "rooms"');
++      };
+       try {
+         const sanitizedBody = this.sanitizeJsonObject(params.body);
+         const jsonString = JSON.stringify(sanitizedBody);
+         await this.withEntityContext(params.entityId, async (tx) => {
++          const existingRoom = await tx.select({ id: roomTable.id }).from(roomTable).where(eq2(roomTable.id, params.roomId)).limit(1);
++          if (existingRoom.length === 0) {
++            warnMissingRoom();
++            return;
++          }
+           await tx.insert(logTable).values({
+             body: sql27`${jsonString}::jsonb`,
+             entityId: params.entityId,
+@@ -4522,6 +4540,10 @@ class BaseDrizzleAdapter extends DatabaseAdapter {
+           });
+         });
+       } catch (error) {
++        if (isMissingRoomForeignKey(error)) {
++          warnMissingRoom();
++          return;
++        }
+         logger9.error({
+           src: "plugin:sql",
+           type: params.type,
+diff --git a/dist/cjs/index.node.cjs b/dist/cjs/index.node.cjs
+index 077ef8c80dcfb2fb3974612f2ffc5867495244e8..37f933f89fdf18ca55356f8ba4a07d23fbeede44 100644
+--- a/dist/cjs/index.node.cjs
++++ b/dist/cjs/index.node.cjs
+@@ -1972,8 +1972,8 @@ function generateCreateTableSQL(fullTableName, table) {
+   const foreignKeys = table.foreignKeys || {};
+   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
+     const fk = fkDef;
+-    const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""};`;
+-    fkSQLs.push(fkSQL);
++    const fkBody = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""}`;
++    fkSQLs.push(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fkName.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`);
+   }
+   return { tableSQL, fkSQLs };
+ }
+@@ -2156,14 +2156,14 @@ function generateCreateForeignKeySQL(fk) {
+   const tableFrom = fk.tableFrom;
+   const columnsFrom = fk.columnsFrom.map((c) => `"${c}"`).join(", ");
+   const columnsTo = fk.columnsTo.map((c) => `"${c}"`).join(", ");
+-  let sql21 = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
++  let fkBody = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+   if (fk.onDelete) {
+-    sql21 += ` ON DELETE ${fk.onDelete}`;
++    fkBody += ` ON DELETE ${fk.onDelete}`;
+   }
+   if (fk.onUpdate) {
+-    sql21 += ` ON UPDATE ${fk.onUpdate}`;
++    fkBody += ` ON UPDATE ${fk.onUpdate}`;
+   }
+-  return `${sql21};`;
++  return `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fk.name.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`;
+ }
+ function generateDropForeignKeySQL(fk) {
+   const [schema, tableName] = fk.tableFrom ? fk.tableFrom.includes(".") ? fk.tableFrom.split(".") : ["public", fk.tableFrom] : ["public", ""];
+@@ -4644,10 +4644,28 @@ class BaseDrizzleAdapter extends import_core10.DatabaseAdapter {
+   }
+   async log(params) {
+     return this.withDatabase(async () => {
++      const warnMissingRoom = () => {
++        import_core10.logger.warn({
++          src: "plugin:sql",
++          type: params.type,
++          roomId: params.roomId,
++          entityId: params.entityId
++        }, "Skipping log entry for deleted room");
++      };
++      const isMissingRoomForeignKey = (error) => {
++        const errorCode = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
++        const errorMessage = error instanceof Error ? error.message : String(error);
++        return errorCode === "23503" && errorMessage.includes("logs_room_id_rooms_id_fk") || errorMessage.includes('violates foreign key constraint "logs_room_id_rooms_id_fk"') || errorMessage.includes("Key (room_id)=") && errorMessage.includes('is not present in table "rooms"');
++      };
+       try {
+         const sanitizedBody = this.sanitizeJsonObject(params.body);
+         const jsonString = JSON.stringify(sanitizedBody);
+         await this.withEntityContext(params.entityId, async (tx) => {
++          const existingRoom = await tx.select({ id: roomTable.id }).from(roomTable).where(import_drizzle_orm28.eq(roomTable.id, params.roomId)).limit(1);
++          if (existingRoom.length === 0) {
++            warnMissingRoom();
++            return;
++          }
+           await tx.insert(logTable).values({
+             body: import_drizzle_orm28.sql`${jsonString}::jsonb`,
+             entityId: params.entityId,
+@@ -4656,6 +4674,10 @@ class BaseDrizzleAdapter extends import_core10.DatabaseAdapter {
+           });
+         });
+       } catch (error) {
++        if (isMissingRoomForeignKey(error)) {
++          warnMissingRoom();
++          return;
++        }
+         import_core10.logger.error({
+           src: "plugin:sql",
+           type: params.type,
+diff --git a/dist/node/index.node.js b/dist/node/index.node.js
+index c231d59de7256f318174b602923538346d4c61b6..c7ddedcc081ce35eb5c4611acdc3888e034aa208 100644
+--- a/dist/node/index.node.js
++++ b/dist/node/index.node.js
+@@ -1922,8 +1922,8 @@ function generateCreateTableSQL(fullTableName, table) {
+   const foreignKeys = table.foreignKeys || {};
+   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
+     const fk = fkDef;
+-    const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""};`;
+-    fkSQLs.push(fkSQL);
++    const fkBody = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.schemaTo || "public"}"."${fk.tableTo}" (${fk.columnsTo.map((c) => `"${c}"`).join(", ")})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ""}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ""}`;
++    fkSQLs.push(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fkName.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`);
+   }
+   return { tableSQL, fkSQLs };
+ }
+@@ -2106,14 +2106,14 @@ function generateCreateForeignKeySQL(fk) {
+   const tableFrom = fk.tableFrom;
+   const columnsFrom = fk.columnsFrom.map((c) => `"${c}"`).join(", ");
+   const columnsTo = fk.columnsTo.map((c) => `"${c}"`).join(", ");
+-  let sql21 = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
++  let fkBody = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+   if (fk.onDelete) {
+-    sql21 += ` ON DELETE ${fk.onDelete}`;
++    fkBody += ` ON DELETE ${fk.onDelete}`;
+   }
+   if (fk.onUpdate) {
+-    sql21 += ` ON UPDATE ${fk.onUpdate}`;
++    fkBody += ` ON UPDATE ${fk.onUpdate}`;
+   }
+-  return `${sql21};`;
++  return `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${fk.name.replace(/'/g, "''")}') THEN ${fkBody}; END IF; END $$;`;
+ }
+ function generateDropForeignKeySQL(fk) {
+   const [schema, tableName] = fk.tableFrom ? fk.tableFrom.includes(".") ? fk.tableFrom.split(".") : ["public", fk.tableFrom] : ["public", ""];
+@@ -3782,7 +3782,7 @@ class BaseDrizzleAdapter extends DatabaseAdapter {
+     return [String(names)];
+   }
+   isValidUUID(value) {
+-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
++    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+   }
+   normalizeWorldData(world) {
+     const worldData = {
+@@ -4604,10 +4604,28 @@ class BaseDrizzleAdapter extends DatabaseAdapter {
+   }
+   async log(params) {
+     return this.withDatabase(async () => {
++      const warnMissingRoom = () => {
++        logger9.warn({
++          src: "plugin:sql",
++          type: params.type,
++          roomId: params.roomId,
++          entityId: params.entityId
++        }, "Skipping log entry for deleted room");
++      };
++      const isMissingRoomForeignKey = (error) => {
++        const errorCode = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
++        const errorMessage = error instanceof Error ? error.message : String(error);
++        return errorCode === "23503" && errorMessage.includes("logs_room_id_rooms_id_fk") || errorMessage.includes('violates foreign key constraint "logs_room_id_rooms_id_fk"') || errorMessage.includes("Key (room_id)=") && errorMessage.includes('is not present in table "rooms"');
++      };
+       try {
+         const sanitizedBody = this.sanitizeJsonObject(params.body);
+         const jsonString = JSON.stringify(sanitizedBody);
+         await this.withEntityContext(params.entityId, async (tx) => {
++          const existingRoom = await tx.select({ id: roomTable.id }).from(roomTable).where(eq2(roomTable.id, params.roomId)).limit(1);
++          if (existingRoom.length === 0) {
++            warnMissingRoom();
++            return;
++          }
+           await tx.insert(logTable).values({
+             body: sql27`${jsonString}::jsonb`,
+             entityId: params.entityId,
+@@ -4616,6 +4634,10 @@ class BaseDrizzleAdapter extends DatabaseAdapter {
+           });
+         });
+       } catch (error) {
++        if (isMissingRoomForeignKey(error)) {
++          warnMissingRoom();
++          return;
++        }
+         logger9.error({
+           src: "plugin:sql",
+           type: params.type,

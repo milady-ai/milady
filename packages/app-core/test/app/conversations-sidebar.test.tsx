@@ -62,6 +62,7 @@ function createContext(overrides: Record<string, unknown> = {}) {
     handleSelectConversation: vi.fn(async () => {}),
     handleDeleteConversation: vi.fn(async () => {}),
     handleRenameConversation: vi.fn(async () => {}),
+    suggestConversationTitle: vi.fn(async () => null),
     uiLanguage: "en",
     ...overrides,
   };
@@ -159,12 +160,10 @@ describe("ConversationsSidebar", () => {
     expect(handleDeleteConversation).toHaveBeenCalledWith("conv-1");
   });
 
-  it("starts a draft chat instead of creating a persisted conversation immediately", async () => {
-    const handleStartDraftConversation = vi.fn(async () => {});
+  it("calls handleNewConversation immediately when New Chat is clicked", async () => {
     const handleNewConversation = vi.fn(async () => {});
     mockUseApp.mockReturnValue(
       createContext({
-        handleStartDraftConversation,
         handleNewConversation,
       }),
     );
@@ -179,7 +178,111 @@ describe("ConversationsSidebar", () => {
       newChatButton.props.onClick();
     });
 
-    expect(handleStartDraftConversation).toHaveBeenCalledTimes(1);
-    expect(handleNewConversation).not.toHaveBeenCalled();
+    expect(handleNewConversation).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the empty-state guidance when no conversations exist", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        conversations: [],
+        activeConversationId: null,
+      }),
+    );
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const content = JSON.stringify(tree.toJSON());
+    expect(content).toContain("conversations.none");
+    expect(content).toContain("conversations.chats");
+  });
+
+  it("uses the rounded desktop shell treatment and shows unread count badges", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        unreadConversations: new Set(["conv-1", "conv-2"]),
+      }),
+    );
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const sidebar = tree.root.findByProps({
+      "data-testid": "conversations-sidebar",
+    });
+    expect(String(sidebar.props.className)).toContain("rounded-tr-[26px]");
+    expect(String(sidebar.props.className)).toContain("rounded-l-none");
+    expect(
+      tree.root.findAll(
+        (node) =>
+          node.type === "span" &&
+          Array.isArray(node.children) &&
+          node.children.includes("New"),
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("collapses the desktop rail into a slim history bar", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const collapseButton = tree.root.findByProps({
+      "data-testid": "chat-sidebar-collapse-toggle",
+    });
+
+    await act(async () => {
+      collapseButton.props.onClick();
+    });
+
+    const sidebar = tree.root.findByProps({
+      "data-testid": "conversations-sidebar",
+    });
+    expect(sidebar.props["data-collapsed"]).toBe(true);
+    expect(String(sidebar.props.className)).toContain("w-[4.75rem]");
+    expect(
+      tree.root.findByProps({
+        "data-testid": "chat-sidebar-expand-toggle",
+      }),
+    ).toBeTruthy();
+  });
+
+  it("renders a mobile close control and calls onClose", async () => {
+    const onClose = vi.fn();
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, {
+          mobile: true,
+          onClose,
+        }),
+      );
+    });
+
+    const closeButton = tree.root.find(
+      (node) =>
+        node.type === "button" &&
+        node.props["aria-label"] === "conversations.closePanel",
+    );
+    const sidebar = tree.root.findByProps({
+      "data-testid": "conversations-sidebar",
+    });
+
+    await act(async () => {
+      closeButton.props.onClick();
+    });
+
+    expect(String(sidebar.props.className)).toContain("w-full");
+    expect(closeButton.children).not.toContain("bugreportmodal.Times");
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

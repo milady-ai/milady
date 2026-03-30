@@ -40,10 +40,19 @@ milady models
   OpenAI (GPT): not set
   Vercel AI Gateway: not set
   Google (Gemini): not set
+  Google Antigravity (Vertex AI): not set
   Groq: not set
   xAI (Grok): not set
   OpenRouter: not set
+  DeepSeek: not set
+  Together AI: not set
+  Mistral: not set
+  Cohere: not set
+  Perplexity: not set
+  Zai: not set
+  Pi AI: not set
   Ollama (local): not set
+  elizaOS Cloud: not set
 ```
 
 Each line shows `configured` if the corresponding environment variable is set and non-empty, or `not set` if it is absent or empty.
@@ -52,14 +61,25 @@ Each line shows `configured` if the corresponding environment variable is set an
 
 | Environment Variable | Provider | Notes |
 |---------------------|----------|-------|
-| `ANTHROPIC_API_KEY` | Anthropic (Claude) | Claude 3 and 4 model families |
-| `OPENAI_API_KEY` | OpenAI (GPT) | GPT-4o, GPT-4, and other OpenAI models |
-| `AI_GATEWAY_API_KEY` | Vercel AI Gateway | Routes requests through the Vercel AI Gateway |
-| `GOOGLE_API_KEY` | Google (Gemini) | Gemini model family |
+| `ANTHROPIC_API_KEY` | Anthropic (Claude) | Claude 3 and 4 model families. Also accepted: `CLAUDE_API_KEY`. |
+| `OPENAI_API_KEY` | OpenAI (GPT) | GPT-4o, GPT-4, o1, o3 and other OpenAI models |
+| `AI_GATEWAY_API_KEY` | Vercel AI Gateway | Routes requests through the Vercel AI Gateway. Also accepted: `AIGATEWAY_API_KEY`. |
+| `GOOGLE_API_KEY` | Google (Gemini) | Gemini model family. Also accepted: `GOOGLE_GENERATIVE_AI_API_KEY`. |
+| `GOOGLE_CLOUD_API_KEY` | Google Antigravity (Vertex AI) | Google Cloud / Vertex AI models |
 | `GROQ_API_KEY` | Groq | Fast inference via Groq hardware |
-| `XAI_API_KEY` | xAI (Grok) | Grok model family |
+| `XAI_API_KEY` | xAI (Grok) | Grok model family. Also accepted: `GROK_API_KEY`. |
 | `OPENROUTER_API_KEY` | OpenRouter | Unified API for many providers |
+| `DEEPSEEK_API_KEY` | DeepSeek | Reasoning and code models |
+| `TOGETHER_API_KEY` | Together AI | Open-source model hosting |
+| `MISTRAL_API_KEY` | Mistral | Mistral and Mixtral models |
+| `COHERE_API_KEY` | Cohere | Command R+ and embed models |
+| `PERPLEXITY_API_KEY` | Perplexity | Search-augmented generation |
+| `ZAI_API_KEY` | Zai | Homunculus Labs Zai models |
+| `ELIZA_USE_PI_AI` | Pi AI | Inflection Pi conversational models |
 | `OLLAMA_BASE_URL` | Ollama (local) | Local models via Ollama (URL, not a key) |
+| `ELIZAOS_CLOUD_API_KEY` | elizaOS Cloud | Cloud-hosted model inference via elizaOS |
+
+Providers without an environment variable trigger (Qwen, MiniMax) can be enabled via plugin entries in `milady.json`. See [Model Providers](/model-providers) for full configuration details.
 
 ## Setting Provider Keys
 
@@ -77,24 +97,15 @@ source ~/.zshrc
 Or set them inline when running Milady:
 
 ```bash
-ANTHROPIC_API_KEY="sk-ant-..." milady tui
+ANTHROPIC_API_KEY="sk-ant-..." milady start
 ```
 
 ## Selecting a Model at Runtime
 
-Use the `--model` flag with `milady tui` to override the active model for a session:
-
-```bash
-milady tui --model anthropic/claude-sonnet-4-20250514
-milady tui --model openai/gpt-4o
-milady tui --model google/gemini-2.0-flash
-```
-
-Inside the TUI, use the `/model` slash command or press `Ctrl+P` to open the model selector overlay.
+Use the `/model` slash command in the dashboard to switch models during a session.
 
 ## Related
 
 - [milady configure](/cli/configure) -- print provider key guidance to the terminal
-- [milady tui](/cli/tui) -- start the TUI with a model override flag
 - [Environment Variables](/cli/environment) -- complete environment variable reference
-- [Model Providers](/model-providers) -- detailed provider configuration and model IDs
+- [Model Providers](/runtime/models) -- detailed provider configuration and model IDs

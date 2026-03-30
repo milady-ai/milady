@@ -1,48 +1,82 @@
+import { type BundledVrmAsset, getBootConfig } from "../config/boot-config";
 import { resolveAppAssetUrl } from "../utils/asset-url";
 import type { UiTheme } from "./ui-preferences";
 
-/** Number of bundled VRM avatars shipped with the app. */
-const BASE_VRM_COUNT = 4;
-
-export const VRM_COUNT = BASE_VRM_COUNT;
+// ---------------------------------------------------------------------------
+// Bundled VRM asset roster
+// ---------------------------------------------------------------------------
 
 /**
- * Maps logical avatar indices (1-4) to the original source file numbers.
- * Index 1 → milady-1, Index 2 → milady-4, Index 3 → milady-5, Index 4 → milady-9.
+ * When the boot roster is empty, still point at a real bundled asset.
+ * WHY `"default"` was wrong: `public/vrms` ships `milady-1`…`milady-8` only;
+ * a `default.vrm.gz` URL 404s and breaks the companion in desktop/WebView.
  */
-const VRM_INDEX_MAP: readonly number[] = [1, 4, 5, 9];
+const BUNDLED_VRM_FALLBACK_SLUG = "milady-1";
 
-function resolveSourceIndex(logicalIndex: number): number {
-  const normalized = normalizeAvatarIndex(logicalIndex);
-  const safe = normalized > 0 ? normalized : 1;
-  return VRM_INDEX_MAP[safe - 1] ?? VRM_INDEX_MAP[0];
+/**
+ * Get the VRM asset roster from the boot config.
+ * The host app passes its character roster via AppBootConfig.vrmAssets.
+ * Returns an empty array if no assets were configured.
+ */
+function getAssets(): BundledVrmAsset[] {
+  const assets = getBootConfig().vrmAssets;
+  if (Array.isArray(assets) && assets.length > 0) {
+    return assets;
+  }
+  return [];
 }
 
-function normalizeAvatarIndex(index: number): number {
+/** Number of bundled VRM avatars shipped with the app. */
+export function getVrmCount(): number {
+  return getAssets().length;
+}
+
+// Legacy constant — prefer getVrmCount() for dynamic rosters.
+// Returns 0 if no boot config has been set yet.
+export const VRM_COUNT = 8;
+
+export function normalizeAvatarIndex(index: number): number {
   if (!Number.isFinite(index)) return 1;
   const n = Math.trunc(index);
   if (n === 0) return 0;
-  if (n < 1 || n > VRM_COUNT) return 1;
+  const count = getAssets().length;
+  if (n < 1 || n > count) return 1;
   return n;
 }
 
 /** Resolve a bundled VRM index (1–N) to its public asset URL. */
 export function getVrmUrl(index: number): string {
-  const sourceIndex = resolveSourceIndex(index);
-  return resolveAppAssetUrl(`vrms/milady-${sourceIndex}.vrm.gz`);
+  const assets = getAssets();
+  if (assets.length === 0)
+    return resolveAppAssetUrl(`vrms/${BUNDLED_VRM_FALLBACK_SLUG}.vrm.gz`);
+  const n = normalizeAvatarIndex(index);
+  const safe = n > 0 ? n : 1;
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
+  return resolveAppAssetUrl(`vrms/${slug}.vrm.gz`);
 }
 
 /** Resolve a bundled VRM index (1–N) to its preview thumbnail URL. */
 export function getVrmPreviewUrl(index: number): string {
-  const sourceIndex = resolveSourceIndex(index);
-  return resolveAppAssetUrl(`vrms/previews/milady-${sourceIndex}.png`);
+  const assets = getAssets();
+  if (assets.length === 0)
+    return resolveAppAssetUrl(`vrms/previews/${BUNDLED_VRM_FALLBACK_SLUG}.png`);
+  const n = normalizeAvatarIndex(index);
+  const safe = n > 0 ? n : 1;
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
+  return resolveAppAssetUrl(`vrms/previews/${slug}.png`);
 }
 
 /** Resolve a bundled VRM index (1-N) to its custom background URL. */
 export function getVrmBackgroundUrl(index: number): string {
-  const sourceIndex = resolveSourceIndex(index);
-  const EXT = "png";
-  return resolveAppAssetUrl(`vrms/backgrounds/milady-${sourceIndex}.${EXT}`);
+  const assets = getAssets();
+  if (assets.length === 0)
+    return resolveAppAssetUrl(
+      `vrms/backgrounds/${BUNDLED_VRM_FALLBACK_SLUG}.png`,
+    );
+  const n = normalizeAvatarIndex(index);
+  const safe = n > 0 ? n : 1;
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
+  return resolveAppAssetUrl(`vrms/backgrounds/${slug}.png`);
 }
 
 const COMPANION_THEME_BACKGROUND_INDEX: Record<UiTheme, number> = {
@@ -57,20 +91,19 @@ export function getCompanionBackgroundUrl(theme: UiTheme): string {
 
 /** Human-readable roster title for bundled avatars. */
 export function getVrmTitle(index: number): string {
-  const sourceIndex = resolveSourceIndex(index);
-  return `MILADY-${String(sourceIndex).padStart(2, "0")}`;
+  const assets = getAssets();
+  if (assets.length === 0) return "Avatar";
+  const n = normalizeAvatarIndex(index);
+  const safe = n > 0 ? n : 1;
+  return assets[safe - 1]?.title ?? assets[0]?.title ?? "Avatar";
 }
 
-/** Whether a bundled index points to the official Milady avatar set. */
+/** @deprecated Stub — always returns false. Retained for API compatibility. */
 export function isOfficialVrmIndex(_index: number): boolean {
   return false;
 }
 
-/** Whether a VRM index requires an explicit 180° face-camera flip instead of auto-detection. */
-export function getVrmNeedsFlip(index: number): boolean {
-  const normalized = normalizeAvatarIndex(index);
-  if (normalized <= BASE_VRM_COUNT) return false;
+/** @deprecated Stub — always returns false. Retained for API compatibility. */
+export function getVrmNeedsFlip(_index: number): boolean {
   return false;
 }
-
-export { normalizeAvatarIndex };

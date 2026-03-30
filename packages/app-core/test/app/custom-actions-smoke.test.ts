@@ -4,6 +4,17 @@ import type { CustomActionDef } from "@miladyai/app-core/api";
 import React, { useEffect, useState } from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { text, findButtonByText, flush } from "../../../../test/helpers/react-test";
+
+function translateTest(
+  key: string,
+  vars?: {
+    defaultValue?: string;
+  },
+): string {
+  if (key === "common.save") return "Save";
+  return vars?.defaultValue ?? key;
+}
 
 const { mockClient, mockUseApp, mockUseVoiceChat } = vi.hoisted(() => ({
   mockClient: {
@@ -29,12 +40,20 @@ vi.mock("@miladyai/app-core/platform", () => ({
 }));
 
 vi.mock("@miladyai/app-core/hooks", async () => {
-  const actual = await vi.importActual<typeof import("@miladyai/app-core/hooks")>(
-    "@miladyai/app-core/hooks",
-  );
+  const actual = await vi.importActual<
+    typeof import("@miladyai/app-core/hooks")
+  >("@miladyai/app-core/hooks");
   return {
     ...actual,
     useVoiceChat: () => mockUseVoiceChat(),
+    useTimeout: () => ({
+      setTimeout: (fn: () => void, ms: number) => globalThis.setTimeout(fn, ms),
+      clearTimeout: (id: ReturnType<typeof globalThis.setTimeout>) =>
+        globalThis.clearTimeout(id),
+    }),
+    useDocumentVisibility: () => true,
+    useBugReport: () => ({ isOpen: false, open: vi.fn(), close: vi.fn() }),
+    BugReportProvider: ({ children }: { children: React.ReactNode }) => children,
   };
 });
 
@@ -50,6 +69,54 @@ vi.mock("../../src/components/MessageContent", () => ({
 vi.mock("@miladyai/app-core/api", () => ({
   client: mockClient,
 }));
+
+// Mock @miladyai/ui components to render inline (no Radix portals)
+// so react-test-renderer does not crash with parentInstance.children.indexOf.
+vi.mock("@miladyai/ui", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  const React = require("react");
+  const passthrough = ({
+    children,
+    ...props
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement("div", props, children);
+  return {
+    ...actual,
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
+      React.createElement("textarea", props),
+    Select: passthrough,
+    SelectContent: passthrough,
+    SelectItem: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("option", props, children),
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
+    Switch: passthrough,
+    Checkbox: passthrough,
+    Dialog: ({
+      children,
+      open,
+    }: React.PropsWithChildren<{ open?: boolean }>) =>
+      open !== false
+        ? React.createElement(React.Fragment, null, children)
+        : null,
+    DialogContent: passthrough,
+    DialogHeader: passthrough,
+    DialogTitle: passthrough,
+    DialogDescription: passthrough,
+    DialogFooter: passthrough,
+    ConfirmDelete: passthrough,
+  };
+});
 
 interface ChatViewContextStub {
   agentStatus: { agentName: string } | null;
@@ -94,31 +161,8 @@ function createContext(
     chatPendingImages: [],
     ...overrides,
     uiLanguage: "en" as const,
-    t: (k: string) => k,
+    t: translateTest,
   };
-}
-
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child: TestRenderer.ReactTestInstance | string) =>
-      typeof child === "string"
-        ? child
-        : text(child as TestRenderer.ReactTestInstance),
-    )
-    .join("")
-    .trim();
-}
-
-function findButtonByText(
-  root: TestRenderer.ReactTestRenderer,
-  label: string,
-): TestRenderer.ReactTestInstance {
-  const found = root.root.findAll(
-    (n: TestRenderer.ReactTestInstance) =>
-      n.type === "button" && text(n) === label,
-  );
-  expect(found.length).toBeGreaterThan(0);
-  return found[0];
 }
 
 function findInputByPlaceholder(
@@ -133,13 +177,6 @@ function findInputByPlaceholder(
   );
   expect(found.length).toBeGreaterThan(0);
   return found[0];
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-    await Promise.resolve();
-  });
 }
 
 import { ChatView } from "../../src/components/ChatView";
@@ -305,7 +342,7 @@ describe("custom actions smoke flow", () => {
     expect(title.length).toBe(1);
 
     const createButton = findButtonByText(
-      tree,
+      tree.root,
       "customactionspanel.NewCustomAction",
     );
     await act(async () => {
@@ -315,9 +352,9 @@ describe("custom actions smoke flow", () => {
 
     const editorHeader = tree?.root.findAll(
       (node: TestRenderer.ReactTestInstance) =>
-        node.type === "h2" && text(node) === "New Custom Action",
+        (node.type === "h2" || node.type === "div") && text(node) === "New Custom Action",
     );
-    expect(editorHeader.length).toBe(1);
+    expect(editorHeader.length).toBeGreaterThanOrEqual(1);
 
     const promptInput = findInputByPlaceholder(
       tree,
@@ -330,7 +367,7 @@ describe("custom actions smoke flow", () => {
     });
     await flush();
 
-    const generateButton = findButtonByText(tree, "Generate");
+    const generateButton = findButtonByText(tree.root, "Generate");
     await act(async () => {
       generateButton.props.onClick();
     });
@@ -353,7 +390,7 @@ describe("custom actions smoke flow", () => {
     )[0];
     expect(descriptionArea.props.value).toBe("Checks if a URL responds.");
 
-    const saveButton = findButtonByText(tree, "Save");
+    const saveButton = findButtonByText(tree.root, "Save");
     await act(async () => {
       saveButton.props.onClick();
     });

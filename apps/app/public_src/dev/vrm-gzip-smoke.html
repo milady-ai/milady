@@ -41,13 +41,17 @@
       <pre id="status">booting</pre>
     </div>
     <script type="module">
+      import { DEFAULT_MILADY_CHARACTER_ASSET } from "@miladyai/app-core/character-catalog";
       import { VrmEngine } from "@miladyai/app-core/components/avatar/VrmEngine";
 
       const canvas = document.getElementById("canvas");
       const status = document.getElementById("status");
       const engine = new VrmEngine();
       const params = new URLSearchParams(window.location.search);
-      const vrmPath = params.get("path") ?? "/vrms/milady-1.vrm.gz";
+      const vrmPath =
+        params.get("path") ??
+        DEFAULT_MILADY_CHARACTER_ASSET?.compressedVrmPath ??
+        "/vrms/milady-1.vrm.gz";
 
       const setStatus = (value) => {
         status.textContent = value;

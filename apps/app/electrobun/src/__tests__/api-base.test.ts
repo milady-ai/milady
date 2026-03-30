@@ -3,7 +3,9 @@ import {
   normalizeApiBase,
   resolveDesktopRuntimeMode,
   resolveExternalApiBase,
+  resolveHttpLoopbackRendererOriginForApiClient,
   resolveInitialApiBase,
+  resolveRendererFacingApiBase,
 } from "../api-base";
 
 describe("normalizeApiBase", () => {
@@ -191,7 +193,7 @@ describe("resolveInitialApiBase", () => {
   });
 
   it("returns the local port in local mode", () => {
-    expect(resolveInitialApiBase({ MILADY_PORT: "4242" })).toBe(
+    expect(resolveInitialApiBase({ MILADY_API_PORT: "4242" })).toBe(
       "http://127.0.0.1:4242",
     );
   });
@@ -200,8 +202,72 @@ describe("resolveInitialApiBase", () => {
     expect(
       resolveInitialApiBase({
         MILADY_DESKTOP_SKIP_EMBEDDED_AGENT: "1",
-        MILADY_PORT: "5151",
+        ELIZA_API_PORT: "5151",
       }),
     ).toBe("http://127.0.0.1:5151");
+  });
+});
+
+describe("resolveHttpLoopbackRendererOriginForApiClient", () => {
+  it("returns null when no dev URL is set", () => {
+    expect(resolveHttpLoopbackRendererOriginForApiClient({})).toBeNull();
+  });
+
+  it("returns Vite origin from MILADY_RENDERER_URL", () => {
+    expect(
+      resolveHttpLoopbackRendererOriginForApiClient({
+        MILADY_RENDERER_URL: "http://127.0.0.1:2138/",
+      }),
+    ).toBe("http://127.0.0.1:2138");
+  });
+
+  it("prefers MILADY_RENDERER_URL over VITE_DEV_SERVER_URL", () => {
+    expect(
+      resolveHttpLoopbackRendererOriginForApiClient({
+        MILADY_RENDERER_URL: "http://127.0.0.1:2138",
+        VITE_DEV_SERVER_URL: "http://127.0.0.1:9999",
+      }),
+    ).toBe("http://127.0.0.1:2138");
+  });
+
+  it("falls back to VITE_DEV_SERVER_URL", () => {
+    expect(
+      resolveHttpLoopbackRendererOriginForApiClient({
+        VITE_DEV_SERVER_URL: "http://localhost:5173/",
+      }),
+    ).toBe("http://localhost:5173");
+  });
+
+  it("returns null for non-loopback hosts", () => {
+    expect(
+      resolveHttpLoopbackRendererOriginForApiClient({
+        MILADY_RENDERER_URL: "http://192.168.1.5:2138",
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null for file:// and electrobun://", () => {
+    expect(
+      resolveHttpLoopbackRendererOriginForApiClient({
+        MILADY_RENDERER_URL: "file:///tmp/index.html",
+      }),
+    ).toBeNull();
+  });
+});
+
+describe("resolveRendererFacingApiBase", () => {
+  it("uses dev server origin when MILADY_RENDERER_URL is loopback http", () => {
+    expect(
+      resolveRendererFacingApiBase(
+        { MILADY_RENDERER_URL: "http://127.0.0.1:2138" },
+        31337,
+      ),
+    ).toBe("http://127.0.0.1:2138");
+  });
+
+  it("uses API port when no dev URL", () => {
+    expect(resolveRendererFacingApiBase({}, 31337)).toBe(
+      "http://127.0.0.1:31337",
+    );
   });
 });

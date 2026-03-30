@@ -32,12 +32,7 @@
 
 import { GpuWindow, WGPUView } from "electrobun/bun";
 import type { GpuViewInfo, GpuWindowInfo, WindowBounds } from "../rpc-schema";
-
-type SendToWebview = (message: string, payload?: unknown) => void;
-
-// ============================================================================
-// GpuWindowManager
-// ============================================================================
+import type { SendToWebview } from "../types.js";
 
 export class GpuWindowManager {
   private sendToWebview: SendToWebview | null = null;
@@ -137,8 +132,6 @@ export class GpuWindowManager {
     // GpuWindow.hide() makes the window invisible without sending it to the
     // dock (unlike minimize). Fall back to minimize() if not available yet in
     // this Electrobun build.
-    // TODO: remove minimize() fallback once electrobun/bun types GpuWindow.hide()
-    // (targeting Electrobun ≥ 1.16.0)
     if (typeof (win as GpuWindow & { hide?: () => void }).hide === "function") {
       (win as GpuWindow & { hide: () => void }).hide();
     } else {

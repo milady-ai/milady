@@ -15,16 +15,17 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 vi.mock("@miladyai/app-core/events", () => ({
-  APP_EMOTE_EVENT: "milady:app-emote",
-  CHAT_AVATAR_VOICE_EVENT: "milady:chat-avatar-voice",
+  APP_EMOTE_EVENT: "eliza:app-emote",
+  CHAT_AVATAR_VOICE_EVENT: "eliza:chat-avatar-voice",
   STOP_EMOTE_EVENT: "stop-emote",
 }));
 
 vi.mock("@miladyai/app-core/utils", () => ({
   resolveAppAssetUrl: (path: string) => path,
+  DESKTOP_WORKSPACE_SURFACES: [],
 }));
 
-vi.mock("@miladyai/app-core/components/avatar/VrmViewer", () => ({
+vi.mock("../../src/components/avatar/VrmViewer", () => ({
   VrmViewer: (props: Record<string, unknown>) => {
     viewerRenderCount++;
     viewerPropsRef.current = props;
@@ -32,11 +33,11 @@ vi.mock("@miladyai/app-core/components/avatar/VrmViewer", () => ({
   },
 }));
 
-vi.mock("@miladyai/app-core/components/AvatarLoader", () => ({
+vi.mock("../../src/components/AvatarLoader", () => ({
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
 }));
 
-import { VrmStage } from "@miladyai/app-core/components/VrmStage";
+import { VrmStage } from "../../src/components/VrmStage";
 
 describe("VrmStage", () => {
   beforeEach(() => {
@@ -53,90 +54,33 @@ describe("VrmStage", () => {
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(VrmStage, {
-          vrmPath: "/vrms/milady-1.vrm.gz",
+          vrmPath: "/vrms/eliza-1.vrm.gz",
           worldUrl: "/worlds/companion-day.spz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
+          fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
           t: (key: string) => key,
         }),
       );
     });
 
     expect(tree).not.toBeNull();
-    const stageLayer = tree?.root.find(
+    // VrmStage no longer wraps children in a programmatic opacity gate —
+    // verify no div carries an explicit opacity style.
+    const opacityNodes = tree?.root.findAll(
       (node) =>
         node.type === "div" &&
         node.props.style &&
         Object.hasOwn(node.props.style, "opacity"),
     );
-    expect(stageLayer?.props.style.opacity).toBe(1);
+    expect(opacityNodes).toHaveLength(0);
   });
 
-  it("passes the shared chat voice state through to the companion avatar", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-    await act(async () => {
-      tree = TestRenderer.create(
-        React.createElement(VrmStage, {
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
-          t: (key: string) => key,
-        }),
-      );
-    });
 
-    await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("milady:chat-avatar-voice", {
-          detail: { mouthOpen: 0.42, isSpeaking: false },
-        }),
-      );
-    });
-
-    expect(tree).not.toBeNull();
-    expect(viewerPropsRef.current).toMatchObject({
-      mouthOpen: 0.42,
-      isSpeaking: false,
-    });
-  });
-
-  it("ignores duplicate chat voice events with the same payload", async () => {
-    await act(async () => {
-      TestRenderer.create(
-        React.createElement(VrmStage, {
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
-          t: (key: string) => key,
-        }),
-      );
-    });
-
-    await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("milady:chat-avatar-voice", {
-          detail: { mouthOpen: 0.4, isSpeaking: false },
-        }),
-      );
-    });
-
-    const renderCountAfterFirstEvent = viewerRenderCount;
-
-    await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("milady:chat-avatar-voice", {
-          detail: { mouthOpen: 0.4, isSpeaking: false },
-        }),
-      );
-    });
-
-    expect(viewerRenderCount).toBe(renderCountAfterFirstEvent);
-  });
 
   it("disables canvas parallax and forwards the ready engine callback", async () => {
     const handleEngineReady = vi.fn();
-    const setPaused = vi.fn();
     const setCameraAnimation = vi.fn();
     const setPointerParallaxEnabled = vi.fn();
     const engine = {
-      setPaused,
       setCameraAnimation,
       setPointerParallaxEnabled,
     };
@@ -144,8 +88,8 @@ describe("VrmStage", () => {
     await act(async () => {
       TestRenderer.create(
         React.createElement(VrmStage, {
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
+          vrmPath: "/vrms/eliza-1.vrm.gz",
+          fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
           onEngineReady: handleEngineReady,
           t: (key: string) => key,
         }),
@@ -162,7 +106,6 @@ describe("VrmStage", () => {
       ready?.(engine);
     });
 
-    expect(setPaused).toHaveBeenCalledWith(false);
     expect(setCameraAnimation).toHaveBeenCalledTimes(1);
     expect(setPointerParallaxEnabled).toHaveBeenCalledWith(false);
     expect(handleEngineReady).toHaveBeenCalledWith(engine);
@@ -180,8 +123,8 @@ describe("VrmStage", () => {
     await act(async () => {
       TestRenderer.create(
         React.createElement(VrmStage, {
-          vrmPath: "/vrms/milady-1.vrm.gz",
-          fallbackPreviewUrl: "/vrms/previews/milady-1.png",
+          vrmPath: "/vrms/eliza-1.vrm.gz",
+          fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
           t: (key: string) => key,
         }),
       );
@@ -200,7 +143,7 @@ describe("VrmStage", () => {
 
     await act(async () => {
       window.dispatchEvent(
-        new CustomEvent("milady:app-emote", {
+        new CustomEvent("eliza:app-emote", {
           detail: {
             emoteId: "wave",
             path: "/animations/emotes/waving-both-hands.glb",
@@ -218,12 +161,11 @@ describe("VrmStage", () => {
     );
   });
 
-  it("waves after the initial avatar reveal starts when enabled", async () => {
+  it("waves after the VRM loads when enabled", async () => {
     vi.useFakeTimers();
     const playEmote = vi.fn();
     const engine = {
       playEmote,
-      setPaused: vi.fn(),
       setCameraAnimation: vi.fn(),
       setPointerParallaxEnabled: vi.fn(),
     };
@@ -234,8 +176,8 @@ describe("VrmStage", () => {
       await act(async () => {
         tree = TestRenderer.create(
           React.createElement(VrmStage, {
-            vrmPath: "/vrms/milady-1.vrm.gz",
-            fallbackPreviewUrl: "/vrms/previews/milady-1.png",
+            vrmPath: "/vrms/eliza-1.vrm.gz",
+            fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
             playWaveOnAvatarChange: true,
             t: (key: string) => key,
           }),
@@ -250,10 +192,10 @@ describe("VrmStage", () => {
       });
 
       await act(async () => {
-        const onRevealStart = viewerPropsRef.current?.onRevealStart as
-          | (() => void)
+        const onEngineState = viewerPropsRef.current?.onEngineState as
+          | ((value: unknown) => void)
           | undefined;
-        onRevealStart?.();
+        onEngineState?.({ vrmLoaded: true });
       });
 
       expect(playEmote).not.toHaveBeenCalled();
@@ -264,7 +206,7 @@ describe("VrmStage", () => {
 
       expect(playEmote).toHaveBeenCalledTimes(1);
       expect(playEmote).toHaveBeenCalledWith(
-        "/animations/emotes/waving-both-hands.glb",
+        "/animations/emotes/greeting.fbx",
         2.5,
         false,
       );
@@ -275,12 +217,11 @@ describe("VrmStage", () => {
     }
   });
 
-  it("waves after the avatar reveal starts when the stage switches characters", async () => {
+  it("waves after the VRM loads when the stage switches characters", async () => {
     vi.useFakeTimers();
     const playEmote = vi.fn();
     const engine = {
       playEmote,
-      setPaused: vi.fn(),
       setCameraAnimation: vi.fn(),
       setPointerParallaxEnabled: vi.fn(),
     };
@@ -291,8 +232,8 @@ describe("VrmStage", () => {
       await act(async () => {
         tree = TestRenderer.create(
           React.createElement(VrmStage, {
-            vrmPath: "/vrms/milady-1.vrm.gz",
-            fallbackPreviewUrl: "/vrms/previews/milady-1.png",
+            vrmPath: "/vrms/eliza-1.vrm.gz",
+            fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
             playWaveOnAvatarChange: true,
             t: (key: string) => key,
           }),
@@ -306,22 +247,38 @@ describe("VrmStage", () => {
         ready?.(engine);
       });
 
+      // First VRM load — hasMountedRef becomes true after vrmPath effect
+      await act(async () => {
+        const onEngineState = viewerPropsRef.current?.onEngineState as
+          | ((value: unknown) => void)
+          | undefined;
+        onEngineState?.({ vrmLoaded: true });
+      });
+
+      // Advance past the initial wave timer
+      await act(async () => {
+        vi.advanceTimersByTime(650);
+      });
+      playEmote.mockClear();
+
+      // Switch to a new character
       await act(async () => {
         tree?.update(
           React.createElement(VrmStage, {
-            vrmPath: "/vrms/milady-2.vrm.gz",
-            fallbackPreviewUrl: "/vrms/previews/milady-2.png",
+            vrmPath: "/vrms/eliza-2.vrm.gz",
+            fallbackPreviewUrl: "/vrms/previews/eliza-2.png",
             playWaveOnAvatarChange: true,
             t: (key: string) => key,
           }),
         );
       });
 
+      // Simulate new VRM loaded
       await act(async () => {
-        const onRevealStart = viewerPropsRef.current?.onRevealStart as
-          | (() => void)
+        const onEngineState = viewerPropsRef.current?.onEngineState as
+          | ((value: unknown) => void)
           | undefined;
-        onRevealStart?.();
+        onEngineState?.({ vrmLoaded: true });
       });
 
       expect(playEmote).not.toHaveBeenCalled();
@@ -338,7 +295,7 @@ describe("VrmStage", () => {
 
       expect(playEmote).toHaveBeenCalledTimes(1);
       expect(playEmote).toHaveBeenCalledWith(
-        "/animations/emotes/waving-both-hands.glb",
+        "/animations/emotes/greeting.fbx",
         2.5,
         false,
       );

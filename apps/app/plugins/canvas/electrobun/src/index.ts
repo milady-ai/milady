@@ -7,6 +7,7 @@
  */
 
 import type { PluginListenerHandle } from "@capacitor/core";
+import type { EventCallback } from "../../../shared-types.js";
 import type {
   CanvasColor,
   CanvasDrawBatchCommand,
@@ -27,7 +28,6 @@ import type {
   CanvasTransform,
 } from "../../src/definitions";
 
-type EventCallback<T> = (event: T) => void;
 type CanvasEvent = CanvasTouchEvent | CanvasRenderEvent;
 
 interface ListenerEntry {

@@ -66,11 +66,11 @@ describe("MiladyClient training endpoints", () => {
     await client.getTrainingJob("job-1");
     await client.cancelTrainingJob("job-1");
     await client.importTrainingModelToOllama("model-1", {
-      modelName: "milady-ft-model",
+      modelName: "eliza-ft-model",
       baseModel: "qwen2.5:7b-instruct",
       ollamaUrl: "http://localhost:11434",
     });
-    await client.activateTrainingModel("model-1", "ollama/milady-ft-model");
+    await client.activateTrainingModel("model-1", "ollama/eliza-ft-model");
     await client.benchmarkTrainingModel("model-1");
 
     const calls = fetchMock.mock.calls.map((call) => ({
@@ -109,7 +109,7 @@ describe("MiladyClient training endpoints", () => {
       url: "http://localhost:2138/api/training/models/model-1/import-ollama",
       method: "POST",
       body: JSON.stringify({
-        modelName: "milady-ft-model",
+        modelName: "eliza-ft-model",
         baseModel: "qwen2.5:7b-instruct",
         ollamaUrl: "http://localhost:11434",
       }),
@@ -117,7 +117,7 @@ describe("MiladyClient training endpoints", () => {
     expect(calls).toContainEqual({
       url: "http://localhost:2138/api/training/models/model-1/activate",
       method: "POST",
-      body: JSON.stringify({ providerModel: "ollama/milady-ft-model" }),
+      body: JSON.stringify({ providerModel: "ollama/eliza-ft-model" }),
     });
     expect(calls).toContainEqual({
       url: "http://localhost:2138/api/training/models/model-1/benchmark",

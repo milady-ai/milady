@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAgents } from "../../lib/AgentProvider";
 import type { CloudBackup } from "../../lib/cloud-api";
 
@@ -10,45 +10,36 @@ export function ExportPanel({ connectionId }: ExportPanelProps) {
   const { agents } = useAgents();
   const agent = agents.find((a) => a.id === connectionId);
 
-  // Local/remote export state
-  const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  // Cloud backup state
   const [backups, setBackups] = useState<CloudBackup[]>([]);
   const [backupsLoading, setBackupsLoading] = useState(false);
 
-  const isCloud =
-    agent?.source === "cloud" && agent.cloudClient && agent.cloudAgentId;
+  const hasCloud = agent?.cloudClient && agent.cloudAgentId;
 
-  // Fetch cloud backups on mount / agent change
   useEffect(() => {
-    if (!isCloud) return;
+    if (!hasCloud) return;
     setBackupsLoading(true);
     agent.cloudClient
       ?.listBackups(agent.cloudAgentId ?? "")
       .then(setBackups)
       .catch(() => setBackups([]))
       .finally(() => setBackupsLoading(false));
-  }, [isCloud, agent?.cloudAgentId, agent?.cloudClient]);
+  }, [hasCloud, agent?.cloudAgentId, agent?.cloudClient]);
 
-  // Cloud: take snapshot
   const handleSnapshot = useCallback(async () => {
     if (!agent?.cloudClient || !agent.cloudAgentId) return;
-    setStatus("Taking snapshot...");
+    setStatus("Creating snapshot...");
     try {
       await agent.cloudClient.takeSnapshot(agent.cloudAgentId);
       setStatus("Snapshot created");
-      // Refresh backup list
       const updated = await agent.cloudClient.listBackups(agent.cloudAgentId);
       setBackups(updated);
+      setTimeout(() => setStatus(null), 3000);
     } catch (err) {
-      setStatus(`Snapshot failed: ${err}`);
+      setStatus(`Error: ${err}`);
     }
   }, [agent]);
 
-  // Cloud: restore backup
   const handleRestore = useCallback(
     async (backupId: string) => {
       if (!agent?.cloudClient || !agent.cloudAgentId) return;
@@ -56,6 +47,7 @@ export function ExportPanel({ connectionId }: ExportPanelProps) {
       try {
         await agent.cloudClient.restoreBackup(agent.cloudAgentId, backupId);
         setStatus("Restore complete");
+        setTimeout(() => setStatus(null), 3000);
       } catch (err) {
         setStatus(`Restore failed: ${err}`);
       }
@@ -63,171 +55,139 @@ export function ExportPanel({ connectionId }: ExportPanelProps) {
     [agent],
   );
 
-  // Local/remote: export
-  const handleExport = useCallback(async () => {
-    if (!agent?.client || password.length < 4) return;
-    setStatus("Exporting...");
-    try {
-      const blob = await agent.client.exportAgent(password);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `milady-agent-export-${Date.now()}.bin`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setStatus("Export complete");
-    } catch (err) {
-      setStatus(`Export failed: ${err}`);
-    }
-  }, [agent, password]);
-
-  // Local/remote: import
-  const handleImport = useCallback(async () => {
-    if (!agent?.client || password.length < 4) return;
-    const file = fileRef.current?.files?.[0];
-    if (!file) {
-      setStatus("No file selected");
-      return;
-    }
-    setStatus("Importing...");
-    try {
-      await agent.client.importAgent(file, password);
-      setStatus("Import complete");
-    } catch (err) {
-      setStatus(`Import failed: ${err}`);
-    }
-  }, [agent, password]);
-
   if (!connectionId) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-3">
-        <div className="text-text-muted/30 text-4xl">{"\u2913"}</div>
-        <div className="text-text-muted font-mono text-sm">
-          No agent selected
-        </div>
-        <div className="text-text-muted/50 font-mono text-xs">
-          Select an agent from the Agents panel to export or import snapshots.
-        </div>
+      <div className="text-center py-12">
+        <p className="font-mono text-xs text-text-subtle mb-2">
+          NO AGENT SELECTED
+        </p>
+        <p className="font-mono text-xs text-text-muted">
+          Select an agent from the Agents panel to manage snapshots.
+        </p>
       </div>
     );
   }
 
   if (!agent) {
     return (
-      <div className="text-text-muted font-mono text-sm">Agent not found</div>
+      <div className="text-center py-12">
+        <p className="font-mono text-xs text-text-muted">Agent not found</p>
+      </div>
     );
   }
 
-  // Cloud agent: snapshot & backup UI
-  if (isCloud) {
-    return (
-      <div className="space-y-6 max-w-lg">
-        <h3 className="font-mono text-xs uppercase tracking-widest text-brand">
-          Cloud Snapshots — {agent.name}
-        </h3>
-
+  return (
+    <div className="space-y-6 max-w-2xl">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] tracking-[0.15em] text-text-subtle mb-1">
+            SNAPSHOTS
+          </p>
+          <p className="font-mono text-sm text-text-light">{agent.name}</p>
+        </div>
         <button
           type="button"
           onClick={handleSnapshot}
-          className="px-4 py-2 bg-brand text-dark font-mono text-xs uppercase tracking-widest rounded hover:bg-brand-hover transition-colors"
+          disabled={!hasCloud}
+          className="px-4 py-2 bg-brand text-dark font-mono text-xs font-semibold tracking-wide
+            hover:bg-brand-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Take Snapshot
+          + TAKE SNAPSHOT
         </button>
+      </div>
 
-        {backupsLoading && (
-          <div className="text-brand font-mono text-sm animate-pulse">
+      {/* Status message */}
+      {status && (
+        <div
+          className={`px-4 py-2 border font-mono text-xs ${
+            status.startsWith("Error") || status.startsWith("Restore failed")
+              ? "border-status-stopped/30 bg-status-stopped/5 text-status-stopped"
+              : "border-brand/30 bg-brand/5 text-brand"
+          }`}
+        >
+          {status}
+        </div>
+      )}
+
+      {/* Backups list */}
+      {backupsLoading ? (
+        <div className="flex items-center gap-2 py-8 justify-center">
+          <div className="w-4 h-4 rounded-full border-2 border-brand/30 border-t-brand animate-spin" />
+          <span className="font-mono text-xs text-text-muted">
             Loading backups...
+          </span>
+        </div>
+      ) : backups.length === 0 ? (
+        <div className="border border-border bg-surface">
+          <div className="px-4 py-2 bg-dark-secondary border-b border-border">
+            <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+              BACKUP HISTORY
+            </span>
           </div>
-        )}
-
-        {!backupsLoading && backups.length === 0 && (
-          <div className="text-text-muted font-mono text-xs">
-            No backups yet.
+          <div className="p-8 text-center">
+            <p className="font-mono text-xs text-text-muted mb-2">
+              No snapshots yet
+            </p>
+            <p className="font-mono text-[10px] text-text-subtle">
+              Snapshots capture agent state, memories, and configuration.
+              <br />
+              Use them to restore or migrate your agent.
+            </p>
           </div>
-        )}
-
-        {!backupsLoading && backups.length > 0 && (
-          <div className="space-y-2">
-            <div className="text-text-muted font-mono text-[10px] uppercase tracking-wider">
-              Backups
-            </div>
+        </div>
+      ) : (
+        <div className="border border-border bg-surface">
+          <div className="px-4 py-2 bg-dark-secondary border-b border-border flex items-center justify-between">
+            <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+              BACKUP HISTORY
+            </span>
+            <span className="font-mono text-[10px] text-text-subtle">
+              {backups.length} snapshot{backups.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+          <div className="divide-y divide-border-subtle">
             {backups.map((b) => (
               <div
                 key={b.id}
-                className="flex items-center justify-between bg-dark border border-white/10 rounded p-3"
+                className="flex items-center justify-between px-4 py-3 hover:bg-surface-hover transition-colors"
               >
                 <div>
-                  <div className="text-text-light font-mono text-xs">
+                  <p className="font-mono text-xs text-text-light tabular-nums">
                     {b.id.slice(0, 12)}
-                  </div>
-                  <div className="text-text-muted font-mono text-[10px]">
-                    {new Date(b.createdAt).toLocaleString()}
-                    {b.size ? ` — ${(b.size / 1024 / 1024).toFixed(1)} MB` : ""}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="font-mono text-[10px] text-text-subtle">
+                      {new Date(b.createdAt).toLocaleString()}
+                    </span>
+                    {b.size && (
+                      <span className="font-mono text-[10px] text-text-subtle">
+                        {(b.size / 1024 / 1024).toFixed(1)} MB
+                      </span>
+                    )}
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRestore(b.id)}
-                  className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider border border-brand/30 text-brand rounded hover:bg-brand/10 transition-colors"
+                  className="px-3 py-1.5 font-mono text-[10px] tracking-wide
+                    border border-brand/20 text-brand
+                    hover:bg-brand/10 transition-colors"
                 >
-                  Restore
+                  RESTORE
                 </button>
               </div>
             ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {status && (
-          <p className="text-xs font-mono text-text-muted">{status}</p>
-        )}
-      </div>
-    );
-  }
-
-  // Local/remote agent: password-based export/import
-  return (
-    <div className="space-y-4 max-w-md">
-      <label className="block">
-        <span className="text-text-muted text-xs font-mono">
-          Password (min 4 chars)
-        </span>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full bg-dark border border-white/10 px-3 py-2 text-sm text-text-light font-mono rounded focus:border-brand focus:outline-none"
-        />
-      </label>
-
-      <input ref={fileRef} type="file" className="hidden" />
-
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={password.length < 4}
-          className="px-4 py-2 bg-brand text-dark font-mono text-xs uppercase tracking-widest rounded hover:bg-brand-hover transition-colors disabled:opacity-30"
-        >
-          Export Agent
-        </button>
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="px-4 py-2 border border-white/10 text-text-muted font-mono text-xs uppercase tracking-widest rounded hover:border-white/30 transition-colors"
-        >
-          Select File...
-        </button>
-        <button
-          type="button"
-          onClick={handleImport}
-          disabled={password.length < 4}
-          className="px-4 py-2 border border-white/10 text-text-muted font-mono text-xs uppercase tracking-widest rounded hover:border-white/30 transition-colors disabled:opacity-30"
-        >
-          Import Agent
-        </button>
-      </div>
-
-      {status && <p className="text-xs font-mono text-text-muted">{status}</p>}
+      {/* Info */}
+      {!hasCloud && (
+        <p className="font-mono text-[10px] text-text-subtle">
+          Cloud snapshots are only available for Eliza Cloud agents.
+        </p>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@
  * Shared implementation ported forward to Electrobun; no runtime-specific APIs required.
  */
 
+import type { SendToWebview } from "../types.js";
 import type {
   AllPermissionsState,
   PermissionCheckResult,
@@ -26,15 +27,13 @@ async function getPlatformModule(): Promise<PlatformModule | null> {
     case "darwin":
       return await import("./permissions-darwin");
     case "win32":
-      return (await import("./permissions-win32")) as unknown as PlatformModule;
+      return (await import("./permissions-win32")) as PlatformModule;
     case "linux":
-      return (await import("./permissions-linux")) as unknown as PlatformModule;
+      return (await import("./permissions-linux")) as PlatformModule;
     default:
       return null;
   }
 }
-
-type SendToWebview = (message: string, payload?: unknown) => void;
 
 const platform = process.platform as "darwin" | "win32" | "linux";
 const DEFAULT_CACHE_TIMEOUT_MS = 30000;

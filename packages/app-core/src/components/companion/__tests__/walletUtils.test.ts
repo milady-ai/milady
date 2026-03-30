@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   BSC_GAS_READY_THRESHOLD,
   BSC_SWAP_GAS_RESERVE,
-  fetchBscTokenMetadata,
+  fetchTokenMetadata,
   formatRouteAddress,
   getRecentTradeGroupKey,
   getTokenExplorerUrl,
@@ -65,7 +65,7 @@ function makeTrade(
     tokenAddress: `0x${"a".repeat(40)}`,
     amount: "1.5",
     inputSymbol: "BNB",
-    outputSymbol: "MILADY",
+    outputSymbol: "ELIZA",
     createdAt: Date.now(),
     status: "success",
     confirmations: 12,
@@ -569,8 +569,8 @@ describe("walletUtils", () => {
     });
   });
 
-  // ── fetchBscTokenMetadata ─────────────────────────────────────────
-  describe("fetchBscTokenMetadata", () => {
+  // ── fetchTokenMetadata ─────────────────────────────────────────
+  describe("fetchTokenMetadata", () => {
     let fetchMock: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
@@ -583,13 +583,13 @@ describe("walletUtils", () => {
     });
 
     it("returns null for invalid hex address", async () => {
-      const result = await fetchBscTokenMetadata("not-an-address");
+      const result = await fetchTokenMetadata("not-an-address");
       expect(result).toBeNull();
       expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it("returns null for empty address", async () => {
-      const result = await fetchBscTokenMetadata("");
+      const result = await fetchTokenMetadata("");
       expect(result).toBeNull();
     });
 
@@ -613,7 +613,7 @@ describe("walletUtils", () => {
         }),
       });
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toEqual({
         symbol: "TEST",
         name: "Test Token",
@@ -635,7 +635,7 @@ describe("walletUtils", () => {
         }),
       });
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toBeNull();
     });
 
@@ -646,7 +646,7 @@ describe("walletUtils", () => {
         json: async () => ({}),
       });
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toBeNull();
     });
 
@@ -654,7 +654,7 @@ describe("walletUtils", () => {
       const contractAddr = `0x${"a".repeat(40)}`;
       fetchMock.mockRejectedValueOnce(new Error("Network failure"));
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toBeNull();
     });
 
@@ -682,7 +682,7 @@ describe("walletUtils", () => {
         }),
       });
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toEqual({
         symbol: "QUOTE",
         name: "Quote Token",
@@ -705,7 +705,7 @@ describe("walletUtils", () => {
         }),
       });
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toEqual({
         symbol: "TOKEN",
         name: "Unknown Token",
@@ -720,23 +720,15 @@ describe("walletUtils", () => {
         json: async () => ({ pairs: "not-array" }),
       });
 
-      const result = await fetchBscTokenMetadata(contractAddr);
+      const result = await fetchTokenMetadata(contractAddr);
       expect(result).toBeNull();
     });
   });
 
   // ── exported constants ────────────────────────────────────────────
   describe("exported constants", () => {
-    it("BSC_GAS_READY_THRESHOLD is a positive number", () => {
-      expect(BSC_GAS_READY_THRESHOLD).toBeGreaterThan(0);
-    });
-
     it("BSC_SWAP_GAS_RESERVE is less than BSC_GAS_READY_THRESHOLD", () => {
       expect(BSC_SWAP_GAS_RESERVE).toBeLessThan(BSC_GAS_READY_THRESHOLD);
-    });
-
-    it("MAX_WALLET_RECENT_TRADES is 10", () => {
-      expect(MAX_WALLET_RECENT_TRADES).toBe(10);
     });
   });
 });

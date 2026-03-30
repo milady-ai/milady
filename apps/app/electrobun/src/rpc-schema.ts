@@ -95,6 +95,69 @@ export interface VersionInfo {
   runtime: string;
 }
 
+export interface DesktopBuildInfo {
+  platform: string;
+  arch: string;
+  defaultRenderer: "native" | "cef";
+  availableRenderers: Array<"native" | "cef">;
+  cefVersion?: string;
+  bunVersion?: string;
+  runtime?: Record<string, unknown>;
+}
+
+export interface DesktopUpdaterSnapshot {
+  currentVersion: string;
+  currentHash?: string;
+  channel?: string;
+  baseUrl?: string;
+  appBundlePath?: string | null;
+  canAutoUpdate: boolean;
+  autoUpdateDisabledReason?: string | null;
+  updateAvailable: boolean;
+  updateReady: boolean;
+  latestVersion?: string | null;
+  latestHash?: string | null;
+  error?: string | null;
+  lastStatus?: {
+    status: string;
+    message: string;
+    timestamp: number;
+  } | null;
+}
+
+export type DesktopSessionStorageType =
+  | "cookies"
+  | "localStorage"
+  | "sessionStorage"
+  | "indexedDB"
+  | "webSQL"
+  | "cache"
+  | "all";
+
+export interface DesktopSessionCookie {
+  name: string;
+  value?: string;
+  domain?: string;
+  path?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+  session?: boolean;
+  expirationDate?: number;
+}
+
+export interface DesktopSessionSnapshot {
+  partition: string;
+  persistent: boolean;
+  cookieCount: number;
+  cookies: DesktopSessionCookie[];
+}
+
+export interface DesktopReleaseNotesWindowInfo {
+  url: string;
+  windowId: number | null;
+  webviewId: number | null;
+}
+
 export interface PowerState {
   onBattery: boolean;
   idleState: "active" | "idle" | "locked" | "unknown";
@@ -134,27 +197,18 @@ export interface DiscoveryResult {
 }
 
 // -- Permissions --
-export type SystemPermissionId =
-  | "accessibility"
-  | "screen-recording"
-  | "microphone"
-  | "camera"
-  | "shell";
+export type {
+  PermissionState,
+  PermissionStatus,
+  SystemPermissionId,
+} from "@miladyai/shared/contracts/permissions";
 
-export type PermissionStatus =
-  | "granted"
-  | "denied"
-  | "not-determined"
-  | "restricted"
-  | "not-applicable";
+import type {
+  PermissionState,
+  SystemPermissionId,
+} from "@miladyai/shared/contracts/permissions";
 
-export interface PermissionState {
-  id: SystemPermissionId;
-  status: PermissionStatus;
-  lastChecked: number;
-  canRequest: boolean;
-}
-
+/** Local variant uses an index signature (the canonical contract uses explicit keys). */
 export interface AllPermissionsState {
   [key: string]: PermissionState;
 }
@@ -286,6 +340,52 @@ export interface MessageBoxResult {
   response: number;
 }
 
+export interface EmbeddedAgentStatus {
+  state: "not_started" | "starting" | "running" | "stopped" | "error";
+  agentName: string | null;
+  port: number | null;
+  startedAt: number | null;
+  error: string | null;
+}
+
+export interface ExistingElizaInstallInfo {
+  detected: boolean;
+  stateDir: string;
+  configPath: string;
+  configExists: boolean;
+  stateDirExists: boolean;
+  hasStateEntries: boolean;
+  source: "config-path-env" | "state-dir-env" | "default-state-dir";
+}
+
+export interface DesktopStartupDiagnostics {
+  state: "not_started" | "starting" | "running" | "stopped" | "error";
+  phase: string;
+  updatedAt: string;
+  lastError: string | null;
+  agentName: string | null;
+  port: number | null;
+  startedAt: number | null;
+  platform: string;
+  arch: string;
+  configDir: string;
+  logPath: string;
+  statusPath: string;
+  logTail: string;
+  appVersion?: string;
+  appRuntime?: string;
+  packaged?: boolean;
+  locale?: string;
+}
+
+export interface DesktopBugReportBundleInfo {
+  directory: string;
+  reportMarkdownPath: string;
+  reportJsonPath: string;
+  startupLogPath: string | null;
+  startupStatusPath: string | null;
+}
+
 // ============================================================================
 // RPC Schema
 // ============================================================================
@@ -293,6 +393,32 @@ export interface MessageBoxResult {
 export type MiladyRPCSchema = {
   bun: RPCSchema<{
     requests: {
+      // ---- Agent ----
+      agentStart: { params: undefined; response: EmbeddedAgentStatus };
+      agentStop: { params: undefined; response: { ok: true } };
+      agentRestart: { params: undefined; response: EmbeddedAgentStatus };
+      agentRestartClearLocalDb: {
+        params: undefined;
+        response: EmbeddedAgentStatus;
+      };
+      agentStatus: { params: undefined; response: EmbeddedAgentStatus };
+      agentInspectExistingInstall: {
+        params: undefined;
+        response: ExistingElizaInstallInfo;
+      };
+      agentPostCloudDisconnect: {
+        params: { apiBase?: string; bearerToken?: string } | undefined | null;
+        response: { ok: boolean; error?: string };
+      };
+      /** Native confirm + main POST (renderer bridge/fetch can stall after a sheet). */
+      agentCloudDisconnectWithConfirm: {
+        params: { apiBase?: string; bearerToken?: string } | undefined | null;
+        response:
+          | { cancelled: true }
+          | { ok: true }
+          | { ok: false; error: string };
+      };
+
       // ---- Desktop: Tray ----
       desktopCreateTray: { params: TrayOptions; response: undefined };
       desktopUpdateTray: { params: Partial<TrayOptions>; response: undefined };
@@ -368,6 +494,10 @@ export type MiladyRPCSchema = {
         response: { id: string };
       };
       desktopCloseNotification: { params: { id: string }; response: undefined };
+      desktopShowBackgroundNotice: {
+        params: undefined;
+        response: { shown: boolean };
+      };
 
       // ---- Desktop: Power ----
       desktopGetPowerState: { params: undefined; response: PowerState };
@@ -390,14 +520,91 @@ export type MiladyRPCSchema = {
       desktopQuit: { params: undefined; response: undefined };
       desktopRelaunch: { params: undefined; response: undefined };
       desktopApplyUpdate: { params: undefined; response: undefined };
+      desktopCheckForUpdates: {
+        params: undefined;
+        response: DesktopUpdaterSnapshot;
+      };
+      desktopGetUpdaterState: {
+        params: undefined;
+        response: DesktopUpdaterSnapshot;
+      };
       desktopGetVersion: { params: undefined; response: VersionInfo };
+      desktopGetBuildInfo: { params: undefined; response: DesktopBuildInfo };
       desktopIsPackaged: { params: undefined; response: { packaged: boolean } };
+      desktopGetDockIconVisibility: {
+        params: undefined;
+        response: { visible: boolean };
+      };
+      desktopSetDockIconVisibility: {
+        params: { visible: boolean };
+        response: { visible: boolean };
+      };
       desktopGetPath: {
         params: { name: string };
         response: { path: string };
       };
+      desktopGetStartupDiagnostics: {
+        params: undefined;
+        response: DesktopStartupDiagnostics;
+      };
+      desktopOpenLogsFolder: { params: undefined; response: undefined };
+      desktopCreateBugReportBundle: {
+        params: {
+          reportMarkdown: string;
+          reportJson: Record<string, unknown>;
+          prefix?: string;
+        };
+        response: DesktopBugReportBundleInfo;
+      };
       desktopBeep: { params: undefined; response: undefined };
-      desktopOpenSettingsWindow: { params: undefined; response: undefined };
+      desktopShowSelectionContextMenu: {
+        params: { text: string };
+        response: { shown: boolean };
+      };
+      desktopGetSessionSnapshot: {
+        params: { partition: string };
+        response: DesktopSessionSnapshot;
+      };
+      desktopClearSessionData: {
+        params: {
+          partition: string;
+          storageTypes?: DesktopSessionStorageType[] | "all";
+          clearCookies?: boolean;
+        };
+        response: DesktopSessionSnapshot;
+      };
+      desktopGetWebGpuBrowserStatus: {
+        params: undefined;
+        response: {
+          available: boolean;
+          reason: string;
+          renderer: string;
+          chromeBetaPath: string | null;
+          downloadUrl: string | null;
+        };
+      };
+      desktopOpenReleaseNotesWindow: {
+        params: { url: string; title?: string };
+        response: DesktopReleaseNotesWindowInfo;
+      };
+      desktopOpenSettingsWindow: {
+        params: { tabHint?: string } | undefined;
+        response: undefined;
+      };
+      desktopOpenSurfaceWindow: {
+        params: {
+          surface:
+            | "chat"
+            | "browser"
+            | "release"
+            | "triggers"
+            | "plugins"
+            | "connectors"
+            | "cloud";
+          browse?: string;
+        };
+        response: undefined;
+      };
 
       // ---- Desktop: Clipboard ----
       desktopWriteToClipboard: {
@@ -843,7 +1050,12 @@ export type MiladyRPCSchema = {
       permissionsChanged: { id: string };
 
       // Desktop: Tray events
-      desktopTrayMenuClick: { itemId: string; checked?: boolean };
+      desktopTrayMenuClick: {
+        itemId: string;
+        checked?: boolean;
+        /** Present when `itemId === "menu-reset-milady-applied"` (main-process reset). */
+        agentStatus?: Record<string, unknown> | null;
+      };
       desktopTrayClick: TrayClickEvent;
 
       // Desktop: Shortcut events
@@ -955,7 +1167,11 @@ export const CHANNEL_TO_RPC_METHOD: Record<string, string> = {
   "agent:start": "agentStart",
   "agent:stop": "agentStop",
   "agent:restart": "agentRestart",
+  "agent:restartClearLocalDb": "agentRestartClearLocalDb",
   "agent:status": "agentStatus",
+  "agent:inspectExistingInstall": "agentInspectExistingInstall",
+  "agent:postCloudDisconnect": "agentPostCloudDisconnect",
+  "agent:cloudDisconnectWithConfirm": "agentCloudDisconnectWithConfirm",
 
   // Desktop: Tray
   "desktop:createTray": "desktopCreateTray",
@@ -996,6 +1212,7 @@ export const CHANNEL_TO_RPC_METHOD: Record<string, string> = {
   // Desktop: Notifications
   "desktop:showNotification": "desktopShowNotification",
   "desktop:closeNotification": "desktopCloseNotification",
+  "desktop:showBackgroundNotice": "desktopShowBackgroundNotice",
 
   // Desktop: Power
   "desktop:getPowerState": "desktopGetPowerState",
@@ -1012,11 +1229,25 @@ export const CHANNEL_TO_RPC_METHOD: Record<string, string> = {
   "desktop:quit": "desktopQuit",
   "desktop:relaunch": "desktopRelaunch",
   "desktop:applyUpdate": "desktopApplyUpdate",
+  "desktop:checkForUpdates": "desktopCheckForUpdates",
+  "desktop:getUpdaterState": "desktopGetUpdaterState",
   "desktop:getVersion": "desktopGetVersion",
+  "desktop:getBuildInfo": "desktopGetBuildInfo",
   "desktop:isPackaged": "desktopIsPackaged",
+  "desktop:getDockIconVisibility": "desktopGetDockIconVisibility",
+  "desktop:setDockIconVisibility": "desktopSetDockIconVisibility",
   "desktop:getPath": "desktopGetPath",
+  "desktop:getStartupDiagnostics": "desktopGetStartupDiagnostics",
+  "desktop:openLogsFolder": "desktopOpenLogsFolder",
+  "desktop:createBugReportBundle": "desktopCreateBugReportBundle",
   "desktop:beep": "desktopBeep",
+  "desktop:showSelectionContextMenu": "desktopShowSelectionContextMenu",
+  "desktop:getSessionSnapshot": "desktopGetSessionSnapshot",
+  "desktop:clearSessionData": "desktopClearSessionData",
+  "desktop:getWebGpuBrowserStatus": "desktopGetWebGpuBrowserStatus",
+  "desktop:openReleaseNotesWindow": "desktopOpenReleaseNotesWindow",
   "desktop:openSettingsWindow": "desktopOpenSettingsWindow",
+  "desktop:openSurfaceWindow": "desktopOpenSurfaceWindow",
 
   // Desktop: Clipboard
   "desktop:writeToClipboard": "desktopWriteToClipboard",

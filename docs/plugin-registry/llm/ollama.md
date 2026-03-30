@@ -196,4 +196,4 @@ If Milady doesn't detect your Ollama instance:
 
 - [Groq Plugin](/plugin-registry/llm/groq) — Fast cloud inference for Llama models
 - [OpenRouter Plugin](/plugin-registry/llm/openrouter) — Multi-provider gateway
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers

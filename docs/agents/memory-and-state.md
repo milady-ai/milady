@@ -74,7 +74,7 @@ A full `connectionString` can be used instead of individual fields:
 nomic-embed-text-v1.5.Q5_K_M.gguf
 ```
 
-Models are stored in `~/.eliza/models/` by default.
+Models are stored in `~/.milady/models/` by default.
 
 ### Embedding Configuration
 

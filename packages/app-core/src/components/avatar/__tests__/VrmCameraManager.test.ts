@@ -46,7 +46,7 @@ function createVrmWithBones(options: {
 }
 
 describe("VrmCameraManager", () => {
-  it("frames companion_close avatars at their own neck height", () => {
+  it("frames companion avatars at their own neck height", () => {
     const manager = new VrmCameraManager();
     const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 20);
     const lookAtShort = new THREE.Vector3();
@@ -60,7 +60,7 @@ describe("VrmCameraManager", () => {
       shortVrm,
       camera,
       null,
-      "companion_close",
+      "companion",
       lookAtShort,
       baseCameraPosition,
       () => {},
@@ -71,7 +71,7 @@ describe("VrmCameraManager", () => {
       tallVrm,
       camera,
       null,
-      "companion_close",
+      "companion",
       lookAtTall,
       baseCameraPosition,
       () => {},

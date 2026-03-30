@@ -28,6 +28,7 @@ bunx miladyai
 | `--dev` | Shorthand for `--profile dev` (also sets the gateway port to `19001`) |
 | `--verbose` | Enable informational runtime logs |
 | `--debug` | Enable debug-level runtime logs |
+| `--connection-key [key]` | Set or auto-generate a connection key for remote access |
 | `--no-color` | Disable ANSI colors |
 
 ## Commands
@@ -35,12 +36,10 @@ bunx miladyai
 <CardGroup cols={2}>
 
 <Card title="start" icon="play" href="/cli/start">
-  Start the elizaOS agent runtime in headless server-only mode.
+  Start the elizaOS agent runtime.
 </Card>
 
-<Card title="tui" icon="terminal" href="/cli/tui">
-  Launch the interactive terminal UI with chat, model selection, and slash commands (default command).
-</Card>
+
 
 <Card title="setup" icon="gear" href="/cli/setup">
   Initialize the config file and bootstrap the agent workspace directory.
@@ -54,6 +53,10 @@ bunx miladyai
   Read and inspect configuration values with get, path, and show subcommands.
 </Card>
 
+<Card title="run" icon="play" href="/cli/start">
+  Alias for `start` — start the agent runtime.
+</Card>
+
 <Card title="dashboard" icon="gauge" href="/cli/dashboard">
   Open the Control UI in your default web browser.
 </Card>
@@ -63,15 +66,19 @@ bunx miladyai
 </Card>
 
 <Card title="plugins" icon="plug" href="/cli/plugins">
-  Browse, search, install, and manage elizaOS plugins from the registry.
+  Browse, search, install, and manage elizaOS plugins. Subcommands: `install`, `list`, `uninstall`, `search`, `info`, `installed`, `refresh`, `test`, `add-path`, `paths`, `config`, `open`.
 </Card>
 
 <Card title="update" icon="arrow-up" href="/cli/update">
   Check for and install updates with release channel support (stable, beta, nightly).
 </Card>
 
+<Card title="db" icon="database" href="/cli/db">
+  Manage the local database — reset agent state and conversation history.
+</Card>
+
 <Card title="doctor" icon="stethoscope" href="/cli/doctor">
-  Diagnose common issues with your installation and configuration (planned).
+  Check environment health and diagnose common issues.
 </Card>
 
 </CardGroup>
@@ -79,14 +86,11 @@ bunx miladyai
 ## Quick Reference
 
 ```bash
-# Start the interactive TUI (default command)
+# Start the agent
 milady
 
-# Start agent in headless server mode
+# Start agent in headless server mode (alias: milady run)
 milady start
-
-# Launch TUI with a specific model
-milady tui -m anthropic/claude-sonnet-4-20250514
 
 # Run setup
 milady setup
@@ -94,11 +98,23 @@ milady setup
 # Install a plugin
 milady plugins install twitter
 
+# List installed plugins
+milady plugins installed
+
+# Search the plugin registry
+milady plugins search twitter
+
 # Check for updates
 milady update
 
 # Show model provider status
 milady models
+
+# Reset local database
+milady db reset
+
+# Run health checks
+milady doctor
 ```
 
 ## Environment Variables

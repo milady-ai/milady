@@ -9,12 +9,29 @@
  *  - ConfigField wrapper component (label + renderer + help + errors)
  */
 
+import {
+  Button,
+  Checkbox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SELECT_FLOATING_LAYER_NAME,
+  SELECT_FLOATING_LAYER_Z_INDEX,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+} from "@miladyai/ui";
 import { ChevronDown, X } from "lucide-react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useApp } from "../state";
 import type { DynamicValue } from "../types";
 import type { FieldRenderer, FieldRenderProps } from "./config-catalog";
 import { resolveDynamic } from "./config-catalog";
+import {
+  getConfigInputClassName,
+  getConfigTextareaClassName,
+} from "./config-control-primitives";
 
 // ── Action binding helper ──────────────────────────────────────────────
 
@@ -41,16 +58,12 @@ function fireAction(props: FieldRenderProps, eventName: string): void {
   void props.onAction(binding.action, resolvedParams);
 }
 
-// ── Shared Tailwind class constants ─────────────────────────────────────
-
-const INPUT_CLS =
-  "w-full px-3 py-2 border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border h-[36px] rounded-sm placeholder:text-[var(--muted)] placeholder:opacity-60";
-
-const INPUT_ERROR_CLS =
-  "w-full px-3 py-2 border border-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_3%,var(--card))] text-[13px] font-[var(--mono)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border h-[36px] rounded-sm placeholder:text-[var(--muted)] placeholder:opacity-60";
-
 function inputCls(hasError: boolean): string {
-  return hasError ? INPUT_ERROR_CLS : INPUT_CLS;
+  return getConfigInputClassName({ hasError });
+}
+
+function textareaCls(hasError: boolean, className?: string): string {
+  return getConfigTextareaClassName({ hasError, className });
 }
 
 // ── 1. Text ─────────────────────────────────────────────────────────────
@@ -142,9 +155,11 @@ function PasswordFieldInner({ fp: props }: { fp: FieldRenderProps }) {
         }}
         onBlur={() => fireAction(props, "blur")}
       />
-      <button
+      <Button
         type="button"
-        className="px-3 border border-[var(--border)] bg-[var(--bg-hover)] text-[11px] text-[var(--muted)] cursor-pointer whitespace-nowrap min-w-[56px] text-center transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] h-[36px] font-medium rounded-r-sm"
+        variant="outline"
+        size="default"
+        className="px-3 border border-[var(--border)] bg-[var(--bg-hover)] text-[11px] text-[var(--muted)] whitespace-nowrap min-w-[56px] text-center transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] h-[36px] font-medium rounded-l-none rounded-r-sm"
         onClick={() => {
           void handleToggle();
           fireAction(props, "click");
@@ -152,7 +167,7 @@ function PasswordFieldInner({ fp: props }: { fp: FieldRenderProps }) {
         title={visible ? "Hide value" : "Reveal value"}
       >
         {busy ? "\u2026" : visible ? "\u{1F441} Hide" : "\u{1F441} Show"}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -198,13 +213,15 @@ function NumberFieldInner({ fp: props }: { fp: FieldRenderProps }) {
     <div>
       <div className="flex items-center gap-1.5">
         {!props.readonly && (
-          <button
+          <Button
             type="button"
-            className="px-2 py-1.5 border border-[var(--border)] bg-transparent text-sm text-[var(--muted)] cursor-pointer transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] h-[36px] rounded-sm font-mono select-none"
+            variant="outline"
+            size="default"
+            className="px-2 py-1.5 bg-transparent text-sm text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] h-[36px] rounded-sm font-mono select-none"
             onClick={() => step(-1)}
           >
             −
-          </button>
+          </Button>
         )}
         <input
           className={`${inputCls(!!props.errors?.length)} ${unit ? "flex-1" : "w-full"} text-center`}
@@ -226,13 +243,15 @@ function NumberFieldInner({ fp: props }: { fp: FieldRenderProps }) {
           onClick={() => fireAction(props, "click")}
         />
         {!props.readonly && (
-          <button
+          <Button
             type="button"
-            className="px-2 py-1.5 border border-[var(--border)] bg-transparent text-sm text-[var(--muted)] cursor-pointer transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] h-[36px] rounded-sm font-mono select-none"
+            variant="outline"
+            size="default"
+            className="px-2 py-1.5 bg-transparent text-sm text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] h-[36px] rounded-sm font-mono select-none"
             onClick={() => step(1)}
           >
             +
-          </button>
+          </Button>
         )}
         {unit && (
           <span className="text-[11px] text-[var(--muted)] font-medium shrink-0 min-w-[20px]">
@@ -277,34 +296,25 @@ function BooleanFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   };
 
   return (
-    <button
-      type="button"
-      className="flex items-center gap-2.5 cursor-pointer bg-transparent border-none p-0 group"
-      disabled={props.readonly}
-      onClick={() => {
-        handleToggle();
-        fireAction(props, "click");
-      }}
+    <div
+      className="flex items-center gap-2.5"
       data-config-key={props.key}
       data-field-type="boolean"
     >
-      <div
-        className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${
-          localVal ? "bg-[var(--accent)]" : "bg-[var(--muted)] opacity-40"
-        }`}
-      >
-        <div
-          className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-200 ${
-            localVal ? "left-[21px]" : "left-[3px]"
-          }`}
-        />
-      </div>
+      <Switch
+        checked={localVal}
+        disabled={props.readonly}
+        onCheckedChange={() => {
+          handleToggle();
+          fireAction(props, "click");
+        }}
+      />
       <span
         className={`text-xs transition-colors ${localVal ? "text-[var(--text)] font-medium" : "text-[var(--muted)]"}`}
       >
         {localVal ? "Enabled" : "Disabled"}
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -378,31 +388,47 @@ export function RenderSelectField(props: FieldRenderProps) {
   }
 
   return (
-    <select
-      className={`${INPUT_CLS} appearance-auto`}
+    <Select
       defaultValue={effectiveValue}
-      data-config-key={props.key}
-      data-field-type="select"
       disabled={props.readonly}
-      onChange={(e) => {
-        props.onChange(e.target.value);
+      onValueChange={(value) => {
+        props.onChange(value === "__none__" ? "" : value);
         fireAction(props, "change");
+        fireAction(props, "blur");
       }}
-      onBlur={() => fireAction(props, "blur")}
-      onClick={() => fireAction(props, "click")}
+      onOpenChange={(open) => {
+        if (open) fireAction(props, "click");
+      }}
     >
-      {!props.required && (
-        <option value="">
-          {t("config-field.None", { defaultValue: "None" })}
-        </option>
-      )}
-      {allOptions.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-          {opt.description ? ` — ${opt.description}` : ""}
-        </option>
-      ))}
-    </select>
+      <SelectTrigger
+        className={inputCls(!!props.errors?.length)}
+        data-config-key={props.key}
+        data-field-type="select"
+      >
+        <SelectValue
+          placeholder={
+            !props.required
+              ? t("config-field.None", { defaultValue: "None" })
+              : undefined
+          }
+        />
+      </SelectTrigger>
+      <SelectContent>
+        {!props.required && (
+          <SelectItem value="__none__">
+            {t("config-field.None", { defaultValue: "None" })}
+          </SelectItem>
+        )}
+        {allOptions
+          .filter((opt) => opt.value !== "")
+          .map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+              {opt.description ? ` — ${opt.description}` : ""}
+            </SelectItem>
+          ))}
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -422,8 +448,9 @@ function SearchableSelectInner({
   );
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const filtered = filter
     ? options.filter(
@@ -444,30 +471,59 @@ function SearchableSelectInner({
     [props],
   );
 
+  // Compute portal position synchronously from the trigger rect.
+  // Called in the click handler so the style is set before the portal renders.
+  const computeDropdownStyle = useCallback(() => {
+    if (!triggerRef.current) return {};
+    const rect = triggerRef.current.getBoundingClientRect();
+    return {
+      position: "fixed" as const,
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: SELECT_FLOATING_LAYER_Z_INDEX,
+    };
+  }, []);
+
   // Close on click outside
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
       if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-        setFilter("");
-      }
+        triggerRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      )
+        return;
+      setOpen(false);
+      setFilter("");
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Close on scroll of any ancestor (position shifts)
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => {
+      setOpen(false);
+      setFilter("");
+    };
+    window.addEventListener("scroll", handler, true);
+    return () => window.removeEventListener("scroll", handler, true);
+  }, [open]);
+
   return (
-    <div className="relative" ref={containerRef}>
+    <div>
       {/* Trigger button that looks like a select */}
-      <button
+      <Button
+        ref={triggerRef}
         type="button"
+        variant="outline"
         className={`${inputCls(!!props.errors?.length)} text-left flex items-center justify-between gap-2 cursor-pointer`}
         disabled={props.readonly}
         onClick={() => {
+          if (!open) setDropdownStyle(computeDropdownStyle());
           setOpen(!open);
           setFilter("");
         }}
@@ -480,80 +536,90 @@ function SearchableSelectInner({
         <span className="text-[var(--muted)] text-[10px] shrink-0">
           {open ? "\u25B2" : "\u25BC"}
         </span>
-      </button>
+      </Button>
 
-      {/* Dropdown panel */}
-      {open && (
-        <div className="absolute z-50 left-0 right-0 mt-1 border border-[var(--border)] bg-[var(--card)] shadow-lg max-h-[280px] flex flex-col rounded-sm">
-          {/* Search input */}
-          <div className="p-1.5 border-b border-[var(--border)]">
-            <input
-              ref={inputRef}
-              className="w-full px-2 py-1.5 border border-[var(--border)] bg-[var(--bg)] text-[12px] font-[var(--mono)] focus:border-[var(--accent)] focus:outline-none rounded-sm"
-              type="text"
-              value={filter}
-              placeholder={`Search ${options.length} models...`}
-              onChange={(e) => setFilter(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setOpen(false);
-                  setFilter("");
-                } else if (e.key === "Enter" && filtered.length === 1) {
-                  select(filtered[0]);
-                }
-              }}
-            />
-          </div>
-          {/* Options list */}
-          <div className="overflow-y-auto flex-1">
-            {!props.required && (
-              <button
-                type="button"
-                className="w-full text-left px-3 py-1.5 text-[12px] text-[var(--muted)] hover:bg-[var(--bg-hover)] transition-colors italic"
-                onClick={() => {
-                  props.onChange("");
-                  setInputVal("");
-                  setOpen(false);
-                  setFilter("");
-                  fireAction(props, "change");
+      {/* Dropdown panel — rendered as portal to escape overflow:hidden ancestors */}
+      {open &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            data-floating-layer={SELECT_FLOATING_LAYER_NAME}
+            style={dropdownStyle}
+            className="border border-[var(--border)] bg-[var(--card)] shadow-lg rounded-sm"
+          >
+            {/* Search input */}
+            <div className="p-1.5 border-b border-[var(--border)]">
+              <input
+                // biome-ignore lint/a11y/noAutofocus: dropdown search needs immediate focus
+                autoFocus
+                className="w-full px-2 py-1.5 border border-[var(--border)] bg-[var(--bg)] text-[12px] font-[var(--mono)] focus:border-[var(--accent)] focus:outline-none rounded-sm"
+                type="text"
+                value={filter}
+                placeholder={`Search ${options.length} options...`}
+                onChange={(e) => setFilter(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setOpen(false);
+                    setFilter("");
+                  } else if (e.key === "Enter" && filtered.length === 1) {
+                    select(filtered[0]);
+                  }
                 }}
-              >
-                {t("config-field.None", { defaultValue: "None" })}
-              </button>
-            )}
-            {filtered.length === 0 && (
-              <div className="px-3 py-3 text-[12px] text-[var(--muted)] text-center">
-                {t("config-field.NoMatches", {
-                  defaultValue: "No matches",
-                })}
-              </div>
-            )}
-            {filtered.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-[var(--bg-hover)] transition-colors ${
-                  opt.value === effectiveValue
-                    ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--card))] text-[var(--accent)] font-medium"
-                    : ""
-                }`}
-                onClick={() => select(opt)}
-              >
-                {opt.label}
-                {opt.description && (
-                  <span className="text-[var(--muted)] ml-1.5 text-[11px]">
-                    {opt.description}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-          <div className="px-3 py-1 border-t border-[var(--border)] text-[10px] text-[var(--muted)]">
-            {filtered.length} of {options.length}{" "}
-            {t("config-field.models", { defaultValue: "models" })}
-          </div>
-        </div>
-      )}
+              />
+            </div>
+            {/* Options list */}
+            <div className="overflow-y-auto max-h-[220px]">
+              {!props.required && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full text-left px-3 py-1.5 text-[12px] text-[var(--muted)] hover:bg-[var(--bg-hover)] transition-colors italic rounded-none justify-start h-auto"
+                  onClick={() => {
+                    props.onChange("");
+                    setInputVal("");
+                    setOpen(false);
+                    setFilter("");
+                    fireAction(props, "change");
+                  }}
+                >
+                  {t("config-field.None", { defaultValue: "None" })}
+                </Button>
+              )}
+              {filtered.length === 0 && (
+                <div className="px-3 py-3 text-[12px] text-[var(--muted)] text-center">
+                  {t("config-field.NoMatches", {
+                    defaultValue: "No matches",
+                  })}
+                </div>
+              )}
+              {filtered.map((opt) => (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  variant="ghost"
+                  className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-[var(--bg-hover)] transition-colors rounded-none justify-start h-auto ${
+                    opt.value === effectiveValue
+                      ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--card))] text-[var(--accent)] font-medium"
+                      : ""
+                  }`}
+                  onClick={() => select(opt)}
+                >
+                  {opt.label}
+                  {opt.description && (
+                    <span className="text-[var(--muted)] ml-1.5 text-[11px]">
+                      {opt.description}
+                    </span>
+                  )}
+                </Button>
+              ))}
+            </div>
+            <div className="px-3 py-1 border-t border-[var(--border)] text-[10px] text-[var(--muted)]">
+              {filtered.length} of {options.length}{" "}
+              {t("config-field.options", { defaultValue: "options" })}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -583,7 +649,7 @@ function TextareaFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   return (
     <textarea
       ref={textareaRef}
-      className="w-full px-3 py-2 border border-[var(--border)] bg-[var(--card)] text-[13px] font-[var(--mono)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border min-h-[72px] max-h-[400px] rounded-sm placeholder:text-[var(--muted)] placeholder:opacity-60"
+      className={textareaCls(!!props.errors?.length)}
       style={{ fieldSizing: "content" } as React.CSSProperties}
       defaultValue={value}
       placeholder={placeholder}
@@ -807,13 +873,15 @@ function MultiselectFieldInner({ fp: props }: { fp: FieldRenderProps }) {
             >
               {opt.label}
               {!props.readonly && (
-                <button
+                <Button
                   type="button"
-                  className="inline-flex items-center justify-center w-3.5 h-3.5 text-[10px] rounded-full hover:bg-[var(--accent)] hover:text-[var(--accent-foreground,#1a1f26)] transition-colors cursor-pointer"
+                  variant="ghost"
+                  size="icon"
+                  className="inline-flex items-center justify-center w-3.5 h-3.5 text-[10px] rounded-full hover:bg-[var(--accent)] hover:text-[var(--accent-foreground,#1a1f26)] transition-colors"
                   onClick={() => remove(opt.value)}
                 >
                   ×
-                </button>
+                </Button>
               )}
             </span>
           ))}
@@ -822,18 +890,18 @@ function MultiselectFieldInner({ fp: props }: { fp: FieldRenderProps }) {
       {/* Checkbox list */}
       <div className="flex flex-col gap-1">
         {options.map((opt) => (
+          // biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically
           <label
             key={opt.value}
             className="flex items-center gap-2 cursor-pointer text-[13px]"
           >
-            <input
-              type="checkbox"
-              value={opt.value}
+            <Checkbox
               checked={selected.has(opt.value)}
               disabled={props.readonly}
-              onChange={() => toggle(opt.value)}
-              onClick={() => fireAction(props, "click")}
-              onBlur={() => fireAction(props, "blur")}
+              onCheckedChange={() => {
+                toggle(opt.value);
+                fireAction(props, "click");
+              }}
             />
             <span>{opt.label}</span>
           </label>
@@ -904,15 +972,15 @@ function JsonFieldInner({ fp: props }: { fp: FieldRenderProps }) {
   return (
     <div>
       <textarea
-        className={`w-full px-2.5 py-[7px] border ${
-          jsonError || props.errors?.length
-            ? "border-[var(--destructive)]"
-            : "border-[var(--border)]"
-        } bg-[var(--card)] text-[13px] font-mono transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border min-h-[100px] resize-y rounded-sm`}
+        className={textareaCls(
+          Boolean(jsonError || props.errors?.length),
+          "min-h-[100px]",
+        )}
         defaultValue={initial}
-        placeholder={t("config-field.KeyValue", {
-          defaultValue: "Key-value JSON",
-        })}
+        placeholder={
+          props.hint.placeholder ||
+          t("config-field.KeyValue", { defaultValue: "Key-value JSON" })
+        }
         rows={6}
         data-config-key={props.key}
         data-field-type="json"
@@ -943,11 +1011,7 @@ export function renderCodeField(props: FieldRenderProps) {
 
   return (
     <textarea
-      className={`w-full px-2.5 py-[7px] border ${
-        props.errors?.length
-          ? "border-[var(--destructive)]"
-          : "border-[var(--border)]"
-      } bg-[var(--card)] text-[13px] font-mono transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] box-border min-h-[100px] resize-y rounded-sm`}
+      className={textareaCls(!!props.errors?.length, "min-h-[100px]")}
       defaultValue={value}
       placeholder={placeholder}
       rows={6}
@@ -999,9 +1063,11 @@ function ArrayItem({
     <div className="flex items-center gap-1">
       {!readonly && (
         <div className="flex flex-col shrink-0">
-          <button
+          <Button
             type="button"
-            className="px-1 py-0 text-[10px] leading-tight text-[var(--muted)] cursor-pointer hover:text-[var(--text)] disabled:opacity-30 disabled:cursor-not-allowed"
+            variant="ghost"
+            size="icon"
+            className="px-1 py-0 h-auto w-auto text-[10px] leading-tight text-[var(--muted)] hover:text-[var(--text)] disabled:opacity-30 disabled:cursor-not-allowed"
             onClick={onMoveUp}
             disabled={index === 0}
             title={t("config-field.MoveUp", {
@@ -1009,10 +1075,12 @@ function ArrayItem({
             })}
           >
             ▲
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="px-1 py-0 text-[10px] leading-tight text-[var(--muted)] cursor-pointer hover:text-[var(--text)] disabled:opacity-30 disabled:cursor-not-allowed"
+            variant="ghost"
+            size="icon"
+            className="px-1 py-0 h-auto w-auto text-[10px] leading-tight text-[var(--muted)] hover:text-[var(--text)] disabled:opacity-30 disabled:cursor-not-allowed"
             onClick={onMoveDown}
             disabled={index === total - 1}
             title={t("config-field.MoveDown", {
@@ -1020,7 +1088,7 @@ function ArrayItem({
             })}
           >
             <ChevronDown className="w-3 h-3" />
-          </button>
+          </Button>
         </div>
       )}
       <input
@@ -1033,13 +1101,15 @@ function ArrayItem({
         onBlur={onBlur}
       />
       {!readonly && (
-        <button
+        <Button
           type="button"
-          className="px-2 py-1.5 border border-[var(--border)] bg-[var(--bg-hover)] text-xs text-[var(--muted)] cursor-pointer transition-colors hover:bg-[var(--surface)] hover:text-[var(--destructive)] h-[36px] rounded-sm"
+          variant="outline"
+          size="icon"
+          className="px-2 py-1.5 bg-[var(--bg-hover)] text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--destructive)] h-[36px] rounded-sm"
           onClick={onRemove}
         >
           <X className="w-3 h-3" />
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -1108,16 +1178,18 @@ function ArrayFieldInner({ fp: props }: { fp: FieldRenderProps }) {
         />
       ))}
       {!props.readonly && (
-        <button
+        <Button
           type="button"
-          className="self-start px-3 py-1.5 border border-dashed border-[var(--border)] bg-transparent text-[11px] text-[var(--muted)] cursor-pointer transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)] hover:border-[var(--accent)] rounded-sm"
+          variant="outline"
+          size="sm"
+          className="self-start px-3 py-1.5 border-dashed bg-transparent text-[11px] text-[var(--muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)] hover:border-[var(--accent)] rounded-sm"
           onClick={() => {
             addItem();
             fireAction(props, "click");
           }}
         >
           {t("config-field.AddItem", { defaultValue: "Add item" })}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -1198,30 +1270,34 @@ function KeyValueFieldInner({ fp: props }: { fp: FieldRenderProps }) {
             onBlur={() => fireAction(props, "blur")}
           />
           {!props.readonly && (
-            <button
+            <Button
               type="button"
-              className="px-2 py-1.5 border border-[var(--border)] bg-[var(--bg-hover)] text-xs text-[var(--muted)] cursor-pointer transition-colors hover:bg-[var(--surface)] hover:text-[var(--destructive)] h-[36px] rounded-sm"
+              variant="outline"
+              size="icon"
+              className="px-2 py-1.5 bg-[var(--bg-hover)] text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--destructive)] h-[36px] rounded-sm"
               onClick={() => {
                 removeRow(index);
                 fireAction(props, "click");
               }}
             >
               <X className="w-3 h-3" />
-            </button>
+            </Button>
           )}
         </div>
       ))}
       {!props.readonly && (
-        <button
+        <Button
           type="button"
-          className="self-start px-3 py-1.5 border border-dashed border-[var(--border)] bg-transparent text-[11px] text-[var(--muted)] cursor-pointer transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)] hover:border-[var(--accent)] rounded-sm"
+          variant="outline"
+          size="sm"
+          className="self-start px-3 py-1.5 border-dashed bg-transparent text-[11px] text-[var(--muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)] hover:border-[var(--accent)] rounded-sm"
           onClick={() => {
             addRow();
             fireAction(props, "click");
           }}
         >
           {t("config-field.AddRow", { defaultValue: "Add row" })}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -1483,28 +1559,32 @@ function MarkdownFieldInner(props: FieldRenderProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2 mb-1">
-        <button
+        <Button
           type="button"
-          className={`text-[11px] px-2 py-0.5 border transition-colors ${
+          variant={!preview ? "default" : "outline"}
+          size="sm"
+          className={`text-[11px] px-2 py-0.5 transition-colors h-auto ${
             !preview
               ? "bg-[var(--accent)] text-[var(--accent-fg)] border-[var(--accent)]"
-              : "bg-transparent text-[var(--muted)] border-[var(--border)] hover:text-[var(--txt)]"
+              : "bg-transparent text-[var(--muted)] hover:text-[var(--txt)]"
           }`}
           onClick={() => setPreview(false)}
         >
           {t("config-field.Edit", { defaultValue: "Edit" })}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={`text-[11px] px-2 py-0.5 border transition-colors ${
+          variant={preview ? "default" : "outline"}
+          size="sm"
+          className={`text-[11px] px-2 py-0.5 transition-colors h-auto ${
             preview
               ? "bg-[var(--accent)] text-[var(--accent-fg)] border-[var(--accent)]"
-              : "bg-transparent text-[var(--muted)] border-[var(--border)] hover:text-[var(--txt)]"
+              : "bg-transparent text-[var(--muted)] hover:text-[var(--txt)]"
           }`}
           onClick={() => setPreview(true)}
         >
           {t("config-field.Preview", { defaultValue: "Preview" })}
-        </button>
+        </Button>
       </div>
       {preview ? (
         <div
@@ -1524,7 +1604,10 @@ function MarkdownFieldInner(props: FieldRenderProps) {
         </div>
       ) : (
         <textarea
-          className={`${inputCls(!!props.errors?.length)} min-h-[100px] h-auto resize-y font-[var(--mono)]`}
+          className={textareaCls(
+            !!props.errors?.length,
+            "min-h-[100px] h-auto",
+          )}
           defaultValue={value}
           placeholder={props.hint.placeholder ?? "Markdown content..."}
           data-config-key={props.key}
@@ -1584,6 +1667,7 @@ function CheckboxGroupInner(props: FieldRenderProps) {
       data-field-type="checkbox-group"
     >
       {options.map((opt) => (
+        // biome-ignore lint/a11y/noLabelWithoutControl: form control is associated programmatically
         <label
           key={opt.value}
           className={`flex items-start gap-2.5 px-3 py-2 border border-[var(--border)] bg-[var(--card)] cursor-pointer transition-colors hover:bg-[var(--bg-hover)] ${
@@ -1592,12 +1676,11 @@ function CheckboxGroupInner(props: FieldRenderProps) {
               : ""
           } ${opt.disabled ? "opacity-50 pointer-events-none" : ""}`}
         >
-          <input
-            type="checkbox"
+          <Checkbox
             checked={selected.has(opt.value)}
             disabled={props.readonly || opt.disabled}
-            onChange={() => toggle(opt.value)}
-            className="mt-0.5 accent-[var(--accent)]"
+            onCheckedChange={() => toggle(opt.value)}
+            className="mt-0.5"
           />
           <div className="flex flex-col">
             <span className="text-[13px]">{opt.label}</span>
@@ -1639,7 +1722,7 @@ export const renderGroupField: FieldRenderer = (props) => {
         {props.hint.label ?? props.key}
       </legend>
       <textarea
-        className={`${inputCls(!!props.errors?.length)} min-h-[60px] h-auto resize-y`}
+        className={textareaCls(!!props.errors?.length, "min-h-[60px] h-auto")}
         defaultValue={value}
         placeholder={props.hint.placeholder ?? "Group configuration..."}
         disabled={props.readonly}
@@ -1737,16 +1820,18 @@ function TableFieldInner(props: FieldRenderProps) {
                 ))}
                 <td className="text-center">
                   {!props.readonly && rows.length > 1 && (
-                    <button
+                    <Button
                       type="button"
-                      className="text-[var(--muted)] hover:text-[var(--destructive)] text-[14px] px-1"
+                      variant="ghost"
+                      size="icon"
+                      className="text-[var(--muted)] hover:text-[var(--destructive)] text-[14px] px-1 h-auto w-auto"
                       onClick={() => removeRow(ri)}
                       title={t("config-field.RemoveRow", {
                         defaultValue: "Remove row",
                       })}
                     >
                       {t("config-field.Times")}
-                    </button>
+                    </Button>
                   )}
                 </td>
               </tr>
@@ -1755,13 +1840,15 @@ function TableFieldInner(props: FieldRenderProps) {
         </table>
       </div>
       {!props.readonly && rows.length < MAX_TABLE_ROWS && (
-        <button
+        <Button
           type="button"
-          className="self-start text-[11px] text-[var(--accent)] hover:underline"
+          variant="link"
+          size="sm"
+          className="self-start text-[11px] text-[var(--accent)] hover:underline p-0 h-auto"
           onClick={addRow}
         >
           {t("config-field.AddRow", { defaultValue: "Add row" })}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -1816,8 +1903,6 @@ export function ConfigField({
 }) {
   const { t } = useApp();
   const label = renderProps.hint.label ?? renderProps.key;
-  const envKey = renderProps.key;
-  const labelDiffersFromKey = label !== envKey;
   const errors = renderProps.errors ?? [];
   const hasError = errors.length > 0;
   const isRequiredEmpty = renderProps.required && !renderProps.isSet;
@@ -1847,7 +1932,7 @@ export function ConfigField({
         {/* Label row */}
         <div className="flex items-center gap-2 mb-1.5">
           <span
-            className="font-semibold leading-tight truncate"
+            className="font-semibold leading-tight"
             style={{
               fontSize: "var(--plugin-label-size)",
               color: "var(--plugin-label)",
@@ -1857,7 +1942,7 @@ export function ConfigField({
           </span>
           {renderProps.required && !renderProps.isSet && (
             <span className="text-[10px] text-[var(--destructive)] font-semibold px-1.5 py-px bg-[color-mix(in_srgb,var(--destructive)_10%,transparent)] rounded-sm shrink-0">
-              {t("config-field.Required")}
+              {t("secretsview.Required")}
             </span>
           )}
           {renderProps.isSet && (
@@ -1866,12 +1951,6 @@ export function ConfigField({
 
               {t("config-field.Configured")}
             </span>
-          )}
-          {/* Env key — right-aligned, subtle, only when label differs */}
-          {labelDiffersFromKey && (
-            <code className="text-[10px] font-mono text-[var(--muted)] opacity-0 group-hover/field:opacity-50 transition-opacity truncate ml-auto">
-              {envKey}
-            </code>
           )}
         </div>
 

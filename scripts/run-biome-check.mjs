@@ -1,14 +1,22 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 
 const BIOME_CRASHER_PATHS = new Set([
   "apps/app/plugins/screencapture/src/web.ts",
   "apps/app/plugins/talkmode/electrobun/src/index.d.ts",
-  "src/types/elizaos-tui-fallback.d.ts",
-  "src/types/optional-plugin-modules.d.ts",
+  "apps/app/plugins/gateway/electrobun/src/index.ts",
+  "packages/app-core/src/types/elizaos-tui-fallback.d.ts",
+  "packages/app-core/src/types/optional-plugin-modules.d.ts",
+  "scripts/type-audit-report.json",
+  "scripts/type-audit-report.md",
 ]);
 
 const BIOME_ROOTS = ["src", "scripts", "apps"];
-const BIOME_CHUNK_SIZE = 200;
+// Windows shell invocations hit command length limits quickly. Keep chunks
+// smaller there so `bunx biome check` can run reliably in pre-review hooks.
+const BIOME_CHUNK_SIZE = process.platform === "win32" ? 40 : 200;
+const BIOME_FILE_PATTERN =
+  /\.(?:[cm]?js|[cm]?ts|jsx|tsx|json|jsonc|css|md|mdx)$/i;
 
 function getBiomeFiles() {
   const output = execFileSync(
@@ -28,7 +36,9 @@ function getBiomeFiles() {
   return output
     .split("\0")
     .filter(Boolean)
-    .filter((file) => !BIOME_CRASHER_PATHS.has(file));
+    .filter((file) => !BIOME_CRASHER_PATHS.has(file))
+    .filter((file) => BIOME_FILE_PATTERN.test(file))
+    .filter((file) => existsSync(file));
 }
 
 function chunk(items, size) {

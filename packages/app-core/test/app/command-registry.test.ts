@@ -10,7 +10,7 @@ function makeArgs(overrides?: Partial<BuildCommandsArgs>): BuildCommandsArgs {
     agentState: "running",
     activeGameViewerUrl: "",
     handleStart: vi.fn(),
-
+    handleStop: vi.fn(),
     handleRestart: vi.fn(),
     setTab: vi.fn(),
     setAppsSubTab: vi.fn(),
@@ -20,6 +20,10 @@ function makeArgs(overrides?: Partial<BuildCommandsArgs>): BuildCommandsArgs {
     loadWorkbench: vi.fn(),
     handleChatClear: vi.fn(),
     openBugReport: vi.fn(),
+    desktopRuntime: false,
+    focusDesktopMainWindow: vi.fn(),
+    openDesktopSettingsWindow: vi.fn(),
+    openDesktopSurfaceWindow: vi.fn(),
     ...overrides,
   };
 }

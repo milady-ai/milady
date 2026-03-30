@@ -1,5 +1,6 @@
+import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
@@ -33,7 +34,6 @@ describe("runtime-package-manifest", () => {
   it("extracts package names from static and dynamic imports", () => {
     const source = `
       import { logger } from "@elizaos/core";
-      export { thing } from "@elizaos/plugin-retake";
       const chalk = require("chalk");
       await import("@scope/pkg/subpath.js");
       await import("./relative.js");
@@ -41,7 +41,6 @@ describe("runtime-package-manifest", () => {
 
     expect(extractBarePackageSpecifiers(source)).toEqual([
       "@elizaos/core",
-      "@elizaos/plugin-retake",
       "@scope/pkg",
       "chalk",
     ]);
@@ -69,6 +68,40 @@ describe("runtime-package-manifest", () => {
     );
     expect(bundled).not.toContain("@elizaos/plugin-bnb-identity");
     expect(bundled).not.toContain("@elizaos/plugin-streaming-base");
+  });
+
+  it("resolves the manifest module through node tsx like desktop staging", () => {
+    const repoRoot = path.join(__dirname, "..");
+    const manifestModuleUrl = pathToFileURL(
+      path.join(__dirname, "runtime-package-manifest.ts"),
+    ).href;
+    const script = `
+      const { discoverAlwaysBundledPackages } = await import(${JSON.stringify(manifestModuleUrl)});
+      console.log(JSON.stringify(discoverAlwaysBundledPackages(${JSON.stringify(repoPackageJson)})));
+    `;
+    const result = spawnSync(
+      process.execPath,
+      ["--import", "tsx", "--input-type=module", "--eval", script],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+      },
+    );
+
+    if (result.status !== 0) {
+      throw new Error(
+        result.stderr || result.stdout || "node --import tsx failed",
+      );
+    }
+
+    const bundled = JSON.parse(result.stdout.trim()) as string[];
+    expect(bundled).toEqual(
+      expect.arrayContaining([
+        "@elizaos/core",
+        "@elizaos/plugin-agent-orchestrator",
+        "@elizaos/plugin-openai",
+      ]),
+    );
   });
 
   it("excludes discovered post-release plugin packages from the baseline bundle", () => {

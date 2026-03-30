@@ -1,4 +1,14 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ElectrobunConfig } from "electrobun";
+
+const electrobunDir = path.dirname(fileURLToPath(import.meta.url));
+const libMacWindowEffectsDylib = path.join(
+  electrobunDir,
+  "src",
+  "libMacWindowEffects.dylib",
+);
 
 export default {
   app: {
@@ -43,7 +53,7 @@ export default {
     copy: {
       "../dist": "renderer",
       "src/preload.js": "bun/preload.js",
-      // ElizaOS backend server bundle (tsdown output from repo root dist/).
+      // elizaOS backend server bundle (tsdown output from repo root dist/).
       // agent.ts walks up from import.meta.dir looking for milady-dist/ to spawn
       // the canonical runtime entry (`entry.js start`).
       // Paths are relative to apps/app/electrobun/ (where electrobun build is run).
@@ -55,9 +65,13 @@ export default {
       // package.json is needed so findOwnPackageRoot() can match on the
       // "milady" package name. dist/package.json only has {"type":"module"}.
       "../../../package.json": "milady-dist/package.json",
-      // libMacWindowEffects.dylib is macOS-only — only copy when building on macOS.
-      // On Windows/Linux this file does not exist and the copy would fail the build.
-      ...(process.platform === "darwin"
+      // Tray icon loaded at runtime via path.join(import.meta.dir, "../assets/appIcon.png").
+      // import.meta.dir resolves to app/bun/ in the packaged bundle, so the
+      // destination "assets/appIcon.png" places it at app/assets/appIcon.png.
+      "assets/appIcon.png": "assets/appIcon.png",
+      // Optional native blur (run build:native-effects locally). Omit when missing to avoid noisy copy errors in dev.
+      ...(process.platform === "darwin" &&
+      fs.existsSync(libMacWindowEffectsDylib)
         ? { "src/libMacWindowEffects.dylib": "libMacWindowEffects.dylib" }
         : {}),
     },
@@ -85,7 +99,7 @@ export default {
         // Hardware device access
         "com.apple.security.device.camera": true,
         "com.apple.security.device.microphone": true,
-        // Screen recording (screencapture, retake/computer-use)
+        // Screen recording (screencapture)
         "com.apple.security.device.screen-recording": true,
       },
     },
@@ -121,10 +135,18 @@ export default {
       defaultRenderer: "cef",
       icon: "assets/appIcon.ico",
       // Enable WebGPU in CEF on Windows.
+      // The GPU process sandbox causes STATUS_BREAKPOINT crashes
+      // (exit code -2147483645) on Windows during GPU initialization,
+      // cascading into a fully broken UI.  Running the GPU in-process
+      // with the sandbox disabled avoids the crash while keeping
+      // hardware-accelerated rendering active.
       chromiumFlags: {
         "enable-unsafe-webgpu": true,
         "enable-features": "Vulkan",
-      },
+        "in-process-gpu": true,
+        "disable-gpu-sandbox": true,
+        "no-sandbox": true,
+      } as unknown as Record<string, string | true>,
     },
   },
   release: {

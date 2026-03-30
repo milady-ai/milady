@@ -20,6 +20,7 @@ describe("desktop-build.mjs", () => {
       "Ensuring Electrobun workspace dependencies are installed",
     );
     expect(script).toContain('runPackageBinary("vite", ["build"],');
+    expect(script).toContain("runDesktopPreflight();");
     expect(script).toContain('runBun(["run", "build:preload"]');
     expect(script).toContain('runBun(["run", "build:native-effects"]');
     expect(script).toContain('runBun(["run", "build:whisper"]');
@@ -30,7 +31,7 @@ describe("desktop-build.mjs", () => {
 
     expect(script).toContain("PROFILE_EXCLUDED_OPTIONAL_PACKS");
     expect(script).toContain("function getProfileExcludedOptionalPacks(");
-    expect(script).toContain("MILADY_DESKTOP_COMMAND_PREFIX");
+    expect(script).toMatch(/(?:MILADY|ELIZA)_DESKTOP_COMMAND_PREFIX/);
     expect(script).toContain("function buildInvocation(");
     expect(script).toContain("function getRepeatedArgValues(");
     expect(script).toContain('const direct = which("electrobun")');
@@ -38,9 +39,11 @@ describe("desktop-build.mjs", () => {
       'runPackageBinary("electrobun", commandArgs, options);',
     );
     expect(script).toContain('case "stage":');
+    expect(script).toContain('case "preflight":');
     expect(script).toContain('case "package":');
     expect(script).toContain('case "build":');
     expect(script).toContain('case "run":');
+    expect(script).toContain("[desktop-preflight]");
   });
 
   it("packages through the electrobun workspace build script", () => {
@@ -65,8 +68,8 @@ describe("desktop-build.mjs", () => {
     expect(script).toContain(
       "apps/app/electrobun/scripts/stage-macos-release-artifacts.sh",
     );
-    expect(script).toContain('MILADY_ELECTROBUN_NOTARIZE: "0"');
-    expect(script).toContain("MILADY_STAGE_MACOS_SKIP_DMG");
+    expect(script).toMatch(/(?:MILADY|ELIZA)_ELECTROBUN_NOTARIZE: "0"/);
+    expect(script).toMatch(/(?:MILADY|ELIZA)_STAGE_MACOS_SKIP_DMG/);
     expect(script).toContain(
       "--stage-macos-release-app        Stage a direct macOS .app + DMG from the Electrobun build output",
     );

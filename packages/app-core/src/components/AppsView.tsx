@@ -14,17 +14,21 @@ import {
   DEFAULT_VIEWER_SANDBOX,
   shouldShowAppInAppsView,
 } from "./apps/helpers";
+import {
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+} from "./desktop-surface-primitives";
 
 export { shouldShowAppInAppsView } from "./apps/helpers";
 
 function AppsEmptyState() {
+  const { t } = useApp();
+
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center py-20">
-      <span className="text-4xl mb-4 opacity-30">📱</span>
-      <span className="text-[13px] text-muted">
-        Select an app to view details
-      </span>
-    </div>
+    <DesktopEmptyStatePanel
+      description={t("appsview.EmptyStateDescription")}
+      title={t("appsview.EmptyStateTitle")}
+    />
   );
 }
 
@@ -35,6 +39,7 @@ export function AppsView() {
     activeGameViewerUrl,
     setState,
     setActionNotice,
+    t,
   } = useApp();
   const [apps, setApps] = useState<RegistryAppInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +69,10 @@ export function AppsView() {
     try {
       const [list, installed] = await Promise.all([
         client.listApps(),
-        client.listInstalledApps().catch(() => []),
+        client.listInstalledApps().catch((err: unknown) => {
+          console.warn("[AppsView] Failed to list installed apps:", err);
+          return [];
+        }),
       ]);
       setApps(list);
       setActiveAppNames(new Set(installed.map((app) => app.name)));
@@ -76,7 +84,10 @@ export function AppsView() {
       });
     } catch (err) {
       setError(
-        `Failed to load apps: ${err instanceof Error ? err.message : "network error"}`,
+        t("appsview.LoadError", {
+          message:
+            err instanceof Error ? err.message : t("appsview.NetworkError"),
+        }),
       );
     } finally {
       setLoading(false);
@@ -124,7 +135,9 @@ export function AppsView() {
           );
           if (result.viewer.postMessageAuth && !result.viewer.authMessage) {
             setActionNotice(
-              `${app.displayName ?? app.name} requires iframe auth, but no auth payload is configured.`,
+              t("appsview.IframeAuthMissing", {
+                name: app.displayName ?? app.name,
+              }),
               "error",
               4800,
             );
@@ -139,13 +152,17 @@ export function AppsView() {
           try {
             await openExternalUrl(targetUrl);
             setActionNotice(
-              `${app.displayName ?? app.name} opened in a new tab.`,
+              t("appsview.OpenedInNewTab", {
+                name: app.displayName ?? app.name,
+              }),
               "success",
               2600,
             );
           } catch {
             setActionNotice(
-              `Popup blocked while opening ${app.displayName ?? app.name}. Allow popups and try again.`,
+              t("appsview.PopupBlockedOpen", {
+                name: app.displayName ?? app.name,
+              }),
               "error",
               4200,
             );
@@ -153,13 +170,18 @@ export function AppsView() {
           return;
         }
         setActionNotice(
-          `${app.displayName ?? app.name} launched, but no viewer or URL is configured.`,
+          t("appsview.LaunchedNoViewer", {
+            name: app.displayName ?? app.name,
+          }),
           "error",
           4000,
         );
       } catch (err) {
         setActionNotice(
-          `Failed to launch ${app.displayName ?? app.name}: ${err instanceof Error ? err.message : "error"}`,
+          t("appsview.LaunchFailed", {
+            name: app.displayName ?? app.name,
+            message: err instanceof Error ? err.message : t("common.error"),
+          }),
           "error",
           4000,
         );
@@ -180,15 +202,11 @@ export function AppsView() {
     if (!hasCurrentGame) return;
     try {
       await openExternalUrl(currentGameViewerUrl);
-      setActionNotice("Current game opened in a new tab.", "success", 2600);
+      setActionNotice(t("appsview.CurrentGameOpened"), "success", 2600);
     } catch {
-      setActionNotice(
-        "Popup blocked. Allow popups and try again.",
-        "error",
-        4200,
-      );
+      setActionNotice(t("appsview.PopupBlocked"), "error", 4200);
     }
-  }, [currentGameViewerUrl, hasCurrentGame, setActionNotice]);
+  }, [currentGameViewerUrl, hasCurrentGame, setActionNotice, t]);
 
   const visibleApps = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -212,31 +230,17 @@ export function AppsView() {
   }, [activeAppNames, apps, searchQuery, showActiveOnly]);
 
   return (
-    <div className="device-layout">
-      <div className="phone-frame">
-        <div className="phone-status-bar">
+    <div className="device-layout mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 lg:px-6">
+      <div className="phone-frame overflow-hidden rounded-[2rem] border border-border/40 bg-card/86 shadow-[0_20px_60px_rgba(0,0,0,0.16)] backdrop-blur-xl">
+        <div className="phone-status-bar flex items-center justify-between border-b border-border/40 px-5 py-3 text-[12px] text-muted-strong">
           <span className="font-semibold">9:41</span>
           <span className="opacity-50">📶 🔋</span>
         </div>
 
-        <div className="phone-content">
-          {selectedApp ? (
-            <AppDetailPane
-              app={selectedApp}
-              compact
-              busy={busyApp === selectedApp.name}
-              hasActiveViewer={selectedAppHasActiveViewer}
-              isActive={selectedAppIsActive}
-              onBack={() => setSelectedAppName(null)}
-              onLaunch={() => void handleLaunch(selectedApp)}
-              onOpenCurrentGame={handleOpenCurrentGame}
-              onOpenCurrentGameInNewTab={() =>
-                void handleOpenCurrentGameInNewTab()
-              }
-            />
-          ) : null}
-
-          <div className={selectedApp ? "phone-grid-when-detail" : ""}>
+        <div className="phone-content grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,23rem)] lg:p-5">
+          <div
+            className={`phone-grid-when-detail ${selectedApp ? "order-2 lg:order-1" : "order-1"}`}
+          >
             <AppsCatalogGrid
               activeAppNames={activeAppNames}
               activeGameDisplayName={activeGameDisplayName}
@@ -256,18 +260,40 @@ export function AppsView() {
               }
             />
           </div>
+
+          <div
+            className={`order-1 p-4 lg:order-2 ${DESKTOP_INSET_PANEL_CLASSNAME}`}
+          >
+            {selectedApp ? (
+              <AppDetailPane
+                app={selectedApp}
+                compact
+                busy={busyApp === selectedApp.name}
+                hasActiveViewer={selectedAppHasActiveViewer}
+                isActive={selectedAppIsActive}
+                onBack={() => setSelectedAppName(null)}
+                onLaunch={() => void handleLaunch(selectedApp)}
+                onOpenCurrentGame={handleOpenCurrentGame}
+                onOpenCurrentGameInNewTab={() =>
+                  void handleOpenCurrentGameInNewTab()
+                }
+              />
+            ) : (
+              <AppsEmptyState />
+            )}
+          </div>
         </div>
 
-        <div className="phone-home-indicator" />
+        <div className="phone-home-indicator h-1.5 w-28 rounded-full bg-border/60 mx-auto mb-3" />
       </div>
 
-      <div className="pad-frame">
-        <div className="phone-status-bar">
+      <div className="pad-frame overflow-hidden rounded-[2rem] border border-border/40 bg-card/86 shadow-[0_20px_60px_rgba(0,0,0,0.16)] backdrop-blur-xl">
+        <div className="phone-status-bar flex items-center justify-between border-b border-border/40 px-5 py-3 text-[12px] text-muted-strong">
           <span className="font-semibold">9:41</span>
           <span className="opacity-50">📶 🔋</span>
         </div>
 
-        <div className="phone-content">
+        <div className="phone-content p-5">
           {selectedApp ? (
             <AppDetailPane
               app={selectedApp}
@@ -286,7 +312,7 @@ export function AppsView() {
           )}
         </div>
 
-        <div className="phone-home-indicator" />
+        <div className="phone-home-indicator h-1.5 w-28 rounded-full bg-border/60 mx-auto mb-3" />
       </div>
     </div>
   );

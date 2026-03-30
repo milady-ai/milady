@@ -226,6 +226,40 @@ Export private keys in plaintext. Requires explicit confirmation. This action is
 
 ---
 
+## Steward bridge
+
+The Steward bridge enables delegated transaction signing through an external policy service. When configured, trade and transfer endpoints route signing requests through Steward, which can approve, reject, or hold transactions for policy review before they are broadcast.
+
+### GET /api/wallet/steward-status
+
+Get the current status of the Steward bridge connection, including whether the service is configured, reachable, and which agent identity is in use.
+
+**Response**
+
+```json
+{
+  "configured": true,
+  "available": true,
+  "connected": true,
+  "baseUrl": "https://steward.example.com",
+  "agentId": "agent-1",
+  "evmAddress": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  "error": null
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `configured` | boolean | Whether the Steward API URL is set |
+| `available` | boolean | Whether the Steward service responded successfully |
+| `connected` | boolean | Whether the bridge established a connection |
+| `baseUrl` | string \| null | Steward API base URL, if configured |
+| `agentId` | string \| null | Agent identity used for Steward requests |
+| `evmAddress` | string \| null | EVM wallet address associated with this agent |
+| `error` | string \| null | Error message if the connection check failed |
+
+---
+
 ## Trading
 
 ### POST /api/wallet/trade/preflight
@@ -271,12 +305,19 @@ Returns a quote object with estimated output amount, price impact, and route det
 
 ### POST /api/wallet/trade/execute
 
-Execute a token trade on BSC. Behavior depends on wallet configuration and confirmation:
+Execute a token trade on BSC. Behavior depends on wallet configuration, Steward bridge availability, and confirmation:
 
 - Without `confirm: true` or without a local private key, returns an unsigned transaction for client-side signing.
 - With `confirm: true`, a local key, and appropriate trade permissions, executes the trade on-chain and returns the receipt.
+- When the Steward bridge is configured, signing is delegated to the Steward service. Steward may approve the transaction immediately, hold it for policy review, or reject it based on configured policies.
 
-**Request Body**
+**Request headers**
+
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `x-milady-agent-action` | string | No | Set to `1`, `true`, `yes`, or `agent` to mark this as an agent-automated request. Affects trade permission mode resolution. |
+
+**Request body**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -288,31 +329,124 @@ Execute a token trade on BSC. Behavior depends on wallet configuration and confi
 | `confirm` | boolean | No | Set to `true` to execute immediately with a local key |
 | `source` | string | No | `"agent"` or `"manual"` — attribution for ledger tracking |
 
-**Response (unsigned)**
+**Response (unsigned — user must sign)**
+
+Returned when `confirm` is not `true`, no local key is available, or the trade permission mode does not allow server-side execution.
 
 ```json
 {
   "ok": true,
+  "side": "buy",
   "mode": "user-sign",
+  "quote": {
+    "side": "buy",
+    "tokenAddress": "0x...",
+    "slippageBps": 100,
+    "route": "TOKEN/WBNB",
+    "routerAddress": "0x...",
+    "quoteIn": { "symbol": "BNB", "amount": "0.1", "amountWei": "100000000000000000" },
+    "quoteOut": { "symbol": "TOKEN", "amount": "1000", "amountWei": "1000000000000000000000" }
+  },
   "executed": false,
   "requiresUserSignature": true,
-  "unsignedTx": { "to": "0x...", "data": "0x...", "value": "0x0" },
+  "unsignedTx": {
+    "to": "0x...",
+    "data": "0x...",
+    "valueWei": "100000000000000000",
+    "chainId": 56
+  },
+  "requiresApproval": false
+}
+```
+
+For sell orders, the response includes an additional `unsignedApprovalTx` field when the router needs token approval:
+
+```json
+{
   "requiresApproval": true,
-  "unsignedApprovalTx": { "to": "0x...", "data": "0x..." }
+  "unsignedApprovalTx": {
+    "to": "0x...",
+    "data": "0x...",
+    "valueWei": "0",
+    "chainId": 56
+  }
 }
 ```
 
 **Response (executed)**
 
+Returned when the trade was signed and broadcast (locally or via Steward).
+
 ```json
 {
   "ok": true,
-  "mode": "local-sign",
+  "side": "buy",
+  "mode": "local",
+  "quote": { "..." : "..." },
   "executed": true,
   "requiresUserSignature": false,
+  "unsignedTx": { "..." : "..." },
+  "requiresApproval": false,
   "execution": {
     "hash": "0x...",
-    "explorerUrl": "https://bscscan.com/tx/0x..."
+    "nonce": 42,
+    "gasLimit": "250000",
+    "valueWei": "100000000000000000",
+    "explorerUrl": "https://bscscan.com/tx/0x...",
+    "blockNumber": null,
+    "status": "pending",
+    "approvalHash": "0x..."
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mode` | string | `"local-key"`, `"user-sign"`, `"steward"`, or `"local"` |
+| `execution.hash` | string | On-chain transaction hash |
+| `execution.nonce` | number \| null | Transaction nonce (`null` when signed by Steward) |
+| `execution.status` | string | `"pending"` immediately after broadcast |
+| `execution.approvalHash` | string \| undefined | Token approval transaction hash (sell orders only) |
+
+**Response (Steward pending approval)**
+
+Returned when Steward holds the transaction for policy review instead of signing immediately.
+
+```json
+{
+  "ok": true,
+  "side": "buy",
+  "mode": "steward",
+  "quote": { "..." : "..." },
+  "executed": false,
+  "requiresUserSignature": false,
+  "unsignedTx": { "..." : "..." },
+  "requiresApproval": false,
+  "execution": {
+    "status": "pending_approval",
+    "policyResults": [
+      { "policy": "max-trade-value", "result": "pending" }
+    ]
+  }
+}
+```
+
+**Response (Steward policy rejection)**
+
+Returned with status `403` when Steward rejects the transaction based on policy rules.
+
+```json
+{
+  "ok": false,
+  "mode": "steward",
+  "executed": false,
+  "requiresUserSignature": false,
+  "error": "Policy rejected",
+  "execution": {
+    "status": "rejected",
+    "policyResults": [
+      { "policy": "max-trade-value", "result": "denied" }
+    ]
   }
 }
 ```
@@ -322,7 +456,9 @@ Execute a token trade on BSC. Behavior depends on wallet configuration and confi
 | Status | Condition |
 |--------|-----------|
 | 400 | Missing `side`, `tokenAddress`, or `amount` |
-| 403 | Trade permission denied |
+| 400 | `side` is not `"buy"` or `"sell"` |
+| 403 | Steward policy rejection (see response shape above) |
+| 500 | Trade execution failed |
 
 ---
 
@@ -389,8 +525,15 @@ Transfer native tokens (BNB) or ERC-20 tokens on BSC.
 
 - Without `confirm: true` or without a local private key, returns an unsigned transaction for client-side signing.
 - With `confirm: true` and a local key, executes the transfer on-chain.
+- When the Steward bridge is configured, signing is delegated to the Steward service with the same policy approval flow as trade execution.
 
-**Request Body**
+**Request headers**
+
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `x-milady-agent-action` | string | No | Set to `1`, `true`, `yes`, or `agent` to mark this as an agent-automated request. Affects trade permission mode resolution. |
+
+**Request body**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -400,9 +543,102 @@ Transfer native tokens (BNB) or ERC-20 tokens on BSC.
 | `tokenAddress` | string | No | ERC-20 contract address (required for non-native tokens) |
 | `confirm` | boolean | No | Set to `true` to execute immediately with a local key |
 
-**Response**
+**Response (unsigned — user must sign)**
 
-Same shape as the trade execute response — returns either an unsigned transaction or an execution receipt.
+```json
+{
+  "ok": true,
+  "mode": "user-sign",
+  "executed": false,
+  "requiresUserSignature": true,
+  "toAddress": "0x...",
+  "amount": "1.5",
+  "assetSymbol": "BNB",
+  "unsignedTx": {
+    "chainId": 56,
+    "from": "0x...",
+    "to": "0x...",
+    "data": "0x",
+    "valueWei": "1500000000000000000",
+    "explorerUrl": "https://bscscan.com",
+    "assetSymbol": "BNB",
+    "amount": "1.5"
+  }
+}
+```
+
+For ERC-20 transfers, `unsignedTx.to` is the token contract address, `unsignedTx.data` contains the encoded `transfer` call, and `unsignedTx.tokenAddress` is included.
+
+**Response (executed)**
+
+```json
+{
+  "ok": true,
+  "mode": "local",
+  "executed": true,
+  "requiresUserSignature": false,
+  "toAddress": "0x...",
+  "amount": "1.5",
+  "assetSymbol": "BNB",
+  "unsignedTx": { "..." : "..." },
+  "execution": {
+    "hash": "0x...",
+    "nonce": 42,
+    "gasLimit": "21000",
+    "valueWei": "1500000000000000000",
+    "explorerUrl": "https://bscscan.com/tx/0x...",
+    "blockNumber": null,
+    "status": "pending"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mode` | string | `"local-key"`, `"user-sign"`, `"steward"`, or `"local"` |
+| `execution.nonce` | number \| null | Transaction nonce (`null` when signed by Steward) |
+| `execution.status` | string | `"pending"` immediately after broadcast |
+
+**Response (Steward pending approval)**
+
+```json
+{
+  "ok": true,
+  "mode": "steward",
+  "executed": false,
+  "requiresUserSignature": false,
+  "toAddress": "0x...",
+  "amount": "1.5",
+  "assetSymbol": "BNB",
+  "unsignedTx": { "..." : "..." },
+  "execution": {
+    "status": "pending_approval",
+    "policyResults": [
+      { "policy": "max-transfer-value", "result": "pending" }
+    ]
+  }
+}
+```
+
+**Response (Steward policy rejection)**
+
+Returned with status `403` when Steward rejects the transaction based on policy rules.
+
+```json
+{
+  "ok": false,
+  "mode": "steward",
+  "executed": false,
+  "requiresUserSignature": false,
+  "error": "Policy rejected",
+  "execution": {
+    "status": "rejected",
+    "policyResults": [
+      { "policy": "max-transfer-value", "result": "denied" }
+    ]
+  }
+}
+```
 
 **Errors**
 
@@ -410,6 +646,8 @@ Same shape as the trade execute response — returns either an unsigned transact
 |--------|-----------|
 | 400 | Missing `toAddress`, `amount`, or `assetSymbol` |
 | 400 | Invalid EVM address format |
+| 403 | Steward policy rejection (see response shape above) |
+| 500 | Transfer execution failed |
 
 ---
 
@@ -437,7 +675,7 @@ Apply opinionated production defaults for wallet trading configuration (trade pe
 
 ---
 
-## Common Error Codes
+## Common error codes
 
 | Status | Code | Description |
 |--------|------|-------------|
@@ -448,5 +686,6 @@ Apply opinionated production defaults for wallet trading configuration (trade pe
 | 400 | `INVALID_ADDRESS` | EVM address format is invalid |
 | 403 | `EXPORT_FORBIDDEN` | Export is not permitted without proper confirmation |
 | 403 | `TRADE_FORBIDDEN` | Trade permission denied |
+| 403 | `STEWARD_POLICY_REJECTED` | Steward policy engine rejected the transaction. The response body includes `execution.policyResults` with details on which policies were evaluated. |
 | 500 | `INSUFFICIENT_BALANCE` | Wallet balance is insufficient for the operation |
 | 500 | `INTERNAL_ERROR` | Unexpected server error |

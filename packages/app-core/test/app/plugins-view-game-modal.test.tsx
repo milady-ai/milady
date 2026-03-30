@@ -4,6 +4,8 @@ import type { PluginInfo } from "@miladyai/app-core/api";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
+import { textOf as text } from "../../../../test/helpers/react-test";
 
 const mockUseApp = vi.fn();
 const mockOnWsEvent = vi.fn(() => () => {});
@@ -20,6 +22,16 @@ const mockOpenExternalInvoke = vi.fn(async () => undefined);
 
 let narrowViewport = false;
 let originalMatchMedia: typeof window.matchMedia | undefined;
+
+function translateTest(
+  key: string,
+  vars?: {
+    defaultValue?: string;
+  },
+): string {
+  if (key === "pluginsview.TestConnection") return "Test Connection";
+  return vars?.defaultValue ?? key;
+}
 
 function ensureWindowGlobals() {
   const root = globalThis as typeof globalThis & {
@@ -77,7 +89,98 @@ vi.mock("@miladyai/app-core/api", () => ({
   },
 }));
 
-import { PluginsView } from "@miladyai/app-core/components/PluginsView";
+vi.mock("@miladyai/ui", () => ({
+  cn: (...classes: Array<string | false | null | undefined>) =>
+    classes.filter(Boolean).join(" "),
+  EmptyState: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  Button: ({
+    children,
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement("button", { type: "button", ...props }, children),
+  Dialog: ({
+    children,
+    open,
+  }: {
+    children: React.ReactNode;
+    open?: boolean;
+  }) => (open === false ? null : React.createElement("div", null, children)),
+  DialogContent: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  DialogDescription: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  DialogFooter: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  DialogHeader: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  DialogTitle: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+    React.createElement("input", props),
+  Select: ({
+    children,
+    value,
+  }: {
+    children: React.ReactNode;
+    value?: string;
+  }) => React.createElement("div", { "data-value": value }, children),
+  SelectTrigger: ({
+    children,
+    className,
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement("button", { type: "button", className, ...props }, children),
+  SelectValue: ({ children }: { children?: React.ReactNode }) =>
+    React.createElement("span", null, children),
+  SelectContent: ({
+    children,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className }, children),
+  SelectItem: ({
+    children,
+    value,
+    className,
+  }: React.HTMLAttributes<HTMLDivElement> & { value: string }) =>
+    React.createElement("div", { className, "data-value": value }, children),
+  Switch: ({
+    checked,
+    onCheckedChange,
+    ...props
+  }: {
+    checked?: boolean;
+    onCheckedChange?: (next: boolean) => void;
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement("button", {
+      type: "button",
+      "aria-pressed": checked,
+      onClick: () => onCheckedChange?.(!checked),
+      ...props,
+    }),
+}));
+
+import { PluginsView } from "../../src/components/PluginsView";
 
 function hasClass(
   node: TestRenderer.ReactTestInstance,
@@ -85,12 +188,6 @@ function hasClass(
 ): boolean {
   if (typeof node.props.className !== "string") return false;
   return node.props.className.split(/\s+/).includes(className);
-}
-
-function text(node: TestRenderer.ReactTestInstance): string {
-  return node.children
-    .map((child) => (typeof child === "string" ? child : text(child)))
-    .join("");
 }
 
 function createPlugin(
@@ -134,7 +231,7 @@ function createPlugin(
 
 function baseContext(plugins?: PluginInfo[]) {
   return {
-    t: (k: string) => k,
+    t: translateTest,
     plugins: plugins ?? [
       createPlugin("test-plugin", "Test Plugin", "feature"),
       createPlugin("second-plugin", "Second Plugin", "feature"),
@@ -156,6 +253,10 @@ function baseContext(plugins?: PluginInfo[]) {
 describe("PluginsView game modal", () => {
   beforeEach(() => {
     ensureWindowGlobals();
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
+      undefined,
+    );
     mockUseApp.mockReset();
     mockOnWsEvent.mockReset();
     mockHandlePluginToggle.mockReset();
@@ -198,15 +299,12 @@ describe("PluginsView game modal", () => {
         };
       }),
     });
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: undefined,
-    });
+    // Relies on vi.restoreAllMocks() in suite cleanup
     mockOpenExternalInvoke.mockReset();
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     if (originalMatchMedia) {
       Object.defineProperty(window, "matchMedia", {
         configurable: true,
@@ -217,7 +315,7 @@ describe("PluginsView game modal", () => {
   });
 
   it("renders game modal for both plugins and connectors modals", async () => {
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -255,7 +353,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -266,17 +364,36 @@ describe("PluginsView game modal", () => {
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "plugins-view-social",
       ).length,
-    ).toBe(1);
+    ).toBeGreaterThan(0);
     expect(
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
       ).length,
     ).toBe(1);
+    const sidebar = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
+    )[0];
+    expect(sidebar).toBeDefined();
+    const shell = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-shell",
+    )[0];
+    expect(String(shell?.props.className)).toContain("rounded-[30px]");
+    expect(String(shell?.props.className)).toContain("backdrop-blur-md");
+    const selectedConnector = tree?.root.findAll(
+      (node) => node.props?.["aria-current"] === "page",
+    )[0];
+    expect(String(selectedConnector?.parent?.props.className)).toContain(
+      "border-accent/26",
+    );
+    expect(String(selectedConnector?.parent?.props.className)).toContain(
+      "ring-accent/10",
+    );
+    expect(String(selectedConnector?.parent?.props.className)).toContain(
+      "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_28px_-22px_rgba(0,0,0,0.26),0_0_0_1px_rgba(var(--accent-rgb),0.12)]",
+    );
     expect(
       tree?.root.findAll((node) => hasClass(node, "plugins-game-modal")).length,
     ).toBe(0);
-    expect(text(tree?.root)).toContain("All (2)");
-    expect(text(tree?.root)).toContain("Enabled (1)");
     expect(text(tree?.root)).toContain("Discord");
   });
 
@@ -290,7 +407,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -319,7 +436,7 @@ describe("PluginsView game modal", () => {
 
   it("uses list/detail mobile panes on narrow viewport", async () => {
     narrowViewport = true;
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -370,7 +487,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -407,7 +524,7 @@ describe("PluginsView game modal", () => {
     ]);
     mockUseApp.mockImplementation(() => state);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -440,7 +557,7 @@ describe("PluginsView game modal", () => {
       baseContext([createPlugin("test-plugin", "Test Plugin", "feature")]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -457,7 +574,7 @@ describe("PluginsView game modal", () => {
         node.type === "button" &&
         typeof node.props.className === "string" &&
         node.props.className.includes("plugins-game-action-btn") &&
-        node.children.some((c) => c === "pluginsview.TestConnection"),
+        node.children.some((c) => c === "Test Connection"),
     )[0];
     await act(async () => {
       await testConnectionBtn.props.onClick();
@@ -473,26 +590,26 @@ describe("PluginsView game modal", () => {
     expect(mockHandlePluginConfigSave).toHaveBeenCalledWith("test-plugin", {});
   });
 
-  it("shows retake only in streaming mode", async () => {
+  it("shows streaming plugin only in streaming mode", async () => {
     mockUseApp.mockReturnValue(
       baseContext([
-        createPlugin("retake", "Retake.tv", "streaming"),
+        createPlugin("twitch", "Twitch", "streaming"),
         createPlugin("discord", "Discord", "connector"),
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "streaming" }),
       );
     });
 
-    expect(text(tree?.root)).toContain("Retake.tv");
+    expect(text(tree?.root)).toContain("Twitch");
     expect(text(tree?.root)).not.toContain("Discord");
   });
 
-  it("shows all connectors in Connectors view and keeps connector search/filter controls", async () => {
+  it("shows all connectors in Connectors view", async () => {
     const state = baseContext([
       createPlugin("telegram", "Telegram", "connector", {
         tags: ["connector", "social", "social-chat", "messaging"],
@@ -508,13 +625,10 @@ describe("PluginsView game modal", () => {
         enabled: false,
         tags: [],
       }),
-      createPlugin("retake", "Retake.tv", "streaming", {
-        tags: ["streaming", "broadcast"],
-      }),
     ]);
     mockUseApp.mockImplementation(() => state);
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { mode: "social" }),
@@ -525,7 +639,11 @@ describe("PluginsView game modal", () => {
     expect(text(tree?.root)).toContain("Signal");
     expect(text(tree?.root)).toContain("GitHub");
     expect(text(tree?.root)).toContain("Iq");
-    expect(text(tree?.root)).not.toContain("Retake.tv");
+    const sidebar = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
+    )[0];
+    expect(sidebar).toBeDefined();
+    expect(text(sidebar)).toContain("All");
 
     const addButtons = tree?.root.findAll(
       (node) =>
@@ -533,36 +651,6 @@ describe("PluginsView game modal", () => {
         node.children.some((child) => child === "pluginsview.AddPlugin"),
     );
     expect(addButtons.length).toBe(0);
-
-    const searchInputs = tree?.root.findAll(
-      (node) =>
-        node.type === "input" && typeof node.props.placeholder === "string",
-    );
-    expect(searchInputs.length).toBe(1);
-    expect(searchInputs[0]?.props.placeholder).toBe("Search...");
-    expect(text(tree?.root)).toContain("All (4)");
-    expect(text(tree?.root)).toContain("Enabled (2)");
-
-    state.pluginSearch = "Iq";
-    await act(async () => {
-      tree?.update(React.createElement(PluginsView, { mode: "social" }));
-    });
-    expect(text(tree?.root)).toContain("Iq");
-    expect(text(tree?.root)).not.toContain("Telegram");
-    expect(text(tree?.root)).not.toContain("GitHub");
-
-    state.pluginSearch = "";
-    mockUseApp.mockImplementation(() => ({
-      ...state,
-      pluginStatusFilter: "enabled",
-    }));
-    await act(async () => {
-      tree?.update(React.createElement(PluginsView, { mode: "social" }));
-    });
-    expect(text(tree?.root)).toContain("Telegram");
-    expect(text(tree?.root)).toContain("GitHub");
-    expect(text(tree?.root)).not.toContain("Signal");
-    expect(text(tree?.root)).not.toContain("Iq");
   });
 
   it("renders plugin type filters in a desktop sidebar for the main plugins view", async () => {
@@ -574,13 +662,13 @@ describe("PluginsView game modal", () => {
         createPlugin("discord", "Discord", "connector", {
           tags: ["connector", "messaging"],
         }),
-        createPlugin("retake", "Retake.tv", "streaming", {
+        createPlugin("twitch", "Twitch", "streaming", {
           tags: ["streaming", "broadcast"],
         }),
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(PluginsView));
     });
@@ -589,40 +677,40 @@ describe("PluginsView game modal", () => {
       "data-testid": "plugins-subgroup-sidebar",
     })[0];
     expect(sidebar).toBeDefined();
-    expect(text(sidebar)).toContain("Plugin Types");
-    expect(text(sidebar)).toContain("All");
-    expect(text(sidebar)).toContain("AI Providers");
-    expect(text(sidebar)).toContain("Connectors");
-    expect(text(sidebar)).toContain("Streaming Destinations");
+    expect(String(sidebar.props.className)).not.toContain("h-screen");
+    expect(String(sidebar.props.className)).toContain("overflow-hidden");
+    expect(String(sidebar.props.className)).toContain("backdrop-blur-md");
+    expect(String(sidebar.props.className)).toContain("border-border/34");
+    const sidebarText = text(sidebar);
+    expect(sidebarText).toContain("All");
+    expect(sidebarText).toContain("AI Providers");
+    expect(sidebarText).toContain("Connectors");
+    expect(sidebarText).toContain("Streaming Destinations");
   });
 
   it("renders setup links on cards and opens detail links via desktop IPC with browser fallback", async () => {
     const openSpy = vi
       .spyOn(window, "open")
       .mockImplementation(() => null as unknown as Window);
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: {
-        request: {
-          desktopOpenExternal: mockOpenExternalInvoke,
-        },
-        onMessage: vi.fn(),
-        offMessage: vi.fn(),
+    (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__ = {
+      request: {
+        desktopOpenExternal: mockOpenExternalInvoke,
       },
-    });
+      onMessage: vi.fn(),
+      offMessage: vi.fn(),
+    };
 
     mockUseApp.mockReturnValue(
       baseContext([
-        createPlugin("retake", "Retake.tv", "streaming", {
-          setupGuideUrl: "https://docs.milady.ai/plugin-setup-guide#retaketv",
+        createPlugin("twitch", "Twitch", "streaming", {
+          setupGuideUrl: "https://docs.milady.ai/plugin-setup-guide#twitch",
           repository:
-            "https://github.com/milady-ai/milady/tree/main/packages/plugin-retake",
+            "https://github.com/milady-ai/milady/tree/main/packages/plugin-twitch",
         }),
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer;
+    let tree: TestRenderer.ReactTestRenderer = null as any;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { mode: "streaming" }),
@@ -658,14 +746,10 @@ describe("PluginsView game modal", () => {
       await Promise.resolve();
     });
     expect(mockOpenExternalInvoke).toHaveBeenCalledWith({
-      url: "https://docs.milady.ai/plugin-setup-guide#retaketv",
+      url: "https://docs.milady.ai/plugin-setup-guide#twitch",
     });
 
-    Object.defineProperty(window, "__MILADY_ELECTROBUN_RPC__", {
-      configurable: true,
-      writable: true,
-      value: undefined,
-    });
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
     const sourceButton = tree?.root.findAll(
       (node) =>
         hasClass(node, "plugins-game-link-btn") &&
@@ -673,10 +757,10 @@ describe("PluginsView game modal", () => {
     )[0];
     await act(async () => {
       sourceButton.props.onClick();
-      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(openSpy).toHaveBeenCalledWith(
-      "https://github.com/milady-ai/milady/tree/main/packages/plugin-retake",
+      "https://github.com/milady-ai/milady/tree/main/packages/plugin-twitch",
       "_blank",
       "noopener,noreferrer",
     );

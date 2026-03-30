@@ -83,10 +83,11 @@ describe("CanvasManager.eval() URL allowlist", () => {
       expect(result).toBe("ok");
     });
 
-    it("allows file:// URLs", async () => {
+    it("blocks file:// URLs for eval (security: prevents local file script injection)", async () => {
       injectFakeCanvas(manager, "c5", "file:///Users/test/index.html");
-      const result = await manager.eval({ id: "c5", script: "1+1" });
-      expect(result).toBe("ok");
+      await expect(manager.eval({ id: "c5", script: "1+1" })).rejects.toThrow(
+        /blocked|external/i,
+      );
     });
 
     it("allows about:blank", async () => {

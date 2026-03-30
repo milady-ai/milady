@@ -73,3 +73,22 @@ Some `@elizaos` packages (e.g. `@elizaos/plugin-coding-agent`) publish a `packag
 **What happens:** Bun's resolver prefers the `"bun"` export condition. It tries to load `./src/index.ts`, the file is missing, and we get "Cannot find module … from …/src/runtime/eliza.ts" even though the package is in `node_modules`. Bun does not fall back to the `"import"` condition when the `"bun"` target is missing.
 
 **Our fix:** `scripts/patch-deps.mjs` runs after `bun install` via `scripts/run-repo-setup.mjs` (used by `postinstall` and the app build bootstrap). It finds `@elizaos/plugin-coding-agent` (and any other package we add) and, if `exports["."].bun` points to `./src/index.ts` and that file does not exist, removes the `"bun"` and `"default"` conditions that reference `src/`. After the patch, only `"import"` (and similar) remain, so Bun resolves to `./dist/index.js`. **Why we only patch when the file is missing:** In a development workspace where the plugin is checked out with `src/` present, we leave the package unchanged so upstream workflows still work.
+
+## Pinned: `@elizaos/plugin-openrouter`
+
+Root `package.json` lists **`@elizaos/plugin-openrouter`** as an **exact** version (**`2.0.0-alpha.10`**) instead of a caret range.
+
+### What went wrong in `2.0.0-alpha.12`
+
+The published npm tarball for **`2.0.0-alpha.12`** contains **truncated** JavaScript outputs for the Node ESM and browser entrypoints (`dist/node/index.node.js`, `dist/browser/index.browser.js`). Those files only include the bundled `utils/config` helpers (~80 lines). The **main plugin implementation** (the object that should be exported as `openrouterPlugin` and as `default`) is **not present** in the file, but the final `export { … }` list still names `openrouterPlugin` and `openrouterPlugin2 as default`.
+
+**Why Bun errors:** When the runtime loads the plugin, Bun builds/transpiles that entry file and fails with errors like *`openrouterPlugin` is not declared in this file* — the symbols are exported but never defined. The CommonJS build (`dist/cjs/index.node.cjs`) is incomplete in the same way (export getters reference a missing `import_plugin` chunk).
+
+**Why we pin instead of postinstall-patching the dist:** The broken release is missing the entire plugin body, not a single wrong identifier (contrast `@elizaos/plugin-pdf`, where a small string replace fixes a bad export alias). Reconstructing the plugin from source inside Milady would fork upstream and be fragile. **Pinning to `2.0.0-alpha.10`** restores a full bundle (~500+ lines in `index.node.js`) that loads cleanly.
+
+### Maintainer notes
+
+- **Before bumping** the OpenRouter dependency, verify the **published tarball** on npm: open `dist/node/index.node.js` and confirm it defines the default export / `openrouterPlugin`, or run `bun build node_modules/@elizaos/plugin-openrouter/dist/node/index.node.js --target=bun` after install.
+- **Remove the pin** (restore a semver range) only after upstream publishes a fixed version and you have confirmed the artifact. **Why:** `^2.0.0-alpha.10` allowed Bun to resolve **`alpha.12`**, which broke installs that upgraded the lockfile.
+
+User-facing context and configuration for OpenRouter itself live in **[OpenRouter plugin](plugin-registry/llm/openrouter.md)** (Mintlify: `/plugin-registry/llm/openrouter`).

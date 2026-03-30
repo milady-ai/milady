@@ -1,10 +1,3 @@
-/**
- * Linux Permission Checks
- *
- * Linux generally grants all permissions to desktop apps.
- * Camera/microphone are handled by PipeWire/PulseAudio at runtime.
- */
-
 import type {
   PermissionCheckResult,
   SystemPermissionId,

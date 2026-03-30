@@ -40,7 +40,7 @@ const { mockClient } = vi.hoisted(() => ({
     getAgentEvents: vi.fn(async () => ({ events: [], latestEventId: null })),
     getStatus: vi.fn(async () => ({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -54,6 +54,7 @@ const { mockClient } = vi.hoisted(() => ({
       triggers: [],
       todos: [],
     })),
+    getBaseUrl: vi.fn(() => "http://localhost:2138"),
     cloudLogin: vi.fn(async () => ({
       ok: false,
       browserUrl: "",
@@ -74,15 +75,9 @@ vi.mock("@miladyai/app-core/api", () => ({
   SkillScanReportSummary: {},
 }));
 
+import type { AppState } from "@miladyai/app-core/state";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
-
-function createDeferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
+import { createDeferred } from "../../../../test/helpers/test-utils";
 
 type ProbeApi = {
   setState: (key: string, value: unknown) => void;
@@ -99,8 +94,8 @@ function Probe(props: { onReady: (api: ProbeApi) => void }) {
 
   useEffect(() => {
     onReady({
-      // biome-ignore lint/suspicious/noExplicitAny: test probe
-      setState: (key, value) => app.setState(key as any, value),
+      setState: (key, value) =>
+        app.setState(key as keyof AppState, value as AppState[keyof AppState]),
       handleOnboardingNext: app.handleOnboardingNext,
       handleOnboardingBack: app.handleOnboardingBack,
       handleCloudLogin: app.handleCloudLogin,
@@ -125,6 +120,9 @@ describe("cloud login locking", () => {
       setInterval: globalThis.setInterval,
       clearInterval: globalThis.clearInterval,
       open: vi.fn(() => null),
+      // Simulate an available backend so the startup flow doesn't skip to
+      // fresh-install onboarding immediately.
+      __MILADY_API_BASE__: "http://localhost:2138",
     });
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
 
@@ -172,7 +170,7 @@ describe("cloud login locking", () => {
     });
     mockClient.getStatus.mockResolvedValue({
       state: "running",
-      agentName: "Milady",
+      agentName: "Eliza",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
@@ -188,6 +186,7 @@ describe("cloud login locking", () => {
       triggers: [],
       todos: [],
     });
+    mockClient.getBaseUrl.mockReturnValue("http://localhost:2138");
     mockClient.cloudLogin.mockResolvedValue({
       ok: false,
       browserUrl: "",
@@ -200,6 +199,7 @@ describe("cloud login locking", () => {
       critical: false,
     });
     mockClient.getCodingAgentStatus.mockResolvedValue(null);
+    mockClient.saveStreamSettings.mockResolvedValue({ ok: true });
   });
 
   it("allows only one same-tick cloud login start", async () => {

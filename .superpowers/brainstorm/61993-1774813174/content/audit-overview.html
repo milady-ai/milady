@@ -1,0 +1,125 @@
+<h2>Frontend Audit Results</h2>
+<p class="subtitle">Full sweep across UI components, CSS/theming, dark mode, responsive design, homepage, and cross-app consistency</p>
+
+<div class="section">
+  <h3>Issue Heatmap</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
+
+    <div style="background:rgba(246,70,93,0.12);border:1px solid rgba(246,70,93,0.3);border-radius:12px;padding:16px;">
+      <div style="font-size:32px;font-weight:700;color:#f6465d;">19</div>
+      <div style="font-size:14px;font-weight:600;color:#f6465d;margin-bottom:8px;">HIGH severity</div>
+      <ul style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;padding-left:16px;line-height:1.6;">
+        <li>6 hardcoded bg-white / text-black (invisible in wrong theme)</li>
+        <li>8 dead UI components exported but never imported</li>
+        <li>2 hardcoded hex backgrounds (won't adapt to theme)</li>
+        <li>Homepage token system completely decoupled from app</li>
+        <li>107 hardcoded status color classes in homepage</li>
+        <li>Color values drift between app and homepage</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(240,185,11,0.12);border:1px solid rgba(240,185,11,0.3);border-radius:12px;padding:16px;">
+      <div style="font-size:32px;font-weight:700;color:#f0b90b;">28</div>
+      <div style="font-size:14px;font-weight:600;color:#f0b90b;margin-bottom:8px;">MEDIUM severity</div>
+      <ul style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;padding-left:16px;line-height:1.6;">
+        <li>13+ ad-hoc z-index values (only 1 constant defined)</li>
+        <li>20+ status color classes without dark variants</li>
+        <li>4 duplicate component patterns (search, tags, tooltips, dialogs)</li>
+        <li>Hardcoded colors in 10+ components (EmotePicker, BscTradePanel, etc.)</li>
+        <li>Dual theme selector undocumented</li>
+        <li>5 fixed-width components without responsive alternatives</li>
+        <li>Missing aria-labels, heading hierarchy, landmarks</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(3,166,109,0.12);border:1px solid rgba(3,166,109,0.3);border-radius:12px;padding:16px;">
+      <div style="font-size:32px;font-weight:700;color:#03a66d;">14</div>
+      <div style="font-size:14px;font-weight:600;color:#03a66d;margin-bottom:8px;">LOW severity</div>
+      <ul style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;padding-left:16px;line-height:1.6;">
+        <li>3 unused CSS animations (avatar-loader-progress, slide-in-left, marquee-vertical)</li>
+        <li>2 unused CSS variables (--duration-fast, --duration-slow)</li>
+        <li>10+ hardcoded animation durations not aligned with tokens</li>
+        <li>Unused @tailwindcss/typography in homepage</li>
+        <li>Duplicate Google Fonts loading in homepage</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(138,138,148,0.12);border:1px solid rgba(138,138,148,0.3);border-radius:12px;padding:16px;">
+      <div style="font-size:32px;font-weight:700;color:#8a8a94;">5</div>
+      <div style="font-size:14px;font-weight:600;color:#8a8a94;margin-bottom:8px;">Areas of Strength</div>
+      <ul style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;padding-left:16px;line-height:1.6;">
+        <li>Radix UI primitives give solid accessibility foundation</li>
+        <li>CVA variant system is well-implemented</li>
+        <li>CSS custom property architecture is sound</li>
+        <li>Theme switching logic is correct (dual-selector works)</li>
+        <li>All forwardRef components have displayName</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Top 7 Problem Areas (by impact)</h3>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(246,70,93,0.08);border-radius:8px;border-left:3px solid #f6465d;">
+      <span style="font-weight:700;color:#f6465d;min-width:24px;">1</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">Homepage theme system is completely separate from app</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Different token names, different values, different fonts, dark-mode-only. Can't share components.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(246,70,93,0.08);border-radius:8px;border-left:3px solid #f6465d;">
+      <span style="font-weight:700;color:#f6465d;min-width:24px;">2</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">Dark mode breakage from hardcoded colors</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">bg-white switch thumbs, text-black on warn buttons, hex backgrounds that won't adapt. Visible bugs.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(246,70,93,0.08);border-radius:8px;border-left:3px solid #f6465d;">
+      <span style="font-weight:700;color:#f6465d;min-width:24px;">3</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">8 dead components exported from UI library</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">ChatAtoms, ConfirmDelete, SearchBar, SearchInput, TagEditor, TagInput, Sonner, TooltipExtended -- never imported.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(240,185,11,0.08);border-radius:8px;border-left:3px solid #f0b90b;">
+      <span style="font-weight:700;color:#f0b90b;min-width:24px;">4</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">Z-index anarchy (13+ ad-hoc values, 1 constant)</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Values range from z-10 to z-[12000] with no system. Stacking bugs waiting to happen.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(240,185,11,0.08);border-radius:8px;border-left:3px solid #f0b90b;">
+      <span style="font-weight:700;color:#f0b90b;min-width:24px;">5</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">Hardcoded status/chain colors throughout components</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">text-red-400, text-green-400, bg-blue-500/20 scattered across BscTradePanel, CustomActionsPanel, steward/, etc.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(240,185,11,0.08);border-radius:8px;border-left:3px solid #f0b90b;">
+      <span style="font-weight:700;color:#f0b90b;min-width:24px;">6</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">Duplicate component patterns in UI library</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">SearchBar vs SearchInput, TagEditor vs TagInput, Tooltip vs TooltipExtended, Dialog vs DrawerSheet -- unclear which to use.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(240,185,11,0.08);border-radius:8px;border-left:3px solid #f0b90b;">
+      <span style="font-weight:700;color:#f0b90b;min-width:24px;">7</span>
+      <div>
+        <div style="font-weight:600;color:rgba(255,255,255,0.92);">Prop naming inconsistencies (variant vs tone)</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Button/Badge use "variant", StatusBadge/ConfirmDialog use "tone" for the same concept.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p style="margin-top:24px;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Detailed findings continue in the terminal. Respond there to discuss approaches.</p>

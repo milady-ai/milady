@@ -44,6 +44,26 @@ vi.mock("@miladyai/app-core/config", () => ({
   defaultRegistry: {},
 }));
 
+vi.mock("@miladyai/ui", async () => {
+  const actual = await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  return {
+    ...actual,
+    Select: ({ value, onValueChange, children }: any) => (
+      <select value={value} onChange={e => onValueChange(e.target.value)}>
+        {children}
+      </select>
+    ),
+    SelectTrigger: ({ children }: any) => <>{children}</>,
+    SelectValue: () => null,
+    SelectContent: ({ children }: any) => <>{children}</>,
+    SelectItem: ({ value, disabled, children }: any) => (
+      <option value={value} disabled={disabled}>
+        {children}
+      </option>
+    ),
+  };
+});
+
 import { ProviderSwitcher } from "@miladyai/app-core/components";
 
 // ---------------------------------------------------------------------------
@@ -85,8 +105,7 @@ function defaultProps() {
 }
 
 function getSelectValue(tree: ReactTestRenderer): string | undefined {
-  // biome-ignore lint/suspicious/noExplicitAny: test introspection
-  const root = (tree as any).root;
+  const root = tree.root;
   const selects = root.findAll(
     (node: ReactTestInstance) =>
       node.type === "select" && node.props.value !== undefined,
@@ -95,12 +114,26 @@ function getSelectValue(tree: ReactTestRenderer): string | undefined {
 }
 
 function getSelect(tree: ReactTestRenderer): ReactTestInstance {
-  // biome-ignore lint/suspicious/noExplicitAny: test introspection
-  const root = (tree as any).root;
+  const root = tree.root;
   return root.find(
     (node: ReactTestInstance) =>
       node.type === "select" && node.props.value !== undefined,
   );
+}
+
+function getSelectOptionLabels(tree: ReactTestRenderer): string[] {
+  return getSelect(tree)
+    .findAll((node: ReactTestInstance) => node.type === "option")
+    .map((node) => {
+      const children = node.props.children;
+      if (typeof children === "string") {
+        return children;
+      }
+      if (Array.isArray(children)) {
+        return children.join("");
+      }
+      return String(children ?? "");
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -118,10 +151,13 @@ describe("ProviderSwitcher provider dropdown default", () => {
     mockSwitchProvider.mockResolvedValue({ ok: true });
   });
 
-  it("does not auto-select __cloud__ when config returns non-cloud inference", async () => {
-    // Config returns cloud.enabled=false — not a cloud user
+  it("uses config.connection as the authoritative local provider selection", async () => {
     mockGetConfig.mockResolvedValue({
-      models: { small: "some-local-model", large: "some-local-model" },
+      connection: {
+        kind: "local-provider",
+        provider: "anthropic",
+      },
+      models: {},
       cloud: { enabled: false },
       agents: {},
       env: { vars: {} },
@@ -144,9 +180,7 @@ describe("ProviderSwitcher provider dropdown default", () => {
     });
 
     const selectValue = getSelectValue(tree);
-    // With the fix, the dropdown should resolve to the enabled plugin
-    // (plugin-anthropic), NOT "__cloud__"
-    expect(selectValue).toBe("plugin-anthropic");
+    expect(selectValue).toBe("anthropic");
   });
 
   it("selects __cloud__ when config returns cloud inference enabled", async () => {
@@ -254,16 +288,9 @@ describe("ProviderSwitcher provider dropdown default", () => {
       await Promise.resolve();
     });
 
-    expect(mockUpdateConfig).toHaveBeenCalledWith({
-      cloud: {
-        services: { inference: false },
-        inferenceMode: "byok",
-      },
-      env: { vars: { MILADY_USE_PI_AI: "" } },
-    });
     expect(mockSwitchProvider).toHaveBeenCalledWith("anthropic-subscription");
-    expect(handlePluginToggle).toHaveBeenCalledWith("plugin-anthropic", true);
-    expect(handlePluginToggle).toHaveBeenCalledWith("plugin-openai", false);
+    expect(mockUpdateConfig).not.toHaveBeenCalled();
+    expect(handlePluginToggle).not.toHaveBeenCalled();
   });
 
   it("restores Claude Subscription from saved config instead of collapsing to anthropic", async () => {
@@ -298,5 +325,39 @@ describe("ProviderSwitcher provider dropdown default", () => {
     });
 
     expect(getSelectValue(tree)).toBe("anthropic-subscription");
+  });
+
+  it("shows plain-English subscription labels instead of raw translation keys", async () => {
+    mockGetConfig.mockResolvedValue({
+      models: {},
+      cloud: {
+        enabled: false,
+        inferenceMode: "byok",
+        services: { inference: false },
+      },
+      agents: {},
+      env: { vars: {} },
+    });
+    mockGetOnboardingOptions.mockResolvedValue({
+      models: [],
+      piAiModels: [],
+      piAiDefaultModel: "",
+    });
+    mockGetSubscriptionStatus.mockResolvedValue({ providers: [] });
+
+    let tree!: ReactTestRenderer;
+    await act(async () => {
+      tree = create(React.createElement(ProviderSwitcher, defaultProps()));
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const optionLabels = getSelectOptionLabels(tree);
+    expect(optionLabels).toContain("Claude Subscription");
+    expect(optionLabels).toContain("ChatGPT Subscription");
+    expect(optionLabels).not.toContain("providerswitcher.claudeSubscription");
+    expect(optionLabels).not.toContain("providerswitcher.chatgptSubscription");
   });
 });

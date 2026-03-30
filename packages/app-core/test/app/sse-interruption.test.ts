@@ -58,7 +58,7 @@ describe("SSE stream interruption detection", () => {
       buildSseResponse([
         'data: {"type":"token","text":"Hello "}\n\n',
         'data: {"type":"token","text":"world"}\n\n',
-        'data: {"type":"done","fullText":"Hello world","agentName":"Milady"}\n\n',
+        'data: {"type":"done","fullText":"Hello world","agentName":"Eliza"}\n\n',
       ]),
     );
 
@@ -67,7 +67,7 @@ describe("SSE stream interruption detection", () => {
 
     expect(result.completed).toBe(true);
     expect(result.text).toBe("Hello world");
-    expect(result.agentName).toBe("Milady");
+    expect(result.agentName).toBe("Eliza");
     expect(tokens).toEqual(["Hello ", "world"]);
   });
 

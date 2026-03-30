@@ -130,4 +130,4 @@ Pricing: [openai.com/pricing](https://openai.com/pricing)
 
 - [Anthropic Plugin](/plugin-registry/llm/anthropic) — Claude model family
 - [OpenRouter Plugin](/plugin-registry/llm/openrouter) — Route between providers
-- [Model Providers Guide](/model-providers) — Compare all providers
+- [Model Providers](/runtime/models) — Compare all providers
