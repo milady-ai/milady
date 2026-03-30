@@ -28,7 +28,7 @@
     "tags": ["feature", "voice", "text-to-speech", "audio"]
   },
   "eliza-classic": {
-    "description": "Compatibility plugin for loading classic elizaOS behavior and legacy agent workflows.",
+    "description": "Compatibility plugin referencing the original ELIZA-style patterns alongside legacy elizaOS agent workflows.",
     "tags": ["feature", "compatibility", "legacy", "agents"]
   },
   "elizacloud": {

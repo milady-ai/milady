@@ -11,5 +11,6 @@ alwaysApply: true
 - **URLs and GitHub** may use whatever path the upstream repo uses (e.g. `github.com/elizaOS`); match the URL literally when linking.
 - When editing existing strings, prefer aligning with **elizaOS** unless an external API or third-party string requires a fixed spelling.
 - Referring to **running agents** in plain language: **Eliza agents** is fine. Do **not** write **elizaOS agents** for that.
+- **Eliza Classic** (`plugin-eliza-classic`): keep this display name — **Eliza** refers to the historical 1966 chatbot, not the elizaOS product spelling.
 
 Repo convention is also documented in `CLAUDE.md` (naming section).

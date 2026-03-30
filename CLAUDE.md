@@ -6,7 +6,7 @@ Milady is a local-first AI assistant built on [elizaOS](https://github.com/eliza
 
 ### elizaOS naming (agents & editors)
 
-Write the framework name as **elizaOS** in prose, comments, user-facing strings, and documentation — not `ElizaOS`. The npm scope remains **`@elizaos/*`** (lowercase). Say **Eliza agents** when you mean agents in plain language (not **elizaOS agents**). Cursor picks this up via `.cursor/rules/elizaos-branding.mdc`.
+Write the framework name as **elizaOS** in prose, comments, user-facing strings, and documentation — not `ElizaOS`. The npm scope remains **`@elizaos/*`** (lowercase). Say **Eliza agents** when you mean agents in plain language (not **elizaOS agents**). The **Eliza Classic** plugin name is an exception (**Eliza** = the 1966 chatbot), not “elizaOS Classic”. Cursor picks this up via `.cursor/rules/elizaos-branding.mdc`.
 
 ## Quick Start (Dev)
 

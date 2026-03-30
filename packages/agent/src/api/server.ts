@@ -9512,7 +9512,11 @@ async function handleRequest(
           apiKey: trimmedApiKey,
         };
         if (trimmedApiKey) {
-          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
+          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1.
+          // Persisted cloud.* + ELIZAOS_* come from applyOnboardingConnectionConfig
+          // (enableCloudInference there); this block is process-only for SDK-compatible CLIs.
+          // Omitting trimmedApiKey leaves existing direct keys (E2E: switch to elizacloud
+          // without apiKey preserves OPENAI_API_KEY).
           const cloudApiKey = trimmedApiKey;
           const cloudBaseUrl = "https://www.elizacloud.ai";
           process.env.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;

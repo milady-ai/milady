@@ -1,7 +1,9 @@
 /**
  * Verifies that switching to ElizaCloud inference configures coding agent
- * CLI credentials to proxy through ElizaCloud's API endpoints, and that
- * switching away clears the proxy base URLs.
+ * CLI credentials to proxy through ElizaCloud's API endpoints (server.ts),
+ * and that switching to a local provider clears ElizaCloud proxy base URLs
+ * plus the paired OPENAI_/ANTHROPIC_ API keys when those URLs pointed at
+ * ElizaCloud (provider-switch-config clearElizaCloudCliProxyEnv).
  */
 
 import { readFileSync } from "node:fs";
@@ -54,21 +56,23 @@ describe("ElizaCloud coding agent credentials", () => {
     expect(cloudSection).toContain("OPENAI_API_KEY = cloudApiKey");
   });
 
-  it("clears ElizaCloud CLI proxy base URLs when applying a local provider", () => {
+  it("clears ElizaCloud CLI proxy URLs and paired API keys when applying a local provider", () => {
     const clearSection = providerSwitchSource.slice(
-      providerSwitchSource.indexOf("function clearElizaCloudCliProxyBaseUrls"),
+      providerSwitchSource.indexOf("function clearElizaCloudCliProxyEnv"),
       providerSwitchSource.indexOf(
         "function applyLocalProviderCapabilities",
         providerSwitchSource.indexOf(
-          "function clearElizaCloudCliProxyBaseUrls",
+          "function clearElizaCloudCliProxyEnv",
         ) + 1,
       ),
     );
     expect(clearSection).toContain("OPENAI_BASE_URL");
+    expect(clearSection).toContain("OPENAI_API_KEY");
     expect(clearSection).toContain("ANTHROPIC_BASE_URL");
+    expect(clearSection).toContain("ANTHROPIC_API_KEY");
     expect(clearSection).toContain("elizacloud");
-    expect(clearSection).toContain("delete process.env[key]");
-    expect(providerSwitchSource).toContain("clearElizaCloudCliProxyBaseUrls()");
+    expect(clearSection).toContain("delete process.env[apiKey]");
+    expect(providerSwitchSource).toContain("clearElizaCloudCliProxyEnv()");
   });
 
   it("documents that Gemini/Aider are unavailable through ElizaCloud", () => {
