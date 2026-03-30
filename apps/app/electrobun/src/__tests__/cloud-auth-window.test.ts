@@ -63,7 +63,7 @@ class FakeCloudWindow implements CloudAuthWindowLike {
 }
 
 describe("isTrustedElizaUrl", () => {
-  it("accepts Eliza Cloud and ElizaOS hosts over http(s)", () => {
+  it("accepts Eliza Cloud and elizaOS hosts over http(s)", () => {
     expect(isTrustedElizaUrl("https://www.elizacloud.ai/login")).toBe(true);
     expect(isTrustedElizaUrl("https://elizacloud.ai/dashboard/eliza")).toBe(
       true,
@@ -134,7 +134,7 @@ describe("CloudAuthWindowManager", () => {
     expect(focused).toHaveLength(1);
   });
 
-  it("accepts trusted ElizaOS URLs in the same in-app window", () => {
+  it("accepts trusted elizaOS URLs in the same in-app window", () => {
     const window = new FakeCloudWindow();
     const manager = new CloudAuthWindowManager({
       createWindow: () => window,

@@ -1,10 +1,10 @@
 ---
 title: "Testing Plugins"
 sidebarTitle: "Testing"
-description: "Unit, integration, and E2E testing patterns for ElizaOS plugins using Vitest."
+description: "Unit, integration, and E2E testing patterns for elizaOS plugins using Vitest."
 ---
 
-This guide covers testing patterns for ElizaOS plugins — from unit testing individual actions and providers to integration testing with the runtime, and embedding test suites in your plugin.
+This guide covers testing patterns for elizaOS plugins — from unit testing individual actions and providers to integration testing with the runtime, and embedding test suites in your plugin.
 
 ## Setup
 

@@ -172,6 +172,6 @@ src/awareness/contributors/
   connectors.ts                      — Channel status
   cloud.ts                           — Cloud connection + credits
   features.ts                        — Feature flags
-src/providers/self-status.ts         — ElizaOS provider (calls registry.composeSummary)
+src/providers/self-status.ts         — elizaOS provider (calls registry.composeSummary)
 src/actions/get-self-status.ts       — GET_SELF_STATUS action (calls registry.getDetail)
 ```

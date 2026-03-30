@@ -105,7 +105,7 @@ const DEFAULT_MEMORY_ALT_FILENAME = "memory.md";
 const WORKSPACE_TEMPLATES: Record<string, string> = {
   [DEFAULT_AGENTS_FILENAME]: `# Agents
 
-You are an autonomous AI agent powered by ElizaOS.
+You are an autonomous AI agent powered by elizaOS.
 
 ## Capabilities
 
@@ -214,8 +214,8 @@ export type WorkspaceInitFile = {
 export function isDefaultBoilerplate(name: string, content: string): boolean {
   const template = WORKSPACE_TEMPLATES[name];
   if (!template) return false;
-  // Case-insensitive comparison — template casing may drift from on-disk files
-  // (e.g. "ElizaOS" vs "elizaOS") written by an older version.
+  // Case-insensitive comparison — on-disk files may use different casing for the
+  // product name (e.g. ELIZAOS) than the current template.
   return content.trim().toLowerCase() === template.trim().toLowerCase();
 }
 

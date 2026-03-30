@@ -53,7 +53,7 @@ export default {
     copy: {
       "../dist": "renderer",
       "src/preload.js": "bun/preload.js",
-      // ElizaOS backend server bundle (tsdown output from repo root dist/).
+      // elizaOS backend server bundle (tsdown output from repo root dist/).
       // agent.ts walks up from import.meta.dir looking for milady-dist/ to spawn
       // the canonical runtime entry (`entry.js start`).
       // Paths are relative to apps/app/electrobun/ (where electrobun build is run).

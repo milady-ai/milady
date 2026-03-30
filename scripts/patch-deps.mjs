@@ -292,7 +292,7 @@ function patchPluginElizaCloudResponsesCompat() {
   }
   if (!response.ok) {
     const errorBody = typeof data === "object" && data ? data.error : undefined;
-    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`ElizaOS Cloud error \${response.status}\`;
+    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`elizaOS Cloud error \${response.status}\`;
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     if (errorBody) {
@@ -406,7 +406,7 @@ function patchPluginElizaCloudResponsesCompat() {
   }
   if (!response.ok) {
     const errorBody = typeof data === "object" && data ? data.error : undefined;
-    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`ElizaOS Cloud error \${response.status}\`;
+    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`elizaOS Cloud error \${response.status}\`;
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     if (errorBody) {
@@ -426,7 +426,7 @@ function patchPluginElizaCloudResponsesCompat() {
     text = data.output.flatMap((item) => Array.isArray(item?.content) ? item.content : []).map((part) => typeof part?.text === "string" ? part.text : "").join("");
   }
   if (!text.trim()) {
-    throw new Error("ElizaOS Cloud returned no text response");
+    throw new Error("elizaOS Cloud returned no text response");
   }
   return text;
 }`
@@ -483,7 +483,7 @@ patchPluginElizaCloudResponsesCompat();
 /**
  * Patch @elizaos/plugin-sql UUID validation regex.
  *
- * The upstream plugin strictly checks for UUID versions 1-5, but ElizaOS
+ * The upstream plugin strictly checks for UUID versions 1-5, but elizaOS
  * generates custom version 0 UUIDs. We patch the regex to allow version 0.
  * Remove once upstream fixes its isValidUUID method.
  */

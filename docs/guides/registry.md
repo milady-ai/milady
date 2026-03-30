@@ -135,7 +135,7 @@ Each plugin in the registry has a manifest entry:
   "dirName": "plugin-telegram",
   "name": "Telegram",
   "npmName": "@elizaos/plugin-telegram",
-  "description": "Telegram bot connector for elizaOS agents",
+  "description": "Telegram bot connector for Eliza agents",
   "category": "connector",
   "envKey": "TELEGRAM_BOT_TOKEN",
   "configKeys": [
