@@ -82,7 +82,9 @@ function resolveCompatOnboardingStyle(
 function resolvePersistedOnboardingConnection(
   body: Record<string, unknown>,
 ): OnboardingConnection | null {
-  const nextConnection = normalizePersistedOnboardingConnection(body.connection);
+  const nextConnection = normalizePersistedOnboardingConnection(
+    body.connection,
+  );
   if (!nextConnection) {
     return null;
   }
