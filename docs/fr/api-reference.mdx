@@ -535,6 +535,11 @@ Les conversations sont limitées à l'interface de chat web. Chaque conversation
 | `POST` | `/api/cloud/agents/:id/provision` | Provisionner un agent cloud |
 | `POST` | `/api/cloud/agents/:id/shutdown` | Arrêter et supprimer un agent cloud |
 | `POST` | `/api/cloud/agents/:id/connect` | Se connecter à un agent cloud existant |
+| `POST` | `/api/cloud/v1/milady/agents/:id/pairing-token` | Générer un jeton d'appairage pour ouvrir l'interface Web d'un agent cloud dans un nouvel onglet. Retourne `{ success, data: { token, redirectUrl, expiresIn } }` |
+
+<Info>
+Les routes sous `/api/cloud/v1/` sont transmises en tant que `/api/v1/` vers le backend cloud, distinctes du mappage hérité `/api/cloud/compat/*`. Les en-têtes `Authorization: Bearer` et `X-Api-Key` sont acceptés pour l'authentification.
+</Info>
 
 ---
 
@@ -801,7 +806,7 @@ Les conversations sont limitées à l'interface de chat web. Chaque conversation
 | `GET` | `/api/stream/voice` | Obtenir la configuration voix/TTS |
 | `POST` | `/api/stream/voice` | Enregistrer les paramètres voix/TTS |
 | `POST` | `/api/stream/voice/speak` | Déclencher la synthèse vocale sur le flux en direct |
-| `GET` | `/api/stream/settings` | Obtenir les paramètres visuels du flux |
+| `GET` | `/api/stream/settings` | Obtenir les paramètres visuels du flux. La réponse inclut `avatarIndex` (1–8) pour l'avatar VRM de l'agent |
 | `POST` | `/api/stream/settings` | Enregistrer les paramètres visuels du flux |
 
 ---

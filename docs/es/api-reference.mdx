@@ -535,6 +535,11 @@ Las conversaciones están limitadas a la interfaz de web-chat. Cada conversació
 | `POST` | `/api/cloud/agents/:id/provision` | Aprovisionar un agente en la nube |
 | `POST` | `/api/cloud/agents/:id/shutdown` | Apagar y eliminar un agente en la nube |
 | `POST` | `/api/cloud/agents/:id/connect` | Conectarse a un agente existente en la nube |
+| `POST` | `/api/cloud/v1/milady/agents/:id/pairing-token` | Generar un token de emparejamiento para abrir la interfaz Web de un agente en la nube en una nueva pestaña. Devuelve `{ success, data: { token, redirectUrl, expiresIn } }` |
+
+<Info>
+Las rutas bajo `/api/cloud/v1/` se reenvían como `/api/v1/` al backend en la nube, a diferencia del mapeo heredado `/api/cloud/compat/*`. Se aceptan tanto `Authorization: Bearer` como `X-Api-Key` para la autenticación.
+</Info>
 
 ---
 
@@ -801,7 +806,7 @@ Las conversaciones están limitadas a la interfaz de web-chat. Cada conversació
 | `GET` | `/api/stream/voice` | Obtener la configuración de voz/TTS |
 | `POST` | `/api/stream/voice` | Guardar la configuración de voz/TTS |
 | `POST` | `/api/stream/voice/speak` | Activar TTS en el stream en vivo |
-| `GET` | `/api/stream/settings` | Obtener la configuración visual del stream |
+| `GET` | `/api/stream/settings` | Obtener la configuración visual del stream. La respuesta incluye `avatarIndex` (1–8) para el avatar VRM del agente |
 | `POST` | `/api/stream/settings` | Guardar la configuración visual del stream |
 
 ---

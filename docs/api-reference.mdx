@@ -459,6 +459,11 @@ Conversations are scoped to the web-chat interface. Each conversation maps to an
 | `POST` | `/api/cloud/agents/:id/provision` | Provision a cloud agent |
 | `POST` | `/api/cloud/agents/:id/shutdown` | Shutdown and delete a cloud agent |
 | `POST` | `/api/cloud/agents/:id/connect` | Connect to an existing cloud agent |
+| `POST` | `/api/cloud/v1/milady/agents/:id/pairing-token` | Generate a pairing token for opening a cloud agent's Web UI in a new tab. Returns `{ success, data: { token, redirectUrl, expiresIn } }` |
+
+<Info>
+Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, distinct from the legacy `/api/cloud/compat/*` mapping. Both `Authorization: Bearer` and `X-Api-Key` headers are accepted for authentication.
+</Info>
 
 ---
 
@@ -701,7 +706,7 @@ Conversations are scoped to the web-chat interface. Each conversation maps to an
 | `GET` | `/api/stream/voice` | Get voice/TTS configuration |
 | `POST` | `/api/stream/voice` | Save voice/TTS settings |
 | `POST` | `/api/stream/voice/speak` | Trigger TTS on the live stream |
-| `GET` | `/api/stream/settings` | Get visual stream settings |
+| `GET` | `/api/stream/settings` | Get visual stream settings. Response includes `avatarIndex` (1–8) for the agent's VRM avatar |
 | `POST` | `/api/stream/settings` | Save visual stream settings |
 
 ---
