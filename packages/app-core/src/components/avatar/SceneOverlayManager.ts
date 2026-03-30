@@ -53,7 +53,7 @@ const HEARTBEATS_PANEL: PanelConfig = {
 interface OverlayPanel {
   group: THREE.Group;
   mesh: THREE.Mesh;
-  glowMesh: THREE.Mesh;
+  glowMesh?: THREE.Mesh;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   texture: THREE.CanvasTexture;
@@ -98,28 +98,14 @@ function createPanel(config: PanelConfig): OverlayPanel {
   });
   const mesh = new THREE.Mesh(geometry, material);
 
-  // Subtle glow plane behind the panel
-  const glowGeometry = new THREE.PlaneGeometry(w * 1.08, h * 1.08);
-  const glowMaterial = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(0xf0b90b),
-    transparent: true,
-    opacity: 0,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-  });
-  const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
-  glowMesh.position.z = -0.01;
-
   const group = new THREE.Group();
   group.name = "OverlayPanel";
   group.position.copy(config.position);
-  group.add(glowMesh);
   group.add(mesh);
 
   return {
     group,
     mesh,
-    glowMesh,
     canvas,
     ctx,
     texture,
@@ -135,9 +121,11 @@ function disposePanel(panel: OverlayPanel): void {
   mat.dispose();
   panel.mesh.geometry.dispose();
 
-  const glowMat = panel.glowMesh.material as THREE.MeshBasicMaterial;
-  glowMat.dispose();
-  panel.glowMesh.geometry.dispose();
+  if (panel.glowMesh) {
+    const glowMat = panel.glowMesh.material as THREE.MeshBasicMaterial;
+    glowMat.dispose();
+    panel.glowMesh.geometry.dispose();
+  }
 
   panel.texture.dispose();
   panel.group.removeFromParent();
@@ -342,8 +330,10 @@ export class SceneOverlayManager {
       const mat = panel.mesh.material as THREE.MeshBasicMaterial;
       mat.opacity = panel.opacity * 0.92;
 
-      const glowMat = panel.glowMesh.material as THREE.MeshBasicMaterial;
-      glowMat.opacity = panel.opacity * 0.04;
+      if (panel.glowMesh) {
+        const glowMat = panel.glowMesh.material as THREE.MeshBasicMaterial;
+        glowMat.opacity = panel.opacity * 0.04;
+      }
     }
 
     // Hide group entirely when fully faded out
