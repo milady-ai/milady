@@ -1131,3 +1131,97 @@ function patchAgentSkillsLocalFallback() {
   }
 }
 patchAgentSkillsLocalFallback();
+
+/**
+ * Patch testcafe for Bun compatibility.
+ *
+ * Two issues prevent TestCafe from running under `bunx testcafe`:
+ *
+ * 1) api-based.js uses `module.constructor` to get the Module object, but in
+ *    Bun `module.constructor._nodeModulePaths` is undefined. We fall back to
+ *    `require('module')` which has the function.
+ *
+ * 2) callsite.js assumes callsite objects are always non-null, but Bun's stack
+ *    trace capture can produce null callsites. We add null guards.
+ *
+ * Remove once TestCafe ships Bun-compatible builds.
+ */
+function patchTestCafeBunCompat() {
+  const bunCacheDir = resolve(root, "node_modules/.bun");
+  if (!existsSync(bunCacheDir)) return;
+
+  let patched = 0;
+
+  for (const entry of readdirSync(bunCacheDir)) {
+    if (!entry.startsWith("testcafe@")) continue;
+
+    const tcRoot = resolve(
+      bunCacheDir,
+      entry,
+      "node_modules/testcafe",
+    );
+
+    // Patch 1: module.constructor -> require('module') fallback
+    const apiBasedPath = resolve(
+      tcRoot,
+      "lib/compiler/test-file/api-based.js",
+    );
+    if (existsSync(apiBasedPath)) {
+      let src = readFileSync(apiBasedPath, "utf8");
+      const needle = "const Module = module.constructor;";
+      if (src.includes(needle)) {
+        src = src.replace(
+          needle,
+          "const Module = typeof module.constructor._nodeModulePaths === 'function' ? module.constructor : require('module');",
+        );
+        writeFileSync(apiBasedPath, src, "utf8");
+        patched++;
+        console.log(
+          `[patch-deps] Applied testcafe Module constructor Bun fix: ${apiBasedPath}`,
+        );
+      }
+    }
+
+    // Patch 2: null-safe callsite helpers
+    const callsitePath = resolve(tcRoot, "lib/utils/callsite.js");
+    if (existsSync(callsitePath)) {
+      let src = readFileSync(callsitePath, "utf8");
+      let changed = false;
+
+      const oldStackFrame =
+        "function getCallsiteStackFrameString(callsite) {\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
+      const newStackFrame =
+        "function getCallsiteStackFrameString(callsite) {\n    if (!callsite || !callsite.stackFrames) return '<unknown>';\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
+
+      if (src.includes(oldStackFrame)) {
+        src = src.replace(oldStackFrame, newStackFrame);
+        changed = true;
+      }
+
+      const oldGetId =
+        "function getCallsiteId(callsite) {\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
+      const newGetId =
+        "function getCallsiteId(callsite) {\n    if (!callsite) return '<unknown>:0';\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
+
+      if (src.includes(oldGetId)) {
+        src = src.replace(oldGetId, newGetId);
+        changed = true;
+      }
+
+      if (changed) {
+        writeFileSync(callsitePath, src, "utf8");
+        patched++;
+        console.log(
+          `[patch-deps] Applied testcafe callsite null-guard Bun fix: ${callsitePath}`,
+        );
+      }
+    }
+  }
+
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] testcafe: applied ${patched} Bun compatibility patch(es).`,
+    );
+  }
+}
+patchTestCafeBunCompat();

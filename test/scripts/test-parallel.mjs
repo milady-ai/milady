@@ -11,6 +11,9 @@ import path from "node:path";
  * - Entries may specify a `cmd` to override the default (`bunx`).
  * - `forceSerial: true` entries always run after parallel groups.
  * - `maxWorkers` lets a suite pin worker concurrency.
+ *
+ * Opt-in UI browser E2E (TestCafe): set MILADY_TEST_UI_TESTCAFE=1. Spawns dev if needed
+ * and requires a supported browser on the runner (Chrome, Opera, Firefox, Edge, Safari).
  */
 const runs = [
   {
@@ -33,6 +36,15 @@ const runs = [
     forceSerial: true,
   },
 ];
+
+if (process.env.MILADY_TEST_UI_TESTCAFE === "1") {
+  runs.push({
+    name: "ui-testcafe",
+    cmd: "bun",
+    args: ["scripts/run-testcafe.mjs", "--spawn-dev"],
+    forceSerial: true,
+  });
+}
 
 const children = new Set();
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
