@@ -53,7 +53,11 @@ export function WalletsPanel({ managedAgent }: WalletsPanelProps) {
     let client: CloudApiClient;
     if (managedAgent.source !== "cloud" && managedAgent.client) {
       client = managedAgent.client;
-    } else if (managedAgent.source === "cloud" && managedAgent.cloudAgentId && cloudToken) {
+    } else if (
+      managedAgent.source === "cloud" &&
+      managedAgent.cloudAgentId &&
+      cloudToken
+    ) {
       // Route through cloud proxy to avoid 401 on direct agent URLs
       client = new CloudApiClient({
         url: `${CLOUD_BASE}/api/v1/milady/agents/${managedAgent.cloudAgentId}`,

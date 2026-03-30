@@ -9466,8 +9466,6 @@ async function handleRequest(
   const disableCloudInference = (): void => {
     delete process.env.ANTHROPIC_BASE_URL;
     delete process.env.OPENAI_BASE_URL;
-    delete process.env.ANTHROPIC_API_KEY;
-    delete process.env.OPENAI_API_KEY;
   };
 
   const enableCloudInference = (cloudApiKey: string, baseUrl: string): void => {

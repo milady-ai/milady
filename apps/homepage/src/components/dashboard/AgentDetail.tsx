@@ -2,9 +2,9 @@ import { useCallback, useMemo, useState } from "react";
 import type { ManagedAgent } from "../../lib/AgentProvider";
 import type { AgentStatus } from "../../lib/cloud-api";
 import { CloudApiClient } from "../../lib/cloud-api";
-import { CLOUD_BASE } from "../../lib/runtime-config";
 import { formatUptime as formatUptimeShared } from "../../lib/format";
 import { openWebUI } from "../../lib/open-web-ui";
+import { CLOUD_BASE } from "../../lib/runtime-config";
 import { ApprovalQueue } from "./ApprovalQueue";
 import { ExportPanel } from "./ExportPanel";
 import { LogsPanel } from "./LogsPanel";
@@ -78,13 +78,18 @@ export function AgentDetail({
   const stewardClient = useMemo(() => {
     if (!managedAgent.sourceUrl && !managedAgent.client) return null;
     // For non-cloud agents with a direct client, use it as-is.
-    if (managedAgent.source !== "cloud" && managedAgent.client) return managedAgent.client;
+    if (managedAgent.source !== "cloud" && managedAgent.client)
+      return managedAgent.client;
     // For cloud agents, always route through the cloud proxy so wallet
     // requests go to elizacloud.ai/api/v1/milady/agents/{id}/api/wallet/*
     // instead of hitting agentId.milady.ai directly (which returns 401
     // because the cloud API key isn't valid for agent-level auth).
     const cloudToken = managedAgent.cloudClient?.getToken();
-    if (managedAgent.source === "cloud" && managedAgent.cloudAgentId && cloudToken) {
+    if (
+      managedAgent.source === "cloud" &&
+      managedAgent.cloudAgentId &&
+      cloudToken
+    ) {
       const cloudBase = CLOUD_BASE;
       return new CloudApiClient({
         url: `${cloudBase}/api/v1/milady/agents/${managedAgent.cloudAgentId}`,
