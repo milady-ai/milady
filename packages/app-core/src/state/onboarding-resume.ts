@@ -1,97 +1,22 @@
 import {
-  normalizeOnboardingProviderId,
-  ONBOARDING_PROVIDER_CATALOG,
+  inferOnboardingConnectionFromConfig,
   type OnboardingConnection,
-  type OnboardingLocalProviderId,
 } from "@miladyai/shared/contracts/onboarding";
 import type { BuildOnboardingConnectionArgs } from "../onboarding-config";
-import { asRecord, readString } from "./config-readers";
+import { asRecord } from "./config-readers";
 import type { OnboardingStep } from "./types";
-
-const REDACTED_SECRET = "[REDACTED]";
 
 function hasConfigValue(value: unknown): boolean {
   return typeof value === "string" ? value.trim().length > 0 : value === true;
 }
 
-function readNonRedactedString(
-  source: Record<string, unknown> | null | undefined,
-  key: string,
-): string | null {
-  const value = readString(source, key);
-  return value === REDACTED_SECRET ? null : value;
-}
-
-function readEnvString(
-  config: Record<string, unknown> | null | undefined,
-  key: string,
-): string | null {
-  const env = asRecord(config?.env);
-  const vars = asRecord(env?.vars);
-  return readString(vars, key) ?? readString(env, key);
-}
-
-function readEnvSecret(
-  config: Record<string, unknown> | null | undefined,
-  key: string,
-): string | null {
-  const value = readEnvString(config, key);
-  return value === REDACTED_SECRET ? null : value;
-}
-
-function readPrimaryModel(
-  config: Record<string, unknown> | null | undefined,
-): string | null {
-  const agents = asRecord(config?.agents);
-  const defaults = asRecord(agents?.defaults);
-  const model = asRecord(defaults?.model);
-  return readString(model, "primary");
-}
-
-function isPiAiEnabled(
-  config: Record<string, unknown> | null | undefined,
-): boolean {
-  const value = readEnvString(config, "ELIZA_USE_PI_AI");
-  if (!value) {
-    return false;
-  }
-  return value !== "0" && value.toLowerCase() !== "false";
-}
-
-function resolveConfiguredLocalProvider(
-  config: Record<string, unknown> | null | undefined,
-): OnboardingLocalProviderId | null {
-  const agents = asRecord(config?.agents);
-  const defaults = asRecord(agents?.defaults);
-  const storedSubscriptionProvider = normalizeOnboardingProviderId(
-    readString(defaults, "subscriptionProvider"),
-  );
-  if (
-    storedSubscriptionProvider &&
-    storedSubscriptionProvider !== "elizacloud"
-  ) {
-    return storedSubscriptionProvider;
-  }
-
-  if (isPiAiEnabled(config)) {
-    return "pi-ai";
-  }
-
-  for (const provider of ONBOARDING_PROVIDER_CATALOG) {
-    if (provider.id === "elizacloud" || !provider.envKey) {
-      continue;
-    }
-    if (readEnvString(config, provider.envKey)) {
-      return provider.id;
-    }
-  }
-
-  return null;
-}
-
 export function hasPartialOnboardingConnectionConfig(
   config: Record<string, unknown> | null | undefined,
 ): boolean {
+  if (inferOnboardingConnectionFromConfig(config)) {
+    return true;
+  }
+
   const cloud = asRecord(config?.cloud);
   if (!cloud) {
     return false;
@@ -99,7 +24,6 @@ export function hasPartialOnboardingConnectionConfig(
 
   return [
     cloud.enabled,
-    cloud.apiKey,
     cloud.provider,
     cloud.inferenceMode,
     cloud.remoteApiBase,
@@ -121,65 +45,7 @@ export function inferOnboardingResumeStep(args: {
 export function deriveOnboardingResumeConnection(
   config: Record<string, unknown> | null | undefined,
 ): OnboardingConnection | null {
-  const cloud = asRecord(config?.cloud);
-  const models = asRecord(config?.models);
-  const remoteApiBase = readString(cloud, "remoteApiBase");
-  const remoteAccessToken = readNonRedactedString(cloud, "remoteAccessToken");
-  const localProvider = resolveConfiguredLocalProvider(config);
-  const primaryModel = readPrimaryModel(config) ?? undefined;
-  const localProviderOption = ONBOARDING_PROVIDER_CATALOG.find(
-    (provider) => provider.id === localProvider,
-  );
-  const localApiKey =
-    localProviderOption?.envKey != null
-      ? (readEnvSecret(config, localProviderOption.envKey) ?? undefined)
-      : undefined;
-
-  if (remoteApiBase || remoteAccessToken) {
-    return {
-      kind: "remote-provider",
-      remoteApiBase: remoteApiBase ?? "",
-      remoteAccessToken: remoteAccessToken ?? undefined,
-      provider: localProvider ?? undefined,
-      apiKey: localApiKey,
-      primaryModel,
-    };
-  }
-
-  const cloudProvider = normalizeOnboardingProviderId(
-    readString(cloud, "provider"),
-  );
-  const cloudApiKey = readNonRedactedString(cloud, "apiKey") ?? undefined;
-  const smallModel = readString(models, "small") ?? undefined;
-  const largeModel = readString(models, "large") ?? undefined;
-
-  if (
-    cloud?.enabled === true ||
-    cloudProvider === "elizacloud" ||
-    readString(cloud, "inferenceMode") === "cloud" ||
-    cloudApiKey ||
-    smallModel ||
-    largeModel
-  ) {
-    return {
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      apiKey: cloudApiKey,
-      smallModel,
-      largeModel,
-    };
-  }
-
-  if (!localProvider) {
-    return null;
-  }
-
-  return {
-    kind: "local-provider",
-    provider: localProvider,
-    apiKey: localApiKey,
-    primaryModel,
-  };
+  return inferOnboardingConnectionFromConfig(config);
 }
 
 export function deriveOnboardingResumeFields(

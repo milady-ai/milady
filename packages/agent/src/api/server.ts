@@ -157,6 +157,14 @@ import {
 } from "../triggers/scheduling.js";
 import { parseClampedInteger } from "../utils/number-parsing.js";
 import { sanitizeSpeechText } from "../utils/spoken-text.js";
+import {
+  ONBOARDING_CLOUD_PROVIDER_OPTIONS,
+  ONBOARDING_PROVIDER_CATALOG,
+  isOnboardingConnectionComplete,
+  normalizeOnboardingProviderId,
+  normalizePersistedOnboardingConnection,
+  stripOnboardingConnectionSecrets,
+} from "../contracts/onboarding.js";
 import { handleAgentAdminRoutes } from "./agent-admin-routes.js";
 import { handleAgentLifecycleRoutes } from "./agent-lifecycle-routes.js";
 import { detectRuntimeModel, resolveProviderFromModel } from "./agent-model.js";
@@ -225,8 +233,9 @@ import {
   validatePluginConfig,
 } from "./plugin-validation.js";
 import {
-  applySubscriptionProviderConfig,
-  clearSubscriptionProviderConfig,
+  applyOnboardingConnectionConfig,
+  createProviderSwitchConnection,
+  reconcilePersistedOnboardingConnection,
   resolveExistingOnboardingConnection,
 } from "./provider-switch-config.js";
 import { handleRegistryRoutes } from "./registry-routes.js";
@@ -420,18 +429,8 @@ function hasPersistedOnboardingState(config: ElizaConfig): boolean {
   const existingConnection = resolveExistingOnboardingConnection(
     config as Record<string, unknown>,
   );
-  if (existingConnection?.kind === "local-provider") {
+  if (isOnboardingConnectionComplete(existingConnection)) {
     return true;
-  }
-  if (existingConnection?.kind === "remote-provider") {
-    return Boolean(existingConnection.remoteApiBase.trim());
-  }
-  if (existingConnection?.kind === "cloud-managed") {
-    return Boolean(
-      existingConnection.apiKey?.trim() &&
-        existingConnection.smallModel?.trim() &&
-        existingConnection.largeModel?.trim(),
-    );
   }
 
   const agents = config.agents;
@@ -457,6 +456,37 @@ export function resolveAppUserName(config: ElizaConfig): string {
     ?.ownerName as string | undefined;
   const normalized = ownerName?.trim().slice(0, APP_OWNER_NAME_MAX_LENGTH);
   return normalized || "User";
+}
+
+function patchTouchesProviderSelection(
+  patch: Record<string, unknown>,
+): boolean {
+  if (
+    Object.prototype.hasOwnProperty.call(patch, "cloud") ||
+    Object.prototype.hasOwnProperty.call(patch, "env") ||
+    Object.prototype.hasOwnProperty.call(patch, "models")
+  ) {
+    return true;
+  }
+
+  const agents =
+    patch.agents && typeof patch.agents === "object" && !Array.isArray(patch.agents)
+      ? (patch.agents as Record<string, unknown>)
+      : null;
+  const defaults =
+    agents?.defaults &&
+    typeof agents.defaults === "object" &&
+    !Array.isArray(agents.defaults)
+      ? (agents.defaults as Record<string, unknown>)
+      : null;
+  if (!defaults) {
+    return false;
+  }
+
+  return (
+    Object.prototype.hasOwnProperty.call(defaults, "subscriptionProvider") ||
+    Object.prototype.hasOwnProperty.call(defaults, "model")
+  );
 }
 
 function resolveConversationGreetingText(
@@ -985,6 +1015,7 @@ export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set([
   "database",
   "media",
   "cloud",
+  "connection",
   "x402",
   "mcp",
   "features",
@@ -5774,131 +5805,14 @@ function getProviderOptions(): Array<{
   keyPrefix: string | null;
   description: string;
 }> {
-  return [
-    {
-      id: "elizacloud",
-      name: "Eliza Cloud",
-      envKey: null,
-      pluginName: "@elizaos/plugin-elizacloud",
-      keyPrefix: null,
-      description:
-        "Managed hosting for Eliza agents and bundled infrastructure.",
-    },
-    {
-      id: "anthropic-subscription",
-      name: "Anthropic Subscription",
-      envKey: null,
-      pluginName: "@elizaos/plugin-anthropic",
-      keyPrefix: null,
-      description:
-        "Use your $20-200/mo Claude subscription via OAuth or setup token.",
-    },
-    {
-      id: "openai-subscription",
-      name: "OpenAI Subscription",
-      envKey: null,
-      pluginName: "@elizaos/plugin-openai",
-      keyPrefix: null,
-      description: "Use your $20-200/mo ChatGPT subscription via OAuth.",
-    },
-    {
-      id: "pi-ai",
-      name: "Pi Credentials (pi-ai)",
-      envKey: null,
-      pluginName: "@elizaos/plugin-pi-ai",
-      keyPrefix: null,
-      description:
-        "Use credentials from ~/.pi/agent/auth.json (API keys or OAuth).",
-    },
-    {
-      id: "anthropic",
-      name: "Anthropic (API Key)",
-      envKey: "ANTHROPIC_API_KEY",
-      pluginName: "@elizaos/plugin-anthropic",
-      keyPrefix: "sk-ant-",
-      description: "Claude models via API key.",
-    },
-    {
-      id: "openai",
-      name: "OpenAI (API Key)",
-      envKey: "OPENAI_API_KEY",
-      pluginName: "@elizaos/plugin-openai",
-      keyPrefix: "sk-",
-      description: "GPT models via API key.",
-    },
-    {
-      id: "openrouter",
-      name: "OpenRouter",
-      envKey: "OPENROUTER_API_KEY",
-      pluginName: "@elizaos/plugin-openrouter",
-      keyPrefix: "sk-or-",
-      description: "Access multiple models via one API key.",
-    },
-    {
-      id: "gemini",
-      name: "Gemini",
-      envKey: "GOOGLE_GENERATIVE_AI_API_KEY",
-      pluginName: "@elizaos/plugin-google-genai",
-      keyPrefix: null,
-      description: "Google's Gemini models.",
-    },
-    {
-      id: "grok",
-      name: "Grok",
-      envKey: "XAI_API_KEY",
-      pluginName: "@elizaos/plugin-xai",
-      keyPrefix: "xai-",
-      description: "xAI's Grok models.",
-    },
-    {
-      id: "groq",
-      name: "Groq",
-      envKey: "GROQ_API_KEY",
-      pluginName: "@elizaos/plugin-groq",
-      keyPrefix: "gsk_",
-      description: "Fast inference.",
-    },
-    {
-      id: "deepseek",
-      name: "DeepSeek",
-      envKey: "DEEPSEEK_API_KEY",
-      pluginName: "@elizaos/plugin-deepseek",
-      keyPrefix: "sk-",
-      description: "DeepSeek models.",
-    },
-    {
-      id: "mistral",
-      name: "Mistral",
-      envKey: "MISTRAL_API_KEY",
-      pluginName: "@elizaos/plugin-mistral",
-      keyPrefix: null,
-      description: "Mistral AI models.",
-    },
-    {
-      id: "together",
-      name: "Together AI",
-      envKey: "TOGETHER_API_KEY",
-      pluginName: "@elizaos/plugin-together",
-      keyPrefix: null,
-      description: "Open-source model hosting.",
-    },
-    {
-      id: "ollama",
-      name: "Ollama (local)",
-      envKey: null,
-      pluginName: "@elizaos/plugin-ollama",
-      keyPrefix: null,
-      description: "Local models, no API key needed.",
-    },
-    {
-      id: "zai",
-      name: "z.ai (GLM Coding Plan)",
-      envKey: "ZAI_API_KEY",
-      pluginName: "@homunculuslabs/plugin-zai",
-      keyPrefix: null,
-      description: "GLM models via z.ai Coding Plan.",
-    },
-  ];
+  return ONBOARDING_PROVIDER_CATALOG.map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+    envKey: provider.envKey,
+    pluginName: provider.pluginName,
+    keyPrefix: provider.keyPrefix,
+    description: provider.description,
+  }));
 }
 
 function getCloudProviderOptions(): Array<{
@@ -5906,14 +5820,11 @@ function getCloudProviderOptions(): Array<{
   name: string;
   description: string;
 }> {
-  return [
-    {
-      id: "elizacloud",
-      name: "Eliza Cloud",
-      description:
-        "Managed cloud infrastructure. Wallets, LLMs, and RPCs included.",
-    },
-  ];
+  return ONBOARDING_CLOUD_PROVIDER_OPTIONS.map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+    description: provider.description,
+  }));
 }
 
 function getModelOptions(): {
@@ -9551,42 +9462,43 @@ async function handleRequest(
     return;
   }
 
+  // ── Provider inference helpers ────────────────────────────────────────
+  const disableCloudInference = (): void => {
+    delete process.env.ANTHROPIC_BASE_URL;
+    delete process.env.OPENAI_BASE_URL;
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+  };
+
+  const enableCloudInference = (cloudApiKey: string, baseUrl: string): void => {
+    // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
+    process.env.ANTHROPIC_BASE_URL = `${baseUrl}/api/v1`;
+    process.env.ANTHROPIC_API_KEY = cloudApiKey;
+    process.env.OPENAI_BASE_URL = `${baseUrl}/api/v1`;
+    process.env.OPENAI_API_KEY = cloudApiKey;
+    // Gemini CLI and Aider — no proxy support via ElizaCloud inference
+  };
+
   // ── POST /api/provider/switch ─────────────────────────────────────────
-  // Atomically switch the active AI provider.  Clears competing credentials
-  // and env vars so the runtime loads the correct plugin on restart.
+  // Atomically switch the active AI provider selection while preserving
+  // previously configured credentials and cloud auth as capability state.
   if (method === "POST" && pathname === "/api/provider/switch") {
-    const body = await readJsonBody<{ provider: string; apiKey?: string }>(
-      req,
-      res,
-    );
+    const body = await readJsonBody<{
+      provider: string;
+      apiKey?: string;
+      primaryModel?: string;
+    }>(req, res);
     if (!body) return;
-    const provider = body.provider;
-    if (!provider || typeof provider !== "string") {
+    if (!body.provider || typeof body.provider !== "string") {
       error(res, "Missing provider", 400);
       return;
     }
 
-    // P1 §7 — explicit provider allowlist
-    const VALID_PROVIDERS = new Set([
-      "elizacloud",
-      "pi-ai",
-      "openai-codex",
-      "openai-subscription",
-      "anthropic-subscription",
-      "openai",
-      "anthropic",
-      "deepseek",
-      "google",
-      "groq",
-      "xai",
-      "openrouter",
-    ]);
-    if (!VALID_PROVIDERS.has(provider)) {
+    const normalizedProvider = normalizeOnboardingProviderId(body.provider);
+    if (!normalizedProvider) {
       error(res, "Invalid provider", 400);
       return;
     }
-
-    const normalizedProvider = provider;
 
     // P0 §3 — race guard: reject concurrent provider switch requests
     if (providerSwitchInProgress) {
@@ -9595,270 +9507,58 @@ async function handleRequest(
     }
     providerSwitchInProgress = true;
 
-    const config = state.config;
-    if (!config.cloud) config.cloud = {} as NonNullable<typeof config.cloud>;
-    if (!config.env) config.env = {};
-    const envCfg = config.env as Record<string, string>;
-
-    // Helper: disable cloud inference while preserving cloud connection
-    // for RPC and other services.  Does NOT delete cloud.apiKey or
-    // cloud.enabled — only toggles inference off.
-    const disableCloudInference = () => {
-      const cloudCfg = config.cloud as Record<string, unknown>;
-      cloudCfg.inferenceMode = "byok";
-      if (!cloudCfg.services || typeof cloudCfg.services !== "object") {
-        cloudCfg.services = {};
-      }
-      (cloudCfg.services as Record<string, unknown>).inference = false;
-      // Clean cloud model env vars so the cloud plugin doesn't intercept
-      // model calls — user's own keys handle models.
-      delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
-      delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
-      // Clear ElizaCloud proxy base URLs so coding agents use direct
-      // provider APIs with the user's own keys.
-      delete process.env.ANTHROPIC_BASE_URL;
-      delete process.env.OPENAI_BASE_URL;
-      delete envCfg.ANTHROPIC_BASE_URL;
-      delete envCfg.OPENAI_BASE_URL;
-    };
-
-    // Helper: enable cloud inference (switching TO cloud)
-    const enableCloudInference = () => {
-      const cloudCfg = config.cloud as Record<string, unknown>;
-      cloudCfg.inferenceMode = "cloud";
-      if (!cloudCfg.services || typeof cloudCfg.services !== "object") {
-        cloudCfg.services = {};
-      }
-      (cloudCfg.services as Record<string, unknown>).inference = true;
-    };
-
-    // Helper: clear pi-ai mode
-    const clearPiAi = () => {
-      delete process.env.ELIZA_USE_PI_AI;
-      delete envCfg.ELIZA_USE_PI_AI;
-
-      const envRoot = config.env as Record<string, unknown>;
-      const vars = envRoot.vars;
-      if (vars && typeof vars === "object" && !Array.isArray(vars)) {
-        delete (vars as Record<string, unknown>).ELIZA_USE_PI_AI;
-      }
-
-      if (state.runtime?.character?.secrets) {
-        const secrets = state.runtime.character.secrets as Record<
-          string,
-          unknown
-        >;
-        delete secrets.ELIZA_USE_PI_AI;
-      }
-    };
-
-    // Helper: clear subscription credentials
-    const clearSubscriptions = async () => {
-      try {
-        const { deleteCredentials } = await import("../auth/index");
-        deleteCredentials("anthropic-subscription");
-        deleteCredentials("openai-codex");
-      } catch (err) {
-        logger.warn(
-          `[api] Failed to clear subscriptions: ${err instanceof Error ? err.message : err}`,
-        );
-      }
-      // Don't clear the env keys here — applySubscriptionCredentials on
-      // restart will simply not set them if creds are gone.
-    };
-
-    // Provider-specific env key map
-    const PROVIDER_ENV_KEYS: Record<string, string> = {
-      openai: "OPENAI_API_KEY",
-      anthropic: "ANTHROPIC_API_KEY",
-      deepseek: "DEEPSEEK_API_KEY",
-      google: "GOOGLE_GENERATIVE_AI_API_KEY",
-      groq: "GROQ_API_KEY",
-      xai: "XAI_API_KEY",
-      openrouter: "OPENROUTER_API_KEY",
-    };
-
-    // Helper: clear all direct API keys from env (except the one we're switching to)
-    const clearOtherApiKeys = (keepKey?: string) => {
-      for (const [, envKey] of Object.entries(PROVIDER_ENV_KEYS)) {
-        if (envKey === keepKey) continue;
-        delete process.env[envKey];
-        delete envCfg[envKey];
-        // P1 §6 — also clear from runtime character secrets
-        if (state.runtime?.character?.secrets) {
-          const secrets = state.runtime.character.secrets as Record<
-            string,
-            unknown
-          >;
-          delete secrets[envKey];
-        }
-      }
-
-      // Clear the legacy Gemini alias too so provider switches don't leave
-      // multiple Google keys behind.
-      if (keepKey !== "GOOGLE_API_KEY") {
-        delete process.env.GOOGLE_API_KEY;
-        delete envCfg.GOOGLE_API_KEY;
-        if (state.runtime?.character?.secrets) {
-          const secrets = state.runtime.character.secrets as Record<
-            string,
-            unknown
-          >;
-          delete secrets.GOOGLE_API_KEY;
-        }
-      }
-    };
-
     try {
-      // P0 §4 — input validation for direct API key providers
-      if (PROVIDER_ENV_KEYS[normalizedProvider]) {
-        const trimmedKey =
-          typeof body.apiKey === "string" ? body.apiKey.trim() : "";
-        if (!trimmedKey) {
-          providerSwitchInProgress = false;
-          error(res, "API key is required for this provider", 400);
-          return;
-        }
-        if (trimmedKey.length > 512) {
-          providerSwitchInProgress = false;
-          error(res, "API key is too long", 400);
-          return;
-        }
-        // Store trimmed key back for use below
-        body.apiKey = trimmedKey;
+      const trimmedApiKey =
+        typeof body.apiKey === "string" ? body.apiKey.trim() : undefined;
+      if (trimmedApiKey && trimmedApiKey.length > 512) {
+        providerSwitchInProgress = false;
+        error(res, "API key is too long", 400);
+        return;
       }
 
+      const config = state.config;
+      let connection: ReturnType<typeof createProviderSwitchConnection> | {
+        kind: "cloud-managed";
+        cloudProvider: "elizacloud";
+        apiKey?: string;
+      } | null;
       if (normalizedProvider === "elizacloud") {
-        // Switching TO elizacloud for inference
-        clearPiAi();
-        await clearSubscriptions();
-        clearOtherApiKeys();
-        clearSubscriptionProviderConfig(config);
-        enableCloudInference();
-        // Ensure cloud is enabled — the actual API key should already be in
-        // config.cloud.apiKey from the original cloud login.
-        (config.cloud as Record<string, unknown>).enabled = true;
-        if (config.cloud.apiKey) {
-          process.env.ELIZAOS_CLOUD_API_KEY = config.cloud.apiKey;
-          process.env.ELIZAOS_CLOUD_ENABLED = "true";
-
-          // Configure coding agent CLIs to proxy through ElizaCloud.
-          // ElizaCloud provides Anthropic-compatible (/api/v1/messages) and
-          // OpenAI-compatible (/api/v1/chat/completions) proxy endpoints
-          // that bill to the user's cloud credits.
-          const cloudBaseUrl =
-            (config.cloud as Record<string, unknown>).baseUrl ??
-            process.env.ELIZAOS_CLOUD_BASE_URL ??
-            "https://www.elizacloud.ai";
-          const cloudApiKey = config.cloud.apiKey;
-
-          // Claude Code: Anthropic-compatible proxy
-          process.env.ANTHROPIC_API_KEY = cloudApiKey;
+        connection = {
+          kind: "cloud-managed" as const,
+          cloudProvider: "elizacloud" as const,
+          apiKey: trimmedApiKey,
+        };
+        if (trimmedApiKey) {
+          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
+          const cloudApiKey = trimmedApiKey;
+          const cloudBaseUrl = "https://www.elizacloud.ai";
           process.env.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;
-          envCfg.ANTHROPIC_API_KEY = cloudApiKey;
-          envCfg.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;
-
-          // Codex: OpenAI-compatible proxy
-          process.env.OPENAI_API_KEY = cloudApiKey;
+          process.env.ANTHROPIC_API_KEY = cloudApiKey;
           process.env.OPENAI_BASE_URL = `${cloudBaseUrl}/api/v1`;
-          envCfg.OPENAI_API_KEY = cloudApiKey;
-          envCfg.OPENAI_BASE_URL = `${cloudBaseUrl}/api/v1`;
-
-          // Gemini CLI and Aider use direct Google/provider APIs — no
-          // ElizaCloud proxy exists for those. Their keys were already
-          // cleared by clearOtherApiKeys() above, so they'll show as
-          // unavailable in the coding agent settings.
+          process.env.OPENAI_API_KEY = cloudApiKey;
+          // Gemini CLI and Aider — no proxy support via ElizaCloud inference
         }
-      } else if (normalizedProvider === "pi-ai") {
-        // Switching TO pi-ai credentials mode
+      } else if (normalizedProvider) {
+        connection = createProviderSwitchConnection({
+          provider: normalizedProvider,
+          apiKey: trimmedApiKey,
+          primaryModel:
+            typeof body.primaryModel === "string"
+              ? body.primaryModel.trim()
+              : undefined,
+        });
         disableCloudInference();
-        await clearSubscriptions();
-        clearOtherApiKeys();
-        process.env.ELIZA_USE_PI_AI = "1";
-        envCfg.ELIZA_USE_PI_AI = "1";
-
-        const envRoot = config.env as Record<string, unknown>;
-        const vars =
-          envRoot.vars &&
-          typeof envRoot.vars === "object" &&
-          !Array.isArray(envRoot.vars)
-            ? (envRoot.vars as Record<string, unknown>)
-            : {};
-        vars.ELIZA_USE_PI_AI = "1";
-        envRoot.vars = vars;
-      } else if (
-        normalizedProvider === "openai-codex" ||
-        normalizedProvider === "openai-subscription"
-      ) {
-        // Switching TO OpenAI subscription — keep cloud for RPC
-        clearPiAi();
-        disableCloudInference();
-        clearOtherApiKeys("OPENAI_API_KEY");
-        applySubscriptionProviderConfig(config, provider);
-        // Delete Anthropic subscription but keep OpenAI
-        try {
-          const { deleteCredentials } = await import("../auth/index");
-          deleteCredentials("anthropic-subscription");
-        } catch (err) {
-          logger.warn(
-            `[api] Failed to clear Anthropic subscription: ${err instanceof Error ? err.message : err}`,
-          );
-        }
-        // Apply the OpenAI subscription credentials to env + install stealth
-        try {
-          const { applySubscriptionCredentials } = await import(
-            "../auth/index"
-          );
-          await applySubscriptionCredentials(config);
-        } catch (err) {
-          logger.warn(
-            `[api] Failed to apply OpenAI subscription creds: ${err instanceof Error ? err.message : err}`,
-          );
-        }
-      } else if (normalizedProvider === "anthropic-subscription") {
-        // Switching TO Anthropic subscription — keep cloud for RPC
-        clearPiAi();
-        disableCloudInference();
-        clearOtherApiKeys("ANTHROPIC_API_KEY");
-        applySubscriptionProviderConfig(config, provider);
-        // Delete OpenAI subscription but keep Anthropic
-        try {
-          const { deleteCredentials } = await import("../auth/index");
-          deleteCredentials("openai-codex");
-        } catch (err) {
-          logger.warn(
-            `[api] Failed to clear OpenAI subscription: ${err instanceof Error ? err.message : err}`,
-          );
-        }
-        // Apply the Anthropic subscription credentials to env + install stealth
-        try {
-          const { applySubscriptionCredentials } = await import(
-            "../auth/index"
-          );
-          await applySubscriptionCredentials(config);
-        } catch (err) {
-          logger.warn(
-            `[api] Failed to apply Anthropic subscription creds: ${err instanceof Error ? err.message : err}`,
-          );
-        }
-      } else if (PROVIDER_ENV_KEYS[normalizedProvider]) {
-        // Switching TO a direct API key provider — keep cloud for RPC
-        clearPiAi();
-        disableCloudInference();
-        await clearSubscriptions();
-        clearSubscriptionProviderConfig(config);
-        const envKey = PROVIDER_ENV_KEYS[normalizedProvider];
-        clearOtherApiKeys(envKey);
-        const apiKey = body.apiKey;
-        if (!apiKey) {
-          providerSwitchInProgress = false;
-          error(res, "API key is required for this provider", 400);
-          return;
-        }
-        process.env[envKey] = apiKey;
-        envCfg[envKey] = apiKey;
+      } else {
+        connection = null;
       }
 
+      if (!connection) {
+        providerSwitchInProgress = false;
+        error(res, "Invalid provider", 400);
+        return;
+      }
+
+      await applyOnboardingConnectionConfig(config, connection);
       saveElizaConfig(config);
 
       // Schedule runtime restart so the new provider takes effect.
@@ -9875,7 +9575,7 @@ async function handleRequest(
 
       json(res, {
         success: true,
-        provider,
+        provider: normalizedProvider,
         restarting: true,
       });
     } catch (err) {
@@ -10380,10 +10080,20 @@ async function handleRequest(
         | "psycho";
     }
 
+    const explicitConnectionRequested = Object.prototype.hasOwnProperty.call(
+      body,
+      "connection",
+    );
+    const explicitConnection = explicitConnectionRequested
+      ? normalizePersistedOnboardingConnection(body.connection)
+      : null;
+    if (explicitConnectionRequested && !explicitConnection) {
+      error(res, "Invalid connection", 400);
+      return;
+    }
+
     // ── Run mode & cloud configuration ────────────────────────────────────
     const runMode = (body.runMode as string) || "local";
-    if (!config.cloud) config.cloud = {};
-    config.cloud.enabled = runMode === "cloud";
 
     // ── Sandbox mode (from 3-mode onboarding: off / light / standard / max)
     const sandboxMode = (body.sandboxMode as string) || "off";
@@ -10402,117 +10112,131 @@ async function handleRequest(
       logger.info(`[eliza-api] Sandbox mode set to: ${sandboxMode}`);
     }
 
-    if (runMode === "cloud") {
-      if (body.cloudProvider) {
-        config.cloud.provider = body.cloudProvider as string;
+    if (explicitConnection) {
+      await applyOnboardingConnectionConfig(config, explicitConnection);
+    } else {
+      if (!config.cloud) config.cloud = {};
+      config.cloud.enabled = runMode === "cloud";
+
+      if (runMode === "cloud") {
+        if (body.cloudProvider) {
+          config.cloud.provider = body.cloudProvider as string;
+        }
+        if (
+          typeof body.providerApiKey === "string" &&
+          body.providerApiKey.trim().length > 0
+        ) {
+          const cloudApiKey = body.providerApiKey.trim();
+          config.cloud.apiKey = cloudApiKey;
+          process.env.ELIZAOS_CLOUD_API_KEY = cloudApiKey;
+        }
+        // Always ensure model defaults when cloud is selected so the cloud
+        // plugin has valid models to call even if the user didn't pick unknown.
+        if (!config.models) config.models = {};
+        config.models.small =
+          (body.smallModel as string) ||
+          config.models.small ||
+          "openai/gpt-5-mini";
+        config.models.large =
+          (body.largeModel as string) ||
+          config.models.large ||
+          "anthropic/claude-sonnet-4.5";
       }
+
+      // ── Local LLM provider ──────────────────────────────────────────────
+      {
+        if (!config.env) config.env = {};
+        const envCfg = config.env as Record<string, unknown>;
+        const vars = (envCfg.vars ?? {}) as Record<string, string>;
+        const providerId =
+          typeof body.provider === "string" ? body.provider : "";
+
+        // Persist vars back onto config.env
+        (envCfg as Record<string, unknown>).vars = vars;
+
+        const clearPiAiFlag = () => {
+          for (const key of ["ELIZA_USE_PI_AI", "MILADY_USE_PI_AI"] as const) {
+            delete vars[key];
+            delete (config.env as Record<string, string>)[key];
+            delete process.env[key];
+          }
+        };
+
+        if (runMode === "local" && providerId === "pi-ai") {
+          vars.ELIZA_USE_PI_AI = "1";
+          process.env.ELIZA_USE_PI_AI = "1";
+
+          // Optional primary model override (provider/model).
+          if (!config.agents) config.agents = {};
+          if (!config.agents.defaults) config.agents.defaults = {};
+          const defaults = config.agents.defaults as Record<string, unknown>;
+          const modelConfig = (defaults.model ?? {}) as Record<string, unknown>;
+          const primaryModel =
+            typeof body.primaryModel === "string"
+              ? body.primaryModel.trim()
+              : "";
+
+          if (primaryModel) {
+            modelConfig.primary = primaryModel;
+          } else {
+            delete modelConfig.primary;
+          }
+
+          defaults.model = modelConfig;
+        } else {
+          clearPiAiFlag();
+        }
+
+        // API-key providers (envKey backed)
+        if (runMode === "local" && providerId && body.providerApiKey) {
+          const providerOpt = getProviderOptions().find(
+            (p) => p.id === providerId,
+          );
+          if (providerOpt?.envKey) {
+            (config.env as Record<string, string>)[providerOpt.envKey] =
+              body.providerApiKey as string;
+            process.env[providerOpt.envKey] = body.providerApiKey as string;
+          }
+        }
+      }
+
+      // ── Subscription providers (no API key needed — uses OAuth) ────────
+      // If the user selected a subscription provider during onboarding,
+      // note it in config. The actual OAuth flow happens via
+      // /api/subscription/{provider}/start + /exchange endpoints.
       if (
-        typeof body.providerApiKey === "string" &&
-        body.providerApiKey.trim().length > 0
+        runMode === "local" &&
+        (body.provider === "anthropic-subscription" ||
+          body.provider === "openai-subscription")
       ) {
-        const cloudApiKey = body.providerApiKey.trim();
-        config.cloud.apiKey = cloudApiKey;
-        process.env.ELIZAOS_CLOUD_API_KEY = cloudApiKey;
-      }
-      // Always ensure model defaults when cloud is selected so the cloud
-      // plugin has valid models to call even if the user didn't pick unknown.
-      if (!config.models) config.models = {};
-      config.models.small =
-        (body.smallModel as string) ||
-        config.models.small ||
-        "openai/gpt-5-mini";
-      config.models.large =
-        (body.largeModel as string) ||
-        config.models.large ||
-        "anthropic/claude-sonnet-4.5";
-    }
-
-    // ── Local LLM provider ────────────────────────────────────────────────
-    {
-      if (!config.env) config.env = {};
-      const envCfg = config.env as Record<string, unknown>;
-      const vars = (envCfg.vars ?? {}) as Record<string, string>;
-      const providerId = typeof body.provider === "string" ? body.provider : "";
-
-      // Persist vars back onto config.env
-      (envCfg as Record<string, unknown>).vars = vars;
-
-      const clearPiAiFlag = () => {
-        delete vars.ELIZA_USE_PI_AI;
-        delete (config.env as Record<string, string>).ELIZA_USE_PI_AI;
-        delete process.env.ELIZA_USE_PI_AI;
-      };
-
-      if (runMode === "local" && providerId === "pi-ai") {
-        vars.ELIZA_USE_PI_AI = "1";
-        process.env.ELIZA_USE_PI_AI = "1";
-
-        // Optional primary model override (provider/model).
         if (!config.agents) config.agents = {};
         if (!config.agents.defaults) config.agents.defaults = {};
-        const defaults = config.agents.defaults as Record<string, unknown>;
-        const modelConfig = (defaults.model ?? {}) as Record<string, unknown>;
-        const primaryModel =
-          typeof body.primaryModel === "string" ? body.primaryModel.trim() : "";
-
-        if (primaryModel) {
-          modelConfig.primary = primaryModel;
-        } else {
-          delete modelConfig.primary;
-        }
-
-        defaults.model = modelConfig;
-      } else {
-        clearPiAiFlag();
-      }
-
-      // API-key providers (envKey backed)
-      if (runMode === "local" && providerId && body.providerApiKey) {
-        const providerOpt = getProviderOptions().find(
-          (p) => p.id === providerId,
-        );
-        if (providerOpt?.envKey) {
-          (config.env as Record<string, string>)[providerOpt.envKey] =
-            body.providerApiKey as string;
-          process.env[providerOpt.envKey] = body.providerApiKey as string;
-        }
-      }
-    }
-
-    // ── Subscription providers (no API key needed — uses OAuth) ──────────
-    // If the user selected a subscription provider during onboarding,
-    // note it in config. The actual OAuth flow happens via
-    // /api/subscription/{provider}/start + /exchange endpoints.
-    if (
-      runMode === "local" &&
-      (body.provider === "anthropic-subscription" ||
-        body.provider === "openai-subscription")
-    ) {
-      if (!config.agents) config.agents = {};
-      if (!config.agents.defaults) config.agents.defaults = {};
-      (config.agents.defaults as Record<string, unknown>).subscriptionProvider =
-        body.provider;
-      logger.info(
-        `[eliza-api] Subscription provider selected: ${body.provider} — complete OAuth via /api/subscription/ endpoints`,
-      );
-
-      // Handle Anthropic setup token (sk-ant-oat01-...) provided during
-      // onboarding. The API-key gate above skips subscription providers
-      // because their envKey is null. Mirrors POST /api/subscription/
-      // anthropic/setup-token in subscription-routes.ts.
-      if (
-        body.provider === "anthropic-subscription" &&
-        typeof body.providerApiKey === "string" &&
-        body.providerApiKey.trim().startsWith("sk-ant-")
-      ) {
-        const token = body.providerApiKey.trim();
-        if (!config.env) config.env = {};
-        (config.env as Record<string, string>).ANTHROPIC_API_KEY = token;
-        process.env.ANTHROPIC_API_KEY = token;
+        (config.agents.defaults as Record<string, unknown>)
+          .subscriptionProvider = body.provider;
         logger.info(
-          "[eliza-api] Anthropic setup token saved during onboarding",
+          `[eliza-api] Subscription provider selected: ${body.provider} — complete OAuth via /api/subscription/ endpoints`,
         );
+
+        // Handle Anthropic setup token (sk-ant-oat01-...) provided during
+        // onboarding. The API-key gate above skips subscription providers
+        // because their envKey is null. Mirrors POST /api/subscription/
+        // anthropic/setup-token in subscription-routes.ts.
+        if (
+          body.provider === "anthropic-subscription" &&
+          typeof body.providerApiKey === "string" &&
+          body.providerApiKey.trim().startsWith("sk-ant-")
+        ) {
+          const token = body.providerApiKey.trim();
+          if (!config.env) config.env = {};
+          (config.env as Record<string, string>).ANTHROPIC_API_KEY = token;
+          process.env.ANTHROPIC_API_KEY = token;
+          logger.info(
+            "[eliza-api] Anthropic setup token saved during onboarding",
+          );
+        }
       }
+
+      reconcilePersistedOnboardingConnection(config);
     }
 
     // ── GitHub token ────────────────────────────────────────────────────
@@ -14155,6 +13879,22 @@ async function handleRequest(
     // Strip "[REDACTED]" from the whole patch (GET → PUT round-trips).
     stripRedactedPlaceholderValuesDeep(filtered);
 
+    const explicitConnectionRequested = Object.prototype.hasOwnProperty.call(
+      filtered,
+      "connection",
+    );
+    const normalizedConnectionPatch = explicitConnectionRequested
+      ? normalizePersistedOnboardingConnection(filtered.connection)
+      : null;
+    if (explicitConnectionRequested && !normalizedConnectionPatch) {
+      error(res, "connection must be a valid onboarding connection object", 400);
+      return;
+    }
+    if (normalizedConnectionPatch) {
+      filtered.connection =
+        stripOnboardingConnectionSecrets(normalizedConnectionPatch);
+    }
+
     if (isMiladySettingsDebugEnabled()) {
       logger.debug(
         `[milady][settings][api] PUT /api/config filtered topKeys=${Object.keys(filtered).sort().join(",")} snapshot=${JSON.stringify(sanitizeForSettingsDebug(filtered))}`,
@@ -14162,24 +13902,6 @@ async function handleRequest(
     }
 
     safeMerge(state.config as Record<string, unknown>, filtered);
-
-    // Deep-merge leaves stale `cloud.apiKey` when the client only sends
-    // `cloud: { enabled: false, … }` (e.g. switching to OpenRouter). Strip it
-    // so disk + hot-reload match "disconnected" and env backfill cannot revive
-    // Eliza Cloud on the next boot.
-    if (
-      filtered.cloud &&
-      typeof filtered.cloud === "object" &&
-      !Array.isArray(filtered.cloud) &&
-      (filtered.cloud as Record<string, unknown>).enabled === false
-    ) {
-      const mergedCloud = (state.config as Record<string, unknown>).cloud as
-        | Record<string, unknown>
-        | undefined;
-      if (mergedCloud && typeof mergedCloud === "object") {
-        delete mergedCloud.apiKey;
-      }
-    }
 
     // If the client updated env vars, synchronise them into process.env so
     // subsequent hot-restarts see the latest values (loadElizaConfig()
@@ -14229,6 +13951,12 @@ async function handleRequest(
           }
         }
       }
+    }
+
+    if (normalizedConnectionPatch) {
+      await applyOnboardingConnectionConfig(state.config, normalizedConnectionPatch);
+    } else if (patchTouchesProviderSelection(filtered)) {
+      reconcilePersistedOnboardingConnection(state.config);
     }
 
     try {

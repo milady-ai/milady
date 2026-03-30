@@ -1,7 +1,7 @@
 import {
-  normalizeOnboardingProviderId,
-  ONBOARDING_PROVIDER_CATALOG,
-} from "@miladyai/agent/contracts/onboarding";
+  inferOnboardingConnectionFromConfig,
+  isLocalProviderConnection,
+} from "@miladyai/shared/contracts/onboarding";
 import type {
   CloudPreferenceClientLike as ClientLike,
   CloudPreferencePatchState as PatchState,
@@ -37,55 +37,6 @@ function readBoolean(
   return typeof value === "boolean" ? value : null;
 }
 
-function readEnvString(config: StorageConfig | null | undefined, key: string) {
-  const env = asRecord(config?.env);
-  const vars = asRecord(env?.vars);
-  return readString(vars, key) ?? readString(env, key);
-}
-
-function isTruthyEnvFlag(value: string | null): boolean {
-  if (!value) {
-    return false;
-  }
-  const normalized = value.trim().toLowerCase();
-  return normalized !== "0" && normalized !== "false" && normalized !== "no";
-}
-
-function isPiAiEnabled(config: StorageConfig | null | undefined): boolean {
-  return (
-    isTruthyEnvFlag(readEnvString(config, "ELIZA_USE_PI_AI")) ||
-    isTruthyEnvFlag(readEnvString(config, "MILADY_USE_PI_AI"))
-  );
-}
-
-function resolveConfiguredLocalProvider(
-  config: StorageConfig | null | undefined,
-): string | null {
-  const agents = asRecord(config?.agents);
-  const defaults = asRecord(agents?.defaults);
-  const subscriptionProvider = normalizeOnboardingProviderId(
-    readString(defaults, "subscriptionProvider"),
-  );
-  if (subscriptionProvider && subscriptionProvider !== "elizacloud") {
-    return subscriptionProvider;
-  }
-
-  if (isPiAiEnabled(config)) {
-    return "pi-ai";
-  }
-
-  for (const provider of ONBOARDING_PROVIDER_CATALOG) {
-    if (provider.id === "elizacloud" || !provider.envKey) {
-      continue;
-    }
-    if (readEnvString(config, provider.envKey)) {
-      return provider.id;
-    }
-  }
-
-  return null;
-}
-
 function hasRemoteConnection(
   config: StorageConfig | null | undefined,
 ): boolean {
@@ -116,8 +67,7 @@ function hasInactiveCloudSignals(
   const models = asRecord(config?.models);
   return Boolean(
     readString(cloud, "apiKey") ||
-      normalizeOnboardingProviderId(readString(cloud, "provider")) ===
-        "elizacloud" ||
+      readString(cloud, "provider") === "elizacloud" ||
       readString(cloud, "inferenceMode") === "cloud" ||
       readString(models, "small") ||
       readString(models, "large"),
@@ -127,6 +77,11 @@ function hasInactiveCloudSignals(
 export function shouldPreferLocalProviderConfig(
   config: StorageConfig | null | undefined,
 ): boolean {
+  const connection = inferOnboardingConnectionFromConfig(config);
+  if (!connection || !isLocalProviderConnection(connection)) {
+    return false;
+  }
+
   // If cloud.enabled is explicitly true, the user has actively chosen cloud —
   // never override their preference even if a local provider is also configured.
   const cloud = asRecord(config?.cloud);
@@ -135,8 +90,7 @@ export function shouldPreferLocalProviderConfig(
   }
 
   return Boolean(
-    resolveConfiguredLocalProvider(config) &&
-      !hasRemoteConnection(config) &&
+    !hasRemoteConnection(config) &&
       !cloudHandlesInference(config) &&
       hasInactiveCloudSignals(config),
   );
@@ -154,10 +108,7 @@ export function normalizeConfigForLocalProviderPreference(
   const nextCloud: Record<string, unknown> = { ...cloud };
   delete nextCloud.apiKey;
 
-  if (
-    normalizeOnboardingProviderId(readString(cloud, "provider")) ===
-    "elizacloud"
-  ) {
+  if (readString(cloud, "provider") === "elizacloud") {
     delete nextCloud.provider;
   }
 

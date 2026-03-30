@@ -3,11 +3,11 @@
  * cloud-mode detection, and cloud-provisioned container detection.
  */
 import { logger, stringToUuid } from "@elizaos/core";
-import type {
-  OnboardingConnection,
-  OnboardingLocalProviderId,
-} from "@miladyai/agent/contracts/onboarding";
-import { normalizeOnboardingProviderId } from "@miladyai/agent/contracts/onboarding";
+import {
+  getOnboardingProviderOption,
+  normalizePersistedOnboardingConnection,
+  type OnboardingConnection,
+} from "@miladyai/shared/contracts/onboarding";
 import {
   getDefaultStylePreset,
   getStylePresets,
@@ -35,21 +35,6 @@ function getCompatApiToken(): string | null {
 // ---------------------------------------------------------------------------
 // Onboarding API key persistence
 // ---------------------------------------------------------------------------
-
-const ONBOARDING_PROVIDER_ENV_KEYS: Record<string, string> = {
-  anthropic: "ANTHROPIC_API_KEY",
-  openai: "OPENAI_API_KEY",
-  groq: "GROQ_API_KEY",
-  grok: "XAI_API_KEY",
-  xai: "XAI_API_KEY",
-  gemini: "GOOGLE_GENERATIVE_AI_API_KEY",
-  "google-genai": "GOOGLE_GENERATIVE_AI_API_KEY",
-  openrouter: "OPENROUTER_API_KEY",
-  deepseek: "DEEPSEEK_API_KEY",
-  mistral: "MISTRAL_API_KEY",
-  together: "TOGETHER_API_KEY",
-  zai: "ZAI_API_KEY",
-};
 
 function trimToUndefined(value: unknown): string | undefined {
   if (typeof value !== "string") {
@@ -94,63 +79,10 @@ function resolveCompatOnboardingStyle(
   return getDefaultStylePreset(language);
 }
 
-function normalizeOnboardingConnection(
-  body: Record<string, unknown>,
-): OnboardingConnection | null {
-  const connection =
-    body.connection && typeof body.connection === "object"
-      ? (body.connection as Record<string, unknown>)
-      : null;
-  if (!connection) {
-    return null;
-  }
-
-  if (connection.kind === "cloud-managed") {
-    return {
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      apiKey: trimToUndefined(connection.apiKey),
-      smallModel: trimToUndefined(connection.smallModel),
-      largeModel: trimToUndefined(connection.largeModel),
-    };
-  }
-
-  if (connection.kind === "local-provider") {
-    const provider = normalizeOnboardingProviderId(connection.provider);
-    if (!provider || provider === "elizacloud") {
-      return null;
-    }
-    return {
-      kind: "local-provider",
-      provider: provider as OnboardingLocalProviderId,
-      apiKey: trimToUndefined(connection.apiKey),
-      primaryModel: trimToUndefined(connection.primaryModel),
-    };
-  }
-
-  if (connection.kind === "remote-provider") {
-    const remoteApiBase = trimToUndefined(connection.remoteApiBase);
-    const provider = normalizeOnboardingProviderId(connection.provider);
-    if (!remoteApiBase) {
-      return null;
-    }
-    return {
-      kind: "remote-provider",
-      remoteApiBase,
-      remoteAccessToken: trimToUndefined(connection.remoteAccessToken),
-      provider: provider && provider !== "elizacloud" ? provider : undefined,
-      apiKey: trimToUndefined(connection.apiKey),
-      primaryModel: trimToUndefined(connection.primaryModel),
-    };
-  }
-
-  return null;
-}
-
 function resolvePersistedOnboardingConnection(
   body: Record<string, unknown>,
 ): OnboardingConnection | null {
-  const nextConnection = normalizeOnboardingConnection(body);
+  const nextConnection = normalizePersistedOnboardingConnection(body.connection);
   if (!nextConnection) {
     return null;
   }
@@ -163,6 +95,16 @@ function resolvePersistedOnboardingConnection(
     nextConnection,
     existingConnection,
   );
+}
+
+function getPersistableLocalProviderEnvKey(
+  connection: OnboardingConnection,
+): string | null {
+  if (connection.kind !== "local-provider") {
+    return null;
+  }
+
+  return getOnboardingProviderOption(connection.provider)?.envKey ?? null;
 }
 
 /**
@@ -178,7 +120,7 @@ export async function extractAndPersistOnboardingApiKey(
   }
 
   if (persistedConnection.kind === "local-provider") {
-    const envKey = ONBOARDING_PROVIDER_ENV_KEYS[persistedConnection.provider];
+    const envKey = getPersistableLocalProviderEnvKey(persistedConnection);
     if (envKey && !persistedConnection.apiKey) {
       return null;
     }
@@ -192,7 +134,7 @@ export async function extractAndPersistOnboardingApiKey(
     return null;
   }
 
-  const envKey = ONBOARDING_PROVIDER_ENV_KEYS[persistedConnection.provider];
+  const envKey = getPersistableLocalProviderEnvKey(persistedConnection);
   if (!envKey || !persistedConnection.apiKey) {
     return null;
   }

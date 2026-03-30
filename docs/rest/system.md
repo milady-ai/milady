@@ -161,18 +161,19 @@ Deep runtime introspection endpoint for advanced debugging. Returns detailed inf
 
 ### POST /api/provider/switch
 
-Atomically switch the active AI provider. Clears competing credentials and env vars, sets the new provider key, and triggers a restart.
+Atomically switch the active AI provider selection. The authoritative selection is persisted to the root `connection` field in config, low-level runtime config is derived from that selection, and previously configured credentials remain available as capability state. The server triggers a restart after the switch.
 
 **Request Body**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `provider` | string | Yes | Provider ID |
-| `apiKey` | string | Conditional | Required for direct API key providers (see below). Max 512 characters. |
+| `apiKey` | string | No | Optional new credential to store for the selected provider. Max 512 characters. |
+| `primaryModel` | string | No | Optional primary model override for local providers that support it |
 
-Valid providers: `elizacloud`, `pi-ai`, `openai-codex`, `openai-subscription`, `anthropic-subscription`, `openai`, `anthropic`, `deepseek`, `google`, `groq`, `xai`, `openrouter`.
+Canonical providers: `elizacloud`, `pi-ai`, `openai-subscription`, `anthropic-subscription`, `openai`, `anthropic`, `deepseek`, `gemini`, `groq`, `grok`, `openrouter`, `ollama`, `mistral`, `together`, `zai`.
 
-The `apiKey` field is required for direct API key providers: `openai`, `anthropic`, `deepseek`, `google`, `groq`, `xai`, and `openrouter`. It is optional for managed providers (`elizacloud`, `pi-ai`, `openai-codex`, `openai-subscription`, `anthropic-subscription`).
+Compatibility aliases are still accepted on input and normalized before persistence, including `google`, `google-genai`, `xai`, and `openai-codex`.
 
 When switching to `elizacloud`, cloud inference is enabled and `cloud.services.inference` is set to `true`. When switching away from `elizacloud` to any other provider, cloud inference is disabled but the cloud connection remains active for other services (RPC, media, TTS, embeddings). See [granular cloud service toggles](/guides/cloud#granular-cloud-service-toggles) for details.
 
@@ -180,9 +181,9 @@ When switching to `elizacloud`, cloud inference is enabled and `cloud.services.i
 
 ```json
 {
-  "ok": true,
+  "success": true,
   "provider": "anthropic",
-  "requiresRestart": true
+  "restarting": true
 }
 ```
 
@@ -191,7 +192,6 @@ When switching to `elizacloud`, cloud inference is enabled and `cloud.services.i
 | Status | Condition |
 |--------|-----------|
 | 400 | Missing or invalid provider |
-| 400 | API key is required for this provider |
 | 400 | API key is too long (max 512 characters) |
 | 409 | Provider switch already in progress |
 
@@ -243,6 +243,8 @@ A JSON Schema object describing all config keys, types, and defaults.
 
 Update one or more configuration keys. Uses a deep-merge strategy — provided keys are merged recursively without wiping sibling keys. Protected against prototype pollution.
 
+The root `connection` field is the authoritative active-provider record. When a `PUT /api/config` request includes `connection`, the server canonicalizes and persists it, then derives runtime-facing cloud/env/subscription settings from that record. When a patch omits `connection` but changes provider-affecting keys such as `cloud`, `env`, `models`, or `agents.defaults.subscriptionProvider`, the server reconciles `connection` from the merged config for backward compatibility.
+
 **Request Body**
 
 Partial config object. Only provided keys are updated:
@@ -260,11 +262,8 @@ Partial config object. Only provided keys are updated:
 
 **Response**
 
-```json
-{
-  "ok": true
-}
-```
+Returns the updated redacted config snapshot, including the root `connection`
+field when present.
 
 ---
 

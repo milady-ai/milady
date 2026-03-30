@@ -195,6 +195,14 @@ const FIELD_LABELS: Record<string, string> = {
   "meta.onboardingComplete": "Onboarding Complete",
   "meta.lastTouchedVersion": "Config Last Touched Version",
   "meta.lastTouchedAt": "Config Last Touched At",
+  connection: "Active Connection",
+  "connection.kind": "Active Connection Kind",
+  "connection.provider": "Active Provider",
+  "connection.cloudProvider": "Active Cloud Provider",
+  "connection.primaryModel": "Active Primary Model Override",
+  "connection.smallModel": "Active Small Model",
+  "connection.largeModel": "Active Large Model",
+  "connection.remoteApiBase": "Remote Provider API Base",
   "update.channel": "Update Channel",
   "update.checkOnStart": "Update Check on Start",
   "diagnostics.enabled": "Diagnostics Enabled",
@@ -510,6 +518,22 @@ const FIELD_HELP: Record<string, string> = {
     "Explicit onboarding completion marker used to keep the app out of onboarding until reset.",
   "meta.lastTouchedVersion": "Auto-set when Eliza writes the config.",
   "meta.lastTouchedAt": "ISO timestamp of the last config write (auto-set).",
+  connection:
+    "Authoritative active provider selection persisted from onboarding and settings.",
+  "connection.kind":
+    'Selected connection kind: "cloud-managed", "local-provider", or "remote-provider".',
+  "connection.provider":
+    "Canonical selected local provider id. Capability credentials remain in env, auth, or cloud config.",
+  "connection.cloudProvider":
+    'Selected cloud provider id (currently always "elizacloud").',
+  "connection.primaryModel":
+    "Optional primary model override for the selected local or remote provider.",
+  "connection.smallModel":
+    "Selected small cloud model when cloud-managed inference is active.",
+  "connection.largeModel":
+    "Selected large cloud model when cloud-managed inference is active.",
+  "connection.remoteApiBase":
+    "Remote provider base URL when the active connection uses a remote backend.",
   "update.channel":
     'Update channel for git + npm installs ("stable", "beta", or "dev").',
   "update.checkOnStart":
@@ -1268,7 +1292,7 @@ let cachedBase: ConfigSchemaResponse | null = null;
 function stripConnectorSchema(schema: ConfigSchema): ConfigSchema {
   const next = cloneSchema(schema);
   const root = asSchemaObject(next);
-  if (!root || !root.properties) {
+  if (!root?.properties) {
     return next;
   }
   const connectorsNode = asSchemaObject(root.properties.connectors);

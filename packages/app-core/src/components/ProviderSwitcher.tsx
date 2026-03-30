@@ -23,12 +23,10 @@ import {
 } from "../config";
 import { useBranding } from "../config/branding";
 import { useTimeout } from "../hooks";
+import { inferOnboardingConnectionFromConfig } from "@miladyai/shared/contracts/onboarding";
 import {
   getOnboardingProviderOption,
-  getStoredSubscriptionProvider,
-  getSubscriptionProviderFamily,
   isSubscriptionProviderSelectionId,
-  normalizeSubscriptionProviderSelectionId,
   SUBSCRIPTION_PROVIDER_SELECTIONS,
   type SubscriptionProviderSelectionId,
 } from "../providers";
@@ -109,8 +107,6 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const app = useApp();
   const branding = useBranding();
   const t = app.t;
-  const elizaCloudEnabled =
-    props.elizaCloudEnabled ?? Boolean(app.elizaCloudEnabled);
   const elizaCloudConnected =
     props.elizaCloudConnected ?? Boolean(app.elizaCloudConnected);
   const elizaCloudCredits = props.elizaCloudCredits ?? app.elizaCloudCredits;
@@ -144,7 +140,6 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       ? app.pluginSaveSuccess
       : new Set<string>());
   const loadPlugins = props.loadPlugins ?? app.loadPlugins;
-  const handlePluginToggle = props.handlePluginToggle ?? app.handlePluginToggle;
   const handlePluginConfigSave =
     props.handlePluginConfigSave ?? app.handlePluginConfigSave;
   const handleCloudLogin = props.handleCloudLogin ?? app.handleCloudLogin;
@@ -173,11 +168,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const [anthropicConnected, setAnthropicConnected] = useState(false);
   const [openaiConnected, setOpenaiConnected] = useState(false);
 
-  /* ── Cloud inference state ─────────────────────────────────────── */
-  const [cloudHandlesInference, setCloudHandlesInference] = useState(false);
-
   /* ── pi-ai state ──────────────────────────────────────────────── */
-  const [piAiEnabled, setPiAiEnabled] = useState(false);
   const [piAiModelSpec, setPiAiModelSpec] = useState("");
   const [piAiModelOptions, setPiAiModelOptions] = useState<
     OnboardingOptions["piAiModels"]
@@ -185,6 +176,30 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const [piAiDefaultModelSpec, setPiAiDefaultModelSpec] = useState("");
   const [piAiSaving, setPiAiSaving] = useState(false);
   const [piAiSaveSuccess, setPiAiSaveSuccess] = useState(false);
+
+  const syncSelectionFromConfig = useCallback(
+    (cfg: Record<string, unknown>) => {
+      const connection = inferOnboardingConnectionFromConfig(cfg);
+      const nextSelectedId =
+        connection?.kind === "cloud-managed"
+          ? "__cloud__"
+          : connection?.kind === "local-provider"
+            ? connection.provider
+            : connection?.kind === "remote-provider"
+              ? (connection.provider ?? null)
+              : null;
+
+      if (!hasManualSelection.current) {
+        setSelectedProviderId(nextSelectedId);
+      }
+      const piAiSelected =
+        connection?.kind === "local-provider" && connection.provider === "pi-ai";
+      if (piAiSelected) {
+        setPiAiModelSpec(connection.primaryModel ?? "");
+      }
+    },
+    [],
+  );
 
   const loadSubscriptionStatus = useCallback(async () => {
     try {
@@ -213,8 +228,10 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       try {
         const cfg = await client.getConfig();
         const models = cfg.models as Record<string, string> | undefined;
-        const cloud = cfg.cloud as Record<string, unknown> | undefined;
-        const elizaCloudEnabledCfg = cloud?.enabled === true;
+        const connection = inferOnboardingConnectionFromConfig(
+          cfg as Record<string, unknown>,
+        );
+        const elizaCloudEnabledCfg = connection?.kind === "cloud-managed";
         const defaultSmall = "moonshotai/kimi-k2-turbo";
         const defaultLarge = "moonshotai/kimi-k2-0905";
 
@@ -239,54 +256,26 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             envLarge ||
             (elizaCloudEnabledCfg ? defaultLarge : ""),
         );
-        const rawPiAi =
-          (typeof vars.ELIZA_USE_PI_AI === "string"
-            ? vars.ELIZA_USE_PI_AI
-            : undefined) ||
-          (typeof env?.ELIZA_USE_PI_AI === "string" ? env.ELIZA_USE_PI_AI : "");
-        const piAiOn = ["1", "true", "yes"].includes(
-          rawPiAi.trim().toLowerCase(),
-        );
-        setPiAiEnabled(piAiOn);
-
-        // Check if cloud handles inference or user has own keys
-        const cloudServices = cloud?.services as
-          | Record<string, unknown>
-          | undefined;
-        const inferenceMode =
-          typeof cloud?.inferenceMode === "string"
-            ? cloud.inferenceMode
-            : "cloud";
-        const inferenceToggle = cloudServices?.inference !== false;
-        const cloudHandlesInferenceCfg =
-          elizaCloudEnabledCfg && inferenceMode === "cloud" && inferenceToggle;
-        setCloudHandlesInference(cloudHandlesInferenceCfg);
+        syncSelectionFromConfig(cfg as Record<string, unknown>);
 
         const agents = cfg.agents as Record<string, unknown> | undefined;
         const defaults = agents?.defaults as
           | Record<string, unknown>
           | undefined;
         const model = defaults?.model as Record<string, unknown> | undefined;
-        const savedSubscriptionProvider =
-          normalizeSubscriptionProviderSelectionId(
-            defaults?.subscriptionProvider,
-          );
-        setPiAiModelSpec(
-          typeof model?.primary === "string" ? model.primary : "",
-        );
         if (
-          !hasManualSelection.current &&
-          savedSubscriptionProvider &&
-          !piAiOn &&
-          !cloudHandlesInferenceCfg
+          connection?.kind !== "local-provider" ||
+          connection.provider !== "pi-ai"
         ) {
-          setSelectedProviderId(savedSubscriptionProvider);
+          setPiAiModelSpec(
+            typeof model?.primary === "string" ? model.primary : "",
+          );
         }
       } catch (err) {
         console.warn("[eliza] Failed to load config", err);
       }
     })();
-  }, [loadSubscriptionStatus]);
+  }, [loadSubscriptionStatus, syncSelectionFromConfig]);
 
   useEffect(() => {
     const anthStatus = subscriptionStatus.find(
@@ -321,28 +310,22 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       ),
     [plugins],
   );
-  const enabledAiProviders = useMemo(
-    () => allAiProviders.filter((p) => p.enabled),
+  const availableProviderIds = useMemo(
+    () =>
+      new Set(
+        allAiProviders.map(
+          (provider) =>
+            getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+              ?.id ?? normalizeAiProviderPluginId(provider.id),
+        ),
+      ),
     [allAiProviders],
   );
 
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
-    () => (elizaCloudEnabled ? "__cloud__" : null),
+    null,
   );
   const hasManualSelection = useRef(false);
-
-  useEffect(() => {
-    if (hasManualSelection.current) return;
-    if (piAiEnabled) {
-      if (selectedProviderId !== "pi-ai") setSelectedProviderId("pi-ai");
-      return;
-    }
-    // Only auto-select cloud if cloud handles inference (not just enabled)
-    if (cloudHandlesInference) {
-      if (selectedProviderId !== "__cloud__")
-        setSelectedProviderId("__cloud__");
-    }
-  }, [cloudHandlesInference, piAiEnabled, selectedProviderId]);
 
   const resolvedSelectedId = useMemo(
     () =>
@@ -351,37 +334,36 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         : selectedProviderId === "pi-ai"
           ? "pi-ai"
           : selectedProviderId &&
-              (allAiProviders.some((p) => p.id === selectedProviderId) ||
+              (availableProviderIds.has(selectedProviderId) ||
                 isSubscriptionProviderSelectionId(selectedProviderId))
             ? selectedProviderId
-            : cloudHandlesInference
-              ? "__cloud__"
-              : piAiEnabled
-                ? "pi-ai"
-                : anthropicConnected
-                  ? "anthropic-subscription"
-                  : openaiConnected
-                    ? "openai-subscription"
-                    : (enabledAiProviders[0]?.id ?? null),
+            : null,
     [
-      allAiProviders,
-      anthropicConnected,
-      cloudHandlesInference,
-      enabledAiProviders,
-      openaiConnected,
-      piAiEnabled,
+      availableProviderIds,
       selectedProviderId,
     ],
   );
 
   const selectedProvider = useMemo(
-    () =>
-      resolvedSelectedId &&
-      resolvedSelectedId !== "__cloud__" &&
-      resolvedSelectedId !== "pi-ai" &&
-      !isSubscriptionProviderSelectionId(resolvedSelectedId)
-        ? (allAiProviders.find((p) => p.id === resolvedSelectedId) ?? null)
-        : null,
+    () => {
+      if (
+        !resolvedSelectedId ||
+        resolvedSelectedId === "__cloud__" ||
+        resolvedSelectedId === "pi-ai" ||
+        isSubscriptionProviderSelectionId(resolvedSelectedId)
+      ) {
+        return null;
+      }
+
+      return (
+        allAiProviders.find(
+          (provider) =>
+            (getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+              ?.id ?? normalizeAiProviderPluginId(provider.id)) ===
+            resolvedSelectedId,
+        ) ?? null
+      );
+    },
     [allAiProviders, resolvedSelectedId],
   );
 
@@ -390,166 +372,64 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     async (newId: string) => {
       hasManualSelection.current = true;
       setSelectedProviderId(newId);
-      const target = allAiProviders.find((p) => p.id === newId);
-      if (!target) return;
+      const target =
+        allAiProviders.find(
+          (provider) =>
+            (getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+              ?.id ?? normalizeAiProviderPluginId(provider.id)) === newId,
+        ) ?? null;
+      const providerId =
+        getOnboardingProviderOption(
+          normalizeAiProviderPluginId(target?.id ?? newId),
+        )?.id ?? newId;
 
-      // Direct providers require API keys. The UI does not have access to stored
-      // secrets, so we avoid calling /api/provider/switch here and instead rely
-      // on enabling/disabling provider plugins + saving provider config.
-      const willTogglePlugins =
-        !target.enabled || enabledAiProviders.some((p) => p.id !== newId);
-      if (elizaCloudEnabled || piAiEnabled) {
-        try {
-          // Disable cloud inference and explicitly mark cloud as disabled
-          // so the cloud-status check doesn't re-enable it on restart.
-          await client.updateConfig({
-            cloud: {
-              enabled: false,
-              services: { inference: false },
-              inferenceMode: "byok",
-            },
-            env: { vars: { ELIZA_USE_PI_AI: "" } },
-            agents: { defaults: { subscriptionProvider: null } },
-          });
-          setPiAiEnabled(false);
-          setCloudHandlesInference(false);
-          if (!willTogglePlugins) {
-            await client.restartAgent();
-          }
-        } catch (err) {
-          console.warn(
-            "[eliza] Failed to update cloud inference config during provider switch",
-            err,
-          );
-        }
-      }
-      if (!target.enabled) {
-        await handlePluginToggle(newId, true);
-      }
-      for (const p of enabledAiProviders) {
-        if (p.id !== newId) {
-          await handlePluginToggle(p.id, false);
-        }
+      try {
+        await client.switchProvider(providerId);
+      } catch (err) {
+        console.warn("[eliza] Provider switch failed", err);
       }
     },
-    [
-      allAiProviders,
-      enabledAiProviders,
-      handlePluginToggle,
-      elizaCloudEnabled,
-      piAiEnabled,
-    ],
+    [allAiProviders],
   );
 
   const handleSelectSubscription = useCallback(
     async (providerId: SubscriptionProviderSelectionId) => {
       hasManualSelection.current = true;
       setSelectedProviderId(providerId);
-      const providerFamily = getSubscriptionProviderFamily(providerId);
-      const target =
-        allAiProviders.find((plugin) => {
-          const normalizedId = normalizeAiProviderPluginId(plugin.id);
-          const normalizedName = plugin.name.toLowerCase();
-          return (
-            normalizedId === providerFamily ||
-            normalizedId.startsWith(`${providerFamily}-`) ||
-            normalizedName.includes(providerFamily)
-          );
-        }) ?? null;
 
       try {
-        // Disable cloud inference but keep cloud connected for RPC/services
-        await client.updateConfig({
-          cloud: {
-            services: { inference: false },
-            inferenceMode: "byok",
-          },
-          env: { vars: { ELIZA_USE_PI_AI: "" } },
-        });
-        await client.switchProvider(getStoredSubscriptionProvider(providerId));
-
-        // Persist plugin toggles after successful switch to avoid inconsistent
-        // UI state if switchProvider fails.
-        if (target && !target.enabled) {
-          await handlePluginToggle(target.id, true);
-        }
-        for (const p of enabledAiProviders) {
-          if (!target || p.id !== target.id) {
-            await handlePluginToggle(p.id, false);
-          }
-        }
-
-        // Only update UI state after all operations succeed
-        setCloudHandlesInference(false);
-        setPiAiEnabled(false);
+        await client.switchProvider(providerId);
       } catch (err) {
         console.warn("[eliza] Provider switch failed", err);
       }
     },
-    [allAiProviders, enabledAiProviders, handlePluginToggle],
+    [],
   );
 
   const handleSelectCloud = useCallback(async () => {
     hasManualSelection.current = true;
     setSelectedProviderId("__cloud__");
     try {
-      await client.updateConfig({
-        cloud: {
-          enabled: true,
-          services: { inference: true },
-          inferenceMode: "cloud",
-        },
-        env: { vars: { ELIZA_USE_PI_AI: "" } },
-        agents: {
-          defaults: { model: { primary: null }, subscriptionProvider: null },
-        },
-        models: {
-          small: currentSmallModel || "moonshotai/kimi-k2-turbo",
-          large: currentLargeModel || "moonshotai/kimi-k2-0905",
-        },
-      });
+      await client.switchProvider("elizacloud");
       setState("elizaCloudEnabled", true);
-      setCloudHandlesInference(true);
-      setPiAiEnabled(false);
-      for (const p of enabledAiProviders) {
-        await handlePluginToggle(p.id, false);
-      }
-      await client.restartAgent();
     } catch (err) {
       console.warn("[eliza] Failed to select cloud provider", err);
     }
-  }, [
-    currentSmallModel,
-    currentLargeModel,
-    enabledAiProviders,
-    handlePluginToggle,
-    setState,
-  ]);
+  }, [setState]);
 
   const handlePiAiSave = useCallback(async () => {
     setPiAiSaving(true);
     setPiAiSaveSuccess(false);
     try {
-      for (const p of enabledAiProviders) {
-        await handlePluginToggle(p.id, false);
-      }
       await client.updateConfig({
-        cloud: {
-          enabled: false,
-          services: { inference: false },
-          inferenceMode: "byok",
-        },
-        env: { vars: { ELIZA_USE_PI_AI: "1" } },
-        agents: {
-          defaults: {
-            model: {
-              primary: piAiModelSpec.trim() || null,
-            },
-            subscriptionProvider: null,
-          },
+        connection: {
+          kind: "local-provider",
+          provider: "pi-ai",
+          ...(piAiModelSpec.trim()
+            ? { primaryModel: piAiModelSpec.trim() }
+            : {}),
         },
       });
-      setPiAiEnabled(true);
       setPiAiSaveSuccess(true);
       setTimeout(() => setPiAiSaveSuccess(false), 2000);
       await client.restartAgent();
@@ -558,7 +438,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     } finally {
       setPiAiSaving(false);
     }
-  }, [enabledAiProviders, handlePluginToggle, piAiModelSpec, setTimeout]);
+  }, [piAiModelSpec, setTimeout]);
 
   const handleSelectPiAi = useCallback(async () => {
     hasManualSelection.current = true;
@@ -597,7 +477,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       disabled: false,
     })),
     ...allAiProviders.map((provider) => ({
-      id: provider.id,
+      id:
+        getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+          ?.id ?? normalizeAiProviderPluginId(provider.id),
       label:
         getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
           ?.name ?? provider.name,

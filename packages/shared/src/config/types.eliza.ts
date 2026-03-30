@@ -5,6 +5,7 @@ import type {
   MediaConfig,
   ReleaseChannel,
 } from "../contracts/config.js";
+import type { OnboardingConnection } from "../contracts/onboarding.js";
 import type { AgentBinding, AgentsConfig } from "./types.agents.js";
 import type {
   DiscoveryConfig,
@@ -738,6 +739,8 @@ export type ElizaConfig = {
   database?: DatabaseConfig;
   /** Eliza Cloud integration for remote agent provisioning and inference. */
   cloud?: CloudConfig;
+  /** Authoritative active provider selection persisted from onboarding/settings. */
+  connection?: OnboardingConnection;
   /** CUA (Computer Use Agent) cloud sandbox configuration. */
   cua?: CuaConfig;
   x402?: X402Config;

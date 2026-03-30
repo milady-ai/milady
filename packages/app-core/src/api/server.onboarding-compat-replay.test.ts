@@ -72,7 +72,7 @@ describe("POST /api/onboarding compat replay", () => {
     }
   });
 
-  it("preserves a local provider key and clears stale cloud config across the compat replay", async () => {
+  it("preserves a local provider key and disables stale cloud inference across the compat replay", async () => {
     const tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), "eliza-onboarding-replay-"),
     );
@@ -125,7 +125,8 @@ describe("POST /api/onboarding compat replay", () => {
       expect(env.GROQ_API_KEY).toBe("gsk-test-groq-key");
       expect(cloud.enabled).toBe(false);
       expect(cloud.runtime).toBe("local");
-      expect(cloud.apiKey).toBeUndefined();
+      expect(cloud.apiKey).toBe("stale-cloud-key");
+      expect(cloud.inferenceMode).toBe("byok");
       expect(models.small).toBeUndefined();
       expect(models.large).toBeUndefined();
       expect((config.meta as Record<string, unknown>)?.onboardingComplete).toBe(

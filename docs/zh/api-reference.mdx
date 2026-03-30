@@ -254,7 +254,7 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 
 | 方法 | 路径 | 描述 |
 |--------|------|-------------|
-| `POST` | `/api/provider/switch` | 原子性切换当前活跃的 AI 提供商（清除竞争凭据） |
+| `POST` | `/api/provider/switch` | 原子性切换当前活跃的 AI 提供商选择，并持久化规范化的 `connection` 状态 |
 
 ---
 
@@ -535,6 +535,11 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `POST` | `/api/cloud/agents/:id/provision` | 预配云代理 |
 | `POST` | `/api/cloud/agents/:id/shutdown` | 关闭并删除云代理 |
 | `POST` | `/api/cloud/agents/:id/connect` | 连接到现有云代理 |
+| `POST` | `/api/cloud/v1/milady/agents/:id/pairing-token` | 生成配对令牌，用于在新标签页中打开云代理的 Web UI。返回 `{ success, data: { token, redirectUrl, expiresIn } }` |
+
+<Info>
+`/api/cloud/v1/` 下的路由将作为 `/api/v1/` 转发到云后端，与旧版 `/api/cloud/compat/*` 映射不同。认证同时支持 `Authorization: Bearer` 和 `X-Api-Key` 头部。
+</Info>
 
 ---
 
@@ -801,7 +806,7 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `GET` | `/api/stream/voice` | 获取语音/TTS 配置 |
 | `POST` | `/api/stream/voice` | 保存语音/TTS 设置 |
 | `POST` | `/api/stream/voice/speak` | 在直播流中触发 TTS |
-| `GET` | `/api/stream/settings` | 获取视觉流设置 |
+| `GET` | `/api/stream/settings` | 获取视觉流设置。响应包含 `avatarIndex`（1–8），表示代理的 VRM 头像 |
 | `POST` | `/api/stream/settings` | 保存视觉流设置 |
 
 ---

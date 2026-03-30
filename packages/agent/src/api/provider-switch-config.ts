@@ -2,21 +2,23 @@ import {
   applySubscriptionCredentials,
   deleteCredentials,
 } from "@miladyai/agent/auth";
-import type { SubscriptionProvider } from "../auth/types";
 import { SUBSCRIPTION_PROVIDER_MAP } from "../auth/types";
 import type { ElizaConfig } from "../config/types.eliza";
 import {
-  ONBOARDING_PROVIDER_CATALOG,
   getOnboardingProviderOption,
+  getOnboardingProviderSignalEnvKeys,
+  getStoredOnboardingProviderId,
+  inferCompatibilityOnboardingConnection,
+  inferOnboardingConnectionFromConfig,
   isCloudManagedConnection,
   isLocalProviderConnection,
   isRemoteProviderConnection,
   normalizeOnboardingProviderId,
+  normalizePersistedOnboardingConnection,
   type OnboardingConnection,
   type OnboardingLocalProviderId,
+  stripOnboardingConnectionSecrets,
 } from "../contracts/onboarding";
-
-const REDACTED_SECRET = "[REDACTED]";
 
 type MutableElizaConfig = Partial<ElizaConfig> & {
   cloud?: Record<string, unknown>;
@@ -25,7 +27,7 @@ type MutableElizaConfig = Partial<ElizaConfig> & {
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object"
+  return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
 }
@@ -38,20 +40,20 @@ function trimToUndefined(value: string | null | undefined): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function normalizeSecret(
-  value: string | null | undefined,
-  existing?: string,
-): string | undefined {
-  const trimmed = trimToUndefined(value);
-  if (!trimmed || trimmed.toUpperCase() === REDACTED_SECRET) {
-    return existing;
-  }
-  return trimmed;
+function ensureEnv(config: MutableElizaConfig): Record<string, unknown> {
+  config.env ??= {};
+  return config.env as Record<string, unknown>;
 }
 
-function ensureEnv(config: MutableElizaConfig): Record<string, string> {
-  config.env ??= {};
-  return config.env as Record<string, string>;
+function ensureEnvVars(config: MutableElizaConfig): Record<string, string> {
+  const env = ensureEnv(config);
+  const existing = asRecord(env.vars);
+  if (existing) {
+    return existing as Record<string, string>;
+  }
+  const next: Record<string, string> = {};
+  env.vars = next;
+  return next;
 }
 
 function ensureDefaults(
@@ -62,19 +64,50 @@ function ensureDefaults(
   return config.agents.defaults;
 }
 
+function ensureCloud(config: MutableElizaConfig): Record<string, unknown> {
+  config.cloud ??= {};
+  return config.cloud;
+}
+
+function ensureModels(config: MutableElizaConfig): Record<string, unknown> {
+  config.models ??= {};
+  return config.models;
+}
+
+function pruneEnv(config: MutableElizaConfig): void {
+  const env = asRecord(config.env);
+  if (!env) {
+    return;
+  }
+  const vars = asRecord(env.vars);
+  if (vars && Object.keys(vars).length === 0) {
+    delete env.vars;
+  }
+
+  const envKeys = Object.keys(env).filter((key) => key !== "shellEnv");
+  const hasShellEnv = Boolean(env.shellEnv);
+  if (envKeys.length === 0 && !hasShellEnv) {
+    delete config.env;
+  }
+}
+
 function setEnvValue(
   config: MutableElizaConfig,
   key: string,
   value: string | undefined,
 ): void {
   const env = ensureEnv(config);
+  const vars = ensureEnvVars(config);
   if (value) {
     env[key] = value;
+    vars[key] = value;
     process.env[key] = value;
     return;
   }
   delete env[key];
+  delete vars[key];
   delete process.env[key];
+  pruneEnv(config);
 }
 
 function setPrimaryModel(
@@ -92,9 +125,10 @@ function setPrimaryModel(
 }
 
 function clearPiAiFlag(config: MutableElizaConfig): void {
-  const env = ensureEnv(config);
-  delete env.ELIZA_USE_PI_AI;
-  delete process.env.ELIZA_USE_PI_AI;
+  for (const key of ["ELIZA_USE_PI_AI", "MILADY_USE_PI_AI"] as const) {
+    clearPersistedEnvValue(config, key);
+    delete process.env[key];
+  }
 }
 
 function clearPersistedEnvValue(config: MutableElizaConfig, key: string): void {
@@ -116,67 +150,125 @@ function clearPersistedEnvValue(config: MutableElizaConfig, key: string): void {
   }
 }
 
-function readString(
-  source: Record<string, unknown> | null | undefined,
-  key: string,
-): string | undefined {
-  const value = source?.[key];
-  return trimToUndefined(typeof value === "string" ? value : undefined);
+function clearCloudModelSelections(config: MutableElizaConfig): void {
+  const models = asRecord(config.models);
+  if (!models) {
+    return;
+  }
+  delete models.small;
+  delete models.large;
+  if (Object.keys(models).length === 0) {
+    delete config.models;
+  }
 }
 
-function readEnvString(
-  config: Record<string, unknown> | null | undefined,
-  key: string,
-): string | undefined {
-  const env = asRecord(config?.env);
-  const vars = asRecord(env?.vars);
-  return readString(vars, key) ?? readString(env, key);
+function clearRemoteProviderConfig(config: MutableElizaConfig): void {
+  const cloud = asRecord(config.cloud);
+  if (!cloud) {
+    return;
+  }
+  delete cloud.remoteApiBase;
+  delete cloud.remoteAccessToken;
+  if (cloud.provider === "remote") {
+    delete cloud.provider;
+  }
 }
 
-function resolveConfiguredLocalProvider(
-  config: Record<string, unknown> | null | undefined,
-): OnboardingLocalProviderId | null {
-  const agents = asRecord(config?.agents);
-  const defaults = asRecord(agents?.defaults);
-  const storedSubscriptionProvider = normalizeOnboardingProviderId(
-    readString(defaults, "subscriptionProvider"),
-  );
+function disableCloudInference(config: MutableElizaConfig): void {
+  const cloud = ensureCloud(config);
+  cloud.enabled = false;
+  cloud.inferenceMode = "byok";
+  cloud.runtime = "local";
 
+  const services = asRecord(cloud.services) ?? {};
+  services.inference = false;
+  cloud.services = services;
+}
+
+function enableCloudInference(config: MutableElizaConfig): void {
+  const cloud = ensureCloud(config);
+  cloud.enabled = true;
+  cloud.provider = "elizacloud";
+  cloud.inferenceMode = "cloud";
+  cloud.runtime = "cloud";
+
+  const services = asRecord(cloud.services) ?? {};
+  services.inference = true;
+  cloud.services = services;
+}
+
+function persistConnectionSelection(
+  config: MutableElizaConfig,
+  connection: OnboardingConnection | null,
+): void {
+  if (!connection) {
+    delete config.connection;
+    return;
+  }
+  config.connection = stripOnboardingConnectionSecrets(connection);
+}
+
+function applyLocalProviderCapabilities(
+  config: MutableElizaConfig,
+  connection: Extract<OnboardingConnection, { kind: "local-provider" }>,
+): Promise<void> {
+  const normalizedProvider = normalizeOnboardingProviderId(connection.provider);
+  if (!normalizedProvider || normalizedProvider === "elizacloud") {
+    return Promise.resolve();
+  }
+
+  disableCloudInference(config);
+  clearRemoteProviderConfig(config);
+  clearCloudModelSelections(config);
+
+  clearSubscriptionProviderConfig(config);
+  if (normalizedProvider !== "pi-ai") {
+    clearPiAiFlag(config);
+  }
+
+  const storedProviderId = getStoredOnboardingProviderId(normalizedProvider);
   if (
-    storedSubscriptionProvider &&
-    storedSubscriptionProvider !== "elizacloud"
+    storedProviderId === "anthropic-subscription" ||
+    storedProviderId === "openai-codex"
   ) {
-    return storedSubscriptionProvider;
+    applySubscriptionProviderConfig(config, storedProviderId);
+
+    const setupToken =
+      storedProviderId === "anthropic-subscription"
+        ? trimToUndefined(connection.apiKey)
+        : undefined;
+
+    if (setupToken?.startsWith("sk-ant-")) {
+      setEnvValue(config, "ANTHROPIC_API_KEY", setupToken);
+      return Promise.resolve();
+    }
+
+    return applySubscriptionCredentials(config);
   }
 
-  const piAiEnabled = readEnvString(config, "ELIZA_USE_PI_AI");
-  if (piAiEnabled && piAiEnabled !== "0" && piAiEnabled !== "false") {
-    return "pi-ai";
+  if (normalizedProvider === "pi-ai") {
+    setEnvValue(config, "ELIZA_USE_PI_AI", "1");
   }
 
-  const localProvider = (
-    [
-      "anthropic",
-      "deepseek",
-      "gemini",
-      "grok",
-      "groq",
-      "mistral",
-      "ollama",
-      "openai",
-      "openrouter",
-      "pi-ai",
-      "together",
-      "zai",
-    ] as const satisfies readonly OnboardingLocalProviderId[]
-  ).find((providerId) => {
-    const providerOption = getOnboardingProviderOption(providerId);
-    return providerOption?.envKey
-      ? Boolean(readEnvString(config, providerOption.envKey))
-      : false;
-  });
+  const providerOption = getOnboardingProviderOption(normalizedProvider);
+  if (providerOption?.envKey) {
+    const apiKey = trimToUndefined(connection.apiKey);
+    if (apiKey) {
+      setEnvValue(config, providerOption.envKey, apiKey);
+    }
+  } else {
+    for (const envKey of getOnboardingProviderSignalEnvKeys(
+      normalizedProvider,
+    )) {
+      const value = trimToUndefined(connection.apiKey);
+      if (value) {
+        setEnvValue(config, envKey, value);
+      }
+    }
+  }
 
-  return localProvider ?? null;
+  setPrimaryModel(config, trimToUndefined(connection.primaryModel));
+  return Promise.resolve();
 }
 
 /**
@@ -258,12 +350,32 @@ export function clearPersistedOnboardingConfig(
     }
   }
 
-  for (const provider of ONBOARDING_PROVIDER_CATALOG) {
-    if (provider.envKey) {
-      clearPersistedEnvValue(config, provider.envKey);
+  delete config.connection;
+
+  const signalProviders = [
+    "anthropic",
+    "anthropic-subscription",
+    "deepseek",
+    "gemini",
+    "grok",
+    "groq",
+    "mistral",
+    "ollama",
+    "openai",
+    "openai-subscription",
+    "openrouter",
+    "pi-ai",
+    "together",
+    "zai",
+  ] as const satisfies readonly OnboardingLocalProviderId[];
+
+  for (const providerId of signalProviders) {
+    for (const envKey of getOnboardingProviderSignalEnvKeys(providerId)) {
+      clearPersistedEnvValue(config, envKey);
+      delete process.env[envKey];
     }
   }
-  clearPersistedEnvValue(config, "ELIZA_USE_PI_AI");
+  clearPiAiFlag(config);
 
   delete process.env.ELIZAOS_CLOUD_API_KEY;
   delete process.env.ELIZAOS_CLOUD_ENABLED;
@@ -277,8 +389,15 @@ export function createProviderSwitchConnection(args: {
   primaryModel?: string;
 }): OnboardingConnection | null {
   const provider = normalizeOnboardingProviderId(args.provider);
-  if (!provider || provider === "elizacloud") {
+  if (!provider) {
     return null;
+  }
+
+  if (provider === "elizacloud") {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+    };
   }
 
   return {
@@ -292,248 +411,134 @@ export function createProviderSwitchConnection(args: {
 export function resolveExistingOnboardingConnection(
   config: Record<string, unknown> | null | undefined,
 ): OnboardingConnection | null {
-  const cloud = asRecord(config?.cloud);
-  const models = asRecord(config?.models);
-  const agentDefaults = asRecord(asRecord(config?.agents)?.defaults);
-  const agentModel = asRecord(agentDefaults?.model);
-  const remoteApiBase = readString(cloud, "remoteApiBase");
-  const remoteAccessToken = normalizeSecret(
-    readString(cloud, "remoteAccessToken"),
-  );
-  const localProvider = resolveConfiguredLocalProvider(config);
-  const primaryModel = readString(agentModel, "primary");
-  const localProviderOption = getOnboardingProviderOption(localProvider);
-  const localApiKey =
-    localProviderOption?.envKey != null
-      ? normalizeSecret(readEnvString(config, localProviderOption.envKey))
-      : undefined;
-
-  if (remoteApiBase || remoteAccessToken) {
-    return {
-      kind: "remote-provider",
-      remoteApiBase: remoteApiBase ?? "",
-      remoteAccessToken,
-      provider: localProvider ?? undefined,
-      apiKey: localApiKey,
-      primaryModel,
-    };
-  }
-
-  const cloudProvider = normalizeOnboardingProviderId(
-    readString(cloud, "provider"),
-  );
-  const cloudApiKey = normalizeSecret(readString(cloud, "apiKey"));
-  const smallModel = readString(models, "small");
-  const largeModel = readString(models, "large");
-
-  if (
-    cloud?.enabled === true ||
-    cloudProvider === "elizacloud" ||
-    readString(cloud, "inferenceMode") === "cloud" ||
-    cloudApiKey ||
-    smallModel ||
-    largeModel
-  ) {
-    return {
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      apiKey: cloudApiKey,
-      smallModel,
-      largeModel,
-    };
-  }
-
-  if (!localProvider) {
-    return null;
-  }
-
-  return {
-    kind: "local-provider",
-    provider: localProvider,
-    apiKey: localApiKey,
-    primaryModel,
-  };
+  return inferOnboardingConnectionFromConfig(config);
 }
 
 export function mergeOnboardingConnectionWithExisting(
   nextConnection: OnboardingConnection,
   existingConnection: OnboardingConnection | null | undefined,
 ): OnboardingConnection {
-  if (!existingConnection || existingConnection.kind !== nextConnection.kind) {
+  const normalizedNext = normalizePersistedOnboardingConnection(nextConnection);
+  if (!normalizedNext) {
     return nextConnection;
   }
 
-  if (nextConnection.kind === "cloud-managed") {
+  if (!existingConnection || existingConnection.kind !== normalizedNext.kind) {
+    return normalizedNext;
+  }
+
+  if (normalizedNext.kind === "cloud-managed") {
     if (
       !isCloudManagedConnection(existingConnection) ||
-      existingConnection.cloudProvider !== nextConnection.cloudProvider
+      existingConnection.cloudProvider !== normalizedNext.cloudProvider
     ) {
-      return nextConnection;
+      return normalizedNext;
     }
     return {
       ...existingConnection,
-      ...nextConnection,
-      apiKey: normalizeSecret(nextConnection.apiKey, existingConnection.apiKey),
-      smallModel: nextConnection.smallModel ?? existingConnection.smallModel,
-      largeModel: nextConnection.largeModel ?? existingConnection.largeModel,
+      ...normalizedNext,
+      apiKey: normalizedNext.apiKey ?? existingConnection.apiKey,
+      smallModel: normalizedNext.smallModel ?? existingConnection.smallModel,
+      largeModel: normalizedNext.largeModel ?? existingConnection.largeModel,
     };
   }
 
-  if (nextConnection.kind === "local-provider") {
+  if (normalizedNext.kind === "local-provider") {
     if (
       !isLocalProviderConnection(existingConnection) ||
-      existingConnection.provider !== nextConnection.provider
+      existingConnection.provider !== normalizedNext.provider
     ) {
-      return nextConnection;
+      return normalizedNext;
     }
     return {
       ...existingConnection,
-      ...nextConnection,
-      apiKey: normalizeSecret(nextConnection.apiKey, existingConnection.apiKey),
+      ...normalizedNext,
+      apiKey: normalizedNext.apiKey ?? existingConnection.apiKey,
       primaryModel:
-        nextConnection.primaryModel ?? existingConnection.primaryModel,
+        normalizedNext.primaryModel ?? existingConnection.primaryModel,
     };
   }
 
   if (!isRemoteProviderConnection(existingConnection)) {
-    return nextConnection;
+    return normalizedNext;
   }
 
   return {
     ...existingConnection,
-    ...nextConnection,
-    apiKey: normalizeSecret(nextConnection.apiKey, existingConnection.apiKey),
-    remoteAccessToken: normalizeSecret(
-      nextConnection.remoteAccessToken,
-      existingConnection.remoteAccessToken,
-    ),
+    ...normalizedNext,
+    remoteAccessToken:
+      normalizedNext.remoteAccessToken ?? existingConnection.remoteAccessToken,
+    apiKey: normalizedNext.apiKey ?? existingConnection.apiKey,
     primaryModel:
-      nextConnection.primaryModel ?? existingConnection.primaryModel,
+      normalizedNext.primaryModel ?? existingConnection.primaryModel,
   };
+}
+
+export function reconcilePersistedOnboardingConnection(
+  config: MutableElizaConfig,
+): OnboardingConnection | null {
+  const resolved = inferCompatibilityOnboardingConnection(config);
+  persistConnectionSelection(config, resolved);
+  return resolved;
 }
 
 export async function applyOnboardingConnectionConfig(
   config: MutableElizaConfig,
   connection: OnboardingConnection,
 ): Promise<void> {
-  if (connection.kind === "cloud-managed") {
-    config.cloud ??= {};
-    config.models ??= {};
-    config.cloud.enabled = true;
-    config.cloud.provider = "elizacloud";
-    config.cloud.inferenceMode = "cloud";
-    config.cloud.runtime = "cloud";
+  const normalizedConnection =
+    normalizePersistedOnboardingConnection(connection);
+  if (!normalizedConnection) {
+    throw new Error("Invalid onboarding connection");
+  }
 
-    const apiKey = trimToUndefined(connection.apiKey);
+  persistConnectionSelection(config, normalizedConnection);
+
+  if (normalizedConnection.kind === "cloud-managed") {
+    enableCloudInference(config);
+    clearRemoteProviderConfig(config);
+
+    const cloud = ensureCloud(config);
+    const models = ensureModels(config);
+    const apiKey = trimToUndefined(normalizedConnection.apiKey);
     if (apiKey) {
-      config.cloud.apiKey = apiKey;
+      cloud.apiKey = apiKey;
       process.env.ELIZAOS_CLOUD_API_KEY = apiKey;
     }
-    if (connection.smallModel) {
-      config.models.small = connection.smallModel;
+    if (normalizedConnection.smallModel) {
+      models.small = normalizedConnection.smallModel;
     }
-    if (connection.largeModel) {
-      config.models.large = connection.largeModel;
+    if (normalizedConnection.largeModel) {
+      models.large = normalizedConnection.largeModel;
     }
 
+    process.env.ELIZAOS_CLOUD_ENABLED = "true";
     clearSubscriptionProviderConfig(config);
     clearPiAiFlag(config);
     return;
   }
 
-  if (connection.kind === "remote-provider") {
-    if (connection.provider) {
-      const localConnection = createProviderSwitchConnection({
-        provider: connection.provider,
-        apiKey: connection.apiKey,
-        primaryModel: connection.primaryModel,
-      });
-      if (localConnection) {
-        await applyOnboardingConnectionConfig(config, localConnection);
-      }
-    }
-
-    config.cloud ??= {};
-    config.cloud.enabled = true;
-    config.cloud.provider = "remote";
-    config.cloud.runtime = "cloud";
-    (config.cloud as Record<string, unknown>).remoteApiBase =
-      connection.remoteApiBase;
-    if (connection.remoteAccessToken) {
-      (config.cloud as Record<string, unknown>).remoteAccessToken =
-        connection.remoteAccessToken;
-    }
-    return;
-  }
-
-  config.cloud = {
-    enabled: false,
-    runtime: "local",
-  };
-
-  const models = asRecord(config.models);
-  if (models) {
-    delete models.small;
-    delete models.large;
-    if (Object.keys(models).length === 0) {
-      delete config.models;
-    }
-  }
-
-  delete process.env.ELIZAOS_CLOUD_API_KEY;
   delete process.env.ELIZAOS_CLOUD_ENABLED;
   delete process.env.ELIZAOS_CLOUD_BASE_URL;
   delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
   delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
 
-  const normalizedProvider =
-    connection.provider === "openai-subscription"
-      ? "openai-codex"
-      : connection.provider;
+  if (normalizedConnection.kind === "remote-provider") {
+    clearSubscriptionProviderConfig(config);
+    clearPiAiFlag(config);
+    clearCloudModelSelections(config);
 
-  if (
-    normalizedProvider === "anthropic-subscription" ||
-    normalizedProvider === "openai-codex"
-  ) {
-    applySubscriptionProviderConfig(config, normalizedProvider);
-
-    const setupToken =
-      normalizedProvider === "anthropic-subscription"
-        ? trimToUndefined(connection.apiKey)
-        : undefined;
-
-    if (setupToken?.startsWith("sk-ant-")) {
-      setEnvValue(config, "ANTHROPIC_API_KEY", setupToken);
-      deleteCredentials("anthropic-subscription");
-      deleteCredentials("openai-codex");
-      return;
+    const cloud = ensureCloud(config);
+    cloud.enabled = true;
+    cloud.provider = "remote";
+    cloud.runtime = "cloud";
+    cloud.remoteApiBase = normalizedConnection.remoteApiBase;
+    if (normalizedConnection.remoteAccessToken) {
+      cloud.remoteAccessToken = normalizedConnection.remoteAccessToken;
     }
 
-    await applySubscriptionCredentials(config);
-    deleteCredentials(
-      (normalizedProvider === "anthropic-subscription"
-        ? "openai-codex"
-        : "anthropic-subscription") satisfies SubscriptionProvider,
-    );
     return;
   }
 
-  clearSubscriptionProviderConfig(config);
-
-  if (normalizedProvider === "pi-ai") {
-    setEnvValue(config, "ELIZA_USE_PI_AI", "1");
-  } else {
-    clearPiAiFlag(config);
-  }
-
-  const providerOption = getOnboardingProviderOption(normalizedProvider);
-  if (providerOption?.envKey) {
-    setEnvValue(
-      config,
-      providerOption.envKey,
-      trimToUndefined(connection.apiKey),
-    );
-  }
-
-  setPrimaryModel(config, trimToUndefined(connection.primaryModel));
+  await applyLocalProviderCapabilities(config, normalizedConnection);
 }

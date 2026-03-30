@@ -121,7 +121,7 @@ The agent's `name`, `bio`, and `systemPrompt` are persisted directly into the co
 | `messageExamples` | array | No | Example message conversations |
 | `theme` | string | No | UI theme — `milady`, `qt314`, `web2000`, `programmer`, `haxor`, or `psycho` |
 | `runMode` | string | No | `local` or `cloud` (defaults to `local`). Can also be inferred from the `connection` field |
-| `connection` | object | No | Connection descriptor. When `connection.kind` is `"cloud-managed"`, the server treats this as cloud mode and automatically injects `runMode: "cloud"` even if `runMode` is not explicitly set |
+| `connection` | object | No | Connection descriptor. This is the authoritative active-provider record persisted at the config root. When `connection.kind` is `"cloud-managed"`, the server treats this as cloud mode and automatically injects `runMode: "cloud"` even if `runMode` is not explicitly set |
 | `provider` | string | No | AI provider ID (e.g. `openai`, `anthropic`, `anthropic-subscription`) |
 | `providerApiKey` | string | No | API key for the selected provider |
 | `cloudProvider` | string | No | Cloud provider ID when `runMode` is `cloud` |

@@ -610,3 +610,318 @@ export function isLocalProviderConnection(
 ): connection is OnboardingLocalProviderConnection {
   return connection?.kind === "local-provider";
 }
+
+export function isOnboardingConnectionComplete(
+  connection: OnboardingConnection | null | undefined,
+): boolean {
+  if (isLocalProviderConnection(connection)) {
+    return true;
+  }
+
+  if (isRemoteProviderConnection(connection)) {
+    return Boolean(connection.remoteApiBase.trim());
+  }
+
+  if (isCloudManagedConnection(connection)) {
+    return Boolean(
+      connection.apiKey?.trim() &&
+        connection.smallModel?.trim() &&
+        connection.largeModel?.trim(),
+    );
+  }
+
+  return false;
+}
+
+const REDACTED_SECRET = "[REDACTED]";
+const PI_AI_ENV_SIGNAL_KEYS = [
+  "ELIZA_USE_PI_AI",
+  "MILADY_USE_PI_AI",
+] as const;
+
+function asConfigRecord(
+  value: unknown,
+): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function readConfigString(
+  source: Record<string, unknown> | null | undefined,
+  key: string,
+): string | undefined {
+  const value = source?.[key];
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeSecretString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.toUpperCase() === REDACTED_SECRET) {
+    return undefined;
+  }
+  return trimmed;
+}
+
+function readOnboardingEnvContainer(
+  config: Record<string, unknown> | null | undefined,
+): {
+  env: Record<string, unknown> | null;
+  vars: Record<string, unknown> | null;
+} {
+  const env = asConfigRecord(config?.env);
+  return {
+    env,
+    vars: asConfigRecord(env?.vars),
+  };
+}
+
+export function readOnboardingEnvString(
+  config: Record<string, unknown> | null | undefined,
+  key: string,
+): string | undefined {
+  const { env, vars } = readOnboardingEnvContainer(config);
+  return readConfigString(vars, key) ?? readConfigString(env, key);
+}
+
+export function readOnboardingEnvSecret(
+  config: Record<string, unknown> | null | undefined,
+  key: string,
+): string | undefined {
+  return normalizeSecretString(readOnboardingEnvString(config, key));
+}
+
+function isTruthyEnvFlag(value: string | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized.length > 0 &&
+    normalized !== "0" &&
+    normalized !== "false" &&
+    normalized !== "no"
+  );
+}
+
+export function isPiAiEnabledInConfig(
+  config: Record<string, unknown> | null | undefined,
+): boolean {
+  return PI_AI_ENV_SIGNAL_KEYS.some((key) =>
+    isTruthyEnvFlag(readOnboardingEnvString(config, key)),
+  );
+}
+
+export function getOnboardingProviderSignalEnvKeys(
+  providerId: OnboardingLocalProviderId,
+): string[] {
+  if (providerId === "pi-ai") {
+    return [...PI_AI_ENV_SIGNAL_KEYS];
+  }
+
+  if (providerId === "ollama") {
+    return ["OLLAMA_BASE_URL"];
+  }
+
+  const provider = getOnboardingProviderOption(providerId);
+  return provider?.envKey ? [provider.envKey] : [];
+}
+
+function readPrimaryModelFromConfig(
+  config: Record<string, unknown> | null | undefined,
+): string | undefined {
+  const agents = asConfigRecord(config?.agents);
+  const defaults = asConfigRecord(agents?.defaults);
+  const model = asConfigRecord(defaults?.model);
+  return readConfigString(model, "primary");
+}
+
+function resolveConfiguredLocalProviderFromSignals(
+  config: Record<string, unknown> | null | undefined,
+): OnboardingLocalProviderId | null {
+  const agents = asConfigRecord(config?.agents);
+  const defaults = asConfigRecord(agents?.defaults);
+  const storedSubscriptionProvider = normalizeOnboardingProviderId(
+    readConfigString(defaults, "subscriptionProvider"),
+  );
+  if (
+    storedSubscriptionProvider &&
+    storedSubscriptionProvider !== "elizacloud"
+  ) {
+    return storedSubscriptionProvider;
+  }
+
+  if (isPiAiEnabledInConfig(config)) {
+    return "pi-ai";
+  }
+
+  for (const provider of ONBOARDING_PROVIDER_CATALOG) {
+    if (provider.id === "elizacloud") {
+      continue;
+    }
+    const providerId = provider.id as OnboardingLocalProviderId;
+    const detected = getOnboardingProviderSignalEnvKeys(providerId).some(
+      (key) => Boolean(readOnboardingEnvString(config, key)),
+    );
+    if (detected) {
+      return providerId;
+    }
+  }
+
+  return null;
+}
+
+export function normalizePersistedOnboardingConnection(
+  value: unknown,
+): OnboardingConnection | null {
+  const connection = asConfigRecord(value);
+  if (!connection) {
+    return null;
+  }
+
+  if (connection.kind === "cloud-managed") {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      apiKey: normalizeSecretString(connection.apiKey),
+      smallModel: readConfigString(connection, "smallModel"),
+      largeModel: readConfigString(connection, "largeModel"),
+    };
+  }
+
+  if (connection.kind === "local-provider") {
+    const provider = normalizeOnboardingProviderId(connection.provider);
+    if (!provider || provider === "elizacloud") {
+      return null;
+    }
+    return {
+      kind: "local-provider",
+      provider,
+      apiKey: normalizeSecretString(connection.apiKey),
+      primaryModel: readConfigString(connection, "primaryModel"),
+    };
+  }
+
+  if (connection.kind === "remote-provider") {
+    const remoteApiBase = readConfigString(connection, "remoteApiBase");
+    const provider = normalizeOnboardingProviderId(connection.provider);
+    if (!remoteApiBase) {
+      return null;
+    }
+    return {
+      kind: "remote-provider",
+      remoteApiBase,
+      remoteAccessToken: normalizeSecretString(connection.remoteAccessToken),
+      provider: provider && provider !== "elizacloud" ? provider : undefined,
+      apiKey: normalizeSecretString(connection.apiKey),
+      primaryModel: readConfigString(connection, "primaryModel"),
+    };
+  }
+
+  return null;
+}
+
+export function stripOnboardingConnectionSecrets(
+  connection: OnboardingConnection,
+): OnboardingConnection {
+  if (connection.kind === "cloud-managed") {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      smallModel: connection.smallModel,
+      largeModel: connection.largeModel,
+    };
+  }
+
+  if (connection.kind === "local-provider") {
+    return {
+      kind: "local-provider",
+      provider: connection.provider,
+      primaryModel: connection.primaryModel,
+    };
+  }
+
+  return {
+    kind: "remote-provider",
+    remoteApiBase: connection.remoteApiBase,
+    provider: connection.provider,
+    primaryModel: connection.primaryModel,
+  };
+}
+
+export function inferCompatibilityOnboardingConnection(
+  config: Record<string, unknown> | null | undefined,
+): OnboardingConnection | null {
+  const cloud = asConfigRecord(config?.cloud);
+  const models = asConfigRecord(config?.models);
+  const remoteApiBase = readConfigString(cloud, "remoteApiBase");
+  const remoteAccessToken = normalizeSecretString(cloud?.remoteAccessToken);
+  const localProvider = resolveConfiguredLocalProviderFromSignals(config);
+  const primaryModel = readPrimaryModelFromConfig(config);
+  const localProviderOption = getOnboardingProviderOption(localProvider);
+  const localApiKey =
+    localProviderOption?.envKey != null
+      ? readOnboardingEnvSecret(config, localProviderOption.envKey)
+      : undefined;
+
+  if (remoteApiBase || remoteAccessToken) {
+    return {
+      kind: "remote-provider",
+      remoteApiBase: remoteApiBase ?? "",
+      remoteAccessToken,
+      provider: localProvider ?? undefined,
+      apiKey: localApiKey,
+      primaryModel,
+    };
+  }
+
+  const cloudProvider = normalizeOnboardingProviderId(
+    readConfigString(cloud, "provider"),
+  );
+  const cloudApiKey = normalizeSecretString(cloud?.apiKey);
+  const smallModel = readConfigString(models, "small");
+  const largeModel = readConfigString(models, "large");
+
+  if (
+    cloud?.enabled === true ||
+    cloudProvider === "elizacloud" ||
+    readConfigString(cloud, "inferenceMode") === "cloud" ||
+    smallModel ||
+    largeModel
+  ) {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      apiKey: cloudApiKey,
+      smallModel,
+      largeModel,
+    };
+  }
+
+  if (!localProvider) {
+    return null;
+  }
+
+  return {
+    kind: "local-provider",
+    provider: localProvider,
+    apiKey: localApiKey,
+    primaryModel,
+  };
+}
+
+export function inferOnboardingConnectionFromConfig(
+  config: Record<string, unknown> | null | undefined,
+): OnboardingConnection | null {
+  const explicitConnection = normalizePersistedOnboardingConnection(
+    asConfigRecord(config)?.connection,
+  );
+  return explicitConnection ?? inferCompatibilityOnboardingConnection(config);
+}

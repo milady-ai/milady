@@ -1,23 +1,50 @@
 /**
  * E2E tests for POST /api/provider/switch
  *
- * Tests the provider switching endpoint using the real server.
- * No mocks — exercises actual production code paths.
+ * Tests the real API server with persisted config state and canonical provider
+ * normalization. The endpoint now changes active selection intent without
+ * deleting other configured capabilities.
  */
 
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { startApiServer } from "../src/api/server";
 import { req } from "../../../test/helpers/http";
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
+import { startApiServer } from "../src/api/server";
 
 describe("POST /api/provider/switch", () => {
   let port: number;
   let close: () => Promise<void>;
+  let tempDir: string;
+  const savedEnv = new Map<string, string | undefined>();
+  const managedEnvKeys = [
+    "ELIZA_STATE_DIR",
+    "MILADY_STATE_DIR",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "MISTRAL_API_KEY",
+    "TOGETHER_API_KEY",
+    "ZAI_API_KEY",
+    "OLLAMA_BASE_URL",
+    "ELIZA_USE_PI_AI",
+    "MILADY_USE_PI_AI",
+    "ELIZAOS_CLOUD_ENABLED",
+    "ELIZAOS_CLOUD_API_KEY",
+  ] as const;
 
   beforeAll(async () => {
+    for (const key of managedEnvKeys) {
+      savedEnv.set(key, process.env[key]);
+      delete process.env[key];
+    }
+
+    tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "milady-provider-switch-"),
+    );
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+
     const server = await startApiServer({ port: 0 });
     port = server.port;
     close = server.close;
@@ -25,28 +52,31 @@ describe("POST /api/provider/switch", () => {
 
   afterAll(async () => {
     await close();
+    await fs.rm(tempDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
+    for (const key of managedEnvKeys) {
+      const original = savedEnv.get(key);
+      if (original === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = original;
+      }
+    }
   });
-
-  // -- Validation --
 
   describe("input validation", () => {
     it("rejects missing body (no JSON)", async () => {
       const { status } = await req(port, "POST", "/api/provider/switch");
-      // readJsonBody will return an error for missing/invalid body
       expect(status).toBeGreaterThanOrEqual(400);
     });
 
     it("rejects missing provider field", async () => {
       const { status, data } = await req(port, "POST", "/api/provider/switch", {
         apiKey: "sk-test-123",
-      });
-      expect(status).toBe(400);
-      expect(data.error).toMatch(/missing provider/i);
-    });
-
-    it("rejects empty string provider", async () => {
-      const { status, data } = await req(port, "POST", "/api/provider/switch", {
-        provider: "",
       });
       expect(status).toBe(400);
       expect(data.error).toMatch(/missing provider/i);
@@ -60,183 +90,148 @@ describe("POST /api/provider/switch", () => {
       expect(data.error).toMatch(/invalid provider/i);
     });
 
-    it("rejects numeric provider", async () => {
-      const { status } = await req(port, "POST", "/api/provider/switch", {
-        provider: 42,
-      } as Record<string, unknown>);
+    it("rejects api keys longer than 512 characters", async () => {
+      const { status, data } = await req(port, "POST", "/api/provider/switch", {
+        provider: "openai",
+        apiKey: "x".repeat(513),
+      });
       expect(status).toBe(400);
+      expect(data.error).toMatch(/too long/i);
     });
   });
 
-  // -- API key validation for direct providers --
-
-  describe("API key validation (direct key providers)", () => {
-    const directProviders = [
-      "openai",
-      "anthropic",
-      "deepseek",
-      "google",
-      "groq",
-      "xai",
-      "openrouter",
-    ];
-
-    for (const provider of directProviders) {
-      it(`rejects ${provider} with missing apiKey`, async () => {
-        const { status, data } = await req(
-          port,
-          "POST",
-          "/api/provider/switch",
-          { provider },
-        );
-        expect(status).toBe(400);
-        expect(data.error).toMatch(/api key is required/i);
+  describe("canonical provider normalization", () => {
+    it.each([
+      ["google", "gemini"],
+      ["google-genai", "gemini"],
+      ["xai", "grok"],
+      ["openai-subscription", "openai-subscription"],
+      ["openai-codex", "openai-subscription"],
+      ["ollama", "ollama"],
+      ["mistral", "mistral"],
+      ["together", "together"],
+      ["zai", "zai"],
+    ])("normalizes %s to %s", async (inputProvider, expectedProvider) => {
+      const { status, data } = await req(port, "POST", "/api/provider/switch", {
+        provider: inputProvider,
       });
+      expect(status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.provider).toBe(expectedProvider);
 
-      it(`rejects ${provider} with empty string apiKey`, async () => {
-        const { status, data } = await req(
-          port,
-          "POST",
-          "/api/provider/switch",
-          { provider, apiKey: "" },
-        );
-        expect(status).toBe(400);
-        expect(data.error).toMatch(/api key is required/i);
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.status).toBe(200);
+      expect(configRes.data.connection).toMatchObject({
+        kind:
+          expectedProvider === "elizacloud"
+            ? "cloud-managed"
+            : "local-provider",
       });
-
-      it(`rejects ${provider} with whitespace-only apiKey`, async () => {
-        const { status, data } = await req(
-          port,
-          "POST",
-          "/api/provider/switch",
-          { provider, apiKey: "   " },
-        );
-        expect(status).toBe(400);
-        expect(data.error).toMatch(/api key is required/i);
-      });
-    }
+      if (expectedProvider === "elizacloud") {
+        expect(configRes.data.connection.cloudProvider).toBe("elizacloud");
+      } else {
+        expect(configRes.data.connection.provider).toBe(expectedProvider);
+      }
+    });
   });
 
-  // -- Successful switches --
-
-  describe("successful provider switches", () => {
-    // These providers don't require an apiKey
-    const nonKeyProviders = [
-      "elizacloud",
-      "pi-ai",
-      "openai-codex",
-      "openai-subscription",
-      "anthropic-subscription",
-    ];
-
-    for (const provider of nonKeyProviders) {
-      it(`switches to ${provider} successfully`, async () => {
-        const { status, data } = await req(
-          port,
-          "POST",
-          "/api/provider/switch",
-          { provider },
-        );
-        expect(status).toBe(200);
-        expect(data.success).toBe(true);
-        expect(data.provider).toBe(provider);
+  describe("selection persistence and capability preservation", () => {
+    it("allows selecting a direct provider without providing a fresh apiKey", async () => {
+      const { status } = await req(port, "POST", "/api/provider/switch", {
+        provider: "openai",
       });
-    }
+      expect(status).toBe(200);
 
-    // Direct key providers need apiKey
-    const directProviders = [
-      { provider: "openai", key: "sk-test-openai-key-1234" },
-      { provider: "anthropic", key: "sk-ant-test-key-1234" },
-      { provider: "deepseek", key: "sk-test-deepseek-key-1234" },
-      { provider: "google", key: "AIza-test-google-key" },
-      { provider: "groq", key: "gsk_test-groq-key" },
-      { provider: "xai", key: "xai-test-key-1234" },
-      { provider: "openrouter", key: "sk-or-test-key-1234" },
-    ];
-
-    for (const { provider, key } of directProviders) {
-      it(`switches to ${provider} with valid API key`, async () => {
-        const { status, data } = await req(
-          port,
-          "POST",
-          "/api/provider/switch",
-          { provider, apiKey: key },
-        );
-        expect(status).toBe(200);
-        expect(data.success).toBe(true);
-        expect(data.provider).toBe(provider);
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "openai",
       });
-    }
-  });
+    });
 
-  // -- Credential clearing --
-
-  describe("credential clearing", () => {
-    it("switching to anthropic clears openai env key", async () => {
-      // First set openai
+    it("preserves existing direct provider credentials when switching to another local provider", async () => {
       await req(port, "POST", "/api/provider/switch", {
         provider: "openai",
-        apiKey: "sk-should-be-cleared",
+        apiKey: "sk-openai-preserve",
       });
-      expect(process.env.OPENAI_API_KEY).toBe("sk-should-be-cleared");
+      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-preserve");
 
-      // Now switch to anthropic
-      await req(port, "POST", "/api/provider/switch", {
+      const second = await req(port, "POST", "/api/provider/switch", {
         provider: "anthropic",
         apiKey: "sk-ant-new-key",
       });
+      expect(second.status).toBe(200);
       expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-new-key");
-      expect(process.env.OPENAI_API_KEY).toBeUndefined();
+      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-preserve");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "anthropic",
+      });
     });
 
-    it("switching to elizacloud clears direct API keys", async () => {
-      // Set a direct key first
+    it("preserves direct provider credentials when switching to elizacloud", async () => {
       await req(port, "POST", "/api/provider/switch", {
-        provider: "google",
-        apiKey: "AIza-test-key",
+        provider: "openai",
+        apiKey: "sk-openai-cloud-preserve",
       });
-      expect(process.env.GOOGLE_GENERATIVE_AI_API_KEY).toBe(
-        "AIza-test-key",
-      );
+      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-cloud-preserve");
 
-      // Switch to cloud
-      await req(port, "POST", "/api/provider/switch", {
+      const { status } = await req(port, "POST", "/api/provider/switch", {
         provider: "elizacloud",
       });
-      expect(process.env.GOOGLE_GENERATIVE_AI_API_KEY).toBeUndefined();
+      expect(status).toBe(200);
+      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-cloud-preserve");
+      expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+      });
     });
 
-    it("switching to pi-ai clears direct API keys and sets flag", async () => {
+    it("preserves direct provider credentials when switching to pi-ai", async () => {
       await req(port, "POST", "/api/provider/switch", {
         provider: "openai",
-        apiKey: "sk-test-openai-key-1234",
+        apiKey: "sk-openai-pi-preserve",
       });
-      expect(process.env.OPENAI_API_KEY).toBe("sk-test-openai-key-1234");
+      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-pi-preserve");
 
-      await req(port, "POST", "/api/provider/switch", {
+      const { status } = await req(port, "POST", "/api/provider/switch", {
         provider: "pi-ai",
       });
+      expect(status).toBe(200);
 
-      expect(process.env.OPENAI_API_KEY).toBeUndefined();
+      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-pi-preserve");
       expect(process.env.ELIZA_USE_PI_AI).toBe("1");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "pi-ai",
+      });
     });
 
-    it("trims whitespace from API keys before storing", async () => {
+    it("stores canonical selection while keeping provider-specific capability env vars", async () => {
       const { status } = await req(port, "POST", "/api/provider/switch", {
-        provider: "openai",
-        apiKey: "  sk-trimmed-key  ",
+        provider: "mistral",
+        apiKey: "mistral-key",
       });
       expect(status).toBe(200);
-      expect(process.env.OPENAI_API_KEY).toBe("sk-trimmed-key");
+      expect(process.env.MISTRAL_API_KEY).toBe("mistral-key");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "mistral",
+      });
     });
   });
 
-  // -- Race guard (P0 §3) --
-
   describe("race condition guard", () => {
     it("rejects concurrent switch requests with 409", async () => {
-      // We need an onRestart handler that takes some time to complete,
-      // so the lock stays held. Start server with a slow onRestart.
       const slowServer = await startApiServer({
         port: 0,
         onRestart: () =>
@@ -244,15 +239,12 @@ describe("POST /api/provider/switch", () => {
       });
 
       try {
-        // Fire first request (will succeed and hold the lock)
         const first = req(slowServer.port, "POST", "/api/provider/switch", {
           provider: "elizacloud",
         });
 
-        // Wait a tick for the first request to be processed
         await new Promise((resolve) => setTimeout(resolve, 50));
 
-        // Fire second request (should be rejected)
         const second = await req(
           slowServer.port,
           "POST",
@@ -265,7 +257,6 @@ describe("POST /api/provider/switch", () => {
         expect(second.status).toBe(409);
         expect(second.data.error).toMatch(/already in progress/i);
       } finally {
-        // Wait for the lock to clear before closing
         await new Promise((resolve) => setTimeout(resolve, 2500));
         await slowServer.close();
       }

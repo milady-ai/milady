@@ -213,6 +213,7 @@ import {
   clearPersistedOnboardingConfig,
   resolveExistingOnboardingConnection,
 } from "./provider-switch-config";
+import { isOnboardingConnectionComplete } from "../contracts/onboarding";
 
 // ---------------------------------------------------------------------------
 // Import from extracted modules for use within this file
@@ -680,18 +681,8 @@ function hasCompatPersistedOnboardingState(config: ElizaConfig): boolean {
   const existingConnection = resolveExistingOnboardingConnection(
     config as Record<string, unknown>,
   );
-  if (existingConnection?.kind === "local-provider") {
+  if (isOnboardingConnectionComplete(existingConnection)) {
     return true;
-  }
-  if (existingConnection?.kind === "remote-provider") {
-    return Boolean(existingConnection.remoteApiBase.trim());
-  }
-  if (existingConnection?.kind === "cloud-managed") {
-    return Boolean(
-      existingConnection.apiKey?.trim() &&
-        existingConnection.smallModel?.trim() &&
-        existingConnection.largeModel?.trim(),
-    );
   }
 
   if (Array.isArray(config.agents?.list) && config.agents.list.length > 0) {

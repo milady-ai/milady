@@ -24,12 +24,12 @@ import type {
 import type { DropStatus, MintResult } from "@miladyai/agent/contracts/drop";
 import type {
   CloudProviderOption,
-  ConnectorConfig,
   InventoryProviderOption,
   MessageExample,
   MessageExampleContent,
   ModelOption,
   OnboardingConnection,
+  OnboardingConnectorConfig as ConnectorConfig,
   OnboardingData,
   OnboardingOptions,
   OpenRouterModelOption,
@@ -39,7 +39,7 @@ import type {
   StylePreset,
   SubscriptionProviderStatus,
   SubscriptionStatusResponse,
-} from "@miladyai/agent/contracts/onboarding";
+} from "@miladyai/shared/contracts/onboarding";
 import type {
   AllPermissionsState,
   PermissionState,

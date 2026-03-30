@@ -67,6 +67,17 @@ function readJsonFile<T>(filePath: string): T | null {
   }
 }
 
+function isTruthyFlag(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized.length > 0 &&
+    normalized !== "0" &&
+    normalized !== "false" &&
+    normalized !== "no"
+  );
+}
+
 async function isCliInstalled(name: string): Promise<boolean> {
   try {
     const proc = Bun.spawn(["which", name], {
@@ -171,31 +182,103 @@ async function scanClaudeKeychainCredentials(): Promise<DetectedProvider | null>
  * Environment variable → provider ID mapping for all Eliza AI providers.
  * Each entry maps an env var name to its provider plugin ID.
  */
-const ENV_PROVIDER_MAP: Array<{ envVar: string; providerId: string }> = [
-  { envVar: "OPENAI_API_KEY", providerId: "openai" },
-  { envVar: "ANTHROPIC_API_KEY", providerId: "anthropic" },
-  { envVar: "GROQ_API_KEY", providerId: "groq" },
-  { envVar: "GOOGLE_GENERATIVE_AI_API_KEY", providerId: "google-genai" },
-  { envVar: "OPENROUTER_API_KEY", providerId: "openrouter" },
-  { envVar: "XAI_API_KEY", providerId: "xai" },
-  { envVar: "AI_GATEWAY_API_KEY", providerId: "vercel-ai-gateway" },
-  { envVar: "AIGATEWAY_API_KEY", providerId: "vercel-ai-gateway" },
+const ENV_PROVIDER_MAP: Array<{
+  envVar: string;
+  providerId: string;
+  authMode: string;
+  includeValue?: boolean;
+}> = [
+  { envVar: "OPENAI_API_KEY", providerId: "openai", authMode: "api-key" },
+  {
+    envVar: "ANTHROPIC_API_KEY",
+    providerId: "anthropic",
+    authMode: "api-key",
+  },
+  { envVar: "GROQ_API_KEY", providerId: "groq", authMode: "api-key" },
+  {
+    envVar: "GOOGLE_GENERATIVE_AI_API_KEY",
+    providerId: "gemini",
+    authMode: "api-key",
+  },
+  { envVar: "GOOGLE_API_KEY", providerId: "gemini", authMode: "api-key" },
+  {
+    envVar: "OPENROUTER_API_KEY",
+    providerId: "openrouter",
+    authMode: "api-key",
+  },
+  { envVar: "XAI_API_KEY", providerId: "grok", authMode: "api-key" },
+  {
+    envVar: "DEEPSEEK_API_KEY",
+    providerId: "deepseek",
+    authMode: "api-key",
+  },
+  {
+    envVar: "MISTRAL_API_KEY",
+    providerId: "mistral",
+    authMode: "api-key",
+  },
+  {
+    envVar: "TOGETHER_API_KEY",
+    providerId: "together",
+    authMode: "api-key",
+  },
+  { envVar: "ZAI_API_KEY", providerId: "zai", authMode: "api-key" },
+  {
+    envVar: "OLLAMA_BASE_URL",
+    providerId: "ollama",
+    authMode: "local",
+    includeValue: true,
+  },
+  {
+    envVar: "ELIZA_USE_PI_AI",
+    providerId: "pi-ai",
+    authMode: "credentials",
+    includeValue: false,
+  },
+  {
+    envVar: "MILADY_USE_PI_AI",
+    providerId: "pi-ai",
+    authMode: "credentials",
+    includeValue: false,
+  },
+  {
+    envVar: "ELIZAOS_CLOUD_API_KEY",
+    providerId: "elizacloud",
+    authMode: "cloud",
+  },
+  {
+    envVar: "AI_GATEWAY_API_KEY",
+    providerId: "vercel-ai-gateway",
+    authMode: "api-key",
+  },
+  {
+    envVar: "AIGATEWAY_API_KEY",
+    providerId: "vercel-ai-gateway",
+    authMode: "api-key",
+  },
 ];
 
 function scanEnvCredentials(): DetectedProvider[] {
   const results: DetectedProvider[] = [];
   const seen = new Set<string>();
 
-  for (const { envVar, providerId } of ENV_PROVIDER_MAP) {
+  for (const {
+    envVar,
+    providerId,
+    authMode,
+    includeValue,
+  } of ENV_PROVIDER_MAP) {
     if (seen.has(providerId)) continue;
     const value = process.env[envVar];
-    if (value && value.trim().length > 0) {
+    const hasValue =
+      includeValue === false ? isTruthyFlag(value) : Boolean(value?.trim());
+    if (hasValue) {
       seen.add(providerId);
       results.push({
         id: providerId,
         source: "env",
-        apiKey: value.trim(),
-        authMode: "api-key",
+        apiKey: includeValue === false ? undefined : value.trim(),
+        authMode,
         cliInstalled: false,
         status: "unchecked",
       });
@@ -294,7 +377,7 @@ const VALIDATION_ENDPOINTS: Record<
     url: "https://api.groq.com/openai/v1/models",
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
   },
-  "google-genai": {
+  gemini: {
     url: "https://generativelanguage.googleapis.com/v1beta/models",
     authHeader: (key) => ({ "x-goog-api-key": key }),
   },
@@ -302,8 +385,24 @@ const VALIDATION_ENDPOINTS: Record<
     url: "https://openrouter.ai/api/v1/models",
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
   },
-  xai: {
+  grok: {
     url: "https://api.x.ai/v1/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  deepseek: {
+    url: "https://api.deepseek.com/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  mistral: {
+    url: "https://api.mistral.ai/v1/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  together: {
+    url: "https://api.together.xyz/v1/models",
+    authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
+  zai: {
+    url: "https://api.z.ai/api/paas/v4/models",
     authHeader: (key) => ({ Authorization: `Bearer ${key}` }),
   },
 };

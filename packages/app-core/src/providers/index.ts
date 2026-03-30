@@ -15,7 +15,7 @@ export {
   SUBSCRIPTION_PROVIDER_SELECTIONS,
   type SubscriptionProviderSelectionId,
   sortOnboardingProviders,
-} from "@miladyai/agent/contracts/onboarding";
+} from "@miladyai/shared/contracts/onboarding";
 
 import { resolveAppAssetUrl } from "../utils/asset-url";
 

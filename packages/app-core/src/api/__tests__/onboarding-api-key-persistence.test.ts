@@ -59,7 +59,9 @@ describe("extractAndPersistOnboardingApiKey", () => {
     expect(savedConfig.env.ANTHROPIC_API_KEY).toBe("sk-ant-test-key-123");
     expect(savedConfig.cloud).toEqual({
       enabled: false,
+      inferenceMode: "byok",
       runtime: "local",
+      services: { inference: false },
     });
     expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-test-key-123");
   });

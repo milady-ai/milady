@@ -86,6 +86,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   ELIZAOS_CLOUD_API_KEY: "@elizaos/plugin-elizacloud",
   ELIZAOS_CLOUD_ENABLED: "@elizaos/plugin-elizacloud",
   ELIZA_USE_PI_AI: "@elizaos/plugin-pi-ai",
+  MILADY_USE_PI_AI: "@elizaos/plugin-pi-ai",
   CUA_API_KEY: "@elizaos/plugin-cua",
   CUA_HOST: "@elizaos/plugin-cua",
   OBSIDIAN_VAULT_PATH: "@elizaos/plugin-obsidian",
@@ -268,7 +269,8 @@ export function applyPluginAutoEnable(
   pluginsConfig.entries = pluginsConfig.entries ?? {};
 
   const connectors =
-    updatedConfig.connectors ?? (updatedConfig as Record<string, unknown>).channels;
+    updatedConfig.connectors ??
+    (updatedConfig as Record<string, unknown>).channels;
   if (connectors) {
     for (const [connectorName, connectorConfig] of Object.entries(connectors)) {
       const pluginName = CONNECTOR_PLUGINS[connectorName];

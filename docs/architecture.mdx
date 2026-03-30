@@ -358,6 +358,7 @@ Routes are organized into domain-specific handler modules:
 | `autonomy-routes.ts` | `/api/autonomy/*` | Autonomous mode state |
 | `character-routes.ts` | `/api/character/*` | Character CRUD, AI-assisted generation |
 | `cloud-routes.ts` | `/api/cloud/*` | Eliza Cloud integration |
+| `cloud-compat-routes.ts` | `/api/cloud/compat/*`, `/api/cloud/v1/*` | Cloud backend proxy (forwards to `/api/compat/*` and `/api/v1/*` respectively) |
 | `knowledge-routes.ts` | `/api/knowledge/*` | Document upload, search, RAG management |
 | `models-routes.ts` | `/api/models/*` | Model provider discovery and selection |
 | `plugin-validation.ts` | `/api/plugins/*` | Plugin config validation |

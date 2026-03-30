@@ -174,6 +174,44 @@ describe("GET /api/onboarding/status", () => {
     }
   });
 
+  it("returns incomplete for an explicit cloud-managed connection without selected models", async () => {
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "eliza-onboarding-status-"),
+    );
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+    await fs.writeFile(
+      path.join(tempDir, "eliza.json"),
+      JSON.stringify({
+        logging: { level: "error" },
+        connection: {
+          kind: "cloud-managed",
+          cloudProvider: "elizacloud",
+        },
+        cloud: {
+          enabled: true,
+          apiKey: "eliza_test_partial_cloud_auth",
+        },
+      }),
+    );
+
+    const server = await startApiServer({ port: 0, runtime: RUNTIME_STUB });
+
+    try {
+      const { status, data } = await req(
+        server.port,
+        "GET",
+        "/api/onboarding/status",
+      );
+
+      expect(status).toBe(200);
+      expect(data.complete).toBe(false);
+    } finally {
+      await server.close();
+      await cleanupTempDir(tempDir);
+    }
+  });
+
   it("returns complete when a provider is configured via env-backed config", async () => {
     const tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), "eliza-onboarding-status-"),

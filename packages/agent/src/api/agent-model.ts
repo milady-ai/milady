@@ -1,4 +1,5 @@
 import type { AgentRuntime } from "@elizaos/core";
+import { inferOnboardingConnectionFromConfig } from "../contracts/onboarding";
 
 const MODEL_PLACEHOLDERS = new Set(["", "n/a", "na", "unknown", "provided"]);
 
@@ -15,8 +16,12 @@ const PROVIDER_HINTS = [
   "groq",
   "gemini",
   "google",
+  "grok",
   "xai",
   "ollama",
+  "mistral",
+  "together",
+  "zai",
   "pi-ai",
 ] as const;
 
@@ -29,8 +34,14 @@ const ENV_PROVIDER_SIGNALS: ReadonlyArray<{
   { envVar: "OPENROUTER_API_KEY", label: "openrouter" },
   { envVar: "GROQ_API_KEY", label: "groq" },
   { envVar: "GOOGLE_GENERATIVE_AI_API_KEY", label: "gemini" },
-  { envVar: "XAI_API_KEY", label: "xai" },
+  { envVar: "XAI_API_KEY", label: "grok" },
   { envVar: "DEEPSEEK_API_KEY", label: "deepseek" },
+  { envVar: "MISTRAL_API_KEY", label: "mistral" },
+  { envVar: "TOGETHER_API_KEY", label: "together" },
+  { envVar: "ZAI_API_KEY", label: "zai" },
+  { envVar: "OLLAMA_BASE_URL", label: "ollama" },
+  { envVar: "ELIZA_USE_PI_AI", label: "pi-ai" },
+  { envVar: "MILADY_USE_PI_AI", label: "pi-ai" },
 ];
 
 function normalizeModelSpec(value: unknown): string | undefined {
@@ -72,12 +83,36 @@ function readCharacterModel(runtime: AgentRuntime): string | undefined {
 
 export function detectRuntimeModel(
   runtime: AgentRuntime | null,
-  config?: { agents?: { defaults?: { model?: { primary?: string } } } },
+  config?: {
+    connection?: unknown;
+    agents?: { defaults?: { model?: { primary?: string } } };
+  },
 ): string | undefined {
   if (!runtime) return undefined;
 
   const configured = readCharacterModel(runtime);
   if (configured) return configured;
+
+  const activeConnection = inferOnboardingConnectionFromConfig(
+    (config ?? null) as Record<string, unknown> | null,
+  );
+  if (activeConnection?.kind === "local-provider") {
+    return activeConnection.primaryModel ?? activeConnection.provider;
+  }
+  if (activeConnection?.kind === "remote-provider") {
+    return (
+      activeConnection.primaryModel ??
+      activeConnection.provider ??
+      activeConnection.remoteApiBase
+    );
+  }
+  if (activeConnection?.kind === "cloud-managed") {
+    return (
+      activeConnection.largeModel ??
+      activeConnection.smallModel ??
+      activeConnection.cloudProvider
+    );
+  }
 
   const configModel = normalizeModelSpec(
     config?.agents?.defaults?.model?.primary,

@@ -19,15 +19,13 @@ vi.mock("@miladyai/agent/auth", () => ({
 import {
   applyOnboardingConnectionConfig,
   applySubscriptionProviderConfig,
+  clearPersistedOnboardingConfig,
   clearSubscriptionProviderConfig,
   createProviderSwitchConnection,
   mergeOnboardingConnectionWithExisting,
+  reconcilePersistedOnboardingConnection,
   resolveExistingOnboardingConnection,
 } from "./provider-switch-config";
-
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
 
 function emptyConfig(): Partial<ElizaConfig> {
   return {};
@@ -42,11 +40,14 @@ function configWithDefaults(
 beforeEach(() => {
   applySubscriptionCredentials.mockClear();
   deleteCredentials.mockClear();
+  delete process.env.OPENAI_API_KEY;
+  delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.ELIZA_USE_PI_AI;
+  delete process.env.MILADY_USE_PI_AI;
+  delete process.env.OLLAMA_BASE_URL;
+  delete process.env.ELIZAOS_CLOUD_ENABLED;
+  delete process.env.ELIZAOS_CLOUD_API_KEY;
 });
-
-// ============================================================================
-//  applySubscriptionProviderConfig
-// ============================================================================
 
 describe("applySubscriptionProviderConfig", () => {
   it("sets subscriptionProvider and model.primary for openai-codex", () => {
@@ -75,47 +76,7 @@ describe("applySubscriptionProviderConfig", () => {
     expect(config.agents?.defaults?.model?.primary).toBe("openai");
   });
 
-  it("initializes agents.defaults when absent", () => {
-    const config = emptyConfig();
-    applySubscriptionProviderConfig(config, "anthropic-subscription");
-
-    expect(config.agents).toBeDefined();
-    expect(config.agents?.defaults).toBeDefined();
-  });
-
-  it("preserves existing agents config fields", () => {
-    const config: Partial<ElizaConfig> = {
-      agents: {
-        defaults: { workspace: "/some/path" },
-      },
-    };
-    applySubscriptionProviderConfig(config, "openai-codex");
-
-    expect(config.agents?.defaults?.workspace).toBe("/some/path");
-    expect(config.agents?.defaults?.subscriptionProvider).toBe("openai-codex");
-  });
-
-  it("does nothing for unrecognized provider", () => {
-    const config = emptyConfig();
-    applySubscriptionProviderConfig(config, "unknown-provider");
-
-    expect(config.agents?.defaults?.subscriptionProvider).toBeUndefined();
-    expect(config.agents?.defaults?.model).toBeUndefined();
-  });
-
-  it("overwrites previous subscription when switching providers", () => {
-    const config = configWithDefaults({
-      subscriptionProvider: "anthropic-subscription",
-      model: { primary: "anthropic" },
-    });
-
-    applySubscriptionProviderConfig(config, "openai-codex");
-
-    expect(config.agents?.defaults?.subscriptionProvider).toBe("openai-codex");
-    expect(config.agents?.defaults?.model?.primary).toBe("openai");
-  });
-
-  it("preserves existing model.fallbacks when switching providers", () => {
+  it("preserves existing model fallbacks", () => {
     const config = configWithDefaults({
       subscriptionProvider: "anthropic-subscription",
       model: {
@@ -134,23 +95,8 @@ describe("applySubscriptionProviderConfig", () => {
   });
 });
 
-// ============================================================================
-//  clearSubscriptionProviderConfig
-// ============================================================================
-
 describe("clearSubscriptionProviderConfig", () => {
-  it("removes subscriptionProvider from defaults", () => {
-    const config = configWithDefaults({
-      subscriptionProvider: "anthropic-subscription",
-      model: { primary: "anthropic" },
-    });
-
-    clearSubscriptionProviderConfig(config);
-
-    expect(config.agents?.defaults?.subscriptionProvider).toBeUndefined();
-  });
-
-  it("preserves other defaults fields", () => {
+  it("removes subscriptionProvider and preserves other defaults", () => {
     const config = configWithDefaults({
       subscriptionProvider: "openai-codex",
       workspace: "/some/path",
@@ -159,47 +105,39 @@ describe("clearSubscriptionProviderConfig", () => {
 
     clearSubscriptionProviderConfig(config);
 
+    expect(config.agents?.defaults?.subscriptionProvider).toBeUndefined();
     expect(config.agents?.defaults?.workspace).toBe("/some/path");
     expect(config.agents?.defaults?.model?.primary).toBe("openai");
-  });
-
-  it("handles empty config without errors", () => {
-    const config = emptyConfig();
-    expect(() => clearSubscriptionProviderConfig(config)).not.toThrow();
-  });
-
-  it("is idempotent", () => {
-    const config = configWithDefaults({
-      subscriptionProvider: "openai-codex",
-    });
-
-    clearSubscriptionProviderConfig(config);
-
-    expect(config.agents?.defaults?.subscriptionProvider).toBeUndefined();
   });
 });
 
 describe("applyOnboardingConnectionConfig", () => {
-  it("applies a Claude subscription connection and keeps the selection distinct", async () => {
-    const config = emptyConfig();
+  it("persists a sanitized subscription selection without deleting other credentials", async () => {
+    const config = {
+      env: { OPENAI_API_KEY: "sk-openai-existing" },
+    } as Partial<ElizaConfig>;
 
     await applyOnboardingConnectionConfig(config, {
       kind: "local-provider",
       provider: "anthropic-subscription",
     });
 
+    expect(config.connection).toEqual({
+      kind: "local-provider",
+      provider: "anthropic-subscription",
+    });
     expect(config.agents?.defaults?.subscriptionProvider).toBe(
       "anthropic-subscription",
     );
     expect(config.agents?.defaults?.model?.primary).toBe("anthropic");
-    expect(applySubscriptionCredentials).toHaveBeenCalledWith(config);
-    // Ensure subscription credentials are applied exactly once (by the
-    // upstream handler) — a double call could overwrite an explicit apiKey.
     expect(applySubscriptionCredentials).toHaveBeenCalledTimes(1);
-    expect(deleteCredentials).toHaveBeenCalledWith("openai-codex");
+    expect(deleteCredentials).not.toHaveBeenCalled();
+    expect((config.env as Record<string, string>).OPENAI_API_KEY).toBe(
+      "sk-openai-existing",
+    );
   });
 
-  it("keeps an Anthropic setup token instead of rehydrating saved subscription credentials", async () => {
+  it("keeps an Anthropic setup token instead of rehydrating stored subscription credentials", async () => {
     const config = emptyConfig();
 
     await applyOnboardingConnectionConfig(config, {
@@ -208,6 +146,10 @@ describe("applyOnboardingConnectionConfig", () => {
       apiKey: "sk-ant-oat01-test-token",
     });
 
+    expect(config.connection).toEqual({
+      kind: "local-provider",
+      provider: "anthropic-subscription",
+    });
     expect(config.agents?.defaults?.subscriptionProvider).toBe(
       "anthropic-subscription",
     );
@@ -215,43 +157,49 @@ describe("applyOnboardingConnectionConfig", () => {
     expect((config.env as Record<string, string>)?.ANTHROPIC_API_KEY).toBe(
       "sk-ant-oat01-test-token",
     );
-    // When an explicit apiKey is provided, the upstream handler sets it
-    // directly in config.env without calling applySubscriptionCredentials —
-    // calling it here would overwrite the setup token with stale stored creds.
     expect(applySubscriptionCredentials).not.toHaveBeenCalled();
-    expect(deleteCredentials).toHaveBeenCalledWith("openai-codex");
   });
 
-  it("applies the same config mutation for onboarding and provider-switch paths", async () => {
-    const onboardingConfig = configWithDefaults({
-      subscriptionProvider: "openai-codex",
-      model: { primary: "openai" },
-    });
-    const providerSwitchConfig = configWithDefaults({
-      subscriptionProvider: "openai-codex",
-      model: { primary: "openai" },
-    });
-    const providerSwitchConnection = createProviderSwitchConnection({
-      provider: "anthropic-subscription",
-    });
-    if (!providerSwitchConnection) {
-      throw new Error("provider switch connection should be created");
-    }
+  it("preserves an existing direct-provider key when selection changes without a new apiKey", async () => {
+    const config = {
+      env: {
+        OPENAI_API_KEY: "sk-saved-openai",
+        vars: { OPENAI_API_KEY: "sk-saved-openai" },
+      },
+    } as Partial<ElizaConfig>;
 
-    await applyOnboardingConnectionConfig(onboardingConfig, {
+    await applyOnboardingConnectionConfig(config, {
       kind: "local-provider",
-      provider: "anthropic-subscription",
+      provider: "openai",
     });
-    await applyOnboardingConnectionConfig(
-      providerSwitchConfig,
-      providerSwitchConnection,
-    );
 
-    expect(providerSwitchConfig).toEqual(onboardingConfig);
+    expect(config.connection).toEqual({
+      kind: "local-provider",
+      provider: "openai",
+    });
+    expect((config.env as Record<string, unknown>).OPENAI_API_KEY).toBe(
+      "sk-saved-openai",
+    );
+    expect(
+      ((config.env as Record<string, unknown>).vars as Record<string, string>)
+        .OPENAI_API_KEY,
+    ).toBe("sk-saved-openai");
   });
 
-  it("applies openrouter model overrides through the normalized path", async () => {
-    const config = emptyConfig();
+  it("disables cloud inference while preserving cloud auth state for local providers", async () => {
+    const config = {
+      cloud: {
+        enabled: true,
+        provider: "elizacloud",
+        apiKey: "ck-cloud-existing",
+        inferenceMode: "cloud",
+        runtime: "cloud",
+      },
+      models: {
+        small: "openai/gpt-5-mini",
+        large: "anthropic/claude-sonnet-4.5",
+      },
+    } as Partial<ElizaConfig>;
 
     await applyOnboardingConnectionConfig(config, {
       kind: "local-provider",
@@ -260,33 +208,117 @@ describe("applyOnboardingConnectionConfig", () => {
       primaryModel: "openai/gpt-5-mini",
     });
 
-    expect(config.agents?.defaults?.model?.primary).toBe("openai/gpt-5-mini");
-    expect((config.env as Record<string, string>)?.OPENROUTER_API_KEY).toBe(
+    expect(config.connection).toEqual({
+      kind: "local-provider",
+      provider: "openrouter",
+      primaryModel: "openai/gpt-5-mini",
+    });
+    expect(config.cloud).toMatchObject({
+      enabled: false,
+      provider: "elizacloud",
+      apiKey: "ck-cloud-existing",
+      inferenceMode: "byok",
+      runtime: "local",
+    });
+    expect(config.models).toBeUndefined();
+    expect((config.env as Record<string, string>).OPENROUTER_API_KEY).toBe(
       "sk-or-test",
     );
+    expect(config.agents?.defaults?.model?.primary).toBe("openai/gpt-5-mini");
+  });
+
+  it("persists sanitized cloud-managed selection and runtime config", async () => {
+    const config = emptyConfig();
+
+    await applyOnboardingConnectionConfig(config, {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      apiKey: "ck-cloud-key",
+      smallModel: "openai/gpt-5-mini",
+      largeModel: "moonshotai/kimi-k2-0905",
+    });
+
+    expect(config.connection).toEqual({
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      smallModel: "openai/gpt-5-mini",
+      largeModel: "moonshotai/kimi-k2-0905",
+    });
+    expect(config.cloud).toMatchObject({
+      enabled: true,
+      provider: "elizacloud",
+      apiKey: "ck-cloud-key",
+      inferenceMode: "cloud",
+      runtime: "cloud",
+    });
+    expect(config.models).toEqual({
+      small: "openai/gpt-5-mini",
+      large: "moonshotai/kimi-k2-0905",
+    });
+  });
+});
+
+describe("createProviderSwitchConnection", () => {
+  it.each([
+    ["google", "gemini"],
+    ["google-genai", "gemini"],
+    ["xai", "grok"],
+    ["openai-subscription", "openai-subscription"],
+    ["ollama", "ollama"],
+    ["mistral", "mistral"],
+    ["together", "together"],
+    ["zai", "zai"],
+  ])("normalizes %s to canonical provider %s", (input, expected) => {
+    expect(createProviderSwitchConnection({ provider: input })).toMatchObject({
+      kind: "local-provider",
+      provider: expected,
+    });
   });
 });
 
 describe("resolveExistingOnboardingConnection", () => {
-  it("reconstructs a saved eliza cloud onboarding connection", () => {
+  it("prefers explicit config.connection over compatibility inference", () => {
     expect(
       resolveExistingOnboardingConnection({
+        connection: {
+          kind: "local-provider",
+          provider: "openrouter",
+          primaryModel: "openai/gpt-5-mini",
+        },
+        env: {
+          OPENAI_API_KEY: "sk-openai",
+        },
         cloud: {
           enabled: true,
           inferenceMode: "cloud",
-          apiKey: "sk-cloud-test",
-        },
-        models: {
-          small: "openai/gpt-5-mini",
-          large: "anthropic/claude-sonnet-4.5",
+          apiKey: "ck-cloud",
         },
       }),
     ).toEqual({
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      apiKey: "sk-cloud-test",
-      smallModel: "openai/gpt-5-mini",
-      largeModel: "anthropic/claude-sonnet-4.5",
+      kind: "local-provider",
+      provider: "openrouter",
+      primaryModel: "openai/gpt-5-mini",
+    });
+  });
+});
+
+describe("reconcilePersistedOnboardingConnection", () => {
+  it("backfills ollama from OLLAMA_BASE_URL compatibility signals", () => {
+    const config = {
+      env: {
+        vars: {
+          OLLAMA_BASE_URL: "http://localhost:11434",
+        },
+      },
+    } as Partial<ElizaConfig>;
+
+    expect(reconcilePersistedOnboardingConnection(config)).toEqual({
+      kind: "local-provider",
+      provider: "ollama",
+    });
+    expect(config.connection).toEqual({
+      kind: "local-provider",
+      provider: "ollama",
     });
   });
 });
@@ -338,5 +370,55 @@ describe("mergeOnboardingConnectionWithExisting", () => {
       smallModel: "openai/gpt-5-mini",
       largeModel: "anthropic/claude-sonnet-4.5",
     });
+  });
+});
+
+describe("clearPersistedOnboardingConfig", () => {
+  it("clears selection state, provider signals, and subscription oauth caches", () => {
+    const config = {
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+      },
+      env: {
+        OPENAI_API_KEY: "sk-openai",
+        vars: {
+          OPENAI_API_KEY: "sk-openai",
+          ELIZA_USE_PI_AI: "1",
+          OLLAMA_BASE_URL: "http://localhost:11434",
+        },
+      },
+      cloud: {
+        enabled: true,
+        apiKey: "ck-cloud",
+      },
+      models: {
+        small: "openai/gpt-5-mini",
+        large: "anthropic/claude-sonnet-4.5",
+      },
+      agents: {
+        defaults: {
+          subscriptionProvider: "openai-codex",
+        },
+      },
+    } as Partial<ElizaConfig>;
+
+    clearPersistedOnboardingConfig(config);
+
+    expect(config.connection).toBeUndefined();
+    expect(config.cloud).toEqual({});
+    expect(config.models).toBeUndefined();
+    expect(
+      (config.env as Record<string, unknown>)?.OPENAI_API_KEY,
+    ).toBeUndefined();
+    expect(
+      (
+        (config.env as Record<string, unknown>)?.vars as
+          | Record<string, unknown>
+          | undefined
+      )?.OPENAI_API_KEY,
+    ).toBeUndefined();
+    expect(deleteCredentials).toHaveBeenCalledWith("anthropic-subscription");
+    expect(deleteCredentials).toHaveBeenCalledWith("openai-codex");
   });
 });

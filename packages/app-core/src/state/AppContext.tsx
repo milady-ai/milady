@@ -124,6 +124,7 @@ import {
   resolveOnboardingPreviousStep,
 } from "../onboarding/flow";
 import { buildOnboardingConnectionConfig } from "../onboarding-config";
+import { restartAgentAfterOnboarding } from "./onboarding-restart";
 import {
   alertDesktopMessage,
   confirmDesktopAction,
@@ -5540,7 +5541,7 @@ function AppProviderInner({
           }
 
           setOnboardingHandoffPhase("restarting");
-          setAgentStatus(await client.restartAgent());
+          setAgentStatus(await restartAgentAfterOnboarding(client));
           setOnboardingHandoffPhase("bootstrapping");
           await bootstrapConversationAfterAgentReady(
             "onboarding:cloud_fast_track",
@@ -5735,7 +5736,7 @@ function AppProviderInner({
         }
 
         setOnboardingHandoffPhase("restarting");
-        setAgentStatus(await client.restartAgent());
+        setAgentStatus(await restartAgentAfterOnboarding(client));
         setOnboardingHandoffPhase("bootstrapping");
         await bootstrapConversationAfterAgentReady("onboarding:full_finish", {
           forceFreshConversation: true,

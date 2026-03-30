@@ -276,6 +276,42 @@ const CharacterStyleSchema = z
   .strict()
   .optional();
 
+const OnboardingCloudManagedConnectionSchema = z
+  .object({
+    kind: z.literal("cloud-managed"),
+    cloudProvider: z.literal("elizacloud"),
+    apiKey: z.string().optional(),
+    smallModel: z.string().optional(),
+    largeModel: z.string().optional(),
+  })
+  .strict();
+
+const OnboardingLocalProviderConnectionSchema = z
+  .object({
+    kind: z.literal("local-provider"),
+    provider: z.string(),
+    apiKey: z.string().optional(),
+    primaryModel: z.string().optional(),
+  })
+  .strict();
+
+const OnboardingRemoteProviderConnectionSchema = z
+  .object({
+    kind: z.literal("remote-provider"),
+    remoteApiBase: z.string().min(1),
+    remoteAccessToken: z.string().optional(),
+    provider: z.string().optional(),
+    apiKey: z.string().optional(),
+    primaryModel: z.string().optional(),
+  })
+  .strict();
+
+const OnboardingConnectionSchema = z.union([
+  OnboardingCloudManagedConnectionSchema,
+  OnboardingLocalProviderConnectionSchema,
+  OnboardingRemoteProviderConnectionSchema,
+]);
+
 export const CharacterSchema = z
   .object({
     name: z.string().min(1).max(100).optional(),
@@ -315,6 +351,7 @@ export const ElizaSchema = z
       })
       .catchall(z.string())
       .optional(),
+    connection: OnboardingConnectionSchema.optional(),
     wizard: z
       .object({
         lastRunAt: z.string().optional(),

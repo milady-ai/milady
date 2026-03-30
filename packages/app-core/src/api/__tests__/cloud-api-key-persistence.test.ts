@@ -66,7 +66,7 @@ describe("cloud API key persistence through onboarding", () => {
   });
 
   describe("extractAndPersistOnboardingApiKey normalizes connection state", () => {
-    it("clears stale cloud state when saving a local provider key", async () => {
+    it("disables stale cloud inference while preserving cloud auth when saving a local provider key", async () => {
       const config = makeConfig({
         enabled: true,
         apiKey: "cloud-key-abc",
@@ -88,7 +88,10 @@ describe("cloud API key persistence through onboarding", () => {
       const saved = saveElizaConfigMock.mock.calls[0][0];
       expect(saved.cloud).toEqual({
         enabled: false,
+        apiKey: "cloud-key-abc",
+        inferenceMode: "byok",
         runtime: "local",
+        services: { inference: false },
       });
       expect(saved.env.ANTHROPIC_API_KEY).toBe("sk-ant-test-key-123");
     });
@@ -175,7 +178,7 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saved.cloud.apiKey).toBe("cloud-key-persisted");
     });
 
-    it("switching to a local provider clears the prior cloud key", async () => {
+    it("switching to a local provider preserves the prior cloud key but disables cloud inference", async () => {
       const config = makeConfig({
         enabled: true,
         apiKey: "cloud-key-dual",
@@ -195,7 +198,10 @@ describe("cloud API key persistence through onboarding", () => {
       const saved1 = saveElizaConfigMock.mock.calls[0][0];
       expect(saved1.cloud).toEqual({
         enabled: false,
+        apiKey: "cloud-key-dual",
+        inferenceMode: "byok",
         runtime: "local",
+        services: { inference: false },
       });
       expect(saved1.env.OPENAI_API_KEY).toBe("sk-openai-test");
 
@@ -206,7 +212,10 @@ describe("cloud API key persistence through onboarding", () => {
       const saved2 = saveElizaConfigMock.mock.calls[1][0];
       expect(saved2.cloud).toEqual({
         enabled: false,
+        apiKey: "cloud-key-dual",
+        inferenceMode: "byok",
         runtime: "local",
+        services: { inference: false },
       });
     });
   });

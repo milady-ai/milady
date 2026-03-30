@@ -715,6 +715,15 @@ describe("AUTH_PROVIDER_PLUGINS", () => {
     expect(AUTH_PROVIDER_PLUGINS.CUA_API_KEY).toBe("@elizaos/plugin-cua");
     expect(AUTH_PROVIDER_PLUGINS.CUA_HOST).toBe("@elizaos/plugin-cua");
   });
+
+  it("maps both pi-ai env aliases to the pi-ai plugin", () => {
+    expect(AUTH_PROVIDER_PLUGINS.ELIZA_USE_PI_AI).toBe(
+      "@elizaos/plugin-pi-ai",
+    );
+    expect(AUTH_PROVIDER_PLUGINS.MILADY_USE_PI_AI).toBe(
+      "@elizaos/plugin-pi-ai",
+    );
+  });
 });
 
 // ============================================================================

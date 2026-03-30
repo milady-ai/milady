@@ -16,22 +16,27 @@ describe("hasPartialOnboardingConnectionConfig", () => {
     {
       config: {},
       expected: false,
-      name: "returns false when cloud config is missing",
+      name: "returns false when no provider selection signals exist",
     },
     {
       config: { cloud: { enabled: true } },
       expected: true,
-      name: "returns true when cloud is enabled",
+      name: "returns true when cloud inference is enabled",
+    },
+    {
+      config: {
+        connection: {
+          kind: "local-provider",
+          provider: "openai",
+        },
+      },
+      expected: true,
+      name: "returns true when config.connection is present",
     },
     {
       config: { cloud: { apiKey: "sk-test" } },
-      expected: true,
-      name: "returns true when api key is present",
-    },
-    {
-      config: { cloud: { apiKey: "   " } },
       expected: false,
-      name: "ignores blank strings",
+      name: "does not treat cloud api key capability alone as active selection",
     },
   ])("$name", ({ config, expected }) => {
     expect(
@@ -47,14 +52,6 @@ describe("inferOnboardingResumeStep", () => {
     expect(inferOnboardingResumeStep({})).toBe("cloud_login");
   });
 
-  it("defaults to cloud_login with empty config and no persisted step", () => {
-    expect(inferOnboardingResumeStep({ config: {} })).toBe("cloud_login");
-  });
-
-  it("defaults to cloud_login with null config and no persisted step", () => {
-    expect(inferOnboardingResumeStep({ config: null })).toBe("cloud_login");
-  });
-
   it("returns the persisted step when available", () => {
     expect(
       inferOnboardingResumeStep({ persistedStep: "providers", config: {} }),
@@ -65,45 +62,42 @@ describe("inferOnboardingResumeStep", () => {
     expect(
       inferOnboardingResumeStep({
         persistedStep: "providers",
-        config: { cloud: { enabled: true } },
+        config: {
+          connection: { kind: "cloud-managed", cloudProvider: "elizacloud" },
+        },
       }),
     ).toBe("providers");
-  });
-
-  it("returns persisted step 'hosting' when persisted", () => {
-    expect(inferOnboardingResumeStep({ persistedStep: "hosting" })).toBe(
-      "hosting",
-    );
-  });
-
-  it("returns persisted step 'permissions' when persisted", () => {
-    expect(inferOnboardingResumeStep({ persistedStep: "permissions" })).toBe(
-      "permissions",
-    );
-  });
-
-  it("returns persisted step 'launch' when persisted", () => {
-    expect(inferOnboardingResumeStep({ persistedStep: "launch" })).toBe(
-      "launch",
-    );
-  });
-
-  it("does not return old step names as defaults", () => {
-    const result = inferOnboardingResumeStep({ config: {} });
-    expect(result).toBe("cloud_login");
-  });
-
-  it("falls back to welcome when nothing is persisted yet", () => {
-    expect(
-      inferOnboardingResumeStep({
-        config: {},
-      }),
-    ).toBe("cloud_login");
   });
 });
 
 describe("deriveOnboardingResumeConnection", () => {
-  it("reconstructs an eliza cloud connection from partial saved config", () => {
+  it("prefers explicit config.connection over compatibility inference", () => {
+    expect(
+      deriveOnboardingResumeConnection({
+        connection: {
+          kind: "local-provider",
+          provider: "openrouter",
+          primaryModel: "openai/gpt-5-mini",
+        },
+        env: {
+          vars: {
+            OPENAI_API_KEY: "sk-openai-test",
+          },
+        },
+        cloud: {
+          enabled: true,
+          apiKey: "ck-cloud-test",
+          inferenceMode: "cloud",
+        },
+      }),
+    ).toEqual({
+      kind: "local-provider",
+      provider: "openrouter",
+      primaryModel: "openai/gpt-5-mini",
+    });
+  });
+
+  it("reconstructs an eliza cloud connection from compatibility config", () => {
     expect(
       deriveOnboardingResumeConnection({
         cloud: { enabled: true, apiKey: "[REDACTED]" },
@@ -118,6 +112,42 @@ describe("deriveOnboardingResumeConnection", () => {
       apiKey: undefined,
       smallModel: "openai/gpt-5-mini",
       largeModel: "anthropic/claude-sonnet-4.5",
+    });
+  });
+
+  it("reconstructs ollama from OLLAMA_BASE_URL", () => {
+    expect(
+      deriveOnboardingResumeConnection({
+        env: {
+          vars: {
+            OLLAMA_BASE_URL: "http://localhost:11434",
+          },
+        },
+      }),
+    ).toEqual({
+      kind: "local-provider",
+      provider: "ollama",
+    });
+  });
+
+  it("treats MILADY_USE_PI_AI as the same selection as ELIZA_USE_PI_AI", () => {
+    expect(
+      deriveOnboardingResumeConnection({
+        env: {
+          vars: {
+            MILADY_USE_PI_AI: "1",
+          },
+        },
+        agents: {
+          defaults: {
+            model: { primary: "pi/default" },
+          },
+        },
+      }),
+    ).toEqual({
+      kind: "local-provider",
+      provider: "pi-ai",
+      primaryModel: "pi/default",
     });
   });
 

@@ -151,10 +151,13 @@ describe("ProviderSwitcher provider dropdown default", () => {
     mockSwitchProvider.mockResolvedValue({ ok: true });
   });
 
-  it("does not auto-select __cloud__ when config returns non-cloud inference", async () => {
-    // Config returns cloud.enabled=false — not a cloud user
+  it("uses config.connection as the authoritative local provider selection", async () => {
     mockGetConfig.mockResolvedValue({
-      models: { small: "some-local-model", large: "some-local-model" },
+      connection: {
+        kind: "local-provider",
+        provider: "anthropic",
+      },
+      models: {},
       cloud: { enabled: false },
       agents: {},
       env: { vars: {} },
@@ -177,9 +180,7 @@ describe("ProviderSwitcher provider dropdown default", () => {
     });
 
     const selectValue = getSelectValue(tree);
-    // With the fix, the dropdown should resolve to the enabled plugin
-    // (plugin-anthropic), NOT "__cloud__"
-    expect(selectValue).toBe("plugin-anthropic");
+    expect(selectValue).toBe("anthropic");
   });
 
   it("selects __cloud__ when config returns cloud inference enabled", async () => {
@@ -287,16 +288,9 @@ describe("ProviderSwitcher provider dropdown default", () => {
       await Promise.resolve();
     });
 
-    expect(mockUpdateConfig).toHaveBeenCalledWith({
-      cloud: {
-        services: { inference: false },
-        inferenceMode: "byok",
-      },
-      env: { vars: { ELIZA_USE_PI_AI: "" } },
-    });
     expect(mockSwitchProvider).toHaveBeenCalledWith("anthropic-subscription");
-    expect(handlePluginToggle).toHaveBeenCalledWith("plugin-anthropic", true);
-    expect(handlePluginToggle).toHaveBeenCalledWith("plugin-openai", false);
+    expect(mockUpdateConfig).not.toHaveBeenCalled();
+    expect(handlePluginToggle).not.toHaveBeenCalled();
   });
 
   it("restores Claude Subscription from saved config instead of collapsing to anthropic", async () => {
