@@ -1161,17 +1161,27 @@ function patchTestCafeBunCompat() {
       "node_modules/testcafe",
     );
 
+    if (!existsSync(tcRoot)) continue;
+
     // Patch 1: module.constructor -> require('module') fallback
     const apiBasedPath = resolve(
       tcRoot,
       "lib/compiler/test-file/api-based.js",
     );
-    if (existsSync(apiBasedPath)) {
+    const moduleNeedle = "const Module = module.constructor;";
+    if (!existsSync(apiBasedPath)) {
+      console.warn(
+        "[patch-deps] testcafe: expected file missing (layout may have changed). " +
+          `Update patchTestCafeBunCompat() in patch-deps.mjs. Missing: ${apiBasedPath}`,
+      );
+    } else {
       let src = readFileSync(apiBasedPath, "utf8");
-      const needle = "const Module = module.constructor;";
-      if (src.includes(needle)) {
+      const moduleAlreadyPatched =
+        src.includes("typeof module.constructor._nodeModulePaths") &&
+        src.includes("require('module')");
+      if (src.includes(moduleNeedle)) {
         src = src.replace(
-          needle,
+          moduleNeedle,
           "const Module = typeof module.constructor._nodeModulePaths === 'function' ? module.constructor : require('module');",
         );
         writeFileSync(apiBasedPath, src, "utf8");
@@ -1179,29 +1189,39 @@ function patchTestCafeBunCompat() {
         console.log(
           `[patch-deps] Applied testcafe Module constructor Bun fix: ${apiBasedPath}`,
         );
+      } else if (!moduleAlreadyPatched) {
+        console.warn(
+          "[patch-deps] testcafe: Module constructor patch needle not found in api-based.js — " +
+            "TestCafe may have refactored; Bun runs may fail until patch-deps.mjs is updated. " +
+            `File: ${apiBasedPath}`,
+        );
       }
     }
 
     // Patch 2: null-safe callsite helpers
     const callsitePath = resolve(tcRoot, "lib/utils/callsite.js");
-    if (existsSync(callsitePath)) {
+    const oldStackFrame =
+      "function getCallsiteStackFrameString(callsite) {\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
+    const newStackFrame =
+      "function getCallsiteStackFrameString(callsite) {\n    if (!callsite || !callsite.stackFrames) return '<unknown>';\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
+    const oldGetId =
+      "function getCallsiteId(callsite) {\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
+    const newGetId =
+      "function getCallsiteId(callsite) {\n    if (!callsite) return '<unknown>:0';\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
+
+    if (!existsSync(callsitePath)) {
+      console.warn(
+        "[patch-deps] testcafe: expected file missing (layout may have changed). " +
+          `Update patchTestCafeBunCompat() in patch-deps.mjs. Missing: ${callsitePath}`,
+      );
+    } else {
       let src = readFileSync(callsitePath, "utf8");
       let changed = false;
-
-      const oldStackFrame =
-        "function getCallsiteStackFrameString(callsite) {\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
-      const newStackFrame =
-        "function getCallsiteStackFrameString(callsite) {\n    if (!callsite || !callsite.stackFrames) return '<unknown>';\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
 
       if (src.includes(oldStackFrame)) {
         src = src.replace(oldStackFrame, newStackFrame);
         changed = true;
       }
-
-      const oldGetId =
-        "function getCallsiteId(callsite) {\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
-      const newGetId =
-        "function getCallsiteId(callsite) {\n    if (!callsite) return '<unknown>:0';\n    return `${callsite.filename}:${callsite.lineNum}`;\n}";
 
       if (src.includes(oldGetId)) {
         src = src.replace(oldGetId, newGetId);
@@ -1214,6 +1234,17 @@ function patchTestCafeBunCompat() {
         console.log(
           `[patch-deps] Applied testcafe callsite null-guard Bun fix: ${callsitePath}`,
         );
+      } else {
+        const callsiteAlreadyPatched =
+          src.includes("if (!callsite || !callsite.stackFrames)") &&
+          src.includes("if (!callsite) return '<unknown>:0'");
+        if (!callsiteAlreadyPatched) {
+          console.warn(
+            "[patch-deps] testcafe: callsite.js present but patch patterns not found — " +
+              "TestCafe may have refactored; Bun runs may fail until patch-deps.mjs is updated. " +
+              `File: ${callsitePath}`,
+          );
+        }
       }
     }
   }

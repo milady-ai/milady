@@ -7,10 +7,20 @@
  *
  * Run: bunx testcafe <browser> apps/app/test/testcafe/smoke.testcafe.js
  * Requires: bun run dev (ELIZA_DEV_ONCHAIN=0) on localhost:2138
+ *
+ * skipJsErrors() — intentional:
+ * Hammerhead (TestCafe’s proxy) plus WebKit/Safari often surface third-party or
+ * browser-level errors that are unrelated to Milady. Without skipJsErrors, the
+ * runner fails the whole test on those before our assertions run. We still
+ * assert #root, URL/onboarding guards, and at least one button. Do not remove
+ * blindly; run without skipJsErrors locally to see current noise before deleting.
  */
 const { Selector, ClientFunction, RequestMock } = require("testcafe");
 
 const BASE = "http://localhost:2138";
+const ROOT_READY = Selector("#root");
+const ROOT_TIMEOUT_MS = 20000;
+const NAV_TIMEOUT_MS = 12000;
 
 const getLocation = ClientFunction(() => window.location.href);
 
@@ -53,7 +63,9 @@ fixture`Milady UI — Full View Traversal`.page`about:blank`
     });
 
     await t.navigateTo(BASE);
-    await t.wait(2000);
+    await t
+      .expect(ROOT_READY.with({ timeout: ROOT_TIMEOUT_MS }).exists)
+      .ok("#root should appear after onboarding seed");
   });
 
 // ---------------------------------------------------------------------------
@@ -207,13 +219,12 @@ const VIEWS = [
 
 // Generate one test per view
 for (const view of VIEWS) {
+  // skipJsErrors: see file header (Hammerhead / Safari noise vs app assertions).
   test.skipJsErrors()(`[${view.id}] ${view.label} view loads`, async (t) => {
     await t.navigateTo(`${BASE}${view.path}`);
-    await t.wait(3000);
-
-    // Root element must exist
-    const root = Selector("#root");
-    await t.expect(root.exists).ok(`Root element should exist on ${view.path}`);
+    await t
+      .expect(ROOT_READY.with({ timeout: ROOT_TIMEOUT_MS }).exists)
+      .ok(`Root element should exist on ${view.path}`);
 
     // Must not redirect to onboarding
     const url = await getLocation();
@@ -292,14 +303,12 @@ for (const view of VIEWS) {
 // Cross-view stability: rapid navigation between all views
 // ---------------------------------------------------------------------------
 
+// skipJsErrors: see file header.
 test.skipJsErrors()("Rapid view traversal without crash", async (t) => {
   for (const view of VIEWS) {
     await t.navigateTo(`${BASE}${view.path}`);
-    await t.wait(1000);
-
-    const root = Selector("#root");
     await t
-      .expect(root.exists)
+      .expect(ROOT_READY.with({ timeout: NAV_TIMEOUT_MS }).exists)
       .ok(`Root should exist after navigating to ${view.path}`);
 
     const url = await getLocation();

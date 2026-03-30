@@ -7,10 +7,17 @@
  * Run (dev on :2138):
  *   bun run test:ui:testcafe -- --fixture apps/app/test/testcafe/settings-chat-companion.testcafe.js
  *   bun run test:ui:testcafe:with-dev -- --fixture apps/app/test/testcafe/settings-chat-companion.testcafe.js
+ *
+ * skipJsErrors() — intentional (see smoke.testcafe.js header): Hammerhead / WebKit
+ * noise vs Milady assertions. Do not remove without a local run without it.
  */
 const { Selector, ClientFunction, RequestMock } = require("testcafe");
 
 const BASE = "http://localhost:2138";
+const ROOT = Selector("#root");
+const SETTINGS_SHELL = Selector('[data-testid="settings-shell"]');
+const ROOT_TIMEOUT_MS = 20000;
+const PANEL_TIMEOUT_MS = 20000;
 
 const readLs = ClientFunction((key) => {
   try {
@@ -65,12 +72,15 @@ fixture`Settings — Chat companion (Media)`.page`about:blank`
     await t.navigateTo(BASE);
     await setupStorage();
     await t.navigateTo(BASE);
-    await t.wait(1500);
+    await t
+      .expect(ROOT.with({ timeout: ROOT_TIMEOUT_MS }).exists)
+      .ok("#root after storage seed");
   })
   .afterEach(async (_t) => {
     await resetCompanionPrefs();
   });
 
+// skipJsErrors: see file header.
 test.skipJsErrors()(
   "companion 3D settings persist across navigation (localStorage + UI)",
   async (t) => {
@@ -83,10 +93,8 @@ test.skipJsErrors()(
     );
 
     await t.navigateTo(`${BASE}/voice`);
-    await t.wait(3500);
-
     await t
-      .expect(vrmCard.exists)
+      .expect(vrmCard.with({ timeout: PANEL_TIMEOUT_MS }).exists)
       .ok(
         "Companion VRM block should render (companion mode on, media config loaded)",
       );
@@ -111,16 +119,28 @@ test.skipJsErrors()(
       .eql("1");
 
     await t.navigateTo(`${BASE}/companion`);
-    await t.wait(800);
+    await t
+      .expect(ROOT.with({ timeout: ROOT_TIMEOUT_MS }).exists)
+      .ok("companion shell");
     await t.navigateTo(`${BASE}/settings`);
-    await t.wait(2000);
+    await t
+      .expect(SETTINGS_SHELL.with({ timeout: ROOT_TIMEOUT_MS }).exists)
+      .ok("settings shell");
 
     const mediaNav = Selector(
       '[data-testid="settings-sidebar"] button',
     ).withExactText("Media");
-    await t.expect(mediaNav.exists).ok("Media section should be in sidebar");
+    await t
+      .expect(mediaNav.with({ timeout: 15000 }).exists)
+      .ok("Media section should be in sidebar");
     await t.click(mediaNav);
-    await t.wait(600);
+    await t
+      .expect(
+        Selector('[data-testid="settings-companion-vrm-power"]').with({
+          timeout: 15000,
+        }).exists,
+      )
+      .ok("companion settings visible after Media nav");
 
     const vrmAfter = Selector('[data-testid="settings-companion-vrm-power"]');
     const halfAfter = Selector(

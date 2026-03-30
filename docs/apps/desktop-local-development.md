@@ -156,6 +156,10 @@ Browser smoke tests target the **same renderer URL** Electrobun loads in watch m
 
 **Why TestCafe + Bun:** `bunx testcafe` runs the CLI under Bun. Postinstall patches in `scripts/patch-deps.mjs` adjust TestCafe for Bun (`module` / callsite compatibility). Use **`bun run …`** / **`bunx`** only for this suite — do not rely on `npx` for the runner.
 
+**Dependency:** `testcafe` is a **devDependency of `@miladyai/app`** (next to `apps/app/test/testcafe/`), not the monorepo root, so UI E2E tooling stays with the Vite app. A normal root `bun install` still hoists workspace packages; the TestCafe tree is only needed for opt-in `test:ui:testcafe*` runs.
+
+**Browser auto-pick:** `scripts/run-testcafe.mjs` tries **macOS `.app` paths** first; on **Linux / Windows** nothing matches and it falls back to **`bunx testcafe --list-browsers`** (preferred order: chrome, opera, edge, firefox, safari).
+
 | Command | Purpose |
 |---------|---------|
 | `bun run test:ui:testcafe` | Run [`apps/app/test/testcafe/smoke.testcafe.js`](../../apps/app/test/testcafe/smoke.testcafe.js); expects dev UI already on **:2138** (e.g. `ELIZA_DEV_ONCHAIN=0 bun run dev`). Auto-picks an installed browser (Chrome, Opera GX, Firefox, Edge, Safari). |

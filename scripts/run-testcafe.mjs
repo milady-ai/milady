@@ -13,6 +13,10 @@
  *   MILADY_TESTCAFE_FIXTURE=path — default smoke suite if unset
  *
  * Requires UI on localhost:2138 unless --spawn-dev (or dev already running).
+ *
+ * Browser pick: `BROWSER_DETECTION_ORDER` uses **macOS .app bundle paths** only.
+ * On Linux and Windows no path matches, so detection falls through to
+ * `bunx testcafe --list-browsers` and the first preferred name (chrome, opera, …).
  */
 import { execSync, spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -20,6 +24,7 @@ import net from "node:net";
 
 const DEFAULT_FIXTURE = "apps/app/test/testcafe/smoke.testcafe.js";
 
+/** macOS-only fast path; other OSes use `--list-browsers` (see file header). */
 const BROWSER_DETECTION_ORDER = [
   { name: "chrome", paths: ["/Applications/Google Chrome.app"] },
   {

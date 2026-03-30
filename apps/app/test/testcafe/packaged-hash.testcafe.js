@@ -5,6 +5,10 @@
  * Run: `bun run test:ui:testcafe:packaged` (or set MILADY_TESTCAFE_FIXTURE to this path).
  *
  * Skips gracefully when dist is missing so CI without a web build does not fail.
+ *
+ * skipJsErrors() — intentional: file:// + Hammerhead often triggers security or
+ * script errors unrelated to routing under test; we assert protocol, #root, and
+ * onboarding URL. See smoke.testcafe.js header for the full rationale.
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -39,6 +43,7 @@ fixture`Packaged hash routing (file protocol)`.page`about:blank`
     });
   });
 
+// skipJsErrors: see file header.
 test.skipJsErrors()(
   "dist exists — file URL with hash navigates (packaged parity)",
   async (t) => {
@@ -54,14 +59,15 @@ test.skipJsErrors()(
     const target = `${fileBase}#/settings`;
 
     await t.navigateTo(target);
-    await t.wait(5000);
+
+    const root = Selector("#root");
+    await t
+      .expect(root.with({ timeout: 20000 }).exists)
+      .ok("#root should exist on file:// + hash");
 
     await t
       .expect(await getProtocol())
       .eql("file:", "Should use file protocol");
-
-    const root = Selector("#root");
-    await t.expect(root.exists).ok("#root should exist on file:// + hash");
 
     const url = await getHref();
     await t
