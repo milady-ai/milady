@@ -414,7 +414,8 @@
               "cli/plugins",
               "cli/update",
               "cli/doctor",
-              "cli/db"
+              "cli/db",
+              "cli/benchmark"
             ]
           },
           {

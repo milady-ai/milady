@@ -116,11 +116,15 @@ The onboarding wizard only runs when stdin is a TTY (interactive terminal). In h
     │  ○ Skip for now
     ```
 
-    After selecting a provider, you paste your API key (masked input). For Ollama, you confirm or change the base URL (default: `http://localhost:11434`).
+    After selecting a provider, you paste your API key (masked input). For Ollama, you confirm or change the base URL (default: `http://localhost:11434`). Make sure the Ollama service is running (`ollama serve`) and that you have pulled at least one model (`ollama pull llama3.3`) before proceeding.
 
     <Info>
     If Milady detects an existing API key in your environment (e.g., `ANTHROPIC_API_KEY` is already set), it skips this step and uses the detected provider automatically.
     </Info>
+
+    <Tip>
+    The wizard shows the most common providers. Milady supports 19 providers total — including DeepSeek, Together AI, Cohere, Perplexity, Pi AI, and more. Configure additional providers anytime via environment variables or `milady.json`. See [Model Providers](/model-providers) for the full list.
+    </Tip>
   </Step>
 
   <Step title="Set up crypto wallets (optional)">

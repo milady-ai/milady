@@ -4,7 +4,7 @@ sidebarTitle: API Reference
 description: Complete reference for all Milady REST API endpoints, organized by resource group.
 ---
 
-The Milady API server runs on port **2138** by default. All endpoints are prefixed with `/api/`. Authentication is required when `MILADY_API_TOKEN` is set.
+The Milady API server runs on port **2138** by default (production via `milady start`). In development mode (`bun run dev`), the API runs on port **31337** (`MILADY_API_PORT`) while the dashboard UI stays on **2138** (`MILADY_PORT`). All endpoints are prefixed with `/api/`. Authentication is required when `MILADY_API_TOKEN` is set.
 
 <Warning>
 When `MILADY_API_TOKEN` is configured, include the token as a `Bearer` token in the `Authorization` header, or use the pairing flow to obtain it.

@@ -20,7 +20,7 @@ A plugin is a self-contained module that registers one or more of:
 <CardGroup cols={2}>
 
 <Card title="Core Plugins" icon="cube" href="/plugin-registry/knowledge">
-  Essential plugins that ship with every Milady installation — sql, local-embedding, form, knowledge, trajectory-logger, agent-orchestrator, cron, shell, and agent-skills.
+  Essential plugins that ship with every Milady installation — sql, local-embedding, form, knowledge, trajectory-logger, agent-orchestrator, cron, shell, agent-skills, commands, and roles.
 </Card>
 
 <Card title="Model Providers" icon="brain" href="/plugin-registry/llm/openai">
