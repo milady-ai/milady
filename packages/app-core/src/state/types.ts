@@ -36,6 +36,10 @@ import type {
   SkillInfo,
   SkillMarketplaceResult,
   SkillScanReportSummary,
+  StewardApprovalActionResponse,
+  StewardHistoryResponse,
+  StewardPendingResponse,
+  StewardStatusResponse,
   StreamEventEnvelope,
   SystemPermissionId,
   TriggerHealthSnapshot,
@@ -60,30 +64,51 @@ import type { Tab } from "../navigation";
 import type { UiShellMode, UiTheme } from "./ui-preferences";
 
 export type { UiShellMode } from "./ui-preferences";
+
+/** 3D companion render power: full quality, OS/battery-aware default, or always efficient. */
+export type CompanionVrmPowerMode = "quality" | "balanced" | "efficiency";
+
+/** When to cap the companion VRM loop at ~half the display refresh rate. */
+export type CompanionHalfFramerateMode = "off" | "when_saving_power" | "always";
 export type ShellView = "companion" | "character" | "desktop";
+export type OnboardingHandoffPhase =
+  | "idle"
+  | "fading"
+  | "provisioning"
+  | "starting-backend"
+  | "saving"
+  | "restarting"
+  | "bootstrapping"
+  | "error";
+
+/** Emitted after each tab/shell-related layout commit (see `navigation` on app context). */
+export interface TabCommittedDetail {
+  tab: Tab;
+  previousTab: Tab | null;
+  uiShellMode: UiShellMode;
+}
+
+/** Tab commit subscription + deferred work (for multi-step navigation). */
+export interface NavigationEventsApi {
+  subscribeTabCommitted: (
+    listener: (detail: TabCommittedDetail) => void,
+  ) => () => void;
+  /**
+   * Run `fn` after the next layout commit where `tab` has been applied.
+   * Use to chain `switchShellView` → `setTab` without the second call losing
+   * to batched `setTab(lastNativeTab)`.
+   */
+  scheduleAfterTabCommit: (fn: () => void) => void;
+}
 
 export type OnboardingStep =
-  | "wakeUp"
+  | "cloud_login"
   | "identity"
-  | "connection"
-  | "rpc"
-  | "senses"
-  | "activate";
-
-export type StartupStatus =
-  | "loading"
-  | "onboarding"
-  | "ready"
-  | "auth-blocked"
-  | "recoverable-error";
-
-export type OnboardingMode = "basic" | "advanced";
-
-export type FlaminaGuideTopic =
-  | "provider"
-  | "rpc"
+  | "hosting"
+  | "providers"
+  | "voice"
   | "permissions"
-  | "voice";
+  | "launch";
 
 export interface OnboardingStepMeta {
   id: OnboardingStep;
@@ -91,11 +116,12 @@ export interface OnboardingStepMeta {
   subtitle: string;
 }
 
+/** Unified 7-step onboarding flow — cloud check is first, identity is second. */
 export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
   {
-    id: "wakeUp",
-    name: "onboarding.stepName.wakeUp",
-    subtitle: "onboarding.stepSub.wakeUp",
+    id: "cloud_login",
+    name: "onboarding.stepName.cloudLogin",
+    subtitle: "onboarding.stepSub.cloudLogin",
   },
   {
     id: "identity",
@@ -103,30 +129,39 @@ export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
     subtitle: "onboarding.stepSub.identity",
   },
   {
-    id: "connection",
-    name: "onboarding.connect",
-    subtitle: "onboarding.stepSub.connection",
+    id: "hosting",
+    name: "onboarding.stepName.hosting",
+    subtitle: "onboarding.stepSub.hosting",
   },
   {
-    id: "rpc",
-    name: "onboarding.stepName.rpc",
-    subtitle: "onboarding.stepSub.rpc",
+    id: "providers",
+    name: "onboarding.stepName.providers",
+    subtitle: "onboarding.stepSub.providers",
   },
   {
-    id: "senses",
-    name: "onboarding.stepName.senses",
-    subtitle: "onboarding.stepSub.senses",
+    id: "voice",
+    name: "onboarding.stepName.voice",
+    subtitle: "onboarding.stepSub.voice",
   },
   {
-    id: "activate",
-    name: "onboarding.stepName.activate",
-    subtitle: "onboarding.readyTitle",
+    id: "permissions",
+    name: "onboarding.stepName.permissions",
+    subtitle: "onboarding.stepSub.permissions",
+  },
+  {
+    id: "launch",
+    name: "onboarding.stepName.launch",
+    subtitle: "onboarding.stepSub.launch",
   },
 ];
 
+export type OnboardingMode = "basic" | "advanced" | "elizacloudonly";
+
+export type FlaminaGuideTopic = "provider" | "rpc" | "permissions" | "voice";
+
 export interface OnboardingNextOptions {
   allowPermissionBypass?: boolean;
-  skipTask?: FlaminaGuideTopic;
+  skipTask?: string;
 }
 
 export const ONBOARDING_PERMISSION_LABELS: Record<SystemPermissionId, string> =
@@ -141,6 +176,8 @@ export const ONBOARDING_PERMISSION_LABELS: Record<SystemPermissionId, string> =
 export interface ActionNotice {
   tone: string;
   text: string;
+  /** When true, ShellOverlays shows an indeterminate spinner (long-running work). */
+  busy?: boolean;
 }
 
 export type LifecycleAction = "start" | "stop" | "restart" | "reset";
@@ -175,7 +212,8 @@ export const LIFECYCLE_MESSAGES: Record<
   },
   reset: {
     inProgress: "resetting",
-    progress: "Resetting agent...",
+    progress:
+      "Resetting agent (server wipe + restart). This can take 1–2 minutes — keep the app open.",
     success: "Agent reset. Returning to onboarding.",
     verb: "reset",
   },
@@ -228,18 +266,40 @@ export interface ChatTurnUsage extends ChatTokenUsage {
 
 // ── Context value type ─────────────────────────────────────────────────
 
+/** One toggle per primary chain in the wallet inventory filter strip. */
+export type InventoryChainFilters = {
+  ethereum: boolean;
+  base: boolean;
+  bsc: boolean;
+  avax: boolean;
+  solana: boolean;
+};
+
 export interface AppState {
   // Core
   tab: Tab;
   uiShellMode: UiShellMode;
   uiLanguage: UiLanguage;
   uiTheme: UiTheme;
+  ownerName: string | null;
+  /** VRM quality vs GPU use: always full quality, battery-aware (default), or always efficient. */
+  companionVrmPowerMode: CompanionVrmPowerMode;
+  /**
+   * When true and the document is hidden, keep the VRM render loop alive and
+   * hide only the splat world + Spark backdrop (lower GPU than full scene).
+   */
+  companionAnimateWhenHidden: boolean;
+  /** When to cap companion at ~half display Hz (independent of DPR/shadows/Spark). */
+  companionHalfFramerateMode: CompanionHalfFramerateMode;
   connected: boolean;
   agentStatus: AgentStatus | null;
   onboardingComplete: boolean;
+  /** Incremented on agent reset so onboarding UI shows immediately (not stuck behind VRM reveal). */
+  onboardingUiRevealNonce: number;
   onboardingLoading: boolean;
+  onboardingHandoffPhase: OnboardingHandoffPhase;
+  onboardingHandoffError: string | null;
   startupPhase: StartupPhase;
-  startupStatus: StartupStatus;
   startupError: StartupErrorState | null;
   authRequired: boolean;
   actionNotice: ActionNotice | null;
@@ -274,6 +334,7 @@ export interface AppState {
   chatInput: string;
   chatSending: boolean;
   chatFirstTokenReceived: boolean;
+  chatAwaitingGreeting: boolean;
   chatLastUsage: ChatTurnUsage | null;
   chatAvatarVisible: boolean;
   chatAgentVoiceMuted: boolean;
@@ -348,7 +409,9 @@ export interface AppState {
   walletExportVisible: boolean;
   walletApiKeySaving: boolean;
   inventorySort: "chain" | "symbol" | "value";
-  inventoryChainFocus: string;
+  /** Ascending vs descending for the active `inventorySort` key. */
+  inventorySortDirection: "asc" | "desc";
+  inventoryChainFilters: InventoryChainFilters;
   walletError: string | null;
 
   // ERC-8004 Registry
@@ -365,9 +428,10 @@ export interface AppState {
   mintError: string | null;
   mintShiny: boolean;
 
-  // Whitelist
   whitelistStatus: WhitelistStatus | null;
   whitelistLoading: boolean;
+
+  // Twitter verification
   twitterVerifyMessage: string | null;
   twitterVerifyUrl: string;
   twitterVerifying: boolean;
@@ -386,11 +450,18 @@ export interface AppState {
   // Eliza Cloud
   elizaCloudEnabled: boolean;
   elizaCloudConnected: boolean;
+  elizaCloudHasPersistedKey: boolean;
   elizaCloudCredits: number | null;
   elizaCloudCreditsLow: boolean;
   elizaCloudCreditsCritical: boolean;
+  /** Eliza Cloud returned 401 on balance check — inference will fail until the key is fixed. */
+  elizaCloudAuthRejected: boolean;
+  /** Non-fatal credits/API message from Eliza Cloud (e.g. unexpected response, network). */
+  elizaCloudCreditsError: string | null;
   elizaCloudTopUpUrl: string;
   elizaCloudUserId: string | null;
+  /** Last `reason` from GET /api/cloud/status (e.g. API-key-only vs OAuth). */
+  elizaCloudStatusReason: string | null;
   cloudDashboardView: "billing" | "agents";
   elizaCloudLoginBusy: boolean;
   elizaCloudLoginError: string | null;
@@ -448,11 +519,14 @@ export interface AppState {
   importError: string | null;
   importSuccess: string | null;
 
+  // Startup
+  startupStatus: string | null;
+
   // Onboarding
   onboardingStep: OnboardingStep;
   onboardingMode: OnboardingMode;
-  onboardingActiveGuide: FlaminaGuideTopic | null;
-  onboardingDeferredTasks: FlaminaGuideTopic[];
+  onboardingActiveGuide: string | null;
+  onboardingDeferredTasks: string[];
   postOnboardingChecklistDismissed: boolean;
   onboardingOptions: OnboardingOptions | null;
   onboardingName: string;
@@ -464,6 +538,9 @@ export interface AppState {
   onboardingLargeModel: string;
   onboardingProvider: string;
   onboardingApiKey: string;
+  onboardingVoiceProvider: string;
+  onboardingVoiceApiKey: string;
+  onboardingExistingInstallDetected: boolean;
   onboardingDetectedProviders: Array<{
     id: string;
     source: string;
@@ -550,7 +627,7 @@ export type LoadConversationMessagesResult =
   | { ok: false; status?: number; message: string };
 
 export const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;
-export const AGENT_READY_TIMEOUT_MS = 90_000;
+export const AGENT_READY_TIMEOUT_MS = 120_000;
 
 export interface AppActions {
   // Navigation
@@ -558,8 +635,12 @@ export interface AppActions {
   setUiShellMode: (mode: UiShellMode) => void;
   switchUiShellMode: (mode: UiShellMode) => void;
   switchShellView: (view: ShellView) => void;
+  navigation: NavigationEventsApi;
   setUiLanguage: (language: UiLanguage) => void;
   setUiTheme: (theme: UiTheme) => void;
+  setCompanionVrmPowerMode: (mode: CompanionVrmPowerMode) => void;
+  setCompanionAnimateWhenHidden: (enabled: boolean) => void;
+  setCompanionHalfFramerateMode: (mode: CompanionHalfFramerateMode) => void;
 
   // Lifecycle
   handleStart: () => Promise<void>;
@@ -567,11 +648,13 @@ export interface AppActions {
 
   handleRestart: () => Promise<void>;
   handleReset: () => Promise<void>;
+  /** After main-process app-menu reset (Electrobun): sync local React state + client. */
+  handleResetAppliedFromMain: (payload: unknown) => Promise<void>;
   retryStartup: () => void;
   dismissRestartBanner: () => void;
   showRestartBanner: () => void;
-  triggerRestart: () => Promise<void>;
   relaunchDesktop: () => Promise<void>;
+  triggerRestart: () => Promise<void>;
   dismissBackendDisconnectedBanner: () => void;
   retryBackendConnection: () => void;
   restartBackend: () => Promise<void>;
@@ -589,8 +672,20 @@ export interface AppActions {
   handleSelectConversation: (id: string) => Promise<void>;
   handleDeleteConversation: (id: string) => Promise<void>;
   handleRenameConversation: (id: string, title: string) => Promise<void>;
+  /** LLM title from recent messages; persists on the server and updates local list. */
+  suggestConversationTitle: (id: string) => Promise<string | null>;
   /** Send a programmatic message (e.g. from a UiSpec action) without touching chatInput. */
   sendActionMessage: (text: string) => Promise<void>;
+  /** Send a chat message with optional metadata (e.g. task creation intent). */
+  sendChatText: (
+    rawInput: string,
+    options?: {
+      channelType?: ConversationChannelType;
+      conversationId?: string | null;
+      images?: ImageAttachment[];
+      metadata?: Record<string, unknown>;
+    },
+  ) => Promise<void>;
 
   // Triggers
   loadTriggers: () => Promise<void>;
@@ -651,6 +746,23 @@ export interface AppActions {
     request: BscTradeQuoteRequest,
   ) => Promise<BscTradeQuoteResponse>;
   getBscTradeTxStatus: (hash: string) => Promise<BscTradeTxStatusResponse>;
+  getStewardStatus: () => Promise<StewardStatusResponse>;
+  getStewardHistory: (opts?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) => Promise<{
+    records: StewardHistoryResponse;
+    total: number;
+    offset: number;
+    limit: number;
+  }>;
+  getStewardPending: () => Promise<StewardPendingResponse>;
+  approveStewardTx: (txId: string) => Promise<StewardApprovalActionResponse>;
+  rejectStewardTx: (
+    txId: string,
+    reason?: string,
+  ) => Promise<StewardApprovalActionResponse>;
   loadWalletTradingProfile: (
     window?: WalletTradingProfileWindow,
     source?: WalletTradingProfileSourceFilter,
@@ -686,12 +798,19 @@ export interface AppActions {
   // Onboarding
   handleOnboardingNext: (options?: OnboardingNextOptions) => Promise<void>;
   handleOnboardingBack: () => void;
+  retryOnboardingHandoff: () => Promise<void>;
+  cancelOnboardingHandoff: () => void;
+  /** Jump to an earlier step in the active track (sidebar); backward-only. */
+  handleOnboardingJumpToStep: (step: OnboardingStep) => void;
+  /** Set onboarding step and sync Flamina guide (e.g. welcome → connection). */
+  goToOnboardingStep: (step: OnboardingStep) => void;
   handleOnboardingRemoteConnect: () => Promise<void>;
   handleOnboardingUseLocalBackend: () => void;
 
   // Cloud
   handleCloudLogin: () => Promise<void>;
   handleCloudDisconnect: () => Promise<void>;
+  handleCloudOnboardingFinish: () => Promise<void>;
 
   // Updates
   loadUpdateStatus: (force?: boolean) => Promise<void>;
@@ -716,6 +835,8 @@ export interface AppActions {
     text: string,
     tone?: "info" | "success" | "error",
     ttlMs?: number,
+    once?: boolean,
+    busy?: boolean,
   ) => void;
 
   // Generic state setter

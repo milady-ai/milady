@@ -5,6 +5,7 @@ dist
 storybook-static
 coverage
 tmp/
+.tmp/
 apps/app/electron/build/
 apps/app/electrobun/build/
 .bun
@@ -16,12 +17,18 @@ apps/app/electrobun/build/
 **/*.bun-build
 *.tsbuildinfo
 apps/app/electron/tsc-out/
+# Android build output (capacitor plugins, main app)
+**/android/build/
 
 # TypeScript declaration build outputs inside source dirs
 packages/*/src/**/*.d.ts
+!packages/app-core/src/ambient-modules.d.ts
 packages/*/src/**/*.d.ts.map
 src/plugins/**/*.d.ts
 src/plugins/**/*.d.ts.map
+
+# Compiled JS build outputs inside source dirs (packages/ui uses tsx source directly)
+packages/ui/src/**/*.js
 
 # Lock files (managed at repo root)
 package-lock.json
@@ -39,7 +46,6 @@ apps/ui/test-results/
 
 # Vendored repos (clone separately if needed)
 vendor/
-plugins/plugin-blooio/
 
 # Local untracked files
 .local/
@@ -53,6 +59,7 @@ USER.md
 .eliza/
 .eliza.broken.*/
 .milady-repo-setup.lock
+.milady/desktop-dev-console.log
 .turbo/
 skills/*
 !skills/README.md
@@ -81,14 +88,20 @@ report/
 
 # Agent learning docs & knowledge base
 knowledge/
+!src/knowledge/
+src/knowledge/*
+!src/knowledge/history.ts
+!src/knowledge/history.md
 scripts/knowledge-loop.mjs
-test/contracts/
+# Foundry build artifacts (keep source .sol, foundry.toml, lib/)
+test/contracts/out/
+test/contracts/cache/
+**/__pycache__/
 apps/app/test-results/
 # WhatsApp session files (Baileys auth state)
 /auth/
 :memory:/
-benchmarks/
-/plugins/
+benchmarks/results/
 !docs/plugins/
 
 # Electrobun compiled native binaries (built locally, not committed)
@@ -138,3 +151,14 @@ apps/app/public/vrms/previews/*.png
 apps/app/public/vrms/backgrounds/*.jpg
 apps/app/public/vrms/previews/*.jpg
 apps/app/public/vrms/*.jpg
+apps/app/ios/App/build*/
+
+# Ignored caches
+.ruff_cache/
+cache/voice/
+apps/app/.vite/
+
+# Dev workflow artifacts
+milady-*.html
+# prr state file (auto-generated)
+.pr-resolver-state.json

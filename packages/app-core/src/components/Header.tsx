@@ -1,13 +1,25 @@
 import { LanguageDropdown, ThemeToggle } from "@miladyai/app-core/components";
 import { getTabGroups, type TabGroup } from "@miladyai/app-core/navigation";
 import { useApp } from "@miladyai/app-core/state";
-import { AlertTriangle, CircleDollarSign, Menu } from "lucide-react";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
 import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@miladyai/ui";
+import { ListTodo, Menu, X } from "lucide-react";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CloudStatusBadge } from "./CloudStatusBadge";
+import { InferenceCloudAlertButton } from "./companion/InferenceCloudAlertButton";
+import { resolveCompanionInferenceNotice } from "./companion/resolve-companion-inference-notice";
+import {
+  HEADER_BUTTON_STYLE,
   HEADER_ICON_BUTTON_CLASSNAME,
   ShellHeaderControls,
-} from "./shared/ShellHeaderControls";
+} from "./companion/ShellHeaderControls";
 
 const NAV_LABEL_I18N_KEY: Record<string, string> = {
   Chat: "nav.chat",
@@ -26,15 +38,39 @@ const NAV_LABEL_I18N_KEY: Record<string, string> = {
 interface HeaderProps {
   mobileLeft?: ReactNode;
   transparent?: boolean;
+  hideCloudCredits?: boolean;
+  tasksEventsPanelOpen?: boolean;
+  onToggleTasksPanel?: () => void;
 }
 
-export function Header({ mobileLeft, transparent = false }: HeaderProps) {
+const HEADER_NAV_BUTTON_BASE_CLASSNAME =
+  "relative z-10 min-h-[44px] shrink-0 rounded-xl border border-transparent px-3 py-2.5 text-[12px] transition-all duration-200 md:px-3.5 xl:px-4";
+const HEADER_NAV_BUTTON_ACTIVE_CLASSNAME =
+  "border-accent/30 bg-accent/12 text-txt font-semibold shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.14),0_0_14px_rgba(var(--accent-rgb),0.14)]";
+const HEADER_NAV_BUTTON_INACTIVE_CLASSNAME =
+  "text-muted hover:border-border/45 hover:bg-bg-hover/70 hover:text-txt";
+const HEADER_MOBILE_NAV_BUTTON_BASE_CLASSNAME =
+  "flex min-h-[48px] w-full rounded-xl border px-3 py-3 text-[14px] font-medium transition-all duration-200";
+const HEADER_MOBILE_NAV_BUTTON_ACTIVE_CLASSNAME =
+  "border-accent/30 bg-accent/12 text-txt shadow-[0_2px_10px_rgba(3,5,10,0.08)] ring-1 ring-inset ring-accent/18 dark:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.14),0_0_14px_rgba(var(--accent-rgb),0.14)]";
+const HEADER_MOBILE_NAV_BUTTON_INACTIVE_CLASSNAME =
+  "border-transparent bg-transparent text-txt hover:border-border/45 hover:bg-bg-hover/70";
+
+export function Header({
+  mobileLeft,
+  transparent: _transparent = false,
+  hideCloudCredits = false,
+  tasksEventsPanelOpen = false,
+  onToggleTasksPanel,
+}: HeaderProps) {
   const {
     elizaCloudEnabled,
     elizaCloudConnected,
     elizaCloudCredits,
     elizaCloudCreditsCritical,
     elizaCloudCreditsLow,
+    elizaCloudAuthRejected,
+    elizaCloudCreditsError,
     tab,
     setTab,
     setState,
@@ -46,23 +82,20 @@ export function Header({ mobileLeft, transparent = false }: HeaderProps) {
     setUiLanguage,
     uiTheme,
     setUiTheme,
+    chatAgentVoiceMuted,
+    handleNewConversation,
+    conversationMessages,
+    chatLastUsage,
     t,
   } = useApp();
 
-  const [copied, setCopied] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuPortalContainer =
+    typeof document !== "undefined" ? document.body : undefined;
 
   useEffect(() => {
     void loadDropStatus();
   }, [loadDropStatus]);
-
-  // Clear copied state after 2 seconds
-  useEffect(() => {
-    if (copied) {
-      const timer = setTimeout(() => setCopied(null), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [copied]);
 
   // Close mobile menu on escape key
   useEffect(() => {
@@ -88,12 +121,13 @@ export function Header({ mobileLeft, transparent = false }: HeaderProps) {
     () => getTabGroups(streamingEnabled),
     [streamingEnabled],
   );
-
-  const creditColor = elizaCloudCreditsCritical
-    ? "border-danger text-danger bg-danger/10"
-    : elizaCloudCreditsLow
-      ? "border-warn text-warn bg-warn/10"
-      : "border-ok text-ok bg-ok/10";
+  const activeTabGroup = useMemo(
+    () =>
+      tabGroups.find((group) => group.tabs.includes(tab)) ??
+      tabGroups[0] ??
+      null,
+    [tab, tabGroups],
+  );
 
   const shellMode =
     tab === "character" || tab === "character-select"
@@ -105,15 +139,12 @@ export function Header({ mobileLeft, transparent = false }: HeaderProps) {
       : tab === "character" || tab === "character-select"
         ? "character"
         : "desktop";
-  const useMinimalHeaderChrome = transparent || activeShellView !== "desktop";
-  const showNavigationMenu = activeShellView === "desktop";
-  const showCloudCredits = activeShellView === "desktop";
-  const showCloudCreditsStatus =
-    showCloudCredits && (elizaCloudEnabled || elizaCloudConnected);
-  const cloudCreditsDisplay =
-    elizaCloudCredits === null
-      ? t("header.elizaCloudConnected")
-      : `$${elizaCloudCredits.toFixed(2)}`;
+  const isDesktopShell = activeShellView === "desktop";
+  const showNavigationMenu = isDesktopShell;
+  const showCloudStatus = isDesktopShell && !hideCloudCredits;
+  const headerFrameClassName = "";
+  const headerShellClassName =
+    "border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none";
 
   const handleShellViewChange = (
     view: "companion" | "character" | "desktop",
@@ -127,80 +158,38 @@ export function Header({ mobileLeft, transparent = false }: HeaderProps) {
     setMobileMenuOpen(false);
   };
 
-  const renderCloudCredits = (placement: "desktop" | "mobile-menu") => {
-    if (!showCloudCreditsStatus) return null;
+  const chatInferenceNotice = useMemo(() => {
+    if (tab !== "chat") return null;
+    return resolveCompanionInferenceNotice({
+      elizaCloudConnected,
+      elizaCloudAuthRejected,
+      elizaCloudCreditsError,
+      elizaCloudEnabled,
+      chatLastUsageModel: chatLastUsage?.model,
+      hasInterruptedAssistant: (conversationMessages ?? []).some(
+        (m) => m.role === "assistant" && m.interrupted,
+      ),
+      t,
+    });
+  }, [
+    chatLastUsage?.model,
+    conversationMessages,
+    elizaCloudAuthRejected,
+    elizaCloudConnected,
+    elizaCloudCreditsError,
+    elizaCloudEnabled,
+    tab,
+    t,
+  ]);
 
-    if (elizaCloudConnected) {
-      if (placement === "desktop") {
-        return (
-          <button
-            type="button"
-            data-testid="header-cloud-credits-desktop"
-            className={`hidden shrink-0 items-center gap-1.5 px-2.5 py-1.5 h-11 border rounded-md font-mono text-[11px] sm:text-xs no-underline transition-all duration-200 hover:border-accent hover:text-txt hover:shadow-sm sm:inline-flex ${elizaCloudCredits === null ? "border-muted text-muted" : creditColor}`}
-            title={t("header.CloudCreditsBalanc")}
-            onClick={openCloudBilling}
-          >
-            <CircleDollarSign className="w-3.5 h-3.5" />
-            {cloudCreditsDisplay}
-          </button>
-        );
-      }
-
-      return (
-        <button
-          type="button"
-          data-testid="header-cloud-credits-mobile"
-          className={`flex w-full items-center justify-between gap-3 px-3 py-3 border rounded-xl text-left no-underline transition-all duration-200 hover:border-accent hover:text-txt ${elizaCloudCredits === null ? "border-muted text-muted" : creditColor}`}
-          title={t("header.CloudCreditsBalanc")}
-          onClick={openCloudBilling}
-        >
-          <span className="flex min-w-0 items-center gap-3">
-            <CircleDollarSign className="h-4 w-4 shrink-0" />
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-medium font-sans text-txt">
-                {t("header.Cloud")}
-              </span>
-              <span className="truncate text-xs font-sans text-muted">
-                {t("header.CloudCreditsBalanc")}
-              </span>
-            </span>
-          </span>
-          <span className="shrink-0 font-mono text-sm">
-            {cloudCreditsDisplay}
-          </span>
-        </button>
-      );
+  const handleChatInferenceAlertClick = useCallback(() => {
+    if (!chatInferenceNotice) return;
+    if (chatInferenceNotice.kind === "cloud") {
+      setState("cloudDashboardView", "billing");
     }
-
-    if (placement === "desktop") {
-      return (
-        <span className="hidden shrink-0 items-center gap-1 px-2.5 py-1.5 h-11 border border-danger text-danger bg-danger/10 rounded-md font-mono text-[11px] sm:text-xs sm:inline-flex">
-          <AlertTriangle className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">
-            {t("header.cloudDisconnected")}
-          </span>
-          <span className="sm:hidden">{t("header.Cloud")}</span>
-        </span>
-      );
-    }
-
-    return (
-      <div
-        data-testid="header-cloud-credits-mobile"
-        className="flex w-full items-center gap-3 px-3 py-3 border border-danger text-danger bg-danger/10 rounded-xl"
-      >
-        <AlertTriangle className="h-4 w-4 shrink-0" />
-        <div className="min-w-0">
-          <div className="truncate text-sm font-medium text-current">
-            {t("header.Cloud")}
-          </div>
-          <div className="truncate text-xs text-danger/80">
-            {t("header.cloudDisconnected")}
-          </div>
-        </div>
-      </div>
-    );
-  };
+    setTab("settings");
+    setMobileMenuOpen(false);
+  }, [chatInferenceNotice, setState, setTab]);
 
   const renderMobileMenuThemeToggle = () => (
     <div
@@ -241,138 +230,219 @@ export function Header({ mobileLeft, transparent = false }: HeaderProps) {
   return (
     <>
       <header
-        className={`py-2 px-3 sm:py-3 sm:px-4 z-20 sticky top-0 w-full transition-all ${
-          useMinimalHeaderChrome
-            ? "border-b border-transparent bg-transparent backdrop-blur-0 shadow-none"
-            : "border-b border-border/50 bg-bg/80 backdrop-blur-xl"
-        }`}
+        className="sticky top-0 z-20 w-full select-none overflow-visible"
+        style={{ WebkitUserSelect: "none", userSelect: "none" }}
+        data-no-camera-drag="true"
       >
-        <ShellHeaderControls
-          activeShellView={activeShellView}
-          onShellViewChange={handleShellViewChange}
-          uiLanguage={uiLanguage}
-          setUiLanguage={setUiLanguage}
-          uiTheme={uiTheme}
-          setUiTheme={setUiTheme}
-          t={t}
-          languageDropdownClassName={
-            showNavigationMenu ? "hidden sm:inline-flex" : undefined
-          }
-          languageDropdownWrapperTestId={
-            showNavigationMenu ? "header-language-dropdown-desktop" : undefined
-          }
-          themeToggleWrapperClassName={
-            showNavigationMenu ? "hidden sm:flex" : undefined
-          }
-          themeToggleWrapperTestId={
-            showNavigationMenu ? "header-theme-toggle-desktop" : undefined
-          }
-          rightExtras={renderCloudCredits("desktop")}
-          trailingExtras={
-            showNavigationMenu ? (
-              <button
-                type="button"
-                className={`sm:hidden ${HEADER_ICON_BUTTON_CLASSNAME}`}
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open navigation menu"
-                aria-expanded={mobileMenuOpen}
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            ) : null
-          }
+        <div
+          style={{
+            paddingTop: `calc(var(--safe-area-top, 0px) + var(--milady-macos-frame-top-inset, 0px) + ${
+              isDesktopShell ? "0.875rem" : "0.375rem"
+            })`,
+            paddingLeft: `calc(var(--safe-area-left, 0px) + ${
+              isDesktopShell ? "clamp(0.65rem, 1.3vw, 1.2rem)" : "0.375rem"
+            })`,
+            paddingRight: `calc(var(--safe-area-right, 0px) + ${
+              isDesktopShell ? "clamp(0.65rem, 1.3vw, 1.2rem)" : "0.375rem"
+            })`,
+          }}
         >
-          {mobileLeft ? (
-            <div className="flex sm:hidden">{mobileLeft}</div>
-          ) : null}
-          {showNavigationMenu ? (
-            <nav className="hidden sm:flex flex-1 items-center justify-left gap-1 overflow-x-auto whitespace-nowrap px-2 scrollbar-hide">
-              {tabGroups.map((group: TabGroup) => {
-                const primaryTab = group.tabs[0];
-                const isActive = group.tabs.includes(tab);
-                const Icon = group.icon;
-                return (
-                  <button
-                    type="button"
-                    key={group.label}
-                    className={`inline-flex items-center justify-center gap-0 xl:gap-1.5 shrink-0 px-2.5 md:px-3 xl:px-4 py-2 text-[12px] bg-transparent border border-transparent cursor-pointer transition-all duration-300 rounded-full ${
-                      isActive
-                        ? "text-accent font-bold bg-accent/15 shadow-[0_0_15px_rgba(var(--accent),0.18)] border-accent/40 ring-1 ring-inset ring-accent/20"
-                        : "text-muted hover:text-txt hover:bg-bg-hover hover:border-border/50"
-                    }`}
-                    onClick={() => setTab(primaryTab)}
-                    title={group.description}
+          <div
+            className={`pointer-events-auto relative mx-auto w-full rounded-[20px] border bg-clip-padding transition-all sm:rounded-[22px] ${headerFrameClassName} ${headerShellClassName}`}
+            data-testid="header-glass-shell"
+          >
+            <ShellHeaderControls
+              activeShellView={activeShellView}
+              onShellViewChange={handleShellViewChange}
+              uiLanguage={uiLanguage}
+              setUiLanguage={setUiLanguage}
+              uiTheme={uiTheme}
+              setUiTheme={setUiTheme}
+              t={t}
+              languageDropdownClassName={
+                showNavigationMenu ? "hidden sm:inline-flex" : undefined
+              }
+              languageDropdownWrapperTestId={
+                showNavigationMenu
+                  ? "header-language-dropdown-desktop"
+                  : undefined
+              }
+              themeToggleWrapperClassName={
+                showNavigationMenu ? "hidden sm:flex" : undefined
+              }
+              themeToggleWrapperTestId={
+                showNavigationMenu ? "header-theme-toggle-desktop" : undefined
+              }
+              rightExtras={
+                <>
+                  {onToggleTasksPanel ? (
+                    <Button
+                      size="icon"
+                      variant={tasksEventsPanelOpen ? "default" : "outline"}
+                      className={HEADER_ICON_BUTTON_CLASSNAME}
+                      onClick={onToggleTasksPanel}
+                      aria-label={t("taskseventspanel.Title", {
+                        defaultValue: "Tasks & Events",
+                      })}
+                      aria-pressed={tasksEventsPanelOpen}
+                      style={HEADER_BUTTON_STYLE}
+                      data-testid="header-tasks-events-toggle"
+                    >
+                      <ListTodo className="pointer-events-none w-4 h-4" />
+                    </Button>
+                  ) : null}
+                  {mobileLeft ? (
+                    <div className="shrink-0 sm:hidden">{mobileLeft}</div>
+                  ) : null}
+                  {chatInferenceNotice ? (
+                    <InferenceCloudAlertButton
+                      notice={chatInferenceNotice}
+                      onClick={handleChatInferenceAlertClick}
+                    />
+                  ) : null}
+                  {showCloudStatus ? (
+                    <CloudStatusBadge
+                      connected={elizaCloudConnected}
+                      credits={elizaCloudCredits}
+                      creditsLow={elizaCloudCreditsLow}
+                      creditsCritical={elizaCloudCreditsCritical}
+                      authRejected={elizaCloudAuthRejected}
+                      creditsError={elizaCloudCreditsError}
+                      t={t}
+                      onClick={openCloudBilling}
+                      dataTestId="header-cloud-status"
+                    />
+                  ) : null}
+                </>
+              }
+              showCompanionControls={
+                activeShellView === "companion" ||
+                activeShellView === "character"
+              }
+              chatAgentVoiceMuted={chatAgentVoiceMuted}
+              onToggleVoiceMute={() =>
+                setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
+              }
+              onNewChat={
+                activeShellView === "character"
+                  ? undefined
+                  : () => void handleNewConversation()
+              }
+              trailingExtras={
+                showNavigationMenu ? (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className={`sm:hidden ${HEADER_ICON_BUTTON_CLASSNAME}`}
+                    onClick={() => setMobileMenuOpen(true)}
+                    aria-label={t("aria.openNavMenu")}
+                    aria-expanded={mobileMenuOpen}
+                    style={HEADER_BUTTON_STYLE}
                   >
-                    <span
-                      data-testid={`header-nav-icon-${primaryTab}`}
-                      className="inline-flex md:hidden xl:inline-flex"
-                    >
-                      <Icon className="w-4 h-4" />
-                    </span>
-                    <span
-                      data-testid={`header-nav-label-${primaryTab}`}
-                      className="hidden md:inline"
-                    >
-                      {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
-                    </span>
-                  </button>
-                );
-              })}
-            </nav>
-          ) : null}
-        </ShellHeaderControls>
+                    <Menu className="pointer-events-none w-5 h-5" />
+                  </Button>
+                ) : null
+              }
+            >
+              {showNavigationMenu ? (
+                <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
+                  {tabGroups.map((group: TabGroup) => {
+                    const primaryTab = group.tabs[0];
+                    const isActive = group.tabs.includes(tab);
+                    return (
+                      <Button
+                        variant={isActive ? "default" : "ghost"}
+                        key={group.label}
+                        data-testid={`header-nav-button-${primaryTab}`}
+                        className={`${HEADER_NAV_BUTTON_BASE_CLASSNAME} ${
+                          isActive
+                            ? HEADER_NAV_BUTTON_ACTIVE_CLASSNAME
+                            : HEADER_NAV_BUTTON_INACTIVE_CLASSNAME
+                        }`}
+                        onClick={() => setTab(primaryTab)}
+                        title={group.description}
+                        style={HEADER_BUTTON_STYLE}
+                      >
+                        <span
+                          data-testid={`header-nav-label-${primaryTab}`}
+                          className="pointer-events-none inline"
+                        >
+                          {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
+                        </span>
+                      </Button>
+                    );
+                  })}
+                </nav>
+              ) : null}
+            </ShellHeaderControls>
+          </div>
+        </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      {showNavigationMenu && mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-[140] sm:hidden"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation menu"
-        >
-          {/* Backdrop */}
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm w-full h-full border-0 cursor-pointer"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Close navigation menu"
-          />
-
-          {/* Menu Panel */}
-          <div className="absolute right-0 top-0 bottom-0 w-[280px] max-w-[85vw] bg-bg border-l border-border shadow-2xl animate-in slide-in-from-right duration-200 flex flex-col">
-            <div className="flex flex-1 flex-col py-3 px-3">
-              <div className="flex-1 overflow-y-auto">
+      {showNavigationMenu ? (
+        <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <DialogContent
+            container={mobileMenuPortalContainer}
+            showCloseButton={false}
+            className="fixed left-auto right-0 top-0 z-[240] flex h-[100dvh] w-[min(22rem,88vw)] max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-l border-border/60 bg-bg/98 p-0 shadow-[0_24px_70px_rgba(2,8,23,0.34)] backdrop-blur-2xl data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right max-sm:!bottom-0 max-sm:!left-auto max-sm:!right-0 max-sm:!top-0 max-sm:!max-h-[100dvh] max-sm:!w-[min(22rem,88vw)] max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:!rounded-none max-sm:data-[state=closed]:slide-out-to-right max-sm:data-[state=open]:slide-in-from-right sm:hidden"
+          >
+            <DialogHeader className="border-b border-border/50 px-4 py-3 text-left">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
+                    {t("aria.navMenu")}
+                  </div>
+                  <DialogTitle className="truncate text-sm font-medium text-txt">
+                    {activeTabGroup
+                      ? t(
+                          NAV_LABEL_I18N_KEY[activeTabGroup.label] ??
+                            activeTabGroup.label,
+                        )
+                      : t("aria.navMenu")}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    {t("header.MobileNavigationDescription", {
+                      defaultValue: "Navigate between sections",
+                    })}
+                  </DialogDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={`shrink-0 ${HEADER_ICON_BUTTON_CLASSNAME}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label={t("aria.closeNavMenu")}
+                  style={HEADER_BUTTON_STYLE}
+                >
+                  <X className="pointer-events-none h-4 w-4" />
+                </Button>
+              </div>
+            </DialogHeader>
+            <div className="flex flex-1 flex-col px-3 py-3">
+              <div className="flex-1 overflow-y-auto pr-1">
                 <div className="flex flex-col gap-1">
                   {tabGroups.map((group: TabGroup, index) => {
                     const primaryTab = group.tabs[0];
                     const isActive = group.tabs.includes(tab);
-                    const Icon = group.icon;
                     return (
-                      <button
+                      <Button
+                        variant={isActive ? "default" : "ghost"}
                         key={group.label}
-                        type="button"
-                        className={`w-full flex items-center gap-3 px-3 py-3.5 border rounded-xl text-[14px] font-medium transition-all duration-300 cursor-pointer min-h-[48px] ${
+                        className={`${HEADER_MOBILE_NAV_BUTTON_BASE_CLASSNAME} ${
                           isActive
-                            ? "border-accent/40 bg-accent/15 text-accent shadow-[0_0_15px_rgba(var(--accent),0.18)] ring-1 ring-inset ring-accent/20"
-                            : "border-transparent bg-transparent text-txt hover:border-border/50 hover:bg-bg-hover"
+                            ? HEADER_MOBILE_NAV_BUTTON_ACTIVE_CLASSNAME
+                            : HEADER_MOBILE_NAV_BUTTON_INACTIVE_CLASSNAME
                         }`}
-                        style={{ animationDelay: `${index * 50}ms` }}
+                        style={{
+                          ...HEADER_BUTTON_STYLE,
+                          animationDelay: `${index * 50}ms`,
+                        }}
                         onClick={() => {
                           setTab(primaryTab);
                           setMobileMenuOpen(false);
                         }}
                       >
-                        <span
-                          className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
-                            isActive ? "bg-accent/20" : "bg-bg-accent"
-                          }`}
-                        >
-                          <Icon
-                            className={`w-4 h-4 ${isActive ? "text-txt" : "text-muted"}`}
-                          />
-                        </span>
-                        <div className="flex-1 text-left">
+                        <div className="pointer-events-none flex-1 text-left">
                           <div className="font-medium">
                             {t(NAV_LABEL_I18N_KEY[group.label] ?? group.label)}
                           </div>
@@ -382,22 +452,21 @@ export function Header({ mobileLeft, transparent = false }: HeaderProps) {
                             </div>
                           )}
                         </div>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
               </div>
               <div className="mt-3 flex flex-col gap-3 border-t border-border/50 pt-3">
-                {renderCloudCredits("mobile-menu")}
                 <div className="flex items-center justify-end gap-2">
                   {renderMobileMenuLanguageDropdown()}
                   {renderMobileMenuThemeToggle()}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </>
   );
 }

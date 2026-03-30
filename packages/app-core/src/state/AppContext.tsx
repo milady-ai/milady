@@ -4,11 +4,17 @@
  * Children access state and actions through the useApp() hook.
  */
 
-import type { OnboardingConnection } from "@miladyai/autonomous/contracts/onboarding";
+import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
+import {
+  getDefaultStylePreset,
+  getStylePresets,
+  resolveStylePresetByAvatarIndex,
+} from "@miladyai/shared/onboarding-presets";
 import {
   type ReactNode,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -73,8 +79,6 @@ import {
   type WorkbenchOverview,
 } from "../api";
 import {
-  type AutonomyEventStore,
-  type AutonomyRunHealthMap,
   buildAutonomyGapReplayRequests,
   hasPendingAutonomyGaps,
   markPendingAutonomyGapsPartial,
@@ -82,7 +86,10 @@ import {
 } from "../autonomy";
 import {
   getBackendStartupTimeoutMs,
+  inspectExistingElizaInstall,
   invokeDesktopBridgeRequest,
+  invokeDesktopBridgeRequestWithTimeout,
+  isElectrobunRuntime,
   scanProviderCredentials,
 } from "../bridge";
 import {
@@ -92,33 +99,61 @@ import {
   normalizeSlashCommandName,
 } from "../chat";
 import { mapServerTasksToSessions } from "../coding";
-import { type AppEmoteEventDetail, dispatchAppEmoteEvent } from "../events";
+import { replaceNameTokens } from "../components/character-editor-helpers";
+import { getBootConfig, setBootConfig } from "../config/boot-config";
+import { BrandingContext, DEFAULT_BRANDING } from "../config/branding";
 import {
-  createTranslator,
-  normalizeLanguage,
-  t as translateText,
-  type UiLanguage,
-} from "../i18n";
-import { pathForTab, type Tab, tabFromPath } from "../navigation";
+  type AppEmoteEventDetail,
+  dispatchAppEmoteEvent,
+  dispatchElizaCloudStatusUpdated,
+} from "../events";
+import type { UiLanguage } from "../i18n";
+import {
+  COMPANION_ENABLED,
+  isRouteRootPath,
+  pathForTab,
+  resolveInitialTabForPath,
+  type Tab,
+  tabFromPath,
+} from "../navigation";
+import { getResetConnectionWizardToHostingStepPatch } from "../onboarding/connection-flow";
+import {
+  canRevertOnboardingTo,
+  getFlaminaTopicForOnboardingStep,
+  resolveOnboardingNextStep,
+  resolveOnboardingPreviousStep,
+} from "../onboarding/flow";
 import { buildOnboardingConnectionConfig } from "../onboarding-config";
-import { getMissingOnboardingPermissions } from "../platform";
+import { restartAgentAfterOnboarding } from "./onboarding-restart";
 import {
   alertDesktopMessage,
   confirmDesktopAction,
   copyTextToClipboard,
   openExternalUrl,
   resolveApiUrl,
+  yieldMiladyHttpAfterNativeMessageBox,
 } from "../utils";
+import { isMiladyTtsDebugEnabled } from "../utils/milady-tts-debug";
+import { normalizeOwnerName } from "../utils/owner-name";
+import { PREMADE_VOICES } from "../voice/types";
 import {
-  type ActionNotice,
-  AGENT_READY_TIMEOUT_MS,
+  computeAgentDeadlineExtensions,
+  getAgentReadyTimeoutMs,
+} from "./agent-startup-timing";
+import { CompanionSceneConfigCtx } from "./CompanionSceneConfigContext";
+import { completeResetLocalStateAfterServerWipe as runCompleteResetLocalStateAfterServerWipe } from "./complete-reset-local-state-after-wipe";
+import { handleResetAppliedFromMainCore } from "./handle-reset-applied-from-main";
+import {
   AGENT_TRANSFER_MIN_PASSWORD_LENGTH,
   AppContext,
   type AppContextValue,
   type AppState,
   applyUiTheme,
   asApiLikeError,
-  type ChatTurnUsage,
+  type CompanionHalfFramerateMode,
+  type CompanionVrmPowerMode,
+  clearAvatarIndex,
+  clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
@@ -127,61 +162,80 @@ import {
   type GamePostMessageAuthPayload,
   inferOnboardingResumeStep,
   LIFECYCLE_MESSAGES,
-  type LifecycleAction,
   type LoadConversationMessagesResult,
   loadActiveConversationId,
   loadAvatarIndex,
-  loadChatAvatarVisible,
-  loadChatMode,
-  loadChatVoiceMuted,
-  loadCompanionMessageCutoffTs,
+  loadCompanionAnimateWhenHidden,
+  loadCompanionHalfFramerateMode,
+  loadCompanionVrmPowerMode,
   loadLastNativeTab,
+  loadPersistedConnectionMode,
+  loadPersistedOnboardingComplete,
   loadPersistedOnboardingStep,
-  loadUiLanguage,
   loadUiTheme,
   mergeStreamingText,
   normalizeAvatarIndex,
+  normalizeCompanionHalfFramerateMode,
+  normalizeCompanionVrmPowerMode,
   normalizeCustomActionName,
+  type OnboardingHandoffPhase,
   normalizeUiShellMode,
   normalizeUiTheme,
-  ONBOARDING_PERMISSION_LABELS,
   type OnboardingNextOptions,
   type OnboardingStep,
   parseAgentStatusEvent,
+  parseAgentStatusFromMainMenuResetPayload,
   parseCustomActionParams,
   parseProactiveMessageEvent,
   parseSlashCommandInput,
   parseStreamEventEnvelopeEvent,
   type ShellView,
   type StartupErrorState,
-  type StartupPhase,
-  saveActiveConversationId,
   saveAvatarIndex,
-  saveChatAvatarVisible,
-  saveChatMode,
-  saveChatVoiceMuted,
-  saveCompanionMessageCutoffTs,
+  saveCompanionAnimateWhenHidden,
+  saveCompanionHalfFramerateMode,
+  saveCompanionVrmPowerMode,
   saveLastNativeTab,
-  saveOnboardingStep,
-  saveUiLanguage,
+  savePersistedConnectionMode,
   saveUiShellMode,
   saveUiTheme,
   shouldApplyFinalStreamText,
+  type TabCommittedDetail,
   type UiShellMode,
   type UiTheme,
 } from "./internal";
+import { NavigationEventHub } from "./navigation-events";
+import {
+  deriveDetectedProviderPrefill,
+  detectExistingOnboardingConnection,
+  resolveStartupWithoutRestoredConnection,
+} from "./onboarding-bootstrap";
 import {
   deriveUiShellModeForTab,
   getTabForShellView,
   shouldStartAtCharacterSelectOnLaunch,
 } from "./shell-routing";
+import { TranslationProvider, useTranslation } from "./TranslationContext";
+import type { InventoryChainFilters } from "./types";
+import { useChatState } from "./useChatState";
+import { useLifecycleState } from "./useLifecycleState";
+import { useOnboardingState } from "./useOnboardingState";
 
 const AGENT_STATUS_POLL_INTERVAL_MS = 500;
 const ONBOARDING_GREETING_READY_TIMEOUT_MS = 15_000;
 
+type OnboardingHandoffMode = "full" | "cloud_fast_track";
+
+type OnboardingHandoffRetryState = {
+  mode: OnboardingHandoffMode;
+  onboardingSubmitted: boolean;
+  skipCloudProvisioning: boolean;
+  cloudApiBase?: string;
+  authToken?: string;
+};
+
 export {
   type ActionNotice,
-  AGENT_READY_TIMEOUT_MS,
   AGENT_STATES,
   AGENT_TRANSFER_MIN_PASSWORD_LENGTH,
   type AppActions,
@@ -191,6 +245,8 @@ export {
   applyUiTheme,
   asApiLikeError,
   type ChatTurnUsage,
+  type CompanionHalfFramerateMode,
+  type CompanionVrmPowerMode,
   computeStreamingDelta,
   formatSearchBullet,
   formatStartupErrorDetail,
@@ -200,7 +256,6 @@ export {
   getVrmPreviewUrl,
   getVrmTitle,
   getVrmUrl,
-  isOfficialVrmIndex,
   LIFECYCLE_MESSAGES,
   type LifecycleAction,
   type LoadConversationMessagesResult,
@@ -208,11 +263,17 @@ export {
   loadChatAvatarVisible,
   loadChatMode,
   loadChatVoiceMuted,
+  loadCompanionAnimateWhenHidden,
+  loadCompanionHalfFramerateMode,
+  loadCompanionVrmPowerMode,
   loadUiLanguage,
   loadUiShellMode,
   loadUiTheme,
   mergeStreamingText,
+  type NavigationEventsApi,
   normalizeAvatarIndex,
+  normalizeCompanionHalfFramerateMode,
+  normalizeCompanionVrmPowerMode,
   normalizeCustomActionName,
   normalizeStreamComparisonText,
   normalizeUiShellMode,
@@ -222,6 +283,7 @@ export {
   type OnboardingStep,
   parseAgentStartupDiagnostics,
   parseAgentStatusEvent,
+  parseAgentStatusFromMainMenuResetPayload,
   parseConversationMessageEvent,
   parseCustomActionParams,
   parseProactiveMessageEvent,
@@ -236,35 +298,42 @@ export {
   saveChatAvatarVisible,
   saveChatMode,
   saveChatVoiceMuted,
+  saveCompanionAnimateWhenHidden,
+  saveCompanionHalfFramerateMode,
+  saveCompanionVrmPowerMode,
   saveUiLanguage,
   saveUiShellMode,
   saveUiTheme,
   shouldApplyFinalStreamText,
+  type TabCommittedDetail,
+  type TranslationContextValue,
   type UiShellMode,
   type UiTheme,
   useApp,
+  useTranslation,
   VRM_COUNT,
 } from "./internal";
+export { AGENT_READY_TIMEOUT_MS } from "./types";
 
 import {
-  ConfirmModal,
-  PromptModal,
+  ConfirmDialog,
+  PromptDialog,
   useConfirm,
   usePrompt,
-} from "../components/ConfirmModal";
+} from "@miladyai/ui";
 import { buildWalletRpcUpdateRequest } from "../wallet-rpc";
 
-const GREETING_EMOTE_DELAY_MS = 1400;
-const GREETING_WAVE_EMOTE: AppEmoteEventDetail = {
-  emoteId: "wave",
-  path: "/animations/emotes/waving-both-hands.glb",
-  duration: 2.5,
-  loop: false,
-  showOverlay: false,
-};
 const ELIZA_CLOUD_LOGIN_POLL_INTERVAL_MS = 1000;
 const ELIZA_CLOUD_LOGIN_TIMEOUT_MS = 300_000;
 const ELIZA_CLOUD_LOGIN_MAX_CONSECUTIVE_ERRORS = 3;
+const DEFAULT_LANDING_TAB: Tab = COMPANION_ENABLED ? "companion" : "chat";
+
+function getNavigationPathFromWindow(): string {
+  if (typeof window === "undefined") return "/";
+  return window.location.protocol === "file:"
+    ? window.location.hash.replace(/^#/, "") || "/"
+    : window.location.pathname;
+}
 
 function normalizeAppEmoteEvent(
   data: Record<string, unknown>,
@@ -299,6 +368,59 @@ function filterRenderableConversationMessages(
   messages: ConversationMessage[],
 ): ConversationMessage[] {
   return messages.filter((message) => shouldKeepConversationMessage(message));
+}
+
+function hasConversationBootstrapMessage(
+  messages: ConversationMessage[],
+): boolean {
+  return messages.some(
+    (message) =>
+      message.role === "assistant" && shouldKeepConversationMessage(message),
+  );
+}
+
+function resolveSelectedOnboardingStyle(args: {
+  styles: readonly StylePreset[] | undefined;
+  onboardingStyle: string;
+  selectedVrmIndex: number;
+  uiLanguage: UiLanguage;
+}): StylePreset {
+  const styles = args.styles ?? [];
+  return (
+    styles.find((style) => style.id === args.onboardingStyle) ??
+    styles.find(
+      (style) =>
+        typeof style.avatarIndex === "number" &&
+        style.avatarIndex === args.selectedVrmIndex,
+    ) ??
+    styles[0] ??
+    getDefaultStylePreset(args.uiLanguage)
+  );
+}
+
+async function persistOnboardingStyleVoice(
+  style: StylePreset | undefined,
+): Promise<void> {
+  const voicePresetId = style?.voicePresetId?.trim();
+  if (!voicePresetId) {
+    return;
+  }
+  const presetVoice = PREMADE_VOICES.find(
+    (voice) => voice.id === voicePresetId,
+  );
+  if (!presetVoice) {
+    return;
+  }
+  await client.updateConfig({
+    messages: {
+      tts: {
+        provider: "elevenlabs",
+        elevenlabs: {
+          voiceId: presetVoice.voiceId,
+        },
+      },
+    },
+  });
 }
 
 const COMPANION_STALE_THREAD_MAX_AGE_MS = 30 * 60 * 1000;
@@ -338,6 +460,16 @@ function shouldStartFreshCompanionConversation(
     }
     return now - message.timestamp > COMPANION_STALE_THREAD_MAX_AGE_MS;
   });
+}
+
+interface QueuedChatSend {
+  rawInput: string;
+  channelType: ConversationChannelType;
+  conversationId?: string | null;
+  images?: ImageAttachment[];
+  metadata?: Record<string, unknown>;
+  resolve: () => void;
+  reject: (error: unknown) => void;
 }
 
 function isPrivateNetworkHost(host: string): boolean {
@@ -384,92 +516,244 @@ function normalizeRemoteApiBaseInput(rawValue: string): string {
   return parsed.toString().replace(/\/+$/, "");
 }
 
-function loadSessionApiBase(): string {
-  if (typeof window === "undefined") return "";
-  return window.sessionStorage.getItem("milady_api_base")?.trim() ?? "";
+/** Verbose trace for Settings / menu “Reset agent” — filter DevTools by `[milady][reset]`. */
+const RESET_LOG_PREFIX = "[milady][reset]";
+
+function logResetDebug(
+  message: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (detail !== undefined && Object.keys(detail).length > 0) {
+    console.debug(`${RESET_LOG_PREFIX} ${message}`, detail);
+  } else {
+    console.debug(`${RESET_LOG_PREFIX} ${message}`);
+  }
 }
 
-function isRemoteApiBase(baseUrl: string): boolean {
-  if (!baseUrl || typeof window === "undefined") return false;
+function logResetInfo(message: string, detail?: Record<string, unknown>): void {
+  if (detail !== undefined && Object.keys(detail).length > 0) {
+    console.info(`${RESET_LOG_PREFIX} ${message}`, detail);
+  } else {
+    console.info(`${RESET_LOG_PREFIX} ${message}`);
+  }
+}
+
+function logResetWarn(message: string, detail?: unknown): void {
+  console.warn(`${RESET_LOG_PREFIX} ${message}`, detail);
+}
+
+function buildLocalizedCharacterPayload(
+  preset: StylePreset,
+  name?: string | null,
+): CharacterData {
+  const resolvedName = name?.trim() || preset.name;
+  return {
+    name: resolvedName,
+    bio: [...preset.bio],
+    system: preset.system,
+    adjectives: [...preset.adjectives],
+    topics: [...preset.topics],
+    style: {
+      all: [...preset.style.all],
+      chat: [...preset.style.chat],
+      post: [...preset.style.post],
+    },
+    messageExamples: preset.messageExamples.map((conversation) => ({
+      examples: conversation.map((message) => ({
+        name: message.user,
+        content: { text: message.content.text },
+      })),
+    })),
+    postExamples: [...preset.postExamples],
+  };
+}
+
+/** Enable with `MILADY_TTS_DEBUG=1` or `localStorage.setItem("milady:debug:greeting", "1")`. */
+function miladyGreetingDebugEnabled(): boolean {
+  if (isMiladyTtsDebugEnabled()) return true;
   try {
-    const parsed = new URL(baseUrl);
     return (
-      parsed.hostname !== window.location.hostname &&
-      parsed.hostname !== "localhost" &&
-      parsed.hostname !== "127.0.0.1" &&
-      parsed.hostname !== "::1"
+      typeof localStorage !== "undefined" &&
+      localStorage.getItem("milady:debug:greeting") === "1"
     );
   } catch {
     return false;
   }
 }
 
-function getFlaminaTopicForOnboardingStep(
-  step: OnboardingStep,
-): AppState["onboardingActiveGuide"] {
-  switch (step) {
-    case "connection":
-      return "provider";
-    case "rpc":
-      return "rpc";
-    case "senses":
-      return "permissions";
-    default:
-      return null;
+function traceMiladyGreeting(
+  phase: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (!miladyGreetingDebugEnabled()) return;
+  if (detail && Object.keys(detail).length > 0) {
+    console.info(`[milady][greeting] ${phase}`, detail);
+  } else {
+    console.info(`[milady][greeting] ${phase}`);
   }
+}
+
+/** Publish server cloud snapshot for chat TTS (`useVoiceChat` + `loadVoiceConfig`). */
+function publishElizaCloudVoiceSnapshot(
+  setHasPersistedKey: (value: boolean) => void,
+  snapshot: {
+    apiConnected: boolean;
+    enabled: boolean;
+    hasPersistedApiKey: boolean;
+  },
+): void {
+  setHasPersistedKey(snapshot.hasPersistedApiKey);
+  dispatchElizaCloudStatusUpdated({
+    connected: snapshot.apiConnected,
+    enabled: snapshot.enabled,
+    hasPersistedApiKey: snapshot.hasPersistedApiKey,
+    cloudVoiceProxyAvailable:
+      snapshot.hasPersistedApiKey || snapshot.enabled || snapshot.apiConnected,
+  });
 }
 
 // ── Provider ───────────────────────────────────────────────────────────
 
-export function AppProvider({ children }: { children: ReactNode }) {
+export function AppProvider({
+  children,
+  branding: brandingOverride,
+}: {
+  children: ReactNode;
+  branding?: Partial<import("../config/branding").BrandingConfig>;
+}) {
+  const onLanguageSyncError = useCallback((lang: UiLanguage) => {
+    // Notification is deferred until AppProviderInner mounts; this is
+    // only called on language *changes*, never on initial mount.
+    console.warn("[milady] Failed to sync language to server:", lang);
+  }, []);
+  return (
+    <TranslationProvider onLanguageSyncError={onLanguageSyncError}>
+      <AppProviderInner branding={brandingOverride}>
+        {children}
+      </AppProviderInner>
+    </TranslationProvider>
+  );
+}
+
+function AppProviderInner({
+  children,
+  branding: brandingOverride,
+}: {
+  children: ReactNode;
+  branding?: Partial<import("../config/branding").BrandingConfig>;
+}) {
   const [lastNativeTab, setLastNativeTabState] =
     useState<Tab>(loadLastNativeTab);
   // --- Core state ---
-  const [tab, setTabRaw] = useState<Tab>("chat");
-  const [uiLanguage, setUiLanguageState] = useState<UiLanguage>(loadUiLanguage);
+  const [tab, _setTabRawInner] = useState<Tab>(() =>
+    resolveInitialTabForPath(
+      getNavigationPathFromWindow(),
+      DEFAULT_LANDING_TAB,
+    ),
+  );
+  const initialTabSetRef = useRef(false);
+  const setTabRaw = useCallback((t: Tab) => {
+    _setTabRawInner(t);
+  }, []);
+  // uiLanguage + t live in TranslationContext; consumed via useTranslation()
+  const { t, uiLanguage, setUiLanguage } = useTranslation();
   const [uiTheme, setUiThemeState] = useState<UiTheme>(loadUiTheme);
-  const [connected, setConnected] = useState(false);
-  const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
-  const [onboardingLoading, setOnboardingLoading] = useState(true);
-  const [startupPhase, setStartupPhase] =
-    useState<StartupPhase>("starting-backend");
-  const [startupError, setStartupError] = useState<StartupErrorState | null>(
-    null,
-  );
-  const [startupRetryNonce, setStartupRetryNonce] = useState(0);
-  const [authRequired, setAuthRequired] = useState(false);
-  const [actionNotice, setActionNoticeState] = useState<ActionNotice | null>(
-    null,
-  );
-  const [lifecycleBusy, setLifecycleBusy] = useState(false);
-  const [lifecycleAction, setLifecycleAction] =
-    useState<LifecycleAction | null>(null);
+  const [companionVrmPowerMode, setCompanionVrmPowerModeState] =
+    useState<CompanionVrmPowerMode>(loadCompanionVrmPowerMode);
+  const [companionAnimateWhenHidden, setCompanionAnimateWhenHiddenState] =
+    useState<boolean>(loadCompanionAnimateWhenHidden);
+  const [companionHalfFramerateMode, setCompanionHalfFramerateModeState] =
+    useState<CompanionHalfFramerateMode>(loadCompanionHalfFramerateMode);
 
-  // --- Deferred restart ---
-  const [pendingRestart, setPendingRestart] = useState(false);
-  const [pendingRestartReasons, setPendingRestartReasons] = useState<string[]>(
-    [],
-  );
-  const [restartBannerDismissed, setRestartBannerDismissed] = useState(false);
+  // ── Lifecycle state (consolidated from 20+ useState hooks) ──
+  const lifecycle = useLifecycleState();
+  const {
+    state: {
+      connected,
+      agentStatus,
+      onboardingComplete,
+      onboardingUiRevealNonce,
+      onboardingLoading,
+      startupPhase,
+      startupError,
+      startupRetryNonce,
+      authRequired,
+      actionNotice,
+      lifecycleBusy,
+      lifecycleAction,
+      pendingRestart,
+      pendingRestartReasons,
+      restartBannerDismissed,
+      backendConnection,
+      backendDisconnectedBannerDismissed,
+      systemWarnings,
+    },
+    setConnected,
+    setAgentStatus,
+    setAgentStatusIfChanged,
+    setOnboardingComplete,
+    incrementOnboardingRevealNonce: setOnboardingUiRevealNonce_increment,
+    setOnboardingLoading,
+    setStartupPhase,
+    setStartupError,
+    setAuthRequired,
+    setActionNotice,
+    beginLifecycleAction,
+    finishLifecycleAction,
+    setPendingRestart: setPendingRestartAction,
+    dismissRestartBanner,
+    showRestartBanner,
+    setBackendConnection,
+    dismissBackendBanner: dismissBackendDisconnectedBanner,
+    resetBackendConnection,
+    dismissSystemWarning,
+    startupStatus,
+    lifecycleBusyRef,
+    lifecycleActionRef,
+  } = lifecycle;
 
-  // --- Backend connection state (for crash handling) ---
-  const [backendConnection, setBackendConnection] = useState<{
-    state: "connected" | "disconnected" | "reconnecting" | "failed";
-    reconnectAttempt: number;
-    maxReconnectAttempts: number;
-    showDisconnectedUI: boolean;
-  }>({
-    state: "disconnected",
-    reconnectAttempt: 0,
-    maxReconnectAttempts: 15,
-    showDisconnectedUI: false,
-  });
-  const [
-    backendDisconnectedBannerDismissed,
-    setBackendDisconnectedBannerDismissed,
-  ] = useState(false);
-  const [systemWarnings, setSystemWarnings] = useState<string[]>([]);
+  // Compatibility wrappers — old code calls these separately; lifecycle hook combines them.
+  const setPendingRestart = useCallback(
+    (v: boolean | ((prev: boolean) => boolean)) => {
+      const resolved =
+        typeof v === "function" ? v(lifecycle.state.pendingRestart) : v;
+      setPendingRestartAction(resolved);
+    },
+    [lifecycle.state.pendingRestart, setPendingRestartAction],
+  );
+  const setPendingRestartReasons = useCallback(
+    (v: string[] | ((prev: string[]) => string[])) => {
+      const resolved =
+        typeof v === "function" ? v(lifecycle.state.pendingRestartReasons) : v;
+      setPendingRestartAction(lifecycle.state.pendingRestart, resolved);
+    },
+    [
+      lifecycle.state.pendingRestart,
+      lifecycle.state.pendingRestartReasons,
+      setPendingRestartAction,
+    ],
+  );
+  const setOnboardingUiRevealNonce = useCallback(
+    (_fn: (n: number) => number) => setOnboardingUiRevealNonce_increment(),
+    [setOnboardingUiRevealNonce_increment],
+  );
+  const setBackendDisconnectedBannerDismissed = useCallback(
+    (v: boolean) => {
+      if (v) dismissBackendDisconnectedBanner();
+      // Note: only dismissal is supported via the reducer
+    },
+    [dismissBackendDisconnectedBanner],
+  );
+  const setSystemWarnings = useCallback(
+    (v: string[] | ((prev: string[]) => string[])) => {
+      const resolved =
+        typeof v === "function" ? v(lifecycle.state.systemWarnings) : v;
+      lifecycle.setSystemWarnings(resolved);
+    },
+    [lifecycle.state.systemWarnings, lifecycle.setSystemWarnings],
+  );
+  const retryStartup = lifecycle.retryStartup;
+
   const uiShellMode = deriveUiShellModeForTab(tab);
 
   // --- Pairing ---
@@ -479,96 +763,105 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pairingError, setPairingError] = useState<string | null>(null);
   const [pairingBusy, setPairingBusy] = useState(false);
 
-  // --- Chat ---
-  const [chatInput, setChatInput] = useState("");
-  const [chatSending, setChatSending] = useState(false);
-  const [chatFirstTokenReceived, setChatFirstTokenReceived] = useState(false);
-  const [chatLastUsage, setChatLastUsage] = useState<ChatTurnUsage | null>(
-    null,
-  );
-  const [chatAvatarVisible, setChatAvatarVisible] = useState(
-    loadChatAvatarVisible,
-  );
-  const [chatAgentVoiceMuted, setChatAgentVoiceMuted] =
-    useState(loadChatVoiceMuted);
-  const [chatMode, setChatMode] = useState<ConversationMode>(loadChatMode);
-  const [chatAvatarSpeaking, setChatAvatarSpeaking] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<
+  // ── Chat state (consolidated from 18+ useState + 10 useEffect hooks) ──
+  const chatState = useChatState();
+  const {
+    state: {
+      chatInput,
+      chatSending,
+      chatFirstTokenReceived,
+      chatLastUsage,
+      chatAvatarVisible,
+      chatAgentVoiceMuted,
+      chatMode,
+      chatAvatarSpeaking,
+      conversations,
+      activeConversationId,
+      companionMessageCutoffTs,
+      conversationMessages,
+      autonomousEvents,
+      autonomousLatestEventId,
+      autonomousRunHealthByRunId,
+      ptySessions,
+      unreadConversations,
+      chatPendingImages,
+    },
+    setChatInput,
+    setChatSending,
+    setChatFirstTokenReceived,
+    setChatLastUsage,
+    setChatAvatarVisible,
+    setChatAgentVoiceMuted,
+    setChatMode,
+    setChatAvatarSpeaking,
+    setConversations,
+    setActiveConversationId,
+    setCompanionMessageCutoffTs,
+    setConversationMessages,
+    setAutonomousEvents,
+    setAutonomousLatestEventId,
+    setAutonomousRunHealthByRunId,
+    setPtySessions,
+    setChatPendingImages,
+    resetDraftState: resetConversationDraftState,
+    activeConversationIdRef,
+    chatInputRef,
+    chatPendingImagesRef,
+    conversationMessagesRef,
+    conversationHydrationEpochRef,
+    chatAbortRef,
+    chatSendBusyRef,
+    chatSendNonceRef,
+    greetingFiredRef,
+    greetingInFlightConversationRef,
+    companionStaleConversationRefreshRef,
+    autonomousStoreRef,
+    autonomousEventsRef,
+    autonomousLatestEventIdRef,
+    autonomousRunHealthByRunIdRef,
+    autonomousReplayInFlightRef,
+  } = chatState;
+  const chatSendQueueRef = useRef<QueuedChatSend[]>([]);
+  const resolveQueuedChatSends = useCallback(() => {
+    const queued = chatSendQueueRef.current.splice(0);
+    for (const turn of queued) {
+      turn.resolve();
+    }
+  }, []);
+  const interruptActiveChatPipeline = useCallback(() => {
+    resolveQueuedChatSends();
+    chatAbortRef.current?.abort();
+    chatAbortRef.current = null;
+    setChatSending(false);
+    setChatFirstTokenReceived(false);
+  }, [
+    chatAbortRef,
+    resolveQueuedChatSends,
+    setChatFirstTokenReceived,
+    setChatSending,
+  ]);
+  // Compat: old code sometimes used a separate chatAwaitingGreeting state
+  const [chatAwaitingGreeting, setChatAwaitingGreeting] = useState(false);
+  const [onboardingHandoffPhase, setOnboardingHandoffPhase] =
+    useState<OnboardingHandoffPhase>("idle");
+  const [onboardingHandoffError, setOnboardingHandoffError] = useState<
     string | null
   >(null);
-  const [companionMessageCutoffTs, setCompanionMessageCutoffTs] = useState(
-    loadCompanionMessageCutoffTs,
+  const onboardingHandoffRetryStateRef =
+    useRef<OnboardingHandoffRetryState | null>(null);
+  // addUnread / removeUnread wrappers for old setUnreadConversations patterns
+  const setUnreadConversations = useCallback(
+    (v: Set<string> | ((prev: Set<string>) => Set<string>)) => {
+      if (typeof v === "function") {
+        const nextVal = v(chatState.state.unreadConversations);
+        // Sync back through dispatch
+        for (const id of nextVal) chatState.addUnread(id);
+      } else {
+        // Direct set not supported through reducer — use add/remove
+      }
+    },
+    [chatState],
   );
-  const [conversationMessages, setConversationMessages] = useState<
-    ConversationMessage[]
-  >([]);
-  const [autonomousEvents, setAutonomousEvents] = useState<
-    StreamEventEnvelope[]
-  >([]);
-  const [autonomousLatestEventId, setAutonomousLatestEventId] = useState<
-    string | null
-  >(null);
-  const [autonomousRunHealthByRunId, setAutonomousRunHealthByRunId] =
-    useState<AutonomyRunHealthMap>({});
-  const [ptySessions, setPtySessions] = useState<CodingAgentSession[]>([]);
-  const [unreadConversations, setUnreadConversations] = useState<Set<string>>(
-    new Set(),
-  );
-  const autonomousStoreRef = useRef<AutonomyEventStore>({
-    eventsById: {},
-    eventOrder: [],
-    runIndex: {},
-    watermark: null,
-  });
-  const autonomousEventsRef = useRef<StreamEventEnvelope[]>([]);
-  const autonomousLatestEventIdRef = useRef<string | null>(null);
-  const autonomousRunHealthByRunIdRef = useRef<AutonomyRunHealthMap>({});
-  const autonomousReplayInFlightRef = useRef(false);
-  const activeConversationIdRef = useRef<string | null>(null);
-  const conversationMessagesRef = useRef<ConversationMessage[]>([]);
-  const conversationsRef = useRef<Conversation[]>([]);
-  const conversationHydrationEpochRef = useRef(0);
-
-  useEffect(() => {
-    autonomousEventsRef.current = autonomousEvents;
-  }, [autonomousEvents]);
-
-  useEffect(() => {
-    autonomousLatestEventIdRef.current = autonomousLatestEventId;
-  }, [autonomousLatestEventId]);
-
-  useEffect(() => {
-    autonomousRunHealthByRunIdRef.current = autonomousRunHealthByRunId;
-  }, [autonomousRunHealthByRunId]);
-
-  useEffect(() => {
-    conversationMessagesRef.current = conversationMessages;
-  }, [conversationMessages]);
-
-  useEffect(() => {
-    conversationsRef.current = conversations;
-  }, [conversations]);
-
-  useEffect(() => {
-    saveChatAvatarVisible(chatAvatarVisible);
-  }, [chatAvatarVisible]);
-
-  useEffect(() => {
-    saveChatVoiceMuted(chatAgentVoiceMuted);
-  }, [chatAgentVoiceMuted]);
-
-  useEffect(() => {
-    saveChatMode(chatMode);
-  }, [chatMode]);
-
-  useEffect(() => {
-    saveActiveConversationId(activeConversationId);
-  }, [activeConversationId]);
-
-  useEffect(() => {
-    saveCompanionMessageCutoffTs(companionMessageCutoffTs);
-  }, [companionMessageCutoffTs]);
 
   // --- Triggers ---
   const [triggers, setTriggers] = useState<TriggerSummary[]>([]);
@@ -655,7 +948,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [inventorySort, setInventorySort] = useState<
     "chain" | "symbol" | "value"
   >("value");
-  const [inventoryChainFocus, setInventoryChainFocus] = useState<string>("all");
+  const [inventorySortDirection, setInventorySortDirection] = useState<
+    "asc" | "desc"
+  >("desc");
+  const [inventoryChainFilters, setInventoryChainFilters] =
+    useState<InventoryChainFilters>({
+      ethereum: true,
+      base: true,
+      bsc: true,
+      avax: true,
+      solana: true,
+    });
   const [walletError, setWalletError] = useState<string | null>(null);
 
   // --- ERC-8004 Registry ---
@@ -678,9 +981,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [whitelistStatus, setWhitelistStatus] =
     useState<WhitelistStatus | null>(null);
   const [whitelistLoading, setWhitelistLoading] = useState(false);
-  const [twitterVerifyMessage] = useState<string | null>(null);
-  const [twitterVerifyUrl] = useState("");
-  const [twitterVerifying] = useState(false);
+  // Dead state — setters were never destructured. These never change.
+  const twitterVerifyMessage: string | null = null;
+  const twitterVerifyUrl = "";
+  const twitterVerifying = false;
 
   // --- Character ---
   const [characterData, setCharacterData] = useState<CharacterData | null>(
@@ -711,15 +1015,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // --- Eliza Cloud ---
   const [elizaCloudEnabled, setElizaCloudEnabled] = useState(false);
   const [elizaCloudConnected, setElizaCloudConnected] = useState(false);
+  const [elizaCloudHasPersistedKey, setElizaCloudHasPersistedKey] =
+    useState(false);
   const [elizaCloudCredits, setElizaCloudCredits] = useState<number | null>(
     null,
   );
   const [elizaCloudCreditsLow, setElizaCloudCreditsLow] = useState(false);
   const [elizaCloudCreditsCritical, setElizaCloudCreditsCritical] =
     useState(false);
+  const [elizaCloudAuthRejected, setElizaCloudAuthRejected] = useState(false);
+  const [elizaCloudCreditsError, setElizaCloudCreditsError] = useState<
+    string | null
+  >(null);
   const [elizaCloudTopUpUrl, setElizaCloudTopUpUrl] =
     useState("/cloud/billing");
   const [elizaCloudUserId, setElizaCloudUserId] = useState<string | null>(null);
+  const [ownerName, setOwnerNameState] = useState<string | null>(null);
+  const [elizaCloudStatusReason, setElizaCloudStatusReason] = useState<
+    string | null
+  >(null);
   const [cloudDashboardView, setCloudDashboardView] = useState<
     "billing" | "agents"
   >("billing");
@@ -799,124 +1113,231 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
 
-  // --- Onboarding ---
-  const [onboardingStep, setOnboardingStepRaw] = useState<OnboardingStep>(
-    () => loadPersistedOnboardingStep() ?? "wakeUp",
-  );
-  const [onboardingMode, setOnboardingMode] =
-    useState<AppState["onboardingMode"]>("basic");
-  const [onboardingActiveGuide, setOnboardingActiveGuide] = useState<
-    AppState["onboardingActiveGuide"]
-  >(null);
-  const [onboardingDeferredTasks, setOnboardingDeferredTasks] = useState<
-    AppState["onboardingDeferredTasks"]
-  >([]);
-  const [
-    postOnboardingChecklistDismissed,
-    setPostOnboardingChecklistDismissed,
-  ] = useState(false);
-  const [onboardingOptions, setOnboardingOptions] =
-    useState<OnboardingOptions | null>(null);
-  const [onboardingName, setOnboardingName] = useState("Eliza");
-  const [onboardingOwnerName, setOnboardingOwnerName] = useState("anon");
-
-  const [onboardingStyle, setOnboardingStyle] = useState("");
-  const [onboardingRunMode, setOnboardingRunMode] = useState<
-    "local" | "cloud" | ""
-  >("");
-  const [onboardingCloudProvider, setOnboardingCloudProvider] = useState("");
-  const [onboardingSmallModel, setOnboardingSmallModel] = useState(
-    "moonshotai/kimi-k2-turbo",
-  );
-  const [onboardingLargeModel, setOnboardingLargeModel] = useState(
-    "moonshotai/kimi-k2-0905",
-  );
-  const [onboardingProvider, setOnboardingProvider] = useState("");
-  const [onboardingApiKey, setOnboardingApiKey] = useState("");
-  const [onboardingDetectedProviders, setOnboardingDetectedProviders] =
-    useState<
-      Array<{
-        id: string;
-        source: string;
-        apiKey?: string;
-        authMode?: string;
-        cliInstalled: boolean;
-      }>
-    >([]);
-  const [onboardingRemoteApiBase, setOnboardingRemoteApiBase] =
-    useState(loadSessionApiBase);
-  const [onboardingRemoteToken, setOnboardingRemoteToken] = useState("");
-  const [onboardingRemoteConnecting, setOnboardingRemoteConnecting] =
-    useState(false);
-  const [onboardingRemoteError, setOnboardingRemoteError] = useState<
-    string | null
-  >(null);
-  const [onboardingRemoteConnected, setOnboardingRemoteConnected] = useState(
-    () => isRemoteApiBase(loadSessionApiBase()),
-  );
-  const [onboardingOpenRouterModel, setOnboardingOpenRouterModel] =
-    useState("");
-  const [onboardingPrimaryModel, setOnboardingPrimaryModel] = useState("");
-  const [onboardingTelegramToken, setOnboardingTelegramToken] = useState("");
-  const [onboardingDiscordToken, setOnboardingDiscordToken] = useState("");
-  const [onboardingWhatsAppSessionPath, setOnboardingWhatsAppSessionPath] =
-    useState("");
-  const [onboardingTwilioAccountSid, setOnboardingTwilioAccountSid] =
-    useState("");
-  const [onboardingTwilioAuthToken, setOnboardingTwilioAuthToken] =
-    useState("");
-  const [onboardingTwilioPhoneNumber, setOnboardingTwilioPhoneNumber] =
-    useState("");
-  const [onboardingBlooioApiKey, setOnboardingBlooioApiKey] = useState("");
-  const [onboardingBlooioPhoneNumber, setOnboardingBlooioPhoneNumber] =
-    useState("");
-  const [onboardingGithubToken, setOnboardingGithubToken] = useState("");
-  const [onboardingSubscriptionTab, setOnboardingSubscriptionTab] = useState<
-    "token" | "oauth"
-  >("token");
-  const [onboardingElizaCloudTab, setOnboardingElizaCloudTab] = useState<
-    "login" | "apikey"
-  >("login");
-  const [onboardingSelectedChains, setOnboardingSelectedChains] = useState<
-    Set<string>
-  >(new Set(["evm", "solana"]));
-  const [onboardingRpcSelections, setOnboardingRpcSelections] = useState<
-    Record<string, string>
-  >({});
-  const [onboardingRpcKeys, setOnboardingRpcKeys] = useState<
-    Record<string, string>
-  >({});
-  const [onboardingAvatar, setOnboardingAvatar] = useState(1);
-  const [onboardingRestarting, setOnboardingRestarting] = useState(false);
-
-  const setOnboardingStep = useCallback((step: OnboardingStep) => {
-    setOnboardingStepRaw(step);
-    saveOnboardingStep(step);
-  }, []);
-
-  const startupStatus = useMemo<AppState["startupStatus"]>(() => {
-    if (startupError) return "recoverable-error";
-    if (authRequired) return "auth-blocked";
-    if (onboardingLoading || startupPhase !== "ready") return "loading";
-    if (!onboardingComplete) return "onboarding";
-    return "ready";
-  }, [
-    authRequired,
-    onboardingComplete,
-    onboardingLoading,
-    startupError,
-    startupPhase,
-  ]);
-
-  const addDeferredOnboardingTask = useCallback(
-    (task: NonNullable<AppState["onboardingActiveGuide"]>) => {
-      setOnboardingDeferredTasks((current) =>
-        current.includes(task) ? current : [...current, task],
-      );
-      setPostOnboardingChecklistDismissed(false);
+  // ── Onboarding state (consolidated from 35+ useState hooks) ──
+  const onboarding = useOnboardingState(brandingOverride?.cloudOnly);
+  const {
+    state: {
+      step: onboardingStep,
+      mode: onboardingMode,
+      activeGuide: onboardingActiveGuide,
+      deferredTasks: onboardingDeferredTasks,
+      postChecklistDismissed: postOnboardingChecklistDismissed,
+      options: onboardingOptions,
+      name: onboardingName,
+      ownerName: onboardingOwnerName,
+      style: onboardingStyle,
+      avatar: onboardingAvatar,
+      runMode: onboardingRunMode,
+      cloudProvider: onboardingCloudProvider,
+      provider: onboardingProvider,
+      apiKey: onboardingApiKey,
+      voiceProvider: onboardingVoiceProvider,
+      voiceApiKey: onboardingVoiceApiKey,
+      smallModel: onboardingSmallModel,
+      largeModel: onboardingLargeModel,
+      openRouterModel: onboardingOpenRouterModel,
+      primaryModel: onboardingPrimaryModel,
+      existingInstallDetected: onboardingExistingInstallDetected,
+      detectedProviders: onboardingDetectedProviders,
+      connectorTokens,
+      remote: onboardingRemote,
+      remoteApiBase: onboardingRemoteApiBase,
+      remoteToken: onboardingRemoteToken,
+      subscriptionTab: onboardingSubscriptionTab,
+      elizaCloudTab: onboardingElizaCloudTab,
+      selectedChains: onboardingSelectedChains,
+      rpcSelections: onboardingRpcSelections,
+      rpcKeys: onboardingRpcKeys,
+      restarting: onboardingRestarting,
     },
-    [],
+    setStep: setOnboardingStep,
+    setMode: setOnboardingMode,
+    setActiveGuide: setOnboardingActiveGuide,
+    addDeferredTask: addDeferredOnboardingTask,
+    setOptions: setOnboardingOptions,
+    setField: setOnboardingField,
+    setConnectorToken,
+    setRemoteStatus: setOnboardingRemoteStatus,
+    setDetectedProviders: setOnboardingDetectedProviders,
+    finishBusyRef: onboardingFinishBusyRefFromHook,
+    resumeConnectionRef: onboardingResumeConnectionRefFromHook,
+    completionCommittedRef: onboardingCompletionCommittedRefFromHook,
+    forceLocalBootstrapRef: forceLocalBootstrapRefFromHook,
+    finishSavingRef: onboardingFinishSavingRefFromHook,
+  } = onboarding;
+
+  // Compat aliases for old onboarding variable names
+  const onboardingRemoteConnecting = onboardingRemote.status === "connecting";
+  const onboardingRemoteError = onboardingRemote.error;
+  const onboardingRemoteConnected = onboardingRemote.status === "connected";
+
+  // Map connector tokens to old individual variable names
+  const onboardingTelegramToken = connectorTokens.telegramToken;
+  const onboardingDiscordToken = connectorTokens.discordToken;
+  const onboardingWhatsAppSessionPath = connectorTokens.whatsAppSessionPath;
+  const onboardingTwilioAccountSid = connectorTokens.twilioAccountSid;
+  const onboardingTwilioAuthToken = connectorTokens.twilioAuthToken;
+  const onboardingTwilioPhoneNumber = connectorTokens.twilioPhoneNumber;
+  const onboardingBlooioApiKey = connectorTokens.blooioApiKey;
+  const onboardingBlooioPhoneNumber = connectorTokens.blooioPhoneNumber;
+  const onboardingGithubToken = connectorTokens.githubToken;
+
+  // Compat setters for old setState map entries
+  const setOnboardingName = useCallback(
+    (v: string) => setOnboardingField("name", v),
+    [setOnboardingField],
   );
+  const setOnboardingOwnerName = useCallback(
+    (v: string) => setOnboardingField("ownerName", v),
+    [setOnboardingField],
+  );
+  const setOnboardingStyle = useCallback(
+    (v: string) => setOnboardingField("style", v),
+    [setOnboardingField],
+  );
+  const setOnboardingRunMode = useCallback(
+    (v: "local" | "cloud" | "") => setOnboardingField("runMode", v),
+    [setOnboardingField],
+  );
+  const setOnboardingCloudProvider = useCallback(
+    (v: string) => setOnboardingField("cloudProvider", v),
+    [setOnboardingField],
+  );
+  const setOnboardingSmallModel = useCallback(
+    (v: string) => setOnboardingField("smallModel", v),
+    [setOnboardingField],
+  );
+  const setOnboardingLargeModel = useCallback(
+    (v: string) => setOnboardingField("largeModel", v),
+    [setOnboardingField],
+  );
+  const setOnboardingProvider = useCallback(
+    (v: string) => setOnboardingField("provider", v),
+    [setOnboardingField],
+  );
+  const setOnboardingApiKey = useCallback(
+    (v: string) => setOnboardingField("apiKey", v),
+    [setOnboardingField],
+  );
+  const setOnboardingVoiceProvider = useCallback(
+    (v: string) => setOnboardingField("voiceProvider", v),
+    [setOnboardingField],
+  );
+  const setOnboardingVoiceApiKey = useCallback(
+    (v: string) => setOnboardingField("voiceApiKey", v),
+    [setOnboardingField],
+  );
+  const setOnboardingExistingInstallDetected = useCallback(
+    (v: boolean) => setOnboardingField("existingInstallDetected", v),
+    [setOnboardingField],
+  );
+  const setOnboardingRemoteApiBase = useCallback(
+    (v: string) =>
+      onboarding.dispatch({ type: "SET_REMOTE_API_BASE", value: v }),
+    [onboarding.dispatch],
+  );
+  const setOnboardingRemoteToken = useCallback(
+    (v: string) => onboarding.dispatch({ type: "SET_REMOTE_TOKEN", value: v }),
+    [onboarding.dispatch],
+  );
+  const setOnboardingRemoteConnecting = useCallback(
+    (v: boolean) => setOnboardingRemoteStatus(v ? "connecting" : "idle"),
+    [setOnboardingRemoteStatus],
+  );
+  const setOnboardingRemoteError = useCallback(
+    (v: string | null) => setOnboardingRemoteStatus(v ? "error" : "idle", v),
+    [setOnboardingRemoteStatus],
+  );
+  const setOnboardingRemoteConnected = useCallback(
+    (v: boolean) => setOnboardingRemoteStatus(v ? "connected" : "idle"),
+    [setOnboardingRemoteStatus],
+  );
+  const setOnboardingOpenRouterModel = useCallback(
+    (v: string) => setOnboardingField("openRouterModel", v),
+    [setOnboardingField],
+  );
+  const setOnboardingPrimaryModel = useCallback(
+    (v: string) => setOnboardingField("primaryModel", v),
+    [setOnboardingField],
+  );
+  const setOnboardingTelegramToken = useCallback(
+    (v: string) => setConnectorToken("telegramToken", v),
+    [setConnectorToken],
+  );
+  const setOnboardingDiscordToken = useCallback(
+    (v: string) => setConnectorToken("discordToken", v),
+    [setConnectorToken],
+  );
+  const setOnboardingWhatsAppSessionPath = useCallback(
+    (v: string) => setConnectorToken("whatsAppSessionPath", v),
+    [setConnectorToken],
+  );
+  const setOnboardingTwilioAccountSid = useCallback(
+    (v: string) => setConnectorToken("twilioAccountSid", v),
+    [setConnectorToken],
+  );
+  const setOnboardingTwilioAuthToken = useCallback(
+    (v: string) => setConnectorToken("twilioAuthToken", v),
+    [setConnectorToken],
+  );
+  const setOnboardingTwilioPhoneNumber = useCallback(
+    (v: string) => setConnectorToken("twilioPhoneNumber", v),
+    [setConnectorToken],
+  );
+  const setOnboardingBlooioApiKey = useCallback(
+    (v: string) => setConnectorToken("blooioApiKey", v),
+    [setConnectorToken],
+  );
+  const setOnboardingBlooioPhoneNumber = useCallback(
+    (v: string) => setConnectorToken("blooioPhoneNumber", v),
+    [setConnectorToken],
+  );
+  const setOnboardingGithubToken = useCallback(
+    (v: string) => setConnectorToken("githubToken", v),
+    [setConnectorToken],
+  );
+  const setOnboardingSubscriptionTab = useCallback(
+    (v: "token" | "oauth") => setOnboardingField("subscriptionTab", v),
+    [setOnboardingField],
+  );
+  const setOnboardingElizaCloudTab = useCallback(
+    (v: "login" | "apikey") => setOnboardingField("elizaCloudTab", v),
+    [setOnboardingField],
+  );
+  const setOnboardingSelectedChains = useCallback(
+    (v: Set<string>) => setOnboardingField("selectedChains", v),
+    [setOnboardingField],
+  );
+  const setOnboardingRpcSelections = useCallback(
+    (v: Record<string, string>) => setOnboardingField("rpcSelections", v),
+    [setOnboardingField],
+  );
+  const setOnboardingRpcKeys = useCallback(
+    (v: Record<string, string>) => setOnboardingField("rpcKeys", v),
+    [setOnboardingField],
+  );
+  const setOnboardingAvatar = useCallback(
+    (v: number) => setOnboardingField("avatar", v),
+    [setOnboardingField],
+  );
+  const setOnboardingRestarting = useCallback(
+    (v: boolean) => setOnboardingField("restarting", v),
+    [setOnboardingField],
+  );
+  const setPostOnboardingChecklistDismissed = useCallback(
+    (v: boolean) =>
+      onboarding.dispatch({ type: "SET_POST_CHECKLIST_DISMISSED", value: v }),
+    [onboarding.dispatch],
+  );
+  const setOnboardingDeferredTasks = useCallback(
+    (v: string[]) => {
+      // Direct set — used only by reset paths
+      for (const task of v) addDeferredOnboardingTask(task);
+    },
+    [addDeferredOnboardingTask],
+  );
+
+  // startupStatus is now derived in useLifecycleState
 
   // --- Command palette ---
   const [commandPaletteOpen, _setCommandPaletteOpen] = useState(false);
@@ -952,10 +1373,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [droppedFiles, setDroppedFiles] = useState<string[]>([]);
   const [shareIngestNotice, setShareIngestNotice] = useState("");
 
-  // --- Chat pending images ---
-  const [chatPendingImages, setChatPendingImages] = useState<ImageAttachment[]>(
-    [],
-  );
+  // chatPendingImages now comes from useChatState
 
   // --- Game ---
   const [activeGameApp, setActiveGameApp] = useState("");
@@ -987,50 +1405,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [configText, setConfigText] = useState("");
 
   // --- Refs for timers ---
-  const actionNoticeTimer = useRef<number | null>(null);
-  /** Session-scoped set of notice texts that have been shown with once=true. */
-  const shownOnceNotices = useRef<Set<string>>(new Set());
+  // actionNoticeTimer, shownOnceNotices, agentStatusRef, lifecycleBusyRef,
+  // lifecycleActionRef, setAgentStatusIfChanged are now in useLifecycleState
   const elizaCloudPollInterval = useRef<number | null>(null);
+  /** While true, ignore stale poll results (in-flight GETs may predate POST /api/cloud/disconnect). */
+  const elizaCloudDisconnectInFlightRef = useRef(false);
+  /**
+   * After the user disconnects, keep the “Connect Eliza Cloud” screen until they start login again,
+   * even if GET /api/cloud/status still reports `connected: true` (laggy snapshot or proxy mismatch).
+   */
+  const elizaCloudPreferDisconnectedUntilLoginRef = useRef(false);
+  /** Last `connected` applied by pollCloudCredits; used when a poll is skipped mid-flight. */
+  const lastElizaCloudPollConnectedRef = useRef(false);
   const elizaCloudLoginPollTimer = useRef<number | null>(null);
   const prevAgentStateRef = useRef<string | null>(null);
-  /** Tracks last agent status to skip no-op updates from WS heartbeats. */
-  const agentStatusRef = useRef<AgentStatus | null>(null);
   const restartNotificationSignatureRef = useRef<string | null>(null);
   const heartbeatNotificationKeyRef = useRef<string | null>(null);
-  /** Only call setAgentStatus when the payload has materially changed. */
-  const setAgentStatusIfChanged = useCallback((next: AgentStatus | null) => {
-    const prev = agentStatusRef.current;
-    if (
-      prev &&
-      next &&
-      prev.state === next.state &&
-      prev.agentName === next.agentName &&
-      prev.model === next.model &&
-      prev.startedAt === next.startedAt
-    ) {
-      return; // identical — skip re-render
-    }
-    agentStatusRef.current = next;
-    setAgentStatus(next);
-  }, []);
-  const lifecycleBusyRef = useRef(false);
-  const lifecycleActionRef = useRef<LifecycleAction | null>(null);
-  /** Synchronous lock for onboarding finish to prevent duplicate same-tick submits. */
-  const onboardingFinishBusyRef = useRef(false);
-  const onboardingResumeConnectionRef = useRef<OnboardingConnection | null>(
-    null,
-  );
+  const localizedCharacterLanguageRef = useRef<UiLanguage>(uiLanguage);
+  // Onboarding refs now come from useOnboardingState
+  const onboardingFinishBusyRef = onboardingFinishBusyRefFromHook;
+  const onboardingResumeConnectionRef = onboardingResumeConnectionRefFromHook;
+  const onboardingCompletionCommittedRef =
+    onboardingCompletionCommittedRefFromHook;
+  const forceLocalBootstrapRef = forceLocalBootstrapRefFromHook;
+  const onboardingFinishSavingRef = onboardingFinishSavingRefFromHook;
   const pairingBusyRef = useRef(false);
-  /** Guards against double-greeting when both init and state-transition paths fire. */
-  const greetingFiredRef = useRef(false);
-  const greetingInFlightConversationRef = useRef<string | null>(null);
-  const greetingEmoteTimerRef = useRef<number | null>(null);
-  const companionStaleConversationRefreshRef = useRef<string | null>(null);
-  const onboardingCompletionCommittedRef = useRef(false);
-  const chatAbortRef = useRef<AbortController | null>(null);
-  /** Synchronous lock so same-tick chat submits cannot double-send. */
-  const chatSendBusyRef = useRef(false);
-  const chatSendNonceRef = useRef(0);
   /** Synchronous lock for export action to prevent duplicate clicks in the same tick. */
   const exportBusyRef = useRef(false);
   /** Synchronous lock for import action to prevent duplicate clicks in the same tick. */
@@ -1039,70 +1438,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const walletApiKeySavingRef = useRef(false);
   /** Synchronous lock for cloud login action to prevent duplicate clicks in the same tick. */
   const elizaCloudLoginBusyRef = useRef(false);
+  const elizaCloudAuthNoticeSentRef = useRef(false);
+  /** Forward ref so handleOnboardingNext (defined earlier) can call handleCloudLogin (defined later). */
+  const handleCloudLoginRef = useRef<() => Promise<void>>(async () => {});
   /** Synchronous lock for update channel changes to prevent duplicate submits. */
   const updateChannelSavingRef = useRef(false);
-  /** Synchronous lock for onboarding completion submit to prevent duplicate clicks. */
-  const onboardingFinishSavingRef = useRef(false);
 
   // --- Confirm Modal ---
   const { modalProps } = useConfirm();
   const { prompt: promptModal, modalProps: promptModalProps } = usePrompt();
 
-  // ── Action notice ──────────────────────────────────────────────────
-
-  const setActionNotice = useCallback(
-    (
-      text: string,
-      tone: "info" | "success" | "error" = "info",
-      ttlMs = 2800,
-      once = false,
-    ) => {
-      if (once && shownOnceNotices.current.has(text)) return;
-      if (once) shownOnceNotices.current.add(text);
-      setActionNoticeState({ tone, text });
-      if (actionNoticeTimer.current != null) {
-        window.clearTimeout(actionNoticeTimer.current);
-      }
-      actionNoticeTimer.current = window.setTimeout(() => {
-        setActionNoticeState(null);
-        actionNoticeTimer.current = null;
-      }, ttlMs);
-    },
-    [],
-  );
-
-  const scheduleGreetingWave = useCallback((showOverlay = false) => {
-    if (typeof window === "undefined") return;
-    if (greetingEmoteTimerRef.current != null) {
-      window.clearTimeout(greetingEmoteTimerRef.current);
-    }
-    greetingEmoteTimerRef.current = window.setTimeout(() => {
-      dispatchAppEmoteEvent({
-        ...GREETING_WAVE_EMOTE,
-        showOverlay,
-      });
-      greetingEmoteTimerRef.current = null;
-    }, GREETING_EMOTE_DELAY_MS);
-  }, []);
-
-  const scheduleGreetingWaveForCompanion = useCallback(
-    (showOverlay = false) => {
-      if (uiShellMode !== "companion") {
-        return;
-      }
-      scheduleGreetingWave(showOverlay);
-    },
-    [scheduleGreetingWave, uiShellMode],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (greetingEmoteTimerRef.current != null) {
-        window.clearTimeout(greetingEmoteTimerRef.current);
-        greetingEmoteTimerRef.current = null;
-      }
-    };
-  }, []);
+  // setActionNotice is now provided by useLifecycleState
 
   // ── Clipboard ──────────────────────────────────────────────────────
 
@@ -1110,34 +1456,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await copyTextToClipboard(text);
   }, []);
 
-  // ── Language ────────────────────────────────────────────────────────
-
-  const setUiLanguage = useCallback(
-    (language: UiLanguage) => {
-      const nextLanguage = normalizeLanguage(language);
-      setUiLanguageState(nextLanguage);
-      void client.updateConfig({ ui: { language: nextLanguage } }).catch(() => {
-        setActionNotice(
-          translateText(nextLanguage, "settings.languageSyncFailed"),
-          "error",
-          3200,
-        );
-      });
-    },
-    [setActionNotice],
-  );
-
-  useEffect(() => {
-    saveUiLanguage(uiLanguage);
-    if (
-      typeof (client as unknown as { setUiLanguage?: unknown })
-        .setUiLanguage === "function"
-    ) {
-      (
-        client as unknown as { setUiLanguage: (lang: string) => void }
-      ).setUiLanguage(uiLanguage);
-    }
-  }, [uiLanguage]);
+  // Language is managed by TranslationProvider (see useTranslation() above)
 
   useEffect(() => {
     saveUiShellMode(uiShellMode);
@@ -1158,11 +1477,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     applyUiTheme(uiTheme);
   }, [uiTheme]);
 
-  // Apply theme on initial mount
+  const setCompanionVrmPowerMode = useCallback(
+    (mode: CompanionVrmPowerMode) => {
+      setCompanionVrmPowerModeState(normalizeCompanionVrmPowerMode(mode));
+    },
+    [],
+  );
+
   useEffect(() => {
-    applyUiTheme(uiTheme);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uiTheme]);
+    saveCompanionVrmPowerMode(companionVrmPowerMode);
+  }, [companionVrmPowerMode]);
+
+  const setCompanionAnimateWhenHidden = useCallback((enabled: boolean) => {
+    setCompanionAnimateWhenHiddenState(enabled);
+  }, []);
+
+  useEffect(() => {
+    saveCompanionAnimateWhenHidden(companionAnimateWhenHidden);
+  }, [companionAnimateWhenHidden]);
+
+  const setCompanionHalfFramerateMode = useCallback(
+    (mode: CompanionHalfFramerateMode) => {
+      setCompanionHalfFramerateModeState(
+        normalizeCompanionHalfFramerateMode(mode),
+      );
+    },
+    [],
+  );
+
+  useEffect(() => {
+    saveCompanionHalfFramerateMode(companionHalfFramerateMode);
+  }, [companionHalfFramerateMode]);
 
   // ── Navigation ─────────────────────────────────────────────────────
 
@@ -1185,7 +1530,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.warn("[milady][nav] failed to update browser location", err);
       }
     },
-    [activeGameViewerUrl],
+    [activeGameViewerUrl, setTabRaw],
   );
 
   const setUiShellMode = useCallback(
@@ -1228,10 +1573,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const switchShellView = useCallback(
     (view: ShellView) => {
-      setTab(getTabForShellView(view, lastNativeTab));
+      const nextTab = getTabForShellView(view, lastNativeTab);
+      console.log(
+        `[shell] switchShellView: ${view} → tab=${nextTab}, lastNativeTab=${lastNativeTab}`,
+      );
+      setTab(nextTab);
     },
     [lastNativeTab, setTab],
   );
+
+  const navigationHubRef = useRef(new NavigationEventHub());
+  const pendingPostTabCommitRef = useRef<(() => void)[]>([]);
+  const prevTabCommittedRef = useRef<Tab | null>(null);
+  const prevUiShellCommittedRef = useRef<UiShellMode | null>(null);
+  const [_tabCommitFlushNonce, setTabCommitFlushNonce] = useState(0);
+
+  const scheduleAfterTabCommit = useCallback((fn: () => void) => {
+    pendingPostTabCommitRef.current.push(fn);
+    if (pendingPostTabCommitRef.current.length === 1) {
+      queueMicrotask(() => {
+        setTabCommitFlushNonce((n) => n + 1);
+      });
+    }
+  }, []);
+
+  const navigation = useMemo(
+    () => ({
+      subscribeTabCommitted: (
+        listener: (detail: TabCommittedDetail) => void,
+      ): (() => void) => navigationHubRef.current.subscribe(listener),
+      scheduleAfterTabCommit,
+    }),
+    [scheduleAfterTabCommit],
+  );
+
+  useLayoutEffect(() => {
+    const tabChanged = prevTabCommittedRef.current !== tab;
+    const shellChanged = prevUiShellCommittedRef.current !== uiShellMode;
+    const pending = pendingPostTabCommitRef.current;
+    pendingPostTabCommitRef.current = [];
+
+    if (tabChanged || shellChanged) {
+      const previousTab = prevTabCommittedRef.current;
+      prevTabCommittedRef.current = tab;
+      prevUiShellCommittedRef.current = uiShellMode;
+      navigationHubRef.current.emit({ tab, previousTab, uiShellMode });
+    }
+
+    for (const task of pending) {
+      try {
+        task();
+      } catch (err) {
+        console.warn(
+          "[milady][navigation] scheduleAfterTabCommit task failed",
+          err,
+        );
+      }
+    }
+  }, [tab, uiShellMode]);
 
   const sortTriggersByNextRun = useCallback(
     (items: TriggerSummary[]): TriggerSummary[] => {
@@ -1480,7 +1879,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return merged;
     },
-    [],
+    [
+      autonomousEventsRef,
+      autonomousLatestEventIdRef,
+      autonomousRunHealthByRunIdRef,
+      autonomousStoreRef,
+      setAutonomousEvents,
+      setAutonomousLatestEventId,
+      setAutonomousRunHealthByRunId,
+    ],
   );
 
   const fetchAutonomyReplay = useCallback(async () => {
@@ -1534,7 +1941,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       autonomousReplayInFlightRef.current = false;
     }
-  }, [applyAutonomyEventMerge]);
+  }, [
+    applyAutonomyEventMerge,
+    autonomousReplayInFlightRef,
+    autonomousRunHealthByRunIdRef,
+    autonomousStoreRef.current,
+    setAutonomousRunHealthByRunId,
+  ]);
 
   const appendAutonomousEvent = useCallback(
     (event: StreamEventEnvelope) => {
@@ -1556,14 +1969,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch {
       return null;
     }
-  }, []);
+  }, [setConversations]);
 
   const loadConversationMessages = useCallback(
     async (convId: string): Promise<LoadConversationMessagesResult> => {
       try {
         const { messages } = await client.getConversationMessages(convId);
         const nextMessages = filterRenderableConversationMessages(messages);
-        greetingFiredRef.current = nextMessages.length > 0;
+        greetingFiredRef.current =
+          hasConversationBootstrapMessage(nextMessages);
         conversationMessagesRef.current = nextMessages;
         setConversationMessages(nextMessages);
         return { ok: true };
@@ -1596,7 +2010,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         };
       }
     },
-    [],
+    [
+      activeConversationIdRef,
+      conversationMessagesRef,
+      greetingFiredRef,
+      setActiveConversationId,
+      setConversationMessages,
+      setConversations,
+    ],
   );
 
   const loadWalletConfig = useCallback(async () => {
@@ -1661,6 +2082,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const getStewardStatus = useCallback(
+    async () => client.getStewardStatus(),
+    [],
+  );
+
+  const getStewardHistory = useCallback(
+    async (opts?: { status?: string; limit?: number; offset?: number }) =>
+      client.getStewardHistory(opts),
+    [],
+  );
+
+  const getStewardPending = useCallback(
+    async () => client.getStewardPending(),
+    [],
+  );
+
+  const approveStewardTx = useCallback(
+    async (txId: string) => client.approveStewardTx(txId),
+    [],
+  );
+
+  const rejectStewardTx = useCallback(
+    async (txId: string, reason?: string) =>
+      client.rejectStewardTx(txId, reason),
+    [],
+  );
+
   const loadWalletTradingProfile = useCallback(
     async (
       window: WalletTradingProfileWindow = "30d",
@@ -1695,13 +2143,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const { character } = await client.getCharacter();
       setCharacterData(character);
+      // Replace any un-substituted {{name}} tokens that may have been persisted
+      // to the server before the fix (onboarding saved raw templates).
+      const savedName = character.name ?? "";
+      const clean = (s: string) => replaceNameTokens(s, savedName);
       setCharacterDraft({
-        name: character.name ?? "",
+        name: savedName,
         username: character.username ?? "",
         bio: Array.isArray(character.bio)
-          ? character.bio.join("\n")
-          : (character.bio ?? ""),
-        system: character.system ?? "",
+          ? character.bio.map(clean).join("\n")
+          : clean(character.bio ?? ""),
+        system: clean(character.system ?? ""),
         adjectives: character.adjectives ?? [],
         topics: character.topics ?? [],
         style: {
@@ -1718,6 +2170,80 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     setCharacterLoading(false);
   }, []);
+
+  // Hydrate ownerName from config on startup
+  useEffect(() => {
+    let cancelled = false;
+    void client
+      .getConfig()
+      .then((cfg) => {
+        if (cancelled) {
+          return;
+        }
+
+        const name = (cfg as Record<string, unknown>).ui as
+          | Record<string, unknown>
+          | undefined;
+        const persisted = normalizeOwnerName(name?.ownerName as string);
+        if (persisted) {
+          setOwnerNameState(persisted);
+        }
+      })
+      .catch(() => {})
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const previousLanguage = localizedCharacterLanguageRef.current;
+    localizedCharacterLanguageRef.current = uiLanguage;
+
+    if (previousLanguage === uiLanguage) {
+      return;
+    }
+    if (!onboardingComplete || selectedVrmIndex <= 0) {
+      return;
+    }
+
+    const preset = resolveStylePresetByAvatarIndex(
+      selectedVrmIndex,
+      uiLanguage,
+    );
+    if (!preset) {
+      return;
+    }
+
+    const resolvedName =
+      characterData?.name?.trim() ||
+      characterDraft?.name?.trim() ||
+      agentStatus?.agentName?.trim() ||
+      preset.name;
+
+    void (async () => {
+      try {
+        await client.updateCharacter(
+          buildLocalizedCharacterPayload(preset, resolvedName),
+        );
+        await loadCharacter();
+      } catch (err) {
+        console.warn(
+          "[milady] Failed to sync localized character preset after language change",
+          err,
+        );
+      }
+    })();
+  }, [
+    agentStatus?.agentName,
+    characterData?.name,
+    characterDraft?.name,
+    loadCharacter,
+    onboardingComplete,
+    selectedVrmIndex,
+    uiLanguage,
+  ]);
 
   const loadWorkbench = useCallback(async () => {
     setWorkbenchLoading(true);
@@ -1764,94 +2290,153 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const pollCloudCredits = useCallback(async (): Promise<boolean> => {
+    if (elizaCloudDisconnectInFlightRef.current) {
+      return lastElizaCloudPollConnectedRef.current;
+    }
     const cloudStatus = await client.getCloudStatus().catch(() => null);
+    if (elizaCloudDisconnectInFlightRef.current) {
+      return lastElizaCloudPollConnectedRef.current;
+    }
     if (!cloudStatus) {
       setElizaCloudConnected(false);
+      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+        apiConnected: false,
+        enabled: false,
+        hasPersistedApiKey: false,
+      });
       setElizaCloudCredits(null);
       setElizaCloudCreditsLow(false);
       setElizaCloudCreditsCritical(false);
+      setElizaCloudAuthRejected(false);
+      setElizaCloudCreditsError(null);
+      setElizaCloudStatusReason(null);
+      lastElizaCloudPollConnectedRef.current = false;
       return false;
     }
-    // A cached cloud API key represents a completed login and should be shared
-    // across all views, even before runtime CLOUD_AUTH fully initializes.
-    const isConnected = Boolean(cloudStatus.connected || cloudStatus.hasApiKey);
-    setElizaCloudEnabled(Boolean(cloudStatus.enabled ?? false));
+    const enabled = Boolean(cloudStatus.enabled ?? false);
+    const hasPersistedApiKey = Boolean(cloudStatus.hasApiKey);
+    // Trust `connected` from the server snapshot (it already folds in API key + CLOUD_AUTH).
+    const isConnected = Boolean(cloudStatus.connected);
+    if (isConnected && elizaCloudPreferDisconnectedUntilLoginRef.current) {
+      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+        apiConnected: isConnected,
+        enabled,
+        hasPersistedApiKey,
+      });
+      lastElizaCloudPollConnectedRef.current = false;
+      return false;
+    }
+    if (!isConnected) {
+      elizaCloudPreferDisconnectedUntilLoginRef.current = false;
+    }
+    setElizaCloudEnabled(enabled);
     setElizaCloudConnected(isConnected);
+    publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+      apiConnected: isConnected,
+      enabled,
+      hasPersistedApiKey,
+    });
     setElizaCloudUserId(cloudStatus.userId ?? null);
+    setElizaCloudStatusReason(
+      isConnected &&
+        typeof cloudStatus.reason === "string" &&
+        cloudStatus.reason.trim()
+        ? cloudStatus.reason.trim()
+        : null,
+    );
     if (cloudStatus.topUpUrl) setElizaCloudTopUpUrl(cloudStatus.topUpUrl);
     if (isConnected) {
       const credits = await client.getCloudCredits().catch(() => null);
-      if (credits && typeof credits.balance === "number") {
-        setElizaCloudCredits(credits.balance);
-        setElizaCloudCreditsLow(credits.low ?? false);
-        setElizaCloudCreditsCritical(credits.critical ?? false);
-        if (credits.topUpUrl) setElizaCloudTopUpUrl(credits.topUpUrl);
-      } else {
+      if (elizaCloudDisconnectInFlightRef.current) {
+        return lastElizaCloudPollConnectedRef.current;
+      }
+      if (credits?.authRejected) {
+        setElizaCloudAuthRejected(true);
+        setElizaCloudCreditsError(null);
         setElizaCloudCredits(null);
         setElizaCloudCreditsLow(false);
         setElizaCloudCreditsCritical(false);
-        if (credits?.topUpUrl) setElizaCloudTopUpUrl(credits.topUpUrl);
+        if (credits.topUpUrl) setElizaCloudTopUpUrl(credits.topUpUrl);
+      } else {
+        setElizaCloudAuthRejected(false);
+        const apiErr =
+          credits &&
+          typeof credits.error === "string" &&
+          credits.error.trim() &&
+          typeof credits.balance !== "number"
+            ? credits.error.trim()
+            : null;
+        setElizaCloudCreditsError(apiErr);
+        if (credits && typeof credits.balance === "number") {
+          setElizaCloudCredits(credits.balance);
+          setElizaCloudCreditsLow(credits.low ?? false);
+          setElizaCloudCreditsCritical(credits.critical ?? false);
+          if (credits.topUpUrl) setElizaCloudTopUpUrl(credits.topUpUrl);
+        } else {
+          setElizaCloudCredits(null);
+          setElizaCloudCreditsLow(false);
+          setElizaCloudCreditsCritical(false);
+          if (credits?.topUpUrl) setElizaCloudTopUpUrl(credits.topUpUrl);
+        }
       }
     } else {
       setElizaCloudCredits(null);
       setElizaCloudCreditsLow(false);
       setElizaCloudCreditsCritical(false);
+      setElizaCloudAuthRejected(false);
+      setElizaCloudCreditsError(null);
+      setElizaCloudStatusReason(null);
+    }
+    lastElizaCloudPollConnectedRef.current = isConnected;
+    // Self-manage the recurring poll interval: start when connected, stop when not.
+    // This covers login during onboarding (interval wasn't started at mount) and
+    // disconnect (interval should stop to avoid useless API calls).
+    if (isConnected && !elizaCloudPollInterval.current) {
+      elizaCloudPollInterval.current = window.setInterval(() => {
+        if (
+          typeof document !== "undefined" &&
+          document.visibilityState !== "visible"
+        ) {
+          return;
+        }
+        void pollCloudCredits();
+      }, 60_000);
+    } else if (!isConnected && elizaCloudPollInterval.current) {
+      clearInterval(elizaCloudPollInterval.current);
+      elizaCloudPollInterval.current = null;
     }
     return isConnected;
   }, []);
 
   // ── Lifecycle actions ──────────────────────────────────────────────
 
-  const beginLifecycleAction = useCallback(
-    (action: LifecycleAction): boolean => {
-      if (lifecycleBusyRef.current) {
-        const activeAction =
-          lifecycleActionRef.current ?? lifecycleAction ?? action;
-        setActionNotice(
-          `Agent action already in progress (${LIFECYCLE_MESSAGES[activeAction].inProgress}). Please wait.`,
-          "info",
-          2800,
-        );
-        return false;
-      }
-      lifecycleBusyRef.current = true;
-      lifecycleActionRef.current = action;
-      setLifecycleBusy(true);
-      setLifecycleAction(action);
-      return true;
-    },
-    [lifecycleAction, setActionNotice],
-  );
-
-  const finishLifecycleAction = useCallback(() => {
-    lifecycleBusyRef.current = false;
-    lifecycleActionRef.current = null;
-    setLifecycleBusy(false);
-    setLifecycleAction(null);
-  }, []);
+  // beginLifecycleAction / finishLifecycleAction are now provided by useLifecycleState
 
   // ── Chat ───────────────────────────────────────────────────────────
 
   /** Request an agent greeting for a conversation and add it to messages. */
   const fetchGreeting = useCallback(
-    async (
-      convId: string,
-      options?: {
-        showOverlay?: boolean;
-      },
-    ): Promise<boolean> => {
+    async (convId: string): Promise<boolean> => {
       if (greetingInFlightConversationRef.current === convId) {
+        traceMiladyGreeting("fetchGreeting:skip_duplicate_in_flight", {
+          convId,
+        });
         return false;
       }
       greetingInFlightConversationRef.current = convId;
+      setChatAwaitingGreeting(true);
+      traceMiladyGreeting("fetchGreeting:request", { convId });
       try {
         const data = await client.requestGreeting(convId, uiLanguage);
         if (data.text) {
-          greetingFiredRef.current = true;
-          if (data.persisted === true) {
-            scheduleGreetingWaveForCompanion(options?.showOverlay === true);
-          }
-          if (activeConversationIdRef.current === convId) {
+          const stillActive = activeConversationIdRef.current === convId;
+          traceMiladyGreeting("fetchGreeting:response", {
+            convId,
+            stillActive,
+            textLength: data.text.length,
+            persisted: data.persisted === true,
+          });
+          if (stillActive) {
             setConversationMessages((prev: ConversationMessage[]) => {
               if (
                 prev.some(
@@ -1874,37 +2459,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 },
               ];
             });
+            greetingFiredRef.current = true;
           }
-          return true;
+          return stillActive;
         }
+        traceMiladyGreeting("fetchGreeting:empty_or_whitespace", { convId });
         greetingFiredRef.current = false;
-      } catch {
+      } catch (err) {
+        traceMiladyGreeting("fetchGreeting:request_failed", {
+          convId,
+          error: err instanceof Error ? err.message : String(err),
+        });
         greetingFiredRef.current = false;
         /* greeting failed silently — user can still chat */
       } finally {
+        setChatAwaitingGreeting(false);
         if (greetingInFlightConversationRef.current === convId) {
           greetingInFlightConversationRef.current = null;
         }
       }
       return false;
     },
-    [scheduleGreetingWaveForCompanion, uiLanguage],
+    [
+      uiLanguage,
+      activeConversationIdRef,
+      greetingFiredRef,
+      greetingInFlightConversationRef,
+      setConversationMessages,
+    ],
   );
 
   const requestGreetingWhenRunning = useCallback(
-    async (
-      convId: string | null,
-      options?: {
-        showOverlay?: boolean;
-      },
-    ): Promise<void> => {
+    async (convId: string | null): Promise<void> => {
       if (!convId || greetingFiredRef.current) {
+        traceMiladyGreeting("requestGreetingWhenRunning:skip", {
+          convId: convId ?? null,
+          greetingFired: greetingFiredRef.current,
+        });
         return;
       }
       try {
         const status = await client.getStatus();
+        traceMiladyGreeting("requestGreetingWhenRunning:status", {
+          convId,
+          state: status.state,
+        });
         if (status.state === "running" && !greetingFiredRef.current) {
-          await fetchGreeting(convId, options);
+          await fetchGreeting(convId);
         }
       } catch (err) {
         console.warn(
@@ -1941,7 +2542,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setTimeout(resolve, AGENT_STATUS_POLL_INTERVAL_MS);
       });
     }
-  }, []);
+  }, [
+    setAgentStatus,
+    setConnected,
+    setPendingRestart,
+    setPendingRestartReasons,
+  ]);
 
   const hydrateInitialConversationState = useCallback(async (): Promise<
     string | null
@@ -1952,6 +2558,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     try {
       const { conversations: c } = await client.listConversations();
+      traceMiladyGreeting("hydrate:listConversations", { count: c.length });
       if (!isCurrentHydration()) {
         return null;
       }
@@ -1978,7 +2585,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             return null;
           }
           const nextMessages = filterRenderableConversationMessages(messages);
-          greetingFiredRef.current = nextMessages.length > 0;
+          greetingFiredRef.current =
+            hasConversationBootstrapMessage(nextMessages);
           conversationMessagesRef.current = nextMessages;
           setConversationMessages(nextMessages);
           return nextMessages.length === 0 ? restoredConversation.id : null;
@@ -2000,6 +2608,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!isCurrentHydration()) {
         return null;
       }
+      traceMiladyGreeting("hydrate:no_conversations_on_server");
       greetingFiredRef.current = false;
       conversationMessagesRef.current = [];
       setConversationMessages([]);
@@ -2010,30 +2619,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.warn("[milady][chat:init] failed to hydrate conversations", err);
       return null;
     }
-  }, []);
+  }, [
+    activeConversationIdRef,
+    conversationHydrationEpochRef,
+    conversationMessagesRef,
+    greetingFiredRef,
+    setActiveConversationId,
+    setConversationMessages,
+    setConversations,
+  ]);
 
-  const resetConversationDraftState = useCallback(() => {
-    conversationHydrationEpochRef.current += 1;
-    greetingFiredRef.current = false;
-    greetingInFlightConversationRef.current = null;
-    setChatInput("");
-    setChatPendingImages([]);
-    setChatSending(false);
-    setChatFirstTokenReceived(false);
-    conversationMessagesRef.current = [];
-    setConversationMessages([]);
-    setActiveConversationId(null);
-    activeConversationIdRef.current = null;
-    setCompanionMessageCutoffTs(Date.now());
-  }, []);
+  // resetConversationDraftState now comes from useChatState (aliased above)
 
   const handleStartDraftConversation = useCallback(async () => {
+    interruptActiveChatPipeline();
     resetConversationDraftState();
-  }, [resetConversationDraftState]);
+  }, [interruptActiveChatPipeline, resetConversationDraftState]);
 
   const handleStart = useCallback(async () => {
     if (!beginLifecycleAction("start")) return;
-    setActionNotice(LIFECYCLE_MESSAGES.start.progress, "info", 3000);
+    setActionNotice(
+      LIFECYCLE_MESSAGES.start.progress,
+      "info",
+      300_000,
+      false,
+      true,
+    );
     try {
       const s = await client.startAgent();
       setAgentStatus(s);
@@ -2049,11 +2660,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       finishLifecycleAction();
     }
-  }, [beginLifecycleAction, finishLifecycleAction, setActionNotice]);
+  }, [
+    beginLifecycleAction,
+    finishLifecycleAction,
+    setActionNotice,
+    setAgentStatus,
+  ]);
 
   const handleStop = useCallback(async () => {
     if (!beginLifecycleAction("stop")) return;
-    setActionNotice(LIFECYCLE_MESSAGES.stop.progress, "info", 3000);
+    setActionNotice(
+      LIFECYCLE_MESSAGES.stop.progress,
+      "info",
+      120_000,
+      false,
+      true,
+    );
     try {
       const s = await client.stopAgent();
       setAgentStatus(s);
@@ -2069,11 +2691,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       finishLifecycleAction();
     }
-  }, [beginLifecycleAction, finishLifecycleAction, setActionNotice]);
+  }, [
+    beginLifecycleAction,
+    finishLifecycleAction,
+    setActionNotice,
+    setAgentStatus,
+  ]);
 
   const handleRestart = useCallback(async () => {
     if (!beginLifecycleAction("restart")) return;
-    setActionNotice(LIFECYCLE_MESSAGES.restart.progress, "info", 3200);
+    setActionNotice(
+      LIFECYCLE_MESSAGES.restart.progress,
+      "info",
+      300_000,
+      false,
+      true,
+    );
     try {
       setAgentStatus({
         ...(agentStatus ?? {
@@ -2091,7 +2724,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const s = await client.restartAgent();
       setAgentStatus(s);
       const greetConvId = await hydrateInitialConversationState();
-      await requestGreetingWhenRunning(greetConvId, { showOverlay: true });
+      await requestGreetingWhenRunning(greetConvId);
       setPendingRestart(false);
       setPendingRestartReasons([]);
       void loadPlugins();
@@ -2121,34 +2754,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setActionNotice,
     hydrateInitialConversationState,
     loadPlugins,
-    requestGreetingWhenRunning,
+    requestGreetingWhenRunning, // Server restart clears in-memory conversations — reset client state
+    setActiveConversationId,
+    setAgentStatus,
+    setConversationMessages,
+    setConversations,
+    setPendingRestart,
+    setPendingRestartReasons,
   ]);
 
-  const dismissRestartBanner = useCallback(() => {
-    setRestartBannerDismissed(true);
-  }, []);
-
-  const showRestartBanner = useCallback(() => {
-    setRestartBannerDismissed(false);
-  }, []);
+  // dismissRestartBanner, showRestartBanner are now provided by useLifecycleState
+  // dismissBackendDisconnectedBanner, dismissSystemWarning are now provided by useLifecycleState
 
   const triggerRestart = useCallback(async () => {
     await handleRestart();
   }, [handleRestart]);
 
-  // Backend disconnection banner actions
-  const dismissBackendDisconnectedBanner = useCallback(() => {
-    setBackendDisconnectedBannerDismissed(true);
-  }, []);
-
   const retryBackendConnection = useCallback(() => {
     setBackendDisconnectedBannerDismissed(false);
     client.resetConnection();
-  }, []);
-
-  const dismissSystemWarning = useCallback((message: string) => {
-    setSystemWarnings((prev) => prev.filter((m) => m !== message));
-  }, []);
+  }, [setBackendDisconnectedBannerDismissed]);
 
   const restartBackend = useCallback(async () => {
     const restarted = await invokeDesktopBridgeRequest({
@@ -2156,18 +2781,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ipcChannel: "agent:restart",
     });
     if (restarted === null) {
-      // Fallback for web: call API restart endpoint
       await client.restart();
     }
-    // Reset connection state after restart
-    setBackendConnection((prev) => ({
-      ...prev,
-      state: "disconnected",
-      reconnectAttempt: 0,
-      showDisconnectedUI: false,
-    }));
-    setBackendDisconnectedBannerDismissed(false);
-  }, []);
+    resetBackendConnection();
+  }, [resetBackendConnection]);
 
   const relaunchDesktop = useCallback(async () => {
     const relaunched = await invokeDesktopBridgeRequest<void>({
@@ -2201,7 +2818,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const notifyHeartbeatEvent = useCallback(
     (event: StreamEventEnvelope) => {
-      const payload = event.payload;
+      // biome-ignore lint/suspicious/noExplicitAny: heartbeat payloads are loosely typed
+      const payload = event.payload as any;
       const status =
         typeof payload.status === "string"
           ? payload.status.trim().toLowerCase()
@@ -2289,18 +2907,172 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [pendingRestart, pendingRestartReasons, showDesktopNotification]);
 
-  const retryStartup = useCallback(() => {
-    setStartupError(null);
-    setAuthRequired(false);
-    setOnboardingLoading(true);
-    setStartupPhase("starting-backend");
-    setStartupRetryNonce((prev) => prev + 1);
-  }, []);
+  // retryStartup provided by useLifecycleState (dispatches RETRY_STARTUP)
+
+  /**
+   * Wipes server-side agent config (`POST /api/agent/reset`) and local UI state.
+   *
+   * **WHY restart after reset:** the compat route only rewrites `eliza.json` on disk.
+   * The embedded desktop child keeps in-memory runtime + PGLite until we stop it,
+   * delete `~/.milady/workspace/.eliza/.elizadb`, and spawn a fresh process (RPC
+   * `agentRestartClearLocalDb` when `desktopRuntimeMode=local`).
+   * With `MILADY_DESKTOP_API_BASE` (external dev API on :31337), embedded restart is a
+   * no-op — we must call `restartAndWait()` so the **real** API process reloads.
+   * Wallet keys from env are not touched. Local **GGUF** model files
+   * (`MODELS_DIR`, typically ~/.eliza/models) are not deleted — only the agent DB dir `.elizadb` is removed when embedded restart runs.
+   *
+   * **WHY clear `clearPersistedConnectionMode` + `setBaseUrl(null)` / `setToken(null)`**
+   * after the API call: the server no longer matches cloud/remote session data; leaving
+   * persisted mode or client base pointed at Eliza Cloud made the next screen look
+   * “stuck” or skipped onboarding.
+   *
+   * **WHY Eliza Cloud state cleared:** avoid showing “connected” after config wipe.
+   */
+  const completeResetLocalStateAfterServerWipe = useCallback(
+    async (postResetAgentStatus: AgentStatus | null): Promise<void> => {
+      await runCompleteResetLocalStateAfterServerWipe(postResetAgentStatus, {
+        setAgentStatus,
+        resetClientConnection: () => client.resetConnection(),
+        clearPersistedConnectionMode,
+        clearPersistedAvatarIndex: clearAvatarIndex,
+        setClientBaseUrl: (url) => client.setBaseUrl(url),
+        setClientToken: (token) => client.setToken(token),
+        clearElizaCloudSessionUi: () => {
+          elizaCloudPreferDisconnectedUntilLoginRef.current = false;
+          setElizaCloudEnabled(false);
+          setElizaCloudConnected(false);
+          publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+            apiConnected: false,
+            enabled: false,
+            hasPersistedApiKey: false,
+          });
+          setElizaCloudCredits(null);
+          setElizaCloudCreditsLow(false);
+          setElizaCloudCreditsCritical(false);
+          setElizaCloudAuthRejected(false);
+          setElizaCloudCreditsError(null);
+          setElizaCloudTopUpUrl("/cloud/billing");
+          setElizaCloudUserId(null);
+          setElizaCloudStatusReason(null);
+          setElizaCloudLoginError(null);
+        },
+        markOnboardingReset: () => {
+          onboardingCompletionCommittedRef.current = false;
+          setOnboardingUiRevealNonce((n) => n + 1);
+          setOnboardingLoading(false);
+          setOnboardingComplete(false);
+          onboardingResumeConnectionRef.current = null;
+          setOnboardingStep("cloud_login");
+          setOnboardingMode("basic");
+          setOnboardingActiveGuide(null);
+          setOnboardingDeferredTasks([]);
+          setPostOnboardingChecklistDismissed(false);
+          setOnboardingName("Chen");
+          setOnboardingStyle("chen");
+          setOnboardingRunMode("");
+          setOnboardingCloudProvider("");
+          setOnboardingProvider("");
+          setOnboardingApiKey("");
+          setOnboardingVoiceProvider("");
+          setOnboardingVoiceApiKey("");
+          setOnboardingPrimaryModel("");
+          setOnboardingOpenRouterModel("");
+          setOnboardingRemoteConnected(false);
+          setOnboardingRemoteApiBase("");
+          setOnboardingRemoteToken("");
+          setOnboardingSmallModel("");
+          setOnboardingLargeModel("");
+        },
+        resetAvatarSelection: () => {
+          setSelectedVrmIndex(1);
+          setCustomVrmUrl("");
+          setCustomBackgroundUrl("");
+        },
+        clearConversationLists: () => {
+          setConversationMessages([]);
+          setActiveConversationId(null);
+          activeConversationIdRef.current = null;
+          setConversations([]);
+          setPlugins([]);
+          setSkills([]);
+          setLogs([]);
+        },
+        fetchOnboardingOptions: () => client.getOnboardingOptions(),
+        setOnboardingOptions,
+        logResetDebug,
+        logResetWarn,
+      });
+    },
+    [
+      setAgentStatus,
+      setOnboardingComplete,
+      setOnboardingLoading,
+      setOnboardingOptions,
+      setOnboardingStep,
+      setOnboardingMode,
+      setOnboardingActiveGuide,
+      setOnboardingDeferredTasks,
+      setPostOnboardingChecklistDismissed,
+      setOnboardingName,
+      setOnboardingStyle,
+      setOnboardingRunMode,
+      setOnboardingCloudProvider,
+      setOnboardingProvider,
+      setOnboardingApiKey,
+      setOnboardingPrimaryModel,
+      setOnboardingOpenRouterModel,
+      setOnboardingRemoteConnected,
+      setOnboardingRemoteApiBase,
+      setOnboardingRemoteToken,
+      setOnboardingSmallModel,
+      setOnboardingLargeModel,
+      setOnboardingUiRevealNonce,
+      setConversationMessages,
+      setActiveConversationId,
+      setConversations,
+      activeConversationIdRef,
+      onboardingCompletionCommittedRef,
+      onboardingResumeConnectionRef,
+      setSelectedVrmIndex,
+    ],
+  );
+
+  const handleResetAppliedFromMain = useCallback(
+    async (payload: unknown) => {
+      await handleResetAppliedFromMainCore(payload, {
+        performanceNow: () => performance.now(),
+        isLifecycleBusy: () => lifecycleBusyRef.current,
+        getActiveLifecycleAction: () =>
+          lifecycleActionRef.current ?? lifecycleAction ?? "reset",
+        beginLifecycleAction,
+        finishLifecycleAction,
+        setActionNotice,
+        parseTrayResetPayload: parseAgentStatusFromMainMenuResetPayload,
+        completeResetLocalState: completeResetLocalStateAfterServerWipe,
+        alertDesktopMessage,
+        logResetInfo,
+        logResetWarn,
+      });
+    },
+    [
+      lifecycleAction,
+      beginLifecycleAction,
+      finishLifecycleAction,
+      setActionNotice,
+      completeResetLocalStateAfterServerWipe,
+      lifecycleActionRef.current,
+      lifecycleBusyRef.current,
+    ],
+  );
 
   const handleReset = useCallback(async () => {
+    logResetInfo("handleReset: invoked");
     if (lifecycleBusyRef.current) {
       const activeAction =
         lifecycleActionRef.current ?? lifecycleAction ?? "reset";
+      logResetInfo("handleReset: skipped — lifecycle busy", {
+        activeAction,
+      });
       setActionNotice(
         `Agent action already in progress (${LIFECYCLE_MESSAGES[activeAction].inProgress}). Please wait.`,
         "info",
@@ -2308,40 +3080,159 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
       return;
     }
+    logResetInfo("handleReset: showing confirm dialog");
     const confirmed = await confirmDesktopAction({
       title: "Reset Agent",
       message:
-        "This will completely reset the agent, wiping all config, memory, and data.",
-      detail: "You will be taken back to the onboarding wizard.",
+        "This will reset the agent: config, cloud keys, and local agent database (conversations / memory).",
+      detail:
+        "Downloaded GGUF embedding models are kept. You will return to the onboarding wizard.",
       confirmLabel: "Reset",
       cancelLabel: "Cancel",
       type: "warning",
     });
-    if (!confirmed) return;
-    if (!beginLifecycleAction("reset")) return;
-    setActionNotice(LIFECYCLE_MESSAGES.reset.progress, "info", 3200);
+    if (!confirmed) {
+      logResetInfo("handleReset: cancelled by user");
+      return;
+    }
+    // Native message boxes (Electrobun/macOS) can return without letting the webview
+    // process network/RPC on the same turn — `fetch` and bridge requests then appear
+    // to "never run" until something else wakes the loop. Yield once before reset work.
+    logResetInfo(
+      "handleReset: confirmed — scheduling reset on next event-loop turn (native dialog)",
+    );
+    await new Promise<void>((resolve) => {
+      window.setTimeout(() => resolve(), 0);
+    });
+
+    if (!beginLifecycleAction("reset")) {
+      logResetInfo(
+        "handleReset: aborted — could not begin lifecycle (race with another action)",
+      );
+      setActionNotice(
+        "Another agent operation is still running. Wait for it to finish, then try Reset again.",
+        "info",
+        4200,
+      );
+      return;
+    }
+    setActionNotice(
+      LIFECYCLE_MESSAGES.reset.progress,
+      "info",
+      120_000,
+      false,
+      true,
+    );
+    const resetStartedAt = performance.now();
+    logResetInfo(
+      "handleReset: starting (POST /api/agent/reset + restart path)",
+      {
+        electrobun: isElectrobunRuntime(),
+        apiBase:
+          client.getBaseUrl() || "(empty — will resolve after reconnect)",
+      },
+    );
+    logResetInfo(
+      "handleReset: tip — reset logs also appear in this window (filter [milady][reset]); API terminal only shows server-side routes",
+    );
     try {
+      logResetDebug("handleReset: calling client.resetAgent()");
       await client.resetAgent();
-      setAgentStatus(null);
-      onboardingCompletionCommittedRef.current = false;
-      setOnboardingComplete(false);
-      onboardingResumeConnectionRef.current = null;
-      setOnboardingStep("wakeUp");
-      setConversationMessages([]);
-      setActiveConversationId(null);
-      activeConversationIdRef.current = null;
-      setConversations([]);
-      setPlugins([]);
-      setSkills([]);
-      setLogs([]);
+      logResetDebug("handleReset: client.resetAgent() completed");
+
+      let postResetAgentStatus: AgentStatus | null = null;
+      logResetDebug(
+        "handleReset: invoking desktop bridge agentRestartClearLocalDb",
+      );
+      const BRIDGE_RESTART_MS = 150_000;
       try {
-        const options = await client.getOnboardingOptions();
-        setOnboardingOptions(options);
-      } catch {
-        /* ignore */
+        postResetAgentStatus = await Promise.race([
+          invokeDesktopBridgeRequest<AgentStatus>({
+            rpcMethod: "agentRestartClearLocalDb",
+            ipcChannel: "agent:restartClearLocalDb",
+          }),
+          new Promise<AgentStatus | null>((_, reject) => {
+            window.setTimeout(() => {
+              reject(
+                Object.assign(
+                  new Error(
+                    `agentRestartClearLocalDb exceeded ${BRIDGE_RESTART_MS / 1000}s`,
+                  ),
+                  { name: "ResetBridgeTimeout" },
+                ),
+              );
+            }, BRIDGE_RESTART_MS);
+          }),
+        ]);
+        logResetDebug("handleReset: bridge agentRestartClearLocalDb settled", {
+          hasResult: postResetAgentStatus != null,
+          state: postResetAgentStatus?.state ?? null,
+          port: postResetAgentStatus?.port ?? null,
+        });
+        if (postResetAgentStatus == null && isElectrobunRuntime()) {
+          logResetWarn(
+            "handleReset: agentRestartClearLocalDb RPC returned null — bridge request missing; will rely on HTTP restart path",
+          );
+        }
+      } catch (bridgeErr) {
+        postResetAgentStatus = null;
+        if (
+          bridgeErr instanceof Error &&
+          bridgeErr.name === "ResetBridgeTimeout"
+        ) {
+          logResetWarn(
+            "handleReset: agentRestartClearLocalDb timed out — falling back to HTTP restart",
+            bridgeErr,
+          );
+        } else {
+          logResetWarn(
+            "handleReset: bridge agentRestartClearLocalDb threw (will try HTTP restart)",
+            bridgeErr,
+          );
+        }
       }
+
+      const embeddedRestartedOk =
+        postResetAgentStatus != null &&
+        (postResetAgentStatus.state === "running" ||
+          postResetAgentStatus.state === "starting");
+
+      logResetDebug("handleReset: embedded restart decision", {
+        embeddedRestartedOk,
+        bridgeState: postResetAgentStatus?.state ?? null,
+      });
+
+      if (!embeddedRestartedOk) {
+        logResetInfo(
+          "handleReset: calling client.restartAndWait(120s) — external API or bridge no-op",
+        );
+        try {
+          postResetAgentStatus = await client.restartAndWait(120_000);
+          logResetDebug("handleReset: restartAndWait completed", {
+            state: postResetAgentStatus.state,
+            port: postResetAgentStatus.port,
+          });
+        } catch (httpErr) {
+          postResetAgentStatus = null;
+          logResetWarn(
+            "handleReset: client.restartAndWait failed — UI may be stale until manual restart",
+            httpErr,
+          );
+        }
+      }
+
+      await completeResetLocalStateAfterServerWipe(postResetAgentStatus);
+      const elapsedMs = Math.round(performance.now() - resetStartedAt);
+      logResetInfo(
+        "handleReset: success — local UI reset; see server logs for API",
+        {
+          elapsedMs,
+          finalAgentState: postResetAgentStatus?.state ?? null,
+        },
+      );
       setActionNotice(LIFECYCLE_MESSAGES.reset.success, "success", 3200);
     } catch (err) {
+      logResetWarn("handleReset: failed before local UI could reset", err);
       setActionNotice(
         `Failed to ${LIFECYCLE_MESSAGES.reset.verb} agent: ${
           err instanceof Error ? err.message : "unknown error"
@@ -2362,7 +3253,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     beginLifecycleAction,
     finishLifecycleAction,
     setActionNotice,
-    setOnboardingStep,
+    completeResetLocalStateAfterServerWipe,
+    lifecycleActionRef.current,
+    lifecycleBusyRef.current,
   ]);
 
   const handleNewConversation = useCallback(
@@ -2371,28 +3264,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const previousMessages = conversationMessagesRef.current;
       const previousCutoffTs = companionMessageCutoffTs;
 
+      interruptActiveChatPipeline();
       resetConversationDraftState();
 
       try {
-        const { conversation, greeting } = await client.createConversation(
-          title,
-          {
+        const { conversation, greeting: inlineGreeting } =
+          await client.createConversation(title, {
             bootstrapGreeting: true,
             lang: uiLanguage,
-          },
-        );
+          });
         const nextCutoffTs = Date.now();
         setConversations((prev) => [conversation, ...prev]);
         setActiveConversationId(conversation.id);
         activeConversationIdRef.current = conversation.id;
         setCompanionMessageCutoffTs(nextCutoffTs);
-        const greetingText = greeting?.text?.trim() ?? "";
-        if (greetingText) {
-          greetingFiredRef.current = true;
-          if (greeting?.persisted === true) {
-            scheduleGreetingWaveForCompanion();
+        // Try inline greeting first; fall back to dedicated greeting endpoint
+        let greetingText = inlineGreeting?.text?.trim() || "";
+        if (!greetingText) {
+          try {
+            const resp = await client.requestGreeting(
+              conversation.id,
+              uiLanguage,
+            );
+            greetingText = resp.text?.trim() || "";
+          } catch {
+            // Greeting generation failed — continue without greeting
           }
-          setConversationMessages([
+        }
+
+        if (greetingText) {
+          setChatAwaitingGreeting(false);
+          greetingFiredRef.current = true;
+          const initMessages: ConversationMessage[] = [
             {
               id: `greeting-${Date.now()}`,
               role: "assistant",
@@ -2400,11 +3303,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
               timestamp: Date.now(),
               source: "agent_greeting",
             },
-          ]);
+          ];
+          conversationMessagesRef.current = initMessages;
+          setConversationMessages(initMessages);
         } else {
           greetingFiredRef.current = false;
+          conversationMessagesRef.current = [];
           setConversationMessages([]);
-          void requestGreetingWhenRunning(conversation.id);
+          // Fallback: if inline greeting wasn't returned (e.g. old server),
+          // request one via the dedicated /greeting endpoint.
+          void fetchGreeting(conversation.id);
         }
         client.sendWsMessage({
           type: "active-conversation",
@@ -2415,7 +3323,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeConversationIdRef.current = previousConversationId;
         setConversationMessages(previousMessages);
         setCompanionMessageCutoffTs(previousCutoffTs);
-        greetingFiredRef.current = previousMessages.length > 0;
+        greetingFiredRef.current =
+          hasConversationBootstrapMessage(previousMessages);
         if (previousConversationId) {
           client.sendWsMessage({
             type: "active-conversation",
@@ -2426,10 +3335,107 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [
       companionMessageCutoffTs,
-      requestGreetingWhenRunning,
+      fetchGreeting,
       resetConversationDraftState,
-      scheduleGreetingWaveForCompanion,
       uiLanguage,
+      activeConversationIdRef,
+      conversationMessagesRef,
+      greetingFiredRef,
+      interruptActiveChatPipeline,
+      setActiveConversationId,
+      setCompanionMessageCutoffTs,
+      setConversationMessages,
+      setConversations,
+    ],
+  );
+
+  /**
+   * After agent is up: load conversations; if the server has none, create a
+   * default thread (same as sidebar "new chat") so greeting/bootstrap can run.
+   */
+  const bootstrapConversationAfterAgentReady = useCallback(
+    async (
+      context: string,
+      options?: {
+        forceFreshConversation?: boolean;
+        skipAgentRunningWait?: boolean;
+      },
+    ) => {
+      traceMiladyGreeting(`${context}:begin`, {
+        forceFreshConversation: options?.forceFreshConversation === true,
+        skipAgentRunningWait: options?.skipAgentRunningWait === true,
+      });
+      if (options?.skipAgentRunningWait !== true) {
+        await waitForOnboardingGreetingBootstrap();
+      }
+      if (options?.forceFreshConversation === true) {
+        try {
+          const { conversations: existingConversations } =
+            await client.listConversations();
+          setConversations(existingConversations);
+        } catch (err) {
+          console.warn(
+            "[milady][chat:init] failed to load existing conversations before onboarding handoff",
+            err,
+          );
+          setConversations([]);
+        }
+        greetingFiredRef.current = false;
+        conversationMessagesRef.current = [];
+        setConversationMessages([]);
+        setActiveConversationId(null);
+        activeConversationIdRef.current = null;
+        traceMiladyGreeting(`${context}:force_fresh_conversation`);
+        await handleNewConversation();
+        if (!activeConversationIdRef.current) {
+          throw new Error("Failed to create your first conversation.");
+        }
+        return;
+      }
+      const greetConvId = await hydrateInitialConversationState();
+      traceMiladyGreeting(`${context}:hydrate`, {
+        greetConvId,
+        activeConversationId: activeConversationIdRef.current,
+        messageCount: conversationMessagesRef.current.length,
+        greetingFired: greetingFiredRef.current,
+      });
+
+      if (!greetConvId && !activeConversationIdRef.current) {
+        traceMiladyGreeting(`${context}:create_default_conversation`);
+        await handleNewConversation();
+        traceMiladyGreeting(`${context}:after_create`, {
+          activeConversationId: activeConversationIdRef.current,
+          messageCount: conversationMessagesRef.current.length,
+          greetingFired: greetingFiredRef.current,
+        });
+        return;
+      }
+
+      if (greetConvId) {
+        traceMiladyGreeting(`${context}:request_greeting`, { greetConvId });
+        await requestGreetingWhenRunning(greetConvId);
+        traceMiladyGreeting(`${context}:after_request_greeting`, {
+          messageCount: conversationMessagesRef.current.length,
+          greetingFired: greetingFiredRef.current,
+        });
+      } else {
+        traceMiladyGreeting(`${context}:skip_request_greeting`, {
+          activeConversationId: activeConversationIdRef.current,
+          messageCount: conversationMessagesRef.current.length,
+        });
+      }
+    },
+    [
+      activeConversationIdRef,
+      conversationMessagesRef,
+      greetingFiredRef,
+      handleNewConversation,
+      hydrateInitialConversationState,
+      requestGreetingWhenRunning,
+      setActiveConversationId,
+      setConversationMessages,
+      setConversations,
+      waitForOnboardingGreetingBootstrap,
     ],
   );
 
@@ -2460,6 +3466,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     handleNewConversation,
     tab,
     uiShellMode,
+    companionStaleConversationRefreshRef,
   ]);
 
   const appendLocalCommandTurn = useCallback(
@@ -2483,7 +3490,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         },
       ]);
     },
-    [],
+    [setConversationMessages],
   );
 
   const tryHandlePrefixedChatCommand = useCallback(
@@ -2703,65 +3710,206 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [appendLocalCommandTurn],
   );
 
-  const sendChatText = useCallback(
-    async (
-      rawInput: string,
-      options?: {
-        channelType?: ConversationChannelType;
-        conversationId?: string | null;
-        images?: ImageAttachment[];
-        clearChatInput?: boolean;
-      },
-    ) => {
-      const hasAttachedImages = Boolean(options?.images?.length);
-      const rawText = rawInput.trim();
+  const runQueuedChatSend = useCallback(
+    async (turn: Omit<QueuedChatSend, "resolve" | "reject">) => {
+      const hasAttachedImages = Boolean(turn.images?.length);
+      const rawText = turn.rawInput.trim();
       if (!rawText && !hasAttachedImages) return;
-      if (chatSendBusyRef.current) return;
-      chatSendBusyRef.current = true;
-      const sendNonce = ++chatSendNonceRef.current;
-      const channelType = options?.channelType ?? "DM";
+
+      const channelType = turn.channelType;
       const conversationMode: ConversationMode =
         channelType === "VOICE_DM" || channelType === "VOICE_GROUP"
           ? "simple"
           : chatMode;
-      const imagesToSend = options?.images;
+      const imagesToSend = turn.images;
       let controller: AbortController | null = null;
 
+      let text = hasAttachedImages
+        ? rawText || "Please review the attached image."
+        : rawText;
+      if (rawText) {
+        let commandResult: { handled: boolean; rewrittenText?: string };
+        try {
+          commandResult = await tryHandlePrefixedChatCommand(rawText);
+        } catch (err) {
+          appendLocalCommandTurn(
+            rawText,
+            `Command failed: ${err instanceof Error ? err.message : "unknown error"}`,
+          );
+          return;
+        }
+        if (commandResult.handled) {
+          return;
+        }
+        if (
+          typeof commandResult.rewrittenText === "string" &&
+          commandResult.rewrittenText.trim()
+        ) {
+          text = commandResult.rewrittenText.trim();
+        }
+      }
+
+      let convId: string =
+        turn.conversationId ?? activeConversationIdRef.current ?? "";
+      if (!convId) {
+        try {
+          const { conversation } = await client.createConversation(undefined, {
+            lang: uiLanguage,
+          });
+          const nextCutoffTs = Date.now();
+          setConversations((prev) => [conversation, ...prev]);
+          setActiveConversationId(conversation.id);
+          activeConversationIdRef.current = conversation.id;
+          setCompanionMessageCutoffTs(nextCutoffTs);
+          convId = conversation.id;
+        } catch {
+          return;
+        }
+      }
+
+      client.sendWsMessage({
+        type: "active-conversation",
+        conversationId: convId,
+      });
+
+      const activeConv = conversations.find((c) => c.id === convId);
+      if (
+        activeConv &&
+        (!activeConv.title ||
+          activeConv.title === "New Chat" ||
+          activeConv.title === "companion.newChat" ||
+          activeConv.title === "conversations.newChatTitle")
+      ) {
+        const fallbackTitle =
+          text.length > 15 ? `${text.slice(0, 15)}...` : text;
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === convId ? { ...c, title: fallbackTitle } : c,
+          ),
+        );
+      }
+
+      const now = Date.now();
+      const userMsgId = `temp-${now}`;
+      const assistantMsgId = `temp-resp-${now}`;
+
+      setCompanionMessageCutoffTs(now);
+      setConversationMessages((prev: ConversationMessage[]) => [
+        ...prev,
+        { id: userMsgId, role: "user", text, timestamp: now },
+        { id: assistantMsgId, role: "assistant", text: "", timestamp: now },
+      ]);
+      setChatFirstTokenReceived(false);
+
+      controller = new AbortController();
+      chatAbortRef.current = controller;
+      let streamedAssistantText = "";
+
       try {
-        let text = hasAttachedImages
-          ? rawText || "Please review the attached image."
-          : rawText;
-        if (rawText) {
-          let commandResult: { handled: boolean; rewrittenText?: string };
-          try {
-            commandResult = await tryHandlePrefixedChatCommand(rawText);
-          } catch (err) {
-            appendLocalCommandTurn(
-              rawText,
-              `Command failed: ${err instanceof Error ? err.message : "unknown error"}`,
+        const data = await client.sendConversationMessageStream(
+          convId,
+          text,
+          (token, accumulatedText) => {
+            const nextText =
+              typeof accumulatedText === "string"
+                ? accumulatedText
+                : mergeStreamingText(streamedAssistantText, token);
+            if (nextText === streamedAssistantText) return;
+            streamedAssistantText = nextText;
+            setChatFirstTokenReceived(true);
+            setConversationMessages((prev) =>
+              prev.map((message) =>
+                message.id !== assistantMsgId
+                  ? message
+                  : message.text === nextText
+                    ? message
+                    : { ...message, text: nextText },
+              ),
             );
-            if (options?.clearChatInput) {
-              setChatInput("");
-            }
-            return;
-          }
-          if (commandResult.handled) {
-            if (options?.clearChatInput) {
-              setChatInput("");
-            }
-            return;
-          }
-          if (
-            typeof commandResult.rewrittenText === "string" &&
-            commandResult.rewrittenText.trim()
-          ) {
-            text = commandResult.rewrittenText.trim();
-          }
+          },
+          channelType,
+          controller.signal,
+          imagesToSend,
+          conversationMode,
+          turn.metadata,
+        );
+
+        if (!data.text.trim()) {
+          setConversationMessages((prev) =>
+            prev.filter((message) => message.id !== assistantMsgId),
+          );
+        } else if (
+          shouldApplyFinalStreamText(streamedAssistantText, data.text)
+        ) {
+          setConversationMessages((prev) => {
+            let changed = false;
+            const next = prev.map((message) => {
+              if (message.id !== assistantMsgId) return message;
+              if (message.text === data.text) return message;
+              changed = true;
+              return { ...message, text: data.text };
+            });
+            return changed ? next : prev;
+          });
+        }
+        if (data.usage) {
+          setChatLastUsage({
+            promptTokens: data.usage.promptTokens,
+            completionTokens: data.usage.completionTokens,
+            totalTokens: data.usage.totalTokens,
+            model: data.usage.model,
+            updatedAt: Date.now(),
+          });
         }
 
-        let convId: string =
-          options?.conversationId ?? activeConversationId ?? "";
-        if (!convId) {
+        if (!data.completed && streamedAssistantText.trim()) {
+          setConversationMessages((prev) =>
+            prev.map((message) =>
+              message.id === assistantMsgId
+                ? { ...message, interrupted: true }
+                : message,
+            ),
+          );
+        }
+
+        // Action callbacks can persist additional assistant turns that are not
+        // mirrored by the optimistic streaming placeholder in local state.
+        if (activeConversationIdRef.current === convId) {
+          await loadConversationMessages(convId);
+        }
+
+        const userMessageCount = conversationMessagesRef.current.filter(
+          (message) =>
+            message.role === "user" && !message.id.startsWith("temp-"),
+        ).length;
+
+        if (userMessageCount === 1) {
+          void client
+            .renameConversation(convId, "", { generate: true })
+            .then(() => {
+              void loadConversations();
+            });
+        } else {
+          void loadConversations();
+        }
+
+        if (elizaCloudEnabled || elizaCloudConnected) {
+          void pollCloudCredits();
+        }
+      } catch (err) {
+        const abortError = err as Error;
+        if (abortError.name === "AbortError") {
+          setConversationMessages((prev) =>
+            prev.filter(
+              (message) =>
+                !(message.id === assistantMsgId && !message.text.trim()),
+            ),
+          );
+          return;
+        }
+
+        const status = (err as { status?: number }).status;
+        if (status === 404) {
           try {
             const { conversation } = await client.createConversation();
             const nextCutoffTs = Date.now();
@@ -2769,205 +3917,167 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setActiveConversationId(conversation.id);
             activeConversationIdRef.current = conversation.id;
             setCompanionMessageCutoffTs(nextCutoffTs);
-            convId = conversation.id;
+            client.sendWsMessage({
+              type: "active-conversation",
+              conversationId: conversation.id,
+            });
+
+            const retryData = await client.sendConversationMessage(
+              conversation.id,
+              text,
+              channelType,
+              imagesToSend,
+              conversationMode,
+            );
+            setConversationMessages(
+              filterRenderableConversationMessages([
+                {
+                  id: `temp-${Date.now()}`,
+                  role: "user",
+                  text,
+                  timestamp: Date.now(),
+                },
+                {
+                  id: `temp-resp-${Date.now()}`,
+                  role: "assistant",
+                  text: retryData.text,
+                  timestamp: Date.now(),
+                },
+              ]),
+            );
           } catch {
-            return;
-          }
-        }
-
-        client.sendWsMessage({
-          type: "active-conversation",
-          conversationId: convId,
-        });
-
-        const now = Date.now();
-        const userMsgId = `temp-${now}`;
-        const assistantMsgId = `temp-resp-${now}`;
-
-        setCompanionMessageCutoffTs(now);
-        setConversationMessages((prev: ConversationMessage[]) => [
-          ...prev,
-          { id: userMsgId, role: "user", text, timestamp: now },
-          { id: assistantMsgId, role: "assistant", text: "", timestamp: now },
-        ]);
-        if (options?.clearChatInput) {
-          setChatInput("");
-        }
-        setChatSending(true);
-        setChatFirstTokenReceived(false);
-
-        controller = new AbortController();
-        chatAbortRef.current = controller;
-        let streamedAssistantText = "";
-
-        try {
-          const data = await client.sendConversationMessageStream(
-            convId,
-            text,
-            (token, accumulatedText) => {
-              const nextText =
-                typeof accumulatedText === "string"
-                  ? accumulatedText
-                  : mergeStreamingText(streamedAssistantText, token);
-              if (nextText === streamedAssistantText) return;
-              streamedAssistantText = nextText;
-              setChatFirstTokenReceived(true);
-              setConversationMessages((prev) =>
-                prev.map((message) =>
-                  message.id !== assistantMsgId
-                    ? message
-                    : message.text === nextText
-                      ? message
-                      : { ...message, text: nextText },
-                ),
-              );
-            },
-            channelType,
-            controller.signal,
-            imagesToSend,
-            conversationMode,
-          );
-
-          if (!data.text.trim()) {
-            setConversationMessages((prev) =>
-              prev.filter((message) => message.id !== assistantMsgId),
-            );
-          } else if (
-            shouldApplyFinalStreamText(streamedAssistantText, data.text)
-          ) {
-            setConversationMessages((prev) => {
-              let changed = false;
-              const next = prev.map((message) => {
-                if (message.id !== assistantMsgId) return message;
-                if (message.text === data.text) return message;
-                changed = true;
-                return { ...message, text: data.text };
-              });
-              return changed ? next : prev;
-            });
-          }
-          if (data.usage) {
-            setChatLastUsage({
-              promptTokens: data.usage.promptTokens,
-              completionTokens: data.usage.completionTokens,
-              totalTokens: data.usage.totalTokens,
-              model: data.usage.model,
-              updatedAt: Date.now(),
-            });
-          }
-
-          if (!data.completed && streamedAssistantText.trim()) {
-            setConversationMessages((prev) =>
-              prev.map((message) =>
-                message.id === assistantMsgId
-                  ? { ...message, interrupted: true }
-                  : message,
-              ),
-            );
-          }
-          void loadConversations();
-        } catch (err) {
-          const abortError = err as Error;
-          if (abortError.name === "AbortError") {
             setConversationMessages((prev) =>
               prev.filter(
                 (message) =>
                   !(message.id === assistantMsgId && !message.text.trim()),
               ),
             );
-            return;
           }
-
-          const status = (err as { status?: number }).status;
-          if (status === 404) {
-            try {
-              const { conversation } = await client.createConversation();
-              const nextCutoffTs = Date.now();
-              setConversations((prev) => [conversation, ...prev]);
-              setActiveConversationId(conversation.id);
-              activeConversationIdRef.current = conversation.id;
-              setCompanionMessageCutoffTs(nextCutoffTs);
-              client.sendWsMessage({
-                type: "active-conversation",
-                conversationId: conversation.id,
-              });
-
-              const retryData = await client.sendConversationMessage(
-                conversation.id,
-                text,
-                channelType,
-                imagesToSend,
-                conversationMode,
-              );
-              setConversationMessages(
-                filterRenderableConversationMessages([
-                  {
-                    id: `temp-${Date.now()}`,
-                    role: "user",
-                    text,
-                    timestamp: Date.now(),
-                  },
-                  {
-                    id: `temp-resp-${Date.now()}`,
-                    role: "assistant",
-                    text: retryData.text,
-                    timestamp: Date.now(),
-                  },
-                ]),
-              );
-            } catch {
-              setConversationMessages((prev) =>
-                prev.filter(
-                  (message) =>
-                    !(message.id === assistantMsgId && !message.text.trim()),
-                ),
-              );
-            }
-          } else {
-            await loadConversationMessages(convId);
-          }
-        } finally {
-          if (chatAbortRef.current === controller) {
-            chatAbortRef.current = null;
-          }
-          if (chatSendNonceRef.current === sendNonce) {
-            chatSendBusyRef.current = false;
-            setChatSending(false);
-            setChatFirstTokenReceived(false);
-          }
+        } else {
+          await loadConversationMessages(convId);
         }
       } finally {
-        if (controller == null && chatSendNonceRef.current === sendNonce) {
-          chatSendBusyRef.current = false;
+        if (chatAbortRef.current === controller) {
+          chatAbortRef.current = null;
         }
       }
     },
     [
-      activeConversationId,
       appendLocalCommandTurn,
       chatMode,
       loadConversationMessages,
       loadConversations,
       tryHandlePrefixedChatCommand,
+      activeConversationIdRef,
+      chatAbortRef,
+      conversationMessagesRef.current.filter,
+      conversations.find,
+      setActiveConversationId,
+      setChatFirstTokenReceived,
+      setChatLastUsage,
+      setCompanionMessageCutoffTs,
+      setConversationMessages,
+      setConversations,
+      uiLanguage,
+      elizaCloudEnabled,
+      elizaCloudConnected,
+      pollCloudCredits,
     ],
+  );
+
+  const flushQueuedChatSends = useCallback(async () => {
+    if (chatSendBusyRef.current) return;
+    chatSendBusyRef.current = true;
+    setChatSending(true);
+
+    try {
+      while (chatSendQueueRef.current.length > 0) {
+        const nextTurn = chatSendQueueRef.current.shift();
+        if (!nextTurn) break;
+        try {
+          await runQueuedChatSend(nextTurn);
+          nextTurn.resolve();
+        } catch (err) {
+          nextTurn.reject(err);
+        }
+      }
+    } finally {
+      chatSendBusyRef.current = false;
+      setChatSending(false);
+      setChatFirstTokenReceived(false);
+    }
+  }, [
+    chatSendBusyRef,
+    runQueuedChatSend,
+    setChatFirstTokenReceived,
+    setChatSending,
+  ]);
+
+  const sendChatText = useCallback(
+    async (
+      rawInput: string,
+      options?: {
+        channelType?: ConversationChannelType;
+        conversationId?: string | null;
+        images?: ImageAttachment[];
+        metadata?: Record<string, unknown>;
+      },
+    ) => {
+      const hasAttachedImages = Boolean(options?.images?.length);
+      if (!rawInput.trim() && !hasAttachedImages) {
+        return;
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        chatSendQueueRef.current.push({
+          rawInput,
+          channelType: options?.channelType ?? "DM",
+          conversationId: options?.conversationId,
+          images: options?.images,
+          metadata: options?.metadata,
+          resolve,
+          reject,
+        });
+        setChatSending(true);
+        void flushQueuedChatSends();
+      });
+    },
+    [flushQueuedChatSends, setChatSending],
   );
 
   const handleChatSend = useCallback(
     async (channelType: ConversationChannelType = "DM") => {
-      const imagesToSend = chatPendingImages.length
-        ? chatPendingImages
+      const claimedInput = chatInputRef.current;
+      const imagesToSend = chatPendingImagesRef.current.length
+        ? [...chatPendingImagesRef.current]
         : undefined;
+
+      if (!claimedInput.trim() && !imagesToSend?.length) {
+        return;
+      }
+
+      chatInputRef.current = "";
+      chatPendingImagesRef.current = [];
+      setChatInput("");
       setChatPendingImages([]);
-      await sendChatText(chatInput, {
+
+      await sendChatText(claimedInput, {
         channelType,
+        conversationId: activeConversationIdRef.current,
         images: imagesToSend,
-        clearChatInput: true,
       });
     },
-    [chatInput, chatPendingImages, sendChatText],
+    [
+      activeConversationIdRef,
+      chatInputRef,
+      chatPendingImagesRef,
+      sendChatText,
+      setChatInput,
+      setChatPendingImages,
+    ],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: t is stable but defined later
+  // biome-ignore lint/correctness/useExhaustiveDependencies: conversations omitted to limit rerenders
   const sendActionMessage = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
@@ -2982,8 +4092,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         let convId: string = activeConversationId ?? "";
         if (!convId) {
           try {
+            const actionTitle =
+              trimmed.length > 50 ? `${trimmed.slice(0, 47)}...` : trimmed;
             const { conversation } = await client.createConversation(
-              t("conversations.newChatTitle"),
+              actionTitle || t("companion.newChat"),
             );
             const nextCutoffTs = Date.now();
             setConversations((prev) => [conversation, ...prev]);
@@ -3000,6 +4112,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
           type: "active-conversation",
           conversationId: convId,
         });
+
+        // Eagerly rename "New Chat" using a snippet of the first message
+        const activeConv = conversations.find((c) => c.id === convId);
+        if (
+          activeConv &&
+          (!activeConv.title ||
+            activeConv.title === "New Chat" ||
+            activeConv.title === "companion.newChat" ||
+            activeConv.title === "conversations.newChatTitle")
+        ) {
+          const fallbackTitle =
+            trimmed.length > 15 ? `${trimmed.slice(0, 15)}...` : trimmed;
+          setConversations((prev) =>
+            prev.map((c) =>
+              c.id === convId ? { ...c, title: fallbackTitle } : c,
+            ),
+          );
+        }
 
         const now = Date.now();
         const userMsgId = `temp-action-${now}`;
@@ -3064,7 +4194,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
               return changed ? next : prev;
             });
           }
+
+          if (!data.completed && streamedAssistantText.trim()) {
+            setConversationMessages((prev) =>
+              prev.map((message) =>
+                message.id === assistantMsgId
+                  ? { ...message, interrupted: true }
+                  : message,
+              ),
+            );
+          }
+
+          // Keep the visible thread authoritative when the server stores
+          // additional action-generated messages during a successful send.
+          if (activeConversationIdRef.current === convId) {
+            await loadConversationMessages(convId);
+          }
+
           void loadConversations();
+          if (elizaCloudEnabled || elizaCloudConnected) {
+            void pollCloudCredits();
+          }
         } catch (err) {
           const abortError = err as Error;
           if (abortError.name === "AbortError") {
@@ -3085,34 +4235,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
             chatSendBusyRef.current = false;
             setChatSending(false);
             setChatFirstTokenReceived(false);
+            if (chatSendQueueRef.current.length > 0) {
+              void flushQueuedChatSends();
+            }
           }
         }
       } finally {
         if (controller == null && chatSendNonceRef.current === sendNonce) {
           chatSendBusyRef.current = false;
+          if (chatSendQueueRef.current.length > 0) {
+            void flushQueuedChatSends();
+          }
         }
       }
     },
     [
       chatMode,
       activeConversationId,
+      chatSendQueueRef,
+      elizaCloudEnabled,
+      elizaCloudConnected,
+      flushQueuedChatSends,
       loadConversationMessages,
       loadConversations,
+      pollCloudCredits,
+      uiLanguage,
     ],
   );
 
   const handleChatStop = useCallback(() => {
-    chatSendBusyRef.current = false;
-    chatAbortRef.current?.abort();
-    chatAbortRef.current = null;
-    setChatSending(false);
-    setChatFirstTokenReceived(false);
+    interruptActiveChatPipeline();
 
     // Also stop any active PTY sessions — the user wants everything to halt
     for (const session of ptySessions) {
       client.stopCodingAgent(session.sessionId).catch(() => {});
     }
-  }, [ptySessions]);
+  }, [interruptActiveChatPipeline, ptySessions]);
 
   const handleChatRetry = useCallback(
     (assistantMsgId: string) => {
@@ -3145,7 +4303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         void sendChatText(retryText);
       }
     },
-    [sendChatText],
+    [sendChatText, setConversationMessages],
   );
 
   const handleChatEdit = useCallback(
@@ -3182,11 +4340,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      chatSendBusyRef.current = false;
-      chatAbortRef.current?.abort();
-      chatAbortRef.current = null;
-      setChatSending(false);
-      setChatFirstTokenReceived(false);
+      interruptActiveChatPipeline();
       setChatInput("");
 
       const preservedMessages = currentMessages.slice(0, messageIndex);
@@ -3209,7 +4363,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [loadConversationMessages, sendChatText, setActionNotice],
+    [
+      loadConversationMessages,
+      sendChatText,
+      setActionNotice,
+      activeConversationIdRef.current,
+      conversationMessagesRef,
+      interruptActiveChatPipeline,
+      setChatInput,
+      setConversationMessages,
+    ],
   );
 
   const handleChatClear = useCallback(async () => {
@@ -3218,6 +4381,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setActionNotice("No active conversation to clear.", "info", 2200);
       return;
     }
+    interruptActiveChatPipeline();
     try {
       await client.deleteConversation(convId);
       setActiveConversationId(null);
@@ -3250,7 +4414,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         4200,
       );
     }
-  }, [activeConversationId, loadConversations, setActionNotice]);
+  }, [
+    activeConversationId,
+    interruptActiveChatPipeline,
+    loadConversations,
+    setActionNotice,
+    activeConversationIdRef,
+    setActiveConversationId,
+    setConversationMessages,
+    setUnreadConversations,
+  ]);
 
   const handleSelectConversation = useCallback(
     async (id: string) => {
@@ -3260,6 +4433,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         conversationMessagesRef.current.length > 0
       )
         return;
+
+      interruptActiveChatPipeline();
 
       // Clean up empty conversations: if the previous conversation has only
       // system/greeting messages and no user messages, delete it silently.
@@ -3350,12 +4525,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       loadConversationMessages,
       loadConversations,
       setActionNotice,
+      activeConversationIdRef,
+      conversationHydrationEpochRef,
+      conversationMessagesRef.current,
+      interruptActiveChatPipeline,
+      setActiveConversationId,
+      setConversationMessages,
+      setConversations,
+      setUnreadConversations,
     ],
   );
 
   const handleDeleteConversation = useCallback(
     async (id: string) => {
       const deletingActive = activeConversationId === id;
+      if (deletingActive) {
+        interruptActiveChatPipeline();
+      }
       try {
         await client.deleteConversation(id);
         setConversations((prev) =>
@@ -3424,9 +4610,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [
       activeConversationId,
+      interruptActiveChatPipeline,
       loadConversationMessages,
       loadConversations,
       setActionNotice,
+      activeConversationIdRef,
+      setActiveConversationId,
+      setConversationMessages,
+      setConversations,
+      setUnreadConversations,
     ],
   );
 
@@ -3462,7 +4654,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       }
     },
-    [loadConversations, setActionNotice],
+    [loadConversations, setActionNotice, setConversations],
+  );
+
+  const suggestConversationTitle = useCallback(
+    async (id: string) => {
+      try {
+        const { conversation } = await client.renameConversation(id, "", {
+          generate: true,
+        });
+        setConversations((prev) =>
+          prev.map((existing) =>
+            existing.id === id ? conversation : existing,
+          ),
+        );
+        const next = conversation.title?.trim();
+        return next && next.length > 0 ? next : null;
+      } catch (err) {
+        const status = (err as { status?: number }).status;
+        if (status === 404) {
+          await loadConversations();
+          setActionNotice(
+            "Conversation was not found. Refreshed the conversation list.",
+            "info",
+            3200,
+          );
+          return null;
+        }
+        setActionNotice(
+          `Failed to suggest conversation title: ${err instanceof Error ? err.message : "network error"}`,
+          "error",
+          4200,
+        );
+        return null;
+      }
+    },
+    [loadConversations, setActionNotice, setConversations],
   );
 
   // ── Pairing ────────────────────────────────────────────────────────
@@ -4023,7 +5250,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCharacterSaveSuccess(null);
     try {
       const draft = prepareDraftForSave(characterDraft);
-      if (!draft.name?.trim()) {
+      if (!(draft.name as string | undefined)?.trim()) {
         throw new Error("Character name is required before saving.");
       }
       const { agentName } = await client.updateCharacter(draft);
@@ -4051,7 +5278,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       throw new Error(finalMessage);
     }
     setCharacterSaving(false);
-  }, [characterDraft, agentStatus, loadCharacter, selectedVrmIndex]);
+  }, [
+    characterDraft,
+    agentStatus,
+    loadCharacter,
+    selectedVrmIndex,
+    setAgentStatus,
+  ]);
 
   const handleCharacterFieldInput = useCallback(
     <K extends keyof CharacterData>(field: K, value: CharacterData[K]) => {
@@ -4116,226 +5349,483 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // ── Onboarding ─────────────────────────────────────────────────────
 
-  const handleOnboardingFinish = useCallback(async () => {
-    if (onboardingFinishBusyRef.current || onboardingRestarting) return;
-    if (!onboardingOptions) return;
-    if (onboardingFinishSavingRef.current || onboardingRestarting) return;
-    const style = onboardingOptions.styles.find(
-      (s: StylePreset) => s.catchphrase === onboardingStyle,
+  const completeOnboardingChatHandoff = useCallback(() => {
+    clearPersistedOnboardingStep();
+    onboardingResumeConnectionRef.current = null;
+    onboardingCompletionCommittedRef.current = true;
+    setOnboardingMode("basic");
+    setOnboardingActiveGuide(null);
+    setPostOnboardingChecklistDismissed(false);
+    setOnboardingDetectedProviders(
+      onboardingDetectedProviders.map((provider) => {
+        const { apiKey: _, ...rest } = provider;
+        return rest;
+      }) as AppState["onboardingDetectedProviders"],
     );
-    const systemPrompt = style?.system
-      ? style.system.replace(/\{\{name\}\}/g, onboardingName)
-      : `You are ${onboardingName}, an autonomous AI agent powered by elizaOS. ${onboardingOptions.sharedStyleRules}`;
-    onboardingFinishBusyRef.current = true;
-    setOnboardingRestarting(true);
-    onboardingFinishSavingRef.current = true;
-
-    try {
-      let connection =
-        buildOnboardingConnectionConfig({
-          onboardingRunMode,
-          onboardingCloudProvider,
-          onboardingProvider,
-          onboardingApiKey,
-          onboardingPrimaryModel,
-          onboardingOpenRouterModel,
-          onboardingRemoteConnected,
-          onboardingRemoteApiBase,
-          onboardingRemoteToken,
-          onboardingSmallModel,
-          onboardingLargeModel,
-        }) ?? onboardingResumeConnectionRef.current;
-
-      // If connection is still null (e.g. after a permissions restart wiped
-      // form state), try one more time by re-deriving from the server config.
-      if (!connection) {
-        try {
-          const freshConfig = await client.getConfig();
-          connection = deriveOnboardingResumeConnection(freshConfig);
-          if (connection) {
-            onboardingResumeConnectionRef.current = connection;
-          }
-        } catch {
-          /* config fetch failed — fall through to the error below */
-        }
-      }
-
-      if (!connection) {
-        const startOver = await confirmDesktopAction({
-          title: "Setup Incomplete",
-          message:
-            "Your connection settings could not be restored after restart.",
-          detail: 'Choose "Start Over" to begin setup again.',
-          type: "warning",
-          confirmLabel: "Start Over",
-          cancelLabel: "Cancel",
-        });
-        if (startOver) {
-          clearPersistedOnboardingStep();
-          onboardingResumeConnectionRef.current = null;
-          setOnboardingStep("wakeUp");
-          setOnboardingMode("basic");
-          setOnboardingActiveGuide(null);
-          setOnboardingDeferredTasks([]);
-          setPostOnboardingChecklistDismissed(false);
-          setOnboardingName("Eliza");
-          setOnboardingStyle("");
-          setOnboardingRunMode("cloud");
-          setOnboardingCloudProvider("");
-          setOnboardingProvider("");
-          setOnboardingApiKey("");
-          setOnboardingPrimaryModel("");
-          setOnboardingOpenRouterModel("");
-          setOnboardingRemoteConnected(false);
-          setOnboardingRemoteApiBase("");
-          setOnboardingRemoteToken("");
-          setOnboardingSmallModel("");
-          setOnboardingLargeModel("");
-        }
-        return;
-      }
-      const rpcSel = onboardingRpcSelections as Record<string, string>;
-      const rpcK = onboardingRpcKeys as Record<string, string>;
-      const nextWalletConfig = buildWalletRpcUpdateRequest({
-        walletConfig,
-        rpcFieldValues: rpcK,
-        selectedProviders: {
-          evm: rpcSel.evm,
-          bsc: rpcSel.bsc,
-          solana: rpcSel.solana,
-        },
-      });
-
-      await client.submitOnboarding({
-        name: onboardingName,
-        sandboxMode: "off" as const,
-        bio: style?.bio ?? ["An autonomous AI agent."],
-        systemPrompt,
-        style: style?.style,
-        adjectives: style?.adjectives,
-        postExamples: style?.postExamples,
-        messageExamples: style?.messageExamples,
-        connection,
-        walletConfig: nextWalletConfig,
-      });
-      try {
-        setAgentStatus(await client.restartAgent());
-      } catch {
-        /* ignore */
-      }
-      await waitForOnboardingGreetingBootstrap();
-      const greetConvId = await hydrateInitialConversationState();
-      if (greetConvId) {
-        void requestGreetingWhenRunning(greetConvId, { showOverlay: true });
-      }
-      clearPersistedOnboardingStep();
-      onboardingResumeConnectionRef.current = null;
-      onboardingCompletionCommittedRef.current = true;
-      setOnboardingMode("basic");
-      setOnboardingActiveGuide(null);
-      setPostOnboardingChecklistDismissed(false);
-      setOnboardingDetectedProviders((providers) =>
-        providers.map((provider) => {
-          const nextProvider = { ...provider };
-          delete nextProvider.apiKey;
-          return nextProvider;
-        }),
-      );
-      setOnboardingComplete(true);
-      setTab("chat");
-    } catch (err) {
-      const startOver = await confirmDesktopAction({
-        title: "Setup Failed",
-        message: `${
-          err instanceof Error ? err.message : "network error"
-        }`,
-        detail:
-          'You can retry, or choose "Start Over" to begin setup from scratch.',
-        type: "warning",
-        confirmLabel: "Start Over",
-        cancelLabel: "Retry",
-      });
-      if (startOver) {
-        clearPersistedOnboardingStep();
-        onboardingResumeConnectionRef.current = null;
-        setOnboardingStep("wakeUp");
-        setOnboardingMode("basic");
-        setOnboardingActiveGuide(null);
-        setOnboardingDeferredTasks([]);
-        setPostOnboardingChecklistDismissed(false);
-        setOnboardingName("Eliza");
-        setOnboardingStyle("");
-        setOnboardingRunMode("cloud");
-        setOnboardingCloudProvider("");
-        setOnboardingProvider("");
-        setOnboardingApiKey("");
-        setOnboardingPrimaryModel("");
-        setOnboardingOpenRouterModel("");
-        setOnboardingRemoteConnected(false);
-        setOnboardingRemoteApiBase("");
-        setOnboardingRemoteToken("");
-        setOnboardingSmallModel("");
-        setOnboardingLargeModel("");
-      }
-    } finally {
-      onboardingFinishSavingRef.current = false;
-      onboardingFinishBusyRef.current = false;
-      setOnboardingRestarting(false);
-    }
+    setOnboardingComplete(true);
+    initialTabSetRef.current = true;
+    setTab(DEFAULT_LANDING_TAB);
+    setOnboardingHandoffPhase("idle");
+    setOnboardingHandoffError(null);
+    onboardingHandoffRetryStateRef.current = null;
+    void loadCharacter();
   }, [
-    onboardingRestarting,
-    onboardingOptions,
-    onboardingStyle,
-    onboardingName,
-    onboardingRunMode,
-    onboardingCloudProvider,
-    onboardingSmallModel,
-    onboardingLargeModel,
-    onboardingProvider,
-    onboardingApiKey,
+    onboardingCompletionCommittedRef,
     onboardingDetectedProviders,
-    onboardingRemoteApiBase,
-    onboardingRemoteConnected,
-    onboardingRemoteToken,
-    onboardingOpenRouterModel,
-    onboardingPrimaryModel,
-    onboardingRpcSelections,
-    onboardingRpcKeys,
-    walletConfig,
-    hydrateInitialConversationState,
+    onboardingResumeConnectionRef,
+    setOnboardingActiveGuide,
+    setOnboardingComplete,
+    setOnboardingDetectedProviders,
+    setOnboardingMode,
+    setPostOnboardingChecklistDismissed,
     setTab,
-    requestGreetingWhenRunning,
-    waitForOnboardingGreetingBootstrap,
+    loadCharacter,
   ]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: t is stable but defined later
-  const handleOnboardingNext = useCallback(
+  const prepareOnboardingChatHandoffAttempt = useCallback(
+    (attempt: OnboardingHandoffRetryState) => {
+      onboardingHandoffRetryStateRef.current = attempt;
+      setOnboardingHandoffError(null);
+      setOnboardingHandoffPhase("fading");
+      setTab(DEFAULT_LANDING_TAB);
+      interruptActiveChatPipeline();
+      resetConversationDraftState();
+      setActiveConversationId(null);
+      setConversations([]);
+      setChatAwaitingGreeting(true);
+      setAgentStatus({
+        ...(agentStatus ?? {
+          agentName: onboardingName || "Milady",
+          model: undefined,
+          startedAt: undefined,
+          uptime: undefined,
+        }),
+        state: "starting",
+      });
+    },
+    [
+      agentStatus,
+      onboardingName,
+      interruptActiveChatPipeline,
+      resetConversationDraftState,
+      setActiveConversationId,
+      setAgentStatus,
+      setConversations,
+      setTab,
+    ],
+  );
+
+  const failOnboardingChatHandoff = useCallback((err: unknown) => {
+    console.error("[onboarding] Failed to hand off into chat", err);
+    setChatAwaitingGreeting(false);
+    setOnboardingHandoffError(
+      err instanceof Error ? err.message : "network error",
+    );
+    setOnboardingHandoffPhase("error");
+  }, []);
+
+  const runOnboardingChatHandoff = useCallback(
+    async (
+      mode: OnboardingHandoffMode,
+      retryState?: OnboardingHandoffRetryState | null,
+    ) => {
+      if (onboardingFinishBusyRef.current || onboardingRestarting) return;
+      if (!onboardingOptions) return;
+      if (onboardingFinishSavingRef.current || onboardingRestarting) return;
+
+      const attempt: OnboardingHandoffRetryState = retryState
+        ? { ...retryState }
+        : {
+            mode,
+            onboardingSubmitted: false,
+            skipCloudProvisioning: false,
+          };
+
+      prepareOnboardingChatHandoffAttempt(attempt);
+      onboardingFinishBusyRef.current = true;
+      setOnboardingRestarting(true);
+      onboardingFinishSavingRef.current = true;
+
+      try {
+        if (mode === "cloud_fast_track") {
+          const style = resolveSelectedOnboardingStyle({
+            styles: onboardingOptions.styles,
+            onboardingStyle,
+            selectedVrmIndex,
+            uiLanguage,
+          });
+          const defaultName =
+            style.name ?? getDefaultStylePreset(uiLanguage).name;
+
+          if (!attempt.onboardingSubmitted) {
+            setOnboardingHandoffPhase("saving");
+            await client.submitOnboarding({
+              name: onboardingName || defaultName,
+              bio: style?.bio ?? ["An autonomous AI agent."],
+              systemPrompt:
+                style?.system?.replace(
+                  /\{\{name\}\}/g,
+                  onboardingName || defaultName,
+                ) ??
+                `You are ${onboardingName || defaultName}, an autonomous AI agent powered by elizaOS.`,
+              style: style?.style,
+              adjectives: style?.adjectives,
+              postExamples: style?.postExamples,
+              messageExamples: style?.messageExamples,
+              topics: style?.topics,
+              avatarIndex: style?.avatarIndex ?? 1,
+              language: uiLanguage,
+              presetId: style?.id ?? "chen",
+              runMode: "cloud",
+              cloudProvider: "elizacloud",
+              smallModel: "moonshotai/kimi-k2-turbo",
+              largeModel: "moonshotai/kimi-k2-0905",
+            } as unknown as Parameters<typeof client.submitOnboarding>[0]);
+            attempt.onboardingSubmitted = true;
+            onboardingHandoffRetryStateRef.current = attempt;
+            try {
+              await persistOnboardingStyleVoice(style);
+            } catch (err) {
+              console.warn(
+                "[onboarding] Failed to persist cloud voice preset",
+                err,
+              );
+            }
+          }
+
+          setOnboardingHandoffPhase("restarting");
+          setAgentStatus(await restartAgentAfterOnboarding(client));
+          setOnboardingHandoffPhase("bootstrapping");
+          await bootstrapConversationAfterAgentReady(
+            "onboarding:cloud_fast_track",
+            { forceFreshConversation: true },
+          );
+          completeOnboardingChatHandoff();
+          return;
+        }
+
+        const style = resolveSelectedOnboardingStyle({
+          styles: onboardingOptions.styles,
+          onboardingStyle,
+          selectedVrmIndex,
+          uiLanguage,
+        });
+        const systemPrompt = style?.system
+          ? style.system.replace(/\{\{name\}\}/g, onboardingName)
+          : `You are ${onboardingName}, an autonomous AI agent powered by elizaOS. ${onboardingOptions.sharedStyleRules}`;
+
+        let connection =
+          buildOnboardingConnectionConfig({
+            onboardingRunMode,
+            onboardingCloudProvider,
+            onboardingProvider,
+            onboardingApiKey,
+            onboardingVoiceProvider,
+            onboardingVoiceApiKey,
+            onboardingPrimaryModel,
+            onboardingOpenRouterModel,
+            onboardingRemoteConnected,
+            onboardingRemoteApiBase,
+            onboardingRemoteToken,
+            onboardingSmallModel,
+            onboardingLargeModel,
+          }) ?? onboardingResumeConnectionRef.current;
+
+        if (!connection) {
+          try {
+            const freshConfig = await client.getConfig();
+            connection = deriveOnboardingResumeConnection(freshConfig);
+            if (connection) {
+              onboardingResumeConnectionRef.current = connection;
+            }
+          } catch {
+            /* config fetch failed — fall through to the error below */
+          }
+        }
+
+        if (!connection) {
+          throw new Error(
+            "Your connection settings could not be restored after restart.",
+          );
+        }
+
+        const rpcSel = onboardingRpcSelections as Record<string, string>;
+        const rpcK = onboardingRpcKeys as Record<string, string>;
+        const nextWalletConfig = buildWalletRpcUpdateRequest({
+          walletConfig,
+          rpcFieldValues: rpcK,
+          selectedProviders: {
+            evm: rpcSel.evm,
+            bsc: rpcSel.bsc,
+            solana: rpcSel.solana,
+          },
+        });
+
+        const isSandboxMode =
+          onboardingRunMode === "cloud" &&
+          onboardingCloudProvider === "elizacloud";
+        const isLocalMode = onboardingRunMode === "local" || !onboardingRunMode;
+
+        if (isSandboxMode) {
+          if (!attempt.skipCloudProvisioning) {
+            setOnboardingHandoffPhase("provisioning");
+            const cloudApiBase =
+              getBootConfig().cloudApiBase ?? "https://www.elizacloud.ai";
+            const authToken = ((window as unknown as Record<string, unknown>)
+              .__ELIZA_CLOUD_AUTH_TOKEN__ ?? "") as string;
+
+            if (!authToken) {
+              throw new Error(
+                "Eliza Cloud authentication required. Please log in first.",
+              );
+            }
+
+            await client.provisionCloudSandbox({
+              cloudApiBase,
+              authToken,
+              name: onboardingName,
+              bio: style?.bio ?? ["An autonomous AI agent."],
+              onProgress: (status, detail) => {
+                console.log(`[Sandbox] ${status}: ${detail ?? ""}`);
+              },
+            });
+
+            client.setBaseUrl(cloudApiBase);
+            client.setToken(authToken);
+            savePersistedConnectionMode({
+              runMode: "cloud",
+              cloudApiBase,
+              cloudAuthToken: authToken,
+            });
+            attempt.skipCloudProvisioning = true;
+            attempt.cloudApiBase = cloudApiBase;
+            attempt.authToken = authToken;
+            onboardingHandoffRetryStateRef.current = attempt;
+          } else {
+            if (attempt.cloudApiBase) {
+              client.setBaseUrl(attempt.cloudApiBase);
+            }
+            if (attempt.authToken) {
+              client.setToken(attempt.authToken);
+            }
+            savePersistedConnectionMode({
+              runMode: "cloud",
+              cloudApiBase: attempt.cloudApiBase,
+              cloudAuthToken: attempt.authToken,
+            });
+          }
+        } else if (isLocalMode) {
+          setOnboardingHandoffPhase("starting-backend");
+          try {
+            await invokeDesktopBridgeRequest({
+              rpcMethod: "agentStart",
+              ipcChannel: "agent:start",
+            });
+          } catch {
+            try {
+              const agentPluginId = "@miladyai/capacitor-agent";
+              const { Agent } = await import(/* @vite-ignore */ agentPluginId);
+              await Agent.start();
+            } catch {
+              /* dev mode where agent is already running */
+            }
+          }
+
+          const localDeadline = Date.now() + 120_000;
+          let pollMs = 1000;
+          while (Date.now() < localDeadline) {
+            try {
+              await client.getAuthStatus();
+              break;
+            } catch {
+              await new Promise((r) => setTimeout(r, pollMs));
+              pollMs = Math.min(pollMs * 1.5, 5000);
+            }
+          }
+
+          savePersistedConnectionMode({ runMode: "local" });
+        } else if (
+          onboardingRunMode === "cloud" &&
+          onboardingCloudProvider === "remote"
+        ) {
+          savePersistedConnectionMode({
+            runMode: "remote",
+            remoteApiBase: onboardingRemoteApiBase,
+            remoteAccessToken: onboardingRemoteToken || undefined,
+          });
+        }
+
+        if (!attempt.onboardingSubmitted) {
+          const sandboxMode = isSandboxMode ? "standard" : "off";
+          setOnboardingHandoffPhase("saving");
+          await client.submitOnboarding({
+            name: onboardingName,
+            sandboxMode: sandboxMode as "off",
+            bio: style?.bio ?? ["An autonomous AI agent."],
+            systemPrompt,
+            style: style?.style,
+            adjectives: style?.adjectives,
+            topics: style?.topics,
+            postExamples: style?.postExamples,
+            messageExamples: style?.messageExamples,
+            avatarIndex: style?.avatarIndex ?? selectedVrmIndex,
+            language: uiLanguage,
+            presetId: (style?.id ?? onboardingStyle) || "chen",
+            connection,
+            walletConfig: nextWalletConfig,
+          } as Parameters<typeof client.submitOnboarding>[0]);
+          attempt.onboardingSubmitted = true;
+          onboardingHandoffRetryStateRef.current = attempt;
+          try {
+            await persistOnboardingStyleVoice(style);
+          } catch (err) {
+            console.warn(
+              "[onboarding] Failed to persist selected voice preset",
+              err,
+            );
+          }
+
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+
+        setOnboardingHandoffPhase("restarting");
+        setAgentStatus(await restartAgentAfterOnboarding(client));
+        setOnboardingHandoffPhase("bootstrapping");
+        await bootstrapConversationAfterAgentReady("onboarding:full_finish", {
+          forceFreshConversation: true,
+        });
+        completeOnboardingChatHandoff();
+      } catch (err) {
+        failOnboardingChatHandoff(err);
+      } finally {
+        onboardingFinishSavingRef.current = false;
+        onboardingFinishBusyRef.current = false;
+        setOnboardingRestarting(false);
+      }
+    },
+    [
+      agentStatus,
+      onboardingRestarting,
+      onboardingOptions,
+      onboardingStyle,
+      onboardingName,
+      onboardingRunMode,
+      onboardingCloudProvider,
+      onboardingSmallModel,
+      onboardingLargeModel,
+      onboardingProvider,
+      onboardingApiKey,
+      onboardingRemoteApiBase,
+      onboardingRemoteConnected,
+      onboardingRemoteToken,
+      onboardingOpenRouterModel,
+      onboardingPrimaryModel,
+      onboardingVoiceProvider,
+      onboardingVoiceApiKey,
+      selectedVrmIndex,
+      uiLanguage,
+      onboardingRpcSelections,
+      onboardingRpcKeys,
+      walletConfig,
+      onboardingResumeConnectionRef,
+      onboardingFinishBusyRef,
+      onboardingFinishSavingRef,
+      setOnboardingRestarting,
+      prepareOnboardingChatHandoffAttempt,
+      bootstrapConversationAfterAgentReady,
+      completeOnboardingChatHandoff,
+      failOnboardingChatHandoff,
+    ],
+  );
+
+  const retryOnboardingHandoff = useCallback(async () => {
+    const retryState = onboardingHandoffRetryStateRef.current;
+    if (!retryState || onboardingRestarting) {
+      return;
+    }
+    await runOnboardingChatHandoff(retryState.mode, retryState);
+  }, [onboardingRestarting, runOnboardingChatHandoff]);
+
+  const cancelOnboardingHandoff = useCallback(() => {
+    onboardingHandoffRetryStateRef.current = null;
+    setChatAwaitingGreeting(false);
+    setOnboardingHandoffError(null);
+    setOnboardingHandoffPhase("idle");
+    if (
+      agentStatus?.state === "starting" ||
+      agentStatus?.state === "restarting"
+    ) {
+      void client
+        .getStatus()
+        .then((status) => setAgentStatus(status))
+        .catch(() => {
+          /* ignore */
+        });
+    }
+  }, [agentStatus, setAgentStatus]);
+
+  const handleOnboardingFinish = useCallback(async () => {
+    await runOnboardingChatHandoff(
+      elizaCloudConnected ? "cloud_fast_track" : "full",
+    );
+  }, [elizaCloudConnected, runOnboardingChatHandoff]);
+
+  // ── Onboarding motion (flow graph: packages/app-core/src/onboarding/flow.ts) ──
+  // WHY split from flow.ts: advance/revert need handleCloudLoginRef, finish,
+  // provider auto-fill, and dozens of state fields—keeping them here avoids a
+  // giant deps struct and stale-closure traps. WHY goToOnboardingStep: Welcome
+  // "Get Started" must not use raw setState(onboardingStep) alone or advanced
+  // mode's Flamina guide desyncs from the visible step.
+
+  const goToOnboardingStep = useCallback(
+    (step: OnboardingStep) => {
+      setOnboardingStep(step);
+      setOnboardingActiveGuide(
+        onboardingMode === "advanced"
+          ? getFlaminaTopicForOnboardingStep(step)
+          : null,
+      );
+    },
+    [onboardingMode, setOnboardingStep, setOnboardingActiveGuide],
+  );
+
+  const applyResetConnectionWizardToHostingStep = useCallback(() => {
+    const patch = getResetConnectionWizardToHostingStepPatch();
+    if (patch.onboardingRunMode !== undefined) {
+      setOnboardingRunMode(patch.onboardingRunMode);
+    }
+    if (patch.onboardingCloudProvider !== undefined) {
+      setOnboardingCloudProvider(patch.onboardingCloudProvider);
+    }
+    if (patch.onboardingProvider !== undefined) {
+      setOnboardingProvider(patch.onboardingProvider);
+    }
+    if (patch.onboardingApiKey !== undefined) {
+      setOnboardingApiKey(patch.onboardingApiKey);
+    }
+    if (patch.onboardingPrimaryModel !== undefined) {
+      setOnboardingPrimaryModel(patch.onboardingPrimaryModel);
+    }
+    if (patch.onboardingRemoteError !== undefined) {
+      setOnboardingRemoteError(patch.onboardingRemoteError);
+    }
+    if (patch.onboardingRemoteConnecting !== undefined) {
+      setOnboardingRemoteConnecting(patch.onboardingRemoteConnecting);
+    }
+  }, [
+    setOnboardingApiKey,
+    setOnboardingCloudProvider,
+    setOnboardingPrimaryModel,
+    setOnboardingProvider,
+    setOnboardingRemoteConnecting,
+    setOnboardingRemoteError,
+    setOnboardingRunMode,
+  ]);
+
+  const advanceOnboarding = useCallback(
     async (options?: OnboardingNextOptions) => {
-      const STEP_ORDER: OnboardingStep[] = [
-        "wakeUp",
-        "identity",
-        "connection",
-        "rpc",
-        "senses",
-        "activate",
-      ];
-
-      // Auto-select first style if none chosen (identity step will let user change)
       if (
-        onboardingStep === "wakeUp" &&
-        !onboardingStyle &&
-        onboardingOptions?.styles?.length
-      ) {
-        setState("onboardingStyle", onboardingOptions.styles[0].catchphrase);
-      }
-
-      // Default agent name to Rin if none set after identity step
-      if (onboardingStep === "identity" && !onboardingName) {
-        setState("onboardingName", "Rin");
-      }
-
-      if (
-        onboardingStep === "connection" &&
+        onboardingStep === "providers" &&
         onboardingRunMode === "local" &&
         !onboardingProvider
       ) {
@@ -4346,7 +5836,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
             (provider) => provider.id !== "elizacloud",
           )?.id ??
           "";
-
         if (fallbackProvider) {
           setOnboardingProvider(fallbackProvider);
           if (
@@ -4358,53 +5847,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // At activate step, finish onboarding
-      if (onboardingStep === "activate") {
+      if (onboardingStep === "launch") {
         await handleOnboardingFinish();
         return;
       }
 
-      // At senses step, check permissions unless bypass
-      if (onboardingStep === "senses") {
+      if (onboardingStep === "permissions") {
         if (options?.allowPermissionBypass) {
-          if (options.skipTask) {
-            addDeferredOnboardingTask(options.skipTask);
-          }
-          await handleOnboardingFinish();
-          return;
-        }
-        try {
-          const permissions = await client.getPermissions();
-          const missingPermissions =
-            getMissingOnboardingPermissions(permissions);
-          if (missingPermissions.length > 0) {
-            const missingLabels = missingPermissions
-              .map((id) => ONBOARDING_PERMISSION_LABELS[id] ?? id)
-              .join(", ");
-            setActionNotice(
-              `Missing required permissions: ${missingLabels}. Grant them or use "Skip for Now".`,
-              "error",
-              5200,
-            );
-            return;
-          }
-        } catch (err) {
-          setActionNotice(
-            `Could not verify permissions (${err instanceof Error ? err.message : "unknown error"}). Use "Skip for Now" to continue.`,
-            "error",
-            5200,
-          );
-          return;
+          if (options.skipTask) addDeferredOnboardingTask(options.skipTask);
+          // Don't finish yet — advance to the next step
         }
       }
 
-      // Advance to next step
-      const currentIndex = STEP_ORDER.indexOf(onboardingStep);
-      if (currentIndex < STEP_ORDER.length - 1) {
-        if (options?.skipTask) {
-          addDeferredOnboardingTask(options.skipTask);
+      let nextStep = resolveOnboardingNextStep(onboardingStep);
+
+      // Skip voice provider selection if they set up Eliza Cloud
+      if (
+        nextStep === "voice" &&
+        onboardingRunMode === "cloud" &&
+        onboardingCloudProvider === "elizacloud"
+      ) {
+        nextStep = resolveOnboardingNextStep(nextStep);
+      }
+
+      if (nextStep) {
+        if (nextStep === "hosting") {
+          applyResetConnectionWizardToHostingStep();
         }
-        const nextStep = STEP_ORDER[currentIndex + 1];
         setOnboardingStep(nextStep);
         setOnboardingActiveGuide(
           onboardingMode === "advanced"
@@ -4415,44 +5884,84 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [
       addDeferredOnboardingTask,
+      applyResetConnectionWizardToHostingStep,
+      handleOnboardingFinish,
       onboardingDetectedProviders,
       onboardingMode,
-      onboardingName,
-      onboardingOptions,
+      onboardingOptions?.providers,
       onboardingProvider,
       onboardingRunMode,
       onboardingStep,
-      onboardingStyle,
+      setOnboardingStep,
+      setOnboardingActiveGuide,
       setOnboardingApiKey,
       setOnboardingProvider,
-      setActionNotice,
-      handleOnboardingFinish,
+      onboardingCloudProvider,
     ],
   );
 
-  const handleOnboardingBack = useCallback(() => {
-    const STEP_ORDER: OnboardingStep[] = [
-      "wakeUp",
-      "identity",
-      "connection",
-      "rpc",
-      "senses",
-      "activate",
-    ];
+  const handleOnboardingNext = useCallback(
+    async (options?: OnboardingNextOptions) => advanceOnboarding(options),
+    [advanceOnboarding],
+  );
 
-    const currentIndex = STEP_ORDER.indexOf(onboardingStep);
-    if (currentIndex > 0) {
-      const previousStep = STEP_ORDER[currentIndex - 1];
-      setOnboardingStep(previousStep);
+  const revertOnboarding = useCallback(() => {
+    let previousStep = resolveOnboardingPreviousStep(onboardingStep);
+
+    // Skip voice provider selection if they set up Eliza Cloud
+    if (
+      previousStep === "voice" &&
+      onboardingRunMode === "cloud" &&
+      onboardingCloudProvider === "elizacloud"
+    ) {
+      previousStep = resolveOnboardingPreviousStep(previousStep);
+    }
+
+    if (!previousStep) return;
+    if (previousStep === "hosting") {
+      applyResetConnectionWizardToHostingStep();
+    }
+    setOnboardingStep(previousStep);
+    setOnboardingActiveGuide(
+      onboardingMode === "advanced"
+        ? getFlaminaTopicForOnboardingStep(previousStep)
+        : null,
+    );
+  }, [
+    applyResetConnectionWizardToHostingStep,
+    onboardingMode,
+    onboardingStep,
+    setOnboardingActiveGuide,
+    onboardingRunMode,
+    onboardingCloudProvider,
+  ]);
+
+  const handleOnboardingBack = revertOnboarding;
+
+  const handleOnboardingJumpToStep = useCallback(
+    (target: OnboardingStep) => {
+      if (!canRevertOnboardingTo({ current: onboardingStep, target })) return;
+      if (target === "hosting") {
+        applyResetConnectionWizardToHostingStep();
+      }
+      setOnboardingStep(target);
       setOnboardingActiveGuide(
         onboardingMode === "advanced"
-          ? getFlaminaTopicForOnboardingStep(previousStep)
+          ? getFlaminaTopicForOnboardingStep(target)
           : null,
       );
-    }
-  }, [onboardingMode, onboardingStep, setOnboardingStep]);
+    },
+    [
+      applyResetConnectionWizardToHostingStep,
+      onboardingMode,
+      onboardingStep,
+      setOnboardingStep,
+      setOnboardingActiveGuide,
+    ],
+  );
 
   const handleOnboardingUseLocalBackend = useCallback(() => {
+    forceLocalBootstrapRef.current = true;
     client.setBaseUrl(null);
     client.setToken(null);
     setOnboardingRemoteConnecting(false);
@@ -4462,8 +5971,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setOnboardingRemoteToken("");
     setOnboardingCloudProvider("");
     setOnboardingRunMode("");
+    setActionNotice(
+      "Checking this device for an existing Eliza setup...",
+      "info",
+      3200,
+    );
     retryStartup();
-  }, [retryStartup]);
+  }, [
+    retryStartup,
+    setActionNotice,
+    forceLocalBootstrapRef,
+    setOnboardingCloudProvider,
+    setOnboardingRemoteApiBase,
+    setOnboardingRemoteConnected,
+    setOnboardingRemoteConnecting,
+    setOnboardingRemoteError,
+    setOnboardingRemoteToken,
+    setOnboardingRunMode,
+  ]);
 
   const handleOnboardingRemoteConnect = useCallback(async () => {
     if (onboardingRemoteConnecting) return;
@@ -4513,17 +6038,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingRemoteToken,
     retryStartup,
     setActionNotice,
+    setOnboardingCloudProvider,
+    setOnboardingRemoteApiBase,
+    setOnboardingRemoteConnected,
+    setOnboardingRemoteConnecting,
+    setOnboardingRemoteError,
+    setOnboardingRemoteToken,
+    setOnboardingRunMode,
   ]);
 
   // ── Cloud ──────────────────────────────────────────────────────────
 
   const handleCloudLogin = useCallback(async () => {
+    // Already connected (existing API key) — no need to re-authenticate.
+    if (elizaCloudConnected) return;
     if (elizaCloudLoginBusyRef.current || elizaCloudLoginBusy) return;
     elizaCloudLoginBusyRef.current = true;
     setElizaCloudLoginBusy(true);
     setElizaCloudLoginError(null);
+    elizaCloudPreferDisconnectedUntilLoginRef.current = false;
+
+    // Determine if we should use direct cloud auth (no local backend) or
+    // go through the local agent's proxy. During sandbox onboarding there is
+    // no local backend, so we talk to Eliza Cloud directly.
+    const hasBackend = Boolean(client.getBaseUrl());
+    const cloudApiBase =
+      getBootConfig().cloudApiBase ?? "https://www.elizacloud.ai";
+    const useDirectAuth = !hasBackend;
+
     try {
-      const resp = await client.cloudLogin();
+      let resp: {
+        ok: boolean;
+        browserUrl?: string;
+        sessionId?: string;
+        error?: string;
+      };
+      if (useDirectAuth) {
+        resp = await client.cloudLoginDirect(cloudApiBase);
+      } else {
+        resp = await client.cloudLogin();
+      }
       if (!resp.ok) {
         setElizaCloudLoginError(
           resp.error || "Failed to start Eliza Cloud login",
@@ -4547,6 +6101,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           );
         }
       }
+
+      const sessionId = resp.sessionId ?? "";
 
       let pollInFlight = false;
       let consecutivePollErrors = 0;
@@ -4576,7 +6132,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pollInFlight = true;
         try {
           if (!elizaCloudLoginPollTimer.current) return;
-          const poll = await client.cloudLoginPoll(resp.sessionId);
+          let poll: {
+            status: string;
+            token?: string;
+            userId?: string;
+            error?: string;
+          };
+          if (useDirectAuth) {
+            poll = await client.cloudLoginPollDirect(cloudApiBase, sessionId);
+          } else {
+            poll = await client.cloudLoginPoll(sessionId);
+          }
           if (!elizaCloudLoginPollTimer.current) return;
 
           consecutivePollErrors = 0;
@@ -4585,11 +6151,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setElizaCloudConnected(true);
             setElizaCloudEnabled(true);
             setElizaCloudLoginError(null);
+            if (poll.userId) {
+              setElizaCloudUserId(poll.userId);
+            }
+
+            // Store the cloud auth token for provisioning
+            if (poll.token && typeof window !== "undefined") {
+              (
+                window as unknown as Record<string, unknown>
+              ).__ELIZA_CLOUD_AUTH_TOKEN__ = poll.token;
+              // Also update boot config so subsequent reads use the resolved cloud base.
+              const cfg = getBootConfig();
+              setBootConfig({ ...cfg, cloudApiBase });
+            }
+
             setActionNotice(
               "Logged in to Eliza Cloud successfully.",
               "success",
               6000,
             );
+            if (useDirectAuth && poll.token) {
+              // Direct auth bypasses the backend's login/status handler, so
+              // the API key was never persisted server-side. Send it now so
+              // billing/compat routes can authenticate with Eliza Cloud.
+              void fetch("/api/cloud/login/persist", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ apiKey: poll.token }),
+              }).catch(() => {
+                // Non-fatal: credits/billing will fail but core chat works
+              });
+            }
             void loadWalletConfig();
             // Delay the credit fetch slightly so the backend has time to
             // persist the API key before we query cloud status / credits.
@@ -4627,30 +6219,146 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setElizaCloudLoginBusy(false);
     }
   }, [
+    elizaCloudConnected,
     elizaCloudLoginBusy,
     setActionNotice,
     pollCloudCredits,
     loadWalletConfig,
   ]);
 
+  // Keep forward ref in sync so handleOnboardingNext can call it.
+  handleCloudLoginRef.current = handleCloudLogin;
+
   const handleCloudDisconnect = useCallback(async () => {
-    if (
-      !(await confirmDesktopAction({
-        title: "Disconnect from Eliza Cloud",
-        message: "The agent will need a local AI provider to continue working.",
-        confirmLabel: "Disconnect",
-        cancelLabel: "Cancel",
-        type: "warning",
-      }))
-    )
-      return;
+    const MAIN_CONFIRM_DISCONNECT_MS = 300_000;
+    const MAIN_POST_ONLY_MS = 12_000;
+    const RENDERER_DISCONNECT_MS = 12_000;
+
+    elizaCloudDisconnectInFlightRef.current = true;
     setElizaCloudDisconnecting(true);
+
     try {
-      await client.cloudDisconnect();
+      let needRendererDisconnect = true;
+
+      if (isElectrobunRuntime()) {
+        const combined = await invokeDesktopBridgeRequestWithTimeout<
+          { cancelled: true } | { ok: true } | { ok: false; error?: string }
+        >({
+          rpcMethod: "agentCloudDisconnectWithConfirm",
+          ipcChannel: "agent:cloudDisconnectWithConfirm",
+          params: {
+            apiBase: client.getBaseUrl().trim() || undefined,
+            bearerToken: client.getRestAuthToken() ?? undefined,
+          },
+          timeoutMs: MAIN_CONFIRM_DISCONNECT_MS,
+        });
+
+        if (combined.status === "ok" && combined.value) {
+          const v = combined.value;
+          if ("cancelled" in v && v.cancelled) {
+            return;
+          }
+          if ("ok" in v) {
+            if (
+              v.ok === false &&
+              typeof v.error === "string" &&
+              v.error.trim()
+            ) {
+              throw new Error(v.error.trim());
+            }
+            if (v.ok === true) {
+              needRendererDisconnect = false;
+            }
+          }
+        }
+
+        if (needRendererDisconnect) {
+          if (
+            !(await confirmDesktopAction({
+              title: "Disconnect from Eliza Cloud",
+              message:
+                "The agent will need a local AI provider to continue working.",
+              confirmLabel: "Disconnect",
+              cancelLabel: "Cancel",
+              type: "warning",
+            }))
+          ) {
+            return;
+          }
+          await yieldMiladyHttpAfterNativeMessageBox();
+
+          const postOutcome = await invokeDesktopBridgeRequestWithTimeout<{
+            ok: boolean;
+            error?: string;
+          }>({
+            rpcMethod: "agentPostCloudDisconnect",
+            ipcChannel: "agent:postCloudDisconnect",
+            params: {
+              apiBase: client.getBaseUrl().trim() || undefined,
+              bearerToken: client.getRestAuthToken() ?? undefined,
+            },
+            timeoutMs: MAIN_POST_ONLY_MS,
+          });
+
+          if (postOutcome.status === "ok" && postOutcome.value) {
+            const mr = postOutcome.value;
+            if (mr.ok === true) {
+              needRendererDisconnect = false;
+            } else if (
+              mr.ok === false &&
+              typeof mr.error === "string" &&
+              mr.error.trim()
+            ) {
+              throw new Error(mr.error.trim());
+            }
+          }
+        }
+      } else if (
+        !(await confirmDesktopAction({
+          title: "Disconnect from Eliza Cloud",
+          message:
+            "The agent will need a local AI provider to continue working.",
+          confirmLabel: "Disconnect",
+          cancelLabel: "Cancel",
+          type: "warning",
+        }))
+      ) {
+        return;
+      } else {
+        await yieldMiladyHttpAfterNativeMessageBox();
+      }
+
+      if (needRendererDisconnect) {
+        await Promise.race([
+          client.cloudDisconnect(),
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => {
+              reject(
+                new Error(
+                  `Disconnect timed out after ${RENDERER_DISCONNECT_MS / 1000}s`,
+                ),
+              );
+            }, RENDERER_DISCONNECT_MS);
+          }),
+        ]);
+      }
+
       setElizaCloudEnabled(false);
       setElizaCloudConnected(false);
+      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
+        apiConnected: false,
+        enabled: false,
+        hasPersistedApiKey: false,
+      });
       setElizaCloudCredits(null);
+      setElizaCloudCreditsLow(false);
+      setElizaCloudCreditsCritical(false);
+      setElizaCloudAuthRejected(false);
+      setElizaCloudCreditsError(null);
       setElizaCloudUserId(null);
+      setElizaCloudStatusReason(null);
+      lastElizaCloudPollConnectedRef.current = false;
+      elizaCloudPreferDisconnectedUntilLoginRef.current = true;
       setActionNotice("Disconnected from Eliza Cloud.", "success");
     } catch (err) {
       setActionNotice(
@@ -4658,9 +6366,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         "error",
       );
     } finally {
+      elizaCloudDisconnectInFlightRef.current = false;
       setElizaCloudDisconnecting(false);
+      void pollCloudCredits();
     }
-  }, [setActionNotice]);
+  }, [pollCloudCredits, setActionNotice]);
+
+  const handleCloudOnboardingFinish = useCallback(async () => {
+    await runOnboardingChatHandoff("cloud_fast_track");
+  }, [runOnboardingChatHandoff]);
 
   // ── Updates ────────────────────────────────────────────────────────
 
@@ -4792,6 +6506,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEmotePickerOpen(false);
   }, []);
 
+  const applyDetectedProviders = useCallback(
+    (detected: Awaited<ReturnType<typeof scanProviderCredentials>>) => {
+      setOnboardingDetectedProviders(detected);
+
+      const prefill = deriveDetectedProviderPrefill(detected);
+      if (!prefill) {
+        return;
+      }
+
+      // Keep users on provider choice first: detection should inform and
+      // annotate options, not auto-route into a specific provider detail view.
+      // We only nudge run mode so the provider grid is available.
+      setOnboardingRunMode(prefill.runMode);
+    },
+    [setOnboardingDetectedProviders, setOnboardingRunMode],
+  );
+
   // ── Generic state setter ───────────────────────────────────────────
 
   const setState = useCallback(
@@ -4801,10 +6532,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }> = {
         tab: setTabRaw,
         onboardingStep: setOnboardingStep,
-        onboardingMode: setOnboardingMode,
-        onboardingActiveGuide: setOnboardingActiveGuide,
-        onboardingDeferredTasks: setOnboardingDeferredTasks,
-        postOnboardingChecklistDismissed: setPostOnboardingChecklistDismissed,
         chatInput: setChatInput,
         chatAvatarVisible: setChatAvatarVisible,
         chatAgentVoiceMuted: setChatAgentVoiceMuted,
@@ -4813,7 +6540,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         chatAvatarSpeaking: setChatAvatarSpeaking,
         companionMessageCutoffTs: setCompanionMessageCutoffTs,
         uiShellMode: setUiShellMode,
-        uiLanguage: setUiLanguageState,
+        uiLanguage: setUiLanguage as (v: AppState["uiLanguage"]) => void,
         autonomousRunHealthByRunId: setAutonomousRunHealthByRunId,
         startupError: setStartupError,
         pairingCodeInput: setPairingCodeInput,
@@ -4833,7 +6560,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         logSourceFilter: setLogSourceFilter,
         inventoryView: setInventoryView,
         inventorySort: setInventorySort,
-        inventoryChainFocus: setInventoryChainFocus,
+        inventorySortDirection: setInventorySortDirection,
+        inventoryChainFilters: setInventoryChainFilters,
         exportPassword: setExportPassword,
         exportIncludeLogs: setExportIncludeLogs,
         exportError: setExportError,
@@ -4851,6 +6579,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         onboardingLargeModel: setOnboardingLargeModel,
         onboardingProvider: setOnboardingProvider,
         onboardingApiKey: setOnboardingApiKey,
+        onboardingVoiceProvider: setOnboardingVoiceProvider,
+        onboardingVoiceApiKey: setOnboardingVoiceApiKey,
+        onboardingExistingInstallDetected: setOnboardingExistingInstallDetected,
         onboardingDetectedProviders: setOnboardingDetectedProviders,
         onboardingRemoteApiBase: setOnboardingRemoteApiBase,
         onboardingRemoteToken: setOnboardingRemoteToken,
@@ -4934,8 +6665,89 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const setter = setterMap[key];
       if (setter) setter(value);
     },
-    [setOnboardingStep, setSelectedVrmIndex, setUiShellMode],
+    [
+      setOnboardingStep,
+      setSelectedVrmIndex,
+      setUiLanguage,
+      setUiShellMode,
+      setAutonomousRunHealthByRunId,
+      setChatAgentVoiceMuted,
+      setChatAvatarSpeaking,
+      setChatAvatarVisible,
+      setChatInput,
+      setChatLastUsage,
+      setChatMode,
+      setCompanionMessageCutoffTs,
+      setOnboardingApiKey,
+      setOnboardingAvatar,
+      setOnboardingBlooioApiKey,
+      setOnboardingBlooioPhoneNumber,
+      setOnboardingCloudProvider,
+      setOnboardingDetectedProviders,
+      setOnboardingDiscordToken,
+      setOnboardingElizaCloudTab,
+      setOnboardingExistingInstallDetected,
+      setOnboardingGithubToken,
+      setOnboardingLargeModel,
+      setOnboardingName,
+      setOnboardingOpenRouterModel,
+      setOnboardingOwnerName,
+      setOnboardingPrimaryModel,
+      setOnboardingProvider,
+      setOnboardingRemoteApiBase,
+      setOnboardingRemoteConnected,
+      setOnboardingRemoteConnecting,
+      setOnboardingRemoteError,
+      setOnboardingRemoteToken,
+      setOnboardingRestarting,
+      setOnboardingRpcKeys,
+      setOnboardingRpcSelections,
+      setOnboardingRunMode,
+      setOnboardingSelectedChains,
+      setOnboardingSmallModel,
+      setOnboardingStyle,
+      setOnboardingSubscriptionTab,
+      setOnboardingTelegramToken,
+      setOnboardingTwilioAccountSid,
+      setOnboardingTwilioAuthToken,
+      setOnboardingTwilioPhoneNumber,
+      setOnboardingWhatsAppSessionPath,
+      setStartupError,
+      setTabRaw,
+    ],
   );
+
+  const requestGreetingWhenRunningRef = useRef(requestGreetingWhenRunning);
+  useEffect(() => {
+    requestGreetingWhenRunningRef.current = requestGreetingWhenRunning;
+  }, [requestGreetingWhenRunning]);
+
+  useEffect(() => {
+    const publishConnectionState = (state: {
+      state: "connected" | "disconnected" | "reconnecting" | "failed";
+      reconnectAttempt: number;
+      maxReconnectAttempts: number;
+    }) => {
+      setBackendConnection({
+        state: state.state,
+        reconnectAttempt: state.reconnectAttempt,
+        maxReconnectAttempts: state.maxReconnectAttempts,
+        showDisconnectedUI: state.state === "failed",
+      });
+    };
+
+    if (typeof client.getConnectionState === "function") {
+      publishConnectionState(client.getConnectionState());
+    }
+
+    if (typeof client.onConnectionStateChange !== "function") {
+      return;
+    }
+
+    return client.onConnectionStateChange((state) => {
+      publishConnectionState(state);
+    });
+  }, [setBackendConnection]);
 
   // ── Initialization ─────────────────────────────────────────────────
 
@@ -4951,6 +6763,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let unbindWsReconnect: (() => void) | null = null;
     let unbindSystemWarnings: (() => void) | null = null;
     let unbindRestartRequired: (() => void) | null = null;
+    let ptyPollInterval: ReturnType<typeof setInterval> | null = null;
     let cancelled = false;
     const describeBackendFailure = (
       err: unknown,
@@ -5011,13 +6824,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         };
       }
       if (timedOut) {
+        const hint =
+          "First-time startup often downloads a local embedding model (GGUF, hundreds of MB). That can take many minutes on a slow network.\n\n" +
+          'If logs still show a download in progress, wait for it to finish, then tap Retry. On desktop, the app keeps extending the wait while the agent stays in "starting" (up to 15 minutes total).';
+        const emb =
+          diagnostics?.embeddingDetail ??
+          (diagnostics?.embeddingPhase === "downloading"
+            ? "Embedding model download in progress."
+            : undefined);
+        const detailBlocks = [detail, emb, hint].filter(
+          (b): b is string => typeof b === "string" && b.trim().length > 0,
+        );
         return {
           reason: "agent-timeout",
           phase: "initializing-agent",
-          message: `Agent did not reach running or paused within ${Math.round(
-            AGENT_READY_TIMEOUT_MS / 1000,
-          )}s.`,
-          detail,
+          message:
+            "The agent did not become ready in time. This is common while a large embedding model (GGUF) is still downloading on first run.",
+          detail: detailBlocks.join("\n\n"),
         };
       }
       return {
@@ -5033,7 +6856,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     const initApp = async () => {
-      if (import.meta.env.DEV && startupRunId > 0) {
+      if (process.env.NODE_ENV !== "production" && startupRunId > 0) {
         console.debug(`[milady] Retrying startup run #${startupRunId}`);
       }
       const BASE_DELAY_MS = 250;
@@ -5041,6 +6864,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const sleep = (ms: number) =>
         new Promise<void>((resolve) => setTimeout(resolve, ms));
       let onboardingNeedsOptions = false;
+      const persistedOnboardingCompleteAtStartup =
+        loadPersistedOnboardingComplete();
       let requiresAuth = false;
       let latestAuth: {
         required: boolean;
@@ -5051,10 +6876,122 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pairingEnabled: false,
         expiresAt: null,
       };
+      const hadPersistedOnboardingCompletion =
+        loadPersistedOnboardingComplete();
       setStartupError(null);
       setStartupPhase("starting-backend");
       setAuthRequired(false);
       setConnected(false);
+      setOnboardingExistingInstallDetected(false);
+
+      const forceLocalBootstrap = forceLocalBootstrapRef.current;
+      forceLocalBootstrapRef.current = false;
+      const persistedConnection = loadPersistedConnectionMode();
+      const desktopExistingInstall =
+        !persistedConnection && isElectrobunRuntime()
+          ? await inspectExistingElizaInstall().catch(() => null)
+          : null;
+      const shouldPreferLocalBootstrap =
+        forceLocalBootstrap ||
+        isElectrobunRuntime() ||
+        Boolean(desktopExistingInstall?.detected);
+      const probedConnection = persistedConnection
+        ? null
+        : await detectExistingOnboardingConnection({
+            client,
+            timeoutMs: shouldPreferLocalBootstrap
+              ? Math.min(getBackendStartupTimeoutMs(), 30_000)
+              : Math.min(getBackendStartupTimeoutMs(), 3_500),
+          });
+      if (cancelled) {
+        return;
+      }
+      const restoredConnection =
+        persistedConnection ??
+        probedConnection?.connection ??
+        (shouldPreferLocalBootstrap ? { runMode: "local" } : null);
+      const shouldPreserveCompletedOnboarding =
+        persistedOnboardingCompleteAtStartup &&
+        !onboardingCompletionCommittedRef.current;
+
+      setOnboardingExistingInstallDetected(
+        Boolean(
+          persistedOnboardingCompleteAtStartup ||
+            desktopExistingInstall?.detected ||
+            probedConnection?.detectedExistingInstall,
+        ),
+      );
+
+      if (!restoredConnection) {
+        const startupWithoutConnection =
+          resolveStartupWithoutRestoredConnection({
+            hadPersistedOnboardingCompletion,
+          });
+        if (startupWithoutConnection.kind === "startup-error") {
+          setOnboardingComplete(true);
+          setStartupError(startupWithoutConnection.error);
+          setOnboardingLoading(false);
+          return;
+        }
+        // No reusable backend/config was found yet. Show static onboarding
+        // immediately so first-run users are not blocked on server startup.
+        setOnboardingOptions({
+          names: [],
+          styles: getStylePresets(uiLanguage),
+          providers: [
+            ...ONBOARDING_PROVIDER_CATALOG,
+          ] as OnboardingOptions["providers"],
+          cloudProviders: [],
+          models: { small: [], large: [] },
+          inventoryProviders: [],
+          sharedStyleRules: "",
+        });
+        try {
+          const detected = await scanProviderCredentials();
+          if (!cancelled) {
+            applyDetectedProviders(detected);
+          }
+        } catch {
+          // Non-fatal — credential scan is best-effort
+        }
+        setStartupPhase("ready");
+        setOnboardingComplete(false);
+        setOnboardingLoading(false);
+        return;
+      }
+
+      if (restoredConnection) {
+        if (
+          restoredConnection.runMode === "cloud" &&
+          restoredConnection.cloudApiBase
+        ) {
+          client.setBaseUrl(restoredConnection.cloudApiBase);
+          if (restoredConnection.cloudAuthToken) {
+            client.setToken(restoredConnection.cloudAuthToken);
+          }
+        } else if (
+          restoredConnection.runMode === "remote" &&
+          restoredConnection.remoteApiBase
+        ) {
+          client.setBaseUrl(restoredConnection.remoteApiBase);
+          if (restoredConnection.remoteAccessToken) {
+            client.setToken(restoredConnection.remoteAccessToken);
+          }
+        } else if (restoredConnection.runMode === "local") {
+          // Always nudge the local desktop/native startup path. The embedded
+          // agent start call is idempotent, and packaged shells can inject the
+          // API base before the local process is actually accepting requests.
+          try {
+            await invokeDesktopBridgeRequest({
+              rpcMethod: "agentStart",
+              ipcChannel: "agent:start",
+            });
+          } catch {
+            // Not on desktop or agent already running
+          }
+        }
+      }
+
       const backendStartedAt = Date.now();
       let lastBackendError: unknown = null;
 
@@ -5078,10 +7015,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
           const { complete } = await client.getOnboardingStatus();
           const sessionOnboardingComplete =
-            complete || onboardingCompletionCommittedRef.current;
+            complete ||
+            onboardingCompletionCommittedRef.current ||
+            shouldPreserveCompletedOnboarding;
           if (complete) {
             clearPersistedOnboardingStep();
             onboardingResumeConnectionRef.current = null;
+          }
+          if (
+            sessionOnboardingComplete &&
+            !persistedConnection &&
+            restoredConnection
+          ) {
+            savePersistedConnectionMode(restoredConnection);
+          }
+          if (!complete && shouldPreserveCompletedOnboarding) {
+            console.warn(
+              "[milady][startup:init] Preserving completed onboarding despite incomplete backend onboarding status.",
+            );
           }
           setOnboardingComplete(sessionOnboardingComplete);
           onboardingNeedsOptions = !sessionOnboardingComplete;
@@ -5143,7 +7094,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const resumeConnection = deriveOnboardingResumeConnection(config);
             const resumeFields = deriveOnboardingResumeFields(resumeConnection);
             onboardingResumeConnectionRef.current = resumeConnection;
-            setOnboardingOptions(options);
+
+            setOnboardingOptions({
+              ...options,
+              styles:
+                options.styles.length > 0
+                  ? options.styles
+                  : getStylePresets(uiLanguage),
+            });
 
             // Auto-detect AI provider credentials from local CLI installs.
             // Only auto-fill if no existing connection config was found.
@@ -5151,14 +7109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               try {
                 const detected = await scanProviderCredentials();
                 if (detected.length > 0) {
-                  setOnboardingDetectedProviders(detected);
-                  // Auto-fill with the first detected provider
-                  const first = detected[0];
-                  if (first.apiKey) {
-                    setOnboardingRunMode("local");
-                    setOnboardingProvider(first.id);
-                    setOnboardingApiKey(first.apiKey);
-                  }
+                  applyDetectedProviders(detected);
                 }
               } catch {
                 // Non-fatal — credential scan is best-effort
@@ -5173,6 +7124,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             }
             if (resumeFields.onboardingProvider !== undefined) {
               setOnboardingProvider(resumeFields.onboardingProvider);
+            }
+            if (resumeFields.onboardingVoiceProvider !== undefined) {
+              setOnboardingVoiceProvider(resumeFields.onboardingVoiceProvider);
             }
             if (resumeFields.onboardingApiKey !== undefined) {
               setOnboardingApiKey(resumeFields.onboardingApiKey);
@@ -5238,7 +7192,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       // Existing installs: keep loading until the runtime reports ready.
       let agentReady = false;
-      const agentDeadlineAt = Date.now() + AGENT_READY_TIMEOUT_MS;
+      const agentWaitStartedAt = Date.now();
+      let agentDeadlineAt = agentWaitStartedAt + getAgentReadyTimeoutMs();
       let lastAgentError: unknown = null;
       let lastAgentDiagnostics: AgentStartupDiagnostics | undefined;
       while (!cancelled) {
@@ -5254,6 +7209,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setAgentStatus(status);
           setConnected(true);
           lastAgentDiagnostics = status.startup;
+
+          agentDeadlineAt = computeAgentDeadlineExtensions({
+            agentWaitStartedAt,
+            agentDeadlineAt,
+            state: status.state,
+          });
 
           // Hydrate deferred restart state
           if (status.pendingRestart) {
@@ -5313,11 +7274,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setStartupPhase("ready");
       setOnboardingLoading(false);
       if (greetConvId) {
-        void requestGreetingWhenRunning(greetConvId, { showOverlay: true });
+        void requestGreetingWhenRunningRef.current(greetConvId);
       }
 
       void loadWorkbench();
       void loadPlugins(); // Hydrate plugin state early so Nav sees streaming-base toggle
+      void loadCharacter(); // Hydrate character data for chat UI agent name + responses
 
       // Hydrate coding agent sessions (also re-called on WS reconnect / server restart)
       const hydratePtySessions = () => {
@@ -5332,6 +7294,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       hydratePtySessions();
       let ptyHydratedViaWs = false;
+
+      // Fallback 5s poll for PTY sessions in case WS events don't flow
+      ptyPollInterval = setInterval(() => {
+        hydratePtySessions();
+      }, 5_000);
 
       // Connect WebSocket
       client.connectWs();
@@ -5383,11 +7350,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           const nextStatus = parseAgentStatusEvent(data);
           if (nextStatus) {
             setAgentStatusIfChanged(nextStatus);
-            // Auto-refresh plugins when agent reports a restart
+            // Auto-refresh plugins and cloud status when agent reports a restart
             if (data.restarted) {
               setPendingRestart(false);
               setPendingRestartReasons([]);
               void loadPlugins();
+              void pollCloudCredits();
               hydratePtySessions();
               ptyHydratedViaWs = true;
             }
@@ -5431,7 +7399,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               data.reasons.filter((el): el is string => typeof el === "string"),
             );
             setPendingRestart(true);
-            setRestartBannerDismissed(false);
+            showRestartBanner();
           }
         },
       );
@@ -5476,11 +7444,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setUnreadConversations((prev) => new Set([...prev, convId]));
           }
 
-          // Synthesize agent_event for non-retake sources (e.g. discord)
+          // Synthesize agent_event for non-client_chat sources (e.g. discord)
           // so they appear in the StreamView activity feed
           if (
             msg.source &&
-            msg.source !== "retake" &&
             msg.source !== "client_chat" &&
             msg.role === "user"
           ) {
@@ -5689,17 +7656,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
         logStartupWarning("failed to load wallet addresses", err);
       }
 
-      // Restore avatar selection from config (server-persisted under "ui")
+      // Restore avatar selection from stream settings (same source used when saving).
+      // This prevents detached/settings windows from snapping back to stale
+      // config.ui.avatarIndex values and overwriting local avatar preference.
       let resolvedIndex = loadAvatarIndex();
       try {
-        const cfg = await client.getConfig();
-        const ui = cfg.ui as Record<string, unknown> | undefined;
-        if (ui?.avatarIndex != null) {
-          resolvedIndex = normalizeAvatarIndex(Number(ui.avatarIndex));
+        const stream = await client.getStreamSettings();
+        const serverAvatarIndex = stream.settings?.avatarIndex;
+        if (
+          typeof serverAvatarIndex === "number" &&
+          Number.isFinite(serverAvatarIndex)
+        ) {
+          resolvedIndex = normalizeAvatarIndex(serverAvatarIndex);
           setSelectedVrmIndex(resolvedIndex);
         }
       } catch (err) {
-        logStartupWarning("failed to load config for avatar selection", err);
+        logStartupWarning(
+          "failed to load stream settings for avatar selection",
+          err,
+        );
       }
       // If custom avatar selected, verify the file still exists on the server
       if (resolvedIndex === 0) {
@@ -5718,35 +7693,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Cloud polling — always run the initial poll unconditionally so we can
-      // discover a pre-existing API key / connection. If connected, start the
-      // recurring interval too.
-      pollCloudCredits().then((connected) => {
-        if (connected) {
-          elizaCloudPollInterval.current = window.setInterval(
-            () => pollCloudCredits(),
-            60_000,
-          );
-        }
-      });
+      // Cloud polling — run the initial poll to discover a pre-existing
+      // connection. The recurring interval is started automatically by
+      // pollCloudCredits whenever it detects a connected state.
+      void pollCloudCredits();
 
       // Load tab from URL — use hash in file:// mode (packaged desktop builds)
-      const navPath =
-        window.location.protocol === "file:"
-          ? window.location.hash.replace(/^#/, "") || "/"
-          : window.location.pathname;
+      const navPath = getNavigationPathFromWindow();
       const urlTab = tabFromPath(navPath);
-      const shouldStartAtCharacterSelect = shouldStartAtCharacterSelectOnLaunch(
-        {
+      const isRootNavPath = isRouteRootPath(navPath);
+
+      // If the user navigates directly to /character while onboarding is incomplete,
+      // override the persisted step to show them the connection step.
+      if (onboardingNeedsOptions && navPath === "/character") {
+        setOnboardingStep("hosting");
+      }
+
+      const shouldStartAtCharacterSelect =
+        onboardingCompletionCommittedRef.current ||
+        shouldStartAtCharacterSelectOnLaunch({
           onboardingNeedsOptions,
+          onboardingMode,
           navPath,
           urlTab,
-        },
-      );
-      if (shouldStartAtCharacterSelect) {
-        setTab("character-select");
-        void loadCharacter();
-      } else if (urlTab) {
+        });
+      // Only set the initial tab ONCE ever — use a ref so async retries
+      // inside the same effect closure don't override the user's navigation.
+      if (!initialTabSetRef.current) {
+        initialTabSetRef.current = true;
+        if (shouldStartAtCharacterSelect) {
+          onboardingCompletionCommittedRef.current = false;
+          setTab("character-select");
+          void loadCharacter();
+        } else if (!onboardingNeedsOptions && isRootNavPath) {
+          setTab(DEFAULT_LANDING_TAB);
+        }
+      }
+      if (urlTab && urlTab !== "chat" && urlTab !== "companion") {
         setTabRaw(urlTab);
         if (urlTab === "plugins" || urlTab === "connectors") {
           void loadPlugins();
@@ -5761,7 +7744,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           void loadUpdateStatus();
           void loadPlugins();
         }
-        if (urlTab === "character") {
+        if (urlTab === "character" || urlTab === "character-select") {
           void loadCharacter();
         }
         if (urlTab === "wallets") {
@@ -5775,11 +7758,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Navigation listener — use hashchange in file:// mode (packaged desktop builds)
     const isFileProtocol = window.location.protocol === "file:";
     const handleNavChange = () => {
-      const navPath = isFileProtocol
-        ? window.location.hash.replace(/^#/, "") || "/"
-        : window.location.pathname;
-      const t = tabFromPath(navPath);
-      if (t) setTabRaw(t);
+      const navPath = getNavigationPathFromWindow();
+      const navTab = tabFromPath(navPath);
+      if (navTab) setTabRaw(navTab);
     };
     const navEvent = isFileProtocol ? "hashchange" : "popstate";
     window.addEventListener(navEvent, handleNavChange);
@@ -5803,12 +7784,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unbindWsReconnect?.();
       unbindSystemWarnings?.();
       unbindRestartRequired?.();
+      if (ptyPollInterval) {
+        clearInterval(ptyPollInterval);
+        ptyPollInterval = null;
+      }
       if (handleVisibilityRef)
         document.removeEventListener("visibilitychange", handleVisibilityRef);
       client.disconnectWs();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    applyDetectedProviders,
     appendAutonomousEvent,
     checkExtensionStatus,
     fetchAutonomyReplay,
@@ -5821,11 +7807,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadWalletConfig,
     loadWorkbench, // Cloud polling
     pollCloudCredits,
-    requestGreetingWhenRunning,
     setSelectedVrmIndex,
     startupRetryNonce,
     uiLanguage,
   ]);
+
+  const requestGreetingWhenRunningRef2 = useRef(requestGreetingWhenRunning);
+  useEffect(() => {
+    requestGreetingWhenRunningRef2.current = requestGreetingWhenRunning;
+  }, [requestGreetingWhenRunning]);
 
   // When agent transitions to "running", send a greeting if conversation is empty
   useEffect(() => {
@@ -5858,9 +7848,79 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fetchGreeting,
   ]);
 
+  // Empty thread + running agent: ensure a first assistant message is requested
+  // (covers races where startup/transition greeting paths miss the active conv id).
+  useEffect(() => {
+    if (
+      !activeConversationId ||
+      conversationMessages.length > 0 ||
+      agentStatus?.state !== "running" ||
+      chatSending
+    ) {
+      return;
+    }
+    if (greetingFiredRef.current) return;
+    if (greetingInFlightConversationRef.current === activeConversationId) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      if (activeConversationIdRef.current !== activeConversationId) return;
+      if (conversationMessagesRef.current.length > 0) return;
+      if (greetingFiredRef.current) return;
+      if (greetingInFlightConversationRef.current === activeConversationId) {
+        return;
+      }
+      traceMiladyGreeting("effect:empty_thread_auto_greet", {
+        activeConversationId,
+      });
+      void fetchGreeting(activeConversationId);
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, [
+    activeConversationId,
+    agentStatus?.state,
+    chatSending,
+    conversationMessages.length,
+    fetchGreeting,
+  ]);
+
   // ── Context value ──────────────────────────────────────────────────
 
-  const t = useMemo(() => createTranslator(uiLanguage), [uiLanguage]);
+  // t is provided by TranslationContext (useTranslation() above)
+
+  useEffect(() => {
+    if (elizaCloudAuthRejected) {
+      if (!elizaCloudAuthNoticeSentRef.current) {
+        elizaCloudAuthNoticeSentRef.current = true;
+        setActionNotice(t("notice.elizaCloudAuthRejected"), "error", 14_000);
+      }
+    } else {
+      elizaCloudAuthNoticeSentRef.current = false;
+    }
+  }, [elizaCloudAuthRejected, setActionNotice, t]);
+
+  const companionSceneConfig = useMemo(
+    () => ({
+      selectedVrmIndex,
+      customVrmUrl,
+      uiTheme,
+      tab,
+      companionVrmPowerMode,
+      companionHalfFramerateMode,
+      companionAnimateWhenHidden,
+    }),
+    [
+      selectedVrmIndex,
+      customVrmUrl,
+      uiTheme,
+      tab,
+      companionVrmPowerMode,
+      companionHalfFramerateMode,
+      companionAnimateWhenHidden,
+    ],
+  );
 
   const value: AppContextValue = {
     // Translations
@@ -5870,10 +7930,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     uiShellMode,
     uiLanguage,
     uiTheme,
+    companionVrmPowerMode,
+    companionAnimateWhenHidden,
+    companionHalfFramerateMode,
     connected,
     agentStatus,
     onboardingComplete,
+    onboardingUiRevealNonce,
     onboardingLoading,
+    onboardingHandoffPhase,
+    onboardingHandoffError,
     startupPhase,
     startupStatus,
     startupError,
@@ -5894,6 +7960,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     chatInput,
     chatSending,
     chatFirstTokenReceived,
+    chatAwaitingGreeting,
     chatLastUsage,
     chatAvatarVisible,
     chatAgentVoiceMuted,
@@ -5955,7 +8022,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     walletExportVisible,
     walletApiKeySaving,
     inventorySort,
-    inventoryChainFocus,
+    inventorySortDirection,
+    inventoryChainFilters,
     walletError,
     registryStatus,
     registryLoading,
@@ -5983,11 +8051,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     customBackgroundUrl,
     elizaCloudEnabled,
     elizaCloudConnected,
+    elizaCloudHasPersistedKey,
     elizaCloudCredits,
     elizaCloudCreditsLow,
     elizaCloudCreditsCritical,
+    elizaCloudAuthRejected,
+    elizaCloudCreditsError,
     elizaCloudTopUpUrl,
     elizaCloudUserId,
+    elizaCloudStatusReason,
+    ownerName,
     cloudDashboardView,
     elizaCloudLoginBusy,
     elizaCloudLoginError,
@@ -6047,6 +8120,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onboardingLargeModel,
     onboardingProvider,
     onboardingApiKey,
+    onboardingVoiceProvider,
+    onboardingVoiceApiKey,
+    onboardingExistingInstallDetected,
     onboardingDetectedProviders,
     onboardingRemoteApiBase,
     onboardingRemoteToken,
@@ -6108,13 +8184,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUiShellMode,
     switchUiShellMode,
     switchShellView,
+    navigation,
     setUiLanguage,
     setUiTheme,
+    setCompanionVrmPowerMode,
+    setCompanionAnimateWhenHidden,
+    setCompanionHalfFramerateMode,
     handleStart,
     handleStop,
 
     handleRestart,
     handleReset,
+    handleResetAppliedFromMain,
     retryStartup,
     dismissRestartBanner,
     showRestartBanner,
@@ -6136,7 +8217,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     handleSelectConversation,
     handleDeleteConversation,
     handleRenameConversation,
+    suggestConversationTitle,
     sendActionMessage,
+    sendChatText,
     loadTriggers,
     createTrigger,
     updateTrigger,
@@ -6169,6 +8252,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getBscTradePreflight,
     getBscTradeQuote,
     getBscTradeTxStatus,
+    getStewardStatus,
+    getStewardHistory,
+    getStewardPending,
+    approveStewardTx,
+    rejectStewardTx,
     loadWalletTradingProfile,
     handleWalletApiKeySave,
     handleExportKeys,
@@ -6186,10 +8274,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     handleCharacterMessageExamplesInput,
     handleOnboardingNext,
     handleOnboardingBack,
+    retryOnboardingHandoff,
+    cancelOnboardingHandoff,
+    handleOnboardingJumpToStep,
+    goToOnboardingStep,
     handleOnboardingRemoteConnect,
     handleOnboardingUseLocalBackend,
     handleCloudLogin,
     handleCloudDisconnect,
+    handleCloudOnboardingFinish,
     loadUpdateStatus,
     handleChannelChange,
     checkExtensionStatus,
@@ -6203,11 +8296,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     copyToClipboard,
   };
 
+  const mergedBranding = useMemo(
+    () => ({ ...DEFAULT_BRANDING, ...brandingOverride }),
+    [brandingOverride],
+  );
+
   return (
-    <AppContext.Provider value={value}>
-      {children}
-      <ConfirmModal {...modalProps} />
-      <PromptModal {...promptModalProps} />
-    </AppContext.Provider>
+    <BrandingContext.Provider value={mergedBranding}>
+      <CompanionSceneConfigCtx.Provider value={companionSceneConfig}>
+        <AppContext.Provider value={value}>
+          {children}
+          <ConfirmDialog {...modalProps} />
+          <PromptDialog {...promptModalProps} />
+        </AppContext.Provider>
+      </CompanionSceneConfigCtx.Provider>
+    </BrandingContext.Provider>
   );
 }

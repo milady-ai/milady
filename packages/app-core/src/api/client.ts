@@ -20,17 +20,16 @@ import type {
   VideoProvider,
   VisionConfig,
   VisionProvider,
-} from "@miladyai/autonomous/contracts/config";
-import type { DropStatus, MintResult } from "@miladyai/autonomous/contracts/drop";
-import type { VerificationResult } from "@miladyai/autonomous/contracts/verification";
+} from "@miladyai/agent/contracts/config";
+import type { DropStatus, MintResult } from "@miladyai/agent/contracts/drop";
 import type {
   CloudProviderOption,
-  ConnectorConfig,
   InventoryProviderOption,
   MessageExample,
   MessageExampleContent,
   ModelOption,
   OnboardingConnection,
+  OnboardingConnectorConfig as ConnectorConfig,
   OnboardingData,
   OnboardingOptions,
   OpenRouterModelOption,
@@ -40,7 +39,15 @@ import type {
   StylePreset,
   SubscriptionProviderStatus,
   SubscriptionStatusResponse,
-} from "@miladyai/autonomous/contracts/onboarding";
+} from "@miladyai/shared/contracts/onboarding";
+import type {
+  AllPermissionsState,
+  PermissionState,
+  PermissionStatus,
+  SystemPermissionDefinition,
+  SystemPermissionId,
+} from "@miladyai/agent/contracts/permissions";
+import type { VerificationResult } from "@miladyai/agent/contracts/verification";
 import type {
   BscTradeExecuteRequest,
   BscTradeExecuteResponse,
@@ -55,6 +62,12 @@ import type {
   EvmTokenBalance,
   SolanaNft,
   SolanaTokenBalance,
+  StewardApprovalActionResponse,
+  StewardApprovalInfo,
+  StewardHistoryResponse,
+  StewardPendingResponse,
+  StewardPolicyResult,
+  StewardStatusResponse,
   WalletAddresses,
   WalletBalancesResponse,
   WalletConfigStatus,
@@ -67,22 +80,28 @@ import type {
   WalletTradingProfileResponse,
   WalletTradingProfileSourceFilter,
   WalletTradingProfileWindow,
-} from "@miladyai/autonomous/contracts/wallet";
+} from "@miladyai/agent/contracts/wallet";
+import type {
+  StewardPendingApproval,
+  StewardSignRequest,
+  StewardSignResponse,
+  StewardTxRecord,
+  StewardTxStatus,
+} from "@miladyai/shared/contracts/wallet";
 import {
   DEFAULT_WALLET_RPC_SELECTIONS,
   normalizeWalletRpcProviderId,
   normalizeWalletRpcSelections,
   WALLET_RPC_PROVIDER_OPTIONS,
-} from "@miladyai/autonomous/contracts/wallet";
-import type {
-  AllPermissionsState,
-  PermissionState,
-  PermissionStatus,
-  SystemPermissionDefinition,
-  SystemPermissionId,
-} from "@miladyai/autonomous/contracts/permissions";
+} from "@miladyai/agent/contracts/wallet";
+import {
+  isMiladySettingsDebugEnabled,
+  sanitizeForSettingsDebug,
+  settingsDebugCloudSummary,
+} from "@miladyai/shared";
 import type { ConfigUiHint } from "../types";
 import { stripAssistantStageDirections } from "../utils/assistant-text";
+import { getElizaApiBase, getElizaApiToken } from "../utils/eliza-globals";
 import { mergeStreamingText } from "../utils/streaming-text";
 
 export type {
@@ -123,10 +142,21 @@ export type {
   PermissionStatus,
   PiAiModelOption,
   ProviderOption,
-  RpcProviderOption,
   ReleaseChannel,
+  RpcProviderOption,
   SolanaNft,
   SolanaTokenBalance,
+  StewardApprovalActionResponse,
+  StewardApprovalInfo,
+  StewardHistoryResponse,
+  StewardPendingApproval,
+  StewardPendingResponse,
+  StewardPolicyResult,
+  StewardSignRequest,
+  StewardSignResponse,
+  StewardStatusResponse,
+  StewardTxRecord,
+  StewardTxStatus,
   StylePreset,
   SubscriptionProviderStatus,
   SubscriptionStatusResponse,
@@ -240,6 +270,11 @@ export interface AgentStartupDiagnostics {
   lastError?: string;
   lastErrorAt?: number;
   nextRetryAt?: number;
+  /** Local embedding (GGUF) warmup — from Milady status overlay */
+  embeddingPhase?: "checking" | "downloading" | "loading" | "ready";
+  embeddingDetail?: string;
+  /** 0–100 when parseable from embedding detail */
+  embeddingProgressPct?: number;
 }
 
 export interface AgentStatus {
@@ -248,6 +283,7 @@ export interface AgentStatus {
   model: string | undefined;
   uptime: number | undefined;
   startedAt: number | undefined;
+  port?: number;
   pendingRestart?: boolean;
   pendingRestartReasons?: string[];
   startup?: AgentStartupDiagnostics;
@@ -414,9 +450,17 @@ export interface RuntimeDebugSnapshot {
   };
 }
 
-export type TriggerType = "interval" | "once" | "cron";
-export type TriggerWakeMode = "inject_now" | "next_autonomy_cycle";
-export type TriggerLastStatus = "success" | "error" | "skipped";
+export type {
+  TriggerLastStatus,
+  TriggerType,
+  TriggerWakeMode,
+} from "@miladyai/agent/triggers/types";
+
+import type {
+  TriggerLastStatus,
+  TriggerType,
+  TriggerWakeMode,
+} from "@miladyai/agent/triggers/types";
 
 export interface TriggerSummary {
   id: string;
@@ -630,6 +674,7 @@ export interface ConversationGreeting {
 }
 
 export interface CreateConversationOptions {
+  includeGreeting?: boolean;
   bootstrapGreeting?: boolean;
   lang?: string;
 }
@@ -686,7 +731,7 @@ export interface ConversationMessage {
   blocks?: ContentBlock[];
   /** Source channel when forwarded from another channel (e.g. "autonomy"). */
   source?: string;
-  /** Username of the sender (e.g. retake viewer username, discord username). */
+  /** Username of the sender (e.g. viewer username, discord username). */
   from?: string;
   /** True when the SSE stream was interrupted before receiving a "done" event. */
   interrupted?: boolean;
@@ -852,10 +897,9 @@ export type SecurityAuditStreamEvent =
       entry: SecurityAuditEntry;
     };
 
-export type StreamEventType =
-  | "agent_event"
-  | "heartbeat_event"
-  | "training_event";
+export type { StreamEventType } from "@miladyai/agent/api/server";
+
+import type { StreamEventType } from "@miladyai/agent/api/server";
 
 export interface StreamEventEnvelope {
   type: StreamEventType;
@@ -1104,6 +1148,9 @@ export interface CloudStatus {
 export interface CloudCredits {
   connected: boolean;
   balance: number | null;
+  /** True when the cloud API rejected the stored API key (same as chat 401). */
+  authRejected?: boolean;
+  error?: string;
   low?: boolean;
   critical?: boolean;
   topUpUrl?: string;
@@ -1381,6 +1428,46 @@ export interface CodingAgentStatus {
   taskCount: number;
   tasks: CodingAgentSession[];
   pendingConfirmations: number;
+}
+
+/** Raw PTY session shape returned by /api/coding-agents. */
+export interface RawPtySession {
+  id: string;
+  name?: string;
+  agentType?: string;
+  workdir?: string;
+  status?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Maps raw PTY sessions from /api/coding-agents into CodingAgentSession[].
+ * Extracted as a pure function so it can be unit-tested without instantiating
+ * the full MiladyClient.
+ */
+export function mapPtySessionsToCodingAgentSessions(
+  ptySessions: RawPtySession[],
+): CodingAgentSession[] {
+  return ptySessions.map((s) => ({
+    sessionId: s.id,
+    agentType: s.agentType ?? "claude",
+    label: (s.metadata?.label as string) ?? s.name ?? s.agentType ?? "Agent",
+    originalTask: "",
+    workdir: s.workdir ?? "",
+    status:
+      s.status === "ready" || s.status === "busy"
+        ? ("active" as const)
+        : s.status === "error"
+          ? ("error" as const)
+          : s.status === "stopped" ||
+              s.status === "done" ||
+              s.status === "completed" ||
+              s.status === "exited"
+            ? ("stopped" as const)
+            : ("active" as const),
+    decisionCount: 0,
+    autoResolvedCount: 0,
+  }));
 }
 
 // MCP
@@ -1769,7 +1856,9 @@ export interface TrajectoryConfig {
   enabled: boolean;
 }
 
-export type TrajectoryExportFormat = "json" | "csv" | "zip";
+import type { TrajectoryExportFormat } from "@miladyai/agent/api/trajectory-routes";
+
+export type { TrajectoryExportFormat };
 
 export interface TrajectoryExportOptions {
   format: TrajectoryExportFormat;
@@ -1945,11 +2034,10 @@ export interface VerificationMessageResponse {
 // System Permissions
 // ---------------------------------------------------------------------------
 
+import { getBootConfig, setBootConfig } from "../config/boot-config";
+
 declare global {
-  interface Window {
-    __MILADY_API_BASE__?: string;
-    __MILADY_API_TOKEN__?: string;
-  }
+  interface Window {}
 }
 
 // ---------------------------------------------------------------------------
@@ -1961,7 +2049,30 @@ const GENERIC_NO_RESPONSE_TEXT =
 const AGENT_TRANSFER_MIN_PASSWORD_LENGTH = 4;
 const DEFAULT_FETCH_TIMEOUT_MS = 10_000;
 const SESSION_STORAGE_API_BASE_KEY = "milady_api_base";
-const SESSION_STORAGE_API_TOKEN_KEY = "milady_api_token";
+
+function miladyClientSettingsDebug(): boolean {
+  let viteEnv: Record<string, unknown> | undefined;
+  try {
+    viteEnv = import.meta.env as Record<string, unknown>;
+  } catch {
+    viteEnv = undefined;
+  }
+  return isMiladySettingsDebugEnabled({
+    importMetaEnv: viteEnv,
+    env: typeof process !== "undefined" ? process.env : undefined,
+  });
+}
+
+function logSettingsClient(
+  phase: string,
+  detail: Record<string, unknown>,
+): void {
+  if (!miladyClientSettingsDebug()) return;
+  console.debug(
+    `[milady][settings][client] ${phase}`,
+    sanitizeForSettingsDebug(detail),
+  );
+}
 
 export class MiladyClient {
   private _baseUrl: string;
@@ -1994,19 +2105,6 @@ export class MiladyClient {
     this._uiLanguage = lang || null;
   }
 
-  private static resolveDesktopLocalFallbackBase(): string {
-    if (typeof window === "undefined") return "";
-    const proto = window.location.protocol;
-    // In the desktop shell the main process injects the live API base
-    // once the embedded agent has bound a port. Avoid eager localhost probes
-    // to prevent noisy ERR_CONNECTION_REFUSED logs during startup.
-    if (proto === "electrobun:") return "";
-    if (proto === "file:") {
-      return "http://localhost:2138";
-    }
-    return "";
-  }
-
   private static generateClientId(): string {
     const random =
       typeof globalThis.crypto?.randomUUID === "function"
@@ -2017,43 +2115,30 @@ export class MiladyClient {
 
   constructor(baseUrl?: string, token?: string) {
     this.clientId = MiladyClient.generateClientId();
-    const stored =
-      typeof window !== "undefined"
-        ? window.sessionStorage.getItem(SESSION_STORAGE_API_TOKEN_KEY)
-        : null;
     const storedBase =
       typeof window !== "undefined"
         ? window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY)
         : null;
     this._explicitBase = baseUrl != null || Boolean(storedBase?.trim());
-    this._token = token?.trim() || stored || null;
-    // Priority: explicit arg > desktop-injected global > same origin (Vite proxy)
-    const injectedBase =
-      typeof window !== "undefined" ? window.__MILADY_API_BASE__ : undefined;
+    this._token = token?.trim() || null;
+    // Priority: explicit arg > session storage(base only) > boot config > same origin (Vite proxy)
+    const bootBase = getBootConfig().apiBase;
     this._baseUrl =
-      baseUrl ??
-      storedBase ??
-      injectedBase ??
-      MiladyClient.resolveDesktopLocalFallbackBase();
+      baseUrl ?? storedBase ?? bootBase ?? getElizaApiBase() ?? "";
   }
 
   /**
    * Resolve the API base URL lazily.
-   * In the desktop shell the main process injects window.__MILADY_API_BASE__ after the
-   * page loads (once the agent runtime starts). Re-checking on every call
-   * ensures we pick up the injected value even if it wasn't set at construction.
+   * In the desktop shell the main process injects the API base after the
+   * page loads (once the agent runtime starts). Re-checking the boot config
+   * on every call ensures we pick up the injected value even if it wasn't
+   * set at construction.
    */
   private get baseUrl(): string {
-    if (!this._explicitBase && typeof window !== "undefined") {
-      const injected = window.__MILADY_API_BASE__;
-      // In the desktop shell the API base can be injected after initial render. Always
-      // prefer the injected value when present so the client can switch away
-      // from the localhost fallback once the main process publishes the real
-      // endpoint.
-      if (injected && injected !== this._baseUrl) {
-        this._baseUrl = injected;
-      } else if (!this._baseUrl) {
-        this._baseUrl = MiladyClient.resolveDesktopLocalFallbackBase();
+    if (!this._explicitBase) {
+      const bootBase = getBootConfig().apiBase ?? getElizaApiBase();
+      if (bootBase && bootBase !== this._baseUrl) {
+        this._baseUrl = bootBase;
       }
     }
     return this._baseUrl;
@@ -2061,9 +2146,11 @@ export class MiladyClient {
 
   private get apiToken(): string | null {
     if (this._token) return this._token;
-    if (typeof window === "undefined") return null;
-    const injected = window.__MILADY_API_TOKEN__;
-    if (typeof injected === "string" && injected.trim()) return injected.trim();
+    const bootToken = getBootConfig().apiToken;
+    if (typeof bootToken === "string" && bootToken.trim())
+      return bootToken.trim();
+    const injectedToken = getElizaApiToken();
+    if (injectedToken) return injectedToken;
     return null;
   }
 
@@ -2071,20 +2158,24 @@ export class MiladyClient {
     return Boolean(this.apiToken);
   }
 
+  /**
+   * Bearer token sent on Milady REST requests (compat API). Used when the
+   * Electrobun main process relays HTTP so it can match the renderer-injected
+   * token in external-desktop / Vite-proxy setups.
+   */
+  getRestAuthToken(): string | null {
+    return this.apiToken;
+  }
+
   setToken(token: string | null): void {
     this._token = token?.trim() || null;
-    if (typeof window !== "undefined") {
-      if (this._token) {
-        window.__MILADY_API_TOKEN__ = this._token;
-        window.sessionStorage.setItem(
-          SESSION_STORAGE_API_TOKEN_KEY,
-          this._token,
-        );
-      } else {
-        delete window.__MILADY_API_TOKEN__;
-        window.sessionStorage.removeItem(SESSION_STORAGE_API_TOKEN_KEY);
-      }
-    }
+    // Update boot config so other consumers see the new token.
+    const config = getBootConfig();
+    setBootConfig({ ...config, apiToken: this._token ?? undefined });
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   setBaseUrl(baseUrl: string | null): void {
@@ -2092,12 +2183,13 @@ export class MiladyClient {
     this._explicitBase = normalized.length > 0;
     this._baseUrl = normalized;
     this.disconnectWs();
+    // Update boot config so other consumers (resolveApiUrl, etc.) see the new base.
+    const config = getBootConfig();
+    setBootConfig({ ...config, apiBase: normalized || undefined });
     if (typeof window !== "undefined") {
       if (normalized) {
-        window.__MILADY_API_BASE__ = normalized;
         window.sessionStorage.setItem(SESSION_STORAGE_API_BASE_KEY, normalized);
       } else {
-        delete window.__MILADY_API_BASE__;
         window.sessionStorage.removeItem(SESSION_STORAGE_API_BASE_KEY);
       }
     }
@@ -2222,34 +2314,15 @@ export class MiladyClient {
     if (!res.ok && !options?.allowNonOk) {
       const body = (await res
         .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, unknown>;
-      const validationErrors = Array.isArray(body.validationErrors)
-        ? body.validationErrors
-            .map((issue) => {
-              if (!issue || typeof issue !== "object") return null;
-              const record = issue as Record<string, unknown>;
-              const path =
-                typeof record.path === "string" && record.path.trim()
-                  ? record.path.trim()
-                  : "character";
-              const message =
-                typeof record.message === "string" && record.message.trim()
-                  ? record.message.trim()
-                  : null;
-              if (!message) return null;
-              return `${path}: ${message}`;
-            })
-            .filter((issue): issue is string => Boolean(issue))
-        : [];
+        .catch(() => ({ error: res.statusText }))) as Record<
+        string,
+        string
+      > | null;
       throw new ApiError({
         kind: "http",
         path,
         status: res.status,
-        message:
-          (typeof body.error === "string" ? body.error : null) ??
-          (validationErrors.length > 0
-            ? `Validation failed: ${validationErrors.join("; ")}`
-            : `HTTP ${res.status}`),
+        message: body?.error ?? `HTTP ${res.status}`,
       });
     }
     return res;
@@ -2330,6 +2403,36 @@ export class MiladyClient {
 
   async getOnboardingStatus(): Promise<{ complete: boolean }> {
     return this.fetch("/api/onboarding/status");
+  }
+
+  async getWalletKeys(): Promise<{
+    evmPrivateKey: string;
+    evmAddress: string;
+    solanaPrivateKey: string;
+    solanaAddress: string;
+  }> {
+    return this.fetch("/api/wallet/keys");
+  }
+
+  async getWalletOsStoreStatus(): Promise<{
+    backend: string;
+    available: boolean;
+    readEnabled: boolean;
+    vaultId: string;
+  }> {
+    return this.fetch("/api/wallet/os-store");
+  }
+
+  async postWalletOsStoreAction(action: "migrate" | "delete"): Promise<{
+    ok: boolean;
+    migrated?: string[];
+    failed?: string[];
+    error?: string;
+  }> {
+    return this.fetch("/api/wallet/os-store", {
+      method: "POST",
+      body: JSON.stringify({ action }),
+    });
   }
 
   async getAuthStatus(): Promise<{
@@ -2423,11 +2526,22 @@ export class MiladyClient {
     provider: string,
     apiKey?: string,
   ): Promise<{ success: boolean; provider: string; restarting: boolean }> {
-    return this.fetch("/api/provider/switch", {
+    logSettingsClient("POST /api/provider/switch → start", {
+      baseUrl: this.getBaseUrl(),
+      provider,
+      hasApiKey: Boolean(apiKey?.trim()),
+      apiKey,
+    });
+    const result = (await this.fetch("/api/provider/switch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider, ...(apiKey ? { apiKey } : {}) }),
+    })) as { success: boolean; provider: string; restarting: boolean };
+    logSettingsClient("POST /api/provider/switch ← ok", {
+      baseUrl: this.getBaseUrl(),
+      result,
     });
+    return result;
   }
 
   async startOpenAILogin(): Promise<{
@@ -2527,34 +2641,90 @@ export class MiladyClient {
    * Polls status until the agent state is "running".
    */
   async restartAndWait(maxWaitMs = 30000): Promise<AgentStatus> {
+    const t0 = Date.now();
+    console.info("[milady][reset][client] restartAndWait: begin", {
+      baseUrl: this.getBaseUrl(),
+      maxWaitMs,
+    });
     // Try triggering a restart; 409 means one is already in progress
     try {
       await this.restartAgent();
-    } catch {
-      // Already restarting — that's fine, we'll poll
+      console.info(
+        "[milady][reset][client] restartAndWait: POST /api/agent/restart accepted",
+      );
+    } catch (e) {
+      console.info(
+        "[milady][reset][client] restartAndWait: initial restart call failed (often 409 while restarting)",
+        e,
+      );
     }
     // Poll until running
     const start = Date.now();
     const interval = 1000;
+    let pollN = 0;
     while (Date.now() - start < maxWaitMs) {
       await new Promise((r) => setTimeout(r, interval));
+      pollN += 1;
       try {
         const status = await this.getStatus();
-        if (status.state === "running") return status;
-      } catch {
-        // Server may be briefly unavailable during restart
+        if (status.state === "running") {
+          console.info("[milady][reset][client] restartAndWait: running", {
+            pollN,
+            waitedMs: Date.now() - t0,
+            port: status.port,
+          });
+          return status;
+        }
+        if (pollN === 1 || pollN % 5 === 0) {
+          console.debug("[milady][reset][client] restartAndWait: poll", {
+            pollN,
+            state: status.state,
+            waitedMs: Date.now() - t0,
+          });
+        }
+      } catch (pollErr) {
+        if (pollN === 1 || pollN % 5 === 0) {
+          console.debug(
+            "[milady][reset][client] restartAndWait: getStatus error while polling",
+            { pollN, waitedMs: Date.now() - t0 },
+            pollErr,
+          );
+        }
       }
     }
     // Return whatever we get after timeout
-    return this.getStatus();
+    const final = await this.getStatus();
+    console.warn(
+      "[milady][reset][client] restartAndWait: timed out — returning last status",
+      {
+        state: final.state,
+        waitedMs: Date.now() - t0,
+        maxWaitMs,
+      },
+    );
+    return final;
   }
 
   async resetAgent(): Promise<void> {
+    console.info("[milady][reset][client] POST /api/agent/reset", {
+      baseUrl: this.getBaseUrl(),
+    });
     await this.fetch("/api/agent/reset", { method: "POST" });
+    console.info("[milady][reset][client] POST /api/agent/reset OK");
   }
 
   async getConfig(): Promise<Record<string, unknown>> {
-    return this.fetch("/api/config");
+    logSettingsClient("GET /api/config → start", {
+      baseUrl: this.getBaseUrl(),
+    });
+    const r = (await this.fetch("/api/config")) as Record<string, unknown>;
+    const cloud = r.cloud as Record<string, unknown> | undefined;
+    logSettingsClient("GET /api/config ← ok", {
+      baseUrl: this.getBaseUrl(),
+      topKeys: Object.keys(r).sort(),
+      cloud: settingsDebugCloudSummary(cloud),
+    });
+    return r;
   }
 
   async getConfigSchema(): Promise<ConfigSchemaResponse> {
@@ -2564,11 +2734,22 @@ export class MiladyClient {
   async updateConfig(
     patch: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
-    return this.fetch("/api/config", {
+    logSettingsClient("PUT /api/config → start", {
+      baseUrl: this.getBaseUrl(),
+      patch,
+    });
+    const out = (await this.fetch("/api/config", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
+    })) as Record<string, unknown>;
+    const cloud = out.cloud as Record<string, unknown> | undefined;
+    logSettingsClient("PUT /api/config ← ok", {
+      baseUrl: this.getBaseUrl(),
+      topKeys: Object.keys(out).sort(),
+      cloud: settingsDebugCloudSummary(cloud),
     });
+    return out;
   }
 
   // ── Custom VRM avatar ────────────────────────────────────────────────
@@ -2849,10 +3030,19 @@ export class MiladyClient {
     id: string,
     config: Record<string, unknown>,
   ): Promise<{ ok: boolean; restarting?: boolean }> {
-    return this.fetch(`/api/plugins/${id}`, {
+    logSettingsClient(`PUT /api/plugins/${id} → start`, {
+      baseUrl: this.getBaseUrl(),
+      body: config,
+    });
+    const result = (await this.fetch(`/api/plugins/${id}`, {
       method: "PUT",
       body: JSON.stringify(config),
+    })) as { ok: boolean; restarting?: boolean };
+    logSettingsClient(`PUT /api/plugins/${id} ← ok`, {
+      baseUrl: this.getBaseUrl(),
+      result,
     });
+    return result;
   }
 
   async getSecrets(): Promise<{ secrets: SecretInfo[] }> {
@@ -2862,10 +3052,24 @@ export class MiladyClient {
   async updateSecrets(
     secrets: Record<string, string>,
   ): Promise<{ ok: boolean; updated: string[] }> {
-    return this.fetch("/api/secrets", {
+    logSettingsClient("PUT /api/secrets → start", {
+      baseUrl: this.getBaseUrl(),
+      secretMeta: Object.keys(secrets)
+        .sort()
+        .map((key) => ({
+          key,
+          hasValue: Boolean(secrets[key]),
+        })),
+    });
+    const out = (await this.fetch("/api/secrets", {
       method: "PUT",
       body: JSON.stringify({ secrets }),
+    })) as { ok: boolean; updated: string[] };
+    logSettingsClient("PUT /api/secrets ← ok", {
+      baseUrl: this.getBaseUrl(),
+      out,
     });
+    return out;
   }
 
   async testPluginConnection(id: string): Promise<{
@@ -2954,8 +3158,11 @@ export class MiladyClient {
     if (!res.ok) {
       const body = (await res
         .json()
-        .catch(() => ({ error: res.statusText }))) as Record<string, string>;
-      const err = new Error(body.error ?? `HTTP ${res.status}`);
+        .catch(() => ({ error: res.statusText }))) as Record<
+        string,
+        string
+      > | null;
+      const err = new Error(body?.error ?? `HTTP ${res.status}`);
       (err as Error & { status?: number }).status = res.status;
       throw err;
     }
@@ -3355,6 +3562,83 @@ export class MiladyClient {
     );
   }
 
+  async getStewardStatus(): Promise<StewardStatusResponse> {
+    return this.fetch("/api/wallet/steward-status");
+  }
+
+  async getStewardPolicies(): Promise<
+    Array<{
+      id: string;
+      type: string;
+      enabled: boolean;
+      config: Record<string, unknown>;
+    }>
+  > {
+    return this.fetch("/api/wallet/steward-policies");
+  }
+
+  async setStewardPolicies(
+    policies: Array<{
+      id: string;
+      type: string;
+      enabled: boolean;
+      config: Record<string, unknown>;
+    }>,
+  ): Promise<void> {
+    await this.fetch("/api/wallet/steward-policies", {
+      method: "PUT",
+      body: JSON.stringify({ policies }),
+    });
+  }
+
+  async getStewardHistory(opts?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    records: StewardHistoryResponse;
+    total: number;
+    offset: number;
+    limit: number;
+  }> {
+    const params = new URLSearchParams();
+    if (opts?.status) params.set("status", opts.status);
+    if (opts?.limit) params.set("limit", String(opts.limit));
+    if (opts?.offset) params.set("offset", String(opts.offset));
+    const qs = params.toString();
+    return this.fetch(`/api/wallet/steward-tx-records${qs ? `?${qs}` : ""}`);
+  }
+
+  async getStewardPending(): Promise<StewardPendingResponse> {
+    return this.fetch("/api/wallet/steward-pending-approvals");
+  }
+
+  async approveStewardTx(txId: string): Promise<StewardApprovalActionResponse> {
+    return this.fetch("/api/wallet/steward-approve-tx", {
+      method: "POST",
+      body: JSON.stringify({ txId }),
+    });
+  }
+
+  async rejectStewardTx(
+    txId: string,
+    reason?: string,
+  ): Promise<StewardApprovalActionResponse> {
+    return this.fetch("/api/wallet/steward-deny-tx", {
+      method: "POST",
+      body: JSON.stringify({ txId, reason }),
+    });
+  }
+
+  async signViaSteward(
+    request: StewardSignRequest,
+  ): Promise<StewardSignResponse> {
+    return this.fetch("/api/wallet/steward-sign", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
   async getWalletTradingProfile(
     window: WalletTradingProfileWindow = "30d",
     source: WalletTradingProfileSourceFilter = "all",
@@ -3566,6 +3850,17 @@ export class MiladyClient {
   }> {
     return this.fetch(
       `/api/cloud/compat/agents/${encodeURIComponent(agentId)}/launch`,
+      { method: "POST" },
+    );
+  }
+
+  /** Fetch a pairing token for a cloud agent (for opening Web UI in a new tab). */
+  async getCloudCompatPairingToken(agentId: string): Promise<{
+    success: boolean;
+    data: { token: string; redirectUrl: string; expiresIn: number };
+  }> {
+    return this.fetch(
+      `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
       { method: "POST" },
     );
   }
@@ -4129,13 +4424,15 @@ export class MiladyClient {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     let url = `${protocol}//${host}/ws`;
     const params = new URLSearchParams({ clientId: this.clientId });
-    const token = this.apiToken;
-    if (token) params.set("token", token);
     url += `?${params.toString()}`;
 
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
+      const token = this.apiToken;
+      if (token && this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({ type: "auth", token }));
+      }
       this.backoffMs = 500;
       // Reset connection state on successful connection
       this.reconnectAttempt = 0;
@@ -4224,8 +4521,13 @@ export class MiladyClient {
 
   private scheduleReconnect(): void {
     if (this.reconnectTimer) return;
-    // Stop reconnecting if we've hit max attempts
+    // After the short backoff window is exhausted, keep probing at a
+    // low frequency so the UI can recover without a full page refresh.
     if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+      this.reconnectTimer = setTimeout(() => {
+        this.reconnectTimer = null;
+        this.connectWs();
+      }, 30_000);
       return;
     }
     this.reconnectTimer = setTimeout(() => {
@@ -4301,6 +4603,8 @@ export class MiladyClient {
     }
 
     if (this.wsSendQueue.length >= this.wsSendQueueLimit) {
+      const droppedType = typeof data.type === "string" ? data.type : "unknown";
+      console.warn("[ws] send queue full - dropping:", droppedType);
       this.wsSendQueue.shift();
     }
     this.wsSendQueue.push(payload);
@@ -4363,6 +4667,7 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
     conversationMode?: ConversationMode,
+    metadata?: Record<string, unknown>,
   ): Promise<{
     text: string;
     agentName: string;
@@ -4380,6 +4685,7 @@ export class MiladyClient {
         channelType,
         ...(images?.length ? { images } : {}),
         ...(conversationMode ? { conversationMode } : {}),
+        ...(metadata ? { metadata } : {}),
       }),
       signal,
     });
@@ -4434,6 +4740,10 @@ export class MiladyClient {
         return;
       }
 
+      if (!parsed.type && typeof parsed.text === "string") {
+        parsed.type = "token";
+      }
+
       if (parsed.type === "token") {
         const chunk = parsed.text ?? "";
         const nextFullText =
@@ -4462,20 +4772,21 @@ export class MiladyClient {
             model: parsed.usage.model,
           };
         }
+        // Terminal event: stop reading immediately instead of waiting for the
+        // server to close the body (some stacks leave the stream open briefly).
+        void reader.cancel("milady-sse-terminal-done").catch(() => {});
         return;
       }
 
       if (parsed.type === "error") {
         throw new Error(parsed.message ?? "generation failed");
       }
-
-      // Backward compatibility with legacy stream payloads: { text: "..." }
-      if (parsed.text) {
-        fullText = mergeStreamingText(fullText, parsed.text);
-        onToken(parsed.text, fullText);
-      }
     };
 
+    // Contract: the API must emit `data: {"type":"done",...}` or
+    // `data: {"type":"error",...}` and then end the response. If it stops
+    // mid-stream without either, the UI stays in "sending" until the user
+    // aborts — fix belongs in the conversation stream handler (@miladyai/agent).
     while (true) {
       let done = false;
       let value: Uint8Array | undefined;
@@ -4581,8 +4892,9 @@ export class MiladyClient {
       method: "POST",
       body: JSON.stringify({
         title,
-        ...(options?.bootstrapGreeting === true
-          ? { bootstrapGreeting: true }
+        ...(options?.includeGreeting === true ||
+        options?.bootstrapGreeting === true
+          ? { includeGreeting: true }
           : {}),
         ...(typeof options?.lang === "string" && options.lang.trim()
           ? { lang: options.lang.trim() }
@@ -4665,6 +4977,7 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
     conversationMode?: ConversationMode,
+    metadata?: Record<string, unknown>,
   ): Promise<{
     text: string;
     agentName: string;
@@ -4679,6 +4992,7 @@ export class MiladyClient {
       signal,
       images,
       conversationMode,
+      metadata,
     );
   }
 
@@ -4709,10 +5023,11 @@ export class MiladyClient {
   async renameConversation(
     id: string,
     title: string,
+    options?: { generate?: boolean },
   ): Promise<{ conversation: Conversation }> {
     return this.fetch(`/api/conversations/${encodeURIComponent(id)}`, {
       method: "PATCH",
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, generate: options?.generate }),
     });
   }
 
@@ -4720,13 +5035,6 @@ export class MiladyClient {
     return this.fetch(`/api/conversations/${encodeURIComponent(id)}`, {
       method: "DELETE",
     });
-  }
-
-  /** @deprecated Prefer {@link sendChatRest} — WebSocket chat may silently drop messages. */
-  sendChat(text: string): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type: "chat", text }));
-    }
   }
 
   // ── Database API ──────────────────────────────────────────────────────
@@ -5236,6 +5544,7 @@ export class MiladyClient {
   async checkBugReportInfo(): Promise<{
     nodeVersion?: string;
     platform?: string;
+    submissionMode?: "remote" | "github" | "fallback";
   }> {
     return this.fetch("/api/bug-report/info");
   }
@@ -5249,7 +5558,24 @@ export class MiladyClient {
     nodeVersion?: string;
     modelProvider?: string;
     logs?: string;
-  }): Promise<{ url?: string; fallback?: string }> {
+    category?: "general" | "startup-failure";
+    appVersion?: string;
+    releaseChannel?: string;
+    startup?: {
+      reason?: string;
+      phase?: string;
+      message?: string;
+      detail?: string;
+      status?: number;
+      path?: string;
+    };
+  }): Promise<{
+    accepted?: boolean;
+    id?: string;
+    url?: string;
+    fallback?: string;
+    destination?: "remote" | "github" | "fallback";
+  }> {
     return this.fetch("/api/bug-report", {
       method: "POST",
       body: JSON.stringify(report),
@@ -5260,9 +5586,25 @@ export class MiladyClient {
 
   async getCodingAgentStatus(): Promise<CodingAgentStatus | null> {
     try {
-      return await this.fetch<CodingAgentStatus>(
+      const status = await this.fetch<CodingAgentStatus>(
         "/api/coding-agents/coordinator/status",
       );
+      // If coordinator returned but tasks is empty, fall back to ptyService
+      // session list so the UI shows active PTY sessions even when the
+      // coordinator hasn't registered them yet.
+      if (status && (!status.tasks || status.tasks.length === 0)) {
+        try {
+          const ptySessions =
+            await this.fetch<RawPtySession[]>("/api/coding-agents");
+          if (Array.isArray(ptySessions) && ptySessions.length > 0) {
+            status.tasks = mapPtySessionsToCodingAgentSessions(ptySessions);
+            status.taskCount = status.tasks.length;
+          }
+        } catch {
+          // /api/coding-agents may not exist — ignore
+        }
+      }
+      return status;
     } catch {
       return null;
     }
@@ -5287,7 +5629,11 @@ export class MiladyClient {
       return await this.fetch<CodingAgentScratchWorkspace[]>(
         "/api/coding-agents/scratch",
       );
-    } catch {
+    } catch (err) {
+      console.warn(
+        "[api-client] Failed to list coding agent scratch workspaces:",
+        err,
+      );
       return [];
     }
   }
@@ -5540,6 +5886,168 @@ export class MiladyClient {
       method: "POST",
       body: JSON.stringify({ settings }),
     });
+  }
+
+  // ── Direct Eliza Cloud Auth (no local backend required) ─────────────
+
+  /**
+   * Initiate a direct login to Eliza Cloud without going through a local agent.
+   * Used in sandbox mode when no local backend exists yet.
+   */
+  async cloudLoginDirect(cloudApiBase: string): Promise<{
+    ok: boolean;
+    browserUrl?: string;
+    sessionId?: string;
+    error?: string;
+  }> {
+    const sessionId = globalThis.crypto.randomUUID();
+    try {
+      const res = await fetch(`${cloudApiBase}/api/auth/cli-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+      if (!res.ok) {
+        return { ok: false, error: `Login failed (${res.status})` };
+      }
+      return {
+        ok: true,
+        sessionId,
+        browserUrl: `${cloudApiBase}/auth/cli-login?session=${encodeURIComponent(sessionId)}`,
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        error: `Failed to reach Eliza Cloud: ${err instanceof Error ? err.message : String(err)}`,
+      };
+    }
+  }
+
+  /**
+   * Poll a direct Eliza Cloud login session for authentication status.
+   */
+  async cloudLoginPollDirect(
+    cloudApiBase: string,
+    sessionId: string,
+  ): Promise<{
+    status: "pending" | "authenticated" | "expired" | "error";
+    token?: string;
+    userId?: string;
+    error?: string;
+  }> {
+    try {
+      const res = await fetch(
+        `${cloudApiBase}/api/auth/cli-session/${encodeURIComponent(sessionId)}`,
+      );
+      if (!res.ok) {
+        if (res.status === 404) {
+          return {
+            status: "expired",
+            error: "Auth session expired or not found",
+          };
+        }
+        return { status: "error", error: `Poll failed (${res.status})` };
+      }
+      const data = await res.json();
+      // Map cli-session response shape to expected poll shape
+      if (data.status === "authenticated" && data.apiKey) {
+        return {
+          status: "authenticated",
+          token: data.apiKey,
+          userId: data.userId,
+        };
+      }
+      return { status: data.status ?? "pending" };
+    } catch {
+      return { status: "error", error: "Poll request failed" };
+    }
+  }
+
+  // ── Eliza Cloud Sandbox Provisioning ───────────────────────────────
+
+  /**
+   * Create a sandbox agent on Eliza Cloud and provision it.
+   * Returns the bridge URL when provisioning completes.
+   *
+   * Flow:
+   *   1. POST /api/v1/milady/agents — create agent record
+   *   2. POST /api/v1/milady/agents/{id}/provision — start async provisioning
+   *   3. Poll GET /api/v1/jobs/{jobId} until completed
+   *   4. Return bridgeUrl from job result
+   */
+  async provisionCloudSandbox(options: {
+    cloudApiBase: string;
+    authToken: string;
+    name: string;
+    bio?: string[];
+    onProgress?: (status: string, detail?: string) => void;
+  }): Promise<{ bridgeUrl: string; agentId: string }> {
+    const { cloudApiBase, authToken, name, bio, onProgress } = options;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    };
+
+    onProgress?.("creating", "Creating agent...");
+
+    // Step 1: Create agent
+    const createRes = await fetch(`${cloudApiBase}/api/v1/milady/agents`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ name, bio }),
+    });
+    if (!createRes.ok) {
+      const err = await createRes.text().catch(() => "Unknown error");
+      throw new Error(`Failed to create cloud agent: ${err}`);
+    }
+    const createData = (await createRes.json()) as { id: string };
+    const agentId = createData.id;
+
+    onProgress?.("provisioning", "Provisioning sandbox environment...");
+
+    // Step 2: Start provisioning
+    const provisionRes = await fetch(
+      `${cloudApiBase}/api/v1/milady/agents/${agentId}/provision`,
+      { method: "POST", headers },
+    );
+    if (!provisionRes.ok) {
+      const err = await provisionRes.text().catch(() => "Unknown error");
+      throw new Error(`Failed to start provisioning: ${err}`);
+    }
+    const provisionData = (await provisionRes.json()) as { jobId: string };
+    const jobId = provisionData.jobId;
+
+    // Step 3: Poll job status
+    const deadline = Date.now() + 120_000; // 2 minute timeout
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 2000));
+
+      const jobRes = await fetch(`${cloudApiBase}/api/v1/jobs/${jobId}`, {
+        headers,
+      });
+      if (!jobRes.ok) continue;
+
+      const jobData = (await jobRes.json()) as {
+        status: string;
+        result?: { bridgeUrl?: string };
+        error?: string;
+      };
+
+      if (jobData.status === "completed" && jobData.result?.bridgeUrl) {
+        onProgress?.("ready", "Sandbox ready!");
+        return { bridgeUrl: jobData.result.bridgeUrl, agentId };
+      }
+
+      if (jobData.status === "failed") {
+        throw new Error(
+          `Provisioning failed: ${jobData.error ?? "Unknown error"}`,
+        );
+      }
+
+      onProgress?.("provisioning", `Status: ${jobData.status}...`);
+    }
+
+    throw new Error("Provisioning timed out after 2 minutes");
   }
 }
 

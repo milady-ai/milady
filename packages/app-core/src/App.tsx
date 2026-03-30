@@ -3,19 +3,31 @@
  */
 
 import { Keyboard } from "@capacitor/keyboard";
+import { isIOS, isNative } from "@miladyai/app-core/platform";
 import {
-  isIOS,
-  isLifoPopoutValue,
-  isNative,
-} from "@miladyai/app-core/platform";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+  Button,
+  DrawerSheet,
+  DrawerSheetContent,
+  DrawerSheetHeader,
+  DrawerSheetTitle,
+  ErrorBoundary,
+  Z_MODAL,
+} from "@miladyai/ui";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { AgentStartupDiagnostics } from "./api/client";
 import {
   AdvancedPageView,
   AppsPageView,
   AvatarLoader,
-  CharacterView,
+  BugReportModal,
+  CharacterEditor,
   ChatView,
-  CloudDashboard,
   CompanionShell,
   CompanionView,
   ConnectionFailedBanner,
@@ -23,15 +35,14 @@ import {
   ConversationsSidebar,
   CustomActionEditor,
   CustomActionsPanel,
-  ErrorBoundary,
   GameViewOverlay,
   Header,
   HeartbeatsView,
   InventoryView,
   KnowledgeView,
   OnboardingWizard,
+
   PairingView,
-  PluginsPageView,
   SaveCommandModal,
   SettingsView,
   SharedCompanionScene,
@@ -39,37 +50,124 @@ import {
   StartupFailureView,
   StreamView,
   SystemWarningBanner,
-} from "./components";
+} from "./app-shell-components";
+import { CompanionHeader } from "./components/companion/CompanionHeader";
 import { DeferredSetupChecklist } from "./components/FlaminaGuide";
+import { SceneOverlayDataBridge } from "./components/scene-overlay-bridge";
+import { TasksEventsPanel } from "./components/TasksEventsPanel";
+import { useActivityEvents } from "./hooks/useActivityEvents";
 import {
   BugReportProvider,
   useBugReportState,
   useContextMenu,
-  useMiladyBar,
   useStreamPopoutNavigation,
 } from "./hooks";
 import type { Tab } from "./navigation";
 import { APPS_ENABLED, COMPANION_ENABLED } from "./navigation";
-import { parseShellRoute, type DetachedShellTab } from "./shell-params";
 import { useApp } from "./state";
 
-const rootShellRoute =
-  typeof window !== "undefined"
-    ? parseShellRoute(window.location.search)
-    : { mode: "main" as const };
+const CHAT_MOBILE_BREAKPOINT_PX = 820;
+const CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS =
+  "pointer-events-none absolute inset-x-0 bottom-0 h-[5.75rem]";
 
-const CHAT_MOBILE_BREAKPOINT_PX = 1024;
+function formatStartupElapsed(sec: number): string {
+  if (sec <= 0) return "";
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
-/** Check if we're in pop-out mode (StreamView only, no chrome).
- *  Legacy LIFO popout values are ignored so the normal app shell still loads. */
+function resolveAgentLoaderCopy(
+  agentStarting: boolean,
+  onboardingLoading: boolean,
+  elapsedSec: number,
+  startup: AgentStartupDiagnostics | undefined,
+): { label: string; progress?: number } {
+  const elapsed =
+    elapsedSec > 0 ? ` · ${formatStartupElapsed(elapsedSec)} elapsed` : "";
+  if (startup?.embeddingPhase === "downloading") {
+    const detail = startup.embeddingDetail?.trim();
+    const base = `Downloading embedding model (GGUF)${elapsed}`;
+    return {
+      label: detail
+        ? `${base} · ${detail}`
+        : `${base} · first run can take several minutes`,
+      progress: startup.embeddingProgressPct,
+    };
+  }
+  if (startup?.embeddingPhase === "loading") {
+    return {
+      label: `Loading embedding model${elapsed}`,
+      progress: startup.embeddingProgressPct,
+    };
+  }
+  if (startup?.embeddingPhase === "checking") {
+    return { label: `Checking embedding model${elapsed}` };
+  }
+  if (agentStarting || onboardingLoading) {
+    return {
+      label: `Starting agent${elapsed} · plugins and local models may take a while`,
+    };
+  }
+  return { label: `Starting systems${elapsed}` };
+}
+
+function resolveOnboardingHandoffCopy(
+  phase: string,
+  error: string | null,
+): { detail: string; title: string } {
+  switch (phase) {
+    case "provisioning":
+      return {
+        title: "Provisioning your agent",
+        detail: "Preparing the runtime before your companion opens.",
+      };
+    case "starting-backend":
+      return {
+        title: "Starting the local agent",
+        detail:
+          "Waking up the embedded backend so companion mode can take over in place.",
+      };
+    case "saving":
+      return {
+        title: "Saving your setup",
+        detail: "Persisting the onboarding choices for the new agent session.",
+      };
+    case "restarting":
+      return {
+        title: "Restarting your agent",
+        detail:
+          "Hot-swapping the runtime without reloading the companion shell.",
+      };
+    case "bootstrapping":
+      return {
+        title: "Starting your first conversation",
+        detail:
+          "Creating a fresh chat thread and asking the agent to greet you.",
+      };
+    case "error":
+      return {
+        title: "Setup hit a problem",
+        detail:
+          error?.trim() || "The agent could not finish the onboarding handoff.",
+      };
+    case "fading":
+    default:
+      return {
+        title: "Opening your companion",
+        detail: "Handing off from onboarding into companion mode.",
+      };
+  }
+}
+
+/** Check if we're in pop-out mode (StreamView only, no chrome). */
 function useIsPopout(): boolean {
   const [popout] = useState(() => {
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(
       window.location.search || window.location.hash.split("?")[1] || "",
     );
-    if (!params.has("popout")) return false;
-    return !isLifoPopoutValue(params.get("popout"));
+    return params.has("popout") && params.get("popout") !== "false";
   });
   return popout;
 }
@@ -130,7 +228,7 @@ function ViewRouter({
       case "character-select":
         return (
           <TabScrollView>
-            <CharacterView sceneOverlay={characterSceneVisible} />
+            <CharacterEditor sceneOverlay={characterSceneVisible} />
           </TabScrollView>
         );
       case "wallets":
@@ -153,21 +251,19 @@ function ViewRouter({
         );
       case "triggers":
         return (
-          <TabScrollView>
-            <section className="w-full px-4 py-4 lg:px-6">
-              <HeartbeatsView />
-            </section>
-          </TabScrollView>
+          <TabContentView>
+            <HeartbeatsView />
+          </TabContentView>
         );
       case "voice":
         return (
-          <TabScrollView className="settings-scroll-region">
-            <SettingsView key="settings-voice" initialSection="voice" />
+          <TabScrollView className="[scrollbar-gutter:stable] [scroll-padding-top:7rem]">
+            <SettingsView key="settings-media" initialSection="media" />
           </TabScrollView>
         );
       case "settings":
         return (
-          <TabScrollView className="settings-scroll-region">
+          <TabScrollView className="[scrollbar-gutter:stable] [scroll-padding-top:7rem]">
             <SettingsView key="settings-root" />
           </TabScrollView>
         );
@@ -179,7 +275,7 @@ function ViewRouter({
       case "trajectories":
       case "runtime":
       case "database":
-      case "lifo":
+      case "desktop":
       case "logs":
       case "security":
         return (
@@ -195,104 +291,42 @@ function ViewRouter({
   return <ErrorBoundary>{view}</ErrorBoundary>;
 }
 
-function DetachedSurfaceShell({ targetTab }: { targetTab: DetachedShellTab }) {
-  const { tab, setTab } = useApp();
-  const syncedTab = targetTab === "cloud" ? null : targetTab;
-
-  useEffect(() => {
-    if (syncedTab && tab !== syncedTab) {
-      setTab(syncedTab);
-    }
-  }, [setTab, syncedTab, tab]);
-
-  if (syncedTab && tab !== syncedTab) {
-    return null;
-  }
-
-  const view = (() => {
-    switch (targetTab) {
-      case "chat":
-        return <ChatView />;
-      case "triggers":
-        return (
-          <TabScrollView>
-            <section className="w-full px-4 py-4 lg:px-6">
-              <HeartbeatsView />
-            </section>
-          </TabScrollView>
-        );
-      case "plugins":
-        return (
-          <TabScrollView>
-            <PluginsPageView />
-          </TabScrollView>
-        );
-      case "connectors":
-        return (
-          <TabScrollView>
-            <ConnectorsPageView inModal />
-          </TabScrollView>
-        );
-      case "cloud":
-        return (
-          <TabScrollView>
-            <section className="w-full px-4 py-4 lg:px-6">
-              <section className="bg-bg rounded-2xl border border-border/50 overflow-hidden relative">
-                <CloudDashboard />
-              </section>
-            </section>
-          </TabScrollView>
-        );
-      default:
-        return <ChatView />;
-    }
-  })();
-
-  return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-bg text-txt">
-      {view}
-    </div>
-  );
-}
-
-function SettingsWindowShell({ initialSection }: { initialSection?: string }) {
-  const handleClose = useCallback(() => {
-    if (typeof window !== "undefined") {
-      window.close();
-    }
-  }, []);
-
-  return (
-    <div className="flex h-screen w-screen overflow-hidden bg-bg text-txt">
-      <SettingsView initialSection={initialSection} onClose={handleClose} />
-    </div>
-  );
-}
-
 export function App() {
-  if (rootShellRoute.mode === "settings") {
-    return <SettingsWindowShell initialSection={rootShellRoute.tab} />;
-  }
-
-  if (rootShellRoute.mode === "surface") {
-    return <DetachedSurfaceShell targetTab={rootShellRoute.tab} />;
-  }
-
   const {
-    startupStatus,
+    onboardingLoading,
+    onboardingHandoffError,
+    onboardingHandoffPhase,
+    startupPhase,
     startupError,
+    authRequired,
+    onboardingComplete,
     retryStartup,
     tab,
     setTab,
+    setState,
     actionNotice,
     uiShellMode,
+    switchShellView,
+    uiLanguage,
+    setUiLanguage,
+    uiTheme,
+    setUiTheme,
+    chatAgentVoiceMuted,
+    cancelOnboardingHandoff,
+    handleSaveCharacter,
+    characterSaving,
+    characterSaveSuccess,
     agentStatus,
     unreadConversations,
     activeGameViewerUrl,
     gameOverlayEnabled,
+    retryOnboardingHandoff,
+    t,
   } = useApp();
 
   const isPopout = useIsPopout();
+  const onboardingHandoffActive =
+    onboardingHandoffPhase != null && onboardingHandoffPhase !== "idle";
   const shellMode =
     tab === "character" || tab === "character-select"
       ? "native"
@@ -307,15 +341,23 @@ export function App() {
     shellMode === "native" &&
     (isCharacterTab(effectiveTab) || isCharacterTab(tab));
   const companionShellVisible = shellMode === "companion";
+  // Don't initialize the 3D scene while the system is still booting — this
+  // prevents VrmEngine's Three.js setup from blocking the JS thread and
+  // delaying WebSocket agent-status updates (which would freeze the loader).
   const companionSceneActive =
-    COMPANION_ENABLED && (companionShellVisible || characterSceneVisible);
+    COMPANION_ENABLED &&
+    !onboardingLoading &&
+    agentStatus?.state !== "starting" &&
+    (companionShellVisible || characterSceneVisible);
   const contextMenu = useContextMenu();
 
   useStreamPopoutNavigation(setTab);
-  useMiladyBar();
 
   const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
   const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);
+  const [tasksEventsPanelOpen, setTasksEventsPanelOpen] = useState(false);
+  const { events: activityEvents, clearEvents: clearActivityEvents } =
+    useActivityEvents();
   const [editingAction, setEditingAction] = useState<
     import("./api").CustomActionDef | null
   >(null);
@@ -330,9 +372,10 @@ export function App() {
   const unreadCount = unreadConversations?.size ?? 0;
   const mobileChatControls = isChatMobileLayout ? (
     <div className="flex items-center gap-2 w-max">
-      <button
-        type="button"
-        className={`inline-flex items-center gap-2 px-3 py-2 border rounded-md text-[12px] font-semibold transition-all cursor-pointer ${
+      <Button
+        variant="outline"
+        size="sm"
+        className={`inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
           mobileConversationsOpen
             ? "border-accent bg-accent-subtle text-txt"
             : "border-border bg-card text-txt hover:border-accent hover:text-txt"
@@ -340,7 +383,7 @@ export function App() {
         onClick={() => {
           setMobileConversationsOpen(true);
         }}
-        aria-label="Open chats panel"
+        aria-label={t("aria.openChatsPanel")}
       >
         <svg
           width="14"
@@ -353,22 +396,23 @@ export function App() {
           strokeLinejoin="round"
           aria-hidden
         >
-          <title>Chats</title>
+          <title>{t("conversations.chats")}</title>
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
-        Chats
+        {t("conversations.chats")}
         {unreadCount > 0 && (
           <span className="inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-accent text-accent-fg text-[10px] font-bold px-1">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
     </div>
   ) : undefined;
 
   // Keep hook order stable across onboarding/auth state transitions.
   // Otherwise React can throw when onboarding completes and the main shell mounts.
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const handler = () => setCustomActionsPanelOpen((v) => !v);
     window.addEventListener("toggle-custom-actions-panel", handler);
     return () =>
@@ -379,6 +423,17 @@ export function App() {
     setCustomActionsEditorOpen(false);
     setEditingAction(null);
   }, []);
+
+  const handleDeferredTaskOpen = useCallback(
+    (task: "provider" | "rpc" | "permissions" | "voice") => {
+      if (task === "voice") {
+        setTab("voice");
+        return;
+      }
+      setTab("settings");
+    },
+    [setTab],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -428,37 +483,74 @@ export function App() {
   const bugReport = useBugReportState();
   const agentStarting = agentStatus?.state === "starting";
 
+  const showFullScreenLoader =
+    onboardingComplete &&
+    !onboardingHandoffActive &&
+    (onboardingLoading || agentStarting);
+
+  const [startupElapsedSec, setStartupElapsedSec] = useState(0);
+  useEffect(() => {
+    if (!showFullScreenLoader) {
+      setStartupElapsedSec(0);
+      return;
+    }
+    const t0 = Date.now();
+    setStartupElapsedSec(0);
+    const id = window.setInterval(() => {
+      setStartupElapsedSec(Math.floor((Date.now() - t0) / 1000));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [showFullScreenLoader]);
+
   useEffect(() => {
     const STARTUP_TIMEOUT_MS = 300_000;
-    if (startupStatus === "loading" && !startupError) {
+    if ((startupPhase as string) !== "ready" && !startupError) {
       const timer = setTimeout(() => {
         retryStartup();
       }, STARTUP_TIMEOUT_MS);
       return () => clearTimeout(timer);
     }
-  }, [startupStatus, startupError, retryStartup]);
+  }, [startupPhase, startupError, retryStartup]);
 
-  // Pop-out mode — render only StreamView, skip startup gates.
-  // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.
-  if (isPopout) {
-    return (
-      <div className="flex flex-col h-screen w-screen font-body text-txt bg-bg overflow-hidden">
-        <StreamView />
-      </div>
-    );
-  }
+  // Agent startup must not hide onboarding: after reset the runtime often goes
+  // to "starting" while we need to show the wizard immediately.
+  const blockOnboardingForShell = onboardingLoading;
 
-  if (startupStatus === "recoverable-error" && startupError) {
-    return <StartupFailureView error={startupError} onRetry={retryStartup} />;
-  }
-
-  const shouldLoad = startupStatus === "loading" || agentStarting;
   const [loaderFadingOut, setLoaderFadingOut] = useState(false);
   const showLoaderRef = useRef(true);
   const [showLoader, setShowLoader] = useState(true);
 
+  // Crossfade state for onboarding -> chat
+  const [fadingOutOnboarding, setFadingOutOnboarding] = useState(false);
+  const prevOnboardingHandoffActiveRef = useRef(onboardingHandoffActive);
+  const prevOnboardingCompleteRef = useRef(onboardingComplete);
+
   useEffect(() => {
-    if (shouldLoad) {
+    const enteredHandoff =
+      !prevOnboardingHandoffActiveRef.current && onboardingHandoffActive;
+    const completedOnboarding =
+      !prevOnboardingCompleteRef.current && onboardingComplete;
+
+    if (enteredHandoff || completedOnboarding) {
+      setFadingOutOnboarding(true);
+      const timer = setTimeout(() => {
+        setFadingOutOnboarding(false);
+      }, 700);
+      prevOnboardingHandoffActiveRef.current = onboardingHandoffActive;
+      prevOnboardingCompleteRef.current = onboardingComplete;
+      return () => clearTimeout(timer);
+    }
+
+    if (!onboardingHandoffActive && !onboardingComplete) {
+      setFadingOutOnboarding(false);
+    }
+
+    prevOnboardingHandoffActiveRef.current = onboardingHandoffActive;
+    prevOnboardingCompleteRef.current = onboardingComplete;
+  }, [onboardingComplete, onboardingHandoffActive]);
+
+  useEffect(() => {
+    if (showFullScreenLoader) {
       showLoaderRef.current = true;
       setShowLoader(true);
       setLoaderFadingOut(false);
@@ -471,10 +563,40 @@ export function App() {
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [shouldLoad]);
+  }, [showFullScreenLoader]);
 
-  if (startupStatus === "auth-blocked" && !shouldLoad) return <PairingView />;
-  if (startupStatus === "onboarding" && !shouldLoad) return <OnboardingWizard />;
+  // Pop-out mode — render only StreamView, skip startup gates.
+  // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.
+  if (isPopout) {
+    return (
+      <div className="flex flex-col h-screen w-screen font-body text-txt bg-bg overflow-hidden">
+        <StreamView />
+      </div>
+    );
+  }
+
+  // After loader hooks (stable hook order); do not return startupError before useState above.
+  if (startupError) {
+    return (
+      <BugReportProvider value={bugReport}>
+        <StartupFailureView error={startupError} onRetry={retryStartup} />
+        <BugReportModal />
+      </BugReportProvider>
+    );
+  }
+
+  if (authRequired && !blockOnboardingForShell) return <PairingView />;
+  const showOnboarding =
+    ((!onboardingComplete && !onboardingHandoffActive) ||
+      fadingOutOnboarding) &&
+    !blockOnboardingForShell;
+
+  // We conditionally skip returning early for onboarding so we can mount the app shell
+  // behind it during the crossfade. If we are completely before the fade out, we can
+  // still return early to prevent the engine from paying the cost of the main shell.
+  if (showOnboarding && !fadingOutOnboarding) {
+    return <OnboardingWizard />;
+  }
 
   const shellContent = companionShellVisible ? (
     <CompanionShell tab={effectiveTab} actionNotice={actionNotice} />
@@ -487,41 +609,95 @@ export function App() {
     </div>
   ) : isChat ? (
     <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
-      <Header mobileLeft={mobileChatControls} />
+      <Header
+        mobileLeft={mobileChatControls}
+        tasksEventsPanelOpen={tasksEventsPanelOpen}
+        onToggleTasksPanel={() => setTasksEventsPanelOpen((o) => !o)}
+      />
       <div className="flex flex-1 min-h-0 relative">
+        {!isChatMobileLayout ? (
+          <div
+            className={CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS}
+            data-chat-shell-composer-underlay
+          />
+        ) : null}
         {isChatMobileLayout ? (
           <>
             <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-2 px-2">
               <DeferredSetupChecklist
-                className="mb-2"
-                onOpenTask={(task) => {
-                  setTab(task === "voice" ? "voice" : "settings");
-                }}
+                className="mb-3"
+                onOpenTask={handleDeferredTaskOpen}
               />
               <ChatView />
             </main>
 
             {mobileConversationsOpen && (
-              <div className="fixed inset-0 z-[120] bg-bg">
-                <ConversationsSidebar
-                  mobile
-                  onClose={() => setMobileConversationsOpen(false)}
-                />
-              </div>
+              <DrawerSheet
+                open={mobileConversationsOpen}
+                onOpenChange={setMobileConversationsOpen}
+              >
+                <DrawerSheetContent
+                  aria-describedby={undefined}
+                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                  showCloseButton={false}
+                >
+                  <DrawerSheetHeader className="sr-only">
+                    <DrawerSheetTitle>
+                      {t("conversations.chats")}
+                    </DrawerSheetTitle>
+                  </DrawerSheetHeader>
+                  <ConversationsSidebar
+                    mobile
+                    onClose={() => setMobileConversationsOpen(false)}
+                  />
+                </DrawerSheetContent>
+              </DrawerSheet>
+            )}
+
+            {tasksEventsPanelOpen && (
+              <DrawerSheet
+                open={tasksEventsPanelOpen}
+                onOpenChange={setTasksEventsPanelOpen}
+              >
+                <DrawerSheetContent
+                  aria-describedby={undefined}
+                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                  showCloseButton={false}
+                >
+                  <DrawerSheetHeader className="sr-only">
+                    <DrawerSheetTitle>
+                      {t("taskseventspanel.Title", {
+                        defaultValue: "Tasks & Events",
+                      })}
+                    </DrawerSheetTitle>
+                  </DrawerSheetHeader>
+                  <TasksEventsPanel
+                    open
+                    onClose={() => setTasksEventsPanelOpen(false)}
+                    events={activityEvents}
+                    clearEvents={clearActivityEvents}
+                    mobile
+                  />
+                </DrawerSheetContent>
+              </DrawerSheet>
             )}
           </>
         ) : (
           <>
             <ConversationsSidebar />
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-3 px-3 xl:px-5">
+            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
               <DeferredSetupChecklist
-                className="mb-3"
-                onOpenTask={(task) => {
-                  setTab(task === "voice" ? "voice" : "settings");
-                }}
+                className="mx-3 mb-3 mt-3 xl:mx-5"
+                onOpenTask={handleDeferredTaskOpen}
               />
               <ChatView />
             </main>
+            <TasksEventsPanel
+              open={tasksEventsPanelOpen}
+              onClose={() => setTasksEventsPanelOpen(false)}
+              events={activityEvents}
+              clearEvents={clearActivityEvents}
+            />
           </>
         )}
         <CustomActionsPanel
@@ -534,19 +710,31 @@ export function App() {
         />
       </div>
     </div>
+  ) : characterSceneVisible ? (
+    <div className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent">
+      <CompanionHeader
+        activeShellView="character"
+        onShellViewChange={(view) => switchShellView(view)}
+        uiLanguage={uiLanguage}
+        setUiLanguage={setUiLanguage}
+        uiTheme={uiTheme}
+        setUiTheme={setUiTheme}
+        t={t}
+        showCompanionControls
+        chatAgentVoiceMuted={chatAgentVoiceMuted}
+        onToggleVoiceMute={() =>
+          setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
+        }
+      />
+      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
+        <ViewRouter characterSceneVisible />
+      </main>
+    </div>
   ) : (
-    <div
-      className={`flex flex-col flex-1 min-h-0 w-full font-body text-txt ${
-        characterSceneVisible ? "bg-transparent" : "bg-bg"
-      }`}
-    >
-      <Header transparent={characterSceneVisible} />
-      <main
-        className={`flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 ${
-          characterSceneVisible ? "pb-4 pt-2 xl:pb-6" : "py-4 xl:py-6"
-        }`}
-      >
-        <ViewRouter characterSceneVisible={characterSceneVisible} />
+    <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
+      <Header />
+      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
+        <ViewRouter />
       </main>
     </div>
   );
@@ -554,7 +742,7 @@ export function App() {
   const appShell = COMPANION_ENABLED ? (
     <SharedCompanionScene
       active={companionSceneActive}
-      interactive={companionShellVisible}
+      interactive={companionShellVisible || characterSceneVisible}
     >
       {shellContent}
     </SharedCompanionScene>
@@ -562,9 +750,74 @@ export function App() {
     shellContent
   );
 
+  const onboardingHandoffCopy = resolveOnboardingHandoffCopy(
+    onboardingHandoffPhase,
+    onboardingHandoffError,
+  );
+
   return (
     <BugReportProvider value={bugReport}>
+      {/* Bridge React state into the 3D scene overlay panels */}
+      {COMPANION_ENABLED && <SceneOverlayDataBridge />}
+      {/*
+        If we are in the crossfade phase, mount the shell but cover it with the fading onboarding layer.
+      */}
       {appShell}
+
+      {showOnboarding && (
+        <div
+          className={`fixed inset-0 z-[${Z_MODAL}] transition-opacity duration-700`}
+          style={{ opacity: fadingOutOnboarding ? 0 : 1 }}
+        >
+          <OnboardingWizard />
+        </div>
+      )}
+
+      {onboardingHandoffActive && (
+        <div
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-[90] flex justify-center px-4 pb-6 pt-20"
+          data-testid="onboarding-handoff-overlay"
+        >
+          <div className="pointer-events-auto w-full max-w-lg rounded-[24px] border border-border/50 bg-card/92 p-5 shadow-[0_18px_48px_rgba(15,23,42,0.24)] backdrop-blur-md">
+            <div className="flex items-start gap-3">
+              {onboardingHandoffPhase === "error" ? (
+                <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-danger" />
+              ) : (
+                <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-accent animate-pulse" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-txt">
+                  {onboardingHandoffCopy.title}
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  {onboardingHandoffCopy.detail}
+                </p>
+              </div>
+            </div>
+
+            {onboardingHandoffPhase === "error" && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  data-testid="onboarding-handoff-retry"
+                  onClick={() => {
+                    void retryOnboardingHandoff();
+                  }}
+                >
+                  Retry
+                </Button>
+                <Button
+                  variant="outline"
+                  data-testid="onboarding-handoff-back"
+                  onClick={cancelOnboardingHandoff}
+                >
+                  Back to setup
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Persistent game overlay — stays visible across all tabs */}
       {activeGameViewerUrl && gameOverlayEnabled && tab !== "apps" && (
         <GameViewOverlay />
@@ -589,7 +842,15 @@ export function App() {
       <SystemWarningBanner />
       {showLoader && (
         <AvatarLoader
-          label={agentStarting ? "Initializing agent" : "Starting systems"}
+          {...(() => {
+            const { label, progress } = resolveAgentLoaderCopy(
+              agentStarting,
+              onboardingLoading,
+              startupElapsedSec,
+              agentStatus?.startup,
+            );
+            return { label, progress };
+          })()}
           fullScreen
           fadingOut={loaderFadingOut}
         />
