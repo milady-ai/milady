@@ -3,8 +3,9 @@ const EACCES_VIEW_PATTERN =
 
 export function parseBunVersion(rawVersion) {
   const raw = String(rawVersion ?? "").trim();
-  const versionToken = raw.split(/\s+/)[0] ?? "";
-  const match = /^(\d+)\.(\d+)\.(\d+)(.*)$/.exec(versionToken);
+  // Bun may print only "1.3.10" or a prefixed line (e.g. "Bun 1.3.10"); scan for semver.
+  const firstLine = raw.split(/\r?\n/)[0]?.trim() ?? raw;
+  const match = /(\d+)\.(\d+)\.(\d+)([^\s]*)/.exec(firstLine);
   if (!match) {
     return {
       raw,
@@ -15,7 +16,10 @@ export function parseBunVersion(rawVersion) {
     };
   }
   const suffix = match[4] ?? "";
-  const channel = /canary/i.test(suffix) ? "canary" : "stable";
+  const channel =
+    /canary/i.test(suffix) || /\bcanary\b/i.test(firstLine)
+      ? "canary"
+      : "stable";
   return {
     raw,
     major: Number(match[1]),

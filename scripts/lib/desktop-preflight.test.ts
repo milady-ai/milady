@@ -29,6 +29,8 @@ describe("desktop-preflight helpers", () => {
   it("accepts stable bun >=1.3 and rejects canary", () => {
     expect(isSupportedBunVersion("1.3.10")).toBe(true);
     expect(isSupportedBunVersion("1.4.0")).toBe(true);
+    expect(isSupportedBunVersion("Bun 1.3.10")).toBe(true);
+    expect(isSupportedBunVersion("v1.3.10")).toBe(true);
     expect(isSupportedBunVersion("1.3.0-canary.9")).toBe(false);
     expect(isSupportedBunVersion("1.2.22")).toBe(false);
   });
