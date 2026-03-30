@@ -1,3 +1,5 @@
+import path from "node:path";
+
 const EACCES_VIEW_PATTERN =
   /electrobun[\\/](?:node_modules[\\/])?view|electrobun[\\/](?:node_modules[\\/])?electrobun[\\/]view/i;
 
@@ -47,6 +49,24 @@ export function hasElectrobunViewExport(manifest) {
   const exportsField = manifest.exports;
   if (!exportsField || typeof exportsField !== "object") return false;
   return Object.hasOwn(exportsField, "./view");
+}
+
+export function findElectrobunManifestPath(
+  candidateRoots,
+  existsSyncFn = () => false,
+) {
+  for (const root of candidateRoots) {
+    const manifestPath = path.join(
+      root,
+      "node_modules",
+      "electrobun",
+      "package.json",
+    );
+    if (existsSyncFn(manifestPath)) {
+      return manifestPath;
+    }
+  }
+  return null;
 }
 
 export function classifyElectrobunViewFailure(stderrText) {
