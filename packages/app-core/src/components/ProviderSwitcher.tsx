@@ -193,7 +193,8 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         setSelectedProviderId(nextSelectedId);
       }
       const piAiSelected =
-        connection?.kind === "local-provider" && connection.provider === "pi-ai";
+        connection?.kind === "local-provider" &&
+        connection.provider === "pi-ai";
       if (piAiSelected) {
         setPiAiModelSpec(connection.primaryModel ?? "");
       }
@@ -315,8 +316,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       new Set(
         allAiProviders.map(
           (provider) =>
-            getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
-              ?.id ?? normalizeAiProviderPluginId(provider.id),
+            getOnboardingProviderOption(
+              normalizeAiProviderPluginId(provider.id),
+            )?.id ?? normalizeAiProviderPluginId(provider.id),
         ),
       ),
     [allAiProviders],
@@ -338,34 +340,28 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                 isSubscriptionProviderSelectionId(selectedProviderId))
             ? selectedProviderId
             : null,
-    [
-      availableProviderIds,
-      selectedProviderId,
-    ],
+    [availableProviderIds, selectedProviderId],
   );
 
-  const selectedProvider = useMemo(
-    () => {
-      if (
-        !resolvedSelectedId ||
-        resolvedSelectedId === "__cloud__" ||
-        resolvedSelectedId === "pi-ai" ||
-        isSubscriptionProviderSelectionId(resolvedSelectedId)
-      ) {
-        return null;
-      }
+  const selectedProvider = useMemo(() => {
+    if (
+      !resolvedSelectedId ||
+      resolvedSelectedId === "__cloud__" ||
+      resolvedSelectedId === "pi-ai" ||
+      isSubscriptionProviderSelectionId(resolvedSelectedId)
+    ) {
+      return null;
+    }
 
-      return (
-        allAiProviders.find(
-          (provider) =>
-            (getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
-              ?.id ?? normalizeAiProviderPluginId(provider.id)) ===
-            resolvedSelectedId,
-        ) ?? null
-      );
-    },
-    [allAiProviders, resolvedSelectedId],
-  );
+    return (
+      allAiProviders.find(
+        (provider) =>
+          (getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
+            ?.id ?? normalizeAiProviderPluginId(provider.id)) ===
+          resolvedSelectedId,
+      ) ?? null
+    );
+  }, [allAiProviders, resolvedSelectedId]);
 
   /* ── Handlers ─────────────────────────────────────────────────── */
   const handleSwitchProvider = useCallback(
@@ -375,8 +371,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       const target =
         allAiProviders.find(
           (provider) =>
-            (getOnboardingProviderOption(normalizeAiProviderPluginId(provider.id))
-              ?.id ?? normalizeAiProviderPluginId(provider.id)) === newId,
+            (getOnboardingProviderOption(
+              normalizeAiProviderPluginId(provider.id),
+            )?.id ?? normalizeAiProviderPluginId(provider.id)) === newId,
         ) ?? null;
       const providerId =
         getOnboardingProviderOption(

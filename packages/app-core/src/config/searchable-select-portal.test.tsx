@@ -5,18 +5,17 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {
+  SELECT_FLOATING_LAYER_NAME,
+  SELECT_FLOATING_LAYER_Z_INDEX,
+} from "@miladyai/ui";
+import {
   cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
 } from "@testing-library/react";
-import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  SELECT_FLOATING_LAYER_NAME,
-  SELECT_FLOATING_LAYER_Z_INDEX,
-} from "@miladyai/ui";
 import { ProviderSwitcher } from "../components/ProviderSwitcher";
 
 const mockGetConfig = vi.fn();

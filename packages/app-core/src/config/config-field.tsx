@@ -12,11 +12,11 @@
 import {
   Button,
   Checkbox,
+  SELECT_FLOATING_LAYER_NAME,
+  SELECT_FLOATING_LAYER_Z_INDEX,
   Select,
   SelectContent,
   SelectItem,
-  SELECT_FLOATING_LAYER_NAME,
-  SELECT_FLOATING_LAYER_Z_INDEX,
   SelectTrigger,
   SelectValue,
   Switch,
