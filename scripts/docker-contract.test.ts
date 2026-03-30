@@ -23,7 +23,7 @@ const DOCKERFILES = [
     name: "Dockerfile",
     path: path.join(ROOT, "Dockerfile"),
     expectedBase: "bookworm",
-    expectedCommand: 'CMD ["node", "milady.mjs", "start"]',
+    expectedCommand: 'CMD ["/root/.bun/bin/bun", "milady.mjs", "start"]',
   },
   {
     name: "Dockerfile.slim",
