@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 @import "@miladyai/app-core/styles/base.css";
-@plugin "@tailwindcss/typography";
 
 /* Scan @miladyai/ui source so Tailwind generates CSS for all UI package classes
    (z-[160], z-[170], bg-black/80, bg-bg, text-muted, ring-ring, etc.) */
