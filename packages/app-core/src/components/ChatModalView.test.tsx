@@ -6,35 +6,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ChatModalView } from "./ChatModalView";
 
-vi.mock("@miladyai/ui", async () => {
-  const React = await vi.importActual<typeof import("react")>("react");
-
-  return {
-    DrawerSheet: ({
-      open,
-      children,
-    }: {
-      open?: boolean;
-      children?: React.ReactNode;
-    }) => (open ? React.createElement(React.Fragment, null, children) : null),
-    DrawerSheetContent: ({
-      children,
-      ...props
-    }: React.HTMLAttributes<HTMLDivElement>) =>
-      React.createElement("div", props, children),
-    DrawerSheetHeader: ({
-      children,
-      ...props
-    }: React.HTMLAttributes<HTMLDivElement>) =>
-      React.createElement("div", props, children),
-    DrawerSheetTitle: ({
-      children,
-      ...props
-    }: React.HTMLAttributes<HTMLDivElement>) =>
-      React.createElement("div", props, children),
-  };
-});
-
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: vi.fn(),
   useTranslation: () => ({ t: (key: string) => key }),

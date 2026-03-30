@@ -666,7 +666,7 @@ const SwitchComponent: ComponentFn = (props, _children, ctx) => {
         onClick={() => setValue(!checked)}
       >
         <div
-          className={`absolute top-0.5 w-[14px] h-[14px] bg-white transition-all ${checked ? "left-5" : "left-0.5"}`}
+          className={`absolute top-0.5 w-[14px] h-[14px] bg-[var(--card)] transition-all ${checked ? "left-5" : "left-0.5"}`}
         />
       </Button>
       <span className="text-xs font-semibold">{String(props.label ?? "")}</span>
@@ -1257,9 +1257,9 @@ const MetricComponent: ComponentFn = (props) => {
   const trend = props.trend as string | undefined;
   const trendColor =
     trend === "up"
-      ? "text-green-400"
+      ? "text-status-success"
       : trend === "down"
-        ? "text-red-400"
+        ? "text-status-danger"
         : "text-[var(--muted)]";
   return (
     <div className="flex flex-col gap-0.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--card)]">

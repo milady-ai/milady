@@ -59,7 +59,7 @@ export function AddressRow({
           onClick={() => onCopy(address, field)}
           className={`shrink-0 p-1.5 border transition-all duration-150 ${
             copiedField === field
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+              ? "border-status-running/30 bg-status-running/10 text-status-running"
               : "border-border text-text-muted hover:text-text-light hover:border-text-muted"
           }`}
           title="Copy address"

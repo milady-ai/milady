@@ -124,6 +124,7 @@ import {
   resolveOnboardingPreviousStep,
 } from "../onboarding/flow";
 import { buildOnboardingConnectionConfig } from "../onboarding-config";
+import { restartAgentAfterOnboarding } from "./onboarding-restart";
 import {
   alertDesktopMessage,
   confirmDesktopAction,
@@ -466,6 +467,7 @@ interface QueuedChatSend {
   channelType: ConversationChannelType;
   conversationId?: string | null;
   images?: ImageAttachment[];
+  metadata?: Record<string, unknown>;
   resolve: () => void;
   reject: (error: unknown) => void;
 }
@@ -1029,9 +1031,6 @@ function AppProviderInner({
     useState("/cloud/billing");
   const [elizaCloudUserId, setElizaCloudUserId] = useState<string | null>(null);
   const [ownerName, setOwnerNameState] = useState<string | null>(null);
-  const [ownerNameHydrated, setOwnerNameHydrated] = useState(false);
-  const [pendingOwnerNamePrompt, setPendingOwnerNamePrompt] = useState(false);
-  const [showOwnerNamePrompt, setShowOwnerNamePrompt] = useState(false);
   const [elizaCloudStatusReason, setElizaCloudStatusReason] = useState<
     string | null
   >(null);
@@ -1575,20 +1574,12 @@ function AppProviderInner({
   const switchShellView = useCallback(
     (view: ShellView) => {
       const nextTab = getTabForShellView(view, lastNativeTab);
-      // Gate: prompt for owner name the first time user enters desktop/native view
-      if (view === "desktop" && !ownerName && !showOwnerNamePrompt) {
-        if (ownerNameHydrated) {
-          setShowOwnerNamePrompt(true);
-        } else {
-          setPendingOwnerNamePrompt(true);
-        }
-      }
       console.log(
         `[shell] switchShellView: ${view} → tab=${nextTab}, lastNativeTab=${lastNativeTab}`,
       );
       setTab(nextTab);
     },
-    [lastNativeTab, ownerName, ownerNameHydrated, showOwnerNamePrompt, setTab],
+    [lastNativeTab, setTab],
   );
 
   const navigationHubRef = useRef(new NavigationEventHub());
@@ -2199,51 +2190,11 @@ function AppProviderInner({
         }
       })
       .catch(() => {})
-      .finally(() => {
-        if (!cancelled) {
-          setOwnerNameHydrated(true);
-        }
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  useEffect(() => {
-    if (!ownerNameHydrated) {
-      return;
-    }
-
-    if (ownerName || showOwnerNamePrompt) {
-      if (pendingOwnerNamePrompt) {
-        setPendingOwnerNamePrompt(false);
-      }
-      return;
-    }
-
-    if (pendingOwnerNamePrompt && uiShellMode === "native") {
-      setShowOwnerNamePrompt(true);
-      setPendingOwnerNamePrompt(false);
-    }
-  }, [
-    ownerName,
-    ownerNameHydrated,
-    pendingOwnerNamePrompt,
-    showOwnerNamePrompt,
-    uiShellMode,
-  ]);
-
-  const handleOwnerNameSubmit = useCallback((name: string) => {
-    const normalized = normalizeOwnerName(name);
-    if (!normalized) {
-      return;
-    }
-
-    setOwnerNameState(normalized);
-    setShowOwnerNamePrompt(false);
-    setPendingOwnerNamePrompt(false);
-    void client.updateConfig({ ui: { ownerName: normalized } }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -3880,6 +3831,7 @@ function AppProviderInner({
           controller.signal,
           imagesToSend,
           conversationMode,
+          turn.metadata,
         );
 
         if (!data.text.trim()) {
@@ -4068,6 +4020,7 @@ function AppProviderInner({
         channelType?: ConversationChannelType;
         conversationId?: string | null;
         images?: ImageAttachment[];
+        metadata?: Record<string, unknown>;
       },
     ) => {
       const hasAttachedImages = Boolean(options?.images?.length);
@@ -4081,6 +4034,7 @@ function AppProviderInner({
           channelType: options?.channelType ?? "DM",
           conversationId: options?.conversationId,
           images: options?.images,
+          metadata: options?.metadata,
           resolve,
           reject,
         });
@@ -5540,7 +5494,7 @@ function AppProviderInner({
           }
 
           setOnboardingHandoffPhase("restarting");
-          setAgentStatus(await client.restartAgent());
+          setAgentStatus(await restartAgentAfterOnboarding(client));
           setOnboardingHandoffPhase("bootstrapping");
           await bootstrapConversationAfterAgentReady(
             "onboarding:cloud_fast_track",
@@ -5735,7 +5689,7 @@ function AppProviderInner({
         }
 
         setOnboardingHandoffPhase("restarting");
-        setAgentStatus(await client.restartAgent());
+        setAgentStatus(await restartAgentAfterOnboarding(client));
         setOnboardingHandoffPhase("bootstrapping");
         await bootstrapConversationAfterAgentReady("onboarding:full_finish", {
           forceFreshConversation: true,
@@ -7550,152 +7504,162 @@ function AppProviderInner({
       );
 
       // Handle PTY session events from SwarmCoordinator
-      unbindPtySessionEvent = client.onWsEvent("pty-session-event", (data: Record<string, unknown>) => {
-        const eventType = (data.eventType ?? data.type) as string;
-        const sessionId = data.sessionId as string;
-        if (!sessionId) return;
+      unbindPtySessionEvent = client.onWsEvent(
+        "pty-session-event",
+        (data: Record<string, unknown>) => {
+          const eventType = (data.eventType ?? data.type) as string;
+          const sessionId = data.sessionId as string;
+          if (!sessionId) return;
 
-        if (eventType === "task_registered") {
-          const d = data.data as Record<string, unknown> | undefined;
-          setPtySessions((prev) => [
-            ...prev.filter((s) => s.sessionId !== sessionId),
-            {
-              sessionId,
-              agentType: (d?.agentType as string) ?? "claude",
-              label: (d?.label as string) ?? sessionId,
-              originalTask: (d?.originalTask as string) ?? "",
-              workdir: (d?.workdir as string) ?? "",
-              status: "active",
-              decisionCount: 0,
-              autoResolvedCount: 0,
-              lastActivity: "Starting",
-            },
-          ]);
-        } else if (eventType === "task_complete" || eventType === "stopped") {
-          setPtySessions((prev) =>
-            prev.filter((s) => s.sessionId !== sessionId),
-          );
-        } else {
-          // Status update — apply to known session, or full re-hydrate if unknown
-          const applyUpdate = (
-            prev: CodingAgentSession[],
-          ): CodingAgentSession[] => {
-            const known = prev.some((s) => s.sessionId === sessionId);
-            if (!known) return prev; // will trigger hydration below
+          if (eventType === "task_registered") {
+            const d = data.data as Record<string, unknown> | undefined;
+            setPtySessions((prev) => [
+              ...prev.filter((s) => s.sessionId !== sessionId),
+              {
+                sessionId,
+                agentType: (d?.agentType as string) ?? "claude",
+                label: (d?.label as string) ?? sessionId,
+                originalTask: (d?.originalTask as string) ?? "",
+                workdir: (d?.workdir as string) ?? "",
+                status: "active",
+                decisionCount: 0,
+                autoResolvedCount: 0,
+                lastActivity: "Starting",
+              },
+            ]);
+          } else if (eventType === "task_complete" || eventType === "stopped") {
+            setPtySessions((prev) =>
+              prev.filter((s) => s.sessionId !== sessionId),
+            );
+          } else {
+            // Status update — apply to known session, or full re-hydrate if unknown
+            const applyUpdate = (
+              prev: CodingAgentSession[],
+            ): CodingAgentSession[] => {
+              const known = prev.some((s) => s.sessionId === sessionId);
+              if (!known) return prev; // will trigger hydration below
 
-            if (eventType === "blocked" || eventType === "escalation") {
-              const activity =
-                eventType === "escalation"
-                  ? "Escalated — needs attention"
-                  : "Waiting for input";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? { ...s, status: "blocked" as const, lastActivity: activity }
-                  : s,
-              );
-            }
-            if (eventType === "tool_running") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const toolDesc =
-                (d?.description as string) ??
-                (d?.toolName as string) ??
-                "external tool";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "tool_running" as const,
-                      toolDescription: toolDesc,
-                      lastActivity: `Running ${toolDesc}`.slice(0, 60),
-                    }
-                  : s,
-              );
-            }
-            if (eventType === "blocked_auto_resolved") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const prompt =
-                (d?.prompt as string) ?? (d?.reasoning as string) ?? "";
-              const excerpt = prompt
-                ? `Approved: ${prompt}`.slice(0, 60)
-                : "Approved";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "active" as const,
-                      toolDescription: undefined,
-                      lastActivity: excerpt,
-                    }
-                  : s,
-              );
-            }
-            // coordination_decision — emitted by swarm decision loop.
-            // d.action values: "approve" | "respond" | "escalate" | "continue"
-            if (eventType === "coordination_decision") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const reasoning =
-                (d?.reasoning as string) ?? (d?.action as string) ?? "";
-              const wasEscalation = (d?.action as string) === "escalate";
-              const excerpt = wasEscalation
-                ? `Escalated: ${reasoning}`.slice(0, 60)
-                : reasoning
-                  ? `Responded: ${reasoning}`.slice(0, 60)
-                  : "Responded";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "active" as const,
-                      toolDescription: undefined,
-                      lastActivity: excerpt,
-                    }
-                  : s,
-              );
-            }
-            if (eventType === "ready") {
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "active" as const,
-                      toolDescription: undefined,
-                      lastActivity: "Running",
-                    }
-                  : s,
-              );
-            }
-            if (eventType === "error") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const errMsg = (d?.message as string) ?? "Unknown error";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "error" as const,
-                      lastActivity: `Error: ${errMsg}`.slice(0, 60),
-                    }
-                  : s,
-              );
-            }
-            return prev;
-          };
-
-          let needsHydrate = false;
-          setPtySessions((prev) => {
-            const next = applyUpdate(prev);
-            if (next === prev && !prev.some((s) => s.sessionId === sessionId)) {
-              // Unknown session — flag for re-hydration outside the updater
-              needsHydrate = true;
+              if (eventType === "blocked" || eventType === "escalation") {
+                const activity =
+                  eventType === "escalation"
+                    ? "Escalated — needs attention"
+                    : "Waiting for input";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "blocked" as const,
+                        lastActivity: activity,
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "tool_running") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const toolDesc =
+                  (d?.description as string) ??
+                  (d?.toolName as string) ??
+                  "external tool";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "tool_running" as const,
+                        toolDescription: toolDesc,
+                        lastActivity: `Running ${toolDesc}`.slice(0, 60),
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "blocked_auto_resolved") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const prompt =
+                  (d?.prompt as string) ?? (d?.reasoning as string) ?? "";
+                const excerpt = prompt
+                  ? `Approved: ${prompt}`.slice(0, 60)
+                  : "Approved";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "active" as const,
+                        toolDescription: undefined,
+                        lastActivity: excerpt,
+                      }
+                    : s,
+                );
+              }
+              // coordination_decision — emitted by swarm decision loop.
+              // d.action values: "approve" | "respond" | "escalate" | "continue"
+              if (eventType === "coordination_decision") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const reasoning =
+                  (d?.reasoning as string) ?? (d?.action as string) ?? "";
+                const wasEscalation = (d?.action as string) === "escalate";
+                const excerpt = wasEscalation
+                  ? `Escalated: ${reasoning}`.slice(0, 60)
+                  : reasoning
+                    ? `Responded: ${reasoning}`.slice(0, 60)
+                    : "Responded";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "active" as const,
+                        toolDescription: undefined,
+                        lastActivity: excerpt,
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "ready") {
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "active" as const,
+                        toolDescription: undefined,
+                        lastActivity: "Running",
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "error") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const errMsg = (d?.message as string) ?? "Unknown error";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "error" as const,
+                        lastActivity: `Error: ${errMsg}`.slice(0, 60),
+                      }
+                    : s,
+                );
+              }
               return prev;
+            };
+
+            let needsHydrate = false;
+            setPtySessions((prev) => {
+              const next = applyUpdate(prev);
+              if (
+                next === prev &&
+                !prev.some((s) => s.sessionId === sessionId)
+              ) {
+                // Unknown session — flag for re-hydration outside the updater
+                needsHydrate = true;
+                return prev;
+              }
+              return next;
+            });
+            if (needsHydrate) {
+              // Re-hydrate from server to pick up missed registrations
+              hydratePtySessions();
             }
-            return next;
-          });
-          if (needsHydrate) {
-            // Re-hydrate from server to pick up missed registrations
-            hydratePtySessions();
           }
-        }
-      });
+        },
+      );
 
       // Load wallet addresses for header
       try {
@@ -8111,8 +8075,6 @@ function AppProviderInner({
     elizaCloudUserId,
     elizaCloudStatusReason,
     ownerName,
-    showOwnerNamePrompt,
-    handleOwnerNameSubmit,
     cloudDashboardView,
     elizaCloudLoginBusy,
     elizaCloudLoginError,
@@ -8271,6 +8233,7 @@ function AppProviderInner({
     handleRenameConversation,
     suggestConversationTitle,
     sendActionMessage,
+    sendChatText,
     loadTriggers,
     createTrigger,
     updateTrigger,

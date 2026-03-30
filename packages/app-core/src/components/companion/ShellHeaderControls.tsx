@@ -205,7 +205,7 @@ export function ShellHeaderControls({
       {isSaving ? (
         <Loader2 className="pointer-events-none h-4 w-4 shrink-0 animate-spin" />
       ) : saveSuccess ? (
-        <Check className="pointer-events-none h-4 w-4 shrink-0 text-green-400" />
+        <Check className="pointer-events-none h-4 w-4 shrink-0 text-status-success" />
       ) : (
         <Save className="pointer-events-none h-4 w-4 shrink-0" />
       )}

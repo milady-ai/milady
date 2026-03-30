@@ -69,7 +69,7 @@ vi.mock("./app-shell-components", () => {
     InventoryView: stub("InventoryView"),
     KnowledgeView: stub("KnowledgeView"),
     OnboardingWizard: stub("OnboardingWizard"),
-    OwnerNamePrompt: stub("OwnerNamePrompt"),
+
     PairingView: stub("PairingView"),
     SaveCommandModal: stub("SaveCommandModal"),
     SettingsView: stub("SettingsView"),
@@ -127,8 +127,6 @@ describe("App", () => {
       unreadConversations: new Set(),
       activeGameViewerUrl: null,
       gameOverlayEnabled: false,
-      showOwnerNamePrompt: false,
-      handleOwnerNameSubmit: vi.fn(),
     };
     useAppMock.mockImplementation(() => appState);
 

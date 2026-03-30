@@ -105,17 +105,17 @@ export function LoadingScreen({
       : t(meta.labelKey, { defaultValue: meta.defaultLabel });
 
   return (
-    <div className="flex items-center justify-center h-dvh bg-[#0c0e14] relative overflow-hidden">
+    <div className="flex items-center justify-center h-dvh bg-[var(--bg)] relative overflow-hidden">
       <div className="flex flex-col items-start gap-3.5 w-[420px] max-w-[90vw]">
-        <div className="font-mono text-[13px] font-normal tracking-[0.35em] uppercase text-white/70 select-none">
+        <div className="font-mono text-[13px] font-normal tracking-[0.35em] uppercase text-[var(--text)]/70 select-none">
           {t("loadingscreen.Loading", { defaultValue: "Loading" })}
           <span className="loading-screen__dots" />
         </div>
 
         <div className="flex items-center gap-4 w-full">
-          <div className="flex-1 h-1 bg-white/10 overflow-hidden relative">
+          <div className="flex-1 h-1 bg-[var(--bg-accent)] overflow-hidden relative">
             <div
-              className="h-full bg-white/85 relative shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+              className="h-full bg-[var(--accent)] relative shadow-[0_0_8px_var(--accent-subtle)]"
               style={{
                 width: `${progress}%`,
                 transition: "width 1.5s ease-out",

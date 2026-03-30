@@ -1,41 +1,40 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+@import "@miladyai/app-core/styles/base.css";
+
+/* Scan @miladyai/ui source so Tailwind generates CSS for all UI package classes
+   (z-[160], z-[170], bg-black/80, bg-bg, text-muted, ring-ring, etc.) */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 @theme inline {
+  /* Fonts — homepage uses DM Sans (branded); app uses system stack */
   --font-sans: "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
   --font-display: "DM Sans", "Helvetica Neue", Arial, sans-serif;
 
-  /* Core palette - tinted darks, never pure black */
-  --color-dark: #08080a;
-  --color-dark-secondary: #0e0e11;
-  --color-light: #f4f4f6;
+  /* Map to shared tokens */
+  --color-dark: var(--bg);
+  --color-dark-secondary: var(--bg-elevated);
+  --color-light: var(--text);
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accent-hover);
+  --color-brand-muted: var(--accent-muted);
+  --color-accent: var(--accent);
+  --color-text-light: var(--text);
+  --color-text-dark: var(--text-strong);
+  --color-text-muted: var(--muted);
+  --color-text-subtle: var(--muted-strong);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-surface-hover: var(--bg-hover);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border);
 
-  /* Shared Binance-inspired yellow accent */
-  --color-brand: #f0b90b;
-  --color-brand-hover: #f3ba2f;
-  --color-brand-muted: #d8a000;
-  --color-accent: #f0b90b;
-
-  /* Text hierarchy */
-  --color-text-light: #e8e8ec;
-  --color-text-dark: #08080a;
-  --color-text-muted: #9494a2;
-  --color-text-subtle: #7a7a89;
-
-  /* Surfaces - layered depth */
-  --color-surface: #131316;
-  --color-surface-elevated: #1a1a1f;
-  --color-surface-hover: #1e1e24;
-  --color-border: #252530;
-  --color-border-subtle: #1c1c24;
-
-  /* Status colors - refined */
-  --color-status-running: #22c55e;
-  --color-status-paused: #f0b90b;
-  --color-status-stopped: #ef4444;
-  --color-status-provisioning: #f0b90b;
+  /* Homepage-only status tokens */
+  --color-status-running: var(--ok);
+  --color-status-paused: var(--warn);
+  --color-status-stopped: var(--danger);
+  --color-status-provisioning: var(--warn);
 }
 
 html {
@@ -57,6 +56,100 @@ body {
   box-shadow: 0 0 0 4px rgb(240 185 11 / 18%);
 }
 
+/* ── Radix / tailwindcss-animate compatibility ────────────────────── */
+/* The @miladyai/ui Dialog uses data-[state=open]:animate-in, fade-in-0,
+   zoom-in-95, etc. These come from tailwindcss-animate which isn't
+   installed here, so we provide the keyframes and base classes manually. */
+
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(
+        var(--tw-enter-translate-x, 0),
+        var(--tw-enter-translate-y, 0),
+        0
+      )
+      scale3d(
+        var(--tw-enter-scale, 1),
+        var(--tw-enter-scale, 1),
+        var(--tw-enter-scale, 1)
+      )
+      rotate(var(--tw-enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity, 1);
+    transform: translate3d(
+        var(--tw-exit-translate-x, 0),
+        var(--tw-exit-translate-y, 0),
+        0
+      )
+      scale3d(
+        var(--tw-exit-scale, 1),
+        var(--tw-exit-scale, 1),
+        var(--tw-exit-scale, 1)
+      )
+      rotate(var(--tw-exit-rotate, 0));
+  }
+}
+
+.animate-in {
+  animation-name: enter;
+  animation-duration: 150ms;
+  --tw-enter-opacity: initial;
+  --tw-enter-scale: initial;
+  --tw-enter-rotate: initial;
+  --tw-enter-translate-x: initial;
+  --tw-enter-translate-y: initial;
+}
+
+.animate-out {
+  animation-name: exit;
+  animation-duration: 150ms;
+  --tw-exit-opacity: initial;
+  --tw-exit-scale: initial;
+  --tw-exit-rotate: initial;
+  --tw-exit-translate-x: initial;
+  --tw-exit-translate-y: initial;
+}
+
+/* Enter/exit variant helpers used by Radix Dialog */
+.fade-in-0 {
+  --tw-enter-opacity: 0;
+}
+.fade-out-0 {
+  --tw-exit-opacity: 0;
+}
+.zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+.zoom-out-95 {
+  --tw-exit-scale: 0.95;
+}
+
+/* Slide variants for dialog (centers from left-1/2 / top-[48%]) */
+.slide-in-from-left-1\/2 {
+  --tw-enter-translate-x: -50%;
+}
+.slide-out-to-left-1\/2 {
+  --tw-exit-translate-x: -50%;
+}
+.slide-in-from-top-\[48\%\] {
+  --tw-enter-translate-y: -48%;
+}
+.slide-out-to-top-\[48\%\] {
+  --tw-exit-translate-y: -48%;
+}
+/* Mobile bottom-sheet variants */
+.slide-in-from-bottom-6 {
+  --tw-enter-translate-y: 1.5rem;
+}
+.slide-out-to-bottom-6 {
+  --tw-exit-translate-y: 1.5rem;
+}
+
 /* ── Keyframes ────────────────────────────────────────────────────── */
 
 @keyframes fade-up {
@@ -76,15 +169,6 @@ body {
   }
   100% {
     transform: translateX(-100%);
-  }
-}
-
-@keyframes marquee-vertical {
-  0% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(-100%);
   }
 }
 
@@ -125,17 +209,6 @@ body {
   51%,
   100% {
     opacity: 0;
-  }
-}
-
-@keyframes slide-in-left {
-  from {
-    transform: translateX(-100%) scaleY(0.5);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0) scaleY(1);
-    opacity: 1;
   }
 }
 

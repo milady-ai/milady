@@ -1,4 +1,4 @@
-import { StatusBadge, type StatusTone } from "@miladyai/ui";
+import { StatusBadge, type StatusVariant } from "@miladyai/ui";
 import { formatDateTime } from "../format";
 import { useApp } from "../../state";
 
@@ -26,7 +26,7 @@ export function formatTimestamp(
   return formatDateTime(timestamp, { fallback });
 }
 
-const PILL_TONE_MAP: Record<string, StatusTone> = {
+const PILL_TONE_MAP: Record<string, StatusVariant> = {
   good: "success",
   warning: "warning",
   neutral: "muted",
@@ -42,7 +42,7 @@ export function StatusPill({
   return (
     <StatusBadge
       label={label}
-      tone={PILL_TONE_MAP[tone] ?? "muted"}
+      variant={PILL_TONE_MAP[tone] ?? "muted"}
       className="rounded-full px-2.5 py-1 text-[11px] font-medium normal-case"
     />
   );

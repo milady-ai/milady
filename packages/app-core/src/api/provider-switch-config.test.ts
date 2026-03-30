@@ -47,6 +47,8 @@ beforeEach(() => {
   delete process.env.OLLAMA_BASE_URL;
   delete process.env.ELIZAOS_CLOUD_ENABLED;
   delete process.env.ELIZAOS_CLOUD_API_KEY;
+  delete process.env.OPENAI_BASE_URL;
+  delete process.env.ANTHROPIC_BASE_URL;
 });
 
 describe("applySubscriptionProviderConfig", () => {
@@ -420,5 +422,41 @@ describe("clearPersistedOnboardingConfig", () => {
     ).toBeUndefined();
     expect(deleteCredentials).toHaveBeenCalledWith("anthropic-subscription");
     expect(deleteCredentials).toHaveBeenCalledWith("openai-codex");
+  });
+});
+
+describe("ElizaCloud CLI proxy env cleanup on local switch", () => {
+  it("clears elizacloud base URLs and paired API keys, then applies the new local key", async () => {
+    process.env.OPENAI_BASE_URL = "https://www.elizacloud.ai/api/v1";
+    process.env.OPENAI_API_KEY = "cloud-secret";
+    process.env.ANTHROPIC_BASE_URL = "https://www.elizacloud.ai/api/v1";
+    process.env.ANTHROPIC_API_KEY = "cloud-secret";
+
+    const config = emptyConfig();
+    await applyOnboardingConnectionConfig(config, {
+      kind: "local-provider",
+      provider: "openai",
+      apiKey: "sk-direct",
+    });
+
+    expect(process.env.OPENAI_BASE_URL).toBeUndefined();
+    expect(process.env.ANTHROPIC_BASE_URL).toBeUndefined();
+    expect(process.env.OPENAI_API_KEY).toBe("sk-direct");
+    expect(process.env.ANTHROPIC_API_KEY).toBeUndefined();
+  });
+
+  it("does not clear OPENAI_API_KEY when elizacloud proxy URLs were never set", async () => {
+    process.env.OPENAI_API_KEY = "sk-openai-preserve";
+    process.env.ANTHROPIC_API_KEY = "sk-ant-legacy";
+
+    const config = emptyConfig();
+    await applyOnboardingConnectionConfig(config, {
+      kind: "local-provider",
+      provider: "anthropic",
+      apiKey: "sk-ant-new",
+    });
+
+    expect(process.env.OPENAI_API_KEY).toBe("sk-openai-preserve");
+    expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-new");
   });
 });

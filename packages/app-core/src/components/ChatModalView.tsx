@@ -4,6 +4,7 @@ import {
   DrawerSheetContent,
   DrawerSheetHeader,
   DrawerSheetTitle,
+  Z_MODAL,
 } from "@miladyai/ui";
 import { memo } from "react";
 import { useTranslation } from "../state";
@@ -12,8 +13,7 @@ import { ConversationsSidebar } from "./ConversationsSidebar.js";
 
 const CHAT_MODAL_NARROW_BREAKPOINT = 768;
 const CHAT_MODAL_MEDIA_QUERY = `(max-width: ${CHAT_MODAL_NARROW_BREAKPOINT}px)`;
-const CHAT_MODAL_FULL_OVERLAY_CLASS =
-  "absolute inset-[max(1rem,6vh)_max(0.75rem,6vw)] z-[100] flex flex-col";
+const CHAT_MODAL_FULL_OVERLAY_CLASS = `absolute inset-[max(1rem,6vh)_max(0.75rem,6vw)] z-[${Z_MODAL}] flex flex-col`;
 const CHAT_MODAL_DOCK_WRAPPER_CLASS =
   "absolute inset-0 z-10 flex flex-col bg-transparent pb-2 pt-2 sm:pb-4 sm:pt-4";
 const CHAT_MODAL_SHELL_BASE_CLASS =

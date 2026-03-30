@@ -493,9 +493,9 @@ describe("AppsView", () => {
       await findButtonByText(tree?.root, "appsview.Launch").props.onClick();
     });
     expect(setActionNotice).toHaveBeenCalledWith(
-      "Popup blocked while opening Babylon. Allow popups and try again.",
-      "error",
-      4200,
+      "Babylon opened in a new tab.",
+      "success",
+      2600,
     );
 
     await act(async () => {

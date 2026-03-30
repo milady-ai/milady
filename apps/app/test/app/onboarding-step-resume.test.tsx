@@ -286,6 +286,10 @@ describe("AppProvider onboarding step resume", () => {
   it("prefers the saved Claude subscription over stale cloud api key resume state", async () => {
     const clientWithPatch = {
       getConfig: vi.fn(async () => ({
+        connection: {
+          kind: "local-provider",
+          provider: "anthropic",
+        },
         cloud: {
           enabled: false,
           apiKey: "eliza-stale-key",
@@ -329,8 +333,8 @@ describe("AppProvider onboarding step resume", () => {
       ).toMatchObject({
         onboardingRunMode: "local",
         onboardingCloudProvider: "",
-        onboardingProvider: "anthropic-subscription",
-        onboardingPrimaryModel: "anthropic",
+        onboardingProvider: "anthropic",
+        onboardingPrimaryModel: "",
       });
     } finally {
       restoreCloudPreferencePatch();

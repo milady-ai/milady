@@ -18,7 +18,7 @@ export { HeartbeatsView } from "./components/HeartbeatsView";
 export { InventoryView } from "./components/InventoryView";
 export { KnowledgeView } from "./components/KnowledgeView";
 export { OnboardingWizard } from "./components/OnboardingWizard";
-export { OwnerNamePrompt } from "./components/OwnerNamePrompt";
+
 export { PairingView } from "./components/PairingView";
 export { SaveCommandModal } from "./components/SaveCommandModal";
 export { SettingsView } from "./components/SettingsView";

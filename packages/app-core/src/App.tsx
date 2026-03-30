@@ -11,6 +11,7 @@ import {
   DrawerSheetHeader,
   DrawerSheetTitle,
   ErrorBoundary,
+  Z_MODAL,
 } from "@miladyai/ui";
 import {
   type ReactNode,
@@ -40,7 +41,6 @@ import {
   InventoryView,
   KnowledgeView,
   OnboardingWizard,
-  OwnerNamePrompt,
   PairingView,
   SaveCommandModal,
   SettingsView,
@@ -52,6 +52,9 @@ import {
 } from "./app-shell-components";
 import { CompanionHeader } from "./components/companion/CompanionHeader";
 import { DeferredSetupChecklist } from "./components/FlaminaGuide";
+import { SceneOverlayDataBridge } from "./components/scene-overlay-bridge";
+import { TasksEventsPanel } from "./components/TasksEventsPanel";
+import { useActivityEvents } from "./hooks/useActivityEvents";
 import {
   BugReportProvider,
   useBugReportState,
@@ -316,8 +319,6 @@ export function App() {
     activeGameViewerUrl,
     gameOverlayEnabled,
     retryOnboardingHandoff,
-    showOwnerNamePrompt,
-    handleOwnerNameSubmit,
     t,
   } = useApp();
 
@@ -352,6 +353,9 @@ export function App() {
 
   const [customActionsPanelOpen, setCustomActionsPanelOpen] = useState(false);
   const [customActionsEditorOpen, setCustomActionsEditorOpen] = useState(false);
+  const [tasksEventsPanelOpen, setTasksEventsPanelOpen] = useState(false);
+  const { events: activityEvents, clearEvents: clearActivityEvents } =
+    useActivityEvents();
   const [editingAction, setEditingAction] = useState<
     import("./api").CustomActionDef | null
   >(null);
@@ -607,7 +611,11 @@ export function App() {
     </div>
   ) : isChat ? (
     <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
-      <Header mobileLeft={mobileChatControls} />
+      <Header
+        mobileLeft={mobileChatControls}
+        tasksEventsPanelOpen={tasksEventsPanelOpen}
+        onToggleTasksPanel={() => setTasksEventsPanelOpen((o) => !o)}
+      />
       <div className="flex flex-1 min-h-0 relative">
         {!isChatMobileLayout ? (
           <div
@@ -647,6 +655,34 @@ export function App() {
                 </DrawerSheetContent>
               </DrawerSheet>
             )}
+
+            {tasksEventsPanelOpen && (
+              <DrawerSheet
+                open={tasksEventsPanelOpen}
+                onOpenChange={setTasksEventsPanelOpen}
+              >
+                <DrawerSheetContent
+                  aria-describedby={undefined}
+                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                  showCloseButton={false}
+                >
+                  <DrawerSheetHeader className="sr-only">
+                    <DrawerSheetTitle>
+                      {t("taskseventspanel.Title", {
+                        defaultValue: "Tasks & Events",
+                      })}
+                    </DrawerSheetTitle>
+                  </DrawerSheetHeader>
+                  <TasksEventsPanel
+                    open
+                    onClose={() => setTasksEventsPanelOpen(false)}
+                    events={activityEvents}
+                    clearEvents={clearActivityEvents}
+                    mobile
+                  />
+                </DrawerSheetContent>
+              </DrawerSheet>
+            )}
           </>
         ) : (
           <>
@@ -658,6 +694,12 @@ export function App() {
               />
               <ChatView />
             </main>
+            <TasksEventsPanel
+              open={tasksEventsPanelOpen}
+              onClose={() => setTasksEventsPanelOpen(false)}
+              events={activityEvents}
+              clearEvents={clearActivityEvents}
+            />
           </>
         )}
         <CustomActionsPanel
@@ -717,14 +759,16 @@ export function App() {
 
   return (
     <BugReportProvider value={bugReport}>
-      {/* 
+      {/* Bridge React state into the 3D scene overlay panels */}
+      {COMPANION_ENABLED && <SceneOverlayDataBridge />}
+      {/*
         If we are in the crossfade phase, mount the shell but cover it with the fading onboarding layer.
       */}
       {appShell}
 
       {showOnboarding && (
         <div
-          className="fixed inset-0 z-[100] transition-opacity duration-700"
+          className={`fixed inset-0 z-[${Z_MODAL}] transition-opacity duration-700`}
           style={{ opacity: fadingOutOnboarding ? 0 : 1 }}
         >
           <OnboardingWizard />
@@ -795,10 +839,6 @@ export function App() {
           setCustomActionsEditorOpen(false);
           setEditingAction(null);
         }}
-      />
-      <OwnerNamePrompt
-        open={showOwnerNamePrompt}
-        onSubmit={handleOwnerNameSubmit}
       />
       <ConnectionFailedBanner />
       <SystemWarningBanner />

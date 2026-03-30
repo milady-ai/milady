@@ -4346,6 +4346,58 @@ async function generateChatResponse(
       };
     }
 
+    // ── Direct dispatch for explicit task creation intent from UI ────
+    const contentMetadata = message.content.metadata as
+      | Record<string, unknown>
+      | undefined;
+    if (contentMetadata?.intent === "create_task") {
+      const coordinator = runtime.getService("SWARM_COORDINATOR");
+      if (coordinator) {
+        const createTaskAction = runtime.actions.find(
+          (a) => a?.name?.toUpperCase() === "CREATE_TASK",
+        );
+        if (createTaskAction) {
+          runtime.logger?.info(
+            {
+              src: "eliza-api",
+              agentType: contentMetadata.agentType,
+              intent: "create_task",
+            },
+            "[eliza-api] Direct dispatch CREATE_TASK from UI intent",
+          );
+          let actionResponseText = "";
+          await createTaskAction.handler(
+            runtime,
+            message,
+            undefined,
+            {},
+            async (content: Content) => {
+              const chunk = extractCompatTextContent(content);
+              if (chunk) {
+                appendIncomingText(chunk);
+                actionResponseText = responseText;
+              }
+              return [];
+            },
+          );
+          const finalText = actionResponseText || responseText || "Task created.";
+          const promptText = originalUserText;
+          const estPromptTokens = Math.ceil(promptText.length / 4);
+          const estCompletionTokens = Math.ceil(finalText.length / 4);
+          return {
+            text: finalText,
+            agentName,
+            usage: {
+              promptTokens: estPromptTokens,
+              completionTokens: estCompletionTokens,
+              totalTokens: estPromptTokens + estCompletionTokens,
+            },
+          };
+        }
+      }
+      // Fall through to normal LLM-based routing if coordinator not available
+    }
+
     if (directWalletExecutionFallback?.errorText) {
       forcedWalletExecutionText = true;
       responseText = directWalletExecutionFallback.errorText;
@@ -5007,6 +5059,7 @@ export function buildUserMessages(params: {
   roomId: UUID;
   channelType: ChannelType;
   conversationMode?: "simple" | "power";
+  metadata?: Record<string, unknown>;
 }): { userMessage: MessageMemory; messageToStore: MessageMemory } {
   const {
     images,
@@ -5016,6 +5069,7 @@ export function buildUserMessages(params: {
     roomId,
     channelType,
     conversationMode,
+    metadata,
   } = params;
   const { attachments, compactAttachments } = buildChatAttachments(images);
   const id = crypto.randomUUID() as UUID;
@@ -5031,7 +5085,8 @@ export function buildUserMessages(params: {
       channelType,
       ...(conversationMode ? { conversationMode } : {}),
       ...(attachments?.length ? { attachments } : {}),
-    },
+      ...(metadata ? { metadata } : {}),
+    } as Content & { text: string },
   });
   // Persisted message: compact placeholder URL, no raw bytes in DB.
   const messageToStore = compactAttachments?.length
@@ -5046,7 +5101,8 @@ export function buildUserMessages(params: {
           channelType,
           ...(conversationMode ? { conversationMode } : {}),
           attachments: compactAttachments,
-        },
+          ...(metadata ? { metadata } : {}),
+        } as Content & { text: string },
       })
     : userMessage;
   return { userMessage, messageToStore };
@@ -5072,6 +5128,7 @@ async function readChatRequestPayload(
   images?: ChatImageAttachment[];
   conversationMode?: "simple" | "power";
   preferredLanguage?: string;
+  metadata?: Record<string, unknown>;
 } | null> {
   const body = await helpers.readJsonBody<{
     text?: string;
@@ -5079,6 +5136,7 @@ async function readChatRequestPayload(
     images?: ChatImageAttachment[];
     conversationMode?: string;
     language?: string;
+    metadata?: Record<string, unknown>;
   }>(req, res, { maxBytes });
   if (!body) return null;
   const normalizedPrompt = normalizeIncomingChatPrompt(body.text, body.images);
@@ -5117,12 +5175,17 @@ async function readChatRequestPayload(
   const preferredLanguage = rawPreferredLanguage
     ? normalizeCharacterLanguage(rawPreferredLanguage)
     : undefined;
+  const metadata =
+    body.metadata && typeof body.metadata === "object" && !Array.isArray(body.metadata)
+      ? body.metadata
+      : undefined;
   return {
     prompt: normalizedPrompt,
     channelType,
     images,
     ...(conversationMode ? { conversationMode } : {}),
     ...(preferredLanguage ? { preferredLanguage } : {}),
+    ...(metadata ? { metadata } : {}),
   };
 }
 
@@ -6789,11 +6852,13 @@ function buildPluginEvmDiagnosticEntry(
   };
 }
 
+// "send" alone is too broad — "send a slack message" shouldn't trigger wallet
+// mode.  Require "send" to appear near a crypto/wallet keyword within 40 chars.
 const WALLET_CHAT_INTENT_RE =
-  /\b(wallet|privy|onchain|on-chain|address|balance|swap|trade|transfer|send|token|bnb|eth|sol)\b/i;
+  /\b(wallet|privy|onchain|on-chain|address|balance|swap|trade|transfer|token|bnb|t?bnb|eth|sol)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|t?bnb|wallet|crypto|coin)\b))/i;
 
 const WALLET_EXECUTION_INTENT_RE =
-  /\b(swap|trade|transfer|send|buy|sell|execute|approve)\b/i;
+  /\b(swap|trade|transfer|buy|sell|execute|approve)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|t?bnb|wallet|crypto|coin)\b))/i;
 
 const WALLET_IDENTITY_INTENT_RE = /\b(wallet\s*address|address)\b/i;
 
@@ -9529,7 +9594,11 @@ async function handleRequest(
           apiKey: trimmedApiKey,
         };
         if (trimmedApiKey) {
-          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1
+          // Configure coding agent CLIs to proxy through ElizaCloud /api/v1.
+          // Persisted cloud.* + ELIZAOS_* come from applyOnboardingConnectionConfig
+          // (enableCloudInference there); this block is process-only for SDK-compatible CLIs.
+          // Omitting trimmedApiKey leaves existing direct keys (E2E: switch to elizacloud
+          // without apiKey preserves OPENAI_API_KEY).
           const cloudApiKey = trimmedApiKey;
           const cloudBaseUrl = "https://www.elizacloud.ai";
           process.env.ANTHROPIC_BASE_URL = `${cloudBaseUrl}/api/v1`;
@@ -9547,7 +9616,6 @@ async function handleRequest(
               ? body.primaryModel.trim()
               : undefined,
         });
-        disableCloudInference();
       } else {
         connection = null;
       }
@@ -16016,8 +16084,14 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType, images, conversationMode, preferredLanguage } =
-      chatPayload;
+    const {
+      prompt,
+      channelType,
+      images,
+      conversationMode,
+      preferredLanguage,
+      metadata: chatMetadata,
+    } = chatPayload;
 
     const runtime = state.runtime;
     if (!runtime) {
@@ -16047,6 +16121,7 @@ async function handleRequest(
       roomId: conv.roomId,
       channelType,
       conversationMode,
+      metadata: chatMetadata,
     });
 
     try {
@@ -16205,8 +16280,14 @@ async function handleRequest(
       error,
     });
     if (!chatPayload) return;
-    const { prompt, channelType, images, conversationMode, preferredLanguage } =
-      chatPayload;
+    const {
+      prompt,
+      channelType,
+      images,
+      conversationMode,
+      preferredLanguage,
+      metadata: restMetadata,
+    } = chatPayload;
     const runtime = state.runtime;
     if (!runtime) {
       error(res, "Agent is not running", 503);
@@ -16234,6 +16315,7 @@ async function handleRequest(
       roomId: conv.roomId,
       channelType,
       conversationMode,
+      metadata: restMetadata,
     });
 
     try {

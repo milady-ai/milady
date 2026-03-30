@@ -182,7 +182,7 @@ export function StartupFailureView({
           <div className="flex flex-col gap-4">
             <StatusBadge
               label={reasonLabel}
-              tone="danger"
+              variant="danger"
               withDot
               className="self-start"
             />

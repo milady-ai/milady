@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
+import { Z_DIALOG, Z_DIALOG_OVERLAY } from "../../lib/floating-layers";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -19,7 +20,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[160] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      `fixed inset-0 z-[${Z_DIALOG_OVERLAY}] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`,
       className,
     )}
     {...props}
@@ -41,7 +42,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-[170] grid w-[min(calc(100vw-1.5rem),42rem)] max-h-[min(calc(100dvh-1.5rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),44rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-hidden rounded-[1.125rem] border border-border/70 bg-bg p-5 shadow-[0_24px_70px_rgba(2,8,23,0.24)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:p-6",
+        `fixed left-[50%] top-[50%] z-[${Z_DIALOG}] grid w-[min(calc(100vw-1.5rem),42rem)] max-h-[min(calc(100dvh-1.5rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),44rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-hidden rounded-[1.125rem] border border-border/70 bg-bg p-5 shadow-[0_24px_70px_rgba(2,8,23,0.24)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:p-6`,
         "max-sm:left-1/2 max-sm:top-auto max-sm:bottom-[max(0.75rem,var(--safe-area-bottom,0px))] max-sm:max-h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),42rem)] max-sm:w-[min(calc(100vw-1rem),42rem)] max-sm:translate-y-0 max-sm:rounded-[1.25rem] max-sm:data-[state=closed]:slide-out-to-bottom-6 max-sm:data-[state=open]:slide-in-from-bottom-6",
         className,
       )}

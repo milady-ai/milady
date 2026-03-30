@@ -5,6 +5,8 @@ import { formatUptime } from "../../lib/format";
 interface AgentCardProps {
   agent: AgentStatus;
   source: AgentSource;
+  /** VRM avatar index from agent stream settings (overrides name-based hash). */
+  avatarIndex?: number;
   detailsId?: string;
   sourceUrl?: string;
   webUiUrl?: string;
@@ -33,10 +35,10 @@ const STATE_CONFIG: Record<
   { color: string; bg: string; bgLight: string; label: string; border: string }
 > = {
   running: {
-    color: "text-emerald-400",
-    bg: "bg-emerald-500",
-    bgLight: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
+    color: "text-status-running",
+    bg: "bg-status-running",
+    bgLight: "bg-status-running/10",
+    border: "border-status-running/20",
     label: "LIVE",
   },
   paused: {
@@ -47,10 +49,10 @@ const STATE_CONFIG: Record<
     label: "PAUSED",
   },
   stopped: {
-    color: "text-red-400",
-    bg: "bg-red-500",
-    bgLight: "bg-red-500/10",
-    border: "border-red-500/20",
+    color: "text-status-stopped",
+    bg: "bg-status-stopped",
+    bgLight: "bg-status-stopped/10",
+    border: "border-status-stopped/20",
     label: "STOPPED",
   },
   provisioning: {
@@ -69,13 +71,10 @@ const STATE_CONFIG: Record<
   },
 };
 
-/** Generate initials from agent name */
-function getInitials(name: string): string {
-  const words = name.trim().split(/[\s_-]+/);
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-  return (words[0][0] + words[1][0]).toUpperCase();
+/** Derive a character avatar index (1-8) from agent name */
+function getAvatarIndex(name: string): number {
+  const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return (hash % 8) + 1;
 }
 
 const SOURCE_ICON: Record<string, string> = {
@@ -159,13 +158,16 @@ export function AgentCard({
   onStop,
   onSelect,
   onOpenUI,
+  avatarIndex: avatarIndexProp,
   selected,
   busy = false,
 }: AgentCardProps) {
   const stateConfig = STATE_CONFIG[agent.state] ?? STATE_CONFIG.unknown;
   const canOpenUI = agent.state === "running" || source === "cloud";
   const uiUrl = webUiUrl || sourceUrl;
-  const initials = getInitials(agent.agentName);
+  const resolvedAvatarIndex =
+    avatarIndexProp ?? getAvatarIndex(agent.agentName);
+  const avatarUrl = `/vrms/previews/milady-${resolvedAvatarIndex}.png`;
   const isLive = agent.state === "running";
   const isProvisioning = agent.state === "provisioning";
 
@@ -198,14 +200,14 @@ export function AgentCard({
           <div className="flex items-start gap-4 p-4 pb-0">
             {/* Agent avatar - prominent */}
             <div
-              className={`w-12 h-12 flex items-center justify-center flex-shrink-0
-              ${stateConfig.bgLight} ${stateConfig.border} border`}
+              className={`w-12 h-12 flex-shrink-0 overflow-hidden
+              ${stateConfig.border} border`}
             >
-              <span
-                className={`font-mono text-sm font-semibold ${stateConfig.color}`}
-              >
-                {initials}
-              </span>
+              <img
+                src={avatarUrl}
+                alt={agent.agentName}
+                className="w-full h-full object-cover object-top"
+              />
             </div>
 
             {/* Agent identity */}
@@ -225,17 +227,14 @@ export function AgentCard({
               )}
             </div>
 
-            {/* Status badge - prominent */}
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 flex-shrink-0
-              ${stateConfig.bgLight} ${stateConfig.border} border`}
-            >
+            {/* Status indicator */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <span
-                className={`w-2 h-2 rounded-full ${stateConfig.bg}
+                className={`w-1.5 h-1.5 rounded-full ${stateConfig.bg}
                 ${isLive || isProvisioning ? "animate-[status-pulse_2s_ease-in-out_infinite]" : ""}`}
               />
               <span
-                className={`font-mono text-[11px] font-medium tracking-wide ${stateConfig.color}`}
+                className={`font-mono text-[11px] tracking-wide ${stateConfig.color}`}
               >
                 {stateConfig.label}
               </span>
@@ -350,7 +349,7 @@ export function AgentCard({
               aria-label={`Open ${agent.agentName} UI`}
               disabled={busy}
               className="flex items-center gap-1.5 px-3 py-1.5
-                min-h-[40px] rounded-md bg-brand text-dark font-mono text-[11px] font-semibold tracking-wide
+                min-h-[40px] bg-brand text-dark font-mono text-[11px] font-semibold tracking-wide
                 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-dark
                 hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -428,9 +427,11 @@ function ActionBtn({
   disabled?: boolean;
 }) {
   const colors = {
-    success: "text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20",
+    success:
+      "text-status-running hover:bg-status-running/10 border-status-running/20",
     warn: "text-brand hover:bg-brand/10 border-brand/20",
-    danger: "text-red-400 hover:bg-red-500/10 border-red-500/20",
+    danger:
+      "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
   };
 
   return (
@@ -441,7 +442,7 @@ function ActionBtn({
       title={label}
       disabled={disabled}
       className={`flex items-center gap-1.5 px-2.5 py-1.5
-        min-h-[40px] rounded-md font-mono text-[11px] font-medium border transition-colors duration-150
+        min-h-[40px] font-mono text-[11px] font-medium border transition-colors duration-150
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-dark disabled:cursor-not-allowed disabled:opacity-50
         ${colors[variant]}`}
     >

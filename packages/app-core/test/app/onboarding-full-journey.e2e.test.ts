@@ -381,7 +381,6 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
       "onboarding.enter",
     );
   },
-  OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
   PairingView: () => React.createElement("div", null, "PairingView"),
   SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () => React.createElement("div", null, "SettingsView"),

@@ -1,4 +1,5 @@
 import type { Command } from "commander";
+import { registerBenchmarkCommand } from "./register.benchmark";
 import { registerConfigCli } from "./register.config";
 import { registerConfigureCommand } from "./register.configure";
 import { registerDashboardCommand } from "./register.dashboard";
@@ -14,6 +15,7 @@ export function registerProgramCommands(
   argv: string[] = process.argv,
 ) {
   registerStartCommand(program);
+  registerBenchmarkCommand(program);
   registerSetupCommand(program);
   registerDoctorCommand(program);
   registerDbCommand(program);

@@ -50,6 +50,16 @@
   --danger: #f6465d;
   --info: #f0b90b;
 
+  /* Status semantic aliases */
+  --status-success: var(--ok);
+  --status-success-bg: var(--ok-subtle);
+  --status-danger: var(--danger);
+  --status-danger-bg: var(--destructive-subtle);
+  --status-warning: var(--warn);
+  --status-warning-bg: var(--warn-subtle);
+  --status-info: #3b82f6;
+  --status-info-bg: rgba(59, 130, 246, 0.12);
+
   --focus: rgba(240, 185, 11, 0.16);
   --focus-ring: 0 0 0 2px rgba(240, 185, 11, 0.42);
   --scrollbar-track: #edf1f4;
@@ -87,9 +97,7 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
   --radius: 0.5rem;
-  --duration-fast: 100ms;
   --duration-normal: 150ms;
-  --duration-slow: 250ms;
 
   /* Plugin UI Design Tokens */
   --plugin-field-gap: 1rem;
@@ -155,6 +163,15 @@
   --danger: hsl(0 84.2% 60.2%);
   --info: #f0b90b;
 
+  --status-success: var(--ok);
+  --status-success-bg: var(--ok-subtle);
+  --status-danger: var(--danger);
+  --status-danger-bg: var(--destructive-subtle);
+  --status-warning: var(--warn);
+  --status-warning-bg: var(--warn-subtle);
+  --status-info: #60a5fa;
+  --status-info-bg: rgba(96, 165, 250, 0.12);
+
   --focus: rgba(240, 185, 11, 0.18);
   --focus-ring: 0 0 0 2px rgba(240, 185, 11, 0.44);
   --scrollbar-track: transparent;
@@ -191,9 +208,7 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
   --radius: 0.5rem;
-  --duration-fast: 150ms;
   --duration-normal: 200ms;
-  --duration-slow: 300ms;
 
   /* Plugin UI */
   --plugin-field-gap: 1rem;

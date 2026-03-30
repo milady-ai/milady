@@ -56,6 +56,14 @@
   --color-destructive-fg: var(--destructive-foreground);
   --color-destructive-subtle: var(--destructive-subtle);
   --color-muted-strong: var(--muted-strong);
+  --color-status-success: var(--status-success);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-danger: var(--status-danger);
+  --color-status-danger-bg: var(--status-danger-bg);
+  --color-status-warning: var(--status-warning);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-info: var(--status-info);
+  --color-status-info-bg: var(--status-info-bg);
 
   /* Colors — header */
   --color-header-bg: var(--header-bar-bg);
@@ -158,24 +166,6 @@
 
   75% {
     content: "...";
-  }
-}
-
-/* Avatar loader indeterminate bar */
-@keyframes avatar-loader-progress {
-  0% {
-    width: 20%;
-    opacity: 0.6;
-  }
-
-  50% {
-    width: 70%;
-    opacity: 1;
-  }
-
-  100% {
-    width: 20%;
-    opacity: 0.6;
   }
 }
 

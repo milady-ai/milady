@@ -1,4 +1,4 @@
-import { Button, Input } from "@miladyai/ui";
+import { Button, Input, Z_SYSTEM_CRITICAL } from "@miladyai/ui";
 import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client } from "../api";
@@ -380,7 +380,7 @@ export function EmotePicker() {
   return (
     <div
       ref={panelRef}
-      className="fixed bottom-4 left-4 z-[9999] w-[320px] rounded-xl shadow-2xl"
+      className={`fixed bottom-4 left-4 z-[${Z_SYSTEM_CRITICAL}] w-[320px] rounded-xl shadow-2xl`}
       style={{
         background: "rgba(18, 22, 32, 0.96)",
         border: "1px solid rgba(240, 178, 50, 0.18)",

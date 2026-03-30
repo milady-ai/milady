@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Z_GLOBAL_EMOTE } from "@miladyai/ui";
 import { APP_EMOTE_EVENT, type AppEmoteEventDetail } from "../events";
 
 const OVERLAY_LIFETIME_MS = 2400;
@@ -120,7 +121,7 @@ export function GlobalEmoteOverlay() {
           aria-hidden="true"
           data-testid="global-emote-overlay"
           data-emote-id={activeEmote.emoteId}
-          className="pointer-events-none fixed inset-0 z-[11000] flex items-start justify-center overflow-hidden"
+          className={`pointer-events-none fixed inset-0 z-[${Z_GLOBAL_EMOTE}] flex items-start justify-center overflow-hidden`}
         >
           <div className="relative mt-[18vh] flex items-center justify-center">
             <div

@@ -519,6 +519,7 @@ describe("chat journey", () => {
         expect.any(AbortSignal),
         undefined,
         "simple",
+        undefined,
       );
 
       await act(async () => {

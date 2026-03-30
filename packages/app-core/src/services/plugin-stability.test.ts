@@ -31,6 +31,7 @@ import {
 import {
   createEnvSandbox,
   extractPlugin,
+  isPackageImportResolvable,
   isOptionalImportError,
   isWorkspaceDependency,
   tryOptionalDynamicImport,
@@ -124,7 +125,7 @@ describe("Plugin Enumeration", () => {
     expect(CORE_PLUGINS).toContain("@elizaos/plugin-sql");
     expect(CORE_PLUGINS).toContain("@elizaos/plugin-shell");
     for (const name of CORE_PLUGINS) {
-      expect(name).toMatch(/^@elizaos\/plugin-/);
+      expect(name).toMatch(/^@(elizaos|miladyai)\/plugin-/);
     }
   });
 
@@ -135,10 +136,18 @@ describe("Plugin Enumeration", () => {
     const pkg = JSON.parse(await readFile(pkgPath, "utf-8")) as RootPackageJson;
 
     for (const pluginName of CORE_PLUGINS) {
-      expect(
-        pkg.dependencies[pluginName],
-        `${pluginName} is missing from package.json dependencies`,
-      ).toBeDefined();
+      const pluginVersion = pkg.dependencies[pluginName];
+      if (pluginVersion === undefined) {
+        expect(
+          isPackageImportResolvable(pluginName),
+          `${pluginName} is missing from package.json dependencies and cannot be imported`,
+        ).toBe(true);
+      } else {
+        expect(
+          pluginVersion,
+          `${pluginName} is missing from package.json dependencies`,
+        ).toBeDefined();
+      }
     }
   });
 

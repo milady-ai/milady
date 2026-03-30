@@ -331,7 +331,7 @@ export function TradePanel({
             <span
               className={
                 p.status === "rejected"
-                  ? "text-red-400"
+                  ? "text-status-danger"
                   : "text-[color:var(--warn,var(--accent))]"
               }
             >
@@ -423,7 +423,7 @@ export function TradePanel({
       if (isRejected) {
         return (
           <div className="border border-border p-2 text-xs space-y-1">
-            <div className="flex items-center gap-1 text-red-500">
+            <div className="flex items-center gap-1 text-status-danger">
               <span>🚫</span>
               <span>{t("bsctradepanel.StewardPolicyRejectedTransaction")}</span>
             </div>
@@ -486,7 +486,7 @@ export function TradePanel({
         <span
           className={
             tradeReady
-              ? "text-green-500"
+              ? "text-status-success"
               : "text-[color:var(--warn,var(--accent))]"
           }
         >
@@ -539,10 +539,10 @@ export function TradePanel({
           data-testid="wallet-trade-feedback"
           className={`border px-2 py-1.5 text-xs ${
             tradeFeedback.tone === "success"
-              ? "border-green-500/40 text-green-400"
+              ? "border-status-success/40 text-status-success"
               : tradeFeedback.tone === "info"
                 ? "border-accent/40 text-txt"
-                : "border-red-500/40 text-red-400"
+                : "border-status-danger/40 text-status-danger"
           }`}
         >
           {tradeFeedback.text}

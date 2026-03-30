@@ -178,6 +178,7 @@ vi.mock("@miladyai/app-core/state", async () => {
 
 vi.mock("@miladyai/app-core/api", () => ({
   client: {
+    onWsEvent: vi.fn(() => () => {}),
     importAgent: vi.fn(),
     startAnthropicLogin: vi.fn(),
     exchangeAnthropicCode: vi.fn(),

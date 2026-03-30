@@ -2130,8 +2130,7 @@ export class MiladyClient {
     // Injected global (window.__MILADY_API_BASE__) must beat stale sessionStorage
     // from a prior cloud/remote session so the desktop always connects to the
     // correct local agent.
-    this._baseUrl =
-      baseUrl ?? injectedBase ?? bootBase ?? storedBase ?? "";
+    this._baseUrl = baseUrl ?? injectedBase ?? bootBase ?? storedBase ?? "";
   }
 
   /**
@@ -3862,6 +3861,17 @@ export class MiladyClient {
     );
   }
 
+  /** Fetch a pairing token for a cloud agent (for opening Web UI in a new tab). */
+  async getCloudCompatPairingToken(agentId: string): Promise<{
+    success: boolean;
+    data: { token: string; redirectUrl: string; expiresIn: number };
+  }> {
+    return this.fetch(
+      `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+      { method: "POST" },
+    );
+  }
+
   /** Get cloud availability (capacity info). */
   async getCloudCompatAvailability(): Promise<{
     success: boolean;
@@ -4667,6 +4677,7 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
     conversationMode?: ConversationMode,
+    metadata?: Record<string, unknown>,
   ): Promise<{
     text: string;
     agentName: string;
@@ -4684,6 +4695,7 @@ export class MiladyClient {
         channelType,
         ...(images?.length ? { images } : {}),
         ...(conversationMode ? { conversationMode } : {}),
+        ...(metadata ? { metadata } : {}),
       }),
       signal,
     });
@@ -4986,6 +4998,7 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
     conversationMode?: ConversationMode,
+    metadata?: Record<string, unknown>,
   ): Promise<{
     text: string;
     agentName: string;
@@ -5000,6 +5013,7 @@ export class MiladyClient {
       signal,
       images,
       conversationMode,
+      metadata,
     );
   }
 

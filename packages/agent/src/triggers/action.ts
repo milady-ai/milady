@@ -29,17 +29,6 @@ import {
 
 const CREATE_TRIGGER_TASK_ACTION = "CREATE_TRIGGER_TASK";
 
-const CREATE_TRIGGER_KEYWORDS = [
-  "create trigger",
-  "create a trigger",
-  "create task",
-  "schedule trigger",
-  "schedule task",
-  "run every",
-  "run at",
-  "every hour",
-  "every day",
-];
 
 interface TriggerExtraction {
   triggerType?: string;
@@ -123,14 +112,45 @@ function scheduleText(
 
 export const createTriggerTaskAction: Action = {
   name: CREATE_TRIGGER_TASK_ACTION,
-  similes: ["CREATE_TRIGGER", "SCHEDULE_TRIGGER"],
+  similes: [
+    "CREATE_TRIGGER",
+    "SCHEDULE_TRIGGER",
+    "SCHEDULE_TASK",
+    "CREATE_HEARTBEAT",
+    "SCHEDULE_HEARTBEAT",
+    "SET_REMINDER",
+    "CREATE_CRON",
+    "CREATE_RECURRING",
+  ],
   description:
-    "Create an autonomous trigger task that executes interval, once, or cron schedules",
+    "Create an autonomous trigger task that executes on a schedule (interval, once, or cron). Use when the user wants to schedule, automate, or create a recurring/timed task, trigger, or heartbeat.",
   validate: async (runtime, message) => {
     if (!triggersFeatureEnabled(runtime)) return false;
-    const text = message.content.text?.toLowerCase() ?? "";
-    if (!text) return false;
-    return CREATE_TRIGGER_KEYWORDS.some((keyword) => text.includes(keyword));
+
+    // Permissive keyword check across the current message AND recent
+    // conversation so that confirmations like "yes" still match when the
+    // agent just asked "should I create a trigger?".
+    const TRIGGER_HINTS = /\b(schedule|trigger|heartbeat|cron|recurring|interval|every\s+\d|remind|automat|timed|repeat|loop|auto|run\s|poll|periodic|daily|hourly|weekly|monthly|wake)\b/i;
+
+    const currentText = message.content.text ?? "";
+    if (TRIGGER_HINTS.test(currentText)) return true;
+
+    // Check recent conversation window (up to last 6 messages) so
+    // short confirmations ("yes", "do it", "go ahead") still resolve.
+    try {
+      const recent = await runtime.getMemories({
+        tableName: "messages",
+        roomId: message.roomId,
+        count: 6,
+      });
+      for (const mem of recent) {
+        if (TRIGGER_HINTS.test(mem.content.text ?? "")) return true;
+      }
+    } catch {
+      // If memory lookup fails, fall back to current-message-only
+    }
+
+    return false;
   },
   handler: async (
     runtime: IAgentRuntime,

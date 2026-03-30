@@ -6,6 +6,7 @@ import path from "node:path";
 import {
   buildWindowsRepairSteps,
   classifyElectrobunViewFailure,
+  findElectrobunManifestPath,
   hasElectrobunViewExport,
   isSupportedBunVersion,
 } from "./lib/desktop-preflight.mjs";
@@ -315,50 +316,50 @@ function runDesktopPreflight() {
     });
   }
 
-  const electrobunPkgPath = path.join(
-    ELECTROBUN_DIR,
-    "node_modules",
-    "electrobun",
-    "package.json",
+  const electrobunPkgPath = findElectrobunManifestPath(
+    [ELECTROBUN_DIR, APP_DIR, ROOT],
+    fs.existsSync,
   );
-  if (!fs.existsSync(electrobunPkgPath)) {
-    failPreflight(
-      "Electrobun package is missing from workspace node_modules.",
-      {
-        step: "electrobun-manifest",
-        cwd: preflightCwd,
-        module: moduleName,
-        bunVersion,
-        errorCode: "ELECTROBUN_MISSING",
-      },
-    );
-  }
-
-  let electrobunManifest = null;
-  try {
-    electrobunManifest = JSON.parse(fs.readFileSync(electrobunPkgPath, "utf8"));
-  } catch (err) {
-    failPreflight(
-      "Failed to parse electrobun package manifest.",
-      {
-        step: "electrobun-manifest",
-        cwd: preflightCwd,
-        module: moduleName,
-        bunVersion,
-        errorCode: "ELECTROBUN_MANIFEST_PARSE_ERROR",
-      },
-      [String(err)],
-    );
-  }
-
-  if (!hasElectrobunViewExport(electrobunManifest)) {
-    failPreflight("Electrobun package exports are missing ./view.", {
+  if (!electrobunPkgPath) {
+    logPreflightDiagnostic({
+      level: "info",
       step: "electrobun-manifest",
       cwd: preflightCwd,
       module: moduleName,
       bunVersion,
-      errorCode: "ELECTROBUN_VIEW_EXPORT_MISSING",
+      errorCode: "ELECTROBUN_MANIFEST_NOT_IN_WORKSPACE",
+      detail:
+        "Falling back to Bun import resolution because electrobun is not present in workspace node_modules.",
     });
+  } else {
+    let electrobunManifest = null;
+    try {
+      electrobunManifest = JSON.parse(
+        fs.readFileSync(electrobunPkgPath, "utf8"),
+      );
+    } catch (err) {
+      failPreflight(
+        "Failed to parse electrobun package manifest.",
+        {
+          step: "electrobun-manifest",
+          cwd: preflightCwd,
+          module: moduleName,
+          bunVersion,
+          errorCode: "ELECTROBUN_MANIFEST_PARSE_ERROR",
+        },
+        [String(err)],
+      );
+    }
+
+    if (!hasElectrobunViewExport(electrobunManifest)) {
+      failPreflight("Electrobun package exports are missing ./view.", {
+        step: "electrobun-manifest",
+        cwd: preflightCwd,
+        module: moduleName,
+        bunVersion,
+        errorCode: "ELECTROBUN_VIEW_EXPORT_MISSING",
+      });
+    }
   }
 
   const importProbe = runBunCapture(

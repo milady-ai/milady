@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "./button";
+import { Z_OVERLAY, Z_TOOLTIP } from "../../lib/floating-layers";
 
 export interface HoverTooltipProps {
   children: React.ReactNode;
@@ -133,7 +134,7 @@ export function IconTooltip({
     <div className="relative isolate group">
       {children}
       <div
-        className={`absolute ${posClass} px-2 py-1.5 bg-bg-elevated border border-border text-[11px] text-txt-strong rounded-md ${bodyClass} opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-opacity duration-200 z-[200] shadow-lg pointer-events-none`}
+        className={`absolute ${posClass} px-2 py-1.5 bg-bg-elevated border border-border text-[11px] text-txt-strong rounded-md ${bodyClass} opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-opacity duration-200 z-[${Z_OVERLAY}] shadow-lg pointer-events-none`}
         role="tooltip"
       >
         <div className="font-medium">{label}</div>
@@ -189,7 +190,7 @@ export function Spotlight({
   const padding = 8;
 
   return (
-    <div className="fixed inset-0 z-[300] pointer-events-none">
+    <div className={`fixed inset-0 z-[${Z_TOOLTIP}] pointer-events-none`}>
       <div
         className="absolute inset-0 bg-black/60 pointer-events-auto"
         style={{

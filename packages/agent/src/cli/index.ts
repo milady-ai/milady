@@ -8,10 +8,17 @@ function printHelp(): void {
 Usage:
   eliza-autonomous serve
   eliza-autonomous runtime
+  eliza-autonomous benchmark [options]
 
 Commands:
-  serve    Start the autonomous backend in server-only mode
-  runtime  Boot the runtime without entering the API/CLI wrapper
+  serve      Start the autonomous backend in server-only mode
+  runtime    Boot the runtime without entering the API/CLI wrapper
+  benchmark  Run a benchmark task headlessly against the agent
+
+Benchmark options:
+  --task <path>    Path to task JSON file
+  --server         Keep runtime alive and accept tasks via stdin (line-delimited JSON)
+  --timeout <ms>   Timeout per task in milliseconds (default: 120000)
 `);
 }
 
@@ -43,6 +50,27 @@ export async function runAutonomousCli(
 
   if (command === "serve" || command === "start") {
     await startEliza({ serverOnly: true });
+    return;
+  }
+
+  if (command === "benchmark") {
+    const { runBenchmark } = await import("./benchmark");
+    // Parse benchmark-specific flags from argv
+    const opts = {
+      task: undefined as string | undefined,
+      server: false,
+      timeout: "120000",
+    };
+    for (let i = 3; i < argv.length; i++) {
+      if (argv[i] === "--task" && argv[i + 1]) {
+        opts.task = argv[++i];
+      } else if (argv[i] === "--server") {
+        opts.server = true;
+      } else if (argv[i] === "--timeout" && argv[i + 1]) {
+        opts.timeout = argv[++i];
+      }
+    }
+    await runBenchmark(opts);
     return;
   }
 

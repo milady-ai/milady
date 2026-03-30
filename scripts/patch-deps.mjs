@@ -17,10 +17,13 @@
  */
 import {
   existsSync,
+  lstatSync,
   readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -292,7 +295,7 @@ function patchPluginElizaCloudResponsesCompat() {
   }
   if (!response.ok) {
     const errorBody = typeof data === "object" && data ? data.error : undefined;
-    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`ElizaOS Cloud error \${response.status}\`;
+    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`elizaOS Cloud error \${response.status}\`;
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     if (errorBody) {
@@ -406,7 +409,7 @@ function patchPluginElizaCloudResponsesCompat() {
   }
   if (!response.ok) {
     const errorBody = typeof data === "object" && data ? data.error : undefined;
-    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`ElizaOS Cloud error \${response.status}\`;
+    const errorMessage = typeof errorBody?.message === "string" && errorBody.message.trim() ? errorBody.message.trim() : \`elizaOS Cloud error \${response.status}\`;
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     if (errorBody) {
@@ -426,7 +429,7 @@ function patchPluginElizaCloudResponsesCompat() {
     text = data.output.flatMap((item) => Array.isArray(item?.content) ? item.content : []).map((part) => typeof part?.text === "string" ? part.text : "").join("");
   }
   if (!text.trim()) {
-    throw new Error("ElizaOS Cloud returned no text response");
+    throw new Error("elizaOS Cloud returned no text response");
   }
   return text;
 }`
@@ -483,7 +486,7 @@ patchPluginElizaCloudResponsesCompat();
 /**
  * Patch @elizaos/plugin-sql UUID validation regex.
  *
- * The upstream plugin strictly checks for UUID versions 1-5, but ElizaOS
+ * The upstream plugin strictly checks for UUID versions 1-5, but elizaOS
  * generates custom version 0 UUIDs. We patch the regex to allow version 0.
  * Remove once upstream fixes its isValidUUID method.
  */
@@ -1131,3 +1134,168 @@ function patchAgentSkillsLocalFallback() {
   }
 }
 patchAgentSkillsLocalFallback();
+
+/**
+ * Patch testcafe for Bun compatibility.
+ *
+ * Two issues prevent TestCafe from running under `bunx testcafe`:
+ *
+ * 1) api-based.js uses `module.constructor` to get the Module object, but in
+ *    Bun `module.constructor._nodeModulePaths` is undefined. We fall back to
+ *    `require('module')` which has the function.
+ *
+ * 2) callsite.js assumes callsite objects are always non-null, but Bun's stack
+ *    trace capture can produce null callsites. We add null guards.
+ *
+ * Remove once TestCafe ships Bun-compatible builds.
+ */
+function patchTestCafeBunCompat() {
+  const bunCacheDir = resolve(root, "node_modules/.bun");
+  if (!existsSync(bunCacheDir)) return;
+
+  let patched = 0;
+
+  for (const entry of readdirSync(bunCacheDir)) {
+    if (!entry.startsWith("testcafe@")) continue;
+
+    const tcRoot = resolve(bunCacheDir, entry, "node_modules/testcafe");
+
+    if (!existsSync(tcRoot)) continue;
+
+    // Patch 1: module.constructor -> require('module') fallback
+    const apiBasedPath = resolve(tcRoot, "lib/compiler/test-file/api-based.js");
+    const moduleNeedle = "const Module = module.constructor;";
+    if (!existsSync(apiBasedPath)) {
+      console.warn(
+        "[patch-deps] testcafe: expected file missing (layout may have changed). " +
+          `Update patchTestCafeBunCompat() in patch-deps.mjs. Missing: ${apiBasedPath}`,
+      );
+    } else {
+      let src = readFileSync(apiBasedPath, "utf8");
+      const moduleAlreadyPatched =
+        src.includes("typeof module.constructor._nodeModulePaths") &&
+        src.includes("require('module')");
+      if (src.includes(moduleNeedle)) {
+        src = src.replace(
+          moduleNeedle,
+          "const Module = typeof module.constructor._nodeModulePaths === 'function' ? module.constructor : require('module');",
+        );
+        writeFileSync(apiBasedPath, src, "utf8");
+        patched++;
+        console.log(
+          `[patch-deps] Applied testcafe Module constructor Bun fix: ${apiBasedPath}`,
+        );
+      } else if (!moduleAlreadyPatched) {
+        console.warn(
+          "[patch-deps] testcafe: Module constructor patch needle not found in api-based.js — " +
+            "TestCafe may have refactored; Bun runs may fail until patch-deps.mjs is updated. " +
+            `File: ${apiBasedPath}`,
+        );
+      }
+    }
+
+    // Patch 2: null-safe callsite helpers
+    const callsitePath = resolve(tcRoot, "lib/utils/callsite.js");
+    const oldStackFrame =
+      "function getCallsiteStackFrameString(callsite) {\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
+    const newStackFrame =
+      "function getCallsiteStackFrameString(callsite) {\n    if (!callsite || !callsite.stackFrames) return '<unknown>';\n    return callsite.stackFrames[callsite.callsiteFrameIdx].toString();\n}";
+    const oldGetId =
+      "function getCallsiteId(callsite) {\n    return `\u0024{callsite.filename}:\u0024{callsite.lineNum}`;\n}";
+    const newGetId =
+      "function getCallsiteId(callsite) {\n    if (!callsite) return '<unknown>:0';\n    return `\u0024{callsite.filename}:\u0024{callsite.lineNum}`;\n}";
+
+    if (!existsSync(callsitePath)) {
+      console.warn(
+        "[patch-deps] testcafe: expected file missing (layout may have changed). " +
+          `Update patchTestCafeBunCompat() in patch-deps.mjs. Missing: ${callsitePath}`,
+      );
+    } else {
+      let src = readFileSync(callsitePath, "utf8");
+      let changed = false;
+
+      if (src.includes(oldStackFrame)) {
+        src = src.replace(oldStackFrame, newStackFrame);
+        changed = true;
+      }
+
+      if (src.includes(oldGetId)) {
+        src = src.replace(oldGetId, newGetId);
+        changed = true;
+      }
+
+      if (changed) {
+        writeFileSync(callsitePath, src, "utf8");
+        patched++;
+        console.log(
+          `[patch-deps] Applied testcafe callsite null-guard Bun fix: ${callsitePath}`,
+        );
+      } else {
+        const callsiteAlreadyPatched =
+          src.includes("if (!callsite || !callsite.stackFrames)") &&
+          src.includes("if (!callsite) return '<unknown>:0'");
+        if (!callsiteAlreadyPatched) {
+          console.warn(
+            "[patch-deps] testcafe: callsite.js present but patch patterns not found — " +
+              "TestCafe may have refactored; Bun runs may fail until patch-deps.mjs is updated. " +
+              `File: ${callsitePath}`,
+          );
+        }
+      }
+    }
+  }
+
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] testcafe: applied ${patched} Bun compatibility patch(es).`,
+    );
+  }
+}
+patchTestCafeBunCompat();
+
+/**
+ * 8) @elizaos/plugin-groq: The published plugin bundles @ai-sdk/groq@1.x which
+ *    creates v1-spec models. Our root overrides ai@6.x (AI SDK 5) which requires
+ *    spec v2+. Symlink the nested @ai-sdk/groq to the root's @ai-sdk/groq@3.x
+ *    so the plugin uses the compatible version.
+ */
+function patchGroqSdkVersion() {
+  const rootGroq = resolve(root, "node_modules", "@ai-sdk", "groq");
+  if (!existsSync(rootGroq)) return;
+
+  const bunDir = resolve(root, "node_modules", ".bun");
+  if (!existsSync(bunDir)) return;
+
+  let patched = 0;
+  for (const entry of readdirSync(bunDir)) {
+    if (!entry.startsWith("@elizaos+plugin-groq@")) continue;
+    const nested = resolve(bunDir, entry, "node_modules", "@ai-sdk", "groq");
+    if (!existsSync(nested)) continue;
+
+    // Skip if already a symlink pointing to root
+    try {
+      if (lstatSync(nested).isSymbolicLink()) {
+        if (realpathSync(nested) === realpathSync(rootGroq)) continue;
+        unlinkSync(nested);
+      } else {
+        rmSync(nested, { recursive: true, force: true });
+      }
+    } catch {
+      continue;
+    }
+
+    try {
+      symlinkSync(rootGroq, nested);
+      patched++;
+    } catch {
+      // Symlink may fail on some systems; non-critical
+    }
+  }
+
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] Replaced ${patched} nested @ai-sdk/groq with root v3.x for AI SDK 5 compat`,
+    );
+  }
+}
+patchGroqSdkVersion();

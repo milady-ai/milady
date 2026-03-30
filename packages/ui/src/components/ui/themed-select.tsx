@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { Button } from "./button";
+import { Z_MODAL } from "../../lib/floating-layers";
 
 export interface ThemedSelectGroup<T extends string = string> {
   label: string;
@@ -188,7 +189,7 @@ export function ThemedSelect<T extends string>({
   return (
     <div
       ref={rootRef}
-      className={`relative min-w-0 w-full ${open ? "z-[100]" : ""} ${className}`}
+      className={`relative min-w-0 w-full ${open ? `z-[${Z_MODAL}]` : ""} ${className}`}
     >
       <Button
         ref={triggerRef}

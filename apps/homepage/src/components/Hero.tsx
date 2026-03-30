@@ -95,15 +95,20 @@ export function HeroBackground() {
         initial="hidden"
         animate="visible"
       >
-        <motion.h1
+        <motion.div
           variants={itemVariants}
-          className="text-[13vw] sm:text-[11vw] lg:text-[13vw] font-black leading-[0.76] tracking-tighter uppercase text-white/95 flex flex-col items-center pointer-events-none select-none mt-16 sm:mt-12 max-w-none"
+          className="flex flex-col items-center pointer-events-none select-none mt-16 sm:mt-12 max-w-none"
         >
-          <span>MILADY</span>
-          <span className="w-full break-words hyphens-none text-center text-[11vw] text-brand drop-shadow-[0_10px_28px_rgba(240,185,11,0.18)] sm:text-[9vw] lg:text-[11vw]">
+          <h1 className="text-[13vw] sm:text-[11vw] lg:text-[13vw] font-black leading-[0.76] tracking-tighter uppercase text-white/95">
+            MILADY
+          </h1>
+          <p
+            className="w-full break-words hyphens-none text-center text-[11vw] text-brand drop-shadow-[0_10px_28px_rgba(240,185,11,0.18)] sm:text-[9vw] lg:text-[11vw] font-black leading-[0.76] tracking-tighter uppercase"
+            aria-live="polite"
+          >
             <TypewriterLoop />
-          </span>
-        </motion.h1>
+          </p>
+        </motion.div>
       </motion.div>
     </section>
   );

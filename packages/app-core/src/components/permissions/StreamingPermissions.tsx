@@ -269,7 +269,7 @@ export function StreamingPermissionsSettingsView({
                             : "permissionssection.badge.notDetermined",
                         getBadgeLabel(status),
                       )}
-                      tone={getBadgeTone(status)}
+                      variant={getBadgeTone(status)}
                       withDot
                       className="rounded-full font-semibold"
                     />

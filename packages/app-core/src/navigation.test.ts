@@ -30,7 +30,7 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/advanced")).toBe("advanced");
     expect(tabFromPath("/plugins")).toBe("plugins");
     expect(tabFromPath("/skills")).toBe("skills");
-    expect(tabFromPath("/actions")).toBe("actions");
+    expect(tabFromPath("/actions")).toBeNull();
     expect(tabFromPath("/triggers")).toBe("triggers");
     expect(tabFromPath("/fine-tuning")).toBe("fine-tuning");
     expect(tabFromPath("/trajectories")).toBe("trajectories");
@@ -94,7 +94,6 @@ describe("pathForTab", () => {
     "connectors",
     "plugins",
     "skills",
-    "actions",
     "triggers",
     "advanced",
     "fine-tuning",
@@ -119,7 +118,7 @@ describe("pathForTab", () => {
 
   it("applies basePath prefixes", () => {
     expect(pathForTab("chat", "/app")).toBe("/app/chat");
-    expect(pathForTab("actions", "/app")).toBe("/app/actions");
+    expect(pathForTab("advanced", "/app")).toBe("/app/advanced");
   });
 });
 
@@ -147,7 +146,6 @@ describe("tab groups", () => {
       "advanced",
       "plugins",
       "skills",
-      "actions",
       "fine-tuning",
       "trajectories",
       "runtime",
@@ -168,7 +166,6 @@ describe("tab groups", () => {
       "connectors",
       "plugins",
       "skills",
-      "actions",
       "triggers",
       "advanced",
       "fine-tuning",
@@ -202,7 +199,6 @@ describe("tab groups", () => {
 describe("titleForTab", () => {
   it("returns human-friendly titles for representative tabs", () => {
     expect(titleForTab("chat")).toBe("Chat");
-    expect(titleForTab("actions")).toBe("Actions");
     expect(titleForTab("advanced")).toBe("Advanced");
     expect(titleForTab("stream")).toBe("Stream");
     expect(titleForTab("database")).toBe("Databases");

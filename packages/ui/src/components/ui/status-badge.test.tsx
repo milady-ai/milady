@@ -4,23 +4,23 @@ import { StatCard, StatusBadge, StatusDot, statusToneForBoolean } from "./status
 
 describe("StatusBadge", () => {
   it("renders label", () => {
-    render(<StatusBadge label="Online" tone="success" />);
+    render(<StatusBadge label="Online" variant="success" />);
     expect(screen.getByText("Online")).toBeInTheDocument();
   });
 
   it("applies tone styles", () => {
-    const { container } = render(<StatusBadge label="Warn" tone="warning" />);
+    const { container } = render(<StatusBadge label="Warn" variant="warning" />);
     expect(container.firstChild).toHaveClass("text-warn");
   });
 
   it("shows dot when withDot=true", () => {
-    const { container } = render(<StatusBadge label="Active" tone="success" withDot />);
+    const { container } = render(<StatusBadge label="Active" variant="success" withDot />);
     const dot = container.querySelector(".rounded-full");
     expect(dot).toBeInTheDocument();
   });
 
   it("does not show dot by default", () => {
-    const { container } = render(<StatusBadge label="Active" tone="success" />);
+    const { container } = render(<StatusBadge label="Active" variant="success" />);
     const dot = container.querySelector(".rounded-full");
     expect(dot).not.toBeInTheDocument();
   });

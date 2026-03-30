@@ -85,6 +85,8 @@ export interface ManagedAgent {
   lastHeartbeat?: string;
   /** API token for direct agent access (from sandbox discovery or manual config). */
   apiToken?: string;
+  /** VRM avatar index (1-8) from agent stream settings. */
+  avatarIndex?: number;
 }
 
 export type SourceFilter = "all" | "local" | "cloud" | "remote";
@@ -418,6 +420,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
       uptime?: number;
       memories?: number;
       agentName?: string;
+      avatarIndex?: number;
     } | null> => {
       await semaphore.acquire();
       try {
@@ -434,9 +437,12 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           return { index: target.index, status: "running" };
         }
         try {
-          const status = await target.client.getAgentStatus({
-            signal: AbortSignal.timeout(STATUS_TIMEOUT_MS),
-          });
+          const [status, streamSettings] = await Promise.all([
+            target.client.getAgentStatus({
+              signal: AbortSignal.timeout(STATUS_TIMEOUT_MS),
+            }),
+            target.client.getStreamSettings().catch(() => null),
+          ]);
           return {
             index: target.index,
             status: status.state,
@@ -444,6 +450,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
             uptime: status.uptime,
             memories: status.memories,
             agentName: status.agentName,
+            avatarIndex: streamSettings?.settings?.avatarIndex,
           };
         } catch {
           // Health OK but no detailed status
@@ -525,8 +532,15 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     // Apply probe results to their respective agents
     for (const result of probeResults) {
       if (result.status === "fulfilled" && result.value) {
-        const { index, status, model, uptime, memories, agentName } =
-          result.value;
+        const {
+          index,
+          status,
+          model,
+          uptime,
+          memories,
+          agentName,
+          avatarIndex,
+        } = result.value;
         if (index < enrichedResults.length) {
           const agent = enrichedResults[index];
           if (status) agent.status = status;
@@ -534,6 +548,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           if (uptime) agent.uptime = uptime;
           if (memories) agent.memories = memories;
           if (agentName && !agent.name) agent.name = agentName;
+          if (avatarIndex) agent.avatarIndex = avatarIndex;
         }
       }
     }

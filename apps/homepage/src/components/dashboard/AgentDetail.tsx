@@ -4,6 +4,7 @@ import type { AgentStatus } from "../../lib/cloud-api";
 import { CloudApiClient } from "../../lib/cloud-api";
 import { formatUptime as formatUptimeShared } from "../../lib/format";
 import { openWebUI } from "../../lib/open-web-ui";
+import { CLOUD_BASE } from "../../lib/runtime-config";
 import { ApprovalQueue } from "./ApprovalQueue";
 import { ExportPanel } from "./ExportPanel";
 import { LogsPanel } from "./LogsPanel";
@@ -51,9 +52,9 @@ function formatDate(dateStr?: string): string {
 }
 
 const STATE_COLORS: Record<string, { text: string; bg: string }> = {
-  running: { text: "text-emerald-400", bg: "bg-emerald-500" },
+  running: { text: "text-status-running", bg: "bg-status-running" },
   paused: { text: "text-brand", bg: "bg-brand" },
-  stopped: { text: "text-red-400", bg: "bg-red-500" },
+  stopped: { text: "text-status-stopped", bg: "bg-status-stopped" },
   provisioning: { text: "text-brand", bg: "bg-brand" },
   unknown: { text: "text-text-muted", bg: "bg-text-muted" },
 };
@@ -68,14 +69,40 @@ export function AgentDetail({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Build a CloudApiClient for steward proxy endpoints (tx history, approvals)
+  // Build a CloudApiClient for steward proxy endpoints (tx history, approvals).
+  // For cloud agents that have been matched with a running sandbox, managedAgent.client
+  // is already set (pointing directly to the sandbox URL) and takes priority.
+  // For cloud agents without a sandbox match, we construct a client pointing at the
+  // cloud management URL and authenticate with the user's cloud API token so the
+  // cloud backend can proxy wallet/steward requests to the agent.
   const stewardClient = useMemo(() => {
     if (!managedAgent.sourceUrl && !managedAgent.client) return null;
-    if (managedAgent.client) return managedAgent.client;
+    // For non-cloud agents with a direct client, use it as-is.
+    if (managedAgent.source !== "cloud" && managedAgent.client)
+      return managedAgent.client;
+    // For cloud agents, always route through the cloud proxy so wallet
+    // requests go to elizacloud.ai/api/v1/milady/agents/{id}/api/wallet/*
+    // instead of hitting agentId.milady.ai directly (which returns 401
+    // because the cloud API key isn't valid for agent-level auth).
+    const cloudToken = managedAgent.cloudClient?.getToken();
+    if (
+      managedAgent.source === "cloud" &&
+      managedAgent.cloudAgentId &&
+      cloudToken
+    ) {
+      const cloudBase = CLOUD_BASE;
+      return new CloudApiClient({
+        url: `${cloudBase}/api/v1/milady/agents/${managedAgent.cloudAgentId}`,
+        type: "cloud",
+        authToken: cloudToken,
+      });
+    }
+    const authToken =
+      managedAgent.apiToken ?? managedAgent.cloudClient?.getToken();
     return new CloudApiClient({
       url: managedAgent.sourceUrl ?? "",
       type: managedAgent.source === "cloud" ? "cloud" : "remote",
-      authToken: managedAgent.apiToken,
+      authToken,
     });
   }, [managedAgent]);
 
@@ -223,9 +250,9 @@ export function AgentDetail({
           <PolicyControls client={stewardClient} />
         )}
         {tab === "Policies" && !stewardClient && (
-          <div className="border border-border bg-surface p-8 text-center">
+          <div className="py-8 text-center">
             <p className="font-mono text-xs text-text-muted">
-              Connect an agent to manage transaction policies.
+              Connect an agent to manage policies.
             </p>
           </div>
         )}
@@ -233,7 +260,7 @@ export function AgentDetail({
           <TransactionHistory client={stewardClient} />
         )}
         {tab === "Transactions" && !stewardClient && (
-          <div className="border border-border bg-surface p-8 text-center">
+          <div className="py-8 text-center">
             <p className="font-mono text-xs text-text-muted">
               Connect an agent to view transaction history.
             </p>
@@ -243,7 +270,7 @@ export function AgentDetail({
           <ApprovalQueue client={stewardClient} />
         )}
         {tab === "Approvals" && !stewardClient && (
-          <div className="border border-border bg-surface p-8 text-center">
+          <div className="py-8 text-center">
             <p className="font-mono text-xs text-text-muted">
               Connect an agent to view pending approvals.
             </p>
@@ -404,7 +431,9 @@ function OverviewTab({
             />
           </div>
           {actionError && (
-            <p className="mt-3 font-mono text-xs text-red-400">{actionError}</p>
+            <p className="mt-3 font-mono text-xs text-status-stopped">
+              {actionError}
+            </p>
           )}
         </div>
       )}
@@ -444,9 +473,11 @@ function CloudActionButton({
 }) {
   const isLoading = loading === action;
   const colors = {
-    success: "text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20",
+    success:
+      "text-status-running hover:bg-status-running/10 border-status-running/20",
     warn: "text-brand hover:bg-brand/10 border-brand/20",
-    danger: "text-red-400 hover:bg-red-500/10 border-red-500/20",
+    danger:
+      "text-status-stopped hover:bg-status-stopped/10 border-status-stopped/20",
     default:
       "text-text-muted hover:text-text-light hover:bg-surface-elevated border-border",
   };

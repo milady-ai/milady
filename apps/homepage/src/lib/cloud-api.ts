@@ -185,7 +185,10 @@ export class CloudClient {
     clearAuthOnFailure = false,
   ): Promise<T> {
     const headers = new Headers(opts.headers);
+    // Send both X-Api-Key and Authorization: Bearer for cross-origin
+    // compatibility. The cloud backend accepts either header format.
     headers.set("X-Api-Key", this.apiKey);
+    headers.set("Authorization", `Bearer ${this.apiKey}`);
     if (opts.body && typeof opts.body === "string") {
       headers.set("Content-Type", "application/json");
     }
@@ -409,6 +412,26 @@ export class CloudClient {
     return this.request("/api/v1/billing/settings", { method: "GET" });
   }
 
+  // Billing checkout — creates a Stripe checkout session, returns { url, sessionId }
+  async createBillingCheckout(amountUsd: number): Promise<{
+    checkoutUrl?: string;
+    url?: string;
+    clientSecret?: string;
+    publishableKey?: string;
+    sessionId?: string;
+  }> {
+    // Use the cloud base URL for redirects since the cloud validates redirect origins
+    const redirectBase = CLOUD_BASE;
+    return this.request("/api/v1/credits/checkout", {
+      method: "POST",
+      body: JSON.stringify({
+        credits: amountUsd,
+        success_url: `${redirectBase}/dashboard/billing/success`,
+        cancel_url: `${redirectBase}/dashboard/settings?tab=billing&canceled=1`,
+      }),
+    });
+  }
+
   // Pairing token (for opening Web UI with auth handoff)
   async getPairingToken(agentId: string): Promise<{
     token: string;
@@ -563,6 +586,15 @@ export class CloudApiClient {
     }
 
     throw new Error(`API ${primary.status}: /api/health`);
+  }
+
+  async getStreamSettings(): Promise<{
+    ok: boolean;
+    settings: { theme?: string; avatarIndex?: number };
+  }> {
+    const res = await this.rawFetch("/api/stream/settings");
+    if (!res.ok) return { ok: false, settings: {} };
+    return res.json();
   }
 
   async getAgentStatus(options?: {

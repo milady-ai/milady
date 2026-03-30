@@ -156,7 +156,7 @@ export function WhatsAppQrOverlay({
             <img
               src={qrDataUrl}
               alt="WhatsApp QR Code"
-              className="w-48 h-48 bg-white"
+              className="w-48 h-48 bg-white dark:bg-white"
               style={{
                 imageRendering: "pixelated",
                 border: "1px solid var(--border)",

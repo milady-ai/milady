@@ -7,17 +7,33 @@
     "description": "Anthropic model provider for Claude chat and reasoning models.",
     "tags": ["ai-provider", "llm", "anthropic", "chat"]
   },
+  "blooio": {
+    "description": "Integrates Blooio iMessage/SMS messaging into elizaOS with signed webhooks and outbound message sending.",
+    "tags": ["connector", "social", "social-chat", "messaging", "blooio"]
+  },
   "bluebubbles": {
     "description": "BlueBubbles connector for sending and receiving iMessage chats through the BlueBubbles bridge.",
     "tags": ["connector", "messaging", "imessage", "bluebubbles"]
+  },
+  "commands": {
+    "description": "Chat command system for Eliza agents (/help, /status, /reset, etc.)",
+    "tags": ["commands"]
+  },
+  "directives": {
+    "description": "Inline directive parsing for Eliza agents (@think, @model, @verbose, etc.)",
+    "tags": ["directives"]
   },
   "elevenlabs": {
     "description": "ElevenLabs voice plugin for text-to-speech generation and conversational audio output.",
     "tags": ["feature", "voice", "text-to-speech", "audio"]
   },
   "eliza-classic": {
-    "description": "Compatibility plugin for loading classic ElizaOS behavior and legacy agent workflows.",
+    "description": "Compatibility plugin referencing the original ELIZA-style patterns alongside legacy elizaOS agent workflows.",
     "tags": ["feature", "compatibility", "legacy", "agents"]
+  },
+  "elizacloud": {
+    "description": "elizaOS plugin to connect with elizaOS Cloud services",
+    "tags": ["elizacloud"]
   },
   "farcaster": {
     "description": "Farcaster connector for publishing casts and responding to social conversations.",
@@ -39,6 +55,14 @@
     "description": "iMessage connector for Mac-based conversations and message automation.",
     "tags": ["connector", "messaging", "imessage", "apple"]
   },
+  "iq": {
+    "description": "IQ on-chain chat plugin for Eliza agents on Solana",
+    "tags": ["connector", "integration", "iq"]
+  },
+  "knowledge": {
+    "description": "elizaOS RAG knowledge plugin",
+    "tags": ["knowledge"]
+  },
   "line": {
     "description": "LINE connector for bot messaging and customer conversations.",
     "tags": ["connector", "messaging", "line", "social"]
@@ -55,6 +79,10 @@
     "description": "Minecraft automation app for driving Mineflayer bots from Milady agents.",
     "tags": ["app", "games", "minecraft", "automation"]
   },
+  "moltbook": {
+    "description": "Moltbook social plugin for Eliza agents - Reddit-style platform for AI agents",
+    "tags": ["moltbook", "social", "reddit", "agents", "autonomous"]
+  },
   "nostr": {
     "description": "Nostr connector for relay-based social posting and conversation handling.",
     "tags": ["connector", "social", "nostr", "relays"]
@@ -67,6 +95,10 @@
     "description": "OpenRouter provider for routing requests across many hosted models through one API.",
     "tags": ["ai-provider", "llm", "openrouter", "routing"]
   },
+  "pdf": {
+    "description": "Core Node.js plugin for elizaOS that provides essential services and actions for file operations.",
+    "tags": ["pdf"]
+  },
   "roblox": {
     "description": "Roblox app integration for agent-driven gameplay and interactive experiences.",
     "tags": ["app", "games", "roblox", "interactive"]
@@ -74,6 +106,10 @@
   "s3-storage": {
     "description": "S3-compatible object storage plugin for saving files, media, and generated artifacts.",
     "tags": ["feature", "storage", "files", "s3"]
+  },
+  "solana": {
+    "description": "Core Solana blockchain plugin for elizaOS, enabling token operations, trading, and DeFi integrations.",
+    "tags": ["crypto", "solana"]
   },
   "sql": {
     "description": "SQL database adapter for persistent agent state, memory, and logs.",

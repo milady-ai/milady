@@ -1,3 +1,4 @@
+import { Z_MODAL } from "@miladyai/ui";
 import { useRef, useState } from "react";
 import { HeroBackground } from "./components/Hero";
 import { releaseData } from "./generated/release-data";
@@ -152,7 +153,7 @@ function DownloadDropdown() {
         <ChevronDown />
       </button>
       {open && (
-        <div className="absolute bottom-full left-0 pb-2 w-72 z-[100]">
+        <div className={`absolute bottom-full left-0 pb-2 w-72 z-[${Z_MODAL}]`}>
           <div className="border border-text-subtle/20 bg-dark/95 backdrop-blur-md">
             {downloads.map((d) => (
               <a
@@ -216,7 +217,7 @@ export function Homepage() {
     >
       <div className="fixed inset-0 z-0 bg-dark pointer-events-none" />
 
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <main className="relative z-10 min-h-screen flex flex-col">
         <div className="flex items-center justify-center gap-5 pt-[12vh] relative z-50">
           <a
             href={GITHUB_URL}
@@ -248,7 +249,7 @@ export function Homepage() {
             Try Cloud
           </a>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

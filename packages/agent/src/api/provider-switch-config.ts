@@ -174,6 +174,7 @@ function clearRemoteProviderConfig(config: MutableElizaConfig): void {
   }
 }
 
+// Config-only; does not touch process.env OPENAI_/ANTHROPIC_ (see clearElizaCloudCliProxyEnv).
 function disableCloudInference(config: MutableElizaConfig): void {
   const cloud = ensureCloud(config);
   cloud.enabled = false;
@@ -185,6 +186,8 @@ function disableCloudInference(config: MutableElizaConfig): void {
   cloud.services = services;
 }
 
+// Updates persisted config + ELIZAOS_* for Milady runtime. Does not set OPENAI_/ANTHROPIC_
+// proxy env; POST /api/provider/switch does that in server.ts when elizacloud + apiKey.
 function enableCloudInference(config: MutableElizaConfig): void {
   const cloud = ensureCloud(config);
   cloud.enabled = true;
@@ -208,6 +211,23 @@ function persistConnectionSelection(
   config.connection = stripOnboardingConnectionSecrets(connection);
 }
 
+// Remove ElizaCloud CLI proxy endpoints from process.env and the API keys that server.ts
+// pairs with them (same cloud key for both SDKs). Only clears a key when its matching
+// base URL pointed at ElizaCloud—so local-provider switches that never set those URLs
+// keep multi-key preservation (provider-switch.e2e).
+function clearElizaCloudCliProxyEnv(): void {
+  const pairs = [
+    ["OPENAI_BASE_URL", "OPENAI_API_KEY"],
+    ["ANTHROPIC_BASE_URL", "ANTHROPIC_API_KEY"],
+  ] as const;
+  for (const [baseKey, apiKey] of pairs) {
+    const v = process.env[baseKey];
+    if (v && /elizacloud/i.test(v)) {
+      delete process.env[baseKey];
+      delete process.env[apiKey];
+    }
+  }
+}
 function applyLocalProviderCapabilities(
   config: MutableElizaConfig,
   connection: Extract<OnboardingConnection, { kind: "local-provider" }>,
@@ -218,6 +238,7 @@ function applyLocalProviderCapabilities(
   }
 
   disableCloudInference(config);
+  clearElizaCloudCliProxyEnv();
   clearRemoteProviderConfig(config);
   clearCloudModelSelections(config);
 
@@ -519,6 +540,7 @@ export async function applyOnboardingConnectionConfig(
   }
 
   delete process.env.ELIZAOS_CLOUD_ENABLED;
+  delete process.env.ELIZAOS_CLOUD_API_KEY;
   delete process.env.ELIZAOS_CLOUD_BASE_URL;
   delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
   delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;

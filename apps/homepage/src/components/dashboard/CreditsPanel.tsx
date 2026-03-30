@@ -15,22 +15,7 @@ import {
 } from "../../lib/pricing-constants";
 import { useAuth } from "../../lib/useAuth";
 
-/* ── Credit pack definitions ─────────────────────────────────────────── */
-
-interface CreditPack {
-  name: string;
-  price: number;
-  credits: number;
-  bonus: number; // percentage bonus (0 = no bonus)
-  highlight?: boolean;
-}
-
-const CREDIT_PACKS: CreditPack[] = [
-  { name: "STARTER", price: 5, credits: 500, bonus: 0 },
-  { name: "STANDARD", price: 13, credits: 1500, bonus: 15, highlight: true },
-  { name: "PRO", price: 40, credits: 5000, bonus: 25 },
-  { name: "BULK", price: 100, credits: 15000, bonus: 50 },
-];
+const PRESET_AMOUNTS = [10, 25, 50, 100];
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
@@ -51,9 +36,12 @@ export function CreditsPanel() {
     useState<CreditsSummaryResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "purchase" | "history"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"usage" | "history">("usage");
+
+  // Purchase flow
+  const [topUpAmount, setTopUpAmount] = useState("25");
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authed || !token) {
@@ -87,7 +75,6 @@ export function CreditsPanel() {
 
   /* ── Derived usage stats ────────────────────────────────────────── */
 
-  // Memoize these filter results so the hourlyBurn useMemo has stable dependencies
   const runningAgents = useMemo(
     () =>
       cloudAgents.filter(
@@ -126,8 +113,8 @@ export function CreditsPanel() {
     return Math.floor(balance / dailyBurn);
   }, [balance, dailyBurn]);
 
-  const isLowBalance = balance != null && balance < dailyBurn * 3; // less than 3 days
-  const isCriticalBalance = balance != null && balance < dailyBurn; // less than 1 day
+  const isLowBalance = balance != null && balance < dailyBurn * 3;
+  const isCriticalBalance = balance != null && balance < dailyBurn;
 
   const autoTopUp = billingSettings?.settings?.autoTopUp;
   const org = creditsSummary?.organization;
@@ -180,12 +167,12 @@ export function CreditsPanel() {
     return (
       <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         <div className="px-4 py-2.5 bg-dark-secondary border-b border-border">
-          <span className="font-mono text-xs text-red-400">
+          <span className="font-mono text-xs text-status-stopped">
             $ credits --status [FAILED]
           </span>
         </div>
         <div className="p-6 text-center">
-          <p className="font-mono text-xs text-red-400 mb-3">{error}</p>
+          <p className="font-mono text-xs text-status-stopped mb-3">{error}</p>
           <button
             type="button"
             onClick={() => window.location.reload()}
@@ -202,139 +189,66 @@ export function CreditsPanel() {
 
   return (
     <div className="space-y-6 max-w-5xl animate-[fade-up_0.4s_ease-out_both]">
-      {/* Header */}
-      <div>
-        <h2 className="font-mono text-lg font-medium text-text-light tracking-wide">
-          CREDITS &amp; BILLING
-        </h2>
-        <p className="font-mono text-xs text-text-muted mt-1">
-          Balance, usage estimates, and billing configuration
-        </p>
-      </div>
-
-      {/* ── Balance Hero + Burn Rate ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-px bg-border">
-        {/* Balance */}
-        <div
-          className={`p-6 ${
-            isCriticalBalance
-              ? "bg-red-500/5 border-r border-red-500/20"
-              : isLowBalance
-                ? "bg-brand/5 border-r border-brand/20"
-                : "bg-brand/5 border-r border-brand/20"
-          }`}
-        >
-          <div className="flex items-start justify-between mb-1">
-            <p className="font-mono text-[10px] tracking-[0.15em] text-text-subtle">
-              CURRENT BALANCE
-            </p>
-            {isCriticalBalance && (
-              <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20">
-                CRITICAL
-              </span>
-            )}
-            {isLowBalance && !isCriticalBalance && (
-              <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-brand/10 text-brand border border-brand/20">
-                LOW
-              </span>
-            )}
-          </div>
-          <p
-            className={`font-mono text-4xl font-semibold tabular-nums tracking-tight ${
-              isCriticalBalance
-                ? "text-red-400"
-                : isLowBalance
-                  ? "text-brand"
-                  : "text-brand"
-            }`}
-          >
-            {balance?.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }) ?? "—"}
+      {/* ── Balance Hero ────────────────────────────────────────── */}
+      <div
+        className={`p-6 border ${
+          isCriticalBalance
+            ? "border-status-stopped/30 bg-status-stopped/5"
+            : isLowBalance
+              ? "border-brand/30 bg-brand/5"
+              : "border-border bg-surface"
+        }`}
+      >
+        <div className="flex items-start justify-between mb-1">
+          <p className="font-mono text-[10px] tracking-[0.15em] text-text-subtle">
+            CURRENT BALANCE
           </p>
-          <p className="font-mono text-xs text-text-muted mt-1">
-            {credits?.currency ?? "credits"}
-          </p>
-
-          {/* Balance duration estimate */}
-          {daysRemaining != null && (
-            <div className="mt-4 pt-3 border-t border-border-subtle">
-              <p className="font-mono text-[10px] text-text-subtle">
-                AT CURRENT USAGE
-              </p>
-              <p
-                className={`font-mono text-sm font-medium mt-0.5 ${
-                  daysRemaining < 1
-                    ? "text-red-400"
-                    : daysRemaining < 7
-                      ? "text-brand"
-                      : "text-emerald-400"
-                }`}
-              >
-                {daysRemaining < 1
-                  ? "Less than 1 day remaining"
-                  : daysRemaining === 1
-                    ? "~1 day remaining"
-                    : `~${daysRemaining} days remaining`}
-              </p>
-            </div>
+          {isCriticalBalance && (
+            <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-status-stopped/10 text-status-stopped border border-status-stopped/20">
+              CRITICAL
+            </span>
+          )}
+          {isLowBalance && !isCriticalBalance && (
+            <span className="font-mono text-[9px] tracking-wider px-2 py-0.5 bg-brand/10 text-brand border border-brand/20">
+              LOW
+            </span>
           )}
         </div>
+        <p
+          className={`font-mono text-4xl font-semibold tabular-nums tracking-tight ${
+            isCriticalBalance
+              ? "text-status-stopped"
+              : isLowBalance
+                ? "text-brand"
+                : "text-brand"
+          }`}
+        >
+          {balance?.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) ?? "—"}
+        </p>
+        <p className="font-mono text-xs text-text-muted mt-1">
+          {credits?.currency ?? "credits"}
+        </p>
 
-        {/* Burn rate */}
-        <div className="bg-surface p-6">
-          <p className="font-mono text-[10px] tracking-[0.15em] text-text-subtle mb-3">
-            BURN RATE
+        {daysRemaining != null && (
+          <p
+            className={`font-mono text-xs mt-3 ${
+              daysRemaining < 1
+                ? "text-status-stopped"
+                : daysRemaining < 7
+                  ? "text-brand"
+                  : "text-text-subtle"
+            }`}
+          >
+            {daysRemaining < 1
+              ? "Less than 1 day remaining at current usage"
+              : daysRemaining === 1
+                ? "~1 day remaining at current usage"
+                : `~${daysRemaining} days remaining at current usage`}
           </p>
-          <div className="space-y-3">
-            <div className="flex items-baseline justify-between">
-              <span className="font-mono text-xs text-text-muted">Hourly</span>
-              <span className="font-mono text-lg font-semibold text-text-light tabular-nums">
-                ${hourlyBurn.toFixed(4)}
-                <span className="text-xs font-normal text-text-muted">/hr</span>
-              </span>
-            </div>
-            <div className="flex items-baseline justify-between">
-              <span className="font-mono text-xs text-text-muted">Daily</span>
-              <span className="font-mono text-sm text-text-light tabular-nums">
-                ${dailyBurn.toFixed(2)}
-                <span className="text-xs font-normal text-text-muted">
-                  /day
-                </span>
-              </span>
-            </div>
-            <div className="flex items-baseline justify-between">
-              <span className="font-mono text-xs text-text-muted">
-                Monthly (est.)
-              </span>
-              <span className="font-mono text-sm text-text-light tabular-nums">
-                ${monthlyBurn.toFixed(2)}
-                <span className="text-xs font-normal text-text-muted">/mo</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Agent breakdown */}
-          <div className="mt-4 pt-3 border-t border-border-subtle">
-            <div className="flex items-center justify-between text-[10px] font-mono text-text-subtle">
-              <span>
-                {runningAgents.length} running × {PRICE_RUNNING_PER_HR}/hr
-              </span>
-              <span>
-                ${(runningAgents.length * PRICE_RUNNING_HR_VALUE).toFixed(4)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-[10px] font-mono text-text-subtle mt-1">
-              <span>
-                {idleAgents.length} idle × {PRICE_IDLE_PER_HR}/hr
-              </span>
-              <span>
-                ${(idleAgents.length * PRICE_IDLE_HR_VALUE).toFixed(4)}
-              </span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* ── Low balance warning ─────────────────────────────────── */}
@@ -342,15 +256,15 @@ export function CreditsPanel() {
         <div
           className={`flex items-center gap-3 px-4 py-3 border ${
             isCriticalBalance
-              ? "border-red-500/30 bg-red-500/5"
+              ? "border-status-stopped/30 bg-status-stopped/5"
               : "border-brand/30 bg-brand/5"
           }`}
         >
           <span
-            className={`w-2 h-2 rounded-full ${isCriticalBalance ? "bg-red-500 animate-pulse" : "bg-brand"}`}
+            className={`w-2 h-2 rounded-full flex-shrink-0 ${isCriticalBalance ? "bg-status-stopped animate-pulse" : "bg-brand"}`}
           />
           <p
-            className={`font-mono text-xs ${isCriticalBalance ? "text-red-400" : "text-brand"}`}
+            className={`font-mono text-xs ${isCriticalBalance ? "text-status-stopped" : "text-brand"}`}
           >
             {isCriticalBalance
               ? "Balance critically low — agents may be suspended soon. Top up now."
@@ -359,12 +273,128 @@ export function CreditsPanel() {
         </div>
       )}
 
+      {/* ── Add Funds ───────────────────────────────────────────── */}
+      <div className="border border-border bg-surface">
+        <div className="px-4 py-2.5 bg-dark-secondary border-b border-border flex items-center justify-between">
+          <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+            ADD FUNDS
+          </span>
+          <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+            $ milady credits --buy
+          </span>
+        </div>
+        <div className="p-5 space-y-4">
+          {/* Preset amounts */}
+          <div className="flex gap-2 flex-wrap">
+            {PRESET_AMOUNTS.map((amt) => (
+              <button
+                key={amt}
+                type="button"
+                onClick={() => setTopUpAmount(String(amt))}
+                className={`px-4 py-1.5 font-mono text-xs tracking-wider border transition-all
+                  ${
+                    topUpAmount === String(amt)
+                      ? "border-brand bg-brand/10 text-brand"
+                      : "border-border-subtle bg-dark text-text-muted hover:border-text-muted/40 hover:text-text-light"
+                  }`}
+              >
+                ${amt}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom amount input */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-[200px]">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sm text-text-muted pointer-events-none">
+                $
+              </span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+                className="w-full pl-7 pr-3 py-2 font-mono text-sm bg-dark border border-border text-text-light
+                  focus:outline-none focus:border-brand transition-colors"
+                placeholder="25"
+              />
+            </div>
+            <span className="font-mono text-xs text-text-subtle">USD</span>
+          </div>
+
+          {/* Error */}
+          {checkoutError && (
+            <p className="font-mono text-xs text-red-400">{checkoutError}</p>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex gap-3 flex-wrap pt-1">
+            <button
+              type="button"
+              disabled={checkoutBusy}
+              onClick={async () => {
+                setCheckoutError(null);
+                const amountUsd = Number(topUpAmount);
+                const minAmt = pricing?.minimumTopUp ?? 1;
+                if (!Number.isFinite(amountUsd) || amountUsd < minAmt) {
+                  setCheckoutError(`Minimum deposit is $${minAmt.toFixed(2)}`);
+                  return;
+                }
+                setCheckoutBusy(true);
+                try {
+                  if (!token) return;
+                  const cc = new CloudClient(token);
+                  const res = await cc.createBillingCheckout(amountUsd);
+                  const url = res.checkoutUrl ?? res.url;
+                  if (url) {
+                    window.open(url, "_blank", "noopener,noreferrer");
+                  } else {
+                    setCheckoutError("No checkout URL returned — try again.");
+                  }
+                } catch (err) {
+                  setCheckoutError(
+                    err instanceof Error ? err.message : "Checkout failed.",
+                  );
+                } finally {
+                  setCheckoutBusy(false);
+                }
+              }}
+              className="px-5 py-2 font-mono text-xs tracking-wider bg-brand text-dark font-medium
+                hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {checkoutBusy ? "OPENING..." : "PAY WITH CARD"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                window.open(
+                  "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+              className="px-5 py-2 font-mono text-xs tracking-wider border border-border-subtle bg-dark
+                text-text-muted hover:border-text-muted/40 hover:text-text-light transition-all"
+            >
+              PAY WITH CRYPTO
+            </button>
+          </div>
+
+          {pricing?.minimumTopUp != null && (
+            <p className="font-mono text-[10px] text-text-subtle">
+              Minimum deposit: ${pricing.minimumTopUp.toFixed(2)}
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* ── Tab navigation ──────────────────────────────────────── */}
       <div className="flex border-b border-border">
         {(
           [
-            { key: "overview", label: "OVERVIEW" },
-            { key: "purchase", label: "PURCHASE" },
+            { key: "usage", label: "USAGE" },
             { key: "history", label: "HISTORY" },
           ] as const
         ).map((tab) => (
@@ -384,8 +414,8 @@ export function CreditsPanel() {
         ))}
       </div>
 
-      {/* ── Tab: Overview ────────────────────────────────────────── */}
-      {activeTab === "overview" && (
+      {/* ── Tab: Usage ───────────────────────────────────────────── */}
+      {activeTab === "usage" && (
         <div className="space-y-6">
           {/* Stats grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
@@ -415,21 +445,66 @@ export function CreditsPanel() {
             />
           </div>
 
-          {/* Session stats */}
-          {session && (
-            <div className="border border-border bg-surface">
-              <div className="px-4 py-2 bg-dark-secondary border-b border-border">
-                <span className="font-mono text-[10px] tracking-wider text-text-subtle">
-                  CURRENT SESSION
+          {/* Burn rate */}
+          <div className="border border-border bg-surface">
+            <div className="px-4 py-2 bg-dark-secondary border-b border-border">
+              <span className="font-mono text-[10px] tracking-wider text-text-subtle">
+                BURN RATE
+              </span>
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-xs text-text-muted">
+                  Hourly
+                </span>
+                <span className="font-mono text-lg font-semibold text-text-light tabular-nums">
+                  ${hourlyBurn.toFixed(4)}
+                  <span className="text-xs font-normal text-text-muted">
+                    /hr
+                  </span>
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-px bg-border">
-                <MiniDataCell label="REQUESTS" value={session.requests} />
-                <MiniDataCell label="TOKENS" value={session.tokens} />
-                <MiniDataCell label="CREDITS USED" value={session.credits} />
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-xs text-text-muted">Daily</span>
+                <span className="font-mono text-sm text-text-light tabular-nums">
+                  ${dailyBurn.toFixed(2)}
+                  <span className="text-xs font-normal text-text-muted">
+                    /day
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-xs text-text-muted">
+                  Monthly (est.)
+                </span>
+                <span className="font-mono text-sm text-text-light tabular-nums">
+                  ${monthlyBurn.toFixed(2)}
+                  <span className="text-xs font-normal text-text-muted">
+                    /mo
+                  </span>
+                </span>
+              </div>
+              <div className="pt-3 border-t border-border-subtle space-y-1">
+                <div className="flex items-center justify-between text-[10px] font-mono text-text-subtle">
+                  <span>
+                    {runningAgents.length} running × {PRICE_RUNNING_PER_HR}/hr
+                  </span>
+                  <span>
+                    $
+                    {(runningAgents.length * PRICE_RUNNING_HR_VALUE).toFixed(4)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10px] font-mono text-text-subtle">
+                  <span>
+                    {idleAgents.length} idle × {PRICE_IDLE_PER_HR}/hr
+                  </span>
+                  <span>
+                    ${(idleAgents.length * PRICE_IDLE_HR_VALUE).toFixed(4)}
+                  </span>
+                </div>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Pricing reference */}
           <div className="border border-border bg-surface">
@@ -445,7 +520,7 @@ export function CreditsPanel() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="border border-border-subtle bg-dark p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="w-2 h-2 rounded-full bg-status-running" />
                     <p className="font-mono text-[9px] tracking-wider text-text-subtle">
                       RUNNING AGENT
                     </p>
@@ -491,7 +566,7 @@ export function CreditsPanel() {
                 <span
                   className={`font-mono text-[10px] tracking-wider px-2 py-0.5 ${
                     autoTopUp?.enabled || org?.autoTopUpEnabled
-                      ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                      ? "text-status-running bg-status-running/10 border border-status-running/20"
                       : "text-text-subtle bg-dark border border-border-subtle"
                   }`}
                 >
@@ -509,7 +584,7 @@ export function CreditsPanel() {
                     className={`font-mono text-xs ${
                       autoTopUp?.hasPaymentMethod || org?.hasPaymentMethod
                         ? "text-brand"
-                        : "text-red-400"
+                        : "text-status-stopped"
                     }`}
                   >
                     {autoTopUp?.hasPaymentMethod || org?.hasPaymentMethod
@@ -598,69 +673,6 @@ export function CreditsPanel() {
         </div>
       )}
 
-      {/* ── Tab: Purchase ────────────────────────────────────────── */}
-      {activeTab === "purchase" && (
-        <div className="space-y-6">
-          {/* Credit packs */}
-          <div className="border border-border bg-surface">
-            <div className="px-4 py-2.5 bg-dark-secondary border-b border-border flex items-center justify-between">
-              <span className="font-mono text-[10px] tracking-wider text-text-subtle">
-                CREDIT PACKS
-              </span>
-              <span className="font-mono text-[10px] tracking-wider text-text-subtle">
-                $ milady credits --buy
-              </span>
-            </div>
-            <div className="p-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {CREDIT_PACKS.map((pack) => (
-                  <CreditPackCard key={pack.name} pack={pack} />
-                ))}
-              </div>
-
-              <p className="font-mono text-[10px] text-text-subtle mt-5 pt-3 border-t border-border-subtle">
-                Minimum deposit:{" "}
-                {pricing?.minimumTopUp != null
-                  ? `$${pricing.minimumTopUp.toFixed(2)}`
-                  : MIN_DEPOSIT_DISPLAY}{" "}
-                • Credits are non-refundable • Prices in USD
-              </p>
-            </div>
-          </div>
-
-          {/* Cost calculator */}
-          <div className="border border-border bg-surface">
-            <div className="px-4 py-2.5 bg-dark-secondary border-b border-border">
-              <span className="font-mono text-[10px] tracking-wider text-text-subtle">
-                COST CALCULATOR
-              </span>
-            </div>
-            <div className="p-5">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <CostEstimate
-                  label="1 AGENT"
-                  sublabel="running 24/7"
-                  monthly={PRICE_RUNNING_HR_VALUE * 24 * 30}
-                />
-                <CostEstimate
-                  label="3 AGENTS"
-                  sublabel="running 24/7"
-                  monthly={PRICE_RUNNING_HR_VALUE * 24 * 30 * 3}
-                />
-                <CostEstimate
-                  label="5 AGENTS"
-                  sublabel="2 running + 3 idle"
-                  monthly={
-                    PRICE_RUNNING_HR_VALUE * 24 * 30 * 2 +
-                    PRICE_IDLE_HR_VALUE * 24 * 30 * 3
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── Tab: History ─────────────────────────────────────────── */}
       {activeTab === "history" && (
         <div className="space-y-6">
@@ -727,7 +739,9 @@ export function CreditsPanel() {
                         </span>
                         <span
                           className={`font-mono text-[10px] tabular-nums text-right ${
-                            isRunning ? "text-emerald-400" : "text-text-muted"
+                            isRunning
+                              ? "text-status-running"
+                              : "text-text-muted"
                           }`}
                         >
                           {isRunning
@@ -762,82 +776,6 @@ export function CreditsPanel() {
 }
 
 /* ── Sub-components ────────────────────────────────────────────────── */
-
-function CreditPackCard({ pack }: { pack: CreditPack }) {
-  return (
-    <div
-      className={`relative border p-5 transition-all duration-200 cursor-pointer group
-        ${
-          pack.highlight
-            ? "border-brand/30 bg-brand/5 hover:border-brand/50"
-            : "border-border-subtle bg-dark hover:border-text-muted/30"
-        }`}
-    >
-      {pack.highlight && (
-        <div className="absolute -top-px left-0 right-0 h-px bg-brand" />
-      )}
-      {pack.bonus > 0 && (
-        <span className="absolute top-3 right-3 font-mono text-[9px] tracking-wider px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          +{pack.bonus}%
-        </span>
-      )}
-      <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-2">
-        {pack.name}
-      </p>
-      <p className="font-mono text-2xl font-semibold text-text-light tabular-nums mb-1">
-        ${pack.price}
-      </p>
-      <p className="font-mono text-xs text-text-muted tabular-nums">
-        {pack.credits.toLocaleString()} credits
-      </p>
-      {pack.bonus > 0 && (
-        <p className="font-mono text-[10px] text-brand mt-2">
-          ${Math.round(pack.price * (1 + pack.bonus / 100))} value
-        </p>
-      )}
-      <button
-        type="button"
-        disabled
-        title="Payment integration coming soon"
-        className={`mt-4 w-full py-2 font-mono text-[11px] tracking-wider font-medium
-          opacity-50 cursor-not-allowed
-          ${
-            pack.highlight
-              ? "bg-brand text-dark"
-              : "bg-surface border border-border text-text-muted"
-          }`}
-      >
-        PURCHASE
-      </button>
-    </div>
-  );
-}
-
-function CostEstimate({
-  label,
-  sublabel,
-  monthly,
-}: {
-  label: string;
-  sublabel: string;
-  monthly: number;
-}) {
-  return (
-    <div className="border border-border-subtle bg-dark p-4">
-      <p className="font-mono text-[9px] tracking-wider text-text-subtle mb-0.5">
-        {label}
-      </p>
-      <p className="font-mono text-[10px] text-text-muted mb-3">{sublabel}</p>
-      <p className="font-mono text-lg font-semibold text-text-light tabular-nums">
-        ${monthly.toFixed(2)}
-        <span className="text-xs font-normal text-text-muted">/mo</span>
-      </p>
-      <p className="font-mono text-[10px] text-text-subtle mt-1">
-        ${(monthly / 30).toFixed(2)}/day
-      </p>
-    </div>
-  );
-}
 
 function DataCell({
   label,
