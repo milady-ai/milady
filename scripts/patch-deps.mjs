@@ -1155,19 +1155,12 @@ function patchTestCafeBunCompat() {
   for (const entry of readdirSync(bunCacheDir)) {
     if (!entry.startsWith("testcafe@")) continue;
 
-    const tcRoot = resolve(
-      bunCacheDir,
-      entry,
-      "node_modules/testcafe",
-    );
+    const tcRoot = resolve(bunCacheDir, entry, "node_modules/testcafe");
 
     if (!existsSync(tcRoot)) continue;
 
     // Patch 1: module.constructor -> require('module') fallback
-    const apiBasedPath = resolve(
-      tcRoot,
-      "lib/compiler/test-file/api-based.js",
-    );
+    const apiBasedPath = resolve(tcRoot, "lib/compiler/test-file/api-based.js");
     const moduleNeedle = "const Module = module.constructor;";
     if (!existsSync(apiBasedPath)) {
       console.warn(
