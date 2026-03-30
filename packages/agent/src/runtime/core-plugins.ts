@@ -16,10 +16,12 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-cron", // scheduled jobs and automation
   "@elizaos/plugin-shell", // shell command execution
   "@elizaos/plugin-agent-skills", // skill execution and marketplace runtime
+  "@elizaos/plugin-commands", // slash command handling (skills auto-register as /commands)
   // "@elizaos/plugin-secrets-manager", // secrets management — load early, other plugins depend on it
   // "@elizaos/plugin-rolodex", // contact graph and relationship/social memory
   // "@elizaos/plugin-plugin-manager", // dynamic plugin management
   // "@elizaos/plugin-trust", // trust scoring and policy signals
+  "@miladyai/plugin-roles", // role-based access control (OWNER/ADMIN/NONE)
   // "@elizaos/plugin-todo", // todo/task management
   // "@elizaos/plugin-personality", // personality coherence
   // "@elizaos/plugin-experience", // learning from interactions
@@ -46,7 +48,6 @@ export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-edge-tts", // text-to-speech (Microsoft Edge TTS)
   "@elizaos/plugin-elevenlabs", // ElevenLabs text-to-speech
   // "@elizaos/plugin-directives", // directive processing - not yet ready
-  // "@elizaos/plugin-commands", // slash command handling - not yet ready
   // "@elizaos/plugin-mcp", // MCP protocol support - not yet ready
   // "@elizaos/plugin-scheduling", // scheduling - not yet ready
   // "@elizaos/plugin-scratchpad", // scratchpad notes - not yet ready

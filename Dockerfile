@@ -221,4 +221,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD sh -lc 'port="${PORT:-${MILADY_PORT:-2138}}"; code="$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${port}/api/health")"; [ "$code" = "200" ] || [ "$code" = "401" ]'
 
 ENTRYPOINT ["sh", "./scripts/docker-entrypoint.sh"]
-CMD ["/root/.bun/bin/bun", "milady.mjs", "start"]
+CMD ["node", "milady.mjs", "start"]

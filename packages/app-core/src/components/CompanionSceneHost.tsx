@@ -1,8 +1,8 @@
-import { useRenderGuard } from "@miladyai/app-core/hooks";
 import {
   dispatchAppEmoteEvent,
   VRM_TELEPORT_COMPLETE_EVENT,
 } from "@miladyai/app-core/events";
+import { useRenderGuard } from "@miladyai/app-core/hooks";
 import {
   getVrmPreviewUrl,
   getVrmUrl,
@@ -351,13 +351,11 @@ function CompanionSceneSurface({
   const handleRootWheelCapture = useCallback(
     (event: CompanionWheelEvent) => {
       if (!active || !interactive) return;
-      if (shouldIgnoreCameraZoom(event.target)) {
+      if (hasFocusedTextEntry()) {
+        event.preventDefault();
         return;
       }
-      if (hasFocusedTextEntry()) {
-        if (event.ctrlKey) {
-          event.preventDefault();
-        }
+      if (shouldIgnoreCameraZoom(event.target)) {
         return;
       }
       handleWheelCapture(event);

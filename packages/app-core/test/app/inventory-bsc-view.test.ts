@@ -456,9 +456,12 @@ describe("InventoryView unified wallets", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const bscButton = tree?.root.findByProps({
-      "data-testid": "inventory-chain-toggle-bsc",
-    });
+    const bscButton = tree?.root.findAll(
+      (node) =>
+        node.type === "button" &&
+        typeof node.props["aria-label"] === "string" &&
+        node.props["aria-label"].startsWith("BSC —"),
+    )[0];
     expect(bscButton).toBeDefined();
 
     await act(async () => {
@@ -1011,7 +1014,7 @@ describe("InventoryView unified wallets", () => {
     });
 
     const content = text(tree?.root);
-    expect(content).toContain("inventoryview.LegacyRpcConfigTitle");
-    expect(content).toContain("inventoryview.LegacyRpcConfigBody");
+    expect(content).toContain("is using legacy raw RPC config.");
+    expect(content).toContain("Re-save a supported provider in Settings to migrate fully.");
   });
 });

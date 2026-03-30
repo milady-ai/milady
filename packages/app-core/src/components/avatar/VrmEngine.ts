@@ -17,6 +17,7 @@ import type {
   SplatMesh as SparkSplatMesh,
 } from "@sparkjsdev/spark";
 import * as THREE from "three";
+import { SceneOverlayManager } from "./SceneOverlayManager";
 import type {
   TeleportSparkleParticle,
   TeleportSparkleSystem,
@@ -588,6 +589,7 @@ export class VrmEngine {
   private rendererBackend: RendererBackend = "webgl";
   private rendererPreference: RendererPreference = "auto";
   private scene: THREE.Scene | null = null;
+  private overlayManager: SceneOverlayManager | null = null;
   private avatarRoot: THREE.Group | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
   private clock = new THREE.Clock();
@@ -957,7 +959,8 @@ export class VrmEngine {
           sort360: false,
         },
       });
-      sparkRenderer.renderOrder = 9998;
+      // Render the Gaussian splat world behind everything else.
+      sparkRenderer.renderOrder = -100;
       this.scene.add(sparkRenderer);
       this.sparkRenderer = sparkRenderer;
       if (this.minimalBackgroundMode) {
@@ -1883,6 +1886,16 @@ export class VrmEngine {
         if (this.lowPowerRenderMode) {
           this.applyLowPowerShadowPolicy();
         }
+        // Auto-create the scene overlay manager for floating HUD panels.
+        if (!this.overlayManager && this.scene) {
+          try {
+            this.overlayManager = new SceneOverlayManager();
+            this.overlayManager.attach(this.scene);
+          } catch {
+            // Overlay panels require a full 2D canvas context; gracefully
+            // skip when running in headless / test environments.
+          }
+        }
         this.initialized = true;
         this.resumeLoop();
         this.settleReady();
@@ -1906,6 +1919,8 @@ export class VrmEngine {
     return this.initialized && this.renderer !== null;
   }
   dispose(): void {
+    this.overlayManager?.dispose();
+    this.overlayManager = null;
     this.loadingAborted = true;
     this.initialized = false;
     this.settleReady();
@@ -2278,6 +2293,13 @@ export class VrmEngine {
       this.speakingStartTime = this.elapsedTime;
     }
     this.speaking = speaking;
+  }
+  attachOverlayManager(manager: SceneOverlayManager): void {
+    this.overlayManager = manager;
+    if (this.scene) manager.attach(this.scene);
+  }
+  getOverlayManager(): SceneOverlayManager | null {
+    return this.overlayManager;
   }
   setCameraAnimation(config: Partial<CameraAnimationConfig>): void {
     this.cameraAnimation = { ...this.cameraAnimation, ...config };
@@ -3336,6 +3358,7 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
       this.refreshAvatarEyeTracking();
     }
     this.updateSparkDepthOfField(camera);
+    this.overlayManager?.update(camera, stableDelta);
     renderer.render(scene, camera);
     this.onUpdate?.();
   }

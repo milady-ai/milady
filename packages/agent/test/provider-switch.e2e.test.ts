@@ -151,6 +151,28 @@ describe("POST /api/provider/switch", () => {
 
     it("preserves existing direct provider credentials when switching to another local provider", async () => {
       await req(port, "POST", "/api/provider/switch", {
+        provider: "together",
+        apiKey: "sk-together-preserve",
+      });
+      expect(process.env.TOGETHER_API_KEY).toBe("sk-together-preserve");
+
+      const second = await req(port, "POST", "/api/provider/switch", {
+        provider: "mistral",
+        apiKey: "sk-mistral-new-key",
+      });
+      expect(second.status).toBe(200);
+      expect(process.env.MISTRAL_API_KEY).toBe("sk-mistral-new-key");
+      expect(process.env.TOGETHER_API_KEY).toBe("sk-together-preserve");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "mistral",
+      });
+    });
+
+    it("preserves OpenAI credentials when switching to Anthropic", async () => {
+      await req(port, "POST", "/api/provider/switch", {
         provider: "openai",
         apiKey: "sk-openai-preserve",
       });
@@ -163,26 +185,20 @@ describe("POST /api/provider/switch", () => {
       expect(second.status).toBe(200);
       expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-new-key");
       expect(process.env.OPENAI_API_KEY).toBe("sk-openai-preserve");
-
-      const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "anthropic",
-      });
     });
 
     it("preserves direct provider credentials when switching to elizacloud", async () => {
       await req(port, "POST", "/api/provider/switch", {
-        provider: "openai",
-        apiKey: "sk-openai-cloud-preserve",
+        provider: "together",
+        apiKey: "sk-together-cloud-preserve",
       });
-      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-cloud-preserve");
+      expect(process.env.TOGETHER_API_KEY).toBe("sk-together-cloud-preserve");
 
       const { status } = await req(port, "POST", "/api/provider/switch", {
         provider: "elizacloud",
       });
       expect(status).toBe(200);
-      expect(process.env.OPENAI_API_KEY).toBe("sk-openai-cloud-preserve");
+      expect(process.env.TOGETHER_API_KEY).toBe("sk-together-cloud-preserve");
       expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
 
       const configRes = await req(port, "GET", "/api/config");
@@ -194,6 +210,28 @@ describe("POST /api/provider/switch", () => {
 
     it("preserves direct provider credentials when switching to pi-ai", async () => {
       await req(port, "POST", "/api/provider/switch", {
+        provider: "together",
+        apiKey: "sk-together-pi-preserve",
+      });
+      expect(process.env.TOGETHER_API_KEY).toBe("sk-together-pi-preserve");
+
+      const { status } = await req(port, "POST", "/api/provider/switch", {
+        provider: "pi-ai",
+      });
+      expect(status).toBe(200);
+
+      expect(process.env.TOGETHER_API_KEY).toBe("sk-together-pi-preserve");
+      expect(process.env.ELIZA_USE_PI_AI).toBe("1");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "pi-ai",
+      });
+    });
+
+    it("preserves OpenAI credentials when switching to pi-ai", async () => {
+      await req(port, "POST", "/api/provider/switch", {
         provider: "openai",
         apiKey: "sk-openai-pi-preserve",
       });
@@ -203,15 +241,8 @@ describe("POST /api/provider/switch", () => {
         provider: "pi-ai",
       });
       expect(status).toBe(200);
-
       expect(process.env.OPENAI_API_KEY).toBe("sk-openai-pi-preserve");
       expect(process.env.ELIZA_USE_PI_AI).toBe("1");
-
-      const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "pi-ai",
-      });
     });
 
     it("stores canonical selection while keeping provider-specific capability env vars", async () => {

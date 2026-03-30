@@ -1,3 +1,9 @@
+export * from "./task-executor";
+export { CodingTaskExecutor } from "./coding-task-executor";
+export { ResearchTaskExecutor } from "./research-task-executor";
+
+export { createDefaultExecutorRegistry } from "./executor-registry";
+
 export * from "./agent-export";
 export * from "./app-manager";
 export * from "./browser-capture";

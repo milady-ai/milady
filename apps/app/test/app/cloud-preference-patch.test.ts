@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 describe("cloud preference patch", () => {
   it("normalizes inactive cloud config when a Claude subscription is already configured", () => {
     const normalized = normalizeConfigForLocalProviderPreference({
+      connection: { kind: "local-provider", provider: "anthropic" },
       cloud: {
         enabled: false,
         apiKey: "eliza-stale-key",
@@ -30,6 +31,7 @@ describe("cloud preference patch", () => {
 
     expect(
       shouldPreferLocalProviderConfig({
+        connection: { kind: "local-provider", provider: "anthropic" },
         cloud: {
           enabled: false,
           apiKey: "eliza-stale-key",
@@ -199,6 +201,10 @@ describe("cloud preference patch", () => {
 
   it("patches client getters so onboarding and cloud badges ignore stale cloud state", async () => {
     const originalGetConfig = vi.fn(async () => ({
+      connection: {
+        kind: "local-provider",
+        provider: "anthropic",
+      },
       cloud: {
         enabled: false,
         apiKey: "eliza-stale-key",
@@ -232,6 +238,10 @@ describe("cloud preference patch", () => {
 
     try {
       await expect(mockClient.getConfig()).resolves.toEqual({
+        connection: {
+          kind: "local-provider",
+          provider: "anthropic",
+        },
         cloud: {
           enabled: false,
           inferenceMode: "byok",

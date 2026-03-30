@@ -12,6 +12,7 @@ import type {
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ManagedAgent } from "../../lib/AgentProvider";
 import { CloudApiClient } from "../../lib/cloud-api";
+import { CLOUD_BASE } from "../../lib/runtime-config";
 import { BalancesSection } from "./wallets/BalancesSection";
 import { FundSection } from "./wallets/FundSection";
 import { REFRESH_INTERVAL_MS } from "./wallets/helpers";
@@ -48,15 +49,29 @@ export function WalletsPanel({ managedAgent }: WalletsPanelProps) {
 
     // For cloud agents without a matched sandbox, fall back to the cloud API
     // token so requests can be authenticated through the cloud proxy.
-    const authToken =
-      managedAgent.apiToken ?? managedAgent.cloudClient?.getToken();
-    const client =
-      managedAgent.client ??
-      new CloudApiClient({
+    const cloudToken = managedAgent.cloudClient?.getToken();
+    let client: CloudApiClient;
+    if (managedAgent.source !== "cloud" && managedAgent.client) {
+      client = managedAgent.client;
+    } else if (
+      managedAgent.source === "cloud" &&
+      managedAgent.cloudAgentId &&
+      cloudToken
+    ) {
+      // Route through cloud proxy to avoid 401 on direct agent URLs
+      client = new CloudApiClient({
+        url: `${CLOUD_BASE}/api/v1/milady/agents/${managedAgent.cloudAgentId}`,
+        type: "cloud",
+        authToken: cloudToken,
+      });
+    } else {
+      const authToken = managedAgent.apiToken ?? cloudToken;
+      client = new CloudApiClient({
         url: managedAgent.sourceUrl ?? "",
         type: managedAgent.source === "cloud" ? "cloud" : "remote",
         authToken,
       });
+    }
 
     try {
       const [addresses, balances, steward] = await Promise.allSettled([

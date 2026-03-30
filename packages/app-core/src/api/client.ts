@@ -4667,6 +4667,7 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
     conversationMode?: ConversationMode,
+    metadata?: Record<string, unknown>,
   ): Promise<{
     text: string;
     agentName: string;
@@ -4684,6 +4685,7 @@ export class MiladyClient {
         channelType,
         ...(images?.length ? { images } : {}),
         ...(conversationMode ? { conversationMode } : {}),
+        ...(metadata ? { metadata } : {}),
       }),
       signal,
     });
@@ -4975,6 +4977,7 @@ export class MiladyClient {
     signal?: AbortSignal,
     images?: ImageAttachment[],
     conversationMode?: ConversationMode,
+    metadata?: Record<string, unknown>,
   ): Promise<{
     text: string;
     agentName: string;
@@ -4989,6 +4992,7 @@ export class MiladyClient {
       signal,
       images,
       conversationMode,
+      metadata,
     );
   }
 

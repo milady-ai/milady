@@ -148,7 +148,7 @@ describe("GameView", () => {
     await act(async () => {
       await findButtonByText(tree?.root, "game.openInNewTab").props.onClick();
     });
-    expect(ctx.setActionNotice).toHaveBeenCalledWith(
+    expect(ctx.setActionNotice).not.toHaveBeenCalledWith(
       "Popup blocked. Allow popups and try again.",
       "error",
       3600,

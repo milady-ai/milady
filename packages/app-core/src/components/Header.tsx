@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@miladyai/ui";
-import { Menu, X } from "lucide-react";
+import { ListTodo, Menu, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CloudStatusBadge } from "./CloudStatusBadge";
@@ -39,6 +39,8 @@ interface HeaderProps {
   mobileLeft?: ReactNode;
   transparent?: boolean;
   hideCloudCredits?: boolean;
+  tasksEventsPanelOpen?: boolean;
+  onToggleTasksPanel?: () => void;
 }
 
 const HEADER_NAV_BUTTON_BASE_CLASSNAME =
@@ -58,6 +60,8 @@ export function Header({
   mobileLeft,
   transparent: _transparent = false,
   hideCloudCredits = false,
+  tasksEventsPanelOpen = false,
+  onToggleTasksPanel,
 }: HeaderProps) {
   const {
     elizaCloudEnabled,
@@ -271,6 +275,22 @@ export function Header({
               }
               rightExtras={
                 <>
+                  {onToggleTasksPanel ? (
+                    <Button
+                      size="icon"
+                      variant={tasksEventsPanelOpen ? "default" : "outline"}
+                      className={HEADER_ICON_BUTTON_CLASSNAME}
+                      onClick={onToggleTasksPanel}
+                      aria-label={t("taskseventspanel.Title", {
+                        defaultValue: "Tasks & Events",
+                      })}
+                      aria-pressed={tasksEventsPanelOpen}
+                      style={HEADER_BUTTON_STYLE}
+                      data-testid="header-tasks-events-toggle"
+                    >
+                      <ListTodo className="pointer-events-none w-4 h-4" />
+                    </Button>
+                  ) : null}
                   {mobileLeft ? (
                     <div className="shrink-0 sm:hidden">{mobileLeft}</div>
                   ) : null}

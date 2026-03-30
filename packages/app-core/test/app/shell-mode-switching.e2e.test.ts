@@ -177,7 +177,6 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
   KnowledgeView: () =>
     React.createElement("section", null, "KnowledgeView Ready"),
   OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
-  OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
   PairingView: () => React.createElement("div", null, "PairingView"),
   SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () =>

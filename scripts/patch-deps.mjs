@@ -17,10 +17,13 @@
  */
 import {
   existsSync,
+  lstatSync,
   readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -1249,3 +1252,50 @@ function patchTestCafeBunCompat() {
   }
 }
 patchTestCafeBunCompat();
+
+/**
+ * 8) @elizaos/plugin-groq: The published plugin bundles @ai-sdk/groq@1.x which
+ *    creates v1-spec models. Our root overrides ai@6.x (AI SDK 5) which requires
+ *    spec v2+. Symlink the nested @ai-sdk/groq to the root's @ai-sdk/groq@3.x
+ *    so the plugin uses the compatible version.
+ */
+function patchGroqSdkVersion() {
+  const rootGroq = resolve(ROOT, "node_modules", "@ai-sdk", "groq");
+  if (!existsSync(rootGroq)) return;
+
+  const bunDir = resolve(ROOT, "node_modules", ".bun");
+  if (!existsSync(bunDir)) return;
+
+  let patched = 0;
+  for (const entry of readdirSync(bunDir)) {
+    if (!entry.startsWith("@elizaos+plugin-groq@")) continue;
+    const nested = resolve(bunDir, entry, "node_modules", "@ai-sdk", "groq");
+    if (!existsSync(nested)) continue;
+
+    // Skip if already a symlink pointing to root
+    try {
+      if (lstatSync(nested).isSymbolicLink()) {
+        if (realpathSync(nested) === realpathSync(rootGroq)) continue;
+        unlinkSync(nested);
+      } else {
+        rmSync(nested, { recursive: true, force: true });
+      }
+    } catch {
+      continue;
+    }
+
+    try {
+      symlinkSync(rootGroq, nested);
+      patched++;
+    } catch {
+      // Symlink may fail on some systems; non-critical
+    }
+  }
+
+  if (patched > 0) {
+    console.log(
+      `[patch-deps] Replaced ${patched} nested @ai-sdk/groq with root v3.x for AI SDK 5 compat`,
+    );
+  }
+}
+patchGroqSdkVersion();

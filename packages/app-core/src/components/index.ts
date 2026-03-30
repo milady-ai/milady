@@ -86,7 +86,7 @@ export * from "./MediaGalleryView";
 export * from "./MediaSettingsSection";
 export * from "./MessageContent";
 export * from "./OnboardingWizard";
-export * from "./OwnerNamePrompt";
+
 export * from "./PairingView";
 export * from "./PermissionsSection";
 export * from "./PolicyControlsView";
@@ -111,6 +111,7 @@ export * from "./StartupFailureView";
 export * from "./StreamView";
 export * from "./SubscriptionStatus";
 export * from "./SystemWarningBanner";
+export * from "./TasksEventsPanel";
 export { useSharedCompanionScene } from "./shared-companion-scene-context";
 export * from "./ThemeToggle";
 export * from "./TrajectoriesView";

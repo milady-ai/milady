@@ -115,7 +115,6 @@ vi.mock("@miladyai/app-core/components", async () => {
     KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
     OnboardingWizard: () =>
       React.createElement("div", null, "OnboardingWizard"),
-    OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
     PairingView: () => React.createElement("div", null, "PairingView"),
     SharedCompanionScene: ({
       children,
@@ -211,7 +210,6 @@ vi.mock("../../src/app-shell-components", () => ({
   InventoryView: () => React.createElement("div", null, "InventoryView"),
   KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
   OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
-  OwnerNamePrompt: () => React.createElement("div", null, "OwnerNamePrompt"),
   PairingView: () => React.createElement("div", null, "PairingView"),
   SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () => React.createElement("div", null, "SettingsView"),

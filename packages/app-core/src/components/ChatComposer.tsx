@@ -1,5 +1,6 @@
 import { Button, Textarea } from "@miladyai/ui";
 import { Mic, Paperclip, Send, Square, Volume2, VolumeX } from "lucide-react";
+import { CreateTaskPopover } from "./CreateTaskPopover";
 import {
   type KeyboardEvent,
   type PointerEvent,
@@ -49,6 +50,8 @@ interface ChatComposerProps {
   onStop: () => void;
   onStopSpeaking: () => void;
   onToggleAgentVoice: () => void;
+  codingAgentsAvailable?: boolean;
+  onCreateTask?: (description: string, agentType: string) => void;
 }
 
 const COMPOSER_CONTROL_HEIGHT_CLASSNAME = "h-[46px]";
@@ -84,6 +87,8 @@ export function ChatComposer({
   onStop,
   onStopSpeaking,
   onToggleAgentVoice,
+  codingAgentsAvailable = false,
+  onCreateTask,
 }: ChatComposerProps) {
   const [isNarrow, setIsNarrow] = useState(
     () => typeof window !== "undefined" && window.innerWidth < 310,
@@ -226,6 +231,15 @@ export function ChatComposer({
         >
           <Paperclip className="w-4 h-4" />
         </Button>
+      )}
+
+      {!isGameModal && codingAgentsAvailable && onCreateTask && (
+        <CreateTaskPopover
+          chatInput={chatInput}
+          disabled={isComposerLocked}
+          onCreateTask={onCreateTask}
+          t={t}
+        />
       )}
 
       {showVoiceButton && (
