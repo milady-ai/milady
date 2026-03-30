@@ -550,6 +550,13 @@ let isQuitting = false;
 const cleanupFns: Array<() => void | Promise<void>> = [];
 let lastFocusedWindow: ManagedWindowLike | null = null;
 
+function shouldKeepRunningInBackground(): boolean {
+  // Linux package builds do not provide a reliable quit affordance via app
+  // menus, so closing the last window must terminate the process instead of
+  // leaving the agent and renderer servers bound in the background.
+  return process.platform !== "linux";
+}
+
 function sendToActiveRenderer(message: string, payload?: unknown): void {
   currentSendToWebview?.(message, payload);
   if (!currentSendToWebview) {
@@ -802,6 +809,11 @@ function attachMainWindow(win: BrowserWindow): BrowserWindow {
     }
 
     if (!isQuitting) {
+      if (!shouldKeepRunningInBackground()) {
+        isQuitting = true;
+        Utils.quit();
+        return;
+      }
       void ensureBackgroundWindow();
     }
   });

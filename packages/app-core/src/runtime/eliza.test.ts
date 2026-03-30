@@ -76,6 +76,7 @@ import {
   isEnvKeyAllowedForForwarding,
   isRecoverablePgliteInitError,
   mergeDropInPlugins,
+  normalizeOllamaProviderConfig,
   normalizeOpenAiCompatibleProviderConfig,
   repairBrokenInstallRecord,
   resolvePackageEntry,
@@ -2709,6 +2710,113 @@ describe("OpenAI-compatible Groq normalization", () => {
     expect(
       (config.env as { vars?: Record<string, string> }).vars?.GROQ_LARGE_MODEL,
     ).toBe("qwen/qwen3-32b");
+  });
+});
+
+describe("Ollama OpenAI-compatible normalization", () => {
+  const envKeys = [
+    "OLLAMA_BASE_URL",
+    "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
+    "OPENAI_SMALL_MODEL",
+    "OPENAI_LARGE_MODEL",
+    "SMALL_MODEL",
+    "LARGE_MODEL",
+  ];
+  const snap = envSnapshot(envKeys);
+
+  beforeEach(() => {
+    snap.save();
+    for (const key of envKeys) delete process.env[key];
+  });
+
+  afterEach(() => snap.restore());
+
+  it("rewrites explicit Ollama selection into OpenAI-compatible runtime settings", () => {
+    const config = {
+      connection: {
+        kind: "local-provider",
+        provider: "ollama",
+        primaryModel: "llama3.2:3b",
+      },
+      env: {
+        vars: {
+          OLLAMA_BASE_URL: "http://127.0.0.1:11434",
+        },
+      },
+    } as Partial<ElizaConfig> as ElizaConfig;
+
+    const changed = normalizeOllamaProviderConfig(config);
+
+    expect(changed).toBe(true);
+    expect(process.env.OLLAMA_BASE_URL).toBeUndefined();
+    expect(process.env.OPENAI_API_KEY).toBe("ollama");
+    expect(process.env.OPENAI_BASE_URL).toBe("http://127.0.0.1:11434/v1");
+    expect(process.env.OPENAI_SMALL_MODEL).toBe("llama3.2:3b");
+    expect(process.env.OPENAI_LARGE_MODEL).toBe("llama3.2:3b");
+    expect(
+      (config.env as { vars?: Record<string, string> }).vars?.OLLAMA_BASE_URL,
+    ).toBeUndefined();
+    expect(
+      (config.env as { vars?: Record<string, string> }).vars?.OPENAI_BASE_URL,
+    ).toBe("http://127.0.0.1:11434/v1");
+    expect(
+      (config.env as { vars?: Record<string, string> }).vars
+        ?.OPENAI_SMALL_MODEL,
+    ).toBe("llama3.2:3b");
+    expect(
+      (config.env as { vars?: Record<string, string> }).vars
+        ?.OPENAI_LARGE_MODEL,
+    ).toBe("llama3.2:3b");
+
+    const names = collectPluginNames(config);
+    expect(names.has("@elizaos/plugin-openai")).toBe(true);
+    expect(names.has("@elizaos/plugin-ollama")).toBe(false);
+  });
+
+  it("preserves shared model overrides and strips legacy /api from the base URL", () => {
+    const config = {
+      connection: {
+        kind: "local-provider",
+        provider: "ollama",
+        primaryModel: "llama3.2:3b",
+      },
+      env: {
+        vars: {
+          OLLAMA_BASE_URL: "http://127.0.0.1:11434/api",
+          SMALL_MODEL: "qwen2.5:7b",
+          LARGE_MODEL: "llama3.1:8b",
+        },
+      },
+    } as Partial<ElizaConfig> as ElizaConfig;
+
+    const changed = normalizeOllamaProviderConfig(config);
+
+    expect(changed).toBe(true);
+    expect(process.env.OPENAI_BASE_URL).toBe("http://127.0.0.1:11434/v1");
+    expect(process.env.OPENAI_SMALL_MODEL).toBe("qwen2.5:7b");
+    expect(process.env.OPENAI_LARGE_MODEL).toBe("llama3.1:8b");
+  });
+
+  it("does not hijack non-Ollama explicit selections that happen to keep OLLAMA_BASE_URL around", () => {
+    const config = {
+      connection: {
+        kind: "local-provider",
+        provider: "anthropic",
+        primaryModel: "claude-sonnet-4.5",
+      },
+      env: {
+        vars: {
+          OLLAMA_BASE_URL: "http://127.0.0.1:11434",
+        },
+      },
+    } as Partial<ElizaConfig> as ElizaConfig;
+
+    const changed = normalizeOllamaProviderConfig(config);
+
+    expect(changed).toBe(false);
+    expect(process.env.OPENAI_BASE_URL).toBeUndefined();
+    expect(process.env.OPENAI_API_KEY).toBeUndefined();
   });
 });
 

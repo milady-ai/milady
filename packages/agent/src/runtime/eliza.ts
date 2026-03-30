@@ -67,6 +67,7 @@ import {
   isMiladySettingsDebugEnabled,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
+import { inferOnboardingConnectionFromConfig } from "../contracts/onboarding";
 import * as pluginAgentOrchestrator from "@elizaos/plugin-agent-orchestrator";
 import * as pluginAgentSkills from "@elizaos/plugin-agent-skills";
 import * as pluginAnthropic from "@elizaos/plugin-anthropic";
@@ -536,6 +537,109 @@ function isLikelyOpenAiTextModel(value: string | undefined): boolean {
   if (!value) return false;
   const normalized = value.trim().toLowerCase();
   return normalized.startsWith("gpt-") || normalized.startsWith("openai/");
+}
+
+function normalizeOllamaOpenAiBaseUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    const pathname = url.pathname.replace(/\/+$/, "");
+    const basePath = pathname.endsWith("/api")
+      ? pathname.slice(0, -"/api".length)
+      : pathname;
+    url.pathname = `${basePath || ""}/v1`.replace(/\/{2,}/g, "/");
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Normalize Ollama into the OpenAI-compatible runtime path.
+ *
+ * @elizaos/plugin-ollama currently depends on an older AI SDK adapter and
+ * fails under AI SDK 6 with `Unsupported model version v1`. Ollama exposes an
+ * OpenAI-compatible `/v1` endpoint, so for the selected Ollama provider we can
+ * route inference through @elizaos/plugin-openai instead.
+ */
+/** @internal Exported for testing. */
+export function normalizeOllamaProviderConfig(
+  config: ElizaConfig,
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  const cloudInferenceEnabled =
+    config.cloud?.enabled === true &&
+    (config.cloud?.inferenceMode ?? "cloud") === "cloud" &&
+    config.cloud?.services?.inference !== false;
+  if (cloudInferenceEnabled) {
+    return false;
+  }
+
+  const activeConnection = inferOnboardingConnectionFromConfig(
+    config as unknown as Record<string, unknown>,
+  );
+  if (
+    activeConnection?.kind === "local-provider" &&
+    activeConnection.provider !== "ollama"
+  ) {
+    return false;
+  }
+
+  const ollamaBaseUrl = readEffectiveEnvValue(config, "OLLAMA_BASE_URL", env);
+  if (!ollamaBaseUrl) {
+    return false;
+  }
+
+  const normalizedBaseUrl = normalizeOllamaOpenAiBaseUrl(ollamaBaseUrl);
+  if (!normalizedBaseUrl) {
+    return false;
+  }
+
+  const openaiApiKey = readEffectiveEnvValue(config, "OPENAI_API_KEY", env);
+  const existingOpenAiSmallModel = readEffectiveEnvValue(
+    config,
+    "OPENAI_SMALL_MODEL",
+    env,
+  );
+  const existingOpenAiLargeModel = readEffectiveEnvValue(
+    config,
+    "OPENAI_LARGE_MODEL",
+    env,
+  );
+  const sharedSmallModel = readEffectiveEnvValue(config, "SMALL_MODEL", env);
+  const sharedLargeModel = readEffectiveEnvValue(config, "LARGE_MODEL", env);
+  const selectedModel =
+    activeConnection?.kind === "local-provider" &&
+    activeConnection.provider === "ollama"
+      ? trimEnvString(activeConnection.primaryModel)
+      : undefined;
+
+  const normalizedSmallModel =
+    existingOpenAiSmallModel ?? sharedSmallModel ?? selectedModel;
+  const normalizedLargeModel =
+    existingOpenAiLargeModel ?? sharedLargeModel ?? selectedModel;
+
+  env.OPENAI_BASE_URL = normalizedBaseUrl;
+  env.OPENAI_API_KEY = openaiApiKey ?? "ollama";
+  setConfigEnvValue(config, "OPENAI_BASE_URL", normalizedBaseUrl);
+  setConfigEnvValue(config, "OPENAI_API_KEY", openaiApiKey ?? "ollama");
+
+  if (normalizedSmallModel) {
+    env.OPENAI_SMALL_MODEL = normalizedSmallModel;
+    setConfigEnvValue(config, "OPENAI_SMALL_MODEL", normalizedSmallModel);
+  }
+  if (normalizedLargeModel) {
+    env.OPENAI_LARGE_MODEL = normalizedLargeModel;
+    setConfigEnvValue(config, "OPENAI_LARGE_MODEL", normalizedLargeModel);
+  }
+
+  delete env.OLLAMA_BASE_URL;
+  deleteConfigEnvValue(config, "OLLAMA_BASE_URL");
+
+  logger.warn(
+    "[eliza] Detected Ollama selection; normalizing runtime settings to use Ollama's OpenAI-compatible /v1 endpoint via @elizaos/plugin-openai",
+  );
+
+  return true;
 }
 
 /**
@@ -4114,6 +4218,7 @@ export async function startEliza(
     }
   }
 
+  normalizeOllamaProviderConfig(config);
   normalizeOpenAiCompatibleProviderConfig(config);
 
   // Log active database configuration for debugging persistence issues

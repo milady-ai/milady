@@ -22,6 +22,16 @@ describe("close-to-background behavior", () => {
     expect(fnBody).toContain("showBackgroundRunNoticeOnce");
   });
 
+  it("linux close path quits instead of backgrounding the process", () => {
+    const closeHandler = source.indexOf('win.on("close"');
+    expect(closeHandler).toBeGreaterThan(-1);
+
+    const handlerBody = source.slice(closeHandler, closeHandler + 500);
+    expect(handlerBody).toContain("shouldKeepRunningInBackground");
+    expect(handlerBody).toContain("Utils.quit()");
+    expect(handlerBody).toContain("isQuitting = true");
+  });
+
   it("restoreWindow function exists and creates window when needed", () => {
     const fnStart = source.indexOf("async function restoreWindow");
     expect(fnStart).toBeGreaterThan(-1);
