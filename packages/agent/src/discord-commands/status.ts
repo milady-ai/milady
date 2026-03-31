@@ -6,14 +6,15 @@
 
 import type { IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { allowAll } from "./validators";
+import os from "node:os";
+import { requireAdmin, getInteractionUserRole } from "./validators";
 import type { DiscordSlashCommand } from "./types";
 
 export const statusCommand: DiscordSlashCommand = {
   name: "status",
   description: "Show system status — loaded plugins, active agents, system info",
   guildOnly: true,
-  validator: allowAll,
+  validator: requireAdmin,
   options: [],
 };
 
@@ -74,15 +75,19 @@ export async function handleStatusCommand(
       lines.push(`\n**Services:** ${runningCount}/${serviceCount} running`);
     }
 
-    // System info
-    const os = await import("node:os");
-    lines.push("\n**System:**");
-    lines.push(`• Uptime: ${formatUptime(process.uptime())}`);
-    lines.push(
-      `• Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB`,
-    );
-    lines.push(`• Node: ${process.version}`);
-    lines.push(`• Platform: ${process.platform} ${process.arch}`);
+    // SEC-4: System info is only shown to ADMIN+ users (contains heap, node version, platform)
+    const role = await getInteractionUserRole(interaction, runtime);
+    const isAdmin = role === "ADMIN" || role === "OWNER";
+
+    if (isAdmin) {
+      lines.push("\n**System:**");
+      lines.push(`• Uptime: ${formatUptime(process.uptime())}`);
+      lines.push(
+        `• Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB / ${Math.round(os.totalmem() / 1024 / 1024)}MB`,
+      );
+      lines.push(`• Node: ${process.version}`);
+      lines.push(`• Platform: ${process.platform} ${process.arch}`);
+    }
 
     const reply = lines.join("\n").slice(0, 2000);
     await interaction.editReply(reply);

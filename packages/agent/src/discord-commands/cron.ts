@@ -181,6 +181,9 @@ async function handleCreate(
   // Generate a short name from the task
   const name = task.length > 50 ? task.slice(0, 47) + "..." : task;
 
+  const userId = interaction.user?.id ?? "unknown";
+  console.warn(`[discord-cron] ADMIN ${userId} created cron: ${schedule} — ${task}`);
+
   const job = await cronService.createJob({
     name,
     description: task,
@@ -199,6 +202,9 @@ async function handleDelete(
   cronService: CronServiceLike,
 ): Promise<void> {
   const id = interaction.options.getString("id", true);
+
+  const userId = interaction.user?.id ?? "unknown";
+  console.warn(`[discord-cron] ADMIN ${userId} deleted cron: ${id}`);
 
   const deleted = await cronService.deleteJob(id);
 

@@ -10,7 +10,7 @@
  */
 
 import { logger, type EventPayload, type IAgentRuntime } from "@elizaos/core";
-import type { ChatInputCommandInteraction } from "discord.js";
+import type { ChatInputCommandInteraction, Interaction } from "discord.js";
 
 /** Params emitted with DISCORD_SLASH_COMMAND events. */
 interface DiscordSlashCommandParams extends EventPayload {
@@ -45,6 +45,14 @@ const HANDLERS: Record<
   cron: handleCronCommand,
 };
 
+/** Map command names to their validators for auth checks (SEC-1). */
+const VALIDATORS: Record<
+  string,
+  (interaction: Interaction, runtime: IAgentRuntime) => Promise<boolean>
+> = Object.fromEntries(
+  COMMANDS.filter((c) => c.validator).map((c) => [c.name, c.validator!]),
+);
+
 /**
  * Set up Discord slash command integration on a runtime.
  *
@@ -61,7 +69,6 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
   // When Discord connects to a guild, register our slash commands.
   runtime.registerEvent("DISCORD_SERVER_CONNECTED", async (_params: EventPayload) => {
     if (commandsRegistered) return;
-    commandsRegistered = true;
 
     logger.info(`${LOG_PREFIX} Discord server connected — registering ${COMMANDS.length} slash commands`);
 
@@ -72,6 +79,9 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
       source: "discord-commands",
       commands: COMMANDS,
     } as unknown as EventPayload);
+
+    // Set flag AFTER successful registration (fix: was set before emitEvent)
+    commandsRegistered = true;
 
     logger.info(
       `${LOG_PREFIX} Registered commands: ${COMMANDS.map((c) => `/${c.name}`).join(", ")}`,
@@ -90,6 +100,22 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
     logger.info(
       `${LOG_PREFIX} Handling /${commandName} from ${interaction.user?.username ?? "unknown"}`,
     );
+
+    // [SEC-1] Enforce permission validators before dispatching to handler
+    const validator = VALIDATORS[commandName];
+    if (validator) {
+      const allowed = await validator(interaction as Interaction, runtime);
+      if (!allowed) {
+        logger.warn(
+          `${LOG_PREFIX} Permission denied: /${commandName} from ${interaction.user?.username ?? "unknown"} (${interaction.user?.id})`,
+        );
+        await interaction.reply({
+          content: "🚫 Permission denied. You do not have the required role for this command.",
+          ephemeral: true,
+        });
+        return;
+      }
+    }
 
     try {
       await handler(interaction as ChatInputCommandInteraction, runtime);

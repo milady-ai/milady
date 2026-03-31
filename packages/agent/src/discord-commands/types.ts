@@ -18,6 +18,19 @@ export interface DiscordSlashCommandOption {
   channel_types?: number[];
 }
 
+/**
+ * Escape user-supplied strings for safe interpolation into XML.
+ * Prevents tag injection (SEC-3).
+ */
+export function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export interface DiscordSlashCommand {
   name: string;
   description: string;

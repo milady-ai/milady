@@ -6,11 +6,11 @@
  * Maps to the START_CODING_TASK action from plugin-agent-orchestrator.
  */
 
-import type { IAgentRuntime, Memory } from "@elizaos/core";
+import { createUniqueUuid, stringToUuid, type IAgentRuntime, type Memory } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
-import type { DiscordSlashCommand } from "./types";
+import { escapeXml, type DiscordSlashCommand } from "./types";
 
 export const codeCommand: DiscordSlashCommand = {
   name: "code",
@@ -82,9 +82,11 @@ export async function handleCodeCommand(
     }
 
     // Create a minimal Memory for the action handler
-    const { createUniqueUuid, stringToUuid } = await import("@elizaos/core");
     const entityId = createUniqueUuid(runtime, interaction.user.id);
     const roomId = createUniqueUuid(runtime, interaction.channelId);
+    // SEC-3: Escape user input to prevent XML injection
+    const safeAgentSpec = escapeXml(agentSpec);
+    const safeRepo = repo ? escapeXml(repo) : null;
     const memory = {
       id: stringToUuid(`slash-code-${Date.now()}`),
       entityId,
@@ -92,7 +94,7 @@ export async function handleCodeCommand(
       content: {
         text: `Start coding task: ${task}`,
         source: "discord",
-        params: `<START_CODING_TASK><agents>${agentSpec}</agents>${repo ? `<repo>${repo}</repo>` : ""}</START_CODING_TASK>`,
+        params: `<START_CODING_TASK><agents>${safeAgentSpec}</agents>${safeRepo ? `<repo>${safeRepo}</repo>` : ""}</START_CODING_TASK>`,
         actions: ["START_CODING_TASK"],
       },
     };
