@@ -150,6 +150,7 @@
     "@miladyai/shared": "workspace:*",
     "@noble/curves": "^2.0.1",
     "@whiskeysockets/baileys": "7.0.0-rc.9",
+    "discord.js": "^14.18.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "0.45.1",
     "ethers": "^6.16.0",
