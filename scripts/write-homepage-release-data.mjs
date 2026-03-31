@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildJsDelivrAssetBase } from "./lib/asset-cdn.mjs";
+import { buildRawGitHubAssetBase } from "./lib/asset-cdn.mjs";
 
 const REPOSITORY = "milady-ai/milady";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -229,14 +229,14 @@ function buildPayload(release, allReleases = []) {
       appAssetBaseUrl:
         tagName === "unavailable"
           ? ""
-          : buildJsDelivrAssetBase({
+          : buildRawGitHubAssetBase({
               releaseTag: tagName,
               assetRoot: "apps/app/public",
             }),
       homepageAssetBaseUrl:
         tagName === "unavailable"
           ? ""
-          : buildJsDelivrAssetBase({
+          : buildRawGitHubAssetBase({
               releaseTag: tagName,
               assetRoot: "apps/homepage/public",
             }),

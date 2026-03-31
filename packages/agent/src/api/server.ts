@@ -2696,7 +2696,9 @@ function serveStaticUi(
       const body = getCachedFile(candidatePath, stat.mtimeMs);
       const cacheControl = relativePath.startsWith("assets/")
         ? "public, max-age=31536000, immutable"
-        : "public, max-age=0, must-revalidate";
+        : ext === ".vrm" || relativePath.endsWith(".vrm.gz")
+          ? "public, max-age=86400"
+          : "public, max-age=0, must-revalidate";
       sendStaticResponse(
         req,
         res,

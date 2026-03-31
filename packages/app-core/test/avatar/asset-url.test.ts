@@ -28,18 +28,18 @@ describe("resolveAppAssetUrl", () => {
     setBootConfig({
       branding: {},
       assetBaseUrl:
-        "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.131/apps/app/public/",
+        "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/",
     });
     expect(resolveAppAssetUrl("vrms/1.vrm")).toBe(
-      "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.131/apps/app/public/vrms/1.vrm",
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/vrms/1.vrm",
     );
   });
 
-  it("routes release-tagged splat worlds through raw GitHub when jsDelivr blocks the extension", () => {
+  it("resolves .spz files through the same raw GitHub base as all other assets", () => {
     setBootConfig({
       branding: {},
       assetBaseUrl:
-        "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.131/apps/app/public/",
+        "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/",
     });
     expect(resolveAppAssetUrl("worlds/companion-day.spz")).toBe(
       "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/worlds/companion-day.spz",

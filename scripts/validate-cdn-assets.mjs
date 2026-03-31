@@ -15,8 +15,7 @@ import {
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
-const JSDELIVR_PREFIX = "https://cdn.jsdelivr.net/gh/";
-const CI_RETRYABLE_STATUSES = new Set([0, 404, 429, 500, 502, 503, 504]);
+const CI_RETRYABLE_STATUSES = new Set([0, 429, 500, 502, 503, 504]);
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -38,13 +37,13 @@ function getValidationRetryPolicy({ env = process.env } = {}) {
       Number.isFinite(explicitAttempts) && explicitAttempts > 0
         ? explicitAttempts
         : inCi
-          ? 16
+          ? 3
           : 1,
     delayMs:
       Number.isFinite(explicitDelayMs) && explicitDelayMs >= 0
         ? explicitDelayMs
         : inCi
-          ? 15000
+          ? 5000
           : 0,
   };
 }
@@ -73,9 +72,7 @@ async function probeManagedAssetUrl(url, retryPolicy) {
   }
 
   const isRetryable =
-    url.startsWith(JSDELIVR_PREFIX) &&
-    CI_RETRYABLE_STATUSES.has(result.status) &&
-    retryPolicy.attempts > 1;
+    CI_RETRYABLE_STATUSES.has(result.status) && retryPolicy.attempts > 1;
   if (!isRetryable) {
     return result;
   }
@@ -128,7 +125,6 @@ async function validateGroup(
 
       if (
         attempt < retryPolicy.attempts &&
-        url.startsWith(JSDELIVR_PREFIX) &&
         CI_RETRYABLE_STATUSES.has(response.status)
       ) {
         retryable.push(url);
