@@ -35,6 +35,17 @@ describe("resolveAppAssetUrl", () => {
     );
   });
 
+  it("routes release-tagged splat worlds through raw GitHub when jsDelivr blocks the extension", () => {
+    setBootConfig({
+      branding: {},
+      assetBaseUrl:
+        "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.131/apps/app/public/",
+    });
+    expect(resolveAppAssetUrl("worlds/companion-day.spz")).toBe(
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/worlds/companion-day.spz",
+    );
+  });
+
   it("resolves file:// assets relative to index directory", () => {
     const url = resolveAppAssetUrl("/vrms/1.vrm", {
       currentUrl:

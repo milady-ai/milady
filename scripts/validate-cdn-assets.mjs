@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import {
-  buildJsDelivrAssetBase,
+  buildManagedAssetUrl,
   resolveMiladyAssetRepository,
   resolveMiladyReleaseTag,
 } from "./lib/asset-cdn.mjs";
@@ -16,11 +16,16 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 
-async function validateGroup(files, baseUrl) {
+async function validateGroup(files, { repository, releaseTag, assetRoot }) {
   const missing = [];
   for (const file of files) {
     const suffix = file.split("/").slice(3).join("/");
-    const url = new URL(suffix, baseUrl).toString();
+    const url = buildManagedAssetUrl({
+      repository,
+      releaseTag,
+      assetRoot,
+      assetPath: suffix,
+    });
     const response = await fetch(url, { method: "HEAD" });
     if (!response.ok) {
       missing.push(`${response.status} ${url}`);
@@ -49,20 +54,17 @@ async function main() {
   if (!manifest) {
     throw new Error("Static asset manifest is missing.");
   }
-  const appBase = buildJsDelivrAssetBase({
-    repository,
-    releaseTag,
-    assetRoot: "apps/app/public",
-  });
-  const homepageBase = buildJsDelivrAssetBase({
-    repository,
-    releaseTag,
-    assetRoot: "apps/homepage/public",
-  });
-
   const [missingApp, missingHomepage] = await Promise.all([
-    validateGroup(manifest.app, appBase),
-    validateGroup(manifest.homepage, homepageBase),
+    validateGroup(manifest.app, {
+      repository,
+      releaseTag,
+      assetRoot: "apps/app/public",
+    }),
+    validateGroup(manifest.homepage, {
+      repository,
+      releaseTag,
+      assetRoot: "apps/homepage/public",
+    }),
   ]);
 
   const missing = [...missingApp, ...missingHomepage];
@@ -75,7 +77,7 @@ async function main() {
   }
 
   console.log(
-    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} jsDelivr asset URLs for ${releaseTag}.`,
+    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} managed asset URLs for ${releaseTag}.`,
   );
 }
 

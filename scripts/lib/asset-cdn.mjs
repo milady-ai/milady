@@ -2,6 +2,7 @@ import process from "node:process";
 
 export const MILADY_GITHUB_REPOSITORY = "milady-ai/milady";
 const CDN_ORIGIN = "https://cdn.jsdelivr.net/gh";
+const RAW_GITHUB_ORIGIN = "https://raw.githubusercontent.com";
 
 function normalizeReleaseTag(value) {
   const normalized = value?.trim();
@@ -34,6 +35,42 @@ export function buildJsDelivrAssetBase({
   }
   const normalizedRoot = assetRoot.replace(/^\/+|\/+$/g, "");
   return `${CDN_ORIGIN}/${repository}@${releaseTag}/${normalizedRoot}/`;
+}
+
+export function buildRawGitHubAssetBase({
+  repository = MILADY_GITHUB_REPOSITORY,
+  releaseTag,
+  assetRoot,
+}) {
+  if (!releaseTag || !assetRoot) {
+    return "";
+  }
+  const normalizedRoot = assetRoot.replace(/^\/+|\/+$/g, "");
+  return `${RAW_GITHUB_ORIGIN}/${repository}/${releaseTag}/${normalizedRoot}/`;
+}
+
+export function shouldUseRawGitHubAssetHost(assetPath) {
+  const normalized = assetPath?.trim().replace(/^\/+/, "").toLowerCase();
+  if (!normalized) return false;
+  return normalized.endsWith(".spz");
+}
+
+export function buildManagedAssetUrl({
+  repository = MILADY_GITHUB_REPOSITORY,
+  releaseTag,
+  assetRoot,
+  assetPath,
+}) {
+  if (!releaseTag || !assetRoot || !assetPath) {
+    return "";
+  }
+
+  const normalizedAssetPath = assetPath.replace(/^\/+/, "");
+  const base = shouldUseRawGitHubAssetHost(normalizedAssetPath)
+    ? buildRawGitHubAssetBase({ repository, releaseTag, assetRoot })
+    : buildJsDelivrAssetBase({ repository, releaseTag, assetRoot });
+  if (!base) return "";
+  return new URL(normalizedAssetPath, base).toString();
 }
 
 export function resolveMiladyAssetBaseUrls({
