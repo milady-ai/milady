@@ -26,12 +26,14 @@ import { agentsCommand, handleAgentsCommand } from "./agents";
 import { statusCommand, handleStatusCommand } from "./status";
 import { shellCommand, handleShellCommand } from "./shell";
 import { cronCommand, handleCronCommand } from "./cron";
+import { skillCommand, handleSkillCommand } from "./skill";
+import { workspaceCommand, handleWorkspaceCommand } from "./workspace";
 import type { DiscordSlashCommand } from "./types";
 
 const LOG_PREFIX = "[discord-commands]";
 
 /** All slash commands to register. */
-const COMMANDS: DiscordSlashCommand[] = [codeCommand, agentsCommand, statusCommand, shellCommand, cronCommand];
+const COMMANDS: DiscordSlashCommand[] = [codeCommand, agentsCommand, statusCommand, shellCommand, cronCommand, skillCommand, workspaceCommand];
 
 /** Map command names to their handlers. */
 const HANDLERS: Record<
@@ -43,6 +45,8 @@ const HANDLERS: Record<
   status: handleStatusCommand,
   shell: handleShellCommand,
   cron: handleCronCommand,
+  skill: handleSkillCommand,
+  workspace: handleWorkspaceCommand,
 };
 
 /** Map command names to their validators for auth checks (SEC-1). */
