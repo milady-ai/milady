@@ -6,7 +6,7 @@
  * Maps to the START_CODING_TASK action from plugin-agent-orchestrator.
  */
 
-import type { IAgentRuntime } from "@elizaos/core";
+import type { IAgentRuntime, Memory } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
@@ -103,7 +103,7 @@ export async function handleCodeCommand(
       return [];
     };
 
-    await startAction.handler(runtime, memory as any, undefined, {}, callback);
+    await startAction.handler(runtime, memory as unknown as Memory, undefined, {}, callback);
 
     const replyText =
       callbackMessages.length > 0

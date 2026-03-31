@@ -9,8 +9,17 @@
  * plugin is not loaded, it simply does nothing.
  */
 
-import { logger, type IAgentRuntime } from "@elizaos/core";
+import { logger, type EventPayload, type IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
+
+/** Params emitted with DISCORD_SLASH_COMMAND events. */
+interface DiscordSlashCommandParams extends EventPayload {
+  interaction?: ChatInputCommandInteraction & {
+    isCommand?: () => boolean;
+    replied?: boolean;
+    deferred?: boolean;
+  };
+}
 
 import { codeCommand, handleCodeCommand } from "./code";
 import { agentsCommand, handleAgentsCommand } from "./agents";
@@ -46,7 +55,7 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
   let commandsRegistered = false;
 
   // When Discord connects to a guild, register our slash commands.
-  runtime.registerEvent("DISCORD_SERVER_CONNECTED", async (_params: any) => {
+  runtime.registerEvent("DISCORD_SERVER_CONNECTED", async (_params: EventPayload) => {
     if (commandsRegistered) return;
     commandsRegistered = true;
 
@@ -58,7 +67,7 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
       runtime,
       source: "discord-commands",
       commands: COMMANDS,
-    } as any);
+    } as unknown as EventPayload);
 
     logger.info(
       `${LOG_PREFIX} Registered commands: ${COMMANDS.map((c) => `/${c.name}`).join(", ")}`,
@@ -66,7 +75,7 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
   });
 
   // Handle incoming slash command interactions.
-  runtime.registerEvent("DISCORD_SLASH_COMMAND", async (params: any) => {
+  runtime.registerEvent("DISCORD_SLASH_COMMAND", async (params: DiscordSlashCommandParams) => {
     const interaction = params?.interaction;
     if (!interaction?.isCommand?.()) return;
 

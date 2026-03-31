@@ -62,12 +62,11 @@ export async function handleStatusCommand(
     }
 
     // Service health
-    const runtimeAny = runtime as any;
-    if (typeof runtimeAny.getServiceHealth === "function") {
-      const health = runtimeAny.getServiceHealth() as Record<
-        string,
-        { status: string; instances: number }
-      >;
+    const runtimeWithHealth = runtime as IAgentRuntime & {
+      getServiceHealth?: () => Record<string, { status: string; instances: number }>;
+    };
+    if (typeof runtimeWithHealth.getServiceHealth === "function") {
+      const health = runtimeWithHealth.getServiceHealth();
       const serviceCount = Object.keys(health).length;
       const runningCount = Object.values(health).filter(
         (s) => s.status === "registered",

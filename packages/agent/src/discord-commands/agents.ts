@@ -11,7 +11,7 @@
  * from plugin-agent-orchestrator.
  */
 
-import type { IAgentRuntime } from "@elizaos/core";
+import type { IAgentRuntime, Memory } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
@@ -119,7 +119,7 @@ export async function handleAgentsCommand(
         const messages: string[] = [];
         await listAction.handler(
           runtime,
-          memory as any,
+          memory as unknown as Memory,
           undefined,
           {},
           async (content: { text?: string }) => {
@@ -166,7 +166,7 @@ export async function handleAgentsCommand(
         const messages: string[] = [];
         await listAction.handler(
           runtime,
-          memory as any,
+          memory as unknown as Memory,
           undefined,
           {},
           async (content: { text?: string }) => {
@@ -213,7 +213,7 @@ export async function handleAgentsCommand(
         const messages: string[] = [];
         await stopAction.handler(
           runtime,
-          memory as any,
+          memory as unknown as Memory,
           undefined,
           {},
           async (content: { text?: string }) => {
@@ -261,7 +261,7 @@ export async function handleAgentsCommand(
         const messages: string[] = [];
         await sendAction.handler(
           runtime,
-          memory as any,
+          memory as unknown as Memory,
           undefined,
           {},
           async (content: { text?: string }) => {
