@@ -581,7 +581,9 @@ describe("DesktopManager", () => {
 
       const snapshot = await manager.getUpdaterState();
 
-      expect(snapshot.appBundlePath).toBe("/Volumes/Milady/Milady.app");
+      expect(snapshot.appBundlePath?.replaceAll("\\", "/")).toMatch(
+        /\/Volumes\/Milady\/Milady\.app$/,
+      );
       expect(snapshot.canAutoUpdate).toBe(false);
       expect(snapshot.autoUpdateDisabledReason).toContain(
         "Move Milady.app to /Applications",
@@ -857,6 +859,57 @@ describe("DesktopManager", () => {
   });
 
   describe("window restore", () => {
+    it("restores the main window before showing when the app is background-only", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      manager.clearMainWindow();
+
+      await manager.showWindow();
+
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("clears the stale window handle when the attached window closes", () => {
+      const fakeWindow = {
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+
+      manager.setMainWindow(
+        fakeWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+      );
+
+      const closeHandler = (
+        fakeWindow.on as ReturnType<typeof vi.fn>
+      ).mock.calls.find(([event]) => event === "close")?.[1] as
+        | (() => void)
+        | undefined;
+
+      expect(closeHandler).toBeTypeOf("function");
+      closeHandler?.();
+
+      expect(
+        (manager as unknown as { getWindow: () => unknown }).getWindow(),
+      ).toBeNull();
+    });
+
     it("restores a minimized macOS window when the app becomes active", async () => {
       vi.useFakeTimers();
       setPlatform("darwin");

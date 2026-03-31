@@ -166,6 +166,7 @@ export class DesktopManager {
 
   // Callback to open the settings window (set by index.ts)
   private openSettingsCallback: ((tabHint?: string) => void) | null = null;
+  private restoreMainWindowCallback: (() => Promise<void> | void) | null = null;
   private openSurfaceWindowCallback:
     | ((
         surface:
@@ -226,6 +227,14 @@ export class DesktopManager {
   }
 
   /**
+   * Set the callback used to restore the main window when the app is still
+   * running in the background but no BrowserWindow is currently attached.
+   */
+  setRestoreMainWindowCallback(cb: (() => Promise<void> | void) | null): void {
+    this.restoreMainWindowCallback = cb;
+  }
+
+  /**
    * Set the callback used to open detached surface windows from RPC or menus.
    */
   setOpenSurfaceWindowCallback(
@@ -258,6 +267,16 @@ export class DesktopManager {
    */
   openSettings(tabHint?: string): void {
     this.openSettingsCallback?.(tabHint);
+  }
+
+  clearMainWindow(window?: BrowserWindow | null): void {
+    if (window && this.mainWindow !== window) {
+      return;
+    }
+    this.teardownWindowEvents(this.mainWindow);
+    this.mainWindow = null;
+    this._windowHidden = true;
+    this._windowFocused = false;
   }
 
   /**
@@ -874,16 +893,25 @@ X-GNOME-Autostart-enabled=true
   }
 
   async showWindow(): Promise<void> {
-    const win = this.mainWindow;
+    let win = this.mainWindow;
+    if (!win) {
+      await this.restoreMainWindowCallback?.();
+      win = this.mainWindow;
+    }
     if (!win) return;
     const ptr = (win as { ptr?: unknown }).ptr;
-    if (ptr && process.platform === "darwin") {
-      makeKeyAndOrderFront(ptr as Parameters<typeof makeKeyAndOrderFront>[0]);
-    } else {
-      win.show();
-      win.focus();
+    try {
+      if (ptr && process.platform === "darwin") {
+        makeKeyAndOrderFront(ptr as Parameters<typeof makeKeyAndOrderFront>[0]);
+      } else {
+        win.show();
+        win.focus();
+      }
+      this._windowHidden = false;
+    } catch {
+      this.clearMainWindow(win);
+      await this.restoreMainWindowCallback?.();
     }
-    this._windowHidden = false;
   }
 
   async hideWindow(): Promise<void> {
@@ -901,7 +929,12 @@ X-GNOME-Autostart-enabled=true
   }
 
   async focusWindow(): Promise<void> {
-    this.getWindow()?.focus();
+    let win = this.getWindow();
+    if (!win) {
+      await this.restoreMainWindowCallback?.();
+      win = this.getWindow();
+    }
+    win?.focus();
   }
 
   async isWindowMaximized(): Promise<{ maximized: boolean }> {
@@ -958,6 +991,7 @@ X-GNOME-Autostart-enabled=true
     win.on("blur", blurHandler);
 
     const closeHandler = () => {
+      this.clearMainWindow(win);
       this.send("desktopWindowClose");
     };
     this.windowEventHandlers.close = closeHandler;

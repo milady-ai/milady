@@ -1612,10 +1612,12 @@ async function main(): Promise<void> {
   });
 
   // Wire detached window callbacks so menus and RPC can open them.
-  getDesktopManager().setOpenSettingsCallback((tabHint) => {
+  const desktopManager = getDesktopManager();
+  desktopManager.setRestoreMainWindowCallback(() => restoreWindow());
+  desktopManager.setOpenSettingsCallback((tabHint) => {
     void createSettingsWindow(tabHint);
   });
-  getDesktopManager().setOpenSurfaceWindowCallback((surface, browse) => {
+  desktopManager.setOpenSurfaceWindowCallback((surface, browse) => {
     if (!surfaceWindowManager) {
       return;
     }
@@ -1637,7 +1639,7 @@ async function main(): Promise<void> {
   setupDeepLinks();
   setupDockReopen();
 
-  const desktop = getDesktopManager();
+  const desktop = desktopManager;
   try {
     await desktop.createTray({
       icon: resolveDesktopAppIconPath(),
