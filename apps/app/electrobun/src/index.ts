@@ -822,18 +822,27 @@ async function ensureBackgroundWindow(): Promise<void> {
 }
 
 /** Restore or recreate the main window (called on dock icon click). */
+function focusCurrentWindow(): void {
+  if (!currentWindow) {
+    return;
+  }
+
+  try {
+    currentWindow.unminimize();
+    currentWindow.focus();
+  } catch {
+    // unminimize/focus may not be available
+  }
+}
+
 async function restoreWindow(): Promise<void> {
   if (currentWindow) {
-    try {
-      currentWindow.unminimize();
-      currentWindow.focus();
-    } catch {
-      // unminimize/focus may not be available
-    }
+    focusCurrentWindow();
     return;
   }
   if (backgroundWindowPromise) {
     await backgroundWindowPromise;
+    focusCurrentWindow();
     return;
   }
   backgroundWindowPromise = (async () => {
@@ -844,6 +853,7 @@ async function restoreWindow(): Promise<void> {
     backgroundWindowPromise = null;
   });
   await backgroundWindowPromise;
+  focusCurrentWindow();
 }
 
 function showBackgroundRunNoticeOnce(): void {

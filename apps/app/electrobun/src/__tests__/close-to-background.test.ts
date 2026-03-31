@@ -37,6 +37,23 @@ describe("close-to-background behavior", () => {
     expect(fnBody).toContain("injectApiBase");
   });
 
+  it("restoreWindow focuses the restored window after an in-flight recreate finishes", () => {
+    const helperStart = source.indexOf("function focusCurrentWindow");
+    expect(helperStart).toBeGreaterThan(-1);
+
+    const helperBody = source.slice(helperStart, helperStart + 220);
+    expect(helperBody).toContain("currentWindow.unminimize()");
+    expect(helperBody).toContain("currentWindow.focus()");
+
+    const fnStart = source.indexOf("async function restoreWindow");
+    expect(fnStart).toBeGreaterThan(-1);
+
+    const fnBody = source.slice(fnStart, fnStart + 700);
+    expect(fnBody).toContain("if (backgroundWindowPromise)");
+    expect(fnBody).toContain("await backgroundWindowPromise");
+    expect(fnBody).toContain("focusCurrentWindow();");
+  });
+
   it("setupDockReopen wires the Electrobun reopen event", () => {
     const fnStart = source.indexOf("function setupDockReopen");
     expect(fnStart).toBeGreaterThan(-1);
