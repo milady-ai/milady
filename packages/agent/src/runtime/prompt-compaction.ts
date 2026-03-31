@@ -274,6 +274,9 @@ export function compactConversationHistory(prompt: string): string {
  */
 export function compactCodingExamplesForIntent(prompt: string): string {
   if (hasIntent(prompt, CODING_INTENT_RE)) return prompt;
+  // Guard: if the boundary header is missing, don't strip — the regex would
+  // match to end-of-string and remove everything after the examples header.
+  if (!prompt.includes("# Available Actions")) return prompt;
   // Strip everything from the examples header up to (but not including)
   // the "# Available Actions" header. The examples section contains its own
   // <actions> tags as part of the examples, so we can't use <actions> as a

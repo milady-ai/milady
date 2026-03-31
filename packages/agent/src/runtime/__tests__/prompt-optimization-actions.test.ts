@@ -611,6 +611,18 @@ Possible response actions: REPLY, START_CODING_TASK
     const prompt = "just a plain prompt with no examples";
     expect(compactCodingExamplesForIntent(prompt)).toBe(prompt);
   });
+
+  it("returns prompt unchanged when boundary header is missing", () => {
+    // If # Available Actions is absent, the regex would match to end-of-string.
+    // The guard should prevent stripping in this case.
+    const malformed = `# Coding Agent Action Call Examples
+Some examples here
+## Single Agent Examples
+More content that should NOT be stripped`;
+    const result = compactCodingExamplesForIntent(malformed);
+    expect(result).toContain("# Coding Agent Action Call Examples");
+    expect(result).toContain("should NOT be stripped");
+  });
 });
 
 // ---------------------------------------------------------------------------
