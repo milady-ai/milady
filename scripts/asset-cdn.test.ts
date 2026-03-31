@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildManagedAssetUrl,
   buildJsDelivrAssetBase,
+  buildManagedAssetUrl,
   buildRawGitHubAssetBase,
   resolveMiladyAssetBaseUrls,
   resolveMiladyAssetRepository,
