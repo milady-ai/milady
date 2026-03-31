@@ -8,6 +8,7 @@ import {
   classifyElectrobunViewFailure,
   hasElectrobunViewExport,
   isSupportedBunVersion,
+  resolveWorkspacePackageManifestPath,
 } from "./lib/desktop-preflight.mjs";
 
 const ROOT = process.cwd();
@@ -315,15 +316,13 @@ function runDesktopPreflight() {
     });
   }
 
-  const electrobunPkgPath = path.join(
+  const electrobunPkgPath = resolveWorkspacePackageManifestPath(
     ELECTROBUN_DIR,
-    "node_modules",
     "electrobun",
-    "package.json",
   );
-  if (!fs.existsSync(electrobunPkgPath)) {
+  if (!electrobunPkgPath || !fs.existsSync(electrobunPkgPath)) {
     failPreflight(
-      "Electrobun package is missing from workspace node_modules.",
+      "Electrobun package is missing from the workspace install graph.",
       {
         step: "electrobun-manifest",
         cwd: preflightCwd,
