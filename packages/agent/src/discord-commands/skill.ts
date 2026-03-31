@@ -12,16 +12,13 @@
  */
 
 import {
-  createUniqueUuid,
-  stringToUuid,
   logger,
   type IAgentRuntime,
-  type Memory,
 } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin, allowAll } from "./validators";
-import { escapeXml, type DiscordSlashCommand } from "./types";
+import { escapeXml, type DiscordSlashCommand, ApplicationCommandOptionType } from "./types";
+import { makeCommandMemory } from "./utils";
 import {
   searchSkillsMarketplace,
   installMarketplaceSkill,
@@ -127,14 +124,14 @@ export async function handleSkillCommand(
     case "search":
       return handleSkillSearch(interaction);
     case "install":
-      return handleSkillInstall(interaction);
+      return handleSkillInstall(interaction, runtime);
     case "list":
       return handleSkillList(interaction);
     case "run":
       return handleSkillRun(interaction, runtime);
     default:
       await interaction.reply({
-        content: `❌ Unknown subcommand \`${escapeXml(sub)}\`.`,
+        content: `❌ Unknown subcommand \`${sub}\`.`,
         ephemeral: true,
       });
   }
@@ -153,22 +150,21 @@ async function handleSkillSearch(
     const results = await searchSkillsMarketplace(query, { limit: 10 });
 
     if (results.length === 0) {
-      await interaction.editReply(`🔍 No skills found for **${escapeXml(query)}**.`);
+      await interaction.editReply(`🔍 No skills found for **${query}**.`);
       return;
     }
 
     const lines = results.map((r, i) => {
-      const name = escapeXml(r.name || r.slug || r.id);
-      const desc = escapeXml(
+      const name = r.name || r.slug || r.id;
+      const desc =
         r.description?.length > 80
           ? `${r.description.slice(0, 77)}...`
-          : r.description || "No description",
-      );
-      const tags = r.tags?.length ? ` \`${r.tags.slice(0, 3).map(escapeXml).join("` `")}\`` : "";
+          : r.description || "No description";
+      const tags = r.tags?.length ? ` \`${r.tags.slice(0, 3).join("` `")}\`` : "";
       return `**${i + 1}.** \`${name}\` — ${desc}${tags}`;
     });
 
-    const header = `🔍 **Skill search: "${escapeXml(query)}"** (${results.length} result${results.length !== 1 ? "s" : ""})\n`;
+    const header = `🔍 **Skill search: "${query}"** (${results.length} result${results.length !== 1 ? "s" : ""})\n`;
     const body = lines.join("\n");
     const reply = `${header}${body}`.slice(0, DISCORD_MAX_CHARS);
 
@@ -182,13 +178,23 @@ async function handleSkillSearch(
 
 async function handleSkillInstall(
   interaction: ChatInputCommandInteraction,
+  runtime: IAgentRuntime,
 ): Promise<void> {
   const name = interaction.options.getString("name", true);
   const userId = interaction.user?.id ?? "unknown";
   const userName = interaction.user?.username ?? "unknown";
 
+  // 1f: URL scheme validation — only allow https:// GitHub URLs
+  if (name.startsWith("http://") || name.startsWith("ftp://")) {
+    await interaction.reply({
+      content: "❌ Only `https://` URLs are accepted for skill installation.",
+      ephemeral: true,
+    });
+    return;
+  }
+
   // SEC-2: Audit log
-  console.warn(`${LOG_PREFIX} ADMIN ${userId} (${userName}) installing skill: ${name}`);
+  logger.warn(`${LOG_PREFIX} ADMIN ${userId} (${userName}) installing skill: ${name}`);
 
   await interaction.deferReply({ ephemeral: true });
 
@@ -196,14 +202,14 @@ async function handleSkillInstall(
     const workspaceDir = resolveWorkspaceDir();
 
     // Determine if input is a GitHub URL or a name
-    const isUrl = name.startsWith("http://") || name.startsWith("https://") || name.includes("github.com");
+    const isUrl = name.startsWith("https://") || name.includes("github.com");
     const input = isUrl
       ? { githubUrl: name, source: "manual" as const }
       : { slug: name, name, source: "clawhub" as const };
 
     const installed = await installMarketplaceSkill(workspaceDir, input);
 
-    console.warn(
+    logger.warn(
       `${LOG_PREFIX} Skill installed: ${installed.id} by ${userId} (${userName}) — scan: ${installed.scanStatus ?? "unknown"}`,
     );
 
@@ -215,9 +221,9 @@ async function handleSkillInstall(
           : "";
 
     await interaction.editReply(
-      `📦 Installed skill **${escapeXml(installed.id)}**\n` +
-        `Repository: \`${escapeXml(installed.repository)}\`\n` +
-        `Path: \`${escapeXml(installed.installPath)}\`${scanNote}`,
+      `📦 Installed skill **${installed.id}**\n` +
+        `Repository: \`${installed.repository}\`\n` +
+        `Path: \`${installed.installPath}\`${scanNote}`,
     );
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
@@ -241,12 +247,11 @@ async function handleSkillList(
     }
 
     const lines = skills.map((s) => {
-      const name = escapeXml(s.name || s.id);
-      const desc = escapeXml(
+      const name = s.name || s.id;
+      const desc =
         s.description?.length > 60
           ? `${s.description.slice(0, 57)}...`
-          : s.description || "",
-      );
+          : s.description || "";
       const scan = s.scanStatus === "clean" ? "✅" : s.scanStatus === "warning" ? "⚠️" : "❓";
       return `${scan} \`${name}\` — ${desc}`;
     });
@@ -273,7 +278,7 @@ async function handleSkillRun(
   const userName = interaction.user?.username ?? "unknown";
 
   // SEC-2: Audit log
-  console.warn(`${LOG_PREFIX} ADMIN ${userId} (${userName}) running skill: ${name} args: ${args}`);
+  logger.warn(`${LOG_PREFIX} ADMIN ${userId} (${userName}) running skill: ${name} args: ${args}`);
 
   // Ephemeral — skill output may contain sensitive data
   await interaction.deferReply({ ephemeral: true });
@@ -290,23 +295,16 @@ async function handleSkillRun(
       return;
     }
 
-    // Build a Memory object for the action handler
-    const entityId = createUniqueUuid(runtime, interaction.user.id);
-    const roomId = createUniqueUuid(runtime, interaction.channelId);
+    // SEC-3: Escape user input to prevent XML injection in params only
     const safeName = escapeXml(name);
     const safeArgs = escapeXml(args);
 
-    const memory = {
-      id: stringToUuid(`slash-skill-run-${Date.now()}`),
-      entityId,
-      roomId,
-      content: {
-        text: `Run skill script: ${name} ${args}`.trim(),
-        source: "discord",
-        params: `<RUN_SKILL_SCRIPT><skill>${safeName}</skill><args>${safeArgs}</args></RUN_SKILL_SCRIPT>`,
-        actions: ["RUN_SKILL_SCRIPT"],
-      },
-    };
+    const memory = makeCommandMemory(runtime, interaction, {
+      idSuffix: "skill-run",
+      text: `Run skill script: ${name} ${args}`.trim(),
+      params: `<RUN_SKILL_SCRIPT><skill>${safeName}</skill><args>${safeArgs}</args></RUN_SKILL_SCRIPT>`,
+      actions: ["RUN_SKILL_SCRIPT"],
+    });
 
     const callbackMessages: string[] = [];
     const callback = async (content: { text?: string }) => {
@@ -314,14 +312,15 @@ async function handleSkillRun(
       return [];
     };
 
-    await runAction.handler(runtime, memory as unknown as Memory, undefined, {}, callback);
+    await runAction.handler(runtime, memory, undefined, {}, callback);
 
     const output =
       callbackMessages.length > 0
         ? callbackMessages.join("\n")
         : "(no output)";
 
-    const prefix = `🔧 **Skill run:** \`${safeName}\`\n`;
+    // Display name is unescaped — Discord renders Markdown, not XML
+    const prefix = `🔧 **Skill run:** \`${name}\`\n`;
     const reply = `${prefix}\`\`\`\n${output}\n\`\`\``.slice(0, DISCORD_MAX_CHARS);
 
     await interaction.editReply(reply);

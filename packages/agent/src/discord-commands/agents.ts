@@ -11,11 +11,11 @@
  * from plugin-agent-orchestrator.
  */
 
-import { createUniqueUuid, stringToUuid, type IAgentRuntime, type Memory } from "@elizaos/core";
+import { type IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
-import { escapeXml, type DiscordSlashCommand } from "./types";
+import { escapeXml, ApplicationCommandOptionType, type DiscordSlashCommand } from "./types";
+import { makeCommandMemory } from "./utils";
 
 export const agentsCommand: DiscordSlashCommand = {
   name: "agents",
@@ -102,21 +102,16 @@ export async function handleAgentsCommand(
           return;
         }
 
-        const listMemory = {
-          id: stringToUuid(`slash-agents-list-${Date.now()}`),
-          entityId: createUniqueUuid(runtime, interaction.user.id),
-          roomId: createUniqueUuid(runtime, interaction.channelId),
-          content: {
-            text: "List coding agents",
-            source: "discord",
-            actions: ["LIST_CODING_AGENTS"],
-          },
-        };
+        const memory = makeCommandMemory(runtime, interaction, {
+          idSuffix: "agents-list",
+          text: "List coding agents",
+          actions: ["LIST_CODING_AGENTS"],
+        });
 
         const messages: string[] = [];
         await listAction.handler(
           runtime,
-          listMemory as unknown as Memory,
+          memory,
           undefined,
           {},
           async (content: { text?: string }) => {
@@ -154,23 +149,17 @@ export async function handleAgentsCommand(
           return;
         }
 
-        const statusMemory = {
-          id: stringToUuid(`slash-agents-status-${Date.now()}`),
-          entityId: createUniqueUuid(runtime, interaction.user.id),
-          roomId: createUniqueUuid(runtime, interaction.channelId),
-          content: {
-            text: `Show status of coding agent ${agentId}`,
-            source: "discord",
-            // Include the agent ID in params so the action can filter
-            params: `<${actionToUse.name}><sessionId>${safeAgentId}</sessionId></${actionToUse.name}>`,
-            actions: [actionToUse.name],
-          },
-        };
+        const statusMemory = makeCommandMemory(runtime, interaction, {
+          idSuffix: "agents-status",
+          text: `Show status of coding agent ${agentId}`,
+          params: `<${actionToUse.name}><sessionId>${safeAgentId}</sessionId></${actionToUse.name}>`,
+          actions: [actionToUse.name],
+        });
 
         const statusMessages: string[] = [];
         await actionToUse.handler(
           runtime,
-          statusMemory as unknown as Memory,
+          statusMemory,
           undefined,
           {},
           async (content: { text?: string }) => {
@@ -201,22 +190,18 @@ export async function handleAgentsCommand(
 
         // SEC-3: Escape user input for XML interpolation
         const safeStopId = escapeXml(agentId);
-        const stopMemory = {
-          id: stringToUuid(`slash-agents-stop-${Date.now()}`),
-          entityId: createUniqueUuid(runtime, interaction.user.id),
-          roomId: createUniqueUuid(runtime, interaction.channelId),
-          content: {
-            text: `Stop coding agent ${agentId}`,
-            source: "discord",
-            params: `<STOP_CODING_AGENT><sessionId>${safeStopId}</sessionId></STOP_CODING_AGENT>`,
-            actions: ["STOP_CODING_AGENT"],
-          },
-        };
+
+        const stopMemory = makeCommandMemory(runtime, interaction, {
+          idSuffix: "agents-stop",
+          text: `Stop coding agent ${agentId}`,
+          params: `<STOP_CODING_AGENT><sessionId>${safeStopId}</sessionId></STOP_CODING_AGENT>`,
+          actions: ["STOP_CODING_AGENT"],
+        });
 
         const messages: string[] = [];
         await stopAction.handler(
           runtime,
-          stopMemory as unknown as Memory,
+          stopMemory,
           undefined,
           {},
           async (content: { text?: string }) => {
@@ -249,22 +234,18 @@ export async function handleAgentsCommand(
         // SEC-3: Escape user input for XML interpolation
         const safeSendId = escapeXml(agentId);
         const safeMessage = escapeXml(message);
-        const sendMemory = {
-          id: stringToUuid(`slash-agents-send-${Date.now()}`),
-          entityId: createUniqueUuid(runtime, interaction.user.id),
-          roomId: createUniqueUuid(runtime, interaction.channelId),
-          content: {
-            text: `Send to agent ${agentId}: ${message}`,
-            source: "discord",
-            params: `<SEND_TO_CODING_AGENT><sessionId>${safeSendId}</sessionId><message>${safeMessage}</message></SEND_TO_CODING_AGENT>`,
-            actions: ["SEND_TO_CODING_AGENT"],
-          },
-        };
+
+        const sendMemory = makeCommandMemory(runtime, interaction, {
+          idSuffix: "agents-send",
+          text: `Send to agent ${agentId}: ${message}`,
+          params: `<SEND_TO_CODING_AGENT><sessionId>${safeSendId}</sessionId><message>${safeMessage}</message></SEND_TO_CODING_AGENT>`,
+          actions: ["SEND_TO_CODING_AGENT"],
+        });
 
         const messages: string[] = [];
         await sendAction.handler(
           runtime,
-          sendMemory as unknown as Memory,
+          sendMemory,
           undefined,
           {},
           async (content: { text?: string }) => {

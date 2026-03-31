@@ -7,14 +7,14 @@
 import type { IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
 import os from "node:os";
-import { requireAdmin, getInteractionUserRole } from "./validators";
+import { allowAll, getInteractionUserRole } from "./validators";
 import type { DiscordSlashCommand } from "./types";
 
 export const statusCommand: DiscordSlashCommand = {
   name: "status",
   description: "Show system status — loaded plugins, active agents, system info",
   guildOnly: true,
-  validator: requireAdmin,
+  validator: allowAll, // Available to all server members; system details gated inside handler
   options: [],
 };
 

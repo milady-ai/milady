@@ -9,9 +9,8 @@
 
 import { logger, type IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
 import { requireOwner } from "./validators";
-import type { DiscordSlashCommand } from "./types";
+import { ApplicationCommandOptionType, type DiscordSlashCommand } from "./types";
 
 const DISCORD_MAX_CHARS = 2000;
 const TRUNCATION_NOTE = "\n… (output truncated)";
@@ -75,7 +74,7 @@ export async function handleShellCommand(
   // RISK: This command grants arbitrary shell access to OWNER-role users.
   // Even with auth gating, a compromised OWNER account can execute anything.
   // Audit logs provide forensic traceability.
-  console.warn(`[discord-shell] OWNER ${userId} executed: ${command}`);
+  logger.warn(`[discord-shell] OWNER ${userId} executed: ${command}`);
 
   // Defer with ephemeral — only the invoker sees the response
   await interaction.deferReply({ ephemeral: true });

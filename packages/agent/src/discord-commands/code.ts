@@ -6,11 +6,11 @@
  * Maps to the START_CODING_TASK action from plugin-agent-orchestrator.
  */
 
-import { createUniqueUuid, stringToUuid, type IAgentRuntime, type Memory } from "@elizaos/core";
+import { type IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
-import { escapeXml, type DiscordSlashCommand } from "./types";
+import { escapeXml, ApplicationCommandOptionType, type DiscordSlashCommand } from "./types";
+import { makeCommandMemory } from "./utils";
 
 export const codeCommand: DiscordSlashCommand = {
   name: "code",
@@ -64,8 +64,6 @@ export async function handleCodeCommand(
   try {
     // Build the agents spec string for START_CODING_TASK
     const agentSpec = `${agent.toLowerCase()}:${task}`;
-    const params: Record<string, string> = { agents: agentSpec };
-    if (repo) params.repo = repo;
 
     // Find and invoke the START_CODING_TASK action
     const actions = runtime.getAllActions();
@@ -81,23 +79,16 @@ export async function handleCodeCommand(
       return;
     }
 
-    // Create a minimal Memory for the action handler
-    const entityId = createUniqueUuid(runtime, interaction.user.id);
-    const roomId = createUniqueUuid(runtime, interaction.channelId);
-    // SEC-3: Escape user input to prevent XML injection
+    // SEC-3: Escape user input for XML params only
     const safeAgentSpec = escapeXml(agentSpec);
     const safeRepo = repo ? escapeXml(repo) : null;
-    const memory = {
-      id: stringToUuid(`slash-code-${Date.now()}`),
-      entityId,
-      roomId,
-      content: {
-        text: `Start coding task: ${task}`,
-        source: "discord",
-        params: `<START_CODING_TASK><agents>${safeAgentSpec}</agents>${safeRepo ? `<repo>${safeRepo}</repo>` : ""}</START_CODING_TASK>`,
-        actions: ["START_CODING_TASK"],
-      },
-    };
+
+    const memory = makeCommandMemory(runtime, interaction, {
+      idSuffix: "code",
+      text: `Start coding task: ${task}`,
+      params: `<START_CODING_TASK><agents>${safeAgentSpec}</agents>${safeRepo ? `<repo>${safeRepo}</repo>` : ""}</START_CODING_TASK>`,
+      actions: ["START_CODING_TASK"],
+    });
 
     const callbackMessages: string[] = [];
     const callback = async (content: { text?: string }) => {
@@ -105,7 +96,7 @@ export async function handleCodeCommand(
       return [];
     };
 
-    await startAction.handler(runtime, memory as unknown as Memory, undefined, {}, callback);
+    await startAction.handler(runtime, memory, undefined, {}, callback);
 
     const replyText =
       callbackMessages.length > 0

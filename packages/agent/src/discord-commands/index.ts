@@ -28,12 +28,30 @@ import { shellCommand, handleShellCommand } from "./shell";
 import { cronCommand, handleCronCommand } from "./cron";
 import { skillCommand, handleSkillCommand } from "./skill";
 import { workspaceCommand, handleWorkspaceCommand } from "./workspace";
+import { issueCommand, handleIssueCommand } from "./issue";
+import { setupVisionAutoTrigger } from "./vision";
 import type { DiscordSlashCommand } from "./types";
 
 const LOG_PREFIX = "[discord-commands]";
 
+/**
+ * Module-level flag so hot reloads don't re-register slash commands.
+ * Previously was inside the setupDiscordCommands closure, which meant each
+ * call got its own flag and commands could be registered multiple times.
+ */
+let commandsRegistered = false;
+
 /** All slash commands to register. */
-const COMMANDS: DiscordSlashCommand[] = [codeCommand, agentsCommand, statusCommand, shellCommand, cronCommand, skillCommand, workspaceCommand];
+const COMMANDS: DiscordSlashCommand[] = [
+  codeCommand,
+  agentsCommand,
+  statusCommand,
+  shellCommand,
+  cronCommand,
+  skillCommand,
+  workspaceCommand,
+  issueCommand, // Phase 4
+];
 
 /** Map command names to their handlers. */
 const HANDLERS: Record<
@@ -47,6 +65,7 @@ const HANDLERS: Record<
   cron: handleCronCommand,
   skill: handleSkillCommand,
   workspace: handleWorkspaceCommand,
+  issue: handleIssueCommand, // Phase 4
 };
 
 /** Map command names to their validators for auth checks (SEC-1). */
@@ -68,8 +87,6 @@ const VALIDATORS: Record<
  * never fire.
  */
 export function setupDiscordCommands(runtime: IAgentRuntime): void {
-  let commandsRegistered = false;
-
   // When Discord connects to a guild, register our slash commands.
   runtime.registerEvent("DISCORD_SERVER_CONNECTED", async (_params: EventPayload) => {
     if (commandsRegistered) return;
@@ -145,6 +162,9 @@ export function setupDiscordCommands(runtime: IAgentRuntime): void {
       }
     }
   });
+
+  // Phase 4: Auto-vision on image attachments
+  setupVisionAutoTrigger(runtime);
 
   logger.info(`${LOG_PREFIX} Discord commands module initialized (waiting for server connection)`);
 }

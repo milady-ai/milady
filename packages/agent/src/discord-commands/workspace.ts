@@ -10,16 +10,13 @@
  */
 
 import {
-  createUniqueUuid,
-  stringToUuid,
   logger,
   type IAgentRuntime,
-  type Memory,
 } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
-import { escapeXml, type DiscordSlashCommand } from "./types";
+import { escapeXml, ApplicationCommandOptionType, type DiscordSlashCommand } from "./types";
+import { makeCommandMemory } from "./utils";
 
 const LOG_PREFIX = "[discord-workspace]";
 const DISCORD_MAX_CHARS = 2000;
@@ -38,7 +35,7 @@ export const workspaceCommand: DiscordSlashCommand = {
         {
           name: "repo",
           type: ApplicationCommandOptionType.String,
-          description: "Repository URL to clone",
+          description: "Repository URL to clone (https:// only)",
           required: true,
         },
         {
@@ -87,7 +84,7 @@ export async function handleWorkspaceCommand(
       return handleFinalize(interaction, runtime);
     default:
       await interaction.reply({
-        content: `❌ Unknown subcommand \`${escapeXml(sub)}\`.`,
+        content: `❌ Unknown subcommand \`${sub}\`.`,
         ephemeral: true,
       });
   }
@@ -104,8 +101,17 @@ async function handleProvision(
   const userId = interaction.user?.id ?? "unknown";
   const userName = interaction.user?.username ?? "unknown";
 
+  // 1f: URL scheme validation — only allow https://
+  if (!repo.startsWith("https://")) {
+    await interaction.reply({
+      content: "❌ Only `https://` repository URLs are accepted.",
+      ephemeral: true,
+    });
+    return;
+  }
+
   // SEC-2: Audit log
-  console.warn(
+  logger.warn(
     `${LOG_PREFIX} ADMIN ${userId} (${userName}) provisioning workspace: repo=${repo} branch=${branch ?? "default"}`,
   );
 
@@ -125,23 +131,16 @@ async function handleProvision(
       return;
     }
 
-    // Build Memory for the action handler
-    const entityId = createUniqueUuid(runtime, interaction.user.id);
-    const roomId = createUniqueUuid(runtime, interaction.channelId);
+    // SEC-3: Escape user input for XML params only
     const safeRepo = escapeXml(repo);
     const safeBranch = branch ? escapeXml(branch) : null;
 
-    const memory = {
-      id: stringToUuid(`slash-workspace-provision-${Date.now()}`),
-      entityId,
-      roomId,
-      content: {
-        text: `Provision workspace for ${repo}${branch ? ` on branch ${branch}` : ""}`,
-        source: "discord",
-        params: `<PROVISION_WORKSPACE><repo>${safeRepo}</repo>${safeBranch ? `<branch>${safeBranch}</branch>` : ""}</PROVISION_WORKSPACE>`,
-        actions: ["PROVISION_WORKSPACE"],
-      },
-    };
+    const memory = makeCommandMemory(runtime, interaction, {
+      idSuffix: "workspace-provision",
+      text: `Provision workspace for ${repo}${branch ? ` on branch ${branch}` : ""}`,
+      params: `<PROVISION_WORKSPACE><repo>${safeRepo}</repo>${safeBranch ? `<branch>${safeBranch}</branch>` : ""}</PROVISION_WORKSPACE>`,
+      actions: ["PROVISION_WORKSPACE"],
+    });
 
     const callbackMessages: string[] = [];
     const callback = async (content: { text?: string }) => {
@@ -149,25 +148,19 @@ async function handleProvision(
       return [];
     };
 
-    await provisionAction.handler(
-      runtime,
-      memory as unknown as Memory,
-      undefined,
-      {},
-      callback,
-    );
+    await provisionAction.handler(runtime, memory, undefined, {}, callback);
 
     const output =
       callbackMessages.length > 0
         ? callbackMessages.join("\n")
         : "✅ Workspace provisioned successfully.";
 
-    console.warn(
+    logger.warn(
       `${LOG_PREFIX} Workspace provisioned: repo=${repo} by ${userId} (${userName})`,
     );
 
     await interaction.editReply(
-      `📁 **Workspace provisioned**\nRepo: \`${safeRepo}\`${safeBranch ? `\nBranch: \`${safeBranch}\`` : ""}\n\n${output}`.slice(
+      `📁 **Workspace provisioned**\nRepo: \`${repo}\`${branch ? `\nBranch: \`${branch}\`` : ""}\n\n${output}`.slice(
         0,
         DISCORD_MAX_CHARS,
       ),
@@ -191,7 +184,7 @@ async function handleFinalize(
   const userName = interaction.user?.username ?? "unknown";
 
   // SEC-2: Audit log
-  console.warn(
+  logger.warn(
     `${LOG_PREFIX} ADMIN ${userId} (${userName}) finalizing workspace: id=${id} pr-title=${prTitle ?? "(auto)"}`,
   );
 
@@ -211,23 +204,16 @@ async function handleFinalize(
       return;
     }
 
-    // Build Memory for the action handler
-    const entityId = createUniqueUuid(runtime, interaction.user.id);
-    const roomId = createUniqueUuid(runtime, interaction.channelId);
+    // SEC-3: Escape user input for XML params only
     const safeId = escapeXml(id);
     const safePrTitle = prTitle ? escapeXml(prTitle) : null;
 
-    const memory = {
-      id: stringToUuid(`slash-workspace-finalize-${Date.now()}`),
-      entityId,
-      roomId,
-      content: {
-        text: `Finalize workspace ${id}${prTitle ? ` with PR title: ${prTitle}` : ""}`,
-        source: "discord",
-        params: `<FINALIZE_WORKSPACE><workspaceId>${safeId}</workspaceId>${safePrTitle ? `<prTitle>${safePrTitle}</prTitle>` : ""}</FINALIZE_WORKSPACE>`,
-        actions: ["FINALIZE_WORKSPACE"],
-      },
-    };
+    const memory = makeCommandMemory(runtime, interaction, {
+      idSuffix: "workspace-finalize",
+      text: `Finalize workspace ${id}${prTitle ? ` with PR title: ${prTitle}` : ""}`,
+      params: `<FINALIZE_WORKSPACE><workspaceId>${safeId}</workspaceId>${safePrTitle ? `<prTitle>${safePrTitle}</prTitle>` : ""}</FINALIZE_WORKSPACE>`,
+      actions: ["FINALIZE_WORKSPACE"],
+    });
 
     const callbackMessages: string[] = [];
     const callback = async (content: { text?: string }) => {
@@ -235,25 +221,19 @@ async function handleFinalize(
       return [];
     };
 
-    await finalizeAction.handler(
-      runtime,
-      memory as unknown as Memory,
-      undefined,
-      {},
-      callback,
-    );
+    await finalizeAction.handler(runtime, memory, undefined, {}, callback);
 
     const output =
       callbackMessages.length > 0
         ? callbackMessages.join("\n")
         : "✅ Workspace finalized successfully.";
 
-    console.warn(
+    logger.warn(
       `${LOG_PREFIX} Workspace finalized: id=${id} by ${userId} (${userName})`,
     );
 
     await interaction.editReply(
-      `🏁 **Workspace finalized**\nID: \`${safeId}\`${safePrTitle ? `\nPR: ${safePrTitle}` : ""}\n\n${output}`.slice(
+      `🏁 **Workspace finalized**\nID: \`${id}\`${prTitle ? `\nPR: ${prTitle}` : ""}\n\n${output}`.slice(
         0,
         DISCORD_MAX_CHARS,
       ),

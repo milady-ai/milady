@@ -12,11 +12,21 @@
 
 import { logger, type IAgentRuntime } from "@elizaos/core";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
 import { requireAdmin } from "./validators";
-import type { DiscordSlashCommand } from "./types";
+import { ApplicationCommandOptionType, type DiscordSlashCommand } from "./types";
 
 const DISCORD_MAX_CHARS = 2000;
+
+/**
+ * Validate a cron expression (5 or 6 fields separated by whitespace).
+ * Each field may contain digits, commas, hyphens, slashes, and wildcards.
+ */
+function isValidCronExpression(expr: string): boolean {
+  // Allow 5-field (standard) or 6-field (with seconds) cron expressions
+  return /^(\*|[0-9,\-*/]+)\s+(\*|[0-9,\-*/]+)\s+(\*|[0-9,\-*/]+)\s+(\*|[0-9,\-*/]+)\s+(\*|[0-9,\-*/]+)(\s+(\*|[0-9,\-*/]+))?$/.test(
+    expr.trim(),
+  );
+}
 
 export const cronCommand: DiscordSlashCommand = {
   name: "cron",
@@ -178,11 +188,19 @@ async function handleCreate(
   const schedule = interaction.options.getString("schedule", true);
   const task = interaction.options.getString("task", true);
 
+  // 1f: Validate cron expression format before passing to createJob
+  if (!isValidCronExpression(schedule)) {
+    await interaction.editReply(
+      "❌ Invalid cron expression. Expected 5 fields (min hour dom mon dow), e.g. `0 9 * * 1-5`.",
+    );
+    return;
+  }
+
   // Generate a short name from the task
   const name = task.length > 50 ? task.slice(0, 47) + "..." : task;
 
   const userId = interaction.user?.id ?? "unknown";
-  console.warn(`[discord-cron] ADMIN ${userId} created cron: ${schedule} — ${task}`);
+  logger.warn(`[discord-cron] ADMIN ${userId} created cron: ${schedule} — ${task}`);
 
   const job = await cronService.createJob({
     name,
@@ -204,7 +222,7 @@ async function handleDelete(
   const id = interaction.options.getString("id", true);
 
   const userId = interaction.user?.id ?? "unknown";
-  console.warn(`[discord-cron] ADMIN ${userId} deleted cron: ${id}`);
+  logger.warn(`[discord-cron] ADMIN ${userId} deleted cron: ${id}`);
 
   const deleted = await cronService.deleteJob(id);
 
