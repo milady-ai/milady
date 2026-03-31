@@ -75,14 +75,12 @@ export function buildReleaseValidationAssetUrl({
   assetRoot,
   assetPath,
 }) {
-  if (!releaseTag || !assetRoot || !assetPath) {
-    return "";
-  }
-
-  const normalizedAssetPath = assetPath.replace(/^\/+/, "");
-  const base = buildRawGitHubAssetBase({ repository, releaseTag, assetRoot });
-  if (!base) return "";
-  return new URL(normalizedAssetPath, base).toString();
+  return buildManagedAssetUrl({
+    repository,
+    releaseTag,
+    assetRoot,
+    assetPath,
+  });
 }
 
 export function resolveMiladyAssetBaseUrls({
