@@ -484,7 +484,7 @@ async function decompressGzipBuffer(buffer: ArrayBuffer): Promise<ArrayBuffer> {
  * or cloned across instances.  Re-parsing from an ArrayBuffer is fast (<200ms)
  * and avoids an entire class of WebGL state bugs.
  *
- * LRU eviction keeps memory bounded (default: 4 entries ≈ 40-80 MB).
+ * LRU eviction keeps memory bounded (default: 8 entries ≈ 80-160 MB).
  * ──────────────────────────────────────────────────────────────────────────── */
 
 interface VrmBufferCacheEntry {
@@ -495,7 +495,7 @@ interface VrmBufferCacheEntry {
 }
 
 const vrmBufferCache = new Map<string, VrmBufferCacheEntry>();
-const VRM_BUFFER_CACHE_MAX = 4;
+const VRM_BUFFER_CACHE_MAX = 8;
 
 function touchVrmCacheEntry(url: string, buffer: ArrayBuffer): void {
   vrmBufferCache.set(url, { buffer, lastUsed: performance.now() });
