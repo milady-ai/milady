@@ -163,7 +163,7 @@ export function AgentCard({
   busy = false,
 }: AgentCardProps) {
   const stateConfig = STATE_CONFIG[agent.state] ?? STATE_CONFIG.unknown;
-  const canOpenUI = agent.state === "running" || source === "cloud";
+  const canOpenUI = agent.state === "running";
   const uiUrl = webUiUrl || sourceUrl;
   const resolvedAvatarIndex =
     avatarIndexProp ?? getAvatarIndex(agent.agentName);

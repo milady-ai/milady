@@ -178,7 +178,7 @@ export function AgentDetail({
 
         {/* Quick actions */}
         <div className="flex items-center gap-2">
-          {webUIUrl && (
+          {webUIUrl && agent.state === "running" && (
             <button
               type="button"
               onClick={() =>
