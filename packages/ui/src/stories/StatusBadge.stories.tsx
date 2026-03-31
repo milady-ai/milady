@@ -6,7 +6,7 @@ const meta = {
   component: StatusBadge,
   tags: ["autodocs"],
   argTypes: {
-    tone: {
+    variant: {
       control: "select",
       options: ["success", "warning", "danger", "muted"],
     },
@@ -19,32 +19,32 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Success: Story = {
-  args: { label: "Active", tone: "success" },
+  args: { label: "Active", variant: "success" },
 };
 
 export const Warning: Story = {
-  args: { label: "Pending", tone: "warning" },
+  args: { label: "Pending", variant: "warning" },
 };
 
 export const Danger: Story = {
-  args: { label: "Error", tone: "danger" },
+  args: { label: "Error", variant: "danger" },
 };
 
 export const Muted: Story = {
-  args: { label: "Offline", tone: "muted" },
+  args: { label: "Offline", variant: "muted" },
 };
 
 export const WithDot: Story = {
-  args: { label: "Connected", tone: "success", withDot: true },
+  args: { label: "Connected", variant: "success", withDot: true },
 };
 
 export const AllTones: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
-      <StatusBadge label="Active" tone="success" withDot />
-      <StatusBadge label="Pending" tone="warning" withDot />
-      <StatusBadge label="Error" tone="danger" withDot />
-      <StatusBadge label="Offline" tone="muted" withDot />
+      <StatusBadge label="Active" variant="success" withDot />
+      <StatusBadge label="Pending" variant="warning" withDot />
+      <StatusBadge label="Error" variant="danger" withDot />
+      <StatusBadge label="Offline" variant="muted" withDot />
     </div>
   ),
 };

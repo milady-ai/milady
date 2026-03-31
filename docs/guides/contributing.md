@@ -109,7 +109,7 @@ milady/
 │   ├── app/                 # Desktop/mobile app (Capacitor + React)
 │   └── ...                  # No shipped chrome-extension app in this release checkout
 ├── src/                     # Milady runtime
-│   ├── runtime/             # ElizaOS runtime bootstrap
+│   ├── runtime/             # elizaOS runtime bootstrap
 │   ├── plugins/             # Built-in Milady plugins
 │   ├── config/              # Configuration loading
 │   ├── services/            # Registry client, plugin manager

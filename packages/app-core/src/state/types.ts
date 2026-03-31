@@ -677,6 +677,16 @@ export interface AppActions {
   suggestConversationTitle: (id: string) => Promise<string | null>;
   /** Send a programmatic message (e.g. from a UiSpec action) without touching chatInput. */
   sendActionMessage: (text: string) => Promise<void>;
+  /** Send a chat message with optional metadata (e.g. task creation intent). */
+  sendChatText: (
+    rawInput: string,
+    options?: {
+      channelType?: ConversationChannelType;
+      conversationId?: string | null;
+      images?: ImageAttachment[];
+      metadata?: Record<string, unknown>;
+    },
+  ) => Promise<void>;
 
   // Triggers
   loadTriggers: () => Promise<void>;
@@ -797,12 +807,12 @@ export interface AppActions {
   goToOnboardingStep: (step: OnboardingStep) => void;
   handleOnboardingRemoteConnect: () => Promise<void>;
   handleOnboardingUseLocalBackend: () => void;
-  handleOwnerNameSubmit: (name: string) => void;
 
   // Cloud
   handleCloudLogin: () => Promise<void>;
   handleCloudDisconnect: () => Promise<void>;
   handleCloudOnboardingFinish: () => Promise<void>;
+  handleOwnerNameSubmit: (name: string) => void;
 
   // Updates
   loadUpdateStatus: (force?: boolean) => Promise<void>;

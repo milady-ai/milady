@@ -427,7 +427,7 @@ export function PolicyControlsView() {
         message={confirmMessage}
         confirmLabel="Disable"
         cancelLabel="Keep"
-        tone="warn"
+        variant="warn"
         onConfirm={() => {
           confirmCallback?.();
           setConfirmOpen(false);

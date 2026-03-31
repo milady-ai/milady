@@ -41,7 +41,7 @@ export function WalletOverview({
                 walletProvider === "steward"
                   ? "border-brand/30 bg-brand/8 text-brand"
                   : walletProvider.includes("disconnected")
-                    ? "border-red-500/30 bg-red-500/5 text-red-400"
+                    ? "border-status-stopped/30 bg-status-stopped/5 text-status-stopped"
                     : "border-border bg-surface-elevated text-text-light"
               }`}
             >
@@ -50,7 +50,7 @@ export function WalletOverview({
                   walletProvider === "steward"
                     ? "bg-brand"
                     : walletProvider.includes("disconnected")
-                      ? "bg-red-500"
+                      ? "bg-status-stopped"
                       : "bg-text-muted"
                 }`}
               />
@@ -116,13 +116,13 @@ export function WalletOverview({
               {truncateAddress(steward.agentId)}
             </span>
             {steward.connected ? (
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] text-status-running">
+                <span className="w-1.5 h-1.5 rounded-full bg-status-running" />
                 CONNECTED
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] text-red-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] text-status-stopped">
+                <span className="w-1.5 h-1.5 rounded-full bg-status-stopped" />
                 DISCONNECTED
               </span>
             )}

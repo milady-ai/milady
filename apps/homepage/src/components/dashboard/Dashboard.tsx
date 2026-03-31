@@ -20,6 +20,16 @@ export function Dashboard() {
     }
   }, [authed, section]);
 
+  // Listen for navigate-section events (e.g. from "Add Credits" button in deploy error)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (detail) setSection(detail as DashboardSection);
+    };
+    window.addEventListener("navigate-section", handler);
+    return () => window.removeEventListener("navigate-section", handler);
+  }, []);
+
   return (
     <AgentProvider>
       <div

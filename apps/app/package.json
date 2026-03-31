@@ -60,6 +60,7 @@
     "jsdom": "^28.1.0",
     "react-test-renderer": "^19.2.4",
     "tailwindcss": "^4.1.18",
+    "testcafe": "^3.7.4",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
     "vite-plugin-node-polyfills": "^0.25.0",

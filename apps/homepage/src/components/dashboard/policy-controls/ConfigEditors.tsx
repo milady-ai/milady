@@ -233,8 +233,8 @@ function ApprovedAddressesEditor({
               ${
                 mode === m
                   ? m === "whitelist"
-                    ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
-                    : "text-red-400 border-red-500/20 bg-red-500/5"
+                    ? "text-status-running border-status-running/20 bg-status-running/5"
+                    : "text-status-stopped border-status-stopped/20 bg-status-stopped/5"
                   : "text-text-muted border-border hover:text-text-light"
               }`}
           >
@@ -256,7 +256,7 @@ function ApprovedAddressesEditor({
             <button
               type="button"
               onClick={() => handleRemove(addr)}
-              className="text-text-subtle hover:text-red-400 transition-colors"
+              className="text-text-subtle hover:text-status-stopped transition-colors"
             >
               <svg
                 aria-hidden="true"

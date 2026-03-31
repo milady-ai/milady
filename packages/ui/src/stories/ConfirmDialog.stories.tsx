@@ -12,7 +12,7 @@ const meta = {
     message: { control: "text" },
     confirmLabel: { control: "text" },
     cancelLabel: { control: "text" },
-    tone: {
+    variant: {
       control: "select",
       options: ["default", "danger", "warn"],
     },
@@ -40,7 +40,7 @@ export const Danger: Story = {
     title: "Delete Item",
     message: "This action cannot be undone. All data will be permanently removed.",
     confirmLabel: "Delete",
-    tone: "danger",
+    variant: "danger",
   },
 };
 
@@ -50,7 +50,7 @@ export const Warn: Story = {
     title: "Unsaved Changes",
     message: "You have unsaved changes. Do you want to leave without saving?",
     confirmLabel: "Leave",
-    tone: "warn",
+    variant: "warn",
   },
 };
 

@@ -21,7 +21,7 @@ export function CloudLoginBanner({ onAuthenticated }: CloudLoginBannerProps) {
           Connect your cloud account to manage remote agents and access premium
           features.
         </p>
-        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+        {error && <p className="text-xs text-status-stopped mt-1">{error}</p>}
         {manualLoginUrl && (
           <a
             href={manualLoginUrl}

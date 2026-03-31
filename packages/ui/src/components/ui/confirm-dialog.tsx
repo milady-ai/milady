@@ -12,7 +12,7 @@ import {
 import { Field, FieldLabel } from "./field";
 import { Input } from "./input";
 
-export type ConfirmTone = "danger" | "warn" | "default";
+export type ConfirmVariant = "danger" | "warn" | "default";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -20,15 +20,15 @@ export interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  tone?: ConfirmTone;
+  variant?: ConfirmVariant;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-const TONE_CLASSES: Record<ConfirmTone, string> = {
+const VARIANT_CLASSES: Record<ConfirmVariant, string> = {
   danger:
     "border-destructive/70 bg-destructive text-destructive-fg hover:border-destructive hover:bg-destructive",
-  warn: "border-warn/55 bg-warn/92 text-black hover:border-warn hover:bg-warn",
+  warn: "border-warn/55 bg-warn/92 text-[var(--accent-foreground)] hover:border-warn hover:bg-warn",
   default:
     "border-accent/55 bg-accent/22 text-accent-fg hover:border-accent/75 hover:bg-accent/32",
 };
@@ -39,7 +39,7 @@ export function ConfirmDialog({
   message,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  tone = "default",
+  variant = "default",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -61,7 +61,7 @@ export function ConfirmDialog({
           <Button variant="outline" onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button className={TONE_CLASSES[tone]} onClick={onConfirm}>
+          <Button className={VARIANT_CLASSES[variant]} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </DialogFooter>
@@ -151,7 +151,7 @@ export interface ConfirmOptions {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  tone?: ConfirmTone;
+  variant?: ConfirmVariant;
 }
 
 export function useConfirm() {

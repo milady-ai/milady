@@ -8,7 +8,7 @@ import { buildContext } from "./workspace-provider";
 
 const DEFAULT_AGENTS_CONTENT = `# Agents
 
-You are an autonomous AI agent powered by ElizaOS.
+You are an autonomous AI agent powered by elizaOS.
 
 ## Capabilities
 
@@ -27,7 +27,7 @@ You are an autonomous AI agent powered by ElizaOS.
 
 const CUSTOM_AGENTS_CONTENT = `# Agents
 
-You are Mima, a cozy companion agent powered by ElizaOS.
+You are Mima, a cozy companion agent powered by elizaOS.
 
 ## Capabilities
 

@@ -603,6 +603,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget,
         resetDragOrbit,
         setCompanionZoomNormalized,
+        attachOverlayManager: vi.fn(),
       });
     });
 
@@ -678,6 +679,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget,
         resetDragOrbit: vi.fn(),
         setCompanionZoomNormalized: vi.fn(),
+        attachOverlayManager: vi.fn(),
       });
     });
     setDragOrbitTarget.mockClear();
@@ -737,6 +739,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget: vi.fn(),
         resetDragOrbit: vi.fn(),
         setCompanionZoomNormalized,
+        attachOverlayManager: vi.fn(),
       });
     });
     setCompanionZoomNormalized.mockClear();
@@ -784,6 +787,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget: vi.fn(),
         resetDragOrbit: vi.fn(),
         setCompanionZoomNormalized,
+        attachOverlayManager: vi.fn(),
       });
     });
     setCompanionZoomNormalized.mockClear();
@@ -830,6 +834,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget: vi.fn(),
         resetDragOrbit: vi.fn(),
         setCompanionZoomNormalized,
+        attachOverlayManager: vi.fn(),
       });
     });
     setCompanionZoomNormalized.mockClear();
@@ -882,6 +887,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget: vi.fn(),
         resetDragOrbit,
         setCompanionZoomNormalized,
+        attachOverlayManager: vi.fn(),
       });
     });
 
@@ -946,6 +952,7 @@ describe("CompanionView", () => {
         setDragOrbitTarget: vi.fn(),
         resetDragOrbit: vi.fn(),
         setCompanionZoomNormalized,
+        attachOverlayManager: vi.fn(),
       });
     });
 

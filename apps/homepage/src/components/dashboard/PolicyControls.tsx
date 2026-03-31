@@ -139,11 +139,11 @@ export function PolicyControls({ client }: PolicyControlsProps) {
   if (error) {
     return (
       <div className="animate-[fade-up_0.4s_ease-out_both]">
-        <div className="border border-red-500/20 bg-red-500/5 p-6 text-center">
-          <div className="w-10 h-10 mx-auto mb-3 bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+        <div className="border border-status-stopped/20 bg-status-stopped/5 p-6 text-center">
+          <div className="w-10 h-10 mx-auto mb-3 bg-status-stopped/10 border border-status-stopped/20 flex items-center justify-center">
             <svg
               aria-hidden="true"
-              className="w-5 h-5 text-red-400"
+              className="w-5 h-5 text-status-stopped"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -156,7 +156,7 @@ export function PolicyControls({ client }: PolicyControlsProps) {
               />
             </svg>
           </div>
-          <p className="font-mono text-xs text-red-400 mb-3">{error}</p>
+          <p className="font-mono text-xs text-status-stopped mb-3">{error}</p>
           <button
             type="button"
             onClick={fetchPolicies}
@@ -206,7 +206,7 @@ export function PolicyControls({ client }: PolicyControlsProps) {
             ) : saveSuccess ? (
               <svg
                 aria-hidden="true"
-                className="w-3.5 h-3.5 text-emerald-400"
+                className="w-3.5 h-3.5 text-status-running"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -226,8 +226,10 @@ export function PolicyControls({ client }: PolicyControlsProps) {
 
       {/* Save error */}
       {saveError && (
-        <div className="px-3 py-2 border border-red-500/20 bg-red-500/5">
-          <p className="font-mono text-[11px] text-red-400">{saveError}</p>
+        <div className="px-3 py-2 border border-status-stopped/20 bg-status-stopped/5">
+          <p className="font-mono text-[11px] text-status-stopped">
+            {saveError}
+          </p>
         </div>
       )}
 

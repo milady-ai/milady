@@ -45,13 +45,13 @@ import {
 import { AgentActivityBox } from "./AgentActivityBox";
 import { ChatComposer } from "./ChatComposer";
 import { ChatMessage, TypingIndicator } from "./ChatMessage";
+import { useCompanionSceneStatus } from "./companion-scene-status-context";
 import {
   DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME,
   DESKTOP_CHAT_BUBBLE_USER_CLASSNAME,
 } from "./desktop-surface-primitives";
 import { MessageContent } from "./MessageContent";
 import { PtyConsoleDrawer } from "./PtyConsoleDrawer";
-import { useCompanionSceneStatus } from "./companion-scene-status-context";
 
 function nowMs(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -803,6 +803,7 @@ export function ChatView({
     setChatPendingImages,
     uiLanguage,
     ptySessions,
+    sendChatText,
     t,
   } = useApp();
 
@@ -814,6 +815,31 @@ export function ChatView({
   const [imageDragOver, setImageDragOver] = useState(false);
   const [ptyDrawerSessionId, setPtyDrawerSessionId] = useState<string | null>(
     null,
+  );
+
+  // ── Coding agent preflight ──────────────────────────────────────
+  const [codingAgentsAvailable, setCodingAgentsAvailable] = useState(false);
+  useEffect(() => {
+    fetch("/api/coding-agents/preflight")
+      .then((r) => r.json())
+      .then((data: { installed?: unknown[]; available?: boolean }) => {
+        setCodingAgentsAvailable(
+          (Array.isArray(data.installed) && data.installed.length > 0) ||
+            data.available === true,
+        );
+      })
+      .catch(() => {
+        /* preflight unavailable — hide code button */
+      });
+  }, []);
+
+  const handleCreateTask = useCallback(
+    (description: string, agentType: string) => {
+      void sendChatText(description, {
+        metadata: { intent: "create_task", agentType },
+      });
+    },
+    [sendChatText],
   );
 
   // ── Derived composer state ──────────────────────────────────────
@@ -1060,7 +1086,7 @@ export function ChatView({
         data-no-camera-zoom={false}
         className={
           isGameModal
-            ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-auto"
+            ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-auto opacity-0"
             : "chat-native-scrollbar relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 xl:px-5"
         }
         style={
@@ -1361,6 +1387,8 @@ export function ChatView({
                 onToggleAgentVoice={() =>
                   setState("chatAgentVoiceMuted", !agentVoiceMuted)
                 }
+                codingAgentsAvailable={codingAgentsAvailable}
+                onCreateTask={handleCreateTask}
               />
             </div>
           </div>
@@ -1405,6 +1433,8 @@ export function ChatView({
             onToggleAgentVoice={() =>
               setState("chatAgentVoiceMuted", !agentVoiceMuted)
             }
+            codingAgentsAvailable={codingAgentsAvailable}
+            onCreateTask={handleCreateTask}
           />
         </div>
       )}

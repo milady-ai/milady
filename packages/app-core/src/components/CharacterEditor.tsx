@@ -1906,17 +1906,17 @@ export function CharacterEditor({
         {(characterSaveSuccess || combinedSaveError || generateError) && (
           <div className="flex flex-wrap items-center justify-center gap-2">
             {characterSaveSuccess && (
-              <span className="rounded-lg border border-green-400/20 bg-green-400/10 px-3 py-1 text-xs font-bold text-green-400">
+              <span className="rounded-lg border border-status-success/20 bg-status-success-bg px-3 py-1 text-xs font-bold text-status-success">
                 {characterSaveSuccess}
               </span>
             )}
             {combinedSaveError && (
-              <span className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-500">
+              <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger">
                 {combinedSaveError}
               </span>
             )}
             {generateError && (
-              <span className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-500">
+              <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger">
                 {generateError}
               </span>
             )}

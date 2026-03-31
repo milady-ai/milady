@@ -15,13 +15,13 @@ const STATUS_FILTERS: Array<{ value: string; label: string }> = [
 ];
 
 const STATUS_COLORS: Record<string, { text: string; bg: string }> = {
-  signed: { text: "text-emerald-400", bg: "bg-emerald-500" },
-  confirmed: { text: "text-emerald-400", bg: "bg-emerald-500" },
+  signed: { text: "text-status-running", bg: "bg-status-running" },
+  confirmed: { text: "text-status-running", bg: "bg-status-running" },
   broadcast: { text: "text-blue-400", bg: "bg-blue-500" },
-  approved: { text: "text-emerald-400", bg: "bg-emerald-500" },
+  approved: { text: "text-status-running", bg: "bg-status-running" },
   pending: { text: "text-brand", bg: "bg-brand" },
-  failed: { text: "text-red-400", bg: "bg-red-500" },
-  rejected: { text: "text-red-400", bg: "bg-red-500" },
+  failed: { text: "text-status-stopped", bg: "bg-status-stopped" },
+  rejected: { text: "text-status-stopped", bg: "bg-status-stopped" },
 };
 
 const PAGE_SIZE = 20;
@@ -96,7 +96,7 @@ function CopyButton({ text }: { text: string }) {
       {copied ? (
         <svg
           aria-hidden="true"
-          className="w-3 h-3 text-emerald-400"
+          className="w-3 h-3 text-status-running"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -248,7 +248,9 @@ export function TransactionHistory({ client }: TransactionHistoryProps) {
         {/* Error state */}
         {!loading && error && (
           <div className="p-6 text-center">
-            <p className="font-mono text-xs text-red-400 mb-2">{error}</p>
+            <p className="font-mono text-xs text-status-stopped mb-2">
+              {error}
+            </p>
             <button
               type="button"
               onClick={() => fetchRecords(0, false)}

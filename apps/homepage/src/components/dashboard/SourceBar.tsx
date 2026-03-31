@@ -100,7 +100,7 @@ export function SourceBar() {
               isRefreshing
                 ? "text-text-subtle cursor-not-allowed"
                 : showSuccess
-                  ? "text-emerald-400"
+                  ? "text-status-running"
                   : "text-text-subtle hover:text-text-light hover:bg-surface"
             }`}
         >

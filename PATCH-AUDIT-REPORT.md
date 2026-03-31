@@ -77,7 +77,7 @@ Many patches overlap (both layers patch the same package). The patches target th
 
 ### 1.5 `@elizaos/plugin-sql` — UUID Version 0 (HIGH PRIORITY)
 
-**Problem:** `isValidUUID()` regex only allows versions 1-5 (`[1-5]`), but ElizaOS generates version 0 UUIDs.
+**Problem:** `isValidUUID()` regex only allows versions 1-5 (`[1-5]`), but elizaOS generates version 0 UUIDs.
 
 **Fix:** Change regex from `[1-5]` to `[0-5]`.
 

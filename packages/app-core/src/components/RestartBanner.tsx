@@ -1,4 +1,4 @@
-import { Button } from "@miladyai/ui";
+import { Button, Z_SYSTEM_BANNER } from "@miladyai/ui";
 import { useCallback, useState } from "react";
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
@@ -38,7 +38,7 @@ export function RestartBanner() {
 
   return (
     <div
-      className="fixed left-0 right-0 z-[9998] flex items-center justify-between gap-3 px-4 py-2 text-[13px] font-medium shadow-lg"
+      className={`fixed left-0 right-0 z-[${Z_SYSTEM_BANNER}] flex items-center justify-between gap-3 px-4 py-2 text-[13px] font-medium shadow-lg`}
       style={{
         top: isElectrobunRuntime() ? 40 : 0,
         background: "color-mix(in srgb, var(--accent) 15%, var(--bg) 85%)",

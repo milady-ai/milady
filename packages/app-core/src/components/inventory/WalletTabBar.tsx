@@ -52,7 +52,7 @@ export function WalletTabBar({
             ) : null}
             {label}
             {key === "approvals" && pendingCount > 0 && (
-              <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+              <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-status-danger px-1 text-[9px] font-bold text-[var(--destructive-foreground)]">
                 {pendingCount > 99 ? "99+" : pendingCount}
               </span>
             )}

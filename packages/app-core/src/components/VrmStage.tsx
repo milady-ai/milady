@@ -235,7 +235,7 @@ export const VrmStage = memo(function VrmStage({
   /* ── Render ─────────────────────────────────────────────────────── */
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-[#030711]">
+    <div className="fixed inset-0 z-0 overflow-hidden bg-[var(--bg)]">
       {/* Static CSS fallback background */}
       <div className="pointer-events-none absolute inset-0">
         <div

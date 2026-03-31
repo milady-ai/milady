@@ -1072,6 +1072,7 @@ describe("chat send locking", () => {
       expect.any(AbortSignal),
       undefined,
       "simple",
+      undefined,
     );
 
     expect(api?.snapshot().conversationMessages).toEqual([

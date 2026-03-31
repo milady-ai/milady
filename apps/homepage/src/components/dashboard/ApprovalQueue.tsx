@@ -49,12 +49,12 @@ function PolicyTag({ policy }: { policy: StewardPolicyResult }) {
       className={`inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[9px] tracking-wide border
         ${
           passed
-            ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
-            : "text-red-400 border-red-500/20 bg-red-500/5"
+            ? "text-status-running border-status-running/20 bg-status-running/5"
+            : "text-status-stopped border-status-stopped/20 bg-status-stopped/5"
         }`}
     >
       <span
-        className={`w-1 h-1 rounded-full ${passed ? "bg-emerald-500" : "bg-red-500"}`}
+        className={`w-1 h-1 rounded-full ${passed ? "bg-status-running" : "bg-status-stopped"}`}
       />
       {label}
     </span>
@@ -183,8 +183,8 @@ export function ApprovalQueue({ client }: ApprovalQueueProps) {
 
       {/* Error */}
       {!loading && error && (
-        <div className="border border-red-500/20 bg-red-500/5 p-4 text-center">
-          <p className="font-mono text-xs text-red-400 mb-2">{error}</p>
+        <div className="border border-status-stopped/20 bg-status-stopped/5 p-4 text-center">
+          <p className="font-mono text-xs text-status-stopped mb-2">{error}</p>
           <button
             type="button"
             onClick={() => fetchPending(false)}
@@ -198,10 +198,10 @@ export function ApprovalQueue({ client }: ApprovalQueueProps) {
       {/* Empty state */}
       {!loading && !error && pending.length === 0 && (
         <div className="border border-border bg-surface p-8 text-center">
-          <div className="w-10 h-10 mx-auto mb-3 bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 mx-auto mb-3 bg-status-running/10 border border-status-running/20 flex items-center justify-center">
             <svg
               aria-hidden="true"
-              className="w-5 h-5 text-emerald-400"
+              className="w-5 h-5 text-status-running"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -223,8 +223,10 @@ export function ApprovalQueue({ client }: ApprovalQueueProps) {
 
       {/* Action-level error */}
       {actionError && (
-        <div className="mb-3 px-3 py-2 border border-red-500/20 bg-red-500/5">
-          <p className="font-mono text-[11px] text-red-400">{actionError}</p>
+        <div className="mb-3 px-3 py-2 border border-status-stopped/20 bg-status-stopped/5">
+          <p className="font-mono text-[11px] text-status-stopped">
+            {actionError}
+          </p>
         </div>
       )}
 
@@ -318,8 +320,8 @@ export function ApprovalQueue({ client }: ApprovalQueueProps) {
                     onClick={() => handleAction(txId, "approve")}
                     disabled={isProcessing}
                     className="flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] tracking-wide
-                      bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
-                      hover:bg-emerald-500/20 transition-colors disabled:opacity-40"
+                      bg-status-running/10 text-status-running border border-status-running/20
+                      hover:bg-status-running/20 transition-colors disabled:opacity-40"
                   >
                     {isProcessing ? (
                       <div className="w-3 h-3 rounded-full border border-emerald-400/30 border-t-emerald-400 animate-spin" />
@@ -346,8 +348,8 @@ export function ApprovalQueue({ client }: ApprovalQueueProps) {
                     onClick={() => handleAction(txId, "deny")}
                     disabled={isProcessing}
                     className="flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] tracking-wide
-                      bg-red-500/10 text-red-400 border border-red-500/20
-                      hover:bg-red-500/20 transition-colors disabled:opacity-40"
+                      bg-status-stopped/10 text-status-stopped border border-status-stopped/20
+                      hover:bg-status-stopped/20 transition-colors disabled:opacity-40"
                   >
                     {isProcessing ? (
                       <div className="w-3 h-3 rounded-full border border-red-400/30 border-t-red-400 animate-spin" />

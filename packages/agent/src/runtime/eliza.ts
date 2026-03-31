@@ -70,6 +70,7 @@ import {
 import * as pluginAgentOrchestrator from "@elizaos/plugin-agent-orchestrator";
 import * as pluginAgentSkills from "@elizaos/plugin-agent-skills";
 import * as pluginAnthropic from "@elizaos/plugin-anthropic";
+import * as pluginCommands from "@elizaos/plugin-commands";
 import * as pluginCron from "@elizaos/plugin-cron";
 import * as pluginElizacloud from "@elizaos/plugin-elizacloud";
 import * as pluginExperience from "@elizaos/plugin-experience";
@@ -88,6 +89,7 @@ import * as pluginSql from "@elizaos/plugin-sql";
 import * as pluginTodo from "@elizaos/plugin-todo";
 import * as pluginTrajectoryLogger from "@elizaos/plugin-trajectory-logger";
 import * as pluginTrust from "@elizaos/plugin-trust";
+import * as pluginRoles from "@miladyai/plugin-roles";
 import {
   debugLogResolvedContext,
   validateRuntimeContext,
@@ -219,12 +221,14 @@ const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   "@elizaos/plugin-shell": pluginShell,
   "@elizaos/plugin-plugin-manager": pluginPluginManager,
   "@elizaos/plugin-agent-skills": pluginAgentSkills,
+  "@elizaos/plugin-commands": pluginCommands,
   "@elizaos/plugin-pdf": pluginPdf,
   "@elizaos/plugin-openai": pluginOpenai,
   "@elizaos/plugin-anthropic": pluginAnthropic,
   "@elizaos/plugin-ollama": pluginOllama,
   "@elizaos/plugin-elizacloud": pluginElizacloud,
   "@elizaos/plugin-trust": pluginTrust,
+  "@miladyai/plugin-roles": pluginRoles,
   "@elizaos/plugin-todo": pluginTodo,
   "@elizaos/plugin-personality": pluginPersonality,
   "@elizaos/plugin-experience": pluginExperience,
@@ -4420,6 +4424,42 @@ export async function startEliza(
           `[eliza] Boosted plugin "${plugin.name}" priority to ${plugin.priority} (model.primary)`,
         );
         break;
+      }
+    }
+  }
+
+  // ── Strip upstream skill providers ──────────────────────────────────────
+  // The upstream @elizaos/plugin-agent-skills registers providers that dump
+  // ALL loaded skills into every prompt (~2000-4000 tokens).  Milady replaces
+  // them with a BM25-lite dynamic provider (see providers/skill-provider.ts)
+  // that injects only the most relevant skills per turn.
+  //
+  // We keep:
+  //   - agent_skills_overview  (lightweight stats, ~50 tokens)
+  //   - all actions (GET_SKILL_GUIDANCE, SEARCH_SKILLS, INSTALL_SKILL, …)
+  //   - the AGENT_SKILLS_SERVICE itself
+  {
+    const UPSTREAM_SKILL_PROVIDERS_TO_STRIP = new Set([
+      "agent_skills",
+      "agent_skill_instructions",
+      "agent_skills_catalog",
+    ]);
+    for (const plugin of pluginsForRuntime) {
+      if (
+        plugin.name === "@elizaos/plugin-agent-skills" &&
+        Array.isArray(plugin.providers)
+      ) {
+        const before = plugin.providers.length;
+        plugin.providers = plugin.providers.filter(
+          (p: { name?: string }) =>
+            !UPSTREAM_SKILL_PROVIDERS_TO_STRIP.has(p.name ?? ""),
+        );
+        const removed = before - plugin.providers.length;
+        if (removed > 0) {
+          logger.info(
+            `[eliza] Stripped ${removed} upstream skill provider(s) — using dynamic BM25-lite provider instead`,
+          );
+        }
       }
     }
   }

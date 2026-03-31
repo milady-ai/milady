@@ -11,7 +11,11 @@ describe("/api/dev/stack auth guard", () => {
     // Read the server source to verify the auth guard is present
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const serverPath = path.resolve(import.meta.dirname, "..", "server.ts");
+    const serverPath = path.resolve(
+      import.meta.dirname,
+      "..",
+      "dev-compat-routes.ts",
+    );
     const source = fs.readFileSync(serverPath, "utf-8");
 
     // Find the dev/stack route handler
@@ -26,7 +30,11 @@ describe("/api/dev/stack auth guard", () => {
   it("route handler includes a loopback-only socket guard", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const serverPath = path.resolve(import.meta.dirname, "..", "server.ts");
+    const serverPath = path.resolve(
+      import.meta.dirname,
+      "..",
+      "dev-compat-routes.ts",
+    );
     const source = fs.readFileSync(serverPath, "utf-8");
 
     const devStackIdx = source.indexOf('"/api/dev/stack"');
@@ -40,7 +48,11 @@ describe("/api/dev/stack auth guard", () => {
   it("gates /api/dev/* routes behind a production 404", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const serverPath = path.resolve(import.meta.dirname, "..", "server.ts");
+    const serverPath = path.resolve(
+      import.meta.dirname,
+      "..",
+      "dev-compat-routes.ts",
+    );
     const source = fs.readFileSync(serverPath, "utf-8");
 
     const devRouteIdx = source.indexOf('url.pathname.startsWith("/api/dev/")');

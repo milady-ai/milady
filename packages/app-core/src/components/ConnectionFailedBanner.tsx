@@ -1,4 +1,4 @@
-import { Button, Spinner } from "@miladyai/ui";
+import { Button, Spinner, Z_SYSTEM_CRITICAL } from "@miladyai/ui";
 import { isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
 
@@ -23,7 +23,7 @@ export function ConnectionFailedBanner() {
       <div
         role="status"
         aria-live="polite"
-        className="fixed left-0 right-0 z-[9999] flex items-center gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg"
+        className={`fixed left-0 right-0 z-[${Z_SYSTEM_CRITICAL}] flex items-center gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg`}
         style={{ top: bannerTop }}
       >
         <Spinner
@@ -48,7 +48,7 @@ export function ConnectionFailedBanner() {
       <div
         role="alert"
         aria-live="assertive"
-        className="fixed left-0 right-0 z-[9999] flex items-center justify-between gap-3 bg-danger px-4 py-2 text-[13px] font-medium text-white shadow-lg"
+        className={`fixed left-0 right-0 z-[${Z_SYSTEM_CRITICAL}] flex items-center justify-between gap-3 bg-danger px-4 py-2 text-[13px] font-medium text-white shadow-lg`}
         style={{ top: bannerTop }}
       >
         <span className="truncate">
@@ -69,7 +69,7 @@ export function ConnectionFailedBanner() {
             variant="secondary"
             size="sm"
             onClick={retryBackendConnection}
-            className="rounded bg-white px-3 py-1 text-[12px] font-semibold text-red-700 hover:bg-red-50 border-transparent"
+            className="rounded bg-[var(--card)] px-3 py-1 text-[12px] font-semibold text-[var(--destructive)] hover:bg-[var(--bg-hover)] border-transparent"
           >
             {t("vectorbrowserview.RetryConnection")}
           </Button>

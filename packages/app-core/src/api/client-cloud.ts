@@ -95,6 +95,14 @@ declare module "./client-base" {
       success: boolean;
       data: CloudCompatAgent;
     }>;
+    getCloudCompatPairingToken(agentId: string): Promise<{
+      success: boolean;
+      data: {
+        token: string;
+        redirectUrl: string;
+        expiresIn: number;
+      };
+    }>;
     deleteCloudCompatAgent(agentId: string): Promise<{
       success: boolean;
       data: { jobId: string; status: string; message: string };
@@ -330,6 +338,16 @@ MiladyClient.prototype.getCloudCompatAgent = async function (
 ) {
   return this.fetch(
     `/api/cloud/compat/agents/${encodeURIComponent(agentId)}`,
+  );
+};
+
+MiladyClient.prototype.getCloudCompatPairingToken = async function (
+  this: MiladyClient,
+  agentId,
+) {
+  return this.fetch(
+    `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+    { method: "POST" },
   );
 };
 

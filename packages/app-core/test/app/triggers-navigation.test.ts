@@ -50,13 +50,13 @@ describe("navigation", () => {
     expect(advanced?.tabs.includes("advanced")).toBe(true);
     expect(advanced?.tabs.includes("plugins")).toBe(true);
     expect(advanced?.tabs.includes("skills")).toBe(true);
-    expect(advanced?.tabs.includes("actions")).toBe(true);
     expect(advanced?.tabs.includes("triggers")).toBe(false);
     expect(advanced?.tabs.includes("fine-tuning")).toBe(true);
     expect(advanced?.tabs.includes("trajectories")).toBe(true);
     expect(advanced?.tabs.includes("runtime")).toBe(true);
     expect(advanced?.tabs.includes("database")).toBe(true);
     expect(advanced?.tabs.includes("logs")).toBe(true);
+    expect(advanced?.tabs.includes("security")).toBe(true);
   });
 
   test("hides Voice from top-level header groups", () => {

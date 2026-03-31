@@ -6809,6 +6809,7 @@ function AppProviderInner({
     handleRenameConversation,
     suggestConversationTitle,
     sendActionMessage,
+    sendChatText,
     loadTriggers,
     createTrigger,
     updateTrigger,

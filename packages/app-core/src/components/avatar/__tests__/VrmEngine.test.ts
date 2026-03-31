@@ -579,6 +579,20 @@ const mockCanvas2d = {
   fill: vi.fn(),
   beginPath: vi.fn(),
   arc: vi.fn(),
+  scale: vi.fn(),
+  clearRect: vi.fn(),
+  drawImage: vi.fn(),
+  save: vi.fn(),
+  restore: vi.fn(),
+  translate: vi.fn(),
+  rotate: vi.fn(),
+  measureText: vi.fn(() => ({ width: 0 })),
+  font: "",
+  textAlign: "",
+  textBaseline: "",
+  fillText: vi.fn(),
+  strokeText: vi.fn(),
+  globalAlpha: 1,
 };
 Object.assign(globalThis, {
   document: {

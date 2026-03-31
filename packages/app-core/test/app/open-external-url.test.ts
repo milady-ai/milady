@@ -56,12 +56,10 @@ describe("openExternalUrl", () => {
     );
   });
 
-  it("throws when the browser blocks the fallback popup", async () => {
+  it("resolves normally when the browser blocks the fallback popup", async () => {
     vi.spyOn(window, "open").mockReturnValue(null);
 
-    await expect(openExternalUrl("https://claude.ai")).rejects.toThrow(
-      "Popup blocked. Allow popups and try again.",
-    );
+    await expect(openExternalUrl("https://claude.ai")).resolves.toBeUndefined();
   });
 });
 

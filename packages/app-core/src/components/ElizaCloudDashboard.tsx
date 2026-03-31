@@ -33,7 +33,7 @@ import {
   client,
 } from "../api";
 import { useIntervalWhenDocumentVisible } from "../hooks/useDocumentVisibility";
-import { useApp } from "../state";
+import { getVrmPreviewUrl, useApp } from "../state";
 import { openExternalUrl } from "../utils";
 import { StripeEmbeddedCheckout } from "./StripeEmbeddedCheckout";
 
@@ -75,6 +75,14 @@ const STATUS_BADGE: Record<string, { i18nKey: string; className: string }> = {
   },
 };
 
+function getCloudAuthToken(): string {
+  if (typeof window === "undefined") return "";
+  return (
+    ((window as unknown as Record<string, unknown>)
+      .__ELIZA_CLOUD_AUTH_TOKEN__ as string) || ""
+  );
+}
+
 function AgentStatusBadge({ status }: { status: string }) {
   const { t } = useApp();
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.stopped;
@@ -93,6 +101,8 @@ function CloudAgentCard({
   deleting,
   launching,
   onLaunch,
+  onOpenUI,
+  openingUI,
   onSelect,
   selected = false,
 }: {
@@ -101,6 +111,8 @@ function CloudAgentCard({
   deleting: boolean;
   launching: boolean;
   onLaunch: (id: string) => void;
+  onOpenUI: (id: string) => void;
+  openingUI: boolean;
   onSelect?: (id: string) => void;
   selected?: boolean;
 }) {
@@ -125,7 +137,22 @@ function CloudAgentCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Server className="w-4 h-4 text-txt shrink-0" />
+          {(() => {
+            const agentName = agent.agent_name ?? "";
+            const avatarIndex =
+              (agentName
+                .split("")
+                .reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+                8) +
+              1;
+            return (
+              <img
+                src={getVrmPreviewUrl(avatarIndex)}
+                alt={agentName}
+                className="w-7 h-7 rounded-full object-cover shrink-0 border border-border/40"
+              />
+            );
+          })()}
           <span className="max-w-[16rem] truncate text-sm font-bold text-txt-strong">
             {agent.agent_name || t("elizaclouddashboard.unnamedAgent")}
           </span>
@@ -409,19 +436,22 @@ export function CloudDashboard() {
   const [checkoutSession, setCheckoutSession] =
     useState<CloudBillingCheckoutResponse | null>(null);
   const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
-  const [cryptoBusy, setCryptoBusy] = useState(false);
+  const [_cryptoBusy, setCryptoBusy] = useState(false);
   const [cryptoQuote, setCryptoQuote] = useState<Record<
     string,
     unknown
   > | null>(null);
-  const [cryptoPayBusy, setCryptoPayBusy] = useState(false);
-  const [cryptoPayResult, setCryptoPayResult] = useState<string | null>(null);
+  const [_cryptoPayBusy, setCryptoPayBusy] = useState(false);
+  const [_cryptoPayResult, setCryptoPayResult] = useState<string | null>(null);
   const [cloudAgents, setCloudAgents] = useState<CloudCompatAgent[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(false);
   const [agentsError, setAgentsError] = useState<string | null>(null);
   const [cloudNotReady, setCloudNotReady] = useState(false);
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
   const [launchingAgentId, setLaunchingAgentId] = useState<string | null>(null);
+  const [openingWebUiAgentId, setOpeningWebUiAgentId] = useState<string | null>(
+    null,
+  );
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const selectedAgent = cloudAgents.find((a) => a.agent_id === selectedAgentId);
   const [showDeployForm, setShowDeployForm] = useState(false);
@@ -457,7 +487,7 @@ export function CloudDashboard() {
     } finally {
       if (mountedRef.current) setAgentsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchBillingData = useCallback(async () => {
     setBillingLoading(true);
@@ -506,7 +536,7 @@ export function CloudDashboard() {
         setBillingLoading(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     dispatchAutoTopUpForm({
@@ -552,7 +582,7 @@ export function CloudDashboard() {
     }
   }, [deployAgentName, fetchCloudAgents]);
 
-  const handleLaunchAgent = useCallback(
+  const _handleLaunchAgent = useCallback(
     async (agentId: string) => {
       setLaunchingAgentId(agentId);
       try {
@@ -601,7 +631,88 @@ export function CloudDashboard() {
         }
       }
     },
-    [retryStartup, setActionNotice, setState, setTab],
+    [retryStartup, setActionNotice, setState, setTab, t],
+  );
+
+  const handleOpenWebUI = useCallback(
+    async (agentId: string) => {
+      // Open a blank tab immediately (must be synchronous to avoid popup blockers)
+      const tab = window.open("", "_blank");
+      if (!tab) {
+        setActionNotice(
+          t("elizaclouddashboard.PopupBlocked", {
+            defaultValue: "Popup blocked. Please allow popups and try again.",
+          }),
+          "error",
+          4200,
+        );
+        return;
+      }
+
+      setOpeningWebUiAgentId(agentId);
+      try {
+        // Try local backend proxy first, then direct cloud call
+        let redirectUrl: string | undefined;
+
+        // Try local backend proxy first
+        try {
+          const response = await client.getCloudCompatPairingToken(agentId);
+          redirectUrl = response?.data?.redirectUrl;
+        } catch {
+          // proxy failed, fall through to direct call
+        }
+
+        // If proxy failed, try direct cloud call
+        if (!redirectUrl) {
+          const cloudBase = "https://www.elizacloud.ai";
+          const token =
+            getCloudAuthToken() || client.getRestAuthToken?.() || "";
+          try {
+            const directRes = await fetch(
+              `${cloudBase}/api/v1/milady/agents/${encodeURIComponent(agentId)}/pairing-token`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "X-Api-Key": token,
+                },
+              },
+            );
+            if (directRes.ok) {
+              const json = await directRes.json();
+              redirectUrl = json?.data?.redirectUrl ?? json?.redirectUrl;
+            }
+          } catch {
+            // direct fetch failed, redirectUrl remains unset
+          }
+        }
+
+        if (!redirectUrl)
+          throw new Error("No redirectUrl from proxy or direct call");
+        if (!tab.closed) tab.location.href = redirectUrl;
+      } catch {
+        // Fallback: open the agent's web UI URL directly
+        const agent = cloudAgents.find((a) => a.agent_id === agentId);
+        const fallbackUrl = agent?.webUiUrl ?? agent?.web_ui_url;
+        if (fallbackUrl) {
+          if (!tab.closed) tab.location.href = fallbackUrl;
+        } else {
+          tab.close();
+          setActionNotice(
+            t("elizaclouddashboard.FailedToOpenWebUI", {
+              defaultValue: "Failed to open Web UI for this agent.",
+            }),
+            "error",
+            4200,
+          );
+        }
+      } finally {
+        if (mountedRef.current) {
+          setOpeningWebUiAgentId(null);
+        }
+      }
+    },
+    [cloudAgents, setActionNotice, t],
   );
 
   const handleRefresh = useCallback(async () => {
@@ -664,8 +775,7 @@ export function CloudDashboard() {
     if (autoTopUpEnabled && !hasPaymentMethod) {
       setActionNotice(
         t("elizaclouddashboard.SavePaymentMethodBeforeAutoTopUp", {
-          defaultValue:
-            "Save a payment method through card checkout before enabling auto top-up.",
+          defaultValue: "Add a card first",
         }),
         "info",
         4200,
@@ -721,6 +831,7 @@ export function CloudDashboard() {
     billingSummary,
     fetchBillingData,
     setActionNotice,
+    t,
   ]);
 
   const handleStartCheckout = useCallback(async () => {
@@ -763,10 +874,10 @@ export function CloudDashboard() {
       }
 
       throw new Error(
-        readString(response.message) ??
-          t("elizaclouddashboard.CheckoutSessionMissing", {
-            defaultValue: "Eliza Cloud did not return a checkout session.",
-          }),
+        t("elizaclouddashboard.CheckoutSessionMissing", {
+          defaultValue:
+            "Checkout unavailable. Try again or use the billing portal.",
+        }),
       );
     } catch (err) {
       setActionNotice(
@@ -781,9 +892,9 @@ export function CloudDashboard() {
     } finally {
       setCheckoutBusy(false);
     }
-  }, [billingAmount, billingSummary, setActionNotice]);
+  }, [billingAmount, billingSummary, setActionNotice, t]);
 
-  const handleCreateCryptoQuote = useCallback(async () => {
+  const _handleCreateCryptoQuote = useCallback(async () => {
     const minimumTopUp =
       readNumber(
         (billingSummary as Record<string, unknown> | null)?.minimumTopUp,
@@ -826,9 +937,9 @@ export function CloudDashboard() {
     } finally {
       setCryptoBusy(false);
     }
-  }, [billingAmount, billingSummary, setActionNotice, walletAddresses]);
+  }, [billingAmount, billingSummary, setActionNotice, walletAddresses, t]);
 
-  const handlePayCryptoFromAgentWallet = useCallback(async () => {
+  const _handlePayCryptoFromAgentWallet = useCallback(async () => {
     if (!cryptoQuote) return;
 
     const network = readString(cryptoQuote.network)?.toLowerCase();
@@ -962,7 +1073,7 @@ export function CloudDashboard() {
     } finally {
       setCryptoPayBusy(false);
     }
-  }, [cryptoQuote, setActionNotice]);
+  }, [cryptoQuote, setActionNotice, t]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -1057,10 +1168,10 @@ export function CloudDashboard() {
     elizaCloudStatusReason,
     t,
   );
-  const hasAgentWallet = Boolean(
+  const _hasAgentWallet = Boolean(
     walletAddresses?.evmAddress || walletAddresses?.solanaAddress,
   );
-  const hasWalletFunds = Boolean(
+  const _hasWalletFunds = Boolean(
     walletBalances?.evm?.chains.some(
       (chain) =>
         Number(chain.nativeBalance) > 0 ||
@@ -1128,10 +1239,6 @@ export function CloudDashboard() {
           <h2 className="text-lg font-bold text-txt-strong tracking-tight">
             {t("elizaclouddashboard.CloudDashboard")}
           </h2>
-          <span className="text-xs text-muted">·</span>
-          <span className="text-xs text-muted">
-            {t("elizaclouddashboard.ManageInstance")}
-          </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -1319,93 +1426,18 @@ export function CloudDashboard() {
                     {t("elizaclouddashboard.PayWithCrypto")}
                   </span>
                 </div>
-                <p className="text-[11px] text-muted mb-3">
-                  {hasAgentWallet
-                    ? hasWalletFunds
-                      ? t("elizaclouddashboard.AgentWalletFunded")
-                      : t("elizaclouddashboard.AgentWalletDetected")
-                    : t("elizaclouddashboard.NoAgentWalletDetected")}
-                </p>
-                {cryptoQuote ? (
-                  <div className="space-y-2">
-                    <div className="text-xs">
-                      <span className="font-semibold text-txt-strong">
-                        {readString(cryptoQuote.currency) ?? "USDC"}{" "}
-                        {readString(cryptoQuote.amount) ?? "0"}
-                      </span>{" "}
-                      <span className="text-muted">
-                        {t("elizaclouddashboard.OnNetwork", {
-                          defaultValue: "on {{network}}",
-                          network: readString(cryptoQuote.network) ?? "—",
-                        })}
-                      </span>
-                    </div>
-                    {readString(cryptoQuote.payToAddress) && (
-                      <code className="block rounded-lg border border-border/40 bg-bg/30 px-2 py-1.5 text-[10px] text-txt-strong break-all">
-                        {readString(cryptoQuote.payToAddress)}
-                      </code>
-                    )}
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      {readString(cryptoQuote.paymentLinkUrl) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-lg text-xs h-8 flex-1"
-                          onClick={() =>
-                            void openExternalUrl(
-                              readString(cryptoQuote.paymentLinkUrl) ?? "",
-                            )
-                          }
-                        >
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          {t("elizaclouddashboard.Hosted", {
-                            defaultValue: "Hosted",
-                          })}
-                        </Button>
-                      )}
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className={`rounded-lg text-xs h-8 flex-1 ${CLOUD_ACCENT_CONTROL_TEXT_CLASSNAME}`}
-                        disabled={
-                          cryptoPayBusy ||
-                          !hasAgentWallet ||
-                          !hasWalletFunds ||
-                          readString(cryptoQuote.network)?.toLowerCase() !==
-                            "bsc" ||
-                          !readString(cryptoQuote.payToAddress) ||
-                          !readString(cryptoQuote.amount)
-                        }
-                        onClick={() => void handlePayCryptoFromAgentWallet()}
-                      >
-                        {cryptoPayBusy ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          t("elizaclouddashboard.PayFromWallet", {
-                            defaultValue: "Pay from wallet",
-                          })
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-lg h-9"
-                    disabled={cryptoBusy || billingLoading}
-                    onClick={() => void handleCreateCryptoQuote()}
-                  >
-                    {cryptoBusy ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    {t("elizaclouddashboard.PayWithCrypto")}
-                  </Button>
-                )}
-                {cryptoPayResult && (
-                  <div className="mt-2 rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-xs text-ok">
-                    {cryptoPayResult}
-                  </div>
-                )}
+                <Button
+                  variant="outline"
+                  className="w-full rounded-lg h-9"
+                  onClick={() =>
+                    void openExternalUrl(
+                      "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+                    )
+                  }
+                >
+                  <ExternalLink className="mr-1.5 h-3 w-3" />
+                  {t("elizaclouddashboard.PayWithCrypto")}
+                </Button>
               </div>
             </div>
           </div>
@@ -1419,8 +1451,12 @@ export function CloudDashboard() {
                 </h3>
                 <p className="text-[11px] text-muted mt-0.5">
                   {autoTopUpHasPaymentMethod
-                    ? t("elizaclouddashboard.AutoTopUpPaymentReady")
-                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod")}
+                    ? t("elizaclouddashboard.AutoTopUpPaymentReady", {
+                        defaultValue: "Card saved",
+                      })
+                    : t("elizaclouddashboard.AutoTopUpNeedsPaymentMethod", {
+                        defaultValue: "Add a card first",
+                      })}
                 </p>
               </div>
               <Switch
@@ -1541,10 +1577,7 @@ export function CloudDashboard() {
                 })}
               </p>
               <p className="text-xs text-muted text-center max-w-xs leading-relaxed">
-                {t("elizaclouddashboard.CloudAgentsComingSoonDesc", {
-                  defaultValue:
-                    "Eliza Cloud is being prepared for production. You'll be able to deploy and manage cloud agents here shortly.",
-                })}
+                Coming soon.
               </p>
             </div>
           )}
@@ -1606,7 +1639,9 @@ export function CloudDashboard() {
                       onDelete={handleDeleteAgent}
                       deleting={deletingAgentId === agent.agent_id}
                       launching={launchingAgentId === agent.agent_id}
-                      onLaunch={handleLaunchAgent}
+                      onLaunch={handleOpenWebUI}
+                      onOpenUI={handleOpenWebUI}
+                      openingUI={openingWebUiAgentId === agent.agent_id}
                       onSelect={(id) => setSelectedAgentId(id)}
                       selected={selectedAgentId === agent.agent_id}
                     />

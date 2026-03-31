@@ -11,8 +11,8 @@ interface CustomActionsPanelProps {
 }
 
 const HANDLER_TYPE_COLORS: Record<string, string> = {
-  http: "bg-blue-500/20 text-blue-400",
-  shell: "bg-green-500/20 text-green-400",
+  http: "bg-status-info-bg text-status-info",
+  shell: "bg-status-success-bg text-status-success",
   code: "bg-purple-500/20 text-purple-400",
 };
 

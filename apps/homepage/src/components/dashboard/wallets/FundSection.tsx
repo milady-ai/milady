@@ -102,7 +102,7 @@ export function FundSection({
                 onClick={() => onCopy(primaryAddress, "fund")}
                 className={`flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] tracking-wide border transition-all duration-150 ${
                   copiedField === "fund"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    ? "border-status-running/30 bg-status-running/10 text-status-running"
                     : "border-brand/30 bg-brand/8 text-brand hover:bg-brand/15"
                 }`}
               >

@@ -138,9 +138,6 @@ RUN bun install --frozen-lockfile --ignore-scripts
 RUN node ./scripts/link-browser-server.mjs && node ./scripts/patch-deps.mjs
 RUN bun run build
 
-# Re-install with production-only dependencies for the runtime image.
-RUN rm -rf node_modules && bun install --frozen-lockfile --ignore-scripts --production
-
 # ==============================================================================
 # Stage 2: Runtime — lean production image without dev deps, source, or build tools
 # ==============================================================================
@@ -163,7 +160,7 @@ LABEL org.opencontainers.image.title="${OCI_TITLE}" \
 
 # Install Bun (needed at runtime for bun-native modules)
 RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}"
-ENV PATH="/root/.bun/bin:${PATH}"
+ENV PATH="/root/.bun/bin:/app/node_modules/.bin:${PATH}"
 
 WORKDIR /app
 ENV NODE_LLAMA_CPP_SKIP_DOWNLOAD="true"
@@ -176,7 +173,7 @@ RUN if [ -n "$MILADY_DOCKER_APT_PACKAGES" ]; then \
       rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     fi
 
-# Copy production node_modules (no devDependencies)
+# Copy workspace node_modules
 COPY --from=builder /app/node_modules ./node_modules
 
 # Ensure tsx is available (bun symlinks don't survive docker COPY)
@@ -190,6 +187,7 @@ COPY --from=builder /app/apps/app/dist ./apps/app/dist
 COPY --from=builder /app/milady.mjs ./milady.mjs
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/packages ./packages
 
 # Copy resolved VRM/animation assets (from LFS or fallback)
 COPY --from=builder /app/apps/app/public ./apps/app/public
@@ -197,6 +195,14 @@ COPY --from=builder /app/apps/app/public ./apps/app/public
 # Copy workspace package.json files so Node module resolution works
 COPY --from=builder /app/apps/app/package.json ./apps/app/package.json
 COPY --from=builder /app/apps/app/node_modules ./apps/app/node_modules
+
+# Bun preserves workspace packages as symlinks in node_modules. The runtime
+# needs the matching package trees present for those links to resolve.
+RUN mkdir -p /app/node_modules/@miladyai && \
+    ln -sf ../../packages/shared /app/node_modules/@miladyai/shared && \
+    ln -sf ../../packages/ui /app/node_modules/@miladyai/ui && \
+    ln -sf ../../packages/plugin-wechat /app/node_modules/@miladyai/plugin-wechat && \
+    ln -sf ../../packages/vrm-utils /app/node_modules/@miladyai/vrm-utils
 
 ENV NODE_ENV=production
 ENV MILADY_PORT=2138

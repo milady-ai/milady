@@ -38,13 +38,13 @@ interface EnvVarRow {
 }
 
 const terminalPrimaryButtonClassName =
-  "h-11 rounded-xl border-brand/70 bg-brand text-dark font-mono text-xs font-semibold uppercase tracking-[0.18em] shadow-[0_16px_40px_rgba(240,185,11,0.16)] hover:border-brand hover:bg-brand-hover";
+  "h-11 border-brand/70 bg-brand !text-[#08080a] font-mono text-xs font-semibold uppercase tracking-[0.18em] hover:border-brand hover:bg-brand-hover";
 
 const terminalSecondaryButtonClassName =
-  "h-11 rounded-xl border-border bg-dark/55 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:border-brand/30 hover:bg-dark-secondary";
+  "h-11 border-border bg-dark/55 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:border-brand/30 hover:bg-dark-secondary";
 
 const terminalInputClassName =
-  "h-11 rounded-xl border-border bg-dark/80 px-4 font-mono text-sm text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35";
+  "h-11 border-border bg-dark/80 px-4 font-mono text-sm text-text-light placeholder:text-text-muted/65 focus-visible:ring-brand/35";
 
 export function CreateAgentForm({
   onAuthenticated,
@@ -246,7 +246,7 @@ export function CreateAgentForm({
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
           <div className="flex items-center gap-1.5">
             <span
-              className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-emerald-500" : "bg-brand animate-[status-pulse_2s_ease-in-out_infinite]"}`}
+              className={`w-2.5 h-2.5 rounded-full ${step === "done" ? "bg-status-running" : "bg-brand animate-[status-pulse_2s_ease-in-out_infinite]"}`}
             />
           </div>
           <span
@@ -279,7 +279,7 @@ export function CreateAgentForm({
             {deploySteps.map((s) => (
               <li key={s.id} className="flex items-center gap-3">
                 {s.status === "done" && (
-                  <span className="text-emerald-400 w-4 text-center">✓</span>
+                  <span className="text-status-running w-4 text-center">✓</span>
                 )}
                 {s.status === "active" && (
                   <span className="text-brand w-4 text-center animate-pulse">
@@ -290,7 +290,7 @@ export function CreateAgentForm({
                   <span className="text-text-subtle w-4 text-center">○</span>
                 )}
                 {s.status === "error" && (
-                  <span className="text-red-400 w-4 text-center">✗</span>
+                  <span className="text-status-stopped w-4 text-center">✗</span>
                 )}
                 <span
                   className={
@@ -311,7 +311,7 @@ export function CreateAgentForm({
           {/* Done state — brief flash */}
           {step === "done" && (
             <div className="mt-6 pt-4 border-t border-border-subtle">
-              <div className="flex items-center gap-2 text-emerald-400">
+              <div className="flex items-center gap-2 text-status-running">
                 <span>→</span>
                 <span className="text-text-light">{createdName}</span>
                 <span className="text-text-subtle">is live</span>
@@ -329,7 +329,7 @@ export function CreateAgentForm({
       <div className="border border-border bg-surface animate-[fade-up_0.4s_ease-out_both]">
         {/* Terminal header bar */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-secondary border-b border-border">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+          <span className="w-2.5 h-2.5 rounded-full bg-status-stopped" />
           <span
             ref={errorHeadingRef}
             tabIndex={-1}
@@ -346,36 +346,80 @@ export function CreateAgentForm({
             {createdName || name}
           </div>
 
-          <div
-            className="text-red-400 mb-6"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <span className="text-red-500">ERROR:</span> {error}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setStep("form");
-                setError(null);
-              }}
-              className={terminalSecondaryButtonClassName}
-            >
-              Retry
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onCancel}
-              className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
-            >
-              Cancel
-            </Button>
-          </div>
+          {error?.includes("nsufficient") || error?.includes("402") ? (
+            <>
+              <div
+                className="text-status-stopped mb-4"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+              >
+                <span className="text-status-stopped">
+                  INSUFFICIENT BALANCE
+                </span>
+              </div>
+              <p className="text-text-muted text-xs mb-6">
+                A minimum balance of $5.00 is required to deploy agents.
+              </p>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    onCancel();
+                    // Navigate to credits section
+                    window.dispatchEvent(
+                      new CustomEvent("navigate-section", {
+                        detail: "credits",
+                      }),
+                    );
+                  }}
+                  className={`${terminalPrimaryButtonClassName} px-6`}
+                >
+                  Add Credits
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onCancel}
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="text-status-stopped mb-6"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+              >
+                <span className="text-status-stopped">ERROR:</span> {error}
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setStep("form");
+                    setError(null);
+                  }}
+                  className={terminalSecondaryButtonClassName}
+                >
+                  Retry
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onCancel}
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -406,7 +450,7 @@ export function CreateAgentForm({
               AUTHENTICATION REQUIRED
             </p>
             <FieldDescription className="text-sm text-text-muted">
-              Sign in to Eliza Cloud to deploy agents.
+              Sign in to deploy.
             </FieldDescription>
             {loginError && (
               <FieldMessage
@@ -456,7 +500,7 @@ export function CreateAgentForm({
                   type="button"
                   variant="ghost"
                   onClick={onCancel}
-                  className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
                 >
                   Cancel
                 </Button>
@@ -474,7 +518,7 @@ export function CreateAgentForm({
       {/* Terminal header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-dark-secondary border-b border-border">
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span className="w-2.5 h-2.5 rounded-full bg-status-running" />
           <span className="font-mono text-xs text-text-muted">new agent</span>
         </div>
         <span className="font-mono text-[10px] text-text-subtle tracking-wide">
@@ -515,8 +559,7 @@ export function CreateAgentForm({
             className={terminalInputClassName}
           />
           <FieldDescription className="font-mono text-[11px] text-text-subtle">
-            Lowercase letters, numbers, and hyphens work best for cloud agent
-            names.
+            Use lowercase, numbers, hyphens.
           </FieldDescription>
         </Field>
 
@@ -528,7 +571,7 @@ export function CreateAgentForm({
                 Environment
               </FieldLabel>
               <FieldDescription className="font-mono text-[11px] text-text-subtle">
-                Optional secrets and runtime config for your agent.
+                Runtime secrets and config.
               </FieldDescription>
             </div>
             <Button
@@ -559,7 +602,7 @@ export function CreateAgentForm({
           {showEnvVars && (
             <div
               id="homepage-agent-env-vars"
-              className="mt-3 rounded-2xl border border-border-subtle bg-dark/95"
+              className="mt-3 border border-border-subtle bg-dark/95"
             >
               {/* Config file header */}
               <div className="px-3 py-2 border-b border-border-subtle bg-dark-secondary">
@@ -588,7 +631,7 @@ export function CreateAgentForm({
                       }}
                       aria-label={`Environment variable ${i + 1} key`}
                       placeholder="KEY"
-                      className="h-10 rounded-xl border-border/60 bg-transparent px-3 font-mono text-sm uppercase text-brand placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
+                      className="h-10 border-border/60 bg-transparent px-3 font-mono text-sm uppercase text-brand placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
                     />
                     <div className="hidden items-center justify-center text-text-subtle md:flex">
                       =
@@ -602,7 +645,7 @@ export function CreateAgentForm({
                       }}
                       aria-label={`Environment variable ${i + 1} value`}
                       placeholder="value"
-                      className="h-10 rounded-xl border-border/60 bg-transparent px-3 font-mono text-sm text-text-light placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
+                      className="h-10 border-border/60 bg-transparent px-3 font-mono text-sm text-text-light placeholder:text-text-subtle/50 focus-visible:ring-brand/25"
                     />
                     <Button
                       type="button"
@@ -610,7 +653,7 @@ export function CreateAgentForm({
                       size="icon"
                       onClick={() => removeEnvVar(i)}
                       aria-label={`Remove environment variable ${i + 1}`}
-                      className="h-10 w-10 rounded-xl border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-400"
+                      className="h-10 w-10 border border-transparent text-text-subtle hover:border-red-400/20 hover:bg-status-stopped/10 hover:text-status-stopped"
                     >
                       ×
                     </Button>
@@ -621,7 +664,7 @@ export function CreateAgentForm({
                   variant="ghost"
                   size="sm"
                   onClick={addEnvVar}
-                  className="w-fit rounded-lg border border-transparent px-2 text-text-subtle hover:border-brand/20 hover:bg-brand/5 hover:text-brand"
+                  className="w-fit border border-transparent px-2 text-text-subtle hover:border-brand/20 hover:bg-brand/5 hover:text-brand"
                 >
                   <span>+</span> add
                 </Button>
@@ -632,7 +675,7 @@ export function CreateAgentForm({
 
         {/* Pricing note */}
         <div
-          className="mb-5 rounded-xl border border-brand/15 bg-brand/5 px-3 py-2.5"
+          className="mb-5 border-l-2 border-brand/30 pl-3 py-1.5 bg-brand/[4%]"
           id="homepage-hosting-note"
         >
           <p className="font-mono text-[10px] text-text-muted leading-relaxed">
@@ -684,7 +727,7 @@ export function CreateAgentForm({
             type="button"
             variant="ghost"
             onClick={onCancel}
-            className="h-11 rounded-xl px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+            className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
           >
             Cancel
           </Button>

@@ -103,6 +103,13 @@ const { mockClient } = vi.hoisted(() => ({
       startedAt: undefined,
       uptime: undefined,
     })),
+    restartAndWait: vi.fn(async () => ({
+      state: "running",
+      agentName: "Milady",
+      model: undefined,
+      startedAt: undefined,
+      uptime: undefined,
+    })),
     saveStreamSettings: vi.fn(async () => ({ ok: true })),
     getBaseUrl: vi.fn(() => "http://localhost:2138"),
     setBaseUrl: vi.fn(),
@@ -370,6 +377,13 @@ describe("onboarding finish locking", () => {
       startedAt: undefined,
       uptime: undefined,
     });
+    mockClient.restartAndWait.mockResolvedValue({
+      state: "running",
+      agentName: "Milady",
+      model: undefined,
+      startedAt: undefined,
+      uptime: undefined,
+    });
     mockClient.saveStreamSettings.mockResolvedValue({ ok: true });
     mockClient.getBaseUrl.mockReturnValue("http://localhost:2138");
     mockClient.setBaseUrl.mockImplementation(() => {});
@@ -560,7 +574,7 @@ describe("onboarding finish locking", () => {
         tab: "companion",
       }),
     );
-    expect(["saving", "restarting", "bootstrapping"]).toContain(
+    expect(["saving", "restarting"]).toContain(
       handoffSnapshot.onboardingHandoffPhase,
     );
 
@@ -769,23 +783,13 @@ describe("onboarding finish locking", () => {
   });
 
   it("waits for the restarted agent before creating a fresh onboarding conversation", async () => {
-    let runtimeReady = false;
-    mockClient.restartAgent.mockResolvedValue({
-      state: "restarting",
+    const runtimeReady = true;
+    mockClient.restartAndWait.mockResolvedValue({
+      state: "running",
       agentName: "Milady",
       model: undefined,
       startedAt: undefined,
       uptime: undefined,
-    });
-    mockClient.getStatus.mockImplementation(async () => {
-      runtimeReady = true;
-      return {
-        state: "running",
-        agentName: "Milady",
-        model: undefined,
-        startedAt: undefined,
-        uptime: undefined,
-      };
     });
     mockClient.listConversations.mockResolvedValue({
       conversations: [
@@ -849,7 +853,7 @@ describe("onboarding finish locking", () => {
     expect(snapshot.onboardingComplete).toBe(true);
     expect(snapshot.tab).toBe("companion");
     expect(snapshot.activeConversationId).toBe("conv-created");
-    expect(mockClient.getStatus).toHaveBeenCalled();
+    expect(mockClient.restartAgent).toHaveBeenCalled();
     expect(mockClient.createConversation).toHaveBeenCalledWith(undefined, {
       bootstrapGreeting: true,
       lang: "en",

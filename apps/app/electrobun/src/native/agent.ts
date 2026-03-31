@@ -1,7 +1,7 @@
 /**
  * Agent Native Module for Electrobun
  *
- * Embeds the Milady agent runtime (ElizaOS) as an isolated child process
+ * Embeds the Milady agent runtime (elizaOS) as an isolated child process
  * using Bun.spawn() and exposes it to the webview via RPC messages.
  *
  * Instead of dynamically importing the runtime into the main process

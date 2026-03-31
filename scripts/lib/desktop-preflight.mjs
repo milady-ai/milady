@@ -1,10 +1,13 @@
+import path from "node:path";
+
 const EACCES_VIEW_PATTERN =
   /electrobun[\\/](?:node_modules[\\/])?view|electrobun[\\/](?:node_modules[\\/])?electrobun[\\/]view/i;
 
 export function parseBunVersion(rawVersion) {
   const raw = String(rawVersion ?? "").trim();
-  const versionToken = raw.split(/\s+/)[0] ?? "";
-  const match = /^(\d+)\.(\d+)\.(\d+)(.*)$/.exec(versionToken);
+  // Bun may print only "1.3.10" or a prefixed line (e.g. "Bun 1.3.10"); scan for semver.
+  const firstLine = raw.split(/\r?\n/)[0]?.trim() ?? raw;
+  const match = /(\d+)\.(\d+)\.(\d+)([^\s]*)/.exec(firstLine);
   if (!match) {
     return {
       raw,
@@ -15,7 +18,10 @@ export function parseBunVersion(rawVersion) {
     };
   }
   const suffix = match[4] ?? "";
-  const channel = /canary/i.test(suffix) ? "canary" : "stable";
+  const channel =
+    /canary/i.test(suffix) || /\bcanary\b/i.test(firstLine)
+      ? "canary"
+      : "stable";
   return {
     raw,
     major: Number(match[1]),
@@ -43,6 +49,24 @@ export function hasElectrobunViewExport(manifest) {
   const exportsField = manifest.exports;
   if (!exportsField || typeof exportsField !== "object") return false;
   return Object.hasOwn(exportsField, "./view");
+}
+
+export function findElectrobunManifestPath(
+  candidateRoots,
+  existsSyncFn = () => false,
+) {
+  for (const root of candidateRoots) {
+    const manifestPath = path.join(
+      root,
+      "node_modules",
+      "electrobun",
+      "package.json",
+    );
+    if (existsSyncFn(manifestPath)) {
+      return manifestPath;
+    }
+  }
+  return null;
 }
 
 export function classifyElectrobunViewFailure(stderrText) {

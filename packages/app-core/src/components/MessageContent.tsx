@@ -74,7 +74,7 @@ const CONFIG_RE = /\[CONFIG:([@\w][\w@./:-]*)\]/g;
 const FENCED_JSON_RE = /```(?:json)?\s*\n([\s\S]*?)```/g;
 
 /**
- * Strip ElizaOS action XML blocks (`<actions>...</actions>` and
+ * Strip elizaOS action XML blocks (`<actions>...</actions>` and
  * `<params>...</params>`) from displayed text. These are framework
  * metadata, not user-facing content.
  */

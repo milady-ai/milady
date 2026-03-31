@@ -9,7 +9,7 @@ describe("isDefaultBoilerplate", () => {
   it("returns true for exact default AGENTS.md content", () => {
     const content = `# Agents
 
-You are an autonomous AI agent powered by ElizaOS.
+You are an autonomous AI agent powered by elizaOS.
 
 ## Capabilities
 
@@ -32,7 +32,7 @@ You are an autonomous AI agent powered by ElizaOS.
     const content = `
   # Agents
 
-You are an autonomous AI agent powered by ElizaOS.
+You are an autonomous AI agent powered by elizaOS.
 
 ## Capabilities
 
@@ -92,10 +92,10 @@ configuration is required.
     expect(isDefaultBoilerplate("TOOLS.md", content)).toBe(true);
   });
 
-  it("matches despite casing drift (elizaOS vs ElizaOS)", () => {
+  it("matches default boilerplate ignoring elizaOS name casing", () => {
     const content = `# Agents
 
-You are an autonomous AI agent powered by elizaOS.
+You are an autonomous AI agent powered by ELIZAOS.
 
 ## Capabilities
 

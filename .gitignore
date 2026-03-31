@@ -101,7 +101,7 @@ apps/app/test-results/
 # WhatsApp session files (Baileys auth state)
 /auth/
 :memory:/
-benchmarks/
+benchmarks/results/
 !docs/plugins/
 
 # Electrobun compiled native binaries (built locally, not committed)

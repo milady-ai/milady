@@ -11,6 +11,9 @@ import path from "node:path";
  * - Entries may specify a `cmd` to override the default (`bunx`).
  * - `forceSerial: true` entries always run after parallel groups.
  * - `maxWorkers` lets a suite pin worker concurrency.
+ *
+ * Opt-in UI browser E2E (TestCafe): set MILADY_TEST_UI_TESTCAFE=1. Spawns dev if needed
+ * and requires a supported browser on the runner (Chrome, Opera, Firefox, Edge, Safari).
  */
 const runs = [
   {
@@ -33,6 +36,15 @@ const runs = [
     forceSerial: true,
   },
 ];
+
+if (process.env.MILADY_TEST_UI_TESTCAFE === "1") {
+  runs.push({
+    name: "ui-testcafe",
+    cmd: "bun",
+    args: ["scripts/run-testcafe.mjs", "--spawn-dev"],
+    forceSerial: true,
+  });
+}
 
 const children = new Set();
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
@@ -90,6 +102,19 @@ function sanitiseNodeOptions(nodeOptions) {
     .trim();
 }
 
+function readReportExitCode(reportFile) {
+  if (!reportFile) return null;
+  try {
+    const report = JSON.parse(fs.readFileSync(reportFile, "utf8"));
+    if (typeof report?.success === "boolean") {
+      return report.success ? 0 : 1;
+    }
+  } catch {
+    // Ignore transient reads while Vitest is still writing the report file.
+  }
+  return null;
+}
+
 const runOnce = (entry, extraArgs = []) =>
   new Promise((resolve) => {
     if (entry.reportFile) {
@@ -135,14 +160,8 @@ const runOnce = (entry, extraArgs = []) =>
     if (entry.reportFile) {
       reportPoll = setInterval(() => {
         if (forcedCode !== null) return;
-        let report = null;
-        try {
-          report = JSON.parse(fs.readFileSync(entry.reportFile, "utf8"));
-        } catch {
-          return;
-        }
-        if (typeof report?.success !== "boolean") return;
-        forcedCode = report.success ? 0 : 1;
+        forcedCode = readReportExitCode(entry.reportFile);
+        if (forcedCode === null) return;
         child.kill("SIGTERM");
         forceKillTimer = setTimeout(() => {
           child.kill("SIGKILL");
@@ -155,7 +174,11 @@ const runOnce = (entry, extraArgs = []) =>
       children.delete(child);
       if (reportPoll) clearInterval(reportPoll);
       if (forceKillTimer) clearTimeout(forceKillTimer);
-      resolve(forcedCode ?? code ?? (signal ? 1 : 0));
+      const reportCode =
+        forcedCode === null ? readReportExitCode(entry.reportFile) : null;
+      resolve(
+        forcedCode ?? reportCode ?? code ?? (signal ? 1 : 0),
+      );
     });
   });
 
