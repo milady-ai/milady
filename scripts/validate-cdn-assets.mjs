@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import {
-  buildManagedAssetUrl,
+  buildReleaseValidationAssetUrl,
   resolveMiladyAssetRepository,
   resolveMiladyReleaseTag,
 } from "./lib/asset-cdn.mjs";
@@ -15,23 +15,145 @@ import {
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
+const JSDELIVR_PREFIX = "https://cdn.jsdelivr.net/gh/";
+const CI_RETRYABLE_STATUSES = new Set([0, 404, 429, 500, 502, 503, 504]);
 
-async function validateGroup(files, { repository, releaseTag, assetRoot }) {
-  const missing = [];
-  for (const file of files) {
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getValidationRetryPolicy({ env = process.env } = {}) {
+  const explicitAttempts = Number.parseInt(
+    env.MILADY_CDN_VALIDATE_ATTEMPTS ?? "",
+    10,
+  );
+  const explicitDelayMs = Number.parseInt(
+    env.MILADY_CDN_VALIDATE_DELAY_MS ?? "",
+    10,
+  );
+  const inCi = String(env.CI ?? "").toLowerCase() === "true";
+
+  return {
+    attempts:
+      Number.isFinite(explicitAttempts) && explicitAttempts > 0
+        ? explicitAttempts
+        : inCi
+          ? 16
+          : 1,
+    delayMs:
+      Number.isFinite(explicitDelayMs) && explicitDelayMs >= 0
+        ? explicitDelayMs
+        : inCi
+          ? 15000
+          : 0,
+  };
+}
+
+async function headManagedAssetUrl(url) {
+  try {
+    const response = await fetch(url, { method: "HEAD" });
+    return {
+      ok: response.ok,
+      status: response.status,
+      url,
+    };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      url,
+    };
+  }
+}
+
+async function probeManagedAssetUrl(url, retryPolicy) {
+  let result = await headManagedAssetUrl(url);
+  if (result.ok) {
+    return result;
+  }
+
+  const isRetryable =
+    url.startsWith(JSDELIVR_PREFIX) &&
+    CI_RETRYABLE_STATUSES.has(result.status) &&
+    retryPolicy.attempts > 1;
+  if (!isRetryable) {
+    return result;
+  }
+
+  for (let attempt = 2; attempt <= retryPolicy.attempts; attempt += 1) {
+    if (retryPolicy.delayMs > 0) {
+      await delay(retryPolicy.delayMs);
+    }
+    result = await headManagedAssetUrl(url);
+    if (result.ok) {
+      return result;
+    }
+  }
+
+  return result;
+}
+
+async function validateGroup(
+  files,
+  { repository, releaseTag, assetRoot, retryPolicy },
+) {
+  let pending = files.map((file) => {
     const suffix = file.split("/").slice(3).join("/");
-    const url = buildManagedAssetUrl({
+    return buildReleaseValidationAssetUrl({
       repository,
       releaseTag,
       assetRoot,
       assetPath: suffix,
     });
-    const response = await fetch(url, { method: "HEAD" });
-    if (!response.ok) {
+  });
+  let lastMissing = [];
+
+  for (let attempt = 1; attempt <= retryPolicy.attempts; attempt += 1) {
+    const responses = await Promise.all(
+      pending.map(async (url) => ({
+        url,
+        response:
+          attempt === 1
+            ? await headManagedAssetUrl(url)
+            : await probeManagedAssetUrl(url, { attempts: 1, delayMs: 0 }),
+      })),
+    );
+
+    const missing = [];
+    const retryable = [];
+    for (const { url, response } of responses) {
+      if (response.ok) {
+        continue;
+      }
+
+      if (
+        attempt < retryPolicy.attempts &&
+        url.startsWith(JSDELIVR_PREFIX) &&
+        CI_RETRYABLE_STATUSES.has(response.status)
+      ) {
+        retryable.push(url);
+        continue;
+      }
+
       missing.push(`${response.status} ${url}`);
     }
+    lastMissing = missing;
+
+    if (missing.length > 0 && retryable.length === 0) {
+      return missing;
+    }
+
+    if (retryable.length === 0) {
+      return [];
+    }
+
+    pending = retryable;
+    if (retryPolicy.delayMs > 0) {
+      await delay(retryPolicy.delayMs);
+    }
   }
-  return missing;
+
+  return lastMissing;
 }
 
 async function main() {
@@ -54,16 +176,19 @@ async function main() {
   if (!manifest) {
     throw new Error("Static asset manifest is missing.");
   }
+  const retryPolicy = getValidationRetryPolicy();
   const [missingApp, missingHomepage] = await Promise.all([
     validateGroup(manifest.app, {
       repository,
       releaseTag,
       assetRoot: "apps/app/public",
+      retryPolicy,
     }),
     validateGroup(manifest.homepage, {
       repository,
       releaseTag,
       assetRoot: "apps/homepage/public",
+      retryPolicy,
     }),
   ]);
 

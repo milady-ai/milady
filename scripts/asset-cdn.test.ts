@@ -3,6 +3,8 @@ import {
   buildJsDelivrAssetBase,
   buildManagedAssetUrl,
   buildRawGitHubAssetBase,
+  buildReleaseValidationAssetUrl,
+  isCanonicalMiladyRepository,
   resolveMiladyAssetBaseUrls,
   resolveMiladyAssetRepository,
   resolveMiladyReleaseTag,
@@ -99,6 +101,8 @@ describe("asset-cdn", () => {
 
   it("routes blocked world splats through raw GitHub for the same tagged release", () => {
     expect(shouldUseRawGitHubAssetHost("worlds/companion-day.spz")).toBe(true);
+    expect(isCanonicalMiladyRepository("milady-ai/milady")).toBe(true);
+    expect(isCanonicalMiladyRepository("dutchiono/milady")).toBe(false);
     expect(
       buildRawGitHubAssetBase({
         repository: "dutchiono/milady",
@@ -127,6 +131,26 @@ describe("asset-cdn", () => {
       }),
     ).toBe(
       "https://cdn.jsdelivr.net/gh/dutchiono/milady@v2.0.0-alpha.131-cdn.1/apps/app/public/vrms/milady-1.vrm.gz",
+    );
+    expect(
+      buildReleaseValidationAssetUrl({
+        repository: "dutchiono/milady",
+        releaseTag: "v2.0.0-alpha.131-cdn.1",
+        assetRoot: "apps/app/public",
+        assetPath: "vrms/milady-1.vrm.gz",
+      }),
+    ).toBe(
+      "https://raw.githubusercontent.com/dutchiono/milady/v2.0.0-alpha.131-cdn.1/apps/app/public/vrms/milady-1.vrm.gz",
+    );
+    expect(
+      buildReleaseValidationAssetUrl({
+        repository: "milady-ai/milady",
+        releaseTag: "v2.0.0-alpha.131",
+        assetRoot: "apps/app/public",
+        assetPath: "vrms/milady-1.vrm.gz",
+      }),
+    ).toBe(
+      "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.131/apps/app/public/vrms/milady-1.vrm.gz",
     );
   });
 });

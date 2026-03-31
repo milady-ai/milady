@@ -25,6 +25,10 @@ export function resolveMiladyAssetRepository({ env = process.env } = {}) {
   return configured || MILADY_GITHUB_REPOSITORY;
 }
 
+export function isCanonicalMiladyRepository(repository) {
+  return repository === MILADY_GITHUB_REPOSITORY;
+}
+
 export function buildJsDelivrAssetBase({
   repository = MILADY_GITHUB_REPOSITORY,
   releaseTag,
@@ -69,6 +73,26 @@ export function buildManagedAssetUrl({
   const base = shouldUseRawGitHubAssetHost(normalizedAssetPath)
     ? buildRawGitHubAssetBase({ repository, releaseTag, assetRoot })
     : buildJsDelivrAssetBase({ repository, releaseTag, assetRoot });
+  if (!base) return "";
+  return new URL(normalizedAssetPath, base).toString();
+}
+
+export function buildReleaseValidationAssetUrl({
+  repository = MILADY_GITHUB_REPOSITORY,
+  releaseTag,
+  assetRoot,
+  assetPath,
+}) {
+  if (!releaseTag || !assetRoot || !assetPath) {
+    return "";
+  }
+
+  const normalizedAssetPath = assetPath.replace(/^\/+/, "");
+  const base =
+    shouldUseRawGitHubAssetHost(normalizedAssetPath) ||
+    !isCanonicalMiladyRepository(repository)
+      ? buildRawGitHubAssetBase({ repository, releaseTag, assetRoot })
+      : buildJsDelivrAssetBase({ repository, releaseTag, assetRoot });
   if (!base) return "";
   return new URL(normalizedAssetPath, base).toString();
 }
