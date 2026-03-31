@@ -1,9 +1,9 @@
-const EACCES_VIEW_PATTERN =
-  /electrobun[\\/](?:node_modules[\\/])?view|electrobun[\\/](?:node_modules[\\/])?electrobun[\\/]view/i;
-
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
+
+const EACCES_VIEW_PATTERN =
+  /electrobun[\\/](?:node_modules[\\/])?view|electrobun[\\/](?:node_modules[\\/])?electrobun[\\/]view/i;
 
 export function parseBunVersion(rawVersion) {
   const raw = String(rawVersion ?? "").trim();
