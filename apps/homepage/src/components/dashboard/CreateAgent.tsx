@@ -87,17 +87,11 @@ function CreateAgentInner() {
           setStep("error");
           setError(status.error ?? "Provisioning failed.");
         } else {
-          pollRef.current = setTimeout(
-            () => pollJob(jobId, attempt + 1),
-            2500,
-          );
+          pollRef.current = setTimeout(() => pollJob(jobId, attempt + 1), 2500);
         }
       } catch {
         // Network error during polling — retry with backoff
-        pollRef.current = setTimeout(
-          () => pollJob(jobId, attempt + 1),
-          5000,
-        );
+        pollRef.current = setTimeout(() => pollJob(jobId, attempt + 1), 5000);
       }
     },
     [cloudClient],
@@ -163,10 +157,7 @@ function CreateAgentInner() {
       {
         id: "create",
         label: "Agent created",
-        status:
-          step === "creating"
-            ? ("active" as const)
-            : ("done" as const),
+        status: step === "creating" ? ("active" as const) : ("done" as const),
       },
       {
         id: "provision",
@@ -400,7 +391,9 @@ function CreateAgentInner() {
                       </span>
                     )}
                     {s.status === "pending" && (
-                      <span className="text-text-subtle w-4 text-center">○</span>
+                      <span className="text-text-subtle w-4 text-center">
+                        ○
+                      </span>
                     )}
                     <span
                       className={
