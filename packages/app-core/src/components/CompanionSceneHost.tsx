@@ -565,37 +565,29 @@ function CompanionSceneSurface({
     }
   }, [teleportKey]);
 
-  const preloadAvatars = useMemo(() => {
+  const preloadPreviews = useMemo(() => {
     if (tab !== "character" && tab !== "character-select") {
       return [];
     }
     return Array.from({ length: VRM_COUNT }, (_, index) => {
       const avatarIndex = index + 1;
-      return {
-        vrmPath: getVrmUrl(avatarIndex),
-        fallbackPreviewUrl: getVrmPreviewUrl(avatarIndex),
-      };
+      return { previewUrl: getVrmPreviewUrl(avatarIndex) };
     });
   }, [tab]);
 
-  /* ── Preload all VRM files into browser cache for instant character swaps ── */
+  /* ── Preload only lightweight preview thumbnails (~80KB each) for the
+   *    character-select grid. Full VRMs (~10MB each) are fetched on-demand
+   *    when the user actually selects an avatar, and cached in-memory by
+   *    VrmEngine so subsequent swaps skip the network entirely. ── */
   const preloadedRef = useRef(false);
   useEffect(() => {
-    if (preloadedRef.current || preloadAvatars.length === 0) return;
+    if (preloadedRef.current || preloadPreviews.length === 0) return;
     preloadedRef.current = true;
-    for (const entry of preloadAvatars) {
-      // Fire-and-forget fetch to warm browser cache; low priority.
-      void fetch(entry.vrmPath, { priority: "low" } as RequestInit).catch(
-        (err: unknown) => {
-          console.warn(
-            "[CompanionSceneHost] VRM preload fetch failed:",
-            entry.vrmPath,
-            err,
-          );
-        },
-      );
+    for (const entry of preloadPreviews) {
+      const img = new Image();
+      img.src = entry.previewUrl;
     }
-  }, [preloadAvatars]);
+  }, [preloadPreviews]);
 
   return (
     <div
