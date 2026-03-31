@@ -4782,6 +4782,18 @@ export async function startEliza(
       }
     }
 
+    // 8c. Set up Discord slash commands (graceful if Discord is not loaded).
+    try {
+      const { setupDiscordCommands } = await import(
+        "../discord-commands/index.js"
+      );
+      setupDiscordCommands(runtime);
+    } catch (err) {
+      logger.debug(
+        `[eliza] Discord commands setup skipped: ${formatError(err)}`,
+      );
+    }
+
     // Do not block runtime startup on skills warm-up.
     void warmAgentSkillsService().catch((err) => {
       logger.warn(`[eliza] Skills warm-up failed: ${formatError(err)}`);

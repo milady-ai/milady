@@ -123,6 +123,7 @@
     "@elizaos/plugin-anthropic": "alpha",
     "@elizaos/plugin-coding-agent": "0.1.0-next.1",
     "@elizaos/plugin-cron": "alpha",
+    "@elizaos/plugin-discord": "2.0.0-alpha.10",
     "@elizaos/plugin-elizacloud": "alpha",
     "@elizaos/plugin-experience": "alpha",
     "@elizaos/plugin-form": "alpha",
