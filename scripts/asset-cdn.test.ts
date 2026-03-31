@@ -169,4 +169,17 @@ describe("asset-cdn", () => {
       "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/vrms/milady-1.vrm.gz",
     );
   });
+
+  it("keeps validation URL generation aligned with managed asset URLs", () => {
+    const input = {
+      repository: "milady-ai/milady",
+      releaseTag: "v2.0.0-alpha.131",
+      assetRoot: "apps/homepage/public",
+      assetPath: "logo.png",
+    };
+
+    expect(buildReleaseValidationAssetUrl(input)).toBe(
+      buildManagedAssetUrl(input),
+    );
+  });
 });
