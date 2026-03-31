@@ -250,8 +250,9 @@ export function compactConversationHistory(prompt: string): string {
   const after = prompt.slice(msgEnd);
 
   const compacted = history
-    // Strip internal thought lines
-    .replace(/\n\([^)]*'s internal thought:[\s\S]*?\)/g, "")
+    // Strip internal thought lines (single-line only — [^\n]* prevents
+    // eating across lines if the thought contains unbalanced parens)
+    .replace(/\n\([^\n]*'s internal thought:[^\n]*\)/g, "")
     // Strip action list lines
     .replace(/\n\s*\([^)]*'s actions:.*?\)/g, "")
     // Strip entity UUIDs from timestamps: [b850bc30-45f8-...] → ""

@@ -644,6 +644,23 @@ User: that was funny`;
     expect(result).toContain("that was funny");
   });
 
+  it("handles thoughts containing parentheses and emoticons", () => {
+    const historyWithParens = `# Conversation Messages
+12:30 (5 minutes ago) [b850bc30-45f8-0041-a00a-83df46d8555d] Eliza: sure thing :)
+(Eliza's internal thought: User seems happy (which is great!) and I should keep the energy up :))
+ (Eliza's actions: REPLY)
+
+# Received Message
+User: thanks`;
+
+    const result = compactConversationHistory(historyWithParens);
+    expect(result).not.toContain("internal thought");
+    expect(result).not.toContain("'s actions:");
+    // The actual message with emoticon is preserved
+    expect(result).toContain("sure thing :)");
+    expect(result).toContain("thanks");
+  });
+
   it("strips entity UUIDs from timestamps", () => {
     const result = compactConversationHistory(HISTORY);
     expect(result).not.toContain("[b850bc30-45f8-0041-a00a-83df46d8555d]");
