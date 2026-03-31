@@ -8,11 +8,18 @@ import {
   Input,
   Textarea,
 } from "@miladyai/ui";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentProvider, useAgents } from "../../lib/AgentProvider";
+import type { JobStatus } from "../../lib/cloud-api";
 
-type OnboardingStep = "select" | "customize" | "deploying" | "done";
+type OnboardingStep =
+  | "select"
+  | "customize"
+  | "creating"
+  | "provisioning"
+  | "done"
+  | "error";
 
 const shellPanelClassName =
   "rounded-[28px] border border-border/70 bg-surface/96 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl";
@@ -40,8 +47,19 @@ function CreateAgentInner() {
   const [agentName, setAgentName] = useState("");
   const [bio, setBio] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const preset = STYLE_PRESETS.find((p) => p.id === selectedPreset);
+
+  // Clean up polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current !== null) {
+        clearTimeout(pollRef.current);
+      }
+    };
+  }, []);
 
   const handleSelect = useCallback((presetId: string) => {
     const p = STYLE_PRESETS.find((c) => c.id === presetId);
@@ -51,32 +69,118 @@ function CreateAgentInner() {
     setStep("customize");
   }, []);
 
+  const pollJob = useCallback(
+    async (jobId: string, attempt = 0) => {
+      const MAX_ATTEMPTS = 60; // ~2.5 min at 2.5s intervals
+      if (!cloudClient) return;
+      if (attempt >= MAX_ATTEMPTS) {
+        setStep("error");
+        setError("Provisioning timed out. Please check the dashboard.");
+        return;
+      }
+      try {
+        const status = await cloudClient.getJobStatus(jobId);
+        setJobStatus(status);
+        if (status.status === "completed") {
+          setStep("done");
+        } else if (status.status === "failed") {
+          setStep("error");
+          setError(status.error ?? "Provisioning failed.");
+        } else {
+          pollRef.current = setTimeout(() => pollJob(jobId, attempt + 1), 2500);
+        }
+      } catch {
+        // Network error during polling — retry with backoff
+        pollRef.current = setTimeout(() => pollJob(jobId, attempt + 1), 5000);
+      }
+    },
+    [cloudClient],
+  );
+
   const handleDeploy = useCallback(async () => {
     if (!agentName.trim()) {
       setError("Agent name is required.");
       return;
     }
     setError(null);
-    setStep("deploying");
+    setStep("creating");
     try {
       if (!cloudClient) {
         setError("Not signed in to Eliza Cloud.");
         setStep("customize");
         return;
       }
-      await cloudClient.createAgent({
+      const result = await cloudClient.createAgent({
         name: agentName.trim(),
         config: {
           preset: selectedPreset,
           bio: bio.trim(),
         },
       });
-      setStep("done");
+
+      if (result.id) {
+        setStep("provisioning");
+        try {
+          const provResult = await cloudClient.provisionAgent(result.id);
+          if (provResult.jobId) {
+            pollJob(provResult.jobId);
+          } else {
+            // Provisioning was synchronous
+            setStep("done");
+          }
+        } catch {
+          // Provisioning endpoint failed but agent was still created
+          setStep("error");
+          setError(
+            "Agent was created but provisioning failed. Check the dashboard.",
+          );
+        }
+      } else {
+        setStep("error");
+        setError("Agent creation did not return an ID.");
+      }
     } catch (err) {
-      setError(`Failed to create agent: ${err}`);
-      setStep("customize");
+      const msg = err instanceof Error ? err.message : String(err);
+      setStep("error");
+      setError(`Failed to create agent: ${msg}`);
     }
-  }, [agentName, bio, selectedPreset, cloudClient]);
+  }, [agentName, bio, selectedPreset, cloudClient, pollJob]);
+
+  // Derive deployment progress steps for terminal display
+  const getDeploySteps = () => {
+    const isProvisioning = step === "provisioning";
+    const isDone = step === "done";
+    const jobPending = jobStatus?.status === "pending";
+    const jobInProgress = jobStatus?.status === "in_progress";
+
+    return [
+      {
+        id: "create",
+        label: "Agent created",
+        status: step === "creating" ? ("active" as const) : ("done" as const),
+      },
+      {
+        id: "provision",
+        label: "Provisioning container",
+        status: isDone
+          ? ("done" as const)
+          : isProvisioning && jobPending
+            ? ("active" as const)
+            : isProvisioning
+              ? ("done" as const)
+              : ("pending" as const),
+      },
+      {
+        id: "runtime",
+        label: "Starting runtime",
+        status: isDone
+          ? ("done" as const)
+          : isProvisioning && jobInProgress
+            ? ("active" as const)
+            : ("pending" as const),
+      },
+    ];
+  };
 
   return (
     <div className="min-h-screen bg-dark text-text-light">
@@ -86,7 +190,7 @@ function CreateAgentInner() {
           <Button
             type="button"
             onClick={() =>
-              step === "select" || step === "done"
+              step === "select" || step === "done" || step === "error"
                 ? navigate("/dashboard")
                 : setStep("select")
             }
@@ -254,44 +358,159 @@ function CreateAgentInner() {
           </section>
         )}
 
-        {/* Step: Deploying */}
-        {step === "deploying" && (
+        {/* Step: Creating / Provisioning — terminal deploy log */}
+        {(step === "creating" || step === "provisioning") && (
           <section
-            className={`${shellPanelClassName} flex flex-col items-center justify-center space-y-4 py-20 text-center`}
+            className={`${shellPanelClassName} overflow-hidden`}
             role="status"
             aria-live="polite"
           >
-            <div className="font-mono text-sm text-brand animate-pulse">
-              Deploying {agentName} to Eliza Cloud...
+            {/* Terminal header bar */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/50">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand animate-[status-pulse_2s_ease-in-out_infinite]" />
+              <span className="font-mono text-xs text-text-muted">
+                deploying...
+              </span>
             </div>
-            <p className="max-w-md text-sm leading-relaxed text-text-muted">
-              This may take a minute. Your agent is being provisioned.
-            </p>
+
+            <div className="p-6 font-mono text-sm">
+              <div className="text-text-muted mb-4">
+                <span className="text-brand">$</span> milady deploy --name{" "}
+                <span className="text-text-light">{agentName}</span>
+              </div>
+
+              <ol className="space-y-2.5" aria-label="Deployment progress">
+                {getDeploySteps().map((s) => (
+                  <li key={s.id} className="flex items-center gap-3">
+                    {s.status === "done" && (
+                      <span className="text-green-500 w-4 text-center">✓</span>
+                    )}
+                    {s.status === "active" && (
+                      <span className="text-brand w-4 text-center animate-pulse">
+                        ◌
+                      </span>
+                    )}
+                    {s.status === "pending" && (
+                      <span className="text-text-subtle w-4 text-center">
+                        ○
+                      </span>
+                    )}
+                    <span
+                      className={
+                        s.status === "done"
+                          ? "text-text-light"
+                          : s.status === "active"
+                            ? "text-brand"
+                            : "text-text-subtle"
+                      }
+                    >
+                      {s.label}
+                      {s.status === "active" && "..."}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </section>
         )}
 
         {/* Step: Done */}
         {step === "done" && (
           <section
-            className={`${shellPanelClassName} flex flex-col items-center justify-center space-y-4 py-20 text-center`}
+            className={`${shellPanelClassName} overflow-hidden`}
             role="status"
             aria-live="polite"
           >
-            <div className="text-green-500 text-3xl">{"\u2713"}</div>
-            <div className="font-mono text-sm text-text-light">
-              {agentName} is live!
+            {/* Terminal header bar */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/50">
+              <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+              <span className="font-mono text-xs text-text-muted">
+                deploy complete
+              </span>
             </div>
-            <p className="max-w-md text-sm leading-relaxed text-text-muted">
-              Your agent has been deployed to Eliza Cloud. It may take a moment
-              to finish provisioning.
-            </p>
-            <Button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="mt-2 h-11 rounded-xl border-brand/70 bg-brand px-6 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-dark shadow-[0_16px_40px_rgba(240,185,11,0.16)] hover:border-brand hover:bg-brand-hover"
-            >
-              View Dashboard
-            </Button>
+
+            <div className="p-6 font-mono text-sm">
+              <div className="text-text-muted mb-4">
+                <span className="text-brand">$</span> milady deploy --name{" "}
+                <span className="text-text-light">{agentName}</span>
+              </div>
+
+              <ol className="space-y-2.5 mb-6" aria-label="Deployment progress">
+                {getDeploySteps().map((s) => (
+                  <li key={s.id} className="flex items-center gap-3">
+                    <span className="text-green-500 w-4 text-center">✓</span>
+                    <span className="text-text-light">{s.label}</span>
+                  </li>
+                ))}
+              </ol>
+
+              <div className="pt-4 border-t border-border/50">
+                <div className="flex items-center gap-2 text-green-500 mb-6">
+                  <span>→</span>
+                  <span className="text-text-light">{agentName}</span>
+                  <span className="text-text-subtle">is live</span>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  className="h-11 rounded-xl border-brand/70 bg-brand px-6 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-dark shadow-[0_16px_40px_rgba(240,185,11,0.16)] hover:border-brand hover:bg-brand-hover"
+                >
+                  View Dashboard
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Step: Error */}
+        {step === "error" && (
+          <section
+            className={`${shellPanelClassName} overflow-hidden`}
+            role="alert"
+            aria-live="assertive"
+          >
+            {/* Terminal header bar */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/50">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+              <span className="font-mono text-xs text-text-muted">
+                deploy failed
+              </span>
+            </div>
+
+            <div className="p-6 font-mono text-sm">
+              <div className="text-text-muted mb-4">
+                <span className="text-brand">$</span> milady deploy --name{" "}
+                <span className="text-text-light">{agentName}</span>
+              </div>
+
+              <div className="text-red-500 mb-6">
+                <span>ERROR:</span> {error}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setStep("customize");
+                    setError(null);
+                    setJobStatus(null);
+                  }}
+                  variant="outline"
+                  className="h-11 rounded-xl border-border bg-dark/50 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-light hover:bg-dark-secondary"
+                >
+                  Retry
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  variant="ghost"
+                  className="h-11 px-4 font-mono text-xs font-medium uppercase tracking-[0.18em] text-text-muted hover:bg-transparent hover:text-text-light"
+                >
+                  Dashboard
+                </Button>
+              </div>
+            </div>
           </section>
         )}
       </div>
