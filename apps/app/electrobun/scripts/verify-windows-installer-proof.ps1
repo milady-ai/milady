@@ -54,6 +54,7 @@ $summary = [ordered]@{
   uninstallerPath = $null
   checks = [ordered]@{
     installerExecuted = $false
+    reinstallExecuted = $false
     installRootExists = $false
     launcherExists = $false
     shortcutExists = $false
@@ -151,6 +152,23 @@ try {
     throw "Uninstaller executable was not found under $ProofInstallDir"
   }
   $summary.uninstallerPath = $uninstaller.FullName
+
+  Stop-MiladyProcesses
+
+  # Re-run the installer into the same target to catch upgrade/reinstall
+  # regressions where stale runtime directories break file replacement.
+  $reinstallArgs = @(
+    "/VERYSILENT",
+    "/SUPPRESSMSGBOXES",
+    "/NORESTART",
+    "/SP-",
+    "/DIR=$ProofInstallDir"
+  )
+  $reinstallProcess = Start-Process -FilePath $installer.FullName -ArgumentList $reinstallArgs -WorkingDirectory $installer.DirectoryName -PassThru -Wait
+  if ($reinstallProcess.ExitCode -ne 0) {
+    throw "Installer reinstall exited with code $($reinstallProcess.ExitCode)"
+  }
+  $summary.checks.reinstallExecuted = $true
 
   Stop-MiladyProcesses
 

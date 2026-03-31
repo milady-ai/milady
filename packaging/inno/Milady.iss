@@ -33,7 +33,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest
 WizardStyle=modern
 SetupLogging=yes
-CloseApplications=no
+CloseApplications=yes
 RestartIfNeededByRun=no
 __SIGN_SETUP_LINES__
 
@@ -42,6 +42,15 @@ Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
+
+[InstallDelete]
+; Reinstall/upgrade in place over a stale runtime tree can fail during file
+; replacement (MoveFile code 3) when old runtime directories are partially
+; missing or mismatched. Clear the mutable bundle roots first, then copy the
+; packaged app back in atomically.
+Type: filesandordirs; Name: "{app}\Resources"
+Type: filesandordirs; Name: "{app}\resources"
+Type: filesandordirs; Name: "{app}\bin"
 
 [Files]
 Source: "{#MySourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

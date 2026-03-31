@@ -476,6 +476,14 @@ describe("Electrobun release workflow drift", () => {
     expect(template).toContain(
       'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\\{#MyAppIconFile}"',
     );
+    expect(template).toContain("CloseApplications=yes");
+    expect(template).toContain(
+      'Type: filesandordirs; Name: "{app}\\Resources"',
+    );
+    expect(template).toContain(
+      'Type: filesandordirs; Name: "{app}\\resources"',
+    );
+    expect(template).toContain('Type: filesandordirs; Name: "{app}\\bin"');
     expect(template).not.toContain('#define MyAppExeName "launcher.exe"');
   });
 
@@ -772,6 +780,13 @@ describe("Electrobun release workflow drift", () => {
     expect(proofScript).toContain("Start Menu");
     expect(proofScript).toContain("unins*.exe");
     expect(proofScript).toContain("proof-summary.json");
+    expect(proofScript).toContain("reinstallExecuted");
+    expect(proofScript).toContain(
+      "$reinstallProcess = Start-Process -FilePath $installer.FullName",
+    );
+    expect(proofScript).toContain(
+      'throw "Installer reinstall exited with code $($reinstallProcess.ExitCode)"',
+    );
   });
 
   it("normalizes Windows setup upload inputs down to canonical installer naming", () => {

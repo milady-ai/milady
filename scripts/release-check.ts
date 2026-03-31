@@ -793,6 +793,9 @@ function assertWindowsInstallerProofScript() {
     "Start Menu",
     "unins*.exe",
     "proof-summary.json",
+    "reinstallExecuted",
+    "$reinstallProcess = Start-Process -FilePath $installer.FullName",
+    'throw "Installer reinstall exited with code $($reinstallProcess.ExitCode)"',
   ];
   const missingSnippets = requiredSnippets.filter(
     (snippet) => !script.includes(snippet),
@@ -844,6 +847,10 @@ function assertInnoTemplateTargetsBundledLauncher() {
     "UninstallDisplayIcon={app}\\{#MyAppIconFile}",
     'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; IconFilename: "{app}\\{#MyAppIconFile}"',
     'Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\\{#MyAppIconFile}"',
+    "CloseApplications=yes",
+    'Type: filesandordirs; Name: "{app}\\Resources"',
+    'Type: filesandordirs; Name: "{app}\\resources"',
+    'Type: filesandordirs; Name: "{app}\\bin"',
   ];
   const missingSnippets = requiredSnippets.filter(
     (snippet) => !template.includes(snippet),
