@@ -146,15 +146,7 @@ export default defineConfig({
                 "plugin-stub.mjs",
               ),
             },
-            {
-              find: "@elizaos/plugin-discord",
-              replacement: path.join(
-                repoRoot,
-                "test",
-                "stubs",
-                "plugin-stub.mjs",
-              ),
-            },
+            // @elizaos/plugin-discord is now a real dependency — no stub needed
           ]
         : []),
       {
