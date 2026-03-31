@@ -24,12 +24,14 @@ interface DiscordSlashCommandParams extends EventPayload {
 import { codeCommand, handleCodeCommand } from "./code";
 import { agentsCommand, handleAgentsCommand } from "./agents";
 import { statusCommand, handleStatusCommand } from "./status";
+import { shellCommand, handleShellCommand } from "./shell";
+import { cronCommand, handleCronCommand } from "./cron";
 import type { DiscordSlashCommand } from "./types";
 
 const LOG_PREFIX = "[discord-commands]";
 
 /** All slash commands to register. */
-const COMMANDS: DiscordSlashCommand[] = [codeCommand, agentsCommand, statusCommand];
+const COMMANDS: DiscordSlashCommand[] = [codeCommand, agentsCommand, statusCommand, shellCommand, cronCommand];
 
 /** Map command names to their handlers. */
 const HANDLERS: Record<
@@ -39,6 +41,8 @@ const HANDLERS: Record<
   code: handleCodeCommand,
   agents: handleAgentsCommand,
   status: handleStatusCommand,
+  shell: handleShellCommand,
+  cron: handleCronCommand,
 };
 
 /**

@@ -47,6 +47,17 @@ export async function requireAdmin(
 }
 
 /**
+ * Validator: requires OWNER role only.
+ */
+export async function requireOwner(
+  interaction: Interaction,
+  runtime: IAgentRuntime,
+): Promise<boolean> {
+  const role = await getInteractionUserRole(interaction, runtime);
+  return role === "OWNER";
+}
+
+/**
  * Validator: allows everyone (no restriction).
  */
 export async function allowAll(
