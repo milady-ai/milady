@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  JSDELIVR_CDN_BASE,
   type GithubRelease,
   buildCdnUrl,
+  JSDELIVR_CDN_BASE,
   matchAsset,
   pickRelease,
 } from "../lib/release-helpers";

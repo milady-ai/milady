@@ -4,8 +4,7 @@
  */
 
 /** jsDelivr CDN base for serving GitHub repo files at a specific release tag. */
-export const JSDELIVR_CDN_BASE =
-  "https://cdn.jsdelivr.net/gh/milady-ai/milady";
+export const JSDELIVR_CDN_BASE = "https://cdn.jsdelivr.net/gh/milady-ai/milady";
 
 /**
  * Build a jsDelivr CDN URL for a file committed to the repo at a release tag.
