@@ -899,18 +899,14 @@ X-GNOME-Autostart-enabled=true
       win = this.mainWindow;
     }
     if (!win) return;
-    const ptr = (win as { ptr?: unknown }).ptr;
     try {
-      if (ptr && process.platform === "darwin") {
-        makeKeyAndOrderFront(ptr as Parameters<typeof makeKeyAndOrderFront>[0]);
-      } else {
-        win.show();
-        win.focus();
-      }
-      this._windowHidden = false;
+      this.showMainWindow(win);
     } catch {
       this.clearMainWindow(win);
       await this.restoreMainWindowCallback?.();
+      win = this.mainWindow;
+      if (!win) return;
+      this.showMainWindow(win);
     }
   }
 
@@ -969,6 +965,17 @@ X-GNOME-Autostart-enabled=true
 
   async setOpacity(_options: SetOpacityOptions): Promise<void> {
     // No-op: Electrobun BrowserWindow does not support setOpacity
+  }
+
+  private showMainWindow(win: BrowserWindow): void {
+    const ptr = (win as { ptr?: unknown }).ptr;
+    if (ptr && process.platform === "darwin") {
+      makeKeyAndOrderFront(ptr as Parameters<typeof makeKeyAndOrderFront>[0]);
+    } else {
+      win.show();
+      win.focus();
+    }
+    this._windowHidden = false;
   }
 
   private setupWindowEvents(): void {
