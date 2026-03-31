@@ -63,4 +63,24 @@ describe("releaseData structure", () => {
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
     expect(diffDays).toBeLessThan(30);
   });
+
+  it("scripts.shell has a cdnUrl pointing to jsDelivr", () => {
+    expect(releaseData.scripts.shell.cdnUrl).toMatch(
+      /^https:\/\/cdn\.jsdelivr\.net\/gh\/milady-ai\/milady@/,
+    );
+    expect(releaseData.scripts.shell.cdnUrl).toContain("/install.sh");
+  });
+
+  it("scripts.powershell has a cdnUrl pointing to jsDelivr", () => {
+    expect(releaseData.scripts.powershell.cdnUrl).toMatch(
+      /^https:\/\/cdn\.jsdelivr\.net\/gh\/milady-ai\/milady@/,
+    );
+    expect(releaseData.scripts.powershell.cdnUrl).toContain("/install.ps1");
+  });
+
+  it("script cdnUrls contain the release tag", () => {
+    const tag = releaseData.release.tagName;
+    expect(releaseData.scripts.shell.cdnUrl).toContain(`@${tag}/`);
+    expect(releaseData.scripts.powershell.cdnUrl).toContain(`@${tag}/`);
+  });
 });

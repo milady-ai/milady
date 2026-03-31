@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  JSDELIVR_CDN_BASE,
   type GithubRelease,
+  buildCdnUrl,
   matchAsset,
   pickRelease,
 } from "../lib/release-helpers";
@@ -116,5 +118,36 @@ describe("matchAsset (script logic)", () => {
   it("returns null for unrecognized assets", () => {
     expect(matchAsset("SHA256SUMS.txt")).toBeNull();
     expect(matchAsset("source.tar.gz")).toBeNull();
+  });
+});
+
+describe("buildCdnUrl", () => {
+  it("builds a jsDelivr CDN URL for a tagged release file", () => {
+    expect(buildCdnUrl("v2.0.0-alpha.128", "install.sh")).toBe(
+      `${JSDELIVR_CDN_BASE}@v2.0.0-alpha.128/install.sh`,
+    );
+  });
+
+  it("builds a URL for install.ps1", () => {
+    expect(buildCdnUrl("v1.0.0", "install.ps1")).toBe(
+      `${JSDELIVR_CDN_BASE}@v1.0.0/install.ps1`,
+    );
+  });
+
+  it("strips a leading slash from filePath", () => {
+    expect(buildCdnUrl("v1.0.0", "/install.sh")).toBe(
+      `${JSDELIVR_CDN_BASE}@v1.0.0/install.sh`,
+    );
+  });
+
+  it("URL starts with the jsDelivr GitHub CDN base", () => {
+    const url = buildCdnUrl("v2.0.0", "install.sh");
+    expect(url.startsWith("https://cdn.jsdelivr.net/gh/")).toBe(true);
+  });
+
+  it("URL contains the release tag", () => {
+    const tag = "v3.0.0-beta.1";
+    const url = buildCdnUrl(tag, "install.sh");
+    expect(url).toContain(`@${tag}/`);
   });
 });

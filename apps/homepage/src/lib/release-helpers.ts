@@ -3,6 +3,22 @@
  * so they can be unit-tested.
  */
 
+/** jsDelivr CDN base for serving GitHub repo files at a specific release tag. */
+export const JSDELIVR_CDN_BASE =
+  "https://cdn.jsdelivr.net/gh/milady-ai/milady";
+
+/**
+ * Build a jsDelivr CDN URL for a file committed to the repo at a release tag.
+ *
+ * Example:
+ *   buildCdnUrl("v2.0.0-alpha.128", "install.sh")
+ *   → "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.128/install.sh"
+ */
+export function buildCdnUrl(tag: string, filePath: string): string {
+  const cleanPath = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+  return `${JSDELIVR_CDN_BASE}@${tag}/${cleanPath}`;
+}
+
 export interface GithubRelease {
   draft: boolean;
   prerelease: boolean;

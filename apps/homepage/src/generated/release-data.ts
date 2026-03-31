@@ -4,10 +4,14 @@ export const releaseData = {
     shell: {
       url: "https://milady.ai/install.sh",
       command: "curl -fsSL https://milady.ai/install.sh | bash",
+      cdnUrl:
+        "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.128/install.sh",
     },
     powershell: {
       url: "https://milady.ai/install.ps1",
       command: "irm https://milady.ai/install.ps1 | iex",
+      cdnUrl:
+        "https://cdn.jsdelivr.net/gh/milady-ai/milady@v2.0.0-alpha.128/install.ps1",
     },
   },
   release: {

@@ -16,6 +16,18 @@ const OUTPUT_PATH = path.resolve(
 const RELEASES_URL = `https://api.github.com/repos/${REPOSITORY}/releases?per_page=20`;
 const RELEASES_PAGE_URL = `https://github.com/${REPOSITORY}/releases`;
 
+/** jsDelivr CDN base for serving GitHub repo files at a specific release tag. */
+const JSDELIVR_CDN_BASE = `https://cdn.jsdelivr.net/gh/${REPOSITORY}`;
+
+/**
+ * Build a jsDelivr CDN URL for a file committed to the repo at a release tag.
+ * jsDelivr serves files at: https://cdn.jsdelivr.net/gh/owner/repo@tag/path
+ */
+function buildCdnUrl(tag, filePath) {
+  const cleanPath = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+  return `${JSDELIVR_CDN_BASE}@${tag}/${cleanPath}`;
+}
+
 const installBaseUrl = "https://milady.ai";
 const scripts = {
   shell: {
@@ -219,10 +231,29 @@ function buildRelease(release, allReleases = []) {
 }
 
 function buildPayload(release, allReleases = []) {
+  const releaseInfo = buildRelease(release, allReleases);
+  const tag =
+    releaseInfo.tagName !== "unavailable" ? releaseInfo.tagName : null;
+
+  // Attach jsDelivr CDN URLs for install scripts when a release tag is available.
+  // These serve the exact committed version of install.sh / install.ps1 via CDN.
+  const scriptsWithCdn = tag
+    ? {
+        shell: {
+          ...scripts.shell,
+          cdnUrl: buildCdnUrl(tag, "install.sh"),
+        },
+        powershell: {
+          ...scripts.powershell,
+          cdnUrl: buildCdnUrl(tag, "install.ps1"),
+        },
+      }
+    : scripts;
+
   return {
     generatedAt: new Date().toISOString(),
-    scripts,
-    release: buildRelease(release, allReleases),
+    scripts: scriptsWithCdn,
+    release: releaseInfo,
   };
 }
 
