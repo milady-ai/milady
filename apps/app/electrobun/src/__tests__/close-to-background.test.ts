@@ -23,21 +23,6 @@ describe("close-to-background behavior", () => {
   });
 
   it("restoreWindow function exists and creates window when needed", () => {
-    const fnStart = source.indexOf("async function restoreWindow");
-    expect(fnStart).toBeGreaterThan(-1);
-
-    const fnBody = source.slice(fnStart, fnStart + 600);
-
-    // Should handle existing window (unminimize + focus)
-    expect(fnBody).toContain("unminimize");
-    expect(fnBody).toContain("focus");
-    // Should create new window when none exists
-    expect(fnBody).toContain("createMainWindow");
-    expect(fnBody).toContain("attachMainWindow");
-    expect(fnBody).toContain("injectApiBase");
-  });
-
-  it("restoreWindow focuses the restored window after an in-flight recreate finishes", () => {
     const helperStart = source.indexOf("function focusCurrentWindow");
     expect(helperStart).toBeGreaterThan(-1);
 
@@ -45,6 +30,20 @@ describe("close-to-background behavior", () => {
     expect(helperBody).toContain("currentWindow.unminimize()");
     expect(helperBody).toContain("currentWindow.focus()");
 
+    const fnStart = source.indexOf("async function restoreWindow");
+    expect(fnStart).toBeGreaterThan(-1);
+
+    const fnBody = source.slice(fnStart, fnStart + 600);
+
+    // Should handle existing window via the shared focus helper
+    expect(fnBody).toContain("focusCurrentWindow();");
+    // Should create new window when none exists
+    expect(fnBody).toContain("createMainWindow");
+    expect(fnBody).toContain("attachMainWindow");
+    expect(fnBody).toContain("injectApiBase");
+  });
+
+  it("restoreWindow focuses the restored window after an in-flight recreate finishes", () => {
     const fnStart = source.indexOf("async function restoreWindow");
     expect(fnStart).toBeGreaterThan(-1);
 
