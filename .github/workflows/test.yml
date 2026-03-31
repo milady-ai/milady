@@ -20,7 +20,7 @@ env:
 jobs:
   regression-matrix:
     name: Regression Matrix Contract
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -70,7 +70,7 @@ jobs:
 
   db-check:
     name: Database Security Check
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -94,7 +94,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Vitest)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -120,7 +120,7 @@ jobs:
 
   app-startup-e2e:
     name: App Startup E2E (Onboarding)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -146,7 +146,7 @@ jobs:
 
   desktop-contract:
     name: Electrobun Desktop Contract
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -202,7 +202,7 @@ jobs:
 
   cloud-live-e2e:
     name: Cloud Live E2E (Eliza Cloud)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 20
     steps:
       - name: Check cloud secrets
@@ -241,7 +241,7 @@ jobs:
 
   validation-e2e:
     name: End-to-End Validation (Issue #6)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -265,7 +265,7 @@ jobs:
     name: All Tests Passed
     if: always()
     needs: [regression-matrix, unit-tests, db-check, e2e-tests, app-startup-e2e, desktop-contract, cloud-live-e2e, validation-e2e]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     steps:
       - name: Check test results
         shell: bash
