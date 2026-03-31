@@ -2588,7 +2588,7 @@ export class VrmEngine {
 
   /** Play a one-shot wave greeting after the VRM becomes visible. */
   playWaveGreeting(): void {
-    this.playEmote("animations/emotes/greeting.fbx", 3, false);
+    this.playEmote(resolveAppAssetUrl("animations/emotes/greeting.fbx"), 3, false);
   }
 
   async loadVrmFromUrl(url: string, name?: string): Promise<void> {

@@ -273,9 +273,21 @@ async function fetchReleases() {
 async function writePayload(payload) {
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, toModule(payload));
-  execFileSync("bunx", ["@biomejs/biome", "format", "--write", OUTPUT_PATH], {
-    stdio: "ignore",
-  });
+  const biomeCommand = process.platform === "win32" ? "cmd.exe" : "bunx";
+  const biomeArgs =
+    process.platform === "win32"
+      ? [
+          "/d",
+          "/s",
+          "/c",
+          "bunx",
+          "@biomejs/biome",
+          "format",
+          "--write",
+          OUTPUT_PATH,
+        ]
+      : ["@biomejs/biome", "format", "--write", OUTPUT_PATH];
+  execFileSync(biomeCommand, biomeArgs, { stdio: "ignore" });
 }
 
 async function main() {

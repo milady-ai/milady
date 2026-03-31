@@ -141,6 +141,8 @@ jobs:
           cd apps/app
           npx vite build
         env:
+          MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
+          VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://cdn.jsdelivr.net/gh/milady-ai/milady@{0}/apps/app/public/', steps.version.outputs.version) || '' }}
           NODE_ENV: production
 
       # ── 9. Determine version ────────────────────────────────────────────────
@@ -223,6 +225,7 @@ jobs:
           build-args: |
             VERSION=${{ steps.version.outputs.version }}
             VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            MILADY_RELEASE_TAG=${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
           cache-from: type=gha,scope=milady-docker
           cache-to: type=gha,scope=milady-docker,mode=max
           provenance: false
