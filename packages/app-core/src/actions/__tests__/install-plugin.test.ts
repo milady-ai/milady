@@ -1,4 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const ensurePluginManagerAllowedMock = vi.fn(() => "already-enabled");
+
+vi.mock("../../runtime/plugin-manager-guard", () => ({
+  ensurePluginManagerAllowed: (...args: unknown[]) =>
+    ensurePluginManagerAllowedMock(...args),
+}));
+
 import { installPluginAction } from "../../actions/install-plugin";
 
 function mockJsonResponse(response: {
@@ -21,6 +29,7 @@ function mockJsonResponse(response: {
 describe("installPluginAction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    ensurePluginManagerAllowedMock.mockReturnValue("already-enabled");
     vi.stubGlobal("fetch", vi.fn());
   });
 
@@ -155,5 +164,101 @@ describe("installPluginAction", () => {
 
     expect(result.success).toBe(true);
     expect(result.text).toBe("plugin-telegram installed and restart scheduled");
+  });
+
+  it("restarts and retries when plugin-manager is auto-enabled for install", async () => {
+    ensurePluginManagerAllowedMock.mockReturnValue("enabled");
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true, restarting: true },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true, message: "installed after restart" },
+        }),
+      );
+
+    const result = await installPluginAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { pluginId: "farcaster" } },
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.text).toBe("installed after restart");
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:31337/api/agent/restart",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:31337/api/plugins/install",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "@elizaos/plugin-farcaster",
+          autoRestart: true,
+        }),
+      }),
+    );
+  });
+
+  it("restarts and retries when install reports missing plugin-manager service", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: false,
+          status: 503,
+          body: { error: "Plugin manager service not found" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true, restarting: true },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true, message: "installed after retry" },
+        }),
+      );
+
+    const result = await installPluginAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { pluginId: "farcaster" } },
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.text).toBe("installed after retry");
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:31337/api/agent/restart",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      3,
+      "http://localhost:31337/api/plugins/install",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "@elizaos/plugin-farcaster",
+          autoRestart: true,
+        }),
+      }),
+    );
   });
 });

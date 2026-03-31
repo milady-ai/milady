@@ -119,6 +119,7 @@ import {
   defaultRegistry,
   type JsonSchemaObject,
 } from "../config";
+import { ensurePluginManagerAllowed } from "../runtime/plugin-manager-guard";
 import { useApp } from "../state";
 import type { ConfigUiHint } from "../types";
 import { openExternalUrl, resolveAppAssetUrl } from "../utils";
@@ -1594,6 +1595,21 @@ function PluginListView({
   const handleInstallPlugin = async (pluginId: string, npmName: string) => {
     setInstallingPlugins((prev) => new Set(prev).add(pluginId));
     try {
+      const pluginManagerGuard = ensurePluginManagerAllowed();
+      if (pluginManagerGuard === "disabled-by-user") {
+        throw new Error("plugin-manager is explicitly disabled in config");
+      }
+      if (pluginManagerGuard === "enabled") {
+        setActionNotice(
+          t("pluginsview.PluginInstallPreparing", {
+            plugin: npmName,
+            defaultValue:
+              "Enabling plugin installs for {{plugin}} and restarting the agent...",
+          }),
+          "success",
+        );
+        await client.restartAndWait(120_000);
+      }
       await client.installRegistryPlugin(npmName);
       await loadPlugins();
       setActionNotice(
@@ -1604,10 +1620,47 @@ function PluginListView({
         "success",
       );
     } catch (err) {
+      let installError = err;
+      if (
+        installError instanceof Error &&
+        installError.message.includes("Plugin manager service not found")
+      ) {
+        try {
+          const pluginManagerGuard = ensurePluginManagerAllowed();
+          if (pluginManagerGuard === "disabled-by-user") {
+            throw new Error("plugin-manager is explicitly disabled in config");
+          }
+          setActionNotice(
+            t("pluginsview.PluginInstallRecovering", {
+              plugin: npmName,
+              defaultValue:
+                "Finishing plugin install setup for {{plugin}} and restarting the agent...",
+            }),
+            "success",
+          );
+          await client.restartAndWait(120_000);
+          await client.installRegistryPlugin(npmName);
+          await loadPlugins();
+          setActionNotice(
+            t("pluginsview.PluginInstalledRestartRequired", {
+              plugin: npmName,
+              defaultValue:
+                "{{plugin}} installed. Restart required to activate.",
+            }),
+            "success",
+          );
+          return;
+        } catch (recoveryErr) {
+          installError = recoveryErr;
+        }
+      }
       setActionNotice(
         t("pluginsview.PluginInstallFailed", {
           plugin: npmName,
-          message: err instanceof Error ? err.message : "unknown error",
+          message:
+            installError instanceof Error
+              ? installError.message
+              : "unknown error",
           defaultValue: "Failed to install {{plugin}}: {{message}}",
         }),
         "error",

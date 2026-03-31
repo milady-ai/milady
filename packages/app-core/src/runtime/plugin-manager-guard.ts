@@ -11,13 +11,22 @@ import {
   saveElizaConfig,
 } from "@miladyai/agent/config/config";
 
-let _checked = false;
+export type PluginManagerGuardResult =
+  | "enabled"
+  | "already-enabled"
+  | "disabled-by-user"
+  | "disabled-by-env"
+  | "error";
 
-export function ensurePluginManagerAllowed(): void {
-  if (_checked) return;
+let _checked = false;
+let _lastResult: PluginManagerGuardResult = "error";
+
+export function ensurePluginManagerAllowed(): PluginManagerGuardResult {
+  if (_checked) return _lastResult;
   if (process.env.MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE === "1") {
     _checked = true;
-    return;
+    _lastResult = "disabled-by-env";
+    return _lastResult;
   }
   try {
     const config = loadElizaConfig();
@@ -26,11 +35,13 @@ export function ensurePluginManagerAllowed(): void {
     const id = "plugin-manager";
     if (entries[id]?.enabled === false) {
       _checked = true;
-      return; // explicitly disabled by user
+      _lastResult = "disabled-by-user";
+      return _lastResult;
     }
     if (entries[id]) {
       _checked = true;
-      return; // already present
+      _lastResult = "already-enabled";
+      return _lastResult;
     }
     // The upstream ElizaConfig type marks `plugins` as a complex branded type
     // that doesn't allow direct property assignment. We know the runtime shape
@@ -46,12 +57,18 @@ export function ensurePluginManagerAllowed(): void {
         "Set MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1 to prevent this.",
     );
     _checked = true;
+    _lastResult = "enabled";
+    return _lastResult;
   } catch {
-    // Non-fatal — plugin install button won't work but everything else is fine
+    // Non-fatal; plugin install button will still fail until the service exists.
+    _checked = true;
+    _lastResult = "error";
+    return _lastResult;
   }
 }
 
 /** Reset the in-process guard (for testing only). @internal */
 export function _resetPluginManagerChecked(): void {
   _checked = false;
+  _lastResult = "error";
 }

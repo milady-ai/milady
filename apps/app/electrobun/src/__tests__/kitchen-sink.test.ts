@@ -1258,6 +1258,16 @@ describe("DesktopManager — app lifecycle", () => {
     expect(mockUtils.quit).toHaveBeenCalled();
   });
 
+  it("quit() uses the registered quit callback when provided", async () => {
+    const quitCallback = vi.fn();
+    manager.setRequestQuitCallback(quitCallback);
+
+    await manager.quit();
+
+    expect(quitCallback).toHaveBeenCalledTimes(1);
+    expect(mockUtils.quit).not.toHaveBeenCalled();
+  });
+
   it("relaunch() calls Utils.quit() (no native relaunch, falls back to quit)", async () => {
     await manager.relaunch();
     expect(mockUtils.quit).toHaveBeenCalled();

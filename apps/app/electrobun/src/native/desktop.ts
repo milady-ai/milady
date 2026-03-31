@@ -182,6 +182,7 @@ export class DesktopManager {
   private openExternalHandler:
     | ((url: string) => boolean | Promise<boolean>)
     | null = null;
+  private requestQuitCallback: (() => void | Promise<void>) | null = null;
 
   // Track menu items for context-menu-clicked matching
   private trayMenuItems: Map<string, TrayMenuItem> = new Map();
@@ -251,6 +252,10 @@ export class DesktopManager {
     cb: ((url: string) => boolean | Promise<boolean>) | null,
   ): void {
     this.openExternalHandler = cb;
+  }
+
+  setRequestQuitCallback(cb: (() => void | Promise<void>) | null): void {
+    this.requestQuitCallback = cb;
   }
 
   /**
@@ -502,7 +507,7 @@ export class DesktopManager {
       } else if (action === "restart-agent" || action === "tray-restart") {
         triggerAgentRestart();
       } else if (action === "quit") {
-        Utils.quit();
+        void this.quit();
       } else if (action === "open-settings") {
         this.openSettingsCallback?.();
       }
@@ -1109,6 +1114,10 @@ X-GNOME-Autostart-enabled=true
   // MARK: - App
 
   async quit(): Promise<void> {
+    if (this.requestQuitCallback) {
+      await this.requestQuitCallback();
+      return;
+    }
     Utils.quit();
   }
 
