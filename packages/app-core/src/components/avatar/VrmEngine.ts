@@ -536,9 +536,7 @@ async function loadGltfAsset(
       throw new Error(`Failed to fetch VRM asset: ${response.status}`);
     }
 
-    const contentLength = Number(
-      response.headers.get("content-length") || 0,
-    );
+    const contentLength = Number(response.headers.get("content-length") || 0);
 
     if (!contentLength || !response.body || !onProgress) {
       buffer = await response.arrayBuffer();

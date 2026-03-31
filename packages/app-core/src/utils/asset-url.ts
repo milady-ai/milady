@@ -88,7 +88,10 @@ export function resolveAppAssetUrl(
   const configuredBaseUrl = getBootConfig().assetBaseUrl?.trim();
   if (configuredBaseUrl) {
     try {
-      return new URL(normalized, normalizeBaseHref(configuredBaseUrl)).toString();
+      return new URL(
+        normalized,
+        normalizeBaseHref(configuredBaseUrl),
+      ).toString();
     } catch {
       // Fall through to local runtime resolution when the configured CDN base is invalid.
     }
