@@ -59,7 +59,14 @@ describe("asset-cdn", () => {
   });
 
   it("returns empty jsDelivr bases when required fields are missing", () => {
-    expect(buildJsDelivrAssetBase({ releaseTag: "", assetRoot: "apps/app/public" })).toBe("");
-    expect(buildJsDelivrAssetBase({ releaseTag: "v2.0.0-alpha.131", assetRoot: "" })).toBe("");
+    expect(
+      buildJsDelivrAssetBase({ releaseTag: "", assetRoot: "apps/app/public" }),
+    ).toBe("");
+    expect(
+      buildJsDelivrAssetBase({
+        releaseTag: "v2.0.0-alpha.131",
+        assetRoot: "",
+      }),
+    ).toBe("");
   });
 });

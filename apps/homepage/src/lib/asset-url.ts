@@ -6,7 +6,10 @@ function normalizeBaseHref(baseHref: string): string {
 
 export function resolveHomepageAssetUrl(assetPath: string): string {
   if (!assetPath) return assetPath;
-  if (/^[A-Za-z][A-Za-z0-9+.-]*:/.test(assetPath) || assetPath.startsWith("//")) {
+  if (
+    /^[A-Za-z][A-Za-z0-9+.-]*:/.test(assetPath) ||
+    assetPath.startsWith("//")
+  ) {
     return assetPath;
   }
 

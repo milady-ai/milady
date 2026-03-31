@@ -4,8 +4,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   APP_PUBLIC_REPO_PREFIX,
-  HOMEPAGE_PUBLIC_REPO_PREFIX,
   buildStaticAssetManifest,
+  HOMEPAGE_PUBLIC_REPO_PREFIX,
   resolveStaticAssetManifestPath,
   serializeStaticAssetManifest,
   validateStaticAssetManifest,
@@ -15,7 +15,9 @@ import {
 const tempDirs: string[] = [];
 
 function makeTempRepo() {
-  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "milady-static-assets-"));
+  const rootDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "milady-static-assets-"),
+  );
   tempDirs.push(rootDir);
   fs.mkdirSync(path.join(rootDir, APP_PUBLIC_REPO_PREFIX), { recursive: true });
   fs.mkdirSync(path.join(rootDir, HOMEPAGE_PUBLIC_REPO_PREFIX), {

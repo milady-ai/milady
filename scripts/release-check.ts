@@ -42,7 +42,8 @@ const requiredWorkflowSnippets = [
   "run: bun run test:live:cloud",
   "name: Restore build metadata after test rebuilds",
   "name: Release readiness checks",
-  'MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}',
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+  "MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}",
   'MILADY_VALIDATE_CDN: "1"',
   "run: bun run release:check",
   "for attempt in 1 2 3; do",

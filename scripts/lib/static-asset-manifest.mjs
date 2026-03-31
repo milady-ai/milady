@@ -95,7 +95,9 @@ export function writeStaticAssetManifest(rootDir) {
 }
 
 export function validateStaticAssetManifest(rootDir) {
-  const expected = serializeStaticAssetManifest(buildStaticAssetManifest(rootDir));
+  const expected = serializeStaticAssetManifest(
+    buildStaticAssetManifest(rootDir),
+  );
   const manifestPath = resolveStaticAssetManifestPath(rootDir);
   if (!fs.existsSync(manifestPath)) {
     return {

@@ -12,9 +12,7 @@ function normalizeReleaseTag(value) {
   return normalized.startsWith("v") ? normalized : `v${normalized}`;
 }
 
-export function resolveMiladyReleaseTag({
-  env = process.env,
-} = {}) {
+export function resolveMiladyReleaseTag({ env = process.env } = {}) {
   return normalizeReleaseTag(
     env.MILADY_RELEASE_TAG || env.RELEASE_TAG || env.GITHUB_REF_NAME,
   );

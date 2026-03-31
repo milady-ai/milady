@@ -273,11 +273,9 @@ async function fetchReleases() {
 async function writePayload(payload) {
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, toModule(payload));
-  execFileSync(
-    "bunx",
-    ["@biomejs/biome", "format", "--write", OUTPUT_PATH],
-    { stdio: "ignore" },
-  );
+  execFileSync("bunx", ["@biomejs/biome", "format", "--write", OUTPUT_PATH], {
+    stdio: "ignore",
+  });
 }
 
 async function main() {

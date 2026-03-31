@@ -61,10 +61,25 @@ for (const group of chunk(files, BIOME_CHUNK_SIZE)) {
     "bunx",
     ["@biomejs/biome", "check", ...extraArgs, ...group],
     {
-      stdio: "inherit",
+      encoding: "utf8",
       shell: process.platform === "win32",
     },
   );
+
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
+  }
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
+
+  const combinedOutput = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+  if (
+    (result.status ?? 1) !== 0 &&
+    combinedOutput.includes("No files were processed in the specified paths.")
+  ) {
+    continue;
+  }
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1);

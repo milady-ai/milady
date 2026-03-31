@@ -4,10 +4,13 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import {
+  buildJsDelivrAssetBase,
+  resolveMiladyReleaseTag,
+} from "./lib/asset-cdn.mjs";
+import {
   readStaticAssetManifest,
   validateStaticAssetManifest,
 } from "./lib/static-asset-manifest.mjs";
-import { buildJsDelivrAssetBase, resolveMiladyReleaseTag } from "./lib/asset-cdn.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
