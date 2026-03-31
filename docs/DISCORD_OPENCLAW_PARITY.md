@@ -228,21 +228,25 @@ The `@miladyai/plugin-roles` already has `connectorAdmins` for Discord. Need to:
 - Security: ADMIN+ only
 - **Complexity:** Medium
 
-### Phase 4: Polish (P3) — Estimated: 1-2 days
+### Phase 4: Polish (P3) — ✅ COMPLETE (2026-03-31)
 
-#### 4.1 Auto-Vision on Image Attachments
-- When an image is attached to a message mentioning the bot, auto-trigger vision analysis
-- Maps to: `plugin-vision`
+#### 4.1 Auto-Vision on Image Attachments ✅
+- Implemented in `packages/agent/src/discord-commands/vision.ts`
+- `setupVisionAutoTrigger()` registers `DISCORD_MESSAGE_RECEIVED` listener
+- When the bot is mentioned and message has image attachments (jpg/png/gif/webp), auto-triggers `ANALYZE_IMAGE` action
+- Gracefully degrades if `plugin-vision` is not loaded
 - No slash command needed — automatic behavior
-- **Complexity:** Low
 
-#### 4.2 GitHub Issue Commands
+#### 4.2 GitHub Issue Commands ✅
 ```
 /issue create repo:<url> title:<text> body:<text>
-/issue list repo:<url>
+/issue list repo:<url> [state:<open|closed|all>]
 ```
-- Maps to: `MANAGE_ISSUES`
-- **Complexity:** Low
+- Implemented in `packages/agent/src/discord-commands/issue.ts`
+- Maps to: `MANAGE_ISSUES` action from `plugin-agent-orchestrator`
+- ADMIN+ gated
+- URL scheme validation (https:// only)
+- Registered in `index.ts`
 
 ---
 
