@@ -1,4 +1,5 @@
 import { releaseData } from "../generated/release-data";
+import { resolveHomepageAssetUrl } from "../lib/asset-url";
 
 export function Footer() {
   return (
@@ -12,19 +13,19 @@ export function Footer() {
             className="absolute inset-0 w-full h-full pointer-events-none"
           >
             <img
-              src="/black-asset-1.png"
+              src={resolveHomepageAssetUrl("black-asset-1.png")}
               alt=""
               draggable={false}
               className="absolute left-0 bottom-0 w-24 h-32 object-contain object-bottom opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-auto select-none"
             />
             <img
-              src="/black-asset-2.png"
+              src={resolveHomepageAssetUrl("black-asset-2.png")}
               alt=""
               draggable={false}
               className="absolute left-1/2 -translate-x-1/2 bottom-0 w-24 h-32 object-contain object-bottom opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-auto select-none"
             />
             <img
-              src="/black-asset-3.png"
+              src={resolveHomepageAssetUrl("black-asset-3.png")}
               alt=""
               draggable={false}
               className="absolute right-0 bottom-0 w-24 h-32 object-contain object-bottom opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-auto select-none"
@@ -33,7 +34,7 @@ export function Footer() {
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 overflow-hidden flex items-center justify-center">
               <img
-                src="/logo.png"
+                src={resolveHomepageAssetUrl("logo.png")}
                 alt="Milady"
                 className="w-full h-full object-cover"
               />

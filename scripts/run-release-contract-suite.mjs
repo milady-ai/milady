@@ -23,12 +23,14 @@ function run(command, args) {
 run("bunx", [
   "vitest",
   "run",
+  "scripts/asset-cdn.test.ts",
   "scripts/docker-contract.test.ts",
   "scripts/chrome-extension-release-surface.test.ts",
   "scripts/electrobun-release-workflow-drift.test.ts",
   "scripts/electrobun-test-workflow-drift.test.ts",
   "scripts/whisper-build-script-drift.test.ts",
   "scripts/release-check.test.ts",
+  "scripts/static-asset-manifest.test.ts",
 ]);
 run("bun", ["run", "test:startup:contract"]);
 

@@ -78,6 +78,8 @@
     "build:home": "cd apps/home && bun run build",
     "build:home:desktop": "node scripts/desktop-build.mjs build --app=home --variant=base --stage-macos-release-app",
     "build:homepage": "node scripts/write-homepage-release-data.mjs && cd apps/homepage && bun run build",
+    "cdn:validate": "node scripts/validate-cdn-assets.mjs",
+    "cdn:manifest": "node scripts/generate-static-asset-manifest.mjs",
     "build:ios": "cd apps/app && bun scripts/build.mjs && capacitor sync ios",
     "clean": "node scripts/clean-repo.mjs",
     "clean:deep": "node scripts/clean-repo.mjs --deep",

@@ -60,11 +60,13 @@ permissions:
 env:
   CI: "true"
   BUN_VERSION: "1.3.9" # pinned: 1.3.10 clean-lockfile breaks Windows frozen installs — NOTE: repo standard is 1.3.10
+  RUNNER_UBUNTU: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
+  RUNNER_WINDOWS: ${{ vars.RUNNER_WINDOWS || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-windows-2025' || 'windows-2025') }}
 
 jobs:
   prepare:
     name: Prepare Release
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ env.RUNNER_UBUNTU }}
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
@@ -101,7 +103,7 @@ jobs:
   validate-release:
     name: Validate Release Inputs
     needs: prepare
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ env.RUNNER_UBUNTU }}
     env:
       NODE_NO_WARNINGS: "1"
     defaults:
@@ -171,6 +173,9 @@ jobs:
         run: node --import tsx scripts/write-build-info.ts
 
       - name: Release readiness checks
+        env:
+          MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          MILADY_VALIDATE_CDN: "1"
         run: bun run release:check
 
   build:
@@ -197,7 +202,7 @@ jobs:
             artifact-name: macos-x64
           - name: Windows
             os: windows
-            runner: blacksmith-4vcpu-windows-2025
+            runner: ${{ env.RUNNER_WINDOWS }}
             artifact-name: windows-x64
           - name: Linux
             os: linux
@@ -1113,7 +1118,7 @@ jobs:
     name: Create Release
     if: ${{ github.event_name != 'workflow_call' || inputs.publish_release }}
     needs: [prepare, build]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ env.RUNNER_UBUNTU }}
     timeout-minutes: 10
     permissions:
       contents: write

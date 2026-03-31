@@ -65,6 +65,8 @@ export interface ClientMiddleware {
 export interface AppBootConfig {
   /** Branding overrides (product name, URLs, etc.). */
   branding: Partial<BrandingConfig>;
+  /** Static asset base URL for CDN-backed runtime assets. */
+  assetBaseUrl?: string;
   /** API base URL — replaces window.__MILADY_API_BASE__. */
   apiBase?: string;
   /** API auth token — replaces window.__MILADY_API_TOKEN__. */
@@ -133,10 +135,10 @@ function resolveAssets(
 ): ResolvedCharacterAsset[] {
   return catalog.assets.map((asset) => ({
     ...asset,
-    compressedVrmPath: `/vrms/${asset.slug}.vrm.gz`,
-    rawVrmPath: `/vrms/${asset.slug}.vrm`,
-    previewPath: `/vrms/previews/${asset.slug}.png`,
-    backgroundPath: `/vrms/backgrounds/${asset.slug}.png`,
+    compressedVrmPath: `vrms/${asset.slug}.vrm.gz`,
+    rawVrmPath: `vrms/${asset.slug}.vrm`,
+    previewPath: `vrms/previews/${asset.slug}.png`,
+    backgroundPath: `vrms/backgrounds/${asset.slug}.png`,
     sourceVrmFilename: `${asset.sourceName}.vrm`,
   }));
 }

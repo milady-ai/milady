@@ -87,9 +87,6 @@ COPY --from=builder /app/milady.mjs ./milady.mjs
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/scripts ./scripts
 
-# Copy static assets (VRMs, animations, etc.)
-COPY --from=builder /app/apps/app/public ./apps/app/public
-
 # Copy workspace package.json files so Node module resolution works
 COPY --from=builder /app/apps/app/package.json ./apps/app/package.json
 COPY --from=builder /app/apps/app/node_modules ./apps/app/node_modules

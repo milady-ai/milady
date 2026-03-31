@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+
+import path from "node:path";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
+import {
+  readStaticAssetManifest,
+  validateStaticAssetManifest,
+} from "./lib/static-asset-manifest.mjs";
+import { buildJsDelivrAssetBase, resolveMiladyReleaseTag } from "./lib/asset-cdn.mjs";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "..");
+
+async function validateGroup(files, baseUrl) {
+  const missing = [];
+  for (const file of files) {
+    const suffix = file.split("/").slice(3).join("/");
+    const url = new URL(suffix, baseUrl).toString();
+    const response = await fetch(url, { method: "HEAD" });
+    if (!response.ok) {
+      missing.push(`${response.status} ${url}`);
+    }
+  }
+  return missing;
+}
+
+async function main() {
+  const releaseTag = resolveMiladyReleaseTag();
+  if (!releaseTag) {
+    throw new Error(
+      "Could not resolve release tag for CDN validation. Set MILADY_RELEASE_TAG or RELEASE_TAG.",
+    );
+  }
+
+  const manifestValidation = validateStaticAssetManifest(repoRoot);
+  if (!manifestValidation.ok) {
+    throw new Error(
+      `Static asset manifest is ${manifestValidation.reason}. Run node scripts/generate-static-asset-manifest.mjs.`,
+    );
+  }
+
+  const manifest = readStaticAssetManifest(repoRoot);
+  if (!manifest) {
+    throw new Error("Static asset manifest is missing.");
+  }
+  const appBase = buildJsDelivrAssetBase({
+    releaseTag,
+    assetRoot: "apps/app/public",
+  });
+  const homepageBase = buildJsDelivrAssetBase({
+    releaseTag,
+    assetRoot: "apps/homepage/public",
+  });
+
+  const [missingApp, missingHomepage] = await Promise.all([
+    validateGroup(manifest.app, appBase),
+    validateGroup(manifest.homepage, homepageBase),
+  ]);
+
+  const missing = [...missingApp, ...missingHomepage];
+  if (missing.length > 0) {
+    console.error("validate-cdn-assets: missing CDN files:");
+    for (const entry of missing) {
+      console.error(`  - ${entry}`);
+    }
+    process.exit(1);
+  }
+
+  console.log(
+    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} jsDelivr asset URLs for ${releaseTag}.`,
+  );
+}
+
+await main();

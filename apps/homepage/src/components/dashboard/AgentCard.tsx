@@ -1,4 +1,5 @@
 import type { AgentSource } from "../../lib/AgentProvider";
+import { resolveHomepageAssetUrl } from "../../lib/asset-url";
 import type { AgentStatus } from "../../lib/cloud-api";
 import { formatUptime } from "../../lib/format";
 
@@ -167,7 +168,9 @@ export function AgentCard({
   const uiUrl = webUiUrl || sourceUrl;
   const resolvedAvatarIndex =
     avatarIndexProp ?? getAvatarIndex(agent.agentName);
-  const avatarUrl = `/vrms/previews/milady-${resolvedAvatarIndex}.png`;
+  const avatarUrl = resolveHomepageAssetUrl(
+    `vrms/previews/milady-${resolvedAvatarIndex}.png`,
+  );
   const isLive = agent.state === "running";
   const isProvisioning = agent.state === "provisioning";
 

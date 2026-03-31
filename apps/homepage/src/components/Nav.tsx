@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { releaseData } from "../generated/release-data";
+import { resolveHomepageAssetUrl } from "../lib/asset-url";
 
 export function Nav() {
   const location = useLocation();
@@ -21,7 +22,7 @@ export function Nav() {
         >
           <div className="w-10 h-10 overflow-hidden bg-surface flex items-center justify-center">
             <img
-              src="/logo.png"
+              src={resolveHomepageAssetUrl("logo.png")}
               alt="Milady"
               className="w-full h-full object-cover"
             />

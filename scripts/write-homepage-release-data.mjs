@@ -5,6 +5,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildJsDelivrAssetBase } from "./lib/asset-cdn.mjs";
 
 const REPOSITORY = "milady-ai/milady";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -219,9 +220,27 @@ function buildRelease(release, allReleases = []) {
 }
 
 function buildPayload(release, allReleases = []) {
+  const tagName = release?.tag_name ?? "unavailable";
   return {
     generatedAt: new Date().toISOString(),
     scripts,
+    cdn: {
+      tagName,
+      appAssetBaseUrl:
+        tagName === "unavailable"
+          ? ""
+          : buildJsDelivrAssetBase({
+              releaseTag: tagName,
+              assetRoot: "apps/app/public",
+            }),
+      homepageAssetBaseUrl:
+        tagName === "unavailable"
+          ? ""
+          : buildJsDelivrAssetBase({
+              releaseTag: tagName,
+              assetRoot: "apps/homepage/public",
+            }),
+    },
     release: buildRelease(release, allReleases),
   };
 }
@@ -255,7 +274,7 @@ async function writePayload(payload) {
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, toModule(payload));
   execFileSync(
-    process.platform === "win32" ? "bunx.cmd" : "bunx",
+    "bunx",
     ["@biomejs/biome", "format", "--write", OUTPUT_PATH],
     { stdio: "ignore" },
   );
