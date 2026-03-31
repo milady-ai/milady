@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildJsDelivrAssetBase,
   resolveMiladyAssetBaseUrls,
+  resolveMiladyAssetRepository,
   resolveMiladyReleaseTag,
 } from "./lib/asset-cdn.mjs";
 
@@ -21,6 +22,7 @@ describe("asset-cdn", () => {
 
   it("does not fall back to package.json when release context is missing", () => {
     expect(resolveMiladyReleaseTag({ env: {} })).toBeNull();
+    expect(resolveMiladyAssetRepository({ env: {} })).toBe("milady-ai/milady");
     expect(resolveMiladyAssetBaseUrls({ env: {} })).toEqual({
       releaseTag: null,
       appAssetBaseUrl: "",
@@ -55,6 +57,28 @@ describe("asset-cdn", () => {
       releaseTag: "v2.0.0-alpha.131",
       appAssetBaseUrl: "https://cdn.example.com/app/",
       homepageAssetBaseUrl: "https://cdn.example.com/homepage/",
+    });
+  });
+
+  it("uses the current Actions repository for fork validation runs", () => {
+    expect(
+      resolveMiladyAssetRepository({
+        env: { GITHUB_REPOSITORY: "dutchiono/milady" },
+      }),
+    ).toBe("dutchiono/milady");
+    expect(
+      resolveMiladyAssetBaseUrls({
+        env: {
+          GITHUB_REPOSITORY: "dutchiono/milady",
+          MILADY_RELEASE_TAG: "v2.0.0-alpha.131-cdn.1",
+        },
+      }),
+    ).toEqual({
+      releaseTag: "v2.0.0-alpha.131-cdn.1",
+      appAssetBaseUrl:
+        "https://cdn.jsdelivr.net/gh/dutchiono/milady@v2.0.0-alpha.131-cdn.1/apps/app/public/",
+      homepageAssetBaseUrl:
+        "https://cdn.jsdelivr.net/gh/dutchiono/milady@v2.0.0-alpha.131-cdn.1/apps/homepage/public/",
     });
   });
 

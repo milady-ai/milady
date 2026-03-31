@@ -18,6 +18,12 @@ export function resolveMiladyReleaseTag({ env = process.env } = {}) {
   );
 }
 
+export function resolveMiladyAssetRepository({ env = process.env } = {}) {
+  const configured =
+    env.MILADY_ASSET_GITHUB_REPOSITORY?.trim() || env.GITHUB_REPOSITORY?.trim();
+  return configured || MILADY_GITHUB_REPOSITORY;
+}
+
 export function buildJsDelivrAssetBase({
   repository = MILADY_GITHUB_REPOSITORY,
   releaseTag,
@@ -33,6 +39,7 @@ export function buildJsDelivrAssetBase({
 export function resolveMiladyAssetBaseUrls({
   env = process.env,
   releaseTag = resolveMiladyReleaseTag({ env }),
+  repository = resolveMiladyAssetRepository({ env }),
 } = {}) {
   const explicitAppBase =
     env.VITE_ASSET_BASE_URL?.trim() || env.MILADY_ASSET_BASE_URL?.trim() || "";
@@ -46,12 +53,14 @@ export function resolveMiladyAssetBaseUrls({
     appAssetBaseUrl:
       explicitAppBase ||
       buildJsDelivrAssetBase({
+        repository,
         releaseTag,
         assetRoot: "apps/app/public",
       }),
     homepageAssetBaseUrl:
       explicitHomepageBase ||
       buildJsDelivrAssetBase({
+        repository,
         releaseTag,
         assetRoot: "apps/homepage/public",
       }),

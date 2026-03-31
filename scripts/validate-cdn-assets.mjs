@@ -5,6 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import {
   buildJsDelivrAssetBase,
+  resolveMiladyAssetRepository,
   resolveMiladyReleaseTag,
 } from "./lib/asset-cdn.mjs";
 import {
@@ -30,6 +31,7 @@ async function validateGroup(files, baseUrl) {
 
 async function main() {
   const releaseTag = resolveMiladyReleaseTag();
+  const repository = resolveMiladyAssetRepository();
   if (!releaseTag) {
     throw new Error(
       "Could not resolve release tag for CDN validation. Set MILADY_RELEASE_TAG or RELEASE_TAG.",
@@ -48,10 +50,12 @@ async function main() {
     throw new Error("Static asset manifest is missing.");
   }
   const appBase = buildJsDelivrAssetBase({
+    repository,
     releaseTag,
     assetRoot: "apps/app/public",
   });
   const homepageBase = buildJsDelivrAssetBase({
+    repository,
     releaseTag,
     assetRoot: "apps/homepage/public",
   });
