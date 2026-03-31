@@ -116,7 +116,10 @@ export function resolveAppAssetUrl(
       if (rawGitHubUrl) {
         return rawGitHubUrl;
       }
-      return new URL(normalized, normalizeBaseHref(configuredBaseUrl)).toString();
+      return new URL(
+        normalized,
+        normalizeBaseHref(configuredBaseUrl),
+      ).toString();
     } catch {
       // Fall through to local runtime resolution when the configured CDN base is invalid.
     }

@@ -45,7 +45,6 @@ export function tabFlags(tab: Tab) {
   const isKnowledge = tab === "knowledge";
   const isAdvancedOverlay =
     tab === "advanced" ||
-    tab === "actions" ||
     tab === "fine-tuning" ||
     tab === "trajectories" ||
     tab === "runtime" ||

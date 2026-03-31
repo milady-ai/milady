@@ -127,10 +127,12 @@ export function isStewardConfigured(
 }
 
 export function formatStewardError(error: unknown): string {
-  if (error instanceof StewardApiError) {
-    return error.message;
-  }
-  if (error instanceof Error) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
     return error.message;
   }
   return String(error);

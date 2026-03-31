@@ -2115,16 +2115,22 @@ export class MiladyClient {
 
   constructor(baseUrl?: string, token?: string) {
     this.clientId = MiladyClient.generateClientId();
+    this._token = token?.trim() || null;
+
+    const injectedBase = getElizaApiBase();
     const storedBase =
       typeof window !== "undefined"
         ? window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY)
         : null;
-    this._explicitBase = baseUrl != null || Boolean(storedBase?.trim());
-    this._token = token?.trim() || null;
-    // Priority: explicit arg > session storage(base only) > boot config > same origin (Vite proxy)
     const bootBase = getBootConfig().apiBase;
-    this._baseUrl =
-      baseUrl ?? storedBase ?? bootBase ?? getElizaApiBase() ?? "";
+
+    this._explicitBase = baseUrl != null || Boolean(storedBase?.trim());
+
+    // Priority: explicit arg > desktop injection > boot config > session storage > same origin.
+    // Injected global (window.__MILADY_API_BASE__) must beat stale sessionStorage
+    // from a prior cloud/remote session so the desktop always connects to the
+    // correct local agent.
+    this._baseUrl = baseUrl ?? injectedBase ?? bootBase ?? storedBase ?? "";
   }
 
   /**
@@ -2456,12 +2462,13 @@ export class MiladyClient {
           return { required: false, pairingEnabled: false, expiresAt: null };
         }
         lastErr = err;
-        const kind = (err as Error & { kind?: string })?.kind;
-        if (kind === "timeout" && attempt < maxRetries) {
+        // Retry on transient errors (timeout, network) — the server may not
+        // be listening yet during boot. Non-transient HTTP errors (401, 404)
+        // are handled above and never reach here.
+        if (attempt < maxRetries) {
           await new Promise((r) => setTimeout(r, baseBackoffMs * 2 ** attempt));
           continue;
         }
-        if (attempt >= maxRetries) break;
       }
     }
     throw lastErr;
@@ -4409,20 +4416,23 @@ export class MiladyClient {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
     let host: string;
+    let wsProtocol: "ws:" | "wss:";
     if (this.baseUrl) {
-      host = new URL(this.baseUrl).host;
+      const parsed = new URL(this.baseUrl);
+      host = parsed.host;
+      wsProtocol = parsed.protocol === "https:" ? "wss:" : "ws:";
     } else {
       // In non-HTTP environments (electrobun://, file://, etc.)
       // window.location.host may be empty or a non-routable placeholder like "-".
       const loc = window.location;
       if (loc.protocol !== "http:" && loc.protocol !== "https:") return;
       host = loc.host;
+      wsProtocol = loc.protocol === "https:" ? "wss:" : "ws:";
     }
 
     if (!host) return;
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    let url = `${protocol}//${host}/ws`;
+    let url = `${wsProtocol}//${host}/ws`;
     const params = new URLSearchParams({ clientId: this.clientId });
     url += `?${params.toString()}`;
 
@@ -4784,16 +4794,27 @@ export class MiladyClient {
     };
 
     // Contract: the API must emit `data: {"type":"done",...}` or
-    // `data: {"type":"error",...}` and then end the response. If it stops
-    // mid-stream without either, the UI stays in "sending" until the user
-    // aborts — fix belongs in the conversation stream handler (@miladyai/agent).
+    // `data: {"type":"error",...}` and then end the response. If the server
+    // stalls mid-stream (e.g. LLM provider timeout without error propagation),
+    // the idle timeout below aborts the read so the UI doesn't hang forever.
+    const SSE_IDLE_TIMEOUT_MS = 60_000;
     while (true) {
       let done = false;
       let value: Uint8Array | undefined;
       try {
-        ({ done, value } = await reader.read());
+        const readPromise = reader.read();
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          const id = setTimeout(
+            () => reject(new Error("SSE idle timeout — no data for 60s")),
+            SSE_IDLE_TIMEOUT_MS,
+          );
+          // Clear timeout if the read resolves first
+          void readPromise.finally(() => clearTimeout(id));
+        });
+        ({ done, value } = await Promise.race([readPromise, timeoutPromise]));
       } catch (streamErr) {
         console.warn("[api-client] SSE stream interrupted:", streamErr);
+        void reader.cancel("milady-sse-idle-timeout").catch(() => {});
         break;
       }
       if (done || !value) break;

@@ -4,7 +4,7 @@ description: Reviews elizaOS plugin integration for correct dynamic imports, NOD
 tools: [Read, Grep, Glob, Bash]
 ---
 
-# ElizaOS Plugin Integration Reviewer
+# elizaOS Plugin Integration Reviewer
 
 You are reviewing plugin integration in the milady repo. This repo wraps elizaOS with dynamic plugin loading that depends on fragile NODE_PATH resolution and post-install patching.
 

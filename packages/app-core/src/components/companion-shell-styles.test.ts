@@ -28,7 +28,6 @@ describe("COMPANION_OVERLAY_TABS", () => {
 describe("tabFlags", () => {
   const advancedOverlayTabs: Tab[] = [
     "advanced",
-    "actions",
     "fine-tuning",
     "trajectories",
     "runtime",
@@ -64,16 +63,16 @@ describe("tabFlags", () => {
     expect(tabFlags("wallets").isWallets).toBe(true);
     expect(tabFlags("character").isCharacter).toBe(true);
     expect(tabFlags("character-select").isCharacter).toBe(true);
-    expect(tabFlags("actions").isSkills).toBe(false);
-    expect(tabFlags("actions").isStream).toBe(false);
-    expect(tabFlags("actions").isCharacter).toBe(false);
-    expect(tabFlags("actions").isWallets).toBe(false);
+    expect(tabFlags("advanced").isSkills).toBe(false);
+    expect(tabFlags("advanced").isStream).toBe(false);
+    expect(tabFlags("advanced").isCharacter).toBe(false);
+    expect(tabFlags("advanced").isWallets).toBe(false);
   });
 });
 
 describe("derived style helpers", () => {
   it("gives advanced overlays the large centered card layout", () => {
-    const classes = cardSizeClass(tabFlags("actions"));
+    const classes = cardSizeClass(tabFlags("advanced"));
     expect(classes).toContain("w-[95vw]");
     expect(classes).toContain("h-[95vh]");
     expect(classes).toContain("rounded-2xl");
@@ -81,7 +80,7 @@ describe("derived style helpers", () => {
   });
 
   it("gives advanced overlays the dark blurred backdrop", () => {
-    const classes = overlayBackdropClass(tabFlags("actions"));
+    const classes = overlayBackdropClass(tabFlags("advanced"));
     expect(classes).toContain("backdrop-blur-2xl");
     expect(classes).toContain("bg-black/50");
     expect(classes).toContain("pointer-events-auto");
@@ -92,7 +91,7 @@ describe("derived style helpers", () => {
   });
 
   it("uses the default accent for generic advanced overlays", () => {
-    const flags = tabFlags("actions");
+    const flags = tabFlags("advanced");
     expect(accentVar(flags)).toBe("#f0b90b");
     expect(accentSubtleVar(flags)).toBe("rgba(240, 185, 11, 0.12)");
   });
@@ -117,7 +116,6 @@ describe("derived style helpers", () => {
 describe("App.tsx advanced-tab parity", () => {
   const advancedParityTabs: Tab[] = [
     "advanced",
-    "actions",
     "fine-tuning",
     "trajectories",
     "runtime",

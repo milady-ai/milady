@@ -371,7 +371,7 @@ function extractVoiceText(input: string): string {
   // during streaming — prevents the voice from speaking internal LLM reasoning.
   text = text.replace(HIDDEN_VOICE_BLOCK_RE, " ");
 
-  // Strip ElizaOS action/params blocks.
+  // Strip elizaOS action/params blocks.
   text = text.replace(/\s*<actions>[\s\S]*?(?:<\/actions>|$)\s*/g, " ");
   text = text.replace(/\s*<params>[\s\S]*?(?:<\/params>|$)\s*/g, " ");
 

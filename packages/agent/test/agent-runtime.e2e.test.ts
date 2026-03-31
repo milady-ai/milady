@@ -1,5 +1,5 @@
 /**
- * Comprehensive E2E tests for the Eliza agent runtime.
+ * Comprehensive E2E tests for the elizaOS agent runtime.
  *
  * NO MOCKS. Single test file (PGlite constraint). All suites share one
  * fully-initialized runtime with PRODUCTION defaults:

@@ -1,7 +1,7 @@
 /**
  * Agent Native Module for Electrobun
  *
- * Embeds the Milady agent runtime (ElizaOS) as an isolated child process
+ * Embeds the Milady agent runtime (elizaOS) as an isolated child process
  * using Bun.spawn() and exposes it to the webview via RPC messages.
  *
  * Instead of dynamically importing the runtime into the main process
@@ -35,7 +35,7 @@ import {
 } from "@miladyai/shared/runtime-env";
 
 import { resolveDesktopRuntimeMode } from "../api-base";
-import { DEFAULT_PORT } from "../constants";
+import { DEFAULT_API_PORT } from "../constants";
 import { recordStartupPhase, resolveStartupBundlePath } from "../startup-trace";
 import type { SendToWebview } from "../types.js";
 import { findFirstAvailableLoopbackPort } from "./loopback-port";
@@ -1094,7 +1094,8 @@ export class AgentManager {
       await this.killChildProcess();
     }
 
-    const preferredPort = resolveDesktopApiPort(process.env) || DEFAULT_PORT;
+    const preferredPort =
+      resolveDesktopApiPort(process.env) || DEFAULT_API_PORT;
     if (!packagedRuntime) {
       await maybeReclaimPortWithSigkill(preferredPort);
     }

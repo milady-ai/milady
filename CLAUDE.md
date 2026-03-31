@@ -2,7 +2,11 @@
 
 ## What This Is
 
-Milady is a local-first AI assistant built on [elizaOS](https://github.com/elizaOS). It wraps the Eliza runtime with a CLI, desktop app (Electrobun), web dashboard, and platform connectors (Telegram, Discord, etc.).
+Milady is a local-first AI assistant built on [elizaOS](https://github.com/elizaOS). It wraps the elizaOS runtime with a CLI, desktop app (Electrobun), web dashboard, and platform connectors (Telegram, Discord, etc.).
+
+### elizaOS naming (agents & editors)
+
+Write the framework name as **elizaOS** in prose, comments, user-facing strings, and documentation — not `ElizaOS`. The npm scope remains **`@elizaos/*`** (lowercase). Say **Eliza agents** when you mean agents in plain language (not **elizaOS agents**). The **Eliza Classic** plugin name is an exception (**Eliza** = the 1966 chatbot), not “elizaOS Classic”. Cursor picks this up via `.cursor/rules/elizaos-branding.mdc`.
 
 ## Quick Start (Dev)
 
@@ -17,7 +21,7 @@ Desktop dev observability (agents cannot see the native window; Cursor does not 
 
 Desktop dev rationale (signals, Quit, `detached` children): `docs/apps/desktop-local-development.md`.
 
-Optional — link a local Eliza checkout for live package development:
+Optional — link a local elizaOS source checkout for live package development:
 ```bash
 bun run setup:eliza-workspace   # clones ../eliza if missing, symlinks all @elizaos/* packages
 ```
@@ -96,7 +100,7 @@ The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the deskt
 - Minimal dependencies — only add if `src/` directly imports them.
 - Commit messages: concise, action-oriented (e.g., `fix telegram reconnect on rate limit`)
 
-## Dependencies on Eliza
+## Dependencies on elizaOS
 
 All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bun run setup:eliza-workspace` symlinks packages from `../eliza` so changes are picked up immediately. Set `ELIZA_SKIP_LOCAL_ELIZA=1` to use only npm-published versions.
 

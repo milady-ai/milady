@@ -23,7 +23,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { BrowserWindow } from "electrobun/bun";
-import { DEFAULT_PORT } from "../constants";
+import { DEFAULT_API_PORT } from "../constants";
 import type { SendToWebview, WebviewEvalRpc } from "../types.js";
 
 /**
@@ -75,7 +75,7 @@ export class ScreenCaptureManager {
    * full screen, not a specific webview. The setter is retained because it is
    * wired into the RPC schema (screencapture:setCaptureTarget) and called by
    * StreamView popout logic. Removing it would require coordinated changes
-   * across rpc-schema.ts, rpc-handlers.ts, electrobun-bridge.ts, and the
+   * across rpc-schema.ts, rpc-handlers.ts, electrobun-direct-rpc.ts, and the
    * renderer.
    */
   setCaptureTarget(_webview: Webview | null): void {
@@ -333,7 +333,7 @@ $bmp.Dispose()`;
 
     const fps = options?.fps ?? 10;
     const quality = options?.quality ?? 70;
-    const apiBase = options?.apiBase ?? `http://127.0.0.1:${DEFAULT_PORT}`;
+    const apiBase = options?.apiBase ?? `http://127.0.0.1:${DEFAULT_API_PORT}`;
     const endpointPath = options?.endpoint ?? "/api/stream/frame";
     const endpoint = `${apiBase}${endpointPath}`;
     const interval = Math.round(1000 / fps);

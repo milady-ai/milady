@@ -16,6 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable long paths (Windows)
+        run: git config --global core.longpaths true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -31,7 +39,7 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
 
       - name: Desktop preflight
-        run: node scripts/desktop-build.mjs preflight --variant=base
+        run: bun scripts/desktop-build.mjs preflight --variant=base
 
       - name: Build preload bridge
         working-directory: apps/app/electrobun

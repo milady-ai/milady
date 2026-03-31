@@ -30,10 +30,10 @@ import { LogsPageView } from "./LogsPageView";
 import { PluginsPageView } from "./PluginsPageView";
 import { RuntimeView } from "./RuntimeView";
 import { SkillsView } from "./SkillsView";
+import { SecretsView } from "./SecretsView";
 import { TrajectoriesView } from "./TrajectoriesView";
 
 type SubTab =
-  // | "actions"
   | "plugins"
   | "skills"
   | "fine-tuning"
@@ -41,7 +41,8 @@ type SubTab =
   | "runtime"
   | "database"
   | "desktop"
-  | "logs";
+  | "logs"
+  | "security";
 
 const SUB_TABS: Array<{
   id: SubTab;
@@ -93,6 +94,11 @@ const SUB_TABS: Array<{
     labelKey: "advancedpageview.Logs",
     descriptionKey: "advancedpageview.LogsDescription",
   },
+  {
+    id: "security",
+    labelKey: "advancedpageview.Security",
+    descriptionKey: "advancedpageview.SecurityDescription",
+  },
 ];
 
 const MODAL_SUB_TABS = SUB_TABS.filter(
@@ -128,6 +134,8 @@ function mapTabToSubTab(tab: Tab): SubTab {
       return "desktop";
     case "logs":
       return "logs";
+    case "security":
+      return "security";
     default:
       return "plugins";
   }
@@ -212,6 +220,8 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         return <DesktopWorkspaceSection />;
       case "logs":
         return <LogsPageView />;
+      case "security":
+        return <SecretsView />;
       default:
         return <PluginsPageView />;
     }

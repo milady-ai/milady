@@ -268,17 +268,39 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Check test results
+        shell: bash
         run: |
-          # Note: electron jobs are optional (macOS packaging can have flaky deps)
-          if [[ "${{ needs.regression-matrix.result }}" == "failure" || \
-                "${{ needs.unit-tests.result }}" == "failure" || \
-                "${{ needs.db-check.result }}" == "failure" || \
-                "${{ needs.e2e-tests.result }}" == "failure" || \
-                "${{ needs.app-startup-e2e.result }}" == "failure" || \
-                "${{ needs.desktop-contract.result }}" == "failure" || \
-                "${{ needs.cloud-live-e2e.result }}" == "failure" || \
-                "${{ needs.validation-e2e.result }}" == "failure" ]]; then
-            echo "One or more test jobs failed"
+          set -u
+          # Gate job: surface which dependency failed (logs are easy to miss otherwise).
+          echo "=== Required test job results ==="
+          echo "regression-matrix:  ${{ needs.regression-matrix.result }}"
+          echo "unit-tests:         ${{ needs.unit-tests.result }}"
+          echo "db-check:           ${{ needs.db-check.result }}"
+          echo "e2e-tests:          ${{ needs.e2e-tests.result }}"
+          echo "app-startup-e2e:    ${{ needs.app-startup-e2e.result }}"
+          echo "desktop-contract:   ${{ needs.desktop-contract.result }}"
+          echo "cloud-live-e2e:     ${{ needs.cloud-live-e2e.result }}"
+          echo "validation-e2e:     ${{ needs.validation-e2e.result }}"
+          echo "==================================="
+          bad=0
+          for pair in \
+            "regression-matrix:${{ needs.regression-matrix.result }}" \
+            "unit-tests:${{ needs.unit-tests.result }}" \
+            "db-check:${{ needs.db-check.result }}" \
+            "e2e-tests:${{ needs.e2e-tests.result }}" \
+            "app-startup-e2e:${{ needs.app-startup-e2e.result }}" \
+            "desktop-contract:${{ needs.desktop-contract.result }}" \
+            "cloud-live-e2e:${{ needs.cloud-live-e2e.result }}" \
+            "validation-e2e:${{ needs.validation-e2e.result }}"; do
+            name="${pair%%:*}"
+            result="${pair##*:}"
+            if [[ "$result" != "success" ]]; then
+              echo "::error title=Test gate::Required job '${name}' finished with '${result}' (expected success)"
+              bad=1
+            fi
+          done
+          if [[ "$bad" -ne 0 ]]; then
+            echo "One or more required jobs did not succeed; see rows above and the failing job logs."
             exit 1
           fi
-          echo "All test jobs passed"
+          echo "All required test jobs succeeded"
