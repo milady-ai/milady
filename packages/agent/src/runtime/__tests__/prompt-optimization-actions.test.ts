@@ -662,6 +662,16 @@ User: that was funny`;
     expect(result).toContain("'s actions:");
   });
 
+  it("preserves full history for wallet/on-chain intent", () => {
+    const walletHistory = HISTORY.replace(
+      "that was funny",
+      "send 0.01 BNB to this wallet address",
+    );
+    const result = compactConversationHistory(walletHistory);
+    expect(result).toContain("internal thought");
+    expect(result).toContain("'s actions:");
+  });
+
   it("returns prompt unchanged when no conversation section", () => {
     const prompt = "just a plain prompt";
     expect(compactConversationHistory(prompt)).toBe(prompt);

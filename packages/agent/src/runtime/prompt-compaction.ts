@@ -237,6 +237,8 @@ export function buildFullParamActionSet(
  */
 export function compactConversationHistory(prompt: string): string {
   if (hasIntent(prompt, CODING_INTENT_RE)) return prompt;
+  // Wallet/on-chain turns need full history for transaction context
+  if (hasIntent(prompt, WALLET_INTENT_RE)) return prompt;
 
   const msgStart = prompt.indexOf("# Conversation Messages");
   if (msgStart === -1) return prompt;
