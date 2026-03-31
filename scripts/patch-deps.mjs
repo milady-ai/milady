@@ -1258,10 +1258,10 @@ patchTestCafeBunCompat();
  *    so the plugin uses the compatible version.
  */
 function patchGroqSdkVersion() {
-  const rootGroq = resolve(ROOT, "node_modules", "@ai-sdk", "groq");
+  const rootGroq = resolve(root, "node_modules", "@ai-sdk", "groq");
   if (!existsSync(rootGroq)) return;
 
-  const bunDir = resolve(ROOT, "node_modules", ".bun");
+  const bunDir = resolve(root, "node_modules", ".bun");
   if (!existsSync(bunDir)) return;
 
   let patched = 0;
