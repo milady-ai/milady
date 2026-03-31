@@ -38,7 +38,7 @@ A local JSON file shipped with Milady containing metadata for ~97 plugins from t
       "dirName": "plugin-telegram",
       "name": "Telegram",
       "npmName": "@elizaos/plugin-telegram",
-      "description": "Telegram bot connector for elizaOS agents",
+      "description": "Telegram bot connector for Eliza agents",
       "category": "connector",
       "envKey": "TELEGRAM_BOT_TOKEN",
       "configKeys": ["TELEGRAM_BOT_TOKEN", "TELEGRAM_BOT_USERNAME"],
@@ -449,7 +449,7 @@ Results are sorted by score descending, then by star count as a tiebreaker.
 
 ### Organization Structure
 
-Official ElizaOS plugins live in the [`elizaos-plugins`](https://github.com/elizaos-plugins) GitHub organization. The registry indexes plugins from this org automatically.
+Official elizaOS plugins live in the [`elizaos-plugins`](https://github.com/elizaos-plugins) GitHub organization. The registry indexes plugins from this org automatically.
 
 | Repository | Contents |
 |-----------|----------|

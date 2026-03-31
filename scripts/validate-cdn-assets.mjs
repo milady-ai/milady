@@ -72,8 +72,7 @@ async function probeManagedAssetUrl(url, retryPolicy) {
   }
 
   const isRetryable =
-    CI_RETRYABLE_STATUSES.has(result.status) &&
-    retryPolicy.attempts > 1;
+    CI_RETRYABLE_STATUSES.has(result.status) && retryPolicy.attempts > 1;
   if (!isRetryable) {
     return result;
   }

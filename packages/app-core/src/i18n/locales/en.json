@@ -5,6 +5,8 @@
   "advancedpageview.DesktopDescription": "Native runtime diagnostics, detached windows, file dialogs, clipboard, and shell controls",
   "advancedpageview.Logs": "Logs",
   "advancedpageview.LogsDescription": "Runtime and service logs",
+  "advancedpageview.Security": "Security",
+  "advancedpageview.SecurityDescription": "API keys and credentials vault",
   "advancedpageview.Plugins": "Plugins",
   "advancedpageview.PluginsDescription": "Features and connectors",
   "advancedpageview.Runtime": "Runtime",

@@ -623,10 +623,11 @@ export function isOnboardingConnectionComplete(
   }
 
   if (isCloudManagedConnection(connection)) {
+    // Cloud OAuth sessions have no apiKey — inference access is provided by
+    // the cloud session token. The connection is complete when models are
+    // selected, regardless of whether an explicit API key is present.
     return Boolean(
-      connection.apiKey?.trim() &&
-        connection.smallModel?.trim() &&
-        connection.largeModel?.trim(),
+      connection.smallModel?.trim() && connection.largeModel?.trim(),
     );
   }
 
@@ -871,10 +872,10 @@ export function inferCompatibilityOnboardingConnection(
       ? readOnboardingEnvSecret(config, localProviderOption.envKey)
       : undefined;
 
-  if (remoteApiBase || remoteAccessToken) {
+  if (remoteApiBase) {
     return {
       kind: "remote-provider",
-      remoteApiBase: remoteApiBase ?? "",
+      remoteApiBase,
       remoteAccessToken,
       provider: localProvider ?? undefined,
       apiKey: localApiKey,

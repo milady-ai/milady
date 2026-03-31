@@ -59,7 +59,7 @@ rpc.onMessage("agentStatusUpdate", (status) => {
 
 **Class**: `AgentManager` | **Channels**: 4 invoke, 1 event
 
-Manages the embedded Eliza agent runtime lifecycle — starting, stopping, restarting, and monitoring the local agent process.
+Manages the embedded elizaOS agent runtime lifecycle — starting, stopping, restarting, and monitoring the local agent process.
 
 **Return type** — `AgentStatus`:
 ```typescript

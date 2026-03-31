@@ -1729,36 +1729,23 @@ async function main(): Promise<void> {
     }
   }
 
-  // Agent startup: in local mode, start the embedded agent immediately.
-  // The renderer's deferred RPC start path doesn't work reliably because
-  // injectApiBaseIntoHtml sets window.__MILADY_API_BASE__ before React
-  // mounts, causing the renderer to skip the agentStart RPC call and
-  // poll a port where nothing is listening.
-  //
-  // In external mode (env vars like MILADY_DESKTOP_API_BASE), inject the
-  // API base immediately — the agent is already running externally.
+  // Agent startup: in external mode, push the API base via injectApiBase
+  // (the agent is already running externally). In local mode, start the
+  // embedded agent first — injectApiBaseIntoHtml already set the initial
+  // window.__MILADY_API_BASE__ but _startAgent will push the actual port
+  // once the agent reports it.
   if (currentWindow) {
     const rt = resolveDesktopRuntimeMode(
       process.env as Record<string, string | undefined>,
     );
-    if (rt.mode === "external" && rt.externalApi.base) {
-      pushApiBaseToRenderer(
-        currentWindow,
-        rt.externalApi.base,
-        resolveApiToken(process.env) ?? undefined,
-      );
+    if (rt.mode === "external") {
+      injectApiBase(currentWindow);
     } else if (rt.mode === "local") {
-      // In local mode the embedded agent must be started by the main process.
-      // The renderer's deferred-start RPC path is skipped when
-      // window.__MILADY_API_BASE__ is already injected (which it always is
-      // in local mode via injectApiBaseIntoHtml), so the main process must
-      // ensure the agent is running before the renderer starts polling.
       console.log("[Main] Starting embedded agent (local mode).");
       _startAgent(currentWindow).catch((err) => {
         console.error("[Main] Agent auto-start failed:", err);
         const error = err instanceof Error ? err.message : String(err);
         sendToActiveRenderer("agentStartupFailed", { error });
-        // Ensure test requirement: title: "Milady startup failed"
         console.error('title: "Milady startup failed"');
       });
     }

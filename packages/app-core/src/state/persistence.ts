@@ -369,7 +369,6 @@ function normalizeLastNativeTab(tab: unknown): Tab {
     case "triggers":
     case "plugins":
     case "skills":
-    case "actions":
     case "advanced":
     case "fine-tuning":
     case "trajectories":

@@ -185,6 +185,12 @@ describe("POST /api/provider/switch", () => {
       expect(second.status).toBe(200);
       expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-new-key");
       expect(process.env.OPENAI_API_KEY).toBe("sk-openai-preserve");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "anthropic",
+      });
     });
 
     it("preserves direct provider credentials when switching to elizacloud", async () => {
@@ -243,6 +249,12 @@ describe("POST /api/provider/switch", () => {
       expect(status).toBe(200);
       expect(process.env.OPENAI_API_KEY).toBe("sk-openai-pi-preserve");
       expect(process.env.ELIZA_USE_PI_AI).toBe("1");
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "pi-ai",
+      });
     });
 
     it("stores canonical selection while keeping provider-specific capability env vars", async () => {

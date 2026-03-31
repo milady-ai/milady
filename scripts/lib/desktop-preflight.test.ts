@@ -1,13 +1,11 @@
-import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildWindowsRepairSteps,
   classifyElectrobunViewFailure,
+  findElectrobunManifestPath,
   hasElectrobunViewExport,
   isSupportedBunVersion,
-  resolveWorkspacePackageManifestPath,
 } from "./desktop-preflight.mjs";
 
 describe("desktop-preflight helpers", () => {
@@ -30,9 +28,30 @@ describe("desktop-preflight helpers", () => {
     ).toBe(true);
   });
 
+  it("falls back to parent workspace node_modules for the electrobun manifest", () => {
+    const repoRoot = "/repo";
+    const appRoot = path.join(repoRoot, "apps", "app");
+    const electrobunRoot = path.join(appRoot, "electrobun");
+    const expected = path.join(
+      repoRoot,
+      "node_modules",
+      "electrobun",
+      "package.json",
+    );
+
+    expect(
+      findElectrobunManifestPath(
+        [electrobunRoot, appRoot, repoRoot],
+        (candidatePath) => candidatePath === expected,
+      ),
+    ).toBe(expected);
+  });
+
   it("accepts stable bun >=1.3 and rejects canary", () => {
     expect(isSupportedBunVersion("1.3.10")).toBe(true);
     expect(isSupportedBunVersion("1.4.0")).toBe(true);
+    expect(isSupportedBunVersion("Bun 1.3.10")).toBe(true);
+    expect(isSupportedBunVersion("v1.3.10")).toBe(true);
     expect(isSupportedBunVersion("1.3.0-canary.9")).toBe(false);
     expect(isSupportedBunVersion("1.2.22")).toBe(false);
   });
@@ -43,33 +62,5 @@ describe("desktop-preflight helpers", () => {
     expect(lines.join("\n")).toContain("apps/app/electrobun/node_modules");
     expect(lines.join("\n")).toContain("node_modules/.bun");
     expect(lines.join("\n")).toContain("bun run start:desktop");
-  });
-
-  it("resolves hoisted workspace package manifests", () => {
-    const rootDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "desktop-preflight-"),
-    );
-    const workspaceDir = path.join(rootDir, "apps", "app", "electrobun");
-    const packageRoot = path.join(rootDir, "node_modules", "electrobun");
-    const mainEntry = path.join(packageRoot, "dist", "api", "bun", "index.js");
-
-    fs.mkdirSync(path.dirname(mainEntry), { recursive: true });
-    fs.mkdirSync(workspaceDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(workspaceDir, "package.json"),
-      JSON.stringify({ name: "@miladyai/electrobun" }),
-    );
-    fs.writeFileSync(
-      path.join(packageRoot, "package.json"),
-      JSON.stringify({
-        name: "electrobun",
-        exports: { ".": "./dist/api/bun/index.js" },
-      }),
-    );
-    fs.writeFileSync(mainEntry, "export {};");
-
-    expect(
-      resolveWorkspacePackageManifestPath(workspaceDir, "electrobun"),
-    ).toBe(path.join(packageRoot, "package.json"));
   });
 });

@@ -152,7 +152,9 @@ export function hasIntent(prompt: string, keywords: RegExp): boolean {
     // User message is between the header and the next section marker (# or <)
     const nextSection = afterHeader.search(/\n#|\n<|\n\n\n/);
     const userMsg = (
-      nextSection !== -1 ? afterHeader.slice(0, nextSection) : afterHeader.slice(0, 500)
+      nextSection !== -1
+        ? afterHeader.slice(0, nextSection)
+        : afterHeader.slice(0, 500)
     ).trim();
     if (keywords.test(userMsg)) return true;
   }
@@ -218,6 +220,71 @@ export function buildFullParamActionSet(
     for (const a of INTENT_ACTION_MAP.issues) fullActions.add(a);
   }
   return fullActions;
+}
+
+/**
+ * Strip internal thoughts, action lists, and entity UUIDs from conversation
+ * history when no coding/swarm intent is detected. For general chat, the
+ * agent's previous reasoning and action selections are noise — only the
+ * actual messages matter. Coding tasks keep the full context so the swarm
+ * coordinator can see its previous reasoning chain.
+ *
+ * Targets lines like:
+ *   (Eliza's internal thought: User wants me to spawn...)
+ *   (Eliza's actions: REPLY, START_CODING_TASK)
+ *   12:53 (17 minutes ago) [b850bc30-45f8-0041-a00a-83df46d8555d]
+ *                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ UUID
+ */
+export function compactConversationHistory(prompt: string): string {
+  if (hasIntent(prompt, CODING_INTENT_RE)) return prompt;
+  // Wallet/on-chain turns need full history for transaction context
+  if (hasIntent(prompt, WALLET_INTENT_RE)) return prompt;
+
+  const msgStart = prompt.indexOf("# Conversation Messages");
+  if (msgStart === -1) return prompt;
+  const msgEnd = prompt.indexOf("\n# Received Message", msgStart);
+  if (msgEnd === -1) return prompt;
+
+  const before = prompt.slice(0, msgStart);
+  const history = prompt.slice(msgStart, msgEnd);
+  const after = prompt.slice(msgEnd);
+
+  const compacted = history
+    // Strip internal thought lines (single-line only — [^\n]* prevents
+    // eating across lines if the thought contains unbalanced parens)
+    .replace(/\n\([^\n]*'s internal thought:[^\n]*\)/g, "")
+    // Strip action list lines
+    .replace(/\n\s*\([^)]*'s actions:.*?\)/g, "")
+    // Strip entity UUIDs from timestamps: [b850bc30-45f8-...] → ""
+    .replace(
+      /\s*\[[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\]/g,
+      "",
+    )
+    // Collapse multiple blank lines
+    .replace(/\n{3,}/g, "\n\n");
+
+  return before + compacted + after;
+}
+
+/**
+ * Strip the "Coding Agent Action Call Examples" provider section when
+ * no coding intent is detected. These examples (~4k chars) teach the LLM
+ * how to use START_CODING_TASK / SPAWN_CODING_AGENT / FINALIZE_WORKSPACE
+ * — unnecessary for general chat, emote, or plugin-config messages.
+ */
+export function compactCodingExamplesForIntent(prompt: string): string {
+  if (hasIntent(prompt, CODING_INTENT_RE)) return prompt;
+  // Guard: if the boundary header is missing, don't strip — the regex would
+  // match to end-of-string and remove everything after the examples header.
+  if (!prompt.includes("# Available Actions")) return prompt;
+  // Strip everything from the examples header up to (but not including)
+  // the "# Available Actions" header. The examples section contains its own
+  // <actions> tags as part of the examples, so we can't use <actions> as a
+  // boundary — we must match the markdown header specifically.
+  return prompt.replace(
+    /# Coding Agent Action Call Examples[\s\S]*?(?=\n# Available Actions)/,
+    "",
+  );
 }
 
 /**

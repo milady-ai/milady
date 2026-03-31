@@ -6763,6 +6763,8 @@ function AppProviderInner({
     let unbindWsReconnect: (() => void) | null = null;
     let unbindSystemWarnings: (() => void) | null = null;
     let unbindRestartRequired: (() => void) | null = null;
+    let unbindConversationUpdated: (() => void) | null = null;
+    let unbindPtySessionEvent: (() => void) | null = null;
     let ptyPollInterval: ReturnType<typeof setInterval> | null = null;
     let cancelled = false;
     const describeBackendFailure = (
@@ -7484,7 +7486,7 @@ function AppProviderInner({
       );
 
       // Handle conversation updates (e.g. title changes)
-      client.onWsEvent(
+      unbindConversationUpdated = client.onWsEvent(
         "conversation-updated",
         (data: Record<string, unknown>) => {
           const conv = data.conversation as Conversation;
@@ -7502,152 +7504,162 @@ function AppProviderInner({
       );
 
       // Handle PTY session events from SwarmCoordinator
-      client.onWsEvent("pty-session-event", (data: Record<string, unknown>) => {
-        const eventType = (data.eventType ?? data.type) as string;
-        const sessionId = data.sessionId as string;
-        if (!sessionId) return;
+      unbindPtySessionEvent = client.onWsEvent(
+        "pty-session-event",
+        (data: Record<string, unknown>) => {
+          const eventType = (data.eventType ?? data.type) as string;
+          const sessionId = data.sessionId as string;
+          if (!sessionId) return;
 
-        if (eventType === "task_registered") {
-          const d = data.data as Record<string, unknown> | undefined;
-          setPtySessions((prev) => [
-            ...prev.filter((s) => s.sessionId !== sessionId),
-            {
-              sessionId,
-              agentType: (d?.agentType as string) ?? "claude",
-              label: (d?.label as string) ?? sessionId,
-              originalTask: (d?.originalTask as string) ?? "",
-              workdir: (d?.workdir as string) ?? "",
-              status: "active",
-              decisionCount: 0,
-              autoResolvedCount: 0,
-              lastActivity: "Starting",
-            },
-          ]);
-        } else if (eventType === "task_complete" || eventType === "stopped") {
-          setPtySessions((prev) =>
-            prev.filter((s) => s.sessionId !== sessionId),
-          );
-        } else {
-          // Status update — apply to known session, or full re-hydrate if unknown
-          const applyUpdate = (
-            prev: CodingAgentSession[],
-          ): CodingAgentSession[] => {
-            const known = prev.some((s) => s.sessionId === sessionId);
-            if (!known) return prev; // will trigger hydration below
+          if (eventType === "task_registered") {
+            const d = data.data as Record<string, unknown> | undefined;
+            setPtySessions((prev) => [
+              ...prev.filter((s) => s.sessionId !== sessionId),
+              {
+                sessionId,
+                agentType: (d?.agentType as string) ?? "claude",
+                label: (d?.label as string) ?? sessionId,
+                originalTask: (d?.originalTask as string) ?? "",
+                workdir: (d?.workdir as string) ?? "",
+                status: "active",
+                decisionCount: 0,
+                autoResolvedCount: 0,
+                lastActivity: "Starting",
+              },
+            ]);
+          } else if (eventType === "task_complete" || eventType === "stopped") {
+            setPtySessions((prev) =>
+              prev.filter((s) => s.sessionId !== sessionId),
+            );
+          } else {
+            // Status update — apply to known session, or full re-hydrate if unknown
+            const applyUpdate = (
+              prev: CodingAgentSession[],
+            ): CodingAgentSession[] => {
+              const known = prev.some((s) => s.sessionId === sessionId);
+              if (!known) return prev; // will trigger hydration below
 
-            if (eventType === "blocked" || eventType === "escalation") {
-              const activity =
-                eventType === "escalation"
-                  ? "Escalated — needs attention"
-                  : "Waiting for input";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? { ...s, status: "blocked" as const, lastActivity: activity }
-                  : s,
-              );
-            }
-            if (eventType === "tool_running") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const toolDesc =
-                (d?.description as string) ??
-                (d?.toolName as string) ??
-                "external tool";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "tool_running" as const,
-                      toolDescription: toolDesc,
-                      lastActivity: `Running ${toolDesc}`.slice(0, 60),
-                    }
-                  : s,
-              );
-            }
-            if (eventType === "blocked_auto_resolved") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const prompt =
-                (d?.prompt as string) ?? (d?.reasoning as string) ?? "";
-              const excerpt = prompt
-                ? `Approved: ${prompt}`.slice(0, 60)
-                : "Approved";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "active" as const,
-                      toolDescription: undefined,
-                      lastActivity: excerpt,
-                    }
-                  : s,
-              );
-            }
-            // coordination_decision — emitted by swarm decision loop.
-            // d.action values: "approve" | "respond" | "escalate" | "continue"
-            if (eventType === "coordination_decision") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const reasoning =
-                (d?.reasoning as string) ?? (d?.action as string) ?? "";
-              const wasEscalation = (d?.action as string) === "escalate";
-              const excerpt = wasEscalation
-                ? `Escalated: ${reasoning}`.slice(0, 60)
-                : reasoning
-                  ? `Responded: ${reasoning}`.slice(0, 60)
-                  : "Responded";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "active" as const,
-                      toolDescription: undefined,
-                      lastActivity: excerpt,
-                    }
-                  : s,
-              );
-            }
-            if (eventType === "ready") {
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "active" as const,
-                      toolDescription: undefined,
-                      lastActivity: "Running",
-                    }
-                  : s,
-              );
-            }
-            if (eventType === "error") {
-              const d = data.data as Record<string, unknown> | undefined;
-              const errMsg = (d?.message as string) ?? "Unknown error";
-              return prev.map((s) =>
-                s.sessionId === sessionId
-                  ? {
-                      ...s,
-                      status: "error" as const,
-                      lastActivity: `Error: ${errMsg}`.slice(0, 60),
-                    }
-                  : s,
-              );
-            }
-            return prev;
-          };
-
-          let needsHydrate = false;
-          setPtySessions((prev) => {
-            const next = applyUpdate(prev);
-            if (next === prev && !prev.some((s) => s.sessionId === sessionId)) {
-              // Unknown session — flag for re-hydration outside the updater
-              needsHydrate = true;
+              if (eventType === "blocked" || eventType === "escalation") {
+                const activity =
+                  eventType === "escalation"
+                    ? "Escalated — needs attention"
+                    : "Waiting for input";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "blocked" as const,
+                        lastActivity: activity,
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "tool_running") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const toolDesc =
+                  (d?.description as string) ??
+                  (d?.toolName as string) ??
+                  "external tool";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "tool_running" as const,
+                        toolDescription: toolDesc,
+                        lastActivity: `Running ${toolDesc}`.slice(0, 60),
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "blocked_auto_resolved") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const prompt =
+                  (d?.prompt as string) ?? (d?.reasoning as string) ?? "";
+                const excerpt = prompt
+                  ? `Approved: ${prompt}`.slice(0, 60)
+                  : "Approved";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "active" as const,
+                        toolDescription: undefined,
+                        lastActivity: excerpt,
+                      }
+                    : s,
+                );
+              }
+              // coordination_decision — emitted by swarm decision loop.
+              // d.action values: "approve" | "respond" | "escalate" | "continue"
+              if (eventType === "coordination_decision") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const reasoning =
+                  (d?.reasoning as string) ?? (d?.action as string) ?? "";
+                const wasEscalation = (d?.action as string) === "escalate";
+                const excerpt = wasEscalation
+                  ? `Escalated: ${reasoning}`.slice(0, 60)
+                  : reasoning
+                    ? `Responded: ${reasoning}`.slice(0, 60)
+                    : "Responded";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "active" as const,
+                        toolDescription: undefined,
+                        lastActivity: excerpt,
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "ready") {
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "active" as const,
+                        toolDescription: undefined,
+                        lastActivity: "Running",
+                      }
+                    : s,
+                );
+              }
+              if (eventType === "error") {
+                const d = data.data as Record<string, unknown> | undefined;
+                const errMsg = (d?.message as string) ?? "Unknown error";
+                return prev.map((s) =>
+                  s.sessionId === sessionId
+                    ? {
+                        ...s,
+                        status: "error" as const,
+                        lastActivity: `Error: ${errMsg}`.slice(0, 60),
+                      }
+                    : s,
+                );
+              }
               return prev;
+            };
+
+            let needsHydrate = false;
+            setPtySessions((prev) => {
+              const next = applyUpdate(prev);
+              if (
+                next === prev &&
+                !prev.some((s) => s.sessionId === sessionId)
+              ) {
+                // Unknown session — flag for re-hydration outside the updater
+                needsHydrate = true;
+                return prev;
+              }
+              return next;
+            });
+            if (needsHydrate) {
+              // Re-hydrate from server to pick up missed registrations
+              hydratePtySessions();
             }
-            return next;
-          });
-          if (needsHydrate) {
-            // Re-hydrate from server to pick up missed registrations
-            hydratePtySessions();
           }
-        }
-      });
+        },
+      );
 
       // Load wallet addresses for header
       try {
@@ -7784,6 +7796,8 @@ function AppProviderInner({
       unbindWsReconnect?.();
       unbindSystemWarnings?.();
       unbindRestartRequired?.();
+      unbindConversationUpdated?.();
+      unbindPtySessionEvent?.();
       if (ptyPollInterval) {
         clearInterval(ptyPollInterval);
         ptyPollInterval = null;

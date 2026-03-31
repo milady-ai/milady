@@ -3,6 +3,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const BUILD_DOCKER_WORKFLOW = path.join(
+  ROOT,
+  ".github/workflows/build-docker.yml",
+);
 const EXPECTED_NODE_VERSION = "22";
 const EXPECTED_BUN_VERSION = "1.3.10";
 const EXPECTED_EXPOSE_PORT = "2138";
@@ -97,6 +101,36 @@ describe("Docker contract", () => {
     expect(entrypoint).toContain(
       // biome-ignore lint/suspicious/noTemplateCurlyInString: shell variable assertion
       'export ELIZA_API_PORT="${ELIZA_API_PORT:-$resolved_port}"',
+    );
+  });
+
+  it("triggers on GitHub Release published and resolves ref and version from release tag", () => {
+    const workflow = read(BUILD_DOCKER_WORKFLOW);
+
+    // release trigger must be present
+    expect(workflow).toContain("release:");
+    expect(workflow).toContain("types: [published]");
+
+    // checkout ref must fall back to release tag_name so the correct commit is built
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: workflow expression assertion
+      "ref: ${{ inputs.source_sha || github.event.release.tag_name || github.sha }}",
+    );
+
+    // version determination must pick up the release tag
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: workflow expression assertion
+      'elif [ -n "${{ github.event.release.tag_name }}" ]',
+    );
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: workflow expression assertion
+      'VERSION="${{ github.event.release.tag_name }}"',
+    );
+
+    // release event must be treated as a release build (IS_RELEASE=true)
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: workflow expression assertion
+      '[[ -n "${{ github.event.release.tag_name }}" ]]',
     );
   });
 

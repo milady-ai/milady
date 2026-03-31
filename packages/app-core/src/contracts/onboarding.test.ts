@@ -128,6 +128,16 @@ describe("onboarding provider catalog", () => {
     });
   });
 
+  it("does not infer remote selection from an access token without an API base", () => {
+    expect(
+      inferOnboardingConnectionFromConfig({
+        cloud: {
+          remoteAccessToken: "remote-token",
+        },
+      }),
+    ).toBeNull();
+  });
+
   it("does not infer cloud selection from cloud api key capability alone", () => {
     expect(
       inferOnboardingConnectionFromConfig({
@@ -178,6 +188,15 @@ describe("onboarding provider catalog", () => {
   });
 
   it("requires full cloud-managed model selection before onboarding is complete", () => {
+    expect(
+      isOnboardingConnectionComplete({
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      }),
+    ).toBe(true);
+
     expect(
       isOnboardingConnectionComplete({
         kind: "cloud-managed",

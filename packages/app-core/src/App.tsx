@@ -41,7 +41,6 @@ import {
   InventoryView,
   KnowledgeView,
   OnboardingWizard,
-
   PairingView,
   SaveCommandModal,
   SettingsView,
@@ -270,7 +269,6 @@ function ViewRouter({
       case "advanced":
       case "plugins":
       case "skills":
-      case "actions":
       case "fine-tuning":
       case "trajectories":
       case "runtime":
@@ -503,8 +501,12 @@ export function App() {
   }, [showFullScreenLoader]);
 
   useEffect(() => {
+    // During "initializing-agent" phase the agent-wait loop has its own
+    // sliding deadline (up to 900s for first-run embedding downloads).
+    // Only arm the watchdog during "starting-backend" to avoid killing a
+    // valid agent download mid-flight.
     const STARTUP_TIMEOUT_MS = 300_000;
-    if ((startupPhase as string) !== "ready" && !startupError) {
+    if (startupPhase === "starting-backend" && !startupError) {
       const timer = setTimeout(() => {
         retryStartup();
       }, STARTUP_TIMEOUT_MS);

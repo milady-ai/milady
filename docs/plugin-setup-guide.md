@@ -205,7 +205,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 **Variables:**
 - `ELIZAOS_CLOUD_API_KEY` — Your Eliza Cloud API key
 - `ELIZAOS_CLOUD_ENABLED` — Set to `true` to enable cloud features
-**Tips:** Eliza Cloud provides hosted infrastructure for running elizaOS agents with managed scaling and monitoring.
+**Tips:** Eliza Cloud provides hosted infrastructure for running Eliza agents with managed scaling and monitoring.
 
 ---
 
