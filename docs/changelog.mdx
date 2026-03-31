@@ -3,6 +3,31 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-03-31" description="Week of March 30–31; tasks panel, code creation UX, security hardening, Docker fix" tags={["Feature", "Update", "Fix"]}>
+## Tasks and events panel
+
+The chat view now includes a collapsible side panel that shows live coding agent sessions and a real-time event log. Click the tasks icon in the chat header to open it — you can watch PTY terminal output as your agent works and monitor WebSocket events as they happen. On mobile, it opens as a bottom drawer. See the [coding swarms guide](/guides/coding-swarms) for details.
+
+## Code creation popover
+
+A new popover in the chat composer lets you create coding or research tasks directly. Choose the agent type and kick off a task without typing a prompt from scratch — the request is routed to the right executor automatically.
+
+## Updates
+
+- **Onboarding connection selection persisted** — Your hosting choice during [onboarding](/guides/beginners-user-guide) (local, cloud, or remote) is now saved reliably. Switching providers, resuming after a restart, and cloud-to-local transitions all respect your original selection instead of falling back to defaults.
+- **Frontend dark mode and accessibility pass** — Seven dark mode bugs have been fixed across toggle switches, loading screens, banners, and overlays. The homepage now includes proper Open Graph meta tags, ARIA landmarks, and a corrected heading hierarchy. Status colors use semantic tokens throughout, so indicators look consistent in both light and dark themes.
+- **Homepage dark theme restored** — The homepage dark theme, which was inadvertently broken by a recent cleanup, has been restored.
+
+## Bug fixes
+
+- Fixed the onboarding restart flow failing on Windows with "a restart is already in progress" — restarts are now serialized so overlapping restart requests wait instead of failing
+- Fixed Docker containers failing to start due to missing internal workspace modules — Bun workspace dependencies are now correctly preserved in the runtime image
+- Fixed the startup watchdog killing agent downloads by scoping it to the backend startup phase only
+- Fixed two WebSocket subscription leaks and added an SSE idle timeout so stale streaming connections clean up automatically
+- Fixed the TTS endpoint being accessible without authentication — voice synthesis now requires a valid session
+
+</Update>
+
 <Update label="2026-03-30" description="Week of March 29–30; cloud dashboard polish, live metrics, billing" tags={["Update"]}>
 ## Cloud dashboard overhaul
 
