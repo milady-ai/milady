@@ -140,14 +140,6 @@ describe("Electrobun release workflow drift", () => {
     const releaseCheckIndex = workflow.indexOf("run: bun run release:check");
 
     expect(workflow).toContain('BUN_VERSION: "1.3.9"');
-    expect(workflow).toContain(
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-      "RUNNER_UBUNTU: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}",
-    );
-    expect(workflow).toContain(
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-      "RUNNER_WINDOWS: ${{ vars.RUNNER_WINDOWS || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-windows-2025' || 'windows-2025') }}",
-    );
     expect(workflow).toContain('NODE_NO_WARNINGS: "1"');
     expect(workflow).toContain("bun-version: $" + "{{ env.BUN_VERSION }}");
     expect(workflow).not.toContain("bun-version: latest");
@@ -155,6 +147,10 @@ describe("Electrobun release workflow drift", () => {
     expect(buildJobIndex).toBeGreaterThan(validateJobIndex);
     expect(releaseCheckIndex).toBeGreaterThan(validateJobIndex);
     expect(workflow).toContain("needs: [prepare, validate-release]");
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+      "runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}",
+    );
   });
 
   it("runs the release regression contract before release-check", () => {
@@ -302,8 +298,10 @@ describe("Electrobun release workflow drift", () => {
       'node scripts/build-patched-electrobun-cli.mjs "$' +
         '{{ steps.resolve-electrobun.outputs.package-dir }}"',
     );
-    // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-    expect(workflow).toContain("runner: ${{ env.RUNNER_WINDOWS }}");
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+      "runner: ${{ vars.RUNNER_WINDOWS || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-windows-2025' || 'windows-2025') }}",
+    );
     expect(workflow).not.toContain(
       'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
     );
