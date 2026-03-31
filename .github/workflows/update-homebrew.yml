@@ -26,7 +26,7 @@ concurrency:
 jobs:
   update-tap:
     name: Trigger Homebrew tap update
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
     steps:
       - name: Determine version
         id: meta
@@ -44,6 +44,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          repository: milady-ai/homebrew-tap
+          repository: ${{ vars.HOMEBREW_TAP_REPO || 'milady-ai/homebrew-tap' }}
           event-type: update-homebrew
           client-payload: '{"version": "${{ steps.meta.outputs.version }}"}'
