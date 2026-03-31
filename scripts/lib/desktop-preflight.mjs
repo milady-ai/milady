@@ -1,5 +1,3 @@
-import path from "node:path";
-
 const EACCES_VIEW_PATTERN =
   /electrobun[\\/](?:node_modules[\\/])?view|electrobun[\\/](?:node_modules[\\/])?electrobun[\\/]view/i;
 
