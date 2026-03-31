@@ -31,7 +31,35 @@ const BACKGROUNDS_DIR = path.join(
   "vrms",
   "backgrounds",
 );
-const VRM_COUNT = 8;
+const CHARACTER_DEFS_PATH = path.join(
+  ROOT,
+  "packages",
+  "agent",
+  "src",
+  "brand",
+  "character-definitions.json",
+);
+
+/** Same default slug rule as `createPresetApi({ slugPrefix: "milady" })` for dev tooling. */
+const DEFAULT_SLUG_PREFIX = "milady";
+
+function loadScreenshotRoster() {
+  const raw = fs.readFileSync(CHARACTER_DEFS_PATH, "utf8");
+  const defs = JSON.parse(raw);
+  if (!Array.isArray(defs)) {
+    throw new Error("character-definitions.json must be an array");
+  }
+  const prefix = DEFAULT_SLUG_PREFIX.replace(/-+$/, "");
+  return [...defs]
+    .sort((a, b) => a.avatarIndex - b.avatarIndex)
+    .map((d) => ({
+      id: d.avatarIndex,
+      slug:
+        typeof d.slug === "string" && d.slug
+          ? d.slug
+          : `${prefix}-${d.avatarIndex}`,
+    }));
+}
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -47,6 +75,7 @@ function parseArgs() {
 
 async function main() {
   const { url } = parseArgs();
+  const roster = loadScreenshotRoster();
   const screenshotterUrl = `${url}/public_src/screenshotter.html`;
 
   console.log("[run-screenshotter] Launching browser...");
@@ -105,28 +134,29 @@ async function main() {
     fs.mkdirSync(BACKGROUNDS_DIR, { recursive: true });
 
     let saved = 0;
-    for (let i = 1; i <= VRM_COUNT; i++) {
-      const dataUrl = await page.evaluate((index) => {
-        const dl = document.getElementById(`d${index}`);
+    const total = roster.length;
+    for (const { id, slug } of roster) {
+      const dataUrl = await page.evaluate((assetId) => {
+        const dl = document.getElementById(`d${assetId}`);
         return dl?.href ?? null;
-      }, i);
+      }, id);
       if (!dataUrl?.startsWith("data:image/png")) {
-        console.warn(`[run-screenshotter] No preview for eliza-${i}`);
+        console.warn(`[run-screenshotter] No preview for ${slug} (id ${id})`);
         continue;
       }
       const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
       const buf = Buffer.from(base64, "base64");
-      const previewPath = path.join(PREVIEWS_DIR, `eliza-${i}.png`);
+      const previewPath = path.join(PREVIEWS_DIR, `${slug}.png`);
       fs.writeFileSync(previewPath, buf);
       console.log(`[run-screenshotter] Saved ${previewPath}`);
       saved++;
 
-      const bgPath = path.join(BACKGROUNDS_DIR, `eliza-${i}.png`);
+      const bgPath = path.join(BACKGROUNDS_DIR, `${slug}.png`);
       fs.writeFileSync(bgPath, buf);
     }
 
     console.log(
-      `[run-screenshotter] Done. Saved ${saved}/${VRM_COUNT} previews and backgrounds.`,
+      `[run-screenshotter] Done. Saved ${saved}/${total} previews and backgrounds.`,
     );
   } finally {
     await browser.close();

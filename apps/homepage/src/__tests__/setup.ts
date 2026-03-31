@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import "../register-presets";
 
 function createMemoryStorage(): Storage {
   const values = new Map<string, string>();

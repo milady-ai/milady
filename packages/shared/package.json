@@ -33,7 +33,8 @@
     "./awareness": "./src/awareness/index.ts",
     "./restart": "./src/restart.ts",
     "./spoken-text": "./src/spoken-text.ts",
-    "./onboarding-presets": "./src/onboarding-presets.ts"
+    "./onboarding-presets": "./src/onboarding-presets.ts",
+    "./milady-legacy-english-examples": "./src/milady-legacy-english-examples.ts"
   },
   "publishConfig": {
     "access": "public",

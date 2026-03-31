@@ -9,7 +9,7 @@ const { mockUseApp } = vi.hoisted(() => ({
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
   getVrmPreviewUrl: (index: number) => `mock-vrm-${index}.png`,
-  VRM_COUNT: 8,
+  getVrmCount: () => 8,
 }));
 
 vi.mock("@miladyai/ui", async () => {

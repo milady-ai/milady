@@ -21,7 +21,7 @@ vi.mock("@miladyai/app-core/state", () => ({
     setPosition: vi.fn(),
   }),
   useTranslation: () => ({ t: (k: string) => k }),
-  VRM_COUNT: 24,
+  getVrmCount: () => 24,
 }));
 
 vi.mock("@miladyai/app-core/utils", () => ({

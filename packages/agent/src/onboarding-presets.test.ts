@@ -6,8 +6,8 @@ import {
 } from "./onboarding-presets";
 
 describe("getStylePresets", () => {
-  it("returns the STYLE_PRESETS array", () => {
-    expect(getStylePresets()).toBe(STYLE_PRESETS);
+  it("returns the same preset list as STYLE_PRESETS (English)", () => {
+    expect(getStylePresets()).toStrictEqual(STYLE_PRESETS);
   });
 
   it("returns a non-empty array of presets with required fields", () => {

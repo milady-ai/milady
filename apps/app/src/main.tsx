@@ -1,3 +1,5 @@
+import "./boot/register-presets";
+
 import { ErrorBoundary } from "@miladyai/app-core/components";
 import "@miladyai/app-core/styles/styles.css";
 import "@miladyai/app-core/styles/brand-gold.css";
@@ -56,6 +58,7 @@ import { Agent } from "@miladyai/capacitor-agent";
 import { Desktop } from "@miladyai/capacitor-desktop";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { miladyPresets } from "./brand/brand-presets";
 import { MILADY_ENV_ALIASES } from "./brand-env";
 import { MILADY_CHARACTER_CATALOG } from "./character-catalog";
 import { shouldUseCloudOnlyBranding } from "./cloud-only";
@@ -149,20 +152,19 @@ installDesktopPermissionsClientPatch(client as never);
 // Register custom character editor for app-core's ViewRouter to pick up
 window.__MILADY_CHARACTER_EDITOR__ = CharacterEditor;
 
-import { getStylePresets } from "@miladyai/shared/onboarding-presets";
-
-// Derive VRM roster from STYLE_PRESETS so character names stay in one place.
-const MILADY_STYLE_PRESETS = getStylePresets();
-
-const MILADY_VRM_ASSETS = MILADY_STYLE_PRESETS.slice()
-  .sort((a, b) => a.avatarIndex - b.avatarIndex)
-  .map((p) => ({ title: p.name, slug: `milady-${p.avatarIndex}` }));
+const MILADY_STYLE_PRESETS = miladyPresets.getStylePresets();
+const catalogAssets = miladyPresets.buildCharacterCatalog().assets;
+const MILADY_VRM_ASSETS = catalogAssets
+  .slice()
+  .sort((a, b) => a.id - b.id)
+  .map((a) => ({ title: a.title, slug: a.slug }));
 
 const miladyBootConfig: AppBootConfig = {
   branding: MILADY_BRANDING,
   cloudApiBase:
     (import.meta.env.VITE_CLOUD_BASE as string) ?? "https://www.elizacloud.ai",
   vrmAssets: MILADY_VRM_ASSETS,
+  companionBackgrounds: { light: 3, dark: 4 },
   onboardingStyles: MILADY_STYLE_PRESETS,
   characterEditor: CharacterEditor,
   characterCatalog: MILADY_CHARACTER_CATALOG,

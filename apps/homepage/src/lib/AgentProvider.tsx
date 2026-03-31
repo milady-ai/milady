@@ -344,7 +344,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
         // No matching cloud agent — add as standalone remote agent with "checking..." status
         const newIndex = results.length;
         results.push({
-          id: `milady-${sb.id}`,
+          id: `remote-${sb.id}`,
           name: sb.agent_name || sb.id,
           source: "remote",
           status: "unknown", // Will be enriched by health probe

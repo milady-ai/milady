@@ -1,4 +1,10 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -85,6 +91,23 @@ writeFileSync(
   path.join(distDir, "package.json"),
   `${JSON.stringify(cleanUndefined(publishManifest), null, 2)}\n`,
 );
+
+// Agent runtime reads brand JSON next to compiled init-character-presets.js (tsc does not copy it).
+if (path.basename(packageDir) === "agent") {
+  const brandSrc = path.join(packageDir, "src", "brand");
+  const brandDest = path.join(distDir, "packages", "agent", "src", "brand");
+  try {
+    cpSync(brandSrc, brandDest, { recursive: true });
+  } catch (err) {
+    if (err && typeof err === "object" && err.code === "ENOENT") {
+      console.warn(
+        "[prepare-package-dist] agent: no src/brand to copy (skipping)",
+      );
+    } else {
+      throw err;
+    }
+  }
+}
 
 function collectWorkspaceVersions(rootDir) {
   const packageRoots = [

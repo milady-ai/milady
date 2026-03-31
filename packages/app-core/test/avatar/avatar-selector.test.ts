@@ -4,27 +4,28 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Build the VRM asset roster from STYLE_PRESETS inside vi.hoisted so it's
-// available when vi.mock runs (both are hoisted above normal imports).
-const { TEST_VRM_ASSETS } = vi.hoisted(() => {
-  // Inline the preset names/avatarIndex here because vi.hoisted can't access
-  // module imports. This list MUST match STYLE_PRESETS in onboarding-presets.ts.
-  // If a preset is added/removed/reordered, this test will fail and signal
-  // that this list needs updating.
-  const presets = [
-    { name: "Chen", avatarIndex: 1 },
-    { name: "Jin", avatarIndex: 2 },
-    { name: "Kei", avatarIndex: 3 },
-    { name: "Momo", avatarIndex: 4 },
-    { name: "Rin", avatarIndex: 5 },
-    { name: "Ryu", avatarIndex: 6 },
-    { name: "Satoshi", avatarIndex: 7 },
-    { name: "Yuki", avatarIndex: 8 },
-  ];
+type RosterEntry = { name: string; avatarIndex: number };
+
+// Load roster from shared JSON (same source as getStylePresets) inside vi.hoisted so
+// TEST_VRM_ASSETS exists before vi.mock runs. Use require() here — ESM imports are not
+// initialized yet when the hoisted factory runs.
+const { TEST_CHARACTER_ROSTER, TEST_VRM_ASSETS } = vi.hoisted(() => {
+  const fs = require("node:fs") as typeof import("node:fs");
+  const path = require("node:path") as typeof import("node:path");
+  const { fileURLToPath } = require("node:url") as typeof import("node:url");
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const jsonPath = path.join(
+    here,
+    "../../../../packages/agent/src/brand/character-definitions.json",
+  );
+  const defs = JSON.parse(fs.readFileSync(jsonPath, "utf-8")) as RosterEntry[];
+  const sorted = [...defs].sort((a, b) => a.avatarIndex - b.avatarIndex);
   return {
-    TEST_VRM_ASSETS: presets
-      .sort((a, b) => a.avatarIndex - b.avatarIndex)
-      .map((p) => ({ title: p.name, slug: `milady-${p.avatarIndex}` })),
+    TEST_CHARACTER_ROSTER: sorted,
+    TEST_VRM_ASSETS: sorted.map((p) => ({
+      title: p.name,
+      slug: `milady-${p.avatarIndex}`,
+    })),
   };
 });
 
@@ -43,32 +44,26 @@ vi.mock("../../src/config/boot-config", async (importOriginal) => {
 
 import {
   getCompanionBackgroundUrl,
+  getVrmCount,
   getVrmPreviewUrl,
   getVrmTitle,
   getVrmUrl,
-  VRM_COUNT,
 } from "@miladyai/app-core/state";
 
 describe("Avatar VRM Utilities", () => {
   describe("getVrmUrl", () => {
-    it("returns correct path for bundled Milady VRMs (1-8)", () => {
-      const expectedSlugs = [
-        "milady-1",
-        "milady-2",
-        "milady-3",
-        "milady-4",
-        "milady-5",
-        "milady-6",
-        "milady-7",
-        "milady-8",
-      ];
-      expectedSlugs.forEach((slug, index) => {
-        expect(getVrmUrl(index + 1)).toBe(`/vrms/${slug}.vrm.gz`);
-      });
+    it("returns correct path for each bundled Milady VRM", () => {
+      for (const p of TEST_CHARACTER_ROSTER) {
+        expect(getVrmUrl(p.avatarIndex)).toBe(
+          `/vrms/milady-${p.avatarIndex}.vrm.gz`,
+        );
+      }
     });
 
     it("clamps out-of-range indices to avatar 1", () => {
-      expect(getVrmUrl(9)).toBe("/vrms/milady-1.vrm.gz");
+      const pastEnd =
+        Math.max(...TEST_CHARACTER_ROSTER.map((p) => p.avatarIndex), 0) + 1;
+      expect(getVrmUrl(pastEnd)).toBe("/vrms/milady-1.vrm.gz");
       expect(getVrmUrl(34)).toBe("/vrms/milady-1.vrm.gz");
       expect(getVrmUrl(-3)).toBe("/vrms/milady-1.vrm.gz");
       expect(getVrmUrl(Number.NaN)).toBe("/vrms/milady-1.vrm.gz");
@@ -77,24 +72,18 @@ describe("Avatar VRM Utilities", () => {
   });
 
   describe("getVrmPreviewUrl", () => {
-    it("returns correct preview path for bundled Milady VRMs (1-8)", () => {
-      const expectedSlugs = [
-        "milady-1",
-        "milady-2",
-        "milady-3",
-        "milady-4",
-        "milady-5",
-        "milady-6",
-        "milady-7",
-        "milady-8",
-      ];
-      expectedSlugs.forEach((slug, index) => {
-        expect(getVrmPreviewUrl(index + 1)).toBe(`/vrms/previews/${slug}.png`);
-      });
+    it("returns correct preview path for each bundled Milady VRM", () => {
+      for (const p of TEST_CHARACTER_ROSTER) {
+        expect(getVrmPreviewUrl(p.avatarIndex)).toBe(
+          `/vrms/previews/milady-${p.avatarIndex}.png`,
+        );
+      }
     });
 
     it("clamps out-of-range preview indices to avatar 1", () => {
-      expect(getVrmPreviewUrl(9)).toBe("/vrms/previews/milady-1.png");
+      const pastEnd =
+        Math.max(...TEST_CHARACTER_ROSTER.map((p) => p.avatarIndex), 0) + 1;
+      expect(getVrmPreviewUrl(pastEnd)).toBe("/vrms/previews/milady-1.png");
       expect(getVrmPreviewUrl(999)).toBe("/vrms/previews/milady-1.png");
       expect(getVrmPreviewUrl(-1)).toBe("/vrms/previews/milady-1.png");
       expect(getVrmPreviewUrl(0)).toBe("/vrms/previews/milady-1.png");
@@ -103,18 +92,17 @@ describe("Avatar VRM Utilities", () => {
 
   describe("getVrmTitle", () => {
     it("returns roster titles for bundled Milady avatars", () => {
-      expect(getVrmTitle(1)).toBe("Chen");
-      expect(getVrmTitle(2)).toBe("Jin");
-      expect(getVrmTitle(3)).toBe("Kei");
-      expect(getVrmTitle(4)).toBe("Momo");
-      expect(getVrmTitle(5)).toBe("Rin");
-      expect(getVrmTitle(6)).toBe("Ryu");
-      expect(getVrmTitle(7)).toBe("Satoshi");
-      expect(getVrmTitle(8)).toBe("Yuki");
+      for (const p of TEST_CHARACTER_ROSTER) {
+        expect(getVrmTitle(p.avatarIndex)).toBe(p.name);
+      }
     });
 
     it("clamps out-of-range index to avatar 1", () => {
-      expect(getVrmTitle(9)).toBe("Chen");
+      const pastEnd =
+        Math.max(...TEST_CHARACTER_ROSTER.map((p) => p.avatarIndex), 0) + 1;
+      expect(getVrmTitle(pastEnd)).toBe(
+        TEST_CHARACTER_ROSTER[0]?.name ?? "Chen",
+      );
     });
 
     it("hoisted test roster stays in sync with STYLE_PRESETS", async () => {
@@ -171,7 +159,7 @@ describe("Avatar Selection State", () => {
       expect(stored).toBe("3");
       const index = Number(stored);
       expect(index).toBe(3);
-      expect(index >= 1 && index <= VRM_COUNT).toBe(true);
+      expect(index >= 1 && index <= getVrmCount()).toBe(true);
     });
 
     it("handles custom VRM (index 0)", () => {
@@ -188,7 +176,7 @@ describe("Avatar Selection State", () => {
 
       for (const invalid of testCases) {
         const n = Number(invalid);
-        const isValid = !Number.isNaN(n) && n >= 0 && n <= VRM_COUNT;
+        const isValid = !Number.isNaN(n) && n >= 0 && n <= getVrmCount();
         const result = isValid ? n : 1;
         // Invalid cases should fall back to 1
         if (!isValid) {

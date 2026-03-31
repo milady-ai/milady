@@ -17,7 +17,7 @@ vi.mock("@miladyai/app-core/state", () => ({
   getVrmBackgroundUrl: (index: number) =>
     `/vrms/backgrounds/milady-${index}.png`,
   getVrmTitle: (index: number) => `MILADY-${index}`,
-  VRM_COUNT: 24,
+  getVrmCount: () => 24,
   CUSTOM_ONBOARDING_STEPS: [],
   useCompanionSceneConfig: () => {
     const state = (mockUseApp() as Record<string, unknown>) ?? {};

@@ -311,7 +311,7 @@ export {
   type UiTheme,
   useApp,
   useTranslation,
-  VRM_COUNT,
+  getVrmCount,
 } from "./internal";
 export { AGENT_READY_TIMEOUT_MS } from "./types";
 

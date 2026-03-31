@@ -1,8 +1,9 @@
 /**
- * Milady character catalog derived from the shared character preset source.
+ * Milady character catalog derived from registered preset API (`./boot/register-presets`
+ * must load before this module).
  */
 import type { CharacterCatalogData } from "@miladyai/app-core/config";
-import { buildMiladyCharacterCatalog } from "@miladyai/shared/onboarding-presets";
+import { buildCharacterCatalog } from "@miladyai/shared/onboarding-presets";
 
 export const MILADY_CHARACTER_CATALOG: CharacterCatalogData =
-  buildMiladyCharacterCatalog() as CharacterCatalogData;
+  buildCharacterCatalog() as CharacterCatalogData;

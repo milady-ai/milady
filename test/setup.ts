@@ -1,5 +1,14 @@
 import Module from "node:module";
 import { afterAll, afterEach, vi } from "vitest";
+import characterDefinitions from "../packages/agent/src/brand/character-definitions.json" with {
+  type: "json",
+};
+import {
+  type CharacterDefinition,
+  createPresetApi,
+  MILADY_LEGACY_ENGLISH_EXAMPLES,
+  registerPresetApi,
+} from "../packages/shared/src/onboarding-presets.ts";
 import {
   createMockStorage,
   hasStorageApi,
@@ -81,6 +90,14 @@ process.env.VITEST = "true";
 process.env.LOG_LEVEL ??= "error";
 // Allow tests to run without a real database (uses InMemoryDatabaseAdapter).
 process.env.ALLOW_NO_DATABASE ??= "true";
+
+registerPresetApi(
+  createPresetApi({
+    definitions: characterDefinitions as CharacterDefinition[],
+    legacyEnglishExamples: MILADY_LEGACY_ENGLISH_EXAMPLES,
+    slugPrefix: "milady",
+  }),
+);
 
 declare global {
   // React 18 testing flag to suppress act() environment warnings.

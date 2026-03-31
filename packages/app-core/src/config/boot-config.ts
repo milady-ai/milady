@@ -80,6 +80,11 @@ export interface AppBootConfig {
   /** Character catalog data — replaces cross-package import of catalog.json. */
   characterCatalog?: CharacterCatalogData;
   /**
+   * Companion-mode background VRM indices (1-based), keyed by UI theme.
+   * Clamped to the current `vrmAssets` length when the roster is smaller.
+   */
+  companionBackgrounds?: { light: number; dark: number };
+  /**
    * Env var alias pairs for brand compatibility (e.g. MILADY_* ↔ ELIZA_*).
    * Each pair is [brandKey, elizaKey]. Called at server startup.
    */

@@ -10,7 +10,7 @@ import {
   getVrmPreviewUrl,
   getVrmTitle,
   useApp,
-  VRM_COUNT,
+  getVrmCount,
 } from "@miladyai/app-core/state";
 import { alertDesktopMessage } from "@miladyai/app-core/utils";
 import { Button, Spinner } from "@miladyai/ui";
@@ -146,7 +146,10 @@ export function AvatarSelector({
     [handleVrmFile],
   );
 
-  const avatarIndices = Array.from({ length: VRM_COUNT }, (_, i) => i + 1);
+  const avatarIndices = Array.from(
+    { length: getVrmCount() },
+    (_, i) => i + 1,
+  );
   const containerClass = fullWidth
     ? "flex flex-row gap-2 w-full items-center"
     : "flex flex-wrap gap-3 justify-start";

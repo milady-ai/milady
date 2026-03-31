@@ -8,10 +8,16 @@ import type { UiTheme } from "./ui-preferences";
 
 /**
  * When the boot roster is empty, still point at a real bundled asset.
- * WHY `"default"` was wrong: `public/vrms` ships `milady-1`…`milady-8` only;
- * a `default.vrm.gz` URL 404s and breaks the companion in desktop/WebView.
+ * Uses the first configured `vrmAssets` slug when present; otherwise `default`
+ * (host apps should always set `vrmAssets` when shipping avatars).
  */
-const BUNDLED_VRM_FALLBACK_SLUG = "milady-1";
+function fallbackSlug(): string {
+  const assets = getBootConfig().vrmAssets;
+  if (Array.isArray(assets) && assets.length > 0 && assets[0]?.slug) {
+    return assets[0].slug;
+  }
+  return "default";
+}
 
 /**
  * Get the VRM asset roster from the boot config.
@@ -26,20 +32,33 @@ function getAssets(): BundledVrmAsset[] {
   return [];
 }
 
-/** Number of bundled VRM avatars shipped with the app. */
+/** Number of bundled VRM avatars from the current boot roster. */
 export function getVrmCount(): number {
   return getAssets().length;
 }
 
-// Legacy constant — prefer getVrmCount() for dynamic rosters.
-// Returns 0 if no boot config has been set yet.
-export const VRM_COUNT = 8;
+function clampAvatarIndexToRoster(index: number, count: number): number {
+  if (count <= 0) return 1;
+  return Math.min(Math.max(1, Math.trunc(index)), count);
+}
+
+function companionBackgroundIndices(): Record<UiTheme, number> {
+  const count = getAssets().length;
+  const cfg = getBootConfig().companionBackgrounds;
+  const light = cfg?.light ?? 3;
+  const dark = cfg?.dark ?? 4;
+  return {
+    light: clampAvatarIndexToRoster(light, count),
+    dark: clampAvatarIndexToRoster(dark, count),
+  };
+}
 
 export function normalizeAvatarIndex(index: number): number {
   if (!Number.isFinite(index)) return 1;
   const n = Math.trunc(index);
   if (n === 0) return 0;
   const count = getAssets().length;
+  if (count <= 0) return 1;
   if (n < 1 || n > count) return 1;
   return n;
 }
@@ -48,10 +67,10 @@ export function normalizeAvatarIndex(index: number): number {
 export function getVrmUrl(index: number): string {
   const assets = getAssets();
   if (assets.length === 0)
-    return resolveAppAssetUrl(`vrms/${BUNDLED_VRM_FALLBACK_SLUG}.vrm.gz`);
+    return resolveAppAssetUrl(`vrms/${fallbackSlug()}.vrm.gz`);
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? fallbackSlug();
   return resolveAppAssetUrl(`vrms/${slug}.vrm.gz`);
 }
 
@@ -59,10 +78,10 @@ export function getVrmUrl(index: number): string {
 export function getVrmPreviewUrl(index: number): string {
   const assets = getAssets();
   if (assets.length === 0)
-    return resolveAppAssetUrl(`vrms/previews/${BUNDLED_VRM_FALLBACK_SLUG}.png`);
+    return resolveAppAssetUrl(`vrms/previews/${fallbackSlug()}.png`);
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? fallbackSlug();
   return resolveAppAssetUrl(`vrms/previews/${slug}.png`);
 }
 
@@ -70,23 +89,17 @@ export function getVrmPreviewUrl(index: number): string {
 export function getVrmBackgroundUrl(index: number): string {
   const assets = getAssets();
   if (assets.length === 0)
-    return resolveAppAssetUrl(
-      `vrms/backgrounds/${BUNDLED_VRM_FALLBACK_SLUG}.png`,
-    );
+    return resolveAppAssetUrl(`vrms/backgrounds/${fallbackSlug()}.png`);
   const n = normalizeAvatarIndex(index);
   const safe = n > 0 ? n : 1;
-  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? "default";
+  const slug = assets[safe - 1]?.slug ?? assets[0]?.slug ?? fallbackSlug();
   return resolveAppAssetUrl(`vrms/backgrounds/${slug}.png`);
 }
 
-const COMPANION_THEME_BACKGROUND_INDEX: Record<UiTheme, number> = {
-  light: 3,
-  dark: 4,
-};
-
 /** Resolve the fixed companion-mode background for the current UI theme. */
 export function getCompanionBackgroundUrl(theme: UiTheme): string {
-  return getVrmBackgroundUrl(COMPANION_THEME_BACKGROUND_INDEX[theme]);
+  const idx = companionBackgroundIndices()[theme];
+  return getVrmBackgroundUrl(idx);
 }
 
 /** Human-readable roster title for bundled avatars. */

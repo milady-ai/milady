@@ -1,4 +1,5 @@
 import type { AgentSource } from "../../lib/AgentProvider";
+import { bundledVrmPreviewUrlForAvatarIndex } from "../../lib/bundled-vrm-preview";
 import type { AgentStatus } from "../../lib/cloud-api";
 import { formatUptime } from "../../lib/format";
 
@@ -167,7 +168,7 @@ export function AgentCard({
   const uiUrl = webUiUrl || sourceUrl;
   const resolvedAvatarIndex =
     avatarIndexProp ?? getAvatarIndex(agent.agentName);
-  const avatarUrl = `/vrms/previews/milady-${resolvedAvatarIndex}.png`;
+  const avatarUrl = bundledVrmPreviewUrlForAvatarIndex(resolvedAvatarIndex);
   const isLive = agent.state === "running";
   const isProvisioning = agent.state === "provisioning";
 

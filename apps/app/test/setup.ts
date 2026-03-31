@@ -5,7 +5,24 @@
  * are created here with vi.fn() stubs so tests can vi.spyOn() them freely.
  */
 
+import characterDefinitions from "../../../packages/agent/src/brand/character-definitions.json" with {
+  type: "json",
+};
+import {
+  createPresetApi,
+  type CharacterDefinition,
+  MILADY_LEGACY_ENGLISH_EXAMPLES,
+  registerPresetApi,
+} from "@miladyai/shared/onboarding-presets";
 import React from "react";
+
+registerPresetApi(
+  createPresetApi({
+    definitions: characterDefinitions as CharacterDefinition[],
+    legacyEnglishExamples: MILADY_LEGACY_ENGLISH_EXAMPLES,
+    slugPrefix: "milady",
+  }),
+);
 import { vi } from "vitest";
 import {
   createMockStorage,

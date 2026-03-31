@@ -115,9 +115,9 @@ export { AppContext, useApp } from "./useApp";
 export {
   getCompanionBackgroundUrl,
   getVrmBackgroundUrl,
+  getVrmCount,
   getVrmPreviewUrl,
   getVrmTitle,
   getVrmUrl,
   normalizeAvatarIndex,
-  VRM_COUNT,
 } from "./vrm";

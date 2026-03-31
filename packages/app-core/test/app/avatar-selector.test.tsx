@@ -8,7 +8,7 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => ({ t: (k: string) => k }),
   getVrmPreviewUrl: vi.fn(() => "preview.png"),
   getVrmTitle: vi.fn(() => "Avatar"),
-  VRM_COUNT: 4,
+  getVrmCount: () => 4,
 }));
 
 describe("AvatarSelector", () => {

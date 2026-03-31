@@ -7,6 +7,7 @@
  *
  * @module eliza
  */
+import "../init-character-presets.js";
 import crypto from "node:crypto";
 import type { Dirent } from "node:fs";
 import {
@@ -3460,20 +3461,26 @@ async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfig> {
   clack.log.message(`♡♡${name}♡♡: Oh that's right, I'm ${name}!`);
 
   // ── Step 3: Catchphrase / writing style ────────────────────────────────
-  const styleChoice = await clack.select({
-    message: `${name}: Now... how do I like to talk again?`,
-    options: getStylePresets().map((preset: StylePreset) => ({
-      value: preset.id,
-      label: preset.catchphrase,
-      hint: preset.hint,
-    })),
-  });
+  let chosenTemplate: StylePreset | undefined;
+  const styleOptions = getStylePresets();
+  if (styleOptions.length > 0) {
+    const styleChoice = await clack.select({
+      message: `${name}: Now... how do I like to talk again?`,
+      options: styleOptions.map((preset: StylePreset) => ({
+        value: preset.id,
+        label: preset.catchphrase,
+        hint: preset.hint,
+      })),
+    });
 
-  if (clack.isCancel(styleChoice)) cancelOnboarding();
+    if (clack.isCancel(styleChoice)) cancelOnboarding();
 
-  const chosenTemplate = getStylePresets().find(
-    (p: StylePreset) => p.id === styleChoice,
-  );
+    chosenTemplate = styleOptions.find((p: StylePreset) => p.id === styleChoice);
+  } else {
+    clack.log.info(
+      "No bundled writing-style presets — continuing without a personality template.",
+    );
+  }
 
   // ── Step 3.5: Runtime selection (Cloud vs Local) ───────────────────────
   // Present the user with a choice of where to run their agent. Cloud mode

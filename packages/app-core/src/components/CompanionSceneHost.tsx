@@ -8,7 +8,7 @@ import {
   getVrmUrl,
   useCompanionSceneConfig,
   useTranslation,
-  VRM_COUNT,
+  getVrmCount,
 } from "@miladyai/app-core/state";
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import {
@@ -565,18 +565,19 @@ function CompanionSceneSurface({
     }
   }, [teleportKey]);
 
+  const vrmCount = getVrmCount();
   const preloadAvatars = useMemo(() => {
     if (tab !== "character" && tab !== "character-select") {
       return [];
     }
-    return Array.from({ length: VRM_COUNT }, (_, index) => {
+    return Array.from({ length: vrmCount }, (_, index) => {
       const avatarIndex = index + 1;
       return {
         vrmPath: getVrmUrl(avatarIndex),
         fallbackPreviewUrl: getVrmPreviewUrl(avatarIndex),
       };
     });
-  }, [tab]);
+  }, [tab, vrmCount]);
 
   /* ── Preload all VRM files into browser cache for instant character swaps ── */
   const preloadedRef = useRef(false);

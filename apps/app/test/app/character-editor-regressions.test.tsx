@@ -39,7 +39,7 @@ vi.mock("@miladyai/app-core/state/useApp", () => ({
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: useAppMock,
   CUSTOM_ONBOARDING_STEPS: [],
-  VRM_COUNT: 4,
+  getVrmCount: () => 4,
   getVrmPreviewUrl: (index: number) => `/avatars/preview-${index}.png`,
   getVrmTitle: (index: number) => `Avatar ${index}`,
 }));
