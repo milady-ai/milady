@@ -53,12 +53,6 @@ export function buildRawGitHubAssetBase({
   return `${RAW_GITHUB_ORIGIN}/${repository}/${releaseTag}/${normalizedRoot}/`;
 }
 
-export function shouldUseRawGitHubAssetHost(assetPath) {
-  const normalized = assetPath?.trim().replace(/^\/+/, "").toLowerCase();
-  if (!normalized) return false;
-  return normalized.endsWith(".spz");
-}
-
 export function buildManagedAssetUrl({
   repository = MILADY_GITHUB_REPOSITORY,
   releaseTag,
@@ -70,9 +64,7 @@ export function buildManagedAssetUrl({
   }
 
   const normalizedAssetPath = assetPath.replace(/^\/+/, "");
-  const base = shouldUseRawGitHubAssetHost(normalizedAssetPath)
-    ? buildRawGitHubAssetBase({ repository, releaseTag, assetRoot })
-    : buildJsDelivrAssetBase({ repository, releaseTag, assetRoot });
+  const base = buildRawGitHubAssetBase({ repository, releaseTag, assetRoot });
   if (!base) return "";
   return new URL(normalizedAssetPath, base).toString();
 }
@@ -88,11 +80,7 @@ export function buildReleaseValidationAssetUrl({
   }
 
   const normalizedAssetPath = assetPath.replace(/^\/+/, "");
-  const base =
-    shouldUseRawGitHubAssetHost(normalizedAssetPath) ||
-    !isCanonicalMiladyRepository(repository)
-      ? buildRawGitHubAssetBase({ repository, releaseTag, assetRoot })
-      : buildJsDelivrAssetBase({ repository, releaseTag, assetRoot });
+  const base = buildRawGitHubAssetBase({ repository, releaseTag, assetRoot });
   if (!base) return "";
   return new URL(normalizedAssetPath, base).toString();
 }
@@ -113,14 +101,14 @@ export function resolveMiladyAssetBaseUrls({
     releaseTag,
     appAssetBaseUrl:
       explicitAppBase ||
-      buildJsDelivrAssetBase({
+      buildRawGitHubAssetBase({
         repository,
         releaseTag,
         assetRoot: "apps/app/public",
       }),
     homepageAssetBaseUrl:
       explicitHomepageBase ||
-      buildJsDelivrAssetBase({
+      buildRawGitHubAssetBase({
         repository,
         releaseTag,
         assetRoot: "apps/homepage/public",

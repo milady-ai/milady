@@ -15,8 +15,6 @@ type AssetUrlResolveOptions = {
 };
 
 let cachedRuntimeBaseHref: string | null = null;
-const JSDELIVR_GH_BASE_PATTERN =
-  /^https:\/\/cdn\.jsdelivr\.net\/gh\/([^@/]+\/[^@/]+)@([^/]+)\/(.+)$/i;
 
 function stripLeadingPathMarkers(assetPath: string): string {
   return assetPath
@@ -32,25 +30,6 @@ function isAlreadyAbsolute(assetPath: string): boolean {
 
 function normalizeBaseHref(baseHref: string): string {
   return baseHref.endsWith("/") ? baseHref : `${baseHref}/`;
-}
-
-function maybeResolveRawGitHubAssetUrl(
-  normalizedAssetPath: string,
-  configuredBaseUrl: string,
-): string | null {
-  if (!normalizedAssetPath.toLowerCase().endsWith(".spz")) {
-    return null;
-  }
-
-  const normalizedBase = normalizeBaseHref(configuredBaseUrl);
-  const match = normalizedBase.match(JSDELIVR_GH_BASE_PATTERN);
-  if (!match) {
-    return null;
-  }
-
-  const [, repository, releaseTag, assetRoot] = match;
-  const normalizedRoot = assetRoot.replace(/\/+$/, "");
-  return `https://raw.githubusercontent.com/${repository}/${releaseTag}/${normalizedRoot}/${normalizedAssetPath}`;
 }
 
 function inferBaseForUrl(url: URL): string {
@@ -109,13 +88,6 @@ export function resolveAppAssetUrl(
   const configuredBaseUrl = getBootConfig().assetBaseUrl?.trim();
   if (configuredBaseUrl) {
     try {
-      const rawGitHubUrl = maybeResolveRawGitHubAssetUrl(
-        normalized,
-        configuredBaseUrl,
-      );
-      if (rawGitHubUrl) {
-        return rawGitHubUrl;
-      }
       return new URL(normalized, normalizeBaseHref(configuredBaseUrl)).toString();
     } catch {
       // Fall through to local runtime resolution when the configured CDN base is invalid.

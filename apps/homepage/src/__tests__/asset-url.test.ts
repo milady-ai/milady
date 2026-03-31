@@ -5,7 +5,7 @@ describe("resolveHomepageAssetUrl", () => {
     vi.resetModules();
   });
 
-  it("uses generated jsDelivr release metadata when no env override is set", async () => {
+  it("uses generated raw GitHub release metadata when no env override is set", async () => {
     const { resolveHomepageAssetUrl } = await import("../lib/asset-url");
     expect(resolveHomepageAssetUrl("logo.png")).toContain(
       "/apps/homepage/public/logo.png",
