@@ -22,6 +22,7 @@ import {
   useState,
 } from "react";
 import type { VrmEngine } from "../avatar/VrmEngine";
+import { prefetchVrmToCache } from "../avatar/VrmEngine";
 import { resolveCharacterGreetingAnimation } from "../character/character-greeting";
 import { CompanionSceneStatusContext } from "./companion-scene-status-context";
 import { SharedCompanionSceneContext } from "./shared-companion-scene-context";
@@ -588,6 +589,20 @@ function CompanionSceneSurface({
       img.src = entry.previewUrl;
     }
   }, [preloadPreviews]);
+
+  /* ── Prefetch VRM buffers into the in-memory cache as soon as the character
+   *    tab opens. Fire-and-forget: errors are silently swallowed inside
+   *    prefetchVrmToCache. This converts the first character-click from a
+   *    cold ~3-8 s network fetch into a <200 ms re-parse from cached bytes. ── */
+  const vrmPrefetchedRef = useRef(false);
+  useEffect(() => {
+    if (tab !== "character" && tab !== "character-select") return;
+    if (vrmPrefetchedRef.current) return;
+    vrmPrefetchedRef.current = true;
+    for (let i = 1; i <= VRM_COUNT; i++) {
+      void prefetchVrmToCache(getVrmUrl(i));
+    }
+  }, [tab]);
 
   return (
     <div

@@ -138,17 +138,7 @@ jobs:
           # write-build-info.ts may not exist on all branches — soft fail
           node --import tsx scripts/write-build-info.ts 2>/dev/null || true
 
-      # ── 8. Build UI (vite) ──────────────────────────────────────────────────
-      - name: Build UI (vite)
-        run: |
-          cd apps/app
-          npx vite build
-        env:
-          MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
-          VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://raw.githubusercontent.com/milady-ai/milady/{0}/apps/app/public/', steps.version.outputs.version) || '' }}
-          NODE_ENV: production
-
-      # ── 9. Determine version ────────────────────────────────────────────────
+      # ── 8. Determine version ────────────────────────────────────────────────
       - name: Determine version
         id: version
         run: |
@@ -186,6 +176,16 @@ jobs:
           echo "Is release: ${IS_RELEASE}"
           echo "Tag latest: ${TAG_LATEST}"
           echo "Source SHA: $(git rev-parse HEAD)"
+
+      # ── 9. Build UI (vite) ──────────────────────────────────────────────────
+      - name: Build UI (vite)
+        run: |
+          cd apps/app
+          npx vite build
+        env:
+          MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
+          VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://raw.githubusercontent.com/milady-ai/milady/{0}/apps/app/public/', steps.version.outputs.version) || '' }}
+          NODE_ENV: production
 
       # ── 10. Override dockerignore to include pre-built dist/ ────────────────
       # The repo's .dockerignore excludes dist/ to keep developer Docker builds clean.

@@ -484,7 +484,7 @@ async function decompressGzipBuffer(buffer: ArrayBuffer): Promise<ArrayBuffer> {
  * or cloned across instances.  Re-parsing from an ArrayBuffer is fast (<200ms)
  * and avoids an entire class of WebGL state bugs.
  *
- * LRU eviction keeps memory bounded (default: 4 entries ≈ 40-80 MB).
+ * LRU eviction keeps memory bounded (default: 8 entries ≈ 80-160 MB).
  * ──────────────────────────────────────────────────────────────────────────── */
 
 interface VrmBufferCacheEntry {
@@ -495,7 +495,7 @@ interface VrmBufferCacheEntry {
 }
 
 const vrmBufferCache = new Map<string, VrmBufferCacheEntry>();
-const VRM_BUFFER_CACHE_MAX = 4;
+const VRM_BUFFER_CACHE_MAX = 8;
 
 function touchVrmCacheEntry(url: string, buffer: ArrayBuffer): void {
   vrmBufferCache.set(url, { buffer, lastUsed: performance.now() });
@@ -512,6 +512,26 @@ function touchVrmCacheEntry(url: string, buffer: ArrayBuffer): void {
     }
     if (oldestKey) vrmBufferCache.delete(oldestKey);
     else break;
+  }
+}
+
+/**
+ * Prefetch a VRM file into the in-memory buffer cache without parsing it.
+ * Fire-and-forget: silently swallows errors since prefetch is best-effort.
+ * Calling this when the character tab opens means the buffer is ready before
+ * the user clicks a character, turning a ~3-8 s cold fetch into a <200 ms
+ * re-parse from cache.
+ */
+export async function prefetchVrmToCache(url: string): Promise<void> {
+  if (vrmBufferCache.has(url)) return; // already warm
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return;
+    let buffer = await response.arrayBuffer();
+    if (isGzipBuffer(buffer)) buffer = await decompressGzipBuffer(buffer);
+    touchVrmCacheEntry(url, buffer);
+  } catch {
+    // Prefetch is best-effort — network errors are silently ignored.
   }
 }
 

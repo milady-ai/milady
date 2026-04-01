@@ -129,6 +129,7 @@ import {
   readDevConsoleLogTail,
 } from "./dev-console-log";
 import { handleAuthPairingCompatRoutes } from "./auth-pairing-compat-routes";
+import { isCloudProvisioned as _isCloudProvisioned } from "./server-onboarding-compat";
 import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
 import { handleDevCompatRoutes } from "./dev-compat-routes";
 import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
@@ -743,7 +744,14 @@ async function handleMiladyCompatRoute(
     !url.pathname.startsWith("/api/cloud/billing/");
 
   if (isCloudRoute) {
-    if (!ensureCompatApiAuthorized(req, res)) {
+    // Cloud-provisioned containers exempt /api/cloud/status from auth so the
+    // SPA can discover cloud connection state without a token.
+    const isCloudStatusExempt =
+      _isCloudProvisioned() &&
+      method === "GET" &&
+      url.pathname === "/api/cloud/status";
+
+    if (!isCloudStatusExempt && !ensureCompatApiAuthorized(req, res)) {
       return true;
     }
 
