@@ -8,7 +8,7 @@
  * This is zero-slash-command — it is automatic behaviour, not a user command.
  */
 
-import { logger, type EventPayload, type IAgentRuntime } from "@elizaos/core";
+import { logger, type EventPayload, type IAgentRuntime, type Memory } from "@elizaos/core";
 import { makeCommandMemory } from "./utils";
 
 const LOG_PREFIX = "[discord-vision]";
@@ -105,8 +105,7 @@ export function setupVisionAutoTrigger(runtime: IAgentRuntime): void {
           const results: string[] = [];
           await analyzeAction.handler(
             runtime,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            memory as any,
+            memory as unknown as Memory,
             undefined,
             {},
             async (content: { text?: string }) => {
