@@ -3302,13 +3302,20 @@ function isLoopbackBindHost(host: string): boolean {
 }
 
 export function ensureApiTokenForBindHost(host: string): void {
-  if (resolveApiSecurityConfig(process.env).disableAutoApiToken) {
-    return;
-  }
+  const { disableAutoApiToken } = resolveApiSecurityConfig(process.env);
 
   const token = getConfiguredApiToken();
   if (token) return;
+
   const cloudProvisioned = isCloudProvisionedContainer();
+
+  // Cloud-provisioned containers must never run without an inbound API token
+  // (isAuthorized rejects all requests when no token + cloud flag is set).
+  // Override the disable flag for cloud containers so they always get a
+  // fallback token rather than dead-locking into 401 on every request.
+  if (disableAutoApiToken && !cloudProvisioned) {
+    return;
+  }
   if (!cloudProvisioned && isLoopbackBindHost(host)) return;
 
   const generated = crypto.randomBytes(32).toString("hex");
