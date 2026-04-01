@@ -9398,6 +9398,14 @@ async function handleRequest(
     method === "GET" &&
     pathname === "/api/onboarding/status" &&
     isCloudProvisionedContainer();
+  // Cloud-provisioned containers must also exempt /api/cloud/status from auth
+  // so the SPA can discover the cloud connection state without a token.
+  // Without this, the SPA sees 401 on cloud/status and falls into the
+  // cloud_login onboarding step even though the container IS cloud-connected.
+  const isCloudStatusEndpoint =
+    method === "GET" &&
+    pathname === "/api/cloud/status" &&
+    isCloudProvisionedContainer();
   const isAuthProtectedPath = isAuthProtectedRoute(pathname);
   const registryService = state.registryService;
   const dropService = state.dropService;
@@ -9548,6 +9556,7 @@ async function handleRequest(
     !isAuthEndpoint &&
     !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
+    !isCloudStatusEndpoint &&
     !isAuthorized(req)
   ) {
     json(res, { error: "Unauthorized" }, 401);
@@ -9560,6 +9569,7 @@ async function handleRequest(
     !isAuthEndpoint &&
     !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
+    !isCloudStatusEndpoint &&
     !isAuthorized(req)
   ) {
     json(res, { error: "Unauthorized" }, 401);
