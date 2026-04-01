@@ -6,12 +6,24 @@ function tryBindOnce(
 ): Promise<{ ok: true } | { ok: false }> {
   return new Promise((resolve) => {
     const server = createServer();
+    // Timeout prevents hanging on Windows when firewall silently blocks
+    const timer = setTimeout(() => {
+      server.removeAllListeners();
+      try {
+        server.close();
+      } catch {
+        /* already closed */
+      }
+      resolve({ ok: false });
+    }, 3000);
     const fail = () => {
+      clearTimeout(timer);
       server.removeAllListeners();
       resolve({ ok: false });
     };
     server.once("error", fail);
     server.listen({ port, host }, () => {
+      clearTimeout(timer);
       server.close(() => resolve({ ok: true }));
     });
   });

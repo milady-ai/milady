@@ -28,7 +28,7 @@ export interface ConfirmDialogProps {
 const VARIANT_CLASSES: Record<ConfirmVariant, string> = {
   danger:
     "border-destructive/70 bg-destructive text-destructive-fg hover:border-destructive hover:bg-destructive",
-  warn: "border-warn/55 bg-warn/92 text-[var(--accent-foreground)] hover:border-warn hover:bg-warn",
+  warn: "border-warn/55 bg-warn/92 !text-black hover:border-warn hover:bg-warn",
   default:
     "border-accent/55 bg-accent/22 text-accent-fg hover:border-accent/75 hover:bg-accent/32",
 };
@@ -50,7 +50,7 @@ export function ConfirmDialog({
         if (!nextOpen) onCancel();
       }}
     >
-      <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/96 shadow-[var(--shadow-lg)] backdrop-blur-xl">
+      <DialogContent className="max-w-md rounded-2xl border-border/60 bg-bg shadow-[var(--shadow-lg)] backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="whitespace-pre-line text-muted-strong">
@@ -111,7 +111,7 @@ export function PromptDialog({
         if (!nextOpen) onCancel();
       }}
     >
-      <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/96 shadow-[var(--shadow-lg)] backdrop-blur-xl">
+      <DialogContent className="max-w-md rounded-2xl border-border/60 bg-bg shadow-[var(--shadow-lg)] backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="whitespace-pre-line text-muted-strong">

@@ -425,7 +425,7 @@ kill_stale_processes() {
     pgrep -f '/(Applications|tmp|private/tmp|Volumes)/.*Milady[^/]*\.app/Contents/MacOS/launcher|milady-dist/entry\.js' || true
   )
 
-  pid="$(lsof -nP -tiTCP:2138 -sTCP:LISTEN 2>/dev/null | head -1 || true)"
+  pid="$(lsof -nP -tiTCP:31337 -sTCP:LISTEN 2>/dev/null | head -1 || true)"
   if [[ -n "$pid" ]]; then
     if [[ $found -eq 0 ]]; then
       echo "Stopping stale Milady launcher/backend processes..."

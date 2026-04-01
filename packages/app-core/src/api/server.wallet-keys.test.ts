@@ -167,14 +167,20 @@ describe("GET /api/wallet/keys", () => {
   });
 
   it("includes an explicit loopback-only guard in the route handler", async () => {
-    const source = await fs.readFile(
+    const serverSource = await fs.readFile(
       path.resolve(import.meta.dirname, "server.ts"),
       "utf-8",
     );
-    const routeIdx = source.indexOf('"/api/wallet/keys"');
+    expect(serverSource).toContain("handleWalletCompatRoutes(req, res, state)");
+
+    const routeSource = await fs.readFile(
+      path.resolve(import.meta.dirname, "wallet-compat-routes.ts"),
+      "utf-8",
+    );
+    const routeIdx = routeSource.indexOf('"/api/wallet/keys"');
     expect(routeIdx).toBeGreaterThan(-1);
 
-    const nearbyCode = source.slice(routeIdx, routeIdx + 300);
+    const nearbyCode = routeSource.slice(routeIdx, routeIdx + 400);
     expect(nearbyCode).toContain(
       "isLoopbackRemoteAddress(req.socket.remoteAddress)",
     );

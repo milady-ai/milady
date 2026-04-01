@@ -22,7 +22,7 @@ type SidebarContextStub = {
   handleRenameConversation: (id: string, title: string) => Promise<void>;
   suggestConversationTitle: (id: string) => Promise<string | null>;
   uiLanguage: "en" | "zh-CN";
-  t: (k: string) => string;
+  t: (k: string, vars?: { defaultValue?: string }) => string;
 };
 
 const { mockUseApp } = vi.hoisted(() => ({
@@ -102,6 +102,79 @@ vi.mock("@miladyai/ui", async () => {
       ...props
     }: React.ComponentProps<"button">) =>
       React.createElement("button", { ...props, onClick }, children),
+    ChatConversationRenameDialog: ({
+      open,
+      title,
+      description,
+      inputLabel,
+      value,
+      onChange,
+      onClose,
+      onSave,
+      onSuggest,
+      saveDisabled,
+      saveLabel,
+      suggestDisabled,
+      suggestLabel,
+    }: {
+      open?: boolean;
+      title?: React.ReactNode;
+      description?: React.ReactNode;
+      inputLabel?: React.ReactNode;
+      value: string;
+      onChange: (value: string) => void;
+      onClose: () => void;
+      onSave: () => void;
+      onSuggest: () => void;
+      saveDisabled?: boolean;
+      saveLabel?: React.ReactNode;
+      suggestDisabled?: boolean;
+      suggestLabel?: React.ReactNode;
+    }) =>
+      open
+        ? React.createElement(
+            "div",
+            { "data-testid": "conv-rename-dialog" },
+            React.createElement("h2", null, title),
+            React.createElement("p", null, description),
+            React.createElement("label", null, inputLabel),
+            React.createElement("input", {
+              "data-testid": "conv-rename-input",
+              value,
+              onChange: (event: { target: { value: string } }) =>
+                onChange(event.target.value),
+            }),
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                "data-testid": "conv-rename-suggest",
+                disabled: suggestDisabled,
+                onClick: onSuggest,
+              },
+              suggestLabel,
+            ),
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                "data-testid": "conv-rename-save",
+                disabled: saveDisabled,
+                onClick: onSave,
+              },
+              saveLabel,
+            ),
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                "data-testid": "conv-rename-cancel",
+                onClick: onClose,
+              },
+              "cancel",
+            ),
+          )
+        : null,
   };
 });
 
@@ -120,7 +193,7 @@ function createContext(
 ): SidebarContextStub {
   const now = Date.now();
   return {
-    t: (k: string) => k,
+    t: (k: string, vars?: { defaultValue?: string }) => vars?.defaultValue ?? k,
     conversations: [
       {
         id: "conv-1",
@@ -250,6 +323,34 @@ describe("ConversationsSidebar game-modal variant", () => {
       confirmYes[0].props.onClick();
     });
     expect(handleDeleteConversation).toHaveBeenCalledWith("conv-2");
+  });
+
+  it("renders a Search chats input in game-modal and filters rows", async () => {
+    mockUseApp.mockReturnValue(createContext());
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(ConversationsSidebar, { variant: "game-modal" }),
+      );
+    });
+
+    const searchInput = tree?.root.find(
+      (node) =>
+        node.type === "input" && node.props["aria-label"] === "Search chats",
+    );
+    expect(searchInput).toBeDefined();
+
+    await act(async () => {
+      searchInput?.props.onChange({ target: { value: "newest" } });
+    });
+
+    const visibleRows = tree?.root.findAllByProps({
+      "data-testid": "conv-item",
+    });
+    expect(visibleRows).toHaveLength(1);
+    expect(JSON.stringify(tree?.toJSON())).toContain("Newest room");
+    expect(JSON.stringify(tree?.toJSON())).not.toContain("First room");
   });
 
   it("opens delete confirm from row X control then deletes", async () => {

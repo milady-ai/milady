@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
+import { ChatComposer } from "@miladyai/ui";
 import React, { createRef } from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ChatComposer } from "../../src/components/ChatComposer";
 
 function createVoiceState(
   overrides?: Partial<React.ComponentProps<typeof ChatComposer>["voice"]>,
@@ -191,6 +191,8 @@ describe("ChatComposer mic controls", () => {
     expect(sendButton.props.className).toContain("bg-[linear-gradient");
     expect(sendButton.props.className).toContain("text-txt");
     expect(String(textarea.props.className)).toContain("text-txt-strong");
-    expect(String(textarea.props.className)).toContain("placeholder:text-muted");
+    expect(String(textarea.props.className)).toContain(
+      "placeholder:text-muted",
+    );
   });
 });

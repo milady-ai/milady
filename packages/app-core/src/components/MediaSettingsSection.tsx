@@ -10,15 +10,14 @@
 
 import {
   Button,
-  Input,
   SaveFooter,
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
-  SelectTrigger,
   SelectValue,
+  SettingsControls,
   Switch,
 } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
@@ -44,12 +43,6 @@ import {
   CloudConnectionStatus,
   CloudSourceModeToggle,
 } from "./CloudSourceControls";
-import {
-  SETTINGS_COMPACT_INPUT_CLASSNAME,
-  SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME,
-  SETTINGS_SEGMENTED_GROUP_CLASSNAME,
-  SETTINGS_SOFT_SELECT_TRIGGER_CLASSNAME,
-} from "./settings-control-primitives";
 import { VoiceConfigView } from "./VoiceConfigView";
 
 type MediaCategory = "image" | "video" | "audio" | "vision" | "voice";
@@ -579,13 +572,13 @@ export function DesktopMediaControlPanel() {
             value={selectedCameraId}
             onValueChange={(value) => setSelectedCameraId(value)}
           >
-            <SelectTrigger className={SETTINGS_SOFT_SELECT_TRIGGER_CLASSNAME}>
+            <SettingsControls.SelectTrigger variant="soft">
               <SelectValue
                 placeholder={t("mediasettingssection.NoCameraDevices", {
                   defaultValue: "No camera devices",
                 })}
               />
-            </SelectTrigger>
+            </SettingsControls.SelectTrigger>
             <SelectContent>
               {cameraDevices.length === 0 ? (
                 <SelectItem value="__none__" disabled>
@@ -844,13 +837,13 @@ export function DesktopMediaControlPanel() {
             value={selectedSourceId}
             onValueChange={(value) => setSelectedSourceId(value)}
           >
-            <SelectTrigger className={SETTINGS_SOFT_SELECT_TRIGGER_CLASSNAME}>
+            <SettingsControls.SelectTrigger variant="soft">
               <SelectValue
                 placeholder={t("mediasettingssection.NoScreenSources", {
                   defaultValue: "No screen sources",
                 })}
               />
-            </SelectTrigger>
+            </SettingsControls.SelectTrigger>
             <SelectContent>
               {screenSources.length === 0 ? (
                 <SelectItem value="__none__" disabled>
@@ -1268,7 +1261,7 @@ export function MediaSettingsSection() {
               {t("settings.companionVrmPower.desc")}
             </div>
           </div>
-          <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
+          <SettingsControls.SegmentedGroup>
             {COMPANION_VRM_POWER_OPTIONS.map((mode) => {
               const active = companionVrmPowerMode === mode;
               return (
@@ -1289,7 +1282,7 @@ export function MediaSettingsSection() {
                 </Button>
               );
             })}
-          </div>
+          </SettingsControls.SegmentedGroup>
           <div
             className="flex flex-col gap-2 border-t border-border pt-3"
             data-testid="settings-companion-half-framerate"
@@ -1302,7 +1295,7 @@ export function MediaSettingsSection() {
                 {t("settings.companionHalfFramerate.desc")}
               </div>
             </div>
-            <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
+            <SettingsControls.SegmentedGroup>
               {COMPANION_HALF_FRAMERATE_OPTIONS.map((mode) => {
                 const active = companionHalfFramerateMode === mode;
                 return (
@@ -1323,7 +1316,7 @@ export function MediaSettingsSection() {
                   </Button>
                 );
               })}
-            </div>
+            </SettingsControls.SegmentedGroup>
           </div>
           <div
             className="flex flex-col gap-2 border-t border-border pt-3"
@@ -1371,7 +1364,7 @@ export function MediaSettingsSection() {
         </header>
 
         {/* Category tabs */}
-        <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
+        <SettingsControls.SegmentedGroup>
           {(
             ["image", "video", "audio", "vision", "voice"] as MediaCategory[]
           ).map((cat) => {
@@ -1398,7 +1391,7 @@ export function MediaSettingsSection() {
               </Button>
             );
           })}
-        </div>
+        </SettingsControls.SegmentedGroup>
 
         {/* Voice tab — render VoiceConfigView instead of media config */}
         {activeTab === "voice" ? (
@@ -1511,9 +1504,9 @@ export function MediaSettingsSection() {
                     <span className="text-xs font-semibold">
                       {t(apiKeyField.labelKey)}
                     </span>
-                    <Input
+                    <SettingsControls.Input
                       type="password"
-                      className={SETTINGS_COMPACT_INPUT_CLASSNAME}
+                      variant="compact"
                       placeholder={
                         getNestedValue(
                           mediaConfig as Record<string, unknown>,
@@ -1549,11 +1542,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("image.fal.model", value)
                       }
                     >
-                      <SelectTrigger
-                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                      >
+                      <SettingsControls.SelectTrigger variant="compact">
                         <SelectValue />
-                      </SelectTrigger>
+                      </SettingsControls.SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>
@@ -1626,11 +1617,9 @@ export function MediaSettingsSection() {
                           updateNestedValue("image.openai.model", value)
                         }
                       >
-                        <SelectTrigger
-                          className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                        >
+                        <SettingsControls.SelectTrigger variant="compact">
                           <SelectValue />
-                        </SelectTrigger>
+                        </SettingsControls.SelectTrigger>
                         <SelectContent>
                           <SelectItem value="dall-e-3">
                             {t("mediasettingssection.DALLE3")}
@@ -1656,11 +1645,9 @@ export function MediaSettingsSection() {
                           updateNestedValue("image.openai.quality", value)
                         }
                       >
-                        <SelectTrigger
-                          className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                        >
+                        <SettingsControls.SelectTrigger variant="compact">
                           <SelectValue />
-                        </SelectTrigger>
+                        </SettingsControls.SelectTrigger>
                         <SelectContent>
                           <SelectItem value="standard">
                             {t("mediasettingssection.Standard")}
@@ -1694,11 +1681,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("video.fal.model", value)
                       }
                     >
-                      <SelectTrigger
-                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                      >
+                      <SettingsControls.SelectTrigger variant="compact">
                         <SelectValue />
-                      </SelectTrigger>
+                      </SettingsControls.SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>
@@ -1804,11 +1789,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("audio.suno.model", value)
                       }
                     >
-                      <SelectTrigger
-                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                      >
+                      <SettingsControls.SelectTrigger variant="compact">
                         <SelectValue />
-                      </SelectTrigger>
+                      </SettingsControls.SelectTrigger>
                       <SelectContent>
                         <SelectItem value="chirp-v3.5">
                           {t("mediasettingssection.ChirpV35")}
@@ -1827,12 +1810,13 @@ export function MediaSettingsSection() {
                     <span className="text-xs font-semibold">
                       {t("mediasettingssection.MaxDurationSecond")}
                     </span>
-                    <Input
+                    <SettingsControls.Input
                       type="number"
                       min={0.5}
                       max={22}
                       step={0.5}
-                      className={`${SETTINGS_COMPACT_INPUT_CLASSNAME} w-24`}
+                      variant="compact"
+                      className="w-24"
                       value={
                         (getNestedValue(
                           mediaConfig as Record<string, unknown>,
@@ -1866,11 +1850,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("vision.openai.model", value)
                       }
                     >
-                      <SelectTrigger
-                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                      >
+                      <SettingsControls.SelectTrigger variant="compact">
                         <SelectValue />
-                      </SelectTrigger>
+                      </SettingsControls.SelectTrigger>
                       <SelectContent>
                         <SelectItem value="gpt-4o">
                           {t("mediasettingssection.GPT4o")}
@@ -1902,11 +1884,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("vision.google.model", value)
                       }
                     >
-                      <SelectTrigger
-                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                      >
+                      <SettingsControls.SelectTrigger variant="compact">
                         <SelectValue />
-                      </SelectTrigger>
+                      </SettingsControls.SelectTrigger>
                       <SelectContent>
                         <SelectItem value="gemini-2.0-flash">
                           {t("mediasettingssection.Gemini20Flash")}
@@ -1938,11 +1918,9 @@ export function MediaSettingsSection() {
                         updateNestedValue("vision.anthropic.model", value)
                       }
                     >
-                      <SelectTrigger
-                        className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
-                      >
+                      <SettingsControls.SelectTrigger variant="compact">
                         <SelectValue />
-                      </SelectTrigger>
+                      </SettingsControls.SelectTrigger>
                       <SelectContent>
                         <SelectItem value="claude-sonnet-4-20250514">
                           {t("mediasettingssection.ClaudeSonnet4")}

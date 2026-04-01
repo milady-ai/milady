@@ -1,23 +1,9 @@
 // @vitest-environment jsdom
 
+import { ChatMessage } from "@miladyai/ui";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
-
-const { mockUseApp } = vi.hoisted(() => ({
-  mockUseApp: vi.fn(),
-}));
-
-vi.mock("@miladyai/app-core/state", () => ({
-  useApp: () => mockUseApp(),
-}));
-
-vi.mock("../../src/components/MessageContent", () => ({
-  MessageContent: ({ message }: { message: { text: string } }) =>
-    React.createElement("span", null, message.text),
-}));
-
-import { ChatMessage } from "../../src/components/ChatMessage";
 
 describe("ChatMessage actions", () => {
   it("reveals assistant actions on tap when hover is unavailable", async () => {
@@ -32,23 +18,24 @@ describe("ChatMessage actions", () => {
         removeListener: vi.fn(),
       })),
     });
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (key: string) => key,
-    });
-
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "assistant-1",
-            role: "assistant",
-            text: "hello there",
-            timestamp: 1,
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "assistant-1",
+              role: "assistant",
+              text: "hello there",
+              timestamp: 1,
+            },
+            labels: { play: "aria.playMessage" },
+            onSpeak: vi.fn(),
+            onCopy: vi.fn(),
           },
-          onSpeak: vi.fn(),
-        }),
+          React.createElement("span", null, "hello there"),
+        ),
       );
     });
 
@@ -89,23 +76,24 @@ describe("ChatMessage actions", () => {
   });
 
   it("renders copy and play actions for assistant messages", async () => {
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (key: string) => key,
-    });
-
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "assistant-1",
-            role: "assistant",
-            text: "hello there",
-            timestamp: 1,
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "assistant-1",
+              role: "assistant",
+              text: "hello there",
+              timestamp: 1,
+            },
+            labels: { play: "aria.playMessage" },
+            onSpeak: vi.fn(),
+            onCopy: vi.fn(),
           },
-          onSpeak: vi.fn(),
-        }),
+          React.createElement("span", null, "hello there"),
+        ),
       );
     });
 
@@ -118,24 +106,26 @@ describe("ChatMessage actions", () => {
   });
 
   it("plays assistant messages from the message action button", async () => {
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (key: string) => key,
-    });
     const onSpeak = vi.fn();
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "assistant-1",
-            role: "assistant",
-            text: "hello there",
-            timestamp: 1,
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "assistant-1",
+              role: "assistant",
+              text: "hello there",
+              timestamp: 1,
+            },
+            labels: { play: "aria.playMessage" },
+            onSpeak,
+            onCopy: vi.fn(),
           },
-          onSpeak,
-        }),
+          React.createElement("span", null, "hello there"),
+        ),
       );
     });
 
@@ -150,29 +140,30 @@ describe("ChatMessage actions", () => {
   });
 
   it("edits and resends user messages from the inline editor", async () => {
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (
-        key: string,
-        vars?: {
-          defaultValue?: string;
-        },
-      ) => vars?.defaultValue ?? key,
-    });
     const onEdit = vi.fn(async () => true);
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "user-1",
-            role: "user",
-            text: "old text",
-            timestamp: 1,
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "user-1",
+              role: "user",
+              text: "old text",
+              timestamp: 1,
+            },
+            onEdit,
+            labels: {
+              edit: "aria.editMessage",
+              cancel: "common.cancel",
+              saveAndResend: "Save and resend",
+              saving: "Saving...",
+            },
           },
-          onEdit,
-        }),
+          React.createElement("span", null, "old text"),
+        ),
       );
     });
 
@@ -205,24 +196,28 @@ describe("ChatMessage actions", () => {
   });
 
   it("does not render a retry action for interrupted assistant messages", async () => {
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (key: string) => key,
-    });
-
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "assistant-1",
-            role: "assistant",
-            text: "partial",
-            interrupted: true,
-            timestamp: 1,
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "assistant-1",
+              role: "assistant",
+              text: "partial",
+              interrupted: true,
+              timestamp: 1,
+            },
+            labels: {
+              play: "aria.playMessage",
+              responseInterrupted: "chatmessage.ResponseInterrupte",
+            },
+            onSpeak: vi.fn(),
+            onCopy: vi.fn(),
           },
-          onSpeak: vi.fn(),
-        }),
+          React.createElement("span", null, "partial"),
+        ),
       );
     });
 
@@ -232,23 +227,23 @@ describe("ChatMessage actions", () => {
   });
 
   it("uses the emphasized user bubble treatment for editable user messages", async () => {
-    mockUseApp.mockReturnValue({
-      copyToClipboard: vi.fn(),
-      t: (key: string) => key,
-    });
-
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
-        React.createElement(ChatMessage, {
-          message: {
-            id: "user-1",
-            role: "user",
-            text: "hello there",
-            timestamp: 1,
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "user-1",
+              role: "user",
+              text: "hello there",
+              timestamp: 1,
+            },
+            onEdit: vi.fn(async () => true),
+            labels: { edit: "aria.editMessage" },
           },
-          onEdit: vi.fn(async () => true),
-        }),
+          React.createElement("span", null, "hello there"),
+        ),
       );
     });
 
@@ -259,5 +254,44 @@ describe("ChatMessage actions", () => {
           node.props.className.includes("border-accent/24"),
       ).length,
     ).toBeGreaterThan(0);
+  });
+
+  it("keeps the user message action rail inline beside the bubble", async () => {
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(
+          ChatMessage,
+          {
+            message: {
+              id: "user-1",
+              role: "user",
+              text: "hello there",
+              timestamp: 1,
+            },
+            onCopy: vi.fn(),
+            onEdit: vi.fn(async () => true),
+            labels: { edit: "aria.editMessage" },
+          },
+          React.createElement("span", null, "hello there"),
+        ),
+      );
+    });
+
+    const actionRail = tree.root.find(
+      (node) =>
+        node.type === "div" &&
+        typeof node.props.className === "string" &&
+        node.props.className.includes("inline-flex items-center gap-1") &&
+        node.props.className.includes("whitespace-nowrap"),
+    );
+
+    expect(actionRail).toBeDefined();
+    expect(
+      actionRail.findByProps({ "aria-label": "Copy message" }),
+    ).toBeDefined();
+    expect(
+      actionRail.findByProps({ "aria-label": "aria.editMessage" }),
+    ).toBeDefined();
   });
 });

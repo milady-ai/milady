@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
 import type { PluginInfo } from "@miladyai/app-core/api";
+import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import * as electrobunRpc from "@miladyai/app-core/bridge/electrobun-rpc";
 import { textOf as text } from "../../../../test/helpers/react-test";
 
 const mockUseApp = vi.fn();
@@ -19,6 +19,12 @@ const mockTestPluginConnection = vi.fn(async () => ({
   durationMs: 12,
 }));
 const mockOpenExternalInvoke = vi.fn(async () => undefined);
+
+type SidebarHeaderSearchProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  clearLabel?: string;
+  loading?: boolean;
+  onClear?: () => void;
+};
 
 let narrowViewport = false;
 let originalMatchMedia: typeof window.matchMedia | undefined;
@@ -90,6 +96,46 @@ vi.mock("@miladyai/app-core/api", () => ({
 }));
 
 vi.mock("@miladyai/ui", () => ({
+  AdminDialog: {
+    BodyScroll: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", { className, ...props }, children),
+    Content: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", { className, ...props }, children),
+    Footer: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", { className, ...props }, children),
+    Header: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", { className, ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    MetaBadge: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", { className, ...props }, children),
+    MonoMeta: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", { className, ...props }, children),
+  },
   cn: (...classes: Array<string | false | null | undefined>) =>
     classes.filter(Boolean).join(" "),
   EmptyState: ({
@@ -138,6 +184,29 @@ vi.mock("@miladyai/ui", () => ({
     React.createElement("div", { className }, children),
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
     React.createElement("input", props),
+  SidebarHeader: ({
+    children,
+    className,
+    search,
+    ...props
+  }: React.PropsWithChildren<{
+    className?: string;
+    search?: SidebarHeaderSearchProps;
+  }>) => {
+    const { clearLabel, loading, onClear, ...inputProps } = search ?? {};
+    void clearLabel;
+    void loading;
+    void onClear;
+
+    return React.createElement(
+      "div",
+      { className, ...props },
+      search ? React.createElement("input", inputProps) : null,
+      children,
+    );
+  },
+  SidebarSearchBar: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+    React.createElement("input", props),
   Select: ({
     children,
     value,
@@ -150,7 +219,23 @@ vi.mock("@miladyai/ui", () => ({
     className,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
-    React.createElement("button", { type: "button", className, ...props }, children),
+    React.createElement(
+      "button",
+      { type: "button", className, ...props },
+      children,
+    ),
+  SettingsControls: {
+    SelectTrigger: ({
+      children,
+      className,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement(
+        "button",
+        { type: "button", className, ...props },
+        children,
+      ),
+  },
   SelectValue: ({ children }: { children?: React.ReactNode }) =>
     React.createElement("span", null, children),
   SelectContent: ({
@@ -178,6 +263,263 @@ vi.mock("@miladyai/ui", () => ({
       onClick: () => onCheckedChange?.(!checked),
       ...props,
     }),
+  StatusBadge: ({
+    label,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLSpanElement> & { label: string }) =>
+    React.createElement("span", { className, ...props }, label),
+  Sidebar: ({
+    children,
+    className,
+    header,
+    footer,
+    testId,
+  }: React.HTMLAttributes<HTMLElement> & {
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+    testId?: string;
+  }) =>
+    React.createElement(
+      "aside",
+      {
+        className: [
+          "flex flex-col overflow-hidden border-border/34 backdrop-blur-md",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" "),
+        "data-testid": testId,
+      },
+      header,
+      children,
+      footer,
+    ),
+  SidebarScrollRegion: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  SidebarPanel: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  SidebarHeaderStack: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  SidebarContent: {
+    EmptyState: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", { className, ...props }, children),
+    Item: ({
+      children,
+      className,
+      as,
+      ...props
+    }: React.HTMLAttributes<HTMLElement> & { as?: "button" | "div" }) =>
+      React.createElement(as ?? "button", { className, ...props }, children),
+    ItemBody: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", { className, ...props }, children),
+    ItemDescription: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", { className, ...props }, children),
+    ItemButton: ({
+      children,
+      className,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement(
+        "button",
+        { type: "button", className, ...props },
+        children,
+      ),
+    RailItem: ({
+      children,
+      className,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement(
+        "button",
+        { type: "button", className, ...props },
+        children,
+      ),
+    ItemIcon: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", { className, ...props }, children),
+    ItemTitle: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", { className, ...props }, children),
+  },
+  PageLayout: ({
+    children,
+    className,
+    contentClassName,
+    contentHeader,
+    contentInnerClassName,
+    sidebar,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement> & {
+    contentClassName?: string;
+    contentHeader?: React.ReactNode;
+    contentInnerClassName?: string;
+    sidebar: React.ReactNode;
+  }) =>
+    React.createElement(
+      "div",
+      { className, ...props },
+      sidebar,
+      React.createElement(
+        "main",
+        {
+          className:
+            contentClassName ??
+            "chat-native-scrollbar relative flex flex-1 min-w-0 flex-col overflow-x-hidden overflow-y-auto bg-transparent px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-3 lg:px-7 lg:pb-7 lg:pt-4",
+        },
+        React.createElement(
+          "div",
+          { className: contentInnerClassName },
+          contentHeader,
+          children,
+        ),
+      ),
+    ),
+  PageLayoutHeader: ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", { className, ...props }, children),
+  PagePanel: Object.assign(
+    ({
+      children,
+      as,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLElement> & { as?: "div" | "section" }) =>
+      React.createElement(as ?? "div", { className, ...props }, children),
+    {
+      Empty: ({
+        children,
+        className,
+        ...props
+      }: React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", { className, ...props }, children),
+      Header: ({
+        children,
+        heading,
+        description,
+        actions,
+        media,
+        className,
+        ...props
+      }: React.HTMLAttributes<HTMLDivElement> & {
+        heading?: React.ReactNode;
+        description?: React.ReactNode;
+        actions?: React.ReactNode;
+        media?: React.ReactNode;
+      }) =>
+        React.createElement(
+          "div",
+          { className, ...props },
+          media,
+          heading,
+          description,
+          actions,
+          children,
+        ),
+      Meta: ({
+        children,
+        className,
+        ...props
+      }: React.HTMLAttributes<HTMLSpanElement>) =>
+        React.createElement("span", { className, ...props }, children),
+      ContentArea: ({
+        children,
+        className,
+        ...props
+      }: React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", { className, ...props }, children),
+      CollapsibleSection: ({
+        children,
+        heading,
+        description,
+        actions,
+        media,
+        className,
+        expanded,
+        onExpandedChange,
+        ...props
+      }: React.HTMLAttributes<HTMLElement> & {
+        actions?: React.ReactNode;
+        description?: React.ReactNode;
+        expanded?: boolean;
+        heading?: React.ReactNode;
+        media?: React.ReactNode;
+        onExpandedChange?: (next: boolean) => void;
+      }) =>
+        React.createElement(
+          "section",
+          {
+            className,
+            onClick:
+              expanded === false && onExpandedChange
+                ? () => onExpandedChange(true)
+                : undefined,
+            ...props,
+          },
+          media,
+          heading,
+          description,
+          actions,
+          expanded ? children : null,
+        ),
+      Frame: ({
+        children,
+        className,
+        ...props
+      }: React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", { className, ...props }, children),
+      Notice: ({
+        children,
+        actions,
+        className,
+        ...props
+      }: React.HTMLAttributes<HTMLDivElement> & {
+        actions?: React.ReactNode;
+      }) =>
+        React.createElement("div", { className, ...props }, children, actions),
+    },
+  ),
+  useLinkedSidebarSelection: () => ({
+    contentContainerRef: { current: null },
+    queueContentAlignment: vi.fn(),
+    registerContentItem: () => vi.fn(),
+    registerRailItem: () => vi.fn(),
+    registerSidebarItem: () => vi.fn(),
+    scrollContentToItem: vi.fn(),
+  }),
 }));
 
 import { PluginsView } from "../../src/components/PluginsView";
@@ -253,7 +595,8 @@ function baseContext(plugins?: PluginInfo[]) {
 describe("PluginsView game modal", () => {
   beforeEach(() => {
     ensureWindowGlobals();
-    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown })
+      .__MILADY_ELECTROBUN_RPC__;
     vi.spyOn(electrobunRpc, "getElectrobunRendererRpc").mockReturnValue(
       undefined,
     );
@@ -315,7 +658,7 @@ describe("PluginsView game modal", () => {
   });
 
   it("renders game modal for both plugins and connectors modals", async () => {
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -353,18 +696,13 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
       );
     });
 
-    expect(
-      tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "plugins-view-social",
-      ).length,
-    ).toBeGreaterThan(0);
     expect(
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
@@ -374,30 +712,24 @@ describe("PluginsView game modal", () => {
       (node) => node.props?.["data-testid"] === "connectors-settings-sidebar",
     )[0];
     expect(sidebar).toBeDefined();
-    const shell = tree?.root.findAll(
-      (node) => node.props?.["data-testid"] === "connectors-shell",
-    )[0];
-    expect(String(shell?.props.className)).toContain("rounded-[30px]");
-    expect(String(shell?.props.className)).toContain("backdrop-blur-md");
+    const contentAreas = tree?.root.findAll(
+      (node) =>
+        typeof node.props?.className === "string" &&
+        node.props.className.includes("chat-native-scrollbar") &&
+        node.props.className.includes("overflow-y-auto"),
+    );
+    expect(contentAreas.length).toBeGreaterThan(0);
     const selectedConnector = tree?.root.findAll(
       (node) => node.props?.["aria-current"] === "page",
     )[0];
-    expect(String(selectedConnector?.parent?.props.className)).toContain(
-      "border-accent/26",
-    );
-    expect(String(selectedConnector?.parent?.props.className)).toContain(
-      "ring-accent/10",
-    );
-    expect(String(selectedConnector?.parent?.props.className)).toContain(
-      "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_28px_-22px_rgba(0,0,0,0.26),0_0_0_1px_rgba(var(--accent-rgb),0.12)]",
-    );
+    expect(selectedConnector).toBeDefined();
     expect(
       tree?.root.findAll((node) => hasClass(node, "plugins-game-modal")).length,
     ).toBe(0);
     expect(text(tree?.root)).toContain("Discord");
   });
 
-  it("allows collapsing the selected desktop connector section", async () => {
+  it("allows expanding and collapsing a desktop connector section", async () => {
     mockUseApp.mockReturnValue(
       baseContext([
         createPlugin("discord", "Discord", "connector"),
@@ -407,17 +739,27 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
       );
     });
 
+    const expandButton = tree.root.findByProps({
+      "aria-label": "Expand Discord",
+    });
+    expect(text(tree.root)).not.toContain("Save Settings");
+
+    await act(async () => {
+      expandButton.props.onClick();
+    });
+
+    expect(text(tree.root)).toContain("Save Settings");
+
     const collapseButton = tree.root.findByProps({
       "aria-label": "Collapse Discord",
     });
-    expect(text(tree.root)).toContain("Save Settings");
 
     await act(async () => {
       collapseButton.props.onClick();
@@ -436,7 +778,7 @@ describe("PluginsView game modal", () => {
 
   it("uses list/detail mobile panes on narrow viewport", async () => {
     narrowViewport = true;
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -487,7 +829,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "social" }),
@@ -505,11 +847,15 @@ describe("PluginsView game modal", () => {
         .length,
     ).toBe(0);
 
-    const discordHeader = tree?.root.findAll(
-      (node) => node.props?.["data-testid"] === "connector-header-discord",
+    const discordCard = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connector-card-discord",
     )[0];
     await act(async () => {
-      discordHeader.props.onClick();
+      if (typeof discordCard.props.onClick === "function") {
+        discordCard.props.onClick();
+      } else {
+        discordCard.props.onExpandedChange?.(true);
+      }
     });
 
     expect(text(tree?.root)).toContain("Save Settings");
@@ -524,7 +870,7 @@ describe("PluginsView game modal", () => {
     ]);
     mockUseApp.mockImplementation(() => state);
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -557,7 +903,7 @@ describe("PluginsView game modal", () => {
       baseContext([createPlugin("test-plugin", "Test Plugin", "feature")]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "all" }),
@@ -598,7 +944,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { inModal: true, mode: "streaming" }),
@@ -628,7 +974,7 @@ describe("PluginsView game modal", () => {
     ]);
     mockUseApp.mockImplementation(() => state);
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { mode: "social" }),
@@ -644,6 +990,50 @@ describe("PluginsView game modal", () => {
     )[0];
     expect(sidebar).toBeDefined();
     expect(text(sidebar)).toContain("All");
+    const connectorSections = tree?.root
+      .findAll(
+        (node) =>
+          typeof node.props?.["data-testid"] === "string" &&
+          node.props["data-testid"].startsWith("connector-section-"),
+      )
+      .map((node) => String(node.props["data-testid"]));
+    expect(connectorSections).toEqual(
+      expect.arrayContaining([
+        "connector-section-telegram",
+        "connector-section-signal",
+        "connector-section-github",
+        "connector-section-iq",
+      ]),
+    );
+    expect(text(tree?.root)).not.toContain("Save Settings");
+
+    const telegramSidebarButton = sidebar.findAll(
+      (node) =>
+        node.type === "button" &&
+        typeof node.props?.onClick === "function" &&
+        text(node).includes("Telegram"),
+    )[0];
+    expect(telegramSidebarButton).toBeDefined();
+
+    await act(async () => {
+      telegramSidebarButton.props.onClick();
+    });
+
+    expect(text(tree?.root)).toContain("Save Settings");
+
+    const githubCard = tree?.root.findAll(
+      (node) => node.props?.["data-testid"] === "connector-card-github",
+    )[0];
+    await act(async () => {
+      if (typeof githubCard.props.onClick === "function") {
+        githubCard.props.onClick();
+      } else {
+        githubCard.props.onExpandedChange?.(true);
+      }
+    });
+
+    expect(text(tree?.root)).toContain("GitHub");
+    expect(text(tree?.root)).toContain("Collapse");
 
     const addButtons = tree?.root.findAll(
       (node) =>
@@ -668,7 +1058,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(PluginsView));
     });
@@ -692,7 +1082,9 @@ describe("PluginsView game modal", () => {
     const openSpy = vi
       .spyOn(window, "open")
       .mockImplementation(() => null as unknown as Window);
-    (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__ = {
+    (
+      window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }
+    ).__MILADY_ELECTROBUN_RPC__ = {
       request: {
         desktopOpenExternal: mockOpenExternalInvoke,
       },
@@ -710,7 +1102,7 @@ describe("PluginsView game modal", () => {
       ]),
     );
 
-    let tree: TestRenderer.ReactTestRenderer = null as any;
+    let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
       tree = TestRenderer.create(
         React.createElement(PluginsView, { mode: "streaming" }),
@@ -749,7 +1141,8 @@ describe("PluginsView game modal", () => {
       url: "https://docs.milady.ai/plugin-setup-guide#twitch",
     });
 
-    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown }).__MILADY_ELECTROBUN_RPC__;
+    delete (window as Window & { __MILADY_ELECTROBUN_RPC__?: unknown })
+      .__MILADY_ELECTROBUN_RPC__;
     const sourceButton = tree?.root.findAll(
       (node) =>
         hasClass(node, "plugins-game-link-btn") &&

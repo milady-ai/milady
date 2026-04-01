@@ -26,6 +26,7 @@ const { mockClient } = vi.hoisted(() => ({
       expiresAt: null,
     })),
     getOnboardingStatus: vi.fn(async () => ({ complete: false })),
+    getConfig: vi.fn(async () => null),
     disconnectWs: vi.fn(),
     getCodingAgentStatus: vi.fn(async () => null),
     getConfig: vi.fn(async () => ({})),
@@ -150,7 +151,7 @@ describe("fresh install detection (startup)", () => {
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
   });
 
-  it("skips backend polling on fresh install (no persisted mode, no API base)", async () => {
+  it("shows splash on fresh install without polling the backend", async () => {
     const React = await import("react");
     const TestRenderer = await import("react-test-renderer");
     const { AppProvider, useApp } = await import("@miladyai/app-core/state");
@@ -186,14 +187,14 @@ describe("fresh install detection (startup)", () => {
       await Promise.resolve();
     });
 
-    // On fresh install: should immediately be ready for onboarding
-    // without waiting for a backend
+    // On fresh install: the splash page is shown. The coordinator stays
+    // at the splash phase until the user clicks "Start". No backend
+    // polling occurs while the splash is visible.
     expect(latest).not.toBeNull();
     expect(latest!.onboardingComplete).toBe(false);
-    expect(latest!.onboardingLoading).toBe(false);
     expect(latest!.startupError).toBeNull();
 
-    // The backend should NOT have been polled
+    // The backend should NOT have been polled while splash is showing
     expect(mockClient.getAuthStatus).not.toHaveBeenCalled();
     expect(mockClient.getOnboardingStatus).not.toHaveBeenCalled();
 

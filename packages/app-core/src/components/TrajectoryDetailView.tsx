@@ -3,23 +3,11 @@
  * embedded right-hand viewer.
  */
 
-import {
-  client,
-  type TrajectoryDetailResult,
-  type TrajectoryLlmCall,
-} from "@miladyai/app-core/api";
+import { client, type TrajectoryDetailResult } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { Button, PagePanel, TrajectoryLlmCallCard } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import { estimateTokenCost } from "./conversations/conversation-utils";
-import {
-  DESKTOP_CONTROL_SURFACE_CLASSNAME,
-  DESKTOP_INSET_PANEL_CLASSNAME,
-  DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME,
-  DESKTOP_SECTION_SHELL_CLASSNAME,
-  DesktopEmptyStatePanel,
-} from "./desktop-surface-primitives";
 import {
   formatTrajectoryDuration,
   formatTrajectoryTimestamp,
@@ -39,185 +27,11 @@ function estimateCost(
   return estimateTokenCost(promptTokens, completionTokens, model);
 }
 
-function CodeBlock({ content, label }: { content: string; label: string }) {
-  const { t, copyToClipboard } = useApp();
-  const [expanded, setExpanded] = useState(false);
-  const lines = content.split("\n").length;
-  const shouldTruncate = !expanded && lines > 20;
-  const displayContent = shouldTruncate
-    ? `${content.split("\n").slice(0, 20).join("\n")}\n...`
-    : content;
-
-  return (
-    <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} overflow-hidden`}>
-      <div className="flex items-center justify-between gap-3 border-b border-border/20 px-4 py-3">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
-            {label}
-          </div>
-          <div className="mt-1 text-[11px] text-muted">
-            {lines} {t("trajectorydetailview.lines")}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {lines > 20 && (
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              className={`h-8 rounded-full px-3 text-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
-              onClick={() => setExpanded((current) => !current)}
-            >
-              {expanded
-                ? t("trajectorydetailview.Collapse", {
-                    defaultValue: "Collapse",
-                  })
-                : t("trajectorydetailview.Expand", { defaultValue: "Expand" })}
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            className={`h-8 rounded-full px-3 text-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
-            onClick={() => {
-              void copyToClipboard(content);
-            }}
-            title={t("trajectorydetailview.CopyToClipboard")}
-          >
-            {t("trajectorydetailview.Copy")}
-          </Button>
-        </div>
-      </div>
-      <pre className="max-h-[28rem] overflow-x-auto overflow-y-auto whitespace-pre-wrap break-words px-4 py-4 text-xs leading-6 text-txt">
-        {displayContent}
-      </pre>
-    </div>
-  );
-}
-
-function LlmCallCard({
-  call,
-  index,
-}: {
-  call: TrajectoryLlmCall;
-  index: number;
-}) {
-  const { t } = useApp();
-  const [showSystem, setShowSystem] = useState(false);
-  const promptTokens = call.promptTokens ?? 0;
-  const completionTokens = call.completionTokens ?? 0;
-  const totalTokens = promptTokens + completionTokens;
-
-  return (
-    <section className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5`}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold text-txt">#{index + 1}</span>
-            <span className="rounded-full border border-accent/26 bg-accent/12 px-2.5 py-1 text-[11px] font-semibold text-txt-strong">
-              {call.model}
-            </span>
-            <span className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-              {call.purpose ||
-                call.actionType ||
-                t("trajectorydetailview.Response")}
-            </span>
-          </div>
-          <div className="mt-2 text-xs text-muted">
-            {formatTrajectoryDuration(call.latencyMs)}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
-          <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-            {t("trajectorydetailview.Tokens")}
-          </div>
-          <div className="mt-2 text-sm font-semibold text-txt">
-            {formatTrajectoryTokenCount(totalTokens, { emptyLabel: "—" })}
-          </div>
-          <div className="mt-1 text-[11px] text-muted">
-            {formatTrajectoryTokenCount(promptTokens, { emptyLabel: "—" })}↑ •{" "}
-            {formatTrajectoryTokenCount(completionTokens, {
-              emptyLabel: "—",
-            })}{" "}
-            ↓
-          </div>
-        </div>
-        <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
-          <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-            {t("trajectorydetailview.Cost")}
-          </div>
-          <div className="mt-2 text-sm font-semibold text-txt">
-            {estimateCost(promptTokens, completionTokens, call.model)}
-          </div>
-        </div>
-        <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
-          <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-            {t("trajectorydetailview.Temp")}
-          </div>
-          <div className="mt-2 text-sm font-semibold text-txt">
-            {call.temperature}
-          </div>
-        </div>
-        <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
-          <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-            {t("trajectorydetailview.Max")}
-          </div>
-          <div className="mt-2 text-sm font-semibold text-txt">
-            {call.maxTokens > 0 ? call.maxTokens : "—"}
-          </div>
-        </div>
-      </div>
-
-      {call.systemPrompt ? (
-        <div className="mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            className={`h-9 rounded-full px-4 text-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
-            onClick={() => setShowSystem((current) => !current)}
-          >
-            {showSystem ? (
-              <ChevronDown className="mr-1.5 h-4 w-4" />
-            ) : (
-              <ChevronRight className="mr-1.5 h-4 w-4" />
-            )}
-            {t("trajectorydetailview.SystemPrompt")}
-          </Button>
-          {showSystem ? (
-            <div className="mt-3">
-              <CodeBlock
-                content={call.systemPrompt}
-                label={t("trajectorydetailview.System")}
-              />
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        <CodeBlock
-          content={call.userPrompt}
-          label={t("trajectorydetailview.InputUser")}
-        />
-        <CodeBlock
-          content={call.response}
-          label={t("trajectorydetailview.OutputResponse")}
-        />
-      </div>
-    </section>
-  );
-}
-
 export function TrajectoryDetailView({
   trajectoryId,
   onBack,
 }: TrajectoryDetailViewProps) {
-  const { t } = useApp();
+  const { t, copyToClipboard } = useApp();
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<TrajectoryDetailResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -243,30 +57,30 @@ export function TrajectoryDetailView({
 
   if (loading) {
     return (
-      <DesktopEmptyStatePanel
-        className="min-h-[22rem]"
+      <PagePanel.Loading
+        variant="workspace"
+        heading={t("trajectorydetailview.LoadingTrajectory")}
         description={t("trajectorydetailview.LoadingDescription")}
-        title={t("trajectorydetailview.LoadingTrajectory")}
       />
     );
   }
 
   if (error) {
     return (
-      <DesktopEmptyStatePanel
-        className="min-h-[22rem] border-danger/25 bg-danger/10 text-danger"
-        description={error}
+      <PagePanel.Empty
+        variant="workspace"
         title={t("trajectorydetailview.UnableToLoad")}
+        description={error}
       />
     );
   }
 
   if (!detail) {
     return (
-      <DesktopEmptyStatePanel
-        className="min-h-[22rem]"
-        description={t("trajectorydetailview.TrajectoryNotFound")}
+      <PagePanel.Empty
+        variant="workspace"
         title={t("trajectorydetailview.Unavailable")}
+        description={t("trajectorydetailview.TrajectoryNotFound")}
       />
     );
   }
@@ -287,9 +101,33 @@ export function TrajectoryDetailView({
       ? (orchestrator as Record<string, unknown>)
       : null;
 
+  const summaryCards = [
+    {
+      label: t("trajectorydetailview.Source"),
+      value: trajectory.source,
+    },
+    {
+      label: t("trajectorydetailview.Status"),
+      value: trajectory.status,
+    },
+    {
+      label: t("trajectorydetailview.Duration"),
+      value: formatTrajectoryDuration(trajectory.durationMs),
+    },
+    {
+      label: t("trajectorydetailview.TotalTokens", {
+        defaultValue: "Total Tokens",
+      }),
+      value: formatTrajectoryTokenCount(
+        totalPromptTokens + totalCompletionTokens,
+        { emptyLabel: "—" },
+      ),
+    },
+  ];
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <section className={DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME}>
+      <PagePanel variant="surface" className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
@@ -308,7 +146,7 @@ export function TrajectoryDetailView({
               size="sm"
               type="button"
               onClick={onBack}
-              className={`h-9 rounded-full px-4 text-[11px] ${DESKTOP_CONTROL_SURFACE_CLASSNAME}`}
+              className="h-9 rounded-full px-4 text-[11px]"
             >
               {t("onboarding.back")}
             </Button>
@@ -316,43 +154,20 @@ export function TrajectoryDetailView({
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}>
-            <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-              {t("trajectorydetailview.Source")}
-            </div>
-            <div className="mt-2 text-sm font-semibold text-txt">
-              {trajectory.source}
-            </div>
-          </div>
-          <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}>
-            <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-              {t("trajectorydetailview.Status")}
-            </div>
-            <div className="mt-2 text-sm font-semibold text-txt">
-              {trajectory.status}
-            </div>
-          </div>
-          <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}>
-            <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-              {t("trajectorydetailview.Duration")}
-            </div>
-            <div className="mt-2 text-sm font-semibold text-txt">
-              {formatTrajectoryDuration(trajectory.durationMs)}
-            </div>
-          </div>
-          <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-4`}>
-            <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-              {t("trajectorydetailview.TotalTokens", {
-                defaultValue: "Total Tokens",
-              })}
-            </div>
-            <div className="mt-2 text-sm font-semibold text-txt">
-              {formatTrajectoryTokenCount(
-                totalPromptTokens + totalCompletionTokens,
-                { emptyLabel: "—" },
-              )}
-            </div>
-          </div>
+          {summaryCards.map((card) => (
+            <PagePanel.SummaryCard
+              key={String(card.label)}
+              compact
+              className="px-4 py-4"
+            >
+              <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                {card.label}
+              </div>
+              <div className="mt-2 text-sm font-semibold text-txt">
+                {card.value}
+              </div>
+            </PagePanel.SummaryCard>
+          ))}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -363,53 +178,112 @@ export function TrajectoryDetailView({
             {trajectory.id}
           </span>
         </div>
-      </section>
+      </PagePanel>
 
       {orchestratorData ? (
-        <section className={`${DESKTOP_SECTION_SHELL_CLASSNAME} p-5`}>
+        <PagePanel variant="section" className="p-5">
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
             {t("trajectorydetailview.Orchestrator")}
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
+            <PagePanel.SummaryCard compact className="px-4 py-3">
               <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
                 {t("trajectorydetailview.DecisionType")}
               </div>
               <div className="mt-2 text-sm font-semibold text-txt">
                 {String(orchestratorData.decisionType ?? "—")}
               </div>
-            </div>
-            <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
+            </PagePanel.SummaryCard>
+            <PagePanel.SummaryCard compact className="px-4 py-3">
               <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
                 {t("trajectorydetailview.Task")}
               </div>
               <div className="mt-2 text-sm font-semibold text-txt">
                 {String(orchestratorData.taskLabel ?? "—")}
               </div>
-            </div>
-            <div className={`${DESKTOP_INSET_PANEL_CLASSNAME} px-4 py-3`}>
+            </PagePanel.SummaryCard>
+            <PagePanel.SummaryCard compact className="px-4 py-3">
               <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
                 {t("trajectorydetailview.Session1")}
               </div>
               <div className="mt-2 break-all font-mono text-[11px] text-txt">
                 {String(orchestratorData.sessionId ?? "—")}
               </div>
-            </div>
+            </PagePanel.SummaryCard>
           </div>
-        </section>
+        </PagePanel>
       ) : null}
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <div className="space-y-4 pb-1">
           {llmCalls.length === 0 ? (
-            <DesktopEmptyStatePanel
+            <PagePanel.Empty
+              variant="surface"
               className="min-h-[18rem]"
-              description={t("trajectorydetailview.NoLLMCallsRecorde")}
               title={t("trajectorydetailview.NoCapturedCalls")}
+              description={t("trajectorydetailview.NoLLMCallsRecorde")}
             />
           ) : (
             llmCalls.map((call, index) => (
-              <LlmCallCard key={call.id} call={call} index={index} />
+              <TrajectoryLlmCallCard
+                key={call.id}
+                callLabel={`#${index + 1}`}
+                model={call.model}
+                purposeLabel={
+                  call.purpose ||
+                  call.actionType ||
+                  t("trajectorydetailview.Response")
+                }
+                latencyLabel={formatTrajectoryDuration(call.latencyMs)}
+                tokensLabel={t("trajectorydetailview.Tokens")}
+                totalTokensValue={formatTrajectoryTokenCount(
+                  (call.promptTokens ?? 0) + (call.completionTokens ?? 0),
+                  { emptyLabel: "—" },
+                )}
+                tokenBreakdownMeta={`${formatTrajectoryTokenCount(
+                  call.promptTokens ?? 0,
+                  { emptyLabel: "—" },
+                )}↑ • ${formatTrajectoryTokenCount(call.completionTokens ?? 0, {
+                  emptyLabel: "—",
+                })} ↓`}
+                costLabel={t("trajectorydetailview.Cost")}
+                costValue={estimateCost(
+                  call.promptTokens ?? 0,
+                  call.completionTokens ?? 0,
+                  call.model,
+                )}
+                temperatureLabel={t("trajectorydetailview.Temp")}
+                temperatureValue={call.temperature}
+                maxLabel={t("trajectorydetailview.Max")}
+                maxValue={call.maxTokens > 0 ? call.maxTokens : "—"}
+                systemPrompt={call.systemPrompt}
+                systemPromptButtonLabel={t("trajectorydetailview.SystemPrompt")}
+                systemLabel={t("trajectorydetailview.System")}
+                systemLinesLabel={`${call.systemPrompt?.split("\n").length ?? 0} ${t(
+                  "trajectorydetailview.lines",
+                )}`}
+                systemCollapseLabel={t("trajectorydetailview.Collapse", {
+                  defaultValue: "Collapse",
+                })}
+                systemExpandLabel={t("trajectorydetailview.Expand", {
+                  defaultValue: "Expand",
+                })}
+                inputLabel={t("trajectorydetailview.InputUser")}
+                outputLabel={t("trajectorydetailview.OutputResponse")}
+                inputLinesLabel={`${call.userPrompt.split("\n").length} ${t(
+                  "trajectorydetailview.lines",
+                )}`}
+                outputLinesLabel={`${call.response.split("\n").length} ${t(
+                  "trajectorydetailview.lines",
+                )}`}
+                userPrompt={call.userPrompt}
+                response={call.response}
+                copyLabel={t("trajectorydetailview.Copy")}
+                copyToClipboardLabel={t("trajectorydetailview.CopyToClipboard")}
+                onCopy={(content) => {
+                  void copyToClipboard(content);
+                }}
+              />
             ))
           )}
         </div>

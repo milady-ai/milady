@@ -188,6 +188,7 @@ describe("companion greeting wave", () => {
       "eliza:connection-mode",
       JSON.stringify({ runMode: "local" }),
     );
+    localStorage.setItem("eliza:onboarding-complete", "1");
     localStorage.setItem("eliza:ui-shell-mode", "companion");
     window.history.replaceState({}, "", "/chat");
     Object.assign(window, {

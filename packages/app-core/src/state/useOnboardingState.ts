@@ -119,7 +119,7 @@ const EMPTY_TOKENS: Record<ConnectorTokenKey, string> = {
 function createInitialState(cloudOnly?: boolean): OnboardingState {
   const savedApiBase = loadSessionApiBase();
   return {
-    step: loadPersistedOnboardingStep() ?? "cloud_login",
+    step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",
     activeGuide: null,
     deferredTasks: [],
@@ -252,8 +252,6 @@ export interface OnboardingStateHook {
     value: AppState["onboardingDetectedProviders"],
   ) => void;
 
-  /** Ref to guard against duplicate onboarding finish submits. */
-  finishBusyRef: React.RefObject<boolean>;
   /** Ref for onboarding resume connection. */
   resumeConnectionRef: React.RefObject<
     import("@miladyai/shared/contracts/onboarding").OnboardingConnection | null
@@ -262,8 +260,6 @@ export interface OnboardingStateHook {
   completionCommittedRef: React.RefObject<boolean>;
   /** Force local bootstrap ref. */
   forceLocalBootstrapRef: React.RefObject<boolean>;
-  /** Synchronous lock for onboarding finish saving. */
-  finishSavingRef: React.RefObject<boolean>;
 }
 
 export function useOnboardingState(cloudOnly?: boolean): OnboardingStateHook {
@@ -271,13 +267,11 @@ export function useOnboardingState(cloudOnly?: boolean): OnboardingStateHook {
     createInitialState(co),
   );
 
-  const finishBusyRef = useRef(false);
   const resumeConnectionRef = useRef<
     import("@miladyai/shared/contracts/onboarding").OnboardingConnection | null
   >(null);
   const completionCommittedRef = useRef(false);
   const forceLocalBootstrapRef = useRef(false);
-  const finishSavingRef = useRef(false);
 
   const setStep = useCallback((step: OnboardingStep) => {
     dispatch({ type: "SET_STEP", step });
@@ -337,11 +331,9 @@ export function useOnboardingState(cloudOnly?: boolean): OnboardingStateHook {
     setConnectorToken,
     setRemoteStatus,
     setDetectedProviders,
-    finishBusyRef,
     resumeConnectionRef,
     completionCommittedRef,
     forceLocalBootstrapRef,
-    finishSavingRef,
   };
 }
 

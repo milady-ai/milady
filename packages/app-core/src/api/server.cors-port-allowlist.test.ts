@@ -36,13 +36,23 @@ afterEach(() => {
 describe("buildCorsAllowedPorts", () => {
   it("returns default ports when no env vars set", () => {
     const ports = buildCorsAllowedPorts();
-    expect(ports).toEqual(new Set(["31337", "2138", "18789", "2142"]));
+    // Core service ports
+    expect(ports.has("31337")).toBe(true);
+    expect(ports.has("2138")).toBe(true);
+    expect(ports.has("18789")).toBe(true);
+    expect(ports.has("2142")).toBe(true);
+    // Electrobun renderer static server range (5174–5200)
+    for (let p = 5174; p <= 5200; p++) {
+      expect(ports.has(String(p))).toBe(true);
+    }
   });
 
   it("respects MILADY_API_PORT override", () => {
     process.env.MILADY_API_PORT = "9000";
     const ports = buildCorsAllowedPorts();
     expect(ports.has("9000")).toBe(true);
+    // 31337 is no longer the API port, but it may still be in the Electrobun range check —
+    // the key assertion is that the override port is present
     expect(ports.has("31337")).toBe(false);
   });
 

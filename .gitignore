@@ -162,3 +162,10 @@ apps/app/.vite/
 milady-*.html
 # prr state file (auto-generated)
 .pr-resolver-state.json
+
+# Tutorial assets — host externally, not in git
+docs/tutorials/videos/
+docs/tutorials/captures/
+
+# Agent skill files — per-user, not committed
+.agents/skills/

@@ -100,11 +100,7 @@ function DetachedShellContent({ route }: DetachedShellRootProps): JSX.Element {
     case "plugins":
       return <PluginsPageView />;
     case "triggers":
-      return (
-        <section className="w-full px-4 py-4 lg:px-6">
-          <HeartbeatsView />
-        </section>
-      );
+      return <HeartbeatsView />;
     case "settings":
       return (
         <section className="w-full px-4 py-4 lg:px-6">

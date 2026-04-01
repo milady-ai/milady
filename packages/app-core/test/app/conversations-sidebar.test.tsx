@@ -47,7 +47,7 @@ type ConversationStub = {
 
 function createContext(overrides: Record<string, unknown> = {}) {
   return {
-    t: (k: string) => k,
+    t: (k: string, vars?: { defaultValue?: string }) => vars?.defaultValue ?? k,
     conversations: [
       {
         id: "conv-1",
@@ -197,6 +197,47 @@ describe("ConversationsSidebar", () => {
     const content = JSON.stringify(tree.toJSON());
     expect(content).toContain("conversations.none");
     expect(content).toContain("conversations.chats");
+  });
+
+  it("renders a Search chats input and filters the conversation list", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        conversations: [
+          {
+            id: "conv-1",
+            title: "First conversation",
+            updatedAt: "2026-02-19T00:00:00.000Z",
+          } satisfies ConversationStub,
+          {
+            id: "conv-2",
+            title: "Wallet planning",
+            updatedAt: "2026-02-20T00:00:00.000Z",
+          } satisfies ConversationStub,
+        ],
+        activeConversationId: "conv-2",
+      }),
+    );
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(ConversationsSidebar));
+    });
+
+    const searchInput = tree.root.find(
+      (node) =>
+        node.type === "input" && node.props["aria-label"] === "Search chats",
+    );
+    expect(searchInput).toBeDefined();
+
+    await act(async () => {
+      searchInput.props.onChange({ target: { value: "wallet" } });
+    });
+
+    expect(
+      tree.root.findAllByProps({ "data-testid": "conv-item" }),
+    ).toHaveLength(1);
+    expect(JSON.stringify(tree.toJSON())).toContain("Wallet planning");
+    expect(JSON.stringify(tree.toJSON())).not.toContain("First conversation");
   });
 
   it("uses the rounded desktop shell treatment and shows unread count badges", async () => {

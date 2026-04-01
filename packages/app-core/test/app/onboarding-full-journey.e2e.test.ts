@@ -32,8 +32,6 @@ type AppHarnessState = {
   startupError: null;
   authRequired: boolean;
   onboardingComplete: boolean;
-  onboardingHandoffError: string | null;
-  onboardingHandoffPhase: string;
   tab: string;
   actionNotice: null;
   onboardingStep: OnboardingStep;
@@ -389,6 +387,50 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
   ShellOverlays: () => null,
   StartupFailureView: ({ error }: { error: { message: string } }) =>
     React.createElement("div", null, error.message),
+  StartupShell: () => {
+    const state = mockUseApp();
+    const phase = state?.startupCoordinator?.phase;
+    if (phase === "error") {
+      return React.createElement("div", null, state.startupError?.message ?? "StartupFailureView");
+    }
+    if (phase === "pairing-required") {
+      return React.createElement("div", null, "PairingView");
+    }
+    if (phase === "onboarding-required") {
+      const s = mockUseApp();
+      if (s.onboardingStep === "cloud_login") {
+        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.getStarted");
+      }
+      if (s.onboardingStep === "identity") {
+        return React.createElement("div", { "data-testid": "identity-step" },
+          React.createElement("div", { "data-testid": "character-roster" }, `roster:avatar-${s.selectedVrmIndex ?? 1}`),
+          React.createElement("button", {
+            onClick: () => {
+              s.setState?.("onboardingStyle", "chaotic");
+              s.setState?.("onboardingName", "TestAgent");
+              s.setState?.("selectedVrmIndex", 2);
+              s.handleOnboardingNext();
+            },
+            type: "button",
+          }, "onboarding.chooseAgent"),
+        );
+      }
+      if (s.onboardingStep === "connection") {
+        if (!s.onboardingRunMode) {
+          return React.createElement("button", { onClick: () => { s.setState?.("onboardingRunMode", "local"); }, type: "button" }, "onboarding.hostingLocal");
+        }
+        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.confirm");
+      }
+      if (s.onboardingStep === "rpc") {
+        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.rpcSkip");
+      }
+      if (s.onboardingStep === "senses") {
+        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "permissions-continue");
+      }
+      return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.enter");
+    }
+    return null;
+  },
   StreamView: () => React.createElement("div", null, "StreamView"),
   SystemWarningBanner: () =>
     React.createElement("div", null, "SystemWarningBanner"),
@@ -588,8 +630,6 @@ function createHarnessState(
     startupError: null,
     authRequired: false,
     onboardingComplete: false,
-    onboardingHandoffError: null,
-    onboardingHandoffPhase: "idle",
     tab: "chat",
     actionNotice: null,
     onboardingStep: "identity",
@@ -638,6 +678,8 @@ function createHarnessState(
     elizaCloudCredits: null,
     uiShellMode: "native",
     agentStatus: null,
+    startupCoordinator: { phase: "onboarding-required", serverReachable: false },
+    startupCoordinatorLegacyPhase: "starting-backend" as const,
     ...overrides,
   };
 }
@@ -736,6 +778,8 @@ function setupMock(state: AppHarnessState) {
     if (state.onboardingStep === "activate") {
       state.onboardingComplete = true;
       state.startupStatus = "ready";
+      state.startupCoordinator = { phase: "ready" };
+      state.startupCoordinatorLegacyPhase = "ready";
       state.uiShellMode = "companion";
       state.tab = "companion";
       return;
@@ -757,6 +801,8 @@ function setupMock(state: AppHarnessState) {
     // Simulate the real handleReset — wipes state and returns to onboarding
     state.onboardingComplete = false;
     state.startupStatus = "onboarding";
+    state.startupCoordinator = { phase: "onboarding-required", serverReachable: false };
+    state.startupCoordinatorLegacyPhase = "starting-backend";
     state.onboardingStep = "identity";
     state.onboardingStyle = "";
     state.onboardingName = "Eliza";
@@ -775,7 +821,6 @@ function setupMock(state: AppHarnessState) {
   mockUseApp.mockImplementation(() => ({
     t: (k: string) => k,
     ...state,
-    cancelOnboardingHandoff: vi.fn(),
     setState: (key: string, value: unknown) => {
       state[key] = value;
     },
@@ -802,7 +847,6 @@ function setupMock(state: AppHarnessState) {
       generated: true,
       persisted: false,
     })),
-    retryOnboardingHandoff: vi.fn(async () => {}),
     retryStartup: vi.fn(),
     startupPhase:
       state.startupStatus === "ready" ? "ready" : "starting-backend",
@@ -924,6 +968,8 @@ describe("onboarding journey to companion mode (e2e)", () => {
     // Start already completed
     state.onboardingComplete = true;
     state.startupStatus = "ready";
+    state.startupCoordinator = { phase: "ready" };
+    state.startupCoordinatorLegacyPhase = "ready";
     state.tab = "character-select";
     state.uiShellMode = "native";
 

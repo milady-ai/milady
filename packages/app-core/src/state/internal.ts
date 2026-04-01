@@ -97,7 +97,6 @@ export {
   type LifecycleAction,
   type LoadConversationMessagesResult,
   type NavigationEventsApi,
-  type OnboardingHandoffPhase,
   ONBOARDING_PERMISSION_LABELS,
   ONBOARDING_STEPS,
   type OnboardingMode,

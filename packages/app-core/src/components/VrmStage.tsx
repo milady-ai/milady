@@ -283,12 +283,7 @@ export const VrmStage = memo(function VrmStage({
         />
       )}
 
-      {/* Loading spinner while VRM loads */}
-      {!loaderHidden && !showVrmFallback && (
-        <div className="absolute inset-0 z-20">
-          <AvatarLoader progress={loadingProgress} fadingOut={loaderFading} />
-        </div>
-      )}
+      {/* VRM loads silently — no loading overlay */}
     </div>
   );
 });

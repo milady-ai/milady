@@ -122,6 +122,31 @@ describe("trigger routes", () => {
     expect(triggers.length).toBe(1);
   });
 
+  test("creates disabled triggers without requiring an active schedule", async () => {
+    const createResult = await invoke({
+      method: "POST",
+      pathname: "/api/triggers",
+      body: {
+        displayName: "Disabled Heartbeat",
+        instructions: "Stay paused until enabled.",
+        triggerType: "interval",
+        intervalMs: 120000,
+        wakeMode: "inject_now",
+        enabled: false,
+        createdBy: "tester",
+      },
+    });
+
+    expect(createResult.status).toBe(201);
+    const createdTrigger = (
+      createResult.payload as {
+        trigger?: { enabled?: boolean; nextRunAtMs?: number };
+      }
+    ).trigger;
+    expect(createdTrigger?.enabled).toBe(false);
+    expect(createdTrigger?.nextRunAtMs).toBeTypeOf("number");
+  });
+
   test("updates and deletes trigger by trigger id", async () => {
     const create = await invoke({
       method: "POST",

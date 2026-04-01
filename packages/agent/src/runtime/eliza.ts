@@ -958,6 +958,9 @@ const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
   GROQ_API_KEY: "@elizaos/plugin-groq",
   XAI_API_KEY: "@elizaos/plugin-xai",
   OPENROUTER_API_KEY: "@elizaos/plugin-openrouter",
+  DEEPSEEK_API_KEY: "@elizaos/plugin-deepseek",
+  MISTRAL_API_KEY: "@elizaos/plugin-mistral",
+  TOGETHER_API_KEY: "@elizaos/plugin-together",
   AI_GATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   AIGATEWAY_API_KEY: "@elizaos/plugin-vercel-ai-gateway",
   OLLAMA_BASE_URL: "@elizaos/plugin-ollama",
@@ -4110,6 +4113,21 @@ export async function startEliza(
       if (isElizaCloudManagedProcessEnvKey(key)) continue;
       if (typeof value === "string" && !process.env[key]) {
         process.env[key] = value;
+      }
+    }
+    // Also hydrate from config.env.vars — setEnvValue writes API keys to
+    // both config.env["KEY"] and config.env.vars["KEY"]. If the top-level
+    // key was lost (e.g. pruneEnv, config migration), the nested form is
+    // the authoritative source.
+    const vars = (config.env as Record<string, unknown>).vars;
+    if (vars && typeof vars === "object" && !Array.isArray(vars)) {
+      for (const [key, value] of Object.entries(
+        vars as Record<string, unknown>,
+      )) {
+        if (isElizaCloudManagedProcessEnvKey(key)) continue;
+        if (typeof value === "string" && !process.env[key]) {
+          process.env[key] = value;
+        }
       }
     }
   }

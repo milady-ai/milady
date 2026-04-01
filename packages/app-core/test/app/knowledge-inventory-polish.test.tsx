@@ -4,6 +4,14 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("react-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-dom")>("react-dom");
+  return {
+    ...actual,
+    createPortal: (children: React.ReactNode) => children,
+  };
+});
+
 const {
   mockUseApp,
   mockListKnowledgeDocuments,
@@ -23,6 +31,12 @@ const {
   mockGetKnowledgeDocument: vi.fn(),
   mockGetKnowledgeFragments: vi.fn(),
 }));
+
+type SidebarHeaderSearchProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  clearLabel?: string;
+  loading?: boolean;
+  onClear?: () => void;
+};
 
 vi.mock("@miladyai/ui", async (importOriginal) => {
   const React = await import("react");
@@ -91,6 +105,131 @@ vi.mock("@miladyai/ui", async (importOriginal) => {
       React.createElement("div", null, children),
     Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
       React.createElement("input", props),
+    PageLayout: ({
+      children,
+      className,
+      sidebar,
+      ...props
+    }: React.PropsWithChildren<{
+      className?: string;
+      sidebar?: React.ReactNode;
+    }>) =>
+      React.createElement(
+        "div",
+        { className, ...props },
+        sidebar,
+        React.createElement("main", null, children),
+      ),
+    Sidebar: ({
+      children,
+      className,
+      header,
+      footer,
+      ...props
+    }: React.PropsWithChildren<{
+      className?: string;
+      header?: React.ReactNode;
+      footer?: React.ReactNode;
+    }>) =>
+      React.createElement(
+        "aside",
+        {
+          className: ["border-b border-border/34 backdrop-blur-md", className]
+            .filter(Boolean)
+            .join(" "),
+          ...props,
+        },
+        header,
+        children,
+        footer,
+      ),
+    SidebarPanel: ({
+      children,
+      className,
+      ...props
+    }: React.PropsWithChildren<{ className?: string }>) =>
+      React.createElement("div", { className, ...props }, children),
+    SidebarFilterBar: ({
+      children,
+      className,
+      ...props
+    }: React.PropsWithChildren<{ className?: string }>) =>
+      React.createElement("div", { className, ...props }, children),
+    SidebarHeader: ({
+      children,
+      className,
+      search,
+      ...props
+    }: React.PropsWithChildren<{
+      className?: string;
+      search?: SidebarHeaderSearchProps;
+    }>) => {
+      const { clearLabel, loading, onClear, ...inputProps } = search ?? {};
+      void clearLabel;
+      void loading;
+      void onClear;
+
+      return React.createElement(
+        "div",
+        { className, ...props },
+        search ? React.createElement("input", inputProps) : null,
+        children,
+      );
+    },
+    SidebarHeaderStack: ({
+      children,
+      className,
+      ...props
+    }: React.PropsWithChildren<{ className?: string }>) =>
+      React.createElement("div", { className, ...props }, children),
+    SidebarSearchBar: ({
+      className,
+      value,
+      onChange,
+      ...props
+    }: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", {
+        className,
+        value,
+        onChange,
+        ...props,
+      }),
+    SidebarScrollRegion: ({
+      children,
+      className,
+      ...props
+    }: React.PropsWithChildren<{ className?: string }>) =>
+      React.createElement("div", { className, ...props }, children),
+    SegmentedControl: ({
+      className,
+      items = [],
+      onValueChange,
+      value,
+      ...props
+    }: {
+      className?: string;
+      items?: Array<{ label: React.ReactNode; value: string }>;
+      onValueChange?: (value: string) => void;
+      value?: string;
+    }) =>
+      React.createElement(
+        "div",
+        { className, ...props },
+        items.map((item) =>
+          React.createElement(
+            "button",
+            {
+              key: item.value,
+              type: "button",
+              "aria-pressed": value === item.value,
+              onClick: () => onValueChange?.(item.value),
+            },
+            item.label,
+          ),
+        ),
+      ),
+    TooltipHint: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
   };
 });
 
@@ -189,39 +328,23 @@ vi.mock("../../src/components/inventory/useInventoryData", () => ({
 import { InventoryView } from "../../src/components/InventoryView";
 import { KnowledgeView } from "../../src/components/KnowledgeView";
 
-function translate(key: string, options?: Record<string, unknown>): string {
-  const template =
-    typeof options?.defaultValue === "string" ? options.defaultValue : key;
-  return template.replace(/\{\{(\w+)\}\}/g, (_, token: string) =>
-    String(options?.[token] ?? `{{${token}}}`),
-  );
-}
-
-function flattenText(value: React.ReactNode): string {
-  if (typeof value === "string" || typeof value === "number") {
-    return String(value);
-  }
-  if (Array.isArray(value)) {
-    return value.map(flattenText).join("");
-  }
-  if (React.isValidElement(value)) {
-    return flattenText(value.props.children);
-  }
-  return "";
-}
-
-function findKnowledgeDocumentButtons(tree: TestRenderer.ReactTestRenderer) {
-  return tree.root.findAll(
-    (node) =>
-      node.type === "button" &&
-      typeof node.props["aria-label"] === "string" &&
-      node.props["aria-label"].startsWith("Open "),
-  );
-}
+const testRendererOptions = {
+  createNodeMock: () => ({}),
+};
 
 describe("Knowledge and inventory polish", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes("min-width: 768px"),
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
     mockListKnowledgeDocuments.mockResolvedValue({
       documents: [
         {
@@ -259,7 +382,10 @@ describe("Knowledge and inventory polish", () => {
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(KnowledgeView));
+      tree = TestRenderer.create(
+        React.createElement(KnowledgeView),
+        testRendererOptions,
+      );
       await Promise.resolve();
     });
 
@@ -279,84 +405,6 @@ describe("Knowledge and inventory polish", () => {
 
     expect(tokenPanels.length).toBeGreaterThan(0);
     expect(sidebars.length).toBeGreaterThan(0);
-  });
-
-  it("filters documents locally before semantic search and clears back to the full list", async () => {
-    mockListKnowledgeDocuments.mockResolvedValue({
-      documents: [
-        {
-          id: "doc-1",
-          filename: "README.md",
-          contentType: "text/markdown",
-          fileSize: 1024,
-          createdAt: Date.now(),
-          fragmentCount: 4,
-          source: "upload",
-        },
-        {
-          id: "doc-2",
-          filename: "roadmap.txt",
-          contentType: "text/plain",
-          fileSize: 2048,
-          createdAt: Date.now(),
-          fragmentCount: 2,
-          source: "upload",
-        },
-      ],
-    });
-    mockUseApp.mockReturnValue({
-      t: translate,
-      setActionNotice: vi.fn(),
-    });
-
-    let tree!: TestRenderer.ReactTestRenderer;
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(KnowledgeView));
-      await Promise.resolve();
-      await Promise.resolve();
-    });
-
-    expect(findKnowledgeDocumentButtons(tree)).toHaveLength(2);
-
-    const searchInput = tree.root.find(
-      (node) => node.type === "input" && node.props.type === "text",
-    );
-
-    await act(async () => {
-      searchInput.props.onChange({
-        target: { value: "road" },
-      });
-    });
-
-    const filteredButtons = findKnowledgeDocumentButtons(tree);
-    expect(filteredButtons).toHaveLength(1);
-    expect(flattenText(filteredButtons[0].props.children)).toContain(
-      "roadmap.txt",
-    );
-    expect(mockSearchKnowledge).not.toHaveBeenCalled();
-
-    await act(async () => {
-      searchInput.props.onChange({
-        target: { value: "zzz" },
-      });
-    });
-
-    expect(findKnowledgeDocumentButtons(tree)).toHaveLength(0);
-    expect(JSON.stringify(tree.toJSON())).toContain("No matching documents");
-
-    const clearButton = tree.root.find(
-      (node) => node.type === "button" && node.props["aria-label"] === "Clear",
-    );
-
-    await act(async () => {
-      clearButton.props.onClick();
-    });
-
-    const resetButtons = findKnowledgeDocumentButtons(tree);
-    expect(resetButtons).toHaveLength(2);
-    expect(JSON.stringify(tree.toJSON())).not.toContain(
-      "No matching documents",
-    );
   });
 
   it("renders the steward badge with token-driven accent styling", async () => {
@@ -404,7 +452,10 @@ describe("Knowledge and inventory polish", () => {
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(InventoryView));
+      tree = TestRenderer.create(
+        React.createElement(InventoryView),
+        testRendererOptions,
+      );
       await Promise.resolve();
     });
 

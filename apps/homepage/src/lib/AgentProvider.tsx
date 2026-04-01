@@ -571,6 +571,22 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     setIsRefreshing(false);
   }, []);
 
+  // Adaptive polling: 5s when any agent is provisioning, 30s otherwise
+  const activeIntervalMs = useRef<number>(30000);
+
+  useEffect(() => {
+    const hasProvisioning = agents.some((a) => a.status === "provisioning");
+    const desiredInterval = hasProvisioning ? 5000 : 30000;
+
+    if (desiredInterval !== activeIntervalMs.current) {
+      activeIntervalMs.current = desiredInterval;
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+      }
+      intervalRef.current = setInterval(fetchAll, desiredInterval);
+    }
+  }, [agents, fetchAll]);
+
   useEffect(() => {
     void fetchAll();
     intervalRef.current = setInterval(fetchAll, 30000);

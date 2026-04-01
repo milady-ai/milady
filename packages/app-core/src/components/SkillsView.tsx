@@ -8,18 +8,33 @@
 
 import {
   Button,
+  ConfirmDelete,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   Input,
+  PageLayout,
+  PagePanel,
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarPanel,
+  SidebarScrollRegion,
+  SkillSidebarItem,
   StatusBadge,
   Switch,
   Textarea,
 } from "@miladyai/ui";
 import { RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const BINANCE_SKILL_IDS = new Set([
   "binance-crypto-market-rank",
@@ -44,28 +59,6 @@ import {
   ADMIN_SEGMENTED_TAB_INACTIVE_CLASSNAME,
   ADMIN_SEGMENTED_TABLIST_CLASSNAME,
 } from "./admin-surface-primitives";
-import { ConfirmDeleteControl } from "./confirm-delete-control";
-import {
-  DESKTOP_INSET_PANEL_CLASSNAME,
-  DESKTOP_PAGE_CONTENT_CLASSNAME,
-  DESKTOP_SECTION_SHELL_CLASSNAME,
-  DesktopEmptyStatePanel,
-  DesktopPageFrame,
-} from "./desktop-surface-primitives";
-import {
-  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
-  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
-  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
-  APP_SIDEBAR_CARD_BASE_CLASSNAME,
-  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_META_CLASSNAME,
-  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
-  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
-} from "./sidebar-shell-styles";
-
-const SKILLS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
 
 /* ── Marketplace Result Card ────────────────────────────────────────── */
 
@@ -405,82 +398,6 @@ function InstallModal({
   );
 }
 
-/* ── Create Skill Inline Form ───────────────────────────────────────── */
-
-function CreateSkillForm({
-  skillCreateName,
-  skillCreateDescription,
-  skillCreating,
-  setState,
-  onCancel,
-  onCreate,
-}: {
-  skillCreateName: string;
-  skillCreateDescription: string;
-  skillCreating: boolean;
-  setState: ReturnType<typeof useApp>["setState"];
-  onCancel: () => void;
-  onCreate: () => void;
-}) {
-  const { t } = useApp();
-  return (
-    <div className="border border-[var(--accent)]/40 bg-[var(--card)] mb-4">
-      <div className="px-4 py-3 border-b border-[var(--border)]">
-        <div className="text-xs font-semibold text-[var(--txt)]">
-          {t("skillsview.CreateNewSkill")}
-        </div>
-      </div>
-      <div className="p-4 flex flex-col gap-3">
-        <div>
-          <span className="block text-[11px] text-[var(--muted)] mb-1 font-medium">
-            {t("skillsview.SkillName")} <span className="text-danger">*</span>
-          </span>
-          <Input
-            className="w-full bg-bg/50 border-border/50 focus-visible:ring-accent"
-            placeholder={t("skillsview.eGMyAwesomeSkil")}
-            value={skillCreateName}
-            onChange={(e) => setState("skillCreateName", e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && skillCreateName.trim()) onCreate();
-            }}
-          />
-        </div>
-        <div>
-          <span className="block text-[11px] text-[var(--muted)] mb-1 font-medium">
-            {t("skillsview.Description")}
-          </span>
-          <Input
-            className="w-full bg-bg/50 border-border/50 focus-visible:ring-accent"
-            placeholder={t("skillsview.BriefDescriptionOf")}
-            value={skillCreateDescription}
-            onChange={(e) => setState("skillCreateDescription", e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && skillCreateName.trim()) onCreate();
-            }}
-          />
-        </div>
-        <div className="flex gap-2 justify-end pt-2">
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            {t("common.cancel")}
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={onCreate}
-            disabled={skillCreating || !skillCreateName.trim()}
-          >
-            {skillCreating
-              ? t("skillsview.creating", { defaultValue: "Creating..." })
-              : t("skillsview.createSkill", {
-                  defaultValue: "Create Skill",
-                })}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Edit Skill Modal ──────────────────────────────────────────────── */
 
 function EditSkillModal({
@@ -519,7 +436,7 @@ function EditSkillModal({
       );
     }
     setLoading(false);
-  }, [skillId]);
+  }, [skillId, t]);
 
   useEffect(() => {
     void loadSource();
@@ -671,9 +588,15 @@ function EditSkillModal({
 
 /* ── Main Skills View ───────────────────────────────────────────────── */
 
-export function SkillsView({ inModal }: { inModal?: boolean } = {}) {
+export function SkillsView({
+  contentHeader,
+  inModal,
+}: {
+  contentHeader?: ReactNode;
+  inModal?: boolean;
+} = {}) {
   if (inModal) return <SkillsModalView />;
-  return <SkillsFullView />;
+  return <SkillsFullView contentHeader={contentHeader} />;
 }
 
 /* ── Companion Modal View (sidebar + detail, reuses plugins-game-* CSS) ── */
@@ -736,7 +659,6 @@ function SkillsModalView() {
     ? (skills.find((s) => s.id === effectiveSelectedId) ?? null)
     : null;
 
-  const binanceCount = skills.filter((s) => BINANCE_SKILL_IDS.has(s.id)).length;
   const tabs: { key: typeof filterTab; label: string }[] = [
     {
       key: "all",
@@ -952,7 +874,7 @@ function SkillsModalView() {
 
 /* ── Full-Page Skills View ─────────────────────────────────────────── */
 
-function SkillsFullView() {
+function SkillsFullView({ contentHeader }: { contentHeader?: ReactNode } = {}) {
   const {
     skills,
     skillCreateFormOpen,
@@ -1023,9 +945,6 @@ function SkillsFullView() {
     ? (skills.find((skill) => skill.id === selectedSkillId) ?? null)
     : null;
 
-  const binanceSkillCount = skills.filter((skill) =>
-    BINANCE_SKILL_IDS.has(skill.id),
-  ).length;
   const filterTabs: { key: typeof filterTab; label: string }[] = [
     {
       key: "all",
@@ -1058,20 +977,31 @@ function SkillsFullView() {
     selectedSkill?.scanStatus === "critical" ||
     selectedSkill?.scanStatus === "blocked";
 
-  return (
-    <DesktopPageFrame>
-      <div className={SKILLS_SHELL_CLASS} data-testid="skills-shell">
-        <aside
-          data-testid="skills-sidebar"
-          className={APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}
-        >
-          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+  const skillsSidebar = (
+    <Sidebar
+      testId="skills-sidebar"
+      aria-label={t("skillsview.filterSkills", {
+        defaultValue: "Skills list",
+      })}
+    >
+      <SidebarHeader
+        search={{
+          value: filterText,
+          onChange: (event) => setFilterText(event.target.value),
+          placeholder: t("skillsview.filterSkills"),
+          "aria-label": t("skillsview.filterSkills"),
+          onClear: () => setFilterText(""),
+        }}
+      />
+      <SidebarScrollRegion>
+        <SidebarPanel>
+          <SidebarContent.Toolbar className="mb-3">
+            <SidebarContent.ToolbarPrimary>
               <Button
                 variant={skillCreateFormOpen ? "outline" : "default"}
                 size="sm"
                 type="button"
-                className={`h-9 flex-1 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] ${
+                className={`h-9 w-full rounded-full px-4 text-[11px] font-bold tracking-[0.12em] ${
                   skillCreateFormOpen
                     ? "border-border/50 bg-bg/25 text-txt"
                     : "text-txt-strong"
@@ -1087,6 +1017,8 @@ function SkillsFullView() {
                   ? t("common.cancel")
                   : `+ ${t("skillsview.NewSkill", { defaultValue: "New Skill" })}`}
               </Button>
+            </SidebarContent.ToolbarPrimary>
+            <SidebarContent.ToolbarActions>
               <Button
                 variant="outline"
                 size="sm"
@@ -1096,22 +1028,11 @@ function SkillsFullView() {
               >
                 {t("skillsview.Install", { defaultValue: "Install" })}
               </Button>
-            </div>
-
-            <div className="mt-3 flex items-center gap-2">
-              <Input
-                type="text"
-                placeholder={t("skillsview.filterSkills")}
-                value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                aria-label={t("skillsview.filterSkills")}
-                className={`min-w-0 flex-1 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
-              />
               <Button
                 variant="ghost"
                 size="icon"
                 type="button"
-                className="h-10 w-10 shrink-0 rounded-full text-muted hover:text-txt"
+                className="h-9 w-9 rounded-full text-muted hover:text-txt"
                 onClick={() => void refreshSkills()}
                 title={t("skillsview.RefreshSkillsList", {
                   defaultValue: "Refresh Skills List",
@@ -1122,416 +1043,466 @@ function SkillsFullView() {
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
-            </div>
+            </SidebarContent.ToolbarActions>
+          </SidebarContent.Toolbar>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              {filterTabs.map((tab) => (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  key={tab.key}
-                  type="button"
-                  className={`h-8 rounded-full border px-3 text-[10px] font-bold tracking-[0.14em] ${
-                    filterTab === tab.key
-                      ? "border-accent/30 bg-accent/10 text-txt"
-                      : "border-border/45 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
-                  }`}
-                  onClick={() => setFilterTab(tab.key)}
-                >
-                  {tab.label}
-                </Button>
-              ))}
-            </div>
-
-            <section
-              className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
-              aria-label={t("skillsview.filterSkills", {
-                defaultValue: "Skills list",
-              })}
-            >
-              {filteredSkills.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border/45 bg-bg/20 px-4 py-6 text-center text-sm text-muted">
-                  {skills.length === 0
-                    ? t("skillsview.noSkillsInstalled", {
-                        defaultValue: "No Skills Installed",
-                      })
-                    : t("skillsview.noSkillsMatchFilter", {
-                        defaultValue: 'No skills match "{{filter}}"',
-                        filter: filterText,
-                      })}
-                </div>
-              ) : (
-                filteredSkills.map((skill) => {
-                  const needsAttention =
-                    skill.scanStatus === "warning" ||
-                    skill.scanStatus === "critical" ||
-                    skill.scanStatus === "blocked";
-
-                  return (
-                    <div
-                      key={skill.id}
-                      data-testid={`skill-row-${skill.id}`}
-                      className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} items-start gap-2 ${
-                        selectedSkillId === skill.id
-                          ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                          : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                      }`}
-                    >
-                      <Button
-                        variant="ghost"
-                        role="option"
-                        aria-selected={selectedSkillId === skill.id}
-                        className="flex h-auto min-w-0 flex-1 items-start gap-3 rounded-none p-0 text-left"
-                        onClick={() => {
-                          setSelectedId(skill.id);
-                          setState("skillCreateFormOpen", false);
-                        }}
-                        aria-current={
-                          selectedSkillId === skill.id ? "page" : undefined
-                        }
-                      >
-                        <span
-                          className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border p-2 text-sm font-bold ${
-                            selectedSkillId === skill.id
-                              ? "border-accent/30 bg-accent/18 text-txt-strong"
-                              : "border-border/50 bg-bg-accent/80 text-muted"
-                          }`}
-                        >
-                          {skill.name.charAt(0).toUpperCase()}
-                        </span>
-                        <span className="min-w-0 flex-1 text-left">
-                          <span className="block whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug">
-                            {skill.name}
-                          </span>
-                          <span className="mt-1 block whitespace-normal break-words [overflow-wrap:anywhere] line-clamp-2 text-[11px] leading-relaxed text-muted/85">
-                            {skill.description || t("skillsview.noDescription")}
-                          </span>
-                        </span>
-                      </Button>
-                      <div className="flex shrink-0 flex-col items-end gap-2">
-                        <span
-                          className={`rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] ${
-                            skill.enabled
-                              ? "border-accent bg-accent text-accent-fg"
-                              : "border-border bg-transparent text-muted"
-                          }`}
-                        >
-                          {skill.enabled ? t("common.on") : t("common.off")}
-                        </span>
-                        {needsAttention && (
-                          <span className="rounded-full border border-warn/30 bg-warn/12 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-warn">
-                            {skill.scanStatus === "blocked"
-                              ? t("skillsview.statusBlocked")
-                              : t("skillsview.statusWarning")}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </section>
-          </div>
-        </aside>
-
-        <div
-          data-testid="skills-detail"
-          className={DESKTOP_PAGE_CONTENT_CLASSNAME}
-        >
-          <div className="mx-auto max-w-[76rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-            {skills.length === 0 && !skillCreateFormOpen ? (
-              <div
-                className={`${DESKTOP_SECTION_SHELL_CLASSNAME} px-6 py-12 text-center`}
+          <div className="mb-3 flex flex-wrap gap-2">
+            {filterTabs.map((tab) => (
+              <Button
+                variant="ghost"
+                size="sm"
+                key={tab.key}
+                type="button"
+                className={`h-8 rounded-full border px-3 text-[10px] font-bold tracking-[0.14em] ${
+                  filterTab === tab.key
+                    ? "border-accent/30 bg-accent/10 text-txt"
+                    : "border-border/45 text-muted hover:border-border/70 hover:bg-bg/35 hover:text-txt"
+                }`}
+                onClick={() => setFilterTab(tab.key)}
               >
-                <div
+                {tab.label}
+              </Button>
+            ))}
+          </div>
+
+          {filteredSkills.length === 0 ? (
+            <SidebarContent.EmptyState>
+              {skills.length === 0
+                ? t("skillsview.noSkillsInstalled", {
+                    defaultValue: "No Skills Installed",
+                  })
+                : t("skillsview.noSkillsMatchFilter", {
+                    defaultValue: 'No skills match "{{filter}}"',
+                    filter: filterText,
+                  })}
+            </SidebarContent.EmptyState>
+          ) : (
+            <div className="space-y-1.5">
+              {filteredSkills.map((skill) => {
+                const needsAttention =
+                  skill.scanStatus === "warning" ||
+                  skill.scanStatus === "critical" ||
+                  skill.scanStatus === "blocked";
+                const selected = selectedSkillId === skill.id;
+
+                return (
+                  <SkillSidebarItem
+                    key={skill.id}
+                    active={selected}
+                    testId={`skill-row-${skill.id}`}
+                    enabled={skill.enabled}
+                    icon={skill.name.charAt(0).toUpperCase()}
+                    name={skill.name}
+                    description={
+                      skill.description || t("skillsview.noDescription")
+                    }
+                    onLabel={t("common.on")}
+                    offLabel={t("common.off")}
+                    onSelect={() => {
+                      setSelectedId(skill.id);
+                      setState("skillCreateFormOpen", false);
+                    }}
+                    attentionLabel={
+                      needsAttention
+                        ? skill.scanStatus === "blocked"
+                          ? t("skillsview.statusBlocked")
+                          : t("skillsview.statusWarning")
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
+        </SidebarPanel>
+      </SidebarScrollRegion>
+    </Sidebar>
+  );
+
+  return (
+    <>
+      <PageLayout
+        data-testid="skills-shell"
+        sidebar={skillsSidebar}
+        contentHeader={contentHeader}
+        contentInnerClassName="mx-auto w-full max-w-[76rem]"
+      >
+        <div data-testid="skills-detail">
+          <PagePanel variant="section">
+            <PagePanel.Header
+              eyebrow={t("nav.advanced")}
+              heading={t("advancedpageview.Skills", {
+                defaultValue: "Skills",
+              })}
+              description={t("advancedpageview.SkillsDescription", {
+                defaultValue: "Custom agent skills",
+              })}
+              className="border-border/35"
+              actions={
+                <PagePanel.Meta className="border-border/45 px-2.5 py-1 font-bold tracking-[0.16em] text-muted">
+                  {t("skillsview.VisibleCount", {
+                    defaultValue: "{{count}} shown",
+                    count: filteredSkills.length,
+                  })}
+                </PagePanel.Meta>
+              }
+            />
+
+            <div className="bg-bg/18 px-4 py-4 sm:px-5">
+              {skills.length === 0 && !skillCreateFormOpen ? (
+                <PagePanel.Empty
                   data-testid="skills-empty-state"
-                  className="text-sm font-semibold text-txt"
-                >
-                  {t("skillsview.noSkillsInstalled", {
+                  variant="surface"
+                  className="min-h-[18rem] rounded-[1.6rem] px-6 py-12"
+                  title={t("skillsview.noSkillsInstalled", {
                     defaultValue: "No Skills Installed",
                   })}
-                </div>
-                <div className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
-                  {t("skillsview.noSkillsInstalledDesc", {
+                  description={t("skillsview.noSkillsInstalledDesc", {
                     defaultValue:
                       "Install skills from the marketplace or create your own.",
                   })}
-                </div>
-                <div className="mt-5 flex justify-center gap-3">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-10 rounded-full px-5 font-bold tracking-[0.12em]"
-                    onClick={() => setInstallModalOpen(true)}
-                  >
-                    {t("skillsview.BrowseMarketplace")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 rounded-full px-5 font-bold tracking-[0.12em]"
-                    onClick={() => setState("skillCreateFormOpen", true)}
-                  >
-                    {t("skillsview.createSkill", {
-                      defaultValue: "Create Skill",
-                    })}
-                  </Button>
-                </div>
-              </div>
-            ) : filteredSkills.length === 0 && !skillCreateFormOpen ? (
-              <DesktopEmptyStatePanel
-                data-testid="skills-filter-empty"
-                className="px-6 py-12 text-center text-sm text-muted"
-                title={t("skillsview.noMatchingSkills", {
-                  defaultValue: "No matching skills",
-                })}
-                description={t("skillsview.noSkillsMatchFilter", {
-                  defaultValue: 'No skills match "{{filter}}"',
-                  filter: filterText,
-                })}
-              />
-            ) : skillCreateFormOpen ? (
-              <section className={DESKTOP_SECTION_SHELL_CLASSNAME}>
-                <div className="border-b border-border/35 px-5 py-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
-                    {t("skillsview.skillBuilder", {
+                  action={
+                    <div className="flex justify-center gap-3">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="h-10 rounded-full px-5 font-bold tracking-[0.12em]"
+                        onClick={() => setInstallModalOpen(true)}
+                      >
+                        {t("skillsview.BrowseMarketplace")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-10 rounded-full px-5 font-bold tracking-[0.12em]"
+                        onClick={() => setState("skillCreateFormOpen", true)}
+                      >
+                        {t("skillsview.createSkill", {
+                          defaultValue: "Create Skill",
+                        })}
+                      </Button>
+                    </div>
+                  }
+                />
+              ) : filteredSkills.length === 0 && !skillCreateFormOpen ? (
+                <PagePanel.Empty
+                  data-testid="skills-filter-empty"
+                  variant="surface"
+                  className="min-h-[16rem] rounded-[1.6rem] px-6 py-12"
+                  title={t("skillsview.noMatchingSkills", {
+                    defaultValue: "No matching skills",
+                  })}
+                  description={t("skillsview.noSkillsMatchFilter", {
+                    defaultValue: 'No skills match "{{filter}}"',
+                    filter: filterText,
+                  })}
+                />
+              ) : skillCreateFormOpen ? (
+                <PagePanel variant="surface" className="overflow-hidden">
+                  <PagePanel.Header
+                    eyebrow={t("skillsview.skillBuilder", {
                       defaultValue: "Skill Builder",
                     })}
-                  </div>
-                  <div className="mt-1 text-sm font-semibold text-txt">
-                    {t("skillsview.CreateNewSkill")}
-                  </div>
-                </div>
-                <div className="bg-bg/18 px-4 py-4 sm:px-5">
-                  <CreateSkillForm
-                    skillCreateName={skillCreateName}
-                    skillCreateDescription={skillCreateDescription}
-                    skillCreating={skillCreating}
-                    setState={setState}
-                    onCancel={handleCancelCreate}
-                    onCreate={handleCreateSkill}
+                    heading={t("skillsview.CreateNewSkill")}
                   />
-                </div>
-              </section>
-            ) : selectedSkill ? (
-              <section
-                data-skill-id={selectedSkill.id}
-                className={DESKTOP_SECTION_SHELL_CLASSNAME}
-              >
-                <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
-                  <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-accent/30 bg-accent/18 p-2.5 text-base font-bold text-txt-strong">
-                    {selectedSkill.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <div
-                        data-testid="skills-detail-name"
-                        className="whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug text-txt"
-                      >
-                        {selectedSkill.name}
-                      </div>
-                      <StatusBadge
-                        label={
-                          selectedSkill.scanStatus === "blocked" ||
-                          selectedSkill.scanStatus === "critical"
-                            ? t("skillsview.statusBlocked")
-                            : selectedSkill.scanStatus === "warning"
-                              ? t("skillsview.statusWarning")
-                              : selectedSkill.enabled
-                                ? t("skillsview.statusActive")
-                                : t("skillsview.statusInactive")
-                        }
-                        variant={
-                          selectedSkill.scanStatus === "warning"
-                            ? "warning"
-                            : selectedSkill.scanStatus === "blocked" ||
-                                selectedSkill.scanStatus === "critical"
-                              ? "danger"
-                              : selectedSkill.enabled
-                                ? "success"
-                                : "muted"
-                        }
-                        withDot
-                      />
-                      <span className="text-[11px] font-mono text-muted/80">
-                        {selectedSkill.id}
-                      </span>
-                    </div>
-                    <div className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">
-                      {selectedSkill.description ||
-                        t("skillsview.noDescriptionProvided", {
-                          defaultValue: "No description provided.",
-                        })}
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {selectedNeedsAttention && !selectedSkillReviewOpen && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-auto rounded-full border-warn/35 bg-warn/12 px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-warn"
-                        onClick={() => handleReviewSkill(selectedSkill.id)}
-                      >
-                        {t("skillsview.ReviewFindings")}
-                      </Button>
-                    )}
-                    {selectedNeedsAttention && selectedSkillReviewOpen && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-auto rounded-full border-border/50 px-3 py-1.5 text-[11px] font-semibold text-muted hover:text-txt"
-                        onClick={handleDismissReview}
-                      >
-                        {t("skillsview.Dismiss")}
-                      </Button>
-                    )}
-                    <Switch
-                      checked={selectedSkill.enabled}
-                      disabled={skillToggleAction === selectedSkill.id}
-                      onCheckedChange={(next) =>
-                        handleSkillToggle(selectedSkill.id, next)
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="border-t border-border/40 bg-bg/18 px-4 py-4 sm:px-5">
-                  <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
-                      onClick={() => setEditingSkill(selectedSkill)}
-                    >
-                      {t("skillsview.EditSource", {
-                        defaultValue: "Edit Source",
-                      })}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      type="button"
-                      className="h-9 w-9 rounded-full text-muted hover:text-txt"
-                      onClick={() => void refreshSkills()}
-                      title={t("common.refresh")}
-                      aria-label={t("common.refresh")}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                    <ConfirmDeleteControl
-                      triggerClassName="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] !bg-transparent text-danger hover:!bg-danger/15 hover:text-danger-foreground transition-colors border border-danger/30"
-                      confirmClassName="px-3 py-1 text-[11px] font-bold bg-danger text-danger-foreground hover:bg-danger/90 transition-colors rounded-md shadow-sm"
-                      cancelClassName="px-3 py-1 text-[11px] font-bold text-muted border border-border/40 hover:text-txt transition-colors rounded-md"
-                      confirmLabel={t("conversations.deleteYes")}
-                      cancelLabel={t("conversations.deleteNo")}
-                      onConfirm={() =>
-                        handleDeleteSkill(selectedSkill.id, selectedSkill.name)
-                      }
-                    />
-                  </div>
-
-                  {selectedSkillReviewOpen && skillReviewReport ? (
-                    <div
-                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} p-4 sm:p-5`}
-                    >
-                      <div className="mb-3 flex flex-wrap items-center gap-3">
-                        <span className="text-xs font-semibold text-txt">
-                          {t("skillsview.ScanReport")}
+                  <div className="bg-bg/18 px-4 py-4 sm:px-5">
+                    <div className="flex flex-col gap-3">
+                      <div>
+                        <span className="mb-1 block text-[11px] font-medium text-[var(--muted)]">
+                          {t("skillsview.SkillName")}{" "}
+                          <span className="text-danger">*</span>
                         </span>
-                        <span className="text-[11px] font-mono text-danger">
-                          {skillReviewReport.summary.critical}{" "}
-                          {t("skillsview.critical")}
-                        </span>
-                        <span className="text-[11px] font-mono text-warn">
-                          {skillReviewReport.summary.warn}{" "}
-                          {t("skillsview.warnings")}
-                        </span>
-                      </div>
-                      {skillReviewReport.findings.length > 0 && (
-                        <div className="custom-scrollbar max-h-64 overflow-y-auto rounded-2xl border border-border/35 bg-card/30">
-                          {skillReviewReport.findings.map((finding, idx) => (
-                            <div
-                              key={`${finding.file}:${finding.line}:${finding.message}`}
-                              className={`flex items-start gap-2 px-3 py-2 text-[11px] ${
-                                idx > 0 ? "border-t border-border/30" : ""
-                              }`}
-                            >
-                              <span
-                                className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${
-                                  finding.severity === "critical"
-                                    ? "bg-danger/12 text-danger"
-                                    : "bg-warn/12 text-warn"
-                                }`}
-                              >
-                                {finding.severity === "critical"
-                                  ? t("skillsview.critical")
-                                  : t("skillsview.statusWarning")}
-                              </span>
-                              <span className="min-w-0 flex-1 text-txt">
-                                {finding.message}
-                              </span>
-                              <span className="shrink-0 font-mono text-muted">
-                                {finding.file}:{finding.line}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <div className="mt-4 flex gap-2">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
-                          onClick={() =>
-                            handleAcknowledgeSkill(selectedSkill.id)
+                        <Input
+                          className="w-full border-border/50 bg-bg/50 focus-visible:ring-accent"
+                          placeholder={t("skillsview.eGMyAwesomeSkil")}
+                          value={skillCreateName}
+                          onChange={(event) =>
+                            setState("skillCreateName", event.target.value)
                           }
-                        >
-                          {t("skillsview.AcknowledgeAmpEn")}
-                        </Button>
+                          onKeyDown={(event) => {
+                            if (
+                              event.key === "Enter" &&
+                              skillCreateName.trim() &&
+                              !skillCreating
+                            ) {
+                              handleCreateSkill();
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <span className="mb-1 block text-[11px] font-medium text-[var(--muted)]">
+                          {t("skillsview.Description")}
+                        </span>
+                        <Input
+                          className="w-full border-border/50 bg-bg/50 focus-visible:ring-accent"
+                          placeholder={t("skillsview.BriefDescriptionOf")}
+                          value={skillCreateDescription}
+                          onChange={(event) =>
+                            setState(
+                              "skillCreateDescription",
+                              event.target.value,
+                            )
+                          }
+                          onKeyDown={(event) => {
+                            if (
+                              event.key === "Enter" &&
+                              skillCreateName.trim() &&
+                              !skillCreating
+                            ) {
+                              handleCreateSkill();
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] text-muted hover:text-txt"
+                          onClick={handleCancelCreate}
+                        >
+                          {t("common.cancel")}
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={handleCreateSkill}
+                          disabled={!skillCreateName.trim() || skillCreating}
+                        >
+                          {skillCreating
+                            ? t("skillsview.creating", {
+                                defaultValue: "Creating...",
+                              })
+                            : t("skillsview.createSkill", {
+                                defaultValue: "Create Skill",
+                              })}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </PagePanel>
+              ) : selectedSkill ? (
+                <PagePanel
+                  variant="surface"
+                  className="overflow-hidden"
+                  data-skill-id={selectedSkill.id}
+                >
+                  <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
+                    <div className="mt-0.5 shrink-0">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/30 bg-accent/18 p-2.5 text-base font-bold text-txt-strong">
+                        {selectedSkill.name.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <div
+                          data-testid="skills-detail-name"
+                          className="whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-snug text-txt"
+                        >
+                          {selectedSkill.name}
+                        </div>
+                        <StatusBadge
+                          label={
+                            selectedSkill.scanStatus === "blocked" ||
+                            selectedSkill.scanStatus === "critical"
+                              ? t("skillsview.statusBlocked")
+                              : selectedSkill.scanStatus === "warning"
+                                ? t("skillsview.statusWarning")
+                                : selectedSkill.enabled
+                                  ? t("skillsview.statusActive")
+                                  : t("skillsview.statusInactive")
+                          }
+                          variant={
+                            selectedSkill.scanStatus === "warning"
+                              ? "warning"
+                              : selectedSkill.scanStatus === "blocked" ||
+                                  selectedSkill.scanStatus === "critical"
+                                ? "danger"
+                                : selectedSkill.enabled
+                                  ? "success"
+                                  : "muted"
+                          }
+                          withDot
+                        />
+                        <span className="text-[11px] font-mono text-muted/80">
+                          {selectedSkill.id}
+                        </span>
+                      </div>
+                      <div className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">
+                        {selectedSkill.description ||
+                          t("skillsview.noDescriptionProvided", {
+                            defaultValue: "No description provided.",
+                          })}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {selectedNeedsAttention && !selectedSkillReviewOpen && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-auto rounded-full border-warn/35 bg-warn/12 px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-warn"
+                          onClick={() => handleReviewSkill(selectedSkill.id)}
+                        >
+                          {t("skillsview.ReviewFindings")}
+                        </Button>
+                      )}
+                      {selectedNeedsAttention && selectedSkillReviewOpen && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-auto rounded-full border-border/50 px-3 py-1.5 text-[11px] font-semibold text-muted hover:text-txt"
                           onClick={handleDismissReview}
                         >
                           {t("skillsview.Dismiss")}
                         </Button>
-                      </div>
+                      )}
+                      <Switch
+                        checked={selectedSkill.enabled}
+                        disabled={skillToggleAction === selectedSkill.id}
+                        onCheckedChange={(next) =>
+                          handleSkillToggle(selectedSkill.id, next)
+                        }
+                      />
                     </div>
-                  ) : selectedSkillReviewOpen && skillReviewLoading ? (
-                    <div className="rounded-2xl border border-border/35 bg-bg/10 px-4 py-3 text-sm text-muted">
-                      {t("skillsview.LoadingScanReport")}
-                    </div>
-                  ) : (
-                    <div
-                      className={`${DESKTOP_INSET_PANEL_CLASSNAME} p-4 sm:p-5`}
-                    >
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                  </div>
+                  <div className="border-t border-border/40 bg-bg/18 px-4 py-4 sm:px-5">
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                        onClick={() => setEditingSkill(selectedSkill)}
+                      >
                         {t("skillsview.EditSource", {
                           defaultValue: "Edit Source",
                         })}
-                      </div>
-                      <div className="mt-2 text-sm leading-relaxed text-muted">
-                        {t("skillsview.SkillSourceEditorDescription", {
-                          defaultValue:
-                            "Open the skill source editor to inspect or modify `SKILL.md`, or review findings here when a skill needs attention.",
-                        })}
-                      </div>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        className="h-9 w-9 rounded-full text-muted hover:text-txt"
+                        onClick={() => void refreshSkills()}
+                        title={t("common.refresh")}
+                        aria-label={t("common.refresh")}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <ConfirmDelete
+                        triggerClassName="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] !bg-transparent text-danger hover:!bg-danger/15 hover:text-danger-foreground transition-colors border border-danger/30"
+                        confirmClassName="px-3 py-1 text-[11px] font-bold bg-danger text-danger-foreground hover:bg-danger/90 transition-colors rounded-md shadow-sm"
+                        cancelClassName="px-3 py-1 text-[11px] font-bold text-muted border border-border/40 hover:text-txt transition-colors rounded-md"
+                        confirmLabel={t("conversations.deleteYes")}
+                        cancelLabel={t("conversations.deleteNo")}
+                        onConfirm={() =>
+                          handleDeleteSkill(
+                            selectedSkill.id,
+                            selectedSkill.name,
+                          )
+                        }
+                      />
                     </div>
-                  )}
-                </div>
-              </section>
-            ) : (
-              <DesktopEmptyStatePanel
-                className="px-6 py-12 text-center text-sm text-muted"
-                title={t("skillsview.SelectATalentToConf", {
-                  defaultValue: "Select a talent to configure",
-                })}
-              />
-            )}
-          </div>
+
+                    {selectedSkillReviewOpen && skillReviewReport ? (
+                      <PagePanel variant="inset" className="p-4 sm:p-5">
+                        <div className="mb-3 flex flex-wrap items-center gap-3">
+                          <span className="text-xs font-semibold text-txt">
+                            {t("skillsview.ScanReport")}
+                          </span>
+                          <span className="text-[11px] font-mono text-danger">
+                            {skillReviewReport.summary.critical}{" "}
+                            {t("skillsview.critical")}
+                          </span>
+                          <span className="text-[11px] font-mono text-warn">
+                            {skillReviewReport.summary.warn}{" "}
+                            {t("skillsview.warnings")}
+                          </span>
+                        </div>
+                        {skillReviewReport.findings.length > 0 && (
+                          <div className="custom-scrollbar max-h-64 overflow-y-auto rounded-2xl border border-border/35 bg-card/30">
+                            {skillReviewReport.findings.map((finding, idx) => (
+                              <div
+                                key={`${finding.file}:${finding.line}:${finding.message}`}
+                                className={`flex items-start gap-2 px-3 py-2 text-[11px] ${
+                                  idx > 0 ? "border-t border-border/30" : ""
+                                }`}
+                              >
+                                <span
+                                  className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${
+                                    finding.severity === "critical"
+                                      ? "bg-danger/12 text-danger"
+                                      : "bg-warn/12 text-warn"
+                                  }`}
+                                >
+                                  {finding.severity === "critical"
+                                    ? t("skillsview.critical")
+                                    : t("skillsview.statusWarning")}
+                                </span>
+                                <span className="min-w-0 flex-1 text-txt">
+                                  {finding.message}
+                                </span>
+                                <span className="shrink-0 font-mono text-muted">
+                                  {finding.file}:{finding.line}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="mt-4 flex gap-2">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em]"
+                            onClick={() =>
+                              handleAcknowledgeSkill(selectedSkill.id)
+                            }
+                          >
+                            {t("skillsview.AcknowledgeAmpEn")}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.12em] text-muted hover:text-txt"
+                            onClick={handleDismissReview}
+                          >
+                            {t("skillsview.Dismiss")}
+                          </Button>
+                        </div>
+                      </PagePanel>
+                    ) : selectedSkillReviewOpen && skillReviewLoading ? (
+                      <PagePanel.Notice tone="accent">
+                        {t("skillsview.LoadingScanReport")}
+                      </PagePanel.Notice>
+                    ) : (
+                      <PagePanel variant="inset" className="p-4 sm:p-5">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                          {t("skillsview.EditSource", {
+                            defaultValue: "Edit Source",
+                          })}
+                        </div>
+                        <div className="mt-2 text-sm leading-relaxed text-muted">
+                          {t("skillsview.SkillSourceEditorDescription", {
+                            defaultValue:
+                              "Open the skill source editor to inspect or modify `SKILL.md`, or review findings here when a skill needs attention.",
+                          })}
+                        </div>
+                      </PagePanel>
+                    )}
+                  </div>
+                </PagePanel>
+              ) : (
+                <PagePanel.Empty
+                  variant="surface"
+                  className="min-h-[16rem] rounded-[1.6rem] px-6 py-12"
+                  title={t("skillsview.SelectATalentToConf", {
+                    defaultValue: "Select a talent to configure",
+                  })}
+                />
+              )}
+            </div>
+          </PagePanel>
         </div>
-      </div>
+      </PageLayout>
       {editingSkill && (
         <EditSkillModal
           skillId={editingSkill.id}
@@ -1557,6 +1528,6 @@ function SkillsFullView() {
           onClose={() => setInstallModalOpen(false)}
         />
       )}
-    </DesktopPageFrame>
+    </>
   );
 }

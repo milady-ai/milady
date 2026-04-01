@@ -85,7 +85,8 @@ vi.mock("../../src/components/TriggersView", () => {
 vi.mock("../../src/components/FineTuningView", () => {
   const R = require("react");
   return {
-    FineTuningView: () => R.createElement("div", null, "stub-fine-tuning"),
+    FineTuningView: (props: { contentHeader?: React.ReactNode }) =>
+      R.createElement("div", null, props.contentHeader, "stub-fine-tuning"),
   };
 });
 
@@ -94,22 +95,28 @@ vi.mock("../../src/components/TrajectoriesView", () => {
   const R = require("react");
   return {
     TrajectoriesView: (props: {
+      contentHeader?: React.ReactNode;
       onSelectTrajectory?: (id: string) => void;
     }) => {
       mockTrajectoriesViewProps.push(props);
       return R.createElement(
-        "table",
+        "div",
         null,
+        props.contentHeader,
         R.createElement(
-          "tbody",
+          "table",
           null,
           R.createElement(
-            "tr",
-            {
-              onClick: () =>
-                props.onSelectTrajectory?.("shared-traj-123456789"),
-            },
-            R.createElement("td", null, "shared-traj..."),
+            "tbody",
+            null,
+            R.createElement(
+              "tr",
+              {
+                onClick: () =>
+                  props.onSelectTrajectory?.("shared-traj-123456789"),
+              },
+              R.createElement("td", null, "shared-traj..."),
+            ),
           ),
         ),
       );
@@ -158,6 +165,44 @@ vi.mock("@miladyai/ui", () => {
     CardDescription: passthrough,
     CardHeader: passthrough,
     CardTitle: passthrough,
+    SegmentedControl: ({
+      children,
+      buttonClassName,
+      items,
+      onValueChange,
+      value,
+      ...props
+    }: {
+      buttonClassName?: string;
+      children?: React.ReactNode;
+      items?: Array<{
+        label: React.ReactNode;
+        testId?: string;
+        value: string;
+      }>;
+      onValueChange?: (value: string) => void;
+      value?: string;
+      [k: string]: unknown;
+    }) =>
+      R.createElement(
+        "div",
+        { "data-testid": "ui-segmented-control", ...props },
+        items?.map((item) =>
+          R.createElement(
+            "button",
+            {
+              key: item.value,
+              type: "button",
+              "aria-pressed": item.value === value,
+              "data-testid": item.testId,
+              className: buttonClassName,
+              onClick: () => onValueChange?.(item.value),
+            },
+            item.label,
+          ),
+        ),
+        children,
+      ),
     Textarea: passthrough,
   };
 });
@@ -330,7 +375,7 @@ describe("Advanced trajectories/fine-tuning integration", () => {
     }
   });
 
-  it("applies the advanced subtab button class in both layouts", async () => {
+  it("renders shared segmented tabs in standard layout and compact buttons in modal", async () => {
     let tree!: ReactTestRenderer;
 
     await act(async () => {
@@ -340,9 +385,13 @@ describe("Advanced trajectories/fine-tuning integration", () => {
     const standardSubtabButtons = tree.root.findAll(
       (node) =>
         node.type === "button" &&
-        String(node.props.className ?? "").includes("select-none"),
+        typeof node.props["data-testid"] === "string" &&
+        String(node.props["data-testid"]).startsWith("advanced-subtab-"),
     );
     expect(standardSubtabButtons.length).toBeGreaterThan(0);
+    expect(
+      standardSubtabButtons.some((node) => node.props["aria-pressed"] === true),
+    ).toBe(true);
 
     await act(async () => {
       tree.update(

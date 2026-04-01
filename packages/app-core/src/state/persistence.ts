@@ -255,7 +255,6 @@ const ONBOARDING_STEP_STORAGE_KEY = "eliza:onboarding:step";
 
 function normalizeOnboardingStep(value: unknown): OnboardingStep | null {
   switch (value) {
-    case "cloud_login":
     case "identity":
     case "hosting":
     case "providers":
@@ -264,8 +263,10 @@ function normalizeOnboardingStep(value: unknown): OnboardingStep | null {
     case "launch":
       return value;
     // Legacy step ID migration — map old persisted values to new equivalents
+    case "cloud_login":
     case "welcome":
-      return "cloud_login";
+      // cloud_login is now handled by the splash page; resume at identity
+      return "identity";
     case "connection":
       return "hosting";
     case "cloudLogin":

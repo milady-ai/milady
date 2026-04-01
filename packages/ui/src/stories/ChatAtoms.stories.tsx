@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TypingIndicator } from "../components/ui/chat-atoms";
+import { TypingIndicator } from "../components/composites/chat";
 
 const meta = {
   title: "UI/ChatAtoms/TypingIndicator",

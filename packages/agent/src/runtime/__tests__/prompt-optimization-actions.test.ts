@@ -190,7 +190,9 @@ describe("detectIntentCategories", () => {
   });
 
   it("returns empty array for general chat", () => {
-    const prompt = buildPrompt("What is the difference between a stack and a queue?");
+    const prompt = buildPrompt(
+      "What is the difference between a stack and a queue?",
+    );
     expect(detectIntentCategories(prompt)).toEqual([]);
   });
 
@@ -217,34 +219,58 @@ describe("detectIntentCategories", () => {
   });
 
   it("does NOT trigger ANY intent for general chat", () => {
-    expect(detectIntentCategories(buildPrompt("what are your favorite pancake toppings"))).toEqual([]);
+    expect(
+      detectIntentCategories(
+        buildPrompt("what are your favorite pancake toppings"),
+      ),
+    ).toEqual([]);
     expect(detectIntentCategories(buildPrompt("tell me a joke"))).toEqual([]);
-    expect(detectIntentCategories(buildPrompt("how are you doing today"))).toEqual([]);
-    expect(detectIntentCategories(buildPrompt("what is the meaning of life"))).toEqual([]);
+    expect(
+      detectIntentCategories(buildPrompt("how are you doing today")),
+    ).toEqual([]);
+    expect(
+      detectIntentCategories(buildPrompt("what is the meaning of life")),
+    ).toEqual([]);
   });
 
   // Multilingual intent detection (supported locales: ko, zh-CN, es, pt, vi)
   it("detects coding intent in Korean", () => {
-    expect(detectIntentCategories(buildPrompt("이 코드를 수정해주세요"))).toContain("coding");
-    expect(detectIntentCategories(buildPrompt("저장소를 확인해주세요"))).toContain("coding");
+    expect(
+      detectIntentCategories(buildPrompt("이 코드를 수정해주세요")),
+    ).toContain("coding");
+    expect(
+      detectIntentCategories(buildPrompt("저장소를 확인해주세요")),
+    ).toContain("coding");
   });
 
   it("detects coding intent in Chinese", () => {
-    expect(detectIntentCategories(buildPrompt("请检查这个代码"))).toContain("coding");
-    expect(detectIntentCategories(buildPrompt("帮我看一下这个仓库"))).toContain("coding");
+    expect(detectIntentCategories(buildPrompt("请检查这个代码"))).toContain(
+      "coding",
+    );
+    expect(detectIntentCategories(buildPrompt("帮我看一下这个仓库"))).toContain(
+      "coding",
+    );
   });
 
   it("detects coding intent in Spanish", () => {
-    expect(detectIntentCategories(buildPrompt("revisa el código por favor"))).toContain("coding");
-    expect(detectIntentCategories(buildPrompt("mira el repositorio"))).toContain("coding");
+    expect(
+      detectIntentCategories(buildPrompt("revisa el código por favor")),
+    ).toContain("coding");
+    expect(
+      detectIntentCategories(buildPrompt("mira el repositorio")),
+    ).toContain("coding");
   });
 
   it("detects terminal intent in Korean", () => {
-    expect(detectIntentCategories(buildPrompt("터미널에서 명령어를 실행해주세요"))).toContain("terminal");
+    expect(
+      detectIntentCategories(buildPrompt("터미널에서 명령어를 실행해주세요")),
+    ).toContain("terminal");
   });
 
   it("detects issue intent in Chinese", () => {
-    expect(detectIntentCategories(buildPrompt("请创建一个新的问题"))).toContain("issues");
+    expect(detectIntentCategories(buildPrompt("请创建一个新的问题"))).toContain(
+      "issues",
+    );
   });
 
   it("detects wallet intent for transaction requests", () => {
@@ -486,7 +512,10 @@ describe("installPromptOptimizations", () => {
         return "mock response";
       },
     };
-    return { runtime: runtime as unknown as import("@elizaos/core").AgentRuntime, calls };
+    return {
+      runtime: runtime as unknown as import("@elizaos/core").AgentRuntime,
+      calls,
+    };
   }
 
   it("is idempotent — double install does not double-wrap", () => {
@@ -500,7 +529,10 @@ describe("installPromptOptimizations", () => {
   it("passes through non-TEXT_LARGE calls unchanged", async () => {
     const { runtime, calls } = createMockRuntime();
     installPromptOptimizations(runtime);
-    await runtime.useModel("TEXT_SMALL" as any, { prompt: "hello" } as any);
+    await runtime.useModel(
+      "TEXT_SMALL" as unknown as Parameters<typeof runtime.useModel>[0],
+      { prompt: "hello" } as unknown as Parameters<typeof runtime.useModel>[1],
+    );
     expect(calls).toHaveLength(1);
     expect(calls[0].modelType).toBe("TEXT_SMALL");
     expect(calls[0].prompt).toBe("hello");
@@ -515,13 +547,163 @@ describe("installPromptOptimizations", () => {
 </actions>
 # Received Message
 user: tell me a joke`;
-    await runtime.useModel("TEXT_LARGE" as any, { prompt } as any);
+    await runtime.useModel(
+      "TEXT_LARGE" as unknown as Parameters<typeof runtime.useModel>[0],
+      { prompt } as unknown as Parameters<typeof runtime.useModel>[1],
+    );
     expect(calls).toHaveLength(1);
     // START_CODING_TASK params should be stripped (no coding intent in "tell me a joke")
     expect(calls[0].prompt).not.toContain("<param>");
     // But action names preserved
     expect(calls[0].prompt).toContain("<name>START_CODING_TASK</name>");
     expect(calls[0].prompt).toContain("<name>REPLY</name>");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// compactCodingExamplesForIntent
+// ---------------------------------------------------------------------------
+
+import { compactCodingExamplesForIntent } from "../prompt-compaction";
+
+describe("compactCodingExamplesForIntent", () => {
+  const EXAMPLES_BLOCK = `# Coding Agent Action Call Examples
+When the user asks you to work on code, you MUST select actions.
+
+## Single Agent Examples
+User: Fix the login bug
+Assistant:
+<actions><action>REPLY</action><action>START_CODING_TASK</action></actions>
+
+## Multi-Agent Example
+User: Spin up 3 agents
+Assistant:
+<actions><action>REPLY</action><action>START_CODING_TASK</action></actions>
+Possible response actions: REPLY, START_CODING_TASK
+`;
+
+  function buildWithExamples(userMsg: string): string {
+    return `${EXAMPLES_BLOCK}\n# Available Actions\n<actions>\n  <action><name>REPLY</name><description>Reply.</description></action>\n</actions>\n# Received Message\nuser: ${userMsg}`;
+  }
+
+  it("strips coding examples for general chat", () => {
+    const prompt = buildWithExamples("what is the meaning of life");
+    const result = compactCodingExamplesForIntent(prompt);
+    expect(result).not.toContain("# Coding Agent Action Call Examples");
+    expect(result).not.toContain("Possible response actions");
+    // Actions block still present
+    expect(result).toContain("# Available Actions");
+  });
+
+  it("preserves coding examples when coding intent is detected", () => {
+    const prompt = buildWithExamples("fix the bug in the repository");
+    const result = compactCodingExamplesForIntent(prompt);
+    expect(result).toContain("# Coding Agent Action Call Examples");
+  });
+
+  it("preserves coding examples for GitHub URLs", () => {
+    const prompt = buildWithExamples("check out https://github.com/org/repo");
+    const result = compactCodingExamplesForIntent(prompt);
+    expect(result).toContain("# Coding Agent Action Call Examples");
+  });
+
+  it("returns prompt unchanged when no examples section exists", () => {
+    const prompt = "just a plain prompt with no examples";
+    expect(compactCodingExamplesForIntent(prompt)).toBe(prompt);
+  });
+
+  it("returns prompt unchanged when boundary header is missing", () => {
+    // If # Available Actions is absent, the regex would match to end-of-string.
+    // The guard should prevent stripping in this case.
+    const malformed = `# Coding Agent Action Call Examples
+Some examples here
+## Single Agent Examples
+More content that should NOT be stripped`;
+    const result = compactCodingExamplesForIntent(malformed);
+    expect(result).toContain("# Coding Agent Action Call Examples");
+    expect(result).toContain("should NOT be stripped");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// compactConversationHistory
+// ---------------------------------------------------------------------------
+
+import { compactConversationHistory } from "../prompt-compaction";
+
+describe("compactConversationHistory", () => {
+  const HISTORY = `# Conversation Messages
+12:30 (5 minutes ago) [b850bc30-45f8-0041-a00a-83df46d8555d] Eliza: hey there~ how can i help?
+(Eliza's internal thought: User just greeted me, I should respond warmly and ask what they need.)
+ (Eliza's actions: REPLY)
+12:31 (4 minutes ago) [0afe069b-83d3-0ea3-aa07-a47dd72ade03] User: tell me a joke
+12:31 (4 minutes ago) [b850bc30-45f8-0041-a00a-83df46d8555d] Eliza: why did the chicken cross the road? 2 get 2 the other side :3
+(Eliza's internal thought: User wants a joke, I'll give them a classic one with my personality.)
+ (Eliza's actions: REPLY)
+
+# Received Message
+User: that was funny`;
+
+  it("strips thoughts and actions for non-coding chat", () => {
+    const result = compactConversationHistory(HISTORY);
+    expect(result).not.toContain("internal thought");
+    expect(result).not.toContain("'s actions:");
+    // Actual messages preserved
+    expect(result).toContain("hey there~ how can i help?");
+    expect(result).toContain("tell me a joke");
+    expect(result).toContain("why did the chicken cross the road?");
+    // Received message preserved
+    expect(result).toContain("that was funny");
+  });
+
+  it("handles thoughts containing parentheses and emoticons", () => {
+    const historyWithParens = `# Conversation Messages
+12:30 (5 minutes ago) [b850bc30-45f8-0041-a00a-83df46d8555d] Eliza: sure thing :)
+(Eliza's internal thought: User seems happy (which is great!) and I should keep the energy up :))
+ (Eliza's actions: REPLY)
+
+# Received Message
+User: thanks`;
+
+    const result = compactConversationHistory(historyWithParens);
+    expect(result).not.toContain("internal thought");
+    expect(result).not.toContain("'s actions:");
+    // The actual message with emoticon is preserved
+    expect(result).toContain("sure thing :)");
+    expect(result).toContain("thanks");
+  });
+
+  it("strips entity UUIDs from timestamps", () => {
+    const result = compactConversationHistory(HISTORY);
+    expect(result).not.toContain("[b850bc30-45f8-0041-a00a-83df46d8555d]");
+    expect(result).not.toContain("[0afe069b-83d3-0ea3-aa07-a47dd72ade03]");
+    // Timestamps still present
+    expect(result).toContain("12:30");
+  });
+
+  it("preserves full history for coding intent", () => {
+    const codingHistory = HISTORY.replace(
+      "that was funny",
+      "fix the bug in the repository",
+    );
+    const result = compactConversationHistory(codingHistory);
+    expect(result).toContain("internal thought");
+    expect(result).toContain("'s actions:");
+  });
+
+  it("preserves full history for wallet/on-chain intent", () => {
+    const walletHistory = HISTORY.replace(
+      "that was funny",
+      "send 0.01 BNB to this wallet address",
+    );
+    const result = compactConversationHistory(walletHistory);
+    expect(result).toContain("internal thought");
+    expect(result).toContain("'s actions:");
+  });
+
+  it("returns prompt unchanged when no conversation section", () => {
+    const prompt = "just a plain prompt";
+    expect(compactConversationHistory(prompt)).toBe(prompt);
   });
 });
 

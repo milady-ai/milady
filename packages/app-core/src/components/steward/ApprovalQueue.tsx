@@ -8,12 +8,10 @@ import type {
   StewardPendingApproval,
   StewardPolicyResult,
 } from "@miladyai/shared/contracts/wallet";
-import { Button, Spinner } from "@miladyai/ui";
+import { Button, PagePanel, Spinner } from "@miladyai/ui";
 import { Check, Clock, Copy, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DESKTOP_SURFACE_PANEL_CLASSNAME } from "../desktop-surface-primitives";
 import { formatWeiValue, getChainName, truncateAddress } from "./chain-utils";
-import { StewardLogo } from "./StewardLogo";
 
 interface ApprovalQueueProps {
   getStewardPending: () => Promise<StewardPendingApproval[]>;
@@ -29,6 +27,7 @@ interface ApprovalQueueProps {
     ttlMs?: number,
   ) => void;
   onPendingCountChange?: (count: number) => void;
+  embedded?: boolean;
 }
 
 const POLL_INTERVAL_MS = 10_000;
@@ -40,6 +39,7 @@ export function ApprovalQueue({
   copyToClipboard,
   setActionNotice,
   onPendingCountChange,
+  embedded = false,
 }: ApprovalQueueProps) {
   const [items, setItems] = useState<StewardPendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
@@ -176,62 +176,52 @@ export function ApprovalQueue({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <StewardLogo size={16} className="opacity-80" />
-          <span className="text-sm font-semibold text-txt">Pending</span>
-          {items.length > 0 && (
-            <span className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-fg">
-              {items.length}
-            </span>
-          )}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 rounded-xl px-3 text-xs"
-          onClick={() => {
-            setLoading(true);
-            void loadData();
-          }}
-          disabled={loading}
-        >
-          <RefreshCw
-            className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
-          />
-          Refresh
-        </Button>
-      </div>
+    <div className={embedded ? "flex min-h-0 flex-1 flex-col" : "space-y-4"}>
+      {error ? (
+        <PagePanel.Notice tone="danger">{error}</PagePanel.Notice>
+      ) : null}
 
-      {error && (
-        <div className="rounded-2xl border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger">
-          {error}
-        </div>
-      )}
-
-      {loading && items.length === 0 && (
-        <div
-          className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} flex items-center justify-center px-6 py-12`}
-        >
+      {loading && items.length === 0 ? (
+        <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-12">
           <Spinner className="h-5 w-5 text-muted" />
           <span className="ml-3 text-sm text-muted">
             Checking for pending approvals…
           </span>
         </div>
-      )}
+      ) : null}
 
-      {!loading && items.length === 0 && !error && (
-        <div
-          className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-6 py-12 text-center`}
-        >
-          <StewardLogo size={32} className="mx-auto opacity-30" />
-          <p className="mt-3 text-sm font-medium text-txt">All clear</p>
-          <p className="mt-1 text-xs text-muted/60">
-            Transactions that exceed auto-approve limits will show up here.
-          </p>
-        </div>
-      )}
+      {!loading && items.length === 0 && !error ? (
+        <PagePanel.Empty
+          variant={embedded ? "workspace" : "panel"}
+          title="No pending approvals"
+        />
+      ) : null}
+
+      {items.length > 0 ? (
+        <PagePanel.Toolbar className="justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-txt">Pending</span>
+            <span className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-fg">
+              {items.length}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 rounded-xl px-3 text-xs"
+            onClick={() => {
+              setLoading(true);
+              void loadData();
+            }}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+        </PagePanel.Toolbar>
+      ) : null}
 
       {/* Approval cards */}
       <div className="space-y-3">
@@ -243,7 +233,7 @@ export function ApprovalQueue({
           return (
             <div
               key={item.queueId}
-              className={`${DESKTOP_SURFACE_PANEL_CLASSNAME} px-5 py-4 transition-opacity ${
+              className={`rounded-[28px] border border-border/18 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_92%,transparent),color-mix(in_srgb,var(--bg)_98%,transparent))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-opacity ${
                 isProcessing ? "opacity-60 pointer-events-none" : ""
               }`}
             >

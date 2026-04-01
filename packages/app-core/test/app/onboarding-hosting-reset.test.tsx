@@ -63,6 +63,7 @@ type ProbeApi = {
   handleOnboardingNext: () => Promise<void>;
   hasOnboardingOptions: () => boolean;
   setState: (key: string, value: unknown) => void;
+  splashContinue: () => void;
   snapshot: () => {
     onboardingStep: string;
     onboardingRunMode: "local" | "cloud" | "";
@@ -82,6 +83,8 @@ function Probe(props: { onReady: (api: ProbeApi) => void }) {
       hasOnboardingOptions: () => Boolean(app.onboardingOptions),
       setState: (key, value) =>
         app.setState(key as keyof AppState, value as AppState[keyof AppState]),
+      splashContinue: () =>
+        app.startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" }),
       snapshot: () => ({
         onboardingStep: app.onboardingStep,
         onboardingRunMode: app.onboardingRunMode,
@@ -107,6 +110,7 @@ async function waitForOnboardingOptions(getApi: () => ProbeApi) {
 
 describe("onboarding hosting reset", () => {
   beforeEach(() => {
+    localStorage.clear();
     window.history.pushState(null, "", "/chat");
     Object.assign(window, {
       setTimeout: globalThis.setTimeout,
@@ -196,6 +200,12 @@ describe("onboarding hosting reset", () => {
         }
         return api;
       };
+
+      // Advance past the startup splash so the coordinator enters the
+      // session-restore / onboarding flow.
+      await act(async () => {
+        getApi().splashContinue();
+      });
 
       await waitForOnboardingOptions(getApi);
 

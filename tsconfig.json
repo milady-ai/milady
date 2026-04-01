@@ -22,6 +22,12 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
+      "@miladyai/plugin-roles": [
+        "./packages/plugin-roles/src/index.ts"
+      ],
+      "@miladyai/plugin-roles/*": [
+        "./packages/plugin-roles/src/*"
+      ],
       "@miladyai/ui": [
         "./packages/ui/src/index.ts"
       ],

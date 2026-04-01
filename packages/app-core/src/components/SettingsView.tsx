@@ -5,44 +5,40 @@
 import {
   Button,
   Checkbox,
+  cn,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   Input,
   Label,
-  SectionCard,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  PageLayout,
+  PagePanel,
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarPanel,
+  SidebarScrollRegion,
   Spinner,
+  useLinkedSidebarSelection,
 } from "@miladyai/ui";
 import { AlertTriangle, Download, Upload } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ComponentPropsWithoutRef,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useApp } from "../state";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
-import {
-  DESKTOP_SURFACE_PANEL_CLASSNAME,
-  DesktopPageFrame,
-} from "./desktop-surface-primitives";
 import { CloudDashboard } from "./ElizaCloudDashboard";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
+import { ProviderSwitcher } from "./ProviderSwitcher";
 import { ReleaseCenterView } from "./ReleaseCenterView";
-import { SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME } from "./settings-control-primitives";
-import {
-  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
-  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
-  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
-  APP_SIDEBAR_CARD_BASE_CLASSNAME,
-  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_KICKER_CLASSNAME,
-  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
-  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
-} from "./sidebar-shell-styles";
 
 interface SettingsSectionDef {
   id: string;
@@ -51,13 +47,10 @@ interface SettingsSectionDef {
   keywords?: string[];
 }
 
-const SETTINGS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
-const SETTINGS_SIDEBAR_RAIL_CLASS = `hidden lg:flex ${APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}`;
 const SETTINGS_CONTENT_CLASS =
-  "settings-page-content flex-1 min-w-0 overflow-y-auto scroll-smooth bg-bg/10 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-7 lg:pb-10 lg:pt-6";
-const SETTINGS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[82rem]";
+  "[scroll-padding-top:7rem] [scrollbar-gutter:stable] scroll-smooth bg-bg/10 pb-6 pt-4 sm:pb-8 sm:pt-5 lg:pb-10 lg:pt-6";
+const SETTINGS_CONTENT_WIDTH_CLASS = "w-full min-h-0";
 const SETTINGS_SECTION_STACK_CLASS = "space-y-6 pb-14 sm:space-y-8 sm:pb-16";
-const SETTINGS_SECTION_CARD_CLASS = `overflow-visible ${DESKTOP_SURFACE_PANEL_CLASSNAME}`;
 
 const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
@@ -65,6 +58,22 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
     label: "providerswitcher.elizaCloud",
     description: "settings.sections.cloud.desc",
     keywords: ["cloud", "billing", "credits", "auth", "subscription"],
+  },
+  {
+    id: "ai-model",
+    label: "settings.sections.aimodel.label",
+    description: "settings.sections.aimodel.desc",
+    keywords: [
+      "model",
+      "provider",
+      "openai",
+      "anthropic",
+      "grok",
+      "gemini",
+      "api key",
+      "inference",
+      "llm",
+    ],
   },
   {
     id: "coding-agents",
@@ -142,145 +151,49 @@ function matchesSettingsSection(
   );
 }
 
-function SettingsMobileToolbar({
-  sections,
-  activeSection,
-  onSectionChange,
-  searchQuery,
-  onSearchChange,
-}: {
-  sections: SettingsSectionDef[];
-  activeSection: string;
-  onSectionChange: (id: string) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-}) {
-  const { t } = useApp();
-  const active = sections.find((section) => section.id === activeSection);
-  const searchLabel = t("settingsview.SearchSettings", {
-    defaultValue: "Search settings",
-  });
-
-  return (
-    <div
-      className="sticky z-20 mb-4 space-y-3 rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/88 p-3 shadow-lg backdrop-blur-xl lg:hidden"
-      style={{ top: "calc(var(--safe-area-top, 0px) + 0.5rem)" }}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
-            {t("nav.settings")}
-          </div>
-          <div className="truncate text-sm font-medium text-txt">
-            {active ? t(active.label) : t("nav.settings")}
-          </div>
-        </div>
-        <div className="min-w-[10rem] flex-1 max-w-[14rem]">
-          <Select value={activeSection} onValueChange={onSectionChange}>
-            <SelectTrigger
-              className={SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {sections.map((section) => (
-                <SelectItem key={section.id} value={section.id}>
-                  {t(section.label)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <Input
-        type="search"
-        value={searchQuery}
-        onChange={(event) => onSearchChange(event.target.value)}
-        placeholder={searchLabel}
-        aria-label={searchLabel}
-        className={`h-11 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
-      />
-    </div>
-  );
+interface SettingsSectionProps extends ComponentPropsWithoutRef<"section"> {
+  title?: string;
+  description?: string;
+  bodyClassName?: string;
 }
 
-/* ── Settings Sidebar ────────────────────────────────────────────────── */
-
-function SettingsSidebar({
-  sections,
-  activeSection,
-  onSectionChange,
-  searchQuery,
-  onSearchChange,
-  onClose: _onClose,
-}: {
-  sections: SettingsSectionDef[];
-  activeSection: string;
-  onSectionChange: (id: string) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  onClose: () => void;
-}) {
-  const { t } = useApp();
-  const searchLabel = t("settingsview.SearchSettings", {
-    defaultValue: "Search settings",
-  });
-
-  return (
-    <aside
-      className="hidden lg:flex lg:min-h-0 lg:flex-col"
-      data-testid="settings-sidebar"
-    >
-      <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-        <Input
-          type="search"
-          value={searchQuery}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder={searchLabel}
-          aria-label={searchLabel}
-          className={`w-full ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
-        />
-
-        <nav
-          className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
-          aria-label={t("nav.settings")}
+const SettingsSection = forwardRef<HTMLElement, SettingsSectionProps>(
+  function SettingsSection(
+    { title, description, bodyClassName, className, children, ...props },
+    ref,
+  ) {
+    if (title || description) {
+      return (
+        <PagePanel.CollapsibleSection
+          ref={ref}
+          as="section"
+          expanded
+          variant="section"
+          heading={title ?? ""}
+          description={description}
+          bodyClassName={bodyClassName}
+          className={className}
+          {...props}
         >
-          {sections.map((section) => {
-            const isActive = activeSection === section.id;
-            return (
-              <Button
-                key={section.id}
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={() => onSectionChange(section.id)}
-                aria-current={isActive ? "page" : undefined}
-                className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} ${
-                  isActive
-                    ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
-                    : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
-                }`}
-              >
-                <div className="min-w-0 flex-1 text-left">
-                  <div
-                    className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}
-                  >
-                    {t(section.label)}
-                  </div>
-                  {section.description ? (
-                    <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted/85">
-                      {t(section.description)}
-                    </div>
-                  ) : null}
-                </div>
-              </Button>
-            );
-          })}
-        </nav>
-      </div>
-    </aside>
-  );
-}
+          {children}
+        </PagePanel.CollapsibleSection>
+      );
+    }
+
+    return (
+      <section
+        ref={ref}
+        data-content-align-offset={4}
+        className={className}
+        {...props}
+      >
+        <PagePanel variant="section">
+          <div className={cn("p-4 sm:p-5", bodyClassName)}>{children}</div>
+        </PagePanel>
+      </section>
+    );
+  },
+);
 
 /* ── Updates Section ─────────────────────────────────────────────────── */
 
@@ -614,64 +527,54 @@ function AdvancedSection() {
 
 export function SettingsView({
   inModal,
-  onClose,
+  onClose: _onClose,
   initialSection,
 }: {
   inModal?: boolean;
   onClose?: () => void;
   initialSection?: string;
 } = {}) {
-  const { t, loadPlugins, setTab } = useApp();
+  const { t, loadPlugins } = useApp();
   const [activeSection, setActiveSection] = useState(initialSection ?? "cloud");
   const [searchQuery, setSearchQuery] = useState("");
   const shellRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLElement | null>(null);
+
+  const effectiveSections = SETTINGS_SECTIONS;
 
   const visibleSections = useMemo(
     () =>
-      SETTINGS_SECTIONS.filter((section) =>
+      effectiveSections.filter((section) =>
         matchesSettingsSection(section, searchQuery, t),
       ),
-    [searchQuery, t],
+    [effectiveSections, searchQuery, t],
   );
   const visibleSectionIds = useMemo(
     () => new Set(visibleSections.map((section) => section.id)),
     [visibleSections],
   );
+  const {
+    contentContainerRef,
+    queueContentAlignment,
+    registerContentItem,
+    registerSidebarItem,
+  } = useLinkedSidebarSelection<string>({
+    contentTopOffset: 24,
+    enabled: visibleSections.length > 0,
+    selectedId: visibleSectionIds.has(activeSection) ? activeSection : null,
+    topAlignedId: visibleSections[0]?.id ?? null,
+  });
 
   useEffect(() => {
     void loadPlugins();
   }, [loadPlugins]);
 
-  useEffect(() => {
-    const content = contentRef.current;
-    const shell = shellRef.current;
-    if (content) {
-      scrollContainerRef.current = content;
-      return;
-    }
-    if (!shell) return;
-
-    scrollContainerRef.current = inModal
-      ? shell
-      : (shell.closest('[data-shell-scroll-region="true"]') ?? shell);
-  }, [inModal]);
-
-  const handleClose = useCallback(
-    () => onClose?.() ?? setTab(inModal ? "companion" : "chat"),
-    [inModal, onClose, setTab],
+  const handleSectionChange = useCallback(
+    (sectionId: string) => {
+      setActiveSection(sectionId);
+      queueContentAlignment(sectionId);
+    },
+    [queueContentAlignment],
   );
-
-  const handleSectionChange = useCallback((sectionId: string) => {
-    setActiveSection(sectionId);
-    if (shellRef.current) {
-      const element = shellRef.current.querySelector(`#${sectionId}`);
-      if (element instanceof HTMLElement) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (visibleSections.length === 0) return;
@@ -687,7 +590,7 @@ export function SettingsView({
 
   useEffect(() => {
     const shell = shellRef.current;
-    const root = scrollContainerRef.current;
+    const root = contentContainerRef.current;
     if (!shell || !root) return;
 
     const handleScroll = () => {
@@ -730,80 +633,171 @@ export function SettingsView({
     handleScroll();
 
     return () => root.removeEventListener("scroll", handleScroll);
-  }, [visibleSections]);
+  }, [contentContainerRef, visibleSections]);
+
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
+  const activeSectionDef =
+    visibleSections.find((section) => section.id === activeSection) ??
+    effectiveSections.find((section) => section.id === activeSection) ??
+    visibleSections[0] ??
+    null;
+
+  const settingsSidebar = (
+    <Sidebar
+      testId="settings-sidebar"
+      collapsible
+      contentIdentity="settings"
+      collapseButtonTestId="settings-sidebar-collapse-toggle"
+      expandButtonTestId="settings-sidebar-expand-toggle"
+      collapseButtonAriaLabel="Collapse settings"
+      expandButtonAriaLabel="Expand settings"
+      mobileTitle={t("nav.settings")}
+      mobileMeta={activeSectionDef ? t(activeSectionDef.label) : undefined}
+      header={
+        <SidebarHeader
+          search={{
+            value: searchQuery,
+            onChange: (event) => setSearchQuery(event.target.value),
+            onClear: () => setSearchQuery(""),
+            placeholder: searchLabel,
+            "aria-label": searchLabel,
+            autoComplete: "off",
+            spellCheck: false,
+          }}
+        />
+      }
+    >
+      <SidebarScrollRegion>
+        <SidebarPanel>
+          {visibleSections.length === 0 ? (
+            <SidebarContent.EmptyState className="px-4 py-6">
+              {t("settingsview.NoMatchingSettings")}
+            </SidebarContent.EmptyState>
+          ) : (
+            <nav className="space-y-1.5" aria-label={t("nav.settings")}>
+              {visibleSections.map((section) => {
+                const isActive = activeSection === section.id;
+                return (
+                  <SidebarContent.Item
+                    key={section.id}
+                    as="div"
+                    active={isActive}
+                    className="gap-2"
+                    ref={registerSidebarItem(section.id)}
+                  >
+                    <SidebarContent.ItemButton
+                      onClick={() => handleSectionChange(section.id)}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <SidebarContent.ItemBody>
+                        <SidebarContent.ItemTitle
+                          className={isActive ? "font-semibold" : "font-medium"}
+                        >
+                          {t(section.label)}
+                        </SidebarContent.ItemTitle>
+                        {section.description ? (
+                          <SidebarContent.ItemDescription>
+                            {t(section.description)}
+                          </SidebarContent.ItemDescription>
+                        ) : null}
+                      </SidebarContent.ItemBody>
+                    </SidebarContent.ItemButton>
+                  </SidebarContent.Item>
+                );
+              })}
+            </nav>
+          )}
+        </SidebarPanel>
+      </SidebarScrollRegion>
+    </Sidebar>
+  );
 
   const sectionsContent = (
     <>
       {visibleSectionIds.has("cloud") && (
-        <section
+        <SettingsSection
           id="cloud"
-          className={`${SETTINGS_SECTION_CARD_CLASS} relative`}
+          className="relative overflow-hidden"
+          bodyClassName="p-0"
+          ref={registerContentItem("cloud")}
         >
           <CloudDashboard />
-        </section>
+        </SettingsSection>
+      )}
+
+      {visibleSectionIds.has("ai-model") && (
+        <SettingsSection
+          id="ai-model"
+          title={t("settings.sections.aimodel.label")}
+          description={t("settings.sections.aimodel.desc")}
+          ref={registerContentItem("ai-model")}
+        >
+          <ProviderSwitcher />
+        </SettingsSection>
       )}
 
       {visibleSectionIds.has("coding-agents") && (
-        <SectionCard
+        <SettingsSection
           id="coding-agents"
           title={t("settings.sections.codingagents.label")}
           description={t("settings.codingAgentsDescription")}
-          className={SETTINGS_SECTION_CARD_CLASS}
+          ref={registerContentItem("coding-agents")}
         >
           <CodingAgentSettingsSection />
-        </SectionCard>
+        </SettingsSection>
       )}
 
       {visibleSectionIds.has("media") && (
-        <SectionCard
+        <SettingsSection
           id="media"
           title={t("settings.sections.media.label")}
           description={t("settings.sections.media.desc")}
-          className={SETTINGS_SECTION_CARD_CLASS}
+          ref={registerContentItem("media")}
         >
           <MediaSettingsSection />
-        </SectionCard>
+        </SettingsSection>
       )}
 
       {visibleSectionIds.has("permissions") && (
-        <SectionCard
+        <SettingsSection
           id="permissions"
           title={t("settings.sections.permissions.label")}
           description={t("settings.sections.permissions.desc")}
-          className={SETTINGS_SECTION_CARD_CLASS}
+          ref={registerContentItem("permissions")}
         >
           <PermissionsSection />
-        </SectionCard>
+        </SettingsSection>
       )}
 
       {visibleSectionIds.has("updates") && (
-        <SectionCard
+        <SettingsSection
           id="updates"
           title={t("settings.sections.updates.label")}
           description={t("settings.sections.updates.desc")}
-          className={SETTINGS_SECTION_CARD_CLASS}
+          ref={registerContentItem("updates")}
         >
           <UpdatesSection />
-        </SectionCard>
+        </SettingsSection>
       )}
 
       {visibleSectionIds.has("advanced") && (
-        <SectionCard
+        <SettingsSection
           id="advanced"
           title={t("nav.advanced")}
           description={t("settings.sections.advanced.desc")}
-          className={SETTINGS_SECTION_CARD_CLASS}
+          ref={registerContentItem("advanced")}
         >
           <AdvancedSection />
-        </SectionCard>
+        </SettingsSection>
       )}
 
       {visibleSections.length === 0 && (
-        <SectionCard
+        <SettingsSection
           id="settings-empty"
           title={t("settingsview.NoMatchingSettings")}
           description={t("settings.noMatchingSettingsDescription")}
-          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <Button
             variant="outline"
@@ -812,44 +806,26 @@ export function SettingsView({
           >
             {t("settingsview.ClearSearch")}
           </Button>
-        </SectionCard>
+        </SettingsSection>
       )}
     </>
   );
 
   return (
-    <DesktopPageFrame>
-      <div
-        ref={shellRef}
-        className={SETTINGS_SHELL_CLASS}
-        data-testid="settings-shell"
-      >
-        <div className={SETTINGS_SIDEBAR_RAIL_CLASS}>
-          <SettingsSidebar
-            sections={visibleSections}
-            activeSection={activeSection}
-            onSectionChange={handleSectionChange}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onClose={handleClose}
-          />
-        </div>
-
-        <div ref={contentRef} className={SETTINGS_CONTENT_CLASS}>
-          <div className={SETTINGS_CONTENT_WIDTH_CLASS}>
-            <SettingsMobileToolbar
-              sections={visibleSections}
-              activeSection={activeSection}
-              onSectionChange={handleSectionChange}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-            />
-            <div className={SETTINGS_SECTION_STACK_CLASS}>
-              {sectionsContent}
-            </div>
-          </div>
-        </div>
+    <PageLayout
+      className={cn("h-full", inModal && "min-h-0")}
+      data-testid="settings-shell"
+      sidebar={settingsSidebar}
+      contentRef={contentContainerRef}
+      contentClassName={SETTINGS_CONTENT_CLASS}
+      contentInnerClassName={SETTINGS_CONTENT_WIDTH_CLASS}
+      mobileSidebarLabel={
+        activeSectionDef ? t(activeSectionDef.label) : t("nav.settings")
+      }
+    >
+      <div ref={shellRef} className={`w-full ${SETTINGS_SECTION_STACK_CLASS}`}>
+        {sectionsContent}
       </div>
-    </DesktopPageFrame>
+    </PageLayout>
   );
 }

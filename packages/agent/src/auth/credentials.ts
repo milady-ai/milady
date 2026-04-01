@@ -17,6 +17,8 @@ import {
   type SubscriptionProvider,
 } from "./types";
 
+import { execSync } from "node:child_process";
+
 const AUTH_DIR = path.join(
   process.env.ELIZA_HOME || path.join(os.homedir(), ".eliza"),
   "auth",
@@ -162,6 +164,58 @@ export function getSubscriptionStatus(): Array<{
 }
 
 /**
+ * Try to import an OAuth token from Claude Code's keychain or credentials file.
+ * Claude Code stores OAuth tokens that are valid for the Anthropic API when
+ * used with the stealth interceptor.
+ */
+function importClaudeCodeOAuthToken(): string | null {
+  // 1. Try ~/.claude/.credentials.json
+  const credPath = path.join(os.homedir(), ".claude", ".credentials.json");
+  try {
+    if (fs.existsSync(credPath)) {
+      const data = JSON.parse(fs.readFileSync(credPath, "utf-8"));
+      const token =
+        data?.claudeAiOauth?.accessToken ??
+        data?.claudeAiOauth?.access_token;
+      if (typeof token === "string" && token.trim()) {
+        logger.info(
+          "[auth] Imported OAuth token from Claude Code credentials file",
+        );
+        return token.trim();
+      }
+    }
+  } catch {
+    // Non-fatal
+  }
+
+  // 2. Try macOS Keychain
+  if (process.platform === "darwin") {
+    try {
+      const raw = execSync(
+        'security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null',
+        { encoding: "utf8", timeout: 3000 },
+      ).trim();
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const token =
+          parsed?.claudeAiOauth?.accessToken ??
+          parsed?.claudeAiOauth?.access_token;
+        if (typeof token === "string" && token.trim()) {
+          logger.info(
+            "[auth] Imported OAuth token from Claude Code keychain",
+          );
+          return token.trim();
+        }
+      }
+    } catch {
+      // Keychain not available or no entry
+    }
+  }
+
+  return null;
+}
+
+/**
  * Apply subscription credentials to the environment.
  * Called at startup to make credentials available to elizaOS plugins.
  *
@@ -175,7 +229,15 @@ export async function applySubscriptionCredentials(config?: {
   };
 }): Promise<void> {
   // Anthropic subscription → set ANTHROPIC_API_KEY
-  const anthropicToken = await getAccessToken("anthropic-subscription");
+  let anthropicToken = await getAccessToken("anthropic-subscription");
+
+  // Fallback: if no stored credentials, try importing from Claude Code's
+  // keychain or credentials file. This lets users who have Claude Code
+  // installed use Milady without separate API key setup.
+  if (!anthropicToken) {
+    anthropicToken = importClaudeCodeOAuthToken();
+  }
+
   if (anthropicToken) {
     process.env.ANTHROPIC_API_KEY = anthropicToken;
     logger.info(

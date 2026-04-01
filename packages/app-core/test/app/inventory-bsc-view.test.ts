@@ -7,6 +7,12 @@ const { mockUseApp } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
 }));
 
+type SidebarHeaderSearchProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  clearLabel?: string;
+  loading?: boolean;
+  onClear?: () => void;
+};
+
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
@@ -20,6 +26,198 @@ vi.mock("@miladyai/ui", () => {
   return {
     cn: (...classes: Array<string | false | null | undefined>) =>
       classes.filter(Boolean).join(" "),
+    PageLayout: ({
+      sidebar,
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", props, sidebar as React.ReactNode, children),
+    PagePanel: Object.assign(
+      ({
+        children,
+        ...props
+      }: React.PropsWithChildren<Record<string, unknown>>) =>
+        React.createElement("div", props, children),
+      {
+        Empty: ({
+          children,
+          ...props
+        }: React.PropsWithChildren<Record<string, unknown>>) =>
+          React.createElement("div", props, children),
+        Notice: ({
+          children,
+          ...props
+        }: React.PropsWithChildren<Record<string, unknown>>) =>
+          React.createElement("div", props, children),
+        Frame: ({
+          children,
+          ...props
+        }: React.PropsWithChildren<Record<string, unknown>>) =>
+          React.createElement("div", props, children),
+        ContentArea: ({
+          children,
+          ...props
+        }: React.PropsWithChildren<Record<string, unknown>>) =>
+          React.createElement("div", props, children),
+      },
+    ),
+    Sidebar: ({
+      children,
+      header,
+      footer,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement(
+        "aside",
+        props,
+        header as React.ReactNode,
+        children,
+        footer as React.ReactNode,
+      ),
+    SidebarHeader: ({
+      children,
+      search,
+      ...props
+    }: React.PropsWithChildren<{
+      search?: SidebarHeaderSearchProps;
+    }>) => {
+      const { clearLabel, loading, onClear, ...inputProps } = search ?? {};
+      void clearLabel;
+      void loading;
+      void onClear;
+
+      return React.createElement(
+        "div",
+        props,
+        search ? React.createElement("input", inputProps) : null,
+        children,
+      );
+    },
+    SidebarHeaderStack: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", props, children),
+    SidebarPanel: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", props, children),
+    SidebarScrollRegion: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", props, children),
+    TooltipHint: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement("div", props, children),
+    SidebarFilterBar: ({
+      selectValue,
+      selectOptions,
+      onSelectValueChange,
+      onSortDirectionToggle,
+      onRefresh,
+      selectTestId,
+      sortDirectionButtonTestId,
+      refreshButtonTestId,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement(
+        "div",
+        props,
+        React.createElement("mock-select", {
+          value: selectValue,
+          "data-testid": selectTestId,
+          onChange: (event: { target: { value: string } }) =>
+            typeof onSelectValueChange === "function" &&
+            onSelectValueChange(event.target.value),
+        }),
+        ...(Array.isArray(selectOptions)
+          ? selectOptions.map((option) =>
+              React.createElement(
+                "option",
+                { key: option.value, value: option.value },
+                option.label,
+              ),
+            )
+          : []),
+        React.createElement(
+          "button",
+          {
+            type: "button",
+            "data-testid": sortDirectionButtonTestId,
+            onClick: () =>
+              typeof onSortDirectionToggle === "function" &&
+              onSortDirectionToggle(),
+          },
+          "sort",
+        ),
+        React.createElement(
+          "button",
+          {
+            type: "button",
+            "data-testid": refreshButtonTestId,
+            onClick: () => typeof onRefresh === "function" && onRefresh(),
+          },
+          "refresh",
+        ),
+      ),
+    SidebarSearchBar: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    SegmentedControl: ({
+      items,
+      ...props
+    }: React.PropsWithChildren<
+      Record<string, unknown> & {
+        items?: Array<{
+          value: string;
+          label: React.ReactNode;
+          testId?: string;
+        }>;
+      }
+    >) =>
+      React.createElement(
+        "div",
+        props,
+        ...(items ?? []).map((item) =>
+          React.createElement(
+            "button",
+            {
+              key: item.value,
+              type: "button",
+              "data-testid": item.testId,
+              onClick: () =>
+                typeof props.onValueChange === "function" &&
+                props.onValueChange(item.value),
+            },
+            item.label,
+          ),
+        ),
+      ),
+    SidebarContent: {
+      SectionLabel: ({
+        children,
+        ...props
+      }: React.PropsWithChildren<Record<string, unknown>>) =>
+        React.createElement("div", props, children),
+      Toolbar: ({
+        children,
+        ...props
+      }: React.PropsWithChildren<Record<string, unknown>>) =>
+        React.createElement("div", props, children),
+      ToolbarPrimary: ({
+        children,
+        ...props
+      }: React.PropsWithChildren<Record<string, unknown>>) =>
+        React.createElement("div", props, children),
+      ToolbarActions: ({
+        children,
+        ...props
+      }: React.PropsWithChildren<Record<string, unknown>>) =>
+        React.createElement("div", props, children),
+    },
     Button: ({
       children,
       ...props
@@ -27,25 +225,30 @@ vi.mock("@miladyai/ui", () => {
       React.createElement("button", { type: "button", ...props }, children),
     Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
       React.createElement("input", props),
-    Select: passthrough,
-    SelectContent: passthrough,
-    SelectItem: ({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) =>
-      React.createElement("option", props, children),
-    SelectTrigger: passthrough,
-    SelectValue: passthrough,
-    Tooltip: passthrough,
-    TooltipContent: passthrough,
-    TooltipProvider: passthrough,
-    TooltipTrigger: passthrough,
     Tabs: passthrough,
     TabsList: passthrough,
     TabsTrigger: passthrough,
     TabsContent: passthrough,
     DropdownMenuShortcut: "DropdownMenuShortcut",
     Badge: passthrough,
+    Dialog: passthrough,
+    DialogContent: passthrough,
+    DialogHeader: passthrough,
+    DialogTitle: passthrough,
+    Spinner: () => React.createElement("span", { "aria-label": "loading" }),
+    ConfirmDialog: passthrough,
+    Label: passthrough,
+    Slider: (props: React.HTMLAttributes<HTMLElement>) =>
+      React.createElement("input", { type: "range", ...props }),
+    Switch: (props: React.HTMLAttributes<HTMLElement>) =>
+      React.createElement("button", { type: "button", role: "switch", ...props }),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    Select: passthrough,
+    SelectContent: passthrough,
+    SelectItem: passthrough,
+    SelectTrigger: passthrough,
+    SelectValue: passthrough,
   };
 });
 
@@ -342,6 +545,12 @@ function createContext(
     setActionNotice: vi.fn(),
     copyToClipboard: vi.fn(async () => {}),
     uiLanguage: "en",
+    elizaCloudCredits: null,
+    elizaCloudCreditsLow: false,
+    elizaCloudCreditsCritical: false,
+    elizaCloudAuthRejected: false,
+    elizaCloudTopUpUrl: null,
+    getStewardStatus: vi.fn(async () => ({ connected: false })),
     t: (k: string) => k,
   };
 
@@ -397,7 +606,7 @@ describe("InventoryView unified wallets", () => {
     ).toHaveLength(0);
   });
 
-  it("hides wallet sort chrome in NFT view", async () => {
+  it("keeps wallet sort chrome visible in NFT view", async () => {
     const ctx = createContext({ inventoryView: "nfts" });
     mockUseApp.mockImplementation(() => ctx);
 
@@ -410,12 +619,12 @@ describe("InventoryView unified wallets", () => {
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "wallet-sidebar-sort-block",
       ),
-    ).toHaveLength(0);
+    ).not.toHaveLength(0);
     expect(
       tree?.root.findAll(
         (node) => node.props?.["data-testid"] === "wallet-sort-select",
       ),
-    ).toHaveLength(0);
+    ).not.toHaveLength(0);
   });
 
   it("shows no balances when every chain is empty", async () => {
@@ -456,12 +665,9 @@ describe("InventoryView unified wallets", () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const bscButton = tree?.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        typeof node.props["aria-label"] === "string" &&
-        node.props["aria-label"].startsWith("BSC —"),
-    )[0];
+    const bscButton = tree?.root.findByProps({
+      "data-testid": "inventory-chain-toggle-bsc",
+    });
     expect(bscButton).toBeDefined();
 
     await act(async () => {
@@ -1014,7 +1220,9 @@ describe("InventoryView unified wallets", () => {
     });
 
     const content = text(tree?.root);
-    expect(content).toContain("is using legacy raw RPC config.");
-    expect(content).toContain("Re-save a supported provider in Settings to migrate fully.");
+    expect(content).toContain("BSC is using legacy raw RPC config.");
+    expect(content).toContain(
+      "Re-save a supported provider in Settings to migrate fully.",
+    );
   });
 });

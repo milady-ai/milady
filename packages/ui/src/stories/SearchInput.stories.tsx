@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { SearchInput } from "../components/ui/search-input";
+import { SearchInput } from "../components/composites/search";
 
 const meta = {
   title: "UI/SearchInput",

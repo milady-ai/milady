@@ -10,6 +10,7 @@ import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveMiladyAssetBaseUrls } from "./lib/asset-cdn.mjs";
 
 const rootDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -49,11 +50,22 @@ function resolveBunForScripts() {
 }
 
 function run(executable, args, cwd) {
+  const env = {
+    ...process.env,
+    ...(appAssetBaseUrl
+      ? {
+          VITE_ASSET_BASE_URL:
+            process.env.VITE_ASSET_BASE_URL ??
+            process.env.MILADY_ASSET_BASE_URL ??
+            appAssetBaseUrl,
+        }
+      : {}),
+  };
   return new Promise((resolve, reject) => {
     const child = spawn(executable, args, {
       cwd,
       stdio: "inherit",
-      env: process.env,
+      env,
       shell: false,
     });
     child.on("exit", (code, signal) => {
@@ -97,6 +109,12 @@ const writeBuildInfoScript = path.join(
   "write-build-info.ts",
 );
 const bunForScripts = resolveBunForScripts();
+const pruneCdnAssetsScript = path.join(
+  rootDir,
+  "scripts",
+  "prune-cdn-local-assets.mjs",
+);
+const { appAssetBaseUrl } = resolveMiladyAssetBaseUrls();
 
 await Promise.all([
   run(node, [tsdownCli], rootDir),
@@ -112,3 +130,6 @@ async function runWriteBuildInfo() {
 }
 
 await Promise.all([runWriteBuildInfo(), run(node, [viteCli, "build"], appDir)]);
+if (appAssetBaseUrl) {
+  await run(node, [pruneCdnAssetsScript], rootDir);
+}

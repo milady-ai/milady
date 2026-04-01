@@ -288,8 +288,60 @@ function applyLocalProviderCapabilities(
     }
   }
 
-  setPrimaryModel(config, trimToUndefined(connection.primaryModel));
+  // Set the primary model plugin so the runtime boosts its priority.
+  // If the user didn't pick a specific model, resolve from the provider's
+  // plugin name so the correct provider wins the TEXT_SMALL/TEXT_LARGE
+  // handler registration.
+  const explicitPrimary = trimToUndefined(connection.primaryModel);
+  const resolvedPrimary =
+    explicitPrimary ?? providerOption?.pluginName ?? undefined;
+  setPrimaryModel(config, resolvedPrimary);
+
+  // Set provider-specific default model names so TEXT_SMALL and TEXT_LARGE
+  // resolve to sensible models even when the user didn't override them.
+  applyDefaultModelNames(config, normalizedProvider);
+
   return Promise.resolve();
+}
+
+/** Default small/large model names by provider family. */
+const PROVIDER_DEFAULT_MODELS: Record<
+  string,
+  { smallKey: string; smallVal: string; largeKey: string; largeVal: string }
+> = {
+  anthropic: {
+    smallKey: "ANTHROPIC_SMALL_MODEL",
+    smallVal: "claude-haiku-4-5-20251001",
+    largeKey: "ANTHROPIC_LARGE_MODEL",
+    largeVal: "claude-sonnet-4-6",
+  },
+  openai: {
+    smallKey: "OPENAI_SMALL_MODEL",
+    smallVal: "gpt-5-mini",
+    largeKey: "OPENAI_LARGE_MODEL",
+    largeVal: "gpt-5",
+  },
+  google: {
+    smallKey: "GOOGLE_SMALL_MODEL",
+    smallVal: "gemini-2.0-flash-001",
+    largeKey: "GOOGLE_LARGE_MODEL",
+    largeVal: "gemini-2.5-pro-preview-03-25",
+  },
+};
+
+function applyDefaultModelNames(
+  config: MutableElizaConfig,
+  provider: string,
+): void {
+  const defaults = PROVIDER_DEFAULT_MODELS[provider];
+  if (!defaults) return;
+  // Only set if not already configured — don't clobber user overrides
+  if (!process.env[defaults.smallKey]) {
+    setEnvValue(config, defaults.smallKey, defaults.smallVal);
+  }
+  if (!process.env[defaults.largeKey]) {
+    setEnvValue(config, defaults.largeKey, defaults.largeVal);
+  }
 }
 
 /**
@@ -363,6 +415,7 @@ export function clearPersistedOnboardingConfig(
     }
   }
 
+  // Clear voice settings so presets apply their correct voice on re-onboarding.
   const messages = asRecord(config.messages);
   if (messages) {
     delete messages.tts;
@@ -370,6 +423,11 @@ export function clearPersistedOnboardingConfig(
       delete config.messages;
     }
   }
+
+  // Clear UI state (avatar, preset selection) so the full character resets.
+  // Without this, the avatar survives a reset but the voice doesn't,
+  // causing mismatched character state (e.g. male preset with female voice).
+  delete config.ui;
 
   delete config.connection;
 

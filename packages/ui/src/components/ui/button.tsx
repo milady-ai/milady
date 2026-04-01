@@ -13,6 +13,12 @@ const buttonVariants = cva(
           // Solid accent surfaces use text-accent-fg; translucent accent buttons
           // switch to text-accent in dark mode to preserve contrast.
           "border border-accent/45 bg-accent/18 text-accent-fg dark:text-accent shadow-sm hover:border-accent/70 hover:bg-accent/28",
+        surface:
+          "border border-border/32 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] text-muted-strong shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_20px_-18px_rgba(15,23,42,0.14)] backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-200 hover:border-border/46 hover:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_90%,transparent),color-mix(in_srgb,var(--bg)_97%,transparent))] hover:text-txt hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_16px_22px_-18px_rgba(15,23,42,0.16)] active:scale-95 disabled:hover:border-border/32 disabled:hover:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] disabled:hover:text-muted-strong dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_16px_24px_-20px_rgba(0,0,0,0.24)]",
+        surfaceAccent:
+          "border border-accent/26 bg-[linear-gradient(180deg,rgba(var(--accent-rgb),0.16),rgba(var(--accent-rgb),0.07))] text-txt-strong shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_14px_22px_-18px_rgba(var(--accent-rgb),0.24)] ring-1 ring-inset ring-accent/10 hover:border-accent/42 hover:bg-[linear-gradient(180deg,rgba(var(--accent-rgb),0.2),rgba(var(--accent-rgb),0.1))] hover:text-txt-strong",
+        surfaceDestructive:
+          "border border-danger/30 bg-[linear-gradient(180deg,rgba(239,68,68,0.12),rgba(239,68,68,0.06))] text-danger shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_20px_-18px_rgba(127,29,29,0.18)] hover:border-danger/44 hover:bg-[linear-gradient(180deg,rgba(239,68,68,0.16),rgba(239,68,68,0.08))] hover:text-danger",
         destructive:
           "border border-destructive/45 bg-destructive/92 text-destructive-fg shadow-sm hover:border-destructive/75 hover:bg-destructive",
         outline:

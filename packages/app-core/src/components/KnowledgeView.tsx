@@ -22,37 +22,53 @@ import {
   formatShortDate,
 } from "@miladyai/app-core/components";
 import { useApp } from "@miladyai/app-core/state";
-import { Button, Input } from "@miladyai/ui";
+import { confirmDesktopAction } from "@miladyai/app-core/utils";
+import {
+  Button,
+  Checkbox,
+  Input,
+  PageLayout,
+  PagePanel,
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarPanel,
+  SidebarScrollRegion,
+} from "@miladyai/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  DESKTOP_INSET_EMPTY_PANEL_CLASSNAME,
-  DESKTOP_INSET_PANEL_CLASSNAME,
-  DESKTOP_PAGE_CONTENT_CLASSNAME,
-  DESKTOP_SURFACE_PANEL_CLASSNAME,
-  DesktopEmptyStatePanel,
-  DesktopInsetEmptyStatePanel,
-  DesktopPageFrame,
-} from "./desktop-surface-primitives";
-import {
-  APP_PANEL_SHELL_CLASSNAME,
-  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
-  APP_SIDEBAR_CARD_BASE_CLASSNAME,
-  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
-  APP_SIDEBAR_INNER_CLASSNAME,
-  APP_SIDEBAR_RAIL_CLASSNAME,
-} from "./sidebar-shell-styles";
+  isKnowledgeImageFile,
+  MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
+  maybeCompressKnowledgeUploadImage,
+} from "./knowledge-upload-image";
 
-const KNOWLEDGE_SHELL_CLASS = APP_PANEL_SHELL_CLASSNAME;
-const KNOWLEDGE_SIDEBAR_CLASS = `lg:w-[22rem] lg:max-w-[360px] ${APP_SIDEBAR_RAIL_CLASSNAME}`;
-const KNOWLEDGE_PANEL_CLASS = DESKTOP_SURFACE_PANEL_CLASSNAME;
-const KNOWLEDGE_INSET_PANEL_CLASS = DESKTOP_INSET_PANEL_CLASSNAME;
-const KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS = APP_SIDEBAR_CARD_BASE_CLASSNAME;
-const KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS = APP_SIDEBAR_CARD_ACTIVE_CLASSNAME;
-const KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS =
-  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME;
+const MAX_UPLOAD_REQUEST_BYTES = 32 * 1_048_576; // Must match server knowledge route limit
+const BULK_UPLOAD_TARGET_BYTES = 24 * 1_048_576;
+const MAX_BULK_REQUEST_DOCUMENTS = 100;
+const LARGE_FILE_WARNING_BYTES = 8 * 1_048_576;
+const SUPPORTED_UPLOAD_EXTENSIONS = new Set([
+  ".txt",
+  ".md",
+  ".mdx",
+  ".pdf",
+  ".docx",
+  ".json",
+  ".csv",
+  ".xml",
+  ".html",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".gif",
+]);
 
 export type KnowledgeUploadFile = File & {
   webkitRelativePath?: string;
+};
+
+type KnowledgeUploadOptions = {
+  includeImageDescriptions: boolean;
 };
 
 export function getKnowledgeUploadFilename(file: KnowledgeUploadFile): string {
@@ -78,6 +94,14 @@ export function shouldReadKnowledgeFileAsText(
   );
 }
 
+function isSupportedKnowledgeFile(file: Pick<File, "name">): boolean {
+  const lowerName = file.name.toLowerCase();
+  for (const extension of SUPPORTED_UPLOAD_EXTENSIONS) {
+    if (lowerName.endsWith(extension)) return true;
+  }
+  return false;
+}
+
 function getKnowledgeTypeLabel(contentType?: string): string {
   return contentType?.split("/").pop()?.toUpperCase() || "DOC";
 }
@@ -95,6 +119,226 @@ function getKnowledgeSourceLabel(
   return t("knowledgeview.Upload", { defaultValue: "Upload" });
 }
 
+function getKnowledgeDocumentSummary(
+  doc: KnowledgeDocument,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  const fragmentLabel =
+    doc.fragmentCount === 1
+      ? t("knowledgeview.FragmentCountOne", {
+          defaultValue: "1 fragment",
+        })
+      : t("knowledgeview.FragmentCountMany", {
+          defaultValue: "{{count}} fragments",
+          count: doc.fragmentCount,
+        });
+  return `${getKnowledgeSourceLabel(doc.source, t)} • ${fragmentLabel} • ${formatByteSize(doc.fileSize)}`;
+}
+
+function getRailMonogram(label: string): string {
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  const initials = words
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? "")
+    .join("");
+  return (initials || label.slice(0, 1).toUpperCase() || "?").slice(0, 2);
+}
+
+/* ── Upload Zone ────────────────────────────────────────────────────── */
+
+function UploadZone({
+  onFilesUpload,
+  onUrlUpload,
+  uploading,
+  uploadStatus,
+}: {
+  onFilesUpload: (
+    files: KnowledgeUploadFile[],
+    options: KnowledgeUploadOptions,
+  ) => void;
+  onUrlUpload: (url: string, options: KnowledgeUploadOptions) => void;
+  uploading: boolean;
+  uploadStatus: { current: number; total: number; filename: string } | null;
+}) {
+  const { t } = useApp();
+  const [dragOver, setDragOver] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [includeImageDescriptions, setIncludeImageDescriptions] =
+    useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+      const files = Array.from(e.dataTransfer.files) as KnowledgeUploadFile[];
+      if (files.length > 0 && !uploading) {
+        onFilesUpload(files, { includeImageDescriptions });
+      }
+    },
+    [includeImageDescriptions, onFilesUpload, uploading],
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0 && !uploading) {
+        onFilesUpload(Array.from(files) as KnowledgeUploadFile[], {
+          includeImageDescriptions,
+        });
+      }
+      e.target.value = "";
+    },
+    [includeImageDescriptions, onFilesUpload, uploading],
+  );
+
+  const handleUrlSubmit = useCallback(() => {
+    const url = urlInput.trim();
+    if (url && !uploading) {
+      onUrlUpload(url, { includeImageDescriptions });
+      setUrlInput("");
+      setShowUrlInput(false);
+    }
+  }, [includeImageDescriptions, urlInput, uploading, onUrlUpload]);
+
+  return (
+    <fieldset
+      className="w-full"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+      aria-label={t("aria.knowledgeUpload")}
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        multiple
+        accept=".txt,.md,.mdx,.pdf,.docx,.json,.csv,.xml,.html,.png,.jpg,.jpeg,.webp,.gif"
+        onChange={handleFileSelect}
+      />
+      <div className="flex items-start justify-between gap-3 px-1">
+        <PagePanel.Meta compact tone="strong">
+          {t("knowledgeview.FormatsCount", {
+            defaultValue: "{{count}} formats",
+            count: SUPPORTED_UPLOAD_EXTENSIONS.size,
+          })}
+        </PagePanel.Meta>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          className="h-10 px-4 text-[11px] font-semibold text-txt-strong shadow-sm hover:text-txt-strong"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {t("knowledgeview.ChooseFiles")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-10 px-4 text-[11px] font-semibold text-txt shadow-sm hover:text-txt"
+          onClick={() => setShowUrlInput(!showUrlInput)}
+          disabled={uploading}
+        >
+          {t("knowledgeview.AddFromURL")}
+        </Button>
+      </div>
+      <div className="mt-2 inline-flex min-h-11 w-full items-center gap-2 rounded-xl border border-border/35 bg-bg/18 px-3 text-[11px] leading-relaxed text-muted-strong transition-colors hover:border-border/55 hover:bg-bg/28 hover:text-txt">
+        <Checkbox
+          id="knowledge-upload-image-descriptions"
+          checked={includeImageDescriptions}
+          onCheckedChange={(checked) => setIncludeImageDescriptions(!!checked)}
+          disabled={uploading}
+        />
+        <label
+          htmlFor="knowledge-upload-image-descriptions"
+          className="min-w-0 cursor-pointer"
+        >
+          {t("knowledgeview.IncludeAIImageDes")}
+        </label>
+      </div>
+      <div
+        className={`mt-3 rounded-2xl border px-3 py-3 transition-colors ${
+          dragOver
+            ? "border-accent/50 bg-accent/8 shadow-sm"
+            : "border-dashed border-border/35 bg-card/62"
+        } ${uploading ? "opacity-60" : ""}`}
+      >
+        {(dragOver || uploading) && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted/80">
+            <span className="font-medium text-txt/80">
+              {uploadStatus
+                ? t("knowledgeview.UploadingProgress", {
+                    defaultValue: "Uploading {{current}}/{{total}}{{filename}}",
+                    current: uploadStatus.current,
+                    total: uploadStatus.total,
+                    filename: uploadStatus.filename
+                      ? `: ${uploadStatus.filename}`
+                      : "",
+                  })
+                : t("knowledgeview.DropFilesOrFoldersToUpload", {
+                    defaultValue: "Drop files or folders to upload",
+                  })}
+            </span>
+          </div>
+        )}
+
+        {!dragOver && !uploading && !showUrlInput && (
+          <div className="space-y-1 py-1 text-center">
+            <div className="text-[11px] font-medium text-muted-strong">
+              {t("knowledgeview.DropFilesHereToUpload", {
+                defaultValue: "Drop files here to upload",
+              })}
+            </div>
+            <div className="text-[10px] text-muted">
+              {t("knowledgeview.UploadSupportedTypes", {
+                defaultValue: "Docs, PDFs, JSON, CSV, and supported images.",
+              })}
+            </div>
+          </div>
+        )}
+
+        {showUrlInput && (
+          <div
+            className={`${dragOver || uploading ? "mt-2" : ""} animate-in fade-in slide-in-from-top-2 duration-300`}
+          >
+            <div className="mb-2 text-[11px] font-medium leading-relaxed text-muted">
+              {t("knowledgeview.PasteAURLToImpor")}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                type="url"
+                placeholder={t("knowledgeview.httpsExampleCom")}
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                disabled={uploading}
+                className="h-10 flex-1 border-border/55 bg-bg/72 text-xs shadow-none"
+              />
+              <Button
+                variant="default"
+                size="sm"
+                className="h-10 px-4 text-[11px] font-semibold"
+                onClick={handleUrlSubmit}
+                disabled={!urlInput.trim() || uploading}
+              >
+                {t("settings.import")}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </fieldset>
+  );
+}
+
 /* ── Search Result Item ─────────────────────────────────────────────── */
 
 function SearchResultListItem({
@@ -109,42 +353,32 @@ function SearchResultListItem({
   const { t } = useApp();
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      type="button"
+    <SidebarContent.ItemButton
       onClick={() => onSelect(result.documentId || result.id)}
+      type="button"
       aria-current={active ? "page" : undefined}
-      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} h-auto w-full ${
-        active
-          ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
-          : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
-      }`}
     >
-      <span
-        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-[10px] font-semibold ${
-          active
-            ? "border-accent/30 bg-accent/18 text-txt-strong"
-            : "border-border/50 bg-bg-accent/80 text-muted"
-        }`}
+      <SidebarContent.ItemIcon
+        active={active}
+        className="text-[10px] font-semibold"
       >
         {(result.similarity * 100).toFixed(0)}%
-      </span>
-      <span className="min-w-0 flex-1 text-left">
-        <span className="block truncate text-sm font-semibold text-txt">
+      </SidebarContent.ItemIcon>
+      <SidebarContent.ItemBody>
+        <SidebarContent.ItemTitle className="truncate">
           {result.documentTitle ||
             t("knowledgeview.UnknownDocument", {
               defaultValue: "Unknown Document",
             })}
-        </span>
-        <span className="mt-1 block line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+        </SidebarContent.ItemTitle>
+        <SidebarContent.ItemDescription className="line-clamp-2">
           {result.text}
-        </span>
+        </SidebarContent.ItemDescription>
         <span className="mt-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-accent-fg/85">
           {(result.similarity * 100).toFixed(0)}% {t("knowledgeview.Match")}
         </span>
-      </span>
-    </Button>
+      </SidebarContent.ItemBody>
+    </SidebarContent.ItemButton>
   );
 }
 
@@ -165,47 +399,40 @@ function DocumentListItem({
 }) {
   const { t } = useApp();
   return (
-    <button
-      type="button"
-      className={`${KNOWLEDGE_SIDEBAR_ITEM_BASE_CLASS} relative cursor-pointer ${
-        active
-          ? KNOWLEDGE_SIDEBAR_ITEM_ACTIVE_CLASS
-          : KNOWLEDGE_SIDEBAR_ITEM_INACTIVE_CLASS
-      }`}
-      onClick={() => onSelect(doc.id)}
-      aria-label={t("knowledgeview.OpenDocument", {
-        defaultValue: "Open {{filename}}",
-        filename: doc.filename,
-      })}
-      aria-current={active ? "page" : undefined}
-    >
-      <span className="min-w-0 flex-1 text-left">
-        <span className="block truncate text-sm font-semibold leading-snug text-txt">
-          {doc.filename}
-        </span>
-        <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          <span
-            className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider ${
-              active
-                ? "border-accent/30 bg-accent/18 text-txt-strong"
-                : "border-border/45 bg-bg/30 text-muted/80"
-            }`}
-          >
-            {getKnowledgeTypeLabel(doc.contentType)}
-          </span>
-          <span className="inline-flex items-center rounded-md border border-border/45 bg-bg/30 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider text-muted/80">
-            {getKnowledgeSourceLabel(doc.source, t)}
-          </span>
-          <span className="text-[10px] text-muted/50 opacity-0 transition-opacity group-hover:opacity-100">
-            {formatShortDate(doc.createdAt, { fallback: "—" })}
-          </span>
-        </span>
-      </span>
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents lint/a11y/noStaticElementInteractions: stopPropagation wrapper for nested interactive */}
-      <span
-        className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
-        onClick={(e) => e.stopPropagation()}
+    <SidebarContent.Item as="div" active={active} className="relative">
+      <SidebarContent.ItemButton
+        onClick={() => onSelect(doc.id)}
+        aria-label={t("knowledgeview.OpenDocument", {
+          defaultValue: "Open {{filename}}",
+          filename: doc.filename,
+        })}
+        aria-current={active ? "page" : undefined}
+        title={getKnowledgeDocumentSummary(doc, t)}
       >
+        <SidebarContent.ItemBody>
+          <div className="truncate text-sm font-semibold leading-snug text-txt">
+            {doc.filename}
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span
+              className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider ${
+                active
+                  ? "border-accent/30 bg-accent/18 text-txt-strong"
+                  : "border-border/45 bg-bg/30 text-muted/80"
+              }`}
+            >
+              {getKnowledgeTypeLabel(doc.contentType)}
+            </span>
+            <span className="inline-flex items-center rounded-md border border-border/45 bg-bg/30 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider text-muted/80">
+              {getKnowledgeSourceLabel(doc.source, t)}
+            </span>
+            <span className="text-[10px] text-muted/50 opacity-0 transition-opacity group-hover:opacity-100">
+              {formatShortDate(doc.createdAt, { fallback: "—" })}
+            </span>
+          </div>
+        </SidebarContent.ItemBody>
+      </SidebarContent.ItemButton>
+      <span className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
         <ConfirmDeleteControl
           triggerClassName="h-7 rounded-lg border border-transparent px-2 text-[10px] font-bold !bg-transparent text-danger/70 transition-all hover:!bg-danger/12 hover:border-danger/25 hover:text-danger"
           confirmClassName="h-7 rounded-lg border border-danger/25 bg-danger/14 px-2 text-[10px] font-bold text-danger transition-all hover:bg-danger/20"
@@ -215,7 +442,7 @@ function DocumentListItem({
           onConfirm={() => onDelete(doc.id)}
         />
       </span>
-    </button>
+    </SidebarContent.Item>
   );
 }
 
@@ -277,9 +504,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
   const previewText = doc?.content?.text?.trim();
 
   return (
-    <section
-      className={`${KNOWLEDGE_PANEL_CLASS} min-h-[62vh] overflow-hidden`}
-    >
+    <PagePanel className="min-h-[62vh] overflow-hidden">
       {doc && (
         <div className="flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-6 lg:justify-end">
           <span className="rounded-full border border-border/45 bg-bg/25 px-3 py-1.5 text-[11px] font-semibold text-muted">
@@ -305,7 +530,8 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
         )}
 
         {!loading && !error && !doc && (
-          <DesktopInsetEmptyStatePanel
+          <PagePanel.Empty
+            variant="inset"
             className="px-6 py-16"
             description={t("knowledgeview.NoDocumentSelectedDesc", {
               defaultValue:
@@ -320,7 +546,7 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
         {!loading && !error && doc && (
           <>
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)]">
-              <div className={`${KNOWLEDGE_INSET_PANEL_CLASS} p-5`}>
+              <PagePanel variant="inset" className="p-5">
                 <div className="mb-3 flex items-center justify-between gap-3 border-b border-border/25 pb-3">
                   <div className="text-sm font-semibold text-txt">
                     {t("knowledgeview.Preview", { defaultValue: "Preview" })}
@@ -334,7 +560,8 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                     {previewText.slice(0, 1200)}
                   </pre>
                 ) : (
-                  <DesktopInsetEmptyStatePanel
+                  <PagePanel.Empty
+                    variant="inset"
                     className="min-h-[10rem] px-4 py-10 text-sm"
                     description={t("knowledgeview.NoPreviewDesc", {
                       defaultValue:
@@ -345,9 +572,9 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                     })}
                   />
                 )}
-              </div>
+              </PagePanel>
 
-              <div className={`${KNOWLEDGE_INSET_PANEL_CLASS} p-5`}>
+              <PagePanel variant="inset" className="p-5">
                 <div className="text-sm font-semibold text-txt">
                   {t("knowledgeview.Details", { defaultValue: "Details" })}
                 </div>
@@ -404,10 +631,10 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                     </div>
                   )}
                 </div>
-              </div>
+              </PagePanel>
             </div>
 
-            <div className={`${KNOWLEDGE_INSET_PANEL_CLASS} p-5`}>
+            <PagePanel variant="inset" className="p-5">
               <div className="mb-4 flex items-center justify-between border-b border-border/30 pb-3">
                 <h3 className="text-sm font-bold tracking-wide text-txt">
                   {t("knowledgeview.Fragments1")}
@@ -438,17 +665,18 @@ function DocumentViewer({ documentId }: { documentId: string | null }) {
                   </div>
                 ))}
                 {fragments.length === 0 && (
-                  <DesktopInsetEmptyStatePanel
+                  <PagePanel.Empty
+                    variant="inset"
                     className="min-h-[10rem] py-12"
                     title={t("knowledgeview.NoFragmentsFound")}
                   />
                 )}
               </div>
-            </div>
+            </PagePanel>
           </>
         )}
       </div>
-    </section>
+    </PagePanel>
   );
 }
 
@@ -465,6 +693,12 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     KnowledgeSearchResult[] | null
   >(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<{
+    current: number;
+    total: number;
+    filename: string;
+  } | null>(null);
   const [searching, setSearching] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -529,6 +763,389 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     }, delayMs);
     return () => clearTimeout(timer);
   }, [isServiceLoading, loadData, t]);
+
+  const readKnowledgeFile = useCallback(
+    async (file: KnowledgeUploadFile) => {
+      const reader = new FileReader();
+      return new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === "string") {
+            resolve(result);
+            return;
+          }
+
+          if (result instanceof ArrayBuffer) {
+            const bytes = new Uint8Array(result);
+            let binary = "";
+            for (let i = 0; i < bytes.byteLength; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            resolve(btoa(binary));
+            return;
+          }
+
+          reject(
+            new Error(
+              t("knowledgeview.FailedToReadFile", {
+                defaultValue: "Failed to read file",
+              }),
+            ),
+          );
+        };
+
+        reader.onerror = () => reject(reader.error);
+
+        if (shouldReadKnowledgeFileAsText(file)) {
+          reader.readAsText(file);
+        } else {
+          reader.readAsArrayBuffer(file);
+        }
+      });
+    },
+    [t],
+  );
+
+  const buildKnowledgeUploadRequest = useCallback(
+    async (file: KnowledgeUploadFile, options: KnowledgeUploadOptions) => {
+      const optimizedImage = await maybeCompressKnowledgeUploadImage(file);
+      const uploadFile = optimizedImage.file as KnowledgeUploadFile;
+      if (
+        isKnowledgeImageFile(uploadFile) &&
+        uploadFile.size > MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES
+      ) {
+        throw new Error(
+          t("knowledgeview.ImageCouldNotBeCompressed", {
+            defaultValue:
+              "Image could not be compressed below {{limit}} for processing.",
+            limit: formatByteSize(MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES),
+          }),
+        );
+      }
+
+      const uploadFilename = getKnowledgeUploadFilename(uploadFile);
+      const content = await readKnowledgeFile(uploadFile);
+
+      const request = {
+        content,
+        filename: uploadFilename,
+        contentType: uploadFile.type || "application/octet-stream",
+        metadata: {
+          includeImageDescriptions: options.includeImageDescriptions,
+          relativePath: uploadFile.webkitRelativePath || undefined,
+        },
+      };
+      const requestBytes = new TextEncoder().encode(
+        JSON.stringify(request),
+      ).length;
+      if (requestBytes > MAX_UPLOAD_REQUEST_BYTES) {
+        throw new Error(
+          t("knowledgeview.UploadPayloadExceedsLimit", {
+            defaultValue:
+              "Upload payload is {{size}}, which exceeds the current limit ({{limit}}).",
+            size: formatByteSize(requestBytes),
+            limit: formatByteSize(MAX_UPLOAD_REQUEST_BYTES),
+          }),
+        );
+      }
+
+      return {
+        filename: uploadFilename,
+        request,
+        requestBytes,
+      };
+    },
+    [readKnowledgeFile, t],
+  );
+
+  const handleFilesUpload = useCallback(
+    async (files: KnowledgeUploadFile[], options: KnowledgeUploadOptions) => {
+      const unsupportedFiles = files.filter(
+        (file) => !isSupportedKnowledgeFile(file),
+      );
+      const uploadQueue = files.filter(
+        (file) => file.size > 0 && isSupportedKnowledgeFile(file),
+      );
+      if (uploadQueue.length === 0) {
+        setActionNotice(
+          unsupportedFiles.length > 0
+            ? t("knowledgeview.NoSupportedNonEmptyFiles", {
+                defaultValue: "No supported non-empty files were selected.",
+              })
+            : t("knowledgeview.NoNonEmptyFiles", {
+                defaultValue: "No non-empty files were selected.",
+              }),
+          "info",
+          3000,
+        );
+        return;
+      }
+
+      const largeFiles = uploadQueue.filter(
+        (file) => file.size >= LARGE_FILE_WARNING_BYTES,
+      );
+      if (largeFiles.length > 0) {
+        const shouldContinue =
+          typeof window === "undefined"
+            ? true
+            : await confirmDesktopAction({
+                title: t("knowledgeview.UploadLargeFiles", {
+                  defaultValue: "Upload Large Files",
+                }),
+                message: t("knowledgeview.LargeFilesDetected", {
+                  defaultValue: "{{count}} large file(s) detected.",
+                  count: largeFiles.length,
+                }),
+                detail: t("knowledgeview.UploadLargeFilesDetail", {
+                  defaultValue:
+                    "Uploading can take longer and may increase embedding or vision costs.",
+                }),
+                confirmLabel: t("onboarding.savedMyKeys", {
+                  defaultValue: "Continue",
+                }),
+                cancelLabel: t("common.cancel", {
+                  defaultValue: "Cancel",
+                }),
+                type: "warning",
+              });
+        if (!shouldContinue) return;
+      }
+
+      const failures: string[] = [];
+      const warnings: string[] = [];
+      let successful = 0;
+
+      const normalizeUploadError = (err: unknown): string => {
+        const message =
+          err instanceof Error
+            ? err.message
+            : t("knowledgeview.UnknownUploadError", {
+                defaultValue: "Unknown upload error",
+              });
+        const status = (err as Error & { status?: number })?.status;
+        return status === 413 || /maximum size|payload is/i.test(message)
+          ? t("knowledgeview.UploadTooLarge", {
+              defaultValue: "Upload too large. Try splitting this file.",
+            })
+          : message;
+      };
+
+      setUploading(true);
+      setUploadStatus({
+        current: 0,
+        total: uploadQueue.length,
+        filename: t("knowledgeview.Preparing", {
+          defaultValue: "Preparing...",
+        }),
+      });
+
+      try {
+        type PreparedUpload = {
+          filename: string;
+          request: {
+            content: string;
+            filename: string;
+            contentType: string;
+            metadata: {
+              includeImageDescriptions: boolean;
+              relativePath: string | undefined;
+            };
+          };
+          requestBytes: number;
+        };
+
+        let currentBatch: PreparedUpload[] = [];
+        let currentBatchBytes = 0;
+
+        const flushBatch = async () => {
+          if (currentBatch.length === 0) return;
+
+          const batchToUpload = currentBatch;
+          currentBatch = [];
+          currentBatchBytes = 0;
+
+          const batchLabel =
+            batchToUpload[0]?.filename ||
+            t("knowledgeview.Batch", { defaultValue: "batch" });
+          setUploadStatus({
+            current: successful + failures.length,
+            total: uploadQueue.length,
+            filename: t("knowledgeview.UploadingBatchStartingWith", {
+              defaultValue: "Uploading batch starting with {{label}}",
+              label: batchLabel,
+            }),
+          });
+
+          try {
+            const result = await client.uploadKnowledgeDocumentsBulk({
+              documents: batchToUpload.map((item) => item.request),
+            });
+
+            for (const item of result.results) {
+              const batchItem = batchToUpload[item.index];
+              const filename =
+                item.filename ||
+                batchItem?.filename ||
+                t("knowledgeview.Document", {
+                  defaultValue: "document",
+                });
+              if (item.ok) {
+                successful += 1;
+                if (item.warnings?.[0]) {
+                  warnings.push(`${filename}: ${item.warnings[0]}`);
+                }
+              } else {
+                failures.push(
+                  `${filename}: ${
+                    item.error ||
+                    t("knowledgeview.UploadFailed", {
+                      defaultValue: "Upload failed",
+                    })
+                  }`,
+                );
+              }
+            }
+          } catch (err) {
+            const message = normalizeUploadError(err);
+            for (const batchItem of batchToUpload) {
+              failures.push(`${batchItem.filename}: ${message}`);
+            }
+          }
+        };
+
+        for (const [index, file] of uploadQueue.entries()) {
+          const uploadFilename = getKnowledgeUploadFilename(file);
+          setUploadStatus({
+            current: index + 1,
+            total: uploadQueue.length,
+            filename: t("knowledgeview.PreparingFile", {
+              defaultValue: "Preparing: {{filename}}",
+              filename: uploadFilename,
+            }),
+          });
+
+          try {
+            const prepared = await buildKnowledgeUploadRequest(file, options);
+            if (
+              currentBatch.length > 0 &&
+              (currentBatchBytes + prepared.requestBytes >
+                BULK_UPLOAD_TARGET_BYTES ||
+                currentBatch.length >= MAX_BULK_REQUEST_DOCUMENTS)
+            ) {
+              await flushBatch();
+            }
+            currentBatch.push(prepared);
+            currentBatchBytes += prepared.requestBytes;
+          } catch (err) {
+            failures.push(`${uploadFilename}: ${normalizeUploadError(err)}`);
+          }
+        }
+
+        await flushBatch();
+
+        let refreshFailed = false;
+        try {
+          await loadData();
+        } catch (err) {
+          refreshFailed = true;
+          console.error("[KnowledgeView] Failed to refresh after upload:", err);
+        }
+
+        const skippedSummary =
+          unsupportedFiles.length > 0
+            ? ` Skipped ${unsupportedFiles.length} unsupported file(s).`
+            : "";
+        const refreshSummary = refreshFailed
+          ? " Uploaded, but failed to refresh document list."
+          : "";
+
+        if (
+          uploadQueue.length === 1 &&
+          successful === 1 &&
+          failures.length === 0
+        ) {
+          const onlyFile = getKnowledgeUploadFilename(uploadQueue[0]);
+          const baseMessage = `Uploaded "${onlyFile}"`;
+          if (warnings.length > 0) {
+            setActionNotice(`${baseMessage}. ${warnings[0]}`, "info", 6000);
+          } else if (refreshFailed) {
+            setActionNotice(
+              `${baseMessage}. Uploaded, but failed to refresh document list.`,
+              "info",
+              6000,
+            );
+          } else {
+            setActionNotice(baseMessage, "success", 3000);
+          }
+          return;
+        }
+
+        if (failures.length === 0) {
+          setActionNotice(
+            `Uploaded ${successful}/${uploadQueue.length} files.${warnings.length > 0 ? ` ${warnings[0]}` : ""}${skippedSummary}${refreshSummary}`,
+            warnings.length > 0 || refreshFailed || unsupportedFiles.length > 0
+              ? "info"
+              : "success",
+            7000,
+          );
+          return;
+        }
+
+        setActionNotice(
+          `Uploaded ${successful}/${uploadQueue.length} files. ${failures.length} failed.${failures.length > 0 ? ` ${failures[0]}` : ""}${skippedSummary}${refreshSummary}`,
+          successful > 0 ? "info" : "error",
+          7000,
+        );
+      } finally {
+        setUploading(false);
+        setUploadStatus(null);
+      }
+    },
+    [buildKnowledgeUploadRequest, loadData, setActionNotice, t],
+  );
+
+  const handleUrlUpload = useCallback(
+    async (url: string, options: KnowledgeUploadOptions) => {
+      setUploading(true);
+      try {
+        const result = await client.uploadKnowledgeFromUrl(url, {
+          includeImageDescriptions: options.includeImageDescriptions,
+        });
+
+        const baseMessage = result.isYouTubeTranscript
+          ? `Imported YouTube transcript (${result.fragmentCount} fragments)`
+          : `Imported "${result.filename}" (${result.fragmentCount} fragments)`;
+        if (result.warnings && result.warnings.length > 0) {
+          setActionNotice(
+            `${baseMessage}. ${result.warnings[0]}`,
+            "info",
+            6000,
+          );
+        } else {
+          setActionNotice(baseMessage, "success", 3000);
+        }
+        loadData();
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : t("knowledgeview.UnknownImportError", {
+                defaultValue: "Unknown import error",
+              });
+        setActionNotice(
+          t("knowledgeview.FailedToImportFromUrl", {
+            defaultValue: "Failed to import from URL: {{message}}",
+            message,
+          }),
+          "error",
+          5000,
+        );
+      } finally {
+        setUploading(false);
+      }
+    },
+    [loadData, setActionNotice, t],
+  );
 
   const handleSearch = useCallback(
     async (query: string) => {
@@ -610,29 +1227,23 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     [loadData, setActionNotice, t],
   );
 
-  const handleSearchSubmit = useCallback(
-    (e?: React.FormEvent<HTMLFormElement>) => {
-      e?.preventDefault();
-      const query = searchQuery.trim();
-      if (!query) return;
-      void handleSearch(query);
-    },
-    [handleSearch, searchQuery],
+  const totalFragments = useMemo(
+    () => documents.reduce((sum, d) => sum + (d.fragmentCount || 0), 0),
+    [documents],
   );
-
   const isShowingSearchResults = searchResults !== null;
   const visibleSearchResults = searchResults ?? [];
-
-  // Local filename filter — filters document list as user types (before submitting semantic search)
   const filteredDocuments = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q || isShowingSearchResults) return documents;
+    const query = searchQuery.trim().toLowerCase();
+    if (!query || isShowingSearchResults) {
+      return documents;
+    }
     return documents.filter(
       (doc) =>
-        doc.filename.toLowerCase().includes(q) ||
-        doc.contentType?.toLowerCase().includes(q),
+        doc.filename.toLowerCase().includes(query) ||
+        doc.contentType?.toLowerCase().includes(query),
     );
-  }, [documents, searchQuery, isShowingSearchResults]);
+  }, [documents, isShowingSearchResults, searchQuery]);
 
   useEffect(() => {
     if (documents.length === 0) {
@@ -650,192 +1261,230 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
     }
   }, [documents, selectedDocId]);
 
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      if (searchResults !== null) {
+        setSearchResults(null);
+      }
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void handleSearch(query);
+    }, 200);
+
+    return () => window.clearTimeout(timer);
+  }, [handleSearch, searchQuery, searchResults]);
+
   return (
-    <DesktopPageFrame className={inModal ? "p-0 lg:p-0" : undefined}>
-      <div className={KNOWLEDGE_SHELL_CLASS}>
-        <aside className={KNOWLEDGE_SIDEBAR_CLASS}>
-          <div className={APP_SIDEBAR_INNER_CLASSNAME}>
-            <div className="mt-4 border-b border-border/25 pb-4">
-              <form
-                className="mt-3 w-full max-w-[500px] flex-[1_1_500px]"
-                onSubmit={handleSearchSubmit}
-              >
-                <div className="flex items-stretch gap-2">
-                  <div className="relative flex-1">
-                    <Input
-                      type="text"
-                      placeholder={t("knowledge.ui.searchPlaceholder")}
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        // Clear semantic results when user edits the query — fall back to local filter
-                        if (isShowingSearchResults) setSearchResults(null);
-                      }}
-                      disabled={searching}
-                      className="h-10 border-border/55 bg-bg/82 pr-8 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
-                    />
-                    {searchQuery && (
-                      <button
-                        type="button"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted/60 transition-colors hover:text-txt"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setSearchResults(null);
-                        }}
-                        aria-label={t("common.clear", {
-                          defaultValue: "Clear",
-                        })}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          aria-hidden="true"
-                        >
-                          <title>Clear</title>
-                          <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                  <Button
-                    type="submit"
-                    variant="default"
-                    size="sm"
-                    className="h-10 px-4 text-txt shadow-sm"
-                    disabled={!searchQuery.trim() || searching}
-                  >
-                    {searching
-                      ? t("knowledge.ui.searching")
-                      : t("knowledge.ui.search")}
-                  </Button>
-                </div>
-              </form>
-              <div className="mt-3 flex flex-wrap items-center gap-2 px-1">
-                {isShowingSearchResults && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 rounded-lg border border-border/35 px-3 text-[11px] font-semibold text-muted hover:border-border/60 hover:bg-bg/35 hover:text-txt"
-                    onClick={() => {
-                      setSearchResults(null);
-                      setSearchQuery("");
-                    }}
-                  >
-                    {t("knowledgeview.ClearSearch", {
-                      defaultValue: "Clear search",
-                    })}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-3">
-              {loading && !isShowingSearchResults && documents.length === 0 && (
-                <div
-                  className={`${DESKTOP_INSET_EMPTY_PANEL_CLASSNAME} px-4 py-10 text-center text-sm font-medium text-muted`}
-                >
-                  {t("knowledgeview.LoadingDocuments")}
-                </div>
-              )}
-
-              {!loading &&
-                !isShowingSearchResults &&
-                documents.length === 0 && (
-                  <DesktopEmptyStatePanel
-                    className="min-h-[12rem] px-4 py-8"
-                    description={t("knowledgeview.UploadFilesOrImpo")}
-                    title={t("knowledgeview.NoDocumentsYet")}
-                  />
-                )}
-
-              {!loading &&
-                !isShowingSearchResults &&
-                documents.length > 0 &&
-                filteredDocuments.length === 0 && (
-                  <DesktopEmptyStatePanel
-                    className="min-h-[12rem] px-4 py-8"
-                    description={t("knowledgeview.SearchTips", {
-                      defaultValue:
-                        "Try a filename, topic, or phrase from the document body.",
-                    })}
-                    title={t("knowledgeview.NoMatchingDocuments", {
-                      defaultValue: "No matching documents",
-                    })}
-                  />
-                )}
-
-              {isShowingSearchResults && visibleSearchResults.length === 0 && (
-                <DesktopEmptyStatePanel
-                  className="min-h-[12rem] px-4 py-8"
-                  description={t("knowledgeview.SearchTips", {
-                    defaultValue:
-                      "Try a filename, topic, or phrase from the document body.",
-                  })}
-                  title={t("knowledgeview.NoResultsFound")}
-                />
-              )}
-
-              {isShowingSearchResults
-                ? visibleSearchResults.map((result) => (
-                    <SearchResultListItem
+    <PageLayout
+      className={inModal ? "min-h-0" : undefined}
+      sidebar={
+        <Sidebar
+          testId="knowledge-sidebar"
+          contentIdentity="knowledge"
+          header={
+            <SidebarHeader
+              search={{
+                placeholder: t("knowledge.ui.searchPlaceholder"),
+                value: searchQuery,
+                onChange: (e) => {
+                  setSearchQuery(e.target.value);
+                  if (isShowingSearchResults) {
+                    setSearchResults(null);
+                  }
+                },
+                onClear: () => {
+                  setSearchQuery("");
+                  setSearchResults(null);
+                },
+                loading: searching,
+                clearLabel: t("common.clear", { defaultValue: "Clear" }),
+                autoComplete: "off",
+                spellCheck: false,
+              }}
+            />
+          }
+          collapsedRailItems={
+            isShowingSearchResults
+              ? visibleSearchResults.map((result) => {
+                  const resultLabel =
+                    result.documentTitle ||
+                    t("knowledgeview.UnknownDocument", {
+                      defaultValue: "Unknown Document",
+                    });
+                  return (
+                    <SidebarContent.RailItem
                       key={result.id}
-                      result={result}
+                      aria-label={resultLabel}
+                      title={resultLabel}
                       active={
                         selectedDocId === (result.documentId || result.id)
                       }
-                      onSelect={setSelectedDocId}
-                    />
-                  ))
-                : filteredDocuments.map((doc) => (
-                    <DocumentListItem
-                      key={doc.id}
-                      doc={doc}
-                      active={selectedDocId === doc.id}
-                      onSelect={setSelectedDocId}
-                      onDelete={handleDelete}
-                      deleting={deleting === doc.id}
-                    />
-                  ))}
-            </div>
-          </div>
-        </aside>
+                      onClick={() =>
+                        setSelectedDocId(result.documentId || result.id)
+                      }
+                    >
+                      {getRailMonogram(resultLabel)}
+                    </SidebarContent.RailItem>
+                  );
+                })
+              : filteredDocuments.map((doc) => (
+                  <SidebarContent.RailItem
+                    key={doc.id}
+                    aria-label={doc.filename}
+                    title={doc.filename}
+                    active={selectedDocId === doc.id}
+                    onClick={() => setSelectedDocId(doc.id)}
+                  >
+                    {getRailMonogram(doc.filename)}
+                  </SidebarContent.RailItem>
+                ))
+          }
+        >
+          <SidebarScrollRegion>
+            <SidebarPanel>
+              <div className="space-y-4">
+                <PagePanel variant="inset" className="p-4">
+                  <UploadZone
+                    onFilesUpload={handleFilesUpload}
+                    onUrlUpload={handleUrlUpload}
+                    uploading={uploading}
+                    uploadStatus={uploadStatus}
+                  />
+                </PagePanel>
 
-        <div className={DESKTOP_PAGE_CONTENT_CLASSNAME}>
-          <div className="mx-auto max-w-[78rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-            {isServiceLoading && (
-              <div
-                className={`${KNOWLEDGE_INSET_PANEL_CLASS} mb-4 flex items-center gap-2 px-4 py-3 text-sm text-muted-strong`}
-              >
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
-                {t("knowledgeview.KnowledgeServiceIs")}
+                <div className="flex flex-wrap gap-2 px-1">
+                  <PagePanel.Meta compact>
+                    {t("knowledgeview.DocumentsCount", {
+                      defaultValue: "{{count}} docs",
+                      count: documents.length,
+                    })}
+                  </PagePanel.Meta>
+                  <PagePanel.Meta compact tone="strong">
+                    {t("knowledgeview.TotalFragmentsCount", {
+                      defaultValue: "{{count}} fragments",
+                      count: totalFragments,
+                    })}
+                  </PagePanel.Meta>
+                </div>
+
+                <div className="space-y-1.5">
+                  {loading &&
+                    !isShowingSearchResults &&
+                    documents.length === 0 && (
+                      <PagePanel.Empty
+                        variant="inset"
+                        className="px-4 py-10 text-center text-sm font-medium"
+                        title={t("knowledgeview.LoadingDocuments")}
+                      >
+                        {t("knowledgeview.LoadingDocuments")}
+                      </PagePanel.Empty>
+                    )}
+
+                  {!loading &&
+                    !isShowingSearchResults &&
+                    documents.length === 0 && (
+                      <PagePanel.Empty
+                        variant="inset"
+                        className="min-h-[12rem] px-4 py-8"
+                        description={t("knowledgeview.UploadFilesOrImpo")}
+                        title={t("knowledgeview.NoDocumentsYet")}
+                      />
+                    )}
+
+                  {!loading &&
+                    !isShowingSearchResults &&
+                    documents.length > 0 &&
+                    filteredDocuments.length === 0 && (
+                      <PagePanel.Empty
+                        variant="inset"
+                        className="min-h-[12rem] px-4 py-8"
+                        description={t("knowledgeview.SearchTips", {
+                          defaultValue:
+                            "Try a filename, topic, or phrase from the document body.",
+                        })}
+                        title={t("knowledgeview.NoMatchingDocuments", {
+                          defaultValue: "No matching documents",
+                        })}
+                      />
+                    )}
+
+                  {isShowingSearchResults &&
+                    visibleSearchResults.length === 0 && (
+                      <PagePanel.Empty
+                        variant="inset"
+                        className="min-h-[12rem] px-4 py-8"
+                        description={t("knowledgeview.SearchTips", {
+                          defaultValue:
+                            "Try a filename, topic, or phrase from the document body.",
+                        })}
+                        title={t("knowledgeview.NoResultsFound")}
+                      />
+                    )}
+
+                  {isShowingSearchResults
+                    ? visibleSearchResults.map((result) => (
+                        <SearchResultListItem
+                          key={result.id}
+                          result={result}
+                          active={
+                            selectedDocId === (result.documentId || result.id)
+                          }
+                          onSelect={setSelectedDocId}
+                        />
+                      ))
+                    : filteredDocuments.map((doc) => (
+                        <DocumentListItem
+                          key={doc.id}
+                          doc={doc}
+                          active={selectedDocId === doc.id}
+                          onSelect={setSelectedDocId}
+                          onDelete={handleDelete}
+                          deleting={deleting === doc.id}
+                        />
+                      ))}
+                </div>
               </div>
-            )}
+            </SidebarPanel>
+          </SidebarScrollRegion>
+        </Sidebar>
+      }
+      contentInnerClassName="mx-auto w-full max-w-[78rem]"
+    >
+      {isServiceLoading && (
+        <PagePanel
+          variant="inset"
+          className="mb-4 flex items-center gap-2 px-4 py-3 text-sm text-muted-strong"
+        >
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+          {t("knowledgeview.KnowledgeServiceIs")}
+        </PagePanel>
+      )}
 
-            {loadError && !isServiceLoading && (
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-danger shadow-sm">
-                <span>{loadError}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-danger/30 px-3 text-xs text-danger hover:bg-danger/16"
-                  onClick={() => loadData()}
-                >
-                  {t("common.retry")}
-                </Button>
-              </div>
-            )}
+      {loadError && !isServiceLoading && (
+        <PagePanel.Notice
+          tone="danger"
+          className="mb-4"
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-danger/30 px-3 text-xs text-danger hover:bg-danger/16"
+              onClick={() => loadData()}
+            >
+              {t("common.retry")}
+            </Button>
+          }
+        >
+          {loadError}
+        </PagePanel.Notice>
+      )}
 
-            <div className="mt-4">
-              <DocumentViewer documentId={selectedDocId} />
-            </div>
-          </div>
-        </div>
+      <div className="mt-4">
+        <DocumentViewer documentId={selectedDocId} />
       </div>
-    </DesktopPageFrame>
+    </PageLayout>
   );
 }

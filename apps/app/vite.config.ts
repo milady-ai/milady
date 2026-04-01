@@ -547,6 +547,11 @@ export default defineConfig({
     "import.meta.env.VITE_MILADY_SETTINGS_DEBUG": JSON.stringify(
       process.env.VITE_MILADY_SETTINGS_DEBUG ?? "",
     ),
+    "import.meta.env.VITE_ASSET_BASE_URL": JSON.stringify(
+      process.env.VITE_ASSET_BASE_URL ??
+        process.env.MILADY_ASSET_BASE_URL ??
+        "",
+    ),
   },
   plugins: [
     nativeModuleStubPlugin(),

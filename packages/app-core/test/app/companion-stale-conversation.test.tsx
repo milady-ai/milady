@@ -191,6 +191,7 @@ describe("companion stale conversation rollover", () => {
       "eliza:connection-mode",
       JSON.stringify({ runMode: "local" }),
     );
+    localStorage.setItem("eliza:onboarding-complete", "1");
     localStorage.setItem(UI_SHELL_MODE_STORAGE_KEY, "companion");
     window.history.replaceState({}, "", "/chat");
     Object.assign(window, {

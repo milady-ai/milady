@@ -1083,28 +1083,32 @@ export class AgentManager {
       throw new Error(reason);
     }
 
-    configureDesktopLocalApiAuth();
-    const packagedRuntime = isPackagedDesktopRuntime();
-
-    // Reset per-startup flags
-    this.pgliteRecoveryDone = false;
-
-    // Clean up any stale process before starting
-    if (this.childProcess) {
-      await this.killChildProcess();
-    }
-
-    const preferredPort =
-      resolveDesktopApiPort(process.env) || DEFAULT_API_PORT;
-    if (!packagedRuntime) {
-      await maybeReclaimPortWithSigkill(preferredPort);
-    }
+    let packagedRuntime: boolean;
     let apiPort: number;
+    let preferredPort: number;
     try {
+      configureDesktopLocalApiAuth();
+      packagedRuntime = isPackagedDesktopRuntime();
+
+      // Reset per-startup flags
+      this.pgliteRecoveryDone = false;
+
+      // Clean up any stale process before starting
+      if (this.childProcess) {
+        await this.killChildProcess();
+      }
+
+      preferredPort = resolveDesktopApiPort(process.env) || DEFAULT_API_PORT;
+      diagnosticLog(
+        `[Agent] Preferred port: ${preferredPort} (packaged: ${packagedRuntime})`,
+      );
+      if (!packagedRuntime) {
+        await maybeReclaimPortWithSigkill(preferredPort);
+      }
       apiPort = await findFirstAvailableLoopbackPort(preferredPort);
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : "Failed to allocate loopback port";
+        err instanceof Error ? err.message : "Failed during pre-startup";
       diagnosticLog(`[Agent] ${msg}`);
       this.status = {
         state: "error",
@@ -1118,10 +1122,6 @@ export class AgentManager {
         error: msg,
       });
       this.setStartupPhase("port_allocation_failed", msg);
-      recordStartupPhase("fatal", {
-        port: null,
-        error: msg,
-      });
       this.emitStatus();
       return this.status;
     }

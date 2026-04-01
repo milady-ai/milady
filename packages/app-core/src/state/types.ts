@@ -71,15 +71,6 @@ export type CompanionVrmPowerMode = "quality" | "balanced" | "efficiency";
 /** When to cap the companion VRM loop at ~half the display refresh rate. */
 export type CompanionHalfFramerateMode = "off" | "when_saving_power" | "always";
 export type ShellView = "companion" | "character" | "desktop";
-export type OnboardingHandoffPhase =
-  | "idle"
-  | "fading"
-  | "provisioning"
-  | "starting-backend"
-  | "saving"
-  | "restarting"
-  | "bootstrapping"
-  | "error";
 
 /** Emitted after each tab/shell-related layout commit (see `navigation` on app context). */
 export interface TabCommittedDetail {
@@ -102,7 +93,6 @@ export interface NavigationEventsApi {
 }
 
 export type OnboardingStep =
-  | "cloud_login"
   | "identity"
   | "hosting"
   | "providers"
@@ -116,13 +106,8 @@ export interface OnboardingStepMeta {
   subtitle: string;
 }
 
-/** Unified 7-step onboarding flow — cloud check is first, identity is second. */
+/** Unified 6-step onboarding flow — identity is first (cloud login is on the splash page). */
 export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
-  {
-    id: "cloud_login",
-    name: "onboarding.stepName.cloudLogin",
-    subtitle: "onboarding.stepSub.cloudLogin",
-  },
   {
     id: "identity",
     name: "onboarding.stepName.identity",
@@ -242,7 +227,8 @@ export type StartupErrorReason =
   | "backend-unreachable"
   | "agent-timeout"
   | "agent-error"
-  | "asset-missing";
+  | "asset-missing"
+  | "unknown";
 
 export interface StartupErrorState {
   reason: StartupErrorReason;
@@ -297,10 +283,10 @@ export interface AppState {
   /** Incremented on agent reset so onboarding UI shows immediately (not stuck behind VRM reveal). */
   onboardingUiRevealNonce: number;
   onboardingLoading: boolean;
-  onboardingHandoffPhase: OnboardingHandoffPhase;
-  onboardingHandoffError: string | null;
   startupPhase: StartupPhase;
   startupError: StartupErrorState | null;
+  /** StartupCoordinator handle — the sole startup authority. */
+  startupCoordinator: import("./useStartupCoordinator").StartupCoordinatorHandle;
   authRequired: boolean;
   actionNotice: ActionNotice | null;
   lifecycleBusy: boolean;
@@ -334,7 +320,6 @@ export interface AppState {
   chatInput: string;
   chatSending: boolean;
   chatFirstTokenReceived: boolean;
-  chatAwaitingGreeting: boolean;
   chatLastUsage: ChatTurnUsage | null;
   chatAvatarVisible: boolean;
   chatAgentVoiceMuted: boolean;
@@ -355,6 +340,7 @@ export interface AppState {
 
   // Triggers
   triggers: TriggerSummary[];
+  triggersLoaded: boolean;
   triggersLoading: boolean;
   triggersSaving: boolean;
   triggerRunsById: Record<string, TriggerRunRecord[]>;
@@ -546,6 +532,7 @@ export interface AppState {
     source: string;
     apiKey?: string;
     authMode?: string;
+    status?: "valid" | "invalid" | "unchecked" | "error";
     cliInstalled: boolean;
   }>;
   onboardingRemoteApiBase: string;
@@ -570,7 +557,6 @@ export interface AppState {
   onboardingRpcSelections: Record<string, string>;
   onboardingRpcKeys: Record<string, string>;
   onboardingAvatar: number;
-  onboardingRestarting: boolean;
 
   // Command palette
   commandPaletteOpen: boolean;
@@ -688,7 +674,8 @@ export interface AppActions {
   ) => Promise<void>;
 
   // Triggers
-  loadTriggers: () => Promise<void>;
+  loadTriggers: (options?: { silent?: boolean }) => Promise<void>;
+  ensureTriggersLoaded: () => Promise<void>;
   createTrigger: (
     request: CreateTriggerRequest,
   ) => Promise<TriggerSummary | null>;
@@ -705,7 +692,8 @@ export interface AppActions {
   handlePairingSubmit: () => Promise<void>;
 
   // Plugins
-  loadPlugins: () => Promise<void>;
+  loadPlugins: (options?: { silent?: boolean }) => Promise<void>;
+  ensurePluginsLoaded: () => Promise<void>;
   handlePluginToggle: (pluginId: string, enabled: boolean) => Promise<void>;
   handlePluginConfigSave: (
     pluginId: string,
@@ -798,8 +786,6 @@ export interface AppActions {
   // Onboarding
   handleOnboardingNext: (options?: OnboardingNextOptions) => Promise<void>;
   handleOnboardingBack: () => void;
-  retryOnboardingHandoff: () => Promise<void>;
-  cancelOnboardingHandoff: () => void;
   /** Jump to an earlier step in the active track (sidebar); backward-only. */
   handleOnboardingJumpToStep: (step: OnboardingStep) => void;
   /** Set onboarding step and sync Flamina guide (e.g. welcome → connection). */

@@ -297,6 +297,32 @@ describe("SettingsView Sections", () => {
       expect(renderedTree).not.toContain("settings.sections.permissions.label");
     });
 
+    it("uses the shared collapsible settings rail", async () => {
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+
+      await act(async () => {
+        tree = TestRenderer.create(React.createElement(SettingsView));
+      });
+
+      const collapseButton = tree?.root.findByProps({
+        "data-testid": "settings-sidebar-collapse-toggle",
+      });
+
+      await act(async () => {
+        collapseButton?.props.onClick();
+      });
+
+      const collapsedSidebar = tree?.root.findByProps({
+        "data-testid": "settings-sidebar",
+      });
+      expect(collapsedSidebar?.props["data-collapsed"]).toBe(true);
+
+      const expandButton = tree?.root.findByProps({
+        "data-testid": "settings-sidebar-expand-toggle",
+      });
+      expect(expandButton).toBeDefined();
+    });
+
     it("renders danger zone with reset button", async () => {
       let tree: TestRenderer.ReactTestRenderer | null = null;
 

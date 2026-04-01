@@ -55,7 +55,7 @@ function withLocalStorageStub(fn: () => void) {
 
 describe("normalizeOnboardingStep (via load/save helpers)", () => {
   it.each([
-    "cloud_login",
+    "identity",
     "hosting",
     "providers",
     "permissions",

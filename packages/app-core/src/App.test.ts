@@ -81,6 +81,23 @@ vi.mock("./app-shell-components", () => {
         { "data-testid": "StartupFailureView" },
         error.message,
       ),
+    StartupShell: () => {
+      const app = useAppMock();
+      const coordPhase = app?.startupCoordinator?.phase ?? "restoring-session";
+      if (coordPhase === "error") {
+        const err = app?.startupError ?? {
+          message: "Startup error",
+          reason: "unknown",
+          phase: "starting-backend",
+        };
+        return React.createElement(
+          "div",
+          { "data-testid": "StartupFailureView" },
+          err.message,
+        );
+      }
+      return React.createElement("div", { "data-testid": "StartupShell" });
+    },
     StreamView: stub("StreamView"),
     SystemWarningBanner: stub("SystemWarningBanner"),
   };
@@ -116,6 +133,7 @@ describe("App", () => {
       onboardingLoading: false,
       startupPhase: "ready",
       startupError: null,
+      startupCoordinator: { phase: "ready" },
       authRequired: false,
       onboardingComplete: true,
       retryStartup: vi.fn(),
@@ -135,6 +153,18 @@ describe("App", () => {
       renderer = TestRenderer.create(React.createElement(App));
     });
 
+    // Transition the coordinator to the error phase — StartupShell renders
+    // StartupFailureView when the coordinator is in the error phase.
+    appState.startupCoordinator = {
+      phase: "error",
+      state: {
+        phase: "error",
+        reason: "agent-error",
+        message: "backend died",
+        timedOut: false,
+      },
+      retry: vi.fn(),
+    };
     appState.startupError = {
       reason: "agent-error",
       phase: "ready",
@@ -153,5 +183,70 @@ describe("App", () => {
       renderer.root.findByProps({ "data-testid": "StartupFailureView" })
         .children,
     ).toContain("backend died");
+  });
+
+  it("mounts advanced-family tabs in the full-height shell instead of the padded default shell", async () => {
+    const makeState = (tab: string) => ({
+      onboardingLoading: false,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
+      startupPhase: "ready",
+      startupError: null,
+      startupCoordinator: { phase: "ready" },
+      authRequired: false,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab,
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "native",
+      switchShellView: vi.fn(),
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "dark",
+      setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      cancelOnboardingHandoff: vi.fn(),
+      handleSaveCharacter: vi.fn(),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      agentStatus: { state: "running" },
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      retryOnboardingHandoff: vi.fn(),
+      t: (key: string) => key,
+    });
+
+    for (const tab of ["plugins", "skills", "trajectories"] as const) {
+      useAppMock.mockImplementation(() => makeState(tab));
+
+      let renderer!: TestRenderer.ReactTestRenderer;
+      await act(async () => {
+        renderer = TestRenderer.create(React.createElement(App));
+      });
+
+      renderer.root.findByProps({
+        "data-testid": "AdvancedPageView",
+      });
+      const fullHeightShells = renderer.root.findAll(
+        (node) =>
+          node.type === "div" &&
+          typeof node.props.className === "string" &&
+          node.props.className.includes(
+            "flex flex-1 min-h-0 min-w-0 overflow-hidden",
+          ),
+      );
+      const paddedMain = renderer.root.findAll(
+        (node) =>
+          node.type === "main" &&
+          typeof node.props.className === "string" &&
+          node.props.className.includes("px-3 xl:px-5 py-4 xl:py-6"),
+      );
+
+      expect(fullHeightShells.length).toBeGreaterThan(0);
+      expect(paddedMain.length).toBe(0);
+    }
   });
 });

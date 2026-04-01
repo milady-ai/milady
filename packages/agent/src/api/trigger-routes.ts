@@ -220,7 +220,17 @@ export async function handleTriggerRoutes(
       return true;
     }
 
-    const metadata = buildTriggerMetadata({ trigger, nowMs: Date.now() });
+    const nowMs = Date.now();
+    const metadata = trigger.enabled
+      ? buildTriggerMetadata({ trigger, nowMs })
+      : ({
+          updatedAt: nowMs,
+          updateInterval: DISABLED_TRIGGER_INTERVAL_MS,
+          trigger: {
+            ...trigger,
+            nextRunAtMs: nowMs + DISABLED_TRIGGER_INTERVAL_MS,
+          },
+        } as TriggerTaskMetadataLike);
     if (!metadata) {
       error(res, "Unable to compute trigger schedule", 400);
       return true;

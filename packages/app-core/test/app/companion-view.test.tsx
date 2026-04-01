@@ -96,7 +96,6 @@ function createContext(overrides: Record<string, unknown> = {}) {
     elizaCloudCreditsError: null,
     elizaCloudEnabled: false,
     elizaCloudConnected: false,
-    onboardingHandoffPhase: "idle",
     setState: vi.fn(),
     handleStartDraftConversation: vi.fn(async () => {}),
     handleNewConversation: vi.fn(async () => {}),
@@ -391,25 +390,6 @@ describe("CompanionView", () => {
       window.setTimeout = globalThis.setTimeout.bind(globalThis);
       window.clearTimeout = globalThis.clearTimeout.bind(globalThis);
     }
-  });
-
-  it("reveals the companion dock immediately during onboarding handoff", async () => {
-    mockUseApp.mockReturnValue(
-      createContext({
-        onboardingHandoffPhase: "bootstrapping",
-      }),
-    );
-
-    let tree: TestRenderer.ReactTestRenderer | undefined;
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(CompanionView));
-    });
-
-    expect(
-      tree?.root.findAllByProps({
-        "data-testid": "companion-chat-modal-stub",
-      }),
-    ).toHaveLength(1);
   });
 
   it("plays the greeting emote only after teleport completion", async () => {

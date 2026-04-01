@@ -147,6 +147,10 @@ describe("Electrobun release workflow drift", () => {
     expect(buildJobIndex).toBeGreaterThan(validateJobIndex);
     expect(releaseCheckIndex).toBeGreaterThan(validateJobIndex);
     expect(workflow).toContain("needs: [prepare, validate-release]");
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+      "runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}",
+    );
   });
 
   it("runs the release regression contract before release-check", () => {
@@ -166,6 +170,11 @@ describe("Electrobun release workflow drift", () => {
     expect(liveCloudIndex).toBeGreaterThan(heavyE2EIndex);
     expect(restoreBuildInfoIndex).toBeGreaterThan(liveCloudIndex);
     expect(releaseCheckIndex).toBeGreaterThan(restoreBuildInfoIndex);
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+      "MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}",
+    );
+    expect(workflow).toContain('MILADY_VALIDATE_CDN: "1"');
   });
 
   it("requires an explicit tag for manual non-tag runs", () => {
@@ -288,6 +297,10 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain(
       'node scripts/build-patched-electrobun-cli.mjs "$' +
         '{{ steps.resolve-electrobun.outputs.package-dir }}"',
+    );
+    expect(workflow).toContain(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+      "runner: ${{ vars.RUNNER_WINDOWS || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-windows-2025' || 'windows-2025') }}",
     );
     expect(workflow).not.toContain(
       'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',

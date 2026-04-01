@@ -1,7 +1,7 @@
 param(
   [string]$ArtifactsDir = (Join-Path $PSScriptRoot "..\\artifacts"),
   [string]$BuildDir = (Join-Path $PSScriptRoot "..\\build"),
-  [int]$BackendPort = 2138,
+  [int]$BackendPort = 31337,
   [int]$TimeoutSeconds = 240
 )
 

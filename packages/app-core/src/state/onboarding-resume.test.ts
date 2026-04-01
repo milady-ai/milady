@@ -48,8 +48,8 @@ describe("hasPartialOnboardingConnectionConfig", () => {
 });
 
 describe("inferOnboardingResumeStep", () => {
-  it("defaults to cloud_login with no persisted step and no config", () => {
-    expect(inferOnboardingResumeStep({})).toBe("cloud_login");
+  it("defaults to identity with no persisted step and no config", () => {
+    expect(inferOnboardingResumeStep({})).toBe("identity");
   });
 
   it("returns the persisted step when available", () => {

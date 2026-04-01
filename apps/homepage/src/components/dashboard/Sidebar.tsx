@@ -69,7 +69,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
                 type="button"
                 key={s.id}
                 onClick={() => onChange(s.id)}
-                className={`group w-full flex items-center gap-2 text-left px-3 py-2.5 
+                className={`group w-full flex items-center gap-2 text-left px-3 py-2.5
                   font-mono text-xs tracking-wide transition-all duration-150 relative
                   ${
                     active === s.id
@@ -127,8 +127,8 @@ export function Sidebar({ active, onChange }: SidebarProps) {
             <button
               type="button"
               onClick={() => signOut()}
-              className="w-full flex items-center gap-2 px-4 py-3 
-                font-mono text-[11px] text-text-subtle hover:text-status-stopped 
+              className="w-full flex items-center gap-2 px-4 py-3
+                font-mono text-[11px] text-text-subtle hover:text-status-stopped
                 border-t border-border-subtle transition-colors"
             >
               <svg

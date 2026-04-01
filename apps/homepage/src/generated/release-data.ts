@@ -1,5 +1,5 @@
 export const releaseData = {
-  generatedAt: "2026-03-28T11:50:13.738Z",
+  generatedAt: "2026-03-31T11:28:20.998Z",
   scripts: {
     shell: {
       url: "https://milady.ai/install.sh",
@@ -10,41 +10,48 @@ export const releaseData = {
       command: "irm https://milady.ai/install.ps1 | iex",
     },
   },
+  cdn: {
+    tagName: "v2.0.4",
+    appAssetBaseUrl:
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/app/public/",
+    homepageAssetBaseUrl:
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/homepage/public/",
+  },
   release: {
-    tagName: "v2.0.0-alpha.128",
-    publishedAtLabel: "Mar 28, 2026",
-    prerelease: true,
-    url: "https://github.com/milady-ai/milady/releases/tag/v2.0.0-alpha.128",
+    tagName: "v2.0.4",
+    publishedAtLabel: "Mar 31, 2026",
+    prerelease: false,
+    url: "https://github.com/milady-ai/milady/releases/tag/v2.0.4",
     downloads: [
       {
         id: "macos-arm64",
         label: "macOS (Apple Silicon)",
-        fileName: "canary-macos-arm64-Milady-canary.dmg",
-        url: "https://github.com/milady-ai/milady/releases/download/v2.0.0-alpha.128/canary-macos-arm64-Milady-canary.dmg",
-        sizeLabel: "587.7 MB",
+        fileName: "stable-macos-arm64-Milady.dmg",
+        url: "https://github.com/milady-ai/milady/releases/download/v2.0.4/stable-macos-arm64-Milady.dmg",
+        sizeLabel: "597.6 MB",
         note: "DMG installer",
       },
       {
         id: "macos-x64",
         label: "macOS (Intel)",
-        fileName: "canary-macos-x64-Milady-canary.dmg",
-        url: "https://github.com/milady-ai/milady/releases/download/v2.0.0-alpha.128/canary-macos-x64-Milady-canary.dmg",
-        sizeLabel: "611.4 MB",
+        fileName: "stable-macos-x64-Milady.dmg",
+        url: "https://github.com/milady-ai/milady/releases/download/v2.0.4/stable-macos-x64-Milady.dmg",
+        sizeLabel: "597.5 MB",
         note: "DMG installer",
       },
       {
         id: "windows-x64",
         label: "Windows",
-        fileName: "Milady-Setup-canary.exe",
-        url: "https://github.com/milady-ai/milady/releases/download/v2.0.0-alpha.128/Milady-Setup-canary.exe",
-        sizeLabel: "672.4 MB",
+        fileName: "Milady-Setup-stable.exe",
+        url: "https://github.com/milady-ai/milady/releases/download/v2.0.4/Milady-Setup-stable.exe",
+        sizeLabel: "672.6 MB",
         note: "Windows installer",
       },
       {
         id: "linux-x64",
         label: "Linux",
-        fileName: "canary-linux-x64-Milady-canary-Setup.tar.gz",
-        url: "https://github.com/milady-ai/milady/releases/download/v2.0.0-alpha.128/canary-linux-x64-Milady-canary-Setup.tar.gz",
+        fileName: "stable-linux-x64-Milady-Setup.tar.gz",
+        url: "https://github.com/milady-ai/milady/releases/download/v2.0.4/stable-linux-x64-Milady-Setup.tar.gz",
         sizeLabel: "653.9 MB",
         note: "tar.gz package",
       },
@@ -59,7 +66,7 @@ export const releaseData = {
     ],
     checksum: {
       fileName: "SHA256SUMS.txt",
-      url: "https://github.com/milady-ai/milady/releases/download/v2.0.0-alpha.128/SHA256SUMS.txt",
+      url: "https://github.com/milady-ai/milady/releases/download/v2.0.4/SHA256SUMS.txt",
     },
   },
 } as const;

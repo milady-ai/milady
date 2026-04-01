@@ -29,6 +29,18 @@ vi.mock("@miladyai/ui", () => {
     ...props
   }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement("div", props, children);
+  const settingsControls = {
+    Field: passthrough,
+    FieldDescription: passthrough,
+    FieldLabel: passthrough,
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
+    MutedText: passthrough,
+    SegmentedGroup: passthrough,
+    SelectTrigger: passthrough,
+    Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
+      React.createElement("textarea", props),
+  };
   return {
     Button: ({
       children,
@@ -40,6 +52,7 @@ vi.mock("@miladyai/ui", () => {
     SelectValue: passthrough,
     SelectContent: passthrough,
     SelectItem: passthrough,
+    SettingsControls: settingsControls,
   };
 });
 

@@ -13,11 +13,20 @@ Field.displayName = "Field";
 
 const FieldLabel = React.forwardRef<
   React.ElementRef<typeof Label>,
-  React.ComponentPropsWithoutRef<typeof Label>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof Label> & {
+    variant?: "default" | "form" | "kicker";
+  }
+>(({ className, variant = "default", ...props }, ref) => (
   <Label
     ref={ref}
-    className={cn("text-sm font-medium text-txt-strong", className)}
+    className={cn(
+      variant === "form"
+        ? "mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted/80"
+        : variant === "kicker"
+          ? "text-[11px] font-semibold uppercase tracking-[0.16em] text-muted"
+          : "text-sm font-medium text-txt-strong",
+      className,
+    )}
     {...props}
   />
 ));

@@ -160,6 +160,9 @@ const MILADY_VRM_ASSETS = MILADY_STYLE_PRESETS.slice()
 
 const miladyBootConfig: AppBootConfig = {
   branding: MILADY_BRANDING,
+  assetBaseUrl:
+    (import.meta.env.VITE_ASSET_BASE_URL as string | undefined)?.trim() ||
+    undefined,
   cloudApiBase:
     (import.meta.env.VITE_CLOUD_BASE as string) ?? "https://www.elizacloud.ai",
   vrmAssets: MILADY_VRM_ASSETS,

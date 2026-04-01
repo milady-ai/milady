@@ -476,56 +476,102 @@ async function decompressGzipBuffer(buffer: ArrayBuffer): Promise<ArrayBuffer> {
   return await new Response(stream).arrayBuffer();
 }
 
+/* ── In-memory VRM ArrayBuffer cache ─────────────────────────────────────────
+ * Caches the decompressed (ready-to-parse) ArrayBuffer keyed by URL so that
+ * switching back to a previously-loaded avatar skips the network fetch entirely.
+ * We intentionally cache raw bytes rather than parsed GLTF/VRM objects because
+ * three.js scene graphs carry GPU-bound resources that cannot be safely shared
+ * or cloned across instances.  Re-parsing from an ArrayBuffer is fast (<200ms)
+ * and avoids an entire class of WebGL state bugs.
+ *
+ * LRU eviction keeps memory bounded (default: 4 entries ≈ 40-80 MB).
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+interface VrmBufferCacheEntry {
+  /** Decompressed, ready-to-parse ArrayBuffer. */
+  buffer: ArrayBuffer;
+  /** Monotonic timestamp for LRU eviction. */
+  lastUsed: number;
+}
+
+const vrmBufferCache = new Map<string, VrmBufferCacheEntry>();
+const VRM_BUFFER_CACHE_MAX = 4;
+
+function touchVrmCacheEntry(url: string, buffer: ArrayBuffer): void {
+  vrmBufferCache.set(url, { buffer, lastUsed: performance.now() });
+
+  // Evict oldest entries when over capacity.
+  while (vrmBufferCache.size > VRM_BUFFER_CACHE_MAX) {
+    let oldestKey: string | null = null;
+    let oldestTime = Infinity;
+    for (const [key, entry] of vrmBufferCache) {
+      if (entry.lastUsed < oldestTime) {
+        oldestTime = entry.lastUsed;
+        oldestKey = key;
+      }
+    }
+    if (oldestKey) vrmBufferCache.delete(oldestKey);
+    else break;
+  }
+}
+
 async function loadGltfAsset(
   loader: GLTFLoader,
   url: string,
   onProgress?: (progress: number) => void,
 ): Promise<Awaited<ReturnType<GLTFLoader["loadAsync"]>>> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch VRM asset: ${response.status}`);
-  }
-
-  const contentLength = Number(response.headers.get("content-length") || 0);
-
   let buffer: ArrayBuffer;
-  if (!contentLength || !response.body || !onProgress) {
-    buffer = await response.arrayBuffer();
+
+  const cached = vrmBufferCache.get(url);
+  if (cached) {
+    // Cache hit — skip network entirely, copy the buffer so the cache stays
+    // valid even if GLTFLoader transfers/neuters the original.
+    buffer = cached.buffer.slice(0);
+    touchVrmCacheEntry(url, cached.buffer);
     onProgress?.(1);
   } else {
-    const reader = response.body.getReader();
-    let received = 0;
-    const chunks: Uint8Array[] = [];
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-        received += value.length;
-        onProgress(Math.min(received / contentLength, 1));
+    // Cache miss — fetch from network.
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch VRM asset: ${response.status}`);
+    }
+
+    const contentLength = Number(response.headers.get("content-length") || 0);
+
+    if (!contentLength || !response.body || !onProgress) {
+      buffer = await response.arrayBuffer();
+      onProgress?.(1);
+    } else {
+      const reader = response.body.getReader();
+      let received = 0;
+      const chunks: Uint8Array[] = [];
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          chunks.push(value);
+          received += value.length;
+          onProgress(Math.min(received / contentLength, 1));
+        }
       }
+      const combined = new Uint8Array(received);
+      let offset = 0;
+      for (const chunk of chunks) {
+        combined.set(chunk, offset);
+        offset += chunk.length;
+      }
+      buffer = combined.buffer;
     }
-    const combined = new Uint8Array(received);
-    let offset = 0;
-    for (const chunk of chunks) {
-      combined.set(chunk, offset);
-      offset += chunk.length;
+
+    // Decompress gzip if needed, then store the decompressed bytes.
+    if (isGzipBuffer(buffer)) {
+      buffer = await decompressGzipBuffer(buffer);
     }
-    buffer = combined.buffer;
+
+    // Store a copy in the cache (keep the original for parsing below).
+    touchVrmCacheEntry(url, buffer.slice(0));
   }
 
-  if (!isGzipBuffer(buffer)) {
-    const objectUrl = URL.createObjectURL(
-      new Blob([buffer], { type: "model/gltf-binary" }),
-    );
-    try {
-      return await loader.loadAsync(objectUrl);
-    } finally {
-      URL.revokeObjectURL(objectUrl);
-    }
-  }
-
-  buffer = await decompressGzipBuffer(buffer);
   const objectUrl = URL.createObjectURL(
     new Blob([buffer], { type: "model/gltf-binary" }),
   );
@@ -2588,7 +2634,11 @@ export class VrmEngine {
 
   /** Play a one-shot wave greeting after the VRM becomes visible. */
   playWaveGreeting(): void {
-    this.playEmote("animations/emotes/greeting.fbx", 3, false);
+    this.playEmote(
+      resolveAppAssetUrl("animations/emotes/greeting.fbx"),
+      3,
+      false,
+    );
   }
 
   async loadVrmFromUrl(url: string, name?: string): Promise<void> {

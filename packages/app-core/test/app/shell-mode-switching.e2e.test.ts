@@ -97,6 +97,8 @@ vi.mock("@miladyai/app-core/components", async () => {
     ErrorBoundary: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
     Header: () => React.createElement("header", null, "Header"),
+    HeartbeatsDesktopShell: () =>
+      React.createElement("section", null, "HeartbeatsDesktopShell Ready"),
     HeartbeatsView: () =>
       React.createElement("section", null, "HeartbeatsView Ready"),
     InventoryView: () =>
@@ -170,6 +172,8 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
     React.createElement("aside", null, "CustomActionsPanel"),
   GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
   Header: () => React.createElement("header", null, "Header"),
+  HeartbeatsDesktopShell: () =>
+    React.createElement("section", null, "HeartbeatsDesktopShell Ready"),
   HeartbeatsView: () =>
     React.createElement("section", null, "HeartbeatsView Ready"),
   InventoryView: () =>
@@ -449,6 +453,8 @@ function makeState(overrides?: Partial<HarnessState>): HarnessState {
     startupPhase: "ready",
     startupStatus: "ready",
     startupError: null,
+    startupCoordinator: { phase: "ready" },
+    startupCoordinatorLegacyPhase: "ready" as const,
     retryStartup: vi.fn(),
     setActionNotice: vi.fn(),
     setTab: (tab: Tab) => {
@@ -514,7 +520,7 @@ function expectShellForTab(text: string, tab: Tab): void {
       case "connectors":
         return "ConnectorsPageView Ready";
       case "triggers":
-        return "HeartbeatsView Ready";
+        return "HeartbeatsDesktopShell Ready";
       case "apps":
         return "AppsPageView Ready";
       case "settings":

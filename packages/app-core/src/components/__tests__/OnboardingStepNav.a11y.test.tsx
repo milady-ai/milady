@@ -31,9 +31,9 @@ vi.mock("../../../config/branding", () => ({
 vi.mock("../../../onboarding/flow", () => ({
   getOnboardingNavMetas: () => [
     {
-      id: "cloud_login",
-      name: "onboarding.stepName.cloudLogin",
-      subtitle: "onboarding.stepSub.cloudLogin",
+      id: "identity",
+      name: "onboarding.stepName.identity",
+      subtitle: "onboarding.stepSub.identity",
     },
     {
       id: "hosting",
@@ -67,7 +67,7 @@ describe("OnboardingStepNav accessibility", () => {
     await act(async () => {
       tree = TestRenderer.create(<OnboardingStepNav />);
     });
-    // "hosting" is current (index=1), "cloud_login" is done (clickable → Button),
+    // "hosting" is current (index=1), "identity" is done (clickable → Button),
     // "hosting" and "activate" are non-clickable → li
     const items = tree?.root.findAll((node) => node.type === "li");
     expect(items?.length).toBeGreaterThanOrEqual(2); // hosting (active) + activate (future)
@@ -101,14 +101,14 @@ describe("OnboardingStepNav accessibility", () => {
     await act(async () => {
       tree = TestRenderer.create(<OnboardingStepNav />);
     });
-    // "cloud_login" is done (index 0 < currentIndex 1) → renders as Button
+    // "identity" is done (index 0 < currentIndex 1) → renders as Button
     const buttons = tree?.root.findAll(
       (node) => node.type === "button" && node.props["aria-label"],
     );
     expect(buttons?.length).toBeGreaterThanOrEqual(1);
     // Label should contain the step name and "completed"
     expect(buttons?.[0].props["aria-label"]).toContain(
-      "onboarding.stepName.cloudLogin",
+      "onboarding.stepName.identity",
     );
     expect(buttons?.[0].props["aria-label"]).toContain("onboarding.completed");
   });

@@ -124,7 +124,7 @@ describe("VrmStage", () => {
     );
   });
 
-  it("keeps the loader visible when avatar loading exceeds four seconds", async () => {
+  it("does not show a loader overlay when avatar loading exceeds four seconds", async () => {
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
@@ -138,6 +138,7 @@ describe("VrmStage", () => {
       vi.advanceTimersByTime(4_000);
     });
 
+    // VRM loads silently — no loading overlay or AvatarLoader rendered
     expect(renderer?.root.findAllByType("img")).toHaveLength(0);
     expect(
       renderer?.root.findAll(
@@ -146,7 +147,7 @@ describe("VrmStage", () => {
           Array.isArray(node.children) &&
           node.children.includes("AvatarLoader"),
       ),
-    ).toHaveLength(1);
+    ).toHaveLength(0);
   });
 
   it("shows the static preview only after a real avatar load error", async () => {

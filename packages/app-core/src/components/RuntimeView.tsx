@@ -3,8 +3,8 @@
  * a focused summary/detail pane.
  */
 
-import { Button, Input } from "@miladyai/ui";
-import { useCallback, useEffect, useState } from "react";
+import { Button, Input, PageLayoutHeader } from "@miladyai/ui";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import {
   client,
   type RuntimeDebugSnapshot,
@@ -396,7 +396,11 @@ function RuntimeSummaryCard(props: {
   );
 }
 
-export function RuntimeView() {
+export function RuntimeView({
+  contentHeader,
+}: {
+  contentHeader?: ReactNode;
+} = {}) {
   const { t } = useApp();
   const [snapshot, setSnapshot] = useState<RuntimeDebugSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
@@ -451,7 +455,6 @@ export function RuntimeView() {
     });
   }, []);
 
-  const runtimeAvailable = snapshot?.runtimeAvailable ?? false;
   const sectionMeta: Record<RuntimeSectionKey, string> = {
     summary: snapshot
       ? `${snapshot.meta.pluginCount + snapshot.meta.providerCount + snapshot.meta.evaluatorCount} signals`
@@ -640,6 +643,9 @@ export function RuntimeView() {
 
         <div className={RUNTIME_PANE_CLASSNAME}>
           <div className="flex min-h-0 flex-1 flex-col gap-4 p-3 lg:p-4">
+            {contentHeader ? (
+              <PageLayoutHeader>{contentHeader}</PageLayoutHeader>
+            ) : null}
             {error ? (
               <div className="rounded-[18px] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
                 {error}
@@ -663,28 +669,26 @@ export function RuntimeView() {
                 title={t("runtimeview.AgentRuntimeIsNot")}
               />
             ) : activeSection === "summary" ? (
-              <>
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  <OrderCard
-                    title={t("runtimeview.Plugins")}
-                    entries={snapshot.order.plugins}
-                  />
-                  <OrderCard
-                    title={t("runtimeview.Actions")}
-                    entries={snapshot.order.actions}
-                  />
-                  <OrderCard
-                    title={t("runtimeview.Providers")}
-                    entries={snapshot.order.providers}
-                  />
-                  <OrderCard
-                    title={t("runtimeview.Evaluators")}
-                    entries={snapshot.order.evaluators}
-                  />
-                  <ServicesOrderCard entries={snapshot.order.services} />
-                  <RuntimeSummaryCard snapshot={snapshot} t={t} />
-                </div>
-              </>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <OrderCard
+                  title={t("runtimeview.Plugins")}
+                  entries={snapshot.order.plugins}
+                />
+                <OrderCard
+                  title={t("runtimeview.Actions")}
+                  entries={snapshot.order.actions}
+                />
+                <OrderCard
+                  title={t("runtimeview.Providers")}
+                  entries={snapshot.order.providers}
+                />
+                <OrderCard
+                  title={t("runtimeview.Evaluators")}
+                  entries={snapshot.order.evaluators}
+                />
+                <ServicesOrderCard entries={snapshot.order.services} />
+                <RuntimeSummaryCard snapshot={snapshot} t={t} />
+              </div>
             ) : (
               <>
                 <section className={DESKTOP_PADDED_SURFACE_PANEL_CLASSNAME}>

@@ -280,11 +280,8 @@ describe("app startup routing (e2e)", () => {
       onboardingLoading: false,
       authRequired: false,
       onboardingComplete: true,
-      onboardingHandoffError: null,
-      onboardingHandoffPhase: "idle",
       tab: "chat",
       actionNotice: null,
-      cancelOnboardingHandoff: vi.fn(),
       setActionNotice: vi.fn(),
       plugins: [],
       conversations: [],
@@ -294,10 +291,11 @@ describe("app startup routing (e2e)", () => {
       unreadConversations: new Set(),
       activeGameViewerUrl: null,
       gameOverlayEnabled: false,
-      retryOnboardingHandoff: vi.fn(async () => {}),
       startupPhase: "ready",
       startupStatus: "ready",
       startupError: null,
+      startupCoordinator: { phase: "ready" },
+      startupCoordinatorLegacyPhase: "ready" as const,
       retryStartup: vi.fn(),
     });
   });
@@ -318,17 +316,9 @@ describe("app startup routing (e2e)", () => {
       let renderedText = textOf(tree.root);
 
       expect(renderedText).toContain("ChatView");
-      expect(renderedText).toContain("AvatarLoader");
+      // AvatarLoader was removed from VrmStage — VRM loads silently now
       expect(renderedText).not.toContain("OnboardingWizard");
       expect(renderedText).not.toContain("PairingView");
-
-      await act(async () => {
-        vi.advanceTimersByTime(801);
-      });
-
-      renderedText = textOf(tree.root);
-
-      expect(renderedText).not.toContain("AvatarLoader");
     } finally {
       vi.useRealTimers();
     }
@@ -340,11 +330,8 @@ describe("app startup routing (e2e)", () => {
       onboardingLoading: false,
       authRequired: false,
       onboardingComplete: true,
-      onboardingHandoffError: null,
-      onboardingHandoffPhase: "idle",
       tab: "wallets",
       actionNotice: null,
-      cancelOnboardingHandoff: vi.fn(),
       setActionNotice: vi.fn(),
       plugins: [],
       conversations: [],
@@ -354,10 +341,11 @@ describe("app startup routing (e2e)", () => {
       unreadConversations: new Set(),
       activeGameViewerUrl: null,
       gameOverlayEnabled: false,
-      retryOnboardingHandoff: vi.fn(async () => {}),
       startupPhase: "ready",
       startupStatus: "ready",
       startupError: null,
+      startupCoordinator: { phase: "ready" },
+      startupCoordinatorLegacyPhase: "ready" as const,
       retryStartup: vi.fn(),
     });
 

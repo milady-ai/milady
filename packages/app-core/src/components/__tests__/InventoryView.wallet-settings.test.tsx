@@ -8,76 +8,213 @@ const { mockUseApp } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
 }));
 
+type SidebarHeaderSearchProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  clearLabel?: string;
+  loading?: boolean;
+  onClear?: () => void;
+};
+
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => mockUseApp(),
 }));
 
 vi.mock("@miladyai/ui", () => ({
+  PageLayout: ({
+    sidebar,
+    children,
+    contentHeader,
+    ...props
+  }: Record<string, unknown>) =>
+    React.createElement(
+      "div",
+      props,
+      sidebar as React.ReactNode,
+      contentHeader as React.ReactNode,
+      children as React.ReactNode,
+    ),
+  PagePanel: Object.assign(
+    (props: Record<string, unknown>) =>
+      React.createElement("div", props, props.children as React.ReactNode),
+    {
+      Empty: (props: Record<string, unknown>) =>
+        React.createElement("div", props, props.children as React.ReactNode),
+      Notice: (props: Record<string, unknown>) =>
+        React.createElement("div", props, props.children as React.ReactNode),
+      Frame: (props: Record<string, unknown>) =>
+        React.createElement("div", props, props.children as React.ReactNode),
+      ContentArea: (props: Record<string, unknown>) =>
+        React.createElement("div", props, props.children as React.ReactNode),
+    },
+  ),
+  Sidebar: ({ header, footer, children, ...props }: Record<string, unknown>) =>
+    React.createElement(
+      "aside",
+      props,
+      header as React.ReactNode,
+      children as React.ReactNode,
+      footer as React.ReactNode,
+    ),
+  SidebarHeader: ({
+    search,
+    children,
+    ...props
+  }: {
+    search?: SidebarHeaderSearchProps;
+    children?: React.ReactNode;
+  }) => {
+    const { clearLabel, loading, onClear, ...inputProps } = search ?? {};
+    void clearLabel;
+    void loading;
+    void onClear;
+
+    return React.createElement(
+      "div",
+      props,
+      search ? React.createElement("input", inputProps) : null,
+      children,
+    );
+  },
+  SidebarHeaderStack: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  SidebarPanel: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  SidebarScrollRegion: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  SidebarFilterBar: ({
+    selectValue,
+    selectOptions,
+    onSelectValueChange,
+    onSortDirectionToggle,
+    onRefresh,
+    selectTestId,
+    sortDirectionButtonTestId,
+    refreshButtonTestId,
+    ...props
+  }: Record<string, unknown>) =>
+    React.createElement(
+      "div",
+      props,
+      React.createElement("mock-select", {
+        value: selectValue,
+        "data-testid": selectTestId,
+        onChange: (event: { target: { value: string } }) =>
+          typeof onSelectValueChange === "function" &&
+          onSelectValueChange(event.target.value),
+      }),
+      ...(Array.isArray(selectOptions)
+        ? selectOptions.map((option) =>
+            React.createElement(
+              "mock-option",
+              { key: option.value, value: option.value },
+              option.label as React.ReactNode,
+            ),
+          )
+        : []),
+      React.createElement(
+        "button",
+        {
+          type: "button",
+          "data-testid": sortDirectionButtonTestId,
+          onClick: () =>
+            typeof onSortDirectionToggle === "function" &&
+            onSortDirectionToggle(),
+        },
+        "sort",
+      ),
+      React.createElement(
+        "button",
+        {
+          type: "button",
+          "data-testid": refreshButtonTestId,
+          onClick: () => typeof onRefresh === "function" && onRefresh(),
+        },
+        "refresh",
+      ),
+    ),
+  TooltipHint: ({ children, ...props }: Record<string, unknown>) =>
+    React.createElement("div", props, children as React.ReactNode),
+  SidebarSearchBar: (props: Record<string, unknown>) =>
+    React.createElement("input", props),
+  SegmentedControl: ({
+    items,
+    onValueChange,
+    ...props
+  }: Record<string, unknown>) =>
+    React.createElement(
+      "div",
+      props,
+      ...(Array.isArray(items)
+        ? items.map((item) =>
+            React.createElement(
+              "button",
+              {
+                key: item.value,
+                type: "button",
+                "data-testid": item.testId,
+                onClick: () =>
+                  typeof onValueChange === "function" &&
+                  onValueChange(item.value),
+              },
+              item.label as React.ReactNode,
+              item.badge as React.ReactNode,
+            ),
+          )
+        : []),
+    ),
+  SidebarContent: {
+    SectionLabel: (props: Record<string, unknown>) =>
+      React.createElement("div", props, props.children as React.ReactNode),
+    Toolbar: (props: Record<string, unknown>) =>
+      React.createElement("div", props, props.children as React.ReactNode),
+    ToolbarPrimary: (props: Record<string, unknown>) =>
+      React.createElement("div", props, props.children as React.ReactNode),
+    ToolbarActions: (props: Record<string, unknown>) =>
+      React.createElement("div", props, props.children as React.ReactNode),
+  },
   Button: (props: Record<string, unknown>) =>
     React.createElement(
       "button",
       { type: "button", ...props },
       props.children as React.ReactNode,
     ),
+  Dialog: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  DialogContent: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  DialogHeader: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  DialogTitle: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  Spinner: () => React.createElement("span", { "aria-label": "loading" }),
+  ConfirmDialog: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
+  Label: (props: Record<string, unknown>) =>
+    React.createElement("label", props, props.children as React.ReactNode),
+  Slider: (props: Record<string, unknown>) =>
+    React.createElement("input", { type: "range", ...props }),
+  Switch: (props: Record<string, unknown>) =>
+    React.createElement("button", {
+      type: "button",
+      role: "switch",
+      ...props,
+    }),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+    React.createElement("input", props),
   Select: (props: Record<string, unknown>) =>
-    React.createElement(
-      "mock-select",
-      props,
-      props.children as React.ReactNode,
-    ),
-  SelectTrigger: (props: Record<string, unknown>) =>
-    React.createElement(
-      "button",
-      { type: "button", ...props },
-      props.children as React.ReactNode,
-    ),
+    React.createElement("div", props, props.children as React.ReactNode),
   SelectContent: (props: Record<string, unknown>) =>
     React.createElement("div", props, props.children as React.ReactNode),
   SelectItem: (props: Record<string, unknown>) =>
-    React.createElement(
-      "mock-option",
-      props,
-      props.children as React.ReactNode,
-    ),
-  SelectValue: (props: Record<string, unknown>) =>
-    React.createElement("span", props, props.children as React.ReactNode),
-  Tooltip: (props: Record<string, unknown>) =>
-    React.createElement(
-      React.Fragment,
-      null,
-      props.children as React.ReactNode,
-    ),
-  TooltipContent: (props: Record<string, unknown>) =>
+    React.createElement("option", props, props.children as React.ReactNode),
+  SelectTrigger: (props: Record<string, unknown>) =>
     React.createElement("div", props, props.children as React.ReactNode),
-  TooltipProvider: (props: Record<string, unknown>) =>
-    React.createElement(
-      React.Fragment,
-      null,
-      props.children as React.ReactNode,
-    ),
-  TooltipTrigger: (props: Record<string, unknown>) =>
-    React.createElement(
-      React.Fragment,
-      null,
-      props.children as React.ReactNode,
-    ),
+  SelectValue: (props: Record<string, unknown>) =>
+    React.createElement("div", props, props.children as React.ReactNode),
 }));
 
 vi.mock("../BscTradePanel", () => ({
   TradePanel: () =>
     React.createElement("div", { "data-testid": "trade-panel" }),
-}));
-
-vi.mock("../desktop-surface-primitives", () => ({
-  DESKTOP_PAGE_CONTENT_CLASSNAME: "page-content",
-  DESKTOP_RAIL_SUMMARY_CARD_CLASSNAME: "summary-card",
-  DESKTOP_SURFACE_PANEL_CLASSNAME: "surface-panel",
-  DesktopPageFrame: (props: Record<string, unknown>) =>
-    React.createElement(
-      "div",
-      { "data-testid": "desktop-page-frame" },
-      props.children as React.ReactNode,
-    ),
 }));
 
 vi.mock("../inventory/NftGrid", () => ({
@@ -227,6 +364,11 @@ function createContext(
     },
     walletError: null,
     elizaCloudConnected: false,
+    elizaCloudCredits: null,
+    elizaCloudCreditsLow: false,
+    elizaCloudCreditsCritical: false,
+    elizaCloudAuthRejected: false,
+    elizaCloudTopUpUrl: null,
     loadBalances: vi.fn(async () => {}),
     loadNfts: vi.fn(async () => {}),
     setTab: vi.fn(),
@@ -269,11 +411,6 @@ describe("InventoryView wallet settings", () => {
     );
     expect(sortSelect).toBeTruthy();
 
-    const assetsHeader = tree?.root.find(
-      (node) => node.props["data-testid"] === "wallet-assets-header",
-    );
-    expect(assetsHeader).toBeTruthy();
-
     // No overview card, funding route pill, or summary sort pill
     expect(
       tree?.root.findAll(
@@ -292,14 +429,14 @@ describe("InventoryView wallet settings", () => {
     ).toHaveLength(0);
 
     await act(async () => {
-      sortSelect?.props.onValueChange("chain");
+      sortSelect?.props.onChange({ target: { value: "chain" } });
     });
 
     expect(ctx.setState).toHaveBeenCalledWith("inventorySort", "chain");
     expect(ctx.setState).toHaveBeenCalledWith("inventorySortDirection", "asc");
   });
 
-  it("hides the sort control in NFT view", async () => {
+  it("renders the shared sort control in NFT view", async () => {
     const ctx = createContext({ inventoryView: "nfts" });
     mockUseApp.mockImplementation(() => ctx);
 
@@ -308,18 +445,15 @@ describe("InventoryView wallet settings", () => {
       tree = TestRenderer.create(<InventoryView />);
     });
 
-    expect(
-      tree?.root.findAll(
-        (node) =>
-          node.type === "button" &&
-          node.props["data-testid"] === "wallet-sort-select",
-      ),
-    ).toHaveLength(0);
-    expect(
-      tree?.root.findAll(
-        (node) => node.props["data-testid"] === "wallet-sidebar-sort-block",
-      ),
-    ).toHaveLength(0);
+    const sidebarSortBlock = tree?.root.find(
+      (node) => node.props["data-testid"] === "wallet-sidebar-sort-block",
+    );
+    expect(sidebarSortBlock).toBeTruthy();
+
+    const sortSelect = sidebarSortBlock?.find(
+      (node) => node.type === "mock-select" && node.props.value === "symbol",
+    );
+    expect(sortSelect).toBeTruthy();
   });
 
   it("keeps the simplified wallet shell and interactive chain icon grid", async () => {
@@ -332,7 +466,11 @@ describe("InventoryView wallet settings", () => {
     });
 
     // Wallet Overview heading is removed
-    expect(JSON.stringify(tree?.toJSON())).not.toContain("Wallet Overview");
+    expect(
+      JSON.stringify(tree?.toJSON(), (_key, value) =>
+        typeof value === "function" ? "[function]" : value,
+      ),
+    ).not.toContain("Wallet Overview");
     expect(
       tree?.root.findAll((node) => node.children.includes("WALLET")),
     ).toHaveLength(0);

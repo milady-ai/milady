@@ -1,7 +1,12 @@
 import { resolveApiUrl, resolveAppAssetUrl } from "@miladyai/app-core/utils";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { setBootConfig } from "@miladyai/app-core/config";
 
 describe("resolveAppAssetUrl", () => {
+  beforeEach(() => {
+    setBootConfig({ branding: {} });
+  });
+
   it("returns root-relative path when runtime URL context is unavailable", () => {
     expect(resolveAppAssetUrl("vrms/1.vrm")).toBe("/vrms/1.vrm");
     expect(resolveAppAssetUrl("/vrms/previews/milady-1.png")).toBe(
@@ -16,6 +21,28 @@ describe("resolveAppAssetUrl", () => {
     expect(resolveAppAssetUrl("data:text/plain,ok")).toBe("data:text/plain,ok");
     expect(resolveAppAssetUrl("https://cdn.example.com/a.vrm")).toBe(
       "https://cdn.example.com/a.vrm",
+    );
+  });
+
+  it("prefers the configured CDN asset base for relative asset paths", () => {
+    setBootConfig({
+      branding: {},
+      assetBaseUrl:
+        "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/",
+    });
+    expect(resolveAppAssetUrl("vrms/1.vrm")).toBe(
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/vrms/1.vrm",
+    );
+  });
+
+  it("resolves .spz files through the same raw GitHub base as all other assets", () => {
+    setBootConfig({
+      branding: {},
+      assetBaseUrl:
+        "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/",
+    });
+    expect(resolveAppAssetUrl("worlds/companion-day.spz")).toBe(
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/worlds/companion-day.spz",
     );
   });
 
@@ -42,8 +69,6 @@ describe("resolveAppAssetUrl", () => {
 // ---------------------------------------------------------------------------
 // resolveApiUrl()
 // ---------------------------------------------------------------------------
-import { setBootConfig } from "@miladyai/app-core/config";
-import { beforeEach } from "vitest";
 
 describe("resolveApiUrl", () => {
   beforeEach(() => {

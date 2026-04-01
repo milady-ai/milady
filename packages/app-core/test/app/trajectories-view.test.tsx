@@ -53,17 +53,186 @@ vi.mock("@miladyai/ui", () => ({
     children: React.ReactNode;
     onClick?: () => void;
   }) => React.createElement("button", { type: "button", onClick }, children),
-  Input: ({
-    value,
-    onChange,
-    ...rest
+  PageLayout: ({
+    children,
+    sidebar,
+    contentHeader,
+    ...props
   }: {
-    value?: string;
-    onChange?: (event: { target: { value: string } }) => void;
-    type?: string;
-    placeholder?: string;
-    className?: string;
-  }) => React.createElement("input", { value, onChange, ...rest }),
+    children: React.ReactNode;
+    sidebar: React.ReactNode;
+    contentHeader?: React.ReactNode;
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement(
+      "div",
+      props,
+      sidebar,
+      contentHeader
+        ? React.createElement(
+            "div",
+            { "data-testid": "trajectories-content-header" },
+            contentHeader,
+          )
+        : null,
+      children,
+    ),
+  PagePanel: Object.assign(
+    ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode;
+    } & React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    {
+      Header: ({
+        heading,
+        description,
+        actions,
+        ...props
+      }: {
+        heading: React.ReactNode;
+        description?: React.ReactNode;
+        actions?: React.ReactNode;
+      } & React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement(
+          "div",
+          props,
+          heading,
+          description ?? null,
+          actions ?? null,
+        ),
+      Meta: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) =>
+        React.createElement("span", props, children),
+      Notice: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", props, children),
+      Empty: ({
+        title,
+        description,
+        children,
+        ...props
+      }: {
+        title?: React.ReactNode;
+        description?: React.ReactNode;
+        children?: React.ReactNode;
+      } & React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement(
+          "div",
+          props,
+          title ?? null,
+          description ?? null,
+          children ?? null,
+        ),
+      Loading: ({
+        heading,
+        description,
+        ...props
+      }: {
+        heading: React.ReactNode;
+        description?: React.ReactNode;
+      } & React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", props, heading, description ?? null),
+    },
+  ),
+  Sidebar: ({
+    children,
+    testId,
+    ...props
+  }: {
+    children: React.ReactNode;
+    testId?: string;
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("aside", { "data-testid": testId, ...props }, children),
+  SidebarHeader: ({
+    children,
+    search,
+    ...props
+  }: {
+    children?: React.ReactNode;
+    search?: React.InputHTMLAttributes<HTMLInputElement> & {
+      onClear?: () => void;
+    };
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement(
+      "div",
+      props,
+      search
+        ? React.createElement("input", {
+            value: search.value,
+            onChange: search.onChange,
+            placeholder: search.placeholder,
+            "aria-label": search["aria-label"],
+          })
+        : null,
+      children ?? null,
+    ),
+  SidebarPanel: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
+  SidebarScrollRegion: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
+  SidebarContent: {
+    Toolbar: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    ToolbarActions: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    SectionHeader: ({
+      children,
+      meta,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & { meta?: React.ReactNode }) =>
+      React.createElement("div", props, children, meta ?? null),
+    SectionLabel: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    EmptyState: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    Item: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    ItemIcon: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+    ItemBody: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+    ItemTitle: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+    ItemDescription: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+  },
+  TrajectorySidebarItem: ({
+    title,
+    onSelect,
+    ...props
+  }: {
+    title: React.ReactNode;
+    onSelect?: () => void;
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement(
+      "button",
+      { type: "button", onClick: onSelect, ...props },
+      title,
+    ),
   Select: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", null, children),
   SelectTrigger: ({ children }: { children: React.ReactNode }) =>

@@ -11,26 +11,19 @@
  *   - Logs: Runtime log viewer
  */
 
-import { Button } from "@miladyai/ui";
+import { Button, SegmentedControl } from "@miladyai/ui";
 import type React from "react";
 import { useState } from "react";
 import type { Tab } from "../navigation";
 import { useApp } from "../state";
 import { DatabasePageView } from "./DatabasePageView";
 import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
-import {
-  DESKTOP_PAGE_CONTENT_CLASSNAME,
-  DESKTOP_SEGMENTED_GROUP_CLASSNAME,
-  DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME,
-  DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME,
-  DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME,
-} from "./desktop-surface-primitives";
 import { FineTuningView } from "./FineTuningView";
 import { LogsPageView } from "./LogsPageView";
 import { PluginsPageView } from "./PluginsPageView";
 import { RuntimeView } from "./RuntimeView";
-import { SkillsView } from "./SkillsView";
 import { SecretsView } from "./SecretsView";
+import { SkillsView } from "./SkillsView";
 import { TrajectoriesView } from "./TrajectoriesView";
 
 type SubTab =
@@ -107,14 +100,6 @@ const MODAL_SUB_TABS = SUB_TABS.filter(
 
 const ADVANCED_TAB_BUTTON_RESET_CLASSNAME =
   "select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none";
-const ADVANCED_SHELL_NAV_SURFACE_CLASSNAME = "mb-3 shrink-0";
-const ADVANCED_SHELL_NAV_SCROLL_CLASSNAME =
-  "flex gap-1.5 overflow-x-auto overflow-y-hidden pr-2";
-const ADVANCED_TAB_BUTTON_BASE_CLASSNAME = `${ADVANCED_TAB_BUTTON_RESET_CLASSNAME} ${DESKTOP_SEGMENTED_ITEM_BASE_CLASSNAME} group shrink-0 text-left transition-all duration-150`;
-const ADVANCED_TAB_BUTTON_ACTIVE_CLASSNAME =
-  DESKTOP_SEGMENTED_ITEM_ACTIVE_CLASSNAME;
-const ADVANCED_TAB_BUTTON_INACTIVE_CLASSNAME =
-  DESKTOP_SEGMENTED_ITEM_INACTIVE_CLASSNAME;
 
 function mapTabToSubTab(tab: Tab): SubTab {
   switch (tab) {
@@ -149,11 +134,25 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
 
   const currentSubTab = mapTabToSubTab(tab);
   const tabs = inModal ? MODAL_SUB_TABS : SUB_TABS;
-
   const handleSubTabChange = (subTab: SubTab) => {
     setSelectedTrajectoryId(null);
     setTab(subTab as Tab);
   };
+  const advancedSubTabItems = tabs.map((subTab) => ({
+    value: subTab.id,
+    label: t(subTab.labelKey),
+    testId: `advanced-subtab-${subTab.id}`,
+  }));
+  const advancedContentHeader = inModal ? undefined : (
+    <SegmentedControl
+      value={currentSubTab}
+      onValueChange={handleSubTabChange}
+      items={advancedSubTabItems}
+      buttonClassName="min-h-9 whitespace-nowrap px-3 py-2.5"
+      data-testid="advanced-subtab-nav"
+      aria-label={t("aria.advancedNavigation")}
+    />
+  );
 
   const renderSubTabButton = (
     subTab: { id: SubTab; labelKey: string; descriptionKey: string },
@@ -169,14 +168,12 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         variant="ghost"
         key={subTab.id}
         aria-current={isActive ? "page" : undefined}
-        className={`${ADVANCED_TAB_BUTTON_BASE_CLASSNAME} ${
-          compact
-            ? "items-center px-3 py-2.5"
-            : "min-h-9 items-center whitespace-nowrap px-2.5 py-1.5"
+        className={`${ADVANCED_TAB_BUTTON_RESET_CLASSNAME} inline-flex select-none items-center rounded-xl border transition-all duration-150 ${
+          compact ? "px-3 py-2.5" : "min-h-9 whitespace-nowrap px-2.5 py-1.5"
         } ${
           isActive
-            ? ADVANCED_TAB_BUTTON_ACTIVE_CLASSNAME
-            : ADVANCED_TAB_BUTTON_INACTIVE_CLASSNAME
+            ? "border-accent/26 bg-accent/14 text-txt-strong shadow-sm"
+            : "border-transparent text-muted-strong hover:bg-card/60 hover:text-txt"
         }`}
         onClick={() => handleSubTabChange(subTab.id)}
         title={description}
@@ -200,30 +197,33 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
       // case "actions":
       //   return <CustomActionsView />;
       case "plugins":
-        return <PluginsPageView />;
+        return <PluginsPageView contentHeader={advancedContentHeader} />;
       case "skills":
-        return <SkillsView />;
+        return <SkillsView contentHeader={advancedContentHeader} />;
       case "fine-tuning":
-        return <FineTuningView />;
+        return <FineTuningView contentHeader={advancedContentHeader} />;
       case "trajectories":
         return (
           <TrajectoriesView
+            contentHeader={advancedContentHeader}
             selectedTrajectoryId={selectedTrajectoryId}
             onSelectTrajectory={setSelectedTrajectoryId}
           />
         );
       case "runtime":
-        return <RuntimeView />;
+        return <RuntimeView contentHeader={advancedContentHeader} />;
       case "database":
-        return <DatabasePageView />;
+        return <DatabasePageView contentHeader={advancedContentHeader} />;
       case "desktop":
-        return <DesktopWorkspaceSection />;
+        return (
+          <DesktopWorkspaceSection contentHeader={advancedContentHeader} />
+        );
       case "logs":
-        return <LogsPageView />;
+        return <LogsPageView contentHeader={advancedContentHeader} />;
       case "security":
         return <SecretsView />;
       default:
-        return <PluginsPageView />;
+        return <PluginsPageView contentHeader={advancedContentHeader} />;
     }
   };
 
@@ -237,21 +237,11 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         <nav className="settings-icon-sidebar">
           {tabs.map((subTab) => renderSubTabButton(subTab, { compact: true }))}
         </nav>
-      ) : (
-        <div className={ADVANCED_SHELL_NAV_SURFACE_CLASSNAME}>
-          <nav
-            className={`${DESKTOP_SEGMENTED_GROUP_CLASSNAME} ${ADVANCED_SHELL_NAV_SCROLL_CLASSNAME}`}
-            aria-label={t("aria.advancedNavigation")}
-            data-testid="advanced-subtab-nav"
-          >
-            {tabs.map((subTab) => renderSubTabButton(subTab))}
-          </nav>
-        </div>
-      )}
+      ) : null}
 
       <div
         className={
-          inModal ? "settings-content-area" : DESKTOP_PAGE_CONTENT_CLASSNAME
+          inModal ? "settings-content-area" : "flex min-h-0 flex-1 flex-col"
         }
         style={
           inModal

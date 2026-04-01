@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 const EACCES_VIEW_PATTERN =
@@ -89,4 +91,32 @@ export function buildWindowsRepairSteps() {
     "4. From repo root, run: bun install --frozen-lockfile",
     "5. Retry: bun run start:desktop",
   ];
+}
+
+export function resolveWorkspacePackageManifestPath(workspaceDir, packageName) {
+  const req = createRequire(path.join(workspaceDir, "package.json"));
+  let resolvedEntry;
+  try {
+    resolvedEntry = req.resolve(packageName);
+  } catch {
+    return null;
+  }
+
+  let dir = path.dirname(resolvedEntry);
+  while (dir !== path.dirname(dir)) {
+    const manifestPath = path.join(dir, "package.json");
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        if (manifest?.name === packageName) {
+          return manifestPath;
+        }
+      } catch {
+        return manifestPath;
+      }
+    }
+    dir = path.dirname(dir);
+  }
+
+  return null;
 }

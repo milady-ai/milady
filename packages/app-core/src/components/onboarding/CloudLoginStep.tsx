@@ -27,7 +27,6 @@ const errorCardClass = `${statusCardClass} border-[color:color-mix(in_srgb,var(-
 export function CloudLoginStep() {
   const branding = useBranding();
   const {
-    onboardingStep,
     elizaCloudConnected,
     elizaCloudLoginBusy,
     elizaCloudLoginError,
@@ -39,15 +38,11 @@ export function CloudLoginStep() {
 
   const advancedRef = useRef(false);
   useEffect(() => {
-    if (
-      elizaCloudConnected &&
-      onboardingStep === "cloud_login" &&
-      !advancedRef.current
-    ) {
+    if (elizaCloudConnected && !advancedRef.current) {
       advancedRef.current = true;
       void handleOnboardingNext();
     }
-  }, [elizaCloudConnected, onboardingStep, handleOnboardingNext]);
+  }, [elizaCloudConnected, handleOnboardingNext]);
 
   return (
     <>

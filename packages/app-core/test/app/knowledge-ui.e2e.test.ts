@@ -538,7 +538,6 @@ describe("KnowledgeView UI", () => {
     const documentButtons =
       tree?.root.findAll(
         (node) =>
-          node.type === "button" &&
           typeof node.props["aria-label"] === "string" &&
           node.props["aria-label"].startsWith("Open "),
       ) ?? [];
@@ -587,14 +586,13 @@ describe("KnowledgeView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("keeps yellow knowledge action buttons on a dark foreground", async () => {
+  it("keeps the current knowledge action buttons readable", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
       tree = TestRenderer.create(React.createElement(KnowledgeView));
     });
 
-    const searchForm = tree?.root.findAllByType("form")[0];
     const allText = JSON.stringify(tree?.toJSON());
     const flattenText = (value: React.ReactNode): string => {
       if (typeof value === "string" || typeof value === "number") {
@@ -609,17 +607,61 @@ describe("KnowledgeView UI", () => {
       return "";
     };
     const buttons = tree?.root.findAllByType("button") ?? [];
-    const searchButton = buttons.find(
+    const deleteButton = buttons.find(
       (node) =>
-        flattenText(node.props.children) === "knowledge.ui.search" &&
+        flattenText(node.props.children) === "Delete" &&
         typeof node.props.className === "string",
     );
-    expect(allText).not.toContain("knowledgeview.ChooseFolder");
-    expect(allText).not.toContain("knowledgeview.ChooseFiles");
-    expect(allText).toContain("knowledge.ui.search");
-    expect(searchForm?.props.className).toContain("max-w-[500px]");
-    expect(searchButton?.props.className).toContain("h-10");
-    expect(searchButton?.props.className).toContain("text-txt");
+    const collapseSidebarButton = buttons.find(
+      (node) =>
+        node.props["aria-label"] === "Collapse sidebar" &&
+        typeof node.props.className === "string",
+    );
+    const sidebarSearch = tree?.root.findAll(
+      (node) =>
+        node.type === "input" &&
+        String(node.props.placeholder ?? "").includes(
+          "knowledge.ui.searchPlaceholder",
+        ),
+    );
+
+    expect(allText).toContain("README.md");
+    expect(sidebarSearch.length).toBeGreaterThan(0);
+    expect(deleteButton?.props.className).toContain("h-7");
+    expect(deleteButton?.props.className).toContain("text-danger");
+    expect(collapseSidebarButton?.props.className).toContain(
+      "text-muted-strong",
+    );
+  });
+
+  it("renders a compact document rail when the knowledge sidebar collapses", async () => {
+    let tree: TestRenderer.ReactTestRenderer | null = null;
+
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(KnowledgeView));
+    });
+
+    const collapseSidebarButton = tree?.root.find(
+      (node) =>
+        node.type === "button" &&
+        node.props["aria-label"] === "Collapse sidebar",
+    );
+
+    await act(async () => {
+      collapseSidebarButton?.props.onClick();
+    });
+
+    const sidebar = tree?.root.findByProps({
+      "data-testid": "knowledge-sidebar",
+    });
+    expect(sidebar?.props["data-collapsed"]).toBe(true);
+    expect(
+      tree?.root.findAll(
+        (node) =>
+          typeof node.props?.["aria-label"] === "string" &&
+          node.props["aria-label"].includes("README.md"),
+      ).length,
+    ).toBeGreaterThan(0);
   });
 
   it("shows loading state when knowledgeLoading is true", async () => {

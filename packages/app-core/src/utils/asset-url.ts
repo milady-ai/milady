@@ -28,6 +28,10 @@ function isAlreadyAbsolute(assetPath: string): boolean {
   return /^[A-Za-z][A-Za-z0-9+.-]*:/.test(assetPath);
 }
 
+function normalizeBaseHref(baseHref: string): string {
+  return baseHref.endsWith("/") ? baseHref : `${baseHref}/`;
+}
+
 function inferBaseForUrl(url: URL): string {
   if (url.protocol !== "file:") return "/";
 
@@ -80,6 +84,18 @@ export function resolveAppAssetUrl(
 
   const normalized = stripLeadingPathMarkers(assetPath);
   if (!normalized) return normalized;
+
+  const configuredBaseUrl = getBootConfig().assetBaseUrl?.trim();
+  if (configuredBaseUrl) {
+    try {
+      return new URL(
+        normalized,
+        normalizeBaseHref(configuredBaseUrl),
+      ).toString();
+    } catch {
+      // Fall through to local runtime resolution when the configured CDN base is invalid.
+    }
+  }
 
   if (options?.currentUrl) {
     try {

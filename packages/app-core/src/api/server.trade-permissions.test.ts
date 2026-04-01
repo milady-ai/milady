@@ -10,7 +10,7 @@ import type { ElizaConfig } from "../config/config";
 import {
   canUseLocalTradeExecution,
   resolveTradePermissionMode,
-} from "./server";
+} from "./server-wallet-trade";
 
 function makeConfig(tradePermissionMode: unknown): ElizaConfig {
   return {

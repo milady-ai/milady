@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { SearchInput } from "./search-input";
+import { SearchInput } from "../composites/search";
 
 describe("SearchInput", () => {
   it("renders input", () => {
@@ -15,12 +15,16 @@ describe("SearchInput", () => {
 
   it("shows clear button when value exists and onClear provided", () => {
     render(<SearchInput value="test" onClear={vi.fn()} onChange={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Clear search" }),
+    ).toBeInTheDocument();
   });
 
   it("does not show clear button when value is empty", () => {
     render(<SearchInput value="" onClear={vi.fn()} onChange={vi.fn()} />);
-    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Clear search" }),
+    ).not.toBeInTheDocument();
   });
 
   it("calls onClear", () => {

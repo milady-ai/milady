@@ -13,6 +13,219 @@ const { mockUseApp, mockLoadSkills, mockRefreshSkills } = vi.hoisted(() => ({
 vi.mock("@miladyai/ui", () => ({
   cn: (...classes: Array<string | false | null | undefined>) =>
     classes.filter(Boolean).join(" "),
+  PageLayout: ({
+    children,
+    sidebar,
+    contentHeader,
+    ...props
+  }: {
+    children: React.ReactNode;
+    sidebar: React.ReactNode;
+    contentHeader?: React.ReactNode;
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement(
+      "div",
+      { ...props },
+      sidebar,
+      contentHeader
+        ? React.createElement(
+            "div",
+            { "data-testid": "skills-content-header" },
+            contentHeader,
+          )
+        : null,
+      children,
+    ),
+  PagePanel: Object.assign(
+    ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode;
+    } & React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    {
+      Header: ({
+        heading,
+        description,
+        actions,
+        ...props
+      }: {
+        heading: React.ReactNode;
+        description?: React.ReactNode;
+        actions?: React.ReactNode;
+      } & React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement(
+          "div",
+          props,
+          heading,
+          description ?? null,
+          actions ?? null,
+        ),
+      Meta: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) =>
+        React.createElement("span", props, children),
+      Notice: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", props, children),
+      Empty: ({
+        title,
+        description,
+        action,
+        children,
+        ...props
+      }: {
+        title?: React.ReactNode;
+        description?: React.ReactNode;
+        action?: React.ReactNode;
+        children?: React.ReactNode;
+      } & React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement(
+          "div",
+          props,
+          title ?? null,
+          description ?? null,
+          children ?? null,
+          action ?? null,
+        ),
+      Loading: ({
+        heading,
+        description,
+        ...props
+      }: {
+        heading: React.ReactNode;
+        description?: React.ReactNode;
+      } & React.HTMLAttributes<HTMLDivElement>) =>
+        React.createElement("div", props, heading, description ?? null),
+    },
+  ),
+  Sidebar: ({
+    children,
+    testId,
+    ...props
+  }: {
+    children: React.ReactNode;
+    testId?: string;
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("aside", { "data-testid": testId, ...props }, children),
+  SidebarHeader: ({
+    children,
+    search,
+    ...props
+  }: {
+    children?: React.ReactNode;
+    search?: React.InputHTMLAttributes<HTMLInputElement> & {
+      onClear?: () => void;
+    };
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement(
+      "div",
+      props,
+      search
+        ? React.createElement("input", {
+            value: search.value,
+            onChange: search.onChange,
+            placeholder: search.placeholder,
+            "aria-label": search["aria-label"],
+          })
+        : null,
+      children ?? null,
+    ),
+  SidebarPanel: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
+  SidebarScrollRegion: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement("div", props, children),
+  SidebarContent: {
+    Toolbar: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    ToolbarPrimary: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    ToolbarActions: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    EmptyState: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
+    Item: ({
+      children,
+      as,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & {
+      as?: "div" | "button";
+    }) =>
+      as === "div"
+        ? React.createElement("div", props, children)
+        : React.createElement("button", { type: "button", ...props }, children),
+    ItemButton: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    ItemIcon: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+    ItemBody: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+    ItemTitle: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+    ItemDescription: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement>) =>
+      React.createElement("span", props, children),
+  },
+  SkillSidebarItem: ({
+    active,
+    name,
+    description,
+    testId,
+    onSelect,
+    ...props
+  }: {
+    active?: boolean;
+    name: React.ReactNode;
+    description?: React.ReactNode;
+    testId?: string;
+    onSelect?: () => void;
+  } & React.HTMLAttributes<HTMLDivElement>) =>
+    React.createElement(
+      "div",
+      { "data-testid": testId, ...props },
+      React.createElement(
+        "button",
+        {
+          type: "button",
+          onClick: onSelect,
+          "aria-current": active ? "page" : undefined,
+        },
+        name,
+        description ?? null,
+      ),
+    ),
+  ConfirmDelete: ({
+    onConfirm,
+    ...props
+  }: {
+    onConfirm: () => void;
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+    React.createElement(
+      "button",
+      { type: "button", onClick: onConfirm, ...props },
+      "delete",
+    ),
   Button: ({
     children,
     ...props
@@ -136,15 +349,10 @@ describe("SkillsView", () => {
     expect(
       tree.root.findByProps({ "data-testid": "skills-shell" }),
     ).toBeTruthy();
-    const skillsShell = tree.root.findByProps({
-      "data-testid": "skills-shell",
-    });
     const skillsSidebar = tree.root.findByProps({
       "data-testid": "skills-sidebar",
     });
     expect(skillsSidebar).toBeTruthy();
-    expect(String(skillsShell.props.className)).toContain("flex-col");
-    expect(String(skillsSidebar.props.className)).toContain("w-full");
     expect(
       tree.root.findByProps({ "data-testid": "skills-empty-state" }),
     ).toBeTruthy();

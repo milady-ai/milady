@@ -4,6 +4,7 @@ import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateStaticAssetManifest } from "./lib/static-asset-manifest.mjs";
 
 type PackFile = { path: string };
 type PackResult = { files?: PackFile[] };
@@ -41,6 +42,9 @@ const requiredWorkflowSnippets = [
   "run: bun run test:live:cloud",
   "name: Restore build metadata after test rebuilds",
   "name: Release readiness checks",
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
+  "MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}",
+  'MILADY_VALIDATE_CDN: "1"',
   "run: bun run release:check",
   "for attempt in 1 2 3; do",
   `bun install failed on attempt \${attempt}; retrying in 15 seconds`,
@@ -1002,6 +1006,30 @@ function assertStartApiServerCatchBlockSafety() {
   }
 }
 
+function maybeValidateCdnAssets() {
+  if (process.env.MILADY_VALIDATE_CDN !== "1") {
+    return;
+  }
+
+  execSync("node scripts/validate-cdn-assets.mjs", {
+    stdio: "inherit",
+    env: process.env,
+  });
+}
+
+function assertStaticAssetManifestIsCurrent() {
+  const result = validateStaticAssetManifest(process.cwd());
+  if (result.ok) {
+    return;
+  }
+
+  console.error(
+    `release-check: static asset manifest is ${result.reason}. Run node scripts/generate-static-asset-manifest.mjs.`,
+  );
+  console.error(`  - ${result.manifestPath}`);
+  process.exit(1);
+}
+
 function main() {
   assertReleaseWorkflowHasNotaryWrapper();
   assertElectrobunPrWorkflowExists();
@@ -1014,6 +1042,8 @@ function main() {
   assertMacSmokeScriptLaunchesPackagedLauncherDirectly();
   assertServerDynamicHyperscapeImport();
   assertStartApiServerCatchBlockSafety();
+  assertStaticAssetManifestIsCurrent();
+  maybeValidateCdnAssets();
   assertBundledAgentOrchestratorInstallFix();
   assertOrchestratorVersionPinned();
   assertCloudAgentTemplateDependenciesPinned();
