@@ -5,17 +5,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  PageLayoutHeader,
   Textarea,
 } from "@miladyai/ui";
 import { Monitor, RefreshCw } from "lucide-react";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../bridge";
 import { useApp } from "../state";
 import { copyTextToClipboard } from "../utils/clipboard";
@@ -233,11 +226,7 @@ function renderPathList(
   );
 }
 
-export function DesktopWorkspaceSection({
-  contentHeader,
-}: {
-  contentHeader?: ReactNode;
-} = {}) {
+export function DesktopWorkspaceSection() {
   const desktopRuntime = isElectrobunRuntime();
   const { relaunchDesktop, restartBackend, t } = useApp();
   const [snapshot, setSnapshot] = useState<DesktopWorkspaceSnapshot | null>(
@@ -351,9 +340,6 @@ export function DesktopWorkspaceSection({
 
   return (
     <div className="space-y-6">
-      {contentHeader ? (
-        <PageLayoutHeader>{contentHeader}</PageLayoutHeader>
-      ) : null}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
           variant="outline"

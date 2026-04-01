@@ -23,18 +23,18 @@
   /* Borders */
   --border: #dce1e7;
   --border-strong: #ced6df;
-  --border-hover: #7a9a3a;
+  --border-hover: #f0b90b;
   --input: #d6dee7;
-  --ring: #7a9a3a;
+  --ring: #f0b90b;
 
   /* Accent */
-  --accent: #7a9a3a;
-  --accent-rgb: 122, 154, 58;
-  --accent-hover: #8aaa48;
-  --accent-muted: #5a6e2e;
-  --accent-subtle: rgba(122, 154, 58, 0.12);
+  --accent: #f0b90b;
+  --accent-rgb: 240, 185, 11;
+  --accent-hover: #f3ba2f;
+  --accent-muted: #d8a000;
+  --accent-subtle: rgba(240, 185, 11, 0.12);
   --accent-foreground: #1a1f26;
-  --primary: #7a9a3a;
+  --primary: #f0b90b;
   --primary-foreground: #1a1f26;
 
   /* Status */
@@ -44,11 +44,11 @@
   --destructive: #f6465d;
   --destructive-foreground: #ffffff;
   --destructive-subtle: rgba(246, 70, 93, 0.12);
-  --warn: #7a9a3a;
-  --warn-muted: rgba(122, 154, 58, 0.72);
-  --warn-subtle: rgba(122, 154, 58, 0.12);
+  --warn: #f0b90b;
+  --warn-muted: rgba(240, 185, 11, 0.72);
+  --warn-subtle: rgba(240, 185, 11, 0.12);
   --danger: #f6465d;
-  --info: #7a9a3a;
+  --info: #f0b90b;
 
   /* Status semantic aliases */
   --status-success: var(--ok);
@@ -60,16 +60,16 @@
   --status-info: #3b82f6;
   --status-info-bg: rgba(59, 130, 246, 0.12);
 
-  --focus: rgba(122, 154, 58, 0.16);
-  --focus-ring: 0 0 0 2px rgba(122, 154, 58, 0.42);
+  --focus: rgba(240, 185, 11, 0.16);
+  --focus-ring: 0 0 0 2px rgba(240, 185, 11, 0.42);
   --scrollbar-track: #edf1f4;
-  --scrollbar-thumb-start: rgba(122, 154, 58, 0.42);
-  --scrollbar-thumb-mid: rgba(122, 154, 58, 0.58);
+  --scrollbar-thumb-start: rgba(240, 185, 11, 0.42);
+  --scrollbar-thumb-mid: rgba(240, 185, 11, 0.58);
   --scrollbar-thumb-end: rgba(216, 160, 0, 0.66);
-  --scrollbar-thumb-hover-start: rgba(122, 154, 58, 0.56);
-  --scrollbar-thumb-hover-mid: rgba(122, 154, 58, 0.7);
+  --scrollbar-thumb-hover-start: rgba(240, 185, 11, 0.56);
+  --scrollbar-thumb-hover-mid: rgba(240, 185, 11, 0.7);
   --scrollbar-thumb-hover-end: rgba(216, 160, 0, 0.78);
-  --scrollbar-thumb-edge: rgba(122, 154, 58, 0.12);
+  --scrollbar-thumb-edge: rgba(240, 185, 11, 0.12);
 
   /* Header */
   --header-bar-bg: #fcfdfd;
@@ -138,17 +138,17 @@
 
   --border: #232329;
   --border-strong: #313136;
-  --border-hover: #7a9a3a;
+  --border-hover: #f0b90b;
   --input: #17171c;
-  --ring: #7a9a3a;
+  --ring: #f0b90b;
 
-  --accent: #7a9a3a;
-  --accent-rgb: 122, 154, 58;
-  --accent-hover: #8aaa48;
-  --accent-muted: #5a6e2e;
-  --accent-subtle: rgba(122, 154, 58, 0.12);
+  --accent: #f0b90b;
+  --accent-rgb: 240, 185, 11;
+  --accent-hover: #f3ba2f;
+  --accent-muted: #d8a000;
+  --accent-subtle: rgba(240, 185, 11, 0.12);
   --accent-foreground: #1a1f26;
-  --primary: #7a9a3a;
+  --primary: #f0b90b;
   --primary-foreground: #1a1f26;
 
   --ok: hsl(142 76% 36%);
@@ -157,11 +157,11 @@
   --destructive: hsl(0 84.2% 60.2%);
   --destructive-foreground: hsl(0 0% 100%);
   --destructive-subtle: hsla(0 84% 60% / 0.1);
-  --warn: #7a9a3a;
-  --warn-muted: rgba(122, 154, 58, 0.7);
-  --warn-subtle: rgba(122, 154, 58, 0.12);
+  --warn: #f0b90b;
+  --warn-muted: rgba(240, 185, 11, 0.7);
+  --warn-subtle: rgba(240, 185, 11, 0.12);
   --danger: hsl(0 84.2% 60.2%);
-  --info: #7a9a3a;
+  --info: #f0b90b;
 
   --status-success: var(--ok);
   --status-success-bg: var(--ok-subtle);
@@ -172,14 +172,14 @@
   --status-info: #60a5fa;
   --status-info-bg: rgba(96, 165, 250, 0.12);
 
-  --focus: rgba(122, 154, 58, 0.18);
-  --focus-ring: 0 0 0 2px rgba(122, 154, 58, 0.44);
+  --focus: rgba(240, 185, 11, 0.18);
+  --focus-ring: 0 0 0 2px rgba(240, 185, 11, 0.44);
   --scrollbar-track: transparent;
   --scrollbar-thumb-start: rgba(255, 226, 105, 0.88);
-  --scrollbar-thumb-mid: rgba(122, 154, 58, 0.72);
+  --scrollbar-thumb-mid: rgba(240, 185, 11, 0.72);
   --scrollbar-thumb-end: rgba(255, 210, 77, 0.8);
   --scrollbar-thumb-hover-start: rgba(255, 232, 137, 0.94);
-  --scrollbar-thumb-hover-mid: rgba(122, 154, 58, 0.82);
+  --scrollbar-thumb-hover-mid: rgba(240, 185, 11, 0.82);
   --scrollbar-thumb-hover-end: rgba(255, 214, 92, 0.88);
   --scrollbar-thumb-edge: rgba(255, 235, 175, 0.12);
 
@@ -188,7 +188,7 @@
   --section-bar-bg: #0a0a0c;
   --section-bar-fg: #ffffff;
   --link-color: var(--text);
-  --link-hover-color: #7a9a3a;
+  --link-hover-color: #f0b90b;
 
   --mono: "Courier New", Courier, monospace;
   --font-body:

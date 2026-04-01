@@ -13,6 +13,7 @@ describe("onboarding flow", () => {
   describe("getStepOrder", () => {
     it("returns unified 6-step order", () => {
       expect(getStepOrder()).toEqual([
+        "cloud_login",
         "identity",
         "hosting",
         "providers",
@@ -25,6 +26,7 @@ describe("onboarding flow", () => {
 
   describe("resolveOnboardingNextStep", () => {
     it("advances through all steps", () => {
+      expect(resolveOnboardingNextStep("cloud_login")).toBe("identity");
       expect(resolveOnboardingNextStep("identity")).toBe("hosting");
       expect(resolveOnboardingNextStep("hosting")).toBe("providers");
       expect(resolveOnboardingNextStep("providers")).toBe("voice");
@@ -36,7 +38,8 @@ describe("onboarding flow", () => {
 
   describe("resolveOnboardingPreviousStep", () => {
     it("steps back through all steps", () => {
-      expect(resolveOnboardingPreviousStep("identity")).toBe(null);
+      expect(resolveOnboardingPreviousStep("cloud_login")).toBe(null);
+      expect(resolveOnboardingPreviousStep("identity")).toBe("cloud_login");
       expect(resolveOnboardingPreviousStep("hosting")).toBe("identity");
       expect(resolveOnboardingPreviousStep("providers")).toBe("hosting");
       expect(resolveOnboardingPreviousStep("voice")).toBe("providers");
@@ -51,7 +54,7 @@ describe("onboarding flow", () => {
         canRevertOnboardingTo({ current: "providers", target: "hosting" }),
       ).toBe(true);
       expect(
-        canRevertOnboardingTo({ current: "launch", target: "identity" }),
+        canRevertOnboardingTo({ current: "launch", target: "cloud_login" }),
       ).toBe(true);
     });
     it("disallows same-step jump", () => {
@@ -61,7 +64,7 @@ describe("onboarding flow", () => {
     });
     it("disallows forward jump", () => {
       expect(
-        canRevertOnboardingTo({ current: "identity", target: "hosting" }),
+        canRevertOnboardingTo({ current: "cloud_login", target: "hosting" }),
       ).toBe(false);
     });
   });
@@ -70,6 +73,7 @@ describe("onboarding flow", () => {
     it("returns all 6 steps regardless of current step", () => {
       const metas = getOnboardingNavMetas("providers", false);
       expect(metas.map((m) => m.id)).toEqual([
+        "cloud_login",
         "identity",
         "hosting",
         "providers",
@@ -79,8 +83,9 @@ describe("onboarding flow", () => {
       ]);
     });
     it("returns same steps when cloudOnly", () => {
-      const metas = getOnboardingNavMetas("identity", true);
+      const metas = getOnboardingNavMetas("cloud_login", true);
       expect(metas.map((m) => m.id)).toEqual([
+        "cloud_login",
         "identity",
         "hosting",
         "providers",
@@ -97,6 +102,7 @@ describe("onboarding flow", () => {
       expect(getFlaminaTopicForOnboardingStep("permissions")).toBe(
         "permissions",
       );
+      expect(getFlaminaTopicForOnboardingStep("cloud_login")).toBe(null);
       expect(getFlaminaTopicForOnboardingStep("hosting")).toBe(null);
       expect(getFlaminaTopicForOnboardingStep("identity")).toBe(null);
       expect(getFlaminaTopicForOnboardingStep("launch")).toBe(null);

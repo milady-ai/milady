@@ -6,7 +6,7 @@ export const SHELL_ICON_BUTTON_CLASSNAME = `inline-flex h-11 w-11 min-h-[44px] m
 export const SHELL_EXPANDED_BUTTON_CLASSNAME = `inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl px-3.5 py-0 ${SHELL_CONTROL_BASE_CLASSNAME}`;
 
 export const SHELL_SEGMENTED_CONTROL_CLASSNAME =
-  "inline-flex items-center gap-0.5 rounded-2xl border border-border/45 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_52%,transparent),color-mix(in_srgb,var(--bg)_34%,transparent))] p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_12px_28px_rgba(3,5,10,0.12)] ring-1 ring-inset ring-white/6 backdrop-blur-xl";
+  "inline-flex items-center gap-0.5 rounded-xl border border-border/45 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_52%,transparent),color-mix(in_srgb,var(--bg)_34%,transparent))] p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_12px_28px_rgba(3,5,10,0.12)] ring-1 ring-inset ring-white/6 backdrop-blur-xl";
 
 export const SHELL_SEGMENT_ACTIVE_CLASSNAME =
   "border-[color:color-mix(in_srgb,var(--accent)_34%,var(--border))] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--accent)_20%,var(--card)),color-mix(in_srgb,var(--accent)_10%,var(--bg)))] text-[color:color-mix(in_srgb,var(--text-strong)_78%,var(--accent)_22%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_20px_rgba(3,5,10,0.12)]";

@@ -4,22 +4,13 @@ describe("/api/auth/pair remote address guard", () => {
   it("rejects requests when socket.remoteAddress is unavailable", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const serverSource = fs.readFileSync(
-      path.resolve(import.meta.dirname, "server.ts"),
-      "utf-8",
-    );
-    expect(serverSource).toContain(
-      "handleAuthPairingCompatRoutes(req, res, state)",
-    );
+    const serverPath = path.resolve(import.meta.dirname, "server.ts");
+    const source = fs.readFileSync(serverPath, "utf-8");
 
-    const routeSource = fs.readFileSync(
-      path.resolve(import.meta.dirname, "auth-pairing-compat-routes.ts"),
-      "utf-8",
-    );
-    const pairRouteIdx = routeSource.indexOf('"/api/auth/pair"');
+    const pairRouteIdx = source.indexOf('"/api/auth/pair"');
     expect(pairRouteIdx).toBeGreaterThan(-1);
 
-    const nearbyCode = routeSource.slice(pairRouteIdx, pairRouteIdx + 800);
+    const nearbyCode = source.slice(pairRouteIdx, pairRouteIdx + 800);
     expect(nearbyCode).toContain(
       "const remoteAddress = req.socket.remoteAddress",
     );

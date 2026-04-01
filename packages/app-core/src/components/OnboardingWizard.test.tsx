@@ -210,7 +210,7 @@ describe("OnboardingWizard", () => {
 
   it("bottom-aligns the non-identity onboarding chrome container", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "cloud_login",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",
@@ -260,7 +260,7 @@ describe("OnboardingWizard", () => {
 
     it("fades in the UI overlay when VrmStage never calls onRevealStart", async () => {
       mockUseApp.mockReturnValue({
-        onboardingStep: "identity",
+        onboardingStep: "cloud_login",
         selectedVrmIndex: 1,
         customVrmUrl: "",
         uiLanguage: "en",
@@ -281,13 +281,6 @@ describe("OnboardingWizard", () => {
       const overlay = tree?.root.findByProps({
         "data-testid": "onboarding-ui-overlay",
       });
-      // identity step starts hidden and fades in after fallback timeout
-      expect(overlay?.props.style.opacity).toBe(0);
-
-      await act(async () => {
-        vi.advanceTimersByTime(1200);
-      });
-
       expect(overlay?.props.style.opacity).toBe(1);
 
       await act(async () => {
@@ -333,7 +326,7 @@ describe("OnboardingWizard", () => {
 
     it("shows the overlay immediately when opening onboarding after agent reset", async () => {
       mockUseApp.mockReturnValue({
-        onboardingStep: "identity",
+        onboardingStep: "cloud_login",
         selectedVrmIndex: 1,
         customVrmUrl: "",
         uiLanguage: "en",
@@ -364,7 +357,7 @@ describe("OnboardingWizard", () => {
 
   it("locks document/body scroll while mounted and restores on unmount", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "identity",
+      onboardingStep: "cloud_login",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",

@@ -14,28 +14,23 @@ vi.mock("../state", () => ({
 }));
 
 vi.mock("./DatabasePageView", () => ({
-  DatabasePageView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "database-view"),
+  DatabasePageView: () => React.createElement("div", null, "database-view"),
 }));
 
 vi.mock("./LogsPageView", () => ({
-  LogsPageView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "logs-view"),
+  LogsPageView: () => React.createElement("div", null, "logs-view"),
 }));
 
 vi.mock("./PluginsPageView", () => ({
-  PluginsPageView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "plugins-view"),
+  PluginsPageView: () => React.createElement("div", null, "plugins-view"),
 }));
 
 vi.mock("./RuntimeView", () => ({
-  RuntimeView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "runtime-view"),
+  RuntimeView: () => React.createElement("div", null, "runtime-view"),
 }));
 
 vi.mock("./SkillsView", () => ({
-  SkillsView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "skills-view"),
+  SkillsView: () => React.createElement("div", null, "skills-view"),
 }));
 
 vi.mock("@miladyai/ui", () => ({
@@ -45,59 +40,18 @@ vi.mock("@miladyai/ui", () => ({
     (props: Record<string, unknown>, ref: React.Ref<HTMLButtonElement>) =>
       React.createElement("button", { type: "button", ...props, ref }),
   ),
-  SegmentedControl: ({
-    items,
-    value,
-    onValueChange,
-    ...props
-  }: {
-    items: Array<{
-      label: React.ReactNode;
-      testId?: string;
-      value: string;
-    }>;
-    onValueChange: (value: string) => void;
-    value: string;
-  }) =>
-    React.createElement(
-      "div",
-      props,
-      items.map((item) =>
-        React.createElement(
-          "button",
-          {
-            key: item.value,
-            type: "button",
-            "aria-pressed": item.value === value,
-            "data-testid": item.testId,
-            className:
-              item.value === value
-                ? "border-accent/26 text-txt-strong px-3"
-                : "px-3",
-            onClick: () => onValueChange(item.value),
-          },
-          item.label,
-        ),
-      ),
-    ),
 }));
 
 vi.mock("./DesktopWorkspaceSection", () => ({
-  DesktopWorkspaceSection: ({
-    contentHeader,
-  }: {
-    contentHeader?: React.ReactNode;
-  }) => React.createElement("div", null, contentHeader, "desktop"),
+  DesktopWorkspaceSection: () => React.createElement("div", null, "desktop"),
 }));
 
 vi.mock("./FineTuningView", () => ({
-  FineTuningView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "fine-tuning"),
+  FineTuningView: () => React.createElement("div", null, "fine-tuning"),
 }));
 
 vi.mock("./TrajectoriesView", () => ({
-  TrajectoriesView: ({ contentHeader }: { contentHeader?: React.ReactNode }) =>
-    React.createElement("div", null, contentHeader, "trajectories"),
+  TrajectoriesView: () => React.createElement("div", null, "trajectories"),
 }));
 
 vi.mock("./TrajectoryDetailView", () => ({
@@ -107,7 +61,7 @@ vi.mock("./TrajectoryDetailView", () => ({
 import { AdvancedPageView } from "./AdvancedPageView";
 
 describe("AdvancedPageView", () => {
-  it("injects the shared advanced sub-nav into the standard content pane", async () => {
+  it("renders the compact advanced sub-nav with an active tab in the standard layout", async () => {
     const setTab = vi.fn();
     mockUseApp.mockReturnValue({
       tab: "skills",
@@ -128,8 +82,8 @@ describe("AdvancedPageView", () => {
     expect(nav).toBeDefined();
     expect(String(activeButton.props.className)).toContain("border-accent/26");
     expect(String(activeButton.props.className)).toContain("text-txt-strong");
-    expect(String(activeButton.props.className)).toContain("px-3");
-    expect(activeButton.props["aria-pressed"]).toBe(true);
+    expect(String(activeButton.props.className)).toContain("px-2.5");
+    expect(activeButton.props["aria-current"]).toBe("page");
   });
 
   it("renders compact advanced sub-nav buttons in the modal layout", async () => {
@@ -154,29 +108,5 @@ describe("AdvancedPageView", () => {
     expect(String(runtimeButton.props.className)).toContain("inline-flex");
     expect(String(runtimeButton.props.className)).toContain("px-3");
     expect(runtimeButton.props["aria-current"]).toBe("page");
-  });
-
-  it("keeps the shared advanced header container when fine-tuning is active", async () => {
-    const setTab = vi.fn();
-    mockUseApp.mockReturnValue({
-      tab: "fine-tuning",
-      setTab,
-      t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
-    });
-
-    let tree!: TestRenderer.ReactTestRenderer;
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(AdvancedPageView));
-    });
-
-    expect(
-      tree.root.findByProps({ "data-testid": "advanced-subtab-nav" }),
-    ).toBeDefined();
-    expect(
-      tree.root.findAll(
-        (node) =>
-          Array.isArray(node.children) && node.children.includes("fine-tuning"),
-      ).length,
-    ).toBeGreaterThan(0);
   });
 });

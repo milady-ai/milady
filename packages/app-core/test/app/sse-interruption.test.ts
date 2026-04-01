@@ -20,18 +20,15 @@ function buildSseResponse(chunks: string[]): Response {
 
 function buildErroringSseResponse(chunks: string[]): Response {
   const encoder = new TextEncoder();
-  // Simulate an interrupted stream: deliver chunks then close without a
-  // "done" SSE event. Using close() rather than controller.error() avoids
-  // an unhandled rejection from Node's ReadableStream pull algorithm, which
-  // fires asynchronously even after the reader is cancelled by the client.
-  // The observable behaviour is identical — the client sees completed: false
-  // because no "done" event was emitted before the stream ended.
+  let pullCount = 0;
   const body = new ReadableStream<Uint8Array>({
-    start(controller) {
-      for (const chunk of chunks) {
-        controller.enqueue(encoder.encode(chunk));
+    pull(controller) {
+      if (pullCount < chunks.length) {
+        controller.enqueue(encoder.encode(chunks[pullCount]));
+        pullCount++;
+      } else {
+        controller.error(new Error("network connection lost"));
       }
-      controller.close();
     },
   });
 

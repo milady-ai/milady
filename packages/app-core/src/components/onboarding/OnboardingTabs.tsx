@@ -19,7 +19,7 @@ export function OnboardingTabs<T extends string>({
             onClick={() => onChange(tab.id)}
             className={`relative rounded-[8px] border-none px-5 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] outline-none transition-all duration-300 ${
               isActive
-                ? "bg-[var(--onboarding-accent-bg)] text-[var(--onboarding-text-strong)] shadow-[0_0_0_1px_rgba(122,154,58,0.14),0_0_12px_rgba(122,154,58,0.12)]"
+                ? "bg-[var(--onboarding-accent-bg)] text-[var(--onboarding-text-strong)] shadow-[0_0_0_1px_rgba(240,185,11,0.14),0_0_12px_rgba(240,185,11,0.12)]"
                 : "bg-transparent text-[var(--onboarding-text-subtle)] hover:text-[var(--onboarding-text-strong)] hover:bg-[var(--onboarding-card-bg-hover)]"
             }`}
             style={{ textShadow: "0 1px 5px rgba(3,5,10,0.34)" }}

@@ -14,10 +14,7 @@ export { CustomActionEditor } from "./components/CustomActionEditor";
 export { CustomActionsPanel } from "./components/CustomActionsPanel";
 export { GameViewOverlay } from "./components/GameViewOverlay";
 export { Header } from "./components/Header";
-export {
-  HeartbeatsDesktopShell,
-  HeartbeatsView,
-} from "./components/HeartbeatsView";
+export { HeartbeatsView } from "./components/HeartbeatsView";
 export { InventoryView } from "./components/InventoryView";
 export { KnowledgeView } from "./components/KnowledgeView";
 export { OnboardingWizard } from "./components/OnboardingWizard";
@@ -27,6 +24,5 @@ export { SaveCommandModal } from "./components/SaveCommandModal";
 export { SettingsView } from "./components/SettingsView";
 export { ShellOverlays } from "./components/ShellOverlays";
 export { StartupFailureView } from "./components/StartupFailureView";
-export { StartupShell } from "./components/StartupShell";
 export { StreamView } from "./components/StreamView";
 export { SystemWarningBanner } from "./components/SystemWarningBanner";

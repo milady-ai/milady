@@ -34,12 +34,6 @@ function translateTest(
   return vars?.defaultValue ?? key;
 }
 
-type SidebarHeaderSearchProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  clearLabel?: string;
-  loading?: boolean;
-  onClear?: () => void;
-};
-
 // ---------------------------------------------------------------------------
 // Part 1: API Tests for Wallet Endpoints
 // ---------------------------------------------------------------------------
@@ -202,197 +196,16 @@ vi.mock("@miladyai/ui", () => {
     ...props
   }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement("div", props, children);
-  const button = ({
-    children,
-    ...props
-  }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
-    React.createElement("button", { type: "button", ...props }, children);
-  const input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-    React.createElement("input", props);
-  const sidebarSearchBar = (
-    props: React.InputHTMLAttributes<HTMLInputElement>,
-  ) => {
-    const placeholder =
-      typeof props.placeholder === "string" &&
-      props.placeholder.trim().length > 0 &&
-      !/(\.\.\.|…)$/.test(props.placeholder.trim())
-        ? `${props.placeholder.trim()}...`
-        : props.placeholder;
-    return React.createElement("input", { ...props, placeholder });
-  };
-  const sidebarHeader = ({
-    children,
-    search,
-    ...props
-  }: React.PropsWithChildren<{
-    search?: SidebarHeaderSearchProps;
-  }>) => {
-    const { clearLabel, loading, onClear, ...inputProps } = search ?? {};
-    void clearLabel;
-    void loading;
-    void onClear;
-
-    return React.createElement(
-      "div",
-      props,
-      search ? sidebarSearchBar(inputProps) : null,
-      children,
-    );
-  };
-  const pageLayout = ({
-    children,
-    sidebar,
-    contentHeader,
-    contentRef,
-    ...props
-  }: React.PropsWithChildren<{
-    sidebar?: React.ReactNode;
-    contentHeader?: React.ReactNode;
-    contentRef?: React.Ref<HTMLElement>;
-  }>) => {
-    const sidebarElement = React.isValidElement<{
-      collapsible?: boolean;
-    }>(sidebar)
-      ? React.cloneElement(sidebar, {
-          collapsible: sidebar.props.collapsible ?? true,
-        })
-      : sidebar;
-
-    return React.createElement(
-      "div",
-      props,
-      sidebarElement,
-      React.createElement("main", { ref: contentRef }, contentHeader, children),
-    );
-  };
-  const MockSidebar = ({
-    children,
-    header,
-    footer,
-    testId,
-    collapsible = false,
-    collapsed,
-    defaultCollapsed = false,
-    onCollapsedChange,
-    collapsedContent,
-    collapsedRailAction,
-    collapsedRailItems,
-    collapseButtonTestId,
-    expandButtonTestId,
-    collapseButtonAriaLabel = "Collapse sidebar",
-    expandButtonAriaLabel = "Expand sidebar",
-    ...props
-  }: React.PropsWithChildren<{
-    header?: React.ReactNode;
-    footer?: React.ReactNode;
-    testId?: string;
-    collapsible?: boolean;
-    collapsed?: boolean;
-    defaultCollapsed?: boolean;
-    onCollapsedChange?: (collapsed: boolean) => void;
-    collapsedContent?: React.ReactNode;
-    collapsedRailAction?: React.ReactNode;
-    collapsedRailItems?: React.ReactNode;
-    collapseButtonTestId?: string;
-    expandButtonTestId?: string;
-    collapseButtonAriaLabel?: string;
-    expandButtonAriaLabel?: string;
-  }>) => {
-    const [internalCollapsed, setInternalCollapsed] =
-      React.useState(defaultCollapsed);
-    const isCollapsed = collapsed ?? internalCollapsed;
-
-    const setNextCollapsed = (next: boolean) => {
-      if (collapsed === undefined) {
-        setInternalCollapsed(next);
-      }
-      onCollapsedChange?.(next);
-    };
-    const collapsedRailContent =
-      collapsedRailAction != null || collapsedRailItems != null
-        ? React.createElement(
-            React.Fragment,
-            null,
-            collapsedRailAction,
-            collapsedRailItems,
-          )
-        : null;
-
-    return React.createElement(
-      "aside",
-      {
-        "data-testid": testId,
-        "data-collapsed": isCollapsed || undefined,
-        ...props,
-      },
-      isCollapsed && collapsible
-        ? React.createElement(
-            React.Fragment,
-            null,
-            collapsedContent ?? collapsedRailContent ?? children,
-            React.createElement(
-              "button",
-              {
-                type: "button",
-                "data-testid": expandButtonTestId,
-                "aria-label": expandButtonAriaLabel,
-                onClick: () => setNextCollapsed(false),
-              },
-              "expand",
-            ),
-          )
-        : React.createElement(
-            React.Fragment,
-            null,
-            header,
-            children,
-            footer,
-            collapsible
-              ? React.createElement(
-                  "button",
-                  {
-                    type: "button",
-                    "data-testid": collapseButtonTestId,
-                    "aria-label": collapseButtonAriaLabel,
-                    onClick: () => setNextCollapsed(true),
-                  },
-                  "collapse",
-                )
-              : null,
-          ),
-    );
-  };
-  const pagePanel = ({
-    children,
-    ...props
-  }: React.PropsWithChildren<Record<string, unknown>>) =>
-    React.createElement("section", props, children);
-  const sidebarContent = {
-    EmptyState: passthrough,
-    Item: passthrough,
-    ItemBody: passthrough,
-    ItemButton: button,
-    ItemDescription: passthrough,
-    ItemIcon: passthrough,
-    ItemTitle: passthrough,
-    Notice: passthrough,
-    RailItem: button,
-    SectionHeader: passthrough,
-    SectionLabel: passthrough,
-    Toolbar: passthrough,
-    ToolbarActions: passthrough,
-    ToolbarPrimary: passthrough,
-  };
-  pagePanel.Empty = passthrough;
-  pagePanel.Loading = passthrough;
-  pagePanel.Notice = passthrough;
   return {
     cn: (...classes: Array<string | false | null | undefined>) =>
       classes.filter(Boolean).join(" "),
-    Button: button,
-    Input: input,
-    PageLayout: pageLayout,
-    PagePanel: pagePanel,
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) =>
+      React.createElement("button", { type: "button", ...props }, children),
+    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+      React.createElement("input", props),
     Select: passthrough,
     SelectContent: passthrough,
     SelectItem: ({
@@ -402,48 +215,8 @@ vi.mock("@miladyai/ui", () => {
       React.createElement("option", props, children),
     SelectTrigger: passthrough,
     SelectValue: passthrough,
-    SegmentedControl: ({
-      items,
-      onValueChange,
-      ...props
-    }: React.PropsWithChildren<
-      Record<string, unknown> & {
-        items?: Array<{
-          value: string;
-          label: React.ReactNode;
-          testId?: string;
-        }>;
-      }
-    >) =>
-      React.createElement(
-        "div",
-        props,
-        ...(items ?? []).map((item) =>
-          React.createElement(
-            "button",
-            {
-              key: item.value,
-              type: "button",
-              "data-testid": item.testId,
-              onClick: () =>
-                typeof onValueChange === "function" &&
-                onValueChange(item.value),
-            },
-            item.label,
-          ),
-        ),
-      ),
-    Sidebar: MockSidebar,
-    SidebarContent: sidebarContent,
-    SidebarFilterBar: passthrough,
-    SidebarHeader: sidebarHeader,
-    SidebarHeaderStack: passthrough,
-    SidebarPanel: passthrough,
-    SidebarScrollRegion: passthrough,
-    SidebarSearchBar: sidebarSearchBar,
     Tooltip: passthrough,
     TooltipContent: passthrough,
-    TooltipHint: passthrough,
     TooltipProvider: passthrough,
     TooltipTrigger: passthrough,
     Tabs: passthrough,
@@ -451,16 +224,6 @@ vi.mock("@miladyai/ui", () => {
     TabsTrigger: passthrough,
     TabsContent: passthrough,
     Badge: passthrough,
-    Dialog: passthrough,
-    DialogContent: passthrough,
-    DialogHeader: passthrough,
-    DialogTitle: passthrough,
-    DialogTrigger: passthrough,
-    ConfirmDialog: passthrough,
-    Label: passthrough,
-    Slider: passthrough,
-    Switch: passthrough,
-    Spinner: passthrough,
   };
 });
 
@@ -559,9 +322,7 @@ describe("InventoryView UI", () => {
       uiLanguage: "en",
       ...state,
       t: translateTest,
-      walletAddresses: {
-        evmAddress: "0x1234567890123456789012345678901234567890",
-      },
+      walletAddresses: { evmAddress: "0x1234567890123456789012345678901234567890" },
       walletBalances: {
         evm: { chains: [] },
         solana: null,
@@ -648,48 +409,6 @@ describe("InventoryView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("uses the Search wallets label for the sidebar search input", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(InventoryView));
-    });
-
-    const searchInput = tree?.root
-      .findAllByType("input")
-      .find((node) => node.props["aria-label"] === "Search wallets");
-
-    expect(searchInput).toBeDefined();
-    expect(searchInput?.props.placeholder).toBe("Search wallets...");
-  });
-
-  it("renders compact wallet controls when the shared sidebar rail collapses", async () => {
-    let tree: TestRenderer.ReactTestRenderer | null = null;
-
-    await act(async () => {
-      tree = TestRenderer.create(React.createElement(InventoryView));
-    });
-
-    const collapseButton = tree?.root.find(
-      (node) =>
-        node.type === "button" &&
-        node.props["aria-label"] === "Collapse sidebar",
-    );
-
-    await act(async () => {
-      collapseButton?.props.onClick();
-    });
-
-    const sidebar = tree?.root.findByProps({
-      "data-testid": "wallets-sidebar",
-    });
-    expect(sidebar?.props["data-collapsed"]).toBe(true);
-    expect(
-      tree?.root.findByProps({
-        "data-testid": "wallet-view-tokens",
-      }),
-    ).toBeDefined();
-  });
 });
 
 // ---------------------------------------------------------------------------

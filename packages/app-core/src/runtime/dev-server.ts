@@ -340,13 +340,6 @@ async function main() {
   // the **Vite** listen port for `/api/dev/stack` + static HTML hints, while
   // MILADY_API_PORT is the **Milady API**. Overwriting MILADY_PORT here would
   // collapse UI vs API in observability JSON and confuse tools that read env.
-  if (actualPort !== port) {
-    console.error(
-      `${getLogPrefix()} [CRITICAL] API bound to port ${actualPort} but orchestrator expected ${port}. ` +
-        `Electrobun renderer has MILADY_DESKTOP_API_BASE pointing at the wrong port. ` +
-        `Kill the process using port ${port} or set MILADY_API_PORT to a free port.`,
-    );
-  }
   syncResolvedApiPort(process.env, actualPort);
   // Use console.log for startup timing to bypass logger filtering
   console.log(

@@ -30,14 +30,7 @@ import {
 import { getVrmPreviewUrl, useApp } from "@miladyai/app-core/state";
 import { miladyTtsDebug } from "@miladyai/app-core/utils";
 import { resolveCharacterVoiceConfigFromAppConfig } from "@miladyai/app-core/voice";
-import {
-  ChatAttachmentStrip,
-  ChatComposer,
-  ChatComposerShell,
-  ChatThreadLayout,
-  ChatTranscript,
-  TypingIndicator,
-} from "@miladyai/ui";
+import { Button } from "@miladyai/ui";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -50,7 +43,13 @@ import {
   useState,
 } from "react";
 import { AgentActivityBox } from "./AgentActivityBox";
+import { ChatComposer } from "./ChatComposer";
+import { ChatMessage, TypingIndicator } from "./ChatMessage";
 import { useCompanionSceneStatus } from "./companion-scene-status-context";
+import {
+  DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME,
+  DESKTOP_CHAT_BUBBLE_USER_CLASSNAME,
+} from "./desktop-surface-primitives";
 import { MessageContent } from "./MessageContent";
 import { PtyConsoleDrawer } from "./PtyConsoleDrawer";
 
@@ -82,6 +81,23 @@ const CHAT_INPUT_MAX_HEIGHT_PX = 200;
 const COMPANION_VISIBLE_MESSAGE_LIMIT = 2;
 const COMPANION_HISTORY_HOLD_MS = 30_000;
 const COMPANION_HISTORY_FADE_MS = 5_000;
+const COMPANION_MESSAGE_LAYER_TOP = "calc(-100% + 1.5rem)";
+const COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK = "5.25rem";
+const COMPANION_COMPOSER_GAP_PX = 18;
+/** Companion dock composer: padding + min-height live here (not on the glass layer). */
+const COMPANION_COMPOSER_SHELL_LAYOUT_CLASSNAME =
+  "relative flex items-center px-3 py-2 max-[380px]:min-h-[78px] max-[380px]:px-2.5 max-[380px]:py-1.5";
+/** Frosted pill behind the game-modal composer; separate from content so padding stays obvious. */
+const COMPANION_COMPOSER_GLASS_LAYER_CLASSNAME =
+  "pointer-events-none absolute inset-0 rounded-[34px] border border-border/26 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_72%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_20px_52px_rgba(15,23,42,0.18)] ring-1 ring-inset ring-white/8 backdrop-blur-[22px] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_58px_rgba(0,0,0,0.36)]";
+const COMPANION_MESSAGE_LAYER_MASK =
+  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.28) 6%, rgba(0,0,0,0.82) 12%, black 17%, black 100%)";
+const COMPANION_ASSISTANT_BUBBLE_CLASSNAME = `${DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME} backdrop-blur-md`;
+const COMPANION_USER_BUBBLE_CLASSNAME = `${DESKTOP_CHAT_BUBBLE_USER_CLASSNAME} backdrop-blur-md`;
+const COMPANION_TYPING_BUBBLE_CLASSNAME = `${DESKTOP_CHAT_BUBBLE_ASSISTANT_CLASSNAME} backdrop-blur-md`;
+const COMPANION_TYPING_DOT_CLASSNAME =
+  "h-1.5 w-1.5 rounded-full bg-[color:color-mix(in_srgb,var(--muted)_82%,transparent)] animate-bounce";
+
 type ChatViewVariant = "default" | "game-modal";
 
 interface ChatViewProps {
@@ -189,9 +205,8 @@ function useChatVoiceController(options: {
     uiLanguage,
   } = options;
   /** After the first `eliza:cloud-status-updated`, mirrors server `cloudVoiceProxyAvailable` (avoids one-frame lag vs context). */
-  const [cloudVoiceSnapshot, setCloudVoiceSnapshot] = useState<boolean | null>(
-    null,
-  );
+  const cloudVoiceSnapshotRef = useRef<boolean | null>(null);
+  const [, cloudVoiceSnapshotTick] = useState(0);
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig | null>(null);
   /** Bumps after each `getConfig` (or inline VOICE_CONFIG event) settles — game-modal auto-speak waits for this so TTS does not run with a stale/null voice profile and get stuck deduped. */
   const [voiceBootstrapTick, setVoiceBootstrapTick] = useState(0);
@@ -300,8 +315,9 @@ function useChatVoiceController(options: {
         });
       }
       if (detail && typeof detail.cloudVoiceProxyAvailable === "boolean") {
-        setCloudVoiceSnapshot(detail.cloudVoiceProxyAvailable);
+        cloudVoiceSnapshotRef.current = detail.cloudVoiceProxyAvailable;
       }
+      cloudVoiceSnapshotTick((n) => n + 1);
       void loadVoiceConfig();
     };
     window.addEventListener(ELIZA_CLOUD_STATUS_UPDATED_EVENT, onCloudStatus);
@@ -379,17 +395,18 @@ function useChatVoiceController(options: {
   const cloudVoiceAvailable = useMemo(() => {
     const fromContext =
       elizaCloudConnected || elizaCloudEnabled || elizaCloudHasPersistedKey;
+    const snap = cloudVoiceSnapshotRef.current;
     // Ref snapshot can be `false` from an early status poll before the key is
     // loaded, then never updated if no further event fires — that stuck
     // `cloudConnected` false in useVoiceChat and kept browser TTS. Prefer
-    // context; only use the event snapshot to force `true` when the event
-    // arrives before the wider app state catches up.
-    return fromContext || cloudVoiceSnapshot === true;
+    // context; only use the ref to force `true` when the event arrives before
+    // React state commits (same-turn lag).
+    return fromContext || snap === true;
   }, [
-    cloudVoiceSnapshot,
     elizaCloudConnected,
     elizaCloudEnabled,
     elizaCloudHasPersistedKey,
+    cloudVoiceSnapshotTick,
   ]);
 
   useEffect(() => {
@@ -398,11 +415,11 @@ function useChatVoiceController(options: {
       elizaCloudConnected,
       elizaCloudEnabled,
       elizaCloudHasPersistedKey,
-      snapshotValue: cloudVoiceSnapshot,
+      snapshotRef: cloudVoiceSnapshotRef.current,
     });
   }, [
     cloudVoiceAvailable,
-    cloudVoiceSnapshot,
+    cloudVoiceSnapshotTick,
     elizaCloudConnected,
     elizaCloudEnabled,
     elizaCloudHasPersistedKey,
@@ -768,6 +785,7 @@ export function ChatView({
     chatInput,
     chatSending,
     chatFirstTokenReceived,
+    chatAwaitingGreeting,
     companionMessageCutoffTs,
     conversationMessages,
     handleChatSend,
@@ -777,7 +795,6 @@ export function ChatView({
     elizaCloudConnected,
     elizaCloudHasPersistedKey,
     setState,
-    copyToClipboard,
     droppedFiles,
     shareIngestNotice,
     chatAgentVoiceMuted: agentVoiceMuted,
@@ -836,6 +853,7 @@ export function ChatView({
         (message.role === "assistant" && message.text.trim().length > 0),
     );
   const isComposerLocked = isAgentStarting && !hasCompletedLifecycleActivity;
+  const cloudVoiceAvailable = elizaCloudConnected || elizaCloudEnabled;
   const {
     beginVoiceCapture,
     endVoiceCapture,
@@ -1047,41 +1065,60 @@ export function ChatView({
     [setChatPendingImages],
   );
 
-  const chatMessageLabels = {
-    cancel: t("common.cancel"),
-    delete: t("aria.deleteMessage"),
-    edit: t("aria.editMessage"),
-    play: t("aria.playMessage"),
-    responseInterrupted: t("chatmessage.ResponseInterrupte"),
-    saveAndResend: t("chatmessage.SaveAndResend", {
-      defaultValue: "Save and resend",
-    }),
-    saving: t("chatmessage.Saving", {
-      defaultValue: "Saving...",
-    }),
-  };
-
-  const messagesContent =
-    visibleMsgs.length === 0 && !chatSending ? null : (
-      <ChatTranscript
-        variant={variant}
-        agentName={agentName}
-        carryoverMessages={companionCarryover?.messages}
-        carryoverOpacity={gameModalCarryoverOpacity}
-        labels={chatMessageLabels}
-        messages={isGameModal ? gameModalVisibleMsgs : visibleMsgs}
-        onEdit={handleEditMessage}
-        onSpeak={handleSpeakMessage}
-        onCopy={(text) => {
-          void copyToClipboard(text);
-        }}
-        renderMessageContent={(message) => (
-          <MessageContent message={message as ConversationMessage} />
-        )}
-        typingIndicator={
-          chatSending && !chatFirstTokenReceived ? (
+  return (
+    <section
+      aria-label={t("aria.chatWorkspace")}
+      className={`flex flex-col flex-1 min-h-0 relative ${
+        isGameModal ? "overflow-visible pointer-events-none" : "bg-transparent"
+      }${imageDragOver ? " ring-2 ring-accent ring-inset" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setImageDragOver(true);
+      }}
+      onDragLeave={() => setImageDragOver(false)}
+      onDrop={handleImageDrop}
+    >
+      <div
+        ref={messagesRef}
+        data-testid="chat-messages-scroll"
+        data-no-window-drag={false}
+        data-no-camera-drag={false}
+        data-no-camera-zoom={false}
+        className={
+          isGameModal
+            ? "chat-native-scrollbar absolute inset-x-0 overflow-x-hidden overflow-y-auto pointer-events-auto opacity-0"
+            : "chat-native-scrollbar relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 xl:px-5"
+        }
+        style={
+          isGameModal
+            ? {
+                zIndex: 1,
+                top: COMPANION_MESSAGE_LAYER_TOP,
+                bottom:
+                  composerHeight > 0
+                    ? `${composerHeight + COMPANION_COMPOSER_GAP_PX}px`
+                    : COMPANION_MESSAGE_LAYER_BOTTOM_FALLBACK,
+                overscrollBehavior: "contain",
+                touchAction: "pan-y",
+                userSelect: "text",
+                WebkitUserSelect: "text",
+                maskImage: COMPANION_MESSAGE_LAYER_MASK,
+                WebkitMaskImage: COMPANION_MESSAGE_LAYER_MASK,
+              }
+            : {
+                zIndex: 1,
+              }
+        }
+      >
+        {visibleMsgs.length === 0 && !chatSending ? (
+          chatAwaitingGreeting ? (
             isGameModal ? (
-              <TypingIndicator variant="game-modal" agentName={agentName} />
+              <div className="flex min-h-full items-end px-1 py-4">
+                <TypingIndicator
+                  agentName={agentName}
+                  agentAvatarSrc={agentAvatarSrc}
+                />
+              </div>
             ) : (
               <TypingIndicator
                 agentName={agentName}
@@ -1089,48 +1126,144 @@ export function ChatView({
               />
             )
           ) : null
-        }
-      />
-    );
+        ) : isGameModal ? (
+          <div className="flex min-h-full w-full flex-col justify-end gap-4 px-1 py-4">
+            {companionCarryover?.messages.map((msg) => {
+              const isUser = msg.role === "user";
+              return (
+                <div
+                  key={`carryover-${msg.id}`}
+                  data-testid="companion-message-row"
+                  data-companion-carryover="true"
+                  className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
+                  style={{ opacity: gameModalCarryoverOpacity }}
+                >
+                  <div
+                    className={`max-w-[min(85%,24rem)] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                      isUser
+                        ? `${COMPANION_USER_BUBBLE_CLASSNAME} rounded-br-sm`
+                        : `${COMPANION_ASSISTANT_BUBBLE_CLASSNAME} rounded-bl-sm`
+                    }`}
+                  >
+                    <div
+                      className="break-words"
+                      style={{ fontFamily: "var(--font-chat)" }}
+                    >
+                      <MessageContent message={msg} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {gameModalVisibleMsgs.map((msg) => {
+              const isUser = msg.role === "user";
+              return (
+                <div
+                  key={msg.id}
+                  data-testid="companion-message-row"
+                  className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[min(85%,24rem)] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
+                      isUser
+                        ? `${COMPANION_USER_BUBBLE_CLASSNAME} rounded-br-sm`
+                        : `${COMPANION_ASSISTANT_BUBBLE_CLASSNAME} rounded-bl-sm`
+                    }`}
+                  >
+                    <div
+                      className="break-words"
+                      style={{ fontFamily: "var(--font-chat)" }}
+                    >
+                      <MessageContent message={msg} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {chatSending && !chatFirstTokenReceived && (
+              <div className="flex w-full justify-start">
+                <div
+                  className={`max-w-[min(85%,24rem)] rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1 ${COMPANION_TYPING_BUBBLE_CLASSNAME}`}
+                >
+                  <span
+                    className={COMPANION_TYPING_DOT_CLASSNAME}
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className={COMPANION_TYPING_DOT_CLASSNAME}
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <span
+                    className={COMPANION_TYPING_DOT_CLASSNAME}
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="w-full space-y-1.5">
+            {visibleMsgs.map((msg, i) => {
+              const prev = i > 0 ? visibleMsgs[i - 1] : null;
+              const isGrouped = prev?.role === msg.role;
 
-  const activityNode = isGameModal ? (
-    <div className="pointer-events-auto">
-      <AgentActivityBox
-        sessions={ptySessions}
-        onSessionClick={(id) =>
-          setPtyDrawerSessionId((prev) => (prev === id ? null : id))
-        }
-      />
-    </div>
-  ) : (
-    <AgentActivityBox
-      sessions={ptySessions}
-      onSessionClick={(id) =>
-        setPtyDrawerSessionId((prev) => (prev === id ? null : id))
-      }
-    />
-  );
+              return (
+                <ChatMessage
+                  key={msg.id}
+                  message={msg}
+                  isGrouped={isGrouped}
+                  agentName={agentName}
+                  agentAvatarSrc={agentAvatarSrc}
+                  onSpeak={handleSpeakMessage}
+                  onEdit={handleEditMessage}
+                />
+              );
+            })}
 
-  const drawerNode =
-    ptyDrawerSessionId && ptySessions.length > 0 ? (
-      <PtyConsoleDrawer
-        activeSessionId={ptyDrawerSessionId}
-        sessions={ptySessions}
-        onClose={() => setPtyDrawerSessionId(null)}
-      />
-    ) : null;
+            {chatSending && !chatFirstTokenReceived && (
+              <TypingIndicator
+                agentName={agentName}
+                agentAvatarSrc={agentAvatarSrc}
+              />
+            )}
+          </div>
+        )}
+      </div>
 
-  const auxiliaryNode = (
-    <>
-      {shareIngestNotice ? (
+      {/* Agent activity box — sticky status per active coding-agent task */}
+      {isGameModal ? (
+        <div className="pointer-events-auto">
+          <AgentActivityBox
+            sessions={ptySessions}
+            onSessionClick={(id) =>
+              setPtyDrawerSessionId((prev) => (prev === id ? null : id))
+            }
+          />
+        </div>
+      ) : (
+        <AgentActivityBox
+          sessions={ptySessions}
+          onSessionClick={(id) =>
+            setPtyDrawerSessionId((prev) => (prev === id ? null : id))
+          }
+        />
+      )}
+      {ptyDrawerSessionId && ptySessions.length > 0 && (
+        <PtyConsoleDrawer
+          activeSessionId={ptyDrawerSessionId}
+          sessions={ptySessions}
+          onClose={() => setPtyDrawerSessionId(null)}
+        />
+      )}
+      {shareIngestNotice && (
         <div
           className={`text-xs text-ok py-1 relative${isGameModal ? " pointer-events-auto" : ""}`}
           style={{ zIndex: 1 }}
         >
           {shareIngestNotice}
         </div>
-      ) : null}
-      {droppedFiles.length > 0 ? (
+      )}
+      {droppedFiles.length > 0 && (
         <div
           className={`text-xs text-muted py-0.5 flex gap-2 relative${isGameModal ? " pointer-events-auto" : ""}`}
           style={{ zIndex: 1 }}
@@ -1139,19 +1272,39 @@ export function ChatView({
             <span key={f}>{f}</span>
           ))}
         </div>
-      ) : null}
-      <ChatAttachmentStrip
-        variant={variant}
-        items={chatPendingImages.map((img, imgIdx) => ({
-          id: String(imgIdx),
-          alt: img.name,
-          name: img.name,
-          src: `data:${img.mimeType};base64,${img.data}`,
-        }))}
-        removeLabel={(item) => `Remove image ${item.name}`}
-        onRemove={(id) => removeImage(Number(id))}
-      />
-      {voiceLatency ? (
+      )}
+      {chatPendingImages.length > 0 && (
+        <div
+          className={`flex gap-2 flex-wrap py-1 relative${isGameModal ? " pointer-events-auto" : ""}`}
+          data-no-camera-drag={isGameModal || undefined}
+          style={{ zIndex: 1 }}
+        >
+          {chatPendingImages.map((img, imgIdx) => (
+            <div
+              key={`${img.name}-${img.data}`}
+              className="relative group w-16 h-16 shrink-0"
+            >
+              <img
+                src={`data:${img.mimeType};base64,${img.data}`}
+                alt={img.name}
+                className="w-16 h-16 object-cover border border-border rounded"
+              />
+              <Button
+                variant="destructive"
+                size="icon"
+                title={t("chatview.RemoveImage")}
+                aria-label={`Remove image ${img.name}`}
+                onClick={() => removeImage(imgIdx)}
+                className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-danger text-white text-[10px] flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity cursor-pointer"
+              >
+                ×
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {voiceLatency && (
         <div
           className={`pb-1 text-[10px] text-muted relative${isGameModal ? " pointer-events-auto" : ""}`}
           style={{ zIndex: 1 }}
@@ -1167,7 +1320,7 @@ export function ChatView({
               ? "cached"
               : "uncached"}
         </div>
-      ) : null}
+      )}
       <input
         ref={fileInputRef}
         type="file"
@@ -1176,120 +1329,115 @@ export function ChatView({
         className="hidden"
         onChange={handleFileInputChange}
       />
-    </>
-  );
-
-  const composerNode = isGameModal ? (
-    <ChatComposerShell
-      variant="game-modal"
-      shellRef={composerRef}
-      before={
-        <AgentActivityBox
-          sessions={ptySessions}
-          onSessionClick={
-            onPtySessionClick ??
-            ((id) => setPtyDrawerSessionId((prev) => (prev === id ? null : id)))
-          }
-        />
-      }
-    >
-      <ChatComposer
-        variant="game-modal"
-        textareaRef={textareaRef}
-        chatInput={chatInput}
-        chatPendingImagesCount={chatPendingImages.length}
-        isComposerLocked={isComposerLocked}
-        isAgentStarting={isAgentStarting}
-        chatSending={chatSending}
-        voice={{
-          supported: voice.supported,
-          isListening: voice.isListening,
-          captureMode: voice.captureMode,
-          interimTranscript: voice.interimTranscript,
-          isSpeaking: voice.isSpeaking,
-          assistantTtsQuality: voice.assistantTtsQuality,
-          toggleListening: voice.toggleListening,
-          startListening: beginVoiceCapture,
-          stopListening: endVoiceCapture,
-        }}
-        agentVoiceEnabled={!agentVoiceMuted}
-        showAgentVoiceToggle={showComposerVoiceToggle}
-        t={t}
-        onAttachImage={() => fileInputRef.current?.click()}
-        onChatInputChange={(value) => setState("chatInput", value)}
-        onKeyDown={handleKeyDown}
-        onSend={() => void handleChatSend()}
-        onStop={handleChatStop}
-        onStopSpeaking={stopSpeaking}
-        onToggleAgentVoice={() =>
-          setState("chatAgentVoiceMuted", !agentVoiceMuted)
-        }
-        codingAgentsAvailable={codingAgentsAvailable}
-        onCreateTask={handleCreateTask}
-      />
-    </ChatComposerShell>
-  ) : (
-    <ChatComposerShell variant="default">
-      <ChatComposer
-        variant="default"
-        textareaRef={textareaRef}
-        chatInput={chatInput}
-        chatPendingImagesCount={chatPendingImages.length}
-        isComposerLocked={isComposerLocked}
-        isAgentStarting={isAgentStarting}
-        chatSending={chatSending}
-        voice={{
-          supported: voice.supported,
-          isListening: voice.isListening,
-          captureMode: voice.captureMode,
-          interimTranscript: voice.interimTranscript,
-          isSpeaking: voice.isSpeaking,
-          assistantTtsQuality: voice.assistantTtsQuality,
-          toggleListening: voice.toggleListening,
-          startListening: beginVoiceCapture,
-          stopListening: endVoiceCapture,
-        }}
-        agentVoiceEnabled={!agentVoiceMuted}
-        showAgentVoiceToggle={showComposerVoiceToggle}
-        t={t}
-        onAttachImage={() => fileInputRef.current?.click()}
-        onChatInputChange={(value) => setState("chatInput", value)}
-        onKeyDown={handleKeyDown}
-        onSend={() => void handleChatSend()}
-        onStop={handleChatStop}
-        onStopSpeaking={stopSpeaking}
-        onToggleAgentVoice={() =>
-          setState("chatAgentVoiceMuted", !agentVoiceMuted)
-        }
-        codingAgentsAvailable={codingAgentsAvailable}
-        onCreateTask={handleCreateTask}
-      />
-    </ChatComposerShell>
-  );
-
-  return (
-    <ChatThreadLayout
-      aria-label={t("aria.chatWorkspace")}
-      variant={variant}
-      composerHeight={composerHeight}
-      imageDragOver={imageDragOver}
-      messagesRef={messagesRef}
-      footerStack={
-        <>
-          {activityNode}
-          {drawerNode}
-          {auxiliaryNode}
-        </>
-      }
-      composer={composerNode}
-      onDragOver={(event) => {
-        event.preventDefault();
-        setImageDragOver(true);
-      }}
-      onDragLeave={() => setImageDragOver(false)}
-      onDrop={handleImageDrop}
-    >
-      {messagesContent}
-    </ChatThreadLayout>
+      {isGameModal ? (
+        /* ── Game-modal composer ──────────────────────────────────────── */
+        <div
+          ref={composerRef}
+          className="mt-auto pointer-events-auto px-1 max-[380px]:px-0.5"
+          data-no-camera-drag="true"
+          style={{
+            zIndex: 1,
+            paddingBottom:
+              "calc(max(env(safe-area-inset-bottom, 0px), 0px) + 0.25rem)",
+          }}
+        >
+          {/* Agent activity box — above composer in companion dock */}
+          <AgentActivityBox
+            sessions={ptySessions}
+            onSessionClick={
+              onPtySessionClick ??
+              ((id) =>
+                setPtyDrawerSessionId((prev) => (prev === id ? null : id)))
+            }
+          />
+          <div className={COMPANION_COMPOSER_SHELL_LAYOUT_CLASSNAME}>
+            <div
+              aria-hidden
+              className={COMPANION_COMPOSER_GLASS_LAYER_CLASSNAME}
+            />
+            <div className="relative z-[1] flex w-full items-center">
+              <ChatComposer
+                variant="game-modal"
+                textareaRef={textareaRef}
+                chatInput={chatInput}
+                chatPendingImagesCount={chatPendingImages.length}
+                isComposerLocked={isComposerLocked}
+                isAgentStarting={isAgentStarting}
+                chatSending={chatSending}
+                voice={{
+                  supported: voice.supported,
+                  isListening: voice.isListening,
+                  captureMode: voice.captureMode,
+                  interimTranscript: voice.interimTranscript,
+                  isSpeaking: voice.isSpeaking,
+                  assistantTtsQuality: voice.assistantTtsQuality,
+                  toggleListening: voice.toggleListening,
+                  startListening: beginVoiceCapture,
+                  stopListening: endVoiceCapture,
+                }}
+                agentVoiceEnabled={!agentVoiceMuted}
+                showAgentVoiceToggle={showComposerVoiceToggle}
+                t={t}
+                onAttachImage={() => fileInputRef.current?.click()}
+                onChatInputChange={(value) => setState("chatInput", value)}
+                onKeyDown={handleKeyDown}
+                onSend={() => void handleChatSend()}
+                onStop={handleChatStop}
+                onStopSpeaking={stopSpeaking}
+                onToggleAgentVoice={() =>
+                  setState("chatAgentVoiceMuted", !agentVoiceMuted)
+                }
+                codingAgentsAvailable={codingAgentsAvailable}
+                onCreateTask={handleCreateTask}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ── Default composer ─────────────────────────────────────────── */
+        <div
+          className="relative border-t border-border/20 bg-transparent px-3 pb-3 pt-3 sm:px-4 sm:pb-4 xl:px-5"
+          style={{
+            zIndex: 1,
+            paddingBottom: "calc(var(--safe-area-bottom, 0px) + 0.75rem)",
+          }}
+        >
+          <ChatComposer
+            variant="default"
+            textareaRef={textareaRef}
+            chatInput={chatInput}
+            chatPendingImagesCount={chatPendingImages.length}
+            isComposerLocked={isComposerLocked}
+            isAgentStarting={isAgentStarting}
+            chatSending={chatSending}
+            voice={{
+              supported: voice.supported,
+              isListening: voice.isListening,
+              captureMode: voice.captureMode,
+              interimTranscript: voice.interimTranscript,
+              isSpeaking: voice.isSpeaking,
+              assistantTtsQuality: voice.assistantTtsQuality,
+              toggleListening: voice.toggleListening,
+              startListening: beginVoiceCapture,
+              stopListening: endVoiceCapture,
+            }}
+            agentVoiceEnabled={!agentVoiceMuted}
+            showAgentVoiceToggle={showComposerVoiceToggle}
+            t={t}
+            onAttachImage={() => fileInputRef.current?.click()}
+            onChatInputChange={(value) => setState("chatInput", value)}
+            onKeyDown={handleKeyDown}
+            onSend={() => void handleChatSend()}
+            onStop={handleChatStop}
+            onStopSpeaking={stopSpeaking}
+            onToggleAgentVoice={() =>
+              setState("chatAgentVoiceMuted", !agentVoiceMuted)
+            }
+            codingAgentsAvailable={codingAgentsAvailable}
+            onCreateTask={handleCreateTask}
+          />
+        </div>
+      )}
+    </section>
   );
 }

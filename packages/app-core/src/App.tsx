@@ -20,9 +20,11 @@ import {
   useRef,
   useState,
 } from "react";
+import type { AgentStartupDiagnostics } from "./api/client";
 import {
   AdvancedPageView,
   AppsPageView,
+  AvatarLoader,
   BugReportModal,
   CharacterEditor,
   ChatView,
@@ -35,29 +37,30 @@ import {
   CustomActionsPanel,
   GameViewOverlay,
   Header,
-  HeartbeatsDesktopShell,
   HeartbeatsView,
   InventoryView,
   KnowledgeView,
   OnboardingWizard,
+  PairingView,
   SaveCommandModal,
   SettingsView,
   SharedCompanionScene,
   ShellOverlays,
-  StartupShell,
+  StartupFailureView,
   StreamView,
   SystemWarningBanner,
 } from "./app-shell-components";
 import { CompanionHeader } from "./components/companion/CompanionHeader";
 import { DeferredSetupChecklist } from "./components/FlaminaGuide";
+import { SceneOverlayDataBridge } from "./components/scene-overlay-bridge";
 import { TasksEventsPanel } from "./components/TasksEventsPanel";
+import { useActivityEvents } from "./hooks/useActivityEvents";
 import {
   BugReportProvider,
   useBugReportState,
   useContextMenu,
   useStreamPopoutNavigation,
 } from "./hooks";
-import { useActivityEvents } from "./hooks/useActivityEvents";
 import type { Tab } from "./navigation";
 import { APPS_ENABLED, COMPANION_ENABLED } from "./navigation";
 import { useApp } from "./state";
@@ -65,6 +68,96 @@ import { useApp } from "./state";
 const CHAT_MOBILE_BREAKPOINT_PX = 820;
 const CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS =
   "pointer-events-none absolute inset-x-0 bottom-0 h-[5.75rem]";
+
+function formatStartupElapsed(sec: number): string {
+  if (sec <= 0) return "";
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function resolveAgentLoaderCopy(
+  agentStarting: boolean,
+  onboardingLoading: boolean,
+  elapsedSec: number,
+  startup: AgentStartupDiagnostics | undefined,
+): { label: string; progress?: number } {
+  const elapsed =
+    elapsedSec > 0 ? ` · ${formatStartupElapsed(elapsedSec)} elapsed` : "";
+  if (startup?.embeddingPhase === "downloading") {
+    const detail = startup.embeddingDetail?.trim();
+    const base = `Downloading embedding model (GGUF)${elapsed}`;
+    return {
+      label: detail
+        ? `${base} · ${detail}`
+        : `${base} · first run can take several minutes`,
+      progress: startup.embeddingProgressPct,
+    };
+  }
+  if (startup?.embeddingPhase === "loading") {
+    return {
+      label: `Loading embedding model${elapsed}`,
+      progress: startup.embeddingProgressPct,
+    };
+  }
+  if (startup?.embeddingPhase === "checking") {
+    return { label: `Checking embedding model${elapsed}` };
+  }
+  if (agentStarting || onboardingLoading) {
+    return {
+      label: `Starting agent${elapsed} · plugins and local models may take a while`,
+    };
+  }
+  return { label: `Starting systems${elapsed}` };
+}
+
+function resolveOnboardingHandoffCopy(
+  phase: string,
+  error: string | null,
+): { detail: string; title: string } {
+  switch (phase) {
+    case "provisioning":
+      return {
+        title: "Provisioning your agent",
+        detail: "Preparing the runtime before your companion opens.",
+      };
+    case "starting-backend":
+      return {
+        title: "Starting the local agent",
+        detail:
+          "Waking up the embedded backend so companion mode can take over in place.",
+      };
+    case "saving":
+      return {
+        title: "Saving your setup",
+        detail: "Persisting the onboarding choices for the new agent session.",
+      };
+    case "restarting":
+      return {
+        title: "Restarting your agent",
+        detail:
+          "Hot-swapping the runtime without reloading the companion shell.",
+      };
+    case "bootstrapping":
+      return {
+        title: "Starting your first conversation",
+        detail:
+          "Creating a fresh chat thread and asking the agent to greet you.",
+      };
+    case "error":
+      return {
+        title: "Setup hit a problem",
+        detail:
+          error?.trim() || "The agent could not finish the onboarding handoff.",
+      };
+    case "fading":
+    default:
+      return {
+        title: "Opening your companion",
+        detail: "Handing off from onboarding into companion mode.",
+      };
+  }
+}
 
 /** Check if we're in pop-out mode (StreamView only, no chrome). */
 function useIsPopout(): boolean {
@@ -163,15 +256,15 @@ function ViewRouter({
         );
       case "voice":
         return (
-          <TabContentView>
+          <TabScrollView className="[scrollbar-gutter:stable] [scroll-padding-top:7rem]">
             <SettingsView key="settings-media" initialSection="media" />
-          </TabContentView>
+          </TabScrollView>
         );
       case "settings":
         return (
-          <TabContentView>
+          <TabScrollView className="[scrollbar-gutter:stable] [scroll-padding-top:7rem]">
             <SettingsView key="settings-root" />
-          </TabContentView>
+          </TabScrollView>
         );
       case "advanced":
       case "plugins":
@@ -199,9 +292,13 @@ function ViewRouter({
 export function App() {
   const {
     onboardingLoading,
+    onboardingHandoffError,
+    onboardingHandoffPhase,
+    startupPhase,
     startupError,
-    startupCoordinator,
+    authRequired,
     onboardingComplete,
+    retryStartup,
     tab,
     setTab,
     setState,
@@ -213,6 +310,7 @@ export function App() {
     uiTheme,
     setUiTheme,
     chatAgentVoiceMuted,
+    cancelOnboardingHandoff,
     handleSaveCharacter,
     characterSaving,
     characterSaveSuccess,
@@ -220,10 +318,13 @@ export function App() {
     unreadConversations,
     activeGameViewerUrl,
     gameOverlayEnabled,
+    retryOnboardingHandoff,
     t,
   } = useApp();
 
   const isPopout = useIsPopout();
+  const onboardingHandoffActive =
+    onboardingHandoffPhase != null && onboardingHandoffPhase !== "idle";
   const shellMode =
     tab === "character" || tab === "character-select"
       ? "native"
@@ -243,7 +344,8 @@ export function App() {
   // delaying WebSocket agent-status updates (which would freeze the loader).
   const companionSceneActive =
     COMPANION_ENABLED &&
-    startupCoordinator.phase === "ready" &&
+    !onboardingLoading &&
+    agentStatus?.state !== "starting" &&
     (companionShellVisible || characterSceneVisible);
   const contextMenu = useContextMenu();
 
@@ -265,22 +367,6 @@ export function App() {
   const [mobileConversationsOpen, setMobileConversationsOpen] = useState(false);
 
   const isChat = tab === "chat";
-  const isWallets = tab === "wallets";
-  const isConnectors = tab === "connectors";
-  const isHeartbeats = tab === "triggers";
-  const isKnowledge = tab === "knowledge";
-  const isSettingsPage = tab === "settings" || tab === "voice";
-  const isAdvancedPage =
-    tab === "advanced" ||
-    tab === "plugins" ||
-    tab === "skills" ||
-    tab === "fine-tuning" ||
-    tab === "trajectories" ||
-    tab === "runtime" ||
-    tab === "database" ||
-    tab === "desktop" ||
-    tab === "logs" ||
-    tab === "security";
   const unreadCount = unreadConversations?.size ?? 0;
   const mobileChatControls = isChatMobileLayout ? (
     <div className="flex items-center gap-2 w-max">
@@ -393,29 +479,93 @@ export function App() {
   }, []);
 
   const bugReport = useBugReportState();
-  // Loading is handled entirely by StartupShell — no separate loader needed.
+  const agentStarting = agentStatus?.state === "starting";
+
+  const showFullScreenLoader =
+    onboardingComplete &&
+    !onboardingHandoffActive &&
+    (onboardingLoading || agentStarting);
+
+  const [startupElapsedSec, setStartupElapsedSec] = useState(0);
+  useEffect(() => {
+    if (!showFullScreenLoader) {
+      setStartupElapsedSec(0);
+      return;
+    }
+    const t0 = Date.now();
+    setStartupElapsedSec(0);
+    const id = window.setInterval(() => {
+      setStartupElapsedSec(Math.floor((Date.now() - t0) / 1000));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [showFullScreenLoader]);
 
   useEffect(() => {
-    // Safety-net watchdog: the coordinator has its own timeouts per phase, but
-    // this catches any edge case where the coordinator gets stuck in a loading
-    // phase. During "starting-runtime" the agent-wait loop has its own sliding
-    // deadline (up to 900s for embedding downloads), so we only watch the
-    // pre-runtime phases.
+    // During "initializing-agent" phase the agent-wait loop has its own
+    // sliding deadline (up to 900s for first-run embedding downloads).
+    // Only arm the watchdog during "starting-backend" to avoid killing a
+    // valid agent download mid-flight.
     const STARTUP_TIMEOUT_MS = 300_000;
-    const coordinatorPolling =
-      startupCoordinator.phase === "polling-backend" ||
-      startupCoordinator.phase === "restoring-session";
-    if (coordinatorPolling && !startupError) {
+    if (startupPhase === "starting-backend" && !startupError) {
       const timer = setTimeout(() => {
-        startupCoordinator.retry();
+        retryStartup();
       }, STARTUP_TIMEOUT_MS);
       return () => clearTimeout(timer);
     }
-  }, [startupCoordinator.phase, startupError, startupCoordinator.retry]);
+  }, [startupPhase, startupError, retryStartup]);
 
   // Agent startup must not hide onboarding: after reset the runtime often goes
   // to "starting" while we need to show the wizard immediately.
   const blockOnboardingForShell = onboardingLoading;
+
+  const [loaderFadingOut, setLoaderFadingOut] = useState(false);
+  const showLoaderRef = useRef(true);
+  const [showLoader, setShowLoader] = useState(true);
+
+  // Crossfade state for onboarding -> chat
+  const [fadingOutOnboarding, setFadingOutOnboarding] = useState(false);
+  const prevOnboardingHandoffActiveRef = useRef(onboardingHandoffActive);
+  const prevOnboardingCompleteRef = useRef(onboardingComplete);
+
+  useEffect(() => {
+    const enteredHandoff =
+      !prevOnboardingHandoffActiveRef.current && onboardingHandoffActive;
+    const completedOnboarding =
+      !prevOnboardingCompleteRef.current && onboardingComplete;
+
+    if (enteredHandoff || completedOnboarding) {
+      setFadingOutOnboarding(true);
+      const timer = setTimeout(() => {
+        setFadingOutOnboarding(false);
+      }, 700);
+      prevOnboardingHandoffActiveRef.current = onboardingHandoffActive;
+      prevOnboardingCompleteRef.current = onboardingComplete;
+      return () => clearTimeout(timer);
+    }
+
+    if (!onboardingHandoffActive && !onboardingComplete) {
+      setFadingOutOnboarding(false);
+    }
+
+    prevOnboardingHandoffActiveRef.current = onboardingHandoffActive;
+    prevOnboardingCompleteRef.current = onboardingComplete;
+  }, [onboardingComplete, onboardingHandoffActive]);
+
+  useEffect(() => {
+    if (showFullScreenLoader) {
+      showLoaderRef.current = true;
+      setShowLoader(true);
+      setLoaderFadingOut(false);
+    } else if (showLoaderRef.current) {
+      showLoaderRef.current = false;
+      setLoaderFadingOut(true);
+      const timer = setTimeout(() => {
+        setShowLoader(false);
+        setLoaderFadingOut(false);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [showFullScreenLoader]);
 
   // Pop-out mode — render only StreamView, skip startup gates.
   // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.
@@ -427,38 +577,40 @@ export function App() {
     );
   }
 
-  // StartupCoordinator gate — the coordinator is the sole startup authority.
-  // Non-ready phases are handled by StartupShell (which renders the appropriate
-  // view for each coordinator phase: loading, pairing, onboarding, or error).
-  if (startupCoordinator.phase !== "ready") {
+  // After loader hooks (stable hook order); do not return startupError before useState above.
+  if (startupError) {
     return (
       <BugReportProvider value={bugReport}>
-        <StartupShell />
+        <StartupFailureView error={startupError} onRetry={retryStartup} />
         <BugReportModal />
       </BugReportProvider>
     );
   }
 
-  // Coordinator is at "ready" — the app shell renders. No legacy onboarding
-  // overlays — the coordinator handled all of that before reaching ready.
+  if (authRequired && !blockOnboardingForShell) return <PairingView />;
+  const showOnboarding =
+    ((!onboardingComplete && !onboardingHandoffActive) ||
+      fadingOutOnboarding) &&
+    !blockOnboardingForShell;
+
+  // We conditionally skip returning early for onboarding so we can mount the app shell
+  // behind it during the crossfade. If we are completely before the fade out, we can
+  // still return early to prevent the engine from paying the cost of the main shell.
+  if (showOnboarding && !fadingOutOnboarding) {
+    return <OnboardingWizard />;
+  }
 
   const shellContent = companionShellVisible ? (
     <CompanionShell tab={effectiveTab} actionNotice={actionNotice} />
   ) : tab === "stream" ? (
-    <div
-      key="stream-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
+    <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
       <Header />
       <main className="flex-1 min-h-0 overflow-hidden">
         <StreamView />
       </main>
     </div>
   ) : isChat ? (
-    <div
-      key="chat-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
+    <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
       <Header
         mobileLeft={mobileChatControls}
         tasksEventsPanelOpen={tasksEventsPanelOpen}
@@ -497,7 +649,6 @@ export function App() {
                     </DrawerSheetTitle>
                   </DrawerSheetHeader>
                   <ConversationsSidebar
-                    key="chat-sidebar-mobile"
                     mobile
                     onClose={() => setMobileConversationsOpen(false)}
                   />
@@ -535,13 +686,13 @@ export function App() {
           </>
         ) : (
           <>
-            <ConversationsSidebar key="chat-sidebar-desktop" />
+            <ConversationsSidebar />
             <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
               <DeferredSetupChecklist
                 className="mx-3 mb-3 mt-3 xl:mx-5"
                 onOpenTask={handleDeferredTaskOpen}
               />
-              <ChatView key="chat-view-desktop" />
+              <ChatView />
             </main>
             <TasksEventsPanel
               open={tasksEventsPanelOpen}
@@ -561,74 +712,8 @@ export function App() {
         />
       </div>
     </div>
-  ) : isHeartbeats ? (
-    <div
-      key="heartbeats-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <HeartbeatsDesktopShell key="heartbeats-view-desktop" />
-      </div>
-    </div>
-  ) : isConnectors ? (
-    <div
-      key="connectors-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <ConnectorsPageView />
-      </div>
-    </div>
-  ) : isKnowledge ? (
-    <div
-      key="knowledge-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <KnowledgeView />
-      </div>
-    </div>
-  ) : isSettingsPage ? (
-    <div
-      key={`settings-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <SettingsView
-          key={tab === "voice" ? "settings-media" : "settings-root"}
-          initialSection={tab === "voice" ? "media" : undefined}
-        />
-      </div>
-    </div>
-  ) : isWallets ? (
-    <div
-      key="wallets-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <InventoryView />
-      </div>
-    </div>
-  ) : isAdvancedPage ? (
-    <div
-      key={`advanced-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <AdvancedPageView />
-      </div>
-    </div>
   ) : characterSceneVisible ? (
-    <div
-      key="character-shell"
-      className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent"
-    >
+    <div className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent">
       <CompanionHeader
         activeShellView="character"
         onShellViewChange={(view) => switchShellView(view)}
@@ -648,10 +733,7 @@ export function App() {
       </main>
     </div>
   ) : (
-    <div
-      key={`tab-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
+    <div className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg">
       <Header />
       <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
         <ViewRouter />
@@ -670,12 +752,73 @@ export function App() {
     shellContent
   );
 
+  const onboardingHandoffCopy = resolveOnboardingHandoffCopy(
+    onboardingHandoffPhase,
+    onboardingHandoffError,
+  );
+
   return (
     <BugReportProvider value={bugReport}>
+      {/* Bridge React state into the 3D scene overlay panels */}
+      {COMPANION_ENABLED && <SceneOverlayDataBridge />}
       {/*
         If we are in the crossfade phase, mount the shell but cover it with the fading onboarding layer.
       */}
       {appShell}
+
+      {showOnboarding && (
+        <div
+          className={`fixed inset-0 z-[${Z_MODAL}] transition-opacity duration-700`}
+          style={{ opacity: fadingOutOnboarding ? 0 : 1 }}
+        >
+          <OnboardingWizard />
+        </div>
+      )}
+
+      {onboardingHandoffActive && (
+        <div
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-[90] flex justify-center px-4 pb-6 pt-20"
+          data-testid="onboarding-handoff-overlay"
+        >
+          <div className="pointer-events-auto w-full max-w-lg rounded-[24px] border border-border/50 bg-card/92 p-5 shadow-[0_18px_48px_rgba(15,23,42,0.24)] backdrop-blur-md">
+            <div className="flex items-start gap-3">
+              {onboardingHandoffPhase === "error" ? (
+                <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-danger" />
+              ) : (
+                <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-accent animate-pulse" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-txt">
+                  {onboardingHandoffCopy.title}
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  {onboardingHandoffCopy.detail}
+                </p>
+              </div>
+            </div>
+
+            {onboardingHandoffPhase === "error" && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  data-testid="onboarding-handoff-retry"
+                  onClick={() => {
+                    void retryOnboardingHandoff();
+                  }}
+                >
+                  Retry
+                </Button>
+                <Button
+                  variant="outline"
+                  data-testid="onboarding-handoff-back"
+                  onClick={cancelOnboardingHandoff}
+                >
+                  Back to setup
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Persistent game overlay — stays visible across all tabs */}
       {activeGameViewerUrl && gameOverlayEnabled && tab !== "apps" && (
@@ -699,6 +842,21 @@ export function App() {
       />
       <ConnectionFailedBanner />
       <SystemWarningBanner />
+      {showLoader && (
+        <AvatarLoader
+          {...(() => {
+            const { label, progress } = resolveAgentLoaderCopy(
+              agentStarting,
+              onboardingLoading,
+              startupElapsedSec,
+              agentStatus?.startup,
+            );
+            return { label, progress };
+          })()}
+          fullScreen
+          fadingOut={loaderFadingOut}
+        />
+      )}
     </BugReportProvider>
   );
 }

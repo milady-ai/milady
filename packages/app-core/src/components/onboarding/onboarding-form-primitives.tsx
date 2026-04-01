@@ -12,15 +12,15 @@ export const onboardingDetailStackClassName =
 export const onboardingCenteredStackClassName =
   "flex w-full flex-col items-center gap-3 text-center";
 export const onboardingReadableTextStrongClassName =
-  "text-[var(--onboarding-text-strong)]";
+  "text-[var(--onboarding-text-strong)] [text-shadow:var(--onboarding-text-shadow-strong)] [-webkit-text-stroke:0.3px_var(--onboarding-text-stroke)]";
 export const onboardingReadableTextPrimaryClassName =
-  "text-[var(--onboarding-text-primary)]";
+  "text-[var(--onboarding-text-primary)] [text-shadow:var(--onboarding-text-shadow-primary)]";
 export const onboardingReadableTextMutedClassName =
-  "text-[var(--onboarding-text-muted)]";
+  "text-[var(--onboarding-text-muted)] [text-shadow:var(--onboarding-text-shadow-muted)]";
 export const onboardingReadableTextSubtleClassName =
-  "text-[var(--onboarding-text-subtle)]";
+  "text-[var(--onboarding-text-subtle)] [text-shadow:var(--onboarding-text-shadow-muted)]";
 export const onboardingReadableTextFaintClassName =
-  "text-[var(--onboarding-text-faint)]";
+  "text-[var(--onboarding-text-faint)] [text-shadow:var(--onboarding-text-shadow-muted)]";
 export const onboardingHelperTextClassName = `text-[12px] leading-relaxed ${onboardingReadableTextMutedClassName}`;
 export const onboardingSubtleTextClassName = `text-[11px] leading-relaxed ${onboardingReadableTextSubtleClassName}`;
 export const onboardingFieldLabelClassName = `text-xs font-semibold uppercase tracking-[0.14em] ${onboardingReadableTextMutedClassName}`;
@@ -38,7 +38,7 @@ export const onboardingRecommendedSurfaceHoverClassName =
   "hover:border-[var(--onboarding-recommended-border-strong)] hover:bg-[var(--onboarding-recommended-bg-hover)]";
 export const onboardingInputSurfaceClassName =
   "border border-[var(--onboarding-input-border)] bg-[var(--onboarding-input-bg)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]";
-export const onboardingInfoPanelClassName = `rounded-2xl px-4 py-4 ${onboardingCardSurfaceClassName}`;
+export const onboardingInfoPanelClassName = `rounded-2xl px-4 py-4 backdrop-blur-[18px] backdrop-saturate-[1.15] ${onboardingCardSurfaceClassName}`;
 export const onboardingInputClassName = `h-12 w-full rounded-xl px-4 text-left ${onboardingReadableTextPrimaryClassName} transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-[var(--onboarding-text-subtle)] focus-visible:border-[var(--onboarding-field-focus-border)] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-[var(--onboarding-field-focus-shadow)] ${onboardingInputSurfaceClassName}`;
 export const onboardingChoiceCardTitleClassName = `text-[12px] font-medium leading-[1.3] ${onboardingReadableTextPrimaryClassName}`;
 export const onboardingChoiceCardDescriptionClassName = `mt-1 text-[11px] leading-[1.35] ${onboardingReadableTextMutedClassName}`;
@@ -48,8 +48,6 @@ export const onboardingChoiceCardDetectedBadgeClassName =
   "ml-auto shrink-0 whitespace-nowrap rounded-full bg-[rgba(34,197,94,0.2)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[rgba(34,197,94,0.94)] [text-shadow:0_1px_6px_rgba(3,5,10,0.45)]";
 export const onboardingChoiceCardRecommendedLabelClassName =
   "ml-auto shrink-0 whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.12em] text-accent";
-export const onboardingDifficultyBadgeClassName =
-  "ml-auto shrink-0 whitespace-nowrap rounded-full bg-[rgba(20,24,16,0.7)] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[rgba(255,255,255,0.85)]";
 
 export function getOnboardingChoiceCardClassName({
   detected = false,
@@ -61,12 +59,12 @@ export function getOnboardingChoiceCardClassName({
   recommended?: boolean;
 }) {
   return cn(
-    "flex min-h-[60px] w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left transition-[border-color,background-color,box-shadow] duration-200",
+    "flex min-h-[60px] w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left backdrop-blur-[18px] backdrop-saturate-[1.2] transition-[border-color,background-color,box-shadow] duration-200",
     recommended
       ? `${onboardingRecommendedSurfaceClassName} ${onboardingRecommendedSurfaceHoverClassName}`
       : `${onboardingCardSurfaceClassName} ${onboardingCardSurfaceHoverClassName}`,
     selected &&
-      "border-[rgba(122,154,58,0.32)] bg-[rgba(122,154,58,0.12)] shadow-[0_0_0_1px_rgba(122,154,58,0.18)]",
+      "border-[rgba(240,185,11,0.32)] bg-[rgba(240,185,11,0.12)] shadow-[0_0_0_1px_rgba(240,185,11,0.18)]",
     detected &&
       "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.1)] hover:border-[rgba(34,197,94,0.5)] hover:bg-[rgba(34,197,94,0.15)]",
   );

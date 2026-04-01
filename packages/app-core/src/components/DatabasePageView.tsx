@@ -2,8 +2,7 @@
  * Databases page — wrapper with Tables / Media / Vectors sub-tabs.
  */
 
-import { Button, PageLayoutHeader } from "@miladyai/ui";
-import type { ReactNode } from "react";
+import { Button } from "@miladyai/ui";
 import { useApp } from "../state";
 import { DatabaseView } from "./DatabaseView";
 import {
@@ -17,11 +16,7 @@ import {
 import { MediaGalleryView } from "./MediaGalleryView";
 import { VectorBrowserView } from "./VectorBrowserView";
 
-export function DatabasePageView({
-  contentHeader,
-}: {
-  contentHeader?: ReactNode;
-} = {}) {
+export function DatabasePageView() {
   const { t, databaseSubTab, setState } = useApp();
   const dbTabs = [
     {
@@ -74,11 +69,6 @@ export function DatabasePageView({
       <div
         className={`${DESKTOP_PAGE_CONTENT_CLASSNAME} flex h-full w-full min-h-0 flex-col`}
       >
-        {contentHeader ? (
-          <PageLayoutHeader className="px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6">
-            {contentHeader}
-          </PageLayoutHeader>
-        ) : null}
         {databaseSubTab === "tables" && <DatabaseView leftNav={leftNav} />}
         {databaseSubTab === "media" && <MediaGalleryView leftNav={leftNav} />}
         {databaseSubTab === "vectors" && (

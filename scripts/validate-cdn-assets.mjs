@@ -152,20 +152,6 @@ async function validateGroup(
   return lastMissing;
 }
 
-/**
- * Probe whether a git ref is resolvable on raw.githubusercontent.com.
- * Returns true if at least one well-known path returns 200.
- */
-async function isRefAccessible(repository, ref) {
-  const probeUrl = `https://raw.githubusercontent.com/${repository}/${ref}/package.json`;
-  try {
-    const res = await fetch(probeUrl, { method: "HEAD" });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 async function main() {
   const releaseTag = resolveMiladyReleaseTag();
   const repository = resolveMiladyAssetRepository();
@@ -186,34 +172,17 @@ async function main() {
   if (!manifest) {
     throw new Error("Static asset manifest is missing.");
   }
-
-  // When validating before the tag is created (e.g. agent-release build
-  // matrix runs before the publish step creates the tag), fall back to the
-  // commit SHA so we still verify the assets exist in the repo at this
-  // commit. raw.githubusercontent.com resolves any git ref — branch, tag,
-  // or full SHA — so the check is equivalent.
-  let effectiveRef = releaseTag;
-  if (!(await isRefAccessible(repository, releaseTag))) {
-    const sha = process.env.GITHUB_SHA;
-    if (sha && (await isRefAccessible(repository, sha))) {
-      console.log(
-        `validate-cdn-assets: tag ${releaseTag} not yet accessible, falling back to commit SHA ${sha.slice(0, 12)}.`,
-      );
-      effectiveRef = sha;
-    }
-  }
-
   const retryPolicy = getValidationRetryPolicy();
   const [missingApp, missingHomepage] = await Promise.all([
     validateGroup(manifest.app, {
       repository,
-      releaseTag: effectiveRef,
+      releaseTag,
       assetRoot: "apps/app/public",
       retryPolicy,
     }),
     validateGroup(manifest.homepage, {
       repository,
-      releaseTag: effectiveRef,
+      releaseTag,
       assetRoot: "apps/homepage/public",
       retryPolicy,
     }),
@@ -229,7 +198,7 @@ async function main() {
   }
 
   console.log(
-    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} managed asset URLs for ${effectiveRef}${effectiveRef !== releaseTag ? ` (tag ${releaseTag} pending)` : ""}.`,
+    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} managed asset URLs for ${releaseTag}.`,
   );
 }
 

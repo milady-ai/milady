@@ -2,43 +2,59 @@
  * Settings view — two-panel layout with section navigator and active section.
  */
 
+import type { StewardStatusResponse } from "@miladyai/shared/contracts/wallet";
 import {
   Button,
   Checkbox,
-  cn,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   Input,
   Label,
-  PageLayout,
-  PagePanel,
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarPanel,
-  SidebarScrollRegion,
+  SectionCard,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Spinner,
-  useLinkedSidebarSelection,
 } from "@miladyai/ui";
-import { AlertTriangle, Download, Upload } from "lucide-react";
 import {
-  type ComponentPropsWithoutRef,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+  AlertTriangle,
+  ChevronDown,
+  Copy,
+  Download,
+  Shield,
+  Upload,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { client } from "../api";
 import { useApp } from "../state";
 import { CodingAgentSettingsSection } from "./CodingAgentSettingsSection";
+import { ConfigPageView } from "./ConfigPageView";
+import {
+  DESKTOP_SURFACE_PANEL_CLASSNAME,
+  DesktopPageFrame,
+} from "./desktop-surface-primitives";
 import { CloudDashboard } from "./ElizaCloudDashboard";
 import { MediaSettingsSection } from "./MediaSettingsSection";
 import { PermissionsSection } from "./PermissionsSection";
+import { PolicyControlsView } from "./PolicyControlsView";
 import { ProviderSwitcher } from "./ProviderSwitcher";
 import { ReleaseCenterView } from "./ReleaseCenterView";
+import { SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME } from "./settings-control-primitives";
+import {
+  APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME,
+  APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME,
+  APP_SIDEBAR_CARD_ACTIVE_CLASSNAME,
+  APP_SIDEBAR_CARD_BASE_CLASSNAME,
+  APP_SIDEBAR_CARD_INACTIVE_CLASSNAME,
+  APP_SIDEBAR_INNER_CLASSNAME,
+  APP_SIDEBAR_KICKER_CLASSNAME,
+  APP_SIDEBAR_SCROLL_REGION_CLASSNAME,
+  APP_SIDEBAR_SEARCH_INPUT_CLASSNAME,
+} from "./sidebar-shell-styles";
 
 interface SettingsSectionDef {
   id: string;
@@ -47,10 +63,13 @@ interface SettingsSectionDef {
   keywords?: string[];
 }
 
+const SETTINGS_SHELL_CLASS = APP_DESKTOP_INLINE_SPLIT_SHELL_CLASSNAME;
+const SETTINGS_SIDEBAR_RAIL_CLASS = `hidden lg:flex ${APP_DESKTOP_SIDEBAR_RAIL_STANDARD_CLASSNAME}`;
 const SETTINGS_CONTENT_CLASS =
-  "[scroll-padding-top:7rem] [scrollbar-gutter:stable] scroll-smooth bg-bg/10 pb-6 pt-4 sm:pb-8 sm:pt-5 lg:pb-10 lg:pt-6";
-const SETTINGS_CONTENT_WIDTH_CLASS = "w-full min-h-0";
+  "settings-page-content flex-1 min-w-0 overflow-y-auto scroll-smooth bg-bg/10 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5 lg:px-7 lg:pb-10 lg:pt-6";
+const SETTINGS_CONTENT_WIDTH_CLASS = "mx-auto w-full max-w-[82rem]";
 const SETTINGS_SECTION_STACK_CLASS = "space-y-6 pb-14 sm:space-y-8 sm:pb-16";
+const SETTINGS_SECTION_CARD_CLASS = `overflow-visible ${DESKTOP_SURFACE_PANEL_CLASSNAME}`;
 
 const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
@@ -80,6 +99,41 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
     label: "settings.sections.codingagents.label",
     description: "settings.sections.codingagents.desc",
     keywords: ["codex", "agent", "reasoning", "parallel", "approval"],
+  },
+  {
+    id: "wallet-rpc",
+    label: "settings.sections.walletrpc.label",
+    description: "settings.sections.walletrpc.desc",
+    keywords: [
+      "wallet",
+      "rpc",
+      "chain",
+      "solana",
+      "ethereum",
+      "base",
+      "private key",
+      "address",
+      "network",
+    ],
+  },
+  {
+    id: "wallet-policies",
+    label: "settings.sections.walletpolicies.label",
+    description: "settings.sections.walletpolicies.desc",
+    keywords: [
+      "policy",
+      "policies",
+      "spending",
+      "limit",
+      "approved",
+      "addresses",
+      "rate limit",
+      "time window",
+      "auto approve",
+      "steward",
+      "safety",
+      "guardrails",
+    ],
   },
   {
     id: "media",
@@ -151,49 +205,145 @@ function matchesSettingsSection(
   );
 }
 
-interface SettingsSectionProps extends ComponentPropsWithoutRef<"section"> {
-  title?: string;
-  description?: string;
-  bodyClassName?: string;
+function SettingsMobileToolbar({
+  sections,
+  activeSection,
+  onSectionChange,
+  searchQuery,
+  onSearchChange,
+}: {
+  sections: SettingsSectionDef[];
+  activeSection: string;
+  onSectionChange: (id: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+}) {
+  const { t } = useApp();
+  const active = sections.find((section) => section.id === activeSection);
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
+
+  return (
+    <div
+      className="sticky z-20 mb-4 space-y-3 rounded-[calc(var(--radius-xl)+2px)] border border-border/50 bg-card/88 p-3 shadow-lg backdrop-blur-xl lg:hidden"
+      style={{ top: "calc(var(--safe-area-top, 0px) + 0.5rem)" }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className={APP_SIDEBAR_KICKER_CLASSNAME}>
+            {t("nav.settings")}
+          </div>
+          <div className="truncate text-sm font-medium text-txt">
+            {active ? t(active.label) : t("nav.settings")}
+          </div>
+        </div>
+        <div className="min-w-[10rem] flex-1 max-w-[14rem]">
+          <Select value={activeSection} onValueChange={onSectionChange}>
+            <SelectTrigger
+              className={SETTINGS_TOOLBAR_SELECT_TRIGGER_CLASSNAME}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sections.map((section) => (
+                <SelectItem key={section.id} value={section.id}>
+                  {t(section.label)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <Input
+        type="search"
+        value={searchQuery}
+        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder={searchLabel}
+        aria-label={searchLabel}
+        className={`h-11 ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+      />
+    </div>
+  );
 }
 
-const SettingsSection = forwardRef<HTMLElement, SettingsSectionProps>(
-  function SettingsSection(
-    { title, description, bodyClassName, className, children, ...props },
-    ref,
-  ) {
-    if (title || description) {
-      return (
-        <PagePanel.CollapsibleSection
-          ref={ref}
-          as="section"
-          expanded
-          variant="section"
-          heading={title ?? ""}
-          description={description}
-          bodyClassName={bodyClassName}
-          className={className}
-          {...props}
-        >
-          {children}
-        </PagePanel.CollapsibleSection>
-      );
-    }
+/* ── Settings Sidebar ────────────────────────────────────────────────── */
 
-    return (
-      <section
-        ref={ref}
-        data-content-align-offset={4}
-        className={className}
-        {...props}
-      >
-        <PagePanel variant="section">
-          <div className={cn("p-4 sm:p-5", bodyClassName)}>{children}</div>
-        </PagePanel>
-      </section>
-    );
-  },
-);
+function SettingsSidebar({
+  sections,
+  activeSection,
+  onSectionChange,
+  searchQuery,
+  onSearchChange,
+  onClose: _onClose,
+}: {
+  sections: SettingsSectionDef[];
+  activeSection: string;
+  onSectionChange: (id: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  onClose: () => void;
+}) {
+  const { t } = useApp();
+  const searchLabel = t("settingsview.SearchSettings", {
+    defaultValue: "Search settings",
+  });
+
+  return (
+    <aside
+      className="hidden lg:flex lg:min-h-0 lg:flex-col"
+      data-testid="settings-sidebar"
+    >
+      <div className={APP_SIDEBAR_INNER_CLASSNAME}>
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={searchLabel}
+          aria-label={searchLabel}
+          className={`w-full ${APP_SIDEBAR_SEARCH_INPUT_CLASSNAME}`}
+        />
+
+        <nav
+          className={`mt-4 space-y-1.5 ${APP_SIDEBAR_SCROLL_REGION_CLASSNAME}`}
+          aria-label={t("nav.settings")}
+        >
+          {sections.map((section) => {
+            const isActive = activeSection === section.id;
+            return (
+              <Button
+                key={section.id}
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={() => onSectionChange(section.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`${APP_SIDEBAR_CARD_BASE_CLASSNAME} ${
+                  isActive
+                    ? APP_SIDEBAR_CARD_ACTIVE_CLASSNAME
+                    : APP_SIDEBAR_CARD_INACTIVE_CLASSNAME
+                }`}
+              >
+                <div className="min-w-0 flex-1 text-left">
+                  <div
+                    className={`truncate text-sm ${isActive ? "font-semibold" : "font-medium"}`}
+                  >
+                    {t(section.label)}
+                  </div>
+                  {section.description ? (
+                    <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted/85">
+                      {t(section.description)}
+                    </div>
+                  ) : null}
+                </div>
+              </Button>
+            );
+          })}
+        </nav>
+      </div>
+    </aside>
+  );
+}
 
 /* ── Updates Section ─────────────────────────────────────────────────── */
 
@@ -523,23 +673,220 @@ function AdvancedSection() {
   );
 }
 
+/* ── Steward Wallet Section ───────────────────────────────────────────── */
+
+function CopyableAddress({
+  label,
+  address,
+}: {
+  label: string;
+  address: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(address).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [address]);
+
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-bg/50 px-3 py-2.5">
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] font-medium text-muted">{label}</div>
+        <div className="mt-0.5 truncate font-mono text-xs text-txt">
+          {address}
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0 text-muted hover:text-txt"
+        onClick={handleCopy}
+        aria-label={`Copy ${label} address`}
+      >
+        {copied ? (
+          <span className="text-ok text-xs">✓</span>
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </Button>
+    </div>
+  );
+}
+
+function StewardWalletInfo({
+  stewardStatus,
+  onScrollToPolicies,
+}: {
+  stewardStatus: StewardStatusResponse;
+  onScrollToPolicies: () => void;
+}) {
+  const { t } = useApp();
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const evmAddress =
+    stewardStatus.walletAddresses?.evm ?? stewardStatus.evmAddress ?? null;
+  const solanaAddress = stewardStatus.walletAddresses?.solana ?? null;
+
+  return (
+    <div className="space-y-4">
+      {/* Steward status banner */}
+      <div className="flex items-center gap-3 rounded-lg border border-accent/20 bg-accent/5 p-3">
+        <Shield className="h-5 w-5 shrink-0 text-accent" />
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-semibold text-txt">
+            {t("settings.stewardWalletManaged", {
+              defaultValue: "Wallet managed by Steward",
+            })}
+          </div>
+          <div className="mt-0.5 text-[11px] text-muted">
+            {stewardStatus.vaultHealth === "ok"
+              ? t("settings.stewardVaultHealthy", {
+                  defaultValue: "Vault connected and healthy",
+                })
+              : stewardStatus.vaultHealth === "degraded"
+                ? t("settings.stewardVaultDegraded", {
+                    defaultValue: "Vault connected — degraded",
+                  })
+                : t("settings.stewardVaultError", {
+                    defaultValue: "Vault connected — error state",
+                  })}
+          </div>
+        </div>
+        <span
+          className={`h-2 w-2 shrink-0 rounded-full ${
+            stewardStatus.vaultHealth === "ok"
+              ? "bg-ok"
+              : stewardStatus.vaultHealth === "degraded"
+                ? "bg-warn"
+                : "bg-danger"
+          }`}
+        />
+      </div>
+
+      {/* Wallet addresses */}
+      <div className="space-y-2">
+        {evmAddress && (
+          <CopyableAddress label="EVM Address" address={evmAddress} />
+        )}
+        {solanaAddress && (
+          <CopyableAddress label="Solana Address" address={solanaAddress} />
+        )}
+        {!evmAddress && !solanaAddress && (
+          <div className="rounded-lg border border-border/50 bg-bg/50 px-3 py-2.5 text-xs text-muted">
+            {t("settings.stewardNoAddresses", {
+              defaultValue: "No vault addresses yet",
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Link to Wallet Policies */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-center gap-2 text-xs"
+        onClick={onScrollToPolicies}
+      >
+        <Shield className="h-3.5 w-3.5" />
+        {t("settings.viewWalletPolicies", {
+          defaultValue: "View Wallet Policies",
+        })}
+      </Button>
+
+      {/* RPC configuration — always visible */}
+      <div className="border-t border-border/50 pt-4">
+        <div className="text-xs font-semibold text-txt mb-2">
+          {t("settings.rpcConfiguration", {
+            defaultValue: "RPC Configuration",
+          })}
+        </div>
+        <ConfigPageView embedded />
+      </div>
+
+      {/* Advanced: show local key import */}
+      <div className="border-t border-border/50 pt-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-between text-xs text-muted hover:text-txt"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+        >
+          {t("settings.showAdvancedKeyManagement", {
+            defaultValue: "Advanced key management",
+          })}
+          <ChevronDown
+            className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
+          />
+        </Button>
+        {showAdvanced && (
+          <div className="mt-3 rounded-lg border border-warn/20 bg-warn/5 p-3">
+            <div className="mb-2 flex items-center gap-2 text-[11px] text-warn">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {t("settings.advancedKeyWarning", {
+                defaultValue: "Not needed with Steward. Use with caution.",
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── SettingsView ─────────────────────────────────────────────────────── */
 
 export function SettingsView({
   inModal,
-  onClose: _onClose,
+  onClose,
   initialSection,
 }: {
   inModal?: boolean;
   onClose?: () => void;
   initialSection?: string;
 } = {}) {
-  const { t, loadPlugins } = useApp();
+  const { t, loadPlugins, setTab } = useApp();
   const [activeSection, setActiveSection] = useState(initialSection ?? "cloud");
   const [searchQuery, setSearchQuery] = useState("");
   const shellRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
 
-  const effectiveSections = SETTINGS_SECTIONS;
+  /* ── Steward status ─────────────────────────────────────────────────── */
+  const [stewardStatus, setStewardStatus] =
+    useState<StewardStatusResponse | null>(null);
+  const stewardConnected = stewardStatus?.connected === true;
+
+  useEffect(() => {
+    let cancelled = false;
+    client
+      .getStewardStatus()
+      .then((status) => {
+        if (!cancelled) setStewardStatus(status);
+      })
+      .catch(() => {
+        /* steward not available — leave null */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* Dynamic section definitions based on steward status */
+  const effectiveSections = useMemo(() => {
+    if (!stewardConnected) return SETTINGS_SECTIONS;
+    return SETTINGS_SECTIONS.map((section) =>
+      section.id === "wallet-rpc"
+        ? {
+            ...section,
+            label: "settings.sections.wallet.label" as const,
+            description: "settings.sections.wallet.stewardDesc" as const,
+          }
+        : section,
+    );
+  }, [stewardConnected]);
 
   const visibleSections = useMemo(
     () =>
@@ -552,29 +899,43 @@ export function SettingsView({
     () => new Set(visibleSections.map((section) => section.id)),
     [visibleSections],
   );
-  const {
-    contentContainerRef,
-    queueContentAlignment,
-    registerContentItem,
-    registerSidebarItem,
-  } = useLinkedSidebarSelection<string>({
-    contentTopOffset: 24,
-    enabled: visibleSections.length > 0,
-    selectedId: visibleSectionIds.has(activeSection) ? activeSection : null,
-    topAlignedId: visibleSections[0]?.id ?? null,
-  });
 
   useEffect(() => {
     void loadPlugins();
   }, [loadPlugins]);
 
-  const handleSectionChange = useCallback(
-    (sectionId: string) => {
-      setActiveSection(sectionId);
-      queueContentAlignment(sectionId);
-    },
-    [queueContentAlignment],
+  useEffect(() => {
+    const content = contentRef.current;
+    const shell = shellRef.current;
+    if (content) {
+      scrollContainerRef.current = content;
+      return;
+    }
+    if (!shell) return;
+
+    scrollContainerRef.current = inModal
+      ? shell
+      : (shell.closest('[data-shell-scroll-region="true"]') ?? shell);
+  }, [inModal]);
+
+  const handleClose = useCallback(
+    () => onClose?.() ?? setTab(inModal ? "companion" : "chat"),
+    [inModal, onClose, setTab],
   );
+
+  const handleSectionChange = useCallback((sectionId: string) => {
+    setActiveSection(sectionId);
+    if (shellRef.current) {
+      const element = shellRef.current.querySelector(`#${sectionId}`);
+      if (element instanceof HTMLElement) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, []);
+
+  const scrollToPolicies = useCallback(() => {
+    handleSectionChange("wallet-policies");
+  }, [handleSectionChange]);
 
   useEffect(() => {
     if (visibleSections.length === 0) return;
@@ -590,7 +951,7 @@ export function SettingsView({
 
   useEffect(() => {
     const shell = shellRef.current;
-    const root = contentContainerRef.current;
+    const root = scrollContainerRef.current;
     if (!shell || !root) return;
 
     const handleScroll = () => {
@@ -633,171 +994,136 @@ export function SettingsView({
     handleScroll();
 
     return () => root.removeEventListener("scroll", handleScroll);
-  }, [contentContainerRef, visibleSections]);
-
-  const searchLabel = t("settingsview.SearchSettings", {
-    defaultValue: "Search settings",
-  });
-  const activeSectionDef =
-    visibleSections.find((section) => section.id === activeSection) ??
-    effectiveSections.find((section) => section.id === activeSection) ??
-    visibleSections[0] ??
-    null;
-
-  const settingsSidebar = (
-    <Sidebar
-      testId="settings-sidebar"
-      collapsible
-      contentIdentity="settings"
-      collapseButtonTestId="settings-sidebar-collapse-toggle"
-      expandButtonTestId="settings-sidebar-expand-toggle"
-      collapseButtonAriaLabel="Collapse settings"
-      expandButtonAriaLabel="Expand settings"
-      mobileTitle={t("nav.settings")}
-      mobileMeta={activeSectionDef ? t(activeSectionDef.label) : undefined}
-      header={
-        <SidebarHeader
-          search={{
-            value: searchQuery,
-            onChange: (event) => setSearchQuery(event.target.value),
-            onClear: () => setSearchQuery(""),
-            placeholder: searchLabel,
-            "aria-label": searchLabel,
-            autoComplete: "off",
-            spellCheck: false,
-          }}
-        />
-      }
-    >
-      <SidebarScrollRegion>
-        <SidebarPanel>
-          {visibleSections.length === 0 ? (
-            <SidebarContent.EmptyState className="px-4 py-6">
-              {t("settingsview.NoMatchingSettings")}
-            </SidebarContent.EmptyState>
-          ) : (
-            <nav className="space-y-1.5" aria-label={t("nav.settings")}>
-              {visibleSections.map((section) => {
-                const isActive = activeSection === section.id;
-                return (
-                  <SidebarContent.Item
-                    key={section.id}
-                    as="div"
-                    active={isActive}
-                    className="gap-2"
-                    ref={registerSidebarItem(section.id)}
-                  >
-                    <SidebarContent.ItemButton
-                      onClick={() => handleSectionChange(section.id)}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      <SidebarContent.ItemBody>
-                        <SidebarContent.ItemTitle
-                          className={isActive ? "font-semibold" : "font-medium"}
-                        >
-                          {t(section.label)}
-                        </SidebarContent.ItemTitle>
-                        {section.description ? (
-                          <SidebarContent.ItemDescription>
-                            {t(section.description)}
-                          </SidebarContent.ItemDescription>
-                        ) : null}
-                      </SidebarContent.ItemBody>
-                    </SidebarContent.ItemButton>
-                  </SidebarContent.Item>
-                );
-              })}
-            </nav>
-          )}
-        </SidebarPanel>
-      </SidebarScrollRegion>
-    </Sidebar>
-  );
+  }, [visibleSections]);
 
   const sectionsContent = (
     <>
       {visibleSectionIds.has("cloud") && (
-        <SettingsSection
+        <section
           id="cloud"
-          className="relative overflow-hidden"
-          bodyClassName="p-0"
-          ref={registerContentItem("cloud")}
+          className={`${SETTINGS_SECTION_CARD_CLASS} relative`}
         >
           <CloudDashboard />
-        </SettingsSection>
+        </section>
       )}
 
       {visibleSectionIds.has("ai-model") && (
-        <SettingsSection
+        <SectionCard
           id="ai-model"
           title={t("settings.sections.aimodel.label")}
           description={t("settings.sections.aimodel.desc")}
-          ref={registerContentItem("ai-model")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <ProviderSwitcher />
-        </SettingsSection>
+        </SectionCard>
       )}
 
       {visibleSectionIds.has("coding-agents") && (
-        <SettingsSection
+        <SectionCard
           id="coding-agents"
           title={t("settings.sections.codingagents.label")}
           description={t("settings.codingAgentsDescription")}
-          ref={registerContentItem("coding-agents")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <CodingAgentSettingsSection />
-        </SettingsSection>
+        </SectionCard>
+      )}
+
+      {visibleSectionIds.has("wallet-rpc") && (
+        <SectionCard
+          id="wallet-rpc"
+          title={
+            stewardConnected
+              ? t("settings.sections.wallet.label", {
+                  defaultValue: "Wallet",
+                })
+              : t("settings.sections.walletrpc.label")
+          }
+          description={
+            stewardConnected
+              ? t("settings.sections.wallet.stewardDesc", {
+                  defaultValue: "Managed by Steward vault",
+                })
+              : t("settings.walletRpcDescription")
+          }
+          className={SETTINGS_SECTION_CARD_CLASS}
+        >
+          {stewardConnected && stewardStatus ? (
+            <StewardWalletInfo
+              stewardStatus={stewardStatus}
+              onScrollToPolicies={scrollToPolicies}
+            />
+          ) : (
+            <ConfigPageView embedded />
+          )}
+        </SectionCard>
+      )}
+
+      {visibleSectionIds.has("wallet-policies") && (
+        <SectionCard
+          id="wallet-policies"
+          title={t("settings.sections.walletpolicies.label", {
+            defaultValue: "Wallet Policies",
+          })}
+          description={t("settings.sections.walletpolicies.desc", {
+            defaultValue: "Spending limits and transaction rules",
+          })}
+          className={SETTINGS_SECTION_CARD_CLASS}
+        >
+          <PolicyControlsView />
+        </SectionCard>
       )}
 
       {visibleSectionIds.has("media") && (
-        <SettingsSection
+        <SectionCard
           id="media"
           title={t("settings.sections.media.label")}
           description={t("settings.sections.media.desc")}
-          ref={registerContentItem("media")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <MediaSettingsSection />
-        </SettingsSection>
+        </SectionCard>
       )}
 
       {visibleSectionIds.has("permissions") && (
-        <SettingsSection
+        <SectionCard
           id="permissions"
           title={t("settings.sections.permissions.label")}
           description={t("settings.sections.permissions.desc")}
-          ref={registerContentItem("permissions")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <PermissionsSection />
-        </SettingsSection>
+        </SectionCard>
       )}
 
       {visibleSectionIds.has("updates") && (
-        <SettingsSection
+        <SectionCard
           id="updates"
           title={t("settings.sections.updates.label")}
           description={t("settings.sections.updates.desc")}
-          ref={registerContentItem("updates")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <UpdatesSection />
-        </SettingsSection>
+        </SectionCard>
       )}
 
       {visibleSectionIds.has("advanced") && (
-        <SettingsSection
+        <SectionCard
           id="advanced"
           title={t("nav.advanced")}
           description={t("settings.sections.advanced.desc")}
-          ref={registerContentItem("advanced")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <AdvancedSection />
-        </SettingsSection>
+        </SectionCard>
       )}
 
       {visibleSections.length === 0 && (
-        <SettingsSection
+        <SectionCard
           id="settings-empty"
           title={t("settingsview.NoMatchingSettings")}
           description={t("settings.noMatchingSettingsDescription")}
+          className={SETTINGS_SECTION_CARD_CLASS}
         >
           <Button
             variant="outline"
@@ -806,26 +1132,44 @@ export function SettingsView({
           >
             {t("settingsview.ClearSearch")}
           </Button>
-        </SettingsSection>
+        </SectionCard>
       )}
     </>
   );
 
   return (
-    <PageLayout
-      className={cn("h-full", inModal && "min-h-0")}
-      data-testid="settings-shell"
-      sidebar={settingsSidebar}
-      contentRef={contentContainerRef}
-      contentClassName={SETTINGS_CONTENT_CLASS}
-      contentInnerClassName={SETTINGS_CONTENT_WIDTH_CLASS}
-      mobileSidebarLabel={
-        activeSectionDef ? t(activeSectionDef.label) : t("nav.settings")
-      }
-    >
-      <div ref={shellRef} className={`w-full ${SETTINGS_SECTION_STACK_CLASS}`}>
-        {sectionsContent}
+    <DesktopPageFrame>
+      <div
+        ref={shellRef}
+        className={SETTINGS_SHELL_CLASS}
+        data-testid="settings-shell"
+      >
+        <div className={SETTINGS_SIDEBAR_RAIL_CLASS}>
+          <SettingsSidebar
+            sections={visibleSections}
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClose={handleClose}
+          />
+        </div>
+
+        <div ref={contentRef} className={SETTINGS_CONTENT_CLASS}>
+          <div className={SETTINGS_CONTENT_WIDTH_CLASS}>
+            <SettingsMobileToolbar
+              sections={visibleSections}
+              activeSection={activeSection}
+              onSectionChange={handleSectionChange}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+            <div className={SETTINGS_SECTION_STACK_CLASS}>
+              {sectionsContent}
+            </div>
+          </div>
+        </div>
       </div>
-    </PageLayout>
+    </DesktopPageFrame>
   );
 }

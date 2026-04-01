@@ -14,7 +14,6 @@ import {
   normalizeCharacterLanguage,
 } from "@miladyai/shared/onboarding-presets";
 import { loadElizaConfig, saveElizaConfig } from "../config/config";
-import { resolveProviderCredential } from "./credential-resolver";
 import { PREMADE_VOICES } from "../voice/types";
 import {
   applyOnboardingConnectionConfig,
@@ -117,55 +116,15 @@ function getPersistableLocalProviderEnvKey(
 export async function extractAndPersistOnboardingApiKey(
   body: Record<string, unknown>,
 ): Promise<string | null> {
-  logger.info(
-    `[onboarding] extractAndPersistOnboardingApiKey: connection=${body.connection ? "present" : "missing"}, keys=${Object.keys(body).join(",")}`,
-  );
   const persistedConnection = resolvePersistedOnboardingConnection(body);
   if (!persistedConnection) {
-    logger.warn(
-      "[onboarding] No persisted connection resolved from onboarding body",
-    );
     return null;
   }
-  logger.info(
-    `[onboarding] Resolved connection: kind=${persistedConnection.kind}, provider=${"provider" in persistedConnection ? persistedConnection.provider : "N/A"}, hasKey=${Boolean("apiKey" in persistedConnection && persistedConnection.apiKey)}`,
-  );
 
-  // If the key is masked (from IPC) or missing, try to resolve the real
-  // key from local credential stores (files, keychain, env).
-  if (
-    persistedConnection.kind === "local-provider" &&
-    (!persistedConnection.apiKey ||
-      persistedConnection.apiKey.startsWith("****"))
-  ) {
-    const resolved = resolveProviderCredential(persistedConnection.provider);
-    if (resolved && resolved.authType === "subscription") {
-      // OAuth tokens (e.g. Claude Code) go through the subscription auth
-      // flow — they can't be used as direct API keys. Rewrite the
-      // connection to use the subscription path.
-      (persistedConnection as unknown as Record<string, unknown>).kind =
-        "local-provider";
-      (persistedConnection as unknown as Record<string, unknown>).provider =
-        "anthropic-subscription";
-      (persistedConnection as unknown as Record<string, unknown>).apiKey =
-        resolved.apiKey;
-      logger.info(
-        `[onboarding] Using subscription auth for ${resolved.providerId}`,
-      );
-    } else if (resolved) {
-      (persistedConnection as unknown as Record<string, unknown>).apiKey =
-        resolved.apiKey;
-      logger.info(
-        `[onboarding] Resolved real key for ${persistedConnection.provider} via credential-resolver`,
-      );
-    } else {
-      const envKey = getPersistableLocalProviderEnvKey(persistedConnection);
-      if (envKey && !persistedConnection.apiKey) {
-        logger.warn(
-          `[onboarding] No key found for ${persistedConnection.provider} — cannot persist`,
-        );
-        return null;
-      }
+  if (persistedConnection.kind === "local-provider") {
+    const envKey = getPersistableLocalProviderEnvKey(persistedConnection);
+    if (envKey && !persistedConnection.apiKey) {
+      return null;
     }
   }
 

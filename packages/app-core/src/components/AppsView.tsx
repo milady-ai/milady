@@ -14,7 +14,10 @@ import {
   DEFAULT_VIEWER_SANDBOX,
   shouldShowAppInAppsView,
 } from "./apps/helpers";
-import { PagePanel } from "@miladyai/ui";
+import {
+  DESKTOP_INSET_PANEL_CLASSNAME,
+  DesktopEmptyStatePanel,
+} from "./desktop-surface-primitives";
 
 export { shouldShowAppInAppsView } from "./apps/helpers";
 
@@ -22,7 +25,7 @@ function AppsEmptyState() {
   const { t } = useApp();
 
   return (
-    <PagePanel.Empty
+    <DesktopEmptyStatePanel
       description={t("appsview.EmptyStateDescription")}
       title={t("appsview.EmptyStateTitle")}
     />
@@ -258,7 +261,9 @@ export function AppsView() {
             />
           </div>
 
-          <PagePanel variant="inset" className="order-1 p-4 lg:order-2">
+          <div
+            className={`order-1 p-4 lg:order-2 ${DESKTOP_INSET_PANEL_CLASSNAME}`}
+          >
             {selectedApp ? (
               <AppDetailPane
                 app={selectedApp}
@@ -276,7 +281,7 @@ export function AppsView() {
             ) : (
               <AppsEmptyState />
             )}
-          </PagePanel>
+          </div>
         </div>
 
         <div className="phone-home-indicator h-1.5 w-28 rounded-full bg-border/60 mx-auto mb-3" />

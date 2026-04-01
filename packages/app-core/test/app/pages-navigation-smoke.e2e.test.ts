@@ -176,15 +176,6 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
   ShellOverlays: () => null,
   StartupFailureView: ({ error }: { error: { message: string } }) =>
     React.createElement("div", null, error.message),
-  StartupShell: () => {
-    // Delegate to the correct sub-mock based on coordinator phase
-    const app = mockUseApp();
-    const phase = app?.startupCoordinator?.phase;
-    if (phase === "pairing-required") return React.createElement("div", null, "PairingView");
-    if (phase === "onboarding-required") return React.createElement("div", null, "OnboardingWizard");
-    if (phase === "error") return React.createElement("div", null, "StartupError");
-    return React.createElement("div", null, "StartupLoading");
-  },
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
   SystemWarningBanner: () =>
     React.createElement("div", null, "SystemWarningBanner"),
@@ -232,15 +223,6 @@ vi.mock("../../src/app-shell-components", () => ({
   ShellOverlays: () => null,
   StartupFailureView: ({ error }: { error: { message: string } }) =>
     React.createElement("div", null, error.message),
-  StartupShell: () => {
-    // Delegate to the correct sub-mock based on coordinator phase
-    const app = mockUseApp();
-    const phase = app?.startupCoordinator?.phase;
-    if (phase === "pairing-required") return React.createElement("div", null, "PairingView");
-    if (phase === "onboarding-required") return React.createElement("div", null, "OnboardingWizard");
-    if (phase === "error") return React.createElement("div", null, "StartupError");
-    return React.createElement("div", null, "StartupLoading");
-  },
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
   SystemWarningBanner: () =>
     React.createElement("div", null, "SystemWarningBanner"),
@@ -414,9 +396,13 @@ import { App } from "../../src/App";
 import { AppContext } from "../../src/state/useApp";
 
 type HarnessState = {
+  cancelOnboardingHandoff: () => void;
   onboardingLoading: boolean;
   authRequired: boolean;
   onboardingComplete: boolean;
+  onboardingHandoffError: string | null;
+  onboardingHandoffPhase: string;
+  retryOnboardingHandoff: () => Promise<void>;
   tab: Tab;
   actionNotice: null;
   setTab: (tab: Tab) => void;
@@ -540,6 +526,8 @@ describe("pages navigation smoke (e2e)", () => {
       onboardingLoading: false,
       authRequired: false,
       onboardingComplete: true,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
       tab: "chat",
       actionNotice: null,
       plugins: [],
@@ -558,8 +546,9 @@ describe("pages navigation smoke (e2e)", () => {
       startupPhase: "ready",
       startupStatus: "ready",
       startupError: null,
-      startupCoordinator: { phase: "ready", state: { phase: "ready" }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "ready", loading: false, terminal: true, target: null },
       retryStartup: vi.fn(),
+      retryOnboardingHandoff: vi.fn(async () => {}),
+      cancelOnboardingHandoff: vi.fn(),
       setActionNotice: vi.fn(),
       setTab: (tab: Tab) => {
         state.tab = tab;
@@ -691,9 +680,8 @@ describe("pages navigation smoke (e2e)", () => {
           onboardingLoading: true,
           onboardingComplete: false,
           startupStatus: "loading",
-          startupCoordinator: { phase: "polling-backend", state: { phase: "polling-backend", target: "embedded-local", attempts: 0 }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "starting-backend", loading: true, terminal: false, target: "embedded-local" },
         },
-        token: "StartupLoading",
+        token: "AvatarLoader",
       },
       {
         name: "pairing",
@@ -702,7 +690,6 @@ describe("pages navigation smoke (e2e)", () => {
           onboardingComplete: true,
           authRequired: true,
           startupStatus: "auth-blocked",
-          startupCoordinator: { phase: "pairing-required", state: { phase: "pairing-required" }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "ready", loading: false, terminal: false, target: null },
         },
         token: "PairingView",
       },
@@ -713,7 +700,6 @@ describe("pages navigation smoke (e2e)", () => {
           authRequired: false,
           onboardingComplete: false,
           startupStatus: "onboarding",
-          startupCoordinator: { phase: "onboarding-required", state: { phase: "onboarding-required", serverReachable: true }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "ready", loading: false, terminal: false, target: null },
         },
         token: "OnboardingWizard",
       },
@@ -741,6 +727,8 @@ describe("pages navigation smoke (e2e)", () => {
         onboardingLoading: false,
         authRequired: false,
         onboardingComplete: true,
+        onboardingHandoffError: null,
+        onboardingHandoffPhase: "idle",
         tab: "chat",
         actionNotice: null,
         plugins: [],
@@ -759,9 +747,9 @@ describe("pages navigation smoke (e2e)", () => {
         startupPhase: "ready",
         startupStatus: "ready",
         startupError: null,
-        startupCoordinator: { phase: "ready" },
-        startupCoordinatorLegacyPhase: "ready" as const,
         retryStartup: vi.fn(),
+        retryOnboardingHandoff: vi.fn(async () => {}),
+        cancelOnboardingHandoff: vi.fn(),
         setActionNotice: vi.fn(),
         setTab: (tab: Tab) => {
           state.tab = tab;
@@ -797,4 +785,54 @@ describe("pages navigation smoke (e2e)", () => {
     warnSpy.mockRestore();
   });
 
+  it("renders onboarding handoff progress and retry overlays in companion mode", async () => {
+    const cases: Array<{
+      error: string | null;
+      phase: string;
+      tokens: string[];
+    }> = [
+      {
+        phase: "bootstrapping",
+        error: null,
+        tokens: [
+          "CompanionShell Ready: companion",
+          "Starting your first conversation",
+        ],
+      },
+      {
+        phase: "error",
+        error: "restart down",
+        tokens: [
+          "CompanionShell Ready: companion",
+          "Setup hit a problem",
+          "restart down",
+          "Retry",
+          "Back to setup",
+        ],
+      },
+    ];
+
+    for (const entry of cases) {
+      state = {
+        ...state,
+        onboardingComplete: false,
+        onboardingHandoffError: entry.error,
+        onboardingHandoffPhase: entry.phase,
+        tab: "companion",
+        uiShellMode: "companion",
+      };
+      mockUseApp.mockImplementation(() => state);
+
+      let tree: TestRenderer.ReactTestRenderer | null = null;
+      await act(async () => {
+        tree = TestRenderer.create(renderApp(state));
+      });
+
+      const appText = textOf(requireTree(tree).root);
+      for (const token of entry.tokens) {
+        expect(appText).toContain(token);
+      }
+      expect(appText).not.toContain("OnboardingWizard");
+    }
+  });
 });

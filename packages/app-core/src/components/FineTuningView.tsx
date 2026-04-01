@@ -16,24 +16,23 @@ import { useApp } from "@miladyai/app-core/state";
 import { confirmDesktopAction } from "@miladyai/app-core/utils";
 import {
   Button,
-  PageLayoutHeader,
+  Input,
   Select,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
-  SettingsControls,
+  Textarea,
 } from "@miladyai/ui";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   parsePositiveFloat,
   parsePositiveInteger,
 } from "../utils/number-parsing";
+import {
+  SETTINGS_FILTER_CONTROL_CLASSNAME,
+  SETTINGS_TEXTAREA_CLASSNAME,
+} from "./settings-control-primitives";
 
 const TRAINING_EVENT_KINDS = new Set<TrainingStreamEvent["kind"]>([
   "job_started",
@@ -111,16 +110,15 @@ const FINE_TUNING_PANEL_CLASS =
   "rounded-2xl border border-border/45 bg-bg/20 shadow-sm";
 const FINE_TUNING_PANEL_HEADER_CLASS =
   "border-b border-border/35 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted/70";
+const FINE_TUNING_INPUT_CLASS = SETTINGS_FILTER_CONTROL_CLASSNAME;
+const FINE_TUNING_SELECT_TRIGGER_CLASS = SETTINGS_FILTER_CONTROL_CLASSNAME;
+const FINE_TUNING_TEXTAREA_CLASS = SETTINGS_TEXTAREA_CLASSNAME;
 const FINE_TUNING_ACTION_CLASS =
   "h-10 rounded-xl px-3 text-xs shadow-sm hover:border-accent disabled:opacity-50";
 const FINE_TUNING_STATUS_CARD_CLASS =
   "rounded-xl border border-border/35 bg-bg/30 px-3 py-3 shadow-sm";
 
-export function FineTuningView({
-  contentHeader,
-}: {
-  contentHeader?: ReactNode;
-} = {}) {
+export function FineTuningView() {
   const { handleRestart, setActionNotice, t } = useApp();
 
   const [pageLoading, setPageLoading] = useState(true);
@@ -248,7 +246,7 @@ export function FineTuningView({
     } finally {
       setPageLoading(false);
     }
-  }, [loadDatasets, loadJobs, loadModels, loadStatus, loadTrajectories, t]);
+  }, [loadDatasets, loadJobs, loadModels, loadStatus, loadTrajectories]);
 
   const loadTrajectoryDetail = useCallback(
     async (trajectoryId: string) => {
@@ -266,7 +264,7 @@ export function FineTuningView({
         setTrajectoryLoading(false);
       }
     },
-    [setActionNotice, t],
+    [setActionNotice],
   );
 
   const handleBuildDataset = useCallback(async () => {
@@ -302,7 +300,7 @@ export function FineTuningView({
     } finally {
       setDatasetBuilding(false);
     }
-  }, [buildLimit, buildMinCalls, loadDatasets, loadStatus, setActionNotice, t]);
+  }, [buildLimit, buildMinCalls, loadDatasets, loadStatus, setActionNotice]);
 
   const handleStartJob = useCallback(async () => {
     setStartingJob(true);
@@ -344,7 +342,6 @@ export function FineTuningView({
     startIterations,
     startLearningRate,
     startModel,
-    t,
   ]);
 
   const handleCancelJob = useCallback(
@@ -370,7 +367,7 @@ export function FineTuningView({
         setCancellingJobId("");
       }
     },
-    [loadJobs, loadStatus, setActionNotice, t],
+    [loadJobs, loadStatus, setActionNotice],
   );
 
   const handleImportSelectedModel = useCallback(async () => {
@@ -418,7 +415,6 @@ export function FineTuningView({
     loadModels,
     selectedModel,
     setActionNotice,
-    t,
   ]);
 
   const handleActivateSelectedModel = useCallback(async () => {
@@ -468,7 +464,6 @@ export function FineTuningView({
     loadModels,
     selectedModel,
     setActionNotice,
-    t,
   ]);
 
   const handleBenchmarkSelectedModel = useCallback(async () => {
@@ -497,7 +492,7 @@ export function FineTuningView({
     } finally {
       setModelAction("");
     }
-  }, [loadModels, selectedModel, setActionNotice, t]);
+  }, [loadModels, selectedModel, setActionNotice]);
 
   const handleSmokeTestSelectedModel = useCallback(async () => {
     if (!selectedModel) return;
@@ -521,7 +516,7 @@ export function FineTuningView({
     } finally {
       setModelAction("");
     }
-  }, [selectedModel, setActionNotice, t]);
+  }, [selectedModel, setActionNotice]);
 
   useEffect(() => {
     void refreshAll();
@@ -559,22 +554,14 @@ export function FineTuningView({
 
   if (pageLoading) {
     return (
-      <div className={FINE_TUNING_PAGE_CLASS}>
-        {contentHeader ? (
-          <PageLayoutHeader>{contentHeader}</PageLayoutHeader>
-        ) : null}
-        <div className="text-sm text-muted">
-          {t("finetuningview.LoadingFineTuning")}
-        </div>
+      <div className="text-sm text-muted">
+        {t("finetuningview.LoadingFineTuning")}
       </div>
     );
   }
 
   return (
     <div className={FINE_TUNING_PAGE_CLASS}>
-      {contentHeader ? (
-        <PageLayoutHeader>{contentHeader}</PageLayoutHeader>
-      ) : null}
       <section className={FINE_TUNING_SECTION_CLASS}>
         <div className={FINE_TUNING_SECTION_HEADER_CLASS}>
           <div className="space-y-2">
@@ -773,10 +760,10 @@ export function FineTuningView({
                       </span>{" "}
                       {selectedTrajectory.totalReward ?? "n/a"}
                     </div>
-                    <SettingsControls.Textarea
+                    <Textarea
                       readOnly
                       value={selectedTrajectory.stepsJson}
-                      className="min-h-56"
+                      className={`${FINE_TUNING_TEXTAREA_CLASS} min-h-56`}
                     />
                   </div>
                 )}
@@ -798,14 +785,14 @@ export function FineTuningView({
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-4 mb-3">
-          <SettingsControls.Input
-            variant="filter"
+          <Input
+            className={FINE_TUNING_INPUT_CLASS}
             value={buildLimit}
             onChange={(event) => setBuildLimit(event.target.value)}
             placeholder={t("finetuningview.LimitTrajectories")}
           />
-          <SettingsControls.Input
-            variant="filter"
+          <Input
+            className={FINE_TUNING_INPUT_CLASS}
             value={buildMinCalls}
             onChange={(event) => setBuildMinCalls(event.target.value)}
             placeholder={t("finetuningview.MinLLMCallsPerTr")}
@@ -887,11 +874,11 @@ export function FineTuningView({
             value={selectedDatasetId}
             onValueChange={(value) => setSelectedDatasetId(value)}
           >
-            <SettingsControls.SelectTrigger variant="toolbar">
+            <SelectTrigger className={FINE_TUNING_SELECT_TRIGGER_CLASS}>
               <SelectValue
                 placeholder={t("finetuningview.AutoBuildDatasetF")}
               />
-            </SettingsControls.SelectTrigger>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="__auto__">
                 {t("finetuningview.AutoBuildDatasetF")}
@@ -911,35 +898,35 @@ export function FineTuningView({
               setStartBackend(value as "mlx" | "cuda" | "cpu")
             }
           >
-            <SettingsControls.SelectTrigger variant="toolbar">
+            <SelectTrigger className={FINE_TUNING_SELECT_TRIGGER_CLASS}>
               <SelectValue />
-            </SettingsControls.SelectTrigger>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="cpu">{t("finetuningview.cpu")}</SelectItem>
               <SelectItem value="mlx">{t("finetuningview.mlx")}</SelectItem>
               <SelectItem value="cuda">{t("finetuningview.cuda")}</SelectItem>
             </SelectContent>
           </Select>
-          <SettingsControls.Input
-            variant="filter"
+          <Input
+            className={FINE_TUNING_INPUT_CLASS}
             value={startModel}
             onChange={(event) => setStartModel(event.target.value)}
             placeholder={t("finetuningview.BaseModelOptional")}
           />
-          <SettingsControls.Input
-            variant="filter"
+          <Input
+            className={FINE_TUNING_INPUT_CLASS}
             value={startIterations}
             onChange={(event) => setStartIterations(event.target.value)}
             placeholder={t("finetuningview.IterationsOptional")}
           />
-          <SettingsControls.Input
-            variant="filter"
+          <Input
+            className={FINE_TUNING_INPUT_CLASS}
             value={startBatchSize}
             onChange={(event) => setStartBatchSize(event.target.value)}
             placeholder={t("finetuningview.BatchSizeOptional")}
           />
-          <SettingsControls.Input
-            variant="filter"
+          <Input
+            className={FINE_TUNING_INPUT_CLASS}
             value={startLearningRate}
             onChange={(event) => setStartLearningRate(event.target.value)}
             placeholder={t("finetuningview.LearningRateOptio")}
@@ -1048,10 +1035,10 @@ export function FineTuningView({
                   </span>{" "}
                   <span className="font-mono">{selectedJob.datasetId}</span>
                 </div>
-                <SettingsControls.Textarea
+                <Textarea
                   readOnly
                   value={selectedJob.logs.join("\n")}
-                  className="min-h-56"
+                  className={`${FINE_TUNING_TEXTAREA_CLASS} min-h-56`}
                 />
               </div>
             )}
@@ -1131,20 +1118,20 @@ export function FineTuningView({
                   </span>
                 </div>
 
-                <SettingsControls.Input
-                  variant="filter"
+                <Input
+                  className={FINE_TUNING_INPUT_CLASS}
                   value={importModelName}
                   onChange={(event) => setImportModelName(event.target.value)}
                   placeholder={t("finetuningview.OllamaModelNameO")}
                 />
-                <SettingsControls.Input
-                  variant="filter"
+                <Input
+                  className={FINE_TUNING_INPUT_CLASS}
                   value={importBaseModel}
                   onChange={(event) => setImportBaseModel(event.target.value)}
                   placeholder={t("finetuningview.BaseModelForOllam")}
                 />
-                <SettingsControls.Input
-                  variant="filter"
+                <Input
+                  className={FINE_TUNING_INPUT_CLASS}
                   value={importOllamaUrl}
                   onChange={(event) => setImportOllamaUrl(event.target.value)}
                   placeholder={t("finetuningview.OllamaURL")}
@@ -1163,8 +1150,8 @@ export function FineTuningView({
                     : t("finetuningview.ImportToOllama")}
                 </Button>
 
-                <SettingsControls.Input
-                  variant="filter"
+                <Input
+                  className={FINE_TUNING_INPUT_CLASS}
                   value={activateProviderModel}
                   onChange={(event) =>
                     setActivateProviderModel(event.target.value)
@@ -1213,10 +1200,10 @@ export function FineTuningView({
                   </Button>
                 </div>
                 {smokeResult && (
-                  <SettingsControls.Textarea
+                  <Textarea
                     readOnly
                     value={smokeResult}
-                    className="min-h-24"
+                    className={`${FINE_TUNING_TEXTAREA_CLASS} min-h-24`}
                   />
                 )}
               </div>

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
-import { ChatEmptyState } from "../components/composites/chat";
+import { ChatEmptyState } from "../components/ui/chat-atoms";
 
 const meta = {
   title: "UI/ChatAtoms/ChatEmptyState",

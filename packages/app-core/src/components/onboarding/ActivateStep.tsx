@@ -12,8 +12,13 @@ import {
 
 export function ActivateStep() {
   const branding = useBranding();
-  const { onboardingName, handleOnboardingNext, handleOnboardingBack, t } =
-    useApp();
+  const {
+    onboardingName,
+    handleOnboardingNext,
+    handleOnboardingBack,
+    t,
+    onboardingRestarting,
+  } = useApp();
 
   return (
     <>
@@ -48,8 +53,13 @@ export function ActivateStep() {
             handleOnboardingNext();
           }}
           type="button"
+          disabled={onboardingRestarting}
         >
-          {t("onboarding.enter")}
+          {onboardingRestarting ? (
+            <div className="m-auto h-[18px] w-[18px] animate-spin rounded-full border-2 border-solid border-[color:var(--onboarding-text-faint)] border-t-[color:var(--onboarding-text-strong)]" />
+          ) : (
+            t("onboarding.enter")
+          )}
         </Button>
       </div>
     </>

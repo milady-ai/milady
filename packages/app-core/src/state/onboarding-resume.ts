@@ -39,7 +39,7 @@ export function inferOnboardingResumeStep(args: {
     return args.persistedStep;
   }
 
-  return "identity";
+  return "cloud_login";
 }
 
 export function deriveOnboardingResumeConnection(

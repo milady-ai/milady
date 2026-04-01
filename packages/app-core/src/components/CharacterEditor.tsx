@@ -81,16 +81,16 @@ const accentGradientStyle = {
   background:
     "linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white 8%) 0%, var(--accent) 100%)",
   color: "var(--accent-foreground, #1a1f26)",
-  borderColor: "rgba(var(--accent-rgb, 122, 154, 58), 0.5)",
+  borderColor: "rgba(var(--accent-rgb, 240, 185, 11), 0.5)",
   boxShadow:
-    "0 0 14px rgba(var(--accent-rgb, 122, 154, 58), 0.16), inset 0 1px 0 var(--soft-white-glow)",
+    "0 0 14px rgba(var(--accent-rgb, 240, 185, 11), 0.16), inset 0 1px 0 var(--soft-white-glow)",
 } as const;
 
 const idleSaveBtnStyle = {
   background:
-    "linear-gradient(180deg, rgba(var(--accent-rgb,122,154,58),0.16) 0%, rgba(var(--accent-rgb,122,154,58),0.1) 100%)",
-  color: "rgba(var(--accent-rgb, 122, 154, 58), 0.78)",
-  borderColor: "rgba(var(--accent-rgb, 122, 154, 58), 0.22)",
+    "linear-gradient(180deg, rgba(var(--accent-rgb,240,185,11),0.16) 0%, rgba(var(--accent-rgb,240,185,11),0.1) 100%)",
+  color: "rgba(var(--accent-rgb, 240, 185, 11), 0.78)",
+  borderColor: "rgba(var(--accent-rgb, 240, 185, 11), 0.22)",
   boxShadow: "none",
 } as const;
 

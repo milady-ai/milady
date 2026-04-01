@@ -40,6 +40,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     elizaCloudEnabled,
     handleNewConversation,
     navigation,
+    onboardingHandoffPhase,
     ptySessions,
     setState,
     setTab,
@@ -72,7 +73,10 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
       window.clearTimeout(fallbackTimer);
     };
   }, [sceneAvatarReady, teleportKey]);
-  const avatarReady = sceneAvatarReady || avatarReadyFallback;
+  const onboardingHandoffActive =
+    onboardingHandoffPhase != null && onboardingHandoffPhase !== "idle";
+  const avatarReady =
+    sceneAvatarReady || avatarReadyFallback || onboardingHandoffActive;
 
   const handleShellViewChange = useCallback(
     (view: "companion" | "character" | "desktop") => {

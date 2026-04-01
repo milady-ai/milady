@@ -7,9 +7,9 @@
  */
 
 // ── Design tokens ────────────────────────────────────────────────────
-const GOLD = "#7a9a3a";
-const GOLD_BORDER = "rgba(122, 154, 58, 0.25)";
-const GOLD_DIM = "rgba(122, 154, 58, 0.12)";
+const GOLD = "#f0b90b";
+const GOLD_BORDER = "rgba(240, 185, 11, 0.25)";
+const GOLD_DIM = "rgba(240, 185, 11, 0.12)";
 const BG_DARK = "rgba(10, 10, 12, 0.88)";
 const BG_CARD = "rgba(18, 20, 26, 0.72)";
 const TEXT_PRIMARY = "#eaecef";
@@ -17,7 +17,7 @@ const TEXT_SECONDARY = "rgba(234, 236, 239, 0.6)";
 const TEXT_MUTED = "rgba(234, 236, 239, 0.38)";
 const STATUS_GREEN = "#03a66d";
 const STATUS_RED = "#f6465d";
-const STATUS_YELLOW = "#7a9a3a";
+const STATUS_YELLOW = "#f0b90b";
 const STATUS_BLUE = "#1e88e5";
 
 const FONT_SANS = '"DM Sans", "Inter", sans-serif';
@@ -84,7 +84,7 @@ function drawPanelBackground(
 ): void {
   // Outer glow
   ctx.save();
-  ctx.shadowColor = "rgba(122, 154, 58, 0.08)";
+  ctx.shadowColor = "rgba(240, 185, 11, 0.08)";
   ctx.shadowBlur = 32;
   roundRect(ctx, 4, 4, w - 8, h - 8, CORNER_RADIUS);
   ctx.fillStyle = BG_DARK;
@@ -270,11 +270,11 @@ export function renderChatPanel(
       roundRect(ctx, bubbleX, y, bubbleWidth, height, bubbleRadius);
       // Gradient fill
       const grad = ctx.createLinearGradient(bubbleX, y, bubbleX, y + height);
-      grad.addColorStop(0, "rgba(122, 154, 58, 0.16)");
-      grad.addColorStop(1, "rgba(122, 154, 58, 0.06)");
+      grad.addColorStop(0, "rgba(240, 185, 11, 0.16)");
+      grad.addColorStop(1, "rgba(240, 185, 11, 0.06)");
       ctx.fillStyle = grad;
       ctx.fill();
-      ctx.strokeStyle = "rgba(122, 154, 58, 0.28)";
+      ctx.strokeStyle = "rgba(240, 185, 11, 0.28)";
       ctx.lineWidth = 1;
       ctx.stroke();
       // Inner top highlight
@@ -337,7 +337,7 @@ export function renderStatusPanel(
 
   // Thin sci-fi border frame — angled corner cuts
   ctx.save();
-  ctx.strokeStyle = "rgba(122, 154, 58, 0.18)";
+  ctx.strokeStyle = "rgba(240, 185, 11, 0.18)";
   ctx.lineWidth = 1;
   const cx = 10; // corner cut size
   ctx.beginPath();
@@ -393,7 +393,7 @@ export function renderStatusPanel(
   y += 18;
 
   // Thin separator
-  ctx.strokeStyle = "rgba(122, 154, 58, 0.08)";
+  ctx.strokeStyle = "rgba(240, 185, 11, 0.08)";
   ctx.lineWidth = 0.5;
   ctx.beginPath();
   ctx.moveTo(pad + 8, y);
@@ -437,7 +437,7 @@ export function renderHeartbeatsPanel(
 
   // Sci-fi border frame — matching status panel style
   ctx.save();
-  ctx.strokeStyle = "rgba(122, 154, 58, 0.18)";
+  ctx.strokeStyle = "rgba(240, 185, 11, 0.18)";
   ctx.lineWidth = 1;
   const cx = 10;
   ctx.beginPath();

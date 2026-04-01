@@ -117,7 +117,7 @@ export function CharacterRoster({
                       background:
                         "linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, white 10%) 0%, var(--accent) 100%)",
                       boxShadow:
-                        "0 0 16px rgba(var(--accent-rgb, 122, 154, 58), 0.16)",
+                        "0 0 16px rgba(var(--accent-rgb, 240, 185, 11), 0.16)",
                     }
                   : {}),
               }}
@@ -128,7 +128,7 @@ export function CharacterRoster({
               >
                 {isSelected && (
                   <div
-                    className="pointer-events-none absolute -inset-3 bg-[rgba(var(--accent-rgb,122,154,58),0.15)] blur-xl"
+                    className="pointer-events-none absolute -inset-3 bg-[rgba(var(--accent-rgb,240,185,11),0.15)] blur-xl"
                     style={{ clipPath: SLANT_CLIP }}
                   />
                 )}

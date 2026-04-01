@@ -17,8 +17,6 @@ export interface ExistingOnboardingProbeResult {
 export interface DetectedProviderCandidate {
   id: string;
   apiKey?: string;
-  authMode?: string;
-  status?: string;
 }
 
 export type StartupWithoutConnectionResolution =

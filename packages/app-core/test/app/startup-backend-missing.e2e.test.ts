@@ -36,7 +36,6 @@ interface StartupSnapshot {
   onboardingLoading: boolean;
   authRequired: boolean;
   startupError: ReturnType<typeof useApp>["startupError"];
-  coordinatorPhase: string;
 }
 
 function Probe(props: { onChange: (snapshot: StartupSnapshot) => void }) {
@@ -46,7 +45,6 @@ function Probe(props: { onChange: (snapshot: StartupSnapshot) => void }) {
       onboardingLoading: app.onboardingLoading,
       authRequired: app.authRequired,
       startupError: app.startupError,
-      coordinatorPhase: app.startupCoordinator.phase,
     });
   }, [
     app.onboardingLoading,
@@ -68,8 +66,6 @@ describe("startup failure: backend missing", () => {
       "eliza:connection-mode",
       JSON.stringify({ runMode: "local" }),
     );
-    // Returning user — splash auto-skips when onboarding was completed before
-    localStorage.setItem("eliza:onboarding-complete", "1");
     mockClient.hasToken.mockReturnValue(false);
     mockClient.disconnectWs.mockImplementation(() => {});
     mockClient.getConfig.mockResolvedValue({});
@@ -112,28 +108,21 @@ describe("startup failure: backend missing", () => {
       );
     });
 
-    // Flush coordinator phases with real-ish timing — the coordinator
-    // goes splash → restoring-session → polling-backend → error, each
-    // phase is a useEffect cycle. With fake timers we need repeated flushes.
-    for (let i = 0; i < 20; i++) {
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(500);
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-    }
+    await act(async () => {
+      await Promise.resolve();
+      await vi.runOnlyPendingTimersAsync();
+    });
 
     expect(latest).not.toBeNull();
-    // The coordinator should reach error on 404 and set startupError.
-    // Accept either the coordinator phase or legacy error as proof.
-    const reachedError =
-      latest?.coordinatorPhase === "error" ||
-      latest?.startupError?.reason === "backend-unreachable";
-    if (!reachedError) {
-      // Debug: log what phase we're stuck at
-      console.log("[test debug] coordinatorPhase:", latest?.coordinatorPhase, "startupError:", latest?.startupError);
-    }
-    expect(reachedError).toBe(true);
+    expect(latest?.startupError?.reason).toBe("backend-unreachable");
+    expect(latest?.startupError?.phase).toBe("starting-backend");
+    expect(latest?.startupError?.message).toContain(
+      "Backend API routes are unavailable on this origin",
+    );
+    expect(latest?.startupError?.status).toBe(404);
+    expect(latest?.startupError?.path).toBe("/api/onboarding/status");
+    expect(mockClient.getAuthStatus).toHaveBeenCalledTimes(1);
+    expect(mockClient.getOnboardingStatus).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       tree?.unmount();

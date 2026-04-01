@@ -4,14 +4,22 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
-  SettingsControls,
 } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import type { AgentPreflightResult } from "../api";
 import { client } from "../api";
 import { useTimeout } from "../hooks";
 import { useApp } from "../state";
+import {
+  SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME,
+  SETTINGS_MUTED_TEXT_CLASSNAME,
+  SETTINGS_SEGMENTED_GROUP_CLASSNAME,
+  SettingsField,
+  SettingsFieldDescription,
+  SettingsFieldLabel,
+} from "./settings-control-primitives";
 
 type AgentTab = "claude" | "gemini" | "codex" | "aider";
 type AiderProvider = "anthropic" | "openai" | "google";
@@ -335,19 +343,19 @@ export function CodingAgentSettingsSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SettingsControls.Field>
-        <SettingsControls.FieldLabel>
+      <SettingsField>
+        <SettingsFieldLabel>
           {t("codingagentsettingssection.AgentSelectionStra")}
-        </SettingsControls.FieldLabel>
+        </SettingsFieldLabel>
         <Select
           value={selectionStrategy}
           onValueChange={(value) =>
             setPref("PARALLAX_AGENT_SELECTION_STRATEGY", value)
           }
         >
-          <SettingsControls.SelectTrigger variant="compact">
+          <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
             <SelectValue />
-          </SettingsControls.SelectTrigger>
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="fixed">
               {t("codingagentsettingssection.Fixed")}
@@ -357,27 +365,29 @@ export function CodingAgentSettingsSection() {
             </SelectItem>
           </SelectContent>
         </Select>
-        <SettingsControls.FieldDescription className="mt-1.5">
+        <SettingsFieldDescription className="mt-1.5">
           {selectionStrategy === "fixed"
             ? t("codingagentsettingssection.AgentUsedWhenNoEStrategyFixed")
             : t("codingagentsettingssection.AgentUsedWhenNoEStrategyRanked")}
-        </SettingsControls.FieldDescription>
-      </SettingsControls.Field>
+        </SettingsFieldDescription>
+      </SettingsField>
 
       {selectionStrategy === "fixed" && (
-        <SettingsControls.Field>
-          <SettingsControls.FieldLabel>
+        <SettingsField>
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.DefaultAgentType")}
-          </SettingsControls.FieldLabel>
+          </SettingsFieldLabel>
           <Select
             value={effectiveDefaultAgentType}
             onValueChange={(value) =>
               setPref("PARALLAX_DEFAULT_AGENT_TYPE", value)
             }
           >
-            <SettingsControls.SelectTrigger variant="compact">
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue />
-            </SettingsControls.SelectTrigger>
+            </SelectTrigger>
             <SelectContent>
               {availableAgents.map((agent) => (
                 <SelectItem key={agent} value={agent}>
@@ -386,25 +396,25 @@ export function CodingAgentSettingsSection() {
               ))}
             </SelectContent>
           </Select>
-          <SettingsControls.FieldDescription>
+          <SettingsFieldDescription>
             {t("codingagentsettingssection.AgentUsedWhenNoE")}
-          </SettingsControls.FieldDescription>
-        </SettingsControls.Field>
+          </SettingsFieldDescription>
+        </SettingsField>
       )}
 
-      <SettingsControls.Field>
-        <SettingsControls.FieldLabel>
+      <SettingsField>
+        <SettingsFieldLabel>
           {t("codingagentsettingssection.DefaultPermissionL")}
-        </SettingsControls.FieldLabel>
+        </SettingsFieldLabel>
         <Select
           value={approvalPreset}
           onValueChange={(value) =>
             setPref("PARALLAX_DEFAULT_APPROVAL_PRESET", value)
           }
         >
-          <SettingsControls.SelectTrigger variant="compact">
+          <SelectTrigger className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}>
             <SelectValue />
-          </SettingsControls.SelectTrigger>
+          </SelectTrigger>
           <SelectContent>
             {APPROVAL_PRESETS.map((preset) => (
               <SelectItem key={preset.value} value={preset.value}>
@@ -413,7 +423,7 @@ export function CodingAgentSettingsSection() {
             ))}
           </SelectContent>
         </Select>
-        <SettingsControls.FieldDescription className="mt-1.5">
+        <SettingsFieldDescription className="mt-1.5">
           {APPROVAL_PRESETS.find((preset) => preset.value === approvalPreset)
             ?.descKey
             ? t(
@@ -423,10 +433,10 @@ export function CodingAgentSettingsSection() {
               )
             : ""}
           {t("codingagentsettingssection.AppliesToAllNewlySpawned")}
-        </SettingsControls.FieldDescription>
-      </SettingsControls.Field>
+        </SettingsFieldDescription>
+      </SettingsField>
 
-      <SettingsControls.SegmentedGroup>
+      <div className={SETTINGS_SEGMENTED_GROUP_CLASSNAME}>
         {availableAgents.map((agent) => {
           const active = activeTab === agent;
           const installState = getInstallState(agent);
@@ -458,10 +468,10 @@ export function CodingAgentSettingsSection() {
             </Button>
           );
         })}
-      </SettingsControls.SegmentedGroup>
+      </div>
 
       {preflightLoaded && (
-        <SettingsControls.MutedText className="mt-1.5">
+        <div className={`${SETTINGS_MUTED_TEXT_CLASSNAME} mt-1.5`}>
           {t("codingagentsettingssection.Availability")}{" "}
           {AGENT_TABS.map((agent) => {
             const installState = getInstallState(agent);
@@ -473,21 +483,23 @@ export function CodingAgentSettingsSection() {
                   : t("codingagentsettingssection.Unknown");
             return `${AGENT_LABELS[agent]}: ${label}`;
           }).join(" · ")}
-        </SettingsControls.MutedText>
+        </div>
       )}
 
       {activeTab === "aider" && (
-        <SettingsControls.Field>
-          <SettingsControls.FieldLabel>
+        <SettingsField>
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.Provider")}
-          </SettingsControls.FieldLabel>
+          </SettingsFieldLabel>
           <Select
             value={aiderProvider}
             onValueChange={(value) => setPref("PARALLAX_AIDER_PROVIDER", value)}
           >
-            <SettingsControls.SelectTrigger variant="compact">
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue />
-            </SettingsControls.SelectTrigger>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="anthropic">
                 {t("codingagentsettingssection.Anthropic")}
@@ -500,25 +512,27 @@ export function CodingAgentSettingsSection() {
               </SelectItem>
             </SelectContent>
           </Select>
-        </SettingsControls.Field>
+        </SettingsField>
       )}
 
       <div className="flex gap-3">
-        <SettingsControls.Field className="flex-1">
-          <SettingsControls.FieldLabel>
+        <SettingsField className="flex-1">
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.PowerfulModel")}
-          </SettingsControls.FieldLabel>
+          </SettingsFieldLabel>
           <Select
             value={powerfulValue}
             onValueChange={(value) =>
               setPref(`${prefix}_MODEL_POWERFUL`, value)
             }
           >
-            <SettingsControls.SelectTrigger variant="compact">
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue
                 placeholder={t("codingagentsettingssection.Default")}
               />
-            </SettingsControls.SelectTrigger>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="__default__">
                 {t("codingagentsettingssection.Default")}
@@ -530,20 +544,22 @@ export function CodingAgentSettingsSection() {
               ))}
             </SelectContent>
           </Select>
-        </SettingsControls.Field>
-        <SettingsControls.Field className="flex-1">
-          <SettingsControls.FieldLabel>
+        </SettingsField>
+        <SettingsField className="flex-1">
+          <SettingsFieldLabel>
             {t("codingagentsettingssection.FastModel")}
-          </SettingsControls.FieldLabel>
+          </SettingsFieldLabel>
           <Select
             value={fastValue}
             onValueChange={(value) => setPref(`${prefix}_MODEL_FAST`, value)}
           >
-            <SettingsControls.SelectTrigger variant="compact">
+            <SelectTrigger
+              className={SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME}
+            >
               <SelectValue
                 placeholder={t("codingagentsettingssection.Default")}
               />
-            </SettingsControls.SelectTrigger>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="__default__">
                 {t("codingagentsettingssection.Default")}
@@ -555,14 +571,14 @@ export function CodingAgentSettingsSection() {
               ))}
             </SelectContent>
           </Select>
-        </SettingsControls.Field>
+        </SettingsField>
       </div>
 
-      <SettingsControls.MutedText className="mt-1.5">
+      <div className={`${SETTINGS_MUTED_TEXT_CLASSNAME} mt-1.5`}>
         {isDynamic
           ? t("codingagentsettingssection.ModelsFetched")
           : t("codingagentsettingssection.UsingFallback")}
-      </SettingsControls.MutedText>
+      </div>
 
       <SaveFooter
         dirty={dirty}

@@ -39,10 +39,6 @@ function startupReasonLabel(
       return t("startupfailureview.AssetMissing", {
         defaultValue: "Asset Missing",
       });
-    case "unknown":
-      return t("startupfailureview.Unknown", {
-        defaultValue: "Unknown Error",
-      });
   }
 }
 

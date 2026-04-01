@@ -388,36 +388,10 @@ export function useInventoryData({
         });
       }
     }
-    const filtered = items.filter((nft) =>
+    return items.filter((nft) =>
       matchesInventoryChainFilter(nft.chain, inventoryChainFilters),
     );
-    const sorted = [...filtered];
-    const asc = inventorySortDirection === "asc";
-    const normalizedSort = inventorySort === "value" ? "symbol" : inventorySort;
-
-    if (normalizedSort === "chain") {
-      sorted.sort((a, b) => {
-        const chainDiff = a.chain.localeCompare(b.chain);
-        if (chainDiff !== 0) return asc ? chainDiff : -chainDiff;
-        const nameDiff = a.name.localeCompare(b.name);
-        return asc ? nameDiff : -nameDiff;
-      });
-    } else {
-      sorted.sort((a, b) => {
-        const nameDiff = a.name.localeCompare(b.name);
-        if (nameDiff !== 0) return asc ? nameDiff : -nameDiff;
-        const chainDiff = a.chain.localeCompare(b.chain);
-        return asc ? chainDiff : -chainDiff;
-      });
-    }
-
-    return sorted;
-  }, [
-    walletNfts,
-    inventoryChainFilters,
-    inventorySort,
-    inventorySortDirection,
-  ]);
+  }, [walletNfts, inventoryChainFilters]);
 
   // ── Derived values ────────────────────────────────────────────────
   const focusedChain = useMemo(() => {

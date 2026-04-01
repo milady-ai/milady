@@ -290,15 +290,6 @@ function emitWs(type: string, payload: Record<string, unknown>): void {
   }
 }
 
-async function drainAsync(): Promise<void> {
-  // Aggressively drain microtasks + React state updates.
-  // The StartupCoordinator uses separate effects per phase, each with
-  // multiple await points that need independent microtask ticks.
-  for (let i = 0; i < 10; i++) {
-    await flush();
-  }
-}
-
 async function waitFor(assertion: () => void): Promise<void> {
   for (let idx = 0; idx < 30; idx += 1) {
     try {
@@ -306,7 +297,7 @@ async function waitFor(assertion: () => void): Promise<void> {
       return;
     } catch (err) {
       if (idx === 29) throw err;
-      await drainAsync();
+      await flush();
     }
   }
 }
@@ -319,7 +310,6 @@ describe("AppContext autonomy replay", () => {
       "eliza:connection-mode",
       JSON.stringify({ runMode: "local" }),
     );
-    localStorage.setItem("eliza:onboarding-complete", "1");
     window.history.replaceState({}, "", "/chat");
     Object.assign(window, {
       setTimeout: globalThis.setTimeout,

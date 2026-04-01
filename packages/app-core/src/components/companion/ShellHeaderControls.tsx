@@ -246,9 +246,9 @@ export function ShellHeaderControls({
             const selected = activeShellView === view;
             const edgeClass =
               index === 0
-                ? "rounded-l-2xl rounded-r-none"
+                ? "rounded-l-xl rounded-r-none"
                 : index === shellOptions.length - 1
-                  ? "rounded-l-none rounded-r-2xl"
+                  ? "rounded-l-none rounded-r-xl"
                   : "rounded-none";
             return (
               <Button

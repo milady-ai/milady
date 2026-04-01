@@ -90,10 +90,6 @@ const { connectionStateListeners, mockClient } = vi.hoisted(() => {
           postExamples: [],
         },
       })),
-      getStreamSettings: vi.fn(async () => ({
-        ok: true,
-        settings: { theme: undefined, avatarIndex: undefined },
-      })),
       saveStreamSettings: vi.fn(async () => ({ ok: true })),
       resetConnection: vi.fn(),
     },
@@ -248,10 +244,6 @@ describe("startup onboarding recovery", () => {
         messageExamples: [],
         postExamples: [],
       },
-    });
-    mockClient.getStreamSettings.mockResolvedValue({
-      ok: true,
-      settings: { theme: undefined, avatarIndex: undefined },
     });
     mockClient.saveStreamSettings.mockResolvedValue({ ok: true });
     mockClient.resetConnection.mockImplementation(() => {});

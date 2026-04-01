@@ -7,7 +7,7 @@ interface OnboardingPanelProps {
 }
 
 export const onboardingPanelSurfaceClassName =
-  "olive-surface shadow-[var(--onboarding-panel-shadow)]";
+  "border border-[var(--onboarding-panel-border)] bg-[var(--onboarding-panel-bg)] shadow-[var(--onboarding-panel-shadow)]";
 
 export function OnboardingPanel({ step, children }: OnboardingPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export function OnboardingPanel({ step, children }: OnboardingPanelProps) {
   return (
     <div className="absolute right-0 top-0 bottom-0 z-10 flex min-h-0 w-full max-w-[min(100%,32rem)] flex-col items-end justify-center py-[clamp(1rem,5vh,2.5rem)] pr-[clamp(1rem,4vw,3.5rem)] pl-0 max-lg:max-w-[min(100%,28rem)] max-lg:pr-8 max-md:relative max-md:max-w-none max-md:items-stretch max-md:justify-end max-md:px-4 max-md:pb-4 max-md:pt-2">
       <div
-        className={`onboarding-panel relative flex max-h-full min-h-0 w-full max-w-[30rem] flex-col gap-0 overflow-x-hidden overflow-y-auto rounded-[28px] py-[clamp(1.5rem,4vw,2.25rem)] px-[clamp(1rem,3vw,1.5rem)] animate-[onboarding-panel-enter_0.6s_cubic-bezier(0.25,0.46,0.45,0.94)_both] max-md:max-h-[min(60dvh,calc(100dvh-8.5rem))] max-md:max-w-none max-md:rounded-[22px] ${onboardingPanelSurfaceClassName}`}
+        className={`onboarding-panel relative flex max-h-full min-h-0 w-full max-w-[30rem] flex-col gap-0 overflow-x-hidden overflow-y-auto rounded-[18px] py-[clamp(1.5rem,4vw,2.25rem)] px-[clamp(1rem,3vw,1.5rem)] backdrop-blur-[36px] backdrop-saturate-[1.24] animate-[onboarding-panel-enter_0.6s_cubic-bezier(0.25,0.46,0.45,0.94)_both] max-md:max-h-[min(60dvh,calc(100dvh-8.5rem))] max-md:max-w-none max-md:rounded-[16px] ${onboardingPanelSurfaceClassName}`}
         ref={panelRef}
       >
         {children}

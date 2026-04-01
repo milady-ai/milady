@@ -17,6 +17,8 @@ type AppHarnessState = {
   startupError: null;
   authRequired: boolean;
   onboardingComplete: boolean;
+  onboardingHandoffError: string | null;
+  onboardingHandoffPhase: string;
   tab: string;
   actionNotice: null;
   onboardingStep: OnboardingStep;
@@ -289,41 +291,6 @@ vi.mock("@miladyai/app-core/components", async () => {
 });
 
 vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
-  StartupShell: () => {
-    const state = mockUseApp();
-    const phase = state?.startupCoordinator?.phase;
-    if (phase === "error") {
-      return React.createElement("div", null, state.startupError?.message ?? "StartupFailureView");
-    }
-    if (phase === "pairing-required") {
-      return React.createElement("div", null, "PairingView");
-    }
-    if (phase === "onboarding-required") {
-      // Render the interactive OnboardingWizard by delegating to the mock below
-      const s = mockUseApp();
-      if (s.onboardingStep === "identity") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.chooseAgent");
-      }
-      if (s.onboardingStep === "connection") {
-        if (!s.onboardingRunMode) {
-          return React.createElement(React.Fragment, null,
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingRunMode", "local"); }, type: "button" }, "onboarding.hostingLocal"),
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingMode", "advanced"); s.setState?.("onboardingActiveGuide", "provider"); }, type: "button" }, "advanced-configuration"),
-            s.onboardingMode === "advanced" ? React.createElement("div", null, "Flamina guidance") : null,
-          );
-        }
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.confirm");
-      }
-      if (s.onboardingStep === "rpc") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.rpcSkip");
-      }
-      if (s.onboardingStep === "senses") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "permissions-continue");
-      }
-      return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.enter");
-    }
-    return null;
-  },
   AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
@@ -443,40 +410,6 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
 }));
 
 vi.mock("../../src/app-shell-components", () => ({
-  StartupShell: () => {
-    const state = mockUseApp();
-    const phase = state?.startupCoordinator?.phase;
-    if (phase === "error") {
-      return React.createElement("div", null, state.startupError?.message ?? "StartupFailureView");
-    }
-    if (phase === "pairing-required") {
-      return React.createElement("div", null, "PairingView");
-    }
-    if (phase === "onboarding-required") {
-      const s = mockUseApp();
-      if (s.onboardingStep === "identity") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.chooseAgent");
-      }
-      if (s.onboardingStep === "connection") {
-        if (!s.onboardingRunMode) {
-          return React.createElement(React.Fragment, null,
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingRunMode", "local"); }, type: "button" }, "onboarding.hostingLocal"),
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingMode", "advanced"); s.setState?.("onboardingActiveGuide", "provider"); }, type: "button" }, "advanced-configuration"),
-            s.onboardingMode === "advanced" ? React.createElement("div", null, "Flamina guidance") : null,
-          );
-        }
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.confirm");
-      }
-      if (s.onboardingStep === "rpc") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.rpcSkip");
-      }
-      if (s.onboardingStep === "senses") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "permissions-continue");
-      }
-      return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.enter");
-    }
-    return null;
-  },
   AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
@@ -773,6 +706,8 @@ function createHarnessState(): AppHarnessState {
     startupError: null,
     authRequired: false,
     onboardingComplete: false,
+    onboardingHandoffError: null,
+    onboardingHandoffPhase: "idle",
     tab: "chat",
     actionNotice: null,
     onboardingStep: "identity",
@@ -820,8 +755,6 @@ function createHarnessState(): AppHarnessState {
     conversations: [],
     elizaCloudCredits: null,
     uiShellMode: "native",
-    startupCoordinator: { phase: "onboarding-required", serverReachable: false },
-    startupCoordinatorLegacyPhase: "starting-backend" as const,
   };
 }
 
@@ -894,8 +827,6 @@ describe("app startup onboarding flow (e2e)", () => {
       if (state.onboardingStep === "activate") {
         state.onboardingComplete = true;
         state.startupStatus = "ready";
-        state.startupCoordinator = { phase: "ready" };
-        state.startupCoordinatorLegacyPhase = "ready";
         state.uiShellMode = "companion";
         state.tab = "companion";
         return;
@@ -917,6 +848,7 @@ describe("app startup onboarding flow (e2e)", () => {
     mockUseApp.mockImplementation(() => ({
       t: (k: string) => TRANSLATIONS[k] ?? k,
       ...state,
+      cancelOnboardingHandoff: vi.fn(),
       setState: (key: string, value: unknown) => {
         state[key] = value;
       },
@@ -939,6 +871,7 @@ describe("app startup onboarding flow (e2e)", () => {
         generated: true,
         persisted: false,
       })),
+      retryOnboardingHandoff: vi.fn(async () => {}),
       retryStartup: vi.fn(),
       startupPhase:
         state.startupStatus === "ready" ? "ready" : "starting-backend",
@@ -999,8 +932,6 @@ describe("app startup onboarding flow (e2e)", () => {
   it("renders character select when the tab is character-select even if companion mode lingers", async () => {
     state.onboardingComplete = true;
     state.startupStatus = "ready";
-    state.startupCoordinator = { phase: "ready" };
-    state.startupCoordinatorLegacyPhase = "ready";
     state.tab = "character-select";
     state.uiShellMode = "companion";
 
@@ -1035,8 +966,6 @@ describe("app startup onboarding flow (e2e)", () => {
   it("shows deferred setup checklist after onboarding when setup was skipped", async () => {
     state.onboardingComplete = true;
     state.startupStatus = "ready";
-    state.startupCoordinator = { phase: "ready" };
-    state.startupCoordinatorLegacyPhase = "ready";
     state.tab = "chat";
     state.uiShellMode = "native";
     state.onboardingDeferredTasks = ["rpc", "permissions"];

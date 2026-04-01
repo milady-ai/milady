@@ -3,7 +3,6 @@
 @import "./electrobun-mac-window-drag.css";
 
 @source "..";
-@source "../../../ui/src";
 
 /*
  * Map the existing theme CSS custom properties to Tailwind theme tokens.
@@ -77,7 +76,7 @@
   --color-chain-op: #ff0420;
   --color-chain-pol: #8247e5;
   --color-chain-sol: #9945ff;
-  --color-chain-bsc: #7a9a3a;
+  --color-chain-bsc: #f0b90b;
 
   /* Fonts */
   --font-body: var(--font-body);

@@ -586,18 +586,10 @@ function onboardingOptions() {
 function createHarnessState(
   overrides?: Partial<AppHarnessState>,
 ): AppHarnessState {
-  // Determine coordinator phase from the effective startupStatus (overrides take precedence)
-  const effectiveStatus = (overrides as { startupStatus?: string } | undefined)?.startupStatus ?? "onboarding";
-  const defaultCoordinator =
-    effectiveStatus === "ready"
-      ? { phase: "ready" }
-      : { phase: "onboarding-required", serverReachable: false };
-
   return {
     onboardingLoading: false,
     startupStatus: "onboarding",
     startupError: null,
-    startupCoordinator: defaultCoordinator,
     authRequired: false,
     onboardingComplete: false,
     tab: "chat",
@@ -712,7 +704,6 @@ function setupMockUseApp(state: AppHarnessState) {
       if (state.onboardingStep === "launch") {
         state.onboardingComplete = true;
         state.startupStatus = "ready";
-        state.startupCoordinator = { phase: "ready" };
         state.uiShellMode = "companion";
         state.tab = "companion";
         return;
