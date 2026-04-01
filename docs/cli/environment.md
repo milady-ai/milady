@@ -36,6 +36,7 @@ These variables control the API server and network behavior.
 | `MILADY_API_BIND` | Bind address for the API server. Set to `0.0.0.0` to accept external connections (requires `MILADY_API_TOKEN` for security). | `127.0.0.1` |
 | `MILADY_GATEWAY_PORT` | Gateway port. Automatically set to `19001` when `--profile dev` is active. | (unset) |
 | `MILADY_API_TOKEN` | Static API token for authenticating requests to the agent API server. When set, all API requests must include this token. Auto-generated if unset and bind is non-loopback. | (unset) |
+| `MILADY_DISABLE_AUTO_API_TOKEN` | When set to `1`, suppresses automatic API token generation for non-loopback binds. Ignored for cloud-provisioned containers — they always receive a fallback token to prevent auth deadlocks. | (unset) |
 | `MILADY_ALLOW_WS_QUERY_TOKEN` | When set to `1`, allows the API token to be passed as a WebSocket query parameter (less secure; useful for some clients). | (unset) |
 | `MILADY_PAIRING_DISABLED` | When set to `1`, disables the pairing endpoint on the API server (requires `MILADY_API_TOKEN` to be set). | (unset) |
 | `MILADY_API_PORT` | API server port in dev mode (used by `bun run dev`). In production (`milady start`), the API shares `MILADY_PORT`. | `31337` |

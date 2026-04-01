@@ -376,7 +376,7 @@ When `MILADY_API_TOKEN` is set (or auto-generated for non-loopback binds), all A
 Authorization: Bearer <token>
 ```
 
-If the API is bound to a non-loopback address (`MILADY_API_BIND` is not `127.0.0.1` or `localhost`) and no token is set, the server auto-generates a temporary token and logs it to stderr.
+If the API is bound to a non-loopback address (`MILADY_API_BIND` is not `127.0.0.1` or `localhost`) and no token is set, the server auto-generates a temporary token and logs it to stderr. You can suppress this with `MILADY_DISABLE_AUTO_API_TOKEN=1`, but cloud-provisioned containers always receive a fallback token regardless of this setting.
 
 ## WebSocket Event System
 

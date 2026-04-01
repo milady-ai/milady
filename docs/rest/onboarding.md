@@ -11,7 +11,7 @@ The onboarding API drives the first-run setup wizard. It lets you check whether 
 When the agent is running as a cloud-provisioned container, onboarding is bypassed automatically. The bypass activates only when **both** conditions are met:
 
 1. `MILADY_CLOUD_PROVISIONED=1` (or `ELIZA_CLOUD_PROVISIONED=1`) is set
-2. `MILADY_API_TOKEN` (or `ELIZA_API_TOKEN`) is configured
+2. `MILADY_API_TOKEN` (or `ELIZA_API_TOKEN`) is configured — either explicitly or via automatic token generation (cloud containers always receive a fallback token even when `MILADY_DISABLE_AUTO_API_TOKEN` is set)
 
 When cloud provisioned, `GET /api/onboarding/status` returns `{ "complete": true }` so the frontend skips the setup wizard and goes directly to chat. A container with only the cloud flag but no API token falls through to the normal onboarding flow.
 

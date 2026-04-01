@@ -86,11 +86,17 @@ The IP is resolved from `req.socket.remoteAddress`. When the limit is exceeded, 
 When the agent is running as a cloud-provisioned container (e.g., on Eliza Cloud or in an enterprise deployment), authentication and pairing are bypassed automatically. The bypass activates only when **both** conditions are met:
 
 1. `MILADY_CLOUD_PROVISIONED=1` (or `ELIZA_CLOUD_PROVISIONED=1`) is set
-2. `MILADY_API_TOKEN` (or `ELIZA_API_TOKEN`) is configured
+2. `MILADY_API_TOKEN` (or `ELIZA_API_TOKEN`) is configured — either explicitly or via automatic token generation (see below)
 
 When cloud provisioned, `GET /api/auth/status` returns `{ "required": true, "pairingEnabled": false, "expiresAt": null }` — the API token is still required for requests, but the pairing flow is disabled since the token is already provisioned.
 
 A container with only the cloud flag but no API token falls through to the normal pairing flow.
+
+### Automatic token generation in cloud containers
+
+When the API server binds to a non-loopback address and no `MILADY_API_TOKEN` is set, the server auto-generates a fallback token. You can suppress this behavior for non-cloud deployments by setting `MILADY_DISABLE_AUTO_API_TOKEN=1`.
+
+However, cloud-provisioned containers **always** receive a fallback token, even when `MILADY_DISABLE_AUTO_API_TOKEN` is set. This override prevents a deadlock where every inbound API request would receive a `401 Unauthorized` response (because the authorization layer rejects all requests when no token is configured on a cloud-flagged container).
 
 ## Endpoints
 
@@ -169,7 +175,7 @@ Access-Control-Allow-Headers: Content-Type, Authorization, X-Milady-Token, X-Api
 ## Related
 
 - [API Reference overview](/api-reference)
-- [Environment variables](/cli/environment) — `MILADY_API_TOKEN`, `MILADY_ALLOW_WS_QUERY_TOKEN`, `MILADY_PAIRING_DISABLED`, `MILADY_CLOUD_PROVISIONED`
+- [Environment variables](/cli/environment) — `MILADY_API_TOKEN`, `MILADY_ALLOW_WS_QUERY_TOKEN`, `MILADY_PAIRING_DISABLED`, `MILADY_CLOUD_PROVISIONED`, `MILADY_DISABLE_AUTO_API_TOKEN`
 
 ## Common Error Codes
 
