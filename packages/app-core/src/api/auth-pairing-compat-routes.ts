@@ -124,7 +124,7 @@ export async function handleAuthPairingCompatRoutes(
     // Cloud-provisioned containers always report onboarding complete and
     // skip auth so the SPA can read this before pairing/token exchange.
     if (_isCloudProvisioned()) {
-      sendJsonResponse(res, 200, { complete: true });
+      sendJsonResponse(res, 200, { complete: true, cloudProvisioned: true });
       return true;
     }
     if (!ensureCompatApiAuthorized(req, res)) {

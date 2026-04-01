@@ -115,7 +115,7 @@ declare module "./client-base" {
     ): Promise<{ ok: boolean; tradePermissionMode: string }>;
     playEmote(emoteId: string): Promise<{ ok: boolean }>;
     runTerminalCommand(command: string): Promise<{ ok: boolean }>;
-    getOnboardingStatus(): Promise<{ complete: boolean }>;
+    getOnboardingStatus(): Promise<{ complete: boolean; cloudProvisioned?: boolean }>;
     getWalletKeys(): Promise<{
       evmPrivateKey: string;
       evmAddress: string;

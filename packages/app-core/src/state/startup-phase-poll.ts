@@ -114,15 +114,20 @@ export async function runPollingBackend(
         dispatch({ type: "BACKEND_AUTH_REQUIRED" });
         return;
       }
-      const { complete } = await client.getOnboardingStatus();
+      const { complete, cloudProvisioned } = await client.getOnboardingStatus();
       if (cancelled.current) return;
       let sessionComplete =
         complete ||
         deps.onboardingCompletionCommittedRef.current ||
         (ctx?.shouldPreserveCompletedOnboarding ?? false);
 
+      // Cloud-provisioned containers always skip onboarding regardless of
+      // browser storage state. Without this, first-time visitors with no
+      // persisted connection/onboarding state get forced into onboarding
+      // even though the backend reports complete:true.
       if (
         sessionComplete &&
+        !cloudProvisioned &&
         !ctx?.persistedConnection &&
         !ctx?.hadPriorOnboarding
       ) {
