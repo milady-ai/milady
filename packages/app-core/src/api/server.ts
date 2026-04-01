@@ -742,7 +742,15 @@ async function handleMiladyCompatRoute(
     !url.pathname.startsWith("/api/cloud/billing/");
 
   if (isCloudRoute) {
-    if (!ensureCompatApiAuthorized(req, res)) {
+    // Cloud-provisioned containers exempt /api/cloud/status from auth so the
+    // SPA can discover cloud connection state without a token. Without this,
+    // the SPA falls into the cloud_login onboarding step.
+    const isCloudStatusExempt =
+      _isCloudProvisioned() &&
+      method === "GET" &&
+      url.pathname === "/api/cloud/status";
+
+    if (!isCloudStatusExempt && !ensureCompatApiAuthorized(req, res)) {
       return true;
     }
 
