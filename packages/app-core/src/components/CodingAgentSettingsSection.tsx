@@ -107,7 +107,11 @@ const ENV_PREFIX: Record<AgentTab, string> = {
   aider: "PARALLAX_AIDER",
 };
 
-/** Text input that uses local state while typing and only syncs on blur/enter. */
+/**
+ * Text input that uses local state while typing and only syncs on blur/enter.
+ * `initial` is only read on mount — safe because the parent guards rendering
+ * behind `if (loading) return …`, so `initial` is always the loaded value.
+ */
 function CodingDirInput({
   initial,
   onCommit,
@@ -284,7 +288,7 @@ export function CodingAgentSettingsSection() {
     try {
       const envPatch: Record<string, string> = {};
       for (const [key, value] of Object.entries(prefs)) {
-        if (value) {
+        if (value != null) {
           envPatch[key] = value;
         }
       }
@@ -462,9 +466,12 @@ export function CodingAgentSettingsSection() {
         </SettingsControls.FieldLabel>
         <Select
           value={prefs.PARALLAX_SCRATCH_RETENTION || "pending_decision"}
-          onValueChange={(value) =>
-            setPref("PARALLAX_SCRATCH_RETENTION", value)
-          }
+          onValueChange={(value) => {
+            // Skip if user re-selects the visual default that was never stored
+            if (!prefs.PARALLAX_SCRATCH_RETENTION && value === "pending_decision")
+              return;
+            setPref("PARALLAX_SCRATCH_RETENTION", value);
+          }}
         >
           <SettingsControls.SelectTrigger variant="compact">
             <SelectValue />
