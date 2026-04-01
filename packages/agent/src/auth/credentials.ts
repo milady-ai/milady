@@ -154,11 +154,28 @@ export function getSubscriptionStatus(): Array<{
   ];
   return providers.map((provider) => {
     const stored = loadCredentials(provider);
+    if (stored) {
+      return {
+        provider,
+        configured: true,
+        valid: stored.credentials.expires > Date.now(),
+        expiresAt: stored.credentials.expires,
+      };
+    }
+    // Setup token fallback: if ANTHROPIC_API_KEY is a Claude Code setup token
+    // (sk-ant-oat...), report configured+valid. Setup tokens are stored in env
+    // rather than OAuth credential files, so the file check above won't find them.
+    if (provider === "anthropic-subscription") {
+      const envKey = process.env.ANTHROPIC_API_KEY?.trim();
+      if (envKey?.startsWith("sk-ant-oat")) {
+        return { provider, configured: true, valid: true, expiresAt: null };
+      }
+    }
     return {
       provider,
-      configured: stored !== null,
-      valid: stored ? stored.credentials.expires > Date.now() : false,
-      expiresAt: stored?.credentials.expires ?? null,
+      configured: false,
+      valid: false,
+      expiresAt: null,
     };
   });
 }
