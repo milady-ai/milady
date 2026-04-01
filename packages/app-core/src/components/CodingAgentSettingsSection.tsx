@@ -107,6 +107,28 @@ const ENV_PREFIX: Record<AgentTab, string> = {
   aider: "PARALLAX_AIDER",
 };
 
+/** Text input that uses local state while typing and only syncs on blur/enter. */
+function CodingDirInput({
+  initial,
+  onCommit,
+}: { initial: string; onCommit: (val: string) => void }) {
+  const [val, setVal] = useState(initial);
+  return (
+    <SettingsControls.Input
+      className="w-full"
+      variant="compact"
+      type="text"
+      placeholder="~/Projects"
+      value={val}
+      onChange={(e) => setVal(e.target.value)}
+      onBlur={() => onCommit(val)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") onCommit(val);
+      }}
+    />
+  );
+}
+
 export function CodingAgentSettingsSection() {
   const { setTimeout } = useTimeout();
   const { t } = useApp();
@@ -166,6 +188,12 @@ export function CodingAgentSettingsSection() {
         }
         if (env.PARALLAX_DEFAULT_AGENT_TYPE) {
           loaded.PARALLAX_DEFAULT_AGENT_TYPE = env.PARALLAX_DEFAULT_AGENT_TYPE;
+        }
+        if (env.PARALLAX_SCRATCH_RETENTION) {
+          loaded.PARALLAX_SCRATCH_RETENTION = env.PARALLAX_SCRATCH_RETENTION;
+        }
+        if (env.PARALLAX_CODING_DIRECTORY) {
+          loaded.PARALLAX_CODING_DIRECTORY = env.PARALLAX_CODING_DIRECTORY;
         }
         setPrefs(loaded);
 
@@ -423,6 +451,65 @@ export function CodingAgentSettingsSection() {
               )
             : ""}
           {t("codingagentsettingssection.AppliesToAllNewlySpawned")}
+        </SettingsControls.FieldDescription>
+      </SettingsControls.Field>
+
+      <SettingsControls.Field>
+        <SettingsControls.FieldLabel>
+          {t("codingagentsettingssection.ScratchRetention", {
+            defaultValue: "Scratch Retention",
+          })}
+        </SettingsControls.FieldLabel>
+        <Select
+          value={prefs.PARALLAX_SCRATCH_RETENTION || "pending_decision"}
+          onValueChange={(value) =>
+            setPref("PARALLAX_SCRATCH_RETENTION", value)
+          }
+        >
+          <SettingsControls.SelectTrigger variant="compact">
+            <SelectValue />
+          </SettingsControls.SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ephemeral">
+              {t("codingagentsettingssection.RetentionEphemeral", {
+                defaultValue: "Auto-delete",
+              })}
+            </SelectItem>
+            <SelectItem value="pending_decision">
+              {t("codingagentsettingssection.RetentionAskMe", {
+                defaultValue: "Ask me (default)",
+              })}
+            </SelectItem>
+            <SelectItem value="persistent">
+              {t("codingagentsettingssection.RetentionAlwaysKeep", {
+                defaultValue: "Always keep",
+              })}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <SettingsControls.FieldDescription>
+          {t("codingagentsettingssection.ScratchRetentionDesc", {
+            defaultValue:
+              "What happens to scratch workspace code when a task finishes.",
+          })}
+        </SettingsControls.FieldDescription>
+      </SettingsControls.Field>
+
+      <SettingsControls.Field>
+        <SettingsControls.FieldLabel>
+          {t("codingagentsettingssection.CodingDirectory", {
+            defaultValue: "Coding Directory",
+          })}
+        </SettingsControls.FieldLabel>
+        <CodingDirInput
+          initial={prefs.PARALLAX_CODING_DIRECTORY || ""}
+          onCommit={(val) => setPref("PARALLAX_CODING_DIRECTORY", val)}
+        />
+        <SettingsControls.FieldDescription>
+          {t("codingagentsettingssection.CodingDirectoryDesc", {
+            defaultValue:
+              "Where scratch task code is saved. Leave empty for default (~/.milady/workspaces/).",
+          })}
         </SettingsControls.FieldDescription>
       </SettingsControls.Field>
 

@@ -171,7 +171,7 @@
     "@electric-sql/pglite": "^0.3.16",
     "@elizaos/app-hyperscape": "1.0.0",
     "@elizaos/core": "2.0.0-alpha.109",
-    "@elizaos/plugin-agent-orchestrator": "0.4.1",
+    "@elizaos/plugin-agent-orchestrator": "0.4.2",
     "@elizaos/plugin-agent-skills": "^2.0.0-alpha.70",
     "@elizaos/plugin-commands": "alpha",
     "@elizaos/plugin-anthropic": "^2.0.0-alpha.9",
