@@ -121,12 +121,13 @@ export async function handleAuthPairingCompatRoutes(
 
   // ── GET /api/onboarding/status ──────────────────────────────────────
   if (method === "GET" && url.pathname === "/api/onboarding/status") {
-    if (!ensureCompatApiAuthorized(req, res)) {
-      return true;
-    }
-
+    // Cloud-provisioned containers always report onboarding complete and
+    // skip auth so the SPA can read this before pairing/token exchange.
     if (_isCloudProvisioned()) {
       sendJsonResponse(res, 200, { complete: true });
+      return true;
+    }
+    if (!ensureCompatApiAuthorized(req, res)) {
       return true;
     }
     const config = loadElizaConfig();
