@@ -536,16 +536,18 @@ describe("cloud-billing-routes", () => {
       }),
     );
 
-    // Upstream handler now throws for redirect errors
-    await expect(
-      handleCloudBillingRoute(
-        makeReq({}),
-        makeRes(),
-        "/api/cloud/billing/summary",
-        "GET",
-        makeState(),
-      ),
-    ).rejects.toThrow();
+    await handleCloudBillingRoute(
+      makeReq({}),
+      makeRes(),
+      "/api/cloud/billing/summary",
+      "GET",
+      makeState(),
+    );
+    expect(sendJsonError).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining("redirect"),
+      502,
+    );
   });
 
   it("returns 504 on timeout", async () => {
@@ -553,15 +555,17 @@ describe("cloud-billing-routes", () => {
       new DOMException("Timed out", "AbortError"),
     );
 
-    // Upstream handler now throws for timeout errors
-    await expect(
-      handleCloudBillingRoute(
-        makeReq({}),
-        makeRes(),
-        "/api/cloud/billing/history",
-        "GET",
-        makeState(),
-      ),
-    ).rejects.toThrow();
+    await handleCloudBillingRoute(
+      makeReq({}),
+      makeRes(),
+      "/api/cloud/billing/history",
+      "GET",
+      makeState(),
+    );
+    expect(sendJsonError).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining("timed out"),
+      504,
+    );
   });
 });

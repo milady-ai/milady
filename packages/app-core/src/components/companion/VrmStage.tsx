@@ -4,6 +4,10 @@ import {
   STOP_EMOTE_EVENT,
 } from "@miladyai/app-core/events";
 import { useRenderGuard } from "@miladyai/app-core/hooks";
+import {
+  getParallaxAssetBasePath,
+  isParallaxAvatar,
+} from "@miladyai/app-core/state";
 import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type {
@@ -12,6 +16,8 @@ import type {
 } from "../../state/types";
 import type { TranslateFn } from "../../types";
 import { AvatarLoader } from "../character/AvatarLoader";
+import type { ParallaxEngineState } from "../avatar/ParallaxAvatarEngine";
+import { ParallaxAvatarViewer } from "../avatar/ParallaxAvatarViewer";
 import type {
   CameraProfile,
   VrmEngine,
@@ -35,6 +41,7 @@ const AVATAR_CHANGE_WAVE_EMOTE: AppEmoteEventDetail = {
  */
 export const VrmStage = memo(function VrmStage({
   active = true,
+  avatarIndex = 1,
   vrmPath,
   worldUrl,
   fallbackPreviewUrl,
@@ -50,6 +57,8 @@ export const VrmStage = memo(function VrmStage({
   t,
 }: {
   active?: boolean;
+  /** Selected avatar index — used to detect parallax-2d avatars. */
+  avatarIndex?: number;
   vrmPath: string;
   worldUrl?: string;
   fallbackPreviewUrl: string;
@@ -232,6 +241,35 @@ export const VrmStage = memo(function VrmStage({
     };
   }, []);
 
+  /* ── Parallax engine state bridge ────────────────────────────────── */
+
+  const handleParallaxState = useCallback(
+    (state: ParallaxEngineState) => {
+      if (state.loadingProgress !== undefined) {
+        setLoadingProgress(Math.round(state.loadingProgress * 100));
+      }
+      if (state.loaded) {
+        setVrmLoaded(true);
+        setShowVrmFallback(false);
+        hasLoadedFirstVrmRef.current = true;
+        if (!loaderFadingStartedRef.current) {
+          loaderFadingStartedRef.current = true;
+          setLoaderFading(true);
+          setTimeout(() => setLoaderHidden(true), 800);
+        }
+        return;
+      }
+      if (state.loadError) {
+        setLoaderHidden(true);
+        setVrmLoaded(false);
+        setShowVrmFallback(true);
+      }
+    },
+    [],
+  );
+
+  const useParallax = isParallaxAvatar(avatarIndex);
+
   /* ── Render ─────────────────────────────────────────────────────── */
 
   return (
@@ -258,20 +296,29 @@ export const VrmStage = memo(function VrmStage({
         />
       </div>
 
-      {/* Single persistent VrmViewer — world stays loaded, only character swaps */}
+      {/* Avatar renderer — parallax 2D or VRM 3D depending on selection */}
       <div className="absolute inset-0 z-10">
-        <VrmViewer
-          active={active}
-          vrmPath={vrmPath}
-          worldUrl={worldUrl}
-          cameraProfile={cameraProfile}
-          companionVrmPowerMode={companionVrmPowerMode}
-          companionHalfFramerateMode={companionHalfFramerateMode}
-          companionAnimateWhenHidden={companionAnimateWhenHidden}
-          onEngineReady={handleEngineReady}
-          onEngineState={handleEngineState}
-          onRevealStart={handleRevealStart}
-        />
+        {useParallax ? (
+          <ParallaxAvatarViewer
+            active={active}
+            assetBasePath={getParallaxAssetBasePath(avatarIndex)}
+            onEngineState={handleParallaxState}
+            onRevealStart={handleRevealStart}
+          />
+        ) : (
+          <VrmViewer
+            active={active}
+            vrmPath={vrmPath}
+            worldUrl={worldUrl}
+            cameraProfile={cameraProfile}
+            companionVrmPowerMode={companionVrmPowerMode}
+            companionHalfFramerateMode={companionHalfFramerateMode}
+            companionAnimateWhenHidden={companionAnimateWhenHidden}
+            onEngineReady={handleEngineReady}
+            onEngineState={handleEngineState}
+            onRevealStart={handleRevealStart}
+          />
+        )}
       </div>
 
       {/* Fallback preview on VRM load error */}

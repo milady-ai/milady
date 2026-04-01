@@ -98,6 +98,23 @@ export function getVrmTitle(index: number): string {
   return assets[safe - 1]?.title ?? assets[0]?.title ?? "Avatar";
 }
 
+/** True when the avatar at `index` should use the layered 2D parallax renderer. */
+export function isParallaxAvatar(index: number): boolean {
+  const assets = getAssets();
+  const n = normalizeAvatarIndex(index);
+  if (n < 1 || n > assets.length) return false;
+  return assets[n - 1]?.rendererType === "parallax-2d";
+}
+
+/** Resolve a parallax avatar's public asset directory URL. */
+export function getParallaxAssetBasePath(index: number): string {
+  const assets = getAssets();
+  const n = normalizeAvatarIndex(index);
+  const safe = n > 0 ? n : 1;
+  const slug = assets[safe - 1]?.slug ?? "milady-1";
+  return resolveAppAssetUrl(`avatars/parallax/${slug}`);
+}
+
 /** @deprecated Stub — always returns false. Retained for API compatibility. */
 export function isOfficialVrmIndex(_index: number): boolean {
   return false;

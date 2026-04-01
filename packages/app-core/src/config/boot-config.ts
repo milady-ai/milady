@@ -12,10 +12,12 @@ import type { BrandingConfig } from "./branding";
 // Types
 // ---------------------------------------------------------------------------
 
-/** A bundled VRM avatar asset descriptor. */
+/** A bundled avatar asset descriptor. */
 export interface BundledVrmAsset {
   title: string;
   slug: string;
+  /** Rendering backend. Defaults to "vrm" (3D) when omitted. */
+  rendererType?: "vrm" | "parallax-2d";
 }
 
 /** Lightweight character catalog data passed from the host app. */

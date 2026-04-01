@@ -7,6 +7,7 @@
  */
 
 import {
+  getVrmCount,
   getVrmPreviewUrl,
   getVrmTitle,
   useApp,
@@ -146,7 +147,8 @@ export function AvatarSelector({
     [handleVrmFile],
   );
 
-  const avatarIndices = Array.from({ length: VRM_COUNT }, (_, i) => i + 1);
+  const dynamicCount = getVrmCount() || VRM_COUNT;
+  const avatarIndices = Array.from({ length: dynamicCount }, (_, i) => i + 1);
   const containerClass = fullWidth
     ? "flex flex-row gap-2 w-full items-center"
     : "flex flex-wrap gap-3 justify-start";

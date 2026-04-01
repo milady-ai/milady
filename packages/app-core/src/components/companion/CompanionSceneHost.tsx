@@ -619,6 +619,7 @@ function CompanionSceneSurface({
         {shouldMountVrm && (
           <VrmStage
             active={active}
+            avatarIndex={selectedVrmIndex}
             vrmPath={vrmPath}
             worldUrl={worldUrl}
             fallbackPreviewUrl={fallbackPreviewUrl}

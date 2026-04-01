@@ -154,9 +154,18 @@ import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const MILADY_STYLE_PRESETS = getStylePresets();
 
+/** Avatar IDs that use the layered parallax renderer instead of VRM. */
+const PARALLAX_AVATAR_IDS = new Set(["lady"]);
+
 const MILADY_VRM_ASSETS = MILADY_STYLE_PRESETS.slice()
   .sort((a, b) => a.avatarIndex - b.avatarIndex)
-  .map((p) => ({ title: p.name, slug: `milady-${p.avatarIndex}` }));
+  .map((p) => ({
+    title: p.name,
+    slug: `milady-${p.avatarIndex}`,
+    ...(PARALLAX_AVATAR_IDS.has(p.id)
+      ? { rendererType: "parallax-2d" as const }
+      : {}),
+  }));
 
 const miladyBootConfig: AppBootConfig = {
   branding: MILADY_BRANDING,
