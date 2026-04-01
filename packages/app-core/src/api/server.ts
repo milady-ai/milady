@@ -128,6 +128,7 @@ import {
   readDevConsoleLogTail,
 } from "./dev-console-log";
 import { handleAuthPairingCompatRoutes } from "./auth-pairing-compat-routes";
+import { isCloudProvisioned as _isCloudProvisioned } from "./server-onboarding-compat";
 import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
 import { handleDevCompatRoutes } from "./dev-compat-routes";
 import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
