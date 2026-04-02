@@ -6,7 +6,7 @@ export const sidebarRootVariants = cva(
     variants: {
       variant: {
         default:
-          "relative isolate min-h-0 h-[calc(100%-1rem)] w-full shrink-0 rounded-l-none rounded-tr-[26px] rounded-br-none border-y-0 border-l-0 border-b border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_76%,transparent),color-mix(in_srgb,var(--bg-muted)_97%,transparent))] ring-1 ring-border/12 backdrop-blur-md before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.26),transparent)] after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:top-[1.25rem] after:w-[2px] after:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_24%,transparent)] lg:border-b-0 lg:border-r dark:ring-white/5 dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)] dark:after:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_22%,transparent)]",
+          "relative isolate min-h-0 h-[calc(100%-1rem)] w-full shrink-0 rounded-l-none rounded-tr-[26px] rounded-br-none border-y-0 border-l-0 border-b border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_76%,transparent),color-mix(in_srgb,var(--bg-muted)_97%,transparent))] ring-0 shadow-[0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-md before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)] after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:top-[1.25rem] after:w-[2px] after:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_22%,transparent)] lg:border-b-0 lg:border-r",
         mobile:
           "h-full w-full min-w-0 border-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_96%,transparent),color-mix(in_srgb,var(--bg)_92%,transparent))] shadow-none ring-0",
         "game-modal":
@@ -64,9 +64,9 @@ export const sidebarPanelVariants = cva("", {
   variants: {
     variant: {
       default:
-        "flex min-h-full flex-col gap-2 rounded-[20px] border border-border/12 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_16%,transparent),transparent_48%)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]",
+        "flex min-h-full flex-col gap-2 rounded-[20px] border border-border bg-bg p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
       mobile:
-        "flex min-h-full flex-col gap-2 rounded-[20px] border border-border/12 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_16%,transparent),transparent_48%)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]",
+        "flex min-h-full flex-col gap-2 rounded-[20px] border border-border bg-bg p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
       "game-modal":
         "flex min-h-full flex-col gap-1.5 rounded-[22px] border border-white/10 bg-black/12 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
     },

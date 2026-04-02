@@ -1,5 +1,23 @@
 /* Milady — Theme System */
 
+@font-face {
+  font-family: "Geist";
+  src:
+    url("/fonts/Geist-Latin.woff2") format("woff2"),
+    url("/fonts/Geist-Latin-Ext.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Departure Mono";
+  src: url("/fonts/DepartureMono-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Backgrounds */
   --bg: #f7f8fa;
@@ -79,13 +97,13 @@
   --link-color: #c99400;
   --link-hover-color: #b38300;
 
-  --mono: "Courier New", Courier, monospace;
+  --mono: "Departure Mono", "Courier New", Courier, monospace;
   --font-body:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-chat:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Legacy */
   --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.05);
@@ -119,15 +137,15 @@
 
 [data-theme="dark"],
 .dark {
-  --bg: #050506;
-  --bg-accent: #0a0a0c;
-  --bg-elevated: #0d0d10;
-  --bg-hover: #141418;
-  --bg-muted: #0a0a0c;
+  --bg: #000000;
+  --bg-accent: #060606;
+  --bg-elevated: #060606;
+  --bg-hover: #1a1a1a;
+  --bg-muted: #060606;
 
-  --card: #0e0e11;
+  --card: #060606;
   --card-foreground: #eaecef;
-  --surface: #121214;
+  --surface: #060606;
 
   --text: #eaecef;
   --text-strong: #ffffff;
@@ -139,7 +157,7 @@
   --border: #232329;
   --border-strong: #313136;
   --border-hover: #f0b90b;
-  --input: #17171c;
+  --input: #1a1a1a;
   --ring: #f0b90b;
 
   --accent: #f0b90b;
@@ -183,20 +201,20 @@
   --scrollbar-thumb-hover-end: rgba(255, 214, 92, 0.88);
   --scrollbar-thumb-edge: rgba(255, 235, 175, 0.12);
 
-  --header-bar-bg: #050506;
+  --header-bar-bg: #000000;
   --header-bar-fg: #ffffff;
-  --section-bar-bg: #0a0a0c;
+  --section-bar-bg: #060606;
   --section-bar-fg: #ffffff;
   --link-color: var(--text);
   --link-hover-color: #f0b90b;
 
-  --mono: "Courier New", Courier, monospace;
+  --mono: "Departure Mono", "Courier New", Courier, monospace;
   --font-body:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-chat:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);

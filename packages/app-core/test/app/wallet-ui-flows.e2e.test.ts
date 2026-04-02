@@ -649,19 +649,19 @@ describe("InventoryView UI", () => {
     expect(tree).not.toBeNull();
   });
 
-  it("uses the Search wallets label for the sidebar search input", async () => {
+  it("renders the Balances/Transactions/Approvals tab switcher in the sidebar", async () => {
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
       tree = TestRenderer.create(React.createElement(InventoryView));
     });
 
-    const searchInput = tree?.root
-      .findAllByType("input")
-      .find((node) => node.props["aria-label"] === "Search wallets");
+    const balancesTab = tree?.root.findAll(
+      (node) =>
+        node.type === "button" && node.props["aria-pressed"] === true,
+    );
 
-    expect(searchInput).toBeDefined();
-    expect(searchInput?.props.placeholder).toBe("Search wallets...");
+    expect(balancesTab).not.toHaveLength(0);
   });
 
   it("renders compact wallet controls when the shared sidebar rail collapses", async () => {

@@ -481,59 +481,6 @@ export function TradePanel({
 
   return (
     <>
-      {/* Status bar */}
-      <div className="flex items-center gap-2 text-xs">
-        <span
-          className={
-            tradeReady
-              ? "text-status-success"
-              : "text-[color:var(--warn,var(--accent))]"
-          }
-        >
-          {tradeReady
-            ? t("bsctradepanel.TradeReady")
-            : t("bsctradepanel.TradeNotReady")}
-        </span>
-        {stewardConnected && (
-          <span
-            data-testid="steward-trade-indicator"
-            className="text-purple-400 flex items-center gap-0.5"
-            title="Trades routed through Steward vault policy enforcement"
-          >
-            <StewardLogo size={14} className="inline-block" /> Steward
-          </span>
-        )}
-        <span className="text-muted">
-          {t("bsctradepanel.BNB")} {formatBalance(String(bnbBalance))}
-        </span>
-        {getBscTradePreflight && (
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="wallet-token-preflight"
-            className="h-6 px-2 py-0.5 text-[10px] font-mono shadow-sm hover:border-accent"
-            onClick={() => {
-              void handlePreflight();
-            }}
-          >
-            {t("bsctradepanel.Preflight")}
-          </Button>
-        )}
-        {getBscTradeQuote && (
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="wallet-token-quote"
-            className="h-6 px-2 py-0.5 text-[10px] font-mono shadow-sm hover:border-accent"
-            onClick={() => {
-              void handleToolbarQuote();
-            }}
-          >
-            {t("bsctradepanel.Quote")}
-          </Button>
-        )}
-      </div>
-
       {tradeFeedback && (
         <div
           data-testid="wallet-trade-feedback"
@@ -550,51 +497,95 @@ export function TradePanel({
       )}
 
       {/* Quick trade panel */}
-      <div className="border border-border bg-card p-3 space-y-2">
-        <div className="flex items-center gap-2">
-          <Input
-            data-testid="wallet-quick-token-input"
-            placeholder={t("bsctradepanel.TokenContractAddre")}
-            value={quickTokenAddress}
-            onChange={(e) => setQuickTokenAddress(e.target.value)}
-            className="flex-1 h-8 px-2 py-1 text-xs font-mono bg-bg border-border shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="wallet-quick-add-token"
-            className="h-8 px-2 py-1 text-[10px] font-mono shadow-sm hover:border-accent"
-            onClick={handleAddToken}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+        {/* Status bar */}
+        <div className="flex items-center gap-2 text-xs">
+          <span
+            className={
+              tradeReady
+                ? "text-status-success font-semibold"
+                : "text-[color:var(--warn,var(--accent))] font-semibold"
+            }
           >
-            {t("secretsview.Add")}
-          </Button>
+            {tradeReady
+              ? t("bsctradepanel.TradeReady")
+              : t("bsctradepanel.TradeNotReady")}
+          </span>
+          {stewardConnected && (
+            <span
+              data-testid="steward-trade-indicator"
+              className="text-purple-400 flex items-center gap-0.5"
+              title="Trades routed through Steward vault policy enforcement"
+            >
+              <StewardLogo size={14} className="inline-block" /> Steward
+            </span>
+          )}
+          <span className="text-muted font-mono">
+            {t("bsctradepanel.BNB")} {formatBalance(String(bnbBalance))}
+          </span>
+          <span className="text-muted font-mono">
+            {t("wallet.dailyReturns")}: 0
+          </span>
+          <div className="ml-auto flex items-center gap-1.5">
+            {getBscTradePreflight && (
+              <Button
+                variant="outline"
+                size="sm"
+                data-testid="wallet-token-preflight"
+                className="h-7 px-2.5 text-[10px] font-mono shadow-sm hover:border-accent"
+                onClick={() => {
+                  void handlePreflight();
+                }}
+              >
+                {t("bsctradepanel.Preflight")}
+              </Button>
+            )}
+            {getBscTradeQuote && (
+              <Button
+                variant="outline"
+                size="sm"
+                data-testid="wallet-token-quote"
+                className="h-7 px-2.5 text-[10px] font-mono shadow-sm hover:border-accent"
+                onClick={() => {
+                  void handleToolbarQuote();
+                }}
+              >
+                {t("bsctradepanel.Quote")}
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <Input
+          data-testid="wallet-quick-token-input"
+          placeholder={t("bsctradepanel.TokenContractAddre")}
+          value={quickTokenAddress}
+          onChange={(e) => setQuickTokenAddress(e.target.value)}
+          className="h-9 w-full rounded-lg px-3 text-xs font-mono bg-bg border-border/60 shadow-sm focus-visible:ring-1 focus-visible:ring-accent"
+        />
+
+        <div className="flex items-center gap-2">
           {AMOUNT_PRESETS.map((amt) => (
             <Button
               key={amt}
               variant="outline"
               size="sm"
               data-testid={`wallet-quick-amount-${amt}`}
-              className={`px-2 py-0.5 text-[10px] font-mono cursor-pointer ${
+              className={`h-8 flex-1 text-[10px] font-mono cursor-pointer ${
                 quickAmount === String(amt)
                   ? "border-accent text-txt"
-                  : "border-border bg-bg hover:border-accent"
+                  : "border-border/60 bg-bg hover:border-accent"
               }`}
               onClick={() => setQuickAmount(String(amt))}
             >
               {amt} {t("bsctradepanel.BNB1")}
             </Button>
           ))}
-        </div>
-
-        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             data-testid="wallet-quick-buy"
-            className="h-8 px-3 py-1 text-xs font-mono text-green-500 border-green-500 hover:bg-green-500 hover:text-white shadow-sm"
+            className="h-8 flex-1 text-xs font-mono text-green-500 border-green-500/60 hover:bg-green-500 hover:text-white shadow-sm"
             onClick={() => {
               void handleQuickBuy();
             }}
@@ -605,7 +596,7 @@ export function TradePanel({
             variant="outline"
             size="sm"
             data-testid="wallet-quick-sell"
-            className="h-8 px-3 py-1 text-xs font-mono text-red-500 border-red-500 hover:bg-red-500 hover:text-white shadow-sm"
+            className="h-8 flex-1 text-xs font-mono text-red-500 border-red-500/60 hover:bg-red-500 hover:text-white shadow-sm"
             onClick={() => {
               void handleQuickSell();
             }}

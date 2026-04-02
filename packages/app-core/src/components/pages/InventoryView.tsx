@@ -27,6 +27,7 @@ import {
 import {
   AlertTriangle,
   ChevronDown,
+  Coins,
   Copy,
   Settings,
   Shield,
@@ -627,20 +628,93 @@ export function InventoryView() {
     [copyToClipboard, setActionNotice, t],
   );
 
+  const walletSubTabItems = [
+    { value: "balances" as const, label: t("wallet.balances") },
+    { value: "transactions" as const, label: t("wallet.transactions") },
+    {
+      value: "approvals" as const,
+      label: t("wallet.approvals"),
+      badge:
+        pendingApprovalCount > 0 ? (
+          <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+            {pendingApprovalCount > 99 ? "99+" : pendingApprovalCount}
+          </span>
+        ) : undefined,
+    },
+  ];
+
   const walletSidebar = (
     <Sidebar
       testId="wallets-sidebar"
       contentIdentity={`wallets:${inventoryView}`}
       header={
-        <SidebarHeader
-          search={{
-            value: walletSearch,
-            onChange: (event) => setWalletSearch(event.target.value),
-            onClear: () => setWalletSearch(""),
-            placeholder: walletSearchLabel,
-            "aria-label": walletSearchLabel,
-          }}
-        />
+        <>
+          <div className="px-3.5 pt-3.5 pb-2">
+            <SidebarContent.SectionLabel>
+              {t("wallet.chain", { defaultValue: "Chain" })}
+            </SidebarContent.SectionLabel>
+            <div className="mt-3 grid grid-cols-5 gap-2">
+              {chainItemMeta.map((item) => {
+                const isOn = inventoryChainFilters[item.key];
+                const label = item.label;
+                const disabled = !item.hasAddress;
+                return (
+                  <TooltipHint
+                    key={item.key}
+                    side="bottom"
+                    sideOffset={6}
+                    contentClassName="px-2.5 py-1.5 text-xs font-medium"
+                    content={
+                      disabled
+                        ? `${label} — no wallet configured`
+                        : isOn
+                          ? `${label} — visible`
+                          : `${label} — hidden`
+                    }
+                  >
+                    <button
+                      type="button"
+                      data-testid={`inventory-chain-toggle-${item.key}`}
+                      onClick={
+                        disabled
+                          ? undefined
+                          : () => handleInventoryChainToggle(item.key)
+                      }
+                      aria-pressed={disabled ? undefined : isOn}
+                      aria-label={
+                        disabled
+                          ? label
+                          : isOn
+                            ? `${label} — shown (click to hide)`
+                            : `${label} — hidden (click to show)`
+                      }
+                      aria-disabled={disabled}
+                      className={`flex aspect-square items-center justify-center rounded-2xl border transition-colors ${
+                        disabled
+                          ? "cursor-not-allowed border-border/20 bg-bg/10 text-muted opacity-25"
+                          : isOn
+                            ? "border-accent/30 bg-accent/14 text-txt-strong"
+                            : "border-border/40 bg-bg/20 text-muted opacity-45 hover:border-border/60 hover:text-txt hover:opacity-70"
+                      }`}
+                    >
+                      <ChainIcon chain={item.key} size="lg" />
+                    </button>
+                  </TooltipHint>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mx-3.5 mt-4 mb-4 h-px bg-[linear-gradient(90deg,#f0b90b,#f8d12f,#d8a000,#f0b90b)] opacity-60" />
+          <div className="px-3.5 pb-3">
+            <SegmentedControl
+              className="grid w-full grid-cols-3 rounded-full border border-input bg-bg p-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]"
+              buttonClassName="justify-center rounded-full text-[10px] px-1"
+              value={walletSubTab}
+              onValueChange={setWalletSubTab}
+              items={walletSubTabItems}
+            />
+          </div>
+        </>
       }
       footer={
         <div className="flex w-full flex-col gap-2">
@@ -695,122 +769,33 @@ export function InventoryView() {
       <SidebarScrollRegion>
         <SidebarPanel>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-2">
-              <SegmentedControl
-                className="grid w-full grid-cols-2"
-                buttonClassName="h-10 justify-center"
-                value={inventoryView}
-                onValueChange={handleInventoryViewChange}
-                items={[
-                  {
-                    value: "tokens",
-                    label: t("wallet.tokens"),
-                    testId: "wallet-view-tokens",
-                  },
-                  {
-                    value: "nfts",
-                    label: t("wallet.nfts"),
-                    testId: "wallet-view-nfts",
-                  },
-                ]}
-              />
+            <div className="flex items-center gap-4 px-2.5 mt-3">
+              {(["tokens", "nfts"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  data-testid={`wallet-view-${tab}`}
+                  onClick={() => handleInventoryViewChange(tab)}
+                  style={{ fontFamily: "var(--mono)" }}
+                  className={`text-xs uppercase tracking-wide transition-colors pb-1 ${
+                    inventoryView === tab
+                      ? "text-accent border-b-2 border-accent"
+                      : "text-muted hover:text-accent/70 border-b-2 border-transparent"
+                  }`}
+                >
+                  {tab === "tokens" ? t("wallet.tokens") : t("wallet.nfts")}
+                </button>
+              ))}
             </div>
 
-            <SidebarFilterBar
-              data-testid="wallet-sidebar-sort-block"
-              selectValue={
-                inventoryView === "nfts" && inventorySort === "value"
-                  ? "symbol"
-                  : inventorySort
-              }
-              selectOptions={[
-                ...(inventoryView === "tokens"
-                  ? [{ value: "value", label: t("wallet.value") }]
-                  : []),
-                { value: "chain", label: t("wallet.chain") },
-                { value: "symbol", label: t("wallet.name") },
-              ]}
-              onSelectValueChange={(nextSort) => {
-                if (!isInventorySortKey(nextSort)) return;
-                setState("inventorySort", nextSort);
-                setState(
-                  "inventorySortDirection",
-                  nextSort === "value" ? "desc" : "asc",
-                );
-              }}
-              selectAriaLabel={t("wallet.sort")}
-              selectTestId="wallet-sort-select"
-              sortDirection={inventorySortDirection}
-              onSortDirectionToggle={() =>
-                setState(
-                  "inventorySortDirection",
-                  inventorySortDirection === "asc" ? "desc" : "asc",
-                )
-              }
-              sortDirectionButtonTestId="wallet-sort-direction-toggle"
-              sortAscendingLabel={t("wallet.sortAscending")}
-              sortDescendingLabel={t("wallet.sortDescending")}
-              refreshButtonTestId="wallet-refresh-balances"
-              refreshLabel={t("common.refresh")}
-              onRefresh={() =>
-                void (inventoryView === "tokens" ? loadBalances() : loadNfts())
-              }
-            />
-
-            <div>
-              <SidebarContent.SectionLabel>
-                {t("wallet.chain", { defaultValue: "Chain" })}
-              </SidebarContent.SectionLabel>
-              <div className="mt-3 grid grid-cols-5 gap-2">
-                {chainItemMeta.map((item) => {
-                  const isOn = inventoryChainFilters[item.key];
-                  const label = item.label;
-                  const disabled = !item.hasAddress;
-                  return (
-                    <TooltipHint
-                      key={item.key}
-                      side="bottom"
-                      sideOffset={6}
-                      contentClassName="px-2.5 py-1.5 text-xs font-medium"
-                      content={
-                        disabled
-                          ? `${label} — no wallet configured`
-                          : isOn
-                            ? `${label} — visible`
-                            : `${label} — hidden`
-                      }
-                    >
-                      <button
-                        type="button"
-                        data-testid={`inventory-chain-toggle-${item.key}`}
-                        onClick={
-                          disabled
-                            ? undefined
-                            : () => handleInventoryChainToggle(item.key)
-                        }
-                        aria-pressed={disabled ? undefined : isOn}
-                        aria-label={
-                          disabled
-                            ? label
-                            : isOn
-                              ? `${label} — shown (click to hide)`
-                              : `${label} — hidden (click to show)`
-                        }
-                        aria-disabled={disabled}
-                        className={`flex aspect-square items-center justify-center rounded-2xl border transition-colors ${
-                          disabled
-                            ? "cursor-not-allowed border-border/20 bg-bg/10 text-muted opacity-25"
-                            : isOn
-                              ? "border-accent/30 bg-accent/14 text-txt-strong"
-                              : "border-border/40 bg-bg/20 text-muted opacity-45 hover:border-border/60 hover:text-txt hover:opacity-70"
-                        }`}
-                      >
-                        <ChainIcon chain={item.key} size="lg" />
-                      </button>
-                    </TooltipHint>
-                  );
-                })}
-              </div>
+            <div className="flex items-center gap-2 px-2.5">
+              <Coins className="h-5 w-5 shrink-0 text-accent" />
+              <span
+                style={{ fontFamily: "var(--mono)" }}
+                className="text-[11px] text-muted"
+              >
+                {t("wallet.wheresBag")}
+              </span>
             </div>
           </div>
         </SidebarPanel>
@@ -849,27 +834,6 @@ export function InventoryView() {
   }
 
   const stewardConnected = stewardStatus?.connected === true;
-  const walletSubTabItems = [
-    { value: "balances" as const, label: "Balances" },
-    { value: "transactions" as const, label: "Transactions" },
-    {
-      value: "approvals" as const,
-      label: "Approvals",
-      badge:
-        pendingApprovalCount > 0 ? (
-          <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-            {pendingApprovalCount > 99 ? "99+" : pendingApprovalCount}
-          </span>
-        ) : undefined,
-    },
-  ];
-  const walletSubTabHeader = (
-    <SegmentedControl
-      value={walletSubTab}
-      onValueChange={setWalletSubTab}
-      items={walletSubTabItems}
-    />
-  );
 
   // ════════════════════════════════════════════════════════════════════
   // Render
@@ -881,7 +845,7 @@ export function InventoryView() {
       <div className="flex flex-1 min-h-0 flex-col">
         <PageLayout
           sidebar={walletSidebar}
-          contentHeader={walletSubTabHeader}
+          contentHeader={undefined}
           contentInnerClassName="mx-auto w-full max-w-[76rem]"
         >
           <PagePanel.Loading
@@ -897,7 +861,7 @@ export function InventoryView() {
     <div className="flex flex-1 min-h-0 flex-col">
       <PageLayout
         sidebar={walletSidebar}
-        contentHeader={walletSubTabHeader}
+        contentHeader={undefined}
         contentInnerClassName="mx-auto w-full max-w-[76rem]"
       >
         <div className="grid gap-3">
@@ -972,6 +936,7 @@ export function InventoryView() {
                   showChainColumn={singleChainFocus === null}
                   handleUntrackToken={handleUntrackToken}
                   chainName={focusedChainLabel}
+                  onOpenWalletRpc={() => setWalletRpcOpen(true)}
                 />
               ) : (
                 <NftGrid

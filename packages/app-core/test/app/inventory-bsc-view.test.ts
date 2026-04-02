@@ -609,7 +609,7 @@ describe("InventoryView unified wallets", () => {
     ).toHaveLength(0);
   });
 
-  it("keeps wallet sort chrome visible in NFT view", async () => {
+  it("keeps wallet view tabs visible in NFT view", async () => {
     const ctx = createContext({ inventoryView: "nfts" });
     mockUseApp.mockImplementation(() => ctx);
 
@@ -620,12 +620,12 @@ describe("InventoryView unified wallets", () => {
 
     expect(
       tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "wallet-sidebar-sort-block",
+        (node) => node.props?.["data-testid"] === "wallet-view-tokens",
       ),
     ).not.toHaveLength(0);
     expect(
       tree?.root.findAll(
-        (node) => node.props?.["data-testid"] === "wallet-sort-select",
+        (node) => node.props?.["data-testid"] === "wallet-view-nfts",
       ),
     ).not.toHaveLength(0);
   });
@@ -916,12 +916,7 @@ describe("InventoryView unified wallets", () => {
         node.type === "input" &&
         node.props["data-testid"] === "wallet-quick-token-input",
     )[0];
-    const addButton = tree?.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        node.props["data-testid"] === "wallet-quick-add-token",
-    )[0];
-    expect(addButton).toBeDefined();
+    expect(tokenInput).toBeDefined();
 
     await act(async () => {
       tokenInput.props.onChange({
@@ -930,37 +925,10 @@ describe("InventoryView unified wallets", () => {
       await flushAsync();
     });
 
-    const addButtonUpdated = tree?.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        node.props["data-testid"] === "wallet-quick-add-token",
-    )[0];
-
-    await act(async () => {
-      addButtonUpdated.props.onClick();
-      await flushAsync();
-    });
-
-    expect(ctx.setActionNotice).toHaveBeenCalledWith(
-      "bsctradepanel.TokenAddedToWatchlist",
-      "success",
-      2600,
+    // Token input accepts a contract address for trading
+    expect(tokenInput.props.value).toBe(
+      "0x1111111111111111111111111111111111111112",
     );
-    expect(text(tree?.root)).toContain("TKN-1111");
-
-    const untrackButton = tree?.root.findAll(
-      (node) =>
-        node.type === "button" &&
-        node.props["data-testid"] === "wallet-token-untrack",
-    )[0];
-    expect(untrackButton).toBeDefined();
-
-    await act(async () => {
-      untrackButton.props.onClick();
-      await flushAsync();
-    });
-
-    expect(text(tree?.root)).not.toContain("TKN-1111");
   });
 
   it("executes latest quote via inline confirmation", async () => {

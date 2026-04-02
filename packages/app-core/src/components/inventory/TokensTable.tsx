@@ -17,6 +17,7 @@ export interface TokensTableProps {
   showChainColumn: boolean;
   handleUntrackToken: (address: string) => void;
   chainName?: string | null;
+  onOpenWalletRpc?: () => void;
 }
 
 export function TokensTable({
@@ -28,6 +29,7 @@ export function TokensTable({
   showChainColumn,
   handleUntrackToken,
   chainName,
+  onOpenWalletRpc,
 }: TokensTableProps) {
   const renderChainErrors = () =>
     visibleChainErrors.length > 0 ? (
@@ -74,21 +76,13 @@ export function TokensTable({
   if (visibleRows.length === 0) {
     return (
       <div className="flex min-h-[24rem] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <div className="inline-flex overflow-hidden rounded-full border border-amber-500/60">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-txt-strong bg-bg-hover/40 hover:bg-bg-hover transition-colors"
-          >
-            {t("wallet.importFromCloud")}
-          </button>
-          <div className="w-px bg-amber-500/60" />
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-txt-strong bg-bg-hover/40 hover:bg-bg-hover transition-colors"
-          >
-            {t("wallet.connectWallet")}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded-full border border-accent/60 px-4 py-1.5 text-sm font-medium text-accent bg-bg-hover/40 hover:bg-bg-hover transition-colors my-[8px] mx-[10px] cursor-pointer"
+          onClick={onOpenWalletRpc}
+        >
+          {t("wallet.importFromCloud")}
+        </button>
         {renderChainErrors()}
       </div>
     );
