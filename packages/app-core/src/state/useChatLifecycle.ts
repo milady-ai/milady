@@ -348,7 +348,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
       setActiveConversationId(null);
       setConversationMessages([]);
       setConversations([]);
-      const s = await client.restartAgent();
+      const s = await client.restartAndWait(120_000);
       setAgentStatus(s);
       const greetConvId = await hydrateInitialConversationState();
       await requestGreetingWhenRunning(greetConvId);

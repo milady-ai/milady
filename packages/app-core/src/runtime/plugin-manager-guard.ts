@@ -11,6 +11,12 @@ import {
   saveElizaConfig,
 } from "@miladyai/agent/config/config";
 
+let _checked = false;
+let _lastResult: PluginManagerGuardResult = "error";
+
+export const PLUGIN_MANAGER_UNAVAILABLE_ERROR =
+  "Plugin manager service not found";
+
 export type PluginManagerGuardResult =
   | "enabled"
   | "already-enabled"
@@ -18,8 +24,17 @@ export type PluginManagerGuardResult =
   | "disabled-by-env"
   | "error";
 
-let _checked = false;
-let _lastResult: PluginManagerGuardResult = "error";
+export function getPluginManagerBlockReason(
+  result: PluginManagerGuardResult,
+): string | null {
+  if (result === "disabled-by-user") {
+    return "plugin-manager is explicitly disabled in config";
+  }
+  if (result === "disabled-by-env") {
+    return "plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1";
+  }
+  return null;
+}
 
 export function ensurePluginManagerAllowed(): PluginManagerGuardResult {
   if (_checked) return _lastResult;
@@ -60,6 +75,7 @@ export function ensurePluginManagerAllowed(): PluginManagerGuardResult {
     _lastResult = "enabled";
     return _lastResult;
   } catch {
+    // Non-fatal — plugin install button won't work but everything else is fine
     _checked = true;
     _lastResult = "error";
     return _lastResult;

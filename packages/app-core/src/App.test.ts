@@ -5,12 +5,14 @@ import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
+  subscribeDesktopBridgeEventMock,
   keyboardSetScrollMock,
   useAppMock,
   useBugReportStateMock,
   useContextMenuMock,
   useStreamPopoutNavigationMock,
 } = vi.hoisted(() => ({
+  subscribeDesktopBridgeEventMock: vi.fn(() => vi.fn()),
   keyboardSetScrollMock: vi.fn(() => Promise.resolve()),
   useAppMock: vi.fn(),
   useBugReportStateMock: vi.fn(),
@@ -27,6 +29,10 @@ vi.mock("@capacitor/keyboard", () => ({
 vi.mock("@miladyai/app-core/platform", () => ({
   isIOS: false,
   isNative: false,
+}));
+
+vi.mock("@miladyai/app-core/bridge", () => ({
+  subscribeDesktopBridgeEvent: subscribeDesktopBridgeEventMock,
 }));
 
 vi.mock("./state", () => ({
@@ -116,6 +122,7 @@ import { App } from "./App";
 
 describe("App", () => {
   beforeEach(() => {
+    subscribeDesktopBridgeEventMock.mockReset().mockReturnValue(vi.fn());
     keyboardSetScrollMock.mockReset();
     useAppMock.mockReset();
     useBugReportStateMock.mockReset().mockReturnValue({});
@@ -247,5 +254,70 @@ describe("App", () => {
       expect(advancedShells.length).toBeGreaterThan(0);
       expect(paddedMain.length).toBe(0);
     }
+  });
+
+  it("shows a shutdown overlay when desktop quit starts", async () => {
+    let shutdownListener: ((payload: unknown) => void) | null = null;
+    subscribeDesktopBridgeEventMock.mockImplementation(
+      ({ listener }: { listener: (payload: unknown) => void }) => {
+        shutdownListener = listener;
+        return vi.fn();
+      },
+    );
+
+    useAppMock.mockImplementation(() => ({
+      onboardingLoading: false,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
+      startupPhase: "ready",
+      startupError: null,
+      startupCoordinator: { phase: "ready" },
+      authRequired: false,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab: "chat",
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "native",
+      switchShellView: vi.fn(),
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "dark",
+      setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      cancelOnboardingHandoff: vi.fn(),
+      handleSaveCharacter: vi.fn(),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      agentStatus: { state: "running" },
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      retryOnboardingHandoff: vi.fn(),
+      t: (key: string, vars?: { defaultValue?: string }) =>
+        vars?.defaultValue ?? key,
+    }));
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(React.createElement(App));
+    });
+
+    expect(
+      renderer.root.findAll(
+        (node) => node.props["aria-label"] === "Shutting down",
+      ),
+    ).toHaveLength(0);
+
+    await act(async () => {
+      shutdownListener?.({ reason: "before-quit" });
+    });
+
+    expect(
+      renderer.root.findAll(
+        (node) => node.props["aria-label"] === "Shutting down",
+      ),
+    ).toHaveLength(1);
   });
 });

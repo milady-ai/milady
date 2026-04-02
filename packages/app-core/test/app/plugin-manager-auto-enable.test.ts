@@ -89,8 +89,9 @@ describe("ensurePluginManagerAllowed", () => {
   it("skips entirely when MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1", () => {
     process.env.MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE = "1";
 
-    expect(ensurePluginManagerAllowed()).toBe("disabled-by-env");
+    const result = ensurePluginManagerAllowed();
 
+    expect(result).toBe("disabled-by-env");
     expect(mockLoadElizaConfig).not.toHaveBeenCalled();
     expect(mockSaveElizaConfig).not.toHaveBeenCalled();
   });

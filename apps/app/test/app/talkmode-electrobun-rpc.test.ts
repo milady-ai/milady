@@ -293,4 +293,55 @@ describe("TalkModeElectrobun direct Electrobun RPC bridge", () => {
     });
     expect(directListeners.get("talkmodeError")?.size ?? 0).toBe(1);
   });
+
+  it("falls back to browser speech recognition when native talkmode starts without whisper", async () => {
+    class MockSpeechRecognition {
+      continuous = false;
+      interimResults = false;
+      onresult: ((event: SpeechRecognitionEvent) => void) | null = null;
+      onerror: ((event: SpeechRecognitionErrorEvent) => void) | null = null;
+      onend: (() => void) | null = null;
+      start = vi.fn();
+      stop = vi.fn();
+    }
+
+    Object.defineProperty(window, "SpeechRecognition", {
+      value: MockSpeechRecognition,
+      writable: true,
+      configurable: true,
+    });
+
+    const plugin = new TalkModeElectrobun();
+    const invokeBridge = vi.fn(async (rpcMethod: string) => {
+      switch (rpcMethod) {
+        case "talkmodeStart":
+          return { available: true };
+        case "talkmodeIsWhisperAvailable":
+          return { available: false };
+        case "talkmodeStop":
+          return undefined;
+        default:
+          throw new Error(`Unexpected bridge request: ${rpcMethod}`);
+      }
+    });
+    (plugin as TalkModeElectrobunPrivate).invokeBridge = invokeBridge;
+
+    await expect(plugin.start()).resolves.toEqual({ started: true });
+
+    expect(invokeBridge).toHaveBeenNthCalledWith(
+      1,
+      "talkmodeStart",
+      "talkmode:start",
+    );
+    expect(invokeBridge).toHaveBeenNthCalledWith(
+      2,
+      "talkmodeIsWhisperAvailable",
+      "talkmode:isWhisperAvailable",
+    );
+    expect(invokeBridge).toHaveBeenNthCalledWith(
+      3,
+      "talkmodeStop",
+      "talkmode:stop",
+    );
+  });
 });

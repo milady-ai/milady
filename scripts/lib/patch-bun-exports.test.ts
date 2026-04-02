@@ -29,6 +29,7 @@ import {
   patchBrokenElizaCoreRuntimeDists,
   patchBunExports,
   patchCodexFolderApprovalPromptCompat,
+  patchElectrobunWindowsTar,
   patchElizaCoreStreamingRetryPlaceholder,
   patchElizaCoreStreamingTtsHandlerGuard,
   patchExtensionlessJsExports,
@@ -1686,6 +1687,131 @@ describe("warnStaleBunCache", () => {
       const logs: string[] = [];
       const count = warnStaleBunCache(tmp, (msg: string) => logs.push(msg));
       expect(count).toBe(0);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// patchElectrobunWindowsTar
+// ---------------------------------------------------------------------------
+
+const ELECTROBUN_CJS_UNPATCHED = `const tarballPath = join(cacheDir, \`electrobun-\${platform}-\${arch}.tar.gz\`);
+await downloadFile(tarballUrl, tarballPath);
+execSync(\`tar -xzf "\${tarballPath}"\`, { cwd: cacheDir, stdio: 'pipe' });
+unlinkSync(tarballPath);`;
+
+const ELECTROBUN_CJS_PATCHED = `const tarballPath = join(cacheDir, \`electrobun-\${platform}-\${arch}.tar.gz\`);
+await downloadFile(tarballUrl, tarballPath);
+execSync(\`tar -xzf electrobun-\${platform}-\${arch}.tar.gz\`, { cwd: cacheDir, stdio: 'pipe' });
+unlinkSync(tarballPath);`;
+
+const PLATFORM_PLACEHOLDER = "$" + "{platform}";
+const ARCH_PLACEHOLDER = "$" + "{arch}";
+const TARBALL_PATH_PLACEHOLDER = "$" + "{tarballPath}";
+
+describe("patchElectrobunWindowsTar", () => {
+  it("patches the tar command and returns true", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-electrobun-tar-"));
+    try {
+      const cjsPath = join(tmp, "node_modules", "electrobun", "bin");
+      mkdirSync(cjsPath, { recursive: true });
+      writeFileSync(
+        join(cjsPath, "electrobun.cjs"),
+        ELECTROBUN_CJS_UNPATCHED,
+        "utf8",
+      );
+
+      expect(patchElectrobunWindowsTar(tmp)).toBe(true);
+
+      const patched = readFileSync(join(cjsPath, "electrobun.cjs"), "utf8");
+      expect(patched).toContain(
+        `electrobun-${PLATFORM_PLACEHOLDER}-${ARCH_PLACEHOLDER}.tar.gz\``,
+      );
+      expect(patched).not.toContain(`"${TARBALL_PATH_PLACEHOLDER}"`);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("returns false when already patched", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-electrobun-tar-"));
+    try {
+      const cjsPath = join(tmp, "node_modules", "electrobun", "bin");
+      mkdirSync(cjsPath, { recursive: true });
+      writeFileSync(
+        join(cjsPath, "electrobun.cjs"),
+        ELECTROBUN_CJS_PATCHED,
+        "utf8",
+      );
+
+      expect(patchElectrobunWindowsTar(tmp)).toBe(false);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("returns false when needle is absent", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-electrobun-tar-"));
+    try {
+      const cjsPath = join(tmp, "node_modules", "electrobun", "bin");
+      mkdirSync(cjsPath, { recursive: true });
+      writeFileSync(
+        join(cjsPath, "electrobun.cjs"),
+        "// unrelated content",
+        "utf8",
+      );
+
+      expect(patchElectrobunWindowsTar(tmp)).toBe(false);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("logs a message on successful patch", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-electrobun-tar-"));
+    try {
+      const cjsPath = join(tmp, "node_modules", "electrobun", "bin");
+      mkdirSync(cjsPath, { recursive: true });
+      writeFileSync(
+        join(cjsPath, "electrobun.cjs"),
+        ELECTROBUN_CJS_UNPATCHED,
+        "utf8",
+      );
+
+      const logs: string[] = [];
+      patchElectrobunWindowsTar(tmp, (msg: string) => logs.push(msg));
+
+      expect(logs.some((line) => line.includes("electrobun"))).toBe(true);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("finds and patches electrobun in the .bun cache", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-electrobun-tar-"));
+    try {
+      const cjsPath = join(
+        tmp,
+        "node_modules",
+        ".bun",
+        "electrobun@1.16.0",
+        "node_modules",
+        "electrobun",
+        "bin",
+      );
+      mkdirSync(cjsPath, { recursive: true });
+      writeFileSync(
+        join(cjsPath, "electrobun.cjs"),
+        ELECTROBUN_CJS_UNPATCHED,
+        "utf8",
+      );
+
+      expect(patchElectrobunWindowsTar(tmp)).toBe(true);
+
+      const patched = readFileSync(join(cjsPath, "electrobun.cjs"), "utf8");
+      expect(patched).not.toContain(`"${TARBALL_PATH_PLACEHOLDER}"`);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

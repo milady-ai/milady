@@ -429,4 +429,109 @@ describe("PermissionsOnboardingSection", () => {
 
     expect(findButtonsByAriaLabel(root, "Check Access Camera")).toHaveLength(0);
   });
+
+  it("uses Windows privacy settings copy during desktop onboarding", async () => {
+    mockIsWeb.mockReturnValue(false);
+    mockIsDesktop.mockReturnValue(true);
+    mockIsNative.value = false;
+    const onContinue = vi.fn();
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            accessibility: { status: "not-applicable", canRequest: false },
+            "screen-recording": { status: "not-applicable", canRequest: false },
+            microphone: { status: "not-determined", canRequest: true },
+            camera: { status: "not-determined", canRequest: true },
+            shell: { status: "granted", canRequest: false },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "win32";
+        }
+        return null;
+      },
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(PermissionsOnboardingSection, { onContinue }),
+      );
+    });
+
+    const root = tree?.root;
+    expect(root).toBeDefined();
+    if (!root) {
+      throw new Error("PermissionsOnboardingSection root not rendered");
+    }
+
+    const text = collectText(root);
+    expect(text).toContain(
+      "Open Windows privacy settings to prepare microphone and camera access for desktop features.",
+    );
+    expect(text).toContain(
+      "Windows privacy settings are advisory here. Continue, then verify microphone and camera directly in Milady.",
+    );
+    expect(findButtonsByAriaLabel(root, "Open Privacy Settings Microphone")).toHaveLength(1);
+    expect(findButtonsByAriaLabel(root, "Open Privacy Settings Camera")).toHaveLength(1);
+    expect(text).toContain("Continue");
+    expect(text).not.toContain("Grant Permissions");
+  });
+
+  it("allows Windows desktop onboarding to continue without a synthetic granted state", async () => {
+    mockIsWeb.mockReturnValue(false);
+    mockIsDesktop.mockReturnValue(true);
+    mockIsNative.value = false;
+    const onContinue = vi.fn();
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            accessibility: { status: "not-applicable", canRequest: false },
+            "screen-recording": { status: "not-applicable", canRequest: false },
+            microphone: { status: "not-determined", canRequest: true },
+            camera: { status: "not-determined", canRequest: true },
+            shell: { status: "granted", canRequest: false },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "win32";
+        }
+        return null;
+      },
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(
+        React.createElement(PermissionsOnboardingSection, { onContinue }),
+      );
+    });
+
+    const root = tree?.root;
+    expect(root).toBeDefined();
+    if (!root) {
+      throw new Error("PermissionsOnboardingSection root not rendered");
+    }
+
+    const continueBtn = root.findByProps({
+      "data-testid": "permissions-onboarding-continue",
+    });
+
+    await act(async () => {
+      continueBtn.props.onClick();
+    });
+
+    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(onContinue.mock.calls[0]).toEqual([]);
+  });
 });

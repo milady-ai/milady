@@ -12,9 +12,58 @@
 
 import type { Action, HandlerOptions } from "@elizaos/core";
 import { resolveDesktopApiPort } from "@miladyai/shared/runtime-env";
+import {
+  ensurePluginManagerAllowed,
+  getPluginManagerBlockReason,
+  PLUGIN_MANAGER_UNAVAILABLE_ERROR,
+} from "../runtime/plugin-manager-guard";
 
 /** API port for posting install requests. */
 const API_PORT = String(resolveDesktopApiPort(process.env));
+
+type InstallPluginResponse = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+};
+
+function parseInstallPluginResponse(value: unknown): InstallPluginResponse {
+  if (!value || typeof value !== "object") {
+    return { ok: false, error: "Invalid install response" };
+  }
+
+  const record = value as Record<string, unknown>;
+  return {
+    ok: record.ok === true,
+    message: typeof record.message === "string" ? record.message : undefined,
+    error: typeof record.error === "string" ? record.error : undefined,
+  };
+}
+
+async function postInstallRequest(npmName: string): Promise<Response> {
+  return fetch(`http://localhost:${API_PORT}/api/plugins/install`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: npmName, autoRestart: true }),
+  });
+}
+
+async function restartAgent(): Promise<void> {
+  const response = await fetch(
+    `http://localhost:${API_PORT}/api/agent/restart`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    },
+  );
+  if (!response.ok) {
+    const body = parseInstallPluginResponse(
+      await response.json().catch(() => null),
+    );
+    throw new Error(body.error ?? `HTTP ${response.status}`);
+  }
+}
 
 export const installPluginAction: Action = {
   name: "INSTALL_PLUGIN",
@@ -51,32 +100,69 @@ export const installPluginAction: Action = {
       const npmName = pluginId.startsWith("@")
         ? pluginId
         : `@elizaos/plugin-${pluginId}`;
-
-      const response = await fetch(
-        `http://localhost:${API_PORT}/api/plugins/install`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: npmName, autoRestart: true }),
-        },
-      );
-
-      if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as Record<
-          string,
-          string
-        >;
+      const pluginManagerGuard = ensurePluginManagerAllowed();
+      const pluginManagerBlockReason =
+        getPluginManagerBlockReason(pluginManagerGuard);
+      if (pluginManagerBlockReason) {
         return {
-          text: `Failed to install ${pluginId}: ${body.error ?? `HTTP ${response.status}`}`,
+          text: `Failed to install ${pluginId}: ${pluginManagerBlockReason}`,
           success: false,
         };
       }
+      let restartedForPluginManager = false;
+      if (pluginManagerGuard === "enabled") {
+        await restartAgent();
+        restartedForPluginManager = true;
+      }
 
-      const result = (await response.json()) as {
-        ok: boolean;
-        message?: string;
-        error?: string;
-      };
+      let response = await postInstallRequest(npmName);
+
+      if (!response.ok) {
+        let body = parseInstallPluginResponse(
+          await response.json().catch(() => null),
+        );
+        if ((body.error ?? "").includes(PLUGIN_MANAGER_UNAVAILABLE_ERROR)) {
+          const recoveryGuard = ensurePluginManagerAllowed();
+          const recoveryBlockReason =
+            getPluginManagerBlockReason(recoveryGuard);
+          if (recoveryBlockReason) {
+            return {
+              text: `Failed to install ${pluginId}: ${recoveryBlockReason}`,
+              success: false,
+            };
+          }
+          if (!restartedForPluginManager) {
+            await restartAgent();
+            restartedForPluginManager = true;
+          }
+          response = await postInstallRequest(npmName);
+          body = parseInstallPluginResponse(
+            await response.json().catch(() => null),
+          );
+        }
+        if (!response.ok) {
+          return {
+            text: `Failed to install ${pluginId}: ${body.error ?? `HTTP ${response.status}`}`,
+            success: false,
+          };
+        }
+        const result = body;
+        if (!result.ok) {
+          return {
+            text: `Failed to install ${pluginId}: ${result.error ?? "unknown error"}`,
+            success: false,
+          };
+        }
+        return {
+          text:
+            result.message ??
+            `Plugin ${pluginId} installed successfully. The agent is restarting to load it.`,
+          success: true,
+          data: { pluginId, npmName },
+        };
+      }
+
+      const result = parseInstallPluginResponse(await response.json());
 
       if (!result.ok) {
         return {

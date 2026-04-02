@@ -100,13 +100,32 @@ let sharedAudioCtx: AudioContext | null = null;
 
 function shouldPreferNativeTalkMode(): boolean {
   if (typeof window === "undefined") return false;
-  if (getElectrobunRendererRpc()) return true;
-  return Capacitor.isNativePlatform();
+  return Capacitor.isNativePlatform() || !!getElectrobunRendererRpc();
+}
+
+function isWindowsElectrobunRenderer(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    !!getElectrobunRendererRpc() &&
+    typeof process !== "undefined" &&
+    process.platform === "win32"
+  );
+}
+
+function shouldAutoRestartBrowserRecognition(): boolean {
+  if (typeof window === "undefined") return false;
+  if (isWindowsElectrobunRenderer()) {
+    return false;
+  }
+  return true;
 }
 
 // ── Test-visible internals ───────────────────────────────────────────
 
 export const __voiceChatInternals = {
+  isWindowsElectrobunRenderer,
+  shouldPreferNativeTalkMode,
+  shouldAutoRestartBrowserRecognition,
   splitFirstSentence,
   remainderAfter,
   queueableSpeechPrefix,
@@ -501,7 +520,11 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
       };
 
       recognition.onend = () => {
-        if (enabledRef.current && listeningModeRef.current === mode) {
+        if (
+          shouldAutoRestartBrowserRecognition() &&
+          enabledRef.current &&
+          listeningModeRef.current === mode
+        ) {
           try {
             recognition.start();
           } catch {
@@ -529,6 +552,10 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
 
   const startTalkModeRecognition = useCallback(
     async (mode: Exclude<VoiceCaptureMode, "idle">) => {
+      if (!shouldPreferNativeTalkMode()) {
+        return false;
+      }
+
       await ensureTalkModeListeners();
 
       try {

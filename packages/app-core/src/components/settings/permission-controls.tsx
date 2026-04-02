@@ -31,12 +31,6 @@ type DesktopMediaPermissionId = Extract<
   "camera" | "microphone"
 >;
 
-function isDesktopMediaPermission(
-  id: SystemPermissionId,
-): id is DesktopMediaPermissionId {
-  return id === "camera" || id === "microphone";
-}
-
 function mapRendererMediaPermissionState(
   state: "granted" | "denied" | "prompt" | undefined,
 ): PermissionStatus | null {
@@ -50,12 +44,6 @@ function mapRendererMediaPermissionState(
     return "not-determined";
   }
   return null;
-}
-
-function getRendererMediaConstraints(
-  id: DesktopMediaPermissionId,
-): MediaStreamConstraints {
-  return id === "camera" ? { video: true } : { audio: true };
 }
 
 async function queryRendererMediaPermission(
@@ -118,29 +106,6 @@ async function probeRendererMediaPermission(
   return queriedStatus;
 }
 
-async function requestRendererMediaPermission(
-  id: DesktopMediaPermissionId,
-): Promise<PermissionStatus | null> {
-  if (
-    typeof navigator === "undefined" ||
-    !navigator.mediaDevices?.getUserMedia
-  ) {
-    return null;
-  }
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia(
-      getRendererMediaConstraints(id),
-    );
-    stream.getTracks().forEach((track) => {
-      track.stop();
-    });
-    return "granted";
-  } catch {
-    return probeRendererMediaPermission(id);
-  }
-}
-
 export interface DesktopPermissionsSnapshot {
   permissions: AllPermissionsState;
   platform: string;
@@ -150,6 +115,10 @@ export interface DesktopPermissionsSnapshot {
 async function reconcileRendererMediaPermissions(
   snapshot: DesktopPermissionsSnapshot,
 ): Promise<DesktopPermissionsSnapshot> {
+  if (snapshot.platform === "win32") {
+    return snapshot;
+  }
+
   let nextPermissions = snapshot.permissions;
   let changed = false;
 
@@ -219,7 +188,7 @@ export function PermissionRow({
   onToggleShell?: (enabled: boolean) => void;
 }) {
   const { t } = useApp();
-  const action = getPermissionAction(t, def.id, status, canRequest);
+  const action = getPermissionAction(t, def.id, status, canRequest, platform);
   const badge = getPermissionBadge(t, def.id, status, platform);
   const name = translateWithFallback(t, def.nameKey, def.name);
   const description = translateWithFallback(
@@ -593,14 +562,6 @@ export function useDesktopPermissionsState() {
   const handleRequest = useCallback(
     async (id: SystemPermissionId) => {
       try {
-        if (isDesktopMediaPermission(id)) {
-          const rendererStatus = await requestRendererMediaPermission(id);
-          if (rendererStatus === "granted") {
-            await replaceSnapshot(true);
-            return;
-          }
-        }
-
         const bridged = await invokeDesktopBridgeRequest<PermissionState>({
           rpcMethod: "permissionsRequest",
           ipcChannel: "permissions:request",
