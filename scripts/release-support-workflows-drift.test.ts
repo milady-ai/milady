@@ -35,6 +35,7 @@ const UPDATE_HOMEBREW_WORKFLOW = path.join(
   ROOT,
   ".github/workflows/update-homebrew.yml",
 );
+const ROOT_PACKAGE_JSON = path.join(ROOT, "package.json");
 
 describe("release support workflow drift", () => {
   it("validates both generic and cloud app image builds in Agent Release", () => {
@@ -64,10 +65,21 @@ describe("release support workflow drift", () => {
     expect(workflow).toContain("- [ ] Cloud app image push to GHCR");
   });
 
+  it("keeps the homepage workflow entrypoint aligned with root package scripts", () => {
+    const workflow = fs.readFileSync(AGENT_RELEASE_WORKFLOW, "utf8");
+    const pkg = JSON.parse(fs.readFileSync(ROOT_PACKAGE_JSON, "utf8")) as {
+      scripts?: Record<string, string>;
+    };
+
+    expect(workflow).toContain("run: bun run build:homepage");
+    expect(pkg.scripts?.["build:homepage"]).toBe("bun run build:web");
+  });
+
   it("keeps stable release publishing idempotent", () => {
     const workflow = fs.readFileSync(AGENT_RELEASE_WORKFLOW, "utf8");
 
     expect(workflow).toContain("bump_patch()");
+    expect(workflow).toContain('VERSION="$' + "{VERSION_OVERRIDE#v}" + '"');
     expect(workflow).toContain("grep -v -- '-alpha\\.'");
     expect(workflow).toContain("git ls-remote --exit-code --tags origin");
     expect(workflow).toContain(

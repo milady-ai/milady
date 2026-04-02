@@ -214,7 +214,7 @@ async function main() {
     validateGroup(manifest.homepage, {
       repository,
       releaseTag: effectiveRef,
-      assetRoot: "apps/homepage/public",
+      assetRoot: "apps/web/public",
       retryPolicy,
     }),
   ]);

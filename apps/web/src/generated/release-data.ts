@@ -1,5 +1,5 @@
 export const releaseData = {
-  generatedAt: "2026-03-31T11:28:20.998Z",
+  generatedAt: "2026-04-02T01:41:54.000Z",
   scripts: {
     shell: {
       url: "https://milady.ai/install.sh",
@@ -15,7 +15,7 @@ export const releaseData = {
     appAssetBaseUrl:
       "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/app/public/",
     homepageAssetBaseUrl:
-      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/homepage/public/",
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/web/public/",
   },
   release: {
     tagName: "v2.0.4",

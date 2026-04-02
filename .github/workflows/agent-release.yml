@@ -173,7 +173,7 @@ jobs:
           }
 
           if [ -n "$VERSION_OVERRIDE" ]; then
-            VERSION="$VERSION_OVERRIDE"
+            VERSION="${VERSION_OVERRIDE#v}"
           elif [ "$STABLE" = "true" ]; then
             LATEST_ALPHA="$(git tag --sort=-creatordate | grep '^v[0-9].*-alpha\.[0-9]\+$' | head -1 || true)"
             LATEST_STABLE="$(git tag --sort=-creatordate | grep '^v[0-9]' | grep -v -- '-alpha\.' | head -1 || true)"

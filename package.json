@@ -76,6 +76,7 @@
     "build:home": "cd apps/home && bun run build",
     "build:home:desktop": "node scripts/desktop-build.mjs build --app=home --variant=base --stage-macos-release-app",
     "build:web": "node scripts/write-homepage-release-data.mjs && cd apps/web && bun run build",
+    "build:homepage": "bun run build:web",
     "cdn:validate": "node scripts/validate-cdn-assets.mjs",
     "cdn:manifest": "node scripts/generate-static-asset-manifest.mjs",
     "build:ios": "cd apps/app && bun scripts/build.mjs && capacitor sync ios",
