@@ -26,7 +26,10 @@ import {
 } from "react";
 import type { PluginInfo } from "../../api";
 import { client } from "../../api";
-import { ensurePluginManagerAllowed } from "../../runtime/plugin-manager-guard";
+import {
+  ensurePluginManagerAllowed,
+  type PluginManagerGuardResult,
+} from "../../runtime/plugin-manager-guard";
 import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
 
@@ -50,6 +53,18 @@ import {
 import { PluginSettingsDialog } from "./plugin-view-dialogs";
 import { PluginGameModal } from "./plugin-view-modal";
 import { ConnectorSidebar } from "./plugin-view-sidebar";
+
+function getPluginManagerBlockReason(
+  result: PluginManagerGuardResult,
+): string | null {
+  if (result === "disabled-by-user") {
+    return "plugin-manager is explicitly disabled in config";
+  }
+  if (result === "disabled-by-env") {
+    return "plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1";
+  }
+  return null;
+}
 
 /* ── Shared PluginListView ─────────────────────────────────────────── */
 
@@ -434,10 +449,13 @@ function PluginListView({
 
   const handleInstallPlugin = async (pluginId: string, npmName: string) => {
     setInstallingPlugins((prev) => new Set(prev).add(pluginId));
+    let restartedForPluginManager = false;
     try {
       const pluginManagerGuard = ensurePluginManagerAllowed();
-      if (pluginManagerGuard === "disabled-by-user") {
-        throw new Error("plugin-manager is explicitly disabled in config");
+      const pluginManagerBlockReason =
+        getPluginManagerBlockReason(pluginManagerGuard);
+      if (pluginManagerBlockReason) {
+        throw new Error(pluginManagerBlockReason);
       }
       if (pluginManagerGuard === "enabled") {
         setActionNotice(
@@ -449,6 +467,7 @@ function PluginListView({
           "success",
         );
         await client.restartAndWait(120_000);
+        restartedForPluginManager = true;
       }
       await client.installRegistryPlugin(npmName);
       await loadPlugins();
@@ -467,18 +486,23 @@ function PluginListView({
       ) {
         try {
           const pluginManagerGuard = ensurePluginManagerAllowed();
-          if (pluginManagerGuard === "disabled-by-user") {
-            throw new Error("plugin-manager is explicitly disabled in config");
+          const pluginManagerBlockReason =
+            getPluginManagerBlockReason(pluginManagerGuard);
+          if (pluginManagerBlockReason) {
+            throw new Error(pluginManagerBlockReason);
           }
-          setActionNotice(
-            t("pluginsview.PluginInstallRecovering", {
-              plugin: npmName,
-              defaultValue:
-                "Finishing plugin install setup for {{plugin}} and restarting the agent...",
-            }),
-            "success",
-          );
-          await client.restartAndWait(120_000);
+          if (!restartedForPluginManager) {
+            setActionNotice(
+              t("pluginsview.PluginInstallRecovering", {
+                plugin: npmName,
+                defaultValue:
+                  "Finishing plugin install setup for {{plugin}} and restarting the agent...",
+              }),
+              "success",
+            );
+            await client.restartAndWait(120_000);
+            restartedForPluginManager = true;
+          }
           await client.installRegistryPlugin(npmName);
           await loadPlugins();
           setActionNotice(

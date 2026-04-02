@@ -12,7 +12,10 @@
 
 import type { Action, HandlerOptions } from "@elizaos/core";
 import { resolveDesktopApiPort } from "@miladyai/shared/runtime-env";
-import { ensurePluginManagerAllowed } from "../runtime/plugin-manager-guard";
+import {
+  ensurePluginManagerAllowed,
+  type PluginManagerGuardResult,
+} from "../runtime/plugin-manager-guard";
 
 /** API port for posting install requests. */
 const API_PORT = String(resolveDesktopApiPort(process.env));
@@ -23,6 +26,18 @@ type InstallPluginResponse = {
   message?: string;
   error?: string;
 };
+
+function getPluginManagerBlockReason(
+  result: PluginManagerGuardResult,
+): string | null {
+  if (result === "disabled-by-user") {
+    return "plugin-manager is explicitly disabled in config";
+  }
+  if (result === "disabled-by-env") {
+    return "plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1";
+  }
+  return null;
+}
 
 function parseInstallPluginResponse(value: unknown): InstallPluginResponse {
   if (!value || typeof value !== "object") {
@@ -98,14 +113,18 @@ export const installPluginAction: Action = {
         ? pluginId
         : `@elizaos/plugin-${pluginId}`;
       const pluginManagerGuard = ensurePluginManagerAllowed();
-      if (pluginManagerGuard === "disabled-by-user") {
+      const pluginManagerBlockReason =
+        getPluginManagerBlockReason(pluginManagerGuard);
+      if (pluginManagerBlockReason) {
         return {
-          text: `Failed to install ${pluginId}: plugin-manager is explicitly disabled in config`,
+          text: `Failed to install ${pluginId}: ${pluginManagerBlockReason}`,
           success: false,
         };
       }
+      let restartedForPluginManager = false;
       if (pluginManagerGuard === "enabled") {
         await restartAgent();
+        restartedForPluginManager = true;
       }
 
       let response = await postInstallRequest(npmName);
@@ -116,13 +135,18 @@ export const installPluginAction: Action = {
         );
         if ((body.error ?? "").includes(PLUGIN_MANAGER_UNAVAILABLE_ERROR)) {
           const recoveryGuard = ensurePluginManagerAllowed();
-          if (recoveryGuard === "disabled-by-user") {
+          const recoveryBlockReason =
+            getPluginManagerBlockReason(recoveryGuard);
+          if (recoveryBlockReason) {
             return {
-              text: `Failed to install ${pluginId}: plugin-manager is explicitly disabled in config`,
+              text: `Failed to install ${pluginId}: ${recoveryBlockReason}`,
               success: false,
             };
           }
-          await restartAgent();
+          if (!restartedForPluginManager) {
+            await restartAgent();
+            restartedForPluginManager = true;
+          }
           response = await postInstallRequest(npmName);
           body = parseInstallPluginResponse(
             await response.json().catch(() => null),

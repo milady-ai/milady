@@ -259,4 +259,83 @@ describe("installPluginAction", () => {
       }),
     );
   });
+
+  it("does not restart twice when plugin-manager was already auto-enabled", async () => {
+    ensurePluginManagerAllowedMock.mockReturnValue("enabled");
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: false,
+          status: 503,
+          body: { error: "Plugin manager service not found" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true, message: "installed after existing restart" },
+        }),
+      );
+
+    const result = await installPluginAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { pluginId: "telegram" } },
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.text).toBe("installed after existing restart");
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:31337/api/agent/restart",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:31337/api/plugins/install",
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: "@elizaos/plugin-telegram",
+          autoRestart: true,
+        }),
+      }),
+    );
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      3,
+      "http://localhost:31337/api/plugins/install",
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: "@elizaos/plugin-telegram",
+          autoRestart: true,
+        }),
+      }),
+    );
+  });
+
+  it("fails fast when env disables plugin-manager auto-enable", async () => {
+    ensurePluginManagerAllowedMock.mockReturnValue("disabled-by-env");
+
+    const result = await installPluginAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { pluginId: "telegram" } },
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.text).toBe(
+      "Failed to install telegram: plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1",
+    );
+    expect(vi.mocked(fetch)).not.toHaveBeenCalled();
+  });
 });
