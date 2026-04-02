@@ -18,6 +18,25 @@ import { ensurePluginManagerAllowed } from "../runtime/plugin-manager-guard";
 const API_PORT = String(resolveDesktopApiPort(process.env));
 const PLUGIN_MANAGER_UNAVAILABLE_ERROR = "Plugin manager service not found";
 
+type InstallPluginResponse = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+};
+
+function parseInstallPluginResponse(value: unknown): InstallPluginResponse {
+  if (!value || typeof value !== "object") {
+    return { ok: false, error: "Invalid install response" };
+  }
+
+  const record = value as Record<string, unknown>;
+  return {
+    ok: record.ok === true,
+    message: typeof record.message === "string" ? record.message : undefined,
+    error: typeof record.error === "string" ? record.error : undefined,
+  };
+}
+
 async function postInstallRequest(npmName: string): Promise<Response> {
   return fetch(`http://localhost:${API_PORT}/api/plugins/install`, {
     method: "POST",
@@ -36,10 +55,9 @@ async function restartAgent(): Promise<void> {
     },
   );
   if (!response.ok) {
-    const body = (await response.json().catch(() => ({}))) as Record<
-      string,
-      string
-    >;
+    const body = parseInstallPluginResponse(
+      await response.json().catch(() => null),
+    );
     throw new Error(body.error ?? `HTTP ${response.status}`);
   }
 }
@@ -93,10 +111,9 @@ export const installPluginAction: Action = {
       let response = await postInstallRequest(npmName);
 
       if (!response.ok) {
-        let body = (await response.json().catch(() => ({}))) as Record<
-          string,
-          string
-        >;
+        let body = parseInstallPluginResponse(
+          await response.json().catch(() => null),
+        );
         if ((body.error ?? "").includes(PLUGIN_MANAGER_UNAVAILABLE_ERROR)) {
           const recoveryGuard = ensurePluginManagerAllowed();
           if (recoveryGuard === "disabled-by-user") {
@@ -107,10 +124,9 @@ export const installPluginAction: Action = {
           }
           await restartAgent();
           response = await postInstallRequest(npmName);
-          body = (await response.json().catch(() => ({}))) as Record<
-            string,
-            string
-          >;
+          body = parseInstallPluginResponse(
+            await response.json().catch(() => null),
+          );
         }
         if (!response.ok) {
           return {
@@ -118,11 +134,7 @@ export const installPluginAction: Action = {
             success: false,
           };
         }
-        const result = body as unknown as {
-          ok: boolean;
-          message?: string;
-          error?: string;
-        };
+        const result = body;
         if (!result.ok) {
           return {
             text: `Failed to install ${pluginId}: ${result.error ?? "unknown error"}`,
@@ -138,11 +150,7 @@ export const installPluginAction: Action = {
         };
       }
 
-      const result = (await response.json()) as {
-        ok: boolean;
-        message?: string;
-        error?: string;
-      };
+      const result = parseInstallPluginResponse(await response.json());
 
       if (!result.ok) {
         return {
