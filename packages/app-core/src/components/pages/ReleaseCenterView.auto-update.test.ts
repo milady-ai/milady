@@ -41,7 +41,10 @@ vi.mock("@miladyai/ui", () => ({
     React.createElement("input", props),
 }));
 
-import { findButtonByText, textOf } from "../../../../../test/helpers/react-test";
+import {
+  findButtonByText,
+  textOf,
+} from "../../../../../test/helpers/react-test";
 import { ReleaseCenterView } from "./ReleaseCenterView";
 
 describe("ReleaseCenterView auto-update guard", () => {
