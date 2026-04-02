@@ -121,6 +121,11 @@ function shouldAutoRestartBrowserRecognition(): boolean {
   return true;
 }
 
+function isVoiceInputSupportedInRuntime(): boolean {
+  if (typeof window === "undefined") return false;
+  return true;
+}
+
 // ── Test-visible internals ───────────────────────────────────────────
 
 export const __voiceChatInternals = {
