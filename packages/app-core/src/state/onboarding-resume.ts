@@ -1,8 +1,9 @@
 import {
   inferOnboardingConnectionFromConfig,
+  isElizaCloudLinkedInConfig,
   resolveDeploymentTargetInConfig,
   type OnboardingConnection,
-} from "@miladyai/shared/contracts/onboarding";
+} from "@miladyai/shared/contracts";
 import type { BuildOnboardingConnectionArgs } from "../onboarding-config";
 import { asRecord } from "./config-readers";
 import type { OnboardingStep } from "./types";
@@ -31,18 +32,7 @@ export function hasPartialOnboardingConnectionConfig(
     return true;
   }
 
-  const cloud = asRecord(config?.cloud);
-  if (!cloud) {
-    return false;
-  }
-
-  return [
-    cloud.enabled,
-    cloud.provider,
-    cloud.inferenceMode,
-    cloud.remoteApiBase,
-    cloud.remoteAccessToken,
-  ].some(hasConfigValue);
+  return isElizaCloudLinkedInConfig(config);
 }
 
 export function inferOnboardingResumeStep(args: {

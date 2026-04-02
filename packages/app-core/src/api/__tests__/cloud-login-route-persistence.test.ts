@@ -142,7 +142,15 @@ describe("cloud login route persistence", () => {
     expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
     const savedConfig = saveElizaConfigMock.mock.calls[0][0];
     expect(savedConfig.cloud.apiKey).toBe("new-cloud-api-key-from-oauth");
-    expect(savedConfig.cloud.enabled).toBe(true);
+    expect(savedConfig.linkedAccounts).toMatchObject({
+      elizacloud: { status: "linked", source: "api-key" },
+    });
+    expect(savedConfig.serviceRouting).toMatchObject({
+      llmText: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+      },
+    });
   });
 
   it("persists a linked cloud key without re-enabling cloud inference for local providers", async () => {
@@ -200,7 +208,13 @@ describe("cloud login route persistence", () => {
     expect(getStatus()).toBe(200);
     const savedConfig = saveElizaConfigMock.mock.calls[0][0];
     expect(savedConfig.cloud.apiKey).toBe("new-cloud-api-key-from-oauth");
-    expect(savedConfig.cloud.enabled).toBe(false);
+    expect(savedConfig.linkedAccounts).toMatchObject({
+      elizacloud: { status: "linked", source: "api-key" },
+    });
+    expect(savedConfig.serviceRouting?.llmText).toEqual({
+      backend: "anthropic",
+      transport: "direct",
+    });
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
     expect(updateAgent).toHaveBeenCalledWith("agent-1", {
       secrets: {

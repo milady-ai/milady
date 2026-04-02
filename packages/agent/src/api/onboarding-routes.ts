@@ -3,6 +3,7 @@ import { logger, stringToUuid, type UUID } from "@elizaos/core";
 import type { ElizaConfig } from "../config/config.js";
 import { configFileExists, loadElizaConfig } from "../config/config.js";
 import {
+  migrateLegacyRuntimeConfig,
   normalizePersistedOnboardingConnection,
   normalizeOnboardingProviderId,
 } from "../contracts/onboarding.js";
@@ -383,12 +384,8 @@ export async function handleOnboardingRoutes(
       await applyOnboardingConnectionConfig(config, explicitConnection);
     } else if (!hasCanonicalRuntimeConfig) {
       if (!config.cloud) config.cloud = {};
-      config.cloud.enabled = runMode === "cloud";
 
       if (runMode === "cloud") {
-        if (body.cloudProvider) {
-          config.cloud.provider = body.cloudProvider as string;
-        }
         if (
           typeof body.providerApiKey === "string" &&
           body.providerApiKey.trim().length > 0
@@ -513,29 +510,6 @@ export async function handleOnboardingRoutes(
 
       if (!explicitConnection) {
         delete config.connection;
-
-        if (!config.cloud) config.cloud = {};
-        config.cloud.enabled = false;
-        config.cloud.inferenceMode = "byok";
-        config.cloud.runtime =
-          explicitDeploymentTarget?.runtime === "cloud" ? "cloud" : "local";
-        if (explicitDeploymentTarget?.provider === "elizacloud") {
-          config.cloud.provider = "elizacloud";
-        } else if (explicitDeploymentTarget?.provider === "remote") {
-          config.cloud.provider = "remote";
-          config.cloud.remoteApiBase = explicitDeploymentTarget.remoteApiBase;
-          if (explicitDeploymentTarget.remoteAccessToken) {
-            config.cloud.remoteAccessToken =
-              explicitDeploymentTarget.remoteAccessToken;
-          }
-        }
-
-        const services =
-          config.cloud.services && typeof config.cloud.services === "object"
-            ? (config.cloud.services as Record<string, unknown>)
-            : {};
-        services.inference = false;
-        config.cloud.services = services;
         delete process.env.ELIZAOS_CLOUD_ENABLED;
         delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
         delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
@@ -729,6 +703,7 @@ export async function handleOnboardingRoutes(
 
     state.config = config;
     state.agentName = (body.name as string) ?? state.agentName;
+    migrateLegacyRuntimeConfig(config as Record<string, unknown>);
     try {
       ctx.saveElizaConfig(config);
     } catch (err) {

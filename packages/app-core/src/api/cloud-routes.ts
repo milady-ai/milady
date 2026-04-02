@@ -10,7 +10,10 @@ import type { CloudManager } from "@miladyai/agent/cloud/cloud-manager";
 import { validateCloudBaseUrl } from "@miladyai/agent/cloud/validate-url";
 import type { ElizaConfig } from "@miladyai/agent/config/config";
 import { saveElizaConfig } from "@miladyai/agent/config/config";
-import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
+import {
+  isCloudInferenceSelectedInConfig,
+  migrateLegacyRuntimeConfig,
+} from "@miladyai/shared/contracts/onboarding";
 import { createIntegrationTelemetrySpan } from "../diagnostics/integration-observability";
 import { isTimeoutError } from "../utils/errors";
 import {
@@ -99,6 +102,7 @@ async function persistCloudLoginStatus(args: {
     return;
   }
 
+  migrateLegacyRuntimeConfig(args.state.config as Record<string, unknown>);
   const cloud = { ...(args.state.config.cloud ?? {}) } as Record<
     string,
     unknown
@@ -108,16 +112,6 @@ async function persistCloudLoginStatus(args: {
   const cloudInferenceSelected = isCloudInferenceSelectedInConfig(
     args.state.config as Record<string, unknown>,
   );
-  cloud.enabled = cloudInferenceSelected;
-  if (!cloudInferenceSelected) {
-    cloud.inferenceMode = "byok";
-    const services =
-      cloud.services && typeof cloud.services === "object"
-        ? (cloud.services as Record<string, unknown>)
-        : {};
-    services.inference = false;
-    cloud.services = services;
-  }
 
   args.state.config.cloud = cloud as ElizaConfig["cloud"];
   applyCanonicalOnboardingConfig(args.state.config, {
@@ -128,6 +122,7 @@ async function persistCloudLoginStatus(args: {
       },
     },
   });
+  migrateLegacyRuntimeConfig(args.state.config as Record<string, unknown>);
 
   try {
     saveElizaConfig(args.state.config);

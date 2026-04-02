@@ -67,11 +67,12 @@ export function isElizaCloudLinkedInConfig(
 export function resolveElizaCloudTopology(
   config: Record<string, unknown> | null | undefined,
 ): ResolvedElizaCloudTopology {
-  const cloud = asConfigRecord(config?.cloud);
   const deploymentTarget = resolveDeploymentTargetInConfig(config);
   const routing = resolveServiceRoutingInConfig(config);
   const provider =
-    normalizeOnboardingProviderId(readConfigString(cloud, "provider")) ??
+    (normalizeOnboardingProviderId(routing?.llmText?.backend) === "elizacloud"
+      ? "elizacloud"
+      : null) ??
     (deploymentTarget.provider === "elizacloud" ? "elizacloud" : null);
   const runtime = deploymentTarget.runtime === "cloud" ? "cloud" : "local";
   const resolvedServices = {

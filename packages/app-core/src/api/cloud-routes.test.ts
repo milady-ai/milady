@@ -653,8 +653,11 @@ describe("handleCloudRoute", () => {
     expect(getStatus()).toBe(200);
     expect(getJson()).toEqual({ ok: true, status: "disconnected" });
     expect(disconnectMock).toHaveBeenCalledTimes(1);
-    expect(state.config.cloud?.enabled).toBe(false);
     expect(state.config.cloud?.apiKey).toBeUndefined();
+    expect(state.config.deploymentTarget).toEqual({ runtime: "local" });
+    expect(state.config.linkedAccounts).toMatchObject({
+      elizacloud: { status: "unlinked", source: "api-key" },
+    });
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
     expect(updateAgentMock).toHaveBeenCalledTimes(1);
@@ -843,8 +846,15 @@ describe("handleCloudRoute", () => {
     expect(handled).toBe(true);
     expect(getStatus()).toBe(200);
     expect(getJson()).toEqual({ ok: true, status: "disconnected" });
-    expect(state.config.cloud).toEqual({
-      enabled: false,
+    expect(state.config.cloud).toBeUndefined();
+    expect(state.config.deploymentTarget).toEqual({
+      runtime: "local",
+    });
+    expect(state.config.linkedAccounts).toMatchObject({
+      elizacloud: {
+        status: "unlinked",
+        source: "api-key",
+      },
     });
     expect(updateAgentMock).not.toHaveBeenCalled();
   });
@@ -1023,8 +1033,11 @@ describe("handleCloudRoute", () => {
     expect(disconnectMock).toHaveBeenCalledTimes(1);
     expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
 
-    expect(state.config.cloud?.enabled).toBe(false);
     expect(state.config.cloud?.apiKey).toBeUndefined();
+    expect(state.config.deploymentTarget).toEqual({ runtime: "local" });
+    expect(state.config.linkedAccounts).toMatchObject({
+      elizacloud: { status: "unlinked", source: "api-key" },
+    });
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
 

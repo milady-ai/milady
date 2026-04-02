@@ -11,6 +11,7 @@ import { sendJson as sendJsonResponse } from "./response";
 import {
   normalizeOnboardingProviderId,
   normalizePersistedOnboardingConnection,
+  migrateLegacyRuntimeConfig,
 } from "@miladyai/shared/contracts/onboarding";
 import { normalizeServiceRoutingConfig } from "@miladyai/shared/contracts/service-routing";
 import {
@@ -28,7 +29,7 @@ function scheduleCloudApiKeyResave(apiKey: string): void {
           (freshConfig as Record<string, unknown>).cloud = {};
         }
         (freshConfig.cloud as Record<string, unknown>).apiKey = apiKey;
-        (freshConfig.cloud as Record<string, unknown>).enabled = true;
+        migrateLegacyRuntimeConfig(freshConfig as Record<string, unknown>);
         saveElizaConfig(freshConfig);
         logger.info(
           "[milady-api] Re-saved cloud.apiKey after upstream handler clobbered it",
@@ -113,8 +114,6 @@ export async function handleOnboardingCompatRoute(
         if (!config.cloud) {
           (config as Record<string, unknown>).cloud = {};
         }
-        (config.cloud as Record<string, unknown>).enabled =
-          cloudInferenceSelected;
 
         resolvedCloudApiKey = (config.cloud as Record<string, unknown>)
           .apiKey as string | undefined;

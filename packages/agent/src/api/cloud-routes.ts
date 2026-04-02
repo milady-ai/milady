@@ -1,6 +1,9 @@
 import type http from "node:http";
 import { logger } from "@elizaos/core";
-import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
+import {
+  isCloudInferenceSelectedInConfig,
+  migrateLegacyRuntimeConfig,
+} from "@miladyai/shared/contracts/onboarding";
 import { normalizeCloudSiteUrl } from "../cloud/base-url";
 import { validateCloudBaseUrl } from "../cloud/validate-url";
 import { applyCanonicalOnboardingConfig } from "./provider-switch-config";
@@ -317,6 +320,7 @@ export async function handleCloudRoute(
     loginPollSpan.success({ statusCode: pollRes.status });
 
     if (data.status === "authenticated" && data.apiKey) {
+      migrateLegacyRuntimeConfig(state.config as Record<string, unknown>);
       const cloud = (state.config.cloud ?? {}) as NonNullable<
         CloudConfigLike["cloud"]
       >;
@@ -333,6 +337,7 @@ export async function handleCloudRoute(
       const cloudInferenceSelected = isCloudInferenceSelectedInConfig(
         state.config as Record<string, unknown>,
       );
+      migrateLegacyRuntimeConfig(state.config as Record<string, unknown>);
       try {
         if (state.saveConfig) {
           state.saveConfig(state.config);
@@ -527,7 +532,6 @@ export async function handleCloudRoute(
     const cloud = (state.config.cloud ?? {}) as NonNullable<
       CloudConfigLike["cloud"]
     >;
-    cloud.enabled = false;
     delete cloud.apiKey;
     (state.config as Record<string, unknown>).cloud = cloud;
     applyCanonicalOnboardingConfig(state.config as never, {
@@ -540,6 +544,7 @@ export async function handleCloudRoute(
       },
       clearRoutes: ["llmText", "tts", "media", "embeddings", "rpc"],
     });
+    migrateLegacyRuntimeConfig(state.config as Record<string, unknown>);
 
     try {
       if (state.saveConfig) {

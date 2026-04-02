@@ -5,6 +5,7 @@
 import { logger, stringToUuid } from "@elizaos/core";
 import {
   getOnboardingProviderOption,
+  migrateLegacyRuntimeConfig,
   normalizePersistedOnboardingConnection,
   type OnboardingConnection,
 } from "@miladyai/shared/contracts/onboarding";
@@ -299,6 +300,7 @@ export function persistCompatOnboardingDefaults(
     };
   }
 
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   saveElizaConfig(config);
   return adminEntityId;
 }

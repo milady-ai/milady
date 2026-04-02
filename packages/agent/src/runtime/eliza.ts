@@ -95,6 +95,7 @@ import {
 import {
   getOnboardingProviderOption,
   inferOnboardingConnectionFromConfig,
+  migrateLegacyRuntimeConfig,
   normalizeOnboardingProviderId,
   resolveDeploymentTargetInConfig,
 } from "@miladyai/shared/contracts/onboarding";
@@ -1424,6 +1425,7 @@ export async function autoResolveDiscordAppId(): Promise<void> {
  */
 /** @internal Exported for testing. */
 export function applyCloudConfigToEnv(config: ElizaConfig): void {
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   const cloud = config.cloud;
   if (!cloud) return;
   const topology = resolveElizaCloudTopology(config as Record<string, unknown>);
@@ -1463,7 +1465,7 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
 
   if (shouldLoadCloudPlugin) {
     logger.info(
-      `[eliza] Cloud config: enabled=${cloud.enabled}, hasApiKey=${Boolean(cloud.apiKey)}, baseUrl=${cloud.baseUrl ?? "(default)"}`,
+      `[eliza] Cloud config: inference=${topology.services.inference}, runtime=${topology.runtime}, hasApiKey=${Boolean(cloud.apiKey)}, baseUrl=${cloud.baseUrl ?? "(default)"}`,
     );
     // Only propagate the API key when cloud is enabled AND it is a real
     // credential — never set the literal "[REDACTED]" placeholder (which can
@@ -2889,8 +2891,7 @@ export async function startEliza(
     deploymentTarget.runtime === "cloud" &&
     deploymentTarget.provider === "elizacloud" &&
     config.cloud?.apiKey &&
-    config.cloud?.agentId?.trim() &&
-    config.cloud?.runtime === "cloud"
+    config.cloud?.agentId?.trim()
   ) {
     return startInCloudMode(config, config.cloud.agentId, opts);
   }
@@ -4097,7 +4098,7 @@ export async function startInCloudMode(
     logger.error(`[eliza] Failed to connect to cloud agent: ${msg}`);
     throw new Error(
       `Failed to connect to cloud agent: ${msg}\n` +
-        "You can retry with `eliza start`, or switch to local mode with `eliza config set cloud.runtime local`",
+        "You can retry with `eliza start`, or switch to local mode by setting `deploymentTarget.runtime` to `local`",
     );
   }
 }

@@ -1,7 +1,9 @@
 import type { AgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
+import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import {
   isMiladySettingsDebugEnabled,
+  migrateLegacyRuntimeConfig,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
 import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
@@ -203,6 +205,7 @@ export function resolveCloudConnectionSnapshot(
   config: Partial<ElizaConfig>,
   runtime: AgentRuntime | null,
 ): CloudConnectionSnapshot {
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   const cloudRecord =
     config.cloud && typeof config.cloud === "object"
       ? (config.cloud as Record<string, unknown>)
@@ -523,9 +526,19 @@ export async function disconnectUnifiedCloudConnection(args: {
   await clearCloudAuthService(getCloudAuth(runtime));
 
   const nextCloud = { ...(config.cloud ?? {}) };
-  nextCloud.enabled = false;
   delete nextCloud.apiKey;
   config.cloud = nextCloud;
+  applyCanonicalOnboardingConfig(config as ElizaConfig, {
+    deploymentTarget: { runtime: "local" },
+    linkedAccounts: {
+      elizacloud: {
+        status: "unlinked",
+        source: "api-key",
+      },
+    },
+    clearRoutes: ["llmText", "tts", "media", "embeddings", "rpc"],
+  });
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
 
   try {
     saveConfig?.(config);

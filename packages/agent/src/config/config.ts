@@ -3,6 +3,7 @@ import path from "node:path";
 import JSON5 from "json5";
 import {
   isMiladySettingsDebugEnabled,
+  migrateLegacyRuntimeConfig,
   sanitizeForSettingsDebug,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
@@ -37,6 +38,7 @@ export function loadElizaConfig(): ElizaConfig {
 
   const parsed = JSON5.parse(raw) as Record<string, unknown>;
   const resolved = resolveConfigIncludes(parsed, configPath) as ElizaConfig;
+  migrateLegacyRuntimeConfig(resolved as Record<string, unknown>);
 
   const skillsJsonPath = resolveUserPath("~/.eliza/skills.json");
 
@@ -142,12 +144,15 @@ export function saveElizaConfig(config: ElizaConfig): void {
     fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }
 
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   const sanitized = stripIncludeDirectives(config);
   if (!sanitized || typeof sanitized !== "object") {
     throw new Error(
       `[eliza-config] stripIncludeDirectives returned invalid result: ${typeof sanitized}`,
     );
   }
+
+  migrateLegacyRuntimeConfig(sanitized as Record<string, unknown>);
 
   const content = `${JSON.stringify(sanitized, null, 2)}\n`;
 

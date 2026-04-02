@@ -215,12 +215,21 @@ describe("applyOnboardingConnectionConfig", () => {
       provider: "openrouter",
       primaryModel: "openai/gpt-5-mini",
     });
-    expect(config.cloud).toMatchObject({
-      enabled: false,
-      provider: "elizacloud",
+    expect(config.cloud).toEqual({
       apiKey: "ck-cloud-existing",
-      inferenceMode: "byok",
-      runtime: "local",
+    });
+    expect(config.linkedAccounts).toMatchObject({
+      elizacloud: {
+        status: "linked",
+        source: "api-key",
+      },
+    });
+    expect(config.serviceRouting).toMatchObject({
+      llmText: {
+        backend: "openrouter",
+        transport: "direct",
+        primaryModel: "openai/gpt-5-mini",
+      },
     });
     expect(config.models).toBeUndefined();
     expect((config.env as Record<string, string>).OPENROUTER_API_KEY).toBe(
@@ -246,12 +255,23 @@ describe("applyOnboardingConnectionConfig", () => {
       smallModel: "openai/gpt-5-mini",
       largeModel: "moonshotai/kimi-k2-0905",
     });
-    expect(config.cloud).toMatchObject({
-      enabled: true,
-      provider: "elizacloud",
+    expect(config.cloud).toEqual({
       apiKey: "ck-cloud-key",
-      inferenceMode: "cloud",
-      runtime: "cloud",
+    });
+    expect(config.linkedAccounts).toMatchObject({
+      elizacloud: {
+        status: "linked",
+        source: "api-key",
+      },
+    });
+    expect(config.serviceRouting).toMatchObject({
+      llmText: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "moonshotai/kimi-k2-0905",
+      },
     });
     expect(config.models).toEqual({
       small: "openai/gpt-5-mini",

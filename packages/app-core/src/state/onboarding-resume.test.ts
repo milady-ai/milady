@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { migrateLegacyRuntimeConfig } from "@miladyai/shared/contracts";
 import {
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
@@ -19,7 +20,14 @@ describe("hasPartialOnboardingConnectionConfig", () => {
       name: "returns false when no provider selection signals exist",
     },
     {
-      config: { cloud: { enabled: true } },
+      config: {
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+          },
+        },
+      },
       expected: true,
       name: "returns true when cloud inference is enabled",
     },
@@ -35,8 +43,8 @@ describe("hasPartialOnboardingConnectionConfig", () => {
     },
     {
       config: { cloud: { apiKey: "sk-test" } },
-      expected: false,
-      name: "does not treat cloud api key capability alone as active selection",
+      expected: true,
+      name: "treats a linked cloud account as partial onboarding progress",
     },
   ])("$name", ({ config, expected }) => {
     expect(
@@ -98,15 +106,15 @@ describe("deriveOnboardingResumeConnection", () => {
   });
 
   it("reconstructs an eliza cloud connection from compatibility config", () => {
-    expect(
-      deriveOnboardingResumeConnection({
+    const migrated = migrateLegacyRuntimeConfig({
         cloud: { enabled: true, apiKey: "[REDACTED]" },
         models: {
           small: "openai/gpt-5-mini",
           large: "anthropic/claude-sonnet-4.5",
         },
-      }),
-    ).toEqual({
+      });
+
+    expect(deriveOnboardingResumeConnection(migrated)).toEqual({
       kind: "cloud-managed",
       cloudProvider: "elizacloud",
       apiKey: undefined,

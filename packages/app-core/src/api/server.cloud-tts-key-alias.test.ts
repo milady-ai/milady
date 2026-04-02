@@ -16,16 +16,16 @@ describe("cloud-backed ElevenLabs API key alias", () => {
   it("returns direct ElevenLabs key when present", () => {
     const env = {
       ELEVENLABS_API_KEY: "direct-key",
-      ELIZAOS_CLOUD_ENABLED: "true",
+      ELIZAOS_CLOUD_USE_TTS: "true",
       ELIZAOS_CLOUD_API_KEY: "cloud-key",
     } as NodeJS.ProcessEnv;
 
     expect(resolveElevenLabsApiKeyForCloudMode(env)).toBe("direct-key");
   });
 
-  it("falls back to cloud key when cloud mode is enabled", () => {
+  it("falls back to cloud key when cloud TTS routing is enabled", () => {
     const env = {
-      ELIZAOS_CLOUD_ENABLED: "true",
+      ELIZAOS_CLOUD_USE_TTS: "true",
       ELIZAOS_CLOUD_API_KEY: "cloud-key",
     } as NodeJS.ProcessEnv;
 
@@ -34,7 +34,7 @@ describe("cloud-backed ElevenLabs API key alias", () => {
 
   it("does not resolve cloud key when cloud TTS is disabled", () => {
     const env = {
-      ELIZAOS_CLOUD_ENABLED: "true",
+      ELIZAOS_CLOUD_USE_TTS: "true",
       ELIZAOS_CLOUD_API_KEY: "cloud-key",
       ELIZA_CLOUD_TTS_DISABLED: "true",
     } as NodeJS.ProcessEnv;
@@ -44,7 +44,7 @@ describe("cloud-backed ElevenLabs API key alias", () => {
 
   it("aliases cloud key into ELEVENLABS_API_KEY when direct key is missing", () => {
     const env = {
-      ELIZAOS_CLOUD_ENABLED: "true",
+      ELIZAOS_CLOUD_USE_TTS: "true",
       ELIZAOS_CLOUD_API_KEY: "cloud-key",
     } as NodeJS.ProcessEnv;
 
@@ -55,7 +55,7 @@ describe("cloud-backed ElevenLabs API key alias", () => {
   it("does not overwrite existing ELEVENLABS_API_KEY", () => {
     const env = {
       ELEVENLABS_API_KEY: "direct-key",
-      ELIZAOS_CLOUD_ENABLED: "true",
+      ELIZAOS_CLOUD_USE_TTS: "true",
       ELIZAOS_CLOUD_API_KEY: "cloud-key",
     } as NodeJS.ProcessEnv;
 

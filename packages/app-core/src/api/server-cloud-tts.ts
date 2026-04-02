@@ -323,10 +323,7 @@ export function resolveElevenLabsApiKeyForCloudMode(
   }
   const cloudTtsEnabled =
     env.ELIZAOS_CLOUD_USE_TTS === "true" ||
-    (env.ELIZAOS_CLOUD_USE_TTS === undefined &&
-      ((env.ELIZAOS_CLOUD_ENABLED === "true" &&
-        env.ELIZA_CLOUD_TTS_DISABLED !== "true") ||
-        configWantsCloudTts));
+    (env.ELIZAOS_CLOUD_USE_TTS === undefined && configWantsCloudTts);
   if (!cloudTtsEnabled) {
     return null;
   }

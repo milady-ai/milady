@@ -10,6 +10,7 @@ import {
   getStoredOnboardingProviderId,
   isOnboardingConnectionComplete,
   getSubscriptionProviderFamily,
+  migrateLegacyRuntimeConfig,
   normalizeOnboardingProviderId,
   normalizePersistedOnboardingConnection,
   normalizeSubscriptionProviderSelectionId,
@@ -131,47 +132,66 @@ describe("onboarding provider catalog", () => {
     ).toBe(false);
   });
 
-  it("treats legacy cloud-only configs as using cloud inference", () => {
-    expect(
-      isCloudInferenceSelectedInConfig({
-        cloud: {
-          provider: "elizacloud",
-          inferenceMode: "cloud",
-        },
-        models: {
-          small: "openai/gpt-5-mini",
-          large: "anthropic/claude-sonnet-4.5",
-        },
-      }),
-    ).toBe(true);
+  it("migrates legacy cloud-only configs into canonical cloud inference routing", () => {
+    const migrated = migrateLegacyRuntimeConfig({
+      cloud: {
+        provider: "elizacloud",
+        inferenceMode: "cloud",
+      },
+      models: {
+        small: "openai/gpt-5-mini",
+        large: "anthropic/claude-sonnet-4.5",
+      },
+    });
+
+    expect(migrated.serviceRouting).toMatchObject({
+      llmText: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      },
+    });
+    expect(migrated.cloud).not.toMatchObject({
+      provider: "elizacloud",
+      inferenceMode: "cloud",
+    });
+    expect(isCloudInferenceSelectedInConfig(migrated)).toBe(true);
   });
 
-  it("treats legacy byok configs as not using cloud inference even when provider is elizacloud", () => {
-    expect(
-      isCloudInferenceSelectedInConfig({
-        cloud: {
-          enabled: true,
-          provider: "elizacloud",
-          inferenceMode: "byok",
-          services: {
-            inference: false,
-          },
+  it("drops legacy byok cloud routing during migration", () => {
+    const migrated = migrateLegacyRuntimeConfig({
+      cloud: {
+        enabled: true,
+        provider: "elizacloud",
+        inferenceMode: "byok",
+        services: {
+          inference: false,
         },
-      }),
-    ).toBe(false);
+      },
+    });
+
+    expect(migrated.serviceRouting).toBeUndefined();
+    expect(isCloudInferenceSelectedInConfig(migrated)).toBe(false);
   });
 
   it("keeps linked cloud auth separate from service routing", () => {
     const topology = resolveElizaCloudTopology({
-      connection: {
-        kind: "local-provider",
-        provider: "openai",
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
       },
-      cloud: {
-        enabled: false,
-        apiKey: "ck-cloud-test",
-        services: {
-          tts: true,
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
         },
       },
     });
@@ -184,15 +204,21 @@ describe("onboarding provider catalog", () => {
     expect(
       isElizaCloudServiceSelectedInConfig(
         {
-          connection: {
-            kind: "local-provider",
-            provider: "openai",
+          linkedAccounts: {
+            elizacloud: {
+              status: "linked",
+              source: "api-key",
+            },
           },
-          cloud: {
-            enabled: false,
-            apiKey: "ck-cloud-test",
-            services: {
-              tts: true,
+          serviceRouting: {
+            llmText: {
+              backend: "openai",
+              transport: "direct",
+            },
+            tts: {
+              backend: "elizacloud",
+              transport: "cloud-proxy",
+              accountId: "elizacloud",
             },
           },
         },
@@ -204,12 +230,11 @@ describe("onboarding provider catalog", () => {
   it("keeps remote selection ahead of local env-backed providers", () => {
     expect(
       inferOnboardingConnectionFromConfig({
-        cloud: {
+        deploymentTarget: {
+          runtime: "remote",
+          provider: "remote",
           remoteApiBase: "https://remote.example/api",
           remoteAccessToken: "remote-token",
-          enabled: true,
-          provider: "elizacloud",
-          inferenceMode: "cloud",
         },
         env: {
           vars: {
@@ -227,9 +252,7 @@ describe("onboarding provider catalog", () => {
   it("does not infer remote selection from an access token without an API base", () => {
     expect(
       inferOnboardingConnectionFromConfig({
-        cloud: {
-          remoteAccessToken: "remote-token",
-        },
+        deploymentTarget: { runtime: "remote", provider: "remote" },
       }),
     ).toBeNull();
   });

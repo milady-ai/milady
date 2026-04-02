@@ -13,6 +13,7 @@ import {
   isCloudManagedConnection,
   isLocalProviderConnection,
   isRemoteProviderConnection,
+  migrateLegacyRuntimeConfig,
   normalizeOnboardingProviderId,
   normalizePersistedOnboardingConnection,
   type OnboardingConnection,
@@ -285,32 +286,6 @@ function clearRemoteProviderConfig(config: MutableElizaConfig): void {
   }
 }
 
-// Config-only; does not touch process.env OPENAI_/ANTHROPIC_ (see clearElizaCloudCliProxyEnv).
-function disableCloudInference(config: MutableElizaConfig): void {
-  const cloud = ensureCloud(config);
-  cloud.enabled = false;
-  cloud.inferenceMode = "byok";
-  cloud.runtime = "local";
-
-  const services = asRecord(cloud.services) ?? {};
-  services.inference = false;
-  cloud.services = services;
-}
-
-// Updates persisted config + ELIZAOS_* for Milady runtime. Does not set OPENAI_/ANTHROPIC_
-// proxy env; POST /api/provider/switch does that in server.ts when elizacloud + apiKey.
-function enableCloudInference(config: MutableElizaConfig): void {
-  const cloud = ensureCloud(config);
-  cloud.enabled = true;
-  cloud.provider = "elizacloud";
-  cloud.inferenceMode = "cloud";
-  cloud.runtime = "cloud";
-
-  const services = asRecord(cloud.services) ?? {};
-  services.inference = true;
-  cloud.services = services;
-}
-
 function persistConnectionSelection(
   config: MutableElizaConfig,
   connection: OnboardingConnection | null,
@@ -348,7 +323,6 @@ function applyLocalProviderCapabilities(
     return Promise.resolve();
   }
 
-  disableCloudInference(config);
   clearElizaCloudCliProxyEnv();
   clearRemoteProviderConfig(config);
   clearCloudModelSelections(config);
@@ -686,12 +660,11 @@ export async function applyOnboardingConnectionConfig(
   }
 
   persistConnectionSelection(config, normalizedConnection);
-  const existingDeploymentTarget =
-    normalizeDeploymentTargetConfig(config.deploymentTarget) ??
-    ({ runtime: "local" } as const);
+  const existingDeploymentTarget = normalizeDeploymentTargetConfig(
+    config.deploymentTarget,
+  );
 
   if (normalizedConnection.kind === "cloud-managed") {
-    enableCloudInference(config);
     clearRemoteProviderConfig(config);
 
     const cloud = ensureCloud(config);
@@ -736,6 +709,7 @@ export async function applyOnboardingConnectionConfig(
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
     clearSubscriptionProviderConfig(config);
     clearPiAiFlag(config);
+    migrateLegacyRuntimeConfig(config as Record<string, unknown>);
     return;
   }
 
@@ -749,15 +723,7 @@ export async function applyOnboardingConnectionConfig(
     clearSubscriptionProviderConfig(config);
     clearPiAiFlag(config);
     clearCloudModelSelections(config);
-
-    const cloud = ensureCloud(config);
-    cloud.enabled = true;
-    cloud.provider = "remote";
-    cloud.runtime = "cloud";
-    cloud.remoteApiBase = normalizedConnection.remoteApiBase;
-    if (normalizedConnection.remoteAccessToken) {
-      cloud.remoteAccessToken = normalizedConnection.remoteAccessToken;
-    }
+    clearRemoteProviderConfig(config);
 
     applyCanonicalOnboardingConfig(config, {
       deploymentTarget: {
@@ -783,6 +749,7 @@ export async function applyOnboardingConnectionConfig(
       clearRoutes: normalizedConnection.provider ? [] : ["llmText"],
     });
 
+    migrateLegacyRuntimeConfig(config as Record<string, unknown>);
     return;
   }
 
@@ -817,4 +784,5 @@ export async function applyOnboardingConnectionConfig(
       },
     },
   });
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
 }

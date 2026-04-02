@@ -31,13 +31,13 @@ describe("cloud-preference-patch", () => {
 
     const normalized = normalizeConfigForLocalProviderPreference(config);
     expect(normalized?.cloud).toMatchObject({
-      enabled: false,
-      inferenceMode: "byok",
-      services: { inference: false },
+      apiKey: "ck-cloud-test",
     });
-    expect(normalized?.cloud).not.toHaveProperty("apiKey");
+    expect(normalized?.cloud).not.toHaveProperty("enabled");
     expect(normalized?.cloud).not.toHaveProperty("provider");
-    expect(normalized).not.toHaveProperty("models");
+    expect(normalized?.cloud).not.toHaveProperty("inferenceMode");
+    expect(normalized?.cloud).not.toHaveProperty("services");
+    expect(normalized?.models).toEqual(config.models);
 
     expect(
       shouldMaskInactiveCloudStatus({
@@ -77,10 +77,7 @@ describe("cloud-preference-patch", () => {
           elizacloud: { status: "linked", source: "api-key" },
         },
         cloud: {
-          enabled: true,
-          provider: "elizacloud",
-          inferenceMode: "cloud",
-          services: { inference: true },
+          apiKey: "ck-cloud-test",
         },
       }),
     ).toBe(false);
@@ -107,10 +104,9 @@ describe("cloud-preference-patch", () => {
         },
       },
       cloud: {
-        enabled: true,
-        provider: "elizacloud",
         apiKey: "ck-cloud-test",
-        inferenceMode: "cloud",
+        runtime: "cloud",
+        provider: "elizacloud",
         services: { inference: true, rpc: true },
       },
     };
@@ -119,10 +115,8 @@ describe("cloud-preference-patch", () => {
 
     const normalized = normalizeConfigForLocalProviderPreference(config);
     expect(normalized?.deploymentTarget).toEqual(config.deploymentTarget);
-    expect(normalized?.cloud).toMatchObject({
-      enabled: false,
-      inferenceMode: "byok",
-      services: { inference: false, rpc: true },
+    expect(normalized?.cloud).toEqual({
+      apiKey: "ck-cloud-test",
     });
   });
 
@@ -160,13 +154,13 @@ describe("cloud-preference-patch", () => {
     await expect(client.getConfig()).resolves.toMatchObject({
       connection: rawConfig.connection,
       cloud: {
-        enabled: false,
-        inferenceMode: "byok",
-        services: { inference: false },
+        apiKey: "ck-cloud-test",
       },
     });
     const patchedConfig = await client.getConfig();
-    expect(patchedConfig.cloud).not.toHaveProperty("apiKey");
+    expect(patchedConfig.cloud).not.toHaveProperty("enabled");
+    expect(patchedConfig.cloud).not.toHaveProperty("provider");
+    expect(patchedConfig.cloud).not.toHaveProperty("inferenceMode");
 
     await expect(client.getCloudStatus()).resolves.toBe(rawStatus);
     await expect(client.getCloudCredits?.()).resolves.toEqual({

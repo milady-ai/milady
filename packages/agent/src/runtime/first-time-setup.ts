@@ -21,6 +21,7 @@
 import { type ElizaConfig, saveElizaConfig } from "../config/config";
 import type { AgentConfig } from "../config/types.agents";
 import type { StylePreset } from "../contracts/onboarding";
+import { migrateLegacyRuntimeConfig } from "../contracts/onboarding";
 import { getStylePresets } from "../onboarding-presets";
 import { pickRandomNames } from "./onboarding-names";
 
@@ -567,6 +568,7 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
   }
 
   try {
+    migrateLegacyRuntimeConfig(updated as Record<string, unknown>);
     saveElizaConfig(updated);
   } catch (err) {
     // Non-fatal: the agent can still start, but choices won't persist.

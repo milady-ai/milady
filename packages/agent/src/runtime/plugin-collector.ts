@@ -14,6 +14,7 @@ import {
 } from "@miladyai/shared/contracts";
 import {
   hasExplicitCanonicalRuntimeConfig,
+  migrateLegacyRuntimeConfig,
   normalizePersistedOnboardingConnection,
 } from "@miladyai/shared/contracts/onboarding";
 import type { ElizaConfig } from "../config/config";
@@ -123,6 +124,7 @@ export const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
  */
 /** @internal Exported for testing. */
 export function collectPluginNames(config: ElizaConfig): Set<string> {
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   const shellPluginDisabled = config.features?.shellEnabled === false;
   const localEmbeddingsExplicitlyDisabled = (() => {
     const raw = process.env.ELIZA_DISABLE_LOCAL_EMBEDDINGS;

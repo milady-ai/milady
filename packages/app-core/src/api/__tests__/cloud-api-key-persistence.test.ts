@@ -86,12 +86,13 @@ describe("cloud API key persistence through onboarding", () => {
 
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
       const saved = saveElizaConfigMock.mock.calls[0][0];
-      expect(saved.cloud).toEqual({
-        enabled: false,
-        apiKey: "cloud-key-abc",
-        inferenceMode: "byok",
-        runtime: "local",
-        services: { inference: false },
+      expect(saved.cloud.apiKey).toBe("cloud-key-abc");
+      expect(saved.serviceRouting?.llmText).toMatchObject({
+        backend: "anthropic",
+        transport: "direct",
+      });
+      expect(saved.linkedAccounts).toMatchObject({
+        elizacloud: { status: "linked", source: "api-key" },
       });
       expect(saved.env.ANTHROPIC_API_KEY).toBe("sk-ant-test-key-123");
     });
@@ -114,7 +115,12 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
       const saved = saveElizaConfigMock.mock.calls[0][0];
       expect(saved.cloud.apiKey).toBe("cloud-key-abc");
-      expect(saved.cloud.enabled).toBe(true);
+      expect(saved.serviceRouting).toMatchObject({
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+        },
+      });
       expect(saved.models.small).toBe("openai/gpt-5-mini");
       expect(saved.models.large).toBe("moonshotai/kimi-k2-0905");
     });
@@ -138,7 +144,9 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
       const saved = saveElizaConfigMock.mock.calls[0][0];
       expect(saved.cloud.apiKey).toBe("cloud-key-xyz");
-      expect(saved.cloud.enabled).toBe(true);
+      expect(saved.linkedAccounts).toMatchObject({
+        elizacloud: { status: "linked", source: "api-key" },
+      });
       expect(saved.agents.list[0].name).toBe("MyAgent");
     });
   });
@@ -196,12 +204,10 @@ describe("cloud API key persistence through onboarding", () => {
       });
 
       const saved1 = saveElizaConfigMock.mock.calls[0][0];
-      expect(saved1.cloud).toEqual({
-        enabled: false,
-        apiKey: "cloud-key-dual",
-        inferenceMode: "byok",
-        runtime: "local",
-        services: { inference: false },
+      expect(saved1.cloud.apiKey).toBe("cloud-key-dual");
+      expect(saved1.serviceRouting?.llmText).toMatchObject({
+        backend: "openai",
+        transport: "direct",
       });
       expect(saved1.env.OPENAI_API_KEY).toBe("sk-openai-test");
 
@@ -210,12 +216,10 @@ describe("cloud API key persistence through onboarding", () => {
       persistCompatOnboardingDefaults({ name: "Agent" });
 
       const saved2 = saveElizaConfigMock.mock.calls[1][0];
-      expect(saved2.cloud).toEqual({
-        enabled: false,
-        apiKey: "cloud-key-dual",
-        inferenceMode: "byok",
-        runtime: "local",
-        services: { inference: false },
+      expect(saved2.cloud.apiKey).toBe("cloud-key-dual");
+      expect(saved2.serviceRouting?.llmText).toMatchObject({
+        backend: "openai",
+        transport: "direct",
       });
     });
   });

@@ -53,15 +53,7 @@ function cloudHandlesInference(
 function hasInactiveCloudSignals(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const cloud = asRecord(config?.cloud);
-  const models = asRecord(config?.models);
-  return Boolean(
-    isElizaCloudLinkedInConfig(config as Record<string, unknown>) ||
-      readString(cloud, "provider") === "elizacloud" ||
-      readString(cloud, "inferenceMode") === "cloud" ||
-      readString(models, "small") ||
-      readString(models, "large"),
-  );
+  return isElizaCloudLinkedInConfig(config as Record<string, unknown>);
 }
 
 export function shouldPreferLocalProviderConfig(
@@ -87,36 +79,29 @@ export function normalizeConfigForLocalProviderPreference(
   }
 
   const cloud = asRecord(config.cloud) ?? {};
-  const models = asRecord(config.models);
   const nextCloud: Record<string, unknown> = { ...cloud };
-  delete nextCloud.apiKey;
+  delete nextCloud.enabled;
+  delete nextCloud.provider;
+  delete nextCloud.inferenceMode;
+  delete nextCloud.runtime;
+  delete nextCloud.remoteApiBase;
+  delete nextCloud.remoteAccessToken;
 
-  if (readString(cloud, "provider") === "elizacloud") {
-    delete nextCloud.provider;
-  }
-
-  if (readString(cloud, "inferenceMode") === "cloud") {
-    nextCloud.inferenceMode = "byok";
-  }
-
-  const services = asRecord(cloud.services);
+  const services = asRecord(nextCloud.services);
   if (services) {
-    nextCloud.services = { ...services, inference: false };
-  }
-  nextCloud.enabled = false;
-
-  const nextConfig: StorageConfig = { ...config, cloud: nextCloud };
-
-  if (models) {
-    const nextModels: Record<string, unknown> = { ...models };
-    delete nextModels.small;
-    delete nextModels.large;
-    if (Object.keys(nextModels).length > 0) {
-      nextConfig.models = nextModels;
+    delete services.inference;
+    delete services.tts;
+    delete services.media;
+    delete services.embeddings;
+    delete services.rpc;
+    if (Object.keys(services).length === 0) {
+      delete nextCloud.services;
     } else {
-      delete nextConfig.models;
+      nextCloud.services = services;
     }
   }
+
+  const nextConfig: StorageConfig = { ...config, cloud: nextCloud };
 
   return nextConfig;
 }
