@@ -1,7 +1,12 @@
 import {
   inferOnboardingConnectionFromConfig,
   isLocalProviderConnection,
+  resolveDeploymentTargetInConfig,
 } from "@miladyai/shared/contracts/onboarding";
+import {
+  isElizaCloudLinkedInConfig,
+  resolveElizaCloudTopology,
+} from "@miladyai/shared/contracts";
 import type {
   CloudPreferenceClientLike as ClientLike,
   CloudPreferencePatchState as PatchState,
@@ -29,35 +34,20 @@ function readString(
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function readBoolean(
-  source: Record<string, unknown> | null | undefined,
-  key: string,
-): boolean | null {
-  const value = source?.[key];
-  return typeof value === "boolean" ? value : null;
-}
-
 function hasRemoteConnection(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const cloud = asRecord(config?.cloud);
-  return Boolean(
-    readString(cloud, "remoteApiBase") ||
-      readString(cloud, "remoteAccessToken"),
+  return (
+    resolveDeploymentTargetInConfig(config as Record<string, unknown>)
+      .runtime === "remote"
   );
 }
 
 function cloudHandlesInference(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const cloud = asRecord(config?.cloud);
-  if (readBoolean(cloud, "enabled") !== true) {
-    return false;
-  }
-  const services = asRecord(cloud?.services);
-  const inferenceToggle = services?.inference !== false;
-  const inferenceMode = readString(cloud, "inferenceMode") ?? "cloud";
-  return inferenceMode === "cloud" && inferenceToggle;
+  return resolveElizaCloudTopology(config as Record<string, unknown>).services
+    .inference;
 }
 
 function hasInactiveCloudSignals(
@@ -66,7 +56,7 @@ function hasInactiveCloudSignals(
   const cloud = asRecord(config?.cloud);
   const models = asRecord(config?.models);
   return Boolean(
-    readString(cloud, "apiKey") ||
+    isElizaCloudLinkedInConfig(config as Record<string, unknown>) ||
       readString(cloud, "provider") === "elizacloud" ||
       readString(cloud, "inferenceMode") === "cloud" ||
       readString(models, "small") ||
@@ -79,13 +69,6 @@ export function shouldPreferLocalProviderConfig(
 ): boolean {
   const connection = inferOnboardingConnectionFromConfig(config);
   if (!connection || !isLocalProviderConnection(connection)) {
-    return false;
-  }
-
-  // If cloud.enabled is explicitly true, the user has actively chosen cloud —
-  // never override their preference even if a local provider is also configured.
-  const cloud = asRecord(config?.cloud);
-  if (readBoolean(cloud, "enabled") === true) {
     return false;
   }
 

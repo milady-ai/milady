@@ -568,10 +568,9 @@ export function normalizeOpenAiCompatibleProviderConfig(
   config: ElizaConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  const cloudInferenceEnabled =
-    config.cloud?.enabled === true &&
-    (config.cloud?.inferenceMode ?? "cloud") === "cloud" &&
-    config.cloud?.services?.inference !== false;
+  const cloudInferenceEnabled = resolveElizaCloudTopology(
+    config as Record<string, unknown>,
+  ).services.inference;
   if (cloudInferenceEnabled) {
     return false;
   }

@@ -770,7 +770,7 @@ function readPrimaryModelFromConfig(
   return readConfigString(model, "primary");
 }
 
-function hasExplicitCanonicalRuntimeConfig(
+export function hasExplicitCanonicalRuntimeConfig(
   config: Record<string, unknown> | null | undefined,
 ): boolean {
   const root = asConfigRecord(config);
