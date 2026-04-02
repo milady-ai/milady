@@ -83,7 +83,7 @@ describe("PolicyControlsView", () => {
   });
 
   it("exports PolicyControlsView component", async () => {
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     expect(mod.PolicyControlsView).toBeDefined();
     expect(typeof mod.PolicyControlsView).toBe("function");
   });
@@ -95,7 +95,7 @@ describe("PolicyControlsView", () => {
       new Promise(() => {}),
     );
 
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     const { container } = render(<mod.PolicyControlsView />);
 
     // Should show a spinner or loading indicator
@@ -110,7 +110,7 @@ describe("PolicyControlsView", () => {
       connected: false,
     });
 
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     render(<mod.PolicyControlsView />);
 
     await waitFor(() => {
@@ -152,7 +152,7 @@ describe("PolicyControlsView", () => {
       mockPolicies,
     );
 
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     render(<mod.PolicyControlsView />);
 
     await waitFor(() => {
@@ -179,7 +179,7 @@ describe("PolicyControlsView", () => {
       [],
     );
 
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     render(<mod.PolicyControlsView />);
 
     await waitFor(() => {
@@ -217,7 +217,7 @@ describe("PolicyControlsView", () => {
       ok: true,
     });
 
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     render(<mod.PolicyControlsView />);
 
     // Wait for policies to load
@@ -261,7 +261,7 @@ describe("PolicyControlsView", () => {
       new Error("Network error"),
     );
 
-    const mod = await import("../PolicyControlsView");
+    const mod = await import("../settings/PolicyControlsView");
     render(<mod.PolicyControlsView />);
 
     await waitFor(() => {

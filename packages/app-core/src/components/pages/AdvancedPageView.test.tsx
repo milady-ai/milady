@@ -3,7 +3,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
-import { testT } from "../../../../test/helpers/i18n";
+import { testT } from "../../../../../test/helpers/i18n";
 
 const { mockUseApp } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),

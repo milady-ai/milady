@@ -37,7 +37,7 @@ vi.mock("../../hooks", () => ({
   useOptionalBugReport: () => optionalBugReportMock(),
 }));
 
-import { StartupFailureView } from "./shell/StartupFailureView";
+import { StartupFailureView } from "./StartupFailureView";
 
 describe("StartupFailureView", () => {
   beforeEach(() => {

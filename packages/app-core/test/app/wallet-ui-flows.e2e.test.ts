@@ -390,6 +390,7 @@ vi.mock("@miladyai/ui", () => {
     cn: (...classes: Array<string | false | null | undefined>) =>
       classes.filter(Boolean).join(" "),
     Button: button,
+    ContentLayout: passthrough,
     Input: input,
     PageLayout: pageLayout,
     PagePanel: pagePanel,

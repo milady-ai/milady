@@ -4,8 +4,8 @@ import React from "react";
 import type { ReactTestRenderer } from "react-test-renderer";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { LanguageDropdownProps } from "./shared/LanguageDropdown";
-import { LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME } from "./shared/LanguageDropdown";
+import type { LanguageDropdownProps } from "../shared/LanguageDropdown";
+import { LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME } from "../shared/LanguageDropdown";
 
 const { mockUseApp, mockVrmStage, mockLanguageDropdown } = vi.hoisted(() => ({
   mockUseApp: vi.fn(),
@@ -57,37 +57,37 @@ vi.mock("../../config/branding", () => ({
   }),
 }));
 
-vi.mock("./companion/VrmStage", () => ({
+vi.mock("../companion/VrmStage", () => ({
   VrmStage: (props: unknown) => mockVrmStage(props),
 }));
 
-vi.mock("./onboarding/ActivateStep", () => ({
+vi.mock("./ActivateStep", () => ({
   ActivateStep: () => React.createElement("div", null, "ActivateStep"),
 }));
 
-vi.mock("./onboarding/ConnectionStep", () => ({
+vi.mock("./ConnectionStep", () => ({
   ConnectionStep: () => React.createElement("div", null, "ConnectionStep"),
 }));
 
-vi.mock("./onboarding/OnboardingPanel", () => ({
+vi.mock("./OnboardingPanel", () => ({
   OnboardingPanel: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", null, children),
 }));
 
-vi.mock("./onboarding/OnboardingStepNav", () => ({
+vi.mock("./OnboardingStepNav", () => ({
   OnboardingStepNav: () =>
     React.createElement("div", null, "OnboardingStepNav"),
 }));
 
-vi.mock("./onboarding/PermissionsStep", () => ({
+vi.mock("./PermissionsStep", () => ({
   PermissionsStep: () => React.createElement("div", null, "PermissionsStep"),
 }));
 
-vi.mock("./onboarding/WelcomeStep", () => ({
+vi.mock("./WelcomeStep", () => ({
   WelcomeStep: () => React.createElement("div", null, "WelcomeStep"),
 }));
 
-import { OnboardingWizard } from "./onboarding/OnboardingWizard";
+import { OnboardingWizard } from "./OnboardingWizard";
 
 describe("OnboardingWizard", () => {
   beforeEach(() => {

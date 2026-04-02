@@ -203,6 +203,7 @@
     "@lunchtable/plugin-ltcg": "^0.1.0",
     "@miladyai/agent": "workspace:*",
     "@miladyai/app-core": "workspace:*",
+    "@miladyai/plugin-roles": "github:milady-ai/plugin-roles",
     "@noble/curves": "^2.0.1",
     "@opinion-labs/opinion-clob-sdk": "0.5.2",
     "@pixiv/three-vrm": "^3.5.1",

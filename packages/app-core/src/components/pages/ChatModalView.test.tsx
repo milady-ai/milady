@@ -4,7 +4,7 @@ import React from "react";
 import { act, create, type ReactTestRenderer } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
 
-import { ChatModalView } from "./pages/ChatModalView";
+import { ChatModalView } from "./ChatModalView";
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: vi.fn(),
@@ -42,7 +42,7 @@ vi.mock("./ChatView.js", () => ({
     }),
 }));
 
-vi.mock("./ConversationsSidebar.js", () => ({
+vi.mock("../conversations/ConversationsSidebar.js", () => ({
   ConversationsSidebar: ({
     mobile,
     variant,

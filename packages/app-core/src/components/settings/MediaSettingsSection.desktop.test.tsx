@@ -3,7 +3,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { testT } from "../../../../test/helpers/i18n";
+import { testT } from "../../../../../test/helpers/i18n";
 
 const { invokeDesktopBridgeRequestMock, isElectrobunRuntimeMock } = vi.hoisted(
   () => ({
@@ -56,8 +56,8 @@ vi.mock("@miladyai/ui", () => {
   };
 });
 
-import { findButtonByText } from "../../../../test/helpers/react-test";
-import { DesktopMediaControlPanel } from "./settings/MediaSettingsSection";
+import { findButtonByText } from "../../../../../test/helpers/react-test";
+import { DesktopMediaControlPanel } from "./MediaSettingsSection";
 
 describe("DesktopMediaControlPanel", () => {
   beforeEach(() => {
