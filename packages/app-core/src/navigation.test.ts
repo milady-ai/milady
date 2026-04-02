@@ -37,7 +37,6 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/runtime")).toBe("runtime");
     expect(tabFromPath("/database")).toBe("database");
     expect(tabFromPath("/logs")).toBe("logs");
-    expect(tabFromPath("/security")).toBe("security");
   });
 
   it("maps legacy paths", () => {
@@ -103,7 +102,6 @@ describe("pathForTab", () => {
     "desktop",
     "settings",
     "logs",
-    "security",
   ];
   if (APPS_ENABLED) {
     roundTripTabs.splice(3, 0, "apps");
@@ -151,7 +149,6 @@ describe("tab groups", () => {
       "runtime",
       "database",
       "logs",
-      "security",
     ]);
   });
 
@@ -173,7 +170,6 @@ describe("tab groups", () => {
       "runtime",
       "database",
       "logs",
-      "security",
       "settings",
     ];
 

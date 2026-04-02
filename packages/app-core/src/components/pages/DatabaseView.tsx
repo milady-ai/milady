@@ -447,7 +447,7 @@ export function DatabaseView({
               </PagePanel>
             </div>
           ) : view === "tables" ? (
-            <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
+            <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr] gap-0 overflow-y-auto p-6" style={{ gridTemplateColumns: "1fr" }}>
               {!selectedTable ? (
                 <>
                   <PagePanel
@@ -746,7 +746,7 @@ export function DatabaseView({
           )}
 
           {/* Main grid area */}
-          <div className="flex-1 min-w-0 flex flex-col bg-bg/10">
+          <div className="grid flex-1 min-w-0 bg-bg/10" style={{ gridTemplateColumns: "1fr", gridTemplateRows: "auto 1fr" }}>
             {!selectedTable ? (
               <>
                 <PagePanel

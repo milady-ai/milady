@@ -182,7 +182,6 @@ function ViewRouter({
       case "database":
       case "desktop":
       case "logs":
-      case "security":
         return (
           <TabContentView>
             <AdvancedPageView />
@@ -279,8 +278,7 @@ export function App() {
     tab === "runtime" ||
     tab === "database" ||
     tab === "desktop" ||
-    tab === "logs" ||
-    tab === "security";
+    tab === "logs";
   const unreadCount = unreadConversations?.size ?? 0;
   const mobileChatControls = isChatMobileLayout ? (
     <div className="flex items-center gap-2 w-max">

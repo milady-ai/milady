@@ -92,7 +92,7 @@ export function PageLayout({
         <main
           ref={contentRef}
           className={cn(
-            "chat-native-scrollbar relative flex flex-1 min-w-0 flex-col overflow-x-hidden overflow-y-auto bg-transparent px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-3 lg:px-7 lg:pb-7 lg:pt-4",
+            "chat-native-scrollbar relative flex flex-1 w-0 flex-col overflow-x-hidden overflow-y-auto bg-transparent px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-3 lg:px-7 lg:pb-7 lg:pt-4",
             contentClassName,
           )}
         >
@@ -104,7 +104,7 @@ export function PageLayout({
             onMobileSidebarOpenChange={setMobileSidebarOpen}
             sidebar={sidebar}
           />
-        <div className={cn("w-full min-h-0", contentInnerClassName)}>
+        <div className={cn("flex flex-1 flex-col w-full min-h-0", contentInnerClassName)}>
           {children}
         </div>
         </main>

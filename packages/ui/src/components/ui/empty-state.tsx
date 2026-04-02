@@ -20,7 +20,7 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
     <div
       ref={ref}
       className={cn(
-        "flex flex-1 flex-col items-center justify-center p-6 text-center",
+        "flex flex-1 w-full flex-col items-center justify-center p-6 text-center",
         className,
       )}
       {...props}

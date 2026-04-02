@@ -33,7 +33,6 @@ describe("tabFlags", () => {
     "runtime",
     "database",
     "logs",
-    "security",
   ];
 
   for (const tab of advancedOverlayTabs) {
@@ -121,7 +120,6 @@ describe("App.tsx advanced-tab parity", () => {
     "runtime",
     "database",
     "logs",
-    "security",
   ];
 
   for (const tab of advancedParityTabs) {

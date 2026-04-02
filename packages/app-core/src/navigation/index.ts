@@ -47,8 +47,7 @@ export type Tab =
   | "database"
   | "desktop"
   | "settings"
-  | "logs"
-  | "security";
+  | "logs";
 
 export interface TabGroup {
   label: string;
@@ -118,7 +117,6 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
       "runtime",
       "database",
       "logs",
-      "security",
     ],
     icon: Sparkles,
     description: "Developer and power user tools",
@@ -156,7 +154,6 @@ const TAB_PATHS: Record<Tab, string> = {
   desktop: "/desktop",
   settings: "/settings",
   logs: "/logs",
-  security: "/security",
 };
 
 /** Legacy path redirects — old paths that now map to new tabs. */
@@ -287,8 +284,6 @@ export function titleForTab(tab: Tab): string {
       return "Logs";
     case "stream":
       return "Stream";
-    case "security":
-      return "Security";
     default:
       return DEFAULT_BRANDING.appName;
   }
