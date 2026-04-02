@@ -100,8 +100,7 @@ let sharedAudioCtx: AudioContext | null = null;
 
 function shouldPreferNativeTalkMode(): boolean {
   if (typeof window === "undefined") return false;
-  if (getElectrobunRendererRpc()) return true;
-  return Capacitor.isNativePlatform();
+  return Capacitor.isNativePlatform() || !!getElectrobunRendererRpc();
 }
 
 function isWindowsElectrobunRenderer(): boolean {
@@ -118,11 +117,6 @@ function shouldAutoRestartBrowserRecognition(): boolean {
   if (isWindowsElectrobunRenderer()) {
     return false;
   }
-  return true;
-}
-
-function isVoiceInputSupportedInRuntime(): boolean {
-  if (typeof window === "undefined") return false;
   return true;
 }
 
@@ -622,7 +616,6 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
   const startListening = useCallback(
     async (mode: Exclude<VoiceCaptureMode, "idle"> = "compose") => {
       if (enabledRef.current) return;
-      if (!isVoiceInputSupportedInRuntime()) return;
 
       transcriptBufferRef.current = "";
       setInterimTranscript("");
