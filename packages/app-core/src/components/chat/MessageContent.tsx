@@ -799,14 +799,22 @@ function UiSpecBlock({ spec, raw }: { spec: UiSpec; raw: string }) {
         // Collect all config.* state values
         if (params) {
           for (const [key, value] of Object.entries(params)) {
-            if (key.startsWith("config.") && typeof value === "string" && value.trim()) {
+            if (
+              key.startsWith("config.") &&
+              typeof value === "string" &&
+              value.trim()
+            ) {
               config[key.slice(7)] = value.trim();
             }
           }
         }
         void client
           .updatePlugin(pluginId, { config })
-          .then(() => sendActionMessage(`[Plugin ${pluginId} configuration saved successfully]`))
+          .then(() =>
+            sendActionMessage(
+              `[Plugin ${pluginId} configuration saved successfully]`,
+            ),
+          )
           .catch((err: unknown) =>
             sendActionMessage(
               `[Failed to save plugin config: ${err instanceof Error ? err.message : "unknown error"}]`,
@@ -817,7 +825,11 @@ function UiSpecBlock({ spec, raw }: { spec: UiSpec; raw: string }) {
       if (action === "plugin:enable" && params?.pluginId) {
         void client
           .updatePlugin(String(params.pluginId), { enabled: true })
-          .then(() => sendActionMessage(`[Plugin ${params.pluginId} enabled. Restart required.]`))
+          .then(() =>
+            sendActionMessage(
+              `[Plugin ${params.pluginId} enabled. Restart required.]`,
+            ),
+          )
           .catch(() => sendActionMessage(`[Failed to enable plugin]`));
         return;
       }

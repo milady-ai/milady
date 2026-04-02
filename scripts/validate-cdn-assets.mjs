@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -30,6 +31,10 @@ function getValidationRetryPolicy({ env = process.env } = {}) {
     env.MILADY_CDN_VALIDATE_DELAY_MS ?? "",
     10,
   );
+  const explicitConcurrency = Number.parseInt(
+    env.MILADY_CDN_VALIDATE_CONCURRENCY ?? "",
+    10,
+  );
   const inCi = String(env.CI ?? "").toLowerCase() === "true";
 
   return {
@@ -45,6 +50,12 @@ function getValidationRetryPolicy({ env = process.env } = {}) {
         : inCi
           ? 5000
           : 0,
+    concurrency:
+      Number.isFinite(explicitConcurrency) && explicitConcurrency > 0
+        ? explicitConcurrency
+        : inCi
+          ? 4
+          : 2,
   };
 }
 
@@ -90,6 +101,27 @@ async function probeManagedAssetUrl(url, retryPolicy) {
   return result;
 }
 
+async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.max(1, Math.min(limit, items.length));
+
+  async function worker() {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      if (currentIndex >= items.length) {
+        return;
+      }
+
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
+}
+
 async function validateGroup(
   files,
   { repository, releaseTag, assetRoot, retryPolicy },
@@ -106,14 +138,16 @@ async function validateGroup(
   let lastMissing = [];
 
   for (let attempt = 1; attempt <= retryPolicy.attempts; attempt += 1) {
-    const responses = await Promise.all(
-      pending.map(async (url) => ({
+    const responses = await mapWithConcurrency(
+      pending,
+      retryPolicy.concurrency,
+      async (url) => ({
         url,
         response:
           attempt === 1
             ? await headManagedAssetUrl(url)
             : await probeManagedAssetUrl(url, { attempts: 1, delayMs: 0 }),
-      })),
+      }),
     );
 
     const missing = [];
@@ -166,23 +200,52 @@ async function isRefAccessible(repository, ref) {
   }
 }
 
-async function main() {
-  const releaseTag = resolveMiladyReleaseTag();
-  const repository = resolveMiladyAssetRepository();
-  if (!releaseTag) {
+export function resolveCurrentGitSha({
+  cwd = repoRoot,
+  env = process.env,
+} = {}) {
+  const explicit = env.GITHUB_SHA?.trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  try {
+    const sha = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return sha || null;
+  } catch {
+    return null;
+  }
+}
+
+export function resolveValidationGitRef({
+  cwd = repoRoot,
+  env = process.env,
+} = {}) {
+  return resolveMiladyReleaseTag({ env }) || resolveCurrentGitSha({ cwd, env });
+}
+
+export async function main({ cwd = repoRoot, env = process.env } = {}) {
+  const releaseTag = resolveMiladyReleaseTag({ env });
+  const gitSha = resolveCurrentGitSha({ cwd, env });
+  const repository = resolveMiladyAssetRepository({ env });
+  if (!releaseTag && !gitSha) {
     throw new Error(
-      "Could not resolve release tag for CDN validation. Set MILADY_RELEASE_TAG or RELEASE_TAG.",
+      "Could not resolve release tag or git SHA for CDN validation. Set MILADY_RELEASE_TAG / RELEASE_TAG or run inside a git checkout.",
     );
   }
 
-  const manifestValidation = validateStaticAssetManifest(repoRoot);
+  const manifestValidation = validateStaticAssetManifest(cwd);
   if (!manifestValidation.ok) {
     throw new Error(
       `Static asset manifest is ${manifestValidation.reason}. Run node scripts/generate-static-asset-manifest.mjs.`,
     );
   }
 
-  const manifest = readStaticAssetManifest(repoRoot);
+  const manifest = readStaticAssetManifest(cwd);
   if (!manifest) {
     throw new Error("Static asset manifest is missing.");
   }
@@ -192,14 +255,17 @@ async function main() {
   // commit SHA so we still verify the assets exist in the repo at this
   // commit. raw.githubusercontent.com resolves any git ref — branch, tag,
   // or full SHA — so the check is equivalent.
-  let effectiveRef = releaseTag;
-  if (!(await isRefAccessible(repository, releaseTag))) {
-    const sha = process.env.GITHUB_SHA;
-    if (sha && (await isRefAccessible(repository, sha))) {
+  let effectiveRef = releaseTag || gitSha;
+  if (!releaseTag && gitSha) {
+    console.log(
+      `validate-cdn-assets: no release tag provided, validating against commit SHA ${gitSha.slice(0, 12)}.`,
+    );
+  } else if (releaseTag && !(await isRefAccessible(repository, releaseTag))) {
+    if (gitSha && (await isRefAccessible(repository, gitSha))) {
       console.log(
-        `validate-cdn-assets: tag ${releaseTag} not yet accessible, falling back to commit SHA ${sha.slice(0, 12)}.`,
+        `validate-cdn-assets: tag ${releaseTag} not yet accessible, falling back to commit SHA ${gitSha.slice(0, 12)}.`,
       );
-      effectiveRef = sha;
+      effectiveRef = gitSha;
     }
   }
 
@@ -214,7 +280,7 @@ async function main() {
     validateGroup(manifest.homepage, {
       repository,
       releaseTag: effectiveRef,
-      assetRoot: "apps/homepage/public",
+      assetRoot: "apps/web/public",
       retryPolicy,
     }),
   ]);
@@ -229,8 +295,13 @@ async function main() {
   }
 
   console.log(
-    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} managed asset URLs for ${effectiveRef}${effectiveRef !== releaseTag ? ` (tag ${releaseTag} pending)` : ""}.`,
+    `validate-cdn-assets: verified ${manifest.app.length + manifest.homepage.length} managed asset URLs for ${effectiveRef}${releaseTag && effectiveRef !== releaseTag ? ` (tag ${releaseTag} pending)` : ""}.`,
   );
 }
 
-await main();
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  await main();
+}

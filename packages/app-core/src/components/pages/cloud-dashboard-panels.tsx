@@ -1,11 +1,5 @@
 import { Button, SectionCard } from "@miladyai/ui";
-import {
-  ExternalLink,
-  Loader2,
-  Terminal,
-  Trash2,
-  X,
-} from "lucide-react";
+import { ExternalLink, Loader2, Terminal, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type CloudCompatAgent, client } from "../../api";
 import { useIntervalWhenDocumentVisible } from "../../hooks/useDocumentVisibility";

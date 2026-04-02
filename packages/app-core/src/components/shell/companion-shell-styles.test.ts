@@ -11,7 +11,7 @@ import {
   TOP_BAR_COLORS,
   tabFlags,
   viewWrapperStyle,
-} from "./shell/companion-shell-styles";
+} from "./companion-shell-styles";
 
 describe("COMPANION_OVERLAY_TABS", () => {
   it("contains only companion — settings/character/skills etc. require native mode", () => {
@@ -33,7 +33,6 @@ describe("tabFlags", () => {
     "runtime",
     "database",
     "logs",
-    "security",
   ];
 
   for (const tab of advancedOverlayTabs) {
@@ -121,7 +120,6 @@ describe("App.tsx advanced-tab parity", () => {
     "runtime",
     "database",
     "logs",
-    "security",
   ];
 
   for (const tab of advancedParityTabs) {

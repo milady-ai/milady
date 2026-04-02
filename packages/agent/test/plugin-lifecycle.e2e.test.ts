@@ -53,6 +53,18 @@ function http$(
   });
 }
 
+type PluginApiRecord = Record<string, unknown>;
+
+function isStandardManagedPlugin(plugin: PluginApiRecord): boolean {
+  return plugin.managementMode !== "core-optional";
+}
+
+function getStandardManagedPlugins(
+  plugins: PluginApiRecord[],
+): PluginApiRecord[] {
+  return plugins.filter(isStandardManagedPlugin);
+}
+
 // ---------------------------------------------------------------------------
 // Test suite
 // ---------------------------------------------------------------------------
@@ -176,7 +188,9 @@ describe("Plugin Lifecycle E2E", () => {
         "GET",
         "/api/plugins",
       );
-      const plugins = listData.plugins as Array<Record<string, unknown>>;
+      const plugins = getStandardManagedPlugins(
+        listData.plugins as PluginApiRecord[],
+      );
       if (plugins.length === 0) return;
 
       const target = plugins[0];
@@ -199,7 +213,9 @@ describe("Plugin Lifecycle E2E", () => {
         "GET",
         "/api/plugins",
       );
-      const plugins = listData.plugins as Array<Record<string, unknown>>;
+      const plugins = getStandardManagedPlugins(
+        listData.plugins as PluginApiRecord[],
+      );
       if (plugins.length === 0) return;
 
       const target = plugins[0];
@@ -224,7 +240,9 @@ describe("Plugin Lifecycle E2E", () => {
         "GET",
         "/api/plugins",
       );
-      const plugins = listData.plugins as Array<Record<string, unknown>>;
+      const plugins = getStandardManagedPlugins(
+        listData.plugins as PluginApiRecord[],
+      );
       const noErrors = plugins.find(
         (p) => (p.validationErrors as Array<unknown>).length === 0,
       );
@@ -487,7 +505,9 @@ describe("Plugin Lifecycle E2E", () => {
         "GET",
         "/api/plugins",
       );
-      const plugins = listData.plugins as Array<Record<string, unknown>>;
+      const plugins = getStandardManagedPlugins(
+        listData.plugins as PluginApiRecord[],
+      );
 
       // Find a plugin that needs configuration
       const needsConfig = plugins.find(
@@ -529,8 +549,8 @@ describe("Plugin Lifecycle E2E", () => {
         "GET",
         "/api/plugins",
       );
-      const available = (
-        freshList.plugins as Array<Record<string, unknown>>
+      const available = getStandardManagedPlugins(
+        freshList.plugins as PluginApiRecord[],
       ).find((p) => (p.validationErrors as Array<unknown>).length === 0);
       if (!available) return;
 

@@ -379,7 +379,6 @@ function normalizeLastNativeTab(tab: unknown): Tab {
     case "desktop":
     case "settings":
     case "logs":
-    case "security":
       return tab;
     default:
       return "chat";

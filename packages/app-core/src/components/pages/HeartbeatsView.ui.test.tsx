@@ -11,7 +11,7 @@ vi.mock("../../state", () => ({
   useApp: () => mockUseApp(),
 }));
 
-import { HeartbeatsView } from "./pages/HeartbeatsView";
+import { HeartbeatsView } from "./HeartbeatsView";
 
 const SHARED_SIDEBAR_COLLAPSED_STORAGE_KEY =
   "milady:ui:sidebar:primary-app-sidebar:collapsed";

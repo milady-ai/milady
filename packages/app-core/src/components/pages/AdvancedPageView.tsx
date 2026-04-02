@@ -22,7 +22,6 @@ import { FineTuningView } from "../settings/FineTuningView";
 import { LogsPageView } from "./LogsPageView";
 import { PluginsPageView } from "./PluginsPageView";
 import { RuntimeView } from "./RuntimeView";
-import { SecretsView } from "./SecretsView";
 import { SkillsView } from "./SkillsView";
 import { TrajectoriesView } from "./TrajectoriesView";
 
@@ -34,8 +33,7 @@ type SubTab =
   | "runtime"
   | "database"
   | "desktop"
-  | "logs"
-  | "security";
+  | "logs";
 
 const SUB_TABS: Array<{
   id: SubTab;
@@ -87,11 +85,6 @@ const SUB_TABS: Array<{
     labelKey: "advancedpageview.Logs",
     descriptionKey: "advancedpageview.LogsDescription",
   },
-  {
-    id: "security",
-    labelKey: "advancedpageview.Security",
-    descriptionKey: "advancedpageview.SecurityDescription",
-  },
 ];
 
 const MODAL_SUB_TABS = SUB_TABS.filter(
@@ -119,8 +112,6 @@ function mapTabToSubTab(tab: Tab): SubTab {
       return "desktop";
     case "logs":
       return "logs";
-    case "security":
-      return "security";
     default:
       return "plugins";
   }
@@ -220,8 +211,6 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         );
       case "logs":
         return <LogsPageView contentHeader={advancedContentHeader} />;
-      case "security":
-        return <SecretsView contentHeader={advancedContentHeader} />;
       default:
         return <PluginsPageView contentHeader={advancedContentHeader} />;
     }
@@ -230,7 +219,9 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
   return (
     <div
       className={
-        inModal ? "settings-modal-layout" : "flex flex-col h-full min-h-0"
+        inModal
+          ? "settings-modal-layout"
+          : "flex w-full flex-col h-full min-h-0"
       }
     >
       {inModal ? (
@@ -241,7 +232,9 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
 
       <div
         className={
-          inModal ? "settings-content-area" : "flex min-h-0 flex-1 flex-col"
+          inModal
+            ? "settings-content-area"
+            : "flex w-full min-h-0 flex-1 flex-col"
         }
         style={
           inModal

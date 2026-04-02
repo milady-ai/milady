@@ -6716,6 +6716,34 @@
       },
       "repository": "https://github.com/milady-ai/milady/tree/main/packages/plugin-wechat",
       "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#wechat"
+    },
+    {
+      "id": "vincent",
+      "dirName": "plugin-vincent",
+      "name": "Vincent Finance",
+      "npmName": "@milady-plugins/vincent-finance",
+      "description": "Vincent-powered delegated trading across Hyperliquid perpetual futures and Polymarket prediction markets via MCP.",
+      "tags": ["feature", "trading", "defi", "hyperliquid", "polymarket", "vincent", "lit-protocol"],
+      "category": "feature",
+      "enabled": false,
+      "env": {
+        "VINCENT_APP_ID": {
+          "description": "Vincent App ID from the on-chain App Registry",
+          "required": true,
+          "sensitive": false
+        },
+        "VINCENT_MCP_TRANSPORT": {
+          "description": "MCP transport mode: 'stdio' or 'http'",
+          "required": false,
+          "default": "stdio"
+        },
+        "VINCENT_MCP_SERVER_URL": {
+          "description": "Vincent MCP server URL (required when transport is 'http')",
+          "required": false,
+          "sensitive": false
+        }
+      },
+      "repository": "https://github.com/milady-ai/plugin-vincent"
     }
   ]
 }

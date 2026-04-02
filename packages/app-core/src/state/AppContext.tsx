@@ -152,6 +152,7 @@ import { useCharacterState } from "./useCharacterState";
 import { useWalletState } from "./useWalletState";
 import { usePluginsSkillsState } from "./usePluginsSkillsState";
 import { useCloudState } from "./useCloudState";
+import { useVincentState } from "./useVincentState";
 import { useDataLoaders } from "./useDataLoaders";
 import { useNavigationState } from "./useNavigationState";
 import { useOnboardingCallbacks } from "./useOnboardingCallbacks";
@@ -992,6 +993,9 @@ function AppProviderInner({
   // ── Cloud state (extracted to useCloudState) ───────────────────────
   // Placed after walletHook so loadWalletConfig is available.
   const cloudHook = useCloudState({ setActionNotice, loadWalletConfig, t });
+
+  // ── Vincent state (extracted to useVincentState) ──────────────────
+  const vincentHook = useVincentState({ setActionNotice, t });
   const {
     elizaCloudEnabled,
     setElizaCloudEnabled,
@@ -2060,6 +2064,11 @@ function AppProviderInner({
     handleCloudLogin,
     handleCloudDisconnect,
     handleCloudOnboardingFinish,
+    vincentConnected: vincentHook.vincentConnected,
+    vincentLoginBusy: vincentHook.vincentLoginBusy,
+    vincentLoginError: vincentHook.vincentLoginError,
+    handleVincentLogin: vincentHook.handleVincentLogin,
+    handleVincentDisconnect: vincentHook.handleVincentDisconnect,
     loadUpdateStatus,
     handleChannelChange,
     checkExtensionStatus,

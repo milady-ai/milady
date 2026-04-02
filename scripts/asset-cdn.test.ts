@@ -44,7 +44,7 @@ describe("asset-cdn", () => {
       appAssetBaseUrl:
         "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/app/public/",
       homepageAssetBaseUrl:
-        "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/homepage/public/",
+        "https://raw.githubusercontent.com/milady-ai/milady/v2.0.0-alpha.131/apps/web/public/",
     });
   });
 
@@ -82,7 +82,7 @@ describe("asset-cdn", () => {
       appAssetBaseUrl:
         "https://raw.githubusercontent.com/dutchiono/milady/v2.0.0-alpha.131-cdn.1/apps/app/public/",
       homepageAssetBaseUrl:
-        "https://raw.githubusercontent.com/dutchiono/milady/v2.0.0-alpha.131-cdn.1/apps/homepage/public/",
+        "https://raw.githubusercontent.com/dutchiono/milady/v2.0.0-alpha.131-cdn.1/apps/web/public/",
     });
   });
 

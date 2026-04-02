@@ -15,11 +15,11 @@ export const PagePanelRoot = React.forwardRef<HTMLDivElement, PagePanelProps>(
       ref={ref as never}
       className={cn(
         variant === "surface"
-          ? "rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]"
+          ? "w-full rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]"
           : variant === "workspace"
             ? "flex min-h-[58vh] flex-col overflow-hidden rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]"
             : variant === "section"
-              ? "overflow-visible rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]"
+              ? "w-full overflow-visible rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]"
               : variant === "padded"
                 ? "rounded-[28px] border border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_82%,transparent),color-mix(in_srgb,var(--bg)_96%,transparent))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_34px_-26px_rgba(15,23,42,0.14)] ring-1 ring-border/8 backdrop-blur-md sm:px-6 sm:py-5 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_36px_-26px_rgba(0,0,0,0.32)]"
                 : variant === "shell"

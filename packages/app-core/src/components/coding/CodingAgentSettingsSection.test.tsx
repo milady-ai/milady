@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ADAPTER_NAME_TO_TAB } from "./coding/CodingAgentSettingsSection";
+import { ADAPTER_NAME_TO_TAB } from "./CodingAgentSettingsSection";
 
 describe("ADAPTER_NAME_TO_TAB", () => {
   it("maps full adapter names from preflight API to tab keys", () => {

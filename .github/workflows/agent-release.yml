@@ -173,10 +173,10 @@ jobs:
           }
 
           if [ -n "$VERSION_OVERRIDE" ]; then
-            VERSION="$VERSION_OVERRIDE"
+            VERSION="${VERSION_OVERRIDE#v}"
           elif [ "$STABLE" = "true" ]; then
-            LATEST_ALPHA="$(git tag --sort=-creatordate | grep '^v[0-9].*-alpha\.[0-9]\+$' | head -1 || true)"
-            LATEST_STABLE="$(git tag --sort=-creatordate | grep '^v[0-9]' | grep -v -- '-alpha\.' | head -1 || true)"
+            LATEST_ALPHA="$(git tag --sort=-creatordate | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+-alpha\.[0-9]\+$' | head -1 || true)"
+            LATEST_STABLE="$(git tag --sort=-creatordate | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | head -1 || true)"
             ALPHA_BASE="$(echo "$LATEST_ALPHA" | sed 's/^v//' | sed 's/-alpha\.[0-9]*$//' )"
             STABLE_VERSION="${LATEST_STABLE#v}"
 
@@ -190,7 +190,7 @@ jobs:
               VERSION="$(bump_patch "$STABLE_VERSION")"
             fi
           else
-            LATEST=$(git tag --sort=-creatordate | grep '^v.*-alpha\.' | head -1)
+            LATEST="$(git tag --sort=-creatordate | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+-alpha\.[0-9]\+$' | head -1 || true)"
             if [ -z "$LATEST" ]; then VERSION="2.0.0-alpha.1"
             else
               PREFIX=$(echo "$LATEST" | sed 's/\.[0-9]*$/\./' | sed 's/^v//')

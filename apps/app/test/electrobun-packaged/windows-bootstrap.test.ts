@@ -41,9 +41,13 @@ describe("hasPackagedRendererBootstrapRequests", () => {
     ).toBe(false);
   });
 
-  it("rejects config-only traffic without a renderer-owned follow-up", () => {
-    expect(hasPackagedRendererBootstrapRequests(["GET /api/config"])).toBe(
-      false,
-    );
+  it("accepts splash-era bootstrap traffic that pauses after config", () => {
+    expect(
+      hasPackagedRendererBootstrapRequests([
+        "GET /api/triggers",
+        "GET /api/triggers/health",
+        "GET /api/config",
+      ]),
+    ).toBe(true);
   });
 });

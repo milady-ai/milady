@@ -3,7 +3,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { testT } from "../../../../test/helpers/i18n";
+import { testT } from "../../../../../test/helpers/i18n";
 
 const {
   invokeDesktopBridgeRequestMock,
@@ -61,6 +61,7 @@ vi.mock("@miladyai/ui", () => {
     CardHeader: passthrough,
     CardTitle: passthrough,
     CardDescription: passthrough,
+    ContentLayout: passthrough,
     Switch: passthrough,
     Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
       React.createElement("textarea", props),
@@ -72,7 +73,7 @@ vi.mock("lucide-react", () => ({
   RefreshCw: () => React.createElement("span", null, "refresh"),
 }));
 
-import { DesktopWorkspaceSection } from "./settings/DesktopWorkspaceSection";
+import { DesktopWorkspaceSection } from "./DesktopWorkspaceSection";
 
 function findButtonByText(
   root: TestRenderer.ReactTestInstance,

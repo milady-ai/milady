@@ -182,7 +182,6 @@ function ViewRouter({
       case "database":
       case "desktop":
       case "logs":
-      case "security":
         return (
           <TabContentView>
             <AdvancedPageView />
@@ -279,8 +278,7 @@ export function App() {
     tab === "runtime" ||
     tab === "database" ||
     tab === "desktop" ||
-    tab === "logs" ||
-    tab === "security";
+    tab === "logs";
   const unreadCount = unreadConversations?.size ?? 0;
   const mobileChatControls = isChatMobileLayout ? (
     <div className="flex items-center gap-2 w-max">
@@ -620,7 +618,7 @@ export function App() {
       className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
     >
       <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+      <div className="flex flex-1 min-h-0 min-w-0">
         <AdvancedPageView />
       </div>
     </div>

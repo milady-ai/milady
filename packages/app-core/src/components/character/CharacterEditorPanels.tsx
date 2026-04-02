@@ -9,10 +9,7 @@ import { Button, Input, Textarea, ThemedSelect } from "@miladyai/ui";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import type { CharacterData } from "../../api/client-types-config";
 import type { MessageExampleGroup } from "@elizaos/core";
-import {
-  EDGE_BACKUP_VOICES,
-  PREMADE_VOICES,
-} from "../../voice/types";
+import { EDGE_BACKUP_VOICES, PREMADE_VOICES } from "../../voice/types";
 
 /* ── Inline SVG icon helpers ─────────────────────────────────────── */
 const svgBase = {
@@ -103,12 +100,17 @@ export interface CharacterIdentityPanelProps {
   voiceTesting: boolean;
   voiceLoading: boolean;
   useElevenLabs: boolean;
-  elevenLabsVoiceGroups: { label: string; items: { id: string; text: string }[] }[];
+  elevenLabsVoiceGroups: {
+    label: string;
+    items: { id: string; text: string }[];
+  }[];
   edgeVoiceGroups: { label: string; items: { id: string; text: string }[] }[];
   voiceTestAudio: HTMLAudioElement | null;
   handleFieldEdit: (field: string, value: unknown) => void;
   handleGenerate: (field: string, mode?: "replace" | "append") => Promise<void>;
-  handleSelectPreset: (preset: (typeof PREMADE_VOICES)[0] | (typeof EDGE_BACKUP_VOICES)[0]) => void;
+  handleSelectPreset: (
+    preset: (typeof PREMADE_VOICES)[0] | (typeof EDGE_BACKUP_VOICES)[0],
+  ) => void;
   handleStopTest: () => void;
   setVoiceTesting: (v: boolean) => void;
   setVoiceTestAudio: (v: HTMLAudioElement | null) => void;
@@ -124,7 +126,11 @@ export interface CharacterStylePanelProps {
   handlePendingStyleEntryChange: (key: string, value: string) => void;
   handleAddStyleEntry: (key: string) => void;
   handleRemoveStyleEntry: (key: string, index: number) => void;
-  handleStyleEntryDraftChange: (key: string, index: number, value: string) => void;
+  handleStyleEntryDraftChange: (
+    key: string,
+    index: number,
+    value: string,
+  ) => void;
   handleCommitStyleEntry: (key: string, index: number) => void;
   t: (key: string, opts?: { defaultValue?: string }) => string;
 }
@@ -201,11 +207,7 @@ export function CharacterIdentityPanel({
             <div className="flex items-center gap-1.5">
               <ThemedSelect
                 value={voiceSelectValue}
-                groups={
-                  useElevenLabs
-                    ? elevenLabsVoiceGroups
-                    : edgeVoiceGroups
-                }
+                groups={useElevenLabs ? elevenLabsVoiceGroups : edgeVoiceGroups}
                 onChange={(id: string) => {
                   const allVoices = useElevenLabs
                     ? PREMADE_VOICES
@@ -232,9 +234,7 @@ export function CharacterIdentityPanel({
                     handleStopTest();
                   } else if (activeVoicePreset?.previewUrl) {
                     setVoiceTesting(true);
-                    const audio = new Audio(
-                      activeVoicePreset.previewUrl,
-                    );
+                    const audio = new Audio(activeVoicePreset.previewUrl);
                     audio.onended = () => {
                       setVoiceTesting(false);
                       setVoiceTestAudio(null);
@@ -251,9 +251,7 @@ export function CharacterIdentityPanel({
                   }
                 }}
                 aria-label={
-                  voiceTesting
-                    ? "Stop voice preview"
-                    : "Preview voice"
+                  voiceTesting ? "Stop voice preview" : "Preview voice"
                 }
                 disabled={!activeVoicePreset || voiceLoading}
               >
@@ -300,9 +298,9 @@ export function CharacterIdentityPanel({
           placeholder={t("charactereditor.AboutMePlaceholder", {
             defaultValue: "Describe who your agent is...",
           })}
-          onChange={(
-            e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-          ) => handleFieldEdit("bio", e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            handleFieldEdit("bio", e.target.value)
+          }
           className={CHARACTER_EDITOR_TEXTAREA_CLASSNAME}
         />
       </section>
@@ -336,9 +334,9 @@ export function CharacterIdentityPanel({
           placeholder={t("charactereditor.SystemPromptPlaceholder", {
             defaultValue: "Write in first person...",
           })}
-          onChange={(
-            e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-          ) => handleFieldEdit("system", e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            handleFieldEdit("system", e.target.value)
+          }
           className={CHARACTER_EDITOR_TEXTAREA_CLASSNAME}
         />
       </section>
@@ -364,9 +362,7 @@ export function CharacterStylePanel({
   const style = d.style;
 
   return (
-    <section
-      className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
-    >
+    <section className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}>
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -394,17 +390,13 @@ export function CharacterStylePanel({
                   items.map((item, index) => (
                     <div
                       key={`${key}:${item}`}
-                      className={
-                        CHARACTER_EDITOR_INLINE_RULE_CLASSNAME
-                      }
+                      className={CHARACTER_EDITOR_INLINE_RULE_CLASSNAME}
                     >
                       <span className="mt-0.5 shrink-0 text-[10px] font-bold text-accent">
                         {index + 1}
                       </span>
                       <Textarea
-                        value={
-                          styleEntryDrafts[key]?.[index] ?? item
-                        }
+                        value={styleEntryDrafts[key]?.[index] ?? item}
                         rows={1}
                         onChange={(
                           e: ChangeEvent<
@@ -417,26 +409,17 @@ export function CharacterStylePanel({
                             e.target.value,
                           )
                         }
-                        onBlur={() =>
-                          handleCommitStyleEntry(key, index)
-                        }
-                        aria-label={`${t(
-                          `charactereditor.StyleRules.${key}`,
-                          {
-                            defaultValue: "Style rule",
-                          },
-                        )} ${index + 1}`}
+                        onBlur={() => handleCommitStyleEntry(key, index)}
+                        aria-label={`${t(`charactereditor.StyleRules.${key}`, {
+                          defaultValue: "Style rule",
+                        })} ${index + 1}`}
                         className="min-w-0 flex-1 resize-none border-none bg-transparent p-0 font-mono text-xs leading-normal text-txt [field-sizing:content] min-h-[1.5em] focus-visible:outline-none focus-visible:shadow-none"
                       />
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={
-                          CHARACTER_EDITOR_ICON_GHOST_CLASSNAME
-                        }
-                        onClick={() =>
-                          handleRemoveStyleEntry(key, index)
-                        }
+                        className={CHARACTER_EDITOR_ICON_GHOST_CLASSNAME}
+                        onClick={() => handleRemoveStyleEntry(key, index)}
                         title={t("common.remove")}
                         aria-label={`${t("common.remove")} ${t(
                           `charactereditor.StyleRules.${key}`,
@@ -453,8 +436,7 @@ export function CharacterStylePanel({
                   <div className="rounded-md border border-dashed border-border px-3 py-2 text-[11px] text-muted">
                     {t(STYLE_SECTION_EMPTY_STATES[key].key, {
                       defaultValue:
-                        STYLE_SECTION_EMPTY_STATES[key]
-                          .defaultValue,
+                        STYLE_SECTION_EMPTY_STATES[key].defaultValue,
                     })}
                   </div>
                 )}
@@ -463,27 +445,13 @@ export function CharacterStylePanel({
                 <Input
                   type="text"
                   value={pendingStyleEntries[key]}
-                  placeholder={t(
-                    STYLE_SECTION_PLACEHOLDERS[key].key,
-                    {
-                      defaultValue:
-                        STYLE_SECTION_PLACEHOLDERS[key]
-                          .defaultValue,
-                    },
-                  )}
+                  placeholder={t(STYLE_SECTION_PLACEHOLDERS[key].key, {
+                    defaultValue: STYLE_SECTION_PLACEHOLDERS[key].defaultValue,
+                  })}
                   onChange={(
-                    e: ChangeEvent<
-                      HTMLInputElement | HTMLTextAreaElement
-                    >,
-                  ) =>
-                    handlePendingStyleEntryChange(
-                      key,
-                      e.target.value,
-                    )
-                  }
-                  onKeyDown={(
-                    e: KeyboardEvent<HTMLInputElement>,
-                  ) => {
+                    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+                  ) => handlePendingStyleEntryChange(key, e.target.value)}
+                  onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddStyleEntry(key);
@@ -494,9 +462,7 @@ export function CharacterStylePanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={
-                    CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME
-                  }
+                  className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
                   onClick={() => handleAddStyleEntry(key)}
                   disabled={!pendingStyleEntries[key].trim()}
                 >
@@ -539,9 +505,7 @@ export function CharacterExamplesPanel({
             variant="ghost"
             size="sm"
             className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
-            onClick={() =>
-              void handleGenerate("chatExamples", "replace")
-            }
+            onClick={() => void handleGenerate("chatExamples", "replace")}
             disabled={generating === "chatExamples"}
           >
             {generating === "chatExamples"
@@ -592,9 +556,7 @@ export function CharacterExamplesPanel({
                     <Input
                       value={msg.content?.text ?? ""}
                       onChange={(e) => {
-                        const updated = [
-                          ...normalizedMessageExamples,
-                        ];
+                        const updated = [...normalizedMessageExamples];
                         const convoClone = {
                           examples: [...updated[ci].examples],
                         };
@@ -605,9 +567,7 @@ export function CharacterExamplesPanel({
                         updated[ci] = convoClone;
                         handleFieldEdit("messageExamples", updated);
                       }}
-                      className={
-                        CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME
-                      }
+                      className={CHARACTER_EDITOR_INLINE_FIELD_CLASSNAME}
                     />
                   </div>
                 ))}
@@ -638,9 +598,7 @@ export function CharacterExamplesPanel({
             variant="ghost"
             size="sm"
             className={CHARACTER_EDITOR_SMALL_GOLD_ACTION_CLASSNAME}
-            onClick={() =>
-              void handleGenerate("postExamples", "replace")
-            }
+            onClick={() => void handleGenerate("postExamples", "replace")}
             disabled={generating === "postExamples"}
           >
             {generating === "postExamples"

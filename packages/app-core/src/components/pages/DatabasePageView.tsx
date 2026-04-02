@@ -47,22 +47,12 @@ export function DatabasePageView({
   // Each sub-view owns its own PageLayout + Sidebar.
   // contentHeader and leftNav are passed through so the layout is uniform.
   if (databaseSubTab === "media") {
-    return (
-      <MediaGalleryView
-        leftNav={leftNav}
-        contentHeader={contentHeader}
-      />
-    );
+    return <MediaGalleryView leftNav={leftNav} contentHeader={contentHeader} />;
   }
   if (databaseSubTab === "vectors") {
     return (
-      <VectorBrowserView
-        leftNav={leftNav}
-        contentHeader={contentHeader}
-      />
+      <VectorBrowserView leftNav={leftNav} contentHeader={contentHeader} />
     );
   }
-  return (
-    <DatabaseView leftNav={leftNav} contentHeader={contentHeader} />
-  );
+  return <DatabaseView leftNav={leftNav} contentHeader={contentHeader} />;
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
-import { ShellOverlays } from "./shell/ShellOverlays";
+import { ShellOverlays } from "./ShellOverlays";
 
 vi.mock("@miladyai/ui", async (importOriginal) => {
   const actual = await importOriginal();
@@ -20,7 +20,7 @@ vi.mock("./CommandPalette", () => ({
   CommandPalette: () => null,
 }));
 
-vi.mock("./GlobalEmoteOverlay", () => ({
+vi.mock("../companion/GlobalEmoteOverlay", () => ({
   GlobalEmoteOverlay: () => null,
 }));
 

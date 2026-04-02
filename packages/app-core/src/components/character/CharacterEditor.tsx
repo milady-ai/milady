@@ -1183,14 +1183,18 @@ export function CharacterEditor({
                 className={`custom-scrollbar flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]${activePage === "identity" ? " hidden" : ""}`}
               >
                 {/* Style Rules */}
-                <div style={{ display: rightTab === "style" ? undefined : "none" }}>
+                <div
+                  style={{ display: rightTab === "style" ? undefined : "none" }}
+                >
                   <CharacterStylePanel
                     d={d}
                     generating={generating}
                     pendingStyleEntries={pendingStyleEntries}
                     styleEntryDrafts={styleEntryDrafts}
                     handleGenerate={handleGenerate}
-                    handlePendingStyleEntryChange={handlePendingStyleEntryChange}
+                    handlePendingStyleEntryChange={
+                      handlePendingStyleEntryChange
+                    }
                     handleAddStyleEntry={handleAddStyleEntry}
                     handleRemoveStyleEntry={handleRemoveStyleEntry}
                     handleStyleEntryDraftChange={handleStyleEntryDraftChange}
@@ -1200,7 +1204,11 @@ export function CharacterEditor({
                 </div>
 
                 {/* Chat + Post Examples */}
-                <div style={{ display: rightTab === "examples" ? undefined : "none" }}>
+                <div
+                  style={{
+                    display: rightTab === "examples" ? undefined : "none",
+                  }}
+                >
                   <CharacterExamplesPanel
                     d={d}
                     normalizedMessageExamples={normalizedMessageExamples}

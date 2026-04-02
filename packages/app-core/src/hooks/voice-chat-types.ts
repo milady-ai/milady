@@ -43,9 +43,7 @@ export interface WindowWithSpeechRecognition extends Window {
 }
 
 /** Access browser SpeechRecognition APIs which may live under a vendor prefix. */
-export function getSpeechRecognitionCtor():
-  | SpeechRecognitionCtor
-  | undefined {
+export function getSpeechRecognitionCtor(): SpeechRecognitionCtor | undefined {
   const w = window as WindowWithSpeechRecognition;
   return w.SpeechRecognition ?? w.webkitSpeechRecognition;
 }

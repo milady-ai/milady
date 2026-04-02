@@ -1,6 +1,5 @@
 import { Button, Z_SYSTEM_BANNER } from "@miladyai/ui";
 import { useCallback, useState } from "react";
-import { isElectrobunRuntime } from "../../bridge";
 import { useApp } from "../../state";
 
 export function RestartBanner() {
@@ -38,18 +37,19 @@ export function RestartBanner() {
 
   return (
     <div
-      className={`fixed left-0 right-0 z-[${Z_SYSTEM_BANNER}] flex items-center justify-between gap-3 px-4 py-2 text-[13px] font-medium shadow-lg`}
+      className={`fixed bottom-4 right-4 z-[${Z_SYSTEM_BANNER}] flex flex-col gap-2 rounded-lg px-4 py-3 text-[13px] font-medium shadow-lg`}
       style={{
-        top: isElectrobunRuntime() ? 40 : 0,
-        background: "color-mix(in srgb, var(--accent) 15%, var(--bg) 85%)",
-        borderBottom:
-          "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
-        display: "flex",
+        background: "color-mix(in srgb, var(--bg) 95%, var(--accent) 5%)",
+        border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
         color: "var(--text)",
+        maxWidth: "22rem",
+        backdropFilter: "blur(12px)",
       }}
+      role="status"
+      aria-live="polite"
     >
-      <span className="truncate">{text}</span>
-      <div className="flex items-center gap-2 shrink-0">
+      <span className="leading-snug">{text}</span>
+      <div className="flex items-center justify-end gap-2">
         <Button
           variant="ghost"
           size="sm"

@@ -3,7 +3,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { testT } from "../../../../test/helpers/i18n";
+import { testT } from "../../../../../test/helpers/i18n";
 
 const {
   invokeDesktopBridgeRequestMock,
@@ -41,7 +41,10 @@ vi.mock("@miladyai/ui", () => ({
     React.createElement("input", props),
 }));
 
-import { findButtonByText, textOf } from "../../../../test/helpers/react-test";
+import {
+  findButtonByText,
+  textOf,
+} from "../../../../../test/helpers/react-test";
 import { ReleaseCenterView } from "./ReleaseCenterView";
 
 describe("ReleaseCenterView auto-update guard", () => {

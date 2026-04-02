@@ -124,6 +124,7 @@ import {
 } from "../utils/sql-compat";
 import { handleCloudRoute } from "./cloud-routes";
 import { handleCloudStatusRoutes } from "./cloud-status-routes";
+import { handleVincentRoute } from "./vincent-routes";
 import {
   isAllowedDevConsoleLogPath,
   readDevConsoleLogTail,
@@ -808,6 +809,16 @@ async function handleMiladyCompatRoute(
     return handled;
   }
 
+  // ── Vincent OAuth routes ────────────────────────────────────────
+  if (url.pathname.startsWith("/api/vincent/")) {
+    if (!ensureCompatApiAuthorized(req, res)) return true;
+    const vincentConfig = loadElizaConfig();
+    const handled = await handleVincentRoute(req, res, url.pathname, method, {
+      config: vincentConfig,
+    });
+    if (handled) return true;
+  }
+
   if (method === "POST" && url.pathname === "/api/agent/reset") {
     if (!ensureCompatSensitiveRouteAuthorized(req, res)) {
       logger.warn(
@@ -874,13 +885,11 @@ async function handleMiladyCompatRoute(
     const { buildPluginConfigUiSpec } = await import(
       "../config/plugin-ui-spec"
     );
-    const { buildPluginListResponse } = await import(
-      "./plugins-compat-routes"
-    );
+    const { buildPluginListResponse } = await import("./plugins-compat-routes");
     const pluginList = buildPluginListResponse(state.current);
-    const plugin = (
-      pluginList.plugins as Array<Record<string, unknown>>
-    ).find((p) => p.id === pluginId);
+    const plugin = (pluginList.plugins as Array<Record<string, unknown>>).find(
+      (p) => p.id === pluginId,
+    );
     if (!plugin) {
       sendJsonResponse(res, 404, { error: `Plugin "${pluginId}" not found` });
       return true;
@@ -902,7 +911,9 @@ async function handleMiladyCompatRoute(
     const config = loadElizaConfig();
     const character = buildCharacterFromConfig(config);
     const agentId =
-      state.current?.agentId ?? character.id ?? "00000000-0000-0000-0000-000000000000";
+      state.current?.agentId ??
+      character.id ??
+      "00000000-0000-0000-0000-000000000000";
     sendJsonResponse(res, 200, [
       {
         id: agentId,

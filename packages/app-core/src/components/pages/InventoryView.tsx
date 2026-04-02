@@ -28,19 +28,14 @@ import {
   AlertTriangle,
   ChevronDown,
   Copy,
+  Link,
+  RefreshCw,
   Settings,
   Shield,
+  Unlink,
   Wallet,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TradePanel } from "../inventory/BscTradePanel";
-import {
-  CHAIN_CONFIGS,
-  type ChainKey,
-  chainKeyToWalletRpcChain,
-  PRIMARY_CHAIN_KEYS,
-  resolveChainKey,
-} from "../inventory/chainConfig";
 import {
   BSC_GAS_READY_THRESHOLD,
   loadTrackedBscTokens,
@@ -49,7 +44,15 @@ import {
   saveTrackedTokens,
   type TrackedToken,
 } from "../inventory";
+import { TradePanel } from "../inventory/BscTradePanel";
 import { ChainIcon } from "../inventory/ChainIcon";
+import {
+  CHAIN_CONFIGS,
+  type ChainKey,
+  chainKeyToWalletRpcChain,
+  PRIMARY_CHAIN_KEYS,
+  resolveChainKey,
+} from "../inventory/chainConfig";
 import {
   type PrimaryInventoryChainKey,
   toggleInventoryChainFilter,
@@ -57,11 +60,10 @@ import {
 import { NftGrid } from "../inventory/NftGrid";
 import { TokensTable } from "../inventory/TokensTable";
 import { useInventoryData } from "../inventory/useInventoryData";
-import { ConfigPageView } from "./ConfigPageView";
 import { PolicyControlsView } from "../settings/PolicyControlsView";
 import { ApprovalQueue } from "../steward/ApprovalQueue";
-import { StewardLogo } from "../steward/StewardLogo";
 import { TransactionHistory } from "../steward/TransactionHistory";
+import { ConfigPageView } from "./ConfigPageView";
 
 /* ── Component ─────────────────────────────────────────────────────── */
 
@@ -285,6 +287,11 @@ export function InventoryView() {
     approveStewardTx,
     rejectStewardTx,
     copyToClipboard,
+    vincentConnected,
+    vincentLoginBusy,
+    vincentLoginError,
+    handleVincentLogin,
+    handleVincentDisconnect,
     t,
   } = useApp();
 
@@ -645,15 +652,6 @@ export function InventoryView() {
       }
       footer={
         <div className="flex w-full flex-col gap-2">
-          {stewardStatus?.connected && (
-            <div
-              data-testid="steward-status-badge"
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold bg-accent/10 text-accent-fg"
-            >
-              <Shield className="h-3.5 w-3.5 shrink-0" />
-              {t("settings.stewardManaged", { defaultValue: "Managed Wallet" })}
-            </div>
-          )}
           {addresses.map((item) => (
             <Button
               key={`${item.label}-${item.address}`}
@@ -699,6 +697,55 @@ export function InventoryView() {
               defaultValue: "Wallet Policies",
             })}
           </Button>
+
+          {/* Vincent OAuth connect / disconnect */}
+          <div className="mt-1 border-t border-border/30 pt-2">
+            {vincentConnected ? (
+              <div className="flex items-center justify-between rounded-xl border border-accent/25 bg-accent/8 px-4 py-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-500" />
+                  <span className="text-xs font-semibold text-txt">
+                    {t("vincent.connected", {
+                      defaultValue: "Vincent Connected",
+                    })}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] text-muted hover:text-danger"
+                  onClick={() => void handleVincentDisconnect()}
+                  data-testid="vincent-disconnect"
+                >
+                  <Unlink className="mr-1 h-3 w-3" />
+                  {t("vincent.disconnect", { defaultValue: "Disconnect" })}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                data-testid="vincent-connect"
+                className="h-11 w-full justify-start rounded-xl px-4 text-xs font-semibold shadow-sm"
+                onClick={() => void handleVincentLogin()}
+                disabled={vincentLoginBusy}
+              >
+                {vincentLoginBusy ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Link className="h-4 w-4" />
+                )}
+                {vincentLoginBusy
+                  ? t("vincent.connecting", { defaultValue: "Connecting..." })
+                  : t("vincent.connect", { defaultValue: "Connect Vincent" })}
+              </Button>
+            )}
+            {vincentLoginError ? (
+              <p className="mt-1 px-1 text-[10px] text-danger">
+                {vincentLoginError}
+              </p>
+            ) : null}
+          </div>
         </div>
       }
     >

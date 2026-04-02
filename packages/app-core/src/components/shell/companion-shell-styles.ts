@@ -49,8 +49,7 @@ export function tabFlags(tab: Tab) {
     tab === "trajectories" ||
     tab === "runtime" ||
     tab === "database" ||
-    tab === "logs" ||
-    tab === "security";
+    tab === "logs";
   const isPluginsLike = isPlugins || isConnectors || isSkills;
   const isCentered =
     isSkills ||

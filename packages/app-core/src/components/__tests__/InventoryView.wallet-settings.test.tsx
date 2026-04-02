@@ -19,6 +19,17 @@ vi.mock("@miladyai/app-core/state", () => ({
 }));
 
 vi.mock("@miladyai/ui", () => ({
+  ContentLayout: ({
+    contentHeader,
+    children,
+    ...props
+  }: Record<string, unknown>) =>
+    React.createElement(
+      "div",
+      props,
+      contentHeader as React.ReactNode,
+      children as React.ReactNode,
+    ),
   PageLayout: ({
     sidebar,
     children,
@@ -274,7 +285,7 @@ vi.mock("../inventory/useInventoryData", () => ({
   },
 }));
 
-import { InventoryView } from "../InventoryView";
+import { InventoryView } from "../pages/InventoryView";
 
 function t(
   key: string,

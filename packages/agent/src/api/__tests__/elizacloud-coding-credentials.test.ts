@@ -10,8 +10,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-const serverSource = readFileSync(
-  path.resolve(import.meta.dirname, "..", "server.ts"),
+const providerSwitchRouteSource = readFileSync(
+  path.resolve(import.meta.dirname, "..", "provider-switch-routes.ts"),
   "utf-8",
 );
 
@@ -20,40 +20,38 @@ const providerSwitchSource = readFileSync(
   "utf-8",
 );
 
+function sliceSection(
+  source: string,
+  startNeedle: string,
+  endNeedle: string,
+): string {
+  const start = source.indexOf(startNeedle);
+  if (start === -1) return "";
+  const end = source.indexOf(endNeedle, start + startNeedle.length);
+  return end === -1 ? source.slice(start) : source.slice(start, end);
+}
+
 describe("ElizaCloud coding agent credentials", () => {
+  const cloudSwitchSection = sliceSection(
+    providerSwitchRouteSource,
+    'if (normalizedProvider === "elizacloud")',
+    "} else if",
+  );
+
   it("sets ANTHROPIC_BASE_URL when switching to elizacloud", () => {
-    const cloudSection = serverSource.slice(
-      serverSource.indexOf('normalizedProvider === "elizacloud"'),
-      serverSource.indexOf(
-        "else if",
-        serverSource.indexOf('normalizedProvider === "elizacloud"') + 50,
-      ),
-    );
-    expect(cloudSection).toContain("ANTHROPIC_BASE_URL");
-    expect(cloudSection).toContain("ANTHROPIC_API_KEY");
-    expect(cloudSection).toContain("/api/v1");
+    expect(cloudSwitchSection).toContain("ANTHROPIC_BASE_URL");
+    expect(cloudSwitchSection).toContain("ANTHROPIC_API_KEY");
+    expect(cloudSwitchSection).toContain("/api/v1");
   });
 
   it("sets OPENAI_BASE_URL when switching to elizacloud", () => {
-    const cloudSection = serverSource.slice(
-      serverSource.indexOf('normalizedProvider === "elizacloud"'),
-      serverSource.indexOf(
-        "else if",
-        serverSource.indexOf('normalizedProvider === "elizacloud"') + 50,
-      ),
-    );
-    expect(cloudSection).toContain("OPENAI_BASE_URL");
-    expect(cloudSection).toContain("OPENAI_API_KEY");
+    expect(cloudSwitchSection).toContain("OPENAI_BASE_URL");
+    expect(cloudSwitchSection).toContain("OPENAI_API_KEY");
   });
 
   it("uses the cloud API key for both Anthropic and OpenAI proxying", () => {
-    const cloudSection = serverSource.slice(
-      serverSource.indexOf("Configure coding agent CLIs"),
-      serverSource.indexOf("Gemini CLI and Aider"),
-    );
-    // Both should use cloudApiKey, not separate keys
-    expect(cloudSection).toContain("ANTHROPIC_API_KEY = cloudApiKey");
-    expect(cloudSection).toContain("OPENAI_API_KEY = cloudApiKey");
+    expect(cloudSwitchSection).toContain("ANTHROPIC_API_KEY = cloudApiKey");
+    expect(cloudSwitchSection).toContain("OPENAI_API_KEY = cloudApiKey");
   });
 
   it("clears ElizaCloud CLI proxy URLs and paired API keys when applying a local provider", () => {
@@ -75,15 +73,9 @@ describe("ElizaCloud coding agent credentials", () => {
     expect(providerSwitchSource).toContain("clearElizaCloudCliProxyEnv()");
   });
 
-  it("documents that Gemini/Aider are unavailable through ElizaCloud", () => {
-    const cloudSection = serverSource.slice(
-      serverSource.indexOf('normalizedProvider === "elizacloud"'),
-      serverSource.indexOf(
-        "else if",
-        serverSource.indexOf('normalizedProvider === "elizacloud"') + 50,
-      ),
-    );
-    expect(cloudSection).toContain("Gemini CLI and Aider");
-    expect(cloudSection).toContain("no");
+  it("only provisions Anthropic and OpenAI proxy env vars for ElizaCloud", () => {
+    expect(cloudSwitchSection).not.toContain("GEMINI_BASE_URL");
+    expect(cloudSwitchSection).not.toContain("GEMINI_API_KEY");
+    expect(cloudSwitchSection).not.toContain("AIDER_API_KEY");
   });
 });

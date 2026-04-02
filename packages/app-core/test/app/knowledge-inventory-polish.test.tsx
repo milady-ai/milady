@@ -459,13 +459,13 @@ describe("Knowledge and inventory polish", () => {
       await Promise.resolve();
     });
 
-    const stewardBadge = tree.root.findByProps({
-      "data-testid": "steward-status-badge",
-    });
     const sidebar = tree.root.findByType("aside");
 
-    expect(stewardBadge.props.className).toContain("bg-accent/10");
-    expect(stewardBadge.props.className).toContain("text-accent-fg");
+    expect(
+      tree.root.findAllByProps({
+        "data-testid": "steward-status-badge",
+      }),
+    ).toHaveLength(0);
     expect(String(sidebar.props.className)).toContain(
       "border-b border-border/34",
     );

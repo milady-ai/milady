@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   replaceNameTokens,
   shouldApplyPresetDefaults,
-} from "./character/character-editor-helpers";
+} from "./character-editor-helpers";
 
 describe("replaceNameTokens", () => {
   it("replaces {{name}} with the character name", () => {

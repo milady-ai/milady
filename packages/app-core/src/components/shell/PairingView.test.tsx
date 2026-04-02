@@ -17,7 +17,7 @@ vi.mock("../../config/branding", () => ({
   appNameInterpolationVars: () => ({ appName: "Milady" }),
 }));
 
-import { PairingView } from "./shell/PairingView";
+import { PairingView } from "./PairingView";
 
 function createAppState(overrides: Record<string, unknown> = {}) {
   return {

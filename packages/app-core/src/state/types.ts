@@ -793,6 +793,13 @@ export interface AppActions {
   handleCloudDisconnect: () => Promise<void>;
   handleCloudOnboardingFinish: () => Promise<void>;
 
+  // Vincent
+  vincentConnected: boolean;
+  vincentLoginBusy: boolean;
+  vincentLoginError: string | null;
+  handleVincentLogin: () => Promise<void>;
+  handleVincentDisconnect: () => Promise<void>;
+
   // Updates
   loadUpdateStatus: (force?: boolean) => Promise<void>;
   handleChannelChange: (channel: ReleaseChannel) => Promise<void>;

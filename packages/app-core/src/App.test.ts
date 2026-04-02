@@ -185,7 +185,7 @@ describe("App", () => {
     ).toContain("backend died");
   });
 
-  it("mounts advanced-family tabs in the full-height shell instead of the padded default shell", async () => {
+  it("mounts advanced-family tabs in the dedicated advanced shell instead of the padded default main shell", async () => {
     const makeState = (tab: string) => ({
       onboardingLoading: false,
       onboardingHandoffError: null,
@@ -230,13 +230,12 @@ describe("App", () => {
       renderer.root.findByProps({
         "data-testid": "AdvancedPageView",
       });
-      const fullHeightShells = renderer.root.findAll(
+      const advancedShells = renderer.root.findAll(
         (node) =>
           node.type === "div" &&
           typeof node.props.className === "string" &&
-          node.props.className.includes(
-            "flex flex-1 min-h-0 min-w-0 overflow-hidden",
-          ),
+          node.props.className.includes("flex flex-1 min-h-0 min-w-0") &&
+          node.findAllByProps({ "data-testid": "AdvancedPageView" }).length > 0,
       );
       const paddedMain = renderer.root.findAll(
         (node) =>
@@ -245,7 +244,7 @@ describe("App", () => {
           node.props.className.includes("px-3 xl:px-5 py-4 xl:py-6"),
       );
 
-      expect(fullHeightShells.length).toBeGreaterThan(0);
+      expect(advancedShells.length).toBeGreaterThan(0);
       expect(paddedMain.length).toBe(0);
     }
   });

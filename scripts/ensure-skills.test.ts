@@ -54,36 +54,7 @@ describe("ensureShippedSkills", () => {
       assetsDir: SHIPPED_SKILLS_DIR,
     });
 
-    expect(created).toEqual([
-      "bags",
-      "binance-algo",
-      "binance-alpha",
-      "binance-assets",
-      "binance-convert",
-      "binance-crypto-market-rank",
-      "binance-derivatives-trading-coin-futures",
-      "binance-derivatives-trading-options",
-      "binance-derivatives-trading-portfolio-margin",
-      "binance-derivatives-trading-portfolio-margin-pro",
-      "binance-derivatives-trading-usds-futures",
-      "binance-fiat",
-      "binance-margin-trading",
-      "binance-meme-rush",
-      "binance-onchain-pay",
-      "binance-p2p",
-      "binance-query-address-info",
-      "binance-query-token-audit",
-      "binance-query-token-info",
-      "binance-simple-earn",
-      "binance-spot",
-      "binance-square-post",
-      "binance-sub-account",
-      "binance-tokenized-securities-info",
-      "binance-trading-signal",
-      "binance-vip-loan",
-      "milady-development",
-      "moltbook",
-    ]);
+    expect(created).toEqual(["milady-development"]);
     for (const skillId of created) {
       expect(existsSync(path.join(skillsDir, skillId, "SKILL.md"))).toBe(true);
     }
@@ -92,8 +63,13 @@ describe("ensureShippedSkills", () => {
   it("does not overwrite an existing managed skill", () => {
     const stateDir = makeTempDir("milady-skill-existing-");
     const skillsDir = path.join(stateDir, "skills");
-    const existingSkillPath = path.join(skillsDir, "bags", "SKILL.md");
-    const customContent = "---\nname: bags\ndescription: custom\n---\n";
+    const existingSkillPath = path.join(
+      skillsDir,
+      "milady-development",
+      "SKILL.md",
+    );
+    const customContent =
+      "---\nname: milady-development\ndescription: custom\n---\n";
 
     mkdirSync(path.dirname(existingSkillPath), { recursive: true });
     writeFileSync(existingSkillPath, customContent, "utf8");
@@ -103,35 +79,7 @@ describe("ensureShippedSkills", () => {
       assetsDir: SHIPPED_SKILLS_DIR,
     });
 
-    expect(created).toEqual([
-      "binance-algo",
-      "binance-alpha",
-      "binance-assets",
-      "binance-convert",
-      "binance-crypto-market-rank",
-      "binance-derivatives-trading-coin-futures",
-      "binance-derivatives-trading-options",
-      "binance-derivatives-trading-portfolio-margin",
-      "binance-derivatives-trading-portfolio-margin-pro",
-      "binance-derivatives-trading-usds-futures",
-      "binance-fiat",
-      "binance-margin-trading",
-      "binance-meme-rush",
-      "binance-onchain-pay",
-      "binance-p2p",
-      "binance-query-address-info",
-      "binance-query-token-audit",
-      "binance-query-token-info",
-      "binance-simple-earn",
-      "binance-spot",
-      "binance-square-post",
-      "binance-sub-account",
-      "binance-tokenized-securities-info",
-      "binance-trading-signal",
-      "binance-vip-loan",
-      "milady-development",
-      "moltbook",
-    ]);
+    expect(created).toEqual([]);
     expect(readFileSync(existingSkillPath, "utf8")).toBe(customContent);
   });
 });

@@ -4,7 +4,7 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("./pages/PluginsView", () => ({
+vi.mock("./PluginsView", () => ({
   PluginsView: (props: Record<string, unknown>) =>
     React.createElement("div", {
       "data-in-modal": String(props.inModal),
@@ -12,7 +12,7 @@ vi.mock("./pages/PluginsView", () => ({
     }),
 }));
 
-import { PluginsPageView } from "./pages/PluginsPageView";
+import { PluginsPageView } from "./PluginsPageView";
 
 describe("PluginsPageView", () => {
   it("renders the advanced plugins surface as a page by default", async () => {

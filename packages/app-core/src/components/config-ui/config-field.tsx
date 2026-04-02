@@ -26,7 +26,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useApp } from "../../state";
 import type { DynamicValue } from "../../types";
-import type { FieldRenderer, FieldRenderProps } from "../../config/config-catalog";
+import type {
+  FieldRenderer,
+  FieldRenderProps,
+} from "../../config/config-catalog";
 import { resolveDynamic } from "../../config/config-catalog";
 import {
   getConfigInputClassName,

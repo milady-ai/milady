@@ -94,10 +94,7 @@ function SkillsFullView({ contentHeader }: { contentHeader?: ReactNode } = {}) {
     return skills.filter((skill) => {
       if (filterTab === "on" && !skill.enabled) return false;
       if (filterTab === "off" && skill.enabled) return false;
-      if (
-        filterTab === "binance" &&
-        !BINANCE_SKILL_IDS.has(skill.id)
-      )
+      if (filterTab === "binance" && !BINANCE_SKILL_IDS.has(skill.id))
         return false;
       if (
         query &&

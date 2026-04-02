@@ -10,57 +10,62 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-const serverSource = readFileSync(
-	path.resolve(import.meta.dirname, "..", "server.ts"),
-	"utf-8",
+const chatRoutesSource = readFileSync(
+  path.resolve(import.meta.dirname, "..", "chat-routes.ts"),
+  "utf-8",
 );
 
-const persistSource = readFileSync(
-	path.resolve(
-		import.meta.dirname,
-		"..",
-		"..",
-		"runtime",
-		"trajectory-persistence.ts",
-	),
-	"utf-8",
+const corePluginsSource = readFileSync(
+  path.resolve(import.meta.dirname, "..", "..", "runtime", "core-plugins.ts"),
+  "utf-8",
+);
+
+const storageSource = readFileSync(
+  path.resolve(
+    import.meta.dirname,
+    "..",
+    "..",
+    "runtime",
+    "trajectory-storage.ts",
+  ),
+  "utf-8",
 );
 
 describe("chat trajectory wiring", () => {
-	it("emits MESSAGE_RECEIVED before handleMessage", () => {
-		const emitIdx = serverSource.indexOf('emitEvent("MESSAGE_RECEIVED"');
-		const handleIdx = serverSource.indexOf(
-			"runtime.messageService?.handleMessage",
-		);
-		expect(emitIdx).toBeGreaterThan(-1);
-		expect(handleIdx).toBeGreaterThan(-1);
-		expect(emitIdx).toBeLessThan(handleIdx);
-	});
+  it("emits MESSAGE_RECEIVED before handleMessage", () => {
+    const emitIdx = chatRoutesSource.indexOf('emitEvent("MESSAGE_RECEIVED"');
+    const handleIdx = chatRoutesSource.indexOf(
+      "runtime.messageService?.handleMessage",
+    );
+    expect(emitIdx).toBeGreaterThan(-1);
+    expect(handleIdx).toBeGreaterThan(-1);
+    expect(emitIdx).toBeLessThan(handleIdx);
+  });
 
-	it("does NOT manually start a trajectory (delegates to plugin)", () => {
-		// The server should NOT call startTrajectory directly — that creates
-		// a duplicate trajectory that conflicts with the plugin's step ID.
-		expect(serverSource).not.toContain("trajLogger.startTrajectory");
-	});
+  it("does NOT manually start a trajectory (delegates to plugin)", () => {
+    // The chat route should not create its own trajectory; the logger plugin
+    // handles that off the MESSAGE_RECEIVED event.
+    expect(chatRoutesSource).not.toContain("startTrajectory(");
+  });
 
-	it("documents that trajectory creation is handled by the plugin", () => {
-		expect(serverSource).toContain(
-			"Trajectory creation is handled by @elizaos/plugin-trajectory-logger",
-		);
-	});
+  it("keeps the trajectory logger in the core plugin list", () => {
+    expect(corePluginsSource).toContain("@elizaos/plugin-trajectory-logger");
+  });
 });
 
 describe("startStep returns trajectory ID (regression)", () => {
-	it("DatabaseTrajectoryLogger.startStep returns trajectoryId", () => {
-		const classMatch = persistSource.match(
-			/startStep\(trajectoryId:\s*string\):\s*string\s*\{[^}]*return\s+trajectoryId/,
-		);
-		expect(classMatch).toBeTruthy();
-	});
+  it("DatabaseTrajectoryLogger.startStep returns trajectoryId", () => {
+    const classMatch = storageSource.match(
+      /startStep\(trajectoryId:\s*string\):\s*string\s*\{\s*return\s+trajectoryId;/m,
+    );
+    expect(classMatch).toBeTruthy();
+  });
 
-	it("no startStep generates step-xxx IDs", () => {
-		expect(persistSource).not.toMatch(
-			/startStep[^}]*step-\$\{Date\.now\(\)\}/,
-		);
-	});
+  it("no startStep generates step-xxx IDs", () => {
+    const startStepBlock =
+      storageSource.match(
+        /startStep\(trajectoryId:\s*string\):\s*string\s*\{[\s\S]*?\n\s*\}/m,
+      )?.[0] ?? "";
+    expect(startStepBlock).not.toContain("step-${Date.now()}");
+  });
 });

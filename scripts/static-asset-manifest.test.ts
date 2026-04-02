@@ -49,7 +49,7 @@ describe("static-asset-manifest", () => {
 
     expect(buildStaticAssetManifest(rootDir)).toEqual({
       app: ["apps/app/public/vrms/a.vrm.gz"],
-      homepage: ["apps/homepage/public/logo.png"],
+      homepage: ["apps/web/public/logo.png"],
     });
   });
 

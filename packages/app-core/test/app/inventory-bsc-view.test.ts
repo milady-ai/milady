@@ -26,6 +26,7 @@ vi.mock("@miladyai/ui", () => {
   return {
     cn: (...classes: Array<string | false | null | undefined>) =>
       classes.filter(Boolean).join(" "),
+    ContentLayout: passthrough,
     PageLayout: ({
       sidebar,
       children,
@@ -241,9 +242,11 @@ vi.mock("@miladyai/ui", () => {
     Slider: (props: React.HTMLAttributes<HTMLElement>) =>
       React.createElement("input", { type: "range", ...props }),
     Switch: (props: React.HTMLAttributes<HTMLElement>) =>
-      React.createElement("button", { type: "button", role: "switch", ...props }),
-    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-      React.createElement("input", props),
+      React.createElement("button", {
+        type: "button",
+        role: "switch",
+        ...props,
+      }),
     Select: passthrough,
     SelectContent: passthrough,
     SelectItem: passthrough,

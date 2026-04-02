@@ -113,13 +113,9 @@ export function PluginCard({
           : undefined
       }
       onDragOver={
-        allowCustomOrder && onDragOver
-          ? (e) => onDragOver(e, p.id)
-          : undefined
+        allowCustomOrder && onDragOver ? (e) => onDragOver(e, p.id) : undefined
       }
-      onDrop={
-        allowCustomOrder && onDrop ? (e) => onDrop(e, p.id) : undefined
-      }
+      onDrop={allowCustomOrder && onDrop ? (e) => onDrop(e, p.id) : undefined}
       onDragEnd={allowCustomOrder ? onDragEnd : undefined}
       className={`border border-border bg-card transition-colors duration-150 flex flex-col ${enabledBorder} ${
         isOpen ? "ring-1 ring-accent" : "hover:border-accent/40"
@@ -339,34 +335,28 @@ export function PluginCard({
       </div>
       {p.enabled && p.validationErrors && p.validationErrors.length > 0 && (
         <div className="px-3 py-1.5 border-t border-destructive bg-[rgba(153,27,27,0.04)] text-xs">
-          {p.validationErrors.map(
-            (err: { field: string; message: string }) => (
-              <div
-                key={`${err.field}:${err.message}`}
-                className="text-destructive mb-0.5 text-[10px]"
-              >
-                {err.field}: {err.message}
-              </div>
-            ),
-          )}
+          {p.validationErrors.map((err: { field: string; message: string }) => (
+            <div
+              key={`${err.field}:${err.message}`}
+              className="text-destructive mb-0.5 text-[10px]"
+            >
+              {err.field}: {err.message}
+            </div>
+          ))}
         </div>
       )}
-      {p.enabled &&
-        p.validationWarnings &&
-        p.validationWarnings.length > 0 && (
-          <div className="px-3 py-1">
-            {p.validationWarnings.map(
-              (w: { field: string; message: string }) => (
-                <div
-                  key={`${w.field}:${w.message}`}
-                  className="text-warn text-[10px]"
-                >
-                  {w.message}
-                </div>
-              ),
-            )}
-          </div>
-        )}
+      {p.enabled && p.validationWarnings && p.validationWarnings.length > 0 && (
+        <div className="px-3 py-1">
+          {p.validationWarnings.map((w: { field: string; message: string }) => (
+            <div
+              key={`${w.field}:${w.message}`}
+              className="text-warn text-[10px]"
+            >
+              {w.message}
+            </div>
+          ))}
+        </div>
+      )}
     </li>
   );
 }

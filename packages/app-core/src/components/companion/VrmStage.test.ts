@@ -17,11 +17,11 @@ vi.mock("@miladyai/app-core/utils", () => ({
   resolveAppAssetUrl: (path: string) => path,
 }));
 
-vi.mock("./character/AvatarLoader", () => ({
+vi.mock("../character/AvatarLoader", () => ({
   AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
 }));
 
-vi.mock("./avatar/VrmViewer", () => ({
+vi.mock("../avatar/VrmViewer", () => ({
   VrmViewer: (props: Record<string, unknown>) => {
     testState.viewerProps = props;
     return React.createElement("div", {

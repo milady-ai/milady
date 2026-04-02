@@ -183,7 +183,10 @@ function collectStrings(obj: unknown, out: Set<string>) {
 export function MediaGalleryView({
   leftNav,
   contentHeader,
-}: { leftNav?: ReactNode; contentHeader?: ReactNode }) {
+}: {
+  leftNav?: ReactNode;
+  contentHeader?: ReactNode;
+}) {
   const { t } = useApp();
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -405,63 +408,65 @@ export function MediaGalleryView({
   );
 
   return (
-    <PageLayout sidebar={mediaSidebar} contentHeader={contentHeader}>
-      {error ? (
-        <div className="m-5 rounded-2xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger">
-          {error}
-        </div>
-      ) : loading ? (
-        <div className="flex flex-1 items-center justify-center px-6 py-12 text-sm italic text-muted">
-          {t("mediagalleryview.ScanningForMedia")}
-        </div>
-      ) : !selectedItem ? (
-        <div className="flex flex-1 items-center justify-center p-6">
-          <div className="rounded-3xl border border-border/35 bg-bg/35 px-8 py-10 text-center shadow-inner">
-            <div className="text-base font-semibold text-txt">
-              {t("mediagalleryview.NoMediaFound")}
-            </div>
-            <div className="mt-2 max-w-sm text-sm text-muted">
-              {media.length === 0
+    <PageLayout
+      sidebar={mediaSidebar}
+      contentHeader={contentHeader}
+      contentInnerClassName="w-full min-h-0"
+    >
+      <div className="flex min-h-0 flex-1 flex-col w-full">
+        {error ? (
+          <div className="mb-4 rounded-2xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger">
+            {error}
+          </div>
+        ) : loading ? (
+          <div className="flex flex-1 items-center justify-center text-sm italic text-muted">
+            {t("mediagalleryview.ScanningForMedia")}
+          </div>
+        ) : !selectedItem ? (
+          <PagePanel.Empty
+            variant="surface"
+            className="min-h-[18rem] rounded-[1.6rem] px-5 py-10"
+            title={t("mediagalleryview.NoMediaFound")}
+            description={
+              media.length === 0
                 ? t("mediagalleryview.NoMediaDetectedDescription", {
                     defaultValue:
                       "No images, videos, or audio files were detected in the database.",
                   })
                 : t("mediagalleryview.NoFilterMatchesDescription", {
                     defaultValue: "No items match the current filter.",
-                  })}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="border-b border-border/40 px-6 py-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
-              {t("mediagalleryview.Media", { defaultValue: "Media" })}
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-semibold text-txt">
-                {selectedItem.filename ||
-                  t("mediagalleryview.MediaItem", {
-                    defaultValue: "Media item",
-                  })}
-              </h2>
-              <span className="rounded-full border border-accent/30 bg-accent/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-fg">
-                {mediaTypeLabel(t, selectedItem.type)}
-              </span>
-            </div>
-            <div className="mt-2 text-sm text-muted">
-              {t("mediagalleryview.SourceLabel", {
-                defaultValue: "Source:",
-              })}{" "}
-              {selectedItem.source}
-              {selectedItem.createdAt ? ` · ${selectedItem.createdAt}` : ""}
-            </div>
-          </div>
+                  })
+            }
+          />
+        ) : (
+          <div className="w-full">
+            <PagePanel variant="surface" as="section" className="px-6 py-5">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted/60">
+                {t("mediagalleryview.Media", { defaultValue: "Media" })}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl font-semibold text-txt">
+                  {selectedItem.filename ||
+                    t("mediagalleryview.MediaItem", {
+                      defaultValue: "Media item",
+                    })}
+                </h2>
+                <span className="rounded-full border border-accent/30 bg-accent/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-fg">
+                  {mediaTypeLabel(t, selectedItem.type)}
+                </span>
+              </div>
+              <div className="mt-2 text-sm text-muted">
+                {t("mediagalleryview.SourceLabel", {
+                  defaultValue: "Source:",
+                })}{" "}
+                {selectedItem.source}
+                {selectedItem.createdAt ? ` · ${selectedItem.createdAt}` : ""}
+              </div>
+            </PagePanel>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
             <PagePanel
               variant="inset"
-              className="flex min-h-[22rem] flex-1 items-center justify-center p-6"
+              className="mt-4 flex min-h-[22rem] flex-1 items-center justify-center p-6"
             >
               {selectedItem.type === "image" ? (
                 <img
@@ -531,8 +536,8 @@ export function MediaGalleryView({
               </div>
             </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </PageLayout>
   );
 }

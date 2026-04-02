@@ -2163,6 +2163,5 @@
   "startupshell.InitializingAgent": "Initializing agent…",
   "startupshell.Loading": "Loading…",
   "startupshell.GetStarted": "Press Start",
-  "startupshell.SplashTagline": "Your local-first AI assistant",
-  "settings.stewardManaged": "Managed by Steward"
+  "startupshell.SplashTagline": "Your local-first AI assistant"
 }

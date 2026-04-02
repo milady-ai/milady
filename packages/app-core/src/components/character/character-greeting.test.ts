@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveCharacterGreetingAnimation } from "./character/character-greeting";
+import { resolveCharacterGreetingAnimation } from "./character-greeting";
 
 describe("resolveCharacterGreetingAnimation", () => {
   it("prefers the explicit character greeting animation when present", () => {

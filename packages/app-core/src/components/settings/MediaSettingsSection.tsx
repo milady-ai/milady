@@ -8,12 +8,7 @@
  *   - Status badges (Configured / Needs Setup)
  */
 
-import {
-  Button,
-  SaveFooter,
-  SettingsControls,
-  Switch,
-} from "@miladyai/ui";
+import { Button, SaveFooter, SettingsControls, Switch } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
 import {
   type AudioGenProvider,

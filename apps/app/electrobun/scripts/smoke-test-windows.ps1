@@ -14,10 +14,33 @@ try {
 } catch {
   $resolvedBuildDir = $null
 }
+$tempRoot = if ($env:RUNNER_TEMP) {
+  $env:RUNNER_TEMP
+} else {
+  [System.IO.Path]::GetTempPath()
+}
+$testAppDataRoot = if ($env:MILADY_TEST_WINDOWS_APPDATA_PATH) {
+  $env:MILADY_TEST_WINDOWS_APPDATA_PATH
+} else {
+  Join-Path $tempRoot ("milady-windows-appdata-" + [Guid]::NewGuid().ToString("N"))
+}
+$testLocalAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) {
+  $env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH
+} else {
+  Join-Path $tempRoot ("milady-windows-localappdata-" + [Guid]::NewGuid().ToString("N"))
+}
+$env:APPDATA = $testAppDataRoot
+$env:LOCALAPPDATA = $testLocalAppDataRoot
+New-Item -ItemType Directory -Force -Path $env:APPDATA | Out-Null
+New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA | Out-Null
+if ($env:GITHUB_ENV) {
+  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"
+  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"
+}
 # Milady writes its startup log to AppData\Roaming\Milady on Windows, not the
 # Unix-style ~/.config/Milady path used on macOS/Linux.
 $startupLog = Join-Path $env:APPDATA "Milady\\milady-startup.log"
-$selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady\\canary\\self-extraction"
+$selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"
 $tempExtractDir = Join-Path $env:RUNNER_TEMP ("milady-windows-smoke-" + [Guid]::NewGuid().ToString("N"))
 $persistLauncherDir = $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR
 $persistLauncherPathFile = $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE
@@ -107,6 +130,38 @@ function Get-TarCommand() {
     return "C:\\Windows\\System32\\tar.exe"
   }
   return "tar"
+}
+
+function Test-LoopbackPortAvailable([int]$Port) {
+  $listener = $null
+  try {
+    $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)
+    $listener.Start()
+    return $true
+  } catch {
+    return $false
+  } finally {
+    if ($listener) {
+      try {
+        $listener.Stop()
+      } catch {}
+    }
+  }
+}
+
+function Resolve-BackendPort([int]$PreferredPort) {
+  if (Test-LoopbackPortAvailable $PreferredPort) {
+    return $PreferredPort
+  }
+
+  Write-Warning "Preferred backend port $PreferredPort is unavailable. Falling back to an ephemeral loopback port."
+  $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
+  try {
+    $listener.Start()
+    return ([System.Net.IPEndPoint]$listener.LocalEndpoint).Port
+  } finally {
+    $listener.Stop()
+  }
 }
 
 function Assert-PackagedAssetVariants(
@@ -282,6 +337,8 @@ Write-Host "Artifacts dir: $resolvedArtifactsDir"
 if ($resolvedBuildDir) {
   Write-Host "Build dir: $resolvedBuildDir"
 }
+Write-Host "Smoke APPDATA: $($env:APPDATA)"
+Write-Host "Smoke LOCALAPPDATA: $($env:LOCALAPPDATA)"
 
 Stop-MiladyProcesses
 $env:ELECTROBUN_CONSOLE = "1"
@@ -289,6 +346,14 @@ $env:MILADY_FORCE_AUTOSTART_AGENT = "1"
 $env:MILADY_STARTUP_SESSION_ID = $startupSessionId
 $env:MILADY_STARTUP_STATE_FILE = $startupStateFile
 $env:MILADY_STARTUP_EVENTS_FILE = $startupEventsFile
+$BackendPort = Resolve-BackendPort $BackendPort
+$env:MILADY_API_PORT = "$BackendPort"
+$env:ELIZA_API_PORT = "$BackendPort"
+$env:ELIZA_PORT = "$BackendPort"
+Write-Host "Smoke backend port: $BackendPort"
+if ($env:GITHUB_ENV) {
+  Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_BACKEND_PORT=$BackendPort"
+}
 
 # Reset stale startup logs before launch so fatal classification only applies
 # to this run.
@@ -535,7 +600,9 @@ function Dump-FailureDiagnostics([int]$Port) {
     "MILADY_PORT", "MILADY_API_BIND", "MILADY_API_PORT",
     "MILADY_DISABLE_LOCAL_EMBEDDINGS", "ANTHROPIC_API_KEY",
     "NO_PROXY", "HTTP_PROXY", "HTTPS_PROXY",
-    "ELECTROBUN_CONSOLE", "APPDATA", "LOCALAPPDATA"
+    "ELECTROBUN_CONSOLE", "APPDATA", "LOCALAPPDATA",
+    "MILADY_TEST_WINDOWS_APPDATA_PATH", "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
+    "ELIZA_API_PORT", "ELIZA_PORT"
   )) {
     $val = [System.Environment]::GetEnvironmentVariable($varName)
     if ($varName -eq "ANTHROPIC_API_KEY" -and $val) {

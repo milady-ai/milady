@@ -107,6 +107,12 @@ const liveModelTestsEnabled = process.env.ELIZA_LIVE_TEST === "1";
 const hasModelProvider =
   liveModelTestsEnabled && (hasOpenAI || hasAnthropic || hasGroq);
 
+type PluginApiRecord = Record<string, unknown>;
+
+function isStandardManagedPlugin(plugin: PluginApiRecord): boolean {
+  return plugin.managementMode !== "core-optional";
+}
+
 // ---------------------------------------------------------------------------
 const pluginLoadResults: Array<{
   name: string;
@@ -1046,7 +1052,9 @@ describe("Rapid Sequential Operations", () => {
     const srv = await startApiServer({ port: 0 });
     try {
       const { data: listData } = await http$(srv.port, "GET", "/api/plugins");
-      const plugins = listData.plugins as Array<Record<string, unknown>>;
+      const plugins = (listData.plugins as PluginApiRecord[]).filter(
+        isStandardManagedPlugin,
+      );
       if (plugins.length === 0) return;
 
       const target = plugins[0];

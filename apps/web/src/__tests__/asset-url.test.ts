@@ -8,7 +8,7 @@ describe("resolveHomepageAssetUrl", () => {
   it("uses generated raw GitHub release metadata when no env override is set", async () => {
     const { resolveHomepageAssetUrl } = await import("../lib/asset-url");
     expect(resolveHomepageAssetUrl("logo.png")).toContain(
-      "/apps/homepage/public/logo.png",
+      "/apps/web/public/logo.png",
     );
   });
 
