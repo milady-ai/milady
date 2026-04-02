@@ -3,6 +3,38 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-02" description="Week of March 30 – April 2; tasks panel, CDN delivery, prompt optimization, scratch workspaces" tags={["Feature", "Update", "Fix"]}>
+## Tasks and events panel
+
+A new collapsible panel in the chat view shows live coding agent sessions and WebSocket events in real time. Click the tasks icon in the chat header to toggle it open. On mobile, it opens as a bottom drawer. You can also create new coding tasks directly from the chat composer using a quick-create popover with agent type selection.
+
+## CDN asset delivery and faster character switching
+
+Static assets like VRM avatars and 3D scenes are now served from a CDN by default, cutting Docker image sizes and speeding up page loads. Character switching is significantly faster — the app preloads thumbnails instead of full models, and an in-memory cache means swapping back to a recently viewed character is nearly instant.
+
+## Scratch workspace settings
+
+The [coding agents](/guides/coding-swarms) settings section now includes two new controls: a **Scratch Retention** dropdown (auto-delete, ask me, or always keep) so you can decide what happens to temporary workspaces after a task completes, and a **Coding Directory** input to set a custom location for scratch workspaces.
+
+## Deeper prompt optimization
+
+Building on last week's prompt compaction, this release strips coding examples and internal metadata from non-coding conversations, reducing prompt size by an additional ~34% for general chat. Wallet and on-chain messages preserve full action schemas so trade and transfer flows remain unaffected. Coding tasks continue to receive full context for swarm coordination.
+
+## Updates
+
+- **Cloud agent provisioning** — Creating an agent on [Eliza Cloud](/guides/cloud) now properly provisions a container and waits for it to be live before showing the "agent is live" message. Previously, agents were created in the cloud but never received a runtime.
+- **Adaptive cloud polling** — The cloud dashboard now polls every 5 seconds while an agent is provisioning and slows to 30 seconds once it's running, so you see status changes faster without unnecessary background requests.
+- **"Open UI" button gated on agent state** — The Open Web UI button on cloud agent cards is now disabled while an agent is provisioning or stopped, preventing clicks to a non-existent dashboard.
+
+## Bug fixes
+
+- Fixed cloud-provisioned containers returning 401 on all requests when no API token was configured — containers now generate a fallback token automatically
+- Fixed the prompt compaction system stripping content past the end of a section when a boundary header was missing from a malformed prompt
+- Fixed seven dark mode rendering issues across toggles, dialogs, banners, and the homepage
+- Fixed a potential memory leak from uncleared timer handles in chat components on unmount
+
+</Update>
+
 <Update label="2026-03-30" description="Week of March 29–30; cloud dashboard polish, live metrics, billing" tags={["Update"]}>
 ## Cloud dashboard overhaul
 
