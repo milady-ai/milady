@@ -635,9 +635,9 @@ describe("InventoryView unified wallets", () => {
       walletBalances: createEmptyWalletBalances(),
       t: (key: string) =>
         key === "wallet.noTokensFound"
-          ? "No tokens yet. Send your agent some tokens!"
-          : key === "wallet.emptyTokensCta"
-            ? "Use the wallet addresses below to fund this agent."
+          ? "Activate agent wallet"
+          : key === "wallet.generateWallet"
+            ? "Generate Wallet"
             : key === "wallet.copyEvmAddress"
               ? "Copy EVM address"
               : key === "wallet.copySolanaAddress"
@@ -652,7 +652,7 @@ describe("InventoryView unified wallets", () => {
     });
 
     const content = text(tree?.root);
-    expect(content).toContain("No tokens yet. Send your agent some tokens!");
+    expect(content).toContain("Activate agent wallet");
     expect(content).toContain("Copy EVM address");
     expect(content).toContain("Copy Solana address");
     expect(content).not.toContain("tokenstable.nativeGasEthereum");
