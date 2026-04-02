@@ -145,6 +145,70 @@ describe("cloud login route persistence", () => {
     expect(savedConfig.cloud.enabled).toBe(true);
   });
 
+  it("persists a linked cloud key without re-enabling cloud inference for local providers", async () => {
+    const { handleCloudRoute } = await import("../cloud-routes");
+
+    const updateAgent = vi.fn(async () => undefined);
+    const config = makeConfig({
+      enabled: false,
+      apiKey: undefined,
+      inferenceMode: "byok",
+    });
+    (
+      config as {
+        connection?: Record<string, unknown>;
+      }
+    ).connection = {
+      kind: "local-provider",
+      provider: "anthropic",
+    };
+    const state = {
+      config,
+      runtime: {
+        agentId: "agent-1",
+        character: { secrets: { ELIZAOS_CLOUD_ENABLED: "true" } },
+        updateAgent,
+      },
+      cloudManager: null,
+    };
+
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          status: "authenticated",
+          apiKey: "new-cloud-api-key-from-oauth",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    );
+
+    const { res, getStatus } = createMockHttpResponse();
+    const req = createMockIncomingMessage({
+      method: "GET",
+      url: "/api/cloud/login/status?sessionId=test-session-local-provider",
+    });
+
+    const handled = await handleCloudRoute(
+      req,
+      res,
+      "/api/cloud/login/status",
+      "GET",
+      state as never,
+    );
+
+    expect(handled).toBe(true);
+    expect(getStatus()).toBe(200);
+    const savedConfig = saveElizaConfigMock.mock.calls[0][0];
+    expect(savedConfig.cloud.apiKey).toBe("new-cloud-api-key-from-oauth");
+    expect(savedConfig.cloud.enabled).toBe(false);
+    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
+    expect(updateAgent).toHaveBeenCalledWith("agent-1", {
+      secrets: {
+        ELIZAOS_CLOUD_API_KEY: "new-cloud-api-key-from-oauth",
+      },
+    });
+  });
+
   it("handleCloudRoute handles /api/cloud/login/status with pending status", async () => {
     const { handleCloudRoute } = await import("../cloud-routes");
 

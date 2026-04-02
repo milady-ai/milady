@@ -79,6 +79,8 @@ import {
   normalizeOpenAiCompatibleProviderConfig,
   repairBrokenInstallRecord,
   resolvePackageEntry,
+  resolvePreferredProviderId,
+  resolvePreferredProviderPluginName,
   resolvePrimaryModel,
   resolveVisionModeSetting,
   scanDropInPlugins,
@@ -1098,6 +1100,51 @@ describe("applyCloudConfigToEnv", () => {
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
   });
 
+  it("does NOT expose cloud credentials when a local provider is explicitly selected", () => {
+    process.env.ELIZAOS_CLOUD_ENABLED = "true";
+    process.env.ELIZAOS_CLOUD_API_KEY = "old-key";
+
+    const config = {
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+      },
+      cloud: {
+        enabled: true,
+        apiKey: "ck-123",
+        inferenceMode: "cloud",
+      },
+    } as ElizaConfig;
+
+    applyCloudConfigToEnv(config);
+
+    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
+  });
+
+  it("uses the canonical cloud-managed connection even without raw enabled=true", () => {
+    const config = {
+      connection: {
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      },
+      cloud: {
+        apiKey: "ck-123",
+      },
+      models: {
+        small: "openai/gpt-5-mini",
+        large: "anthropic/claude-sonnet-4.5",
+      },
+    } as ElizaConfig;
+
+    applyCloudConfigToEnv(config);
+
+    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-123");
+  });
+
   it("clears ELIZAOS_CLOUD_ENABLED when enabled is explicitly false", () => {
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
     const config = {
@@ -1722,6 +1769,37 @@ describe("resolvePrimaryModel", () => {
       agents: { defaults: { model: { fallbacks: ["gpt-5-mini"] } } },
     } as Partial<ElizaConfig> as ElizaConfig;
     expect(resolvePrimaryModel(config)).toBeUndefined();
+  });
+});
+
+describe("resolvePreferredProviderId", () => {
+  it("prefers the persisted connection provider over model prefixes", () => {
+    const config = {
+      connection: {
+        kind: "local-provider",
+        provider: "openrouter",
+        primaryModel: "openai/gpt-5.2",
+      },
+      agents: {
+        defaults: { model: { primary: "anthropic/claude-sonnet-4.5" } },
+      },
+    } as Partial<ElizaConfig> as ElizaConfig;
+
+    expect(resolvePreferredProviderId(config)).toBe("openrouter");
+    expect(resolvePreferredProviderPluginName(config)).toBe(
+      "@elizaos/plugin-openrouter",
+    );
+  });
+
+  it("derives the provider from explicit model selections when no connection is stored", () => {
+    const config = {
+      agents: { defaults: { model: { primary: "openai/gpt-5.2" } } },
+    } as Partial<ElizaConfig> as ElizaConfig;
+
+    expect(resolvePreferredProviderId(config)).toBe("openai");
+    expect(resolvePreferredProviderPluginName(config)).toBe(
+      "@elizaos/plugin-openai",
+    );
   });
 });
 

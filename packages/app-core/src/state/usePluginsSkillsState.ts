@@ -17,6 +17,7 @@ import {
   type SkillMarketplaceResult,
   type SkillScanReportSummary,
 } from "../api";
+import { normalizeOnboardingProviderId } from "../providers";
 import { confirmDesktopAction } from "../utils";
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -197,25 +198,33 @@ export function usePluginsSkillsState({
         // Check if this is an AI provider plugin
         const plugin = plugins.find((p) => p.id === pluginId);
         const isAiProvider = plugin?.category === "ai-provider";
+        let providerSwitchError: Error | null = null;
 
         // When saving an AI provider's API key, also trigger a provider
         // switch so the runtime restarts with the new plugin loaded.
         if (isAiProvider) {
-          const providerApiKey = Object.values(config)[0];
+          const providerId =
+            normalizeOnboardingProviderId(pluginId) ?? pluginId;
+          const providerApiKey = Object.values(config).find(
+            (value): value is string =>
+              typeof value === "string" && value.trim().length > 0,
+          );
           try {
-            await client.switchProvider(pluginId, providerApiKey);
-          } catch {
-            // switchProvider may fail if provider ID doesn't match —
-            // the key is already saved via updatePlugin above.
+            await client.switchProvider(providerId, providerApiKey);
+          } catch (err) {
+            providerSwitchError =
+              err instanceof Error ? err : new Error(String(err));
           }
         }
 
         await loadPlugins();
         setActionNotice(
           isAiProvider
-            ? "Provider settings saved. Restarting agent..."
+            ? providerSwitchError
+              ? `Provider settings saved, but activating ${plugin?.name ?? pluginId} failed: ${providerSwitchError.message}`
+              : "Provider settings saved. Restarting agent..."
             : "Plugin settings saved.",
-          "success",
+          isAiProvider && providerSwitchError ? "error" : "success",
         );
         setPluginSaveSuccess((prev) => new Set([...prev, pluginId]));
         setTimeout(() => {

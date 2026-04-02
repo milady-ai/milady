@@ -175,7 +175,7 @@ describe("cloud status routes", () => {
     });
   });
 
-  test("reports cloud as disconnected when explicitly disabled with api key", async () => {
+  test("reports cloud as linked but not enabled when explicitly disabled with api key", async () => {
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/status",
@@ -185,10 +185,44 @@ describe("cloud status routes", () => {
 
     expect(result.handled).toBe(true);
     expect(result.payload).toEqual({
-      connected: false,
+      connected: true,
       enabled: false,
-      hasApiKey: false,
-      reason: "runtime_not_started",
+      hasApiKey: true,
+      userId: undefined,
+      organizationId: undefined,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+      reason: "api_key_present_runtime_not_started",
+    });
+  });
+
+  test("prefers an explicit local-provider selection over stale cloud flags", async () => {
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/cloud/status",
+      runtime: null,
+      config: {
+        connection: {
+          kind: "local-provider",
+          provider: "openai",
+        },
+        cloud: {
+          enabled: true,
+          provider: "elizacloud",
+          apiKey: "abc123",
+          inferenceMode: "cloud",
+        },
+      } as ElizaConfig,
+    });
+
+    expect(result.handled).toBe(true);
+    expect(result.payload).toEqual({
+      connected: true,
+      enabled: false,
+      hasApiKey: true,
+      userId: undefined,
+      organizationId: undefined,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+      reason: "api_key_present_runtime_not_started",
     });
   });
 

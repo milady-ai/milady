@@ -80,7 +80,7 @@ describe("cloud-preference-patch", () => {
     ).toBe(false);
   });
 
-  it("patches client reads without mutating the underlying capability state", async () => {
+  it("normalizes config reads without hiding linked cloud status", async () => {
     const rawConfig = {
       connection: {
         kind: "local-provider",
@@ -122,15 +122,10 @@ describe("cloud-preference-patch", () => {
     const patchedConfig = await client.getConfig();
     expect(patchedConfig.cloud).not.toHaveProperty("apiKey");
 
-    await expect(client.getCloudStatus()).resolves.toEqual({
-      connected: false,
-      enabled: false,
-      hasApiKey: false,
-      reason: "inactive_local_provider",
-    });
+    await expect(client.getCloudStatus()).resolves.toBe(rawStatus);
     await expect(client.getCloudCredits?.()).resolves.toEqual({
-      balance: null,
-      connected: false,
+      balance: 42,
+      connected: true,
     });
 
     uninstall();

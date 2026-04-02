@@ -122,7 +122,8 @@ export function __resetCompanionSpeechMemoryForTests(): void {
  *    `true` before React state commits; `cloudConnected` is `context || ref===true`
  *    so an early `false` snapshot cannot block TTS after auth loads. Then reloads
  *    `messages.tts` from `getConfig`.
- * 4. `useVoiceChat` resolves cloud vs own-key mode and speaks via `/api/tts/cloud` when the browser has no xi-api-key.
+ * 4. `useVoiceChat` resolves cloud vs own-key mode and speaks via `/api/tts/cloud`
+ *    only when cloud inference is actually selected, not merely linked.
  */
 export function useChatVoiceController(options: {
   agentVoiceMuted: boolean;
@@ -349,19 +350,15 @@ export function useChatVoiceController(options: {
   );
 
   const cloudVoiceAvailable = useMemo(() => {
-    const fromContext =
-      elizaCloudConnected || elizaCloudEnabled || elizaCloudHasPersistedKey;
+    const fromContext = elizaCloudEnabled;
     // Ref snapshot can be `false` from an early status poll before the key is
-    // loaded, then never updated if no further event fires — that stuck
-    // `cloudConnected` false in useVoiceChat and kept browser TTS. Prefer
-    // context; only use the event snapshot to force `true` when the event
-    // arrives before the wider app state catches up.
+    // loaded, then never updated if no further event fires. Prefer the
+    // committed `enabled` state; only use the event snapshot to force `true`
+    // when it arrives before the wider app state catches up.
     return fromContext || cloudVoiceSnapshot === true;
   }, [
     cloudVoiceSnapshot,
-    elizaCloudConnected,
     elizaCloudEnabled,
-    elizaCloudHasPersistedKey,
   ]);
 
   useEffect(() => {

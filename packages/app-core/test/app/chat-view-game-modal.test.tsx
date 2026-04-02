@@ -658,7 +658,7 @@ describe("ChatView game-modal variant", () => {
     expect(handleChatStop).not.toHaveBeenCalled();
   });
 
-  it("passes cloud auth into the voice hook for companion defaults", async () => {
+  it("does not pass linked cloud auth into the voice hook without cloud selection", async () => {
     mockUseApp.mockReturnValue(
       createContext({
         elizaCloudConnected: true,
@@ -673,7 +673,7 @@ describe("ChatView game-modal variant", () => {
 
     expect(mockUseVoiceChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        cloudConnected: true,
+        cloudConnected: false,
         interruptOnSpeech: true,
       }),
     );
@@ -756,7 +756,7 @@ describe("ChatView game-modal variant", () => {
     );
   });
 
-  it("treats persisted Eliza Cloud API key as voice cloud access without oauth", async () => {
+  it("does not treat a persisted Eliza Cloud API key as voice cloud access by itself", async () => {
     mockUseApp.mockReturnValue(
       createContext({
         elizaCloudEnabled: false,
@@ -773,7 +773,7 @@ describe("ChatView game-modal variant", () => {
 
     expect(mockUseVoiceChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        cloudConnected: true,
+        cloudConnected: false,
         interruptOnSpeech: true,
       }),
     );

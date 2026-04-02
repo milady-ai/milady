@@ -3,23 +3,24 @@
  * training, plugins, streaming/PTY, logs, character, permissions, updates.
  */
 
+import type { ReleaseChannel } from "@miladyai/agent/contracts/config";
+import type {
+  AllPermissionsState,
+  PermissionState,
+  SystemPermissionId,
+} from "@miladyai/agent/contracts/permissions";
+import {
+  isMiladySettingsDebugEnabled,
+  sanitizeForSettingsDebug,
+  settingsDebugCloudSummary,
+} from "@miladyai/shared";
 import type {
   OnboardingConnectorConfig as ConnectorConfig,
   OnboardingData,
   OnboardingOptions,
   SubscriptionStatusResponse,
 } from "@miladyai/shared/contracts/onboarding";
-import type {
-  AllPermissionsState,
-  PermissionState,
-  SystemPermissionId,
-} from "@miladyai/agent/contracts/permissions";
-import type { ReleaseChannel } from "@miladyai/agent/contracts/config";
-import {
-  settingsDebugCloudSummary,
-  isMiladySettingsDebugEnabled,
-  sanitizeForSettingsDebug,
-} from "@miladyai/shared";
+import { MiladyClient } from "./client-base";
 import type {
   AgentAutomationMode,
   AgentAutomationModeResponse,
@@ -63,7 +64,6 @@ import type {
   UpdateTriggerRequest,
 } from "./client-types";
 import { ApiError, mapPtySessionsToCodingAgentSessions } from "./client-types";
-import { MiladyClient } from "./client-base";
 
 // ---------------------------------------------------------------------------
 // Module-level helpers
@@ -154,6 +154,7 @@ declare module "./client-base" {
     switchProvider(
       provider: string,
       apiKey?: string,
+      primaryModel?: string,
     ): Promise<{ success: boolean; provider: string; restarting: boolean }>;
     startOpenAILogin(): Promise<{
       authUrl: string;
@@ -544,7 +545,6 @@ MiladyClient.prototype.getAuthStatus = async function (this: MiladyClient) {
       lastErr = err;
       if (attempt < maxRetries) {
         await new Promise((r) => setTimeout(r, baseBackoffMs * 2 ** attempt));
-        continue;
       }
     }
   }
@@ -622,17 +622,24 @@ MiladyClient.prototype.switchProvider = async function (
   this: MiladyClient,
   provider,
   apiKey?,
+  primaryModel?,
 ) {
   logSettingsClient("POST /api/provider/switch → start", {
     baseUrl: this.getBaseUrl(),
     provider,
     hasApiKey: Boolean(apiKey?.trim()),
     apiKey,
+    hasPrimaryModel: Boolean(primaryModel?.trim()),
+    primaryModel,
   });
   const result = (await this.fetch("/api/provider/switch", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider, ...(apiKey ? { apiKey } : {}) }),
+    body: JSON.stringify({
+      provider,
+      ...(apiKey ? { apiKey } : {}),
+      ...(primaryModel ? { primaryModel } : {}),
+    }),
   })) as { success: boolean; provider: string; restarting: boolean };
   logSettingsClient("POST /api/provider/switch ← ok", {
     baseUrl: this.getBaseUrl(),

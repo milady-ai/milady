@@ -66,8 +66,7 @@ function publishElizaCloudVoiceSnapshot(
     connected: snapshot.apiConnected,
     enabled: snapshot.enabled,
     hasPersistedApiKey: snapshot.hasPersistedApiKey,
-    cloudVoiceProxyAvailable:
-      snapshot.hasPersistedApiKey || snapshot.enabled || snapshot.apiConnected,
+    cloudVoiceProxyAvailable: snapshot.enabled,
   });
 }
 

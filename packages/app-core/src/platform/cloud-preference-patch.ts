@@ -167,11 +167,6 @@ export function installLocalProviderCloudPreferencePatch(
   }
 
   const originalGetConfig = client.getConfig.bind(client);
-  const originalGetCloudStatus = client.getCloudStatus.bind(client);
-  const originalGetCloudCredits =
-    typeof client.getCloudCredits === "function"
-      ? client.getCloudCredits.bind(client)
-      : null;
 
   client[PATCH_STATE] = {
     getConfig: client.getConfig,
@@ -189,40 +184,6 @@ export function installLocalProviderCloudPreferencePatch(
       unknown
     >;
   }) as typeof client.getConfig;
-
-  client.getCloudStatus = async () => {
-    const [status, config] = await Promise.all([
-      originalGetCloudStatus(),
-      originalGetConfig().catch(() => null),
-    ]);
-
-    if (shouldMaskInactiveCloudStatus({ config, status })) {
-      return {
-        ...status,
-        connected: false,
-        enabled: false,
-        hasApiKey: false,
-        reason: "inactive_local_provider",
-      };
-    }
-
-    return status;
-  };
-
-  if (originalGetCloudCredits) {
-    client.getCloudCredits = async () => {
-      const [status, config] = await Promise.all([
-        originalGetCloudStatus().catch(() => null),
-        originalGetConfig().catch(() => null),
-      ]);
-
-      if (shouldMaskInactiveCloudStatus({ config, status })) {
-        return { balance: null, connected: false };
-      }
-
-      return originalGetCloudCredits();
-    };
-  }
 
   return () => {
     const patchState = client[PATCH_STATE] as PatchState | undefined;

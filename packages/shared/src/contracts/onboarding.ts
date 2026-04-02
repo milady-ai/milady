@@ -2,8 +2,8 @@
  * Shared onboarding contracts.
  */
 
-import type { WalletConfigUpdateRequest } from "./wallet.js";
 import { isTruthyEnvValue } from "../env-utils.js";
+import type { WalletConfigUpdateRequest } from "./wallet.js";
 
 export const CHARACTER_LANGUAGES = [
   "en",
@@ -546,13 +546,39 @@ export function normalizeOnboardingProviderId(
   value: unknown,
 ): OnboardingProviderId | null {
   if (typeof value !== "string") return null;
-  const directMatch = ONBOARDING_PROVIDER_CATALOG.find(
-    (provider) => provider.id === value,
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return null;
+
+  const candidates = Array.from(
+    new Set([
+      trimmed,
+      trimmed.replace(/^@[^/]+\//, ""),
+      trimmed.replace(/^@[^/]+\//, "").replace(/^plugin-/, ""),
+    ]),
   );
-  if (directMatch) {
-    return directMatch.id;
+
+  for (const candidate of candidates) {
+    const directMatch = ONBOARDING_PROVIDER_CATALOG.find(
+      (provider) => provider.id === candidate,
+    );
+    if (directMatch) {
+      return directMatch.id;
+    }
+
+    const pluginMatch = ONBOARDING_PROVIDER_CATALOG.find(
+      (provider) => provider.pluginName.toLowerCase() === candidate,
+    );
+    if (pluginMatch) {
+      return pluginMatch.id;
+    }
+
+    const alias = ONBOARDING_PROVIDER_ALIASES[candidate];
+    if (alias) {
+      return alias;
+    }
   }
-  return ONBOARDING_PROVIDER_ALIASES[value] ?? null;
+
+  return null;
 }
 
 export function getOnboardingProviderOption(
@@ -636,14 +662,9 @@ export function isOnboardingConnectionComplete(
 }
 
 const REDACTED_SECRET = "[REDACTED]";
-const PI_AI_ENV_SIGNAL_KEYS = [
-  "ELIZA_USE_PI_AI",
-  "MILADY_USE_PI_AI",
-] as const;
+const PI_AI_ENV_SIGNAL_KEYS = ["ELIZA_USE_PI_AI", "MILADY_USE_PI_AI"] as const;
 
-function asConfigRecord(
-  value: unknown,
-): Record<string, unknown> | null {
+function asConfigRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
@@ -880,13 +901,15 @@ export function inferCompatibilityOnboardingConnection(
   const cloudApiKey = normalizeSecretString(cloud?.apiKey);
   const smallModel = readConfigString(models, "small");
   const largeModel = readConfigString(models, "large");
+  const cloudExplicitlyDisabled = cloud?.enabled === false;
 
   if (
-    cloud?.enabled === true ||
-    cloudProvider === "elizacloud" ||
-    readConfigString(cloud, "inferenceMode") === "cloud" ||
-    smallModel ||
-    largeModel
+    !cloudExplicitlyDisabled &&
+    (cloud?.enabled === true ||
+      cloudProvider === "elizacloud" ||
+      readConfigString(cloud, "inferenceMode") === "cloud" ||
+      smallModel ||
+      largeModel)
   ) {
     return {
       kind: "cloud-managed",
@@ -916,4 +939,10 @@ export function inferOnboardingConnectionFromConfig(
     asConfigRecord(config)?.connection,
   );
   return explicitConnection ?? inferCompatibilityOnboardingConnection(config);
+}
+
+export function isCloudInferenceSelectedInConfig(
+  config: Record<string, unknown> | null | undefined,
+): boolean {
+  return isCloudManagedConnection(inferOnboardingConnectionFromConfig(config));
 }

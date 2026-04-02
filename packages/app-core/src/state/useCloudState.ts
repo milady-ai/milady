@@ -53,8 +53,7 @@ function publishElizaCloudVoiceSnapshot(
     connected: snapshot.apiConnected,
     enabled: snapshot.enabled,
     hasPersistedApiKey: snapshot.hasPersistedApiKey,
-    cloudVoiceProxyAvailable:
-      snapshot.hasPersistedApiKey || snapshot.enabled || snapshot.apiConnected,
+    cloudVoiceProxyAvailable: snapshot.enabled,
   });
 }
 
@@ -394,11 +393,8 @@ export function useCloudState({
             }
             void loadWalletConfig();
             // Skip the immediate pollCloudCredits() call after login.
-            // The cloud-preference-patch masks getCloudStatus() when a
-            // local provider is configured, which would instantly undo
-            // the login we just completed. The recurring 60s poll will
-            // pick up credits once the backend has fully persisted the
-            // API key and the cloud status stabilizes.
+            // The backend persists the linked-account state asynchronously,
+            // so the recurring poll is enough to pick up the stable snapshot.
           } else if (poll.status === "expired" || poll.status === "error") {
             stopCloudLoginPolling(
               poll.error ?? "Login session expired. Please try again.",

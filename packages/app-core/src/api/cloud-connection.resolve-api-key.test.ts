@@ -15,16 +15,20 @@ describe("resolveCloudApiKey (integration)", () => {
     delete process.env.ELIZAOS_CLOUD_API_KEY;
   });
 
-  it("returns undefined when cloud.enabled is false (ignores env, sealed store, runtime)", () => {
+  it("keeps a persisted linked-account key even when cloud inference is disabled", () => {
     process.env.ELIZAOS_CLOUD_API_KEY = "from-env";
     scrubCloudSecretsFromEnv();
     process.env.ELIZAOS_CLOUD_API_KEY = "from-env";
 
     const key = resolveCloudApiKey(
       {
+        connection: {
+          kind: "local-provider",
+          provider: "openai",
+        },
         cloud: {
           enabled: false,
-          apiKey: "in-file-should-not-matter",
+          apiKey: "in-file-linked-key",
         },
       },
       {
@@ -34,11 +38,29 @@ describe("resolveCloudApiKey (integration)", () => {
       } as never,
     );
 
-    expect(key).toBeUndefined();
+    expect(key).toBe("in-file-linked-key");
   });
 
-  it("still resolves when enabled is undefined and env has a key", () => {
+  it("does not fall back to env-only cloud state when cloud inference is not selected", () => {
     process.env.ELIZAOS_CLOUD_API_KEY = "legacy-env";
-    expect(resolveCloudApiKey({ cloud: {} }, null)).toBe("legacy-env");
+    expect(
+      resolveCloudApiKey(
+        {
+          connection: {
+            kind: "local-provider",
+            provider: "anthropic",
+          },
+          cloud: {},
+        },
+        null,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("still resolves env fallback for legacy cloud-selected configs", () => {
+    process.env.ELIZAOS_CLOUD_API_KEY = "legacy-env";
+    expect(
+      resolveCloudApiKey({ cloud: { inferenceMode: "cloud" } }, null),
+    ).toBe("legacy-env");
   });
 });

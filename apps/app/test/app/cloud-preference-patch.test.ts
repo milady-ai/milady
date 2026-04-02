@@ -199,7 +199,7 @@ describe("cloud preference patch", () => {
     expect(shouldPreferLocalProviderConfig(config)).toBe(true);
   });
 
-  it("patches client getters so onboarding and cloud badges ignore stale cloud state", async () => {
+  it("patches config reads without hiding linked cloud account state", async () => {
     const originalGetConfig = vi.fn(async () => ({
       connection: {
         kind: "local-provider",
@@ -255,15 +255,14 @@ describe("cloud preference patch", () => {
       });
       await expect(mockClient.getCloudStatus()).resolves.toEqual({
         enabled: false,
-        connected: false,
-        hasApiKey: false,
-        reason: "inactive_local_provider",
+        connected: true,
+        hasApiKey: true,
       });
       await expect(mockClient.getCloudCredits()).resolves.toEqual({
-        balance: null,
-        connected: false,
+        balance: 0.17,
+        connected: true,
       });
-      expect(originalGetCloudCredits).toHaveBeenCalledTimes(0);
+      expect(originalGetCloudCredits).toHaveBeenCalledTimes(1);
     } finally {
       restore();
     }

@@ -105,6 +105,8 @@ describe("POST /api/provider/switch", () => {
       ["google", "gemini"],
       ["google-genai", "gemini"],
       ["xai", "grok"],
+      ["@elizaos/plugin-openai", "openai"],
+      ["plugin-anthropic", "anthropic"],
       ["openai-subscription", "openai-subscription"],
       ["openai-codex", "openai-subscription"],
       ["ollama", "ollama"],
@@ -147,6 +149,24 @@ describe("POST /api/provider/switch", () => {
         kind: "local-provider",
         provider: "openai",
       });
+    });
+
+    it("persists an explicit primaryModel override for the active provider", async () => {
+      const { status } = await req(port, "POST", "/api/provider/switch", {
+        provider: "openrouter",
+        primaryModel: "openai/gpt-5.2",
+      });
+      expect(status).toBe(200);
+
+      const configRes = await req(port, "GET", "/api/config");
+      expect(configRes.data.connection).toEqual({
+        kind: "local-provider",
+        provider: "openrouter",
+        primaryModel: "openai/gpt-5.2",
+      });
+      expect(configRes.data.agents.defaults.model.primary).toBe(
+        "openai/gpt-5.2",
+      );
     });
 
     it("preserves existing direct provider credentials when switching to another local provider", async () => {

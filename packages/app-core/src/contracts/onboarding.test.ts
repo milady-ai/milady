@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   inferOnboardingConnectionFromConfig,
+  isCloudInferenceSelectedInConfig,
   getStoredOnboardingProviderId,
   isOnboardingConnectionComplete,
   getSubscriptionProviderFamily,
@@ -103,6 +104,42 @@ describe("onboarding provider catalog", () => {
       provider: "openrouter",
       primaryModel: "openai/gpt-5-mini",
     });
+  });
+
+  it("treats explicit local-provider selections as not using cloud inference", () => {
+    expect(
+      isCloudInferenceSelectedInConfig({
+        connection: {
+          kind: "local-provider",
+          provider: "openrouter",
+        },
+        cloud: {
+          enabled: true,
+          provider: "elizacloud",
+          apiKey: "ck-cloud-test",
+          inferenceMode: "cloud",
+        },
+        models: {
+          small: "openai/gpt-5-mini",
+          large: "anthropic/claude-sonnet-4.5",
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("treats legacy cloud-only configs as using cloud inference", () => {
+    expect(
+      isCloudInferenceSelectedInConfig({
+        cloud: {
+          provider: "elizacloud",
+          inferenceMode: "cloud",
+        },
+        models: {
+          small: "openai/gpt-5-mini",
+          large: "anthropic/claude-sonnet-4.5",
+        },
+      }),
+    ).toBe(true);
   });
 
   it("keeps remote selection ahead of local env-backed providers", () => {
