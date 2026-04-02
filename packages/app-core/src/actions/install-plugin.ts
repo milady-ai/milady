@@ -14,30 +14,18 @@ import type { Action, HandlerOptions } from "@elizaos/core";
 import { resolveDesktopApiPort } from "@miladyai/shared/runtime-env";
 import {
   ensurePluginManagerAllowed,
-  type PluginManagerGuardResult,
+  getPluginManagerBlockReason,
+  PLUGIN_MANAGER_UNAVAILABLE_ERROR,
 } from "../runtime/plugin-manager-guard";
 
 /** API port for posting install requests. */
 const API_PORT = String(resolveDesktopApiPort(process.env));
-const PLUGIN_MANAGER_UNAVAILABLE_ERROR = "Plugin manager service not found";
 
 type InstallPluginResponse = {
   ok: boolean;
   message?: string;
   error?: string;
 };
-
-function getPluginManagerBlockReason(
-  result: PluginManagerGuardResult,
-): string | null {
-  if (result === "disabled-by-user") {
-    return "plugin-manager is explicitly disabled in config";
-  }
-  if (result === "disabled-by-env") {
-    return "plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1";
-  }
-  return null;
-}
 
 function parseInstallPluginResponse(value: unknown): InstallPluginResponse {
   if (!value || typeof value !== "object") {

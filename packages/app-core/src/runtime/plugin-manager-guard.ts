@@ -14,12 +14,27 @@ import {
 let _checked = false;
 let _lastResult: PluginManagerGuardResult = "error";
 
+export const PLUGIN_MANAGER_UNAVAILABLE_ERROR =
+  "Plugin manager service not found";
+
 export type PluginManagerGuardResult =
   | "enabled"
   | "already-enabled"
   | "disabled-by-user"
   | "disabled-by-env"
   | "error";
+
+export function getPluginManagerBlockReason(
+  result: PluginManagerGuardResult,
+): string | null {
+  if (result === "disabled-by-user") {
+    return "plugin-manager is explicitly disabled in config";
+  }
+  if (result === "disabled-by-env") {
+    return "plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1";
+  }
+  return null;
+}
 
 export function ensurePluginManagerAllowed(): PluginManagerGuardResult {
   if (_checked) return _lastResult;

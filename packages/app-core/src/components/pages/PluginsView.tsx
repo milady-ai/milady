@@ -28,7 +28,8 @@ import type { PluginInfo } from "../../api";
 import { client } from "../../api";
 import {
   ensurePluginManagerAllowed,
-  type PluginManagerGuardResult,
+  getPluginManagerBlockReason,
+  PLUGIN_MANAGER_UNAVAILABLE_ERROR,
 } from "../../runtime/plugin-manager-guard";
 import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
@@ -53,18 +54,6 @@ import {
 import { PluginSettingsDialog } from "./plugin-view-dialogs";
 import { PluginGameModal } from "./plugin-view-modal";
 import { ConnectorSidebar } from "./plugin-view-sidebar";
-
-function getPluginManagerBlockReason(
-  result: PluginManagerGuardResult,
-): string | null {
-  if (result === "disabled-by-user") {
-    return "plugin-manager is explicitly disabled in config";
-  }
-  if (result === "disabled-by-env") {
-    return "plugin-manager auto-enable is disabled by MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1";
-  }
-  return null;
-}
 
 /* ── Shared PluginListView ─────────────────────────────────────────── */
 
@@ -482,7 +471,7 @@ function PluginListView({
       let installError = err;
       if (
         installError instanceof Error &&
-        installError.message.includes("Plugin manager service not found")
+        installError.message.includes(PLUGIN_MANAGER_UNAVAILABLE_ERROR)
       ) {
         try {
           const pluginManagerGuard = ensurePluginManagerAllowed();

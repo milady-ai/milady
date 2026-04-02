@@ -3,10 +3,17 @@ import { installPluginAction } from "../../actions/install-plugin";
 
 const ensurePluginManagerAllowedMock = vi.fn(() => "already-enabled");
 
-vi.mock("../../runtime/plugin-manager-guard", () => ({
-  ensurePluginManagerAllowed: (...args: unknown[]) =>
-    ensurePluginManagerAllowedMock(...args),
-}));
+vi.mock("../../runtime/plugin-manager-guard", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("../../runtime/plugin-manager-guard")
+  >();
+
+  return {
+    ...actual,
+    ensurePluginManagerAllowed: (...args: unknown[]) =>
+      ensurePluginManagerAllowedMock(...args),
+  };
+});
 
 function mockJsonResponse(response: {
   ok: boolean;
