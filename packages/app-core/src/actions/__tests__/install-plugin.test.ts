@@ -117,7 +117,7 @@ describe("installPluginAction", () => {
     );
 
     expect(result.success).toBe(false);
-    expect(result.text).toBe("Failed to install discord: HTTP 502");
+    expect(result.text).toBe("Failed to install discord: Invalid install response");
   });
 
   it("returns a failure message when install service reports ok:false", async () => {
