@@ -73,7 +73,7 @@ export function PageLayout({
   return (
     <div
       className={cn(
-        "flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden",
+        "flex flex-1 w-full min-h-0 min-w-0 flex-col overflow-hidden",
         className,
       )}
       {...props}
@@ -85,7 +85,7 @@ export function PageLayout({
           </PageLayoutHeader>
         </div>
       ) : null}
-      <div className="flex flex-1 min-h-0 min-w-0 flex-col md:flex-row">
+      <div className="flex flex-1 w-full min-h-0 overflow-hidden flex-col md:flex-row">
         <div className="hidden min-h-0 w-full shrink-0 items-stretch px-0 pb-0 pt-2 sm:pt-3 md:flex md:w-auto lg:pt-4">
           {desktopSidebarElement}
         </div>

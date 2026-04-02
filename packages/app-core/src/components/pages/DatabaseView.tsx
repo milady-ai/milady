@@ -412,7 +412,7 @@ export function DatabaseView({
     );
 
     return (
-      <PageLayout sidebar={dbSidebar} contentHeader={contentHeader}>
+      <PageLayout sidebar={dbSidebar} contentHeader={contentHeader} contentInnerClassName="w-full min-h-0">
         <div className="flex flex-1 flex-col min-h-0 w-full">
           {errorMessage ? (
             <div className="m-5 rounded-xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -447,15 +447,10 @@ export function DatabaseView({
               </PagePanel>
             </div>
           ) : view === "tables" ? (
-            <div
-              className="grid min-h-0 flex-1 grid-rows-[auto_1fr] gap-0 overflow-y-auto p-6"
-              style={{ gridTemplateColumns: "1fr" }}
-            >
+            <div className="flex min-h-0 flex-1 w-full flex-col overflow-y-auto p-6">
               {!selectedTable ? (
-                <>
-                  <PagePanel
-                    variant="surface"
-                    as="section"
+                <div className="w-full">
+                  <PagePanel variant="surface" as="section"
                     className="px-5 py-5 sm:px-6"
                   >
                     <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
@@ -466,17 +461,13 @@ export function DatabaseView({
                     </h1>
                   </PagePanel>
 
-                  <PagePanel
+                  <PagePanel.Empty
                     variant="surface"
-                    className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
-                  >
-                    <PagePanel.Empty
-                      className="flex-1 min-h-[14rem]"
-                      title={t("databaseview.SelectATable")}
-                      description={t("databaseview.ChooseATableFrom")}
-                    />
-                  </PagePanel>
-                </>
+                    className="mt-4 min-h-[18rem] rounded-[1.6rem] px-5 py-10"
+                    title={t("databaseview.SelectATable")}
+                    description={t("databaseview.ChooseATableFrom")}
+                  />
+                </div>
               ) : loading && !tableData ? (
                 <PagePanel
                   variant="surface"
@@ -749,15 +740,10 @@ export function DatabaseView({
           )}
 
           {/* Main grid area */}
-          <div
-            className="grid flex-1 min-w-0 bg-bg/10"
-            style={{ gridTemplateColumns: "1fr", gridTemplateRows: "auto 1fr" }}
-          >
+          <div className="flex min-w-0 flex-1 w-full flex-col bg-bg/10">
             {!selectedTable ? (
-              <>
-                <PagePanel
-                  variant="surface"
-                  as="section"
+              <div className="w-full">
+                <PagePanel variant="surface" as="section"
                   className="px-5 py-5 sm:px-6"
                 >
                   <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
@@ -768,17 +754,13 @@ export function DatabaseView({
                   </div>
                 </PagePanel>
 
-                <PagePanel
+                <PagePanel.Empty
                   variant="surface"
-                  className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
-                >
-                  <PagePanel.Empty
-                    className="flex-1 min-h-[14rem]"
-                    title={t("databaseview.SelectATable")}
-                    description={t("databaseview.ChooseATableFrom")}
-                  />
-                </PagePanel>
-              </>
+                  className="mt-4 min-h-[18rem] rounded-[1.6rem] px-5 py-10"
+                  title={t("databaseview.SelectATable")}
+                  description={t("databaseview.ChooseATableFrom")}
+                />
+              </div>
             ) : loading && !tableData ? (
               <PagePanel
                 variant="surface"
