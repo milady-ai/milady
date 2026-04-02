@@ -118,7 +118,7 @@ export const installPluginAction: Action = {
             success: false,
           };
         }
-        const result = body as {
+        const result = body as unknown as {
           ok: boolean;
           message?: string;
           error?: string;
