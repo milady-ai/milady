@@ -12,9 +12,37 @@
 
 import type { Action, HandlerOptions } from "@elizaos/core";
 import { resolveDesktopApiPort } from "@miladyai/shared/runtime-env";
+import { ensurePluginManagerAllowed } from "../runtime/plugin-manager-guard";
 
 /** API port for posting install requests. */
 const API_PORT = String(resolveDesktopApiPort(process.env));
+const PLUGIN_MANAGER_UNAVAILABLE_ERROR = "Plugin manager service not found";
+
+async function postInstallRequest(npmName: string): Promise<Response> {
+  return fetch(`http://localhost:${API_PORT}/api/plugins/install`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: npmName, autoRestart: true }),
+  });
+}
+
+async function restartAgent(): Promise<void> {
+  const response = await fetch(
+    `http://localhost:${API_PORT}/api/agent/restart`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    },
+  );
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as Record<
+      string,
+      string
+    >;
+    throw new Error(body.error ?? `HTTP ${response.status}`);
+  }
+}
 
 export const installPluginAction: Action = {
   name: "INSTALL_PLUGIN",
@@ -51,24 +79,62 @@ export const installPluginAction: Action = {
       const npmName = pluginId.startsWith("@")
         ? pluginId
         : `@elizaos/plugin-${pluginId}`;
+      const pluginManagerGuard = ensurePluginManagerAllowed();
+      if (pluginManagerGuard === "disabled-by-user") {
+        return {
+          text: `Failed to install ${pluginId}: plugin-manager is explicitly disabled in config`,
+          success: false,
+        };
+      }
+      if (pluginManagerGuard === "enabled") {
+        await restartAgent();
+      }
 
-      const response = await fetch(
-        `http://localhost:${API_PORT}/api/plugins/install`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: npmName, autoRestart: true }),
-        },
-      );
+      let response = await postInstallRequest(npmName);
 
       if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as Record<
+        let body = (await response.json().catch(() => ({}))) as Record<
           string,
           string
         >;
+        if ((body.error ?? "").includes(PLUGIN_MANAGER_UNAVAILABLE_ERROR)) {
+          const recoveryGuard = ensurePluginManagerAllowed();
+          if (recoveryGuard === "disabled-by-user") {
+            return {
+              text: `Failed to install ${pluginId}: plugin-manager is explicitly disabled in config`,
+              success: false,
+            };
+          }
+          await restartAgent();
+          response = await postInstallRequest(npmName);
+          body = (await response.json().catch(() => ({}))) as Record<
+            string,
+            string
+          >;
+        }
+        if (!response.ok) {
+          return {
+            text: `Failed to install ${pluginId}: ${body.error ?? `HTTP ${response.status}`}`,
+            success: false,
+          };
+        }
+        const result = body as {
+          ok: boolean;
+          message?: string;
+          error?: string;
+        };
+        if (!result.ok) {
+          return {
+            text: `Failed to install ${pluginId}: ${result.error ?? "unknown error"}`,
+            success: false,
+          };
+        }
         return {
-          text: `Failed to install ${pluginId}: ${body.error ?? `HTTP ${response.status}`}`,
-          success: false,
+          text:
+            result.message ??
+            `Plugin ${pluginId} installed successfully. The agent is restarting to load it.`,
+          success: true,
+          data: { pluginId, npmName },
         };
       }
 

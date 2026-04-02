@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installPluginAction } from "../../actions/install-plugin";
 
+const ensurePluginManagerAllowedMock = vi.fn(() => "already-enabled");
+
+vi.mock("../../runtime/plugin-manager-guard", () => ({
+  ensurePluginManagerAllowed: (...args: unknown[]) =>
+    ensurePluginManagerAllowedMock(...args),
+}));
+
 function mockJsonResponse(response: {
   ok: boolean;
   status: number;
@@ -21,6 +28,7 @@ function mockJsonResponse(response: {
 describe("installPluginAction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    ensurePluginManagerAllowedMock.mockReturnValue("already-enabled");
     vi.stubGlobal("fetch", vi.fn());
   });
 
@@ -155,5 +163,98 @@ describe("installPluginAction", () => {
 
     expect(result.success).toBe(true);
     expect(result.text).toBe("plugin-telegram installed and restart scheduled");
+  });
+
+  it("restarts first when plugin-manager was just auto-enabled", async () => {
+    ensurePluginManagerAllowedMock.mockReturnValue("enabled");
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true },
+        }),
+      );
+
+    const result = await installPluginAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { pluginId: "telegram" } },
+    );
+
+    expect(result.success).toBe(true);
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:31337/api/agent/restart",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:31337/api/plugins/install",
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: "@elizaos/plugin-telegram",
+          autoRestart: true,
+        }),
+      }),
+    );
+  });
+
+  it("retries after plugin-manager service missing by restarting the agent", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: false,
+          status: 503,
+          body: { error: "Plugin manager service not found" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true },
+        }),
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          ok: true,
+          status: 200,
+          body: { ok: true, message: "installed after restart" },
+        }),
+      );
+
+    const result = await installPluginAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { pluginId: "telegram" } },
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.text).toBe("installed after restart");
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:31337/api/agent/restart",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
+      3,
+      "http://localhost:31337/api/plugins/install",
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: "@elizaos/plugin-telegram",
+          autoRestart: true,
+        }),
+      }),
+    );
   });
 });
