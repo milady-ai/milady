@@ -1046,6 +1046,19 @@ export function ConnectionProviderDetailScreen({
           {t("onboarding.back")}
         </Button>
         <Button
+          variant="ghost"
+          className={onboardingSecondaryActionClass}
+          style={onboardingSecondaryActionTextShadowStyle}
+          onClick={() => {
+            void handleOnboardingNext();
+          }}
+          type="button"
+        >
+          {t("onboarding.configureAiLater", {
+            defaultValue: "Set up later",
+          })}
+        </Button>
+        <Button
           className={onboardingPrimaryActionClass}
           style={onboardingPrimaryActionTextShadowStyle}
           disabled={isConfirmDisabled}

@@ -368,12 +368,12 @@ export {
   AGENT_EVENT_ALLOWED_STREAMS,
 } from "./plugin-discovery-helpers.js";
 
-// @ts-expect-error
+// @ts-expect-error plugin package does not ship declarations
 type PiAiPluginModule = typeof import("@elizaos/plugin-pi-ai");
 let _piAiPluginModule: PiAiPluginModule | null = null;
 async function loadPiAiPluginModule(): Promise<PiAiPluginModule> {
   if (!_piAiPluginModule) {
-    // @ts-expect-error
+    // @ts-expect-error plugin package does not ship declarations
     _piAiPluginModule = await import("@elizaos/plugin-pi-ai");
   }
   return _piAiPluginModule;

@@ -312,6 +312,63 @@ const OnboardingConnectionSchema = z.union([
   OnboardingRemoteProviderConnectionSchema,
 ]);
 
+const LinkedAccountSchema = z
+  .object({
+    status: z.union([z.literal("linked"), z.literal("unlinked")]).optional(),
+    source: z
+      .union([
+        z.literal("api-key"),
+        z.literal("oauth"),
+        z.literal("credentials"),
+        z.literal("subscription"),
+      ])
+      .optional(),
+    userId: z.string().optional(),
+    organizationId: z.string().optional(),
+  })
+  .strict();
+
+const ServiceRouteSchema = z
+  .object({
+    backend: z.string().optional(),
+    transport: z
+      .union([
+        z.literal("direct"),
+        z.literal("cloud-proxy"),
+        z.literal("remote"),
+      ])
+      .optional(),
+    accountId: z.string().optional(),
+    primaryModel: z.string().optional(),
+    smallModel: z.string().optional(),
+    largeModel: z.string().optional(),
+    remoteApiBase: z.string().optional(),
+  })
+  .strict();
+
+const ServiceRoutingSchema = z
+  .object({
+    llmText: ServiceRouteSchema.optional(),
+    tts: ServiceRouteSchema.optional(),
+    media: ServiceRouteSchema.optional(),
+    embeddings: ServiceRouteSchema.optional(),
+    rpc: ServiceRouteSchema.optional(),
+  })
+  .strict();
+
+const DeploymentTargetSchema = z
+  .object({
+    runtime: z.union([
+      z.literal("local"),
+      z.literal("cloud"),
+      z.literal("remote"),
+    ]),
+    provider: z.union([z.literal("elizacloud"), z.literal("remote")]).optional(),
+    remoteApiBase: z.string().optional(),
+    remoteAccessToken: z.string().optional(),
+  })
+  .strict();
+
 export const CharacterSchema = z
   .object({
     name: z.string().min(1).max(100).optional(),
@@ -351,6 +408,9 @@ export const ElizaSchema = z
       })
       .catchall(z.string())
       .optional(),
+    deploymentTarget: DeploymentTargetSchema.optional(),
+    linkedAccounts: z.record(z.string(), LinkedAccountSchema).optional(),
+    serviceRouting: ServiceRoutingSchema.optional(),
     connection: OnboardingConnectionSchema.optional(),
     wizard: z
       .object({

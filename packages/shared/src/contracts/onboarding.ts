@@ -3,6 +3,17 @@
  */
 
 import { isTruthyEnvValue } from "../env-utils.js";
+import type {
+  DeploymentTargetConfig,
+  LinkedAccountsConfig,
+  ServiceRouteConfig,
+  ServiceRoutingConfig,
+} from "./service-routing.js";
+import {
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "./service-routing.js";
 import type { WalletConfigUpdateRequest } from "./wallet.js";
 
 export const CHARACTER_LANGUAGES = [
@@ -464,7 +475,10 @@ export interface OnboardingData {
   adjectives?: string[];
   postExamples?: string[];
   messageExamples?: MessageExample[][];
-  connection: OnboardingConnection;
+  connection?: OnboardingConnection;
+  deploymentTarget?: DeploymentTargetConfig;
+  linkedAccounts?: LinkedAccountsConfig;
+  serviceRouting?: ServiceRoutingConfig;
   channels?: Record<string, unknown>;
   walletConfig?: WalletConfigUpdateRequest;
   inventoryProviders?: Array<{
@@ -756,6 +770,281 @@ function readPrimaryModelFromConfig(
   return readConfigString(model, "primary");
 }
 
+function hasExplicitCanonicalRuntimeConfig(
+  config: Record<string, unknown> | null | undefined,
+): boolean {
+  const root = asConfigRecord(config);
+  return Boolean(
+    root &&
+      (Object.hasOwn(root, "deploymentTarget") ||
+        Object.hasOwn(root, "linkedAccounts") ||
+        Object.hasOwn(root, "serviceRouting")),
+  );
+}
+
+function buildElizaCloudTextRoute(args: {
+  smallModel?: string;
+  largeModel?: string;
+}): ServiceRouteConfig {
+  return {
+    backend: "elizacloud",
+    transport: "cloud-proxy",
+    accountId: "elizacloud",
+    ...(args.smallModel ? { smallModel: args.smallModel } : {}),
+    ...(args.largeModel ? { largeModel: args.largeModel } : {}),
+  };
+}
+
+export function resolveLinkedAccountsInConfig(
+  config: Record<string, unknown> | null | undefined,
+): LinkedAccountsConfig | null {
+  const root = asConfigRecord(config);
+  const explicit = normalizeLinkedAccountsConfig(root?.linkedAccounts) ?? {};
+  const next: LinkedAccountsConfig = { ...explicit };
+  const cloud = asConfigRecord(config?.cloud);
+  const hasCloudKey = Boolean(normalizeSecretString(cloud?.apiKey));
+  const existingCloudAccount = next.elizacloud;
+
+  if (hasCloudKey && (!existingCloudAccount || !existingCloudAccount.status)) {
+    next.elizacloud = {
+      ...existingCloudAccount,
+      status: "linked",
+      source: existingCloudAccount?.source ?? "api-key",
+    };
+  }
+
+  return Object.keys(next).length > 0 ? next : null;
+}
+
+export function resolveDeploymentTargetInConfig(
+  config: Record<string, unknown> | null | undefined,
+): DeploymentTargetConfig {
+  const root = asConfigRecord(config);
+  const explicit = normalizeDeploymentTargetConfig(root?.deploymentTarget);
+  if (explicit) {
+    return explicit;
+  }
+
+  const explicitConnection = normalizePersistedOnboardingConnection(
+    root?.connection,
+  );
+  if (isRemoteProviderConnection(explicitConnection)) {
+    return {
+      runtime: "remote",
+      provider: "remote",
+      remoteApiBase: explicitConnection.remoteApiBase,
+      ...(explicitConnection.remoteAccessToken
+        ? { remoteAccessToken: explicitConnection.remoteAccessToken }
+        : {}),
+    };
+  }
+
+  const cloud = asConfigRecord(config?.cloud);
+  const remoteApiBase = readConfigString(cloud, "remoteApiBase");
+  if (remoteApiBase) {
+    return {
+      runtime: "remote",
+      provider: "remote",
+      remoteApiBase,
+      ...(normalizeSecretString(cloud?.remoteAccessToken)
+        ? {
+            remoteAccessToken: normalizeSecretString(cloud?.remoteAccessToken),
+          }
+        : {}),
+    };
+  }
+
+  const cloudProvider = normalizeOnboardingProviderId(
+    readConfigString(cloud, "provider"),
+  );
+  const cloudRuntime = readConfigString(cloud, "runtime");
+  const cloudAgentId = readConfigString(cloud, "agentId");
+
+  if (
+    cloudRuntime === "cloud" &&
+    cloudProvider === "elizacloud" &&
+    cloudAgentId
+  ) {
+    return { runtime: "cloud", provider: "elizacloud" };
+  }
+
+  return { runtime: "local" };
+}
+
+export function resolveServiceRoutingInConfig(
+  config: Record<string, unknown> | null | undefined,
+): ServiceRoutingConfig | null {
+  const root = asConfigRecord(config);
+  const explicit = normalizeServiceRoutingConfig(root?.serviceRouting) ?? {};
+  const next: ServiceRoutingConfig = { ...explicit };
+  const explicitConnection = normalizePersistedOnboardingConnection(
+    root?.connection,
+  );
+  const deploymentTarget = resolveDeploymentTargetInConfig(config);
+  const cloud = asConfigRecord(config?.cloud);
+  const cloudServices = asConfigRecord(cloud?.services);
+  const models = asConfigRecord(config?.models);
+
+  if (!next.llmText) {
+    if (isCloudManagedConnection(explicitConnection)) {
+      next.llmText = buildElizaCloudTextRoute({
+        smallModel: explicitConnection.smallModel,
+        largeModel: explicitConnection.largeModel,
+      });
+    } else if (isLocalProviderConnection(explicitConnection)) {
+      next.llmText = {
+        backend: explicitConnection.provider,
+        transport: "direct",
+        ...(explicitConnection.primaryModel
+          ? { primaryModel: explicitConnection.primaryModel }
+          : {}),
+      };
+    } else if (isRemoteProviderConnection(explicitConnection)) {
+      next.llmText = {
+        backend: explicitConnection.provider ?? "remote",
+        transport: "remote",
+        remoteApiBase: explicitConnection.remoteApiBase,
+        ...(explicitConnection.primaryModel
+          ? { primaryModel: explicitConnection.primaryModel }
+          : {}),
+        };
+    } else if (
+      deploymentTarget.runtime === "remote" &&
+      deploymentTarget.remoteApiBase
+    ) {
+      const remotePrimaryModel = readPrimaryModelFromConfig(config);
+      next.llmText = {
+        backend: "remote",
+        transport: "remote",
+        remoteApiBase: deploymentTarget.remoteApiBase,
+        ...(remotePrimaryModel ? { primaryModel: remotePrimaryModel } : {}),
+      };
+    } else if (inferLegacyCloudInferenceSelection(config)) {
+      next.llmText = buildElizaCloudTextRoute({
+        smallModel: readConfigString(models, "small"),
+        largeModel: readConfigString(models, "large"),
+      });
+    } else {
+      const localProvider = resolveConfiguredLocalProviderFromSignals(config);
+      if (localProvider) {
+        next.llmText = {
+          backend: localProvider,
+          transport: "direct",
+          ...(readPrimaryModelFromConfig(config)
+            ? { primaryModel: readPrimaryModelFromConfig(config) }
+            : {}),
+        };
+      }
+    }
+  }
+
+  const hasCloudManagedTextRoute = Boolean(
+    normalizeOnboardingProviderId(next.llmText?.backend) === "elizacloud" &&
+      next.llmText?.transport === "cloud-proxy",
+  );
+  const cloudContextSelected =
+    hasCloudManagedTextRoute ||
+    (deploymentTarget.runtime === "cloud" &&
+      deploymentTarget.provider === "elizacloud");
+
+  const legacyCloudServices: Array<["tts" | "media" | "embeddings" | "rpc", boolean | undefined]> =
+    [
+      ["tts", typeof cloudServices?.tts === "boolean" ? cloudServices.tts : undefined],
+      [
+        "media",
+        typeof cloudServices?.media === "boolean" ? cloudServices.media : undefined,
+      ],
+      [
+        "embeddings",
+        typeof cloudServices?.embeddings === "boolean"
+          ? cloudServices.embeddings
+          : undefined,
+      ],
+      ["rpc", typeof cloudServices?.rpc === "boolean" ? cloudServices.rpc : undefined],
+    ];
+
+  for (const [capability, legacyValue] of legacyCloudServices) {
+    if (next[capability]) {
+      continue;
+    }
+    if (legacyValue === true || (legacyValue !== false && cloudContextSelected)) {
+      next[capability] = {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+      };
+    }
+  }
+
+  return Object.keys(next).length > 0 ? next : null;
+}
+
+function deriveOnboardingConnectionFromRuntimeConfig(
+  config: Record<string, unknown> | null | undefined,
+): OnboardingConnection | null {
+  const routing = resolveServiceRoutingInConfig(config);
+  const deploymentTarget = resolveDeploymentTargetInConfig(config);
+  const llmText = routing?.llmText;
+  const backend = normalizeOnboardingProviderId(llmText?.backend);
+  const localProviderOption = backend
+    ? getOnboardingProviderOption(backend)
+    : null;
+  const routeApiKey =
+    localProviderOption?.envKey != null
+      ? readOnboardingEnvSecret(config, localProviderOption.envKey)
+      : undefined;
+
+  if (llmText?.transport === "cloud-proxy" && backend === "elizacloud") {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      ...(llmText.smallModel ? { smallModel: llmText.smallModel } : {}),
+      ...(llmText.largeModel ? { largeModel: llmText.largeModel } : {}),
+    };
+  }
+
+  if (llmText?.transport === "remote") {
+    const remoteApiBase = llmText.remoteApiBase ?? deploymentTarget.remoteApiBase;
+    if (!remoteApiBase) {
+      return null;
+    }
+    return {
+      kind: "remote-provider",
+      remoteApiBase,
+      ...(deploymentTarget.remoteAccessToken
+        ? { remoteAccessToken: deploymentTarget.remoteAccessToken }
+        : {}),
+      ...(backend && backend !== "elizacloud" ? { provider: backend } : {}),
+      ...(routeApiKey ? { apiKey: routeApiKey } : {}),
+      ...(llmText.primaryModel ? { primaryModel: llmText.primaryModel } : {}),
+    };
+  }
+
+  if (backend && backend !== "elizacloud") {
+    return {
+      kind: "local-provider",
+      provider: backend,
+      ...(routeApiKey ? { apiKey: routeApiKey } : {}),
+      ...(llmText?.primaryModel ? { primaryModel: llmText.primaryModel } : {}),
+    };
+  }
+
+  if (
+    deploymentTarget.runtime === "remote" &&
+    deploymentTarget.remoteApiBase?.trim()
+  ) {
+    return {
+      kind: "remote-provider",
+      remoteApiBase: deploymentTarget.remoteApiBase,
+      ...(deploymentTarget.remoteAccessToken
+        ? { remoteAccessToken: deploymentTarget.remoteAccessToken }
+        : {}),
+    };
+  }
+
+  return null;
+}
+
 function resolveConfiguredLocalProviderFromSignals(
   config: Record<string, unknown> | null | undefined,
 ): OnboardingLocalProviderId | null {
@@ -935,10 +1224,18 @@ export function inferCompatibilityOnboardingConnection(
 export function inferOnboardingConnectionFromConfig(
   config: Record<string, unknown> | null | undefined,
 ): OnboardingConnection | null {
+  if (hasExplicitCanonicalRuntimeConfig(config)) {
+    return deriveOnboardingConnectionFromRuntimeConfig(config);
+  }
+
   const explicitConnection = normalizePersistedOnboardingConnection(
     asConfigRecord(config)?.connection,
   );
-  return explicitConnection ?? inferCompatibilityOnboardingConnection(config);
+  return (
+    explicitConnection ??
+    deriveOnboardingConnectionFromRuntimeConfig(config) ??
+    inferCompatibilityOnboardingConnection(config)
+  );
 }
 
 function inferLegacyCloudInferenceSelection(
@@ -978,11 +1275,13 @@ function inferLegacyCloudInferenceSelection(
 export function isCloudInferenceSelectedInConfig(
   config: Record<string, unknown> | null | undefined,
 ): boolean {
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    asConfigRecord(config)?.connection,
-  );
-  if (explicitConnection) {
-    return isCloudManagedConnection(explicitConnection);
+  const routing = resolveServiceRoutingInConfig(config);
+  const llmText = routing?.llmText;
+  if (llmText) {
+    return Boolean(
+      llmText.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(llmText.backend) === "elizacloud",
+    );
   }
 
   return inferLegacyCloudInferenceSelection(config);

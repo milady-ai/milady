@@ -4,5 +4,6 @@ export * from "./config";
 export * from "./drop";
 export * from "./onboarding";
 export * from "./permissions";
+export * from "./service-routing";
 export * from "./verification";
 export * from "./wallet";

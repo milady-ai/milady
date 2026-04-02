@@ -96,6 +96,7 @@ import {
   getOnboardingProviderOption,
   inferOnboardingConnectionFromConfig,
   normalizeOnboardingProviderId,
+  resolveDeploymentTargetInConfig,
 } from "@miladyai/shared/contracts/onboarding";
 import { resolveElizaCloudTopology } from "@miladyai/shared/contracts";
 import {
@@ -2882,8 +2883,12 @@ export async function startEliza(
   // 2g. Cloud mode — if the user chose cloud during onboarding (or on a
   //     subsequent start with cloud config), skip local runtime setup and
   //     connect via the thin client instead.
+  const deploymentTarget = resolveDeploymentTargetInConfig(
+    config as Record<string, unknown>,
+  );
   if (
-    config.cloud?.enabled &&
+    deploymentTarget.runtime === "cloud" &&
+    deploymentTarget.provider === "elizacloud" &&
     config.cloud?.apiKey &&
     config.cloud?.agentId?.trim() &&
     config.cloud?.runtime === "cloud"

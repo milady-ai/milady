@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildOnboardingConnectionConfig,
+  buildOnboardingRuntimeConfig,
   isElizaCloudConnectionReady,
 } from "./onboarding-config";
 
 describe("buildOnboardingConnectionConfig", () => {
-  it("builds a cloud-managed connection when Eliza Cloud is selected", () => {
+  it("does not auto-select cloud inference when onboarding only chooses Eliza Cloud hosting", () => {
     expect(
       buildOnboardingConnectionConfig({
         onboardingRunMode: "cloud",
@@ -20,13 +21,64 @@ describe("buildOnboardingConnectionConfig", () => {
         onboardingRemoteToken: "",
         onboardingSmallModel: "openai/gpt-5-mini",
         onboardingLargeModel: "anthropic/claude-sonnet-4.5",
+        onboardingVoiceProvider: "",
+        onboardingVoiceApiKey: "",
+      }),
+    ).toBeNull();
+  });
+
+  it("keeps cloud hosting and account linking separate from text provider selection", () => {
+    expect(
+      buildOnboardingRuntimeConfig({
+        onboardingRunMode: "cloud",
+        onboardingCloudProvider: "elizacloud",
+        onboardingProvider: "",
+        onboardingApiKey: "ck-test",
+        onboardingPrimaryModel: "",
+        onboardingOpenRouterModel: "",
+        onboardingRemoteConnected: false,
+        onboardingRemoteApiBase: "",
+        onboardingRemoteToken: "",
+        onboardingSmallModel: "openai/gpt-5-mini",
+        onboardingLargeModel: "anthropic/claude-sonnet-4.5",
+        onboardingVoiceProvider: "",
+        onboardingVoiceApiKey: "",
       }),
     ).toEqual({
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      apiKey: "ck-test",
-      smallModel: "openai/gpt-5-mini",
-      largeModel: "anthropic/claude-sonnet-4.5",
+      connection: null,
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        embeddings: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
+      needsProviderSetup: true,
     });
   });
 

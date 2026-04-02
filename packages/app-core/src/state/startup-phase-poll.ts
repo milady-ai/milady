@@ -13,7 +13,7 @@ import {
   asApiLikeError,
   clearPersistedOnboardingStep,
   deriveOnboardingResumeConnection,
-  deriveOnboardingResumeFields,
+  deriveOnboardingResumeFieldsFromConfig,
   formatStartupErrorDetail,
   inferOnboardingResumeStep,
   type StartupErrorState,
@@ -168,7 +168,7 @@ export async function runPollingBackend(
               return;
             }
             const rc = deriveOnboardingResumeConnection(config);
-            const rf = deriveOnboardingResumeFields(rc);
+            const rf = deriveOnboardingResumeFieldsFromConfig(config);
             deps.onboardingResumeConnectionRef.current = rc;
             deps.setOnboardingOptions({
               ...options,

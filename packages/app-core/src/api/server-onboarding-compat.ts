@@ -9,6 +9,11 @@ import {
   type OnboardingConnection,
 } from "@miladyai/shared/contracts/onboarding";
 import {
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "@miladyai/shared/contracts/service-routing";
+import {
   getDefaultStylePreset,
   getStylePresets,
   normalizeCharacterLanguage,
@@ -307,14 +312,28 @@ export function deriveCompatOnboardingReplayBody(
     | Record<string, unknown>;
 } {
   const connection = resolvePersistedOnboardingConnection(body);
+  const deploymentTarget = normalizeDeploymentTargetConfig(
+    body.deploymentTarget,
+  );
+  const linkedAccounts = normalizeLinkedAccountsConfig(body.linkedAccounts);
+  const serviceRouting = normalizeServiceRoutingConfig(body.serviceRouting);
   const isCloudMode =
-    body.runMode === "cloud" || connection?.kind === "cloud-managed";
+    deploymentTarget?.runtime === "cloud" ||
+    body.runMode === "cloud" ||
+    connection?.kind === "cloud-managed";
+
+  const canonicalReplayFields = {
+    ...(deploymentTarget ? { deploymentTarget } : {}),
+    ...(linkedAccounts ? { linkedAccounts } : {}),
+    ...(serviceRouting ? { serviceRouting } : {}),
+  };
 
   if (connection?.kind === "cloud-managed") {
     return {
       isCloudMode: true,
       replayBody: {
         ...body,
+        ...canonicalReplayFields,
         runMode: "cloud",
         cloudProvider: "elizacloud",
         ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
@@ -329,6 +348,7 @@ export function deriveCompatOnboardingReplayBody(
       isCloudMode: false,
       replayBody: {
         ...body,
+        ...canonicalReplayFields,
         runMode: "local",
         provider: connection.provider,
         ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
@@ -343,8 +363,8 @@ export function deriveCompatOnboardingReplayBody(
     isCloudMode,
     replayBody:
       isCloudMode && body.runMode !== "cloud"
-        ? { ...body, runMode: "cloud" as const }
-        : body,
+        ? { ...body, ...canonicalReplayFields, runMode: "cloud" as const }
+        : { ...body, ...canonicalReplayFields },
   };
 }
 

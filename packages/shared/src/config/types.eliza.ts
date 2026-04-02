@@ -6,6 +6,11 @@ import type {
   ReleaseChannel,
 } from "../contracts/config.js";
 import type { OnboardingConnection } from "../contracts/onboarding.js";
+import type {
+  DeploymentTargetConfig,
+  LinkedAccountsConfig,
+  ServiceRoutingConfig,
+} from "../contracts/service-routing.js";
 import type { AgentBinding, AgentsConfig } from "./types.agents.js";
 import type {
   DiscoveryConfig,
@@ -538,6 +543,10 @@ export type CloudConfig = {
   enabled?: boolean;
   /** Selected cloud provider ID (e.g. "elizacloud"). Set during onboarding. */
   provider?: string;
+  /** Remote API base URL used when the app is attached to a remote backend. */
+  remoteApiBase?: string;
+  /** Remote access token used when the app is attached to a remote backend. */
+  remoteAccessToken?: string;
   /** Eliza Cloud API base URL. Default: https://elizacloud.ai/api/v1 */
   baseUrl?: string;
   /** Cached API key (stored encrypted via gateway auth). */
@@ -739,6 +748,12 @@ export type ElizaConfig = {
   database?: DatabaseConfig;
   /** Eliza Cloud integration for remote agent provisioning and inference. */
   cloud?: CloudConfig;
+  /** Deployment target for the current agent runtime. */
+  deploymentTarget?: DeploymentTargetConfig;
+  /** Linked external accounts that can be used by routing decisions. */
+  linkedAccounts?: LinkedAccountsConfig;
+  /** Canonical per-capability routing for AI and cloud-backed services. */
+  serviceRouting?: ServiceRoutingConfig;
   /** Authoritative active provider selection persisted from onboarding/settings. */
   connection?: OnboardingConnection;
   /** CUA (Computer Use Agent) cloud sandbox configuration. */

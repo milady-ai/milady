@@ -49,7 +49,7 @@ export function ConnectionProviderGridScreen({
   getDetectedLabel: (providerId: string) => string | null;
 }) {
   const branding = useBranding();
-  const { t, onboardingRemoteConnected } = useApp();
+  const { t, onboardingRemoteConnected, handleOnboardingNext } = useApp();
 
   return (
     <>
@@ -138,7 +138,19 @@ export function ConnectionProviderGridScreen({
         >
           {t("onboarding.back")}
         </Button>
-        <span />
+        <Button
+          variant="ghost"
+          className={onboardingSecondaryActionClass}
+          style={onboardingSecondaryActionTextShadowStyle}
+          onClick={() => {
+            void handleOnboardingNext();
+          }}
+          type="button"
+        >
+          {t("onboarding.configureAiLater", {
+            defaultValue: "Set up later",
+          })}
+        </Button>
       </div>
     </>
   );

@@ -100,7 +100,7 @@ describe("trigger runtime", () => {
       | undefined;
 
     vi.mocked(runtime.registerTaskWorker).mockImplementation((definition) => {
-      worker = definition as typeof worker;
+      worker = definition as unknown as typeof worker;
     });
 
     registerTriggerTaskWorker(runtime);

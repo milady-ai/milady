@@ -10,6 +10,7 @@ export {
 export {
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
+  deriveOnboardingResumeFieldsFromConfig,
   hasPartialOnboardingConnectionConfig,
   inferOnboardingResumeStep,
 } from "./onboarding-resume";

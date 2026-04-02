@@ -1,6 +1,8 @@
 import {
-  isCloudInferenceSelectedInConfig,
   normalizeOnboardingProviderId,
+  resolveDeploymentTargetInConfig,
+  resolveLinkedAccountsInConfig,
+  resolveServiceRoutingInConfig,
 } from "./onboarding.js";
 
 export type ElizaCloudService =
@@ -17,14 +19,6 @@ export type ResolvedElizaCloudTopology = {
   services: Record<ElizaCloudService, boolean>;
   shouldLoadPlugin: boolean;
 };
-
-const CLOUD_SERVICES = [
-  "inference",
-  "tts",
-  "media",
-  "embeddings",
-  "rpc",
-] as const satisfies readonly ElizaCloudService[];
 
 const REDACTED_SECRET = "[REDACTED]";
 
@@ -57,17 +51,15 @@ function normalizeSecretString(value: unknown): string | undefined {
   return trimmed;
 }
 
-function readServiceOverride(
-  services: Record<string, unknown> | null,
-  service: ElizaCloudService,
-): boolean | undefined {
-  const value = services?.[service];
-  return typeof value === "boolean" ? value : undefined;
-}
-
 export function isElizaCloudLinkedInConfig(
   config: Record<string, unknown> | null | undefined,
 ): boolean {
+  const linkedAccounts = resolveLinkedAccountsInConfig(config);
+  const linkedCloudAccount = linkedAccounts?.elizacloud;
+  if (linkedCloudAccount?.status === "linked") {
+    return true;
+  }
+
   const cloud = asConfigRecord(config?.cloud);
   return Boolean(normalizeSecretString(cloud?.apiKey));
 }
@@ -76,24 +68,39 @@ export function resolveElizaCloudTopology(
   config: Record<string, unknown> | null | undefined,
 ): ResolvedElizaCloudTopology {
   const cloud = asConfigRecord(config?.cloud);
-  const services = asConfigRecord(cloud?.services);
-  const provider = normalizeOnboardingProviderId(readConfigString(cloud, "provider"));
-  const runtime = readConfigString(cloud, "runtime") === "cloud" ? "cloud" : "local";
-  const inferenceSelected = isCloudInferenceSelectedInConfig(config);
+  const deploymentTarget = resolveDeploymentTargetInConfig(config);
+  const routing = resolveServiceRoutingInConfig(config);
+  const provider =
+    normalizeOnboardingProviderId(readConfigString(cloud, "provider")) ??
+    (deploymentTarget.provider === "elizacloud" ? "elizacloud" : null);
+  const runtime = deploymentTarget.runtime === "cloud" ? "cloud" : "local";
+  const resolvedServices = {
+    inference: Boolean(
+      routing?.llmText?.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(routing.llmText.backend) ===
+          "elizacloud",
+    ),
+    tts: Boolean(
+      routing?.tts?.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(routing.tts.backend) === "elizacloud",
+    ),
+    media: Boolean(
+      routing?.media?.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(routing.media.backend) === "elizacloud",
+    ),
+    embeddings: Boolean(
+      routing?.embeddings?.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(routing.embeddings.backend) ===
+          "elizacloud",
+    ),
+    rpc: Boolean(
+      routing?.rpc?.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(routing.rpc.backend) === "elizacloud",
+    ),
+  } satisfies Record<ElizaCloudService, boolean>;
   const cloudDeploymentSelected =
-    provider === "elizacloud" && runtime === "cloud";
-  const cloudContextSelected = inferenceSelected || cloudDeploymentSelected;
-
-  const resolvedServices = Object.fromEntries(
-    CLOUD_SERVICES.map((service) => {
-      if (service === "inference") {
-        return [service, inferenceSelected];
-      }
-
-      const explicitOverride = readServiceOverride(services, service);
-      return [service, explicitOverride ?? cloudContextSelected];
-    }),
-  ) as Record<ElizaCloudService, boolean>;
+    deploymentTarget.runtime === "cloud" &&
+    deploymentTarget.provider === "elizacloud";
 
   return {
     linked: isElizaCloudLinkedInConfig(config),

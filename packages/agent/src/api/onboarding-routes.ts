@@ -7,6 +7,12 @@ import {
   normalizeOnboardingProviderId,
 } from "../contracts/onboarding.js";
 import {
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "../contracts/service-routing.js";
+import {
+  applyCanonicalOnboardingConfig,
   applyOnboardingConnectionConfig,
   reconcilePersistedOnboardingConnection,
 } from "./provider-switch-config.js";
@@ -323,6 +329,35 @@ export async function handleOnboardingRoutes(
       error(res, "Invalid connection", 400);
       return true;
     }
+    const explicitDeploymentTargetRequested = Object.hasOwn(
+      body,
+      "deploymentTarget",
+    );
+    const explicitDeploymentTarget = explicitDeploymentTargetRequested
+      ? normalizeDeploymentTargetConfig(body.deploymentTarget)
+      : null;
+    if (explicitDeploymentTargetRequested && !explicitDeploymentTarget) {
+      error(res, "Invalid deploymentTarget", 400);
+      return true;
+    }
+    const explicitLinkedAccountsRequested = Object.hasOwn(
+      body,
+      "linkedAccounts",
+    );
+    const explicitLinkedAccounts = explicitLinkedAccountsRequested
+      ? normalizeLinkedAccountsConfig(body.linkedAccounts)
+      : null;
+    const explicitServiceRoutingRequested = Object.hasOwn(
+      body,
+      "serviceRouting",
+    );
+    const explicitServiceRouting = explicitServiceRoutingRequested
+      ? normalizeServiceRoutingConfig(body.serviceRouting)
+      : null;
+    const hasCanonicalRuntimeConfig =
+      explicitDeploymentTargetRequested ||
+      explicitLinkedAccountsRequested ||
+      explicitServiceRoutingRequested;
 
     // ── Run mode & cloud configuration ────────────────────────────────────
     const runMode = (body.runMode as string) || "local";
@@ -346,7 +381,7 @@ export async function handleOnboardingRoutes(
 
     if (explicitConnection) {
       await applyOnboardingConnectionConfig(config, explicitConnection);
-    } else {
+    } else if (!hasCanonicalRuntimeConfig) {
       if (!config.cloud) config.cloud = {};
       config.cloud.enabled = runMode === "cloud";
 
@@ -461,6 +496,59 @@ export async function handleOnboardingRoutes(
       }
 
       reconcilePersistedOnboardingConnection(config);
+    }
+
+    if (hasCanonicalRuntimeConfig) {
+      applyCanonicalOnboardingConfig(config, {
+        deploymentTarget: explicitDeploymentTarget,
+        linkedAccounts: explicitLinkedAccounts,
+        serviceRouting: explicitServiceRouting,
+        clearRoutes:
+          explicitServiceRoutingRequested &&
+          !explicitServiceRouting?.llmText &&
+          !explicitConnection
+            ? ["llmText"]
+            : [],
+      });
+
+      if (!explicitConnection) {
+        delete config.connection;
+
+        if (!config.cloud) config.cloud = {};
+        config.cloud.enabled = false;
+        config.cloud.inferenceMode = "byok";
+        config.cloud.runtime =
+          explicitDeploymentTarget?.runtime === "cloud" ? "cloud" : "local";
+        if (explicitDeploymentTarget?.provider === "elizacloud") {
+          config.cloud.provider = "elizacloud";
+        } else if (explicitDeploymentTarget?.provider === "remote") {
+          config.cloud.provider = "remote";
+          config.cloud.remoteApiBase = explicitDeploymentTarget.remoteApiBase;
+          if (explicitDeploymentTarget.remoteAccessToken) {
+            config.cloud.remoteAccessToken =
+              explicitDeploymentTarget.remoteAccessToken;
+          }
+        }
+
+        const services =
+          config.cloud.services && typeof config.cloud.services === "object"
+            ? (config.cloud.services as Record<string, unknown>)
+            : {};
+        services.inference = false;
+        config.cloud.services = services;
+        delete process.env.ELIZAOS_CLOUD_ENABLED;
+        delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
+        delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
+
+        if (config.models && typeof config.models === "object") {
+          delete config.models.small;
+          delete config.models.large;
+        }
+
+        if (config.agents?.defaults?.model) {
+          delete config.agents.defaults.model.primary;
+        }
+      }
     }
 
     // ── GitHub token ────────────────────────────────────────────────────

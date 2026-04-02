@@ -55,6 +55,7 @@
     "./contracts": "./src/contracts/index.ts",
     "./contracts/*": "./src/contracts/*.ts",
     "./contracts/onboarding": "./src/contracts/onboarding.ts",
+    "./contracts/service-routing": "./src/contracts/service-routing.ts",
     "./contracts/wallet": "./src/contracts/wallet.ts",
     "./diagnostics": "./src/diagnostics/index.ts",
     "./diagnostics/*": "./src/diagnostics/*.ts",

@@ -3,6 +3,7 @@ import { logger } from "@elizaos/core";
 import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
 import { normalizeCloudSiteUrl } from "../cloud/base-url";
 import { validateCloudBaseUrl } from "../cloud/validate-url";
+import { applyCanonicalOnboardingConfig } from "./provider-switch-config";
 import {
   readJsonBody as parseJsonBody,
   sendJson,
@@ -321,6 +322,14 @@ export async function handleCloudRoute(
       >;
       cloud.apiKey = data.apiKey;
       (state.config as Record<string, unknown>).cloud = cloud;
+      applyCanonicalOnboardingConfig(state.config as never, {
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+      });
       const cloudInferenceSelected = isCloudInferenceSelectedInConfig(
         state.config as Record<string, unknown>,
       );
@@ -521,6 +530,16 @@ export async function handleCloudRoute(
     cloud.enabled = false;
     delete cloud.apiKey;
     (state.config as Record<string, unknown>).cloud = cloud;
+    applyCanonicalOnboardingConfig(state.config as never, {
+      deploymentTarget: { runtime: "local" },
+      linkedAccounts: {
+        elizacloud: {
+          status: "unlinked",
+          source: "api-key",
+        },
+      },
+      clearRoutes: ["llmText", "tts", "media", "embeddings", "rpc"],
+    });
 
     try {
       if (state.saveConfig) {

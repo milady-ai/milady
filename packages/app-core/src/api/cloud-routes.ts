@@ -4,11 +4,13 @@ import {
   type CloudRouteState as AutonomousCloudRouteState,
   handleCloudRoute as handleAutonomousCloudRoute,
 } from "@miladyai/agent/api/cloud-routes";
+import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import { normalizeCloudSiteUrl } from "@miladyai/agent/cloud/base-url";
 import type { CloudManager } from "@miladyai/agent/cloud/cloud-manager";
 import { validateCloudBaseUrl } from "@miladyai/agent/cloud/validate-url";
 import type { ElizaConfig } from "@miladyai/agent/config/config";
 import { saveElizaConfig } from "@miladyai/agent/config/config";
+import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
 import { createIntegrationTelemetrySpan } from "../diagnostics/integration-observability";
 import { isTimeoutError } from "../utils/errors";
 import {
@@ -103,15 +105,29 @@ async function persistCloudLoginStatus(args: {
   >;
 
   cloud.apiKey = args.apiKey;
-
-  // Enable cloud unless the user has explicitly opted out (e.g. local-provider
-  // with cloud.enabled === false). Undefined or true both count as enabled.
-  const cloudEnabled = cloud.enabled !== false;
-  if (cloudEnabled) {
-    cloud.enabled = true;
+  const cloudInferenceSelected = isCloudInferenceSelectedInConfig(
+    args.state.config as Record<string, unknown>,
+  );
+  cloud.enabled = cloudInferenceSelected;
+  if (!cloudInferenceSelected) {
+    cloud.inferenceMode = "byok";
+    const services =
+      cloud.services && typeof cloud.services === "object"
+        ? (cloud.services as Record<string, unknown>)
+        : {};
+    services.inference = false;
+    cloud.services = services;
   }
 
   args.state.config.cloud = cloud as ElizaConfig["cloud"];
+  applyCanonicalOnboardingConfig(args.state.config, {
+    linkedAccounts: {
+      elizacloud: {
+        status: "linked",
+        source: "api-key",
+      },
+    },
+  });
 
   try {
     saveElizaConfig(args.state.config);
@@ -128,7 +144,7 @@ async function persistCloudLoginStatus(args: {
 
   clearCloudSecrets();
   process.env.ELIZAOS_CLOUD_API_KEY = args.apiKey;
-  if (cloudEnabled) {
+  if (cloudInferenceSelected) {
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
   } else {
     delete process.env.ELIZAOS_CLOUD_ENABLED;
@@ -153,7 +169,7 @@ async function persistCloudLoginStatus(args: {
       ...(runtime.character.secrets ?? {}),
       ELIZAOS_CLOUD_API_KEY: args.apiKey,
     };
-    if (cloudEnabled) {
+    if (cloudInferenceSelected) {
       nextSecrets.ELIZAOS_CLOUD_ENABLED = "true";
     } else {
       delete nextSecrets.ELIZAOS_CLOUD_ENABLED;

@@ -1,5 +1,6 @@
 import {
   inferOnboardingConnectionFromConfig,
+  resolveDeploymentTargetInConfig,
   type OnboardingConnection,
 } from "@miladyai/shared/contracts/onboarding";
 import type { BuildOnboardingConnectionArgs } from "../onboarding-config";
@@ -14,6 +15,19 @@ export function hasPartialOnboardingConnectionConfig(
   config: Record<string, unknown> | null | undefined,
 ): boolean {
   if (inferOnboardingConnectionFromConfig(config)) {
+    return true;
+  }
+
+  const root =
+    config && typeof config === "object" && !Array.isArray(config)
+      ? (config as Record<string, unknown>)
+      : null;
+  if (
+    root &&
+    (Object.hasOwn(root, "deploymentTarget") ||
+      Object.hasOwn(root, "linkedAccounts") ||
+      Object.hasOwn(root, "serviceRouting"))
+  ) {
     return true;
   }
 
@@ -113,4 +127,30 @@ export function deriveOnboardingResumeFields(
         onboardingRemoteToken: connection.remoteAccessToken ?? "",
       };
   }
+}
+
+export function deriveOnboardingResumeFieldsFromConfig(
+  config: Record<string, unknown> | null | undefined,
+): Partial<BuildOnboardingConnectionArgs> {
+  const connection = deriveOnboardingResumeConnection(config);
+  if (!connection) {
+    const deploymentTarget = resolveDeploymentTargetInConfig(config);
+    if (deploymentTarget.runtime === "remote") {
+      return {
+        onboardingRunMode: "cloud",
+        onboardingCloudProvider: "remote",
+        onboardingRemoteConnected: Boolean(deploymentTarget.remoteApiBase),
+        onboardingRemoteApiBase: deploymentTarget.remoteApiBase ?? "",
+        onboardingRemoteToken: deploymentTarget.remoteAccessToken ?? "",
+      };
+    }
+    if (deploymentTarget.runtime === "cloud") {
+      return {
+        onboardingRunMode: "cloud",
+        onboardingCloudProvider: "elizacloud",
+      };
+    }
+    return {};
+  }
+  return deriveOnboardingResumeFields(connection);
 }

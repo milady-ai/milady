@@ -9,6 +9,11 @@ import { type CompatRuntimeState } from "./compat-route-shared";
 import { getCloudSecret } from "./cloud-secrets";
 import { sendJson as sendJsonResponse } from "./response";
 import {
+  normalizeOnboardingProviderId,
+  normalizePersistedOnboardingConnection,
+} from "@miladyai/shared/contracts/onboarding";
+import { normalizeServiceRoutingConfig } from "@miladyai/shared/contracts/service-routing";
+import {
   deriveCompatOnboardingReplayBody,
   extractAndPersistOnboardingApiKey,
   persistCompatOnboardingDefaults,
@@ -77,6 +82,19 @@ export async function handleOnboardingCompatRoute(
 
     const { isCloudMode, replayBody: replayBodyRecord } =
       deriveCompatOnboardingReplayBody(body);
+    const explicitConnection = normalizePersistedOnboardingConnection(
+      body.connection,
+    );
+    const explicitServiceRouting = normalizeServiceRoutingConfig(
+      body.serviceRouting,
+    );
+    const cloudInferenceSelected = Boolean(
+      explicitConnection?.kind === "cloud-managed" ||
+        (explicitServiceRouting?.llmText?.transport === "cloud-proxy" &&
+          normalizeOnboardingProviderId(
+            explicitServiceRouting.llmText.backend,
+          ) === "elizacloud"),
+    );
 
     // Resolve the cloud API key so the upstream handler can write it
     // into state.config before saving. Without this, the upstream uses
@@ -95,7 +113,8 @@ export async function handleOnboardingCompatRoute(
         if (!config.cloud) {
           (config as Record<string, unknown>).cloud = {};
         }
-        (config.cloud as Record<string, unknown>).enabled = true;
+        (config.cloud as Record<string, unknown>).enabled =
+          cloudInferenceSelected;
 
         resolvedCloudApiKey = (config.cloud as Record<string, unknown>)
           .apiKey as string | undefined;
@@ -130,7 +149,7 @@ export async function handleOnboardingCompatRoute(
 
         capturedCloudApiKey = resolvedCloudApiKey;
 
-        if (body.smallModel) {
+        if (cloudInferenceSelected && body.smallModel) {
           if (!config.models) {
             (config as Record<string, unknown>).models = {};
           }
