@@ -4,9 +4,8 @@ import { installPluginAction } from "../../actions/install-plugin";
 const ensurePluginManagerAllowedMock = vi.fn(() => "already-enabled");
 
 vi.mock("../../runtime/plugin-manager-guard", async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import("../../runtime/plugin-manager-guard")
-  >();
+  const actual =
+    await importOriginal<typeof import("../../runtime/plugin-manager-guard")>();
 
   return {
     ...actual,
