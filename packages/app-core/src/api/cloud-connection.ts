@@ -171,6 +171,7 @@ export function resolveCloudApiKey(
   config: Pick<ElizaConfig, "cloud"> | Record<string, unknown>,
   runtime?: { character?: { secrets?: Record<string, unknown> } } | null,
 ): string | undefined {
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   // 1. Config file (disk)
   const configApiKey = normalizeSecret(
     (config as { cloud?: { apiKey?: string } }).cloud?.apiKey,

@@ -1,4 +1,7 @@
-import { isElizaCloudServiceSelectedInConfig } from "@miladyai/shared/contracts";
+import {
+  isElizaCloudServiceSelectedInConfig,
+  migrateLegacyRuntimeConfig,
+} from "@miladyai/shared/contracts";
 import type { ElizaConfig } from "../config/config";
 import {
   DEFAULT_WALLET_RPC_SELECTIONS,
@@ -550,6 +553,9 @@ export function applyWalletRpcConfigUpdate(
 export function resolveWalletRpcReadiness(
   config?: WalletCapableConfig | null,
 ): WalletRpcReadiness {
+  if (config && typeof config === "object" && !Array.isArray(config)) {
+    migrateLegacyRuntimeConfig(config as Record<string, unknown>);
+  }
   const walletNetwork = resolveWalletNetworkMode(config);
   const cloudApiKey = resolveCloudApiKey(config);
   const cloudBaseUrl = resolveCloudApiBaseUrl(config?.cloud?.baseUrl);
