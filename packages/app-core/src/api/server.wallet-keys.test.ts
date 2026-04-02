@@ -332,7 +332,7 @@ describe("POST /api/agent/reset", () => {
       ) as Record<string, unknown>;
       expect(savedConfig.meta).toEqual({});
       expect(savedConfig.agents).toEqual({ list: [] });
-      expect(savedConfig.cloud).toEqual({});
+      expect(savedConfig.cloud).toBeUndefined();
       expect(savedConfig.messages).toBeUndefined();
       expect(savedConfig.models).toEqual({ embedding: "keep-me" });
       expect(savedConfig.env).toMatchObject({
@@ -397,7 +397,7 @@ describe("POST /api/agent/reset", () => {
       ) as Record<string, unknown>;
       expect(savedConfig.meta).toBeUndefined();
       expect(savedConfig.agents).toEqual({ list: [] });
-      expect(savedConfig.cloud).toEqual({});
+      expect(savedConfig.cloud).toBeUndefined();
       expect(
         (savedConfig.env as { vars?: Record<string, string> | undefined })?.vars
           ?.OPENAI_API_KEY,
