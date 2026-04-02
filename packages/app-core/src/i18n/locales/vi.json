@@ -2119,6 +2119,7 @@
   "wallet.copySolanaAddress": "Copy địa chỉ Solana",
   "wallet.emptyTokensCta": "Dùng nút sao chép phía trên để nạp cho agent.",
   "wallet.enableIt": "Bật lên",
+  "wallet.generateWallet": "Tạo ví",
   "wallet.loadingBalances": "Đang tải số dư...",
   "wallet.loadingNfts": "Đang tải NFTs...",
   "wallet.manual": "Thủ công",

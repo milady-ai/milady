@@ -2119,6 +2119,7 @@
   "wallet.copySolanaAddress": "Copiar dirección Solana",
   "wallet.emptyTokensCta": "Usa los botones de copiar de arriba para fondear este agente.",
   "wallet.enableIt": "Habilítalo",
+  "wallet.generateWallet": "Generar billetera",
   "wallet.loadingBalances": "Cargando saldos...",
   "wallet.loadingNfts": "Cargando NFT...",
   "wallet.manual": "manuales",

@@ -2119,6 +2119,7 @@
   "wallet.copySolanaAddress": "Copiar endereço Solana",
   "wallet.emptyTokensCta": "Use os botões de copiar acima para financiar este agente.",
   "wallet.enableIt": "Habilite-o",
+  "wallet.generateWallet": "Gerar carteira",
   "wallet.loadingBalances": "Carregando saldos...",
   "wallet.loadingNfts": "Carregando NFTs...",
   "wallet.manual": "Manuais",

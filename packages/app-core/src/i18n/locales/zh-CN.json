@@ -2119,6 +2119,7 @@
   "wallet.copySolanaAddress": "复制 Solana 地址",
   "wallet.emptyTokensCta": "使用上方的复制按钮为这个代理充值。",
   "wallet.enableIt": "去启用",
+  "wallet.generateWallet": "生成钱包",
   "wallet.loadingBalances": "正在加载余额...",
   "wallet.loadingNfts": "正在加载 NFT...",
   "wallet.manual": "手动",

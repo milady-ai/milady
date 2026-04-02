@@ -2119,6 +2119,7 @@
   "wallet.copySolanaAddress": "Solana 주소 복사",
   "wallet.emptyTokensCta": "위의 복사 버튼으로 이 에이전트에 자금을 보내세요.",
   "wallet.enableIt": "활성화",
+  "wallet.generateWallet": "지갑 생성",
   "wallet.loadingBalances": "잔액 로드 중...",
   "wallet.loadingNfts": "NFT 로드 중...",
   "wallet.manual": "수동",
