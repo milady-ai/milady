@@ -78,7 +78,13 @@ export function TokensTable({
               ? t("wallet.noTokensFound")
               : t("wallet.noDataRefresh")}
           </div>
-          <div className="text-sm text-muted">{t("wallet.emptyTokensCta")}</div>
+          <Button
+            variant="default"
+            size="sm"
+            className="mt-2 rounded-full px-5"
+          >
+            {t("wallet.generateWallet")}
+          </Button>
         </div>
         {renderChainErrors()}
       </div>
