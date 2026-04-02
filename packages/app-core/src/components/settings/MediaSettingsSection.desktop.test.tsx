@@ -5,14 +5,18 @@ import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { testT } from "../../../../../test/helpers/i18n";
 
-const { invokeDesktopBridgeRequestMock, isElectrobunRuntimeMock } = vi.hoisted(
-  () => ({
-    invokeDesktopBridgeRequestMock: vi.fn(),
-    isElectrobunRuntimeMock: vi.fn(),
-  }),
-);
+const {
+  getPluginsMock,
+  invokeDesktopBridgeRequestMock,
+  isElectrobunRuntimeMock,
+} = vi.hoisted(() => ({
+  getPluginsMock: vi.fn(),
+  invokeDesktopBridgeRequestMock: vi.fn(),
+  isElectrobunRuntimeMock: vi.fn(),
+}));
 
 vi.mock("../../bridge", () => ({
+  getPlugins: getPluginsMock,
   invokeDesktopBridgeRequest: invokeDesktopBridgeRequestMock,
   isElectrobunRuntime: isElectrobunRuntimeMock,
 }));
@@ -60,22 +64,33 @@ import { findButtonByText } from "../../../../../test/helpers/react-test";
 import { DesktopMediaControlPanel } from "./MediaSettingsSection";
 
 describe("DesktopMediaControlPanel", () => {
+  let cameraPluginMock: Record<string, ReturnType<typeof vi.fn>>;
+
   beforeEach(() => {
+    cameraPluginMock = {
+      getDevices: vi.fn().mockResolvedValue({
+        devices: [{ deviceId: "cam-1", label: "Front Camera" }],
+      }),
+      checkPermissions: vi.fn().mockResolvedValue({ camera: "granted" }),
+      getRecordingState: vi
+        .fn()
+        .mockResolvedValue({ isRecording: false, duration: 0 }),
+      requestPermissions: vi.fn().mockResolvedValue({ camera: "granted" }),
+      startPreview: vi.fn().mockResolvedValue({}),
+      stopPreview: vi.fn().mockResolvedValue(undefined),
+      switchCamera: vi.fn().mockResolvedValue({}),
+      capturePhoto: vi.fn().mockResolvedValue({ base64: "abc" }),
+      startRecording: vi.fn().mockResolvedValue(undefined),
+      stopRecording: vi.fn().mockResolvedValue({ path: "/tmp/capture.webm" }),
+    };
+    getPluginsMock.mockReturnValue({
+      camera: { plugin: cameraPluginMock },
+    });
     invokeDesktopBridgeRequestMock.mockReset();
     isElectrobunRuntimeMock.mockReset();
     isElectrobunRuntimeMock.mockReturnValue(true);
     invokeDesktopBridgeRequestMock.mockImplementation(
       async ({ rpcMethod }: { rpcMethod: string }) => {
-        if (rpcMethod === "cameraGetDevices") {
-          return {
-            available: true,
-            devices: [{ deviceId: "cam-1", label: "Front Camera" }],
-          };
-        }
-        if (rpcMethod === "cameraCheckPermissions")
-          return { status: "granted" };
-        if (rpcMethod === "cameraGetRecordingState")
-          return { recording: false, duration: 0 };
         if (rpcMethod === "screencaptureGetSources") {
           return {
             available: true,
@@ -123,6 +138,35 @@ describe("DesktopMediaControlPanel", () => {
           filename: "milady-desktop-screenshot.png",
         }),
       }),
+    );
+  });
+
+  it("uses the camera plugin for desktop camera actions", async () => {
+    let renderer: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(
+        React.createElement(DesktopMediaControlPanel),
+      );
+    });
+    if (!renderer) {
+      throw new Error("Failed to render DesktopMediaControlPanel");
+    }
+    const root = renderer.root;
+
+    await act(async () => {
+      findButtonByText(root, "Request Camera Permission").props.onClick();
+    });
+    await act(async () => {
+      findButtonByText(root, "Capture Photo").props.onClick();
+    });
+
+    expect(cameraPluginMock.requestPermissions).toHaveBeenCalledTimes(1);
+    expect(cameraPluginMock.capturePhoto).toHaveBeenCalledTimes(1);
+    expect(invokeDesktopBridgeRequestMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ rpcMethod: "cameraRequestPermissions" }),
+    );
+    expect(invokeDesktopBridgeRequestMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ rpcMethod: "cameraCapturePhoto" }),
     );
   });
 });

@@ -168,6 +168,7 @@ export function getPermissionAction(
   id: SystemPermissionId,
   status: PermissionStatus,
   canRequest: boolean,
+  platform?: string,
 ): {
   ariaLabelPrefix: string;
   label: string;
@@ -177,9 +178,17 @@ export function getPermissionAction(
     return null;
   }
 
+  const usesWindowsPrivacySettings =
+    platform === "win32" && (id === "microphone" || id === "camera");
+
   if (status === "not-determined" && canRequest) {
-    const label =
-      id === "camera"
+    const label = usesWindowsPrivacySettings
+      ? translateWithFallback(
+          t,
+          "permissionssection.OpenPrivacySettings",
+          "Open Privacy Settings",
+        )
+      : id === "camera"
         ? translateWithFallback(
             t,
             "permissionssection.CheckAccess",
@@ -189,7 +198,7 @@ export function getPermissionAction(
     return {
       ariaLabelPrefix: label,
       label,
-      type: "request",
+      type: usesWindowsPrivacySettings ? "settings" : "request",
     };
   }
 

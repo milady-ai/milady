@@ -512,7 +512,55 @@ describe("PermissionsSection", () => {
     expect(collectText(root)).toContain("Granted");
   });
 
-  it("requests renderer camera access before native settings fallback", async () => {
+  it("does not reconcile renderer camera state on win32 desktop", async () => {
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            ...defaultPermissions,
+            camera: {
+              id: "camera",
+              status: "not-determined",
+              canRequest: true,
+            },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "win32";
+        }
+        return null;
+      },
+    );
+    vi.mocked(navigator.permissions.query).mockImplementation(
+      async () =>
+        ({
+          state: "granted",
+        }) as PermissionStatus,
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(PermissionsSection));
+    });
+
+    const root = tree?.root;
+    expect(root).toBeDefined();
+    if (!root) {
+      throw new Error("PermissionsSection root not rendered");
+    }
+
+    expect(findButtonsByAriaLabel(root, "Open Privacy Settings Camera")).toHaveLength(1);
+    expect(collectText(root)).toContain("Not Asked");
+    expect(collectText(root)).toContain(
+      "Windows may not list Milady as a named app here.",
+    );
+  });
+
+  it("uses the desktop bridge for camera permission requests", async () => {
     mockUseApp.mockReturnValue(baseContext());
     mockInvokeDesktopBridgeRequest.mockImplementation(
       async (options: { rpcMethod: string }) => {
@@ -546,29 +594,6 @@ describe("PermissionsSection", () => {
                 : "prompt",
         }) as PermissionStatus,
     );
-    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue({
-      getTracks: () => [{ stop: vi.fn() }],
-    } as unknown as MediaStream);
-    let enumerateDevicesCallCount = 0;
-    vi.mocked(navigator.mediaDevices.enumerateDevices).mockImplementation(
-      async () => {
-        enumerateDevicesCallCount += 1;
-        if (enumerateDevicesCallCount < 3) {
-          return [];
-        }
-
-        return [
-          {
-            deviceId: "camera-1",
-            groupId: "group-1",
-            kind: "videoinput",
-            label: "FaceTime HD Camera",
-            toJSON: () => ({}),
-          } as MediaDeviceInfo,
-        ];
-      },
-    );
-
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(PermissionsSection));
@@ -592,14 +617,58 @@ describe("PermissionsSection", () => {
       requestButton.props.onClick();
     });
 
-    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
-      video: true,
-    });
-    expect(mockInvokeDesktopBridgeRequest).not.toHaveBeenCalledWith(
+    expect(mockInvokeDesktopBridgeRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         rpcMethod: "permissionsRequest",
         params: { id: "camera" },
       }),
+    );
+  });
+
+  it("opens Windows privacy settings for win32 microphone and camera instead of implying direct grant", async () => {
+    mockUseApp.mockReturnValue(baseContext());
+    mockInvokeDesktopBridgeRequest.mockImplementation(
+      async (options: { rpcMethod: string }) => {
+        if (options.rpcMethod === "permissionsGetAll") {
+          return {
+            ...defaultPermissions,
+            microphone: {
+              id: "microphone",
+              status: "not-determined",
+              canRequest: true,
+            },
+            camera: {
+              id: "camera",
+              status: "not-determined",
+              canRequest: true,
+            },
+          };
+        }
+        if (options.rpcMethod === "permissionsIsShellEnabled") {
+          return true;
+        }
+        if (options.rpcMethod === "permissionsGetPlatform") {
+          return "win32";
+        }
+        return null;
+      },
+    );
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(PermissionsSection));
+    });
+
+    const root = tree?.root;
+    expect(root).toBeDefined();
+    if (!root) {
+      throw new Error("PermissionsSection root not rendered");
+    }
+
+    expect(findButtonsByAriaLabel(root, "Open Privacy Settings Microphone")).toHaveLength(1);
+    expect(findButtonsByAriaLabel(root, "Open Privacy Settings Camera")).toHaveLength(1);
+    expect(collectText(root)).toContain(
+      "Open Windows privacy settings for microphone and camera, then verify access by using those features in Milady.",
     );
   });
 

@@ -104,9 +104,29 @@ function shouldPreferNativeTalkMode(): boolean {
   return Capacitor.isNativePlatform();
 }
 
+function isWindowsElectrobunRenderer(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    !!getElectrobunRendererRpc() &&
+    typeof process !== "undefined" &&
+    process.platform === "win32"
+  );
+}
+
+function shouldAutoRestartBrowserRecognition(): boolean {
+  if (typeof window === "undefined") return false;
+  if (isWindowsElectrobunRenderer()) {
+    return false;
+  }
+  return true;
+}
+
 // ── Test-visible internals ───────────────────────────────────────────
 
 export const __voiceChatInternals = {
+  isWindowsElectrobunRenderer,
+  shouldPreferNativeTalkMode,
+  shouldAutoRestartBrowserRecognition,
   splitFirstSentence,
   remainderAfter,
   queueableSpeechPrefix,
@@ -298,6 +318,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
     setSupported(shouldPreferNativeTalkMode() ? true : !!SpeechRecognitionAPI);
     synthRef.current = window.speechSynthesis ?? null;
   }, []);
+
 
   // ── Mouth animation loop ──────────────────────────────────────────
 
@@ -501,7 +522,11 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
       };
 
       recognition.onend = () => {
-        if (enabledRef.current && listeningModeRef.current === mode) {
+        if (
+          shouldAutoRestartBrowserRecognition() &&
+          enabledRef.current &&
+          listeningModeRef.current === mode
+        ) {
           try {
             recognition.start();
           } catch {
@@ -529,6 +554,10 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
 
   const startTalkModeRecognition = useCallback(
     async (mode: Exclude<VoiceCaptureMode, "idle">) => {
+      if (!shouldPreferNativeTalkMode()) {
+        return false;
+      }
+
       await ensureTalkModeListeners();
 
       try {
@@ -589,6 +618,7 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
   const startListening = useCallback(
     async (mode: Exclude<VoiceCaptureMode, "idle"> = "compose") => {
       if (enabledRef.current) return;
+      if (!isVoiceInputSupportedInRuntime()) return;
 
       transcriptBufferRef.current = "";
       setInterimTranscript("");

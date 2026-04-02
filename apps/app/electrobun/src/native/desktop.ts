@@ -190,6 +190,7 @@ export class DesktopManager {
   private windowEventHandlers: Partial<
     Record<"focus" | "blur" | "close" | "resize" | "move", () => void>
   > = {};
+  private appExitStarted = false;
 
   constructor() {
     activeDesktopManager = this;
@@ -1108,11 +1109,23 @@ X-GNOME-Autostart-enabled=true
 
   // MARK: - App
 
+  private async beginAppExit(reason: string): Promise<void> {
+    if (this.appExitStarted) {
+      return;
+    }
+    this.appExitStarted = true;
+    await this.showWindow().catch(() => {});
+    this.send("desktopShutdownStarted", { reason });
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
+
   async quit(): Promise<void> {
+    await this.beginAppExit("desktop-quit");
     Utils.quit();
   }
 
   async relaunch(): Promise<void> {
+    await this.beginAppExit("desktop-relaunch");
     try {
       const child = Bun.spawn([process.execPath, ...process.argv.slice(1)], {
         detached: true,

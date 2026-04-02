@@ -113,7 +113,8 @@ export function getTalkModePlugin(): TalkModePluginLike {
 }
 
 export function getCameraPlugin(): GenericNativePlugin {
-  return getNativePlugin<GenericNativePlugin>("Camera");
+  const plugins = getCapacitorPlugins();
+  return (plugins.MiladyCamera ?? plugins.Camera ?? {}) as GenericNativePlugin;
 }
 
 export function getLocationPlugin(): GenericNativePlugin {

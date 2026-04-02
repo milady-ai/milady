@@ -59,17 +59,18 @@ export class TalkModeElectrobun {
           options,
         );
         if (result.started) {
-          this.enabled = true;
-          this.setupNativeListeners();
-          this.setState("listening", "Listening");
           const whisperStatus = await window.electrobun.ipcRenderer.invoke(
             "talkmode:isWhisperAvailable",
           );
           if (whisperStatus.available) {
+            this.enabled = true;
+            this.setupNativeListeners();
+            this.setState("listening", "Listening");
             this.captureSampleRate = this.config.stt?.sampleRate ?? 16000;
             await this.startAudioCapture();
+            return result;
           }
-          return result;
+          await window.electrobun.ipcRenderer.invoke("talkmode:stop");
         }
       } catch {
         // Fall through to web implementation
@@ -103,7 +104,11 @@ export class TalkModeElectrobun {
       });
     };
     this.recognition.onend = () => {
-      if (this.enabled && this.state === "listening") {
+      if (
+        this.enabled &&
+        this.state === "listening" &&
+        (!window.electrobun?.ipcRenderer || process.platform !== "win32")
+      ) {
         try {
           this.recognition?.start();
         } catch {
@@ -587,6 +592,9 @@ export class TalkModeElectrobun {
     return { microphone, speechRecognition };
   }
   async requestPermissions() {
+    if (process.platform === "win32") {
+      return this.checkPermissions();
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => {

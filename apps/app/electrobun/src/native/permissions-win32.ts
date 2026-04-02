@@ -9,8 +9,9 @@ export async function checkPermission(
   switch (id) {
     case "microphone":
     case "camera":
-      // Windows manages these at runtime; assume granted for desktop apps
-      return { status: "granted", canRequest: true };
+      // Windows desktop privacy state is not reliably observable here.
+      // Report requestable until runtime capture actually proves access.
+      return { status: "not-determined", canRequest: true };
 
     case "shell":
       return { status: "granted", canRequest: false };
@@ -27,6 +28,9 @@ export async function checkPermission(
 export async function requestPermission(
   id: SystemPermissionId,
 ): Promise<PermissionCheckResult> {
+  if (id === "microphone" || id === "camera") {
+    await openPrivacySettings(id);
+  }
   return checkPermission(id);
 }
 

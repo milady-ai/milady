@@ -1345,7 +1345,7 @@ async function setupUpdater(): Promise<void> {
               console.error("[Main] Agent restart failed:", err);
             });
         } else if (action === "quit") {
-          Utils.quit();
+          void getDesktopManager().quit();
         } else if (action === "show") {
           void getDesktopManager().showWindow();
         } else if (action?.startsWith("navigate-")) {
@@ -1387,6 +1387,7 @@ function setupDockReopen(): void {
 async function runShutdownCleanup(reason: string): Promise<void> {
   console.log(`[Main] App quitting (${reason}), disposing native modules...`);
   isQuitting = true;
+  sendToActiveRenderer("desktopShutdownStarted", { reason });
   for (const cleanupFn of cleanupFns) {
     await Promise.resolve(cleanupFn());
   }
