@@ -356,10 +356,7 @@ export function useChatVoiceController(options: {
     // committed `enabled` state; only use the event snapshot to force `true`
     // when it arrives before the wider app state catches up.
     return fromContext || cloudVoiceSnapshot === true;
-  }, [
-    cloudVoiceSnapshot,
-    elizaCloudEnabled,
-  ]);
+  }, [cloudVoiceSnapshot, elizaCloudEnabled]);
 
   useEffect(() => {
     miladyTtsDebug("chat:cloud-voice-available", {

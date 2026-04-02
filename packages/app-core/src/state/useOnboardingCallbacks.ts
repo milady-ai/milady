@@ -254,12 +254,12 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       onboardingCompletionCommittedRef.current = true;
       _setOnboardingMode("basic");
       setOnboardingActiveGuide(null);
-    setPostOnboardingChecklistDismissed(false);
-    setOnboardingDetectedProviders(
-      onboardingDetectedProviders.map((provider) => {
-        const { apiKey: _, ...rest } = provider;
-        return rest;
-      }) as AppState["onboardingDetectedProviders"],
+      setPostOnboardingChecklistDismissed(false);
+      setOnboardingDetectedProviders(
+        onboardingDetectedProviders.map((provider) => {
+          const { apiKey: _, ...rest } = provider;
+          return rest;
+        }) as AppState["onboardingDetectedProviders"],
       );
       setOnboardingComplete(true);
       coordinatorOnboardingCompleteRef.current?.();

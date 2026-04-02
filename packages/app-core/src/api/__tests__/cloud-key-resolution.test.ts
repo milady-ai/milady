@@ -54,7 +54,8 @@ function resolveCloudApiKey(
   const cloudInferenceSelected =
     config.connection?.kind === "cloud-managed" ||
     (config.connection?.kind == null &&
-      (config.cloud?.enabled === true || config.cloud?.inferenceMode === "cloud"));
+      (config.cloud?.enabled === true ||
+        config.cloud?.inferenceMode === "cloud"));
   if (!cloudInferenceSelected) {
     return undefined;
   }
