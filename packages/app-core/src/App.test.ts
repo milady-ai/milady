@@ -259,11 +259,7 @@ describe("App", () => {
   it("shows a shutdown overlay when desktop quit starts", async () => {
     let shutdownListener: ((payload: unknown) => void) | null = null;
     subscribeDesktopBridgeEventMock.mockImplementation(
-      ({
-        listener,
-      }: {
-        listener: (payload: unknown) => void;
-      }) => {
+      ({ listener }: { listener: (payload: unknown) => void }) => {
         shutdownListener = listener;
         return vi.fn();
       },

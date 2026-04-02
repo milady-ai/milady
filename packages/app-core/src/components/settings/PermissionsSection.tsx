@@ -172,11 +172,11 @@ function DesktopPermissionsView() {
                         "permissionssection.WindowsSystemPermissionsDescription",
                         "Open Windows privacy settings for microphone and camera, then verify access by using those features in Milady.",
                       )
-                  : translateWithFallback(
-                      t,
-                      "permissionssection.SystemPermissionsDescription",
-                      "Grant the runtime access it needs for voice input, camera capture, shell tasks, and desktop automation features.",
-                    )}
+                    : translateWithFallback(
+                        t,
+                        "permissionssection.SystemPermissionsDescription",
+                        "Grant the runtime access it needs for voice input, camera capture, shell tasks, and desktop automation features.",
+                      )}
               </div>
             </div>
             <div className={SETTINGS_PANEL_ACTIONS_CLASSNAME}>

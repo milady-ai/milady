@@ -324,7 +324,6 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
     synthRef.current = window.speechSynthesis ?? null;
   }, []);
 
-
   // ── Mouth animation loop ──────────────────────────────────────────
 
   useEffect(() => {
