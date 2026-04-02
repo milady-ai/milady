@@ -15,7 +15,7 @@ export const releaseData = {
     appAssetBaseUrl:
       "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/app/public/",
     homepageAssetBaseUrl:
-      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/web/public/",
+      "https://raw.githubusercontent.com/milady-ai/milady/v2.0.4/apps/homepage/public/",
   },
   release: {
     tagName: "v2.0.4",
