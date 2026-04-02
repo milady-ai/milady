@@ -941,8 +941,49 @@ export function inferOnboardingConnectionFromConfig(
   return explicitConnection ?? inferCompatibilityOnboardingConnection(config);
 }
 
+function inferLegacyCloudInferenceSelection(
+  config: Record<string, unknown> | null | undefined,
+): boolean {
+  const cloud = asConfigRecord(config?.cloud);
+  if (cloud?.enabled === false) {
+    return false;
+  }
+
+  const services = asConfigRecord(cloud?.services);
+  const inferenceMode = readConfigString(cloud, "inferenceMode");
+  if (
+    inferenceMode === "byok" ||
+    inferenceMode === "local" ||
+    services?.inference === false
+  ) {
+    return false;
+  }
+
+  const cloudProvider = normalizeOnboardingProviderId(
+    readConfigString(cloud, "provider"),
+  );
+  const models = asConfigRecord(config?.models);
+  const smallModel = readConfigString(models, "small");
+  const largeModel = readConfigString(models, "large");
+
+  return Boolean(
+    cloud?.enabled === true ||
+      cloudProvider === "elizacloud" ||
+      inferenceMode === "cloud" ||
+      smallModel ||
+      largeModel,
+  );
+}
+
 export function isCloudInferenceSelectedInConfig(
   config: Record<string, unknown> | null | undefined,
 ): boolean {
-  return isCloudManagedConnection(inferOnboardingConnectionFromConfig(config));
+  const explicitConnection = normalizePersistedOnboardingConnection(
+    asConfigRecord(config)?.connection,
+  );
+  if (explicitConnection) {
+    return isCloudManagedConnection(explicitConnection);
+  }
+
+  return inferLegacyCloudInferenceSelection(config);
 }

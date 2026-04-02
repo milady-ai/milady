@@ -303,7 +303,7 @@ export function renderRpcProviderButtons<T extends string>(
 
 /* ── Cloud services toggle section ───────────────────────────────────── */
 
-type CloudServiceKey = "inference" | "rpc" | "media" | "tts" | "embeddings";
+type CloudServiceKey = "rpc" | "media" | "tts" | "embeddings";
 
 const CLOUD_SERVICE_DEFS: {
   key: CloudServiceKey;
@@ -312,14 +312,6 @@ const CLOUD_SERVICE_DEFS: {
   descriptionKey: string;
   descriptionDefault: string;
 }[] = [
-  {
-    key: "inference",
-    labelKey: "configpageview.ServiceInferenceLabel",
-    labelDefault: "Inference",
-    descriptionKey: "configpageview.ServiceInferenceDesc",
-    descriptionDefault:
-      "Use cloud-hosted models for chat and completions. Disable to use your own API keys.",
-  },
   {
     key: "rpc",
     labelKey: "configpageview.ServiceRpcLabel",
@@ -356,7 +348,6 @@ const CLOUD_SERVICE_DEFS: {
 export function CloudServicesSection() {
   const { t } = useApp();
   const [services, setServices] = useState<Record<CloudServiceKey, boolean>>({
-    inference: true,
     rpc: true,
     media: true,
     tts: true,
@@ -380,7 +371,12 @@ export function CloudServicesSection() {
             ...prev,
             ...Object.fromEntries(
               Object.entries(cloud.services ?? {}).filter(
-                ([, v]) => typeof v === "boolean",
+                ([key, v]) =>
+                  (key === "rpc" ||
+                    key === "media" ||
+                    key === "tts" ||
+                    key === "embeddings") &&
+                  typeof v === "boolean",
               ),
             ),
           }));
@@ -399,11 +395,8 @@ export function CloudServicesSection() {
       const updated = { ...services, [key]: newValue };
       setServices(updated);
       setSaving(true);
-      const inferenceMode = updated.inference ? "cloud" : "byok";
       try {
-        await client.updateConfig({
-          cloud: { services: updated, inferenceMode },
-        });
+        await client.updateConfig({ cloud: { services: updated } });
         setNeedsRestart(true);
       } catch (err) {
         setServices(services);

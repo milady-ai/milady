@@ -1410,7 +1410,6 @@ describe("handleCloudRoute timeout behavior", () => {
     expect(handled).toBe(true);
     expect(res.statusCode).toBe(200);
     expect(state.config.cloud).toMatchObject({
-      enabled: true,
       apiKey: "ak-missing-config",
     });
     expect(getJson()).toEqual({
@@ -1460,7 +1459,7 @@ describe("handleCloudRoute timeout behavior", () => {
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
     expect(getCloudSecret("ELIZAOS_CLOUD_API_KEY")).toBe("ak-test");
-    expect(getCloudSecret("ELIZAOS_CLOUD_ENABLED")).toBe("true");
+    expect(getCloudSecret("ELIZAOS_CLOUD_ENABLED")).toBeUndefined();
   });
 
   it("persists authenticated login to runtime and logs non-Error DB failures", async () => {
@@ -1574,7 +1573,6 @@ describe("handleCloudRoute timeout behavior", () => {
       {
         secrets: {
           ELIZAOS_CLOUD_API_KEY: "ak-runtime",
-          ELIZAOS_CLOUD_ENABLED: "true",
         },
       },
     );
@@ -1667,7 +1665,6 @@ describe("handleCloudRoute timeout behavior", () => {
       {
         secrets: {
           ELIZAOS_CLOUD_API_KEY: "ak-runtime",
-          ELIZAOS_CLOUD_ENABLED: "true",
         },
       },
     );
@@ -1850,7 +1847,7 @@ describe("handleCloudRoute timeout behavior", () => {
       expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
       // but the sealed store has the value
       expect(getCloudSecret("ELIZAOS_CLOUD_API_KEY")).toBe("ck-sealed");
-      expect(getCloudSecret("ELIZAOS_CLOUD_ENABLED")).toBe("true");
+      expect(getCloudSecret("ELIZAOS_CLOUD_ENABLED")).toBeUndefined();
     });
 
     it("getCloudSecret falls back to process.env for docker entrypoint keys", () => {

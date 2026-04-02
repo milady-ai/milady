@@ -94,10 +94,10 @@ import {
 } from "@miladyai/shared";
 import {
   getOnboardingProviderOption,
-  isCloudInferenceSelectedInConfig,
   inferOnboardingConnectionFromConfig,
   normalizeOnboardingProviderId,
 } from "@miladyai/shared/contracts/onboarding";
+import { resolveElizaCloudTopology } from "@miladyai/shared/contracts";
 import {
   debugLogResolvedContext,
   validateRuntimeContext,
@@ -1426,23 +1426,42 @@ export async function autoResolveDiscordAppId(): Promise<void> {
 export function applyCloudConfigToEnv(config: ElizaConfig): void {
   const cloud = config.cloud;
   if (!cloud) return;
+  const topology = resolveElizaCloudTopology(config as Record<string, unknown>);
 
   // Cloud inference is selected from the canonical onboarding connection, not
   // just from raw cloud flags. This keeps linked cloud auth from re-enabling
   // Eliza Cloud after the user has switched to a local or remote provider.
-  const effectivelyEnabled = isCloudInferenceSelectedInConfig(
-    config as Record<string, unknown>,
-  );
+  const effectivelyEnabled = topology.services.inference;
+  const shouldLoadCloudPlugin = topology.shouldLoadPlugin;
+
+  const setCloudUsageEnv = (key: string, enabled: boolean): void => {
+    if (enabled) {
+      process.env[key] = "true";
+    } else {
+      delete process.env[key];
+    }
+  };
 
   if (isMiladySettingsDebugEnabled()) {
     const c = cloud as Record<string, unknown>;
     logger.debug(
-      `[milady][settings][runtime] applyCloudConfigToEnv effectivelyEnabled=${effectivelyEnabled} cloud=${JSON.stringify(settingsDebugCloudSummary(c))} inferenceMode=${String(cloud.inferenceMode ?? "")} servicesInference=${String(cloud.services?.inference ?? "")}`,
+      `[milady][settings][runtime] applyCloudConfigToEnv inference=${effectivelyEnabled} shouldLoadPlugin=${shouldLoadCloudPlugin} cloud=${JSON.stringify(settingsDebugCloudSummary(c))}`,
     );
   }
 
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_INFERENCE", topology.services.inference);
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_TTS", topology.services.tts);
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_MEDIA", topology.services.media);
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_EMBEDDINGS", topology.services.embeddings);
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_RPC", topology.services.rpc);
+
   if (effectivelyEnabled) {
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
+  } else {
+    delete process.env.ELIZAOS_CLOUD_ENABLED;
+  }
+
+  if (shouldLoadCloudPlugin) {
     logger.info(
       `[eliza] Cloud config: enabled=${cloud.enabled}, hasApiKey=${Boolean(cloud.apiKey)}, baseUrl=${cloud.baseUrl ?? "(default)"}`,
     );
@@ -1465,7 +1484,6 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
       delete process.env.ELIZAOS_CLOUD_BASE_URL;
     }
   } else {
-    delete process.env.ELIZAOS_CLOUD_ENABLED;
     delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
     delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
     delete process.env.ELIZAOS_CLOUD_API_KEY;
@@ -1478,61 +1496,46 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
   // user's own keys handle models.
   // If the user chose a subscription provider, treat that as "byok" unless
   // they explicitly set inferenceMode to "cloud".
-  const hasSubProvider = Boolean(config.agents?.defaults?.subscriptionProvider);
-  const explicitMode = cloud.inferenceMode;
-  const inferenceMode = explicitMode ?? (hasSubProvider ? "byok" : "cloud");
-  const inferenceToggle = cloud.services?.inference ?? true;
-  const cloudDoesInference =
-    inferenceMode === "cloud" && inferenceToggle !== false;
   const models = (config as Record<string, unknown>).models as
     | { small?: string; large?: string }
     | undefined;
-  if (effectivelyEnabled && cloudDoesInference) {
+  if (topology.services.inference) {
     const small = models?.small || "openai/gpt-5-mini";
     const large = models?.large || "anthropic/claude-sonnet-4.5";
     process.env.SMALL_MODEL = small;
     process.env.LARGE_MODEL = large;
     process.env.ELIZAOS_CLOUD_SMALL_MODEL = small;
     process.env.ELIZAOS_CLOUD_LARGE_MODEL = large;
-  } else if (effectivelyEnabled) {
-    // Cloud enabled but inference handled by user's own keys — clean cloud
-    // model env vars so the cloud plugin doesn't intercept model calls.
+  } else if (shouldLoadCloudPlugin) {
+    // Cloud plugin may still be active for non-inference services; keep model
+    // routing local by clearing the cloud model aliases.
     delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
     delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
+    delete process.env.SMALL_MODEL;
+    delete process.env.LARGE_MODEL;
   }
 
   // Propagate per-service disable flags so downstream code can check them
   // without needing direct access to the ElizaConfig object.
-  const services = cloud.services;
-  if (services) {
-    if (services.tts === false) {
-      process.env.ELIZA_CLOUD_TTS_DISABLED = "true";
-      process.env.ELIZA_CLOUD_TTS_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_TTS_DISABLED;
-      delete process.env.ELIZA_CLOUD_TTS_DISABLED;
-    }
-    if (services.media === false) {
-      process.env.ELIZA_CLOUD_MEDIA_DISABLED = "true";
-      process.env.ELIZA_CLOUD_MEDIA_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_MEDIA_DISABLED;
-      delete process.env.ELIZA_CLOUD_MEDIA_DISABLED;
-    }
-    if (services.embeddings === false) {
-      process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED = "true";
-      process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED;
-      delete process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED;
-    }
-    if (services.rpc === false) {
-      process.env.ELIZA_CLOUD_RPC_DISABLED = "true";
-      process.env.ELIZA_CLOUD_RPC_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_RPC_DISABLED;
-      delete process.env.ELIZA_CLOUD_RPC_DISABLED;
-    }
+  if (!topology.services.tts) {
+    process.env.ELIZA_CLOUD_TTS_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_TTS_DISABLED;
+  }
+  if (!topology.services.media) {
+    process.env.ELIZA_CLOUD_MEDIA_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_MEDIA_DISABLED;
+  }
+  if (!topology.services.embeddings) {
+    process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED;
+  }
+  if (!topology.services.rpc) {
+    process.env.ELIZA_CLOUD_RPC_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_RPC_DISABLED;
   }
 }
 

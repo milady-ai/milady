@@ -1,5 +1,6 @@
 export * from "./apps.js";
 export * from "./awareness.js";
+export * from "./cloud-topology.js";
 export * from "./config.js";
 export * from "./drop.js";
 export * from "./onboarding.js";

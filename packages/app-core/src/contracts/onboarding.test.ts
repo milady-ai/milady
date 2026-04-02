@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+  isElizaCloudServiceSelectedInConfig,
+  resolveElizaCloudTopology,
+} from "@miladyai/shared/contracts";
 
 import {
   inferOnboardingConnectionFromConfig,
@@ -139,6 +143,61 @@ describe("onboarding provider catalog", () => {
           large: "anthropic/claude-sonnet-4.5",
         },
       }),
+    ).toBe(true);
+  });
+
+  it("treats legacy byok configs as not using cloud inference even when provider is elizacloud", () => {
+    expect(
+      isCloudInferenceSelectedInConfig({
+        cloud: {
+          enabled: true,
+          provider: "elizacloud",
+          inferenceMode: "byok",
+          services: {
+            inference: false,
+          },
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps linked cloud auth separate from service routing", () => {
+    const topology = resolveElizaCloudTopology({
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+      },
+      cloud: {
+        enabled: false,
+        apiKey: "ck-cloud-test",
+        services: {
+          tts: true,
+        },
+      },
+    });
+
+    expect(topology.linked).toBe(true);
+    expect(topology.services.inference).toBe(false);
+    expect(topology.services.tts).toBe(true);
+    expect(topology.services.rpc).toBe(false);
+    expect(topology.shouldLoadPlugin).toBe(true);
+    expect(
+      isElizaCloudServiceSelectedInConfig(
+        {
+          connection: {
+            kind: "local-provider",
+            provider: "openai",
+          },
+          cloud: {
+            enabled: false,
+            apiKey: "ck-cloud-test",
+            services: {
+              tts: true,
+            },
+          },
+        },
+        "tts",
+      ),
     ).toBe(true);
   });
 

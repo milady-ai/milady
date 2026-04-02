@@ -662,7 +662,6 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
         (config as Record<string, unknown>).cloud = {};
       }
       (config.cloud as Record<string, unknown>).apiKey = backfillKey;
-      (config.cloud as Record<string, unknown>).enabled = true;
       // Persist the backfilled key so future reads find it on disk
       try {
         saveElizaConfig(config);

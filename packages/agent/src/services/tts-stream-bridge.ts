@@ -432,9 +432,14 @@ function resolveKey(
   const ev = process.env[envVar]?.trim();
   if (ev && !isRedactedSecret(ev)) return ev;
 
-  if (
+  const explicitCloudTts = process.env.ELIZAOS_CLOUD_USE_TTS === "true";
+  const legacyCloudTts =
+    process.env.ELIZAOS_CLOUD_USE_TTS === undefined &&
     process.env.ELIZAOS_CLOUD_ENABLED === "true" &&
-    process.env.ELIZA_CLOUD_TTS_DISABLED !== "true"
+    process.env.ELIZA_CLOUD_TTS_DISABLED !== "true";
+  if (
+    explicitCloudTts ||
+    legacyCloudTts
   ) {
     const cloudKey = process.env.ELIZAOS_CLOUD_API_KEY?.trim();
     if (cloudKey && !isRedactedSecret(cloudKey)) {

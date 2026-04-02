@@ -8,6 +8,11 @@
  *
  * @module plugin-collector
  */
+import {
+  resolveElizaCloudTopology,
+  type ResolvedElizaCloudTopology,
+} from "@miladyai/shared/contracts";
+import { normalizePersistedOnboardingConnection } from "@miladyai/shared/contracts/onboarding";
 import type { ElizaConfig } from "../config/config";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
 
@@ -21,6 +26,12 @@ function isPiAiEnabledFromEnv(env: NodeJS.ProcessEnv = process.env): boolean {
   const raw = env.ELIZA_USE_PI_AI ?? env.MILADY_USE_PI_AI;
   if (!raw) return false;
   const value = String(raw).trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
+
+function isTruthyCloudEnvValue(raw: string | undefined): boolean {
+  if (!raw) return false;
+  const value = raw.trim().toLowerCase();
   return value === "1" || value === "true" || value === "yes";
 }
 
@@ -116,35 +127,23 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
     const normalized = raw.trim().toLowerCase();
     return normalized === "1" || normalized === "true" || normalized === "yes";
   })();
-  const cloudMode = config.cloud?.enabled;
-  const cloudHasApiKey = Boolean(config.cloud?.apiKey);
-  const cloudExplicitlyDisabled = cloudMode === false;
-  // Note: this is intentionally broader than the inference-path check in
-  // applyCloudConfigToEnv (which requires explicit `enabled: true`).  Here
-  // hasApiKey acts as an implicit enable signal so the cloud *plugin* gets
-  // loaded for RPC/services (auth, credits, billing) even when inference
-  // itself is handled by the user's own keys (BYOK).  The inference and
-  // persistence paths gate on `cloud.enabled === true` separately.
-  const cloudEffectivelyEnabled =
-    cloudMode === true || (!cloudExplicitlyDisabled && cloudHasApiKey);
-  // When inferenceMode is "byok" or "local", OR services.inference is false,
-  // the user wants their own AI provider keys — cloud stays enabled for
-  // RPC/services but does NOT hijack model inference.
-  //
-  // If the user chose a subscription provider (e.g. anthropic-subscription)
-  // during onboarding and never explicitly set inferenceMode, treat that as
-  // "byok" — the subscription IS the user's inference choice.
-  const hasSubscriptionProvider = Boolean(
-    config.agents?.defaults?.subscriptionProvider,
+  const cloudTopology = resolveElizaCloudTopology(
+    config as Record<string, unknown>,
   );
-  const explicitInferenceMode = config.cloud?.inferenceMode;
-  const cloudInferenceMode =
-    explicitInferenceMode ?? (hasSubscriptionProvider ? "byok" : "cloud");
-  const cloudInferenceToggle = config.cloud?.services?.inference ?? true;
-  const cloudHandlesInference =
-    cloudEffectivelyEnabled &&
-    cloudInferenceMode === "cloud" &&
-    cloudInferenceToggle !== false;
+  const explicitConnection = normalizePersistedOnboardingConnection(
+    (config as Record<string, unknown>).connection,
+  );
+  const cloudExplicitlyDisabled = config.cloud?.enabled === false;
+  const cloudPluginRequestedByEnv =
+    !explicitConnection &&
+    !cloudExplicitlyDisabled &&
+    (Boolean(process.env.ELIZAOS_CLOUD_API_KEY?.trim()) ||
+      isTruthyCloudEnvValue(process.env.ELIZAOS_CLOUD_ENABLED));
+  const cloudEffectivelyEnabled = resolveCloudPluginRequirement(
+    cloudTopology,
+    cloudPluginRequestedByEnv,
+  );
+  const cloudHandlesInference = cloudTopology.services.inference;
   const configEnv = config.env as
     | (Record<string, unknown> & { vars?: Record<string, unknown> })
     | undefined;
@@ -234,10 +233,7 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
       // pi-ai enablement uses dedicated boolean parsing + precedence logic below.
       continue;
     }
-    if (
-      cloudExplicitlyDisabled &&
-      (envKey === "ELIZAOS_CLOUD_API_KEY" || envKey === "ELIZAOS_CLOUD_ENABLED")
-    ) {
+    if (envKey === "ELIZAOS_CLOUD_API_KEY" || envKey === "ELIZAOS_CLOUD_ENABLED") {
       continue;
     }
     if (isPluginExplicitlyDisabled(pluginName)) {
@@ -313,11 +309,10 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
       return;
     }
 
-    if (cloudExplicitlyDisabled) {
-      // Cloud was explicitly disabled — remove elizacloud even though it's
-      // in CORE_PLUGINS, so it cannot intercept model calls.
-      pluginsToLoad.delete("@elizaos/plugin-elizacloud");
-    }
+    // Cloud is not part of the resolved topology — remove it even though
+    // it is listed in CORE_PLUGINS so stale env/config does not hijack
+    // provider selection after the user switches away.
+    pluginsToLoad.delete("@elizaos/plugin-elizacloud");
   };
 
   // Apply once before additive plugin-entry/feature paths.
@@ -400,4 +395,11 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
   }
 
   return pluginsToLoad;
+}
+
+function resolveCloudPluginRequirement(
+  topology: ResolvedElizaCloudTopology,
+  requestedByEnv: boolean,
+): boolean {
+  return topology.shouldLoadPlugin || requestedByEnv;
 }
