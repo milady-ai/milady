@@ -97,6 +97,7 @@ export const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   "custom-rtmp": "@elizaos/plugin-custom-rtmp",
   "pumpfun-streaming": "@elizaos/plugin-pumpfun-streaming",
   "x-streaming": "@elizaos/plugin-x-streaming",
+  evm: "@elizaos/plugin-evm",
 };
 
 // ---------------------------------------------------------------------------
@@ -373,6 +374,14 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
   // provider, and would be incorrectly removed during provider precedence.
   if (process.env.OPINION_API_KEY?.trim()) {
     pluginsToLoad.add("@elizaos/plugin-opinion");
+  }
+
+  // EVM wallet plugin — auto-load when private key is available.
+  // NOT in PROVIDER_PLUGIN_MAP because it is a feature plugin (wallet/DeFi),
+  // not a model provider, and would be incorrectly removed during provider
+  // precedence resolution.
+  if (process.env.EVM_PRIVATE_KEY?.trim()) {
+    pluginsToLoad.add("@elizaos/plugin-evm");
   }
 
   // User-installed plugins from config.plugins.installs

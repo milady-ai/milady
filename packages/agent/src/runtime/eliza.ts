@@ -74,6 +74,7 @@ import * as pluginAnthropic from "@elizaos/plugin-anthropic";
 import * as pluginCommands from "@elizaos/plugin-commands";
 import * as pluginCron from "@elizaos/plugin-cron";
 import * as pluginElizacloud from "@elizaos/plugin-elizacloud";
+import * as pluginEvm from "@elizaos/plugin-evm";
 import * as pluginExperience from "@elizaos/plugin-experience";
 import * as pluginForm from "@elizaos/plugin-form";
 import * as pluginKnowledge from "@elizaos/plugin-knowledge";
@@ -234,6 +235,7 @@ export const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   "@miladyai/plugin-roles": pluginRoles,
   "@elizaos/plugin-todo": pluginTodo,
   "@elizaos/plugin-personality": pluginPersonality,
+  "@elizaos/plugin-evm": pluginEvm,
   "@elizaos/plugin-experience": pluginExperience,
 };
 
@@ -3335,10 +3337,34 @@ export async function startEliza(
   };
 
   const initializeRuntimeServices = async (): Promise<void> => {
+    // 7z. Steward EVM bridge pre-boot (cloud-provisioned containers)
+    try {
+      const { stewardEvmPreBoot } = await import(
+        "../services/steward-evm-bridge.js"
+      );
+      await stewardEvmPreBoot(runtime);
+    } catch (err) {
+      logger.debug(
+        `[eliza] Steward EVM pre-boot skipped: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
     // 8. Initialize the runtime (registers remaining plugins, starts services)
     await runtime.initialize();
     await waitForTrajectoryLoggerService(runtime, "runtime.initialize()");
     ensureTrajectoryLoggerEnabled(runtime, "runtime.initialize()");
+
+    // 8.0a. Steward EVM bridge post-boot (swap EVM account to Steward-backed)
+    try {
+      const { stewardEvmPostBoot } = await import(
+        "../services/steward-evm-bridge.js"
+      );
+      await stewardEvmPostBoot(runtime);
+    } catch (err) {
+      logger.debug(
+        `[eliza] Steward EVM post-boot skipped: ${err instanceof Error ? err.message : err}`,
+      );
+    }
 
     // 8a. Install prompt optimization / capture layer (wraps runtime.useModel)
     try {
@@ -3649,6 +3675,16 @@ export async function startEliza(
             }
           }
 
+          // Steward EVM bridge pre-boot (hot-reload)
+          try {
+            const { stewardEvmPreBoot: preBootHR } = await import(
+              "../services/steward-evm-bridge.js"
+            );
+            await preBootHR(newRuntime);
+          } catch {
+            // non-fatal
+          }
+
           await newRuntime.initialize();
           await waitForTrajectoryLoggerService(
             newRuntime,
@@ -3658,6 +3694,16 @@ export async function startEliza(
             newRuntime,
             "hot-reload runtime.initialize()",
           );
+
+          // Steward EVM bridge post-boot (hot-reload)
+          try {
+            const { stewardEvmPostBoot: postBootHR } = await import(
+              "../services/steward-evm-bridge.js"
+            );
+            await postBootHR(newRuntime);
+          } catch {
+            // non-fatal
+          }
 
           // Ensure AutonomyService survives hot-reload (respects ENABLE_AUTONOMY)
           const hotReloadAutonomyEnabled =
