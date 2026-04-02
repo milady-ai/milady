@@ -5,15 +5,14 @@
  * without circular dependency issues.
  */
 
+import { getBootConfig, setBootConfig } from "../config/boot-config";
 import { stripAssistantStageDirections } from "../utils/assistant-text";
 import { getElizaApiBase, getElizaApiToken } from "../utils/eliza-globals";
 import { mergeStreamingText } from "../utils/streaming-text";
-import { getBootConfig, setBootConfig } from "../config/boot-config";
 import type {
   ChatTokenUsage,
   ConnectionStateInfo,
   ConversationChannelType,
-  ConversationMessage,
   ConversationMode,
   ImageAttachment,
   WebSocketConnectionState,
@@ -176,7 +175,7 @@ export class MiladyClient {
   protected async rawRequest(
     path: string,
     init?: RequestInit,
-    options?: { allowNonOk?: boolean },
+    options?: { allowNonOk?: boolean; timeoutMs?: number },
   ): Promise<Response> {
     if (!this.apiAvailable) {
       throw new ApiError({
@@ -210,10 +209,10 @@ export class MiladyClient {
               new ApiError({
                 kind: "timeout",
                 path,
-                message: `Request timed out after ${DEFAULT_FETCH_TIMEOUT_MS}ms`,
+                message: `Request timed out after ${options?.timeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS}ms`,
               }),
             );
-          }, DEFAULT_FETCH_TIMEOUT_MS);
+          }, options?.timeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS);
         }),
       );
 
@@ -294,14 +293,22 @@ export class MiladyClient {
     return res;
   }
 
-  protected async fetch<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await this.rawRequest(path, {
-      ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...init?.headers,
+  protected async fetch<T>(
+    path: string,
+    init?: RequestInit,
+    options?: { allowNonOk?: boolean; timeoutMs?: number },
+  ): Promise<T> {
+    const res = await this.rawRequest(
+      path,
+      {
+        ...init,
+        headers: {
+          "Content-Type": "application/json",
+          ...init?.headers,
+        },
       },
-    });
+      options,
+    );
     return res.json() as Promise<T>;
   }
 

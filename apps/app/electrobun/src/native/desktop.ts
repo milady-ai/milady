@@ -182,6 +182,8 @@ export class DesktopManager {
   private openExternalHandler:
     | ((url: string) => boolean | Promise<boolean>)
     | null = null;
+  private requestQuitCallback: (() => void | Promise<void>) | null = null;
+  private restoreMainWindowCallback: (() => void | Promise<void>) | null = null;
 
   // Track menu items for context-menu-clicked matching
   private trayMenuItems: Map<string, TrayMenuItem> = new Map();
@@ -251,6 +253,21 @@ export class DesktopManager {
     cb: ((url: string) => boolean | Promise<boolean>) | null,
   ): void {
     this.openExternalHandler = cb;
+  }
+
+  setRequestQuitCallback(cb: (() => void | Promise<void>) | null): void {
+    this.requestQuitCallback = cb;
+  }
+
+  setRestoreMainWindowCallback(cb: (() => void | Promise<void>) | null): void {
+    this.restoreMainWindowCallback = cb;
+  }
+
+  clearMainWindow(window?: BrowserWindow | null): void {
+    if (!window || this.mainWindow === window) {
+      this.teardownWindowEvents(this.mainWindow);
+      this.mainWindow = null;
+    }
   }
 
   /**
@@ -874,16 +891,21 @@ X-GNOME-Autostart-enabled=true
   }
 
   async showWindow(): Promise<void> {
-    const win = this.mainWindow;
-    if (!win) return;
-    const ptr = (win as { ptr?: unknown }).ptr;
-    if (ptr && process.platform === "darwin") {
-      makeKeyAndOrderFront(ptr as Parameters<typeof makeKeyAndOrderFront>[0]);
-    } else {
-      win.show();
-      win.focus();
+    let win = this.mainWindow;
+    if (!win) {
+      await this.restoreMainWindowCallback?.();
+      win = this.mainWindow;
     }
-    this._windowHidden = false;
+    if (!win) return;
+    try {
+      this.showMainWindow(win);
+    } catch {
+      this.clearMainWindow(win);
+      await this.restoreMainWindowCallback?.();
+      win = this.mainWindow;
+      if (!win) return;
+      this.showMainWindow(win);
+    }
   }
 
   async hideWindow(): Promise<void> {
@@ -936,6 +958,17 @@ X-GNOME-Autostart-enabled=true
 
   async setOpacity(_options: SetOpacityOptions): Promise<void> {
     // No-op: Electrobun BrowserWindow does not support setOpacity
+  }
+
+  private showMainWindow(win: BrowserWindow): void {
+    const ptr = (win as { ptr?: unknown }).ptr;
+    if (ptr && process.platform === "darwin") {
+      makeKeyAndOrderFront(ptr as Parameters<typeof makeKeyAndOrderFront>[0]);
+    } else {
+      win.show();
+      win.focus();
+    }
+    this._windowHidden = false;
   }
 
   private setupWindowEvents(): void {
@@ -1109,6 +1142,10 @@ X-GNOME-Autostart-enabled=true
   // MARK: - App
 
   async quit(): Promise<void> {
+    if (this.requestQuitCallback) {
+      await this.requestQuitCallback();
+      return;
+    }
     Utils.quit();
   }
 

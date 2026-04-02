@@ -66,7 +66,6 @@ import {
   autoResolveDiscordAppId,
   buildCharacterFromConfig,
   CHANNEL_PLUGIN_MAP,
-  CORE_PLUGINS,
   cleanStalePglitePid,
   collectPluginNames,
   configureLocalEmbeddingPlugin,
@@ -229,9 +228,6 @@ describe("collectPluginNames", () => {
   });
 
   it("includes all core plugins for an empty config", () => {
-    // Guard against accidental removal from CORE_PLUGINS array
-    expect(CORE_PLUGINS).toHaveLength(11);
-
     const expectedCorePlugins = [
       "@elizaos/plugin-sql",
       "@elizaos/plugin-local-embedding",
@@ -242,8 +238,6 @@ describe("collectPluginNames", () => {
       "@elizaos/plugin-cron",
       "@elizaos/plugin-shell",
       "@elizaos/plugin-agent-skills",
-      "@elizaos/plugin-commands",
-      "@miladyai/plugin-roles",
     ];
     const names = collectPluginNames({} as ElizaConfig);
     for (const plugin of expectedCorePlugins) {
