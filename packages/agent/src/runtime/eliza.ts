@@ -74,7 +74,6 @@ import * as pluginAnthropic from "@elizaos/plugin-anthropic";
 import * as pluginCommands from "@elizaos/plugin-commands";
 import * as pluginCron from "@elizaos/plugin-cron";
 import * as pluginElizacloud from "@elizaos/plugin-elizacloud";
-import * as pluginEvm from "@elizaos/plugin-evm";
 import * as pluginExperience from "@elizaos/plugin-experience";
 import * as pluginForm from "@elizaos/plugin-form";
 import * as pluginKnowledge from "@elizaos/plugin-knowledge";
@@ -235,7 +234,6 @@ export const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   "@miladyai/plugin-roles": pluginRoles,
   "@elizaos/plugin-todo": pluginTodo,
   "@elizaos/plugin-personality": pluginPersonality,
-  "@elizaos/plugin-evm": pluginEvm,
   "@elizaos/plugin-experience": pluginExperience,
 };
 

@@ -97,7 +97,6 @@ export const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   "custom-rtmp": "@elizaos/plugin-custom-rtmp",
   "pumpfun-streaming": "@elizaos/plugin-pumpfun-streaming",
   "x-streaming": "@elizaos/plugin-x-streaming",
-  evm: "@elizaos/plugin-evm",
 };
 
 // ---------------------------------------------------------------------------
@@ -376,14 +375,6 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
     pluginsToLoad.add("@elizaos/plugin-opinion");
   }
 
-  // EVM wallet plugin — opt-in via ENABLE_EVM_PLUGIN=1.
-  // Currently has a BRIDGE action spec registration issue that crashes containers,
-  // so we gate it behind an explicit flag until that's resolved.
-  if (process.env.ENABLE_EVM_PLUGIN === "1") {
-    pluginsToLoad.add("@elizaos/plugin-evm");
-  }
-
-  // User-installed plugins from config.plugins.installs
   // These are plugins that were installed via the plugin-manager at runtime
   // and tracked in eliza.json so they persist across restarts.
   const installs = config.plugins?.installs;
