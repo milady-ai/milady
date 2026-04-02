@@ -2119,8 +2119,6 @@
   "wallet.copySolanaAddress": "Kopyahin ang Solana address",
   "wallet.emptyTokensCta": "Gamitin ang mga copy button sa itaas para i-fund ang agent na ito.",
   "wallet.enableIt": "I-enable ito",
-  "wallet.activateInventory": "I-activate ang agent inventory",
-  "wallet.activateChainInventory": "I-activate ang {{chain}} inventory",
   "wallet.loadingBalances": "Naglo-load ng balances...",
   "wallet.loadingNfts": "Naglo-load ng NFTs...",
   "wallet.manual": "Manwal",
@@ -2165,5 +2163,7 @@
   "startupshell.InitializingAgent": "Initializing agent…",
   "startupshell.Loading": "Loading…",
   "startupshell.GetStarted": "Press Start",
-  "startupshell.SplashTagline": "Your local-first AI assistant"
+  "startupshell.SplashTagline": "Your local-first AI assistant",
+  "wallet.importFromCloud": "I-import mula sa Eliza Cloud",
+  "wallet.connectWallet": "Ikonekta ang wallet"
 }

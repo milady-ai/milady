@@ -652,7 +652,7 @@ describe("InventoryView unified wallets", () => {
     });
 
     const content = text(tree?.root);
-    expect(content).toContain("Activate agent wallet");
+    expect(content).toContain("wallet.importFromCloud");
     expect(content).toContain("Copy EVM address");
     expect(content).toContain("Copy Solana address");
     expect(content).not.toContain("tokenstable.nativeGasEthereum");

@@ -2119,8 +2119,6 @@
   "wallet.copySolanaAddress": "Solana 주소 복사",
   "wallet.emptyTokensCta": "위의 복사 버튼으로 이 에이전트에 자금을 보내세요.",
   "wallet.enableIt": "활성화",
-  "wallet.activateInventory": "에이전트 인벤토리 활성화",
-  "wallet.activateChainInventory": "{{chain}} 인벤토리 활성화",
   "wallet.loadingBalances": "잔액 로드 중...",
   "wallet.loadingNfts": "NFT 로드 중...",
   "wallet.manual": "수동",
@@ -2165,5 +2163,7 @@
   "startupshell.InitializingAgent": "Initializing agent…",
   "startupshell.Loading": "Loading…",
   "startupshell.GetStarted": "Press Start",
-  "startupshell.SplashTagline": "Your local-first AI assistant"
+  "startupshell.SplashTagline": "Your local-first AI assistant",
+  "wallet.importFromCloud": "Eliza Cloud에서 가져오기",
+  "wallet.connectWallet": "지갑 연결"
 }

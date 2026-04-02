@@ -2119,8 +2119,6 @@
   "wallet.copySolanaAddress": "Copy địa chỉ Solana",
   "wallet.emptyTokensCta": "Dùng nút sao chép phía trên để nạp cho agent.",
   "wallet.enableIt": "Bật lên",
-  "wallet.activateInventory": "Kích hoạt kho đại lý",
-  "wallet.activateChainInventory": "Kích hoạt kho {{chain}}",
   "wallet.loadingBalances": "Đang tải số dư...",
   "wallet.loadingNfts": "Đang tải NFTs...",
   "wallet.manual": "Thủ công",
@@ -2165,5 +2163,7 @@
   "startupshell.InitializingAgent": "Initializing agent…",
   "startupshell.Loading": "Loading…",
   "startupshell.GetStarted": "Press Start",
-  "startupshell.SplashTagline": "Your local-first AI assistant"
+  "startupshell.SplashTagline": "Your local-first AI assistant",
+  "wallet.importFromCloud": "Nhập từ Eliza Cloud",
+  "wallet.connectWallet": "Kết nối ví"
 }

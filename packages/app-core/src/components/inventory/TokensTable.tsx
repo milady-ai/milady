@@ -5,7 +5,6 @@
 import type { EvmChainBalance } from "@miladyai/app-core/api";
 import type { createTranslator } from "@miladyai/app-core/i18n";
 import { Button } from "@miladyai/ui";
-import { Wallet } from "lucide-react";
 import { chainIcon, formatBalance, type TokenRow } from "./constants";
 import { TokenLogo } from "./TokenLogo";
 
@@ -75,22 +74,20 @@ export function TokensTable({
   if (visibleRows.length === 0) {
     return (
       <div className="flex min-h-[24rem] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <div className="max-w-md space-y-2">
-          <div className="text-base font-medium text-txt-strong">
-            {walletBalances
-              ? t("wallet.noTokensFound")
-              : t("wallet.noDataRefresh")}
-          </div>
-          <Button
-            variant="default"
-            size="sm"
-            className="mt-2 inline-flex items-center gap-2 rounded-full px-5"
+        <div className="inline-flex overflow-hidden rounded-full border border-amber-500/60">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-txt-strong bg-bg-hover/40 hover:bg-bg-hover transition-colors"
           >
-            <Wallet className="h-4 w-4" />
-            {chainName
-              ? t("wallet.activateChainInventory", { chain: chainName })
-              : t("wallet.activateInventory")}
-          </Button>
+            {t("wallet.importFromCloud")}
+          </button>
+          <div className="w-px bg-amber-500/60" />
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-txt-strong bg-bg-hover/40 hover:bg-bg-hover transition-colors"
+          >
+            {t("wallet.connectWallet")}
+          </button>
         </div>
         {renderChainErrors()}
       </div>

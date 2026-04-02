@@ -86,11 +86,11 @@ export function useWalletState({
   >("desc");
   const [inventoryChainFilters, setInventoryChainFilters] =
     useState<InventoryChainFilters>({
-      ethereum: true,
-      base: true,
       bsc: true,
-      avax: true,
-      solana: true,
+      ethereum: false,
+      base: false,
+      avax: false,
+      solana: false,
     });
   const [walletError, setWalletError] = useState<string | null>(null);
 

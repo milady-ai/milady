@@ -2119,8 +2119,6 @@
   "wallet.copySolanaAddress": "Copiar dirección Solana",
   "wallet.emptyTokensCta": "Usa los botones de copiar de arriba para fondear este agente.",
   "wallet.enableIt": "Habilítalo",
-  "wallet.activateInventory": "Activar inventario del agente",
-  "wallet.activateChainInventory": "Activar inventario de {{chain}}",
   "wallet.loadingBalances": "Cargando saldos...",
   "wallet.loadingNfts": "Cargando NFT...",
   "wallet.manual": "manuales",
@@ -2165,5 +2163,7 @@
   "startupshell.InitializingAgent": "Initializing agent…",
   "startupshell.Loading": "Loading…",
   "startupshell.GetStarted": "Press Start",
-  "startupshell.SplashTagline": "Your local-first AI assistant"
+  "startupshell.SplashTagline": "Your local-first AI assistant",
+  "wallet.importFromCloud": "Importar desde Eliza Cloud",
+  "wallet.connectWallet": "Conectar billetera"
 }
