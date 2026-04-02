@@ -636,8 +636,8 @@ describe("InventoryView unified wallets", () => {
       t: (key: string) =>
         key === "wallet.noTokensFound"
           ? "Activate agent wallet"
-          : key === "wallet.generateWallet"
-            ? "Generate Wallet"
+          : key === "wallet.activateInventory"
+            ? "Activate agent inventory"
             : key === "wallet.copyEvmAddress"
               ? "Copy EVM address"
               : key === "wallet.copySolanaAddress"

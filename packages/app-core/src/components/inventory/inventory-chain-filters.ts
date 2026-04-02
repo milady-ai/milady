@@ -9,11 +9,11 @@ import type { ChainKey } from "./chainConfig";
 export type PrimaryInventoryChainKey = keyof InventoryChainFilters;
 
 export const DEFAULT_INVENTORY_CHAIN_FILTERS: InventoryChainFilters = {
-  ethereum: true,
-  base: true,
   bsc: true,
-  avax: true,
-  solana: true,
+  ethereum: false,
+  base: false,
+  avax: false,
+  solana: false,
 };
 
 type InventoryChainFilterState =

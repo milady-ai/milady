@@ -8,45 +8,46 @@ import {
 } from "../inventory-chain-filters";
 
 describe("inventory chain filters", () => {
-  it("defaults missing filters to every primary chain enabled", () => {
+  it("defaults missing filters to only bsc enabled", () => {
     expect(normalizeInventoryChainFilters(undefined)).toEqual(
       DEFAULT_INVENTORY_CHAIN_FILTERS,
     );
-    expect(computeSingleChainFocus(undefined)).toBeNull();
-    expect(matchesInventoryChainFilter("ethereum", undefined)).toBe(true);
+    expect(computeSingleChainFocus(undefined)).toBe("bsc");
+    expect(matchesInventoryChainFilter("bsc", undefined)).toBe(true);
+    expect(matchesInventoryChainFilter("ethereum", undefined)).toBe(false);
   });
 
   it("preserves explicit off toggles when normalizing partial state", () => {
     expect(
       normalizeInventoryChainFilters({
-        ethereum: false,
-        solana: false,
+        ethereum: true,
+        solana: true,
       }),
     ).toEqual({
-      ethereum: false,
-      base: true,
       bsc: true,
-      avax: true,
-      solana: false,
+      ethereum: true,
+      base: false,
+      avax: false,
+      solana: true,
     });
   });
 
   it("computes the focused chain and toggles from normalized state", () => {
     const bscOnly = {
+      bsc: true,
       ethereum: false,
       base: false,
-      bsc: true,
       avax: false,
       solana: false,
     } as const;
 
     expect(computeSingleChainFocus(bscOnly)).toBe("bsc");
     expect(toggleInventoryChainFilter(undefined, "ethereum")).toEqual({
-      ethereum: false,
-      base: true,
       bsc: true,
-      avax: true,
-      solana: true,
+      ethereum: true,
+      base: false,
+      avax: false,
+      solana: false,
     });
   });
 });

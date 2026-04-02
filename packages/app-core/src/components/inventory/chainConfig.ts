@@ -372,9 +372,9 @@ export function getStablecoinAddress(
 
 /** The primary chains we want to support prominently. */
 export const PRIMARY_CHAIN_KEYS: ChainKey[] = [
+  "bsc",
   "ethereum",
   "base",
-  "bsc",
   "avax",
   "solana",
 ];

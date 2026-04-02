@@ -971,6 +971,7 @@ export function InventoryView() {
                   visibleChainErrors={visibleChainErrors}
                   showChainColumn={singleChainFocus === null}
                   handleUntrackToken={handleUntrackToken}
+                  chainName={focusedChainLabel}
                 />
               ) : (
                 <NftGrid

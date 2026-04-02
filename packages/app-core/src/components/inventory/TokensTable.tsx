@@ -5,6 +5,7 @@
 import type { EvmChainBalance } from "@miladyai/app-core/api";
 import type { createTranslator } from "@miladyai/app-core/i18n";
 import { Button } from "@miladyai/ui";
+import { Wallet } from "lucide-react";
 import { chainIcon, formatBalance, type TokenRow } from "./constants";
 import { TokenLogo } from "./TokenLogo";
 
@@ -16,6 +17,7 @@ export interface TokensTableProps {
   visibleChainErrors: EvmChainBalance[];
   showChainColumn: boolean;
   handleUntrackToken: (address: string) => void;
+  chainName?: string | null;
 }
 
 export function TokensTable({
@@ -26,6 +28,7 @@ export function TokensTable({
   visibleChainErrors,
   showChainColumn,
   handleUntrackToken,
+  chainName,
 }: TokensTableProps) {
   const renderChainErrors = () =>
     visibleChainErrors.length > 0 ? (
@@ -81,9 +84,12 @@ export function TokensTable({
           <Button
             variant="default"
             size="sm"
-            className="mt-2 rounded-full px-5"
+            className="mt-2 inline-flex items-center gap-2 rounded-full px-5"
           >
-            {t("wallet.generateWallet")}
+            <Wallet className="h-4 w-4" />
+            {chainName
+              ? t("wallet.activateChainInventory", { chain: chainName })
+              : t("wallet.activateInventory")}
           </Button>
         </div>
         {renderChainErrors()}
