@@ -475,136 +475,119 @@ export function RuntimeView({
   const runtimeSidebar = (
     <Sidebar testId="runtime-sidebar">
       <SidebarPanel>
-            <PagePanel.SummaryCard compact className="mt-2 space-y-2">
-              {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
-              <label className="flex flex-col gap-1 text-[11px] text-muted">
-                <span>{t("runtimeview.depth")}</span>
-                <Input
-                  type="number"
-                  min={1}
-                  max={24}
-                  value={depth}
-                  onChange={(event) =>
-                    setDepth(
-                      Math.max(
-                        1,
-                        Math.min(24, Number(event.target.value) || 1),
-                      ),
-                    )
-                  }
-                  className={INPUT_CLASSNAME}
-                />
-              </label>
+        <PagePanel.SummaryCard compact className="mt-2 space-y-2">
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
+          <label className="flex flex-col gap-1 text-[11px] text-muted">
+            <span>{t("runtimeview.depth")}</span>
+            <Input
+              type="number"
+              min={1}
+              max={24}
+              value={depth}
+              onChange={(event) =>
+                setDepth(
+                  Math.max(1, Math.min(24, Number(event.target.value) || 1)),
+                )
+              }
+              className={INPUT_CLASSNAME}
+            />
+          </label>
 
-              {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
-              <label className="flex flex-col gap-1 text-[11px] text-muted">
-                <span>{t("runtimeview.arrayCap")}</span>
-                <Input
-                  type="number"
-                  min={1}
-                  max={5000}
-                  value={maxArrayLength}
-                  onChange={(event) =>
-                    setMaxArrayLength(
-                      Math.max(
-                        1,
-                        Math.min(5000, Number(event.target.value) || 1),
-                      ),
-                    )
-                  }
-                  className={INPUT_CLASSNAME}
-                />
-              </label>
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
+          <label className="flex flex-col gap-1 text-[11px] text-muted">
+            <span>{t("runtimeview.arrayCap")}</span>
+            <Input
+              type="number"
+              min={1}
+              max={5000}
+              value={maxArrayLength}
+              onChange={(event) =>
+                setMaxArrayLength(
+                  Math.max(1, Math.min(5000, Number(event.target.value) || 1)),
+                )
+              }
+              className={INPUT_CLASSNAME}
+            />
+          </label>
 
-              {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
-              <label className="flex flex-col gap-1 text-[11px] text-muted">
-                <span>{t("runtimeview.objectCap")}</span>
-                <Input
-                  type="number"
-                  min={1}
-                  max={5000}
-                  value={maxObjectEntries}
-                  onChange={(event) =>
-                    setMaxObjectEntries(
-                      Math.max(
-                        1,
-                        Math.min(5000, Number(event.target.value) || 1),
-                      ),
-                    )
-                  }
-                  className={INPUT_CLASSNAME}
-                />
-              </label>
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: programmatic control association is preserved */}
+          <label className="flex flex-col gap-1 text-[11px] text-muted">
+            <span>{t("runtimeview.objectCap")}</span>
+            <Input
+              type="number"
+              min={1}
+              max={5000}
+              value={maxObjectEntries}
+              onChange={(event) =>
+                setMaxObjectEntries(
+                  Math.max(1, Math.min(5000, Number(event.target.value) || 1)),
+                )
+              }
+              className={INPUT_CLASSNAME}
+            />
+          </label>
 
-              <div className="grid grid-cols-2 gap-1.5 pt-0.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={() => void loadSnapshot()}
-                  disabled={loading}
-                  className={
-                    loading
-                      ? TOOLBAR_BUTTON_ACCENT
-                      : TOOLBAR_BUTTON_BASE
-                  }
+          <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => void loadSnapshot()}
+              disabled={loading}
+              className={loading ? TOOLBAR_BUTTON_ACCENT : TOOLBAR_BUTTON_BASE}
+            >
+              {loading ? t("runtimeview.Refreshing") : t("common.refresh")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() =>
+                setExpandedPaths(buildInitialExpanded(rootPath, sectionData))
+              }
+              className={TOOLBAR_BUTTON_BASE}
+              disabled={activeSection === "summary"}
+            >
+              {t("runtimeview.ExpandTop")}
+            </Button>
+          </div>
+        </PagePanel.SummaryCard>
+
+        <SidebarContent.SectionLabel className="mt-3">
+          {t("runtimeview.sections")}
+        </SidebarContent.SectionLabel>
+        <SidebarScrollRegion className="mt-2">
+          <div className="space-y-1.5">
+            {SECTION_TAB_KEYS.map((section) => {
+              const active = section.key === activeSection;
+              return (
+                <SidebarContent.Item
+                  key={section.key}
+                  active={active}
+                  onClick={() => setActiveSection(section.key)}
+                  aria-current={active ? "page" : undefined}
                 >
-                  {loading ? t("runtimeview.Refreshing") : t("common.refresh")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={() =>
-                    setExpandedPaths(
-                      buildInitialExpanded(rootPath, sectionData),
-                    )
-                  }
-                  className={TOOLBAR_BUTTON_BASE}
-                  disabled={activeSection === "summary"}
-                >
-                  {t("runtimeview.ExpandTop")}
-                </Button>
-              </div>
-            </PagePanel.SummaryCard>
-
-            <SidebarContent.SectionLabel className="mt-3">
-              {t("runtimeview.sections")}
-            </SidebarContent.SectionLabel>
-            <SidebarScrollRegion className="mt-2">
-              <div className="space-y-1.5">
-                {SECTION_TAB_KEYS.map((section) => {
-                  const active = section.key === activeSection;
-                  return (
-                    <SidebarContent.Item
-                      key={section.key}
-                      active={active}
-                      onClick={() => setActiveSection(section.key)}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <SidebarContent.ItemIcon active={active}>
-                        {section.key === "summary"
-                          ? "Σ"
-                          : t(section.i18nKey).charAt(0).toUpperCase()}
-                      </SidebarContent.ItemIcon>
-                      <span className="min-w-0 flex-1 text-left">
-                        <SidebarContent.ItemTitle>
-                          {t(section.i18nKey)}
-                        </SidebarContent.ItemTitle>
-                        <SidebarContent.ItemDescription>
-                          {sectionMeta[section.key]}
-                        </SidebarContent.ItemDescription>
-                      </span>
-                      {getSectionCount(section.key) ? (
-                        <MetaPill compact>
-                          {getSectionCount(section.key)}
-                        </MetaPill>
-                      ) : null}
-                    </SidebarContent.Item>
-                  );
-                })}
-              </div>
-            </SidebarScrollRegion>
+                  <SidebarContent.ItemIcon active={active}>
+                    {section.key === "summary"
+                      ? "Σ"
+                      : t(section.i18nKey).charAt(0).toUpperCase()}
+                  </SidebarContent.ItemIcon>
+                  <span className="min-w-0 flex-1 text-left">
+                    <SidebarContent.ItemTitle>
+                      {t(section.i18nKey)}
+                    </SidebarContent.ItemTitle>
+                    <SidebarContent.ItemDescription>
+                      {sectionMeta[section.key]}
+                    </SidebarContent.ItemDescription>
+                  </span>
+                  {getSectionCount(section.key) ? (
+                    <MetaPill compact>{getSectionCount(section.key)}</MetaPill>
+                  ) : null}
+                </SidebarContent.Item>
+              );
+            })}
+          </div>
+        </SidebarScrollRegion>
       </SidebarPanel>
     </Sidebar>
   );
@@ -616,157 +599,157 @@ export function RuntimeView({
       data-testid="runtime-view"
     >
       <div className="flex min-h-0 flex-1 flex-col gap-4">
-            {error ? (
-              <div className="rounded-[18px] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                {error}
-              </div>
-            ) : null}
+        {error ? (
+          <div className="rounded-[18px] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+            {error}
+          </div>
+        ) : null}
 
-            {!snapshot ? (
-              <PagePanel.Empty
-                variant="panel"
-                className="min-h-[24rem]"
-                description={t("runtimeview.loadingDescription")}
-                title={
-                  loading
-                    ? t("runtimeview.loadingSnapshot")
-                    : t("runtimeview.noSnapshotAvailable")
-                }
-              />
-            ) : !snapshot.runtimeAvailable ? (
-              <PagePanel.Empty
-                variant="panel"
-                className="min-h-[24rem] border-warning/25 bg-warning/10 text-warning"
-                description={t("runtimeview.runtimePendingDescription")}
-                title={t("runtimeview.AgentRuntimeIsNot")}
-              />
-            ) : activeSection === "summary" ? (
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <OrderCard
-                  title={t("runtimeview.Plugins")}
-                  entries={snapshot.order.plugins}
-                />
-                <OrderCard
-                  title={t("runtimeview.Actions")}
-                  entries={snapshot.order.actions}
-                />
-                <OrderCard
-                  title={t("runtimeview.Providers")}
-                  entries={snapshot.order.providers}
-                />
-                <OrderCard
-                  title={t("runtimeview.Evaluators")}
-                  entries={snapshot.order.evaluators}
-                />
-                <ServicesOrderCard entries={snapshot.order.services} />
-                <RuntimeSummaryCard snapshot={snapshot} t={t} />
-              </div>
-            ) : (
-              <>
-                <PagePanel variant="padded">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
-                        {t("runtimeview.sectionLabel")}
-                      </div>
-                      <div className="mt-2 text-[2rem] font-semibold leading-tight text-txt">
-                        {t(
-                          SECTION_TAB_KEYS.find(
-                            (section) => section.key === activeSection,
-                          )?.i18nKey ?? "runtimeview.runtime",
-                        )}
-                      </div>
-                      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-                        {t(SECTION_DESCRIPTION_KEYS[activeSection])}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        onClick={() => setExpandedPaths(new Set([rootPath]))}
-                        className={TOOLBAR_BUTTON_BASE}
-                      >
-                        {t("runtimeview.Collapse")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        onClick={() =>
-                          setExpandedPaths(
-                            buildInitialExpanded(rootPath, sectionData),
-                          )
-                        }
-                        className={TOOLBAR_BUTTON_BASE}
-                      >
-                        {t("runtimeview.ExpandTop")}
-                      </Button>
-                    </div>
+        {!snapshot ? (
+          <PagePanel.Empty
+            variant="panel"
+            className="min-h-[24rem]"
+            description={t("runtimeview.loadingDescription")}
+            title={
+              loading
+                ? t("runtimeview.loadingSnapshot")
+                : t("runtimeview.noSnapshotAvailable")
+            }
+          />
+        ) : !snapshot.runtimeAvailable ? (
+          <PagePanel.Empty
+            variant="panel"
+            className="min-h-[24rem] border-warning/25 bg-warning/10 text-warning"
+            description={t("runtimeview.runtimePendingDescription")}
+            title={t("runtimeview.AgentRuntimeIsNot")}
+          />
+        ) : activeSection === "summary" ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <OrderCard
+              title={t("runtimeview.Plugins")}
+              entries={snapshot.order.plugins}
+            />
+            <OrderCard
+              title={t("runtimeview.Actions")}
+              entries={snapshot.order.actions}
+            />
+            <OrderCard
+              title={t("runtimeview.Providers")}
+              entries={snapshot.order.providers}
+            />
+            <OrderCard
+              title={t("runtimeview.Evaluators")}
+              entries={snapshot.order.evaluators}
+            />
+            <ServicesOrderCard entries={snapshot.order.services} />
+            <RuntimeSummaryCard snapshot={snapshot} t={t} />
+          </div>
+        ) : (
+          <>
+            <PagePanel variant="padded">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                    {t("runtimeview.sectionLabel")}
                   </div>
+                  <div className="mt-2 text-[2rem] font-semibold leading-tight text-txt">
+                    {t(
+                      SECTION_TAB_KEYS.find(
+                        (section) => section.key === activeSection,
+                      )?.i18nKey ?? "runtimeview.runtime",
+                    )}
+                  </div>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+                    {t(SECTION_DESCRIPTION_KEYS[activeSection])}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setExpandedPaths(new Set([rootPath]))}
+                    className={TOOLBAR_BUTTON_BASE}
+                  >
+                    {t("runtimeview.Collapse")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() =>
+                      setExpandedPaths(
+                        buildInitialExpanded(rootPath, sectionData),
+                      )
+                    }
+                    className={TOOLBAR_BUTTON_BASE}
+                  >
+                    {t("runtimeview.ExpandTop")}
+                  </Button>
+                </div>
+              </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <PagePanel variant="inset" className="px-4 py-4">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-                        {t("runtimeview.path")}
-                      </div>
-                      <div className="mt-2 font-mono text-sm text-txt">
-                        {rootPath}
-                      </div>
-                    </PagePanel>
-                    <PagePanel variant="inset" className="px-4 py-4">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-                        {t("runtimeview.lastUpdated")}
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-txt">
-                        {formatDateTime(snapshot.generatedAt, {
-                          fallback: "n/a",
-                        })}
-                      </div>
-                    </PagePanel>
-                    <PagePanel variant="inset" className="px-4 py-4">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-                        {t("runtimeview.depth")}
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-txt">
-                        {depth}
-                      </div>
-                    </PagePanel>
-                    <PagePanel variant="inset" className="px-4 py-4">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
-                        {t("runtimeview.objectCap")}
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-txt">
-                        {maxObjectEntries}
-                      </div>
-                    </PagePanel>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <PagePanel variant="inset" className="px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                    {t("runtimeview.path")}
+                  </div>
+                  <div className="mt-2 font-mono text-sm text-txt">
+                    {rootPath}
                   </div>
                 </PagePanel>
-
-                <PagePanel
-                  variant="surface"
-                  className="min-h-[24rem] flex-1 overflow-auto p-4"
-                >
-                  {sectionData == null ? (
-                    <PagePanel.Empty
-                      variant="inset"
-                      description={t("runtimeview.noSectionData")}
-                      title={t("runtimeview.sectionUnavailable")}
-                    />
-                  ) : (
-                    <TreeNode
-                      label={activeSection}
-                      value={sectionData}
-                      path={rootPath}
-                      depth={0}
-                      expanded={expandedPaths}
-                      onToggle={handleTogglePath}
-                    />
-                  )}
+                <PagePanel variant="inset" className="px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                    {t("runtimeview.lastUpdated")}
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-txt">
+                    {formatDateTime(snapshot.generatedAt, {
+                      fallback: "n/a",
+                    })}
+                  </div>
                 </PagePanel>
-              </>
-            )}
+                <PagePanel variant="inset" className="px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                    {t("runtimeview.depth")}
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-txt">
+                    {depth}
+                  </div>
+                </PagePanel>
+                <PagePanel variant="inset" className="px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                    {t("runtimeview.objectCap")}
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-txt">
+                    {maxObjectEntries}
+                  </div>
+                </PagePanel>
+              </div>
+            </PagePanel>
+
+            <PagePanel
+              variant="surface"
+              className="min-h-[24rem] flex-1 overflow-auto p-4"
+            >
+              {sectionData == null ? (
+                <PagePanel.Empty
+                  variant="inset"
+                  description={t("runtimeview.noSectionData")}
+                  title={t("runtimeview.sectionUnavailable")}
+                />
+              ) : (
+                <TreeNode
+                  label={activeSection}
+                  value={sectionData}
+                  path={rootPath}
+                  depth={0}
+                  expanded={expandedPaths}
+                  onToggle={handleTogglePath}
+                />
+              )}
+            </PagePanel>
+          </>
+        )}
       </div>
     </PageLayout>
   );

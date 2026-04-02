@@ -31,7 +31,10 @@ import {
   SETTINGS_COMPACT_INPUT_CLASSNAME,
   SETTINGS_COMPACT_SELECT_TRIGGER_CLASSNAME,
 } from "../settings/settings-control-primitives";
-import { createVectorBrowserRenderer, THREE } from "../avatar/vector-browser-three";
+import {
+  createVectorBrowserRenderer,
+  THREE,
+} from "../avatar/vector-browser-three";
 import { MemoryDetailPanel } from "./MemoryDetailPanel";
 import {
   buildVectorGraph2DLayout,
@@ -813,7 +816,10 @@ function VectorGraph3D({
 export function VectorBrowserView({
   leftNav,
   contentHeader,
-}: { leftNav?: ReactNode; contentHeader?: ReactNode }) {
+}: {
+  leftNav?: ReactNode;
+  contentHeader?: ReactNode;
+}) {
   const { t } = useApp();
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
@@ -1261,8 +1267,7 @@ export function VectorBrowserView({
                     defaultValue: "No records match your search query.",
                   })
                 : t("vectorbrowserview.NoMemoryRecordsDetected", {
-                    defaultValue:
-                      "No memory records detected in the database.",
+                    defaultValue: "No memory records detected in the database.",
                   })}
             </SidebarContent.EmptyState>
           ) : (
@@ -1270,9 +1275,7 @@ export function VectorBrowserView({
               const isActive = selectedMemory?.id === mem.id;
               return (
                 <SidebarContent.Item
-                  key={
-                    mem.id || `${mem.content.slice(0, 30)}-${mem.createdAt}`
-                  }
+                  key={mem.id || `${mem.content.slice(0, 30)}-${mem.createdAt}`}
                   active={isActive}
                   onClick={() => setSelectedMemory(mem)}
                 >

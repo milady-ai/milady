@@ -173,4 +173,3 @@ export function StreamView({ inModal }: { inModal?: boolean } = {}) {
     </div>
   );
 }
-

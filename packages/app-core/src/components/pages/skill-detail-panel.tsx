@@ -116,16 +116,12 @@ export function EditSkillModal({
         container={typeof document !== "undefined" ? document.body : undefined}
         className="h-[85vh] max-w-4xl"
       >
-        <AdminDialogHeader
-          className="flex-row items-center justify-between py-3 space-y-0"
-        >
+        <AdminDialogHeader className="flex-row items-center justify-between py-3 space-y-0">
           <div className="flex items-center gap-3 min-w-0">
             <DialogTitle className="font-semibold text-sm truncate">
               {skillName}
             </DialogTitle>
-            <AdminMonoMeta
-              className="rounded-md border border-border bg-bg-hover px-1.5 py-0.5"
-            >
+            <AdminMonoMeta className="rounded-md border border-border bg-bg-hover px-1.5 py-0.5">
               {t("skillsview.SKILLMd")}
             </AdminMonoMeta>
             <DialogDescription className="sr-only">

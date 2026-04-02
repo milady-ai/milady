@@ -3,11 +3,7 @@ import { createElement } from "react";
 import { useApp } from "../../state";
 import { formatDateTime } from "../../utils/format";
 import { useBranding } from "../../config/branding";
-import {
-  DefinitionRow,
-  partitionDescription,
-  StatusPill,
-} from "./shared";
+import { DefinitionRow, partitionDescription, StatusPill } from "./shared";
 import type {
   AppReleaseStatus,
   DesktopBuildInfo,
@@ -182,10 +178,9 @@ export function ReleaseStatusSection({
           />
           <DefinitionRow
             label={tr(t, "releasecenter.StatusTime", "Status time")}
-            value={formatDateTime(
-              nativeUpdater?.lastStatus?.timestamp,
-              { fallback: tr(t, "releasecenter.NotYet", "Not yet") },
-            )}
+            value={formatDateTime(nativeUpdater?.lastStatus?.timestamp, {
+              fallback: tr(t, "releasecenter.NotYet", "Not yet"),
+            })}
           />
           {autoUpdateDisabled && nativeUpdater?.autoUpdateDisabledReason ? (
             <div className="mt-3 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">

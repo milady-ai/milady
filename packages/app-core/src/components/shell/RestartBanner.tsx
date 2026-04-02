@@ -40,8 +40,7 @@ export function RestartBanner() {
       className={`fixed bottom-4 right-4 z-[${Z_SYSTEM_BANNER}] flex flex-col gap-2 rounded-lg px-4 py-3 text-[13px] font-medium shadow-lg`}
       style={{
         background: "color-mix(in srgb, var(--bg) 95%, var(--accent) 5%)",
-        border:
-          "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
         color: "var(--text)",
         maxWidth: "22rem",
         backdropFilter: "blur(12px)",

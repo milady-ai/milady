@@ -112,7 +112,9 @@ export function buildPluginConfigUiSpec(plugin: PluginForUiSpec): object {
       ...(param.required
         ? {
             validation: {
-              checks: [{ rule: "required", message: `${param.key} is required` }],
+              checks: [
+                { rule: "required", message: `${param.key} is required` },
+              ],
             },
           }
         : {}),

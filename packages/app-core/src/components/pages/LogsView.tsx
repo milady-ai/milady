@@ -225,7 +225,10 @@ export function LogsView() {
       </PagePanel>
 
       {/* Log entries — full remaining height */}
-      <PagePanel variant="surface" className="flex-1 min-h-0 overflow-y-auto p-2 font-mono text-sm">
+      <PagePanel
+        variant="surface"
+        className="flex-1 min-h-0 overflow-y-auto p-2 font-mono text-sm"
+      >
         {filteredLogs.length === 0 ? (
           <PagePanel.Empty
             variant="panel"

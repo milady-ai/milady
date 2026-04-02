@@ -34,9 +34,7 @@ export function SqlEditorPanel({
 
   return (
     <>
-      <PagePanel variant="surface" as="section"
-        className="px-5 py-5 sm:px-6"
-      >
+      <PagePanel variant="surface" as="section" className="px-5 py-5 sm:px-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
           {t("databaseview.Database")}
         </div>
@@ -45,9 +43,7 @@ export function SqlEditorPanel({
         </h1>
       </PagePanel>
 
-      <PagePanel variant="surface"
-        className="mt-4 flex flex-col p-4"
-      >
+      <PagePanel variant="surface" className="mt-4 flex flex-col p-4">
         <div className="relative group">
           <div className="absolute -inset-[1px] bg-gradient-to-r from-accent/0 via-accent/30 to-accent/0 rounded-2xl opacity-0 group-focus-within:opacity-100 blur transition-opacity duration-500" />
           <Textarea
@@ -89,42 +85,38 @@ export function SqlEditorPanel({
               {queryResult.rowCount === 1
                 ? t("databaseview.row")
                 : t("databaseview.Rows")}{" "}
-              ·{" "}
-              <span className="text-txt">
-                {queryResult.durationMs}ms
-              </span>
+              · <span className="text-txt">{queryResult.durationMs}ms</span>
             </div>
           )}
         </div>
       </PagePanel>
 
       {/* Inline query history (standalone layout only) */}
-      {showHistory &&
-        queryHistory.length > 0 &&
-        !queryResult && (
-          <div className="border border-border/40 bg-card/40 backdrop-blur-xl rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-4 py-2.5 text-[10px] text-muted uppercase font-bold tracking-widest bg-bg/60 border-b border-border/40 shadow-inner">
-              {t("databaseview.RecentQueries")}
-            </div>
-            <div className="flex flex-col">
-              {queryHistory.slice(0, 5).map((q) => (
-                <Button
-                  variant="ghost"
-                  key={q}
-                  className="w-full px-4 py-3 h-auto justify-start text-[11px] font-mono text-txt text-left rounded-none border-b border-border/20 hover:bg-accent/10 hover:text-txt transition-colors truncate"
-                  onClick={() => setQueryText(q)}
-                >
-                  <span className="truncate opacity-80 group-hover:opacity-100">
-                    {q}
-                  </span>
-                </Button>
-              ))}
-            </div>
+      {showHistory && queryHistory.length > 0 && !queryResult && (
+        <div className="border border-border/40 bg-card/40 backdrop-blur-xl rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-4 py-2.5 text-[10px] text-muted uppercase font-bold tracking-widest bg-bg/60 border-b border-border/40 shadow-inner">
+            {t("databaseview.RecentQueries")}
           </div>
-        )}
+          <div className="flex flex-col">
+            {queryHistory.slice(0, 5).map((q) => (
+              <Button
+                variant="ghost"
+                key={q}
+                className="w-full px-4 py-3 h-auto justify-start text-[11px] font-mono text-txt text-left rounded-none border-b border-border/20 hover:bg-accent/10 hover:text-txt transition-colors truncate"
+                onClick={() => setQueryText(q)}
+              >
+                <span className="truncate opacity-80 group-hover:opacity-100">
+                  {q}
+                </span>
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {queryResult && queryResult.rows.length > 0 ? (
-        <PagePanel variant="surface"
+        <PagePanel
+          variant="surface"
           className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
         >
           <ResultsGrid

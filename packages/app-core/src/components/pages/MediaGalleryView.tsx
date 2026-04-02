@@ -183,7 +183,10 @@ function collectStrings(obj: unknown, out: Set<string>) {
 export function MediaGalleryView({
   leftNav,
   contentHeader,
-}: { leftNav?: ReactNode; contentHeader?: ReactNode }) {
+}: {
+  leftNav?: ReactNode;
+  contentHeader?: ReactNode;
+}) {
   const { t } = useApp();
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);

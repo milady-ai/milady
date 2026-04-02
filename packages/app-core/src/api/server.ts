@@ -874,13 +874,11 @@ async function handleMiladyCompatRoute(
     const { buildPluginConfigUiSpec } = await import(
       "../config/plugin-ui-spec"
     );
-    const { buildPluginListResponse } = await import(
-      "./plugins-compat-routes"
-    );
+    const { buildPluginListResponse } = await import("./plugins-compat-routes");
     const pluginList = buildPluginListResponse(state.current);
-    const plugin = (
-      pluginList.plugins as Array<Record<string, unknown>>
-    ).find((p) => p.id === pluginId);
+    const plugin = (pluginList.plugins as Array<Record<string, unknown>>).find(
+      (p) => p.id === pluginId,
+    );
     if (!plugin) {
       sendJsonResponse(res, 404, { error: `Plugin "${pluginId}" not found` });
       return true;
@@ -902,7 +900,9 @@ async function handleMiladyCompatRoute(
     const config = loadElizaConfig();
     const character = buildCharacterFromConfig(config);
     const agentId =
-      state.current?.agentId ?? character.id ?? "00000000-0000-0000-0000-000000000000";
+      state.current?.agentId ??
+      character.id ??
+      "00000000-0000-0000-0000-000000000000";
     sendJsonResponse(res, 200, [
       {
         id: agentId,

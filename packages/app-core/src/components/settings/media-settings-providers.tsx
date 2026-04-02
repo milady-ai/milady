@@ -816,9 +816,7 @@ export function ProviderModelSelectors({
             </SettingsControls.SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>
-                  {t("mediasettingssection.Flux")}
-                </SelectLabel>
+                <SelectLabel>{t("mediasettingssection.Flux")}</SelectLabel>
                 <SelectItem value="fal-ai/flux-pro">
                   {t("mediasettingssection.FluxPro")}
                 </SelectItem>
@@ -943,8 +941,7 @@ export function ProviderModelSelectors({
               (getNestedValue(
                 mediaConfig as Record<string, unknown>,
                 "video.fal.model",
-              ) as string) ??
-              "fal-ai/kling-video/v3/pro/text-to-video"
+              ) as string) ?? "fal-ai/kling-video/v3/pro/text-to-video"
             }
             onValueChange={(value) =>
               updateNestedValue("video.fal.model", value)

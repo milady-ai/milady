@@ -31,10 +31,7 @@ import {
 import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
 import { StripeEmbeddedCheckout } from "../cloud/StripeEmbeddedCheckout";
-import {
-  AgentDetailSidebar,
-  CloudAgentCard,
-} from "./cloud-dashboard-panels";
+import { AgentDetailSidebar, CloudAgentCard } from "./cloud-dashboard-panels";
 import {
   autoTopUpFormReducer,
   BILLING_PRESET_AMOUNTS,

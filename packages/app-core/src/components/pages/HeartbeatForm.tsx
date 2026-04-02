@@ -55,9 +55,14 @@ export interface HeartbeatFormProps {
   /** Currently selected trigger ID. */
   selectedTriggerId: string | null;
   /** Set a single form field value. */
-  setField: <K extends keyof TriggerFormState>(key: K, value: TriggerFormState[K]) => void;
+  setField: <K extends keyof TriggerFormState>(
+    key: K,
+    value: TriggerFormState[K],
+  ) => void;
   /** Replace the entire form state. */
-  setForm: (form: TriggerFormState | ((prev: TriggerFormState) => TriggerFormState)) => void;
+  setForm: (
+    form: TriggerFormState | ((prev: TriggerFormState) => TriggerFormState),
+  ) => void;
   /** Set form error message. */
   setFormError: (error: string | null) => void;
   /** Close the editor panel. */
@@ -69,7 +74,10 @@ export interface HeartbeatFormProps {
   /** Run a trigger immediately. */
   onRunSelectedTrigger: (triggerId: string) => Promise<void>;
   /** Toggle a trigger's enabled state. */
-  onToggleTriggerEnabled: (triggerId: string, currentlyEnabled: boolean) => Promise<void>;
+  onToggleTriggerEnabled: (
+    triggerId: string,
+    currentlyEnabled: boolean,
+  ) => Promise<void>;
   /** Save the current form as a template. */
   saveFormAsTemplate: () => void;
   /** Load run history for a trigger. */
@@ -116,9 +124,7 @@ export function HeartbeatForm({
               ? t("heartbeatsview.editHeartbeat")
               : t("heartbeatsview.createHeartbeat")}
           </FieldLabel>
-          <h2 className="text-2xl font-semibold text-txt">
-            {modalTitle}
-          </h2>
+          <h2 className="text-2xl font-semibold text-txt">{modalTitle}</h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 lg:justify-end">
@@ -176,9 +182,7 @@ export function HeartbeatForm({
             <Input
               variant="form"
               value={form.displayName}
-              onChange={(event) =>
-                setField("displayName", event.target.value)
-              }
+              onChange={(event) => setField("displayName", event.target.value)}
               placeholder={t("triggersview.eGDailyDigestH")}
             />
           </div>
@@ -190,9 +194,7 @@ export function HeartbeatForm({
             <Textarea
               variant="form"
               value={form.instructions}
-              onChange={(event) =>
-                setField("instructions", event.target.value)
-              }
+              onChange={(event) => setField("instructions", event.target.value)}
               placeholder={t("triggersview.WhatShouldTheAgen")}
             />
           </div>
@@ -205,7 +207,10 @@ export function HeartbeatForm({
               <FormSelect
                 value={form.triggerType}
                 onValueChange={(value) =>
-                  setField("triggerType", value as TriggerFormState["triggerType"])
+                  setField(
+                    "triggerType",
+                    value as TriggerFormState["triggerType"],
+                  )
                 }
                 placeholder={t("triggersview.RepeatingInterval")}
               >
@@ -261,7 +266,10 @@ export function HeartbeatForm({
                 <FormSelect
                   value={form.durationUnit}
                   onValueChange={(value) =>
-                    setField("durationUnit", value as TriggerFormState["durationUnit"])
+                    setField(
+                      "durationUnit",
+                      value as TriggerFormState["durationUnit"],
+                    )
                   }
                   placeholder={durationUnitLabel(form.durationUnit, t)}
                 >
@@ -319,9 +327,7 @@ export function HeartbeatForm({
               <Input
                 variant="form"
                 value={form.maxRuns}
-                onChange={(event) =>
-                  setField("maxRuns", event.target.value)
-                }
+                onChange={(event) => setField("maxRuns", event.target.value)}
                 placeholder="\u221E"
               />
             </div>
@@ -332,9 +338,7 @@ export function HeartbeatForm({
                 aria-label={t("triggersview.StartEnabled")}
                 className="flex-1"
                 label={t("triggersview.StartEnabled")}
-                onCheckedChange={(checked) =>
-                  setField("enabled", checked)
-                }
+                onCheckedChange={(checked) => setField("enabled", checked)}
               />
             </div>
           </div>
@@ -486,10 +490,7 @@ function HeartbeatRunHistory({
         </div>
 
         {(() => {
-          const hasLoadedRuns = Object.hasOwn(
-            triggerRunsById,
-            editingId,
-          );
+          const hasLoadedRuns = Object.hasOwn(triggerRunsById, editingId);
           const runs = triggerRunsById[editingId] ?? [];
 
           if (!hasLoadedRuns) {
@@ -526,10 +527,7 @@ function HeartbeatRunHistory({
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                           <span className="font-medium text-txt">
-                            {localizedExecutionStatus(
-                              run.status,
-                              t,
-                            )}
+                            {localizedExecutionStatus(run.status, t)}
                           </span>
                           <span className="text-xs text-muted">
                             {formatDateTime(run.finishedAt, {

@@ -45,9 +45,7 @@ export function MarketplaceCard({
         {item.name.charAt(0).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm text-txt">
-          {item.name}
-        </div>
+        <div className="font-semibold text-sm text-txt">{item.name}</div>
         <div className="text-[11px] text-muted mt-0.5 line-clamp-2">
           {item.description || t("skillsview.noDescription")}
         </div>

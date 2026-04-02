@@ -843,8 +843,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
   const applyDetectedProviders = useCallback(
     (detected: Awaited<ReturnType<typeof scanProviderCredentials>>) => {
       setOnboardingDetectedProviders(
-        detected as typeof detected &
-          AppState["onboardingDetectedProviders"],
+        detected as typeof detected & AppState["onboardingDetectedProviders"],
       );
       const prefill = deriveDetectedProviderPrefill(detected);
       if (!prefill) {

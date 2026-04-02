@@ -42,7 +42,10 @@ import { SqlEditorPanel } from "./SqlEditorPanel";
 export function DatabaseView({
   leftNav,
   contentHeader,
-}: { leftNav?: ReactNode; contentHeader?: ReactNode }) {
+}: {
+  leftNav?: ReactNode;
+  contentHeader?: ReactNode;
+}) {
   const { t } = useApp();
   const showExternalSidebar = Boolean(leftNav);
   const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
@@ -310,92 +313,100 @@ export function DatabaseView({
     const dbSidebar = (
       <Sidebar testId="database-sidebar">
         <SidebarPanel>
-            <div className="space-y-3 pt-1">
-              {leftNav}
-              {viewToggle}
-              {sidebarSummary}
-              {refreshButton}
-            </div>
+          <div className="space-y-3 pt-1">
+            {leftNav}
+            {viewToggle}
+            {sidebarSummary}
+            {refreshButton}
+          </div>
 
-            <div className="mt-4 h-px bg-border/30" />
+          <div className="mt-4 h-px bg-border/30" />
 
-            {view === "tables" ? (
-              <>
-                <div className="space-y-3 pt-4">
-                  <Input
-                    type="text"
-                    placeholder={t("databaseview.FilterTables")}
-                    value={sidebarSearch}
-                    onChange={(e) => setSidebarSearch(e.target.value)}
-                    className="h-10 rounded-[16px] border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_20px_-20px_rgba(15,23,42,0.12)] focus-visible:border-accent/28 focus-visible:ring-1 focus-visible:ring-accent/24 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_16px_22px_-20px_rgba(0,0,0,0.22)]"
-                  />
-                  <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
-                    {t("databaseview.Tables")} ({filteredTables.length})
-                  </div>
+          {view === "tables" ? (
+            <>
+              <div className="space-y-3 pt-4">
+                <Input
+                  type="text"
+                  placeholder={t("databaseview.FilterTables")}
+                  value={sidebarSearch}
+                  onChange={(e) => setSidebarSearch(e.target.value)}
+                  className="h-10 rounded-[16px] border-border/34 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_20px_-20px_rgba(15,23,42,0.12)] focus-visible:border-accent/28 focus-visible:ring-1 focus-visible:ring-accent/24 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_16px_22px_-20px_rgba(0,0,0,0.22)]"
+                />
+                <div className="text-[10px] text-muted uppercase font-bold tracking-widest px-2 bg-bg/50 py-1.5 rounded-lg border border-border/30 inline-flex items-center shadow-inner">
+                  {t("databaseview.Tables")} ({filteredTables.length})
                 </div>
+              </div>
 
-                <SidebarScrollRegion className="mt-3 space-y-1.5">
-                  {loading && tables.length === 0 ? (
-                    <PagePanel variant="inset" className="rounded-[18px] px-3 py-4 text-center text-xs text-muted">
-                      {t("databaseview.Loading")}
-                    </PagePanel>
-                  ) : (
-                    filteredTables.map((table) => (
-                      <SidebarContent.Item
-                        key={table.name}
-                        active={selectedTable === table.name}
-                        onClick={() => handleSelectTable(table.name)}
-                        className="gap-2"
-                      >
-                        <SidebarContent.ItemIcon active={selectedTable === table.name}>
-                          {table.name.slice(0, 1).toUpperCase()}
-                        </SidebarContent.ItemIcon>
-                        <SidebarContent.ItemBody>
-                          <SidebarContent.ItemTitle>
-                            {table.name}
-                          </SidebarContent.ItemTitle>
-                          <SidebarContent.ItemDescription>
-                            {t("databaseview.RowCountLabel", {
-                              count: (table.rowCount ?? 0).toLocaleString(),
-                              defaultValue: "{{count}} rows",
-                            })}
-                          </SidebarContent.ItemDescription>
-                        </SidebarContent.ItemBody>
-                      </SidebarContent.Item>
-                    ))
-                  )}
-                </SidebarScrollRegion>
-              </>
-            ) : (
-              <>
-                <div className="space-y-3 pt-4">
-                  <PagePanel variant="inset" className="rounded-[18px] px-3 py-3 text-[11px] text-muted">
-                    {t("databaseview.QueryWorkspaceInfo", {
-                      defaultValue:
-                        "Write ad-hoc queries and inspect results without leaving the database workspace.",
-                    })}
+              <SidebarScrollRegion className="mt-3 space-y-1.5">
+                {loading && tables.length === 0 ? (
+                  <PagePanel
+                    variant="inset"
+                    className="rounded-[18px] px-3 py-4 text-center text-xs text-muted"
+                  >
+                    {t("databaseview.Loading")}
                   </PagePanel>
-                </div>
-
-                {queryHistory.length > 0 ? (
-                  <SidebarScrollRegion className="mt-3 space-y-1.5">
-                    <div className="text-[10px] text-muted uppercase tracking-[0.16em]">
-                      {t("databaseview.RecentQueries")}
-                    </div>
-                    {queryHistory.slice(0, 8).map((q) => (
-                      <Button
-                        variant="ghost"
-                        key={q}
-                        className="h-auto w-full justify-start rounded-[18px] px-3 py-2 text-left text-[11px] font-mono border border-border/32 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] text-muted-strong shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_20px_-18px_rgba(15,23,42,0.14)] backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-200 hover:border-border/46 hover:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_90%,transparent),color-mix(in_srgb,var(--bg)_97%,transparent))] hover:text-txt hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_16px_22px_-18px_rgba(15,23,42,0.16)] active:scale-95 disabled:hover:border-border/32 disabled:hover:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] disabled:hover:text-muted-strong dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_16px_24px_-20px_rgba(0,0,0,0.24)]"
-                        onClick={() => setQueryText(q)}
+                ) : (
+                  filteredTables.map((table) => (
+                    <SidebarContent.Item
+                      key={table.name}
+                      active={selectedTable === table.name}
+                      onClick={() => handleSelectTable(table.name)}
+                      className="gap-2"
+                    >
+                      <SidebarContent.ItemIcon
+                        active={selectedTable === table.name}
                       >
-                        <span className="truncate">{q}</span>
-                      </Button>
-                    ))}
-                  </SidebarScrollRegion>
-                ) : null}
-              </>
-            )}
+                        {table.name.slice(0, 1).toUpperCase()}
+                      </SidebarContent.ItemIcon>
+                      <SidebarContent.ItemBody>
+                        <SidebarContent.ItemTitle>
+                          {table.name}
+                        </SidebarContent.ItemTitle>
+                        <SidebarContent.ItemDescription>
+                          {t("databaseview.RowCountLabel", {
+                            count: (table.rowCount ?? 0).toLocaleString(),
+                            defaultValue: "{{count}} rows",
+                          })}
+                        </SidebarContent.ItemDescription>
+                      </SidebarContent.ItemBody>
+                    </SidebarContent.Item>
+                  ))
+                )}
+              </SidebarScrollRegion>
+            </>
+          ) : (
+            <>
+              <div className="space-y-3 pt-4">
+                <PagePanel
+                  variant="inset"
+                  className="rounded-[18px] px-3 py-3 text-[11px] text-muted"
+                >
+                  {t("databaseview.QueryWorkspaceInfo", {
+                    defaultValue:
+                      "Write ad-hoc queries and inspect results without leaving the database workspace.",
+                  })}
+                </PagePanel>
+              </div>
+
+              {queryHistory.length > 0 ? (
+                <SidebarScrollRegion className="mt-3 space-y-1.5">
+                  <div className="text-[10px] text-muted uppercase tracking-[0.16em]">
+                    {t("databaseview.RecentQueries")}
+                  </div>
+                  {queryHistory.slice(0, 8).map((q) => (
+                    <Button
+                      variant="ghost"
+                      key={q}
+                      className="h-auto w-full justify-start rounded-[18px] px-3 py-2 text-left text-[11px] font-mono border border-border/32 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] text-muted-strong shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_20px_-18px_rgba(15,23,42,0.14)] backdrop-blur-md transition-[border-color,background-color,color,transform,box-shadow] duration-200 hover:border-border/46 hover:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_90%,transparent),color-mix(in_srgb,var(--bg)_97%,transparent))] hover:text-txt hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_16px_22px_-18px_rgba(15,23,42,0.16)] active:scale-95 disabled:hover:border-border/32 disabled:hover:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_84%,transparent),color-mix(in_srgb,var(--bg)_95%,transparent))] disabled:hover:text-muted-strong dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_16px_24px_-20px_rgba(0,0,0,0.24)]"
+                      onClick={() => setQueryText(q)}
+                    >
+                      <span className="truncate">{q}</span>
+                    </Button>
+                  ))}
+                </SidebarScrollRegion>
+              ) : null}
+            </>
+          )}
         </SidebarPanel>
       </Sidebar>
     );
@@ -411,7 +422,9 @@ export function DatabaseView({
 
           {dbStatus && !dbStatus.connected ? (
             <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
-              <PagePanel variant="surface" as="section"
+              <PagePanel
+                variant="surface"
+                as="section"
                 className="px-5 py-5 sm:px-6"
               >
                 <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
@@ -422,7 +435,8 @@ export function DatabaseView({
                 </h1>
               </PagePanel>
 
-              <PagePanel variant="surface"
+              <PagePanel
+                variant="surface"
                 className="mt-4 flex min-h-[18rem] flex-1 items-center justify-center p-6"
               >
                 <PagePanel.Empty
@@ -436,7 +450,9 @@ export function DatabaseView({
             <div className="flex min-h-0 flex-1 flex-col overflow-auto p-6">
               {!selectedTable ? (
                 <>
-                  <PagePanel variant="surface" as="section"
+                  <PagePanel
+                    variant="surface"
+                    as="section"
                     className="px-5 py-5 sm:px-6"
                   >
                     <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
@@ -447,7 +463,8 @@ export function DatabaseView({
                     </h1>
                   </PagePanel>
 
-                  <PagePanel variant="surface"
+                  <PagePanel
+                    variant="surface"
                     className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
                   >
                     <PagePanel.Empty
@@ -458,14 +475,17 @@ export function DatabaseView({
                   </PagePanel>
                 </>
               ) : loading && !tableData ? (
-                <PagePanel variant="surface"
+                <PagePanel
+                  variant="surface"
                   className="flex flex-1 items-center justify-center px-6 py-10 text-sm font-medium italic text-muted"
                 >
                   {t("databaseview.Loading")}
                 </PagePanel>
               ) : tableData ? (
                 <>
-                  <PagePanel variant="surface" as="section"
+                  <PagePanel
+                    variant="surface"
+                    as="section"
                     className="px-5 py-5 sm:px-6"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -491,7 +511,8 @@ export function DatabaseView({
                     </div>
                   </PagePanel>
 
-                  <PagePanel variant="surface"
+                  <PagePanel
+                    variant="surface"
                     className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
                   >
                     <div className="flex-1 min-h-0">
@@ -531,12 +552,12 @@ export function DatabaseView({
             </div>
           )}
         </div>
-          {cellInspect !== null && (
-            <CellPopover
-              value={cellInspect}
-              onClose={() => setCellInspect(null)}
-            />
-          )}
+        {cellInspect !== null && (
+          <CellPopover
+            value={cellInspect}
+            onClose={() => setCellInspect(null)}
+          />
+        )}
       </PageLayout>
     );
   }
@@ -666,7 +687,9 @@ export function DatabaseView({
                 ) : (
                   <SidebarScrollRegion
                     className={`flex flex-col gap-1 flex-1 pr-1 ${
-                      showExternalSidebar ? "" : "overflow-auto custom-scrollbar"
+                      showExternalSidebar
+                        ? ""
+                        : "overflow-auto custom-scrollbar"
                     }`}
                   >
                     {filteredTables.map((t) => (
@@ -676,7 +699,9 @@ export function DatabaseView({
                         onClick={() => handleSelectTable(t.name)}
                         className="gap-2"
                       >
-                        <SidebarContent.ItemIcon active={selectedTable === t.name}>
+                        <SidebarContent.ItemIcon
+                          active={selectedTable === t.name}
+                        >
                           {t.name.slice(0, 1).toUpperCase()}
                         </SidebarContent.ItemIcon>
                         <SidebarContent.ItemBody>
@@ -724,7 +749,9 @@ export function DatabaseView({
           <div className="flex-1 min-w-0 flex flex-col bg-bg/10">
             {!selectedTable ? (
               <>
-                <PagePanel variant="surface" as="section"
+                <PagePanel
+                  variant="surface"
+                  as="section"
                   className="px-5 py-5 sm:px-6"
                 >
                   <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
@@ -735,7 +762,8 @@ export function DatabaseView({
                   </div>
                 </PagePanel>
 
-                <PagePanel variant="surface"
+                <PagePanel
+                  variant="surface"
                   className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
                 >
                   <PagePanel.Empty
@@ -746,14 +774,17 @@ export function DatabaseView({
                 </PagePanel>
               </>
             ) : loading && !tableData ? (
-              <PagePanel variant="surface"
+              <PagePanel
+                variant="surface"
                 className="flex flex-1 items-center justify-center px-6 py-10 text-sm font-medium italic text-muted"
               >
                 {t("databaseview.Loading")}
               </PagePanel>
             ) : tableData ? (
               <>
-                <PagePanel variant="surface" as="section"
+                <PagePanel
+                  variant="surface"
+                  as="section"
                   className="px-5 py-5 sm:px-6"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -787,7 +818,8 @@ export function DatabaseView({
                   </div>
                 </PagePanel>
 
-                <PagePanel variant="surface"
+                <PagePanel
+                  variant="surface"
                   className="mt-4 flex flex-1 min-h-0 flex-col overflow-hidden p-3"
                 >
                   <div className="flex-1 min-h-0">
@@ -829,9 +861,7 @@ export function DatabaseView({
         /* ── SQL Editor ────────────────────────────────────────── */
         <div className="flex flex-1 min-h-0 gap-4">
           {showExternalSidebar && (
-            <aside
-              className="w-[21rem] max-w-[352px] shrink-0 overflow-hidden rounded-[24px] border border-border/34 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_20px_30px_-28px_rgba(15,23,42,0.18)] flex min-h-0 w-full flex-col border-b bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_76%,transparent),color-mix(in_srgb,var(--bg-muted)_97%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),inset_-1px_0_0_rgba(255,255,255,0.03)] backdrop-blur-md lg:border-b-0 lg:border-r dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),inset_-1px_0_0_rgba(255,255,255,0.02)]"
-            >
+            <aside className="w-[21rem] max-w-[352px] shrink-0 overflow-hidden rounded-[24px] border border-border/34 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_20px_30px_-28px_rgba(15,23,42,0.18)] flex min-h-0 w-full flex-col border-b bg-[linear-gradient(180deg,color-mix(in_srgb,var(--card)_76%,transparent),color-mix(in_srgb,var(--bg-muted)_97%,transparent))] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),inset_-1px_0_0_rgba(255,255,255,0.03)] backdrop-blur-md lg:border-b-0 lg:border-r dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),inset_-1px_0_0_rgba(255,255,255,0.02)]">
               <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 pt-3">
                 {sidebarSummary}
                 <div className="space-y-3 pt-4">
@@ -840,7 +870,10 @@ export function DatabaseView({
                   {refreshButton}
                 </div>
                 <div className="h-px bg-border/30" />
-                <PagePanel variant="inset" className="rounded-[18px] px-3 py-3 text-[11px] text-muted">
+                <PagePanel
+                  variant="inset"
+                  className="rounded-[18px] px-3 py-3 text-[11px] text-muted"
+                >
                   {t("databaseview.QueryWorkspaceInfo", {
                     defaultValue:
                       "Write ad-hoc queries and inspect results without leaving the database workspace.",
@@ -867,10 +900,10 @@ export function DatabaseView({
             </aside>
           )}
 
-          <div
-            className="min-w-0 flex-1 overflow-y-auto flex min-h-0 flex-col gap-4 bg-transparent"
-          >
-            <PagePanel variant="surface" as="section"
+          <div className="min-w-0 flex-1 overflow-y-auto flex min-h-0 flex-col gap-4 bg-transparent">
+            <PagePanel
+              variant="surface"
+              as="section"
               className="px-5 py-5 sm:px-6"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -893,7 +926,10 @@ export function DatabaseView({
               </div>
             </PagePanel>
 
-            <SqlEditorPanel {...sqlEditorProps} showHistory={!showExternalSidebar} />
+            <SqlEditorPanel
+              {...sqlEditorProps}
+              showHistory={!showExternalSidebar}
+            />
           </div>
         </div>
       )}

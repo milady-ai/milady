@@ -102,10 +102,7 @@ export function shelterUrls(input: string): {
  * Test whether a period match at `index` inside `value` is a real sentence
  * boundary (not an abbreviation or decimal).
  */
-export function isRealSentenceEnd(
-  value: string,
-  matchIndex: number,
-): boolean {
+export function isRealSentenceEnd(value: string, matchIndex: number): boolean {
   if (matchIndex > 0 && /\d/.test(value[matchIndex - 1]!)) {
     if (matchIndex + 1 < value.length && /\d/.test(value[matchIndex + 1]!)) {
       return false;
@@ -185,10 +182,7 @@ export function remainderAfter(
   return "";
 }
 
-export function queueableSpeechPrefix(
-  text: string,
-  isFinal: boolean,
-): string {
+export function queueableSpeechPrefix(text: string, isFinal: boolean): string {
   const value = collapseWhitespace(text);
   if (!value) return "";
   if (isFinal) return value;

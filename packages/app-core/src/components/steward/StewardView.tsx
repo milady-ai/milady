@@ -60,14 +60,17 @@ export function StewardView() {
   if (stewardStatus && !stewardStatus.connected) {
     return (
       <div className="flex flex-1 items-center justify-center p-6">
-        <PagePanel variant="surface" className="mx-4 w-full max-w-xl px-6 py-10 text-center">
+        <PagePanel
+          variant="surface"
+          className="mx-4 w-full max-w-xl px-6 py-10 text-center"
+        >
           <StewardLogo size={40} className="mx-auto opacity-40" />
           <h2 className="mt-4 text-lg font-semibold text-txt-strong">
             Steward Not Connected
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted leading-relaxed">
-            Set STEWARD_API_URL and STEWARD_API_KEY in agent settings to
-            enable vault management.
+            Set STEWARD_API_URL and STEWARD_API_KEY in agent settings to enable
+            vault management.
           </p>
           {stewardStatus.error && (
             <p className="mt-3 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-xs text-danger">
@@ -92,7 +95,10 @@ export function StewardView() {
             active={activeTab === "approvals"}
             onClick={() => setActiveTab("approvals")}
           >
-            <SidebarContent.ItemIcon active={activeTab === "approvals"} className="relative">
+            <SidebarContent.ItemIcon
+              active={activeTab === "approvals"}
+              className="relative"
+            >
               <StewardLogo size={16} />
               {pendingCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-danger px-1 text-[9px] font-bold text-[var(--destructive-foreground)]">
@@ -103,9 +109,7 @@ export function StewardView() {
             <SidebarContent.ItemBody>
               <SidebarContent.ItemTitle>Approvals</SidebarContent.ItemTitle>
               <SidebarContent.ItemDescription>
-                {pendingCount > 0
-                  ? `${pendingCount} pending`
-                  : "None pending"}
+                {pendingCount > 0 ? `${pendingCount} pending` : "None pending"}
               </SidebarContent.ItemDescription>
             </SidebarContent.ItemBody>
           </SidebarContent.Item>
@@ -154,9 +158,7 @@ export function StewardView() {
             Steward
           </div>
           <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
-            {activeTab === "approvals"
-              ? "Approvals"
-              : "Transaction History"}
+            {activeTab === "approvals" ? "Approvals" : "Transaction History"}
           </h1>
           <p className="mt-1.5 max-w-2xl text-sm text-muted">
             {activeTab === "approvals"

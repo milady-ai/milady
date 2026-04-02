@@ -115,7 +115,10 @@ const ENV_PREFIX: Record<AgentTab, string> = {
 function CodingDirInput({
   initial,
   onCommit,
-}: { initial: string; onCommit: (val: string) => void }) {
+}: {
+  initial: string;
+  onCommit: (val: string) => void;
+}) {
   const [val, setVal] = useState(initial);
   return (
     <SettingsControls.Input
@@ -468,7 +471,10 @@ export function CodingAgentSettingsSection() {
           value={prefs.PARALLAX_SCRATCH_RETENTION || "pending_decision"}
           onValueChange={(value) => {
             // Skip if user re-selects the visual default that was never stored
-            if (!prefs.PARALLAX_SCRATCH_RETENTION && value === "pending_decision")
+            if (
+              !prefs.PARALLAX_SCRATCH_RETENTION &&
+              value === "pending_decision"
+            )
               return;
             setPref("PARALLAX_SCRATCH_RETENTION", value);
           }}

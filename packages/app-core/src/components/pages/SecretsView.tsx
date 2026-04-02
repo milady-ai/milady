@@ -104,7 +104,10 @@ function savePinnedKeys(keys: Set<string>) {
 export function SecretsView({
   contentHeader,
   inModal,
-}: { contentHeader?: React.ReactNode; inModal?: boolean } = {}) {
+}: {
+  contentHeader?: React.ReactNode;
+  inModal?: boolean;
+} = {}) {
   const { t } = useApp();
   const [allSecrets, setAllSecrets] = useState<SecretInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,121 +266,123 @@ export function SecretsView({
 
   return (
     <ContentLayout contentHeader={contentHeader} inModal={inModal}>
-    <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="m-0 max-w-2xl text-[13px] leading-6 text-muted" />
-        <Button
-          variant="default"
-          size="sm"
-          className="h-9 flex-shrink-0 px-3 text-[13px] shadow-sm"
-          onClick={() => {
-            setPickerOpen(true);
-            setPickerSearch("");
-          }}
-        >
-          {t("secretsview.AddSecret")}
-        </Button>
-      </div>
-
-      {/* Picker modal */}
-      {pickerOpen && (
-        <SecretPicker
-          available={availableSecrets}
-          search={pickerSearch}
-          onSearchChange={setPickerSearch}
-          onAdd={(key) => {
-            pinKey(key);
-          }}
-          onClose={() => setPickerOpen(false)}
-        />
-      )}
-
-      {/* Empty state */}
-      {vaultSecrets.length === 0 && (
-        <div
-          className={`${VAULT_PANEL_CLASSNAME} border-dashed px-4 py-8 text-center text-[13px] italic text-muted`}
-        >
-          {t("secretsview.YourVaultIsEmpty")}
-        </div>
-      )}
-
-      {/* Vault secrets grouped by category */}
-      {grouped.map(({ category, label, secrets: catSecrets }) => (
-        <section key={category} className="space-y-3">
-          <Button
-            variant="ghost"
-            className={SECTION_TOGGLE_CLASSNAME}
-            onClick={() => toggleCollapse(category)}
-            aria-expanded={!collapsed.has(category)}
-          >
-            <ChevronDown
-              className="h-3 w-3 select-none text-muted transition-transform"
-              style={{
-                transform: collapsed.has(category)
-                  ? "rotate(-90deg)"
-                  : "rotate(0deg)",
-              }}
-            />
-            <span className="text-[14px] font-semibold text-txt">{label}</span>
-            <span className="text-[12px] text-muted">
-              ({catSecrets.length})
-            </span>
-          </Button>
-
-          {!collapsed.has(category) && (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {catSecrets.map((secret) => (
-                <SecretCard
-                  key={secret.key}
-                  secret={secret}
-                  draftValue={draft[secret.key] ?? ""}
-                  isVisible={visible.has(secret.key)}
-                  isPinned={pinnedKeys.has(secret.key)}
-                  onToggleVisible={() => toggleVisible(secret.key)}
-                  onDraftChange={(val) =>
-                    setDraft((prev) => ({ ...prev, [secret.key]: val }))
-                  }
-                  onRemove={() => unpinKey(secret.key)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      ))}
-
-      {/* Save bar */}
-      {vaultSecrets.length > 0 && (
-        <div
-          className={`${VAULT_PANEL_CLASSNAME} flex flex-col gap-3 border-border/60 px-4 py-3 sm:flex-row sm:items-center`}
-        >
+      <div className="space-y-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="m-0 max-w-2xl text-[13px] leading-6 text-muted" />
           <Button
             variant="default"
             size="sm"
-            className="h-9 px-4 text-[13px] font-medium shadow-sm transition-colors"
-            disabled={dirtyKeys.length === 0 || saving}
-            onClick={handleSave}
+            className="h-9 flex-shrink-0 px-3 text-[13px] shadow-sm"
+            onClick={() => {
+              setPickerOpen(true);
+              setPickerSearch("");
+            }}
           >
-            {saving
-              ? t("secretsview.Saving", {
-                  defaultValue: "Saving...",
-                })
-              : dirtyKeys.length > 0
-                ? t("secretsview.SaveCount", {
-                    defaultValue: "Save ({{count}})",
-                    count: dirtyKeys.length,
-                  })
-                : t("common.save")}
+            {t("secretsview.AddSecret")}
           </Button>
-          {saveResult && (
-            <span
-              className={`text-[13px] ${saveResult.ok ? "text-ok" : "text-danger"}`}
-            >
-              {saveResult.message}
-            </span>
-          )}
         </div>
-      )}
-    </div>
+
+        {/* Picker modal */}
+        {pickerOpen && (
+          <SecretPicker
+            available={availableSecrets}
+            search={pickerSearch}
+            onSearchChange={setPickerSearch}
+            onAdd={(key) => {
+              pinKey(key);
+            }}
+            onClose={() => setPickerOpen(false)}
+          />
+        )}
+
+        {/* Empty state */}
+        {vaultSecrets.length === 0 && (
+          <div
+            className={`${VAULT_PANEL_CLASSNAME} border-dashed px-4 py-8 text-center text-[13px] italic text-muted`}
+          >
+            {t("secretsview.YourVaultIsEmpty")}
+          </div>
+        )}
+
+        {/* Vault secrets grouped by category */}
+        {grouped.map(({ category, label, secrets: catSecrets }) => (
+          <section key={category} className="space-y-3">
+            <Button
+              variant="ghost"
+              className={SECTION_TOGGLE_CLASSNAME}
+              onClick={() => toggleCollapse(category)}
+              aria-expanded={!collapsed.has(category)}
+            >
+              <ChevronDown
+                className="h-3 w-3 select-none text-muted transition-transform"
+                style={{
+                  transform: collapsed.has(category)
+                    ? "rotate(-90deg)"
+                    : "rotate(0deg)",
+                }}
+              />
+              <span className="text-[14px] font-semibold text-txt">
+                {label}
+              </span>
+              <span className="text-[12px] text-muted">
+                ({catSecrets.length})
+              </span>
+            </Button>
+
+            {!collapsed.has(category) && (
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {catSecrets.map((secret) => (
+                  <SecretCard
+                    key={secret.key}
+                    secret={secret}
+                    draftValue={draft[secret.key] ?? ""}
+                    isVisible={visible.has(secret.key)}
+                    isPinned={pinnedKeys.has(secret.key)}
+                    onToggleVisible={() => toggleVisible(secret.key)}
+                    onDraftChange={(val) =>
+                      setDraft((prev) => ({ ...prev, [secret.key]: val }))
+                    }
+                    onRemove={() => unpinKey(secret.key)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+
+        {/* Save bar */}
+        {vaultSecrets.length > 0 && (
+          <div
+            className={`${VAULT_PANEL_CLASSNAME} flex flex-col gap-3 border-border/60 px-4 py-3 sm:flex-row sm:items-center`}
+          >
+            <Button
+              variant="default"
+              size="sm"
+              className="h-9 px-4 text-[13px] font-medium shadow-sm transition-colors"
+              disabled={dirtyKeys.length === 0 || saving}
+              onClick={handleSave}
+            >
+              {saving
+                ? t("secretsview.Saving", {
+                    defaultValue: "Saving...",
+                  })
+                : dirtyKeys.length > 0
+                  ? t("secretsview.SaveCount", {
+                      defaultValue: "Save ({{count}})",
+                      count: dirtyKeys.length,
+                    })
+                  : t("common.save")}
+            </Button>
+            {saveResult && (
+              <span
+                className={`text-[13px] ${saveResult.ok ? "text-ok" : "text-danger"}`}
+              >
+                {saveResult.message}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </ContentLayout>
   );
 }
