@@ -376,11 +376,10 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
     pluginsToLoad.add("@elizaos/plugin-opinion");
   }
 
-  // EVM wallet plugin — auto-load when private key is available.
-  // NOT in PROVIDER_PLUGIN_MAP because it is a feature plugin (wallet/DeFi),
-  // not a model provider, and would be incorrectly removed during provider
-  // precedence resolution.
-  if (process.env.EVM_PRIVATE_KEY?.trim()) {
+  // EVM wallet plugin — opt-in via ENABLE_EVM_PLUGIN=1.
+  // Currently has a BRIDGE action spec registration issue that crashes containers,
+  // so we gate it behind an explicit flag until that's resolved.
+  if (process.env.ENABLE_EVM_PLUGIN === "1") {
     pluginsToLoad.add("@elizaos/plugin-evm");
   }
 
