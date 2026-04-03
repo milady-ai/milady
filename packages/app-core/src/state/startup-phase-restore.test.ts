@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { applyRestoredConnection } from "./startup-phase-restore";
@@ -45,5 +47,14 @@ describe("applyRestoredConnection", () => {
       "https://remote.example/api",
     );
     expect(clientRef.setToken).toHaveBeenCalledWith(null);
+  });
+
+  it("does not keep a redundant dynamic import for onboarding bootstrap helpers", () => {
+    const source = fs.readFileSync(
+      new URL("./startup-phase-restore.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).not.toContain('await import("./onboarding-bootstrap")');
   });
 });
