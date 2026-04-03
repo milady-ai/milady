@@ -163,7 +163,7 @@ jobs:
         uses: useblacksmith/build-push-action@v2
         with:
           context: .
-          file: Dockerfile.cloud
+          file: Dockerfile.ci
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push_image != false }}
           tags: |
