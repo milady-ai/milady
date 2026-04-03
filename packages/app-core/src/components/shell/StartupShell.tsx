@@ -16,10 +16,7 @@ import {
   type GatewayDiscoveryEndpoint,
   gatewayEndpointToApiBase,
 } from "../../bridge/gateway-discovery";
-import {
-  clearPersistedConnectionMode,
-  useApp,
-} from "../../state";
+import { clearPersistedConnectionMode, useApp } from "../../state";
 import type { StartupErrorState } from "../../state/types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
