@@ -720,6 +720,11 @@ async function resolveRendererUrl(): Promise<string> {
 async function createMainWindow(): Promise<BrowserWindow> {
   const rendererUrl = await resolveRendererUrl();
   const mainWindowPartition = resolveMainWindowPartition(process.env);
+  if (mainWindowPartition) {
+    console.log(
+      `[Main] Using isolated main window partition ${mainWindowPartition}`,
+    );
+  }
 
   // Load persisted window state
   const statePath = path.join(Utils.paths.userData, "window-state.json");

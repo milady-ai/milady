@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createPackagedWindowsAppEnv } from "./windows-test-env";
+import { createPackagedWindowsAppEnv } from "../../../test/electrobun-packaged/windows-test-env";
 
 describe("createPackagedWindowsAppEnv", () => {
   it("isolates packaged bootstrap tests from stale desktop env overrides", () => {

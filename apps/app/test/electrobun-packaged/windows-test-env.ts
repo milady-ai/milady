@@ -36,7 +36,7 @@ export function createPackagedWindowsAppEnv(args: {
   return {
     ...env,
     MILADY_DESKTOP_TEST_API_BASE: args.apiBase,
-    MILADY_DESKTOP_TEST_PARTITION: "bootstrap-isolated",
+    MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated",
     MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
     ELECTROBUN_CONSOLE: "1",
     // Redirect both Windows profile roots so the packaged shell does not
