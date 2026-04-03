@@ -15,10 +15,7 @@ import {
 } from "../bridge";
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
-import {
-  deriveOnboardingResumeConnection,
-  type StartupErrorState,
-} from "./internal";
+import { type StartupErrorState } from "./internal";
 import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
 import {
   createPersistedActiveServer,
@@ -126,9 +123,7 @@ export async function runRestoringSession(
 
   const restoredActiveServer =
     persistedActiveServer ??
-    (probed
-      ? createPersistedActiveServer({ kind: probed.connection.runMode })
-      : null);
+    (probed ? probed.activeServer : null);
   const preserveCompleted =
     hadPrior && !deps.onboardingCompletionCommittedRef.current;
 

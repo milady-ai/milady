@@ -30,7 +30,11 @@ describe("detectExistingOnboardingConnection", () => {
         timeoutMs: 50,
       }),
     ).resolves.toEqual({
-      connection: { runMode: "local" },
+      activeServer: {
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      },
       detectedExistingInstall: true,
     });
   });
@@ -52,7 +56,11 @@ describe("detectExistingOnboardingConnection", () => {
         timeoutMs: 50,
       }),
     ).resolves.toEqual({
-      connection: { runMode: "local" },
+      activeServer: {
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      },
       detectedExistingInstall: true,
     });
   });
@@ -74,7 +82,11 @@ describe("detectExistingOnboardingConnection", () => {
         timeoutMs: 50,
       }),
     ).resolves.toEqual({
-      connection: { runMode: "local" },
+      activeServer: {
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      },
       detectedExistingInstall: true,
     });
   });
@@ -116,7 +128,7 @@ describe("deriveDetectedProviderPrefill", () => {
         { id: "openrouter", apiKey: " sk-or-test " },
       ]),
     ).toEqual({
-      runMode: "local",
+      serverTarget: "local",
       providerId: "openrouter",
       apiKey: "sk-or-test",
     });

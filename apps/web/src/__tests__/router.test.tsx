@@ -21,7 +21,7 @@ describe("Router", () => {
     );
     expect(document.querySelector("#top")).toBeTruthy();
     expect(screen.getAllByText("MILADY").length).toBeGreaterThan(0);
-    expect(screen.getByText("Try Cloud")).toBeTruthy();
+    expect(screen.getByText("Open App")).toBeTruthy();
     expect(screen.getByText("Read Docs")).toBeTruthy();
     expect(screen.queryByText("DASHBOARD")).toBeNull();
   });

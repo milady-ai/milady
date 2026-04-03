@@ -12,6 +12,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const { mockClient } = vi.hoisted(() => ({
   mockClient: {
     hasToken: vi.fn(() => false),
+    setBaseUrl: vi.fn(),
+    setToken: vi.fn(),
     getAuthStatus: vi.fn(async () => ({
       required: false,
       pairingEnabled: false,
@@ -183,10 +185,14 @@ describe("companion greeting wave", () => {
     vi.useFakeTimers();
     localStorage.clear();
     sessionStorage.clear();
-    // Persist a connection mode so the init flow proceeds past onboarding gate
+    // Persist an active server so the init flow proceeds past onboarding gate
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
     localStorage.setItem("eliza:onboarding-complete", "1");
     localStorage.setItem("eliza:ui-shell-mode", "companion");

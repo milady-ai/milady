@@ -10,7 +10,6 @@ import { getCloudSecret } from "./cloud-secrets";
 import { sendJson as sendJsonResponse } from "./response";
 import {
   normalizeOnboardingProviderId,
-  normalizePersistedOnboardingConnection,
   migrateLegacyRuntimeConfig,
 } from "@miladyai/shared/contracts/onboarding";
 import {
@@ -22,6 +21,7 @@ import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-swi
 import {
   deriveCompatOnboardingReplayBody,
   extractAndPersistOnboardingApiKey,
+  hasLegacyOnboardingRequestFields,
   persistCompatOnboardingDefaults,
 } from "./server-onboarding-compat";
 
@@ -80,22 +80,21 @@ export async function handleOnboardingCompatRoute(
       string,
       unknown
     >;
+    if (hasLegacyOnboardingRequestFields(body)) {
+      sendJsonResponse(res, 400, {
+        error:
+          "legacy onboarding payloads are no longer supported; send deploymentTarget, linkedAccounts, serviceRouting, and credentialInputs",
+      });
+      return true;
+    }
     await extractAndPersistOnboardingApiKey(body);
     persistCompatOnboardingDefaults(body);
     if (typeof body.name === "string" && body.name.trim()) {
       state.pendingAgentName = body.name.trim();
     }
 
-    const { isCloudMode, replayBody: replayBodyRecord } =
-      deriveCompatOnboardingReplayBody(body);
-    const explicitConnection = normalizePersistedOnboardingConnection(
-      body.connection,
-    );
-    const explicitLinkedAccounts = normalizeLinkedAccountsConfig(
-      body.linkedAccounts,
-    );
-    const explicitServiceRouting = normalizeServiceRoutingConfig(
-      body.serviceRouting,
+    const { replayBody: replayBodyRecord } = deriveCompatOnboardingReplayBody(
+      body,
     );
     const replayDeploymentTarget = normalizeDeploymentTargetConfig(
       replayBodyRecord.deploymentTarget,
@@ -107,16 +106,15 @@ export async function handleOnboardingCompatRoute(
       replayBodyRecord.serviceRouting,
     );
     const cloudInferenceSelected = Boolean(
-      explicitConnection?.kind === "cloud-managed" ||
-        (explicitServiceRouting?.llmText?.transport === "cloud-proxy" &&
+      replayServiceRouting?.llmText?.transport === "cloud-proxy" &&
           normalizeOnboardingProviderId(
-            explicitServiceRouting.llmText.backend,
-          ) === "elizacloud"),
+            replayServiceRouting.llmText.backend,
+          ) === "elizacloud",
     );
     const shouldResolveCloudApiKey =
-      isCloudMode ||
+      replayDeploymentTarget?.runtime === "cloud" ||
       cloudInferenceSelected ||
-      explicitLinkedAccounts?.elizacloud?.status === "linked";
+      replayLinkedAccounts?.elizacloud?.status === "linked";
 
     // Resolve the cloud API key so the upstream handler can write it
     // into state.config before saving. Without this, the upstream uses
@@ -174,15 +172,6 @@ export async function handleOnboardingCompatRoute(
 
         capturedCloudApiKey = resolvedCloudApiKey;
 
-        if (cloudInferenceSelected && body.smallModel) {
-          if (!config.models) {
-            (config as Record<string, unknown>).models = {};
-          }
-          (config.models as Record<string, string>).small =
-            body.smallModel as string;
-          (config.models as Record<string, string>).large =
-            (body.largeModel as string) || "";
-        }
       }
       saveElizaConfig(config);
     } catch (err) {
@@ -191,17 +180,9 @@ export async function handleOnboardingCompatRoute(
       );
     }
 
-    if (
-      resolvedCloudApiKey ||
-      (body.runMode !== "cloud" && replayBodyRecord !== body)
-    ) {
+    if (replayBodyRecord !== body) {
       replayBody = Buffer.from(
-        JSON.stringify({
-          ...replayBodyRecord,
-          ...(resolvedCloudApiKey
-            ? { providerApiKey: resolvedCloudApiKey }
-            : {}),
-        }),
+        JSON.stringify(replayBodyRecord),
         "utf8",
       );
     }

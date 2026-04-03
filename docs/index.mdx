@@ -1,7 +1,7 @@
 ---
 title: "Milady"
 sidebarTitle: "Introduction"
-description: "Your personal AI assistant that runs on YOUR machine. Local-first, multi-provider, extensible."
+description: "A client/server AI agent app that can create, discover, and connect to local, LAN, remote, and Eliza Cloud servers."
 ---
 
 **Milady** is a client/server AI agent app built on [elizaOS](https://github.com/elizaOS).
@@ -43,12 +43,12 @@ mobile, web, CLI, and Chrome extension.
 
 ## Why Milady
 
-### Local-First Privacy
+### Client/Server by Default
 
-Milady defaults to local-first operation. You can run the server on your own
-hardware, keep conversations and keys inside `~/.milady/`, and only connect
-external services when you choose to. You can also connect to trusted remote
-or Eliza Cloud servers without changing the client model.
+Milady can create a local server on your own hardware, discover a server on
+your LAN, or connect to a trusted remote or Eliza Cloud server without
+changing the client model. The selected server owns provider routing,
+conversations, tools, and runtime state.
 
 ### Multi-Model, Multi-Provider
 
@@ -74,7 +74,7 @@ Connect to any of 19 supported AI providers -- or run fully offline with Ollama:
 | **zAI** | Homunculus Labs custom endpoints |
 | **Vercel AI Gateway** | Unified gateway access |
 | **Ollama** | Fully local, free, no API key |
-| **elizaOS Cloud** | Managed cloud inference (via `ELIZAOS_CLOUD_API_KEY`) |
+| **Eliza Cloud** | Cloud server target, linked account, and optional inference route |
 
 Switch providers mid-conversation with `/model <id>`. No lock-in.
 

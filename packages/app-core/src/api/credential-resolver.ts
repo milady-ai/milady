@@ -1,6 +1,6 @@
 /**
  * Server-side credential resolver — scans local credential stores
- * and auto-populates milady.json as the single source of truth.
+ * and hydrates credentials into the canonical server config + secret state.
  *
  * Credential sources:
  *   1. Claude Code OAuth → ~/.claude/.credentials.json or macOS Keychain

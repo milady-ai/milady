@@ -6,8 +6,7 @@ import {
   inferOnboardingConnectionFromConfig,
   isCloudInferenceSelectedInConfig,
   migrateLegacyRuntimeConfig,
-  normalizePersistedOnboardingConnection,
-  normalizeOnboardingProviderId,
+  normalizeOnboardingCredentialInputs,
   stripOnboardingConnectionSecrets,
 } from "../contracts/onboarding.js";
 import {
@@ -17,8 +16,7 @@ import {
 } from "../contracts/service-routing.js";
 import {
   applyCanonicalOnboardingConfig,
-  applyOnboardingConnectionConfig,
-  reconcilePersistedOnboardingConnection,
+  applyOnboardingCredentialPersistence,
 } from "./provider-switch-config.js";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
@@ -218,12 +216,33 @@ export async function handleOnboardingRoutes(
       error(res, "Missing or invalid agent name", 400);
       return true;
     }
-    if (body.runMode && body.runMode !== "local" && body.runMode !== "cloud") {
-      error(res, "Invalid runMode: must be 'local' or 'cloud'", 400);
+    const hasLegacyOnboardingFields = [
+      "connection",
+      "runMode",
+      "cloudProvider",
+      "provider",
+      "providerApiKey",
+      "primaryModel",
+      "smallModel",
+      "largeModel",
+    ].some((key) => Object.hasOwn(body, key));
+    if (hasLegacyOnboardingFields) {
+      error(
+        res,
+        "legacy onboarding payloads are no longer supported; send deploymentTarget, linkedAccounts, serviceRouting, and credentialInputs",
+        400,
+      );
       return true;
     }
 
-    const config = state.config;
+    let config = state.config;
+    try {
+      config = loadElizaConfig();
+    } catch (err) {
+      logger.warn(
+        `[eliza-api] Failed to reload config before onboarding: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
     const configuredLanguage = ctx.normalizeCharacterLanguage(
       (body.language as string | undefined) ??
         ctx.readUiLanguageHeader(req) ??
@@ -325,14 +344,6 @@ export async function handleOnboardingRoutes(
         | "psycho";
     }
 
-    const explicitConnectionRequested = Object.hasOwn(body, "connection");
-    const explicitConnection = explicitConnectionRequested
-      ? normalizePersistedOnboardingConnection(body.connection)
-      : null;
-    if (explicitConnectionRequested && !explicitConnection) {
-      error(res, "Invalid connection", 400);
-      return true;
-    }
     const explicitDeploymentTargetRequested = Object.hasOwn(
       body,
       "deploymentTarget",
@@ -358,13 +369,22 @@ export async function handleOnboardingRoutes(
     const explicitServiceRouting = explicitServiceRoutingRequested
       ? normalizeServiceRoutingConfig(body.serviceRouting)
       : null;
+    const explicitCredentialInputsRequested = Object.hasOwn(
+      body,
+      "credentialInputs",
+    );
+    const explicitCredentialInputs = explicitCredentialInputsRequested
+      ? normalizeOnboardingCredentialInputs(body.credentialInputs)
+      : null;
+    if (explicitCredentialInputsRequested && !explicitCredentialInputs) {
+      error(res, "Invalid credentialInputs", 400);
+      return true;
+    }
     const hasCanonicalRuntimeConfig =
       explicitDeploymentTargetRequested ||
       explicitLinkedAccountsRequested ||
-      explicitServiceRoutingRequested;
-
-    // ── Run mode & cloud configuration ────────────────────────────────────
-    const runMode = (body.runMode as string) || "local";
+      explicitServiceRoutingRequested ||
+      explicitCredentialInputsRequested;
 
     // ── Sandbox mode (from 3-mode onboarding: off / light / standard / max)
     const sandboxMode = (body.sandboxMode as string) || "off";
@@ -384,10 +404,6 @@ export async function handleOnboardingRoutes(
     }
 
     if (hasCanonicalRuntimeConfig) {
-      if (explicitConnection) {
-        await applyOnboardingConnectionConfig(config, explicitConnection);
-      }
-
       applyCanonicalOnboardingConfig(config, {
         deploymentTarget: explicitDeploymentTarget,
         linkedAccounts: explicitLinkedAccounts,
@@ -396,6 +412,16 @@ export async function handleOnboardingRoutes(
           explicitServiceRoutingRequested && !explicitServiceRouting?.llmText
             ? ["llmText"]
             : [],
+      });
+
+      await applyOnboardingCredentialPersistence(config, {
+        credentialInputs: explicitCredentialInputs,
+        deploymentTarget:
+          explicitDeploymentTarget ??
+          normalizeDeploymentTargetConfig(config.deploymentTarget),
+        serviceRouting:
+          explicitServiceRouting ??
+          normalizeServiceRoutingConfig(config.serviceRouting),
       });
 
       delete process.env.ELIZAOS_CLOUD_ENABLED;
@@ -412,141 +438,6 @@ export async function handleOnboardingRoutes(
       ) {
         delete process.env.ELIZAOS_CLOUD_API_KEY;
       }
-    } else if (explicitConnection) {
-      await applyOnboardingConnectionConfig(config, explicitConnection);
-      applyCanonicalOnboardingConfig(config, {
-        deploymentTarget:
-          explicitConnection.kind === "remote-provider"
-            ? {
-                runtime: "remote",
-                provider: "remote",
-                remoteApiBase: explicitConnection.remoteApiBase,
-                ...(explicitConnection.remoteAccessToken
-                  ? {
-                      remoteAccessToken: explicitConnection.remoteAccessToken,
-                    }
-                  : {}),
-              }
-            : runMode === "cloud"
-              ? {
-                  runtime: "cloud",
-                  provider: "elizacloud",
-                }
-              : {
-                  runtime: "local",
-                },
-      });
-    } else {
-      if (!config.cloud) config.cloud = {};
-
-      if (runMode === "cloud") {
-        if (
-          typeof body.providerApiKey === "string" &&
-          body.providerApiKey.trim().length > 0
-        ) {
-          const cloudApiKey = body.providerApiKey.trim();
-          config.cloud.apiKey = cloudApiKey;
-          process.env.ELIZAOS_CLOUD_API_KEY = cloudApiKey;
-        }
-        if (!config.models) config.models = {};
-        config.models.small =
-          (body.smallModel as string) ||
-          config.models.small ||
-          "openai/gpt-5-mini";
-        config.models.large =
-          (body.largeModel as string) ||
-          config.models.large ||
-          "anthropic/claude-sonnet-4.5";
-      }
-
-      // ── Local LLM provider ──────────────────────────────────────────────
-      {
-        if (!config.env) config.env = {};
-        const envCfg = config.env as Record<string, unknown>;
-        const vars = (envCfg.vars ?? {}) as Record<string, string>;
-        const providerId =
-          typeof body.provider === "string" ? body.provider : "";
-
-        (envCfg as Record<string, unknown>).vars = vars;
-
-        const clearPiAiFlag = () => {
-          for (const key of ["ELIZA_USE_PI_AI", "MILADY_USE_PI_AI"] as const) {
-            delete vars[key];
-            delete (config.env as Record<string, string>)[key];
-            delete process.env[key];
-          }
-        };
-
-        if (runMode === "local" && providerId === "pi-ai") {
-          vars.ELIZA_USE_PI_AI = "1";
-          process.env.ELIZA_USE_PI_AI = "1";
-
-          if (!config.agents) config.agents = {};
-          if (!config.agents.defaults) config.agents.defaults = {};
-          const defaults = config.agents.defaults as Record<string, unknown>;
-          const modelConfig = (defaults.model ?? {}) as Record<string, unknown>;
-          const primaryModel =
-            typeof body.primaryModel === "string"
-              ? body.primaryModel.trim()
-              : "";
-
-          if (primaryModel) {
-            modelConfig.primary = primaryModel;
-          } else {
-            delete modelConfig.primary;
-          }
-
-          defaults.model = modelConfig;
-        } else {
-          clearPiAiFlag();
-        }
-
-        if (runMode === "local" && providerId && body.providerApiKey) {
-          const providerOpt = (
-            ctx.getProviderOptions() as Array<{
-              id: string;
-              envKey?: string;
-            }>
-          ).find((p) => p.id === providerId);
-          if (providerOpt?.envKey) {
-            (config.env as Record<string, string>)[providerOpt.envKey] =
-              body.providerApiKey as string;
-            process.env[providerOpt.envKey] = body.providerApiKey as string;
-          }
-        }
-      }
-
-      // ── Subscription providers (no API key needed — uses OAuth) ────────
-      if (
-        runMode === "local" &&
-        (body.provider === "anthropic-subscription" ||
-          body.provider === "openai-subscription")
-      ) {
-        if (!config.agents) config.agents = {};
-        if (!config.agents.defaults) config.agents.defaults = {};
-        (
-          config.agents.defaults as Record<string, unknown>
-        ).subscriptionProvider = body.provider;
-        logger.info(
-          `[eliza-api] Subscription provider selected: ${body.provider} — complete OAuth via /api/subscription/ endpoints`,
-        );
-
-        if (
-          body.provider === "anthropic-subscription" &&
-          typeof body.providerApiKey === "string" &&
-          body.providerApiKey.trim().startsWith("sk-ant-")
-        ) {
-          const token = body.providerApiKey.trim();
-          if (!config.env) config.env = {};
-          (config.env as Record<string, string>).ANTHROPIC_API_KEY = token;
-          process.env.ANTHROPIC_API_KEY = token;
-          logger.info(
-            "[eliza-api] Anthropic setup token saved during onboarding",
-          );
-        }
-      }
-
-      reconcilePersistedOnboardingConnection(config);
     }
     if (hasCanonicalRuntimeConfig && config.agents?.defaults?.model) {
       delete config.agents.defaults.model.primary;
@@ -749,8 +640,11 @@ export async function handleOnboardingRoutes(
       return true;
     }
 
+    const resolvedRuntime =
+      normalizeDeploymentTargetConfig(config.deploymentTarget)?.runtime ??
+      "local";
     logger.info(
-      `[eliza-api] Onboarding complete for agent "${body.name}" (mode: ${(body.runMode as string) || "local"})`,
+      `[eliza-api] Onboarding complete for agent "${body.name}" (runtime: ${resolvedRuntime})`,
     );
     json(res, { ok: true });
     return true;

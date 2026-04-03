@@ -239,11 +239,18 @@ Milady uses [Capacitor](https://capacitorjs.com) to target Android and iOS:
 
 ## Environment Setup
 
-Milady stores all state in `~/.milady/` by default. The onboarding wizard handles initial configuration, but you can also set environment variables directly.
+Milady stores all state in `~/.milady/` by default. On first launch the client
+starts by choosing or connecting to a server. If you are creating a local
+server, you can still preconfigure bootstrap settings and provider keys with
+environment variables or config files.
 
 ### API Keys
 
-Set at least one model provider key. You can do this via the onboarding wizard, in `~/.milady/milady.json` under the `env` field, or in `~/.milady/.env`:
+You only need local provider keys when the local server should use them. If
+you plan to connect to an existing LAN, remote, or Eliza Cloud server, that
+server may already own provider routing and credentials. For local bootstrap,
+you can set provider keys in `~/.milady/milady.json` under the `env` field or
+in `~/.milady/.env`:
 
 <CodeGroup>
 ```bash Anthropic (recommended)
@@ -318,11 +325,13 @@ milady --version
 # Show configured model providers
 milady models
 
-# Run the interactive setup wizard
+# Bootstrap or validate local setup
 milady setup
 ```
 
-The `models` command lists all configured model providers and their status. The `setup` command runs the onboarding wizard if needed and validates your workspace.
+The `models` command lists configured model providers and their status for the
+selected local server context. The `setup` command bootstraps local setup when
+needed and validates your workspace.
 
 ## Troubleshooting
 

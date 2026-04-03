@@ -1,38 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildOnboardingConnectionConfig,
-  buildOnboardingRuntimeConfig,
-  isElizaCloudConnectionReady,
-} from "./onboarding-config";
+import { buildOnboardingRuntimeConfig } from "./onboarding-config";
 
-describe("buildOnboardingConnectionConfig", () => {
-  it("does not auto-select cloud inference when onboarding only chooses Eliza Cloud hosting", () => {
-    expect(
-      buildOnboardingConnectionConfig({
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "elizacloud",
-        onboardingCloudApiKey: "ck-test",
-        onboardingProvider: "",
-        onboardingApiKey: "ck-test",
-        onboardingPrimaryModel: "",
-        onboardingOpenRouterModel: "",
-        onboardingRemoteConnected: false,
-        onboardingRemoteApiBase: "",
-        onboardingRemoteToken: "",
-        onboardingSmallModel: "openai/gpt-5-mini",
-        onboardingLargeModel: "anthropic/claude-sonnet-4.5",
-        onboardingVoiceProvider: "",
-        onboardingVoiceApiKey: "",
-      }),
-    ).toBeNull();
-  });
-
+describe("buildOnboardingRuntimeConfig", () => {
   it("keeps cloud hosting and account linking separate from service routing defaults", () => {
     expect(
       buildOnboardingRuntimeConfig({
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "elizacloud",
+        onboardingServerTarget: "elizacloud",
         onboardingCloudApiKey: "ck-test",
         onboardingProvider: "",
         onboardingApiKey: "ck-test",
@@ -47,10 +21,12 @@ describe("buildOnboardingConnectionConfig", () => {
         onboardingVoiceApiKey: "",
       }),
     ).toEqual({
-      connection: null,
       deploymentTarget: {
         runtime: "cloud",
         provider: "elizacloud",
+      },
+      credentialInputs: {
+        cloudApiKey: "ck-test",
       },
       linkedAccounts: {
         elizacloud: {
@@ -63,11 +39,10 @@ describe("buildOnboardingConnectionConfig", () => {
     });
   });
 
-  it("builds a local provider connection and carries the openrouter model override", () => {
+  it("builds a direct llm route and carries the openrouter model override", () => {
     expect(
-      buildOnboardingConnectionConfig({
-        onboardingRunMode: "local",
-        onboardingCloudProvider: "",
+      buildOnboardingRuntimeConfig({
+        onboardingServerTarget: "local",
         onboardingCloudApiKey: "",
         onboardingProvider: "openrouter",
         onboardingApiKey: "sk-or-test",
@@ -82,18 +57,26 @@ describe("buildOnboardingConnectionConfig", () => {
         onboardingVoiceApiKey: "",
       }),
     ).toEqual({
-      kind: "local-provider",
-      provider: "openrouter",
-      apiKey: "sk-or-test",
-      primaryModel: "openai/gpt-5-mini",
+      deploymentTarget: { runtime: "local" },
+      credentialInputs: {
+        llmApiKey: "sk-or-test",
+      },
+      linkedAccounts: undefined,
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5-mini",
+        },
+      },
+      needsProviderSetup: false,
     });
   });
 
-  it("builds a remote-provider connection when a remote backend is selected", () => {
+  it("builds a remote llm route when a remote backend is selected", () => {
     expect(
-      buildOnboardingConnectionConfig({
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "remote",
+      buildOnboardingRuntimeConfig({
+        onboardingServerTarget: "remote",
         onboardingCloudApiKey: "",
         onboardingProvider: "anthropic-subscription",
         onboardingApiKey: "sk-ant-oat01-test",
@@ -108,20 +91,31 @@ describe("buildOnboardingConnectionConfig", () => {
         onboardingVoiceApiKey: "",
       }),
     ).toEqual({
-      kind: "remote-provider",
-      remoteApiBase: "https://example.com/api",
-      remoteAccessToken: "remote-key",
-      provider: "anthropic-subscription",
-      apiKey: "sk-ant-oat01-test",
-      primaryModel: undefined,
+      deploymentTarget: {
+        runtime: "remote",
+        provider: "remote",
+        remoteApiBase: "https://example.com/api",
+        remoteAccessToken: "remote-key",
+      },
+      credentialInputs: {
+        llmApiKey: "sk-ant-oat01-test",
+      },
+      linkedAccounts: undefined,
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic-subscription",
+          transport: "remote",
+          remoteApiBase: "https://example.com/api",
+        },
+      },
+      needsProviderSetup: false,
     });
   });
 
   it("keeps a linked Eliza Cloud account when local inference uses another provider", () => {
     expect(
       buildOnboardingRuntimeConfig({
-        onboardingRunMode: "local",
-        onboardingCloudProvider: "",
+        onboardingServerTarget: "local",
         onboardingCloudApiKey: "ck-linked",
         onboardingProvider: "openai",
         onboardingApiKey: "sk-openai-test",
@@ -136,13 +130,11 @@ describe("buildOnboardingConnectionConfig", () => {
         onboardingVoiceApiKey: "",
       }),
     ).toEqual({
-      connection: {
-        kind: "local-provider",
-        provider: "openai",
-        apiKey: "sk-openai-test",
-        primaryModel: "openai/gpt-5.2",
-      },
       deploymentTarget: { runtime: "local" },
+      credentialInputs: {
+        cloudApiKey: "ck-linked",
+        llmApiKey: "sk-openai-test",
+      },
       linkedAccounts: {
         elizacloud: {
           status: "linked",
@@ -163,8 +155,7 @@ describe("buildOnboardingConnectionConfig", () => {
   it("allows local runtime to use Eliza Cloud for inference without auto-routing other services", () => {
     expect(
       buildOnboardingRuntimeConfig({
-        onboardingRunMode: "local",
-        onboardingCloudProvider: "",
+        onboardingServerTarget: "local",
         onboardingCloudApiKey: "ck-linked",
         onboardingProvider: "elizacloud",
         onboardingApiKey: "",
@@ -179,14 +170,10 @@ describe("buildOnboardingConnectionConfig", () => {
         onboardingVoiceApiKey: "",
       }),
     ).toEqual({
-      connection: {
-        kind: "cloud-managed",
-        cloudProvider: "elizacloud",
-        apiKey: "ck-linked",
-        smallModel: "openai/gpt-5-mini",
-        largeModel: "anthropic/claude-sonnet-4.5",
-      },
       deploymentTarget: { runtime: "local" },
+      credentialInputs: {
+        cloudApiKey: "ck-linked",
+      },
       linkedAccounts: {
         elizacloud: {
           status: "linked",
@@ -204,29 +191,5 @@ describe("buildOnboardingConnectionConfig", () => {
       },
       needsProviderSetup: false,
     });
-  });
-});
-
-describe("isElizaCloudConnectionReady", () => {
-  it("treats an existing Eliza Cloud login as ready", () => {
-    expect(
-      isElizaCloudConnectionReady({
-        connection: null,
-        elizaCloudConnected: true,
-      }),
-    ).toBe(true);
-  });
-
-  it("treats a cloud-managed API key connection as ready", () => {
-    expect(
-      isElizaCloudConnectionReady({
-        connection: {
-          kind: "cloud-managed",
-          cloudProvider: "elizacloud",
-          apiKey: "ck-ready",
-        },
-        elizaCloudConnected: false,
-      }),
-    ).toBe(true);
   });
 });

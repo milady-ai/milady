@@ -104,10 +104,23 @@ describe("POST /api/onboarding compat replay", () => {
         name: "Chen",
         bio: ["A warm analyst."],
         systemPrompt: "You are Chen.",
-        connection: {
-          kind: "local-provider",
-          provider: "groq",
-          apiKey: "gsk-test-groq-key",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "groq",
+            transport: "direct",
+          },
+        },
+        credentialInputs: {
+          llmApiKey: "gsk-test-groq-key",
         },
       });
 
@@ -166,11 +179,18 @@ describe("POST /api/onboarding compat replay", () => {
         name: "Chen",
         bio: ["A warm analyst."],
         systemPrompt: "You are Chen.",
-        connection: {
-          kind: "local-provider",
-          provider: "openrouter",
-          apiKey: "sk-or-test-key",
-          primaryModel: "openai/gpt-5-mini",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "openrouter",
+            transport: "direct",
+            primaryModel: "openai/gpt-5-mini",
+          },
+        },
+        credentialInputs: {
+          llmApiKey: "sk-or-test-key",
         },
       });
 
@@ -197,7 +217,7 @@ describe("POST /api/onboarding compat replay", () => {
     }
   });
 
-  it("preserves cloud hosting when compat replay selects a direct provider", async () => {
+  it("preserves cloud hosting when canonical routing selects a direct provider", async () => {
     const tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), "eliza-onboarding-replay-"),
     );
@@ -216,11 +236,18 @@ describe("POST /api/onboarding compat replay", () => {
         name: "Chen",
         bio: ["A warm analyst."],
         systemPrompt: "You are Chen.",
-        runMode: "cloud",
-        connection: {
-          kind: "local-provider",
-          provider: "openai",
-          apiKey: "sk-openai-test-key",
+        deploymentTarget: {
+          runtime: "cloud",
+          provider: "elizacloud",
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "direct",
+          },
+        },
+        credentialInputs: {
+          llmApiKey: "sk-openai-test-key",
         },
       });
 

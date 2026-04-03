@@ -154,7 +154,7 @@ export function GuidesLanding() {
                 to="/dashboard"
                 className="border border-brand bg-brand px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-dark transition-colors hover:bg-brand/90"
               >
-                Open Dashboard
+                Open App
               </Link>
               <Link
                 to="/"

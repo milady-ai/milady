@@ -1,7 +1,7 @@
 /**
  * Wipes **renderer-local** state after the server already ran `POST /api/agent/reset`.
  *
- * **WHY:** post-wipe, persisted connection mode + API base + Eliza Cloud flags
+ * **WHY:** post-wipe, persisted active server + API base + Eliza Cloud flags
  * could still point at cloud/remote, so onboarding never appeared “fresh.”
  * **WHY dependency injection:** `AppProvider` wires real `client` and setters;
  * tests inject mocks to assert order and error handling without jsdom.
@@ -14,7 +14,7 @@ import type { AgentStatus, OnboardingOptions } from "../api/client";
 export type CompleteResetLocalStateDeps = {
   setAgentStatus: (status: AgentStatus | null) => void;
   resetClientConnection: () => void;
-  clearPersistedConnectionMode: () => void;
+  clearPersistedActiveServer: () => void;
   clearPersistedAvatarIndex: () => void;
   setClientBaseUrl: (url: string | null) => void;
   setClientToken: (token: string | null) => void;
@@ -36,7 +36,7 @@ export async function completeResetLocalStateAfterServerWipe(
   d.logResetDebug("resetLocalState: client.resetConnection()");
   d.resetClientConnection();
 
-  d.clearPersistedConnectionMode();
+  d.clearPersistedActiveServer();
   d.clearPersistedAvatarIndex();
   d.setClientBaseUrl(null);
   d.setClientToken(null);

@@ -8,19 +8,12 @@ import {
 import type { ElizaConfig } from "../config/config.js";
 import { saveElizaConfig } from "../config/config.js";
 import {
-  isOnboardingConnectionComplete,
-  normalizePersistedOnboardingConnection,
-  stripOnboardingConnectionSecrets,
-} from "../contracts/onboarding.js";
-import {
   normalizeDeploymentTargetConfig,
   normalizeLinkedAccountsConfig,
   normalizeServiceRoutingConfig,
 } from "../contracts/service-routing.js";
 import {
   applyCanonicalOnboardingConfig,
-  applyOnboardingConnectionConfig,
-  reconcilePersistedOnboardingConnection,
 } from "./provider-switch-config.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 
@@ -277,10 +270,10 @@ export async function handleConfigRoutes(
     // Strip "[REDACTED]" from the whole patch (GET → PUT round-trips).
     stripRedactedPlaceholderValuesDeep(filtered);
 
-    const explicitConnectionRequested = Object.hasOwn(filtered, "connection");
-    const normalizedConnectionPatch = explicitConnectionRequested
-      ? normalizePersistedOnboardingConnection(filtered.connection)
-      : null;
+    const explicitConnectionRequested = Object.hasOwn(
+      body as Record<string, unknown>,
+      "connection",
+    );
     const canonicalDeploymentTargetRequested = Object.hasOwn(
       filtered,
       "deploymentTarget",
@@ -302,18 +295,13 @@ export async function handleConfigRoutes(
     const normalizedServiceRouting = canonicalServiceRoutingRequested
       ? normalizeServiceRoutingConfig(filtered.serviceRouting)
       : undefined;
-    if (explicitConnectionRequested && !normalizedConnectionPatch) {
+    if (explicitConnectionRequested) {
       error(
         res,
-        "connection must be a valid onboarding connection object",
+        "connection patches are no longer supported; update deploymentTarget, linkedAccounts, and serviceRouting directly",
         400,
       );
       return true;
-    }
-    if (normalizedConnectionPatch) {
-      filtered.connection = stripOnboardingConnectionSecrets(
-        normalizedConnectionPatch,
-      );
     }
 
     if (isMiladySettingsDebugEnabled()) {
@@ -374,13 +362,6 @@ export async function handleConfigRoutes(
       }
     }
 
-    if (normalizedConnectionPatch) {
-      await applyOnboardingConnectionConfig(
-        config,
-        normalizedConnectionPatch,
-      );
-    }
-
     if (
       canonicalDeploymentTargetRequested ||
       canonicalLinkedAccountsRequested ||
@@ -391,9 +372,6 @@ export async function handleConfigRoutes(
         linkedAccounts: normalizedLinkedAccounts,
         serviceRouting: normalizedServiceRouting,
       });
-      reconcilePersistedOnboardingConnection(config);
-    } else if (!normalizedConnectionPatch && patchTouchesProviderSelection(filtered)) {
-      reconcilePersistedOnboardingConnection(config);
     }
 
     try {

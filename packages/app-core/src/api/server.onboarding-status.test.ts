@@ -174,7 +174,7 @@ describe("GET /api/onboarding/status", () => {
     }
   });
 
-  it("returns incomplete for an explicit cloud-managed connection without selected models", async () => {
+  it("returns incomplete for linked cloud auth without canonical inference routing", async () => {
     const tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), "eliza-onboarding-status-"),
     );
@@ -184,9 +184,15 @@ describe("GET /api/onboarding/status", () => {
       path.join(tempDir, "eliza.json"),
       JSON.stringify({
         logging: { level: "error" },
-        connection: {
-          kind: "cloud-managed",
-          cloudProvider: "elizacloud",
+        deploymentTarget: {
+          runtime: "cloud",
+          provider: "elizacloud",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
         },
         cloud: {
           enabled: true,

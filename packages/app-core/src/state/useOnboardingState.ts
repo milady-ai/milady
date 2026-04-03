@@ -10,8 +10,6 @@ import { useCallback, useReducer, useRef } from "react";
 import type { OnboardingOptions } from "../api";
 import {
   activeServerKindToOnboardingServerTarget,
-  buildOnboardingServerSelection,
-  resolveOnboardingServerTarget,
   type OnboardingServerTarget,
 } from "../onboarding/server-target";
 import {
@@ -59,8 +57,6 @@ export interface OnboardingState {
 
   // Hosting
   serverTarget: OnboardingServerTarget;
-  runMode: "local" | "cloud" | "";
-  cloudProvider: string;
   cloudApiKey: string;
 
   // Provider
@@ -125,13 +121,12 @@ const EMPTY_TOKENS: Record<ConnectorTokenKey, string> = {
 
 function loadInitialServerSelection(): Pick<
   OnboardingState,
-  "runMode" | "cloudProvider" | "remote" | "remoteApiBase" | "remoteToken"
+  "serverTarget" | "remote" | "remoteApiBase" | "remoteToken"
 > {
   const activeServer = loadPersistedActiveServer();
   if (!activeServer) {
     return {
-      runMode: "",
-      cloudProvider: "",
+      serverTarget: "",
       remote: {
         status: "idle",
         error: null,
@@ -142,12 +137,8 @@ function loadInitialServerSelection(): Pick<
   }
 
   if (activeServer.kind === "local") {
-    const selection = buildOnboardingServerSelection(
-      activeServerKindToOnboardingServerTarget(activeServer.kind),
-    );
     return {
-      runMode: selection.runMode,
-      cloudProvider: selection.cloudProvider,
+      serverTarget: activeServerKindToOnboardingServerTarget(activeServer.kind),
       remote: {
         status: "idle",
         error: null,
@@ -158,12 +149,8 @@ function loadInitialServerSelection(): Pick<
   }
 
   if (activeServer.kind === "cloud") {
-    const selection = buildOnboardingServerSelection(
-      activeServerKindToOnboardingServerTarget(activeServer.kind),
-    );
     return {
-      runMode: selection.runMode,
-      cloudProvider: selection.cloudProvider,
+      serverTarget: activeServerKindToOnboardingServerTarget(activeServer.kind),
       remote: {
         status: "idle",
         error: null,
@@ -174,12 +161,8 @@ function loadInitialServerSelection(): Pick<
   }
 
   const apiBase = activeServer.apiBase?.trim() ?? "";
-  const selection = buildOnboardingServerSelection(
-    activeServerKindToOnboardingServerTarget(activeServer.kind),
-  );
   return {
-    runMode: selection.runMode,
-    cloudProvider: selection.cloudProvider,
+    serverTarget: activeServerKindToOnboardingServerTarget(activeServer.kind),
     remote: {
       status: isRemoteApiBase(apiBase) ? "connected" : "idle",
       error: null,
@@ -191,12 +174,7 @@ function loadInitialServerSelection(): Pick<
 
 function createInitialState(cloudOnly?: boolean): OnboardingState {
   const initialServer = loadInitialServerSelection();
-  const initialServerTarget = cloudOnly
-    ? "elizacloud"
-    : resolveOnboardingServerTarget({
-        runMode: initialServer.runMode,
-        cloudProvider: initialServer.cloudProvider,
-      });
+  const initialServerTarget = cloudOnly ? "elizacloud" : initialServer.serverTarget;
   return {
     step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",
@@ -209,8 +187,6 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     style: "chen",
     avatar: 1,
     serverTarget: initialServerTarget,
-    runMode: cloudOnly ? "cloud" : initialServer.runMode,
-    cloudProvider: cloudOnly ? "elizacloud" : initialServer.cloudProvider,
     cloudApiKey: "",
     provider: "",
     apiKey: "",
@@ -289,35 +265,9 @@ function onboardingReducer(
       return { ...state, options: action.options };
     case "SET_FIELD": {
       if (action.field === "serverTarget") {
-        const serverTarget = action.value as OnboardingServerTarget;
-        const selection = buildOnboardingServerSelection(serverTarget);
         return {
           ...state,
-          serverTarget,
-          runMode: selection.runMode,
-          cloudProvider: selection.cloudProvider,
-        };
-      }
-
-      if (action.field === "runMode" || action.field === "cloudProvider") {
-        const nextRunMode =
-          action.field === "runMode"
-            ? (action.value as OnboardingState["runMode"])
-            : state.runMode;
-        const nextCloudProvider =
-          action.field === "cloudProvider"
-            ? (action.value as string)
-            : state.cloudProvider;
-        const serverTarget = resolveOnboardingServerTarget({
-          runMode: nextRunMode,
-          cloudProvider: nextCloudProvider,
-        });
-        const selection = buildOnboardingServerSelection(serverTarget);
-        return {
-          ...state,
-          serverTarget,
-          runMode: selection.runMode,
-          cloudProvider: selection.cloudProvider,
+          serverTarget: action.value as OnboardingServerTarget,
         };
       }
 
@@ -371,10 +321,6 @@ export interface OnboardingStateHook {
     value: AppState["onboardingDetectedProviders"],
   ) => void;
 
-  /** Ref for onboarding resume connection. */
-  resumeConnectionRef: React.RefObject<
-    import("@miladyai/shared/contracts/onboarding").OnboardingConnection | null
-  >;
   /** Tracks whether onboarding completion has been committed this session. */
   completionCommittedRef: React.RefObject<boolean>;
   /** Force local bootstrap ref. */
@@ -386,9 +332,6 @@ export function useOnboardingState(cloudOnly?: boolean): OnboardingStateHook {
     createInitialState(co),
   );
 
-  const resumeConnectionRef = useRef<
-    import("@miladyai/shared/contracts/onboarding").OnboardingConnection | null
-  >(null);
   const completionCommittedRef = useRef(false);
   const forceLocalBootstrapRef = useRef(false);
 
@@ -455,7 +398,6 @@ export function useOnboardingState(cloudOnly?: boolean): OnboardingStateHook {
     setConnectorToken,
     setRemoteStatus,
     setDetectedProviders,
-    resumeConnectionRef,
     completionCommittedRef,
     forceLocalBootstrapRef,
   };

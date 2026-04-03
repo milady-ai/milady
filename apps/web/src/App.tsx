@@ -272,7 +272,7 @@ export function Homepage() {
             className="flex items-center gap-2 px-6 py-3 border border-text-subtle/30 text-text-muted font-mono text-[11px] tracking-[0.15em] uppercase hover:border-text-muted/50 hover:text-text-light transition-all"
           >
             <CloudIcon />
-            Try Cloud
+            Open App
           </a>
         </div>
       </main>

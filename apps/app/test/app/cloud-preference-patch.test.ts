@@ -9,7 +9,12 @@ import { describe, expect, it, vi } from "vitest";
 describe("cloud preference patch", () => {
   it("normalizes inactive cloud config when a Claude subscription is already configured", () => {
     const normalized = normalizeConfigForLocalProviderPreference({
-      connection: { kind: "local-provider", provider: "anthropic" },
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
+      },
       cloud: {
         enabled: false,
         apiKey: "eliza-stale-key",
@@ -31,7 +36,12 @@ describe("cloud preference patch", () => {
 
     expect(
       shouldPreferLocalProviderConfig({
-        connection: { kind: "local-provider", provider: "anthropic" },
+        serviceRouting: {
+          llmText: {
+            backend: "anthropic",
+            transport: "direct",
+          },
+        },
         cloud: {
           enabled: false,
           apiKey: "eliza-stale-key",
@@ -201,9 +211,11 @@ describe("cloud preference patch", () => {
 
   it("patches config reads without hiding linked cloud account state", async () => {
     const originalGetConfig = vi.fn(async () => ({
-      connection: {
-        kind: "local-provider",
-        provider: "anthropic",
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
       },
       cloud: {
         enabled: false,
@@ -238,9 +250,11 @@ describe("cloud preference patch", () => {
 
     try {
       await expect(mockClient.getConfig()).resolves.toEqual({
-        connection: {
-          kind: "local-provider",
-          provider: "anthropic",
+        serviceRouting: {
+          llmText: {
+            backend: "anthropic",
+            transport: "direct",
+          },
         },
         cloud: {
           enabled: false,

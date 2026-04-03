@@ -169,9 +169,7 @@ import { deleteWalletSecretsFromOsStore } from "../security/wallet-os-store-acti
 import { clearCloudSecrets, getCloudSecret } from "./cloud-secrets";
 import {
   clearPersistedOnboardingConfig,
-  resolveExistingOnboardingConnection,
 } from "./provider-switch-config";
-import { isOnboardingConnectionComplete } from "../contracts/onboarding";
 
 // ---------------------------------------------------------------------------
 // Import from extracted modules for use within this file

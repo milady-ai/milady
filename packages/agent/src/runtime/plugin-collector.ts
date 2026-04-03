@@ -15,7 +15,6 @@ import {
 import {
   hasExplicitCanonicalRuntimeConfig,
   migrateLegacyRuntimeConfig,
-  normalizePersistedOnboardingConnection,
 } from "@miladyai/shared/contracts/onboarding";
 import type { ElizaConfig } from "../config/config";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
@@ -138,13 +137,9 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
   const hasCanonicalRuntimeConfig = hasExplicitCanonicalRuntimeConfig(
     config as Record<string, unknown>,
   );
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    (config as Record<string, unknown>).connection,
-  );
   const cloudExplicitlyDisabled = config.cloud?.enabled === false;
   const cloudPluginRequestedByEnv =
     !hasCanonicalRuntimeConfig &&
-    !explicitConnection &&
     !cloudExplicitlyDisabled &&
     (Boolean(process.env.ELIZAOS_CLOUD_API_KEY?.trim()) ||
       isTruthyCloudEnvValue(process.env.ELIZAOS_CLOUD_ENABLED));

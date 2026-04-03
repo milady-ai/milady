@@ -173,11 +173,13 @@ describe("ProviderSwitcher provider dropdown default", () => {
     mockSwitchProvider.mockResolvedValue({ ok: true });
   });
 
-  it("uses config.connection as the authoritative local provider selection", async () => {
+  it("uses canonical service routing as the authoritative local provider selection", async () => {
     mockGetConfig.mockResolvedValue({
-      connection: {
-        kind: "local-provider",
-        provider: "anthropic",
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
       },
       models: {},
       cloud: { enabled: false },
@@ -385,9 +387,11 @@ describe("ProviderSwitcher provider dropdown default", () => {
 
   it("does not carry a stale non-pi model override when switching to pi-ai", async () => {
     mockGetConfig.mockResolvedValue({
-      connection: {
-        kind: "local-provider",
-        provider: "openai",
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
       },
       models: {},
       cloud: {

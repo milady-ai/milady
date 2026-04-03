@@ -516,8 +516,6 @@ export interface AppState {
   onboardingOwnerName: string;
   onboardingStyle: string;
   onboardingServerTarget: OnboardingServerTarget;
-  onboardingRunMode: "local" | "cloud" | "";
-  onboardingCloudProvider: string;
   onboardingCloudApiKey: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;

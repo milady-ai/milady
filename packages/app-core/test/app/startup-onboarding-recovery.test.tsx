@@ -299,8 +299,12 @@ describe("startup onboarding recovery", () => {
       expect(mockClient.getStatus).toHaveBeenCalled();
       expect(mockClient.connectWs).toHaveBeenCalled();
       expect(localStorage.getItem("eliza:onboarding-complete")).toBe("1");
-      expect(localStorage.getItem("eliza:connection-mode")).toBe(
-        JSON.stringify({ runMode: "local" }),
+      expect(localStorage.getItem("milady:active-server")).toBe(
+        JSON.stringify({
+          id: "local:embedded",
+          kind: "local",
+          label: "This device",
+        }),
       );
     } finally {
       await act(async () => {
@@ -311,8 +315,12 @@ describe("startup onboarding recovery", () => {
 
   it("tracks backend connection state changes from the client", async () => {
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
 
     let latest: StartupSnapshot | null = null;

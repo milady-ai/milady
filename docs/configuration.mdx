@@ -52,7 +52,8 @@ The state directory also contains:
 ## Canonical Runtime Routing
 
 Milady's saved runtime topology is no longer inferred from a single
-`connection` blob. The canonical persisted fields are:
+`connection` blob, and the root `connection` field is no longer part of the
+persisted config schema. The canonical persisted fields are:
 
 | Field | Purpose |
 |------|---------|
@@ -1324,7 +1325,9 @@ milady config show --json   # Raw JSON output
 To change values, edit `~/.milady/milady.json` directly (it supports JSON5 with comments).
 
 <Tip>
-Use `milady configure` for a quick reference of common configuration options and environment variables. For full initial setup, run `milady setup` to go through the onboarding wizard, or edit `~/.milady/milady.json` directly.
+Use `milady configure` for a quick reference of common configuration options
+and environment variables. For local bootstrap, run `milady setup`, or edit
+`~/.milady/milady.json` directly.
 </Tip>
 
 ## Full Example

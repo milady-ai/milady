@@ -4602,11 +4602,9 @@ describe("API Server E2E (no runtime)", () => {
     it("POST /api/onboarding stores adminEntityId in defaults", async () => {
       const res = await req(port, "POST", "/api/onboarding", {
         name: "AdminAgent",
-        connection: {
-          kind: "local-provider",
-          provider: "anthropic",
+        deploymentTarget: {
+          runtime: "local",
         },
-        runMode: "local",
       });
       expect(res.status).toBe(200);
 
@@ -4632,11 +4630,9 @@ describe("API Server E2E (no runtime)", () => {
           name: "Chen",
           presetId: "chen",
           avatarIndex: 1,
-          connection: {
-            kind: "local-provider",
-            provider: "groq",
+          deploymentTarget: {
+            runtime: "local",
           },
-          runMode: "local",
         });
         expect(res.status).toBe(200);
 
@@ -4668,16 +4664,9 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
-    it("POST /api/onboarding lets canonical routing override a conflicting connection payload", async () => {
+    it("POST /api/onboarding accepts canonical runtime routing without a connection payload", async () => {
       const res = await req(port, "POST", "/api/onboarding", {
         name: "CanonicalAgent",
-        runMode: "cloud",
-        connection: {
-          kind: "cloud-managed",
-          cloudProvider: "elizacloud",
-          smallModel: "openai/gpt-5-mini",
-          largeModel: "anthropic/claude-sonnet-4.5",
-        },
         deploymentTarget: {
           runtime: "cloud",
           provider: "elizacloud",
@@ -4694,6 +4683,10 @@ describe("API Server E2E (no runtime)", () => {
             transport: "direct",
             primaryModel: "openai/gpt-5.2",
           },
+        },
+        credentialInputs: {
+          llmApiKey: "sk-openai-canonical",
+          cloudApiKey: "ck-linked-canonical",
         },
       });
       expect(res.status).toBe(200);
@@ -4727,6 +4720,28 @@ describe("API Server E2E (no runtime)", () => {
       expect(data.connection).toBeUndefined();
       expect(data.models?.small).toBeUndefined();
       expect(data.models?.large).toBeUndefined();
+      expect((data as Record<string, unknown>).cloud).toMatchObject({
+        apiKey: "[REDACTED]",
+      });
+      expect((data as Record<string, unknown>).env).toMatchObject({
+        OPENAI_API_KEY: "[REDACTED]",
+      });
+    });
+
+    it("POST /api/onboarding rejects legacy onboarding payload fields", async () => {
+      const res = await req(port, "POST", "/api/onboarding", {
+        name: "LegacyAgent",
+        runMode: "cloud",
+        connection: {
+          kind: "cloud-managed",
+          cloudProvider: "elizacloud",
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect((res.data as { error?: string }).error).toContain(
+        "legacy onboarding payloads are no longer supported",
+      );
     });
   });
 

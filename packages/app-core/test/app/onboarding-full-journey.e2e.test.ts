@@ -43,8 +43,8 @@ type AppHarnessState = {
   onboardingName: string;
   onboardingStyle: string;
   onboardingTheme: string;
-  onboardingRunMode: "local" | "cloud" | "";
-  onboardingCloudProvider: string;
+  onboardingServerTarget: "" | "local" | "remote" | "elizacloud";
+  onboardingCloudApiKey: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;
   onboardingProvider: string;
@@ -193,12 +193,12 @@ vi.mock("@miladyai/app-core/components", async () => {
         );
       }
       if (state.onboardingStep === "connection") {
-        if (!state.onboardingRunMode) {
+        if (!state.onboardingServerTarget) {
           return React.createElement(
             "button",
             {
               onClick: () => {
-                state.setState?.("onboardingRunMode", "local");
+                state.setState?.("onboardingServerTarget", "local");
               },
               type: "button",
             },
@@ -329,12 +329,12 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
       );
     }
     if (state.onboardingStep === "connection") {
-      if (!state.onboardingRunMode) {
+      if (!state.onboardingServerTarget) {
         return React.createElement(
           "button",
           {
             onClick: () => {
-              state.setState?.("onboardingRunMode", "local");
+              state.setState?.("onboardingServerTarget", "local");
             },
             type: "button",
           },
@@ -416,8 +416,8 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
         );
       }
       if (s.onboardingStep === "connection") {
-        if (!s.onboardingRunMode) {
-          return React.createElement("button", { onClick: () => { s.setState?.("onboardingRunMode", "local"); }, type: "button" }, "onboarding.hostingLocal");
+        if (!s.onboardingServerTarget) {
+          return React.createElement("button", { onClick: () => { s.setState?.("onboardingServerTarget", "local"); }, type: "button" }, "onboarding.hostingLocal");
         }
         return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.confirm");
       }
@@ -641,8 +641,8 @@ function createHarnessState(
     onboardingName: "Eliza",
     onboardingStyle: "",
     onboardingTheme: "eliza",
-    onboardingRunMode: "",
-    onboardingCloudProvider: "",
+    onboardingServerTarget: "",
+    onboardingCloudApiKey: "",
     onboardingSmallModel: "small-model",
     onboardingLargeModel: "large-model",
     onboardingProvider: "",
@@ -740,7 +740,7 @@ async function advanceOnboarding(
 ): Promise<void> {
   if (
     state.onboardingStep === "connection" &&
-    state.onboardingRunMode === "local" &&
+    state.onboardingServerTarget === "local" &&
     !state.onboardingProvider
   ) {
     state.onboardingProvider = "ollama";
@@ -752,9 +752,9 @@ async function advanceOnboarding(
     applyIdentitySelection(state);
   } else if (
     state.onboardingStep === "connection" &&
-    !state.onboardingRunMode
+    !state.onboardingServerTarget
   ) {
-    state.onboardingRunMode = "local";
+    state.onboardingServerTarget = "local";
     await rerender(tree, state);
     return;
   }
@@ -806,7 +806,7 @@ function setupMock(state: AppHarnessState) {
     state.onboardingStep = "identity";
     state.onboardingStyle = "";
     state.onboardingName = "Eliza";
-    state.onboardingRunMode = "";
+    state.onboardingServerTarget = "";
     state.onboardingProvider = "";
     state.onboardingApiKey = "";
     state.selectedVrmIndex = 1;
@@ -1026,7 +1026,7 @@ describe("agent reset and re-onboarding (e2e)", () => {
     expect(state.startupStatus).toBe("onboarding");
     expect(state.onboardingStep).toBe("identity");
     expect(state.onboardingStyle).not.toBe("chaotic");
-    expect(state.onboardingRunMode).toBe("");
+    expect(state.onboardingServerTarget).toBe("");
     expect(state.onboardingProvider).toBe("");
     expect(state.selectedVrmIndex).toBe(1);
     expect(state.conversations).toEqual([]);

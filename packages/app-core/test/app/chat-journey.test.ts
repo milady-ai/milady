@@ -370,7 +370,7 @@ describe("chat journey", () => {
 
       expect(api).not.toBeNull();
       // listConversations is only called after the startup hydration flow
-      // completes (requires persisted connection mode). With a cleared
+      // completes (requires a persisted active server). With a cleared
       // localStorage the provider enters onboarding and skips hydration.
 
       await act(async () => {

@@ -12,7 +12,7 @@ import { alertDesktopMessage, confirmDesktopAction } from "../utils";
 import type { AppState } from "./internal";
 import {
   clearAvatarIndex,
-  clearPersistedConnectionMode,
+  clearPersistedActiveServer,
   LIFECYCLE_MESSAGES,
   type LoadConversationMessagesResult,
   parseAgentStatusFromMainMenuResetPayload,
@@ -146,7 +146,6 @@ export interface UseChatLifecycleDeps {
 
   // Onboarding setters
   onboardingCompletionCommittedRef: MutableRefObject<boolean>;
-  onboardingResumeConnectionRef: MutableRefObject<unknown>;
   setOnboardingUiRevealNonce: (fn: (n: number) => number) => void;
   setOnboardingLoading: (v: boolean) => void;
   setOnboardingComplete: (v: boolean) => void;
@@ -158,8 +157,6 @@ export interface UseChatLifecycleDeps {
   setOnboardingName: (v: string) => void;
   setOnboardingStyle: (v: string) => void;
   setOnboardingServerTarget: (v: AppState["onboardingServerTarget"]) => void;
-  setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
-  setOnboardingCloudProvider: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;
   setOnboardingVoiceProvider: (v: string) => void;
@@ -227,7 +224,6 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
     setElizaCloudStatusReason,
     setElizaCloudLoginError,
     onboardingCompletionCommittedRef,
-    onboardingResumeConnectionRef,
     setOnboardingUiRevealNonce,
     setOnboardingLoading,
     setOnboardingComplete,
@@ -239,8 +235,6 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
     setOnboardingName,
     setOnboardingStyle,
     setOnboardingServerTarget,
-    setOnboardingRunMode,
-    setOnboardingCloudProvider,
     setOnboardingProvider,
     setOnboardingApiKey,
     setOnboardingVoiceProvider,
@@ -542,7 +536,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
       await runCompleteResetLocalStateAfterServerWipe(postResetAgentStatus, {
         setAgentStatus,
         resetClientConnection: () => client.resetConnection(),
-        clearPersistedConnectionMode,
+        clearPersistedActiveServer,
         clearPersistedAvatarIndex: clearAvatarIndex,
         setClientBaseUrl: (url) => client.setBaseUrl(url),
         setClientToken: (token) => client.setToken(token),
@@ -575,7 +569,6 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
           setOnboardingUiRevealNonce((n) => n + 1);
           setOnboardingLoading(false);
           setOnboardingComplete(false);
-          onboardingResumeConnectionRef.current = null;
           setOnboardingStep("identity");
           setOnboardingMode("basic");
           setOnboardingActiveGuide(null);
@@ -649,7 +642,6 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
       setLogs,
       activeConversationIdRef,
       onboardingCompletionCommittedRef,
-      onboardingResumeConnectionRef,
       elizaCloudPreferDisconnectedUntilLoginRef,
       setElizaCloudEnabled,
       setElizaCloudConnected,

@@ -164,11 +164,13 @@ describe("cloud login route persistence", () => {
     });
     (
       config as {
-        connection?: Record<string, unknown>;
+        serviceRouting?: Record<string, unknown>;
       }
-    ).connection = {
-      kind: "local-provider",
-      provider: "anthropic",
+    ).serviceRouting = {
+      llmText: {
+        backend: "anthropic",
+        transport: "direct",
+      },
     };
     const state = {
       config,

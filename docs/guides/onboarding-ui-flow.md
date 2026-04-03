@@ -87,7 +87,7 @@ Relevant files:
 
 | File | Role |
 |------|------|
-| [`packages/app-core/src/onboarding/server-target.ts`](../../packages/app-core/src/onboarding/server-target.ts) | Canonical mapping between onboarding server target and the older `runMode` / `cloudProvider` pair. |
+| [`packages/app-core/src/onboarding/server-target.ts`](../../packages/app-core/src/onboarding/server-target.ts) | Canonical mapping between onboarding server target and the temporary compatibility fields still used at the onboarding API boundary. |
 | [`packages/app-core/src/onboarding/types.ts`](../../packages/app-core/src/onboarding/types.ts) | Types for the nested connection flow snapshots, patches, screens, and events. |
 | [`packages/app-core/src/onboarding/connection-flow.ts`](../../packages/app-core/src/onboarding/connection-flow.ts) | Pure routing logic for the hosting step panels. No React, no API calls. |
 | [`packages/app-core/src/components/onboarding/ConnectionStep.tsx`](../../packages/app-core/src/components/onboarding/ConnectionStep.tsx) | React shell that renders the pure flow and performs effectful actions. |

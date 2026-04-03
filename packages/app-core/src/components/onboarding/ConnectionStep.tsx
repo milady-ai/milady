@@ -124,13 +124,6 @@ function applyOnboardingPatch(
 ): void {
   if (patch.onboardingServerTarget !== undefined) {
     setState("onboardingServerTarget", patch.onboardingServerTarget);
-  } else {
-    if (patch.onboardingRunMode !== undefined) {
-      setState("onboardingRunMode", patch.onboardingRunMode);
-    }
-    if (patch.onboardingCloudProvider !== undefined) {
-      setState("onboardingCloudProvider", patch.onboardingCloudProvider);
-    }
   }
   if (patch.onboardingCloudApiKey !== undefined) {
     setState("onboardingCloudApiKey", patch.onboardingCloudApiKey);
@@ -162,8 +155,7 @@ export function ConnectionStep() {
   const {
     onboardingStep,
     onboardingOptions,
-    onboardingRunMode,
-    onboardingCloudProvider,
+    onboardingServerTarget,
     onboardingProvider,
     onboardingSubscriptionTab,
     onboardingElizaCloudTab,
@@ -173,6 +165,7 @@ export function ConnectionStep() {
     setState,
     t,
   } = useApp();
+  const resolvedOnboardingServerTarget = onboardingServerTarget ?? "";
 
   const branding = useBranding();
   const cloudOnly = Boolean(branding.cloudOnly);
@@ -253,8 +246,7 @@ export function ConnectionStep() {
 
   const connectionSnapshot: ConnectionFlowSnapshot = useMemo(
     () => ({
-      onboardingRunMode,
-      onboardingCloudProvider,
+      onboardingServerTarget: resolvedOnboardingServerTarget,
       onboardingProvider,
       onboardingRemoteConnected,
       onboardingElizaCloudTab,
@@ -265,8 +257,7 @@ export function ConnectionStep() {
       onboardingDetectedProviders: onboardingDetectedProviders ?? [],
     }),
     [
-      onboardingRunMode,
-      onboardingCloudProvider,
+      resolvedOnboardingServerTarget,
       onboardingProvider,
       onboardingRemoteConnected,
       onboardingElizaCloudTab,
@@ -298,10 +289,9 @@ export function ConnectionStep() {
   );
 
   useEffect(() => {
-    if (!forceCloud || onboardingRunMode) return;
+    if (!forceCloud || resolvedOnboardingServerTarget) return;
     const snap: ConnectionFlowSnapshot = {
-      onboardingRunMode,
-      onboardingCloudProvider,
+      onboardingServerTarget: resolvedOnboardingServerTarget,
       onboardingProvider,
       onboardingRemoteConnected,
       onboardingElizaCloudTab,
@@ -319,8 +309,7 @@ export function ConnectionStep() {
     }
   }, [
     forceCloud,
-    onboardingRunMode,
-    onboardingCloudProvider,
+    resolvedOnboardingServerTarget,
     onboardingProvider,
     onboardingRemoteConnected,
     onboardingElizaCloudTab,

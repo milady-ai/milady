@@ -304,7 +304,7 @@ export function createMobilePolicy(): PlatformPolicy {
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-/** Map a persisted connection mode to a RuntimeTarget. */
+/** Map a restored server-target hint to a RuntimeTarget. */
 export function connectionModeToTarget(
   runMode: string | undefined,
 ): RuntimeTarget {

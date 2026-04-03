@@ -1,10 +1,14 @@
 ---
 title: "Onboarding API"
 sidebarTitle: "Onboarding"
-description: "REST API endpoints for the first-run onboarding flow — checking status, fetching setup options, and submitting the initial agent configuration."
+description: "REST API endpoints for the first-run server-target and onboarding flow — checking status, fetching setup options, and submitting initial local-server configuration."
 ---
 
-The onboarding API drives the first-run setup wizard. It lets you check whether the agent has been configured, retrieve available provider and style options, and submit the initial configuration (agent name, personality, AI provider, connectors, etc.).
+The onboarding API drives first-run setup for local-server bootstrap. It lets
+the client check whether setup is complete, retrieve available provider and
+style options, and submit initial local-server configuration. LAN, remote, and
+Eliza Cloud connections can bypass most of this because the selected server may
+already own provider routing and runtime state.
 
 ## Cloud provisioning bypass
 
@@ -45,7 +49,9 @@ Returns whether the initial setup has been completed. Onboarding is considered c
 
 ### GET /api/onboarding/options
 
-Returns the available options for the onboarding wizard — random name suggestions, style presets, AI provider choices, cloud provider options, model selections, and inventory/RPC provider options.
+Returns the available options for local-server bootstrap — random name
+suggestions, style presets, AI provider choices, cloud provider options, model
+selections, and inventory/RPC provider options.
 
 **Response**
 
@@ -109,12 +115,11 @@ selected runtime in the canonical config fields:
 The agent's `name`, `bio`, and `systemPrompt` are still persisted directly
 onto the active agent entry so the runtime retains its identity after restart.
 
-<Info>
-  Older callers may still send compatibility fields such as `runMode`,
-  `provider`, `providerApiKey`, `cloudProvider`, or `smallModel` / `largeModel`.
-  They are no longer the primary API contract and should not be used for new
-  clients.
-</Info>
+Legacy onboarding request fields such as `connection`, `runMode`,
+`cloudProvider`, `provider`, `providerApiKey`, `primaryModel`, `smallModel`,
+and `largeModel` are rejected. Callers must send canonical
+`deploymentTarget`, `linkedAccounts`, `serviceRouting`, and
+`credentialInputs` instead.
 
 **Request Body**
 
@@ -129,10 +134,10 @@ onto the active agent entry so the runtime retains its identity after restart.
 | `postExamples` | string[] | No | Example social media posts |
 | `messageExamples` | array | No | Example message conversations |
 | `theme` | string | No | UI theme — `milady`, `qt314`, `web2000`, `programmer`, `haxor`, or `psycho` |
-| `connection` | object | No | Optional onboarding connection payload. Accepted as a credential/bootstrap input, but not persisted as the runtime source of truth |
 | `deploymentTarget` | object | No | Canonical hosting target — `{ runtime: "local" \| "cloud" \| "remote", provider?, remoteApiBase?, remoteAccessToken? }` |
 | `linkedAccounts` | object | No | Canonical linked-account map — records what providers or cloud accounts are available |
 | `serviceRouting` | object | No | Canonical per-capability routing — e.g. `llmText`, `tts`, `media`, `embeddings`, `rpc` |
+| `credentialInputs` | object | No | Canonical onboarding credentials — e.g. `{ llmApiKey?, cloudApiKey? }`. Use this to persist provider or Eliza Cloud secrets without falling back to legacy `connection` or `providerApiKey` fields. |
 | `sandboxMode` | string | No | Sandbox isolation level — `off`, `light`, `standard`, or `max` |
 | `telegramToken` | string | No | Telegram bot token |
 | `discordToken` | string | No | Discord bot token |
@@ -160,6 +165,10 @@ onto the active agent entry so the runtime retains its identity after restart.
       "source": "oauth"
     }
   },
+  "credentialInputs": {
+    "cloudApiKey": "ck_live_example",
+    "llmApiKey": "sk-ant-example"
+  },
   "serviceRouting": {
     "llmText": {
       "backend": "anthropic",
@@ -171,8 +180,8 @@ onto the active agent entry so the runtime retains its identity after restart.
 ```
 
 In this example, the agent is hosted on Eliza Cloud, but text inference still
-routes directly to Anthropic. Hosting, linked accounts, and active service
-routing are separate concerns.
+routes directly to Anthropic. Hosting, linked accounts, active service
+routing, and onboarding credential persistence are separate concerns.
 
 **Response**
 
@@ -187,11 +196,16 @@ routing are separate concerns.
 | Status | Condition |
 |--------|-----------|
 | 400 | Missing or invalid agent name |
-| 400 | Invalid `connection`, `deploymentTarget`, `linkedAccounts`, or `serviceRouting` payload |
+| 400 | Legacy onboarding fields were supplied instead of canonical runtime fields |
+| 400 | Invalid `deploymentTarget`, `linkedAccounts`, `serviceRouting`, or `credentialInputs` payload |
 | 500 | Failed to save configuration |
 
 ---
 
 ## Related: in-app wizard (frontend)
 
-The HTTP API above backs **server** configuration. The **React onboarding wizard** (step order, back/next, sidebar) is documented separately because it uses client-side flow helpers and must stay aligned with UI navigation without duplicating step lists. See [Onboarding UI flow](/guides/onboarding-ui-flow).
+The HTTP API above backs **server** configuration. The chooser-first React
+onboarding flow (startup entry, step order, back/next, sidebar) is documented
+separately because it uses client-side flow helpers and must stay aligned with
+UI navigation without duplicating step lists. See
+[Onboarding UI flow](/guides/onboarding-ui-flow).

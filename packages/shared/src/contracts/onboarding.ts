@@ -459,6 +459,11 @@ export interface OnboardingOptions {
   githubOAuthAvailable?: boolean;
 }
 
+export interface OnboardingCredentialInputs {
+  llmApiKey?: string;
+  cloudApiKey?: string;
+}
+
 export interface OnboardingData {
   name: string;
   avatarIndex?: number;
@@ -475,10 +480,10 @@ export interface OnboardingData {
   adjectives?: string[];
   postExamples?: string[];
   messageExamples?: MessageExample[][];
-  connection?: OnboardingConnection;
   deploymentTarget?: DeploymentTargetConfig;
   linkedAccounts?: LinkedAccountsConfig;
   serviceRouting?: ServiceRoutingConfig;
+  credentialInputs?: OnboardingCredentialInputs;
   channels?: Record<string, unknown>;
   walletConfig?: WalletConfigUpdateRequest;
   inventoryProviders?: Array<{
@@ -1231,6 +1236,112 @@ export function normalizePersistedOnboardingConnection(
   }
 
   return null;
+}
+
+export function normalizeOnboardingCredentialInputs(
+  value: unknown,
+): OnboardingCredentialInputs | null {
+  const inputs = asConfigRecord(value);
+  if (!inputs) {
+    return null;
+  }
+
+  const llmApiKey = normalizeSecretString(inputs.llmApiKey);
+  const cloudApiKey = normalizeSecretString(inputs.cloudApiKey);
+
+  if (!llmApiKey && !cloudApiKey) {
+    return null;
+  }
+
+  return {
+    ...(llmApiKey ? { llmApiKey } : {}),
+    ...(cloudApiKey ? { cloudApiKey } : {}),
+  };
+}
+
+export interface OnboardingCredentialPersistencePlan {
+  llmConnection: OnboardingConnection | null;
+  cloudApiKey?: string;
+}
+
+export function deriveOnboardingCredentialPersistencePlan(args: {
+  credentialInputs?: OnboardingCredentialInputs | null;
+  deploymentTarget?: DeploymentTargetConfig | null;
+  serviceRouting?: ServiceRoutingConfig | null;
+}): OnboardingCredentialPersistencePlan {
+  const credentialInputs = normalizeOnboardingCredentialInputs(
+    args.credentialInputs,
+  );
+  const deploymentTarget = normalizeDeploymentTargetConfig(
+    args.deploymentTarget,
+  );
+  const serviceRouting = normalizeServiceRoutingConfig(args.serviceRouting);
+  const llmRoute = serviceRouting?.llmText;
+
+  const cloudApiKey = credentialInputs?.cloudApiKey;
+  const llmApiKey = credentialInputs?.llmApiKey;
+
+  if (
+    llmRoute?.transport === "cloud-proxy" &&
+    normalizeOnboardingProviderId(llmRoute.backend) === "elizacloud" &&
+    cloudApiKey
+  ) {
+    return {
+      llmConnection: {
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        apiKey: cloudApiKey,
+        ...(llmRoute.smallModel ? { smallModel: llmRoute.smallModel } : {}),
+        ...(llmRoute.largeModel ? { largeModel: llmRoute.largeModel } : {}),
+      },
+      cloudApiKey,
+    };
+  }
+
+  if (llmRoute?.transport === "direct" && llmApiKey) {
+    const provider = normalizeOnboardingProviderId(llmRoute.backend);
+    if (provider && provider !== "elizacloud") {
+      return {
+        llmConnection: {
+          kind: "local-provider",
+          provider,
+          apiKey: llmApiKey,
+          ...(llmRoute.primaryModel
+            ? { primaryModel: llmRoute.primaryModel }
+            : {}),
+        },
+        ...(cloudApiKey ? { cloudApiKey } : {}),
+      };
+    }
+  }
+
+  if (llmRoute?.transport === "remote" && llmApiKey) {
+    const provider = normalizeOnboardingProviderId(llmRoute.backend);
+    const remoteApiBase =
+      llmRoute.remoteApiBase ?? deploymentTarget?.remoteApiBase;
+    if (provider && provider !== "elizacloud" && remoteApiBase) {
+      return {
+        llmConnection: {
+          kind: "remote-provider",
+          remoteApiBase,
+          ...(deploymentTarget?.remoteAccessToken
+            ? { remoteAccessToken: deploymentTarget.remoteAccessToken }
+            : {}),
+          provider,
+          apiKey: llmApiKey,
+          ...(llmRoute.primaryModel
+            ? { primaryModel: llmRoute.primaryModel }
+            : {}),
+        },
+        ...(cloudApiKey ? { cloudApiKey } : {}),
+      };
+    }
+  }
+
+  return {
+    llmConnection: null,
+    ...(cloudApiKey ? { cloudApiKey } : {}),
+  };
 }
 
 export function stripOnboardingConnectionSecrets(

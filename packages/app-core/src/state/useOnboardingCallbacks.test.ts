@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from "@testing-library/react";
+import { getDefaultStylePreset } from "@miladyai/shared/onboarding-presets";
 import { MiladyClient } from "../api";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -56,7 +57,6 @@ describe("useOnboardingCallbacks", () => {
   it("records detected providers without rewriting the hosting target", () => {
     const setOnboardingDetectedProviders = vi.fn();
     const setOnboardingServerTarget = vi.fn();
-    const setOnboardingRunMode = vi.fn();
 
     const { result } = renderHook(() => {
       const onboarding = useOnboardingState();
@@ -68,8 +68,6 @@ describe("useOnboardingCallbacks", () => {
         addDeferredOnboardingTask: vi.fn(),
         setOnboardingDetectedProviders,
         setOnboardingServerTarget,
-        setOnboardingRunMode,
-        setOnboardingCloudProvider: vi.fn(),
         setOnboardingCloudApiKey: vi.fn(),
         setOnboardingProvider: vi.fn(),
         setOnboardingApiKey: vi.fn(),
@@ -107,7 +105,6 @@ describe("useOnboardingCallbacks", () => {
       { id: "openrouter", apiKey: "sk-or-test" },
     ]);
     expect(setOnboardingServerTarget).not.toHaveBeenCalled();
-    expect(setOnboardingRunMode).not.toHaveBeenCalled();
   });
 
   it("clears a persisted remote target before retrying local bootstrap", () => {
@@ -138,8 +135,6 @@ describe("useOnboardingCallbacks", () => {
         addDeferredOnboardingTask: vi.fn(),
         setOnboardingDetectedProviders: vi.fn(),
         setOnboardingServerTarget,
-        setOnboardingRunMode: vi.fn(),
-        setOnboardingCloudProvider: vi.fn(),
         setOnboardingCloudApiKey: vi.fn(),
         setOnboardingProvider: vi.fn(),
         setOnboardingApiKey: vi.fn(),
@@ -209,8 +204,6 @@ describe("useOnboardingCallbacks", () => {
           addDeferredOnboardingTask: vi.fn(),
           setOnboardingDetectedProviders: vi.fn(),
           setOnboardingServerTarget,
-          setOnboardingRunMode: vi.fn(),
-          setOnboardingCloudProvider: vi.fn(),
           setOnboardingCloudApiKey: vi.fn(),
           setOnboardingProvider: vi.fn(),
           setOnboardingApiKey: vi.fn(),
@@ -265,5 +258,115 @@ describe("useOnboardingCallbacks", () => {
     expect(window.localStorage.getItem("milady:active-server")).toContain(
       '"kind":"remote"',
     );
+  });
+
+  it("submits canonical credential inputs alongside canonical runtime routing", async () => {
+    const submitOnboarding = vi.fn().mockResolvedValue(undefined);
+    const updateConfig = vi.fn().mockResolvedValue({});
+    const setOnboardingComplete = vi.fn();
+    const setTab = vi.fn();
+    const loadCharacter = vi.fn().mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => {
+      const onboarding = useOnboardingState();
+      return {
+        onboarding,
+        callbacks: useOnboardingCallbacks({
+          onboarding,
+          setOnboardingStep: vi.fn(),
+          setOnboardingMode: vi.fn(),
+          setOnboardingActiveGuide: vi.fn(),
+          addDeferredOnboardingTask: vi.fn(),
+          setOnboardingDetectedProviders: vi.fn(),
+          setOnboardingServerTarget: vi.fn(),
+          setOnboardingCloudApiKey: vi.fn(),
+          setOnboardingProvider: vi.fn(),
+          setOnboardingApiKey: vi.fn(),
+          setOnboardingPrimaryModel: vi.fn(),
+          setOnboardingRemoteApiBase: vi.fn(),
+          setOnboardingRemoteToken: vi.fn(),
+          setOnboardingRemoteConnecting: vi.fn(),
+          setOnboardingRemoteError: vi.fn(),
+          setOnboardingRemoteConnected: vi.fn(),
+          setPostOnboardingChecklistDismissed: vi.fn(),
+          setOnboardingComplete,
+          coordinatorOnboardingCompleteRef: { current: null },
+          initialTabSetRef: { current: false },
+          setTab,
+          defaultLandingTab: "chat",
+          loadCharacter,
+          uiLanguage: "en",
+          selectedVrmIndex: 1,
+          walletConfig: {},
+          elizaCloudConnected: false,
+          setActionNotice: vi.fn(),
+          retryStartup: vi.fn(),
+          forceLocalBootstrapRef: { current: false },
+          client: {
+            submitOnboarding,
+            updateConfig,
+          } as unknown as MiladyClient,
+        }),
+      };
+    });
+
+    act(() => {
+      result.current.onboarding.setOptions({
+        names: [],
+        styles: [getDefaultStylePreset("en")],
+        providers: [],
+        cloudProviders: [],
+        models: { small: [], large: [] },
+        inventoryProviders: [],
+        sharedStyleRules: "Keep responses brief.",
+      });
+      result.current.onboarding.setField("name", "Chen");
+      result.current.onboarding.setField("serverTarget", "remote");
+      result.current.onboarding.setField("provider", "openai");
+      result.current.onboarding.setField("cloudApiKey", "ck-linked");
+      result.current.onboarding.setField("apiKey", "sk-openai-test");
+      result.current.onboarding.setField("primaryModel", "openai/gpt-5.2");
+      result.current.onboarding.setField(
+        "remoteApiBase",
+        "https://ren.example.com",
+      );
+      result.current.onboarding.setField("remoteToken", "sk-remote");
+      result.current.onboarding.setRemoteStatus("connected");
+    });
+
+    await act(async () => {
+      await result.current.callbacks.handleOnboardingFinish();
+    });
+
+    expect(submitOnboarding).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deploymentTarget: {
+          runtime: "remote",
+          provider: "remote",
+          remoteApiBase: "https://ren.example.com",
+          remoteAccessToken: "sk-remote",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "remote",
+            remoteApiBase: "https://ren.example.com",
+            primaryModel: "openai/gpt-5.2",
+          },
+        },
+        credentialInputs: {
+          cloudApiKey: "ck-linked",
+          llmApiKey: "sk-openai-test",
+        },
+      }),
+    );
+    expect(setOnboardingComplete).toHaveBeenCalledWith(true);
+    expect(setTab).toHaveBeenCalledWith("chat");
   });
 });

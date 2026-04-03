@@ -99,8 +99,6 @@ describe("useOnboardingState", () => {
     const { result } = renderHook(() => useOnboardingState());
 
     expect(result.current.state.serverTarget).toBe("local");
-    expect(result.current.state.runMode).toBe("local");
-    expect(result.current.state.cloudProvider).toBe("");
     expect(result.current.state.remote.status).toBe("idle");
     expect(result.current.state.remoteApiBase).toBe("");
   });
@@ -120,13 +118,11 @@ describe("useOnboardingState", () => {
     const { result } = renderHook(() => useOnboardingState());
 
     expect(result.current.state.serverTarget).toBe("elizacloud");
-    expect(result.current.state.runMode).toBe("cloud");
-    expect(result.current.state.cloudProvider).toBe("elizacloud");
     expect(result.current.state.remote.status).toBe("idle");
     expect(result.current.state.remoteToken).toBe("cloud-token");
   });
 
-  it("keeps legacy hosting fields synchronized when serverTarget changes", () => {
+  it("updates the canonical hosting target directly", () => {
     const { result } = renderHook(() => useOnboardingState());
 
     act(() => {
@@ -134,14 +130,11 @@ describe("useOnboardingState", () => {
     });
 
     expect(result.current.state.serverTarget).toBe("remote");
-    expect(result.current.state.runMode).toBe("cloud");
-    expect(result.current.state.cloudProvider).toBe("remote");
 
     act(() => {
-      result.current.setField("runMode", "local");
+      result.current.setField("serverTarget", "local");
     });
 
     expect(result.current.state.serverTarget).toBe("local");
-    expect(result.current.state.cloudProvider).toBe("");
   });
 });

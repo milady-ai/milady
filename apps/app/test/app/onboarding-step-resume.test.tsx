@@ -113,8 +113,7 @@ import { installLocalProviderCloudPreferencePatch } from "@miladyai/app-core/pla
 import type { OnboardingStep } from "@miladyai/app-core/state";
 import { AppProvider, useApp } from "@miladyai/app-core/state";
 import {
-  deriveOnboardingResumeConnection,
-  deriveOnboardingResumeFields,
+  deriveOnboardingResumeFieldsFromConfig,
   inferOnboardingResumeStep,
 } from "@miladyai/app-core/state/internal";
 
@@ -122,21 +121,14 @@ type ProbeApi = {
   getSnapshot: () => {
     onboardingLoading: boolean;
     onboardingStep: OnboardingStep;
-    onboardingRunMode: "local" | "cloud" | "";
-    onboardingCloudProvider: string;
+    onboardingServerTarget: "" | "local" | "remote" | "elizacloud";
   };
   next: (options?: { allowPermissionBypass?: boolean }) => Promise<void>;
 };
 
 function Probe({ onReady }: { onReady: (api: ProbeApi) => void }) {
   const app = useApp();
-  console.log(
-    "PROBE RENDER:",
-    app.onboardingLoading,
-    app.onboardingStep,
-    app.onboardingRunMode,
-    app.onboardingCloudProvider,
-  );
+  console.log("PROBE RENDER:", app.onboardingLoading, app.onboardingStep);
   console.log(
     "APP STATE:",
     app.startupPhase,
@@ -149,8 +141,7 @@ function Probe({ onReady }: { onReady: (api: ProbeApi) => void }) {
       getSnapshot: () => ({
         onboardingLoading: app.onboardingLoading,
         onboardingStep: app.onboardingStep,
-        onboardingRunMode: app.onboardingRunMode,
-        onboardingCloudProvider: app.onboardingCloudProvider,
+        onboardingServerTarget: app.onboardingServerTarget,
       }),
       next: (options) => app.handleOnboardingNext(options),
     });
@@ -286,9 +277,11 @@ describe("AppProvider onboarding step resume", () => {
   it("prefers the saved Claude subscription over stale cloud api key resume state", async () => {
     const clientWithPatch = {
       getConfig: vi.fn(async () => ({
-        connection: {
-          kind: "local-provider",
-          provider: "anthropic",
+        serviceRouting: {
+          llmText: {
+            backend: "anthropic",
+            transport: "direct",
+          },
         },
         cloud: {
           enabled: false,
@@ -327,12 +320,9 @@ describe("AppProvider onboarding step resume", () => {
       });
       expect(["senses", "welcome", "cloud_login"]).toContain(resumeStep);
       expect(
-        deriveOnboardingResumeFields(
-          deriveOnboardingResumeConnection(normalizedConfig),
-        ),
+        deriveOnboardingResumeFieldsFromConfig(normalizedConfig),
       ).toMatchObject({
-        onboardingRunMode: "local",
-        onboardingCloudProvider: "",
+        onboardingServerTarget: "local",
         onboardingProvider: "anthropic",
         onboardingPrimaryModel: "",
       });
@@ -380,8 +370,7 @@ describe("AppProvider onboarding step resume", () => {
       expect(["wakeUp", "welcome", "cloud_login"]).toContain(
         snap?.onboardingStep,
       );
-      expect(snap?.onboardingRunMode).toBe("");
-      expect(snap?.onboardingCloudProvider).toBe("");
+      expect(snap?.onboardingServerTarget).toBe("");
     } finally {
       restoreClient();
       clearForceFreshOnboarding();

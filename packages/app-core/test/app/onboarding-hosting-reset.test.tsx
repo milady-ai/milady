@@ -66,8 +66,7 @@ type ProbeApi = {
   splashContinue: () => void;
   snapshot: () => {
     onboardingStep: string;
-    onboardingRunMode: "local" | "cloud" | "";
-    onboardingCloudProvider: string;
+    onboardingServerTarget: "" | "local" | "remote" | "elizacloud";
     onboardingProvider: string;
     onboardingPrimaryModel: string;
   };
@@ -87,8 +86,7 @@ function Probe(props: { onReady: (api: ProbeApi) => void }) {
         app.startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" }),
       snapshot: () => ({
         onboardingStep: app.onboardingStep,
-        onboardingRunMode: app.onboardingRunMode,
-        onboardingCloudProvider: app.onboardingCloudProvider,
+        onboardingServerTarget: app.onboardingServerTarget,
         onboardingProvider: app.onboardingProvider,
         onboardingPrimaryModel: app.onboardingPrimaryModel,
       }),
@@ -212,8 +210,7 @@ describe("onboarding hosting reset", () => {
       await act(async () => {
         const probe = getApi();
         probe.setState("onboardingStep", "identity");
-        probe.setState("onboardingRunMode", "cloud");
-        probe.setState("onboardingCloudProvider", "elizacloud");
+        probe.setState("onboardingServerTarget", "elizacloud");
         probe.setState("onboardingProvider", "openai");
         probe.setState("onboardingPrimaryModel", "gpt-5");
       });
@@ -224,8 +221,7 @@ describe("onboarding hosting reset", () => {
 
       expect(getApi().snapshot()).toMatchObject({
         onboardingStep: "hosting",
-        onboardingRunMode: "",
-        onboardingCloudProvider: "",
+        onboardingServerTarget: "",
         onboardingProvider: "",
         onboardingPrimaryModel: "",
       });

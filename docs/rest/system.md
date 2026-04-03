@@ -257,10 +257,11 @@ Canonical runtime routing and hosting live in these top-level config fields:
 - `linkedAccounts`
 - `serviceRouting`
 
-`connection` is still accepted as a compatibility patch input, but it is not
-the persisted source of truth. When canonical routing fields are present, the
-server applies them directly and reconciles any compatibility projection from
-that canonical state.
+The server resolves runtime behavior from those canonical fields. Client flows
+should update hosting and routing there instead of sending legacy onboarding
+mirrors or provider-specific compatibility blobs. Initial onboarding secrets
+belong on `POST /api/onboarding` under `credentialInputs`; `PUT /api/config`
+is for persisted canonical config, not for replaying old onboarding payloads.
 
 **Request Body**
 

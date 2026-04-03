@@ -6,7 +6,6 @@ import type {
 } from "./types";
 
 const ACTIVE_SERVER_STORAGE_KEY = "milady:active-server";
-const CONNECTION_MODE_STORAGE_KEY = "eliza:connection-mode";
 const ONBOARDING_STEP_STORAGE_KEY = "eliza:onboarding:step";
 const LEGACY_ONBOARDING_STEP_STORAGE_KEY = "eliza:onboarding-step";
 const LEGACY_ONBOARDING_COMPLETE_STORAGE_KEY = "eliza:onboarding-complete";
@@ -88,7 +87,6 @@ export function applyForceFreshOnboardingReset(args?: {
   if (resolvedStorage) {
     try {
       resolvedStorage.removeItem(ACTIVE_SERVER_STORAGE_KEY);
-      resolvedStorage.removeItem(CONNECTION_MODE_STORAGE_KEY);
       resolvedStorage.removeItem(ONBOARDING_STEP_STORAGE_KEY);
       resolvedStorage.removeItem(LEGACY_ONBOARDING_STEP_STORAGE_KEY);
       resolvedStorage.removeItem(LEGACY_ONBOARDING_COMPLETE_STORAGE_KEY);

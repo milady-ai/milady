@@ -95,8 +95,8 @@ type AppHarnessState = {
   onboardingOwnerName: string;
   onboardingStyle: string;
   onboardingTheme: string;
-  onboardingRunMode: "local" | "cloud" | "";
-  onboardingCloudProvider: string;
+  onboardingServerTarget: "" | "local" | "remote" | "elizacloud";
+  onboardingCloudApiKey: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;
   onboardingProvider: string;
@@ -357,6 +357,96 @@ vi.mock("@miladyai/app-core/components", async () => {
   };
 });
 
+vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
+  AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
+  AppsPageView: () => React.createElement("div", null, "AppsPageView"),
+  AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
+  BugReportModal: () => React.createElement("div", null, "BugReportModal"),
+  CharacterEditor: () => React.createElement("div", null, "CharacterEditor"),
+  ChatView: () => React.createElement("div", null, "ChatView"),
+  CompanionShell: ({ tab }: { tab: string }) =>
+    React.createElement("main", null, `CompanionShell:${tab}`),
+  CompanionView: () => React.createElement("div", null, "CompanionView"),
+  ConnectionFailedBanner: () =>
+    React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectorsPageView: () =>
+    React.createElement("div", null, "ConnectorsPageView"),
+  ConversationsSidebar: () =>
+    React.createElement("div", null, "ConversationsSidebar"),
+  CustomActionEditor: () =>
+    React.createElement("div", null, "CustomActionEditor"),
+  CustomActionsPanel: () =>
+    React.createElement("div", null, "CustomActionsPanel"),
+  GameViewOverlay: () => React.createElement("div", null, "GameViewOverlay"),
+  Header: () => React.createElement("div", null, "Header"),
+  HeartbeatsDesktopShell: () =>
+    React.createElement("div", null, "HeartbeatsDesktopShell"),
+  HeartbeatsView: () => React.createElement("div", null, "HeartbeatsView"),
+  InventoryView: () => React.createElement("div", null, "InventoryView"),
+  KnowledgeView: () => React.createElement("div", null, "KnowledgeView"),
+  OnboardingWizard: () => {
+    const state = mockUseApp();
+    return React.createElement(
+      "div",
+      { "data-testid": "onboarding-wizard" },
+      `OnboardingWizard:${state.onboardingStep}`,
+      React.createElement(
+        "button",
+        {
+          onClick: () => state.handleOnboardingNext(),
+          type: "button",
+        },
+        "onboarding-next",
+      ),
+    );
+  },
+  PairingView: () => React.createElement("div", null, "PairingView"),
+  SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+  SettingsView: () => React.createElement("div", null, "SettingsView"),
+  SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  ShellOverlays: () => null,
+  StartupFailureView: ({ error }: { error: { message: string } }) =>
+    React.createElement("div", null, error.message),
+  StartupShell: () => {
+    const state = mockUseApp();
+    const phase = state?.startupCoordinator?.phase;
+    if (phase === "error") {
+      return React.createElement(
+        "div",
+        null,
+        state.startupError?.message ?? "StartupFailureView",
+      );
+    }
+    if (phase === "pairing-required") {
+      return React.createElement("div", null, "PairingView");
+    }
+    if (phase === "onboarding-required") {
+      return React.createElement(
+        "div",
+        { "data-testid": "onboarding-wizard" },
+        `OnboardingWizard:${state.onboardingStep}`,
+        React.createElement(
+          "button",
+          {
+            onClick: () => state.handleOnboardingNext(),
+            type: "button",
+          },
+          "onboarding-next",
+        ),
+      );
+    }
+    return null;
+  },
+  StreamView: () => React.createElement("div", null, "StreamView"),
+  SystemWarningBanner: () =>
+    React.createElement("div", null, "SystemWarningBanner"),
+}));
+
+vi.mock("../../src/app-shell-components", () =>
+  import("@miladyai/app-core/src/app-shell-components"),
+);
+
 vi.mock("@miladyai/app-core/src/components/shell/Header", () => ({
   Header: () => React.createElement("div", null, "Header"),
 }));
@@ -612,8 +702,8 @@ function createHarnessState(
     onboardingOwnerName: "anon",
     onboardingStyle: "",
     onboardingTheme: "milady",
-    onboardingRunMode: "",
-    onboardingCloudProvider: "",
+    onboardingServerTarget: "",
+    onboardingCloudApiKey: "",
     onboardingSmallModel: "small-model",
     onboardingLargeModel: "large-model",
     onboardingProvider: "",
@@ -907,7 +997,7 @@ describe("Connection step", () => {
   it("renders provider selection grid once local hosting is chosen", async () => {
     const state = createHarnessState({
       onboardingStep: "hosting",
-      onboardingRunMode: "local",
+      onboardingServerTarget: "local",
       onboardingProvider: "",
     });
     setupMockUseApp(state);
@@ -925,7 +1015,7 @@ describe("Connection step", () => {
   it("renders provider config when a provider is selected", async () => {
     const state = createHarnessState({
       onboardingStep: "hosting",
-      onboardingRunMode: "local",
+      onboardingServerTarget: "local",
       onboardingProvider: "openai",
     });
     setupMockUseApp(state);
@@ -943,7 +1033,7 @@ describe("Connection step", () => {
   it("shows auto-detected credentials with detected badge", async () => {
     const state = createHarnessState({
       onboardingStep: "hosting",
-      onboardingRunMode: "local",
+      onboardingServerTarget: "local",
       onboardingProvider: "",
       onboardingDetectedProviders: [
         { id: "openai", name: "OpenAI", detected: true },
@@ -963,8 +1053,7 @@ describe("Connection step", () => {
   it("renders remote backend fields for self-hosted cloud connections", async () => {
     const state = createHarnessState({
       onboardingStep: "hosting",
-      onboardingRunMode: "cloud",
-      onboardingCloudProvider: "remote",
+      onboardingServerTarget: "remote",
     });
     setupMockUseApp(state);
 
@@ -983,8 +1072,7 @@ describe("Connection step", () => {
   it("shows subscription provider OAuth flow for cloud providers", async () => {
     const state = createHarnessState({
       onboardingStep: "hosting",
-      onboardingRunMode: "cloud",
-      onboardingCloudProvider: "elizacloud",
+      onboardingServerTarget: "elizacloud",
     });
     setupMockUseApp(state);
 
@@ -994,8 +1082,8 @@ describe("Connection step", () => {
     });
 
     const text = textOf(tree!.root);
-    // Should show cloud connection UI
-    expect(text).toContain("onboarding.connectAccount");
+    expect(text).toContain("onboarding.neuralLinkTitle");
+    expect(text).toContain("onboarding.chooseProvider");
   });
 
   it("calls handleOnboardingBack from hosting selection", async () => {
@@ -1157,8 +1245,9 @@ describe("full onboarding journey (e2e)", () => {
     // Step through the entire onboarding
     for (let i = 0; i < 20 && !state.onboardingComplete; i += 1) {
       if (
-        (state.onboardingStep === "hosting" || state.onboardingStep === "providers") &&
-        state.onboardingRunMode === "local" &&
+        (state.onboardingStep === "hosting" ||
+          state.onboardingStep === "providers") &&
+        state.onboardingServerTarget === "local" &&
         !state.onboardingProvider
       ) {
         state.onboardingProvider = "ollama";

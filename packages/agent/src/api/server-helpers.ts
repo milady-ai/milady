@@ -17,7 +17,9 @@ import { logger } from "@elizaos/core";
 import type { ElizaConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import {
-  isOnboardingConnectionComplete,
+  normalizeOnboardingProviderId,
+  resolveDeploymentTargetInConfig,
+  resolveServiceRoutingInConfig,
 } from "../contracts/onboarding.js";
 import {
   type AgentEventServiceLike,
@@ -29,9 +31,6 @@ import {
   isPluginManagerLike,
   type PluginManagerLike,
 } from "../services/plugin-manager-types.js";
-import {
-  resolveExistingOnboardingConnection,
-} from "./provider-switch-config.js";
 import {
   normalizeCharacterLanguage,
   resolveStylePresetByAvatarIndex,
@@ -204,10 +203,26 @@ export function hasPersistedOnboardingState(config: ElizaConfig): boolean {
     return true;
   }
 
-  const existingConnection = resolveExistingOnboardingConnection(
+  const deploymentTarget = resolveDeploymentTargetInConfig(
     config as Record<string, unknown>,
   );
-  if (isOnboardingConnectionComplete(existingConnection)) {
+  const llmText = resolveServiceRoutingInConfig(
+    config as Record<string, unknown>,
+  )?.llmText;
+  const backend = normalizeOnboardingProviderId(llmText?.backend);
+  const remoteApiBase =
+    llmText?.remoteApiBase?.trim() ?? deploymentTarget.remoteApiBase?.trim();
+  const hasCompleteCanonicalRouting =
+    (llmText?.transport === "direct" &&
+      Boolean(backend && backend !== "elizacloud")) ||
+    (llmText?.transport === "remote" && Boolean(remoteApiBase)) ||
+    (llmText?.transport === "cloud-proxy" &&
+      backend === "elizacloud" &&
+      Boolean(llmText.smallModel?.trim() && llmText.largeModel?.trim())) ||
+    (deploymentTarget.runtime === "remote" &&
+      Boolean(deploymentTarget.remoteApiBase?.trim()));
+
+  if (hasCompleteCanonicalRouting) {
     return true;
   }
 

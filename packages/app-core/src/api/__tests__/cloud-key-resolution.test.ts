@@ -43,7 +43,12 @@ import { normalizeEnvValue } from "../../utils/env";
 function resolveCloudApiKey(
   config: {
     cloud?: { apiKey?: string; enabled?: boolean; inferenceMode?: string };
-    connection?: { kind?: string; provider?: string };
+    serviceRouting?: {
+      llmText?: {
+        backend?: string;
+        transport?: string;
+      };
+    };
   },
   runtime?: { character?: { secrets?: Record<string, unknown> } } | null,
 ): string | undefined {
@@ -52,8 +57,9 @@ function resolveCloudApiKey(
   if (configApiKey) return configApiKey;
 
   const cloudInferenceSelected =
-    config.connection?.kind === "cloud-managed" ||
-    (config.connection?.kind == null &&
+    (config.serviceRouting?.llmText?.transport === "cloud-proxy" &&
+      config.serviceRouting?.llmText?.backend === "elizacloud") ||
+    (config.serviceRouting?.llmText == null &&
       (config.cloud?.enabled === true ||
         config.cloud?.inferenceMode === "cloud"));
   if (!cloudInferenceSelected) {
@@ -168,7 +174,12 @@ describe("cloud API key resolution fallback chain", () => {
 
       const result = resolveCloudApiKey(
         {
-          connection: { kind: "local-provider", provider: "openai" },
+          serviceRouting: {
+            llmText: {
+              backend: "openai",
+              transport: "direct",
+            },
+          },
           cloud: { enabled: false, apiKey: "config-linked-key" },
         },
         makeRuntime("runtime-key"),
@@ -182,7 +193,12 @@ describe("cloud API key resolution fallback chain", () => {
 
       const result = resolveCloudApiKey(
         {
-          connection: { kind: "local-provider", provider: "openai" },
+          serviceRouting: {
+            llmText: {
+              backend: "openai",
+              transport: "direct",
+            },
+          },
           cloud: { enabled: false },
         },
         makeRuntime("runtime-key"),

@@ -28,10 +28,7 @@ import {
 import { scanProviderCredentials } from "../bridge";
 import { mapServerTasksToSessions } from "../coding";
 import type { WalletAddresses } from "@miladyai/agent/contracts/wallet";
-import {
-  type deriveOnboardingResumeConnection,
-  type StartupErrorState,
-} from "./internal";
+import { type StartupErrorState } from "./internal";
 import { loadPersistedOnboardingComplete } from "./persistence";
 import { resolveApiUrl } from "../utils";
 import { COMPANION_ENABLED, type Tab } from "../navigation";
@@ -87,8 +84,6 @@ export interface StartupCoordinatorDeps {
   setOnboardingServerTarget: (
     v: "" | "local" | "remote" | "elizacloud",
   ) => void;
-  setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
-  setOnboardingCloudProvider: (v: string) => void;
   setOnboardingCloudApiKey: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingVoiceProvider: (v: string) => void;
@@ -141,9 +136,6 @@ export interface StartupCoordinatorDeps {
   requestGreetingWhenRunningRef: React.RefObject<
     (convId: string) => Promise<void>
   >;
-  onboardingResumeConnectionRef: React.MutableRefObject<ReturnType<
-    typeof deriveOnboardingResumeConnection
-  > | null>;
   onboardingCompletionCommittedRef: React.MutableRefObject<boolean>;
   forceLocalBootstrapRef: React.MutableRefObject<boolean>;
   initialTabSetRef: React.MutableRefObject<boolean>;

@@ -26,7 +26,7 @@ import {
 } from "../onboarding/flow";
 import { buildOnboardingRuntimeConfig } from "../onboarding-config";
 import {
-  clearPersistedConnectionMode,
+  clearPersistedActiveServer,
   clearPersistedOnboardingStep,
   createPersistedActiveServer,
   type OnboardingNextOptions,
@@ -178,8 +178,6 @@ export interface OnboardingCallbacksDeps {
   setOnboardingServerTarget: (
     v: "" | "local" | "remote" | "elizacloud",
   ) => void;
-  setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
-  setOnboardingCloudProvider: (v: string) => void;
   setOnboardingCloudApiKey: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;
@@ -223,8 +221,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     addDeferredOnboardingTask,
     setOnboardingDetectedProviders,
     setOnboardingServerTarget,
-    setOnboardingRunMode,
-    setOnboardingCloudProvider,
     setOnboardingCloudApiKey,
     setOnboardingProvider,
     setOnboardingApiKey,
@@ -259,8 +255,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       name: onboardingName,
       style: onboardingStyle,
       serverTarget: onboardingServerTarget,
-      runMode: onboardingRunMode,
-      cloudProvider: onboardingCloudProvider,
       cloudApiKey: onboardingCloudApiKey,
       provider: onboardingProvider,
       apiKey: onboardingApiKey,
@@ -277,7 +271,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       rpcSelections: onboardingRpcSelections,
       rpcKeys: onboardingRpcKeys,
     },
-    resumeConnectionRef: onboardingResumeConnectionRef,
     completionCommittedRef: onboardingCompletionCommittedRef,
   } = onboarding;
 
@@ -288,7 +281,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
   const completeOnboarding = useCallback(
     (landingTab: Tab = defaultLandingTab) => {
       clearPersistedOnboardingStep();
-      onboardingResumeConnectionRef.current = null;
       onboardingCompletionCommittedRef.current = true;
       _setOnboardingMode("basic");
       setOnboardingActiveGuide(null);
@@ -308,7 +300,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     [
       onboardingCompletionCommittedRef,
       onboardingDetectedProviders,
-      onboardingResumeConnectionRef,
       setOnboardingActiveGuide,
       setOnboardingComplete,
       setOnboardingDetectedProviders,
@@ -341,8 +332,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
 
       const runtimeConfig = buildOnboardingRuntimeConfig({
         onboardingServerTarget,
-        onboardingRunMode,
-        onboardingCloudProvider,
         onboardingCloudApiKey,
         onboardingProvider,
         onboardingApiKey,
@@ -460,15 +449,15 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         avatarIndex: style?.avatarIndex ?? selectedVrmIndex,
         language: uiLanguage,
         presetId: (style?.id ?? onboardingStyle) || "chen",
-        ...(runtimeConfig.connection
-          ? { connection: runtimeConfig.connection }
-          : {}),
         deploymentTarget: runtimeConfig.deploymentTarget,
         ...(runtimeConfig.linkedAccounts
           ? { linkedAccounts: runtimeConfig.linkedAccounts }
           : {}),
         ...(runtimeConfig.serviceRouting
           ? { serviceRouting: runtimeConfig.serviceRouting }
+          : {}),
+        ...(runtimeConfig.credentialInputs
+          ? { credentialInputs: runtimeConfig.credentialInputs }
           : {}),
         walletConfig: nextWalletConfig,
       } as Parameters<typeof client.submitOnboarding>[0]);
@@ -507,8 +496,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     onboardingOptions,
     onboardingStyle,
     onboardingName,
-    onboardingRunMode,
-    onboardingCloudProvider,
+    onboardingServerTarget,
     onboardingCloudApiKey,
     onboardingSmallModel,
     onboardingLargeModel,
@@ -557,13 +545,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     const patch = getResetConnectionWizardToHostingStepPatch();
     if (patch.onboardingServerTarget !== undefined) {
       setOnboardingServerTarget(patch.onboardingServerTarget);
-    } else {
-      if (patch.onboardingRunMode !== undefined) {
-        setOnboardingRunMode(patch.onboardingRunMode);
-      }
-      if (patch.onboardingCloudProvider !== undefined) {
-        setOnboardingCloudProvider(patch.onboardingCloudProvider);
-      }
     }
     if (patch.onboardingCloudApiKey !== undefined) {
       setOnboardingCloudApiKey(patch.onboardingCloudApiKey);
@@ -586,13 +567,11 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
   }, [
     setOnboardingApiKey,
     setOnboardingCloudApiKey,
-    setOnboardingCloudProvider,
     setOnboardingServerTarget,
     _setOnboardingPrimaryModel,
     setOnboardingProvider,
     setOnboardingRemoteConnecting,
     setOnboardingRemoteError,
-    setOnboardingRunMode,
   ]);
 
   // ── advanceOnboarding / handleOnboardingNext ─────────────────────
@@ -636,12 +615,10 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       handleOnboardingFinish,
       onboardingDetectedProviders,
       onboardingMode,
-      onboardingRunMode,
       onboardingServerTarget,
       onboardingStep,
       setOnboardingStep,
       setOnboardingActiveGuide,
-      onboardingCloudProvider,
     ],
   );
 
@@ -676,8 +653,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     onboardingStep,
     onboardingServerTarget,
     setOnboardingActiveGuide,
-    onboardingRunMode,
-    onboardingCloudProvider,
     setOnboardingStep,
   ]);
 
@@ -711,7 +686,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
 
   const handleOnboardingUseLocalBackend = useCallback(() => {
     forceLocalBootstrapRef.current = true;
-    clearPersistedConnectionMode();
+    clearPersistedActiveServer();
     client.setBaseUrl(null);
     client.setToken(null);
     setOnboardingRemoteConnecting(false);
@@ -737,7 +712,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingRemoteToken,
     setOnboardingServerTarget,
     client,
-    clearPersistedConnectionMode,
+    clearPersistedActiveServer,
   ]);
 
   // ── handleOnboardingRemoteConnect ────────────────────────────────

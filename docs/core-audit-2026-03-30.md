@@ -1,5 +1,11 @@
 # Milady Core Audit — 2026-03-30
 
+> Historical snapshot. This audit predates the canonical onboarding/runtime
+> refactor. The current live flow now writes `deploymentTarget`,
+> `linkedAccounts`, `serviceRouting`, and `credentialInputs`; deprecated fields
+> such as `config.connection`, `runMode`, and `cloudProvider` are no longer the
+> source of truth for active onboarding or runtime routing.
+
 Comprehensive audit of all core routes, screens, state machines, and platform bridges.
 5 parallel audit teams investigated: API routes, onboarding, lifecycle state, desktop/web bridge, and navigation/views.
 
@@ -108,7 +114,7 @@ The hosting/providers steps share `ConnectionStep` which routes through 6 sub-sc
 | Remote backend unreachable | Startup error screen, no recovery without localStorage clear |
 
 ### Resume Gaps
-Connection sub-state (`onboardingRunMode`, `onboardingProvider`, `onboardingApiKey`) is **never persisted to localStorage**. Interrupted onboarding resumes at the persisted step but with empty connection fields.
+At the time of this audit, connection sub-state was **not persisted to localStorage**. Interrupted onboarding could resume at the persisted step but lose hosting/provider field state between reloads.
 
 ---
 
@@ -150,7 +156,7 @@ else                → "ready"              (main app)
 | L-6 | LOW | `beginLifecycleAction` ref/state drift window (documented, intentional) | `useLifecycleState.ts` |
 
 ### localStorage Keys (19 total)
-All wrapped in `tryLocalStorage` with safe fallbacks. Most critical key: `eliza:connection-mode` — stale cloud/remote entry causes startup to connect to unreachable backend with no recovery except manual clear.
+All wrapped in `tryLocalStorage` with safe fallbacks. Most critical key: `milady:active-server` — stale cloud/remote entry causes startup to connect to unreachable backend with no recovery except manual clear.
 
 ### Blast Radius
 | Wrong state | Impact |

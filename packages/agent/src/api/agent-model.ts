@@ -1,5 +1,10 @@
 import type { AgentRuntime } from "@elizaos/core";
-import { inferOnboardingConnectionFromConfig } from "../contracts/onboarding";
+import type { ElizaConfig } from "../config/config.js";
+import {
+  normalizeOnboardingProviderId,
+  resolveDeploymentTargetInConfig,
+  resolveServiceRoutingInConfig,
+} from "../contracts/onboarding";
 
 const MODEL_PLACEHOLDERS = new Set(["", "n/a", "na", "unknown", "provided"]);
 
@@ -83,35 +88,39 @@ function readCharacterModel(runtime: AgentRuntime): string | undefined {
 
 export function detectRuntimeModel(
   runtime: AgentRuntime | null,
-  config?: {
-    connection?: unknown;
-    agents?: { defaults?: { model?: { primary?: string } } };
-  },
+  config?: Pick<ElizaConfig, "deploymentTarget" | "serviceRouting" | "agents">,
 ): string | undefined {
   if (!runtime) return undefined;
 
   const configured = readCharacterModel(runtime);
   if (configured) return configured;
 
-  const activeConnection = inferOnboardingConnectionFromConfig(
+  const routing = resolveServiceRoutingInConfig(
     (config ?? null) as Record<string, unknown> | null,
   );
-  if (activeConnection?.kind === "local-provider") {
-    return activeConnection.primaryModel ?? activeConnection.provider;
+  const deploymentTarget = resolveDeploymentTargetInConfig(
+    (config ?? null) as Record<string, unknown> | null,
+  );
+  const llmText = routing?.llmText;
+  const backend = normalizeOnboardingProviderId(llmText?.backend);
+
+  if (llmText?.transport === "direct") {
+    const provider = backend && backend !== "elizacloud" ? backend : undefined;
+    return llmText.primaryModel ?? provider;
   }
-  if (activeConnection?.kind === "remote-provider") {
+
+  if (llmText?.transport === "remote") {
+    const provider = backend && backend !== "elizacloud" ? backend : undefined;
     return (
-      activeConnection.primaryModel ??
-      activeConnection.provider ??
-      activeConnection.remoteApiBase
+      llmText.primaryModel ??
+      provider ??
+      llmText.remoteApiBase ??
+      deploymentTarget.remoteApiBase
     );
   }
-  if (activeConnection?.kind === "cloud-managed") {
-    return (
-      activeConnection.largeModel ??
-      activeConnection.smallModel ??
-      activeConnection.cloudProvider
-    );
+
+  if (llmText?.transport === "cloud-proxy" && backend === "elizacloud") {
+    return llmText.largeModel ?? llmText.smallModel ?? backend;
   }
 
   const configModel = normalizeModelSpec(

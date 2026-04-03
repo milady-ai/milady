@@ -22,7 +22,10 @@ describe("force fresh onboarding reset", () => {
     };
     const history = { replaceState: vi.fn() };
     const values = new Map<string, string>([
-      ["eliza:connection-mode", '{"runMode":"cloud"}'],
+      [
+        "milady:active-server",
+        '{"id":"cloud:https://elizacloud.ai","kind":"cloud","label":"Eliza Cloud","apiBase":"https://elizacloud.ai"}',
+      ],
       ["eliza:onboarding:step", "senses"],
       ["eliza:onboarding-step", "connection"],
       ["eliza:onboarding-complete", "true"],
@@ -32,7 +35,7 @@ describe("force fresh onboarding reset", () => {
     const changed = applyForceFreshOnboardingReset({ history, storage, url });
 
     expect(changed).toBe(true);
-    expect(values.has("eliza:connection-mode")).toBe(false);
+    expect(values.has("milady:active-server")).toBe(false);
     expect(values.has("eliza:onboarding:step")).toBe(false);
     expect(values.has("eliza:onboarding-step")).toBe(false);
     expect(values.has("eliza:onboarding-complete")).toBe(false);
@@ -70,7 +73,9 @@ describe("force fresh onboarding reset", () => {
       complete: false,
     });
 
-    await client.submitOnboarding({ connection: { kind: "cloud-managed" } });
+    await client.submitOnboarding({
+      deploymentTarget: { runtime: "local" },
+    });
 
     expect(isForceFreshOnboardingEnabled(storage)).toBe(false);
     await expect(client.getConfig()).resolves.toEqual({

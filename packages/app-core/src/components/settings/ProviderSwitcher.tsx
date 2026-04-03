@@ -5,7 +5,7 @@
  * Composes SubscriptionStatus and ApiKeyConfig sub-components.
  */
 
-import { inferOnboardingConnectionFromConfig } from "@miladyai/shared/contracts/onboarding";
+import { resolveServiceRoutingInConfig } from "@miladyai/shared/contracts/onboarding";
 import {
   Button,
   Input,
@@ -179,24 +179,24 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
 
   const syncSelectionFromConfig = useCallback(
     (cfg: Record<string, unknown>) => {
-      const connection = inferOnboardingConnectionFromConfig(cfg);
+      const llmText = resolveServiceRoutingInConfig(cfg)?.llmText;
+      const providerId = getOnboardingProviderOption(llmText?.backend)?.id;
       const nextSelectedId =
-        connection?.kind === "cloud-managed"
+        llmText?.transport === "cloud-proxy" && providerId === "elizacloud"
           ? "__cloud__"
-          : connection?.kind === "local-provider"
-            ? connection.provider
-            : connection?.kind === "remote-provider"
-              ? (connection.provider ?? null)
+          : llmText?.transport === "direct"
+            ? (providerId ?? null)
+            : llmText?.transport === "remote" && providerId
+              ? providerId
               : null;
 
       if (!hasManualSelection.current) {
         setSelectedProviderId(nextSelectedId);
       }
       const piAiSelected =
-        connection?.kind === "local-provider" &&
-        connection.provider === "pi-ai";
+        llmText?.transport === "direct" && providerId === "pi-ai";
       if (piAiSelected) {
-        setPiAiModelSpec(connection.primaryModel ?? "");
+        setPiAiModelSpec(llmText.primaryModel ?? "");
       }
     },
     [],
@@ -229,10 +229,12 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
       try {
         const cfg = await client.getConfig();
         const models = cfg.models as Record<string, string> | undefined;
-        const connection = inferOnboardingConnectionFromConfig(
+        const llmText = resolveServiceRoutingInConfig(
           cfg as Record<string, unknown>,
-        );
-        const elizaCloudEnabledCfg = connection?.kind === "cloud-managed";
+        )?.llmText;
+        const providerId = getOnboardingProviderOption(llmText?.backend)?.id;
+        const elizaCloudEnabledCfg =
+          llmText?.transport === "cloud-proxy" && providerId === "elizacloud";
         const defaultSmall = "moonshotai/kimi-k2-turbo";
         const defaultLarge = "moonshotai/kimi-k2-0905";
 
@@ -258,10 +260,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
             (elizaCloudEnabledCfg ? defaultLarge : ""),
         );
         syncSelectionFromConfig(cfg as Record<string, unknown>);
-        if (
-          connection?.kind !== "local-provider" ||
-          connection.provider !== "pi-ai"
-        ) {
+        if (!(llmText?.transport === "direct" && providerId === "pi-ai")) {
           setPiAiModelSpec("");
         }
       } catch (err) {

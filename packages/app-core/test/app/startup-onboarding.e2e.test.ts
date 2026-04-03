@@ -78,8 +78,8 @@ type AppHarnessState = {
   onboardingName: string;
   onboardingStyle: string;
   onboardingTheme: string;
-  onboardingRunMode: "local" | "cloud" | "";
-  onboardingCloudProvider: string;
+  onboardingServerTarget: "" | "local" | "remote" | "elizacloud";
+  onboardingCloudApiKey: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;
   onboardingProvider: string;
@@ -197,7 +197,7 @@ vi.mock("@miladyai/app-core/components", async () => {
         );
       }
       if (state.onboardingStep === "connection") {
-        if (!state.onboardingRunMode) {
+        if (!state.onboardingServerTarget) {
           return React.createElement(
             React.Fragment,
             null,
@@ -205,7 +205,7 @@ vi.mock("@miladyai/app-core/components", async () => {
               "button",
               {
                 onClick: () => {
-                  state.setState?.("onboardingRunMode", "local");
+                  state.setState?.("onboardingServerTarget", "local");
                 },
                 type: "button",
               },
@@ -305,9 +305,9 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
         return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.chooseAgent");
       }
       if (s.onboardingStep === "connection") {
-        if (!s.onboardingRunMode) {
+        if (!s.onboardingServerTarget) {
           return React.createElement(React.Fragment, null,
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingRunMode", "local"); }, type: "button" }, "onboarding.hostingLocal"),
+            React.createElement("button", { onClick: () => { s.setState?.("onboardingServerTarget", "local"); }, type: "button" }, "onboarding.hostingLocal"),
             React.createElement("button", { onClick: () => { s.setState?.("onboardingMode", "advanced"); s.setState?.("onboardingActiveGuide", "provider"); }, type: "button" }, "advanced-configuration"),
             s.onboardingMode === "advanced" ? React.createElement("div", null, "Flamina guidance") : null,
           );
@@ -361,7 +361,7 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
       );
     }
     if (state.onboardingStep === "connection") {
-      if (!state.onboardingRunMode) {
+      if (!state.onboardingServerTarget) {
         return React.createElement(
           React.Fragment,
           null,
@@ -369,7 +369,7 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
             "button",
             {
               onClick: () => {
-                state.setState?.("onboardingRunMode", "local");
+                state.setState?.("onboardingServerTarget", "local");
               },
               type: "button",
             },
@@ -458,9 +458,9 @@ vi.mock("../../src/app-shell-components", () => ({
         return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.chooseAgent");
       }
       if (s.onboardingStep === "connection") {
-        if (!s.onboardingRunMode) {
+        if (!s.onboardingServerTarget) {
           return React.createElement(React.Fragment, null,
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingRunMode", "local"); }, type: "button" }, "onboarding.hostingLocal"),
+            React.createElement("button", { onClick: () => { s.setState?.("onboardingServerTarget", "local"); }, type: "button" }, "onboarding.hostingLocal"),
             React.createElement("button", { onClick: () => { s.setState?.("onboardingMode", "advanced"); s.setState?.("onboardingActiveGuide", "provider"); }, type: "button" }, "advanced-configuration"),
             s.onboardingMode === "advanced" ? React.createElement("div", null, "Flamina guidance") : null,
           );
@@ -514,7 +514,7 @@ vi.mock("../../src/app-shell-components", () => ({
       );
     }
     if (state.onboardingStep === "connection") {
-      if (!state.onboardingRunMode) {
+      if (!state.onboardingServerTarget) {
         return React.createElement(
           React.Fragment,
           null,
@@ -522,7 +522,7 @@ vi.mock("../../src/app-shell-components", () => ({
             "button",
             {
               onClick: () => {
-                state.setState?.("onboardingRunMode", "local");
+                state.setState?.("onboardingServerTarget", "local");
               },
               type: "button",
             },
@@ -784,8 +784,8 @@ function createHarnessState(): AppHarnessState {
     onboardingName: "Eliza",
     onboardingStyle: "",
     onboardingTheme: "eliza",
-    onboardingRunMode: "",
-    onboardingCloudProvider: "",
+    onboardingServerTarget: "",
+    onboardingCloudApiKey: "",
     onboardingSmallModel: "small-model",
     onboardingLargeModel: "large-model",
     onboardingProvider: "",
@@ -963,7 +963,7 @@ describe("app startup onboarding flow (e2e)", () => {
     for (let i = 0; i < 20 && !state.onboardingComplete; i += 1) {
       if (
         state.onboardingStep === "connection" &&
-        state.onboardingRunMode === "local" &&
+        state.onboardingServerTarget === "local" &&
         !state.onboardingProvider
       ) {
         state.onboardingProvider = "ollama";
@@ -975,7 +975,7 @@ describe("app startup onboarding flow (e2e)", () => {
       } else if (state.onboardingStep === "identity") {
         clickButton(renderedTree, "onboarding.chooseAgent");
       } else if (state.onboardingStep === "connection") {
-        if (!state.onboardingRunMode) {
+        if (!state.onboardingServerTarget) {
           clickButton(renderedTree, "onboarding.hostingLocal");
         } else {
           clickButton(renderedTree, "onboarding.confirm");

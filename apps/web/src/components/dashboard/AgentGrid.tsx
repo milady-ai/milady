@@ -488,7 +488,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
       {/* Bottom hint */}
       <div className="px-4 py-2 bg-dark-secondary border-t border-border">
         <span className="font-mono text-[10px] text-text-subtle">
-          Use Connect to add a remote agent
+          Use Connect to add another server target
         </span>
       </div>
     </div>

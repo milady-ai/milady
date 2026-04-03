@@ -237,7 +237,6 @@ export interface UseChatCallbacksDeps {
 
   // Onboarding setters (used by completeResetLocalStateAfterServerWipe)
   onboardingCompletionCommittedRef: MutableRefObject<boolean>;
-  onboardingResumeConnectionRef: MutableRefObject<unknown>;
   setOnboardingUiRevealNonce: (fn: (n: number) => number) => void;
   setOnboardingLoading: (v: boolean) => void;
   setOnboardingComplete: (v: boolean) => void;
@@ -249,8 +248,6 @@ export interface UseChatCallbacksDeps {
   setOnboardingName: (v: string) => void;
   setOnboardingStyle: (v: string) => void;
   setOnboardingServerTarget: (v: AppState["onboardingServerTarget"]) => void;
-  setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
-  setOnboardingCloudProvider: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;
   setOnboardingVoiceProvider: (v: string) => void;
@@ -346,7 +343,6 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setElizaCloudStatusReason,
     setElizaCloudLoginError,
     onboardingCompletionCommittedRef,
-    onboardingResumeConnectionRef,
     setOnboardingUiRevealNonce,
     setOnboardingLoading,
     setOnboardingComplete,
@@ -358,8 +354,6 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setOnboardingName,
     setOnboardingStyle,
     setOnboardingServerTarget,
-    setOnboardingRunMode,
-    setOnboardingCloudProvider,
     setOnboardingProvider,
     setOnboardingApiKey,
     setOnboardingVoiceProvider,
@@ -638,7 +632,6 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setElizaCloudStatusReason,
     setElizaCloudLoginError,
     onboardingCompletionCommittedRef,
-    onboardingResumeConnectionRef,
     setOnboardingUiRevealNonce,
     setOnboardingLoading,
     setOnboardingComplete,
@@ -650,8 +643,6 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setOnboardingName,
     setOnboardingStyle,
     setOnboardingServerTarget,
-    setOnboardingRunMode,
-    setOnboardingCloudProvider,
     setOnboardingProvider,
     setOnboardingApiKey,
     setOnboardingVoiceProvider,

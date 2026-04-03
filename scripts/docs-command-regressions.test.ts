@@ -32,18 +32,24 @@ describe("docs command regressions", () => {
     const onboarding = readDoc("docs/rest/onboarding.md");
     const system = readDoc("docs/rest/system.md");
     const apiReference = readDoc("docs/api-reference.mdx");
+    const configuration = readDoc("docs/configuration.mdx");
 
     expect(onboarding).toContain("deploymentTarget");
     expect(onboarding).toContain("linkedAccounts");
     expect(onboarding).toContain("serviceRouting");
+    expect(onboarding).toContain("credentialInputs");
     expect(onboarding).not.toContain(
       "authoritative active-provider record persisted at the config root",
     );
     expect(system).not.toContain(
       "The root `connection` field is the authoritative active-provider record.",
     );
+    expect(system).toContain("credentialInputs");
     expect(apiReference).toContain("canonical routing state");
     expect(apiReference).not.toContain("canonical `connection` state");
+    expect(configuration).toContain(
+      "root `connection` field is no longer part of the",
+    );
   });
 
   it("describes chooser-first startup in consumer docs", () => {

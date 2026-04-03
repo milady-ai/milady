@@ -40,12 +40,6 @@ export function useOnboardingCompat({
       setOnboardingServerTarget: bindField("serverTarget") as (
         value: "" | "local" | "remote" | "elizacloud",
       ) => void,
-      setOnboardingRunMode: bindField("runMode") as (
-        value: "local" | "cloud" | "",
-      ) => void,
-      setOnboardingCloudProvider: bindField("cloudProvider") as (
-        value: string,
-      ) => void,
       setOnboardingCloudApiKey: bindField("cloudApiKey") as (
         value: string,
       ) => void,

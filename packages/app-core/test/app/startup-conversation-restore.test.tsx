@@ -168,11 +168,15 @@ describe("startup conversation restore", () => {
       clearInterval: globalThis.clearInterval,
     });
     Object.assign(document.documentElement, { setAttribute: vi.fn() });
-    // Provide a persisted connection so the startup flow doesn't short-circuit
+    // Provide a persisted active server so the startup flow doesn't short-circuit
     // to onboarding before polling getStatus and hydrating conversations.
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
     localStorage.setItem("eliza:onboarding-complete", "1");
 

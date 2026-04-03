@@ -378,7 +378,6 @@ export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set([
   "database",
   "media",
   "cloud",
-  "connection",
   "x402",
   "mcp",
   "features",

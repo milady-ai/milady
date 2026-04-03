@@ -94,10 +94,10 @@ import {
 } from "@miladyai/shared";
 import {
   getOnboardingProviderOption,
-  inferOnboardingConnectionFromConfig,
   migrateLegacyRuntimeConfig,
   normalizeOnboardingProviderId,
   resolveDeploymentTargetInConfig,
+  resolveServiceRoutingInConfig,
 } from "@miladyai/shared/contracts/onboarding";
 import { resolveElizaCloudTopology } from "@miladyai/shared/contracts";
 import {
@@ -2562,21 +2562,29 @@ function resolveProviderIdFromSelectionHint(
 export function resolvePreferredProviderId(
   config: ElizaConfig,
 ): string | undefined {
-  const connection = inferOnboardingConnectionFromConfig(
+  const llmText = resolveServiceRoutingInConfig(
     config as Record<string, unknown>,
-  );
+  )?.llmText;
+  const backend = normalizeOnboardingProviderId(llmText?.backend);
 
-  if (connection?.kind === "local-provider") {
-    return connection.provider;
+  if (llmText?.transport === "cloud-proxy" && backend === "elizacloud") {
+    return "elizacloud";
   }
-  if (connection?.kind === "remote-provider") {
+
+  if (llmText?.transport === "direct") {
+    const directProvider =
+      backend && backend !== "elizacloud" ? backend : undefined;
     return (
-      connection.provider ??
-      resolveProviderIdFromSelectionHint(connection.primaryModel)
+      directProvider ?? resolveProviderIdFromSelectionHint(llmText.primaryModel)
     );
   }
-  if (connection?.kind === "cloud-managed") {
-    return connection.cloudProvider;
+
+  if (llmText?.transport === "remote") {
+    const remoteProvider =
+      backend && backend !== "elizacloud" ? backend : undefined;
+    return (
+      remoteProvider ?? resolveProviderIdFromSelectionHint(llmText.primaryModel)
+    );
   }
 
   return resolveProviderIdFromSelectionHint(resolvePrimaryModel(config));

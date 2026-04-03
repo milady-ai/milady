@@ -167,7 +167,7 @@ describe("PUT /api/config canonical provider routing", () => {
     }
   });
 
-  it("lets canonical runtime fields win when the config patch also includes a connection mirror", async () => {
+  it("rejects deprecated connection patches and requires canonical runtime fields", async () => {
     const tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), "milady-config-provider-routing-"),
     );
@@ -214,24 +214,11 @@ describe("PUT /api/config canonical provider routing", () => {
         },
       );
 
-      expect(status).toBe(200);
+      expect(status).toBe(400);
 
-      const config = await waitForConfig(
-        configPath,
-        (candidate) =>
-          (
-            ((candidate.serviceRouting ?? {}) as Record<string, unknown>)
-              ?.llmText as Record<string, unknown> | undefined
-          )?.backend === "openrouter",
-      );
-
-      expect((config.serviceRouting as Record<string, unknown>)?.llmText).toEqual(
-        {
-          backend: "openrouter",
-          transport: "direct",
-          primaryModel: "openai/gpt-5-mini",
-        },
-      );
+      const config = await waitForConfig(configPath, () => true);
+      expect(config.deploymentTarget).toBeUndefined();
+      expect(config.serviceRouting).toBeUndefined();
       expect(config.connection).toBeUndefined();
     } finally {
       await server.close();

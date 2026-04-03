@@ -17,7 +17,7 @@ import {
   gatewayEndpointToApiBase,
 } from "../../bridge/gateway-discovery";
 import {
-  clearPersistedConnectionMode,
+  clearPersistedActiveServer,
   savePersistedActiveServer,
   useApp,
 } from "../../state";
@@ -77,11 +77,12 @@ export function StartupShell() {
     ? (startupCoordinator.state as { loaded?: boolean }).loaded
     : false;
   const progress = PHASE_PROGRESS[phase] ?? 50;
+  const cloudApiKey = onboardingCloudApiKey ?? "";
   const showElizaCloudEntry = useMemo(() => {
     if (elizaCloudConnected) {
       return true;
     }
-    if (onboardingCloudApiKey.trim().length > 0) {
+    if (cloudApiKey.trim().length > 0) {
       return true;
     }
     if (typeof window === "undefined") {
@@ -94,7 +95,7 @@ export function StartupShell() {
       .toString()
       .trim();
     return token.length > 0;
-  }, [elizaCloudConnected, onboardingCloudApiKey]);
+  }, [cloudApiKey, elizaCloudConnected]);
 
   useEffect(() => {
     if (!isSplash || !splashLoaded) {
@@ -132,7 +133,7 @@ export function StartupShell() {
   const seedSplashTarget = useCallback(
     (target: "local" | "remote" | "elizacloud", remoteApiBase?: string) => {
       clearClientConnectionIntent();
-      clearPersistedConnectionMode();
+      clearPersistedActiveServer();
       goToOnboardingStep("identity");
       setState("onboardingProvider", "");
       setState("onboardingApiKey", "");

@@ -116,7 +116,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: true,
       enabled: true,
-      cloudVoiceProxyAvailable: true,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: true,
       userId: undefined,
       organizationId: undefined,
@@ -137,7 +137,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: false,
       enabled: true,
-      cloudVoiceProxyAvailable: true,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
@@ -155,7 +155,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: false,
       enabled: true,
-      cloudVoiceProxyAvailable: true,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
@@ -208,9 +208,11 @@ describe("cloud status routes", () => {
       pathname: "/api/cloud/status",
       runtime: null,
       config: {
-        connection: {
-          kind: "local-provider",
-          provider: "openai",
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "direct",
+          },
         },
         cloud: {
           enabled: true,
@@ -252,7 +254,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: true,
       enabled: true,
-      cloudVoiceProxyAvailable: true,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: false,
       userId: "user-1",
       organizationId: "org-1",
