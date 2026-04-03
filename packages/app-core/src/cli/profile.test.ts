@@ -87,11 +87,11 @@ describe("applyCliProfileEnv", () => {
       env,
       homedir: () => "/home/peter",
     });
-    const expectedStateDir = path.join("/home/peter", ".eliza-dev");
+    const expectedStateDir = path.join("/home/peter", ".milady-dev");
     expect(env.ELIZA_PROFILE).toBe("dev");
     expect(env.ELIZA_STATE_DIR).toBe(expectedStateDir);
     expect(env.ELIZA_CONFIG_PATH).toBe(
-      path.join(expectedStateDir, "eliza.json"),
+      path.join(expectedStateDir, "milady.json"),
     );
     expect(env.ELIZA_GATEWAY_PORT).toBe("19001");
   });
@@ -108,7 +108,7 @@ describe("applyCliProfileEnv", () => {
     });
     expect(env.ELIZA_STATE_DIR).toBe("/custom");
     expect(env.ELIZA_GATEWAY_PORT).toBe("19099");
-    expect(env.ELIZA_CONFIG_PATH).toBe(path.join("/custom", "eliza.json"));
+    expect(env.ELIZA_CONFIG_PATH).toBe(path.join("/custom", "milady.json"));
   });
 });
 
