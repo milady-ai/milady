@@ -78,6 +78,13 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("readResolvedPreloadScript(import.meta.dir)");
   });
 
+  it("allows the packaged Windows bootstrap harness to override the main window partition", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("resolveMainWindowPartition(process.env)");
+    expect(source).toContain("browserWindowOptions.partition");
+  });
+
   it("guards embedded agent startup behind local runtime mode", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 

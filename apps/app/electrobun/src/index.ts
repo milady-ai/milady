@@ -28,6 +28,7 @@ import {
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { readNavigationEventUrl } from "./cloud-auth-window";
+import { resolveMainWindowPartition } from "./main-window-session";
 import {
   buildMainMenuResetApiCandidates,
   pickReachableMenuResetApiBase,
@@ -717,6 +718,7 @@ async function resolveRendererUrl(): Promise<string> {
 
 async function createMainWindow(): Promise<BrowserWindow> {
   const rendererUrl = await resolveRendererUrl();
+  const mainWindowPartition = resolveMainWindowPartition(process.env);
 
   // Load persisted window state
   const statePath = path.join(Utils.paths.userData, "window-state.json");
@@ -733,7 +735,7 @@ async function createMainWindow(): Promise<BrowserWindow> {
     preload = "// preload unavailable";
   }
 
-  const win = new BrowserWindow({
+  const browserWindowOptions = {
     title: "Milady",
     // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
     icon: resolveDesktopAppIconPath(),
@@ -751,7 +753,16 @@ async function createMainWindow(): Promise<BrowserWindow> {
     // Transparent background for vibrancy — macOS only.
     // On Windows/Linux a solid background prevents rendering artifacts.
     transparent: process.platform === "darwin",
-  });
+  };
+  if (mainWindowPartition) {
+    // The packaged Windows bootstrap probe only needs to validate renderer
+    // startup against an external API override. An in-memory partition avoids
+    // depending on CEF persistent profile creation in that harness.
+    // @ts-expect-error — partition is a valid Electrobun option not yet typed
+    browserWindowOptions.partition = mainWindowPartition;
+  }
+
+  const win = new BrowserWindow(browserWindowOptions);
 
   // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);

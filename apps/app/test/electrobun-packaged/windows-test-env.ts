@@ -5,6 +5,7 @@ const STRIPPED_ENV_KEYS = [
   "MILADY_API_BASE_URL",
   "MILADY_API_PORT",
   "MILADY_DESKTOP_API_BASE",
+  "MILADY_DESKTOP_TEST_PARTITION",
   "MILADY_RENDERER_URL",
   "MILADY_STARTUP_EVENTS_FILE",
   "MILADY_STARTUP_SESSION_ID",
@@ -35,6 +36,7 @@ export function createPackagedWindowsAppEnv(args: {
   return {
     ...env,
     MILADY_DESKTOP_TEST_API_BASE: args.apiBase,
+    MILADY_DESKTOP_TEST_PARTITION: "bootstrap-isolated",
     MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
     ELECTROBUN_CONSOLE: "1",
     // Redirect both Windows profile roots so the packaged shell does not
