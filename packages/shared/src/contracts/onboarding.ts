@@ -464,6 +464,17 @@ export interface OnboardingCredentialInputs {
   cloudApiKey?: string;
 }
 
+export interface OnboardingLlmPersistenceSelection {
+  backend: OnboardingProviderId;
+  transport: "direct" | "remote" | "cloud-proxy";
+  apiKey?: string;
+  primaryModel?: string;
+  smallModel?: string;
+  largeModel?: string;
+  remoteApiBase?: string;
+  remoteAccessToken?: string;
+}
+
 export interface OnboardingData {
   name: string;
   avatarIndex?: number;
@@ -1260,7 +1271,7 @@ export function normalizeOnboardingCredentialInputs(
 }
 
 export interface OnboardingCredentialPersistencePlan {
-  llmConnection: OnboardingConnection | null;
+  llmSelection: OnboardingLlmPersistenceSelection | null;
   cloudApiKey?: string;
 }
 
@@ -1287,9 +1298,9 @@ export function deriveOnboardingCredentialPersistencePlan(args: {
     cloudApiKey
   ) {
     return {
-      llmConnection: {
-        kind: "cloud-managed",
-        cloudProvider: "elizacloud",
+      llmSelection: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
         apiKey: cloudApiKey,
         ...(llmRoute.smallModel ? { smallModel: llmRoute.smallModel } : {}),
         ...(llmRoute.largeModel ? { largeModel: llmRoute.largeModel } : {}),
@@ -1302,9 +1313,9 @@ export function deriveOnboardingCredentialPersistencePlan(args: {
     const provider = normalizeOnboardingProviderId(llmRoute.backend);
     if (provider && provider !== "elizacloud") {
       return {
-        llmConnection: {
-          kind: "local-provider",
-          provider,
+        llmSelection: {
+          backend: provider,
+          transport: "direct",
           apiKey: llmApiKey,
           ...(llmRoute.primaryModel
             ? { primaryModel: llmRoute.primaryModel }
@@ -1321,13 +1332,13 @@ export function deriveOnboardingCredentialPersistencePlan(args: {
       llmRoute.remoteApiBase ?? deploymentTarget?.remoteApiBase;
     if (provider && provider !== "elizacloud" && remoteApiBase) {
       return {
-        llmConnection: {
-          kind: "remote-provider",
+        llmSelection: {
+          backend: provider,
+          transport: "remote",
           remoteApiBase,
           ...(deploymentTarget?.remoteAccessToken
             ? { remoteAccessToken: deploymentTarget.remoteAccessToken }
             : {}),
-          provider,
           apiKey: llmApiKey,
           ...(llmRoute.primaryModel
             ? { primaryModel: llmRoute.primaryModel }
@@ -1339,7 +1350,7 @@ export function deriveOnboardingCredentialPersistencePlan(args: {
   }
 
   return {
-    llmConnection: null,
+    llmSelection: null,
     ...(cloudApiKey ? { cloudApiKey } : {}),
   };
 }

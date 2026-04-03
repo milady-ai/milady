@@ -9,14 +9,12 @@ import {
   getOnboardingProviderOption,
   getOnboardingProviderSignalEnvKeys,
   getStoredOnboardingProviderId,
-  isCloudManagedConnection,
-  isLocalProviderConnection,
-  isRemoteProviderConnection,
   migrateLegacyRuntimeConfig,
   normalizeOnboardingProviderId,
   normalizeOnboardingCredentialInputs,
   type OnboardingCredentialInputs,
   type OnboardingConnection,
+  type OnboardingLlmPersistenceSelection,
   type OnboardingLocalProviderId,
 } from "../contracts/onboarding";
 import type {
@@ -328,9 +326,13 @@ function persistLinkedCloudApiKey(
 
 function applyLocalProviderCapabilities(
   config: MutableElizaConfig,
-  connection: Extract<OnboardingConnection, { kind: "local-provider" }>,
+  selection: {
+    backend: OnboardingLocalProviderId;
+    apiKey?: string;
+    primaryModel?: string;
+  },
 ): Promise<void> {
-  const normalizedProvider = normalizeOnboardingProviderId(connection.provider);
+  const normalizedProvider = normalizeOnboardingProviderId(selection.backend);
   if (!normalizedProvider || normalizedProvider === "elizacloud") {
     return Promise.resolve();
   }
@@ -353,7 +355,7 @@ function applyLocalProviderCapabilities(
 
     const setupToken =
       storedProviderId === "anthropic-subscription"
-        ? trimToUndefined(connection.apiKey)
+        ? trimToUndefined(selection.apiKey)
         : undefined;
 
     if (setupToken?.startsWith("sk-ant-")) {
@@ -370,7 +372,7 @@ function applyLocalProviderCapabilities(
 
   const providerOption = getOnboardingProviderOption(normalizedProvider);
   if (providerOption?.envKey) {
-    const apiKey = trimToUndefined(connection.apiKey);
+    const apiKey = trimToUndefined(selection.apiKey);
     if (apiKey) {
       setEnvValue(config, providerOption.envKey, apiKey);
     }
@@ -378,7 +380,7 @@ function applyLocalProviderCapabilities(
     for (const envKey of getOnboardingProviderSignalEnvKeys(
       normalizedProvider,
     )) {
-      const value = trimToUndefined(connection.apiKey);
+      const value = trimToUndefined(selection.apiKey);
       if (value) {
         setEnvValue(config, envKey, value);
       }
@@ -389,7 +391,7 @@ function applyLocalProviderCapabilities(
   // If the user didn't pick a specific model, resolve from the provider's
   // plugin name so the correct provider wins the TEXT_SMALL/TEXT_LARGE
   // handler registration.
-  const explicitPrimary = trimToUndefined(connection.primaryModel);
+  const explicitPrimary = trimToUndefined(selection.primaryModel);
   const resolvedPrimary =
     explicitPrimary ?? providerOption?.pluginName ?? undefined;
   setPrimaryModel(config, resolvedPrimary);
