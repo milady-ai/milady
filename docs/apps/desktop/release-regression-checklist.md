@@ -1,8 +1,10 @@
-# Electrobun Release Regression Checklist
+---
+title: "Desktop Release Regression Checklist"
+sidebarTitle: "Desktop Regression Checklist"
+description: "Manual desktop release checklist kept in sync with the regression matrix contract."
+---
 
-Use this checklist for the manual desktop behaviors that still require human judgment before an Electrobun release is published. The canonical inventory lives in `test/regression-matrix.json`; this document is the human signoff companion for those manual-only items.
-
-Automated packaged UI validation remains a Windows CI gate via `bun run test:desktop:playwright`. Local macOS validation should use the strict signed smoke gate `bun run test:desktop:packaged` when a Developer ID identity is available, and reserve `bun run test:desktop:packaged:unsigned` for ad-hoc local debugging only; neither path provides Playwright parity.
+Use this checklist for the manual desktop behaviors that still require human verification before release. The source-of-truth inventory lives in `test/regression-matrix.json`; this page mirrors the manual-only descriptions that the repo still expects to track explicitly.
 
 ## Tray Icon And Menu
 
@@ -18,14 +20,16 @@ Automated packaged UI validation remains a Windows CI gate via `bun run test:des
 - Window can be dragged by clicking the header region (visual)
 - Window retains vibrancy when resized (visual)
 
-## Context Menu
-
-- Context menu appears at cursor position (visual)
-- Context menu closes when clicking elsewhere (visual)
-
 ## Permissions And Hardware
 
 - Photo quality is acceptable at default settings (hardware)
 - Requesting accessibility opens System Preferences (OS interaction)
 - Permission status reflects actual system state (OS interaction)
 - Power state reflects actual battery status (hardware)
+
+## Context Menu
+
+- Context menu appears at cursor position (visual)
+- Context menu closes when clicking elsewhere (visual)
+
+When automated coverage lands for any item above, update both this checklist and `test/regression-matrix.json` in the same change.

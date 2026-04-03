@@ -13,6 +13,7 @@ import {
   getConnections,
   removeConnection,
 } from "../lib/connections";
+import { AppRoutes } from "../router";
 
 beforeEach(() => localStorage.clear());
 afterEach(() => {
@@ -120,8 +121,7 @@ describe("Regression: connections store", () => {
 /*  Regression: routing                                                */
 /* ------------------------------------------------------------------ */
 describe("Regression: routing", () => {
-  it("homepage at / renders top section", async () => {
-    const { AppRoutes } = await import("../router");
+  it("homepage at / renders top section", () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <AppRoutes />
@@ -130,9 +130,8 @@ describe("Regression: routing", () => {
     expect(document.querySelector("#top")).toBeTruthy();
   });
 
-  it("dashboard at /dashboard has data-testid", async () => {
+  it("dashboard at /dashboard has data-testid", () => {
     localStorage.setItem("milady-cloud-token", "test-key");
-    const { AppRoutes } = await import("../router");
     render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <AppRoutes />

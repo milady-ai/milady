@@ -7,6 +7,7 @@ export function Nav() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isOnDashboard = location.pathname === "/dashboard";
+  const isOnGuides = location.pathname === "/guides";
 
   return (
     <nav
@@ -45,6 +46,21 @@ export function Nav() {
           >
             DASHBOARD
             {isOnDashboard && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand" />
+            )}
+          </Link>
+
+          <Link
+            to="/guides"
+            className={`relative self-stretch flex items-center px-4 font-mono text-[11px] tracking-wide transition-colors duration-150
+              ${
+                isOnGuides
+                  ? "text-brand"
+                  : "text-text-muted hover:text-text-light"
+              }`}
+          >
+            GUIDES
+            {isOnGuides && (
               <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand" />
             )}
           </Link>
@@ -117,6 +133,18 @@ export function Nav() {
             onClick={() => setMobileOpen(false)}
           >
             DASHBOARD
+          </Link>
+
+          <Link
+            to="/guides"
+            className={`block w-full pr-4 py-3 font-mono text-xs tracking-wide transition-colors ${
+              isOnGuides
+                ? "text-brand pl-[14px] border-l-2 border-brand"
+                : "text-text-muted pl-[14px] border-l-2 border-transparent hover:text-text-light"
+            }`}
+            onClick={() => setMobileOpen(false)}
+          >
+            GUIDES
           </Link>
 
           <div className="pt-3 border-t border-border-subtle">

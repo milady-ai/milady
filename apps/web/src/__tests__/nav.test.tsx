@@ -19,6 +19,7 @@ describe("Nav", () => {
     const { container } = renderNav();
     expect(container.textContent).toContain("MILADY");
     expect(container.textContent).toContain("DASHBOARD");
+    expect(container.textContent).toContain("GUIDES");
     expect(container.textContent).not.toContain("INSTALL");
     expect(container.textContent).not.toContain("PRIVACY");
     expect(container.textContent).not.toContain("FEATURES");
@@ -42,5 +43,15 @@ describe("Nav", () => {
     expect(dashboardLink).toBeTruthy();
     expect(dashboardLink?.getAttribute("href")).toBe("/dashboard");
     expect(dashboardLink?.getAttribute("target")).toBeNull();
+  });
+
+  it("Guides link navigates to /guides (not external)", () => {
+    const { container } = renderNav(["/dashboard"]);
+    const guidesLink = Array.from(container.querySelectorAll("a")).find(
+      (a) => a.textContent?.trim() === "GUIDES",
+    );
+    expect(guidesLink).toBeTruthy();
+    expect(guidesLink?.getAttribute("href")).toBe("/guides");
+    expect(guidesLink?.getAttribute("target")).toBeNull();
   });
 });
