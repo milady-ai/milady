@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  loadPersistedActiveServer,
+  loadPersistedConnectionMode,
+} from "../state/persistence";
 
 const { fetchMock, mockClient } = vi.hoisted(() => ({
   fetchMock: vi.fn(),
@@ -66,6 +70,18 @@ describe("applyLaunchConnectionFromUrl", () => {
       "https://agent-123.containers.elizacloud.ai",
     );
     expect(mockClient.setToken).toHaveBeenCalledWith("managed-backend-token");
+    expect(loadPersistedActiveServer()).toEqual({
+      id: "cloud:https://agent-123.containers.elizacloud.ai",
+      kind: "cloud",
+      label: "Eliza Cloud",
+      apiBase: "https://agent-123.containers.elizacloud.ai",
+      accessToken: "managed-backend-token",
+    });
+    expect(loadPersistedConnectionMode()).toEqual({
+      runMode: "cloud",
+      cloudApiBase: "https://agent-123.containers.elizacloud.ai",
+      cloudAuthToken: "managed-backend-token",
+    });
     expect(window.location.search).toBe("");
   });
 
@@ -115,6 +131,18 @@ describe("applyLaunchConnectionFromUrl", () => {
       "https://agent-legacy.containers.elizacloud.ai",
     );
     expect(mockClient.setToken).toHaveBeenCalledWith("legacy-token");
+    expect(loadPersistedActiveServer()).toEqual({
+      id: "cloud:https://agent-legacy.containers.elizacloud.ai",
+      kind: "cloud",
+      label: "Eliza Cloud",
+      apiBase: "https://agent-legacy.containers.elizacloud.ai",
+      accessToken: "legacy-token",
+    });
+    expect(loadPersistedConnectionMode()).toEqual({
+      runMode: "cloud",
+      cloudApiBase: "https://agent-legacy.containers.elizacloud.ai",
+      cloudAuthToken: "legacy-token",
+    });
   });
 
   it("falls back to direct launch params and strips them after applying", async () => {
@@ -129,6 +157,18 @@ describe("applyLaunchConnectionFromUrl", () => {
       "https://agent-456.containers.elizacloud.ai",
     );
     expect(mockClient.setToken).toHaveBeenCalledWith("backend-token");
+    expect(loadPersistedActiveServer()).toEqual({
+      id: "remote:https://agent-456.containers.elizacloud.ai",
+      kind: "remote",
+      label: "agent-456.containers.elizacloud.ai",
+      apiBase: "https://agent-456.containers.elizacloud.ai",
+      accessToken: "backend-token",
+    });
+    expect(loadPersistedConnectionMode()).toEqual({
+      runMode: "remote",
+      remoteApiBase: "https://agent-456.containers.elizacloud.ai",
+      remoteAccessToken: "backend-token",
+    });
     expect(window.location.search).toBe("");
   });
 

@@ -100,19 +100,64 @@ export const DEFAULT_BOOT_CONFIG: AppBootConfig = {
 };
 
 // ---------------------------------------------------------------------------
-// Module-level config ref (for non-React code like client.ts, asset-url.ts)
+// Process-global config ref (for non-React code like client.ts, asset-url.ts)
+// Use a Symbol-backed slot on globalThis so duplicated module instances
+// still read/write the same live boot config.
 // ---------------------------------------------------------------------------
 
-let _bootConfig: AppBootConfig = DEFAULT_BOOT_CONFIG;
+const BOOT_CONFIG_STORE_KEY = Symbol.for("milady.app.boot-config");
+const BOOT_CONFIG_WINDOW_KEY = "__MILADY_APP_BOOT_CONFIG__";
+
+interface BootConfigStore {
+  current: AppBootConfig;
+}
+
+function getBootConfigStore(): BootConfigStore {
+  const globalObject = (
+    typeof window !== "undefined"
+      ? (window as unknown as Record<PropertyKey, unknown>)
+      : (globalThis as Record<PropertyKey, unknown>)
+  ) as Record<PropertyKey, unknown> & {
+    [BOOT_CONFIG_WINDOW_KEY]?: AppBootConfig;
+  };
+  const mirroredWindowConfig = globalObject[BOOT_CONFIG_WINDOW_KEY];
+  if (mirroredWindowConfig) {
+    const mirroredStore: BootConfigStore = { current: mirroredWindowConfig };
+    globalObject[BOOT_CONFIG_STORE_KEY] = mirroredStore;
+    return mirroredStore;
+  }
+  const existing = globalObject[BOOT_CONFIG_STORE_KEY];
+  if (
+    existing &&
+    typeof existing === "object" &&
+    "current" in (existing as Record<string, unknown>)
+  ) {
+    return existing as BootConfigStore;
+  }
+
+  const store: BootConfigStore = { current: DEFAULT_BOOT_CONFIG };
+  globalObject[BOOT_CONFIG_STORE_KEY] = store;
+  globalObject[BOOT_CONFIG_WINDOW_KEY] = store.current;
+  return store;
+}
 
 /** Set the boot config. Called by AppBootProvider on mount. */
 export function setBootConfig(config: AppBootConfig): void {
-  _bootConfig = config;
+  const store = getBootConfigStore();
+  store.current = config;
+  const globalObject = (
+    typeof window !== "undefined"
+      ? (window as unknown as Record<PropertyKey, unknown>)
+      : (globalThis as Record<PropertyKey, unknown>)
+  ) as Record<PropertyKey, unknown> & {
+    [BOOT_CONFIG_WINDOW_KEY]?: AppBootConfig;
+  };
+  globalObject[BOOT_CONFIG_WINDOW_KEY] = config;
 }
 
 /** Read the boot config from non-React code. */
 export function getBootConfig(): AppBootConfig {
-  return _bootConfig;
+  return getBootConfigStore().current;
 }
 
 // ---------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import type { TrajectoryExportFormat } from "./client-types-core";
 export interface CloudStatus {
   connected: boolean;
   enabled?: boolean;
+  cloudVoiceProxyAvailable?: boolean;
   hasApiKey?: boolean;
   userId?: string;
   organizationId?: string;

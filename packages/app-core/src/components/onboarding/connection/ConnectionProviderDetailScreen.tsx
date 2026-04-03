@@ -170,6 +170,7 @@ export function ConnectionProviderDetailScreen({
     onboardingOptions,
     onboardingProvider,
     onboardingSubscriptionTab,
+    onboardingCloudApiKey,
     onboardingApiKey,
     onboardingPrimaryModel,
     onboardingElizaCloudTab,
@@ -280,6 +281,10 @@ export function ConnectionProviderDetailScreen({
     const newKey = e.target.value;
     setState("onboardingApiKey", newKey);
     setApiKeyFormatWarning(validateApiKeyFormat(newKey, onboardingProvider));
+  };
+
+  const handleElizaCloudApiKeyChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setState("onboardingCloudApiKey", e.target.value);
   };
 
   const handleOpenRouterModelSelect = (modelId: string) => {
@@ -396,7 +401,10 @@ export function ConnectionProviderDetailScreen({
 
   const isConfirmDisabled = isProviderConfirmDisabled({
     provider: onboardingProvider,
-    apiKey: onboardingApiKey,
+    apiKey:
+      onboardingProvider === "elizacloud"
+        ? onboardingCloudApiKey
+        : onboardingApiKey,
     elizaCloudTab: onboardingElizaCloudTab,
     elizaCloudConnected,
     subscriptionTab: onboardingSubscriptionTab,
@@ -623,8 +631,8 @@ export function ConnectionProviderDetailScreen({
                       aria-invalid={invalid}
                       className={onboardingInputClassName}
                       placeholder="ec-..."
-                      value={onboardingApiKey}
-                      onChange={handleApiKeyChange}
+                      value={onboardingCloudApiKey}
+                      onChange={handleElizaCloudApiKeyChange}
                     />
                   )}
                 </OnboardingField>
@@ -1044,6 +1052,19 @@ export function ConnectionProviderDetailScreen({
           type="button"
         >
           {t("onboarding.back")}
+        </Button>
+        <Button
+          variant="ghost"
+          className={onboardingSecondaryActionClass}
+          style={onboardingSecondaryActionTextShadowStyle}
+          onClick={() => {
+            void handleOnboardingNext();
+          }}
+          type="button"
+        >
+          {t("onboarding.configureAiLater", {
+            defaultValue: "Set up later",
+          })}
         </Button>
         <Button
           className={onboardingPrimaryActionClass}

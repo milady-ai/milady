@@ -12,7 +12,9 @@ Connectez votre agent à Bluesky pour les publications sociales et l'engagement 
 
 </div>
 
-Le connecteur Bluesky est un plugin elizaOS qui relie votre agent à Bluesky via le Protocole AT. Il prend en charge la publication automatisée, la surveillance des mentions et la gestion des réponses. Ce connecteur est disponible dans le registre de plugins.
+Le connecteur Bluesky est un plugin elizaOS qui relie votre agent à Bluesky via le Protocole AT. Il prend en charge la publication automatisée, la surveillance des mentions et la gestion des réponses.
+
+Contrairement aux 19 connecteurs auto-activés (Discord, Telegram, etc.), Bluesky est un **plugin de registre** qui doit être installé manuellement avant utilisation. Il ne s'active pas automatiquement à partir de la seule configuration du connecteur.
 
 <div id="package-info">
 

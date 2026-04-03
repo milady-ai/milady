@@ -6,8 +6,7 @@ const keys = [
   "ELIZA_DISABLE_LOCAL_EMBEDDINGS",
   "MILADY_CLOUD_EMBEDDINGS_DISABLED",
   "ELIZA_CLOUD_EMBEDDINGS_DISABLED",
-  "ELIZAOS_CLOUD_ENABLED",
-  "ELIZAOS_CLOUD_API_KEY",
+  "ELIZAOS_CLOUD_USE_EMBEDDINGS",
 ] as const;
 
 describe("shouldWarmupLocalEmbeddingModel", () => {
@@ -24,18 +23,22 @@ describe("shouldWarmupLocalEmbeddingModel", () => {
 
   it("returns true when cloud embeddings are disabled (must use local)", () => {
     process.env.MILADY_CLOUD_EMBEDDINGS_DISABLED = "1";
-    process.env.ELIZAOS_CLOUD_ENABLED = "true";
+    process.env.ELIZAOS_CLOUD_USE_EMBEDDINGS = "true";
     expect(shouldWarmupLocalEmbeddingModel()).toBe(true);
   });
 
   it("returns false when Eliza Cloud is enabled and cloud embeddings stay on", () => {
-    process.env.ELIZAOS_CLOUD_ENABLED = "true";
+    process.env.ELIZAOS_CLOUD_USE_EMBEDDINGS = "true";
     expect(shouldWarmupLocalEmbeddingModel()).toBe(false);
   });
 
-  it("returns false when a cloud API key is present and embeddings not forced local", () => {
+  it("does not skip warmup just because a cloud account is linked", () => {
     process.env.ELIZAOS_CLOUD_API_KEY = "ck-test";
-    expect(shouldWarmupLocalEmbeddingModel()).toBe(false);
+    try {
+      expect(shouldWarmupLocalEmbeddingModel()).toBe(true);
+    } finally {
+      delete process.env.ELIZAOS_CLOUD_API_KEY;
+    }
   });
 
   it("returns true when no cloud and local embeddings allowed (BYOK / local inference)", () => {

@@ -28,6 +28,7 @@ import {
   startApiServer as upstreamStartApiServer,
   validateMcpServerConfig,
 } from "@miladyai/agent/api/server";
+import { resolveLinkedAccountsInConfig } from "@miladyai/shared/contracts/onboarding";
 import type { PolicyResult } from "@stwd/sdk";
 import {
   ensureCompatApiAuthorized,
@@ -615,10 +616,8 @@ export function isAllowedLocalOrigin(
 }
 
 /**
- * Load config from disk and backfill cloud.apiKey from sealed secrets
- * if it's missing. This handles the case where the API key was persisted
- * to the sealed secret store (via login) but a subsequent config save
- * (e.g. onboarding) overwrote the file without the key.
+ * Load config from disk and backfill `cloud.apiKey` from sealed secrets when the
+ * user is still linked to Eliza Cloud but a stale write dropped the key.
  */
 function resolveCloudConfig(runtime?: unknown): ElizaConfig {
   const config = loadElizaConfig();
@@ -635,13 +634,15 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
         .join(",")}`,
     );
   }
-  if (cloudRec?.enabled === false) {
-    // Respect explicit disconnect / BYOK: never backfill cloud.apiKey from env
-    // or agent secrets into the file with enabled=true. WHY: that undoes
-    // Settings → disconnect + OpenRouter and breaks the next cold start.
+  const linkedAccounts = resolveLinkedAccountsInConfig(
+    config as Record<string, unknown>,
+  );
+  if (linkedAccounts?.elizacloud?.status === "unlinked") {
+    // Respect explicit disconnect: never backfill a cloud key into config once
+    // the canonical linked-account state says the account is disconnected.
     if (isMiladySettingsDebugEnabled()) {
       logger.debug(
-        "[milady][settings][compat] resolveCloudConfig skip backfill (cloud.enabled===false)",
+        "[milady][settings][compat] resolveCloudConfig skip backfill (linkedAccounts.elizacloud.status===unlinked)",
       );
     }
     return config;
@@ -663,7 +664,6 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
         (config as Record<string, unknown>).cloud = {};
       }
       (config.cloud as Record<string, unknown>).apiKey = backfillKey;
-      (config.cloud as Record<string, unknown>).enabled = true;
       // Persist the backfilled key so future reads find it on disk
       try {
         saveElizaConfig(config);

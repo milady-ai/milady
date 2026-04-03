@@ -33,10 +33,8 @@ export function ConnectionElizaCloudPreProviderScreen({
   const branding = useBranding();
   const {
     t,
-    onboardingApiKey,
+    onboardingCloudApiKey,
     onboardingElizaCloudTab,
-    onboardingRunMode,
-    onboardingCloudProvider,
     elizaCloudConnected,
     elizaCloudLoginBusy,
     elizaCloudLoginError,
@@ -46,10 +44,7 @@ export function ConnectionElizaCloudPreProviderScreen({
   } = useApp();
 
   const elizaCloudReady =
-    elizaCloudConnected ||
-    (onboardingRunMode === "cloud" &&
-      onboardingCloudProvider === "elizacloud" &&
-      onboardingApiKey.trim().length > 0);
+    elizaCloudConnected || onboardingCloudApiKey.trim().length > 0;
 
   useAdvanceOnboardingWhenElizaCloudOAuthConnected({
     active: true,
@@ -59,7 +54,7 @@ export function ConnectionElizaCloudPreProviderScreen({
   });
 
   const handleApiKeyChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setState("onboardingApiKey", e.target.value);
+    setState("onboardingCloudApiKey", e.target.value);
   };
 
   return (
@@ -183,7 +178,7 @@ export function ConnectionElizaCloudPreProviderScreen({
                   aria-invalid={invalid}
                   className={`${onboardingInputClassName} text-center`}
                   placeholder="ck-..."
-                  value={onboardingApiKey}
+                  value={onboardingCloudApiKey}
                   onChange={handleApiKeyChange}
                 />
               )}

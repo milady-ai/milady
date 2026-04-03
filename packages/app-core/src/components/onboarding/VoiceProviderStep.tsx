@@ -39,12 +39,15 @@ function ConnectedIcon({ title }: { title: string }) {
 export function VoiceProviderStep() {
   const {
     elizaCloudConnected,
+    onboardingCloudApiKey,
     onboardingVoiceApiKey,
     setState,
     handleOnboardingNext,
     handleOnboardingBack,
     t,
   } = useApp();
+  const cloudVoiceReady =
+    elizaCloudConnected || onboardingCloudApiKey.trim().length > 0;
 
   return (
     <>
@@ -55,7 +58,7 @@ export function VoiceProviderStep() {
       />
 
       <div className={onboardingDetailStackClassName}>
-        {elizaCloudConnected ? (
+        {cloudVoiceReady ? (
           <div className={onboardingCenteredStackClassName}>
             <OnboardingStatusBanner tone="success">
               <ConnectedIcon title={t("onboarding.connected")} />
@@ -116,7 +119,7 @@ export function VoiceProviderStep() {
           }}
           type="button"
         >
-          {elizaCloudConnected || onboardingVoiceApiKey
+          {cloudVoiceReady || onboardingVoiceApiKey
             ? t("onboarding.next")
             : t("onboarding.skip")}
         </Button>

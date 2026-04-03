@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { migrateLegacyRuntimeConfig } from "@miladyai/shared/contracts";
 import {
   deriveOnboardingResumeConnection,
   deriveOnboardingResumeFields,
@@ -19,7 +20,14 @@ describe("hasPartialOnboardingConnectionConfig", () => {
       name: "returns false when no provider selection signals exist",
     },
     {
-      config: { cloud: { enabled: true } },
+      config: {
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+          },
+        },
+      },
       expected: true,
       name: "returns true when cloud inference is enabled",
     },
@@ -35,8 +43,8 @@ describe("hasPartialOnboardingConnectionConfig", () => {
     },
     {
       config: { cloud: { apiKey: "sk-test" } },
-      expected: false,
-      name: "does not treat cloud api key capability alone as active selection",
+      expected: true,
+      name: "treats a linked cloud account as partial onboarding progress",
     },
   ])("$name", ({ config, expected }) => {
     expect(
@@ -68,6 +76,18 @@ describe("inferOnboardingResumeStep", () => {
       }),
     ).toBe("providers");
   });
+
+  it("resumes at hosting when partial routing config already exists", () => {
+    expect(
+      inferOnboardingResumeStep({
+        config: {
+          linkedAccounts: {
+            elizacloud: { status: "linked", source: "api-key" },
+          },
+        },
+      }),
+    ).toBe("hosting");
+  });
 });
 
 describe("deriveOnboardingResumeConnection", () => {
@@ -98,20 +118,20 @@ describe("deriveOnboardingResumeConnection", () => {
   });
 
   it("reconstructs an eliza cloud connection from compatibility config", () => {
-    expect(
-      deriveOnboardingResumeConnection({
-        cloud: { enabled: true, apiKey: "[REDACTED]" },
-        models: {
-          small: "minimax/minimax-m2.7",
-          large: "anthropic/claude-sonnet-4.6",
-        },
-      }),
-    ).toEqual({
+    const migrated = migrateLegacyRuntimeConfig({
+      cloud: { enabled: true, apiKey: "[REDACTED]" },
+      models: {
+        small: "openai/gpt-5-mini",
+        large: "anthropic/claude-sonnet-4.5",
+      },
+    });
+
+    expect(deriveOnboardingResumeConnection(migrated)).toEqual({
       kind: "cloud-managed",
       cloudProvider: "elizacloud",
       apiKey: undefined,
-      smallModel: "minimax/minimax-m2.7",
-      largeModel: "anthropic/claude-sonnet-4.6",
+      smallModel: "openai/gpt-5-mini",
+      largeModel: "anthropic/claude-sonnet-4.5",
     });
   });
 
@@ -175,6 +195,32 @@ describe("deriveOnboardingResumeConnection", () => {
 });
 
 describe("deriveOnboardingResumeFields", () => {
+  it("maps a cloud-managed connection back into the dedicated cloud api key field", () => {
+    expect(
+      deriveOnboardingResumeFields({
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        apiKey: "ck-cloud-test",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      }),
+    ).toEqual({
+      onboardingRunMode: "cloud",
+      onboardingCloudProvider: "elizacloud",
+      onboardingCloudApiKey: "ck-cloud-test",
+      onboardingVoiceProvider: "",
+      onboardingVoiceApiKey: "",
+      onboardingSmallModel: "openai/gpt-5-mini",
+      onboardingLargeModel: "anthropic/claude-sonnet-4.5",
+      onboardingRemoteConnected: false,
+      onboardingRemoteApiBase: "",
+      onboardingRemoteToken: "",
+      onboardingProvider: "",
+      onboardingPrimaryModel: "",
+      onboardingOpenRouterModel: "",
+    });
+  });
+
   it("maps an openrouter connection back into onboarding state", () => {
     expect(
       deriveOnboardingResumeFields({

@@ -1,109 +1,179 @@
 // @vitest-environment jsdom
 
-import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getOnboardingStatusMock, useAppMock } = vi.hoisted(() => ({
-  getOnboardingStatusMock: vi.fn(),
-  useAppMock: vi.fn(),
+const {
+  clientSetBaseUrlMock,
+  clientSetTokenMock,
+  clearPersistedConnectionModeMock,
+  discoverGatewayEndpointsMock,
+  mockUseApp,
+  savePersistedActiveServerMock,
+} = vi.hoisted(() => ({
+  clientSetBaseUrlMock: vi.fn(),
+  clientSetTokenMock: vi.fn(),
+  clearPersistedConnectionModeMock: vi.fn(),
+  discoverGatewayEndpointsMock: vi.fn(),
+  mockUseApp: vi.fn(),
+  savePersistedActiveServerMock: vi.fn(),
 }));
 
 vi.mock("../../api", () => ({
   client: {
-    getOnboardingStatus: getOnboardingStatusMock,
+    setBaseUrl: clientSetBaseUrlMock,
+    setToken: clientSetTokenMock,
   },
 }));
 
 vi.mock("../../state", () => ({
-  useApp: useAppMock,
+  clearPersistedConnectionMode: clearPersistedConnectionModeMock,
+  savePersistedActiveServer: savePersistedActiveServerMock,
+  useApp: () => mockUseApp(),
 }));
 
-vi.mock("../onboarding/OnboardingWizard", () => ({
-  OnboardingWizard: () => React.createElement("div", { "data-testid": "OnboardingWizard" }),
-}));
-
-vi.mock("./PairingView", () => ({
-  PairingView: () => React.createElement("div", { "data-testid": "PairingView" }),
-}));
-
-vi.mock("./StartupFailureView", () => ({
-  StartupFailureView: () =>
-    React.createElement("div", { "data-testid": "StartupFailureView" }),
+vi.mock("../../bridge/gateway-discovery", () => ({
+  discoverGatewayEndpoints: discoverGatewayEndpointsMock,
+  gatewayEndpointToApiBase: (gateway: {
+    host: string;
+    gatewayPort?: number;
+    port: number;
+    tlsEnabled: boolean;
+  }) =>
+    `${gateway.tlsEnabled ? "https" : "http"}://${gateway.host}:${gateway.gatewayPort ?? gateway.port}`,
 }));
 
 import { StartupShell } from "./StartupShell";
 
 describe("StartupShell", () => {
   beforeEach(() => {
-    getOnboardingStatusMock.mockReset();
-    useAppMock.mockReset();
+    clientSetBaseUrlMock.mockReset();
+    clientSetTokenMock.mockReset();
+    clearPersistedConnectionModeMock.mockReset();
+    discoverGatewayEndpointsMock.mockReset();
+    savePersistedActiveServerMock.mockReset();
+    discoverGatewayEndpointsMock.mockResolvedValue([]);
   });
 
-  it("skips onboarding when the fallback server check reports a cloud-provisioned container", async () => {
+  function mockSplashApp(overrides?: Record<string, unknown>) {
     const dispatch = vi.fn();
+    const goToOnboardingStep = vi.fn();
     const setState = vi.fn();
-
-    getOnboardingStatusMock.mockResolvedValue({
-      complete: true,
-      cloudProvisioned: true,
-    });
-    useAppMock.mockReturnValue({
+    mockUseApp.mockReturnValue({
       startupCoordinator: {
-        phase: "onboarding-required",
-        state: {
-          phase: "onboarding-required",
-          serverReachable: false,
-        },
+        phase: "splash",
+        state: { phase: "splash", loaded: true },
         dispatch,
       },
       startupError: null,
       retryStartup: vi.fn(),
       setState,
-      t: (key: string, options?: { defaultValue?: string }) =>
-        options?.defaultValue ?? key,
+      goToOnboardingStep,
+      elizaCloudConnected: false,
+      onboardingCloudApiKey: "",
+      t: (_key: string, values?: Record<string, unknown>) =>
+        (values?.defaultValue as string | undefined) ?? _key,
+      ...overrides,
     });
+    return { dispatch, goToOnboardingStep, setState };
+  }
 
-    let renderer: TestRenderer.ReactTestRenderer | undefined;
+  it("renders chooser actions and discovered gateways on splash", async () => {
+    mockSplashApp();
+    discoverGatewayEndpointsMock.mockResolvedValue([
+      {
+        stableId: "ren",
+        name: "Ren",
+        host: "10.0.0.2",
+        port: 18789,
+        tlsEnabled: false,
+        isLocal: true,
+      },
+    ]);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
-      renderer = TestRenderer.create(React.createElement(StartupShell));
-      await Promise.resolve();
+      tree = TestRenderer.create(<StartupShell />);
     });
+    await act(async () => {});
 
-    if (!renderer) {
-      throw new Error("StartupShell did not render");
-    }
-
-    expect(
-      renderer.root.findByProps({ "data-testid": "OnboardingWizard" }),
-    ).toBeTruthy();
-    expect(getOnboardingStatusMock).toHaveBeenCalledTimes(1);
-    expect(setState).toHaveBeenCalledWith("onboardingComplete", true);
-    expect(dispatch).toHaveBeenCalledWith({ type: "ONBOARDING_COMPLETE" });
+    const snapshot = JSON.stringify(tree?.toJSON());
+    expect(snapshot).toContain("Create one");
+    expect(snapshot).toContain("Manually connect to one");
+    expect(snapshot).toContain("Ren");
   });
 
-  it("does not re-check the server when onboarding is already server-backed", async () => {
-    useAppMock.mockReturnValue({
-      startupCoordinator: {
-        phase: "onboarding-required",
-        state: {
-          phase: "onboarding-required",
-          serverReachable: true,
-        },
-        dispatch: vi.fn(),
-      },
-      startupError: null,
-      retryStartup: vi.fn(),
-      setState: vi.fn(),
-      t: (key: string, options?: { defaultValue?: string }) =>
-        options?.defaultValue ?? key,
+  it("seeds local onboarding when create one is clicked", async () => {
+    const { dispatch, goToOnboardingStep, setState } = mockSplashApp();
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<StartupShell />);
     });
+    await act(async () => {});
+
+    const buttons =
+      tree?.root.findAll(
+        (node) =>
+          node.type === "button" && typeof node.props.onClick === "function",
+      ) ?? [];
+    const createButton = buttons[0];
 
     await act(async () => {
-      TestRenderer.create(React.createElement(StartupShell));
-      await Promise.resolve();
+      createButton?.props.onClick();
     });
 
-    expect(getOnboardingStatusMock).not.toHaveBeenCalled();
+    expect(clientSetTokenMock).toHaveBeenCalledWith(null);
+    expect(clientSetBaseUrlMock).toHaveBeenCalledWith(null);
+    expect(clearPersistedConnectionModeMock).toHaveBeenCalledTimes(1);
+    expect(savePersistedActiveServerMock).not.toHaveBeenCalled();
+    expect(goToOnboardingStep).toHaveBeenCalledWith("identity");
+    expect(setState).toHaveBeenCalledWith("onboardingRunMode", "local");
+    expect(setState).toHaveBeenCalledWith("onboardingRemoteApiBase", "");
+    expect(dispatch).toHaveBeenCalledWith({ type: "SPLASH_CONTINUE" });
+  });
+
+  it("seeds a discovered gateway through the remote onboarding path", async () => {
+    const { dispatch, goToOnboardingStep, setState } = mockSplashApp();
+    discoverGatewayEndpointsMock.mockResolvedValue([
+      {
+        stableId: "kei",
+        name: "Kei",
+        host: "kei.local",
+        port: 18789,
+        tlsEnabled: false,
+        isLocal: true,
+      },
+    ]);
+
+    let tree: TestRenderer.ReactTestRenderer | undefined;
+    await act(async () => {
+      tree = TestRenderer.create(<StartupShell />);
+    });
+    await act(async () => {});
+
+    const buttons =
+      tree?.root.findAll(
+        (node) =>
+          node.type === "button" && typeof node.props.onClick === "function",
+      ) ?? [];
+    const connectButton = buttons[0];
+
+    await act(async () => {
+      connectButton?.props.onClick();
+    });
+
+    expect(clientSetTokenMock).toHaveBeenCalledWith(null);
+    expect(clientSetBaseUrlMock).toHaveBeenCalledWith(null);
+    expect(clearPersistedConnectionModeMock).not.toHaveBeenCalled();
+    expect(savePersistedActiveServerMock).toHaveBeenCalledWith({
+      id: "remote:kei",
+      kind: "remote",
+      label: "Kei",
+      apiBase: "http://kei.local:18789",
+    });
+    expect(goToOnboardingStep).not.toHaveBeenCalled();
+    expect(setState).not.toHaveBeenCalledWith("onboardingRunMode", "cloud");
+    expect(dispatch).toHaveBeenCalledWith({ type: "SPLASH_CONTINUE" });
   });
 });

@@ -7,6 +7,7 @@
  */
 import type http from "node:http";
 import { sanitizeSpeechText } from "@miladyai/agent";
+import { isElizaCloudServiceSelectedInConfig } from "@miladyai/shared/contracts";
 import { loadElizaConfig } from "../config/config";
 import {
   miladyTtsDebug,
@@ -311,13 +312,25 @@ export function resolveElevenLabsApiKeyForCloudMode(
   if (directKey) {
     return directKey;
   }
-  if (env.ELIZAOS_CLOUD_ENABLED !== "true") {
+  let configWantsCloudTts = false;
+  try {
+    configWantsCloudTts = isElizaCloudServiceSelectedInConfig(
+      loadElizaConfig() as Record<string, unknown>,
+      "tts",
+    );
+  } catch {
+    configWantsCloudTts = false;
+  }
+  const cloudTtsEnabled =
+    env.ELIZAOS_CLOUD_USE_TTS === "true" ||
+    (env.ELIZAOS_CLOUD_USE_TTS === undefined && configWantsCloudTts);
+  if (!cloudTtsEnabled) {
     return null;
   }
   if (env.ELIZA_CLOUD_TTS_DISABLED === "true") {
     return null;
   }
-  return normalizeSecretEnvValue(env.ELIZAOS_CLOUD_API_KEY);
+  return resolveCloudApiKey(env);
 }
 
 export function ensureCloudTtsApiKeyAlias(

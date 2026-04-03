@@ -90,6 +90,30 @@ describe("MiladyClient runtime API base/token fallback", () => {
     expect(client.getRestAuthToken()).toBe("rotated-token");
   });
 
+  it("prefers boot config over stale session storage when there is no injected base", async () => {
+    const { setBootConfig, DEFAULT_BOOT_CONFIG } = await import(
+      "../config/boot-config"
+    );
+    const { MiladyClient } = await import("./client");
+
+    const mockWindow = globalThis.window as MockWindow & {
+      sessionStorage: Storage;
+    };
+    delete mockWindow.__MILADY_API_BASE__;
+    setBootConfig({
+      ...DEFAULT_BOOT_CONFIG,
+      apiBase: "http://127.0.0.1:2138",
+    });
+    mockWindow.sessionStorage.setItem(
+      "milady_api_base",
+      "https://ren.example.com",
+    );
+
+    const client = new MiladyClient();
+
+    expect(client.getBaseUrl()).toBe("http://127.0.0.1:2138");
+  });
+
   it("keeps auth tokens in memory instead of sessionStorage", async () => {
     const { setBootConfig, DEFAULT_BOOT_CONFIG, getBootConfig } = await import(
       "../config/boot-config"

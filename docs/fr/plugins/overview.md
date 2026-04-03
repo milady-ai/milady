@@ -44,7 +44,7 @@ Un plugin est un module autonome qui enregistre un ou plusieurs des éléments s
 </Card>
 
 <Card title="Plugins de fonctionnalités" icon="wand-magic-sparkles" href="/fr/plugin-registry/browser">
-  Capacités étendues — contrôle du navigateur, génération d'images, synthèse vocale, reconnaissance vocale, utilisation d'ordinateur, planification cron, vision, shell, webhooks, génération de médias FAL, musique Suno, diagnostics OpenTelemetry, paiements x402 et plus encore.
+  Capacités étendues — contrôle du navigateur, génération d'images, synthèse vocale, reconnaissance vocale, utilisation d'ordinateur, planification cron, vision, shell, webhooks, génération de médias FAL, musique Suno, diagnostics OpenTelemetry, paiements x402, synchronisation de coffres Obsidian, Gmail Watch, réglage de personnalité, suivi d'expérience, compétences d'agent, atelier Claude Code, RepoPrompt et plus encore.
 </Card>
 
 </CardGroup>
@@ -59,8 +59,8 @@ Les plugins sont chargés lors de l'initialisation du runtime dans cet ordre :
 
 1. **Plugin Milady** — Le plugin passerelle (`createMiladyPlugin()`) fournissant le contexte du workspace, les clés de session, les emotes, les actions personnalisées et les actions de cycle de vie. Toujours en première position dans le tableau de plugins.
 2. **Plugins pré-enregistrés** — `@elizaos/plugin-sql` et `@elizaos/plugin-local-embedding` sont pré-enregistrés avant `runtime.initialize()` pour éviter les conditions de concurrence.
-3. **Plugins principaux** — Toujours chargés : `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (voir `packages/agent/src/runtime/core-plugins.ts`). Des plugins supplémentaires comme `pdf`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts` et `elevenlabs` sont optionnels et chargés lorsque leurs feature flags ou variables d'environnement sont configurés.
-4. **Plugins auto-activés** — Les plugins de connecteurs, fournisseurs, fonctionnalités et streaming sont auto-activés en fonction de la configuration et des variables d'environnement (voir [Architecture](/fr/plugins/architecture) pour les cartes complètes).
+3. **Plugins principaux** — Toujours chargés : `sql`, `local-embedding`, `form`, `knowledge`, `trajectory-logger`, `agent-orchestrator`, `cron`, `shell`, `agent-skills` (voir `packages/agent/src/runtime/core-plugins.ts`). Des plugins supplémentaires comme `pdf`, `cua`, `browser`, `computeruse`, `obsidian`, `code`, `repoprompt`, `claude-code-workbench`, `vision`, `cli`, `edge-tts`, `elevenlabs`, `discord`, `telegram` et `twitch` sont optionnels et chargés lorsque leurs feature flags ou variables d'environnement sont configurés.
+4. **Plugins auto-activés** — Les plugins de connecteurs, fournisseurs, fonctionnalités, streaming, abonnement, hooks (webhooks + Gmail Watch) et génération de médias sont auto-activés en fonction de la configuration et des variables d'environnement (voir [Architecture](/fr/plugins/architecture) pour les cartes complètes).
 5. **Plugins éjectés** — Surcharges locales découvertes depuis `~/.milady/plugins/ejected/`. Lorsqu'une copie éjectée existe, elle a la priorité sur la version publiée sur npm.
 6. **Plugins installés par l'utilisateur** — Suivis dans `plugins.installs` dans `milady.json`. Collectés avant les plugins drop-in ; tout nom de plugin déjà présent ici a la priorité.
 7. **Plugins personnalisés/drop-in** — Scannés depuis `~/.milady/plugins/custom/` et tout chemin supplémentaire dans `plugins.load.paths`. Les plugins dont les noms existent déjà dans `plugins.installs` sont ignorés (règle de priorité de `mergeDropInPlugins`).

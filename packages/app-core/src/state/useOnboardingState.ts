@@ -8,7 +8,15 @@
 
 import { useCallback, useReducer, useRef } from "react";
 import type { OnboardingOptions } from "../api";
-import { loadPersistedOnboardingStep, saveOnboardingStep } from "./persistence";
+import {
+  activeServerKindToOnboardingServerTarget,
+  buildOnboardingServerSelection,
+} from "../onboarding/server-target";
+import {
+  loadPersistedActiveServer,
+  loadPersistedOnboardingStep,
+  saveOnboardingStep,
+} from "./persistence";
 import type { AppState, OnboardingStep } from "./types";
 
 // ── Connector token keys ───────────────────────────────────────────────
@@ -50,6 +58,7 @@ export interface OnboardingState {
   // Hosting
   runMode: "local" | "cloud" | "";
   cloudProvider: string;
+  cloudApiKey: string;
 
   // Provider
   provider: string;
@@ -85,11 +94,6 @@ export interface OnboardingState {
   cloudProvisionedContainer: boolean;
 }
 
-function loadSessionApiBase(): string {
-  if (typeof window === "undefined") return "";
-  return window.sessionStorage.getItem("milady_api_base")?.trim() ?? "";
-}
-
 function isRemoteApiBase(baseUrl: string): boolean {
   if (!baseUrl || typeof window === "undefined") return false;
   try {
@@ -117,8 +121,74 @@ const EMPTY_TOKENS: Record<ConnectorTokenKey, string> = {
   githubToken: "",
 };
 
+function loadInitialServerSelection(): Pick<
+  OnboardingState,
+  "runMode" | "cloudProvider" | "remote" | "remoteApiBase" | "remoteToken"
+> {
+  const activeServer = loadPersistedActiveServer();
+  if (!activeServer) {
+    return {
+      runMode: "",
+      cloudProvider: "",
+      remote: {
+        status: "idle",
+        error: null,
+      },
+      remoteApiBase: "",
+      remoteToken: "",
+    };
+  }
+
+  if (activeServer.kind === "local") {
+    const selection = buildOnboardingServerSelection(
+      activeServerKindToOnboardingServerTarget(activeServer.kind),
+    );
+    return {
+      runMode: selection.runMode,
+      cloudProvider: selection.cloudProvider,
+      remote: {
+        status: "idle",
+        error: null,
+      },
+      remoteApiBase: "",
+      remoteToken: "",
+    };
+  }
+
+  if (activeServer.kind === "cloud") {
+    const selection = buildOnboardingServerSelection(
+      activeServerKindToOnboardingServerTarget(activeServer.kind),
+    );
+    return {
+      runMode: selection.runMode,
+      cloudProvider: selection.cloudProvider,
+      remote: {
+        status: "idle",
+        error: null,
+      },
+      remoteApiBase: "",
+      remoteToken: activeServer.accessToken?.trim() ?? "",
+    };
+  }
+
+  const apiBase = activeServer.apiBase?.trim() ?? "";
+  const selection = buildOnboardingServerSelection(
+    activeServerKindToOnboardingServerTarget(activeServer.kind),
+  );
+  return {
+    runMode: selection.runMode,
+    cloudProvider: selection.cloudProvider,
+    remote: {
+      status: isRemoteApiBase(apiBase) ? "connected" : "idle",
+      error: null,
+    },
+    remoteApiBase: apiBase,
+    remoteToken: activeServer.accessToken?.trim() ?? "",
+  };
+}
+
 function createInitialState(cloudOnly?: boolean): OnboardingState {
-  const savedApiBase = loadSessionApiBase();
+  const initialServer = loadInitialServerSelection();
   return {
     step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",
@@ -130,8 +200,9 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     ownerName: "anon",
     style: "chen",
     avatar: 1,
-    runMode: cloudOnly ? "cloud" : "",
-    cloudProvider: cloudOnly ? "elizacloud" : "",
+    runMode: cloudOnly ? "cloud" : initialServer.runMode,
+    cloudProvider: cloudOnly ? "elizacloud" : initialServer.cloudProvider,
+    cloudApiKey: "",
     provider: "",
     apiKey: "",
     voiceProvider: "",
@@ -143,12 +214,9 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     existingInstallDetected: false,
     detectedProviders: [],
     connectorTokens: { ...EMPTY_TOKENS },
-    remote: {
-      status: isRemoteApiBase(savedApiBase) ? "connected" : "idle",
-      error: null,
-    },
-    remoteApiBase: savedApiBase,
-    remoteToken: "",
+    remote: initialServer.remote,
+    remoteApiBase: initialServer.remoteApiBase,
+    remoteToken: initialServer.remoteToken,
     subscriptionTab: "token",
     elizaCloudTab: "login",
     selectedChains: new Set(["evm", "solana"]),

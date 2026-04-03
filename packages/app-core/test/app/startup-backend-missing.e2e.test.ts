@@ -8,6 +8,7 @@ const { mockClient } = vi.hoisted(() => ({
   mockClient: {
     hasToken: vi.fn(() => false),
     getCodingAgentStatus: vi.fn(async () => null),
+    setBaseUrl: vi.fn(),
     setToken: vi.fn(),
     getConfig: vi.fn(async () => ({})),
     getAuthStatus: vi.fn(async () => ({
@@ -52,6 +53,7 @@ function Probe(props: { onChange: (snapshot: StartupSnapshot) => void }) {
     app.onboardingLoading,
     app.authRequired,
     app.startupError,
+    app.startupCoordinator.phase,
     props.onChange,
   ]);
   return null;

@@ -152,11 +152,11 @@ export function CharacterEditor({
     loadDropStatus,
     walletConfig: _walletConfig,
     elizaCloudConnected,
-    elizaCloudEnabled,
+    elizaCloudVoiceProxyAvailable,
   } = useApp();
 
-  /** ElevenLabs voices are available when cloud is connected/enabled (provides API key). */
-  const useElevenLabs = elizaCloudConnected || elizaCloudEnabled;
+  /** ElevenLabs voices are available only when direct key or cloud voice routing is active. */
+  const useElevenLabs = elizaCloudConnected || elizaCloudVoiceProxyAvailable;
   const elevenLabsVoiceGroups = ELEVENLABS_VOICE_GROUPS.map((group) => ({
     label: t(group.labelKey, { defaultValue: group.defaultLabel }),
     items: group.items,

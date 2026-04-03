@@ -8,10 +8,10 @@
  *   2. Name selector (4 random + Custom)
  *   3. Catchphrase / writing-style selector
  *   3.5. Runtime selection (Cloud vs Local)
- *   4. Model provider (local only)
- *   5. Wallet setup (local only)
- *   6. Skills registry (local only)
- *   7. GitHub access (local only)
+ *   4. Model provider
+ *   5. Wallet setup (local runtime only)
+ *   6. Skills registry (local runtime only)
+ *   7. GitHub access (local runtime only)
  *   8. Persist agent + style + provider + embedding config
  *
  * Extracted from eliza.ts to reduce file size.
@@ -21,6 +21,7 @@
 import { type ElizaConfig, saveElizaConfig } from "../config/config";
 import type { AgentConfig } from "../config/types.agents";
 import type { StylePreset } from "../contracts/onboarding";
+import { migrateLegacyRuntimeConfig } from "../contracts/onboarding";
 import { getStylePresets } from "../onboarding-presets";
 import { pickRandomNames } from "./onboarding-names";
 
@@ -30,6 +31,84 @@ import { pickRandomNames } from "./onboarding-names";
 
 function formatError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+type FirstTimeSetupCloudResult = import("./cloud-onboarding").CloudOnboardingResult;
+
+export function applyFirstTimeSetupTopology(
+  config: ElizaConfig,
+  args: {
+    isCloudRuntime: boolean;
+    selectedProviderId?: string;
+    cloudOnboardingResult?: FirstTimeSetupCloudResult | null;
+  },
+): ElizaConfig {
+  const linkedAccounts = {
+    ...(config.linkedAccounts ?? {}),
+  } as NonNullable<ElizaConfig["linkedAccounts"]>;
+  const serviceRouting = {
+    ...(config.serviceRouting ?? {}),
+  } as NonNullable<ElizaConfig["serviceRouting"]>;
+  const cloudOnboardingResult = args.cloudOnboardingResult ?? null;
+
+  if (cloudOnboardingResult?.apiKey?.trim()) {
+    linkedAccounts.elizacloud = {
+      status: "linked",
+      source: "oauth",
+    };
+  }
+
+  const shouldUseCloudInference =
+    args.selectedProviderId === "elizacloud" ||
+    (!args.selectedProviderId &&
+      args.isCloudRuntime &&
+      Boolean(cloudOnboardingResult?.apiKey?.trim()));
+
+  if (shouldUseCloudInference) {
+    serviceRouting.llmText = {
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+      accountId: "elizacloud",
+    };
+  } else if (args.selectedProviderId?.trim()) {
+    serviceRouting.llmText = {
+      backend: args.selectedProviderId.trim(),
+      transport: "direct",
+    };
+  }
+
+  if (args.isCloudRuntime || shouldUseCloudInference) {
+    for (const capability of ["tts", "media", "embeddings", "rpc"] as const) {
+      serviceRouting[capability] = {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+      };
+    }
+  }
+
+  return {
+    ...config,
+    deploymentTarget: args.isCloudRuntime
+      ? { runtime: "cloud", provider: "elizacloud" }
+      : { runtime: "local" },
+    linkedAccounts:
+      Object.keys(linkedAccounts).length > 0 ? linkedAccounts : undefined,
+    serviceRouting:
+      Object.keys(serviceRouting).length > 0 ? serviceRouting : undefined,
+    ...(cloudOnboardingResult
+      ? {
+          cloud: {
+            ...config.cloud,
+            apiKey: cloudOnboardingResult.apiKey,
+            baseUrl: cloudOnboardingResult.baseUrl,
+            ...(cloudOnboardingResult.agentId
+              ? { agentId: cloudOnboardingResult.agentId }
+              : {}),
+          },
+        }
+      : {}),
+  };
 }
 
 // @clack/prompts is loaded lazily so the packaged desktop app (which never
@@ -182,10 +261,11 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
     }
   }
 
-  // ── Steps 4–7: Local-only setup ─────────────────────────────────────────
-  // These steps are skipped when the user chose Eliza Cloud, since the cloud
-  // handles inference, wallets can be configured via the dashboard, and
-  // GitHub access is not needed for the initial cloud agent.
+  // ── Step 4: Model provider ───────────────────────────────────────────────
+  // Runtime location and inference provider are independent. Cloud-hosted
+  // agents can still use direct providers, and local agents can still use
+  // Eliza Cloud as the inference backend when linked.
+  let selectedProviderId: string | undefined;
   let providerEnvKey: string | undefined;
   let providerApiKey: string | undefined;
 
@@ -195,12 +275,18 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
   const hasEvmKey = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
   const hasSolKey = Boolean(process.env.SOLANA_PRIVATE_KEY?.trim());
 
-  if (!isCloudMode) {
-    // ── Step 4: Model provider ───────────────────────────────────────────────
-    // Skip provider selection in cloud mode — Eliza Cloud handles inference.
-    // Check whether an API key is already set in the environment (from .env or
-    // shell).  If none is found, ask the user to pick a provider and enter a key.
-    const PROVIDER_OPTIONS = [
+  const PROVIDER_OPTIONS = [
+      ...(cloudOnboardingResult?.apiKey
+        ? ([
+            {
+              id: "elizacloud",
+              label: "Eliza Cloud",
+              envKey: null,
+              detectKeys: [] as string[],
+              hint: "use linked Eliza Cloud inference",
+            },
+          ] as const)
+        : []),
       {
         id: "anthropic",
         label: "Anthropic (Claude)",
@@ -284,62 +370,81 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
       },
     ] as const;
 
-    // Detect if any provider key is already configured
-    const detectedProvider = PROVIDER_OPTIONS.find((p) =>
-      p.detectKeys.some((key) => process.env[key]?.trim()),
+  // Detect if any provider key is already configured
+  const detectedProvider = PROVIDER_OPTIONS.find((p) =>
+    p.detectKeys.some((key) => process.env[key]?.trim()),
+  );
+
+  if (detectedProvider) {
+    selectedProviderId = detectedProvider.id;
+    providerEnvKey = detectedProvider.envKey ?? undefined;
+    providerApiKey = detectedProvider.detectKeys
+      .map((key) => process.env[key]?.trim())
+      .find((value): value is string => Boolean(value));
+    clack.log.success(
+      `Found existing ${detectedProvider.label} key in environment (${detectedProvider.envKey})`,
     );
+  } else {
+    const providerChoice = await clack.select({
+      message: `${name}: One more thing — which AI provider should I use?`,
+      options: [
+        ...PROVIDER_OPTIONS.map((p) => ({
+          value: p.id,
+          label: p.label,
+          hint:
+            p.id === "ollama"
+              ? "no API key needed"
+              : p.id === "elizacloud"
+                ? "bundled cloud inference"
+                : undefined,
+        })),
+        {
+          value: "_skip_",
+          label: "Skip for now",
+          hint: "set an API key later via env or config",
+        },
+      ],
+    });
 
-    if (detectedProvider) {
-      clack.log.success(
-        `Found existing ${detectedProvider.label} key in environment (${detectedProvider.envKey})`,
-      );
-    } else {
-      const providerChoice = await clack.select({
-        message: `${name}: One more thing — which AI provider should I use?`,
-        options: [
-          ...PROVIDER_OPTIONS.map((p) => ({
-            value: p.id,
-            label: p.label,
-            hint: p.id === "ollama" ? "no API key needed" : undefined,
-          })),
-          {
-            value: "_skip_",
-            label: "Skip for now",
-            hint: "set an API key later via env or config",
-          },
-        ],
-      });
+    if (clack.isCancel(providerChoice)) cancelOnboarding();
 
-      if (clack.isCancel(providerChoice)) cancelOnboarding();
+    if (providerChoice !== "_skip_") {
+      const chosen = PROVIDER_OPTIONS.find((p) => p.id === providerChoice);
+      if (chosen) {
+        selectedProviderId = chosen.id;
+        providerEnvKey = chosen.envKey ?? undefined;
 
-      if (providerChoice !== "_skip_") {
-        const chosen = PROVIDER_OPTIONS.find((p) => p.id === providerChoice);
-        if (chosen) {
-          providerEnvKey = chosen.envKey;
+        if (chosen.id === "elizacloud") {
+          clack.log.info("Using linked Eliza Cloud inference.");
+        } else if (chosen.id === "ollama") {
+          // Ollama just needs a base URL, default to localhost
+          const ollamaUrl = await clack.text({
+            message: "Ollama base URL:",
+            placeholder: "http://localhost:11434",
+            defaultValue: "http://localhost:11434",
+          });
 
-          if (chosen.id === "ollama") {
-            // Ollama just needs a base URL, default to localhost
-            const ollamaUrl = await clack.text({
-              message: "Ollama base URL:",
-              placeholder: "http://localhost:11434",
-              defaultValue: "http://localhost:11434",
-            });
+          if (clack.isCancel(ollamaUrl)) cancelOnboarding();
 
-            if (clack.isCancel(ollamaUrl)) cancelOnboarding();
+          providerApiKey = ollamaUrl.trim() || "http://localhost:11434";
+        } else {
+          const apiKeyInput = await clack.password({
+            message: `Paste your ${chosen.label} API key:`,
+          });
 
-            providerApiKey = ollamaUrl.trim() || "http://localhost:11434";
-          } else {
-            const apiKeyInput = await clack.password({
-              message: `Paste your ${chosen.label} API key:`,
-            });
+          if (clack.isCancel(apiKeyInput)) cancelOnboarding();
 
-            if (clack.isCancel(apiKeyInput)) cancelOnboarding();
-
-            providerApiKey = apiKeyInput.trim();
-          }
+          providerApiKey = apiKeyInput.trim();
         }
       }
     }
+  }
+
+  // ── Steps 5–7: Local-runtime-only setup ─────────────────────────────────
+  // Wallet and GitHub prompts stay local-only for now. Runtime target no
+  // longer implies a specific inference provider, but these device-bound
+  // setup steps still only make sense for local runs.
+  if (!isCloudMode) {
 
     // ── Step 4b: Embedding model preset ────────────────────────────────────
     // (Simplified: always use the standard/reliable model preset. No user choice.)
@@ -514,20 +619,25 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
     },
   };
 
-  // Persist the provider API key and wallet keys in config.env so they
-  // survive restarts.  Initialise the env bucket once to avoid the
-  // repeated `if (!updated.env)` pattern.
-  if (!updated.env) updated.env = {};
-  const envBucket = updated.env as Record<string, string>;
+  const topologyUpdated = applyFirstTimeSetupTopology(updated, {
+    isCloudRuntime: isCloudMode,
+    selectedProviderId,
+    cloudOnboardingResult,
+  });
 
-  // Only persist local-mode env vars when not in cloud mode (those vars
-  // were never prompted for / set during cloud onboarding).
+  // Persist provider API keys and wallet keys in config.env so they survive
+  // restarts. Initialise the env bucket once to avoid the repeated
+  // `if (!config.env)` pattern.
+  if (!topologyUpdated.env) topologyUpdated.env = {};
+  const envBucket = topologyUpdated.env as Record<string, string>;
+
+  if (providerEnvKey && providerApiKey) {
+    envBucket[providerEnvKey] = providerApiKey;
+    // Also set immediately in process.env for the current run
+    process.env[providerEnvKey] = providerApiKey;
+  }
+
   if (!isCloudMode) {
-    if (providerEnvKey && providerApiKey) {
-      envBucket[providerEnvKey] = providerApiKey;
-      // Also set immediately in process.env for the current run
-      process.env[providerEnvKey] = providerApiKey;
-    }
     if (process.env.EVM_PRIVATE_KEY && !hasEvmKey) {
       envBucket.EVM_PRIVATE_KEY = process.env.EVM_PRIVATE_KEY;
     }
@@ -548,26 +658,9 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
     }
   }
 
-  // ── Cloud config persistence ───────────────────────────────────────────
-  // If the user completed cloud onboarding, persist the cloud credentials
-  // and agent ID so subsequent `eliza start` connects directly.
-  if (cloudOnboardingResult) {
-    updated.cloud = {
-      ...updated.cloud,
-      enabled: isCloudMode,
-      provider: "elizacloud",
-      apiKey: cloudOnboardingResult.apiKey,
-      baseUrl: cloudOnboardingResult.baseUrl,
-      inferenceMode: isCloudMode ? "cloud" : updated.cloud?.inferenceMode,
-      runtime: isCloudMode ? "cloud" : "local",
-    };
-    if (cloudOnboardingResult.agentId) {
-      updated.cloud.agentId = cloudOnboardingResult.agentId;
-    }
-  }
-
   try {
-    saveElizaConfig(updated);
+    migrateLegacyRuntimeConfig(topologyUpdated as Record<string, unknown>);
+    saveElizaConfig(topologyUpdated);
   } catch (err) {
     // Non-fatal: the agent can still start, but choices won't persist.
     clack.log.warn(`Could not save config: ${formatError(err)}`);
@@ -577,5 +670,5 @@ export async function runFirstTimeSetup(config: ElizaConfig): Promise<ElizaConfi
     isCloudMode ? "Your agent is live in the cloud! ☁️" : "Let's get started!",
   );
 
-  return updated;
+  return topologyUpdated;
 }

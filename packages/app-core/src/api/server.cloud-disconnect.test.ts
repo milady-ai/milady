@@ -140,13 +140,12 @@ describe("server cloud disconnect", () => {
       const before = await request(server.port, "GET", "/api/cloud/status");
       expect(before.status).toBe(200);
       expect(before.data).toEqual({
+        cloudVoiceProxyAvailable: true,
         connected: true,
         enabled: true,
         hasApiKey: true,
-        userId: "user-1",
-        organizationId: undefined,
         topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
-        reason: undefined,
+        userId: "user-1",
       });
 
       const disconnect = await request(
@@ -166,6 +165,7 @@ describe("server cloud disconnect", () => {
       const after = await request(server.port, "GET", "/api/cloud/status");
       expect(after.status).toBe(200);
       expect(after.data).toEqual({
+        cloudVoiceProxyAvailable: false,
         connected: false,
         enabled: false,
         hasApiKey: false,

@@ -28,6 +28,7 @@
     "./contracts/drop": "./src/contracts/drop.ts",
     "./contracts/onboarding": "./src/contracts/onboarding.ts",
     "./contracts/permissions": "./src/contracts/permissions.ts",
+    "./contracts/service-routing": "./src/contracts/service-routing.ts",
     "./contracts/verification": "./src/contracts/verification.ts",
     "./contracts/wallet": "./src/contracts/wallet.ts",
     "./config": "./src/config/types.ts",

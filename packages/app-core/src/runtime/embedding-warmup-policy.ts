@@ -26,11 +26,7 @@ export function shouldWarmupLocalEmbeddingModel(): boolean {
     return true;
   }
 
-  const cloudLikelyProvidesEmbeddings =
-    process.env.ELIZAOS_CLOUD_ENABLED === "true" ||
-    Boolean(process.env.ELIZAOS_CLOUD_API_KEY?.trim());
-
-  if (cloudLikelyProvidesEmbeddings) {
+  if (process.env.ELIZAOS_CLOUD_USE_EMBEDDINGS === "true") {
     return false;
   }
 

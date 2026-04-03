@@ -2,19 +2,30 @@
  * StartupShell — the front door to the app.
  *
  * Shows a branded splash with retro progress bar during ALL startup phases.
- * New users see "Press Start" first. Returning users see the progress bar
+ * New users see the server chooser first. Returning users see the progress bar
  * immediately. The splash stays visible until the app is FULLY loaded
  * (including a brief settle delay after coordinator reaches ready).
  *
  * Non-loading phases (error, pairing, onboarding) delegate to their views.
  */
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { client } from "../../api";
-import { useApp } from "../../state";
+import {
+  discoverGatewayEndpoints,
+  type GatewayDiscoveryEndpoint,
+  gatewayEndpointToApiBase,
+} from "../../bridge/gateway-discovery";
+import {
+  clearPersistedConnectionMode,
+  savePersistedActiveServer,
+  useApp,
+} from "../../state";
+import { buildOnboardingServerSelection } from "../../onboarding/server-target";
 import type { StartupErrorState } from "../../state/types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
+import { SplashServerChooser } from "./SplashServerChooser";
 import { StartupFailureView } from "./StartupFailureView";
 
 const FONT = "'Courier New', 'Courier', 'Monaco', monospace";
@@ -47,49 +58,134 @@ function phaseToStatusKey(phase: string): string {
 }
 
 export function StartupShell() {
-  const { startupCoordinator, startupError, retryStartup, setState, t } =
-    useApp();
+  const {
+    startupCoordinator,
+    startupError,
+    retryStartup,
+    setState,
+    goToOnboardingStep,
+    elizaCloudConnected,
+    onboardingCloudApiKey,
+    t,
+  } = useApp();
   const phase = startupCoordinator.phase;
-  const cloudSkipProbeStartedRef = useRef(false);
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
+  const [discoveredGateways, setDiscoveredGateways] = useState<
+    GatewayDiscoveryEndpoint[]
+  >([]);
+  const isSplash = phase === "splash";
+  const splashLoaded = isSplash
+    ? (startupCoordinator.state as { loaded?: boolean }).loaded
+    : false;
+  const progress = PHASE_PROGRESS[phase] ?? 50;
+  const showElizaCloudEntry = useMemo(() => {
+    if (elizaCloudConnected) {
+      return true;
+    }
+    if (onboardingCloudApiKey.trim().length > 0) {
+      return true;
+    }
+    if (typeof window === "undefined") {
+      return false;
+    }
+    const token = (
+      (window as unknown as Record<string, unknown>)
+        .__ELIZA_CLOUD_AUTH_TOKEN__ ?? ""
+    )
+      .toString()
+      .trim();
+    return token.length > 0;
+  }, [elizaCloudConnected, onboardingCloudApiKey]);
 
   useEffect(() => {
-    if (phase !== "onboarding-required") {
-      cloudSkipProbeStartedRef.current = false;
+    if (!isSplash || !splashLoaded) {
       return;
     }
 
-    const coordState = startupCoordinator.state;
-    if (
-      coordState.phase !== "onboarding-required" ||
-      coordState.serverReachable ||
-      cloudSkipProbeStartedRef.current
-    ) {
-      return;
-    }
-
-    // Hidden startup path: a first-visit cloud container can land directly in
-    // onboarding-required before the normal backend-poll phase ever runs.
-    // Re-check the server here and fast-forward cloud-provisioned containers.
-    cloudSkipProbeStartedRef.current = true;
     let cancelled = false;
-
-    void client
-      .getOnboardingStatus()
-      .then((status) => {
-        if (cancelled || !status.cloudProvisioned) {
-          return;
+    setDiscoveryLoading(true);
+    void discoverGatewayEndpoints({ timeoutMs: 1500 })
+      .then((gateways) => {
+        if (!cancelled) {
+          setDiscoveredGateways(gateways);
         }
-        setState("onboardingComplete", true);
-        startupCoordinator.dispatch({ type: "ONBOARDING_COMPLETE" });
       })
-      .catch(() => {
-        cloudSkipProbeStartedRef.current = false;
+      .finally(() => {
+        if (!cancelled) {
+          setDiscoveryLoading(false);
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [phase, setState, startupCoordinator]);
+  }, [isSplash, splashLoaded]);
+
+  const continueToOnboarding = useCallback(() => {
+    startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" });
+  }, [startupCoordinator]);
+
+  const clearClientConnectionIntent = useCallback(() => {
+    client.setToken(null);
+    client.setBaseUrl(null);
+  }, []);
+
+  const seedSplashTarget = useCallback(
+    (target: "local" | "remote" | "elizacloud", remoteApiBase?: string) => {
+      const selection = buildOnboardingServerSelection(target);
+      clearClientConnectionIntent();
+      clearPersistedConnectionMode();
+      goToOnboardingStep("identity");
+      setState("onboardingProvider", "");
+      setState("onboardingApiKey", "");
+      setState("onboardingPrimaryModel", "");
+      setState("onboardingRemoteToken", "");
+
+      if (target === "local") {
+        setState("onboardingRunMode", selection.runMode);
+        setState("onboardingCloudProvider", selection.cloudProvider);
+        setState("onboardingRemoteConnected", false);
+        setState("onboardingRemoteApiBase", "");
+        return;
+      }
+
+      setState("onboardingRunMode", selection.runMode);
+      setState("onboardingCloudProvider", selection.cloudProvider);
+      setState("onboardingRemoteConnected", Boolean(remoteApiBase));
+      setState("onboardingRemoteApiBase", remoteApiBase ?? "");
+    },
+    [clearClientConnectionIntent, goToOnboardingStep, setState],
+  );
+
+  const handleCreateLocal = useCallback(() => {
+    seedSplashTarget("local");
+    continueToOnboarding();
+  }, [continueToOnboarding, seedSplashTarget]);
+
+  const handleManualConnect = useCallback(() => {
+    seedSplashTarget("remote");
+    continueToOnboarding();
+  }, [continueToOnboarding, seedSplashTarget]);
+
+  const handleUseElizaCloud = useCallback(() => {
+    seedSplashTarget("elizacloud");
+    continueToOnboarding();
+  }, [continueToOnboarding, seedSplashTarget]);
+
+  const handleConnectGateway = useCallback(
+    (gateway: GatewayDiscoveryEndpoint) => {
+      const remoteApiBase = gatewayEndpointToApiBase(gateway);
+      clearClientConnectionIntent();
+      savePersistedActiveServer({
+        id: `remote:${gateway.stableId}`,
+        kind: "remote",
+        label: gateway.name.trim() || remoteApiBase,
+        apiBase: remoteApiBase,
+      });
+      continueToOnboarding();
+    },
+    [clearClientConnectionIntent, continueToOnboarding],
+  );
 
   // Error — delegate
   if (phase === "error") {
@@ -118,13 +214,6 @@ export function StartupShell() {
   if (phase === "ready") {
     return null;
   }
-
-  // Everything else: splash with progress bar
-  const isSplash = phase === "splash";
-  const splashLoaded = isSplash
-    ? (startupCoordinator.state as { loaded?: boolean }).loaded
-    : false;
-  const progress = PHASE_PROGRESS[phase] ?? 50;
 
   return (
     <div className="flex items-center justify-center h-full w-full bg-[#ffe600] text-black overflow-hidden">
@@ -176,22 +265,29 @@ export function StartupShell() {
           </div>
         )}
 
-        {/* Press Start button — only on splash phase */}
-        {isSplash && (
-          <button
-            type="button"
-            disabled={!splashLoaded}
-            onClick={() =>
-              startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" })
-            }
-            style={{ fontFamily: FONT }}
-            className="mt-3 border-2 border-black bg-black px-5 py-2.5 text-[9px] uppercase text-[#ffe600] hover:bg-black/80 disabled:opacity-30 disabled:cursor-wait transition-all"
-          >
-            {splashLoaded
-              ? t("startupshell.GetStarted", { defaultValue: "Press Start" })
-              : t("startupshell.Loading", { defaultValue: "Loading..." })}
-          </button>
-        )}
+        {/* Server chooser — only on splash phase */}
+        {isSplash &&
+          (!splashLoaded ? (
+            <button
+              type="button"
+              disabled
+              style={{ fontFamily: FONT }}
+              className="mt-3 border-2 border-black bg-black px-5 py-2.5 text-[9px] uppercase text-[#ffe600] hover:bg-black/80 disabled:opacity-30 disabled:cursor-wait transition-all"
+            >
+              {t("startupshell.Loading", { defaultValue: "Loading..." })}
+            </button>
+          ) : (
+            <SplashServerChooser
+              discoveryLoading={discoveryLoading}
+              gateways={discoveredGateways}
+              showElizaCloudEntry={showElizaCloudEntry}
+              t={t}
+              onCreateLocal={handleCreateLocal}
+              onManualConnect={handleManualConnect}
+              onUseElizaCloud={handleUseElizaCloud}
+              onConnectGateway={handleConnectGateway}
+            />
+          ))}
       </div>
     </div>
   );

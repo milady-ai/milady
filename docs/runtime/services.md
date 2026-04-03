@@ -58,6 +58,9 @@ Core plugins are always loaded and each provides one or more services:
 | `@elizaos/plugin-cron` | Cron service | Scheduled job execution |
 | `@elizaos/plugin-shell` | Shell service | Shell command execution with security controls |
 | `@elizaos/plugin-agent-skills` | `AGENT_SKILLS_SERVICE` | Skill catalog loading and execution |
+| `@elizaos/plugin-commands` | Commands service | Slash command handling (skills auto-register as /commands) |
+| `@elizaos/plugin-plugin-manager` | Plugin manager service | Dynamic plugin install/uninstall at runtime |
+| `@miladyai/plugin-roles` | Roles service | Role-based access control (OWNER/ADMIN/NONE) |
 
 ## Optional Core Services
 
@@ -78,7 +81,7 @@ These services are available but not loaded by default — enable via admin pane
 | `@elizaos/plugin-elevenlabs` | ElevenLabs text-to-speech |
 | `@elizaos/plugin-secrets-manager` | Encrypted credential storage (statically imported, may be re-enabled as core) |
 | `@elizaos/plugin-rolodex` | Contact graph, relationship memory (statically imported, may be re-enabled as core) |
-| `@elizaos/plugin-plugin-manager` | Dynamic plugin install/uninstall at runtime (statically imported, may be re-enabled as core) |
+| `@elizaos/plugin-plugin-manager` | Dynamic plugin install/uninstall at runtime (now a core plugin, always loaded) |
 | `@elizaos/plugin-computeruse` | Computer use automation (requires platform binaries) |
 | `@elizaos/plugin-x402` | x402 HTTP micropayment protocol |
 

@@ -7,6 +7,7 @@ import {
   hasConfiguredApiKey,
   PREMADE_VOICES,
 } from "../../voice/types";
+import type { VoiceConfig } from "../../api/client";
 import type { CharacterRosterEntry } from "./CharacterRoster";
 
 /* ── Constants ─────────────────────────────────────────────────────── */
@@ -53,10 +54,7 @@ export const EDGE_VOICE_GROUPS = [
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
-export type CharacterEditorVoiceConfig = Record<
-  string,
-  Record<string, string> | string | undefined
->;
+export type CharacterEditorVoiceConfig = VoiceConfig;
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
 

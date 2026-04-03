@@ -31,13 +31,13 @@ describe("cloud-preference-patch", () => {
 
     const normalized = normalizeConfigForLocalProviderPreference(config);
     expect(normalized?.cloud).toMatchObject({
-      enabled: false,
-      inferenceMode: "byok",
-      services: { inference: false },
+      apiKey: "ck-cloud-test",
     });
-    expect(normalized?.cloud).not.toHaveProperty("apiKey");
+    expect(normalized?.cloud).not.toHaveProperty("enabled");
     expect(normalized?.cloud).not.toHaveProperty("provider");
-    expect(normalized).not.toHaveProperty("models");
+    expect(normalized?.cloud).not.toHaveProperty("inferenceMode");
+    expect(normalized?.cloud).not.toHaveProperty("services");
+    expect(normalized?.models).toEqual(config.models);
 
     expect(
       shouldMaskInactiveCloudStatus({
@@ -66,21 +66,61 @@ describe("cloud-preference-patch", () => {
   it("does not override an explicit cloud selection", () => {
     expect(
       shouldPreferLocalProviderConfig({
-        connection: {
-          kind: "local-provider",
-          provider: "openai",
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+            accountId: "elizacloud",
+          },
+        },
+        linkedAccounts: {
+          elizacloud: { status: "linked", source: "api-key" },
         },
         cloud: {
-          enabled: true,
-          provider: "elizacloud",
-          inferenceMode: "cloud",
-          services: { inference: true },
+          apiKey: "ck-cloud-test",
         },
       }),
     ).toBe(false);
   });
 
-  it("patches client reads without mutating the underlying capability state", async () => {
+  it("still prefers the direct provider when runtime stays on Eliza Cloud", () => {
+    const config = {
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
+      cloud: {
+        apiKey: "ck-cloud-test",
+        runtime: "cloud",
+        provider: "elizacloud",
+        services: { inference: true, rpc: true },
+      },
+    };
+
+    expect(shouldPreferLocalProviderConfig(config)).toBe(true);
+
+    const normalized = normalizeConfigForLocalProviderPreference(config);
+    expect(normalized?.deploymentTarget).toEqual(config.deploymentTarget);
+    expect(normalized?.cloud).toEqual({
+      apiKey: "ck-cloud-test",
+    });
+  });
+
+  it("normalizes config reads without hiding linked cloud status", async () => {
     const rawConfig = {
       connection: {
         kind: "local-provider",
@@ -114,23 +154,18 @@ describe("cloud-preference-patch", () => {
     await expect(client.getConfig()).resolves.toMatchObject({
       connection: rawConfig.connection,
       cloud: {
-        enabled: false,
-        inferenceMode: "byok",
-        services: { inference: false },
+        apiKey: "ck-cloud-test",
       },
     });
     const patchedConfig = await client.getConfig();
-    expect(patchedConfig.cloud).not.toHaveProperty("apiKey");
+    expect(patchedConfig.cloud).not.toHaveProperty("enabled");
+    expect(patchedConfig.cloud).not.toHaveProperty("provider");
+    expect(patchedConfig.cloud).not.toHaveProperty("inferenceMode");
 
-    await expect(client.getCloudStatus()).resolves.toEqual({
-      connected: false,
-      enabled: false,
-      hasApiKey: false,
-      reason: "inactive_local_provider",
-    });
+    await expect(client.getCloudStatus()).resolves.toBe(rawStatus);
     await expect(client.getCloudCredits?.()).resolves.toEqual({
-      balance: null,
-      connected: false,
+      balance: 42,
+      connected: true,
     });
 
     uninstall();

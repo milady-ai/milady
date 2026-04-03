@@ -1,4 +1,8 @@
 import { client } from "../api";
+import {
+  createPersistedActiveServer,
+  savePersistedActiveServer,
+} from "../state/persistence";
 
 function getSearchParams(): URLSearchParams {
   if (typeof window === "undefined") {
@@ -147,6 +151,13 @@ export async function applyLaunchConnectionFromUrl(): Promise<boolean> {
     );
     client.setBaseUrl(connection.apiBase);
     client.setToken(connection.token);
+    savePersistedActiveServer(
+      createPersistedActiveServer({
+        kind: "cloud",
+        apiBase: connection.apiBase,
+        accessToken: connection.token,
+      }),
+    );
     stripLaunchParams();
     return true;
   }
@@ -156,8 +167,18 @@ export async function applyLaunchConnectionFromUrl(): Promise<boolean> {
     return false;
   }
 
-  client.setBaseUrl(normalizeLaunchApiBase(apiBase));
-  client.setToken(params.get("token")?.trim() || null);
+  const normalizedApiBase = normalizeLaunchApiBase(apiBase);
+  const launchToken = params.get("token")?.trim() || null;
+
+  client.setBaseUrl(normalizedApiBase);
+  client.setToken(launchToken);
+  savePersistedActiveServer(
+    createPersistedActiveServer({
+      kind: "remote",
+      apiBase: normalizedApiBase,
+      ...(launchToken ? { accessToken: launchToken } : {}),
+    }),
+  );
   stripLaunchParams();
   return true;
 }

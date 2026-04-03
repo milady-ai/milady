@@ -26,7 +26,6 @@ const { mockClient } = vi.hoisted(() => ({
       expiresAt: null,
     })),
     getOnboardingStatus: vi.fn(async () => ({ complete: false })),
-    getConfig: vi.fn(async () => null),
     disconnectWs: vi.fn(),
     getCodingAgentStatus: vi.fn(async () => null),
     getConfig: vi.fn(async () => ({})),
@@ -60,6 +59,13 @@ describe("PersistedConnectionMode persistence", () => {
     savePersistedConnectionMode({ runMode: "local" });
     const loaded = loadPersistedConnectionMode();
     expect(loaded).toEqual({ runMode: "local" });
+    expect(localStorage.getItem("milady:active-server")).toBe(
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
+    );
   });
 
   it("round-trips a cloud connection mode with auth", async () => {
@@ -98,16 +104,25 @@ describe("PersistedConnectionMode persistence", () => {
 
   it("clears persisted connection mode", async () => {
     const {
+      clearPersistedActiveServer,
       clearPersistedConnectionMode,
+      loadPersistedActiveServer,
       loadPersistedConnectionMode,
       savePersistedConnectionMode,
     } = await import("@miladyai/app-core/state/persistence");
 
     savePersistedConnectionMode({ runMode: "local" });
     expect(loadPersistedConnectionMode()).not.toBeNull();
+    expect(loadPersistedActiveServer()).not.toBeNull();
 
     clearPersistedConnectionMode();
     expect(loadPersistedConnectionMode()).toBeNull();
+    expect(loadPersistedActiveServer()).toBeNull();
+
+    savePersistedConnectionMode({ runMode: "local" });
+    clearPersistedActiveServer();
+    expect(loadPersistedConnectionMode()).toBeNull();
+    expect(loadPersistedActiveServer()).toBeNull();
   });
 
   it("returns null for corrupted JSON", async () => {
@@ -138,6 +153,62 @@ describe("PersistedConnectionMode persistence", () => {
 
     localStorage.setItem("eliza:connection-mode", JSON.stringify([1, 2, 3]));
     expect(loadPersistedConnectionMode()).toBeNull();
+  });
+
+  it("migrates a legacy connection blob into the active server record", async () => {
+    const { loadPersistedActiveServer, loadPersistedConnectionMode } =
+      await import("@miladyai/app-core/state/persistence");
+
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({
+        runMode: "remote",
+        remoteApiBase: "https://ren.example.com/",
+        remoteAccessToken: "key-123",
+      }),
+    );
+
+    expect(loadPersistedActiveServer()).toEqual({
+      id: "remote:https://ren.example.com",
+      kind: "remote",
+      label: "ren.example.com",
+      apiBase: "https://ren.example.com",
+      accessToken: "key-123",
+    });
+    expect(loadPersistedConnectionMode()).toEqual({
+      runMode: "remote",
+      remoteApiBase: "https://ren.example.com",
+      remoteAccessToken: "key-123",
+    });
+  });
+
+  it("prefers the active server record over a stale legacy connection blob", async () => {
+    const { loadPersistedConnectionMode } = await import(
+      "@miladyai/app-core/state/persistence"
+    );
+
+    localStorage.setItem(
+      "milady:active-server",
+      JSON.stringify({
+        id: "remote:https://kei.example.com",
+        kind: "remote",
+        label: "kei.example.com",
+        apiBase: "https://kei.example.com",
+      }),
+    );
+    localStorage.setItem(
+      "eliza:connection-mode",
+      JSON.stringify({
+        runMode: "cloud",
+        cloudApiBase: "https://api.eliza.ai",
+        cloudAuthToken: "stale-token",
+      }),
+    );
+
+    expect(loadPersistedConnectionMode()).toEqual({
+      runMode: "remote",
+      remoteApiBase: "https://kei.example.com",
+    });
   });
 });
 

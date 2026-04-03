@@ -221,6 +221,7 @@ function createAppState() {
     walletConfig: null,
     elizaCloudConnected: false,
     elizaCloudEnabled: true,
+    elizaCloudVoiceProxyAvailable: true,
   };
 }
 

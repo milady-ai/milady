@@ -3,6 +3,12 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const INDEX_PATH = path.resolve(import.meta.dirname, "..", "index.ts");
+const CONFIG_PATH = path.resolve(
+  import.meta.dirname,
+  "..",
+  "..",
+  "electrobun.config.ts",
+);
 const BACKGROUND_NOTICE_PATH = path.resolve(
   import.meta.dirname,
   "..",
@@ -47,11 +53,15 @@ describe("Electrobun startup bootstrap", () => {
 
   it("uses the packaged app icon for the main window and tray", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
+    const configSource = fs.readFileSync(CONFIG_PATH, "utf8");
 
     expect(source).toContain("function resolveDesktopAppIconPath()");
     expect(source).toContain("icon: resolveDesktopAppIconPath(),");
     expect(source).toContain('process.platform === "win32"');
     expect(source).toContain('"../assets/appIcon.ico"');
+    expect(configSource).toContain(
+      '"assets/appIcon.ico": "assets/appIcon.ico"',
+    );
   });
 
   it("resolves the initial renderer API base from desktop runtime mode", () => {

@@ -77,6 +77,7 @@ function createState(overrides: Record<string, unknown> = {}) {
     },
     onboardingProvider: "openai",
     onboardingSubscriptionTab: "token",
+    onboardingCloudApiKey: "",
     onboardingApiKey: "",
     onboardingPrimaryModel: "",
     onboardingElizaCloudTab: "login",

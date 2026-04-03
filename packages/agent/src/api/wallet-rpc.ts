@@ -1,3 +1,7 @@
+import {
+  isElizaCloudServiceSelectedInConfig,
+  migrateLegacyRuntimeConfig,
+} from "@miladyai/shared/contracts";
 import type { ElizaConfig } from "../config/config";
 import {
   DEFAULT_WALLET_RPC_SELECTIONS,
@@ -296,7 +300,13 @@ export function buildCloudSolanaRpcUrl(
 export function hasElizaCloudRpcAccess(
   config?: Pick<ElizaConfig, "cloud"> | null,
 ): boolean {
-  return Boolean(resolveCloudApiKey(config));
+  return Boolean(
+    resolveCloudApiKey(config) &&
+      isElizaCloudServiceSelectedInConfig(
+        (config ?? {}) as Record<string, unknown>,
+        "rpc",
+      ),
+  );
 }
 
 export function getStoredWalletRpcSelections(
@@ -543,10 +553,19 @@ export function applyWalletRpcConfigUpdate(
 export function resolveWalletRpcReadiness(
   config?: WalletCapableConfig | null,
 ): WalletRpcReadiness {
+  if (config && typeof config === "object" && !Array.isArray(config)) {
+    migrateLegacyRuntimeConfig(config as Record<string, unknown>);
+  }
   const walletNetwork = resolveWalletNetworkMode(config);
   const cloudApiKey = resolveCloudApiKey(config);
   const cloudBaseUrl = resolveCloudApiBaseUrl(config?.cloud?.baseUrl);
-  const cloudManagedAccess = Boolean(cloudApiKey);
+  const cloudManagedAccess = Boolean(
+    cloudApiKey &&
+      isElizaCloudServiceSelectedInConfig(
+        (config ?? {}) as Record<string, unknown>,
+        "rpc",
+      ),
+  );
   const cloudOptions = {
     cloudManagedAccess,
     cloudApiKey,

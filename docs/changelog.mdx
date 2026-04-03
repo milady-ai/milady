@@ -3,6 +3,63 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-07-02" description="Week of June 26 – July 2; plugin config forms, Discord commands, cloud hardening" tags={["Feature", "Update", "Fix"]}>
+## Chat-driven plugin configuration
+
+Your agent can now help you configure plugins through conversation. Ask your agent to set up a plugin and it spawns an interactive form right in the chat — no need to navigate to settings. The agent detects which plugin you're asking about, generates the right configuration fields, and applies your choices on submit. See [plugins](/plugins/overview) for details.
+
+## Discord slash commands
+
+Milady now supports native Discord slash commands. Four commands ship this week — `/skill`, `/workspace`, `/shell`, and `/cron` — letting you manage skills, workspaces, shell access, and scheduled tasks directly from Discord. An `/issue` command with auto-vision support is also available for filing issues with screenshots. See the [Discord connector](/connectors/discord) for setup.
+
+## Skills marketplace with remote registry
+
+You can now browse and install skills from a remote registry directly in the dashboard. The [skills](/plugins/skills) marketplace connects to a hosted catalog, so new community-contributed skills appear automatically without a Milady update.
+
+## Vincent OAuth wallet login
+
+The [wallet](/guides/wallet) UI now supports Vincent OAuth login, giving you a browser-based authentication flow for connecting wallet services without manually entering credentials.
+
+## Steward EVM signing for cloud containers
+
+Cloud-deployed agents can now sign EVM transactions through the [Steward](/guides/wallet) bridge. When a cloud container has Steward configured, trades and transfers route through the policy-enforced signing proxy automatically — the same safety controls available on desktop now work in cloud deployments.
+
+## Splash screen with asset preloading
+
+The startup experience has been redesigned with a retro-styled splash screen that preloads VRM avatars, icons, and voice assets in the background with a visible progress bar. Returning users skip the splash automatically. The result is a faster time-to-interactive with no flash of unstyled content or VRM loader flicker on first load.
+
+## Updates
+
+- **Agent context awareness** — Your agent now knows about its own model configuration, wallet status, and installed plugins when answering questions, so it can give more accurate responses about its own capabilities.
+- **Cloud model defaults updated** — Cloud containers now default to Sonnet 4.6 and Minimax M2.7 for better out-of-the-box response quality.
+- **Sidebar search in Database and Runtime views** — The [database](/advanced/database) and runtime views now include search in the sidebar header, making it easier to find tables and entries in large datasets.
+- **Plugins sorted by status** — The [plugins](/plugins/overview) and [connectors](/guides/connectors) lists now show ready/enabled plugins at the top, so you can quickly see what's active.
+- **Plugins grouped by category** — Plugin lists now display category labels with visual grouping, making it easier to browse large plugin collections.
+- **Dark mode contrast softened** — Dark mode surfaces use deeper backgrounds with dimmer text for reduced eye strain during extended sessions.
+- **Restart banner moved to toast** — The "restart required" banner is now a compact toast notification in the bottom-right corner instead of a full-width bar, reducing visual disruption.
+- **Database table browser expanded** — The [database](/advanced/database) table browser now fills the available space properly, with full-width empty states and correct overflow handling.
+- **Trajectory logging for cloud** — Cloud containers now log trajectory data, so you can review LLM call history in the [trajectory view](/advanced/trajectories) for cloud-deployed agents.
+- **Cloud account and service routing separated** — Cloud login and service routing (inference, RPC, media) are now independent, so you can be logged in to the cloud without routing all services through it.
+- **Legacy cloud config migration** — Older cloud configuration formats are automatically migrated on startup, preventing settings from being silently ignored after an update.
+
+## Bug fixes
+
+- Fixed cloud-provisioned containers not enabling knowledge, heartbeats, or TTS — these features now activate correctly in cloud deployments
+- Fixed cloud-provisioned containers showing the onboarding wizard instead of skipping directly to the agent — managed containers now start immediately
+- Fixed cloud containers reporting incorrect connection status after login
+- Fixed plugin installs failing silently when the plugin manager was temporarily unavailable — installs now retry and recover gracefully
+- Fixed Windows desktop permissions, camera routing, and shutdown not working correctly in certain configurations
+- Fixed Electrobun tar extraction failing on Windows when using Git Bash
+- Fixed the EVM plugin crashing on startup due to a static import — it is now gated behind an opt-in flag
+- Fixed the Steward EVM address not being discoverable by the wallet UI on first launch
+- Fixed cloud login instantly signing out due to a preference-saving race condition
+- Fixed the database view empty state not filling the available width
+- Fixed the character reset not clearing avatar, preset, and voice selections in the UI
+- Fixed provider API keys not loading from saved configuration on startup
+- Fixed the agent runtime not restarting automatically when you save a new API key in settings
+
+</Update>
+
 <Update label="2026-03-30" description="Week of March 29–30; cloud dashboard polish, live metrics, billing" tags={["Update"]}>
 ## Cloud dashboard overhaul
 

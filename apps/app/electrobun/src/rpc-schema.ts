@@ -1067,6 +1067,7 @@ export type MiladyRPCSchema = {
       desktopWindowMaximize: undefined;
       desktopWindowUnmaximize: undefined;
       desktopWindowClose: undefined;
+      desktopShutdownStarted: { reason: string };
 
       // Canvas: Window events
       canvasWindowEvent: {
@@ -1401,6 +1402,7 @@ export const PUSH_CHANNEL_TO_RPC_MESSAGE: Record<string, string> = {
   "desktop:windowMaximize": "desktopWindowMaximize",
   "desktop:windowUnmaximize": "desktopWindowUnmaximize",
   "desktop:windowClose": "desktopWindowClose",
+  "desktop:shutdownStarted": "desktopShutdownStarted",
   "canvas:windowEvent": "canvasWindowEvent",
   "talkmode:audioChunkPush": "talkmodeAudioChunkPush",
   "talkmode:stateChanged": "talkmodeStateChanged",

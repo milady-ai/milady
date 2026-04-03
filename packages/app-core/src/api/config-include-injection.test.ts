@@ -145,7 +145,7 @@ describe("$include config injection — saveElizaConfig defense-in-depth", () =>
 
     const config = {
       logging: { level: "error" },
-      cloud: { enabled: true, apiKey: "ck-test" },
+      cloud: { apiKey: "ck-test" },
     } as Partial<ElizaConfig> as ElizaConfig;
 
     saveElizaConfig(config);
@@ -154,6 +154,6 @@ describe("$include config injection — saveElizaConfig defense-in-depth", () =>
     expect(fs.existsSync(tmpPersistConfigPath)).toBe(true);
 
     const written = JSON.parse(fs.readFileSync(tmpPersistConfigPath, "utf-8"));
-    expect(written.cloud).toEqual({ enabled: true, apiKey: "ck-test" });
+    expect(written.cloud).toEqual({ apiKey: "ck-test" });
   });
 });

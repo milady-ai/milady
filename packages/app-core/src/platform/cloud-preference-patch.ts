@@ -1,7 +1,12 @@
 import {
   inferOnboardingConnectionFromConfig,
   isLocalProviderConnection,
+  resolveDeploymentTargetInConfig,
 } from "@miladyai/shared/contracts/onboarding";
+import {
+  isElizaCloudLinkedInConfig,
+  resolveElizaCloudTopology,
+} from "@miladyai/shared/contracts";
 import type {
   CloudPreferenceClientLike as ClientLike,
   CloudPreferencePatchState as PatchState,
@@ -29,49 +34,26 @@ function readString(
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function readBoolean(
-  source: Record<string, unknown> | null | undefined,
-  key: string,
-): boolean | null {
-  const value = source?.[key];
-  return typeof value === "boolean" ? value : null;
-}
-
 function hasRemoteConnection(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const cloud = asRecord(config?.cloud);
-  return Boolean(
-    readString(cloud, "remoteApiBase") ||
-      readString(cloud, "remoteAccessToken"),
+  return (
+    resolveDeploymentTargetInConfig(config as Record<string, unknown>)
+      .runtime === "remote"
   );
 }
 
 function cloudHandlesInference(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const cloud = asRecord(config?.cloud);
-  if (readBoolean(cloud, "enabled") !== true) {
-    return false;
-  }
-  const services = asRecord(cloud?.services);
-  const inferenceToggle = services?.inference !== false;
-  const inferenceMode = readString(cloud, "inferenceMode") ?? "cloud";
-  return inferenceMode === "cloud" && inferenceToggle;
+  return resolveElizaCloudTopology(config as Record<string, unknown>).services
+    .inference;
 }
 
 function hasInactiveCloudSignals(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const cloud = asRecord(config?.cloud);
-  const models = asRecord(config?.models);
-  return Boolean(
-    readString(cloud, "apiKey") ||
-      readString(cloud, "provider") === "elizacloud" ||
-      readString(cloud, "inferenceMode") === "cloud" ||
-      readString(models, "small") ||
-      readString(models, "large"),
-  );
+  return isElizaCloudLinkedInConfig(config as Record<string, unknown>);
 }
 
 export function shouldPreferLocalProviderConfig(
@@ -79,13 +61,6 @@ export function shouldPreferLocalProviderConfig(
 ): boolean {
   const connection = inferOnboardingConnectionFromConfig(config);
   if (!connection || !isLocalProviderConnection(connection)) {
-    return false;
-  }
-
-  // If cloud.enabled is explicitly true, the user has actively chosen cloud —
-  // never override their preference even if a local provider is also configured.
-  const cloud = asRecord(config?.cloud);
-  if (readBoolean(cloud, "enabled") === true) {
     return false;
   }
 
@@ -104,36 +79,29 @@ export function normalizeConfigForLocalProviderPreference(
   }
 
   const cloud = asRecord(config.cloud) ?? {};
-  const models = asRecord(config.models);
   const nextCloud: Record<string, unknown> = { ...cloud };
-  delete nextCloud.apiKey;
+  delete nextCloud.enabled;
+  delete nextCloud.provider;
+  delete nextCloud.inferenceMode;
+  delete nextCloud.runtime;
+  delete nextCloud.remoteApiBase;
+  delete nextCloud.remoteAccessToken;
 
-  if (readString(cloud, "provider") === "elizacloud") {
-    delete nextCloud.provider;
-  }
-
-  if (readString(cloud, "inferenceMode") === "cloud") {
-    nextCloud.inferenceMode = "byok";
-  }
-
-  const services = asRecord(cloud.services);
+  const services = asRecord(nextCloud.services);
   if (services) {
-    nextCloud.services = { ...services, inference: false };
-  }
-  nextCloud.enabled = false;
-
-  const nextConfig: StorageConfig = { ...config, cloud: nextCloud };
-
-  if (models) {
-    const nextModels: Record<string, unknown> = { ...models };
-    delete nextModels.small;
-    delete nextModels.large;
-    if (Object.keys(nextModels).length > 0) {
-      nextConfig.models = nextModels;
+    delete services.inference;
+    delete services.tts;
+    delete services.media;
+    delete services.embeddings;
+    delete services.rpc;
+    if (Object.keys(services).length === 0) {
+      delete nextCloud.services;
     } else {
-      delete nextConfig.models;
+      nextCloud.services = services;
     }
   }
+
+  const nextConfig: StorageConfig = { ...config, cloud: nextCloud };
 
   return nextConfig;
 }
@@ -167,11 +135,6 @@ export function installLocalProviderCloudPreferencePatch(
   }
 
   const originalGetConfig = client.getConfig.bind(client);
-  const originalGetCloudStatus = client.getCloudStatus.bind(client);
-  const originalGetCloudCredits =
-    typeof client.getCloudCredits === "function"
-      ? client.getCloudCredits.bind(client)
-      : null;
 
   client[PATCH_STATE] = {
     getConfig: client.getConfig,
@@ -189,40 +152,6 @@ export function installLocalProviderCloudPreferencePatch(
       unknown
     >;
   }) as typeof client.getConfig;
-
-  client.getCloudStatus = async () => {
-    const [status, config] = await Promise.all([
-      originalGetCloudStatus(),
-      originalGetConfig().catch(() => null),
-    ]);
-
-    if (shouldMaskInactiveCloudStatus({ config, status })) {
-      return {
-        ...status,
-        connected: false,
-        enabled: false,
-        hasApiKey: false,
-        reason: "inactive_local_provider",
-      };
-    }
-
-    return status;
-  };
-
-  if (originalGetCloudCredits) {
-    client.getCloudCredits = async () => {
-      const [status, config] = await Promise.all([
-        originalGetCloudStatus().catch(() => null),
-        originalGetConfig().catch(() => null),
-      ]);
-
-      if (shouldMaskInactiveCloudStatus({ config, status })) {
-        return { balance: null, connected: false };
-      }
-
-      return originalGetCloudCredits();
-    };
-  }
 
   return () => {
     const patchState = client[PATCH_STATE] as PatchState | undefined;

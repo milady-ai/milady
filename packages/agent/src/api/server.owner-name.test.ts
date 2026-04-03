@@ -1,5 +1,5 @@
-import type { ElizaConfig } from "@elizaos/core";
 import { describe, expect, it } from "vitest";
+import type { ElizaConfig } from "../config/types.eliza";
 import { resolveAppUserName } from "./server";
 
 function buildConfig(ui?: Record<string, unknown>): ElizaConfig {

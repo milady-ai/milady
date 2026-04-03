@@ -27,14 +27,12 @@ import {
 } from "../api";
 import { scanProviderCredentials } from "../bridge";
 import { mapServerTasksToSessions } from "../coding";
+import type { WalletAddresses } from "@miladyai/agent/contracts/wallet";
 import {
   type deriveOnboardingResumeConnection,
   type StartupErrorState,
 } from "./internal";
-import {
-  loadPersistedConnectionMode,
-  loadPersistedOnboardingComplete,
-} from "./persistence";
+import { loadPersistedOnboardingComplete } from "./persistence";
 import { resolveApiUrl } from "../utils";
 import { COMPANION_ENABLED, type Tab } from "../navigation";
 import {
@@ -88,6 +86,7 @@ export interface StartupCoordinatorDeps {
   setOnboardingStep: (v: OnboardingStep) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
+  setOnboardingCloudApiKey: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingVoiceProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;
@@ -118,8 +117,7 @@ export interface StartupCoordinatorDeps {
   setSelectedVrmIndex: (v: number) => void;
   setCustomVrmUrl: (v: string) => void;
   setCustomBackgroundUrl: (v: string) => void;
-  // biome-ignore lint/suspicious/noExplicitAny: WalletAddresses type from agent contracts
-  setWalletAddresses: (v: any) => void;
+  setWalletAddresses: (v: WalletAddresses) => void;
   setPtySessions: (
     v:
       | CodingAgentSession[]
@@ -148,10 +146,8 @@ export interface StartupCoordinatorDeps {
   forceLocalBootstrapRef: React.MutableRefObject<boolean>;
   initialTabSetRef: React.MutableRefObject<boolean>;
   activeConversationIdRef: React.RefObject<string | null>;
-  // biome-ignore lint/suspicious/noExplicitAny: interval ref typing varies by runtime
-  elizaCloudPollInterval: React.MutableRefObject<any>;
-  // biome-ignore lint/suspicious/noExplicitAny: interval ref typing varies by runtime
-  elizaCloudLoginPollTimer: React.MutableRefObject<any>;
+  elizaCloudPollInterval: React.MutableRefObject<number | null>;
+  elizaCloudLoginPollTimer: React.MutableRefObject<number | null>;
   uiLanguage: UiLanguage;
   onboardingMode: OnboardingMode;
 }

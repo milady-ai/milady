@@ -430,6 +430,7 @@ export interface AppState {
 
   // Eliza Cloud
   elizaCloudEnabled: boolean;
+  elizaCloudVoiceProxyAvailable: boolean;
   elizaCloudConnected: boolean;
   elizaCloudHasPersistedKey: boolean;
   elizaCloudCredits: number | null;
@@ -515,6 +516,7 @@ export interface AppState {
   onboardingStyle: string;
   onboardingRunMode: "local" | "cloud" | "";
   onboardingCloudProvider: string;
+  onboardingCloudApiKey: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;
   onboardingProvider: string;

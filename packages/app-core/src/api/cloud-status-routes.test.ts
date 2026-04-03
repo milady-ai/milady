@@ -77,6 +77,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: false,
       enabled: false,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
@@ -94,6 +95,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: true,
       enabled: false,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: true,
       userId: undefined,
       organizationId: undefined,
@@ -114,6 +116,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: true,
       enabled: true,
+      cloudVoiceProxyAvailable: true,
       hasApiKey: true,
       userId: undefined,
       organizationId: undefined,
@@ -134,6 +137,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: false,
       enabled: true,
+      cloudVoiceProxyAvailable: true,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
@@ -151,6 +155,7 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: false,
       enabled: true,
+      cloudVoiceProxyAvailable: true,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
@@ -170,12 +175,13 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: false,
       enabled: false,
+      cloudVoiceProxyAvailable: false,
       hasApiKey: false,
       reason: "runtime_not_started",
     });
   });
 
-  test("reports cloud as disconnected when explicitly disabled with api key", async () => {
+  test("reports cloud as linked but not enabled when explicitly disabled with api key", async () => {
     const result = await invoke({
       method: "GET",
       pathname: "/api/cloud/status",
@@ -185,10 +191,46 @@ describe("cloud status routes", () => {
 
     expect(result.handled).toBe(true);
     expect(result.payload).toEqual({
-      connected: false,
+      connected: true,
       enabled: false,
-      hasApiKey: false,
-      reason: "runtime_not_started",
+      cloudVoiceProxyAvailable: false,
+      hasApiKey: true,
+      userId: undefined,
+      organizationId: undefined,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+      reason: "api_key_present_runtime_not_started",
+    });
+  });
+
+  test("prefers an explicit local-provider selection over stale cloud flags", async () => {
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/cloud/status",
+      runtime: null,
+      config: {
+        connection: {
+          kind: "local-provider",
+          provider: "openai",
+        },
+        cloud: {
+          enabled: true,
+          provider: "elizacloud",
+          apiKey: "abc123",
+          inferenceMode: "cloud",
+        },
+      } as ElizaConfig,
+    });
+
+    expect(result.handled).toBe(true);
+    expect(result.payload).toEqual({
+      connected: true,
+      enabled: false,
+      cloudVoiceProxyAvailable: false,
+      hasApiKey: true,
+      userId: undefined,
+      organizationId: undefined,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+      reason: "api_key_present_runtime_not_started",
     });
   });
 
@@ -210,11 +252,48 @@ describe("cloud status routes", () => {
     expect(result.payload).toEqual({
       connected: true,
       enabled: true,
+      cloudVoiceProxyAvailable: true,
       hasApiKey: false,
       userId: "user-1",
       organizationId: "org-1",
       topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
       reason: undefined,
+    });
+  });
+
+  test("reports cloud voice proxy availability from canonical tts routing", async () => {
+    const result = await invoke({
+      method: "GET",
+      pathname: "/api/cloud/status",
+      runtime: null,
+      config: {
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          tts: {
+            accountId: "elizacloud",
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+          },
+        },
+        cloud: { apiKey: "abc123" },
+      } as ElizaConfig,
+    });
+
+    expect(result.handled).toBe(true);
+    expect(result.payload).toEqual({
+      connected: true,
+      enabled: false,
+      cloudVoiceProxyAvailable: true,
+      hasApiKey: true,
+      userId: undefined,
+      organizationId: undefined,
+      topUpUrl: "https://www.elizacloud.ai/dashboard/settings?tab=billing",
+      reason: "api_key_present_runtime_not_started",
     });
   });
 

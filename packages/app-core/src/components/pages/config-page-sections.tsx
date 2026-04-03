@@ -3,6 +3,7 @@
  * Extracted from ConfigPageView.tsx.
  */
 
+import { normalizeOnboardingProviderId } from "@miladyai/shared/contracts";
 import { WALLET_RPC_PROVIDER_OPTIONS } from "@miladyai/shared/contracts/wallet";
 import { Button, Switch } from "@miladyai/ui";
 import { useCallback, useEffect, useState } from "react";
@@ -303,7 +304,7 @@ export function renderRpcProviderButtons<T extends string>(
 
 /* ── Cloud services toggle section ───────────────────────────────────── */
 
-type CloudServiceKey = "inference" | "rpc" | "media" | "tts" | "embeddings";
+type CloudServiceKey = "rpc" | "media" | "tts" | "embeddings";
 
 const CLOUD_SERVICE_DEFS: {
   key: CloudServiceKey;
@@ -312,14 +313,6 @@ const CLOUD_SERVICE_DEFS: {
   descriptionKey: string;
   descriptionDefault: string;
 }[] = [
-  {
-    key: "inference",
-    labelKey: "configpageview.ServiceInferenceLabel",
-    labelDefault: "Inference",
-    descriptionKey: "configpageview.ServiceInferenceDesc",
-    descriptionDefault:
-      "Use cloud-hosted models for chat and completions. Disable to use your own API keys.",
-  },
   {
     key: "rpc",
     labelKey: "configpageview.ServiceRpcLabel",
@@ -353,14 +346,24 @@ const CLOUD_SERVICE_DEFS: {
   },
 ];
 
+function isCloudServiceRouteSelected(route: unknown): boolean {
+  if (!route || typeof route !== "object" || Array.isArray(route)) {
+    return false;
+  }
+  const routeRecord = route as Record<string, unknown>;
+  return (
+    routeRecord.transport === "cloud-proxy" &&
+    normalizeOnboardingProviderId(routeRecord.backend) === "elizacloud"
+  );
+}
+
 export function CloudServicesSection() {
   const { t } = useApp();
   const [services, setServices] = useState<Record<CloudServiceKey, boolean>>({
-    inference: true,
-    rpc: true,
-    media: true,
-    tts: true,
-    embeddings: true,
+    rpc: false,
+    media: false,
+    tts: false,
+    embeddings: false,
   });
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -372,19 +375,18 @@ export function CloudServicesSection() {
       .getConfig()
       .then((cfg) => {
         if (cancelled) return;
-        const cloud = cfg.cloud as
-          | { services?: Record<string, boolean> }
-          | undefined;
-        if (cloud?.services) {
-          setServices((prev) => ({
-            ...prev,
-            ...Object.fromEntries(
-              Object.entries(cloud.services ?? {}).filter(
-                ([, v]) => typeof v === "boolean",
-              ),
-            ),
-          }));
-        }
+        const routing =
+          cfg.serviceRouting &&
+          typeof cfg.serviceRouting === "object" &&
+          !Array.isArray(cfg.serviceRouting)
+            ? (cfg.serviceRouting as Record<string, unknown>)
+            : {};
+        setServices({
+          rpc: isCloudServiceRouteSelected(routing.rpc),
+          media: isCloudServiceRouteSelected(routing.media),
+          tts: isCloudServiceRouteSelected(routing.tts),
+          embeddings: isCloudServiceRouteSelected(routing.embeddings),
+        });
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
@@ -399,10 +401,25 @@ export function CloudServicesSection() {
       const updated = { ...services, [key]: newValue };
       setServices(updated);
       setSaving(true);
-      const inferenceMode = updated.inference ? "cloud" : "byok";
       try {
+        const cfg = await client.getConfig();
+        const existingRouting =
+          cfg.serviceRouting &&
+          typeof cfg.serviceRouting === "object" &&
+          !Array.isArray(cfg.serviceRouting)
+            ? (cfg.serviceRouting as Record<string, unknown>)
+            : {};
         await client.updateConfig({
-          cloud: { services: updated, inferenceMode },
+          serviceRouting: {
+            ...existingRouting,
+            [key]: newValue
+              ? {
+                  backend: "elizacloud",
+                  transport: "cloud-proxy",
+                  accountId: "elizacloud",
+                }
+              : null,
+          },
         });
         setNeedsRestart(true);
       } catch (err) {

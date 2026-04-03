@@ -372,7 +372,7 @@ export function getStartupStatusPath(): string {
   return startupStatusPath;
 }
 
-function diagnosticLog(message: string): void {
+export function diagnosticLog(message: string): void {
   const timestamp = new Date().toISOString();
   const line = `[${timestamp}] ${message}\n`;
   console.log(message);

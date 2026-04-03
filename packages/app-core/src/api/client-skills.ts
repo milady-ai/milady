@@ -3,10 +3,8 @@
  * custom actions, WhatsApp, agent events.
  */
 
-import type {
-  CustomActionDef,
-  CustomActionHandler,
-} from "@miladyai/agent/contracts/config";
+import type { CustomActionDef } from "@miladyai/agent/contracts/config";
+import { MiladyClient } from "./client-base";
 import type {
   AppLaunchResult,
   AppStopResult,
@@ -30,7 +28,6 @@ import type {
   SkillMarketplaceResult,
   SkillScanReportSummary,
 } from "./client-types";
-import { MiladyClient } from "./client-base";
 
 // ---------------------------------------------------------------------------
 // Declaration merging
@@ -330,10 +327,14 @@ MiladyClient.prototype.installRegistryPlugin = async function (
   name,
   autoRestart = true,
 ) {
-  return this.fetch("/api/plugins/install", {
-    method: "POST",
-    body: JSON.stringify({ name, autoRestart }),
-  });
+  return this.fetch(
+    "/api/plugins/install",
+    {
+      method: "POST",
+      body: JSON.stringify({ name, autoRestart }),
+    },
+    { timeoutMs: 120_000 },
+  );
 };
 
 MiladyClient.prototype.uninstallRegistryPlugin = async function (

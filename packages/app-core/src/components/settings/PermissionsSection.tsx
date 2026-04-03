@@ -166,11 +166,17 @@ function DesktopPermissionsView() {
                       "permissionssection.MacSystemPermissionsDescription",
                       "Review the native permissions Milady needs for desktop control, voice input, and visual analysis. macOS changes may require opening System Settings.",
                     )
-                  : translateWithFallback(
-                      t,
-                      "permissionssection.SystemPermissionsDescription",
-                      "Grant the runtime access it needs for voice input, camera capture, shell tasks, and desktop automation features.",
-                    )}
+                  : platform === "win32"
+                    ? translateWithFallback(
+                        t,
+                        "permissionssection.WindowsSystemPermissionsDescription",
+                        "Open Windows privacy settings for microphone and camera, then verify access by using those features in Milady.",
+                      )
+                    : translateWithFallback(
+                        t,
+                        "permissionssection.SystemPermissionsDescription",
+                        "Grant the runtime access it needs for voice input, camera capture, shell tasks, and desktop automation features.",
+                      )}
               </div>
             </div>
             <div className={SETTINGS_PANEL_ACTIONS_CLASSNAME}>
@@ -247,11 +253,17 @@ function DesktopPermissionsView() {
             </>
           ) : (
             <>
-              {translateWithFallback(
-                t,
-                "permissionssection.GrantPermissionsNote",
-                "Grant permissions to enable features like voice input and computer control.",
-              )}
+              {platform === "win32"
+                ? translateWithFallback(
+                    t,
+                    "permissionssection.WindowsGrantPermissionsNote",
+                    "Windows may not list Milady as a named app here. Use Privacy settings to enable microphone and camera access, then test them in Milady.",
+                  )
+                : translateWithFallback(
+                    t,
+                    "permissionssection.GrantPermissionsNote",
+                    "Grant permissions to enable features like voice input and computer control.",
+                  )}
             </>
           )}
         </div>
@@ -419,20 +431,27 @@ function DesktopOnboardingPermissions({
     handleRefresh,
     loading,
     permissions,
+    platform,
   } = useDesktopPermissionsState();
   const [grantingPermissions, setGrantingPermissions] = useState(false);
+  const usesWindowsPrivacyFlow = platform === "win32";
 
   /** Check if all critical permissions are granted (or not applicable). */
   const allGranted = hasRequiredOnboardingPermissions(permissions);
+  const canProceed = allGranted || usesWindowsPrivacyFlow;
   const essentialPermissions = SYSTEM_PERMISSIONS.filter((def) => {
     const state = permissions?.[def.id];
     return state?.status !== "not-applicable" && def.id !== "shell";
   });
-  const footerStatusMessage = allGranted
+  const footerStatusMessage = canProceed
     ? translateWithFallback(
         t,
-        "permissionssection.PermissionReadyNote",
-        "All required permissions are ready. Continue when you're ready.",
+        usesWindowsPrivacyFlow
+          ? "permissionssection.WindowsPermissionReadyNote"
+          : "permissionssection.PermissionReadyNote",
+        usesWindowsPrivacyFlow
+          ? "Windows privacy settings are advisory here. Continue, then verify microphone and camera directly in Milady."
+          : "All required permissions are ready. Continue when you're ready.",
       )
     : translateWithFallback(
         t,
@@ -460,7 +479,8 @@ function DesktopOnboardingPermissions({
       const refreshed = await handleRefresh();
       if (
         refreshed &&
-        hasRequiredOnboardingPermissions(refreshed.permissions)
+        (usesWindowsPrivacyFlow ||
+          hasRequiredOnboardingPermissions(refreshed.permissions))
       ) {
         onContinue();
       }
@@ -475,6 +495,7 @@ function DesktopOnboardingPermissions({
     handleRequest,
     onContinue,
     permissions,
+    usesWindowsPrivacyFlow,
   ]);
 
   const handleSkipForNow = useCallback(() => {
@@ -528,11 +549,17 @@ function DesktopOnboardingPermissions({
           )}
         </div>
         <div className="text-[var(--muted)] text-sm">
-          {translateWithFallback(
-            t,
-            "permissionssection.GrantPermissionsTo",
-            "Grant permissions to unlock desktop features.",
-          )}
+          {platform === "win32"
+            ? translateWithFallback(
+                t,
+                "permissionssection.WindowsGrantPermissionsTo",
+                "Open Windows privacy settings to prepare microphone and camera access for desktop features.",
+              )
+            : translateWithFallback(
+                t,
+                "permissionssection.GrantPermissionsTo",
+                "Grant permissions to unlock desktop features.",
+              )}
         </div>
       </div>
 
@@ -546,6 +573,7 @@ function DesktopOnboardingPermissions({
             def.id,
             status,
             state?.canRequest ?? false,
+            platform,
           );
 
           return (
@@ -596,12 +624,16 @@ function DesktopOnboardingPermissions({
       <div className="mt-[18px] border-t border-border/50 pt-3.5">
         <div className="mb-4 space-y-1 text-[11px] leading-5 text-muted">
           <p>{footerStatusMessage}</p>
-          {!allGranted ? (
+          {!canProceed ? (
             <p>
               {translateWithFallback(
                 t,
-                "permissionssection.PermissionGrantNote",
-                "Granting now will request what can be approved immediately and open Settings for anything that must be enabled there.",
+                platform === "win32"
+                  ? "permissionssection.WindowsPermissionGrantNote"
+                  : "permissionssection.PermissionGrantNote",
+                platform === "win32"
+                  ? "This opens Windows privacy settings for microphone and camera. Milady may not appear as a named app there; the real check is whether capture works back in Milady."
+                  : "Granting now will request what can be approved immediately and open Settings for anything that must be enabled there.",
               )}
             </p>
           ) : null}
@@ -621,7 +653,7 @@ function DesktopOnboardingPermissions({
             <span />
           )}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-            {!allGranted ? (
+            {!canProceed ? (
               <Button
                 type="button"
                 variant="outline"
@@ -640,9 +672,9 @@ function DesktopOnboardingPermissions({
               data-testid="permissions-onboarding-continue"
               className="min-h-11 min-w-[8.5rem] rounded-xl px-4 py-2 text-[11px] font-semibold leading-tight text-txt-strong hover:text-txt-strong"
               disabled={grantingPermissions}
-              onClick={allGranted ? () => onContinue() : handleGrantPermissions}
+              onClick={canProceed ? () => onContinue() : handleGrantPermissions}
             >
-              {allGranted
+              {canProceed
                 ? translateWithFallback(t, "onboarding.savedMyKeys", "Continue")
                 : grantingPermissions
                   ? translateWithFallback(

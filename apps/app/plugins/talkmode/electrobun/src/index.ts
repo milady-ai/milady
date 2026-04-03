@@ -159,6 +159,13 @@ export class TalkModeElectrobun implements TalkModePlugin {
     }
   }
 
+  private async getDesktopPlatform(): Promise<string | null> {
+    return this.invokeBridge<string>(
+      "permissionsGetPlatform",
+      "permissions:getPlatform",
+    );
+  }
+
   // MARK: - Plugin Methods
 
   async start(options?: {
@@ -187,20 +194,20 @@ export class TalkModeElectrobun implements TalkModePlugin {
     if (nativeResult) {
       const started = nativeResult.available ?? nativeResult.started ?? false;
       if (started) {
-        this.enabled = true;
-        this.setupNativeListeners();
-        this.setState("listening", "Listening");
-
         const whisperStatus = await this.invokeBridge<{ available: boolean }>(
           "talkmodeIsWhisperAvailable",
           "talkmode:isWhisperAvailable",
         );
         if (whisperStatus?.available) {
+          this.enabled = true;
+          this.setupNativeListeners();
+          this.setState("listening", "Listening");
           this.captureSampleRate = this.config.stt?.sampleRate ?? 16000;
           await this.startAudioCapture();
+          return { started: true };
         }
 
-        return { started: true };
+        await this.invokeBridge("talkmodeStop", "talkmode:stop");
       }
 
       if (nativeResult.error || nativeResult.reason) {
@@ -767,6 +774,10 @@ export class TalkModeElectrobun implements TalkModePlugin {
   }
 
   async requestPermissions(): Promise<TalkModePermissionStatus> {
+    if ((await this.getDesktopPlatform()) === "win32") {
+      return this.checkPermissions();
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => {

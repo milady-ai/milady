@@ -64,6 +64,7 @@ describe("Cloud auth status persistence", () => {
     expect(data.connected).toBe(true);
     expect(data.hasApiKey).toBe(true);
     expect(data.enabled).toBe(true);
+    expect(data.cloudVoiceProxyAvailable).toBe(true);
   });
 
   it("disconnect clears cached cloud auth and persists config change", async () => {
@@ -76,14 +77,19 @@ describe("Cloud auth status persistence", () => {
     expect(statusAfter.data.connected).toBe(false);
     expect(statusAfter.data.hasApiKey).toBe(false);
     expect(statusAfter.data.enabled).toBe(false);
+    expect(statusAfter.data.cloudVoiceProxyAvailable).toBe(false);
     expect(statusAfter.data.reason).toBe("runtime_not_started");
 
     const persistedRaw = fs.readFileSync(configPath, "utf-8");
     const persisted = JSON.parse(persistedRaw) as {
       cloud?: { enabled?: boolean; apiKey?: string };
+      linkedAccounts?: {
+        elizacloud?: { status?: string };
+      };
     };
-    expect(persisted.cloud?.enabled).toBe(false);
+    expect(persisted.cloud).toBeUndefined();
     expect(persisted.cloud?.apiKey).toBeUndefined();
+    expect(persisted.linkedAccounts?.elizacloud?.status).toBe("unlinked");
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
   });

@@ -200,13 +200,14 @@ List all ejected plugins (plugins that have been copied to a local directory for
 
 ### POST /api/plugins/install
 
-Install a plugin package from npm.
+Install a plugin package from npm. Plugin installation may take significant time depending on the package size and dependency tree. The client SDK uses a 120-second timeout for this endpoint (compared to the default timeout used for other API calls).
 
 **Request Body**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | string | Yes | npm package name |
+| `autoRestart` | boolean | No | Whether to restart the agent after install (defaults to `true`) |
 | `version` | string | No | Version (defaults to latest) |
 
 **Response**

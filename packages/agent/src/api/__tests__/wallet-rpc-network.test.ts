@@ -105,7 +105,11 @@ describe("wallet-rpc network mode", () => {
 
     const readiness = resolveWalletRpcReadiness({
       env: {},
-      cloud: { apiKey: "cloud-key", baseUrl: "https://cloud.example" },
+      cloud: {
+        apiKey: "cloud-key",
+        baseUrl: "https://cloud.example",
+        services: { rpc: true },
+      },
     } as ElizaConfig);
 
     expect(readiness.bscRpcUrls).toEqual(
@@ -117,5 +121,22 @@ describe("wallet-rpc network mode", () => {
     expect(readiness.bscRpcUrls.join(" ")).not.toContain("/proxy/evm-rpc/bsc");
     expect(readiness.solanaRpcUrls.join(" ")).not.toContain("/proxy/solana-rpc");
   });
-});
 
+  it("does not expose cloud RPC URLs when cloud is linked but RPC is not selected", () => {
+    const readiness = resolveWalletRpcReadiness({
+      env: {},
+      cloud: {
+        apiKey: "cloud-key",
+        baseUrl: "https://cloud.example",
+      },
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+      },
+    } as ElizaConfig);
+
+    expect(readiness.cloudManagedAccess).toBe(false);
+    expect(readiness.bscRpcUrls.join(" ")).not.toContain("/proxy/evm-rpc/");
+    expect(readiness.solanaRpcUrls.join(" ")).not.toContain("/proxy/solana-rpc");
+  });
+});

@@ -1,7 +1,12 @@
 import type http from "node:http";
 import { logger } from "@elizaos/core";
+import {
+  isCloudInferenceSelectedInConfig,
+  migrateLegacyRuntimeConfig,
+} from "@miladyai/shared/contracts/onboarding";
 import { normalizeCloudSiteUrl } from "../cloud/base-url";
 import { validateCloudBaseUrl } from "../cloud/validate-url";
+import { applyCanonicalOnboardingConfig } from "./provider-switch-config";
 import {
   readJsonBody as parseJsonBody,
   sendJson,
@@ -315,12 +320,24 @@ export async function handleCloudRoute(
     loginPollSpan.success({ statusCode: pollRes.status });
 
     if (data.status === "authenticated" && data.apiKey) {
+      migrateLegacyRuntimeConfig(state.config as Record<string, unknown>);
       const cloud = (state.config.cloud ?? {}) as NonNullable<
         CloudConfigLike["cloud"]
       >;
-      cloud.enabled = true;
       cloud.apiKey = data.apiKey;
       (state.config as Record<string, unknown>).cloud = cloud;
+      applyCanonicalOnboardingConfig(state.config as never, {
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+      });
+      const cloudInferenceSelected = isCloudInferenceSelectedInConfig(
+        state.config as Record<string, unknown>,
+      );
+      migrateLegacyRuntimeConfig(state.config as Record<string, unknown>);
       try {
         if (state.saveConfig) {
           state.saveConfig(state.config);
@@ -335,7 +352,11 @@ export async function handleCloudRoute(
       }
 
       process.env.ELIZAOS_CLOUD_API_KEY = data.apiKey;
-      process.env.ELIZAOS_CLOUD_ENABLED = "true";
+      if (cloudInferenceSelected) {
+        process.env.ELIZAOS_CLOUD_ENABLED = "true";
+      } else {
+        delete process.env.ELIZAOS_CLOUD_ENABLED;
+      }
 
       if (state.runtime) {
         if (!state.runtime.character.secrets) {
@@ -346,7 +367,11 @@ export async function handleCloudRoute(
           string
         >;
         secrets.ELIZAOS_CLOUD_API_KEY = data.apiKey;
-        secrets.ELIZAOS_CLOUD_ENABLED = "true";
+        if (cloudInferenceSelected) {
+          secrets.ELIZAOS_CLOUD_ENABLED = "true";
+        } else {
+          delete secrets.ELIZAOS_CLOUD_ENABLED;
+        }
 
         await state.runtime.updateAgent(state.runtime.agentId, {
           secrets: { ...secrets },
@@ -507,9 +532,19 @@ export async function handleCloudRoute(
     const cloud = (state.config.cloud ?? {}) as NonNullable<
       CloudConfigLike["cloud"]
     >;
-    cloud.enabled = false;
     delete cloud.apiKey;
     (state.config as Record<string, unknown>).cloud = cloud;
+    applyCanonicalOnboardingConfig(state.config as never, {
+      deploymentTarget: { runtime: "local" },
+      linkedAccounts: {
+        elizacloud: {
+          status: "unlinked",
+          source: "api-key",
+        },
+      },
+      clearRoutes: ["llmText", "tts", "media", "embeddings", "rpc"],
+    });
+    migrateLegacyRuntimeConfig(state.config as Record<string, unknown>);
 
     try {
       if (state.saveConfig) {

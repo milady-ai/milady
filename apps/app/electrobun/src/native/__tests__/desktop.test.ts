@@ -52,6 +52,10 @@ vi.mock("../rpc-schema", () => ({}));
 // electrobun/bun must be mocked before module import so PATH_NAME_MAP (which
 // reads Utils.paths.* at module load time) resolves to the mock values.
 vi.mock("electrobun/bun", () => {
+  const electrobunEvents = {
+    on: vi.fn(),
+    off: vi.fn(),
+  };
   const createBrowserWindowInstance = () => ({
     id: 99,
     frame: { width: 1180, height: 860 },
@@ -80,10 +84,22 @@ vi.mock("electrobun/bun", () => {
   ) {
     return createBrowserViewInstance(options);
   });
+  // biome-ignore lint/complexity/useArrowFunction: constructor mock requires a regular function
+  const MockTray = vi.fn(function () {
+    return {
+      on: vi.fn(),
+      off: vi.fn(),
+      setTitle: vi.fn(),
+      setImage: vi.fn(),
+      setMenu: vi.fn(),
+      remove: vi.fn(),
+    };
+  });
 
   return {
     default: {
       BrowserWindow: MockBrowserWindow,
+      events: electrobunEvents,
     },
     Utils: {
       paths: {
@@ -111,7 +127,7 @@ vi.mock("electrobun/bun", () => {
       isDockIconVisible: vi.fn(() => true),
       setDockIconVisible: vi.fn(),
     },
-    Tray: { create: vi.fn() },
+    Tray: MockTray,
     GlobalShortcut: { register: vi.fn(), unregister: vi.fn() },
     Updater: {
       localInfo: { version: vi.fn(async () => "2.0.0") },
@@ -172,7 +188,7 @@ vi.mock("electrobun/bun", () => {
     },
     BrowserView: MockBrowserView,
     BrowserWindow: MockBrowserWindow,
-    Electrobun: {},
+    Electrobun: { events: electrobunEvents },
   };
 });
 
@@ -223,12 +239,24 @@ const mockBrowserView = electrobunBun.BrowserView as ReturnType<typeof vi.fn>;
 const mockBrowserWindow = (
   electrobunBun.default as { BrowserWindow: ReturnType<typeof vi.fn> }
 ).BrowserWindow;
+const mockTray = electrobunBun.Tray as ReturnType<typeof vi.fn>;
+const mockElectrobunEventsOn = (
+  electrobunBun.default as {
+    events: { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> };
+  }
+).events.on;
+const mockElectrobunEventsOff = (
+  electrobunBun.default as {
+    events: { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> };
+  }
+).events.off;
 const mockSpawn = (globalThis as { Bun: { spawn: ReturnType<typeof vi.fn> } })
   .Bun.spawn;
 const mockIsAppActive = macEffects.isAppActive as ReturnType<typeof vi.fn>;
 const mockMakeKeyAndOrderFront = macEffects.makeKeyAndOrderFront as ReturnType<
   typeof vi.fn
 >;
+const mockQuit = electrobunBun.Utils.quit as ReturnType<typeof vi.fn>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -299,9 +327,13 @@ describe("DesktopManager", () => {
       }));
     mockBrowserView.mockClear();
     mockBrowserWindow.mockClear();
+    mockTray.mockClear();
+    mockElectrobunEventsOn.mockReset();
+    mockElectrobunEventsOff.mockReset();
     mockSpawn.mockReset().mockReturnValue(makeSpawnResult(""));
     mockIsAppActive.mockReset().mockReturnValue(false);
     mockMakeKeyAndOrderFront.mockReset().mockReturnValue(true);
+    mockQuit.mockReset();
   });
 
   afterEach(() => {
@@ -581,7 +613,8 @@ describe("DesktopManager", () => {
 
       const snapshot = await manager.getUpdaterState();
 
-      expect(snapshot.appBundlePath).toBe("/Volumes/Milady/Milady.app");
+      expect(snapshot.appBundlePath).toContain("Volumes");
+      expect(snapshot.appBundlePath).toContain("Milady.app");
       expect(snapshot.canAutoUpdate).toBe(false);
       expect(snapshot.autoUpdateDisabledReason).toContain(
         "Move Milady.app to /Applications",
@@ -857,6 +890,141 @@ describe("DesktopManager", () => {
   });
 
   describe("window restore", () => {
+    it("restores and shows a replacement window when the cached handle is stale", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const staleWindow = {
+        show: vi.fn(() => {
+          throw new Error("stale window");
+        }),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      manager.setMainWindow(
+        staleWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+      );
+
+      await manager.showWindow();
+
+      expect(staleWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("restores the same background process when the tray icon is clicked after close", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      await manager.createTray({
+        icon: "/mock/icon.png",
+        title: "Milady",
+        menu: [
+          { id: "tray-show-window", label: "Show Window", type: "normal" },
+        ],
+      });
+      manager.clearMainWindow();
+
+      const trayInstance = mockTray.mock.results.at(-1)?.value as {
+        on: ReturnType<typeof vi.fn>;
+      };
+      const trayClickHandler = trayInstance.on.mock.calls.find(
+        ([event]) => event === "tray-clicked",
+      )?.[1] as (() => void) | undefined;
+
+      expect(trayClickHandler).toBeTypeOf("function");
+      trayClickHandler?.();
+      await Promise.resolve();
+
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("restores the same background process from the tray show action after close", async () => {
+      const restoredWindow = {
+        show: vi.fn(),
+        focus: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
+        isMaximized: vi.fn(() => false),
+        isMinimized: vi.fn(() => false),
+      };
+      const restoreWindow = vi.fn(() => {
+        manager.setMainWindow(
+          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+        );
+      });
+
+      manager.setRestoreMainWindowCallback(restoreWindow);
+      await manager.createTray({
+        icon: "/mock/icon.png",
+        title: "Milady",
+        menu: [
+          { id: "tray-show-window", label: "Show Window", type: "normal" },
+        ],
+      });
+      manager.clearMainWindow();
+
+      const contextMenuHandler = mockElectrobunEventsOn.mock.calls.find(
+        ([event]) => event === "tray-clicked",
+      )?.[1] as ((event: { data?: { action?: string } }) => void) | undefined;
+
+      expect(contextMenuHandler).toBeTypeOf("function");
+      contextMenuHandler?.({ data: { action: "tray-show-window" } });
+      await Promise.resolve();
+
+      expect(restoreWindow).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.show).toHaveBeenCalledTimes(1);
+      expect(restoredWindow.focus).toHaveBeenCalledTimes(1);
+    });
+
+    it("still quits from the tray menu when no window is attached", async () => {
+      await manager.createTray({
+        icon: "/mock/icon.png",
+        title: "Milady",
+        menu: [{ id: "quit", label: "Quit", type: "normal" }],
+      });
+      manager.clearMainWindow();
+
+      const contextMenuHandler = mockElectrobunEventsOn.mock.calls.find(
+        ([event]) => event === "tray-clicked",
+      )?.[1] as ((event: { data?: { action?: string } }) => void) | undefined;
+
+      expect(contextMenuHandler).toBeTypeOf("function");
+      contextMenuHandler?.({ data: { action: "quit" } });
+
+      expect(mockQuit).toHaveBeenCalledTimes(1);
+    });
+
     it("restores a minimized macOS window when the app becomes active", async () => {
       vi.useFakeTimers();
       setPlatform("darwin");

@@ -12,18 +12,50 @@ import {
   SelectValue,
   SettingsControls,
 } from "@miladyai/ui";
-import { useCallback, useEffect, useState } from "react";
-import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../../bridge";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  getPlugins,
+  invokeDesktopBridgeRequest,
+  isElectrobunRuntime,
+} from "../../bridge";
 import { useApp } from "../../state";
 import type { MediaCategory } from "./media-settings-types";
 import { getNestedValue } from "./media-settings-types";
 import type { MediaConfig } from "../../api";
+
+type CameraPluginLike = {
+  getDevices?: () => Promise<{
+    devices: Array<{ deviceId: string; label: string }>;
+  }>;
+  checkPermissions?: () => Promise<{
+    camera?: "granted" | "denied" | "prompt";
+  }>;
+  requestPermissions?: () => Promise<{
+    camera?: "granted" | "denied" | "prompt";
+  }>;
+  startPreview?: (options: {
+    element: HTMLElement;
+    deviceId?: string;
+  }) => Promise<unknown>;
+  stopPreview?: () => Promise<void>;
+  switchCamera?: (options: { deviceId?: string }) => Promise<unknown>;
+  capturePhoto?: () => Promise<{ base64?: string }>;
+  startRecording?: () => Promise<void>;
+  stopRecording?: () => Promise<{ path?: string }>;
+  getRecordingState?: () => Promise<{
+    isRecording?: boolean;
+    duration?: number;
+  }>;
+};
 
 // ── Desktop Native Capture Controls ───────────────────────────────────
 
 export function DesktopMediaControlPanel() {
   const { t } = useApp();
   const desktopRuntime = isElectrobunRuntime();
+  const cameraPlugin = desktopRuntime
+    ? (getPlugins().camera.plugin as CameraPluginLike)
+    : null;
   const [loading, setLoading] = useState(desktopRuntime);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +82,7 @@ export function DesktopMediaControlPanel() {
       defaultValue: "No photo captured yet.",
     }),
   );
+  const cameraPreviewHostRef = useRef<HTMLDivElement | null>(null);
 
   const formatPermissionStatus = useCallback(
     (status: string) =>
@@ -75,21 +108,9 @@ export function DesktopMediaControlPanel() {
       screenPermissionResult,
       screenRecordingState,
     ] = await Promise.all([
-      invokeDesktopBridgeRequest<{
-        devices: Array<{ deviceId: string; label: string }>;
-        available: boolean;
-      }>({
-        rpcMethod: "cameraGetDevices",
-        ipcChannel: "camera:getDevices",
-      }),
-      invokeDesktopBridgeRequest<{ status: string }>({
-        rpcMethod: "cameraCheckPermissions",
-        ipcChannel: "camera:checkPermissions",
-      }),
-      invokeDesktopBridgeRequest<{ recording: boolean; duration: number }>({
-        rpcMethod: "cameraGetRecordingState",
-        ipcChannel: "camera:getRecordingState",
-      }),
+      cameraPlugin?.getDevices?.(),
+      cameraPlugin?.checkPermissions?.(),
+      cameraPlugin?.getRecordingState?.(),
       invokeDesktopBridgeRequest<{
         sources: Array<{ id: string; name: string }>;
         available: boolean;
@@ -117,8 +138,8 @@ export function DesktopMediaControlPanel() {
 
     setCameraDevices(nextDevices);
     setSelectedCameraId((current) => current || nextDevices[0]?.deviceId || "");
-    setCameraPermission(cameraPermissionResult?.status ?? "unknown");
-    setCameraRecording(cameraRecordingState?.recording ?? false);
+    setCameraPermission(cameraPermissionResult?.camera ?? "unknown");
+    setCameraRecording(cameraRecordingState?.isRecording ?? false);
     setCameraRecordingDuration(cameraRecordingState?.duration ?? 0);
     setScreenSources(nextSources);
     setSelectedSourceId((current) => current || nextSources[0]?.id || "");
@@ -127,11 +148,18 @@ export function DesktopMediaControlPanel() {
     setScreenPaused(screenRecordingState?.paused ?? false);
     setScreenRecordingDuration(screenRecordingState?.duration ?? 0);
     setLoading(false);
-  }, [desktopRuntime]);
+  }, [cameraPlugin, desktopRuntime]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(
+    () => () => {
+      void cameraPlugin?.stopPreview?.().catch(() => {});
+    },
+    [cameraPlugin],
+  );
 
   const runAction = useCallback(
     async (
@@ -279,10 +307,7 @@ export function DesktopMediaControlPanel() {
                 void runAction(
                   "media-camera-permission",
                   async () => {
-                    await invokeDesktopBridgeRequest<{ status: string }>({
-                      rpcMethod: "cameraRequestPermissions",
-                      ipcChannel: "camera:requestPermissions",
-                    });
+                    await cameraPlugin?.requestPermissions?.();
                   },
                   t("mediasettingssection.CameraPermissionRequestSent", {
                     defaultValue: "Camera permission request sent.",
@@ -303,31 +328,21 @@ export function DesktopMediaControlPanel() {
                   "media-camera-preview",
                   async () => {
                     if (cameraPreviewRunning) {
-                      await invokeDesktopBridgeRequest<void>({
-                        rpcMethod: "cameraStopPreview",
-                        ipcChannel: "camera:stopPreview",
-                      });
+                      await cameraPlugin?.stopPreview?.();
                       setCameraPreviewRunning(false);
                       return;
                     }
-
-                    const result = await invokeDesktopBridgeRequest<{
-                      available: boolean;
-                      reason?: string;
-                    }>({
-                      rpcMethod: "cameraStartPreview",
-                      ipcChannel: "camera:startPreview",
-                      params: selectedCameraId
-                        ? { deviceId: selectedCameraId }
-                        : {},
-                    });
-                    if (result?.available === false) {
+                    if (!cameraPreviewHostRef.current) {
                       throw new Error(
                         t("mediasettingssection.CameraPreviewUnavailable", {
                           defaultValue: "Camera preview unavailable.",
                         }),
                       );
                     }
+                    await cameraPlugin?.startPreview?.({
+                      element: cameraPreviewHostRef.current,
+                      deviceId: selectedCameraId || undefined,
+                    });
                     setCameraPreviewRunning(true);
                   },
                   cameraPreviewRunning
@@ -364,10 +379,8 @@ export function DesktopMediaControlPanel() {
                         }),
                       );
                     }
-                    await invokeDesktopBridgeRequest<{ available: boolean }>({
-                      rpcMethod: "cameraSwitchCamera",
-                      ipcChannel: "camera:switchCamera",
-                      params: { deviceId: selectedCameraId },
+                    await cameraPlugin?.switchCamera?.({
+                      deviceId: selectedCameraId,
                     });
                   },
                   t("mediasettingssection.CameraSwitched", {
@@ -390,22 +403,9 @@ export function DesktopMediaControlPanel() {
                 void runAction(
                   "media-camera-capture",
                   async () => {
-                    const result = await invokeDesktopBridgeRequest<{
-                      available: boolean;
-                      data?: string;
-                    }>({
-                      rpcMethod: "cameraCapturePhoto",
-                      ipcChannel: "camera:capturePhoto",
-                    });
-                    if (result?.available === false) {
-                      throw new Error(
-                        t("mediasettingssection.PhotoCaptureUnavailable", {
-                          defaultValue: "Photo capture unavailable.",
-                        }),
-                      );
-                    }
+                    const result = await cameraPlugin?.capturePhoto?.();
                     setLastPhotoStatus(
-                      result?.data
+                      result?.base64
                         ? t("mediasettingssection.PhotoCapturedInMemory", {
                             defaultValue: "Photo captured in memory.",
                           })
@@ -434,30 +434,12 @@ export function DesktopMediaControlPanel() {
                   "media-camera-recording",
                   async () => {
                     if (cameraRecording) {
-                      const result = await invokeDesktopBridgeRequest<{
-                        available: boolean;
-                        path?: string;
-                      }>({
-                        rpcMethod: "cameraStopRecording",
-                        ipcChannel: "camera:stopRecording",
-                      });
+                      const result = await cameraPlugin?.stopRecording?.();
                       setLastSavedPath(result?.path ?? null);
                       return;
                     }
 
-                    const result = await invokeDesktopBridgeRequest<{
-                      available: boolean;
-                    }>({
-                      rpcMethod: "cameraStartRecording",
-                      ipcChannel: "camera:startRecording",
-                    });
-                    if (result?.available === false) {
-                      throw new Error(
-                        t("mediasettingssection.CameraRecordingUnavailable", {
-                          defaultValue: "Camera recording unavailable.",
-                        }),
-                      );
-                    }
+                    await cameraPlugin?.startRecording?.();
                   },
                   cameraRecording
                     ? t("mediasettingssection.CameraRecordingStopped", {
@@ -479,6 +461,10 @@ export function DesktopMediaControlPanel() {
                   })}
             </Button>
           </div>
+          <div
+            ref={cameraPreviewHostRef}
+            className="min-h-40 overflow-hidden rounded-lg border border-border/60 bg-black/60"
+          />
           <div className="text-[11px] text-muted">{lastPhotoStatus}</div>
         </div>
 

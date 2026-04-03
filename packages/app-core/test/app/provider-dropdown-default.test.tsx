@@ -7,6 +7,22 @@ import {
 } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+type MockSelectProps = {
+  value: string;
+  onValueChange: (value: string) => void;
+  children?: React.ReactNode;
+};
+
+type MockChildrenProps = {
+  children?: React.ReactNode;
+};
+
+type MockSelectItemProps = {
+  value: string;
+  disabled?: boolean;
+  children?: React.ReactNode;
+};
+
 // ---------------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------------
@@ -45,18 +61,24 @@ vi.mock("@miladyai/app-core/config", () => ({
 }));
 
 vi.mock("@miladyai/ui", async () => {
-  const actual = await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
+  const actual =
+    await vi.importActual<typeof import("@miladyai/ui")>("@miladyai/ui");
   return {
     ...actual,
-    Select: ({ value, onValueChange, children }: any) => (
-      <select value={value} onChange={e => onValueChange(e.target.value)}>
+    Select: ({ value, onValueChange, children }: MockSelectProps) => (
+      <select
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+          onValueChange(e.target.value)
+        }
+      >
         {children}
       </select>
     ),
-    SelectTrigger: ({ children }: any) => <>{children}</>,
+    SelectTrigger: ({ children }: MockChildrenProps) => <>{children}</>,
     SelectValue: () => null,
-    SelectContent: ({ children }: any) => <>{children}</>,
-    SelectItem: ({ value, disabled, children }: any) => (
+    SelectContent: ({ children }: MockChildrenProps) => <>{children}</>,
+    SelectItem: ({ value, disabled, children }: MockSelectItemProps) => (
       <option value={value} disabled={disabled}>
         {children}
       </option>
@@ -359,5 +381,55 @@ describe("ProviderSwitcher provider dropdown default", () => {
     expect(optionLabels).toContain("ChatGPT Subscription");
     expect(optionLabels).not.toContain("providerswitcher.claudeSubscription");
     expect(optionLabels).not.toContain("providerswitcher.chatgptSubscription");
+  });
+
+  it("does not carry a stale non-pi model override when switching to pi-ai", async () => {
+    mockGetConfig.mockResolvedValue({
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+      },
+      models: {},
+      cloud: {
+        enabled: false,
+        inferenceMode: "byok",
+        services: { inference: false },
+      },
+      agents: {
+        defaults: {
+          model: {
+            primary: "openai/gpt-5.2",
+          },
+        },
+      },
+      env: { vars: {} },
+    });
+    mockGetOnboardingOptions.mockResolvedValue({
+      models: [],
+      piAiModels: [],
+      piAiDefaultModel: "",
+    });
+    mockGetSubscriptionStatus.mockResolvedValue({ providers: [] });
+
+    let tree!: ReactTestRenderer;
+    await act(async () => {
+      tree = create(React.createElement(ProviderSwitcher, defaultProps()));
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    await act(async () => {
+      getSelect(tree).props.onChange({ target: { value: "pi-ai" } });
+      await Promise.resolve();
+    });
+
+    expect(mockSwitchProvider).toHaveBeenCalledWith(
+      "pi-ai",
+      undefined,
+      undefined,
+    );
+    expect(mockUpdateConfig).not.toHaveBeenCalled();
   });
 });

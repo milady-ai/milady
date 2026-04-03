@@ -1,9 +1,12 @@
 import type { AgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
+import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import {
   isMiladySettingsDebugEnabled,
+  migrateLegacyRuntimeConfig,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
+import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
 import { resolveCloudApiBaseUrl as resolveCanonicalCloudApiBaseUrl } from "@miladyai/agent/cloud/base-url";
 import { validateCloudBaseUrl } from "@miladyai/agent/cloud/validate-url";
 import type { ElizaConfig } from "../config/config";
@@ -24,6 +27,11 @@ const CLOUD_ENV_KEYS = [
   "ELIZAOS_CLOUD_BASE_URL",
   "ELIZAOS_CLOUD_SMALL_MODEL",
   "ELIZAOS_CLOUD_LARGE_MODEL",
+  "ELIZAOS_CLOUD_USE_INFERENCE",
+  "ELIZAOS_CLOUD_USE_TTS",
+  "ELIZAOS_CLOUD_USE_MEDIA",
+  "ELIZAOS_CLOUD_USE_EMBEDDINGS",
+  "ELIZAOS_CLOUD_USE_RPC",
 ] as const;
 
 const CLOUD_RUNTIME_SECRET_KEYS = [
@@ -163,24 +171,19 @@ export function resolveCloudApiKey(
   config: Pick<ElizaConfig, "cloud"> | Record<string, unknown>,
   runtime?: { character?: { secrets?: Record<string, unknown> } } | null,
 ): string | undefined {
-  const cloudRecord = (config as { cloud?: { enabled?: unknown } }).cloud;
-  if (
-    cloudRecord &&
-    typeof cloudRecord === "object" &&
-    cloudRecord.enabled === false
-  ) {
-    // User disconnected cloud or chose BYOK — do not resurrect a key from env,
-    // sealed store, or agent DB. WHY: ~/.milady/.env may still hold
-    // ELIZAOS_CLOUD_API_KEY; without this guard the runtime looks "connected"
-    // and billing routes can rewrite enabled=true back onto disk.
-    return undefined;
-  }
-
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   // 1. Config file (disk)
   const configApiKey = normalizeSecret(
     (config as { cloud?: { apiKey?: string } }).cloud?.apiKey,
   );
   if (configApiKey) return configApiKey;
+
+  if (!isCloudInferenceSelectedInConfig(config as Record<string, unknown>)) {
+    // A linked cloud account is represented by the persisted disk key above.
+    // Do not resurrect cloud from sealed/env/runtime fallbacks when the
+    // canonical connection is local, remote, or unset.
+    return undefined;
+  }
 
   // 2. Sealed in-process secret store
   const sealedKey = normalizeSecret(getCloudSecret("ELIZAOS_CLOUD_API_KEY"));
@@ -203,25 +206,14 @@ export function resolveCloudConnectionSnapshot(
   config: Partial<ElizaConfig>,
   runtime: AgentRuntime | null,
 ): CloudConnectionSnapshot {
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   const cloudRecord =
     config.cloud && typeof config.cloud === "object"
       ? (config.cloud as Record<string, unknown>)
       : undefined;
-  const explicitlyDisabled = cloudRecord?.enabled === false;
-  const provider =
-    typeof cloudRecord?.provider === "string"
-      ? cloudRecord.provider.trim().toLowerCase()
-      : "";
-  const inferenceMode =
-    typeof cloudRecord?.inferenceMode === "string"
-      ? cloudRecord.inferenceMode.trim().toLowerCase()
-      : "";
-  const enabled =
-    !explicitlyDisabled &&
-    (config.cloud?.enabled === true ||
-      getCloudSecret("ELIZAOS_CLOUD_ENABLED") === "true" ||
-      provider === "elizacloud" ||
-      inferenceMode === "cloud");
+  const enabled = isCloudInferenceSelectedInConfig(
+    config as Record<string, unknown>,
+  );
   const apiKey = resolveCloudApiKey(config, runtime);
   const cloudAuth = getCloudAuth(runtime);
   const authConnected = Boolean(cloudAuth?.isAuthenticated?.());
@@ -535,9 +527,19 @@ export async function disconnectUnifiedCloudConnection(args: {
   await clearCloudAuthService(getCloudAuth(runtime));
 
   const nextCloud = { ...(config.cloud ?? {}) };
-  nextCloud.enabled = false;
   delete nextCloud.apiKey;
   config.cloud = nextCloud;
+  applyCanonicalOnboardingConfig(config as ElizaConfig, {
+    deploymentTarget: { runtime: "local" },
+    linkedAccounts: {
+      elizacloud: {
+        status: "unlinked",
+        source: "api-key",
+      },
+    },
+    clearRoutes: ["llmText", "tts", "media", "embeddings", "rpc"],
+  });
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
 
   try {
     saveConfig?.(config);

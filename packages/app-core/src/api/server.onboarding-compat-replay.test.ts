@@ -123,10 +123,19 @@ describe("POST /api/onboarding compat replay", () => {
       const models = (config.models ?? {}) as Record<string, unknown>;
 
       expect(env.GROQ_API_KEY).toBe("gsk-test-groq-key");
-      expect(cloud.enabled).toBe(false);
-      expect(cloud.runtime).toBe("local");
       expect(cloud.apiKey).toBe("stale-cloud-key");
-      expect(cloud.inferenceMode).toBe("byok");
+      expect(
+        (config.linkedAccounts as Record<string, unknown>)?.elizacloud,
+      ).toEqual({
+        status: "linked",
+        source: "api-key",
+      });
+      expect(
+        (config.serviceRouting as Record<string, unknown>)?.llmText,
+      ).toEqual({
+        backend: "groq",
+        transport: "direct",
+      });
       expect(models.small).toBeUndefined();
       expect(models.large).toBeUndefined();
       expect((config.meta as Record<string, unknown>)?.onboardingComplete).toBe(

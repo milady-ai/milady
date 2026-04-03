@@ -33,11 +33,11 @@ export const ELIZA_CLOUD_STATUS_UPDATED_EVENT =
 export interface ElizaCloudStatusUpdatedDetail {
   /** Same as cloud status `connected` (auth or API key on server). */
   connected: boolean;
-  /** Config `cloud.enabled` (and related flags) from the server snapshot. */
+  /** True only when Eliza Cloud inference is the active connection. */
   enabled: boolean;
   /** Server reports a persisted Eliza Cloud API key. */
   hasPersistedApiKey: boolean;
-  /** Prefer for `useVoiceChat` `cloudConnected`: key, enabled, or connected. */
+  /** True only when cloud voice/chat routing should actively use the proxy. */
   cloudVoiceProxyAvailable: boolean;
 }
 

@@ -7,6 +7,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { mockClient } = vi.hoisted(() => ({
   mockClient: {
     hasToken: vi.fn(() => false),
+    setBaseUrl: vi.fn(),
+    setToken: vi.fn(),
     getAuthStatus: vi.fn(async () => ({
       required: false,
       pairingEnabled: false,

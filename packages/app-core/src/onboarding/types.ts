@@ -26,7 +26,7 @@ export type ConnectionFlowSnapshot = Pick<
   | "onboardingElizaCloudTab"
   | "onboardingSubscriptionTab"
 > & {
-  /** `isNative || branding.cloudOnly` — **why:** same predicate as the bootstrap effect; derivation must agree. */
+  /** `branding.cloudOnly` — **why:** cloud-only distributions skip the hosting chooser entirely. */
   forceCloud: boolean;
   isNative: boolean;
   cloudOnly: boolean;
@@ -37,6 +37,7 @@ export type ConnectionFlowSnapshot = Pick<
 export type ConnectionStatePatch = Partial<{
   onboardingRunMode: AppState["onboardingRunMode"];
   onboardingCloudProvider: string;
+  onboardingCloudApiKey: string;
   onboardingProvider: string;
   onboardingApiKey: string;
   onboardingPrimaryModel: string;

@@ -13,14 +13,14 @@ import {
   asApiLikeError,
   clearPersistedOnboardingStep,
   deriveOnboardingResumeConnection,
-  deriveOnboardingResumeFields,
+  deriveOnboardingResumeFieldsFromConfig,
   formatStartupErrorDetail,
   inferOnboardingResumeStep,
   type StartupErrorState,
 } from "./internal";
 import {
   loadPersistedOnboardingStep,
-  savePersistedConnectionMode,
+  savePersistedActiveServer,
 } from "./persistence";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import type { StartupEvent, PlatformPolicy } from "./startup-coordinator";
@@ -114,24 +114,16 @@ export async function runPollingBackend(
         dispatch({ type: "BACKEND_AUTH_REQUIRED" });
         return;
       }
-      const onboardingStatusRes = await client.getOnboardingStatus();
-      const { complete, cloudProvisioned } = onboardingStatusRes;
-      console.log("[milady][startup] onboarding status response:", JSON.stringify(onboardingStatusRes));
+      const { complete } = await client.getOnboardingStatus();
       if (cancelled.current) return;
-      deps.setOnboardingCloudProvisionedContainer(Boolean(cloudProvisioned));
       let sessionComplete =
         complete ||
         deps.onboardingCompletionCommittedRef.current ||
         (ctx?.shouldPreserveCompletedOnboarding ?? false);
 
-      // Cloud-provisioned containers always skip onboarding regardless of
-      // browser storage state. Without this, first-time visitors with no
-      // persisted connection/onboarding state get forced into onboarding
-      // even though the backend reports complete:true.
       if (
         sessionComplete &&
-        !cloudProvisioned &&
-        !ctx?.persistedConnection &&
+        !ctx?.persistedActiveServer &&
         !ctx?.hadPriorOnboarding
       ) {
         sessionComplete = false;
@@ -143,15 +135,15 @@ export async function runPollingBackend(
       }
       if (
         sessionComplete &&
-        !ctx?.persistedConnection &&
-        ctx?.restoredConnection
-      )
-        savePersistedConnectionMode(ctx.restoredConnection);
+        !ctx?.persistedActiveServer &&
+        ctx?.restoredActiveServer
+      ) {
+        savePersistedActiveServer(ctx.restoredActiveServer);
+      }
       if (!complete && ctx?.shouldPreserveCompletedOnboarding)
         console.warn(
           "[milady][startup:init] Preserving completed onboarding despite incomplete backend onboarding status.",
         );
-      console.log("[milady][startup] sessionComplete:", sessionComplete, "complete:", complete, "cloudProvisioned:", cloudProvisioned, "persistedConnection:", !!ctx?.persistedConnection, "hadPrior:", !!ctx?.hadPriorOnboarding);
       deps.setOnboardingComplete(sessionComplete);
 
       if (!sessionComplete) {
@@ -177,7 +169,7 @@ export async function runPollingBackend(
               return;
             }
             const rc = deriveOnboardingResumeConnection(config);
-            const rf = deriveOnboardingResumeFields(rc);
+            const rf = deriveOnboardingResumeFieldsFromConfig(config);
             deps.onboardingResumeConnectionRef.current = rc;
             deps.setOnboardingOptions({
               ...options,
@@ -198,6 +190,8 @@ export async function runPollingBackend(
               );
             if (rf.onboardingCloudProvider !== undefined)
               deps.setOnboardingCloudProvider(rf.onboardingCloudProvider);
+            if (rf.onboardingCloudApiKey !== undefined)
+              deps.setOnboardingCloudApiKey(rf.onboardingCloudApiKey);
             if (rf.onboardingProvider !== undefined)
               deps.setOnboardingProvider(rf.onboardingProvider);
             if (rf.onboardingVoiceProvider !== undefined)
@@ -257,7 +251,6 @@ export async function runPollingBackend(
         }
         return;
       }
-      console.log("[milady][startup] dispatching BACKEND_REACHED onboardingComplete=true");
       dispatch({ type: "BACKEND_REACHED", onboardingComplete: true });
       return;
     } catch (err) {
