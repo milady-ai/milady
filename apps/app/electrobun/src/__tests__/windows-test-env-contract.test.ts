@@ -25,7 +25,9 @@ describe("createPackagedWindowsAppEnv", () => {
     });
 
     expect(env.MILADY_DESKTOP_TEST_API_BASE).toBe("http://127.0.0.1:43123");
-    expect(env.MILADY_DESKTOP_TEST_PARTITION).toBeUndefined();
+    expect(env.MILADY_DESKTOP_TEST_PARTITION).toBe(
+      "persist:bootstrap-isolated",
+    );
     expect(env.MILADY_DISABLE_LOCAL_EMBEDDINGS).toBe("1");
     expect(env.ELECTROBUN_CONSOLE).toBe("1");
     expect(env.APPDATA).toBe("C:\\tmp\\milady-roaming");

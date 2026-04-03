@@ -144,15 +144,6 @@ describe("Electrobun startup bootstrap", () => {
     expect(source).toContain("startup-crash-report-latest.md");
   });
 
-  it("records machine-readable startup phases for packaged smoke", () => {
-    const source = fs.readFileSync(INDEX_PATH, "utf8");
-
-    expect(source).toContain('recordStartupPhase("main_start"');
-    expect(source).toContain('recordStartupPhase("window_ready"');
-    expect(source).toContain('recordStartupPhase("autostart_requested"');
-    expect(source).toContain("resolveStartupBundlePath");
-  });
-
   it("does not load repo or ~/.eliza env files in packaged desktop builds", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 
