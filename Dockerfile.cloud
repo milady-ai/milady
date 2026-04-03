@@ -132,35 +132,7 @@ RUN set -eux; \
   # Clean up source maps and test dirs
   find /runtime/node_modules -name '*.map' -delete 2>/dev/null; \
   find /runtime/node_modules -type d -name '__tests__' -prune -exec rm -rf {} + 2>/dev/null; \
-<<<<<<< Updated upstream
   find /runtime/node_modules -type d -name 'test' -prune -exec rm -rf {} + 2>/dev/null
-=======
-  find /runtime/node_modules -type d -name 'test' -prune -exec rm -rf {} + 2>/dev/null; \
-  rm -rf \
-    /runtime/node_modules/@storybook \
-    /runtime/node_modules/storybook \
-    /runtime/node_modules/testcafe \
-    /runtime/node_modules/testcafe-* \
-    /runtime/node_modules/playwright \
-    /runtime/node_modules/playwright-core \
-    /runtime/node_modules/@playwright \
-    /runtime/node_modules/@biomejs \
-    /runtime/node_modules/@elizaos/plugin-agent-orchestrator \
-    /runtime/node_modules/coding-agent-adapters \
-    /runtime/node_modules/pty-console \
-    /runtime/node_modules/pty-state-capture \
-    /runtime/node_modules/pty-manager \
-    /runtime/node_modules/git-workspace-service \
-    /runtime/node_modules/vite \
-    /runtime/node_modules/vite-node \
-    /runtime/node_modules/tsup \
-    /runtime/node_modules/@typescript-eslint \
-    /runtime/node_modules/prettier \
-    /runtime/node_modules/typescript \
-    /runtime/node_modules/@types \
-    /runtime/node_modules/.vite \
-    2>/dev/null || true
->>>>>>> Stashed changes
 
 FROM node:${NODE_VERSION}-slim
 ARG OCI_SOURCE
