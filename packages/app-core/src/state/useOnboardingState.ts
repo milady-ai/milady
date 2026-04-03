@@ -116,30 +116,65 @@ const EMPTY_TOKENS: Record<ConnectorTokenKey, string> = {
   githubToken: "",
 };
 
-function loadInitialRemoteSelection(): {
-  apiBase: string;
-  accessToken: string;
-  connected: boolean;
-} {
+function loadInitialServerSelection(): Pick<
+  OnboardingState,
+  "runMode" | "cloudProvider" | "remote" | "remoteApiBase" | "remoteToken"
+> {
   const activeServer = loadPersistedActiveServer();
-  if (activeServer?.kind !== "remote") {
+  if (!activeServer) {
     return {
-      apiBase: "",
-      accessToken: "",
-      connected: false,
+      runMode: "",
+      cloudProvider: "",
+      remote: {
+        status: "idle",
+        error: null,
+      },
+      remoteApiBase: "",
+      remoteToken: "",
+    };
+  }
+
+  if (activeServer.kind === "local") {
+    return {
+      runMode: "local",
+      cloudProvider: "",
+      remote: {
+        status: "idle",
+        error: null,
+      },
+      remoteApiBase: "",
+      remoteToken: "",
+    };
+  }
+
+  if (activeServer.kind === "cloud") {
+    return {
+      runMode: "cloud",
+      cloudProvider: "elizacloud",
+      remote: {
+        status: "idle",
+        error: null,
+      },
+      remoteApiBase: "",
+      remoteToken: activeServer.accessToken?.trim() ?? "",
     };
   }
 
   const apiBase = activeServer.apiBase?.trim() ?? "";
   return {
-    apiBase,
-    accessToken: activeServer.accessToken?.trim() ?? "",
-    connected: isRemoteApiBase(apiBase),
+    runMode: "cloud",
+    cloudProvider: "remote",
+    remote: {
+      status: isRemoteApiBase(apiBase) ? "connected" : "idle",
+      error: null,
+    },
+    remoteApiBase: apiBase,
+    remoteToken: activeServer.accessToken?.trim() ?? "",
   };
 }
 
 function createInitialState(cloudOnly?: boolean): OnboardingState {
-  const initialRemote = loadInitialRemoteSelection();
+  const initialServer = loadInitialServerSelection();
   return {
     step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",
@@ -151,8 +186,8 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     ownerName: "anon",
     style: "chen",
     avatar: 1,
-    runMode: cloudOnly ? "cloud" : "",
-    cloudProvider: cloudOnly ? "elizacloud" : "",
+    runMode: cloudOnly ? "cloud" : initialServer.runMode,
+    cloudProvider: cloudOnly ? "elizacloud" : initialServer.cloudProvider,
     cloudApiKey: "",
     provider: "",
     apiKey: "",
@@ -165,12 +200,9 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     existingInstallDetected: false,
     detectedProviders: [],
     connectorTokens: { ...EMPTY_TOKENS },
-    remote: {
-      status: initialRemote.connected ? "connected" : "idle",
-      error: null,
-    },
-    remoteApiBase: initialRemote.apiBase,
-    remoteToken: initialRemote.accessToken,
+    remote: initialServer.remote,
+    remoteApiBase: initialServer.remoteApiBase,
+    remoteToken: initialServer.remoteToken,
     subscriptionTab: "token",
     elizaCloudTab: "login",
     selectedChains: new Set(["evm", "solana"]),

@@ -76,20 +76,21 @@ export class MiladyClient {
     this.clientId = MiladyClient.generateClientId();
     this._token = token?.trim() || null;
 
+    const bootBase = getBootConfig().apiBase;
     const injectedBase = getElizaApiBase();
     const storedBase =
       typeof window !== "undefined"
         ? window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY)
         : null;
-    const bootBase = getBootConfig().apiBase;
 
-    this._explicitBase = baseUrl != null || Boolean(storedBase?.trim());
+    this._explicitBase =
+      baseUrl != null || Boolean(bootBase?.trim() || storedBase?.trim());
 
-    // Priority: explicit arg > desktop injection > boot config > session storage > same origin.
-    // Injected global (window.__MILADY_API_BASE__) must beat stale sessionStorage
-    // from a prior cloud/remote session so the desktop always connects to the
-    // correct local agent.
-    this._baseUrl = baseUrl ?? injectedBase ?? bootBase ?? storedBase ?? "";
+    // Priority: explicit arg > boot config > desktop injection > session storage > same origin.
+    // `client.setBaseUrl()` updates the boot config, so it must beat the
+    // shell-injected local default once the user has chosen a different
+    // server. Injection still beats stale session state from prior sessions.
+    this._baseUrl = baseUrl ?? bootBase ?? injectedBase ?? storedBase ?? "";
   }
 
   /**
@@ -101,9 +102,11 @@ export class MiladyClient {
    */
   protected get baseUrl(): string {
     if (!this._explicitBase) {
-      const bootBase = getBootConfig().apiBase ?? getElizaApiBase();
-      if (bootBase && bootBase !== this._baseUrl) {
-        this._baseUrl = bootBase;
+      const bootBase = getBootConfig().apiBase;
+      const injectedBase = getElizaApiBase();
+      const preferredBase = bootBase ?? injectedBase;
+      if (preferredBase && preferredBase !== this._baseUrl) {
+        this._baseUrl = preferredBase;
       }
     }
     return this._baseUrl;

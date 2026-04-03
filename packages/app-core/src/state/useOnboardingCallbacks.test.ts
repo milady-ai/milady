@@ -2,7 +2,7 @@
 
 import { act, renderHook } from "@testing-library/react";
 import { MiladyClient } from "../api";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildOnboardingStyleVoiceConfig,
   useOnboardingCallbacks,
@@ -47,6 +47,12 @@ describe("buildOnboardingStyleVoiceConfig", () => {
 });
 
 describe("useOnboardingCallbacks", () => {
+  afterEach(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    vi.restoreAllMocks();
+  });
+
   it("records detected providers without rewriting the hosting target", () => {
     const setOnboardingDetectedProviders = vi.fn();
     const setOnboardingRunMode = vi.fn();
@@ -99,5 +105,68 @@ describe("useOnboardingCallbacks", () => {
       { id: "openrouter", apiKey: "sk-or-test" },
     ]);
     expect(setOnboardingRunMode).not.toHaveBeenCalled();
+  });
+
+  it("clears a persisted remote target before retrying local bootstrap", () => {
+    window.localStorage.setItem(
+      "milady:active-server",
+      JSON.stringify({
+        id: "remote:https://ren.example.com",
+        kind: "remote",
+        label: "ren.example.com",
+        apiBase: "https://ren.example.com",
+      }),
+    );
+
+    const retryStartup = vi.fn();
+    const client = {
+      setBaseUrl: vi.fn(),
+      setToken: vi.fn(),
+    } as unknown as MiladyClient;
+
+    const { result } = renderHook(() => {
+      const onboarding = useOnboardingState();
+      return useOnboardingCallbacks({
+        onboarding,
+        setOnboardingStep: vi.fn(),
+        setOnboardingMode: vi.fn(),
+        setOnboardingActiveGuide: vi.fn(),
+        addDeferredOnboardingTask: vi.fn(),
+        setOnboardingDetectedProviders: vi.fn(),
+        setOnboardingRunMode: vi.fn(),
+        setOnboardingCloudProvider: vi.fn(),
+        setOnboardingCloudApiKey: vi.fn(),
+        setOnboardingProvider: vi.fn(),
+        setOnboardingApiKey: vi.fn(),
+        setOnboardingPrimaryModel: vi.fn(),
+        setOnboardingRemoteApiBase: vi.fn(),
+        setOnboardingRemoteToken: vi.fn(),
+        setOnboardingRemoteConnecting: vi.fn(),
+        setOnboardingRemoteError: vi.fn(),
+        setOnboardingRemoteConnected: vi.fn(),
+        setPostOnboardingChecklistDismissed: vi.fn(),
+        setOnboardingComplete: vi.fn(),
+        coordinatorOnboardingCompleteRef: { current: null },
+        initialTabSetRef: { current: false },
+        setTab: vi.fn(),
+        defaultLandingTab: "chat",
+        loadCharacter: async () => {},
+        uiLanguage: "en",
+        selectedVrmIndex: 1,
+        walletConfig: {},
+        elizaCloudConnected: false,
+        setActionNotice: vi.fn(),
+        retryStartup,
+        forceLocalBootstrapRef: { current: false },
+        client,
+      });
+    });
+
+    act(() => {
+      result.current.handleOnboardingUseLocalBackend();
+    });
+
+    expect(window.localStorage.getItem("milady:active-server")).toBeNull();
+    expect(retryStartup).toHaveBeenCalledTimes(1);
   });
 });
