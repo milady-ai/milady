@@ -652,9 +652,8 @@ describe("Electrobun release workflow drift", () => {
     expect(smokeScript).toContain(
       '$startupSessionId = "milady-windows-smoke-"',
     );
-    expect(smokeScript).toContain(
-      "$startupStateFile = Join-Path $env:RUNNER_TEMP",
-    );
+    expect(smokeScript).toContain("$tempRoot = if ($env:RUNNER_TEMP)");
+    expect(smokeScript).toContain("$startupStateFile = Join-Path $tempRoot");
     expect(smokeScript).toContain(
       '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
     );
