@@ -51,9 +51,12 @@ import {
 } from "./native/mac-window-effects";
 import { getPermissionManager } from "./native/permissions";
 import { checkWebGpuSupport } from "./native/webgpu-browser-support";
-import { readBuiltPreloadScript } from "./preload-validation";
 import { resolveRendererAsset } from "./renderer-static";
 import { registerRpcHandlers } from "./rpc-handlers";
+import {
+  readResolvedPreloadScript,
+  resolveRendererAssetDir,
+} from "./runtime-layout";
 import { startScreenshotDevServer } from "./screenshot-dev-server";
 import { recordStartupPhase, resolveStartupBundlePath } from "./startup-trace";
 import {
@@ -575,7 +578,7 @@ function sendToActiveRenderer(message: string, payload?: unknown): void {
  * Returns the base URL e.g. "http://localhost:5174".
  */
 async function startRendererServer(): Promise<string> {
-  const rendererDir = path.resolve(import.meta.dir, "../renderer");
+  const rendererDir = resolveRendererAssetDir(import.meta.dir);
   if (!fs.existsSync(rendererDir)) {
     console.warn("[Renderer] renderer dir not found:", rendererDir);
     return "";
@@ -699,7 +702,7 @@ async function resolveRendererUrl(): Promise<string> {
 
   if (!rendererUrl) {
     // Last resort: file:// (may have CORS issues with crossorigin module scripts)
-    rendererUrl = `file://${path.resolve(import.meta.dir, "../renderer/index.html")}`;
+    rendererUrl = `file://${path.join(resolveRendererAssetDir(import.meta.dir), "index.html")}`;
     console.warn(
       "[Main] Falling back to file:// renderer URL — CORS issues possible",
     );
@@ -720,7 +723,7 @@ async function createMainWindow(): Promise<BrowserWindow> {
   // setting up Milady's direct Electrobun RPC bridge on the window.
   let preload: string;
   try {
-    preload = readBuiltPreloadScript(import.meta.dir);
+    preload = readResolvedPreloadScript(import.meta.dir);
   } catch (err) {
     console.error("[Main] Failed to read preload script:", err);
     preload = "// preload unavailable";
@@ -1596,7 +1599,7 @@ async function main(): Promise<void> {
     createWindow: (options) =>
       new BrowserWindow(options) as unknown as ManagedWindowLike,
     resolveRendererUrl,
-    readPreload: () => readBuiltPreloadScript(import.meta.dir),
+    readPreload: () => readResolvedPreloadScript(import.meta.dir),
     wireRpc: (window) => wireSettingsRpc(window as unknown as BrowserWindow),
     injectApiBase: (window) =>
       injectApiBase(window as unknown as BrowserWindow),

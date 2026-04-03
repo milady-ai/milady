@@ -40,7 +40,7 @@ describe("Electrobun startup bootstrap", () => {
   it("validates the built preload before creating the BrowserWindow", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
     const validateIndex = source.indexOf(
-      "preload = readBuiltPreloadScript(import.meta.dir);",
+      "preload = readResolvedPreloadScript(import.meta.dir);",
     );
     const browserWindowIndex = source.indexOf("const win = new BrowserWindow(");
 
@@ -69,6 +69,13 @@ describe("Electrobun startup bootstrap", () => {
 
     expect(source).toContain("resolveDesktopRuntimeMode");
     expect(source).toContain("resolveInitialApiBase");
+  });
+
+  it("resolves packaged renderer and preload assets from the app resource root", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("resolveRendererAssetDir(import.meta.dir)");
+    expect(source).toContain("readResolvedPreloadScript(import.meta.dir)");
   });
 
   it("guards embedded agent startup behind local runtime mode", () => {
