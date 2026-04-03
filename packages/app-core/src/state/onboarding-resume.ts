@@ -4,6 +4,7 @@ import {
   resolveDeploymentTargetInConfig,
   type OnboardingConnection,
 } from "@miladyai/shared/contracts";
+import { buildOnboardingServerSelection } from "../onboarding/server-target";
 import type { BuildOnboardingConnectionArgs } from "../onboarding-config";
 import { asRecord } from "./config-readers";
 import type { OnboardingStep } from "./types";
@@ -64,10 +65,11 @@ export function deriveOnboardingResumeFields(
   }
 
   switch (connection.kind) {
-    case "cloud-managed":
+    case "cloud-managed": {
+      const selection = buildOnboardingServerSelection("elizacloud");
       return {
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "elizacloud",
+        onboardingRunMode: selection.runMode,
+        onboardingCloudProvider: selection.cloudProvider,
         onboardingCloudApiKey: connection.apiKey ?? "",
         onboardingVoiceProvider: "",
         onboardingVoiceApiKey: "",
@@ -80,10 +82,12 @@ export function deriveOnboardingResumeFields(
         onboardingPrimaryModel: "",
         onboardingOpenRouterModel: "",
       };
-    case "local-provider":
+    }
+    case "local-provider": {
+      const selection = buildOnboardingServerSelection("local");
       return {
-        onboardingRunMode: "local",
-        onboardingCloudProvider: "",
+        onboardingRunMode: selection.runMode,
+        onboardingCloudProvider: selection.cloudProvider,
         onboardingProvider: connection.provider,
         onboardingApiKey: connection.apiKey ?? "",
         onboardingVoiceProvider: "",
@@ -100,10 +104,12 @@ export function deriveOnboardingResumeFields(
         onboardingRemoteApiBase: "",
         onboardingRemoteToken: "",
       };
-    case "remote-provider":
+    }
+    case "remote-provider": {
+      const selection = buildOnboardingServerSelection("remote");
       return {
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "remote",
+        onboardingRunMode: selection.runMode,
+        onboardingCloudProvider: selection.cloudProvider,
         onboardingProvider: connection.provider ?? "",
         onboardingApiKey: connection.apiKey ?? "",
         onboardingVoiceProvider: "",
@@ -120,6 +126,7 @@ export function deriveOnboardingResumeFields(
         onboardingRemoteApiBase: connection.remoteApiBase,
         onboardingRemoteToken: connection.remoteAccessToken ?? "",
       };
+    }
   }
 }
 
@@ -130,18 +137,20 @@ export function deriveOnboardingResumeFieldsFromConfig(
   if (!connection) {
     const deploymentTarget = resolveDeploymentTargetInConfig(config);
     if (deploymentTarget.runtime === "remote") {
+      const selection = buildOnboardingServerSelection("remote");
       return {
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "remote",
+        onboardingRunMode: selection.runMode,
+        onboardingCloudProvider: selection.cloudProvider,
         onboardingRemoteConnected: Boolean(deploymentTarget.remoteApiBase),
         onboardingRemoteApiBase: deploymentTarget.remoteApiBase ?? "",
         onboardingRemoteToken: deploymentTarget.remoteAccessToken ?? "",
       };
     }
     if (deploymentTarget.runtime === "cloud") {
+      const selection = buildOnboardingServerSelection("elizacloud");
       return {
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "elizacloud",
+        onboardingRunMode: selection.runMode,
+        onboardingCloudProvider: selection.cloudProvider,
       };
     }
     return {};

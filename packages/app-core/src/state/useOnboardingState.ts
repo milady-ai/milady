@@ -9,6 +9,10 @@
 import { useCallback, useReducer, useRef } from "react";
 import type { OnboardingOptions } from "../api";
 import {
+  activeServerKindToOnboardingServerTarget,
+  buildOnboardingServerSelection,
+} from "../onboarding/server-target";
+import {
   loadPersistedActiveServer,
   loadPersistedOnboardingStep,
   saveOnboardingStep,
@@ -135,9 +139,12 @@ function loadInitialServerSelection(): Pick<
   }
 
   if (activeServer.kind === "local") {
+    const selection = buildOnboardingServerSelection(
+      activeServerKindToOnboardingServerTarget(activeServer.kind),
+    );
     return {
-      runMode: "local",
-      cloudProvider: "",
+      runMode: selection.runMode,
+      cloudProvider: selection.cloudProvider,
       remote: {
         status: "idle",
         error: null,
@@ -148,9 +155,12 @@ function loadInitialServerSelection(): Pick<
   }
 
   if (activeServer.kind === "cloud") {
+    const selection = buildOnboardingServerSelection(
+      activeServerKindToOnboardingServerTarget(activeServer.kind),
+    );
     return {
-      runMode: "cloud",
-      cloudProvider: "elizacloud",
+      runMode: selection.runMode,
+      cloudProvider: selection.cloudProvider,
       remote: {
         status: "idle",
         error: null,
@@ -161,9 +171,12 @@ function loadInitialServerSelection(): Pick<
   }
 
   const apiBase = activeServer.apiBase?.trim() ?? "";
+  const selection = buildOnboardingServerSelection(
+    activeServerKindToOnboardingServerTarget(activeServer.kind),
+  );
   return {
-    runMode: "cloud",
-    cloudProvider: "remote",
+    runMode: selection.runMode,
+    cloudProvider: selection.cloudProvider,
     remote: {
       status: isRemoteApiBase(apiBase) ? "connected" : "idle",
       error: null,

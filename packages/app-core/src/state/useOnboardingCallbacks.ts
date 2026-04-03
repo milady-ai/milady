@@ -26,6 +26,9 @@ import {
 } from "../onboarding/flow";
 import { buildOnboardingRuntimeConfig } from "../onboarding-config";
 import {
+  resolveOnboardingServerTarget,
+} from "../onboarding/server-target";
+import {
   clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
   createPersistedActiveServer,
@@ -363,10 +366,13 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         },
       });
 
-      const isSandboxMode =
-        onboardingRunMode === "cloud" &&
-        onboardingCloudProvider === "elizacloud";
-      const isLocalMode = onboardingRunMode === "local" || !onboardingRunMode;
+      const serverTarget = resolveOnboardingServerTarget({
+        runMode: onboardingRunMode,
+        cloudProvider: onboardingCloudProvider,
+      });
+      const isSandboxMode = serverTarget === "elizacloud";
+      const isLocalMode = serverTarget === "local" || !serverTarget;
+      const isRemoteMode = serverTarget === "remote";
 
       if (isSandboxMode) {
         const cloudApiBase =
@@ -430,10 +436,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         savePersistedActiveServer(
           createPersistedActiveServer({ kind: "local" }),
         );
-      } else if (
-        onboardingRunMode === "cloud" &&
-        onboardingCloudProvider === "remote"
-      ) {
+      } else if (isRemoteMode) {
         savePersistedActiveServer(
           createPersistedActiveServer({
             kind: "remote",
@@ -608,8 +611,10 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       // Skip voice provider selection if they set up Eliza Cloud
       if (
         nextStep === "voice" &&
-        onboardingRunMode === "cloud" &&
-        onboardingCloudProvider === "elizacloud"
+        resolveOnboardingServerTarget({
+          runMode: onboardingRunMode,
+          cloudProvider: onboardingCloudProvider,
+        }) === "elizacloud"
       ) {
         nextStep = resolveOnboardingNextStep(nextStep);
       }
@@ -653,8 +658,10 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     // Skip voice provider selection if they set up Eliza Cloud
     if (
       previousStep === "voice" &&
-      onboardingRunMode === "cloud" &&
-      onboardingCloudProvider === "elizacloud"
+      resolveOnboardingServerTarget({
+        runMode: onboardingRunMode,
+        cloudProvider: onboardingCloudProvider,
+      }) === "elizacloud"
     ) {
       previousStep = resolveOnboardingPreviousStep(previousStep);
     }

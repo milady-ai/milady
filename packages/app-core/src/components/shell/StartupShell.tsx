@@ -21,6 +21,7 @@ import {
   savePersistedActiveServer,
   useApp,
 } from "../../state";
+import { buildOnboardingServerSelection } from "../../onboarding/server-target";
 import type { StartupErrorState } from "../../state/types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
@@ -131,6 +132,7 @@ export function StartupShell() {
 
   const seedSplashTarget = useCallback(
     (target: "local" | "remote" | "elizacloud", remoteApiBase?: string) => {
+      const selection = buildOnboardingServerSelection(target);
       clearClientConnectionIntent();
       clearPersistedConnectionMode();
       goToOnboardingStep("identity");
@@ -140,18 +142,15 @@ export function StartupShell() {
       setState("onboardingRemoteToken", "");
 
       if (target === "local") {
-        setState("onboardingRunMode", "local");
-        setState("onboardingCloudProvider", "");
+        setState("onboardingRunMode", selection.runMode);
+        setState("onboardingCloudProvider", selection.cloudProvider);
         setState("onboardingRemoteConnected", false);
         setState("onboardingRemoteApiBase", "");
         return;
       }
 
-      setState("onboardingRunMode", "cloud");
-      setState(
-        "onboardingCloudProvider",
-        target === "elizacloud" ? "elizacloud" : "remote",
-      );
+      setState("onboardingRunMode", selection.runMode);
+      setState("onboardingCloudProvider", selection.cloudProvider);
       setState("onboardingRemoteConnected", Boolean(remoteApiBase));
       setState("onboardingRemoteApiBase", remoteApiBase ?? "");
     },

@@ -9,6 +9,7 @@ import type {
   LinkedAccountsConfig,
   ServiceRoutingConfig,
 } from "@miladyai/shared/contracts/service-routing";
+import { resolveOnboardingServerTarget } from "./onboarding/server-target";
 
 export interface BuildOnboardingConnectionArgs {
   onboardingRunMode: "local" | "cloud" | "";
@@ -61,6 +62,11 @@ export function resolveOnboardingPrimaryModel(args: {
 export function buildOnboardingConnectionConfig(
   args: BuildOnboardingConnectionArgs,
 ): OnboardingConnection | null {
+  const serverTarget = resolveOnboardingServerTarget({
+    runMode: args.onboardingRunMode,
+    cloudProvider: args.onboardingCloudProvider,
+  });
+
   if (args.onboardingProvider === "elizacloud") {
     return {
       kind: "cloud-managed",
@@ -77,7 +83,7 @@ export function buildOnboardingConnectionConfig(
 
   const providerId = resolveLocalProviderId(args.onboardingProvider);
   if (!providerId) {
-    if (args.onboardingCloudProvider === "remote") {
+    if (serverTarget === "remote") {
       return {
         kind: "remote-provider",
         remoteApiBase: args.onboardingRemoteApiBase.trim(),
@@ -93,10 +99,7 @@ export function buildOnboardingConnectionConfig(
     onboardingOpenRouterModel: args.onboardingOpenRouterModel,
   });
 
-  if (
-    args.onboardingRunMode === "cloud" &&
-    args.onboardingCloudProvider === "remote"
-  ) {
+  if (serverTarget === "remote") {
     return {
       kind: "remote-provider",
       remoteApiBase: args.onboardingRemoteApiBase.trim(),
@@ -119,6 +122,10 @@ export function buildOnboardingRuntimeConfig(
   args: BuildOnboardingConnectionArgs,
 ): BuildOnboardingRuntimeConfigResult {
   const connection = buildOnboardingConnectionConfig(args);
+  const serverTarget = resolveOnboardingServerTarget({
+    runMode: args.onboardingRunMode,
+    cloudProvider: args.onboardingCloudProvider,
+  });
   const linkedAccounts: LinkedAccountsConfig = {};
   const cloudApiKey = trimToUndefined(args.onboardingCloudApiKey);
   if (cloudApiKey) {
@@ -129,7 +136,7 @@ export function buildOnboardingRuntimeConfig(
   }
 
   const deploymentTarget: DeploymentTargetConfig =
-    args.onboardingCloudProvider === "remote"
+    serverTarget === "remote"
       ? {
           runtime: "remote",
           provider: "remote",
@@ -138,9 +145,7 @@ export function buildOnboardingRuntimeConfig(
             ? { remoteAccessToken: trimToUndefined(args.onboardingRemoteToken) }
             : {}),
         }
-      : args.onboardingRunMode === "cloud" &&
-          args.onboardingCloudProvider === "elizacloud" &&
-          !args.onboardingRemoteConnected
+      : serverTarget === "elizacloud" && !args.onboardingRemoteConnected
         ? {
             runtime: "cloud",
             provider: "elizacloud",

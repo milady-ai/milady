@@ -34,6 +34,11 @@ import type {
   ConnectionTransitionResult,
   ConnectionUiSpec,
 } from "./types";
+import {
+  buildOnboardingServerSelection,
+  resolveOnboardingServerTarget,
+  type OnboardingServerTarget,
+} from "./server-target";
 
 export type {
   ConnectionEffect,
@@ -106,14 +111,34 @@ export const CONNECTION_TRANSITIONS: ReadonlyArray<ConnectionTransitionDocRow> =
     },
   ];
 
+function toOnboardingTargetPatch(
+  target: OnboardingServerTarget,
+): ConnectionStatePatch {
+  const selection = buildOnboardingServerSelection(target);
+  return {
+    onboardingRunMode: selection.runMode,
+    onboardingCloudProvider: selection.cloudProvider,
+  };
+}
+
 /** **Why exported:** tests and docs; also shared by `derive` and `resolveConnectionUiSpec` so policy lives once. */
 export function getEffectiveRunMode(
   snapshot: ConnectionFlowSnapshot,
 ): "local" | "cloud" | "" {
+  return toOnboardingTargetPatch(getEffectiveServerTarget(snapshot))
+    .onboardingRunMode as "local" | "cloud" | "";
+}
+
+export function getEffectiveServerTarget(
+  snapshot: ConnectionFlowSnapshot,
+): OnboardingServerTarget {
   if (snapshot.forceCloud && snapshot.onboardingRunMode === "") {
     return "local";
   }
-  return snapshot.onboardingRunMode;
+  return resolveOnboardingServerTarget({
+    runMode: snapshot.onboardingRunMode,
+    cloudProvider: snapshot.onboardingCloudProvider,
+  });
 }
 
 /** True when the neural link grid path is active (local run mode or already connected to remote). */
@@ -124,12 +149,12 @@ export function computeShowProviderSelection(
     return true;
   }
 
-  const runMode = getEffectiveRunMode(snapshot);
-  if (!runMode) {
+  const target = getEffectiveServerTarget(snapshot);
+  if (!target) {
     return false;
   }
 
-  return runMode === "local" || snapshot.onboardingCloudProvider !== "remote";
+  return target !== "remote";
 }
 
 /**
@@ -169,7 +194,7 @@ export function resolveConnectionUiSpec(
 }
 
 const resetCloudSelectionPatch = (): ConnectionStatePatch => ({
-  onboardingCloudProvider: "",
+  ...toOnboardingTargetPatch(""),
   onboardingApiKey: "",
   onboardingRemoteError: null,
   onboardingRemoteConnecting: false,
@@ -177,7 +202,6 @@ const resetCloudSelectionPatch = (): ConnectionStatePatch => ({
 
 const resetHostingSelectionPatch = (): ConnectionStatePatch => ({
   ...resetCloudSelectionPatch(),
-  onboardingRunMode: "",
 });
 
 /**
@@ -211,7 +235,7 @@ export function applyConnectionTransition(
       return {
         kind: "patch",
         patch: {
-          onboardingRunMode: "local",
+          ...toOnboardingTargetPatch("local"),
           onboardingProvider: "",
           onboardingApiKey: "",
           onboardingPrimaryModel: "",
@@ -222,8 +246,7 @@ export function applyConnectionTransition(
       return {
         kind: "patch",
         patch: {
-          onboardingRunMode: "local",
-          onboardingCloudProvider: "",
+          ...toOnboardingTargetPatch("local"),
           onboardingRemoteError: null,
           onboardingRemoteConnecting: false,
         },
@@ -232,8 +255,7 @@ export function applyConnectionTransition(
       return {
         kind: "patch",
         patch: {
-          onboardingRunMode: "cloud",
-          onboardingCloudProvider: "remote",
+          ...toOnboardingTargetPatch("remote"),
           onboardingProvider: "",
           onboardingApiKey: "",
           onboardingPrimaryModel: "",
@@ -243,8 +265,7 @@ export function applyConnectionTransition(
       return {
         kind: "patch",
         patch: {
-          onboardingRunMode: "cloud",
-          onboardingCloudProvider: "elizacloud",
+          ...toOnboardingTargetPatch("elizacloud"),
           onboardingProvider: "",
           onboardingApiKey: "",
           onboardingPrimaryModel: "",
