@@ -314,15 +314,33 @@ export function deriveCompatOnboardingReplayBody(
     | Record<string, unknown>;
 } {
   const connection = resolvePersistedOnboardingConnection(body);
-  const deploymentTarget = normalizeDeploymentTargetConfig(
+  const explicitDeploymentTarget = normalizeDeploymentTargetConfig(
     body.deploymentTarget,
   );
+  const deploymentTarget =
+    explicitDeploymentTarget ??
+    (connection?.kind === "remote-provider"
+      ? {
+          runtime: "remote" as const,
+          provider: "remote" as const,
+          remoteApiBase: connection.remoteApiBase,
+          ...(connection.remoteAccessToken
+            ? { remoteAccessToken: connection.remoteAccessToken }
+            : {}),
+        }
+      : body.runMode === "cloud"
+        ? {
+            runtime: "cloud" as const,
+            provider: "elizacloud" as const,
+          }
+        : connection
+          ? { runtime: "local" as const }
+          : undefined);
   const linkedAccounts = normalizeLinkedAccountsConfig(body.linkedAccounts);
   const serviceRouting = normalizeServiceRoutingConfig(body.serviceRouting);
   const isCloudMode =
     deploymentTarget?.runtime === "cloud" ||
-    body.runMode === "cloud" ||
-    connection?.kind === "cloud-managed";
+    body.runMode === "cloud";
 
   const canonicalReplayFields = {
     ...(deploymentTarget ? { deploymentTarget } : {}),
@@ -332,12 +350,12 @@ export function deriveCompatOnboardingReplayBody(
 
   if (connection?.kind === "cloud-managed") {
     return {
-      isCloudMode: true,
+      isCloudMode,
       replayBody: {
         ...body,
         ...canonicalReplayFields,
-        runMode: "cloud",
-        cloudProvider: "elizacloud",
+        runMode: isCloudMode ? "cloud" : "local",
+        ...(isCloudMode ? { cloudProvider: "elizacloud" } : {}),
         ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
         ...(connection.smallModel ? { smallModel: connection.smallModel } : {}),
         ...(connection.largeModel ? { largeModel: connection.largeModel } : {}),
@@ -347,11 +365,11 @@ export function deriveCompatOnboardingReplayBody(
 
   if (connection?.kind === "local-provider") {
     return {
-      isCloudMode: false,
+      isCloudMode,
       replayBody: {
         ...body,
         ...canonicalReplayFields,
-        runMode: "local",
+        runMode: isCloudMode ? "cloud" : "local",
         provider: connection.provider,
         ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
         ...(connection.primaryModel

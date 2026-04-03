@@ -925,15 +925,6 @@ function resolveLegacyServiceRoutingInConfig(
     }
   }
 
-  const hasCloudManagedTextRoute = Boolean(
-    normalizeOnboardingProviderId(next.llmText?.backend) === "elizacloud" &&
-      next.llmText?.transport === "cloud-proxy",
-  );
-  const cloudContextSelected =
-    hasCloudManagedTextRoute ||
-    (deploymentTarget.runtime === "cloud" &&
-      deploymentTarget.provider === "elizacloud");
-
   const legacyCloudServices: Array<
     ["tts" | "media" | "embeddings" | "rpc", boolean | undefined]
   > = [
@@ -963,16 +954,14 @@ function resolveLegacyServiceRoutingInConfig(
     if (next[capability]) {
       continue;
     }
-    if (
-      legacyValue === true ||
-      (legacyValue !== false && cloudContextSelected)
-    ) {
-      next[capability] = {
-        backend: "elizacloud",
-        transport: "cloud-proxy",
-        accountId: "elizacloud",
-      };
+    if (legacyValue !== true) {
+      continue;
     }
+    next[capability] = {
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+      accountId: "elizacloud",
+    };
   }
 
   return Object.keys(next).length > 0 ? next : null;

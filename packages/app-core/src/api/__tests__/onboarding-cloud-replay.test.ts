@@ -38,14 +38,14 @@ describe("deriveCompatOnboardingReplayBody", () => {
     vi.clearAllMocks();
   });
 
-  it("detects cloud mode from connection.kind === 'cloud-managed'", () => {
+  it("does not infer cloud runtime from cloud-managed inference alone", () => {
     const body = {
       name: "Agent",
       connection: { kind: "cloud-managed" },
     };
     const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
-    expect(isCloudMode).toBe(true);
-    expect(replayBody).toHaveProperty("runMode", "cloud");
+    expect(isCloudMode).toBe(false);
+    expect(replayBody).toHaveProperty("runMode", "local");
   });
 
   it("detects cloud mode from runMode === 'cloud'", () => {
@@ -63,6 +63,18 @@ describe("deriveCompatOnboardingReplayBody", () => {
     };
     const { isCloudMode } = deriveCompatOnboardingReplayBody(body);
     expect(isCloudMode).toBe(false);
+  });
+
+  it("keeps cloud runtime when a direct provider is selected on Eliza Cloud hosting", () => {
+    const body = {
+      name: "Agent",
+      runMode: "cloud",
+      connection: { kind: "local-provider", provider: "openai" },
+    };
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
+    expect(isCloudMode).toBe(true);
+    expect(replayBody).toHaveProperty("runMode", "cloud");
+    expect(replayBody).toHaveProperty("provider", "openai");
   });
 });
 

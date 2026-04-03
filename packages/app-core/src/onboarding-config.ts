@@ -194,22 +194,6 @@ export function buildOnboardingRuntimeConfig(
     };
   }
 
-  const cloudContextSelected =
-    (serviceRouting.llmText?.transport === "cloud-proxy" &&
-      serviceRouting.llmText.backend === "elizacloud") ||
-    (deploymentTarget.runtime === "cloud" &&
-      deploymentTarget.provider === "elizacloud");
-
-  if (cloudContextSelected) {
-    for (const capability of ["tts", "media", "embeddings", "rpc"] as const) {
-      serviceRouting[capability] = {
-        backend: "elizacloud",
-        transport: "cloud-proxy",
-        accountId: "elizacloud",
-      };
-    }
-  }
-
   const hasLinkedAccounts = Object.keys(linkedAccounts).length > 0;
   const hasServiceRouting = Object.keys(serviceRouting).length > 0;
 

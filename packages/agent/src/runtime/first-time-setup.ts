@@ -58,11 +58,7 @@ export function applyFirstTimeSetupTopology(
     };
   }
 
-  const shouldUseCloudInference =
-    args.selectedProviderId === "elizacloud" ||
-    (!args.selectedProviderId &&
-      args.isCloudRuntime &&
-      Boolean(cloudOnboardingResult?.apiKey?.trim()));
+  const shouldUseCloudInference = args.selectedProviderId === "elizacloud";
 
   if (shouldUseCloudInference) {
     serviceRouting.llmText = {
@@ -75,16 +71,6 @@ export function applyFirstTimeSetupTopology(
       backend: args.selectedProviderId.trim(),
       transport: "direct",
     };
-  }
-
-  if (args.isCloudRuntime || shouldUseCloudInference) {
-    for (const capability of ["tts", "media", "embeddings", "rpc"] as const) {
-      serviceRouting[capability] = {
-        backend: "elizacloud",
-        transport: "cloud-proxy",
-        accountId: "elizacloud",
-      };
-    }
   }
 
   return {

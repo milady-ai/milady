@@ -13,7 +13,12 @@ import {
   normalizePersistedOnboardingConnection,
   migrateLegacyRuntimeConfig,
 } from "@miladyai/shared/contracts/onboarding";
-import { normalizeServiceRoutingConfig } from "@miladyai/shared/contracts/service-routing";
+import {
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "@miladyai/shared/contracts/service-routing";
+import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import {
   deriveCompatOnboardingReplayBody,
   extractAndPersistOnboardingApiKey,
@@ -86,8 +91,20 @@ export async function handleOnboardingCompatRoute(
     const explicitConnection = normalizePersistedOnboardingConnection(
       body.connection,
     );
+    const explicitLinkedAccounts = normalizeLinkedAccountsConfig(
+      body.linkedAccounts,
+    );
     const explicitServiceRouting = normalizeServiceRoutingConfig(
       body.serviceRouting,
+    );
+    const replayDeploymentTarget = normalizeDeploymentTargetConfig(
+      replayBodyRecord.deploymentTarget,
+    );
+    const replayLinkedAccounts = normalizeLinkedAccountsConfig(
+      replayBodyRecord.linkedAccounts,
+    );
+    const replayServiceRouting = normalizeServiceRoutingConfig(
+      replayBodyRecord.serviceRouting,
     );
     const cloudInferenceSelected = Boolean(
       explicitConnection?.kind === "cloud-managed" ||
@@ -96,6 +113,10 @@ export async function handleOnboardingCompatRoute(
             explicitServiceRouting.llmText.backend,
           ) === "elizacloud"),
     );
+    const shouldResolveCloudApiKey =
+      isCloudMode ||
+      cloudInferenceSelected ||
+      explicitLinkedAccounts?.elizacloud?.status === "linked";
 
     // Resolve the cloud API key so the upstream handler can write it
     // into state.config before saving. Without this, the upstream uses
@@ -109,8 +130,13 @@ export async function handleOnboardingCompatRoute(
         (config as Record<string, unknown>).meta = {};
       }
       (config.meta as Record<string, unknown>).onboardingComplete = true;
+      applyCanonicalOnboardingConfig(config as never, {
+        deploymentTarget: replayDeploymentTarget,
+        linkedAccounts: replayLinkedAccounts,
+        serviceRouting: replayServiceRouting,
+      });
 
-      if (isCloudMode) {
+      if (shouldResolveCloudApiKey) {
         if (!config.cloud) {
           (config as Record<string, unknown>).cloud = {};
         }
@@ -137,12 +163,12 @@ export async function handleOnboardingCompatRoute(
 
         if (!resolvedCloudApiKey) {
           logger.warn(
-            "[milady-api] Cloud onboarding but no API key found on disk, in sealed secrets, or in env. " +
+            "[milady-api] Cloud-linked onboarding but no API key found on disk, in sealed secrets, or in env. " +
               "The upstream handler will save config WITHOUT cloud.apiKey.",
           );
         } else {
           logger.info(
-            "[milady-api] Cloud onboarding: resolved API key, injecting into replay body",
+            "[milady-api] Cloud-linked onboarding: resolved API key, injecting into replay body",
           );
         }
 
@@ -165,15 +191,19 @@ export async function handleOnboardingCompatRoute(
       );
     }
 
-    if (isCloudMode) {
-      const enriched = {
-        ...replayBodyRecord,
-        runMode: "cloud" as const,
-        ...(resolvedCloudApiKey ? { providerApiKey: resolvedCloudApiKey } : {}),
-      };
-      replayBody = Buffer.from(JSON.stringify(enriched), "utf8");
-    } else if (body.runMode !== "cloud" && replayBodyRecord !== body) {
-      replayBody = Buffer.from(JSON.stringify(replayBodyRecord), "utf8");
+    if (
+      resolvedCloudApiKey ||
+      (body.runMode !== "cloud" && replayBodyRecord !== body)
+    ) {
+      replayBody = Buffer.from(
+        JSON.stringify({
+          ...replayBodyRecord,
+          ...(resolvedCloudApiKey
+            ? { providerApiKey: resolvedCloudApiKey }
+            : {}),
+        }),
+        "utf8",
+      );
     }
   } catch {
     // JSON parse failed — let upstream handle the error

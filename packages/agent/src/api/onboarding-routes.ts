@@ -382,6 +382,30 @@ export async function handleOnboardingRoutes(
 
     if (explicitConnection) {
       await applyOnboardingConnectionConfig(config, explicitConnection);
+      if (!hasCanonicalRuntimeConfig) {
+        applyCanonicalOnboardingConfig(config, {
+          deploymentTarget:
+            explicitConnection.kind === "remote-provider"
+              ? {
+                  runtime: "remote",
+                  provider: "remote",
+                  remoteApiBase: explicitConnection.remoteApiBase,
+                  ...(explicitConnection.remoteAccessToken
+                    ? {
+                        remoteAccessToken: explicitConnection.remoteAccessToken,
+                      }
+                    : {}),
+                }
+              : runMode === "cloud"
+                ? {
+                    runtime: "cloud",
+                    provider: "elizacloud",
+                  }
+                : {
+                    runtime: "local",
+                  },
+        });
+      }
     } else if (!hasCanonicalRuntimeConfig) {
       if (!config.cloud) config.cloud = {};
 

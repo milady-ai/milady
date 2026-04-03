@@ -335,7 +335,7 @@ describe("persistCompatOnboardingDefaults", () => {
 });
 
 describe("deriveCompatOnboardingReplayBody", () => {
-  it("injects runMode=cloud for cloud-managed onboarding connections", () => {
+  it("keeps cloud-managed inference local when hosting stays local", () => {
     const body = {
       name: "Milady",
       connection: {
@@ -346,16 +346,38 @@ describe("deriveCompatOnboardingReplayBody", () => {
 
     const result = deriveCompatOnboardingReplayBody(body);
 
-    expect(result.isCloudMode).toBe(true);
+    expect(result.isCloudMode).toBe(false);
     expect(result.replayBody).toMatchObject({
       name: "Milady",
-      runMode: "cloud",
+      runMode: "local",
       connection: {
         kind: "cloud-managed",
         provider: "elizacloud",
       },
     });
     expect(body.runMode).toBeUndefined();
+  });
+
+  it("preserves cloud hosting when a direct provider is selected", () => {
+    const body = {
+      name: "Milady",
+      runMode: "cloud",
+      connection: {
+        kind: "local-provider",
+        provider: "openai",
+        apiKey: "sk-test-openai",
+      },
+    } as Record<string, unknown>;
+
+    const result = deriveCompatOnboardingReplayBody(body);
+
+    expect(result.isCloudMode).toBe(true);
+    expect(result.replayBody).toMatchObject({
+      name: "Milady",
+      runMode: "cloud",
+      provider: "openai",
+      providerApiKey: "sk-test-openai",
+    });
   });
 
   it("leaves non-cloud onboarding payloads unchanged", () => {

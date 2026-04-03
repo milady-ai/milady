@@ -233,6 +233,33 @@ describe("onboarding provider catalog", () => {
     ).toBe(true);
   });
 
+  it("does not auto-route non-text cloud services from cloud hosting or cloud inference alone", () => {
+    const migrated = migrateLegacyRuntimeConfig({
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      connection: {
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      },
+    });
+
+    expect(migrated.serviceRouting).toEqual({
+      llmText: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      },
+    });
+    expect(isElizaCloudServiceSelectedInConfig(migrated, "media")).toBe(false);
+    expect(isElizaCloudServiceSelectedInConfig(migrated, "rpc")).toBe(false);
+  });
+
   it("keeps remote selection ahead of local env-backed providers", () => {
     expect(
       inferOnboardingConnectionFromConfig({

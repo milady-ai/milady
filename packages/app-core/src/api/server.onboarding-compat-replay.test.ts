@@ -196,4 +196,60 @@ describe("POST /api/onboarding compat replay", () => {
       await cleanupTempDir(tempDir);
     }
   });
+
+  it("preserves cloud hosting when compat replay selects a direct provider", async () => {
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "eliza-onboarding-replay-"),
+    );
+    process.env.ELIZA_STATE_DIR = tempDir;
+    process.env.MILADY_STATE_DIR = tempDir;
+    const configPath = path.join(tempDir, "eliza.json");
+    await fs.writeFile(
+      configPath,
+      JSON.stringify({ logging: { level: "error" } }),
+    );
+
+    const server = await startApiServer({ port: 0 });
+
+    try {
+      const { status } = await req(server.port, "POST", "/api/onboarding", {
+        name: "Chen",
+        bio: ["A warm analyst."],
+        systemPrompt: "You are Chen.",
+        runMode: "cloud",
+        connection: {
+          kind: "local-provider",
+          provider: "openai",
+          apiKey: "sk-openai-test-key",
+        },
+      });
+
+      expect(status).toBe(200);
+
+      const config = await waitForConfig(
+        configPath,
+        (candidate) =>
+          Boolean(
+            ((candidate.deploymentTarget ?? {}) as Record<string, unknown>)
+              .runtime,
+          ),
+      );
+      const env = (config.env ?? {}) as Record<string, string>;
+
+      expect(config.deploymentTarget).toEqual({
+        runtime: "cloud",
+        provider: "elizacloud",
+      });
+      expect((config.serviceRouting as Record<string, unknown>)?.llmText).toEqual(
+        {
+          backend: "openai",
+          transport: "direct",
+        },
+      );
+      expect(env.OPENAI_API_KEY).toBe("sk-openai-test-key");
+    } finally {
+      await server.close();
+      await cleanupTempDir(tempDir);
+    }
+  });
 });
