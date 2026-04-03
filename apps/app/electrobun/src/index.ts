@@ -8,7 +8,9 @@ import {
 } from "@miladyai/shared/runtime-env";
 import Electrobun, {
   ApplicationMenu,
+  BrowserView,
   BrowserWindow,
+  BuildConfig,
   Updater,
   Utils,
   WGPU,
@@ -28,6 +30,11 @@ import {
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { readNavigationEventUrl } from "./cloud-auth-window";
+import {
+  resolveBootstrapShellRenderer,
+  resolveBootstrapViewRenderer,
+  resolveMainWindowPartition,
+} from "./main-window-session";
 import {
   buildMainMenuResetApiCandidates,
   pickReachableMenuResetApiBase,
@@ -65,6 +72,10 @@ import {
   SurfaceWindowManager,
 } from "./surface-windows";
 import type { SendToWebview } from "./types.js";
+import {
+  shouldResetWindowsCefProfile,
+  shouldWriteWindowsCefProfileMarker,
+} from "./windows-cef-profile";
 
 type HeartbeatMenuTriggerSummary = {
   enabled: boolean;
@@ -727,6 +738,65 @@ async function createMainWindow(): Promise<BrowserWindow> {
   } catch (err) {
     console.error("[Main] Failed to read preload script:", err);
     preload = "// preload unavailable";
+  }
+
+  const mainWindowPartition =
+    process.platform === "win32"
+      ? resolveMainWindowPartition(
+          process.env as Record<string, string | undefined>,
+        )
+      : null;
+
+  if (process.platform === "win32" && mainWindowPartition) {
+    const buildInfo = await BuildConfig.get();
+    const shellRenderer = resolveBootstrapShellRenderer(buildInfo);
+    const mainViewRenderer = resolveBootstrapViewRenderer(buildInfo);
+    const win = new BrowserWindow({
+      title: "Milady",
+      // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
+      icon: resolveDesktopAppIconPath(),
+      frame: {
+        width: state.width,
+        height: state.height,
+        x: state.x,
+        y: state.y,
+      },
+      renderer: shellRenderer,
+      titleBarStyle: "default",
+      transparent: false,
+    });
+
+    win.webview.remove();
+
+    const mainView = new BrowserView({
+      url: rendererUrl,
+      // @ts-expect-error: BrowserView preload exists at runtime but is not typed yet.
+      preload,
+      renderer: mainViewRenderer,
+      windowId: win.id,
+      partition: mainWindowPartition,
+      frame: {
+        x: 0,
+        y: 0,
+        width: win.frame.width,
+        height: win.frame.height,
+      },
+    });
+
+    // Rewire the main window to the explicit BrowserView so downstream
+    // win.webview access targets the isolated renderer surface.
+    // @ts-expect-error: webviewId is available at runtime but missing in typings.
+    win.webviewId = mainView.id;
+
+    const resizeMainView = () => {
+      mainView.setFrame(0, 0, win.frame.width, win.frame.height);
+      scheduleStateSave(statePath, win);
+    };
+
+    applyMacOSWindowEffects(win);
+    win.on("resize", resizeMainView);
+    win.on("move", () => scheduleStateSave(statePath, win));
+    return win;
   }
 
   const win = new BrowserWindow({
@@ -1542,7 +1612,13 @@ async function main(): Promise<void> {
       } catch {
         // No marker — first run or pre-fix install.
       }
-      if (previousVersion !== currentVersion && fs.existsSync(cefDir)) {
+      if (
+        shouldResetWindowsCefProfile({
+          currentVersion,
+          previousVersion,
+          cefDirExists: fs.existsSync(cefDir),
+        })
+      ) {
         console.log(
           `[Main] CEF version mismatch (${previousVersion ?? "none"} → ${currentVersion}), clearing stale CEF profile`,
         );
@@ -1558,8 +1634,10 @@ async function main(): Promise<void> {
         }
       }
       // Write/update version marker so we don't clear again on next launch.
-      fs.mkdirSync(cefDir, { recursive: true });
-      fs.writeFileSync(cefVersionMarker, currentVersion);
+      if (shouldWriteWindowsCefProfileMarker(currentVersion)) {
+        fs.mkdirSync(cefDir, { recursive: true });
+        fs.writeFileSync(cefVersionMarker, currentVersion);
+      }
     } catch (err) {
       console.warn("[Main] CEF profile cleanup failed (non-fatal):", err);
     }

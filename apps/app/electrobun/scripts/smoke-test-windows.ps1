@@ -31,6 +31,7 @@ $testLocalAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) {
 }
 $env:APPDATA = $testAppDataRoot
 $env:LOCALAPPDATA = $testLocalAppDataRoot
+$env:MILADY_DESKTOP_TEST_PARTITION = "persist:bootstrap-isolated"
 New-Item -ItemType Directory -Force -Path $env:APPDATA | Out-Null
 New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA | Out-Null
 if ($env:GITHUB_ENV) {
@@ -595,20 +596,33 @@ function Dump-FailureDiagnostics([int]$Port) {
 
   # 6. Relevant environment variables
   Write-Host ""
-  Write-Host "[6/6] Relevant environment variables:"
+  Write-Host "[6/7] Relevant environment variables:"
   foreach ($varName in @(
     "MILADY_PORT", "MILADY_API_BIND", "MILADY_API_PORT",
     "MILADY_DISABLE_LOCAL_EMBEDDINGS", "ANTHROPIC_API_KEY",
     "NO_PROXY", "HTTP_PROXY", "HTTPS_PROXY",
     "ELECTROBUN_CONSOLE", "APPDATA", "LOCALAPPDATA",
     "MILADY_TEST_WINDOWS_APPDATA_PATH", "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
-    "ELIZA_API_PORT", "ELIZA_PORT"
+    "MILADY_DESKTOP_TEST_PARTITION", "ELIZA_API_PORT", "ELIZA_PORT"
   )) {
     $val = [System.Environment]::GetEnvironmentVariable($varName)
     if ($varName -eq "ANTHROPIC_API_KEY" -and $val) {
       $val = "$($val.Substring(0, [Math]::Min(8, $val.Length)))..."
     }
     Write-Host "  ${varName}=$($val ?? '<unset>')"
+  }
+
+  Write-Host ""
+  Write-Host "[7/7] Windows CEF profile state:"
+  $cefRoot = Join-Path $env:APPDATA "Milady\\CEF"
+  $cefMarker = Join-Path $cefRoot ".milady-version"
+  Write-Host "  CEF root: $cefRoot"
+  Write-Host "  Marker: $cefMarker"
+  Write-Host "  Root exists: $(Test-Path $cefRoot)"
+  if (Test-Path $cefMarker) {
+    Write-Host "  Marker contents: $(Get-Content $cefMarker -Raw -ErrorAction SilentlyContinue)"
+  } else {
+    Write-Host "  Marker contents: <missing>"
   }
 
   Write-Host "========== END DIAGNOSTICS =========="

@@ -783,6 +783,9 @@ describe("Electrobun release workflow drift", () => {
 
     expect(smokeScript).toContain("MILADY_TEST_WINDOWS_APPDATA_PATH");
     expect(smokeScript).toContain("MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH");
+    expect(smokeScript).toContain(
+      '$env:MILADY_DESKTOP_TEST_PARTITION = "persist:bootstrap-isolated"',
+    );
     expect(smokeScript).toContain("$env:APPDATA = $testAppDataRoot");
     expect(smokeScript).toContain("$env:LOCALAPPDATA = $testLocalAppDataRoot");
     expect(smokeScript).toContain(
@@ -933,6 +936,9 @@ describe("Electrobun release workflow drift", () => {
     );
     expect(windowsEnvHelper).toContain(
       "MILADY_DESKTOP_TEST_API_BASE: args.apiBase",
+    );
+    expect(windowsEnvHelper).toContain(
+      'MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated"',
     );
     expect(windowsEnvHelper).toContain('MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"');
     expect(windowsEnvHelper).toContain('ELECTROBUN_CONSOLE: "1"');

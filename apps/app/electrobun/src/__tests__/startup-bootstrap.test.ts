@@ -51,6 +51,31 @@ describe("Electrobun startup bootstrap", () => {
     );
   });
 
+  it("uses an isolated BrowserView for packaged Windows bootstrap overrides", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("resolveMainWindowPartition");
+    expect(source).toContain(
+      'process.platform === "win32" && mainWindowPartition',
+    );
+    expect(source).toContain("win.webview.remove();");
+    expect(source).toContain("const mainView = new BrowserView({");
+    expect(source).toContain("partition: mainWindowPartition");
+    expect(source).toContain("win.webviewId = mainView.id");
+  });
+
+  it("does not persist an unknown Windows CEF profile marker", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("shouldResetWindowsCefProfile({");
+    expect(source).toContain(
+      "shouldWriteWindowsCefProfileMarker(currentVersion)",
+    );
+    expect(source).toContain(
+      "fs.writeFileSync(cefVersionMarker, currentVersion)",
+    );
+  });
+
   it("uses the packaged app icon for the main window and tray", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
     const configSource = fs.readFileSync(CONFIG_PATH, "utf8");

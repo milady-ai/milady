@@ -1,0 +1,50 @@
+export const PACKAGED_WINDOWS_BOOTSTRAP_PARTITION =
+  "persist:bootstrap-isolated";
+
+type Renderer = "native" | "cef";
+
+type BuildInfo = {
+  defaultRenderer: Renderer;
+  availableRenderers: Renderer[];
+};
+
+function trimToNull(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function normalizePersistentPartition(partition: string): string {
+  const trimmed = partition.trim();
+  if (!trimmed) return PACKAGED_WINDOWS_BOOTSTRAP_PARTITION;
+  if (trimmed.startsWith("persist:")) return trimmed;
+  return `persist:${trimmed}`;
+}
+
+export function resolveMainWindowPartition(
+  env: Record<string, string | undefined>,
+): string | null {
+  const explicit = trimToNull(env.MILADY_DESKTOP_TEST_PARTITION);
+  if (explicit) {
+    return normalizePersistentPartition(explicit);
+  }
+
+  if (trimToNull(env.MILADY_DESKTOP_TEST_API_BASE)) {
+    return PACKAGED_WINDOWS_BOOTSTRAP_PARTITION;
+  }
+
+  return null;
+}
+
+export function resolveBootstrapShellRenderer(buildInfo: BuildInfo): Renderer {
+  if (buildInfo.availableRenderers.includes("native")) {
+    return "native";
+  }
+  return buildInfo.defaultRenderer;
+}
+
+export function resolveBootstrapViewRenderer(buildInfo: BuildInfo): Renderer {
+  if (buildInfo.availableRenderers.includes("cef")) {
+    return "cef";
+  }
+  return buildInfo.defaultRenderer;
+}
