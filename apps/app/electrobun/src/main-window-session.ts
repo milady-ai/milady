@@ -15,7 +15,6 @@ function trimToNull(value: string | undefined): string | null {
 
 function normalizePersistentPartition(partition: string): string {
   const trimmed = partition.trim();
-  if (!trimmed) return PACKAGED_WINDOWS_BOOTSTRAP_PARTITION;
   if (trimmed.startsWith("persist:")) return trimmed;
   return `persist:${trimmed}`;
 }
@@ -29,6 +28,8 @@ export function resolveMainWindowPartition(
   }
 
   if (trimToNull(env.MILADY_DESKTOP_TEST_API_BASE)) {
+    // The Windows smoke harness redirects APPDATA/LOCALAPPDATA before launch,
+    // so the bootstrap renderer can now use a persistent isolated partition.
     return PACKAGED_WINDOWS_BOOTSTRAP_PARTITION;
   }
 
