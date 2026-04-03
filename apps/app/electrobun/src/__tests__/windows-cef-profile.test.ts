@@ -57,6 +57,26 @@ describe("windows-cef-profile", () => {
     ).toBe(true);
   });
 
+  it("does not reset when the CEF directory does not exist", () => {
+    expect(
+      shouldResetWindowsCefProfile({
+        currentVersion: "2.0.0-alpha.116",
+        previousVersion: null,
+        cefDirExists: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("does not reset when the version has not changed", () => {
+    expect(
+      shouldResetWindowsCefProfile({
+        currentVersion: "2.0.0-alpha.116",
+        previousVersion: "2.0.0-alpha.116",
+        cefDirExists: true,
+      }),
+    ).toBe(false);
+  });
+
   it("does not reset or persist a marker when the current version is unknown", () => {
     expect(
       shouldResetWindowsCefProfile({
