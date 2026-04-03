@@ -119,12 +119,12 @@ describe("deriveOnboardingResumeConnection", () => {
 
   it("reconstructs an eliza cloud connection from compatibility config", () => {
     const migrated = migrateLegacyRuntimeConfig({
-        cloud: { enabled: true, apiKey: "[REDACTED]" },
-        models: {
-          small: "openai/gpt-5-mini",
-          large: "anthropic/claude-sonnet-4.5",
-        },
-      });
+      cloud: { enabled: true, apiKey: "[REDACTED]" },
+      models: {
+        small: "openai/gpt-5-mini",
+        large: "anthropic/claude-sonnet-4.5",
+      },
+    });
 
     expect(deriveOnboardingResumeConnection(migrated)).toEqual({
       kind: "cloud-managed",

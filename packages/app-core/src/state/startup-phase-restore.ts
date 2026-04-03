@@ -40,7 +40,9 @@ export interface RestoringSessionCtx {
 
 const SESSION_STORAGE_API_BASE_KEY = "milady_api_base";
 
-function trimSessionValue(value: string | null | undefined): string | undefined {
+function trimSessionValue(
+  value: string | null | undefined,
+): string | undefined {
   const trimmed = value?.trim().replace(/\/+$/, "");
   return trimmed ? trimmed : undefined;
 }
@@ -98,7 +100,9 @@ export async function runRestoringSession(
   const forceLocal = deps.forceLocalBootstrapRef.current;
   deps.forceLocalBootstrapRef.current = false;
   const persisted = loadPersistedConnectionMode();
-  const sessionConnection = !persisted ? loadSessionConnectionModeOverride() : null;
+  const sessionConnection = !persisted
+    ? loadSessionConnectionModeOverride()
+    : null;
   const hadPrior = loadPersistedOnboardingComplete();
   if (cancelled.current) return;
 

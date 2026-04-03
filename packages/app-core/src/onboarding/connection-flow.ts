@@ -129,9 +129,7 @@ export function computeShowProviderSelection(
     return false;
   }
 
-  return (
-    runMode === "local" || snapshot.onboardingCloudProvider !== "remote"
-  );
+  return runMode === "local" || snapshot.onboardingCloudProvider !== "remote";
 }
 
 /**

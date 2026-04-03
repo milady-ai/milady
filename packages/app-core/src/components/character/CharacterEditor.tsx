@@ -156,8 +156,7 @@ export function CharacterEditor({
   } = useApp();
 
   /** ElevenLabs voices are available only when direct key or cloud voice routing is active. */
-  const useElevenLabs =
-    elizaCloudConnected || elizaCloudVoiceProxyAvailable;
+  const useElevenLabs = elizaCloudConnected || elizaCloudVoiceProxyAvailable;
   const elevenLabsVoiceGroups = ELEVENLABS_VOICE_GROUPS.map((group) => ({
     label: t(group.labelKey, { defaultValue: group.defaultLabel }),
     items: group.items,

@@ -579,17 +579,27 @@ export function normalizeOnboardingProviderId(
       return directMatch.id;
     }
 
-    const pluginMatch = ONBOARDING_PROVIDER_CATALOG.find(
-      (provider) => provider.pluginName.toLowerCase() === candidate,
-    );
-    if (pluginMatch) {
-      return pluginMatch.id;
-    }
-
     const alias = ONBOARDING_PROVIDER_ALIASES[candidate];
     if (alias) {
       return alias;
     }
+  }
+
+  for (const candidate of candidates) {
+    const pluginMatches = ONBOARDING_PROVIDER_CATALOG.filter(
+      (provider) => provider.pluginName.toLowerCase() === candidate,
+    );
+    if (pluginMatches.length === 0) {
+      continue;
+    }
+
+    // Some plugin packages back both subscription and API-key flows.
+    // Prefer the concrete API-key provider unless the caller explicitly
+    // passed a subscription id/alias above.
+    const preferredMatch =
+      pluginMatches.find((provider) => provider.authMode === "api-key") ??
+      pluginMatches[0];
+    return preferredMatch.id;
   }
 
   return null;
@@ -927,10 +937,15 @@ function resolveLegacyServiceRoutingInConfig(
   const legacyCloudServices: Array<
     ["tts" | "media" | "embeddings" | "rpc", boolean | undefined]
   > = [
-    ["tts", typeof cloudServices?.tts === "boolean" ? cloudServices.tts : undefined],
+    [
+      "tts",
+      typeof cloudServices?.tts === "boolean" ? cloudServices.tts : undefined,
+    ],
     [
       "media",
-      typeof cloudServices?.media === "boolean" ? cloudServices.media : undefined,
+      typeof cloudServices?.media === "boolean"
+        ? cloudServices.media
+        : undefined,
     ],
     [
       "embeddings",
@@ -938,14 +953,20 @@ function resolveLegacyServiceRoutingInConfig(
         ? cloudServices.embeddings
         : undefined,
     ],
-    ["rpc", typeof cloudServices?.rpc === "boolean" ? cloudServices.rpc : undefined],
+    [
+      "rpc",
+      typeof cloudServices?.rpc === "boolean" ? cloudServices.rpc : undefined,
+    ],
   ];
 
   for (const [capability, legacyValue] of legacyCloudServices) {
     if (next[capability]) {
       continue;
     }
-    if (legacyValue === true || (legacyValue !== false && cloudContextSelected)) {
+    if (
+      legacyValue === true ||
+      (legacyValue !== false && cloudContextSelected)
+    ) {
       next[capability] = {
         backend: "elizacloud",
         transport: "cloud-proxy",
@@ -989,15 +1010,17 @@ function pruneLegacyCloudRoutingFields(
   }
 }
 
-export function migrateLegacyRuntimeConfig<
-  T extends Record<string, unknown>,
->(config: T): T {
+export function migrateLegacyRuntimeConfig<T extends Record<string, unknown>>(
+  config: T,
+): T {
   const root = asConfigRecord(config);
   if (!root) {
     return config;
   }
 
-  const explicitConnection = normalizePersistedOnboardingConnection(root.connection);
+  const explicitConnection = normalizePersistedOnboardingConnection(
+    root.connection,
+  );
   if (explicitConnection) {
     root.connection = stripOnboardingConnectionSecrets(explicitConnection);
   } else if (Object.hasOwn(root, "connection")) {
@@ -1007,7 +1030,10 @@ export function migrateLegacyRuntimeConfig<
   const deploymentTarget =
     normalizeDeploymentTargetConfig(root.deploymentTarget) ??
     resolveLegacyDeploymentTargetInConfig(root);
-  if (deploymentTarget.runtime === "local" && !Object.hasOwn(root, "deploymentTarget")) {
+  if (
+    deploymentTarget.runtime === "local" &&
+    !Object.hasOwn(root, "deploymentTarget")
+  ) {
     // Keep local default implicit to avoid churn in brand-new configs.
   } else {
     root.deploymentTarget = deploymentTarget;
@@ -1113,7 +1139,7 @@ export function resolveServiceRoutingInConfig(
         ...(explicitConnection.primaryModel
           ? { primaryModel: explicitConnection.primaryModel }
           : {}),
-        };
+      };
     } else if (
       deploymentTarget.runtime === "remote" &&
       deploymentTarget.remoteApiBase
@@ -1166,7 +1192,8 @@ function deriveOnboardingConnectionFromRuntimeConfig(
   }
 
   if (llmText?.transport === "remote") {
-    const remoteApiBase = llmText.remoteApiBase ?? deploymentTarget.remoteApiBase;
+    const remoteApiBase =
+      llmText.remoteApiBase ?? deploymentTarget.remoteApiBase;
     if (!remoteApiBase) {
       return null;
     }
@@ -1389,7 +1416,9 @@ export function inferOnboardingConnectionFromConfig(
   const explicitConnection = normalizePersistedOnboardingConnection(
     asConfigRecord(config)?.connection,
   );
-  return explicitConnection ?? deriveOnboardingConnectionFromRuntimeConfig(config);
+  return (
+    explicitConnection ?? deriveOnboardingConnectionFromRuntimeConfig(config)
+  );
 }
 
 function inferLegacyCloudInferenceSelection(

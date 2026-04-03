@@ -30,6 +30,11 @@ const ALL_PROVIDER_KEYS = [
   "ELIZAOS_CLOUD_BASE_URL",
   "ELIZAOS_CLOUD_SMALL_MODEL",
   "ELIZAOS_CLOUD_LARGE_MODEL",
+  "ELIZAOS_CLOUD_USE_INFERENCE",
+  "ELIZAOS_CLOUD_USE_TTS",
+  "ELIZAOS_CLOUD_USE_MEDIA",
+  "ELIZAOS_CLOUD_USE_EMBEDDINGS",
+  "ELIZAOS_CLOUD_USE_RPC",
   "SMALL_MODEL",
   "LARGE_MODEL",
   "ANTHROPIC_API_KEY",
@@ -380,28 +385,39 @@ describe("Provider switching simulation", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Granular cloud service toggles (services.inference)", () => {
-  it("keeps direct providers when services.inference is false", () => {
+  it("keeps direct providers when canonical routing reserves cloud for RPC only", () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-test";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        services: { inference: false },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
-    // Cloud plugin stays (for RPC), but Anthropic is NOT stripped
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
   });
 
-  it("strips direct providers when services.inference is true (default)", () => {
+  it("strips direct providers when cloud inference is selected canonically", () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-test";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        services: { inference: true },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
@@ -409,13 +425,23 @@ describe("Granular cloud service toggles (services.inference)", () => {
     expect(names.has("@elizaos/plugin-anthropic")).toBe(false);
   });
 
-  it("keeps direct providers when inferenceMode is byok", () => {
+  it("keeps direct providers when llmText is direct and cloud is reserved for RPC", () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-test";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        inferenceMode: "byok",
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
@@ -423,13 +449,27 @@ describe("Granular cloud service toggles (services.inference)", () => {
     expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
   });
 
-  it("keeps direct providers when inferenceMode is local", () => {
+  it("keeps direct providers when cloud runtime is selected but llmText stays direct", () => {
     process.env.OPENAI_API_KEY = "sk-test";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        inferenceMode: "local",
+      cloud: { apiKey: "ck-test" },
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
@@ -439,14 +479,27 @@ describe("Granular cloud service toggles (services.inference)", () => {
 });
 
 describe("Subscription provider overrides cloud inference default", () => {
-  it("detects subscriptionProvider and defaults to byok instead of cloud", () => {
+  it("keeps subscription inference direct while cloud remains available for RPC", () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-sub";
     const config = {
-      cloud: { enabled: true, apiKey: "ck-test" },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic-subscription",
+          transport: "direct",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
       agents: { defaults: { subscriptionProvider: "anthropic-subscription" } },
     } as ElizaConfig;
     const names = collectPluginNames(config);
-    // Cloud plugin loaded (for RPC), but Anthropic NOT stripped
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
   });
@@ -481,25 +534,48 @@ describe("Subscription provider overrides cloud inference default", () => {
 describe("Cloud env propagation respects service toggles", () => {
   it("skips cloud model env vars when services.inference is false", () => {
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        services: { inference: false },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     applyCloudConfigToEnv(config);
-    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
+    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
+    expect(process.env.ELIZAOS_CLOUD_USE_RPC).toBe("true");
     expect(process.env.ELIZAOS_CLOUD_SMALL_MODEL).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_LARGE_MODEL).toBeUndefined();
   });
 
   it("skips cloud model env vars when subscriptionProvider is set", () => {
     const config = {
-      cloud: { enabled: true, apiKey: "ck-test" },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic-subscription",
+          transport: "direct",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
       agents: { defaults: { subscriptionProvider: "anthropic-subscription" } },
     } as ElizaConfig;
     applyCloudConfigToEnv(config);
-    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
+    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
+    expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-test");
+    expect(process.env.ELIZAOS_CLOUD_USE_RPC).toBe("true");
     expect(process.env.ELIZAOS_CLOUD_SMALL_MODEL).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_LARGE_MODEL).toBeUndefined();
     expect(process.env.SMALL_MODEL).toBeUndefined();
@@ -562,37 +638,54 @@ describe("Cloud env propagation respects service toggles", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Provider switch preserves cloud for RPC", () => {
-  it("cloud → subscription: cloud stays enabled, inference switches to byok", () => {
+  it("cloud → subscription keeps cloud loaded only for the remaining RPC route", () => {
     // Start: cloud handles everything
     let config = {
-      cloud: { enabled: true, apiKey: "ck-test" },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
     } as ElizaConfig;
     applyCloudConfigToEnv(config);
     let plugins = collectPluginNames(config);
     expect(plugins.has("@elizaos/plugin-elizacloud")).toBe(true);
 
-    // Switch to Anthropic subscription (simulating what the backend now does)
+    // Switch to Anthropic subscription while preserving cloud RPC.
     process.env.ANTHROPIC_API_KEY = "sk-ant-sub";
     config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        inferenceMode: "byok",
-        services: { inference: false },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic-subscription",
+          transport: "direct",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
       agents: { defaults: { subscriptionProvider: "anthropic-subscription" } },
     } as ElizaConfig;
     applyCloudConfigToEnv(config);
     plugins = collectPluginNames(config);
 
-    // Cloud stays for RPC, Anthropic loaded for inference
     expect(plugins.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(plugins.has("@elizaos/plugin-anthropic")).toBe(true);
-    // Cloud model vars cleaned
+    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBeUndefined();
+    expect(process.env.ELIZAOS_CLOUD_USE_RPC).toBe("true");
     expect(process.env.ELIZAOS_CLOUD_SMALL_MODEL).toBeUndefined();
     expect(process.env.ELIZAOS_CLOUD_LARGE_MODEL).toBeUndefined();
-    // Cloud still enabled for RPC
-    expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
     expect(process.env.ELIZAOS_CLOUD_API_KEY).toBe("ck-test");
   });
 
@@ -634,54 +727,64 @@ describe("Provider switch preserves cloud for RPC", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("Pi AI with cloud enabled for RPC (cloud inference byok)", () => {
-  it("loads pi-ai plugin when cloud is enabled but inferenceMode is byok", () => {
+  it("loads pi-ai when cloud routing is reserved for RPC", () => {
     process.env.ELIZA_USE_PI_AI = "1";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        inferenceMode: "byok",
-        services: { inference: false },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
-    // Cloud stays loaded for RPC
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
-    // Pi AI handles inference
     expect(names.has("@elizaos/plugin-pi-ai")).toBe(true);
   });
 
-  it("pi-ai removes direct providers when cloud is in byok mode", () => {
+  it("pi-ai removes direct providers when cloud is reserved for RPC", () => {
     process.env.ELIZA_USE_PI_AI = "1";
     process.env.ANTHROPIC_API_KEY = "sk-ant-test";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        inferenceMode: "byok",
-        services: { inference: false },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
-    // Cloud stays for RPC, Pi AI handles inference
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(names.has("@elizaos/plugin-pi-ai")).toBe(true);
-    // Direct providers should be removed — pi-ai handles upstream selection
     expect(names.has("@elizaos/plugin-anthropic")).toBe(false);
   });
 
-  it("loads direct provider (not pi-ai) when cloud is byok and pi-ai is disabled", () => {
+  it("loads direct provider when cloud is reserved for RPC and pi-ai is disabled", () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-test";
     const config = {
-      cloud: {
-        enabled: true,
-        apiKey: "ck-test",
-        inferenceMode: "byok",
-        services: { inference: false },
+      cloud: { apiKey: "ck-test" },
+      linkedAccounts: {
+        elizacloud: { status: "linked", source: "api-key" },
+      },
+      serviceRouting: {
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as ElizaConfig;
     const names = collectPluginNames(config);
-    // Cloud stays for RPC, direct provider handles inference
     expect(names.has("@elizaos/plugin-elizacloud")).toBe(true);
     expect(names.has("@elizaos/plugin-anthropic")).toBe(true);
     expect(names.has("@elizaos/plugin-pi-ai")).toBe(false);

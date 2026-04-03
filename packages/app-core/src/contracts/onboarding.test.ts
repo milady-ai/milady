@@ -48,6 +48,12 @@ describe("onboarding provider catalog", () => {
     expect(normalizeOnboardingProviderId("openai-codex")).toBe(
       "openai-subscription",
     );
+    expect(normalizeOnboardingProviderId("@elizaos/plugin-openai")).toBe(
+      "openai",
+    );
+    expect(normalizeOnboardingProviderId("@elizaos/plugin-anthropic")).toBe(
+      "anthropic",
+    );
     expect(normalizeOnboardingProviderId("google")).toBe("gemini");
     expect(normalizeOnboardingProviderId("xai")).toBe("grok");
     expect(normalizeOnboardingProviderId("z.ai")).toBe("zai");
