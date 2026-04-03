@@ -3,9 +3,12 @@ import { logger, stringToUuid, type UUID } from "@elizaos/core";
 import type { ElizaConfig } from "../config/config.js";
 import { configFileExists, loadElizaConfig } from "../config/config.js";
 import {
+  inferOnboardingConnectionFromConfig,
+  isCloudInferenceSelectedInConfig,
   migrateLegacyRuntimeConfig,
   normalizePersistedOnboardingConnection,
   normalizeOnboardingProviderId,
+  stripOnboardingConnectionSecrets,
 } from "../contracts/onboarding.js";
 import {
   normalizeDeploymentTargetConfig,
@@ -380,33 +383,68 @@ export async function handleOnboardingRoutes(
       logger.info(`[eliza-api] Sandbox mode set to: ${sandboxMode}`);
     }
 
-    if (explicitConnection) {
-      await applyOnboardingConnectionConfig(config, explicitConnection);
-      if (!hasCanonicalRuntimeConfig) {
-        applyCanonicalOnboardingConfig(config, {
-          deploymentTarget:
-            explicitConnection.kind === "remote-provider"
-              ? {
-                  runtime: "remote",
-                  provider: "remote",
-                  remoteApiBase: explicitConnection.remoteApiBase,
-                  ...(explicitConnection.remoteAccessToken
-                    ? {
-                        remoteAccessToken: explicitConnection.remoteAccessToken,
-                      }
-                    : {}),
-                }
-              : runMode === "cloud"
-                ? {
-                    runtime: "cloud",
-                    provider: "elizacloud",
-                  }
-                : {
-                    runtime: "local",
-                  },
-        });
+    if (hasCanonicalRuntimeConfig) {
+      if (explicitConnection) {
+        await applyOnboardingConnectionConfig(config, explicitConnection);
       }
-    } else if (!hasCanonicalRuntimeConfig) {
+
+      applyCanonicalOnboardingConfig(config, {
+        deploymentTarget: explicitDeploymentTarget,
+        linkedAccounts: explicitLinkedAccounts,
+        serviceRouting: explicitServiceRouting,
+        clearRoutes:
+          explicitServiceRoutingRequested && !explicitServiceRouting?.llmText
+            ? ["llmText"]
+            : [],
+      });
+
+      delete process.env.ELIZAOS_CLOUD_ENABLED;
+      delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
+      delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
+
+      if (config.models && typeof config.models === "object") {
+        delete config.models.small;
+        delete config.models.large;
+      }
+
+      if (
+        !isCloudInferenceSelectedInConfig(config as Record<string, unknown>)
+      ) {
+        delete process.env.ELIZAOS_CLOUD_API_KEY;
+      }
+
+      delete config.connection;
+      const projectedConnection = inferOnboardingConnectionFromConfig(
+        config as Record<string, unknown>,
+      );
+      if (projectedConnection) {
+        config.connection = stripOnboardingConnectionSecrets(projectedConnection);
+      }
+    } else if (explicitConnection) {
+      await applyOnboardingConnectionConfig(config, explicitConnection);
+      applyCanonicalOnboardingConfig(config, {
+        deploymentTarget:
+          explicitConnection.kind === "remote-provider"
+            ? {
+                runtime: "remote",
+                provider: "remote",
+                remoteApiBase: explicitConnection.remoteApiBase,
+                ...(explicitConnection.remoteAccessToken
+                  ? {
+                      remoteAccessToken: explicitConnection.remoteAccessToken,
+                    }
+                  : {}),
+              }
+            : runMode === "cloud"
+              ? {
+                  runtime: "cloud",
+                  provider: "elizacloud",
+                }
+              : {
+                  runtime: "local",
+                },
+      });
+    } else {
       if (!config.cloud) config.cloud = {};
 
       if (runMode === "cloud") {
@@ -518,35 +556,8 @@ export async function handleOnboardingRoutes(
 
       reconcilePersistedOnboardingConnection(config);
     }
-
-    if (hasCanonicalRuntimeConfig) {
-      applyCanonicalOnboardingConfig(config, {
-        deploymentTarget: explicitDeploymentTarget,
-        linkedAccounts: explicitLinkedAccounts,
-        serviceRouting: explicitServiceRouting,
-        clearRoutes:
-          explicitServiceRoutingRequested &&
-          !explicitServiceRouting?.llmText &&
-          !explicitConnection
-            ? ["llmText"]
-            : [],
-      });
-
-      if (!explicitConnection) {
-        delete config.connection;
-        delete process.env.ELIZAOS_CLOUD_ENABLED;
-        delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
-        delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
-
-        if (config.models && typeof config.models === "object") {
-          delete config.models.small;
-          delete config.models.large;
-        }
-
-        if (config.agents?.defaults?.model) {
-          delete config.agents.defaults.model.primary;
-        }
-      }
+    if (hasCanonicalRuntimeConfig && config.agents?.defaults?.model) {
+      delete config.agents.defaults.model.primary;
     }
 
     // ── GitHub token ────────────────────────────────────────────────────

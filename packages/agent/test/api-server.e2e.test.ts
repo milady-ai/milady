@@ -4667,6 +4667,71 @@ describe("API Server E2E (no runtime)", () => {
         }
       }
     });
+
+    it("POST /api/onboarding lets canonical routing override a conflicting connection payload", async () => {
+      const res = await req(port, "POST", "/api/onboarding", {
+        name: "CanonicalAgent",
+        runMode: "cloud",
+        connection: {
+          kind: "cloud-managed",
+          cloudProvider: "elizacloud",
+          smallModel: "openai/gpt-5-mini",
+          largeModel: "anthropic/claude-sonnet-4.5",
+        },
+        deploymentTarget: {
+          runtime: "cloud",
+          provider: "elizacloud",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "direct",
+            primaryModel: "openai/gpt-5.2",
+          },
+        },
+      });
+      expect(res.status).toBe(200);
+
+      const cfg = await req(port, "GET", "/api/config");
+      const data = cfg.data as {
+        connection?: Record<string, unknown>;
+        deploymentTarget?: Record<string, unknown>;
+        linkedAccounts?: Record<string, unknown>;
+        serviceRouting?: Record<string, unknown>;
+        models?: Record<string, unknown>;
+      };
+
+      expect(data.deploymentTarget).toEqual({
+        runtime: "cloud",
+        provider: "elizacloud",
+      });
+      expect(data.linkedAccounts).toMatchObject({
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      });
+      expect(data.serviceRouting).toMatchObject({
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+          primaryModel: "openai/gpt-5.2",
+        },
+      });
+      expect(data.connection).toEqual({
+        kind: "local-provider",
+        provider: "openai",
+        primaryModel: "openai/gpt-5.2",
+      });
+      expect(data.models?.small).toBeUndefined();
+      expect(data.models?.large).toBeUndefined();
+    });
   });
 
   // -- Config --

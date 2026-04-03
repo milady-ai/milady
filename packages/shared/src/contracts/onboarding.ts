@@ -1402,12 +1402,21 @@ export function inferCompatibilityOnboardingConnection(
 export function inferOnboardingConnectionFromConfig(
   config: Record<string, unknown> | null | undefined,
 ): OnboardingConnection | null {
+  const root = asConfigRecord(config);
   const explicitConnection = normalizePersistedOnboardingConnection(
-    asConfigRecord(config)?.connection,
+    root?.connection,
   );
-  return (
-    explicitConnection ?? deriveOnboardingConnectionFromRuntimeConfig(config)
+  const hasCanonicalRuntimeConfig = Boolean(
+    root &&
+      (Object.hasOwn(root, "deploymentTarget") ||
+        Object.hasOwn(root, "linkedAccounts") ||
+        Object.hasOwn(root, "serviceRouting")),
   );
+  const derivedConnection = deriveOnboardingConnectionFromRuntimeConfig(config);
+  if (hasCanonicalRuntimeConfig) {
+    return derivedConnection ?? explicitConnection;
+  }
+  return explicitConnection ?? derivedConnection;
 }
 
 function inferLegacyCloudInferenceSelection(

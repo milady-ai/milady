@@ -117,6 +117,34 @@ describe("onboarding provider catalog", () => {
     });
   });
 
+  it("prefers canonical runtime routing over a conflicting explicit connection", () => {
+    expect(
+      inferOnboardingConnectionFromConfig({
+        connection: {
+          kind: "cloud-managed",
+          cloudProvider: "elizacloud",
+          smallModel: "openai/gpt-5-mini",
+          largeModel: "anthropic/claude-sonnet-4.5",
+        },
+        deploymentTarget: {
+          runtime: "cloud",
+          provider: "elizacloud",
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "direct",
+            primaryModel: "openai/gpt-5.2",
+          },
+        },
+      }),
+    ).toEqual({
+      kind: "local-provider",
+      provider: "openai",
+      primaryModel: "openai/gpt-5.2",
+    });
+  });
+
   it("treats explicit local-provider selections as not using cloud inference", () => {
     expect(
       isCloudInferenceSelectedInConfig({
