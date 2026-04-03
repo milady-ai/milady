@@ -195,11 +195,26 @@ describe("cloud API key persistence through onboarding", () => {
       // 1. extractAndPersistOnboardingApiKey — no-op for cloud mode
       const result = await extractAndPersistOnboardingApiKey({
         name: "Chen",
-        connection: {
-          kind: "cloud-managed",
-          apiKey: "cloud-key-persisted",
-          smallModel: "openai/gpt-5-mini",
-          largeModel: "moonshotai/kimi-k2-0905",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+            accountId: "elizacloud",
+            smallModel: "openai/gpt-5-mini",
+            largeModel: "moonshotai/kimi-k2-0905",
+          },
+        },
+        credentialInputs: {
+          cloudApiKey: "cloud-key-persisted",
         },
       });
       expect(result).toBeNull();
@@ -213,6 +228,10 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(2);
       const saved = saveElizaConfigMock.mock.calls[1][0];
       expect(saved.cloud.apiKey).toBe("cloud-key-persisted");
+      expect(saved.serviceRouting?.llmText).toMatchObject({
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+      });
     });
 
     it("switching to a local provider preserves the prior cloud key but disables cloud inference", async () => {
