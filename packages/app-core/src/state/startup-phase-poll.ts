@@ -121,7 +121,11 @@ export async function runPollingBackend(
         deps.onboardingCompletionCommittedRef.current ||
         (ctx?.shouldPreserveCompletedOnboarding ?? false);
 
-      if (sessionComplete && !ctx?.persistedActiveServer && !ctx?.hadPriorOnboarding) {
+      if (
+        sessionComplete &&
+        !ctx?.persistedActiveServer &&
+        !ctx?.hadPriorOnboarding
+      ) {
         sessionComplete = false;
       }
 

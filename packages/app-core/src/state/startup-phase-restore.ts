@@ -26,9 +26,7 @@ import {
   loadPersistedOnboardingComplete,
   type PersistedActiveServer,
 } from "./persistence";
-import {
-  type StartupEvent,
-} from "./startup-coordinator";
+import { type StartupEvent } from "./startup-coordinator";
 import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
 
 export interface RestoringSessionCtx {
