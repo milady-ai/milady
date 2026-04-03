@@ -162,7 +162,8 @@
     "puppeteer-core": "^24.37.5",
     "qrcode": "^1.5.4",
     "ws": "^8.19.0",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "viem": "^2.21.0"
   },
   "peerDependencies": {
     "@elizaos/signal-native": "*"
