@@ -65,6 +65,10 @@ import {
   SurfaceWindowManager,
 } from "./surface-windows";
 import type { SendToWebview } from "./types.js";
+import {
+  resolveDesktopBundleVersion,
+  shouldResetWindowsCefProfile,
+} from "./windows-cef-profile";
 
 type HeartbeatMenuTriggerSummary = {
   enabled: boolean;
@@ -1528,21 +1532,18 @@ async function main(): Promise<void> {
     try {
       const cefDir = path.join(Utils.paths.userData, "CEF");
       const cefVersionMarker = path.join(cefDir, ".milady-version");
-      let currentVersion = "unknown";
-      try {
-        const pkgPath = path.join(import.meta.dir, "..", "package.json");
-        currentVersion =
-          JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version ?? "unknown";
-      } catch {
-        // Fallback — version marker will still trigger cleanup on next real version.
-      }
+      const currentVersion =
+        resolveDesktopBundleVersion(import.meta.dir) ?? "unknown";
       let previousVersion: string | null = null;
       try {
         previousVersion = fs.readFileSync(cefVersionMarker, "utf-8").trim();
       } catch {
         // No marker — first run or pre-fix install.
       }
-      if (previousVersion !== currentVersion && fs.existsSync(cefDir)) {
+      if (
+        shouldResetWindowsCefProfile(previousVersion, currentVersion) &&
+        fs.existsSync(cefDir)
+      ) {
         console.log(
           `[Main] CEF version mismatch (${previousVersion ?? "none"} → ${currentVersion}), clearing stale CEF profile`,
         );
@@ -1558,8 +1559,10 @@ async function main(): Promise<void> {
         }
       }
       // Write/update version marker so we don't clear again on next launch.
-      fs.mkdirSync(cefDir, { recursive: true });
-      fs.writeFileSync(cefVersionMarker, currentVersion);
+      if (currentVersion !== "unknown") {
+        fs.mkdirSync(cefDir, { recursive: true });
+        fs.writeFileSync(cefVersionMarker, currentVersion);
+      }
     } catch (err) {
       console.warn("[Main] CEF profile cleanup failed (non-fatal):", err);
     }
