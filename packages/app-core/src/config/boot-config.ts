@@ -113,12 +113,11 @@ interface BootConfigStore {
 }
 
 function getBootConfigStore(): BootConfigStore {
-  const globalObject = (typeof window !== "undefined"
-    ? (window as unknown as Record<PropertyKey, unknown>)
-    : (globalThis as Record<PropertyKey, unknown>)) as Record<
-    PropertyKey,
-    unknown
-  > & {
+  const globalObject = (
+    typeof window !== "undefined"
+      ? (window as unknown as Record<PropertyKey, unknown>)
+      : (globalThis as Record<PropertyKey, unknown>)
+  ) as Record<PropertyKey, unknown> & {
     [BOOT_CONFIG_WINDOW_KEY]?: AppBootConfig;
   };
   const mirroredWindowConfig = globalObject[BOOT_CONFIG_WINDOW_KEY];
@@ -146,12 +145,11 @@ function getBootConfigStore(): BootConfigStore {
 export function setBootConfig(config: AppBootConfig): void {
   const store = getBootConfigStore();
   store.current = config;
-  const globalObject = (typeof window !== "undefined"
-    ? (window as unknown as Record<PropertyKey, unknown>)
-    : (globalThis as Record<PropertyKey, unknown>)) as Record<
-    PropertyKey,
-    unknown
-  > & {
+  const globalObject = (
+    typeof window !== "undefined"
+      ? (window as unknown as Record<PropertyKey, unknown>)
+      : (globalThis as Record<PropertyKey, unknown>)
+  ) as Record<PropertyKey, unknown> & {
     [BOOT_CONFIG_WINDOW_KEY]?: AppBootConfig;
   };
   globalObject[BOOT_CONFIG_WINDOW_KEY] = config;
