@@ -126,7 +126,11 @@ jobs:
           elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION="${GITHUB_REF#refs/tags/}"
           else
-            VERSION="$(git tag --sort=-creatordate | grep '^v' | head -1)"
+            # Only match release tags (v2.0.5, v2.0.0-alpha.132) — skip dev/experimental tags
+            VERSION="$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-alpha\.[0-9]+)?$' | head -1)"
+            if [ -z "$VERSION" ]; then
+              VERSION="$(git tag --sort=-creatordate | grep '^v' | head -1)"
+            fi
           fi
 
           VERSION_CLEAN="${VERSION#v}"

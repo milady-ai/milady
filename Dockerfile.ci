@@ -74,6 +74,9 @@ WORKDIR /app
 COPY --from=pruner /app /app
 
 ENV NODE_ENV=production
+# Bake the cloud image version so the version-resolver picks it up at runtime
+# (takes priority over package.json patching which can be fragile)
+ENV ELIZA_BUNDLED_VERSION=${VERSION_CLEAN}
 # MILADY_PORT is the canonical name; ELIZA_PORT kept for backward compat
 ENV MILADY_PORT=2138
 ENV ELIZA_PORT=${MILADY_PORT}
