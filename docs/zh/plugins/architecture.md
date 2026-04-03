@@ -35,10 +35,13 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-cron",              // scheduled jobs and automation
   "@elizaos/plugin-shell",             // shell command execution
   "@elizaos/plugin-agent-skills",      // skill execution and marketplace runtime
+  "@elizaos/plugin-commands",          // slash command handling (skills auto-register as /commands)
+  "@elizaos/plugin-plugin-manager",    // dynamic plugin management for registry/plugin installs
+  "@miladyai/plugin-roles",           // role-based access control (OWNER/ADMIN/NONE)
 ];
 ```
 
-> **注意：** `@elizaos/plugin-secrets-manager`、`@elizaos/plugin-rolodex`、`@elizaos/plugin-plugin-manager`、`@elizaos/plugin-trust`、`@elizaos/plugin-todo`、`@elizaos/plugin-personality` 和 `@elizaos/plugin-experience` 已静态导入以实现快速解析，但在核心列表中被注释掉了。它们可能会在未来的版本中重新启用。
+> **注意：** `@elizaos/plugin-secrets-manager`、`@elizaos/plugin-rolodex`、`@elizaos/plugin-trust`、`@elizaos/plugin-todo`、`@elizaos/plugin-personality` 和 `@elizaos/plugin-experience` 已静态导入以实现快速解析，但在核心列表中被注释掉了。它们可能会在未来的版本中重新启用。
 
 <div id="optional-core-plugins">
 
