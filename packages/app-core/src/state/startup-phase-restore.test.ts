@@ -11,7 +11,11 @@ describe("applyRestoredConnection", () => {
     const startLocalRuntime = vi.fn(async () => {});
 
     await applyRestoredConnection({
-      restoredConnection: { runMode: "local" },
+      restoredActiveServer: {
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      },
       clientRef,
       startLocalRuntime,
     });
@@ -28,9 +32,11 @@ describe("applyRestoredConnection", () => {
     };
 
     await applyRestoredConnection({
-      restoredConnection: {
-        runMode: "remote",
-        remoteApiBase: "https://remote.example/api",
+      restoredActiveServer: {
+        id: "remote:https://remote.example/api",
+        kind: "remote",
+        label: "remote.example",
+        apiBase: "https://remote.example/api",
       },
       clientRef,
     });

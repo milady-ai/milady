@@ -33,7 +33,6 @@ import {
   type StartupErrorState,
 } from "./internal";
 import {
-  loadPersistedConnectionMode,
   loadPersistedOnboardingComplete,
 } from "./persistence";
 import { resolveApiUrl } from "../utils";

@@ -594,32 +594,34 @@ function normalizePersistedConnectionMode(
   }
 }
 
-export function connectionModeToActiveServer(
-  mode: PersistedConnectionMode,
-): PersistedActiveServer {
-  switch (mode.runMode) {
+export function createPersistedActiveServer(args: {
+  kind: PersistedActiveServer["kind"];
+  apiBase?: string;
+  accessToken?: string;
+  label?: string;
+}): PersistedActiveServer {
+  const apiBase = normalizeApiBase(args.apiBase);
+  const accessToken = trimPersistedValue(args.accessToken);
+  const explicitLabel = trimPersistedValue(args.label);
+
+  switch (args.kind) {
     case "local":
       return {
         id: "local:embedded",
         kind: "local",
-        label: "This device",
+        label: explicitLabel ?? "This device",
       };
-    case "cloud": {
-      const apiBase = normalizeApiBase(mode.cloudApiBase);
+    case "cloud":
       return {
         id: `cloud:${apiBase ?? "managed"}`,
         kind: "cloud",
-        label: "Eliza Cloud",
+        label: explicitLabel ?? "Eliza Cloud",
         ...(apiBase ? { apiBase } : {}),
-        ...(trimPersistedValue(mode.cloudAuthToken)
-          ? { accessToken: trimPersistedValue(mode.cloudAuthToken) }
-          : {}),
+        ...(accessToken ? { accessToken } : {}),
       };
-    }
     case "remote": {
-      const apiBase = normalizeApiBase(mode.remoteApiBase);
-      let label = "Remote server";
-      if (apiBase) {
+      let label = explicitLabel ?? "Remote server";
+      if (!explicitLabel && apiBase) {
         try {
           label = new URL(apiBase).host || label;
         } catch {
@@ -631,10 +633,31 @@ export function connectionModeToActiveServer(
         kind: "remote",
         label,
         ...(apiBase ? { apiBase } : {}),
-        ...(trimPersistedValue(mode.remoteAccessToken)
-          ? { accessToken: trimPersistedValue(mode.remoteAccessToken) }
-          : {}),
+        ...(accessToken ? { accessToken } : {}),
       };
+    }
+  }
+}
+
+export function connectionModeToActiveServer(
+  mode: PersistedConnectionMode,
+): PersistedActiveServer {
+  switch (mode.runMode) {
+    case "local":
+      return createPersistedActiveServer({ kind: "local" });
+    case "cloud": {
+      return createPersistedActiveServer({
+        kind: "cloud",
+        apiBase: mode.cloudApiBase,
+        accessToken: mode.cloudAuthToken,
+      });
+    }
+    case "remote": {
+      return createPersistedActiveServer({
+        kind: "remote",
+        apiBase: mode.remoteApiBase,
+        accessToken: mode.remoteAccessToken,
+      });
     }
   }
 }

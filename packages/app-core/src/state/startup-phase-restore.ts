@@ -21,33 +21,31 @@ import {
 } from "./internal";
 import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
 import {
-  loadPersistedConnectionMode,
+  createPersistedActiveServer,
   loadPersistedActiveServer,
   loadPersistedOnboardingComplete,
-  type PersistedConnectionMode,
+  type PersistedActiveServer,
 } from "./persistence";
 import {
-  connectionModeToTarget,
   type StartupEvent,
 } from "./startup-coordinator";
 import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
 
 export interface RestoringSessionCtx {
   persistedActiveServer: ReturnType<typeof loadPersistedActiveServer>;
-  persistedConnection: ReturnType<typeof loadPersistedConnectionMode>;
-  restoredConnection: PersistedConnectionMode;
+  restoredActiveServer: PersistedActiveServer;
   shouldPreserveCompletedOnboarding: boolean;
   hadPriorOnboarding: boolean;
 }
 
 export async function applyRestoredConnection(args: {
-  restoredConnection: PersistedConnectionMode;
+  restoredActiveServer: PersistedActiveServer;
   clientRef: Pick<typeof client, "setBaseUrl" | "setToken">;
   startLocalRuntime?: () => Promise<void>;
 }) {
-  const { restoredConnection, clientRef, startLocalRuntime } = args;
+  const { restoredActiveServer, clientRef, startLocalRuntime } = args;
 
-  if (restoredConnection.runMode === "local") {
+  if (restoredActiveServer.kind === "local") {
     clientRef.setToken(null);
     clientRef.setBaseUrl(null);
     if (startLocalRuntime) {
@@ -56,14 +54,27 @@ export async function applyRestoredConnection(args: {
     return;
   }
 
-  if (restoredConnection.runMode === "cloud") {
-    clientRef.setBaseUrl(restoredConnection.cloudApiBase ?? null);
-    clientRef.setToken(restoredConnection.cloudAuthToken ?? null);
+  if (restoredActiveServer.kind === "cloud") {
+    clientRef.setBaseUrl(restoredActiveServer.apiBase ?? null);
+    clientRef.setToken(restoredActiveServer.accessToken ?? null);
     return;
   }
 
-  clientRef.setBaseUrl(restoredConnection.remoteApiBase ?? null);
-  clientRef.setToken(restoredConnection.remoteAccessToken ?? null);
+  clientRef.setBaseUrl(restoredActiveServer.apiBase ?? null);
+  clientRef.setToken(restoredActiveServer.accessToken ?? null);
+}
+
+function activeServerToTarget(
+  kind: PersistedActiveServer["kind"],
+): "embedded-local" | "cloud-managed" | "remote-backend" {
+  switch (kind) {
+    case "local":
+      return "embedded-local";
+    case "cloud":
+      return "cloud-managed";
+    case "remote":
+      return "remote-backend";
+  }
 }
 
 /**
@@ -91,12 +102,11 @@ export async function runRestoringSession(
   const forceLocal = deps.forceLocalBootstrapRef.current;
   deps.forceLocalBootstrapRef.current = false;
   const persistedActiveServer = loadPersistedActiveServer();
-  const persisted = loadPersistedConnectionMode();
   const hadPrior = loadPersistedOnboardingComplete();
   if (cancelled.current) return;
 
   const desktopInstall =
-    !persisted && isElectrobunRuntime()
+    !persistedActiveServer && isElectrobunRuntime()
       ? await inspectExistingElizaInstall().catch(() => null)
       : null;
   if (cancelled.current) return;
@@ -106,7 +116,7 @@ export async function runRestoringSession(
 
   // Only probe the API when there is evidence of a prior install.
   const probed =
-    !persisted && hasExistingEvidence
+    !persistedActiveServer && hasExistingEvidence
       ? await detectExistingOnboardingConnection({
           client,
           timeoutMs: isDesktop
@@ -116,7 +126,11 @@ export async function runRestoringSession(
       : null;
   if (cancelled.current) return;
 
-  const restored = persisted ?? probed?.connection ?? null;
+  const restoredActiveServer =
+    persistedActiveServer ??
+    (probed
+      ? createPersistedActiveServer({ kind: probed.connection.runMode })
+      : null);
   const preserveCompleted =
     hadPrior && !deps.onboardingCompletionCommittedRef.current;
 
@@ -126,7 +140,7 @@ export async function runRestoringSession(
     ),
   );
 
-  if (!restored) {
+  if (!restoredActiveServer) {
     // No evidence of a prior connection — show onboarding.
     const { resolveStartupWithoutRestoredConnection } = await import(
       "./onboarding-bootstrap"
@@ -175,7 +189,7 @@ export async function runRestoringSession(
   }
 
   await applyRestoredConnection({
-    restoredConnection: restored,
+    restoredActiveServer,
     clientRef: client,
     startLocalRuntime: async () => {
       try {
@@ -189,13 +203,12 @@ export async function runRestoringSession(
 
   ctxRef.current = {
     persistedActiveServer,
-    persistedConnection: persisted,
-    restoredConnection: restored,
+    restoredActiveServer,
     shouldPreserveCompletedOnboarding: preserveCompleted,
     hadPriorOnboarding: hadPrior,
   };
   dispatch({
     type: "SESSION_RESTORED",
-    target: connectionModeToTarget(restored.runMode),
+    target: activeServerToTarget(restoredActiveServer.kind),
   });
 }

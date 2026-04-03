@@ -38,6 +38,7 @@ export {
   clearAvatarIndex,
   clearPersistedActiveServer,
   clearPersistedConnectionMode,
+  createPersistedActiveServer,
   clearPersistedOnboardingStep,
   connectionModeToActiveServer,
   loadActiveConversationId,
