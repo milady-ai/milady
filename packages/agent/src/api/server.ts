@@ -559,6 +559,9 @@ function patchTouchesProviderSelection(
   patch: Record<string, unknown>,
 ): boolean {
   if (
+    Object.hasOwn(patch, "deploymentTarget") ||
+    Object.hasOwn(patch, "linkedAccounts") ||
+    Object.hasOwn(patch, "serviceRouting") ||
     Object.hasOwn(patch, "cloud") ||
     Object.hasOwn(patch, "env") ||
     Object.hasOwn(patch, "models")

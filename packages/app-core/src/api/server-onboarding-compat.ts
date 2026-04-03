@@ -347,6 +347,19 @@ export function deriveCompatOnboardingReplayBody(
     ...(linkedAccounts ? { linkedAccounts } : {}),
     ...(serviceRouting ? { serviceRouting } : {}),
   };
+  const hasCanonicalRuntimeConfig = Boolean(
+    explicitDeploymentTarget || linkedAccounts || serviceRouting,
+  );
+
+  if (hasCanonicalRuntimeConfig) {
+    return {
+      isCloudMode,
+      replayBody: {
+        ...body,
+        ...canonicalReplayFields,
+      },
+    };
+  }
 
   if (connection?.kind === "cloud-managed") {
     return {
@@ -355,7 +368,6 @@ export function deriveCompatOnboardingReplayBody(
         ...body,
         ...canonicalReplayFields,
         runMode: isCloudMode ? "cloud" : "local",
-        ...(isCloudMode ? { cloudProvider: "elizacloud" } : {}),
         ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
         ...(connection.smallModel ? { smallModel: connection.smallModel } : {}),
         ...(connection.largeModel ? { largeModel: connection.largeModel } : {}),

@@ -8,7 +8,6 @@ import {
   getOnboardingProviderOption,
   getOnboardingProviderSignalEnvKeys,
   getStoredOnboardingProviderId,
-  inferCompatibilityOnboardingConnection,
   inferOnboardingConnectionFromConfig,
   isCloudManagedConnection,
   isLocalProviderConnection,
@@ -644,7 +643,7 @@ export function mergeOnboardingConnectionWithExisting(
 export function reconcilePersistedOnboardingConnection(
   config: MutableElizaConfig,
 ): OnboardingConnection | null {
-  const resolved = inferCompatibilityOnboardingConnection(config);
+  const resolved = inferOnboardingConnectionFromConfig(config);
   persistConnectionSelection(config, resolved);
   return resolved;
 }

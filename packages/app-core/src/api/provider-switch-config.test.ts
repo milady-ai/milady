@@ -343,6 +343,45 @@ describe("reconcilePersistedOnboardingConnection", () => {
       provider: "ollama",
     });
   });
+
+  it("projects the persisted connection from canonical routing when present", () => {
+    const config = {
+      connection: {
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "moonshotai/kimi-k2-0905",
+      },
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5-mini",
+        },
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+    } as Partial<ElizaConfig>;
+
+    expect(reconcilePersistedOnboardingConnection(config)).toEqual({
+      kind: "local-provider",
+      provider: "openrouter",
+      primaryModel: "openai/gpt-5-mini",
+    });
+    expect(config.connection).toEqual({
+      kind: "local-provider",
+      provider: "openrouter",
+      primaryModel: "openai/gpt-5-mini",
+    });
+  });
 });
 
 describe("mergeOnboardingConnectionWithExisting", () => {

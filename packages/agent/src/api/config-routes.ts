@@ -13,6 +13,12 @@ import {
   stripOnboardingConnectionSecrets,
 } from "../contracts/onboarding.js";
 import {
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "../contracts/service-routing.js";
+import {
+  applyCanonicalOnboardingConfig,
   applyOnboardingConnectionConfig,
   reconcilePersistedOnboardingConnection,
 } from "./provider-switch-config.js";
@@ -275,6 +281,27 @@ export async function handleConfigRoutes(
     const normalizedConnectionPatch = explicitConnectionRequested
       ? normalizePersistedOnboardingConnection(filtered.connection)
       : null;
+    const canonicalDeploymentTargetRequested = Object.hasOwn(
+      filtered,
+      "deploymentTarget",
+    );
+    const canonicalLinkedAccountsRequested = Object.hasOwn(
+      filtered,
+      "linkedAccounts",
+    );
+    const canonicalServiceRoutingRequested = Object.hasOwn(
+      filtered,
+      "serviceRouting",
+    );
+    const normalizedDeploymentTarget = canonicalDeploymentTargetRequested
+      ? normalizeDeploymentTargetConfig(filtered.deploymentTarget)
+      : undefined;
+    const normalizedLinkedAccounts = canonicalLinkedAccountsRequested
+      ? normalizeLinkedAccountsConfig(filtered.linkedAccounts)
+      : undefined;
+    const normalizedServiceRouting = canonicalServiceRoutingRequested
+      ? normalizeServiceRoutingConfig(filtered.serviceRouting)
+      : undefined;
     if (explicitConnectionRequested && !normalizedConnectionPatch) {
       error(
         res,
@@ -352,7 +379,20 @@ export async function handleConfigRoutes(
         config,
         normalizedConnectionPatch,
       );
-    } else if (patchTouchesProviderSelection(filtered)) {
+    }
+
+    if (
+      canonicalDeploymentTargetRequested ||
+      canonicalLinkedAccountsRequested ||
+      canonicalServiceRoutingRequested
+    ) {
+      applyCanonicalOnboardingConfig(config, {
+        deploymentTarget: normalizedDeploymentTarget,
+        linkedAccounts: normalizedLinkedAccounts,
+        serviceRouting: normalizedServiceRouting,
+      });
+      reconcilePersistedOnboardingConnection(config);
+    } else if (!normalizedConnectionPatch && patchTouchesProviderSelection(filtered)) {
       reconcilePersistedOnboardingConnection(config);
     }
 

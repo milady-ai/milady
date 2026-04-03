@@ -76,6 +76,51 @@ describe("deriveCompatOnboardingReplayBody", () => {
     expect(replayBody).toHaveProperty("runMode", "cloud");
     expect(replayBody).toHaveProperty("provider", "openai");
   });
+
+  it("does not synthesize legacy provider fields when canonical runtime config is present", () => {
+    const body = {
+      name: "Agent",
+      runMode: "cloud",
+      connection: {
+        kind: "local-provider",
+        provider: "openrouter",
+        apiKey: "sk-test-openrouter",
+        primaryModel: "openai/gpt-5-mini",
+      },
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5-mini",
+        },
+      },
+    };
+
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
+
+    expect(isCloudMode).toBe(true);
+    expect(replayBody).toMatchObject({
+      connection: body.connection,
+      deploymentTarget: body.deploymentTarget,
+      linkedAccounts: body.linkedAccounts,
+      serviceRouting: body.serviceRouting,
+      runMode: "cloud",
+    });
+    expect(replayBody).not.toHaveProperty("provider");
+    expect(replayBody).not.toHaveProperty("providerApiKey");
+    expect(replayBody).not.toHaveProperty("cloudProvider");
+    expect(replayBody).not.toHaveProperty("primaryModel");
+  });
 });
 
 describe("onboarding replay body enrichment (integration)", () => {
