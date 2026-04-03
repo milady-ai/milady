@@ -73,6 +73,7 @@ import {
 } from "./surface-windows";
 import type { SendToWebview } from "./types.js";
 import {
+  resolveDesktopBundleVersion,
   shouldResetWindowsCefProfile,
   shouldWriteWindowsCefProfileMarker,
 } from "./windows-cef-profile";
@@ -724,14 +725,16 @@ async function resolveRendererUrl(): Promise<string> {
 
 async function createMainWindow(): Promise<BrowserWindow> {
   const rendererUrl = await resolveRendererUrl();
+  const mainWindowPartition = resolveMainWindowPartition(process.env);
+  if (mainWindowPartition) {
+    console.log(
+      `[Main] Using isolated main window partition ${mainWindowPartition}`,
+    );
+  }
 
-  // Load persisted window state
   const statePath = path.join(Utils.paths.userData, "window-state.json");
   const state = loadWindowState(statePath);
 
-  // Read the pre-built webview bridge preload (built by `bun run build:preload`).
-  // The preload runs in the webview context after Electrobun's built-in preload,
-  // setting up Milady's direct Electrobun RPC bridge on the window.
   let preload: string;
   try {
     preload = readResolvedPreloadScript(import.meta.dir);
@@ -740,89 +743,60 @@ async function createMainWindow(): Promise<BrowserWindow> {
     preload = "// preload unavailable";
   }
 
-  const mainWindowPartition =
-    process.platform === "win32"
-      ? resolveMainWindowPartition(
-          process.env as Record<string, string | undefined>,
-        )
-      : null;
+  const windowFrame = {
+    width: state.width,
+    height: state.height,
+    x: state.x,
+    y: state.y,
+  };
+  const titleBarStyle =
+    process.platform === "darwin" ? "hiddenInset" : "default";
+  const transparent = process.platform === "darwin";
 
+  let win: BrowserWindow;
   if (process.platform === "win32" && mainWindowPartition) {
     const buildInfo = await BuildConfig.get();
-    const shellRenderer = resolveBootstrapShellRenderer(buildInfo);
-    const mainViewRenderer = resolveBootstrapViewRenderer(buildInfo);
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
       title: "Milady",
       // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
       icon: resolveDesktopAppIconPath(),
-      frame: {
-        width: state.width,
-        height: state.height,
-        x: state.x,
-        y: state.y,
-      },
-      renderer: shellRenderer,
-      titleBarStyle: "default",
-      transparent: false,
+      url: null,
+      preload: null,
+      frame: windowFrame,
+      renderer: resolveBootstrapShellRenderer(buildInfo),
+      titleBarStyle,
+      transparent,
     });
-
     win.webview.remove();
-
     const mainView = new BrowserView({
       url: rendererUrl,
       // @ts-expect-error: BrowserView preload exists at runtime but is not typed yet.
       preload,
-      renderer: mainViewRenderer,
-      windowId: win.id,
+      renderer: resolveBootstrapViewRenderer(buildInfo),
       partition: mainWindowPartition,
       frame: {
         x: 0,
         y: 0,
-        width: win.frame.width,
-        height: win.frame.height,
+        width: state.width,
+        height: state.height,
       },
+      windowId: win.id,
     });
-
-    // Rewire the main window to the explicit BrowserView so downstream
-    // win.webview access targets the isolated renderer surface.
-    // @ts-expect-error: webviewId is available at runtime but missing in typings.
     win.webviewId = mainView.id;
-
-    const resizeMainView = () => {
-      mainView.setFrame(0, 0, win.frame.width, win.frame.height);
-      scheduleStateSave(statePath, win);
-    };
-
-    applyMacOSWindowEffects(win);
-    win.on("resize", resizeMainView);
-    win.on("move", () => scheduleStateSave(statePath, win));
-    return win;
+  } else {
+    win = new BrowserWindow({
+      title: "Milady",
+      // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
+      icon: resolveDesktopAppIconPath(),
+      url: rendererUrl,
+      preload,
+      frame: windowFrame,
+      titleBarStyle,
+      transparent,
+    });
   }
 
-  const win = new BrowserWindow({
-    title: "Milady",
-    // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
-    icon: resolveDesktopAppIconPath(),
-    url: rendererUrl,
-    preload,
-    frame: {
-      width: state.width,
-      height: state.height,
-      x: state.x,
-      y: state.y,
-    },
-    // hiddenInset hides the title bar and insets traffic lights — macOS only.
-    // On Windows/Linux use the default title bar so the window remains draggable.
-    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
-    // Transparent background for vibrancy — macOS only.
-    // On Windows/Linux a solid background prevents rendering artifacts.
-    transparent: process.platform === "darwin",
-  });
-
-  // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);
-
-  // Persist window state on resize and move
   win.on("resize", () => scheduleStateSave(statePath, win));
   win.on("move", () => scheduleStateSave(statePath, win));
 
@@ -1598,14 +1572,8 @@ async function main(): Promise<void> {
     try {
       const cefDir = path.join(Utils.paths.userData, "CEF");
       const cefVersionMarker = path.join(cefDir, ".milady-version");
-      let currentVersion = "unknown";
-      try {
-        const pkgPath = path.join(import.meta.dir, "..", "package.json");
-        currentVersion =
-          JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version ?? "unknown";
-      } catch {
-        // Fallback — version marker will still trigger cleanup on next real version.
-      }
+      const currentVersion =
+        resolveDesktopBundleVersion(import.meta.dir) ?? "unknown";
       let previousVersion: string | null = null;
       try {
         previousVersion = fs.readFileSync(cefVersionMarker, "utf-8").trim();

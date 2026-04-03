@@ -42,7 +42,10 @@ describe("Electrobun startup bootstrap", () => {
     const validateIndex = source.indexOf(
       "preload = readResolvedPreloadScript(import.meta.dir);",
     );
-    const browserWindowIndex = source.indexOf("const win = new BrowserWindow(");
+    const browserWindowIndex = source.indexOf(
+      "new BrowserWindow({",
+      validateIndex,
+    );
 
     expect(validateIndex).toBeGreaterThan(-1);
     expect(browserWindowIndex).toBeGreaterThan(validateIndex);
@@ -101,6 +104,17 @@ describe("Electrobun startup bootstrap", () => {
 
     expect(source).toContain("resolveRendererAssetDir(import.meta.dir)");
     expect(source).toContain("readResolvedPreloadScript(import.meta.dir)");
+  });
+
+  it("allows the packaged Windows bootstrap harness to override the main window partition", () => {
+    const source = fs.readFileSync(INDEX_PATH, "utf8");
+
+    expect(source).toContain("resolveMainWindowPartition(process.env)");
+    expect(source).toContain("resolveBootstrapShellRenderer(buildInfo)");
+    expect(source).toContain("resolveBootstrapViewRenderer(buildInfo)");
+    expect(source).toContain("const mainView = new BrowserView({");
+    expect(source).toContain("partition: mainWindowPartition");
+    expect(source).toContain("win.webviewId = mainView.id");
   });
 
   it("guards embedded agent startup behind local runtime mode", () => {

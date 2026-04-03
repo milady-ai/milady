@@ -39,8 +39,10 @@ export function createPackagedWindowsAppEnv(args: {
     MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated",
     MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
     ELECTROBUN_CONSOLE: "1",
-    // Redirect both Windows profile roots so the packaged shell does not
-    // reuse stale CEF/runtime state from the host machine.
+    // Redirect both Windows profile roots so the packaged shell stays isolated
+    // without depending on a second explicit CEF partition inside the test
+    // profile. Hosted runners have been more reliable with the default session
+    // when the profile roots are already unique per test run.
     APPDATA: args.appData,
     LOCALAPPDATA: args.localAppData,
   };
