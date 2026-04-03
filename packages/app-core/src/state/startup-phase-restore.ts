@@ -16,7 +16,10 @@ import {
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import { type StartupErrorState } from "./internal";
-import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
+import {
+  detectExistingOnboardingConnection,
+  resolveStartupWithoutRestoredConnection,
+} from "./onboarding-bootstrap";
 import {
   createPersistedActiveServer,
   loadPersistedActiveServer,
@@ -134,9 +137,6 @@ export async function runRestoringSession(
 
   if (!restoredActiveServer) {
     // No evidence of a prior connection — show onboarding.
-    const { resolveStartupWithoutRestoredConnection } = await import(
-      "./onboarding-bootstrap"
-    );
     const result = resolveStartupWithoutRestoredConnection({
       hadPersistedOnboardingCompletion: hadPrior,
     });

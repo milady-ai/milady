@@ -195,6 +195,9 @@ test("packaged Windows app bootstraps the renderer against the external API over
   const userDataDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "milady-win-userdata-"),
   );
+  const localUserDataDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "milady-win-localappdata-"),
+  );
 
   const executablePath = await resolveWindowsLauncher(tempExtractDir);
 
@@ -210,8 +213,10 @@ test("packaged Windows app bootstraps the renderer against the external API over
       env: {
         ...process.env,
         MILADY_DESKTOP_TEST_API_BASE: api.baseUrl,
-        // Redirect the Roaming AppData so it doesn't pollute the dev machine's real AppData
+        // Redirect both Windows profile roots so the packaged shell does not
+        // reuse stale CEF/runtime state from the host machine.
         APPDATA: userDataDir,
+        LOCALAPPDATA: localUserDataDir,
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -274,6 +279,9 @@ test("packaged Windows app bootstraps the renderer against the external API over
       .catch(() => undefined);
     await fs
       .rm(userDataDir, { recursive: true, force: true })
+      .catch(() => undefined);
+    await fs
+      .rm(localUserDataDir, { recursive: true, force: true })
       .catch(() => undefined);
   }
 });
