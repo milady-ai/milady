@@ -9,7 +9,7 @@ import {
 } from "@miladyai/shared";
 import { collectConfigEnvVars } from "./env-vars";
 import { resolveConfigIncludes } from "./includes";
-import { resolveConfigPath, resolveUserPath } from "./paths";
+import { resolveConfigPath, resolveStateDir, resolveUserPath } from "./paths";
 import type { ElizaConfig } from "./types";
 
 export * from "./types";
@@ -40,7 +40,7 @@ export function loadElizaConfig(): ElizaConfig {
   const resolved = resolveConfigIncludes(parsed, configPath) as ElizaConfig;
   migrateLegacyRuntimeConfig(resolved as Record<string, unknown>);
 
-  const skillsJsonPath = resolveUserPath("~/.eliza/skills.json");
+  const skillsJsonPath = path.join(resolveStateDir(), "skills.json");
 
   if (!fs.existsSync(skillsJsonPath)) {
     try {

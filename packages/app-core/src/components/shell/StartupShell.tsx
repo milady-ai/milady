@@ -9,10 +9,21 @@
  * Non-loading phases (error, pairing, onboarding) delegate to their views.
  */
 
-import { useApp } from "../../state";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  discoverGatewayEndpoints,
+  type GatewayDiscoveryEndpoint,
+  gatewayEndpointToApiBase,
+} from "../../bridge/gateway-discovery";
+import {
+  clearPersistedConnectionMode,
+  savePersistedConnectionMode,
+  useApp,
+} from "../../state";
 import type { StartupErrorState } from "../../state/types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
+import { SplashServerChooser } from "./SplashServerChooser";
 import { StartupFailureView } from "./StartupFailureView";
 
 const FONT = "'Courier New', 'Courier', 'Monaco', monospace";
@@ -45,8 +56,127 @@ function phaseToStatusKey(phase: string): string {
 }
 
 export function StartupShell() {
-  const { startupCoordinator, startupError, retryStartup, t } = useApp();
+  const {
+    startupCoordinator,
+    startupError,
+    retryStartup,
+    setState,
+    goToOnboardingStep,
+    elizaCloudConnected,
+    onboardingCloudApiKey,
+    t,
+  } = useApp();
   const phase = startupCoordinator.phase;
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
+  const [discoveredGateways, setDiscoveredGateways] = useState<
+    GatewayDiscoveryEndpoint[]
+  >([]);
+  const isSplash = phase === "splash";
+  const splashLoaded = isSplash
+    ? (startupCoordinator.state as { loaded?: boolean }).loaded
+    : false;
+  const progress = PHASE_PROGRESS[phase] ?? 50;
+  const showElizaCloudEntry = useMemo(() => {
+    if (elizaCloudConnected) {
+      return true;
+    }
+    if (onboardingCloudApiKey.trim().length > 0) {
+      return true;
+    }
+    if (typeof window === "undefined") {
+      return false;
+    }
+    const token = (
+      (window as unknown as Record<string, unknown>)
+        .__ELIZA_CLOUD_AUTH_TOKEN__ ?? ""
+    )
+      .toString()
+      .trim();
+    return token.length > 0;
+  }, [elizaCloudConnected, onboardingCloudApiKey]);
+
+  useEffect(() => {
+    if (!isSplash || !splashLoaded) {
+      return;
+    }
+
+    let cancelled = false;
+    setDiscoveryLoading(true);
+    void discoverGatewayEndpoints({ timeoutMs: 1500 })
+      .then((gateways) => {
+        if (!cancelled) {
+          setDiscoveredGateways(gateways);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setDiscoveryLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isSplash, splashLoaded]);
+
+  const continueToOnboarding = useCallback(() => {
+    startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" });
+  }, [startupCoordinator]);
+
+  const seedSplashTarget = useCallback(
+    (target: "local" | "remote" | "elizacloud", remoteApiBase?: string) => {
+      clearPersistedConnectionMode();
+      goToOnboardingStep("identity");
+      setState("onboardingProvider", "");
+      setState("onboardingApiKey", "");
+      setState("onboardingPrimaryModel", "");
+      setState("onboardingRemoteToken", "");
+
+      if (target === "local") {
+        setState("onboardingRunMode", "local");
+        setState("onboardingCloudProvider", "");
+        setState("onboardingRemoteConnected", false);
+        setState("onboardingRemoteApiBase", "");
+        return;
+      }
+
+      setState("onboardingRunMode", "cloud");
+      setState(
+        "onboardingCloudProvider",
+        target === "elizacloud" ? "elizacloud" : "remote",
+      );
+      setState("onboardingRemoteConnected", Boolean(remoteApiBase));
+      setState("onboardingRemoteApiBase", remoteApiBase ?? "");
+    },
+    [goToOnboardingStep, setState],
+  );
+
+  const handleCreateLocal = useCallback(() => {
+    seedSplashTarget("local");
+    continueToOnboarding();
+  }, [continueToOnboarding, seedSplashTarget]);
+
+  const handleManualConnect = useCallback(() => {
+    seedSplashTarget("remote");
+    continueToOnboarding();
+  }, [continueToOnboarding, seedSplashTarget]);
+
+  const handleUseElizaCloud = useCallback(() => {
+    seedSplashTarget("elizacloud");
+    continueToOnboarding();
+  }, [continueToOnboarding, seedSplashTarget]);
+
+  const handleConnectGateway = useCallback(
+    (gateway: GatewayDiscoveryEndpoint) => {
+      const remoteApiBase = gatewayEndpointToApiBase(gateway);
+      savePersistedConnectionMode({
+        runMode: "remote",
+        remoteApiBase,
+      });
+      continueToOnboarding();
+    },
+    [continueToOnboarding],
+  );
 
   // Error — delegate
   if (phase === "error") {
@@ -75,13 +205,6 @@ export function StartupShell() {
   if (phase === "ready") {
     return null;
   }
-
-  // Everything else: splash with progress bar
-  const isSplash = phase === "splash";
-  const splashLoaded = isSplash
-    ? (startupCoordinator.state as { loaded?: boolean }).loaded
-    : false;
-  const progress = PHASE_PROGRESS[phase] ?? 50;
 
   return (
     <div className="flex items-center justify-center h-full w-full bg-[#ffe600] text-black overflow-hidden">
@@ -134,21 +257,28 @@ export function StartupShell() {
         )}
 
         {/* Press Start button — only on splash phase */}
-        {isSplash && (
-          <button
-            type="button"
-            disabled={!splashLoaded}
-            onClick={() =>
-              startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" })
-            }
-            style={{ fontFamily: FONT }}
-            className="mt-3 border-2 border-black bg-black px-5 py-2.5 text-[9px] uppercase text-[#ffe600] hover:bg-black/80 disabled:opacity-30 disabled:cursor-wait transition-all"
-          >
-            {splashLoaded
-              ? t("startupshell.GetStarted", { defaultValue: "Press Start" })
-              : t("startupshell.Loading", { defaultValue: "Loading..." })}
-          </button>
-        )}
+        {isSplash &&
+          (!splashLoaded ? (
+            <button
+              type="button"
+              disabled
+              style={{ fontFamily: FONT }}
+              className="mt-3 border-2 border-black bg-black px-5 py-2.5 text-[9px] uppercase text-[#ffe600] hover:bg-black/80 disabled:opacity-30 disabled:cursor-wait transition-all"
+            >
+              {t("startupshell.Loading", { defaultValue: "Loading..." })}
+            </button>
+          ) : (
+            <SplashServerChooser
+              discoveryLoading={discoveryLoading}
+              gateways={discoveredGateways}
+              showElizaCloudEntry={showElizaCloudEntry}
+              t={t}
+              onCreateLocal={handleCreateLocal}
+              onManualConnect={handleManualConnect}
+              onUseElizaCloud={handleUseElizaCloud}
+              onConnectGateway={handleConnectGateway}
+            />
+          ))}
       </div>
     </div>
   );

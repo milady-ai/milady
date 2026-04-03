@@ -529,36 +529,230 @@ export interface PersistedConnectionMode {
   remoteAccessToken?: string;
 }
 
-const CONNECTION_MODE_STORAGE_KEY = "eliza:connection-mode";
+export interface PersistedActiveServer {
+  /** Stable identifier for the selected server target. */
+  id: string;
+  /** Server category as seen by the client startup flow. */
+  kind: "local" | "cloud" | "remote";
+  /** Human-readable label for future chooser/history UI. */
+  label: string;
+  /** Reachable API base for remote/cloud servers. */
+  apiBase?: string;
+  /** Optional auth/access token for the selected server. */
+  accessToken?: string;
+}
+
+const ACTIVE_SERVER_STORAGE_KEY = "milady:active-server";
+const LEGACY_CONNECTION_MODE_STORAGE_KEY = "eliza:connection-mode";
+
+function trimPersistedValue(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizeApiBase(value: unknown): string | undefined {
+  const trimmed = trimPersistedValue(value);
+  return trimmed?.replace(/\/+$/, "");
+}
+
+function normalizePersistedConnectionMode(
+  value: unknown,
+): PersistedConnectionMode | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const parsed = value as Record<string, unknown>;
+  switch (parsed.runMode) {
+    case "local":
+      return { runMode: "local" };
+    case "cloud": {
+      const cloudApiBase = normalizeApiBase(parsed.cloudApiBase);
+      return {
+        runMode: "cloud",
+        ...(cloudApiBase ? { cloudApiBase } : {}),
+        ...(trimPersistedValue(parsed.cloudAuthToken)
+          ? { cloudAuthToken: trimPersistedValue(parsed.cloudAuthToken) }
+          : {}),
+      };
+    }
+    case "remote": {
+      const remoteApiBase = normalizeApiBase(parsed.remoteApiBase);
+      return {
+        runMode: "remote",
+        ...(remoteApiBase ? { remoteApiBase } : {}),
+        ...(trimPersistedValue(parsed.remoteAccessToken)
+          ? { remoteAccessToken: trimPersistedValue(parsed.remoteAccessToken) }
+          : {}),
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+export function connectionModeToActiveServer(
+  mode: PersistedConnectionMode,
+): PersistedActiveServer {
+  switch (mode.runMode) {
+    case "local":
+      return {
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      };
+    case "cloud": {
+      const apiBase = normalizeApiBase(mode.cloudApiBase);
+      return {
+        id: `cloud:${apiBase ?? "managed"}`,
+        kind: "cloud",
+        label: "Eliza Cloud",
+        ...(apiBase ? { apiBase } : {}),
+        ...(trimPersistedValue(mode.cloudAuthToken)
+          ? { accessToken: trimPersistedValue(mode.cloudAuthToken) }
+          : {}),
+      };
+    }
+    case "remote": {
+      const apiBase = normalizeApiBase(mode.remoteApiBase);
+      let label = "Remote server";
+      if (apiBase) {
+        try {
+          label = new URL(apiBase).host || label;
+        } catch {
+          label = apiBase;
+        }
+      }
+      return {
+        id: `remote:${apiBase ?? "manual"}`,
+        kind: "remote",
+        label,
+        ...(apiBase ? { apiBase } : {}),
+        ...(trimPersistedValue(mode.remoteAccessToken)
+          ? { accessToken: trimPersistedValue(mode.remoteAccessToken) }
+          : {}),
+      };
+    }
+  }
+}
+
+export function activeServerToConnectionMode(
+  server: PersistedActiveServer,
+): PersistedConnectionMode {
+  switch (server.kind) {
+    case "local":
+      return { runMode: "local" };
+    case "cloud":
+      return {
+        runMode: "cloud",
+        ...(normalizeApiBase(server.apiBase)
+          ? { cloudApiBase: normalizeApiBase(server.apiBase) }
+          : {}),
+        ...(trimPersistedValue(server.accessToken)
+          ? { cloudAuthToken: trimPersistedValue(server.accessToken) }
+          : {}),
+      };
+    case "remote":
+      return {
+        runMode: "remote",
+        ...(normalizeApiBase(server.apiBase)
+          ? { remoteApiBase: normalizeApiBase(server.apiBase) }
+          : {}),
+        ...(trimPersistedValue(server.accessToken)
+          ? { remoteAccessToken: trimPersistedValue(server.accessToken) }
+          : {}),
+      };
+  }
+}
+
+function normalizePersistedActiveServer(
+  value: unknown,
+): PersistedActiveServer | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const parsed = value as Record<string, unknown>;
+  const kind =
+    parsed.kind === "local" || parsed.kind === "cloud" || parsed.kind === "remote"
+      ? parsed.kind
+      : null;
+  const id = trimPersistedValue(parsed.id);
+  const label = trimPersistedValue(parsed.label);
+  if (!kind || !id || !label) {
+    return null;
+  }
+
+  return {
+    id,
+    kind,
+    label,
+    ...(normalizeApiBase(parsed.apiBase)
+      ? { apiBase: normalizeApiBase(parsed.apiBase) }
+      : {}),
+    ...(trimPersistedValue(parsed.accessToken)
+      ? { accessToken: trimPersistedValue(parsed.accessToken) }
+      : {}),
+  };
+}
+
+export function loadPersistedActiveServer(): PersistedActiveServer | null {
+  return tryLocalStorage(() => {
+    const stored = localStorage.getItem(ACTIVE_SERVER_STORAGE_KEY);
+    if (stored) {
+      const parsed = normalizePersistedActiveServer(JSON.parse(stored));
+      if (parsed) {
+        return parsed;
+      }
+    }
+
+    const legacy = localStorage.getItem(LEGACY_CONNECTION_MODE_STORAGE_KEY);
+    if (!legacy) {
+      return null;
+    }
+
+    const parsedLegacy = normalizePersistedConnectionMode(JSON.parse(legacy));
+    if (!parsedLegacy) {
+      return null;
+    }
+
+    const migrated = connectionModeToActiveServer(parsedLegacy);
+    localStorage.setItem(ACTIVE_SERVER_STORAGE_KEY, JSON.stringify(migrated));
+    return migrated;
+  }, null);
+}
 
 export function loadPersistedConnectionMode(): PersistedConnectionMode | null {
-  return tryLocalStorage(() => {
-    const stored = localStorage.getItem(CONNECTION_MODE_STORAGE_KEY);
-    if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    if (
-      typeof parsed === "object" &&
-      parsed !== null &&
-      (parsed.runMode === "local" ||
-        parsed.runMode === "cloud" ||
-        parsed.runMode === "remote")
-    ) {
-      return parsed as PersistedConnectionMode;
-    }
-    return null;
-  }, null);
+  const activeServer = loadPersistedActiveServer();
+  return activeServer ? activeServerToConnectionMode(activeServer) : null;
+}
+
+export function savePersistedActiveServer(server: PersistedActiveServer): void {
+  tryLocalStorage(() => {
+    localStorage.setItem(ACTIVE_SERVER_STORAGE_KEY, JSON.stringify(server));
+    localStorage.setItem(
+      LEGACY_CONNECTION_MODE_STORAGE_KEY,
+      JSON.stringify(activeServerToConnectionMode(server)),
+    );
+  }, undefined);
 }
 
 export function savePersistedConnectionMode(
   mode: PersistedConnectionMode,
 ): void {
+  savePersistedActiveServer(connectionModeToActiveServer(mode));
+}
+
+export function clearPersistedActiveServer(): void {
   tryLocalStorage(() => {
-    localStorage.setItem(CONNECTION_MODE_STORAGE_KEY, JSON.stringify(mode));
+    localStorage.removeItem(ACTIVE_SERVER_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_CONNECTION_MODE_STORAGE_KEY);
   }, undefined);
 }
 
 export function clearPersistedConnectionMode(): void {
-  tryLocalStorage(() => {
-    localStorage.removeItem(CONNECTION_MODE_STORAGE_KEY);
-  }, undefined);
+  clearPersistedActiveServer();
 }

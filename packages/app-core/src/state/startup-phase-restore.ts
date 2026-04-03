@@ -22,6 +22,7 @@ import {
 import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
 import {
   loadPersistedConnectionMode,
+  loadPersistedActiveServer,
   loadPersistedOnboardingComplete,
 } from "./persistence";
 import {
@@ -31,6 +32,7 @@ import {
 import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
 
 export interface RestoringSessionCtx {
+  persistedActiveServer: ReturnType<typeof loadPersistedActiveServer>;
   persistedConnection: ReturnType<typeof loadPersistedConnectionMode>;
   // biome-ignore lint/suspicious/noExplicitAny: mixed connection types from legacy code
   restoredConnection: any;
@@ -69,9 +71,14 @@ function loadSessionConnectionModeOverride() {
     return null;
   }
 
+  const sessionApiToken =
+    typeof client.getRestAuthToken === "function"
+      ? client.getRestAuthToken()
+      : null;
+
   return deriveSessionConnectionMode({
     sessionApiBase: window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY),
-    sessionApiToken: client.getRestAuthToken(),
+    sessionApiToken,
   });
 }
 
@@ -99,8 +106,9 @@ export async function runRestoringSession(
 
   const forceLocal = deps.forceLocalBootstrapRef.current;
   deps.forceLocalBootstrapRef.current = false;
+  const persistedActiveServer = loadPersistedActiveServer();
   const persisted = loadPersistedConnectionMode();
-  const sessionConnection = !persisted
+  const sessionConnection = !persistedActiveServer
     ? loadSessionConnectionModeOverride()
     : null;
   const hadPrior = loadPersistedOnboardingComplete();
@@ -202,6 +210,7 @@ export async function runRestoringSession(
   }
 
   ctxRef.current = {
+    persistedActiveServer,
     persistedConnection: persisted,
     restoredConnection: restored,
     shouldPreserveCompletedOnboarding: preserveCompleted,

@@ -20,8 +20,9 @@ import {
 } from "./internal";
 import {
   loadPersistedOnboardingStep,
-  savePersistedConnectionMode,
+  savePersistedActiveServer,
 } from "./persistence";
+import { connectionModeToActiveServer } from "./internal";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import type { StartupEvent, PlatformPolicy } from "./startup-coordinator";
 import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
@@ -135,10 +136,13 @@ export async function runPollingBackend(
       }
       if (
         sessionComplete &&
-        !ctx?.persistedConnection &&
+        !ctx?.persistedActiveServer &&
         ctx?.restoredConnection
-      )
-        savePersistedConnectionMode(ctx.restoredConnection);
+      ) {
+        savePersistedActiveServer(
+          connectionModeToActiveServer(ctx.restoredConnection),
+        );
+      }
       if (!complete && ctx?.shouldPreserveCompletedOnboarding)
         console.warn(
           "[milady][startup:init] Preserving completed onboarding despite incomplete backend onboarding status.",

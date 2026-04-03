@@ -1,10 +1,27 @@
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
+function readEnvOverride(
+  env: NodeJS.ProcessEnv,
+  keys: readonly string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = env[key]?.trim();
+    if (value) {
+      return value;
+    }
+  }
+  return undefined;
+}
 
 export function getElizaNamespace(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const override = env.ELIZA_NAMESPACE?.trim();
+  const override = readEnvOverride(env, [
+    "MILADY_NAMESPACE",
+    "ELIZA_NAMESPACE",
+  ]);
   return override && override.length > 0 ? override : "eliza";
 }
 
@@ -32,7 +49,10 @@ export function resolveStateDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = os.homedir,
 ): string {
-  const override = env.ELIZA_STATE_DIR?.trim();
+  const override = readEnvOverride(env, [
+    "MILADY_STATE_DIR",
+    "ELIZA_STATE_DIR",
+  ]);
   if (override) {
     return resolveUserPath(override);
   }
@@ -43,32 +63,66 @@ export function resolveConfigPath(
   env: NodeJS.ProcessEnv = process.env,
   stateDirPath: string = resolveStateDir(env, os.homedir),
 ): string {
-  const override = env.ELIZA_CONFIG_PATH?.trim();
+  const override = readEnvOverride(env, [
+    "MILADY_CONFIG_PATH",
+    "ELIZA_CONFIG_PATH",
+  ]);
   if (override) {
     return resolveUserPath(override);
   }
+
   const namespace = getElizaNamespace(env);
-  return path.join(stateDirPath, `${namespace}.json`);
+  const primaryPath = path.join(stateDirPath, `${namespace}.json`);
+  if (fs.existsSync(primaryPath)) {
+    return primaryPath;
+  }
+
+  if (namespace !== "eliza") {
+    const legacyPath = path.join(stateDirPath, "eliza.json");
+    if (fs.existsSync(legacyPath)) {
+      return legacyPath;
+    }
+  }
+
+  return primaryPath;
 }
 
 export function resolveDefaultConfigCandidates(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = os.homedir,
 ): string[] {
-  const explicit = env.ELIZA_CONFIG_PATH?.trim();
+  const explicit = readEnvOverride(env, [
+    "MILADY_CONFIG_PATH",
+    "ELIZA_CONFIG_PATH",
+  ]);
   if (explicit) {
     return [resolveUserPath(explicit)];
   }
 
   const namespace = getElizaNamespace(env);
 
-  const elizaStateDir = env.ELIZA_STATE_DIR?.trim();
-  if (elizaStateDir) {
-    const resolved = resolveUserPath(elizaStateDir);
-    return [path.join(resolved, `${namespace}.json`)];
+  const stateDirOverride = readEnvOverride(env, [
+    "MILADY_STATE_DIR",
+    "ELIZA_STATE_DIR",
+  ]);
+  if (stateDirOverride) {
+    const resolved = resolveUserPath(stateDirOverride);
+    const primary = path.join(resolved, `${namespace}.json`);
+    if (namespace === "eliza") {
+      return [primary];
+    }
+    return [primary, path.join(resolved, "eliza.json")];
   }
 
-  return [path.join(stateDir(homedir, env), `${namespace}.json`)];
+  const primaryStateDir = stateDir(homedir, env);
+  if (namespace === "eliza") {
+    return [path.join(primaryStateDir, "eliza.json")];
+  }
+
+  return [
+    path.join(primaryStateDir, `${namespace}.json`),
+    path.join(path.join(homedir(), ".eliza"), "eliza.json"),
+  ];
 }
 
 const OAUTH_FILENAME = "oauth.json";
@@ -88,7 +142,10 @@ export function resolveOAuthDir(
   env: NodeJS.ProcessEnv = process.env,
   stateDirPath: string = resolveStateDir(env, os.homedir),
 ): string {
-  const override = env.ELIZA_OAUTH_DIR?.trim();
+  const override = readEnvOverride(env, [
+    "MILADY_OAUTH_DIR",
+    "ELIZA_OAUTH_DIR",
+  ]);
   if (override) {
     return resolveUserPath(override);
   }

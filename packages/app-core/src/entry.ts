@@ -12,6 +12,10 @@ import { getLogPrefix } from "./utils/log-prefix";
 
 process.title = process.env.APP_CLI_NAME?.trim() || "eliza";
 
+if (!process.env.ELIZA_NAMESPACE) {
+  process.env.ELIZA_NAMESPACE = "milady";
+}
+
 if (process.argv.includes("--no-color")) {
   process.env.NO_COLOR = "1";
   process.env.FORCE_COLOR = "0";
