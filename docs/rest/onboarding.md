@@ -99,13 +99,22 @@ Returns the available options for the onboarding wizard — random name suggesti
 
 ### POST /api/onboarding
 
-Submit the initial agent configuration. Creates or updates the Milady config file with the agent's name, personality, AI provider credentials, connector tokens, and theme preferences. The agent will be restarted with the new configuration.
+Submit the initial agent configuration. The onboarding API persists the
+selected runtime in the canonical config fields:
 
-The agent's `name`, `bio`, and `systemPrompt` are persisted directly into the config file as a reliable fallback, ensuring the agent retains its identity after a restart.
+- `deploymentTarget` — where the active server runs (`local`, `cloud`, `remote`)
+- `linkedAccounts` — which accounts are linked and available
+- `serviceRouting` — which backend handles each capability (`llmText`, `tts`, `media`, `embeddings`, `rpc`)
 
-**Cloud mode detection**: cloud mode can be signalled in two ways:
-- Setting `runMode` to `"cloud"` explicitly
-- Setting `connection.kind` to `"cloud-managed"` — the server automatically infers cloud mode and injects `runMode: "cloud"` into the internal processing pipeline
+The agent's `name`, `bio`, and `systemPrompt` are still persisted directly
+onto the active agent entry so the runtime retains its identity after restart.
+
+<Info>
+  Older callers may still send compatibility fields such as `runMode`,
+  `provider`, `providerApiKey`, `cloudProvider`, or `smallModel` / `largeModel`.
+  They are no longer the primary API contract and should not be used for new
+  clients.
+</Info>
 
 **Request Body**
 
@@ -120,13 +129,10 @@ The agent's `name`, `bio`, and `systemPrompt` are persisted directly into the co
 | `postExamples` | string[] | No | Example social media posts |
 | `messageExamples` | array | No | Example message conversations |
 | `theme` | string | No | UI theme — `milady`, `qt314`, `web2000`, `programmer`, `haxor`, or `psycho` |
-| `runMode` | string | No | `local` or `cloud` (defaults to `local`). Can also be inferred from the `connection` field |
-| `connection` | object | No | Connection descriptor. This is the authoritative active-provider record persisted at the config root. When `connection.kind` is `"cloud-managed"`, the server treats this as cloud mode and automatically injects `runMode: "cloud"` even if `runMode` is not explicitly set |
-| `provider` | string | No | AI provider ID (e.g. `openai`, `anthropic`, `anthropic-subscription`) |
-| `providerApiKey` | string | No | API key for the selected provider |
-| `cloudProvider` | string | No | Cloud provider ID when `runMode` is `cloud` |
-| `smallModel` | string | No | Small model override (e.g. `openai/gpt-5-mini`) |
-| `largeModel` | string | No | Large model override (e.g. `anthropic/claude-sonnet-4.5`) |
+| `connection` | object | No | Optional onboarding connection payload. Accepted as a credential/bootstrap input, but not persisted as the runtime source of truth |
+| `deploymentTarget` | object | No | Canonical hosting target — `{ runtime: "local" \| "cloud" \| "remote", provider?, remoteApiBase?, remoteAccessToken? }` |
+| `linkedAccounts` | object | No | Canonical linked-account map — records what providers or cloud accounts are available |
+| `serviceRouting` | object | No | Canonical per-capability routing — e.g. `llmText`, `tts`, `media`, `embeddings`, `rpc` |
 | `sandboxMode` | string | No | Sandbox isolation level — `off`, `light`, `standard`, or `max` |
 | `telegramToken` | string | No | Telegram bot token |
 | `discordToken` | string | No | Discord bot token |
@@ -138,20 +144,35 @@ The agent's `name`, `bio`, and `systemPrompt` are persisted directly into the co
 | `blooioPhoneNumber` | string | No | Bloo.io phone number |
 | `inventoryProviders` | array | No | RPC/inventory provider configs — `[{ chain, rpcProvider, rpcApiKey }]` |
 
-**Example: cloud mode via connection descriptor**
+**Example: Eliza Cloud hosting with direct Anthropic inference**
 
 ```json
 {
   "name": "Milady",
   "bio": ["A helpful AI assistant"],
-  "connection": {
-    "kind": "cloud-managed"
+  "deploymentTarget": {
+    "runtime": "cloud",
+    "provider": "elizacloud"
   },
-  "provider": "anthropic"
+  "linkedAccounts": {
+    "elizacloud": {
+      "status": "linked",
+      "source": "oauth"
+    }
+  },
+  "serviceRouting": {
+    "llmText": {
+      "backend": "anthropic",
+      "transport": "direct",
+      "primaryModel": "anthropic/claude-sonnet-4-5"
+    }
+  }
 }
 ```
 
-In this example, `runMode` is not set, but the server infers cloud mode from `connection.kind` and enables `cloud.enabled` in the config.
+In this example, the agent is hosted on Eliza Cloud, but text inference still
+routes directly to Anthropic. Hosting, linked accounts, and active service
+routing are separate concerns.
 
 **Response**
 
@@ -166,7 +187,7 @@ In this example, `runMode` is not set, but the server infers cloud mode from `co
 | Status | Condition |
 |--------|-----------|
 | 400 | Missing or invalid agent name |
-| 400 | Invalid `runMode` value |
+| 400 | Invalid `connection`, `deploymentTarget`, `linkedAccounts`, or `serviceRouting` payload |
 | 500 | Failed to save configuration |
 
 ---

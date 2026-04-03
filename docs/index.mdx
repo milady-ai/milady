@@ -4,9 +4,21 @@ sidebarTitle: "Introduction"
 description: "Your personal AI assistant that runs on YOUR machine. Local-first, multi-provider, extensible."
 ---
 
-**Milady** is a local-first AI assistant built on [elizaOS](https://github.com/elizaOS). It runs entirely on your machine -- not in a datacenter, not in the cloud. It manages your sessions, tools, and agent personality through a Gateway control plane, connects to Telegram, Discord, and other platforms, and ships with a web dashboard for real-time interaction.
+**Milady** is a client/server AI agent app built on [elizaOS](https://github.com/elizaOS).
+The Milady client can create a local server on your machine, discover a server
+on your LAN, connect to an existing remote gateway, or attach to Eliza Cloud.
+Once connected, the selected server owns provider routing, tools, memory, and
+runtime state through the Gateway control plane.
 
-It supports 19 model providers out of the box (including fully local inference via Ollama), has a growing plugin ecosystem powered by elizaOS, a skills marketplace via [ClawHub](https://clawhub.ai), and runs on every major platform: desktop, mobile, web, CLI, and Chrome extension.
+This Mintlify site documents the developer and operator side of Milady:
+architecture, configuration, APIs, plugins, and runtime behavior. Developer
+docs live at [docs.milady.ai](https://docs.milady.ai). Consumer-facing docs
+live at [milady.ai/docs](https://milady.ai/docs).
+
+Milady supports local inference and third-party model providers, has a growing
+plugin ecosystem powered by elizaOS, a skills marketplace via
+[ClawHub](https://clawhub.ai), and runs on every major platform: desktop,
+mobile, web, CLI, and Chrome extension.
 
 <CardGroup cols={2}>
   <Card title="Installation" icon="download" href="/installation">
@@ -33,7 +45,10 @@ It supports 19 model providers out of the box (including fully local inference v
 
 ### Local-First Privacy
 
-Milady runs on your hardware. Your conversations, memory, and wallet keys stay in `~/.milady/` on your local filesystem. Nothing leaves your machine unless you explicitly connect an external service. Even embedding generation can run locally via the `plugin-local-embedding` package.
+Milady defaults to local-first operation. You can run the server on your own
+hardware, keep conversations and keys inside `~/.milady/`, and only connect
+external services when you choose to. You can also connect to trusted remote
+or Eliza Cloud servers without changing the client model.
 
 ### Multi-Model, Multi-Provider
 
@@ -133,7 +148,10 @@ Milady is structured as a layered system:
 - **Plugin System** -- standard elizaOS plugins that add capabilities (knowledge, browser, TTS, etc.).
 - **Connector Layer** -- platform-specific adapters for Telegram, Discord, Slack, WhatsApp, Signal, iMessage, BlueBubbles, Blooio, MS Teams, Google Chat, Twitter, Farcaster, Twitch, Mattermost, WeChat, Matrix, Feishu/Lark, Nostr, Lens, and the web chat UI.
 
-All configuration lives in `~/.milady/milady.json`. Secrets can go in `~/.milady/.env`.
+The runtime's primary persisted config lives in `~/.milady/milady.json`.
+Canonical runtime routing is split across `deploymentTarget`,
+`linkedAccounts`, and `serviceRouting`. Secrets can also come from
+`~/.milady/.env`.
 
 <Info>
 Milady is currently in alpha (`v2.0.0-alpha.116`). APIs and configuration may change between releases. Check the [GitHub releases](https://github.com/milady-ai/milady/releases) for the latest version.

@@ -1,6 +1,6 @@
 # Eliza Cloud Integration Plan
 
-This document defines the Eliza Cloud rollout as three user-facing hosting paths that all share one onboarding entry point.
+This document defines the Eliza Cloud rollout as one of several server targets exposed through the same chooser-first startup entry point.
 
 ## Product paths
 
@@ -17,13 +17,15 @@ This document defines the Eliza Cloud rollout as three user-facing hosting paths
 
 ### App onboarding
 
-- Add a hosting-choice screen before provider setup.
-- Local continues into the existing provider selection flow.
-- Cloud splits into:
-  - `Eliza Cloud`: submit onboarding with `runMode: "cloud"` and `cloudProvider: "elizacloud"`.
-  - `Remote Milady`: switch the frontend API base to the remote backend and restart app bootstrap against that target.
-- Persist the selected API base in session storage so reloads and popouts keep the same backend.
-- Keep the existing RPC step, but treat Eliza Cloud as ready when the user is authenticated or has entered a cloud API key.
+- Startup begins with a server chooser, not provider selection.
+- The selected server target is canonical runtime state:
+  - `deploymentTarget.runtime = "local"` for a local server
+  - `deploymentTarget.runtime = "remote"` for a remote or LAN server
+  - `deploymentTarget.runtime = "cloud"` for an Eliza Cloud server
+- Provider selection happens after the server target is chosen and writes canonical `serviceRouting`, not hosting state.
+- Eliza Cloud account linkage writes `linkedAccounts.elizacloud`; it does not imply Eliza Cloud inference unless `serviceRouting.llmText.backend = "elizacloud"`.
+- Persist the selected server in client state so reloads and popouts keep the same backend.
+- Treat Eliza Cloud-linked services as optional per-capability routes, not a global “cloud on” flag.
 
 ### Self-hosted remote backend
 
@@ -37,7 +39,7 @@ This document defines the Eliza Cloud rollout as three user-facing hosting paths
 - `elizacloud.ai` is the canonical managed control plane.
 - There is no separate Milady-specific cloud API service.
 - Eliza Cloud is the control plane, OAuth handler, billing surface, and user store.
-- Managed launches redirect into `app.milady.ai` with a one-time launch session that injects the selected backend connection and skips onboarding.
+- Managed launches redirect into `app.milady.ai` with a one-time launch session that selects the hosted server target and skips manual server entry.
 
 ### Browser transport
 
@@ -50,12 +52,13 @@ This document defines the Eliza Cloud rollout as three user-facing hosting paths
 
 ### Milady app and API
 
-- [x] Restore hosting-choice onboarding in the app.
+- [x] Restore chooser-first startup in the app.
 - [x] Add `Eliza Cloud` and `Remote Milady` cloud sub-options.
 - [x] Allow the frontend client to rebind to a remote backend during onboarding.
 - [x] Persist the rebound API base for the current session.
 - [x] Update cloud defaults and user-facing copy to Eliza Cloud.
 - [x] Persist an Eliza Cloud API key during onboarding when the user chooses API-key auth.
+- [x] Separate linked Eliza Cloud auth from active inference routing.
 
 ### Self-hosted remote flow
 
@@ -67,7 +70,7 @@ This document defines the Eliza Cloud rollout as three user-facing hosting paths
 
 ### Eliza Cloud control plane
 
-- [x] Point managed launch onboarding at `cloudProvider: "elizacloud"`.
+- [x] Point managed launch onboarding at canonical `deploymentTarget.runtime = "cloud"`.
 - [x] Keep Milady-managed launch sessions flowing through Eliza Cloud.
 - [x] Make the browser-facing Eliza Cloud auth/compat endpoints callable cross-origin when needed.
 - [x] Remove active `Milady Cloud` labels from the managed auth/runtime surfaces.
@@ -89,7 +92,7 @@ Use this when the user wants to host their own backend and connect from the Mila
 1. Install Milady on the target machine.
 2. Set a non-loopback bind, a strong API token, and explicit allowed origins.
 3. Expose the service over HTTPS or a private Tailscale URL.
-4. In onboarding, choose `Cloud` -> `Remote Milady`, then enter:
+4. In startup, choose `Manually connect` or a discovered remote server, then enter:
    - backend address
    - access key (`MILADY_API_TOKEN`)
 
