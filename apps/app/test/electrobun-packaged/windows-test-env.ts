@@ -23,7 +23,6 @@ export function createPackagedWindowsAppEnv(args: {
   baseEnv: NodeJS.ProcessEnv;
   apiBase: string;
   appData: string;
-  localAppData: string;
 }): NodeJS.ProcessEnv {
   const env = {
     ...args.baseEnv,
@@ -36,12 +35,10 @@ export function createPackagedWindowsAppEnv(args: {
   return {
     ...env,
     MILADY_DESKTOP_TEST_API_BASE: args.apiBase,
-    MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated",
     MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
     ELECTROBUN_CONSOLE: "1",
-    // Redirect both Windows profile roots so the packaged shell does not
-    // reuse stale CEF/runtime state from the host machine.
+    // Match the last known-good release harness: isolate Roaming AppData
+    // without relocating LocalAppData.
     APPDATA: args.appData,
-    LOCALAPPDATA: args.localAppData,
   };
 }

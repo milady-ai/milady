@@ -653,7 +653,7 @@ describe("Electrobun release workflow drift", () => {
       '$startupSessionId = "milady-windows-smoke-"',
     );
     expect(smokeScript).toContain(
-      "$startupStateFile = Join-Path $env:RUNNER_TEMP",
+      "$startupStateFile = Join-Path $tempRoot",
     );
     expect(smokeScript).toContain(
       '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
@@ -926,7 +926,6 @@ describe("Electrobun release workflow drift", () => {
     expect(windowsPackagedTest).toContain("createPackagedWindowsAppEnv({");
     expect(windowsPackagedTest).toContain("apiBase: api.baseUrl");
     expect(windowsPackagedTest).toContain("appData: userDataDir");
-    expect(windowsPackagedTest).toContain("localAppData: localUserDataDir");
     expect(windowsPackagedTest).toContain('from "./windows-bootstrap"');
     expect(windowsPackagedTest).toContain(
       "hasPackagedRendererBootstrapRequests(api.requests)",
@@ -940,7 +939,7 @@ describe("Electrobun release workflow drift", () => {
     expect(windowsEnvHelper).toContain('"VITE_DEV_SERVER_URL"');
     expect(windowsEnvHelper).toContain("for (const key of STRIPPED_ENV_KEYS)");
     expect(windowsEnvHelper).toContain("APPDATA: args.appData");
-    expect(windowsEnvHelper).toContain("LOCALAPPDATA: args.localAppData");
+    expect(windowsEnvHelper).not.toContain("LOCALAPPDATA: args.localAppData");
     expect(windowsBootstrapHelper).toContain('"/api/status"');
     expect(windowsBootstrapHelper).toContain('"/api/config"');
     expect(windowsBootstrapHelper).toContain('"/api/drop/status"');

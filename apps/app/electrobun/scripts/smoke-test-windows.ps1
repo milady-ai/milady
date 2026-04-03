@@ -41,12 +41,12 @@ if ($env:GITHUB_ENV) {
 # Unix-style ~/.config/Milady path used on macOS/Linux.
 $startupLog = Join-Path $env:APPDATA "Milady\\milady-startup.log"
 $selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"
-$tempExtractDir = Join-Path $env:RUNNER_TEMP ("milady-windows-smoke-" + [Guid]::NewGuid().ToString("N"))
+$tempExtractDir = Join-Path $tempRoot ("milady-windows-smoke-" + [Guid]::NewGuid().ToString("N"))
 $persistLauncherDir = $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR
 $persistLauncherPathFile = $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE
 $startupSessionId = "milady-windows-smoke-" + [Guid]::NewGuid().ToString("N")
-$startupStateFile = Join-Path $env:RUNNER_TEMP ($startupSessionId + ".state.json")
-$startupEventsFile = Join-Path $env:RUNNER_TEMP ($startupSessionId + ".events.jsonl")
+$startupStateFile = Join-Path $tempRoot ($startupSessionId + ".state.json")
+$startupEventsFile = Join-Path $tempRoot ($startupSessionId + ".events.jsonl")
 $startupBootstrapFile = $null
 $stopProtectedProcessIds = [System.Collections.Generic.HashSet[int]]::new()
 [void]$stopProtectedProcessIds.Add([int]$PID)
@@ -92,7 +92,7 @@ function Write-ReusableLauncherPath([System.IO.FileInfo]$Launcher, [string]$Temp
     $launcherPath.StartsWith($TemporaryRoot, [System.StringComparison]::OrdinalIgnoreCase)
   ) {
     $stageDir = if ([string]::IsNullOrWhiteSpace($persistLauncherDir)) {
-      Join-Path $env:RUNNER_TEMP "milady-windows-ui-launcher"
+      Join-Path $tempRoot "milady-windows-ui-launcher"
     } else {
       $persistLauncherDir
     }
@@ -201,7 +201,7 @@ function Assert-PackagedArchiveAssetVariants(
       continue
     }
 
-    $extractDir = Join-Path $env:RUNNER_TEMP ("milady-archive-asset-check-" + [Guid]::NewGuid().ToString("N"))
+    $extractDir = Join-Path $tempRoot ("milady-archive-asset-check-" + [Guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
     try {
       & $tarCommand -xf $ArchivePath -C $extractDir $member 2>$null | Out-Null
@@ -377,7 +377,7 @@ $requireInstaller = $env:MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER -eq "1"
 $installerRoot = if ($env:MILADY_TEST_WINDOWS_INSTALL_DIR) {
   $env:MILADY_TEST_WINDOWS_INSTALL_DIR
 } else {
-  Join-Path $env:RUNNER_TEMP ("milady-windows-installed-" + [Guid]::NewGuid().ToString("N"))
+  Join-Path $tempRoot ("milady-windows-installed-" + [Guid]::NewGuid().ToString("N"))
 }
 if ($requireInstaller) {
   $launcher = $null

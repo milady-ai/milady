@@ -3,6 +3,11 @@ name: Windows Desktop Preload Smoke
 on:
   pull_request:
     branches: [main, develop]
+    paths:
+      - "scripts/**"
+      - "apps/app/electrobun/**"
+      - "package.json"
+      - "bun.lock"
   workflow_dispatch:
 
 concurrency:

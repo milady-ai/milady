@@ -8,7 +8,6 @@ import {
 } from "@miladyai/shared/runtime-env";
 import Electrobun, {
   ApplicationMenu,
-  BrowserView,
   BrowserWindow,
   Updater,
   Utils,
@@ -747,57 +746,29 @@ async function createMainWindow(): Promise<BrowserWindow> {
     x: state.x,
     y: state.y,
   };
-  const titleBarStyle =
-    process.platform === "darwin" ? "hiddenInset" : "default";
-  const transparent = process.platform === "darwin";
-
-  let win: BrowserWindow;
+  const browserWindowOptions = {
+    title: "Milady",
+    // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
+    icon: resolveDesktopAppIconPath(),
+    url: rendererUrl,
+    preload,
+    frame: windowFrame,
+    // hiddenInset hides the title bar and insets traffic lights — macOS only.
+    // On Windows/Linux use the default title bar so the window remains draggable.
+    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+    // Transparent background for vibrancy — macOS only.
+    // On Windows/Linux a solid background prevents rendering artifacts.
+    transparent: process.platform === "darwin",
+  };
   if (mainWindowPartition) {
-    // BrowserWindow always creates a default BrowserView. For the packaged
-    // Windows bootstrap probe, force that throwaway view to stay native so the
-    // real CEF renderer can boot inside an explicit isolated partition.
-    win = new BrowserWindow({
-      title: "Milady",
-      // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
-      icon: resolveDesktopAppIconPath(),
-      url: null,
-      preload: null,
-      frame: windowFrame,
-      renderer: "native",
-      titleBarStyle,
-      transparent,
-    });
-    win.webview.remove();
-    const mainView = new BrowserView({
-      url: rendererUrl,
-      preload,
-      renderer: "cef",
-      partition: mainWindowPartition,
-      frame: {
-        x: 0,
-        y: 0,
-        width: state.width,
-        height: state.height,
-      },
-      windowId: win.id,
-    });
-    win.webviewId = mainView.id;
-  } else {
-    win = new BrowserWindow({
-      title: "Milady",
-      // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
-      icon: resolveDesktopAppIconPath(),
-      url: rendererUrl,
-      preload,
-      frame: windowFrame,
-      // hiddenInset hides the title bar and insets traffic lights — macOS only.
-      // On Windows/Linux use the default title bar so the window remains draggable.
-      titleBarStyle,
-      // Transparent background for vibrancy — macOS only.
-      // On Windows/Linux a solid background prevents rendering artifacts.
-      transparent,
-    });
+    // The packaged Windows bootstrap probe only needs to validate renderer
+    // startup against an external API override. An in-memory partition avoids
+    // depending on CEF persistent profile creation in that harness.
+    // @ts-expect-error — partition is a valid Electrobun option not yet typed
+    browserWindowOptions.partition = mainWindowPartition;
   }
+
+  const win = new BrowserWindow(browserWindowOptions);
 
   // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);

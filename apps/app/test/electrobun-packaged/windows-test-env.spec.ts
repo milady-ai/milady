@@ -21,17 +21,14 @@ describe("createPackagedWindowsAppEnv", () => {
       },
       apiBase: "http://127.0.0.1:43123",
       appData: "C:\\tmp\\milady-roaming",
-      localAppData: "C:\\tmp\\milady-local",
     });
 
     expect(env.MILADY_DESKTOP_TEST_API_BASE).toBe("http://127.0.0.1:43123");
-    expect(env.MILADY_DESKTOP_TEST_PARTITION).toBe(
-      "persist:bootstrap-isolated",
-    );
+    expect(env.MILADY_DESKTOP_TEST_PARTITION).toBeUndefined();
     expect(env.MILADY_DISABLE_LOCAL_EMBEDDINGS).toBe("1");
     expect(env.ELECTROBUN_CONSOLE).toBe("1");
     expect(env.APPDATA).toBe("C:\\tmp\\milady-roaming");
-    expect(env.LOCALAPPDATA).toBe("C:\\tmp\\milady-local");
+    expect(env.LOCALAPPDATA).toBe("C:\\Users\\runner\\AppData\\Local");
     expect(env.KEEP_ME).toBe("1");
     expect(env.ELIZA_API_PORT).toBeUndefined();
     expect(env.MILADY_API_BASE).toBeUndefined();
@@ -39,6 +36,7 @@ describe("createPackagedWindowsAppEnv", () => {
     expect(env.MILADY_RENDERER_URL).toBeUndefined();
     expect(env.MILADY_STARTUP_SESSION_ID).toBeUndefined();
     expect(env.MILADY_TEST_WINDOWS_APPDATA_PATH).toBeUndefined();
+    expect(env.MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH).toBeUndefined();
     expect(env.MILADY_TEST_WINDOWS_LAUNCHER_PATH).toBeUndefined();
     expect(env.VITE_DEV_SERVER_URL).toBeUndefined();
   });

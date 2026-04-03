@@ -196,9 +196,6 @@ test("packaged Windows app bootstraps the renderer against the external API over
   const userDataDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "milady-win-userdata-"),
   );
-  const localUserDataDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), "milady-win-localappdata-"),
-  );
 
   const executablePath = await resolveWindowsLauncher(tempExtractDir);
 
@@ -215,7 +212,6 @@ test("packaged Windows app bootstraps the renderer against the external API over
         baseEnv: process.env,
         apiBase: api.baseUrl,
         appData: userDataDir,
-        localAppData: localUserDataDir,
       }),
       stdio: ["ignore", "pipe", "pipe"],
     });

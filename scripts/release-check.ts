@@ -755,7 +755,7 @@ function assertWindowsSmokeScriptHasLeadingParamBlock() {
     "Find-Launcher $selfExtractionRoot",
     "Started extracted launcher:",
     '$startupSessionId = "milady-windows-smoke-"',
-    "$startupStateFile = Join-Path $env:RUNNER_TEMP",
+    "$startupStateFile = Join-Path $tempRoot",
     '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
     "Write-StartupBootstrap",
     "function Resolve-BackendPort",
