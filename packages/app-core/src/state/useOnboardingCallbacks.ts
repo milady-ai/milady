@@ -25,9 +25,7 @@ import {
   resolveOnboardingPreviousStep,
 } from "../onboarding/flow";
 import { buildOnboardingRuntimeConfig } from "../onboarding-config";
-import {
-  resolveOnboardingServerTarget,
-} from "../onboarding/server-target";
+import { resolveOnboardingServerTarget } from "../onboarding/server-target";
 import {
   clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
