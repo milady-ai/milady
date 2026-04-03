@@ -128,7 +128,7 @@ describe("StartupShell", () => {
     expect(clearPersistedConnectionModeMock).toHaveBeenCalledTimes(1);
     expect(savePersistedActiveServerMock).not.toHaveBeenCalled();
     expect(goToOnboardingStep).toHaveBeenCalledWith("identity");
-    expect(setState).toHaveBeenCalledWith("onboardingRunMode", "local");
+    expect(setState).toHaveBeenCalledWith("onboardingServerTarget", "local");
     expect(setState).toHaveBeenCalledWith("onboardingRemoteApiBase", "");
     expect(dispatch).toHaveBeenCalledWith({ type: "SPLASH_CONTINUE" });
   });
@@ -173,7 +173,10 @@ describe("StartupShell", () => {
       apiBase: "http://kei.local:18789",
     });
     expect(goToOnboardingStep).not.toHaveBeenCalled();
-    expect(setState).not.toHaveBeenCalledWith("onboardingRunMode", "cloud");
+    expect(setState).not.toHaveBeenCalledWith(
+      "onboardingServerTarget",
+      "elizacloud",
+    );
     expect(dispatch).toHaveBeenCalledWith({ type: "SPLASH_CONTINUE" });
   });
 });

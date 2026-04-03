@@ -345,7 +345,7 @@ describe("ConnectionStep", () => {
     });
 
     const text = collectText(tree?.root as TestRenderer.ReactTestInstance);
-    expect(text).toContain("Eliza Cloud");
+    expect(text).toContain("header.Cloud");
     expect(text).not.toContain("onboarding.hostingLocal");
     mockIsNativeFn.value = false;
   });

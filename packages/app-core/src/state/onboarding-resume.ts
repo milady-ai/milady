@@ -68,6 +68,7 @@ export function deriveOnboardingResumeFields(
     case "cloud-managed": {
       const selection = buildOnboardingServerSelection("elizacloud");
       return {
+        onboardingServerTarget: "elizacloud",
         onboardingRunMode: selection.runMode,
         onboardingCloudProvider: selection.cloudProvider,
         onboardingCloudApiKey: connection.apiKey ?? "",
@@ -86,6 +87,7 @@ export function deriveOnboardingResumeFields(
     case "local-provider": {
       const selection = buildOnboardingServerSelection("local");
       return {
+        onboardingServerTarget: "local",
         onboardingRunMode: selection.runMode,
         onboardingCloudProvider: selection.cloudProvider,
         onboardingProvider: connection.provider,
@@ -108,6 +110,7 @@ export function deriveOnboardingResumeFields(
     case "remote-provider": {
       const selection = buildOnboardingServerSelection("remote");
       return {
+        onboardingServerTarget: "remote",
         onboardingRunMode: selection.runMode,
         onboardingCloudProvider: selection.cloudProvider,
         onboardingProvider: connection.provider ?? "",
@@ -139,6 +142,7 @@ export function deriveOnboardingResumeFieldsFromConfig(
     if (deploymentTarget.runtime === "remote") {
       const selection = buildOnboardingServerSelection("remote");
       return {
+        onboardingServerTarget: "remote",
         onboardingRunMode: selection.runMode,
         onboardingCloudProvider: selection.cloudProvider,
         onboardingRemoteConnected: Boolean(deploymentTarget.remoteApiBase),
@@ -149,6 +153,7 @@ export function deriveOnboardingResumeFieldsFromConfig(
     if (deploymentTarget.runtime === "cloud") {
       const selection = buildOnboardingServerSelection("elizacloud");
       return {
+        onboardingServerTarget: "elizacloud",
         onboardingRunMode: selection.runMode,
         onboardingCloudProvider: selection.cloudProvider,
       };

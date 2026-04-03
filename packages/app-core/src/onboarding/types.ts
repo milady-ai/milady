@@ -35,6 +35,7 @@ export type ConnectionFlowSnapshot = Pick<
 };
 
 export type ConnectionStatePatch = Partial<{
+  onboardingServerTarget: AppState["onboardingServerTarget"];
   onboardingRunMode: AppState["onboardingRunMode"];
   onboardingCloudProvider: string;
   onboardingCloudApiKey: string;

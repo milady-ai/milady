@@ -184,12 +184,16 @@ export async function runPollingBackend(
                 if (det.length > 0) deps.applyDetectedProviders(det);
               } catch {}
             }
-            if (rf.onboardingRunMode !== undefined)
-              deps.setOnboardingRunMode(
-                rf.onboardingRunMode as "local" | "cloud" | "",
-              );
-            if (rf.onboardingCloudProvider !== undefined)
-              deps.setOnboardingCloudProvider(rf.onboardingCloudProvider);
+            if (rf.onboardingServerTarget !== undefined) {
+              deps.setOnboardingServerTarget(rf.onboardingServerTarget);
+            } else {
+              if (rf.onboardingRunMode !== undefined)
+                deps.setOnboardingRunMode(
+                  rf.onboardingRunMode as "local" | "cloud" | "",
+                );
+              if (rf.onboardingCloudProvider !== undefined)
+                deps.setOnboardingCloudProvider(rf.onboardingCloudProvider);
+            }
             if (rf.onboardingCloudApiKey !== undefined)
               deps.setOnboardingCloudApiKey(rf.onboardingCloudApiKey);
             if (rf.onboardingProvider !== undefined)

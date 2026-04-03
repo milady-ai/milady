@@ -205,6 +205,7 @@ describe("deriveOnboardingResumeFields", () => {
         largeModel: "anthropic/claude-sonnet-4.5",
       }),
     ).toEqual({
+      onboardingServerTarget: "elizacloud",
       onboardingRunMode: "cloud",
       onboardingCloudProvider: "elizacloud",
       onboardingCloudApiKey: "ck-cloud-test",
@@ -230,6 +231,7 @@ describe("deriveOnboardingResumeFields", () => {
         primaryModel: "openai/gpt-5-mini",
       }),
     ).toEqual({
+      onboardingServerTarget: "local",
       onboardingRunMode: "local",
       onboardingCloudProvider: "",
       onboardingProvider: "openrouter",

@@ -157,6 +157,7 @@ export interface UseChatLifecycleDeps {
   setPostOnboardingChecklistDismissed: (v: boolean) => void;
   setOnboardingName: (v: string) => void;
   setOnboardingStyle: (v: string) => void;
+  setOnboardingServerTarget: (v: AppState["onboardingServerTarget"]) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
@@ -237,6 +238,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
     setPostOnboardingChecklistDismissed,
     setOnboardingName,
     setOnboardingStyle,
+    setOnboardingServerTarget,
     setOnboardingRunMode,
     setOnboardingCloudProvider,
     setOnboardingProvider,
@@ -581,8 +583,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
           setPostOnboardingChecklistDismissed(false);
           setOnboardingName("Chen");
           setOnboardingStyle("chen");
-          setOnboardingRunMode("");
-          setOnboardingCloudProvider("");
+          setOnboardingServerTarget("");
           setOnboardingProvider("");
           setOnboardingApiKey("");
           setOnboardingVoiceProvider("");
@@ -627,8 +628,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
       setPostOnboardingChecklistDismissed,
       setOnboardingName,
       setOnboardingStyle,
-      setOnboardingRunMode,
-      setOnboardingCloudProvider,
+      setOnboardingServerTarget,
       setOnboardingProvider,
       setOnboardingApiKey,
       setOnboardingVoiceProvider,

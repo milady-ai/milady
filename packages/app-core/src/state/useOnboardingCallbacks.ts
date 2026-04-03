@@ -25,7 +25,6 @@ import {
   resolveOnboardingPreviousStep,
 } from "../onboarding/flow";
 import { buildOnboardingRuntimeConfig } from "../onboarding-config";
-import { resolveOnboardingServerTarget } from "../onboarding/server-target";
 import {
   clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
@@ -176,6 +175,9 @@ export interface OnboardingCallbacksDeps {
   setOnboardingDetectedProviders: (
     v: AppState["onboardingDetectedProviders"],
   ) => void;
+  setOnboardingServerTarget: (
+    v: "" | "local" | "remote" | "elizacloud",
+  ) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
   setOnboardingCloudApiKey: (v: string) => void;
@@ -220,6 +222,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingActiveGuide,
     addDeferredOnboardingTask,
     setOnboardingDetectedProviders,
+    setOnboardingServerTarget,
     setOnboardingRunMode,
     setOnboardingCloudProvider,
     setOnboardingCloudApiKey,
@@ -255,6 +258,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       options: onboardingOptions,
       name: onboardingName,
       style: onboardingStyle,
+      serverTarget: onboardingServerTarget,
       runMode: onboardingRunMode,
       cloudProvider: onboardingCloudProvider,
       cloudApiKey: onboardingCloudApiKey,
@@ -336,6 +340,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         : `You are ${onboardingName}, an autonomous AI agent powered by elizaOS. ${onboardingOptions.sharedStyleRules}`;
 
       const runtimeConfig = buildOnboardingRuntimeConfig({
+        onboardingServerTarget,
         onboardingRunMode,
         onboardingCloudProvider,
         onboardingCloudApiKey,
@@ -364,13 +369,10 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         },
       });
 
-      const serverTarget = resolveOnboardingServerTarget({
-        runMode: onboardingRunMode,
-        cloudProvider: onboardingCloudProvider,
-      });
-      const isSandboxMode = serverTarget === "elizacloud";
-      const isLocalMode = serverTarget === "local" || !serverTarget;
-      const isRemoteMode = serverTarget === "remote";
+      const isSandboxMode = onboardingServerTarget === "elizacloud";
+      const isLocalMode =
+        onboardingServerTarget === "local" || !onboardingServerTarget;
+      const isRemoteMode = onboardingServerTarget === "remote";
 
       if (isSandboxMode) {
         const cloudApiBase =
@@ -553,11 +555,15 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
 
   const applyResetConnectionWizardToHostingStep = useCallback(() => {
     const patch = getResetConnectionWizardToHostingStepPatch();
-    if (patch.onboardingRunMode !== undefined) {
-      setOnboardingRunMode(patch.onboardingRunMode);
-    }
-    if (patch.onboardingCloudProvider !== undefined) {
-      setOnboardingCloudProvider(patch.onboardingCloudProvider);
+    if (patch.onboardingServerTarget !== undefined) {
+      setOnboardingServerTarget(patch.onboardingServerTarget);
+    } else {
+      if (patch.onboardingRunMode !== undefined) {
+        setOnboardingRunMode(patch.onboardingRunMode);
+      }
+      if (patch.onboardingCloudProvider !== undefined) {
+        setOnboardingCloudProvider(patch.onboardingCloudProvider);
+      }
     }
     if (patch.onboardingCloudApiKey !== undefined) {
       setOnboardingCloudApiKey(patch.onboardingCloudApiKey);
@@ -581,6 +587,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingApiKey,
     setOnboardingCloudApiKey,
     setOnboardingCloudProvider,
+    setOnboardingServerTarget,
     _setOnboardingPrimaryModel,
     setOnboardingProvider,
     setOnboardingRemoteConnecting,
@@ -607,13 +614,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       let nextStep = resolveOnboardingNextStep(onboardingStep);
 
       // Skip voice provider selection if they set up Eliza Cloud
-      if (
-        nextStep === "voice" &&
-        resolveOnboardingServerTarget({
-          runMode: onboardingRunMode,
-          cloudProvider: onboardingCloudProvider,
-        }) === "elizacloud"
-      ) {
+      if (nextStep === "voice" && onboardingServerTarget === "elizacloud") {
         nextStep = resolveOnboardingNextStep(nextStep);
       }
 
@@ -636,6 +637,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       onboardingDetectedProviders,
       onboardingMode,
       onboardingRunMode,
+      onboardingServerTarget,
       onboardingStep,
       setOnboardingStep,
       setOnboardingActiveGuide,
@@ -654,13 +656,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     let previousStep = resolveOnboardingPreviousStep(onboardingStep);
 
     // Skip voice provider selection if they set up Eliza Cloud
-    if (
-      previousStep === "voice" &&
-      resolveOnboardingServerTarget({
-        runMode: onboardingRunMode,
-        cloudProvider: onboardingCloudProvider,
-      }) === "elizacloud"
-    ) {
+    if (previousStep === "voice" && onboardingServerTarget === "elizacloud") {
       previousStep = resolveOnboardingPreviousStep(previousStep);
     }
 
@@ -678,6 +674,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     applyResetConnectionWizardToHostingStep,
     onboardingMode,
     onboardingStep,
+    onboardingServerTarget,
     setOnboardingActiveGuide,
     onboardingRunMode,
     onboardingCloudProvider,
@@ -722,8 +719,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingRemoteConnected(false);
     setOnboardingRemoteApiBase("");
     setOnboardingRemoteToken("");
-    setOnboardingCloudProvider("");
-    setOnboardingRunMode("");
+    setOnboardingServerTarget("");
     setActionNotice(
       "Checking this device for an existing Eliza setup...",
       "info",
@@ -734,13 +730,12 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     retryStartup,
     setActionNotice,
     forceLocalBootstrapRef,
-    setOnboardingCloudProvider,
     setOnboardingRemoteApiBase,
     setOnboardingRemoteConnected,
     setOnboardingRemoteConnecting,
     setOnboardingRemoteError,
     setOnboardingRemoteToken,
-    setOnboardingRunMode,
+    setOnboardingServerTarget,
     client,
     clearPersistedConnectionMode,
   ]);
@@ -776,8 +771,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
           ...(accessKey ? { accessToken: accessKey } : {}),
         }),
       );
-      setOnboardingRunMode("cloud");
-      setOnboardingCloudProvider("remote");
+      setOnboardingServerTarget("remote");
       setOnboardingRemoteApiBase(normalizedBase);
       setOnboardingRemoteToken(accessKey);
       setOnboardingRemoteConnected(true);
@@ -800,13 +794,12 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     onboardingRemoteToken,
     retryStartup,
     setActionNotice,
-    setOnboardingCloudProvider,
     setOnboardingRemoteApiBase,
     setOnboardingRemoteConnected,
     setOnboardingRemoteConnecting,
     setOnboardingRemoteError,
     setOnboardingRemoteToken,
-    setOnboardingRunMode,
+    setOnboardingServerTarget,
     savePersistedActiveServer,
   ]);
 

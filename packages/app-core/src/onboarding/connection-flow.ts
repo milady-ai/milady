@@ -116,6 +116,7 @@ function toOnboardingTargetPatch(
 ): ConnectionStatePatch {
   const selection = buildOnboardingServerSelection(target);
   return {
+    onboardingServerTarget: target,
     onboardingRunMode: selection.runMode,
     onboardingCloudProvider: selection.cloudProvider,
   };
@@ -185,7 +186,7 @@ export function resolveConnectionUiSpec(
     screen,
     effectiveRunMode,
     showProviderSelection,
-    showHostingLocalCard: !snapshot.cloudOnly,
+    showHostingLocalCard: !snapshot.cloudOnly && !snapshot.isNative,
     forceCloud: snapshot.forceCloud,
     providerId: snapshot.onboardingProvider,
     elizaCloudTab: snapshot.onboardingElizaCloudTab,

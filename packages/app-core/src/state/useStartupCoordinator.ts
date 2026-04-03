@@ -84,6 +84,9 @@ export interface StartupCoordinatorDeps {
   setOnboardingOptions: (v: OnboardingOptions) => void;
   setOnboardingExistingInstallDetected: (v: boolean) => void;
   setOnboardingStep: (v: OnboardingStep) => void;
+  setOnboardingServerTarget: (
+    v: "" | "local" | "remote" | "elizacloud",
+  ) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
   setOnboardingCloudApiKey: (v: string) => void;

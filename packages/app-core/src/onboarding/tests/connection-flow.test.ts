@@ -133,9 +133,13 @@ describe("connection-flow", () => {
       }
     });
 
-    it("hides hosting local card only for cloudOnly builds", () => {
+    it("hides hosting local card for cloudOnly and native-client builds", () => {
       expect(
         resolveConnectionUiSpec(baseSnap({ cloudOnly: true }))
+          .showHostingLocalCard,
+      ).toBe(false);
+      expect(
+        resolveConnectionUiSpec(baseSnap({ isNative: true }))
           .showHostingLocalCard,
       ).toBe(false);
       expect(resolveConnectionUiSpec(baseSnap()).showHostingLocalCard).toBe(
@@ -200,6 +204,7 @@ describe("connection-flow", () => {
       );
       expect(r?.kind).toBe("patch");
       if (r?.kind === "patch") {
+        expect(r.patch.onboardingServerTarget).toBe("local");
         expect(r.patch.onboardingRunMode).toBe("local");
         expect(r.patch.onboardingProvider).toBe("");
       }
@@ -219,6 +224,7 @@ describe("connection-flow", () => {
       const r = applyConnectionTransition(s0, { type: "selectRemoteHosting" });
       expect(r?.kind).toBe("patch");
       if (r?.kind !== "patch") return;
+      expect(r.patch.onboardingServerTarget).toBe("remote");
       const s1 = mergeConnectionSnapshot(s0, r.patch);
       expect(deriveConnectionScreen(s1)).toBe("remoteBackend");
     });

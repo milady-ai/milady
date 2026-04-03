@@ -37,6 +37,9 @@ export function useOnboardingCompat({
       setOnboardingName: bindField("name") as (value: string) => void,
       setOnboardingOwnerName: bindField("ownerName") as (value: string) => void,
       setOnboardingStyle: bindField("style") as (value: string) => void,
+      setOnboardingServerTarget: bindField("serverTarget") as (
+        value: "" | "local" | "remote" | "elizacloud",
+      ) => void,
       setOnboardingRunMode: bindField("runMode") as (
         value: "local" | "cloud" | "",
       ) => void,

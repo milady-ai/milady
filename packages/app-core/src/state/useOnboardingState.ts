@@ -11,6 +11,8 @@ import type { OnboardingOptions } from "../api";
 import {
   activeServerKindToOnboardingServerTarget,
   buildOnboardingServerSelection,
+  resolveOnboardingServerTarget,
+  type OnboardingServerTarget,
 } from "../onboarding/server-target";
 import {
   loadPersistedActiveServer,
@@ -56,6 +58,7 @@ export interface OnboardingState {
   avatar: number;
 
   // Hosting
+  serverTarget: OnboardingServerTarget;
   runMode: "local" | "cloud" | "";
   cloudProvider: string;
   cloudApiKey: string;
@@ -188,6 +191,12 @@ function loadInitialServerSelection(): Pick<
 
 function createInitialState(cloudOnly?: boolean): OnboardingState {
   const initialServer = loadInitialServerSelection();
+  const initialServerTarget = cloudOnly
+    ? "elizacloud"
+    : resolveOnboardingServerTarget({
+        runMode: initialServer.runMode,
+        cloudProvider: initialServer.cloudProvider,
+      });
   return {
     step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",
@@ -199,6 +208,7 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     ownerName: "anon",
     style: "chen",
     avatar: 1,
+    serverTarget: initialServerTarget,
     runMode: cloudOnly ? "cloud" : initialServer.runMode,
     cloudProvider: cloudOnly ? "elizacloud" : initialServer.cloudProvider,
     cloudApiKey: "",
@@ -277,8 +287,42 @@ function onboardingReducer(
       return { ...state, postChecklistDismissed: action.value };
     case "SET_OPTIONS":
       return { ...state, options: action.options };
-    case "SET_FIELD":
+    case "SET_FIELD": {
+      if (action.field === "serverTarget") {
+        const serverTarget = action.value as OnboardingServerTarget;
+        const selection = buildOnboardingServerSelection(serverTarget);
+        return {
+          ...state,
+          serverTarget,
+          runMode: selection.runMode,
+          cloudProvider: selection.cloudProvider,
+        };
+      }
+
+      if (action.field === "runMode" || action.field === "cloudProvider") {
+        const nextRunMode =
+          action.field === "runMode"
+            ? (action.value as OnboardingState["runMode"])
+            : state.runMode;
+        const nextCloudProvider =
+          action.field === "cloudProvider"
+            ? (action.value as string)
+            : state.cloudProvider;
+        const serverTarget = resolveOnboardingServerTarget({
+          runMode: nextRunMode,
+          cloudProvider: nextCloudProvider,
+        });
+        const selection = buildOnboardingServerSelection(serverTarget);
+        return {
+          ...state,
+          serverTarget,
+          runMode: selection.runMode,
+          cloudProvider: selection.cloudProvider,
+        };
+      }
+
       return { ...state, [action.field]: action.value };
+    }
     case "SET_CONNECTOR_TOKEN":
       return {
         ...state,

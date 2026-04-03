@@ -9,9 +9,13 @@ import type {
   LinkedAccountsConfig,
   ServiceRoutingConfig,
 } from "@miladyai/shared/contracts/service-routing";
-import { resolveOnboardingServerTarget } from "./onboarding/server-target";
+import {
+  resolveOnboardingServerTarget,
+  type OnboardingServerTarget,
+} from "./onboarding/server-target";
 
 export interface BuildOnboardingConnectionArgs {
+  onboardingServerTarget?: OnboardingServerTarget;
   onboardingRunMode: "local" | "cloud" | "";
   onboardingCloudProvider: string;
   onboardingCloudApiKey: string;
@@ -48,6 +52,21 @@ function resolveLocalProviderId(
   return normalized && normalized !== "elizacloud" ? normalized : null;
 }
 
+function resolveArgsServerTarget(
+  args: Pick<
+    BuildOnboardingConnectionArgs,
+    "onboardingServerTarget" | "onboardingRunMode" | "onboardingCloudProvider"
+  >,
+): OnboardingServerTarget {
+  return (
+    args.onboardingServerTarget ??
+    resolveOnboardingServerTarget({
+      runMode: args.onboardingRunMode,
+      cloudProvider: args.onboardingCloudProvider,
+    })
+  );
+}
+
 export function resolveOnboardingPrimaryModel(args: {
   providerId: string;
   onboardingPrimaryModel: string;
@@ -62,10 +81,7 @@ export function resolveOnboardingPrimaryModel(args: {
 export function buildOnboardingConnectionConfig(
   args: BuildOnboardingConnectionArgs,
 ): OnboardingConnection | null {
-  const serverTarget = resolveOnboardingServerTarget({
-    runMode: args.onboardingRunMode,
-    cloudProvider: args.onboardingCloudProvider,
-  });
+  const serverTarget = resolveArgsServerTarget(args);
 
   if (args.onboardingProvider === "elizacloud") {
     return {
@@ -122,10 +138,7 @@ export function buildOnboardingRuntimeConfig(
   args: BuildOnboardingConnectionArgs,
 ): BuildOnboardingRuntimeConfigResult {
   const connection = buildOnboardingConnectionConfig(args);
-  const serverTarget = resolveOnboardingServerTarget({
-    runMode: args.onboardingRunMode,
-    cloudProvider: args.onboardingCloudProvider,
-  });
+  const serverTarget = resolveArgsServerTarget(args);
   const linkedAccounts: LinkedAccountsConfig = {};
   const cloudApiKey = trimToUndefined(args.onboardingCloudApiKey);
   if (cloudApiKey) {

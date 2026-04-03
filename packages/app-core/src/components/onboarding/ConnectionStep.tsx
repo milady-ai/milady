@@ -122,11 +122,15 @@ function applyOnboardingPatch(
   patch: ConnectionStatePatch,
   setState: <K extends keyof AppState>(key: K, value: AppState[K]) => void,
 ): void {
-  if (patch.onboardingRunMode !== undefined) {
-    setState("onboardingRunMode", patch.onboardingRunMode);
-  }
-  if (patch.onboardingCloudProvider !== undefined) {
-    setState("onboardingCloudProvider", patch.onboardingCloudProvider);
+  if (patch.onboardingServerTarget !== undefined) {
+    setState("onboardingServerTarget", patch.onboardingServerTarget);
+  } else {
+    if (patch.onboardingRunMode !== undefined) {
+      setState("onboardingRunMode", patch.onboardingRunMode);
+    }
+    if (patch.onboardingCloudProvider !== undefined) {
+      setState("onboardingCloudProvider", patch.onboardingCloudProvider);
+    }
   }
   if (patch.onboardingCloudApiKey !== undefined) {
     setState("onboardingCloudApiKey", patch.onboardingCloudApiKey);

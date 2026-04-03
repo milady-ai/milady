@@ -248,6 +248,7 @@ export interface UseChatCallbacksDeps {
   setPostOnboardingChecklistDismissed: (v: boolean) => void;
   setOnboardingName: (v: string) => void;
   setOnboardingStyle: (v: string) => void;
+  setOnboardingServerTarget: (v: AppState["onboardingServerTarget"]) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
@@ -356,6 +357,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setPostOnboardingChecklistDismissed,
     setOnboardingName,
     setOnboardingStyle,
+    setOnboardingServerTarget,
     setOnboardingRunMode,
     setOnboardingCloudProvider,
     setOnboardingProvider,
@@ -647,6 +649,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setPostOnboardingChecklistDismissed,
     setOnboardingName,
     setOnboardingStyle,
+    setOnboardingServerTarget,
     setOnboardingRunMode,
     setOnboardingCloudProvider,
     setOnboardingProvider,
