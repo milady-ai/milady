@@ -62,7 +62,9 @@ export function deriveOnboardingResumeFieldsFromConfig(
   const serviceRouting = resolveServiceRoutingInConfig(config);
   const llmText = serviceRouting?.llmText ?? null;
   const llmBackend = normalizeOnboardingProviderId(llmText?.backend);
-  const llmProvider = llmBackend ? getOnboardingProviderOption(llmBackend) : null;
+  const llmProvider = llmBackend
+    ? getOnboardingProviderOption(llmBackend)
+    : null;
   const root = asRecord(config);
   const cloud = asRecord(root?.cloud);
   const cloudApiKey =

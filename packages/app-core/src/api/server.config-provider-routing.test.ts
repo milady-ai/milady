@@ -153,13 +153,13 @@ describe("PUT /api/config canonical provider routing", () => {
         runtime: "cloud",
         provider: "elizacloud",
       });
-      expect((config.serviceRouting as Record<string, unknown>)?.llmText).toEqual(
-        {
-          backend: "openrouter",
-          transport: "direct",
-          primaryModel: "openai/gpt-5-mini",
-        },
-      );
+      expect(
+        (config.serviceRouting as Record<string, unknown>)?.llmText,
+      ).toEqual({
+        backend: "openrouter",
+        transport: "direct",
+        primaryModel: "openai/gpt-5-mini",
+      });
       expect(config.connection).toBeUndefined();
     } finally {
       await server.close();

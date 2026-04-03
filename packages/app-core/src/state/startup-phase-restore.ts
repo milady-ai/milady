@@ -122,8 +122,7 @@ export async function runRestoringSession(
   if (cancelled.current) return;
 
   const restoredActiveServer =
-    persistedActiveServer ??
-    (probed ? probed.activeServer : null);
+    persistedActiveServer ?? (probed ? probed.activeServer : null);
   const preserveCompleted =
     hadPrior && !deps.onboardingCompletionCommittedRef.current;
 

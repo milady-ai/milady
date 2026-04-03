@@ -59,8 +59,9 @@ function hasInactiveCloudSignals(
 export function shouldPreferLocalProviderConfig(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const llmText = resolveServiceRoutingInConfig(config as Record<string, unknown>)
-    ?.llmText;
+  const llmText = resolveServiceRoutingInConfig(
+    config as Record<string, unknown>,
+  )?.llmText;
   const directProvider = getOnboardingProviderOption(llmText?.backend)?.id;
   if (llmText?.transport !== "direct" || !directProvider) {
     return false;

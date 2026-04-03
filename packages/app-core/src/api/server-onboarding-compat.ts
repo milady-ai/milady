@@ -25,9 +25,7 @@ import {
 import { loadElizaConfig, saveElizaConfig } from "../config/config";
 import { resolveProviderCredential } from "./credential-resolver";
 import { PREMADE_VOICES } from "../voice/types";
-import {
-  applyOnboardingCredentialPersistence,
-} from "./provider-switch-config";
+import { applyOnboardingCredentialPersistence } from "./provider-switch-config";
 
 // ---------------------------------------------------------------------------
 // Internal helpers

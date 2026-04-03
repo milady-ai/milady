@@ -174,7 +174,9 @@ function loadInitialServerSelection(): Pick<
 
 function createInitialState(cloudOnly?: boolean): OnboardingState {
   const initialServer = loadInitialServerSelection();
-  const initialServerTarget = cloudOnly ? "elizacloud" : initialServer.serverTarget;
+  const initialServerTarget = cloudOnly
+    ? "elizacloud"
+    : initialServer.serverTarget;
   return {
     step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",

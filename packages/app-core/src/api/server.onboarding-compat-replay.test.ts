@@ -253,13 +253,11 @@ describe("POST /api/onboarding compat replay", () => {
 
       expect(status).toBe(200);
 
-      const config = await waitForConfig(
-        configPath,
-        (candidate) =>
-          Boolean(
-            ((candidate.deploymentTarget ?? {}) as Record<string, unknown>)
-              .runtime,
-          ),
+      const config = await waitForConfig(configPath, (candidate) =>
+        Boolean(
+          ((candidate.deploymentTarget ?? {}) as Record<string, unknown>)
+            .runtime,
+        ),
       );
       const env = (config.env ?? {}) as Record<string, string>;
 
@@ -267,12 +265,12 @@ describe("POST /api/onboarding compat replay", () => {
         runtime: "cloud",
         provider: "elizacloud",
       });
-      expect((config.serviceRouting as Record<string, unknown>)?.llmText).toEqual(
-        {
-          backend: "openai",
-          transport: "direct",
-        },
-      );
+      expect(
+        (config.serviceRouting as Record<string, unknown>)?.llmText,
+      ).toEqual({
+        backend: "openai",
+        transport: "direct",
+      });
       expect(env.OPENAI_API_KEY).toBe("sk-openai-test-key");
     } finally {
       await server.close();

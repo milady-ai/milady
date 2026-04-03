@@ -93,9 +93,8 @@ export async function handleOnboardingCompatRoute(
       state.pendingAgentName = body.name.trim();
     }
 
-    const { replayBody: replayBodyRecord } = deriveCompatOnboardingReplayBody(
-      body,
-    );
+    const { replayBody: replayBodyRecord } =
+      deriveCompatOnboardingReplayBody(body);
     const replayDeploymentTarget = normalizeDeploymentTargetConfig(
       replayBodyRecord.deploymentTarget,
     );
@@ -107,9 +106,8 @@ export async function handleOnboardingCompatRoute(
     );
     const cloudInferenceSelected = Boolean(
       replayServiceRouting?.llmText?.transport === "cloud-proxy" &&
-          normalizeOnboardingProviderId(
-            replayServiceRouting.llmText.backend,
-          ) === "elizacloud",
+        normalizeOnboardingProviderId(replayServiceRouting.llmText.backend) ===
+          "elizacloud",
     );
     const shouldResolveCloudApiKey =
       replayDeploymentTarget?.runtime === "cloud" ||
@@ -171,7 +169,6 @@ export async function handleOnboardingCompatRoute(
         }
 
         capturedCloudApiKey = resolvedCloudApiKey;
-
       }
       saveElizaConfig(config);
     } catch (err) {
@@ -181,10 +178,7 @@ export async function handleOnboardingCompatRoute(
     }
 
     if (replayBodyRecord !== body) {
-      replayBody = Buffer.from(
-        JSON.stringify(replayBodyRecord),
-        "utf8",
-      );
+      replayBody = Buffer.from(JSON.stringify(replayBodyRecord), "utf8");
     }
   } catch {
     // JSON parse failed — let upstream handle the error
