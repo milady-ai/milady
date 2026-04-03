@@ -14,13 +14,11 @@ function trimToNull(value: string | undefined): string | null {
 }
 
 function normalizePersistentPartition(partition: string): string {
-  const trimmed = partition.trim();
-  if (trimmed.startsWith("persist:")) return trimmed;
-  return `persist:${trimmed}`;
+  return partition.includes(":") ? partition : `persist:${partition}`;
 }
 
 export function resolveMainWindowPartition(
-  env: Record<string, string | undefined>,
+  env: NodeJS.ProcessEnv = process.env,
 ): string | null {
   const explicit = trimToNull(env.MILADY_DESKTOP_TEST_PARTITION);
   if (explicit) {

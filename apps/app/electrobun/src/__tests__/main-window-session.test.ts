@@ -52,4 +52,12 @@ describe("main-window-session", () => {
     expect(resolveBootstrapShellRenderer(buildInfo)).toBe("native");
     expect(resolveBootstrapViewRenderer(buildInfo)).toBe("native");
   });
+
+  it("ignores blank partition overrides", () => {
+    expect(
+      resolveMainWindowPartition({
+        MILADY_DESKTOP_TEST_PARTITION: "   ",
+      }),
+    ).toBeNull();
+  });
 });
