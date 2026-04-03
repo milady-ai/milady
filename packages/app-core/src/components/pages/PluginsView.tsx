@@ -26,6 +26,11 @@ import {
 } from "react";
 import type { PluginInfo } from "../../api";
 import { client } from "../../api";
+import {
+  ensurePluginManagerAllowed,
+  getPluginManagerBlockReason,
+  PLUGIN_MANAGER_UNAVAILABLE_ERROR,
+} from "../../runtime/plugin-manager-guard";
 import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
 
@@ -433,7 +438,26 @@ function PluginListView({
 
   const handleInstallPlugin = async (pluginId: string, npmName: string) => {
     setInstallingPlugins((prev) => new Set(prev).add(pluginId));
+    let restartedForPluginManager = false;
     try {
+      const pluginManagerGuard = ensurePluginManagerAllowed();
+      const pluginManagerBlockReason =
+        getPluginManagerBlockReason(pluginManagerGuard);
+      if (pluginManagerBlockReason) {
+        throw new Error(pluginManagerBlockReason);
+      }
+      if (pluginManagerGuard === "enabled") {
+        setActionNotice(
+          t("pluginsview.PluginInstallPreparing", {
+            plugin: npmName,
+            defaultValue:
+              "Enabling plugin installs for {{plugin}} and restarting the agent...",
+          }),
+          "success",
+        );
+        await client.restartAndWait(120_000);
+        restartedForPluginManager = true;
+      }
       await client.installRegistryPlugin(npmName);
       await loadPlugins();
       setActionNotice(
@@ -444,10 +468,52 @@ function PluginListView({
         "success",
       );
     } catch (err) {
+      let installError = err;
+      if (
+        installError instanceof Error &&
+        installError.message.includes(PLUGIN_MANAGER_UNAVAILABLE_ERROR)
+      ) {
+        try {
+          const pluginManagerGuard = ensurePluginManagerAllowed();
+          const pluginManagerBlockReason =
+            getPluginManagerBlockReason(pluginManagerGuard);
+          if (pluginManagerBlockReason) {
+            throw new Error(pluginManagerBlockReason);
+          }
+          if (!restartedForPluginManager) {
+            setActionNotice(
+              t("pluginsview.PluginInstallRecovering", {
+                plugin: npmName,
+                defaultValue:
+                  "Finishing plugin install setup for {{plugin}} and restarting the agent...",
+              }),
+              "success",
+            );
+            await client.restartAndWait(120_000);
+            restartedForPluginManager = true;
+          }
+          await client.installRegistryPlugin(npmName);
+          await loadPlugins();
+          setActionNotice(
+            t("pluginsview.PluginInstalledRestartRequired", {
+              plugin: npmName,
+              defaultValue:
+                "{{plugin}} installed. Restart required to activate.",
+            }),
+            "success",
+          );
+          return;
+        } catch (recoveryErr) {
+          installError = recoveryErr;
+        }
+      }
       setActionNotice(
         t("pluginsview.PluginInstallFailed", {
           plugin: npmName,
-          message: err instanceof Error ? err.message : "unknown error",
+          message:
+            installError instanceof Error
+              ? installError.message
+              : "unknown error",
           defaultValue: "Failed to install {{plugin}}: {{message}}",
         }),
         "error",

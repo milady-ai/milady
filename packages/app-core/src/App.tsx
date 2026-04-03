@@ -3,6 +3,7 @@
  */
 
 import { Keyboard } from "@capacitor/keyboard";
+import { subscribeDesktopBridgeEvent } from "@miladyai/app-core/bridge";
 import { isIOS, isNative } from "@miladyai/app-core/platform";
 import {
   Button,
@@ -262,6 +263,7 @@ export function App() {
       : false,
   );
   const [mobileConversationsOpen, setMobileConversationsOpen] = useState(false);
+  const [desktopShuttingDown, setDesktopShuttingDown] = useState(false);
 
   const isChat = tab === "chat";
   const isWallets = tab === "wallets";
@@ -388,6 +390,16 @@ export function App() {
         // Ignore cleanup failures when the native bridge is unavailable.
       });
     };
+  }, []);
+
+  useEffect(() => {
+    return subscribeDesktopBridgeEvent({
+      rpcMessage: "desktopShutdownStarted",
+      ipcChannel: "desktop:shutdownStarted",
+      listener: () => {
+        setDesktopShuttingDown(true);
+      },
+    });
   }, []);
 
   const bugReport = useBugReportState();
@@ -697,6 +709,22 @@ export function App() {
       />
       <ConnectionFailedBanner />
       <SystemWarningBanner />
+      {desktopShuttingDown ? (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-bg/80 backdrop-blur-sm"
+          aria-label="Shutting down"
+          aria-live="polite"
+        >
+          <div className="rounded-2xl border border-border/60 bg-card/95 px-6 py-5 text-center shadow-2xl">
+            <div className="text-base font-semibold text-txt">
+              Shutting down…
+            </div>
+            <div className="mt-1 text-sm text-muted">
+              Closing services and saving state.
+            </div>
+          </div>
+        </div>
+      ) : null}
     </BugReportProvider>
   );
 }

@@ -17,9 +17,9 @@ export const CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-shell", // shell command execution
   "@elizaos/plugin-agent-skills", // skill execution and marketplace runtime
   "@elizaos/plugin-commands", // slash command handling (skills auto-register as /commands)
+  "@elizaos/plugin-plugin-manager", // dynamic plugin management for registry/plugin installs
   // "@elizaos/plugin-secrets-manager", // secrets management — load early, other plugins depend on it
   // "@elizaos/plugin-rolodex", // contact graph and relationship/social memory
-  // "@elizaos/plugin-plugin-manager", // dynamic plugin management
   // "@elizaos/plugin-trust", // trust scoring and policy signals
   "@miladyai/plugin-roles", // role-based access control (OWNER/ADMIN/NONE)
   // "@elizaos/plugin-todo", // todo/task management

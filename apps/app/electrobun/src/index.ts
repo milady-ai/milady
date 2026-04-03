@@ -547,6 +547,12 @@ let surfaceWindowManager: SurfaceWindowManager | null = null;
 let rendererUrlPromise: Promise<string> | null = null;
 let backgroundWindowPromise: Promise<void> | null = null;
 let isQuitting = false;
+
+function requestAppQuit(): void {
+  isQuitting = true;
+  Utils.quit();
+}
+
 const cleanupFns: Array<() => void | Promise<void>> = [];
 let lastFocusedWindow: ManagedWindowLike | null = null;
 
@@ -800,6 +806,7 @@ function attachMainWindow(win: BrowserWindow): BrowserWindow {
       currentWindow = null;
       currentSendToWebview = null;
     }
+    getDesktopManager().clearMainWindow(win);
 
     if (!isQuitting) {
       void ensureBackgroundWindow();
@@ -1345,7 +1352,7 @@ async function setupUpdater(): Promise<void> {
               console.error("[Main] Agent restart failed:", err);
             });
         } else if (action === "quit") {
-          Utils.quit();
+          void getDesktopManager().quit();
         } else if (action === "show") {
           void getDesktopManager().showWindow();
         } else if (action?.startsWith("navigate-")) {
@@ -1387,6 +1394,7 @@ function setupDockReopen(): void {
 async function runShutdownCleanup(reason: string): Promise<void> {
   console.log(`[Main] App quitting (${reason}), disposing native modules...`);
   isQuitting = true;
+  sendToActiveRenderer("desktopShutdownStarted", { reason });
   for (const cleanupFn of cleanupFns) {
     await Promise.resolve(cleanupFn());
   }
@@ -1614,6 +1622,10 @@ async function main(): Promise<void> {
   // Wire detached window callbacks so menus and RPC can open them.
   getDesktopManager().setOpenSettingsCallback((tabHint) => {
     void createSettingsWindow(tabHint);
+  });
+  getDesktopManager().setRestoreMainWindowCallback(() => restoreWindow());
+  getDesktopManager().setRequestQuitCallback(() => {
+    requestAppQuit();
   });
   getDesktopManager().setOpenSurfaceWindowCallback((surface, browse) => {
     if (!surfaceWindowManager) {

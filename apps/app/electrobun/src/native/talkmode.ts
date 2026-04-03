@@ -10,6 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import type { TalkModeConfig, TalkModeState } from "../rpc-schema";
 import type { SendToWebview } from "../types.js";
+import { diagnosticLog } from "./agent";
 import {
   isWhisperAvailable,
   transcribeBunSpawn,
@@ -27,6 +28,10 @@ const TALKMODE_AUDIO_BUFFER_THRESHOLD =
   FLOAT32_BYTES_PER_SAMPLE;
 const TALKMODE_MIN_FLUSH_BYTES =
   TALKMODE_SAMPLE_RATE * TALKMODE_MIN_FLUSH_SECONDS * FLOAT32_BYTES_PER_SAMPLE;
+
+function talkmodeLog(message: string): void {
+  diagnosticLog(`[TalkMode] ${message}`);
+}
 
 export class TalkModeManager {
   private sendToWebview: SendToWebview | null = null;
@@ -66,6 +71,9 @@ export class TalkModeManager {
       this.config.engine = "web";
     }
 
+    talkmodeLog(
+      `start platform=${process.platform} whisper=${whisperOk} engine=${this.config.engine}`,
+    );
     this.setState("listening");
     return {
       available: true,
@@ -76,6 +84,9 @@ export class TalkModeManager {
   }
 
   async stop(): Promise<void> {
+    talkmodeLog(
+      `stop state=${this.state} bufferedBytes=${this._audioBufferSize} processing=${this._processing}`,
+    );
     await this._waitForProcessing();
     if (this._audioBufferSize >= TALKMODE_MIN_FLUSH_BYTES) {
       await this._processBuffer({ flush: true });
@@ -91,6 +102,9 @@ export class TalkModeManager {
     directive?: Record<string, unknown>;
   }): Promise<void> {
     const apiKey = process.env.ELEVEN_LABS_API_KEY?.trim();
+    talkmodeLog(
+      `speak chars=${options.text.length} engine=${apiKey ? "elevenlabs" : "system"}`,
+    );
     if (apiKey) {
       await this._speakElevenLabs(options, apiKey);
     } else {
@@ -232,6 +246,7 @@ export class TalkModeManager {
   }
 
   async stopSpeaking(): Promise<void> {
+    talkmodeLog("stopSpeaking");
     // Kill in-flight system TTS process (say / espeak / PowerShell).
     if (this._speakProc) {
       try {
@@ -263,34 +278,53 @@ export class TalkModeManager {
   }
 
   async getWhisperInfo() {
+    const available = isWhisperAvailable();
+    talkmodeLog(
+      `getWhisperInfo available=${available} modelSize=${this.config.modelSize}`,
+    );
     return {
-      available: isWhisperAvailable(),
+      available,
       modelSize: this.config.modelSize,
     };
   }
 
   async isWhisperAvailableCheck() {
-    return { available: isWhisperAvailable() };
+    const available = isWhisperAvailable();
+    talkmodeLog(`isWhisperAvailable ${available}`);
+    return { available };
   }
 
   async updateConfig(config: TalkModeConfig): Promise<void> {
     Object.assign(this.config, config);
+    talkmodeLog(
+      `updateConfig engine=${this.config.engine ?? "unset"} modelSize=${this.config.modelSize ?? "unset"} language=${this.config.language ?? "unset"}`,
+    );
   }
 
   async audioChunk(options: { data: string }): Promise<void> {
     // Only process audio when actively listening or speaking (not idle/error)
-    if (this.state !== "listening" && this.state !== "speaking") return;
+    if (this.state !== "listening" && this.state !== "speaking") {
+      talkmodeLog(`audioChunk ignored state=${this.state}`);
+      return;
+    }
 
     // Decode base64 Float32 PCM and accumulate
     const chunkBuffer = Buffer.from(options.data, "base64");
+    const previousBufferSize = this._audioBufferSize;
     this._audioBuffer.push(chunkBuffer);
     this._audioBufferSize += chunkBuffer.length;
+    if (previousBufferSize === 0) {
+      talkmodeLog(`audioChunk stream-start bytes=${chunkBuffer.length}`);
+    }
 
     // Process in smaller rolling windows so text lands in the composer quickly.
     if (
       this._audioBufferSize >= TALKMODE_AUDIO_BUFFER_THRESHOLD &&
       !this._processing
     ) {
+      talkmodeLog(
+        `audioChunk process-threshold bufferedBytes=${this._audioBufferSize}`,
+      );
       await this._processBuffer();
     }
   }
@@ -324,7 +358,10 @@ export class TalkModeManager {
     }
 
     try {
-      // Safe Float32 conversion — avoids alignment issues from Buffer pool offsets.
+      talkmodeLog(
+        `_processBuffer begin flush=${flush} bufferedBytes=${combined.byteLength}`,
+      );
+      // Safe Float32 conversion - avoids alignment issues from Buffer pool offsets.
       const numSamples = combined.byteLength >>> 2; // divide by 4
       const float32 = new Float32Array(numSamples);
       const dv = new DataView(
@@ -351,7 +388,14 @@ export class TalkModeManager {
         fs.unlinkSync(tmpPath);
       } catch {}
 
-      if (!result?.text?.trim()) return;
+      if (!result?.text?.trim()) {
+        talkmodeLog(`transcribe empty flush=${flush}`);
+        return;
+      }
+
+      talkmodeLog(
+        `transcribe success chars=${result.text.trim().length} segments=${result.segments.length} flush=${flush}`,
+      );
 
       // Emit transcript to renderer
       this.sendToWebview?.("talkmode:transcript", {
@@ -364,6 +408,9 @@ export class TalkModeManager {
         isFinal: flush,
       });
     } catch (err) {
+      talkmodeLog(
+        `_processBuffer error ${err instanceof Error ? err.message : String(err)}`,
+      );
       this.sendToWebview?.("talkmode:error", {
         code: "transcription_failed",
         message: err instanceof Error ? err.message : String(err),

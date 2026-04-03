@@ -134,6 +134,13 @@ export class SwabbleElectrobun implements SwabblePlugin {
     }
   }
 
+  private async getDesktopPlatform(): Promise<string | null> {
+    return this.invokeBridge<string>(
+      "permissionsGetPlatform",
+      "permissions:getPlatform",
+    );
+  }
+
   async start(options: SwabbleStartOptions): Promise<SwabbleStartResult> {
     if (this.isActive) {
       return { started: true };
@@ -666,6 +673,10 @@ export class SwabbleElectrobun implements SwabblePlugin {
   }
 
   async requestPermissions(): Promise<SwabblePermissionStatus> {
+    if ((await this.getDesktopPlatform()) === "win32") {
+      return this.checkPermissions();
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => {
@@ -683,8 +694,10 @@ export class SwabbleElectrobun implements SwabblePlugin {
   async getAudioDevices(): Promise<{
     devices: Array<{ id: string; name: string; isDefault: boolean }>;
   }> {
-    // Ensure we have permission first (required to get device labels)
-    await navigator.mediaDevices.getUserMedia({ audio: true });
+    if ((await this.getDesktopPlatform()) !== "win32") {
+      // Ensure we have permission first (required to get device labels)
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
     const devices = await navigator.mediaDevices.enumerateDevices();
     const audioInputs = devices.filter((d) => d.kind === "audioinput");
 
