@@ -33,13 +33,15 @@ describe("hasPartialOnboardingConnectionConfig", () => {
     },
     {
       config: {
-        connection: {
-          kind: "local-provider",
-          provider: "openai",
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "direct",
+          },
         },
       },
       expected: true,
-      name: "returns true when config.connection is present",
+      name: "returns true when canonical provider routing is present",
     },
     {
       config: { cloud: { apiKey: "sk-test" } },
@@ -71,7 +73,13 @@ describe("inferOnboardingResumeStep", () => {
       inferOnboardingResumeStep({
         persistedStep: "providers",
         config: {
-          connection: { kind: "cloud-managed", cloudProvider: "elizacloud" },
+          serviceRouting: {
+            llmText: {
+              backend: "elizacloud",
+              transport: "cloud-proxy",
+              accountId: "elizacloud",
+            },
+          },
         },
       }),
     ).toBe("providers");
@@ -91,13 +99,15 @@ describe("inferOnboardingResumeStep", () => {
 });
 
 describe("deriveOnboardingResumeConnection", () => {
-  it("prefers explicit config.connection over compatibility inference", () => {
+  it("prefers canonical runtime routing over compatibility inference", () => {
     expect(
       deriveOnboardingResumeConnection({
-        connection: {
-          kind: "local-provider",
-          provider: "openrouter",
-          primaryModel: "openai/gpt-5-mini",
+        serviceRouting: {
+          llmText: {
+            backend: "openrouter",
+            transport: "direct",
+            primaryModel: "openai/gpt-5-mini",
+          },
         },
         env: {
           vars: {

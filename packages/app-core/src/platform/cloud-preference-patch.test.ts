@@ -10,9 +10,11 @@ import {
 describe("cloud-preference-patch", () => {
   it("masks inactive cloud capability when an explicit local provider is selected", () => {
     const config = {
-      connection: {
-        kind: "local-provider",
-        provider: "openrouter",
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+        },
       },
       cloud: {
         enabled: false,
@@ -122,9 +124,11 @@ describe("cloud-preference-patch", () => {
 
   it("normalizes config reads without hiding linked cloud status", async () => {
     const rawConfig = {
-      connection: {
-        kind: "local-provider",
-        provider: "anthropic",
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
       },
       cloud: {
         enabled: false,
@@ -152,7 +156,7 @@ describe("cloud-preference-patch", () => {
     const uninstall = installLocalProviderCloudPreferencePatch(client);
 
     await expect(client.getConfig()).resolves.toMatchObject({
-      connection: rawConfig.connection,
+      serviceRouting: rawConfig.serviceRouting,
       cloud: {
         apiKey: "ck-cloud-test",
       },

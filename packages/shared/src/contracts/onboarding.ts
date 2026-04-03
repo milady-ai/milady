@@ -863,9 +863,6 @@ function resolveLegacyServiceRoutingInConfig(
   const root = asConfigRecord(config);
   const explicit = normalizeServiceRoutingConfig(root?.serviceRouting) ?? {};
   const next: ServiceRoutingConfig = { ...explicit };
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    root?.connection,
-  );
   const deploymentTarget =
     normalizeDeploymentTargetConfig(root?.deploymentTarget) ??
     resolveLegacyDeploymentTargetInConfig(config);
@@ -874,32 +871,7 @@ function resolveLegacyServiceRoutingInConfig(
   const models = asConfigRecord(config?.models);
 
   if (!next.llmText) {
-    if (isCloudManagedConnection(explicitConnection)) {
-      next.llmText = buildElizaCloudTextRoute({
-        smallModel: explicitConnection.smallModel,
-        largeModel: explicitConnection.largeModel,
-      });
-    } else if (isLocalProviderConnection(explicitConnection)) {
-      next.llmText = {
-        backend: explicitConnection.provider,
-        transport: "direct",
-        ...(explicitConnection.primaryModel
-          ? { primaryModel: explicitConnection.primaryModel }
-          : {}),
-      };
-    } else if (isRemoteProviderConnection(explicitConnection)) {
-      next.llmText = {
-        backend: explicitConnection.provider ?? "remote",
-        transport: "remote",
-        remoteApiBase: explicitConnection.remoteApiBase,
-        ...(explicitConnection.primaryModel
-          ? { primaryModel: explicitConnection.primaryModel }
-          : {}),
-      };
-    } else if (
-      deploymentTarget.runtime === "remote" &&
-      deploymentTarget.remoteApiBase
-    ) {
+    if (deploymentTarget.runtime === "remote" && deploymentTarget.remoteApiBase) {
       const remotePrimaryModel = readPrimaryModelFromConfig(config);
       next.llmText = {
         backend: "remote",
@@ -1007,15 +979,6 @@ export function migrateLegacyRuntimeConfig<T extends Record<string, unknown>>(
     return config;
   }
 
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    root.connection,
-  );
-  if (explicitConnection) {
-    root.connection = stripOnboardingConnectionSecrets(explicitConnection);
-  } else if (Object.hasOwn(root, "connection")) {
-    delete root.connection;
-  }
-
   const deploymentTarget =
     normalizeDeploymentTargetConfig(root.deploymentTarget) ??
     resolveLegacyDeploymentTargetInConfig(root);
@@ -1042,6 +1005,10 @@ export function migrateLegacyRuntimeConfig<T extends Record<string, unknown>>(
     root.serviceRouting = serviceRouting;
   } else {
     delete root.serviceRouting;
+  }
+
+  if (Object.hasOwn(root, "connection")) {
+    delete root.connection;
   }
 
   pruneLegacyCloudRoutingFields(root);
@@ -1078,20 +1045,6 @@ export function resolveDeploymentTargetInConfig(
     return explicit;
   }
 
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    root?.connection,
-  );
-  if (isRemoteProviderConnection(explicitConnection)) {
-    return {
-      runtime: "remote",
-      provider: "remote",
-      remoteApiBase: explicitConnection.remoteApiBase,
-      ...(explicitConnection.remoteAccessToken
-        ? { remoteAccessToken: explicitConnection.remoteAccessToken }
-        : {}),
-    };
-  }
-
   return { runtime: "local" };
 }
 
@@ -1101,38 +1054,10 @@ export function resolveServiceRoutingInConfig(
   const root = asConfigRecord(config);
   const explicit = normalizeServiceRoutingConfig(root?.serviceRouting) ?? {};
   const next: ServiceRoutingConfig = { ...explicit };
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    root?.connection,
-  );
   const deploymentTarget = resolveDeploymentTargetInConfig(config);
 
   if (!next.llmText) {
-    if (isCloudManagedConnection(explicitConnection)) {
-      next.llmText = buildElizaCloudTextRoute({
-        smallModel: explicitConnection.smallModel,
-        largeModel: explicitConnection.largeModel,
-      });
-    } else if (isLocalProviderConnection(explicitConnection)) {
-      next.llmText = {
-        backend: explicitConnection.provider,
-        transport: "direct",
-        ...(explicitConnection.primaryModel
-          ? { primaryModel: explicitConnection.primaryModel }
-          : {}),
-      };
-    } else if (isRemoteProviderConnection(explicitConnection)) {
-      next.llmText = {
-        backend: explicitConnection.provider ?? "remote",
-        transport: "remote",
-        remoteApiBase: explicitConnection.remoteApiBase,
-        ...(explicitConnection.primaryModel
-          ? { primaryModel: explicitConnection.primaryModel }
-          : {}),
-      };
-    } else if (
-      deploymentTarget.runtime === "remote" &&
-      deploymentTarget.remoteApiBase
-    ) {
+    if (deploymentTarget.runtime === "remote" && deploymentTarget.remoteApiBase) {
       const remotePrimaryModel = readPrimaryModelFromConfig(config);
       next.llmText = {
         backend: "remote",
@@ -1402,21 +1327,7 @@ export function inferCompatibilityOnboardingConnection(
 export function inferOnboardingConnectionFromConfig(
   config: Record<string, unknown> | null | undefined,
 ): OnboardingConnection | null {
-  const root = asConfigRecord(config);
-  const explicitConnection = normalizePersistedOnboardingConnection(
-    root?.connection,
-  );
-  const hasCanonicalRuntimeConfig = Boolean(
-    root &&
-      (Object.hasOwn(root, "deploymentTarget") ||
-        Object.hasOwn(root, "linkedAccounts") ||
-        Object.hasOwn(root, "serviceRouting")),
-  );
-  const derivedConnection = deriveOnboardingConnectionFromRuntimeConfig(config);
-  if (hasCanonicalRuntimeConfig) {
-    return derivedConnection ?? explicitConnection;
-  }
-  return explicitConnection ?? derivedConnection;
+  return deriveOnboardingConnectionFromRuntimeConfig(config);
 }
 
 function inferLegacyCloudInferenceSelection(

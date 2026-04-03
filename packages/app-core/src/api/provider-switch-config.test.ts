@@ -124,10 +124,7 @@ describe("applyOnboardingConnectionConfig", () => {
       provider: "anthropic-subscription",
     });
 
-    expect(config.connection).toEqual({
-      kind: "local-provider",
-      provider: "anthropic-subscription",
-    });
+    expect(config.connection).toBeUndefined();
     expect(config.agents?.defaults?.subscriptionProvider).toBe(
       "anthropic-subscription",
     );
@@ -148,10 +145,7 @@ describe("applyOnboardingConnectionConfig", () => {
       apiKey: "sk-ant-oat01-test-token",
     });
 
-    expect(config.connection).toEqual({
-      kind: "local-provider",
-      provider: "anthropic-subscription",
-    });
+    expect(config.connection).toBeUndefined();
     expect(config.agents?.defaults?.subscriptionProvider).toBe(
       "anthropic-subscription",
     );
@@ -175,10 +169,7 @@ describe("applyOnboardingConnectionConfig", () => {
       provider: "openai",
     });
 
-    expect(config.connection).toEqual({
-      kind: "local-provider",
-      provider: "openai",
-    });
+    expect(config.connection).toBeUndefined();
     expect((config.env as Record<string, unknown>).OPENAI_API_KEY).toBe(
       "sk-saved-openai",
     );
@@ -210,11 +201,7 @@ describe("applyOnboardingConnectionConfig", () => {
       primaryModel: "openai/gpt-5-mini",
     });
 
-    expect(config.connection).toEqual({
-      kind: "local-provider",
-      provider: "openrouter",
-      primaryModel: "openai/gpt-5-mini",
-    });
+    expect(config.connection).toBeUndefined();
     expect(config.cloud).toEqual({
       apiKey: "ck-cloud-existing",
     });
@@ -249,12 +236,7 @@ describe("applyOnboardingConnectionConfig", () => {
       largeModel: "moonshotai/kimi-k2-0905",
     });
 
-    expect(config.connection).toEqual({
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      smallModel: "openai/gpt-5-mini",
-      largeModel: "moonshotai/kimi-k2-0905",
-    });
+    expect(config.connection).toBeUndefined();
     expect(config.cloud).toEqual({
       apiKey: "ck-cloud-key",
     });
@@ -299,13 +281,15 @@ describe("createProviderSwitchConnection", () => {
 });
 
 describe("resolveExistingOnboardingConnection", () => {
-  it("prefers explicit config.connection over compatibility inference", () => {
+  it("prefers canonical routing over compatibility inference", () => {
     expect(
       resolveExistingOnboardingConnection({
-        connection: {
-          kind: "local-provider",
-          provider: "openrouter",
-          primaryModel: "openai/gpt-5-mini",
+        serviceRouting: {
+          llmText: {
+            backend: "openrouter",
+            transport: "direct",
+            primaryModel: "openai/gpt-5-mini",
+          },
         },
         env: {
           OPENAI_API_KEY: "sk-openai",
@@ -338,10 +322,7 @@ describe("reconcilePersistedOnboardingConnection", () => {
       kind: "local-provider",
       provider: "ollama",
     });
-    expect(config.connection).toEqual({
-      kind: "local-provider",
-      provider: "ollama",
-    });
+    expect(config.connection).toBeUndefined();
   });
 
   it("projects the persisted connection from canonical routing when present", () => {
@@ -376,11 +357,7 @@ describe("reconcilePersistedOnboardingConnection", () => {
       provider: "openrouter",
       primaryModel: "openai/gpt-5-mini",
     });
-    expect(config.connection).toEqual({
-      kind: "local-provider",
-      provider: "openrouter",
-      primaryModel: "openai/gpt-5-mini",
-    });
+    expect(config.connection).toBeUndefined();
   });
 });
 

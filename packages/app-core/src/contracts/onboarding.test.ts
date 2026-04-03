@@ -90,13 +90,15 @@ describe("onboarding provider catalog", () => {
     ]);
   });
 
-  it("prefers explicit connection over capability signals", () => {
+  it("prefers canonical direct routing over inactive cloud capability signals", () => {
     expect(
       inferOnboardingConnectionFromConfig({
-        connection: {
-          kind: "local-provider",
-          provider: "openrouter",
-          primaryModel: "openai/gpt-5-mini",
+        serviceRouting: {
+          llmText: {
+            backend: "openrouter",
+            transport: "direct",
+            primaryModel: "openai/gpt-5-mini",
+          },
         },
         cloud: {
           enabled: true,
@@ -148,9 +150,11 @@ describe("onboarding provider catalog", () => {
   it("treats explicit local-provider selections as not using cloud inference", () => {
     expect(
       isCloudInferenceSelectedInConfig({
-        connection: {
-          kind: "local-provider",
-          provider: "openrouter",
+        serviceRouting: {
+          llmText: {
+            backend: "openrouter",
+            transport: "direct",
+          },
         },
         cloud: {
           enabled: true,
@@ -262,20 +266,23 @@ describe("onboarding provider catalog", () => {
   });
 
   it("does not auto-route non-text cloud services from cloud hosting or cloud inference alone", () => {
-    const migrated = migrateLegacyRuntimeConfig({
+    const config = {
       deploymentTarget: {
         runtime: "cloud",
         provider: "elizacloud",
       },
-      connection: {
-        kind: "cloud-managed",
-        cloudProvider: "elizacloud",
-        smallModel: "openai/gpt-5-mini",
-        largeModel: "anthropic/claude-sonnet-4.5",
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+          smallModel: "openai/gpt-5-mini",
+          largeModel: "anthropic/claude-sonnet-4.5",
+        },
       },
-    });
+    };
 
-    expect(migrated.serviceRouting).toEqual({
+    expect(config.serviceRouting).toEqual({
       llmText: {
         backend: "elizacloud",
         transport: "cloud-proxy",
@@ -284,8 +291,8 @@ describe("onboarding provider catalog", () => {
         largeModel: "anthropic/claude-sonnet-4.5",
       },
     });
-    expect(isElizaCloudServiceSelectedInConfig(migrated, "media")).toBe(false);
-    expect(isElizaCloudServiceSelectedInConfig(migrated, "rpc")).toBe(false);
+    expect(isElizaCloudServiceSelectedInConfig(config, "media")).toBe(false);
+    expect(isElizaCloudServiceSelectedInConfig(config, "rpc")).toBe(false);
   });
 
   it("keeps remote selection ahead of local env-backed providers", () => {

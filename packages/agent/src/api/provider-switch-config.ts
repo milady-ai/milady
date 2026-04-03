@@ -287,13 +287,9 @@ function clearRemoteProviderConfig(config: MutableElizaConfig): void {
 
 function persistConnectionSelection(
   config: MutableElizaConfig,
-  connection: OnboardingConnection | null,
+  _connection: OnboardingConnection | null,
 ): void {
-  if (!connection) {
-    delete config.connection;
-    return;
-  }
-  config.connection = stripOnboardingConnectionSecrets(connection);
+  delete config.connection;
 }
 
 // Remove ElizaCloud CLI proxy endpoints from process.env and the API keys that server.ts

@@ -144,8 +144,9 @@ describe("PUT /api/config canonical provider routing", () => {
         configPath,
         (candidate) =>
           (
-            (candidate.connection ?? null) as Record<string, unknown> | null
-          )?.provider === "openrouter",
+            ((candidate.serviceRouting ?? {}) as Record<string, unknown>)
+              ?.llmText as Record<string, unknown> | undefined
+          )?.backend === "openrouter",
       );
 
       expect(config.deploymentTarget).toEqual({
@@ -159,11 +160,7 @@ describe("PUT /api/config canonical provider routing", () => {
           primaryModel: "openai/gpt-5-mini",
         },
       );
-      expect(config.connection).toEqual({
-        kind: "local-provider",
-        provider: "openrouter",
-        primaryModel: "openai/gpt-5-mini",
-      });
+      expect(config.connection).toBeUndefined();
     } finally {
       await server.close();
       await cleanupTempDir(tempDir);
@@ -223,8 +220,9 @@ describe("PUT /api/config canonical provider routing", () => {
         configPath,
         (candidate) =>
           (
-            (candidate.connection ?? null) as Record<string, unknown> | null
-          )?.provider === "openrouter",
+            ((candidate.serviceRouting ?? {}) as Record<string, unknown>)
+              ?.llmText as Record<string, unknown> | undefined
+          )?.backend === "openrouter",
       );
 
       expect((config.serviceRouting as Record<string, unknown>)?.llmText).toEqual(
@@ -234,11 +232,7 @@ describe("PUT /api/config canonical provider routing", () => {
           primaryModel: "openai/gpt-5-mini",
         },
       );
-      expect(config.connection).toEqual({
-        kind: "local-provider",
-        provider: "openrouter",
-        primaryModel: "openai/gpt-5-mini",
-      });
+      expect(config.connection).toBeUndefined();
     } finally {
       await server.close();
       await cleanupTempDir(tempDir);

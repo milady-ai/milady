@@ -4724,11 +4724,7 @@ describe("API Server E2E (no runtime)", () => {
           primaryModel: "openai/gpt-5.2",
         },
       });
-      expect(data.connection).toEqual({
-        kind: "local-provider",
-        provider: "openai",
-        primaryModel: "openai/gpt-5.2",
-      });
+      expect(data.connection).toBeUndefined();
       expect(data.models?.small).toBeUndefined();
       expect(data.models?.large).toBeUndefined();
     });

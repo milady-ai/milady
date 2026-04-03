@@ -412,14 +412,6 @@ export async function handleOnboardingRoutes(
       ) {
         delete process.env.ELIZAOS_CLOUD_API_KEY;
       }
-
-      delete config.connection;
-      const projectedConnection = inferOnboardingConnectionFromConfig(
-        config as Record<string, unknown>,
-      );
-      if (projectedConnection) {
-        config.connection = stripOnboardingConnectionSecrets(projectedConnection);
-      }
     } else if (explicitConnection) {
       await applyOnboardingConnectionConfig(config, explicitConnection);
       applyCanonicalOnboardingConfig(config, {
