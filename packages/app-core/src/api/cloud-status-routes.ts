@@ -2,6 +2,7 @@ import type {
   CloudConfigLike,
   CloudStatusRouteContext,
 } from "@miladyai/agent/api/cloud-status-routes";
+import { isElizaCloudServiceSelectedInConfig } from "@miladyai/shared/contracts";
 import type { ElizaConfig } from "../config/config";
 import {
   CLOUD_BILLING_URL,
@@ -19,11 +20,16 @@ export async function handleCloudStatusRoutes(
 
   if (method === "GET" && pathname === "/api/cloud/status") {
     const snapshot = resolveCloudConnectionSnapshot(typedConfig, runtime);
+    const cloudVoiceProxyAvailable = isElizaCloudServiceSelectedInConfig(
+      typedConfig as Record<string, unknown>,
+      "tts",
+    );
 
     if (snapshot.connected) {
       json(res, {
         connected: true,
         enabled: snapshot.enabled,
+        cloudVoiceProxyAvailable,
         hasApiKey: snapshot.hasApiKey,
         userId: snapshot.userId,
         organizationId: snapshot.organizationId,
@@ -41,6 +47,7 @@ export async function handleCloudStatusRoutes(
       json(res, {
         connected: false,
         enabled: snapshot.enabled,
+        cloudVoiceProxyAvailable,
         hasApiKey: snapshot.hasApiKey,
         reason: "runtime_not_started",
       });
@@ -50,6 +57,7 @@ export async function handleCloudStatusRoutes(
     json(res, {
       connected: false,
       enabled: snapshot.enabled,
+      cloudVoiceProxyAvailable,
       hasApiKey: snapshot.hasApiKey,
       reason: "not_authenticated",
     });

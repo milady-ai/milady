@@ -50,6 +50,7 @@ export interface OnboardingState {
   // Hosting
   runMode: "local" | "cloud" | "";
   cloudProvider: string;
+  cloudApiKey: string;
 
   // Provider
   provider: string;
@@ -131,6 +132,7 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     avatar: 1,
     runMode: cloudOnly ? "cloud" : "",
     cloudProvider: cloudOnly ? "elizacloud" : "",
+    cloudApiKey: "",
     provider: "",
     apiKey: "",
     voiceProvider: "",

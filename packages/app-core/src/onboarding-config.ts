@@ -13,6 +13,7 @@ import type {
 export interface BuildOnboardingConnectionArgs {
   onboardingRunMode: "local" | "cloud" | "";
   onboardingCloudProvider: string;
+  onboardingCloudApiKey: string;
   onboardingProvider: string;
   onboardingApiKey: string;
   onboardingVoiceProvider: string;
@@ -64,7 +65,13 @@ export function buildOnboardingConnectionConfig(
     return {
       kind: "cloud-managed",
       cloudProvider: "elizacloud",
-      apiKey: trimToUndefined(args.onboardingApiKey),
+      apiKey: trimToUndefined(args.onboardingCloudApiKey),
+      ...(trimToUndefined(args.onboardingSmallModel)
+        ? { smallModel: trimToUndefined(args.onboardingSmallModel) }
+        : {}),
+      ...(trimToUndefined(args.onboardingLargeModel)
+        ? { largeModel: trimToUndefined(args.onboardingLargeModel) }
+        : {}),
     };
   }
 
@@ -113,12 +120,8 @@ export function buildOnboardingRuntimeConfig(
 ): BuildOnboardingRuntimeConfigResult {
   const connection = buildOnboardingConnectionConfig(args);
   const linkedAccounts: LinkedAccountsConfig = {};
-  const apiKey = trimToUndefined(args.onboardingApiKey);
-  const cloudSelected =
-    args.onboardingCloudProvider === "elizacloud" ||
-    args.onboardingProvider === "elizacloud";
-
-  if (cloudSelected && apiKey) {
+  const cloudApiKey = trimToUndefined(args.onboardingCloudApiKey);
+  if (cloudApiKey) {
     linkedAccounts.elizacloud = {
       status: "linked",
       source: "api-key",
@@ -173,10 +176,13 @@ export function buildOnboardingRuntimeConfig(
     };
   }
 
-  if (
-    deploymentTarget.runtime === "cloud" &&
-    deploymentTarget.provider === "elizacloud"
-  ) {
+  const cloudContextSelected =
+    (serviceRouting.llmText?.transport === "cloud-proxy" &&
+      serviceRouting.llmText.backend === "elizacloud") ||
+    (deploymentTarget.runtime === "cloud" &&
+      deploymentTarget.provider === "elizacloud");
+
+  if (cloudContextSelected) {
     for (const capability of ["tts", "media", "embeddings", "rpc"] as const) {
       serviceRouting[capability] = {
         backend: "elizacloud",

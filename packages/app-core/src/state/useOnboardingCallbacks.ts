@@ -12,7 +12,7 @@
 
 import { getDefaultStylePreset } from "@miladyai/shared/onboarding-presets";
 import { type RefObject, useCallback } from "react";
-import { MiladyClient } from "../api";
+import { MiladyClient, type VoiceConfig } from "../api";
 import { invokeDesktopBridgeRequest, scanProviderCredentials } from "../bridge";
 import { getBootConfig } from "../config/boot-config";
 import type { UiLanguage } from "../i18n";
@@ -102,28 +102,57 @@ function resolveSelectedOnboardingStyle(args: {
   );
 }
 
-async function persistOnboardingStyleVoice(
-  style: StylePreset | undefined,
-  clientRef: MiladyClient,
-): Promise<void> {
+export function buildOnboardingStyleVoiceConfig(args: {
+  style: StylePreset | undefined;
+  voiceProvider: string;
+  voiceApiKey: string;
+  cloudTtsSelected: boolean;
+}): VoiceConfig | null {
+  const { style, voiceProvider, voiceApiKey, cloudTtsSelected } = args;
   const voicePresetId = style?.voicePresetId?.trim();
   if (!voicePresetId) {
-    return;
+    return null;
   }
   const presetVoice = PREMADE_VOICES.find(
     (voice) => voice.id === voicePresetId,
   );
   if (!presetVoice) {
+    return null;
+  }
+
+  const trimmedVoiceApiKey = voiceApiKey.trim();
+  const mode =
+    voiceProvider === "elevenlabs" && trimmedVoiceApiKey
+      ? "own-key"
+      : cloudTtsSelected
+        ? "cloud"
+        : undefined;
+
+  return {
+    provider: "elevenlabs",
+    ...(mode ? { mode } : {}),
+    elevenlabs: {
+      voiceId: presetVoice.voiceId,
+      ...(mode === "own-key" ? { apiKey: trimmedVoiceApiKey } : {}),
+    },
+  };
+}
+
+async function persistOnboardingStyleVoice(args: {
+  style: StylePreset | undefined;
+  voiceProvider: string;
+  voiceApiKey: string;
+  cloudTtsSelected: boolean;
+  clientRef: MiladyClient;
+}): Promise<void> {
+  const voiceConfig = buildOnboardingStyleVoiceConfig(args);
+  if (!voiceConfig) {
     return;
   }
-  await clientRef.updateConfig({
+
+  await args.clientRef.updateConfig({
     messages: {
-      tts: {
-        provider: "elevenlabs",
-        elevenlabs: {
-          voiceId: presetVoice.voiceId,
-        },
-      },
+      tts: voiceConfig,
     },
   });
 }
@@ -147,6 +176,7 @@ export interface OnboardingCallbacksDeps {
   ) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
+  setOnboardingCloudApiKey: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;
   setOnboardingPrimaryModel: (v: string) => void;
@@ -190,6 +220,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingDetectedProviders,
     setOnboardingRunMode,
     setOnboardingCloudProvider,
+    setOnboardingCloudApiKey,
     setOnboardingProvider,
     setOnboardingApiKey,
     setOnboardingPrimaryModel: _setOnboardingPrimaryModel,
@@ -224,6 +255,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       style: onboardingStyle,
       runMode: onboardingRunMode,
       cloudProvider: onboardingCloudProvider,
+      cloudApiKey: onboardingCloudApiKey,
       provider: onboardingProvider,
       apiKey: onboardingApiKey,
       voiceProvider: onboardingVoiceProvider,
@@ -304,6 +336,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       const runtimeConfig = buildOnboardingRuntimeConfig({
         onboardingRunMode,
         onboardingCloudProvider,
+        onboardingCloudApiKey,
         onboardingProvider,
         onboardingApiKey,
         onboardingVoiceProvider,
@@ -430,7 +463,15 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         walletConfig: nextWalletConfig,
       } as Parameters<typeof client.submitOnboarding>[0]);
       try {
-        await persistOnboardingStyleVoice(style, client);
+        await persistOnboardingStyleVoice({
+          style,
+          voiceProvider: onboardingVoiceProvider,
+          voiceApiKey: onboardingVoiceApiKey,
+          cloudTtsSelected:
+            runtimeConfig.serviceRouting?.tts?.transport === "cloud-proxy" &&
+            runtimeConfig.serviceRouting?.tts?.backend === "elizacloud",
+          clientRef: client,
+        });
       } catch (err) {
         console.warn(
           "[onboarding] Failed to persist selected voice preset",
@@ -458,6 +499,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     onboardingName,
     onboardingRunMode,
     onboardingCloudProvider,
+    onboardingCloudApiKey,
     onboardingSmallModel,
     onboardingLargeModel,
     onboardingProvider,
@@ -509,6 +551,9 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     if (patch.onboardingCloudProvider !== undefined) {
       setOnboardingCloudProvider(patch.onboardingCloudProvider);
     }
+    if (patch.onboardingCloudApiKey !== undefined) {
+      setOnboardingCloudApiKey(patch.onboardingCloudApiKey);
+    }
     if (patch.onboardingProvider !== undefined) {
       setOnboardingProvider(patch.onboardingProvider);
     }
@@ -526,6 +571,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     }
   }, [
     setOnboardingApiKey,
+    setOnboardingCloudApiKey,
     setOnboardingCloudProvider,
     _setOnboardingPrimaryModel,
     setOnboardingProvider,

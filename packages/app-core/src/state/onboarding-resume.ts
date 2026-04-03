@@ -43,6 +43,10 @@ export function inferOnboardingResumeStep(args: {
     return args.persistedStep;
   }
 
+  if (hasPartialOnboardingConnectionConfig(args.config)) {
+    return "hosting";
+  }
+
   return "identity";
 }
 
@@ -64,7 +68,7 @@ export function deriveOnboardingResumeFields(
       return {
         onboardingRunMode: "cloud",
         onboardingCloudProvider: "elizacloud",
-        onboardingApiKey: connection.apiKey ?? "",
+        onboardingCloudApiKey: connection.apiKey ?? "",
         onboardingVoiceProvider: "",
         onboardingVoiceApiKey: "",
         onboardingSmallModel: connection.smallModel ?? "",

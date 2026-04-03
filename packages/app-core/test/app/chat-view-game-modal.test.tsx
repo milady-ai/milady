@@ -33,6 +33,7 @@ interface ChatViewContextStub {
   chatMode: "simple" | "power";
   chatAgentVoiceMuted: boolean;
   elizaCloudEnabled: boolean;
+  elizaCloudVoiceProxyAvailable: boolean;
   elizaCloudConnected: boolean;
   elizaCloudHasPersistedKey: boolean;
   selectedVrmIndex: number;
@@ -115,7 +116,9 @@ function createContext(
     chatMode: "simple",
     chatAgentVoiceMuted: false,
     elizaCloudEnabled: false,
+    elizaCloudVoiceProxyAvailable: false,
     elizaCloudConnected: false,
+    elizaCloudHasPersistedKey: false,
     selectedVrmIndex: 0,
     uiLanguage: "en",
     chatPendingImages: [],
@@ -287,6 +290,26 @@ describe("ChatView game-modal variant", () => {
       "assistant-1",
       "hello",
       false,
+    );
+  });
+
+  it("uses explicit cloud voice routing instead of generic cloud inference state", async () => {
+    mockUseApp.mockReturnValue(
+      createContext({
+        elizaCloudEnabled: false,
+        elizaCloudVoiceProxyAvailable: true,
+        elizaCloudConnected: true,
+      }),
+    );
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(ChatView, { variant: "game-modal" }));
+    });
+
+    expect(mockUseVoiceChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cloudConnected: true,
+      }),
     );
   });
 
@@ -734,7 +757,7 @@ describe("ChatView game-modal variant", () => {
     });
   });
 
-  it("treats an enabled cloud key as voice cloud access even without oauth", async () => {
+  it("does not treat generic cloud inference state as voice cloud access by itself", async () => {
     mockUseApp.mockReturnValue(
       createContext({
         elizaCloudEnabled: true,
@@ -750,7 +773,7 @@ describe("ChatView game-modal variant", () => {
 
     expect(mockUseVoiceChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        cloudConnected: true,
+        cloudConnected: false,
         interruptOnSpeech: true,
       }),
     );

@@ -223,6 +223,7 @@ export interface UseChatCallbacksDeps {
   elizaCloudPreferDisconnectedUntilLoginRef: MutableRefObject<boolean>;
   setElizaCloudEnabled: (v: boolean) => void;
   setElizaCloudConnected: (v: boolean) => void;
+  setElizaCloudVoiceProxyAvailable: (v: boolean) => void;
   setElizaCloudHasPersistedKey: (v: boolean) => void;
   setElizaCloudCredits: (v: number | null) => void;
   setElizaCloudCreditsLow: (v: boolean) => void;
@@ -332,6 +333,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     elizaCloudPreferDisconnectedUntilLoginRef,
     setElizaCloudEnabled,
     setElizaCloudConnected,
+    setElizaCloudVoiceProxyAvailable,
     setElizaCloudHasPersistedKey,
     setElizaCloudCredits,
     setElizaCloudCreditsLow,
@@ -622,6 +624,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     elizaCloudPreferDisconnectedUntilLoginRef,
     setElizaCloudEnabled,
     setElizaCloudConnected,
+    setElizaCloudVoiceProxyAvailable,
     setElizaCloudHasPersistedKey,
     setElizaCloudCredits,
     setElizaCloudCreditsLow,

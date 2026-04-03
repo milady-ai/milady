@@ -156,9 +156,7 @@ export function RpcStep() {
     elizaCloudConnected,
     elizaCloudLoginBusy,
     elizaCloudLoginError,
-    onboardingRunMode,
-    onboardingCloudProvider,
-    onboardingApiKey,
+    onboardingCloudApiKey,
     handleCloudLogin,
     handleOnboardingNext,
     handleOnboardingBack,
@@ -168,10 +166,7 @@ export function RpcStep() {
   } = useApp();
 
   const elizaCloudReady =
-    elizaCloudConnected ||
-    (onboardingRunMode === "cloud" &&
-      onboardingCloudProvider === "elizacloud" &&
-      onboardingApiKey.trim().length > 0);
+    elizaCloudConnected || onboardingCloudApiKey.trim().length > 0;
   const [mode, setMode] = useState<RpcMode>(elizaCloudReady ? "cloud" : "");
 
   const rpcKeys = onboardingRpcKeys as Record<string, string>;

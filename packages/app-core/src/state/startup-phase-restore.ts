@@ -38,6 +38,41 @@ export interface RestoringSessionCtx {
   hadPriorOnboarding: boolean;
 }
 
+const SESSION_STORAGE_API_BASE_KEY = "milady_api_base";
+
+function trimSessionValue(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim().replace(/\/+$/, "");
+  return trimmed ? trimmed : undefined;
+}
+
+export function deriveSessionConnectionMode(args: {
+  sessionApiBase?: string | null;
+  sessionApiToken?: string | null;
+}) {
+  const sessionApiBase = trimSessionValue(args.sessionApiBase);
+  if (!sessionApiBase) {
+    return null;
+  }
+
+  const sessionApiToken = trimSessionValue(args.sessionApiToken);
+  return {
+    runMode: "remote" as const,
+    remoteApiBase: sessionApiBase,
+    ...(sessionApiToken ? { remoteAccessToken: sessionApiToken } : {}),
+  };
+}
+
+function loadSessionConnectionModeOverride() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return deriveSessionConnectionMode({
+    sessionApiBase: window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY),
+    sessionApiToken: client.getRestAuthToken(),
+  });
+}
+
 /**
  * Runs the restoring-session phase.
  * Probes the local Eliza install and/or API to detect an existing connection,
@@ -63,6 +98,7 @@ export async function runRestoringSession(
   const forceLocal = deps.forceLocalBootstrapRef.current;
   deps.forceLocalBootstrapRef.current = false;
   const persisted = loadPersistedConnectionMode();
+  const sessionConnection = !persisted ? loadSessionConnectionModeOverride() : null;
   const hadPrior = loadPersistedOnboardingComplete();
   if (cancelled.current) return;
 
@@ -87,7 +123,7 @@ export async function runRestoringSession(
       : null;
   if (cancelled.current) return;
 
-  const restored = persisted ?? probed?.connection ?? null;
+  const restored = persisted ?? sessionConnection ?? probed?.connection ?? null;
   const preserveCompleted =
     hadPrior && !deps.onboardingCompletionCommittedRef.current;
 

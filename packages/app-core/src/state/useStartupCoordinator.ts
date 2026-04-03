@@ -88,6 +88,7 @@ export interface StartupCoordinatorDeps {
   setOnboardingStep: (v: OnboardingStep) => void;
   setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
   setOnboardingCloudProvider: (v: string) => void;
+  setOnboardingCloudApiKey: (v: string) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingVoiceProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;

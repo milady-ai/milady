@@ -52,6 +52,7 @@ describe("ConnectionElizaCloudPreProviderScreen", () => {
   it("uses the compact success banner layout once Eliza Cloud is connected", () => {
     mockUseApp.mockReturnValue({
       t,
+      onboardingCloudApiKey: "",
       onboardingApiKey: "",
       onboardingElizaCloudTab: "login",
       onboardingRunMode: "local",

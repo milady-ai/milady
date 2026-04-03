@@ -189,6 +189,8 @@ export async function runPollingBackend(
               );
             if (rf.onboardingCloudProvider !== undefined)
               deps.setOnboardingCloudProvider(rf.onboardingCloudProvider);
+            if (rf.onboardingCloudApiKey !== undefined)
+              deps.setOnboardingCloudApiKey(rf.onboardingCloudApiKey);
             if (rf.onboardingProvider !== undefined)
               deps.setOnboardingProvider(rf.onboardingProvider);
             if (rf.onboardingVoiceProvider !== undefined)

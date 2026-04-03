@@ -131,7 +131,7 @@ export function useChatVoiceController(options: {
   chatInput: string;
   chatSending: boolean;
   elizaCloudConnected: boolean;
-  elizaCloudEnabled: boolean;
+  elizaCloudVoiceProxyAvailable: boolean;
   elizaCloudHasPersistedKey: boolean;
   conversationMessages: ConversationMessage[];
   activeConversationId: string | null;
@@ -150,7 +150,7 @@ export function useChatVoiceController(options: {
     chatInput,
     chatSending,
     elizaCloudConnected,
-    elizaCloudEnabled,
+    elizaCloudVoiceProxyAvailable,
     elizaCloudHasPersistedKey,
     conversationMessages,
     activeConversationId,
@@ -350,19 +350,19 @@ export function useChatVoiceController(options: {
   );
 
   const cloudVoiceAvailable = useMemo(() => {
-    const fromContext = elizaCloudEnabled;
+    const fromContext = elizaCloudVoiceProxyAvailable;
     // Ref snapshot can be `false` from an early status poll before the key is
     // loaded, then never updated if no further event fires. Prefer the
     // committed `enabled` state; only use the event snapshot to force `true`
     // when it arrives before the wider app state catches up.
     return fromContext || cloudVoiceSnapshot === true;
-  }, [cloudVoiceSnapshot, elizaCloudEnabled]);
+  }, [cloudVoiceSnapshot, elizaCloudVoiceProxyAvailable]);
 
   useEffect(() => {
     miladyTtsDebug("chat:cloud-voice-available", {
       cloudVoiceAvailable,
       elizaCloudConnected,
-      elizaCloudEnabled,
+      elizaCloudVoiceProxyAvailable,
       elizaCloudHasPersistedKey,
       snapshotValue: cloudVoiceSnapshot,
     });
@@ -370,7 +370,7 @@ export function useChatVoiceController(options: {
     cloudVoiceAvailable,
     cloudVoiceSnapshot,
     elizaCloudConnected,
-    elizaCloudEnabled,
+    elizaCloudVoiceProxyAvailable,
     elizaCloudHasPersistedKey,
   ]);
 

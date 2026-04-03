@@ -45,6 +45,7 @@ function publishElizaCloudVoiceSnapshot(
   snapshot: {
     apiConnected: boolean;
     enabled: boolean;
+    cloudVoiceProxyAvailable: boolean;
     hasPersistedApiKey: boolean;
   },
 ): void {
@@ -53,7 +54,7 @@ function publishElizaCloudVoiceSnapshot(
     connected: snapshot.apiConnected,
     enabled: snapshot.enabled,
     hasPersistedApiKey: snapshot.hasPersistedApiKey,
-    cloudVoiceProxyAvailable: snapshot.enabled,
+    cloudVoiceProxyAvailable: snapshot.cloudVoiceProxyAvailable,
   });
 }
 
@@ -83,6 +84,8 @@ export function useCloudState({
   // ── State ──────────────────────────────────────────────────────────
 
   const [elizaCloudEnabled, setElizaCloudEnabled] = useState(false);
+  const [elizaCloudVoiceProxyAvailable, setElizaCloudVoiceProxyAvailable] =
+    useState(false);
   const [elizaCloudConnected, setElizaCloudConnected] = useState(false);
   const [elizaCloudHasPersistedKey, setElizaCloudHasPersistedKey] =
     useState(false);
@@ -152,8 +155,10 @@ export function useCloudState({
       publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
         apiConnected: false,
         enabled: false,
+        cloudVoiceProxyAvailable: false,
         hasPersistedApiKey: false,
       });
+      setElizaCloudVoiceProxyAvailable(false);
       setElizaCloudCredits(null);
       setElizaCloudCreditsLow(false);
       setElizaCloudCreditsCritical(false);
@@ -164,6 +169,9 @@ export function useCloudState({
       return false;
     }
     const enabled = Boolean(cloudStatus.enabled ?? false);
+    const cloudVoiceProxyAvailable = Boolean(
+      cloudStatus.cloudVoiceProxyAvailable ?? false,
+    );
     const hasPersistedApiKey = Boolean(cloudStatus.hasApiKey);
     // Trust `connected` from the server snapshot (it already folds in API key + CLOUD_AUTH).
     const isConnected = Boolean(cloudStatus.connected);
@@ -171,6 +179,7 @@ export function useCloudState({
       publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
         apiConnected: isConnected,
         enabled,
+        cloudVoiceProxyAvailable,
         hasPersistedApiKey,
       });
       lastElizaCloudPollConnectedRef.current = false;
@@ -180,10 +189,12 @@ export function useCloudState({
       elizaCloudPreferDisconnectedUntilLoginRef.current = false;
     }
     setElizaCloudEnabled(enabled);
+    setElizaCloudVoiceProxyAvailable(cloudVoiceProxyAvailable);
     setElizaCloudConnected(isConnected);
     publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
       apiConnected: isConnected,
       enabled,
+      cloudVoiceProxyAvailable,
       hasPersistedApiKey,
     });
     setElizaCloudUserId(cloudStatus.userId ?? null);
@@ -358,7 +369,6 @@ export function useCloudState({
           if (poll.status === "authenticated") {
             stopCloudLoginPolling();
             setElizaCloudConnected(true);
-            setElizaCloudEnabled(true);
             setElizaCloudLoginError(null);
             if (poll.userId) {
               setElizaCloudUserId(poll.userId);
@@ -557,8 +567,10 @@ export function useCloudState({
       publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
         apiConnected: false,
         enabled: false,
+        cloudVoiceProxyAvailable: false,
         hasPersistedApiKey: false,
       });
+      setElizaCloudVoiceProxyAvailable(false);
       setElizaCloudCredits(null);
       setElizaCloudCreditsLow(false);
       setElizaCloudCreditsCritical(false);
@@ -600,6 +612,8 @@ export function useCloudState({
     // State
     elizaCloudEnabled,
     setElizaCloudEnabled,
+    elizaCloudVoiceProxyAvailable,
+    setElizaCloudVoiceProxyAvailable,
     elizaCloudConnected,
     setElizaCloudConnected,
     elizaCloudHasPersistedKey,

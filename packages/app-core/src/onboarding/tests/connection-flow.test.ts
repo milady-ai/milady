@@ -42,7 +42,7 @@ describe("connection-flow", () => {
     >([
       ["hosting (web)", baseSnap(), "hosting"],
       [
-        "hosting (forceCloud steady treats as local path → grid)",
+        "hosting (cloudOnly steady path → grid)",
         baseSnap({ forceCloud: true, onboardingRunMode: "" }),
         "providerGrid",
       ],
@@ -55,12 +55,12 @@ describe("connection-flow", () => {
         "remoteBackend",
       ],
       [
-        "elizaCloud_preProvider",
+        "providerGrid (cloud-hosted runtime still chooses a provider)",
         baseSnap({
           onboardingRunMode: "cloud",
           onboardingCloudProvider: "elizacloud",
         }),
-        "elizaCloud_preProvider",
+        "providerGrid",
       ],
       [
         "providerGrid (local)",
@@ -94,17 +94,20 @@ describe("connection-flow", () => {
       expect(deriveConnectionScreen(snap)).toBe(expected);
     });
 
-    it("wizard reset patch lands on hosting after Eliza Cloud pre-provider path", () => {
+    it("wizard reset patch lands on hosting after a cloud-hosted selection", () => {
       const stuck = baseSnap({
         onboardingRunMode: "cloud",
         onboardingCloudProvider: "elizacloud",
       });
-      expect(deriveConnectionScreen(stuck)).toBe("elizaCloud_preProvider");
+      expect(deriveConnectionScreen(stuck)).toBe("providerGrid");
       const after = mergeConnectionSnapshot(
         stuck,
         getResetConnectionWizardToHostingStepPatch(),
       );
       expect(deriveConnectionScreen(after)).toBe("hosting");
+      expect(getResetConnectionWizardToHostingStepPatch()).not.toHaveProperty(
+        "onboardingCloudApiKey",
+      );
     });
   });
 
@@ -130,11 +133,7 @@ describe("connection-flow", () => {
       }
     });
 
-    it("hides hosting local card when native or cloudOnly", () => {
-      expect(
-        resolveConnectionUiSpec(baseSnap({ isNative: true }))
-          .showHostingLocalCard,
-      ).toBe(false);
+    it("hides hosting local card only for cloudOnly builds", () => {
       expect(
         resolveConnectionUiSpec(baseSnap({ cloudOnly: true }))
           .showHostingLocalCard,
@@ -146,7 +145,7 @@ describe("connection-flow", () => {
   });
 
   describe("helpers", () => {
-    it("getEffectiveRunMode maps forceCloud + empty run to local", () => {
+    it("getEffectiveRunMode maps cloudOnly + empty run to local", () => {
       expect(
         getEffectiveRunMode(
           baseSnap({ forceCloud: true, onboardingRunMode: "" }),
@@ -164,6 +163,14 @@ describe("connection-flow", () => {
       expect(
         computeShowProviderSelection(
           baseSnap({ forceCloud: true, onboardingRunMode: "" }),
+        ),
+      ).toBe(true);
+      expect(
+        computeShowProviderSelection(
+          baseSnap({
+            onboardingRunMode: "cloud",
+            onboardingCloudProvider: "elizacloud",
+          }),
         ),
       ).toBe(true);
       expect(
@@ -249,6 +256,23 @@ describe("connection-flow", () => {
       expect(r.patch.onboardingSubscriptionTab).toBe("token");
       const s1 = mergeConnectionSnapshot(s0, r.patch);
       expect(deriveConnectionScreen(s1)).toBe("providerDetail");
+    });
+
+    it("selecting Eliza Cloud keeps its key in the dedicated cloud field", () => {
+      const s0 = baseSnap({
+        onboardingRunMode: "local",
+        onboardingDetectedProviders: [
+          { id: "elizacloud", apiKey: "ck-test" },
+        ] as ConnectionFlowSnapshot["onboardingDetectedProviders"],
+      });
+      const r = applyConnectionTransition(s0, {
+        type: "selectProvider",
+        providerId: "elizacloud",
+      });
+      expect(r?.kind).toBe("patch");
+      if (r?.kind !== "patch") return;
+      expect(r.patch.onboardingCloudApiKey).toBe("ck-test");
+      expect(r.patch.onboardingApiKey).toBe("");
     });
 
     it("setElizaCloudTab keeps screen", () => {

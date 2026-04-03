@@ -400,11 +400,10 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
     setSelectedProviderId("__cloud__");
     try {
       await client.switchProvider("elizacloud");
-      setState("elizaCloudEnabled", true);
     } catch (err) {
       console.warn("[eliza] Failed to select cloud provider", err);
     }
-  }, [setState]);
+  }, []);
 
   const handlePiAiSave = useCallback(async () => {
     setPiAiSaving(true);

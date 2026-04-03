@@ -76,6 +76,18 @@ describe("inferOnboardingResumeStep", () => {
       }),
     ).toBe("providers");
   });
+
+  it("resumes at hosting when partial routing config already exists", () => {
+    expect(
+      inferOnboardingResumeStep({
+        config: {
+          linkedAccounts: {
+            elizacloud: { status: "linked", source: "api-key" },
+          },
+        },
+      }),
+    ).toBe("hosting");
+  });
 });
 
 describe("deriveOnboardingResumeConnection", () => {
@@ -183,6 +195,32 @@ describe("deriveOnboardingResumeConnection", () => {
 });
 
 describe("deriveOnboardingResumeFields", () => {
+  it("maps a cloud-managed connection back into the dedicated cloud api key field", () => {
+    expect(
+      deriveOnboardingResumeFields({
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+        apiKey: "ck-cloud-test",
+        smallModel: "openai/gpt-5-mini",
+        largeModel: "anthropic/claude-sonnet-4.5",
+      }),
+    ).toEqual({
+      onboardingRunMode: "cloud",
+      onboardingCloudProvider: "elizacloud",
+      onboardingCloudApiKey: "ck-cloud-test",
+      onboardingVoiceProvider: "",
+      onboardingVoiceApiKey: "",
+      onboardingSmallModel: "openai/gpt-5-mini",
+      onboardingLargeModel: "anthropic/claude-sonnet-4.5",
+      onboardingRemoteConnected: false,
+      onboardingRemoteApiBase: "",
+      onboardingRemoteToken: "",
+      onboardingProvider: "",
+      onboardingPrimaryModel: "",
+      onboardingOpenRouterModel: "",
+    });
+  });
+
   it("maps an openrouter connection back into onboarding state", () => {
     expect(
       deriveOnboardingResumeFields({

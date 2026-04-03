@@ -43,6 +43,9 @@ export function useOnboardingCompat({
       setOnboardingCloudProvider: bindField("cloudProvider") as (
         value: string,
       ) => void,
+      setOnboardingCloudApiKey: bindField("cloudApiKey") as (
+        value: string,
+      ) => void,
       setOnboardingSmallModel: bindField("smallModel") as (
         value: string,
       ) => void,

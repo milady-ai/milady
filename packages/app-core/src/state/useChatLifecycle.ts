@@ -54,19 +54,22 @@ function logResetWarn(message: string, detail?: unknown): void {
 
 /** Publish server cloud snapshot for chat TTS (`useVoiceChat` + `loadVoiceConfig`). */
 function publishElizaCloudVoiceSnapshot(
+  setCloudVoiceProxyAvailable: (value: boolean) => void,
   setHasPersistedKey: (value: boolean) => void,
   snapshot: {
     apiConnected: boolean;
     enabled: boolean;
+    cloudVoiceProxyAvailable: boolean;
     hasPersistedApiKey: boolean;
   },
 ): void {
+  setCloudVoiceProxyAvailable(snapshot.cloudVoiceProxyAvailable);
   setHasPersistedKey(snapshot.hasPersistedApiKey);
   dispatchElizaCloudStatusUpdated({
     connected: snapshot.apiConnected,
     enabled: snapshot.enabled,
     hasPersistedApiKey: snapshot.hasPersistedApiKey,
-    cloudVoiceProxyAvailable: snapshot.enabled,
+    cloudVoiceProxyAvailable: snapshot.cloudVoiceProxyAvailable,
   });
 }
 
@@ -129,6 +132,7 @@ export interface UseChatLifecycleDeps {
   elizaCloudPreferDisconnectedUntilLoginRef: MutableRefObject<boolean>;
   setElizaCloudEnabled: (v: boolean) => void;
   setElizaCloudConnected: (v: boolean) => void;
+  setElizaCloudVoiceProxyAvailable: (v: boolean) => void;
   setElizaCloudHasPersistedKey: (v: boolean) => void;
   setElizaCloudCredits: (v: number | null) => void;
   setElizaCloudCreditsLow: (v: boolean) => void;
@@ -210,6 +214,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
     elizaCloudPreferDisconnectedUntilLoginRef,
     setElizaCloudEnabled,
     setElizaCloudConnected,
+    setElizaCloudVoiceProxyAvailable,
     setElizaCloudHasPersistedKey,
     setElizaCloudCredits,
     setElizaCloudCreditsLow,
@@ -543,11 +548,16 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
           elizaCloudPreferDisconnectedUntilLoginRef.current = false;
           setElizaCloudEnabled(false);
           setElizaCloudConnected(false);
-          publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
-            apiConnected: false,
-            enabled: false,
-            hasPersistedApiKey: false,
-          });
+          publishElizaCloudVoiceSnapshot(
+            setElizaCloudVoiceProxyAvailable,
+            setElizaCloudHasPersistedKey,
+            {
+              apiConnected: false,
+              enabled: false,
+              cloudVoiceProxyAvailable: false,
+              hasPersistedApiKey: false,
+            },
+          );
           setElizaCloudCredits(null);
           setElizaCloudCreditsLow(false);
           setElizaCloudCreditsCritical(false);
@@ -621,6 +631,8 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
       setOnboardingCloudProvider,
       setOnboardingProvider,
       setOnboardingApiKey,
+      setOnboardingVoiceProvider,
+      setOnboardingVoiceApiKey,
       setOnboardingPrimaryModel,
       setOnboardingOpenRouterModel,
       setOnboardingRemoteConnected,
@@ -632,10 +644,29 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
       setConversationMessages,
       setActiveConversationId,
       setConversations,
+      setPlugins,
+      setSkills,
+      setLogs,
       activeConversationIdRef,
       onboardingCompletionCommittedRef,
       onboardingResumeConnectionRef,
+      elizaCloudPreferDisconnectedUntilLoginRef,
+      setElizaCloudEnabled,
+      setElizaCloudConnected,
+      setElizaCloudVoiceProxyAvailable,
+      setElizaCloudHasPersistedKey,
+      setElizaCloudCredits,
+      setElizaCloudCreditsLow,
+      setElizaCloudCreditsCritical,
+      setElizaCloudAuthRejected,
+      setElizaCloudCreditsError,
+      setElizaCloudTopUpUrl,
+      setElizaCloudUserId,
+      setElizaCloudStatusReason,
+      setElizaCloudLoginError,
       setSelectedVrmIndex,
+      setCustomVrmUrl,
+      setCustomBackgroundUrl,
     ],
   );
 

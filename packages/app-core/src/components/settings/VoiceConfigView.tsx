@@ -672,7 +672,7 @@ function WakeWordSection({
 export function VoiceConfigView() {
   const { setTimeout } = useTimeout();
 
-  const { t, elizaCloudConnected, elizaCloudEnabled } = useApp();
+  const { t, elizaCloudConnected, elizaCloudVoiceProxyAvailable } = useApp();
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({});
   const [swabbleServerConfig, setSwabbleServerConfig] =
     useState<Partial<SwabbleConfig> | null>(null);
@@ -719,7 +719,7 @@ export function VoiceConfigView() {
   }, []);
 
   const currentProvider = voiceConfig.provider ?? "elevenlabs";
-  const cloudVoiceAvailable = elizaCloudConnected || elizaCloudEnabled;
+  const cloudVoiceAvailable = elizaCloudVoiceProxyAvailable;
   const hasElevenLabsApiKey = hasConfiguredApiKey(
     voiceConfig.elevenlabs?.apiKey,
   );
@@ -907,7 +907,7 @@ export function VoiceConfigView() {
           </div>
           {currentMode === "cloud" && (
             <CloudConnectionStatus
-              connected={cloudVoiceAvailable}
+              connected={elizaCloudConnected}
               disconnectedText={t("elizaclouddashboard.ElizaCloudNotConnected")}
             />
           )}

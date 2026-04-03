@@ -3,7 +3,7 @@
  *
  * Why this file stays thin: `connection-flow.ts` cannot call `setState` or `useApp`. This component builds a
  * {@link ConnectionFlowSnapshot}, runs `applyConnectionTransition`, applies patches, and mounts `ConnectionUiRoot`.
- * Why `useEffect` for `forceCloudBootstrap`: same patch as tests — one implementation for native/cloud-only auto-advance.
+ * Why `useEffect` for `forceCloudBootstrap`: same patch as tests — one implementation for cloud-only auto-advance.
  *
  * @see ../../onboarding/connection-flow.ts
  * @see ./connection/README.md
@@ -128,6 +128,9 @@ function applyOnboardingPatch(
   if (patch.onboardingCloudProvider !== undefined) {
     setState("onboardingCloudProvider", patch.onboardingCloudProvider);
   }
+  if (patch.onboardingCloudApiKey !== undefined) {
+    setState("onboardingCloudApiKey", patch.onboardingCloudApiKey);
+  }
   if (patch.onboardingProvider !== undefined) {
     setState("onboardingProvider", patch.onboardingProvider);
   }
@@ -169,7 +172,7 @@ export function ConnectionStep() {
 
   const branding = useBranding();
   const cloudOnly = Boolean(branding.cloudOnly);
-  const forceCloud = isNative || cloudOnly;
+  const forceCloud = cloudOnly;
 
   const catalogProviders: ProviderOption[] = (
     onboardingOptions?.providers as ProviderOption[] | undefined
