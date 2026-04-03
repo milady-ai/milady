@@ -195,9 +195,9 @@ index 1234567..89abcde 100644
         "docs/archive/2026-04-02-pre-startup-doc-reset/plugins/create-a-plugin.md",
       ),
     ).toBe(false);
-    expect(shouldScanFileForBlockedPatterns("docs/guides/contributing.md")).toBe(
-      true,
-    );
+    expect(
+      shouldScanFileForBlockedPatterns("docs/guides/contributing.md"),
+    ).toBe(true);
   });
 
   it("approves when branch has no changed files compared to base", () => {
