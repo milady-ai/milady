@@ -9,14 +9,14 @@ describe("resolveApiUrl (sessionStorage, jsdom)", () => {
     window.sessionStorage.removeItem("milady_api_base");
   });
 
-  it("prefers sessionStorage milady_api_base over boot when both are set", () => {
+  it("prefers boot apiBase over stale sessionStorage state", () => {
     window.sessionStorage.setItem(
       "milady_api_base",
       "http://127.0.0.1:31337",
     );
     setBootConfig({ branding: {}, apiBase: "http://localhost:2138" });
     expect(resolveApiUrl("/api/tts/cloud")).toBe(
-      "http://127.0.0.1:31337/api/tts/cloud",
+      "http://localhost:2138/api/tts/cloud",
     );
   });
 

@@ -26,8 +26,11 @@ import {
 } from "../onboarding/flow";
 import { buildOnboardingRuntimeConfig } from "../onboarding-config";
 import {
+  clearPersistedConnectionMode,
   clearPersistedOnboardingStep,
+  connectionModeToActiveServer,
   type OnboardingNextOptions,
+  savePersistedActiveServer,
   savePersistedConnectionMode,
 } from "./internal";
 import type { OnboardingStateHook } from "./useOnboardingState";
@@ -701,6 +704,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
 
   const handleOnboardingUseLocalBackend = useCallback(() => {
     forceLocalBootstrapRef.current = true;
+    clearPersistedConnectionMode();
     client.setBaseUrl(null);
     client.setToken(null);
     setOnboardingRemoteConnecting(false);
@@ -728,6 +732,7 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingRemoteToken,
     setOnboardingRunMode,
     client,
+    clearPersistedConnectionMode,
   ]);
 
   // ── handleOnboardingRemoteConnect ────────────────────────────────
@@ -754,8 +759,13 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         throw new Error("This backend requires an access key.");
       }
       await probe.getOnboardingStatus();
-      client.setBaseUrl(normalizedBase);
-      client.setToken(accessKey || null);
+      savePersistedActiveServer(
+        connectionModeToActiveServer({
+          runMode: "remote",
+          remoteApiBase: normalizedBase,
+          ...(accessKey ? { remoteAccessToken: accessKey } : {}),
+        }),
+      );
       setOnboardingRunMode("cloud");
       setOnboardingCloudProvider("remote");
       setOnboardingRemoteApiBase(normalizedBase);
@@ -787,7 +797,8 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     setOnboardingRemoteError,
     setOnboardingRemoteToken,
     setOnboardingRunMode,
-    client,
+    savePersistedActiveServer,
+    connectionModeToActiveServer,
   ]);
 
   // ── handleCloudOnboardingFinish ──────────────────────────────────

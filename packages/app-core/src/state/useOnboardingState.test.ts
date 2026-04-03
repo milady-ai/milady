@@ -41,4 +41,23 @@ describe("useOnboardingState", () => {
       "review-logs",
     ]);
   });
+
+  it("hydrates the remote onboarding fields from the active server record", () => {
+    window.localStorage.setItem(
+      "milady:active-server",
+      JSON.stringify({
+        id: "remote:https://ren.example.com",
+        kind: "remote",
+        label: "ren.example.com",
+        apiBase: "https://ren.example.com",
+        accessToken: "token-123",
+      }),
+    );
+
+    const { result } = renderHook(() => useOnboardingState());
+
+    expect(result.current.state.remote.status).toBe("connected");
+    expect(result.current.state.remoteApiBase).toBe("https://ren.example.com");
+    expect(result.current.state.remoteToken).toBe("token-123");
+  });
 });

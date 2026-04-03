@@ -8,7 +8,11 @@
 
 import { useCallback, useReducer, useRef } from "react";
 import type { OnboardingOptions } from "../api";
-import { loadPersistedOnboardingStep, saveOnboardingStep } from "./persistence";
+import {
+  loadPersistedActiveServer,
+  loadPersistedOnboardingStep,
+  saveOnboardingStep,
+} from "./persistence";
 import type { AppState, OnboardingStep } from "./types";
 
 // ── Connector token keys ───────────────────────────────────────────────
@@ -85,11 +89,6 @@ export interface OnboardingState {
   restarting: boolean;
 }
 
-function loadSessionApiBase(): string {
-  if (typeof window === "undefined") return "";
-  return window.sessionStorage.getItem("milady_api_base")?.trim() ?? "";
-}
-
 function isRemoteApiBase(baseUrl: string): boolean {
   if (!baseUrl || typeof window === "undefined") return false;
   try {
@@ -117,8 +116,30 @@ const EMPTY_TOKENS: Record<ConnectorTokenKey, string> = {
   githubToken: "",
 };
 
+function loadInitialRemoteSelection(): {
+  apiBase: string;
+  accessToken: string;
+  connected: boolean;
+} {
+  const activeServer = loadPersistedActiveServer();
+  if (activeServer?.kind !== "remote") {
+    return {
+      apiBase: "",
+      accessToken: "",
+      connected: false,
+    };
+  }
+
+  const apiBase = activeServer.apiBase?.trim() ?? "";
+  return {
+    apiBase,
+    accessToken: activeServer.accessToken?.trim() ?? "",
+    connected: isRemoteApiBase(apiBase),
+  };
+}
+
 function createInitialState(cloudOnly?: boolean): OnboardingState {
-  const savedApiBase = loadSessionApiBase();
+  const initialRemote = loadInitialRemoteSelection();
   return {
     step: loadPersistedOnboardingStep() ?? "identity",
     mode: "basic",
@@ -145,11 +166,11 @@ function createInitialState(cloudOnly?: boolean): OnboardingState {
     detectedProviders: [],
     connectorTokens: { ...EMPTY_TOKENS },
     remote: {
-      status: isRemoteApiBase(savedApiBase) ? "connected" : "idle",
+      status: initialRemote.connected ? "connected" : "idle",
       error: null,
     },
-    remoteApiBase: savedApiBase,
-    remoteToken: "",
+    remoteApiBase: initialRemote.apiBase,
+    remoteToken: initialRemote.accessToken,
     subscriptionTab: "token",
     elizaCloudTab: "login",
     selectedChains: new Set(["evm", "solana"]),
