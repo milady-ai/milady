@@ -677,7 +677,9 @@ function normalizePersistedActiveServer(
 
   const parsed = value as Record<string, unknown>;
   const kind =
-    parsed.kind === "local" || parsed.kind === "cloud" || parsed.kind === "remote"
+    parsed.kind === "local" ||
+    parsed.kind === "cloud" ||
+    parsed.kind === "remote"
       ? parsed.kind
       : null;
   const id = trimPersistedValue(parsed.id);

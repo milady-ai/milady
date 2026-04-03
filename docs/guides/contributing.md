@@ -12,3 +12,5 @@ During the current reset, good contributions should:
 - add tests for user-visible flow changes
 
 Use [`CONTRIBUTING.md`](/Users/home/.codex/worktrees/07ca/milady/CONTRIBUTING.md) for repo-wide policy and this docs site for the current product model.
+
+The monorepo enforces a 25% for lines, functions, and statements, and 15% for branches coverage floor from `scripts/coverage-policy.mjs`.

@@ -35,8 +35,6 @@ describe("gateway-discovery", () => {
     });
 
     expect(getPreferredGatewayHost(gateway)).toBe("ren.tailnet");
-    expect(gatewayEndpointToApiBase(gateway)).toBe(
-      "https://ren.tailnet:443",
-    );
+    expect(gatewayEndpointToApiBase(gateway)).toBe("https://ren.tailnet:443");
   });
 });

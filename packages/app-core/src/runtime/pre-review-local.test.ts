@@ -10,6 +10,7 @@ import {
   resolveRunnableTestFiles,
   runChecks,
   scanDiffTextForBlockedPatterns,
+  shouldScanFileForBlockedPatterns,
   scopeVerdictFor,
   splitRunnableTestFiles,
 } from "../../../../scripts/pre-review-local.mjs";
@@ -182,6 +183,20 @@ index 1234567..89abcde 100644
     const issues = scanDiffTextForBlockedPatterns(diff);
     expect(issues.some((issue) => issue.includes("secret-like string"))).toBe(
       false,
+    );
+  });
+
+  it("skips blocked-pattern scanning for archived docs snapshots", () => {
+    expect(shouldScanFileForBlockedPatterns("docs/archive/old-guide.md")).toBe(
+      false,
+    );
+    expect(
+      shouldScanFileForBlockedPatterns(
+        "docs/archive/2026-04-02-pre-startup-doc-reset/plugins/create-a-plugin.md",
+      ),
+    ).toBe(false);
+    expect(shouldScanFileForBlockedPatterns("docs/guides/contributing.md")).toBe(
+      true,
     );
   });
 

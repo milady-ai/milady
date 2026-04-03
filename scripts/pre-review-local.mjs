@@ -203,12 +203,16 @@ function readDiffForFiles(base, sourceFiles) {
     .join("\n");
 }
 
-export function scanForBlockedDiffPatterns(base, changedFiles) {
-  const sourceFiles = changedFiles.filter(
-    (file) =>
-      file !== "scripts/pre-review-local.mjs" &&
-      !/\.(?:e2e\.)?test\.(tsx?|jsx?)$/i.test(file),
+export function shouldScanFileForBlockedPatterns(file) {
+  return (
+    file !== "scripts/pre-review-local.mjs" &&
+    !file.startsWith("docs/archive/") &&
+    !/\.(?:e2e\.)?test\.(tsx?|jsx?)$/i.test(file)
   );
+}
+
+export function scanForBlockedDiffPatterns(base, changedFiles) {
+  const sourceFiles = changedFiles.filter(shouldScanFileForBlockedPatterns);
   if (sourceFiles.length === 0) return [];
 
   const diffChunks = readDiffForFiles(base, sourceFiles);

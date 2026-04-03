@@ -12,3 +12,5 @@ Priorities for contributions in this phase:
 - update docs and tests in the same patch whenever the flow changes
 
 When touching docs, keep the consumer story in `apps/web` and the developer/reference story in Mintlify aligned.
+
+The monorepo coverage floor remains 25% for lines, functions, and statements, and 15% for branches, as defined in `scripts/coverage-policy.mjs`.
