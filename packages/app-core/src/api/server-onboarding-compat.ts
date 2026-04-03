@@ -127,56 +127,71 @@ export async function extractAndPersistOnboardingApiKey(
     deploymentTarget: explicitDeploymentTarget,
     serviceRouting: explicitServiceRouting,
   });
-  let llmConnection = initialPlan.llmConnection;
-  if (!llmConnection && !initialPlan.cloudApiKey) {
+  let effectiveCredentialInputs = credentialInputs;
+  let effectiveServiceRouting = explicitServiceRouting;
+  let llmSelection = initialPlan.llmSelection;
+
+  if (!llmSelection && !initialPlan.cloudApiKey) {
     logger.warn(
       "[onboarding] No onboarding credentials resolved from request body",
     );
     return null;
   }
   logger.info(
-    `[onboarding] Resolved connection: kind=${llmConnection?.kind ?? "none"}, provider=${llmConnection && "provider" in llmConnection ? llmConnection.provider : "N/A"}, hasKey=${Boolean(llmConnection && "apiKey" in llmConnection && llmConnection.apiKey)}, hasCloudKey=${Boolean(initialPlan.cloudApiKey)}`,
+    `[onboarding] Resolved selection: transport=${llmSelection?.transport ?? "none"}, provider=${llmSelection?.backend ?? "N/A"}, hasKey=${Boolean(llmSelection?.apiKey)}, hasCloudKey=${Boolean(initialPlan.cloudApiKey)}`,
   );
 
   // If the key is masked (from IPC) or missing, try to resolve the real
   // key from local credential stores (files, keychain, env).
   if (
-    llmConnection?.kind === "local-provider" &&
-    (!llmConnection.apiKey || llmConnection.apiKey.startsWith("****"))
+    llmSelection?.transport === "direct" &&
+    llmSelection.backend !== "elizacloud" &&
+    (!llmSelection.apiKey || llmSelection.apiKey.startsWith("****"))
   ) {
-    const resolved = resolveProviderCredential(llmConnection.provider);
+    const resolved = resolveProviderCredential(llmSelection.backend);
     if (resolved && resolved.authType === "subscription") {
-      // OAuth tokens (e.g. Claude Code) go through the subscription auth
-      // flow — they can't be used as direct API keys. Rewrite the
-      // connection to use the subscription path.
-      (llmConnection as unknown as Record<string, unknown>).kind =
-        "local-provider";
-      (llmConnection as unknown as Record<string, unknown>).provider =
-        "anthropic-subscription";
-      (llmConnection as unknown as Record<string, unknown>).apiKey =
-        resolved.apiKey;
+      effectiveCredentialInputs = {
+        ...(effectiveCredentialInputs ?? {}),
+        llmApiKey: resolved.apiKey,
+      };
+      effectiveServiceRouting = normalizeServiceRoutingConfig({
+        ...(effectiveServiceRouting ?? {}),
+        llmText: {
+          ...(effectiveServiceRouting?.llmText ?? {}),
+          backend: resolved.providerId,
+          transport: "direct",
+        },
+      });
       logger.info(
         `[onboarding] Using subscription auth for ${resolved.providerId}`,
       );
     } else if (resolved) {
-      (llmConnection as unknown as Record<string, unknown>).apiKey =
-        resolved.apiKey;
+      effectiveCredentialInputs = {
+        ...(effectiveCredentialInputs ?? {}),
+        llmApiKey: resolved.apiKey,
+      };
       logger.info(
-        `[onboarding] Resolved real key for ${llmConnection.provider} via credential-resolver`,
+        `[onboarding] Resolved real key for ${llmSelection.backend} via credential-resolver`,
       );
-    } else if (!llmConnection.apiKey) {
+    } else if (!llmSelection.apiKey) {
       logger.warn(
-        `[onboarding] No key found for ${llmConnection.provider} — cannot persist`,
+        `[onboarding] No key found for ${llmSelection.backend} — cannot persist`,
       );
       return null;
     }
+
+    llmSelection = deriveOnboardingCredentialPersistencePlan({
+      credentialInputs: effectiveCredentialInputs,
+      deploymentTarget: explicitDeploymentTarget,
+      serviceRouting: effectiveServiceRouting,
+    }).llmSelection;
   }
 
   const config = loadElizaConfig();
   const result = await applyOnboardingCredentialPersistence(config, {
-    credentialInputs,
+    credentialInputs: effectiveCredentialInputs,
     deploymentTarget: explicitDeploymentTarget,
-    serviceRouting: explicitServiceRouting,
+    serviceRouting: effectiveServiceRouting,
   });
   saveElizaConfig(config);
 

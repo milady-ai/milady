@@ -443,6 +443,64 @@ function applyDefaultModelNames(
   }
 }
 
+function toOnboardingConnectionFromSelection(
+  selection: OnboardingLlmPersistenceSelection,
+): OnboardingConnection | null {
+  if (selection.transport === "cloud-proxy") {
+    return {
+      kind: "cloud-managed",
+      cloudProvider: "elizacloud",
+      ...(trimToUndefined(selection.apiKey)
+        ? { apiKey: trimToUndefined(selection.apiKey) }
+        : {}),
+      ...(trimToUndefined(selection.smallModel)
+        ? { smallModel: trimToUndefined(selection.smallModel) }
+        : {}),
+      ...(trimToUndefined(selection.largeModel)
+        ? { largeModel: trimToUndefined(selection.largeModel) }
+        : {}),
+    };
+  }
+
+  const normalizedProvider = normalizeOnboardingProviderId(selection.backend);
+  if (!normalizedProvider || normalizedProvider === "elizacloud") {
+    return null;
+  }
+
+  if (selection.transport === "remote") {
+    const remoteApiBase = trimToUndefined(selection.remoteApiBase);
+    if (!remoteApiBase) {
+      return null;
+    }
+
+    return {
+      kind: "remote-provider",
+      remoteApiBase,
+      provider: normalizedProvider,
+      ...(trimToUndefined(selection.remoteAccessToken)
+        ? { remoteAccessToken: trimToUndefined(selection.remoteAccessToken) }
+        : {}),
+      ...(trimToUndefined(selection.apiKey)
+        ? { apiKey: trimToUndefined(selection.apiKey) }
+        : {}),
+      ...(trimToUndefined(selection.primaryModel)
+        ? { primaryModel: trimToUndefined(selection.primaryModel) }
+        : {}),
+    };
+  }
+
+  return {
+    kind: "local-provider",
+    provider: normalizedProvider as OnboardingLocalProviderId,
+    ...(trimToUndefined(selection.apiKey)
+      ? { apiKey: trimToUndefined(selection.apiKey) }
+      : {}),
+    ...(trimToUndefined(selection.primaryModel)
+      ? { primaryModel: trimToUndefined(selection.primaryModel) }
+      : {}),
+  };
+}
+
 /**
  * Apply subscription provider configuration to the config object.
  *
@@ -689,7 +747,15 @@ export async function applyOnboardingConnectionConfig(
     return;
   }
 
-  await applyLocalProviderCapabilities(config, normalizedConnection);
+  await applyLocalProviderCapabilities(config, {
+    backend: normalizedConnection.provider,
+    ...(normalizedConnection.apiKey
+      ? { apiKey: normalizedConnection.apiKey }
+      : {}),
+    ...(normalizedConnection.primaryModel
+      ? { primaryModel: normalizedConnection.primaryModel }
+      : {}),
+  });
   const linkedAccounts: LinkedAccountsConfig | undefined =
     normalizedConnection.provider === "anthropic-subscription" ||
     normalizedConnection.provider === "openai-subscription"
@@ -737,8 +803,11 @@ export async function applyOnboardingCredentialPersistence(
     serviceRouting: args.serviceRouting,
   });
 
-  if (plan.llmConnection) {
-    await applyOnboardingConnectionConfig(config, plan.llmConnection);
+  if (plan.llmSelection) {
+    const llmConnection = toOnboardingConnectionFromSelection(plan.llmSelection);
+    if (llmConnection) {
+      await applyOnboardingConnectionConfig(config, llmConnection);
+    }
   }
 
   if (plan.cloudApiKey) {
@@ -747,9 +816,14 @@ export async function applyOnboardingCredentialPersistence(
 
   migrateLegacyRuntimeConfig(config as Record<string, unknown>);
 
-  if (!isLocalProviderConnection(plan.llmConnection)) {
+  if (plan.llmSelection?.transport !== "direct") {
     return null;
   }
 
-  return getOnboardingProviderOption(plan.llmConnection.provider)?.envKey ?? null;
+  const provider = normalizeOnboardingProviderId(plan.llmSelection.backend);
+  if (!provider || provider === "elizacloud") {
+    return null;
+  }
+
+  return getOnboardingProviderOption(provider)?.envKey ?? null;
 }
