@@ -88,23 +88,9 @@ RUN set -eux; \
   if [ -n "${VERSION_CLEAN}" ]; then \
     node -e "const fs=require('fs'); const v=process.argv[1]; const p='/runtime/node_modules/@miladyai/agent/package.json'; try { const pkg=JSON.parse(fs.readFileSync(p,'utf8')); pkg.version=v; fs.writeFileSync(p, JSON.stringify(pkg, null, 2)); console.log('Patched autonomous to', v); } catch (err) { console.log('skip:', err.message); }" "${VERSION_CLEAN}"; \
   fi; \
-  # ---------- Prune heavy packages not needed for headless cloud agents ----------
-  # Remove from .bun store (where bun keeps actual package files)
-  cd /runtime/node_modules/.bun && rm -rf \
-    onnxruntime-node@* onnxruntime-web@* \
-    @node-llama-cpp+linux-x64-cuda*@* @node-llama-cpp+linux-arm*@* \
-    koffi@* node-pty@* \
-    @biomejs+*@* \
-    three@* @babylonjs+*@* \
-    @swc+*@* \
-    @napi-rs+canvas*@* \
-    puppeteer*@* \
-    mediapipe@* \
-    @mediapipe+*@* \
-    playwright@* playwright-core@* \
-    2>/dev/null || true; \
-  cd /runtime; \
-  # Remove top-level symlinks/dirs for packages we don't need
+  # ---------- Safe cleanup only (no .bun store pruning — transitive deps break) ----------
+  # Only remove top-level symlinks for packages that are confirmed unused AND
+  # don't have hidden transitive dependents. Keep .bun store fully intact.
   rm -rf \
     node_modules/@storybook \
     node_modules/storybook \
@@ -113,23 +99,15 @@ RUN set -eux; \
     node_modules/playwright \
     node_modules/playwright-core \
     node_modules/@playwright \
-    node_modules/@biomejs \
     node_modules/@elizaos/plugin-agent-orchestrator \
     node_modules/coding-agent-adapters \
     node_modules/pty-console \
     node_modules/pty-state-capture \
     node_modules/pty-manager \
     node_modules/git-workspace-service \
-    node_modules/vite \
-    node_modules/vite-node \
-    node_modules/tsup \
-    node_modules/@typescript-eslint \
-    node_modules/prettier \
-    node_modules/typescript \
-    node_modules/@types \
     node_modules/.vite \
     2>/dev/null || true; \
-  # Clean up source maps and test dirs
+  # Clean up source maps and test dirs (safe, no runtime impact)
   find /runtime/node_modules -name '*.map' -delete 2>/dev/null; \
   find /runtime/node_modules -type d -name '__tests__' -prune -exec rm -rf {} + 2>/dev/null; \
   find /runtime/node_modules -type d -name 'test' -prune -exec rm -rf {} + 2>/dev/null
