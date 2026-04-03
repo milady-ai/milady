@@ -8,6 +8,7 @@ import { expect, test } from "@playwright/test";
 
 import { type MockApiServer, startMockApiServer } from "./mock-api";
 import { hasPackagedRendererBootstrapRequests } from "./windows-bootstrap";
+import { createPackagedWindowsAppEnv } from "./windows-test-env";
 
 const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -210,14 +211,12 @@ test("packaged Windows app bootstraps the renderer against the external API over
 
     appProcess = spawn(executablePath, [], {
       cwd: path.dirname(executablePath),
-      env: {
-        ...process.env,
-        MILADY_DESKTOP_TEST_API_BASE: api.baseUrl,
-        // Redirect both Windows profile roots so the packaged shell does not
-        // reuse stale CEF/runtime state from the host machine.
-        APPDATA: userDataDir,
-        LOCALAPPDATA: localUserDataDir,
-      },
+      env: createPackagedWindowsAppEnv({
+        baseEnv: process.env,
+        apiBase: api.baseUrl,
+        appData: userDataDir,
+        localAppData: localUserDataDir,
+      }),
       stdio: ["ignore", "pipe", "pipe"],
     });
     processLogs = collectProcessLogs(appProcess);
