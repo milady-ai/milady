@@ -24,6 +24,7 @@ import {
   loadPersistedConnectionMode,
   loadPersistedActiveServer,
   loadPersistedOnboardingComplete,
+  type PersistedConnectionMode,
 } from "./persistence";
 import {
   connectionModeToTarget,
@@ -34,8 +35,7 @@ import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
 export interface RestoringSessionCtx {
   persistedActiveServer: ReturnType<typeof loadPersistedActiveServer>;
   persistedConnection: ReturnType<typeof loadPersistedConnectionMode>;
-  // biome-ignore lint/suspicious/noExplicitAny: mixed connection types from legacy code
-  restoredConnection: any;
+  restoredConnection: PersistedConnectionMode;
   shouldPreserveCompletedOnboarding: boolean;
   hadPriorOnboarding: boolean;
 }
@@ -80,6 +80,32 @@ function loadSessionConnectionModeOverride() {
     sessionApiBase: window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY),
     sessionApiToken,
   });
+}
+
+export async function applyRestoredConnection(args: {
+  restoredConnection: PersistedConnectionMode;
+  clientRef: Pick<typeof client, "setBaseUrl" | "setToken">;
+  startLocalRuntime?: () => Promise<void>;
+}) {
+  const { restoredConnection, clientRef, startLocalRuntime } = args;
+
+  if (restoredConnection.runMode === "local") {
+    clientRef.setToken(null);
+    clientRef.setBaseUrl(null);
+    if (startLocalRuntime) {
+      await startLocalRuntime();
+    }
+    return;
+  }
+
+  if (restoredConnection.runMode === "cloud") {
+    clientRef.setBaseUrl(restoredConnection.cloudApiBase ?? null);
+    clientRef.setToken(restoredConnection.cloudAuthToken ?? null);
+    return;
+  }
+
+  clientRef.setBaseUrl(restoredConnection.remoteApiBase ?? null);
+  clientRef.setToken(restoredConnection.remoteAccessToken ?? null);
 }
 
 /**
@@ -193,21 +219,18 @@ export async function runRestoringSession(
     return;
   }
 
-  // Configure client for restored connection
-  if (restored.runMode === "cloud" && restored.cloudApiBase) {
-    client.setBaseUrl(restored.cloudApiBase);
-    if (restored.cloudAuthToken) client.setToken(restored.cloudAuthToken);
-  } else if (restored.runMode === "remote" && restored.remoteApiBase) {
-    client.setBaseUrl(restored.remoteApiBase);
-    if (restored.remoteAccessToken) client.setToken(restored.remoteAccessToken);
-  } else if (restored.runMode === "local") {
-    try {
-      await invokeDesktopBridgeRequest({
-        rpcMethod: "agentStart",
-        ipcChannel: "agent:start",
-      });
-    } catch {}
-  }
+  await applyRestoredConnection({
+    restoredConnection: restored,
+    clientRef: client,
+    startLocalRuntime: async () => {
+      try {
+        await invokeDesktopBridgeRequest({
+          rpcMethod: "agentStart",
+          ipcChannel: "agent:start",
+        });
+      } catch {}
+    },
+  });
 
   ctxRef.current = {
     persistedActiveServer,

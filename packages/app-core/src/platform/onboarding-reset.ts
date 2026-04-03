@@ -98,6 +98,14 @@ export function applyForceFreshOnboardingReset(args?: {
     }
   }
 
+  if (typeof window !== "undefined") {
+    try {
+      window.sessionStorage.removeItem("milady_api_base");
+    } catch {
+      // Ignore storage failures during startup.
+    }
+  }
+
   resolvedUrl.searchParams.delete(RESET_QUERY_PARAM);
   resolvedHistory?.replaceState(null, "", resolvedUrl.toString());
   return true;

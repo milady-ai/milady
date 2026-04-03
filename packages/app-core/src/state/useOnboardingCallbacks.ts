@@ -30,7 +30,6 @@ import {
   type OnboardingNextOptions,
   savePersistedConnectionMode,
 } from "./internal";
-import { deriveDetectedProviderPrefill } from "./onboarding-bootstrap";
 import type { OnboardingStateHook } from "./useOnboardingState";
 import type { AppState, OnboardingStep } from "./types";
 import { buildWalletRpcUpdateRequest } from "../wallet-rpc";
@@ -804,17 +803,8 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       setOnboardingDetectedProviders(
         detected as typeof detected & AppState["onboardingDetectedProviders"],
       );
-      const prefill = deriveDetectedProviderPrefill(detected);
-      if (!prefill) {
-        return;
-      }
-
-      // Keep users on provider choice first: detection should inform and
-      // annotate options, not auto-route into a specific provider detail view.
-      // We only nudge run mode so the provider grid is available.
-      setOnboardingRunMode(prefill.runMode);
     },
-    [setOnboardingDetectedProviders, setOnboardingRunMode],
+    [setOnboardingDetectedProviders],
   );
 
   return {

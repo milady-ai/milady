@@ -27,6 +27,7 @@ import {
 } from "../api";
 import { scanProviderCredentials } from "../bridge";
 import { mapServerTasksToSessions } from "../coding";
+import type { WalletAddresses } from "@miladyai/agent/contracts/wallet";
 import {
   type deriveOnboardingResumeConnection,
   type StartupErrorState,
@@ -118,8 +119,7 @@ export interface StartupCoordinatorDeps {
   setSelectedVrmIndex: (v: number) => void;
   setCustomVrmUrl: (v: string) => void;
   setCustomBackgroundUrl: (v: string) => void;
-  // biome-ignore lint/suspicious/noExplicitAny: WalletAddresses type from agent contracts
-  setWalletAddresses: (v: any) => void;
+  setWalletAddresses: (v: WalletAddresses) => void;
   setPtySessions: (
     v:
       | CodingAgentSession[]
@@ -148,10 +148,8 @@ export interface StartupCoordinatorDeps {
   forceLocalBootstrapRef: React.MutableRefObject<boolean>;
   initialTabSetRef: React.MutableRefObject<boolean>;
   activeConversationIdRef: React.RefObject<string | null>;
-  // biome-ignore lint/suspicious/noExplicitAny: interval ref typing varies by runtime
-  elizaCloudPollInterval: React.MutableRefObject<any>;
-  // biome-ignore lint/suspicious/noExplicitAny: interval ref typing varies by runtime
-  elizaCloudLoginPollTimer: React.MutableRefObject<any>;
+  elizaCloudPollInterval: React.MutableRefObject<number | null>;
+  elizaCloudLoginPollTimer: React.MutableRefObject<number | null>;
   uiLanguage: UiLanguage;
   onboardingMode: OnboardingMode;
 }

@@ -2,7 +2,7 @@
  * StartupShell — the front door to the app.
  *
  * Shows a branded splash with retro progress bar during ALL startup phases.
- * New users see "Press Start" first. Returning users see the progress bar
+ * New users see the server chooser first. Returning users see the progress bar
  * immediately. The splash stays visible until the app is FULLY loaded
  * (including a brief settle delay after coordinator reaches ready).
  *
@@ -10,6 +10,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { client } from "../../api";
 import {
   discoverGatewayEndpoints,
   type GatewayDiscoveryEndpoint,
@@ -123,8 +124,14 @@ export function StartupShell() {
     startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" });
   }, [startupCoordinator]);
 
+  const clearClientConnectionIntent = useCallback(() => {
+    client.setToken(null);
+    client.setBaseUrl(null);
+  }, []);
+
   const seedSplashTarget = useCallback(
     (target: "local" | "remote" | "elizacloud", remoteApiBase?: string) => {
+      clearClientConnectionIntent();
       clearPersistedConnectionMode();
       goToOnboardingStep("identity");
       setState("onboardingProvider", "");
@@ -148,7 +155,7 @@ export function StartupShell() {
       setState("onboardingRemoteConnected", Boolean(remoteApiBase));
       setState("onboardingRemoteApiBase", remoteApiBase ?? "");
     },
-    [goToOnboardingStep, setState],
+    [clearClientConnectionIntent, goToOnboardingStep, setState],
   );
 
   const handleCreateLocal = useCallback(() => {
@@ -169,6 +176,8 @@ export function StartupShell() {
   const handleConnectGateway = useCallback(
     (gateway: GatewayDiscoveryEndpoint) => {
       const remoteApiBase = gatewayEndpointToApiBase(gateway);
+      client.setToken(null);
+      client.setBaseUrl(remoteApiBase);
       savePersistedConnectionMode({
         runMode: "remote",
         remoteApiBase,
@@ -256,7 +265,7 @@ export function StartupShell() {
           </div>
         )}
 
-        {/* Press Start button — only on splash phase */}
+        {/* Server chooser — only on splash phase */}
         {isSplash &&
           (!splashLoaded ? (
             <button

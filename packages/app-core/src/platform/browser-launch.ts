@@ -1,4 +1,5 @@
 import { client } from "../api";
+import { savePersistedConnectionMode } from "../state/persistence";
 
 function getSearchParams(): URLSearchParams {
   if (typeof window === "undefined") {
@@ -147,6 +148,11 @@ export async function applyLaunchConnectionFromUrl(): Promise<boolean> {
     );
     client.setBaseUrl(connection.apiBase);
     client.setToken(connection.token);
+    savePersistedConnectionMode({
+      runMode: "cloud",
+      cloudApiBase: connection.apiBase,
+      cloudAuthToken: connection.token,
+    });
     stripLaunchParams();
     return true;
   }
@@ -156,8 +162,16 @@ export async function applyLaunchConnectionFromUrl(): Promise<boolean> {
     return false;
   }
 
-  client.setBaseUrl(normalizeLaunchApiBase(apiBase));
-  client.setToken(params.get("token")?.trim() || null);
+  const normalizedApiBase = normalizeLaunchApiBase(apiBase);
+  const launchToken = params.get("token")?.trim() || null;
+
+  client.setBaseUrl(normalizedApiBase);
+  client.setToken(launchToken);
+  savePersistedConnectionMode({
+    runMode: "remote",
+    remoteApiBase: normalizedApiBase,
+    ...(launchToken ? { remoteAccessToken: launchToken } : {}),
+  });
   stripLaunchParams();
   return true;
 }

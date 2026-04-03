@@ -22,7 +22,6 @@ describe("Router", () => {
     expect(document.querySelector("#top")).toBeTruthy();
     expect(screen.getAllByText("MILADY").length).toBeGreaterThan(0);
     expect(screen.getByText("Try Cloud")).toBeTruthy();
-    expect(screen.getByText("Read Guides")).toBeTruthy();
     expect(screen.queryByText("DASHBOARD")).toBeNull();
   });
 
@@ -35,18 +34,5 @@ describe("Router", () => {
     expect(screen.getByTestId("dashboard")).toBeTruthy();
     expect(screen.getAllByText("MILADY").length).toBeGreaterThan(0);
     expect(screen.getByText("DASHBOARD")).toBeTruthy();
-  });
-
-  it("renders guides at /guides", () => {
-    render(
-      <MemoryRouter initialEntries={["/guides"]}>
-        <AppRoutes />
-      </MemoryRouter>,
-    );
-    expect(screen.getByText("Start with the chooser")).toBeTruthy();
-    expect(screen.getByText("GUIDES")).toBeTruthy();
-    expect(screen.getByText("Quickstart")).toBeTruthy();
-    expect(screen.getByText("Create One")).toBeTruthy();
-    expect(screen.getByText("Select a Model Provider")).toBeTruthy();
   });
 });

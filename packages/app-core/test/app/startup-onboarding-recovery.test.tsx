@@ -19,6 +19,8 @@ const { connectionStateListeners, mockClient } = vi.hoisted(() => {
     mockClient: {
       apiAvailable: true,
       hasToken: vi.fn(() => false),
+      setBaseUrl: vi.fn(),
+      setToken: vi.fn(),
       getAuthStatus: vi.fn(async () => ({
         required: false,
         pairingEnabled: false,

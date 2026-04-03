@@ -87,26 +87,18 @@ describe("applyCliProfileEnv", () => {
       env,
       homedir: () => "/home/peter",
     });
-    const expectedStateDir = path.join("/home/peter", ".milady-dev");
-    expect(env.MILADY_PROFILE).toBe("dev");
+    const expectedStateDir = path.join("/home/peter", ".eliza-dev");
     expect(env.ELIZA_PROFILE).toBe("dev");
-    expect(env.MILADY_STATE_DIR).toBe(expectedStateDir);
     expect(env.ELIZA_STATE_DIR).toBe(expectedStateDir);
-    expect(env.MILADY_CONFIG_PATH).toBe(
-      path.join(expectedStateDir, "milady.json"),
-    );
     expect(env.ELIZA_CONFIG_PATH).toBe(
-      path.join(expectedStateDir, "milady.json"),
+      path.join(expectedStateDir, "eliza.json"),
     );
-    expect(env.MILADY_GATEWAY_PORT).toBe("19001");
     expect(env.ELIZA_GATEWAY_PORT).toBe("19001");
   });
 
   it("does not override explicit env values", () => {
     const env: Record<string, string | undefined> = {
-      MILADY_STATE_DIR: "/custom",
       ELIZA_STATE_DIR: "/custom",
-      MILADY_GATEWAY_PORT: "19099",
       ELIZA_GATEWAY_PORT: "19099",
     };
     applyCliProfileEnv({
@@ -114,12 +106,9 @@ describe("applyCliProfileEnv", () => {
       env,
       homedir: () => "/home/peter",
     });
-    expect(env.MILADY_STATE_DIR).toBe("/custom");
     expect(env.ELIZA_STATE_DIR).toBe("/custom");
-    expect(env.MILADY_GATEWAY_PORT).toBe("19099");
     expect(env.ELIZA_GATEWAY_PORT).toBe("19099");
-    expect(env.MILADY_CONFIG_PATH).toBe(path.join("/custom", "milady.json"));
-    expect(env.ELIZA_CONFIG_PATH).toBe(path.join("/custom", "milady.json"));
+    expect(env.ELIZA_CONFIG_PATH).toBe(path.join("/custom", "eliza.json"));
   });
 });
 

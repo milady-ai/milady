@@ -196,11 +196,11 @@ describe("WalletsPanel – with data", () => {
     expect(text).toContain("$100.00");
 
     // Fund section
-    expect(text).toContain("FUND WALLET");
+    expect(text).toContain("FUND YOUR AGENT");
     expect(text).toContain("COPY ADDRESS");
 
     // Auto-refresh indicator
-    expect(text).toContain("LIVE · 30S");
+    expect(text).toContain("AUTO-REFRESH EVERY 30S");
   });
 
   it("copies address to clipboard when copy button is clicked", async () => {

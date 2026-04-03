@@ -4,15 +4,26 @@ import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
+  clientSetBaseUrlMock,
+  clientSetTokenMock,
   clearPersistedConnectionModeMock,
   discoverGatewayEndpointsMock,
   mockUseApp,
   savePersistedConnectionModeMock,
 } = vi.hoisted(() => ({
+  clientSetBaseUrlMock: vi.fn(),
+  clientSetTokenMock: vi.fn(),
   clearPersistedConnectionModeMock: vi.fn(),
   discoverGatewayEndpointsMock: vi.fn(),
   mockUseApp: vi.fn(),
   savePersistedConnectionModeMock: vi.fn(),
+}));
+
+vi.mock("../../api", () => ({
+  client: {
+    setBaseUrl: clientSetBaseUrlMock,
+    setToken: clientSetTokenMock,
+  },
 }));
 
 vi.mock("../../state", () => ({
@@ -36,6 +47,8 @@ import { StartupShell } from "./StartupShell";
 
 describe("StartupShell", () => {
   beforeEach(() => {
+    clientSetBaseUrlMock.mockReset();
+    clientSetTokenMock.mockReset();
     clearPersistedConnectionModeMock.mockReset();
     discoverGatewayEndpointsMock.mockReset();
     savePersistedConnectionModeMock.mockReset();
@@ -110,6 +123,8 @@ describe("StartupShell", () => {
       createButton?.props.onClick();
     });
 
+    expect(clientSetTokenMock).toHaveBeenCalledWith(null);
+    expect(clientSetBaseUrlMock).toHaveBeenCalledWith(null);
     expect(clearPersistedConnectionModeMock).toHaveBeenCalledTimes(1);
     expect(goToOnboardingStep).toHaveBeenCalledWith("identity");
     expect(setState).toHaveBeenCalledWith("onboardingRunMode", "local");
@@ -147,6 +162,8 @@ describe("StartupShell", () => {
       connectButton?.props.onClick();
     });
 
+    expect(clientSetTokenMock).toHaveBeenCalledWith(null);
+    expect(clientSetBaseUrlMock).toHaveBeenCalledWith("http://kei.local:18789");
     expect(savePersistedConnectionModeMock).toHaveBeenCalledWith({
       runMode: "remote",
       remoteApiBase: "http://kei.local:18789",
