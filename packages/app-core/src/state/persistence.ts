@@ -510,25 +510,6 @@ export function saveCompanionMessageCutoffTs(value: number): void {
   }, undefined);
 }
 
-/* ── Connection mode persistence ──────────────────────────────────────── */
-
-/**
- * Persisted connection state so the app knows how to connect on restart
- * without waiting for a backend that may not exist yet.
- */
-export interface PersistedConnectionMode {
-  /** "local" = embedded agent, "cloud" = eliza cloud sandbox, "remote" = custom URL */
-  runMode: "local" | "cloud" | "remote";
-  /** For cloud: the eliza cloud API base URL */
-  cloudApiBase?: string;
-  /** For cloud: the auth token */
-  cloudAuthToken?: string;
-  /** For remote: the remote API base URL */
-  remoteApiBase?: string;
-  /** For remote: the access token/connection key */
-  remoteAccessToken?: string;
-}
-
 export interface PersistedActiveServer {
   /** Stable identifier for the selected server target. */
   id: string;
@@ -543,7 +524,6 @@ export interface PersistedActiveServer {
 }
 
 const ACTIVE_SERVER_STORAGE_KEY = "milady:active-server";
-const LEGACY_CONNECTION_MODE_STORAGE_KEY = "eliza:connection-mode";
 
 function trimPersistedValue(value: unknown): string | undefined {
   if (typeof value !== "string") {
@@ -556,42 +536,6 @@ function trimPersistedValue(value: unknown): string | undefined {
 function normalizeApiBase(value: unknown): string | undefined {
   const trimmed = trimPersistedValue(value);
   return trimmed?.replace(/\/+$/, "");
-}
-
-function normalizePersistedConnectionMode(
-  value: unknown,
-): PersistedConnectionMode | null {
-  if (typeof value !== "object" || value === null) {
-    return null;
-  }
-
-  const parsed = value as Record<string, unknown>;
-  switch (parsed.runMode) {
-    case "local":
-      return { runMode: "local" };
-    case "cloud": {
-      const cloudApiBase = normalizeApiBase(parsed.cloudApiBase);
-      return {
-        runMode: "cloud",
-        ...(cloudApiBase ? { cloudApiBase } : {}),
-        ...(trimPersistedValue(parsed.cloudAuthToken)
-          ? { cloudAuthToken: trimPersistedValue(parsed.cloudAuthToken) }
-          : {}),
-      };
-    }
-    case "remote": {
-      const remoteApiBase = normalizeApiBase(parsed.remoteApiBase);
-      return {
-        runMode: "remote",
-        ...(remoteApiBase ? { remoteApiBase } : {}),
-        ...(trimPersistedValue(parsed.remoteAccessToken)
-          ? { remoteAccessToken: trimPersistedValue(parsed.remoteAccessToken) }
-          : {}),
-      };
-    }
-    default:
-      return null;
-  }
 }
 
 export function createPersistedActiveServer(args: {
@@ -639,58 +583,6 @@ export function createPersistedActiveServer(args: {
   }
 }
 
-export function connectionModeToActiveServer(
-  mode: PersistedConnectionMode,
-): PersistedActiveServer {
-  switch (mode.runMode) {
-    case "local":
-      return createPersistedActiveServer({ kind: "local" });
-    case "cloud": {
-      return createPersistedActiveServer({
-        kind: "cloud",
-        apiBase: mode.cloudApiBase,
-        accessToken: mode.cloudAuthToken,
-      });
-    }
-    case "remote": {
-      return createPersistedActiveServer({
-        kind: "remote",
-        apiBase: mode.remoteApiBase,
-        accessToken: mode.remoteAccessToken,
-      });
-    }
-  }
-}
-
-export function activeServerToConnectionMode(
-  server: PersistedActiveServer,
-): PersistedConnectionMode {
-  switch (server.kind) {
-    case "local":
-      return { runMode: "local" };
-    case "cloud":
-      return {
-        runMode: "cloud",
-        ...(normalizeApiBase(server.apiBase)
-          ? { cloudApiBase: normalizeApiBase(server.apiBase) }
-          : {}),
-        ...(trimPersistedValue(server.accessToken)
-          ? { cloudAuthToken: trimPersistedValue(server.accessToken) }
-          : {}),
-      };
-    case "remote":
-      return {
-        runMode: "remote",
-        ...(normalizeApiBase(server.apiBase)
-          ? { remoteApiBase: normalizeApiBase(server.apiBase) }
-          : {}),
-        ...(trimPersistedValue(server.accessToken)
-          ? { remoteAccessToken: trimPersistedValue(server.accessToken) }
-          : {}),
-      };
-  }
-}
-
 function normalizePersistedActiveServer(
   value: unknown,
 ): PersistedActiveServer | null {
@@ -727,57 +619,21 @@ function normalizePersistedActiveServer(
 export function loadPersistedActiveServer(): PersistedActiveServer | null {
   return tryLocalStorage(() => {
     const stored = localStorage.getItem(ACTIVE_SERVER_STORAGE_KEY);
-    if (stored) {
-      const parsed = normalizePersistedActiveServer(JSON.parse(stored));
-      if (parsed) {
-        return parsed;
-      }
-    }
-
-    const legacy = localStorage.getItem(LEGACY_CONNECTION_MODE_STORAGE_KEY);
-    if (!legacy) {
+    if (!stored) {
       return null;
     }
-
-    const parsedLegacy = normalizePersistedConnectionMode(JSON.parse(legacy));
-    if (!parsedLegacy) {
-      return null;
-    }
-
-    const migrated = connectionModeToActiveServer(parsedLegacy);
-    localStorage.setItem(ACTIVE_SERVER_STORAGE_KEY, JSON.stringify(migrated));
-    return migrated;
+    return normalizePersistedActiveServer(JSON.parse(stored));
   }, null);
-}
-
-export function loadPersistedConnectionMode(): PersistedConnectionMode | null {
-  const activeServer = loadPersistedActiveServer();
-  return activeServer ? activeServerToConnectionMode(activeServer) : null;
 }
 
 export function savePersistedActiveServer(server: PersistedActiveServer): void {
   tryLocalStorage(() => {
     localStorage.setItem(ACTIVE_SERVER_STORAGE_KEY, JSON.stringify(server));
-    localStorage.setItem(
-      LEGACY_CONNECTION_MODE_STORAGE_KEY,
-      JSON.stringify(activeServerToConnectionMode(server)),
-    );
   }, undefined);
-}
-
-export function savePersistedConnectionMode(
-  mode: PersistedConnectionMode,
-): void {
-  savePersistedActiveServer(connectionModeToActiveServer(mode));
 }
 
 export function clearPersistedActiveServer(): void {
   tryLocalStorage(() => {
     localStorage.removeItem(ACTIVE_SERVER_STORAGE_KEY);
-    localStorage.removeItem(LEGACY_CONNECTION_MODE_STORAGE_KEY);
   }, undefined);
-}
-
-export function clearPersistedConnectionMode(): void {
-  clearPersistedActiveServer();
 }

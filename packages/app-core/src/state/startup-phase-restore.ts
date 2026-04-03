@@ -15,11 +15,11 @@ import {
 } from "../bridge";
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
+import { type StartupErrorState } from "./internal";
 import {
-  deriveOnboardingResumeConnection,
-  type StartupErrorState,
-} from "./internal";
-import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
+  detectExistingOnboardingConnection,
+  resolveStartupWithoutRestoredConnection,
+} from "./onboarding-bootstrap";
 import {
   createPersistedActiveServer,
   loadPersistedActiveServer,
@@ -125,10 +125,7 @@ export async function runRestoringSession(
   if (cancelled.current) return;
 
   const restoredActiveServer =
-    persistedActiveServer ??
-    (probed
-      ? createPersistedActiveServer({ kind: probed.connection.runMode })
-      : null);
+    persistedActiveServer ?? (probed ? probed.activeServer : null);
   const preserveCompleted =
     hadPrior && !deps.onboardingCompletionCommittedRef.current;
 
@@ -140,9 +137,6 @@ export async function runRestoringSession(
 
   if (!restoredActiveServer) {
     // No evidence of a prior connection — show onboarding.
-    const { resolveStartupWithoutRestoredConnection } = await import(
-      "./onboarding-bootstrap"
-    );
     const result = resolveStartupWithoutRestoredConnection({
       hadPersistedOnboardingCompletion: hadPrior,
     });

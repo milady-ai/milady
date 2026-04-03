@@ -6,14 +6,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   clientSetBaseUrlMock,
   clientSetTokenMock,
-  clearPersistedConnectionModeMock,
+  clearPersistedActiveServerMock,
   discoverGatewayEndpointsMock,
   mockUseApp,
   savePersistedActiveServerMock,
 } = vi.hoisted(() => ({
   clientSetBaseUrlMock: vi.fn(),
   clientSetTokenMock: vi.fn(),
-  clearPersistedConnectionModeMock: vi.fn(),
+  clearPersistedActiveServerMock: vi.fn(),
   discoverGatewayEndpointsMock: vi.fn(),
   mockUseApp: vi.fn(),
   savePersistedActiveServerMock: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock("../../api", () => ({
 }));
 
 vi.mock("../../state", () => ({
-  clearPersistedConnectionMode: clearPersistedConnectionModeMock,
+  clearPersistedActiveServer: clearPersistedActiveServerMock,
   savePersistedActiveServer: savePersistedActiveServerMock,
   useApp: () => mockUseApp(),
 }));
@@ -49,7 +49,7 @@ describe("StartupShell", () => {
   beforeEach(() => {
     clientSetBaseUrlMock.mockReset();
     clientSetTokenMock.mockReset();
-    clearPersistedConnectionModeMock.mockReset();
+    clearPersistedActiveServerMock.mockReset();
     discoverGatewayEndpointsMock.mockReset();
     savePersistedActiveServerMock.mockReset();
     discoverGatewayEndpointsMock.mockResolvedValue([]);
@@ -125,10 +125,10 @@ describe("StartupShell", () => {
 
     expect(clientSetTokenMock).toHaveBeenCalledWith(null);
     expect(clientSetBaseUrlMock).toHaveBeenCalledWith(null);
-    expect(clearPersistedConnectionModeMock).toHaveBeenCalledTimes(1);
+    expect(clearPersistedActiveServerMock).toHaveBeenCalledTimes(1);
     expect(savePersistedActiveServerMock).not.toHaveBeenCalled();
     expect(goToOnboardingStep).toHaveBeenCalledWith("identity");
-    expect(setState).toHaveBeenCalledWith("onboardingRunMode", "local");
+    expect(setState).toHaveBeenCalledWith("onboardingServerTarget", "local");
     expect(setState).toHaveBeenCalledWith("onboardingRemoteApiBase", "");
     expect(dispatch).toHaveBeenCalledWith({ type: "SPLASH_CONTINUE" });
   });
@@ -165,7 +165,7 @@ describe("StartupShell", () => {
 
     expect(clientSetTokenMock).toHaveBeenCalledWith(null);
     expect(clientSetBaseUrlMock).toHaveBeenCalledWith(null);
-    expect(clearPersistedConnectionModeMock).not.toHaveBeenCalled();
+    expect(clearPersistedActiveServerMock).not.toHaveBeenCalled();
     expect(savePersistedActiveServerMock).toHaveBeenCalledWith({
       id: "remote:kei",
       kind: "remote",
@@ -173,7 +173,10 @@ describe("StartupShell", () => {
       apiBase: "http://kei.local:18789",
     });
     expect(goToOnboardingStep).not.toHaveBeenCalled();
-    expect(setState).not.toHaveBeenCalledWith("onboardingRunMode", "cloud");
+    expect(setState).not.toHaveBeenCalledWith(
+      "onboardingServerTarget",
+      "elizacloud",
+    );
     expect(dispatch).toHaveBeenCalledWith({ type: "SPLASH_CONTINUE" });
   });
 });

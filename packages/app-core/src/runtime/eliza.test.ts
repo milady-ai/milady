@@ -1173,9 +1173,11 @@ describe("applyCloudConfigToEnv", () => {
     process.env.ELIZAOS_CLOUD_API_KEY = "old-key";
 
     const config = {
-      connection: {
-        kind: "local-provider",
-        provider: "openai",
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
       },
       cloud: {
         enabled: true,
@@ -1192,11 +1194,14 @@ describe("applyCloudConfigToEnv", () => {
 
   it("uses the canonical cloud-managed connection even without raw enabled=true", () => {
     const config = {
-      connection: {
-        kind: "cloud-managed",
-        cloudProvider: "elizacloud",
-        smallModel: "openai/gpt-5-mini",
-        largeModel: "anthropic/claude-sonnet-4.5",
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+          smallModel: "openai/gpt-5-mini",
+          largeModel: "anthropic/claude-sonnet-4.5",
+        },
       },
       cloud: {
         apiKey: "ck-123",
@@ -1879,12 +1884,14 @@ describe("resolvePrimaryModel", () => {
 });
 
 describe("resolvePreferredProviderId", () => {
-  it("prefers the persisted connection provider over model prefixes", () => {
+  it("prefers canonical provider routing over model prefixes", () => {
     const config = {
-      connection: {
-        kind: "local-provider",
-        provider: "openrouter",
-        primaryModel: "openai/gpt-5.2",
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5.2",
+        },
       },
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4.5" } },
@@ -1897,7 +1904,7 @@ describe("resolvePreferredProviderId", () => {
     );
   });
 
-  it("derives the provider from explicit model selections when no connection is stored", () => {
+  it("derives the provider from explicit model selections when no canonical route is stored", () => {
     const config = {
       agents: { defaults: { model: { primary: "openai/gpt-5.2" } } },
     } as Partial<ElizaConfig> as ElizaConfig;

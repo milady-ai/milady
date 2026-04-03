@@ -15,6 +15,32 @@ import {
 const mockLoadElizaConfig = loadElizaConfig as ReturnType<typeof vi.fn>;
 const mockSaveElizaConfig = saveElizaConfig as ReturnType<typeof vi.fn>;
 
+function canonicalDirectOnboardingBody(
+  provider: unknown,
+  apiKey?: unknown,
+  primaryModel?: string,
+) {
+  return {
+    deploymentTarget: {
+      runtime: "local",
+    },
+    serviceRouting: {
+      llmText: {
+        backend: provider,
+        transport: "direct",
+        ...(primaryModel ? { primaryModel } : {}),
+      },
+    },
+    ...(apiKey !== undefined
+      ? {
+          credentialInputs: {
+            llmApiKey: apiKey,
+          },
+        }
+      : {}),
+  };
+}
+
 describe("extractAndPersistOnboardingApiKey", () => {
   let envSnapshot: Record<string, string | undefined>;
 
@@ -39,16 +65,23 @@ describe("extractAndPersistOnboardingApiKey", () => {
     }
   });
 
-  it("persists Anthropic API key from connection.apiKey to config and process.env", async () => {
+  it("persists a canonical direct-provider API key to config and process.env", async () => {
     const config = { env: {} } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
     const result = await extractAndPersistOnboardingApiKey({
       name: "TestAgent",
-      connection: {
-        kind: "local-provider",
-        provider: "anthropic",
-        apiKey: "sk-ant-test-key-123",
+      deploymentTarget: {
+        runtime: "local",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
+      },
+      credentialInputs: {
+        llmApiKey: "sk-ant-test-key-123",
       },
     });
 
@@ -67,24 +100,53 @@ describe("extractAndPersistOnboardingApiKey", () => {
     expect(process.env.ANTHROPIC_API_KEY).toBe("sk-ant-test-key-123");
   });
 
-  it("persists OpenAI API key", async () => {
+  it("persists a linked Eliza Cloud account without forcing cloud inference", async () => {
     const config = { env: {} } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
     const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "openai",
-        apiKey: "sk-openai-test-key",
+      deploymentTarget: {
+        runtime: "local",
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+          primaryModel: "openai/gpt-5.2",
+        },
+      },
+      credentialInputs: {
+        llmApiKey: "sk-openai-test-key",
+        cloudApiKey: "ck-cloud-test",
       },
     });
 
     expect(result).toBe("OPENAI_API_KEY");
     const savedConfig = mockSaveElizaConfig.mock.calls[0][0];
     expect(savedConfig.env.OPENAI_API_KEY).toBe("sk-openai-test-key");
+    expect(savedConfig.cloud.apiKey).toBe("ck-cloud-test");
+    expect(savedConfig.linkedAccounts).toMatchObject({
+      elizacloud: {
+        status: "linked",
+        source: "api-key",
+      },
+    });
+    expect(savedConfig.serviceRouting).toMatchObject({
+      llmText: {
+        backend: "openai",
+        transport: "direct",
+        primaryModel: "openai/gpt-5.2",
+      },
+    });
   });
 
-  it("returns null when connection field is missing", async () => {
+  it("returns null when credential inputs are missing", async () => {
     const result = await extractAndPersistOnboardingApiKey({
       name: "TestAgent",
     });
@@ -94,38 +156,27 @@ describe("extractAndPersistOnboardingApiKey", () => {
   });
 
   it("returns null when apiKey is empty", async () => {
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "anthropic",
-        apiKey: "   ",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("anthropic", "   "),
+    );
 
     expect(result).toBeNull();
     expect(mockSaveElizaConfig).not.toHaveBeenCalled();
   });
 
   it("returns null when apiKey is missing", async () => {
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "anthropic",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("anthropic"),
+    );
 
     expect(result).toBeNull();
     expect(mockSaveElizaConfig).not.toHaveBeenCalled();
   });
 
   it("returns null for unknown provider", async () => {
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "unknown-provider",
-        apiKey: "some-key",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("unknown-provider", "some-key"),
+    );
 
     expect(result).toBeNull();
     expect(mockSaveElizaConfig).not.toHaveBeenCalled();
@@ -135,13 +186,9 @@ describe("extractAndPersistOnboardingApiKey", () => {
     const config = {} as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "groq",
-        apiKey: "gsk-groq-test",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("groq", "gsk-groq-test"),
+    );
 
     expect(result).toBe("GROQ_API_KEY");
     const savedConfig = mockSaveElizaConfig.mock.calls[0][0];
@@ -152,13 +199,9 @@ describe("extractAndPersistOnboardingApiKey", () => {
     const config = { env: {} } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "google-genai",
-        apiKey: "AIza-google-key",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("google-genai", "AIza-google-key"),
+    );
 
     expect(result).toBe("GOOGLE_GENERATIVE_AI_API_KEY");
   });
@@ -167,13 +210,9 @@ describe("extractAndPersistOnboardingApiKey", () => {
     const config = { env: {} } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "gemini",
-        apiKey: "AIza-gemini-key",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("gemini", "AIza-gemini-key"),
+    );
 
     expect(result).toBe("GOOGLE_GENERATIVE_AI_API_KEY");
   });
@@ -182,13 +221,9 @@ describe("extractAndPersistOnboardingApiKey", () => {
     const config = { env: {} } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: "grok",
-        apiKey: "xai-grok-key",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody("grok", "xai-grok-key"),
+    );
 
     expect(result).toBe("XAI_API_KEY");
   });
@@ -202,24 +237,16 @@ describe("extractAndPersistOnboardingApiKey", () => {
     const config = { env: {} } as Record<string, unknown>;
     mockLoadElizaConfig.mockReturnValue(config);
 
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider,
-        apiKey: `test-key-${provider}`,
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody(provider, `test-key-${provider}`),
+    );
 
     expect(result).toBe(expectedEnvKey);
   });
   it("returns null when provider is not a string", async () => {
-    const result = await extractAndPersistOnboardingApiKey({
-      connection: {
-        kind: "local-provider",
-        provider: 123,
-        apiKey: "some-key",
-      },
-    });
+    const result = await extractAndPersistOnboardingApiKey(
+      canonicalDirectOnboardingBody(123, "some-key"),
+    );
 
     expect(result).toBeNull();
   });
@@ -335,36 +362,18 @@ describe("persistCompatOnboardingDefaults", () => {
 });
 
 describe("deriveCompatOnboardingReplayBody", () => {
-  it("injects runMode=cloud for cloud-managed onboarding connections", () => {
+  it("preserves canonical cloud-proxy inference while hosting stays local", () => {
     const body = {
       name: "Milady",
-      connection: {
-        kind: "cloud-managed",
-        provider: "elizacloud",
+      deploymentTarget: {
+        runtime: "local",
       },
-    } as Record<string, unknown>;
-
-    const result = deriveCompatOnboardingReplayBody(body);
-
-    expect(result.isCloudMode).toBe(true);
-    expect(result.replayBody).toMatchObject({
-      name: "Milady",
-      runMode: "cloud",
-      connection: {
-        kind: "cloud-managed",
-        provider: "elizacloud",
-      },
-    });
-    expect(body.runMode).toBeUndefined();
-  });
-
-  it("leaves non-cloud onboarding payloads unchanged", () => {
-    const body = {
-      name: "Milady",
-      connection: {
-        kind: "local-provider",
-        provider: "openai",
-        apiKey: "sk-test-openai",
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     } as Record<string, unknown>;
 
@@ -373,9 +382,139 @@ describe("deriveCompatOnboardingReplayBody", () => {
     expect(result.isCloudMode).toBe(false);
     expect(result.replayBody).toMatchObject({
       name: "Milady",
-      runMode: "local",
-      provider: "openai",
-      providerApiKey: "sk-test-openai",
+      deploymentTarget: {
+        runtime: "local",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
     });
+    expect(result.replayBody).not.toHaveProperty("runMode");
+    expect(result.replayBody).not.toHaveProperty("connection");
+  });
+
+  it("preserves canonical cloud hosting when a direct provider is selected", () => {
+    const body = {
+      name: "Milady",
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+      },
+    } as Record<string, unknown>;
+
+    const result = deriveCompatOnboardingReplayBody(body);
+
+    expect(result.isCloudMode).toBe(true);
+    expect(result.replayBody).toMatchObject({
+      name: "Milady",
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+      },
+    });
+    expect(result.replayBody).not.toHaveProperty("runMode");
+    expect(result.replayBody).not.toHaveProperty("provider");
+    expect(result.replayBody).not.toHaveProperty("providerApiKey");
+  });
+
+  it("preserves canonical local direct-provider routing", () => {
+    const body = {
+      name: "Milady",
+      deploymentTarget: {
+        runtime: "local",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+      },
+    } as Record<string, unknown>;
+
+    const result = deriveCompatOnboardingReplayBody(body);
+
+    expect(result.isCloudMode).toBe(false);
+    expect(result.replayBody).toMatchObject({
+      name: "Milady",
+      deploymentTarget: {
+        runtime: "local",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+      },
+    });
+    expect(result.replayBody).not.toHaveProperty("runMode");
+    expect(result.replayBody).not.toHaveProperty("provider");
+    expect(result.replayBody).not.toHaveProperty("providerApiKey");
+  });
+
+  it("preserves canonical credential inputs during compat replay", () => {
+    const body = {
+      name: "Milady",
+      deploymentTarget: {
+        runtime: "local",
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+      },
+      credentialInputs: {
+        llmApiKey: "sk-openai-test",
+        cloudApiKey: "ck-cloud-test",
+      },
+    } as Record<string, unknown>;
+
+    const result = deriveCompatOnboardingReplayBody(body);
+
+    expect(result.replayBody).toMatchObject({
+      deploymentTarget: {
+        runtime: "local",
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+        },
+      },
+      credentialInputs: {
+        llmApiKey: "sk-openai-test",
+        cloudApiKey: "ck-cloud-test",
+      },
+    });
+    expect(result.replayBody).not.toHaveProperty("connection");
+    expect(result.replayBody).not.toHaveProperty("providerApiKey");
   });
 });

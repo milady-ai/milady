@@ -8,13 +8,12 @@ import {
 import type { ElizaConfig } from "../config/config.js";
 import { saveElizaConfig } from "../config/config.js";
 import {
-  isOnboardingConnectionComplete,
-  normalizePersistedOnboardingConnection,
-  stripOnboardingConnectionSecrets,
-} from "../contracts/onboarding.js";
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "../contracts/service-routing.js";
 import {
-  applyOnboardingConnectionConfig,
-  reconcilePersistedOnboardingConnection,
+  applyCanonicalOnboardingConfig,
 } from "./provider-switch-config.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 
@@ -271,22 +270,38 @@ export async function handleConfigRoutes(
     // Strip "[REDACTED]" from the whole patch (GET → PUT round-trips).
     stripRedactedPlaceholderValuesDeep(filtered);
 
-    const explicitConnectionRequested = Object.hasOwn(filtered, "connection");
-    const normalizedConnectionPatch = explicitConnectionRequested
-      ? normalizePersistedOnboardingConnection(filtered.connection)
-      : null;
-    if (explicitConnectionRequested && !normalizedConnectionPatch) {
+    const explicitConnectionRequested = Object.hasOwn(
+      body as Record<string, unknown>,
+      "connection",
+    );
+    const canonicalDeploymentTargetRequested = Object.hasOwn(
+      filtered,
+      "deploymentTarget",
+    );
+    const canonicalLinkedAccountsRequested = Object.hasOwn(
+      filtered,
+      "linkedAccounts",
+    );
+    const canonicalServiceRoutingRequested = Object.hasOwn(
+      filtered,
+      "serviceRouting",
+    );
+    const normalizedDeploymentTarget = canonicalDeploymentTargetRequested
+      ? normalizeDeploymentTargetConfig(filtered.deploymentTarget)
+      : undefined;
+    const normalizedLinkedAccounts = canonicalLinkedAccountsRequested
+      ? normalizeLinkedAccountsConfig(filtered.linkedAccounts)
+      : undefined;
+    const normalizedServiceRouting = canonicalServiceRoutingRequested
+      ? normalizeServiceRoutingConfig(filtered.serviceRouting)
+      : undefined;
+    if (explicitConnectionRequested) {
       error(
         res,
-        "connection must be a valid onboarding connection object",
+        "connection patches are no longer supported; update deploymentTarget, linkedAccounts, and serviceRouting directly",
         400,
       );
       return true;
-    }
-    if (normalizedConnectionPatch) {
-      filtered.connection = stripOnboardingConnectionSecrets(
-        normalizedConnectionPatch,
-      );
     }
 
     if (isMiladySettingsDebugEnabled()) {
@@ -347,13 +362,16 @@ export async function handleConfigRoutes(
       }
     }
 
-    if (normalizedConnectionPatch) {
-      await applyOnboardingConnectionConfig(
-        config,
-        normalizedConnectionPatch,
-      );
-    } else if (patchTouchesProviderSelection(filtered)) {
-      reconcilePersistedOnboardingConnection(config);
+    if (
+      canonicalDeploymentTargetRequested ||
+      canonicalLinkedAccountsRequested ||
+      canonicalServiceRoutingRequested
+    ) {
+      applyCanonicalOnboardingConfig(config, {
+        deploymentTarget: normalizedDeploymentTarget,
+        linkedAccounts: normalizedLinkedAccounts,
+        serviceRouting: normalizedServiceRouting,
+      });
     }
 
     try {

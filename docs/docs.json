@@ -46,9 +46,7 @@
           {
             "group": "Guides",
             "pages": [
-              "guides/beginners-user-guide",
               "guides/beginners-development-guide",
-              "guides/learning-paths",
               "guides/developer-playbook",
               "guides/onboarding-ui-flow",
               "guides/electrobun-mac-window-chrome",

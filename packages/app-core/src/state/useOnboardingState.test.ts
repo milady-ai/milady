@@ -27,6 +27,7 @@ describe("useOnboardingState", () => {
 
     const { result } = renderHook(() => useOnboardingState());
 
+    expect(result.current.state.serverTarget).toBe("remote");
     expect(result.current.state.remote.status).toBe("connected");
     expect(result.current.state.remoteApiBase).toBe("https://kei.example/api");
     expect(result.current.state.remoteToken).toBe("remote-token");
@@ -79,6 +80,7 @@ describe("useOnboardingState", () => {
 
     const { result } = renderHook(() => useOnboardingState());
 
+    expect(result.current.state.serverTarget).toBe("remote");
     expect(result.current.state.remote.status).toBe("connected");
     expect(result.current.state.remoteApiBase).toBe("https://ren.example.com");
     expect(result.current.state.remoteToken).toBe("token-123");
@@ -96,8 +98,7 @@ describe("useOnboardingState", () => {
 
     const { result } = renderHook(() => useOnboardingState());
 
-    expect(result.current.state.runMode).toBe("local");
-    expect(result.current.state.cloudProvider).toBe("");
+    expect(result.current.state.serverTarget).toBe("local");
     expect(result.current.state.remote.status).toBe("idle");
     expect(result.current.state.remoteApiBase).toBe("");
   });
@@ -116,9 +117,24 @@ describe("useOnboardingState", () => {
 
     const { result } = renderHook(() => useOnboardingState());
 
-    expect(result.current.state.runMode).toBe("cloud");
-    expect(result.current.state.cloudProvider).toBe("elizacloud");
+    expect(result.current.state.serverTarget).toBe("elizacloud");
     expect(result.current.state.remote.status).toBe("idle");
     expect(result.current.state.remoteToken).toBe("cloud-token");
+  });
+
+  it("updates the canonical hosting target directly", () => {
+    const { result } = renderHook(() => useOnboardingState());
+
+    act(() => {
+      result.current.setField("serverTarget", "remote");
+    });
+
+    expect(result.current.state.serverTarget).toBe("remote");
+
+    act(() => {
+      result.current.setField("serverTarget", "local");
+    });
+
+    expect(result.current.state.serverTarget).toBe("local");
   });
 });

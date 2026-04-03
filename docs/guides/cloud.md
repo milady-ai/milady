@@ -254,43 +254,25 @@ When `maxFailures` consecutive heartbeat failures occur:
 
 ---
 
-## Granular cloud service toggles
+## Granular cloud service routing
 
-When connected to Eliza Cloud, you can enable or disable individual cloud services instead of toggling the entire cloud connection. This lets you keep specific cloud capabilities — such as RPC or media generation — while using a local model provider for inference.
+Eliza Cloud linkage and Eliza Cloud service use are separate.
 
-The following services can be toggled independently:
+Once an Eliza Cloud account is linked, the connected server can route individual capabilities through Eliza Cloud without forcing every capability onto the cloud path. The canonical runtime config expresses that through `serviceRouting`, for example:
 
-| Service | Description | Default |
-|---------|-------------|---------|
-| `inference` | Model inference (chat completions, embeddings routing) | `true` |
-| `rpc` | Blockchain RPC calls | `true` |
-| `media` | Media generation (images, video) | `true` |
-| `tts` | Text-to-speech | `true` |
-| `embeddings` | Embedding generation | `true` |
+- `serviceRouting.llmText` for chat inference
+- `serviceRouting.tts` for text-to-speech
+- `serviceRouting.media` for image/video generation
+- `serviceRouting.embeddings` for embeddings
+- `serviceRouting.rpc` for wallet / blockchain RPC
 
-Service toggles are managed through the provider switch flow. When you switch the active AI provider via `POST /api/provider/switch`:
+That means a server can:
 
-- Switching **to** `elizacloud` enables cloud inference and sets `services.inference = true`.
-- Switching **away** from `elizacloud` to a bring-your-own-key provider (e.g. `openai`, `anthropic`) disables cloud inference while keeping the cloud connection active for other services like RPC.
+- run locally while using Eliza Cloud only for inference
+- run on Eliza Cloud while still using OpenAI, Anthropic, or Ollama for inference
+- keep Eliza Cloud linked for RPC or media while `llmText` uses another provider
 
-You can also configure these toggles in `milady.json` under `cloud.services`:
-
-```json
-{
-  "cloud": {
-    "enabled": true,
-    "services": {
-      "inference": false,
-      "rpc": true,
-      "media": true,
-      "tts": true,
-      "embeddings": true
-    }
-  }
-}
-```
-
-This example keeps the cloud connection active for RPC, media, TTS, and embeddings while routing inference to a local provider.
+Provider switching updates the canonical route for the selected capability. The current Milady app treats `llmText` as the main inference route; additional capabilities are expected to move onto the same `serviceRouting` contract instead of legacy `cloud.services.*` flags.
 
 ---
 

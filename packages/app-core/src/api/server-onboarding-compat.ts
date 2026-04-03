@@ -4,15 +4,18 @@
  */
 import { logger, stringToUuid } from "@elizaos/core";
 import {
+  deriveOnboardingCredentialPersistencePlan,
   getOnboardingProviderOption,
   migrateLegacyRuntimeConfig,
-  normalizePersistedOnboardingConnection,
-  type OnboardingConnection,
+  normalizeOnboardingCredentialInputs,
 } from "@miladyai/shared/contracts/onboarding";
 import {
   normalizeDeploymentTargetConfig,
   normalizeLinkedAccountsConfig,
   normalizeServiceRoutingConfig,
+  type DeploymentTargetConfig,
+  type LinkedAccountsConfig,
+  type ServiceRoutingConfig,
 } from "@miladyai/shared/contracts/service-routing";
 import {
   getDefaultStylePreset,
@@ -22,11 +25,7 @@ import {
 import { loadElizaConfig, saveElizaConfig } from "../config/config";
 import { resolveProviderCredential } from "./credential-resolver";
 import { PREMADE_VOICES } from "../voice/types";
-import {
-  applyOnboardingConnectionConfig,
-  mergeOnboardingConnectionWithExisting,
-  resolveExistingOnboardingConnection,
-} from "./provider-switch-config";
+import { applyOnboardingCredentialPersistence } from "./provider-switch-config";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -86,110 +85,120 @@ function resolveCompatOnboardingStyle(
   return getDefaultStylePreset(language);
 }
 
-function resolvePersistedOnboardingConnection(
+const LEGACY_ONBOARDING_REQUEST_KEYS = [
+  "connection",
+  "runMode",
+  "cloudProvider",
+  "provider",
+  "providerApiKey",
+  "primaryModel",
+  "smallModel",
+  "largeModel",
+] as const;
+
+export function hasLegacyOnboardingRequestFields(
   body: Record<string, unknown>,
-): OnboardingConnection | null {
-  const nextConnection = normalizePersistedOnboardingConnection(
-    body.connection,
-  );
-  if (!nextConnection) {
-    return null;
-  }
-
-  const config = loadElizaConfig();
-  const existingConnection = resolveExistingOnboardingConnection(
-    config as Record<string, unknown>,
-  );
-  return mergeOnboardingConnectionWithExisting(
-    nextConnection,
-    existingConnection,
-  );
-}
-
-function getPersistableLocalProviderEnvKey(
-  connection: OnboardingConnection,
-): string | null {
-  if (connection.kind !== "local-provider") {
-    return null;
-  }
-
-  return getOnboardingProviderOption(connection.provider)?.envKey ?? null;
+): boolean {
+  return LEGACY_ONBOARDING_REQUEST_KEYS.some((key) => Object.hasOwn(body, key));
 }
 
 /**
- * Extract `connection.apiKey` from an onboarding request body and persist it
- * to eliza.json + process.env. Returns the env key name if persisted, or null.
+ * Extract canonical onboarding credential inputs from an onboarding request body
+ * and persist them to config + process.env. Returns the env key name if a local
+ * provider API key was persisted, or null.
  */
 export async function extractAndPersistOnboardingApiKey(
   body: Record<string, unknown>,
 ): Promise<string | null> {
-  logger.info(
-    `[onboarding] extractAndPersistOnboardingApiKey: connection=${body.connection ? "present" : "missing"}, keys=${Object.keys(body).join(",")}`,
+  const credentialInputs = normalizeOnboardingCredentialInputs(
+    body.credentialInputs,
   );
-  const persistedConnection = resolvePersistedOnboardingConnection(body);
-  if (!persistedConnection) {
+  const explicitDeploymentTarget = normalizeDeploymentTargetConfig(
+    body.deploymentTarget,
+  );
+  const explicitServiceRouting = normalizeServiceRoutingConfig(
+    body.serviceRouting,
+  );
+  logger.info(
+    `[onboarding] extractAndPersistOnboardingApiKey: credentialInputs=${credentialInputs ? "present" : "missing"}, keys=${Object.keys(body).join(",")}`,
+  );
+  const initialPlan = deriveOnboardingCredentialPersistencePlan({
+    credentialInputs,
+    deploymentTarget: explicitDeploymentTarget,
+    serviceRouting: explicitServiceRouting,
+  });
+  let effectiveCredentialInputs = credentialInputs;
+  let effectiveServiceRouting = explicitServiceRouting;
+  let llmSelection = initialPlan.llmSelection;
+
+  if (!llmSelection && !initialPlan.cloudApiKey) {
     logger.warn(
-      "[onboarding] No persisted connection resolved from onboarding body",
+      "[onboarding] No onboarding credentials resolved from request body",
     );
     return null;
   }
   logger.info(
-    `[onboarding] Resolved connection: kind=${persistedConnection.kind}, provider=${"provider" in persistedConnection ? persistedConnection.provider : "N/A"}, hasKey=${Boolean("apiKey" in persistedConnection && persistedConnection.apiKey)}`,
+    `[onboarding] Resolved selection: transport=${llmSelection?.transport ?? "none"}, provider=${llmSelection?.backend ?? "N/A"}, hasKey=${Boolean(llmSelection?.apiKey)}, hasCloudKey=${Boolean(initialPlan.cloudApiKey)}`,
   );
 
   // If the key is masked (from IPC) or missing, try to resolve the real
   // key from local credential stores (files, keychain, env).
   if (
-    persistedConnection.kind === "local-provider" &&
-    (!persistedConnection.apiKey ||
-      persistedConnection.apiKey.startsWith("****"))
+    llmSelection?.transport === "direct" &&
+    llmSelection.backend !== "elizacloud" &&
+    (!llmSelection.apiKey || llmSelection.apiKey.startsWith("****"))
   ) {
-    const resolved = resolveProviderCredential(persistedConnection.provider);
+    const resolved = resolveProviderCredential(llmSelection.backend);
     if (resolved && resolved.authType === "subscription") {
-      // OAuth tokens (e.g. Claude Code) go through the subscription auth
-      // flow — they can't be used as direct API keys. Rewrite the
-      // connection to use the subscription path.
-      (persistedConnection as unknown as Record<string, unknown>).kind =
-        "local-provider";
-      (persistedConnection as unknown as Record<string, unknown>).provider =
-        "anthropic-subscription";
-      (persistedConnection as unknown as Record<string, unknown>).apiKey =
-        resolved.apiKey;
+      effectiveCredentialInputs = {
+        ...(effectiveCredentialInputs ?? {}),
+        llmApiKey: resolved.apiKey,
+      };
+      effectiveServiceRouting = normalizeServiceRoutingConfig({
+        ...(effectiveServiceRouting ?? {}),
+        llmText: {
+          ...(effectiveServiceRouting?.llmText ?? {}),
+          backend: resolved.providerId,
+          transport: "direct",
+        },
+      });
       logger.info(
         `[onboarding] Using subscription auth for ${resolved.providerId}`,
       );
     } else if (resolved) {
-      (persistedConnection as unknown as Record<string, unknown>).apiKey =
-        resolved.apiKey;
+      effectiveCredentialInputs = {
+        ...(effectiveCredentialInputs ?? {}),
+        llmApiKey: resolved.apiKey,
+      };
       logger.info(
-        `[onboarding] Resolved real key for ${persistedConnection.provider} via credential-resolver`,
+        `[onboarding] Resolved real key for ${llmSelection.backend} via credential-resolver`,
       );
-    } else {
-      const envKey = getPersistableLocalProviderEnvKey(persistedConnection);
-      if (envKey && !persistedConnection.apiKey) {
-        logger.warn(
-          `[onboarding] No key found for ${persistedConnection.provider} — cannot persist`,
-        );
-        return null;
-      }
+    } else if (!llmSelection.apiKey) {
+      logger.warn(
+        `[onboarding] No key found for ${llmSelection.backend} — cannot persist`,
+      );
+      return null;
     }
+
+    llmSelection = deriveOnboardingCredentialPersistencePlan({
+      credentialInputs: effectiveCredentialInputs,
+      deploymentTarget: explicitDeploymentTarget,
+      serviceRouting: effectiveServiceRouting,
+    }).llmSelection;
   }
 
   const config = loadElizaConfig();
-  await applyOnboardingConnectionConfig(config, persistedConnection);
+  const result = await applyOnboardingCredentialPersistence(config, {
+    credentialInputs: effectiveCredentialInputs,
+    deploymentTarget: explicitDeploymentTarget,
+    serviceRouting: effectiveServiceRouting,
+  });
   saveElizaConfig(config);
 
-  if (persistedConnection.kind !== "local-provider") {
-    return null;
+  if (result) {
+    logger.info(`[onboarding] Persisted ${result} from onboarding credentials`);
   }
-
-  const envKey = getPersistableLocalProviderEnvKey(persistedConnection);
-  if (!envKey || !persistedConnection.apiKey) {
-    return null;
-  }
-
-  logger.info(`[onboarding] Persisted ${envKey} from connection.apiKey`);
-  return envKey;
+  return result;
 }
 
 export function persistCompatOnboardingDefaults(
@@ -309,65 +318,41 @@ export function deriveCompatOnboardingReplayBody(
   body: Record<string, unknown>,
 ): {
   isCloudMode: boolean;
-  replayBody:
-    | (Record<string, unknown> & { runMode: "cloud" })
-    | Record<string, unknown>;
+  replayBody: Record<string, unknown>;
 } {
-  const connection = resolvePersistedOnboardingConnection(body);
-  const deploymentTarget = normalizeDeploymentTargetConfig(
+  const explicitDeploymentTarget = normalizeDeploymentTargetConfig(
     body.deploymentTarget,
   );
-  const linkedAccounts = normalizeLinkedAccountsConfig(body.linkedAccounts);
-  const serviceRouting = normalizeServiceRoutingConfig(body.serviceRouting);
-  const isCloudMode =
-    deploymentTarget?.runtime === "cloud" ||
-    body.runMode === "cloud" ||
-    connection?.kind === "cloud-managed";
+  const explicitCredentialInputs = normalizeOnboardingCredentialInputs(
+    body.credentialInputs,
+  );
+  const deploymentTarget: DeploymentTargetConfig | undefined =
+    explicitDeploymentTarget ?? undefined;
+  const linkedAccounts: LinkedAccountsConfig | undefined =
+    normalizeLinkedAccountsConfig(body.linkedAccounts) ?? undefined;
+  const serviceRouting: ServiceRoutingConfig | undefined =
+    normalizeServiceRoutingConfig(body.serviceRouting) ?? undefined;
+  const isCloudMode = deploymentTarget?.runtime === "cloud";
 
-  const canonicalReplayFields = {
-    ...(deploymentTarget ? { deploymentTarget } : {}),
-    ...(linkedAccounts ? { linkedAccounts } : {}),
-    ...(serviceRouting ? { serviceRouting } : {}),
-  };
-
-  if (connection?.kind === "cloud-managed") {
-    return {
-      isCloudMode: true,
-      replayBody: {
-        ...body,
-        ...canonicalReplayFields,
-        runMode: "cloud",
-        cloudProvider: "elizacloud",
-        ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
-        ...(connection.smallModel ? { smallModel: connection.smallModel } : {}),
-        ...(connection.largeModel ? { largeModel: connection.largeModel } : {}),
-      },
-    };
+  const replayBody = { ...body };
+  for (const key of LEGACY_ONBOARDING_REQUEST_KEYS) {
+    delete replayBody[key];
   }
 
-  if (connection?.kind === "local-provider") {
-    return {
-      isCloudMode: false,
-      replayBody: {
-        ...body,
-        ...canonicalReplayFields,
-        runMode: "local",
-        provider: connection.provider,
-        ...(connection.apiKey ? { providerApiKey: connection.apiKey } : {}),
-        ...(connection.primaryModel
-          ? { primaryModel: connection.primaryModel }
-          : {}),
-      },
-    };
+  if (deploymentTarget) {
+    replayBody.deploymentTarget = deploymentTarget;
+  }
+  if (linkedAccounts) {
+    replayBody.linkedAccounts = linkedAccounts;
+  }
+  if (serviceRouting) {
+    replayBody.serviceRouting = serviceRouting;
+  }
+  if (explicitCredentialInputs) {
+    replayBody.credentialInputs = explicitCredentialInputs;
   }
 
-  return {
-    isCloudMode,
-    replayBody:
-      isCloudMode && body.runMode !== "cloud"
-        ? { ...body, ...canonicalReplayFields, runMode: "cloud" as const }
-        : { ...body, ...canonicalReplayFields },
-  };
+  return { isCloudMode, replayBody };
 }
 
 /**

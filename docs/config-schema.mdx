@@ -4,7 +4,16 @@ sidebarTitle: Config Schema
 description: Complete reference for the milady.json configuration file, organized by section with all fields documented.
 ---
 
-Milady is configured through a `milady.json` file stored in the state directory (default: `~/.milady/milady.json`). All sections are optional; Milady uses sensible defaults when fields are omitted.
+Milady is configured through a `milady.json` file stored in the state
+directory (default: `~/.milady/milady.json`). All sections are optional; Milady
+uses sensible defaults when fields are omitted.
+
+Canonical runtime routing is persisted separately from legacy compatibility
+fields. The top-level runtime source of truth is:
+
+- `deploymentTarget`
+- `linkedAccounts`
+- `serviceRouting`
 
 The configuration is validated against Zod schemas at load time. Invalid fields produce warnings but do not block startup.
 
@@ -30,6 +39,9 @@ The `MiladyConfig` type defines every section available in `milady.json`. Below 
 | [`models`](#models) | `ModelsConfig` | Custom model providers, Bedrock discovery, model selection |
 | [`nodeHost`](#nodehost) | `NodeHostConfig` | Node host browser proxy settings |
 | [`agents`](#agents) | `AgentsConfig` | Agent list, defaults, and per-agent configuration |
+| `deploymentTarget` | `DeploymentTargetConfig` | Canonical hosting target for the active server |
+| `linkedAccounts` | `LinkedAccountsConfig` | Canonical linked-account inventory |
+| `serviceRouting` | `ServiceRoutingConfig` | Canonical per-capability routing |
 | [`tools`](#tools) | `ToolsConfig` | Tool profiles, exec, web, media, links, sandbox policies |
 | [`bindings`](#bindings) | `AgentBinding[]` | Agent-to-channel routing bindings |
 | [`broadcast`](#broadcast) | `BroadcastConfig` | Broadcast peer routing strategy |
@@ -73,6 +85,9 @@ The `MiladyConfig` type defines every section available in `milady.json`. Below 
   "models": {},
   "nodeHost": {},
   "agents": {},
+  "deploymentTarget": {},
+  "linkedAccounts": {},
+  "serviceRouting": {},
   "tools": {},
   "bindings": [],
   "broadcast": {},
@@ -98,6 +113,39 @@ The `MiladyConfig` type defines every section available in `milady.json`. Below 
   "registry": {},
   "features": {},
   "customActions": []
+}
+```
+
+## Canonical Runtime Routing
+
+These three fields define the active runtime topology:
+
+| Field | Description |
+|------|-------------|
+| `deploymentTarget` | Where the active server runs: `local`, `cloud`, or `remote` |
+| `linkedAccounts` | Which provider or cloud accounts are linked |
+| `serviceRouting` | Which backend handles `llmText`, `tts`, `media`, `embeddings`, and `rpc` |
+
+```json5
+{
+  deploymentTarget: {
+    runtime: "remote",
+    provider: "remote",
+    remoteApiBase: "https://milady.example.com",
+  },
+  linkedAccounts: {
+    elizacloud: {
+      status: "linked",
+      source: "oauth",
+    },
+  },
+  serviceRouting: {
+    llmText: {
+      backend: "openrouter",
+      transport: "direct",
+      primaryModel: "openrouter/anthropic/claude-sonnet-4-5",
+    },
+  },
 }
 ```
 

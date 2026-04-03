@@ -61,6 +61,7 @@ import type {
 } from "../api/client";
 import type { UiLanguage } from "../i18n";
 import type { Tab } from "../navigation";
+import type { OnboardingServerTarget } from "../onboarding/server-target";
 import type { UiShellMode, UiTheme } from "./ui-preferences";
 
 export type { UiShellMode } from "./ui-preferences";
@@ -514,8 +515,7 @@ export interface AppState {
   onboardingName: string;
   onboardingOwnerName: string;
   onboardingStyle: string;
-  onboardingRunMode: "local" | "cloud" | "";
-  onboardingCloudProvider: string;
+  onboardingServerTarget: OnboardingServerTarget;
   onboardingCloudApiKey: string;
   onboardingSmallModel: string;
   onboardingLargeModel: string;

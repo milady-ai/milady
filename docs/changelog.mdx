@@ -491,7 +491,7 @@ After browser/OAuth login succeeds on the **Login** tab (pre-provider and provid
 ## Desktop: Reset Milady (app menu) + reliable post-reset onboarding
 
 - **Milady** application menu includes **Reset Milady…** (`reset-milady`). An early iteration pushed **`menu-reset-milady`** to the renderer so **`handleReset()`** owned confirm + API—**why:** one `MiladyClient` and the same teardown as Settings. **Update (changelog **2026-03-22**):** confirm + **`POST /api/agent/reset`** + restart now run in the **main process** (WKWebView could stall renderer `fetch` after native dialogs); the renderer syncs via **`menu-reset-milady-applied`**. Deep dive: [Desktop main-process reset](/apps/desktop-main-process-reset).
-- **`handleReset`** / **`completeResetLocalStateAfterServerWipe`** clear **persisted connection mode**, **API base/token**, and **Eliza Cloud** UI flags after a server wipe. **Why:** otherwise the UI stayed pointed at cloud/remote after config reset, so onboarding looked “stuck.”
+- **`handleReset`** / **`completeResetLocalStateAfterServerWipe`** clear the **persisted active server**, **API base/token**, and **Eliza Cloud** UI flags after a server wipe. **Why:** otherwise the UI stayed pointed at cloud/remote after config reset, so onboarding looked “stuck.”
 - **`App` shell:** onboarding is no longer blocked by **`agentStatus === "starting"`**. **Why:** right after a reset the agent often returns to `starting`; the old gate kept the main shell (or loader) visible instead of **`OnboardingWizard`**, so reset looked like it did nothing after confirm.
 
 Docs: [Desktop app](/apps/desktop) (application menu), [Onboarding UI flow](/guides/onboarding-ui-flow).

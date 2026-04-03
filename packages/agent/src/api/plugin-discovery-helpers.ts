@@ -364,6 +364,9 @@ export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set([
   "approvals",
   "session",
   "web",
+  "deploymentTarget",
+  "linkedAccounts",
+  "serviceRouting",
   "connectors",
   "channels",
   "cron",
@@ -375,7 +378,6 @@ export const CONFIG_WRITE_ALLOWED_TOP_KEYS = new Set([
   "database",
   "media",
   "cloud",
-  "connection",
   "x402",
   "mcp",
   "features",
@@ -1165,4 +1167,3 @@ export function readBundledPluginPackageMetadata(
     };
   }
 }
-

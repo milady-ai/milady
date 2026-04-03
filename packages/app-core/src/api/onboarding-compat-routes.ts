@@ -10,13 +10,18 @@ import { getCloudSecret } from "./cloud-secrets";
 import { sendJson as sendJsonResponse } from "./response";
 import {
   normalizeOnboardingProviderId,
-  normalizePersistedOnboardingConnection,
   migrateLegacyRuntimeConfig,
 } from "@miladyai/shared/contracts/onboarding";
-import { normalizeServiceRoutingConfig } from "@miladyai/shared/contracts/service-routing";
+import {
+  normalizeDeploymentTargetConfig,
+  normalizeLinkedAccountsConfig,
+  normalizeServiceRoutingConfig,
+} from "@miladyai/shared/contracts/service-routing";
+import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import {
   deriveCompatOnboardingReplayBody,
   extractAndPersistOnboardingApiKey,
+  hasLegacyOnboardingRequestFields,
   persistCompatOnboardingDefaults,
 } from "./server-onboarding-compat";
 
@@ -75,27 +80,39 @@ export async function handleOnboardingCompatRoute(
       string,
       unknown
     >;
+    if (hasLegacyOnboardingRequestFields(body)) {
+      sendJsonResponse(res, 400, {
+        error:
+          "legacy onboarding payloads are no longer supported; send deploymentTarget, linkedAccounts, serviceRouting, and credentialInputs",
+      });
+      return true;
+    }
     await extractAndPersistOnboardingApiKey(body);
     persistCompatOnboardingDefaults(body);
     if (typeof body.name === "string" && body.name.trim()) {
       state.pendingAgentName = body.name.trim();
     }
 
-    const { isCloudMode, replayBody: replayBodyRecord } =
+    const { replayBody: replayBodyRecord } =
       deriveCompatOnboardingReplayBody(body);
-    const explicitConnection = normalizePersistedOnboardingConnection(
-      body.connection,
+    const replayDeploymentTarget = normalizeDeploymentTargetConfig(
+      replayBodyRecord.deploymentTarget,
     );
-    const explicitServiceRouting = normalizeServiceRoutingConfig(
-      body.serviceRouting,
+    const replayLinkedAccounts = normalizeLinkedAccountsConfig(
+      replayBodyRecord.linkedAccounts,
+    );
+    const replayServiceRouting = normalizeServiceRoutingConfig(
+      replayBodyRecord.serviceRouting,
     );
     const cloudInferenceSelected = Boolean(
-      explicitConnection?.kind === "cloud-managed" ||
-        (explicitServiceRouting?.llmText?.transport === "cloud-proxy" &&
-          normalizeOnboardingProviderId(
-            explicitServiceRouting.llmText.backend,
-          ) === "elizacloud"),
+      replayServiceRouting?.llmText?.transport === "cloud-proxy" &&
+        normalizeOnboardingProviderId(replayServiceRouting.llmText.backend) ===
+          "elizacloud",
     );
+    const shouldResolveCloudApiKey =
+      replayDeploymentTarget?.runtime === "cloud" ||
+      cloudInferenceSelected ||
+      replayLinkedAccounts?.elizacloud?.status === "linked";
 
     // Resolve the cloud API key so the upstream handler can write it
     // into state.config before saving. Without this, the upstream uses
@@ -109,8 +126,13 @@ export async function handleOnboardingCompatRoute(
         (config as Record<string, unknown>).meta = {};
       }
       (config.meta as Record<string, unknown>).onboardingComplete = true;
+      applyCanonicalOnboardingConfig(config as never, {
+        deploymentTarget: replayDeploymentTarget,
+        linkedAccounts: replayLinkedAccounts,
+        serviceRouting: replayServiceRouting,
+      });
 
-      if (isCloudMode) {
+      if (shouldResolveCloudApiKey) {
         if (!config.cloud) {
           (config as Record<string, unknown>).cloud = {};
         }
@@ -137,26 +159,16 @@ export async function handleOnboardingCompatRoute(
 
         if (!resolvedCloudApiKey) {
           logger.warn(
-            "[milady-api] Cloud onboarding but no API key found on disk, in sealed secrets, or in env. " +
+            "[milady-api] Cloud-linked onboarding but no API key found on disk, in sealed secrets, or in env. " +
               "The upstream handler will save config WITHOUT cloud.apiKey.",
           );
         } else {
           logger.info(
-            "[milady-api] Cloud onboarding: resolved API key, injecting into replay body",
+            "[milady-api] Cloud-linked onboarding: resolved API key, injecting into replay body",
           );
         }
 
         capturedCloudApiKey = resolvedCloudApiKey;
-
-        if (cloudInferenceSelected && body.smallModel) {
-          if (!config.models) {
-            (config as Record<string, unknown>).models = {};
-          }
-          (config.models as Record<string, string>).small =
-            body.smallModel as string;
-          (config.models as Record<string, string>).large =
-            (body.largeModel as string) || "";
-        }
       }
       saveElizaConfig(config);
     } catch (err) {
@@ -165,14 +177,7 @@ export async function handleOnboardingCompatRoute(
       );
     }
 
-    if (isCloudMode) {
-      const enriched = {
-        ...replayBodyRecord,
-        runMode: "cloud" as const,
-        ...(resolvedCloudApiKey ? { providerApiKey: resolvedCloudApiKey } : {}),
-      };
-      replayBody = Buffer.from(JSON.stringify(enriched), "utf8");
-    } else if (body.runMode !== "cloud" && replayBodyRecord !== body) {
+    if (replayBodyRecord !== body) {
       replayBody = Buffer.from(JSON.stringify(replayBodyRecord), "utf8");
     }
   } catch {

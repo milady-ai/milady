@@ -19,8 +19,7 @@ export type ConnectionScreen =
  */
 export type ConnectionFlowSnapshot = Pick<
   AppState,
-  | "onboardingRunMode"
-  | "onboardingCloudProvider"
+  | "onboardingServerTarget"
   | "onboardingProvider"
   | "onboardingRemoteConnected"
   | "onboardingElizaCloudTab"
@@ -35,8 +34,7 @@ export type ConnectionFlowSnapshot = Pick<
 };
 
 export type ConnectionStatePatch = Partial<{
-  onboardingRunMode: AppState["onboardingRunMode"];
-  onboardingCloudProvider: string;
+  onboardingServerTarget: AppState["onboardingServerTarget"];
   onboardingCloudApiKey: string;
   onboardingProvider: string;
   onboardingApiKey: string;
@@ -77,7 +75,6 @@ export type ConnectionTransitionResult =
  */
 export type ConnectionUiSpec = {
   screen: ConnectionScreen;
-  effectiveRunMode: "local" | "cloud" | "";
   showProviderSelection: boolean;
   showHostingLocalCard: boolean;
   forceCloud: boolean;

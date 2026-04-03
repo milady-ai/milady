@@ -5,7 +5,6 @@ import type {
   MediaConfig,
   ReleaseChannel,
 } from "../contracts/config.js";
-import type { OnboardingConnection } from "../contracts/onboarding.js";
 import type {
   DeploymentTargetConfig,
   LinkedAccountsConfig,
@@ -754,8 +753,6 @@ export type ElizaConfig = {
   linkedAccounts?: LinkedAccountsConfig;
   /** Canonical per-capability routing for AI and cloud-backed services. */
   serviceRouting?: ServiceRoutingConfig;
-  /** Authoritative active provider selection persisted from onboarding/settings. */
-  connection?: OnboardingConnection;
   /** CUA (Computer Use Agent) cloud sandbox configuration. */
   cua?: CuaConfig;
   x402?: X402Config;

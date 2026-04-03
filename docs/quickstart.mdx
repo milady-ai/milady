@@ -1,10 +1,18 @@
 ---
 title: "Quick Start"
 sidebarTitle: "Quick Start"
-description: "Get Milady up and running in under a minute."
+description: "Developer/operator quick start for getting a Milady server and client flow running."
 ---
 
-This guide walks through what happens the first time you launch Milady, from installation to your first conversation.
+This guide is for developers and operators who are installing or running
+Milady themselves. It walks through the runtime-facing first-launch flow, from
+installation to the first conversation.
+
+<Info>
+If you are looking for the consumer-facing product walkthrough, use
+[milady.ai/docs](https://milady.ai/docs). This page documents the runtime and
+operator side of the system on [docs.milady.ai](https://docs.milady.ai).
+</Info>
 
 ## Install
 
@@ -39,137 +47,94 @@ Then start:
 milady
 ```
 
-## What Happens on First Run
+## What Happens on First Launch
 
-When Milady detects no existing agent configuration (no `name` field in `~/.milady/milady.json`), it launches an interactive onboarding wizard. The wizard runs in your terminal via [@clack/prompts](https://github.com/bombshell-dev/clack) and walks through five steps: naming your agent, choosing a personality, selecting a model provider, setting up wallets, and saving everything to config.
+Milady now starts from a server-first flow. Instead of assuming you always want
+to create a fresh local runtime, the client asks which server you want to use
+and then completes setup only for that server.
 
-<Info>
-The onboarding wizard only runs when stdin is a TTY (interactive terminal). In headless or piped environments, Milady skips onboarding and expects a pre-configured `milady.json`.
-</Info>
-
-## The Onboarding Flow
+## First-Launch Flow
 
 <Steps>
-  <Step title="Welcome">
-    Milady greets you with a welcome banner:
+  <Step title="Choose a server">
+    The first screen is a chooser:
 
-    ```
-    ┌  WELCOME TO MILADY!
-    ```
+    - **Create one** — start a local Milady server on this machine
+    - **Discovered LAN servers** — connect to a Milady server already running on your network
+    - **Eliza Cloud** — connect to a hosted Milady server
+    - **Manually connect** — enter the URL and credentials for an existing remote server
+
+    If no cloud credentials are available, the cloud-only option should be omitted.
   </Step>
 
-  <Step title="Name your agent">
-    The wizard presents 4 randomly selected names from a pool of 55 options (Japanese-inspired names like Reimu, Sakuya, Yukari, Marisa, Koishi, Remilia, etc.) plus a "Custom..." option to type your own:
-
-    ```
-    ◇  ♡♡milady♡♡: Hey there, I'm.... err, what was my name again?
-    │  ● Sakuya
-    │  ○ Reimu
-    │  ○ Koishi
-    │  ○ Marisa
-    │  ○ Custom...
-    ```
-
-    Pick a name or enter your own. The agent confirms: *"Oh that's right, I'm Sakuya!"*
+  <Step title="Restore or continue setup for that server">
+    Once you pick a server target, Milady checks whether that server is already
+    configured. A healthy existing server drops you straight into the dashboard
+    and chat. A new or incomplete server continues into setup for that server
+    only.
   </Step>
 
-  <Step title="Choose a personality">
-    Select from 7 style presets that define how your agent communicates. Each preset sets the agent's bio, system prompt, writing style, adjectives, topics, and example messages:
+  <Step title="Choose your chat provider only when needed">
+    Hosting target and inference provider are separate:
 
-    | Catchphrase | Hint | Description |
-    |-------------|------|-------------|
-    | `uwu~` | soft & sweet | Warm, gentle, kaomoji and tildes. Cozy lo-fi energy. |
-    | `hell yeah` | bold & fearless | Direct, confident, ships fast. Three espressos. |
-    | `lol k` | terminally online | Internet-native shorthand. Ironic, deadpan, meme-literate. |
-    | `Noted.` | composed & precise | Measured, articulate, every word chosen carefully. |
-    | `hehe~` | playful trickster | Mischievous, witty, sneaks wisdom inside humor. |
-    | `...` | quiet intensity | Terse fragments. Ellipses for weight. Less is more. |
-    | `lmao kms` | unhinged & dark | Abrasive humor, aggressive helpfulness. Roast then answer. |
+    - A **local** server can use Ollama, OpenAI, Anthropic, OpenRouter, or Eliza Cloud inference
+    - An **Eliza Cloud** server can still use direct Anthropic or OpenAI inference
+    - A **remote** server can expose whatever provider routes it has configured
 
-    ```
-    ◇  Sakuya: Now... how do I like to talk again?
-    │  ● uwu~       (soft & sweet)
-    │  ○ hell yeah   (bold & fearless)
-    │  ○ lol k       (terminally online)
-    │  ○ Noted.      (composed & precise)
-    │  ○ hehe~       (playful trickster)
-    │  ○ ...         (quiet intensity)
-    │  ○ lmao kms    (unhinged & dark)
-    ```
-
-    The chosen preset is combined with randomly sampled lines from shared bio and system prompt pools (milady/netart/internet culture aesthetic) to create a unique character every time.
+    The active chat route lives in canonical service routing, not in the hosting choice.
   </Step>
 
-  <Step title="Select a model provider">
-    If no API key is already detected in your environment, the wizard asks you to pick a provider:
-
-    ```
-    ◇  Sakuya: One more thing — which AI provider should I use?
-    │  ● Anthropic (Claude)
-    │  ○ OpenAI (GPT)
-    │  ○ Google (Gemini)
-    │  ○ Groq
-    │  ○ xAI (Grok)
-    │  ○ OpenRouter
-    │  ○ Mistral
-    │  ○ Ollama (local, no key)
-    │  ○ Skip for now
-    ```
-
-    After selecting a provider, you paste your API key (masked input). For Ollama, you confirm or change the base URL (default: `http://localhost:11434`).
-
-    <Info>
-    If Milady detects an existing API key in your environment (e.g., `ANTHROPIC_API_KEY` is already set), it skips this step and uses the detected provider automatically.
-    </Info>
+  <Step title="Link optional services">
+    After the server target is chosen, you can link optional capabilities like
+    Eliza Cloud account access, wallets, connectors, TTS, media, and RPC
+    services without forcing them to become the active chat provider.
   </Step>
 
-  <Step title="Set up crypto wallets (optional)">
-    The wizard offers to set up EVM and Solana wallets for on-chain interactions:
+  <Step title="Open chat">
+    Milady enters chat only after both of these are resolved:
 
-    ```
-    ◇  Sakuya: Do you want me to set up crypto wallets? (for trading, NFTs, DeFi)
-    │  ● Generate new wallets
-    │  ○ Import existing wallets
-    │  ○ Skip for now
-    ```
-
-    - **Generate new wallets** creates fresh EVM and Solana keypairs and prints the public addresses.
-    - **Import existing wallets** lets you paste private keys (EVM hex or Solana base58).
-    - **Skip for now** defers wallet setup. You can add wallets later through config.
-
-    Private keys are stored in the `env` section of `~/.milady/milady.json`.
-  </Step>
-
-  <Step title="Configuration saved">
-    The wizard writes everything to `~/.milady/milady.json`:
-    - Agent name and personality (bio, system prompt, style rules, adjectives, topics, examples)
-    - Provider API key in the `env` section
-    - Wallet keys (if generated/imported)
-    - Skills registry (defaults to `https://clawhub.ai`)
-
-    ```
-    ◇  Sakuya: uwu~ Alright, that's me.
-    └  Let's get started!
-    ```
-
-    The agent starts, the gateway binds, and services come online.
+    1. the selected server target
+    2. the active `llmText` route for that server
   </Step>
 </Steps>
 
-## After Onboarding
+## The Three Knobs That Matter
 
-Once onboarding completes, Milady starts the following services:
+| Field | What it answers |
+|------|------------------|
+| `deploymentTarget` | Where does this server run? |
+| `linkedAccounts` | Which accounts are available to this server? |
+| `serviceRouting` | Which backend handles chat, TTS, media, embeddings, and RPC? |
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| Web Dashboard | `http://localhost:2138` | Chat UI, session management, agent configuration |
-| Gateway | `ws://localhost:18789` | WebSocket + HTTP API for all clients and connectors |
+This is why linking Eliza Cloud does not automatically mean “use Eliza Cloud for inference.”
 
-The desktop app opens the dashboard automatically. The CLI version prints the URLs and enters the interactive chat loop.
+## Local Startup vs Existing Servers
+
+<Tabs>
+  <Tab title="Create a local server">
+    Milady boots a local runtime, writes the server's primary runtime config to
+    `~/.milady/milady.json`, and opens the dashboard when the gateway is ready.
+
+    On a local server, the dashboard is typically served from the runtime on a
+    loopback URL such as `http://localhost:2138`.
+  </Tab>
+  <Tab title="Connect to LAN or remote">
+    Milady treats LAN and remote servers as the same client concept: a reachable
+    Milady gateway. The client stores how to reconnect, while the selected
+    server keeps its own provider routing and runtime config.
+  </Tab>
+  <Tab title="Connect to Eliza Cloud">
+    Eliza Cloud is another server target. It may provide hosted runtime,
+    deployment, or optional cloud-backed services, but the selected chat
+    provider can still be something else.
+  </Tab>
+</Tabs>
 
 ## Your First Conversation
 
-With the agent running, open `http://localhost:2138` in your browser or type directly in the terminal. Try a few things:
+After you choose or connect to a server, open the Milady client and start
+chatting through that server. For a local server, the desktop or browser UI is
+usually available at `http://localhost:2138`. Try a few things:
 
 ```
 you: hey, what can you do?
@@ -196,11 +161,12 @@ you: explain how transformers work
 
 <Tabs>
   <Tab title="Desktop App">
-    The desktop app packages everything -- no terminal needed.
+    The desktop app packages everything — no terminal required.
 
     1. Download and install from [Releases](https://github.com/milady-ai/milady/releases/latest).
-    2. Launch the app. The onboarding wizard runs inside the built-in web UI.
-    3. The dashboard opens automatically. Start chatting.
+    2. Launch the app and choose a server target.
+    3. If the selected server needs setup, finish provider and capability setup for that server.
+    4. The dashboard opens automatically. Start chatting.
 
     The desktop app includes auto-updates, system tray integration, and native window management.
   </Tab>
@@ -247,7 +213,7 @@ you: explain how transformers work
 
     - **Config location**: `~/.milady/milady.json` instead of an inline character file.
     - **Gateway**: Milady adds a multiplexed WebSocket + HTTP gateway on port 18789.
-    - **Onboarding**: The first-run wizard generates a character from style presets and random pool sampling.
+    - **Startup**: The client now starts from server selection, then configures routing for the selected server.
     - **Plugin manager**: Install plugins via `milady plugins install <name>` -- they are tracked in config and auto-loaded.
     - **Skills**: Markdown-based extensions via ClawHub registry, separate from the plugin system.
 

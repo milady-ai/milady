@@ -18,8 +18,8 @@ describe("completeResetLocalStateAfterServerWipe", () => {
       resetClientConnection: vi.fn(() => {
         order.push("resetClientConnection");
       }),
-      clearPersistedConnectionMode: vi.fn(() => {
-        order.push("clearPersistedConnectionMode");
+      clearPersistedActiveServer: vi.fn(() => {
+        order.push("clearPersistedActiveServer");
       }),
       clearPersistedAvatarIndex: vi.fn(() => {
         order.push("clearPersistedAvatarIndex");
@@ -59,7 +59,7 @@ describe("completeResetLocalStateAfterServerWipe", () => {
     expect(order).toEqual([
       "setAgentStatus:running",
       "resetClientConnection",
-      "clearPersistedConnectionMode",
+      "clearPersistedActiveServer",
       "clearPersistedAvatarIndex",
       "setClientBaseUrl",
       "setClientToken",
@@ -81,7 +81,7 @@ describe("completeResetLocalStateAfterServerWipe", () => {
     const deps = {
       setAgentStatus: vi.fn(),
       resetClientConnection: vi.fn(),
-      clearPersistedConnectionMode: vi.fn(),
+      clearPersistedActiveServer: vi.fn(),
       clearPersistedAvatarIndex: vi.fn(),
       setClientBaseUrl: vi.fn(),
       setClientToken: vi.fn(),

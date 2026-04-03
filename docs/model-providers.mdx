@@ -1,16 +1,16 @@
 ---
 title: "Model Providers"
 sidebarTitle: "Model Providers"
-description: "Supported AI model providers and how to configure them."
+description: "Supported inference backends and how they fit into Milady's server-target-first routing model."
 ---
 
-Milady supports **19 model providers** out of the box. Providers are loaded as plugins and can be auto-enabled by setting the right environment variable, or explicitly configured in `milady.json`.
+Milady supports **19 inference backends** out of the box. Provider plugins still supply the concrete model implementations, but the active backend is selected through canonical runtime routing on the connected server, not by ad hoc env toggles in the client.
 
 ---
 
 ## Provider Reference
 
-The table below is the complete list of supported providers, sourced from the auto-enable system in Milady's core.
+The table below is the complete list of supported provider plugins, sourced from Milady's provider catalog.
 
 <Note>
 Providers marked **bundled** ship with every Milady install. Others are installed on demand the first time they are needed — no manual plugin install required.
@@ -36,13 +36,25 @@ Providers marked **bundled** ship with every Milady install. Others are installe
 | [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | No | Search-augmented generation. |
 | [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | No | Homunculus Labs Zai models. |
 | [Pi AI](https://pi.ai) | `@elizaos/plugin-pi-ai` | `ELIZA_USE_PI_AI` | No | Inflection Pi conversational models. |
-| [elizaOS Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` or `ELIZAOS_CLOUD_ENABLED` | Yes | Managed cloud inference. No local GPU needed. |
+| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | Yes | Cloud-managed inference route. Can be selected independently from where Milady itself is running. |
 
 ---
 
 ## How Provider Selection Works
 
-Milady uses an **auto-enable** system. You do not need to manually register provider plugins — just set the API key and Milady handles the rest.
+Milady uses a **server-target-first** model:
+
+1. Choose which server to use: local, Eliza Cloud, or a remote backend.
+2. Link any accounts the server may need, such as Eliza Cloud or OpenAI.
+3. Select the active inference route for `llmText`.
+
+The connected server then resolves the effective provider from canonical runtime config:
+
+- `deploymentTarget` decides where the server runs
+- `linkedAccounts` decides which accounts are available
+- `serviceRouting.llmText` decides who handles inference
+
+Provider plugins are still auto-enabled from the server environment when appropriate, but the client-facing source of truth is the server's runtime routing config, not a raw environment variable on its own.
 
 ### Auto-enable flow
 

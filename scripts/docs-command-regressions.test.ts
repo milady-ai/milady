@@ -28,6 +28,60 @@ describe("docs command regressions", () => {
     expect(quickstart).not.toContain("milady doctor");
   });
 
+  it("documents canonical runtime routing instead of root connection state", () => {
+    const onboarding = readDoc("docs/rest/onboarding.md");
+    const system = readDoc("docs/rest/system.md");
+    const apiReference = readDoc("docs/api-reference.mdx");
+    const configuration = readDoc("docs/configuration.mdx");
+
+    expect(onboarding).toContain("deploymentTarget");
+    expect(onboarding).toContain("linkedAccounts");
+    expect(onboarding).toContain("serviceRouting");
+    expect(onboarding).toContain("credentialInputs");
+    expect(onboarding).not.toContain(
+      "authoritative active-provider record persisted at the config root",
+    );
+    expect(system).not.toContain(
+      "The root `connection` field is the authoritative active-provider record.",
+    );
+    expect(system).toContain("credentialInputs");
+    expect(apiReference).toContain("canonical routing state");
+    expect(apiReference).not.toContain("canonical `connection` state");
+    expect(configuration).toContain(
+      "root `connection` field is no longer part of the",
+    );
+  });
+
+  it("describes chooser-first startup in consumer docs", () => {
+    const quickstart = readDoc("docs/quickstart.mdx");
+    const beginnerGuide = readDoc("docs/guides/beginners-user-guide.md");
+    const dashboard = readDoc("docs/apps/dashboard.md");
+    const onboardingFlow = readDoc("docs/guides/onboarding-ui-flow.md");
+
+    expect(quickstart).toContain("Choose a server");
+    expect(quickstart).toContain("Create one");
+    expect(beginnerGuide).toContain("chooser-first flow");
+    expect(beginnerGuide).toContain("server target");
+    expect(dashboard).toContain("server chooser / startup flow");
+    expect(onboardingFlow).toContain("Startup chooser");
+    expect(onboardingFlow).toContain("serviceRouting.llmText");
+    expect(onboardingFlow).not.toContain("full local setup path");
+    expect(onboardingFlow).not.toContain("cloud path (`welcome`");
+  });
+
+  it("keeps developer docs and consumer docs on separate published surfaces", () => {
+    const index = readDoc("docs/index.mdx");
+    const quickstart = readDoc("docs/quickstart.mdx");
+    const beginnerGuide = readDoc("docs/guides/beginners-user-guide.md");
+
+    expect(index).toContain("https://docs.milady.ai");
+    expect(index).toContain("https://milady.ai/docs");
+    expect(quickstart).toContain("https://docs.milady.ai");
+    expect(quickstart).toContain("https://milady.ai/docs");
+    expect(beginnerGuide).toContain("https://docs.milady.ai");
+    expect(beginnerGuide).toContain("https://milady.ai/docs");
+  });
+
   it("documents the published npm package name as miladyai", () => {
     const installation = readDoc("docs/installation.mdx");
     const configuration = readDoc("docs/configuration.mdx");

@@ -1,9 +1,9 @@
 import {
-  inferOnboardingConnectionFromConfig,
-  isLocalProviderConnection,
   resolveDeploymentTargetInConfig,
+  resolveServiceRoutingInConfig,
 } from "@miladyai/shared/contracts/onboarding";
 import {
+  getOnboardingProviderOption,
   isElizaCloudLinkedInConfig,
   resolveElizaCloudTopology,
 } from "@miladyai/shared/contracts";
@@ -59,8 +59,11 @@ function hasInactiveCloudSignals(
 export function shouldPreferLocalProviderConfig(
   config: StorageConfig | null | undefined,
 ): boolean {
-  const connection = inferOnboardingConnectionFromConfig(config);
-  if (!connection || !isLocalProviderConnection(connection)) {
+  const llmText = resolveServiceRoutingInConfig(
+    config as Record<string, unknown>,
+  )?.llmText;
+  const directProvider = getOnboardingProviderOption(llmText?.backend)?.id;
+  if (llmText?.transport !== "direct" || !directProvider) {
     return false;
   }
 

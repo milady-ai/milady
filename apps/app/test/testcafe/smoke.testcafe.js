@@ -37,8 +37,12 @@ function setLocalStorage() {
     localStorage.setItem("eliza:onboarding-complete", "1");
     localStorage.setItem("eliza:onboarding:step", "activate");
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
     localStorage.setItem("eliza:ui-shell-mode", "native");
   });

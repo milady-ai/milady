@@ -161,7 +161,10 @@ Deep runtime introspection endpoint for advanced debugging. Returns detailed inf
 
 ### POST /api/provider/switch
 
-Atomically switch the active AI provider selection. The authoritative selection is persisted to the root `connection` field in config, low-level runtime config is derived from that selection, and previously configured credentials remain available as capability state. The server triggers a restart after the switch.
+Atomically switch the active AI provider selection. The server persists the
+selection into canonical runtime config, primarily `serviceRouting.llmText`,
+updates linked-account state when needed, and triggers a restart after the
+switch.
 
 **Request Body**
 
@@ -175,7 +178,10 @@ Canonical providers: `elizacloud`, `pi-ai`, `openai-subscription`, `anthropic-su
 
 Compatibility aliases are still accepted on input and normalized before persistence, including `google`, `google-genai`, `xai`, and `openai-codex`.
 
-When switching to `elizacloud`, cloud inference is enabled and `cloud.services.inference` is set to `true`. When switching away from `elizacloud` to any other provider, cloud inference is disabled but the cloud connection remains active for other services (RPC, media, TTS, embeddings). See [granular cloud service toggles](/guides/cloud#granular-cloud-service-toggles) for details.
+When switching to `elizacloud`, text inference is routed through the Eliza
+Cloud proxy. Switching away from `elizacloud` changes only the active text
+route; linked cloud accounts and other routed cloud services can remain
+available independently.
 
 **Response**
 
@@ -241,9 +247,21 @@ A JSON Schema object describing all config keys, types, and defaults.
 
 ### PUT /api/config
 
-Update one or more configuration keys. Uses a deep-merge strategy — provided keys are merged recursively without wiping sibling keys. Protected against prototype pollution.
+Update one or more configuration keys. Uses a deep-merge strategy — provided
+keys are merged recursively without wiping sibling keys. Protected against
+prototype pollution.
 
-The root `connection` field is the authoritative active-provider record. When a `PUT /api/config` request includes `connection`, the server canonicalizes and persists it, then derives runtime-facing cloud/env/subscription settings from that record. When a patch omits `connection` but changes provider-affecting keys such as `cloud`, `env`, `models`, or `agents.defaults.subscriptionProvider`, the server reconciles `connection` from the merged config for backward compatibility.
+Canonical runtime routing and hosting live in these top-level config fields:
+
+- `deploymentTarget`
+- `linkedAccounts`
+- `serviceRouting`
+
+The server resolves runtime behavior from those canonical fields. Client flows
+should update hosting and routing there instead of sending legacy onboarding
+mirrors or provider-specific compatibility blobs. Initial onboarding secrets
+belong on `POST /api/onboarding` under `credentialInputs`; `PUT /api/config`
+is for persisted canonical config, not for replaying old onboarding payloads.
 
 **Request Body**
 
@@ -262,8 +280,7 @@ Partial config object. Only provided keys are updated:
 
 **Response**
 
-Returns the updated redacted config snapshot, including the root `connection`
-field when present.
+Returns the updated redacted config snapshot.
 
 ---
 

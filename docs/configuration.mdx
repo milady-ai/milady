@@ -1,10 +1,12 @@
 ---
 title: "Configuration"
 sidebarTitle: "Configuration"
-description: "Complete reference for the Milady config file, environment variables, CLI commands, and all configuration sections."
+description: "Complete reference for the primary Milady runtime config file, environment variables, CLI commands, and all configuration sections."
 ---
 
-Milady uses a single JSON5 config file for all settings. This page documents every configuration section, environment variable override, and CLI command available.
+Milady uses a primary JSON5 config file for runtime and bootstrap settings.
+This page documents the config file, environment variable overrides, and the
+canonical runtime routing fields that now drive hosting and provider selection.
 
 ## Config File Location
 
@@ -46,6 +48,48 @@ The state directory also contains:
 | `~/.milady/models/` | Cached model provider lists (per-provider JSON files) |
 | `~/.milady/credentials/` | OAuth credentials (overridable via `MILADY_OAUTH_DIR`) |
 | `~/.milady/credentials/oauth.json` | OAuth token storage |
+
+## Canonical Runtime Routing
+
+Milady's saved runtime topology is no longer inferred from a single
+`connection` blob, and the root `connection` field is no longer part of the
+persisted config schema. The canonical persisted fields are:
+
+| Field | Purpose |
+|------|---------|
+| `deploymentTarget` | Where the active server runs: `local`, `cloud`, or `remote` |
+| `linkedAccounts` | Which provider or cloud accounts are available to that server |
+| `serviceRouting` | Which backend handles each capability (`llmText`, `tts`, `media`, `embeddings`, `rpc`) |
+
+```json5
+{
+  deploymentTarget: {
+    runtime: "cloud",
+    provider: "elizacloud",
+  },
+  linkedAccounts: {
+    elizacloud: {
+      status: "linked",
+      source: "oauth",
+    },
+  },
+  serviceRouting: {
+    llmText: {
+      backend: "anthropic",
+      transport: "direct",
+      primaryModel: "anthropic/claude-sonnet-4-5",
+    },
+    tts: {
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+      accountId: "elizacloud",
+    },
+  },
+}
+```
+
+That means a server can be hosted on Eliza Cloud while still using Anthropic,
+OpenAI, OpenRouter, or a local model for chat inference.
 
 ## File Format
 
@@ -156,6 +200,9 @@ Here is every top-level key in `MiladyConfig`:
   models: {},         // Custom model providers, Bedrock discovery
   nodeHost: {},       // Node host browser proxy settings
   agents: {},         // Agent definitions, defaults, personality
+  deploymentTarget: {}, // Canonical hosting target (local/cloud/remote)
+  linkedAccounts: {}, // Canonical linked account inventory
+  serviceRouting: {}, // Canonical per-capability routing
   tools: {},          // Tool profiles, web search/fetch, exec, media
   bindings: [],       // Agent-to-channel routing rules
   broadcast: {},      // Multi-agent broadcast configuration
@@ -1278,7 +1325,9 @@ milady config show --json   # Raw JSON output
 To change values, edit `~/.milady/milady.json` directly (it supports JSON5 with comments).
 
 <Tip>
-Use `milady configure` for a quick reference of common configuration options and environment variables. For full initial setup, run `milady setup` to go through the onboarding wizard, or edit `~/.milady/milady.json` directly.
+Use `milady configure` for a quick reference of common configuration options
+and environment variables. For local bootstrap, run `milady setup`, or edit
+`~/.milady/milady.json` directly.
 </Tip>
 
 ## Full Example

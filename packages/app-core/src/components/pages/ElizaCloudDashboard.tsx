@@ -259,8 +259,7 @@ export function CloudDashboard() {
         client.setBaseUrl(connection.apiBase);
         client.setToken(connection.token);
         setState("startupError", null);
-        setState("onboardingRunMode", "cloud");
-        setState("onboardingCloudProvider", "elizacloud");
+        setState("onboardingServerTarget", "elizacloud");
         setState("onboardingRemoteApiBase", connection.apiBase);
         setState("onboardingRemoteToken", connection.token);
         setState("onboardingRemoteError", null);

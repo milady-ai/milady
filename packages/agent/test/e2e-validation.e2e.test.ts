@@ -365,9 +365,8 @@ describe("Fresh Install Simulation", () => {
           postExamples: [
             "Hello! I am a freshly installed test agent and I am ready to help.",
           ],
-          connection: {
-            kind: "local-provider",
-            provider: "anthropic",
+          deploymentTarget: {
+            runtime: "local",
           },
         },
       );

@@ -8,6 +8,7 @@ import {
 } from "@miladyai/shared/runtime-env";
 import Electrobun, {
   ApplicationMenu,
+  BrowserView,
   BrowserWindow,
   Updater,
   Utils,
@@ -28,6 +29,7 @@ import {
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { readNavigationEventUrl } from "./cloud-auth-window";
+import { resolveMainWindowPartition } from "./main-window-session";
 import {
   buildMainMenuResetApiCandidates,
   pickReachableMenuResetApiBase,
@@ -51,9 +53,12 @@ import {
 } from "./native/mac-window-effects";
 import { getPermissionManager } from "./native/permissions";
 import { checkWebGpuSupport } from "./native/webgpu-browser-support";
-import { readBuiltPreloadScript } from "./preload-validation";
 import { resolveRendererAsset } from "./renderer-static";
 import { registerRpcHandlers } from "./rpc-handlers";
+import {
+  readResolvedPreloadScript,
+  resolveRendererAssetDir,
+} from "./runtime-layout";
 import { startScreenshotDevServer } from "./screenshot-dev-server";
 import { recordStartupPhase, resolveStartupBundlePath } from "./startup-trace";
 import {
@@ -62,6 +67,10 @@ import {
   SurfaceWindowManager,
 } from "./surface-windows";
 import type { SendToWebview } from "./types.js";
+import {
+  resolveDesktopBundleVersion,
+  shouldResetWindowsCefProfile,
+} from "./windows-cef-profile";
 
 type HeartbeatMenuTriggerSummary = {
   enabled: boolean;
@@ -575,7 +584,7 @@ function sendToActiveRenderer(message: string, payload?: unknown): void {
  * Returns the base URL e.g. "http://localhost:5174".
  */
 async function startRendererServer(): Promise<string> {
-  const rendererDir = path.resolve(import.meta.dir, "../renderer");
+  const rendererDir = resolveRendererAssetDir(import.meta.dir);
   if (!fs.existsSync(rendererDir)) {
     console.warn("[Renderer] renderer dir not found:", rendererDir);
     return "";
@@ -739,7 +748,7 @@ async function resolveRendererUrl(): Promise<string> {
 
   if (!rendererUrl) {
     // Last resort: file:// (may have CORS issues with crossorigin module scripts)
-    rendererUrl = `file://${path.resolve(import.meta.dir, "../renderer/index.html")}`;
+    rendererUrl = `file://${path.join(resolveRendererAssetDir(import.meta.dir), "index.html")}`;
     console.warn(
       "[Main] Falling back to file:// renderer URL — CORS issues possible",
     );
@@ -750,6 +759,12 @@ async function resolveRendererUrl(): Promise<string> {
 
 async function createMainWindow(): Promise<BrowserWindow> {
   const rendererUrl = await resolveRendererUrl();
+  const mainWindowPartition = resolveMainWindowPartition(process.env);
+  if (mainWindowPartition) {
+    console.log(
+      `[Main] Using isolated main window partition ${mainWindowPartition}`,
+    );
+  }
 
   // Load persisted window state
   const statePath = path.join(Utils.paths.userData, "window-state.json");
@@ -760,31 +775,69 @@ async function createMainWindow(): Promise<BrowserWindow> {
   // setting up Milady's direct Electrobun RPC bridge on the window.
   let preload: string;
   try {
-    preload = readBuiltPreloadScript(import.meta.dir);
+    preload = readResolvedPreloadScript(import.meta.dir);
   } catch (err) {
     console.error("[Main] Failed to read preload script:", err);
     preload = "// preload unavailable";
   }
 
-  const win = new BrowserWindow({
-    title: "Milady",
-    // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
-    icon: resolveDesktopAppIconPath(),
-    url: rendererUrl,
-    preload,
-    frame: {
-      width: state.width,
-      height: state.height,
-      x: state.x,
-      y: state.y,
-    },
-    // hiddenInset hides the title bar and insets traffic lights — macOS only.
-    // On Windows/Linux use the default title bar so the window remains draggable.
-    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
-    // Transparent background for vibrancy — macOS only.
-    // On Windows/Linux a solid background prevents rendering artifacts.
-    transparent: process.platform === "darwin",
-  });
+  const windowFrame = {
+    width: state.width,
+    height: state.height,
+    x: state.x,
+    y: state.y,
+  };
+  const titleBarStyle =
+    process.platform === "darwin" ? "hiddenInset" : "default";
+  const transparent = process.platform === "darwin";
+
+  let win: BrowserWindow;
+  if (mainWindowPartition) {
+    // BrowserWindow always creates a default BrowserView. For the packaged
+    // Windows bootstrap probe, force that throwaway view to stay native so the
+    // real CEF renderer can boot inside an explicit isolated partition.
+    win = new BrowserWindow({
+      title: "Milady",
+      // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
+      icon: resolveDesktopAppIconPath(),
+      url: null,
+      preload: null,
+      frame: windowFrame,
+      renderer: "native",
+      titleBarStyle,
+      transparent,
+    });
+    win.webview.remove();
+    const mainView = new BrowserView({
+      url: rendererUrl,
+      preload,
+      renderer: "cef",
+      partition: mainWindowPartition,
+      frame: {
+        x: 0,
+        y: 0,
+        width: state.width,
+        height: state.height,
+      },
+      windowId: win.id,
+    });
+    win.webviewId = mainView.id;
+  } else {
+    win = new BrowserWindow({
+      title: "Milady",
+      // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
+      icon: resolveDesktopAppIconPath(),
+      url: rendererUrl,
+      preload,
+      frame: windowFrame,
+      // hiddenInset hides the title bar and insets traffic lights — macOS only.
+      // On Windows/Linux use the default title bar so the window remains draggable.
+      titleBarStyle,
+      // Transparent background for vibrancy — macOS only.
+      // On Windows/Linux a solid background prevents rendering artifacts.
+      transparent,
+    });
+  }
 
   // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);
@@ -1565,21 +1618,18 @@ async function main(): Promise<void> {
     try {
       const cefDir = path.join(Utils.paths.userData, "CEF");
       const cefVersionMarker = path.join(cefDir, ".milady-version");
-      let currentVersion = "unknown";
-      try {
-        const pkgPath = path.join(import.meta.dir, "..", "package.json");
-        currentVersion =
-          JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version ?? "unknown";
-      } catch {
-        // Fallback — version marker will still trigger cleanup on next real version.
-      }
+      const currentVersion =
+        resolveDesktopBundleVersion(import.meta.dir) ?? "unknown";
       let previousVersion: string | null = null;
       try {
         previousVersion = fs.readFileSync(cefVersionMarker, "utf-8").trim();
       } catch {
         // No marker — first run or pre-fix install.
       }
-      if (previousVersion !== currentVersion && fs.existsSync(cefDir)) {
+      if (
+        shouldResetWindowsCefProfile(previousVersion, currentVersion) &&
+        fs.existsSync(cefDir)
+      ) {
         console.log(
           `[Main] CEF version mismatch (${previousVersion ?? "none"} → ${currentVersion}), clearing stale CEF profile`,
         );
@@ -1595,8 +1645,10 @@ async function main(): Promise<void> {
         }
       }
       // Write/update version marker so we don't clear again on next launch.
-      fs.mkdirSync(cefDir, { recursive: true });
-      fs.writeFileSync(cefVersionMarker, currentVersion);
+      if (currentVersion !== "unknown") {
+        fs.mkdirSync(cefDir, { recursive: true });
+        fs.writeFileSync(cefVersionMarker, currentVersion);
+      }
     } catch (err) {
       console.warn("[Main] CEF profile cleanup failed (non-fatal):", err);
     }
@@ -1636,7 +1688,7 @@ async function main(): Promise<void> {
     createWindow: (options) =>
       new BrowserWindow(options) as unknown as ManagedWindowLike,
     resolveRendererUrl,
-    readPreload: () => readBuiltPreloadScript(import.meta.dir),
+    readPreload: () => readResolvedPreloadScript(import.meta.dir),
     wireRpc: (window) => wireSettingsRpc(window as unknown as BrowserWindow),
     injectApiBase: (window) =>
       injectApiBase(window as unknown as BrowserWindow),

@@ -1,17 +1,24 @@
 ---
 title: Beginner User Guide
 sidebarTitle: Beginner User Guide
-summary: Step-by-step onboarding for first-time Milady users, from installation through safe daily operation.
-description: A complete beginner walkthrough for installing Milady, finishing first-run setup, daily usage, safety, troubleshooting, and next steps.
+summary: Step-by-step onboarding for first-time Milady operators, from installation through safe daily operation.
+description: A complete beginner walkthrough for installing Milady, choosing a server target, configuring providers, and operating the runtime safely.
 ---
 
-If you're brand new to Milady, this guide is for you.
+If you're brand new to running Milady yourself, this guide is for you.
+
+<Info>
+If you only need the consumer-facing product walkthrough, use
+[milady.ai/docs](https://milady.ai/docs). This page is for people installing,
+operating, or hosting Milady via the developer docs at
+[docs.milady.ai](https://docs.milady.ai).
+</Info>
 
 You do **not** need to be a developer to use Milady. The core model is:
 
-1. Milady runs locally on your machine.
-2. You connect the model providers and plugins you want.
-3. You control how private vs connected your setup is.
+1. Milady is a client that can create or connect to a server.
+2. The server target and the active model provider are separate choices.
+3. You control how local, connected, or cloud-assisted your setup is.
 
 ---
 
@@ -45,8 +52,8 @@ Main interfaces:
 
 Start simple:
 
-- First get local startup working
-- Then add one model provider
+- First choose the server you want to use
+- Then add one chat provider
 - Then optionally add connectors/plugins
 
 ---
@@ -78,7 +85,7 @@ If `milady` is not found after install, restart your terminal and run `milady --
 
 ---
 
-## 4) First start and onboarding
+## 4) First start and server selection
 
 Start Milady:
 
@@ -86,22 +93,23 @@ Start Milady:
 milady
 ```
 
-On first run, onboarding typically asks for:
+On first launch, Milady should start with a chooser-first flow:
 
-1. Agent name
-2. Style/personality preset
-3. Model provider + API key (or skip)
-4. Optional wallet setup
+1. **Create one** to start a local server on this machine
+2. **Pick a LAN server** if Milady finds one on your network
+3. **Use Eliza Cloud** if you want a hosted Milady server
+4. **Manually connect** if you already know the remote server URL
 
-After onboarding, you'll see local URLs for the dashboard and gateway.
+After you choose a server, Milady checks whether that server is already
+configured. If not, it continues setup for that server only.
 
-### If you skipped provider setup
+### Important rule
 
-That is fine. You can add providers later using:
+Server target and provider target are different things:
 
-```bash
-milady models
-```
+- A local server can still use OpenAI, Anthropic, OpenRouter, Ollama, or Eliza Cloud inference
+- An Eliza Cloud server can still use direct OpenAI or Anthropic inference
+- Linking an Eliza Cloud account does not force cloud inference
 
 ---
 
@@ -110,10 +118,11 @@ milady models
 Use this exact path:
 
 1. Run `milady`
-2. Open the dashboard URL
-3. Send a basic prompt (e.g., "hello")
-4. Confirm a response is returned
-5. Run `milady models` and check provider status
+2. Choose a server target
+3. Open the dashboard for that server
+4. Send a basic prompt (e.g., "hello")
+5. Confirm a response is returned
+6. Run `milady models` and check provider status
 
 If these work, your base install is healthy.
 
@@ -136,25 +145,36 @@ Tip: Use `milady <command> --help` any time you feel stuck.
 
 ---
 
-## 7) Understanding run modes
+## 7) Understanding server target vs provider
 
-### Interactive mode (`milady`)
+### Server target
 
-- Good for active local usage
-- Includes status display and quick controls
+This answers **where the Milady server lives**:
 
-### Service mode (`milady start`)
+- Local
+- LAN
+- Remote
+- Eliza Cloud
 
-- Good for background services
-- Useful with process managers (systemd/pm2/docker)
+### Provider route
 
-If you're unsure, start with interactive mode.
+This answers **who handles chat inference and other capabilities**:
+
+- Local models such as Ollama or llama.cpp-based stacks
+- Direct providers such as OpenAI, Anthropic, OpenRouter, Groq, and Mistral
+- Eliza Cloud inference when you explicitly select it
+
+If something feels confusing, check these in order:
+
+1. Which server am I connected to?
+2. Which provider is active for chat on that server?
+3. Which accounts are merely linked but not active?
 
 ---
 
 ## 8) Where files live on your machine
 
-Milady stores state under `~/.milady/`:
+Local runtime state is stored under `~/.milady/`:
 
 - `~/.milady/milady.json` → main configuration
 - `~/.milady/logs/` → runtime logs
@@ -190,10 +210,11 @@ echo "MILADY_API_TOKEN=$(openssl rand -hex 32)" >> .env
 
 Typical flow:
 
-1. Get key from provider dashboard
-2. Configure through setup/config/models flows
-3. Verify with `milady models`
-4. Send a test prompt
+1. Connect to the server you want to use
+2. Get a key from your provider dashboard if needed
+3. Configure the provider through setup, settings, or `milady models`
+4. Verify with `milady models`
+5. Send a test prompt
 
 If responses fail, verify:
 

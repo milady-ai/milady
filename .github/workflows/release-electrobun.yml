@@ -703,6 +703,12 @@ jobs:
 
       - name: Run Windows packaged renderer bootstrap check
         if: matrix.platform.os == 'windows'
+        env:
+          # Keep the packaged renderer bootstrap probe isolated from stale
+          # Windows smoke env while still matching the earlier packaged launch
+          # safety net for the full process tree.
+          MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: bun run test:desktop:playwright
 
       - name: Upload Windows Playwright UI diagnostics

@@ -12,7 +12,6 @@ import { scanProviderCredentials } from "../bridge";
 import {
   asApiLikeError,
   clearPersistedOnboardingStep,
-  deriveOnboardingResumeConnection,
   deriveOnboardingResumeFieldsFromConfig,
   formatStartupErrorDetail,
   inferOnboardingResumeStep,
@@ -131,7 +130,6 @@ export async function runPollingBackend(
 
       if (complete && sessionComplete) {
         clearPersistedOnboardingStep();
-        deps.onboardingResumeConnectionRef.current = null;
       }
       if (
         sessionComplete &&
@@ -168,9 +166,7 @@ export async function runPollingBackend(
               dispatch({ type: "ONBOARDING_COMPLETE" });
               return;
             }
-            const rc = deriveOnboardingResumeConnection(config);
             const rf = deriveOnboardingResumeFieldsFromConfig(config);
-            deps.onboardingResumeConnectionRef.current = rc;
             deps.setOnboardingOptions({
               ...options,
               styles:
@@ -178,18 +174,15 @@ export async function runPollingBackend(
                   ? options.styles
                   : getStylePresets(deps.uiLanguage),
             });
-            if (!rc) {
+            if (!rf.onboardingProvider) {
               try {
                 const det = await scanProviderCredentials();
                 if (det.length > 0) deps.applyDetectedProviders(det);
               } catch {}
             }
-            if (rf.onboardingRunMode !== undefined)
-              deps.setOnboardingRunMode(
-                rf.onboardingRunMode as "local" | "cloud" | "",
-              );
-            if (rf.onboardingCloudProvider !== undefined)
-              deps.setOnboardingCloudProvider(rf.onboardingCloudProvider);
+            if (rf.onboardingServerTarget !== undefined) {
+              deps.setOnboardingServerTarget(rf.onboardingServerTarget);
+            }
             if (rf.onboardingCloudApiKey !== undefined)
               deps.setOnboardingCloudApiKey(rf.onboardingCloudApiKey);
             if (rf.onboardingProvider !== undefined)

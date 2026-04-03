@@ -14,6 +14,8 @@ const THIRTY_ONE_MINUTES_MS = 31 * 60 * 1000;
 const { mockClient } = vi.hoisted(() => ({
   mockClient: {
     hasToken: vi.fn(() => false),
+    setBaseUrl: vi.fn(),
+    setToken: vi.fn(),
     getAuthStatus: vi.fn(async () => ({
       required: false,
       pairingEnabled: false,
@@ -186,10 +188,14 @@ describe("companion stale conversation rollover", () => {
     vi.useFakeTimers();
     localStorage.clear();
     sessionStorage.clear();
-    // Persist a connection mode so the init flow proceeds past onboarding gate
+    // Persist an active server so the init flow proceeds past onboarding gate
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
     localStorage.setItem("eliza:onboarding-complete", "1");
     localStorage.setItem(UI_SHELL_MODE_STORAGE_KEY, "companion");

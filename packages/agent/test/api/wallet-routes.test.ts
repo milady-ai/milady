@@ -216,6 +216,12 @@ describe("wallet routes", () => {
           enabled: true,
           baseUrl: "https://cloud.example",
         },
+        serviceRouting: {
+          rpc: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+          },
+        },
       } as ElizaConfig,
     });
 
@@ -269,6 +275,12 @@ describe("wallet routes", () => {
           apiKey: "cloud-key",
           enabled: true,
           baseUrl: "https://cloud.example",
+        },
+        serviceRouting: {
+          rpc: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+          },
         },
       } as ElizaConfig,
     });

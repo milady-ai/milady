@@ -237,7 +237,6 @@ export interface UseChatCallbacksDeps {
 
   // Onboarding setters (used by completeResetLocalStateAfterServerWipe)
   onboardingCompletionCommittedRef: MutableRefObject<boolean>;
-  onboardingResumeConnectionRef: MutableRefObject<unknown>;
   setOnboardingUiRevealNonce: (fn: (n: number) => number) => void;
   setOnboardingLoading: (v: boolean) => void;
   setOnboardingComplete: (v: boolean) => void;
@@ -248,8 +247,7 @@ export interface UseChatCallbacksDeps {
   setPostOnboardingChecklistDismissed: (v: boolean) => void;
   setOnboardingName: (v: string) => void;
   setOnboardingStyle: (v: string) => void;
-  setOnboardingRunMode: (v: "local" | "cloud" | "") => void;
-  setOnboardingCloudProvider: (v: string) => void;
+  setOnboardingServerTarget: (v: AppState["onboardingServerTarget"]) => void;
   setOnboardingProvider: (v: string) => void;
   setOnboardingApiKey: (v: string) => void;
   setOnboardingVoiceProvider: (v: string) => void;
@@ -345,7 +343,6 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setElizaCloudStatusReason,
     setElizaCloudLoginError,
     onboardingCompletionCommittedRef,
-    onboardingResumeConnectionRef,
     setOnboardingUiRevealNonce,
     setOnboardingLoading,
     setOnboardingComplete,
@@ -356,8 +353,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setPostOnboardingChecklistDismissed,
     setOnboardingName,
     setOnboardingStyle,
-    setOnboardingRunMode,
-    setOnboardingCloudProvider,
+    setOnboardingServerTarget,
     setOnboardingProvider,
     setOnboardingApiKey,
     setOnboardingVoiceProvider,
@@ -636,7 +632,6 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setElizaCloudStatusReason,
     setElizaCloudLoginError,
     onboardingCompletionCommittedRef,
-    onboardingResumeConnectionRef,
     setOnboardingUiRevealNonce,
     setOnboardingLoading,
     setOnboardingComplete,
@@ -647,8 +642,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setPostOnboardingChecklistDismissed,
     setOnboardingName,
     setOnboardingStyle,
-    setOnboardingRunMode,
-    setOnboardingCloudProvider,
+    setOnboardingServerTarget,
     setOnboardingProvider,
     setOnboardingApiKey,
     setOnboardingVoiceProvider,

@@ -28,7 +28,6 @@ describe("Cloud auth status persistence", () => {
       JSON.stringify(
         {
           cloud: {
-            enabled: true,
             apiKey: "ck-test-persisted-key",
           },
         },
@@ -58,13 +57,14 @@ describe("Cloud auth status persistence", () => {
     }
   });
 
-  it("reports connected cloud status from cached API key", async () => {
+  it("reports cached cloud auth without implying cloud services are enabled", async () => {
     const { status, data } = await req(port, "GET", "/api/cloud/status");
     expect(status).toBe(200);
     expect(data.connected).toBe(true);
     expect(data.hasApiKey).toBe(true);
-    expect(data.enabled).toBe(true);
-    expect(data.cloudVoiceProxyAvailable).toBe(true);
+    expect(data.enabled).toBe(false);
+    expect(data.cloudVoiceProxyAvailable).toBe(false);
+    expect(data.reason).toBe("api_key_present_runtime_not_started");
   });
 
   it("disconnect clears cached cloud auth and persists config change", async () => {

@@ -30,26 +30,6 @@ describe("applyFirstTimeSetupTopology", () => {
           backend: "openai",
           transport: "direct",
         },
-        tts: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-        media: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-        embeddings: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-        rpc: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
       },
       cloud: {
         apiKey: "cloud-key",
@@ -86,31 +66,11 @@ describe("applyFirstTimeSetupTopology", () => {
           transport: "cloud-proxy",
           accountId: "elizacloud",
         },
-        tts: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-        media: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-        embeddings: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-        rpc: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
       },
     });
   });
 
-  it("defaults cloud runtime to Eliza Cloud inference when no provider override was chosen", () => {
+  it("keeps cloud runtime distinct from inference when no provider was chosen yet", () => {
     expect(
       applyFirstTimeSetupTopology({} as never, {
         isCloudRuntime: true,
@@ -125,13 +85,7 @@ describe("applyFirstTimeSetupTopology", () => {
         runtime: "cloud",
         provider: "elizacloud",
       },
-      serviceRouting: {
-        llmText: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-        },
-      },
+      serviceRouting: undefined,
     });
   });
 });

@@ -108,48 +108,67 @@ describe("config updates", () => {
     expect(after).toBeDefined();
   });
 
-  it("persists an explicit root connection patch and derives runtime-facing config", async () => {
+  it("persists canonical direct-provider routing patches", async () => {
     const { status } = await req(port, "PUT", "/api/config", {
-      connection: {
-        kind: "local-provider",
-        provider: "openrouter",
-        primaryModel: "openai/gpt-5-mini",
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5-mini",
+        },
       },
     });
     expect(status).toBe(200);
 
     const { data } = await req(port, "GET", "/api/config");
-    expect(data.connection).toEqual({
-      kind: "local-provider",
-      provider: "openrouter",
+    expect(data.serviceRouting?.llmText).toEqual({
+      backend: "openrouter",
+      transport: "direct",
       primaryModel: "openai/gpt-5-mini",
     });
-    expect(data.agents?.defaults?.model?.primary).toBe("openai/gpt-5-mini");
+    expect(data.connection).toBeUndefined();
   });
 
-  it("reconciles connection from provider-affecting config patches when connection is omitted", async () => {
+  it("persists canonical cloud inference routing without reconstructing connection", async () => {
     const { status } = await req(port, "PUT", "/api/config", {
-      cloud: {
-        enabled: true,
-        inferenceMode: "cloud",
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
       },
-      models: {
-        small: "minimax/minimax-m2.7",
-        large: "anthropic/claude-sonnet-4.6",
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+          smallModel: "openai/gpt-5-mini",
+          largeModel: "anthropic/claude-sonnet-4.5",
+        },
       },
     });
     expect(status).toBe(200);
 
     const { data } = await req(port, "GET", "/api/config");
-    expect(data.connection).toEqual({
-      kind: "cloud-managed",
-      cloudProvider: "elizacloud",
-      smallModel: "minimax/minimax-m2.7",
-      largeModel: "anthropic/claude-sonnet-4.6",
+    expect(data.deploymentTarget).toEqual({
+      runtime: "cloud",
+      provider: "elizacloud",
     });
+    expect(data.serviceRouting?.llmText).toEqual({
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+      accountId: "elizacloud",
+      smallModel: "openai/gpt-5-mini",
+      largeModel: "anthropic/claude-sonnet-4.5",
+    });
+    expect(data.connection).toBeUndefined();
   });
 
-  it("rejects malformed connection patches without mutating config", async () => {
+  it("rejects deprecated connection patches without mutating config", async () => {
     const before = (await req(port, "GET", "/api/config")).data;
 
     const { status, data } = await req(port, "PUT", "/api/config", {
@@ -162,24 +181,67 @@ describe("config updates", () => {
     expect(String(data.error)).toMatch(/connection/i);
 
     const after = (await req(port, "GET", "/api/config")).data;
-    expect(after.connection).toEqual(before.connection);
+    expect(after).toEqual(before);
   });
 
-  it("does not mark partial cloud-managed selection as onboarding-complete", async () => {
-    const { status } = await req(port, "PUT", "/api/config", {
-      connection: {
-        kind: "cloud-managed",
-        cloudProvider: "elizacloud",
-      },
-      cloud: {
-        enabled: true,
-        apiKey: "ck-partial-cloud",
-      },
-    });
-    expect(status).toBe(200);
+  it("does not mark linked cloud auth without inference routing as onboarding-complete", async () => {
+    const isolatedDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "milady-config-hot-linked-cloud-"),
+    );
+    const prevIsolatedElizaStateDir = process.env.ELIZA_STATE_DIR;
+    const prevIsolatedMiladyStateDir = process.env.MILADY_STATE_DIR;
+    process.env.ELIZA_STATE_DIR = isolatedDir;
+    process.env.MILADY_STATE_DIR = isolatedDir;
 
-    const onboarding = await req(port, "GET", "/api/onboarding/status");
-    expect(onboarding.status).toBe(200);
-    expect(onboarding.data).toEqual({ complete: false });
+    const isolatedServer = await startApiServer({
+      port: 0,
+      initialAgentState: "not_started",
+    });
+
+    try {
+      const { status } = await req(isolatedServer.port, "PUT", "/api/config", {
+        deploymentTarget: {
+          runtime: "cloud",
+          provider: "elizacloud",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        cloud: {
+          enabled: true,
+          apiKey: "ck-partial-cloud",
+        },
+      });
+      expect(status).toBe(200);
+
+      const onboarding = await req(
+        isolatedServer.port,
+        "GET",
+        "/api/onboarding/status",
+      );
+      expect(onboarding.status).toBe(200);
+      expect(onboarding.data).toEqual({ complete: false });
+    } finally {
+      await isolatedServer.close();
+      await fs.rm(isolatedDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 3,
+        retryDelay: 100,
+      });
+      if (prevIsolatedElizaStateDir === undefined) {
+        delete process.env.ELIZA_STATE_DIR;
+      } else {
+        process.env.ELIZA_STATE_DIR = prevIsolatedElizaStateDir;
+      }
+      if (prevIsolatedMiladyStateDir === undefined) {
+        delete process.env.MILADY_STATE_DIR;
+      } else {
+        process.env.MILADY_STATE_DIR = prevIsolatedMiladyStateDir;
+      }
+    }
   });
 });

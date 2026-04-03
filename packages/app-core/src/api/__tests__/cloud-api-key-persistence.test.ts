@@ -77,21 +77,36 @@ describe("cloud API key persistence through onboarding", () => {
 
       await extractAndPersistOnboardingApiKey({
         name: "TestAgent",
-        connection: {
-          kind: "local-provider",
-          provider: "anthropic",
-          apiKey: "sk-ant-test-key-123",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "anthropic",
+            transport: "direct",
+          },
+        },
+        credentialInputs: {
+          llmApiKey: "sk-ant-test-key-123",
+          cloudApiKey: "cloud-key-abc",
         },
       });
 
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
       const saved = saveElizaConfigMock.mock.calls[0][0];
-      expect(saved.cloud).toEqual({
-        enabled: false,
-        apiKey: "cloud-key-abc",
-        inferenceMode: "byok",
-        runtime: "local",
-        services: { inference: false },
+      expect(saved.cloud.apiKey).toBe("cloud-key-abc");
+      expect(saved.serviceRouting?.llmText).toMatchObject({
+        backend: "anthropic",
+        transport: "direct",
+      });
+      expect(saved.linkedAccounts).toMatchObject({
+        elizacloud: { status: "linked", source: "api-key" },
       });
       expect(saved.env.ANTHROPIC_API_KEY).toBe("sk-ant-test-key-123");
     });
@@ -102,11 +117,26 @@ describe("cloud API key persistence through onboarding", () => {
 
       const result = await extractAndPersistOnboardingApiKey({
         name: "TestAgent",
-        connection: {
-          kind: "cloud-managed",
-          apiKey: "cloud-key-abc",
-          smallModel: "minimax/minimax-m2.7",
-          largeModel: "anthropic/claude-sonnet-4.6",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+            accountId: "elizacloud",
+            smallModel: "openai/gpt-5-mini",
+            largeModel: "moonshotai/kimi-k2-0905",
+          },
+        },
+        credentialInputs: {
+          cloudApiKey: "cloud-key-abc",
         },
       });
 
@@ -114,9 +144,14 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
       const saved = saveElizaConfigMock.mock.calls[0][0];
       expect(saved.cloud.apiKey).toBe("cloud-key-abc");
-      expect(saved.cloud.enabled).toBe(true);
-      expect(saved.models.small).toBe("minimax/minimax-m2.7");
-      expect(saved.models.large).toBe("anthropic/claude-sonnet-4.6");
+      expect(saved.serviceRouting).toMatchObject({
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+        },
+      });
+      expect(saved.models.small).toBe("openai/gpt-5-mini");
+      expect(saved.models.large).toBe("moonshotai/kimi-k2-0905");
     });
   });
 
@@ -138,7 +173,9 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
       const saved = saveElizaConfigMock.mock.calls[0][0];
       expect(saved.cloud.apiKey).toBe("cloud-key-xyz");
-      expect(saved.cloud.enabled).toBe(true);
+      expect(saved.linkedAccounts).toMatchObject({
+        elizacloud: { status: "linked", source: "api-key" },
+      });
       expect(saved.agents.list[0].name).toBe("MyAgent");
     });
   });
@@ -158,11 +195,26 @@ describe("cloud API key persistence through onboarding", () => {
       // 1. extractAndPersistOnboardingApiKey — no-op for cloud mode
       const result = await extractAndPersistOnboardingApiKey({
         name: "Chen",
-        connection: {
-          kind: "cloud-managed",
-          apiKey: "cloud-key-persisted",
-          smallModel: "minimax/minimax-m2.7",
-          largeModel: "anthropic/claude-sonnet-4.6",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+            accountId: "elizacloud",
+            smallModel: "openai/gpt-5-mini",
+            largeModel: "moonshotai/kimi-k2-0905",
+          },
+        },
+        credentialInputs: {
+          cloudApiKey: "cloud-key-persisted",
         },
       });
       expect(result).toBeNull();
@@ -176,6 +228,10 @@ describe("cloud API key persistence through onboarding", () => {
       expect(saveElizaConfigMock).toHaveBeenCalledTimes(2);
       const saved = saveElizaConfigMock.mock.calls[1][0];
       expect(saved.cloud.apiKey).toBe("cloud-key-persisted");
+      expect(saved.serviceRouting?.llmText).toMatchObject({
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+      });
     });
 
     it("switching to a local provider preserves the prior cloud key but disables cloud inference", async () => {
@@ -188,20 +244,32 @@ describe("cloud API key persistence through onboarding", () => {
       // extractAndPersistOnboardingApiKey with a local provider key
       await extractAndPersistOnboardingApiKey({
         name: "Agent",
-        connection: {
-          kind: "local-provider",
-          provider: "openai",
-          apiKey: "sk-openai-test",
+        deploymentTarget: {
+          runtime: "local",
+        },
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "openai",
+            transport: "direct",
+          },
+        },
+        credentialInputs: {
+          llmApiKey: "sk-openai-test",
+          cloudApiKey: "cloud-key-dual",
         },
       });
 
       const saved1 = saveElizaConfigMock.mock.calls[0][0];
-      expect(saved1.cloud).toEqual({
-        enabled: false,
-        apiKey: "cloud-key-dual",
-        inferenceMode: "byok",
-        runtime: "local",
-        services: { inference: false },
+      expect(saved1.cloud.apiKey).toBe("cloud-key-dual");
+      expect(saved1.serviceRouting?.llmText).toMatchObject({
+        backend: "openai",
+        transport: "direct",
       });
       expect(saved1.env.OPENAI_API_KEY).toBe("sk-openai-test");
 
@@ -210,12 +278,10 @@ describe("cloud API key persistence through onboarding", () => {
       persistCompatOnboardingDefaults({ name: "Agent" });
 
       const saved2 = saveElizaConfigMock.mock.calls[1][0];
-      expect(saved2.cloud).toEqual({
-        enabled: false,
-        apiKey: "cloud-key-dual",
-        inferenceMode: "byok",
-        runtime: "local",
-        services: { inference: false },
+      expect(saved2.cloud.apiKey).toBe("cloud-key-dual");
+      expect(saved2.serviceRouting?.llmText).toMatchObject({
+        backend: "openai",
+        transport: "direct",
       });
     });
   });

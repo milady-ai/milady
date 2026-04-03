@@ -64,10 +64,10 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
               id="connect-modal-title"
               className="font-mono text-sm font-medium text-text-light tracking-wide"
             >
-              CONNECT REMOTE AGENT
+              CONNECT SERVER
             </h2>
             <p className="font-mono text-xs text-text-muted">
-              Connect to a self-hosted Milady backend.
+              Connect this Milady client to a local, LAN, or self-hosted server.
             </p>
           </div>
 

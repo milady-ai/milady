@@ -92,9 +92,10 @@ Run these checks against the live Eliza Cloud deployment:
 2. Open `https://www.elizacloud.ai/auth/cli-login?session=test-session`
 3. Verify the homepage `Get the app` and `Eliza Cloud` CTA on `milady`
 4. In the Milady app onboarding:
-   - `Local` starts a local backend
-   - `Cloud -> Eliza Cloud` reaches Eliza Cloud
-   - `Cloud -> Remote Milady` accepts backend URL + access key
+   - `Create one` starts a local backend on this device
+   - `Use Eliza Cloud` opens the cloud-managed server path
+   - `Manually connect to one` accepts backend URL + access key
+   - discovered LAN servers open through the same remote connection path
 5. Test a real remote self-hosted backend using `MILADY_API_TOKEN`
 6. Create one Eliza Cloud instance, launch it from `/dashboard/milady`, and confirm `app.milady.ai` opens already attached with onboarding skipped
 7. If you enabled the optional Cloudflare proxy, repeat the browser-managed calls through the proxied origin

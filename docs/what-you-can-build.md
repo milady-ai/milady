@@ -171,7 +171,7 @@ Orchestrate multiple agents that collaborate, share knowledge, and specialize in
 Pick a use case above and follow these steps:
 
 1. [Install Milady](/installation)
-2. [Create your character](/quickstart)
+2. Choose or connect to a server target
 3. Install relevant plugins for your use case
 4. Configure connectors for your platforms
 5. Deploy with [cloud](/guides/cloud) or [self-host](/deployment)

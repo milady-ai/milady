@@ -4,8 +4,11 @@ import {
   type ElizaConfig,
   loadElizaConfig,
 } from "@miladyai/agent/config/config";
-import { isOnboardingConnectionComplete } from "../contracts/onboarding";
-import { resolveExistingOnboardingConnection } from "./provider-switch-config";
+import {
+  normalizeOnboardingProviderId,
+  resolveDeploymentTargetInConfig,
+  resolveServiceRoutingInConfig,
+} from "../contracts/onboarding";
 import { sendJsonError as sendJsonErrorResponse } from "./response";
 
 const MAX_BODY_BYTES = 1_048_576;
@@ -81,10 +84,26 @@ export function hasCompatPersistedOnboardingState(
     return true;
   }
 
-  const existingConnection = resolveExistingOnboardingConnection(
+  const deploymentTarget = resolveDeploymentTargetInConfig(
     config as Record<string, unknown>,
   );
-  if (isOnboardingConnectionComplete(existingConnection)) {
+  const llmText = resolveServiceRoutingInConfig(
+    config as Record<string, unknown>,
+  )?.llmText;
+  const backend = normalizeOnboardingProviderId(llmText?.backend);
+  const remoteApiBase =
+    llmText?.remoteApiBase?.trim() ?? deploymentTarget.remoteApiBase?.trim();
+  const hasCompleteCanonicalRouting =
+    (llmText?.transport === "direct" &&
+      Boolean(backend && backend !== "elizacloud")) ||
+    (llmText?.transport === "remote" && Boolean(remoteApiBase)) ||
+    (llmText?.transport === "cloud-proxy" &&
+      backend === "elizacloud" &&
+      Boolean(llmText.smallModel?.trim() && llmText.largeModel?.trim())) ||
+    (deploymentTarget.runtime === "remote" &&
+      Boolean(deploymentTarget.remoteApiBase?.trim()));
+
+  if (hasCompleteCanonicalRouting) {
     return true;
   }
 

@@ -13,6 +13,27 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { req } from "../../../test/helpers/http";
 import { startApiServer } from "../src/api/server";
 
+function expectCanonicalProviderSelection(
+  config: Record<string, any>,
+  expectedProvider: string,
+  primaryModel?: string,
+) {
+  expect(config.connection).toBeUndefined();
+  if (expectedProvider === "elizacloud") {
+    expect(config.serviceRouting?.llmText).toMatchObject({
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+    });
+    return;
+  }
+
+  expect(config.serviceRouting?.llmText).toMatchObject({
+    backend: expectedProvider,
+    transport: "direct",
+    ...(primaryModel ? { primaryModel } : {}),
+  });
+}
+
 describe("POST /api/provider/switch", () => {
   let port: number;
   let close: () => Promise<void>;
@@ -123,17 +144,7 @@ describe("POST /api/provider/switch", () => {
 
       const configRes = await req(port, "GET", "/api/config");
       expect(configRes.status).toBe(200);
-      expect(configRes.data.connection).toMatchObject({
-        kind:
-          expectedProvider === "elizacloud"
-            ? "cloud-managed"
-            : "local-provider",
-      });
-      if (expectedProvider === "elizacloud") {
-        expect(configRes.data.connection.cloudProvider).toBe("elizacloud");
-      } else {
-        expect(configRes.data.connection.provider).toBe(expectedProvider);
-      }
+      expectCanonicalProviderSelection(configRes.data, expectedProvider);
     });
   });
 
@@ -145,10 +156,7 @@ describe("POST /api/provider/switch", () => {
       expect(status).toBe(200);
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "openai",
-      });
+      expectCanonicalProviderSelection(configRes.data, "openai");
     });
 
     it("persists an explicit primaryModel override for the active provider", async () => {
@@ -159,11 +167,11 @@ describe("POST /api/provider/switch", () => {
       expect(status).toBe(200);
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "openrouter",
-        primaryModel: "openai/gpt-5.2",
-      });
+      expectCanonicalProviderSelection(
+        configRes.data,
+        "openrouter",
+        "openai/gpt-5.2",
+      );
       expect(configRes.data.agents.defaults.model.primary).toBe(
         "openai/gpt-5.2",
       );
@@ -185,10 +193,7 @@ describe("POST /api/provider/switch", () => {
       expect(process.env.TOGETHER_API_KEY).toBe("sk-together-preserve");
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "mistral",
-      });
+      expectCanonicalProviderSelection(configRes.data, "mistral");
     });
 
     it("preserves OpenAI credentials when switching to Anthropic", async () => {
@@ -207,10 +212,7 @@ describe("POST /api/provider/switch", () => {
       expect(process.env.OPENAI_API_KEY).toBe("sk-openai-preserve");
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "anthropic",
-      });
+      expectCanonicalProviderSelection(configRes.data, "anthropic");
     });
 
     it("preserves direct provider credentials when switching to elizacloud", async () => {
@@ -228,10 +230,7 @@ describe("POST /api/provider/switch", () => {
       expect(process.env.ELIZAOS_CLOUD_ENABLED).toBe("true");
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "cloud-managed",
-        cloudProvider: "elizacloud",
-      });
+      expectCanonicalProviderSelection(configRes.data, "elizacloud");
     });
 
     it("preserves direct provider credentials when switching to pi-ai", async () => {
@@ -250,10 +249,7 @@ describe("POST /api/provider/switch", () => {
       expect(process.env.ELIZA_USE_PI_AI).toBe("1");
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "pi-ai",
-      });
+      expectCanonicalProviderSelection(configRes.data, "pi-ai");
     });
 
     it("preserves OpenAI credentials when switching to pi-ai", async () => {
@@ -271,10 +267,7 @@ describe("POST /api/provider/switch", () => {
       expect(process.env.ELIZA_USE_PI_AI).toBe("1");
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "pi-ai",
-      });
+      expectCanonicalProviderSelection(configRes.data, "pi-ai");
     });
 
     it("stores canonical selection while keeping provider-specific capability env vars", async () => {
@@ -286,10 +279,7 @@ describe("POST /api/provider/switch", () => {
       expect(process.env.MISTRAL_API_KEY).toBe("mistral-key");
 
       const configRes = await req(port, "GET", "/api/config");
-      expect(configRes.data.connection).toEqual({
-        kind: "local-provider",
-        provider: "mistral",
-      });
+      expectCanonicalProviderSelection(configRes.data, "mistral");
     });
   });
 

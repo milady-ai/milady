@@ -316,8 +316,12 @@ describe("AppContext autonomy replay", () => {
 
   beforeEach(() => {
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
     localStorage.setItem("eliza:onboarding-complete", "1");
     window.history.replaceState({}, "", "/chat");

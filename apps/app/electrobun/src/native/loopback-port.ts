@@ -1,30 +1,55 @@
 import { createServer } from "node:net";
 
+const LISTEN_TIMEOUT_MS = 3000;
+const CLOSE_GRACE_MS = 250;
+
 function tryBindOnce(
   port: number,
   host: string,
 ): Promise<{ ok: true } | { ok: false }> {
   return new Promise((resolve) => {
     const server = createServer();
-    // Timeout prevents hanging on Windows when firewall silently blocks
-    const timer = setTimeout(() => {
+    let settled = false;
+
+    const finish = (result: { ok: true } | { ok: false }) => {
+      if (settled) return;
+      settled = true;
       server.removeAllListeners();
+      resolve(result);
+    };
+
+    const listenTimer = setTimeout(() => {
       try {
         server.close();
       } catch {
         /* already closed */
       }
-      resolve({ ok: false });
-    }, 3000);
+      finish({ ok: false });
+    }, LISTEN_TIMEOUT_MS);
+
     const fail = () => {
-      clearTimeout(timer);
-      server.removeAllListeners();
-      resolve({ ok: false });
+      clearTimeout(listenTimer);
+      finish({ ok: false });
     };
+
     server.once("error", fail);
     server.listen({ port, host }, () => {
-      clearTimeout(timer);
-      server.close(() => resolve({ ok: true }));
+      clearTimeout(listenTimer);
+      server.unref?.();
+
+      // Bun on packaged Windows can occasionally never invoke the close
+      // callback even though the listen succeeded. Without this grace timer
+      // startup stalls before `port_selected`.
+      const closeTimer = setTimeout(() => finish({ ok: true }), CLOSE_GRACE_MS);
+      try {
+        server.close(() => {
+          clearTimeout(closeTimer);
+          finish({ ok: true });
+        });
+      } catch {
+        clearTimeout(closeTimer);
+        finish({ ok: true });
+      }
     });
   });
 }

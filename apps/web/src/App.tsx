@@ -6,6 +6,7 @@ import { releaseData } from "./generated/release-data";
 const DISCORD_URL = "https://discord.gg/F6ww5WHtsg";
 const GITHUB_URL = "https://github.com/milady-ai/milady";
 const DASHBOARD_URL = "/dashboard";
+const DOCS_URL = "/docs";
 
 function GithubIcon() {
   return (
@@ -209,6 +210,24 @@ function CloudIcon() {
   );
 }
 
+function BookIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="w-4 h-4 opacity-60"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22V4.5A2.5 2.5 0 0 1 6.5 2Z" />
+    </svg>
+  );
+}
+
 export function Homepage() {
   return (
     <div
@@ -242,11 +261,18 @@ export function Homepage() {
         <div className="relative z-50 flex items-center justify-center gap-4 pb-10 px-4">
           <DownloadDropdown />
           <a
+            href={DOCS_URL}
+            className="flex items-center gap-2 px-6 py-3 border border-text-subtle/30 text-text-muted font-mono text-[11px] tracking-[0.15em] uppercase hover:border-text-muted/50 hover:text-text-light transition-all"
+          >
+            <BookIcon />
+            Read Docs
+          </a>
+          <a
             href={DASHBOARD_URL}
             className="flex items-center gap-2 px-6 py-3 border border-text-subtle/30 text-text-muted font-mono text-[11px] tracking-[0.15em] uppercase hover:border-text-muted/50 hover:text-text-light transition-all"
           >
             <CloudIcon />
-            Try Cloud
+            Open App
           </a>
         </div>
       </main>

@@ -50,7 +50,7 @@ describe("detectRuntimeModel", () => {
     expect(detectRuntimeModel(runtime)).toBe("openai/gpt-5.2");
   });
 
-  it("prefers config.connection local-provider model over config defaults and plugin hints", () => {
+  it("prefers canonical direct routing over config defaults and plugin hints", () => {
     const runtime = makeRuntime({
       character: { name: "Eliza" } as AgentRuntime["character"],
       plugins: [
@@ -60,10 +60,12 @@ describe("detectRuntimeModel", () => {
 
     expect(
       detectRuntimeModel(runtime, {
-        connection: {
-          kind: "local-provider",
-          provider: "openrouter",
-          primaryModel: "openai/gpt-5.2",
+        serviceRouting: {
+          llmText: {
+            backend: "openrouter",
+            transport: "direct",
+            primaryModel: "openai/gpt-5.2",
+          },
         },
         agents: { defaults: { model: { primary: "anthropic" } } },
       }),
@@ -77,15 +79,17 @@ describe("detectRuntimeModel", () => {
 
     expect(
       detectRuntimeModel(runtime, {
-        connection: {
-          kind: "local-provider",
-          provider: "ollama",
+        serviceRouting: {
+          llmText: {
+            backend: "ollama",
+            transport: "direct",
+          },
         },
       }),
     ).toBe("ollama");
   });
 
-  it("prefers remote-provider selection details over plugin and env hints", () => {
+  it("prefers canonical remote routing details over plugin and env hints", () => {
     const runtime = makeRuntime({
       character: { name: "Eliza" } as AgentRuntime["character"],
       plugins: [{ name: "@elizaos/plugin-openai" }] as AgentRuntime["plugins"],
@@ -93,17 +97,24 @@ describe("detectRuntimeModel", () => {
 
     expect(
       detectRuntimeModel(runtime, {
-        connection: {
-          kind: "remote-provider",
+        deploymentTarget: {
+          runtime: "remote",
+          provider: "remote",
           remoteApiBase: "https://remote.example",
-          provider: "deepseek",
-          primaryModel: "deepseek/chat",
+        },
+        serviceRouting: {
+          llmText: {
+            backend: "deepseek",
+            transport: "remote",
+            remoteApiBase: "https://remote.example",
+            primaryModel: "deepseek/chat",
+          },
         },
       }),
     ).toBe("deepseek/chat");
   });
 
-  it("prefers cloud-managed selected models over other hints", () => {
+  it("prefers canonical cloud-managed selected models over other hints", () => {
     const runtime = makeRuntime({
       character: { name: "Eliza" } as AgentRuntime["character"],
       plugins: [{ name: "@elizaos/plugin-openai" }] as AgentRuntime["plugins"],
@@ -111,14 +122,17 @@ describe("detectRuntimeModel", () => {
 
     expect(
       detectRuntimeModel(runtime, {
-        connection: {
-          kind: "cloud-managed",
-          cloudProvider: "elizacloud",
-          smallModel: "minimax/minimax-m2.7",
-          largeModel: "anthropic/claude-sonnet-4.6",
+        serviceRouting: {
+          llmText: {
+            backend: "elizacloud",
+            transport: "cloud-proxy",
+            accountId: "elizacloud",
+            smallModel: "openai/gpt-5-mini",
+            largeModel: "anthropic/claude-sonnet-4.5",
+          },
         },
       }),
-    ).toBe("anthropic/claude-sonnet-4.6");
+    ).toBe("anthropic/claude-sonnet-4.5");
   });
 
   it("falls back to config model.primary when no explicit connection exists", () => {

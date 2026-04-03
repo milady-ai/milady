@@ -1,18 +1,11 @@
 /**
- * Regression tests: cloud API key must survive the onboarding replay.
+ * Regression tests: compat replay must stay canonical-only.
  *
- * BUG: When the user connects to Eliza Cloud during onboarding, the Milady
- * compat handler (POST /api/onboarding) correctly persists the cloud.apiKey
- * to disk. However, it then replays the body to the upstream Eliza handler,
- * which uses its stale in-memory `state.config` (loaded at startup, before
- * OAuth). The upstream handler calls `saveElizaConfig(state.config)`, which
- * CLOBBERS the apiKey that was just written to disk.
- *
- * FIX: The replay body is enriched with `providerApiKey` so the upstream
- * handler writes the key into state.config before saving. This ensures the
- * apiKey survives the upstream's save.
+ * The active app submits canonical runtime fields. Compat replay may strip
+ * legacy onboarding keys from older payloads, but it must not translate them
+ * back into the live upstream contract.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../config/config", () => ({
   loadElizaConfig: vi.fn(),
@@ -28,158 +21,142 @@ vi.mock("@miladyai/agent/cloud/validate-url", () => ({
   validateCloudBaseUrl: vi.fn(() => Promise.resolve(null)),
 }));
 
-import { loadElizaConfig } from "../../config/config";
 import { deriveCompatOnboardingReplayBody } from "../server-onboarding-compat";
-
-const loadMock = loadElizaConfig as ReturnType<typeof vi.fn>;
 
 describe("deriveCompatOnboardingReplayBody", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("detects cloud mode from connection.kind === 'cloud-managed'", () => {
+  it("does not infer cloud hosting from cloud-proxy inference alone", () => {
     const body = {
       name: "Agent",
-      connection: { kind: "cloud-managed" },
-    };
-    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
-    expect(isCloudMode).toBe(true);
-    expect(replayBody).toHaveProperty("runMode", "cloud");
-  });
-
-  it("detects cloud mode from runMode === 'cloud'", () => {
-    const body = { name: "Agent", runMode: "cloud" };
-    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
-    expect(isCloudMode).toBe(true);
-    // runMode already "cloud", so replayBody === body
-    expect(replayBody.runMode).toBe("cloud");
-  });
-
-  it("returns isCloudMode: false for local provider", () => {
-    const body = {
-      name: "Agent",
-      connection: { kind: "local-provider", provider: "anthropic" },
-    };
-    const { isCloudMode } = deriveCompatOnboardingReplayBody(body);
-    expect(isCloudMode).toBe(false);
-  });
-});
-
-describe("onboarding replay body enrichment (integration)", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    delete process.env.ELIZAOS_CLOUD_API_KEY;
-    delete process.env.ELIZAOS_CLOUD_ENABLED;
-  });
-
-  it("cloud apiKey from disk config is available for replay enrichment", () => {
-    // Simulate: persistCloudLoginStatus already wrote the apiKey to disk
-    const configWithKey = {
-      env: {},
-      cloud: {
-        enabled: true,
-        apiKey: "cloud-key-from-oauth",
-        inferenceMode: "cloud",
+      deploymentTarget: { runtime: "local" },
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
-      agents: { defaults: {}, list: [{ id: "main", default: true }] },
-      meta: {},
-      models: {},
-    };
-    loadMock.mockReturnValue(configWithKey);
-
-    // The compat handler reads fresh config to get the apiKey
-    const config = loadMock();
-    const cloudApiKey = config.cloud?.apiKey;
-
-    expect(cloudApiKey).toBe("cloud-key-from-oauth");
-
-    // This key would be injected into the replay body as providerApiKey
-    const body = { name: "Agent", runMode: "cloud" };
-    const enriched = {
-      ...body,
-      providerApiKey: cloudApiKey,
     };
 
-    expect(enriched.providerApiKey).toBe("cloud-key-from-oauth");
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
+
+    expect(isCloudMode).toBe(false);
+    expect(replayBody).toMatchObject(body);
   });
 
-  it("upstream handler would write providerApiKey to state.config.cloud.apiKey", () => {
-    // Simulate upstream's stale state.config (no apiKey)
-    const staleConfig = {
-      cloud: { enabled: false } as Record<string, unknown>,
+  it("detects cloud mode from canonical deploymentTarget runtime", () => {
+    const body = {
+      name: "Agent",
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
     };
 
-    // Simulate what upstream handler does at lines 8287-8294
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
+
+    expect(isCloudMode).toBe(true);
+    expect(replayBody).toMatchObject(body);
+  });
+
+  it("preserves canonical direct routing on Eliza Cloud hosting", () => {
+    const body = {
+      name: "Agent",
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      linkedAccounts: {
+        elizacloud: {
+          status: "linked",
+          source: "api-key",
+        },
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openai",
+          transport: "direct",
+          primaryModel: "openai/gpt-5.2",
+        },
+      },
+      credentialInputs: {
+        llmApiKey: "sk-openai-test",
+        cloudApiKey: "ck-cloud-test",
+      },
+    };
+
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
+
+    expect(isCloudMode).toBe(true);
+    expect(replayBody).toMatchObject(body);
+  });
+
+  it("strips legacy onboarding fields without synthesizing canonical runtime", () => {
     const body = {
       name: "Agent",
       runMode: "cloud",
-      providerApiKey: "cloud-key-from-replay",
+      connection: {
+        kind: "local-provider",
+        provider: "openrouter",
+        apiKey: "sk-test-openrouter",
+        primaryModel: "openai/gpt-5-mini",
+      },
+      providerApiKey: "sk-test-openrouter",
     };
 
-    if (
-      typeof body.providerApiKey === "string" &&
-      body.providerApiKey.trim().length > 0
-    ) {
-      staleConfig.cloud.apiKey = body.providerApiKey.trim();
-    }
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
 
-    expect(staleConfig.cloud.apiKey).toBe("cloud-key-from-replay");
+    expect(isCloudMode).toBe(false);
+    expect(replayBody).toEqual({
+      name: "Agent",
+    });
+    expect(replayBody).not.toHaveProperty("connection");
+    expect(replayBody).not.toHaveProperty("runMode");
+    expect(replayBody).not.toHaveProperty("providerApiKey");
   });
 
-  it("without providerApiKey, upstream clobbers apiKey (demonstrates the bug)", () => {
-    // This test documents the bug: upstream uses stale config, no apiKey
-    const staleConfig = {
-      cloud: { enabled: false } as Record<string, unknown>,
-    };
-
-    // Body without providerApiKey (the old behavior)
+  it("strips legacy keys while preserving canonical runtime fields when both are present", () => {
     const body = {
       name: "Agent",
       runMode: "cloud",
+      connection: {
+        kind: "cloud-managed",
+        cloudProvider: "elizacloud",
+      },
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5-mini",
+        },
+      },
     };
 
-    // Upstream handler checks for providerApiKey — it's missing
-    if (
-      typeof (body as Record<string, unknown>).providerApiKey === "string" &&
-      ((body as Record<string, unknown>).providerApiKey as string).trim()
-        .length > 0
-    ) {
-      staleConfig.cloud.apiKey = (
-        (body as Record<string, unknown>).providerApiKey as string
-      ).trim();
-    }
+    const { isCloudMode, replayBody } = deriveCompatOnboardingReplayBody(body);
 
-    // apiKey is NOT set — this is the bug
-    expect(staleConfig.cloud.apiKey).toBeUndefined();
-  });
-
-  it("sealed secret fallback works when disk config has no apiKey", () => {
-    // Simulate: persistCloudLoginStatus wrote to sealed secrets but disk
-    // config was somehow corrupted/missing the apiKey
-    const configNoKey = {
-      env: {},
-      cloud: { enabled: true },
-      agents: { defaults: {}, list: [] },
-      meta: {},
-    };
-    loadMock.mockReturnValue(configNoKey);
-
-    const config = loadMock();
-    let cloudApiKey = (config.cloud as Record<string, unknown>)?.apiKey as
-      | string
-      | undefined;
-
-    // No apiKey on disk — fall back to sealed secret store
-    if (!cloudApiKey) {
-      // In production, getCloudSecret("ELIZAOS_CLOUD_API_KEY") would be called
-      // Simulate the sealed secret returning the key
-      cloudApiKey = "sealed-secret-key";
-    }
-
-    expect(cloudApiKey).toBe("sealed-secret-key");
+    expect(isCloudMode).toBe(true);
+    expect(replayBody).toMatchObject({
+      name: "Agent",
+      deploymentTarget: {
+        runtime: "cloud",
+        provider: "elizacloud",
+      },
+      serviceRouting: {
+        llmText: {
+          backend: "openrouter",
+          transport: "direct",
+          primaryModel: "openai/gpt-5-mini",
+        },
+      },
+    });
+    expect(replayBody).not.toHaveProperty("connection");
+    expect(replayBody).not.toHaveProperty("runMode");
   });
 });

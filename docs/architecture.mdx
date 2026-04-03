@@ -43,7 +43,7 @@ Milady is a cross-platform AI agent runtime built on top of [elizaOS](https://el
                              v
 +---------------------------------------------------------------+
 |                    Storage & Config Layer                      |
-|  ~/.milady/milady.json  (Zod-validated config)              |
+|  ~/.milady/milady.json  (primary runtime config)            |
 |  PGLite (default) or PostgreSQL (database)                    |
 |  ~/.milady/workspace/ (agent files, skills)               |
 |  ~/.milady/plugins/  (custom, ejected, installed)            |
@@ -106,8 +106,8 @@ The `startEliza()` function in `packages/app-core/src/runtime/eliza.ts` orchestr
   <Step title="Load Configuration">
     Read `~/.milady/milady.json` via `loadMiladyConfig()`. If no config exists, fall back to an empty `MiladyConfig` object with all-optional fields.
   </Step>
-  <Step title="First-Run Onboarding">
-    If no agent name is configured and stdin is a TTY, run the interactive onboarding flow: welcome banner, name selection (4 random + custom), personality/style preset, AI provider selection, and wallet setup. In headless mode (GUI), this is deferred to the web UI.
+  <Step title="Startup / First-Run Selection">
+    If no server target has been established yet, the app surfaces a chooser-first startup flow: create a local server, connect to a discovered LAN server, connect to Eliza Cloud, or manually connect to a remote server. Provider routing happens after server selection rather than being implied by hosting mode.
   </Step>
   <Step title="Environment Propagation">
     Push connector secrets (`DISCORD_API_TOKEN`, `TELEGRAM_BOT_TOKEN`, etc.) from config into `process.env`. Auto-resolve Discord Application ID from bot token via the Discord API. Propagate cloud, x402, and database config into env vars.

@@ -14,6 +14,7 @@
  */
 
 import type { Action, HandlerOptions, IAgentRuntime } from "@elizaos/core";
+import { isElizaCloudServiceSelectedInConfig } from "@miladyai/shared/contracts";
 import { loadElizaConfig } from "../config/config";
 import {
   createAudioProvider,
@@ -25,10 +26,14 @@ import {
 
 function getMediaProviderOptions(): MediaProviderFactoryOptions {
   const config = loadElizaConfig();
+  const cloudMediaSelected = isElizaCloudServiceSelectedInConfig(
+    config as Record<string, unknown>,
+    "media",
+  );
   return {
     elizaCloudBaseUrl: config.cloud?.baseUrl ?? "https://elizacloud.ai/api/v1",
     elizaCloudApiKey: config.cloud?.apiKey,
-    cloudMediaDisabled: config.cloud?.services?.media === false,
+    cloudMediaDisabled: !cloudMediaSelected,
   };
 }
 

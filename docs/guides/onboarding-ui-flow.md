@@ -1,98 +1,145 @@
 ---
 title: Onboarding UI flow
 sidebarTitle: Onboarding UI
-summary: How the wizard’s step order, back/next, and sidebar stay in sync—and why the code is split between pure flow helpers and AppContext.
-description: Architecture of Milady’s in-app onboarding wizard—flow.ts vs AppContext, custom vs cloud tracks, and safe ways to change steps.
+summary: How Milady moves from the startup server chooser into the six-step onboarding wizard, and how that maps to canonical server and routing state.
+description: Architecture of Milady’s chooser-first startup and in-app onboarding wizard, including server selection, hosting vs provider separation, and the pure connection flow helpers.
 ---
 
-# Onboarding UI: flow data and navigation
+# Onboarding UI: chooser first, provider second
 
-This guide describes how the **in-app onboarding wizard** (not the HTTP `/api/onboarding` contract) decides step order, forward/back motion, and the sidebar. It focuses on **why** the code is structured this way so future changes stay safe.
+This guide describes the **in-app onboarding UI flow** and its relationship to the startup chooser. It is about the client-side user experience, not the HTTP `/api/onboarding` contract.
 
-## Why split “data” and “motion”?
+## Current shape
 
-**Problem:** Step order and sidebar labels used to be duplicated in multiple places (`handleOnboardingNext`, `handleOnboardingBack`, `OnboardingStepNav`). That drifted easily and made “go back” behavior hard to reason about.
+Milady now has two layers before the first chat:
 
-**Approach:**
+1. **Startup chooser**
+   The user chooses which server to use:
+   - create a local server
+   - connect to a discovered LAN server
+   - connect to an existing remote server
+   - use Eliza Cloud when cloud credentials are available
 
-- **`packages/app-core/src/onboarding/flow.ts`** — Pure functions only: given the current step, what is the linear order, the next/previous id, whether a jump is allowed, and which sidebar rows to show. No React, no API client, no `localStorage`. *Why pure:* easy to unit test and impossible to accidentally import UI side effects.
-- **`AppProvider` (`advanceOnboarding`, `revertOnboarding`, `handleOnboardingJumpToStep`, `goToOnboardingStep`)** — All **side effects** live here: `handleCloudLogin`, `handleOnboardingFinish`, provider auto-fill, persisting the step, Flamina guide updates. *Why keep this in context:* those hooks close over dozens of pieces of state; extracting them prematurely into a separate module tends to produce huge dependency bags or stale closures.
+2. **Onboarding wizard**
+   Once a server target is selected, the app runs the six-step wizard defined in
+   [`packages/app-core/src/state/types.ts`](../../packages/app-core/src/state/types.ts):
+   - `identity`
+   - `hosting`
+   - `providers`
+   - `voice`
+   - `permissions`
+   - `launch`
 
-## Tracks: custom vs cloud
+**Important rule:** choosing where the server runs is not the same as choosing who handles inference. Hosting is server selection. Provider choice is service routing.
 
-**Why two tracks:** The product supports a full local setup path (`connection` → `rpc` → `senses` → `activate`) and a shorter cloud path (`welcome` → `cloudLogin` → finish). They are different linear sequences.
+## Source of truth
 
-**How the active track is chosen:** If the current step id appears in `CUSTOM_ONBOARDING_STEPS` ([`types.ts`](../../packages/app-core/src/state/types.ts)), we treat the user as on the **custom** track; otherwise **cloud**. *Why infer from the current step instead of a separate `track` field:* it matches legacy behavior and avoids migrating persisted state. *Caveat:* `welcome` is **not** a custom step, so it resolves against the cloud order even when the user will soon click “Get Started” and land on `connection`.
+The client should treat these concerns separately:
 
-**Why step lists live in `types.ts`:** Those arrays carry i18n keys for names/subtitles and are imported by `flow.ts`. Keeping them in `types` avoids a circular import (`types` ↔ `flow`) while still giving `flow.ts` a single mechanical source for **order** (array order = wizard order).
+- **Server target**
+  The selected server: local, remote/LAN, or Eliza Cloud.
+- **Linked accounts**
+  Accounts available to the selected server, such as Eliza Cloud, OpenAI, or Anthropic.
+- **Service routing**
+  Which backend handles chat, TTS, media, embeddings, or RPC on that server.
 
-## Operators (what to call when)
+The canonical runtime config on disk uses:
 
-| Mechanism | Use when | Why |
-|-----------|----------|-----|
-| `advanceOnboarding` / `handleOnboardingNext` | User presses Continue or an auto-advance (e.g. cloud connected) | Runs step-specific work **before** moving (cloud login on `welcome`, finish on `activate`, etc.), then uses `resolveOnboardingNextStep`. |
-| `revertOnboarding` / `handleOnboardingBack` | User presses Back | Uses `resolveOnboardingPreviousStep`; from `connection` the previous step is **`welcome`** even though `welcome` is not in the custom sidebar list. |
-| `handleOnboardingJumpToStep` | User clicks a **completed** sidebar row | Same backward guarantee as repeated Back, but only if `canRevertOnboardingTo` passes (strictly earlier index in the **current** track). *Why backward-only:* forward jumps would skip `handleOnboardingFinish`, cloud login, and validation. |
-| `goToOnboardingStep` | Controlled transitions that are not “Next” (e.g. Welcome **Get Started** → `connection`) | Updates persisted step **and** Flamina guide in advanced mode. *Why not raw `setState("onboardingStep", …)` from UI:* one place to sync guide and avoid silent desync. |
+- `deploymentTarget`
+- `linkedAccounts`
+- `serviceRouting`
 
-**Administrative transitions** (resume from server, “Start Over”, URL overrides) still call `setOnboardingStep` / `setOnboardingStepRaw` directly in `AppContext`. *Why excluded:* they are not user “Next/Back” and should not run advance hooks.
+The onboarding UI should guide the user toward those fields. It should not rebuild old global cloud toggles or infer active providers from linked credentials.
 
-## Sidebar and `cloudOnly`
+## Why split startup chooser from onboarding?
 
-`getOnboardingNavMetas` mirrors the old rules: on the cloud track with `branding.cloudOnly`, the **welcome** row is hidden so the list does not imply a step the product does not show. *Why `Math.max(0, currentIndex)` in the nav component:* when `welcome` is hidden but the step is still `welcome`, `findIndex` is `-1`; clamping avoids a broken CSS class for the progress line (the active row styling may still look odd—that edge case predates this refactor).
+The old flow mixed too many responsibilities into one place:
 
-## Connection step subflow (inside `connection`)
+- deciding whether the app was local or cloud
+- deciding which backend it should connect to
+- deciding which provider should handle chat
+- deciding whether linked cloud services were active
 
-The wizard step id stays **`connection`**; inside that step, users move through **hosting → remote or Eliza Cloud → neural link (provider grid) → provider detail**. That inner graph is separate from `flow.ts`.
+That created conflicts where cloud login, remote attach, and provider switching could overwrite each other.
 
-**Why separate from `flow.ts`:** outer flow is “which step index”; connection is “which panel inside one step.” Mixing them would force `flow.ts` to import connection field types and would blur “linear wizard” vs “nested state machine.”
+The chooser-first split fixes that:
 
-| Piece | Role |
-|-------|------|
-| [`packages/app-core/src/onboarding/types.ts`](../../packages/app-core/src/onboarding/types.ts) | **Types only** for the connection subflow (`ConnectionScreen`, `ConnectionEvent`, `ConnectionFlowSnapshot`, etc.). **Why split:** consumers can depend on types without importing transition code. |
-| [`packages/app-core/src/onboarding/connection-flow.ts`](../../packages/app-core/src/onboarding/connection-flow.ts) | **Pure:** `deriveConnectionScreen`, `applyConnectionTransition`, `resolveConnectionUiSpec`, `CONNECTION_TRANSITIONS`. Re-exports types. No React. **Why pure:** unit-test routing without jsdom; forbid accidental `client.*` in the same function as branch logic. |
-| [`packages/app-core/src/onboarding/tests/connection-flow.test.ts`](../../packages/app-core/src/onboarding/tests/connection-flow.test.ts) | Table tests for screens, patches, and `forceCloud` steady routing. **Why table tests:** many snapshots × events; one row per edge case catches precedence bugs. |
-| [`packages/app-core/src/components/onboarding/ConnectionStep.tsx`](../../packages/app-core/src/components/onboarding/ConnectionStep.tsx) | **Shell:** builds `ConnectionFlowSnapshot`, runs `forceCloudBootstrap` via the reducer, dispatches transitions, applies patches with `setState`. **Why a shell:** only here do we have stable `setState` and `useApp` handlers; the pure module stays ignorant of React. |
-| [`packages/app-core/src/components/onboarding/connection/`](../../packages/app-core/src/components/onboarding/connection/) | **Views:** `ConnectionUiRoot` + one component per `ConnectionScreen`. See [`connection/README.md`](../../packages/app-core/src/components/onboarding/connection/README.md) for file map and tradeoffs. |
+- **Startup chooser** decides which server the client is talking to.
+- **Onboarding** configures that selected server.
+- **Chat** opens only after the selected server has a valid chat route.
 
-**Effectful transitions:** `backRemoteOrGrid` / grid back while `onboardingRemoteConnected` returns `{ kind: "effect", effect: "useLocalBackend" }`. The shell calls `handleOnboardingUseLocalBackend()` (API client + `retryStartup`). **Why not in the reducer:** those calls are not deterministic pure functions and would make tests depend on network/mocks.
+## Step responsibilities
 
-**OAuth / subscription UI state** (OpenAI redirect flow, Anthropic code entry) lives in **`ConnectionProviderDetailScreen`** as local `useState`, not in the reducer. **Why:** reducer patches only **persisted** onboarding fields; OAuth wizards are ephemeral UI. **Caveat:** backing out of provider detail **unmounts** that screen, so in-progress OAuth UI resets—acceptable unless product requires otherwise (then lift state to `ConnectionStep`).
+| Step | What it owns | What it must not own |
+|------|---------------|----------------------|
+| `identity` | Name, persona, style, basic profile | Hosting or provider routing |
+| `hosting` | Selecting a server target or attaching to a backend | Choosing the active chat model |
+| `providers` | Choosing `serviceRouting.llmText` and related linked accounts | Changing where the server runs |
+| `voice` | Voice/TTS routing and related credentials | Changing chat inference implicitly |
+| `permissions` | Local device capability permissions | Provider selection |
+| `launch` | Final readiness and first-chat handoff | Rewriting routing defaults silently |
 
-**Steady `forceCloud` routing:** When `forceCloud && onboardingRunMode === ""`, derivation treats effective run mode as `"local"` so the described screen matches the post-`useEffect` UI (provider grid), not a one-frame hosting state. **Why:** tests and mental model should match what users see after `useEffect` runs; the first paint may still differ for a frame.
+## Pure connection flow
 
-**Do not** merge this graph into [`onboarding-config.ts`](../../packages/app-core/src/onboarding-config.ts) — that module builds the **submit/API payload**, not which panel to show. **Why keep apart:** submit shape can change for the REST contract without rewriting UI routing, and vice versa.
+The hosting step still has a nested pure state machine for its internal panels.
 
-## Changing the flow safely
+Relevant files:
 
-1. Reorder or add steps in **`CUSTOM_ONBOARDING_STEPS` / `CLOUD_ONBOARDING_STEPS`** in [`types.ts`](../../packages/app-core/src/state/types.ts) (and add a wizard `case` in `OnboardingWizard` if it is a new screen).
-2. Run / extend [`tests/flow.test.ts`](../../packages/app-core/src/onboarding/tests/flow.test.ts).
-3. If “Next” does new work, extend **`advanceOnboarding`** in `AppContext`—do **not** paste new step arrays there.
-4. Do **not** refactor `handleOnboardingFinish` in the same change as flow tweaks unless you are prepared for a large, risky diff.
+| File | Role |
+|------|------|
+| [`packages/app-core/src/onboarding/server-target.ts`](../../packages/app-core/src/onboarding/server-target.ts) | Canonical mapping between onboarding server target and the temporary compatibility fields still used at the onboarding API boundary. |
+| [`packages/app-core/src/onboarding/types.ts`](../../packages/app-core/src/onboarding/types.ts) | Types for the nested connection flow snapshots, patches, screens, and events. |
+| [`packages/app-core/src/onboarding/connection-flow.ts`](../../packages/app-core/src/onboarding/connection-flow.ts) | Pure routing logic for the hosting step panels. No React, no API calls. |
+| [`packages/app-core/src/components/onboarding/ConnectionStep.tsx`](../../packages/app-core/src/components/onboarding/ConnectionStep.tsx) | React shell that renders the pure flow and performs effectful actions. |
+| [`packages/app-core/src/onboarding/tests/connection-flow.test.ts`](../../packages/app-core/src/onboarding/tests/connection-flow.test.ts) | Table-driven coverage for the nested hosting-step decisions. |
 
-### Changing the **connection** subflow safely
+**Why this split still exists:** the hosting step has richer nested UI than the outer wizard, and the pure module keeps that behavior deterministic and testable.
 
-1. Update **`deriveConnectionScreen`** branch order only to match the real UI in `ConnectionUiRoot` / screens; add a **`tests/connection-flow.test.ts`** fixture for every new edge case.
-2. Add **`ConnectionEvent`** variants and **`applyConnectionTransition`** arms together; after `mergeConnectionSnapshot`, assert **`deriveConnectionScreen`** matches the expected screen.
-3. Add or adjust a screen component under **`components/onboarding/connection/`** and register it in **`ConnectionUiRoot`**.
+## What “hosting” means now
 
-## Branding: `{{appName}}` in copy
+Inside the hosting flow, the user is answering:
 
-Some strings use **`{{appName}}`** (welcome title, hosting question, pairing hints, etc.). **Why not hardcode “Milady”:** the same `app-core` build ships in white-label shells; the display name comes from **`BrandingContext`**.
+- should Milady start a local server?
+- should it connect to a remote or discovered server?
+- should it use Eliza Cloud as the server target?
 
-**Contract:** pass **`appNameInterpolationVars(branding)`** (from `@miladyai/app-core/config`) as the second argument to **`t()`** whenever the locale value contains `{{appName}}`. **Why a helper:** avoids mismatched keys (e.g. `name` vs `appName`) and centralizes the default (**`DEFAULT_APP_DISPLAY_NAME`**, currently `"Eliza"`).
+They are **not** yet answering:
 
-## System access (`senses`) — permissions UI
+- should chat use OpenAI?
+- should chat use Anthropic?
+- should chat use Eliza Cloud inference?
+- should TTS come from ElevenLabs or Eliza Cloud?
 
-The permissions step shows **one Continue** control. **Why:** “Skip” vs “Continue” duplicated a single user intent (“proceed”) and confused people; permission rows still show granted vs not. Advance always uses the normal next step (no bypass from this screen).
+Those answers belong to the provider and voice steps, where the app writes canonical service routing for the selected server.
 
-## Eliza Cloud in the **connection** step — OAuth auto-advance
+## Back/next behavior
 
-When the user connects via **Login** (OAuth) on Eliza Cloud panels inside **`connection`**, the wizard advances as soon as **`elizaCloudConnected`** becomes true—no second Confirm. **Why:** parity with **`CloudLoginStep`**; the connected badge is sufficient feedback. **Not** auto-advanced on the **API key** tab: the user may still be editing the field.
+The outer wizard navigation still comes from pure flow helpers in
+[`packages/app-core/src/onboarding/flow.ts`](../../packages/app-core/src/onboarding/flow.ts), while effectful transitions stay in AppContext and onboarding callbacks.
 
-Hook: **`useAdvanceOnboardingWhenElizaCloudOAuthConnected`** next to the connection screens; see [`connection/README.md`](../../packages/app-core/src/components/onboarding/connection/README.md).
+Use:
+
+- `handleOnboardingNext` / `advanceOnboarding` for forward progress
+- `handleOnboardingBack` / `revertOnboarding` for backward motion
+- `goToOnboardingStep` for controlled jumps that must also sync guide state
+
+Do not write raw step changes from UI components unless the transition is administrative and intentionally bypasses normal wizard behavior.
+
+## Safe editing rules
+
+When changing the onboarding UI:
+
+1. Update the chooser or step responsibility first.
+2. Keep hosting and provider logic separate.
+3. Add or update table tests in the pure flow modules.
+4. Keep API calls and bridge effects out of pure onboarding helpers.
+5. Verify that first-chat still depends on both:
+   - a selected server target
+   - an active chat provider route
 
 ## Related docs
 
-- [Onboarding REST API](../rest/onboarding.md) — server-side status, options, and submit.
-- [Plugin resolution / NODE_PATH](../plugin-resolution-and-node-path.md) — unrelated to onboarding UI but often touched in the same repo.
+- [Onboarding REST API](../rest/onboarding.md)
+- [Quickstart](../quickstart.mdx)
+- [Configuration](../configuration.mdx)
+- [Architecture](../architecture.mdx)

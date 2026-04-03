@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { loadElizaConfig } from "../../config/config";
+import { createImageProvider } from "../../providers/media-provider";
 
 const mockImageGenerate = vi.fn();
 const mockVideoGenerate = vi.fn();
@@ -29,12 +31,18 @@ async function loadMediaActions() {
   return await import("../../actions/media");
 }
 
+const loadElizaConfigMock = vi.mocked(loadElizaConfig);
+const createImageProviderMock = vi.mocked(createImageProvider);
+
 describe("media actions", () => {
   beforeEach(() => {
+    createImageProviderMock.mockClear();
+    loadElizaConfigMock.mockClear();
     mockImageGenerate.mockReset();
     mockVideoGenerate.mockReset();
     mockAudioGenerate.mockReset();
     mockVisionAnalyze.mockReset();
+    loadElizaConfigMock.mockReturnValue({ media: {}, cloud: {} } as never);
   });
 
   afterEach(() => {
@@ -102,6 +110,73 @@ describe("media actions", () => {
 
     expect(result.success).toBe(false);
     expect(result.text).toContain("provider unavailable");
+  });
+
+  it("does not fall back to Eliza Cloud media unless media routing selects it", async () => {
+    loadElizaConfigMock.mockReturnValue({
+      media: {},
+      cloud: { apiKey: "ck-cloud" },
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+        },
+      },
+    } as never);
+    mockImageGenerate.mockResolvedValue({
+      success: false,
+      error: "provider unavailable",
+    });
+
+    const { generateImageAction } = await loadMediaActions();
+    await generateImageAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { prompt: "sunset" } },
+    );
+
+    expect(createImageProviderMock).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        elizaCloudApiKey: "ck-cloud",
+        cloudMediaDisabled: true,
+      }),
+    );
+  });
+
+  it("keeps Eliza Cloud media enabled when media routing selects it explicitly", async () => {
+    loadElizaConfigMock.mockReturnValue({
+      media: {},
+      cloud: { apiKey: "ck-cloud" },
+      serviceRouting: {
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
+    } as never);
+    mockImageGenerate.mockResolvedValue({
+      success: false,
+      error: "provider unavailable",
+    });
+
+    const { generateImageAction } = await loadMediaActions();
+    await generateImageAction.handler(
+      undefined,
+      { roomId: "room", content: { text: "" } },
+      undefined,
+      { parameters: { prompt: "sunset" } },
+    );
+
+    expect(createImageProviderMock).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        elizaCloudApiKey: "ck-cloud",
+        cloudMediaDisabled: false,
+      }),
+    );
   });
 
   it("requires a prompt for video generation", async () => {

@@ -14,10 +14,10 @@
  *    - it is `local`
  *    - it is Eliza Cloud-hosted
  *    - or the user already connected to a remote backend
- *    **effectiveRunMode:** if `forceCloud && onboardingRunMode === ""`, use `"local"`. **Why:** cloud-only builds skip
- *    the hosting chooser and land directly on the provider grid.
+ *    **effectiveServerTarget:** if `forceCloud && onboardingServerTarget === ""`, use `"local"`. **Why:** cloud-only
+ *    builds skip the hosting chooser and land directly on the provider grid.
  * 2. If `!showProviderSelection`:
- *    - `!effectiveRunMode` → **hosting**
+ *    - `!effectiveServerTarget` → **hosting**
  *    - else → **remoteBackend**
  * 3. If `showProviderSelection && !onboardingProvider` → **providerGrid**
  * 4. Else → **providerDetail**
@@ -34,11 +34,7 @@ import type {
   ConnectionTransitionResult,
   ConnectionUiSpec,
 } from "./types";
-import {
-  buildOnboardingServerSelection,
-  resolveOnboardingServerTarget,
-  type OnboardingServerTarget,
-} from "./server-target";
+import { type OnboardingServerTarget } from "./server-target";
 
 export type {
   ConnectionEffect,
@@ -107,38 +103,25 @@ export const CONNECTION_TRANSITIONS: ReadonlyArray<ConnectionTransitionDocRow> =
       from: "hosting",
       event: "forceCloudBootstrap",
       to: "providerGrid",
-      note: "When forceCloud && runMode empty (steady UI)",
+      note: "When forceCloud && server target empty (steady UI)",
     },
   ];
 
 function toOnboardingTargetPatch(
   target: OnboardingServerTarget,
 ): ConnectionStatePatch {
-  const selection = buildOnboardingServerSelection(target);
   return {
-    onboardingRunMode: selection.runMode,
-    onboardingCloudProvider: selection.cloudProvider,
+    onboardingServerTarget: target,
   };
-}
-
-/** **Why exported:** tests and docs; also shared by `derive` and `resolveConnectionUiSpec` so policy lives once. */
-export function getEffectiveRunMode(
-  snapshot: ConnectionFlowSnapshot,
-): "local" | "cloud" | "" {
-  return toOnboardingTargetPatch(getEffectiveServerTarget(snapshot))
-    .onboardingRunMode as "local" | "cloud" | "";
 }
 
 export function getEffectiveServerTarget(
   snapshot: ConnectionFlowSnapshot,
 ): OnboardingServerTarget {
-  if (snapshot.forceCloud && snapshot.onboardingRunMode === "") {
+  if (snapshot.forceCloud && snapshot.onboardingServerTarget === "") {
     return "local";
   }
-  return resolveOnboardingServerTarget({
-    runMode: snapshot.onboardingRunMode,
-    cloudProvider: snapshot.onboardingCloudProvider,
-  });
+  return snapshot.onboardingServerTarget;
 }
 
 /** True when the neural link grid path is active (local run mode or already connected to remote). */
@@ -165,9 +148,9 @@ export function deriveConnectionScreen(
   snapshot: ConnectionFlowSnapshot,
 ): ConnectionScreen {
   const show = computeShowProviderSelection(snapshot);
-  const run = getEffectiveRunMode(snapshot);
+  const target = getEffectiveServerTarget(snapshot);
   if (!show) {
-    if (!run) return "hosting";
+    if (!target) return "hosting";
     return "remoteBackend";
   }
   if (!snapshot.onboardingProvider) return "providerGrid";
@@ -179,13 +162,11 @@ export function resolveConnectionUiSpec(
   snapshot: ConnectionFlowSnapshot,
 ): ConnectionUiSpec {
   const screen = deriveConnectionScreen(snapshot);
-  const effectiveRunMode = getEffectiveRunMode(snapshot);
   const showProviderSelection = computeShowProviderSelection(snapshot);
   return {
     screen,
-    effectiveRunMode,
     showProviderSelection,
-    showHostingLocalCard: !snapshot.cloudOnly,
+    showHostingLocalCard: !snapshot.cloudOnly && !snapshot.isNative,
     forceCloud: snapshot.forceCloud,
     providerId: snapshot.onboardingProvider,
     elizaCloudTab: snapshot.onboardingElizaCloudTab,
@@ -229,7 +210,7 @@ export function applyConnectionTransition(
 ): ConnectionTransitionResult | null {
   switch (event.type) {
     case "forceCloudBootstrap": {
-      if (!snapshot.forceCloud || snapshot.onboardingRunMode !== "") {
+      if (!snapshot.forceCloud || snapshot.onboardingServerTarget !== "") {
         return null;
       }
       return {
@@ -379,11 +360,8 @@ export function mergeConnectionSnapshot(
   patch: ConnectionStatePatch,
 ): ConnectionFlowSnapshot {
   const next: ConnectionFlowSnapshot = { ...base };
-  if (patch.onboardingRunMode !== undefined) {
-    next.onboardingRunMode = patch.onboardingRunMode;
-  }
-  if (patch.onboardingCloudProvider !== undefined) {
-    next.onboardingCloudProvider = patch.onboardingCloudProvider;
+  if (patch.onboardingServerTarget !== undefined) {
+    next.onboardingServerTarget = patch.onboardingServerTarget;
   }
   if (patch.onboardingProvider !== undefined) {
     next.onboardingProvider = patch.onboardingProvider;

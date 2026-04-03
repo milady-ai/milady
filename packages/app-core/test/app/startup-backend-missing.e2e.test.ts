@@ -67,8 +67,12 @@ describe("startup failure: backend missing", () => {
     // startup flow proceeds to backend polling (fresh installs now skip
     // backend polling and go straight to onboarding).
     localStorage.setItem(
-      "eliza:connection-mode",
-      JSON.stringify({ runMode: "local" }),
+      "milady:active-server",
+      JSON.stringify({
+        id: "local:embedded",
+        kind: "local",
+        label: "This device",
+      }),
     );
     // Returning user — splash auto-skips when onboarding was completed before
     localStorage.setItem("eliza:onboarding-complete", "1");
@@ -93,7 +97,7 @@ describe("startup failure: backend missing", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    localStorage.removeItem("eliza:connection-mode");
+    localStorage.removeItem("milady:active-server");
   });
 
   it("fails fast on backend 404 and surfaces backend-unreachable", async () => {

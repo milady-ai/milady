@@ -100,8 +100,8 @@ function baseContext(overrides?: Record<string, unknown>) {
     onboardingName: "Eliza",
     onboardingOwnerName: "anon",
     onboardingStyle: "default",
-    onboardingRunMode: "",
-    onboardingCloudProvider: "",
+    onboardingServerTarget: "",
+    onboardingCloudApiKey: "",
     onboardingSmallModel: "",
     onboardingLargeModel: "",
     onboardingProvider: "",
@@ -269,7 +269,10 @@ describe("ConnectionStep", () => {
 
   it("renders provider selection grid once local hosting is chosen", async () => {
     mockUseApp.mockReturnValue(
-      baseContext({ onboardingRunMode: "local", onboardingProvider: "" }),
+      baseContext({
+        onboardingServerTarget: "local",
+        onboardingProvider: "",
+      }),
     );
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
@@ -284,7 +287,7 @@ describe("ConnectionStep", () => {
   it("renders provider config when a provider is selected", async () => {
     mockUseApp.mockReturnValue(
       baseContext({
-        onboardingRunMode: "local",
+        onboardingServerTarget: "local",
         onboardingProvider: "openai",
       }),
     );
@@ -302,8 +305,7 @@ describe("ConnectionStep", () => {
   it("renders remote backend fields for self-hosted cloud connections", async () => {
     mockUseApp.mockReturnValue(
       baseContext({
-        onboardingRunMode: "cloud",
-        onboardingCloudProvider: "remote",
+        onboardingServerTarget: "remote",
       }),
     );
     let tree: TestRenderer.ReactTestRenderer | undefined;
@@ -345,7 +347,7 @@ describe("ConnectionStep", () => {
     });
 
     const text = collectText(tree?.root as TestRenderer.ReactTestInstance);
-    expect(text).toContain("Eliza Cloud");
+    expect(text).toContain("header.Cloud");
     expect(text).not.toContain("onboarding.hostingLocal");
     mockIsNativeFn.value = false;
   });

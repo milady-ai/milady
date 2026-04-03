@@ -140,7 +140,7 @@ describe("server cloud disconnect", () => {
       const before = await request(server.port, "GET", "/api/cloud/status");
       expect(before.status).toBe(200);
       expect(before.data).toEqual({
-        cloudVoiceProxyAvailable: true,
+        cloudVoiceProxyAvailable: false,
         connected: true,
         enabled: true,
         hasApiKey: true,
