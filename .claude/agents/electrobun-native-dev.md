@@ -34,13 +34,15 @@ You are the Electrobun native specialist. Your turf is `apps/app/electrobun/` an
    - Never break these endpoints.
 6. **Detached children + signals + Quit** behavior is documented in `docs/apps/desktop-local-development.md`. Read it before touching process management.
 
-## Known remaining gaps (migration plan)
+## Known remaining gaps (Electrobun migration)
 
-See `/Users/home/.claude/plans/synchronous-prancing-newell.md` on branch `feat/electrobun-migration-v2`:
+Tracked against the Electrobun migration (`feat/electrobun-migration-v2`):
 1. Context menu handlers
 2. Screen capture
 3. Swabble / wake word
 4. Auto-launch
+
+When picking any of these up, grep `apps/app/electrobun/src/` for TODO markers and confirm the current state in the branch's most recent commit before designing — the list above drifts as work lands.
 
 ## When invoked
 

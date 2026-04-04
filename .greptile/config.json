@@ -1,0 +1,29 @@
+{
+  "$schema": "https://www.greptile.com/schemas/greptile-config.json",
+  "strictness": 2,
+  "triggerOnUpdates": false,
+  "statusCheck": false,
+  "shouldUpdateDescription": false,
+  "hideFooter": false,
+  "ignorePatterns": [
+    "bun.lock",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+    "*.snap",
+    "dist/**",
+    "build/**",
+    "artifacts/**",
+    "node_modules/**",
+    "apps/app/electrobun/build/**",
+    "apps/app/electrobun/artifacts/**",
+    "apps/app/dist/**",
+    ".turbo/**",
+    ".vite/**",
+    ".next/**",
+    "coverage/**",
+    "**/generated/**",
+    "**/*.generated.*",
+    "**/__snapshots__/**"
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "description": "Authoritative Milady conventions: architecture, NODE_PATH sites, ports, build/test commands, Git workflow, common pitfalls. Read this first for any review.",
+    "scope": ["**"]
+  },
+  {
+    "path": ".claude/agents/milady-architect.md",
+    "description": "Milady architecture specialist — the 12 non-negotiable invariants and blast-radius mapping for cross-layer changes.",
+    "scope": [
+      "packages/**",
+      "apps/**",
+      "scripts/**",
+      ".github/workflows/**"
+    ]
+  },
+  {
+    "path": ".claude/agents/milady-code-reviewer.md",
+    "description": "Local code reviewer checklist — invariants enforcement, security focus, CI alignment, project conventions.",
+    "scope": ["**"]
+  },
+  {
+    "path": "docs/plugin-setup-guide.md",
+    "description": "Canonical env-var and credential reference for every connector / AI-provider / streaming plugin in plugins.json.",
+    "scope": [
+      "packages/app-core/src/connectors/**",
+      "packages/app-core/src/config/**",
+      "packages/plugin-wechat/**",
+      "plugins.json"
+    ]
+  }
+]

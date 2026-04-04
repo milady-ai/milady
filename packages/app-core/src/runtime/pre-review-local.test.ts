@@ -7,6 +7,8 @@ import {
   classificationFromInputs,
   decisionFromFindings,
   getBaseRef,
+  isSourceCode,
+  isTestExempt,
   resolveRunnableTestFiles,
   runChecks,
   scanDiffTextForBlockedPatterns,
@@ -262,6 +264,59 @@ index 1234567..89abcde 100644
     );
 
     expect(resolved).toEqual(["kept.test.ts"]);
+  });
+
+  it("identifies TypeScript/JavaScript source files for pattern scanning", () => {
+    expect(isSourceCode("packages/app-core/src/runtime/eliza.ts")).toBe(true);
+    expect(isSourceCode("apps/app/src/main.tsx")).toBe(true);
+    expect(isSourceCode("scripts/run-node.mjs")).toBe(true);
+    expect(isSourceCode("packages/ui/src/Button.jsx")).toBe(true);
+    expect(isSourceCode(".eslintrc.cjs")).toBe(true);
+
+    // Non-source files — must NOT be scanned for TS-specific patterns
+    expect(isSourceCode(".claude/agents/milady-code-reviewer.md")).toBe(false);
+    expect(isSourceCode(".github/workflows/agent-review.yml")).toBe(false);
+    expect(isSourceCode(".claude/settings.json")).toBe(false);
+    expect(isSourceCode(".claude/hooks/check-node-path.sh")).toBe(false);
+    expect(isSourceCode("docs/plugin-setup-guide.md")).toBe(false);
+    expect(isSourceCode("bun.lock")).toBe(false);
+  });
+
+  it("identifies files whose changes do not require regression tests", () => {
+    // Docs
+    expect(isTestExempt("docs/plugin-setup-guide.md")).toBe(true);
+    expect(isTestExempt("README.md")).toBe(true);
+    expect(isTestExempt("CHANGELOG.txt")).toBe(true);
+
+    // Agent tooling
+    expect(isTestExempt(".claude/agents/milady-architect.md")).toBe(true);
+    expect(isTestExempt(".claude/hooks/check-node-path.sh")).toBe(true);
+    expect(isTestExempt(".claude/settings.json")).toBe(true);
+
+    // CI workflows and config
+    expect(isTestExempt(".github/workflows/agent-review.yml")).toBe(true);
+    expect(isTestExempt(".github/actionlint.yaml")).toBe(true);
+
+    // Editor rules
+    expect(isTestExempt(".cursor/rules/elizaos-branding.mdc")).toBe(true);
+
+    // Runtime source — NOT exempt
+    expect(isTestExempt("packages/app-core/src/runtime/eliza.ts")).toBe(false);
+    expect(isTestExempt("apps/app/src/main.tsx")).toBe(false);
+    expect(isTestExempt("scripts/run-node.mjs")).toBe(false);
+    expect(isTestExempt("packages/agent/src/api/misc-routes.ts")).toBe(false);
+  });
+
+  it("does not flag TS patterns in Markdown prose describing code rules", () => {
+    // The literal string `api as any` appears in agent documentation
+    // describing antipatterns; this must NOT be flagged when the scan
+    // correctly filters to source files only. Note that scanDiffTextForBlockedPatterns
+    // itself operates on raw text, so this test asserts isSourceCode would
+    // have excluded the file before the scan ran.
+    expect(isSourceCode(".claude/agents/milady-code-reviewer.md")).toBe(false);
+    expect(
+      isSourceCode(".github/workflows/agent-review-greptile-weighted.yml"),
+    ).toBe(false);
   });
 
   it("routes only root e2e tests to the e2e config runner", () => {

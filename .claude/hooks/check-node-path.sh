@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # PostToolUse hook: verifies NODE_PATH guards stay intact in the three critical sites
-# after any Edit/Write/MultiEdit. Non-blocking — prints a reminder to stderr if drift
-# is detected. Runs after the tool already applied.
+# after any Edit/Write/MultiEdit. Runs after the tool already applied. On drift, exits
+# with code 2 which signals the Claude Code hook system to surface the stderr message
+# back to the model and block continuation — this is intentional: dropping NODE_PATH
+# from any of the three sites silently breaks dynamic @elizaos/plugin-* imports under
+# Bun, and we want the agent to see and fix it immediately.
 #
 # Triggered on: Edit | Write | MultiEdit
 # Scope filter: only runs full check when one of the three NODE_PATH files was touched.

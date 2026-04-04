@@ -5,6 +5,31 @@ import { fileURLToPath } from "node:url";
 
 const ANY_TYPE_PATTERN = /:\s*any\b|<\s*any\s*>|\bas\s+any\b/;
 
+// TypeScript / JavaScript source file extensions. TS-specific patterns like
+// ANY_TYPE_PATTERN and @ts-ignore should only be scanned against these — not
+// against Markdown, YAML, JSON, shell scripts, or other non-source files where
+// the literal strings may legitimately appear in prose or configuration.
+const SOURCE_CODE_EXTENSIONS = /\.(?:m|c)?[jt]sx?$/i;
+
+export function isSourceCode(file) {
+  return SOURCE_CODE_EXTENSIONS.test(file);
+}
+
+// Files whose changes do not require accompanying regression tests. Broader
+// than "docs-only" — also covers agent definitions (.claude/), CI workflow
+// YAML (.github/), editor rules (.cursor/), and dev-tooling shell scripts.
+// None of these produce runtime behavior that a Vitest suite could meaningfully
+// assert against.
+export function isTestExempt(file) {
+  if (file.startsWith("docs/")) return true;
+  if (/\.(mdx?|txt)$/i.test(file)) return true;
+  if (file.startsWith(".claude/")) return true;
+  if (file.startsWith(".github/")) return true;
+  if (file.startsWith(".cursor/")) return true;
+  if (/\.sh$/i.test(file)) return true;
+  return false;
+}
+
 const SECRET_LIKE_TOKEN_PATTERNS = [
   /sk-[a-z0-9]{20,}/i,
   /pk_[a-z0-9]{24,}/i,
@@ -207,7 +232,8 @@ export function scanForBlockedDiffPatterns(base, changedFiles) {
   const sourceFiles = changedFiles.filter(
     (file) =>
       file !== "scripts/pre-review-local.mjs" &&
-      !/\.(?:e2e\.)?test\.(tsx?|jsx?)$/i.test(file),
+      !/\.(?:e2e\.)?test\.(tsx?|jsx?)$/i.test(file) &&
+      isSourceCode(file),
   );
   if (sourceFiles.length === 0) return [];
 
@@ -338,13 +364,13 @@ export function runChecks() {
     }
   }
 
-  // Docs-only changes don't need tests
-  const isDocsOnly = changed.files.every(
-    (f) => f.startsWith("docs/") || /\.(mdx?|txt)$/i.test(f),
-  );
+  // Changes that produce no runtime behavior (docs, agent tooling, CI
+  // workflow YAML, editor rules, dev shell scripts) do not need accompanying
+  // regression tests — there is no runtime path to assert against.
+  const allFilesAreTestExempt = changed.files.every(isTestExempt);
 
   if (
-    !isDocsOnly &&
+    !allFilesAreTestExempt &&
     (classification === "bugfix" ||
       classification === "feature" ||
       classification === "security")
