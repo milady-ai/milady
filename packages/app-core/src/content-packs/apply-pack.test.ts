@@ -1,6 +1,11 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 import type { ResolvedContentPack } from "@miladyai/shared/contracts/content-pack";
-import { applyContentPack, type ContentPackApplyDeps } from "./apply-pack";
+import {
+  applyContentPack,
+  applyColorScheme,
+  type ContentPackApplyDeps,
+} from "./apply-pack";
 
 function makeDeps(): ContentPackApplyDeps {
   return {
@@ -74,5 +79,28 @@ describe("applyContentPack", () => {
     expect(deps.setCustomVrmUrl).not.toHaveBeenCalled();
     expect(deps.setCustomBackgroundUrl).not.toHaveBeenCalled();
     expect(deps.setOnboardingName).not.toHaveBeenCalled();
+  });
+});
+
+describe("applyColorScheme", () => {
+  it("rejects customProperties values containing url() to prevent external requests", () => {
+    const root = document.documentElement;
+    const cleanup = applyColorScheme({
+      accent: "#ff00ff",
+      customProperties: {
+        "safe-color": "#00ff00",
+        "unsafe-bg": "url(https://evil.com/tracker.png)",
+        "also-unsafe": "URL( https://evil.com )",
+      },
+    });
+
+    expect(root.style.getPropertyValue("--safe-color")).toBe("#00ff00");
+    expect(root.style.getPropertyValue("--unsafe-bg")).toBe("");
+    expect(root.style.getPropertyValue("--also-unsafe")).toBe("");
+    expect(root.style.getPropertyValue("--pack-accent")).toBe("#ff00ff");
+
+    cleanup();
+    expect(root.style.getPropertyValue("--safe-color")).toBe("");
+    expect(root.style.getPropertyValue("--pack-accent")).toBe("");
   });
 });

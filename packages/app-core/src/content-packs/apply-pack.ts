@@ -90,6 +90,9 @@ export function applyColorScheme(
 
   if (scheme.customProperties) {
     for (const [key, value] of Object.entries(scheme.customProperties)) {
+      // Sanitize: reject values containing url() to prevent external
+      // resource fetches when CSS vars are consumed by components.
+      if (/url\s*\(/i.test(value)) continue;
       const cssVar = key.startsWith("--") ? key : `--${key}`;
       root.style.setProperty(cssVar, value);
       applied.push(cssVar);

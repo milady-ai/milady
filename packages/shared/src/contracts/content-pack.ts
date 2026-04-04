@@ -71,7 +71,14 @@ export interface ContentPackPersonality {
   name?: string;
   /** Bio lines */
   bio?: string[];
-  /** System prompt override */
+  /**
+   * System prompt override.
+   *
+   * SECURITY: intentionally deferred — not wired in applyContentPack().
+   * A remote pack controlling the agent's system prompt is significant
+   * attack surface. Wiring this requires the same trust/review enforcement
+   * as other prompt sources (character editor, config file).
+   */
   system?: string;
   /** Catchphrase shown during onboarding */
   catchphrase?: string;
