@@ -126,7 +126,7 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
       // callback may be processed server-side instead of via URL redirect.
       // Also acts as a fallback if the user closes the auth window.
       let pollAttempts = 0;
-      const maxPollAttempts = 60; // ~2 minutes at 2s intervals
+      const maxPollAttempts = 24; // ~2 minutes at 5s intervals
       const pollInterval = setInterval(async () => {
         pollAttempts++;
         try {
@@ -157,7 +157,7 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
             }),
           );
         }
-      }, 2000);
+      }, 5000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Vincent login failed";
       setVincentLoginError(msg);
