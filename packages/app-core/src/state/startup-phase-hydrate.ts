@@ -394,7 +394,21 @@ export function bindReadyPhase(
       const conv = data.conversation as Conversation;
       if (conv?.id)
         depsRef.current?.setConversations((prev: Conversation[]) => {
-          const u = prev.map((c) => (c.id === conv.id ? conv : c));
+          const u = prev.map((c) => {
+            if (c.id !== conv.id) return c;
+            // Don't let a WS update overwrite a meaningful title with a
+            // generic/default one (e.g. "default", "New Chat", empty).
+            const incomingTitle = conv.title?.trim();
+            const existingTitle = c.title?.trim();
+            const isGenericTitle =
+              !incomingTitle ||
+              incomingTitle === "default" ||
+              incomingTitle === "New Chat";
+            if (isGenericTitle && existingTitle && !existingTitle.startsWith("New Chat")) {
+              return { ...conv, title: existingTitle };
+            }
+            return conv;
+          });
           return u.sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
