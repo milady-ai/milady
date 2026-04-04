@@ -189,7 +189,7 @@ describe("runMainMenuResetAfterApiBaseResolved", () => {
     });
   });
 
-  it("uses external restart path when not embedded", async () => {
+  it("uses external restart path and pushes token to renderer", async () => {
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(mockResponse(true))
@@ -207,7 +207,7 @@ describe("runMainMenuResetAfterApiBaseResolved", () => {
       useEmbeddedRestart: false,
       restartEmbeddedClearingLocalDb,
       pushEmbeddedApiBaseToRenderer,
-      getLocalApiAuthToken: () => "",
+      getLocalApiAuthToken: () => "ext-tok",
       postExternalAgentRestart,
       resolveApiBaseForStatusPoll: () => "http://127.0.0.1:31337",
       sendMenuResetAppliedToRenderer: vi.fn(),
@@ -215,7 +215,12 @@ describe("runMainMenuResetAfterApiBaseResolved", () => {
 
     expect(postExternalAgentRestart).toHaveBeenCalledOnce();
     expect(restartEmbeddedClearingLocalDb).not.toHaveBeenCalled();
-    expect(pushEmbeddedApiBaseToRenderer).not.toHaveBeenCalled();
+    // Token is pushed to renderer even in external mode so the client
+    // can reconnect with valid auth after the restart.
+    expect(pushEmbeddedApiBaseToRenderer).toHaveBeenCalledWith(
+      undefined,
+      "ext-tok",
+    );
   });
 
   it("throws when reset POST is not ok", async () => {
