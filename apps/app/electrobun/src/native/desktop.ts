@@ -100,8 +100,7 @@ interface ShowItemInFolderOptions {
   path: string;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: event handler args vary per Electrobun emitter
-type ElectrobunEventHandler = (...args: any[]) => void;
+type ElectrobunEventHandler = (...args: unknown[]) => void;
 
 interface ElectrobunEventTarget {
   off?: (event: string, handler: ElectrobunEventHandler) => void;
