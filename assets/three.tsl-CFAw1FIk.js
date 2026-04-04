@@ -1,4 +1,4 @@
-import{TSL as t}from"./three.webgpu-3LHf1Na2.js";import"./index-BiKU6IpY.js";/**
+import{TSL as t}from"./three.webgpu-CDZ8kXbL.js";import"./index-BRVtDqg_.js";/**
  * @license
  * Copyright 2010-2025 Three.js Authors
  * SPDX-License-Identifier: MIT
