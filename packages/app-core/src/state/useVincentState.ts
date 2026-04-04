@@ -39,6 +39,7 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
     null,
   );
   const busyRef = useRef(false);
+  const loginPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Poll status on mount ────────────────────────────────────────
   const pollVincentStatus = useCallback(async () => {
@@ -54,6 +55,12 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
 
   useEffect(() => {
     void pollVincentStatus();
+    return () => {
+      if (loginPollRef.current) {
+        clearInterval(loginPollRef.current);
+        loginPollRef.current = null;
+      }
+    };
   }, [pollVincentStatus]);
 
   // ── Handle callback (code in URL) ──────────────────────────────
@@ -125,14 +132,16 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
       // Poll for connection status — handles desktop apps where the OAuth
       // callback may be processed server-side instead of via URL redirect.
       // Also acts as a fallback if the user closes the auth window.
+      if (loginPollRef.current) clearInterval(loginPollRef.current);
       let pollAttempts = 0;
       const maxPollAttempts = 24; // ~2 minutes at 5s intervals
-      const pollInterval = setInterval(async () => {
+      loginPollRef.current = setInterval(async () => {
         pollAttempts++;
         try {
           const connected = await pollVincentStatus();
           if (connected) {
-            clearInterval(pollInterval);
+            if (loginPollRef.current) clearInterval(loginPollRef.current);
+            loginPollRef.current = null;
             setVincentLoginBusy(false);
             busyRef.current = false;
             setVincentLoginError(null);
@@ -147,7 +156,8 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
           // ignore poll errors
         }
         if (pollAttempts >= maxPollAttempts) {
-          clearInterval(pollInterval);
+          if (loginPollRef.current) clearInterval(loginPollRef.current);
+          loginPollRef.current = null;
           setVincentLoginBusy(false);
           busyRef.current = false;
           setVincentLoginError(

@@ -574,13 +574,13 @@ export function InventoryView() {
           body: "Re-save a supported provider in Settings to migrate fully.",
           actionLabel: t("wallet.setup.configureRpc"),
         }
-      : singleChainFocus === "bsc" && !bscReady
+      : singleChainFocus === "bsc" && evmAddr && !bscReady
         ? {
             title: t("wallet.setup.rpcNotConfigured"),
             body: t("portfolioheader.ConnectViaElizaCl"),
             actionLabel: t("wallet.setup.configureRpc"),
           }
-        : singleChainFocus === "solana" && !solanaReady
+        : singleChainFocus === "solana" && solAddr && !solanaReady
           ? {
               title: "Solana RPC is not configured.",
               body: "Connect via Eliza Cloud or configure HELIUS_API_KEY / SOLANA_RPC_URL in Settings to load Solana balances.",
@@ -876,7 +876,16 @@ export function InventoryView() {
   );
 
   const stewardConnected = stewardStatus?.connected === true;
-  const hasAnyAddress = Boolean(evmAddr || solAddr || stewardConnected);
+  const stewardEvmAddrPresent = Boolean(
+    stewardConnected &&
+      (stewardStatus?.walletAddresses?.evm || stewardStatus?.evmAddress),
+  );
+  const stewardSolAddrPresent = Boolean(
+    stewardConnected && stewardStatus?.walletAddresses?.solana,
+  );
+  const hasAnyAddress = Boolean(
+    evmAddr || solAddr || stewardEvmAddrPresent || stewardSolAddrPresent,
+  );
   const walletSubTabItems = [
     { value: "balances" as const, label: "Balances" },
     { value: "transactions" as const, label: "Transactions" },
@@ -1111,21 +1120,6 @@ export function InventoryView() {
             </PagePanel>
           )}
 
-          {/* Import from Eliza Cloud — shown when cloud is connected but no addresses yet */}
-          {!hasAnyAddress && elizaCloudConnected ? (
-            <div className="mt-4 flex justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full border-accent/40 px-6 text-accent hover:bg-accent/10"
-                onClick={goToRpcSettings}
-              >
-                {t("wallet.setup.importFromCloud", {
-                  defaultValue: "Import from Eliza Cloud",
-                })}
-              </Button>
-            </div>
-          ) : null}
         </div>
       </PageLayout>
 
