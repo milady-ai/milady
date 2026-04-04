@@ -434,12 +434,15 @@ export function StartupShell() {
         className="relative z-10 flex flex-col items-center gap-5 px-6 text-center w-full"
         style={{ maxWidth: 360 }}
       >
-        <h1 style={{ fontFamily: FONT }} className="text-2xl text-black">
+        <h1
+          style={{ fontFamily: FONT }}
+          className="text-2xl text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+        >
           MILADY
         </h1>
         <p
           style={{ fontFamily: FONT }}
-          className="text-[7px] text-black/40 uppercase leading-relaxed"
+          className="text-[7px] text-white/80 uppercase leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
         >
           {t("startupshell.SplashTagline", {
             defaultValue: "Your local-first AI assistant",
@@ -509,6 +512,7 @@ export function StartupShell() {
                 onManualConnect={handleManualConnect}
                 onUseElizaCloud={handleUseElizaCloud}
                 onConnectGateway={handleConnectGateway}
+                onLoadContentPack={handleLoadCustomPack}
               />
             </>
           ))}

@@ -1,6 +1,8 @@
 import { Button, Card, CardContent } from "@miladyai/ui";
 import type { GatewayDiscoveryEndpoint } from "../../bridge/gateway-discovery";
 
+const MONO_FONT = "'Courier New', 'Courier', 'Monaco', monospace";
+
 interface SplashServerChooserProps {
   discoveryLoading: boolean;
   gateways: GatewayDiscoveryEndpoint[];
@@ -10,6 +12,7 @@ interface SplashServerChooserProps {
   onManualConnect: () => void;
   onUseElizaCloud: () => void;
   onConnectGateway: (gateway: GatewayDiscoveryEndpoint) => void;
+  onLoadContentPack?: () => void;
 }
 
 function gatewayLabel(
@@ -30,6 +33,7 @@ export function SplashServerChooser({
   onManualConnect,
   onUseElizaCloud,
   onConnectGateway,
+  onLoadContentPack,
 }: SplashServerChooserProps) {
   return (
     <div className="mt-4 flex w-full flex-col gap-3 text-left">
@@ -38,23 +42,20 @@ export function SplashServerChooser({
           {gateways.map((gateway) => (
             <Card
               key={gateway.stableId}
-              className="border border-black/30 bg-black/5 shadow-none"
+              className="border-2 border-black bg-white shadow-md"
             >
               <CardContent className="flex items-center justify-between gap-3 px-3 py-3">
                 <div className="min-w-0">
                   <p
-                    style={{
-                      fontFamily:
-                        "'Courier New', 'Courier', 'Monaco', monospace",
-                    }}
-                    className="text-[9px] uppercase text-black/50"
+                    style={{ fontFamily: MONO_FONT }}
+                    className="text-[9px] uppercase text-black/60"
                   >
                     {gatewayLabel(gateway, t)}
                   </p>
                   <p className="truncate text-sm font-semibold text-black">
                     {gateway.name}
                   </p>
-                  <p className="truncate text-[11px] text-black/60">
+                  <p className="truncate text-[11px] text-black/70">
                     {gateway.host}
                   </p>
                 </div>
@@ -62,7 +63,7 @@ export function SplashServerChooser({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="shrink-0 border-black/50 bg-transparent text-black hover:bg-black/10"
+                  className="shrink-0 border-2 border-black bg-white text-black font-semibold hover:bg-black hover:text-[#ffe600]"
                   onClick={() => onConnectGateway(gateway)}
                 >
                   {t("startupshell.Connect", { defaultValue: "Connect" })}
@@ -73,10 +74,8 @@ export function SplashServerChooser({
         </div>
       ) : (
         <p
-          style={{
-            fontFamily: "'Courier New', 'Courier', 'Monaco', monospace",
-          }}
-          className="text-[8px] uppercase text-black/45"
+          style={{ fontFamily: MONO_FONT }}
+          className="text-[8px] uppercase text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
         >
           {discoveryLoading
             ? t("startupshell.ScanningNetwork", {
@@ -91,22 +90,20 @@ export function SplashServerChooser({
       {showElizaCloudEntry ? (
         <Button
           type="button"
-          variant="outline"
-          className="justify-start border-black/50 bg-black/5 px-3 py-5 text-left text-black hover:bg-black/10"
+          variant="default"
+          className="justify-start border-2 border-black bg-white px-3 py-5 text-left text-black font-semibold shadow-md hover:bg-black hover:text-[#ffe600]"
           onClick={onUseElizaCloud}
         >
           <span className="flex flex-col items-start gap-1">
             <span
-              style={{
-                fontFamily: "'Courier New', 'Courier', 'Monaco', monospace",
-              }}
-              className="text-[9px] uppercase text-black/50"
+              style={{ fontFamily: MONO_FONT }}
+              className="text-[9px] uppercase text-black/60"
             >
               {t("startupshell.ElizaCloudAgent", {
                 defaultValue: "Eliza Cloud",
               })}
             </span>
-            <span className="text-sm font-semibold">
+            <span className="text-sm font-bold">
               {t("startupshell.UseElizaCloud", {
                 defaultValue: "Use Eliza Cloud",
               })}
@@ -118,21 +115,19 @@ export function SplashServerChooser({
       <Button
         type="button"
         variant="default"
-        className="justify-start bg-black px-3 py-5 text-left text-[#ffe600] hover:bg-black/85"
+        className="justify-start border-2 border-black bg-black px-3 py-5 text-left text-[#ffe600] font-semibold shadow-md hover:bg-[#ffe600] hover:text-black hover:border-black"
         onClick={onCreateLocal}
       >
         <span className="flex flex-col items-start gap-1">
           <span
-            style={{
-              fontFamily: "'Courier New', 'Courier', 'Monaco', monospace",
-            }}
-            className="text-[9px] uppercase text-[#ffe600]/70"
+            style={{ fontFamily: MONO_FONT }}
+            className="text-[9px] uppercase text-[#ffe600]/80"
           >
             {t("startupshell.CreateAgentLabel", {
               defaultValue: "New local agent",
             })}
           </span>
-          <span className="text-sm font-semibold">
+          <span className="text-sm font-bold">
             {t("startupshell.CreateOne", { defaultValue: "Create one" })}
           </span>
         </span>
@@ -140,28 +135,51 @@ export function SplashServerChooser({
 
       <Button
         type="button"
-        variant="outline"
-        className="justify-start border-black/50 bg-black/5 px-3 py-5 text-left text-black hover:bg-black/10"
+        variant="default"
+        className="justify-start border-2 border-black bg-white px-3 py-5 text-left text-black font-semibold shadow-md hover:bg-black hover:text-[#ffe600]"
         onClick={onManualConnect}
       >
         <span className="flex flex-col items-start gap-1">
           <span
-            style={{
-              fontFamily: "'Courier New', 'Courier', 'Monaco', monospace",
-            }}
-            className="text-[9px] uppercase text-black/50"
+            style={{ fontFamily: MONO_FONT }}
+            className="text-[9px] uppercase text-black/60"
           >
             {t("startupshell.RemoteAgentLabel", {
               defaultValue: "Existing server",
             })}
           </span>
-          <span className="text-sm font-semibold">
+          <span className="text-sm font-bold">
             {t("startupshell.ManuallyConnect", {
               defaultValue: "Manually connect to one",
             })}
           </span>
         </span>
       </Button>
+
+      {onLoadContentPack ? (
+        <Button
+          type="button"
+          variant="default"
+          className="justify-start border-2 border-dashed border-black/60 bg-white/90 px-3 py-4 text-left text-black font-semibold shadow-sm hover:bg-black hover:text-[#ffe600] hover:border-solid"
+          onClick={onLoadContentPack}
+        >
+          <span className="flex flex-col items-start gap-0.5">
+            <span className="text-sm font-bold">
+              {t("startupshell.LoadPack", {
+                defaultValue: "Load content pack",
+              })}
+            </span>
+            <span
+              style={{ fontFamily: MONO_FONT }}
+              className="text-[8px] uppercase text-black/50"
+            >
+              {t("startupshell.LoadPackHint", {
+                defaultValue: "VRMs, backgrounds, themes",
+              })}
+            </span>
+          </span>
+        </Button>
+      ) : null}
     </div>
   );
 }

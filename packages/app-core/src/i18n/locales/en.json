@@ -1902,7 +1902,8 @@
 
   "startupshell.ContentPacks": "Content Packs",
   "startupshell.PackActive": "Active",
-  "startupshell.LoadPack": "Load pack",
+  "startupshell.LoadPack": "Load content pack",
+  "startupshell.LoadPackHint": "VRMs, backgrounds, themes",
   "startupshell.EnterPackUrl": "Enter the URL of a content pack folder (must contain pack.json):",
   "startupshell.PackLoadFailed": "Failed to load pack: {{error}}",
 
