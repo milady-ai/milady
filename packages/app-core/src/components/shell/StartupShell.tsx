@@ -21,7 +21,6 @@ import {
 import {
   applyColorScheme,
   applyContentPack,
-  getBundledContentPacks,
 } from "../../content-packs";
 import {
   clearPersistedActiveServer,
@@ -115,7 +114,9 @@ export function StartupShell() {
   const progress = PHASE_PROGRESS[phase] ?? 50;
 
   // ── Content packs ───────────────────────────────────────────────
-  const bundledPacks = useMemo(() => getBundledContentPacks(), []);
+  // The 8 built-in characters are the default content — not packs.
+  // The pack browser only shows user-loaded external packs.
+  const [loadedPacks, setLoadedPacks] = useState<ResolvedContentPack[]>([]);
   const colorSchemeCleanupRef = useRef<(() => void) | null>(null);
   const packBaselineRef = useRef<PackBaselineState | null>(null);
   const initialActivePackIdRef = useRef(activePackId);
@@ -218,6 +219,10 @@ export function StartupShell() {
     try {
       const { loadContentPackFromUrl } = await import("../../content-packs");
       const pack = await loadContentPackFromUrl(url.trim());
+      setLoadedPacks((prev) => {
+        if (prev.some((p) => p.manifest.id === pack.manifest.id)) return prev;
+        return [...prev, pack];
+      });
       activatePack(pack, { captureBaseline: activePackId == null });
     } catch (err) {
       console.error("[milady][content-packs] Failed to load custom pack:", err);
@@ -283,11 +288,11 @@ export function StartupShell() {
       return;
     }
 
-    const bundledPack = bundledPacks.find(
+    const loadedPack = loadedPacks.find(
       (pack) => pack.manifest.id === persistedPackId,
     );
-    if (bundledPack) {
-      activatePack(bundledPack);
+    if (loadedPack) {
+      activatePack(loadedPack);
       return;
     }
 
@@ -328,7 +333,7 @@ export function StartupShell() {
     return () => {
       cancelled = true;
     };
-  }, [activatePack, bundledPacks, setState, t]);
+  }, [activatePack, loadedPacks, setState, t]);
 
   const continueToOnboarding = useCallback(() => {
     startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" });
@@ -421,9 +426,9 @@ export function StartupShell() {
   }
 
   return (
-    <div className="flex items-center justify-center h-full w-full bg-white text-black overflow-hidden">
+    <div className="flex items-center justify-center h-full w-full bg-[#ffe600] text-black overflow-hidden">
       <img
-        src="/splash-bg.png"
+        src="/splash-bg.jpg"
         alt=""
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full object-cover"
@@ -484,7 +489,7 @@ export function StartupShell() {
           ) : (
             <>
               <SplashContentPacks
-                packs={bundledPacks}
+                packs={loadedPacks}
                 activePackId={activePackId}
                 t={t}
                 onSelectPack={handleSelectPack}
