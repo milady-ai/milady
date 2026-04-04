@@ -161,6 +161,15 @@ export function saveElizaConfig(config: ElizaConfig): void {
     mode: 0o600,
   });
 
+  // Enforce 600 on every write — writeFileSync's mode only applies on
+  // creation, so files created by older versions retain their original
+  // (potentially world-readable) permissions.
+  try {
+    fs.chmodSync(configPath, 0o600);
+  } catch {
+    // chmodSync may fail on some platforms (e.g. Windows). Non-fatal.
+  }
+
   if (!fs.existsSync(configPath)) {
     throw new Error(
       `[eliza-config] Config file missing after write: ${configPath}`,
