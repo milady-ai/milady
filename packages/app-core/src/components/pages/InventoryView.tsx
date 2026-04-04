@@ -818,7 +818,7 @@ export function InventoryView() {
               <SidebarContent.SectionLabel>
                 {t("wallet.chain", { defaultValue: "Chain" })}
               </SidebarContent.SectionLabel>
-              <div className="mt-3 grid grid-cols-5 gap-2">
+              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {chainItemMeta.map((item) => {
                   const isOn = inventoryChainFilters[item.key];
                   const label = item.label;

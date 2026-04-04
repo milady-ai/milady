@@ -122,9 +122,42 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
       // Step 3: Open browser
       openExternalUrl(url);
 
-      // The user will be redirected back to /callback/vincent with a code.
-      // The useEffect above will handle the token exchange.
-      // Keep busy state — it'll be cleared when the callback fires.
+      // Poll for connection status — handles desktop apps where the OAuth
+      // callback may be processed server-side instead of via URL redirect.
+      // Also acts as a fallback if the user closes the auth window.
+      let pollAttempts = 0;
+      const maxPollAttempts = 60; // ~2 minutes at 2s intervals
+      const pollInterval = setInterval(async () => {
+        pollAttempts++;
+        try {
+          const connected = await pollVincentStatus();
+          if (connected) {
+            clearInterval(pollInterval);
+            setVincentLoginBusy(false);
+            busyRef.current = false;
+            setVincentLoginError(null);
+            setActionNotice(
+              t("vincent.connected", { defaultValue: "Vincent connected" }),
+              "success",
+              5000,
+            );
+            return;
+          }
+        } catch {
+          // ignore poll errors
+        }
+        if (pollAttempts >= maxPollAttempts) {
+          clearInterval(pollInterval);
+          setVincentLoginBusy(false);
+          busyRef.current = false;
+          setVincentLoginError(
+            t("vincent.loginTimeout", {
+              defaultValue:
+                "Login timed out. Close the auth window and try again.",
+            }),
+          );
+        }
+      }, 2000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Vincent login failed";
       setVincentLoginError(msg);
