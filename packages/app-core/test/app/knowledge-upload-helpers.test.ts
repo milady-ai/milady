@@ -8,7 +8,7 @@ import {
   type KnowledgeImageCompressionPlatform,
   MAX_KNOWLEDGE_IMAGE_PROCESSING_BYTES,
   maybeCompressKnowledgeUploadImage,
-} from "../../src/components/knowledge-upload-image";
+} from "../../src/utils/knowledge-upload-image";
 import { describe, expect, it, vi } from "vitest";
 
 function makeUploadFile(
