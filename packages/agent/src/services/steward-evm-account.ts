@@ -25,7 +25,6 @@ import type {
   Hex,
   SignableMessage,
   TransactionSerializable,
-  TypedDataDefinition,
 } from "viem";
 import { toAccount } from "viem/accounts";
 
@@ -278,7 +277,7 @@ export function createStewardEvmAccount(config: StewardEvmAccountConfig): Accoun
       throw new Error("[StewardAccount] signTransaction returned neither signedTx nor txHash");
     },
 
-    async signTypedData(typedData: TypedDataDefinition<any, any>): Promise<Hex> {
+    async signTypedData(typedData): Promise<Hex> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const td = typedData as any;
       const domain = td.domain ?? {};

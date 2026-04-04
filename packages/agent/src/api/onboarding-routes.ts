@@ -15,7 +15,6 @@ import {
 import {
   applyCanonicalOnboardingConfig,
   applyOnboardingConnectionConfig,
-  reconcilePersistedOnboardingConnection,
 } from "./provider-switch-config.js";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
@@ -492,7 +491,6 @@ export async function handleOnboardingRoutes(
         }
       }
 
-      reconcilePersistedOnboardingConnection(config);
     }
 
     if (hasCanonicalRuntimeConfig) {
@@ -509,7 +507,7 @@ export async function handleOnboardingRoutes(
       });
 
       if (!explicitConnection) {
-        delete config.connection;
+        delete (config as Record<string, unknown>).connection;
         delete process.env.ELIZAOS_CLOUD_ENABLED;
         delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
         delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
