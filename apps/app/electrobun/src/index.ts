@@ -284,14 +284,15 @@ async function resetMiladyFromApplicationMenu(): Promise<void> {
       },
       pushEmbeddedApiBaseToRenderer: (port, apiToken) => {
         if (currentWindow) {
-          pushApiBaseToRenderer(
-            currentWindow,
-            resolveRendererFacingApiBase(
-              process.env as Record<string, string | undefined>,
-              port,
-            ),
-            apiToken,
-          );
+          const base = port
+            ? resolveRendererFacingApiBase(
+                process.env as Record<string, string | undefined>,
+                port,
+              )
+            : initialApiBase;
+          if (base) {
+            pushApiBaseToRenderer(currentWindow, base, apiToken);
+          }
         }
       },
       getLocalApiAuthToken: () => configureDesktopLocalApiAuth(),

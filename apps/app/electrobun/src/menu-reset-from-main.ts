@@ -116,7 +116,10 @@ export type MainMenuResetPostConfirmDeps = {
   useEmbeddedRestart: boolean;
   restartEmbeddedClearingLocalDb: () => Promise<{ port?: number }>;
   /** Called when embedded restart returns a port (local mode). */
-  pushEmbeddedApiBaseToRenderer: (port: number, apiToken: string) => void;
+  pushEmbeddedApiBaseToRenderer: (
+    port: number | undefined,
+    apiToken: string,
+  ) => void;
   getLocalApiAuthToken: () => string;
   /** External / non-embedded: POST restart (errors ignored). */
   postExternalAgentRestart: () => Promise<void>;
@@ -151,6 +154,10 @@ export async function runMainMenuResetAfterApiBaseResolved(
       }
     } else {
       await d.postExternalAgentRestart();
+      // Push current API base + token to renderer after external restart
+      // so the client reconnects with valid auth credentials.
+      const apiToken = d.getLocalApiAuthToken();
+      d.pushEmbeddedApiBaseToRenderer(undefined, apiToken);
     }
 
     const pollBase = d.resolveApiBaseForStatusPoll();
