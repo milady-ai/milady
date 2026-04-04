@@ -160,6 +160,10 @@ class StreamManager {
     const savedStartedAt = this.startedAt;
     const savedFrameCount = this._frameCount;
 
+    // Mark as intentional so the exit handler doesn't trigger autoRestart()
+    // concurrently with our manual restart below.
+    this._intentionalStop = true;
+
     // Detach TTS bridge before stopping FFmpeg
     ttsStreamBridge.detach();
 
@@ -190,6 +194,7 @@ class StreamManager {
       volume: this._volume,
       muted: this._muted,
     };
+    this._intentionalStop = false;
     await this.start(config);
 
     // Restore tracking
