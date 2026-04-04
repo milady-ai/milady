@@ -124,6 +124,16 @@ You are invoked by `agent-review.yml` ONLY when it classifies scope as "needs de
 - If the PR is sound after deep analysis, say so plainly. APPROVE is a valid outcome; don't manufacture concerns.
 - **End with a one-line advisory verdict**: `Greptile verdict: APPROVE` / `REQUEST CHANGES` / `CLOSE`. This is input to `agent-review-greptile-weighted.yml`, which will read your review, weight it against the preliminary agent-review, and post the final authoritative decision.
 
+## Format for auto-application (important)
+
+Milady's `agent-review-apply-greptile-suggestions.yml` workflow runs after your initial review and auto-applies your findings in a single commit before a post-fix re-review. To maximize the hit rate:
+
+1. **Prefer inline PR review comments** attached to a specific `file:line` range over top-level summary comments. Inline comments with ` ```suggestion ` fences are applied deterministically by line replacement.
+2. **Include a ` ```suggestion ` fence** whenever the fix is a concrete code change. The fence contents replace the commented line range verbatim.
+3. **For structural issues** that can't be pinned to a single hunk (e.g. "replace the pagination call with `github.paginate`"), still post as an inline comment at the most relevant `file:line` and write the fix as an **actionable prescription**: what to replace, with what, and where. Claude Code reads your description and implements it. Avoid vague "consider refactoring X" language — be specific enough that a machine can execute it.
+4. **One finding per comment.** Don't combine multiple issues in a single comment — the apply workflow tracks one fix per comment.
+5. **Don't suggest changes that violate any of the 12 hard invariants listed above.** The apply workflow will skip them with an "invariant violation risk" log entry, and the finding will be wasted review surface.
+
 ## What NOT to do
 
 - Don't re-run code quality checks agent-review already did.

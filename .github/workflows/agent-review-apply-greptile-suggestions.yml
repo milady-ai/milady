@@ -1,0 +1,401 @@
+# Agent Review — Apply Greptile Suggestions
+#
+# Runs AFTER Greptile posts its initial deep-review on a PR that was flagged
+# as "needs deep review" by agent-review.yml. Collects every Greptile finding
+# (inline PR review comments AND the top-level summary), validates each,
+# applies them in a single commit via Claude Code, then re-tags Greptile for
+# a post-fix re-review. The existing agent-review-greptile-weighted.yml then
+# fires on the post-fix Greptile comment and produces the final verdict.
+#
+# Flow:
+#   1. agent-review.yml posts preliminary verdict + tags @greptileai
+#   2. Greptile responds with findings (this workflow triggers)
+#   3. This workflow collects findings → Claude applies them → one commit → push
+#      → marks preliminary with <!-- suggestions-applied: <sha> --> → re-tags Greptile
+#   4. Greptile re-reviews the fix commit
+#   5. agent-review-greptile-weighted.yml fires on the post-fix Greptile comment
+#      (detects the suggestions-applied marker and proceeds) → posts final verdict
+#
+# Idempotency: the apply-suggestions step runs AT MOST ONCE per PR. Detection
+# looks for an existing <!-- suggestions-applied: --> marker on the preliminary
+# agent-review comment and skips if found.
+
+name: Agent Review - Apply Greptile Suggestions
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+  statuses: write
+
+concurrency:
+  group: agent-review-apply-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    # Only run on PR-attached events
+    if: >
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null) ||
+      github.event_name == 'pull_request_review'
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    outputs:
+      should_apply: ${{ steps.check.outputs.should_apply }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+      pr_head_sha: ${{ steps.check.outputs.pr_head_sha }}
+      pr_head_ref: ${{ steps.check.outputs.pr_head_ref }}
+      pr_title: ${{ steps.check.outputs.pr_title }}
+      pr_author: ${{ steps.check.outputs.pr_author }}
+      initial_review_id: ${{ steps.check.outputs.initial_review_id }}
+      run_marker: ${{ steps.check.outputs.run_marker }}
+      greptile_trigger_id: ${{ steps.check.outputs.greptile_trigger_id }}
+    steps:
+      - name: Detect actionable Greptile review
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Unified event handling — this workflow supports both issue_comment
+            // (Greptile's top-level summary) and pull_request_review (batched
+            // inline comments). Extract the commenter and PR number from whichever
+            // event fired.
+            let commenter = '';
+            let triggerId = 0;
+            let prNumber = 0;
+            let bodyText = '';
+
+            if (context.eventName === 'issue_comment') {
+              commenter = (context.payload.comment.user.login || '').toLowerCase();
+              triggerId = context.payload.comment.id;
+              prNumber = context.payload.issue.number;
+              bodyText = context.payload.comment.body || '';
+            } else if (context.eventName === 'pull_request_review') {
+              commenter = (context.payload.review.user.login || '').toLowerCase();
+              triggerId = context.payload.review.id;
+              prNumber = context.payload.pull_request.number;
+              bodyText = context.payload.review.body || '';
+            }
+
+            // Permissive Greptile match (handles greptile-apps[bot], greptileai[bot], etc.)
+            if (!commenter.includes('greptile')) {
+              console.log(`Trigger author "${commenter}" is not Greptile; skipping.`);
+              core.setOutput('should_apply', 'false');
+              return;
+            }
+
+            // Ignore tiny Greptile comments (re-trigger pings, acknowledgements)
+            if (bodyText.trim().length < 200) {
+              console.log(`Greptile trigger too short (${bodyText.trim().length} chars trimmed); likely not a substantive review. Skipping.`);
+              core.setOutput('should_apply', 'false');
+              return;
+            }
+
+            // Find the most recent preliminary agent-review on this PR
+            const allComments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const preliminary = allComments
+              .filter(c => (c.body || '').includes('<!-- verdict-status: preliminary-awaiting-greptile -->'))
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+            if (!preliminary) {
+              console.log(`No preliminary agent-review found on PR #${prNumber} (scanned ${allComments.length} comments); skipping.`);
+              core.setOutput('should_apply', 'false');
+              return;
+            }
+
+            // Single-shot idempotency — skip if suggestions have already been applied
+            if ((preliminary.body || '').includes('<!-- suggestions-applied:')) {
+              console.log('Suggestions have already been applied on this PR (preliminary marker present); skipping.');
+              core.setOutput('should_apply', 'false');
+              return;
+            }
+
+            // Extract the run marker from the preliminary comment so the commit can correlate
+            const runMarkerMatch = (preliminary.body || '').match(/<!-- agent-review-run:[^>]+-->/);
+            const runMarker = runMarkerMatch ? runMarkerMatch[0] : '';
+
+            // Fetch PR context
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            // Never apply auto-fixes to a fork PR — we cannot push to the fork's branch
+            if (pr.head.repo && pr.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              console.log(`PR #${prNumber} is from a fork (${pr.head.repo.full_name}); auto-apply is skipped for safety. Preliminary verdict stands.`);
+              core.setOutput('should_apply', 'false');
+              return;
+            }
+
+            // Sanitize user-controlled strings (same pattern as weighted workflow)
+            const sanitize = (value, maxLength) => {
+              if (typeof value !== 'string') return '';
+              return value
+                .replace(/[\r\n]+/g, ' ')
+                .replace(/`+/g, "'")
+                .replace(/\$\{/g, '$ {')
+                .replace(/<!--[\s\S]*?-->/g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, maxLength);
+            };
+
+            core.setOutput('should_apply', 'true');
+            core.setOutput('pr_number', String(prNumber));
+            core.setOutput('pr_head_sha', pr.head.sha);
+            core.setOutput('pr_head_ref', pr.head.ref);
+            core.setOutput('pr_title', sanitize(pr.title, 200));
+            core.setOutput('pr_author', sanitize(pr.user.login, 64));
+            core.setOutput('initial_review_id', String(preliminary.id));
+            core.setOutput('run_marker', runMarker);
+            core.setOutput('greptile_trigger_id', String(triggerId));
+
+            console.log(`Ready to apply Greptile suggestions on PR #${prNumber} at ${pr.head.sha}`);
+
+  apply:
+    needs: detect
+    if: needs.detect.outputs.should_apply == 'true'
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.detect.outputs.pr_head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Collect all Greptile findings
+        id: collect
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.detect.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+          mkdir -p .agent-review/greptile-findings
+
+          # Inline PR review comments from Greptile (pulls/:pr/comments)
+          gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/comments?per_page=100" \
+            --jq '[.[] | select(.user.login | test("greptile"; "i")) | {id, path, line, start_line, side, body}]' \
+            > .agent-review/greptile-findings/inline.json
+
+          # Top-level issue comments from Greptile (issues/:pr/comments) — summary + Fix-All block
+          gh api --paginate "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" \
+            --jq '[.[] | select(.user.login | test("greptile"; "i")) | {id, body, created_at}]' \
+            > .agent-review/greptile-findings/toplevel.json
+
+          # Pull request reviews (batched) from Greptile (pulls/:pr/reviews)
+          gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/reviews?per_page=100" \
+            --jq '[.[] | select(.user.login | test("greptile"; "i")) | {id, state, body, submitted_at}]' \
+            > .agent-review/greptile-findings/reviews.json
+
+          echo "Inline comments:  $(jq 'length' .agent-review/greptile-findings/inline.json)"
+          echo "Top-level summary:$(jq 'length' .agent-review/greptile-findings/toplevel.json)"
+          echo "PR reviews:       $(jq 'length' .agent-review/greptile-findings/reviews.json)"
+
+          # Short-circuit if nothing was found (Greptile may have posted only a
+          # metadata comment without any findings)
+          total=$(( $(jq 'length' .agent-review/greptile-findings/inline.json) \
+                  + $(jq 'length' .agent-review/greptile-findings/toplevel.json) \
+                  + $(jq 'length' .agent-review/greptile-findings/reviews.json) ))
+          if [ "${total}" = "0" ]; then
+            echo "No Greptile findings to apply."
+            echo "findings_found=false" >> "${GITHUB_OUTPUT}"
+          else
+            echo "findings_found=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Apply suggestions via Claude Code
+        id: claude-apply
+        if: steps.collect.outputs.findings_found == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        env:
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          claude_args: |
+            --allowedTools "Read,Edit,Write,MultiEdit,Glob,Grep,LS,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(jq:*),Bash(cat:*),Bash(bun run check:*),Bash(bun run lint:*),Bash(bun run typecheck:*),Bash(bunx @biomejs/biome format:*),Bash(bunx @biomejs/biome check:*),Bash(git status:*),Bash(git diff:*)"
+          prompt: |
+            You are applying Greptile code review suggestions to PR #${{ needs.detect.outputs.pr_number }} on the Milady repository. Your job is to read every Greptile finding, validate it against the current state of the code, apply the fixes, and verify the result with `bun run check`.
+
+            **Milady is an agents-only codebase.** The preliminary agent-review verdict already signed off on the PR structure; your job is only to address Greptile's findings, nothing more. Do NOT introduce scope creep. Do NOT refactor surrounding code. Do NOT add features. One fix per finding, that is it.
+
+            ## Inputs (read these first)
+
+            - `.agent-review/greptile-findings/inline.json` — inline PR review comments from Greptile, each with `path`, `line`, `start_line`, `side`, `body`. The `body` often contains a ` ```suggestion ` fence with the exact replacement code.
+            - `.agent-review/greptile-findings/toplevel.json` — top-level summary comments. These contain the overall report and the "Fix All" badge with all findings embedded in a URL-encoded prompt. Extract findings from the narrative prose and the URL payload.
+            - `.agent-review/greptile-findings/reviews.json` — batched pull request reviews.
+
+            ## Process
+
+            ### 1. Extract findings
+            Read all three JSON files. Build a unified list of findings, each with:
+            - Severity (P1, P2, P3) — parse from Greptile's badge images `badges/p1.svg` / `p2.svg` / `p3.svg` in the body
+            - File path (if specified)
+            - Line range (if specified)
+            - Description (the prose portion of the body)
+            - Suggested fix (the ` ```suggestion ` fence contents, if any)
+
+            ### 2. Validate each finding
+            For every finding:
+            - Does the file still exist? If not, skip and log "file removed".
+            - If line-ranged, is the line range still within the file's current line count? If not, skip and log "range drifted".
+            - If the finding includes a ` ```suggestion ` block, is the context still present? Read the surrounding lines in the target file to confirm the code Greptile commented on still matches. If it drifted, skip and log "context drifted".
+            - If the finding is file-level (no line range), it's a structural issue that requires judgment. Read the file, understand the issue, and decide if you can apply a fix without guessing.
+
+            ### 3. Apply fixes
+            Apply each validated finding using the Edit or MultiEdit tool:
+            - For ` ```suggestion ` blocks, replace the target line(s) exactly.
+            - For file-level structural issues (e.g., "replace listComments with github.paginate"), implement the fix as Greptile described it. Use the language in the finding body as the spec. If you need to invent behavior, STOP and skip that finding instead of guessing.
+            - Never apply a finding that contradicts Milady's 12 universal invariants (NODE_PATH in three sites, patch-deps preserved, Electrobun guards, namespace `milady`, port env vars, dynamic plugin imports, uiShellMode companion default, StartupPhase "ready", VrmViewer engineReady gate, Electrobun RPC sync, dev observability endpoints loopback-only, access control files immutable). If Greptile suggests a change that would violate an invariant, skip it and log "invariant violation risk — escalated".
+            - Never modify `.github/actionlint.yaml`, `.greptile/`, `CLAUDE.md`, or any file outside the set of files that had findings. Stay surgical.
+
+            ### 4. Verify
+            After all fixes are applied, run `bun run check` (typecheck + Biome lint). If it fails:
+            - Inspect the failure. Is it caused by one of your fixes?
+            - If yes: revert that specific fix via Edit, log "fix reverted due to check failure: <reason>", and re-run `bun run check`.
+            - If no (pre-existing failure unrelated to your changes): proceed — log the pre-existing failure but do not attempt to fix it.
+            - Loop until `bun run check` is green OR only pre-existing failures remain.
+
+            ### 5. Report
+            Emit a final summary as markdown to stdout using this exact structure (the downstream step will parse it and include it in the commit message + PR comment):
+
+            ```
+            ## Greptile Findings Applied
+
+            ### Applied
+            - [P<severity>] `<path>:<line>` — <short description> → <what changed>
+
+            ### Skipped
+            - [P<severity>] `<path>:<line>` — <reason> (drift | context mismatch | invariant risk | structural ambiguity)
+
+            ### Verification
+            - bun run check: <pass | fail with details>
+            - Pre-existing failures (if any): <list>
+
+            ### Files touched
+            - <path>
+            ```
+
+            Do not commit. Do not push. Do not open a PR. The workflow will handle git operations. Your only outputs are edits to the working tree and the summary report on stdout.
+
+      - name: Commit + push + update markers
+        if: steps.collect.outputs.findings_found == 'true' && steps.claude-apply.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.detect.outputs.pr_number }}
+          PR_HEAD_REF: ${{ needs.detect.outputs.pr_head_ref }}
+          INITIAL_REVIEW_ID: ${{ needs.detect.outputs.initial_review_id }}
+          RUN_MARKER: ${{ needs.detect.outputs.run_marker }}
+        run: |
+          set -euo pipefail
+
+          # If Claude made no changes, exit cleanly without committing
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes were applied by Claude — nothing to commit."
+            # Still mark the preliminary so weighted workflow can proceed
+            MARKER_SUFFIX="none"
+          else
+            git config user.name "milady-agent-review[bot]"
+            git config user.email "milady-agent-review[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "ci(agent-review): apply Greptile suggestions for PR #${PR_NUMBER}
+
+          Auto-generated by agent-review-apply-greptile-suggestions.yml.
+          Claude Code applied Greptile's findings from the initial deep review
+          in a single commit so a post-fix Greptile re-review + weighted final
+          verdict can proceed.
+
+          ${RUN_MARKER}"
+            git push origin "HEAD:${PR_HEAD_REF}"
+            MARKER_SUFFIX="$(git rev-parse HEAD)"
+          fi
+
+          # Update the preliminary agent-review comment with the suggestions-applied marker.
+          # This is how agent-review-greptile-weighted.yml knows it is safe to proceed
+          # with the final weighted verdict — it sees the marker and weights against
+          # the post-fix Greptile re-review.
+          PRELIM_BODY=$(gh api "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" --jq '.body')
+          UPDATED_BODY=$(printf '%s' "${PRELIM_BODY}" | awk -v sha="${MARKER_SUFFIX}" '
+            {print}
+            END {printf "\n\n<!-- suggestions-applied: %s -->\n", sha}
+          ')
+          gh api --method PATCH "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" \
+            -f body="${UPDATED_BODY}" > /dev/null
+
+          # Re-tag Greptile for a post-fix review
+          if [ "${MARKER_SUFFIX}" != "none" ]; then
+            gh api --method POST "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+              -f body="@greptileai please re-review — auto-applied your suggestions in commit ${MARKER_SUFFIX}. This is a post-fix pass triggered by agent-review-apply-greptile-suggestions.yml.
+
+          <!-- apply-suggestions-retrigger:${MARKER_SUFFIX} -->
+          ${RUN_MARKER}" > /dev/null
+            echo "Re-tagged Greptile on PR #${PR_NUMBER} for post-fix review at ${MARKER_SUFFIX}"
+          else
+            echo "No fixes were applied; not re-tagging Greptile. The weighted workflow will use the initial Greptile review."
+          fi
+
+      - name: Report apply failure
+        if: steps.collect.outputs.findings_found == 'true' && steps.claude-apply.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.detect.outputs.pr_number }}
+          INITIAL_REVIEW_ID: ${{ needs.detect.outputs.initial_review_id }}
+          RUN_MARKER: ${{ needs.detect.outputs.run_marker }}
+        run: |
+          set -euo pipefail
+          # Mark preliminary as apply-failed so the weighted workflow still fires
+          # (using the initial Greptile review as the only deep-review signal).
+          PRELIM_BODY=$(gh api "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" --jq '.body')
+          UPDATED_BODY=$(printf '%s' "${PRELIM_BODY}" | awk '
+            {print}
+            END {printf "\n\n<!-- suggestions-applied: failed -->\n"}
+          ')
+          gh api --method PATCH "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" \
+            -f body="${UPDATED_BODY}" > /dev/null
+
+          gh api --method POST "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            -f body="> ⚠️ **Greptile suggestions auto-apply failed.** The initial Greptile review stands. The weighted final verdict will be produced from the initial review only.
+
+          <!-- apply-suggestions-failed -->
+          ${RUN_MARKER}" > /dev/null
+
+      - name: Mark no-op when no findings
+        if: steps.collect.outputs.findings_found != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          INITIAL_REVIEW_ID: ${{ needs.detect.outputs.initial_review_id }}
+        run: |
+          set -euo pipefail
+          PRELIM_BODY=$(gh api "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" --jq '.body')
+          UPDATED_BODY=$(printf '%s' "${PRELIM_BODY}" | awk '
+            {print}
+            END {printf "\n\n<!-- suggestions-applied: no-findings -->\n"}
+          ')
+          gh api --method PATCH "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" \
+            -f body="${UPDATED_BODY}" > /dev/null
+          echo "Greptile posted no actionable findings; preliminary marked and weighted will proceed."

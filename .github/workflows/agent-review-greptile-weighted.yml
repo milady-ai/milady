@@ -89,6 +89,35 @@ jobs:
               return;
             }
 
+            // COORDINATION WITH agent-review-apply-greptile-suggestions.yml
+            //
+            // The apply-suggestions workflow runs BEFORE this one on deep-review PRs.
+            // It collects all Greptile findings, applies them via Claude Code in a
+            // single commit, and then re-tags Greptile for a post-fix review. We want
+            // the weighted final verdict to be based on the POST-FIX Greptile review,
+            // not the initial one — otherwise we'd weight against findings that have
+            // already been addressed.
+            //
+            // Protocol:
+            //   - apply-suggestions writes one of the following markers to the
+            //     preliminary agent-review comment when it finishes:
+            //       <!-- suggestions-applied: <commit-sha> -->  (fixes were committed)
+            //       <!-- suggestions-applied: none -->          (no changes made)
+            //       <!-- suggestions-applied: no-findings -->   (Greptile had nothing actionable)
+            //       <!-- suggestions-applied: failed -->        (Claude apply step errored)
+            //   - This workflow waits for ONE of those markers before proceeding.
+            //   - If the marker is missing, we skip — the apply-suggestions workflow
+            //     will re-tag Greptile and this workflow will fire again with the
+            //     marker in place.
+            const appliedMarkerMatch = (preliminary.body || '').match(/<!-- suggestions-applied:\s*([^\s>]+)\s*-->/);
+            if (!appliedMarkerMatch) {
+              console.log('Preliminary comment has no <!-- suggestions-applied: --> marker yet. The apply-suggestions workflow has not finished; skipping this weighted run and waiting for it to re-tag Greptile.');
+              core.setOutput('should_weight', 'false');
+              return;
+            }
+            const appliedState = appliedMarkerMatch[1];
+            console.log(`apply-suggestions state: ${appliedState}`);
+
             // Extract the run marker from the preliminary comment so the final comment can correlate
             const runMarkerMatch = (preliminary.body || '').match(/<!-- agent-review-run:[^>]+-->/);
             const runMarker = runMarkerMatch ? runMarkerMatch[0] : '';
