@@ -539,8 +539,7 @@ export class DesktopManager {
     };
     Electrobun.events.on(
       "tray-clicked",
-      // biome-ignore lint/suspicious/noExplicitAny: Electrobun event shape is ElectrobunEvent<TrayClickedData>
-      this.contextMenuHandler as any,
+      this.contextMenuHandler as ElectrobunEventHandler,
     );
   }
 
