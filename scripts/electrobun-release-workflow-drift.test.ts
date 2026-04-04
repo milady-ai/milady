@@ -782,10 +782,19 @@ describe("Electrobun release workflow drift", () => {
     expect(smokeScript).toContain("MILADY_TEST_WINDOWS_APPDATA_PATH");
     expect(smokeScript).toContain("MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH");
     expect(smokeScript).toContain(
-      '$defaultAppDataRoot = if ([string]::IsNullOrWhiteSpace($env:APPDATA)) {',
+      "$defaultUserProfile = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) {",
     );
     expect(smokeScript).toContain(
-      '$defaultLocalAppDataRoot = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {',
+      "$defaultAppDataRoot = if (-not [string]::IsNullOrWhiteSpace($env:APPDATA)) {",
+    );
+    expect(smokeScript).toContain(
+      'Join-Path $defaultUserProfile "AppData\\\\Roaming"',
+    );
+    expect(smokeScript).toContain(
+      "$defaultLocalAppDataRoot = if (-not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {",
+    );
+    expect(smokeScript).toContain(
+      'Join-Path $defaultUserProfile "AppData\\\\Local"',
     );
     expect(smokeScript).toContain("$env:APPDATA = $testAppDataRoot");
     expect(smokeScript).toContain("$env:LOCALAPPDATA = $testLocalAppDataRoot");
