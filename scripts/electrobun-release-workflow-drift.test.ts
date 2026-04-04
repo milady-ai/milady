@@ -1006,7 +1006,10 @@ describe("Electrobun release workflow drift", () => {
   });
 
   it("regression matrix desktop-packaged-windows uses direct pwsh invocation with required path snippets", () => {
-    const REGRESSION_MATRIX_PATH = path.join(ROOT, "test/regression-matrix.json");
+    const REGRESSION_MATRIX_PATH = path.join(
+      ROOT,
+      "test/regression-matrix.json",
+    );
     const matrix = JSON.parse(fs.readFileSync(REGRESSION_MATRIX_PATH, "utf8"));
     const suite = matrix.suites["desktop-packaged-windows"];
 
@@ -1017,10 +1020,10 @@ describe("Electrobun release workflow drift", () => {
 
     // Required snippets must pin both artifact and build dir args
     expect(suite.requiredSnippets).toContain(
-      "-ArtifactsDir (Join-Path $PWD \"apps/app/electrobun/artifacts\")",
+      '-ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts")',
     );
     expect(suite.requiredSnippets).toContain(
-      "-BuildDir (Join-Path $PWD \"apps/app/electrobun/build\")",
+      '-BuildDir (Join-Path $PWD "apps/app/electrobun/build")',
     );
 
     // The workflow must contain the command and all required snippets
