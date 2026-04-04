@@ -842,7 +842,7 @@ export function InventoryView() {
                         data-testid={`inventory-chain-toggle-${item.key}`}
                         onClick={
                           disabled
-                            ? undefined
+                            ? () => setWalletRpcOpen(true)
                             : () => handleInventoryChainToggle(item.key)
                         }
                         aria-pressed={disabled ? undefined : isOn}
@@ -856,7 +856,7 @@ export function InventoryView() {
                         aria-disabled={disabled}
                         className={`flex aspect-square items-center justify-center rounded-2xl border transition-colors ${
                           disabled
-                            ? "cursor-not-allowed border-border/20 bg-bg/10 text-muted opacity-25"
+                            ? "cursor-pointer border-border/20 bg-bg/10 text-muted opacity-40 hover:opacity-60 hover:border-accent/30"
                             : isOn
                               ? "border-accent/30 bg-accent/14 text-txt-strong"
                               : "border-border/40 bg-bg/20 text-muted opacity-45 hover:border-border/60 hover:text-txt hover:opacity-70"
