@@ -1004,4 +1004,30 @@ describe("Electrobun release workflow drift", () => {
     const serverOnlyIndex = elizaSource.indexOf("serverOnly", catchIndex);
     expect(serverOnlyIndex).toBeGreaterThan(catchIndex);
   });
+
+  it("regression matrix desktop-packaged-windows uses direct pwsh invocation with required path snippets", () => {
+    const REGRESSION_MATRIX_PATH = path.join(ROOT, "test/regression-matrix.json");
+    const matrix = JSON.parse(fs.readFileSync(REGRESSION_MATRIX_PATH, "utf8"));
+    const suite = matrix.suites["desktop-packaged-windows"];
+
+    // Command must use direct & invocation, not bun run wrapper
+    expect(suite.command).toContain(
+      '& (Join-Path $PWD "apps/app/electrobun/scripts/smoke-test-windows.ps1")',
+    );
+
+    // Required snippets must pin both artifact and build dir args
+    expect(suite.requiredSnippets).toContain(
+      "-ArtifactsDir (Join-Path $PWD \"apps/app/electrobun/artifacts\")",
+    );
+    expect(suite.requiredSnippets).toContain(
+      "-BuildDir (Join-Path $PWD \"apps/app/electrobun/build\")",
+    );
+
+    // The workflow must contain the command and all required snippets
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+    expect(workflow).toContain(suite.command);
+    for (const snippet of suite.requiredSnippets) {
+      expect(workflow).toContain(snippet);
+    }
+  });
 });
