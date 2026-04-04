@@ -256,7 +256,9 @@ function resolveCompatPgliteDataDir(config: ElizaConfig): string {
 function resolveCompatLoopbackApiBase(
   req: Pick<http.IncomingMessage, "headers">,
 ): string {
-  const host = req.headers.host?.trim() || "127.0.0.1:31337";
+  const host =
+    req.headers.host?.trim() ||
+    `127.0.0.1:${process.env.MILADY_API_PORT?.trim() || process.env.ELIZA_PORT?.trim() || "31337"}`;
   return `http://${host}`;
 }
 
@@ -581,12 +583,17 @@ export function buildCorsAllowedPorts(): Set<string> {
   return ports;
 }
 
-/** Lazily cached port set — computed once on first request. */
+/** Lazily cached port set — computed once, invalidated on port changes. */
 let _cachedCorsAllowedPorts: Set<string> | undefined;
 function getCorsAllowedPorts(): Set<string> {
   if (!_cachedCorsAllowedPorts)
     _cachedCorsAllowedPorts = buildCorsAllowedPorts();
   return _cachedCorsAllowedPorts;
+}
+
+/** Invalidate the cached CORS port set so it is recomputed on next request. */
+export function invalidateCorsAllowedPorts(): void {
+  _cachedCorsAllowedPorts = undefined;
 }
 
 /**

@@ -882,6 +882,11 @@ export async function startEliza(
       syncResolvedApiPort(process.env, actualApiPort, {
         overwriteUiPort: true,
       });
+      // Invalidate cached CORS port set so the new port is allowed.
+      try {
+        const { invalidateCorsAllowedPorts } = await import("../api/server.js");
+        invalidateCorsAllowedPorts();
+      } catch {}
 
       logger.info(
         `[milady] API server listening on http://localhost:${actualApiPort}`,
