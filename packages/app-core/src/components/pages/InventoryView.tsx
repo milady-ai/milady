@@ -574,13 +574,13 @@ export function InventoryView() {
           body: "Re-save a supported provider in Settings to migrate fully.",
           actionLabel: t("wallet.setup.configureRpc"),
         }
-      : singleChainFocus === "bsc" && evmAddr && !bscReady
+      : singleChainFocus === "bsc" && !bscReady
         ? {
             title: t("wallet.setup.rpcNotConfigured"),
             body: t("portfolioheader.ConnectViaElizaCl"),
             actionLabel: t("wallet.setup.configureRpc"),
           }
-        : singleChainFocus === "solana" && solAddr && !solanaReady
+        : singleChainFocus === "solana" && !solanaReady
           ? {
               title: "Solana RPC is not configured.",
               body: "Connect via Eliza Cloud or configure HELIUS_API_KEY / SOLANA_RPC_URL in Settings to load Solana balances.",
@@ -875,37 +875,8 @@ export function InventoryView() {
     </Sidebar>
   );
 
-  const stewardHasAddresses = Boolean(
-    stewardStatus?.connected &&
-      (stewardStatus.walletAddresses?.evm || stewardStatus.evmAddress),
-  );
-  if (!evmAddr && !solAddr && !stewardHasAddresses) {
-    return (
-      <div className="flex flex-1 min-h-0 flex-col">
-        <PagePanel.Empty
-          variant="surface"
-          title={t("wallet.noOnchainWallet")}
-          description={t("wallet.noOnchainWalletHint")}
-          action={
-            <Button
-              variant="default"
-              size="sm"
-              className="rounded-full px-5"
-              onClick={() => setTab("settings")}
-            >
-              {t("nav.settings")}
-            </Button>
-          }
-        >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
-            <Wallet className="h-6 w-6" />
-          </div>
-        </PagePanel.Empty>
-      </div>
-    );
-  }
-
   const stewardConnected = stewardStatus?.connected === true;
+  const hasAnyAddress = Boolean(evmAddr || solAddr || stewardConnected);
   const walletSubTabItems = [
     { value: "balances" as const, label: "Balances" },
     { value: "transactions" as const, label: "Transactions" },
@@ -1002,9 +973,81 @@ export function InventoryView() {
             </PagePanel.Notice>
           ) : null}
 
-          {singleChainFocus === "bsc" && evmAddr ? (
+          {/* Wallet setup card — shown when no wallet is connected */}
+          {!hasAnyAddress && (
+            <PagePanel variant="workspace">
+              <div className="flex flex-col items-center gap-4 py-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
+                  <Wallet className="h-6 w-6" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-sm font-semibold text-txt">
+                    {t("wallet.setup.title", {
+                      defaultValue: "Connect your wallet",
+                    })}
+                  </h3>
+                  <p className="mt-1 max-w-sm text-xs text-muted">
+                    {t("wallet.setup.description", {
+                      defaultValue:
+                        "Connect via Eliza Cloud, Vincent, or configure wallet keys directly to start trading.",
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {elizaCloudConnected ? (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="rounded-full px-5"
+                      onClick={goToRpcSettings}
+                    >
+                      {t("wallet.setup.importFromCloud", {
+                        defaultValue: "Import from Eliza Cloud",
+                      })}
+                    </Button>
+                  ) : null}
+                  {!vincentConnected ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full px-5"
+                      onClick={() => void handleVincentLogin()}
+                      disabled={vincentLoginBusy}
+                    >
+                      {vincentLoginBusy ? (
+                        <RefreshCw className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Link className="mr-1.5 h-3.5 w-3.5" />
+                      )}
+                      {t("vincent.connect", {
+                        defaultValue: "Connect Vincent",
+                      })}
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full px-5"
+                    onClick={goToRpcSettings}
+                  >
+                    <Settings className="mr-1.5 h-3.5 w-3.5" />
+                    {t("wallet.setup.configureRpc", {
+                      defaultValue: "Configure RPC",
+                    })}
+                  </Button>
+                </div>
+                {vincentLoginError ? (
+                  <p className="text-[10px] text-danger">
+                    {vincentLoginError}
+                  </p>
+                ) : null}
+              </div>
+            </PagePanel>
+          )}
+
+          {singleChainFocus === "bsc" ? (
             <TradePanel
-              tradeReady={tradeReady}
+              tradeReady={evmAddr ? tradeReady : false}
               bnbBalance={bnbBalance}
               onAddToken={handleAddToken}
               getBscTradePreflight={getBscTradePreflight}
@@ -1069,6 +1112,22 @@ export function InventoryView() {
               )}
             </PagePanel>
           )}
+
+          {/* Import from Eliza Cloud — shown when cloud is connected but no addresses yet */}
+          {!hasAnyAddress && elizaCloudConnected ? (
+            <div className="mt-4 flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full border-accent/40 px-6 text-accent hover:bg-accent/10"
+                onClick={goToRpcSettings}
+              >
+                {t("wallet.setup.importFromCloud", {
+                  defaultValue: "Import from Eliza Cloud",
+                })}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </PageLayout>
 

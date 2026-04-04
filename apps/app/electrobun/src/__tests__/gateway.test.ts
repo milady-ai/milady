@@ -280,8 +280,8 @@ describe("GatewayDiscovery", () => {
 
       callHandleServiceLost(discovery, {
         name: "gw-to-remove",
-        host: "",
-        port: 0,
+        host: "10.0.0.1",
+        port: 8080,
       });
 
       expect(discovery.getDiscoveredGateways()).toHaveLength(0);
