@@ -1037,9 +1037,7 @@ export function InventoryView() {
                   </Button>
                 </div>
                 {vincentLoginError ? (
-                  <p className="text-[10px] text-danger">
-                    {vincentLoginError}
-                  </p>
+                  <p className="text-[10px] text-danger">{vincentLoginError}</p>
                 ) : null}
               </div>
             </PagePanel>
