@@ -79,12 +79,14 @@
     "@capacitor/haptics": "8.0.0",
     "@capacitor/keyboard": "8.0.0",
     "@capacitor/preferences": "^8.0.1",
+    "@elizaos/core": "alpha",
     "@miladyai/agent": "workspace:*",
     "@miladyai/plugin-wechat": "github:milady-ai/plugin-wechat",
     "@lookingglass/webxr": "^0.6.0",
     "@miladyai/ui": "alpha",
     "@miladyai/vrm-utils": "workspace:*",
     "@sparkjsdev/spark": "^0.1.10",
+    "@stwd/sdk": "^0.3.0",
     "lucide-react": "^0.575.0",
     "three": "^0.182.0",
     "zod": "^4.3.6",
@@ -97,6 +99,8 @@
     "directory": "dist"
   },
   "devDependencies": {
+    "@elizaos/plugin-agent-skills": "alpha",
+    "@elizaos/plugin-plugin-manager": "alpha",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.0.0",

@@ -8,21 +8,7 @@ import {
   isSafeResetStateDir as upstreamIsSafeResetStateDir,
   resolveCorsOrigin as upstreamResolveCorsOrigin,
 } from "@miladyai/agent/api/server";
-import {
-  getBootConfig,
-  syncBrandEnvToEliza,
-  syncElizaEnvToBrand,
-} from "../config/boot-config.js";
-
-function syncMiladyEnvToEliza(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncBrandEnvToEliza(aliases);
-}
-
-function syncElizaEnvToMilady(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncElizaEnvToBrand(aliases);
-}
+import { syncMiladyEnvToEliza, syncElizaEnvToMilady } from "../utils/env.js";
 
 const PACKAGE_ROOT_NAMES = new Set(["eliza", "elizaai", "elizaos", "milady"]);
 

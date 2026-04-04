@@ -13,11 +13,18 @@ describe("navigation", () => {
     expect(titleForTab("advanced")).toBe("Advanced");
   });
 
-  it("includes database and logs in the advanced tab group", () => {
+  it("maps database tab to path and title", () => {
+    expect(pathForTab("database")).toBe("/database");
+    expect(tabFromPath("/database")).toBe("database");
+    expect(titleForTab("database")).toBe("Databases");
+  });
+
+  it("includes database, plugins, and logs in the advanced tab group", () => {
     const advancedGroup = ALL_TAB_GROUPS.find(
       (group) => group.label === "Advanced",
     );
     expect(advancedGroup?.tabs).toContain("database");
+    expect(advancedGroup?.tabs).toContain("plugins");
     expect(advancedGroup?.tabs).toContain("logs");
   });
 });
