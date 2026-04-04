@@ -87,7 +87,15 @@ vi.mock("../character/CharacterRoster", () => ({
         }),
       ),
     ),
-  resolveRosterEntries: (styles: Array<{ id: string; name: string; avatarIndex?: number; voicePresetId?: string; catchphrase?: string }>) =>
+  resolveRosterEntries: (
+    styles: Array<{
+      id: string;
+      name: string;
+      avatarIndex?: number;
+      voicePresetId?: string;
+      catchphrase?: string;
+    }>,
+  ) =>
     styles.map((s, i) => ({
       id: s.id,
       name: s.name,
@@ -136,7 +144,8 @@ function successResponse() {
   return Promise.resolve({
     ok: true,
     status: 200,
-    blob: () => Promise.resolve(new Blob(["fake-audio"], { type: "audio/mpeg" })),
+    blob: () =>
+      Promise.resolve(new Blob(["fake-audio"], { type: "audio/mpeg" })),
   });
 }
 
@@ -162,13 +171,13 @@ describe("IdentityStep", () => {
     // Preview is gated on teleport-complete, not fired immediately.
     // Simulate the teleport event (as OnboardingWizard's bridge would in no-VRM mode).
     await act(async () => {
-      window.dispatchEvent(
-        new Event("eliza:vrm-teleport-complete"),
-      );
+      window.dispatchEvent(new Event("eliza:vrm-teleport-complete"));
     });
 
     expect(fetchWithTimeoutMock).toHaveBeenCalledTimes(1);
-    expect(fetchWithTimeoutMock.mock.calls[0][0]).toBe("/audio/onboarding/chen-en.mp3");
+    expect(fetchWithTimeoutMock.mock.calls[0][0]).toBe(
+      "/audio/onboarding/chen-en.mp3",
+    );
   });
 
   it("does not double-fire preview when onboardingStyle is unset on mount", async () => {
@@ -189,7 +198,10 @@ describe("IdentityStep", () => {
   });
 
   it("replays voiceline in new language when uiLanguage changes", async () => {
-    const appState = makeAppState({ onboardingStyle: "chen", uiLanguage: "en" });
+    const appState = makeAppState({
+      onboardingStyle: "chen",
+      uiLanguage: "en",
+    });
     useAppMock.mockReturnValue(appState);
 
     let renderer: TestRenderer.ReactTestRenderer | undefined;
@@ -207,7 +219,9 @@ describe("IdentityStep", () => {
     });
 
     expect(fetchWithTimeoutMock).toHaveBeenCalledTimes(1);
-    expect(fetchWithTimeoutMock.mock.calls[0][0]).toBe("/audio/onboarding/chen-en.mp3");
+    expect(fetchWithTimeoutMock.mock.calls[0][0]).toBe(
+      "/audio/onboarding/chen-en.mp3",
+    );
 
     // Switch language to Spanish
     fetchWithTimeoutMock.mockClear();
@@ -221,6 +235,8 @@ describe("IdentityStep", () => {
     });
 
     expect(fetchWithTimeoutMock).toHaveBeenCalledTimes(1);
-    expect(fetchWithTimeoutMock.mock.calls[0][0]).toBe("/audio/onboarding/chen-es.mp3");
+    expect(fetchWithTimeoutMock.mock.calls[0][0]).toBe(
+      "/audio/onboarding/chen-es.mp3",
+    );
   });
 });

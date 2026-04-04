@@ -873,7 +873,9 @@ export async function startEliza(
       });
       // Invalidate cached CORS port set so the new port is allowed.
       try {
-        const { invalidateCorsAllowedPorts } = await import("../api/server-cors.js");
+        const { invalidateCorsAllowedPorts } = await import(
+          "../api/server-cors.js"
+        );
         invalidateCorsAllowedPorts();
       } catch {}
 

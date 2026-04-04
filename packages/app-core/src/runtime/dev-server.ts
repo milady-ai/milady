@@ -350,7 +350,9 @@ async function main() {
   syncResolvedApiPort(process.env, actualPort);
   // Invalidate cached CORS port set so the new port is allowed.
   try {
-    const { invalidateCorsAllowedPorts } = await import("../api/server-cors.js");
+    const { invalidateCorsAllowedPorts } = await import(
+      "../api/server-cors.js"
+    );
     invalidateCorsAllowedPorts();
   } catch {}
   // Use console.log for startup timing to bypass logger filtering
