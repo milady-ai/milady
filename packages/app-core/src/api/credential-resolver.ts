@@ -191,7 +191,7 @@ export function resolveProviderCredential(
     const key = source.resolve();
     if (key) {
       logger.info(
-        `[credential-resolver] Resolved ${source.envVar} for ${providerId} (${key.length} chars, ${source.authType})`,
+        `[credential-resolver] Resolved ${source.envVar} for ${providerId} (${source.authType})`,
       );
       return {
         providerId: source.providerId,

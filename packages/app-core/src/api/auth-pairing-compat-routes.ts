@@ -74,8 +74,10 @@ function ensurePairingCode(): string | null {
   if (!pairingCode || now > pairingExpiresAt) {
     pairingCode = generatePairingCode();
     pairingExpiresAt = now + PAIRING_TTL_MS;
+    // Log only the first segment — enough to confirm the code was generated
+    // without exposing the full secret to log aggregators or screen-watchers.
     console.warn(
-      `[milady-api] Pairing code: ${pairingCode} (valid for 10 minutes)`,
+      `[milady-api] Pairing code generated: ${pairingCode.slice(0, 4)}-****-**** (valid for 10 minutes)`,
     );
   }
 
