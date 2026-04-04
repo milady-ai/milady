@@ -93,6 +93,8 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   OBSIDAN_VAULT_PATH: "@elizaos/plugin-obsidian",
   REPOPROMPT_CLI_PATH: "@elizaos/plugin-repoprompt",
   CLAUDE_CODE_WORKBENCH_ENABLED: "@elizaos/plugin-claude-code-workbench",
+  EVM_PRIVATE_KEY: "@elizaos/plugin-evm",
+  SOLANA_PRIVATE_KEY: "@elizaos/plugin-solana",
 };
 
 const FEATURE_PLUGINS: Record<string, string> = {
