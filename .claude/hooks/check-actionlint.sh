@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # PostToolUse hook: runs actionlint on edited GitHub Actions workflows.
-# Non-blocking — prints findings to stderr so Claude sees them.
+# Blocking-with-acknowledgment on findings — exits with code 2 when actionlint
+# reports issues, which in the Claude Code hook system requires the agent to
+# see and acknowledge the stderr output before continuing. Workflow syntax
+# errors must not ship silently, so this is intentional.
 #
 # Triggered on: Edit | Write | MultiEdit
 # Scope filter: only runs when the touched file is under .github/workflows/ or .github/actions/.
