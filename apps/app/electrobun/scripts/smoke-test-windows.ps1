@@ -67,6 +67,7 @@ $startupSessionId = "milady-windows-smoke-" + [Guid]::NewGuid().ToString("N")
 $startupStateFile = Join-Path $tempRoot ($startupSessionId + ".state.json")
 $startupEventsFile = Join-Path $tempRoot ($startupSessionId + ".events.jsonl")
 $startupBootstrapFile = $null
+$smokeCompletedSuccessfully = $false
 $stopProtectedProcessIds = [System.Collections.Generic.HashSet[int]]::new()
 [void]$stopProtectedProcessIds.Add([int]$PID)
 try {
@@ -711,7 +712,11 @@ try {
       if (-not $healthy) {
         try {
           $curlResult = & "$env:SystemRoot\System32\curl.exe" -s -o NUL -w "%{http_code}" $uri --connect-timeout 3 --noproxy "127.0.0.1" 2>$null
-          if ($curlResult -eq "200" -or $curlResult -eq "401") {
+          $curlExitCode = $LASTEXITCODE
+          if (
+            $curlExitCode -eq 0 -and
+            ($curlResult -eq "200" -or $curlResult -eq "401")
+          ) {
             $healthy = $true
             $healthCheckMethod = "curl.exe"
             Write-Host "Backend health check passed on port $port (via curl.exe, HTTP $curlResult)."
@@ -789,6 +794,8 @@ try {
 
     throw "Windows packaged app did not become healthy within $TimeoutSeconds seconds."
   }
+
+  $smokeCompletedSuccessfully = $true
 } finally {
   Stop-MiladyProcesses
   if (-not [string]::IsNullOrWhiteSpace($startupBootstrapFile)) {
@@ -796,5 +803,10 @@ try {
   }
   if (Test-Path $tempExtractDir) {
     Remove-Item $tempExtractDir -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  if ($smokeCompletedSuccessfully) {
+    # curl.exe and other native probes can leave $LASTEXITCODE non-zero even
+    # when the smoke test later succeeds via a different probe path.
+    $global:LASTEXITCODE = 0
   }
 }

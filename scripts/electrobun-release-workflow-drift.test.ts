@@ -820,6 +820,12 @@ describe("Electrobun release workflow drift", () => {
     expect(smokeScript).toContain('$env:MILADY_API_PORT = "$BackendPort"');
     expect(smokeScript).toContain('$env:ELIZA_API_PORT = "$BackendPort"');
     expect(smokeScript).toContain('$env:ELIZA_PORT = "$BackendPort"');
+    expect(smokeScript).toContain("$smokeCompletedSuccessfully = $false");
+    expect(smokeScript).toContain("$curlExitCode = $LASTEXITCODE");
+    expect(smokeScript).toContain(
+      'if ($smokeCompletedSuccessfully) {',
+    );
+    expect(smokeScript).toContain("$global:LASTEXITCODE = 0");
   });
 
   it("runs and uploads a clean Windows installer proof artifact on every release build", () => {
