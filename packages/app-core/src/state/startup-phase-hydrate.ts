@@ -404,7 +404,11 @@ export function bindReadyPhase(
               !incomingTitle ||
               incomingTitle === "default" ||
               incomingTitle === "New Chat";
-            if (isGenericTitle && existingTitle && !existingTitle.startsWith("New Chat")) {
+            if (
+              isGenericTitle &&
+              existingTitle &&
+              !existingTitle.startsWith("New Chat")
+            ) {
               return { ...conv, title: existingTitle };
             }
             return conv;
