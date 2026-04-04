@@ -30,6 +30,7 @@
     "./contracts/permissions": "./src/contracts/permissions.ts",
     "./contracts/service-routing": "./src/contracts/service-routing.ts",
     "./contracts/verification": "./src/contracts/verification.ts",
+    "./contracts/content-pack": "./src/contracts/content-pack.ts",
     "./contracts/wallet": "./src/contracts/wallet.ts",
     "./config": "./src/config/types.ts",
     "./awareness": "./src/awareness/index.ts",
