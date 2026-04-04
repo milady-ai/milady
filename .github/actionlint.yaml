@@ -1,6 +1,14 @@
 # actionlint configuration
 # https://github.com/rhysd/actionlint/blob/main/docs/config.md
 
+self-hosted-runner:
+  # Blacksmith managed runners used across the Milady workflow suite
+  labels:
+    - blacksmith-4vcpu-ubuntu-2404
+    - blacksmith-8vcpu-ubuntu-2404
+    - blacksmith-16vcpu-ubuntu-2404
+    - blacksmith-2vcpu-ubuntu-2404
+
 paths:
   .github/workflows/release.yml:
     ignore:

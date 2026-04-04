@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/check-node-path.sh" },
+          { "type": "command", "command": ".claude/hooks/check-actionlint.sh" },
+          { "type": "command", "command": ".claude/hooks/check-rpc-schema-sync.sh" }
+        ]
+      }
+    ]
+  },
+
+  "// enabledPlugins": "Project-level overrides. Milady is Bun + Electrobun + elizaOS with zero Vercel/Next.js. The Vercel plugins' workflow skill uses an over-broad '*workflow*' glob that incorrectly matches .github/workflows/*.yml (GitHub Actions) as if it were Vercel Workflow DevKit files, producing false-positive validator errors about require()/setTimeout inside actions/github-script@v7 blocks — that action has full CommonJS Node support, so the rules don't apply. Both Vercel plugins are also injecting irrelevant Vercel/Next.js guidance into every prompt in this project. Disable them here; keep them enabled globally for other projects that actually use Vercel.",
+  "enabledPlugins": {
+    "vercel@claude-plugins-official": false,
+    "vercel-plugin@vercel-vercel-plugin": false
+  }
+}

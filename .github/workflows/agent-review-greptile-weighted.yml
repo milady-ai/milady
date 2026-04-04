@@ -1,0 +1,273 @@
+# Agent Review — Greptile-weighted final verdict
+#
+# Triggered when Greptile comments on a PR that has a preliminary agent-review.
+# Reads both reviews, weights them against the PR diff, posts the FINAL verdict,
+# and marks the preliminary review as superseded.
+#
+# Flow:
+#   1. issue_comment created by greptileai
+#   2. detect job: verify it's a PR comment on a PR with a preliminary agent-review marker
+#   3. weight job: fetch both reviews → run Claude in weighting mode → post final verdict
+#      → update preliminary comment marker to "superseded-by-final"
+
+name: Agent Review - Greptile Weighted
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+  statuses: write
+
+concurrency:
+  group: agent-review-weighted-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    # Only run on PR comments (not plain issues)
+    if: github.event.issue.pull_request != null
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    outputs:
+      should_weight: ${{ steps.check.outputs.should_weight }}
+      initial_review_id: ${{ steps.check.outputs.initial_review_id }}
+      greptile_comment_id: ${{ steps.check.outputs.greptile_comment_id }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+      pr_title: ${{ steps.check.outputs.pr_title }}
+      pr_author: ${{ steps.check.outputs.pr_author }}
+      pr_base: ${{ steps.check.outputs.pr_base }}
+      pr_head_sha: ${{ steps.check.outputs.pr_head_sha }}
+      run_marker: ${{ steps.check.outputs.run_marker }}
+    steps:
+      - name: Detect Greptile response to preliminary agent-review
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment;
+            const commenter = (comment.user.login || '').toLowerCase();
+
+            // Permissive match — catches greptileai, greptileai[bot], greptile-bot, etc.
+            if (!commenter.includes('greptile')) {
+              console.log(`Commenter "${commenter}" is not Greptile; skipping.`);
+              core.setOutput('should_weight', 'false');
+              return;
+            }
+
+            // Ignore very short Greptile comments (e.g. acknowledgement pings)
+            const body = comment.body || '';
+            if (body.trim().length < 200) {
+              console.log(`Greptile comment too short (${body.length} chars); likely not a substantive review. Skipping.`);
+              core.setOutput('should_weight', 'false');
+              return;
+            }
+
+            // Find the most recent preliminary agent-review on this PR
+            const prNumber = context.payload.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const preliminary = comments
+              .filter(c => (c.body || '').includes('<!-- verdict-status: preliminary-awaiting-greptile -->'))
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+            if (!preliminary) {
+              console.log('No preliminary agent-review found on this PR; skipping.');
+              core.setOutput('should_weight', 'false');
+              return;
+            }
+
+            // Extract the run marker from the preliminary comment so the final comment can correlate
+            const runMarkerMatch = (preliminary.body || '').match(/<!-- agent-review-run:[^>]+-->/);
+            const runMarker = runMarkerMatch ? runMarkerMatch[0] : '';
+
+            // Fetch PR context
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            core.setOutput('should_weight', 'true');
+            core.setOutput('initial_review_id', String(preliminary.id));
+            core.setOutput('greptile_comment_id', String(comment.id));
+            core.setOutput('pr_number', String(prNumber));
+            core.setOutput('pr_title', pr.title);
+            core.setOutput('pr_author', pr.user.login);
+            core.setOutput('pr_base', pr.base.ref);
+            core.setOutput('pr_head_sha', pr.head.sha);
+            core.setOutput('run_marker', runMarker);
+
+  weight:
+    needs: detect
+    if: needs.detect.outputs.should_weight == 'true'
+    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout at PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.detect.outputs.pr_head_sha }}
+
+      - name: Fetch review bodies to disk
+        id: fetch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INITIAL_REVIEW_ID: ${{ needs.detect.outputs.initial_review_id }}
+          GREPTILE_COMMENT_ID: ${{ needs.detect.outputs.greptile_comment_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mkdir -p .agent-review
+          gh api "repos/${REPO}/issues/comments/${INITIAL_REVIEW_ID}" \
+            --jq '.body // ""' > .agent-review/initial.md
+          gh api "repos/${REPO}/issues/comments/${GREPTILE_COMMENT_ID}" \
+            --jq '.body // ""' > .agent-review/greptile.md
+          echo "Wrote .agent-review/initial.md ($(wc -c < .agent-review/initial.md) bytes)"
+          echo "Wrote .agent-review/greptile.md ($(wc -c < .agent-review/greptile.md) bytes)"
+
+      - name: Run Claude weighted review
+        id: claude-weight
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        env:
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,LS,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(cat:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(wc:*),Bash(head:*),Bash(tail:*)"
+          prompt: |
+            You are finalizing a Milady code review. An initial agent-review was posted as PRELIMINARY because the PR was flagged as needing deep analysis (scope = "needs deep review"). Greptile has now completed its independent deep review. Your job is to read both reviews, verify their claims against the actual PR diff, weight them, and produce the FINAL verdict.
+
+            **Milady is an agents-only codebase.** Your final verdict is authoritative.
+
+            ## PR context
+            - **PR #${{ needs.detect.outputs.pr_number }}**: ${{ needs.detect.outputs.pr_title }}
+            - **Author**: ${{ needs.detect.outputs.pr_author }}
+            - **Base**: ${{ needs.detect.outputs.pr_base }}
+            - **Head SHA**: ${{ needs.detect.outputs.pr_head_sha }}
+
+            ## Inputs
+            - Preliminary agent-review body is in `.agent-review/initial.md`
+            - Greptile review body is in `.agent-review/greptile.md`
+            - PR diff: `gh pr diff ${{ needs.detect.outputs.pr_number }}`
+
+            ## Process
+            1. **Read both review files.** Use the Read tool on `.agent-review/initial.md` and `.agent-review/greptile.md`.
+            2. **Read the PR diff yourself** via `gh pr diff`. Do not take either reviewer's word without checking.
+            3. **Identify the highest-severity finding** across both reviews.
+            4. **Where the two reviews agree**, weight their shared conclusion heavily — concurrence between independent reviewers is strong evidence.
+            5. **Where they disagree**:
+               - Verify against the diff.
+               - If one reviewer cites a specific `file:line` that contradicts the other's claim, trust the specific one.
+               - If the disagreement is about judgment (better/worse, too complex, duplication), lean toward the more cautious verdict.
+               - Call out the disagreement explicitly in your final comment.
+            6. **Verify coverage of Milady universal invariants** — at least one reviewer should have checked each relevant invariant for the files touched:
+               1. NODE_PATH at all three sites (`packages/agent/src/runtime/eliza.ts`, `scripts/run-node.mjs`, `apps/app/electrobun/src/native/agent.ts`)
+               2. `scripts/patch-deps.mjs` preserved
+               3. Electrobun startup try/catch guards in `apps/app/electrobun/src/native/agent.ts`
+               4. Namespace `milady` (state dir `~/.milady/`, config `milady.json`, `MILADY_*` env precedence)
+               5. No hardcoded port numbers
+               6. Dynamic `@elizaos/plugin-*` imports only
+               7. `uiShellMode` defaults to `"companion"`; `"native"` labeled "dev mode"
+               8. `StartupPhase` union includes `"ready"`
+               9. `VrmViewer` `engineReady` gate
+               10. Electrobun RPC schema ↔ bridge ↔ handler in sync
+               11. Dev observability endpoints default-on, loopback-only
+               12. Access control files (`imessage/access.json`, `discord/access.json`, `telegram/access.json`) not modified
+               If an invariant is relevant to the diff and NEITHER reviewer covered it, flag that as a coverage gap and verify it yourself.
+            7. **Verify UI reuse** — if the PR touches React components, confirm no hand-rolled primitives that `@miladyai/ui` (at `packages/ui/`) already exports, and no feature components that duplicate `packages/app-core/src/components/`. New UI code must not land in `apps/app/src/` (thin Vite shell).
+            8. **Produce the FINAL verdict.** Post it as a NEW comment (do not edit the preliminary one — that will be marked superseded by a later step).
+
+            ## Output format (post as a new PR comment)
+
+            # Final Review (Greptile-weighted)
+
+            ## Consensus
+            <bullets — what both reviews agree on>
+
+            ## Disagreements
+            <each disagreement, how you resolved it, and which reviewer you sided with + why. Write "None" if the reviews fully agree.>
+
+            ## Highest-severity findings
+            <ordered list, most severe first, with `file:line` citations>
+
+            ## Invariants coverage
+            <all 12 universal invariants covered by at least one reviewer? If any gaps, list them and your own verdict on each>
+
+            ## UI reuse check
+            <N/A if not a UI PR, else: `@miladyai/ui` primitives respected? `packages/app-core/src/components/` feature components respected? New UI code out of `apps/app/src/`?>
+
+            ## Final decision
+            Decision: APPROVE | REQUEST CHANGES | CLOSE
+
+            <!-- verdict-status: final-weighted -->
+            ${{ needs.detect.outputs.run_marker }}
+
+            The `Decision:` line is machine-parsed. The `final-weighted` status marker overrides the preliminary status. Be direct. Match the existing agent-review tone.
+
+      - name: Mark preliminary comment as superseded
+        if: steps.claude-weight.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const initialId = Number('${{ needs.detect.outputs.initial_review_id }}');
+            const { data: initial } = await github.rest.issues.getComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: initialId,
+            });
+
+            const oldBody = initial.body || '';
+            let newBody = oldBody.replace(
+              '<!-- verdict-status: preliminary-awaiting-greptile -->',
+              '<!-- verdict-status: superseded-by-final -->'
+            );
+
+            // Prepend a banner so readers see the preliminary status has changed
+            const banner = '> ♻️ **This preliminary review has been superseded by a Greptile-weighted final review below.**\n\n';
+            if (!newBody.startsWith(banner)) {
+              newBody = banner + newBody;
+            }
+
+            if (newBody !== oldBody) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: initialId,
+                body: newBody,
+              });
+              console.log('Preliminary comment marked as superseded.');
+            } else {
+              console.log('Preliminary comment already up-to-date; no edit needed.');
+            }
+
+      - name: Report weighting failure
+        if: steps.claude-weight.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = Number('${{ needs.detect.outputs.pr_number }}');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: [
+                '> ⚠️ **Greptile-weighted final review failed to generate.**',
+                '',
+                'The preliminary agent-review above stands as the current verdict until a human re-triggers the weighted workflow.',
+                '',
+                '<!-- verdict-status: weighted-failed -->',
+                '${{ needs.detect.outputs.run_marker }}',
+              ].join('\n'),
+            });
