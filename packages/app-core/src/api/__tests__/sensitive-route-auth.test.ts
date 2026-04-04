@@ -61,7 +61,10 @@ describe("ensureCompatSensitiveRouteAuthorized", () => {
     mocks.getCompatApiToken.mockReturnValue(null);
     mocks.isLoopbackRemoteAddress.mockReturnValue(false);
 
-    const result = ensureCompatSensitiveRouteAuthorized(makeReq("10.0.0.5"), res);
+    const result = ensureCompatSensitiveRouteAuthorized(
+      makeReq("10.0.0.5"),
+      res,
+    );
 
     expect(result).toBe(false);
     expect(mocks.sendJsonError).toHaveBeenCalledWith(
