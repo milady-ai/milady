@@ -11,21 +11,7 @@ import {
   resolveTerminalRunRejection as upstreamResolveTerminalRunRejection,
   resolveWebSocketUpgradeRejection as upstreamResolveWebSocketUpgradeRejection,
 } from "@miladyai/agent/api/server";
-import {
-  getBootConfig,
-  syncBrandEnvToEliza,
-  syncElizaEnvToBrand,
-} from "../config/boot-config.js";
-
-function syncMiladyEnvToEliza(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncBrandEnvToEliza(aliases);
-}
-
-function syncElizaEnvToMilady(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncElizaEnvToBrand(aliases);
-}
+import { syncMiladyEnvToEliza, syncElizaEnvToMilady } from "../utils/env.js";
 
 import {
   normalizeCompatRejection,

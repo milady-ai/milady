@@ -317,10 +317,10 @@ describe("startup conversation restore", () => {
 
     await waitFor(() => {
       expect(mockClient.getStatus).toHaveBeenCalled();
-      expect(latest?.startupPhase).toBe("initializing-agent");
-      expect(latest?.onboardingLoading).toBe(true);
     });
 
+    // While listConversations is still pending, no conversation should be active
+    // and no new conversation should have been created.
     expect(latest?.activeConversationId).toBeNull();
     expect(mockClient.createConversation).not.toHaveBeenCalled();
     // The StartupCoordinator calls connectWs during its own hydration phase

@@ -143,21 +143,7 @@ import { resolveDevStackFromEnv } from "./dev-stack";
 
 const require = createRequire(import.meta.url);
 
-import {
-  getBootConfig,
-  syncBrandEnvToEliza,
-  syncElizaEnvToBrand,
-} from "../config/boot-config.js";
-
-function syncMiladyEnvToEliza(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncBrandEnvToEliza(aliases);
-}
-
-function syncElizaEnvToMilady(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncElizaEnvToBrand(aliases);
-}
+import { syncMiladyEnvToEliza, syncElizaEnvToMilady } from "../utils/env.js";
 
 // Lazy-imported to avoid circular dependency with runtime/eliza.ts
 const lazyEnsureTTS = () =>

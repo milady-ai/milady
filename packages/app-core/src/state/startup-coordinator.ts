@@ -78,7 +78,7 @@ export type StartupPhaseValue = StartupState["phase"];
 export type StartupEvent =
   // Session restoration results
   | { type: "SESSION_RESTORED"; target: RuntimeTarget }
-  | { type: "NO_SESSION" }
+  | { type: "NO_SESSION"; hadPriorOnboarding: boolean }
   | { type: "EXISTING_INSTALL_DETECTED"; target: RuntimeTarget }
 
   // Backend poll results
@@ -135,6 +135,15 @@ export function startupReducer(
         case "EXISTING_INSTALL_DETECTED":
           return { phase: "resolving-target", target: event.target };
         case "NO_SESSION":
+          if (event.hadPriorOnboarding) {
+            return {
+              phase: "error",
+              reason: "backend-unreachable",
+              message:
+                "Previously configured backend is unreachable. Check your connection or reset.",
+              timedOut: false,
+            };
+          }
           return { phase: "onboarding-required", serverReachable: false };
         default:
           return state;

@@ -318,7 +318,14 @@ describe("AppProvider onboarding step resume", () => {
       const resumeStep = inferOnboardingResumeStep({
         config: normalizedConfig,
       });
-      expect(["senses", "welcome", "cloud_login", "identity", "hosting", "providers"]).toContain(resumeStep);
+      expect([
+        "senses",
+        "welcome",
+        "cloud_login",
+        "identity",
+        "hosting",
+        "providers",
+      ]).toContain(resumeStep);
       expect(
         deriveOnboardingResumeFieldsFromConfig(normalizedConfig),
       ).toMatchObject({

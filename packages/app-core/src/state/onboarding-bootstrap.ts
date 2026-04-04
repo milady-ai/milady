@@ -4,8 +4,6 @@ import {
   createPersistedActiveServer,
   type PersistedActiveServer,
 } from "./persistence";
-import type { StartupErrorState } from "./types";
-
 export interface ExistingOnboardingProbeClient {
   apiAvailable: boolean;
   getOnboardingStatus: () => Promise<{ complete: boolean }>;
@@ -23,10 +21,6 @@ export interface DetectedProviderCandidate {
   authMode?: string;
   status?: string;
 }
-
-export type StartupWithoutConnectionResolution =
-  | { kind: "onboarding" }
-  | { kind: "startup-error"; error: StartupErrorState };
 
 const LOCAL_ACTIVE_SERVER = createPersistedActiveServer({ kind: "local" });
 
@@ -105,15 +99,6 @@ export async function detectExistingOnboardingConnection(args: {
   }
 
   return result === timeoutToken ? null : result;
-}
-
-export function resolveStartupWithoutRestoredConnection(_args: {
-  hadPersistedOnboardingCompletion: boolean;
-}): StartupWithoutConnectionResolution {
-  // Always allow re-onboarding. Even if the user previously completed setup,
-  // a missing backend means we should let them reconnect rather than showing
-  // a dead-end error screen.
-  return { kind: "onboarding" };
 }
 
 export function deriveDetectedProviderPrefill(

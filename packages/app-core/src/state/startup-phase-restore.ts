@@ -176,7 +176,7 @@ export async function runRestoringSession(
     }
     deps.setOnboardingComplete(false);
     deps.setOnboardingLoading(false);
-    dispatch({ type: "NO_SESSION" });
+    dispatch({ type: "NO_SESSION", hadPriorOnboarding: hadPrior });
     return;
   }
 

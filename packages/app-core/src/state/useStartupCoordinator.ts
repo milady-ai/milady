@@ -35,7 +35,10 @@ import {
   type RestoringSessionCtx,
   type RestoringSessionDeps,
 } from "./startup-phase-restore";
-import { runPollingBackend, type PollingBackendDeps } from "./startup-phase-poll";
+import {
+  runPollingBackend,
+  type PollingBackendDeps,
+} from "./startup-phase-poll";
 import {
   runStartingRuntime,
   type StartingRuntimeDeps,

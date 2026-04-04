@@ -25,7 +25,6 @@ import { IdentityStep } from "./IdentityStep";
 import { OnboardingPanel } from "./OnboardingPanel";
 import { OnboardingStepNav } from "./OnboardingStepNav";
 
-
 const FORCE_VRM =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("test_force_vrm") === "1";

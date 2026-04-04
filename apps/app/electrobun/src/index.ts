@@ -768,7 +768,8 @@ async function createMainWindow(): Promise<BrowserWindow> {
   }
 
   // icon and partition are valid Electrobun options not yet in WindowOptionsType
-  const win = new BrowserWindow(browserWindowOptions as never);
+  // @ts-expect-error — browserWindowOptions includes fields not in WindowOptionsType
+  const win = new BrowserWindow(browserWindowOptions);
 
   // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);

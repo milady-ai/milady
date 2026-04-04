@@ -54,7 +54,10 @@ function withLocalStorageStub(fn: () => void) {
 }
 
 describe("normalizeOnboardingStep (via load/save helpers)", () => {
-  it.each(["identity", "providers"] as const)("accepts valid step %s", (step) => {
+  it.each([
+    "identity",
+    "providers",
+  ] as const)("accepts valid step %s", (step) => {
     withLocalStorageStub(() => {
       saveOnboardingStep(step);
       expect(loadPersistedOnboardingStep()).toBe(step);

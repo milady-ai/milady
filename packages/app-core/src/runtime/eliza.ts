@@ -26,21 +26,7 @@ import {
   resolveServerOnlyPort,
   syncResolvedApiPort,
 } from "@miladyai/shared/runtime-env";
-import {
-  getBootConfig,
-  syncBrandEnvToEliza,
-  syncElizaEnvToBrand,
-} from "../config/boot-config.js";
-
-function syncMiladyEnvToEliza(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncBrandEnvToEliza(aliases);
-}
-
-function syncElizaEnvToMilady(): void {
-  const aliases = getBootConfig().envAliases;
-  if (aliases) syncElizaEnvToBrand(aliases);
-}
+import { syncMiladyEnvToEliza, syncElizaEnvToMilady } from "../utils/env.js";
 
 import { loadElizaConfig } from "@miladyai/agent/config/config";
 import {

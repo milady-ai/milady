@@ -270,6 +270,9 @@ export interface UseChatCallbacksDeps {
   setPlugins: (v: never[]) => void;
   setSkills: (v: never[]) => void;
   setLogs: (v: never[]) => void;
+
+  // Startup coordinator
+  coordinatorResetRef: MutableRefObject<(() => void) | null>;
 }
 
 // ── Hook ────────────────────────────────────────────────────────────
@@ -372,6 +375,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setPlugins,
     setSkills,
     setLogs,
+    coordinatorResetRef,
   } = deps;
 
   // ── Greeting / hydration (defined here; passed into lifecycle) ──────
@@ -661,6 +665,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
     setPlugins,
     setSkills,
     setLogs,
+    coordinatorResetRef,
   });
 
   // ── Conversation management ─────────────────────────────────────────

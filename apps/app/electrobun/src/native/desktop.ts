@@ -100,8 +100,12 @@ interface ShowItemInFolderOptions {
   path: string;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: event handler args vary per Electrobun emitter
-type ElectrobunEventHandler = (...args: any[]) => void;
+type ElectrobunEventHandler = (...args: unknown[]) => void;
+
+interface ElectrobunEventTarget {
+  off?: (event: string, handler: ElectrobunEventHandler) => void;
+  removeListener?: (event: string, handler: ElectrobunEventHandler) => void;
+}
 
 // ============================================================================
 // Path name mapping: legacy desktop path names -> Utils.paths equivalents
@@ -535,8 +539,7 @@ export class DesktopManager {
     };
     Electrobun.events.on(
       "tray-clicked",
-      // biome-ignore lint/suspicious/noExplicitAny: Electrobun event shape is ElectrobunEvent<TrayClickedData>
-      this.contextMenuHandler as any,
+      this.contextMenuHandler as ElectrobunEventHandler,
     );
   }
 
@@ -552,8 +555,7 @@ export class DesktopManager {
   }
 
   private removeEventHandler(
-    // biome-ignore lint/suspicious/noExplicitAny: Electrobun event targets (BrowserWindow, Tray, events) have incompatible .off() signatures
-    target: any,
+    target: ElectrobunEventTarget | null | undefined,
     event: string,
     handler: ElectrobunEventHandler | null | undefined,
   ): void {

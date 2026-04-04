@@ -1,6 +1,0 @@
-- generic [ref=e3]:
-  - img
-  - generic [ref=e4]:
-    - heading "MILADY" [level=1] [ref=e5]
-    - paragraph [ref=e6]: Your local-first AI assistant
-    - button "Press Start" [ref=e7]

@@ -33,3 +33,28 @@ export function isEnvDisabled(value: string | undefined): boolean {
   if (!raw) return false;
   return raw === "0" || raw === "false" || raw === "off" || raw === "no";
 }
+
+/**
+ * Sync Milady brand env vars → elizaOS equivalents.
+ * Extracted from identical copies in runtime/eliza.ts, api/server.ts,
+ * api/server-wallet-trade.ts, api/server-startup.ts, and api/server-security.ts.
+ */
+export {
+  syncBrandEnvToEliza,
+  syncElizaEnvToBrand,
+} from "../config/boot-config.js";
+import {
+  getBootConfig,
+  syncBrandEnvToEliza,
+  syncElizaEnvToBrand,
+} from "../config/boot-config.js";
+
+export function syncMiladyEnvToEliza(): void {
+  const aliases = getBootConfig().envAliases;
+  if (aliases) syncBrandEnvToEliza(aliases);
+}
+
+export function syncElizaEnvToMilady(): void {
+  const aliases = getBootConfig().envAliases;
+  if (aliases) syncElizaEnvToBrand(aliases);
+}
