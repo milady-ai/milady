@@ -5,7 +5,10 @@
  * content pack with their VRM, background, and personality.
  */
 
-import type { ContentPackManifest, ResolvedContentPack } from "@miladyai/shared/contracts/content-pack";
+import type {
+  ContentPackManifest,
+  ResolvedContentPack,
+} from "@miladyai/shared/contracts/content-pack";
 
 interface BundledPackDef {
   id: string;
@@ -16,14 +19,62 @@ interface BundledPackDef {
 }
 
 const BUNDLED_PACK_DEFS: BundledPackDef[] = [
-  { id: "chen", name: "Chen", avatarIndex: 1, slug: "milady-1", catchphrase: "Hey there!" },
-  { id: "jin", name: "Jin", avatarIndex: 2, slug: "milady-2", catchphrase: "What's up?" },
-  { id: "kei", name: "Kei", avatarIndex: 3, slug: "milady-3", catchphrase: "Hi!" },
-  { id: "momo", name: "Momo", avatarIndex: 4, slug: "milady-4", catchphrase: "Hello!" },
-  { id: "rin", name: "Rin", avatarIndex: 5, slug: "milady-5", catchphrase: "Greetings!" },
-  { id: "ryu", name: "Ryu", avatarIndex: 6, slug: "milady-6", catchphrase: "Yo!" },
-  { id: "satoshi", name: "Satoshi", avatarIndex: 7, slug: "milady-7", catchphrase: "Welcome!" },
-  { id: "yuki", name: "Yuki", avatarIndex: 8, slug: "milady-8", catchphrase: "Nice to meet you!" },
+  {
+    id: "chen",
+    name: "Chen",
+    avatarIndex: 1,
+    slug: "milady-1",
+    catchphrase: "Hey there!",
+  },
+  {
+    id: "jin",
+    name: "Jin",
+    avatarIndex: 2,
+    slug: "milady-2",
+    catchphrase: "What's up?",
+  },
+  {
+    id: "kei",
+    name: "Kei",
+    avatarIndex: 3,
+    slug: "milady-3",
+    catchphrase: "Hi!",
+  },
+  {
+    id: "momo",
+    name: "Momo",
+    avatarIndex: 4,
+    slug: "milady-4",
+    catchphrase: "Hello!",
+  },
+  {
+    id: "rin",
+    name: "Rin",
+    avatarIndex: 5,
+    slug: "milady-5",
+    catchphrase: "Greetings!",
+  },
+  {
+    id: "ryu",
+    name: "Ryu",
+    avatarIndex: 6,
+    slug: "milady-6",
+    catchphrase: "Yo!",
+  },
+  {
+    id: "satoshi",
+    name: "Satoshi",
+    avatarIndex: 7,
+    slug: "milady-7",
+    catchphrase: "Welcome!",
+  },
+  {
+    id: "yuki",
+    name: "Yuki",
+    avatarIndex: 8,
+    slug: "milady-8",
+    catchphrase: "Nice to meet you!",
+  },
 ];
 
 function defToManifest(def: BundledPackDef): ContentPackManifest {

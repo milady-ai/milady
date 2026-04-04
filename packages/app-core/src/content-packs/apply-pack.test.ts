@@ -31,10 +31,7 @@ function makePack(
 describe("applyContentPack", () => {
   it("applies custom VRM URL and sets index to 0", () => {
     const deps = makeDeps();
-    applyContentPack(
-      makePack({ vrmUrl: "/packs/test/model.vrm.gz" }),
-      deps,
-    );
+    applyContentPack(makePack({ vrmUrl: "/packs/test/model.vrm.gz" }), deps);
     expect(deps.setCustomVrmUrl).toHaveBeenCalledWith(
       "/packs/test/model.vrm.gz",
     );
@@ -53,10 +50,7 @@ describe("applyContentPack", () => {
 
   it("applies background URL", () => {
     const deps = makeDeps();
-    applyContentPack(
-      makePack({ backgroundUrl: "/packs/test/bg.png" }),
-      deps,
-    );
+    applyContentPack(makePack({ backgroundUrl: "/packs/test/bg.png" }), deps);
     expect(deps.setCustomBackgroundUrl).toHaveBeenCalledWith(
       "/packs/test/bg.png",
     );
@@ -64,10 +58,7 @@ describe("applyContentPack", () => {
 
   it("applies personality name", () => {
     const deps = makeDeps();
-    applyContentPack(
-      makePack({ personality: { name: "Nyx" } }),
-      deps,
-    );
+    applyContentPack(makePack({ personality: { name: "Nyx" } }), deps);
     expect(deps.setOnboardingName).toHaveBeenCalledWith("Nyx");
   });
 
