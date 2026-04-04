@@ -597,13 +597,16 @@ async function ensureTelegramBotPolling(runtime: AgentRuntime): Promise<void> {
           let history = chatHistories.get(chatId);
           if (!history) {
             history = [];
-            chatHistories.set(chatId, history);
-            // Evict oldest chat entry to prevent unbounded memory growth
-            if (chatHistories.size > 500) {
+            // Evict least-recently-used chat to prevent unbounded memory growth
+            if (chatHistories.size >= 500) {
               const oldest = chatHistories.keys().next().value;
               if (oldest !== undefined) chatHistories.delete(oldest);
             }
+          } else {
+            // Move to end of Map iteration order (most-recently-used)
+            chatHistories.delete(chatId);
           }
+          chatHistories.set(chatId, history);
           history.push({ role: "user", content: `@${username}: ${text}` });
           if (history.length > 20) history.splice(0, history.length - 20);
 

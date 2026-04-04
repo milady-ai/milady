@@ -156,10 +156,31 @@ export function saveElizaConfig(config: ElizaConfig): void {
 
   const content = `${JSON.stringify(sanitized, null, 2)}\n`;
 
-  fs.writeFileSync(configPath, content, {
+  // Atomic write: write to a temp file then rename. If the process crashes
+  // during writeFileSync, only the temp file is corrupted — the original
+  // config remains intact. rename() is atomic on POSIX filesystems when
+  // source and destination are on the same filesystem.
+  //
+  // Resolve symlinks so dotfile-managed setups (symlinked config) update
+  // the target file instead of replacing the symlink with a regular file.
+  const realConfigPath = fs.existsSync(configPath)
+    ? fs.realpathSync(configPath)
+    : configPath;
+  const tmpPath = `${realConfigPath}.tmp.${process.pid}`;
+  fs.writeFileSync(tmpPath, content, {
     encoding: "utf-8",
     mode: 0o600,
   });
+  fs.renameSync(tmpPath, realConfigPath);
+
+  // Enforce 600 on every write — writeFileSync's mode only applies on
+  // creation, so files created by older versions retain their original
+  // (potentially world-readable) permissions.
+  try {
+    fs.chmodSync(configPath, 0o600);
+  } catch {
+    // chmodSync may fail on some platforms (e.g. Windows). Non-fatal.
+  }
 
   if (!fs.existsSync(configPath)) {
     throw new Error(

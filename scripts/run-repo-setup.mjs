@@ -145,6 +145,9 @@ export async function runRepoSetup(repoRoot = DEFAULT_REPO_ROOT) {
           stdio: "inherit",
         });
 
+        child.on("error", (err) => {
+          reject(new Error(`${step} failed to spawn: ${err.message}`));
+        });
         child.on("exit", (code, signal) => {
           if (signal) {
             reject(new Error(`${step} exited due to signal ${signal}`));

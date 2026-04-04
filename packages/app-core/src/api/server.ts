@@ -239,11 +239,37 @@ function resolveCompatPgliteDataDir(config: ElizaConfig): string {
   return path.join(resolveUserPath(workspaceDir), ".eliza", ".elizadb");
 }
 
+/**
+ * Actual port the API server is listening on, set after server.listen()
+ * resolves. Used by loopback calls to target the correct endpoint even
+ * when the server binds to a dynamic port (port: 0 or EADDRINUSE fallback).
+ */
+let _resolvedLoopbackPort: number | null = null;
+
+/** Called from startApiServer after the upstream server resolves. */
+export function setResolvedLoopbackPort(port: number): void {
+  _resolvedLoopbackPort = port;
+}
+
+/**
+ * Build the loopback base URL for internal server-to-self API calls.
+ * Always targets 127.0.0.1 — never trusts the incoming Host header,
+ * which would allow an attacker to redirect loopback fetches (and the
+ * attached API token) to an external server.
+ *
+ * Priority: actual listener port > env vars > default 31337.
+ */
 function resolveCompatLoopbackApiBase(
-  req: Pick<http.IncomingMessage, "headers">,
+  _req: Pick<http.IncomingMessage, "headers">,
 ): string {
-  const host = req.headers.host?.trim() || "127.0.0.1:31337";
-  return `http://${host}`;
+  const port =
+    _resolvedLoopbackPort ??
+    (Number(
+      process.env.MILADY_API_PORT?.trim() ||
+        process.env.ELIZA_PORT?.trim() ||
+        "31337",
+    ) || 31337);
+  return `http://127.0.0.1:${port}`;
 }
 
 function buildCompatLoopbackHeaders(
@@ -1074,6 +1100,14 @@ export async function startApiServer(
     }
 
     const server = await upstreamStartApiServer(...args);
+
+    // Record the actual listener port so loopback calls target the right
+    // endpoint even when the server bound to a dynamic port (port: 0 or
+    // EADDRINUSE fallback).
+    if (typeof server.port === "number" && server.port > 0) {
+      setResolvedLoopbackPort(server.port);
+    }
+
     const originalUpdateRuntime = server.updateRuntime as (
       runtime: AgentRuntime,
     ) => void;
