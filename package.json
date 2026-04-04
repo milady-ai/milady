@@ -187,6 +187,7 @@
     "@elizaos/plugin-openrouter": "2.0.0-alpha.10",
     "@elizaos/plugin-pdf": "^2.0.0-alpha.16",
     "@elizaos/plugin-personality": "^2.0.0-alpha.8",
+    "@elizaos/plugin-pi-ai": "1.7.3-alpha.3",
     "@elizaos/plugin-plugin-manager": "^2.0.0-alpha.7",
     "@elizaos/plugin-rolodex": "^2.0.0-alpha.9",
     "@elizaos/plugin-secrets-manager": "^2.0.0-alpha.9",
