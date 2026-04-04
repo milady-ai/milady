@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { buildAuthHeaders, getWalletActionApiPort } from "./wallet-action-shared.js";
+import {
+  buildAuthHeaders,
+  getWalletActionApiPort,
+} from "./wallet-action-shared.js";
 
 const ENV_KEYS = [
   "MILADY_API_PORT",

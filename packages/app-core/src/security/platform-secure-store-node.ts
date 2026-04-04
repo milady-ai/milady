@@ -31,10 +31,7 @@ function isLinux(): boolean {
  * is the last argument with no value. It prompts twice (password + retype),
  * so we write the value twice separated by a newline.
  */
-function keychainSetViaStdin(
-  args: string[],
-  password: string,
-): Promise<void> {
+function keychainSetViaStdin(args: string[], password: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn("security", args, {
       stdio: ["pipe", "pipe", "pipe"],
@@ -51,10 +48,10 @@ function keychainSetViaStdin(
         return;
       }
       reject(
-        Object.assign(
-          new Error(stderr.trim() || `security exited ${code}`),
-          { stderr, code },
-        ),
+        Object.assign(new Error(stderr.trim() || `security exited ${code}`), {
+          stderr,
+          code,
+        }),
       );
     });
     // Swallow EPIPE if security exits before reading stdin (e.g. arg error).
