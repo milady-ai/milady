@@ -21,7 +21,6 @@ describe("electrobun bridge runtime", () => {
     vi.resetModules();
     electroviewInstances.mockReset();
     defineRpc.mockReset();
-    // biome-ignore lint: test cleanup requires deleting non-optional properties
     const w = window as unknown as Record<string, unknown>;
     delete w.__MILADY_ELECTROBUN_RPC__;
     delete w.electrobun;

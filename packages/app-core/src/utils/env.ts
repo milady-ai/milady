@@ -39,8 +39,15 @@ export function isEnvDisabled(value: string | undefined): boolean {
  * Extracted from identical copies in runtime/eliza.ts, api/server.ts,
  * api/server-wallet-trade.ts, api/server-startup.ts, and api/server-security.ts.
  */
-export { syncBrandEnvToEliza, syncElizaEnvToBrand } from "../config/boot-config.js";
-import { getBootConfig, syncBrandEnvToEliza, syncElizaEnvToBrand } from "../config/boot-config.js";
+export {
+  syncBrandEnvToEliza,
+  syncElizaEnvToBrand,
+} from "../config/boot-config.js";
+import {
+  getBootConfig,
+  syncBrandEnvToEliza,
+  syncElizaEnvToBrand,
+} from "../config/boot-config.js";
 
 export function syncMiladyEnvToEliza(): void {
   const aliases = getBootConfig().envAliases;
