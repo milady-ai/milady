@@ -195,6 +195,7 @@ export default defineConfig({
       "packages/app-core/src/**/*.test.ts",
       "packages/app-core/src/**/*.test.tsx",
       "packages/plugin-wechat/src/**/*.test.ts",
+      "packages/shared/src/**/*.test.ts",
       "src/**/*.test.ts",
       "scripts/**/*.test.ts",
       "apps/app/electrobun/src/**/*.test.ts",

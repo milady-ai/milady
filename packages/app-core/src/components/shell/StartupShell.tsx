@@ -22,8 +22,15 @@ import {
   useApp,
 } from "../../state";
 import type { StartupErrorState } from "../../state/types";
+import type { ResolvedContentPack } from "@miladyai/shared/contracts/content-pack";
+import {
+  applyContentPack,
+  applyColorScheme,
+  getBundledContentPacks,
+} from "../../content-packs";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
+import { SplashContentPacks } from "./SplashContentPacks";
 import { SplashServerChooser } from "./SplashServerChooser";
 import { StartupFailureView } from "./StartupFailureView";
 
@@ -65,6 +72,7 @@ export function StartupShell() {
     goToOnboardingStep,
     elizaCloudConnected,
     onboardingCloudApiKey,
+    activePackId,
     t,
   } = useApp();
   const phase = startupCoordinator.phase;
@@ -77,6 +85,56 @@ export function StartupShell() {
     ? (startupCoordinator.state as { loaded?: boolean }).loaded
     : false;
   const progress = PHASE_PROGRESS[phase] ?? 50;
+
+  // ── Content packs ───────────────────────────────────────────────
+  const bundledPacks = useMemo(() => getBundledContentPacks(), []);
+  const colorSchemeCleanupRef = { current: null as (() => void) | null };
+
+  const handleSelectPack = useCallback(
+    (pack: ResolvedContentPack) => {
+      // Toggle off if already active
+      if (activePackId === pack.manifest.id) {
+        setState("activePackId", null);
+        colorSchemeCleanupRef.current?.();
+        colorSchemeCleanupRef.current = null;
+        return;
+      }
+      setState("activePackId", pack.manifest.id);
+      applyContentPack(pack, {
+        setCustomVrmUrl: (url) => setState("customVrmUrl", url),
+        setCustomBackgroundUrl: (url) => setState("customBackgroundUrl", url),
+        setCustomWorldUrl: (url) => setState("customWorldUrl", url),
+        setSelectedVrmIndex: (idx) => setState("selectedVrmIndex", idx),
+        setOnboardingName: (name) => setState("onboardingName", name),
+        setOnboardingStyle: (style) => setState("onboardingStyle", style),
+      });
+      colorSchemeCleanupRef.current?.();
+      colorSchemeCleanupRef.current = applyColorScheme(pack.colorScheme);
+    },
+    [activePackId, setState],
+  );
+
+  const handleLoadCustomPack = useCallback(async () => {
+    const url = window.prompt(
+      t("startupshell.EnterPackUrl", {
+        defaultValue:
+          "Enter the URL of a content pack folder (must contain pack.json):",
+      }),
+    );
+    if (!url?.trim()) return;
+    try {
+      const { loadContentPackFromUrl } = await import("../../content-packs");
+      const pack = await loadContentPackFromUrl(url.trim());
+      handleSelectPack(pack);
+    } catch (err) {
+      console.error("[milady][content-packs] Failed to load custom pack:", err);
+      window.alert(
+        t("startupshell.PackLoadFailed", {
+          defaultValue: `Failed to load pack: ${err instanceof Error ? err.message : "Unknown error"}`,
+        }),
+      );
+    }
+  }, [t, handleSelectPack]);
   const cloudApiKey = onboardingCloudApiKey ?? "";
   const showElizaCloudEntry = useMemo(() => {
     if (elizaCloudConnected) {
@@ -261,7 +319,7 @@ export function StartupShell() {
           </div>
         )}
 
-        {/* Server chooser — only on splash phase */}
+        {/* Server chooser + content packs — only on splash phase */}
         {isSplash &&
           (!splashLoaded ? (
             <button
@@ -273,16 +331,25 @@ export function StartupShell() {
               {t("startupshell.Loading", { defaultValue: "Loading..." })}
             </button>
           ) : (
-            <SplashServerChooser
-              discoveryLoading={discoveryLoading}
-              gateways={discoveredGateways}
-              showElizaCloudEntry={showElizaCloudEntry}
-              t={t}
-              onCreateLocal={handleCreateLocal}
-              onManualConnect={handleManualConnect}
-              onUseElizaCloud={handleUseElizaCloud}
-              onConnectGateway={handleConnectGateway}
-            />
+            <>
+              <SplashContentPacks
+                packs={bundledPacks}
+                activePackId={activePackId}
+                t={t}
+                onSelectPack={handleSelectPack}
+                onLoadCustomPack={handleLoadCustomPack}
+              />
+              <SplashServerChooser
+                discoveryLoading={discoveryLoading}
+                gateways={discoveredGateways}
+                showElizaCloudEntry={showElizaCloudEntry}
+                t={t}
+                onCreateLocal={handleCreateLocal}
+                onManualConnect={handleManualConnect}
+                onUseElizaCloud={handleUseElizaCloud}
+                onConnectGateway={handleConnectGateway}
+              />
+            </>
           ))}
       </div>
     </div>

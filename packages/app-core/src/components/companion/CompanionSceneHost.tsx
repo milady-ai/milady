@@ -158,6 +158,7 @@ function CompanionSceneSurface({
   const {
     selectedVrmIndex,
     customVrmUrl,
+    customWorldUrl,
     uiTheme,
     tab,
     companionVrmPowerMode,
@@ -404,8 +405,9 @@ function CompanionSceneSurface({
       ? getVrmPreviewUrl(safeSelectedVrmIndex)
       : getVrmPreviewUrl(1);
   const teleportKey = vrmPath;
-  const worldUrl =
-    uiTheme === "dark"
+  const worldUrl = customWorldUrl
+    ? customWorldUrl
+    : uiTheme === "dark"
       ? resolveAppAssetUrl("worlds/companion-night.spz")
       : resolveAppAssetUrl("worlds/companion-day.spz");
   const [teleportCompletedKey, setTeleportCompletedKey] = useState<
