@@ -127,10 +127,7 @@ import {
   type UiShellMode,
   type UiTheme,
 } from "./internal";
-import {
-  detectExistingOnboardingConnection,
-  resolveStartupWithoutRestoredConnection,
-} from "./onboarding-bootstrap";
+import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
 import { deriveUiShellModeForTab } from "./shell-routing";
 import { TranslationProvider, useTranslation } from "./TranslationContext";
 import type { InventoryChainFilters } from "./types";
