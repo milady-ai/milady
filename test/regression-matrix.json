@@ -98,11 +98,7 @@
     },
     "desktop-packaged-windows": {
       "tier": "heavy",
-      "command": "& (Join-Path $PWD \"apps/app/electrobun/scripts/smoke-test-windows.ps1\")",
-      "requiredSnippets": [
-        "-ArtifactsDir (Join-Path $PWD \"apps/app/electrobun/artifacts\")",
-        "-BuildDir (Join-Path $PWD \"apps/app/electrobun/build\")"
-      ]
+      "command": "bun run test:desktop:packaged:windows"
     },
     "desktop-playwright": {
       "tier": "heavy",

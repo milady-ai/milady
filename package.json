@@ -130,7 +130,7 @@
     "test:desktop:contract": "cd apps/app/electrobun && bun run test",
     "test:desktop:packaged": "bash apps/app/electrobun/scripts/smoke-test.sh",
     "test:desktop:packaged:unsigned": "SKIP_SIGNATURE_CHECK=1 ELECTROBUN_SKIP_CODESIGN=1 bash apps/app/electrobun/scripts/smoke-test.sh",
-    "test:desktop:packaged:windows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run-windows-smoke-launcher.ps1 apps/app/electrobun/scripts/smoke-test-windows.ps1",
+    "test:desktop:packaged:windows": "pwsh -File apps/app/electrobun/scripts/smoke-test-windows.ps1",
     "test:desktop:playwright": "node scripts/run-desktop-playwright.mjs",
     "test:desktop:playwright:windows": "cd apps/app && bunx playwright test --config playwright.electrobun.packaged.config.ts test/electrobun-packaged/electrobun-windows-startup.e2e.spec.ts",
     "test:e2e": "bunx vitest run --config vitest.e2e.config.ts --exclude packages/agent/test/anvil-contracts.e2e.test.ts --exclude packages/agent/test/apps-e2e.e2e.test.ts",

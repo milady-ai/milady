@@ -72,10 +72,6 @@ const WINDOWS_PACKAGED_BOOTSTRAP_HELPER_PATH = path.join(
   ROOT,
   "apps/app/test/electrobun-packaged/windows-bootstrap.ts",
 );
-const WINDOWS_PACKAGED_ENV_HELPER_PATH = path.join(
-  ROOT,
-  "apps/app/test/electrobun-packaged/windows-test-env.ts",
-);
 const INNO_BUILD_SCRIPT_PATH = path.join(ROOT, "packaging/inno/build-inno.ps1");
 const INNO_TEMPLATE_PATH = path.join(ROOT, "packaging/inno/Milady.iss");
 const MSIX_BUILD_SCRIPT_PATH = path.join(ROOT, "packaging/msix/build-msix.ps1");
@@ -652,7 +648,9 @@ describe("Electrobun release workflow drift", () => {
     expect(smokeScript).toContain(
       '$startupSessionId = "milady-windows-smoke-"',
     );
-    expect(smokeScript).toContain("$startupStateFile = Join-Path $tempRoot");
+    expect(smokeScript).toContain(
+      "$startupStateFile = Join-Path $env:RUNNER_TEMP",
+    );
     expect(smokeScript).toContain(
       '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
     );
@@ -742,18 +740,9 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain('MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"');
     expect(workflow).toContain("MILADY_TEST_WINDOWS_INSTALL_DIR: C:\\mi");
     expect(workflow).toContain(
-      '& (Join-Path $PWD "apps/app/electrobun/scripts/smoke-test-windows.ps1")',
-    );
-    expect(workflow).toContain(
-      '-ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts")',
-    );
-    expect(workflow).toContain(
-      '-BuildDir (Join-Path $PWD "apps/app/electrobun/build")',
-    );
-    expect(workflow).toContain(
       'Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"',
     );
-    expect(workflow).not.toContain(
+    expect(workflow).toContain(
       'Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."',
     );
   });
@@ -771,61 +760,16 @@ describe("Electrobun release workflow drift", () => {
 
     expect(workflow).toContain("name: Collect Windows smoke diagnostics");
     expect(workflow).toContain("name: Upload Windows smoke diagnostics");
-    expect(workflow).toContain("$env:MILADY_TEST_WINDOWS_APPDATA_PATH");
-    expect(workflow).toContain("$env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH");
     expect(workflow).toContain(
-      'Join-Path $appDataRoot "Milady\\\\milady-startup.log"',
+      'Join-Path $env:APPDATA "Milady\\\\milady-startup.log"',
     );
     expect(workflow).toContain(
-      'Join-Path $localAppDataRoot "com.miladyai.milady"',
+      'Join-Path $env:LOCALAPPDATA "com.miladyai.milady"',
     );
     expect(workflow).toContain(
       "path: apps/app/electrobun/artifacts/windows-smoke-diagnostics/**",
     );
     expect(workflow).not.toContain("env.USERPROFILE }}\\.config\\Milady");
-  });
-
-  it("defaults Windows smoke runs to the stable runner profile unless explicit overrides are provided, while still exporting the chosen backend port", () => {
-    const smokeScript = fs.readFileSync(WINDOWS_SMOKE_PATH, "utf8");
-
-    expect(smokeScript).toContain("MILADY_TEST_WINDOWS_APPDATA_PATH");
-    expect(smokeScript).toContain("MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH");
-    expect(smokeScript).toContain(
-      "$defaultUserProfile = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) {",
-    );
-    expect(smokeScript).toContain(
-      "$defaultAppDataRoot = if (-not [string]::IsNullOrWhiteSpace($env:APPDATA)) {",
-    );
-    expect(smokeScript).toContain(
-      'Join-Path $defaultUserProfile "AppData\\\\Roaming"',
-    );
-    expect(smokeScript).toContain(
-      "$defaultLocalAppDataRoot = if (-not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {",
-    );
-    expect(smokeScript).toContain(
-      'Join-Path $defaultUserProfile "AppData\\\\Local"',
-    );
-    expect(smokeScript).toContain("$env:APPDATA = $testAppDataRoot");
-    expect(smokeScript).toContain("$env:LOCALAPPDATA = $testLocalAppDataRoot");
-    expect(smokeScript).toContain(
-      'Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_APPDATA_PATH=$($env:APPDATA)"',
-    );
-    expect(smokeScript).toContain(
-      'Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH=$($env:LOCALAPPDATA)"',
-    );
-    expect(smokeScript).toContain(
-      '$selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"',
-    );
-    expect(smokeScript).toContain("function Resolve-BackendPort");
-    expect(smokeScript).toContain('$env:MILADY_API_PORT = "$BackendPort"');
-    expect(smokeScript).toContain('$env:ELIZA_API_PORT = "$BackendPort"');
-    expect(smokeScript).toContain('$env:ELIZA_PORT = "$BackendPort"');
-    expect(smokeScript).toContain("$smokeCompletedSuccessfully = $false");
-    expect(smokeScript).toContain("$curlExitCode = $LASTEXITCODE");
-    expect(smokeScript).toContain(
-      'if ($smokeCompletedSuccessfully) {',
-    );
-    expect(smokeScript).toContain("$global:LASTEXITCODE = 0");
   });
 
   it("runs and uploads a clean Windows installer proof artifact on every release build", () => {
@@ -925,9 +869,6 @@ describe("Electrobun release workflow drift", () => {
     );
     expect(workflow).toContain("bun run test:desktop:playwright");
     expect(workflow).toContain('MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"');
-    expect(workflow).toContain(
-      "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
-    );
     expect(workflow).not.toContain(
       "name: Install Playwright Chromium (Windows)",
     );
@@ -945,29 +886,14 @@ describe("Electrobun release workflow drift", () => {
       WINDOWS_PACKAGED_BOOTSTRAP_HELPER_PATH,
       "utf8",
     );
-    const windowsEnvHelper = fs.readFileSync(
-      WINDOWS_PACKAGED_ENV_HELPER_PATH,
-      "utf8",
-    );
 
-    expect(windowsPackagedTest).toContain('from "./windows-test-env"');
-    expect(windowsPackagedTest).toContain("createPackagedWindowsAppEnv({");
-    expect(windowsPackagedTest).toContain("apiBase: api.baseUrl");
-    expect(windowsPackagedTest).toContain("appData: userDataDir");
+    expect(windowsPackagedTest).toContain(
+      "MILADY_DESKTOP_TEST_API_BASE: api.baseUrl",
+    );
     expect(windowsPackagedTest).toContain('from "./windows-bootstrap"');
     expect(windowsPackagedTest).toContain(
       "hasPackagedRendererBootstrapRequests(api.requests)",
     );
-    expect(windowsEnvHelper).toContain(
-      "MILADY_DESKTOP_TEST_API_BASE: args.apiBase",
-    );
-    expect(windowsEnvHelper).toContain('MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"');
-    expect(windowsEnvHelper).toContain('ELECTROBUN_CONSOLE: "1"');
-    expect(windowsEnvHelper).toContain('"MILADY_RENDERER_URL"');
-    expect(windowsEnvHelper).toContain('"VITE_DEV_SERVER_URL"');
-    expect(windowsEnvHelper).toContain("for (const key of STRIPPED_ENV_KEYS)");
-    expect(windowsEnvHelper).toContain("APPDATA: args.appData");
-    expect(windowsEnvHelper).not.toContain("LOCALAPPDATA: args.localAppData");
     expect(windowsBootstrapHelper).toContain('"/api/status"');
     expect(windowsBootstrapHelper).toContain('"/api/config"');
     expect(windowsBootstrapHelper).toContain('"/api/drop/status"');
@@ -1009,34 +935,5 @@ describe("Electrobun release workflow drift", () => {
     expect(catchIndex).toBeGreaterThan(-1);
     const serverOnlyIndex = elizaSource.indexOf("serverOnly", catchIndex);
     expect(serverOnlyIndex).toBeGreaterThan(catchIndex);
-  });
-
-  it("regression matrix desktop-packaged-windows uses direct pwsh invocation with required path snippets", () => {
-    const REGRESSION_MATRIX_PATH = path.join(
-      ROOT,
-      "test/regression-matrix.json",
-    );
-    const matrix = JSON.parse(fs.readFileSync(REGRESSION_MATRIX_PATH, "utf8"));
-    const suite = matrix.suites["desktop-packaged-windows"];
-
-    // Command must use direct & invocation, not bun run wrapper
-    expect(suite.command).toContain(
-      '& (Join-Path $PWD "apps/app/electrobun/scripts/smoke-test-windows.ps1")',
-    );
-
-    // Required snippets must pin both artifact and build dir args
-    expect(suite.requiredSnippets).toContain(
-      '-ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts")',
-    );
-    expect(suite.requiredSnippets).toContain(
-      '-BuildDir (Join-Path $PWD "apps/app/electrobun/build")',
-    );
-
-    // The workflow must contain the command and all required snippets
-    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
-    expect(workflow).toContain(suite.command);
-    for (const snippet of suite.requiredSnippets) {
-      expect(workflow).toContain(snippet);
-    }
   });
 });

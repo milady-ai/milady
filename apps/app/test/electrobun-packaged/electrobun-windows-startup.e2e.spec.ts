@@ -8,7 +8,6 @@ import { expect, test } from "@playwright/test";
 
 import { type MockApiServer, startMockApiServer } from "./mock-api";
 import { hasPackagedRendererBootstrapRequests } from "./windows-bootstrap";
-import { createPackagedWindowsAppEnv } from "./windows-test-env";
 
 const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -208,11 +207,12 @@ test("packaged Windows app bootstraps the renderer against the external API over
 
     appProcess = spawn(executablePath, [], {
       cwd: path.dirname(executablePath),
-      env: createPackagedWindowsAppEnv({
-        baseEnv: process.env,
-        apiBase: api.baseUrl,
-        appData: userDataDir,
-      }),
+      env: {
+        ...process.env,
+        MILADY_DESKTOP_TEST_API_BASE: api.baseUrl,
+        // Redirect the Roaming AppData so it doesn't pollute the dev machine's real AppData
+        APPDATA: userDataDir,
+      },
       stdio: ["ignore", "pipe", "pipe"],
     });
     processLogs = collectProcessLogs(appProcess);
@@ -274,9 +274,6 @@ test("packaged Windows app bootstraps the renderer against the external API over
       .catch(() => undefined);
     await fs
       .rm(userDataDir, { recursive: true, force: true })
-      .catch(() => undefined);
-    await fs
-      .rm(localUserDataDir, { recursive: true, force: true })
       .catch(() => undefined);
   }
 });
