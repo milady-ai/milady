@@ -496,6 +496,25 @@ export function buildPluginListResponse(runtime: AgentRuntime | null): {
   return { plugins: pluginList };
 }
 
+/**
+ * Env var keys that must never be written via plugin config, even if a
+ * plugin declares them as parameters. Overwriting these would let an
+ * attacker escalate privileges, redirect loopback calls, or leak secrets.
+ */
+const PLUGIN_CONFIG_DENYLIST = new Set([
+  "MILADY_API_TOKEN",
+  "ELIZA_API_TOKEN",
+  "EVM_PRIVATE_KEY",
+  "SOLANA_PRIVATE_KEY",
+  "NODE_OPTIONS",
+  "NODE_PATH",
+  "LD_PRELOAD",
+  "DYLD_INSERT_LIBRARIES",
+  "MILADY_API_PORT",
+  "ELIZA_PORT",
+  "ELIZAOS_CLOUD_API_KEY",
+]);
+
 function validateCompatPluginConfig(
   plugin: CompatPluginRecord,
   config: Record<string, unknown>,
@@ -510,6 +529,14 @@ function validateCompatPluginConfig(
   const values: Record<string, string> = {};
 
   for (const [key, rawValue] of Object.entries(config)) {
+    if (PLUGIN_CONFIG_DENYLIST.has(key)) {
+      errors.push({
+        field: key,
+        message: `${key} cannot be set via plugin config (security-sensitive).`,
+      });
+      continue;
+    }
+
     const parameter = paramMap.get(key);
     if (!parameter) {
       errors.push({
