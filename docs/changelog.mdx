@@ -3,6 +3,25 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-07-09" description="Week of July 3–9; Windows desktop stability, onboarding reliability, startup hardening" tags={["Update", "Fix"]}>
+
+## Updates
+
+- **Windows desktop startup stabilized** — The Windows desktop app now starts reliably on first boot. A series of fixes isolated the bootstrap webview session, preventing profile data conflicts that could cause the app to hang or fail to render after installation.
+- **Onboarding configuration streamlined** — The [onboarding wizard](/guides/beginners-user-guide) now writes your hosting and provider choices to a single canonical location during setup. Previously, settings could be saved in multiple places, occasionally causing configuration drift after completing onboarding.
+- **Startup gateway reliability** — Startup now restores your previous server connection and provider state more reliably. If your last session used [Eliza Cloud](/guides/cloud), the app reconnects without requiring you to re-select your provider.
+
+## Bug fixes
+
+- Fixed the Windows desktop app hanging on first boot when the port probe timed out during startup
+- Fixed the Windows packaged app failing to render the UI due to a bootstrap session conflict with the main webview
+- Fixed the Windows app clearing saved browser data on every launch, which could reset login state
+- Fixed Eliza Cloud login state not persisting correctly when cloud services were configured but not yet explicitly enabled
+- Fixed startup occasionally dropping your active server connection when restoring from a previous session
+- Fixed provider selection resetting after restarting when cloud inference was active but the legacy config format had not been migrated
+
+</Update>
+
 <Update label="2026-07-02" description="Week of June 26 – July 2; plugin config forms, Discord commands, cloud hardening" tags={["Feature", "Update", "Fix"]}>
 ## Chat-driven plugin configuration
 
