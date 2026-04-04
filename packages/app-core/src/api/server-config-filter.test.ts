@@ -67,11 +67,13 @@ describe("filterConfigEnvForResponse", () => {
     const filtered = filterConfigEnvForResponse(original);
 
     // Original untouched
-    expect(
-      (original.env as Record<string, string>).EVM_PRIVATE_KEY,
-    ).toBe("0xdeadbeef");
+    expect((original.env as Record<string, string>).EVM_PRIVATE_KEY).toBe(
+      "0xdeadbeef",
+    );
     // Filtered has it removed
-    expect((filtered.env as Record<string, unknown>).EVM_PRIVATE_KEY).toBeUndefined();
+    expect(
+      (filtered.env as Record<string, unknown>).EVM_PRIVATE_KEY,
+    ).toBeUndefined();
     // Non-env fields preserved
     expect(filtered.other).toBe("preserved");
   });
@@ -83,12 +85,16 @@ describe("filterConfigEnvForResponse", () => {
 
   it("returns config as-is when env is not an object", () => {
     const config = { env: "not-an-object" };
-    expect(filterConfigEnvForResponse(config as Record<string, unknown>)).toEqual(config);
+    expect(
+      filterConfigEnvForResponse(config as Record<string, unknown>),
+    ).toEqual(config);
   });
 
   it("returns config as-is when env is an array", () => {
     const config = { env: ["a", "b"] };
-    expect(filterConfigEnvForResponse(config as Record<string, unknown>)).toEqual(config);
+    expect(
+      filterConfigEnvForResponse(config as Record<string, unknown>),
+    ).toEqual(config);
   });
 
   it("handles empty env object", () => {
