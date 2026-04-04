@@ -578,29 +578,15 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
 
   const advanceOnboarding = useCallback(
     async (options?: OnboardingNextOptions) => {
-      if (onboardingStep === "launch") {
+      const nextStep = resolveOnboardingNextStep(onboardingStep);
+
+      if (!nextStep) {
+        // Last step (providers) — finish onboarding and go to chat
         await handleOnboardingFinish();
         return;
       }
 
-      if (onboardingStep === "permissions") {
-        if (options?.allowPermissionBypass) {
-          if (options.skipTask) addDeferredOnboardingTask(options.skipTask);
-          // Don't finish yet — advance to the next step
-        }
-      }
-
-      let nextStep = resolveOnboardingNextStep(onboardingStep);
-
-      // Skip voice provider selection if they set up Eliza Cloud
-      if (nextStep === "voice" && onboardingServerTarget === "elizacloud") {
-        nextStep = resolveOnboardingNextStep(nextStep);
-      }
-
       if (nextStep) {
-        if (nextStep === "hosting") {
-          applyResetConnectionWizardToHostingStep();
-        }
         setOnboardingStep(nextStep);
         setOnboardingActiveGuide(
           onboardingMode === "advanced"
@@ -611,7 +597,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
     },
     [
       addDeferredOnboardingTask,
-      applyResetConnectionWizardToHostingStep,
       handleOnboardingFinish,
       onboardingDetectedProviders,
       onboardingMode,
@@ -630,17 +615,9 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
   // ── revertOnboarding / handleOnboardingBack ──────────────────────
 
   const revertOnboarding = useCallback(() => {
-    let previousStep = resolveOnboardingPreviousStep(onboardingStep);
-
-    // Skip voice provider selection if they set up Eliza Cloud
-    if (previousStep === "voice" && onboardingServerTarget === "elizacloud") {
-      previousStep = resolveOnboardingPreviousStep(previousStep);
-    }
+    const previousStep = resolveOnboardingPreviousStep(onboardingStep);
 
     if (!previousStep) return;
-    if (previousStep === "hosting") {
-      applyResetConnectionWizardToHostingStep();
-    }
     setOnboardingStep(previousStep);
     setOnboardingActiveGuide(
       onboardingMode === "advanced"
@@ -648,7 +625,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
         : null,
     );
   }, [
-    applyResetConnectionWizardToHostingStep,
     onboardingMode,
     onboardingStep,
     onboardingServerTarget,
@@ -663,9 +639,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
   const handleOnboardingJumpToStep = useCallback(
     (target: OnboardingStep) => {
       if (!canRevertOnboardingTo({ current: onboardingStep, target })) return;
-      if (target === "hosting") {
-        applyResetConnectionWizardToHostingStep();
-      }
       setOnboardingStep(target);
       setOnboardingActiveGuide(
         onboardingMode === "advanced"
@@ -674,7 +647,6 @@ export function useOnboardingCallbacks(deps: OnboardingCallbacksDeps) {
       );
     },
     [
-      applyResetConnectionWizardToHostingStep,
       onboardingMode,
       onboardingStep,
       setOnboardingStep,

@@ -120,6 +120,7 @@ function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
     isMac,
+    browserEnabled: false,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
     agentReady: isAgentReady(),
@@ -746,9 +747,8 @@ async function createMainWindow(): Promise<BrowserWindow> {
     x: state.x,
     y: state.y,
   };
-  const browserWindowOptions = {
+  const browserWindowOptions: Record<string, unknown> = {
     title: "Milady",
-    // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
     icon: resolveDesktopAppIconPath(),
     url: rendererUrl,
     preload,
@@ -764,11 +764,11 @@ async function createMainWindow(): Promise<BrowserWindow> {
     // The packaged Windows bootstrap probe only needs to validate renderer
     // startup against an external API override. An in-memory partition avoids
     // depending on CEF persistent profile creation in that harness.
-    // @ts-expect-error — partition is a valid Electrobun option not yet typed
     browserWindowOptions.partition = mainWindowPartition;
   }
 
-  const win = new BrowserWindow(browserWindowOptions);
+  // icon and partition are valid Electrobun options not yet in WindowOptionsType
+  const win = new BrowserWindow(browserWindowOptions as never);
 
   // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);

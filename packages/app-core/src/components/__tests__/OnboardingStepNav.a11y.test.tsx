@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => ({
-    onboardingStep: "hosting",
+    onboardingStep: "providers",
     handleOnboardingJumpToStep: vi.fn(),
     t: (key: string, params?: Record<string, unknown>) => {
       if (params) return `${key}(${JSON.stringify(params)})`;
@@ -36,14 +36,9 @@ vi.mock("../../../onboarding/flow", () => ({
       subtitle: "onboarding.stepSub.identity",
     },
     {
-      id: "hosting",
-      name: "onboarding.stepName.hosting",
-      subtitle: "onboarding.stepSub.hosting",
-    },
-    {
-      id: "activate",
-      name: "onboarding.stepName.activate",
-      subtitle: "onboarding.stepSub.activate",
+      id: "providers",
+      name: "onboarding.stepName.providers",
+      subtitle: "onboarding.stepSub.providers",
     },
   ],
 }));
@@ -67,10 +62,10 @@ describe("OnboardingStepNav accessibility", () => {
     await act(async () => {
       tree = TestRenderer.create(<OnboardingStepNav />);
     });
-    // "hosting" is current (index=1), "identity" is done (clickable → Button),
-    // "hosting" and "activate" are non-clickable → li
+    // "providers" is current (index=1), "identity" is done (clickable → Button),
+    // "providers" is non-clickable → li
     const items = tree?.root.findAll((node) => node.type === "li");
-    expect(items?.length).toBeGreaterThanOrEqual(2); // hosting (active) + activate (future)
+    expect(items?.length).toBeGreaterThanOrEqual(1); // providers (active)
   });
 
   it("marks the active step with aria-current=step", async () => {
@@ -92,8 +87,8 @@ describe("OnboardingStepNav accessibility", () => {
     const hiddenDots = tree?.root.findAll(
       (node) => node.props["aria-hidden"] === "true",
     );
-    // One aria-hidden dot per step (3 total)
-    expect(hiddenDots?.length).toBeGreaterThanOrEqual(3);
+    // One aria-hidden dot per step (2 total)
+    expect(hiddenDots?.length).toBeGreaterThanOrEqual(2);
   });
 
   it("completed steps have aria-label on the button", async () => {

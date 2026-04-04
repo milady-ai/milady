@@ -83,7 +83,7 @@ describe("inferOnboardingResumeStep", () => {
     ).toBe("providers");
   });
 
-  it("resumes at hosting when partial routing config already exists", () => {
+  it("resumes at providers when partial routing config already exists", () => {
     expect(
       inferOnboardingResumeStep({
         config: {
@@ -92,7 +92,7 @@ describe("inferOnboardingResumeStep", () => {
           },
         },
       }),
-    ).toBe("hosting");
+    ).toBe("providers");
   });
 });
 

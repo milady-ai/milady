@@ -235,23 +235,28 @@ const mockUpdaterApplyUpdate = electrobunBun.Updater.applyUpdate as ReturnType<
 >;
 const mockSessionFromPartition = electrobunBun.Session
   .fromPartition as ReturnType<typeof vi.fn>;
-const mockBrowserView = electrobunBun.BrowserView as ReturnType<typeof vi.fn>;
+const mockBrowserView = electrobunBun.BrowserView as unknown as ReturnType<
+  typeof vi.fn
+>;
 const mockBrowserWindow = (
-  electrobunBun.default as { BrowserWindow: ReturnType<typeof vi.fn> }
+  electrobunBun.default as unknown as {
+    BrowserWindow: ReturnType<typeof vi.fn>;
+  }
 ).BrowserWindow;
-const mockTray = electrobunBun.Tray as ReturnType<typeof vi.fn>;
+const mockTray = electrobunBun.Tray as unknown as ReturnType<typeof vi.fn>;
 const mockElectrobunEventsOn = (
-  electrobunBun.default as {
+  electrobunBun.default as unknown as {
     events: { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> };
   }
 ).events.on;
 const mockElectrobunEventsOff = (
-  electrobunBun.default as {
+  electrobunBun.default as unknown as {
     events: { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> };
   }
 ).events.off;
-const mockSpawn = (globalThis as { Bun: { spawn: ReturnType<typeof vi.fn> } })
-  .Bun.spawn;
+const mockSpawn = (
+  globalThis as unknown as { Bun: { spawn: ReturnType<typeof vi.fn> } }
+).Bun.spawn;
 const mockIsAppActive = macEffects.isAppActive as ReturnType<typeof vi.fn>;
 const mockMakeKeyAndOrderFront = macEffects.makeKeyAndOrderFront as ReturnType<
   typeof vi.fn
@@ -911,13 +916,17 @@ describe("DesktopManager", () => {
       };
       const restoreWindow = vi.fn(() => {
         manager.setMainWindow(
-          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+          restoredWindow as unknown as Parameters<
+            DesktopManager["setMainWindow"]
+          >[0],
         );
       });
 
       manager.setRestoreMainWindowCallback(restoreWindow);
       manager.setMainWindow(
-        staleWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+        staleWindow as unknown as Parameters<
+          DesktopManager["setMainWindow"]
+        >[0],
       );
 
       await manager.showWindow();
@@ -939,7 +948,9 @@ describe("DesktopManager", () => {
       };
       const restoreWindow = vi.fn(() => {
         manager.setMainWindow(
-          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+          restoredWindow as unknown as Parameters<
+            DesktopManager["setMainWindow"]
+          >[0],
         );
       });
 
@@ -980,7 +991,9 @@ describe("DesktopManager", () => {
       };
       const restoreWindow = vi.fn(() => {
         manager.setMainWindow(
-          restoredWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+          restoredWindow as unknown as Parameters<
+            DesktopManager["setMainWindow"]
+          >[0],
         );
       });
 
@@ -1039,7 +1052,7 @@ describe("DesktopManager", () => {
 
       mockIsAppActive.mockReturnValue(false);
       manager.setMainWindow(
-        fakeWindow as Parameters<DesktopManager["setMainWindow"]>[0],
+        fakeWindow as unknown as Parameters<DesktopManager["setMainWindow"]>[0],
       );
 
       await vi.advanceTimersByTimeAsync(600);

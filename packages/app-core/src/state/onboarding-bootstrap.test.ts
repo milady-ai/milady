@@ -153,21 +153,11 @@ describe("resolveStartupWithoutRestoredConnection", () => {
     ).toEqual({ kind: "onboarding" });
   });
 
-  it("surfaces a recoverable startup error for previously onboarded users", () => {
+  it("allows re-onboarding for previously onboarded users when backend is gone", () => {
     expect(
       resolveStartupWithoutRestoredConnection({
         hadPersistedOnboardingCompletion: true,
       }),
-    ).toEqual({
-      kind: "startup-error",
-      error: {
-        reason: "backend-unreachable",
-        phase: "starting-backend",
-        message:
-          "No reusable backend connection was found for this previously onboarded app.",
-        detail:
-          "Local onboarding state is preserved so setup does not restart unexpectedly. Retry after the backend is reachable again.",
-      },
-    });
+    ).toEqual({ kind: "onboarding" });
   });
 });

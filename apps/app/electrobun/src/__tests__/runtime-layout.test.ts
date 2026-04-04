@@ -44,7 +44,7 @@ describe("runtime-layout", () => {
       "win32",
       {
         existsSync: (filePath) => {
-          calls.push(filePath);
+          calls.push(String(filePath));
           return (
             filePath === "C:\\mi\\resources\\app\\bun\\preload.js" ||
             filePath === "C:\\mi\\Resources\\app\\bun\\preload.js"

@@ -188,14 +188,12 @@ export default defineConfig({
       "packages/agent/src/**/*.test.tsx",
       "packages/agent/test/**/*.test.ts",
       "packages/agent/test/**/*.test.tsx",
-      // app-core: globs (not single files) so colocated *.test.tsx and harness
-      // suites under packages/app-core/test/{state,runtime,...} run in CI.
-      // WHY: omitting test/** silently dropped new suites; listing one TSX path
-      // rotted when files moved. E2E under app-core/test is excluded below.
+      // app-core src-colocated tests run here; test/ harness suites run in
+      // the app-unit config (apps/app/vitest.config.ts) which provides the
+      // correct @miladyai/app-core alias resolution. Running both in parallel
+      // causes file-system race conditions on shared test fixtures.
       "packages/app-core/src/**/*.test.ts",
       "packages/app-core/src/**/*.test.tsx",
-      "packages/app-core/test/**/*.test.ts",
-      "packages/app-core/test/**/*.test.tsx",
       "packages/plugin-wechat/src/**/*.test.ts",
       "src/**/*.test.ts",
       "scripts/**/*.test.ts",
@@ -215,8 +213,6 @@ export default defineConfig({
       // E2E lives under test/ too; run it via vitest.e2e.config.ts, not unit.
       "**/*.e2e.test.ts",
       "**/*.e2e.test.tsx",
-      "packages/app-core/test/**/*.e2e.test.ts",
-      "packages/app-core/test/**/*.e2e.test.tsx",
     ],
     coverage: {
       provider: "v8",

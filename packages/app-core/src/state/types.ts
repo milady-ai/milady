@@ -93,13 +93,7 @@ export interface NavigationEventsApi {
   scheduleAfterTabCommit: (fn: () => void) => void;
 }
 
-export type OnboardingStep =
-  | "identity"
-  | "hosting"
-  | "providers"
-  | "voice"
-  | "permissions"
-  | "launch";
+export type OnboardingStep = "identity" | "providers";
 
 export interface OnboardingStepMeta {
   id: OnboardingStep;
@@ -107,7 +101,7 @@ export interface OnboardingStepMeta {
   subtitle: string;
 }
 
-/** Unified 6-step onboarding flow — identity is first (cloud login is on the splash page). */
+/** 2-step onboarding flow — server selection is on the splash page, permissions are lazy. */
 export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
   {
     id: "identity",
@@ -115,29 +109,9 @@ export const ONBOARDING_STEPS: OnboardingStepMeta[] = [
     subtitle: "onboarding.stepSub.identity",
   },
   {
-    id: "hosting",
-    name: "onboarding.stepName.hosting",
-    subtitle: "onboarding.stepSub.hosting",
-  },
-  {
     id: "providers",
     name: "onboarding.stepName.providers",
     subtitle: "onboarding.stepSub.providers",
-  },
-  {
-    id: "voice",
-    name: "onboarding.stepName.voice",
-    subtitle: "onboarding.stepSub.voice",
-  },
-  {
-    id: "permissions",
-    name: "onboarding.stepName.permissions",
-    subtitle: "onboarding.stepSub.permissions",
-  },
-  {
-    id: "launch",
-    name: "onboarding.stepName.launch",
-    subtitle: "onboarding.stepSub.launch",
   },
 ];
 

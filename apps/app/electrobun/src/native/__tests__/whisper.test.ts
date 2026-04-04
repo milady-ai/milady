@@ -56,8 +56,9 @@ import {
 // Typed references to the mocked functions
 const existsSyncFn = nodeFs.existsSync as ReturnType<typeof vi.fn>;
 const writeFileSyncFn = nodeFs.writeFileSync as ReturnType<typeof vi.fn>;
-const mockSpawn = (globalThis as { Bun: { spawn: ReturnType<typeof vi.fn> } })
-  .Bun.spawn;
+const mockSpawn = (
+  globalThis as unknown as { Bun: { spawn: ReturnType<typeof vi.fn> } }
+).Bun.spawn;
 
 // ---------------------------------------------------------------------------
 // Helpers

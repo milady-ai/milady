@@ -3,6 +3,7 @@ import {
   resolveStylePresetByAvatarIndex,
   resolveStylePresetById,
 } from "@miladyai/shared/onboarding-presets";
+import { asRecord } from "../state/config-readers";
 import { PREMADE_VOICES } from "./types";
 
 const DEFAULT_ELEVENLABS_MODEL_ID = "eleven_flash_v2_5";
@@ -17,12 +18,6 @@ const LEGACY_CHARACTER_VOICE_PRESET_IDS: Record<string, string> = {
   satoshi: "brian",
   yuki: "lily",
 };
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function readString(
   record: Record<string, unknown> | null,

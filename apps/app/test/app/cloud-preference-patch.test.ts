@@ -259,6 +259,7 @@ describe("cloud preference patch", () => {
         cloud: {
           enabled: false,
           inferenceMode: "byok",
+          services: { inference: false },
         },
         agents: {
           defaults: {

@@ -1,8 +1,11 @@
+import type fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   resolveDesktopBundleVersion,
   shouldResetWindowsCefProfile,
 } from "../windows-cef-profile";
+
+type ExistsSyncLike = Pick<typeof fs, "existsSync" | "readFileSync">;
 
 describe("resolveDesktopBundleVersion", () => {
   it("prefers packaged Windows Resources/version.json", () => {
@@ -11,15 +14,15 @@ describe("resolveDesktopBundleVersion", () => {
       "C:\\mi\\bin\\bun.exe",
       "win32",
       {
-        existsSync: (filePath) =>
+        existsSync: (filePath: string) =>
           filePath === "C:\\mi\\Resources\\version.json",
-        readFileSync: (filePath) => {
+        readFileSync: (filePath: string) => {
           if (filePath !== "C:\\mi\\Resources\\version.json") {
             throw new Error(`unexpected path: ${filePath}`);
           }
           return JSON.stringify({ version: "2.0.0-alpha.87" });
         },
-      },
+      } as unknown as ExistsSyncLike,
     );
 
     expect(version).toBe("2.0.0-alpha.87");
@@ -31,15 +34,15 @@ describe("resolveDesktopBundleVersion", () => {
       "/usr/local/bin/bun",
       "darwin",
       {
-        existsSync: (filePath) =>
+        existsSync: (filePath: string) =>
           filePath === "/repo/apps/app/electrobun/package.json",
-        readFileSync: (filePath) => {
+        readFileSync: (filePath: string) => {
           if (filePath !== "/repo/apps/app/electrobun/package.json") {
             throw new Error(`unexpected path: ${filePath}`);
           }
           return JSON.stringify({ version: "2.0.0-dev" });
         },
-      },
+      } as unknown as ExistsSyncLike,
     );
 
     expect(version).toBe("2.0.0-dev");

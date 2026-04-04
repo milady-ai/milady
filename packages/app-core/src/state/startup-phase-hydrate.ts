@@ -30,7 +30,70 @@ import {
 import { shouldStartAtCharacterSelectOnLaunch } from "./shell-routing";
 import { resolveApiUrl } from "../utils";
 import type { StartupEvent } from "./startup-coordinator";
-import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
+import type { AgentStatus, WalletAddresses } from "../api";
+import type { OnboardingMode } from "./types";
+
+export interface HydratingDeps {
+  setStartupError: (v: null) => void;
+  setOnboardingLoading: (v: boolean) => void;
+  hydrateInitialConversationState: () => Promise<string | null>;
+  requestGreetingWhenRunningRef: React.RefObject<
+    (convId: string) => Promise<void>
+  >;
+  loadWorkbench: () => Promise<void>;
+  loadPlugins: () => Promise<void>;
+  loadSkills: () => Promise<void>;
+  loadCharacter: () => Promise<void>;
+  loadWalletConfig: () => Promise<void>;
+  loadInventory: () => Promise<void>;
+  loadUpdateStatus: (force?: boolean) => Promise<void>;
+  checkExtensionStatus: () => Promise<void>;
+  pollCloudCredits: () => void;
+  fetchAutonomyReplay: () => Promise<void>;
+  setSelectedVrmIndex: (v: number) => void;
+  setCustomVrmUrl: (v: string) => void;
+  setCustomBackgroundUrl: (v: string) => void;
+  setWalletAddresses: (v: WalletAddresses) => void;
+  setTab: (t: Tab) => void;
+  setTabRaw: (t: Tab) => void;
+  onboardingCompletionCommittedRef: React.MutableRefObject<boolean>;
+  initialTabSetRef: React.MutableRefObject<boolean>;
+  onboardingMode: OnboardingMode;
+}
+
+export interface ReadyPhaseDeps {
+  setAgentStatusIfChanged: (v: AgentStatus) => void;
+  setPendingRestart: (v: boolean | ((prev: boolean) => boolean)) => void;
+  setPendingRestartReasons: (
+    v: string[] | ((prev: string[]) => string[]),
+  ) => void;
+  setSystemWarnings: (v: string[] | ((prev: string[]) => string[])) => void;
+  showRestartBanner: () => void;
+  setPtySessions: (
+    v:
+      | CodingAgentSession[]
+      | ((prev: CodingAgentSession[]) => CodingAgentSession[]),
+  ) => void;
+  setTabRaw: (t: Tab) => void;
+  setConversationMessages: (
+    v:
+      | ConversationMessage[]
+      | ((prev: ConversationMessage[]) => ConversationMessage[]),
+  ) => void;
+  setUnreadConversations: (
+    v: Set<string> | ((prev: Set<string>) => Set<string>),
+  ) => void;
+  setConversations: (
+    v: Conversation[] | ((prev: Conversation[]) => Conversation[]),
+  ) => void;
+  appendAutonomousEvent: (event: StreamEventEnvelope) => void;
+  notifyHeartbeatEvent: (event: StreamEventEnvelope) => void;
+  loadPlugins: () => Promise<void>;
+  pollCloudCredits: () => void;
+  activeConversationIdRef: React.RefObject<string | null>;
+  elizaCloudPollInterval: React.MutableRefObject<number | null>;
+  elizaCloudLoginPollTimer: React.MutableRefObject<number | null>;
+}
 
 function normalizeAppEmoteEvent(
   data: Record<string, unknown>,
@@ -71,7 +134,7 @@ const DEFAULT_LANDING_TAB: Tab = COMPANION_ENABLED ? "companion" : "chat";
  * Dispatches HYDRATION_COMPLETE when done.
  */
 export async function runHydrating(
-  deps: StartupCoordinatorDeps,
+  deps: HydratingDeps,
   dispatch: (event: StartupEvent) => void,
   cancelled: { current: boolean },
 ): Promise<void> {
@@ -80,7 +143,6 @@ export async function runHydrating(
 
   deps.setStartupError(null);
   const greetConvId = await deps.hydrateInitialConversationState();
-  deps.setStartupPhase("ready");
   deps.setOnboardingLoading(false);
   if (greetConvId) void deps.requestGreetingWhenRunningRef.current(greetConvId);
 
@@ -167,7 +229,7 @@ export async function runHydrating(
  * Should be called once when the coordinator first reaches "ready".
  */
 export function bindReadyPhase(
-  depsRef: React.MutableRefObject<StartupCoordinatorDeps | undefined>,
+  depsRef: React.MutableRefObject<ReadyPhaseDeps | undefined>,
 ): () => void {
   let ptyPollInterval: ReturnType<typeof setInterval> | null = null;
   let handleVis: (() => void) | null = null;

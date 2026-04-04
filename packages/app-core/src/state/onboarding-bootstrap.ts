@@ -107,24 +107,13 @@ export async function detectExistingOnboardingConnection(args: {
   return result === timeoutToken ? null : result;
 }
 
-export function resolveStartupWithoutRestoredConnection(args: {
+export function resolveStartupWithoutRestoredConnection(_args: {
   hadPersistedOnboardingCompletion: boolean;
 }): StartupWithoutConnectionResolution {
-  if (!args.hadPersistedOnboardingCompletion) {
-    return { kind: "onboarding" };
-  }
-
-  return {
-    kind: "startup-error",
-    error: {
-      reason: "backend-unreachable",
-      phase: "starting-backend",
-      message:
-        "No reusable backend connection was found for this previously onboarded app.",
-      detail:
-        "Local onboarding state is preserved so setup does not restart unexpectedly. Retry after the backend is reachable again.",
-    },
-  };
+  // Always allow re-onboarding. Even if the user previously completed setup,
+  // a missing backend means we should let them reconnect rather than showing
+  // a dead-end error screen.
+  return { kind: "onboarding" };
 }
 
 export function deriveDetectedProviderPrefill(

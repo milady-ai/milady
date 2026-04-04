@@ -40,10 +40,10 @@ describe("Electrobun startup bootstrap", () => {
   it("validates the built preload before creating the BrowserWindow", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
     const validateIndex = source.indexOf(
-      "preload = readResolvedPreloadScript(import.meta.dir);",
+      "readResolvedPreloadScript(import.meta.dir)",
     );
     const browserWindowIndex = source.indexOf(
-      "const win = new BrowserWindow(browserWindowOptions);",
+      "new BrowserWindow(",
       validateIndex,
     );
 

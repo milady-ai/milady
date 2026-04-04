@@ -54,10 +54,7 @@ describe("onboarding completion through coordinator", () => {
     state = startupReducer(state, { type: "SPLASH_CONTINUE" });
     expect(state.phase).toBe("restoring-session");
 
-    state = startupReducer(state, {
-      type: "NO_SESSION",
-      hadPriorOnboarding: false,
-    });
+    state = startupReducer(state, { type: "NO_SESSION" });
     expect(state.phase).toBe("onboarding-required");
 
     state = startupReducer(state, { type: "ONBOARDING_COMPLETE" });

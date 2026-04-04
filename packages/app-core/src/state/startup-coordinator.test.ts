@@ -115,10 +115,7 @@ describe("StartupCoordinator", () => {
   describe("first-run — no session, no prior onboarding", () => {
     it("goes straight to onboarding-required (offline)", () => {
       let state: StartupState = { phase: "restoring-session" };
-      state = startupReducer(state, {
-        type: "NO_SESSION",
-        hadPriorOnboarding: false,
-      });
+      state = startupReducer(state, { type: "NO_SESSION" });
       expect(state).toEqual({
         phase: "onboarding-required",
         serverReachable: false,
@@ -127,16 +124,13 @@ describe("StartupCoordinator", () => {
   });
 
   describe("stale session — prior onboarding but backend gone", () => {
-    it("goes to error with backend-unreachable", () => {
+    it("allows re-onboarding instead of dead-end error", () => {
       let state: StartupState = { phase: "restoring-session" };
-      state = startupReducer(state, {
-        type: "NO_SESSION",
-        hadPriorOnboarding: true,
+      state = startupReducer(state, { type: "NO_SESSION" });
+      expect(state).toEqual({
+        phase: "onboarding-required",
+        serverReachable: false,
       });
-      expect(state.phase).toBe("error");
-      if (state.phase === "error") {
-        expect(state.reason).toBe("backend-unreachable");
-      }
     });
   });
 
@@ -351,6 +345,12 @@ describe("StartupCoordinator", () => {
         ready,
       );
       expect(startupReducer(ready, { type: "RETRY" })).toBe(ready);
+    });
+
+    it("RESET from ready returns to splash for re-onboarding", () => {
+      const ready: StartupState = { phase: "ready" };
+      const next = startupReducer(ready, { type: "RESET" });
+      expect(next).toEqual(INITIAL_STARTUP_STATE);
     });
   });
 });

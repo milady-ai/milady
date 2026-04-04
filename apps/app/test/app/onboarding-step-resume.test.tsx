@@ -318,7 +318,7 @@ describe("AppProvider onboarding step resume", () => {
       const resumeStep = inferOnboardingResumeStep({
         config: normalizedConfig,
       });
-      expect(["senses", "welcome", "cloud_login"]).toContain(resumeStep);
+      expect(["senses", "welcome", "cloud_login", "identity", "hosting", "providers"]).toContain(resumeStep);
       expect(
         deriveOnboardingResumeFieldsFromConfig(normalizedConfig),
       ).toMatchObject({
@@ -365,9 +365,9 @@ describe("AppProvider onboarding step resume", () => {
       await flushEffects();
 
       const snap = api?.getSnapshot();
-      // Older app-core versions start at "wakeUp"; newer versions start at
-      // "welcome". Both represent a fresh onboarding entry point.
-      expect(["wakeUp", "welcome", "cloud_login"]).toContain(
+      // The first onboarding step varies by version: "wakeUp", "welcome",
+      // "cloud_login", or "identity". All represent a fresh entry point.
+      expect(["wakeUp", "welcome", "cloud_login", "identity"]).toContain(
         snap?.onboardingStep,
       );
       expect(snap?.onboardingServerTarget).toBe("");

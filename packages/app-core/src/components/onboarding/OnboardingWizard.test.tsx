@@ -25,9 +25,9 @@ vi.mock("@miladyai/app-core/state", () => ({
   applyUiTheme: vi.fn(),
   ONBOARDING_STEPS: [
     {
-      id: "hosting",
-      name: "onboarding.stepName.hosting",
-      subtitle: "onboarding.stepSub.hosting",
+      id: "providers",
+      name: "onboarding.stepName.providers",
+      subtitle: "onboarding.stepSub.providers",
     },
   ],
   useApp: () => mockUseApp(),
@@ -98,7 +98,7 @@ describe("OnboardingWizard", () => {
 
   it("keeps the day scene and light tokens when the UI theme is light", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "providers",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",
@@ -126,7 +126,7 @@ describe("OnboardingWizard", () => {
 
   it("uses the night scene and dark tokens when the UI theme is dark", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "providers",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",
@@ -155,7 +155,7 @@ describe("OnboardingWizard", () => {
 
   it("does not render the legacy corner decoration svgs", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "providers",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",
@@ -179,7 +179,7 @@ describe("OnboardingWizard", () => {
 
   it("uses the shared header language trigger class in onboarding", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "providers",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",
@@ -210,7 +210,7 @@ describe("OnboardingWizard", () => {
 
   it("bottom-aligns the non-identity onboarding chrome container", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "providers",
       selectedVrmIndex: 1,
       customVrmUrl: "",
       uiLanguage: "en",
@@ -297,7 +297,7 @@ describe("OnboardingWizard", () => {
 
     it("reveals non-welcome onboarding steps after a shorter fallback delay", async () => {
       mockUseApp.mockReturnValue({
-        onboardingStep: "hosting",
+        onboardingStep: "providers",
         selectedVrmIndex: 1,
         customVrmUrl: "",
         uiLanguage: "en",

@@ -39,21 +39,16 @@ import { OnboardingStepNav } from "./OnboardingStepNav";
 describe("OnboardingStepNav", () => {
   it("uses the compact mobile nav spacing that keeps the step rail lower", async () => {
     mockUseApp.mockReturnValue({
-      onboardingStep: "hosting",
+      onboardingStep: "providers",
       handleOnboardingJumpToStep: vi.fn(),
       t: (key: string) => key,
     });
     mockUseBranding.mockReturnValue({ cloudOnly: false });
     mockGetOnboardingNavMetas.mockReturnValue([
       {
-        id: "cloud_login",
-        name: "onboarding.stepName.cloud",
-        subtitle: "onboarding.stepSub.cloud",
-      },
-      {
-        id: "hosting",
-        name: "onboarding.stepName.hosting",
-        subtitle: "onboarding.stepSub.hosting",
+        id: "identity",
+        name: "onboarding.stepName.identity",
+        subtitle: "onboarding.stepSub.identity",
       },
       {
         id: "providers",

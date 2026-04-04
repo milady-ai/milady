@@ -212,12 +212,12 @@ export function StartupShell() {
   }
 
   return (
-    <div className="flex items-center justify-center h-full w-full bg-[#ffe600] text-black overflow-hidden">
+    <div className="flex items-center justify-center h-full w-full bg-white text-black overflow-hidden">
       <img
         src="/splash-bg.png"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full object-contain object-right-bottom opacity-40"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
       />
       <div
         className="relative z-10 flex flex-col items-center gap-5 px-6 text-center w-full"

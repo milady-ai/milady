@@ -320,13 +320,10 @@ export function ConnectionStep() {
   ]);
 
   useEffect(() => {
-    const isProviderScreen =
-      spec.screen === "providerGrid" || spec.screen === "providerDetail";
-    const desiredStep = isProviderScreen ? "providers" : "hosting";
-    if (onboardingStep !== desiredStep) {
-      setState("onboardingStep", desiredStep);
+    if (onboardingStep !== "providers") {
+      setState("onboardingStep", "providers");
     }
-  }, [onboardingStep, setState, spec.screen]);
+  }, [onboardingStep, setState]);
 
   const shared: ConnectionUiSharedProps = {
     dispatch: dispatchConnection,

@@ -72,6 +72,7 @@ describe("app public bundle assets", () => {
       "favicon.ico",
       "og-image.png",
       "site.webmanifest",
+      "splash-bg.png",
       ...animationFiles,
       "vrm-decoders/draco/draco_decoder.js",
       "vrm-decoders/draco/draco_decoder.wasm",

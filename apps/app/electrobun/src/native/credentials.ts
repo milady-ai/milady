@@ -277,7 +277,7 @@ function scanEnvCredentials(): DetectedProvider[] {
       results.push({
         id: providerId,
         source: "env",
-        apiKey: includeValue === false ? undefined : value.trim(),
+        apiKey: includeValue === false ? undefined : value?.trim(),
         authMode,
         cliInstalled: false,
         status: "unchecked",

@@ -23,8 +23,85 @@ import {
 } from "./persistence";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
 import type { StartupEvent, PlatformPolicy } from "./startup-coordinator";
-import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
 import type { RestoringSessionCtx } from "./startup-phase-restore";
+import type { OnboardingOptions } from "../api";
+import type { OnboardingStep } from "./types";
+import type { UiLanguage } from "../i18n";
+
+export interface PollingBackendDeps {
+  setStartupError: (v: StartupErrorState | null) => void;
+  setAuthRequired: (v: boolean) => void;
+  setOnboardingComplete: (v: boolean) => void;
+  setOnboardingLoading: (v: boolean) => void;
+  setOnboardingOptions: (v: OnboardingOptions) => void;
+  setOnboardingStep: (v: OnboardingStep) => void;
+  setOnboardingServerTarget: (
+    v: "" | "local" | "remote" | "elizacloud",
+  ) => void;
+  setOnboardingCloudApiKey: (v: string) => void;
+  setOnboardingProvider: (v: string) => void;
+  setOnboardingVoiceProvider: (v: string) => void;
+  setOnboardingApiKey: (v: string) => void;
+  setOnboardingPrimaryModel: (v: string) => void;
+  setOnboardingOpenRouterModel: (v: string) => void;
+  setOnboardingRemoteConnected: (v: boolean) => void;
+  setOnboardingRemoteApiBase: (v: string) => void;
+  setOnboardingRemoteToken: (v: string) => void;
+  setOnboardingSmallModel: (v: string) => void;
+  setOnboardingLargeModel: (v: string) => void;
+  setPairingEnabled: (v: boolean) => void;
+  setPairingExpiresAt: (v: number | null) => void;
+  applyDetectedProviders: (
+    detected: Awaited<ReturnType<typeof scanProviderCredentials>>,
+  ) => void;
+  onboardingCompletionCommittedRef: React.MutableRefObject<boolean>;
+  uiLanguage: UiLanguage;
+}
+
+/** Apply resume fields derived from a partial config to the onboarding state. */
+function applyOnboardingResumeFields(
+  rf: ReturnType<typeof deriveOnboardingResumeFieldsFromConfig>,
+  deps: Pick<
+    PollingBackendDeps,
+    | "setOnboardingServerTarget"
+    | "setOnboardingCloudApiKey"
+    | "setOnboardingProvider"
+    | "setOnboardingVoiceProvider"
+    | "setOnboardingApiKey"
+    | "setOnboardingPrimaryModel"
+    | "setOnboardingOpenRouterModel"
+    | "setOnboardingRemoteConnected"
+    | "setOnboardingRemoteApiBase"
+    | "setOnboardingRemoteToken"
+    | "setOnboardingSmallModel"
+    | "setOnboardingLargeModel"
+  >,
+): void {
+  if (rf.onboardingServerTarget !== undefined)
+    deps.setOnboardingServerTarget(rf.onboardingServerTarget);
+  if (rf.onboardingCloudApiKey !== undefined)
+    deps.setOnboardingCloudApiKey(rf.onboardingCloudApiKey);
+  if (rf.onboardingProvider !== undefined)
+    deps.setOnboardingProvider(rf.onboardingProvider);
+  if (rf.onboardingVoiceProvider !== undefined)
+    deps.setOnboardingVoiceProvider(rf.onboardingVoiceProvider);
+  if (rf.onboardingApiKey !== undefined)
+    deps.setOnboardingApiKey(rf.onboardingApiKey);
+  if (rf.onboardingPrimaryModel !== undefined)
+    deps.setOnboardingPrimaryModel(rf.onboardingPrimaryModel);
+  if (rf.onboardingOpenRouterModel !== undefined)
+    deps.setOnboardingOpenRouterModel(rf.onboardingOpenRouterModel);
+  if (rf.onboardingRemoteConnected !== undefined)
+    deps.setOnboardingRemoteConnected(rf.onboardingRemoteConnected);
+  if (rf.onboardingRemoteApiBase !== undefined)
+    deps.setOnboardingRemoteApiBase(rf.onboardingRemoteApiBase);
+  if (rf.onboardingRemoteToken !== undefined)
+    deps.setOnboardingRemoteToken(rf.onboardingRemoteToken);
+  if (rf.onboardingSmallModel !== undefined)
+    deps.setOnboardingSmallModel(rf.onboardingSmallModel);
+  if (rf.onboardingLargeModel !== undefined)
+    deps.setOnboardingLargeModel(rf.onboardingLargeModel);
+}
 
 /**
  * Runs the polling-backend phase.
@@ -41,7 +118,7 @@ import type { RestoringSessionCtx } from "./startup-phase-restore";
  * @param tidRef - Mutable ref for the pending setTimeout handle (for cleanup)
  */
 export async function runPollingBackend(
-  deps: StartupCoordinatorDeps,
+  deps: PollingBackendDeps,
   dispatch: (event: StartupEvent) => void,
   policy: PlatformPolicy,
   ctx: RestoringSessionCtx | null,
@@ -108,7 +185,6 @@ export async function runPollingBackend(
         deps.setAuthRequired(true);
         deps.setPairingEnabled(auth.pairingEnabled);
         deps.setPairingExpiresAt(auth.expiresAt);
-        deps.setStartupPhase("ready");
         deps.setOnboardingLoading(false);
         dispatch({ type: "BACKEND_AUTH_REQUIRED" });
         return;
@@ -161,7 +237,6 @@ export async function runPollingBackend(
               client.getConfig().catch(() => null),
             ]);
             if (deps.onboardingCompletionCommittedRef.current) {
-              deps.setStartupPhase("ready");
               deps.setOnboardingLoading(false);
               dispatch({ type: "ONBOARDING_COMPLETE" });
               return;
@@ -180,38 +255,13 @@ export async function runPollingBackend(
                 if (det.length > 0) deps.applyDetectedProviders(det);
               } catch {}
             }
-            if (rf.onboardingServerTarget !== undefined) {
-              deps.setOnboardingServerTarget(rf.onboardingServerTarget);
-            }
-            if (rf.onboardingCloudApiKey !== undefined)
-              deps.setOnboardingCloudApiKey(rf.onboardingCloudApiKey);
-            if (rf.onboardingProvider !== undefined)
-              deps.setOnboardingProvider(rf.onboardingProvider);
-            if (rf.onboardingVoiceProvider !== undefined)
-              deps.setOnboardingVoiceProvider(rf.onboardingVoiceProvider);
-            if (rf.onboardingApiKey !== undefined)
-              deps.setOnboardingApiKey(rf.onboardingApiKey);
-            if (rf.onboardingPrimaryModel !== undefined)
-              deps.setOnboardingPrimaryModel(rf.onboardingPrimaryModel);
-            if (rf.onboardingOpenRouterModel !== undefined)
-              deps.setOnboardingOpenRouterModel(rf.onboardingOpenRouterModel);
-            if (rf.onboardingRemoteConnected !== undefined)
-              deps.setOnboardingRemoteConnected(rf.onboardingRemoteConnected);
-            if (rf.onboardingRemoteApiBase !== undefined)
-              deps.setOnboardingRemoteApiBase(rf.onboardingRemoteApiBase);
-            if (rf.onboardingRemoteToken !== undefined)
-              deps.setOnboardingRemoteToken(rf.onboardingRemoteToken);
-            if (rf.onboardingSmallModel !== undefined)
-              deps.setOnboardingSmallModel(rf.onboardingSmallModel);
-            if (rf.onboardingLargeModel !== undefined)
-              deps.setOnboardingLargeModel(rf.onboardingLargeModel);
+            applyOnboardingResumeFields(rf, deps);
             deps.setOnboardingStep(
               inferOnboardingResumeStep({
                 persistedStep: loadPersistedOnboardingStep(),
                 config,
               }),
             );
-            deps.setStartupPhase("ready");
             deps.setOnboardingLoading(false);
             dispatch({
               type: "BACKEND_REACHED",
@@ -225,7 +275,6 @@ export async function runPollingBackend(
               deps.setAuthRequired(true);
               deps.setPairingEnabled(latestAuth.pairingEnabled);
               deps.setPairingExpiresAt(latestAuth.expiresAt);
-              deps.setStartupPhase("ready");
               deps.setOnboardingLoading(false);
               dispatch({ type: "BACKEND_AUTH_REQUIRED" });
               return;
@@ -253,7 +302,6 @@ export async function runPollingBackend(
         deps.setAuthRequired(true);
         deps.setPairingEnabled(latestAuth.pairingEnabled);
         deps.setPairingExpiresAt(latestAuth.expiresAt);
-        deps.setStartupPhase("ready");
         deps.setOnboardingLoading(false);
         dispatch({ type: "BACKEND_AUTH_REQUIRED" });
         return;
