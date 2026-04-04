@@ -25,6 +25,48 @@ function isLinux(): boolean {
   return process.platform === "linux";
 }
 
+/**
+ * Write a password to the macOS Keychain via stdin to avoid argv exposure.
+ * The `security add-generic-password` command reads from stdin when `-w`
+ * is the last argument with no value. It prompts twice (password + retype),
+ * so we write the value twice separated by a newline.
+ */
+function keychainSetViaStdin(
+  args: string[],
+  password: string,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn("security", args, {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stderr = "";
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      reject(
+        Object.assign(
+          new Error(stderr.trim() || `security exited ${code}`),
+          { stderr, code },
+        ),
+      );
+    });
+    // Swallow EPIPE if security exits before reading stdin (e.g. arg error).
+    // Without this, Node emits an unhandled error and may crash the process.
+    child.stdin.on("error", () => {});
+    // Write password twice (password + retype) then close stdin
+    child.stdin.write(`${password}\n${password}\n`, () => {
+      child.stdin.end();
+    });
+  });
+}
+
 function secretToolStoreWithStdin(
   args: string[],
   secretLine: string,
@@ -149,26 +191,19 @@ class MacOSKeychainPlatformSecureStore implements PlatformSecureStore {
   ): Promise<SecureStoreSetResult> {
     const account = keychainAccountForSecretKind(vaultId, kind);
     try {
-      // KNOWN LIMITATION: macOS `security add-generic-password` only accepts the
-      // password via `-w <value>` argv — briefly visible to same-user processes
-      // via `ps`. The Linux path uses stdin (secretToolStoreWithStdin). This is
-      // still a net improvement over plaintext keys in ~/.eliza/eliza.json.
-      //
-      // TODO: Replace with Security.framework via Bun FFI or a Swift helper
-      // binary to eliminate argv exposure entirely. Track: milady-ai/milady#TBD
-      await execFileAsync(
-        "security",
+      // Pass password via stdin instead of argv to avoid exposure via `ps`.
+      // The `-w` flag (last, with no value) triggers stdin read mode.
+      await keychainSetViaStdin(
         [
           "add-generic-password",
           "-s",
           MILADY_AGENT_VAULT_SERVICE,
           "-a",
           account,
-          "-w",
-          value,
           "-U",
+          "-w",
         ],
-        { encoding: "utf8" },
+        value,
       );
       return { ok: true };
     } catch (err: unknown) {
