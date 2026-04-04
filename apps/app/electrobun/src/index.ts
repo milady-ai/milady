@@ -10,6 +10,7 @@ import Electrobun, {
   ApplicationMenu,
   BrowserView,
   BrowserWindow,
+  BuildConfig,
   Updater,
   Utils,
   WGPU,
@@ -29,7 +30,11 @@ import {
 } from "./application-menu";
 import { showBackgroundNoticeOnce } from "./background-notice";
 import { readNavigationEventUrl } from "./cloud-auth-window";
-import { resolveMainWindowPartition } from "./main-window-session";
+import {
+  resolveBootstrapShellRenderer,
+  resolveBootstrapViewRenderer,
+  resolveMainWindowPartition,
+} from "./main-window-session";
 import {
   buildMainMenuResetApiCandidates,
   pickReachableMenuResetApiBase,
@@ -70,6 +75,7 @@ import type { SendToWebview } from "./types.js";
 import {
   resolveDesktopBundleVersion,
   shouldResetWindowsCefProfile,
+  shouldWriteWindowsCefProfileMarker,
 } from "./windows-cef-profile";
 
 type HeartbeatMenuTriggerSummary = {
@@ -278,14 +284,15 @@ async function resetMiladyFromApplicationMenu(): Promise<void> {
       },
       pushEmbeddedApiBaseToRenderer: (port, apiToken) => {
         if (currentWindow) {
-          pushApiBaseToRenderer(
-            currentWindow,
-            resolveRendererFacingApiBase(
-              process.env as Record<string, string | undefined>,
-              port,
-            ),
-            apiToken,
-          );
+          const base = port
+            ? resolveRendererFacingApiBase(
+                process.env as Record<string, string | undefined>,
+                port,
+              )
+            : initialApiBase;
+          if (base) {
+            pushApiBaseToRenderer(currentWindow, base, apiToken);
+          }
         }
       },
       getLocalApiAuthToken: () => configureDesktopLocalApiAuth(),
@@ -766,13 +773,9 @@ async function createMainWindow(): Promise<BrowserWindow> {
     );
   }
 
-  // Load persisted window state
   const statePath = path.join(Utils.paths.userData, "window-state.json");
   const state = loadWindowState(statePath);
 
-  // Read the pre-built webview bridge preload (built by `bun run build:preload`).
-  // The preload runs in the webview context after Electrobun's built-in preload,
-  // setting up Milady's direct Electrobun RPC bridge on the window.
   let preload: string;
   try {
     preload = readResolvedPreloadScript(import.meta.dir);
@@ -792,10 +795,8 @@ async function createMainWindow(): Promise<BrowserWindow> {
   const transparent = process.platform === "darwin";
 
   let win: BrowserWindow;
-  if (mainWindowPartition) {
-    // BrowserWindow always creates a default BrowserView. For the packaged
-    // Windows bootstrap probe, force that throwaway view to stay native so the
-    // real CEF renderer can boot inside an explicit isolated partition.
+  if (process.platform === "win32" && mainWindowPartition) {
+    const buildInfo = await BuildConfig.get();
     win = new BrowserWindow({
       title: "Milady",
       // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
@@ -803,15 +804,16 @@ async function createMainWindow(): Promise<BrowserWindow> {
       url: null,
       preload: null,
       frame: windowFrame,
-      renderer: "native",
+      renderer: resolveBootstrapShellRenderer(buildInfo),
       titleBarStyle,
       transparent,
     });
     win.webview.remove();
     const mainView = new BrowserView({
       url: rendererUrl,
+      // @ts-expect-error: BrowserView preload exists at runtime but is not typed yet.
       preload,
-      renderer: "cef",
+      renderer: resolveBootstrapViewRenderer(buildInfo),
       partition: mainWindowPartition,
       frame: {
         x: 0,
@@ -830,19 +832,12 @@ async function createMainWindow(): Promise<BrowserWindow> {
       url: rendererUrl,
       preload,
       frame: windowFrame,
-      // hiddenInset hides the title bar and insets traffic lights — macOS only.
-      // On Windows/Linux use the default title bar so the window remains draggable.
       titleBarStyle,
-      // Transparent background for vibrancy — macOS only.
-      // On Windows/Linux a solid background prevents rendering artifacts.
       transparent,
     });
   }
 
-  // Apply native macOS vibrancy, shadow, and traffic light positioning
   applyMacOSWindowEffects(win);
-
-  // Persist window state on resize and move
   win.on("resize", () => scheduleStateSave(statePath, win));
   win.on("move", () => scheduleStateSave(statePath, win));
 
@@ -1627,8 +1622,11 @@ async function main(): Promise<void> {
         // No marker — first run or pre-fix install.
       }
       if (
-        shouldResetWindowsCefProfile(previousVersion, currentVersion) &&
-        fs.existsSync(cefDir)
+        shouldResetWindowsCefProfile({
+          currentVersion,
+          previousVersion,
+          cefDirExists: fs.existsSync(cefDir),
+        })
       ) {
         console.log(
           `[Main] CEF version mismatch (${previousVersion ?? "none"} → ${currentVersion}), clearing stale CEF profile`,
@@ -1645,7 +1643,7 @@ async function main(): Promise<void> {
         }
       }
       // Write/update version marker so we don't clear again on next launch.
-      if (currentVersion !== "unknown") {
+      if (shouldWriteWindowsCefProfileMarker(currentVersion)) {
         fs.mkdirSync(cefDir, { recursive: true });
         fs.writeFileSync(cefVersionMarker, currentVersion);
       }

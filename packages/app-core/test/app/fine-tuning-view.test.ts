@@ -352,9 +352,6 @@ describe("FineTuningView", () => {
     await flush();
 
     const root = tree?.root;
-    try {
-      console.log("TREE DUMP:", JSON.stringify(tree?.toJSON(), null, 2));
-    } catch {}
     const limitInput = findInputByPlaceholder(root, "Limit");
     const minCallsInput = findInputByPlaceholder(root, "Min LLM");
     await act(async () => {

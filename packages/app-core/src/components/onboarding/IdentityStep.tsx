@@ -13,20 +13,20 @@ import {
   resolveCompatApiToken,
 } from "../../utils/api-request";
 import { resolveApiUrl } from "../../utils/asset-url";
+import { PREMADE_VOICES } from "../../voice/types";
 import {
   CharacterRoster,
   type CharacterRosterEntry,
   resolveRosterEntries,
 } from "../character/CharacterRoster";
 import { resolveCharacterGreetingAnimation } from "../character/character-greeting";
-import {
-  getOnboardingVoicePreviewBlob,
-  preloadOnboardingCharacterAssets,
-} from "./onboarding-asset-preload";
+import { buildPreviewTtsRequestPlans } from "./identity-preview-tts";
 
 import {
   OnboardingStepHeader,
+  onboardingBodyTextShadowStyle,
   onboardingFooterClass,
+  onboardingLinkActionClass,
   onboardingPrimaryActionClass,
   onboardingPrimaryActionTextShadowStyle,
   onboardingSecondaryActionClass,
@@ -35,6 +35,7 @@ import {
 } from "./onboarding-step-chrome";
 
 const IMPORT_AGENT_FETCH_TIMEOUT_MS = 60_000;
+const PREVIEW_TTS_FETCH_TIMEOUT_MS = 15_000;
 
 export interface IdentityStepProps {
   /**
@@ -57,21 +58,22 @@ export function IdentityStep({
   );
   const firstEntry = entries[0];
   const selectedId = onboardingStyle || entries[0]?.id || "";
-  const selectedEntry =
-    entries.find((entry) => entry.id === selectedId) ?? firstEntry ?? null;
   const [showImport, setShowImport] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPassword, setImportPassword] = useState("");
   const [importBusy, setImportBusy] = useState(false);
-  const [_importError, setImportError] = useState<string | null>(null);
-  const [_importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const importBusyRef = useRef(false);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const previewObjectUrlRef = useRef<string | null>(null);
+  const previewAbortControllerRef = useRef<AbortController | null>(null);
   const previewRequestIdRef = useRef(0);
   const pendingPreviewEntryRef = useRef<CharacterRosterEntry | null>(null);
 
   const stopPreviewAudio = useCallback(() => {
+    previewAbortControllerRef.current?.abort();
+    previewAbortControllerRef.current = null;
     if (previewAudioRef.current) {
       previewAudioRef.current.pause();
       previewAudioRef.current = null;
@@ -104,23 +106,100 @@ export function IdentityStep({
       const catchphrase = entry.catchphrase?.trim();
       if (!catchphrase || typeof window === "undefined") return;
 
-      const audioBlob = await getOnboardingVoicePreviewBlob(entry);
-      if (!audioBlob || !isCurrentRequest()) {
-        return;
-      }
-      stopPreviewAudio();
-      const objectUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(objectUrl);
-      previewAudioRef.current = audio;
-      previewObjectUrlRef.current = objectUrl;
+      const controller = new AbortController();
+      previewAbortControllerRef.current = controller;
+
+      // Try pre-generated static voiceline first (instant, no API call).
+      // Use a relative URL — static assets are served by Vite, not the API server.
+      const lang = uiLanguage || "en";
+      const staticUrl = `/audio/onboarding/${entry.id}-${lang}.mp3`;
       try {
-        await audio.play();
-        if (isCurrentRequest()) return;
+        const staticRes = await fetchWithTimeout(
+          staticUrl,
+          { signal: controller.signal },
+          5_000,
+        );
+        if (staticRes.ok && isCurrentRequest()) {
+          const audioBlob = await staticRes.blob();
+          if (audioBlob.size && isCurrentRequest()) {
+            stopPreviewAudio();
+            const objectUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(objectUrl);
+            previewAudioRef.current = audio;
+            previewObjectUrlRef.current = objectUrl;
+            try {
+              await audio.play();
+            } catch {
+              previewAudioRef.current = null;
+              URL.revokeObjectURL(objectUrl);
+              if (previewObjectUrlRef.current === objectUrl) {
+                previewObjectUrlRef.current = null;
+              }
+            }
+            return;
+          }
+        }
       } catch {
-        previewAudioRef.current = null;
-        URL.revokeObjectURL(objectUrl);
-        if (previewObjectUrlRef.current === objectUrl) {
-          previewObjectUrlRef.current = null;
+        // Static file not available — fall through to TTS API chain
+      }
+
+      if (!isCurrentRequest()) return;
+
+      const selectedPreset = entry.voicePresetId
+        ? PREMADE_VOICES.find((voice) => voice.id === entry.voicePresetId)
+        : undefined;
+      const apiToken = resolveCompatApiToken();
+      const requestPlans = buildPreviewTtsRequestPlans({
+        text: catchphrase,
+        voiceId: selectedPreset?.voiceId,
+        // Prefer the cloud proxy first during onboarding so Eliza Cloud logins
+        // can synthesize the selected preset voice without requiring a browser key.
+        preferCloudProxy: true,
+      });
+
+      for (const plan of requestPlans) {
+        if (!isCurrentRequest()) return;
+        try {
+          const response = await fetchWithTimeout(
+            resolveApiUrl(plan.endpoint),
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "audio/mpeg",
+                ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+              },
+              body: JSON.stringify(plan.body),
+              signal: controller.signal,
+            },
+            PREVIEW_TTS_FETCH_TIMEOUT_MS,
+          );
+          if (!response.ok) {
+            continue;
+          }
+          const audioBlob = await response.blob();
+          if (!audioBlob.size || !isCurrentRequest()) {
+            return;
+          }
+          stopPreviewAudio();
+          const objectUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(objectUrl);
+          previewAudioRef.current = audio;
+          previewObjectUrlRef.current = objectUrl;
+          try {
+            await audio.play();
+            if (isCurrentRequest()) return;
+          } catch {
+            previewAudioRef.current = null;
+            URL.revokeObjectURL(objectUrl);
+            if (previewObjectUrlRef.current === objectUrl) {
+              previewObjectUrlRef.current = null;
+            }
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message === "Request aborted") {
+            return;
+          }
         }
       }
 
@@ -128,7 +207,7 @@ export function IdentityStep({
       // system voices here. If the selected preset catchphrase cannot be
       // synthesized, stay silent instead of playing the wrong line.
     },
-    [stopPreviewAudio],
+    [stopPreviewAudio, uiLanguage],
   );
 
   const handleSelect = useCallback(
@@ -164,17 +243,50 @@ export function IdentityStep({
       stopPreviewAudio,
     ],
   );
-  useEffect(() => {
-    preloadOnboardingCharacterAssets(entries, {
-      voiceEntry: selectedEntry,
-    });
-  }, [entries, selectedEntry]);
-
+  // Fresh onboarding (no pre-existing selection): auto-select first character.
   useEffect(() => {
     if (!onboardingStyle && firstEntry) {
       handleSelect(firstEntry, true);
     }
   }, [onboardingStyle, handleSelect, firstEntry]);
+
+  // Pre-existing selection: queue the preview for the teleport-complete event
+  // so the voiceline plays when the avatar is visually ready, not before.
+  // Uses a ref to capture the initial value — doesn't re-fire on user clicks.
+  const initialOnboardingStyleRef = useRef(onboardingStyle);
+  useEffect(() => {
+    const style = initialOnboardingStyleRef.current;
+    if (!style) return;
+    const entry = entries.find((e) => e.id === style);
+    if (!entry) return;
+    pendingPreviewEntryRef.current = entry;
+    // Defer dispatch so parent effects (OnboardingWizard's no-VRM bridge) mount first.
+    // Desktop: VrmStage fires TELEPORT_COMPLETE when the avatar is visible.
+    // Browser (no VRM): the bridge converts AWAIT_TELEPORT → TELEPORT_COMPLETE.
+    const rafId = requestAnimationFrame(() => {
+      if (pendingPreviewEntryRef.current === entry) {
+        dispatchWindowEvent(ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT);
+      }
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (pendingPreviewEntryRef.current === entry) {
+        pendingPreviewEntryRef.current = null;
+      }
+    };
+  }, [entries]);
+
+  // Replay voiceline when UI language changes (entries update with new catchphrases).
+  const prevLanguageRef = useRef(uiLanguage);
+  useEffect(() => {
+    if (prevLanguageRef.current === uiLanguage) return;
+    prevLanguageRef.current = uiLanguage;
+    if (!onboardingStyle) return;
+    const entry = entries.find((e) => e.id === onboardingStyle);
+    if (entry) {
+      void playSelectionPreview(entry);
+    }
+  }, [uiLanguage, onboardingStyle, entries, playSelectionPreview]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -353,6 +465,7 @@ export function IdentityStep({
       </div>
     );
   }
+  const selected = entries.find((e) => e.id === selectedId);
 
   return (
     <div

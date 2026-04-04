@@ -100,9 +100,9 @@ describe("derived style helpers", () => {
     expect(accentVar(tabFlags("wallets"))).toBe("#f0b90b");
   });
 
-  it("keeps card surfaces non-transparent in base chat shell", () => {
+  it("keeps card surfaces non-transparent in base chat shell (with pack fallback)", () => {
     const style = viewWrapperStyle(tabFlags("chat"), "#7b8fb5");
-    expect(style["--card"]).toBe("rgba(255, 255, 255, 0.05)");
+    expect(style["--card"]).toContain("rgba(255, 255, 255, 0.05)");
   });
 
   it("uses dark accent foregrounds for yellow companion tabs", () => {

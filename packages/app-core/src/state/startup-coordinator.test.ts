@@ -352,5 +352,11 @@ describe("StartupCoordinator", () => {
       );
       expect(startupReducer(ready, { type: "RETRY" })).toBe(ready);
     });
+
+    it("RESET from ready returns to splash for re-onboarding", () => {
+      const ready: StartupState = { phase: "ready" };
+      const next = startupReducer(ready, { type: "RESET" });
+      expect(next).toEqual(INITIAL_STARTUP_STATE);
+    });
   });
 });

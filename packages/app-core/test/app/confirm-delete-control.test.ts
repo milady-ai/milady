@@ -28,7 +28,7 @@ vi.mock("@miladyai/ui", () => ({
   ),
 }));
 
-import { ConfirmDeleteControl } from "@miladyai/app-core/components/confirm-delete-control";
+import { ConfirmDeleteControl } from "@miladyai/app-core/components";
 
 function createSubject(
   overrides: Partial<React.ComponentProps<typeof ConfirmDeleteControl>> = {},

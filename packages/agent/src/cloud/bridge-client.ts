@@ -197,7 +197,8 @@ export class ElizaCloudClient {
 
         for (const line of part.split("\n")) {
           if (line.startsWith("event: ")) eventType = line.slice(7).trim();
-          else if (line.startsWith("data: ")) eventData = line.slice(6);
+          else if (line.startsWith("data: "))
+            eventData += (eventData ? "\n" : "") + line.slice(6);
         }
 
         if (eventData) {

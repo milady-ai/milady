@@ -42,10 +42,15 @@ describe("chat trajectory wiring", () => {
     expect(emitIdx).toBeLessThan(handleIdx);
   });
 
-  it("does NOT manually start a trajectory (delegates to plugin)", () => {
-    // The chat route should not create its own trajectory; the logger plugin
-    // handles that off the MESSAGE_RECEIVED event.
-    expect(chatRoutesSource).not.toContain("startTrajectory(");
+  it("only falls back to manual trajectory start after MESSAGE_RECEIVED", () => {
+    const emitIdx = chatRoutesSource.indexOf('emitEvent("MESSAGE_RECEIVED"');
+    const fallbackIdx = chatRoutesSource.lastIndexOf(
+      "await ensureChatTrajectoryStep(",
+    );
+
+    expect(fallbackIdx).toBeGreaterThan(-1);
+    expect(fallbackIdx).toBeGreaterThan(emitIdx);
+    expect(chatRoutesSource).toContain("readMessageTrajectoryStepId(message)");
   });
 
   it("keeps the trajectory logger in the core plugin list", () => {

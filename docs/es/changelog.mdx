@@ -3,6 +3,79 @@ title: Registro de cambios
 description: Novedades en Milady — funcionalidades, mejoras y correcciones.
 ---
 
+<Update label="2026-07-02" description="Semana del 26 de junio al 2 de julio; formularios de configuración de plugins, comandos de Discord, refuerzo de la nube" tags={["Feature", "Update", "Fix"]}>
+<div id="chat-driven-plugin-configuration">
+## Configuración de plugins mediante chat
+</div>
+
+Tu agente ahora puede ayudarte a configurar plugins a través de la conversación. Pídele a tu agente que configure un plugin y generará un formulario interactivo directamente en el chat — sin necesidad de ir a los ajustes. El agente detecta de qué plugin estás hablando, genera los campos de configuración adecuados y aplica tus opciones al enviar. Consulta [plugins](/es/plugins/overview) para más detalles.
+
+<div id="discord-slash-commands">
+## Comandos slash de Discord
+</div>
+
+Milady ahora soporta comandos slash nativos de Discord. Esta semana se incluyen cuatro comandos — `/skill`, `/workspace`, `/shell` y `/cron` — que te permiten gestionar habilidades, espacios de trabajo, acceso al shell y tareas programadas directamente desde Discord. Un comando `/issue` con soporte de auto-visión también está disponible para crear incidencias con capturas de pantalla. Consulta el [conector de Discord](/es/connectors/discord) para la configuración.
+
+<div id="skills-marketplace-with-remote-registry">
+## Mercado de habilidades con registro remoto
+</div>
+
+Ahora puedes explorar e instalar habilidades desde un registro remoto directamente en el panel de control. El mercado de [habilidades](/es/plugins/skills) se conecta a un catálogo alojado, por lo que las nuevas habilidades contribuidas por la comunidad aparecen automáticamente sin necesidad de actualizar Milady.
+
+<div id="vincent-oauth-wallet-login">
+## Inicio de sesión con billetera Vincent OAuth
+</div>
+
+La interfaz de [billetera](/es/guides/wallet) ahora soporta inicio de sesión Vincent OAuth, proporcionándote un flujo de autenticación basado en navegador para conectar servicios de billetera sin introducir credenciales manualmente.
+
+<div id="steward-evm-signing-for-cloud-containers">
+## Firma EVM de Steward para contenedores en la nube
+</div>
+
+Los agentes desplegados en la nube ahora pueden firmar transacciones EVM a través del puente [Steward](/es/guides/wallet). Cuando un contenedor en la nube tiene Steward configurado, las operaciones y transferencias se enrutan automáticamente a través del proxy de firma con políticas — los mismos controles de seguridad disponibles en escritorio ahora funcionan en despliegues en la nube.
+
+<div id="splash-screen-with-asset-preloading">
+## Pantalla de inicio con precarga de recursos
+</div>
+
+La experiencia de inicio se ha rediseñado con una pantalla de estilo retro que precarga avatares VRM, iconos y recursos de voz en segundo plano con una barra de progreso visible. Los usuarios recurrentes omiten la pantalla automáticamente. El resultado es un tiempo de interacción más rápido sin parpadeo de contenido sin estilos ni del cargador VRM en el primer inicio.
+
+<div id="updates">
+## Actualizaciones
+</div>
+
+- **Conciencia contextual del agente** — Tu agente ahora conoce su propia configuración de modelo, estado de billetera y plugins instalados al responder preguntas, por lo que puede dar respuestas más precisas sobre sus propias capacidades.
+- **Valores predeterminados de modelos en la nube actualizados** — Los contenedores en la nube ahora usan por defecto Sonnet 4.6 y Minimax M2.7 para una mejor calidad de respuesta de serie.
+- **Búsqueda en la barra lateral de las vistas de Base de datos y Runtime** — Las vistas de [base de datos](/es/advanced/database) y runtime ahora incluyen búsqueda en la cabecera de la barra lateral, facilitando encontrar tablas y entradas en conjuntos de datos grandes.
+- **Plugins ordenados por estado** — Las listas de [plugins](/es/plugins/overview) y [conectores](/es/guides/connectors) ahora muestran los plugins listos/habilitados en la parte superior, para que puedas ver rápidamente qué está activo.
+- **Plugins agrupados por categoría** — Las listas de plugins ahora muestran etiquetas de categoría con agrupación visual, facilitando explorar colecciones grandes de plugins.
+- **Contraste del modo oscuro suavizado** — Las superficies del modo oscuro usan fondos más profundos con texto más tenue para reducir la fatiga visual durante sesiones prolongadas.
+- **Banner de reinicio movido a notificación** — El banner de "reinicio necesario" ahora es una notificación compacta en la esquina inferior derecha en lugar de una barra de ancho completo, reduciendo la interrupción visual.
+- **Explorador de tablas de base de datos expandido** — El explorador de tablas de [base de datos](/es/advanced/database) ahora llena correctamente el espacio disponible, con estados vacíos de ancho completo y manejo correcto del desbordamiento.
+- **Registro de trayectorias para la nube** — Los contenedores en la nube ahora registran datos de trayectoria, para que puedas revisar el historial de llamadas LLM en la [vista de trayectorias](/es/advanced/trajectories) para agentes desplegados en la nube.
+- **Cuenta de la nube y enrutamiento de servicios separados** — El inicio de sesión en la nube y el enrutamiento de servicios (inferencia, RPC, medios) ahora son independientes, por lo que puedes estar conectado a la nube sin enrutar todos los servicios a través de ella.
+- **Migración de configuración heredada de la nube** — Los formatos de configuración antiguos de la nube se migran automáticamente al inicio, evitando que los ajustes se ignoren silenciosamente después de una actualización.
+
+<div id="bug-fixes">
+## Correcciones de errores
+</div>
+
+- Se corrigió que los contenedores provisionados en la nube no habilitaran conocimiento, latidos ni TTS — estas funciones ahora se activan correctamente en despliegues en la nube
+- Se corrigió que los contenedores provisionados en la nube mostraran el asistente de incorporación en lugar de pasar directamente al agente — los contenedores gestionados ahora inician inmediatamente
+- Se corrigió que los contenedores en la nube reportaran un estado de conexión incorrecto después del inicio de sesión
+- Se corrigió que las instalaciones de plugins fallaran silenciosamente cuando el gestor de plugins no estaba disponible temporalmente — las instalaciones ahora reintentan y se recuperan correctamente
+- Se corrigieron los permisos de escritorio de Windows, el enrutamiento de cámara y el apagado que no funcionaban correctamente en ciertas configuraciones
+- Se corrigió la extracción tar de Electrobun que fallaba en Windows al usar Git Bash
+- Se corrigió el plugin EVM que se bloqueaba al inicio debido a una importación estática — ahora está condicionado a una marca de activación opcional
+- Se corrigió que la dirección EVM de Steward no fuera detectable por la interfaz de billetera en el primer inicio
+- Se corrigió que el inicio de sesión en la nube cerrara sesión instantáneamente debido a una condición de carrera al guardar preferencias
+- Se corrigió que el estado vacío de la vista de base de datos no llenara el ancho disponible
+- Se corrigió que el restablecimiento de personaje no limpiara las selecciones de avatar, preajuste y voz en la interfaz
+- Se corrigió que las claves API de proveedores no se cargaran desde la configuración guardada al inicio
+- Se corrigió que el runtime del agente no se reiniciara automáticamente al guardar una nueva clave API en los ajustes
+
+</Update>
+
 <Update label="2026-04-16" description="Semana del 10 al 16 de abril" tags={["Feature", "Update", "Fix"]}>
 <div id="keyboard-shortcuts-overlay">
 ## Superposición de atajos de teclado

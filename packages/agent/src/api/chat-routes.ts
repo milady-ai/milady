@@ -466,6 +466,114 @@ export async function readChatRequestPayload(
   };
 }
 
+type ChatTrajectoryLogger = {
+  isEnabled?: () => boolean;
+  setEnabled?: (enabled: boolean) => void;
+  startTrajectory?: (
+    stepIdOrAgentId: string,
+    options?: {
+      source?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ) => Promise<string>;
+  startStep?: (trajectoryId: string, envState?: Record<string, unknown>) => string;
+};
+
+function getMessageMetadata(
+  message: ReturnType<typeof createMessageMemory>,
+): Record<string, unknown> {
+  if (!message.metadata || typeof message.metadata !== "object") {
+    message.metadata = { type: "message" };
+  }
+  return message.metadata as Record<string, unknown>;
+}
+
+function readMessageTrajectoryStepId(
+  message: ReturnType<typeof createMessageMemory>,
+): string | null {
+  const metadata = message.metadata;
+  if (!metadata || typeof metadata !== "object") return null;
+  const stepId = (metadata as Record<string, unknown>).trajectoryStepId;
+  return typeof stepId === "string" && stepId.trim().length > 0
+    ? stepId.trim()
+    : null;
+}
+
+async function ensureChatTrajectoryStep(
+  runtime: AgentRuntime,
+  message: ReturnType<typeof createMessageMemory>,
+  source: string,
+): Promise<void> {
+  if (readMessageTrajectoryStepId(message)) return;
+
+  const trajectoryLogger = runtime.getService?.(
+    "trajectory_logger",
+  ) as ChatTrajectoryLogger | null;
+  if (!trajectoryLogger || typeof trajectoryLogger.startTrajectory !== "function") {
+    return;
+  }
+
+  try {
+    if (
+      typeof trajectoryLogger.isEnabled === "function" &&
+      !trajectoryLogger.isEnabled() &&
+      typeof trajectoryLogger.setEnabled === "function"
+    ) {
+      trajectoryLogger.setEnabled(true);
+    }
+
+    const metadata = getMessageMetadata(message);
+    const content = message.content as Content & {
+      channelType?: unknown;
+    };
+    const trajectoryId = await trajectoryLogger.startTrajectory(runtime.agentId, {
+      source,
+      metadata: {
+        roomId: message.roomId,
+        entityId: message.entityId,
+        messageId: message.id,
+        channelType: metadata.channelType ?? content.channelType,
+        conversationId: metadata.sessionKey,
+      },
+    });
+
+    const stepId =
+      typeof trajectoryLogger.startStep === "function"
+        ? trajectoryLogger.startStep(trajectoryId, {
+            timestamp: Date.now(),
+            agentBalance: 0,
+            agentPoints: 0,
+            agentPnL: 0,
+            openPositions: 0,
+          })
+        : trajectoryId;
+
+    if (typeof stepId === "string" && stepId.trim().length > 0) {
+      metadata.trajectoryStepId = stepId;
+      runtime.logger?.warn(
+        {
+          src: "eliza-api",
+          messageId: message.id,
+          roomId: message.roomId,
+          trajectoryId,
+          trajectoryStepId: stepId,
+        },
+        "[eliza-api] Trajectory logger fallback started a chat trajectory after MESSAGE_RECEIVED did not inject a step id",
+      );
+    }
+  } catch (err) {
+    runtime.logger?.warn(
+      {
+        err,
+        src: "eliza-api",
+        messageId: message.id,
+        roomId: message.roomId,
+      },
+      "Failed to start fallback trajectory logging for chat request",
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // generateChatResponse
 // ---------------------------------------------------------------------------
@@ -536,6 +644,8 @@ export async function generateChatResponse(
       "Failed to emit MESSAGE_RECEIVED event",
     );
   }
+
+  await ensureChatTrajectoryStep(runtime, message, messageSource);
 
   let result:
     | Awaited<
@@ -728,11 +838,23 @@ export async function generateChatResponse(
       const responseMessages = Array.isArray(result?.responseMessages)
         ? (result.responseMessages as Array<{ id?: string; content?: Content }>)
         : [];
+      const fallbackResponseContent =
+        result?.responseContent && typeof result.responseContent === "object"
+          ? (result.responseContent as Content)
+          : responseText
+            ? ({ text: responseText } as Content)
+            : null;
+      const messagesToEmit =
+        responseMessages.length > 0
+          ? responseMessages
+          : fallbackResponseContent
+            ? [{ id: crypto.randomUUID(), content: fallbackResponseContent }]
+            : [];
       if (
-        responseMessages.length > 0 &&
+        messagesToEmit.length > 0 &&
         typeof runtime.emitEvent === "function"
       ) {
-        for (const responseMessage of responseMessages) {
+        for (const responseMessage of messagesToEmit) {
           const memoryLike = {
             id: responseMessage.id ?? crypto.randomUUID(),
             roomId: message.roomId,

@@ -7,7 +7,8 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { AgentRuntime } from "@elizaos/core";
+import { getTrajectoryContext, type AgentRuntime } from "@elizaos/core";
+import { detectRuntimeModel } from "../api/agent-model";
 
 import {
   compactActionsForIntent,
@@ -16,6 +17,13 @@ import {
   compactModelPrompt,
   validateIntentActionMap,
 } from "./prompt-compaction";
+import {
+  ensureTrajectoriesTable,
+  loadTrajectoryByStepId,
+  saveTrajectory,
+  toOptionalNumber,
+  toText,
+} from "./trajectory-internals";
 
 export {
   buildFullParamActionSet,
@@ -54,6 +62,231 @@ const MILADY_ACTION_COMPACTION = (() => {
 
 // Track which runtimes have been wrapped to prevent double-installation.
 const installedRuntimes = new WeakSet<AgentRuntime>();
+const trackedTrajectoryLoggers = new WeakSet<object>();
+const trajectoryLlmLogCounts = new WeakMap<AgentRuntime, Map<string, number>>();
+
+type TrajectoryLoggerLike = {
+  logLlmCall?: (...args: unknown[]) => unknown;
+  updateLatestLlmCall?: (
+    stepId: string,
+    patch: Record<string, unknown>,
+  ) => Promise<void> | void;
+};
+
+type RuntimeWithTrajectoryService = AgentRuntime & {
+  getService?: (serviceType: string) => unknown;
+};
+
+export function shouldPreserveFullPromptForTrajectoryCapture(): boolean {
+  const stepId = getTrajectoryContext()?.trajectoryStepId;
+  return typeof stepId === "string" && stepId.trim().length > 0;
+}
+
+function extractTrajectoryStepIdFromLoggerArgs(args: unknown[]): string | null {
+  if (args.length === 0) return null;
+  const first = args[0];
+  if (typeof first === "string") {
+    const stepId = first.trim();
+    return stepId.length > 0 ? stepId : null;
+  }
+  if (!first || typeof first !== "object") return null;
+  const stepId = (first as { stepId?: unknown }).stepId;
+  return typeof stepId === "string" && stepId.trim().length > 0
+    ? stepId.trim()
+    : null;
+}
+
+function getTrajectoryLlmLogCount(runtime: AgentRuntime, stepId: string): number {
+  return trajectoryLlmLogCounts.get(runtime)?.get(stepId) ?? 0;
+}
+
+function incrementTrajectoryLlmLogCount(
+  runtime: AgentRuntime,
+  stepId: string,
+): void {
+  const counts = trajectoryLlmLogCounts.get(runtime) ?? new Map<string, number>();
+  counts.set(stepId, (counts.get(stepId) ?? 0) + 1);
+  trajectoryLlmLogCounts.set(runtime, counts);
+}
+
+function resolveTrajectoryLogger(runtime: AgentRuntime): TrajectoryLoggerLike | null {
+  const runtimeWithService = runtime as RuntimeWithTrajectoryService;
+  if (typeof runtimeWithService.getService !== "function") return null;
+  const logger = runtimeWithService.getService("trajectory_logger");
+  return logger && typeof logger === "object"
+    ? (logger as TrajectoryLoggerLike)
+    : null;
+}
+
+function ensureTrajectoryLoggerTracking(
+  runtime: AgentRuntime,
+): TrajectoryLoggerLike | null {
+  const trajectoryLogger = resolveTrajectoryLogger(runtime);
+  if (!trajectoryLogger) {
+    return trajectoryLogger;
+  }
+
+  if (typeof trajectoryLogger.updateLatestLlmCall !== "function") {
+    trajectoryLogger.updateLatestLlmCall = async (
+      stepId: string,
+      patch: Record<string, unknown>,
+    ) => {
+      const normalizedStepId = stepId.trim();
+      if (!normalizedStepId) return;
+
+      const tableReady = await ensureTrajectoriesTable(runtime);
+      if (!tableReady) return;
+
+      const trajectory = await loadTrajectoryByStepId(runtime, normalizedStepId);
+      if (!trajectory || !Array.isArray(trajectory.steps)) return;
+
+      const step =
+        [...trajectory.steps]
+          .reverse()
+          .find((candidate) => candidate.stepId === normalizedStepId) ??
+        trajectory.steps[trajectory.steps.length - 1];
+      const calls = Array.isArray(step?.llmCalls) ? step.llmCalls : [];
+      const latestCall =
+        calls.length > 0
+          ? (calls[calls.length - 1] as Record<string, unknown>)
+          : null;
+      if (!latestCall) return;
+
+      let updated = false;
+      const nextModel = toText(patch.model, "").trim();
+      const currentModel = toText(latestCall.model, "").trim();
+      if (
+        nextModel &&
+        currentModel !== nextModel &&
+        (currentModel.length === 0 ||
+          isGenericTrajectoryModel(currentModel) ||
+          !isGenericTrajectoryModel(nextModel))
+      ) {
+        latestCall.model = nextModel;
+        updated = true;
+      }
+
+      const nextSystemPrompt = toText(patch.systemPrompt, "");
+      if (!toText(latestCall.systemPrompt, "") && nextSystemPrompt) {
+        latestCall.systemPrompt = nextSystemPrompt;
+        updated = true;
+      }
+
+      const nextUserPrompt = toText(patch.userPrompt, "");
+      if (!toText(latestCall.userPrompt, "") && nextUserPrompt) {
+        latestCall.userPrompt = nextUserPrompt;
+        updated = true;
+      }
+
+      const nextResponse = toText(patch.response, "");
+      if (!toText(latestCall.response, "") && nextResponse) {
+        latestCall.response = nextResponse;
+        updated = true;
+      }
+
+      const applyMissingNumber = (key: string): void => {
+        const nextValue = toOptionalNumber(patch[key]);
+        if (nextValue === undefined) return;
+        const currentValue = toOptionalNumber(latestCall[key]);
+        if (currentValue !== undefined && currentValue > 0) return;
+        latestCall[key] = nextValue;
+        updated = true;
+      };
+
+      applyMissingNumber("temperature");
+      applyMissingNumber("maxTokens");
+      applyMissingNumber("latencyMs");
+      applyMissingNumber("promptTokens");
+      applyMissingNumber("completionTokens");
+
+      if (!updated) return;
+
+      trajectory.updatedAt = new Date().toISOString();
+      await saveTrajectory(runtime, trajectory);
+    };
+  }
+
+  if (typeof trajectoryLogger.logLlmCall !== "function") {
+    return trajectoryLogger;
+  }
+
+  const loggerObject = trajectoryLogger as object;
+  if (trackedTrajectoryLoggers.has(loggerObject)) {
+    return trajectoryLogger;
+  }
+
+  const originalLogLlmCall = trajectoryLogger.logLlmCall.bind(trajectoryLogger);
+  trajectoryLogger.logLlmCall = ((...args: unknown[]) => {
+    const stepId = extractTrajectoryStepIdFromLoggerArgs(args);
+    if (stepId) {
+      incrementTrajectoryLlmLogCount(runtime, stepId);
+    }
+    return originalLogLlmCall(...args);
+  }) as typeof trajectoryLogger.logLlmCall;
+
+  trackedTrajectoryLoggers.add(loggerObject);
+  return trajectoryLogger;
+}
+
+function stringifyTrajectoryResponse(response: unknown): string {
+  if (typeof response === "string") return response;
+  if (response == null) return "";
+  try {
+    return JSON.stringify(response);
+  } catch {
+    return String(response);
+  }
+}
+
+function estimateTokenCount(text: string): number {
+  return Math.max(1, Math.ceil(text.length / 4));
+}
+
+function isGenericTrajectoryModel(model: string): boolean {
+  const normalized = model.trim().toUpperCase();
+  return (
+    normalized.length === 0 ||
+    normalized === "UNKNOWN" ||
+    normalized.startsWith("TEXT_") ||
+    normalized.startsWith("REASONING_") ||
+    normalized.startsWith("OBJECT_")
+  );
+}
+
+function resolveTrajectoryModelLabel(
+  runtime: AgentRuntime,
+  modelType: string,
+  payloadRecord: Record<string, unknown>,
+  providerHint?: unknown,
+): string {
+  const explicitModel =
+    typeof payloadRecord.model === "string"
+      ? payloadRecord.model.trim()
+      : typeof payloadRecord.modelId === "string"
+        ? payloadRecord.modelId.trim()
+        : "";
+  if (explicitModel) {
+    return explicitModel;
+  }
+
+  const provider =
+    typeof providerHint === "string" && providerHint.trim().length > 0
+      ? providerHint.trim()
+      : typeof payloadRecord.provider === "string" &&
+          payloadRecord.provider.trim().length > 0
+        ? payloadRecord.provider.trim()
+        : "";
+  if (provider) {
+    return modelType ? `${provider}/${modelType}` : provider;
+  }
+
+  const configuredModel = detectRuntimeModel(runtime);
+  if (configuredModel && configuredModel.trim().length > 0) {
+    return configuredModel.trim();
+  }
+
+  return modelType;
+}
 
 // ---------------------------------------------------------------------------
 // Public API — install the useModel wrapper on a runtime
@@ -73,10 +306,22 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
 
   runtime.useModel = (async (...args: Parameters<typeof originalUseModel>) => {
     const modelType = String(args[0] ?? "").toUpperCase();
+    const trajectoryStepId = getTrajectoryContext()?.trajectoryStepId;
+    const normalizedTrajectoryStepId =
+      typeof trajectoryStepId === "string" && trajectoryStepId.trim().length > 0
+        ? trajectoryStepId.trim()
+        : null;
+    const trajectoryLogger = normalizedTrajectoryStepId
+      ? ensureTrajectoryLoggerTracking(runtime)
+      : null;
+    const llmLogCountBefore = normalizedTrajectoryStepId
+      ? getTrajectoryLlmLogCount(runtime, normalizedTrajectoryStepId)
+      : 0;
+    const startedAt = Date.now();
 
     const payload = args[1];
     const isTextLarge = modelType.includes("TEXT_LARGE");
-    if (!isTextLarge || !payload || typeof payload !== "object") {
+    if (!payload || typeof payload !== "object") {
       return originalUseModel(...args);
     }
 
@@ -107,65 +352,120 @@ export function installPromptOptimizations(runtime: AgentRuntime): void {
       ).catch(() => {});
     }
 
-    // --- Context-aware action compaction (when enabled) ---
-    // Strips <params> from actions not relevant to the user's intent.
-    // All action names remain visible — only param detail is stripped.
-    let workingPrompt = MILADY_ACTION_COMPACTION
-      ? compactActionsForIntent(originalPrompt)
-      : originalPrompt;
+    let rewrittenArgs = args;
 
-    // Strip coding agent examples when no coding intent is detected.
-    // These are ~4k chars of provider-injected examples that are only
-    // useful when the user is asking about code/repos/agents.
-    if (MILADY_ACTION_COMPACTION) {
-      workingPrompt = compactCodingExamplesForIntent(workingPrompt);
-      workingPrompt = compactConversationHistory(workingPrompt);
-    }
+    // Preserve exact model input while a trajectory is active so trajectory
+    // detail views and RL exports keep the full prompt instead of the
+    // compacted/debug-optimized version.
+    if (isTextLarge && !shouldPreserveFullPromptForTrajectoryCapture()) {
+      // --- Context-aware action compaction (when enabled) ---
+      // Strips <params> from actions not relevant to the user's intent.
+      // All action names remain visible — only param detail is stripped.
+      let workingPrompt = MILADY_ACTION_COMPACTION
+        ? compactActionsForIntent(originalPrompt)
+        : originalPrompt;
 
-    // --- Full prompt compaction (compact mode only) ---
-    if (MILADY_PROMPT_OPT_MODE !== "compact") {
-      if (workingPrompt !== originalPrompt) {
-        if (MILADY_PROMPT_TRACE) {
+      // Strip coding agent examples when no coding intent is detected.
+      // These are ~4k chars of provider-injected examples that are only
+      // useful when the user is asking about code/repos/agents.
+      if (MILADY_ACTION_COMPACTION) {
+        workingPrompt = compactCodingExamplesForIntent(workingPrompt);
+        workingPrompt = compactConversationHistory(workingPrompt);
+      }
+
+      // --- Full prompt compaction (compact mode only) ---
+      let nextPrompt = workingPrompt;
+      if (MILADY_PROMPT_OPT_MODE === "compact") {
+        nextPrompt = compactModelPrompt(workingPrompt);
+        if (MILADY_PROMPT_TRACE && nextPrompt.length !== originalPrompt.length) {
           runtime.logger?.info(
-            `[milady] Action compaction: ${originalPrompt.length} -> ${workingPrompt.length} chars (saved ${originalPrompt.length - workingPrompt.length})`,
+            `[milady] Compact prompt rewrite: ${originalPrompt.length} -> ${nextPrompt.length} chars`,
           );
         }
+      } else if (workingPrompt !== originalPrompt && MILADY_PROMPT_TRACE) {
+        runtime.logger?.info(
+          `[milady] Action compaction: ${originalPrompt.length} -> ${workingPrompt.length} chars (saved ${originalPrompt.length - workingPrompt.length})`,
+        );
+      }
+
+      if (nextPrompt !== originalPrompt) {
         const rewrittenPayload = {
           ...(payload as Record<string, unknown>),
-          [promptKey]: workingPrompt,
+          [promptKey]: nextPrompt,
         };
-        const rewrittenArgs = [
+        rewrittenArgs = [
           args[0],
           rewrittenPayload as Parameters<typeof originalUseModel>[1],
           ...args.slice(2),
         ] as Parameters<typeof originalUseModel>;
-        return originalUseModel(...rewrittenArgs);
       }
-      return originalUseModel(...args);
     }
 
-    const compactedPrompt = compactModelPrompt(workingPrompt);
-    if (
-      MILADY_PROMPT_TRACE &&
-      compactedPrompt.length !== originalPrompt.length
-    ) {
-      runtime.logger?.info(
-        `[milady] Compact prompt rewrite: ${originalPrompt.length} -> ${compactedPrompt.length} chars`,
-      );
-    }
-    if (compactedPrompt === originalPrompt) {
-      return originalUseModel(...args);
-    }
-
-    const rewrittenPayload = {
-      ...(payload as Record<string, unknown>),
-      [promptKey]: compactedPrompt,
+    const result = await originalUseModel(...rewrittenArgs);
+    const responseText = stringifyTrajectoryResponse(result);
+    const payloadRecord = rewrittenArgs[1] as Record<string, unknown>;
+    const systemPrompt =
+      typeof payloadRecord.system === "string"
+        ? payloadRecord.system
+        : typeof runtime.character?.system === "string"
+          ? runtime.character.system
+          : "";
+    const fallbackCall = {
+      stepId: normalizedTrajectoryStepId ?? undefined,
+      model: resolveTrajectoryModelLabel(
+        runtime,
+        modelType,
+        payloadRecord,
+        args[2],
+      ),
+      systemPrompt,
+      userPrompt: originalPrompt,
+      response: responseText,
+      temperature:
+        typeof payloadRecord.temperature === "number"
+          ? payloadRecord.temperature
+          : 0,
+      maxTokens:
+        typeof payloadRecord.maxTokens === "number"
+          ? payloadRecord.maxTokens
+          : 0,
+      purpose: "action",
+      actionType: "runtime.useModel",
+      latencyMs: Math.max(0, Date.now() - startedAt),
+      promptTokens: estimateTokenCount(systemPrompt + originalPrompt),
+      completionTokens: estimateTokenCount(responseText),
     };
-    const rewrittenArgs = [
-      args[0],
-      rewrittenPayload as Parameters<typeof originalUseModel>[1],
-      ...args.slice(2),
-    ] as Parameters<typeof originalUseModel>;
-    return originalUseModel(...rewrittenArgs);
+
+    if (
+      normalizedTrajectoryStepId &&
+      trajectoryLogger &&
+      typeof trajectoryLogger.logLlmCall === "function" &&
+      getTrajectoryLlmLogCount(runtime, normalizedTrajectoryStepId) ===
+        llmLogCountBefore
+    ) {
+      try {
+        trajectoryLogger.logLlmCall(fallbackCall);
+        runtime.logger?.warn?.(
+          `[milady] Trajectory logger missed live LLM capture for ${normalizedTrajectoryStepId}; recorded fallback call from prompt optimization wrapper`,
+        );
+      } catch {
+        // Ignore fallback logging failures; the model call itself already succeeded.
+      }
+    } else if (
+      normalizedTrajectoryStepId &&
+      trajectoryLogger &&
+      typeof trajectoryLogger.updateLatestLlmCall === "function"
+    ) {
+      try {
+        await trajectoryLogger.updateLatestLlmCall(
+          normalizedTrajectoryStepId,
+          fallbackCall,
+        );
+      } catch {
+        // Ignore enrichment failures; the model call itself already succeeded.
+      }
+    }
+
+    return result;
   }) as typeof runtime.useModel;
 }

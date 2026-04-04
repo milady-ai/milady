@@ -9,21 +9,27 @@
  * Non-loading phases (error, pairing, onboarding) delegate to their views.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ResolvedContentPack } from "@miladyai/shared/contracts/content-pack";
+import { PromptDialog, usePrompt } from "@miladyai/ui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client } from "../../api";
 import {
   discoverGatewayEndpoints,
   type GatewayDiscoveryEndpoint,
   gatewayEndpointToApiBase,
 } from "../../bridge/gateway-discovery";
+import { applyColorScheme, applyContentPack } from "../../content-packs";
 import {
   clearPersistedActiveServer,
+  loadPersistedActivePackUrl,
+  savePersistedActivePackUrl,
   savePersistedActiveServer,
   useApp,
 } from "../../state";
 import type { StartupErrorState } from "../../state/types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
+import { SplashContentPacks } from "./SplashContentPacks";
 import { SplashServerChooser } from "./SplashServerChooser";
 import { StartupFailureView } from "./StartupFailureView";
 
@@ -56,6 +62,24 @@ function phaseToStatusKey(phase: string): string {
   }
 }
 
+type PackBaselineState = {
+  selectedVrmIndex: number;
+  customVrmUrl: string;
+  customBackgroundUrl: string;
+  customWorldUrl: string;
+  onboardingName: string;
+  onboardingStyle: string;
+};
+
+const DEFAULT_PACK_BASELINE: PackBaselineState = {
+  selectedVrmIndex: 1,
+  customVrmUrl: "",
+  customBackgroundUrl: "",
+  customWorldUrl: "",
+  onboardingName: "Chen",
+  onboardingStyle: "chen",
+};
+
 export function StartupShell() {
   const {
     startupCoordinator,
@@ -65,6 +89,13 @@ export function StartupShell() {
     goToOnboardingStep,
     elizaCloudConnected,
     onboardingCloudApiKey,
+    activePackId,
+    selectedVrmIndex,
+    customVrmUrl,
+    customBackgroundUrl,
+    customWorldUrl,
+    onboardingName,
+    onboardingStyle,
     t,
   } = useApp();
   const phase = startupCoordinator.phase;
@@ -72,11 +103,133 @@ export function StartupShell() {
   const [discoveredGateways, setDiscoveredGateways] = useState<
     GatewayDiscoveryEndpoint[]
   >([]);
+  const [packLoadError, setPackLoadError] = useState<string | null>(null);
   const isSplash = phase === "splash";
   const splashLoaded = isSplash
     ? (startupCoordinator.state as { loaded?: boolean }).loaded
     : false;
   const progress = PHASE_PROGRESS[phase] ?? 50;
+
+  // ── Content packs ───────────────────────────────────────────────
+  // The 8 built-in characters are the default content — not packs.
+  // The pack browser only shows user-loaded external packs.
+  const [loadedPacks, setLoadedPacks] = useState<ResolvedContentPack[]>([]);
+  const colorSchemeCleanupRef = useRef<(() => void) | null>(null);
+  const packBaselineRef = useRef<PackBaselineState | null>(null);
+  const initialActivePackIdRef = useRef(activePackId);
+  const rehydratedInitialPackRef = useRef(false);
+  const { prompt: promptForPackUrl, modalProps: packPromptModalProps } =
+    usePrompt();
+
+  const restorePackBaseline = useCallback(() => {
+    const baseline = packBaselineRef.current ?? DEFAULT_PACK_BASELINE;
+    setState("selectedVrmIndex", baseline.selectedVrmIndex);
+    setState("customVrmUrl", baseline.customVrmUrl);
+    setState("customBackgroundUrl", baseline.customBackgroundUrl);
+    setState("customWorldUrl", baseline.customWorldUrl);
+    setState("onboardingName", baseline.onboardingName);
+    setState("onboardingStyle", baseline.onboardingStyle);
+    packBaselineRef.current = null;
+  }, [setState]);
+
+  const activatePack = useCallback(
+    (
+      pack: ResolvedContentPack,
+      options?: {
+        captureBaseline?: boolean;
+      },
+    ) => {
+      const captureBaseline = options?.captureBaseline ?? false;
+      if (captureBaseline && packBaselineRef.current == null) {
+        packBaselineRef.current = {
+          selectedVrmIndex,
+          customVrmUrl,
+          customBackgroundUrl,
+          customWorldUrl,
+          onboardingName,
+          onboardingStyle,
+        };
+      }
+
+      setState("activePackId", pack.manifest.id);
+      savePersistedActivePackUrl(
+        pack.source.kind === "url" ? pack.source.url : null,
+      );
+      applyContentPack(pack, {
+        setCustomVrmUrl: (url) => setState("customVrmUrl", url),
+        setCustomBackgroundUrl: (url) => setState("customBackgroundUrl", url),
+        setCustomWorldUrl: (url) => setState("customWorldUrl", url),
+        setSelectedVrmIndex: (idx) => setState("selectedVrmIndex", idx),
+        setOnboardingName: (name) => setState("onboardingName", name),
+        setOnboardingStyle: (style) => setState("onboardingStyle", style),
+      });
+      colorSchemeCleanupRef.current?.();
+      colorSchemeCleanupRef.current = applyColorScheme(pack.colorScheme);
+      setPackLoadError(null);
+    },
+    [
+      customBackgroundUrl,
+      customVrmUrl,
+      customWorldUrl,
+      onboardingName,
+      onboardingStyle,
+      selectedVrmIndex,
+      setState,
+    ],
+  );
+
+  const deactivatePack = useCallback(() => {
+    setState("activePackId", null);
+    savePersistedActivePackUrl(null);
+    colorSchemeCleanupRef.current?.();
+    colorSchemeCleanupRef.current = null;
+    restorePackBaseline();
+    setPackLoadError(null);
+  }, [restorePackBaseline, setState]);
+
+  const handleSelectPack = useCallback(
+    (pack: ResolvedContentPack) => {
+      if (activePackId === pack.manifest.id) {
+        deactivatePack();
+        return;
+      }
+      activatePack(pack, { captureBaseline: activePackId == null });
+    },
+    [activePackId, activatePack, deactivatePack],
+  );
+
+  const handleLoadCustomPack = useCallback(async () => {
+    const url = await promptForPackUrl({
+      title: t("startupshell.LoadPack", {
+        defaultValue: "Load pack",
+      }),
+      message: t("startupshell.EnterPackUrl", {
+        defaultValue:
+          "Enter the URL of a content pack folder (must contain pack.json):",
+      }),
+      placeholder: "https://example.com/packs/my-pack/",
+      confirmLabel: t("startupshell.LoadPack", {
+        defaultValue: "Load pack",
+      }),
+    });
+    if (!url?.trim()) return;
+    try {
+      const { loadContentPackFromUrl } = await import("../../content-packs");
+      const pack = await loadContentPackFromUrl(url.trim());
+      setLoadedPacks((prev) => {
+        if (prev.some((p) => p.manifest.id === pack.manifest.id)) return prev;
+        return [...prev, pack];
+      });
+      activatePack(pack, { captureBaseline: activePackId == null });
+    } catch (err) {
+      console.error("[milady][content-packs] Failed to load custom pack:", err);
+      setPackLoadError(
+        t("startupshell.PackLoadFailed", {
+          defaultValue: `Failed to load pack: ${err instanceof Error ? err.message : "Unknown error"}`,
+        }),
+      );
+    }
+  }, [activePackId, activatePack, promptForPackUrl, t]);
   const cloudApiKey = onboardingCloudApiKey ?? "";
   const showElizaCloudEntry = useMemo(() => {
     if (elizaCloudConnected) {
@@ -120,6 +273,64 @@ export function StartupShell() {
       cancelled = true;
     };
   }, [isSplash, splashLoaded]);
+
+  useEffect(() => {
+    if (rehydratedInitialPackRef.current) {
+      return;
+    }
+    rehydratedInitialPackRef.current = true;
+
+    const persistedPackId = initialActivePackIdRef.current;
+    if (!persistedPackId) {
+      return;
+    }
+
+    const loadedPack = loadedPacks.find(
+      (pack) => pack.manifest.id === persistedPackId,
+    );
+    if (loadedPack) {
+      activatePack(loadedPack);
+      return;
+    }
+
+    const persistedPackUrl = loadPersistedActivePackUrl();
+    if (!persistedPackUrl) {
+      setState("activePackId", null);
+      return;
+    }
+
+    let cancelled = false;
+    void import("../../content-packs")
+      .then(({ loadContentPackFromUrl }) =>
+        loadContentPackFromUrl(persistedPackUrl),
+      )
+      .then((pack) => {
+        if (cancelled) {
+          return;
+        }
+        activatePack(pack);
+      })
+      .catch((err) => {
+        if (cancelled) {
+          return;
+        }
+        console.error(
+          "[milady][content-packs] Failed to restore persisted pack:",
+          err,
+        );
+        savePersistedActivePackUrl(null);
+        setState("activePackId", null);
+        setPackLoadError(
+          t("startupshell.PackLoadFailed", {
+            defaultValue: `Failed to load pack: ${err instanceof Error ? err.message : "Unknown error"}`,
+          }),
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activatePack, loadedPacks, setState, t]);
 
   const continueToOnboarding = useCallback(() => {
     startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" });
@@ -214,21 +425,24 @@ export function StartupShell() {
   return (
     <div className="flex items-center justify-center h-full w-full bg-[#ffe600] text-black overflow-hidden">
       <img
-        src="/splash-bg.png"
+        src="/splash-bg.jpg"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full object-contain object-right-bottom opacity-40"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
       />
       <div
         className="relative z-10 flex flex-col items-center gap-5 px-6 text-center w-full"
         style={{ maxWidth: 360 }}
       >
-        <h1 style={{ fontFamily: FONT }} className="text-2xl text-black">
+        <h1
+          style={{ fontFamily: FONT }}
+          className="text-2xl text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+        >
           MILADY
         </h1>
         <p
           style={{ fontFamily: FONT }}
-          className="text-[7px] text-black/40 uppercase leading-relaxed"
+          className="text-[7px] text-white/80 uppercase leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
         >
           {t("startupshell.SplashTagline", {
             defaultValue: "Your local-first AI assistant",
@@ -261,7 +475,7 @@ export function StartupShell() {
           </div>
         )}
 
-        {/* Server chooser — only on splash phase */}
+        {/* Server chooser + content packs — only on splash phase */}
         {isSplash &&
           (!splashLoaded ? (
             <button
@@ -273,18 +487,37 @@ export function StartupShell() {
               {t("startupshell.Loading", { defaultValue: "Loading..." })}
             </button>
           ) : (
-            <SplashServerChooser
-              discoveryLoading={discoveryLoading}
-              gateways={discoveredGateways}
-              showElizaCloudEntry={showElizaCloudEntry}
-              t={t}
-              onCreateLocal={handleCreateLocal}
-              onManualConnect={handleManualConnect}
-              onUseElizaCloud={handleUseElizaCloud}
-              onConnectGateway={handleConnectGateway}
-            />
+            <>
+              <SplashContentPacks
+                packs={loadedPacks}
+                activePackId={activePackId}
+                t={t}
+                onSelectPack={handleSelectPack}
+                onLoadCustomPack={handleLoadCustomPack}
+              />
+              {packLoadError ? (
+                <p
+                  style={{ fontFamily: FONT }}
+                  className="w-full text-[8px] text-black/55"
+                >
+                  {packLoadError}
+                </p>
+              ) : null}
+              <SplashServerChooser
+                discoveryLoading={discoveryLoading}
+                gateways={discoveredGateways}
+                showElizaCloudEntry={showElizaCloudEntry}
+                t={t}
+                onCreateLocal={handleCreateLocal}
+                onManualConnect={handleManualConnect}
+                onUseElizaCloud={handleUseElizaCloud}
+                onConnectGateway={handleConnectGateway}
+                onLoadContentPack={handleLoadCustomPack}
+              />
+            </>
           ))}
       </div>
+      <PromptDialog {...packPromptModalProps} />
     </div>
   );
 }

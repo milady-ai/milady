@@ -22,6 +22,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -63,6 +64,48 @@ async function canImportModule(
 			error: err instanceof Error ? err.message : String(err),
 		};
 	}
+}
+
+function runModuleSnippet(
+	source: string,
+): { success: boolean; error?: string; stdout: string; stderr: string } {
+	const result = spawnSync(
+		process.execPath,
+		["--input-type=module", "--eval", source],
+		{
+			cwd: repoRoot,
+			encoding: "utf8",
+			timeout: 30_000,
+		},
+	);
+
+	if (result.status === 0) {
+		return {
+			success: true,
+			stdout: result.stdout ?? "",
+			stderr: result.stderr ?? "",
+		};
+	}
+
+	return {
+		success: false,
+		error:
+			result.error?.message ??
+			result.stderr ??
+			result.stdout ??
+			`process exited with code ${String(result.status)}`,
+		stdout: result.stdout ?? "",
+		stderr: result.stderr ?? "",
+	};
+}
+
+async function canImportModuleInSubprocess(
+	moduleName: string,
+): Promise<{ success: boolean; error?: string }> {
+	const result = runModuleSnippet(`await import(${JSON.stringify(moduleName)});`);
+	return result.success
+		? { success: true }
+		: { success: false, error: result.error };
 }
 
 /**
@@ -322,27 +365,28 @@ describe("Native Module Installation Verification", () => {
 		});
 
 		it.skipIf(!hasSharp)("sharp can be imported", async () => {
-			const result = await canImportModule("sharp");
+			const result = await canImportModuleInSubprocess("sharp");
 			expect(result.success).toBe(true);
 		});
 
 		it.skipIf(!hasSharp)(
 			"sharp can process an image buffer",
 			async () => {
-				const sharp = (await import("sharp")).default;
-				const buffer = await sharp({
-					create: {
-						width: 1,
-						height: 1,
-						channels: 3,
-						background: { r: 255, g: 0, b: 0 },
-					},
-				})
-					.png()
-					.toBuffer();
+				const result = runModuleSnippet(`
+					const sharp = (await import("sharp")).default;
+					const buffer = await sharp({
+						create: {
+							width: 1,
+							height: 1,
+							channels: 3,
+							background: { r: 255, g: 0, b: 0 },
+						},
+					}).png().toBuffer();
+					process.stdout.write(String(buffer.length));
+				`);
 
-				expect(buffer).toBeInstanceOf(Buffer);
-				expect(buffer.length).toBeGreaterThan(0);
+				expect(result.success, result.error).toBe(true);
+				expect(Number(result.stdout.trim())).toBeGreaterThan(0);
 			},
 		);
 	});
@@ -367,7 +411,7 @@ describe("Native Module Installation Verification", () => {
 		it.skipIf(!hasCanvasBinding)(
 			"canvas can be imported",
 			async () => {
-				const result = await canImportModule("canvas");
+				const result = await canImportModuleInSubprocess("canvas");
 				expect(result.success).toBe(true);
 			},
 		);
@@ -375,17 +419,19 @@ describe("Native Module Installation Verification", () => {
 		it.skipIf(!hasCanvasBinding)(
 			"canvas can create a 2D context",
 			async () => {
-				const { createCanvas } = await import("canvas");
-				const canvas = createCanvas(100, 100);
-				const ctx = canvas.getContext("2d");
+				const result = runModuleSnippet(`
+					const { createCanvas } = await import("canvas");
+					const canvas = createCanvas(100, 100);
+					const ctx = canvas.getContext("2d");
+					if (!ctx) throw new Error("2D context missing");
+					ctx.fillStyle = "red";
+					ctx.fillRect(0, 0, 50, 50);
+					const imageData = ctx.getImageData(0, 0, 1, 1);
+					process.stdout.write(String(imageData.data[0]));
+				`);
 
-				expect(ctx).toBeDefined();
-
-				ctx.fillStyle = "red";
-				ctx.fillRect(0, 0, 50, 50);
-
-				const imageData = ctx.getImageData(0, 0, 1, 1);
-				expect(imageData.data[0]).toBe(255);
+				expect(result.success, result.error).toBe(true);
+				expect(Number(result.stdout.trim())).toBe(255);
 			},
 		);
 	});

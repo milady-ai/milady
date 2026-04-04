@@ -8,8 +8,8 @@
  *   and forces side effects (cloud login, finish, provider fill) to stay in
  *   AppContext where they already close over the right state.
  *
- * Consolidated 6-step flow: identity → hosting → providers → voice → permissions → launch
- * (cloud_login is now handled by the startup splash page, not the onboarding wizard)
+ * 2-step flow: identity → providers
+ * Server selection is on the splash page. Permissions are requested lazily.
  *
  * See: docs/guides/onboarding-ui-flow.md
  * Tests: tests/flow.test.ts
@@ -113,10 +113,6 @@ export function getFlaminaTopicForOnboardingStep(
   switch (step) {
     case "providers":
       return "provider";
-    case "voice":
-      return "voice";
-    case "permissions":
-      return "permissions";
     default:
       return null;
   }

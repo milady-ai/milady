@@ -6,35 +6,22 @@
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
-    "types": [
-      "node",
-      "vite/client"
-    ],
+    "types": ["node", "vite/client"],
     "declaration": false,
     "noEmit": true,
     "baseUrl": "../../",
     "paths": {
-      "@miladyai/plugin-roles": [
-        "./packages/plugin-roles/src/index.ts"
+      "@miladyai/plugin-selfcontrol": [
+        "./packages/plugin-selfcontrol/src/index.ts"
       ],
-      "@miladyai/plugin-roles/*": [
-        "./packages/plugin-roles/src/*"
-      ],
-      "@miladyai/ui": [
-        "./packages/ui/src/index.ts"
-      ],
-      "@miladyai/ui/*": [
-        "./packages/ui/src/*"
-      ],
-      "@miladyai/agent/*": [
-        "./packages/agent/src/*"
-      ],
-      "@elizaos/core": [
-        "./node_modules/@elizaos/core"
-      ],
-      "@elizaos/*": [
-        "./node_modules/@elizaos/*"
-      ]
+      "@miladyai/plugin-selfcontrol/*": ["./packages/plugin-selfcontrol/src/*"],
+      "@miladyai/plugin-roles": ["./packages/plugin-roles/src/index.ts"],
+      "@miladyai/plugin-roles/*": ["./packages/plugin-roles/src/*"],
+      "@miladyai/ui": ["./packages/ui/src/index.ts"],
+      "@miladyai/ui/*": ["./packages/ui/src/*"],
+      "@miladyai/agent/*": ["./packages/agent/src/*"],
+      "@elizaos/core": ["./node_modules/@elizaos/core"],
+      "@elizaos/*": ["./node_modules/@elizaos/*"]
     }
   },
   "exclude": [
@@ -43,7 +30,5 @@
     "src/**/*.test.ts",
     "src/**/*.test.tsx"
   ],
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

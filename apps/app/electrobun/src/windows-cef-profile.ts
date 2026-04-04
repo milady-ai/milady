@@ -104,17 +104,21 @@ export function resolveDesktopBundleVersion(
   );
 }
 
-export function shouldResetWindowsCefProfile(
-  previousVersion: string | null,
+export function shouldResetWindowsCefProfile(args: {
+  currentVersion: string | null;
+  previousVersion: string | null;
+  cefDirExists: boolean;
+}): boolean {
+  if (!args.cefDirExists) return false;
+  const currentVersion = trimToNull(args.currentVersion);
+  if (!currentVersion || currentVersion === "unknown") return false;
+  const previousVersion = trimToNull(args.previousVersion);
+  return previousVersion !== currentVersion;
+}
+
+export function shouldWriteWindowsCefProfileMarker(
   currentVersion: string | null,
 ): boolean {
-  const previous = trimToNull(previousVersion);
-  const current = trimToNull(currentVersion);
-  if (!previous || !current) {
-    return false;
-  }
-  if (current === "unknown") {
-    return false;
-  }
-  return previous !== current;
+  const normalized = trimToNull(currentVersion);
+  return Boolean(normalized && normalized !== "unknown");
 }

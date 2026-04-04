@@ -402,6 +402,37 @@ function createContext(
 }
 
 describe("InventoryView wallet settings", () => {
+  it("auto-loads token balances when the wallet view opens on tokens", async () => {
+    const loadBalances = vi.fn(async () => {});
+    const ctx = createContext({
+      walletBalances: null,
+      loadBalances,
+    });
+    mockUseApp.mockImplementation(() => ctx);
+
+    await act(async () => {
+      TestRenderer.create(<InventoryView />);
+    });
+
+    expect(loadBalances).toHaveBeenCalledTimes(1);
+  });
+
+  it("auto-loads NFTs when the wallet view opens on the NFT tab", async () => {
+    const loadNfts = vi.fn(async () => {});
+    const ctx = createContext({
+      inventoryView: "nfts",
+      walletNfts: null,
+      loadNfts,
+    });
+    mockUseApp.mockImplementation(() => ctx);
+
+    await act(async () => {
+      TestRenderer.create(<InventoryView />);
+    });
+
+    expect(loadNfts).toHaveBeenCalledTimes(1);
+  });
+
   it("renders the token sort control and dispatches inventorySort updates", async () => {
     const ctx = createContext();
     mockUseApp.mockImplementation(() => ctx);

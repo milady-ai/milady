@@ -70,7 +70,10 @@ export class ConnectionMonitor {
     );
 
     if (this.consecutiveFailures >= this.maxFailures) {
-      this.callbacks.onStatusChange?.("disconnected");
+      // Don't emit "disconnected" here — attemptReconnect() will emit
+      // "reconnecting" first, and only emits "disconnected" if all
+      // retry attempts fail. This avoids a misleading disconnected→
+      // reconnecting flicker for callers.
       this.callbacks.onDisconnect();
       await this.attemptReconnect();
     }

@@ -1,7 +1,9 @@
 import type http from "node:http";
 import { logger, type AgentRuntime, stringToUuid, type Task, type UUID } from "@elizaos/core";
+import type { LifeOpsOverview } from "../contracts/lifeops.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 import { WORKBENCH_TASK_TAG, WORKBENCH_TODO_TAG } from "./workbench-helpers.js";
+import { LifeOpsService } from "../lifeops/service.js";
 
 interface WorkbenchTaskView {
   id: string;
@@ -109,6 +111,8 @@ export async function handleWorkbenchRoutes(
     let tasksAvailable = false;
     let triggersAvailable = false;
     let todosAvailable = false;
+    let lifeopsAvailable = false;
+    let lifeops: LifeOpsOverview | null = null;
     let runtimeTasks: Task[] = [];
     let todoData: TodoDataServiceLike | null = null;
 
@@ -152,6 +156,13 @@ export async function handleWorkbenchRoutes(
         if (todoData) {
           ctx.recordTodoDbFailure(state.runtime, "overview.getTodos", err);
         }
+      }
+
+      try {
+        lifeops = await new LifeOpsService(state.runtime).getOverview();
+        lifeopsAvailable = true;
+      } catch {
+        lifeopsAvailable = false;
       }
 
       try {
@@ -200,9 +211,11 @@ export async function handleWorkbenchRoutes(
       triggers,
       todos,
       summary,
+      ...(lifeops ? { lifeops } : {}),
       tasksAvailable,
       triggersAvailable,
       todosAvailable,
+      lifeopsAvailable,
     });
     return true;
   }

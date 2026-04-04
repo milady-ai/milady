@@ -8,6 +8,7 @@
 import crypto from "node:crypto";
 import type http from "node:http";
 import { resolveApiToken } from "@miladyai/shared/runtime-env";
+import { isLoopbackRemoteAddress } from "./compat-route-shared";
 import { sendJsonError } from "./response";
 
 /**
@@ -159,9 +160,13 @@ export function ensureCompatSensitiveRouteAuthorized(
   res: http.ServerResponse,
 ): boolean {
   if (!getCompatApiToken()) {
+    // No API token configured. Allow if the request is from loopback
+    // (desktop app / local dev) or if dev bypass is enabled. Block
+    // otherwise — an unconfigured token on a non-loopback bind is
+    // a security risk.
     if (
-      isDevEnvironment() &&
-      process.env.MILADY_DEV_AUTH_BYPASS?.trim() === "1"
+      isLoopbackRemoteAddress(req.socket?.remoteAddress) ||
+      (isDevEnvironment() && process.env.MILADY_DEV_AUTH_BYPASS?.trim() === "1")
     ) {
       return true;
     }

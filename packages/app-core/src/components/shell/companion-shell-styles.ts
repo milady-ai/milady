@@ -212,10 +212,18 @@ export function viewWrapperPadding(f: TabFlags) {
   return "px-16 pt-32 pb-16";
 }
 
+/**
+ * Build CSS custom properties for a view wrapper.
+ * Content pack color overrides (--pack-*) take precedence via var() fallbacks.
+ */
 export function viewWrapperStyle(
   f: TabFlags,
   accentColor: string,
 ): React.CSSProperties {
+  // Helper: wrap a value so --pack-* overrides win when set
+  const pack = (packVar: string, fallback: string) =>
+    `var(${packVar}, ${fallback})`;
+
   if (
     f.isSettings ||
     f.isPlugins ||
@@ -227,16 +235,16 @@ export function viewWrapperStyle(
     f.isWallets
   ) {
     return {
-      "--bg": "transparent",
-      "--card": "rgba(255, 255, 255, 0.05)",
-      "--border": "rgba(255, 255, 255, 0.08)",
-      "--accent": accentVar(f),
+      "--bg": pack("--pack-bg", "transparent"),
+      "--card": pack("--pack-card", "rgba(255, 255, 255, 0.05)"),
+      "--border": pack("--pack-border", "rgba(255, 255, 255, 0.08)"),
+      "--accent": pack("--pack-accent", accentVar(f)),
       "--accent-foreground": accentForegroundVar(f),
       "--accent-subtle": accentSubtleVar(f),
       "--accent-rgb": accentRgbVar(f),
-      "--muted": "rgba(255, 255, 255, 0.45)",
-      "--txt": "rgba(240, 238, 250, 0.92)",
-      "--text": "rgba(240, 238, 250, 0.92)",
+      "--muted": pack("--pack-text-muted", "rgba(255, 255, 255, 0.45)"),
+      "--txt": pack("--pack-text", "rgba(240, 238, 250, 0.92)"),
+      "--text": pack("--pack-text", "rgba(240, 238, 250, 0.92)"),
       "--danger": "#ef4444",
       "--ok": "#22c55e",
       "--warning": "#f59e0b",
@@ -247,12 +255,15 @@ export function viewWrapperStyle(
     } as React.CSSProperties;
   }
   return {
-    "--bg": "transparent",
-    "--card": "rgba(255, 255, 255, 0.05)",
-    "--border": f.isSkills ? "rgba(0,225,255,0.3)" : "rgba(255,255,255,0.08)",
-    "--accent": accentColor,
+    "--bg": pack("--pack-bg", "transparent"),
+    "--card": pack("--pack-card", "rgba(255, 255, 255, 0.05)"),
+    "--border": pack(
+      "--pack-border",
+      f.isSkills ? "rgba(0,225,255,0.3)" : "rgba(255,255,255,0.08)",
+    ),
+    "--accent": pack("--pack-accent", accentColor),
     "--accent-foreground": accentForegroundVar(f),
-    "--muted": "rgba(255, 255, 255, 0.55)",
-    "--txt": "#ffffff",
+    "--muted": pack("--pack-text-muted", "rgba(255, 255, 255, 0.55)"),
+    "--txt": pack("--pack-text", "#ffffff"),
   } as React.CSSProperties;
 }

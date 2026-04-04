@@ -71,6 +71,46 @@ export default defineConfig({
           ]
         : []),
       {
+        find: /^@miladyai\/plugin-selfcontrol\/(.*)/,
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-selfcontrol",
+          "src",
+          "$1",
+        ),
+      },
+      {
+        find: "@miladyai/plugin-selfcontrol",
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-selfcontrol",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
+        find: /^@miladyai\/plugin-roles\/(.*)/,
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-roles",
+          "src",
+          "$1",
+        ),
+      },
+      {
+        find: "@miladyai/plugin-roles",
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-roles",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
         find: "@elizaos/skills",
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),
       },

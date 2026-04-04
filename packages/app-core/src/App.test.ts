@@ -118,6 +118,14 @@ vi.mock("./components/FlaminaGuide", () => ({
     ),
 }));
 
+vi.mock("./components/chat/TasksEventsPanel", () => ({
+  TasksEventsPanel: ({ open }: { open?: boolean }) =>
+    React.createElement("div", {
+      "data-testid": "TasksEventsPanel",
+      "data-open": String(open),
+    }),
+}));
+
 import { App } from "./App";
 
 describe("App", () => {
@@ -256,6 +264,40 @@ describe("App", () => {
     }
   });
 
+  it("renders the workspace widget rail by default on desktop chat", async () => {
+    window.innerWidth = 1440;
+
+    useAppMock.mockImplementation(() => ({
+      onboardingLoading: false,
+      startupPhase: "ready",
+      startupError: null,
+      startupCoordinator: { phase: "ready" },
+      authRequired: false,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab: "chat",
+      setTab: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "native",
+      agentStatus: { state: "running" },
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      t: (key: string, options?: { defaultValue?: string }) =>
+        options?.defaultValue ?? key,
+    }));
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(React.createElement(App));
+    });
+
+    const panel = renderer.root.findByProps({
+      "data-testid": "TasksEventsPanel",
+    });
+    expect(panel.props["data-open"]).toBe("true");
+  });
+
   it("shows a shutdown overlay when desktop quit starts", async () => {
     let shutdownListener: ((payload: unknown) => void) | null = null;
     subscribeDesktopBridgeEventMock.mockImplementation(
@@ -305,9 +347,7 @@ describe("App", () => {
     });
 
     expect(
-      renderer.root.findAll(
-        (node) => node.props["aria-label"] === "Shutting down",
-      ),
+      renderer.root.findAll((node) => node.props.role === "status"),
     ).toHaveLength(0);
 
     await act(async () => {
@@ -315,9 +355,7 @@ describe("App", () => {
     });
 
     expect(
-      renderer.root.findAll(
-        (node) => node.props["aria-label"] === "Shutting down",
-      ),
+      renderer.root.findAll((node) => node.props.role === "status"),
     ).toHaveLength(1);
   });
 });

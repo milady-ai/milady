@@ -18,7 +18,7 @@ const {
   executeDatabaseQueryMock: vi.fn(),
 }));
 
-vi.mock("../../src/components/vector-browser-three", () => {
+vi.mock("../../src/components/avatar/vector-browser-three", () => {
   class MockVector2 {
     x = 0;
     y = 0;

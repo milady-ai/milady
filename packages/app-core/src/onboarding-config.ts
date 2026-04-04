@@ -9,6 +9,10 @@ import type {
   LinkedAccountsConfig,
   ServiceRoutingConfig,
 } from "@miladyai/shared/contracts/service-routing";
+import {
+  buildDefaultElizaCloudServiceRouting,
+  buildElizaCloudServiceRoute,
+} from "@miladyai/shared/contracts/service-routing";
 import { type OnboardingServerTarget } from "./onboarding/server-target";
 
 export interface BuildOnboardingConnectionArgs {
@@ -68,6 +72,8 @@ export function buildOnboardingRuntimeConfig(
   args: BuildOnboardingConnectionArgs,
 ): BuildOnboardingRuntimeConfigResult {
   const serverTarget = resolveArgsServerTarget(args);
+  const smallModel = trimToUndefined(args.onboardingSmallModel);
+  const largeModel = trimToUndefined(args.onboardingLargeModel);
   const linkedAccounts: LinkedAccountsConfig = {};
   const cloudApiKey = trimToUndefined(args.onboardingCloudApiKey);
   if (cloudApiKey) {
@@ -98,17 +104,10 @@ export function buildOnboardingRuntimeConfig(
   let llmTextRoute: ServiceRouteConfig | undefined;
 
   if (args.onboardingProvider === "elizacloud") {
-    llmTextRoute = {
-      backend: "elizacloud",
-      transport: "cloud-proxy",
-      accountId: "elizacloud",
-      ...(trimToUndefined(args.onboardingSmallModel)
-        ? { smallModel: trimToUndefined(args.onboardingSmallModel) }
-        : {}),
-      ...(trimToUndefined(args.onboardingLargeModel)
-        ? { largeModel: trimToUndefined(args.onboardingLargeModel) }
-        : {}),
-    };
+    llmTextRoute = buildElizaCloudServiceRoute({
+      smallModel,
+      largeModel,
+    });
   } else {
     const providerId = resolveLocalProviderId(args.onboardingProvider);
     if (providerId) {
@@ -135,6 +134,22 @@ export function buildOnboardingRuntimeConfig(
 
   if (llmTextRoute) {
     serviceRouting.llmText = llmTextRoute;
+  }
+
+  const cloudDefaultsSelected =
+    args.onboardingProvider === "elizacloud" ||
+    (deploymentTarget.runtime === "cloud" &&
+      deploymentTarget.provider === "elizacloud");
+  if (cloudDefaultsSelected) {
+    Object.assign(
+      serviceRouting,
+      buildDefaultElizaCloudServiceRouting({
+        base: serviceRouting,
+        includeInference: args.onboardingProvider === "elizacloud",
+        smallModel,
+        largeModel,
+      }),
+    );
   }
 
   const hasLinkedAccounts = Object.keys(linkedAccounts).length > 0;

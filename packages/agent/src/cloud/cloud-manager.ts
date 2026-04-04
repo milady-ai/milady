@@ -49,9 +49,11 @@ export class CloudManager {
       throw new Error(urlError);
     }
 
-    const siteUrl = normalizeCloudSiteUrl(rawUrl);
-    this.client = new ElizaCloudClient(siteUrl, apiKey);
-    logger.info(`[cloud-manager] Client initialised (baseUrl=${siteUrl})`);
+    // rawUrl is already normalized above — don't re-normalize, which would
+    // re-read ELIZAOS_CLOUD_BASE_URL and could produce a different URL than
+    // the one we just validated.
+    this.client = new ElizaCloudClient(rawUrl, apiKey);
+    logger.info(`[cloud-manager] Client initialised (baseUrl=${rawUrl})`);
   }
 
   async connect(agentId: string): Promise<CloudRuntimeProxy> {

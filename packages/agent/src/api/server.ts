@@ -237,6 +237,7 @@ import {
   sendJsonError,
 } from "./http-helpers.js";
 import { handleKnowledgeRoutes } from "./knowledge-routes.js";
+import { handleLifeOpsRoutes } from "./lifeops-routes.js";
 import { getKnowledgeService } from "./knowledge-service-loader.js";
 import {
   evictOldestConversation,
@@ -5824,6 +5825,27 @@ async function handleRequest(
         decodePathComponent,
         taskToTriggerSummary: taskToTriggerSummary as any,
         listTriggerTasks: listTriggerTasks as any,
+      })
+    ) {
+      return;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Life-ops routes
+  // ═══════════════════════════════════════════════════════════════════════
+  if (pathname.startsWith("/api/lifeops")) {
+    if (
+      await handleLifeOpsRoutes({
+        req,
+        res,
+        method,
+        pathname,
+        state: state as any,
+        json,
+        error,
+        readJsonBody,
+        decodePathComponent,
       })
     ) {
       return;

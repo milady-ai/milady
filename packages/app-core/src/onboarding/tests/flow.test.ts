@@ -1,4 +1,4 @@
-/** Unit tests for onboarding `flow.ts` — unified 6-step flow. */
+/** Unit tests for onboarding `flow.ts` — 2-step flow. */
 import { describe, expect, it } from "vitest";
 import {
   canRevertOnboardingTo,
@@ -13,47 +13,29 @@ import {
 
 describe("onboarding flow", () => {
   describe("getStepOrder", () => {
-    it("returns unified 6-step order", () => {
-      expect(getStepOrder()).toEqual([
-        "identity",
-        "hosting",
-        "providers",
-        "voice",
-        "permissions",
-        "launch",
-      ]);
+    it("returns 2-step order (server select on splash, permissions lazy)", () => {
+      expect(getStepOrder()).toEqual(["identity", "providers"]);
     });
   });
 
   describe("resolveOnboardingNextStep", () => {
     it("advances through all steps", () => {
-      expect(resolveOnboardingNextStep("identity")).toBe("hosting");
-      expect(resolveOnboardingNextStep("hosting")).toBe("providers");
-      expect(resolveOnboardingNextStep("providers")).toBe("voice");
-      expect(resolveOnboardingNextStep("voice")).toBe("permissions");
-      expect(resolveOnboardingNextStep("permissions")).toBe("launch");
-      expect(resolveOnboardingNextStep("launch")).toBe(null);
+      expect(resolveOnboardingNextStep("identity")).toBe("providers");
+      expect(resolveOnboardingNextStep("providers")).toBe(null);
     });
   });
 
   describe("resolveOnboardingPreviousStep", () => {
     it("steps back through all steps", () => {
       expect(resolveOnboardingPreviousStep("identity")).toBe(null);
-      expect(resolveOnboardingPreviousStep("hosting")).toBe("identity");
-      expect(resolveOnboardingPreviousStep("providers")).toBe("hosting");
-      expect(resolveOnboardingPreviousStep("voice")).toBe("providers");
-      expect(resolveOnboardingPreviousStep("permissions")).toBe("voice");
-      expect(resolveOnboardingPreviousStep("launch")).toBe("permissions");
+      expect(resolveOnboardingPreviousStep("providers")).toBe("identity");
     });
   });
 
   describe("canRevertOnboardingTo", () => {
     it("allows backward jump", () => {
       expect(
-        canRevertOnboardingTo({ current: "providers", target: "hosting" }),
-      ).toBe(true);
-      expect(
-        canRevertOnboardingTo({ current: "launch", target: "identity" }),
+        canRevertOnboardingTo({ current: "providers", target: "identity" }),
       ).toBe(true);
     });
     it("disallows same-step jump", () => {
@@ -63,33 +45,15 @@ describe("onboarding flow", () => {
     });
     it("disallows forward jump", () => {
       expect(
-        canRevertOnboardingTo({ current: "identity", target: "hosting" }),
+        canRevertOnboardingTo({ current: "identity", target: "providers" }),
       ).toBe(false);
     });
   });
 
   describe("getOnboardingNavMetas", () => {
-    it("returns all 6 steps regardless of current step", () => {
+    it("returns all 2 steps", () => {
       const metas = getOnboardingNavMetas("providers", false);
-      expect(metas.map((m) => m.id)).toEqual([
-        "identity",
-        "hosting",
-        "providers",
-        "voice",
-        "permissions",
-        "launch",
-      ]);
-    });
-    it("returns same steps when cloudOnly", () => {
-      const metas = getOnboardingNavMetas("identity", true);
-      expect(metas.map((m) => m.id)).toEqual([
-        "identity",
-        "hosting",
-        "providers",
-        "voice",
-        "permissions",
-        "launch",
-      ]);
+      expect(metas.map((m) => m.id)).toEqual(["identity", "providers"]);
     });
   });
 
@@ -154,12 +118,7 @@ describe("onboarding flow", () => {
   describe("getFlaminaTopicForOnboardingStep", () => {
     it("maps advanced guide topics", () => {
       expect(getFlaminaTopicForOnboardingStep("providers")).toBe("provider");
-      expect(getFlaminaTopicForOnboardingStep("permissions")).toBe(
-        "permissions",
-      );
-      expect(getFlaminaTopicForOnboardingStep("hosting")).toBe(null);
       expect(getFlaminaTopicForOnboardingStep("identity")).toBe(null);
-      expect(getFlaminaTopicForOnboardingStep("launch")).toBe(null);
     });
   });
 });

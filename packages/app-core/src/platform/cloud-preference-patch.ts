@@ -7,6 +7,7 @@ import {
   isElizaCloudLinkedInConfig,
   resolveElizaCloudTopology,
 } from "@miladyai/shared/contracts";
+import { asRecord, readString } from "../state/config-readers";
 import type {
   CloudPreferenceClientLike as ClientLike,
   CloudPreferencePatchState as PatchState,
@@ -15,24 +16,6 @@ import type {
 const PATCH_STATE = Symbol.for("milady.cloudPreferencePatch");
 
 type StorageConfig = Record<string, unknown>;
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function readString(
-  source: Record<string, unknown> | null | undefined,
-  key: string,
-): string | null {
-  const value = source?.[key];
-  if (typeof value !== "string") {
-    return null;
-  }
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
 
 function hasRemoteConnection(
   config: StorageConfig | null | undefined,
@@ -59,6 +42,8 @@ function hasInactiveCloudSignals(
 export function shouldPreferLocalProviderConfig(
   config: StorageConfig | null | undefined,
 ): boolean {
+  if (!config) return false;
+
   const llmText = resolveServiceRoutingInConfig(
     config as Record<string, unknown>,
   )?.llmText;
@@ -81,32 +66,15 @@ export function normalizeConfigForLocalProviderPreference(
     return config;
   }
 
-  const cloud = asRecord(config.cloud) ?? {};
-  const nextCloud: Record<string, unknown> = { ...cloud };
-  delete nextCloud.enabled;
-  delete nextCloud.provider;
-  delete nextCloud.inferenceMode;
-  delete nextCloud.runtime;
-  delete nextCloud.remoteApiBase;
-  delete nextCloud.remoteAccessToken;
+  // Strip cloud capability flags (enabled, provider, inferenceMode, services)
+  // but preserve the apiKey so the cloud account link remains intact for
+  // non-inference services (e.g. RPC proxy, storage).
+  const cloud = asRecord(config.cloud);
+  const apiKey = readString(cloud, "apiKey");
+  const nextCloud: Record<string, unknown> = {};
+  if (apiKey) nextCloud.apiKey = apiKey;
 
-  const services = asRecord(nextCloud.services);
-  if (services) {
-    delete services.inference;
-    delete services.tts;
-    delete services.media;
-    delete services.embeddings;
-    delete services.rpc;
-    if (Object.keys(services).length === 0) {
-      delete nextCloud.services;
-    } else {
-      nextCloud.services = services;
-    }
-  }
-
-  const nextConfig: StorageConfig = { ...config, cloud: nextCloud };
-
-  return nextConfig;
+  return { ...config, cloud: nextCloud };
 }
 
 export function shouldMaskInactiveCloudStatus(args: {

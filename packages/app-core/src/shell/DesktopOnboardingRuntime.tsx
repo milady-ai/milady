@@ -1,33 +1,10 @@
-import {
-  invokeDesktopBridgeRequest,
-  isElectrobunRuntime,
-} from "@miladyai/app-core/bridge";
-import { useApp } from "@miladyai/app-core/state";
-import { useEffect, useRef } from "react";
-
+/**
+ * DesktopOnboardingRuntime — placeholder.
+ *
+ * Previously triggered a desktop background notice during the permissions
+ * onboarding step. Permissions are now requested lazily when features need
+ * them, so this component is a no-op until the lazy permission flow is wired.
+ */
 export function DesktopOnboardingRuntime() {
-  const { onboardingLoading, onboardingStep } = useApp();
-  const requestedBackgroundNoticeRef = useRef(false);
-
-  useEffect(() => {
-    if (!isElectrobunRuntime()) {
-      return;
-    }
-    if (onboardingLoading || onboardingStep !== "permissions") {
-      return;
-    }
-    if (requestedBackgroundNoticeRef.current) {
-      return;
-    }
-
-    requestedBackgroundNoticeRef.current = true;
-    void invokeDesktopBridgeRequest<{ shown: boolean }>({
-      rpcMethod: "desktopShowBackgroundNotice",
-      ipcChannel: "desktop:showBackgroundNotice",
-    }).catch((error) => {
-      console.warn("[Milady] Failed to show desktop background notice:", error);
-    });
-  }, [onboardingLoading, onboardingStep]);
-
   return null;
 }

@@ -21,6 +21,10 @@
 import { type ElizaConfig, saveElizaConfig } from "../config/config";
 import type { AgentConfig } from "../config/types.agents";
 import type { StylePreset } from "../contracts/onboarding";
+import {
+  buildDefaultElizaCloudServiceRouting,
+  buildElizaCloudServiceRoute,
+} from "../contracts/service-routing";
 import { migrateLegacyRuntimeConfig } from "../contracts/onboarding";
 import { getStylePresets } from "../onboarding-presets";
 import { pickRandomNames } from "./onboarding-names";
@@ -61,16 +65,22 @@ export function applyFirstTimeSetupTopology(
   const shouldUseCloudInference = args.selectedProviderId === "elizacloud";
 
   if (shouldUseCloudInference) {
-    serviceRouting.llmText = {
-      backend: "elizacloud",
-      transport: "cloud-proxy",
-      accountId: "elizacloud",
-    };
+    serviceRouting.llmText = buildElizaCloudServiceRoute();
   } else if (args.selectedProviderId?.trim()) {
     serviceRouting.llmText = {
       backend: args.selectedProviderId.trim(),
       transport: "direct",
     };
+  }
+
+  if (args.isCloudRuntime || shouldUseCloudInference) {
+    Object.assign(
+      serviceRouting,
+      buildDefaultElizaCloudServiceRouting({
+        base: serviceRouting,
+        includeInference: shouldUseCloudInference,
+      }),
+    );
   }
 
   return {

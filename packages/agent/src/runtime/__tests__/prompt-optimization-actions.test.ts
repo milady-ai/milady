@@ -12,7 +12,20 @@
  *
  */
 
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { getTrajectoryContextMock } = vi.hoisted(() => ({
+  getTrajectoryContextMock: vi.fn(() => undefined),
+}));
+
+vi.mock("@elizaos/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@elizaos/core")>();
+  return {
+    ...actual,
+    getTrajectoryContext: getTrajectoryContextMock,
+  };
+});
+
 import {
   buildFullParamActionSet,
   compactActionsForIntent,
@@ -499,17 +512,35 @@ describe("compactActionsForIntent", () => {
 import { installPromptOptimizations } from "../prompt-optimization";
 
 describe("installPromptOptimizations", () => {
-  function createMockRuntime() {
+  beforeEach(() => {
+    getTrajectoryContextMock.mockReset();
+    getTrajectoryContextMock.mockReturnValue(undefined);
+  });
+
+  function createMockRuntime(options?: {
+    trajectoryLogger?: {
+      logLlmCall?: (params: Record<string, unknown>) => void;
+      updateLatestLlmCall?: (
+        stepId: string,
+        patch: Record<string, unknown>,
+      ) => Promise<void> | void;
+    } | null;
+    useModelImpl?: (payload: Record<string, unknown>) => Promise<string>;
+  }) {
     const calls: Array<{ modelType: string; prompt: string }> = [];
     const runtime = {
       actions: [{ name: "REPLY" }, { name: "START_CODING_TASK" }],
       logger: { info: () => {}, warn: () => {} },
+      getService: (serviceType: string) =>
+        serviceType === "trajectory_logger"
+          ? (options?.trajectoryLogger ?? null)
+          : null,
       useModel: async (modelType: string, payload: Record<string, unknown>) => {
         calls.push({
           modelType,
           prompt: String(payload?.prompt ?? ""),
         });
-        return "mock response";
+        return (await options?.useModelImpl?.(payload)) ?? "mock response";
       },
     };
     return {
@@ -538,6 +569,42 @@ describe("installPromptOptimizations", () => {
     expect(calls[0].prompt).toBe("hello");
   });
 
+  it("still backfills a trajectory LLM call for non-TEXT_LARGE text models", async () => {
+    getTrajectoryContextMock.mockReturnValue({
+      trajectoryStepId: "trajectory-step-small",
+    });
+
+    const loggedCalls: Array<Record<string, unknown>> = [];
+    const { runtime, calls } = createMockRuntime({
+      trajectoryLogger: {
+        logLlmCall: (params) => {
+          loggedCalls.push(params);
+        },
+      },
+    });
+
+    installPromptOptimizations(runtime);
+
+    await runtime.useModel(
+      "TEXT_SMALL" as unknown as Parameters<typeof runtime.useModel>[0],
+      {
+        prompt: "small model trajectory",
+        system: "small system",
+      } as unknown as Parameters<typeof runtime.useModel>[1],
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].prompt).toBe("small model trajectory");
+    expect(loggedCalls).toHaveLength(1);
+    expect(loggedCalls[0]).toMatchObject({
+      stepId: "trajectory-step-small",
+      model: "TEXT_SMALL",
+      systemPrompt: "small system",
+      userPrompt: "small model trajectory",
+      response: "mock response",
+    });
+  });
+
   it("applies action compaction to TEXT_LARGE calls", async () => {
     const { runtime, calls } = createMockRuntime();
     installPromptOptimizations(runtime);
@@ -557,6 +624,167 @@ user: tell me a joke`;
     // But action names preserved
     expect(calls[0].prompt).toContain("<name>START_CODING_TASK</name>");
     expect(calls[0].prompt).toContain("<name>REPLY</name>");
+  });
+
+  it("preserves the full prompt while trajectory capture is active", async () => {
+    getTrajectoryContextMock.mockReturnValue({
+      trajectoryStepId: "trajectory-step-1",
+    });
+
+    const { runtime, calls } = createMockRuntime();
+    installPromptOptimizations(runtime);
+    const prompt = `<actions>
+  <action><name>REPLY</name><description>Reply.</description></action>
+  <action><name>START_CODING_TASK</name><description>Code.</description><params><param><name>repo</name></param></params></action>
+</actions>
+# Conversation Messages
+assistant: hi
+
+# Received Message
+user: tell me a joke`;
+
+    await runtime.useModel(
+      "TEXT_LARGE" as unknown as Parameters<typeof runtime.useModel>[0],
+      { prompt } as unknown as Parameters<typeof runtime.useModel>[1],
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].prompt).toBe(prompt);
+    expect(calls[0].prompt).toContain("<param>");
+  });
+
+  it("backfills a live LLM call when the trajectory logger misses it", async () => {
+    getTrajectoryContextMock.mockReturnValue({
+      trajectoryStepId: "trajectory-step-1",
+    });
+
+    const loggedCalls: Array<Record<string, unknown>> = [];
+    const { runtime } = createMockRuntime({
+      trajectoryLogger: {
+        logLlmCall: (params) => {
+          loggedCalls.push(params);
+        },
+      },
+    });
+
+    installPromptOptimizations(runtime);
+
+    await runtime.useModel(
+      "TEXT_LARGE" as unknown as Parameters<typeof runtime.useModel>[0],
+      {
+        prompt: "tell me about the trajectory",
+        system: "system prompt",
+        temperature: 0.2,
+        maxTokens: 64,
+      } as unknown as Parameters<typeof runtime.useModel>[1],
+    );
+
+    expect(loggedCalls).toHaveLength(1);
+    expect(loggedCalls[0]).toMatchObject({
+      stepId: "trajectory-step-1",
+      model: "TEXT_LARGE",
+      systemPrompt: "system prompt",
+      userPrompt: "tell me about the trajectory",
+      response: "mock response",
+      temperature: 0.2,
+      maxTokens: 64,
+    });
+    expect(Number(loggedCalls[0]?.promptTokens ?? 0)).toBeGreaterThan(0);
+    expect(Number(loggedCalls[0]?.completionTokens ?? 0)).toBeGreaterThan(0);
+  });
+
+  it("uses the runtime provider hint when labeling fallback trajectory calls", async () => {
+    getTrajectoryContextMock.mockReturnValue({
+      trajectoryStepId: "trajectory-step-1",
+    });
+
+    const loggedCalls: Array<Record<string, unknown>> = [];
+    const { runtime } = createMockRuntime({
+      trajectoryLogger: {
+        logLlmCall: (params) => {
+          loggedCalls.push(params);
+        },
+      },
+    });
+
+    installPromptOptimizations(runtime);
+
+    await runtime.useModel(
+      "TEXT_LARGE" as unknown as Parameters<typeof runtime.useModel>[0],
+      {
+        prompt: "label the live provider",
+      } as unknown as Parameters<typeof runtime.useModel>[1],
+      "elizaOSCloud" as unknown as Parameters<typeof runtime.useModel>[2],
+    );
+
+    expect(loggedCalls).toHaveLength(1);
+    expect(loggedCalls[0]?.model).toBe("elizaOSCloud/TEXT_LARGE");
+  });
+
+  it("does not duplicate a live LLM call when the logger already captured it", async () => {
+    getTrajectoryContextMock.mockReturnValue({
+      trajectoryStepId: "trajectory-step-1",
+    });
+
+    const loggedCalls: Array<Record<string, unknown>> = [];
+    const updateLatestLlmCall = vi.fn();
+    const trajectoryLogger = {
+      logLlmCall: (params: Record<string, unknown>) => {
+        loggedCalls.push(params);
+      },
+      updateLatestLlmCall,
+    };
+    const { runtime } = createMockRuntime({
+      trajectoryLogger,
+      useModelImpl: async (payload) => {
+        trajectoryLogger.logLlmCall({
+          stepId: "trajectory-step-1",
+          model: "TEXT_LARGE",
+          userPrompt: String(payload.prompt ?? ""),
+          response: "captured by logger",
+        });
+        return "captured by logger";
+      },
+    });
+
+    installPromptOptimizations(runtime);
+
+    await runtime.useModel(
+      "TEXT_LARGE" as unknown as Parameters<typeof runtime.useModel>[0],
+      {
+        prompt: "no duplicate logging",
+      } as unknown as Parameters<typeof runtime.useModel>[1],
+    );
+
+    expect(loggedCalls).toHaveLength(1);
+    expect(loggedCalls[0]?.response).toBe("captured by logger");
+    expect(updateLatestLlmCall).toHaveBeenCalledTimes(1);
+    expect(updateLatestLlmCall).toHaveBeenCalledWith(
+      "trajectory-step-1",
+      expect.objectContaining({
+        stepId: "trajectory-step-1",
+        userPrompt: "no duplicate logging",
+        response: "captured by logger",
+      }),
+    );
+    expect(
+      Number(
+        (
+          updateLatestLlmCall.mock.calls[0]?.[1] as
+            | Record<string, unknown>
+            | undefined
+        )?.promptTokens ?? 0,
+      ),
+    ).toBeGreaterThan(0);
+    expect(
+      Number(
+        (
+          updateLatestLlmCall.mock.calls[0]?.[1] as
+            | Record<string, unknown>
+            | undefined
+        )?.completionTokens ?? 0,
+      ),
+    ).toBeGreaterThan(0);
   });
 });
 

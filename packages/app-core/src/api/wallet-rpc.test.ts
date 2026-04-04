@@ -96,6 +96,40 @@ describe("wallet RPC helpers", () => {
     expect(readiness.cloudManagedAccess).toBe(true);
   });
 
+  test("defaults cloud RPC access on when Eliza Cloud is linked and wallet providers stay on cloud defaults", () => {
+    const readiness = resolveWalletRpcReadiness({
+      env: {},
+      cloud: {
+        apiKey: "cloud-key",
+      },
+    } as ElizaConfig);
+
+    expect(readiness.selectedRpcProviders).toEqual({
+      evm: "eliza-cloud",
+      bsc: "eliza-cloud",
+      solana: "eliza-cloud",
+    });
+    expect(readiness.cloudManagedAccess).toBe(true);
+  });
+
+  test("does not expose cloud RPC when wallet providers are explicitly custom", () => {
+    const readiness = resolveWalletRpcReadiness({
+      env: {},
+      cloud: {
+        apiKey: "cloud-key",
+      },
+      wallet: {
+        rpcProviders: {
+          evm: "alchemy",
+          bsc: "ankr",
+          solana: "helius-birdeye",
+        },
+      },
+    } as ElizaConfig);
+
+    expect(readiness.cloudManagedAccess).toBe(false);
+  });
+
   test("prefers canonical providers over legacy raw RPC URLs during migration", () => {
     process.env.ALCHEMY_API_KEY = "alchemy";
     process.env.NODEREAL_BSC_RPC_URL = "https://nodereal.example";

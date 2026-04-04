@@ -232,7 +232,7 @@ describe("collectPluginNames", () => {
 
   it("includes all core plugins for an empty config", () => {
     // Guard against accidental drift in the default runtime contract.
-    expect(CORE_PLUGINS).toHaveLength(12);
+    expect(CORE_PLUGINS).toHaveLength(13);
 
     const expectedCorePlugins = [
       "@elizaos/plugin-sql",
@@ -247,6 +247,7 @@ describe("collectPluginNames", () => {
       "@elizaos/plugin-commands",
       "@elizaos/plugin-plugin-manager",
       "@miladyai/plugin-roles",
+      "@elizaos/plugin-todo",
     ];
     const names = collectPluginNames({} as ElizaConfig);
     for (const plugin of expectedCorePlugins) {
@@ -258,6 +259,13 @@ describe("collectPluginNames", () => {
     const names = collectPluginNames({} as ElizaConfig);
     expect(names.has("@elizaos/plugin-agent-orchestrator")).toBe(true);
     expect(names.has("@elizaos/plugin-edge-tts")).toBe(true);
+  });
+
+  it("maps selfcontrol short ids to the built-in SelfControl plugin", () => {
+    const names = collectPluginNames({
+      plugins: { allow: ["selfcontrol", "website-blocker"] },
+    } as Partial<ElizaConfig> as ElizaConfig);
+    expect(names.has("@miladyai/plugin-selfcontrol")).toBe(true);
   });
 
   it("omits @elizaos/plugin-edge-tts when plugins.entries.edge-tts.enabled is false", () => {

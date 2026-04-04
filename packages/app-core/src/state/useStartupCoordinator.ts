@@ -15,26 +15,9 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import {
-  type AgentStartupDiagnostics,
-  type AgentStatus,
-  type CodingAgentSession,
-  type Conversation,
-  type ConversationMessage,
-  type OnboardingOptions,
-  type StreamEventEnvelope,
-  client,
-} from "../api";
-import { scanProviderCredentials } from "../bridge";
-import { mapServerTasksToSessions } from "../coding";
-import type { WalletAddresses } from "@miladyai/agent/contracts/wallet";
-import { type StartupErrorState } from "./internal";
 import { loadPersistedOnboardingComplete } from "./persistence";
-import { resolveApiUrl } from "../utils";
-import { COMPANION_ENABLED, type Tab } from "../navigation";
 import {
   INITIAL_STARTUP_STATE,
-  connectionModeToTarget,
   createDesktopPolicy,
   createWebPolicy,
   isStartupLoading,
@@ -47,105 +30,41 @@ import {
   type StartupState,
 } from "./startup-coordinator";
 import { isElectrobunRuntime } from "../bridge";
-import type { UiLanguage } from "../i18n";
-import type { OnboardingMode, OnboardingStep } from "./types";
 import {
   runRestoringSession,
   type RestoringSessionCtx,
+  type RestoringSessionDeps,
 } from "./startup-phase-restore";
-import { runPollingBackend } from "./startup-phase-poll";
-import { runStartingRuntime } from "./startup-phase-runtime";
-import { runHydrating, bindReadyPhase } from "./startup-phase-hydrate";
+import {
+  runPollingBackend,
+  type PollingBackendDeps,
+} from "./startup-phase-poll";
+import {
+  runStartingRuntime,
+  type StartingRuntimeDeps,
+} from "./startup-phase-runtime";
+import {
+  runHydrating,
+  bindReadyPhase,
+  type HydratingDeps,
+  type ReadyPhaseDeps,
+} from "./startup-phase-hydrate";
 
 // ── Deps interface ──────────────────────────────────────────────────
+// Composed from per-phase slices defined in each startup-phase-*.ts module.
+// The only member unique to the hook itself is `setStartupPhase` (legacy sync).
 
-export interface StartupCoordinatorDeps {
-  setConnected: (v: boolean) => void;
-  setAgentStatus: (v: AgentStatus | null) => void;
-  setAgentStatusIfChanged: (v: AgentStatus) => void;
-  setStartupPhase: (
-    v: "starting-backend" | "initializing-agent" | "ready",
-  ) => void;
-  setStartupError: (v: StartupErrorState | null) => void;
-  setAuthRequired: (v: boolean) => void;
-  setOnboardingComplete: (v: boolean) => void;
-  setOnboardingLoading: (v: boolean) => void;
-  setPendingRestart: (v: boolean | ((prev: boolean) => boolean)) => void;
-  setPendingRestartReasons: (
-    v: string[] | ((prev: string[]) => string[]),
-  ) => void;
-  setSystemWarnings: (v: string[] | ((prev: string[]) => string[])) => void;
-  showRestartBanner: () => void;
-  setPairingEnabled: (v: boolean) => void;
-  setPairingExpiresAt: (v: number | null) => void;
-  setOnboardingOptions: (v: OnboardingOptions) => void;
-  setOnboardingExistingInstallDetected: (v: boolean) => void;
-  setOnboardingStep: (v: OnboardingStep) => void;
-  setOnboardingServerTarget: (
-    v: "" | "local" | "remote" | "elizacloud",
-  ) => void;
-  setOnboardingCloudApiKey: (v: string) => void;
-  setOnboardingProvider: (v: string) => void;
-  setOnboardingVoiceProvider: (v: string) => void;
-  setOnboardingApiKey: (v: string) => void;
-  setOnboardingPrimaryModel: (v: string) => void;
-  setOnboardingOpenRouterModel: (v: string) => void;
-  setOnboardingRemoteConnected: (v: boolean) => void;
-  setOnboardingRemoteApiBase: (v: string) => void;
-  setOnboardingRemoteToken: (v: string) => void;
-  setOnboardingSmallModel: (v: string) => void;
-  setOnboardingLargeModel: (v: string) => void;
-  setOnboardingCloudProvisionedContainer: (v: boolean) => void;
-  applyDetectedProviders: (
-    detected: Awaited<ReturnType<typeof scanProviderCredentials>>,
-  ) => void;
-  hydrateInitialConversationState: () => Promise<string | null>;
-  loadWorkbench: () => Promise<void>;
-  loadPlugins: () => Promise<void>;
-  loadSkills: () => Promise<void>;
-  loadCharacter: () => Promise<void>;
-  loadWalletConfig: () => Promise<void>;
-  loadInventory: () => Promise<void>;
-  loadUpdateStatus: (force?: boolean) => Promise<void>;
-  checkExtensionStatus: () => Promise<void>;
-  pollCloudCredits: () => void;
-  fetchAutonomyReplay: () => Promise<void>;
-  appendAutonomousEvent: (event: StreamEventEnvelope) => void;
-  notifyHeartbeatEvent: (event: StreamEventEnvelope) => void;
-  setSelectedVrmIndex: (v: number) => void;
-  setCustomVrmUrl: (v: string) => void;
-  setCustomBackgroundUrl: (v: string) => void;
-  setWalletAddresses: (v: WalletAddresses) => void;
-  setPtySessions: (
-    v:
-      | CodingAgentSession[]
-      | ((prev: CodingAgentSession[]) => CodingAgentSession[]),
-  ) => void;
-  setTab: (t: Tab) => void;
-  setTabRaw: (t: Tab) => void;
-  setConversationMessages: (
-    v:
-      | ConversationMessage[]
-      | ((prev: ConversationMessage[]) => ConversationMessage[]),
-  ) => void;
-  setUnreadConversations: (
-    v: Set<string> | ((prev: Set<string>) => Set<string>),
-  ) => void;
-  setConversations: (
-    v: Conversation[] | ((prev: Conversation[]) => Conversation[]),
-  ) => void;
-  requestGreetingWhenRunningRef: React.RefObject<
-    (convId: string) => Promise<void>
-  >;
-  onboardingCompletionCommittedRef: React.MutableRefObject<boolean>;
-  forceLocalBootstrapRef: React.MutableRefObject<boolean>;
-  initialTabSetRef: React.MutableRefObject<boolean>;
-  activeConversationIdRef: React.RefObject<string | null>;
-  elizaCloudPollInterval: React.MutableRefObject<number | null>;
-  elizaCloudLoginPollTimer: React.MutableRefObject<number | null>;
-  uiLanguage: UiLanguage;
-  onboardingMode: OnboardingMode;
-}
+export type StartupCoordinatorDeps = RestoringSessionDeps &
+  PollingBackendDeps &
+  StartingRuntimeDeps &
+  HydratingDeps &
+  ReadyPhaseDeps & {
+    /** Legacy lifecycle setter — driven by the coordinator sync effect. */
+    setStartupPhase: (
+      v: "starting-backend" | "initializing-agent" | "ready",
+    ) => void;
+    setOnboardingCloudProvisionedContainer: (v: boolean) => void;
+  };
 
 // ── Handle ──────────────────────────────────────────────────────────
 
@@ -153,6 +72,7 @@ export interface StartupCoordinatorHandle {
   state: StartupState;
   dispatch: (event: StartupEvent) => void;
   retry: () => void;
+  reset: () => void;
   pairingSuccess: () => void;
   onboardingComplete: () => void;
   policy: PlatformPolicy;
@@ -187,6 +107,13 @@ export function useStartupCoordinator(
 
   // Track whether the ready-phase WS bindings have been set up
   const wsBindingsActiveRef = useRef(false);
+
+  // ── Legacy sync — derive startupPhase from coordinator state ────
+  const legacyPhase = toLegacyStartupPhase(state);
+  useEffect(() => {
+    if (!depsReady) return;
+    depsRef.current!.setStartupPhase(legacyPhase);
+  }, [legacyPhase, depsReady]);
 
   // ── Phase: splash — auto-skip for returning users, mark loaded for new users
   useEffect(() => {
@@ -304,7 +231,7 @@ export function useStartupCoordinator(
     wsBindingsActiveRef.current = true;
 
     const cleanup = bindReadyPhase(
-      depsRef as React.MutableRefObject<StartupCoordinatorDeps | undefined>,
+      depsRef as React.MutableRefObject<ReadyPhaseDeps | undefined>,
     );
 
     return () => {
@@ -317,6 +244,7 @@ export function useStartupCoordinator(
   // ── Public interface ─────────────────────────────────────────────
 
   const retry = useCallback(() => dispatch({ type: "RETRY" }), []);
+  const reset = useCallback(() => dispatch({ type: "RESET" }), []);
   const pairingSuccess = useCallback(
     () => dispatch({ type: "PAIRING_SUCCESS" }),
     [],
@@ -334,6 +262,7 @@ export function useStartupCoordinator(
     state,
     dispatch,
     retry,
+    reset,
     pairingSuccess,
     onboardingComplete: onboardingCompleteFn,
     policy,

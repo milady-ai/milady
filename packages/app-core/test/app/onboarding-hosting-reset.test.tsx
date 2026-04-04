@@ -173,7 +173,7 @@ describe("onboarding hosting reset", () => {
     mockClient.saveStreamSettings.mockResolvedValue({ ok: true });
   });
 
-  it("clears stale connection state when identity advances into hosting", async () => {
+  it("clears stale connection state when identity advances into providers", async () => {
     let api: ProbeApi | null = null;
     let tree: TestRenderer.ReactTestRenderer | null = null;
 
@@ -220,10 +220,10 @@ describe("onboarding hosting reset", () => {
       });
 
       expect(getApi().snapshot()).toMatchObject({
-        onboardingStep: "hosting",
-        onboardingServerTarget: "",
-        onboardingProvider: "",
-        onboardingPrimaryModel: "",
+        onboardingStep: "providers",
+        onboardingServerTarget: "elizacloud",
+        onboardingProvider: "openai",
+        onboardingPrimaryModel: "gpt-5",
       });
     } finally {
       await act(async () => {

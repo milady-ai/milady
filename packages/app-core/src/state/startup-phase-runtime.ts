@@ -16,7 +16,18 @@ import {
   getAgentReadyTimeoutMs,
 } from "./agent-startup-timing";
 import type { StartupEvent } from "./startup-coordinator";
-import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
+
+export interface StartingRuntimeDeps {
+  setAgentStatus: (v: import("../api").AgentStatus | null) => void;
+  setConnected: (v: boolean) => void;
+  setStartupError: (v: StartupErrorState | null) => void;
+  setOnboardingLoading: (v: boolean) => void;
+  setAuthRequired: (v: boolean) => void;
+  setPendingRestart: (v: boolean | ((prev: boolean) => boolean)) => void;
+  setPendingRestartReasons: (
+    v: string[] | ((prev: string[]) => string[]),
+  ) => void;
+}
 
 /**
  * Runs the starting-runtime phase.
@@ -30,15 +41,13 @@ import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
  * @param tidRef - Mutable ref for the pending setTimeout handle (for cleanup)
  */
 export async function runStartingRuntime(
-  deps: StartupCoordinatorDeps,
+  deps: StartingRuntimeDeps,
   dispatch: (event: StartupEvent) => void,
   effectRunId: number,
   effectRunRef: React.MutableRefObject<number>,
   cancelled: { current: boolean },
   tidRef: { current: ReturnType<typeof setTimeout> | null },
 ): Promise<void> {
-  deps.setStartupPhase("initializing-agent");
-
   const describeAgentFailure = (
     err: unknown,
     timedOut: boolean,

@@ -15,11 +15,7 @@ import {
 } from "../bridge";
 import { ONBOARDING_PROVIDER_CATALOG } from "@miladyai/shared/contracts/onboarding";
 import { getStylePresets } from "@miladyai/shared/onboarding-presets";
-import { type StartupErrorState } from "./internal";
-import {
-  detectExistingOnboardingConnection,
-  resolveStartupWithoutRestoredConnection,
-} from "./onboarding-bootstrap";
+import { detectExistingOnboardingConnection } from "./onboarding-bootstrap";
 import {
   createPersistedActiveServer,
   loadPersistedActiveServer,
@@ -27,7 +23,23 @@ import {
   type PersistedActiveServer,
 } from "./persistence";
 import { type StartupEvent } from "./startup-coordinator";
-import type { StartupCoordinatorDeps } from "./useStartupCoordinator";
+import type { UiLanguage } from "../i18n";
+
+export interface RestoringSessionDeps {
+  setStartupError: (v: null) => void;
+  setAuthRequired: (v: boolean) => void;
+  setConnected: (v: boolean) => void;
+  setOnboardingExistingInstallDetected: (v: boolean) => void;
+  setOnboardingOptions: (v: OnboardingOptions) => void;
+  setOnboardingComplete: (v: boolean) => void;
+  setOnboardingLoading: (v: boolean) => void;
+  applyDetectedProviders: (
+    detected: Awaited<ReturnType<typeof scanProviderCredentials>>,
+  ) => void;
+  forceLocalBootstrapRef: React.MutableRefObject<boolean>;
+  onboardingCompletionCommittedRef: React.MutableRefObject<boolean>;
+  uiLanguage: UiLanguage;
+}
 
 export interface RestoringSessionCtx {
   persistedActiveServer: ReturnType<typeof loadPersistedActiveServer>;
@@ -86,13 +98,12 @@ function activeServerToTarget(
  * @param cancelled - Ref-flag set true by the cleanup function
  */
 export async function runRestoringSession(
-  deps: StartupCoordinatorDeps,
+  deps: RestoringSessionDeps,
   dispatch: (event: StartupEvent) => void,
   ctxRef: React.MutableRefObject<RestoringSessionCtx | null>,
   cancelled: { current: boolean },
 ): Promise<void> {
   deps.setStartupError(null);
-  deps.setStartupPhase("starting-backend");
   deps.setAuthRequired(false);
   deps.setConnected(false);
   deps.setOnboardingExistingInstallDetected(false);
@@ -136,17 +147,7 @@ export async function runRestoringSession(
   );
 
   if (!restoredActiveServer) {
-    // No evidence of a prior connection — show onboarding.
-    const result = resolveStartupWithoutRestoredConnection({
-      hadPersistedOnboardingCompletion: hadPrior,
-    });
-    if (result.kind === "startup-error") {
-      deps.setOnboardingComplete(true);
-      deps.setStartupError(result.error as StartupErrorState);
-      deps.setOnboardingLoading(false);
-      dispatch({ type: "NO_SESSION", hadPriorOnboarding: true });
-      return;
-    }
+    // No saved backend found — let the user (re-)onboard.
     deps.setOnboardingOptions({
       names: [],
       styles: getStylePresets(deps.uiLanguage),
@@ -173,10 +174,9 @@ export async function runRestoringSession(
         scanErr,
       );
     }
-    deps.setStartupPhase("ready");
     deps.setOnboardingComplete(false);
     deps.setOnboardingLoading(false);
-    dispatch({ type: "NO_SESSION", hadPriorOnboarding: false });
+    dispatch({ type: "NO_SESSION", hadPriorOnboarding: hadPrior });
     return;
   }
 

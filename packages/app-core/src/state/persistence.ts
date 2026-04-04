@@ -256,26 +256,30 @@ const ONBOARDING_STEP_STORAGE_KEY = "eliza:onboarding:step";
 function normalizeOnboardingStep(value: unknown): OnboardingStep | null {
   switch (value) {
     case "identity":
-    case "hosting":
     case "providers":
-    case "voice":
+      return value;
     case "permissions":
     case "launch":
-      return value;
+      // permissions/launch removed — resume at providers
+      return "providers";
     // Legacy step ID migration — map old persisted values to new equivalents
     case "cloud_login":
     case "welcome":
       // cloud_login is now handled by the splash page; resume at identity
       return "identity";
+    case "hosting":
     case "connection":
-      return "hosting";
+      // hosting is now handled by the splash page; resume at providers
+      return "providers";
     case "cloudLogin":
     case "rpc":
       return "providers";
+    case "voice":
     case "senses":
-      return "permissions";
+      // voice/permissions removed from onboarding; resume at providers
+      return "providers";
     case "activate":
-      return "launch";
+      return "providers";
     default:
       return null;
   }
@@ -325,6 +329,45 @@ export function savePersistedOnboardingComplete(complete: boolean): void {
   } catch {
     /* ignore */
   }
+}
+
+/* ── Content pack persistence ───────────────────────────────────────── */
+
+const ACTIVE_PACK_STORAGE_KEY = "milady:active-pack-id";
+const ACTIVE_PACK_URL_STORAGE_KEY = "milady:active-pack-url";
+
+export function loadPersistedActivePackId(): string | null {
+  return tryLocalStorage(
+    () => localStorage.getItem(ACTIVE_PACK_STORAGE_KEY),
+    null,
+  );
+}
+
+export function savePersistedActivePackId(packId: string | null): void {
+  tryLocalStorage(() => {
+    if (packId) {
+      localStorage.setItem(ACTIVE_PACK_STORAGE_KEY, packId);
+    } else {
+      localStorage.removeItem(ACTIVE_PACK_STORAGE_KEY);
+    }
+  }, undefined);
+}
+
+export function loadPersistedActivePackUrl(): string | null {
+  return tryLocalStorage(
+    () => localStorage.getItem(ACTIVE_PACK_URL_STORAGE_KEY),
+    null,
+  );
+}
+
+export function savePersistedActivePackUrl(packUrl: string | null): void {
+  tryLocalStorage(() => {
+    if (packUrl) {
+      localStorage.setItem(ACTIVE_PACK_URL_STORAGE_KEY, packUrl);
+    } else {
+      localStorage.removeItem(ACTIVE_PACK_URL_STORAGE_KEY);
+    }
+  }, undefined);
 }
 
 export function loadUiLanguage(): UiLanguage {

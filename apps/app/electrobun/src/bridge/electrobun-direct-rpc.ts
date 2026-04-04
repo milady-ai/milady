@@ -19,6 +19,7 @@ import { ensureElectrobunGlobal } from "./electrobun-stub.js";
 type RendererRequestHandler = (params: unknown) => Promise<unknown>;
 type RendererBridgeRpc = {
   request: Record<string, RendererRequestHandler>;
+  setTransport: (transport: unknown) => void;
 };
 
 const listenersByRpcMessage: Record<string, Set<RpcMessageListener>> = {};

@@ -9,8 +9,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── Mock config module before importing eliza.ts ────────────────────────
 
-const mockLoadElizaConfig = vi.fn();
-const mockSaveElizaConfig = vi.fn();
+const { loggerInfoMock, mockLoadElizaConfig, mockSaveElizaConfig } =
+  vi.hoisted(() => ({
+    loggerInfoMock: vi.fn(),
+    mockLoadElizaConfig: vi.fn(),
+    mockSaveElizaConfig: vi.fn(),
+  }));
+
+vi.mock("@elizaos/core", () => ({
+  logger: {
+    info: (...args: unknown[]) => loggerInfoMock(...args),
+  },
+}));
 
 // Mock config module used by plugin-manager-guard.ts
 vi.mock("@miladyai/agent/config/config", () => ({
@@ -28,6 +38,7 @@ describe("ensurePluginManagerAllowed", () => {
 
   beforeEach(() => {
     _resetPluginManagerChecked();
+    loggerInfoMock.mockReset();
     mockLoadElizaConfig.mockReset();
     mockSaveElizaConfig.mockReset();
     delete process.env.MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE;
@@ -51,6 +62,10 @@ describe("ensurePluginManagerAllowed", () => {
     expect(mockSaveElizaConfig).toHaveBeenCalledTimes(1);
     const saved = mockSaveElizaConfig.mock.calls[0][0];
     expect(saved.plugins.entries["plugin-manager"]).toEqual({ enabled: true });
+    expect(loggerInfoMock).toHaveBeenCalledWith(
+      "[milady] Auto-enabled plugin-manager for dashboard plugin installs. " +
+        "Set MILADY_DISABLE_PLUGIN_MANAGER_AUTO_ENABLE=1 to prevent this.",
+    );
   });
 
   it("skips write when plugin-manager already present", () => {

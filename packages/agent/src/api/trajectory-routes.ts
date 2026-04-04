@@ -20,6 +20,13 @@ import {
   sendJsonError,
 } from "./http-helpers";
 import { createZipArchive } from "./zip-utils";
+import {
+  executeRawSql,
+  extractRows,
+  saveTrajectory,
+  type PersistedStep,
+  type PersistedTrajectory,
+} from "../runtime/trajectory-internals";
 
 import type {
   Trajectory,
@@ -238,6 +245,119 @@ function toNullableString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function estimateTokenCount(text: string): number {
+  return Math.max(1, Math.ceil(text.length / 4));
+}
+
+function buildDisplayMetadata(traj: Trajectory): Record<string, unknown> {
+  const metadata = { ...(asRecord(traj.metadata) ?? {}) };
+  const calls = (traj.steps ?? []).flatMap((step) => step.llmCalls ?? []);
+  if (calls.length > 0 && !calls.every((call) => isSyntheticTrajectoryCall(call))) {
+    delete metadata.syntheticLlmCall;
+    delete metadata.syntheticLlmCallSource;
+  }
+  return metadata;
+}
+
+function normalizePersistedStatus(value: unknown): TrajectoryStatus {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (
+    normalized === "active" ||
+    normalized === "completed" ||
+    normalized === "error" ||
+    normalized === "timeout"
+  ) {
+    return normalized;
+  }
+  return normalized.length > 0 ? "completed" : "active";
+}
+
+function toPersistedTrajectory(traj: Trajectory): PersistedTrajectory {
+  const metadata = buildDisplayMetadata(traj);
+  const status = normalizePersistedStatus(
+    traj.metrics?.finalStatus ?? (typeof traj.endTime === "number" ? "completed" : "active"),
+  );
+  const persistedSteps: PersistedStep[] = (traj.steps ?? []).map((step, index) => ({
+    stepId:
+      typeof step.stepId === "string" && step.stepId.trim().length > 0
+        ? step.stepId.trim()
+        : `${traj.trajectoryId}-step-${index + 1}`,
+    stepNumber: index,
+    timestamp:
+      typeof step.timestamp === "number" && Number.isFinite(step.timestamp)
+        ? step.timestamp
+        : traj.startTime,
+    llmCalls: (step.llmCalls ?? []).map((call, callIndex) => ({
+      callId:
+        typeof call.callId === "string" && call.callId.trim().length > 0
+          ? call.callId.trim()
+          : `${traj.trajectoryId}-call-${index + 1}-${callIndex + 1}`,
+      timestamp:
+        typeof call.timestamp === "number" && Number.isFinite(call.timestamp)
+          ? call.timestamp
+          : step.timestamp,
+      model: typeof call.model === "string" ? call.model : "unknown",
+      systemPrompt: typeof call.systemPrompt === "string" ? call.systemPrompt : "",
+      userPrompt: typeof call.userPrompt === "string" ? call.userPrompt : "",
+      response: typeof call.response === "string" ? call.response : "",
+      temperature: toFiniteNumber(call.temperature) ?? 0,
+      maxTokens: toFiniteNumber(call.maxTokens) ?? 0,
+      purpose: typeof call.purpose === "string" ? call.purpose : "",
+      actionType: typeof call.actionType === "string" ? call.actionType : "",
+      latencyMs: toFiniteNumber(call.latencyMs) ?? 0,
+      promptTokens: toFiniteNumber(call.promptTokens) ?? undefined,
+      completionTokens: toFiniteNumber(call.completionTokens) ?? undefined,
+    })),
+    providerAccesses: (step.providerAccesses ?? []).map((access, accessIndex) => ({
+      providerId:
+        typeof access.providerId === "string" && access.providerId.trim().length > 0
+          ? access.providerId.trim()
+          : `${traj.trajectoryId}-provider-${index + 1}-${accessIndex + 1}`,
+      providerName:
+        typeof access.providerName === "string" ? access.providerName : "unknown",
+      timestamp:
+        typeof access.timestamp === "number" && Number.isFinite(access.timestamp)
+          ? access.timestamp
+          : step.timestamp,
+      data: asRecord(access.data) ?? {},
+      query: asRecord(access.query) ?? undefined,
+      purpose: typeof access.purpose === "string" ? access.purpose : "",
+    })),
+  }));
+
+  return {
+    id: traj.trajectoryId,
+    source: toNullableString(metadata.source) ?? "runtime",
+    status,
+    startTime: traj.startTime,
+    endTime: typeof traj.endTime === "number" ? traj.endTime : null,
+    steps: persistedSteps,
+    metadata,
+    totalReward: 0,
+    createdAt: new Date(traj.startTime).toISOString(),
+    updatedAt: new Date(
+      typeof traj.endTime === "number" ? traj.endTime : Date.now(),
+    ).toISOString(),
+  };
+}
+
 function listItemToUIRecord(item: TrajectoryListItem): UITrajectoryRecord {
   const status =
     item.status === "timeout" || item.status === "error"
@@ -337,7 +457,7 @@ function trajectoryToUIDetail(traj: Trajectory): UITrajectoryDetailResult {
     }
   }
 
-  const metadata = (traj.metadata ?? {}) as Record<string, unknown>;
+  const metadata = buildDisplayMetadata(traj);
   const normalizedDurationMs =
     status === "active"
       ? null
@@ -393,6 +513,217 @@ function extractMessageText(memory: unknown): string {
   if (!memory || typeof memory !== "object") return "";
   const content = (memory as { content?: { text?: unknown } }).content;
   return typeof content?.text === "string" ? content.text.trim() : "";
+}
+
+function isTextGenerationLogRow(
+  type: string,
+  body: Record<string, unknown>,
+): boolean {
+  if (!type.startsWith("useModel:")) return false;
+  const modelType =
+    typeof body.modelType === "string" && body.modelType.trim().length > 0
+      ? body.modelType.trim().toUpperCase()
+      : type.slice("useModel:".length).trim().toUpperCase();
+  return (
+    modelType === "TEXT_SMALL" ||
+    modelType === "TEXT_LARGE" ||
+    modelType === "TEXT_COMPLETION" ||
+    modelType === "REASONING_SMALL" ||
+    modelType === "REASONING_LARGE"
+  );
+}
+
+async function maybeBackfillTrajectoryFromUseModelLogs(
+  runtime: AgentRuntime,
+  traj: Trajectory,
+): Promise<Trajectory> {
+  if (!needsConversationBackfill(traj)) {
+    return traj;
+  }
+
+  const metadata = (traj.metadata ?? {}) as Record<string, unknown>;
+  const messageId = toNullableString(metadata.messageId);
+  const roomId = toNullableString(metadata.roomId);
+  if (!messageId && !roomId) {
+    return traj;
+  }
+
+  try {
+    const result = await executeRawSql(
+      runtime,
+      "SELECT type, body, room_id, created_at FROM logs ORDER BY created_at DESC LIMIT 500",
+    );
+    const rows = extractRows(result);
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return traj;
+    }
+
+    const normalizedRows = rows
+      .map((row) => {
+        const record = asRecord(row);
+        if (!record) return null;
+        const bodyValue = record.body;
+        const body =
+          asRecord(bodyValue) ??
+          (typeof bodyValue === "string"
+            ? asRecord(JSON.parse(bodyValue))
+            : null);
+        if (!body) return null;
+        return {
+          type: typeof record.type === "string" ? record.type : "",
+          roomId: toNullableString(record.room_id),
+          createdAt:
+            typeof record.created_at === "string" ? record.created_at : null,
+          body,
+        };
+      })
+      .filter((row): row is NonNullable<typeof row> => row !== null);
+
+    const runEventCandidates = normalizedRows.filter((row) => {
+      if (row.type !== "run_event") return false;
+      const body = row.body;
+      if (typeof body.runId !== "string" || body.runId.trim().length === 0) {
+        return false;
+      }
+      if (messageId && body.messageId === messageId) {
+        return true;
+      }
+      const loggedRoomId = toNullableString(body.roomId) ?? row.roomId;
+      const startTime = toFiniteNumber(body.startTime);
+      const endTime = toFiniteNumber(body.endTime) ?? startTime;
+      return (
+        !!roomId &&
+        loggedRoomId === roomId &&
+        startTime !== null &&
+        endTime !== null &&
+        endTime >= traj.startTime - 60_000 &&
+        startTime <= (traj.endTime ?? traj.startTime + 120_000) + 60_000
+      );
+    });
+
+    if (runEventCandidates.length === 0) {
+      return traj;
+    }
+
+    runEventCandidates.sort((left, right) => {
+      const leftStart = toFiniteNumber(left.body.startTime) ?? 0;
+      const rightStart = toFiniteNumber(right.body.startTime) ?? 0;
+      return Math.abs(leftStart - traj.startTime) - Math.abs(rightStart - traj.startTime);
+    });
+
+    const runId = String(runEventCandidates[0].body.runId);
+    const useModelRows = normalizedRows
+      .filter(
+        (row) =>
+          row.body.runId === runId && isTextGenerationLogRow(row.type, row.body),
+      )
+      .sort((left, right) => {
+        const leftTs =
+          toFiniteNumber(left.body.timestamp) ??
+          Date.parse(left.createdAt ?? "") ??
+          0;
+        const rightTs =
+          toFiniteNumber(right.body.timestamp) ??
+          Date.parse(right.createdAt ?? "") ??
+          0;
+        return leftTs - rightTs;
+      });
+
+    if (useModelRows.length === 0) {
+      return traj;
+    }
+
+    const baseSteps: TrajectoryStep[] =
+      traj.steps && traj.steps.length > 0
+        ? traj.steps.map((step) => ({
+            ...step,
+            llmCalls: [] as TrajectoryLlmCall[],
+          }))
+        : [
+            {
+              stepId: traj.trajectoryId,
+              timestamp: traj.startTime,
+              llmCalls: [] as TrajectoryLlmCall[],
+              providerAccesses: [],
+            },
+          ];
+
+    const firstCallTimestamp =
+      toFiniteNumber(useModelRows[0]?.body.timestamp) ?? traj.startTime;
+    baseSteps[0] = {
+      ...baseSteps[0],
+      timestamp:
+        typeof baseSteps[0].timestamp === "number"
+          ? Math.min(baseSteps[0].timestamp, firstCallTimestamp)
+          : firstCallTimestamp,
+      llmCalls: useModelRows.map((row, index) => {
+        const body = row.body;
+        const systemPrompt =
+          typeof body.systemPrompt === "string" ? body.systemPrompt : "";
+        const userPrompt = typeof body.prompt === "string" ? body.prompt : "";
+        const response = typeof body.response === "string" ? body.response : "";
+        const modelKey =
+          typeof body.modelKey === "string" && body.modelKey.trim().length > 0
+            ? body.modelKey.trim()
+            : row.type.slice("useModel:".length);
+        const provider =
+          typeof body.provider === "string" && body.provider.trim().length > 0
+            ? body.provider.trim()
+            : "";
+        const model =
+          provider &&
+          modelKey &&
+          modelKey.toUpperCase().startsWith("TEXT_")
+            ? `${provider}/${modelKey}`
+            : modelKey || provider || "unknown";
+        return {
+          callId: `${traj.trajectoryId}-log-${index + 1}`,
+          timestamp:
+            toFiniteNumber(body.timestamp) ??
+            Date.parse(row.createdAt ?? "") ??
+            firstCallTimestamp,
+          model,
+          systemPrompt,
+          userPrompt,
+          response,
+          temperature: toFiniteNumber(body.temperature) ?? 0,
+          maxTokens: toFiniteNumber(body.maxTokens) ?? 0,
+          purpose: "chat",
+          actionType: "runtime.useModel",
+          latencyMs:
+            Math.max(
+              0,
+              Math.round(toFiniteNumber(body.executionTime) ?? 0),
+            ) ?? 0,
+          promptTokens: estimateTokenCount(systemPrompt + userPrompt),
+          completionTokens: estimateTokenCount(response),
+        };
+      }),
+    };
+
+    const nextMetadata: Record<string, unknown> = {
+      ...metadata,
+      llmCallBackfillSource: "logs",
+    };
+    delete nextMetadata.syntheticLlmCall;
+    delete nextMetadata.syntheticLlmCallSource;
+
+    const enriched = {
+      ...traj,
+      steps: baseSteps,
+      metadata: nextMetadata,
+    };
+
+    try {
+      await saveTrajectory(runtime, toPersistedTrajectory(enriched));
+    } catch {
+      // Best-effort persistence only; still return the enriched detail payload.
+    }
+
+    return enriched;
+  } catch {
+    return traj;
+  }
 }
 
 async function maybeBackfillTrajectoryFromConversationMemory(
@@ -504,13 +835,17 @@ async function maybeBackfillTrajectoryFromConversationMemory(
       ],
     };
 
+    const nextMetadata: Record<string, unknown> = {
+      ...metadata,
+      llmCallBackfillSource: "conversation-memory",
+    };
+    delete nextMetadata.syntheticLlmCall;
+    delete nextMetadata.syntheticLlmCallSource;
+
     return {
       ...traj,
       steps: baseSteps,
-      metadata: {
-        ...metadata,
-        llmCallBackfillSource: "conversation-memory",
-      },
+      metadata: nextMetadata,
     };
   } catch {
     return traj;
@@ -571,7 +906,10 @@ async function applyRouteSearchFilter(
     list.trajectories.map(async (item) => {
       const detail = await logger.getTrajectoryDetail(item.id);
       const hydrated = detail
-        ? await maybeBackfillTrajectoryFromConversationMemory(runtime, detail)
+        ? await maybeBackfillTrajectoryFromConversationMemory(
+            runtime,
+            await maybeBackfillTrajectoryFromUseModelLogs(runtime, detail),
+          )
         : null;
       return trajectoryMatchesSearch(item, hydrated, search) ? item : null;
     }),
@@ -677,7 +1015,10 @@ async function handleGetTrajectoryDetail(
   }
 
   const uiDetail = trajectoryToUIDetail(
-    await maybeBackfillTrajectoryFromConversationMemory(runtime, trajectory),
+    await maybeBackfillTrajectoryFromConversationMemory(
+      runtime,
+      await maybeBackfillTrajectoryFromUseModelLogs(runtime, trajectory),
+    ),
   );
   sendJson(res, uiDetail);
 }

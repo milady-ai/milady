@@ -26,14 +26,14 @@ function callHandleServiceFound(
   d: GatewayDiscovery,
   service: BonjourServiceLike,
 ): void {
-  (d as PrivateGatewayMethods).handleServiceFound(service);
+  (d as unknown as PrivateGatewayMethods).handleServiceFound(service);
 }
 
 function callHandleServiceLost(
   d: GatewayDiscovery,
   service: BonjourServiceLike,
 ): void {
-  (d as PrivateGatewayMethods).handleServiceLost(service);
+  (d as unknown as PrivateGatewayMethods).handleServiceLost(service);
 }
 
 describe("GatewayDiscovery", () => {
@@ -280,8 +280,8 @@ describe("GatewayDiscovery", () => {
 
       callHandleServiceLost(discovery, {
         name: "gw-to-remove",
-        host: "",
-        port: 0,
+        host: "10.0.0.1",
+        port: 8080,
       });
 
       expect(discovery.getDiscoveredGateways()).toHaveLength(0);

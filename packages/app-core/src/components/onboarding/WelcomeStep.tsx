@@ -22,6 +22,19 @@ import {
   spawnOnboardingRipple,
 } from "./onboarding-step-chrome";
 
+/** Play a silent WAV to unlock browser autoplay during a user gesture. */
+function unlockBrowserAutoplay() {
+  try {
+    const silence = new Audio(
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=",
+    );
+    silence.volume = 0;
+    silence.play().catch(() => {});
+  } catch {
+    // Audio not available
+  }
+}
+
 /** First screen; enters the custom setup track at `connection`. */
 export function WelcomeStep() {
   const branding = useBranding();
@@ -48,6 +61,7 @@ export function WelcomeStep() {
   }, [rosterEntries]);
 
   const handleGetStarted = () => {
+    unlockBrowserAutoplay();
     // Default to Chen (blue-haired anime character) — user picks their
     // character in the identity step (now the very next screen).
     setState("onboardingStyle", "chen");
@@ -59,6 +73,7 @@ export function WelcomeStep() {
   };
 
   const handleUseExistingSetup = () => {
+    unlockBrowserAutoplay();
     setState("onboardingStep", "identity");
   };
 

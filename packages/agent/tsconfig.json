@@ -13,6 +13,8 @@
     "paths": {
       "@elizaos/core": ["../typescript/src/index.node.ts"],
       "@elizaos/core/*": ["../typescript/src/*"],
+      "@miladyai/plugin-selfcontrol": ["../plugin-selfcontrol/src/index.ts"],
+      "@miladyai/plugin-selfcontrol/*": ["../plugin-selfcontrol/src/*"],
       "@miladyai/plugin-roles": ["../plugin-roles/src/index.ts"],
       "@miladyai/plugin-roles/*": ["../plugin-roles/src/*"]
     }

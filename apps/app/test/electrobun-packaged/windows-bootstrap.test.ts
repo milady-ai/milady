@@ -32,13 +32,13 @@ describe("hasPackagedRendererBootstrapRequests", () => {
     ).toBe(true);
   });
 
-  it("rejects main-process heartbeat traffic on its own", () => {
+  it("accepts main-process heartbeat traffic as splash-era bootstrap proof", () => {
     expect(
       hasPackagedRendererBootstrapRequests([
         "GET /api/triggers",
         "GET /api/triggers/health",
       ]),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("accepts splash-era bootstrap traffic that pauses after config", () => {

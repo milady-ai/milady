@@ -11,6 +11,7 @@ import {
   createMockStorage,
   hasStorageApi,
   installCanvasMocks,
+  installMediaElementMocks,
   suppressReactTestConsoleErrors,
 } from "../../../test/helpers/browser-mocks";
 
@@ -18,10 +19,14 @@ declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
 }
 
+const ANCHOR_CLICK_PATCH_MARK = Symbol.for("milady.test.anchorClickPatched");
+const JSDOM_EMIT_PATCH_MARK = Symbol.for("milady.test.jsdomEmitPatched");
+
 globalThis.React = React;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 suppressReactTestConsoleErrors();
+installMediaElementMocks();
 
 // ---------------------------------------------------------------------------
 // Mock @miladyai/app-core bridge modules — the real electrobun RPC module
@@ -128,6 +133,7 @@ function createBridgeMock(extraExports: Record<string, unknown> = {}) {
     },
     initializeCapacitorBridge: () => {},
     initializeStorageBridge: async () => {},
+    scanProviderCredentials: vi.fn(async () => []),
     ElectrobunRendererRpc: {},
     ...extraExports,
   };
@@ -258,6 +264,78 @@ ensureObj(nav, "geolocation", {
 });
 
 ensureObj(nav, "permissions", { query: vi.fn() });
+
+if (typeof globalThis.window !== "undefined") {
+  const anchorPrototype = globalThis.HTMLAnchorElement?.prototype as
+    | ({
+        click?: () => void;
+        [ANCHOR_CLICK_PATCH_MARK]?: boolean;
+      } & Record<string, unknown>)
+    | undefined;
+  const originalAnchorClick = anchorPrototype?.click;
+  if (
+    anchorPrototype &&
+    typeof originalAnchorClick === "function" &&
+    !anchorPrototype[ANCHOR_CLICK_PATCH_MARK]
+  ) {
+    Object.defineProperty(anchorPrototype, "click", {
+      configurable: true,
+      writable: true,
+      value: function patchedAnchorClick(this: HTMLAnchorElement) {
+        const href = this.getAttribute("href") ?? "";
+        const target = this.getAttribute("target") ?? "";
+        const shouldSuppressNavigation =
+          this.hasAttribute("download") ||
+          target === "_blank" ||
+          /^(?:https?:|blob:|data:)/i.test(href);
+
+        if (shouldSuppressNavigation) {
+          this.dispatchEvent(
+            new window.MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+            }),
+          );
+          return;
+        }
+
+        return originalAnchorClick.call(this);
+      },
+    });
+    anchorPrototype[ANCHOR_CLICK_PATCH_MARK] = true;
+  }
+
+  const virtualConsole = (
+    globalThis.window as typeof globalThis.window & {
+      _virtualConsole?: {
+        emit?: ((eventName: string, ...args: unknown[]) => unknown) & {
+          [JSDOM_EMIT_PATCH_MARK]?: boolean;
+        };
+      };
+    }
+  )._virtualConsole;
+  const originalEmit = virtualConsole?.emit;
+  if (
+    virtualConsole &&
+    typeof originalEmit === "function" &&
+    !originalEmit[JSDOM_EMIT_PATCH_MARK]
+  ) {
+    const patchedEmit = function patchedEmit(eventName, ...args) {
+      const [firstArg] = args;
+      if (
+        eventName === "jsdomError" &&
+        firstArg instanceof Error &&
+        firstArg.message === "Not implemented: navigation to another Document"
+      ) {
+        return;
+      }
+      return originalEmit.call(this, eventName, ...args);
+    } as typeof originalEmit;
+    patchedEmit[JSDOM_EMIT_PATCH_MARK] = true;
+    virtualConsole.emit = patchedEmit;
+  }
+}
 
 ensureObj(nav, "clipboard", {
   writeText: vi.fn().mockResolvedValue(undefined),

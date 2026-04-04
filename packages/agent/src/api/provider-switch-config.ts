@@ -23,7 +23,11 @@ import type {
   ServiceCapability,
   ServiceRoutingConfig,
 } from "../contracts/service-routing";
-import { normalizeDeploymentTargetConfig } from "../contracts/service-routing";
+import {
+  buildDefaultElizaCloudServiceRouting,
+  buildElizaCloudServiceRoute,
+  normalizeDeploymentTargetConfig,
+} from "../contracts/service-routing";
 
 type MutableElizaConfig = Partial<ElizaConfig> & {
   cloud?: Record<string, unknown>;
@@ -675,6 +679,16 @@ export async function applyOnboardingConnectionConfig(
       models.large = normalizedConnection.largeModel;
     }
 
+    const serviceRouting = buildDefaultElizaCloudServiceRouting({
+      base: {
+        ...(config.serviceRouting ?? {}),
+        llmText: buildElizaCloudServiceRoute({
+          smallModel: normalizedConnection.smallModel,
+          largeModel: normalizedConnection.largeModel,
+        }),
+      },
+    });
+
     applyCanonicalOnboardingConfig(config, {
       deploymentTarget: existingDeploymentTarget,
       linkedAccounts: apiKey
@@ -685,19 +699,7 @@ export async function applyOnboardingConnectionConfig(
             },
           }
         : undefined,
-      serviceRouting: {
-        llmText: {
-          backend: "elizacloud",
-          transport: "cloud-proxy",
-          accountId: "elizacloud",
-          ...(normalizedConnection.smallModel
-            ? { smallModel: normalizedConnection.smallModel }
-            : {}),
-          ...(normalizedConnection.largeModel
-            ? { largeModel: normalizedConnection.largeModel }
-            : {}),
-        },
-      },
+      serviceRouting,
     });
 
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
@@ -773,18 +775,30 @@ export async function applyOnboardingConnectionConfig(
             },
           }
         : undefined;
+  const shouldDefaultCloudServices =
+    existingDeploymentTarget?.runtime === "cloud" &&
+    existingDeploymentTarget.provider === "elizacloud";
+  const directLlmRoute = {
+    backend: normalizedConnection.provider,
+    transport: "direct",
+    ...(normalizedConnection.primaryModel
+      ? { primaryModel: normalizedConnection.primaryModel }
+      : {}),
+  } satisfies NonNullable<ServiceRoutingConfig["llmText"]>;
+  const serviceRouting = shouldDefaultCloudServices
+    ? buildDefaultElizaCloudServiceRouting({
+        base: {
+          ...(config.serviceRouting ?? {}),
+          llmText: directLlmRoute,
+        },
+      })
+    : {
+        llmText: directLlmRoute,
+      };
   applyCanonicalOnboardingConfig(config, {
     deploymentTarget: existingDeploymentTarget,
     linkedAccounts,
-    serviceRouting: {
-      llmText: {
-        backend: normalizedConnection.provider,
-        transport: "direct",
-        ...(normalizedConnection.primaryModel
-          ? { primaryModel: normalizedConnection.primaryModel }
-          : {}),
-      },
-    },
+    serviceRouting,
   });
   migrateLegacyRuntimeConfig(config as Record<string, unknown>);
 }

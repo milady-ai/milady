@@ -11,7 +11,7 @@
  * The OAuth token from Claude Code is an "anthropic-subscription" credential
  * that goes through applySubscriptionCredentials(), not a direct API key.
  */
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -45,9 +45,12 @@ function extractOauthAccessToken(value: unknown): string | null {
 function readKeychainValue(service: string): string | null {
   if (process.platform !== "darwin") return null;
   try {
-    const output = execSync(
-      `security find-generic-password -s "${service}" -w 2>/dev/null`,
-      { encoding: "utf8", timeout: 3000 },
+    // Use execFileSync to avoid shell injection — service is passed as an
+    // argument array element, not interpolated into a shell command string.
+    const output = execFileSync(
+      "security",
+      ["find-generic-password", "-s", service, "-w"],
+      { encoding: "utf8", timeout: 3000, stdio: ["pipe", "pipe", "pipe"] },
     );
     const trimmed = output.trim();
     return trimmed.length > 0 ? trimmed : null;

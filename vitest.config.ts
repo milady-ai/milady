@@ -2,15 +2,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 import {
+  coverageSummaryReporters,
+  coverageThresholds,
+} from "./scripts/coverage-policy.mjs";
+import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
   getElizaCoreEntry,
   resolveModuleEntry,
 } from "./test/eliza-package-paths";
-import {
-  coverageSummaryReporters,
-  coverageThresholds,
-} from "./scripts/coverage-policy.mjs";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 const elizaCoreEntry = getElizaCoreEntry(repoRoot);
@@ -165,12 +165,58 @@ export default defineConfig({
           ]),
       // @miladyai/shared — always resolve subpath imports from source
       {
+        find: /^@miladyai\/plugin-selfcontrol\/(.*)/,
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-selfcontrol",
+          "src",
+          "$1",
+        ),
+      },
+      {
+        find: "@miladyai/plugin-selfcontrol",
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-selfcontrol",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
+        find: /^@miladyai\/plugin-roles\/(.*)/,
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-roles",
+          "src",
+          "$1",
+        ),
+      },
+      {
+        find: "@miladyai/plugin-roles",
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "plugin-roles",
+          "src",
+          "index.ts",
+        ),
+      },
+      {
         find: /^@miladyai\/shared\/(.*)/,
         replacement: path.join(repoRoot, "packages", "shared", "src", "$1"),
       },
       {
         find: "@miladyai/shared",
-        replacement: path.join(repoRoot, "packages", "shared", "src", "index.ts"),
+        replacement: path.join(
+          repoRoot,
+          "packages",
+          "shared",
+          "src",
+          "index.ts",
+        ),
       },
     ],
   },
@@ -188,14 +234,14 @@ export default defineConfig({
       "packages/agent/src/**/*.test.tsx",
       "packages/agent/test/**/*.test.ts",
       "packages/agent/test/**/*.test.tsx",
-      // app-core: globs (not single files) so colocated *.test.tsx and harness
-      // suites under packages/app-core/test/{state,runtime,...} run in CI.
-      // WHY: omitting test/** silently dropped new suites; listing one TSX path
-      // rotted when files moved. E2E under app-core/test is excluded below.
+      // app-core src-colocated tests run here; test/ harness suites run in
+      // the app-unit config (apps/app/vitest.config.ts) which provides the
+      // correct @miladyai/app-core alias resolution. Running both in parallel
+      // causes file-system race conditions on shared test fixtures.
       "packages/app-core/src/**/*.test.ts",
       "packages/app-core/src/**/*.test.tsx",
-      "packages/app-core/test/**/*.test.ts",
-      "packages/app-core/test/**/*.test.tsx",
+      "packages/plugin-selfcontrol/src/**/*.test.ts",
+      "packages/plugin-selfcontrol/src/**/*.test.ts",
       "packages/plugin-wechat/src/**/*.test.ts",
       "src/**/*.test.ts",
       "scripts/**/*.test.ts",
@@ -215,8 +261,6 @@ export default defineConfig({
       // E2E lives under test/ too; run it via vitest.e2e.config.ts, not unit.
       "**/*.e2e.test.ts",
       "**/*.e2e.test.tsx",
-      "packages/app-core/test/**/*.e2e.test.ts",
-      "packages/app-core/test/**/*.e2e.test.tsx",
     ],
     coverage: {
       provider: "v8",

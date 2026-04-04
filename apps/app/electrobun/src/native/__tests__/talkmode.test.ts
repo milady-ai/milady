@@ -56,7 +56,7 @@ const mockTranscribeBunSpawn = whisperMod.transcribeBunSpawn as ReturnType<
   typeof vi.fn
 >;
 const mockWriteWavFile = whisperMod.writeWavFile as ReturnType<typeof vi.fn>;
-const mockFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+const mockFetch = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
 
 // ---------------------------------------------------------------------------
 // Helpers

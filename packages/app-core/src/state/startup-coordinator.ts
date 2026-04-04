@@ -14,6 +14,8 @@
  * - Same machine for desktop, web, and mobile — only policy differs
  */
 
+import type { StartupErrorReason } from "./types";
+
 // ── Platform Policy ──────────────────────────────────────────────────
 
 export type RuntimeTarget =
@@ -67,13 +69,7 @@ export type StartupState =
       timedOut: boolean;
     };
 
-export type StartupErrorReason =
-  | "backend-unreachable"
-  | "backend-timeout"
-  | "agent-timeout"
-  | "agent-error"
-  | "asset-missing"
-  | "unknown";
+export type { StartupErrorReason };
 
 export type StartupPhaseValue = StartupState["phase"];
 
@@ -108,6 +104,7 @@ export type StartupEvent =
 
   // User actions
   | { type: "RETRY" }
+  | { type: "RESET" }
   | { type: "PAIRING_SUCCESS" }
   | { type: "SPLASH_CONTINUE" }
   | { type: "SPLASH_LOADED" };
@@ -249,9 +246,13 @@ export function startupReducer(
       }
 
     case "ready":
-      // Terminal state for startup. Post-ready events (WS, cloud poll)
-      // are handled by the app runtime, not the startup coordinator.
-      return state;
+      switch (event.type) {
+        case "RESET":
+          // Agent reset — return to splash so user can re-onboard
+          return INITIAL_STARTUP_STATE;
+        default:
+          return state;
+      }
 
     case "error":
       switch (event.type) {

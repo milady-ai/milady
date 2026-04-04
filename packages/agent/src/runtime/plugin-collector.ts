@@ -9,15 +9,15 @@
  * @module plugin-collector
  */
 import {
-  resolveElizaCloudTopology,
   type ResolvedElizaCloudTopology,
+  resolveElizaCloudTopology,
 } from "@miladyai/shared/contracts";
 import {
   hasExplicitCanonicalRuntimeConfig,
   migrateLegacyRuntimeConfig,
 } from "@miladyai/shared/contracts/onboarding";
 import type { ElizaConfig } from "../config/config";
-import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins";
+import { CORE_PLUGINS } from "./core-plugins";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -95,6 +95,9 @@ export const PROVIDER_PLUGIN_MAP: Readonly<Record<string, string>> = {
 export const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   browser: "@elizaos/plugin-browser",
   vision: "@elizaos/plugin-vision",
+  selfcontrol: "@miladyai/plugin-selfcontrol",
+  "website-blocker": "@miladyai/plugin-selfcontrol",
+  websiteBlocker: "@miladyai/plugin-selfcontrol",
   cron: "@elizaos/plugin-cron",
   cua: "@elizaos/plugin-cua",
   computeruse: "@elizaos/plugin-computeruse",
@@ -221,10 +224,7 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
   // Prefer config.connectors, fall back to config.channels for backward compatibility
   const connectors =
     config.connectors ??
-    ((config as Record<string, unknown>).channels as Record<
-      string,
-      unknown
-    >) ??
+    ((config as Record<string, unknown>).channels as Record<string, unknown>) ??
     {};
   for (const [channelName, channelConfig] of Object.entries(connectors)) {
     if (channelConfig && typeof channelConfig === "object") {
@@ -241,7 +241,10 @@ export function collectPluginNames(config: ElizaConfig): Set<string> {
       // pi-ai enablement uses dedicated boolean parsing + precedence logic below.
       continue;
     }
-    if (envKey === "ELIZAOS_CLOUD_API_KEY" || envKey === "ELIZAOS_CLOUD_ENABLED") {
+    if (
+      envKey === "ELIZAOS_CLOUD_API_KEY" ||
+      envKey === "ELIZAOS_CLOUD_ENABLED"
+    ) {
       continue;
     }
     if (isPluginExplicitlyDisabled(pluginName)) {

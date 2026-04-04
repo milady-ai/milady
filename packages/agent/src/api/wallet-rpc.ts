@@ -198,6 +198,12 @@ function inferSelectedRpcProviders(): WalletRpcSelections {
   };
 }
 
+function walletSelectionsUseElizaCloud(
+  selections: WalletRpcSelections,
+): boolean {
+  return Object.values(selections).some((provider) => provider === "eliza-cloud");
+}
+
 function hasLegacyCustomChainUrl(chain: WalletRpcChain): boolean {
   return LEGACY_CUSTOM_CHAIN_KEYS[chain].some((key) =>
     Boolean(normalizeSecret(process.env[key])),
@@ -298,14 +304,18 @@ export function buildCloudSolanaRpcUrl(
 }
 
 export function hasElizaCloudRpcAccess(
-  config?: Pick<ElizaConfig, "cloud"> | null,
+  config?: WalletCapableConfig | null,
 ): boolean {
+  const selectedRpcProviders = hasStoredSelections(config)
+    ? getStoredWalletRpcSelections(config)
+    : inferSelectedRpcProviders();
   return Boolean(
     resolveCloudApiKey(config) &&
-      isElizaCloudServiceSelectedInConfig(
-        (config ?? {}) as Record<string, unknown>,
-        "rpc",
-      ),
+      (walletSelectionsUseElizaCloud(selectedRpcProviders) ||
+        isElizaCloudServiceSelectedInConfig(
+          (config ?? {}) as Record<string, unknown>,
+          "rpc",
+        )),
   );
 }
 
@@ -559,12 +569,17 @@ export function resolveWalletRpcReadiness(
   const walletNetwork = resolveWalletNetworkMode(config);
   const cloudApiKey = resolveCloudApiKey(config);
   const cloudBaseUrl = resolveCloudApiBaseUrl(config?.cloud?.baseUrl);
+  const selectedRpcProviders = hasStoredSelections(config)
+    ? getStoredWalletRpcSelections(config)
+    : inferSelectedRpcProviders();
+  const cloudRpcSelected =
+    walletSelectionsUseElizaCloud(selectedRpcProviders) ||
+    isElizaCloudServiceSelectedInConfig(
+      (config ?? {}) as Record<string, unknown>,
+      "rpc",
+    );
   const cloudManagedAccess = Boolean(
-    cloudApiKey &&
-      isElizaCloudServiceSelectedInConfig(
-        (config ?? {}) as Record<string, unknown>,
-        "rpc",
-      ),
+    cloudApiKey && cloudRpcSelected,
   );
   const cloudOptions = {
     cloudManagedAccess,
@@ -577,9 +592,6 @@ export function resolveWalletRpcReadiness(
   const baseRpcUrls = resolveBaseRpcUrls(cloudOptions);
   const avalancheRpcUrls = resolveAvalancheRpcUrls(cloudOptions);
   const solanaRpcUrls = resolveSolanaRpcUrls(cloudOptions);
-  const selectedRpcProviders = hasStoredSelections(config)
-    ? getStoredWalletRpcSelections(config)
-    : inferSelectedRpcProviders();
   const legacyCustomChains = buildLegacyCustomChains(selectedRpcProviders);
 
   return {

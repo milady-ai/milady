@@ -188,7 +188,7 @@ export class DesktopManager {
   // Track menu items for context-menu-clicked matching
   private trayMenuItems: Map<string, TrayMenuItem> = new Map();
   private trayClickHandler: (() => void) | null = null;
-  private contextMenuHandler: ((action: string) => void) | null = null;
+  private contextMenuHandler: ElectrobunEventHandler | null = null;
   private windowEventHandlers: Partial<
     Record<"focus" | "blur" | "close" | "resize" | "move", () => void>
   > = {};
@@ -503,7 +503,9 @@ export class DesktopManager {
     // Tray menu item clicks fire "tray-clicked" on the global event bus
     // (NOT "context-menu-clicked" — that's for right-click context menus).
     // The event data shape is { data: { id, action, data? } }.
-    this.contextMenuHandler = (e: { data?: { action?: string } }) => {
+    // Electrobun emits ElectrobunEvent<TrayClickedData> for tray-clicked;
+    // the shape carries { data: { action, id, data? } }.
+    this.contextMenuHandler = (e: { data?: { action?: string } }): void => {
       const action = e?.data?.action;
       if (!action) return;
 
@@ -535,7 +537,10 @@ export class DesktopManager {
         });
       }
     };
-    Electrobun.events.on("tray-clicked", this.contextMenuHandler);
+    Electrobun.events.on(
+      "tray-clicked",
+      this.contextMenuHandler as ElectrobunEventHandler,
+    );
   }
 
   private teardownTrayEvents(): void {
@@ -1752,7 +1757,9 @@ X-GNOME-Autostart-enabled=true
       path: cookie.path,
       secure: cookie.secure,
       httpOnly: cookie.httpOnly,
-      session: cookie.session,
+      session: (cookie as unknown as Record<string, unknown>).session as
+        | boolean
+        | undefined,
       expirationDate: cookie.expirationDate,
     }));
 

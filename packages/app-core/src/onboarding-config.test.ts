@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildOnboardingRuntimeConfig } from "./onboarding-config";
 
 describe("buildOnboardingRuntimeConfig", () => {
-  it("keeps cloud hosting and account linking separate from service routing defaults", () => {
+  it("defaults non-text cloud services on for cloud hosting before a chat provider is chosen", () => {
     expect(
       buildOnboardingRuntimeConfig({
         onboardingServerTarget: "elizacloud",
@@ -34,7 +34,28 @@ describe("buildOnboardingRuntimeConfig", () => {
           source: "api-key",
         },
       },
-      serviceRouting: undefined,
+      serviceRouting: {
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        embeddings: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
       needsProviderSetup: true,
     });
   });
@@ -152,7 +173,7 @@ describe("buildOnboardingRuntimeConfig", () => {
     });
   });
 
-  it("allows local runtime to use Eliza Cloud for inference without auto-routing other services", () => {
+  it("defaults all Eliza Cloud services on when cloud inference is selected", () => {
     expect(
       buildOnboardingRuntimeConfig({
         onboardingServerTarget: "local",
@@ -187,6 +208,26 @@ describe("buildOnboardingRuntimeConfig", () => {
           accountId: "elizacloud",
           smallModel: "openai/gpt-5-mini",
           largeModel: "anthropic/claude-sonnet-4.5",
+        },
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        embeddings: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
         },
       },
       needsProviderSetup: false,

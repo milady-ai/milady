@@ -4,6 +4,7 @@ import {
   createMockStorage,
   hasStorageApi,
   installCanvasMocks,
+  installMediaElementMocks,
   suppressReactTestConsoleErrors,
 } from "./helpers/browser-mocks";
 
@@ -120,6 +121,7 @@ const sharedSessionStorage = ensureStorage(
 );
 
 installCanvasMocks();
+installMediaElementMocks();
 
 if (typeof globalThis.window !== "undefined") {
   const win = globalThis.window as unknown as Record<string, unknown>;

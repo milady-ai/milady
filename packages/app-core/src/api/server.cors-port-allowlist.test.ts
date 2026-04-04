@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { buildCorsAllowedPorts, isAllowedLocalOrigin } from "./server.js";
+import { buildCorsAllowedPorts, isAllowedLocalOrigin } from "./server-cors.js";
 
 /* ── Env snapshot/restore ─────────────────────────────────────────── */
 

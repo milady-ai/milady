@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
   deriveDetectedProviderPrefill,
   detectExistingOnboardingConnection,
-  resolveStartupWithoutRestoredConnection,
 } from "./onboarding-bootstrap";
 
 describe("detectExistingOnboardingConnection", () => {
@@ -141,33 +140,5 @@ describe("deriveDetectedProviderPrefill", () => {
         { id: "openrouter", apiKey: "   " },
       ]),
     ).toBeNull();
-  });
-});
-
-describe("resolveStartupWithoutRestoredConnection", () => {
-  it("keeps fresh installs on onboarding when no reusable connection exists", () => {
-    expect(
-      resolveStartupWithoutRestoredConnection({
-        hadPersistedOnboardingCompletion: false,
-      }),
-    ).toEqual({ kind: "onboarding" });
-  });
-
-  it("surfaces a recoverable startup error for previously onboarded users", () => {
-    expect(
-      resolveStartupWithoutRestoredConnection({
-        hadPersistedOnboardingCompletion: true,
-      }),
-    ).toEqual({
-      kind: "startup-error",
-      error: {
-        reason: "backend-unreachable",
-        phase: "starting-backend",
-        message:
-          "No reusable backend connection was found for this previously onboarded app.",
-        detail:
-          "Local onboarding state is preserved so setup does not restart unexpectedly. Retry after the backend is reachable again.",
-      },
-    });
   });
 });

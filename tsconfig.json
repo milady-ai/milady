@@ -6,12 +6,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2023",
-      "ScriptHost"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2023", "ScriptHost"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -22,24 +17,16 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
-      "@miladyai/plugin-roles": [
-        "./packages/plugin-roles/src/index.ts"
+      "@miladyai/plugin-selfcontrol": [
+        "./packages/plugin-selfcontrol/src/index.ts"
       ],
-      "@miladyai/plugin-roles/*": [
-        "./packages/plugin-roles/src/*"
-      ],
-      "@miladyai/ui": [
-        "./packages/ui/src/index.ts"
-      ],
-      "@miladyai/ui/*": [
-        "./packages/ui/src/*"
-      ],
-      "@miladyai/agent/*": [
-        "./packages/agent/src/*"
-      ],
-      "@elizaos/core": [
-        "./node_modules/@elizaos/core"
-      ]
+      "@miladyai/plugin-selfcontrol/*": ["./packages/plugin-selfcontrol/src/*"],
+      "@miladyai/plugin-roles": ["./packages/plugin-roles/src/index.ts"],
+      "@miladyai/plugin-roles/*": ["./packages/plugin-roles/src/*"],
+      "@miladyai/ui": ["./packages/ui/src/index.ts"],
+      "@miladyai/ui/*": ["./packages/ui/src/*"],
+      "@miladyai/agent/*": ["./packages/agent/src/*"],
+      "@elizaos/core": ["./node_modules/@elizaos/core"]
     }
   },
   "include": [

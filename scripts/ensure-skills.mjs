@@ -32,7 +32,7 @@ function resolveUserPath(input, home = homedir) {
 }
 
 export function resolveStateDir(env = process.env, home = homedir) {
-  const override = env.ELIZA_STATE_DIR?.trim();
+  const override = env.MILADY_STATE_DIR?.trim() || env.ELIZA_STATE_DIR?.trim();
   if (override) {
     return resolveUserPath(override, home);
   }
@@ -47,6 +47,7 @@ export function resolveSkillsDir(env = process.env, home = homedir) {
 function shippedSkillIds(assetsDir = SHIPPED_SKILLS_DIR) {
   return readdirSync(assetsDir)
     .filter((entry) => {
+      if (entry.startsWith(".")) return false;
       try {
         return statSync(join(assetsDir, entry)).isDirectory();
       } catch {

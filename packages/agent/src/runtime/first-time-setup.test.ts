@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { applyFirstTimeSetupTopology } from "./first-time-setup";
 
 describe("applyFirstTimeSetupTopology", () => {
-  it("keeps cloud runtime separate from direct inference provider selection", () => {
+  it("defaults cloud services on when cloud runtime uses a direct provider", () => {
     expect(
       applyFirstTimeSetupTopology({} as never, {
         isCloudRuntime: true,
@@ -30,6 +30,26 @@ describe("applyFirstTimeSetupTopology", () => {
           backend: "openai",
           transport: "direct",
         },
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        embeddings: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
       cloud: {
         apiKey: "cloud-key",
@@ -39,7 +59,7 @@ describe("applyFirstTimeSetupTopology", () => {
     });
   });
 
-  it("allows local runtime to use Eliza Cloud for inference", () => {
+  it("defaults all cloud services on when local runtime uses Eliza Cloud inference", () => {
     expect(
       applyFirstTimeSetupTopology({} as never, {
         isCloudRuntime: false,
@@ -66,11 +86,31 @@ describe("applyFirstTimeSetupTopology", () => {
           transport: "cloud-proxy",
           accountId: "elizacloud",
         },
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        embeddings: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
       },
     });
   });
 
-  it("keeps cloud runtime distinct from inference when no provider was chosen yet", () => {
+  it("defaults non-text cloud services on even before cloud runtime picks a chat provider", () => {
     expect(
       applyFirstTimeSetupTopology({} as never, {
         isCloudRuntime: true,
@@ -85,7 +125,28 @@ describe("applyFirstTimeSetupTopology", () => {
         runtime: "cloud",
         provider: "elizacloud",
       },
-      serviceRouting: undefined,
+      serviceRouting: {
+        tts: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        media: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        embeddings: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+        rpc: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+          accountId: "elizacloud",
+        },
+      },
     });
   });
 });

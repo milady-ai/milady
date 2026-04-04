@@ -473,7 +473,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
                 ))}
               </div>
 
-              <CloudServicesSection />
+              {!embedded ? <CloudServicesSection /> : null}
             </>
           ) : (
             <div className="flex flex-col items-center gap-4 py-8 text-center">

@@ -20,13 +20,10 @@ import { useEffect, useState } from "react";
 import { useBranding } from "../../config/branding";
 import { COMPANION_ENABLED } from "../../navigation";
 import { VrmStage } from "../companion/VrmStage";
-import { ActivateStep } from "./ActivateStep";
 import { ConnectionStep } from "./ConnectionStep";
 import { IdentityStep } from "./IdentityStep";
 import { OnboardingPanel } from "./OnboardingPanel";
 import { OnboardingStepNav } from "./OnboardingStepNav";
-import { PermissionsStep } from "./PermissionsStep";
-import { VoiceProviderStep } from "./VoiceProviderStep";
 
 const FORCE_VRM =
   typeof window !== "undefined" &&
@@ -141,17 +138,10 @@ export function OnboardingWizard() {
 
   function renderStep() {
     switch (onboardingStep) {
-      case "hosting":
-      case "providers":
-        return <ConnectionStep />;
-      case "voice":
-        return <VoiceProviderStep />;
-      case "permissions":
-        return <PermissionsStep />;
       case "identity":
         return <IdentityStep gateVoicePreviewOnTeleport={!disableVrm} />;
-      case "launch":
-        return <ActivateStep />;
+      case "providers":
+        return <ConnectionStep />;
       default:
         return null;
     }

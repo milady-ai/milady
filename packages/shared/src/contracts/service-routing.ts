@@ -38,6 +38,22 @@ export type ServiceRoutingConfig = Partial<
   Record<ServiceCapability, ServiceRouteConfig>
 >;
 
+const ELIZA_CLOUD_ROUTE_BASE = {
+  backend: "elizacloud",
+  transport: "cloud-proxy",
+  accountId: "elizacloud",
+} as const satisfies Pick<
+  ServiceRouteConfig,
+  "backend" | "transport" | "accountId"
+>;
+
+const ELIZA_CLOUD_DEFAULT_SERVICE_CAPABILITIES = [
+  "tts",
+  "media",
+  "embeddings",
+  "rpc",
+] as const satisfies readonly Exclude<ServiceCapability, "llmText">[];
+
 export type DeploymentTargetRuntime = "local" | "cloud" | "remote";
 
 export type DeploymentTargetConfig = {
@@ -54,6 +70,39 @@ export const SERVICE_CAPABILITIES = [
   "embeddings",
   "rpc",
 ] as const satisfies readonly ServiceCapability[];
+
+export function buildElizaCloudServiceRoute(args: {
+  smallModel?: string;
+  largeModel?: string;
+} = {}): ServiceRouteConfig {
+  return {
+    ...ELIZA_CLOUD_ROUTE_BASE,
+    ...(args.smallModel ? { smallModel: args.smallModel } : {}),
+    ...(args.largeModel ? { largeModel: args.largeModel } : {}),
+  };
+}
+
+export function buildDefaultElizaCloudServiceRouting(args: {
+  base?: ServiceRoutingConfig | null;
+  includeInference?: boolean;
+  smallModel?: string;
+  largeModel?: string;
+} = {}): ServiceRoutingConfig {
+  const next: ServiceRoutingConfig = { ...(args.base ?? {}) };
+
+  for (const capability of ELIZA_CLOUD_DEFAULT_SERVICE_CAPABILITIES) {
+    next[capability] ??= buildElizaCloudServiceRoute();
+  }
+
+  if (args.includeInference) {
+    next.llmText ??= buildElizaCloudServiceRoute({
+      smallModel: args.smallModel,
+      largeModel: args.largeModel,
+    });
+  }
+
+  return next;
+}
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)

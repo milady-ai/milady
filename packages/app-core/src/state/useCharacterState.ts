@@ -9,10 +9,15 @@
 
 import { useCallback, useState } from "react";
 import { prepareDraftForSave } from "../actions/character";
-import { type CharacterData, client } from "../api";
 import type { AgentStatus } from "../api";
+import { type CharacterData, client } from "../api";
 import { replaceNameTokens } from "../components/character/character-editor-helpers";
-import { loadAvatarIndex, saveAvatarIndex } from "./persistence";
+import {
+  loadAvatarIndex,
+  loadPersistedActivePackId,
+  saveAvatarIndex,
+  savePersistedActivePackId,
+} from "./persistence";
 import { normalizeAvatarIndex } from "./vrm";
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -43,6 +48,15 @@ export function useCharacterState({
   const [selectedVrmIndex, setSelectedVrmIndexRaw] = useState(loadAvatarIndex);
   const [customVrmUrl, setCustomVrmUrl] = useState("");
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
+  const [activePackId, setActivePackIdRaw] = useState<string | null>(() =>
+    loadPersistedActivePackId(),
+  );
+  const [customWorldUrl, setCustomWorldUrl] = useState("");
+
+  const setActivePackId = useCallback((id: string | null) => {
+    setActivePackIdRaw(id);
+    savePersistedActivePackId(id);
+  }, []);
 
   // Wrap setter to also persist to localStorage and sync to server so
   // headless stream capture uses the same avatar.
@@ -204,6 +218,8 @@ export function useCharacterState({
       selectedVrmIndex,
       customVrmUrl,
       customBackgroundUrl,
+      activePackId,
+      customWorldUrl,
     },
     setCharacterData,
     setCharacterDraft,
@@ -212,6 +228,8 @@ export function useCharacterState({
     setSelectedVrmIndex,
     setCustomVrmUrl,
     setCustomBackgroundUrl,
+    setActivePackId,
+    setCustomWorldUrl,
     loadCharacter,
     handleSaveCharacter,
     handleCharacterFieldInput,

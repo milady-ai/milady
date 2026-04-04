@@ -88,6 +88,21 @@ function reqRaw(
   });
 }
 
+type SqlQuery = {
+  queryChunks?: Array<{ value?: unknown }>;
+};
+
+function extractSqlText(query: SqlQuery): string {
+  if (!Array.isArray(query.queryChunks)) return "";
+  return query.queryChunks
+    .map((chunk) => {
+      const value = chunk?.value;
+      if (Array.isArray(value)) return value.join("");
+      return String(value ?? "");
+    })
+    .join("");
+}
+
 type SseEventPayload = {
   type?: string;
   text?: string;
@@ -1360,7 +1375,7 @@ describe("API Server E2E (no runtime)", () => {
       }
     });
 
-    it("POST /api/chat does not use deprecated direct trajectory fallback when hooks do not set a step id", async () => {
+    it("POST /api/chat starts a fallback trajectory when hooks do not set a step id", async () => {
       const starts: Array<{ stepId: string; source?: string }> = [];
       const ends: Array<{ stepId: string; status?: string }> = [];
       const trajectoryLogger = {
@@ -1394,7 +1409,9 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         expect(String(data.text ?? "")).toBe("Hello world");
-        expect(starts).toHaveLength(0);
+        expect(starts).toHaveLength(1);
+        expect(starts[0]?.stepId).toBe("chat-stream-agent");
+        expect(starts[0]?.source).toBe("client_chat");
         expect(ends).toHaveLength(0);
       } finally {
         await streamServer.close();
@@ -1493,6 +1510,104 @@ describe("API Server E2E (no runtime)", () => {
         expect(String(data.text ?? "")).toBe("Hello world");
         expect(starts).toHaveLength(0);
         expect(ends).toHaveLength(0);
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("POST /api/chat falls back to starting and ending a trajectory when MESSAGE_RECEIVED misses the step id", async () => {
+      const starts: Array<{
+        agentId: string;
+        source?: string;
+        messageId?: string;
+      }> = [];
+      const steps: string[] = [];
+      const ends: Array<{ stepId: string; status?: string }> = [];
+      let enabled = false;
+      const trajectoryLogger = {
+        isEnabled: () => enabled,
+        setEnabled: (value: boolean) => {
+          enabled = value;
+        },
+        startTrajectory: async (
+          agentId: string,
+          options?: {
+            source?: string;
+            metadata?: Record<string, unknown>;
+          },
+        ) => {
+          starts.push({
+            agentId,
+            source: options?.source,
+            messageId:
+              typeof options?.metadata?.messageId === "string"
+                ? options.metadata.messageId
+                : undefined,
+          });
+          return "trajectory-fallback-id";
+        },
+        startStep: (trajectoryId: string) => {
+          steps.push(trajectoryId);
+          return "trajectory-fallback-step";
+        },
+        endTrajectory: async (stepId: string, status?: string) => {
+          ends.push({ stepId, status });
+        },
+      };
+
+      const runtime = createRuntimeForChatSseTests({
+        getService: (serviceType) =>
+          serviceType === "trajectory_logger" ? trajectoryLogger : null,
+        onEmitEvent: async (event, payload) => {
+          const eventName = Array.isArray(event) ? event[0] : event;
+          if (
+            eventName === "MESSAGE_SENT" &&
+            payload &&
+            typeof payload === "object" &&
+            "message" in payload &&
+            payload.message &&
+            typeof payload.message === "object"
+          ) {
+            const stepId = (
+              payload.message as { metadata?: { trajectoryStepId?: string } }
+            ).metadata?.trajectoryStepId;
+            if (stepId) {
+              await trajectoryLogger.endTrajectory(stepId, "completed");
+            }
+          }
+        },
+        handleMessage: async (_runtime, message, onResponse) => {
+          const metadata =
+            message && typeof message === "object" && "metadata" in message
+              ? (message.metadata as { trajectoryStepId?: string } | undefined)
+              : undefined;
+          expect(metadata?.trajectoryStepId).toBe("trajectory-fallback-step");
+          await onResponse({ text: "Hello world" } as Content);
+          return {
+            responseContent: {
+              text: "Hello world",
+            },
+          };
+        },
+      });
+
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const { status, data } = await req(streamServer.port, "POST", "/api/chat", {
+          text: "fallback trajectory please",
+          mode: "simple",
+        });
+
+        expect(status).toBe(200);
+        expect(String(data.text ?? "")).toBe("Hello world");
+        expect(enabled).toBe(true);
+        expect(starts).toHaveLength(1);
+        expect(starts[0]?.agentId).toBe("chat-stream-agent");
+        expect(starts[0]?.source).toBe("client_chat");
+        expect(steps).toEqual(["trajectory-fallback-id"]);
+        expect(ends).toEqual([
+          { stepId: "trajectory-fallback-step", status: "completed" },
+        ]);
       } finally {
         await streamServer.close();
       }
@@ -2727,6 +2842,228 @@ describe("API Server E2E (no runtime)", () => {
         expect(llmCalls[0]?.model).toBe("milady/conversation-memory-backfill");
         expect(llmCalls[0]?.userPrompt).toBe(userPrompt);
         expect(llmCalls[0]?.response).toBe(assistantReply);
+      } finally {
+        await streamServer.close();
+      }
+    });
+
+    it("GET /api/trajectories/:id prefers real useModel logs over conversation-memory backfill", async () => {
+      const trajectoryId = "trajectory-logs-backfill";
+      const roomId = "room-logs-backfill";
+      const messageId = "message-logs-backfill";
+      const startTime = Date.now() - 3_000;
+      const endTime = startTime + 1_400;
+      const systemPrompt = "system instructions from live useModel";
+      const userPrompt = "show me the full trajectory please";
+      const assistantReply = "Here is the real model response.";
+
+      const trajectoryLogger = {
+        isEnabled: () => true,
+        setEnabled: () => {},
+        listTrajectories: async () => ({
+          trajectories: [
+            {
+              id: trajectoryId,
+              agentId: "chat-stream-agent",
+              source: "client_chat",
+              status: "completed",
+              startTime,
+              endTime,
+              durationMs: endTime - startTime,
+              stepCount: 1,
+              llmCallCount: 1,
+              totalPromptTokens: 0,
+              totalCompletionTokens: 0,
+              totalReward: 0,
+              scenarioId: null,
+              batchId: null,
+              createdAt: new Date(startTime).toISOString(),
+            },
+          ],
+          total: 1,
+          offset: 0,
+          limit: 50,
+        }),
+        getTrajectoryDetail: async () => ({
+          trajectoryId,
+          agentId: "chat-stream-agent",
+          startTime,
+          endTime,
+          durationMs: endTime - startTime,
+          steps: [
+            {
+              stepId: "step-synthetic",
+              timestamp: startTime + 100,
+              llmCalls: [
+                {
+                  callId: "call-synthetic",
+                  timestamp: startTime + 100,
+                  model: "milady/synthetic-trajectory-fallback",
+                  systemPrompt:
+                    "[synthetic] inserted by trajectory logger because no LLM calls were captured",
+                  userPrompt:
+                    "[synthetic] this trajectory completed without recorded model activity",
+                  response:
+                    "[synthetic] placeholder call inserted to enforce minimum llm_call_count=1",
+                  purpose: "other",
+                  actionType: "TRAJECTORY_FALLBACK",
+                },
+              ],
+              providerAccesses: [
+                {
+                  providerId: "provider-1",
+                  providerName: "elizaOSCloud",
+                  timestamp: startTime + 200,
+                  purpose: "model_lookup",
+                  data: { modelType: "TEXT_LARGE" },
+                },
+              ],
+            },
+          ],
+          metrics: {
+            finalStatus: "completed",
+          },
+          metadata: {
+            source: "client_chat",
+            roomId,
+            messageId,
+            syntheticLlmCall: true,
+            syntheticLlmCallSource: "finalize",
+          },
+        }),
+        getStats: async () => ({
+          totalTrajectories: 1,
+          totalSteps: 1,
+          totalLlmCalls: 1,
+          totalPromptTokens: 0,
+          totalCompletionTokens: 0,
+          averageDurationMs: endTime - startTime,
+          averageReward: 0,
+          bySource: { client_chat: 1 },
+          byStatus: { completed: 1 },
+          byScenario: {},
+        }),
+        deleteTrajectories: async () => 0,
+        clearAllTrajectories: async () => 0,
+        exportTrajectories: async () => ({
+          data: "[]",
+          filename: "trajectories.json",
+          mimeType: "application/json",
+        }),
+      };
+
+      const runtime = createRuntimeForChatSseTests({
+        getService: (serviceType) =>
+          serviceType === "trajectory_logger" ? trajectoryLogger : null,
+        getServicesByType: (serviceType) =>
+          serviceType === "trajectory_logger" ? [trajectoryLogger] : [],
+      }) as AgentRuntime & {
+        adapter?: {
+          db?: {
+            execute: (query: SqlQuery) => Promise<unknown>;
+          };
+        };
+      };
+      runtime.adapter = {
+        db: {
+          execute: async (query: SqlQuery) => {
+            const sql = extractSqlText(query);
+            if (sql.includes("FROM logs")) {
+              return {
+                rows: [
+                  {
+                    type: "run_event",
+                    room_id: roomId,
+                    created_at: new Date(startTime + 90).toISOString(),
+                    body: JSON.stringify({
+                      runId: "run-logs-backfill",
+                      roomId,
+                      messageId,
+                      startTime,
+                      endTime,
+                    }),
+                  },
+                  {
+                    type: "useModel:TEXT_LARGE",
+                    room_id: roomId,
+                    created_at: new Date(startTime + 350).toISOString(),
+                    body: JSON.stringify({
+                      runId: "run-logs-backfill",
+                      modelType: "TEXT_LARGE",
+                      modelKey: "TEXT_LARGE",
+                      provider: "elizaOSCloud",
+                      systemPrompt,
+                      prompt: userPrompt,
+                      response: assistantReply,
+                      temperature: 0,
+                      maxTokens: 4096,
+                      executionTime: 876,
+                      timestamp: startTime + 350,
+                    }),
+                  },
+                ],
+              };
+            }
+
+            throw new Error(`unexpected sql in test: ${sql}`);
+          },
+        },
+      };
+
+      const streamServer = await startApiServer({ port: 0, runtime });
+      try {
+        const list = await req(
+          streamServer.port,
+          "GET",
+          `/api/trajectories?search=${encodeURIComponent(userPrompt)}`,
+        );
+        expect(list.status).toBe(200);
+        const listRows = list.data.trajectories as Array<
+          Record<string, unknown>
+        >;
+        expect(Array.isArray(listRows)).toBe(true);
+        expect(listRows.some((row) => row.id === trajectoryId)).toBe(true);
+
+        const detail = await req(
+          streamServer.port,
+          "GET",
+          `/api/trajectories/${encodeURIComponent(trajectoryId)}`,
+        );
+        expect(detail.status).toBe(200);
+
+        const trajectory = detail.data.trajectory as Record<string, unknown>;
+        const llmCalls = detail.data.llmCalls as Array<Record<string, unknown>>;
+        const providerAccesses = detail.data.providerAccesses as Array<
+          Record<string, unknown>
+        >;
+
+        expect(Array.isArray(llmCalls)).toBe(true);
+        expect(llmCalls).toHaveLength(1);
+        expect(llmCalls[0]?.model).toBe("elizaOSCloud/TEXT_LARGE");
+        expect(llmCalls[0]?.systemPrompt).toBe(systemPrompt);
+        expect(llmCalls[0]?.userPrompt).toBe(userPrompt);
+        expect(llmCalls[0]?.response).toBe(assistantReply);
+        expect(llmCalls[0]?.latencyMs).toBe(876);
+        expect(Number(llmCalls[0]?.promptTokens ?? 0)).toBeGreaterThan(0);
+        expect(Number(llmCalls[0]?.completionTokens ?? 0)).toBeGreaterThan(0);
+
+        expect(Number(trajectory.totalPromptTokens ?? 0)).toBe(
+          Number(llmCalls[0]?.promptTokens ?? 0),
+        );
+        expect(Number(trajectory.totalCompletionTokens ?? 0)).toBe(
+          Number(llmCalls[0]?.completionTokens ?? 0),
+        );
+        expect(
+          (trajectory.metadata as Record<string, unknown>)
+            ?.llmCallBackfillSource,
+        ).toBe("logs");
+        expect(
+          (trajectory.metadata as Record<string, unknown>)?.syntheticLlmCall,
+        ).toBeUndefined();
+
+        expect(Array.isArray(providerAccesses)).toBe(true);
+        expect(providerAccesses).toHaveLength(1);
+        expect(providerAccesses[0]?.providerName).toBe("elizaOSCloud");
       } finally {
         await streamServer.close();
       }

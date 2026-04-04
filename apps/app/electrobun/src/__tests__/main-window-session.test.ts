@@ -1,34 +1,56 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveMainWindowPartition } from "../main-window-session";
+import {
+  PACKAGED_WINDOWS_BOOTSTRAP_PARTITION,
+  resolveBootstrapShellRenderer,
+  resolveBootstrapViewRenderer,
+  resolveMainWindowPartition,
+} from "../main-window-session";
 
-describe("resolveMainWindowPartition", () => {
-  it("returns null by default", () => {
-    expect(resolveMainWindowPartition({})).toBeNull();
-  });
-
-  it("returns the explicit desktop test partition override", () => {
+describe("main-window-session", () => {
+  it("uses the explicit test partition when provided", () => {
     expect(
       resolveMainWindowPartition({
-        MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated",
+        MILADY_DESKTOP_TEST_PARTITION: "milady-smoke",
       }),
-    ).toBe("persist:bootstrap-isolated");
-  });
-
-  it("normalizes bare desktop test partition overrides to persistent CEF partitions", () => {
+    ).toBe("persist:milady-smoke");
     expect(
       resolveMainWindowPartition({
-        MILADY_DESKTOP_TEST_PARTITION: "bootstrap-isolated",
+        MILADY_DESKTOP_TEST_PARTITION: "persist:already-normalized",
       }),
-    ).toBe("persist:bootstrap-isolated");
+    ).toBe("persist:already-normalized");
   });
 
-  it("falls back to the packaged bootstrap partition when the external test API is enabled", () => {
+  it("falls back to the isolated bootstrap partition for test API bootstrap", () => {
     expect(
       resolveMainWindowPartition({
         MILADY_DESKTOP_TEST_API_BASE: "http://127.0.0.1:43123",
       }),
-    ).toBe("persist:bootstrap-isolated");
+    ).toBe(PACKAGED_WINDOWS_BOOTSTRAP_PARTITION);
+  });
+
+  it("returns null for normal startup without bootstrap overrides", () => {
+    expect(resolveMainWindowPartition({})).toBeNull();
+  });
+
+  it("prefers a native shell but chooses CEF for the isolated main view when available", () => {
+    const buildInfo = {
+      defaultRenderer: "native" as const,
+      availableRenderers: ["native", "cef"] as Array<"native" | "cef">,
+    };
+
+    expect(resolveBootstrapShellRenderer(buildInfo)).toBe("native");
+    expect(resolveBootstrapViewRenderer(buildInfo)).toBe("cef");
+  });
+
+  it("falls back cleanly when only the native renderer is bundled", () => {
+    const buildInfo = {
+      defaultRenderer: "native" as const,
+      availableRenderers: ["native"] as Array<"native" | "cef">,
+    };
+
+    expect(resolveBootstrapShellRenderer(buildInfo)).toBe("native");
+    expect(resolveBootstrapViewRenderer(buildInfo)).toBe("native");
   });
 
   it("ignores blank partition overrides", () => {

@@ -251,6 +251,26 @@ describe("applyOnboardingConnectionConfig", () => {
         smallModel: "openai/gpt-5-mini",
         largeModel: "moonshotai/kimi-k2-0905",
       },
+      tts: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+      },
+      media: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+      },
+      embeddings: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+      },
+      rpc: {
+        backend: "elizacloud",
+        transport: "cloud-proxy",
+        accountId: "elizacloud",
+      },
     });
     expect(config.models).toEqual({
       small: "openai/gpt-5-mini",

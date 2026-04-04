@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 describe("@miladyai/app-core package exports", () => {
   const pkgPath = resolve(__dirname, "../../package.json");
   const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
-  console.log("PKG PATH IS:", pkgPath, "KEYS LENGTH:", Object.keys(pkg.exports ?? {}).length); const exportKeys = Object.keys(pkg.exports ?? {});
+  const exportKeys = Object.keys(pkg.exports ?? {});
 
   /**
    * Subpaths that are imported with deep paths within the package
@@ -51,5 +51,4 @@ describe("@miladyai/app-core package exports", () => {
       expect(exportKeys).toContain(subpath);
     });
   }
-
 });

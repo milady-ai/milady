@@ -39,8 +39,9 @@ export function createPackagedWindowsAppEnv(args: {
     MILADY_DESKTOP_TEST_PARTITION: "persist:bootstrap-isolated",
     MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
     ELECTROBUN_CONSOLE: "1",
-    // Redirect both Windows profile roots so the packaged shell does not
-    // reuse stale CEF/runtime state from the host machine.
+    // Redirect both Windows profile roots so the packaged shell and the
+    // explicit bootstrap partition stay isolated from stale host-machine CEF
+    // and runtime state on each test run.
     APPDATA: args.appData,
     LOCALAPPDATA: args.localAppData,
   };

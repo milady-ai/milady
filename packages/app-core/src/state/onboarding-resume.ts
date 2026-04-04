@@ -48,7 +48,7 @@ export function inferOnboardingResumeStep(args: {
   }
 
   if (hasPartialOnboardingConnectionConfig(args.config)) {
-    return "hosting";
+    return "providers";
   }
 
   return "identity";

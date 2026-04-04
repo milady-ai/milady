@@ -1063,17 +1063,10 @@ export async function loadTrajectoryById(
   runtime: IAgentRuntime,
   stepId: string,
 ): Promise<PersistedTrajectory | null> {
-  const safeId = sqlQuote(stepId);
-  try {
-    const result = await executeRawSql(
-      runtime,
-      `SELECT * FROM trajectories WHERE id = ${safeId} LIMIT 1`,
-    );
-    const rows = extractRows(result);
-    if (rows.length === 0) return null;
-    const row = asRecord(rows[0]);
-    if (!row) return null;
-
+  const parseTrajectoryRow = (
+    row: Record<string, unknown>,
+    fallbackId: string,
+  ): PersistedTrajectory => {
     const startTime = toNumber(
       readRecordValue(row, ["start_time", "startTime"]),
       Date.now(),
@@ -1087,13 +1080,92 @@ export async function loadTrajectoryById(
     return {
       id: toText(
         readRecordValue(row, ["id", "trajectory_id", "trajectoryId"]),
-        stepId,
+        fallbackId,
       ),
       source: toText(readRecordValue(row, ["source"]), "runtime"),
       status: normalizeStatus(readRecordValue(row, ["status"]), "completed"),
       startTime,
       endTime,
       steps,
+      metadata: parseMetadata(readRecordValue(row, ["metadata", "meta"])),
+      totalReward: toNumber(
+        readRecordValue(row, ["total_reward", "totalReward"]),
+        0,
+      ),
+      createdAt: toText(
+        readRecordValue(row, ["created_at", "createdAt"]),
+        new Date(startTime).toISOString(),
+      ),
+      updatedAt: toText(
+        readRecordValue(row, ["updated_at", "updatedAt"]),
+        new Date(endTime ?? startTime).toISOString(),
+      ),
+    };
+  };
+
+  const safeId = sqlQuote(stepId);
+  try {
+    const result = await executeRawSql(
+      runtime,
+      `SELECT * FROM trajectories WHERE id = ${safeId} LIMIT 1`,
+    );
+    const rows = extractRows(result);
+    if (rows.length === 0) return null;
+    const row = asRecord(rows[0]);
+    if (!row) return null;
+    return parseTrajectoryRow(row, stepId);
+  } catch {
+    return null;
+  }
+}
+
+export async function loadTrajectoryByStepId(
+  runtime: IAgentRuntime,
+  stepId: string,
+): Promise<PersistedTrajectory | null> {
+  const direct = await loadTrajectoryById(runtime, stepId);
+  if (direct) {
+    return direct;
+  }
+
+  const normalizedStepId = stepId.trim();
+  if (!normalizedStepId) {
+    return null;
+  }
+
+  const stepPattern = sqlQuote(`%"stepId":"${normalizedStepId}"%`);
+  try {
+    const result = await executeRawSql(
+      runtime,
+      `SELECT * FROM trajectories
+       WHERE COALESCE(steps_json, '') LIKE ${stepPattern}
+       ORDER BY updated_at DESC, created_at DESC
+       LIMIT 1`,
+    );
+    const rows = extractRows(result);
+    if (rows.length === 0) return null;
+    const row = asRecord(rows[0]);
+    if (!row) return null;
+
+    const startTime = toNumber(
+      readRecordValue(row, ["start_time", "startTime"]),
+      Date.now(),
+    );
+    const endTime =
+      toOptionalNumber(readRecordValue(row, ["end_time", "endTime"])) ?? null;
+
+    return {
+      id: toText(
+        readRecordValue(row, ["id", "trajectory_id", "trajectoryId"]),
+        normalizedStepId,
+      ),
+      source: toText(readRecordValue(row, ["source"]), "runtime"),
+      status: normalizeStatus(readRecordValue(row, ["status"]), "completed"),
+      startTime,
+      endTime,
+      steps: parseSteps(
+        readRecordValue(row, ["steps_json", "stepsJson", "steps"]),
+      ),
       metadata: parseMetadata(readRecordValue(row, ["metadata", "meta"])),
       totalReward: toNumber(
         readRecordValue(row, ["total_reward", "totalReward"]),
@@ -1299,21 +1371,16 @@ export async function writeCompressedJsonlRows(
   await once(outStream, "finish");
 }
 
-function isCloudProvisionedContainer(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
-  return (
-    env.MILADY_CLOUD_PROVISIONED === "1" ||
-    env.ELIZA_CLOUD_PROVISIONED === "1"
+export function shouldEnableTrajectoryLoggingByDefault(): boolean {
+  const explicit = toOptionalBoolean(
+    process.env.MILADY_TRAJECTORY_LOGGING ??
+      process.env.TRAJECTORY_LOGGING_ENABLED ??
+      process.env.ELIZA_TRAJECTORY_LOGGING,
   );
-}
+  if (explicit !== undefined) return explicit;
 
-export function shouldEnableTrajectoryLoggingByDefault(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
-  if (isCloudProvisionedContainer(env)) {
-    return true;
-  }
-
-  return env.NODE_ENV !== "production";
+  // Trajectory capture underpins debugging, export, and training workflows.
+  // Keep it on by default and require an explicit opt-out instead of silently
+  // disabling it in production builds.
+  return true;
 }

@@ -144,9 +144,9 @@ describe("ConnectionMonitor", () => {
       vi.useRealTimers();
     }
 
-    expect(statuses).toContain("disconnected");
     expect(statuses).toContain("reconnecting");
     expect(statuses).toContain("connected");
+    expect(statuses).not.toContain("disconnected");
   });
 
   it("isMonitoring reflects lifecycle", () => {

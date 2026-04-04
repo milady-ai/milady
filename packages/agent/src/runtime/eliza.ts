@@ -28,20 +28,15 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 // Extracted modules — re-exported for backward compatibility
 // ---------------------------------------------------------------------------
 import { runFirstTimeSetup } from "./first-time-setup";
-import {
-  collectPluginNames,
-  CHANNEL_PLUGIN_MAP,
-  OPTIONAL_PLUGIN_MAP,
-  PROVIDER_PLUGIN_MAP,
-} from "./plugin-collector";
 import { resolvePlugins } from "./plugin-resolver";
 
 export {
-  collectPluginNames,
   CHANNEL_PLUGIN_MAP,
+  collectPluginNames,
   OPTIONAL_PLUGIN_MAP,
   PROVIDER_PLUGIN_MAP,
 } from "./plugin-collector";
+
 // resolvePlugins is re-exported via index.ts from ./plugin-resolver
 
 import {
@@ -64,10 +59,6 @@ import {
   type TargetInfo,
   type UUID,
 } from "@elizaos/core";
-import {
-  isMiladySettingsDebugEnabled,
-  settingsDebugCloudSummary,
-} from "@miladyai/shared";
 let pluginAgentOrchestrator: any;
 try {
   pluginAgentOrchestrator = require("@elizaos/plugin-agent-orchestrator");
@@ -97,6 +88,19 @@ import * as pluginTodo from "@elizaos/plugin-todo";
 import * as pluginTrajectoryLogger from "@elizaos/plugin-trajectory-logger";
 import * as pluginTrust from "@elizaos/plugin-trust";
 import * as pluginRoles from "@miladyai/plugin-roles";
+import * as pluginSelfControl from "@miladyai/plugin-selfcontrol";
+import {
+  isMiladySettingsDebugEnabled,
+  settingsDebugCloudSummary,
+} from "@miladyai/shared";
+import { resolveElizaCloudTopology } from "@miladyai/shared/contracts";
+import {
+  getOnboardingProviderOption,
+  migrateLegacyRuntimeConfig,
+  normalizeOnboardingProviderId,
+  resolveDeploymentTargetInConfig,
+  resolveServiceRoutingInConfig,
+} from "@miladyai/shared/contracts/onboarding";
 import {
   debugLogResolvedContext,
   validateRuntimeContext,
@@ -105,12 +109,10 @@ import {
   configFileExists,
   type ElizaConfig,
   loadElizaConfig,
-  saveElizaConfig,
 } from "../config/config";
 import { collectConfigEnvVars } from "../config/env-vars";
-import { resolveServerOnlyPort } from "../config/runtime-env";
 import { resolveStateDir, resolveUserPath } from "../config/paths";
-import type { AgentConfig } from "../config/types.agents";
+import { resolveServerOnlyPort } from "../config/runtime-env";
 import type { PluginInstallRecord } from "../config/types.eliza";
 import {
   createHookEvent,
@@ -118,6 +120,13 @@ import {
   loadHooks,
   triggerHook,
 } from "../hooks/index";
+import {
+  getDefaultStylePreset,
+  normalizeCharacterLanguage,
+  resolveStylePresetByAvatarIndex,
+  resolveStylePresetById,
+  resolveStylePresetByName,
+} from "../onboarding-presets";
 import {
   ensureAgentWorkspace,
   resolveDefaultAgentWorkspaceDir,
@@ -129,13 +138,6 @@ import { seedBundledKnowledge } from "./default-knowledge";
 import { createElizaPlugin } from "./eliza-plugin";
 import { detectEmbeddingPreset } from "./embedding-presets";
 import { shouldEnableTrajectoryLoggingByDefault } from "./trajectory-persistence";
-import {
-  getDefaultStylePreset,
-  normalizeCharacterLanguage,
-  resolveStylePresetByAvatarIndex,
-  resolveStylePresetById,
-  resolveStylePresetByName,
-} from "../onboarding-presets";
 
 type SignalShutdownContext = {
   getRuntime: () => AgentRuntime;
@@ -147,9 +149,7 @@ let activeSignalShutdownContext: SignalShutdownContext | null = null;
 let signalHandlersRegistered = false;
 let signalShutdownPromise: Promise<void> | null = null;
 
-function registerSignalShutdownHandlers(
-  context: SignalShutdownContext,
-): void {
+function registerSignalShutdownHandlers(context: SignalShutdownContext): void {
   activeSignalShutdownContext = context;
   if (signalHandlersRegistered) {
     return;
@@ -237,6 +237,7 @@ export const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   "@elizaos/plugin-ollama": pluginOllama,
   "@elizaos/plugin-elizacloud": pluginElizacloud,
   "@elizaos/plugin-trust": pluginTrust,
+  "@miladyai/plugin-selfcontrol": pluginSelfControl,
   "@miladyai/plugin-roles": pluginRoles,
   "@elizaos/plugin-todo": pluginTodo,
   "@elizaos/plugin-personality": pluginPersonality,
@@ -313,12 +314,7 @@ export function configureLocalEmbeddingPlugin(
 ): void {
   const detectedPreset = detectEmbeddingPreset();
   const SQL_COMPATIBLE_EMBEDDING_DIMENSIONS = new Set([
-    384,
-    512,
-    768,
-    1024,
-    1536,
-    3072,
+    384, 512, 768, 1024, 1536, 3072,
   ]);
 
   const normalizeEmbeddingDimensions = (
@@ -337,8 +333,8 @@ export function configureLocalEmbeddingPlugin(
   const configuredRepo = embeddingConfig?.modelRepo?.trim();
   const configuredDimensions = normalizeEmbeddingDimensions(
     typeof embeddingConfig?.dimensions === "number" &&
-    Number.isInteger(embeddingConfig.dimensions) &&
-    embeddingConfig.dimensions > 0
+      Number.isInteger(embeddingConfig.dimensions) &&
+      embeddingConfig.dimensions > 0
       ? String(embeddingConfig.dimensions)
       : undefined,
   );
@@ -388,10 +384,7 @@ export function configureLocalEmbeddingPlugin(
   if (configuredDimensions) {
     setEnvFromConfig("LOCAL_EMBEDDING_DIMENSIONS", configuredDimensions);
   } else if (!configuredModel) {
-    setEnvIfMissing(
-      "LOCAL_EMBEDDING_DIMENSIONS",
-      detectedDimensions,
-    );
+    setEnvIfMissing("LOCAL_EMBEDDING_DIMENSIONS", detectedDimensions);
   }
   if (configuredContextSize) {
     setEnvFromConfig("LOCAL_EMBEDDING_CONTEXT_SIZE", configuredContextSize);
@@ -459,13 +452,19 @@ type MutableConfigEnv = Record<string, unknown> & {
 };
 
 function getMutableConfigEnv(config: ElizaConfig): MutableConfigEnv | null {
-  if (!config.env || typeof config.env !== "object" || Array.isArray(config.env)) {
+  if (
+    !config.env ||
+    typeof config.env !== "object" ||
+    Array.isArray(config.env)
+  ) {
     return null;
   }
   return config.env as MutableConfigEnv;
 }
 
-function getMutableConfigEnvVars(configEnv: MutableConfigEnv): Record<string, unknown> | null {
+function getMutableConfigEnvVars(
+  configEnv: MutableConfigEnv,
+): Record<string, unknown> | null {
   if (
     !configEnv.vars ||
     typeof configEnv.vars !== "object" ||
@@ -476,7 +475,10 @@ function getMutableConfigEnvVars(configEnv: MutableConfigEnv): Record<string, un
   return configEnv.vars as Record<string, unknown>;
 }
 
-function readConfigEnvValue(config: ElizaConfig, key: string): string | undefined {
+function readConfigEnvValue(
+  config: ElizaConfig,
+  key: string,
+): string | undefined {
   const configEnv = getMutableConfigEnv(config);
   if (!configEnv) return undefined;
   const vars = getMutableConfigEnvVars(configEnv);
@@ -496,7 +498,11 @@ function setConfigEnvValue(
   key: string,
   value: string,
 ): void {
-  if (!config.env || typeof config.env !== "object" || Array.isArray(config.env)) {
+  if (
+    !config.env ||
+    typeof config.env !== "object" ||
+    Array.isArray(config.env)
+  ) {
     config.env = {};
   }
   const configEnv = config.env as MutableConfigEnv;
@@ -563,10 +569,9 @@ export function normalizeOpenAiCompatibleProviderConfig(
   config: ElizaConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  const cloudInferenceEnabled =
-    config.cloud?.enabled === true &&
-    (config.cloud?.inferenceMode ?? "cloud") === "cloud" &&
-    config.cloud?.services?.inference !== false;
+  const cloudInferenceEnabled = resolveElizaCloudTopology(
+    config as Record<string, unknown>,
+  ).services.inference;
   if (cloudInferenceEnabled) {
     return false;
   }
@@ -583,7 +588,8 @@ export function normalizeOpenAiCompatibleProviderConfig(
   const openaiApiKey = readEffectiveEnvValue(config, "OPENAI_API_KEY", env);
   const groqApiKey = readEffectiveEnvValue(config, "GROQ_API_KEY", env);
   const inheritedGroqApiKey =
-    groqApiKey ?? (looksLikeGroqApiKey(openaiApiKey) ? openaiApiKey : undefined);
+    groqApiKey ??
+    (looksLikeGroqApiKey(openaiApiKey) ? openaiApiKey : undefined);
   if (!inheritedGroqApiKey) {
     return false;
   }
@@ -607,12 +613,14 @@ export function normalizeOpenAiCompatibleProviderConfig(
 
   const normalizedGroqSmallModel =
     currentGroqSmallModel ??
-    (currentSharedSmallModel && !isLikelyOpenAiTextModel(currentSharedSmallModel)
+    (currentSharedSmallModel &&
+    !isLikelyOpenAiTextModel(currentSharedSmallModel)
       ? currentSharedSmallModel
       : "llama-3.1-8b-instant");
   const normalizedGroqLargeModel =
     currentGroqLargeModel ??
-    (currentSharedLargeModel && !isLikelyOpenAiTextModel(currentSharedLargeModel)
+    (currentSharedLargeModel &&
+    !isLikelyOpenAiTextModel(currentSharedLargeModel)
       ? currentSharedLargeModel
       : "qwen-qwq-32b");
 
@@ -658,12 +666,9 @@ export function normalizeOpenAiCompatibleProviderConfig(
 }
 
 /** Redact username segments from filesystem paths to avoid leaking user info in logs. */
-function redactUserSegments(filepath: string): string {
+function _redactUserSegments(filepath: string): string {
   // Replace /Users/<name>/ or /home/<name>/ with /Users/<redacted>/ etc.
-  return filepath.replace(
-    /\/(Users|home)\/[^/]+\//g,
-    "/$1/<redacted>/",
-  );
+  return filepath.replace(/\/(Users|home)\/[^/]+\//g, "/$1/<redacted>/");
 }
 
 type RuntimeAdapterWithClose = {
@@ -843,7 +848,6 @@ function ensureTrajectoryLoggerEnabled(
     );
   }
 }
-
 
 // ---------------------------------------------------------------------------
 // Channel secret mapping
@@ -1421,25 +1425,50 @@ export async function autoResolveDiscordAppId(): Promise<void> {
  */
 /** @internal Exported for testing. */
 export function applyCloudConfigToEnv(config: ElizaConfig): void {
+  migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   const cloud = config.cloud;
   if (!cloud) return;
+  const topology = resolveElizaCloudTopology(config as Record<string, unknown>);
 
-  const cloudMode = cloud.enabled;
-  // Require explicit cloud.enabled = true. Previously, undefined + apiKey
-  // would count as enabled, causing the model to revert to cloud on restart.
-  const effectivelyEnabled = cloudMode === true;
+  // Cloud inference is selected from the canonical onboarding connection, not
+  // just from raw cloud flags. This keeps linked cloud auth from re-enabling
+  // Eliza Cloud after the user has switched to a local or remote provider.
+  const effectivelyEnabled = topology.services.inference;
+  const shouldLoadCloudPlugin = topology.shouldLoadPlugin;
+
+  const setCloudUsageEnv = (key: string, enabled: boolean): void => {
+    if (enabled) {
+      process.env[key] = "true";
+    } else {
+      delete process.env[key];
+    }
+  };
 
   if (isMiladySettingsDebugEnabled()) {
     const c = cloud as Record<string, unknown>;
     logger.debug(
-      `[milady][settings][runtime] applyCloudConfigToEnv effectivelyEnabled=${effectivelyEnabled} cloud=${JSON.stringify(settingsDebugCloudSummary(c))} inferenceMode=${String(cloud.inferenceMode ?? "")} servicesInference=${String(cloud.services?.inference ?? "")}`,
+      `[milady][settings][runtime] applyCloudConfigToEnv inference=${effectivelyEnabled} shouldLoadPlugin=${shouldLoadCloudPlugin} cloud=${JSON.stringify(settingsDebugCloudSummary(c))}`,
     );
   }
 
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_INFERENCE", topology.services.inference);
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_TTS", topology.services.tts);
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_MEDIA", topology.services.media);
+  setCloudUsageEnv(
+    "ELIZAOS_CLOUD_USE_EMBEDDINGS",
+    topology.services.embeddings,
+  );
+  setCloudUsageEnv("ELIZAOS_CLOUD_USE_RPC", topology.services.rpc);
+
   if (effectivelyEnabled) {
     process.env.ELIZAOS_CLOUD_ENABLED = "true";
+  } else {
+    delete process.env.ELIZAOS_CLOUD_ENABLED;
+  }
+
+  if (shouldLoadCloudPlugin) {
     logger.info(
-      `[eliza] Cloud config: enabled=${cloud.enabled}, hasApiKey=${Boolean(cloud.apiKey)}, baseUrl=${cloud.baseUrl ?? "(default)"}`,
+      `[eliza] Cloud config: inference=${topology.services.inference}, runtime=${topology.runtime}, hasApiKey=${Boolean(cloud.apiKey)}, baseUrl=${cloud.baseUrl ?? "(default)"}`,
     );
     // Only propagate the API key when cloud is enabled AND it is a real
     // credential — never set the literal "[REDACTED]" placeholder (which can
@@ -1460,7 +1489,6 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
       delete process.env.ELIZAOS_CLOUD_BASE_URL;
     }
   } else {
-    delete process.env.ELIZAOS_CLOUD_ENABLED;
     delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
     delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
     delete process.env.ELIZAOS_CLOUD_API_KEY;
@@ -1473,61 +1501,46 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
   // user's own keys handle models.
   // If the user chose a subscription provider, treat that as "byok" unless
   // they explicitly set inferenceMode to "cloud".
-  const hasSubProvider = Boolean(config.agents?.defaults?.subscriptionProvider);
-  const explicitMode = cloud.inferenceMode;
-  const inferenceMode = explicitMode ?? (hasSubProvider ? "byok" : "cloud");
-  const inferenceToggle = cloud.services?.inference ?? true;
-  const cloudDoesInference =
-    inferenceMode === "cloud" && inferenceToggle !== false;
   const models = (config as Record<string, unknown>).models as
     | { small?: string; large?: string }
     | undefined;
-  if (effectivelyEnabled && cloudDoesInference) {
-    const small = models?.small || "minimax/minimax-m2.7";
-    const large = models?.large || "anthropic/claude-sonnet-4.6";
+  if (topology.services.inference) {
+    const small = models?.small || "openai/gpt-5-mini";
+    const large = models?.large || "anthropic/claude-sonnet-4.5";
     process.env.SMALL_MODEL = small;
     process.env.LARGE_MODEL = large;
     process.env.ELIZAOS_CLOUD_SMALL_MODEL = small;
     process.env.ELIZAOS_CLOUD_LARGE_MODEL = large;
-  } else if (effectivelyEnabled) {
-    // Cloud enabled but inference handled by user's own keys — clean cloud
-    // model env vars so the cloud plugin doesn't intercept model calls.
+  } else if (shouldLoadCloudPlugin) {
+    // Cloud plugin may still be active for non-inference services; keep model
+    // routing local by clearing the cloud model aliases.
     delete process.env.ELIZAOS_CLOUD_SMALL_MODEL;
     delete process.env.ELIZAOS_CLOUD_LARGE_MODEL;
+    delete process.env.SMALL_MODEL;
+    delete process.env.LARGE_MODEL;
   }
 
   // Propagate per-service disable flags so downstream code can check them
   // without needing direct access to the ElizaConfig object.
-  const services = cloud.services;
-  if (services) {
-    if (services.tts === false) {
-      process.env.ELIZA_CLOUD_TTS_DISABLED = "true";
-      process.env.ELIZA_CLOUD_TTS_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_TTS_DISABLED;
-      delete process.env.ELIZA_CLOUD_TTS_DISABLED;
-    }
-    if (services.media === false) {
-      process.env.ELIZA_CLOUD_MEDIA_DISABLED = "true";
-      process.env.ELIZA_CLOUD_MEDIA_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_MEDIA_DISABLED;
-      delete process.env.ELIZA_CLOUD_MEDIA_DISABLED;
-    }
-    if (services.embeddings === false) {
-      process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED = "true";
-      process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED;
-      delete process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED;
-    }
-    if (services.rpc === false) {
-      process.env.ELIZA_CLOUD_RPC_DISABLED = "true";
-      process.env.ELIZA_CLOUD_RPC_DISABLED = "true";
-    } else {
-      delete process.env.ELIZA_CLOUD_RPC_DISABLED;
-      delete process.env.ELIZA_CLOUD_RPC_DISABLED;
-    }
+  if (!topology.services.tts) {
+    process.env.ELIZA_CLOUD_TTS_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_TTS_DISABLED;
+  }
+  if (!topology.services.media) {
+    process.env.ELIZA_CLOUD_MEDIA_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_MEDIA_DISABLED;
+  }
+  if (!topology.services.embeddings) {
+    process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_EMBEDDINGS_DISABLED;
+  }
+  if (!topology.services.rpc) {
+    process.env.ELIZA_CLOUD_RPC_DISABLED = "true";
+  } else {
+    delete process.env.ELIZA_CLOUD_RPC_DISABLED;
   }
 }
 
@@ -1839,7 +1852,9 @@ async function resetPgliteDataDir(dataDir: string): Promise<void> {
 }
 
 /** Call whichever init method the adapter exposes (.init or .initialize). */
-async function callAdapterInit(adapter: AgentRuntime["adapter"]): Promise<void> {
+async function callAdapterInit(
+  adapter: AgentRuntime["adapter"],
+): Promise<void> {
   const fn =
     (adapter as unknown as Record<string, unknown>).init ?? adapter.initialize;
   if (typeof fn === "function") await fn.call(adapter);
@@ -2380,7 +2395,10 @@ export function buildCharacterFromConfig(config: ElizaConfig): Character {
     resolveStylePresetByAvatarIndex(uiConfig.avatarIndex, language) ??
     resolveStylePresetByName(configuredName, language) ??
     (configuredName ? undefined : getDefaultStylePreset(language));
-  const name = configuredName ?? bundledPreset?.name ?? getDefaultStylePreset(language).name;
+  const name =
+    configuredName ??
+    bundledPreset?.name ??
+    getDefaultStylePreset(language).name;
 
   // Read personality fields from the agent config entry (set during
   // onboarding from the chosen style preset).  Fall back to generic
@@ -2530,6 +2548,61 @@ export function resolvePrimaryModel(config: ElizaConfig): string | undefined {
   return modelConfig.primary;
 }
 
+function resolveProviderIdFromSelectionHint(
+  value: string | undefined,
+): string | undefined {
+  const trimmed = trimEnvString(value);
+  if (!trimmed) return undefined;
+
+  return (
+    normalizeOnboardingProviderId(trimmed) ??
+    normalizeOnboardingProviderId(trimmed.split("/", 1)[0]) ??
+    undefined
+  );
+}
+
+/** @internal Exported for testing. */
+export function resolvePreferredProviderId(
+  config: ElizaConfig,
+): string | undefined {
+  const llmText = resolveServiceRoutingInConfig(
+    config as Record<string, unknown>,
+  )?.llmText;
+  const backend = normalizeOnboardingProviderId(llmText?.backend);
+
+  if (llmText?.transport === "cloud-proxy" && backend === "elizacloud") {
+    return "elizacloud";
+  }
+
+  if (llmText?.transport === "direct") {
+    const directProvider =
+      backend && backend !== "elizacloud" ? backend : undefined;
+    return (
+      directProvider ?? resolveProviderIdFromSelectionHint(llmText.primaryModel)
+    );
+  }
+
+  if (llmText?.transport === "remote") {
+    const remoteProvider =
+      backend && backend !== "elizacloud" ? backend : undefined;
+    return (
+      remoteProvider ?? resolveProviderIdFromSelectionHint(llmText.primaryModel)
+    );
+  }
+
+  return resolveProviderIdFromSelectionHint(resolvePrimaryModel(config));
+}
+
+/** @internal Exported for testing. */
+export function resolvePreferredProviderPluginName(
+  config: ElizaConfig,
+): string | undefined {
+  const providerId = resolvePreferredProviderId(config);
+  return providerId
+    ? getOnboardingProviderOption(providerId)?.pluginName
+    : undefined;
+}
+
 /**
  * Vision is a heavy optional plugin. When Eliza enables it, keep the service
  * loaded but idle until the user explicitly selects CAMERA, SCREEN, or BOTH.
@@ -2643,7 +2716,9 @@ export const logToChatListener = (entry: LogEntry) => {
           },
         )
         .catch((err) => {
-          logger.debug(`[runtime] failed to send log message to target: ${err}`);
+          logger.debug(
+            `[runtime] failed to send log message to target: ${err}`,
+          );
         });
     }
   }
@@ -2820,11 +2895,14 @@ export async function startEliza(
   // 2g. Cloud mode — if the user chose cloud during onboarding (or on a
   //     subsequent start with cloud config), skip local runtime setup and
   //     connect via the thin client instead.
+  const deploymentTarget = resolveDeploymentTargetInConfig(
+    config as Record<string, unknown>,
+  );
   if (
-    config.cloud?.enabled &&
+    deploymentTarget.runtime === "cloud" &&
+    deploymentTarget.provider === "elizacloud" &&
     config.cloud?.apiKey &&
-    config.cloud?.agentId?.trim() &&
-    config.cloud?.runtime === "cloud"
+    config.cloud?.agentId?.trim()
   ) {
     return startInCloudMode(config, config.cloud.agentId, opts);
   }
@@ -2833,6 +2911,9 @@ export async function startEliza(
   const character = buildCharacterFromConfig(config);
 
   const primaryModel = resolvePrimaryModel(config);
+  const preferredProviderId = resolvePreferredProviderId(config);
+  const preferredProviderPluginName =
+    resolvePreferredProviderPluginName(config);
 
   // 4. Ensure workspace exists with required files
   const workspaceDir =
@@ -2889,6 +2970,7 @@ export async function startEliza(
       pluginCount: resolvedPlugins.length,
       providerCount: providerNames.length,
       primaryModel: primaryModel ?? "(auto-detect)",
+      preferredProvider: preferredProviderId ?? "(auto-detect)",
       workspaceDir,
     };
     debugLogResolvedContext(pluginNames, providerNames, contextSummary, (msg) =>
@@ -3036,21 +3118,20 @@ export async function startEliza(
   }
   // ── End sandbox setup ───────────────────────────────────────────────────
 
-  // ── Boost preferred model plugin priority ─────────────────────────────
+  // ── Boost preferred provider plugin priority ──────────────────────────
   // elizaOS selects the model handler with the highest `priority` for each
   // ModelType.  All provider plugins default to priority 0, so whichever
   // registers first wins — essentially random when using Promise.all.
-  // When the user has explicitly chosen a primary model provider (via
-  // `model.primary` in config), we bump that plugin's priority so its
-  // handlers are always selected over other providers.
+  // When the user has explicitly selected a provider or model, prefer that
+  // provider's plugin so its handlers are selected over registration order.
   const pluginsForRuntime = otherPlugins.map((p) => p.plugin);
   const visionModeSetting = resolveVisionModeSetting(config);
-  if (primaryModel) {
+  if (preferredProviderPluginName) {
     for (const plugin of pluginsForRuntime) {
-      if (plugin.name === primaryModel) {
+      if (plugin.name === preferredProviderPluginName) {
         plugin.priority = (plugin.priority ?? 0) + 10;
         logger.info(
-          `[eliza] Boosted plugin "${plugin.name}" priority to ${plugin.priority} (model.primary)`,
+          `[eliza] Boosted plugin "${plugin.name}" priority to ${plugin.priority} (preferred provider: ${preferredProviderId ?? "unknown"})`,
         );
         break;
       }
@@ -3155,7 +3236,7 @@ export async function startEliza(
         ),
       ),
       // Forward Eliza config env vars as runtime settings
-      ...(primaryModel ? { MODEL_PROVIDER: primaryModel } : {}),
+      ...(preferredProviderId ? { MODEL_PROVIDER: preferredProviderId } : {}),
       ...(visionModeSetting ? { VISION_MODE: visionModeSetting } : {}),
       // Forward skills config so plugin-agent-skills can apply allow/deny filtering
       ...(config.skills?.allowBundled
@@ -3407,9 +3488,7 @@ export async function startEliza(
         );
       }
     } else if (!autonomyEnabled) {
-      logger.info(
-        "[eliza] AutonomyService skipped — ENABLE_AUTONOMY=false",
-      );
+      logger.info("[eliza] AutonomyService skipped — ENABLE_AUTONOMY=false");
     }
 
     // Enable the autonomy loop so trigger/heartbeat instructions are
@@ -3600,16 +3679,19 @@ export async function startEliza(
           // Filter out pre-registered plugins so they aren't double-loaded
           // inside initialize()'s Promise.all — same pattern as the initial
           // startup to avoid the TEXT_EMBEDDING race condition.
-          const freshPrimaryModel = resolvePrimaryModel(freshConfig);
+          const freshPreferredProviderId =
+            resolvePreferredProviderId(freshConfig);
+          const freshPreferredProviderPluginName =
+            resolvePreferredProviderPluginName(freshConfig);
           const freshOtherPlugins = resolvedPlugins.filter(
             (p) => !PREREGISTER_PLUGINS.has(p.name),
           );
-          // Boost preferred model plugin priority (same as initial startup)
+          // Boost the preferred provider plugin priority (same as initial startup)
           const freshPluginsForRuntime = freshOtherPlugins.map((p) => p.plugin);
           const freshVisionModeSetting = resolveVisionModeSetting(freshConfig);
-          if (freshPrimaryModel) {
+          if (freshPreferredProviderPluginName) {
             for (const plugin of freshPluginsForRuntime) {
-              if (plugin.name === freshPrimaryModel) {
+              if (plugin.name === freshPreferredProviderPluginName) {
                 plugin.priority = (plugin.priority ?? 0) + 10;
                 break;
               }
@@ -3620,8 +3702,8 @@ export async function startEliza(
             plugins: [freshElizaPlugin, ...freshPluginsForRuntime],
             ...(runtimeLogLevel ? { logLevel: runtimeLogLevel } : {}),
             settings: {
-              ...(freshPrimaryModel
-                ? { MODEL_PROVIDER: freshPrimaryModel }
+              ...(freshPreferredProviderId
+                ? { MODEL_PROVIDER: freshPreferredProviderId }
                 : {}),
               ...(freshVisionModeSetting
                 ? { VISION_MODE: freshVisionModeSetting }
@@ -4071,7 +4153,7 @@ export async function startInCloudMode(
     logger.error(`[eliza] Failed to connect to cloud agent: ${msg}`);
     throw new Error(
       `Failed to connect to cloud agent: ${msg}\n` +
-        "You can retry with `eliza start`, or switch to local mode with `eliza config set cloud.runtime local`",
+        "You can retry with `eliza start`, or switch to local mode by setting `deploymentTarget.runtime` to `local`",
     );
   }
 }

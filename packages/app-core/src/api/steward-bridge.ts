@@ -846,7 +846,11 @@ export async function registerStewardWebhook(
  * Logs but does not throw on failure (best-effort).
  */
 export async function tryRegisterStewardWebhook(
-  port = 31337,
+  port = Number(
+    process.env.MILADY_API_PORT?.trim() ||
+      process.env.ELIZA_PORT?.trim() ||
+      "31337",
+  ) || 31337,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<void> {
   if (!isStewardConfigured(env)) return;

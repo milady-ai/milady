@@ -156,12 +156,15 @@ export class GatewayDiscovery extends EventEmitter {
   }
 
   private handleServiceLost(service: BonjourService): void {
+    // When txt.id is present, match by stableId (most reliable). Otherwise
+    // match by service.name against the stored gateway name. We do NOT
+    // recompute a stableId from service.host/port because Bonjour "lost"
+    // events often carry empty host and port=0.
+    const txt = service.txt ?? {};
+
     for (const [id, gateway] of this.discoveredGateways) {
-      if (
-        (service.name && gateway.name === service.name) ||
-        (service.host && gateway.host === service.host) ||
-        (service.port && gateway.port === service.port)
-      ) {
+      const matched = txt.id ? id === txt.id : gateway.name === service.name;
+      if (matched) {
         this.discoveredGateways.delete(id);
         this.emit("lost", gateway);
         this.sendToWebview?.("gatewayDiscovery", {

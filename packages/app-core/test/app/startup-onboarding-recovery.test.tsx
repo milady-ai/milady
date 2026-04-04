@@ -272,6 +272,10 @@ describe("startup onboarding recovery", () => {
 
     let latest: StartupSnapshot | null = null;
     let tree: TestRenderer.ReactTestRenderer | null = null;
+    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+      // Expected in this recovery path; assert it explicitly instead of
+      // printing to stderr during test runs.
+    });
 
     try {
       await act(async () => {
@@ -306,10 +310,14 @@ describe("startup onboarding recovery", () => {
           label: "This device",
         }),
       );
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "[milady][startup:init] Preserving completed onboarding despite incomplete backend onboarding status.",
+      );
     } finally {
       await act(async () => {
         tree?.unmount();
       });
+      consoleWarnSpy.mockRestore();
     }
   });
 

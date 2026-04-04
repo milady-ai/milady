@@ -21,6 +21,7 @@ import type {
 export interface CompanionSceneConfig {
   selectedVrmIndex: number;
   customVrmUrl: string;
+  customWorldUrl: string;
   uiTheme: UiTheme;
   tab: Tab;
   companionVrmPowerMode: CompanionVrmPowerMode;
@@ -38,6 +39,7 @@ export function useCompanionSceneConfig(): CompanionSceneConfig {
       return {
         selectedVrmIndex: 1,
         customVrmUrl: "",
+        customWorldUrl: "",
         uiTheme: "dark",
         tab: "chat",
         companionVrmPowerMode: "balanced",

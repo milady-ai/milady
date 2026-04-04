@@ -179,6 +179,9 @@ export interface UseChatLifecycleDeps {
   setPlugins: (v: never[]) => void;
   setSkills: (v: never[]) => void;
   setLogs: (v: never[]) => void;
+
+  // Startup coordinator
+  coordinatorResetRef: MutableRefObject<(() => void) | null>;
 }
 
 // ── Hook ────────────────────────────────────────────────────────────
@@ -253,6 +256,7 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
     setPlugins,
     setSkills,
     setLogs,
+    coordinatorResetRef,
   } = deps;
 
   const heartbeatNotificationKeyRef = useRef<string | null>(null);
@@ -588,6 +592,8 @@ export function useChatLifecycle(deps: UseChatLifecycleDeps) {
           setOnboardingRemoteToken("");
           setOnboardingSmallModel("");
           setOnboardingLargeModel("");
+          // Return to splash so user can re-onboard from scratch
+          coordinatorResetRef.current?.();
         },
         resetAvatarSelection: () => {
           setSelectedVrmIndex(1);

@@ -62,6 +62,9 @@ describe("app public bundle assets", () => {
     const animationFiles = actualFiles.filter((f) =>
       f.startsWith("animations/"),
     );
+    const onboardingAudioFiles = actualFiles.filter((f) =>
+      f.startsWith("audio/onboarding/"),
+    );
 
     const allExpected = new Set<string>([
       "android-chrome-192x192.png",
@@ -72,7 +75,9 @@ describe("app public bundle assets", () => {
       "favicon.ico",
       "og-image.png",
       "site.webmanifest",
+      "splash-bg.png",
       ...animationFiles,
+      ...onboardingAudioFiles,
       "vrm-decoders/draco/draco_decoder.js",
       "vrm-decoders/draco/draco_decoder.wasm",
       "vrm-decoders/draco/draco_wasm_wrapper.js",

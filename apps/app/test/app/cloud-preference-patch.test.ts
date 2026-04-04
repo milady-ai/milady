@@ -56,11 +56,12 @@ describe("cloud preference patch", () => {
       }),
     ).toBe(true);
     expect(normalized.cloud).toEqual({
-      enabled: false,
-      inferenceMode: "byok",
-      services: { inference: false },
+      apiKey: "eliza-stale-key",
     });
-    expect(normalized.models).toBeUndefined();
+    expect(normalized.models).toEqual({
+      small: "moonshotai/kimi-k2-turbo",
+      large: "moonshotai/kimi-k2-0905",
+    });
     expect(
       (
         normalized.agents as {
@@ -70,10 +71,15 @@ describe("cloud preference patch", () => {
     ).toBe("anthropic-subscription");
   });
 
-  it("does not normalize active cloud inference config", () => {
+  it("does not normalize config when cloud is actively handling inference via cloud-proxy", () => {
     const config = {
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+        },
+      },
       cloud: {
-        enabled: true,
         apiKey: "eliza-live-key",
         provider: "elizacloud",
         inferenceMode: "cloud",
@@ -127,16 +133,19 @@ describe("cloud preference patch", () => {
     ).toBe(false);
   });
 
-  it("regression: cloud.enabled=true prevents masking even with local provider configured", () => {
-    // This is the exact scenario that caused the login→logout loop:
-    // User logs into cloud → persistCloudLoginStatus sets cloud.enabled=true + apiKey
-    // → shouldPreferLocalProviderConfig was returning true because inferenceMode wasn't "cloud"
-    // → cloud status was masked → user appeared logged out immediately
+  it("regression: cloud-proxy routing prevents masking even with local provider signals", () => {
+    // When the cloud is actively handling inference via cloud-proxy,
+    // shouldPreferLocalProviderConfig returns false regardless of other signals.
     const config = {
+      serviceRouting: {
+        llmText: {
+          backend: "elizacloud",
+          transport: "cloud-proxy",
+        },
+      },
       cloud: {
-        enabled: true,
         apiKey: "eliza-freshly-logged-in-key",
-        inferenceMode: "byok",
+        inferenceMode: "cloud",
       },
       agents: {
         defaults: {
@@ -150,10 +159,15 @@ describe("cloud preference patch", () => {
     expect(normalizeConfigForLocalProviderPreference(config)).toEqual(config);
   });
 
-  it("regression: freshly logged in user cloud status is not masked", () => {
+  it("regression: freshly logged in user cloud status is not masked when userId present", () => {
     const config = {
+      serviceRouting: {
+        llmText: {
+          backend: "anthropic",
+          transport: "direct",
+        },
+      },
       cloud: {
-        enabled: true,
         apiKey: "eliza-freshly-logged-in-key",
         inferenceMode: "byok",
       },
@@ -171,6 +185,7 @@ describe("cloud preference patch", () => {
           enabled: true,
           connected: true,
           hasApiKey: true,
+          userId: "user-1",
         },
       }),
     ).toBe(false);
@@ -257,8 +272,7 @@ describe("cloud preference patch", () => {
           },
         },
         cloud: {
-          enabled: false,
-          inferenceMode: "byok",
+          apiKey: "eliza-stale-key",
         },
         agents: {
           defaults: {

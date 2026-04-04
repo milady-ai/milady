@@ -8,7 +8,7 @@ describe("OnboardingPanel", () => {
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
       tree = TestRenderer.create(
-        <OnboardingPanel step="hosting">
+        <OnboardingPanel step="providers">
           <div>content</div>
         </OnboardingPanel>,
       );

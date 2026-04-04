@@ -70,6 +70,7 @@ export function TokensTable({
   }
 
   if (visibleRows.length === 0) {
+    const showFundingCta = !walletBalances;
     return (
       <div className="flex min-h-[24rem] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="max-w-md space-y-2">
@@ -78,7 +79,11 @@ export function TokensTable({
               ? t("wallet.noTokensFound")
               : t("wallet.noDataRefresh")}
           </div>
-          <div className="text-sm text-muted">{t("wallet.emptyTokensCta")}</div>
+          {showFundingCta ? (
+            <div className="text-sm text-muted">
+              {t("wallet.emptyTokensCta")}
+            </div>
+          ) : null}
         </div>
         {renderChainErrors()}
       </div>

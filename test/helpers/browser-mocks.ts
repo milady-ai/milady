@@ -9,6 +9,10 @@ import { vi } from "vitest";
 
 const CANVAS_PATCH_MARK = Symbol.for("milady.test.canvasMocksInstalled");
 const CONSOLE_PATCH_MARK = Symbol.for("milady.test.consoleErrorPatched");
+const CONSOLE_WARN_PATCH_MARK = Symbol.for("milady.test.consoleWarnPatched");
+const CONSOLE_LOG_PATCH_MARK = Symbol.for("milady.test.consoleLogPatched");
+const MEDIA_PATCH_MARK = Symbol.for("milady.test.mediaMocksInstalled");
+const AUDIO_PATCH_MARK = Symbol.for("milady.test.audioMocksInstalled");
 
 /**
  * Create an in-memory Storage mock backed by a Map.
@@ -123,6 +127,62 @@ export function installCanvasMocks(): void {
 }
 
 /**
+ * Install HTMLMediaElement and Audio mocks to avoid jsdom "Not implemented"
+ * warnings when tests exercise preview/playback flows.
+ */
+export function installMediaElementMocks(): void {
+  if (typeof globalThis.HTMLMediaElement === "undefined") return;
+
+  const prototype = globalThis.HTMLMediaElement.prototype as
+    HTMLMediaElement["prototype"] & {
+      [MEDIA_PATCH_MARK]?: boolean;
+    };
+  if (!prototype[MEDIA_PATCH_MARK]) {
+    Object.defineProperty(prototype, "load", {
+      value: vi.fn(),
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(prototype, "play", {
+      value: vi.fn(() => Promise.resolve()),
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(prototype, "pause", {
+      value: vi.fn(),
+      writable: true,
+      configurable: true,
+    });
+    prototype[MEDIA_PATCH_MARK] = true;
+  }
+
+  const globalObject = globalThis as typeof globalThis & {
+    Audio?: typeof Audio & {
+      [AUDIO_PATCH_MARK]?: boolean;
+    };
+  };
+  if (typeof document === "undefined") return;
+  if (globalObject.Audio?.[AUDIO_PATCH_MARK]) return;
+
+  const MockAudio = vi.fn(function MockAudio(src?: string) {
+    const audio = document.createElement("audio");
+    if (typeof src === "string") {
+      audio.src = src;
+    }
+    return audio;
+  }) as unknown as typeof Audio & {
+    [AUDIO_PATCH_MARK]?: boolean;
+  };
+  MockAudio[AUDIO_PATCH_MARK] = true;
+
+  Object.defineProperty(globalObject, "Audio", {
+    value: MockAudio,
+    writable: true,
+    configurable: true,
+  });
+}
+
+/**
  * Suppress known noisy console.error messages from React test tooling.
  */
 export function suppressReactTestConsoleErrors(): void {
@@ -140,7 +200,8 @@ export function suppressReactTestConsoleErrors(): void {
       (first.includes("react-test-renderer is deprecated") ||
         first.includes(
           "The current testing environment is not configured to support act(...)",
-        ))
+        ) ||
+        first.includes("was not wrapped in act(...)"))
     ) {
       return;
     }
@@ -150,4 +211,51 @@ export function suppressReactTestConsoleErrors(): void {
   };
   patchedConsoleError[CONSOLE_PATCH_MARK] = true;
   console.error = patchedConsoleError;
+
+  const currentConsoleWarn = console.warn as typeof console.warn & {
+    [CONSOLE_WARN_PATCH_MARK]?: boolean;
+  };
+  if (!currentConsoleWarn[CONSOLE_WARN_PATCH_MARK]) {
+    const originalConsoleWarn = console.warn.bind(console);
+    const patchedConsoleWarn = ((...args: unknown[]) => {
+      const first = args[0];
+      if (
+        typeof first === "string" &&
+        (first.includes("[openExternalUrl]") ||
+          first.includes("[RenderGuard]") ||
+          first.includes("[persistence] localStorage operation failed:") ||
+          first.includes(
+            "[Gateway] mDNS discovery not available - desktop bridge not configured",
+          ))
+      ) {
+        return;
+      }
+      originalConsoleWarn(...args);
+    }) as typeof console.warn & {
+      [CONSOLE_WARN_PATCH_MARK]?: boolean;
+    };
+    patchedConsoleWarn[CONSOLE_WARN_PATCH_MARK] = true;
+    console.warn = patchedConsoleWarn;
+  }
+
+  const currentConsoleLog = console.log as typeof console.log & {
+    [CONSOLE_LOG_PATCH_MARK]?: boolean;
+  };
+  if (!currentConsoleLog[CONSOLE_LOG_PATCH_MARK]) {
+    const originalConsoleLog = console.log.bind(console);
+    const patchedConsoleLog = ((...args: unknown[]) => {
+      const first = args[0];
+      if (
+        typeof first === "string" &&
+        first.includes("[shell] switchShellView:")
+      ) {
+        return;
+      }
+      originalConsoleLog(...args);
+    }) as typeof console.log & {
+      [CONSOLE_LOG_PATCH_MARK]?: boolean;
+    };
+    patchedConsoleLog[CONSOLE_LOG_PATCH_MARK] = true;
+    console.log = patchedConsoleLog;
+  }
 }

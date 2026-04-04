@@ -3,6 +3,79 @@ title: Journal des modifications
 description: Nouveautés de Milady — fonctionnalités, améliorations et correctifs.
 ---
 
+<Update label="2026-07-02" description="Semaine du 26 juin au 2 juillet ; formulaires de configuration de plugins, commandes Discord, renforcement du cloud" tags={["Feature", "Update", "Fix"]}>
+<div id="chat-driven-plugin-configuration">
+## Configuration de plugins par le chat
+</div>
+
+Votre agent peut désormais vous aider à configurer des plugins par la conversation. Demandez à votre agent de configurer un plugin et il génère un formulaire interactif directement dans le chat — pas besoin de naviguer vers les paramètres. L'agent détecte de quel plugin vous parlez, génère les champs de configuration appropriés et applique vos choix à la soumission. Consultez [plugins](/fr/plugins/overview) pour plus de détails.
+
+<div id="discord-slash-commands">
+## Commandes slash Discord
+</div>
+
+Milady prend désormais en charge les commandes slash natives de Discord. Quatre commandes sont disponibles cette semaine — `/skill`, `/workspace`, `/shell` et `/cron` — vous permettant de gérer les compétences, les espaces de travail, l'accès au shell et les tâches planifiées directement depuis Discord. Une commande `/issue` avec support auto-vision est également disponible pour soumettre des problèmes avec des captures d'écran. Consultez le [connecteur Discord](/fr/connectors/discord) pour la configuration.
+
+<div id="skills-marketplace-with-remote-registry">
+## Marché de compétences avec registre distant
+</div>
+
+Vous pouvez désormais parcourir et installer des compétences depuis un registre distant directement dans le tableau de bord. Le marché de [compétences](/fr/plugins/skills) se connecte à un catalogue hébergé, de sorte que les nouvelles compétences contribuées par la communauté apparaissent automatiquement sans mise à jour de Milady.
+
+<div id="vincent-oauth-wallet-login">
+## Connexion au portefeuille Vincent OAuth
+</div>
+
+L'interface de [portefeuille](/fr/guides/wallet) prend désormais en charge la connexion Vincent OAuth, vous offrant un flux d'authentification basé sur le navigateur pour connecter les services de portefeuille sans saisir manuellement les identifiants.
+
+<div id="steward-evm-signing-for-cloud-containers">
+## Signature EVM Steward pour les conteneurs cloud
+</div>
+
+Les agents déployés dans le cloud peuvent désormais signer des transactions EVM via le pont [Steward](/fr/guides/wallet). Lorsqu'un conteneur cloud a Steward configuré, les échanges et transferts sont acheminés automatiquement via le proxy de signature avec politique — les mêmes contrôles de sécurité disponibles sur le bureau fonctionnent désormais dans les déploiements cloud.
+
+<div id="splash-screen-with-asset-preloading">
+## Écran de démarrage avec préchargement des ressources
+</div>
+
+L'expérience de démarrage a été repensée avec un écran de style rétro qui précharge les avatars VRM, les icônes et les ressources vocales en arrière-plan avec une barre de progression visible. Les utilisateurs habitués passent automatiquement l'écran. Le résultat est un temps d'interactivité plus rapide sans flash de contenu non stylé ni scintillement du chargeur VRM au premier lancement.
+
+<div id="updates">
+## Mises à jour
+</div>
+
+- **Conscience contextuelle de l'agent** — Votre agent connaît désormais sa propre configuration de modèle, son statut de portefeuille et ses plugins installés lorsqu'il répond aux questions, ce qui lui permet de donner des réponses plus précises sur ses propres capacités.
+- **Modèles cloud par défaut mis à jour** — Les conteneurs cloud utilisent désormais par défaut Sonnet 4.6 et Minimax M2.7 pour une meilleure qualité de réponse immédiate.
+- **Recherche dans la barre latérale des vues Base de données et Runtime** — Les vues [base de données](/fr/advanced/database) et runtime incluent désormais une recherche dans l'en-tête de la barre latérale, facilitant la recherche de tables et d'entrées dans les grands ensembles de données.
+- **Plugins triés par statut** — Les listes de [plugins](/fr/plugins/overview) et de [connecteurs](/fr/guides/connectors) affichent désormais les plugins prêts/activés en haut, pour que vous puissiez voir rapidement ce qui est actif.
+- **Plugins groupés par catégorie** — Les listes de plugins affichent désormais des étiquettes de catégorie avec un regroupement visuel, facilitant la navigation dans les grandes collections de plugins.
+- **Contraste du mode sombre adouci** — Les surfaces du mode sombre utilisent des arrière-plans plus profonds avec un texte plus atténué pour réduire la fatigue oculaire lors des sessions prolongées.
+- **Bannière de redémarrage déplacée vers une notification** — La bannière "redémarrage requis" est désormais une notification compacte dans le coin inférieur droit au lieu d'une barre pleine largeur, réduisant la perturbation visuelle.
+- **Explorateur de tables de base de données étendu** — L'explorateur de tables de [base de données](/fr/advanced/database) remplit désormais correctement l'espace disponible, avec des états vides pleine largeur et une gestion correcte du débordement.
+- **Journalisation des trajectoires pour le cloud** — Les conteneurs cloud enregistrent désormais les données de trajectoire, pour que vous puissiez consulter l'historique des appels LLM dans la [vue de trajectoire](/fr/advanced/trajectories) pour les agents déployés dans le cloud.
+- **Compte cloud et routage des services séparés** — La connexion au cloud et le routage des services (inférence, RPC, médias) sont désormais indépendants, ce qui vous permet d'être connecté au cloud sans acheminer tous les services à travers celui-ci.
+- **Migration de la configuration cloud héritée** — Les anciens formats de configuration cloud sont automatiquement migrés au démarrage, empêchant les paramètres d'être silencieusement ignorés après une mise à jour.
+
+<div id="bug-fixes">
+## Corrections de bugs
+</div>
+
+- Correction des conteneurs provisionnés dans le cloud n'activant pas les connaissances, les battements de cœur ou le TTS — ces fonctionnalités s'activent désormais correctement dans les déploiements cloud
+- Correction des conteneurs provisionnés dans le cloud affichant l'assistant d'intégration au lieu de passer directement à l'agent — les conteneurs gérés démarrent désormais immédiatement
+- Correction des conteneurs cloud signalant un statut de connexion incorrect après la connexion
+- Correction des installations de plugins échouant silencieusement lorsque le gestionnaire de plugins était temporairement indisponible — les installations réessaient et récupèrent désormais correctement
+- Correction des permissions du bureau Windows, du routage de la caméra et de l'arrêt ne fonctionnant pas correctement dans certaines configurations
+- Correction de l'extraction tar Electrobun échouant sur Windows lors de l'utilisation de Git Bash
+- Correction du plugin EVM plantant au démarrage en raison d'une importation statique — il est désormais conditionné par un indicateur d'activation optionnel
+- Correction de l'adresse EVM Steward non découvrable par l'interface de portefeuille au premier lancement
+- Correction de la connexion cloud se déconnectant instantanément en raison d'une condition de concurrence lors de la sauvegarde des préférences
+- Correction de l'état vide de la vue base de données ne remplissant pas la largeur disponible
+- Correction de la réinitialisation du personnage n'effaçant pas les sélections d'avatar, de préréglage et de voix dans l'interface
+- Correction des clés API des fournisseurs ne se chargeant pas depuis la configuration enregistrée au démarrage
+- Correction du runtime de l'agent ne redémarrant pas automatiquement lorsque vous enregistrez une nouvelle clé API dans les paramètres
+
+</Update>
+
 <Update label="2026-04-16" description="Semaine du 10 au 16 avril" tags={["Feature", "Update", "Fix"]}>
 <div id="keyboard-shortcuts-overlay">
 ## Superposition des raccourcis clavier

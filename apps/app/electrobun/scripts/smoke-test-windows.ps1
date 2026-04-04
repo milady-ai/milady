@@ -31,6 +31,7 @@ $testLocalAppDataRoot = if ($env:MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH) {
 }
 $env:APPDATA = $testAppDataRoot
 $env:LOCALAPPDATA = $testLocalAppDataRoot
+$env:MILADY_DESKTOP_TEST_PARTITION = "persist:bootstrap-isolated"
 New-Item -ItemType Directory -Force -Path $env:APPDATA | Out-Null
 New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA | Out-Null
 if ($env:GITHUB_ENV) {
@@ -41,12 +42,12 @@ if ($env:GITHUB_ENV) {
 # Unix-style ~/.config/Milady path used on macOS/Linux.
 $startupLog = Join-Path $env:APPDATA "Milady\\milady-startup.log"
 $selfExtractionRoot = Join-Path $env:LOCALAPPDATA "com.miladyai.milady"
-$tempExtractDir = Join-Path $env:RUNNER_TEMP ("milady-windows-smoke-" + [Guid]::NewGuid().ToString("N"))
+$tempExtractDir = Join-Path $tempRoot ("milady-windows-smoke-" + [Guid]::NewGuid().ToString("N"))
 $persistLauncherDir = $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR
 $persistLauncherPathFile = $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE
 $startupSessionId = "milady-windows-smoke-" + [Guid]::NewGuid().ToString("N")
-$startupStateFile = Join-Path $env:RUNNER_TEMP ($startupSessionId + ".state.json")
-$startupEventsFile = Join-Path $env:RUNNER_TEMP ($startupSessionId + ".events.jsonl")
+$startupStateFile = Join-Path $tempRoot ($startupSessionId + ".state.json")
+$startupEventsFile = Join-Path $tempRoot ($startupSessionId + ".events.jsonl")
 $startupBootstrapFile = $null
 $stopProtectedProcessIds = [System.Collections.Generic.HashSet[int]]::new()
 [void]$stopProtectedProcessIds.Add([int]$PID)
@@ -92,7 +93,7 @@ function Write-ReusableLauncherPath([System.IO.FileInfo]$Launcher, [string]$Temp
     $launcherPath.StartsWith($TemporaryRoot, [System.StringComparison]::OrdinalIgnoreCase)
   ) {
     $stageDir = if ([string]::IsNullOrWhiteSpace($persistLauncherDir)) {
-      Join-Path $env:RUNNER_TEMP "milady-windows-ui-launcher"
+      Join-Path $tempRoot "milady-windows-ui-launcher"
     } else {
       $persistLauncherDir
     }
@@ -201,7 +202,7 @@ function Assert-PackagedArchiveAssetVariants(
       continue
     }
 
-    $extractDir = Join-Path $env:RUNNER_TEMP ("milady-archive-asset-check-" + [Guid]::NewGuid().ToString("N"))
+    $extractDir = Join-Path $tempRoot ("milady-archive-asset-check-" + [Guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
     try {
       & $tarCommand -xf $ArchivePath -C $extractDir $member 2>$null | Out-Null
@@ -377,7 +378,7 @@ $requireInstaller = $env:MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER -eq "1"
 $installerRoot = if ($env:MILADY_TEST_WINDOWS_INSTALL_DIR) {
   $env:MILADY_TEST_WINDOWS_INSTALL_DIR
 } else {
-  Join-Path $env:RUNNER_TEMP ("milady-windows-installed-" + [Guid]::NewGuid().ToString("N"))
+  Join-Path $tempRoot ("milady-windows-installed-" + [Guid]::NewGuid().ToString("N"))
 }
 if ($requireInstaller) {
   $launcher = $null
@@ -595,20 +596,33 @@ function Dump-FailureDiagnostics([int]$Port) {
 
   # 6. Relevant environment variables
   Write-Host ""
-  Write-Host "[6/6] Relevant environment variables:"
+  Write-Host "[6/7] Relevant environment variables:"
   foreach ($varName in @(
     "MILADY_PORT", "MILADY_API_BIND", "MILADY_API_PORT",
     "MILADY_DISABLE_LOCAL_EMBEDDINGS", "ANTHROPIC_API_KEY",
     "NO_PROXY", "HTTP_PROXY", "HTTPS_PROXY",
     "ELECTROBUN_CONSOLE", "APPDATA", "LOCALAPPDATA",
     "MILADY_TEST_WINDOWS_APPDATA_PATH", "MILADY_TEST_WINDOWS_LOCALAPPDATA_PATH",
-    "ELIZA_API_PORT", "ELIZA_PORT"
+    "MILADY_DESKTOP_TEST_PARTITION", "ELIZA_API_PORT", "ELIZA_PORT"
   )) {
     $val = [System.Environment]::GetEnvironmentVariable($varName)
     if ($varName -eq "ANTHROPIC_API_KEY" -and $val) {
       $val = "$($val.Substring(0, [Math]::Min(8, $val.Length)))..."
     }
     Write-Host "  ${varName}=$($val ?? '<unset>')"
+  }
+
+  Write-Host ""
+  Write-Host "[7/7] Windows CEF profile state:"
+  $cefRoot = Join-Path $env:APPDATA "Milady\\CEF"
+  $cefMarker = Join-Path $cefRoot ".milady-version"
+  Write-Host "  CEF root: $cefRoot"
+  Write-Host "  Marker: $cefMarker"
+  Write-Host "  Root exists: $(Test-Path $cefRoot)"
+  if (Test-Path $cefMarker) {
+    Write-Host "  Marker contents: $(Get-Content $cefMarker -Raw -ErrorAction SilentlyContinue)"
+  } else {
+    Write-Host "  Marker contents: <missing>"
   }
 
   Write-Host "========== END DIAGNOSTICS =========="

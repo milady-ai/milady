@@ -279,8 +279,5 @@ test("packaged Windows app bootstraps the renderer against the external API over
     await fs
       .rm(userDataDir, { recursive: true, force: true })
       .catch(() => undefined);
-    await fs
-      .rm(localUserDataDir, { recursive: true, force: true })
-      .catch(() => undefined);
   }
 });
