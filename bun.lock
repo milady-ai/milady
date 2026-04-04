@@ -16,7 +16,7 @@
         "@elizaos/core": "2.0.0-alpha.109",
         "@elizaos/plugin-agent-orchestrator": "0.4.3",
         "@elizaos/plugin-agent-skills": "^2.0.0-alpha.70",
-        "@elizaos/plugin-anthropic": "^2.0.0-alpha.9",
+        "@elizaos/plugin-anthropic": "2.0.0-alpha.11",
         "@elizaos/plugin-commands": "alpha",
         "@elizaos/plugin-cron": "^2.0.0-alpha.7",
         "@elizaos/plugin-edge-tts": "^2.0.0-alpha.11",
@@ -24,11 +24,11 @@
         "@elizaos/plugin-evm": "^2.0.0-alpha.6",
         "@elizaos/plugin-experience": "^2.0.0-alpha.10",
         "@elizaos/plugin-form": "^2.0.0-alpha.10",
-        "@elizaos/plugin-google-genai": "^2.0.0-alpha.9",
+        "@elizaos/plugin-google-genai": "2.0.0-alpha.11",
         "@elizaos/plugin-knowledge": "^2.0.0-alpha.7",
         "@elizaos/plugin-local-embedding": "^2.0.0-alpha.11",
         "@elizaos/plugin-ollama": "^2.0.0-alpha.70",
-        "@elizaos/plugin-openai": "2.0.0-alpha.13",
+        "@elizaos/plugin-openai": "2.0.0-alpha.15",
         "@elizaos/plugin-openrouter": "2.0.0-alpha.10",
         "@elizaos/plugin-pdf": "^2.0.0-alpha.16",
         "@elizaos/plugin-personality": "^2.0.0-alpha.8",
@@ -38,13 +38,13 @@
         "@elizaos/plugin-secrets-manager": "^2.0.0-alpha.9",
         "@elizaos/plugin-shell": "^2.0.0-alpha.9",
         "@elizaos/plugin-sql": "^2.0.0-alpha.17",
-        "@elizaos/plugin-telegram": "2.0.0-alpha.9",
+        "@elizaos/plugin-telegram": "2.0.0-alpha.11",
         "@elizaos/plugin-todo": "2.0.0-alpha.13-milady.0",
         "@elizaos/plugin-trajectory-logger": "^2.0.0-alpha.20",
         "@elizaos/plugin-trust": "^1.2.2",
         "@elizaos/plugin-whatsapp": "^2.0.0-alpha.9",
-        "@elizaos/prompts": "^2.0.0-alpha.93",
-        "@elizaos/skills": "^2.0.0-alpha.93",
+        "@elizaos/prompts": "2.0.0-alpha.109",
+        "@elizaos/skills": "2.0.0-alpha.109",
         "@hapi/boom": "^10.0.1",
         "@lunchtable/plugin-ltcg": "^0.1.0",
         "@miladyai/agent": "workspace:*",
@@ -999,7 +999,7 @@
 
     "@elizaos/plugin-ollama": ["@elizaos/plugin-ollama@2.0.0-alpha.70", "", { "dependencies": { "@ai-sdk/ui-utils": "^1.2.8", "@elizaos/core": "alpha", "ai": "^4.3.9", "js-tiktoken": "^1.0.18", "ollama-ai-provider": "^1.2.0" } }, "sha512-NlNaQTiEUs7KDKazqozmwbUGVHHs6vCocwXvU7RhyeRtgd49rYb5R0d/oLmMCKjTIld/jGmMjY9/qIHRqFk9wA=="],
 
-    "@elizaos/plugin-openai": ["@elizaos/plugin-openai@2.0.0-alpha.13", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "@elizaos/core": "alpha", "ai": "^6.0.30", "js-tiktoken": "^1.0.21", "undici": "^7.16.0" }, "peerDependencies": { "zod": "^4.3.6" } }, "sha512-ho6vxXwoU5kdbT8Rl5Y1iZ9yTXqkUcWgXdb2Wpr2/1tIaVP16yG9IrFrd0OAaF4crUX6wWJWQByfnGgxi8/GqA=="],
+    "@elizaos/plugin-openai": ["@elizaos/plugin-openai@2.0.0-alpha.15", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "ai": "^6.0.30", "js-tiktoken": "^1.0.21", "undici": "^7.16.0" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.98 <3.0.0", "zod": "^4.3.6" } }, "sha512-F2DQhiZ4AEWeCXB5m0NTWDSJjSJEj5RymFbDvMbwc2DeVdL61HD83USZ/oWODIzg5Wwbs9JVXf0ORG86LOhuIQ=="],
 
     "@elizaos/plugin-openrouter": ["@elizaos/plugin-openrouter@2.0.0-alpha.10", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "@ai-sdk/ui-utils": "^1.2.8", "@elizaos/core": "alpha", "@openrouter/ai-sdk-provider": "^1.2.0", "ai": "^6.0.30", "undici": "^7.16.0" } }, "sha512-K75JkVn50Tj21Jl6ODvakDIn9aa9/tKYctR/XGzFCH9yKgBJqewmR7fBCO7/wuFAPQtI36Nj7fE99FFQM0WZHQ=="],
 
@@ -1019,7 +1019,7 @@
 
     "@elizaos/plugin-sql": ["@elizaos/plugin-sql@2.0.0-alpha.17", "", { "dependencies": { "@electric-sql/pglite": "^0.3.3", "@elizaos/core": "alpha", "@neondatabase/serverless": "^1.0.2", "dotenv": "^17.2.3", "drizzle-kit": "^0.31.8", "drizzle-orm": "^0.45.1", "pg": "^8.16.3", "uuid": "^13.0.0" } }, "sha512-O3I7ZX73DFMMCXWtjITi4QBYdo/01MI0neNBfqf6kbCBsE6j1r3ejZDoPBbRi/Ticsj3jlCc9nuwiOnKgWt+mQ=="],
 
-    "@elizaos/plugin-telegram": ["@elizaos/plugin-telegram@2.0.0-alpha.9", "", { "dependencies": { "@elizaos/core": "next", "@telegraf/types": "7.1.0", "@types/node": "^24.0.10", "strip-literal": "^3.0.0", "telegraf": "4.16.3", "type-detect": "^4.1.0", "typescript": "^5.8.3" } }, "sha512-Q49KNqrlJQLNZ662LpxC8aF+Y+6QSf7prrAInnqra/xG9Fs9dk56rE3sIilSE7bBWdjuHpURQQ92Z35U3eacSQ=="],
+    "@elizaos/plugin-telegram": ["@elizaos/plugin-telegram@2.0.0-alpha.11", "", { "dependencies": { "@elizaos/core": "alpha", "@telegraf/types": "7.1.0", "@types/node": "^24.0.10", "strip-literal": "^3.0.0", "telegraf": "4.16.3", "type-detect": "^4.1.0", "typescript": "^5.8.3" } }, "sha512-3KUH8Bo8ceEOlDFkQ7Ds4pRI7qXbxiFm7nlWAuLK7VC86GJ0nD4UspPjgr27jU61ER3kTH+VZd6DKJ8BGUcDZQ=="],
 
     "@elizaos/plugin-todo": ["@elizaos/plugin-todo@2.0.0-alpha.13-milady.0", "", { "dependencies": { "@elizaos/core": "alpha", "drizzle-orm": "^0.45.1", "zod": "^4.3.6" } }, "sha512-OJK14JciCzaaMGk1HnsH0D9XsnHQxypan4uaAiM7gpkmeoWUE14QosydJ0TlUIocbde/9p09ou7NxdJXbUMoEQ=="],
 
@@ -4431,11 +4431,7 @@
 
     "@miladyai/agent/@elizaos/plugin-agent-orchestrator": ["@elizaos/plugin-agent-orchestrator@0.3.16", "", { "dependencies": { "coding-agent-adapters": "0.12.0", "pty-console": "0.3.1" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.0", "git-workspace-service": "0.4.4", "pty-manager": "1.10.0" } }, "sha512-gnBqKvlH6aNg2/FkWo/S7GuwiAG727JQc3ba55BQfwDgzt59UoVG8Zzw/XUBac3HaeSn5rVlqNfjPqY+Mm7ZPQ=="],
 
-    "@miladyai/agent/@elizaos/plugin-openai": ["@elizaos/plugin-openai@2.0.0-alpha.15", "", { "dependencies": { "@ai-sdk/openai": "^3.0.9", "ai": "^6.0.30", "js-tiktoken": "^1.0.21", "undici": "^7.16.0" }, "peerDependencies": { "@elizaos/core": ">=2.0.0-alpha.98 <3.0.0", "zod": "^4.3.6" } }, "sha512-F2DQhiZ4AEWeCXB5m0NTWDSJjSJEj5RymFbDvMbwc2DeVdL61HD83USZ/oWODIzg5Wwbs9JVXf0ORG86LOhuIQ=="],
-
     "@miladyai/agent/@elizaos/plugin-trajectory-logger": ["@elizaos/plugin-trajectory-logger@2.0.0-alpha.20", "", { "dependencies": { "@elizaos/core": "2.0.0-alpha.3", "uuid": "^13.0.0" } }, "sha512-kvoJrY8R3I+qynGu5ghjISMem+GceVrm/O2kMbo2dfX+92SryiAijOGmNJJfqYal2bIoight3tZaeQMvCV4oOA=="],
-
-    "@miladyai/agent/@miladyai/plugin-roles": ["@miladyai/plugin-roles@github:milady-ai/plugin-roles#5b00c49", { "peerDependencies": { "@elizaos/core": "alpha" } }, "milady-ai-plugin-roles-5b00c49", "sha512-QxrX3mPn9KLdor5PdRyVqYzOxVbIfR4cNW9YfqWL3jCE35zg6g1Pu0E9MDkTFmNOFbyjvCnkrFLxZtZfGdlu+A=="],
 
     "@miladyai/agent/sharp": ["sharp@0.33.5", "", { "dependencies": { "color": "^4.2.3", "detect-libc": "^2.0.3", "semver": "^7.6.3" }, "optionalDependencies": { "@img/sharp-darwin-arm64": "0.33.5", "@img/sharp-darwin-x64": "0.33.5", "@img/sharp-libvips-darwin-arm64": "1.0.4", "@img/sharp-libvips-darwin-x64": "1.0.4", "@img/sharp-libvips-linux-arm": "1.0.5", "@img/sharp-libvips-linux-arm64": "1.0.4", "@img/sharp-libvips-linux-s390x": "1.0.4", "@img/sharp-libvips-linux-x64": "1.0.4", "@img/sharp-libvips-linuxmusl-arm64": "1.0.4", "@img/sharp-libvips-linuxmusl-x64": "1.0.4", "@img/sharp-linux-arm": "0.33.5", "@img/sharp-linux-arm64": "0.33.5", "@img/sharp-linux-s390x": "0.33.5", "@img/sharp-linux-x64": "0.33.5", "@img/sharp-linuxmusl-arm64": "0.33.5", "@img/sharp-linuxmusl-x64": "0.33.5", "@img/sharp-wasm32": "0.33.5", "@img/sharp-win32-ia32": "0.33.5", "@img/sharp-win32-x64": "0.33.5" } }, "sha512-haPVm1EkS9pgvHrQ/F3Xy+hgcuMV0Wm9vfIBSiwZ05k+xgb0PkBQpGsAA/oWdDobNaZTH5ppvHtzCFbnSEwHVw=="],
 
