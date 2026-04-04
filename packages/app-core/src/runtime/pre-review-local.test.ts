@@ -283,4 +283,23 @@ index 1234567..89abcde 100644
       homepageTests: ["src/routes/home.test.tsx"],
     });
   });
+
+  it("flags agent doc files that use literal TypeScript any patterns in prose", () => {
+    // Agent instruction markdown files (e.g. .claude/agents/*.md) that reference
+    // TypeScript antipatterns using the exact pattern string (e.g. `api as any`)
+    // will trigger the scanner, because the scanner is content-agnostic.
+    // Authors must rephrase such descriptions to avoid the literal pattern.
+    const docWithLiteralAnyPattern = `
++ 3. Grep for antipatterns: hardcoded ports, \`api as any\`, bare console.log.
+`;
+    const docIssues = scanDiffTextForBlockedPatterns(docWithLiteralAnyPattern);
+    expect(docIssues.some((issue) => issue.includes("`any` usage"))).toBe(true);
+
+    // Rewording to avoid the literal TypeScript cast pattern does not trigger.
+    const docWithRephrasedPattern = `
++ 3. Grep for antipatterns: hardcoded ports, unsafe \`any\` casts, bare console.log.
+`;
+    const safeDocIssues = scanDiffTextForBlockedPatterns(docWithRephrasedPattern);
+    expect(safeDocIssues.some((issue) => issue.includes("`any` usage"))).toBe(false);
+  });
 });

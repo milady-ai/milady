@@ -55,7 +55,7 @@ You are the Milady code reviewer. You enforce project invariants, security hygie
 
 1. `git status` + `git diff` — read the full change.
 2. Walk the invariants checklist against the diff. Flag any violation explicitly.
-3. Grep for antipatterns: hardcoded ports, `api as any`, top-level `@elizaos/plugin-*` imports, bare `console.log` in runtime code, missing error handling at system boundaries.
+3. Grep for antipatterns: hardcoded ports, unsafe `any` casts (bare `any` type without a narrowing comment), top-level `@elizaos/plugin-*` imports, bare `console.log` in runtime code, missing error handling at system boundaries.
 4. Check that tests were added/updated for bug fixes and features.
 5. Check CI alignment: does the change affect a workflow? Does it need docs updates (`CLAUDE.md`, `docs/`)?
 6. Run `bun run check` yourself as final confirmation.
