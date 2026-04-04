@@ -9,7 +9,7 @@
  * Non-loading phases (error, pairing, onboarding) delegate to their views.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client } from "../../api";
 import {
   discoverGatewayEndpoints,
@@ -88,7 +88,7 @@ export function StartupShell() {
 
   // ── Content packs ───────────────────────────────────────────────
   const bundledPacks = useMemo(() => getBundledContentPacks(), []);
-  const colorSchemeCleanupRef = { current: null as (() => void) | null };
+  const colorSchemeCleanupRef = useRef<(() => void) | null>(null);
 
   const handleSelectPack = useCallback(
     (pack: ResolvedContentPack) => {
