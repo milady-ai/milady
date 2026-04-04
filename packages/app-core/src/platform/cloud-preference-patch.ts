@@ -44,10 +44,6 @@ export function shouldPreferLocalProviderConfig(
 ): boolean {
   if (!config) return false;
 
-  // If cloud is explicitly enabled, don't override — user chose cloud.
-  const cloud = asRecord(config.cloud);
-  if (cloud?.enabled === true) return false;
-
   const llmText = resolveServiceRoutingInConfig(
     config as Record<string, unknown>,
   )?.llmText;
