@@ -742,9 +742,18 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain('MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"');
     expect(workflow).toContain("MILADY_TEST_WINDOWS_INSTALL_DIR: C:\\mi");
     expect(workflow).toContain(
-      'Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"',
+      '& (Join-Path $PWD "apps/app/electrobun/scripts/smoke-test-windows.ps1")',
     );
     expect(workflow).toContain(
+      '-ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts")',
+    );
+    expect(workflow).toContain(
+      '-BuildDir (Join-Path $PWD "apps/app/electrobun/build")',
+    );
+    expect(workflow).toContain(
+      'Add-Content -Path $env:GITHUB_ENV -Value "MILADY_TEST_WINDOWS_LAUNCHER_PATH=$launcherPath"',
+    );
+    expect(workflow).not.toContain(
       'Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."',
     );
   });

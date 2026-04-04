@@ -655,11 +655,12 @@ jobs:
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_DIR -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE -Force -ErrorAction SilentlyContinue
 
-          bun run test:desktop:packaged:windows
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."
-            exit $LASTEXITCODE
-          }
+          # Invoke the smoke script directly from pwsh so installer/runtime
+          # failures surface with their original exception instead of bun /
+          # Windows PowerShell collapsing them into a generic -1 wrapper.
+          & (Join-Path $PWD "apps/app/electrobun/scripts/smoke-test-windows.ps1") `
+            -ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts") `
+            -BuildDir (Join-Path $PWD "apps/app/electrobun/build")
 
           if (-not (Test-Path $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE)) {
             Write-Error "Smoke test did not emit a reusable Windows launcher path."

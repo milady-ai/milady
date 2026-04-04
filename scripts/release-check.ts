@@ -141,8 +141,9 @@ const requiredWorkflowSnippets = [
   "ANTHROPIC_API_KEY: $" + "{{ secrets.ANTHROPIC_API_KEY }}",
   "ELIZAOS_CLOUD_API_KEY: $" + "{{ secrets.ELIZAOS_CLOUD_API_KEY }}",
   "ELIZAOS_CLOUD_BASE_URL: $" + "{{ secrets.ELIZAOS_CLOUD_BASE_URL }}",
-  "bun run test:desktop:packaged:windows",
-  'Write-Error "Packaged Windows smoke test exited with code $LASTEXITCODE."',
+  '& (Join-Path $PWD "apps/app/electrobun/scripts/smoke-test-windows.ps1")',
+  '-ArtifactsDir (Join-Path $PWD "apps/app/electrobun/artifacts")',
+  '-BuildDir (Join-Path $PWD "apps/app/electrobun/build")',
   "bun run test:desktop:playwright",
 ];
 const _requiredPatchedElectrobunCliSnippets = [
