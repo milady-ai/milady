@@ -13,21 +13,29 @@
  * initialization, before plugins are loaded.
  */
 
+import { randomBytes } from "node:crypto";
 import type { IAgentRuntime } from "@elizaos/core";
 import {
   initStewardEvmAccount,
   isStewardCloudProvisioned,
 } from "./steward-evm-account";
 
-// A dummy private key that satisfies validation but won't be used for actual signing.
-// This is a well-known "zero" key — funds sent to its address are unrecoverable.
-// It's only used as a placeholder so initWalletProvider doesn't generate a random key.
-const DUMMY_PRIVATE_KEY =
-  "0x0000000000000000000000000000000000000000000000000000000000000001";
+/**
+ * Generate a random throwaway private key as a placeholder.
+ * Called fresh each pre-boot so the key is never reused or predictable.
+ * This key is only set to prevent initWalletProvider from generating a
+ * persisted random key — it is replaced by the Steward account post-boot.
+ * If post-boot fails, the key is cleared so the container has no EVM signer.
+ */
+function generateDummyPrivateKey(): string {
+  return "0x" + randomBytes(32).toString("hex");
+}
 
 /** Stash the account globally so we can retrieve it in the post-start hook. */
 let _stewardAccount: Awaited<ReturnType<typeof initStewardEvmAccount>> = null;
 let _initialized = false;
+/** Track whether we set a dummy key so we can clear it on failure. */
+let _dummyKeyRuntime: IAgentRuntime | null = null;
 
 /**
  * Pre-boot hook: call before plugins are loaded.
@@ -44,12 +52,14 @@ export async function stewardEvmPreBoot(runtime: IAgentRuntime): Promise<void> {
   try {
     _stewardAccount = await initStewardEvmAccount();
     if (_stewardAccount) {
-      // Set the dummy key so initWalletProvider doesn't generate a random one
-      // and doesn't try to persist it to the database
+      // Set a random throwaway key so initWalletProvider doesn't generate and
+      // persist a random key. This key is replaced by the Steward account in
+      // stewardEvmPostBoot. If post-boot fails the key is cleared.
       const existing = runtime.getSetting("EVM_PRIVATE_KEY");
       if (!existing) {
-        runtime.setSetting("EVM_PRIVATE_KEY", DUMMY_PRIVATE_KEY);
-        console.log("[StewardEvmBridge] Set dummy EVM_PRIVATE_KEY placeholder");
+        runtime.setSetting("EVM_PRIVATE_KEY", generateDummyPrivateKey());
+        _dummyKeyRuntime = runtime;
+        console.log("[StewardEvmBridge] Set random throwaway EVM_PRIVATE_KEY placeholder");
       }
       // Expose the steward-managed address so getWalletAddresses() and
       // resolveWalletCapabilityStatus() can discover it synchronously,
@@ -64,7 +74,16 @@ export async function stewardEvmPreBoot(runtime: IAgentRuntime): Promise<void> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`[StewardEvmBridge] Pre-boot failed: ${msg}`);
-    console.warn("[StewardEvmBridge] Plugin-evm will use default key behavior");
+    console.warn("[StewardEvmBridge] Steward init failed — EVM wallet will be unavailable");
+    // Clear any dummy key we may have set so the container has no EVM signer
+    if (_dummyKeyRuntime) {
+      try {
+        _dummyKeyRuntime.setSetting("EVM_PRIVATE_KEY", "");
+      } catch {
+        // best-effort
+      }
+      _dummyKeyRuntime = null;
+    }
   }
 }
 
@@ -89,8 +108,13 @@ export async function stewardEvmPostBoot(
 
     if (!evmService?.walletProvider) {
       console.warn(
-        "[StewardEvmBridge] EVMService not found or no walletProvider — cannot inject Steward account"
+        "[StewardEvmBridge] EVMService not found or no walletProvider — clearing dummy key, EVM wallet unavailable"
       );
+      // Clear the dummy key so nothing can sign with it
+      if (_dummyKeyRuntime) {
+        try { _dummyKeyRuntime.setSetting("EVM_PRIVATE_KEY", ""); } catch { /* best-effort */ }
+        _dummyKeyRuntime = null;
+      }
       return;
     }
 
@@ -105,9 +129,16 @@ export async function stewardEvmPostBoot(
     console.log(
       `[StewardEvmBridge] ✓ Replaced EVM account: ${oldAddress} → ${newAddress} (Steward-backed)`
     );
+    // Dummy key is no longer needed — Steward account is active
+    _dummyKeyRuntime = null;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`[StewardEvmBridge] Post-boot failed: ${msg}`);
+    // Clear dummy key on failure — better to have no signer than a throwaway key
+    if (_dummyKeyRuntime) {
+      try { _dummyKeyRuntime.setSetting("EVM_PRIVATE_KEY", ""); } catch { /* best-effort */ }
+      _dummyKeyRuntime = null;
+    }
   }
 }
 

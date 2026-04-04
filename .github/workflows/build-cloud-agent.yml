@@ -46,7 +46,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: milady-ai/agent
   SOURCE_REF: ${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
-  CLOUD_DEPLOY_WEBHOOK_URL: http://89.167.63.246:9876/deploy
+  CLOUD_DEPLOY_WEBHOOK_URL: ${{ secrets.CLOUD_DEPLOY_WEBHOOK_URL }}
 
 permissions:
   contents: read
@@ -185,9 +185,9 @@ jobs:
           GIT_REF: ${{ github.ref_name }}
           DELIVERY_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
-          if [ -z "$WEBHOOK_SECRET" ]; then
-            echo "CLOUD_DEPLOY_WEBHOOK_SECRET is required" >&2
-            exit 1
+          if [ -z "$WEBHOOK_SECRET" ] || [ -z "${{ env.CLOUD_DEPLOY_WEBHOOK_URL }}" ]; then
+            echo "CLOUD_DEPLOY_WEBHOOK_SECRET or CLOUD_DEPLOY_WEBHOOK_URL not configured, skipping deploy webhook"
+            exit 0
           fi
 
           PAYLOAD=$(python3 -c 'import json, os; print(json.dumps({"image": os.environ["IMAGE"], "tag": os.environ["IMAGE_TAG"], "sha": os.environ["GIT_SHA"], "ref": os.environ["GIT_REF"], "run_id": os.environ["DELIVERY_ID"], "skip_rollout": False}, separators=(",", ":")))')

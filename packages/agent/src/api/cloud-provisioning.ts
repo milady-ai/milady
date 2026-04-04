@@ -2,8 +2,17 @@ function hasValue(value: string | undefined): boolean {
   return Boolean(value?.trim());
 }
 
+/**
+ * A compat API token (MILADY_API_TOKEN / ELIZA_API_TOKEN) is only treated as a
+ * cloud credential when STEWARD_API_URL is also set, confirming an actual Steward
+ * sidecar is present. Without that signal, these tokens exist in local dev setups
+ * too and would incorrectly trigger cloud behavior.
+ */
 function hasCompatApiToken(): boolean {
-  return hasValue(process.env.MILADY_API_TOKEN) || hasValue(process.env.ELIZA_API_TOKEN);
+  return (
+    (hasValue(process.env.MILADY_API_TOKEN) || hasValue(process.env.ELIZA_API_TOKEN)) &&
+    hasValue(process.env.STEWARD_API_URL)
+  );
 }
 
 function hasCloudApiKeyProvisioning(): boolean {
