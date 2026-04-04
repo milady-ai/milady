@@ -166,8 +166,7 @@ export function ensureCompatSensitiveRouteAuthorized(
     // a security risk.
     if (
       isLoopbackRemoteAddress(req.socket?.remoteAddress) ||
-      (isDevEnvironment() &&
-        process.env.MILADY_DEV_AUTH_BYPASS?.trim() === "1")
+      (isDevEnvironment() && process.env.MILADY_DEV_AUTH_BYPASS?.trim() === "1")
     ) {
       return true;
     }

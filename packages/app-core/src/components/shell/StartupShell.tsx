@@ -18,10 +18,7 @@ import {
   type GatewayDiscoveryEndpoint,
   gatewayEndpointToApiBase,
 } from "../../bridge/gateway-discovery";
-import {
-  applyColorScheme,
-  applyContentPack,
-} from "../../content-packs";
+import { applyColorScheme, applyContentPack } from "../../content-packs";
 import {
   clearPersistedActiveServer,
   loadPersistedActivePackUrl,

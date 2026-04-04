@@ -847,7 +847,9 @@ export async function registerStewardWebhook(
  */
 export async function tryRegisterStewardWebhook(
   port = Number(
-    process.env.MILADY_API_PORT?.trim() || process.env.ELIZA_PORT?.trim() || "31337",
+    process.env.MILADY_API_PORT?.trim() ||
+      process.env.ELIZA_PORT?.trim() ||
+      "31337",
   ) || 31337,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<void> {
