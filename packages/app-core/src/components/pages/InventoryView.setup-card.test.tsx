@@ -25,10 +25,7 @@ function hasAnyAddress(args: {
     args.stewardConnected && args.stewardSolAddr,
   );
   return Boolean(
-    args.evmAddr ||
-      args.solAddr ||
-      stewardEvmPresent ||
-      stewardSolPresent,
+    args.evmAddr || args.solAddr || stewardEvmPresent || stewardSolPresent,
   );
 }
 
@@ -39,9 +36,7 @@ function shouldShowBscRpcBanner(args: {
   bscReady: boolean;
 }): boolean {
   return (
-    args.singleChainFocus === "bsc" &&
-    Boolean(args.evmAddr) &&
-    !args.bscReady
+    args.singleChainFocus === "bsc" && Boolean(args.evmAddr) && !args.bscReady
   );
 }
 

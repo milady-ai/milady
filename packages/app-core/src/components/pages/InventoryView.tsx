@@ -1119,7 +1119,6 @@ export function InventoryView() {
               )}
             </PagePanel>
           )}
-
         </div>
       </PageLayout>
 
