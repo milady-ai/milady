@@ -28,6 +28,8 @@ import {
 import {
   ensureCompatApiAuthorized,
   ensureCompatSensitiveRouteAuthorized,
+  getCompatApiToken,
+  isDevEnvironment,
 } from "./auth";
 import {
   sendJsonError as sendJsonErrorResponse,
@@ -138,6 +140,18 @@ export async function handleWalletCompatRoutes(
   if (method === "GET" && url.pathname === "/api/wallet/keys") {
     if (!isLoopbackRemoteAddress(req.socket.remoteAddress)) {
       sendJsonErrorResponse(res, 403, "loopback only");
+      return true;
+    }
+
+    // In production without a configured token, reject even from loopback.
+    // Electrobun injects a generated token before the renderer mounts; a
+    // missing token signals the renderer has not been properly initialised.
+    if (!isDevEnvironment() && !getCompatApiToken()) {
+      sendJsonErrorResponse(
+        res,
+        403,
+        "Sensitive endpoint requires API token authentication",
+      );
       return true;
     }
 
