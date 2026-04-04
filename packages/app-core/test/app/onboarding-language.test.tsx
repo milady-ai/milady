@@ -129,7 +129,7 @@ describe("Onboarding language mode", () => {
 
   it("shows english copy by default", async () => {
     mockUseApp.mockReturnValue(
-      createOnboardingContext({ uiLanguage: "en", onboardingStep: "hosting" }),
+      createOnboardingContext({ uiLanguage: "en", onboardingStep: "providers" }),
     );
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
@@ -148,7 +148,7 @@ describe("Onboarding language mode", () => {
     mockUseApp.mockReturnValue(
       createOnboardingContext({
         uiLanguage: "zh-CN",
-        onboardingStep: "hosting",
+        onboardingStep: "providers",
       }),
     );
     let tree: TestRenderer.ReactTestRenderer | undefined;
@@ -163,6 +163,6 @@ describe("Onboarding language mode", () => {
 
     const text = collectText(tree.root);
     expect(text).toContain("onboarding.stepName.identity");
-    expect(text).toContain("onboarding.stepName.hosting");
+    expect(text).toContain("onboarding.stepName.providers");
   });
 });
