@@ -354,7 +354,11 @@ index 1234567..89abcde 100644
     const docWithRephrasedPattern = `
 + 3. Grep for antipatterns: hardcoded ports, unsafe \`any\` casts, bare console.log.
 `;
-    const safeDocIssues = scanDiffTextForBlockedPatterns(docWithRephrasedPattern);
-    expect(safeDocIssues.some((issue) => issue.includes("`any` usage"))).toBe(false);
+    const safeDocIssues = scanDiffTextForBlockedPatterns(
+      docWithRephrasedPattern,
+    );
+    expect(safeDocIssues.some((issue) => issue.includes("`any` usage"))).toBe(
+      false,
+    );
   });
 });
