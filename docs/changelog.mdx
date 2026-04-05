@@ -3,6 +3,44 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-07-16" description="Week of July 10–16; life-ops system, onboarding voice previews, wallet setup, security hardening" tags={["Feature", "Update", "Fix"]}>
+
+## Life-ops: tasks, habits, and routines
+
+Your agent can now help you manage daily tasks, habits, and routines through a new life-ops system. Define recurring habits with time-of-day windows (morning, afternoon, evening, night), set goals with progress tracking, and create multi-step workflows that your agent executes on schedule. Each item has its own reminder plan with configurable escalation, and occurrences can be completed, snoozed, skipped, or muted. The system is available through new REST API endpoints under `/api/lifeops`.
+
+## Splash content packs
+
+The startup splash screen now supports content packs — themed bundles of backgrounds, copy, and branding that customize the first-run experience. Content packs load automatically on startup and can be swapped without rebuilding the app.
+
+## Onboarding voice previews
+
+Character selection during [onboarding](/guides/beginners-user-guide) now plays a pre-generated voice catchphrase for each character in your selected language. Fifty-six voicelines (eight characters across seven languages) are bundled as static assets for instant playback — no TTS API call required. If a static voiceline is unavailable, the system falls back to your configured TTS provider.
+
+## Updates
+
+- **Onboarding simplified to two steps** — The [onboarding wizard](/guides/beginners-user-guide) has been streamlined from six steps down to splash, identity, providers, and chat. Voice configuration and permissions have moved to [settings](/apps/dashboard/settings) where they can be configured at any time, reducing first-run friction.
+- **Wallet setup available inline** — The [wallet](/guides/wallet) page now shows Vincent connect, Steward status, and setup options directly instead of redirecting you to settings. Each wallet section handles its own unconfigured state, so you always see the full layout with contextual setup prompts.
+- **Wallet plugins auto-enable** — When EVM or Solana private keys are present in your environment, the corresponding wallet plugins now load automatically on startup. Previously, you had to manually enable them even when keys were already configured.
+- **Plugin install paths recorded** — Installing a plugin from the dashboard now records its install path in your configuration, so the plugin resolver can find downloaded packages reliably across restarts.
+- **Voiceline volume normalized** — All onboarding voicelines are now normalized to -16 LUFS (EBU R128), preventing volume jumps when switching between characters or languages.
+
+## Bug fixes
+
+- Fixed the SSE stream parser dropping multi-line data fields — long streaming responses from cloud providers are now received completely
+- Fixed a double FFmpeg spawn when changing volume or mute during a live stream, which could cause audio glitches
+- Fixed the cloud base URL being normalized twice during initialization, which could produce malformed API endpoints
+- Fixed gateway discovery not removing lost services correctly when the stable identifier didn't match
+- Fixed the Telegram chat history cache growing without bound — it now uses LRU eviction with a 500-entry cap
+- Fixed agent reset failing from the desktop app when no API token was configured — loopback requests are now allowed without a token
+- Fixed wallet configuration saves not generating private keys, which left wallet plugins unable to load after connecting to Eliza Cloud
+- Fixed the config file being vulnerable to corruption if the app crashed mid-write — config saves now use atomic writes
+- Fixed the config file permissions not being enforced on every write — the file is now set to owner-only read/write (600) after each save
+- Fixed macOS keychain passwords being passed via command-line arguments where they could appear in process listings — credentials are now passed via stdin
+- Fixed a potential server-side request forgery via Host header injection and a shell injection vector in the credential resolver
+
+</Update>
+
 <Update label="2026-07-09" description="Week of July 3–9; Windows desktop stability, onboarding reliability, startup hardening" tags={["Update", "Fix"]}>
 
 ## Updates
