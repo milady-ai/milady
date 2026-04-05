@@ -153,10 +153,13 @@ Submit a pairing code to receive the API token. Rate-limited by IP address.
 
 Certain endpoints (such as `POST /api/agent/reset`) are classified as sensitive and require stricter authorization than standard API routes:
 
-- In `development` or `dev` environments (set via `NODE_ENV`), sensitive endpoints are accessible without a token.
-- In all other environments (including when `NODE_ENV` is unset), a valid `MILADY_API_TOKEN` must be configured **and** included in the request. If no API token is configured, the server returns `403 Forbidden` with the message "Sensitive endpoint requires API token authentication".
+- **Loopback requests** (from `127.0.0.1`, `::1`, or `::ffff:127.0.0.1`) are allowed without a token when no `MILADY_API_TOKEN` is configured. This supports the desktop app, which communicates over localhost and does not need token auth for local operations.
+- In `development` or `dev` environments (set via `NODE_ENV`) with `MILADY_DEV_AUTH_BYPASS=1`, sensitive endpoints are accessible without a token regardless of the request origin.
+- In all other cases, a valid `MILADY_API_TOKEN` must be configured **and** included in the request. Non-loopback requests without a configured token return `403 Forbidden` with the message "Sensitive endpoint requires API token authentication".
 
-This means that in production, sensitive endpoints are never accessible without explicit token authentication — even from localhost.
+<Note>
+The `/api/wallet/keys` endpoint enforces stricter rules: in production, a token is always required even from loopback addresses.
+</Note>
 
 ## CORS
 

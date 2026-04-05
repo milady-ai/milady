@@ -570,11 +570,30 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/workbench/overview` | Get workbench overview (tasks, triggers, todos, autonomy state) |
+| `GET` | `/api/workbench/overview` | Get workbench overview (tasks, triggers, todos, life-ops, autonomy state) |
 | `GET` | `/api/workbench/tasks` | List workbench tasks |
 | `POST` | `/api/workbench/tasks` | Create or update a workbench task |
 | `GET` | `/api/workbench/todos` | List workbench to-do items |
 | `POST` | `/api/workbench/todos` | Create or update a workbench to-do item |
+
+---
+
+## LifeOps
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/lifeops/overview` | Aggregated overview of occurrences, goals, and reminders |
+| `GET` | `/api/lifeops/definitions` | List all definitions |
+| `POST` | `/api/lifeops/definitions` | Create a new definition |
+| `GET` | `/api/lifeops/definitions/:id` | Get a single definition |
+| `PUT` | `/api/lifeops/definitions/:id` | Update a definition |
+| `GET` | `/api/lifeops/goals` | List all goals |
+| `POST` | `/api/lifeops/goals` | Create a new goal |
+| `GET` | `/api/lifeops/goals/:id` | Get a single goal |
+| `PUT` | `/api/lifeops/goals/:id` | Update a goal |
+| `POST` | `/api/lifeops/occurrences/:id/complete` | Mark an occurrence as completed |
+| `POST` | `/api/lifeops/occurrences/:id/skip` | Skip an occurrence |
+| `POST` | `/api/lifeops/occurrences/:id/snooze` | Snooze an occurrence |
 
 ---
 

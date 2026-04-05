@@ -347,6 +347,7 @@
               "rest/triggers",
               "rest/training",
               "rest/workbench",
+              "rest/lifeops",
               "rest/sandbox",
               "rest/cloud",
               "rest/apps",
