@@ -369,7 +369,6 @@
               "rest/avatar",
               "rest/whatsapp-pairing",
               "rest/bug-report",
-              "rest/ltcg",
               "rest/coding-agents",
               "rest/whitelist",
               "rest/nfa"

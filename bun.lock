@@ -46,7 +46,6 @@
         "@elizaos/prompts": "2.0.0-alpha.109",
         "@elizaos/skills": "2.0.0-alpha.109",
         "@hapi/boom": "^10.0.1",
-        "@lunchtable/plugin-ltcg": "^0.1.0",
         "@miladyai/agent": "workspace:*",
         "@miladyai/app-core": "workspace:*",
         "@miladyai/plugin-roles": "github:milady-ai/plugin-roles#5b00c49c4b7cd6f1cf27cde2cd6f6b40a5d38f77",
@@ -401,7 +400,6 @@
         "@elizaos/plugin-trajectory-logger": "alpha",
         "@elizaos/plugin-trust": "alpha",
         "@hapi/boom": "^10.0.1",
-        "@lunchtable/plugin-ltcg": "^0.1.0",
         "@mariozechner/pi-ai": "0.52.12",
         "@miladyai/plugin-roles": "github:milady-ai/plugin-roles#5b00c49",
         "@miladyai/plugin-wechat": "github:milady-ai/plugin-wechat",
@@ -1246,8 +1244,6 @@
     "@lookingglass/webxr": ["@lookingglass/webxr@0.6.0", "", { "dependencies": { "@lookingglass/webxr-polyfill": "^0.1.1", "gl-matrix": "^2.8.1", "holoplay-core": "^0.0.11" } }, "sha512-BLfVOQiINLdC/o53OsXeFhIvK44HIe0pQOUGph7EV3JjHmawuMBO1UwtTIHxemsPar9knCKAilCxKkRAjG1YMw=="],
 
     "@lookingglass/webxr-polyfill": ["@lookingglass/webxr-polyfill@0.1.1", "", { "dependencies": { "cardboard-vr-display": "^1.0.19", "gl-matrix": "^2.8.1" } }, "sha512-xrsJ8zhBAgE1EglLgbiVX3Z9q0mib/EYBCl31KCXTt7zyCmCSj9PgQ7apqFZBfXbbEEoP7LDBsTWNqzNphczew=="],
-
-    "@lunchtable/plugin-ltcg": ["@lunchtable/plugin-ltcg@0.1.0", "", { "peerDependencies": { "@elizaos/core": ">=1.0.0" } }, "sha512-rLJ8+6/iIDFIQA9YVzNh3tn8KQ/GgzK//4XLZ0iupi4g8Jml1xGydY7C54njFvzc0lLAPPwn12mpE6LOOnNX2Q=="],
 
     "@lydell/node-pty": ["@lydell/node-pty@1.1.0", "", { "optionalDependencies": { "@lydell/node-pty-darwin-arm64": "1.1.0", "@lydell/node-pty-darwin-x64": "1.1.0", "@lydell/node-pty-linux-arm64": "1.1.0", "@lydell/node-pty-linux-x64": "1.1.0", "@lydell/node-pty-win32-arm64": "1.1.0", "@lydell/node-pty-win32-x64": "1.1.0" } }, "sha512-VDD8LtlMTOrPKWMXUAcB9+LTktzuunqrMwkYR1DMRBkS6LQrCt+0/Ws1o2rMml/n3guePpS7cxhHF7Nm5K4iMw=="],
 

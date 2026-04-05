@@ -201,7 +201,6 @@
     "@elizaos/prompts": "2.0.0-alpha.109",
     "@elizaos/skills": "2.0.0-alpha.109",
     "@hapi/boom": "^10.0.1",
-    "@lunchtable/plugin-ltcg": "^0.1.0",
     "@miladyai/agent": "workspace:*",
     "@miladyai/app-core": "workspace:*",
     "@miladyai/plugin-roles": "github:milady-ai/plugin-roles#5b00c49c4b7cd6f1cf27cde2cd6f6b40a5d38f77",
