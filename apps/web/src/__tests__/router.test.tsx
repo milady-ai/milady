@@ -38,15 +38,16 @@ describe("Router", () => {
   });
 
   it("renders consumer docs at /docs", () => {
-    render(
+    const { container } = render(
       <MemoryRouter initialEntries={["/docs"]}>
         <AppRoutes />
       </MemoryRouter>,
     );
-    expect(screen.getByTestId("guides-page")).toBeTruthy();
-    expect(screen.getByText("DOCS")).toBeTruthy();
-    expect(
-      screen.getByText(/Start with the server\./, { exact: false }),
-    ).toBeTruthy();
+    // DocsLayout wraps /docs content with a data-docs-content main area
+    expect(container.querySelector("[data-docs-content]")).toBeTruthy();
+    // DocsLanding renders the tier section heading synchronously
+    expect(screen.getByText("Start where you are")).toBeTruthy();
+    // The old GuidesLanding is no longer at /docs
+    expect(screen.queryByTestId("guides-page")).toBeNull();
   });
 });
