@@ -1,0 +1,104 @@
+# First-hour troubleshooting
+
+Things go sideways. Here's a short list of the stuff that commonly trips people up in the first hour of using Milady, with fast fixes.
+
+**What you'll learn:** how to diagnose and fix the most common early issues. If something on this page doesn't match what you're seeing, the [Milady GitHub Issues](https://github.com/milady-ai/milady/issues) is the right next stop.
+
+## "It won't open"
+
+### macOS: "Milady can't be opened because Apple cannot check it for malicious software"
+
+You downloaded a build that wasn't notarized, or the download is corrupted. Delete it, re-download from the [official GitHub releases](https://github.com/milady-ai/milady/releases/latest), and try again. Every official release is signed and notarized — this error should not appear for a file you got from the right place.
+
+### Windows: SmartScreen warning
+
+Click "More info" → "Run anyway". The installer is signed, but Windows SmartScreen can be cautious with new publishers. If you're extra careful, verify the SHA256 of the downloaded file against the `SHA256SUMS.txt` that ships with every release.
+
+### Linux: AppImage won't execute
+
+You need to mark it executable first:
+
+```bash
+chmod +x Milady.AppImage
+./Milady.AppImage
+```
+
+## "It opens, but the first message hangs forever"
+
+Nine times out of ten, this is a provider problem.
+
+<Steps>
+  <li>Open <strong>Settings → Providers</strong>.</li>
+  <li>Look at the status indicator next to your current provider. Green = connected, yellow = slow or intermittent, red = not reaching the provider at all.</li>
+  <li>If it's red: your API key is wrong, your network is blocking the request, or the provider is down. Re-paste the key (no surrounding quotes, no trailing whitespace), then click "Test connection."</li>
+  <li>If it's yellow or green but messages still hang: the model you picked might be overloaded. Try a different model from the same provider.</li>
+</Steps>
+
+<Callout kind="tip">
+If you're using **Ollama** locally and the first message hangs: make sure Ollama itself is running (`ollama list` in a terminal). If the model you picked hasn't been downloaded yet, the first message will stall while it pulls the model in the background. Give it a few minutes, or run `ollama pull llama3.1` (or whichever model) manually first.
+</Callout>
+
+## "The agent responds but I can't hear anything"
+
+Voice pipeline has three moving parts: text-to-speech (TTS) provider, the audio file, and playback. Check each:
+
+<Steps>
+  <li>Open <strong>Settings → Voice</strong> and make sure voice is toggled on (speaker icon, not crossed out).</li>
+  <li>Click the <strong>preview</strong> button for the selected voice. If you don't hear the preview either, the problem is your audio output — check your OS-level speaker/headphone selection.</li>
+  <li>If the preview works but live responses are silent, your TTS provider might be failing mid-request. Look at the voice provider status (it's a separate entry from the chat provider).</li>
+  <li>If you enabled <strong>talk mode</strong> and nothing happens when you tap the mic, check microphone permissions in your OS. macOS: System Settings → Privacy → Microphone. Windows: Settings → Privacy → Microphone. Grant Milady access.</li>
+</Steps>
+
+## "The avatar disappeared" or "shows up, then vanishes"
+
+This used to be a bug where the VRM avatar would disappear every few minutes. It's fixed in every release since late 2025. If you're seeing it on a current build, please [file an issue](https://github.com/milady-ai/milady/issues) — that's a real regression.
+
+For avatar problems that are *not* disappearing:
+
+- **Avatar is missing entirely** — your install might have skipped the avatar asset download. Restart Milady; it'll try again. If it still doesn't show up, reinstall.
+- **Avatar is there but stiff, not animating** — check Settings → Character and make sure the animation provider is enabled.
+
+## "Messages are slow"
+
+Two kinds of slow:
+
+1. **First word takes forever, then it streams quickly.** That's provider latency — the model is thinking before it starts responding. Expected on larger models. Pick a smaller/faster model if it bothers you.
+2. **First word appears quickly but the whole response drags out.** That's network or throughput limited. On local models, this is almost always your hardware — the model is too big for your GPU. On cloud providers, your connection is the bottleneck.
+
+Pick a smaller model, or switch to a faster provider. See [Picking a provider](/docs/beginner/picking-a-provider).
+
+## "I typed something wrong in Settings and now it won't start"
+
+If you edited `~/.milady/milady.json` by hand and introduced a syntax error, Milady won't start. To recover:
+
+<Steps>
+  <li>Quit Milady if it's running.</li>
+  <li>Open your home directory and find the <code>.milady</code> folder (Windows: <code>%USERPROFILE%\.milady</code>).</li>
+  <li>Rename <code>milady.json</code> to <code>milady.json.backup</code> (don't delete it — you might want to copy settings back).</li>
+  <li>Restart Milady. It'll regenerate a fresh <code>milady.json</code> with defaults.</li>
+  <li>Copy any settings you want to keep from the backup into the new file, saving small changes one at a time.</li>
+</Steps>
+
+Your conversations, characters, and uploaded documents are stored separately and aren't touched by this.
+
+## "I want to start completely over"
+
+Fresh slate:
+
+<Steps>
+  <li>Quit Milady.</li>
+  <li>Rename <code>{"~/.milady"}</code> to <code>{"~/.milady.old"}</code>. That keeps your old data around in case you want to pull something out of it.</li>
+  <li>Launch Milady. It'll behave like a brand-new install and walk you through onboarding again.</li>
+</Steps>
+
+When you're confident you don't need the backup, delete the `.milady.old` directory.
+
+## Still stuck?
+
+- Search existing issues: [github.com/milady-ai/milady/issues](https://github.com/milady-ai/milady/issues)
+- File a new one with: your OS + version, what you were doing, what you expected, what happened, and relevant log snippets if you can grab them (Settings → Logs).
+- Ask in the Milady Discord (link in the footer of the homepage).
+
+## What's next
+
+You've made it through the Beginner tier. The [Intermediate tier](/docs/intermediate) covers connecting Milady to Discord and Telegram, customizing your character, and teaching your agent things it doesn't know yet.

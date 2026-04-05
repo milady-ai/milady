@@ -1,0 +1,73 @@
+# Settings basics
+
+Milady has a lot of settings. Most of them don't matter on day one. This page walks through the handful that actually do, and gives you permission to ignore the rest until you need them.
+
+**What you'll learn:** the five settings worth knowing about in your first hour, and what the other ones are for so you're not afraid to explore later.
+
+## The five that matter
+
+Open **Settings** (gear icon, top-right of the main window) and look for these:
+
+### 1. Provider
+
+You picked one during onboarding. This is where you change it, swap API keys, or wire up a second provider for voice or embeddings. If responses are slow, too expensive, too stupid, or just not working — this is where you go.
+
+See [Picking a provider](/docs/beginner/picking-a-provider) for the deeper dive.
+
+### 2. Voice
+
+Three things live here:
+
+- **Voice on/off.** Toggle whether the character speaks responses aloud.
+- **Which voice.** A dropdown of available voices from whichever voice provider you're using. Pick one that fits your character. There's a preview button.
+- **Talk mode.** Enable this if you want hands-free, voice-in / voice-out conversations. Requires microphone permission.
+
+### 3. Character
+
+Your character's name, personality description, and avatar. You can tweak the personality prompt here — a few sentences describing how your agent should sound. Be specific if you want something other than the defaults.
+
+<Callout kind="tip">
+The character's personality is *not* a behavior filter or a safety layer. It's a voice/style guide. If you describe a terse, sarcastic character, you'll get a terse, sarcastic agent. If you describe a helpful, professional one, you'll get that. Either works — pick what you actually want to talk to.
+</Callout>
+
+### 4. Privacy
+
+Worth looking at once even if you don't change anything:
+
+- **Where data lives.** A read-only field showing your `~/.milady/` directory. Back this up if you care about your conversations.
+- **Telemetry.** Off by default on desktop. If you ever opt in, it's anonymized diagnostic data — no conversation contents.
+- **Prompt capture.** Off by default. This is a developer-only debug feature that dumps full prompts to disk. Never turn it on unless you're actively debugging, and never share the capture files — they contain raw user input.
+
+### 5. Window and shell mode
+
+Milady has two window modes:
+
+- **Companion** — a small overlay that sits beside your other work. This is the default. Good if you want Milady to feel like a desk buddy.
+- **Dev mode** — the full dashboard, with every tab visible. Good if you're doing a lot of configuration, wiring connectors, or just prefer dense interfaces.
+
+Toggle between them in Settings → Appearance. You can also press a keyboard shortcut once you know it (see [Power user shortcuts](/docs/advanced/power-user-shortcuts)).
+
+## What everything else is
+
+Every other settings section exists for a reason, but none of them matter on day one. Here's a quick tour so you can skip them without curiosity:
+
+| Section | What it's for | When to care |
+| --- | --- | --- |
+| **Connectors** | Wire Milady into Discord, Telegram, iMessage, etc. | When you want your agent to respond somewhere other than the desktop app. Intermediate tier. |
+| **Knowledge** | Upload documents for your agent to reference. | When you want it to know about things that aren't in its training data. |
+| **Wallet** | Crypto wallet for paid on-chain actions. | Only if you're using Milady for crypto/web3 use cases. |
+| **Plugins** | Install plugins from the Milady registry. | When you want extra capabilities. Advanced tier. |
+| **Observability** | Telemetry, tracing, metrics. | Developer territory. See [docs.milady.ai](https://docs.milady.ai) if you need it. |
+| **Memory** | How your agent stores and retrieves things across chats. | When you notice your agent isn't remembering things you told it before. |
+| **Logs** | Raw logs from the runtime. | Debugging. |
+| **Advanced** | A grab bag of rarely-used toggles. | When a support answer tells you to look there. |
+
+## The golden rule
+
+**Everything in Settings is reversible.** Nothing you can click here will delete your data, break your install, or do something that can't be undone. Poke around. Turn things on, see what happens, turn them off.
+
+The one exception: if you manually edit `~/.milady/milady.json` outside the app, you can put it in a state where it won't start. If you do that, just delete or rename `milady.json` and Milady will regenerate it with defaults on next launch. Your conversations and character files are stored separately and stay safe.
+
+## What's next
+
+[First-hour troubleshooting](/docs/beginner/troubleshooting) — the handful of things that go wrong in the first hour and how to get unstuck.

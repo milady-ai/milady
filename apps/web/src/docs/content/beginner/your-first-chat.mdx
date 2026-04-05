@@ -1,0 +1,77 @@
+# Your first chat
+
+You've finished onboarding and you're staring at the chat view. Time to send something.
+
+**What you'll learn:** how to send a message, what happens when you do, how voice works, and where your conversation actually lives.
+
+## Say hi
+
+Click the chat input at the bottom of the window and type something. A good first message is anything you'd say to a new assistant:
+
+> "Hey — what can you do?"
+>
+> "Tell me about yourself."
+>
+> "What's the weather like?" *(spoiler: it probably doesn't know the weather yet)*
+
+Hit Enter. A few things happen in the next couple of seconds:
+
+1. Your message gets stored locally in the conversation.
+2. The character's avatar reacts — a subtle animation, maybe a head turn.
+3. Milady sends your message plus some context (who your agent is, recent conversation history) to whichever language model provider you picked.
+4. The response streams back. You'll see text appearing word by word.
+5. If voice is enabled, the character speaks the response out loud while the text renders.
+6. The whole exchange gets saved to your local database.
+
+That's the round trip. Do it a few times to get a feel for how your agent responds.
+
+## Turn voice on (or off)
+
+By default, voice is on — Milady speaks responses aloud using the voice you picked during onboarding. If you'd rather read in silence, there's a speaker icon near the chat that toggles it.
+
+<Callout kind="tip">
+Headphones are strongly recommended the first time you hear it. The default voices are good, and hearing an AI talk back through laptop speakers in a quiet room is a weirder experience than you might expect.
+</Callout>
+
+If voice is on but you don't hear anything, check:
+
+- Your system audio output is pointed at the right device.
+- The voice toggle is actually on (icon isn't crossed out).
+- You're not in Do Not Disturb / focus mode that silences app audio.
+
+## Talk mode
+
+Want to have a hands-free conversation? Open the chat, click the microphone, and talk. Milady transcribes what you say, sends it through the model, and speaks the response back. This is "talk mode."
+
+Talk mode uses your system microphone and Milady's speech-to-text pipeline. First time you enable it, your OS will ask for microphone permission — grant it. If you skip the prompt, you can re-enable it later in your system privacy settings (macOS: System Settings → Privacy & Security → Microphone; Windows: Settings → Privacy → Microphone).
+
+## Where does the conversation live?
+
+Right on your machine, in a local database under `~/.milady/` (Windows: `%USERPROFILE%\.milady\`).
+
+That means:
+
+- You can close Milady and reopen it later — the conversation is still there.
+- Your messages aren't synced to a Milady-owned cloud. There isn't one.
+- If you're using a cloud language model (like OpenAI), the message gets sent to them *during inference*, but the transcript is stored with you, not them.
+- Backups and migrations are your responsibility. If you want to move Milady to a new machine, copy the `~/.milady/` directory and you're done.
+
+## Starting a new conversation
+
+There's a "new chat" button near the conversation list. Click it to start fresh with a blank slate. Your previous conversations don't disappear — they're just shelved under the chat list. Click any of them to pick up where you left off.
+
+<Callout kind="note">
+Each conversation is independent. Your agent remembers things you told it in one conversation, but it won't automatically surface them in a new conversation unless you've set up memory / knowledge (we'll cover that in the Intermediate tier).
+</Callout>
+
+## Things to try before moving on
+
+A few prompts that show off different capabilities:
+
+- **Ask about itself.** "What model are you running?" "What character are you?" "Where does your memory live?"
+- **Ask for help with something concrete.** "Help me write a short birthday message for a friend." Real tasks show you the tone and style best.
+- **Ask it to remember something.** "Remember that my favorite color is green." Then start a new conversation and ask "what's my favorite color?" and see what happens. (Spoiler: nothing, yet — persistent memory across sessions requires a step you'll learn in the Intermediate tier.)
+
+## What's next
+
+[Picking a provider](/docs/beginner/picking-a-provider) — a deeper look at the provider choice you made during onboarding, and how to pick something different if it's not working out.

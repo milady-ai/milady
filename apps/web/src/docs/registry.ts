@@ -59,7 +59,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 1,
     path: "/docs/beginner/welcome",
-    component: null,
+    component: lazy(() => import("./content/beginner/welcome.mdx")),
   },
   {
     slug: "install",
@@ -69,7 +69,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 2,
     path: "/docs/beginner/install",
-    component: null,
+    component: lazy(() => import("./content/beginner/install.mdx")),
   },
   {
     slug: "first-run",
@@ -79,7 +79,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 3,
     path: "/docs/beginner/first-run",
-    component: null,
+    component: lazy(() => import("./content/beginner/first-run.mdx")),
   },
   {
     slug: "your-first-chat",
@@ -89,7 +89,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 4,
     path: "/docs/beginner/your-first-chat",
-    component: null,
+    component: lazy(() => import("./content/beginner/your-first-chat.mdx")),
   },
   {
     slug: "picking-a-provider",
@@ -99,7 +99,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 5,
     path: "/docs/beginner/picking-a-provider",
-    component: null,
+    component: lazy(() => import("./content/beginner/picking-a-provider.mdx")),
   },
   {
     slug: "settings-basics",
@@ -109,7 +109,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 6,
     path: "/docs/beginner/settings-basics",
-    component: null,
+    component: lazy(() => import("./content/beginner/settings-basics.mdx")),
   },
   {
     slug: "troubleshooting",
@@ -119,7 +119,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "beginner",
     order: 7,
     path: "/docs/beginner/troubleshooting",
-    component: null,
+    component: lazy(() => import("./content/beginner/troubleshooting.mdx")),
   },
 
   // ── Intermediate ─────────────────────────────────────────────────────

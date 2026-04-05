@@ -1,0 +1,76 @@
+# Your first launch
+
+The first time you open Milady, it walks you through a short onboarding flow to get an agent running. This page is a tour of what you'll see so nothing feels mysterious.
+
+**What you'll learn:** what each onboarding step does, what you're actually choosing, and how to change your mind later.
+
+## Before you start
+
+You'll need one of the following to give your agent a brain:
+
+- **An API key** from a provider like OpenAI, Anthropic, OpenRouter, or another supported service. This is the fastest option — paste the key and you're live.
+- **A local model** running via [Ollama](https://ollama.ai). No key required; it runs entirely on your machine.
+- **An Eliza Cloud account** if you want a managed provider that's designed for Milady specifically.
+
+Don't have any of these yet? That's fine — pick one during the provider step. You can also start with a free tier from OpenAI or Anthropic to get going in under a minute.
+
+## Step 1 — Server picker
+
+Milady separates **where the runtime lives** from **what language model powers it**. The server picker is step zero: it asks where your agent should run.
+
+| Option | What it means | When to pick it |
+| --- | --- | --- |
+| **Local** | The Milady runtime runs on this computer. Everything stays on your machine. | Almost everyone. This is the default. |
+| **LAN** | The runtime lives on another machine on your network (another laptop, a home server). | You've already got Milady running elsewhere and want this machine to be a remote control. |
+| **Remote** | The runtime lives at a custom URL you specify. | Self-hosting on a VPS, Docker host, or similar. |
+| **Eliza Cloud** | The runtime is hosted by Eliza Cloud. No local install needed. | You want the simplest possible setup and don't want to manage a runtime. |
+
+<Callout kind="tip">
+Picking **Local** is the right answer for most people. You can switch later if you set up a server somewhere else.
+</Callout>
+
+## Step 2 — Identity
+
+This is where you name your agent and pick a character. A character is the combination of personality, voice, and avatar that shapes how Milady feels to talk to.
+
+You'll see a small gallery of built-in characters. Pick one that looks interesting. Don't overthink it — you can change character anytime, and every character can be customized later.
+
+The name you give here is what the agent will call itself in responses. "Milady" is the default. If you call it something else, it'll introduce itself that way.
+
+## Step 3 — Provider
+
+Now you pick the brain. Three categories:
+
+1. **Cloud providers** — OpenAI, Anthropic, OpenRouter, Eliza Cloud, etc. You paste an API key, pick a model, done. Fast, capable, but your messages get sent to the provider for inference.
+2. **Local providers** — Ollama running on your machine. Nothing leaves your computer. Slower on most hardware, but free and fully private.
+3. **Bring your own key** — if you have a provider Milady supports and a key for it, this is the same as "Cloud" above. You don't need an Eliza Cloud account.
+
+<Callout kind="note">
+You're picking a **starting** provider here. Milady supports mixing and matching later — chat goes to one provider, voice synthesis to another, embeddings to a third. Start simple.
+</Callout>
+
+After you pick, Milady runs a quick connection test (is the API key valid? does the local model respond?) and moves on.
+
+## Step 4 — Activate
+
+You'll see a "ready" confirmation. Click through, and Milady hands you the main interface: a chat view, the character's avatar, and a settings gear.
+
+Total time so far: **two to five minutes** if you have an API key in hand, **ten minutes** if you're installing Ollama for the first time, **less than a minute** if you picked Eliza Cloud.
+
+## What about iOS and Android?
+
+On phones, the onboarding flow is almost identical — same server picker, same identity step, same provider step — but the default is usually Eliza Cloud because running a local model on a phone is rarely practical. You can still point a phone at a desktop running Milady (pick **LAN** or **Remote**) if you want.
+
+## I want to change my mind
+
+Every choice from onboarding is editable after the fact:
+
+- **Character, name, avatar, voice** — Settings → Character
+- **Provider** — Settings → Providers
+- **Server (local/LAN/remote/cloud)** — Restart Milady and re-pick at first launch, or Settings → Server
+
+There's no "wrong" onboarding choice. Pick something, move on, change it when you want.
+
+## What's next
+
+[Your first chat](/docs/beginner/your-first-chat) — send the first message and understand what's happening behind the scenes.

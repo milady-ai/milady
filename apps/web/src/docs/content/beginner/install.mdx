@@ -1,0 +1,87 @@
+# Install Milady
+
+Milady ships as a desktop app for macOS, Windows, and Linux. There's also a CLI install for people who want to run it from a terminal — both options use the same underlying runtime, so pick whichever fits how you work.
+
+**Time needed:** about five minutes on a fresh machine, plus a few minutes for the first-run setup.
+
+## Desktop app (recommended)
+
+The desktop app is the friendliest way to get started. It bundles the runtime, the dashboard, and the companion UI into one installable package with auto-updates.
+
+Grab the right file from the [latest GitHub release](https://github.com/milady-ai/milady/releases/latest):
+
+| Platform | File |
+| --- | --- |
+| macOS (Apple Silicon — M1/M2/M3/M4) | `Milady-arm64.dmg` |
+| macOS (Intel — pre-2020 Macs) | `Milady-x64.dmg` |
+| Windows 10 and 11 | `Milady-Setup.exe` |
+| Linux (AppImage, any distro) | `Milady.AppImage` |
+| Linux (Debian / Ubuntu) | `milady_*.deb` |
+| iOS | [App Store](https://apps.apple.com/app/milady-private-ai-assistant/id0000000000) |
+| Android | [Google Play](https://play.google.com/store/apps/details?id=ai.milady.app) or APK on GitHub |
+
+<Callout kind="note">
+Every desktop build is code-signed and (on macOS) notarized. You shouldn't see a Gatekeeper "unidentified developer" warning. If you do, you downloaded a build from somewhere that isn't `github.com/milady-ai/milady` — delete it and grab the official one.
+</Callout>
+
+### macOS
+
+<Steps>
+  <li>Download the `.dmg` that matches your Mac's chip (Apple Silicon or Intel).</li>
+  <li>Double-click to mount. Drag `Milady.app` into your `Applications` folder.</li>
+  <li>Open it from Launchpad or Spotlight. The first launch kicks off onboarding — see <a href="/docs/beginner/first-run">Your first launch</a>.</li>
+</Steps>
+
+### Windows
+
+<Steps>
+  <li>Download `Milady-Setup.exe`.</li>
+  <li>Run the installer. Accept the SmartScreen prompt if it appears — the installer is signed but SmartScreen can be cautious with new publishers.</li>
+  <li>Milady lands in your Start menu. Open it and follow the first-launch flow.</li>
+</Steps>
+
+### Linux
+
+Pick AppImage (works everywhere) or the `.deb` (for Debian, Ubuntu, Pop!_OS, and the like).
+
+<Steps>
+  <li>Download the `.AppImage` or `.deb`.</li>
+  <li>**AppImage:** `chmod +x Milady.AppImage` and double-click (or run from a terminal). **.deb:** `sudo dpkg -i milady_*.deb`.</li>
+  <li>Launch from your application menu or by running `milady-desktop` in a terminal.</li>
+</Steps>
+
+## CLI install (power users)
+
+If you'd rather run Milady from a terminal — on a headless Linux box, a remote server, or just because you prefer the CLI — there's a one-line installer.
+
+**macOS / Linux / WSL / Git Bash:**
+
+```bash
+curl -fsSL https://get.milady.ai | bash
+```
+
+**Windows PowerShell:**
+
+```powershell
+irm https://get.milady.ai/install.ps1 | iex
+```
+
+The installer checks for Node.js 22 or newer, offers to install it if missing, then installs Milady globally via npm. When it finishes, run:
+
+```bash
+milady start
+```
+
+…and the runtime comes up. Your desktop browser opens the dashboard at `http://localhost:31337`.
+
+<Callout kind="tip">
+If you already have a desktop app installed and you're also using the CLI, that's fine — they share the same config directory at `~/.milady/`. Whichever you launch last wins the shared state, so don't run both at the same time.
+</Callout>
+
+## Verify it worked
+
+After install, Milady creates a folder at `~/.milady/` (on Windows: `%USERPROFILE%\.milady\`). That's where your settings, conversations, uploaded documents, and character data live. If that folder doesn't exist after a successful install, something went wrong — see [Troubleshooting](/docs/beginner/troubleshooting).
+
+## What's next
+
+[Your first launch](/docs/beginner/first-run) — Milady asks a handful of questions to set up your agent, then you're in.

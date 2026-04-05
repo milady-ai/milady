@@ -1,0 +1,97 @@
+# Picking a provider
+
+A **provider** is the language model service that powers your agent's responses. Milady doesn't ship its own model — you pick one, and every message you send gets answered by whichever provider you're pointed at.
+
+**What you'll learn:** what the three main provider types are, how to pick the right one for day one, and how to change your mind.
+
+## The three kinds of provider
+
+### 1. Cloud API (OpenAI, Anthropic, OpenRouter, etc.)
+
+You sign up for an account with a commercial provider, get an API key, paste it into Milady, and go. The provider runs the model on their hardware and charges you per token (usually fractions of a cent per message, billed to your account there — not to Milady).
+
+**Pros:**
+
+- Fastest and most capable models available right now.
+- Zero hardware requirements on your end — works on a 5-year-old laptop.
+- Your provider handles model updates, scaling, reliability.
+
+**Cons:**
+
+- Your messages leave your machine for inference. The text of what you send (plus some context) goes to the provider. They have their own privacy policy; read it.
+- Costs money per use. Usually small, but it's real.
+- Requires an API key from a third party.
+
+**Who this is for:** people who want the smartest available responses and don't mind that inference happens in the cloud. The vast majority of new Milady users pick this on day one.
+
+### 2. Local (Ollama + a downloaded model)
+
+You install [Ollama](https://ollama.ai), download a model file (a few GB), and Milady talks to Ollama running on your machine. Nothing ever leaves your computer.
+
+**Pros:**
+
+- Completely private. Messages never leave your hardware.
+- Free after the initial model download.
+- Works offline.
+
+**Cons:**
+
+- Slower on most consumer hardware. A gaming rig with a modern GPU is fine; a MacBook Air with integrated graphics will feel noticeably slower than a cloud model.
+- The best local models (as of now) are still a step behind the best cloud models.
+- You're responsible for picking a model and keeping it updated.
+
+**Who this is for:** privacy-conscious users, people with capable local GPUs, anyone who wants to run offline, and anyone who thinks cloud pricing gets ugly at scale.
+
+### 3. Eliza Cloud
+
+Eliza Cloud is a managed service built specifically for Milady. You sign in, Milady picks routes for you, and you stop thinking about it.
+
+**Pros:**
+
+- Zero setup. No API keys, no provider accounts, no model selection.
+- Handles chat, voice, embeddings, images in one place.
+- Works on phones and tablets where local inference isn't practical.
+
+**Cons:**
+
+- Pricing model is subscription-based rather than pay-per-token.
+- Another service you're trusting with your messages (same privacy tradeoff as any cloud API).
+
+**Who this is for:** people who want turnkey, people on phones, people who tried one of the other options and don't want to deal with provider config.
+
+## A simple decision tree
+
+- **Do you have a capable GPU and care a lot about privacy?** → Local (Ollama). Install Ollama, pick a model like `llama3.1` or `qwen2.5`, plug it into Milady.
+- **Do you want the fastest setup with the smartest model, and you're OK paying per token?** → Cloud API. Sign up with Anthropic or OpenAI, grab a key, paste it in.
+- **Do you want one account that handles everything with zero config?** → Eliza Cloud.
+- **Not sure?** → Cloud API with the free credits most providers give new accounts. You can switch later with two clicks.
+
+## How to switch
+
+Settings → Providers shows your current provider and a list of supported alternatives. Switching is:
+
+<Steps>
+  <li>Click the provider you want.</li>
+  <li>Paste the new credential (API key for cloud providers, URL for a local server, sign-in for Eliza Cloud).</li>
+  <li>Milady runs a connection test.</li>
+  <li>If it passes, new messages start going through the new provider. Your existing conversations aren't affected.</li>
+</Steps>
+
+<Callout kind="tip">
+You don't have to use the same provider for everything. Milady can route chat to one provider, voice synthesis to another, and embeddings to a third. That's covered in [Switching providers mid-flight](/docs/intermediate/switching-providers).
+</Callout>
+
+## Costs, realistically
+
+If you're on a cloud provider, you'll want a rough sense of what messages cost. The numbers move around as providers update pricing, but as a ballpark for a typical Milady conversation:
+
+- **A short chat exchange** (your message + the agent's response) usually runs well under a cent on most models.
+- **Voice transcription and synthesis** add a small amount on top if you're using a cloud voice provider.
+- **Casual daily use** — a handful of conversations a day — typically lands in the single-digit dollars per month range.
+- **Heavy use with a premium model** (the biggest Claude or GPT model) can stretch into tens of dollars per month.
+
+Every provider shows you a running cost in their dashboard. Check it the first week so you know what your actual usage looks like.
+
+## What's next
+
+[Settings basics](/docs/beginner/settings-basics) — the handful of settings worth knowing about on day one.
