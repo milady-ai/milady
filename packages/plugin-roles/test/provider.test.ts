@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { rolesProvider } from "../src/provider";
+import { setConnectorAdminWhitelist } from "../src/utils";
 import type { RoleName, RolesWorldMetadata } from "../src/types";
 import type { IAgentRuntime, Memory, State, UUID } from "@elizaos/core";
 
@@ -7,6 +8,7 @@ function mockRuntime(opts: {
   room?: { worldId: string | null } | null;
   worldMeta?: RolesWorldMetadata | null;
   entities?: Record<string, { names: string[]; metadata?: Record<string, unknown> }>;
+  updateWorld?: ReturnType<typeof vi.fn>;
 }): IAgentRuntime {
   return {
     getRoom: vi.fn().mockResolvedValue(opts.room ?? null),
@@ -15,6 +17,7 @@ function mockRuntime(opts: {
         ? { id: "world-1", metadata: opts.worldMeta }
         : opts.worldMeta === null ? null : undefined,
     ),
+    updateWorld: opts.updateWorld ?? vi.fn().mockResolvedValue(undefined),
     getEntityById: vi.fn().mockImplementation(async (id: string) => {
       const e = opts.entities?.[id];
       if (!e) return null;
@@ -75,6 +78,31 @@ describe("rolesProvider", () => {
     const result = await rolesProvider.get(runtime, msg("nobody"), emptyState);
     expect(result.values?.speakerRole).toBe("GUEST");
     expect(result.values?.canManageRoles).toBe(false);
+  });
+
+  it("promotes a connector-whitelisted Discord speaker to ADMIN on first contact", async () => {
+    const updateWorld = vi.fn().mockResolvedValue(undefined);
+    const worldMeta: RolesWorldMetadata = { roles: { o1: "OWNER" } };
+    const runtime = mockRuntime({
+      room: { worldId: "w1" },
+      worldMeta,
+      updateWorld,
+      entities: {
+        o1: { names: ["Shaw"] },
+        discordAdmin: {
+          names: ["Owner Person"],
+          metadata: { discord: { userId: "123456789", username: "owner" } },
+        },
+      },
+    });
+    setConnectorAdminWhitelist(runtime, { discord: ["123456789"] });
+
+    const result = await rolesProvider.get(runtime, msg("discordAdmin"), emptyState);
+    expect(result.values?.speakerRole).toBe("ADMIN");
+    expect(result.values?.canManageRoles).toBe(true);
+    expect(result.data?.admins).toContain("discordAdmin");
+    expect(worldMeta.roles?.discordAdmin).toBe("ADMIN");
+    expect(updateWorld).toHaveBeenCalledTimes(1);
   });
 
   it("returns empty when no room found", async () => {

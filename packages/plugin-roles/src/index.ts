@@ -22,7 +22,11 @@ import {
 import { rolesProvider } from "./provider";
 import { updateRoleAction } from "./action";
 import type { RolesPluginConfig, RolesWorldMetadata } from "./types";
-import { normalizeRole } from "./utils";
+import {
+  matchEntityToConnectorAdminWhitelist,
+  normalizeRole,
+  setConnectorAdminWhitelist,
+} from "./utils";
 
 export { rolesProvider } from "./provider";
 export { updateRoleAction } from "./action";
@@ -59,11 +63,26 @@ async function updateWorldMetadata(
   await runtime.updateWorld(world as Parameters<IAgentRuntime["updateWorld"]>[0]);
 }
 
+function scheduleBootstrapRetry(
+  label: string,
+  task: () => Promise<boolean>,
+): void {
+  setTimeout(() => {
+    void task().then((ok) => {
+      if (!ok) {
+        logger.info(
+          `[roles] ${label} retry skipped because runtime state is still unavailable`,
+        );
+      }
+    });
+  }, 1500);
+}
+
 /**
  * Ensure the world owner has OWNER role in metadata.
  * Called on plugin init — guarantees the app-local user is always OWNER.
  */
-async function ensureOwnerRole(runtime: IAgentRuntime): Promise<void> {
+async function ensureOwnerRole(runtime: IAgentRuntime): Promise<boolean> {
   try {
     const worlds = await runtime.getAllWorlds();
 
@@ -85,8 +104,12 @@ async function ensureOwnerRole(runtime: IAgentRuntime): Promise<void> {
         return true;
       });
     }
+    return true;
   } catch (err) {
-    logger.warn(`[roles] Failed to bootstrap owner roles: ${err}`);
+    logger.info(
+      `[roles] Deferring owner role bootstrap until worlds are available: ${err}`,
+    );
+    return false;
   }
 }
 
@@ -97,9 +120,9 @@ async function ensureOwnerRole(runtime: IAgentRuntime): Promise<void> {
 async function applyConnectorAdminWhitelists(
   runtime: IAgentRuntime,
   whitelist: Record<string, string[]>,
-): Promise<void> {
+): Promise<boolean> {
   const hasWhitelist = Object.values(whitelist).some((ids) => ids.length > 0);
-  if (!hasWhitelist) return;
+  if (!hasWhitelist) return true;
 
   try {
     const worlds = await runtime.getAllWorlds();
@@ -122,28 +145,11 @@ async function applyConnectorAdminWhitelists(
 
             if (metadata.roles[entityId]) continue;
 
-            if (!entity.metadata) continue;
-
-            const platformMetadata = entity.metadata as Record<
-              string,
-              Record<string, unknown> | undefined
-            >;
-            let matched = false;
-
-            for (const [connector, platformIds] of Object.entries(whitelist)) {
-              const connectorMeta = platformMetadata[connector];
-              if (!connectorMeta || typeof connectorMeta !== "object") continue;
-
-              for (const field of ["userId", "id", "username", "userName"]) {
-                const value = connectorMeta[field];
-                if (typeof value === "string" && platformIds.includes(value)) {
-                  matched = true;
-                  break;
-                }
-              }
-
-              if (matched) break;
-            }
+            const matched = matchEntityToConnectorAdminWhitelist(
+              (entity.metadata as Record<string, unknown> | undefined) ??
+                undefined,
+              whitelist,
+            );
 
             if (matched) {
               metadata.roles[entityId] = "ADMIN";
@@ -158,10 +164,12 @@ async function applyConnectorAdminWhitelists(
         return updated;
       });
     }
+    return true;
   } catch (err) {
-    logger.warn(
-      `[roles] Failed to apply connector admin whitelists: ${String(err)}`,
+    logger.info(
+      `[roles] Deferring connector admin bootstrap until worlds are available: ${String(err)}`,
     );
+    return false;
   }
 }
 
@@ -176,14 +184,28 @@ const rolesPlugin: Plugin = {
 
   async init(pluginConfig: Record<string, unknown>, runtime: IAgentRuntime) {
     logger.info("[roles] Initializing plugin-roles");
+    const config = pluginConfig as RolesPluginConfig | undefined;
+    setConnectorAdminWhitelist(runtime, config?.connectorAdmins);
 
     // Step 1: Ensure world owners have OWNER role
-    await ensureOwnerRole(runtime);
+    const ownerBootstrapOk = await ensureOwnerRole(runtime);
+    if (!ownerBootstrapOk) {
+      scheduleBootstrapRetry("Owner role bootstrap", () =>
+        ensureOwnerRole(runtime),
+      );
+    }
 
     // Step 2: Apply connector admin whitelists if configured
-    const config = pluginConfig as RolesPluginConfig | undefined;
     if (config?.connectorAdmins) {
-      await applyConnectorAdminWhitelists(runtime, config.connectorAdmins);
+      const adminBootstrapOk = await applyConnectorAdminWhitelists(
+        runtime,
+        config.connectorAdmins,
+      );
+      if (!adminBootstrapOk) {
+        scheduleBootstrapRetry("Connector admin bootstrap", () =>
+          applyConnectorAdminWhitelists(runtime, config.connectorAdmins),
+        );
+      }
     }
 
     logger.info("[roles] Plugin-roles initialized");

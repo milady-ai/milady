@@ -15,6 +15,78 @@ export interface BridgeRpcParams {
   text?: string;
   roomId?: string;
   mode?: string;
+  channelType?: string;
+  source?: string;
+  sender?: {
+    id?: string;
+    username?: string;
+    displayName?: string;
+    metadata?: Record<string, unknown>;
+  };
+  metadata?: Record<string, unknown>;
+}
+
+export type NormalizedBridgeMessage = {
+  text: string;
+  roomKey: string;
+  mode: "simple" | "power";
+  channelType: "DM" | "GROUP";
+  source: string;
+  sender?: {
+    id?: string;
+    username?: string;
+    displayName?: string;
+    metadata?: Record<string, unknown>;
+  };
+  metadata?: Record<string, unknown>;
+};
+
+export function normalizeBridgeMessage(
+  params?: BridgeRpcParams,
+): NormalizedBridgeMessage {
+  const trimmedRoomId =
+    typeof params?.roomId === "string" && params.roomId.trim().length > 0
+      ? params.roomId.trim()
+      : "default";
+  const source =
+    typeof params?.source === "string" && params.source.trim().length > 0
+      ? params.source.trim()
+      : "cloud-bridge";
+  const sender =
+    params?.sender && typeof params.sender === "object"
+      ? {
+          ...(typeof params.sender.id === "string" && params.sender.id.trim()
+            ? { id: params.sender.id.trim() }
+            : {}),
+          ...(typeof params.sender.username === "string" &&
+          params.sender.username.trim()
+            ? { username: params.sender.username.trim() }
+            : {}),
+          ...(typeof params.sender.displayName === "string" &&
+          params.sender.displayName.trim()
+            ? { displayName: params.sender.displayName.trim() }
+            : {}),
+          ...(params.sender.metadata &&
+          typeof params.sender.metadata === "object" &&
+          !Array.isArray(params.sender.metadata)
+            ? { metadata: params.sender.metadata }
+            : {}),
+        }
+      : undefined;
+
+  return {
+    text: typeof params?.text === "string" ? params.text : "",
+    roomKey: trimmedRoomId,
+    mode: params?.mode === "simple" ? "simple" : "power",
+    channelType: params?.channelType === "GROUP" ? "GROUP" : "DM",
+    source,
+    ...(sender && Object.keys(sender).length > 0 ? { sender } : {}),
+    ...(params?.metadata &&
+    typeof params.metadata === "object" &&
+    !Array.isArray(params.metadata)
+      ? { metadata: params.metadata }
+      : {}),
+  };
 }
 
 export interface CloudAgentConfig {
@@ -39,15 +111,9 @@ export interface CloudAgentConfig {
 }
 
 interface AgentRuntime {
-  processMessage: (
-    text: string,
-    roomId: string,
-    mode: "simple" | "power",
-  ) => Promise<string>;
+  processMessage: (params: BridgeRpcParams) => Promise<string>;
   processMessageStream: (
-    text: string,
-    roomId: string,
-    mode: "simple" | "power",
+    params: BridgeRpcParams,
     onChunk: (chunk: string) => void,
   ) => Promise<string>;
   getMemories: () => Array<Record<string, unknown>>;
@@ -165,36 +231,145 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
 
       const runtime = new AgentRuntimeCtor({ character, plugins });
       await runtime.initialize();
+      const runtimeWithBridge = runtime as typeof runtime & {
+        ensureWorldExists?: (world: Record<string, unknown>) => Promise<void>;
+        ensureRoomExists?: (room: Record<string, unknown>) => Promise<void>;
+        ensureParticipantInRoom?: (
+          entityId: ReturnType<typeof stringToUuid>,
+          roomId: ReturnType<typeof stringToUuid>,
+        ) => Promise<void>;
+        getEntityById?: (
+          entityId: ReturnType<typeof stringToUuid>,
+        ) => Promise<Record<string, unknown> | null>;
+        createEntity?: (entity: Record<string, unknown>) => Promise<void>;
+        updateEntity?: (entity: Record<string, unknown>) => Promise<void>;
+      };
 
-      const userId = crypto.randomUUID() as ReturnType<typeof stringToUuid>;
-      const roomId = stringToUuid("cloud-agent-bridge-room");
-      const worldId = stringToUuid("cloud-agent-world");
+      const ensureBridgeContext = async (params: BridgeRpcParams) => {
+        const normalized = normalizeBridgeMessage(params);
+        const worldId = stringToUuid(
+          `${normalized.source}-${normalized.channelType.toLowerCase()}-world`,
+        );
+        const serverId = stringToUuid(`${normalized.source}-bridge-server`);
+        const roomId = stringToUuid(
+          `${normalized.source}-bridge-room-${normalized.roomKey}`,
+        );
+        const entityKey =
+          normalized.sender?.id ??
+          normalized.sender?.username ??
+          `${normalized.source}-bridge-user`;
+        const entityId = stringToUuid(
+          `${normalized.source}-bridge-user-${entityKey}`,
+        );
+        const channelType =
+          normalized.channelType === "GROUP"
+            ? ChannelType.GROUP
+            : ChannelType.DM;
+        const displayName =
+          normalized.sender?.displayName ??
+          normalized.sender?.username ??
+          "BridgeUser";
 
-      await runtime.ensureConnection({
-        entityId: userId,
-        roomId,
-        worldId,
-        userName: "BridgeUser",
-        source: "cloud-bridge",
-        channelId: "cloud-bridge",
-        type: ChannelType.DM,
-      });
+        if (typeof runtimeWithBridge.ensureWorldExists === "function") {
+          await runtimeWithBridge.ensureWorldExists({
+            id: worldId,
+            name:
+              normalized.source === "discord"
+                ? "Discord"
+                : "Cloud Bridge",
+            agentId: runtime.agentId,
+            serverId,
+          });
+        }
+
+        if (typeof runtimeWithBridge.ensureRoomExists === "function") {
+          await runtimeWithBridge.ensureRoomExists({
+            id: roomId,
+            name: normalized.roomKey,
+            type: channelType,
+            channelId: normalized.roomKey,
+            worldId,
+            serverId,
+            agentId: runtime.agentId,
+            source: normalized.source,
+          });
+        }
+
+        const entityMetadata =
+          normalized.sender?.metadata &&
+          typeof normalized.sender.metadata === "object" &&
+          !Array.isArray(normalized.sender.metadata)
+            ? normalized.sender.metadata
+            : undefined;
+        const entityPayload = {
+          id: entityId,
+          agentId: runtime.agentId,
+          names: Array.from(
+            new Set(
+              [displayName, normalized.sender?.username].filter(
+                (value): value is string => Boolean(value),
+              ),
+            ),
+          ),
+          ...(entityMetadata ? { metadata: entityMetadata } : {}),
+        };
+
+        try {
+          if (
+            typeof runtimeWithBridge.getEntityById === "function" &&
+            typeof runtimeWithBridge.updateEntity === "function"
+          ) {
+            const existingEntity = await runtimeWithBridge.getEntityById(
+              entityId,
+            );
+            if (existingEntity) {
+              await runtimeWithBridge.updateEntity({
+                ...existingEntity,
+                ...entityPayload,
+                names:
+                  entityPayload.names.length > 0
+                    ? entityPayload.names
+                    : (existingEntity.names as string[] | undefined) ?? [],
+              });
+            } else if (typeof runtimeWithBridge.createEntity === "function") {
+              await runtimeWithBridge.createEntity(entityPayload);
+            }
+          } else if (typeof runtimeWithBridge.createEntity === "function") {
+            await runtimeWithBridge.createEntity(entityPayload);
+          }
+        } catch {
+          // Best-effort entity sync. The room flow still works if the entity already exists.
+        }
+
+        if (typeof runtimeWithBridge.ensureParticipantInRoom === "function") {
+          await Promise.all([
+            runtimeWithBridge.ensureParticipantInRoom(runtime.agentId, roomId),
+            runtimeWithBridge.ensureParticipantInRoom(entityId, roomId),
+          ]);
+        }
+
+        return { normalized, entityId, roomId, channelType };
+      };
 
       agentRuntime = {
-        processMessage: async (
-          text: string,
-          _roomId: string,
-          mode: "simple" | "power",
-        ): Promise<string> => {
+        processMessage: async (params: BridgeRpcParams): Promise<string> => {
+          const { normalized, entityId, roomId, channelType } =
+            await ensureBridgeContext(params);
           const message = createMessageMemory({
             id: crypto.randomUUID() as ReturnType<typeof stringToUuid>,
-            entityId: userId,
+            entityId,
             roomId,
             content: {
-              text,
-              ...(enableChatMode ? { mode, simple: mode === "simple" } : {}),
-              source: "cloud-bridge",
-              channelType: ChannelType.DM,
+              text: normalized.text,
+              ...(enableChatMode
+                ? {
+                    mode: normalized.mode,
+                    simple: normalized.mode === "simple",
+                  }
+                : {}),
+              source: normalized.source,
+              channelType,
+              ...(normalized.metadata ? { metadata: normalized.metadata } : {}),
             },
           });
 
@@ -209,7 +384,13 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
           );
 
           state.lastActivityAt = new Date().toISOString();
-          state.memories.push({ role: "user", text, timestamp: Date.now() });
+          state.memories.push({
+            role: "user",
+            text: normalized.text,
+            timestamp: Date.now(),
+            source: normalized.source,
+            roomId: normalized.roomKey,
+          });
           state.memories.push({
             role: "assistant",
             text: responseText,
@@ -220,20 +401,26 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
           return responseText || "(no response)";
         },
         processMessageStream: async (
-          text: string,
-          _roomId: string,
-          mode: "simple" | "power",
+          params: BridgeRpcParams,
           onChunk: (chunk: string) => void,
         ): Promise<string> => {
+          const { normalized, entityId, roomId, channelType } =
+            await ensureBridgeContext(params);
           const message = createMessageMemory({
             id: crypto.randomUUID() as ReturnType<typeof stringToUuid>,
-            entityId: userId,
+            entityId,
             roomId,
             content: {
-              text,
-              ...(enableChatMode ? { mode, simple: mode === "simple" } : {}),
-              source: "cloud-bridge",
-              channelType: ChannelType.DM,
+              text: normalized.text,
+              ...(enableChatMode
+                ? {
+                    mode: normalized.mode,
+                    simple: normalized.mode === "simple",
+                  }
+                : {}),
+              source: normalized.source,
+              channelType,
+              ...(normalized.metadata ? { metadata: normalized.metadata } : {}),
             },
           });
 
@@ -251,7 +438,13 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
           );
 
           state.lastActivityAt = new Date().toISOString();
-          state.memories.push({ role: "user", text, timestamp: Date.now() });
+          state.memories.push({
+            role: "user",
+            text: normalized.text,
+            timestamp: Date.now(),
+            source: normalized.source,
+            roomId: normalized.roomKey,
+          });
           state.memories.push({
             role: "assistant",
             text: responseText,
@@ -271,13 +464,16 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
         "[cloud-agent] @elizaos/core not available, running in echo mode",
       );
       agentRuntime = {
-        processMessage: async (
-          text: string,
-          _roomId: string,
-          _mode: "simple" | "power",
-        ): Promise<string> => {
-          state.memories.push({ role: "user", text, timestamp: Date.now() });
-          const reply = `[echo] ${text}`;
+        processMessage: async (params: BridgeRpcParams): Promise<string> => {
+          const normalized = normalizeBridgeMessage(params);
+          state.memories.push({
+            role: "user",
+            text: normalized.text,
+            timestamp: Date.now(),
+            source: normalized.source,
+            roomId: normalized.roomKey,
+          });
+          const reply = `[echo] ${normalized.text}`;
           state.memories.push({
             role: "assistant",
             text: reply,
@@ -287,13 +483,18 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
           return reply;
         },
         processMessageStream: async (
-          text: string,
-          _roomId: string,
-          _mode: "simple" | "power",
+          params: BridgeRpcParams,
           onChunk: (chunk: string) => void,
         ): Promise<string> => {
-          state.memories.push({ role: "user", text, timestamp: Date.now() });
-          const reply = `[echo] ${text}`;
+          const normalized = normalizeBridgeMessage(params);
+          state.memories.push({
+            role: "user",
+            text: normalized.text,
+            timestamp: Date.now(),
+            source: normalized.source,
+            roomId: normalized.roomKey,
+          });
+          const reply = `[echo] ${normalized.text}`;
           onChunk(reply);
           state.memories.push({
             role: "assistant",
@@ -451,17 +652,10 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
         res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
       };
 
-      const text = (rpc.params?.text as string) ?? "";
-      const roomId = (rpc.params?.roomId as string) ?? "default";
-      const mode: "simple" | "power" =
-        rpc.params?.mode === "simple" ? "simple" : "power";
-
       sendEvent("connected", { rpcId: rpc.id, timestamp: Date.now() });
 
       await agentRuntime.processMessageStream(
-        text,
-        roomId,
-        mode,
+        rpc.params ?? {},
         (chunk: string) => {
           sendEvent("chunk", { text: chunk });
         },
@@ -503,15 +697,7 @@ export function startCloudAgent(userConfig: CloudAgentConfig = {}): void {
           );
           return;
         }
-        const text = (rpc.params?.text as string) ?? "";
-        const roomId = (rpc.params?.roomId as string) ?? "default";
-        const mode: "simple" | "power" =
-          rpc.params?.mode === "simple" ? "simple" : "power";
-        const responseText = await agentRuntime.processMessage(
-          text,
-          roomId,
-          mode,
-        );
+        const responseText = await agentRuntime.processMessage(rpc.params ?? {});
         res.writeHead(200);
         res.end(
           JSON.stringify({

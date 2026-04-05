@@ -109,6 +109,63 @@ export function readBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
 
+export interface ManagedDiscordCallbackState {
+  status: "connected" | "error";
+  agentId: string | null;
+  guildId: string | null;
+  guildName: string | null;
+  managed: boolean;
+  message: string | null;
+  restarted: boolean;
+}
+
+const MANAGED_DISCORD_CALLBACK_QUERY_KEYS = [
+  "discord",
+  "managed",
+  "agentId",
+  "guildId",
+  "guildName",
+  "restarted",
+  "message",
+] as const;
+
+export function consumeManagedDiscordCallbackUrl(rawUrl: string): {
+  callback: ManagedDiscordCallbackState | null;
+  cleanedUrl: string | null;
+} {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return { callback: null, cleanedUrl: null };
+  }
+
+  const status = url.searchParams.get("discord");
+  const managed = url.searchParams.get("managed") === "1";
+  if ((status !== "connected" && status !== "error") || !managed) {
+    return { callback: null, cleanedUrl: null };
+  }
+
+  const callback: ManagedDiscordCallbackState = {
+    status,
+    managed,
+    agentId: readString(url.searchParams.get("agentId")) ?? null,
+    guildId: readString(url.searchParams.get("guildId")) ?? null,
+    guildName: readString(url.searchParams.get("guildName")) ?? null,
+    message: readString(url.searchParams.get("message")) ?? null,
+    restarted: url.searchParams.get("restarted") === "1",
+  };
+
+  for (const key of MANAGED_DISCORD_CALLBACK_QUERY_KEYS) {
+    url.searchParams.delete(key);
+  }
+
+  return {
+    callback,
+    cleanedUrl: url.toString(),
+  };
+}
+
 export function normalizeBillingSummary(
   raw: CloudBillingSummary,
 ): CloudBillingSummary {

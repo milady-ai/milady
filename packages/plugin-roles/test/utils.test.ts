@@ -3,8 +3,11 @@ import {
   canModifyRole,
   checkSenderRole,
   getEntityRole,
+  matchEntityToConnectorAdminWhitelist,
   normalizeRole,
+  resolveEntityRole,
   resolveWorldForMessage,
+  setConnectorAdminWhitelist,
   setEntityRole,
 } from "../src/utils";
 import type { RoleName, RolesWorldMetadata } from "../src/types";
@@ -19,11 +22,21 @@ function mockRuntime(opts: {
   room?: { worldId: string | null } | null;
   world?: { id: string; metadata: RolesWorldMetadata } | null;
   updateWorld?: ReturnType<typeof vi.fn>;
+  entities?: Record<string, { names?: string[]; metadata?: Record<string, unknown> }>;
 }): IAgentRuntime {
   return {
     getRoom: vi.fn().mockResolvedValue(opts.room ?? null),
     getWorld: vi.fn().mockResolvedValue(opts.world ?? null),
     updateWorld: opts.updateWorld ?? vi.fn().mockResolvedValue(undefined),
+    getEntityById: vi.fn().mockImplementation(async (id: string) => {
+      const entity = opts.entities?.[id];
+      if (!entity) return null;
+      return {
+        id,
+        names: entity.names ?? [],
+        metadata: entity.metadata ?? {},
+      };
+    }),
   } as unknown as IAgentRuntime;
 }
 
@@ -134,6 +147,29 @@ describe("getEntityRole", () => {
   it("normalizes stored role values", () => {
     const meta = { roles: { e1: "owner" as RoleName } };
     expect(getEntityRole(meta, "e1")).toBe("OWNER");
+  });
+});
+
+describe("matchEntityToConnectorAdminWhitelist", () => {
+  it("matches Discord user ids from entity metadata", () => {
+    expect(
+      matchEntityToConnectorAdminWhitelist(
+        { discord: { userId: "123456789" } },
+        { discord: ["123456789"] },
+      ),
+    ).toEqual({
+      connector: "discord",
+      matchedValue: "123456789",
+    });
+  });
+
+  it("returns null when the connector does not match", () => {
+    expect(
+      matchEntityToConnectorAdminWhitelist(
+        { discord: { userId: "123456789" } },
+        { telegram: ["123456789"] },
+      ),
+    ).toBeNull();
   });
 });
 
@@ -266,6 +302,29 @@ describe("resolveWorldForMessage", () => {
   });
 });
 
+describe("resolveEntityRole", () => {
+  it("promotes a connector-whitelisted Discord entity to ADMIN", async () => {
+    const updateWorld = vi.fn().mockResolvedValue(undefined);
+    const world = { id: "w1", metadata: { roles: {} } as RolesWorldMetadata };
+    const runtime = mockRuntime({
+      room: { worldId: "w1" },
+      world,
+      updateWorld,
+      entities: {
+        speaker: {
+          metadata: { discord: { userId: "discord-admin-1", username: "owner" } },
+        },
+      },
+    });
+    setConnectorAdminWhitelist(runtime, { discord: ["discord-admin-1"] });
+
+    const role = await resolveEntityRole(runtime, world, world.metadata, "speaker");
+    expect(role).toBe("ADMIN");
+    expect(world.metadata.roles?.speaker).toBe("ADMIN");
+    expect(updateWorld).toHaveBeenCalledTimes(1);
+  });
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // checkSenderRole
 // ═══════════════════════════════════════════════════════════════════════════
@@ -308,6 +367,27 @@ describe("checkSenderRole", () => {
     });
     expect(await checkSenderRole(runtime, msg("unknown"))).toEqual({
       entityId: "unknown", role: "GUEST", isOwner: false, isAdmin: false, canManageRoles: false,
+    });
+  });
+
+  it("returns ADMIN for a connector-whitelisted Discord sender", async () => {
+    const runtime = mockRuntime({
+      room: { worldId: "w1" },
+      world: { id: "w1", metadata: { roles: {} } },
+      entities: {
+        unknown: {
+          metadata: { discord: { userId: "discord-admin-2", username: "owner" } },
+        },
+      },
+    });
+    setConnectorAdminWhitelist(runtime, { discord: ["discord-admin-2"] });
+
+    expect(await checkSenderRole(runtime, msg("unknown"))).toEqual({
+      entityId: "unknown",
+      role: "ADMIN",
+      isOwner: false,
+      isAdmin: true,
+      canManageRoles: true,
     });
   });
 
