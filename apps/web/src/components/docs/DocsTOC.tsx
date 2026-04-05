@@ -19,6 +19,11 @@ interface TocItem {
 export function DocsTOC({ pathKey }: { pathKey: string }) {
   const [items, setItems] = useState<TocItem[]>([]);
 
+  // `pathKey` is a trigger-only dependency — the effect body queries the DOM
+  // for the freshly rendered page's headings and doesn't read `pathKey`
+  // directly. The re-run is necessary whenever the parent route changes so
+  // stale TOC entries from a previous page don't leak through.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: trigger-only dep; see comment above
   useEffect(() => {
     // Defer to the next tick so the freshly rendered MDX content is in the DOM
     const frame = requestAnimationFrame(() => {
@@ -27,9 +32,8 @@ export function DocsTOC({ pathKey }: { pathKey: string }) {
         setItems([]);
         return;
       }
-      const headings = main.querySelectorAll<HTMLHeadingElement>(
-        "h2[id], h3[id]",
-      );
+      const headings =
+        main.querySelectorAll<HTMLHeadingElement>("h2[id], h3[id]");
       const next: TocItem[] = [];
       headings.forEach((h) => {
         const id = h.id;

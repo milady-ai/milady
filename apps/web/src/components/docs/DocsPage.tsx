@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
+  type DocEntry,
   docsByPath,
   findAdjacent,
   tierSections,
-  type DocEntry,
 } from "../../docs/registry";
 import { DocsTOC } from "./DocsTOC";
 

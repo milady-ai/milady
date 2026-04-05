@@ -22,7 +22,11 @@ export function DocsLayout() {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Close the mobile drawer whenever the route changes
+  // Close the mobile drawer whenever the route changes. The pathname is a
+  // trigger-only dependency — the effect body doesn't read it — but the
+  // re-run is necessary for browser back/forward navigation and in-content
+  // links that bypass the sidebar's own onNavigate callback.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: trigger-only dep; see comment above
   useEffect(() => {
     setDrawerOpen(false);
   }, [location.pathname]);

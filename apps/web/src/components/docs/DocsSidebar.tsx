@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { tierSections, type DocEntry, type DocTier } from "../../docs/registry";
+import { type DocEntry, type DocTier, tierSections } from "../../docs/registry";
 
 interface DocsSidebarProps {
   /** Called when a link is clicked — used by the mobile drawer to close itself. */

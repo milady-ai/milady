@@ -152,7 +152,9 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 3,
     path: "/docs/intermediate/character-tweaks",
-    component: lazy(() => import("./content/intermediate/character-tweaks.mdx")),
+    component: lazy(
+      () => import("./content/intermediate/character-tweaks.mdx"),
+    ),
   },
   {
     slug: "memory-and-knowledge",

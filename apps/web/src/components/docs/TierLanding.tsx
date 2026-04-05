@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { tierSections, type DocTier } from "../../docs/registry";
+import { type DocTier, tierSections } from "../../docs/registry";
 
 const VALID_TIERS: DocTier[] = [
   "beginner",

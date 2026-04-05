@@ -21,16 +21,14 @@ import { Steps } from "./Steps";
  * DocsLayout so every MDX page picks it up automatically.
  */
 
-function ExternalAwareLink(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+function ExternalAwareLink(
+  props: React.AnchorHTMLAttributes<HTMLAnchorElement>,
+) {
   const href = props.href ?? "";
   const isExternal = /^https?:\/\//.test(href);
   if (isExternal) {
     return (
-      <a
-        {...props}
-        target="_blank"
-        rel="noreferrer noopener"
-      >
+      <a {...props} target="_blank" rel="noreferrer noopener">
         {props.children}
       </a>
     );

@@ -29,7 +29,9 @@ export interface CalloutProps {
 export function Callout({ kind = "note", title, children }: CalloutProps) {
   return (
     <aside className={`docs-callout docs-callout--${kind}`} role="note">
-      <span className="docs-callout-title">{title ?? DEFAULT_TITLES[kind]}</span>
+      <span className="docs-callout-title">
+        {title ?? DEFAULT_TITLES[kind]}
+      </span>
       <div>{children}</div>
     </aside>
   );
