@@ -70,7 +70,10 @@ async function canImportModule(
   }
 }
 
-function runModuleSnippet(source: string): {
+function runModuleSnippet(
+  source: string,
+  absolutePathOverrides: Record<string, string> = {},
+): {
   success: boolean;
   error?: string;
   stdout: string;
@@ -79,7 +82,16 @@ function runModuleSnippet(source: string): {
   const module = [
     'import { createRequire } from "node:module";',
     'import { pathToFileURL } from "node:url";',
+    // Map of specifier → absolute on-disk entry file. When present, the
+    // subprocess imports the file:// URL directly and skips bare-specifier
+    // resolution entirely. Used for modules that bun places under a
+    // per-workspace node_modules symlink unreachable via
+    // `createRequire(workspacePackageJson).resolve(specifier)` in CI.
+    `const __absolutePathOverrides = ${JSON.stringify(absolutePathOverrides)};`,
     `const importFromWorkspace = async (specifier) => {
+			if (Object.prototype.hasOwnProperty.call(__absolutePathOverrides, specifier)) {
+				return await import(pathToFileURL(__absolutePathOverrides[specifier]).href);
+			}
 			const resolutionErrors = [];
 			for (const requestPath of ${JSON.stringify(workspaceRequirePaths)}) {
 				try {
@@ -131,13 +143,54 @@ function runModuleSnippet(source: string): {
 
 async function canImportModuleInSubprocess(
   moduleName: string,
+  absolutePathOverrides: Record<string, string> = {},
 ): Promise<{ success: boolean; error?: string }> {
   const result = runModuleSnippet(
     `await importFromWorkspace(${JSON.stringify(moduleName)});`,
+    absolutePathOverrides,
   );
   return result.success
     ? { success: true }
     : { success: false, error: result.error };
+}
+
+/**
+ * Resolves a package's main entry file using the outer process, where
+ * `findPackagePath` has working filesystem access to bun's per-workspace
+ * symlinks. Returns an absolute file path or null.
+ *
+ * This exists because the `importFromWorkspace` helper inside
+ * `runModuleSnippet` relies on bare-specifier resolution via
+ * `createRequire(workspacePackageJson).resolve(specifier)`. That works for
+ * packages with a root-level `node_modules/<pkg>` symlink (created when the
+ * package is declared in the root `package.json`, e.g. sharp) but fails in
+ * CI for packages only declared in a leaf workspace (e.g. canvas, which is
+ * a dep of `packages/agent` only). Bun places those under
+ * `node_modules/.bun/<pkg>@<ver>/` and links them into the leaf's
+ * `node_modules`, but Node's bare-specifier resolver in the spawned
+ * subprocess can't always reach them from the workspace package.json alone.
+ * Resolving to an absolute on-disk path in the outer process and passing the
+ * file:// URL into the subprocess sidesteps bare-specifier resolution.
+ */
+function findPackageMainFile(moduleName: string): string | null {
+  const pkgDir = findPackagePath(moduleName);
+  if (!pkgDir) return null;
+  const pkgJsonPath = path.join(pkgDir, "package.json");
+  if (!fs.existsSync(pkgJsonPath)) return null;
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+    const main =
+      typeof pkg.main === "string" && pkg.main.length > 0
+        ? pkg.main
+        : "index.js";
+    const mainPath = path.resolve(pkgDir, main);
+    if (fs.existsSync(mainPath)) return mainPath;
+    const fallback = path.join(pkgDir, "index.js");
+    if (fs.existsSync(fallback)) return fallback;
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -390,12 +443,24 @@ describe("Native Module Installation Verification", () => {
     });
 
     it.skipIf(!hasCanvasBinding)("canvas can be imported", async () => {
-      const result = await canImportModuleInSubprocess("canvas");
-      expect(result.success).toBe(true);
+      // Pre-resolve canvas's main entry file in the outer process. Bun places
+      // canvas under `node_modules/.bun/canvas@<ver>/node_modules/canvas/`
+      // and only links it into `packages/agent/node_modules/canvas`, which
+      // bare-specifier resolution in the spawned subprocess can't reliably
+      // reach in CI. Passing the absolute path sidesteps that entirely.
+      const canvasMainFile = findPackageMainFile("canvas");
+      expect(canvasMainFile, "canvas main file not resolvable").toBeTruthy();
+      const result = await canImportModuleInSubprocess("canvas", {
+        canvas: canvasMainFile!,
+      });
+      expect(result.success, result.error).toBe(true);
     });
 
     it.skipIf(!hasCanvasBinding)("canvas can create a 2D context", async () => {
-      const result = runModuleSnippet(`
+      const canvasMainFile = findPackageMainFile("canvas");
+      expect(canvasMainFile, "canvas main file not resolvable").toBeTruthy();
+      const result = runModuleSnippet(
+        `
 					const { createCanvas } = await importFromWorkspace("canvas");
 					const canvas = createCanvas(100, 100);
 					const ctx = canvas.getContext("2d");
@@ -404,7 +469,9 @@ describe("Native Module Installation Verification", () => {
 					ctx.fillRect(0, 0, 50, 50);
 					const imageData = ctx.getImageData(0, 0, 1, 1);
 					process.stdout.write(String(imageData.data[0]));
-				`);
+				`,
+        { canvas: canvasMainFile! },
+      );
 
       expect(result.success, result.error).toBe(true);
       expect(Number(result.stdout.trim())).toBe(255);
