@@ -1,0 +1,106 @@
+# Wallet and payments
+
+Milady has optional wallet and payment features for use cases where your agent needs to handle money. This is specifically for on-chain actions (crypto wallets) and agent-budgeted services — it's not about charging your credit card or paying for SaaS subscriptions.
+
+Most Milady users will never need this page. If you don't have a use case involving crypto or automated per-action payments, skip it and come back if you ever do.
+
+**What you'll learn:** what each wallet component is, when to use which, and how to not lose money.
+
+## What's actually in here
+
+Open **Settings → Wallet**. You'll see three main things:
+
+1. **EVM wallet** — a standard Ethereum-compatible wallet your agent can use for on-chain transactions.
+2. **Vincent** — a delegated-authority system where you grant your agent specific, scoped permissions to act on your behalf (think "a spending budget with rules").
+3. **Steward** — an account provisioning service that handles the boring parts (gas, signing, rate limiting).
+
+You can enable any combination. They're not mutually exclusive.
+
+<Callout kind="danger">
+Before you start: <strong>do not use your main wallet with Milady</strong>. Create a new wallet specifically for your agent. Fund it with only what you'd be comfortable losing if something goes wrong — a bug, a compromised machine, a prompt injection that tricks your agent into sending funds somewhere unexpected. Treat it like a dev wallet.
+</Callout>
+
+## EVM wallet
+
+The EVM wallet is a standard Ethereum-compatible wallet that Milady stores in your local config directory. Your agent can use it to:
+
+- Send transactions (transfers, contract calls)
+- Sign messages
+- Interact with smart contracts
+- Hold and move ERC-20 tokens
+
+### Setting one up
+
+You have three options:
+
+<Steps>
+  <li><strong>Generate a new wallet</strong> (recommended for first-time users) — Milady creates a fresh wallet keypair, shows you the mnemonic <strong>once</strong>, and stores the private key encrypted at rest.</li>
+  <li><strong>Import an existing wallet</strong> via mnemonic or private key — if you already have a dev wallet you want to use.</li>
+  <li><strong>Connect to a hardware wallet</strong> (Ledger) — your Milady agent signs via the hardware wallet, so the private key never leaves the device. Slower but safest.</li>
+</Steps>
+
+<Callout kind="warning">
+If you pick "generate," write the mnemonic down on paper and store it somewhere physical. Milady shows it to you once. If you lose it and your machine dies, the wallet and everything in it are unrecoverable.
+</Callout>
+
+### What network am I on?
+
+Check Settings → Wallet → Network. Default is usually Ethereum mainnet, but you can switch to any EVM-compatible network (Polygon, Base, Arbitrum, a local Anvil node for testing). For first-time use, **run on a testnet first.** Sepolia is free and works the same as mainnet for everything except the dollar value.
+
+## Vincent
+
+Vincent is a permission layer. Instead of handing your agent unlimited access to your wallet, you use Vincent to grant scoped capabilities: "you can spend up to X per day, only on contracts I've pre-approved, only for purposes matching this description."
+
+Think of it as an allowance with rules. Your agent has autonomy within those rules, but can't exceed them.
+
+### When to use Vincent
+
+- **Recurring small payments** — your agent handles a subscription, a tip jar, a streaming payment, etc.
+- **Scoped trading** — your agent can trade within a specific budget and pair list but not move the underlying collateral.
+- **Automated service payments** — your agent pays for API calls, cloud compute, or other services on a schedule.
+
+### When not to
+
+- **One-off large transactions** — approve those manually.
+- **Anything where you'd regret the worst-case outcome.** Vincent reduces risk, it doesn't eliminate it.
+
+## Steward
+
+Steward handles the operational glue: gas management, signing queues, rate limiting, error recovery. You don't really "use" Steward directly — it runs behind Vincent and the EVM wallet, making them work smoothly. The main thing you need to know is that it exists and that its status shows up in the wallet settings.
+
+If Steward is showing errors, your agent's on-chain actions will start failing or getting delayed. Usually it means gas prices spiked, your funded wallet ran dry, or the network you're on is congested. Fix whichever of those applies.
+
+## Funding your wallet
+
+Once the wallet is set up:
+
+<Steps>
+  <li>Copy the wallet address from Settings → Wallet.</li>
+  <li>Send a small amount of the relevant token (ETH on mainnet, testnet ETH on Sepolia, MATIC on Polygon, etc.) from your main wallet or from a faucet.</li>
+  <li>Wait for the transaction to confirm. You'll see the balance update in Settings → Wallet.</li>
+</Steps>
+
+**Start with a tiny amount.** Seriously. For your first on-chain action, fund with the minimum viable balance — enough for a couple of transactions, nothing more.
+
+## Monitoring
+
+Settings → Wallet → Activity shows you every transaction your agent has initiated, with status (pending, confirmed, failed) and details. Check this after any action until you trust the setup. It also has a "pending approvals" section if you've enabled the approval-required mode where your agent can *propose* a transaction but you have to click to sign it.
+
+### Approval-required mode
+
+This is an on/off toggle that makes every transaction require your manual approval. Your agent queues up actions, you see them in the pending list, and you click approve or reject.
+
+<Callout kind="tip">
+Turn on approval-required mode for the first week. It's a pain, but it means you see exactly what your agent is trying to do before anything actually happens. After a week you'll know whether to trust the setup enough to turn it off, narrow the scope, or just leave it on forever.
+</Callout>
+
+## Things that can go wrong
+
+- **Your private key leaks.** If your machine is compromised or your `~/.milady/` directory gets exfiltrated, anyone with the key can drain the wallet. This is why you use a fresh wallet with minimal funds.
+- **A prompt injection tricks your agent into sending funds.** If your agent is reading messages from a connector (Discord, Telegram) and someone sends a cleverly-crafted message, it's theoretically possible to get the agent to take an action you didn't intend. Vincent limits the blast radius but doesn't eliminate the risk.
+- **Gas spikes strand a transaction.** Your agent submits a tx with a gas price that's too low for current network conditions, the tx sits in the mempool forever. Steward handles most of this, but not all of it.
+- **A contract call behaves unexpectedly.** Smart contracts have bugs. If your agent interacts with a buggy contract, funds can be lost. This is not specific to Milady — it's a general truth of on-chain anything.
+
+## What's next
+
+[Plugins for non-developers](/docs/advanced/plugins-for-users) — how to install and enable plugins from the Milady registry without touching code.

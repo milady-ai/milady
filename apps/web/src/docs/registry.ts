@@ -198,7 +198,9 @@ export const docsRegistry: DocEntry[] = [
     tier: "advanced",
     order: 1,
     path: "/docs/advanced/multi-connector-setup",
-    component: null,
+    component: lazy(
+      () => import("./content/advanced/multi-connector-setup.mdx"),
+    ),
   },
   {
     slug: "wallet-and-payments",
@@ -208,7 +210,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "advanced",
     order: 2,
     path: "/docs/advanced/wallet-and-payments",
-    component: null,
+    component: lazy(() => import("./content/advanced/wallet-and-payments.mdx")),
   },
   {
     slug: "plugins-for-users",
@@ -218,7 +220,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "advanced",
     order: 3,
     path: "/docs/advanced/plugins-for-users",
-    component: null,
+    component: lazy(() => import("./content/advanced/plugins-for-users.mdx")),
   },
   {
     slug: "privacy-and-data",
@@ -228,7 +230,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "advanced",
     order: 4,
     path: "/docs/advanced/privacy-and-data",
-    component: null,
+    component: lazy(() => import("./content/advanced/privacy-and-data.mdx")),
   },
   {
     slug: "power-user-shortcuts",
@@ -238,7 +240,9 @@ export const docsRegistry: DocEntry[] = [
     tier: "advanced",
     order: 5,
     path: "/docs/advanced/power-user-shortcuts",
-    component: null,
+    component: lazy(
+      () => import("./content/advanced/power-user-shortcuts.mdx"),
+    ),
   },
 
   // ── Developer (lander — real content lives at docs.milady.ai) ───────

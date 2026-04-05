@@ -1,0 +1,106 @@
+# Plugins for non-developers
+
+Milady has a plugin system. Developers use it to extend what their agent can do — wire up new platforms, add new actions, pull in new data sources. You don't need to be a developer to use plugins someone else has written.
+
+This page is about installing and enabling plugins from Milady's plugin registry **without touching code**. If you can install the desktop app, you can do this.
+
+**What you'll learn:** what plugins are, how to browse the registry, how to install one, how to enable it, and how to troubleshoot when a plugin isn't doing what you expect.
+
+## What a plugin actually is
+
+A plugin is a packaged bundle of extra capabilities your agent can use. Common kinds:
+
+- **Connector plugins** — add support for a new platform (Discord, Telegram, iMessage, Slack, Matrix, WhatsApp, etc. are all connector plugins).
+- **Action plugins** — teach your agent to do new things (search the web, check weather, run code, control smart home devices, look up prices).
+- **Data provider plugins** — give your agent access to a new data source (calendar, email, a specific API).
+- **Model provider plugins** — add support for a new language model service.
+- **Character plugins** — ship a pre-built character, personality, voice, and avatar as a single package.
+
+Milady ships with a set of core plugins already installed. Everything else is optional and lives in the registry.
+
+## Browsing the registry
+
+Open **Settings → Plugins**. You'll see:
+
+- **Installed** — plugins that are already on your machine. Enable / disable with the toggle.
+- **Registry** — the full catalog. Browse, filter by category, search by name.
+
+Each registry entry tells you:
+
+- What the plugin does (a one-line description).
+- What category it's in.
+- Who maintains it (Milady team, Eliza team, or a third party).
+- What credentials or setup it needs (some plugins are "free" — no key required; others need API keys).
+- A link to its detailed setup guide.
+
+<Callout kind="tip">
+Read the "setup needs" section before installing. A plugin that needs an API key from a service you haven't signed up for will sit unused until you get the key, which is a waste of a click.
+</Callout>
+
+## Installing a plugin
+
+<Steps>
+  <li>Open Settings → Plugins → Registry.</li>
+  <li>Find the plugin you want. Click it for the detail view.</li>
+  <li>Click <strong>Install</strong>. Milady downloads the plugin package and registers it with the runtime.</li>
+  <li>Restart the agent if Milady prompts you. Most plugins can activate without a restart, but some (especially connectors) need a fresh agent process to load correctly.</li>
+</Steps>
+
+After install, the plugin appears in the "Installed" tab, initially disabled.
+
+## Enabling a plugin
+
+<Steps>
+  <li>Open Settings → Plugins → Installed.</li>
+  <li>Click the plugin you just installed. A detail panel opens on the right.</li>
+  <li>If the plugin needs credentials (an API key, a token, a URL), paste them now.</li>
+  <li>Toggle <strong>Enabled</strong>.</li>
+  <li>Milady loads the plugin and confirms it's active.</li>
+</Steps>
+
+If the plugin needs credentials and you don't have them yet, its enable toggle stays disabled and shows a "credentials required" warning. Click the plugin to see exactly what's needed and where to get it.
+
+## Using a plugin
+
+Different plugin types show up in different places:
+
+- **Connector plugins** appear in Settings → Connectors.
+- **Action plugins** don't have a UI — they just make new capabilities available to your agent. You'll notice them when you ask your agent to do something and it actually does it instead of saying "I can't." For example, if you install a "web search" plugin, your agent can answer questions that require current information it doesn't have in its training data.
+- **Model provider plugins** appear in Settings → Providers as a new option in the chat/voice/embeddings lists.
+- **Character plugins** appear in Settings → Character → Gallery.
+
+## Disabling and uninstalling
+
+**Disable** (Settings → Plugins → Installed → toggle off): plugin stays installed, stops being active. Instant, reversible.
+
+**Uninstall** (Settings → Plugins → Installed → Uninstall button): plugin is removed from disk. Its credentials might still be stored in `~/.milady/milady.json` — Milady asks whether to wipe them when you uninstall.
+
+Always disable before uninstalling if you might want the plugin back. Reinstalling is fast, but re-entering credentials is annoying.
+
+## Plugin trust
+
+Milady's plugin registry has two tiers:
+
+- **Verified** plugins have been reviewed by the Milady team and marked safe. They show a verified badge. The core connectors, official model providers, and common capabilities are all verified.
+- **Community** plugins are written by third parties. They work, but Milady hasn't audited them. They show a community badge.
+
+<Callout kind="warning">
+A plugin runs with the same permissions as Milady itself. That means it can read your config, access your wallet if enabled, and talk to the network. Community plugins are fine for most use cases, but don't install one without at least checking who made it and what it does. "I found this on the registry" isn't the same as "this is safe to run."
+</Callout>
+
+If you want to be extra cautious: community plugins are also on GitHub under the author's account. You can read the source before installing. For most consumer use cases, verified plugins cover what you need without the review step.
+
+## Updating plugins
+
+Settings → Plugins → Installed shows a "Updates available" badge if any of your installed plugins have newer versions in the registry. Click the plugin and then click Update. Updates usually don't break things, but if something was working before an update and doesn't work after, check the plugin's changelog on its registry page.
+
+## Common plugin problems
+
+- **Plugin enabled but nothing is happening** — Milady might need a restart. Settings → Advanced → Restart agent.
+- **"Credentials invalid"** — you pasted the wrong key, or the key is missing permissions the plugin expects. Double-check against the plugin's setup guide.
+- **Plugin isn't in the registry even though I heard about it** — make sure you're on the latest Milady. Older versions might not have the newest plugins yet.
+- **Plugin crashed the agent** — rare but possible. Disable the plugin and file an issue on its repo (or the Milady repo for official plugins).
+
+## What's next
+
+[Privacy, data, and what stays local](/docs/advanced/privacy-and-data) — where your data lives, what gets sent where, and how to minimize what leaves your machine.

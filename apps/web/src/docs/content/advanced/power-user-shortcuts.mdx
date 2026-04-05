@@ -1,0 +1,169 @@
+# Power user shortcuts
+
+This page is for people who've spent a few hours with Milady and want to go faster. Keybindings, a handful of CLI commands, and the dev observability endpoints that are worth knowing about even if you're not a developer.
+
+**What you'll learn:** keyboard shortcuts in the desktop app, CLI commands for people who already have Milady running from a terminal, and the local dev endpoints that tell you what the runtime is doing.
+
+## Keyboard shortcuts
+
+All shortcuts work on both macOS (use ⌘) and Windows/Linux (use Ctrl). Milady uses platform-native conventions where possible.
+
+### Global
+
+| Shortcut | What it does |
+| --- | --- |
+| **⌘/Ctrl + K** | Focus the chat input from anywhere in the window |
+| **⌘/Ctrl + N** | Start a new conversation |
+| **⌘/Ctrl + ,** | Open Settings |
+| **⌘/Ctrl + T** | Toggle between Companion and Dev (native) shell modes |
+| **⌘/Ctrl + L** | Clear the current conversation view (doesn't delete memory) |
+| **⌘/Ctrl + Shift + L** | Clear current conversation memory (this DOES delete it) |
+| **Esc** | Close any open modal / cancel current action |
+
+### Chat
+
+| Shortcut | What it does |
+| --- | --- |
+| **Enter** | Send message |
+| **Shift + Enter** | Newline within message |
+| **↑** (in empty input) | Edit your last message |
+| **⌘/Ctrl + ↑/↓** | Navigate between conversations |
+| **Space** (with mic icon focused) | Push-to-talk (while held) |
+
+### Companion shell
+
+| Shortcut | What it does |
+| --- | --- |
+| **⌘/Ctrl + H** | Hide/show the companion overlay |
+| **⌘/Ctrl + Shift + H** | Hide without muting voice (background mode) |
+
+<Callout kind="tip">
+You can customize most keybindings in Settings → Advanced → Shortcuts. If you want vim-style navigation or emacs-style chord bindings, set them up there.
+</Callout>
+
+## CLI commands
+
+If you installed Milady via the CLI (`curl ... | bash` or `irm ... | iex`), you have a `milady` command in your PATH. The desktop app also installs this CLI globally. Both work identically.
+
+### Starting and stopping
+
+```bash
+milady start           # Start the runtime in the foreground
+milady start --daemon  # Start as a background service
+milady stop            # Stop the running instance
+milady status          # Show whether the runtime is up, port, PID
+milady restart         # Stop + start
+```
+
+### Inspecting state
+
+```bash
+milady config show     # Print your current milady.json
+milady config path     # Print where milady.json lives
+milady plugins list    # List installed plugins
+milady connectors list # List configured connectors + status
+milady logs            # Tail the current runtime log
+milady logs --follow   # Same as tail -f
+```
+
+### Quick actions
+
+```bash
+milady chat            # Open an interactive chat session in the terminal
+milady setup           # Re-run the first-launch onboarding
+milady repair          # Re-run postinstall tasks (re-link plugins, etc.)
+```
+
+<Callout kind="tip">
+<code>milady chat</code> is genuinely underrated. If you just want a quick text conversation without opening the desktop app, spin it up in a terminal and you're talking to your agent in under a second.
+</Callout>
+
+### Version and updates
+
+```bash
+milady --version       # Print the installed version
+milady update          # Check for and install updates (CLI installs only)
+```
+
+The desktop app auto-updates on its own — the `milady update` command is for CLI installs where you're managing the runtime as a binary.
+
+## Dev observability endpoints
+
+Milady exposes a few local HTTP endpoints on its API port (default 31337) that are genuinely useful even if you're not a developer. All of them are **loopback-only** — they only respond to requests from your own machine, not from anywhere else on your network.
+
+### `/api/dev/stack`
+
+```bash
+curl http://localhost:31337/api/dev/stack
+```
+
+Returns a JSON summary of the current runtime state: what providers are configured, what connectors are active, what plugins are loaded, current agent state, startup phase, recent errors. Great for "is anything wrong?" at a glance.
+
+### `/api/dev/console-log`
+
+```bash
+curl http://localhost:31337/api/dev/console-log
+```
+
+Returns the tail of the aggregated desktop dev console log. Same thing you'd see in Settings → Logs, but as JSON over HTTP. Useful for watching what's happening in real time from a terminal while you interact with the app.
+
+### `/api/dev/cursor-screenshot`
+
+```bash
+curl http://localhost:31337/api/dev/cursor-screenshot -o screenshot.png
+```
+
+Takes a full-screen screenshot of whatever's currently visible and returns it as PNG. This exists for AI agents (like Claude Code or Cursor) to see what the native window looks like when they're helping you troubleshoot. You can use it manually too if you want to save a quick screenshot without Cmd+Shift+4.
+
+<Callout kind="note">
+These endpoints are on by default on desktop and off by default on iOS/Android. You can disable them on desktop by setting <code>MILADY_DESKTOP_SCREENSHOT_SERVER=0</code> or <code>MILADY_DESKTOP_DEV_LOG=0</code> in your environment.
+</Callout>
+
+## Useful env vars
+
+A few environment variables you can set when starting Milady from a terminal:
+
+| Env var | What it does |
+| --- | --- |
+| **`MILADY_API_PORT`** | Override the default API port (31337) |
+| **`MILADY_PORT`** | Override the default dashboard UI port (2138) |
+| **`MILADY_CONFIG_PATH`** | Use a specific config file path instead of the default |
+| **`MILADY_STATE_DIR`** | Use a specific state directory instead of `~/.milady/` |
+| **`MILADY_TTS_DEBUG=1`** | Verbose TTS pipeline logging |
+| **`MILADY_PROMPT_TRACE=1`** | Log prompt compaction stats |
+
+Setting these on macOS/Linux:
+
+```bash
+MILADY_TTS_DEBUG=1 milady start
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:MILADY_TTS_DEBUG=1
+milady start
+```
+
+## The `.milady` directory layout
+
+Quick reference if you ever need to poke around by hand:
+
+```
+~/.milady/
+├── milady.json            Main config (safe to inspect, risky to hand-edit)
+├── characters/            Your character files
+├── avatars/               VRM files you've uploaded
+├── database/              SQLite conversation + knowledge storage
+├── logs/                  Rotated runtime logs
+├── cache/                 Model response cache (safe to delete)
+└── .keys/                 Encrypted credentials (don't touch)
+```
+
+Back up the whole directory before doing anything destructive. If you want to start over, rename it to `.milady.old` instead of deleting it.
+
+## What's next
+
+You've reached the end of the consumer docs MVP. If you're looking for building-on-Milady docs — REST API, plugin SDK, CLI reference, architecture internals — head to [the developer docs](/docs/developer).
+
+If you have feedback or something is missing from these docs, [file an issue](https://github.com/milady-ai/milady/issues) and tell us what you expected to find. This page tree is still growing.

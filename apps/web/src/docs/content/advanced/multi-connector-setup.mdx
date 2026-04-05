@@ -1,0 +1,75 @@
+# Running multiple connectors
+
+You've got Milady connected to Discord. Now you want Telegram too. And iMessage. And maybe Slack next week. This page is about running multiple connectors at the same time without your agent getting confused, losing context, or double-replying to the same conversation.
+
+**What you'll learn:** how Milady handles messages from multiple platforms at once, how to keep contexts separate (or shared, if you want), and the common pitfalls.
+
+## The short version
+
+Connectors are independent. Each one runs as its own thread that listens for messages, hands them to your agent, and sends responses back. Enabling a second connector doesn't touch the first — they don't know about each other.
+
+From your agent's perspective, every message comes in with a **source**: "this is from Discord channel #general" or "this is from Telegram DM with Alice." The agent sees the source and the message, and responds. Milady then routes the response back to the right platform automatically.
+
+You can run as many connectors at the same time as you want. The limits are your provider rate limits (how many requests per minute your language model lets you make) and your own attention, not Milady itself.
+
+## Enabling a second connector
+
+Follow the connector-specific walkthroughs from the intermediate tier:
+
+- [Connect to Discord](/docs/intermediate/connect-discord)
+- [Connect to Telegram](/docs/intermediate/connect-telegram)
+
+For iMessage, Slack, WhatsApp, Matrix, and others, open Settings → Connectors and click the one you want. Each connector has its own setup flow, but they all follow the same pattern: paste credentials, configure filters, click save.
+
+## Do connectors share memory?
+
+**By default, no.** Each connector — and each channel within a connector — has its own memory thread. Conversations in #general on Discord are independent of conversations in Telegram DMs with your friend Alice. This is usually what you want: you don't want your Discord server members seeing things your Telegram friends told you.
+
+**If you want shared context**, there are two levers:
+
+1. **Knowledge**: knowledge is global by default. Anything you upload to the Knowledge tab is available to every connector. Use this for reference material you want the agent to know about everywhere.
+2. **Character**: the character's personality and system prompt are also global. One character, multiple connectors. If you want to project the same "voice" across Discord and Telegram, that's automatic.
+
+If you want **conversations** to merge across connectors (say, "treat Discord DM with Bob and Telegram DM with Bob as the same conversation"), that's called **contact linking** and it's an opt-in feature — Settings → Memory → Contact linking. Set up per-person. Most people don't need this.
+
+<Callout kind="warning">
+Don't enable contact linking without thinking about it. If you link a person across platforms and that person says something in a Discord server group chat, their message might end up as context in your Telegram DM with them. This gets weird fast.
+</Callout>
+
+## Rate limits and cost
+
+Every message across every connector hits your language model provider. If you're on a cloud provider, each message costs something. Add up every connector × every channel × every response and you can get to real money faster than you expect.
+
+A few practical tips:
+
+- **Scope each connector tightly.** Don't let Discord listen in every channel of a busy server. Pick 1–3 channels.
+- **Use "only respond to mentions"** on high-traffic connectors. The bot only replies when someone explicitly asks for it, which drops cost by 90%+ in active servers.
+- **Set up different providers per connector** (yes, you can). Route Discord to a cheaper model because the traffic volume is higher, and keep your desktop chat on the premium one. Covered in [Switching providers](/docs/intermediate/switching-providers).
+
+## Avoiding loops
+
+If you have two bots in the same place — say, Milady + another AI bot in a Discord channel — they can start talking to each other and run up your bill in an hour. Every connector has an **ignore bot messages** option, on by default. Don't turn it off unless you specifically want your Milady agent to interact with other bots.
+
+<Callout kind="tip">
+If you notice your Milady is replying to a conversation that's moving suspiciously fast, check whether another bot is in the channel. A loop between two bots is almost always the cause.
+</Callout>
+
+## Debugging "my agent is responding on the wrong connector"
+
+This usually isn't Milady's fault — it's a connector configuration issue. Check:
+
+- **Which channels is Discord listening in?** Settings → Connectors → Discord → Channel IDs.
+- **Which chats is Telegram allowed in?** Settings → Connectors → Telegram → Allowed chats.
+- **Does the bot have permission to post in the channel it's reading?** Sometimes a bot can read messages but can't write (Discord role permissions, or a Telegram group that's moderator-only).
+
+When in doubt, temporarily disable all connectors except the one you're troubleshooting and narrow down from there.
+
+## Turning a connector off temporarily
+
+Settings → Connectors → pick the connector → toggle the "enabled" switch off. The connector disconnects, and messages from that platform stop being processed. Your credentials are still saved — flip the switch back on to reconnect.
+
+This is useful for pausing Milady during a big event (you don't want your agent responding in a work Slack during an all-hands you're sitting in) without having to re-enter credentials later.
+
+## What's next
+
+[Wallet and payments](/docs/advanced/wallet-and-payments) — if you want your agent to handle on-chain actions, manage a small budget, or use Vincent/Steward for automated payments.
