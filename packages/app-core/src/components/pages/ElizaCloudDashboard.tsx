@@ -756,7 +756,10 @@ export function CloudDashboard() {
   }, [fetchBillingData, fetchCloudAgents, loadDropStatus, elizaCloudConnected]);
 
   useEffect(() => {
-    if (handledManagedDiscordCallbackRef.current || typeof window === "undefined") {
+    if (
+      handledManagedDiscordCallbackRef.current ||
+      typeof window === "undefined"
+    ) {
       return;
     }
 
