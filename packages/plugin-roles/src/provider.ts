@@ -4,15 +4,15 @@
  */
 
 import {
-  logger,
   type IAgentRuntime,
+  logger,
   type Memory,
   type Provider,
   type ProviderResult,
   type State,
   type UUID,
 } from "@elizaos/core";
-import { type RoleName, type RolesWorldMetadata } from "./types";
+import type { RoleName, RolesWorldMetadata } from "./types";
 import { normalizeRole, resolveEntityRole } from "./utils";
 
 export const rolesProvider: Provider = {
@@ -49,7 +49,10 @@ export const rolesProvider: Provider = {
       metadata,
       message.entityId,
     );
-    const roles = metadata.roles ?? {};
+    const roles = { ...(metadata.roles ?? {}) };
+    if (!roles[message.entityId] && speakerRole !== "GUEST") {
+      roles[message.entityId] = speakerRole;
+    }
 
     // Build a compact role summary for the agent context.
     const owners: string[] = [];
@@ -72,8 +75,11 @@ export const rolesProvider: Provider = {
           const entity = await runtime.getEntityById(id as UUID);
           const name =
             entity?.names?.[0] ??
-            (entity?.metadata as Record<string, Record<string, string>> | undefined)
-              ?.default?.name ??
+            (
+              entity?.metadata as
+                | Record<string, Record<string, string>>
+                | undefined
+            )?.default?.name ??
             id.slice(0, 8);
           results.push(name);
         } catch {

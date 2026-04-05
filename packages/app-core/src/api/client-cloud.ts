@@ -3,6 +3,7 @@
  * export/import, direct cloud auth, bug reports.
  */
 
+import { MiladyClient } from "./client-base";
 import type {
   CloudBillingCheckoutRequest,
   CloudBillingCheckoutResponse,
@@ -17,6 +18,7 @@ import type {
   CloudCompatAgentStatus,
   CloudCompatJob,
   CloudCompatLaunchResult,
+  CloudCompatManagedDiscordStatus,
   CloudCredits,
   CloudLoginPollResponse,
   CloudLoginResponse,
@@ -28,7 +30,6 @@ import type {
   SandboxStartResponse,
   SandboxWindowInfo,
 } from "./client-types";
-import { MiladyClient } from "./client-base";
 
 // ---------------------------------------------------------------------------
 // Module-level constants
@@ -94,6 +95,27 @@ declare module "./client-base" {
     getCloudCompatAgent(agentId: string): Promise<{
       success: boolean;
       data: CloudCompatAgent;
+    }>;
+    getCloudCompatAgentManagedDiscord(agentId: string): Promise<{
+      success: boolean;
+      data: CloudCompatManagedDiscordStatus;
+    }>;
+    createCloudCompatAgentManagedDiscordOauth(
+      agentId: string,
+      request?: {
+        returnUrl?: string;
+        botNickname?: string;
+      },
+    ): Promise<{
+      success: boolean;
+      data: {
+        authorizeUrl: string;
+        applicationId: string | null;
+      };
+    }>;
+    disconnectCloudCompatAgentManagedDiscord(agentId: string): Promise<{
+      success: boolean;
+      data: CloudCompatManagedDiscordStatus;
     }>;
     deleteCloudCompatAgent(agentId: string): Promise<{
       success: boolean;
@@ -331,6 +353,36 @@ MiladyClient.prototype.getCloudCompatAgent = async function (
 ) {
   return this.fetch(`/api/cloud/compat/agents/${encodeURIComponent(agentId)}`);
 };
+
+MiladyClient.prototype.getCloudCompatAgentManagedDiscord = async function (
+  this: MiladyClient,
+  agentId,
+) {
+  return this.fetch(
+    `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/discord`,
+  );
+};
+
+MiladyClient.prototype.createCloudCompatAgentManagedDiscordOauth =
+  async function (this: MiladyClient, agentId, request = {}) {
+    return this.fetch(
+      `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/discord/oauth`,
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+    );
+  };
+
+MiladyClient.prototype.disconnectCloudCompatAgentManagedDiscord =
+  async function (this: MiladyClient, agentId) {
+    return this.fetch(
+      `/api/cloud/v1/milady/agents/${encodeURIComponent(agentId)}/discord`,
+      {
+        method: "DELETE",
+      },
+    );
+  };
 
 MiladyClient.prototype.deleteCloudCompatAgent = async function (
   this: MiladyClient,

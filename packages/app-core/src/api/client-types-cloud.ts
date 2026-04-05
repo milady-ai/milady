@@ -180,6 +180,22 @@ export interface CloudCompatAgentStatus {
   databaseStatus: string;
 }
 
+export interface CloudCompatManagedDiscordStatus {
+  applicationId: string | null;
+  configured: boolean;
+  connected: boolean;
+  developerPortalUrl: string;
+  guildId: string | null;
+  guildName: string | null;
+  adminDiscordUserId: string | null;
+  adminDiscordUsername: string | null;
+  adminDiscordDisplayName: string | null;
+  adminElizaUserId: string | null;
+  botNickname: string | null;
+  connectedAt: string | null;
+  restarted?: boolean;
+}
+
 export interface CloudCompatJob {
   jobId: string;
   type: string;
