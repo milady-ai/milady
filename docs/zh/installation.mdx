@@ -255,13 +255,16 @@ Milady 使用 [Capacitor](https://capacitorjs.com) 来支持 Android 和 iOS：
 ## 环境设置
 </div>
 
-Milady 默认将所有状态存储在 `~/.milady/` 中。引导向导会处理初始配置，但您也可以直接设置环境变量。
+Milady 默认将所有状态存储在 `~/.milady/` 中。首次启动时，客户端会先选择或连接到一个服务器。
+如果您要创建本地服务器，仍然可以通过环境变量或配置文件预配置引导设置和提供商密钥。
 
 <div id="api-keys">
 ### API 密钥
 </div>
 
-设置至少一个模型提供商的密钥。您可以通过引导向导、在 `~/.milady/milady.json` 的 `env` 字段中或在 `~/.milady/.env` 中进行设置：
+只有当本地服务器需要使用本地提供商密钥时，您才需要设置它们。如果您计划连接到
+现有的局域网、远程或 Eliza Cloud 服务器，该服务器可能已经管理了提供商路由和凭据。
+对于本地引导，您可以在 `~/.milady/milady.json` 的 `env` 字段中或在 `~/.milady/.env` 中设置提供商密钥：
 
 <CodeGroup>
 ```bash Anthropic (recommended)
@@ -344,11 +347,12 @@ milady --version
 # Show configured model providers
 milady models
 
-# Run the interactive setup wizard
+# Bootstrap or validate local setup
 milady setup
 ```
 
-`models` 命令列出所有已配置的模型提供商及其状态。`setup` 命令在需要时运行引导向导并验证您的工作区。
+`models` 命令列出所选本地服务器上下文中已配置的模型提供商及其状态。`setup` 命令在需要时
+引导本地设置并验证您的工作区。
 
 <div id="troubleshooting">
 ## 故障排除

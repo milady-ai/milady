@@ -1,10 +1,10 @@
 ---
 title: "Fournisseurs de modèles"
 sidebarTitle: "Fournisseurs de modèles"
-description: "Fournisseurs de modèles IA pris en charge et comment les configurer."
+description: "Backends d'inférence pris en charge et leur intégration dans le modèle de routage server-target-first de Milady."
 ---
 
-Milady prend en charge **19 fournisseurs de modèles** prêts à l'emploi. Les fournisseurs sont chargés en tant que plugins et peuvent être activés automatiquement en définissant la bonne variable d'environnement, ou configurés explicitement dans `milady.json`.
+Milady prend en charge **19 backends d'inférence** prêts à l'emploi. Les plugins fournisseurs fournissent toujours les implémentations concrètes des modèles, mais le backend actif est sélectionné via le routage canonique du runtime sur le serveur connecté, et non par des bascules ad hoc de variables d'environnement côté client.
 
 ---
 
@@ -14,7 +14,7 @@ Milady prend en charge **19 fournisseurs de modèles** prêts à l'emploi. Les f
 
 </div>
 
-Le tableau ci-dessous est la liste complète des fournisseurs pris en charge, issue du système d'activation automatique du cœur de Milady.
+Le tableau ci-dessous est la liste complète des plugins fournisseurs pris en charge, issue du catalogue de fournisseurs de Milady.
 
 <Note>
 Les fournisseurs marqués **bundled** sont livrés avec chaque installation de Milady. Les autres sont installés à la demande la première fois qu'ils sont nécessaires — aucune installation manuelle de plugin n'est requise.
@@ -40,7 +40,7 @@ Les fournisseurs marqués **bundled** sont livrés avec chaque installation de M
 | [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | Non | Génération augmentée par la recherche. |
 | [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | Non | Modèles Zai de Homunculus Labs. |
 | [Pi AI](https://pi.ai) | `@elizaos/plugin-pi-ai` | `ELIZA_USE_PI_AI` | Non | Modèles conversationnels Inflection Pi. |
-| [elizaOS Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` ou `ELIZAOS_CLOUD_ENABLED` | Oui | Inférence cloud gérée. Aucun GPU local nécessaire. |
+| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | Oui | Route d'inférence gérée dans le cloud. Peut être sélectionnée indépendamment de l'emplacement d'exécution de Milady. |
 
 ---
 
@@ -50,7 +50,19 @@ Les fournisseurs marqués **bundled** sont livrés avec chaque installation de M
 
 </div>
 
-Milady utilise un système d'**activation automatique**. Vous n'avez pas besoin d'enregistrer manuellement les plugins de fournisseurs — il suffit de définir la clé API et Milady s'occupe du reste.
+Milady utilise un modèle **server-target-first** :
+
+1. Choisissez quel serveur utiliser : local, Eliza Cloud ou un backend distant.
+2. Liez les comptes dont le serveur pourrait avoir besoin, comme Eliza Cloud ou OpenAI.
+3. Sélectionnez la route d'inférence active pour `llmText`.
+
+Le serveur connecté résout le fournisseur effectif à partir de la configuration canonique du runtime :
+
+- `deploymentTarget` détermine où le serveur s'exécute
+- `linkedAccounts` détermine quels comptes sont disponibles
+- `serviceRouting.llmText` détermine qui gère l'inférence
+
+Les plugins fournisseurs sont toujours activés automatiquement depuis l'environnement du serveur lorsque c'est approprié, mais la source de vérité côté client est la configuration de routage du runtime du serveur, et non une variable d'environnement brute seule.
 
 <div id="auto-enable-flow">
 

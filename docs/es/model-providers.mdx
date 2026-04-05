@@ -1,10 +1,10 @@
 ---
 title: "Proveedores de Modelos"
 sidebarTitle: "Proveedores de Modelos"
-description: "Proveedores de modelos de IA compatibles y cómo configurarlos."
+description: "Backends de inferencia compatibles y cómo encajan en el modelo de enrutamiento server-target-first de Milady."
 ---
 
-Milady soporta **19 proveedores de modelos** de forma nativa. Los proveedores se cargan como plugins y pueden habilitarse automáticamente configurando la variable de entorno correcta, o configurarse explícitamente en `milady.json`.
+Milady soporta **19 backends de inferencia** de forma nativa. Los plugins de proveedores siguen proporcionando las implementaciones concretas de modelos, pero el backend activo se selecciona a través del enrutamiento canónico del runtime en el servidor conectado, no mediante toggles ad hoc de variables de entorno en el cliente.
 
 ---
 
@@ -12,7 +12,7 @@ Milady soporta **19 proveedores de modelos** de forma nativa. Los proveedores se
 ## Referencia de Proveedores
 </div>
 
-La tabla a continuación es la lista completa de proveedores compatibles, obtenida del sistema de habilitación automática en el núcleo de Milady.
+La tabla a continuación es la lista completa de plugins de proveedores compatibles, obtenida del catálogo de proveedores de Milady.
 
 <Note>
 Los proveedores marcados como **incluidos** vienen con cada instalación de Milady. Los demás se instalan bajo demanda la primera vez que se necesitan — no se requiere instalación manual de plugins.
@@ -38,7 +38,7 @@ Los proveedores marcados como **incluidos** vienen con cada instalación de Mila
 | [Perplexity](https://perplexity.ai) | `@elizaos/plugin-perplexity` | `PERPLEXITY_API_KEY` | No | Generación aumentada por búsqueda. |
 | [Zai](https://homunculuslabs.com) | `@homunculuslabs/plugin-zai` | `ZAI_API_KEY` | No | Modelos Zai de Homunculus Labs. |
 | [Pi AI](https://pi.ai) | `@elizaos/plugin-pi-ai` | `ELIZA_USE_PI_AI` | No | Modelos conversacionales Inflection Pi. |
-| [elizaOS Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` o `ELIZAOS_CLOUD_ENABLED` | Sí | Inferencia gestionada en la nube. No se necesita GPU local. |
+| [Eliza Cloud](https://elizacloud.ai) | `@elizaos/plugin-elizacloud` | `ELIZAOS_CLOUD_API_KEY` | Sí | Ruta de inferencia gestionada en la nube. Se puede seleccionar independientemente de dónde se ejecute Milady. |
 
 ---
 
@@ -46,16 +46,23 @@ Los proveedores marcados como **incluidos** vienen con cada instalación de Mila
 ## Cómo Funciona la Selección de Proveedores
 </div>
 
-Milady utiliza un sistema de **habilitación automática**. No necesitas registrar manualmente los plugins de proveedores — solo configura la clave API y Milady se encarga del resto.
+Milady utiliza un modelo **server-target-first**:
+
+1. Elige qué servidor usar: local, Eliza Cloud o un backend remoto.
+2. Vincula las cuentas que el servidor pueda necesitar, como Eliza Cloud u OpenAI.
+3. Selecciona la ruta de inferencia activa para `llmText`.
+
+El servidor conectado resuelve el proveedor efectivo desde la configuración canónica del runtime:
+
+- `deploymentTarget` decide dónde se ejecuta el servidor
+- `linkedAccounts` decide qué cuentas están disponibles
+- `serviceRouting.llmText` decide quién maneja la inferencia
+
+Los plugins de proveedores siguen habilitándose automáticamente desde el entorno del servidor cuando es apropiado, pero la fuente de verdad orientada al cliente es la configuración de enrutamiento del runtime del servidor, no una variable de entorno sin contexto por sí sola.
 
 <div id="auto-enable-flow">
 ### Flujo de habilitación automática
 </div>
-
-1. Al iniciar, Milady escanea tus variables de entorno (desde `~/.milady/.env`, el entorno del shell, o `milady.json`).
-2. Si se encuentra una clave API reconocida (por ejemplo, `ANTHROPIC_API_KEY`), el plugin del proveedor correspondiente se agrega automáticamente a la lista de plugins permitidos.
-3. El plugin se instala bajo demanda si aún no está presente (se instala en `~/.milady/plugins/installed/`).
-4. El proveedor queda disponible para la selección de modelos.
 
 <div id="explicit-plugin-configuration">
 ### Configuración explícita de plugins

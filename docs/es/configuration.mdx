@@ -1,10 +1,12 @@
 ---
 title: "Configuración"
 sidebarTitle: "Configuración"
-description: "Referencia completa del archivo de configuración de Milady, variables de entorno, comandos CLI y todas las secciones de configuración."
+description: "Referencia completa del archivo de configuración principal del runtime de Milady, variables de entorno, comandos CLI y todas las secciones de configuración."
 ---
 
-Milady utiliza un único archivo de configuración JSON5 para todos los ajustes. Esta página documenta cada sección de configuración, las variables de entorno que las sobreescriben y los comandos CLI disponibles.
+Milady utiliza un archivo de configuración JSON5 principal para los ajustes de runtime y arranque.
+Esta página documenta el archivo de configuración, las variables de entorno que lo sobreescriben y
+los campos canónicos de enrutamiento del runtime que ahora controlan la selección de hosting y proveedor.
 
 <div id="config-file-location">
 
@@ -58,6 +60,52 @@ El directorio de estado también contiene:
 | `~/.milady/models/` | Listas de proveedores de modelos en caché (archivos JSON por proveedor) |
 | `~/.milady/credentials/` | Credenciales OAuth (sobrescribible mediante `MILADY_OAUTH_DIR`) |
 | `~/.milady/credentials/oauth.json` | Almacenamiento de tokens OAuth |
+
+<div id="canonical-runtime-routing">
+
+## Enrutamiento canónico del runtime
+
+</div>
+
+La topología de runtime almacenada de Milady ya no se infiere de un único
+blob `connection`, y el campo raíz `connection` ya no forma parte del
+esquema de configuración persistida. Los campos canónicos persistidos son:
+
+| Campo | Propósito |
+|------|---------|
+| `deploymentTarget` | Dónde se ejecuta el servidor activo: `local`, `cloud` o `remote` |
+| `linkedAccounts` | Qué cuentas de proveedor o nube están disponibles para ese servidor |
+| `serviceRouting` | Qué backend maneja cada capacidad (`llmText`, `tts`, `media`, `embeddings`, `rpc`) |
+
+```json5
+{
+  deploymentTarget: {
+    runtime: "cloud",
+    provider: "elizacloud",
+  },
+  linkedAccounts: {
+    elizacloud: {
+      status: "linked",
+      source: "oauth",
+    },
+  },
+  serviceRouting: {
+    llmText: {
+      backend: "anthropic",
+      transport: "direct",
+      primaryModel: "anthropic/claude-sonnet-4-5",
+    },
+    tts: {
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+      accountId: "elizacloud",
+    },
+  },
+}
+```
+
+Esto significa que un servidor puede estar alojado en Eliza Cloud y aún así
+usar Anthropic, OpenAI, OpenRouter o un modelo local para la inferencia de chat.
 
 <div id="file-format">
 
@@ -184,6 +232,9 @@ Aquí están todas las claves de nivel superior en `MiladyConfig`:
   models: {},         // Custom model providers, Bedrock discovery
   nodeHost: {},       // Node host browser proxy settings
   agents: {},         // Agent definitions, defaults, personality
+  deploymentTarget: {}, // Canonical hosting target (local/cloud/remote)
+  linkedAccounts: {}, // Canonical linked account inventory
+  serviceRouting: {}, // Canonical per-capability routing
   tools: {},          // Tool profiles, web search/fetch, exec, media
   bindings: [],       // Agent-to-channel routing rules
   broadcast: {},      // Multi-agent broadcast configuration
@@ -1462,7 +1513,9 @@ milady config show --json   # Raw JSON output
 Para cambiar valores, edite `~/.milady/milady.json` directamente (admite JSON5 con comentarios).
 
 <Tip>
-Utilice `milady configure` para obtener una referencia rápida de opciones de configuración comunes y variables de entorno. Para la configuración inicial completa, ejecute `milady setup` para pasar por el asistente de incorporación, o edite `~/.milady/milady.json` directamente.
+Utilice `milady configure` para obtener una referencia rápida de opciones de configuración
+comunes y variables de entorno. Para el arranque local, ejecute `milady setup`, o edite
+`~/.milady/milady.json` directamente.
 </Tip>
 
 <div id="full-example">

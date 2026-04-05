@@ -1,10 +1,11 @@
 ---
 title: "配置"
 sidebarTitle: "配置"
-description: "Milady 配置文件、环境变量、CLI 命令及所有配置部分的完整参考。"
+description: "Milady 主运行时配置文件、环境变量、CLI 命令及所有配置部分的完整参考。"
 ---
 
-Milady 使用单个 JSON5 配置文件管理所有设置。本页面记录了每个配置部分、环境变量覆盖和可用的 CLI 命令。
+Milady 使用一个主 JSON5 配置文件管理运行时和引导设置。
+本页面记录了配置文件、环境变量覆盖，以及现在驱动托管和提供商选择的规范化运行时路由字段。
 
 <div id="config-file-location">
 
@@ -58,6 +59,51 @@ MILADY_CONFIG_PATH=~/projects/bot/config.json5 milady start
 | `~/.milady/models/` | 缓存的模型提供商列表（按提供商分的 JSON 文件） |
 | `~/.milady/credentials/` | OAuth 凭据（可通过 `MILADY_OAUTH_DIR` 覆盖） |
 | `~/.milady/credentials/oauth.json` | OAuth 令牌存储 |
+
+<div id="canonical-runtime-routing">
+
+## 规范化运行时路由
+
+</div>
+
+Milady 保存的运行时拓扑不再从单个 `connection` blob 推断，
+根级 `connection` 字段也不再属于持久化配置模式。规范化的持久化字段为：
+
+| 字段 | 用途 |
+|------|---------|
+| `deploymentTarget` | 活跃服务器运行的位置：`local`、`cloud` 或 `remote` |
+| `linkedAccounts` | 该服务器可用的提供商或云帐户 |
+| `serviceRouting` | 哪个后端处理每项能力（`llmText`、`tts`、`media`、`embeddings`、`rpc`） |
+
+```json5
+{
+  deploymentTarget: {
+    runtime: "cloud",
+    provider: "elizacloud",
+  },
+  linkedAccounts: {
+    elizacloud: {
+      status: "linked",
+      source: "oauth",
+    },
+  },
+  serviceRouting: {
+    llmText: {
+      backend: "anthropic",
+      transport: "direct",
+      primaryModel: "anthropic/claude-sonnet-4-5",
+    },
+    tts: {
+      backend: "elizacloud",
+      transport: "cloud-proxy",
+      accountId: "elizacloud",
+    },
+  },
+}
+```
+
+这意味着服务器可以托管在 Eliza Cloud 上，同时仍然使用 Anthropic、
+OpenAI、OpenRouter 或本地模型进行聊天推理。
 
 <div id="file-format">
 
@@ -184,6 +230,9 @@ Milady 从两个来源加载环境变量：
   models: {},         // Custom model providers, Bedrock discovery
   nodeHost: {},       // Node host browser proxy settings
   agents: {},         // Agent definitions, defaults, personality
+  deploymentTarget: {}, // Canonical hosting target (local/cloud/remote)
+  linkedAccounts: {}, // Canonical linked account inventory
+  serviceRouting: {}, // Canonical per-capability routing
   tools: {},          // Tool profiles, web search/fetch, exec, media
   bindings: [],       // Agent-to-channel routing rules
   broadcast: {},      // Multi-agent broadcast configuration
@@ -1462,7 +1511,8 @@ milady config show --json   # Raw JSON output
 要更改值，请直接编辑 `~/.milady/milady.json`（它支持带注释的 JSON5）。
 
 <Tip>
-使用 `milady configure` 快速参考常用配置选项和环境变量。要进行完整的初始设置，请运行 `milady setup` 通过引导向导完成设置，或直接编辑 `~/.milady/milady.json`。
+使用 `milady configure` 快速参考常用配置选项和环境变量。要进行本地引导，
+请运行 `milady setup`，或直接编辑 `~/.milady/milady.json`。
 </Tip>
 
 <div id="full-example">

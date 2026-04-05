@@ -255,13 +255,20 @@ Milady utilise [Capacitor](https://capacitorjs.com) pour cibler Android et iOS :
 ## Configuration de l'environnement
 </div>
 
-Milady stocke tout son état dans `~/.milady/` par défaut. L'assistant d'intégration gère la configuration initiale, mais vous pouvez aussi définir les variables d'environnement directement.
+Milady stocke tout son état dans `~/.milady/` par défaut. Au premier lancement, le client
+commence par choisir ou se connecter à un serveur. Si vous créez un serveur local, vous
+pouvez toujours préconfigurer les paramètres d'amorçage et les clés de fournisseur avec
+des variables d'environnement ou des fichiers de configuration.
 
 <div id="api-keys">
 ### Clés API
 </div>
 
-Définissez au moins une clé de fournisseur de modèles. Vous pouvez le faire via l'assistant d'intégration, dans `~/.milady/milady.json` sous le champ `env`, ou dans `~/.milady/.env` :
+Vous n'avez besoin de clés de fournisseur locales que lorsque le serveur local doit les
+utiliser. Si vous prévoyez de vous connecter à un serveur LAN, distant ou Eliza Cloud
+existant, ce serveur peut déjà gérer le routage et les identifiants du fournisseur. Pour
+l'amorçage local, vous pouvez définir les clés de fournisseur dans
+`~/.milady/milady.json` sous le champ `env` ou dans `~/.milady/.env` :
 
 <CodeGroup>
 ```bash Anthropic (recommended)
@@ -344,11 +351,13 @@ milady --version
 # Show configured model providers
 milady models
 
-# Run the interactive setup wizard
+# Bootstrap or validate local setup
 milady setup
 ```
 
-La commande `models` liste tous les fournisseurs de modèles configurés et leur statut. La commande `setup` lance l'assistant d'intégration si nécessaire et valide votre espace de travail.
+La commande `models` liste les fournisseurs de modèles configurés et leur statut pour le
+contexte du serveur local sélectionné. La commande `setup` amorce la configuration locale
+si nécessaire et valide votre espace de travail.
 
 <div id="troubleshooting">
 ## Dépannage
