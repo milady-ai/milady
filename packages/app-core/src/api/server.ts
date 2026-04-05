@@ -782,8 +782,20 @@ async function handleMiladyCompatRoute(
   }
 
   // ── Vincent OAuth routes ────────────────────────────────────────
-  if (url.pathname.startsWith("/api/vincent/")) {
-    if (!ensureCompatApiAuthorized(req, res)) return true;
+  // /callback/vincent is the OAuth redirect target and is hit by the user's
+  // external system browser — it has no compat API token, so it must bypass
+  // ensureCompatApiAuthorized. The PKCE code_verifier stored server-side
+  // (keyed by the OAuth state param) is what actually authorizes the
+  // token exchange.
+  if (
+    url.pathname.startsWith("/api/vincent/") ||
+    url.pathname === "/callback/vincent"
+  ) {
+    if (
+      url.pathname !== "/callback/vincent" &&
+      !ensureCompatApiAuthorized(req, res)
+    )
+      return true;
     const vincentConfig = loadElizaConfig();
     const handled = await handleVincentRoute(req, res, url.pathname, method, {
       config: vincentConfig,

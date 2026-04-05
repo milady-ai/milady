@@ -4,37 +4,19 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockVincentStatus = vi.fn();
-const mockVincentRegister = vi.fn();
-const mockVincentExchangeToken = vi.fn();
+const mockVincentStartLogin = vi.fn();
 const mockVincentDisconnect = vi.fn();
 
 vi.mock("../api", () => ({
   client: {
     vincentStatus: (...args: unknown[]) => mockVincentStatus(...args),
-    vincentRegister: (...args: unknown[]) => mockVincentRegister(...args),
-    vincentExchangeToken: (...args: unknown[]) =>
-      mockVincentExchangeToken(...args),
+    vincentStartLogin: (...args: unknown[]) => mockVincentStartLogin(...args),
     vincentDisconnect: (...args: unknown[]) => mockVincentDisconnect(...args),
   },
 }));
 
-vi.mock("../api/vincent-oauth", () => ({
-  buildVincentAuthUrl: vi.fn().mockResolvedValue({
-    url: "https://heyvincent.ai/auth?client_id=test",
-    codeVerifier: "test-verifier",
-  }),
-  clearCodeVerifier: vi.fn(),
-  getStoredClientId: vi.fn().mockReturnValue(null),
-  getStoredCodeVerifier: vi.fn().mockReturnValue(null),
-  getVincentRedirectUri: vi
-    .fn()
-    .mockReturnValue("http://localhost/callback/vincent"),
-  storeClientId: vi.fn(),
-  storeCodeVerifier: vi.fn(),
-}));
-
 vi.mock("../utils", () => ({
-  openExternalUrl: vi.fn(),
+  openExternalUrl: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { useVincentState } from "./useVincentState";
@@ -46,7 +28,12 @@ describe("useVincentState — handleVincentLogin poll", () => {
       connected: false,
       connectedAt: null,
     });
-    mockVincentRegister.mockResolvedValue({ client_id: "test-client-id" });
+    mockVincentStartLogin.mockResolvedValue({
+      authUrl:
+        "https://heyvincent.ai/api/oauth/public/authorize?client_id=test",
+      state: "test-state",
+      redirectUri: "http://localhost/callback/vincent",
+    });
   });
 
   afterEach(() => {

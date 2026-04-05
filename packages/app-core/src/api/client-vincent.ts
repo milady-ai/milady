@@ -13,8 +13,15 @@ export interface VincentStatusResponse {
 
 // ── Declaration merging ───────────────────────────────────────────────
 
+export interface VincentStartLoginResponse {
+  authUrl: string;
+  state: string;
+  redirectUri: string;
+}
+
 declare module "./client-base" {
   interface MiladyClient {
+    vincentStartLogin(appName?: string): Promise<VincentStartLoginResponse>;
     vincentRegister(
       appName: string,
       redirectUris: string[],
@@ -30,6 +37,13 @@ declare module "./client-base" {
 }
 
 // ── Implementation ────────────────────────────────────────────────────
+
+MiladyClient.prototype.vincentStartLogin = async function (appName?: string) {
+  return this.fetch("/api/vincent/start-login", {
+    method: "POST",
+    body: JSON.stringify({ appName: appName ?? "Milady" }),
+  });
+};
 
 MiladyClient.prototype.vincentRegister = async function (
   appName: string,

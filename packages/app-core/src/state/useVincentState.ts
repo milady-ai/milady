@@ -1,23 +1,17 @@
 /**
  * Vincent OAuth state — manages connect/disconnect flow for the wallet UI.
  *
- * Follows the same pattern as useCloudState:
- * - Browser-based OAuth flow (opens Vincent authorize URL)
- * - Polls /api/vincent/status after redirect
- * - Exposes connected/busy/error state for the UI
+ * Flow:
+ * - Call POST /api/vincent/start-login → server generates PKCE and returns authUrl
+ * - Open authUrl in the user's external browser
+ * - Vincent redirects to GET /callback/vincent on the same Milady API origin,
+ *   which exchanges the code server-side and persists tokens
+ * - This hook polls /api/vincent/status and flips to connected when the
+ *   server-side exchange completes
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { client } from "../api";
-import {
-  buildVincentAuthUrl,
-  clearCodeVerifier,
-  getStoredClientId,
-  getStoredCodeVerifier,
-  getVincentRedirectUri,
-  storeClientId,
-  storeCodeVerifier,
-} from "../api/vincent-oauth";
 import { openExternalUrl } from "../utils";
 
 interface VincentStateParams {
@@ -63,47 +57,11 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
     };
   }, [pollVincentStatus]);
 
-  // ── Handle callback (code in URL) ──────────────────────────────
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get("code");
-    if (!code || !url.pathname.endsWith("/callback/vincent")) return;
-
-    const codeVerifier = getStoredCodeVerifier();
-    const clientId = getStoredClientId();
-    if (!codeVerifier || !clientId) return;
-
-    // Clean URL
-    url.searchParams.delete("code");
-    window.history.replaceState({}, document.title, url.pathname);
-
-    setVincentLoginBusy(true);
-    client
-      .vincentExchangeToken(code, clientId, codeVerifier)
-      .then((result) => {
-        clearCodeVerifier();
-        if (result.connected) {
-          setVincentConnected(true);
-          setVincentLoginError(null);
-          setActionNotice(
-            t("vincent.connected", { defaultValue: "Vincent connected" }),
-            "success",
-            5000,
-          );
-        }
-      })
-      .catch((err) => {
-        setVincentLoginError(
-          err instanceof Error ? err.message : "Token exchange failed",
-        );
-      })
-      .finally(() => {
-        setVincentLoginBusy(false);
-        busyRef.current = false;
-      });
-  }, [setActionNotice, t]);
-
   // ── Login flow ──────────────────────────────────────────────────
+  // The browser tab that Vincent redirects back to lands on GET
+  // /callback/vincent on the Milady API origin, which does the token
+  // exchange server-side.  All this hook does is kick off that flow and
+  // poll /api/vincent/status until it flips to connected.
   const handleVincentLogin = useCallback(async () => {
     if (vincentConnected || busyRef.current || vincentLoginBusy) return;
     busyRef.current = true;
@@ -111,27 +69,15 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
     setVincentLoginError(null);
 
     try {
-      const redirectUri = getVincentRedirectUri();
+      // Step 1: Ask server to generate PKCE + authUrl
+      const { authUrl } = await client.vincentStartLogin("Milady");
 
-      // Step 1: Register app
-      const { client_id } = await client.vincentRegister("Milady", [
-        redirectUri,
-      ]);
-      storeClientId(client_id);
+      // Step 2: Open the browser on the authUrl
+      await openExternalUrl(authUrl);
 
-      // Step 2: Build PKCE auth URL
-      const { url, codeVerifier } = await buildVincentAuthUrl(
-        client_id,
-        redirectUri,
-      );
-      storeCodeVerifier(codeVerifier);
-
-      // Step 3: Open browser
-      openExternalUrl(url);
-
-      // Poll for connection status — handles desktop apps where the OAuth
-      // callback may be processed server-side instead of via URL redirect.
-      // Also acts as a fallback if the user closes the auth window.
+      // Step 3: Poll /api/vincent/status until the server-side callback
+      // completes the token exchange. Also acts as a fallback if the user
+      // closes the auth window.
       if (loginPollRef.current) clearInterval(loginPollRef.current);
       let pollAttempts = 0;
       const maxPollAttempts = 24; // ~2 minutes at 5s intervals
@@ -183,7 +129,6 @@ export function useVincentState({ setActionNotice, t }: VincentStateParams) {
       setVincentConnected(false);
       setVincentConnectedAt(null);
       setVincentLoginError(null);
-      clearCodeVerifier();
       setActionNotice(
         t("vincent.disconnected", { defaultValue: "Vincent disconnected" }),
         "info",
