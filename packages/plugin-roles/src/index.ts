@@ -231,15 +231,16 @@ const rolesPlugin: Plugin = {
     }
 
     // Step 2: Apply connector admin whitelists if configured
-    if (config?.connectorAdmins) {
-      setConnectorAdminWhitelist(runtime, config.connectorAdmins);
+    const connectorAdmins = config?.connectorAdmins;
+    if (connectorAdmins) {
+      setConnectorAdminWhitelist(runtime, connectorAdmins);
       const adminBootstrapOk = await applyConnectorAdminWhitelists(
         runtime,
-        config.connectorAdmins,
+        connectorAdmins,
       );
       if (!adminBootstrapOk) {
         scheduleBootstrapRetry(runtime, "Connector admin bootstrap", () =>
-          applyConnectorAdminWhitelists(runtime, config.connectorAdmins),
+          applyConnectorAdminWhitelists(runtime, connectorAdmins),
         );
       }
     } else {

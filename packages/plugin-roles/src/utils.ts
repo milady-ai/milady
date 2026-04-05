@@ -84,8 +84,9 @@ export function matchEntityToConnectorAdminWhitelist(
       continue;
     }
 
+    const connectorMetaRecord = connectorMeta as Record<string, unknown>;
     for (const field of CONNECTOR_ID_FIELDS) {
-      const value = connectorMeta[field];
+      const value = connectorMetaRecord[field];
       if (typeof value === "string" && platformIds.includes(value)) {
         return { connector, matchedValue: value };
       }
