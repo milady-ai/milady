@@ -131,7 +131,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 1,
     path: "/docs/intermediate/connect-discord",
-    component: null,
+    component: lazy(() => import("./content/intermediate/connect-discord.mdx")),
   },
   {
     slug: "connect-telegram",
@@ -140,7 +140,9 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 2,
     path: "/docs/intermediate/connect-telegram",
-    component: null,
+    component: lazy(
+      () => import("./content/intermediate/connect-telegram.mdx"),
+    ),
   },
   {
     slug: "character-tweaks",
@@ -150,7 +152,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 3,
     path: "/docs/intermediate/character-tweaks",
-    component: null,
+    component: lazy(() => import("./content/intermediate/character-tweaks.mdx")),
   },
   {
     slug: "memory-and-knowledge",
@@ -160,7 +162,9 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 4,
     path: "/docs/intermediate/memory-and-knowledge",
-    component: null,
+    component: lazy(
+      () => import("./content/intermediate/memory-and-knowledge.mdx"),
+    ),
   },
   {
     slug: "switching-providers",
@@ -170,7 +174,9 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 5,
     path: "/docs/intermediate/switching-providers",
-    component: null,
+    component: lazy(
+      () => import("./content/intermediate/switching-providers.mdx"),
+    ),
   },
   {
     slug: "voice-and-tts",
@@ -180,7 +186,7 @@ export const docsRegistry: DocEntry[] = [
     tier: "intermediate",
     order: 6,
     path: "/docs/intermediate/voice-and-tts",
-    component: null,
+    component: lazy(() => import("./content/intermediate/voice-and-tts.mdx")),
   },
 
   // ── Advanced ─────────────────────────────────────────────────────────

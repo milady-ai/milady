@@ -1,0 +1,107 @@
+# Voice, talk mode, and TTS
+
+Milady's voice system has more going on than it looks. This page covers what's actually happening when your agent speaks, how talk mode works, and what to do when the lip sync drifts.
+
+**What you'll learn:** how to pick a voice, how talk mode handles conversations, the difference between TTS providers, and how to debug the most common voice problems.
+
+## The voice pipeline in one paragraph
+
+When your agent replies, Milady takes the response text, sends it to your **text-to-speech (TTS) provider** to turn into audio, streams that audio to your speakers, and (if an avatar is visible) animates the character's mouth to match. On the input side, when you talk to your agent via **talk mode**, Milady captures your microphone, sends it to a **speech-to-text (STT) provider** to transcribe, and passes the text to your chat provider like any other message.
+
+That's five moving parts: chat provider, TTS provider, STT provider, audio output, microphone input. When voice goes wrong, it's almost always one of those five.
+
+## Picking a voice
+
+Settings → Voice.
+
+**Provider dropdown.** Pick a TTS vendor. The current options, roughly ordered by quality-to-price:
+
+| Provider | Quality | Needs API key | Notes |
+| --- | --- | --- | --- |
+| **ElevenLabs** | Excellent | Yes | Most realistic. Paid. Use the fast model (`eleven_flash_v2_5`) for real-time chat. |
+| **OpenAI** | Very good | Yes | Fast and cheap. Several voices with distinct personalities. |
+| **Cartesia** | Very good | Yes | Very fast; good for low-latency chat. |
+| **Azure** | Good | Yes | Huge voice library; enterprise-friendly. |
+| **Google** | Good | Yes | Good multilingual coverage. |
+| **Edge TTS** | Decent | No | Free. Good for trying things out or running on a budget. |
+
+**Voice dropdown.** Each provider has its own catalog. Hit the preview button next to a voice to hear a sample without sending a real message.
+
+<Callout kind="tip">
+Spend a minute listening to previews across multiple providers before committing. Voice quality is subjective and the same sentence can feel completely different with the same provider just by swapping voices. If you pick something that grates on you after an hour, switch. There's no cost to changing.
+</Callout>
+
+## Talk mode
+
+Talk mode is the "hands-free conversation" path. Click the mic icon in the chat view, talk, and your agent responds out loud.
+
+### How it actually works
+
+<Steps>
+  <li>You click the mic (or hold a push-to-talk key, if you've configured one).</li>
+  <li>Milady starts capturing audio from your system microphone.</li>
+  <li>When you stop talking (or release the push-to-talk key), Milady sends the audio to the STT provider for transcription.</li>
+  <li>The transcript is treated as a regular user message — it goes through your chat provider just like a typed message would.</li>
+  <li>The response streams back as text <em>and</em> is synthesized into speech at the same time, so you hear the start of the answer while the rest is still being generated.</li>
+</Steps>
+
+### Microphone permission
+
+First time you enable talk mode, your OS asks for microphone permission. Grant it, or Milady can't capture audio. If you skipped the prompt:
+
+- **macOS**: System Settings → Privacy & Security → Microphone → enable Milady.
+- **Windows**: Settings → Privacy & security → Microphone → enable Milady in the app list.
+- **Linux**: usually controlled by PipeWire/PulseAudio permissions; check your system sound control panel.
+
+### Push-to-talk vs. auto-detect
+
+Two modes:
+
+- **Auto-detect** (default): Milady detects when you stop talking and submits the audio automatically. Great for slow, deliberate conversations.
+- **Push-to-talk**: hold a key while you talk, release to submit. Better for noisy environments or if auto-detect is cutting you off mid-sentence.
+
+Toggle between them in Settings → Voice → Talk mode.
+
+## Lip sync and the avatar
+
+If you're using the companion window with a VRM avatar, the character's mouth animates while the voice plays. This is called lip sync.
+
+Lip sync is a best-effort visual — Milady analyzes the audio waveform and opens/closes the mouth based on amplitude and rough phoneme cues. It's not perfect. If you care about accuracy, there's a higher-quality "phoneme-based" mode in Settings → Character → Avatar → Lip sync quality, but it uses more CPU.
+
+### When lip sync gets weird
+
+- **Mouth moves for a bit, then stops while audio continues** — usually a voice provider that's streaming audio faster than the lip sync analyzer can keep up. Try switching to the lower quality lip sync mode, or switch TTS providers.
+- **Mouth never moves** — lip sync is probably disabled in settings, or the avatar doesn't have blend shapes for viseme/mouth. Not all VRM files have full mouth rigs; try a different avatar.
+- **Drastically out of sync** (audio leads or lags mouth by a full second) — your audio device is buffering. Try switching audio output in your OS settings, or close other apps using audio.
+
+## Voice problems, fast triage
+
+### "I can't hear anything"
+
+<Steps>
+  <li>Is voice toggled on in Settings → Voice? Check the speaker icon.</li>
+  <li>Does the preview button work? If yes, the TTS provider and playback are fine — move to step 4.</li>
+  <li>If preview is silent: check your OS audio output device. Open System Sound Settings and make sure the selected output is the one you're listening through. Test with another app playing audio.</li>
+  <li>If preview works but live responses are silent: your TTS provider is probably failing. Check its status in Settings → Voice for an error message.</li>
+</Steps>
+
+### "Voice is garbled / robotic / cuts out"
+
+You're either on a provider that's having an off day, or your network is dropping audio packets. Switch to a different provider temporarily and see if the problem follows you.
+
+### "Talk mode doesn't pick up my voice"
+
+<Steps>
+  <li>Check your OS mic permission for Milady (see above).</li>
+  <li>Open your system sound settings and confirm the mic is actually picking up audio (you should see a level meter respond to your voice).</li>
+  <li>If the mic works system-wide but Milady isn't getting it, try restarting Milady.</li>
+  <li>If none of that helps, try push-to-talk mode — it's less finicky than auto-detect and easier to debug.</li>
+</Steps>
+
+### "I hear myself echo"
+
+Your speakers are feeding back into your mic. Use headphones, or mute your input when voice playback starts. Most modern OSes have echo cancellation but it's not perfect at all volumes.
+
+## What's next
+
+You're done with the Intermediate tier. The [Advanced tier](/docs/advanced) covers multi-connector setups, wallets, plugins for non-developers, privacy deep-dives, and a handful of power-user shortcuts.

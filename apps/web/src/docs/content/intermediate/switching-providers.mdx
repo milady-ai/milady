@@ -1,0 +1,85 @@
+# Switching providers mid-flight
+
+You picked a provider during onboarding. Maybe it's fine. Maybe it's slow, or expensive, or the model just doesn't talk the way you want it to. Or maybe you want to route chat to one provider and voice to another. This page covers how to move without breaking your current setup.
+
+**What you'll learn:** how to switch your chat provider, how to configure separate providers for voice and embeddings, and what happens to your existing conversations when you switch.
+
+## The big picture
+
+Milady separates providers by **what they power**. There are four slots:
+
+| Slot | What it does | Default if unset |
+| --- | --- | --- |
+| **Chat** | Your main conversation model. Every message goes through here. | Whatever you picked at onboarding. |
+| **Voice (TTS)** | Text-to-speech for spoken responses. | Edge TTS (free, decent). |
+| **Voice (STT)** | Speech-to-text for talk mode. | System default (Whisper for most). |
+| **Embeddings** | The model that turns text into vectors for knowledge search and memory. | Whatever your chat provider offers. |
+
+You can fill each slot independently. Common patterns:
+
+- **Chat**: Anthropic Claude (smart). **Voice**: ElevenLabs (best sound). **Embeddings**: OpenAI (cheap and fast).
+- **Chat**: Ollama llama3.1 (local, free). **Voice**: Edge TTS (free). **Embeddings**: Ollama nomic-embed-text (local, free). **→ Fully local stack.**
+- **Chat**: Eliza Cloud. **Voice**: Eliza Cloud. **Embeddings**: Eliza Cloud. **→ One account, zero config.**
+
+## Switching the chat provider
+
+<Steps>
+  <li>Open <strong>Settings → Providers → Chat</strong>.</li>
+  <li>Pick a new provider from the list. You'll see the currently-selected one highlighted.</li>
+  <li>Paste the credentials (API key, URL, whatever the new provider needs).</li>
+  <li>Pick a model from the dropdown. The list is populated from whichever provider you picked.</li>
+  <li>Click <strong>Test connection</strong>. Milady makes a tiny roundtrip to verify the key works and the model responds.</li>
+  <li>If the test passes, click <strong>Save</strong>. The new provider takes effect immediately — next message goes through it.</li>
+</Steps>
+
+**What happens to existing conversations?** Nothing. Your conversation history isn't tied to the provider — it's tied to Milady. When you send the next message, the full conversation context is rebuilt and handed to the new provider. Whatever style the previous provider was writing in might shift slightly, because the new model has its own voice, but the agent's personality and the conversation thread continue uninterrupted.
+
+## Switching the voice provider
+
+Settings → Voice. Same flow: pick a provider, add credentials if needed, pick a voice, preview, save. The next response gets spoken in the new voice.
+
+<Callout kind="note">
+Changing the voice provider doesn't re-speak old responses. It only affects new ones. If you want to hear how an old response would sound with a new voice, use the preview button on a fresh message.
+</Callout>
+
+### "Needs key" vs "no key needed"
+
+In the provider list you'll see labels like "ElevenLabs (needs key)" and "Edge TTS (no key needed)". The "no key" providers are either free services or ones that work over public endpoints without authentication. They're the fastest way to try Milady's voice system if you don't have an ElevenLabs account yet.
+
+## Switching embeddings
+
+Most people never touch this. The default is fine — Milady picks a reasonable embedding model based on your chat provider.
+
+If you do want to change it — for cost reasons, for privacy (keeping embeddings local while chat goes to the cloud), or for quality — **Settings → Memory → Embeddings provider**. Pick the provider and model, save.
+
+<Callout kind="warning">
+Changing the embeddings provider on an existing knowledge base <strong>does not re-index</strong> old documents automatically. Embeddings from different models are not compatible — knowledge that was indexed with OpenAI embeddings won't return useful results when searched with a Cohere embedding model. If you switch, you'll want to delete and re-upload your knowledge base. Milady will prompt you about this when you confirm the switch.
+</Callout>
+
+## Fallback chains (advanced)
+
+For a few providers, you can configure fallback chains: "if my primary provider fails, try these next." This lives in Settings → Providers → Advanced.
+
+Example chain for chat:
+
+1. **Primary**: Anthropic Claude Sonnet
+2. **Fallback 1**: OpenAI GPT-4
+3. **Fallback 2**: Ollama llama3.1 (local, always works offline)
+
+If Anthropic is down or rate-limited, Milady automatically retries on OpenAI. If both cloud providers fail, it falls back to the local Ollama model. You never see an error unless all three fail.
+
+This is mostly useful for people running Milady in a connector context (replying to Discord, answering Telegram messages) where reliability matters more than using the absolute best model every time.
+
+## Cost awareness when switching
+
+Changing providers can change your bill significantly. Quick sanity checks:
+
+- **Moving from a cheap model to a premium one** (say, GPT-3.5 → GPT-4, or Claude Haiku → Claude Opus) typically doubles or triples your per-message cost.
+- **Moving from cloud to local** drops your per-message cost to zero, but the upfront cost is hardware time and electricity.
+- **Moving from one cloud to another** at equivalent tiers is usually a wash. Check both providers' pricing pages.
+
+Every provider has a dashboard that shows your running cost. Look at it after a day of use on the new provider to confirm you're not accidentally burning money.
+
+## What's next
+
+[Voice, talk mode, and TTS](/docs/intermediate/voice-and-tts) — a deeper dive into voice settings, talk mode, and what to do when lip sync gets weird.

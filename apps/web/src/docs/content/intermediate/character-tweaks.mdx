@@ -1,0 +1,97 @@
+# Make it yours
+
+Milady ships with a handful of built-in characters — different names, voices, and avatars. Out of the box they're fine, but most people want to tweak at least one thing. This page is about what you can change and how far you can push it without breaking anything.
+
+**What you'll learn:** how to change name, personality, voice, and avatar; how to write a personality that actually produces the tone you want; and what the "system prompt" field does.
+
+## The four knobs
+
+Open **Settings → Character**. You'll see:
+
+1. **Name** — what the agent calls itself.
+2. **Personality** — a short description of how it should behave.
+3. **Voice** — TTS provider + voice selection.
+4. **Avatar** — which VRM character file gets rendered in the companion window.
+
+Changes take effect immediately. You don't need to restart.
+
+## Name
+
+Self-explanatory. Whatever you type here is what the agent will introduce itself as, what it'll refer to itself as in responses (`I'm <name>…`), and what shows up in its header in the chat UI.
+
+Pro tip: don't use your own name. It gets confusing fast when you ask it something and it says `Sure, <your name>, I can help with…`
+
+## Personality
+
+This is the most powerful knob. Whatever you write here becomes part of the prompt that gets sent to the language model on every message.
+
+### A rough recipe
+
+A good personality field has three things:
+
+1. **A voice** — formal, casual, terse, verbose, snarky, earnest, whatever you want.
+2. **Domain hints** — what the agent is supposed to be good at. "Helpful for coding questions" or "Focused on writing and editing" or "An expert on video games."
+3. **Explicit don'ts** — things you don't want it doing. "Never use emoji" or "Don't start responses with 'As an AI…'" or "Avoid corporate-speak."
+
+Keep it to a few sentences. Longer is not better — the model is already good at following short, clear style guides, and long prompts can sometimes drown out the specific thing you asked.
+
+### Example: terse coding assistant
+
+> You are a terse, direct coding assistant. Give me the shortest correct answer. Skip apologies and prefaces. If I ask a yes/no question, answer yes or no first and then explain. Never use emoji. Never say "Certainly!" or "Of course!"
+
+### Example: friendly writing partner
+
+> You are a warm, conversational writing partner. You help me draft and edit short-form writing — essays, emails, tweets. You read what I send carefully and respond with specific, actionable feedback rather than generic praise. You never suggest changes without explaining why.
+
+### Example: lore-heavy character
+
+> You are Iris, a retired astronomer who now tends a small lighthouse on a fictional island. You speak in complete sentences with a slight Victorian cadence. You often compare things to the night sky. You are patient, curious, and quietly funny. You are not a chatbot and you never refer to yourself as one.
+
+### What personality is not
+
+- **Not a safety filter.** If your personality says "never talk about topic X," the model will usually comply, but this is a style preference, not a guarantee. For real content filtering, use provider-level settings.
+- **Not memory.** The personality is static. If you tell your agent a fact during a conversation, don't expect it to end up in the personality automatically. For persistent facts, use [Memory and knowledge](/docs/intermediate/memory-and-knowledge).
+- **Not a skill system.** "You are an expert in Python" does not actually give the agent Python expertise — it gives it an expert *voice*. The underlying language model is doing the real work.
+
+## Voice
+
+**Settings → Character → Voice** (or Settings → Voice, same section).
+
+Two things to pick:
+
+1. **TTS provider** — ElevenLabs, OpenAI, Azure, Google, Cartesia, Edge TTS, and others. Some need their own API key (you'll see a "needs key" label next to them). Edge TTS is free and decent. ElevenLabs is expensive and excellent.
+2. **Voice** — each provider has its own catalog. You'll see a list with a preview button. Click preview to hear a short sample of each one.
+
+<Callout kind="tip">
+You can use a different provider for voice than for chat. Your chat can go to Claude or GPT while your voice goes to ElevenLabs. In fact this is usually the right move — chat quality and voice quality are different problems, and the best vendor for each is rarely the same.
+</Callout>
+
+### Voice modes on ElevenLabs
+
+ElevenLabs specifically has two modes: a fast, lower-latency path (the default for real-time chat) and a higher-quality path (slower, better for longer form). The fast mode is what Milady uses by default. If you want the higher-quality mode for reading longer responses aloud, there's a toggle in the voice settings.
+
+## Avatar
+
+**Settings → Character → Avatar**.
+
+The avatar is a VRM 3D model file. Milady ships with several built-in characters, and you can also load your own `.vrm` file from disk.
+
+- **Picking a built-in** — scroll the gallery, click the one you want. The VRM loads and renders in the companion window.
+- **Loading a custom VRM** — click "Upload custom" and pick a `.vrm` file. It gets copied into your `~/.milady/` directory and persists across launches.
+- **No avatar** — if you don't want the 3D character, there's a "None" option. The companion window collapses to show just the chat.
+
+### Where to find VRM files
+
+The [VRoid Hub](https://hub.vroid.com/) has a huge library of free and paid VRM characters. [Booth](https://booth.pm/) has more. You can also make your own in [VRoid Studio](https://vroid.com/en/studio) — it's free and surprisingly capable for making custom characters.
+
+<Callout kind="note">
+VRM is a standard file format for humanoid 3D characters. Milady supports both VRM 0.x and VRM 1.0 files. If you pick a VRM that has weird lighting or missing expressions in Milady but looks fine in another VRM viewer, it might be using a feature Milady doesn't render yet — file an issue.
+</Callout>
+
+## Nothing is permanent
+
+Everything on this page is reversible. If you write a personality that makes your agent annoying, delete it and start over. If you load a VRM that doesn't work right, pick a different one. If you pick a voice you hate on the third message, switch. None of this is destructive.
+
+## What's next
+
+[Memory and knowledge](/docs/intermediate/memory-and-knowledge) — how to make your agent remember things across conversations and how to teach it from your own documents.

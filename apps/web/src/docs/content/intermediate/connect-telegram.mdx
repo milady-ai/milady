@@ -1,0 +1,83 @@
+# Connect to Telegram
+
+Hook your Milady agent up to a Telegram bot so it can chat with you in Telegram, respond in group chats, or handle conversations on your behalf. The Telegram setup is genuinely the easiest of all the connector flows — usually five minutes start to finish.
+
+**What you'll learn:** how to create a Telegram bot via @BotFather, plug its token into Milady, and start chatting.
+
+## What you need before you start
+
+- **A Telegram account** with the app installed on any device.
+- **Milady running locally** with a working provider.
+
+That's it. No developer portal, no OAuth scopes, no permissions to configure.
+
+## Step 1 — Talk to BotFather
+
+Telegram's bot creation flow is a chat with an official bot called **BotFather**. It's weird the first time but fast.
+
+<Steps>
+  <li>Open Telegram. Search for <strong>@BotFather</strong> (with the verified checkmark). Start a chat.</li>
+  <li>Send <code>/newbot</code>.</li>
+  <li>BotFather asks for a display name. This is what your bot shows up as in conversations. You can change it later.</li>
+  <li>BotFather asks for a username. This must end in <code>bot</code> (e.g., <code>my_milady_bot</code>) and must be unique across all Telegram bots. If it's taken, try another.</li>
+  <li>BotFather replies with a message containing your <strong>bot token</strong> — a long string that looks like <code>123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11</code>. Copy it.</li>
+</Steps>
+
+<Callout kind="warning">
+The bot token is equivalent to the bot's password. Anyone who has it can send messages as the bot, read its chats, and change its settings. Never paste it in a public place.
+</Callout>
+
+## Step 2 — Hand the token to Milady
+
+<Steps>
+  <li>Open Milady. Go to <strong>Settings → Connectors → Telegram</strong>.</li>
+  <li>Paste the bot token.</li>
+  <li>(Optional) If you want the bot to only respond in specific chats, add their chat IDs under <strong>Allowed chats</strong>. Leave blank to allow all chats. See "Getting chat IDs" below.</li>
+  <li>Click <strong>Save</strong>. Milady connects to Telegram in the background.</li>
+</Steps>
+
+## Step 3 — Test it
+
+Open Telegram, search for your bot by the username you picked (with the `@` prefix), and start a chat. Send it a message:
+
+> hey, are you there?
+
+You should see it start typing within a second, then reply.
+
+If nothing happens:
+
+- **Bot never replies** — the token is wrong or Milady's Telegram connector isn't running. Check Settings → Connectors → Telegram for a status indicator. Green means connected.
+- **Bot is connected but silent in group chats** — Telegram bots have "privacy mode" on by default in groups, which means they only see messages directed at them. You can turn privacy mode off through BotFather (`/setprivacy` → pick your bot → Disable) if you want your bot to read everything in a group.
+
+## Getting chat IDs
+
+If you want to restrict your bot to specific chats, you need each chat's ID. The easiest way:
+
+<Steps>
+  <li>Start a chat with your bot and send any message.</li>
+  <li>In your browser, open <code>https://api.telegram.org/bot&lt;YOUR_TOKEN&gt;/getUpdates</code>. Replace <code>&lt;YOUR_TOKEN&gt;</code> with the token from BotFather.</li>
+  <li>Look at the JSON response. Your chat ID is in <code>result[0].message.chat.id</code>. It's a number — positive for direct chats, negative for groups.</li>
+  <li>Copy the number and paste it into Milady's <strong>Allowed chats</strong> field.</li>
+</Steps>
+
+<Callout kind="tip">
+Telegram bots don't auto-join groups the way Discord bots do. To add your bot to a group, someone with add-member permission in that group has to search for the bot and invite it. Once it's in, you can get the group's chat ID using the <code>getUpdates</code> trick above.
+</Callout>
+
+## Useful options
+
+In Settings → Connectors → Telegram:
+
+| Option | What it does |
+| --- | --- |
+| **Allowed chats** | JSON array of chat IDs the bot is allowed to respond in. Empty = all chats. |
+| **API root** | Leave blank for the default Telegram API. Only set this if you're using a Telegram API proxy or running your own Bot API server. |
+| **Test chat ID** | A single chat ID used for testing messages without affecting other chats. Rarely needed. |
+
+## Differences from Discord
+
+If you've done both: Telegram is simpler in almost every way. No developer portal, no OAuth scopes, no intent flags, no rate limits to worry about at casual use, no channel permissions. The tradeoff is that Telegram has fewer structured features — no threads the way Discord has channels, no voice chat integration, no emoji reactions that your bot can see by default. For one-on-one chats and small groups, it's perfect. For large community servers, Discord is the better fit.
+
+## What's next
+
+[Make it yours](/docs/intermediate/character-tweaks) — adjust your agent's personality, voice, and avatar so it actually feels like your assistant.

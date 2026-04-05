@@ -1,0 +1,95 @@
+# Memory and knowledge
+
+Out of the box, Milady remembers the current conversation — but not much else. If you want it to remember things across sessions, surface facts from documents you've uploaded, or keep track of specific people and topics, you'll use the **memory** and **knowledge** systems.
+
+These are two different things with overlapping purposes. This page covers both.
+
+**What you'll learn:** the difference between memory and knowledge, how to upload a document for your agent to read, and how to use conversation memory without accidentally teaching it things you didn't mean to.
+
+## Memory vs. knowledge — what's the difference?
+
+**Memory** is automatic. Every message in a conversation is stored and gets recalled when the conversation continues, so the agent feels like it "remembers" what you said earlier. Memory is per-conversation by default.
+
+**Knowledge** is explicit. You upload a document or paste text, tag it, and the agent can reference it in any conversation when the topic is relevant. Think of knowledge as "things I want this agent to know" and memory as "things this agent has experienced with me."
+
+| | Memory | Knowledge |
+| --- | --- | --- |
+| How you add it | Automatic — every message is stored | Manual — you upload or paste |
+| Scope | Per conversation (by default) | Global across conversations |
+| Persists across sessions | Yes, within the same conversation | Yes, always |
+| Good for | Conversational continuity | Facts, documents, reference material |
+
+## Using memory well
+
+Memory is working by default. You don't need to configure anything. But there are a few things worth knowing:
+
+### Conversations are independent
+
+If you tell your agent "my favorite color is green" in one conversation and start a new conversation tomorrow, it probably won't know. By design: each conversation has its own memory thread. If you want cross-conversation continuity, use knowledge.
+
+### Long conversations get summarized
+
+Every language model has a context limit — the amount of conversation history it can "see" at once. When a conversation grows beyond that limit, older messages get summarized into a compact form so the model still gets the gist. You'll see this behavior kick in after 50–200 messages depending on your provider.
+
+You can't disable summarization — the model just wouldn't work without it — but you can check the current summary in Settings → Memory → Conversation summaries.
+
+### Resetting memory
+
+If you want a fresh start without deleting the whole conversation: Settings → Memory → Clear current conversation memory. This wipes the conversation thread but keeps the character, connectors, and everything else intact.
+
+<Callout kind="warning">
+There's a "Reset all memory" button in advanced settings. Don't click it on accident. It wipes every conversation, every knowledge file, and every stored fact. It's there for people starting completely over — not for a quick cleanup.
+</Callout>
+
+## Using knowledge
+
+Knowledge is where you upload documents your agent should treat as authoritative.
+
+### Uploading a document
+
+<Steps>
+  <li>Open Milady. Go to <strong>Knowledge</strong> (usually in the left sidebar of the dashboard view).</li>
+  <li>Click <strong>Upload</strong> or drag a file into the drop zone.</li>
+  <li>Milady processes the file — splits it into chunks, generates embeddings, and indexes them. This takes anywhere from a few seconds to a minute depending on the file size.</li>
+  <li>Give the document a short description if prompted. This helps the agent know when to reference it ("My cooking notes" is better than "document1.pdf").</li>
+</Steps>
+
+**Supported formats:**
+
+- Plain text (`.txt`, `.md`)
+- PDFs (`.pdf`)
+- Word documents (`.docx`)
+- Web page URLs (Milady will fetch and process the page content)
+- Pasted text (the "paste directly" option is fastest for short content)
+
+### What happens when you ask about an uploaded document
+
+When you chat with your agent, Milady runs a quick search over all your knowledge chunks to find ones that are semantically relevant to your message. If anything looks close, those chunks get included in the context sent to the model, and the agent can reference them in its response.
+
+This is often called "retrieval-augmented generation" or RAG in developer docs. The practical effect: if you upload a 100-page PDF of your company's handbook, you can ask your agent questions like "what's our policy on X?" and it'll answer based on the handbook — even though nothing about that handbook is in the language model's training data.
+
+<Callout kind="tip">
+Knowledge works best for reference material: manuals, specs, FAQs, policy documents, lore files for characters. It works less well for things like "my personal preferences" — for those, just tell the agent directly during a conversation, or add them to the character personality field.
+</Callout>
+
+### Scoping knowledge to specific chats
+
+Advanced: you can tag knowledge chunks and then configure specific chats or connectors to only see chunks with certain tags. For example, upload "work documents" and tag them `work`, then configure your Discord connector to only surface `work` knowledge when people ask questions in a `#work` channel. This prevents your personal knowledge from leaking into work conversations.
+
+This lives in Settings → Knowledge → Scopes. Most people don't need it — it's there for power users running multiple contexts through one Milady install.
+
+## What not to upload
+
+A few rules of thumb:
+
+- **Don't upload things you don't want sent to your language model.** Every knowledge chunk that gets retrieved gets sent to your provider during inference. If you're using a cloud provider, that means cloud storage too (briefly, during the request).
+- **Don't upload secrets, credentials, or API keys.** Ever. If a chunk contains a password and the agent retrieves it, the password gets sent to the provider.
+- **Don't upload massive logs or dumps** expecting the agent to "read them." It'll only surface relevant chunks — if you dump 10 GB of logs, the signal gets drowned in noise. Preprocess and upload summaries instead.
+
+## Deleting knowledge
+
+Knowledge → pick the document → delete. Gone, immediately. Already-running conversations that had context from that document won't be retroactively changed, but future messages won't surface it.
+
+## What's next
+
+[Switching providers mid-flight](/docs/intermediate/switching-providers) — how to change your chat, voice, or embedding provider without starting over.
