@@ -1,0 +1,36 @@
+# For developers
+
+These consumer docs are deliberately light on code. If you're building on Milady — writing a plugin, hitting the REST API, using the CLI, embedding the runtime, or trying to understand how the agent loader actually works — you want the full developer reference instead.
+
+**Go to [docs.milady.ai](https://docs.milady.ai).**
+
+## What's over there
+
+- **REST API reference** — every endpoint the runtime exposes, with request/response schemas, auth rules, and examples.
+- **Plugin SDK** — how plugins are structured, how to write one, how to publish to the Milady plugin registry, and the exact shape of actions, providers, services, and evaluators.
+- **CLI reference** — every `milady` subcommand, flag, and env var.
+- **Runtime internals** — the agent loop, memory system, provider routing, event bus, and service lifecycle.
+- **Architecture guide** — how Milady wraps elizaOS, how the Bun CLI talks to the Electrobun desktop shell, and how the feature components in `@elizaos/app-core` get consumed by the Vite shell at `apps/web/`.
+- **Connectors** — per-platform setup guides at the full detail level (webhooks, scopes, rate limits, signature verification).
+- **Configuration schema** — every field in `~/.milady/milady.json`, with types, defaults, and precedence rules.
+
+## When to use which
+
+**You are here (milady.ai/docs)** if you want to:
+
+- Install Milady, pick a provider, have your first chat.
+- Connect it to Discord or Telegram without writing code.
+- Change the personality, voice, or avatar.
+- Understand privacy, memory, and how your data moves.
+- Install a plugin someone else wrote, without touching the codebase.
+
+**Go to docs.milady.ai** if you want to:
+
+- Write a plugin, action, provider, or service.
+- Call the REST API from your own code.
+- Embed the runtime in another app.
+- Contribute to Milady itself.
+- Run Milady on Linux from the CLI without the desktop app.
+- Understand the plugin resolution, NODE_PATH setup, or bun-exports patching that makes dynamic imports work.
+
+Both docs sites are maintained together. If something is missing from either, it's a bug — file it at [github.com/milady-ai/milady](https://github.com/milady-ai/milady/issues).
