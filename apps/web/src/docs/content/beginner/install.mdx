@@ -4,6 +4,26 @@ Milady ships as a desktop app for macOS, Windows, and Linux. There's also a CLI 
 
 **Time needed:** about five minutes on a fresh machine, plus a few minutes for the first-run setup.
 
+## Which version should I download?
+
+Milady is published in two release channels, plus the source code on GitHub. Pick the one that matches how much risk you're comfortable with — you can switch later.
+
+| Channel | Who it's for | Link |
+| --- | --- | --- |
+| **Stable** | Everyone, by default. Tested, notarized, and safe to leave running day to day. | [Latest stable release](https://github.com/milady-ai/milady/releases/latest) |
+| **Canary** | Early adopters who want new features the day they land and don't mind the occasional rough edge. | [All releases (look for the *Pre-release* badge)](https://github.com/milady-ai/milady/releases) |
+| **Source (GitHub)** | Developers who want to read the code, file issues, or build from `main` themselves. | [github.com/milady-ai/milady](https://github.com/milady-ai/milady) |
+
+**Stable** is what the big "Download" buttons on [milady.ai](https://milady.ai) point to. Release tags look like `v1.4.0` — no suffix. Bug fixes and security patches land here first.
+
+**Canary** is tagged with `alpha`, `beta`, `rc`, or `nightly` (e.g. `v1.5.0-beta.2`). New connectors, UI experiments, and plugin system changes show up here days or weeks before they promote to stable. If you hit a bug on canary, the fastest way to get it fixed is to [file an issue](https://github.com/milady-ai/milady/issues) with the exact tag — canary users are how we catch regressions before stable ships. Canary installs live alongside stable on macOS as `Milady-canary.app`, so you can run both side-by-side without blowing away your stable config.
+
+**Source (GitHub)** isn't a build — it's the full codebase. Use it if you want to read how something works, contribute a fix, or build Milady yourself from a branch. The README has build instructions. Everything else in these docs applies whether you installed from stable, canary, or a source build.
+
+<Callout kind="tip">
+Not sure? Pick **stable**. You can always switch to canary later by downloading it from the releases page; the two channels share the same `~/.milady/` config directory, so your characters, keys, and conversations come with you.
+</Callout>
+
 ## Desktop app (recommended)
 
 The desktop app is the friendliest way to get started. It bundles the runtime, the dashboard, and the companion UI into one installable package with auto-updates.
