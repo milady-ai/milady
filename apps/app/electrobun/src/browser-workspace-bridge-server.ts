@@ -57,7 +57,9 @@ async function readJsonBody<T>(req: http.IncomingMessage): Promise<T | null> {
 }
 
 function isAuthorized(req: http.IncomingMessage, token: string): boolean {
-  if (!token) return true;
+  // Always require a non-empty token. The caller generates a random token at
+  // startup, so an empty token here indicates a misconfiguration — reject.
+  if (!token) return false;
   return req.headers.authorization === `Bearer ${token}`;
 }
 

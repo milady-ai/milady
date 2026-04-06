@@ -281,6 +281,16 @@ $bmp.Dispose()`;
       return buf.length > 100 ? { data: buf.toString("base64") } : null;
     } catch {
       return null;
+    } finally {
+      // Clean up tmp file if it was created but not yet deleted (e.g. crash
+      // between screencapture write and unlinkSync above).
+      try {
+        if (fs.existsSync(tmpPath)) {
+          fs.unlinkSync(tmpPath);
+        }
+      } catch {
+        // best-effort cleanup
+      }
     }
   }
 

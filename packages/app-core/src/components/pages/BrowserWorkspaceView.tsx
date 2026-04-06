@@ -212,13 +212,15 @@ function normalizeBrowserWorkspaceTxRequest(
   const chainId =
     parseBrowserWorkspaceChainId(value.chainId) ?? fallbackChainId;
   const to = typeof value.to === "string" ? value.to.trim() : "";
+  // value is optional — ERC-20 and other contract calls legitimately omit it.
+  // Default to "0x0" when absent so these calls aren't silently rejected.
   const amount =
     typeof value.value === "string"
       ? value.value.trim()
       : typeof value.value === "number"
         ? String(value.value)
-        : "";
-  if (!to || !amount || !chainId) {
+        : "0x0";
+  if (!to || !chainId) {
     return null;
   }
   return {
@@ -461,16 +463,16 @@ export function BrowserWorkspaceView(): JSX.Element {
     if (!selectedTabId) {
       return;
     }
-    const remainingTabs = workspace.tabs.filter(
-      (tab) => tab.id !== selectedTabId,
-    );
-    const nextTabId = remainingTabs[0]?.id ?? null;
     await client.closeBrowserWorkspaceTab(selectedTabId);
+    // Fetch fresh tab list after closing — avoids stale closure refs that
+    // could pick a tab the server no longer knows about.
+    const snapshot = await client.getBrowserWorkspace();
+    const nextTabId = snapshot.tabs[0]?.id ?? null;
     if (nextTabId) {
       await client.showBrowserWorkspaceTab(nextTabId);
     }
     await loadWorkspace({ preferTabId: nextTabId, silent: true });
-  }, [loadWorkspace, selectedTabId, workspace.tabs]);
+  }, [loadWorkspace, selectedTabId]);
 
   const registerBrowserWorkspaceIframe = useCallback(
     (tabId: string, iframe: HTMLIFrameElement | null) => {
@@ -788,7 +790,9 @@ export function BrowserWorkspaceView(): JSX.Element {
           }
 
           browserWalletChainIdByTabRef.current.set(sourceTab.id, nextChainId);
-          postBrowserWalletReady(sourceTab, currentWalletState);
+          // Use the ref (not the stale closure snapshot) so the dApp receives
+          // the most up-to-date wallet state after the chain switch.
+          postBrowserWalletReady(sourceTab, browserWalletStateRef.current);
           respond({
             type: BROWSER_WALLET_RESPONSE_TYPE,
             requestId: request.requestId,
