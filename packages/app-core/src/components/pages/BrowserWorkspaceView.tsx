@@ -142,23 +142,16 @@ function resolveBrowserWorkspaceTargetOrigin(url: string): string {
   }
 }
 
-/** Non-sensitive methods that are safe to respond to with a wildcard origin. */
-const BROWSER_WORKSPACE_WILDCARD_SAFE_METHODS = new Set(["getState"]);
-
-function resolveBrowserWorkspaceMessageOrigin(
+/** @internal Exported for testing only. */
+export function resolveBrowserWorkspaceMessageOrigin(
   origin: string,
-  method?: string,
 ): string | null {
   if (origin && origin !== "null") {
     return origin;
   }
-  // For null-origin frames (sandboxed, file://, cross-origin navigations),
-  // only allow wildcard responses for non-sensitive methods. Sensitive methods
-  // (signing, accounts) must not be broadcast to "*" as any listener could
-  // intercept wallet data.
-  if (method && BROWSER_WORKSPACE_WILDCARD_SAFE_METHODS.has(method)) {
-    return "*";
-  }
+  // Null-origin frames (sandboxed, file://, cross-origin navigations) cannot
+  // be verified. Even "getState" exposes wallet addresses, so no method is
+  // safe to broadcast with "*" targetOrigin — refuse to respond entirely.
   return null;
 }
 
@@ -618,12 +611,9 @@ export function BrowserWorkspaceView(): JSX.Element {
         return;
       }
 
-      const targetOrigin = resolveBrowserWorkspaceMessageOrigin(
-        event.origin,
-        request.method,
-      );
+      const targetOrigin = resolveBrowserWorkspaceMessageOrigin(event.origin);
       if (targetOrigin === null) {
-        // Refuse to respond — origin is "null" and the method is sensitive.
+        // Refuse to respond — origin cannot be verified (null-origin frame).
         return;
       }
       const respond = (response: BrowserWorkspaceWalletResponse) => {

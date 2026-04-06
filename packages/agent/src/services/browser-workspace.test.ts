@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  closeBrowserWorkspaceTab,
   evaluateBrowserWorkspaceTab,
   getBrowserWorkspaceMode,
   getBrowserWorkspaceSnapshot,
@@ -56,6 +57,36 @@ describe("browser-workspace service", () => {
       mode: "web",
       tabs: [{ id: "btab_1", visible: true }],
     });
+  });
+
+  it("serialises concurrent web-mode tab mutations without corruption", async () => {
+    const env = {} as NodeJS.ProcessEnv;
+
+    // Fire 10 concurrent opens — without the mutex, nextId and tabs could corrupt.
+    const opens = Array.from({ length: 10 }, (_, i) =>
+      openBrowserWorkspaceTab(
+        { show: false, url: `https://example.com/${i}` },
+        env,
+      ),
+    );
+    const tabs = await Promise.all(opens);
+
+    // Every tab must have a unique id.
+    const ids = new Set(tabs.map((t) => t.id));
+    expect(ids.size).toBe(10);
+
+    // All 10 tabs must be present in the snapshot.
+    const snapshot = await getBrowserWorkspaceSnapshot(env);
+    // Snapshot includes tabs from prior tests in this suite (module-level
+    // singleton), so just verify our 10 are present.
+    for (const tab of tabs) {
+      expect(snapshot.tabs.some((t) => t.id === tab.id)).toBe(true);
+    }
+
+    // Clean up so subsequent tests aren't affected.
+    for (const tab of tabs) {
+      await closeBrowserWorkspaceTab(tab.id, env);
+    }
   });
 
   it("sends bearer auth when opening a tab", async () => {
