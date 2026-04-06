@@ -22,14 +22,62 @@ const mocks = vi.hoisted(() => {
       state: request.state,
     },
   }));
-  return {
-    captureLifeOpsActivitySignal,
-    getMobileSignalsPlugin: vi.fn(() => ({
-      addListener: vi.fn(async (_eventName, listener) => {
-        mobileListeners.add(listener);
-        return {
-          remove: vi.fn(async () => {
-            mobileListeners.delete(listener);
+  const healthSnapshot = {
+    source: "mobile_health",
+    platform: "ios",
+    state: "sleeping",
+    observedAt: Date.now(),
+    idleState: null,
+    idleTimeSeconds: null,
+    onBattery: false,
+    healthSource: "healthkit",
+    permissions: {
+      sleep: true,
+      biometrics: true,
+    },
+    sleep: {
+      available: true,
+      isSleeping: true,
+      asleepAt: Date.now() - 7 * 60 * 60 * 1000,
+      awakeAt: null,
+      durationMinutes: 420,
+      stage: "asleep",
+    },
+    biometrics: {
+      sampleAt: Date.now() - 10 * 60 * 1000,
+      heartRateBpm: 52,
+      restingHeartRateBpm: 47,
+      heartRateVariabilityMs: 68,
+      respiratoryRate: 13.2,
+      bloodOxygenPercent: 98,
+    },
+    warnings: [],
+    metadata: { reason: "snapshot" },
+  } as const;
+    return {
+      captureLifeOpsActivitySignal,
+      getMobileSignalsPlugin: vi.fn(() => ({
+        checkPermissions: vi.fn(async () => ({
+          status: "granted",
+          canRequest: true,
+          permissions: {
+            sleep: true,
+            biometrics: true,
+          },
+        })),
+        requestPermissions: vi.fn(async () => ({
+          status: "granted",
+          canRequest: false,
+          permissions: {
+            sleep: true,
+            biometrics: true,
+          },
+        })),
+        addListener: vi.fn(async (_eventName, listener) => {
+          mobileListeners.add(listener);
+          return {
+            remove: vi.fn(async () => {
+              mobileListeners.delete(listener);
           }),
         };
       }),
@@ -45,6 +93,7 @@ const mocks = vi.hoisted(() => {
           onBattery: false,
           metadata: { reason: "snapshot" },
         },
+        healthSnapshot,
       })),
       startMonitoring: vi.fn(async () => {
         const snapshot = {
@@ -59,12 +108,14 @@ const mocks = vi.hoisted(() => {
         } as const;
         for (const listener of mobileListeners) {
           listener(snapshot);
+          listener(healthSnapshot);
         }
         return {
           enabled: true,
           supported: true,
           platform: "ios",
           snapshot,
+          healthSnapshot,
         };
       }),
       stopMonitoring: vi.fn(async () => ({ stopped: true })),
@@ -159,11 +210,25 @@ describe("useLifeOpsActivitySignals mobile bridge", () => {
     });
 
     expect(mocks.getMobileSignalsPlugin).toHaveBeenCalledTimes(1);
+    const plugin = mocks.getMobileSignalsPlugin.mock.results[0]?.value;
+    expect(plugin.checkPermissions).toHaveBeenCalledTimes(1);
+    expect(plugin.requestPermissions).not.toHaveBeenCalled();
     expect(mocks.captureLifeOpsActivitySignal).toHaveBeenCalledWith(
       expect.objectContaining({
         source: "mobile_device",
         platform: "ios",
         state: "active",
+      }),
+    );
+    expect(mocks.captureLifeOpsActivitySignal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "mobile_health",
+        platform: "ios",
+        state: "sleeping",
+        health: expect.objectContaining({
+          source: "healthkit",
+          permissions: expect.objectContaining({ sleep: true, biometrics: true }),
+        }),
       }),
     );
 

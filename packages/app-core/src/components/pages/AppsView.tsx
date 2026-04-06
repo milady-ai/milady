@@ -16,7 +16,10 @@ import {
   getDefaultAppsCatalogSelection,
   shouldShowAppInAppsView,
 } from "../apps/helpers";
-import { RunningAppsPanel } from "../apps/RunningAppsPanel";
+import {
+  getRunAttentionReasons,
+  RunningAppsPanel,
+} from "../apps/RunningAppsPanel";
 import { LifeOpsWorkspaceView } from "./LifeOpsWorkspaceView";
 
 export { shouldShowAppInAppsView } from "../apps/helpers";
@@ -81,6 +84,15 @@ export function AppsView() {
     () => [...appRuns].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
     [appRuns],
   );
+  const attentionRuns = useMemo(
+    () => sortedRuns.filter((run) => getRunAttentionReasons(run).length > 0),
+    [sortedRuns],
+  );
+  const topAttentionReason = useMemo(() => {
+    const firstAttentionRun = attentionRuns[0];
+    if (!firstAttentionRun) return null;
+    return getRunAttentionReasons(firstAttentionRun)[0] ?? null;
+  }, [attentionRuns]);
 
   const mergeRun = useCallback(
     (run: AppRunSummary) => {
@@ -183,9 +195,9 @@ export function AppsView() {
     const preferredRunId =
       activeGameRunId && sortedRuns.some((run) => run.runId === activeGameRunId)
         ? activeGameRunId
-        : sortedRuns[0].runId;
+        : (attentionRuns[0]?.runId ?? sortedRuns[0].runId);
     setSelectedRunId(preferredRunId);
-  }, [activeGameRunId, appsSubTab, selectedRunId, sortedRuns]);
+  }, [activeGameRunId, appsSubTab, attentionRuns, selectedRunId, sortedRuns]);
 
   const handleLaunch = useCallback(
     async (app: RegistryAppInfo) => {
@@ -527,6 +539,18 @@ export function AppsView() {
                     ? "Detach, reattach, or stop background runs without losing the rest of your catalog context."
                     : "Pick an app to inspect launch details and start a live agent session."}
               </p>
+              {attentionRuns.length > 0 ? (
+                <div className="mt-3 rounded-xl border border-warn/30 bg-warn/10 px-3 py-2 text-[11px] leading-5 text-warn">
+                  <div className="font-semibold uppercase tracking-[0.12em]">
+                    Recovery queue
+                  </div>
+                  <div className="mt-1">
+                    {attentionRuns.length} run
+                    {attentionRuns.length === 1 ? "" : "s"} need attention
+                    {topAttentionReason ? `: ${topAttentionReason}` : "."}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

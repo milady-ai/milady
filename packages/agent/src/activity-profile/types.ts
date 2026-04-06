@@ -3,6 +3,8 @@
  * is active across platforms, derived from message history and calendar data.
  */
 
+import type { LifeOpsHealthSignal } from "@miladyai/shared/contracts/lifeops";
+
 export type TimeBucket =
   | "EARLY_MORNING" // 5-7
   | "MORNING" // 7-10
@@ -57,13 +59,15 @@ export interface ActivitySignalRecord {
     | "app_lifecycle"
     | "page_visibility"
     | "desktop_power"
-    | "mobile_device";
+    | "mobile_device"
+    | "mobile_health";
   platform: string;
-  state: "active" | "idle" | "background" | "locked";
+  state: "active" | "idle" | "background" | "locked" | "sleeping";
   observedAt: number;
   idleState: "active" | "idle" | "locked" | "unknown" | null;
   idleTimeSeconds: number | null;
   onBattery: boolean | null;
+  health: LifeOpsHealthSignal | null;
   metadata: Record<string, unknown>;
 }
 
@@ -90,6 +94,13 @@ export interface ActivityProfile {
   typicalLastActiveHour: number | null;
   typicalWakeHour: number | null;
   typicalSleepHour: number | null;
+  hasSleepData: boolean;
+  isCurrentlySleeping: boolean;
+  lastSleepSignalAt: number | null;
+  lastWakeSignalAt: number | null;
+  sleepSourcePlatform: string | null;
+  sleepSource: string | null;
+  typicalSleepDurationMinutes: number | null;
 
   lastSeenAt: number;
   lastSeenPlatform: string | null;

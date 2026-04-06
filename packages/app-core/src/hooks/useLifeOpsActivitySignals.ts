@@ -12,11 +12,14 @@ import { loadDesktopWorkspaceSnapshot } from "../utils/desktop-workspace";
 import {
   getMobileSignalsPlugin,
   type MobileSignalsSnapshot,
+  type MobileSignalsHealthSnapshot,
+  type MobileSignalsSignal,
 } from "../bridge/native-plugins";
 
 const APP_SIGNAL_DEDUP_WINDOW_MS = 5_000;
 const PAGE_HEARTBEAT_MS = 60_000;
 const DESKTOP_POWER_POLL_MS = 60_000;
+const MOBILE_HEALTH_POLL_MS = 30 * 60_000;
 
 type SignalFingerprint = {
   fingerprint: string;
@@ -48,7 +51,7 @@ function fingerprintSignal(
 }
 
 function mapMobileSignal(
-  signal: MobileSignalsSnapshot,
+  signal: MobileSignalsSignal,
 ): CaptureLifeOpsActivitySignalRequest {
   return {
     source: signal.source,
@@ -58,6 +61,39 @@ function mapMobileSignal(
     idleState: signal.idleState,
     idleTimeSeconds: signal.idleTimeSeconds ?? undefined,
     onBattery: signal.onBattery ?? undefined,
+    health:
+      signal.source === "mobile_health"
+        ? {
+            source: signal.healthSource,
+            permissions: signal.permissions,
+            sleep: {
+              available: signal.sleep.available,
+              isSleeping: signal.sleep.isSleeping,
+              asleepAt:
+                signal.sleep.asleepAt !== null
+                  ? new Date(signal.sleep.asleepAt).toISOString()
+                  : null,
+              awakeAt:
+                signal.sleep.awakeAt !== null
+                  ? new Date(signal.sleep.awakeAt).toISOString()
+                  : null,
+              durationMinutes: signal.sleep.durationMinutes,
+              stage: signal.sleep.stage,
+            },
+            biometrics: {
+              sampleAt:
+                signal.biometrics.sampleAt !== null
+                  ? new Date(signal.biometrics.sampleAt).toISOString()
+                  : null,
+              heartRateBpm: signal.biometrics.heartRateBpm,
+              restingHeartRateBpm: signal.biometrics.restingHeartRateBpm,
+              heartRateVariabilityMs: signal.biometrics.heartRateVariabilityMs,
+              respiratoryRate: signal.biometrics.respiratoryRate,
+              bloodOxygenPercent: signal.biometrics.bloodOxygenPercent,
+            },
+            warnings: signal.warnings,
+          }
+        : undefined,
     metadata: signal.metadata,
   };
 }
@@ -104,6 +140,18 @@ export function useLifeOpsActivitySignals(): void {
       const { signal: persisted } =
         await client.captureLifeOpsActivitySignal(normalized);
       return persisted;
+    };
+
+    const sendSnapshotResult = async (result: {
+      snapshot: MobileSignalsSnapshot | null;
+      healthSnapshot: MobileSignalsHealthSnapshot | null;
+    }): Promise<void> => {
+      if (result.snapshot) {
+        await sendSignal(mapMobileSignal(result.snapshot));
+      }
+      if (result.healthSnapshot) {
+        await sendSignal(mapMobileSignal(result.healthSnapshot));
+      }
     };
 
     const fireAndForget = (
@@ -186,11 +234,13 @@ export function useLifeOpsActivitySignals(): void {
     const handleResume = (): void => {
       emitLifecycleState("active");
       emitPageState("resume");
+      void refreshMobileHealthSnapshot("resume");
       void emitDesktopSnapshot("resume");
     };
     const handlePause = (): void => {
       emitLifecycleState("background");
       emitPageState("pause");
+      void refreshMobileHealthSnapshot("pause");
       void emitDesktopSnapshot("pause");
     };
 
@@ -198,14 +248,40 @@ export function useLifeOpsActivitySignals(): void {
       isNative && !isElectrobunRuntime() ? getMobileSignalsPlugin() : null;
     let mobileSignalsHandle: { remove: () => Promise<void> } | null = null;
     let mobileSignalsStarted = false;
+    let mobileHealthPoller: number | null = null;
+
+    const refreshMobileHealthSnapshot = async (
+      reason: string,
+    ): Promise<void> => {
+      if (
+        !mobileSignals ||
+        typeof mobileSignals.getSnapshot !== "function"
+      ) {
+        return;
+      }
+      const snapshot = await mobileSignals.getSnapshot();
+      if (snapshot.supported) {
+        await sendSnapshotResult(snapshot);
+      } else {
+        console.warn("[lifeops] mobile signals snapshot unavailable", reason);
+      }
+    };
+
     const startMobileSignals = async (): Promise<void> => {
       if (
         !mobileSignals ||
         typeof mobileSignals.addListener !== "function" ||
+        typeof mobileSignals.checkPermissions !== "function" ||
+        typeof mobileSignals.requestPermissions !== "function" ||
         typeof mobileSignals.startMonitoring !== "function" ||
         typeof mobileSignals.stopMonitoring !== "function"
       ) {
         return;
+      }
+
+      const permissions = await mobileSignals.checkPermissions();
+      if (permissions.status !== "granted" && permissions.canRequest) {
+        await mobileSignals.requestPermissions();
       }
 
       mobileSignalsHandle = await mobileSignals.addListener(
@@ -218,6 +294,11 @@ export function useLifeOpsActivitySignals(): void {
         emitInitial: true,
       });
       mobileSignalsStarted = initial.enabled;
+      await sendSnapshotResult(initial);
+      await refreshMobileHealthSnapshot("start");
+      mobileHealthPoller = window.setInterval(() => {
+        void refreshMobileHealthSnapshot("poll").catch(reportCaptureError);
+      }, MOBILE_HEALTH_POLL_MS);
     };
 
     emitLifecycleState("active");
@@ -252,6 +333,9 @@ export function useLifeOpsActivitySignals(): void {
       }
       if (mobileSignalsStarted) {
         void mobileSignals?.stopMonitoring().catch(reportCaptureError);
+      }
+      if (mobileHealthPoller !== null) {
+        window.clearInterval(mobileHealthPoller);
       }
       window.clearInterval(pageHeartbeat);
       window.clearInterval(desktopPoller);

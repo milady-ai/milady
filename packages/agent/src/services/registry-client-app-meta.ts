@@ -50,6 +50,9 @@ const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
       "team-chat",
       "autonomous",
     ],
+    uiExtension: {
+      detailPanelId: "babylon-operator-dashboard",
+    },
     viewer: {
       url: "{BABYLON_CLIENT_URL}",
       embedParams: { embedded: "true" },
@@ -59,6 +62,32 @@ const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
     session: {
       mode: "spectate-and-steer",
       features: ["commands", "telemetry", "pause", "resume"],
+    },
+  },
+  "@elizaos/app-hyperscape": {
+    displayName: "Hyperscape",
+    category: "game",
+    launchType: "connect",
+    launchUrl: "{HYPERSCAPE_CLIENT_URL}",
+    capabilities: ["combat"],
+    runtimePlugin: "@hyperscape/plugin-hyperscape",
+    uiExtension: {
+      detailPanelId: "hyperscape-embedded-agent-control",
+    },
+    viewer: {
+      url: "{HYPERSCAPE_CLIENT_URL}",
+      embedParams: {
+        embedded: "true",
+        mode: "spectator",
+        surface: "agent-control",
+        followEntity: "{HYPERSCAPE_CHARACTER_ID}",
+      },
+      postMessageAuth: true,
+      sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+    },
+    session: {
+      mode: "spectate-and-steer",
+      features: ["commands", "telemetry", "pause", "resume", "suggestions"],
     },
   },
   "@elizaos/app-hyperfy": {
@@ -72,6 +101,9 @@ const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
   "@elizaos/app-2004scape": {
     launchType: "connect",
     launchUrl: "{RS_SDK_SERVER_URL}",
+    uiExtension: {
+      detailPanelId: "2004scape-operator-dashboard",
+    },
     viewer: {
       url: "{RS_SDK_SERVER_URL}/bot",
       embedParams: {

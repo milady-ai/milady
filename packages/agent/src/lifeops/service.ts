@@ -53,6 +53,7 @@ import type {
   LifeOpsGoalRecord,
   LifeOpsGoalReview,
   LifeOpsGoalSupportSuggestion,
+  LifeOpsHealthSignal,
   LifeOpsGoogleCapability,
   LifeOpsGoogleConnectorStatus,
   LifeOpsNextCalendarEventContext,
@@ -816,8 +817,15 @@ function normalizeActivitySignalSource(
   ) {
     return source as LifeOpsActivitySignal["source"];
   }
-  if (source === "mobileDevice" || source === "mobile-device") {
-    return "mobile_device";
+  if (
+    source === "mobileDevice" ||
+    source === "mobile-device" ||
+    source === "mobileHealth" ||
+    source === "mobile-health"
+  ) {
+    return source.toLowerCase().includes("health")
+      ? "mobile_health"
+      : "mobile_device";
   }
   fail(
     400,
@@ -836,6 +844,9 @@ function normalizeActivitySignalState(
     )
   ) {
     return state as LifeOpsActivitySignal["state"];
+  }
+  if (state === "sleep") {
+    return "sleeping";
   }
   fail(
     400,
@@ -1121,6 +1132,100 @@ function normalizeOptionalNonNegativeInteger(
     fail(400, `${field} must be zero or greater`);
   }
   return number;
+}
+
+function normalizeOptionalFiniteNumber(
+  value: unknown,
+  field: string,
+): number | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+  return normalizeFiniteNumber(value, field);
+}
+
+function normalizeHealthSignal(
+  value: unknown,
+  field: string,
+): LifeOpsHealthSignal | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const record = requireRecord(value, field);
+  const sleep = normalizeOptionalRecord(record.sleep, `${field}.sleep`) ?? {};
+  const biometrics =
+    normalizeOptionalRecord(record.biometrics, `${field}.biometrics`) ?? {};
+  const permissions =
+    normalizeOptionalRecord(record.permissions, `${field}.permissions`) ?? {};
+  const source = normalizeOptionalString(record.source) ?? "healthkit";
+  if (source !== "healthkit" && source !== "health_connect") {
+    fail(400, `${field}.source must be healthkit or health_connect`);
+  }
+  const warnings = Array.isArray(record.warnings)
+    ? record.warnings.map((warning, index) =>
+        requireNonEmptyString(warning, `${field}.warnings[${index}]`),
+      )
+    : [];
+  return {
+    source,
+    permissions: {
+      sleep: normalizeOptionalBoolean(permissions.sleep, `${field}.permissions.sleep`) ?? false,
+      biometrics:
+        normalizeOptionalBoolean(
+          permissions.biometrics,
+          `${field}.permissions.biometrics`,
+        ) ?? false,
+    },
+    sleep: {
+      available:
+        normalizeOptionalBoolean(sleep.available, `${field}.sleep.available`) ??
+        false,
+      isSleeping:
+        normalizeOptionalBoolean(
+          sleep.isSleeping,
+          `${field}.sleep.isSleeping`,
+        ) ?? false,
+      asleepAt:
+        normalizeOptionalIsoString(sleep.asleepAt, `${field}.sleep.asleepAt`) ??
+        null,
+      awakeAt:
+        normalizeOptionalIsoString(sleep.awakeAt, `${field}.sleep.awakeAt`) ??
+        null,
+      durationMinutes: normalizeOptionalFiniteNumber(
+        sleep.durationMinutes,
+        `${field}.sleep.durationMinutes`,
+      ),
+      stage: normalizeOptionalString(sleep.stage) ?? null,
+    },
+    biometrics: {
+      sampleAt:
+        normalizeOptionalIsoString(
+          biometrics.sampleAt,
+          `${field}.biometrics.sampleAt`,
+        ) ?? null,
+      heartRateBpm: normalizeOptionalFiniteNumber(
+        biometrics.heartRateBpm,
+        `${field}.biometrics.heartRateBpm`,
+      ),
+      restingHeartRateBpm: normalizeOptionalFiniteNumber(
+        biometrics.restingHeartRateBpm,
+        `${field}.biometrics.restingHeartRateBpm`,
+      ),
+      heartRateVariabilityMs: normalizeOptionalFiniteNumber(
+        biometrics.heartRateVariabilityMs,
+        `${field}.biometrics.heartRateVariabilityMs`,
+      ),
+      respiratoryRate: normalizeOptionalFiniteNumber(
+        biometrics.respiratoryRate,
+        `${field}.biometrics.respiratoryRate`,
+      ),
+      bloodOxygenPercent: normalizeOptionalFiniteNumber(
+        biometrics.bloodOxygenPercent,
+        `${field}.biometrics.bloodOxygenPercent`,
+      ),
+    },
+    warnings,
+  };
 }
 
 function normalizePrivacyClass(
@@ -6978,6 +7083,7 @@ export class LifeOpsService {
   async captureActivitySignal(
     request: CaptureLifeOpsActivitySignalRequest,
   ): Promise<LifeOpsActivitySignal> {
+    const health = normalizeHealthSignal(request.health, "health");
     const signal = createLifeOpsActivitySignal({
       agentId: this.agentId(),
       source: normalizeActivitySignalSource(request.source, "source"),
@@ -6993,6 +7099,7 @@ export class LifeOpsService {
       ),
       onBattery:
         normalizeOptionalBoolean(request.onBattery, "onBattery") ?? null,
+      health,
       metadata:
         request.metadata !== undefined
           ? requireRecord(request.metadata, "metadata")

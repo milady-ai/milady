@@ -613,6 +613,88 @@ describe("AppsView", () => {
     ).toBe(false);
   });
 
+  it("prefers a run that needs recovery when the running tab opens", async () => {
+    const staleRun = createRunSummary({
+      runId: "run-stale",
+      appName: "@elizaos/app-hyperscape",
+      displayName: "Hyperscape",
+      pluginName: "@elizaos/app-hyperscape",
+      status: "stale",
+      summary: "Reconnect the viewer to continue observing.",
+      viewerAttachment: "detached",
+      health: {
+        state: "degraded",
+        message: "Reconnect the viewer to continue observing.",
+      },
+      session: {
+        sessionId: "stale-session",
+        appName: "@elizaos/app-hyperscape",
+        mode: "spectate-and-steer",
+        status: "disconnected",
+        displayName: "Hyperscape",
+        agentId: "agent-1",
+        characterId: "character-1",
+        followEntity: "entity-9",
+        canSendCommands: false,
+        controls: ["pause"],
+        summary: "Reconnect the viewer to continue observing.",
+      },
+      lastHeartbeatAt: "2026-04-04T00:00:00.000Z",
+      updatedAt: "2026-04-05T00:00:00.000Z",
+    });
+    const healthyRun = createRunSummary({
+      runId: "run-healthy",
+      appName: "@elizaos/app-babylon",
+      displayName: "Babylon",
+      pluginName: "@elizaos/app-babylon",
+      status: "running",
+      summary: "Market watch active.",
+      viewerAttachment: "attached",
+      health: {
+        state: "healthy",
+        message: "Market watch active.",
+      },
+      session: {
+        sessionId: "healthy-session",
+        appName: "@elizaos/app-babylon",
+        mode: "viewer",
+        status: "running",
+        displayName: "Babylon",
+        canSendCommands: true,
+        controls: [],
+        summary: "Market watch active.",
+      },
+      updatedAt: "2026-04-06T00:00:00.000Z",
+      lastHeartbeatAt: new Date().toISOString(),
+    });
+    const ctx = createAppsContext({
+      appRuns: [healthyRun, staleRun],
+      appsSubTab: "running",
+    });
+    mockUseApp.mockReturnValue({
+      ...ctx,
+      uiLanguage: "en",
+      t: tStub,
+    });
+    mockClientFns.listApps.mockResolvedValue([
+      createApp("@elizaos/app-hyperscape", "Hyperscape", "Arena"),
+      createApp("@elizaos/app-babylon", "Babylon", "Market"),
+    ]);
+    mockClientFns.listAppRuns.mockResolvedValue([healthyRun, staleRun]);
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(AppsView));
+    });
+    await flush();
+
+    expect(textOf(tree.root)).toContain("Recovery queue");
+    expect(textOf(tree.root)).toContain("Hyperscape");
+    expect(textOf(tree.root)).toContain("Reattach viewer");
+    expect(textOf(tree.root)).toContain("Viewer is detached");
+    expect(textOf(tree.root)).toContain("Command bridge is unavailable");
+  });
+
   it("shows auth warning when postMessage auth payload is missing", async () => {
     const ctx = createAppsContext();
     mockUseApp.mockReturnValue({

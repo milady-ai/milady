@@ -189,6 +189,10 @@ describe("classifyIntent edge cases", () => {
     // ── BRD acceptance criteria phrases ──────────────
     ["I need help brushing my teeth twice a day", "create_definition"],
     ["Add one push-up and sit-up every day", "create_definition"],
+    [
+      "Actually create a habit named Workout that happens every afternoon, blocks X until I complete it, and then unlocks it for 60 minutes.",
+      "create_definition",
+    ],
     ["I want to call my mom every week. Help me actually do it.", "create_goal"],
     ["What's on my calendar today?", "query_calendar_today"],
     ["Do I have anything important I need to respond to?", "query_email"],
@@ -658,6 +662,52 @@ describe("lifeAction", () => {
     const result = await invoke("finished my pushups", { action: "complete", target: "Workout", details: { note: "Did 20 reps" } });
     expect(mockCompleteOccurrence).toHaveBeenCalledWith("o1", { note: "Did 20 reps" });
     expect(result).toMatchObject({ success: true });
+  });
+
+  it("recovers missing completion targets into creation when the intent is clearly a new habit", async () => {
+    mockGetOverview.mockResolvedValue({
+      owner: { occurrences: [] },
+      agentOps: { occurrences: [] },
+    });
+    mockListGoals.mockResolvedValue([]);
+    mockCreateDefinition.mockResolvedValue({
+      definition: {
+        id: "d-workout-recovered",
+        title: "Workout",
+        cadence: { kind: "daily", windows: ["afternoon"] },
+      },
+      reminderPlan: { id: "rp-workout-recovered" },
+    });
+
+    const result = await invoke(
+      "Actually create a habit named Workout that happens every afternoon, blocks X, Instagram, and Hacker News until I complete it, and then unlocks them for 60 minutes. Do not just give advice.",
+      { action: "complete" },
+    );
+
+    expect(mockCompleteOccurrence).not.toHaveBeenCalled();
+    expect(mockCreateDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Workout",
+        cadence: expect.objectContaining({
+          kind: "daily",
+          windows: ["afternoon"],
+        }),
+        websiteAccess: expect.objectContaining({
+          unlockMode: "fixed_duration",
+          unlockDurationMinutes: 60,
+          websites: expect.arrayContaining([
+            "x.com",
+            "twitter.com",
+            "instagram.com",
+            "news.ycombinator.com",
+          ]),
+        }),
+      }),
+    );
+    expect(result).toMatchObject({
+      success: true,
+      text: expect.stringContaining("Workout"),
+    });
   });
 
   // ── skip_occurrence ───────────────────────────────

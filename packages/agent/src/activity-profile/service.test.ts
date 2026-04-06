@@ -220,4 +220,58 @@ describe("refreshCurrentState", () => {
     expect(refreshed.isCurrentlyActive).toBe(true);
     expect(refreshed.hasOpenActivityCycle).toBe(true);
   });
+
+  it("uses persisted mobile health sleep signals when building and refreshing the profile", async () => {
+    const runtime = createRuntime({}, []);
+    const service = new LifeOpsService(runtime);
+    await service.captureActivitySignal({
+      source: "mobile_health",
+      platform: "ios",
+      state: "sleeping",
+      observedAt: new Date(NOW.getTime() - 30 * 60 * 1000).toISOString(),
+      idleState: null,
+      idleTimeSeconds: null,
+      onBattery: false,
+      health: {
+        source: "healthkit",
+        permissions: {
+          sleep: true,
+          biometrics: true,
+        },
+        sleep: {
+          available: true,
+          isSleeping: true,
+          asleepAt: new Date(NOW.getTime() - 7 * 60 * 60 * 1000).toISOString(),
+          awakeAt: null,
+          durationMinutes: 420,
+          stage: "asleep",
+        },
+        biometrics: {
+          sampleAt: new Date(NOW.getTime() - 10 * 60 * 1000).toISOString(),
+          heartRateBpm: 54,
+          restingHeartRateBpm: 49,
+          heartRateVariabilityMs: 71,
+          respiratoryRate: 13.5,
+          bloodOxygenPercent: 98,
+        },
+        warnings: [],
+      },
+      metadata: {
+        reason: "sleeping",
+      },
+    });
+
+    const built = await buildActivityProfile(runtime, OWNER_ID, "UTC", NOW);
+    expect(built.hasSleepData).toBe(true);
+    expect(built.isCurrentlySleeping).toBe(true);
+    expect(built.lastSleepSignalAt).toBe(NOW.getTime() - 7 * 60 * 60 * 1000);
+    expect(built.effectiveDayKey).toBe("2026-04-06");
+    expect(built.typicalSleepDurationMinutes).toBe(420);
+
+    const staleBase = analyzeMessages([], new Map(), OWNER_ID, "UTC", 7, NOW);
+    const refreshed = await refreshCurrentState(runtime, OWNER_ID, staleBase, NOW);
+    expect(refreshed.isCurrentlyActive).toBe(false);
+    expect(refreshed.hasOpenActivityCycle).toBe(false);
+    expect(refreshed.effectiveDayKey).toBe("2026-04-06");
+  });
 });

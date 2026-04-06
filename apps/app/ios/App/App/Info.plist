@@ -63,6 +63,10 @@
 	<string>Milady saves captured photos and videos to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Milady accesses your photo library to attach and share photos or videos.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Milady reads your HealthKit sleep and biometric data to infer when you are asleep, awake, and ready for reminders.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Milady does not write to HealthKit, but iOS requires this key when HealthKit capability is enabled.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Milady uses on-device speech recognition to listen for voice commands and wake words.</string>
 </dict>

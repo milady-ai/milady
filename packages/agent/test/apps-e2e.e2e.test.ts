@@ -13,7 +13,12 @@
  * - PostMessage auth with auto-provisioned credentials
  * - RS_SDK_SERVER_URL override support
  */
+import fs from "node:fs";
+import http from "node:http";
+import os from "node:os";
+import path from "node:path";
 import net from "node:net";
+import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startApiServer } from "../src/api/server";
 import { req } from "../../../test/helpers/http";
@@ -42,6 +47,15 @@ interface AppEntry {
   launchType: string;
   launchUrl?: string | null;
 }
+
+type BabylonFixtureServer = {
+  url: string;
+  authRequests: Array<{
+    agentId?: string;
+    agentSecret?: string;
+  }>;
+  close: () => Promise<void>;
+};
 
 function asObject(value: JsonValue): JsonObject {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
@@ -100,6 +114,196 @@ function toAppList(data: JsonValue): AppEntry[] {
     }
   }
   return apps;
+}
+
+async function readJsonBody(
+  req: http.IncomingMessage,
+): Promise<JsonObject | null> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  if (chunks.length === 0) {
+    return null;
+  }
+  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as JsonObject;
+}
+
+async function startBabylonFixtureServer(): Promise<BabylonFixtureServer> {
+  const authRequests: BabylonFixtureServer["authRequests"] = [];
+  const server = http.createServer(async (req, res) => {
+    const url = new URL(req.url ?? "/", "http://127.0.0.1");
+    const body = await readJsonBody(req);
+    res.setHeader("Content-Type", "application/json");
+
+    if (req.method === "GET" && url.pathname === "/api/health") {
+      res.statusCode = 200;
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/agents/auth") {
+      const requestBody =
+        body && typeof body === "object"
+          ? (body as {
+              agentId?: string;
+              agentSecret?: string;
+            })
+          : {};
+      authRequests.push(requestBody);
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify({
+          success: true,
+          sessionToken: "fixture-babylon-session-token",
+          expiresAt: "2026-04-07T00:00:00.000Z",
+        }),
+      );
+      return;
+    }
+
+    if (
+      req.method === "GET" &&
+      url.pathname === "/api/agents/babylon-agent-alice/summary"
+    ) {
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify({
+          success: true,
+          agent: {
+            id: "babylon-agent-alice",
+            name: "Babylon Alice",
+            username: "babylon_alice",
+            virtualBalance: 1250,
+            lifetimePnL: 45,
+            totalTrades: 9,
+            winRate: 0.66,
+            autonomousEnabled: true,
+            autonomousTrading: true,
+            autonomousPosting: true,
+            autonomousCommenting: false,
+            autonomousDMs: false,
+            status: "active",
+          },
+          portfolio: {
+            totalPnL: 45,
+            positions: 3,
+            totalAssets: 1295,
+            available: 980,
+            wallet: 1250,
+            agents: 1250,
+            totalPoints: 0,
+          },
+        }),
+      );
+      return;
+    }
+
+    if (
+      req.method === "GET" &&
+      url.pathname === "/api/agents/babylon-agent-alice/goals"
+    ) {
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify({
+          success: true,
+          goals: [
+            {
+              id: "goal-1",
+              description: "Coordinate the desk around ETH momentum",
+              status: "active",
+              createdAt: "2026-04-06T00:00:00.000Z",
+            },
+          ],
+        }),
+      );
+      return;
+    }
+
+    res.statusCode = 404;
+    res.end(JSON.stringify({ error: "Not found" }));
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    server.listen(0, "127.0.0.1", (err?: Error | null) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
+    });
+  });
+
+  const address = server.address() as AddressInfo | null;
+  if (!address) {
+    throw new Error("Failed to resolve Babylon fixture server address.");
+  }
+
+  return {
+    authRequests,
+    url: `http://127.0.0.1:${address.port}`,
+    close: async () => {
+      await new Promise<void>((resolve, reject) => {
+        server.close((err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      });
+    },
+  };
+}
+
+function snapshotEnv(keys: string[]): Record<string, string | undefined> {
+  return Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+}
+
+function restoreEnv(snapshot: Record<string, string | undefined>): void {
+  for (const [key, value] of Object.entries(snapshot)) {
+    if (value === undefined) {
+      delete process.env[key];
+      continue;
+    }
+    process.env[key] = value;
+  }
+}
+
+async function withBabylonFixtureApi<T>(
+  callback: (server: {
+    port: number;
+    close: () => Promise<void>;
+  }, fixture: BabylonFixtureServer) => Promise<T>,
+): Promise<T> {
+  const fixture = await startBabylonFixtureServer();
+  const stateDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "milady-babylon-e2e-"),
+  );
+  const envSnapshot = snapshotEnv([
+    "BABYLON_API_URL",
+    "BABYLON_CLIENT_URL",
+    "BABYLON_AGENT_ID",
+    "BABYLON_AGENT_SECRET",
+    "MILADY_STATE_DIR",
+  ]);
+
+  process.env.BABYLON_API_URL = fixture.url;
+  process.env.BABYLON_CLIENT_URL = fixture.url;
+  process.env.BABYLON_AGENT_ID = "babylon-agent-alice";
+  process.env.BABYLON_AGENT_SECRET = "fixture-babylon-secret";
+  process.env.MILADY_STATE_DIR = stateDir;
+
+  const server = await startApiServer({ port: 0 });
+
+  try {
+    return await callback(server, fixture);
+  } finally {
+    await server.close();
+    await fixture.close();
+    restoreEnv(envSnapshot);
+    fs.rmSync(stateDir, { recursive: true, force: true });
+  }
 }
 
 const KNOWN_LOCAL_APP_NAME = "@elizaos/app-hyperscape";
@@ -814,7 +1018,120 @@ describe("Apps E2E", () => {
   });
 
   // ===================================================================
-  //  11. Hyperscape postMessage auth integration
+  //  11. Babylon integration
+  // ===================================================================
+
+  describe("Babylon integration", () => {
+    it("launch returns viewer auth and persists a Babylon run", async () => {
+      await withBabylonFixtureApi(async (apiServer, fixture) => {
+        const response = await api(apiServer.port, "POST", "/api/apps/launch", {
+          name: "@elizaos/app-babylon",
+        });
+        expect(response.status).toBe(200);
+
+        const body = asObject(response.data);
+        const viewer = asObject(body.viewer as JsonValue);
+        const session = asObject(body.session as JsonValue);
+        const run = asObject(body.run as JsonValue);
+
+        expect(body.displayName).toBe("Babylon");
+        expect(body.launchType).toBe("url");
+        expect(viewer.postMessageAuth).toBe(true);
+        expect(typeof viewer.url).toBe("string");
+        expect((viewer.url as string).includes("?embedded=true")).toBe(true);
+
+        const authMsg = asObject(viewer.authMessage as JsonValue);
+        expect(authMsg.type).toBe("BABYLON_AUTH");
+        expect(authMsg.authToken).toBe("fixture-babylon-session-token");
+        expect(authMsg.sessionToken).toBe("fixture-babylon-session-token");
+        expect(authMsg.agentId).toBe("babylon-agent-alice");
+
+        expect(session).toEqual(
+          expect.objectContaining({
+            sessionId: "babylon-agent-alice",
+            appName: "@elizaos/app-babylon",
+            mode: "spectate-and-steer",
+            status: "connecting",
+            displayName: "Babylon",
+            canSendCommands: true,
+            controls: ["pause", "resume"],
+            summary: "Connecting to Babylon...",
+          }),
+        );
+
+        expect(run).toEqual(
+          expect.objectContaining({
+            appName: "@elizaos/app-babylon",
+            displayName: "Babylon",
+            status: "connecting",
+            supportsBackground: true,
+          }),
+        );
+
+        expect(fixture.authRequests.length).toBeGreaterThan(0);
+        expect(fixture.authRequests[0]).toEqual(
+          expect.objectContaining({
+            agentId: "babylon-agent-alice",
+            agentSecret: "fixture-babylon-secret",
+          }),
+        );
+
+        const runsResponse = await api(apiServer.port, "GET", "/api/apps/runs");
+        expect(runsResponse.status).toBe(200);
+        const runs = asArray(runsResponse.data).map(asObject);
+        expect(runs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              appName: "@elizaos/app-babylon",
+              displayName: "Babylon",
+              status: "connecting",
+              viewerAttachment: expect.any(String),
+            }),
+          ]),
+        );
+      });
+    });
+
+    it("keeps Babylon and 2004scape runs visible together", async () => {
+      await withBabylonFixtureApi(async (apiServer) => {
+        const babylonLaunch = await api(
+          apiServer.port,
+          "POST",
+          "/api/apps/launch",
+          { name: "@elizaos/app-babylon" },
+        );
+        expect(babylonLaunch.status).toBe(200);
+
+        const rsLaunch = await api(apiServer.port, "POST", "/api/apps/launch", {
+          name: "@elizaos/app-2004scape",
+        });
+        expect(rsLaunch.status).toBe(200);
+
+        const runsResponse = await api(apiServer.port, "GET", "/api/apps/runs");
+        expect(runsResponse.status).toBe(200);
+        const runs = asArray(runsResponse.data).map(asObject);
+
+        expect(runs).toHaveLength(2);
+        expect(runs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              appName: "@elizaos/app-babylon",
+              displayName: "Babylon",
+              supportsBackground: true,
+            }),
+            expect.objectContaining({
+              appName: "@elizaos/app-2004scape",
+              displayName: "2004scape",
+              supportsBackground: true,
+            }),
+          ]),
+        );
+      });
+    });
+  });
+
+  // ===================================================================
+  //  12. Hyperscape postMessage auth integration
   // ===================================================================
 
   describe("Hyperscape postMessage auth", () => {

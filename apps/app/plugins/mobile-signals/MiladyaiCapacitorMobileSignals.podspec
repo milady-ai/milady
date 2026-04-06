@@ -14,5 +14,5 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.0'
   s.dependency 'Capacitor'
   s.swift_version = '5.9'
-  s.frameworks = 'UIKit'
+  s.frameworks = 'UIKit', 'HealthKit'
 end

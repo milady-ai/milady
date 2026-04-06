@@ -66,7 +66,7 @@ export interface TalkModeStateEvent {
 export interface MobileSignalsSnapshot {
   source: "mobile_device";
   platform: "ios" | "android" | "web";
-  state: "active" | "idle" | "background" | "locked";
+  state: "active" | "idle" | "background" | "locked" | "sleeping";
   observedAt: number;
   idleState: "active" | "idle" | "locked" | "unknown" | null;
   idleTimeSeconds: number | null;
@@ -74,7 +74,62 @@ export interface MobileSignalsSnapshot {
   metadata: Record<string, unknown>;
 }
 
+export interface MobileSignalsHealthSnapshot {
+  source: "mobile_health";
+  platform: "ios" | "android" | "web";
+  state: "idle" | "sleeping";
+  observedAt: number;
+  idleState: "active" | "idle" | "locked" | "unknown" | null;
+  idleTimeSeconds: number | null;
+  onBattery: boolean | null;
+  healthSource: "healthkit" | "health_connect";
+  permissions: {
+    sleep: boolean;
+    biometrics: boolean;
+  };
+  sleep: {
+    available: boolean;
+    isSleeping: boolean;
+    asleepAt: number | null;
+    awakeAt: number | null;
+    durationMinutes: number | null;
+    stage: string | null;
+  };
+  biometrics: {
+    sampleAt: number | null;
+    heartRateBpm: number | null;
+    restingHeartRateBpm: number | null;
+    heartRateVariabilityMs: number | null;
+    respiratoryRate: number | null;
+    bloodOxygenPercent: number | null;
+  };
+  warnings: string[];
+  metadata: Record<string, unknown>;
+}
+
+export type MobileSignalsSignal =
+  | MobileSignalsSnapshot
+  | MobileSignalsHealthSnapshot;
+
 export interface MobileSignalsPluginLike extends NativePlugin {
+  checkPermissions(): Promise<{
+    status: "granted" | "denied" | "not-determined" | "not-applicable";
+    canRequest: boolean;
+    reason?: string;
+    permissions: {
+      sleep: boolean;
+      biometrics: boolean;
+    };
+  }>;
+  requestPermissions(): Promise<{
+    status: "granted" | "denied" | "not-determined" | "not-applicable";
+    canRequest: boolean;
+    reason?: string;
+    permissions: {
+      sleep: boolean;
+      biometrics: boolean;
+    };
+  }>;
   startMonitoring(options?: {
     emitInitial?: boolean;
   }): Promise<{
@@ -82,15 +137,17 @@ export interface MobileSignalsPluginLike extends NativePlugin {
     supported: boolean;
     platform: "ios" | "android" | "web";
     snapshot: MobileSignalsSnapshot | null;
+    healthSnapshot: MobileSignalsHealthSnapshot | null;
   }>;
   stopMonitoring(): Promise<{ stopped: boolean }>;
   getSnapshot(): Promise<{
     supported: boolean;
     snapshot: MobileSignalsSnapshot | null;
+    healthSnapshot: MobileSignalsHealthSnapshot | null;
   }>;
   addListener(
     eventName: "signal",
-    listenerFunc: (event: MobileSignalsSnapshot) => void,
+    listenerFunc: (event: MobileSignalsSignal) => void,
   ): Promise<PluginListenerHandle>;
 }
 

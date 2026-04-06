@@ -204,7 +204,7 @@ describe.skipIf(!hasLocalHyperscapePlugin)("Hyperscape E2E Integration", () => {
       expect(info?.displayName).toBe("Hyperscape");
       expect(info?.category).toBe("game");
       expect(info?.capabilities).toContain("combat");
-      expect(info?.capabilities).toContain("social-chat");
+      expect(info?.capabilities).toEqual(["combat"]);
     });
 
     test("returns viewer configuration", async () => {

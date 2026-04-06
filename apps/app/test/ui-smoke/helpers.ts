@@ -39,7 +39,10 @@ export async function installDefaultAppMocks(
   page: Page,
   options: AppMockOptions = {},
 ): Promise<void> {
-  await page.route("**/auth/status", async (route) => {
+  const includeConfig = options.includeConfig ?? true;
+  const router = page.context();
+
+  await router.route("**/auth/status", async (route) => {
     await fulfillJson(route, {
       required: false,
       pairingEnabled: false,
@@ -47,7 +50,7 @@ export async function installDefaultAppMocks(
     });
   });
 
-  await page.route("**/api/auth/status", async (route) => {
+  await router.route("**/api/auth/status", async (route) => {
     await fulfillJson(route, {
       required: false,
       pairingEnabled: false,
@@ -55,7 +58,7 @@ export async function installDefaultAppMocks(
     });
   });
 
-  await page.route("**/api/status", async (route) => {
+  await router.route("**/api/status", async (route) => {
     await fulfillJson(route, {
       state: "running",
       startup: { phase: "running", attempt: 0 },
@@ -64,16 +67,42 @@ export async function installDefaultAppMocks(
     });
   });
 
-  await page.route("**/api/onboarding/status", async (route) => {
+  await router.route("**/api/onboarding/status", async (route) => {
     await fulfillJson(route, { complete: true });
   });
 
-  await page.route("**/api/agent/status", async (route) => {
+  await router.route("**/api/agent/status", async (route) => {
     await fulfillJson(route, { onboardingComplete: true, status: "running" });
   });
 
-  if (options.includeConfig) {
-    await page.route("**/api/config**", async (route) => {
+  await router.route("**/api/lifeops/activity-signals", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    await fulfillJson(route, { ok: true });
+  });
+
+  await router.route(
+    "**/api/lifeops/connectors/google/status",
+    async (route) => {
+      await fulfillJson(route, {
+        connected: false,
+        available: false,
+        authUrl: null,
+        lastSyncedAt: null,
+      });
+    },
+  );
+
+  await router.route("**/api/health", async (route) => {
+    await fulfillJson(route, {
+      status: "ok",
+    });
+  });
+
+  if (includeConfig) {
+    await router.route("**/api/config**", async (route) => {
       if (route.request().method() !== "GET") {
         await route.continue();
         return;

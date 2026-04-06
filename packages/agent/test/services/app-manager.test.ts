@@ -995,7 +995,23 @@ describe("AppManager", () => {
         expect.objectContaining({
           appName: "@elizaos/app-hyperscape",
           displayName: "Hyperscape",
+          characterId: "char-runtime",
+          agentId: "runtime-agent-id",
           viewerAttachment: "attached",
+          supportsViewerDetach: true,
+          recentEvents: expect.arrayContaining([
+            expect.objectContaining({
+              kind: "launch",
+              message: expect.any(String),
+            }),
+          ]),
+          awaySummary: expect.objectContaining({
+            eventCount: 1,
+            message: expect.any(String),
+          }),
+          healthDetails: expect.objectContaining({
+            checkedAt: expect.any(String),
+          }),
         }),
       );
       if (result.run?.status === "running") {
@@ -1334,6 +1350,22 @@ describe("AppManager", () => {
           summary: "Connecting to Babylon...",
         }),
       );
+      expect(result.run).toEqual(
+        expect.objectContaining({
+          agentId: "babylon-agent-alice",
+          viewerAttachment: "attached",
+          supportsViewerDetach: true,
+          recentEvents: expect.arrayContaining([
+            expect.objectContaining({
+              kind: "launch",
+              message: expect.any(String),
+            }),
+          ]),
+          awaySummary: expect.objectContaining({
+            eventCount: 1,
+          }),
+        }),
+      );
     } finally {
       await fixtureServer.close();
     }
@@ -1491,9 +1523,33 @@ describe("AppManager", () => {
       ).toEqual(
         expect.objectContaining({
           runId: launchedHyperscape.run?.runId,
+          characterId: "char-runtime",
+          agentId: "runtime-agent-id",
           status: "running",
           summary: "Running live in Hyperscape.",
           lastHeartbeatAt: expect.any(String),
+          chatAvailability: "available",
+          controlAvailability: "available",
+          supportsViewerDetach: true,
+          recentEvents: expect.arrayContaining([
+            expect.objectContaining({
+              kind: "refresh",
+              message: "Running live in Hyperscape.",
+            }),
+            expect.objectContaining({
+              kind: "launch",
+            }),
+          ]),
+          awaySummary: expect.objectContaining({
+            eventCount: 2,
+            message: expect.stringContaining("Running live in Hyperscape."),
+          }),
+          healthDetails: expect.objectContaining({
+            checkedAt: expect.any(String),
+            runtime: expect.objectContaining({ state: "healthy" }),
+            chat: expect.objectContaining({ state: "healthy" }),
+            control: expect.objectContaining({ state: "healthy" }),
+          }),
           health: {
             state: "healthy",
             message: "Running live in Hyperscape.",
@@ -1507,9 +1563,30 @@ describe("AppManager", () => {
       ).toEqual(
         expect.objectContaining({
           runId: launchedBabylon.run?.runId,
+          agentId: "runtime-agent-id",
           status: "running",
           summary: "Defense loop is holding mid lane.",
           lastHeartbeatAt: expect.any(String),
+          chatAvailability: "available",
+          controlAvailability: "available",
+          supportsViewerDetach: true,
+          recentEvents: expect.arrayContaining([
+            expect.objectContaining({
+              kind: "refresh",
+              message: "Defense loop is holding mid lane.",
+            }),
+            expect.objectContaining({
+              kind: "launch",
+            }),
+          ]),
+          awaySummary: expect.objectContaining({
+            eventCount: 2,
+            message: expect.stringContaining("Defense loop is holding mid lane."),
+          }),
+          healthDetails: expect.objectContaining({
+            checkedAt: expect.any(String),
+            runtime: expect.objectContaining({ state: "healthy" }),
+          }),
           health: {
             state: "healthy",
             message: "Defense loop is holding mid lane.",
@@ -1573,6 +1650,19 @@ describe("AppManager", () => {
             status: "disconnected",
             canSendCommands: false,
             controls: [],
+          }),
+          recentEvents: expect.arrayContaining([
+            expect.objectContaining({
+              kind: "health",
+              severity: "error",
+              message: "Run verification failed: viewer bridge is offline",
+            }),
+            expect.objectContaining({
+              kind: "launch",
+            }),
+          ]),
+          awaySummary: expect.objectContaining({
+            message: expect.stringContaining("Run verification failed: viewer bridge is offline"),
           }),
         }),
       );

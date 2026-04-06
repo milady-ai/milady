@@ -86,8 +86,25 @@ export function ChatView({
     uiLanguage,
     ptySessions,
     sendChatText,
-    t,
+    t: appTranslate,
   } = useApp();
+
+  const t = useCallback(
+    (key: string, values?: Record<string, unknown>) => {
+      if (typeof appTranslate === "function") {
+        return appTranslate(key, values);
+      }
+
+      const template =
+        typeof values?.defaultValue === "string" ? values.defaultValue : key;
+
+      return template.replace(/\{\{(\w+)\}\}/g, (_match, token: string) => {
+        const value = values?.[token];
+        return value == null ? "" : String(value);
+      });
+    },
+    [appTranslate],
+  );
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

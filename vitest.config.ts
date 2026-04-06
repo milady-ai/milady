@@ -30,6 +30,7 @@ const workspacePluginPackageNames = Object.keys({
 })
   .filter((packageName) => packageName.startsWith("@elizaos/plugin-"))
   .sort();
+const resolvedPluginNames = new Set<string>();
 const elizaPluginAliases = workspacePluginPackageNames.flatMap((packageName) => {
   const aliases: Array<{ find: string; replacement: string }> = [];
   const nodeEntry = getInstalledPackageEntry(packageName, repoRoot, "node");
@@ -42,6 +43,7 @@ const elizaPluginAliases = workspacePluginPackageNames.flatMap((packageName) => 
 
   const defaultEntry = getInstalledPackageEntry(packageName, repoRoot);
   if (defaultEntry) {
+    resolvedPluginNames.add(packageName);
     aliases.push({
       find: packageName,
       replacement: defaultEntry,
@@ -50,6 +52,15 @@ const elizaPluginAliases = workspacePluginPackageNames.flatMap((packageName) => 
 
   return aliases;
 });
+// Stub @elizaos/plugin-* packages whose npm tarball has a broken or missing
+// entry point (e.g. dist/index.js absent). Without this, vi.mock() factory
+// calls still fail because vitest cannot resolve the module specifier.
+const unresolvedPluginStubs = workspacePluginPackageNames
+  .filter((name) => !resolvedPluginNames.has(name))
+  .map((name) => ({
+    find: name,
+    replacement: path.join(repoRoot, "test", "stubs", "plugin-stub.mjs"),
+  }));
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 const isWindows = process.platform === "win32";
 const localWorkers = 2;
@@ -87,6 +98,7 @@ export default defineConfig({
               replacement: elizaCoreEntry,
             },
             ...elizaPluginAliases,
+            ...unresolvedPluginStubs,
           ]
         : []),
       ...(autonomousSourceRoot
@@ -296,6 +308,8 @@ export default defineConfig({
       // E2E lives under test/ too; run it via vitest.e2e.config.ts, not unit.
       "**/*.e2e.test.ts",
       "**/*.e2e.test.tsx",
+      // Requires plugin-training built dist which only exists after `bun run build`.
+      "**/training-service.import-ollama.test.ts",
     ],
     coverage: {
       provider: "v8",

@@ -21,9 +21,13 @@ import {
 import {
   type AppLaunchDiagnostic,
   type AppLaunchResult,
+  type AppRunCapabilityAvailability,
   type AppRunActionResult,
+  type AppRunAwaySummary,
+  type AppRunEvent,
   type AppRunSummary,
   type AppSessionState,
+  type AppSessionJsonValue,
   type AppStopResult,
   type AppViewerAuthMessage,
   hasAppInterface,
@@ -80,6 +84,7 @@ const ALLOWED_APP_URL_TEMPLATE_KEYS = new Set([
   "RS_SDK_SERVER_URL",
 ]);
 const RUN_REFRESH_MIN_INTERVAL_MS = 5_000;
+const MAX_RUN_EVENTS = 20;
 
 function isProductionRuntime(): boolean {
   return process.env.NODE_ENV === "production";
@@ -942,10 +947,12 @@ async function authenticateBabylonAgentSession(
 async function prepareBabylonLaunch(
   runtime: IAgentRuntime | null,
 ): Promise<AppLaunchDiagnostic[]> {
-  if (!runtime) return [];
-
-  const existingId = resolveSettingLike(runtime, "BABYLON_AGENT_ID");
-  const existingSecret = resolveSettingLike(runtime, "BABYLON_AGENT_SECRET");
+  const existingId =
+    resolveSettingLike(runtime, "BABYLON_AGENT_ID") ??
+    process.env.BABYLON_AGENT_ID?.trim();
+  const existingSecret =
+    resolveSettingLike(runtime, "BABYLON_AGENT_SECRET") ??
+    process.env.BABYLON_AGENT_SECRET?.trim();
 
   // Already configured — nothing to do
   if (existingId && existingSecret) {
@@ -1172,11 +1179,12 @@ function buildViewerAuthMessage(
 
   // Babylon auth — passes agent credentials to the viewer iframe
   if (isBabylonAppName(appName)) {
-    const agentId = resolveSettingLike(runtime, "BABYLON_AGENT_ID");
-    const sessionToken = resolveSettingLike(
-      runtime,
-      BABYLON_AGENT_SESSION_TOKEN_KEY,
-    );
+    const agentId =
+      resolveSettingLike(runtime, "BABYLON_AGENT_ID") ??
+      process.env.BABYLON_AGENT_ID?.trim();
+    const sessionToken =
+      resolveSettingLike(runtime, BABYLON_AGENT_SESSION_TOKEN_KEY) ??
+      process.env[BABYLON_AGENT_SESSION_TOKEN_KEY]?.trim();
     if (!agentId || !sessionToken) {
       return undefined;
     }
@@ -1302,6 +1310,19 @@ function buildAppSession(
     authMessage?.characterId ||
     resolveSettingLike(runtime, "HYPERSCAPE_CHARACTER_ID");
   if (!sessionId) return null;
+  const features = new Set(appInfo.session.features ?? []);
+  const controls: AppSessionState["controls"] = [];
+  if (features.has("pause")) {
+    controls.push("pause");
+  }
+  if (features.has("resume")) {
+    controls.push("resume");
+  }
+  const canSendCommands =
+    features.has("commands") || features.has("suggestions");
+  const summary = isBabylonAppName(appInfo.name)
+    ? "Connecting to Babylon..."
+    : "Connecting session...";
 
   return {
     sessionId,
@@ -1315,9 +1336,9 @@ function buildAppSession(
       resolveSettingLike(runtime, "HYPERSCAPE_CHARACTER_ID"),
     followEntity:
       authMessage?.followEntity ?? authMessage?.characterId ?? undefined,
-    canSendCommands: false,
-    controls: [],
-    summary: "Connecting session...",
+    canSendCommands,
+    controls,
+    summary,
   };
 }
 
@@ -1617,6 +1638,159 @@ function deriveRunHealth(
   };
 }
 
+function buildRunEvent(input: {
+  kind: AppRunEvent["kind"];
+  message: string;
+  severity?: AppRunEvent["severity"];
+  status?: string | null;
+  details?: Record<string, AppSessionJsonValue> | null;
+  createdAt?: string;
+}): AppRunEvent {
+  return {
+    eventId: crypto.randomUUID(),
+    kind: input.kind,
+    severity: input.severity ?? "info",
+    message: input.message,
+    createdAt: input.createdAt ?? new Date().toISOString(),
+    status: input.status ?? null,
+    details: input.details ?? null,
+  };
+}
+
+function normalizeRunEvents(events: AppRunEvent[]): AppRunEvent[] {
+  return [...events]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, MAX_RUN_EVENTS);
+}
+
+function deriveChatAvailability(
+  session: AppSessionState | null,
+): AppRunCapabilityAvailability {
+  if (!session) {
+    return "unknown";
+  }
+  return session.canSendCommands ? "available" : "unavailable";
+}
+
+function deriveControlAvailability(
+  session: AppSessionState | null,
+): AppRunCapabilityAvailability {
+  if (!session) {
+    return "unknown";
+  }
+  return session.canSendCommands || (session.controls?.length ?? 0) > 0
+    ? "available"
+    : "unavailable";
+}
+
+function deriveHealthFacetState(
+  availability: AppRunCapabilityAvailability,
+): AppRunSummary["healthDetails"]["auth"]["state"] {
+  if (availability === "available") {
+    return "healthy";
+  }
+  if (availability === "unavailable") {
+    return "degraded";
+  }
+  return "unknown";
+}
+
+function deriveRunHealthDetails(run: AppRunSummary): AppRunSummary["healthDetails"] {
+  const viewerState: AppRunSummary["healthDetails"]["viewer"]["state"] = !run.viewer
+    ? "unknown"
+    : run.viewerAttachment === "attached"
+      ? "healthy"
+      : run.viewerAttachment === "detached"
+        ? "degraded"
+        : "offline";
+  const authState: AppRunSummary["healthDetails"]["auth"]["state"] = run.session
+    ? run.viewerAttachment === "attached" || run.viewer == null
+      ? "healthy"
+      : "degraded"
+    : "unknown";
+
+  return {
+    checkedAt: run.updatedAt,
+    auth: {
+      state: authState,
+      message: run.session?.summary ?? run.summary,
+    },
+    runtime: {
+      state: run.health.state,
+      message: run.health.message,
+    },
+    viewer: {
+      state: viewerState,
+      message:
+        run.viewerAttachment === "attached"
+          ? "Viewer attached."
+          : run.viewerAttachment === "detached"
+            ? "Viewer detached."
+            : "Viewer unavailable.",
+    },
+    chat: {
+      state: deriveHealthFacetState(run.chatAvailability),
+      message:
+        run.chatAvailability === "available"
+          ? "Operator chat is available."
+          : run.chatAvailability === "unavailable"
+            ? "Operator chat is unavailable."
+            : "Operator chat availability is unknown.",
+    },
+    control: {
+      state: deriveHealthFacetState(run.controlAvailability),
+      message:
+        run.controlAvailability === "available"
+          ? "Control actions are available."
+          : run.controlAvailability === "unavailable"
+            ? "Control actions are unavailable."
+            : "Control availability is unknown.",
+    },
+    message: run.health.message,
+  };
+}
+
+function deriveAwaySummary(run: AppRunSummary): AppRunAwaySummary {
+  const recent = run.recentEvents.slice(0, 3).map((event) => event.message);
+  return {
+    generatedAt: run.updatedAt,
+    message:
+      recent.length > 0
+        ? recent.join(" ")
+        : run.summary ?? `${run.displayName} is ${run.status}.`,
+    eventCount: run.recentEvents.length,
+    since: run.recentEvents.at(-1)?.createdAt ?? run.startedAt,
+    until: run.recentEvents[0]?.createdAt ?? run.updatedAt,
+  };
+}
+
+function normalizeRunSummary(run: AppRunSummary): AppRunSummary {
+  const status = run.session?.status ?? run.status;
+  const summary = run.session?.summary ?? run.summary;
+  const next: AppRunSummary = {
+    ...run,
+    characterId: run.characterId ?? run.session?.characterId ?? null,
+    agentId: run.agentId ?? run.session?.agentId ?? null,
+    chatAvailability: deriveChatAvailability(run.session),
+    controlAvailability: deriveControlAvailability(run.session),
+    supportsViewerDetach:
+      typeof run.supportsViewerDetach === "boolean"
+        ? run.supportsViewerDetach
+        : Boolean(run.supportsBackground),
+    recentEvents: normalizeRunEvents(run.recentEvents),
+    status,
+    summary,
+    lastHeartbeatAt: run.session ? run.updatedAt : run.lastHeartbeatAt,
+    health: deriveRunHealth(status, summary),
+  };
+
+  return {
+    ...next,
+    awaySummary: deriveAwaySummary(next),
+    healthDetails: deriveRunHealthDetails(next),
+  };
+}
+
 function buildRunSummary(input: {
   runId: string;
   appName: string;
@@ -1633,8 +1807,9 @@ function buildRunSummary(input: {
   const status =
     input.session?.status ?? (input.viewer ? "running" : "launching");
   const summary = input.session?.summary ?? null;
+  const health = deriveRunHealth(status, summary);
 
-  return {
+  return normalizeRunSummary({
     runId: input.runId,
     appName: input.appName,
     displayName: input.displayName,
@@ -1643,6 +1818,8 @@ function buildRunSummary(input: {
     launchUrl: input.launchUrl,
     viewer: input.viewer,
     session: input.session,
+    characterId: input.session?.characterId ?? null,
+    agentId: input.session?.agentId ?? null,
     status,
     summary,
     startedAt: input.startedAt ?? now,
@@ -1651,29 +1828,78 @@ function buildRunSummary(input: {
     supportsBackground: true,
     viewerAttachment:
       input.viewerAttachment ?? (input.viewer ? "attached" : "unavailable"),
-    health: deriveRunHealth(status, summary),
-  };
+    chatAvailability: deriveChatAvailability(input.session),
+    controlAvailability: deriveControlAvailability(input.session),
+    supportsViewerDetach: true,
+    recentEvents: [
+      buildRunEvent({
+        kind: "launch",
+        message:
+          summary ??
+          `${input.displayName} launched with ${input.viewer ? "a viewer" : "no viewer"}.`,
+        status,
+        details: {
+          runId: input.runId,
+          appName: input.appName,
+          viewerAttachment:
+            input.viewerAttachment ?? (input.viewer ? "attached" : "unavailable"),
+          characterId: input.session?.characterId ?? null,
+          agentId: input.session?.agentId ?? null,
+        },
+      }),
+    ],
+    awaySummary: null,
+    health,
+    healthDetails: {
+      checkedAt: now,
+      auth: {
+        state: "unknown",
+        message: summary,
+      },
+      runtime: {
+        state: health.state,
+        message: summary,
+      },
+      viewer: {
+        state: "unknown",
+        message: null,
+      },
+      chat: {
+        state: "unknown",
+        message: null,
+      },
+      control: {
+        state: "unknown",
+        message: null,
+      },
+      message: summary,
+    },
+  });
 }
 
 function updateRunSummary(
   run: AppRunSummary,
   patch: Partial<AppRunSummary>,
+  event?: Parameters<typeof buildRunEvent>[0],
 ): AppRunSummary {
   const updatedAt = new Date().toISOString();
-  const next = {
+  const next = normalizeRunSummary({
     ...run,
     ...patch,
     updatedAt,
-  } satisfies AppRunSummary;
-  const status = next.session?.status ?? next.status;
-  const summary = next.session?.summary ?? next.summary;
-  return {
-    ...next,
-    status,
-    summary,
-    lastHeartbeatAt: next.session ? updatedAt : next.lastHeartbeatAt,
-    health: deriveRunHealth(status, summary),
-  };
+    lastHeartbeatAt: patch.session ? updatedAt : run.lastHeartbeatAt,
+    recentEvents: event
+      ? normalizeRunEvents([
+          buildRunEvent({
+            ...event,
+            createdAt: updatedAt,
+          }),
+          ...run.recentEvents,
+        ])
+      : run.recentEvents,
+  } satisfies AppRunSummary);
+
+  return next;
 }
 
 function sameRunIdentity(
@@ -1781,6 +2007,15 @@ export class AppManager {
             session: buildUnavailableSession(run, "offline", summary),
             status: "offline",
             summary,
+          }, {
+            kind: "health",
+            severity: "warning",
+            message: summary,
+            status: "offline",
+            details: {
+              runId: run.runId,
+              appName: run.appName,
+            },
           }),
         );
         return nextRun;
@@ -1790,6 +2025,19 @@ export class AppManager {
           session: nextSession,
           status: nextSession.status,
           summary: nextSession.summary ?? run.summary,
+        }, {
+          kind: "refresh",
+          severity:
+            nextSession.status === "running" ? "info" : "warning",
+          message:
+            nextSession.summary ??
+            `${run.displayName} session refreshed.`,
+          status: nextSession.status,
+          details: {
+            runId: run.runId,
+            appName: run.appName,
+            sessionId: nextSession.sessionId,
+          },
         }),
       );
       return nextRun;
@@ -1804,6 +2052,15 @@ export class AppManager {
           session: buildUnavailableSession(run, nextStatus, message),
           status: nextStatus,
           summary: message,
+        }, {
+          kind: "health",
+          severity: "error",
+          message,
+          status: nextStatus,
+          details: {
+            runId: run.runId,
+            appName: run.appName,
+          },
         }),
       );
       return nextRun;
@@ -1950,6 +2207,17 @@ export class AppManager {
     const updated = this.storeRun(
       updateRunSummary(run, {
         viewerAttachment: run.viewer ? "attached" : "unavailable",
+      }, {
+        kind: "attach",
+        message:
+          run.viewer
+            ? `${run.displayName} viewer attached.`
+            : `${run.displayName} viewer is unavailable.`,
+        status: run.session?.status ?? run.status,
+        details: {
+          runId: run.runId,
+          appName: run.appName,
+        },
       }),
     );
 
@@ -1972,6 +2240,17 @@ export class AppManager {
     const updated = this.storeRun(
       updateRunSummary(run, {
         viewerAttachment: run.viewer ? "detached" : "unavailable",
+      }, {
+        kind: "detach",
+        message:
+          run.viewer
+            ? `${run.displayName} viewer detached.`
+            : `${run.displayName} viewer is unavailable.`,
+        status: run.session?.status ?? run.status,
+        details: {
+          runId: run.runId,
+          appName: run.appName,
+        },
       }),
     );
 
@@ -2173,6 +2452,17 @@ export class AppManager {
             viewer,
             session,
             viewerAttachment: viewer ? "attached" : "unavailable",
+          }, {
+            kind: "refresh",
+            message:
+              session?.summary ??
+              `${appInfo.displayName ?? appInfo.name} launch state refreshed.`,
+            status: session?.status ?? (viewer ? "running" : "launching"),
+            details: {
+              runId: existingRun.runId,
+              appName: name,
+              sessionId: session?.sessionId ?? null,
+            },
           })
         : buildRunSummary({
             runId: crypto.randomUUID(),

@@ -216,6 +216,29 @@ describe("registry-client-app-meta", () => {
       expect(result).toBeDefined();
       expect(result?.launchType).toBe("url");
       expect(result?.launchUrl).toBe("http://localhost:3000");
+      expect(result?.uiExtension?.detailPanelId).toBe(
+        "babylon-operator-dashboard",
+      );
+    });
+
+    it("applies override for known package @elizaos/app-hyperscape", () => {
+      const result = resolveAppOverride("@elizaos/app-hyperscape", undefined);
+      expect(result).toBeDefined();
+      expect(result?.launchType).toBe("connect");
+      expect(result?.viewer?.embedParams?.surface).toBe("agent-control");
+      expect(result?.uiExtension?.detailPanelId).toBe(
+        "hyperscape-embedded-agent-control",
+      );
+    });
+
+    it("applies override for known package @elizaos/app-2004scape", () => {
+      const result = resolveAppOverride("@elizaos/app-2004scape", undefined);
+      expect(result).toBeDefined();
+      expect(result?.launchType).toBe("connect");
+      expect(result?.viewer?.postMessageAuth).toBe(true);
+      expect(result?.uiExtension?.detailPanelId).toBe(
+        "2004scape-operator-dashboard",
+      );
     });
 
     it("merges override with existing metadata", () => {

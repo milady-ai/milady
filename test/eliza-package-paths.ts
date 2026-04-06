@@ -2,6 +2,10 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 
+const skipLocalUpstreams =
+  process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
+  process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1";
+
 /**
  * Return the repo-local eliza core workspace root when it is checked out as
  * part of the Milady repo. This avoids relying on node_modules symlinks which
@@ -11,7 +15,7 @@ function getRepoLocalElizaCoreRoot(
   packageName: string,
   repoRoot: string,
 ): string | undefined {
-  if (packageName !== "@elizaos/core") {
+  if (packageName !== "@elizaos/core" || skipLocalUpstreams) {
     return undefined;
   }
 

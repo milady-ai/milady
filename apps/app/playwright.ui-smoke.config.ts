@@ -1,4 +1,13 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+
+const appDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(appDir, "../..");
+const uiSmokeApiStub = path.join(
+  repoRoot,
+  "scripts/playwright-ui-smoke-api-stub.mjs",
+);
 
 export default defineConfig({
   testDir: "./test/ui-smoke",
@@ -22,12 +31,21 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command:
-      "bun run build:web && bun run preview -- --host 127.0.0.1 --port 2138",
-    cwd: ".",
-    port: 2138,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+  webServer: [
+    {
+      command: `node ${JSON.stringify(uiSmokeApiStub)}`,
+      cwd: repoRoot,
+      port: 31337,
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
+    {
+      command:
+        "bun run build:web && bun run preview -- --host 127.0.0.1 --port 2138",
+      cwd: appDir,
+      port: 2138,
+      reuseExistingServer: false,
+      timeout: 180_000,
+    },
+  ],
 });

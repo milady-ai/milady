@@ -48,6 +48,13 @@ function makeProfile(overrides: Partial<ActivityProfile> = {}): ActivityProfile 
     typicalLastActiveHour: 19,
     typicalWakeHour: 8,
     typicalSleepHour: 23,
+    hasSleepData: false,
+    isCurrentlySleeping: false,
+    lastSleepSignalAt: null,
+    lastWakeSignalAt: null,
+    sleepSourcePlatform: null,
+    sleepSource: null,
+    typicalSleepDurationMinutes: null,
     lastSeenAt: Date.now() - 5 * 60 * 1000,
     lastSeenPlatform: "telegram",
     isCurrentlyActive: true,
@@ -146,6 +153,17 @@ describe("planGm", () => {
     expect(action!.contextSummary).toContain("1 meeting today");
     expect(action!.contextSummary).toContain("first at 9:00");
     expect(action!.status).toBe("pending");
+  });
+
+  it("skips GM while the user is asleep", () => {
+    const profile = makeProfile({
+      isCurrentlySleeping: true,
+      hasOpenActivityCycle: false,
+      lastSleepSignalAt: NOW_MS - 2 * 60 * 60 * 1000,
+    });
+    const action = planGm(profile, [], [], null, TZ, NOW);
+
+    expect(action).toBeNull();
   });
 
   it("includes morning occurrences in context", () => {

@@ -1180,12 +1180,14 @@ export function applyPtyManagerEsmDirnameCompat(filePath) {
     return false;
   }
 
-  const pathImport = 'import { join, relative, dirname } from "path";';
+  const pathImportPattern =
+    /import\s+\{[^}]*\bdirname\b[^}]*\}\s+from\s+"path";/;
   const moduleImport = 'import { createRequire } from "module";';
-  const childProcessImport = 'import { execSync } from "child_process";';
+  const childProcessImportPattern =
+    /import\s+\{[^}]*\bexecSync\b[^}]*\}\s+from\s+"child_process";/;
   if (
-    !compatSource.includes(pathImport) ||
-    !compatSource.includes(childProcessImport)
+    !pathImportPattern.test(compatSource) ||
+    !childProcessImportPattern.test(compatSource)
   ) {
     return false;
   }
@@ -1201,14 +1203,14 @@ export function applyPtyManagerEsmDirnameCompat(filePath) {
   }
   if (!next.includes('import { fileURLToPath } from "url";')) {
     next = next.replace(
-      pathImport,
-      `${pathImport}\nimport { fileURLToPath } from "url";`,
+      pathImportPattern,
+      (match) => `${match}\nimport { fileURLToPath } from "url";`,
     );
   }
   if (!next.includes(PTY_MANAGER_ESM_DIRNAME_MARKER)) {
     next = next.replace(
-      childProcessImport,
-      `${childProcessImport}\n${PTY_MANAGER_ESM_DIRNAME_MARKER}`,
+      childProcessImportPattern,
+      (match) => `${match}\n${PTY_MANAGER_ESM_DIRNAME_MARKER}`,
     );
   }
 

@@ -97,6 +97,7 @@ function mapActivitySignalRecord(
     idleState: signal.idleState,
     idleTimeSeconds: signal.idleTimeSeconds,
     onBattery: signal.onBattery,
+    health: signal.health,
     metadata: signal.metadata,
   };
 }

@@ -32,6 +32,16 @@ export type ServiceRouteConfig = {
   smallModel?: string;
   largeModel?: string;
   remoteApiBase?: string;
+
+  /**
+   * Per-step model overrides for the fine-tuned pipeline.
+   * Each step can specify a model ID (e.g., a Vertex AI fine-tuned endpoint).
+   * Falls back to: stepModel -> plugin override -> smallModel/largeModel -> system default.
+   */
+  shouldRespondModel?: string;
+  plannerModel?: string;
+  responseModel?: string;
+  mediaDescriptionModel?: string;
 };
 
 export type ServiceRoutingConfig = Partial<

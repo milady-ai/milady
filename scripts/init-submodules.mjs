@@ -15,11 +15,21 @@ import { fileURLToPath } from "node:url";
 const scriptFile = fileURLToPath(import.meta.url);
 const __dirname = dirname(scriptFile);
 const root = resolve(__dirname, "..");
+const skipLocalUpstreams =
+  process.env.MILADY_SKIP_LOCAL_UPSTREAMS === "1" ||
+  process.env.ELIZA_SKIP_LOCAL_UPSTREAMS === "1";
 const SUBMODULE_READINESS_MARKERS = {
   eliza: ["package.json", "packages/typescript/package.json"],
   "plugins/plugin-agent-orchestrator": ["package.json"],
   "steward-fi": ["package.json", "packages/api/package.json"],
 };
+
+export function shouldSkipSubmoduleInit(
+  submodulePath,
+  { skipLocal = skipLocalUpstreams } = {},
+) {
+  return skipLocal && submodulePath === "eliza";
+}
 
 export function parseTrackedSubmodules(configOutput) {
   if (!configOutput.trim()) return [];
@@ -105,6 +115,13 @@ export function runInitSubmodules({
   let failed = 0;
 
   for (const submodule of submodules) {
+    if (shouldSkipSubmoduleInit(submodule.path)) {
+      log(
+        `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because local upstreams are disabled`,
+      );
+      continue;
+    }
+
     const checkoutReady = isSubmoduleCheckoutReady(submodule.path, {
       rootDir,
       exists,

@@ -149,8 +149,12 @@ export function classifyIntent(intent: string): LifeOperation {
     return "delete_definition";
   }
 
+  if (looksLikeDefinitionCreateIntent(lower)) {
+    return "create_definition";
+  }
+
   // Completion — "I did it", "mark brushing done", "finished my workout", "I brushed my teeth"
-  if (/\b(done|complete[d]?|finished|did (it|that|my|the)|mark.*(done|complete)|i (brushed|worked out|meditated|exercised|stretched|took|drank|ate|ran|walked|cleaned|called|read))\b/.test(lower)) return "complete_occurrence";
+  if (looksLikeCompletionReport(lower)) return "complete_occurrence";
 
   // Skip — "skip brushing", "pass on workout", "not today"
   if (/\b(skip|pass\b|not today|skip.*(today|this))\b/.test(lower)) return "skip_occurrence";
@@ -173,6 +177,46 @@ export function classifyIntent(intent: string): LifeOperation {
 
   // Default: create a task/habit/routine
   return "create_definition";
+}
+
+function looksLikeDefinitionCreateIntent(lower: string): boolean {
+  if (/\b(goal|my goal is|i want to|aspir|aim to|commit to)\b/.test(lower)) {
+    return false;
+  }
+  return (
+    /\b(create|add|set up|setup|start tracking|track|help me|need help|habit named|routine named|task named|remind me to)\b/.test(
+      lower,
+    ) &&
+    /\b(every|daily|weekly|monthly|morning|night|afternoon|evening|twice a day|times a day|throughout the day|with lunch|with breakfast|with dinner|blocks?|unlock|until)\b/.test(
+      lower,
+    )
+  );
+}
+
+function looksLikeCompletionReport(lower: string): boolean {
+  return (
+    /\b(done|finished)\b/.test(lower) ||
+    /\bcompleted\b/.test(lower) ||
+    /\bdid (it|that|my|the)\b/.test(lower) ||
+    /\bmark.*\b(done|complete)\b/.test(lower) ||
+    /\bi(?:'ve| have)? (already )?(done|completed|finished)\b/.test(lower) ||
+    /\bi (already )?(brushed|worked out|meditated|exercised|stretched|took|drank|ate|ran|walked|cleaned|called|read|showered|shaved)\b/.test(
+      lower,
+    )
+  );
+}
+
+function shouldRecoverMissingOccurrenceAsCreate(
+  intent: string,
+  seed: LifeDefinitionSeed | undefined,
+): boolean {
+  if (!seed) {
+    return false;
+  }
+  const lower = intent.toLowerCase();
+  return (
+    looksLikeDefinitionCreateIntent(lower) && !looksLikeCompletionReport(lower)
+  );
 }
 
 function inferReminderIntensityFromIntent(
@@ -564,7 +608,7 @@ function inferWebsiteTargetsFromIntent(intent: string): string[] {
     normalizeWebsiteTargets(extractWebsiteTargetsFromText(intent)),
   );
   const blockContext =
-    /\b(block|blocked|blocking|unlock|unblock|locked|lock|focus|self ?control)\b/.test(
+    /\b(blocks?|blocked|blocking|unlocks?|unblock|locked|locks?|focus|self ?control)\b/.test(
       lower,
     );
   if (!blockContext) {
@@ -598,7 +642,7 @@ function inferWebsiteAccessPolicyFromIntent(
 ): CreateLifeOpsDefinitionRequest["websiteAccess"] | undefined {
   const lower = intent.toLowerCase();
   if (
-    !/\b(block|blocked|blocking|unlock|unblock|locked|lock|focus|self ?control)\b/.test(
+    !/\b(blocks?|blocked|blocking|unlocks?|unblock|locked|locks?|focus|self ?control)\b/.test(
       lower,
     )
   ) {
@@ -1133,6 +1177,64 @@ export const lifeAction: Action = {
     const targetName = params.target ?? params.title ?? inferredSeed?.title;
 
     try {
+    const createDefinition = async () => {
+      const seed = inferredSeed;
+      const title = params.title ?? seed?.title;
+      const cadence =
+        (detailObject(details, "cadence") as LifeOpsCadence | undefined) ??
+        seed?.cadence;
+      if (!title) {
+        return {
+          success: false as const,
+          text: "I need a name for this item. What should I call it?",
+        };
+      }
+      if (!cadence) {
+        return {
+          success: false as const,
+          text: "I need to know the schedule. How often should this happen?",
+        };
+      }
+      const kind =
+        (detailString(details, "kind") as
+          | CreateLifeOpsDefinitionRequest["kind"]
+          | undefined) ??
+        seed?.kind ??
+        "habit";
+      const goalRef =
+        detailString(details, "goalId") ?? detailString(details, "goalTitle");
+      const resolvedGoal = goalRef
+        ? await resolveGoal(service, goalRef, domain)
+        : null;
+      const created = await service.createDefinition({
+        ownership,
+        kind,
+        title,
+        description: detailString(details, "description") ?? seed?.description,
+        originalIntent: chatText || title,
+        cadence,
+        priority: detailNumber(details, "priority"),
+        progressionRule: detailObject(
+          details,
+          "progressionRule",
+        ) as CreateLifeOpsDefinitionRequest["progressionRule"],
+        reminderPlan:
+          (detailObject(details, "reminderPlan") as
+            | CreateLifeOpsDefinitionRequest["reminderPlan"]
+            | undefined) ?? seed?.reminderPlan,
+        websiteAccess:
+          (detailObject(details, "websiteAccess") as
+            | CreateLifeOpsDefinitionRequest["websiteAccess"]
+            | undefined) ?? seed?.websiteAccess,
+        goalId: resolvedGoal?.goal.id ?? null,
+        source: "chat",
+      });
+      return {
+        success: true as const,
+        text: `Saved "${created.definition.title}" as ${summarizeCadence(created.definition.cadence)}.`,
+        data: toActionData(created),
+      };
+    };
 
     // ── Queries ─────────────────────────────────────
 
@@ -1174,35 +1276,7 @@ export const lifeAction: Action = {
     // ── Mutations ───────────────────────────────────
 
     if (operation === "create_definition") {
-      const seed = inferredSeed;
-      const title = params.title ?? seed?.title;
-      const cadence =
-        (detailObject(details, "cadence") as LifeOpsCadence | undefined) ??
-        seed?.cadence;
-      if (!title) return { success: false, text: "I need a name for this item. What should I call it?" };
-      if (!cadence) return { success: false, text: "I need to know the schedule. How often should this happen?" };
-      const kind = detailString(details, "kind") as CreateLifeOpsDefinitionRequest["kind"] | undefined ?? seed?.kind ?? "habit";
-      const goalRef = detailString(details, "goalId") ?? detailString(details, "goalTitle");
-      const resolvedGoal = goalRef ? await resolveGoal(service, goalRef, domain) : null;
-      const created = await service.createDefinition({
-        ownership,
-        kind,
-        title,
-        description: detailString(details, "description") ?? seed?.description,
-        originalIntent: chatText || title,
-        cadence,
-        priority: detailNumber(details, "priority"),
-        progressionRule: detailObject(details, "progressionRule") as CreateLifeOpsDefinitionRequest["progressionRule"],
-        reminderPlan:
-          (detailObject(details, "reminderPlan") as CreateLifeOpsDefinitionRequest["reminderPlan"]) ??
-          seed?.reminderPlan,
-        websiteAccess:
-          (detailObject(details, "websiteAccess") as unknown as CreateLifeOpsDefinitionRequest["websiteAccess"]) ??
-          seed?.websiteAccess,
-        goalId: resolvedGoal?.goal.id ?? null,
-        source: "chat",
-      });
-      return { success: true, text: `Saved "${created.definition.title}" as ${summarizeCadence(created.definition.cadence)}.`, data: toActionData(created) };
+      return await createDefinition();
     }
 
     if (operation === "create_goal") {
@@ -1265,7 +1339,14 @@ export const lifeAction: Action = {
 
     if (operation === "complete_occurrence") {
       const target = await resolveOccurrence(service, targetName, domain);
-      if (!target) return { success: false, text: "I could not find that active item to complete." };
+      if (!target) {
+        if (
+          shouldRecoverMissingOccurrenceAsCreate(intent, inferredSeed ?? undefined)
+        ) {
+          return await createDefinition();
+        }
+        return { success: false, text: "I could not find that active item to complete." };
+      }
       const completed = await service.completeOccurrence(target.id, { note: detailString(details, "note") });
       return { success: true, text: `Marked "${completed.title}" done.`, data: toActionData(completed) };
     }

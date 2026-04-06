@@ -208,7 +208,8 @@ function createThreadDetail() {
         llmDecision: {
           action: "respond",
           response: "yes",
-          reasoning: "Validation already passed and the deploy is the final step.",
+          reasoning:
+            "Validation already passed and the deploy is the final step.",
         },
         taskContext: {
           label: "alpha-agent",
@@ -348,7 +349,8 @@ describe("agent orchestrator tasks widget", () => {
       tasks: [],
       pendingConfirmations: 1,
       preferredAgentType: "codex",
-      preferredAgentReason: "Codex is authenticated and has the best readiness score.",
+      preferredAgentReason:
+        "Codex is authenticated and has the best readiness score.",
       frameworks: [
         {
           id: "codex",
@@ -392,7 +394,9 @@ describe("agent orchestrator tasks widget", () => {
 
     expect(textOf(requireTree(tree).root)).toContain("Preferred: codex");
     expect(textOf(requireTree(tree).root)).toContain("Pending approvals: 1");
-    expect(textOf(requireTree(tree).root)).toContain("Approve the production deploy?");
+    expect(textOf(requireTree(tree).root)).toContain(
+      "Approve the production deploy?",
+    );
     expect(textOf(requireTree(tree).root)).toContain(
       "Validation already passed and the deploy is the final step.",
     );
@@ -774,7 +778,7 @@ describe("agent orchestrator app runs widget", () => {
         summary: "Holding mid lane with autoplay enabled.",
         startedAt: "2026-04-06T00:00:00.000Z",
         updatedAt: "2026-04-06T00:00:10.000Z",
-        lastHeartbeatAt: "2026-04-06T00:00:10.000Z",
+        lastHeartbeatAt: new Date().toISOString(),
         supportsBackground: true,
         viewerAttachment: "attached",
         health: {
@@ -819,6 +823,8 @@ describe("agent orchestrator app runs widget", () => {
     expect(textOf(requireTree(tree).root)).toContain("Currently playing: 1");
     expect(textOf(requireTree(tree).root)).toContain("Background: 1");
     expect(textOf(requireTree(tree).root)).toContain("Needs attention: 1");
+    expect(textOf(requireTree(tree).root)).toContain("Recovery queue");
+    expect(textOf(requireTree(tree).root)).toContain("Run is offline");
     expect(textOf(requireTree(tree).root)).toContain("Babylon");
     expect(textOf(requireTree(tree).root)).toContain(
       "Run session is no longer available.",

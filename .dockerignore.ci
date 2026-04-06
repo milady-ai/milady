@@ -8,6 +8,7 @@
 .devin
 .vscode
 .idea
+.eliza.ci-disabled
 .env
 .env.local
 .env.*.local

@@ -20,6 +20,7 @@ import { client } from "../../../../api";
 import { TERMINAL_STATUSES } from "../../../../coding";
 import type { ActivityEvent } from "../../../../hooks/useActivityEvents";
 import { useApp } from "../../../../state";
+import { getRunAttentionReasons } from "../../../apps/RunningAppsPanel";
 import { PULSE_STATUSES, STATUS_DOT } from "../../../coding/pty-status-dots";
 import { EmptyWidgetState, WidgetSection } from "../shared";
 import type {
@@ -208,11 +209,7 @@ function DetailList({
   );
 }
 
-function ProviderRoutingPanel({
-  status,
-}: {
-  status: CodingAgentStatus;
-}) {
+function ProviderRoutingPanel({ status }: { status: CodingAgentStatus }) {
   const frameworks = Array.isArray(status.frameworks) ? status.frameworks : [];
 
   if (
@@ -230,10 +227,7 @@ function ProviderRoutingPanel({
           Provider Routing
         </div>
         {status.preferredAgentType ? (
-          <Badge
-            variant="secondary"
-            className="bg-ok/15 text-[9px] text-ok"
-          >
+          <Badge variant="secondary" className="bg-ok/15 text-[9px] text-ok">
             Preferred: {status.preferredAgentType}
           </Badge>
         ) : null}
@@ -380,7 +374,9 @@ function TaskThreadDetailPanel({
                   <div className="font-medium">{session.label}</div>
                   <div className="text-muted">
                     {session.framework}
-                    {session.providerSource ? ` (${session.providerSource})` : ""}
+                    {session.providerSource
+                      ? ` (${session.providerSource})`
+                      : ""}
                     {" · "}
                     {session.status} ·{" "}
                     {session.workdir || session.repo || "no workspace"}
@@ -393,18 +389,20 @@ function TaskThreadDetailPanel({
 
       <DetailList title="Pending User Input">
         {pendingDecisions.length === 0 ? (
-          <div className="text-[11px] text-muted">
-            No pending user input.
-          </div>
+          <div className="text-[11px] text-muted">No pending user input.</div>
         ) : (
           <div className="space-y-1.5">
             {pendingDecisions.map((decision) => (
-              <div key={`${decision.threadId}-${decision.sessionId}`} className="text-[11px] text-txt">
+              <div
+                key={`${decision.threadId}-${decision.sessionId}`}
+                className="text-[11px] text-txt"
+              >
                 <div className="font-medium">{decision.promptText}</div>
                 <div className="line-clamp-2 text-muted">
                   {typeof decision.llmDecision.reasoning === "string"
                     ? decision.llmDecision.reasoning
-                    : decision.recentOutput || "Coordinator is waiting for the next user response."}
+                    : decision.recentOutput ||
+                      "Coordinator is waiting for the next user response."}
                 </div>
               </div>
             ))}
@@ -539,7 +537,13 @@ function getClientErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
 }
 
-function AppRunCard({ run }: { run: AppRunSummary }) {
+function AppRunCard({
+  run,
+  attentionReasons,
+}: {
+  run: AppRunSummary;
+  attentionReasons: string[];
+}) {
   const healthTone =
     run.health.state === "healthy"
       ? "bg-ok/20 text-ok"
@@ -567,6 +571,19 @@ function AppRunCard({ run }: { run: AppRunSummary }) {
       <div className="mt-2 line-clamp-2 text-[11px] text-muted">
         {run.summary || run.health.message || "Run active."}
       </div>
+      {attentionReasons.length > 0 ? (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <Badge
+            variant="secondary"
+            className="bg-warn/15 px-1.5 py-0 text-[9px] text-warn"
+          >
+            Needs attention
+          </Badge>
+          <span className="inline-flex max-w-full items-center rounded-full border border-border/30 bg-bg-hover/70 px-2 py-0.5 text-[10px] text-muted-strong">
+            <span className="truncate">{attentionReasons[0]}</span>
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -587,9 +604,22 @@ function AppRunsWidget(_props: ChatSidebarWidgetProps) {
   const backgroundCount = runs.filter(
     (run) => run.viewerAttachment !== "attached",
   ).length;
-  const needsAttentionCount = runs.filter(
-    (run) => run.health.state !== "healthy",
-  ).length;
+  const attentionMap = useMemo(
+    () =>
+      new Map(
+        runs.map((run) => [run.runId, getRunAttentionReasons(run)] as const),
+      ),
+    [runs],
+  );
+  const needsAttentionCount = useMemo(
+    () =>
+      runs.filter((run) => (attentionMap.get(run.runId)?.length ?? 0) > 0)
+        .length,
+    [attentionMap, runs],
+  );
+  const attentionRuns = runs.filter(
+    (run) => (attentionMap.get(run.runId)?.length ?? 0) > 0,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -700,9 +730,32 @@ function AppRunsWidget(_props: ChatSidebarWidgetProps) {
               Needs attention: {needsAttentionCount}
             </Badge>
           </div>
+          {attentionRuns.length > 0 ? (
+            <div className="rounded-lg border border-warn/30 bg-warn/10 p-2.5">
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-warn">
+                Recovery queue
+              </div>
+              <div className="flex flex-col gap-2">
+                {attentionRuns.slice(0, 3).map((run) => {
+                  const attentionReasons = attentionMap.get(run.runId) ?? [];
+                  return (
+                    <AppRunCard
+                      key={run.runId}
+                      run={run}
+                      attentionReasons={attentionReasons}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-2">
             {runs.slice(0, 4).map((run) => (
-              <AppRunCard key={run.runId} run={run} />
+              <AppRunCard
+                key={run.runId}
+                run={run}
+                attentionReasons={attentionMap.get(run.runId) ?? []}
+              />
             ))}
           </div>
         </div>

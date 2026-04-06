@@ -69,6 +69,19 @@ jobs:
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 
+      # Proto-generated types are gitignored in the eliza submodule and
+      # normally produced by the prebuild script. Unit tests resolve
+      # @elizaos/core from source, so the generated directory must exist.
+      # The buf postinstall (downloads platform binary) is skipped by
+      # --ignore-scripts, so we run it explicitly before buf generate.
+      - name: Generate protobuf types
+        run: |
+          if [ ! -d eliza/packages/typescript/src/types/generated ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            npx --yes @bufbuild/buf@1.67.0 generate
+          fi
+
       - name: Run unit tests with coverage
         run: bun run test:coverage
 
@@ -104,6 +117,19 @@ jobs:
           install-command: bun install --ignore-scripts
           skip-avatar-clone: "true"
           no-vision-deps: "true"
+
+      # Proto-generated types are gitignored in the eliza submodule and
+      # normally produced by the prebuild script. Unit tests resolve
+      # @elizaos/core from source, so the generated directory must exist.
+      # The buf postinstall (downloads platform binary) is skipped by
+      # --ignore-scripts, so we run it explicitly before buf generate.
+      - name: Generate protobuf types
+        run: |
+          if [ ! -d eliza/packages/typescript/src/types/generated ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            npx --yes @bufbuild/buf@1.67.0 generate
+          fi
 
       - name: Run database security and query-guard tests
         run: bun run db:check
@@ -182,6 +208,9 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
 
+      - name: Disable repo-local eliza workspace
+        run: node scripts/disable-local-eliza-workspace.mjs
+
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
@@ -240,6 +269,9 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
 
+      - name: Disable repo-local eliza workspace
+        run: node scripts/disable-local-eliza-workspace.mjs
+
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
@@ -283,6 +315,9 @@ jobs:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
+
+      - name: Disable repo-local eliza workspace
+        run: node scripts/disable-local-eliza-workspace.mjs
 
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
@@ -346,6 +381,9 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('apps/app/android/**/*.gradle*', 'apps/app/android/**/gradle-wrapper.properties', 'apps/app/plugins/websiteblocker/android/**/*.kt') }}
           restore-keys: gradle-${{ runner.os }}-
 
+      - name: Disable repo-local eliza workspace
+        run: node scripts/disable-local-eliza-workspace.mjs
+
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
@@ -390,6 +428,9 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
 
+      - name: Disable repo-local eliza workspace
+        run: node scripts/disable-local-eliza-workspace.mjs
+
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
@@ -423,6 +464,19 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --frozen-lockfile --ignore-scripts
+
+      # Proto-generated types are gitignored in the eliza submodule and
+      # normally produced by the prebuild script. Unit tests resolve
+      # @elizaos/core from source, so the generated directory must exist.
+      # The buf postinstall (downloads platform binary) is skipped by
+      # --ignore-scripts, so we run it explicitly before buf generate.
+      - name: Generate protobuf types
+        run: |
+          if [ ! -d eliza/packages/typescript/src/types/generated ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            npx --yes @bufbuild/buf@1.67.0 generate
+          fi
 
       - name: Run startup E2E contract guard
         run: bun run test:startup:contract
@@ -467,6 +521,9 @@ jobs:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
+
+      - name: Disable repo-local eliza workspace
+        run: node scripts/disable-local-eliza-workspace.mjs
 
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts

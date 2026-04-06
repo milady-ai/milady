@@ -25,7 +25,6 @@ function createRuntime() {
 
 describe("plugin-agent-skills catalog fetch patch", () => {
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -37,34 +36,39 @@ describe("plugin-agent-skills catalog fetch patch", () => {
       registryUrl: "https://skills.example",
     });
 
-    const fetchMock = vi.fn(async () => {
-      return new Response("rate limited", {
+    const fetchMock = vi.fn(async () =>
+      new Response("rate limited", {
         status: 429,
         headers: {
           "retry-after": "120",
         },
-      });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const first = await service.getCatalog({ forceRefresh: true });
-
-    expect(first).toEqual([]);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        "AgentSkills: Catalog fetch failed (will retry after cooldown): Error: Catalog fetch failed: 429",
-      ),
+      }),
     );
-    expect(logger.info).not.toHaveBeenCalled();
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = fetchMock as typeof globalThis.fetch;
 
-    // Second call within cooldown should not trigger another fetch
-    await expect(service.getCatalog({ forceRefresh: true })).resolves.toEqual(
-      [],
-    );
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.info).not.toHaveBeenCalled();
+    try {
+      const first = await service.getCatalog({ forceRefresh: true });
+
+      expect(first).toEqual([]);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "AgentSkills: Catalog rate limited (429); backing off for 120s",
+        ),
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+
+      // Second call within cooldown should not trigger another fetch
+      await expect(service.getCatalog({ forceRefresh: true })).resolves.toEqual(
+        [],
+      );
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });

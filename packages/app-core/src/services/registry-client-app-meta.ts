@@ -41,9 +41,38 @@ const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
   "@elizaos/app-babylon": {
     launchType: "url",
     launchUrl: "http://localhost:3000",
+    uiExtension: {
+      detailPanelId: "babylon-operator-dashboard",
+    },
     viewer: {
       url: "http://localhost:3000",
       sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+    },
+  },
+  "@elizaos/app-hyperscape": {
+    displayName: "Hyperscape",
+    category: "game",
+    launchType: "connect",
+    launchUrl: "{HYPERSCAPE_CLIENT_URL}",
+    capabilities: ["combat"],
+    runtimePlugin: "@hyperscape/plugin-hyperscape",
+    uiExtension: {
+      detailPanelId: "hyperscape-embedded-agent-control",
+    },
+    viewer: {
+      url: "{HYPERSCAPE_CLIENT_URL}",
+      embedParams: {
+        embedded: "true",
+        mode: "spectator",
+        surface: "agent-control",
+        followEntity: "{HYPERSCAPE_CHARACTER_ID}",
+      },
+      postMessageAuth: true,
+      sandbox: "allow-scripts allow-same-origin allow-popups allow-forms",
+    },
+    session: {
+      mode: "spectate-and-steer",
+      features: ["commands", "telemetry", "pause", "resume", "suggestions"],
     },
   },
   "@elizaos/app-hyperfy": {
@@ -57,6 +86,9 @@ const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
   "@elizaos/app-2004scape": {
     launchType: "connect",
     launchUrl: "{RS_SDK_SERVER_URL}",
+    uiExtension: {
+      detailPanelId: "2004scape-operator-dashboard",
+    },
     viewer: {
       url: "{RS_SDK_SERVER_URL}/bot",
       embedParams: {

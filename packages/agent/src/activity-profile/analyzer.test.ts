@@ -8,6 +8,7 @@ import {
   type CalendarEventRecord,
   type MessageRecord,
 } from "./analyzer";
+import type { ActivitySignalRecord } from "./types";
 
 // ── classifyTimeBucket ──────────────────────────────────
 
@@ -191,6 +192,7 @@ describe("analyzeMessages", () => {
         idleState: "active",
         idleTimeSeconds: 0,
         onBattery: false,
+        health: null,
         metadata: {},
       },
     ];
@@ -208,6 +210,61 @@ describe("analyzeMessages", () => {
     expect(profile.lastSeenAt).toBe(NOW.getTime() - 90 * 1000);
     expect(profile.isCurrentlyActive).toBe(true);
     expect(profile.hasOpenActivityCycle).toBe(true);
+  });
+
+  it("treats mobile health sleep signals as the end of the active day", () => {
+    const activitySignals: ActivitySignalRecord[] = [
+      {
+        source: "mobile_health",
+        platform: "ios",
+        state: "sleeping",
+        observedAt: NOW.getTime() - 30 * 60 * 1000,
+        idleState: null,
+        idleTimeSeconds: null,
+        onBattery: false,
+        health: {
+          source: "healthkit",
+          permissions: {
+            sleep: true,
+            biometrics: true,
+          },
+          sleep: {
+            available: true,
+            isSleeping: true,
+            asleepAt: "2026-04-05T03:30:00.000Z",
+            awakeAt: null,
+            durationMinutes: 420,
+            stage: "asleep",
+          },
+          biometrics: {
+            sampleAt: "2026-04-05T23:20:00.000Z",
+            heartRateBpm: 54,
+            restingHeartRateBpm: 49,
+            heartRateVariabilityMs: 71,
+            respiratoryRate: 13.5,
+            bloodOxygenPercent: 98,
+          },
+          warnings: [],
+        },
+        metadata: {},
+      },
+    ];
+
+    const profile = analyzeMessages(
+      [],
+      new Map(),
+      "owner-1",
+      "UTC",
+      7,
+      NOW,
+      activitySignals,
+    );
+    expect(profile.isCurrentlySleeping).toBe(true);
+    expect(profile.isCurrentlyActive).toBe(false);
+    expect(profile.hasOpenActivityCycle).toBe(false);
+    expect(profile.lastSeenPlatform).toBe("ios");
+    expect(profile.effectiveDayKey).toBe("2026-04-05");
+    expect(profile.hasSleepData).toBe(true);
   });
 
   it("derives typical active hours from histogram", () => {

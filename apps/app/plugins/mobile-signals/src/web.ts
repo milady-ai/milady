@@ -1,5 +1,7 @@
 import { WebPlugin } from "@capacitor/core";
 import type {
+  MobileSignalsHealthSnapshot,
+  MobileSignalsPermissionStatus,
   MobileSignalsPlatform,
   MobileSignalsPlugin,
   MobileSignalsSnapshot,
@@ -85,14 +87,70 @@ async function buildSnapshot(reason: string): Promise<MobileSignalsSnapshot> {
   };
 }
 
+function buildHealthSnapshot(reason: string): MobileSignalsHealthSnapshot {
+  return {
+    source: "mobile_health",
+    platform: getPlatform(),
+    state: "idle",
+    observedAt: Date.now(),
+    idleState: null,
+    idleTimeSeconds: null,
+    onBattery: null,
+    healthSource: "healthkit",
+    permissions: {
+      sleep: false,
+      biometrics: false,
+    },
+    sleep: {
+      available: false,
+      isSleeping: false,
+      asleepAt: null,
+      awakeAt: null,
+      durationMinutes: null,
+      stage: null,
+    },
+    biometrics: {
+      sampleAt: null,
+      heartRateBpm: null,
+      restingHeartRateBpm: null,
+      heartRateVariabilityMs: null,
+      respiratoryRate: null,
+      bloodOxygenPercent: null,
+    },
+    warnings: [`web fallback has no health access (${reason})`],
+    metadata: {
+      reason,
+      platform: getPlatform(),
+      supported: false,
+    },
+  };
+}
+
 export class MobileSignalsWeb extends WebPlugin implements MobileSignalsPlugin {
   private monitoring = false;
   private cleanup: Cleanup[] = [];
+
+  async checkPermissions(): Promise<MobileSignalsPermissionStatus> {
+    return {
+      status: "not-applicable",
+      canRequest: false,
+      permissions: {
+        sleep: false,
+        biometrics: false,
+      },
+      reason: "Web fallback has no HealthKit or Health Connect access.",
+    };
+  }
+
+  async requestPermissions(): Promise<MobileSignalsPermissionStatus> {
+    return this.checkPermissions();
+  }
 
   private emitSignal = async (reason: string): Promise<void> => {
     if (!this.monitoring) return;
     const snapshot = await buildSnapshot(reason);
     this.notifyListeners("signal", snapshot);
+    this.notifyListeners("signal", buildHealthSnapshot(reason));
   };
 
   private attachListeners(): void {
@@ -139,14 +197,17 @@ export class MobileSignalsWeb extends WebPlugin implements MobileSignalsPlugin {
     }
 
     const snapshot = await buildSnapshot("start");
+    const healthSnapshot = buildHealthSnapshot("start");
     if (options.emitInitial ?? true) {
       this.notifyListeners("signal", snapshot);
+      this.notifyListeners("signal", healthSnapshot);
     }
     return {
       enabled: this.monitoring,
       supported: true,
       platform: snapshot.platform,
       snapshot,
+      healthSnapshot,
     };
   }
 
@@ -157,9 +218,11 @@ export class MobileSignalsWeb extends WebPlugin implements MobileSignalsPlugin {
   }
 
   async getSnapshot(): Promise<MobileSignalsSnapshotResult> {
+    const snapshot = await buildSnapshot("snapshot");
     return {
       supported: true,
-      snapshot: await buildSnapshot("snapshot"),
+      snapshot,
+      healthSnapshot: buildHealthSnapshot("snapshot"),
     };
   }
 }

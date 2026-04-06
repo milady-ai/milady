@@ -15,10 +15,13 @@ import { getAppDetailExtension } from "./registry";
 
 function createApp(
   overrides: Partial<RegistryAppInfo> = {},
+  detailPanelId: string = "defense-agent-control",
+  name: string = "@elizaos/app-defense-of-the-agents",
+  displayName: string = "Defense of the Agents",
 ): RegistryAppInfo {
   return {
-    name: "@elizaos/app-defense-of-the-agents",
-    displayName: "Defense of the Agents",
+    name,
+    displayName,
     description: "Tower defense operator shell.",
     category: "app",
     launchType: "url",
@@ -30,13 +33,13 @@ function createApp(
     latestVersion: "1.0.0",
     supports: { v0: false, v1: false, v2: true },
     npm: {
-      package: "@elizaos/app-defense-of-the-agents",
+      package: name,
       v0Version: null,
       v1Version: null,
       v2Version: "1.0.0",
     },
     uiExtension: {
-      detailPanelId: "defense-agent-control",
+      detailPanelId,
     },
     ...overrides,
   };
@@ -106,6 +109,36 @@ describe("app detail extensions", () => {
 
   it("registers the defense detail panel by id", () => {
     expect(getAppDetailExtension(createApp())).not.toBeNull();
+    expect(
+      getAppDetailExtension(
+        createApp(
+          {},
+          "babylon-operator-dashboard",
+          "@elizaos/app-babylon",
+          "Babylon",
+        ),
+      ),
+    ).not.toBeNull();
+    expect(
+      getAppDetailExtension(
+        createApp(
+          {},
+          "hyperscape-embedded-agent-control",
+          "@elizaos/app-hyperscape",
+          "Hyperscape",
+        ),
+      ),
+    ).not.toBeNull();
+    expect(
+      getAppDetailExtension(
+        createApp(
+          {},
+          "2004scape-operator-dashboard",
+          "@elizaos/app-2004scape",
+          "2004scape",
+        ),
+      ),
+    ).not.toBeNull();
     expect(
       getAppDetailExtension(
         createApp({

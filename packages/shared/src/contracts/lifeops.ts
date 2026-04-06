@@ -668,6 +668,7 @@ export const LIFEOPS_ACTIVITY_SIGNAL_SOURCES = [
   "page_visibility",
   "desktop_power",
   "mobile_device",
+  "mobile_health",
 ] as const;
 export type LifeOpsActivitySignalSource =
   (typeof LIFEOPS_ACTIVITY_SIGNAL_SOURCES)[number];
@@ -677,9 +678,46 @@ export const LIFEOPS_ACTIVITY_SIGNAL_STATES = [
   "idle",
   "background",
   "locked",
+  "sleeping",
 ] as const;
 export type LifeOpsActivitySignalState =
   (typeof LIFEOPS_ACTIVITY_SIGNAL_STATES)[number];
+
+export const LIFEOPS_HEALTH_SIGNAL_SOURCES = [
+  "healthkit",
+  "health_connect",
+] as const;
+export type LifeOpsHealthSignalSource =
+  (typeof LIFEOPS_HEALTH_SIGNAL_SOURCES)[number];
+
+export interface LifeOpsHealthSignalSleepSummary {
+  available: boolean;
+  isSleeping: boolean;
+  asleepAt: string | null;
+  awakeAt: string | null;
+  durationMinutes: number | null;
+  stage: string | null;
+}
+
+export interface LifeOpsHealthSignalBiometrics {
+  sampleAt: string | null;
+  heartRateBpm: number | null;
+  restingHeartRateBpm: number | null;
+  heartRateVariabilityMs: number | null;
+  respiratoryRate: number | null;
+  bloodOxygenPercent: number | null;
+}
+
+export interface LifeOpsHealthSignal {
+  source: LifeOpsHealthSignalSource;
+  permissions: {
+    sleep: boolean;
+    biometrics: boolean;
+  };
+  sleep: LifeOpsHealthSignalSleepSummary;
+  biometrics: LifeOpsHealthSignalBiometrics;
+  warnings: string[];
+}
 
 export interface LifeOpsActivitySignal {
   id: string;
@@ -691,6 +729,7 @@ export interface LifeOpsActivitySignal {
   idleState: "active" | "idle" | "locked" | "unknown" | null;
   idleTimeSeconds: number | null;
   onBattery: boolean | null;
+  health: LifeOpsHealthSignal | null;
   metadata: Record<string, unknown>;
   createdAt: string;
 }
@@ -1328,6 +1367,7 @@ export interface CaptureLifeOpsActivitySignalRequest {
   idleState?: "active" | "idle" | "locked" | "unknown" | null;
   idleTimeSeconds?: number | null;
   onBattery?: boolean | null;
+  health?: LifeOpsHealthSignal | null;
   metadata?: Record<string, unknown>;
 }
 

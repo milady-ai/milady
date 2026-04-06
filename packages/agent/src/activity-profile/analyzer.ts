@@ -74,8 +74,69 @@ type InteractionSnapshot = {
   lastSeenPlatform: string | null;
 };
 
+type HealthSnapshot = {
+  observedAt: number;
+  platform: string;
+  source: string;
+  isSleeping: boolean;
+  sleepStartedAt: number | null;
+  sleepEndedAt: number | null;
+  durationMinutes: number | null;
+  biometricsSampleAt: number | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
 function localDateKeyForTimestamp(timestamp: number, timezone: string): string {
   return getLocalDateKey(getZonedDateParts(new Date(timestamp), timezone));
+}
+
+function parseTimestamp(value: string | null | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseHealthSnapshot(
+  signal: ActivitySignalRecord,
+): HealthSnapshot | null {
+  if (signal.source !== "mobile_health") {
+    return null;
+  }
+  const health = signal.health ?? (isRecord(signal.metadata.health) ? signal.metadata.health : null);
+  if (!health) {
+    return null;
+  }
+  const sleep = isRecord(health.sleep) ? health.sleep : null;
+  const biometrics = isRecord(health.biometrics) ? health.biometrics : null;
+  const isSleeping = Boolean(sleep?.isSleeping);
+  const sleepStartedAt = parseTimestamp(
+    typeof sleep?.asleepAt === "string" ? sleep.asleepAt : null,
+  );
+  const sleepEndedAt = parseTimestamp(
+    typeof sleep?.awakeAt === "string" ? sleep.awakeAt : null,
+  );
+  const biometricsSampleAt = parseTimestamp(
+    typeof biometrics?.sampleAt === "string" ? biometrics.sampleAt : null,
+  );
+  return {
+    observedAt: signal.observedAt,
+    platform: signal.platform,
+    source: typeof health.source === "string" ? health.source : "healthkit",
+    isSleeping,
+    sleepStartedAt,
+    sleepEndedAt,
+    durationMinutes:
+      typeof sleep?.durationMinutes === "number" &&
+      Number.isFinite(sleep.durationMinutes)
+        ? sleep.durationMinutes
+        : null,
+    biometricsSampleAt,
+  };
 }
 
 function buildActivitySession(
@@ -244,6 +305,9 @@ export function resolveCurrentActivityState(
     | "timezone"
     | "lastSeenAt"
     | "lastSeenPlatform"
+    | "isCurrentlySleeping"
+    | "lastSleepSignalAt"
+    | "lastWakeSignalAt"
     | "hasOpenActivityCycle"
     | "sustainedInactivityThresholdMinutes"
     | "currentActivityCycleStartedAt"
@@ -259,10 +323,18 @@ export function resolveCurrentActivityState(
   const currentTime = now.getTime();
   const thresholdMs = profile.sustainedInactivityThresholdMinutes * 60 * 1000;
   const screenHeartbeatAt = resolveScreenHeartbeatAt(profile);
-  const mostRecentActivityAt = Math.max(profile.lastSeenAt, screenHeartbeatAt);
+  const sleeping = profile.isCurrentlySleeping === true;
+  const sleepBoundaryAt =
+    profile.lastSleepSignalAt ?? profile.lastWakeSignalAt ?? profile.lastSeenAt;
+  const mostRecentActivityAt = sleeping
+    ? sleepBoundaryAt
+    : Math.max(profile.lastSeenAt, screenHeartbeatAt);
   const hasOpenActivityCycle =
-    mostRecentActivityAt > 0 && currentTime - mostRecentActivityAt <= thresholdMs;
+    !sleeping &&
+    mostRecentActivityAt > 0 &&
+    currentTime - mostRecentActivityAt <= thresholdMs;
   const cycleStart =
+    !sleeping &&
     profile.currentActivityCycleStartedAt &&
     (profile.hasOpenActivityCycle ||
       mostRecentActivityAt - profile.currentActivityCycleStartedAt <= thresholdMs)
@@ -272,20 +344,28 @@ export function resolveCurrentActivityState(
         : profile.currentActivityCycleStartedAt;
   const currentActivityCycleLocalDate = cycleStart
     ? localDateKeyForTimestamp(cycleStart, profile.timezone)
-    : profile.currentActivityCycleLocalDate;
+    : sleeping
+      ? sleepBoundaryAt > 0
+        ? localDateKeyForTimestamp(sleepBoundaryAt, profile.timezone)
+        : profile.currentActivityCycleLocalDate
+      : profile.currentActivityCycleLocalDate;
   const effectiveDayKey = hasOpenActivityCycle
     ? currentActivityCycleLocalDate ??
       localDateKeyForTimestamp(currentTime, profile.timezone)
+    : sleeping
+      ? currentActivityCycleLocalDate ??
+        localDateKeyForTimestamp(currentTime, profile.timezone)
     : localDateKeyForTimestamp(currentTime, profile.timezone);
 
   return {
     lastSeenAt: mostRecentActivityAt,
     lastSeenPlatform: profile.lastSeenPlatform,
     isCurrentlyActive:
+      !sleeping &&
       mostRecentActivityAt > 0 &&
       currentTime - mostRecentActivityAt < ACTIVE_THRESHOLD_MS,
     hasOpenActivityCycle,
-    currentActivityCycleStartedAt: cycleStart ?? null,
+    currentActivityCycleStartedAt: sleeping ? null : cycleStart ?? null,
     currentActivityCycleLocalDate,
     effectiveDayKey,
   };
@@ -299,6 +379,9 @@ export function resolveEffectiveDayKey(
     | "currentActivityCycleLocalDate"
     | "lastSeenAt"
     | "lastSeenPlatform"
+    | "isCurrentlySleeping"
+    | "lastSleepSignalAt"
+    | "lastWakeSignalAt"
     | "sustainedInactivityThresholdMinutes"
     | "screenContextAvailable"
     | "screenContextStale"
@@ -326,6 +409,9 @@ function resolveLatestActivityDayKey(
     | "currentActivityCycleLocalDate"
     | "lastSeenAt"
     | "lastSeenPlatform"
+    | "isCurrentlySleeping"
+    | "lastSleepSignalAt"
+    | "lastWakeSignalAt"
     | "sustainedInactivityThresholdMinutes"
     | "screenContextAvailable"
     | "screenContextStale"
@@ -413,6 +499,9 @@ export function analyzeMessages(
       signal.observedAt >= windowStart &&
       isActiveSignal(signal, currentTime.getTime()),
   );
+  const healthSnapshots = activitySignals
+    .map((signal) => parseHealthSnapshot(signal))
+    .filter((snapshot): snapshot is HealthSnapshot => snapshot !== null);
 
   // Group by platform
   const platformMap = new Map<string, {
@@ -495,16 +584,51 @@ export function analyzeMessages(
     ],
     timezone,
   );
+  const sleepHoursFromHealth = healthSnapshots
+    .filter((snapshot) => snapshot.sleepStartedAt !== null)
+    .map((snapshot) =>
+      getZonedDateParts(new Date(snapshot.sleepStartedAt ?? 0), timezone).hour,
+    );
+  const wakeHoursFromHealth = healthSnapshots
+    .filter((snapshot) => snapshot.sleepEndedAt !== null)
+    .map((snapshot) =>
+      getZonedDateParts(new Date(snapshot.sleepEndedAt ?? 0), timezone).hour,
+    );
   const wakeHours = sessions
     .map((session) => session.startHour)
+    .concat(wakeHoursFromHealth)
     .sort((left, right) => left - right);
   const sleepHours = sessions
     .map((session) => session.normalizedEndHour)
+    .concat(sleepHoursFromHealth)
     .sort((left, right) => left - right);
   const typicalWakeHour =
     wakeHours.length > 0 ? median(wakeHours) : null;
   const typicalSleepHour =
     sleepHours.length > 0 ? median(sleepHours) : null;
+  const sleepDurations = healthSnapshots
+    .map((snapshot) => snapshot.durationMinutes)
+    .filter((value): value is number => typeof value === "number");
+  const typicalSleepDurationMinutes =
+    sleepDurations.length > 0
+      ? Math.round(
+          sleepDurations.reduce((sum, value) => sum + value, 0) /
+            sleepDurations.length,
+        )
+      : null;
+  const latestHealthSnapshot =
+    healthSnapshots.length > 0
+      ? [...healthSnapshots].sort((left, right) => right.observedAt - left.observedAt)[0] ??
+        null
+      : null;
+  const latestSleepingHealthSnapshot =
+    [...healthSnapshots]
+      .filter((snapshot) => snapshot.isSleeping)
+      .sort((left, right) => right.observedAt - left.observedAt)[0] ?? null;
+  const latestWakeHealthSnapshot =
+    [...healthSnapshots]
+      .filter((snapshot) => !snapshot.isSleeping)
+      .sort((left, right) => right.observedAt - left.observedAt)[0] ?? null;
 
   // Current state
   const latestInteraction = resolveLatestInteractionSnapshot(
@@ -516,20 +640,48 @@ export function analyzeMessages(
   );
   let lastSeenAt = latestInteraction.lastSeenAt;
   let lastSeenPlatform = latestInteraction.lastSeenPlatform;
+  if (latestHealthSnapshot) {
+    const healthBoundaryAt = latestHealthSnapshot.isSleeping
+      ? latestHealthSnapshot.sleepStartedAt ?? latestHealthSnapshot.observedAt
+      : latestHealthSnapshot.sleepEndedAt ?? latestHealthSnapshot.observedAt;
+    if (healthBoundaryAt > lastSeenAt) {
+      lastSeenAt = healthBoundaryAt;
+      lastSeenPlatform = latestHealthSnapshot.platform;
+    }
+  }
+  const isCurrentlySleeping = latestHealthSnapshot?.isSleeping === true;
+  const hasSleepData = healthSnapshots.length > 0;
+  const lastSleepSignalAt =
+    latestSleepingHealthSnapshot?.sleepStartedAt ??
+    latestSleepingHealthSnapshot?.observedAt ??
+    null;
+  const lastWakeSignalAt =
+    latestWakeHealthSnapshot?.sleepEndedAt ??
+    latestWakeHealthSnapshot?.observedAt ??
+    null;
   const hasOpenActivityCycle =
+    !isCurrentlySleeping &&
     lastSeenAt > 0 &&
     currentTime.getTime() - lastSeenAt <= SUSTAINED_INACTIVITY_GAP_MS;
   const currentActivityCycle =
     sessions.length > 0 ? sessions[sessions.length - 1] : null;
   const latestInteractionStartsNewCycle =
+    !isCurrentlySleeping &&
     lastSeenAt > 0 &&
     (!currentActivityCycle || lastSeenAt > currentActivityCycle.endAt);
   const currentActivityCycleStartedAt = latestInteractionStartsNewCycle
     ? lastSeenAt
-    : currentActivityCycle?.startAt ?? lastSeenAt;
+    : isCurrentlySleeping
+      ? null
+      : currentActivityCycle?.startAt ?? lastSeenAt;
   const currentActivityCycleLocalDate = latestInteractionStartsNewCycle
     ? localDateKeyForTimestamp(lastSeenAt, timezone)
-    : currentActivityCycle?.startDayKey ?? localDateKeyForTimestamp(lastSeenAt, timezone);
+    : isCurrentlySleeping
+      ? lastSleepSignalAt !== null
+        ? localDateKeyForTimestamp(lastSleepSignalAt, timezone)
+        : localDateKeyForTimestamp(currentTime.getTime(), timezone)
+      : currentActivityCycle?.startDayKey ??
+        localDateKeyForTimestamp(lastSeenAt, timezone);
 
   return {
     ownerEntityId,
@@ -547,16 +699,30 @@ export function analyzeMessages(
     typicalLastActiveHour,
     typicalWakeHour,
     typicalSleepHour,
+    hasSleepData,
+    isCurrentlySleeping,
+    lastSleepSignalAt,
+    lastWakeSignalAt,
+    sleepSourcePlatform: latestHealthSnapshot?.platform ?? null,
+    sleepSource: latestHealthSnapshot?.source ?? null,
+    typicalSleepDurationMinutes,
     lastSeenAt,
     lastSeenPlatform,
-    isCurrentlyActive: currentTime.getTime() - lastSeenAt < ACTIVE_THRESHOLD_MS,
+    isCurrentlyActive:
+      !isCurrentlySleeping &&
+      currentTime.getTime() - lastSeenAt < ACTIVE_THRESHOLD_MS,
     hasOpenActivityCycle,
     currentActivityCycleStartedAt,
     currentActivityCycleLocalDate,
     effectiveDayKey: hasOpenActivityCycle
       ? (currentActivityCycleLocalDate ??
         localDateKeyForTimestamp(currentTime.getTime(), timezone))
-      : localDateKeyForTimestamp(currentTime.getTime(), timezone),
+      : isCurrentlySleeping
+        ? currentActivityCycleLocalDate ??
+          (lastSleepSignalAt !== null
+            ? localDateKeyForTimestamp(lastSleepSignalAt, timezone)
+            : localDateKeyForTimestamp(currentTime.getTime(), timezone))
+        : localDateKeyForTimestamp(currentTime.getTime(), timezone),
     screenContextFocus: null,
     screenContextSource: null,
     screenContextSampledAt: null,
@@ -666,6 +832,9 @@ export function wasActiveToday(
     | "lastSeenAt"
     | "lastSeenPlatform"
     | "sustainedInactivityThresholdMinutes"
+    | "isCurrentlySleeping"
+    | "lastSleepSignalAt"
+    | "lastWakeSignalAt"
     | "screenContextAvailable"
     | "screenContextStale"
     | "screenContextFocus"

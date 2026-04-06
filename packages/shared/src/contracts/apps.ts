@@ -14,6 +14,20 @@ export type AppSessionFeature =
 export type AppSessionControlAction = "pause" | "resume";
 export type AppRunViewerAttachment = "attached" | "detached" | "unavailable";
 export type AppRunHealthState = "healthy" | "degraded" | "offline";
+export type AppRunCapabilityAvailability =
+  | "available"
+  | "unavailable"
+  | "unknown";
+export type AppRunEventKind =
+  | "launch"
+  | "refresh"
+  | "attach"
+  | "detach"
+  | "stop"
+  | "status"
+  | "summary"
+  | "health";
+export type AppRunEventSeverity = "info" | "warning" | "error";
 
 export type AppSessionJsonValue =
   | string
@@ -73,6 +87,39 @@ export interface AppRunHealth {
   message: string | null;
 }
 
+export interface AppRunHealthFacet {
+  state: AppRunHealthState | "unknown";
+  message: string | null;
+}
+
+export interface AppRunHealthDetails {
+  checkedAt: string | null;
+  auth: AppRunHealthFacet;
+  runtime: AppRunHealthFacet;
+  viewer: AppRunHealthFacet;
+  chat: AppRunHealthFacet;
+  control: AppRunHealthFacet;
+  message: string | null;
+}
+
+export interface AppRunEvent {
+  eventId: string;
+  kind: AppRunEventKind;
+  severity: AppRunEventSeverity;
+  message: string;
+  createdAt: string;
+  status?: string | null;
+  details?: Record<string, AppSessionJsonValue> | null;
+}
+
+export interface AppRunAwaySummary {
+  generatedAt: string;
+  message: string;
+  eventCount: number;
+  since: string | null;
+  until: string | null;
+}
+
 export interface AppRunSummary {
   runId: string;
   appName: string;
@@ -82,14 +129,22 @@ export interface AppRunSummary {
   launchUrl: string | null;
   viewer: AppViewerConfig | null;
   session: AppSessionState | null;
+  characterId: string | null;
+  agentId: string | null;
   status: string;
   summary: string | null;
   startedAt: string;
   updatedAt: string;
   lastHeartbeatAt: string | null;
   supportsBackground: boolean;
+  supportsViewerDetach: boolean;
+  chatAvailability: AppRunCapabilityAvailability;
+  controlAvailability: AppRunCapabilityAvailability;
   viewerAttachment: AppRunViewerAttachment;
+  recentEvents: AppRunEvent[];
+  awaySummary: AppRunAwaySummary | null;
   health: AppRunHealth;
+  healthDetails: AppRunHealthDetails;
 }
 
 export interface AppRunActionResult {

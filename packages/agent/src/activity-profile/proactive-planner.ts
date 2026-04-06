@@ -69,6 +69,9 @@ export function planGm(
   now?: Date,
 ): ProactiveAction | null {
   const currentTime = now ?? new Date();
+  if (profile.isCurrentlySleeping) {
+    return null;
+  }
 
   // Already fired today
   if (firedToday?.gmFiredAt) {
@@ -143,6 +146,9 @@ export function planGn(
   now?: Date,
 ): ProactiveAction | null {
   const currentTime = now ?? new Date();
+  if (profile.isCurrentlySleeping) {
+    return null;
+  }
 
   // Already fired today
   if (firedToday?.gnFiredAt) {
@@ -178,6 +184,9 @@ export function planNudges(
   now?: Date,
 ): ProactiveAction[] {
   const currentTime = now ?? new Date();
+  if (profile.isCurrentlySleeping) {
+    return [];
+  }
   const actions: ProactiveAction[] = [];
   const nudgedIds = new Set(firedToday?.nudgedOccurrenceIds ?? []);
   const nudgedEventIds = new Set(firedToday?.nudgedCalendarEventIds ?? []);
@@ -244,6 +253,9 @@ export function planDowntimeNudges(
   now?: Date,
 ): ProactiveAction[] {
   const currentTime = now ?? new Date();
+  if (profile.isCurrentlySleeping) {
+    return [];
+  }
   if (isBusyDay(profile, calendarEvents, timezone, currentTime)) {
     return [];
   }

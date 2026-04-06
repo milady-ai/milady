@@ -70,9 +70,9 @@ export const activityProfileProvider: Provider = {
       const metadata = isRecord(task?.metadata) ? task.metadata : null;
       const profile = readProfileFromMetadata(metadata);
 
-      if (profile) {
-        const parts: string[] = [];
-        const localDateKey = getLocalDateKey(getZonedDateParts(now, timezone));
+        if (profile) {
+          const parts: string[] = [];
+          const localDateKey = getLocalDateKey(getZonedDateParts(now, timezone));
 
         const hasActiveScreen =
           profile.screenContextAvailable &&
@@ -102,6 +102,11 @@ export const activityProfileProvider: Provider = {
           screenParts.push(screenAgo);
           parts.push(screenParts.join(" "));
         }
+        if (profile.isCurrentlySleeping) {
+          parts.push("sleeping");
+        } else if (profile.hasSleepData) {
+          parts.push("sleep data ready");
+        }
         parts.push(bucket);
         if (profile.effectiveDayKey !== localDateKey) {
           parts.push("previous day still open");
@@ -119,6 +124,11 @@ export const activityProfileProvider: Provider = {
             userHasOpenActivityCycle: profile.hasOpenActivityCycle,
             userTypicalWakeHour: profile.typicalWakeHour,
             userTypicalSleepHour: profile.typicalSleepHour,
+            userHasSleepData: profile.hasSleepData,
+            userIsSleeping: profile.isCurrentlySleeping,
+            userLastSleepSignalAt: profile.lastSleepSignalAt,
+            userLastWakeSignalAt: profile.lastWakeSignalAt,
+            userTypicalSleepDurationMinutes: profile.typicalSleepDurationMinutes,
             userScreenContextFocus: profile.screenContextFocus,
             userScreenContextSource: profile.screenContextSource,
             userScreenContextSampledAt: profile.screenContextSampledAt,
@@ -156,6 +166,11 @@ export const activityProfileProvider: Provider = {
         userScreenContextBusy: false,
         userScreenContextAvailable: false,
         userScreenContextStale: false,
+        userHasSleepData: false,
+        userIsSleeping: false,
+        userLastSleepSignalAt: null,
+        userLastWakeSignalAt: null,
+        userTypicalSleepDurationMinutes: null,
       },
       data: {},
     };

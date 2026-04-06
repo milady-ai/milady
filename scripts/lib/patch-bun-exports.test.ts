@@ -1414,6 +1414,47 @@ describe("patch-bun-exports", () => {
     }
   });
 
+  it("patchPtyManagerEsmDirnameCompat handles aliased path imports", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "patch-bun-exports-test-"));
+    try {
+      const pkgDir = join(tmp, "node_modules", "pty-manager", "dist");
+      const target = join(pkgDir, "index.mjs");
+      mkdirSync(pkgDir, { recursive: true });
+      writeFileSync(
+        target,
+        [
+          'var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : x)(function(x) {',
+          '  if (typeof require !== "undefined") return require.apply(this, arguments);',
+          `  throw Error('Dynamic require of "' + x + '" is not supported');`,
+          "});",
+          'import { execSync } from "child_process";',
+          'import { dirname, join as join2, relative } from "path";',
+          'const packageRoot = join2(__dirname, "..");',
+        ].join("\n"),
+        "utf8",
+      );
+      writeFileSync(
+        join(tmp, "node_modules", "pty-manager", "package.json"),
+        JSON.stringify({ name: "pty-manager" }, null, 2),
+        "utf8",
+      );
+
+      const patched = patchPtyManagerEsmDirnameCompat(tmp, () => {});
+
+      expect(patched).toBe(true);
+      const updated = readFileSync(target, "utf8");
+      expect(updated).toContain('import { fileURLToPath } from "url";');
+      expect(updated).toContain(
+        "const __dirname = dirname(fileURLToPath(import.meta.url));",
+      );
+      expect(updated).toContain(
+        "const __require = createRequire(import.meta.url);",
+      );
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
   it("patchPtyManagerCursorPositionCompat patches installed CJS, ESM, and worker files", () => {
     const tmp = mkdtempSync(join(tmpdir(), "patch-bun-exports-test-"));
     try {

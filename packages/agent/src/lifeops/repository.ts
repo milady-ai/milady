@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import type { IAgentRuntime } from "@elizaos/core";
 import type {
   LifeOpsActivitySignal,
+  LifeOpsHealthSignal,
   LifeOpsAuditEvent,
   LifeOpsBrowserSession,
   LifeOpsCalendarEvent,
@@ -348,9 +349,83 @@ function parseAuditEvent(row: Record<string, unknown>): LifeOpsAuditEvent {
   };
 }
 
+function parseOptionalFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return null;
+}
+
+function parseHealthSignal(value: unknown): LifeOpsHealthSignal | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+  const record = value as Record<string, unknown>;
+  const sleepRecord =
+    record.sleep && typeof record.sleep === "object" && !Array.isArray(record.sleep)
+      ? (record.sleep as Record<string, unknown>)
+      : null;
+  const biometricsRecord =
+    record.biometrics &&
+    typeof record.biometrics === "object" &&
+    !Array.isArray(record.biometrics)
+      ? (record.biometrics as Record<string, unknown>)
+      : null;
+  const permissionsRecord =
+    record.permissions &&
+    typeof record.permissions === "object" &&
+    !Array.isArray(record.permissions)
+      ? (record.permissions as Record<string, unknown>)
+      : null;
+
+  return {
+    source: toText(record.source, "healthkit") === "health_connect"
+      ? "health_connect"
+      : "healthkit",
+    permissions: {
+      sleep: toBoolean(permissionsRecord?.sleep ?? false),
+      biometrics: toBoolean(permissionsRecord?.biometrics ?? false),
+    },
+    sleep: {
+      available: toBoolean(sleepRecord?.available ?? false),
+      isSleeping: toBoolean(sleepRecord?.isSleeping ?? false),
+      asleepAt: sleepRecord?.asleepAt ? toText(sleepRecord.asleepAt) : null,
+      awakeAt: sleepRecord?.awakeAt ? toText(sleepRecord.awakeAt) : null,
+      durationMinutes: parseOptionalFiniteNumber(sleepRecord?.durationMinutes),
+      stage: sleepRecord?.stage ? toText(sleepRecord.stage) : null,
+    },
+    biometrics: {
+      sampleAt: biometricsRecord?.sampleAt ? toText(biometricsRecord.sampleAt) : null,
+      heartRateBpm: parseOptionalFiniteNumber(biometricsRecord?.heartRateBpm),
+      restingHeartRateBpm: parseOptionalFiniteNumber(
+        biometricsRecord?.restingHeartRateBpm,
+      ),
+      heartRateVariabilityMs: parseOptionalFiniteNumber(
+        biometricsRecord?.heartRateVariabilityMs,
+      ),
+      respiratoryRate: parseOptionalFiniteNumber(
+        biometricsRecord?.respiratoryRate,
+      ),
+      bloodOxygenPercent: parseOptionalFiniteNumber(
+        biometricsRecord?.bloodOxygenPercent,
+      ),
+    },
+    warnings: Array.isArray(record.warnings)
+      ? record.warnings.map((warning) => toText(warning)).filter((warning) => warning.length > 0)
+      : [],
+  };
+}
+
 function parseActivitySignal(
   row: Record<string, unknown>,
 ): LifeOpsActivitySignal {
+  const metadata = parseJsonRecord(row.metadata_json);
   return {
     id: toText(row.id),
     agentId: toText(row.agent_id),
@@ -369,7 +444,8 @@ function parseActivitySignal(
       row.on_battery === null || row.on_battery === undefined
         ? null
         : toBoolean(row.on_battery),
-    metadata: parseJsonRecord(row.metadata_json),
+    health: parseHealthSignal(metadata.health),
+    metadata,
     createdAt: toText(row.created_at),
   };
 }
@@ -2010,6 +2086,10 @@ export class LifeOpsRepository {
 
   async createActivitySignal(signal: LifeOpsActivitySignal): Promise<void> {
     await this.ensureReady();
+    const metadata =
+      signal.health !== null && signal.health !== undefined
+        ? { ...signal.metadata, health: signal.health }
+        : signal.metadata;
     await executeRawSql(
       this.runtime,
       `INSERT INTO life_activity_signals (
@@ -2025,7 +2105,7 @@ export class LifeOpsRepository {
         ${sqlText(signal.idleState)},
         ${sqlInteger(signal.idleTimeSeconds)},
         ${signal.onBattery === null ? "NULL" : sqlBoolean(signal.onBattery)},
-        ${sqlJson(signal.metadata)},
+        ${sqlJson(metadata)},
         ${sqlQuote(signal.createdAt)}
       )`,
     );
