@@ -90,6 +90,17 @@ runs:
       env:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
+    - name: Ensure published @elizaos/core is available
+      if: ${{ env.MILADY_SKIP_LOCAL_UPSTREAMS == '1' || env.ELIZA_SKIP_LOCAL_UPSTREAMS == '1' }}
+      shell: bash
+      run: |
+        if node -e "require.resolve('@elizaos/core')" >/dev/null 2>&1; then
+          echo "@elizaos/core already resolvable"
+        else
+          echo "@elizaos/core missing; installing published fallback for CI runtime imports"
+          bun add --no-save @elizaos/core@2.0.0-alpha.113
+        fi
+
     - name: Run repository postinstall patches
       if: ${{ inputs.run-postinstall == 'true' }}
       shell: bash
