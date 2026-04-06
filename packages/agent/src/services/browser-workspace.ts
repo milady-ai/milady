@@ -3,6 +3,21 @@ const DEFAULT_WEB_PARTITION = "persist:milady-browser";
 const DESKTOP_BRIDGE_UNAVAILABLE_MESSAGE =
   "Milady browser workspace desktop bridge is unavailable.";
 
+/**
+ * Simple async mutex to serialise mutations to webWorkspaceState.
+ * Prevents concurrent requests from corrupting the tab list or nextId counter.
+ */
+let webStateLock: Promise<void> = Promise.resolve();
+function withWebStateLock<T>(fn: () => T | Promise<T>): Promise<T> {
+  const next = webStateLock.then(fn, fn);
+  // Swallow rejections in the chain so the lock stays usable after errors.
+  webStateLock = next.then(
+    () => {},
+    () => {},
+  );
+  return next;
+}
+
 export type BrowserWorkspaceMode = "desktop" | "web";
 
 export type BrowserWorkspaceOperation =
@@ -245,15 +260,17 @@ export async function openBrowserWorkspaceTab(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<BrowserWorkspaceTab> {
   if (!isBrowserWorkspaceBridgeConfigured(env)) {
-    const tab = createWebBrowserWorkspaceTab(request);
-    if (tab.visible) {
-      webWorkspaceState.tabs = webWorkspaceState.tabs.map((entry) => ({
-        ...entry,
-        visible: false,
-      }));
-    }
-    webWorkspaceState.tabs = [...webWorkspaceState.tabs, tab];
-    return cloneBrowserWorkspaceTab(tab);
+    return withWebStateLock(() => {
+      const tab = createWebBrowserWorkspaceTab(request);
+      if (tab.visible) {
+        webWorkspaceState.tabs = webWorkspaceState.tabs.map((entry) => ({
+          ...entry,
+          visible: false,
+        }));
+      }
+      webWorkspaceState.tabs = [...webWorkspaceState.tabs, tab];
+      return cloneBrowserWorkspaceTab(tab);
+    });
   }
 
   const payload = await requestBrowserWorkspace<{ tab: BrowserWorkspaceTab }>(
@@ -272,21 +289,23 @@ export async function navigateBrowserWorkspaceTab(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<BrowserWorkspaceTab> {
   if (!isBrowserWorkspaceBridgeConfigured(env)) {
-    const index = getWebBrowserWorkspaceTabIndex(request.id);
-    if (index < 0) {
-      throw createBrowserWorkspaceNotFoundError(request.id);
-    }
+    return withWebStateLock(() => {
+      const index = getWebBrowserWorkspaceTabIndex(request.id);
+      if (index < 0) {
+        throw createBrowserWorkspaceNotFoundError(request.id);
+      }
 
-    const existing = webWorkspaceState.tabs[index];
-    const updatedAt = getBrowserWorkspaceTimestamp();
-    const nextTab: BrowserWorkspaceTab = {
-      ...existing,
-      title: inferBrowserWorkspaceTitle(request.url),
-      url: request.url,
-      updatedAt,
-    };
-    webWorkspaceState.tabs[index] = nextTab;
-    return cloneBrowserWorkspaceTab(nextTab);
+      const existing = webWorkspaceState.tabs[index];
+      const updatedAt = getBrowserWorkspaceTimestamp();
+      const nextTab: BrowserWorkspaceTab = {
+        ...existing,
+        title: inferBrowserWorkspaceTitle(request.url),
+        url: request.url,
+        updatedAt,
+      };
+      webWorkspaceState.tabs[index] = nextTab;
+      return cloneBrowserWorkspaceTab(nextTab);
+    });
   }
 
   const payload = await requestBrowserWorkspace<{ tab: BrowserWorkspaceTab }>(
@@ -305,15 +324,17 @@ export async function showBrowserWorkspaceTab(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<BrowserWorkspaceTab> {
   if (!isBrowserWorkspaceBridgeConfigured(env)) {
-    getWebBrowserWorkspaceTab(id);
-    const lastFocusedAt = getBrowserWorkspaceTimestamp();
-    webWorkspaceState.tabs = webWorkspaceState.tabs.map((tab) => ({
-      ...tab,
-      visible: tab.id === id,
-      lastFocusedAt: tab.id === id ? lastFocusedAt : tab.lastFocusedAt,
-      updatedAt: tab.id === id ? lastFocusedAt : tab.updatedAt,
-    }));
-    return cloneBrowserWorkspaceTab(getWebBrowserWorkspaceTab(id));
+    return withWebStateLock(() => {
+      getWebBrowserWorkspaceTab(id);
+      const lastFocusedAt = getBrowserWorkspaceTimestamp();
+      webWorkspaceState.tabs = webWorkspaceState.tabs.map((tab) => ({
+        ...tab,
+        visible: tab.id === id,
+        lastFocusedAt: tab.id === id ? lastFocusedAt : tab.lastFocusedAt,
+        updatedAt: tab.id === id ? lastFocusedAt : tab.updatedAt,
+      }));
+      return cloneBrowserWorkspaceTab(getWebBrowserWorkspaceTab(id));
+    });
   }
 
   const payload = await requestBrowserWorkspace<{ tab: BrowserWorkspaceTab }>(
@@ -329,19 +350,21 @@ export async function hideBrowserWorkspaceTab(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<BrowserWorkspaceTab> {
   if (!isBrowserWorkspaceBridgeConfigured(env)) {
-    const index = getWebBrowserWorkspaceTabIndex(id);
-    if (index < 0) {
-      throw createBrowserWorkspaceNotFoundError(id);
-    }
+    return withWebStateLock(() => {
+      const index = getWebBrowserWorkspaceTabIndex(id);
+      if (index < 0) {
+        throw createBrowserWorkspaceNotFoundError(id);
+      }
 
-    const updatedAt = getBrowserWorkspaceTimestamp();
-    const nextTab: BrowserWorkspaceTab = {
-      ...webWorkspaceState.tabs[index],
-      visible: false,
-      updatedAt,
-    };
-    webWorkspaceState.tabs[index] = nextTab;
-    return cloneBrowserWorkspaceTab(nextTab);
+      const updatedAt = getBrowserWorkspaceTimestamp();
+      const nextTab: BrowserWorkspaceTab = {
+        ...webWorkspaceState.tabs[index],
+        visible: false,
+        updatedAt,
+      };
+      webWorkspaceState.tabs[index] = nextTab;
+      return cloneBrowserWorkspaceTab(nextTab);
+    });
   }
 
   const payload = await requestBrowserWorkspace<{ tab: BrowserWorkspaceTab }>(
@@ -357,11 +380,13 @@ export async function closeBrowserWorkspaceTab(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<boolean> {
   if (!isBrowserWorkspaceBridgeConfigured(env)) {
-    const initialLength = webWorkspaceState.tabs.length;
-    webWorkspaceState.tabs = webWorkspaceState.tabs.filter(
-      (tab) => tab.id !== id,
-    );
-    return webWorkspaceState.tabs.length !== initialLength;
+    return withWebStateLock(() => {
+      const initialLength = webWorkspaceState.tabs.length;
+      webWorkspaceState.tabs = webWorkspaceState.tabs.filter(
+        (tab) => tab.id !== id,
+      );
+      return webWorkspaceState.tabs.length !== initialLength;
+    });
   }
 
   const payload = await requestBrowserWorkspace<{ closed?: boolean }>(
