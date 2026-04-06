@@ -30,6 +30,10 @@ inputs:
     description: "Set MILADY_NO_VISION_DEPS=1 for postinstall"
     required: false
     default: "false"
+  disable-local-eliza-workspace:
+    description: "Disable repo-local eliza workspace in CI when local upstreams are skipped"
+    required: false
+    default: "true"
 
 runs:
   using: "composite"
@@ -81,6 +85,7 @@ runs:
       run: node scripts/init-submodules.mjs
 
     - name: Disable repo-local eliza workspace
+      if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
       run: node scripts/disable-local-eliza-workspace.mjs
 

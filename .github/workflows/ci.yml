@@ -37,6 +37,7 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts
+          disable-local-eliza-workspace: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 
