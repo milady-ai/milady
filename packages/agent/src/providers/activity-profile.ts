@@ -80,7 +80,12 @@ export const activityProfileProvider: Provider = {
           profile.screenContextFocus !== "idle" &&
           profile.screenContextFocus !== "unknown";
 
-        if (!hasActiveScreen && profile.lastSeenPlatform && profile.lastSeenAt > 0) {
+        // Only include platform context when the message isn't from the
+        // web chat — otherwise the agent assumes the conversation is
+        // happening on that platform (e.g. "active on imessage" in a
+        // normal web chat makes it think it's an iMessage conversation).
+        const isDirectChat = source === "client_chat";
+        if (!hasActiveScreen && profile.lastSeenPlatform && profile.lastSeenAt > 0 && !isDirectChat) {
           const ago = formatAgo(now.getTime() - profile.lastSeenAt);
           parts.push(
             profile.isCurrentlyActive

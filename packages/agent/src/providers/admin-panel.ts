@@ -136,6 +136,16 @@ export function createAdminPanelProvider(): Provider {
         return empty;
       }
 
+      // Only inject web-chat history when the agent is responding within the
+      // web chat itself.  Surfacing it in connector channels (iMessage,
+      // Telegram, etc.) causes the agent to confuse which channel the current
+      // conversation is on.
+      const source = (message.content as Record<string, unknown> | undefined)
+        ?.source;
+      if (source && source !== "client_chat") {
+        return empty;
+      }
+
       const adminEntityId = await resolveOwnerEntityId(runtime, message);
       if (!adminEntityId) {
         return empty;
