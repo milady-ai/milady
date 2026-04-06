@@ -45,16 +45,18 @@ async function getBatterySnapshot(): Promise<{
   return {
     onBattery: !battery.charging,
     batteryLevel:
-      typeof battery.level === "number" ? Math.max(0, Math.min(1, battery.level)) : null,
+      typeof battery.level === "number"
+        ? Math.max(0, Math.min(1, battery.level))
+        : null,
     isCharging: battery.charging,
   };
 }
 
-async function buildSnapshot(
-  reason: string,
-): Promise<MobileSignalsSnapshot> {
+async function buildSnapshot(reason: string): Promise<MobileSignalsSnapshot> {
   const isVisible =
-    typeof document !== "undefined" ? document.visibilityState === "visible" : true;
+    typeof document !== "undefined"
+      ? document.visibilityState === "visible"
+      : true;
   const hasFocus =
     typeof document !== "undefined" && typeof document.hasFocus === "function"
       ? document.hasFocus()
@@ -100,7 +102,10 @@ export class MobileSignalsWeb extends WebPlugin implements MobileSignalsPlugin {
       };
       document.addEventListener("visibilitychange", handleVisibilityChange);
       this.cleanup.push(() =>
-        document.removeEventListener("visibilitychange", handleVisibilityChange),
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        ),
       );
     }
 

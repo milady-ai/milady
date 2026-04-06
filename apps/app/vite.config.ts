@@ -830,6 +830,10 @@ export default defineConfig({
     // Remap node: builtins to npm polyfills during dep optimization so
     // esbuild doesn't externalize them as "browser-external:node:*".
     esbuildOptions: {
+      // Keep dep pre-bundling on the same baseline as the app build.
+      // Vite's default optimizer target is "modules" (chrome87/safari14), which
+      // can trigger esbuild transform failures on modern dependency code.
+      target: "es2022",
       plugins: [
         {
           name: "node-builtins-polyfill",

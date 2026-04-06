@@ -76,6 +76,10 @@ runs:
         key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
         restore-keys: bun-${{ runner.os }}-
 
+    - name: Initialize required workspace submodules
+      shell: bash
+      run: git submodule update --init --recursive -- plugins/plugin-agent-orchestrator
+
     - name: Install dependencies
       shell: bash
       run: ${{ inputs.install-command }}
