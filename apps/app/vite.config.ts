@@ -830,6 +830,7 @@ export default defineConfig({
     // Remap node: builtins to npm polyfills during dep optimization so
     // esbuild doesn't externalize them as "browser-external:node:*".
     esbuildOptions: {
+      target: "es2022",
       plugins: [
         {
           name: "node-builtins-polyfill",

@@ -93,7 +93,7 @@ function TabScrollView({
 
 function TabContentView({ children }: { children: ReactNode }) {
   return (
-    <div className="flex-1 min-h-0 min-w-0 w-full overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden">
       {children}
     </div>
   );
