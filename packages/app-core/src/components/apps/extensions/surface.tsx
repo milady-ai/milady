@@ -48,18 +48,24 @@ export function formatDetailTimestamp(
 ): string {
   if (typeof value === "number") {
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "Not yet verified" : date.toLocaleString();
+    return Number.isNaN(date.getTime())
+      ? "Not yet verified"
+      : date.toLocaleString();
   }
 
   if (typeof value === "string" && value.trim().length > 0) {
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "Not yet verified" : date.toLocaleString();
+    return Number.isNaN(date.getTime())
+      ? "Not yet verified"
+      : date.toLocaleString();
   }
 
   return "Not yet verified";
 }
 
-export function toneForHealthState(state: AppRunHealthState | null | undefined): SurfaceTone {
+export function toneForHealthState(
+  state: AppRunHealthState | null | undefined,
+): SurfaceTone {
   if (state === "healthy") return "success";
   if (state === "degraded") return "warn";
   if (state === "offline") return "danger";
@@ -74,7 +80,9 @@ export function toneForViewerAttachment(
   return "neutral";
 }
 
-export function toneForStatusText(status: string | null | undefined): SurfaceTone {
+export function toneForStatusText(
+  status: string | null | undefined,
+): SurfaceTone {
   if (!status) return "neutral";
   const normalized = status.toLowerCase();
   if (normalized.includes("running") || normalized.includes("ready")) {
@@ -148,11 +156,7 @@ export function SurfaceCard({
   );
 }
 
-export function SurfaceGrid({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function SurfaceGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-2 md:grid-cols-2">{children}</div>;
 }
 
@@ -189,4 +193,3 @@ export function SurfaceEmptyState({
     </div>
   );
 }
-

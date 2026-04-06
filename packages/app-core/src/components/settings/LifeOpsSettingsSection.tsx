@@ -413,9 +413,7 @@ export function LifeOpsSettingsSection() {
   const agentConnector = useGoogleLifeOpsConnector({ side: "agent" });
   const apiBaseUrl = useMemo(() => resolveApiBaseUrl(), []);
   const t =
-    typeof translate === "function"
-      ? translate
-      : (key: string): string => key;
+    typeof translate === "function" ? translate : (key: string): string => key;
 
   return (
     <div className="space-y-4">

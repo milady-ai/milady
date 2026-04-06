@@ -26,9 +26,7 @@ vi.mock("../../../api", () => ({
 
 import { HyperscapeDetailExtension } from "./HyperscapeDetailExtension";
 
-function createApp(
-  overrides: Partial<RegistryAppInfo> = {},
-): RegistryAppInfo {
+function createApp(overrides: Partial<RegistryAppInfo> = {}): RegistryAppInfo {
   return {
     name: "@elizaos/app-hyperscape",
     displayName: "Hyperscape",
@@ -55,9 +53,7 @@ function createApp(
   };
 }
 
-function createRun(
-  overrides: Partial<AppRunSummary> = {},
-): AppRunSummary {
+function createRun(overrides: Partial<AppRunSummary> = {}): AppRunSummary {
   return {
     runId: "run-hyperscape-1",
     appName: "@elizaos/app-hyperscape",
@@ -240,7 +236,9 @@ describe("HyperscapeDetailExtension", () => {
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
-      tree = TestRenderer.create(<HyperscapeDetailExtension app={createApp()} />);
+      tree = TestRenderer.create(
+        <HyperscapeDetailExtension app={createApp()} />,
+      );
       await flushPromises();
       await flushPromises();
     });
@@ -300,4 +298,3 @@ describe("HyperscapeDetailExtension", () => {
     );
   });
 });
-

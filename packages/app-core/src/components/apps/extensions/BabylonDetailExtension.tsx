@@ -139,7 +139,10 @@ function listPreview(items: BabylonPredictionMarket[]): string {
   if (items.length === 0) return "Market data is not available yet.";
   return items
     .slice(0, 3)
-    .map((market) => `${market.title} (${market.yesPrice.toFixed(2)}/${market.noPrice.toFixed(2)})`)
+    .map(
+      (market) =>
+        `${market.title} (${market.yesPrice.toFixed(2)}/${market.noPrice.toFixed(2)})`,
+    )
     .join(" · ");
 }
 
@@ -185,7 +188,9 @@ export function BabylonDetailExtension({ app }: AppDetailExtensionProps) {
   const [sending, setSending] = useState(false);
 
   const activeGoal =
-    agentGoals.find((goal) => goal.status === "active") ?? agentGoals[0] ?? null;
+    agentGoals.find((goal) => goal.status === "active") ??
+    agentGoals[0] ??
+    null;
   const agentPortfolio = agentSummary?.portfolio ?? null;
   const teamTotals = teamDashboard.summary?.totals ?? null;
 
@@ -322,7 +327,9 @@ export function BabylonDetailExtension({ app }: AppDetailExtensionProps) {
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
           Babylon Operator Dashboard
         </div>
-        <SurfaceBadge tone={toneForStatusText(run.status)}>{run.status}</SurfaceBadge>
+        <SurfaceBadge tone={toneForStatusText(run.status)}>
+          {run.status}
+        </SurfaceBadge>
         <SurfaceBadge tone={toneForViewerAttachment(run.viewerAttachment)}>
           {run.viewerAttachment}
         </SurfaceBadge>
@@ -434,7 +441,9 @@ export function BabylonDetailExtension({ app }: AppDetailExtensionProps) {
                 ? "Ready for live suggestions."
                 : "Command bridge reconnecting."
             }
-            subtitle={formatDetailTimestamp(run.lastHeartbeatAt ?? run.updatedAt)}
+            subtitle={formatDetailTimestamp(
+              run.lastHeartbeatAt ?? run.updatedAt,
+            )}
           />
         </div>
         <div className="space-y-2">
@@ -481,7 +490,9 @@ export function BabylonDetailExtension({ app }: AppDetailExtensionProps) {
           />
           <SurfaceCard
             label="Wallet"
-            value={wallet ? formatCurrency(wallet.balance) : "Waiting for wallet"}
+            value={
+              wallet ? formatCurrency(wallet.balance) : "Waiting for wallet"
+            }
             subtitle={
               wallet
                 ? `${wallet.transactions.length} transactions · trading ${formatCurrency(tradingBalance)}`

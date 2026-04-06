@@ -290,7 +290,7 @@
     "lodash": "4.18.1",
     "lodash-es": "4.18.1",
     "underscore": "1.13.8",
-    "undici": "8.0.2",
+    "undici": "^7.21.0",
     "axios": "1.14.0",
     "defu": "6.1.6",
     "esbuild": "0.28.0"

@@ -54,30 +54,30 @@ const mocks = vi.hoisted(() => {
     warnings: [],
     metadata: { reason: "snapshot" },
   } as const;
-    return {
-      captureLifeOpsActivitySignal,
-      getMobileSignalsPlugin: vi.fn(() => ({
-        checkPermissions: vi.fn(async () => ({
-          status: "granted",
-          canRequest: true,
-          permissions: {
-            sleep: true,
-            biometrics: true,
-          },
-        })),
-        requestPermissions: vi.fn(async () => ({
-          status: "granted",
-          canRequest: false,
-          permissions: {
-            sleep: true,
-            biometrics: true,
-          },
-        })),
-        addListener: vi.fn(async (_eventName, listener) => {
-          mobileListeners.add(listener);
-          return {
-            remove: vi.fn(async () => {
-              mobileListeners.delete(listener);
+  return {
+    captureLifeOpsActivitySignal,
+    getMobileSignalsPlugin: vi.fn(() => ({
+      checkPermissions: vi.fn(async () => ({
+        status: "granted",
+        canRequest: true,
+        permissions: {
+          sleep: true,
+          biometrics: true,
+        },
+      })),
+      requestPermissions: vi.fn(async () => ({
+        status: "granted",
+        canRequest: false,
+        permissions: {
+          sleep: true,
+          biometrics: true,
+        },
+      })),
+      addListener: vi.fn(async (_eventName, listener) => {
+        mobileListeners.add(listener);
+        return {
+          remove: vi.fn(async () => {
+            mobileListeners.delete(listener);
           }),
         };
       }),
@@ -227,7 +227,10 @@ describe("useLifeOpsActivitySignals mobile bridge", () => {
         state: "sleeping",
         health: expect.objectContaining({
           source: "healthkit",
-          permissions: expect.objectContaining({ sleep: true, biometrics: true }),
+          permissions: expect.objectContaining({
+            sleep: true,
+            biometrics: true,
+          }),
         }),
       }),
     );

@@ -253,10 +253,7 @@ export function useLifeOpsActivitySignals(): void {
     const refreshMobileHealthSnapshot = async (
       reason: string,
     ): Promise<void> => {
-      if (
-        !mobileSignals ||
-        typeof mobileSignals.getSnapshot !== "function"
-      ) {
+      if (!mobileSignals || typeof mobileSignals.getSnapshot !== "function") {
         return;
       }
       const snapshot = await mobileSignals.getSnapshot();

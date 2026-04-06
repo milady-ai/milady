@@ -86,9 +86,7 @@ function findInput(
   root: TestRenderer.ReactTestInstance,
   testId: string,
 ): TestRenderer.ReactTestInstance {
-  const matches = root.findAll(
-    (node) => node.props["data-testid"] === testId,
-  );
+  const matches = root.findAll((node) => node.props["data-testid"] === testId);
   if (!matches[0]) {
     throw new Error(`Input "${testId}" not found`);
   }
@@ -190,7 +188,9 @@ describe("WebsiteBlockerSettingsCard", () => {
       await findButton(renderer.root, "Start Block").props.onClick();
       await flush();
     });
-    expect(flattenText(renderer.root)).toContain("Enter at least one website hostname");
+    expect(flattenText(renderer.root)).toContain(
+      "Enter at least one website hostname",
+    );
     expect(mockClient.startWebsiteBlock).not.toHaveBeenCalled();
 
     await act(async () => {

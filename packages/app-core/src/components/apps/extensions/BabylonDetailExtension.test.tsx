@@ -31,9 +31,7 @@ vi.mock("../../../api", () => ({
 
 import { BabylonDetailExtension } from "./BabylonDetailExtension";
 
-function createApp(
-  overrides: Partial<RegistryAppInfo> = {},
-): RegistryAppInfo {
+function createApp(overrides: Partial<RegistryAppInfo> = {}): RegistryAppInfo {
   return {
     name: "@elizaos/app-babylon",
     displayName: "Babylon",
@@ -60,9 +58,7 @@ function createApp(
   };
 }
 
-function createRun(
-  overrides: Partial<AppRunSummary> = {},
-): AppRunSummary {
+function createRun(overrides: Partial<AppRunSummary> = {}): AppRunSummary {
   return {
     runId: "run-babylon-1",
     appName: "@elizaos/app-babylon",
@@ -337,4 +333,3 @@ describe("BabylonDetailExtension", () => {
     );
   });
 });
-

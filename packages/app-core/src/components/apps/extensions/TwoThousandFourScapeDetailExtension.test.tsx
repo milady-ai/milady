@@ -21,9 +21,7 @@ vi.mock("../../../api", () => ({
 
 import { TwoThousandFourScapeDetailExtension } from "./TwoThousandFourScapeDetailExtension";
 
-function createApp(
-  overrides: Partial<RegistryAppInfo> = {},
-): RegistryAppInfo {
+function createApp(overrides: Partial<RegistryAppInfo> = {}): RegistryAppInfo {
   return {
     name: "@elizaos/app-2004scape",
     displayName: "2004scape",
@@ -50,9 +48,7 @@ function createApp(
   };
 }
 
-function createRun(
-  overrides: Partial<AppRunSummary> = {},
-): AppRunSummary {
+function createRun(overrides: Partial<AppRunSummary> = {}): AppRunSummary {
   return {
     runId: "run-2004-1",
     appName: "@elizaos/app-2004scape",

@@ -45,9 +45,7 @@ function createApp(
   };
 }
 
-function createRun(
-  overrides: Partial<AppRunSummary> = {},
-): AppRunSummary {
+function createRun(overrides: Partial<AppRunSummary> = {}): AppRunSummary {
   return {
     runId: "run-defense-1",
     appName: "@elizaos/app-defense-of-the-agents",

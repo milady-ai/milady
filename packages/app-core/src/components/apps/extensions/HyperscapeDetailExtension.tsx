@@ -62,24 +62,25 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
     [app.name, appRuns],
   );
 
-  const [embeddedAgents, setEmbeddedAgents] = useState<HyperscapeEmbeddedAgent[]>(
-    [],
-  );
+  const [embeddedAgents, setEmbeddedAgents] = useState<
+    HyperscapeEmbeddedAgent[]
+  >([]);
   const [activeAgent, setActiveAgent] =
     useState<HyperscapeEmbeddedAgent | null>(null);
   const [goal, setGoal] = useState<HyperscapeGoalState | null>(null);
-  const [availableGoals, setAvailableGoals] = useState<HyperscapeAvailableGoal[]>(
-    [],
-  );
+  const [availableGoals, setAvailableGoals] = useState<
+    HyperscapeAvailableGoal[]
+  >([]);
   const [quickCommands, setQuickCommands] = useState<HyperscapeQuickCommand[]>(
     [],
   );
-  const [nearbyLocations, setNearbyLocations] = useState<HyperscapeNearbyLocation[]>(
-    [],
-  );
+  const [nearbyLocations, setNearbyLocations] = useState<
+    HyperscapeNearbyLocation[]
+  >([]);
   const [inventory, setInventory] = useState<HyperscapeInventoryItem[]>([]);
-  const [playerPosition, setPlayerPosition] =
-    useState<[number, number, number] | null>(null);
+  const [playerPosition, setPlayerPosition] = useState<
+    [number, number, number] | null
+  >(null);
   const [operatorMessage, setOperatorMessage] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -129,7 +130,8 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
         client.getHyperscapeAgentQuickActions(nextActiveAgent.agentId),
       ]);
 
-      const quickActions = quickActionsResponse as HyperscapeQuickActionsResponse;
+      const quickActions =
+        quickActionsResponse as HyperscapeQuickActionsResponse;
       setGoal(goalResponse.goal);
       setAvailableGoals(
         Array.isArray(goalResponse.availableGoals)
@@ -148,7 +150,9 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
           ? quickActions.nearbyLocations
           : [],
       );
-      setInventory(Array.isArray(quickActions.inventory) ? quickActions.inventory : []);
+      setInventory(
+        Array.isArray(quickActions.inventory) ? quickActions.inventory : [],
+      );
       setPlayerPosition(quickActions.playerPosition ?? null);
       setStatusMessage(
         goalResponse.message ??
@@ -180,7 +184,8 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
 
   const handleSendMessage = useCallback(async () => {
     const content = operatorMessage.trim();
-    if (!run || !activeAgent?.agentId || content.length === 0 || sending) return;
+    if (!run || !activeAgent?.agentId || content.length === 0 || sending)
+      return;
 
     setSending(true);
     setStatusMessage(null);
@@ -209,7 +214,10 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
       setStatusMessage(null);
       try {
         if (controlCharacterId) {
-          await client.controlHyperscapeEmbeddedAgent(controlCharacterId, action);
+          await client.controlHyperscapeEmbeddedAgent(
+            controlCharacterId,
+            action,
+          );
         } else if (session?.sessionId) {
           await client.controlAppSession(app.name, session.sessionId, action);
         }
@@ -273,7 +281,9 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
           Hyperscape Embedded Control
         </div>
-        <SurfaceBadge tone={toneForStatusText(run.status)}>{run.status}</SurfaceBadge>
+        <SurfaceBadge tone={toneForStatusText(run.status)}>
+          {run.status}
+        </SurfaceBadge>
         <SurfaceBadge tone={toneForViewerAttachment(run.viewerAttachment)}>
           {run.viewerAttachment}
         </SurfaceBadge>
@@ -439,7 +449,10 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
               nearbyLocations.length > 0
                 ? nearbyLocations
                     .slice(0, 3)
-                    .map((location) => `${location.name} (${formatNumeric(location.distance)})`)
+                    .map(
+                      (location) =>
+                        `${location.name} (${formatNumeric(location.distance)})`,
+                    )
                     .join(" · ")
                 : "No nearby locations yet."
             }
@@ -497,7 +510,9 @@ export function HyperscapeDetailExtension({ app }: AppDetailExtensionProps) {
               className="min-h-11 rounded-xl px-4 shadow-sm"
               onClick={() => void handleSendMessage()}
               disabled={
-                sending || !activeAgent?.agentId || operatorMessage.trim().length === 0
+                sending ||
+                !activeAgent?.agentId ||
+                operatorMessage.trim().length === 0
               }
             >
               {sending ? "Sending" : "Send"}

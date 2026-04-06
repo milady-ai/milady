@@ -24,7 +24,8 @@ interface RecentActivityEntry {
 
 function formatTelemetryValue(value: AppSessionJsonValue | undefined): string {
   if (typeof value === "string") return value;
-  if (typeof value === "number") return Number.isFinite(value) ? `${value}` : "Unknown";
+  if (typeof value === "number")
+    return Number.isFinite(value) ? `${value}` : "Unknown";
   if (typeof value === "boolean") return value ? "true" : "false";
   if (value == null) return "Unavailable";
   if (Array.isArray(value)) return `${value.length} entries`;
@@ -36,21 +37,22 @@ function extractRecentActivity(
 ): RecentActivityEntry[] {
   const recentActivity = telemetry?.recentActivity;
   if (!Array.isArray(recentActivity)) return [];
-  const entries: Array<RecentActivityEntry | null> = recentActivity.map((entry) => {
-      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+  const entries: Array<RecentActivityEntry | null> = recentActivity.map(
+    (entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return null;
       const record = entry as Record<string, AppSessionJsonValue>;
       const normalizedEntry: RecentActivityEntry = {
-        action:
-          typeof record.action === "string" ? record.action : undefined,
-        detail:
-          typeof record.detail === "string" ? record.detail : undefined,
+        action: typeof record.action === "string" ? record.action : undefined,
+        detail: typeof record.detail === "string" ? record.detail : undefined,
         ts:
           typeof record.ts === "string" || typeof record.ts === "number"
             ? record.ts
             : undefined,
       };
       return normalizedEntry;
-    });
+    },
+  );
   return entries
     .filter((entry): entry is RecentActivityEntry => entry !== null)
     .slice(-4)
@@ -146,7 +148,9 @@ export function TwoThousandFourScapeDetailExtension({
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
           2004scape Operator Surface
         </div>
-        <SurfaceBadge tone={toneForStatusText(run.status)}>{run.status}</SurfaceBadge>
+        <SurfaceBadge tone={toneForStatusText(run.status)}>
+          {run.status}
+        </SurfaceBadge>
         <SurfaceBadge tone={toneForViewerAttachment(run.viewerAttachment)}>
           {run.viewerAttachment}
         </SurfaceBadge>
@@ -208,7 +212,9 @@ export function TwoThousandFourScapeDetailExtension({
           <SurfaceCard
             label="Goal"
             value={session?.goalLabel ?? "No goal recorded."}
-            subtitle={session?.summary ?? run.summary ?? "No session summary yet."}
+            subtitle={
+              session?.summary ?? run.summary ?? "No session summary yet."
+            }
           />
           <SurfaceCard
             label="Follow Target"
@@ -341,7 +347,9 @@ export function TwoThousandFourScapeDetailExtension({
             className="min-h-11 rounded-xl px-4 shadow-sm"
             onClick={() => void handleSendMessage()}
             disabled={
-              sending || !session?.sessionId || operatorMessage.trim().length === 0
+              sending ||
+              !session?.sessionId ||
+              operatorMessage.trim().length === 0
             }
           >
             {sending ? "Sending" : "Send"}

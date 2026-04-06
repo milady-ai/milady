@@ -102,8 +102,9 @@ vi.mock("@miladyai/ui", () => {
         React.createElement("div", null, heading ?? "Loading"),
       Notice: ({
         children,
-      }: React.PropsWithChildren<{ tone?: string } & Record<string, unknown>>) =>
-        React.createElement("div", null, children),
+      }: React.PropsWithChildren<
+        { tone?: string } & Record<string, unknown>
+      >) => React.createElement("div", null, children),
     }),
     SegmentedControl: ({
       items,
@@ -579,7 +580,9 @@ describe("LifeOpsWorkspaceView", () => {
       intent: "Draft a concise follow-up that moves the thread forward.",
       includeQuotedOriginal: true,
     });
-    expect(flattenText(renderer.root)).toContain("Thanks, I can review it today.");
+    expect(flattenText(renderer.root)).toContain(
+      "Thanks, I can review it today.",
+    );
 
     await act(async () => {
       findButton(renderer.root, "Send reply").props.onClick();

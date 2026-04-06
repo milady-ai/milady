@@ -226,11 +226,7 @@ function sortMessages(
   });
 }
 
-function ConnectorCard({
-  status,
-}: {
-  status: LifeOpsGoogleConnectorStatus;
-}) {
+function ConnectorCard({ status }: { status: LifeOpsGoogleConnectorStatus }) {
   const capabilities = capabilitySet(status);
   const identity = readIdentityLabel(status.identity);
   return (
@@ -466,7 +462,10 @@ export function LifeOpsWorkspaceView() {
   }, [pane]);
 
   const refreshAll = useCallback(async () => {
-    await Promise.all([ownerConnector.refresh({ silent: true }), agentConnector.refresh({ silent: true })]);
+    await Promise.all([
+      ownerConnector.refresh({ silent: true }),
+      agentConnector.refresh({ silent: true }),
+    ]);
   }, [agentConnector, ownerConnector]);
 
   const loadWorkspace = useCallback(async () => {
@@ -544,7 +543,9 @@ export function LifeOpsWorkspaceView() {
   );
   const selectedGmailMessage = useMemo(
     () =>
-      filteredGmailMessages.find((message) => message.id === selectedMessageId) ??
+      filteredGmailMessages.find(
+        (message) => message.id === selectedMessageId,
+      ) ??
       filteredGmailMessages[0] ??
       null,
     [filteredGmailMessages, selectedMessageId],
@@ -750,7 +751,14 @@ export function LifeOpsWorkspaceView() {
     } finally {
       setSending(false);
     }
-  }, [dataStatus, draft, draftBody, loadWorkspace, selectedGmailMessage, setActionNotice]);
+  }, [
+    dataStatus,
+    draft,
+    draftBody,
+    loadWorkspace,
+    selectedGmailMessage,
+    setActionNotice,
+  ]);
 
   const workspaceConnected = connectedConnectors.length > 0;
   const calendarSummary = calendarEvents.length;
@@ -881,7 +889,9 @@ export function LifeOpsWorkspaceView() {
           </PagePanel.Notice>
         ) : null}
 
-        {loading && calendarEvents.length === 0 && gmailMessages.length === 0 ? (
+        {loading &&
+        calendarEvents.length === 0 &&
+        gmailMessages.length === 0 ? (
           <PagePanel.Loading
             variant="surface"
             heading="Loading LifeOps workspace"
@@ -920,9 +930,7 @@ export function LifeOpsWorkspaceView() {
                 <input
                   type="checkbox"
                   checked={replyNeededOnly}
-                  onChange={(event) =>
-                    setReplyNeededOnly(event.target.checked)
-                  }
+                  onChange={(event) => setReplyNeededOnly(event.target.checked)}
                 />
                 Reply-needed only
               </label>
@@ -973,7 +981,10 @@ export function LifeOpsWorkspaceView() {
                   </div>
                   <div>
                     <span className="font-semibold text-txt">Received:</span>{" "}
-                    {formatLocalDateTime(selectedGmailMessage.receivedAt, timeZone)}
+                    {formatLocalDateTime(
+                      selectedGmailMessage.receivedAt,
+                      timeZone,
+                    )}
                   </div>
                 </DetailBlock>
 
@@ -985,7 +996,9 @@ export function LifeOpsWorkspaceView() {
                     <select
                       value={draftTone}
                       onChange={(event) =>
-                        setDraftTone(event.target.value as LifeOpsGmailDraftTone)
+                        setDraftTone(
+                          event.target.value as LifeOpsGmailDraftTone,
+                        )
                       }
                       className="min-h-11 w-full rounded-xl border border-border/60 bg-card/96 px-3 py-2 text-sm text-txt shadow-sm"
                     >
@@ -1024,7 +1037,9 @@ export function LifeOpsWorkspaceView() {
                     size="sm"
                     className="rounded-full px-4 text-[11px] font-semibold"
                     onClick={() => void handleGenerateDraft()}
-                    disabled={!dataCapabilities.has("google.gmail.triage") || drafting}
+                    disabled={
+                      !dataCapabilities.has("google.gmail.triage") || drafting
+                    }
                   >
                     {drafting ? "Drafting..." : "Generate draft"}
                   </Button>
@@ -1049,7 +1064,9 @@ export function LifeOpsWorkspaceView() {
                 {draft ? (
                   <DetailBlock title="Draft metadata">
                     <div>
-                      <span className="font-semibold text-txt">Send allowed:</span>{" "}
+                      <span className="font-semibold text-txt">
+                        Send allowed:
+                      </span>{" "}
                       {draft.sendAllowed ? "Yes" : "No"}
                     </div>
                     <div>
@@ -1164,7 +1181,10 @@ export function LifeOpsWorkspaceView() {
                   </div>
                   <div>
                     <span className="font-semibold text-txt">Starts:</span>{" "}
-                    {formatLocalDateTime(selectedCalendarEvent.startAt, timeZone)}
+                    {formatLocalDateTime(
+                      selectedCalendarEvent.startAt,
+                      timeZone,
+                    )}
                   </div>
                   <div>
                     <span className="font-semibold text-txt">Ends:</span>{" "}
@@ -1225,7 +1245,7 @@ export function LifeOpsWorkspaceView() {
                       <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
                         Title
                       </span>
-                    <Input
+                      <Input
                         data-testid="lifeops-create-event-title"
                         value={eventTitle}
                         onChange={(event) => setEventTitle(event.target.value)}
@@ -1276,7 +1296,9 @@ export function LifeOpsWorkspaceView() {
                       <Input
                         data-testid="lifeops-create-event-location"
                         value={eventLocation}
-                        onChange={(event) => setEventLocation(event.target.value)}
+                        onChange={(event) =>
+                          setEventLocation(event.target.value)
+                        }
                         placeholder="Conference room or link"
                       />
                     </label>
@@ -1302,7 +1324,8 @@ export function LifeOpsWorkspaceView() {
                       className="rounded-full px-4 text-[11px] font-semibold"
                       onClick={() => void handleCreateEvent()}
                       disabled={
-                        creatingEvent || !dataCapabilities.has("google.calendar.write")
+                        creatingEvent ||
+                        !dataCapabilities.has("google.calendar.write")
                       }
                     >
                       {creatingEvent ? "Creating..." : "Create event"}

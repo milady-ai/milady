@@ -36,13 +36,14 @@ describe("plugin-agent-skills catalog fetch patch", () => {
       registryUrl: "https://skills.example",
     });
 
-    const fetchMock = vi.fn(async () =>
-      new Response("rate limited", {
-        status: 429,
-        headers: {
-          "retry-after": "120",
-        },
-      }),
+    const fetchMock = vi.fn(
+      async () =>
+        new Response("rate limited", {
+          status: 429,
+          headers: {
+            "retry-after": "120",
+          },
+        }),
     );
     const originalFetch = globalThis.fetch;
     globalThis.fetch = fetchMock as typeof globalThis.fetch;

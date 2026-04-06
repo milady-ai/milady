@@ -94,7 +94,7 @@ const resolvePluginImportSpecifier:
   | undefined = ((_elizaExports as Record<string, unknown>)
   .resolveElizaPluginImportSpecifier ??
   (_elizaExports as Record<string, unknown>)
-  .resolveElizaPluginImportSpecifier) as
+    .resolveElizaPluginImportSpecifier) as
   | ((name: string, url?: string) => string)
   | undefined;
 const TELEGRAM_ACCOUNT_CLIENT_PLUGIN =
@@ -838,7 +838,9 @@ describe("collectPluginNames", () => {
 
   it("CHANNEL_PLUGIN_MAP covers every schema connector plugin entry", () => {
     for (const connectorId of Object.keys(CONNECTOR_PLUGINS)) {
-      expect(CHANNEL_PLUGIN_MAP[connectorId]).toBe(CONNECTOR_PLUGINS[connectorId]);
+      expect(CHANNEL_PLUGIN_MAP[connectorId]).toBe(
+        CONNECTOR_PLUGINS[connectorId],
+      );
     }
   });
 

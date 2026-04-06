@@ -161,9 +161,7 @@ describe("MiladyClient runtime API base/token fallback", () => {
 
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValue(
-        new Response(null, { status: 204 }),
-      );
+      .mockResolvedValue(new Response(null, { status: 204 }));
 
     const client = new TestClient();
     await client.request("/api/lifeops/activity-signals");

@@ -130,9 +130,7 @@ export interface MobileSignalsPluginLike extends NativePlugin {
       biometrics: boolean;
     };
   }>;
-  startMonitoring(options?: {
-    emitInitial?: boolean;
-  }): Promise<{
+  startMonitoring(options?: { emitInitial?: boolean }): Promise<{
     enabled: boolean;
     supported: boolean;
     platform: "ios" | "android" | "web";
