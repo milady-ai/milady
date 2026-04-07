@@ -79,7 +79,7 @@ class MobileSignalsPlugin : Plugin() {
             context.registerReceiver(receiver, filter)
             monitoring = true
             call.resolve(buildStartResult())
-            if (call.getBool("emitInitial") ?: true) {
+            if (call.getBoolean("emitInitial") ?: true) {
                 emitSignal("start")
                 emitHealthSignal("start")
             }
@@ -98,14 +98,14 @@ class MobileSignalsPlugin : Plugin() {
     }
 
     @PluginMethod
-    fun checkPermissions(call: PluginCall) {
+    override fun checkPermissions(call: PluginCall) {
         scope.launch {
             call.resolve(resolvePermissionResult())
         }
     }
 
     @PluginMethod
-    fun requestPermissions(call: PluginCall) {
+    override fun requestPermissions(call: PluginCall) {
         val sdkStatus = HealthConnectClient.getSdkStatus(context, HEALTH_CONNECT_PACKAGE)
         if (sdkStatus != HealthConnectClient.SDK_AVAILABLE) {
             call.resolve(buildPermissionResult(sdkStatus))
@@ -379,10 +379,10 @@ class MobileSignalsPlugin : Plugin() {
         }
 
         val latestHeartRate = heartRateSamples.maxByOrNull { it.time }
-        val latestHrv = hrvRecords.maxByOrNull { it.startTime }
+        val latestHrv = hrvRecords.maxByOrNull { it.time }
         val sampleAt = listOfNotNull(
             latestHeartRate?.time,
-            latestHrv?.startTime,
+            latestHrv?.time,
         ).maxOrNull()?.toEpochMilli()
 
         return makeHealthSnapshot(
@@ -468,7 +468,7 @@ class MobileSignalsPlugin : Plugin() {
         return JSObject().apply {
             put("source", "mobile_health")
             put("platform", "android")
-            put("state", if (sleep.getBool("isSleeping")) "sleeping" else "idle")
+            put("state", if (sleep.getBool("isSleeping") == true) "sleeping" else "idle")
             put("observedAt", System.currentTimeMillis())
             put("idleState", JSONObject.NULL)
             put("idleTimeSeconds", JSONObject.NULL)

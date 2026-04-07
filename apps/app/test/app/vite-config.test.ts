@@ -71,4 +71,27 @@ describe("app vite config", () => {
       define?.["import.meta.env.VITE_MILADY_SETTINGS_DEBUG"],
     ).toBeDefined();
   });
+
+  it("aliases capacitor mobile-signals to the local workspace source", async () => {
+    const loaded = await loadConfigFromFile(
+      { command: "build", mode: "test" },
+      CONFIG_PATH,
+      APP_DIR,
+    );
+    const aliases = loaded?.config.resolve?.alias;
+
+    expect(aliases).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          replacement: path.join(
+            APP_DIR,
+            "plugins",
+            "mobile-signals",
+            "src",
+            "index.ts",
+          ),
+        }),
+      ]),
+    );
+  });
 });

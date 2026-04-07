@@ -18,6 +18,7 @@ dependencies {
     implementation project(':miladyai-capacitor-canvas')
     implementation project(':miladyai-capacitor-gateway')
     implementation project(':miladyai-capacitor-location')
+    implementation project(':miladyai-capacitor-mobile-signals')
     implementation project(':miladyai-capacitor-screencapture')
     implementation project(':miladyai-capacitor-swabble')
     implementation project(':miladyai-capacitor-talkmode')

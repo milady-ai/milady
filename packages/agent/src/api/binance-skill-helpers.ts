@@ -150,6 +150,7 @@ export async function executeFallbackParsedActions(
   onActionCallback: (actionTag: string, hasText: boolean) => void,
   options?: {
     getCurrentText?: () => string;
+    onCallbackText?: (incoming: string) => void;
   },
 ): Promise<void> {
   const runtimeActions = Array.isArray(
@@ -213,7 +214,9 @@ export async function executeFallbackParsedActions(
               : "";
           callbackSeen = true;
           onActionCallback(actionTag, Boolean(chunk));
-          if (chunk) appendIncomingText(chunk);
+          if (chunk) {
+            (options?.onCallbackText ?? appendIncomingText)(chunk);
+          }
           return [];
         },
         [],

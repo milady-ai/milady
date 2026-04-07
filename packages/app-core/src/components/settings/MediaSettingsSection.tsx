@@ -26,26 +26,23 @@ import {
   CloudConnectionStatus,
   CloudSourceModeToggle,
 } from "../cloud/CloudSourceControls";
-import { VoiceConfigView } from "./VoiceConfigView";
-import {
-  DesktopMediaControlPanel,
-  ProviderModelSelectors,
-} from "./media-settings-providers";
+import { MusicPlayerSettingsPanel } from "./MusicPlayerSettingsPanel";
+import { ProviderModelSelectors } from "./media-settings-providers";
 import {
   CATEGORY_LABELS,
   COMPANION_HALF_FRAMERATE_OPTIONS,
   COMPANION_VRM_POWER_OPTIONS,
-  DESKTOP_MEDIA_CLICK_AUDIT,
+  getApiKeyField,
+  getNestedValue,
+  getProvidersForCategory,
   MEDIA_API_SOURCE_CATEGORY_KEYS,
   MEDIA_SEGMENT_BUTTON_ACTIVE_CLASSNAME,
   MEDIA_SEGMENT_BUTTON_CLASSNAME,
   MEDIA_SEGMENT_BUTTON_INACTIVE_CLASSNAME,
-  getApiKeyField,
-  getNestedValue,
-  getProvidersForCategory,
-  setNestedValue,
   type MediaCategory,
+  setNestedValue,
 } from "./media-settings-types";
+import { VoiceConfigView } from "./VoiceConfigView";
 
 // ── Re-exports (public API) ──────────────────────────────────────────
 
@@ -201,6 +198,8 @@ export function MediaSettingsSection() {
 
   return (
     <div className="flex flex-col gap-4">
+      <MusicPlayerSettingsPanel />
+
       {COMPANION_ENABLED && (
         <div
           className="rounded-xl border border-border bg-card/60 px-3 py-3 flex flex-col gap-3"

@@ -290,6 +290,7 @@ export default defineConfig({
       "packages/plugin-selfcontrol/src/**/*.test.ts",
       "packages/plugin-selfcontrol/src/**/*.test.ts",
       "packages/plugin-wechat/src/**/*.test.ts",
+      "packages/plugin-music-player/src/**/*.test.ts",
       "src/**/*.test.ts",
       "scripts/**/*.test.ts",
       "apps/app/electrobun/src/**/*.test.ts",

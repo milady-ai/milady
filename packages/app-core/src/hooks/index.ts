@@ -9,6 +9,7 @@ export * from "./useGoogleLifeOpsConnector";
 export * from "./useKeyboardShortcuts";
 export * from "./useLifeOpsActivitySignals";
 export * from "./useMediaQuery";
+export * from "./useMusicPlayer";
 export * from "./useRenderGuard";
 export * from "./useStreamPopoutNavigation";
 export * from "./useTimeout";

@@ -8,6 +8,7 @@ import { getDesktopManager } from "./desktop";
 import { getGatewayDiscovery } from "./gateway";
 import { getGpuWindowManager } from "./gpu-window";
 import { getLocationManager } from "./location";
+import { getMusicPlayerManager } from "./music-player";
 import { getPermissionManager } from "./permissions";
 import { getScreenCaptureManager } from "./screencapture";
 import { isStewardLocalEnabled, stopSteward } from "./steward";
@@ -53,6 +54,7 @@ export async function disposeNativeModules(): Promise<void> {
     ["screencapture", getScreenCaptureManager()],
     ["swabble", getSwabbleManager()],
     ["talkmode", getTalkModeManager()],
+    ["music-player", getMusicPlayerManager()],
   ] as const;
 
   // Stop steward sidecar if it was running

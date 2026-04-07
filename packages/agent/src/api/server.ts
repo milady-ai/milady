@@ -17,6 +17,7 @@ type StreamableServerResponse = Pick<
 >;
 
 const MAX_BODY_BYTES = 1024 * 1024; // 1 MB
+
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -173,26 +174,13 @@ import { parseClampedInteger } from "../utils/number-parsing.js";
 import { sanitizeSpeechText } from "../utils/spoken-text.js";
 import { handleAgentAdminRoutes } from "./agent-admin-routes.js";
 import { handleAgentLifecycleRoutes } from "./agent-lifecycle-routes.js";
-import { handleAgentStatusRoutes } from "./agent-status-routes.js";
-import { handleAvatarRoutes } from "./avatar-routes.js";
-import { handleChatRoutes } from "./chat-routes.js";
-import { handleConnectorRoutes } from "./connector-routes.js";
-import { handleConversationRoutes } from "./conversation-routes.js";
-import { handleDropRoutes } from "./drop-routes.js";
-import { handleMcpRoutes } from "./mcp-routes.js";
-import { handleMiscRoutes } from "./misc-routes.js";
-import { handleOnboardingRoutes } from "./onboarding-routes.js";
-import { handlePermissionsExtraRoutes } from "./permissions-routes-extra.js";
-import { handleProviderSwitchRoutes } from "./provider-switch-routes.js";
-import { handleTtsRoutes } from "./tts-routes.js";
-import { handleUpdateRoutes } from "./update-routes.js";
-import { handleWebsiteBlockerRoutes } from "./website-blocker-routes.js";
-import { handleWorkbenchRoutes } from "./workbench-routes.js";
 import { detectRuntimeModel, resolveProviderFromModel } from "./agent-model.js";
+import { handleAgentStatusRoutes } from "./agent-status-routes.js";
 import { handleAgentTransferRoutes } from "./agent-transfer-routes.js";
 import { handleAppPackageRoutes } from "./app-package-routes.js";
 import { handleAppsRoutes } from "./apps-routes.js";
 import { handleAuthRoutes } from "./auth-routes.js";
+import { handleAvatarRoutes } from "./avatar-routes.js";
 import {
   buildBscApproveUnsignedTx,
   buildBscBuyUnsignedTx,
@@ -205,6 +193,12 @@ import {
 import { handleBugReportRoutes } from "./bug-report-routes.js";
 import { handleBrowserWorkspaceRoutes } from "./browser-workspace-routes.js";
 import { handleCharacterRoutes } from "./character-routes.js";
+import {
+  generateChatResponse as generateChatResponseFromChatRoutes,
+  handleChatRoutes,
+  initSse as initSseFromChatRoutes,
+  writeSseJson as writeSseJsonFromChatRoutes,
+} from "./chat-routes.js";
 import { handleCloudBillingRoute } from "./cloud-billing-routes.js";
 import { handleCloudCompatRoute } from "./cloud-compat-routes.js";
 import { isCloudProvisionedContainer } from "./cloud-provisioning.js";
@@ -216,7 +210,10 @@ import {
   extractOpenAiSystemAndLastUser,
   resolveCompatRoomKey,
 } from "./compat-utils.js";
+import { handleConfigRoutes } from "./config-routes.js";
 import { ConnectorHealthMonitor } from "./connector-health.js";
+import { handleConnectorRoutes } from "./connector-routes.js";
+import { handleConversationRoutes } from "./conversation-routes.js";
 import type {
   SwarmEvent,
   TaskCompletionSummary,
@@ -229,11 +226,9 @@ import {
 } from "./credit-detection.js";
 import { handleDatabaseRoute } from "./database.js";
 import { handleDiagnosticsRoutes } from "./diagnostics-routes.js";
-import { handleSkillsRoutes } from "./skills-routes.js";
-import { handleHealthRoutes } from "./health-routes.js";
-import { handleConfigRoutes } from "./config-routes.js";
-import { handlePluginRoutes } from "./plugin-routes.js";
+import { handleDropRoutes } from "./drop-routes.js";
 import { DropService } from "./drop-service.js";
+import { handleHealthRoutes } from "./health-routes.js";
 import {
   readJsonBody as parseJsonBody,
   type ReadJsonBodyOptions,
@@ -243,8 +238,9 @@ import {
   sendJsonError,
 } from "./http-helpers.js";
 import { handleKnowledgeRoutes } from "./knowledge-routes.js";
-import { handleLifeOpsRoutes } from "./lifeops-routes.js";
 import { getKnowledgeService } from "./knowledge-service-loader.js";
+import { handleLifeOpsRoutes } from "./lifeops-routes.js";
+import { handleMcpRoutes } from "./mcp-routes.js";
 import {
   evictOldestConversation,
   getOrReadCachedFile,
@@ -253,14 +249,17 @@ import {
 } from "./memory-bounds.js";
 import { handleMemoryRoutes } from "./memory-routes.js";
 import { buildWhitelistTree, generateProof } from "./merkle-tree.js";
+import { handleMiscRoutes } from "./misc-routes.js";
 import { handleModelsRoutes } from "./models-routes.js";
 import { handleNfaRoutes } from "./nfa-routes.js";
-
+import { handleOnboardingRoutes } from "./onboarding-routes.js";
 import type {
   CoordinationLLMResponse,
   PTYService,
 } from "./parse-action-block.js";
 import { handlePermissionRoutes } from "./permissions-routes.js";
+import { handlePermissionsExtraRoutes } from "./permissions-routes-extra.js";
+import { handlePluginRoutes } from "./plugin-routes.js";
 import {
   type PluginParamInfo,
   validatePluginConfig,
@@ -269,19 +268,23 @@ import {
   applyOnboardingConnectionConfig,
   createProviderSwitchConnection,
 } from "./provider-switch-config.js";
+import { handleProviderSwitchRoutes } from "./provider-switch-routes.js";
 import { handleRegistryRoutes } from "./registry-routes.js";
 import { RegistryService } from "./registry-service.js";
+import { tryHandleRuntimePluginRoute } from "./runtime-plugin-routes.js";
 import { handleSandboxRoute } from "./sandbox-routes.js";
+import { hasPersistedOnboardingState } from "./server-helpers.js";
 import { applySignalQrOverride, handleSignalRoute } from "./signal-routes.js";
+import { discoverSkills } from "./skill-discovery-helpers.js";
+import { handleSkillsRoutes } from "./skills-routes.js";
 import { resolveStreamingUpdate } from "./streaming-text.js";
 import { handleSubscriptionRoutes } from "./subscription-routes.js";
 import { resolveTerminalRunLimits } from "./terminal-run-limits.js";
-import { hasPersistedOnboardingState } from "./server-helpers.js";
-// Workbench task/todo helpers moved to workbench-helpers.ts
 import { handleTrainingRoutes } from "./training-routes.js";
 import type { TrainingServiceWithRuntime } from "./training-service-like.js";
 import { handleTrajectoryRoute } from "./trajectory-routes.js";
 import { handleTriggerRoutes } from "./trigger-routes.js";
+import { handleTtsRoutes } from "./tts-routes.js";
 import {
   generateVerificationMessage,
   isAddressWhitelisted,
@@ -289,6 +292,8 @@ import {
   verifyTweet,
 } from "./twitter-verify.js";
 import { TxService } from "./tx-service.js";
+import { handleUpdateRoutes } from "./update-routes.js";
+import { handleWebsiteBlockerRoutes } from "./website-blocker-routes.js";
 import {
   fetchEvmBalances,
   fetchSolanaBalances,
@@ -302,7 +307,6 @@ import {
 import { handleWalletBscRoutes } from "./wallet-bsc-routes.js";
 import { handleWalletRoutes } from "./wallet-routes.js";
 import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
-import { discoverSkills } from "./skill-discovery-helpers.js";
 import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
 import {
   loadWalletTradingProfile,
@@ -315,62 +319,61 @@ import {
 } from "./whatsapp-routes.js";
 import { handleIMessageRoute } from "./imessage-routes.js";
 import { handleInboxRoute } from "./inbox-routes.js";
-import {
-  generateChatResponse as generateChatResponseFromChatRoutes,
-  initSse as initSseFromChatRoutes,
-  writeSseJson as writeSseJsonFromChatRoutes,
-} from "./chat-routes.js";
+import { handleWorkbenchRoutes } from "./workbench-routes.js";
+
 export {
-  isNoResponsePlaceholder,
+  executeFallbackParsedActions,
+  extractXmlParams,
+  type FallbackParsedAction,
+  inferBalanceChainFromText,
+  isBalanceIntent,
+  maybeHandleDirectBinanceSkillRequest,
+  parseFallbackActionBlocks,
+  shouldForceCheckBalanceFallback,
+} from "./binance-skill-helpers.js";
+export {
   isClientVisibleNoResponse,
+  isNoResponsePlaceholder,
   stripAssistantStageDirections,
 } from "./chat-text-helpers.js";
-export {
-  inferBalanceChainFromText,
-  shouldForceCheckBalanceFallback,
-  isBalanceIntent,
-  extractXmlParams,
-  parseFallbackActionBlocks,
-  executeFallbackParsedActions,
-  maybeHandleDirectBinanceSkillRequest,
-  type FallbackParsedAction,
-} from "./binance-skill-helpers.js";
+
 import type { FallbackParsedAction } from "./binance-skill-helpers.js";
 import {
-  getModelOptions,
   classifyModel,
+  getInventoryProviderOptions,
+  getModelOptions,
+  getOrFetchAllProviders,
+  getOrFetchProvider,
   paramKeyToCategory,
   providerCachePath,
   readProviderCache,
   writeProviderCache,
-  getOrFetchProvider,
-  getOrFetchAllProviders,
-  getInventoryProviderOptions,
 } from "./model-provider-helpers.js";
 import {
-  type PluginEntry,
-  type PluginParamDef,
-  type SecretEntry,
-  maskValue,
-  buildParamDefs,
+  AGENT_EVENT_ALLOWED_STREAMS,
   aggregateSecrets,
+  BLOCKED_ENV_KEYS,
+  buildParamDefs,
+  CONFIG_WRITE_ALLOWED_TOP_KEYS,
   categorizePlugin,
   discoverInstalledPlugins,
   discoverPluginsFromManifest,
-  getReleaseBundledPluginIds,
   formatPluginName,
-  resolvePluginSetupGuideUrl,
+  getReleaseBundledPluginIds,
+  maskValue,
   normalizeRepositoryUrl,
-  CONFIG_WRITE_ALLOWED_TOP_KEYS,
-  AGENT_EVENT_ALLOWED_STREAMS,
-  BLOCKED_ENV_KEYS,
+  type PluginEntry,
+  type PluginParamDef,
+  resolvePluginSetupGuideUrl,
+  type SecretEntry,
 } from "./plugin-discovery-helpers.js";
+
 // Re-export for downstream consumers (e.g. @miladyai/app-core)
 export {
+  AGENT_EVENT_ALLOWED_STREAMS,
+  CONFIG_WRITE_ALLOWED_TOP_KEYS,
   discoverInstalledPlugins,
   discoverPluginsFromManifest,
-  CONFIG_WRITE_ALLOWED_TOP_KEYS,
-  AGENT_EVENT_ALLOWED_STREAMS,
 } from "./plugin-discovery-helpers.js";
 
 type PiAiPluginModule = typeof import("@elizaos/plugin-pi-ai");
@@ -420,7 +423,50 @@ function requirePluginManager(runtime: AgentRuntime | null): PluginManagerLike {
   if (!isPluginManagerLike(service)) {
     throw new Error("Plugin manager service not found");
   }
-  return service;
+  return wrapPluginManagerWithLocalFallback(service);
+}
+
+/**
+ * The upstream plugin-plugin-manager has its own registry client that only
+ * fetches from GitHub and scans a `plugins/` dir for `elizaos.plugin.json`.
+ * Workspace-vendored plugins (under `packages/plugin-*`) are invisible to it.
+ * Wrap `installPlugin` so that when the upstream returns "not found in the
+ * registry" we retry using our own registry-client (which discovers workspace
+ * packages and node_modules symlinks).
+ */
+function wrapPluginManagerWithLocalFallback(
+  pm: PluginManagerLike,
+): PluginManagerLike {
+  const originalInstall = pm.installPlugin.bind(pm);
+  const wrapped: PluginManagerLike = Object.create(pm);
+
+  wrapped.installPlugin = async (pluginName, onProgress) => {
+    const result = await originalInstall(pluginName, onProgress);
+    if (result.success || !result.error?.includes("not found in the registry")) {
+      return result;
+    }
+
+    // Upstream registry missed it — check Milady's own local discovery.
+    const { getPluginInfo } = await import("../services/registry-client.js");
+    const localInfo = await getPluginInfo(pluginName);
+    if (!localInfo?.localPath) {
+      return result;
+    }
+
+    // The plugin is a workspace package — just return success pointing at it.
+    // The runtime already resolves it via NODE_PATH / bun workspace links so
+    // there is nothing to download; the caller only needs to enable it in
+    // config and restart.
+    return {
+      success: true,
+      pluginName: localInfo.name,
+      version: localInfo.npm.v2Version ?? localInfo.npm.v1Version ?? "workspace",
+      installPath: localInfo.localPath,
+      requiresRestart: true,
+    };
+  };
+
+  return wrapped;
 }
 
 function getPluginManagerForState(state: ServerState): PluginManagerLike {
@@ -794,7 +840,6 @@ export function findOwnPackageRoot(startDir: string): string {
   return startDir;
 }
 
-
 function removeResponseListener(
   res: StreamableServerResponse,
   event: "drain" | "error",
@@ -1020,6 +1065,7 @@ import {
   isAuthProtectedRoute,
   serveStaticUi,
 } from "./static-file-server.js";
+
 export { injectApiBaseIntoHtml };
 
 // Preserved for backward-compat — unused locally after extraction.
@@ -1077,14 +1123,14 @@ export function maybeAugmentChatMessageWithLanguage(
   };
 }
 
-
-export function getErrorMessage(err: unknown, fallback = "generation failed"): string {
+export function getErrorMessage(
+  err: unknown,
+  fallback = "generation failed",
+): string {
   if (err instanceof Error) return err.message;
   if (typeof err === "string") return err;
   return fallback;
 }
-
-
 
 const CHAT_KNOWLEDGE_MIN_SIMILARITY = 0.2;
 const CHAT_KNOWLEDGE_MAX_SNIPPETS = 3;
@@ -1296,7 +1342,6 @@ export async function maybeAugmentChatMessageWithKnowledge(
   }
 }
 
-
 interface ChatImageAttachment {
   /** Base64-encoded image data (no data URL prefix). */
   data: string;
@@ -1479,7 +1524,6 @@ export function buildUserMessages(params: {
     : userMessage;
   return { userMessage, messageToStore };
 }
-
 
 function parseBoundedLimit(rawLimit: string | null, fallback = 15): number {
   return parseClampedInteger(rawLimit, {
@@ -2656,7 +2700,9 @@ export function inferWalletExecutionFallback(
   );
 }
 
-export function hasUsableWalletFallbackParams(action: FallbackParsedAction): boolean {
+export function hasUsableWalletFallbackParams(
+  action: FallbackParsedAction,
+): boolean {
   const parameters = action.parameters ?? {};
   if (action.name === "TRANSFER_TOKEN") {
     return (
@@ -2750,8 +2796,17 @@ export function trimWalletProgressPrefix(text: string): string {
 const PLUGIN_CONFIG_RE =
   /\b(?:set\s*up|configure|connect|enable|install|setup)\b.*?\b(telegram|discord|twitter|slack|anthropic|openai|openrouter|groq|google|gemini|deepseek|mistral|together|grok|zai|ollama)\b|\b(telegram|discord|twitter|slack|anthropic|openai|openrouter|groq|google|gemini|deepseek|mistral|together|grok|zai|ollama)\b.*?\b(?:plugin|connector|set\s*up|configure|connect|enable|setup)\b/i;
 
-const PLUGIN_PARAMS: Record<string, Array<{ key: string; label: string; secret: boolean }>> = {
-  telegram: [{ key: "TELEGRAM_BOT_TOKEN", label: "Bot Token (from @BotFather)", secret: true }],
+const PLUGIN_PARAMS: Record<
+  string,
+  Array<{ key: string; label: string; secret: boolean }>
+> = {
+  telegram: [
+    {
+      key: "TELEGRAM_BOT_TOKEN",
+      label: "Bot Token (from @BotFather)",
+      secret: true,
+    },
+  ],
   discord: [
     { key: "DISCORD_API_TOKEN", label: "Bot Token", secret: true },
     {
@@ -2770,18 +2825,48 @@ const PLUGIN_PARAMS: Record<string, Array<{ key: string; label: string; secret: 
     { key: "SLACK_BOT_TOKEN", label: "Bot Token", secret: true },
     { key: "SLACK_SIGNING_SECRET", label: "Signing Secret", secret: true },
   ],
-  anthropic: [{ key: "ANTHROPIC_API_KEY", label: "API Key (console.anthropic.com)", secret: true }],
-  openai: [{ key: "OPENAI_API_KEY", label: "API Key (platform.openai.com)", secret: true }],
-  openrouter: [{ key: "OPENROUTER_API_KEY", label: "API Key (openrouter.ai)", secret: true }],
-  groq: [{ key: "GROQ_API_KEY", label: "API Key (console.groq.com)", secret: true }],
-  google: [{ key: "GOOGLE_GENERATIVE_AI_API_KEY", label: "API Key", secret: true }],
-  gemini: [{ key: "GOOGLE_GENERATIVE_AI_API_KEY", label: "API Key", secret: true }],
+  anthropic: [
+    {
+      key: "ANTHROPIC_API_KEY",
+      label: "API Key (console.anthropic.com)",
+      secret: true,
+    },
+  ],
+  openai: [
+    {
+      key: "OPENAI_API_KEY",
+      label: "API Key (platform.openai.com)",
+      secret: true,
+    },
+  ],
+  openrouter: [
+    {
+      key: "OPENROUTER_API_KEY",
+      label: "API Key (openrouter.ai)",
+      secret: true,
+    },
+  ],
+  groq: [
+    { key: "GROQ_API_KEY", label: "API Key (console.groq.com)", secret: true },
+  ],
+  google: [
+    { key: "GOOGLE_GENERATIVE_AI_API_KEY", label: "API Key", secret: true },
+  ],
+  gemini: [
+    { key: "GOOGLE_GENERATIVE_AI_API_KEY", label: "API Key", secret: true },
+  ],
   deepseek: [{ key: "DEEPSEEK_API_KEY", label: "API Key", secret: true }],
   mistral: [{ key: "MISTRAL_API_KEY", label: "API Key", secret: true }],
   together: [{ key: "TOGETHER_API_KEY", label: "API Key", secret: true }],
   grok: [{ key: "XAI_API_KEY", label: "API Key", secret: true }],
   zai: [{ key: "ZAI_API_KEY", label: "API Key", secret: true }],
-  ollama: [{ key: "OLLAMA_BASE_URL", label: "Ollama URL (e.g. http://localhost:11434)", secret: false }],
+  ollama: [
+    {
+      key: "OLLAMA_BASE_URL",
+      label: "Ollama URL (e.g. http://localhost:11434)",
+      secret: false,
+    },
+  ],
 };
 
 export async function resolvePluginConfigReply(
@@ -2799,7 +2884,10 @@ export async function resolvePluginConfigReply(
   const fieldIds: string[] = [];
   const state: Record<string, string> = { pluginId: pluginName };
 
-  elements.title = { type: "Heading", props: { level: 3, text: `Configure ${displayName}` } };
+  elements.title = {
+    type: "Heading",
+    props: { level: 3, text: `Configure ${displayName}` },
+  };
   elements.sep = { type: "Separator", props: {} };
 
   for (const param of params) {
@@ -2825,13 +2913,21 @@ export async function resolvePluginConfigReply(
       text: "Save & Enable",
       variant: "default",
       className: "font-semibold",
-      on: { press: { action: "plugin:save", params: { pluginId: pluginName } } },
+      on: {
+        press: { action: "plugin:save", params: { pluginId: pluginName } },
+      },
     },
   };
-  elements.actions = { type: "Stack", props: { direction: "row", gap: "2", children: ["saveBtn"] } };
+  elements.actions = {
+    type: "Stack",
+    props: { direction: "row", gap: "2", children: ["saveBtn"] },
+  };
   elements.root = {
     type: "Card",
-    props: { children: ["title", "sep", "fields", "actions"], className: "p-4 space-y-3" },
+    props: {
+      children: ["title", "sep", "fields", "actions"],
+      className: "p-4 space-y-3",
+    },
   };
 
   const spec = JSON.stringify({ version: 1, root: "root", elements, state });
@@ -3658,20 +3754,21 @@ export function decodePathComponent(
 
 // Workbench task/todo helpers — extracted to workbench-helpers.ts
 import {
-  WORKBENCH_TASK_TAG,
-  WORKBENCH_TODO_TAG,
   asObject,
+  isWorkbenchTodoTask,
   normalizeStringArray,
+  normalizeTags,
+  normalizeTaskId,
   normalizeTimestamp,
   parseNullableNumber,
-  readTaskMetadata,
-  normalizeTaskId,
   readTaskCompleted,
-  isWorkbenchTodoTask,
+  readTaskMetadata,
   toWorkbenchTask,
   toWorkbenchTodo,
-  normalizeTags,
+  WORKBENCH_TASK_TAG,
+  WORKBENCH_TODO_TAG,
 } from "./workbench-helpers.js";
+
 const _WORKBENCH_TASK_TAG = WORKBENCH_TASK_TAG;
 const _WORKBENCH_TODO_TAG = WORKBENCH_TODO_TAG;
 
@@ -4037,9 +4134,14 @@ function wireCoordinatorEventRouting(st: ServerState): boolean {
           rt.llmModeOption = "SMALL";
           let result: { text: string; agentName?: string };
           try {
-            result = await generateChatResponseFromChatRoutes(runtime, message, agentName, {
-              resolveNoResponseText: () => "I'll look into that.",
-            });
+            result = await generateChatResponseFromChatRoutes(
+              runtime,
+              message,
+              agentName,
+              {
+                resolveNoResponseText: () => "I'll look into that.",
+              },
+            );
           } finally {
             rt.llmModeOption = prevLlmMode;
           }
@@ -4796,7 +4898,8 @@ async function handleRequest(
       getCloudProviderOptions: getCloudProviderOptions as any,
       getModelOptions: getModelOptions as any,
       getInventoryProviderOptions: getInventoryProviderOptions as any,
-      resolveConfiguredCharacterLanguage: resolveConfiguredCharacterLanguage as any,
+      resolveConfiguredCharacterLanguage:
+        resolveConfiguredCharacterLanguage as any,
       normalizeCharacterLanguage: normalizeCharacterLanguage as any,
       readUiLanguageHeader: readUiLanguageHeader as any,
       applyOnboardingVoicePreset: applyOnboardingVoicePreset as any,
@@ -5400,7 +5503,6 @@ async function handleRequest(
     return;
   }
 
-
   // ── Avatar routes (extracted to avatar-routes.ts) ───────────────────
   if (
     await handleAvatarRoutes({
@@ -5415,14 +5517,10 @@ async function handleRequest(
     return;
   }
 
-
   // ═══════════════════════════════════════════════════════════════════════
   // Config routes (extracted to config-routes.ts)
   // ═══════════════════════════════════════════════════════════════════════
-  if (
-    pathname === "/api/config" ||
-    pathname === "/api/config/schema"
-  ) {
+  if (pathname === "/api/config" || pathname === "/api/config/schema") {
     if (
       await handleConfigRoutes({
         req,
@@ -5448,8 +5546,6 @@ async function handleRequest(
     }
   }
 
-
-
   // ── Permissions extra routes (extracted to permissions-routes-extra.ts) ──
   if (
     await handlePermissionsExtraRoutes({
@@ -5470,8 +5566,6 @@ async function handleRequest(
   ) {
     return;
   }
-
-
 
   if (
     await handlePermissionRoutes({
@@ -5551,7 +5645,8 @@ async function handleRequest(
         resolvePrimaryBscRpcUrl,
         buildBscTradePreflight,
         buildBscTradeQuote,
-        updateWalletTradeLedgerEntryStatus: updateWalletTradeLedgerEntryStatus as any,
+        updateWalletTradeLedgerEntryStatus:
+          updateWalletTradeLedgerEntryStatus as any,
         loadWalletTradingProfile: loadWalletTradingProfile as any,
         resolveTradePermissionMode,
         isAgentAutomationRequest,
@@ -5684,7 +5779,6 @@ async function handleRequest(
     });
     if (handled) return;
   }
-
 
   // ── Database management API ─────────────────────────────────────────────
   if (pathname.startsWith("/api/database/")) {
@@ -6004,6 +6098,20 @@ async function handleRequest(
     return;
   }
 
+  // ── elizaOS plugin HTTP routes (runtime.routes, e.g. /music-player/*) ───
+  if (
+    await tryHandleRuntimePluginRoute({
+      req,
+      res,
+      method,
+      pathname,
+      url,
+      runtime: state.runtime,
+      isAuthorized: () => isAuthorized(req),
+    })
+  ) {
+    return;
+  }
 
   // ── Connector plugin routes (dynamically registered) ────────────────────
   for (const handler of state.connectorRouteHandlers) {

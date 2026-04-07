@@ -29,6 +29,9 @@ project(':miladyai-capacitor-gateway').projectDir = new File('../plugins/gateway
 include ':miladyai-capacitor-location'
 project(':miladyai-capacitor-location').projectDir = new File('../plugins/location/android')
 
+include ':miladyai-capacitor-mobile-signals'
+project(':miladyai-capacitor-mobile-signals').projectDir = new File('../plugins/mobile-signals/android')
+
 include ':miladyai-capacitor-screencapture'
 project(':miladyai-capacitor-screencapture').projectDir = new File('../plugins/screencapture/android')
 

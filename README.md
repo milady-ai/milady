@@ -18,6 +18,10 @@ Milady is **not** a full IDE: the product bet is **fewer wasted GPU frames and w
 
 If the **VRM** or **Gaussian splat** background fails only in the **desktop** build, the usual cause is **two copies of `three`** in the bundle (nested `node_modules` vs repo root), which breaks Spark’s **`splatDefines`** shader chunk. Milady forces **one** Three resolution path in Vite and isolates world-load failures so the **avatar** can still load. **Why it matters:** the companion is an **agent surface** (visibility + voice sync), not decoration. See **[Desktop VRM, Three.js, and Spark — WHYs](docs/apps/desktop-vrm-three-and-spark.md)**.
 
+### Dashboard chat: progressive action updates
+
+When **actions** call `HandlerCallback` several times in one turn (same idea as Discord **progressive messages**), the Milady API **replaces** the last action-produced segment in the SSE stream instead of concatenating every status line. **Why:** Live status should read like **edits to one message**, not a glued blob. The elizaOS contract stays **`callback({ text, source })`**. **Docs:** [Action callbacks and SSE streaming](docs/runtime/action-callback-streaming.md).
+
 ---
 
 ## BSC / BNB Chain Integration

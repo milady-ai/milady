@@ -98,6 +98,20 @@ function resolveWorkspaceRoots(): string[] {
     path.resolve(cwd, ".."),
     path.resolve(cwd, "..", ".."),
   ].filter((candidate): candidate is string => Boolean(candidate));
+
+  // Monorepos (e.g. Milady) hoist `@elizaos/*` under the repo root, while this
+  // module lives in `packages/agent`. When the process cwd is deep (`apps/...`,
+  // Electrobun bundle, etc.), cwd-based roots never reach that `node_modules`.
+  // Walk up from the agent package so `getPluginInfo` can resolve vendored
+  // workspace plugins for install.
+  let walk = path.resolve(packageRoot);
+  for (let depth = 0; depth < 8; depth += 1) {
+    roots.push(walk);
+    const parent = path.dirname(walk);
+    if (parent === walk) break;
+    walk = parent;
+  }
+
   return uniquePaths(roots);
 }
 
@@ -526,10 +540,104 @@ async function discoverNodeModulePlugins(): Promise<
   return discovered;
 }
 
+/** Workspace-vendored `packages/plugin-*` trees (not always linked under root node_modules). */
+async function discoverPackagesFolderPlugins(): Promise<
+  Map<string, RegistryPluginInfo>
+> {
+  const discovered = new Map<string, RegistryPluginInfo>();
+
+  for (const workspaceRoot of resolveWorkspaceRoots()) {
+    const packagesDir = path.join(workspaceRoot, "packages");
+    let entries: Array<import("node:fs").Dirent>;
+    try {
+      entries = await fs.readdir(packagesDir, { withFileTypes: true });
+    } catch (err) {
+      logger.debug(
+        `[registry] could not read packages dir ${packagesDir}: ${err}`,
+      );
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (!entry.name.startsWith("plugin-")) continue;
+      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+
+      const packageDir = path.join(packagesDir, entry.name);
+      const packageJson = await readJsonFile<
+        LocalPackageJson & {
+          packageType?: string;
+          keywords?: string[];
+          agentConfig?: Record<string, unknown>;
+        }
+      >(path.join(packageDir, "package.json"));
+      if (!packageJson?.name) continue;
+
+      const isPlugin =
+        packageJson.packageType === "plugin" ||
+        packageJson.keywords?.includes("elizaos") ||
+        packageJson.elizaos !== undefined ||
+        packageJson.agentConfig !== undefined;
+      if (!isPlugin) continue;
+      if (packageJson.elizaos?.kind === "app") continue;
+      if (!packageJson.name.startsWith("@elizaos/plugin-")) continue;
+
+      const repo = parseRepositoryMetadata(packageJson.repository);
+      const version = packageJson.version ?? null;
+
+      let localPath = packageDir;
+      try {
+        const realPath = await fs.realpath(packageDir);
+        if (realPath !== packageDir) localPath = realPath;
+      } catch {
+        // fallback
+      }
+
+      discovered.set(packageJson.name, {
+        name: packageJson.name,
+        gitRepo: repo.gitRepo,
+        gitUrl: repo.gitUrl,
+        description: packageJson.description ?? "",
+        homepage: packageJson.homepage ?? null,
+        topics: normalizeLocalTags(packageJson.keywords),
+        stars: 0,
+        language: "TypeScript",
+        npm: {
+          package: packageJson.name,
+          v0Version: null,
+          v1Version: null,
+          v2Version: version,
+        },
+        git: {
+          v0Branch: null,
+          v1Branch: null,
+          v2Branch: "main",
+        },
+        supports: { v0: false, v1: false, v2: true },
+        localPath,
+      });
+    }
+  }
+
+  return discovered;
+}
+
 export async function applyNodeModulePlugins(
   plugins: Map<string, RegistryPluginInfo>,
 ): Promise<void> {
   const localPlugins = await discoverNodeModulePlugins();
+  const packagesPlugins = await discoverPackagesFolderPlugins();
+
+  for (const [name, info] of packagesPlugins) {
+    if (!localPlugins.has(name)) {
+      localPlugins.set(name, info);
+    } else {
+      const existing = localPlugins.get(name);
+      if (existing && !existing.localPath && info.localPath) {
+        localPlugins.set(name, { ...existing, localPath: info.localPath });
+      }
+    }
+  }
+
   if (localPlugins.size === 0) return;
 
   for (const [name, localInfo] of localPlugins.entries()) {

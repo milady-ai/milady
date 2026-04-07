@@ -518,10 +518,11 @@ function inferPluginParameters(configKeys) {
       : isNumberKey(key)
         ? "number"
         : "string";
+    // Do not infer required=true from _API_KEY — many plugins expose optional
+    // third-party enrichers (e.g. music metadata) where any subset may be set.
     const required =
       sensitive &&
-      (key.toUpperCase().endsWith("_API_KEY") ||
-        key.toUpperCase().endsWith("_BOT_TOKEN") ||
+      (key.toUpperCase().endsWith("_BOT_TOKEN") ||
         key.toUpperCase().endsWith("_TOKEN") ||
         key.toUpperCase().endsWith("_PRIVATE_KEY"));
     params[key] = {
@@ -691,6 +692,83 @@ async function main() {
         ? { icon: existingEntry?.icon ?? localMeta.icon }
         : {}),
     });
+  }
+
+  // Milady-vendored @elizaos plugins not yet in elizaos-plugins/registry.
+  const localAdditionsPath = path.join(
+    __dirname,
+    "plugin-index-local-additions.json",
+  );
+  if (fs.existsSync(localAdditionsPath)) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(localAdditionsPath, "utf8"));
+      const list = Array.isArray(raw) ? raw : raw.plugins || [];
+      for (const base of list) {
+        if (!base?.id || entries.some((e) => e.id === base.id)) continue;
+        const id = base.id;
+        const dirName = base.dirName || `plugin-${id}`;
+        const npmName = base.npmName || `@elizaos/plugin-${id}`;
+        const localMeta = readLocalPackageMetadata(dirName, npmName);
+        const override = metadataOverrides[id] ?? {};
+        const inferredCategory = categorize(id);
+        const category =
+          inferredCategory === "feature" && base.category
+            ? base.category
+            : inferredCategory;
+        const configKeys =
+          Array.isArray(override.configKeys) && override.configKeys.length > 0
+            ? override.configKeys
+            : Array.isArray(base.configKeys)
+              ? base.configKeys
+              : [];
+        const envKey =
+          typeof base.envKey === "string"
+            ? base.envKey
+            : findEnvKey(configKeys);
+        const description =
+          override.description ||
+          localMeta.description ||
+          base.description ||
+          inferDescription(id, base.name || formatName(id), category);
+        const tags = mergeTags(
+          override.tags,
+          localMeta.tags,
+          CATEGORY_TAGS[category] ?? [],
+          category === "connector" ? connectorTags(id) : [],
+          idTags(id),
+          base.tags,
+        );
+        let finalPluginParams = base.pluginParameters;
+        if (!finalPluginParams && configKeys.length > 0) {
+          finalPluginParams = inferPluginParameters(configKeys);
+        }
+        entries.push({
+          id,
+          dirName,
+          name: base.name || formatName(id),
+          npmName,
+          description,
+          tags,
+          category,
+          envKey,
+          configKeys,
+          version: base.version || undefined,
+          pluginDeps:
+            Array.isArray(base.pluginDeps) && base.pluginDeps.length > 0
+              ? base.pluginDeps
+              : undefined,
+          pluginParameters: finalPluginParams,
+          ...(base.repository || localMeta.repository
+            ? { repository: base.repository ?? localMeta.repository }
+            : {}),
+          ...(base.homepage || localMeta.homepage
+            ? { homepage: base.homepage ?? localMeta.homepage }
+            : {}),
+        });
+      }
+    } catch (err) {
+      console.warn(`[generate-plugin-index] local additions: ${err.message}`);
+    }
   }
 
   for (const [id, existingEntry] of existingManifest.entries()) {

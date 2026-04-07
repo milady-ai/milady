@@ -58,11 +58,11 @@ public class MobileSignalsPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve(["stopped": true])
     }
 
-    @objc func checkPermissions(_ call: CAPPluginCall) {
+    @objc public override func checkPermissions(_ call: CAPPluginCall) {
         call.resolve(buildPermissionResult())
     }
 
-    @objc func requestPermissions(_ call: CAPPluginCall) {
+    @objc public override func requestPermissions(_ call: CAPPluginCall) {
         let types = requestedHealthTypes()
         guard !types.isEmpty else {
             call.resolve(buildPermissionResult(
@@ -105,7 +105,7 @@ public class MobileSignalsPlugin: CAPPlugin, CAPBridgedPlugin {
             UIApplication.willEnterForegroundNotification,
             UIApplication.protectedDataDidBecomeAvailableNotification,
             UIApplication.protectedDataWillBecomeUnavailableNotification,
-            ProcessInfo.powerStateDidChangeNotification,
+            Notification.Name.NSProcessInfoPowerStateDidChange,
             UIDevice.batteryStateDidChangeNotification,
         ]
 
@@ -218,7 +218,7 @@ public class MobileSignalsPlugin: CAPPlugin, CAPBridgedPlugin {
         return [
             "status": status,
             "canRequest": overrideCanRequest ?? (status != "granted" && hasRequestedTypes),
-            "reason": overrideReason,
+            "reason": overrideReason ?? NSNull(),
             "permissions": [
                 "sleep": sleepGranted,
                 "biometrics": biometricGranted,
@@ -330,7 +330,7 @@ public class MobileSignalsPlugin: CAPPlugin, CAPBridgedPlugin {
                         "respiratoryRate": NSNull(),
                         "bloodOxygenPercent": NSNull(),
                     ],
-                    warnings: ["HealthKit is not available on this device"],
+                    warnings: ["HealthKit is not available on this device"]
                 )
             ))
             return
@@ -516,7 +516,7 @@ public class MobileSignalsPlugin: CAPPlugin, CAPBridgedPlugin {
                         "asleepAt": asleepAt.map { Int64($0.timeIntervalSince1970 * 1000) } ?? NSNull(),
                         "awakeAt": awakeAt.map { Int64($0.timeIntervalSince1970 * 1000) } ?? NSNull(),
                         "durationMinutes": durationMinutes.map { Int64($0.rounded()) } ?? NSNull(),
-                        "stage": stage ?? NSNull(),
+                        "stage": stage,
                     ],
                     biometrics: [
                         "sampleAt": NSNull(),
@@ -603,35 +603,38 @@ public class MobileSignalsPlugin: CAPPlugin, CAPBridgedPlugin {
                 latestRespiratoryRate?.at,
                 latestBloodOxygen?.at,
             ].compactMap { $0 }.sorted().last
+            let hasBiometrics =
+                latestHeartRate != nil ||
+                latestRestingHeartRate != nil ||
+                latestHrv != nil ||
+                latestRespiratoryRate != nil ||
+                latestBloodOxygen != nil
+            let sleep: [String: Any] = [
+                "available": false,
+                "isSleeping": false,
+                "asleepAt": NSNull(),
+                "awakeAt": NSNull(),
+                "durationMinutes": NSNull(),
+                "stage": NSNull(),
+            ]
+            let biometrics: [String: Any] = [
+                "sampleAt": sampleAt.map { Int64($0.timeIntervalSince1970 * 1000) } ?? NSNull(),
+                "heartRateBpm": latestHeartRate.map { Int64($0.value.rounded()) } ?? NSNull(),
+                "restingHeartRateBpm": latestRestingHeartRate.map { Int64($0.value.rounded()) } ?? NSNull(),
+                "heartRateVariabilityMs": latestHrv?.value ?? NSNull(),
+                "respiratoryRate": latestRespiratoryRate?.value ?? NSNull(),
+                "bloodOxygenPercent": latestBloodOxygen?.value ?? NSNull(),
+            ]
 
             completion(
                 HealthCapture(
                     source: "healthkit",
                     permissions: [
                         "sleep": false,
-                        "biometrics":
-                            latestHeartRate != nil ||
-                            latestRestingHeartRate != nil ||
-                            latestHrv != nil ||
-                            latestRespiratoryRate != nil ||
-                            latestBloodOxygen != nil,
+                        "biometrics": hasBiometrics,
                     ],
-                    sleep: [
-                        "available": false,
-                        "isSleeping": false,
-                        "asleepAt": NSNull(),
-                        "awakeAt": NSNull(),
-                        "durationMinutes": NSNull(),
-                        "stage": NSNull(),
-                    ],
-                    biometrics: [
-                        "sampleAt": sampleAt.map { Int64($0.timeIntervalSince1970 * 1000) } ?? NSNull(),
-                        "heartRateBpm": latestHeartRate?.value.map { Int64($0.rounded()) } ?? NSNull(),
-                        "restingHeartRateBpm": latestRestingHeartRate?.value.map { Int64($0.rounded()) } ?? NSNull(),
-                        "heartRateVariabilityMs": latestHrv?.value,
-                        "respiratoryRate": latestRespiratoryRate?.value,
-                        "bloodOxygenPercent": latestBloodOxygen?.value,
-                    ],
+                    sleep: sleep,
+                    biometrics: biometrics,
                     warnings: []
                 ),
                 nil

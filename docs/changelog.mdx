@@ -21,6 +21,21 @@ The homepage download dropdown now separates stable and canary releases into cle
 ## Bug fixes
 
 - Fixed Vincent OAuth login failing silently when the redirect landed in an external browser instead of the desktop webview — the OAuth flow now completes correctly regardless of which browser handles the callback
+</Update>
+
+<Update label="2026-04-05" description="Dashboard chat: action callbacks replace in-place (Discord-style progressive messages over SSE)" tags={["Update", "Fix"]}>
+
+## Action callbacks: replace, don’t concatenate (dashboard SSE)
+
+Long-running **actions** that call `HandlerCallback` multiple times — the same pattern as **progressive messages** on Discord — now **replace** the previous callback text in the streamed assistant reply instead of **appending** it.
+
+**Why:** On Discord, one message is **edited in place**. The web dashboard streams over **SSE**; naively merging each callback with the existing string produced glued status lines (`🔍 …🔍 …✨ …Now playing…`) and looked broken compared to Telegram/Discord live updates.
+
+**How:** `generateChatResponse` snapshots the text that existed **before the first action callback** in the turn (`preCallbackText`, typically the LLM’s streamed reply). Each later callback sets the visible body to `preCallbackText + "\n\n" + latestCallbackText` and emits an SSE **snapshot** so the client’s existing `fullText` handling updates the single assistant bubble.
+
+**Plugin contract:** Unchanged — plugins keep calling `callback({ text, source })`. No WebSocket side channel or runtime-specific hooks required.
+
+**Docs:** [Action callbacks and SSE streaming](/runtime/action-callback-streaming).
 
 </Update>
 

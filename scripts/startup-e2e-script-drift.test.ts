@@ -63,6 +63,23 @@ describe("startup E2E script contract", () => {
     expect(runner).toContain('args: ["run", "test:startup:e2e"]');
   });
 
+  it("invokes the runtime helper through node so root scripts stay Windows-safe", () => {
+    const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, "utf8")) as {
+      scripts?: Record<string, string>;
+    };
+    const scriptsUsingRuntimeHelper = Object.entries(pkg.scripts ?? {}).filter(
+      ([, script]) => script.includes("scripts/rt.mjs"),
+    );
+
+    expect(scriptsUsingRuntimeHelper.length).toBeGreaterThan(0);
+
+    for (const [, script] of scriptsUsingRuntimeHelper) {
+      expect(script).toContain("node scripts/rt.mjs");
+      expect(script).not.toContain("&& scripts/rt.sh");
+      expect(script).not.toMatch(/^scripts\/rt\.sh\b/);
+    }
+  });
+
   it("uses an isolated startup E2E config to prevent cross-file mock bleed", () => {
     const config = fs.readFileSync(STARTUP_E2E_CONFIG_PATH, "utf8");
 

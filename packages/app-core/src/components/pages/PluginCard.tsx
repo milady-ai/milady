@@ -90,9 +90,8 @@ export function PluginCard({
   const totalCount = hasParams ? p.parameters.length : 0;
   const allParamsSet =
     !hasParams ||
-    (requiredParams.length > 0
-      ? requiredSetCount === requiredParams.length
-      : setCount === totalCount);
+    requiredParams.length === 0 ||
+    requiredSetCount === requiredParams.length;
   const isShowcase = p.id === "__ui-showcase__";
   const selectedReleaseStream =
     releaseStreamSelections[p.id] ??

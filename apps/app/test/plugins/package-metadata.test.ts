@@ -11,6 +11,7 @@ const PLUGIN_DIRS = [
   "desktop",
   "gateway",
   "location",
+  "mobile-signals",
   "screencapture",
   "swabble",
   "talkmode",

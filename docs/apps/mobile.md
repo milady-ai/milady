@@ -11,7 +11,7 @@ The Milady mobile app brings the full dashboard experience to iOS and Android de
 | Platform | Minimum Version | Scheme | Notes |
 |----------|----------------|--------|-------|
 | **iOS** | iOS 14+ (armv7) | HTTPS | Automatic content inset, mobile-preferred content mode, link preview disabled |
-| **Android** | API 22 (Android 5.1+) | HTTPS | Input capture enabled, mixed content disabled, WebContents debugging off in production |
+| **Android** | API 26 (Android 8.0+) | HTTPS | Input capture enabled, mixed content disabled, WebContents debugging off in production |
 
 **App ID:** `com.miladyai.milady`
 **Package name:** `@miladyai/app`
@@ -32,7 +32,7 @@ The Milady mobile app brings the full dashboard experience to iOS and Android de
 - **Android Studio** (any recent version)
 - **Android SDK** with API level 35 (compileSdk) installed via SDK Manager
 - **JDK 17+** (bundled with recent Android Studio)
-- A physical device or emulator with API 22+
+- A physical device or emulator with API 26+
 
 ### Shared
 
@@ -464,7 +464,7 @@ The Android manifest declares these permissions:
 
 | Property | Value |
 |----------|-------|
-| `minSdkVersion` | 22 (Android 5.1) |
+| `minSdkVersion` | 26 (Android 8.0) |
 | `compileSdkVersion` | 35 |
 | `targetSdkVersion` | 35 |
 | `applicationId` | `com.miladyai.milady` |

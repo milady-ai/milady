@@ -153,6 +153,7 @@ apps/app/ios/App/build*/
 
 # Ignored caches
 .ruff_cache/
+cache/audio/
 cache/voice/
 apps/app/.vite/
 
@@ -168,3 +169,7 @@ docs/tutorials/captures/
 # Agent skill files — per-user, not committed
 .agents/skills/
 .playwright-mcp/
+
+# Vendored binaries (large, platform-specific)
+scripts/bin/yt-dlp
+scripts/bin/yt-dlp_*

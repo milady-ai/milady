@@ -1,0 +1,182 @@
+import { logger } from '@elizaos/core';
+import type { TrackInfo, ArtistInfo, AlbumInfo } from '../types';
+import { retryWithBackoff } from '../utils/retry';
+
+/**
+ * Client for MusicBrainz API
+ * Free, no authentication required (just User-Agent header)
+ * Rate limit: 1 request per second
+ */
+export class MusicBrainzClient {
+  private readonly baseUrl = 'https://musicbrainz.org/ws/2';
+  private readonly userAgent: string;
+  private lastRequestTime = 0;
+  private readonly minRequestInterval = 1000; // 1 second
+
+  constructor(userAgent: string = 'ElizaOS-MusicInfo/1.0.0 (https://github.com/elizaos/eliza)') {
+    this.userAgent = userAgent;
+  }
+
+  /**
+   * Rate limit: ensure we wait at least 1 second between requests
+   */
+  private async rateLimit(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    if (timeSinceLastRequest < this.minRequestInterval) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.minRequestInterval - timeSinceLastRequest)
+      );
+    }
+    this.lastRequestTime = Date.now();
+  }
+
+  /**
+   * Search for a recording (track) by title and artist
+   */
+  async searchRecording(title: string, artist?: string): Promise<TrackInfo | null> {
+    await this.rateLimit();
+
+    return retryWithBackoff(async () => {
+      let query = `recording:"${title}"`;
+      if (artist) {
+        query += ` AND artist:"${artist}"`;
+      }
+
+      const url = `${this.baseUrl}/recording?query=${encodeURIComponent(query)}&fmt=json&limit=1`;
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error: any = new Error(`MusicBrainz API error: ${response.status} ${response.statusText}`);
+        error.response = { status: response.status, statusText: response.statusText };
+        throw error;
+      }
+
+      const data = await response.json();
+      if (!data.recordings || data.recordings.length === 0) {
+        return null;
+      }
+
+      const recording = data.recordings[0];
+      const trackInfo: TrackInfo = {
+        title: recording.title,
+        artist: recording['artist-credit']?.[0]?.name || artist || 'Unknown Artist',
+        duration: recording.length ? Math.floor(recording.length / 1000) : undefined, // Convert ms to seconds
+        tags: recording.tags?.map((tag: any) => tag.name) || [],
+      };
+
+      // Get release (album) info if available
+      if (recording.releases && recording.releases.length > 0) {
+        const release = recording.releases[0];
+        trackInfo.album = release.title;
+        if (release.date) {
+          trackInfo.year = parseInt(release.date.substring(0, 4), 10);
+        }
+      }
+
+      return trackInfo;
+    }).catch((error) => {
+      logger.error(`Error fetching MusicBrainz recording after retries: ${error}`);
+      return null;
+    });
+  }
+
+  /**
+   * Get artist information by name
+   */
+  async getArtist(artistName: string): Promise<ArtistInfo | null> {
+    await this.rateLimit();
+
+    return retryWithBackoff(async () => {
+      const url = `${this.baseUrl}/artist?query=artist:"${encodeURIComponent(artistName)}"&fmt=json&limit=1`;
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error: any = new Error(`MusicBrainz API error: ${response.status} ${response.statusText}`);
+        error.response = { status: response.status, statusText: response.statusText };
+        throw error;
+      }
+
+      const data = await response.json();
+      if (!data.artists || data.artists.length === 0) {
+        return null;
+      }
+
+      const artist = data.artists[0];
+      const artistInfo: ArtistInfo = {
+        name: artist.name,
+        genres: artist.tags?.map((tag: any) => tag.name) || [],
+      };
+
+      // Get aliases if available
+      if (artist.aliases && artist.aliases.length > 0) {
+        artistInfo.similarArtists = artist.aliases.map((alias: any) => alias.name);
+      }
+
+      return artistInfo;
+    }).catch((error) => {
+      logger.error(`Error fetching MusicBrainz artist after retries: ${error}`);
+      return null;
+    });
+  }
+
+  /**
+   * Get release (album) information
+   */
+  async getRelease(albumTitle: string, artistName?: string): Promise<AlbumInfo | null> {
+    await this.rateLimit();
+
+    return retryWithBackoff(async () => {
+      let query = `release:"${albumTitle}"`;
+      if (artistName) {
+        query += ` AND artist:"${artistName}"`;
+      }
+
+      const url = `${this.baseUrl}/release?query=${encodeURIComponent(query)}&fmt=json&limit=1`;
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error: any = new Error(`MusicBrainz API error: ${response.status} ${response.statusText}`);
+        error.response = { status: response.status, statusText: response.statusText };
+        throw error;
+      }
+
+      const data = await response.json();
+      if (!data.releases || data.releases.length === 0) {
+        return null;
+      }
+
+      const release = data.releases[0];
+      const albumInfo: AlbumInfo = {
+        title: release.title,
+        artist: release['artist-credit']?.[0]?.name || artistName || 'Unknown Artist',
+        genre: release.tags?.map((tag: any) => tag.name) || [],
+      };
+
+      if (release.date) {
+        albumInfo.year = parseInt(release.date.substring(0, 4), 10);
+      }
+
+      return albumInfo;
+    }).catch((error) => {
+      logger.error(`Error fetching MusicBrainz release after retries: ${error}`);
+      return null;
+    });
+  }
+}
+

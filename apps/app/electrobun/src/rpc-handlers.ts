@@ -24,6 +24,7 @@ import { getDesktopManager } from "./native/desktop";
 import { getGatewayDiscovery } from "./native/gateway";
 import { getGpuWindowManager } from "./native/gpu-window";
 import { getLocationManager } from "./native/location";
+import { getMusicPlayerManager } from "./native/music-player";
 import { getPermissionManager } from "./native/permissions";
 import type { AllPermissionsState } from "./native/permissions-shared";
 import { getScreenCaptureManager } from "./native/screencapture";
@@ -109,6 +110,7 @@ export function registerRpcHandlers(
   const screencapture = getScreenCaptureManager();
   const swabble = getSwabbleManager();
   const talkmode = getTalkModeManager();
+  const musicPlayer = getMusicPlayerManager();
 
   rpc?.setRequestHandler?.({
     // ---- Agent ----
@@ -608,6 +610,9 @@ export function registerRpcHandlers(
     talkmodeAudioChunk: async (
       params: Parameters<typeof talkmode.audioChunk>[0],
     ) => talkmode.audioChunk(params),
+
+    musicPlayerGetDesktopPlaybackUrls: async (params?: { guildId?: string }) =>
+      musicPlayer.getDesktopPlaybackUrls(params),
 
     // ---- Context Menu ----
     // These forward text selections from the renderer context menu to the agent.

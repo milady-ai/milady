@@ -25,5 +25,5 @@ export function setup(): void {
 
   // eslint-disable-next-line no-console
   console.log("[e2e-global-setup] dist/ not found — running tsdown…");
-  execSync("npx tsdown", { cwd: packageRoot, stdio: "inherit" });
+  execSync("bunx tsdown", { cwd: packageRoot, stdio: "inherit" });
 }

@@ -138,5 +138,32 @@
   "wechat": {
     "description": "WeChat connector for messaging via proxy API with QR code login.",
     "tags": ["connector", "messaging", "wechat", "social"]
+  },
+  "music-library": {
+    "description": "Music metadata, library storage, playlists, user preferences, analytics, and YouTube search for elizaOS agents.",
+    "tags": ["feature", "music", "library", "playlists", "analytics", "audio"],
+    "configKeys": [
+      "MUSICBRAINZ_USER_AGENT",
+      "LASTFM_API_KEY",
+      "GENIUS_API_KEY",
+      "THEAUDIODB_API_KEY",
+      "SPOTIFY_CLIENT_ID",
+      "SPOTIFY_CLIENT_SECRET",
+      "MUSIC_STORAGE_DIR",
+      "MUSIC_STORAGE_HIGH_QUALITY"
+    ]
+  },
+  "music-player": {
+    "description": "Music playback engine with queue management, cross-fading, HTTP streaming, and optional Discord voice integration.",
+    "tags": ["feature", "music", "playback", "streaming", "audio", "discord"],
+    "configKeys": [
+      "AUDIO_CACHE_DIR",
+      "AUDIO_CACHE_FORMAT",
+      "YOUTUBE_COOKIES",
+      "YTDLP_COOKIES",
+      "YOUTUBE_PROXY",
+      "YTDLP_PROXY",
+      "SERVER_URL"
+    ]
   }
 }

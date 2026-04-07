@@ -300,6 +300,18 @@ export interface TalkModeConfig {
   voiceId?: string;
 }
 
+// -- Music player (plugin-music-player HTTP routes) --
+/** Resolved HTTP URLs for plugin-music-player routes (agent process, not under /api). */
+export interface MusicPlayerDesktopPlaybackUrls {
+  ok: boolean;
+  reason?: string;
+  apiBase?: string;
+  guildId?: string;
+  streamUrl?: string;
+  nowPlayingUrl?: string;
+  queueUrl?: string;
+}
+
 // -- File Dialog --
 export interface FileDialogOptions {
   title?: string;
@@ -943,6 +955,12 @@ export type MiladyRPCSchema = {
       talkmodeUpdateConfig: { params: TalkModeConfig; response: undefined };
       talkmodeAudioChunk: { params: { data: string }; response: undefined };
 
+      // ---- Music player (elizaOS plugin-music-player HTTP routes on agent) ----
+      musicPlayerGetDesktopPlaybackUrls: {
+        params: { guildId?: string };
+        response: MusicPlayerDesktopPlaybackUrls;
+      };
+
       // ---- Context Menu ----
       contextMenuAskAgent: {
         params: { text: string };
@@ -1394,6 +1412,9 @@ export const CHANNEL_TO_RPC_METHOD: Record<string, string> = {
   "talkmode:isWhisperAvailable": "talkmodeIsWhisperAvailable",
   "talkmode:updateConfig": "talkmodeUpdateConfig",
   "talkmode:audioChunk": "talkmodeAudioChunk",
+
+  // Music player (desktop)
+  "musicPlayer:getDesktopPlaybackUrls": "musicPlayerGetDesktopPlaybackUrls",
 
   // Context Menu
   "contextMenu:askAgent": "contextMenuAskAgent",

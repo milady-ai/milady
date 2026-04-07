@@ -543,15 +543,30 @@ describe("elevation support", () => {
   });
 
   it("resolves prompt methods from PATH for each desktop platform", () => {
-    fs.writeFileSync(path.join(tempDir, "osascript"), "", "utf8");
-    fs.writeFileSync(path.join(tempDir, "pkexec"), "", "utf8");
-    fs.writeFileSync(path.join(tempDir, "powershell.exe"), "", "utf8");
-    process.env.PATH = `${tempDir}:${originalPath}`;
+    const existsSync = vi.spyOn(fs, "existsSync");
 
+    existsSync.mockImplementation((candidate) =>
+      String(candidate).endsWith(path.join("bin", "osascript")),
+    );
+    process.env.PATH = [path.join(tempDir, "bin"), originalPath]
+      .filter(Boolean)
+      .join(":");
     expect(resolveSelfControlElevationPromptMethod("darwin")).toBe("osascript");
+
+    existsSync.mockImplementation((candidate) =>
+      String(candidate).endsWith(path.join("bin", "pkexec")),
+    );
+    process.env.PATH = [path.join(tempDir, "bin"), originalPath]
+      .filter(Boolean)
+      .join(":");
     expect(resolveSelfControlElevationPromptMethod("linux")).toBe("pkexec");
 
-    process.env.PATH = `${tempDir};${originalPath}`;
+    existsSync.mockImplementation((candidate) =>
+      String(candidate).endsWith(path.join("bin", "powershell.exe")),
+    );
+    process.env.PATH = [path.join(tempDir, "bin"), originalPath]
+      .filter(Boolean)
+      .join(";");
     expect(resolveSelfControlElevationPromptMethod("win32")).toBe(
       "powershell-runas",
     );

@@ -84,6 +84,9 @@ See `docs/plugin-resolution-and-node-path.md`.
 ### Electrobun startup guards (do not remove)
 The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
 
+### Dashboard SSE: action callbacks replace in place
+In `packages/agent/src/api/chat-routes.ts`, **`HandlerCallback`** text from actions uses **`replaceCallbackText`**: each new callback replaces the previous callback’s segment after a frozen **`preCallbackText`** (the LLM stream so far). **Why:** Matches Discord-style progressive messages; the old path concatenated unrelated status strings in one bubble. The elizaOS callback contract is unchanged. See **`docs/runtime/action-callback-streaming.md`**.
+
 ## Config
 
 - **Runtime config**: `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`; falls back to `ELIZA_CONFIG_PATH` / `ELIZA_STATE_DIR`)
