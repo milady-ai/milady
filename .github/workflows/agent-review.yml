@@ -558,8 +558,8 @@ jobs:
             const multilineDecisionPattern = /(?:^|\n)\s*(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})Decision(?:\*{0,2})?\s*:?\s*\n+\s*(?:\*{0,2})(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
             const boldVerdictPattern = /\*{1,3}(APPROVE|REQUEST CHANGES|CLOSE)\b\*{1,3}/i;
             const bareLineVerdictPattern = /(?:^|\n)\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
-            const maxAttempts = 5; // Increased for fallback comment posting
-            const pollIntervalMs = 3_000;
+            const maxAttempts = 12;
+            const pollIntervalMs = 5_000;
 
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -577,10 +577,10 @@ jobs:
               return '';
             };
 
-            const findLatest = (items) => {
+            const findLatest = (items, { requireRunMarker = true } = {}) => {
               const filtered = items.filter((c) => {
                 if (!c?.body) return false;
-                if (!runMarker || !c.body.includes(runMarker)) return false;
+                if (requireRunMarker && runMarker && !c.body.includes(runMarker)) return false;
                 return Boolean(extractDecision(c.body));
               });
               return filtered.sort((a, b) =>
@@ -614,7 +614,7 @@ jobs:
                 ...comments.filter((c) => c.user?.type === 'Bot'),
                 ...normalizedReviews.filter((r) => r.user?.type === 'Bot'),
               ];
-              latest = findLatest(allBotEntries);
+              latest = findLatest(allBotEntries, { requireRunMarker: true });
 
               if (latest) {
                 break;
@@ -629,6 +629,32 @@ jobs:
             let verdict = 'reject';
             let decision = 'REQUEST CHANGES';
             let decisionCommentUrl = '';
+
+            if (!latest) {
+              const [comments, reviews] = await Promise.all([
+                github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number, per_page: 100,
+                }),
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner, repo, pull_number: issue_number, per_page: 100,
+                }),
+              ]);
+
+              const normalizedReviews = reviews.map(r => ({
+                ...r,
+                created_at: r.submitted_at || r.created_at,
+              }));
+
+              const allBotEntries = [
+                ...comments.filter((c) => c.user?.type === 'Bot'),
+                ...normalizedReviews.filter((r) => r.user?.type === 'Bot'),
+              ];
+
+              latest = findLatest(allBotEntries, { requireRunMarker: false });
+              if (latest) {
+                core.warning('Falling back to latest parseable bot review because the exact run-marker comment was not visible before timeout.');
+              }
+            }
 
             if (latest) {
               const normalized = extractDecision(latest.body);
