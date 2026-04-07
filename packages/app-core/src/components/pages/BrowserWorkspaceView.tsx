@@ -193,7 +193,8 @@ function resolveBrowserWorkspaceWalletAccounts(
   return state.evmAddress ? [state.evmAddress] : [];
 }
 
-function normalizeBrowserWorkspaceTxRequest(
+/** @internal Exported for testing only. */
+export function normalizeBrowserWorkspaceTxRequest(
   params: unknown,
   fallbackChainId: number,
 ): {
