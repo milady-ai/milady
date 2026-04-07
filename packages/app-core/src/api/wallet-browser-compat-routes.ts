@@ -358,14 +358,10 @@ export async function handleWalletBrowserCompatRoutes(
     data: normalizeHexData(body.data),
     description: normalizeString(body.description),
     to: normalizeString(body.to) ?? "",
-    value: normalizeString(body.value) ?? "",
+    value: normalizeString(body.value) ?? "0",
   };
 
-  if (
-    !request.to ||
-    request.value == null ||
-    !Number.isFinite(request.chainId)
-  ) {
+  if (!request.to || !request.value || !Number.isFinite(request.chainId)) {
     sendJsonErrorResponse(
       res,
       400,
