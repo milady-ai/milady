@@ -515,10 +515,14 @@ function PluginListView({
       messages: {
         waiting: string;
         success: string;
+        failure: string;
       },
     ) => {
       setActionNotice(messages.waiting, "info", 120_000, false, true);
-      await client.restartAndWait(120_000);
+      const status = await client.restartAndWait(120_000);
+      if (status.state !== "running") {
+        throw new Error(messages.failure.replace("{{status}}", status.state));
+      }
       await loadPlugins();
       setActionNotice(messages.success, "success");
     },
@@ -557,6 +561,12 @@ function PluginListView({
           success: t("pluginsview.PluginInstalledRestartComplete", {
             plugin: npmName,
             defaultValue: "{{plugin}} installed and activated.",
+          }),
+          failure: t("pluginsview.PluginInstalledRestartFailed", {
+            plugin: npmName,
+            status: "{{status}}",
+            defaultValue:
+              "{{plugin}} installed, but the agent did not come back online (status: {{status}}).",
           }),
         });
       } else {
@@ -628,6 +638,12 @@ function PluginListView({
             plugin: npmName,
             defaultValue: "{{plugin}} updated and activated.",
           }),
+          failure: t("pluginsview.PluginUpdatedRestartFailed", {
+            plugin: npmName,
+            status: "{{status}}",
+            defaultValue:
+              "{{plugin}} updated, but the agent did not come back online (status: {{status}}).",
+          }),
         });
       } else {
         await loadPlugins();
@@ -692,6 +708,12 @@ function PluginListView({
           success: t("pluginsview.PluginUninstalledRestartComplete", {
             plugin: npmName,
             defaultValue: "{{plugin}} uninstalled and fully unloaded.",
+          }),
+          failure: t("pluginsview.PluginUninstalledRestartFailed", {
+            plugin: npmName,
+            status: "{{status}}",
+            defaultValue:
+              "{{plugin}} uninstalled, but the agent did not come back online (status: {{status}}).",
           }),
         });
       } else {

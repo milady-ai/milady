@@ -119,6 +119,8 @@ describe("PluginsView plugin install restart flow", () => {
     await act(async () => {
       tree = TestRenderer.create(React.createElement(PluginsView));
     });
+    mockLoadPlugins.mockClear();
+    mockSetActionNotice.mockClear();
 
     const installButton = tree?.root.find(
       (node) =>
@@ -145,6 +147,63 @@ describe("PluginsView plugin install restart flow", () => {
       true,
     );
     expect(mockSetActionNotice).toHaveBeenCalledWith(
+      "pluginsview.PluginInstalledRestartComplete",
+      "success",
+    );
+  });
+
+  it("shows an error and does not claim activation when restart never returns running", async () => {
+    vi.mocked(client.installRegistryPlugin).mockResolvedValue({
+      ok: true,
+      pluginName: "@elizaos/plugin-test",
+      requiresRestart: true,
+      restartedRuntime: false,
+      loadedPackages: [],
+      unloadedPackages: [],
+      reloadedPackages: [],
+      applied: "restart_required",
+      releaseStream: "alpha",
+      requestedVersion: "2.0.0-alpha.2",
+      latestVersion: "2.0.0-alpha.2",
+      alphaVersion: "2.0.0-alpha.2",
+      message: "@elizaos/plugin-test installed. Restart required to activate.",
+    } as Awaited<ReturnType<typeof client.installRegistryPlugin>>);
+    vi.mocked(client.restartAndWait).mockResolvedValue({
+      state: "stopped",
+      startupPhase: "stopped",
+      status: "stopped",
+      healthy: false,
+    } as Awaited<ReturnType<typeof client.restartAndWait>>);
+
+    let tree: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      tree = TestRenderer.create(React.createElement(PluginsView));
+    });
+
+    const installButton = tree?.root.find(
+      (node) =>
+        node.type === "button" &&
+        String(node.props.children).includes("pluginsview.Install"),
+    );
+
+    await act(async () => {
+      installButton.props.onClick({ stopPropagation: () => {} });
+    });
+
+    expect(client.restartAndWait).toHaveBeenCalledWith(120_000);
+    expect(mockSetActionNotice).toHaveBeenCalledWith(
+      "pluginsview.PluginInstalledRestarting",
+      "info",
+      120_000,
+      false,
+      true,
+    );
+    expect(mockSetActionNotice).toHaveBeenCalledWith(
+      "pluginsview.PluginInstallFailed",
+      "error",
+      3800,
+    );
+    expect(mockSetActionNotice).not.toHaveBeenCalledWith(
       "pluginsview.PluginInstalledRestartComplete",
       "success",
     );
