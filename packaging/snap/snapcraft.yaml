@@ -95,6 +95,7 @@ parts:
       mkdir -p "$CRAFT_PART_INSTALL/bun/bin"
       cp /tmp/bun-extract/bun-linux-${BUN_ARCH}/bun "$CRAFT_PART_INSTALL/bun/bin/bun"
       chmod +x "$CRAFT_PART_INSTALL/bun/bin/bun"
+      ln -sf bun "$CRAFT_PART_INSTALL/bun/bin/bunx"
       "$CRAFT_PART_INSTALL/bun/bin/bun" --version
     build-packages:
       - unzip
@@ -108,12 +109,15 @@ parts:
       set -eu
       export PATH="$CRAFT_STAGE/bun/bin:$CRAFT_STAGE/node/bin:$PATH"
 
+      # Skip building upstream plugins from source — use npm-published packages
+      export MILADY_SKIP_LOCAL_UPSTREAMS=1
+
       # Initialize workspace submodules and disable local eliza workspace
       node scripts/init-submodules.mjs || true
       node scripts/disable-local-eliza-workspace.mjs || true
 
       # Install dependencies using bun (project's native package manager)
-      MILADY_SKIP_LOCAL_UPSTREAMS=1 bun install
+      bun install
 
       # Build the project
       bun run build || true
