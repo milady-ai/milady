@@ -118,7 +118,6 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --ignore-scripts
-          disable-local-eliza-workspace: "false"
 
       - name: Run unit tests
         run: bunx vitest run --config vitest.unit.config.ts

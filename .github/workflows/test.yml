@@ -64,7 +64,6 @@ jobs:
           install-command: bun install --ignore-scripts
           skip-avatar-clone: "true"
           no-vision-deps: "true"
-          disable-local-eliza-workspace: "false"
 
       # Proto-generated types are gitignored in the eliza submodule and
       # normally produced by the prebuild script. Unit tests resolve
