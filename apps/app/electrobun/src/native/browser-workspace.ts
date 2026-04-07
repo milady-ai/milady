@@ -218,13 +218,14 @@ export class BrowserWorkspaceManager {
       return null;
     }
 
+    let tmpPath: string | undefined;
     try {
       const size = tab.window.getSize();
       const x = position.x ?? 0;
       const y = position.y ?? 0;
       const width = size.width;
       const height = size.height;
-      const tmpPath = path.join(
+      tmpPath = path.join(
         os.tmpdir(),
         `milady-browser-workspace-${options.id}-${Date.now()}.png`,
       );
@@ -285,7 +286,7 @@ $bmp.Dispose()`;
       // Clean up tmp file if it was created but not yet deleted (e.g. crash
       // between screencapture write and unlinkSync above).
       try {
-        if (fs.existsSync(tmpPath)) {
+        if (tmpPath && fs.existsSync(tmpPath)) {
           fs.unlinkSync(tmpPath);
         }
       } catch {
