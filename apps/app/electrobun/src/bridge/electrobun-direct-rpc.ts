@@ -13,10 +13,6 @@
  */
 
 import { Electroview } from "electrobun/view";
-import {
-  getBootConfig,
-  setBootConfig,
-} from "@miladyai/app-core/config";
 import type { RpcMessageListener } from "../types.js";
 import { ensureElectrobunGlobal } from "./electrobun-stub.js";
 
@@ -27,11 +23,43 @@ type RendererBridgeRpc = {
 };
 
 const listenersByRpcMessage: Record<string, Set<RpcMessageListener>> = {};
+const BOOT_CONFIG_STORE_KEY = Symbol.for("milady.app.boot-config");
+const BOOT_CONFIG_WINDOW_KEY = "__MILADY_APP_BOOT_CONFIG__";
+
+type BootConfig = {
+  apiBase?: string;
+  apiToken?: string;
+  [key: string]: unknown;
+};
+
+type BootConfigStore = {
+  current: BootConfig;
+};
 
 // Electrobun's native layer sets these globals before preloads run.
 // __electrobun must exist before Electroview.init() tries to write to it.
 // If the built-in preload hasn't fired yet (rare edge case), stub it.
 ensureElectrobunGlobal();
+
+function updateBootConfig(
+  updates: Pick<BootConfig, "apiBase" | "apiToken">,
+): void {
+  const globalObject = window as unknown as Record<PropertyKey, unknown> & {
+    [BOOT_CONFIG_WINDOW_KEY]?: BootConfig;
+  };
+  const currentConfig =
+    globalObject[BOOT_CONFIG_WINDOW_KEY] ??
+    (globalObject[BOOT_CONFIG_STORE_KEY] as BootConfigStore | undefined)
+      ?.current ??
+    {};
+  const nextConfig = {
+    ...currentConfig,
+    ...updates,
+  };
+
+  globalObject[BOOT_CONFIG_WINDOW_KEY] = nextConfig;
+  globalObject[BOOT_CONFIG_STORE_KEY] = { current: nextConfig };
+}
 
 function dispatchMessage(messageName: string, payload: unknown): void {
   if (messageName === "apiBaseUpdate") {
@@ -45,11 +73,8 @@ function dispatchMessage(messageName: string, payload: unknown): void {
         enumerable: false,
       });
     }
-    // Propagate to boot config so MiladyClient picks up port changes.
-    // The client reads boot config (not window globals) after construction.
-    const config = getBootConfig();
-    setBootConfig({
-      ...config,
+    // MiladyClient reads boot config after construction, so keep that store in sync.
+    updateBootConfig({
       apiBase: apiBaseUpdate.base,
       ...(apiBaseUpdate.token ? { apiToken: apiBaseUpdate.token } : {}),
     });

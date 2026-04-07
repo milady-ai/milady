@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const electroviewInstances = vi.fn();
 const defineRpc = vi.fn();
+const BOOT_CONFIG_STORE_KEY = Symbol.for("milady.app.boot-config");
+const BOOT_CONFIG_WINDOW_KEY = "__MILADY_APP_BOOT_CONFIG__";
 
 vi.mock("electrobun/view", () => {
   const Electroview = vi.fn(function MockElectroview(options: unknown) {
@@ -27,6 +29,8 @@ describe("electrobun bridge runtime", () => {
     delete w.__MILADY_API_BASE__;
     delete w.__MILADY_API_TOKEN__;
     delete w.__electrobun;
+    delete w[BOOT_CONFIG_WINDOW_KEY];
+    delete w[BOOT_CONFIG_STORE_KEY];
   });
 
   afterEach(() => {
@@ -81,6 +85,28 @@ describe("electrobun bridge runtime", () => {
     });
     expect(window.__MILADY_API_BASE__).toBe("http://127.0.0.1:2138");
     expect(window.__MILADY_API_TOKEN__).toBe("token-123");
+    expect(
+      (
+        window as unknown as Record<PropertyKey, unknown> & {
+          [BOOT_CONFIG_WINDOW_KEY]?: { apiBase?: string; apiToken?: string };
+        }
+      )[BOOT_CONFIG_WINDOW_KEY],
+    ).toMatchObject({
+      apiBase: "http://127.0.0.1:2138",
+      apiToken: "token-123",
+    });
+    expect(
+      (
+        window as unknown as Record<PropertyKey, unknown> & {
+          [BOOT_CONFIG_STORE_KEY]?: {
+            current?: { apiBase?: string; apiToken?: string };
+          };
+        }
+      )[BOOT_CONFIG_STORE_KEY]?.current,
+    ).toMatchObject({
+      apiBase: "http://127.0.0.1:2138",
+      apiToken: "token-123",
+    });
 
     wildcardHandler?.("shareTargetReceived", { files: ["note.md"] });
     expect(listener).toHaveBeenCalledWith({ files: ["note.md"] });

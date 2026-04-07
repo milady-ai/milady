@@ -463,6 +463,15 @@ function PluginListView({
     [],
   );
 
+  const clearPluginReleaseStream = useCallback((pluginId: string) => {
+    setPluginReleaseStreams((prev) => {
+      if (!(pluginId in prev)) return prev;
+      const next = { ...prev };
+      delete next[pluginId];
+      return next;
+    });
+  }, []);
+
   const runWithPluginManager = useCallback(
     async (
       _pluginName: string,
@@ -568,6 +577,7 @@ function PluginListView({
               "{{plugin}} installed, but the agent did not come back online (status: {{status}}).",
           }),
         });
+        // Preserve the chosen stream on install failure so retry uses the same target.
         if (!restarted) return;
       } else {
         await loadPlugins();
@@ -645,6 +655,7 @@ function PluginListView({
               "{{plugin}} updated, but the agent did not come back online (status: {{status}}).",
           }),
         });
+        // Preserve the chosen stream on update failure so retry uses the same target.
         if (!restarted) return;
       } else {
         await loadPlugins();
@@ -717,7 +728,10 @@ function PluginListView({
               "{{plugin}} uninstalled, but the agent did not come back online (status: {{status}}).",
           }),
         });
-        if (!restarted) return;
+        if (!restarted) {
+          clearPluginReleaseStream(pluginId);
+          return;
+        }
       } else {
         await loadPlugins();
         setActionNotice(
@@ -729,12 +743,7 @@ function PluginListView({
           "success",
         );
       }
-      setPluginReleaseStreams((prev) => {
-        if (!(pluginId in prev)) return prev;
-        const next = { ...prev };
-        delete next[pluginId];
-        return next;
-      });
+      clearPluginReleaseStream(pluginId);
     } catch (err) {
       setActionNotice(
         t("pluginsview.PluginUninstallFailed", {
