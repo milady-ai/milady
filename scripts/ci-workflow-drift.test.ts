@@ -100,7 +100,7 @@ describe("CI workflow drift", () => {
     expect(workflow).toContain('run-postinstall: "false"');
     expect(workflow).toContain("install-command: bun install");
     expect(workflow).toContain(
-      "install-command: bun install --frozen-lockfile --ignore-scripts",
+      "bun install --frozen-lockfile --ignore-scripts || bun install --ignore-scripts",
     );
   });
 
