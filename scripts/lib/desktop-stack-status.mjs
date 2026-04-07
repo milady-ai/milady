@@ -10,7 +10,7 @@
 import { createConnection } from "node:net";
 
 const DEFAULT_UI_PORT = 2138;
-const DEFAULT_API_PORT = 31337;
+const DEFAULT_API_PORT = 2138;
 const CONNECT_TIMEOUT_MS = 800;
 const FETCH_TIMEOUT_MS = 2500;
 

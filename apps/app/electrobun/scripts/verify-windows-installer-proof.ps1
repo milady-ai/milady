@@ -3,7 +3,7 @@ param(
   [string]$BuildDir = (Join-Path $PSScriptRoot "..\\build"),
   [string]$ProofInstallDir = "C:\\mi-proof",
   [string]$OutputDir = (Join-Path $PSScriptRoot "..\\artifacts\\windows-installer-proof"),
-  [int]$BackendPort = 31337,
+  [int]$BackendPort = 2138,
   [int]$TimeoutSeconds = 240
 )
 
