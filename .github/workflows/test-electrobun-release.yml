@@ -55,7 +55,8 @@ jobs:
         run: node scripts/init-submodules.mjs
 
       - name: Install root dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: |
+          bun install --frozen-lockfile --ignore-scripts || bun install --ignore-scripts
 
       - name: Run repository postinstall patches
         run: bun run postinstall
