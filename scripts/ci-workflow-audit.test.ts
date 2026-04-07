@@ -15,18 +15,18 @@ function readWorkflow(name: string): string {
 }
 
 describe("CI workflow audit regressions", () => {
-  it("electrobun workflows pin BUN_VERSION 1.3.9 (Windows frozen-lockfile workaround)", () => {
-    const files = [
-      "release-electrobun.yml",
-      "release-electrobun-build-linux-x64-testbox.yml",
-      "release-electrobun-build-windows-x64-testbox.yml",
-      "test-electrobun-release.yml",
-    ];
-    for (const f of files) {
+  it("electrobun workflows keep expected Bun pins", () => {
+    const expectedPins: Record<string, string> = {
+      "release-electrobun.yml": "1.3.9",
+      "release-electrobun-build-linux-x64-testbox.yml": "1.3.9",
+      "release-electrobun-build-windows-x64-testbox.yml": "1.3.9",
+      "test-electrobun-release.yml": "1.3.11",
+    };
+    for (const [f, expected] of Object.entries(expectedPins)) {
       const content = readWorkflow(f);
       const match = content.match(/BUN_VERSION:\s*"([^"]+)"/);
       expect(match, `${f} should declare BUN_VERSION`).toBeTruthy();
-      expect(match?.[1]).toBe("1.3.9");
+      expect(match?.[1]).toBe(expected);
     }
   });
 
