@@ -838,7 +838,7 @@ function assertWindowsSmokeScriptHasLeadingParamBlock() {
     '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
     "Write-StartupBootstrap",
     "$stopProtectedProcessIds = [System.Collections.Generic.HashSet[int]]::new()",
-    'Get-CimInstance Win32_Process -Filter "ProcessId = $PID"',
+    'Get-CimInstance Win32_Process -Filter "ProcessId = $currentPid"',
     "-not $stopProtectedProcessIds.Contains([int]$_.Id)",
     "[int]::TryParse([string]$state.port, [ref]$observedPort)",
     "if ($state.session_id -ne $startupSessionId)",
