@@ -35,9 +35,6 @@ jobs:
         with:
           node-version: 22
 
-      - name: Disable repo-local eliza workspace
-        run: node scripts/disable-local-eliza-workspace.mjs
-
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

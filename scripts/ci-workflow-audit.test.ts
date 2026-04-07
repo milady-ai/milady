@@ -20,7 +20,7 @@ describe("CI workflow audit regressions", () => {
       "release-electrobun.yml": "1.3.9",
       "release-electrobun-build-linux-x64-testbox.yml": "1.3.9",
       "release-electrobun-build-windows-x64-testbox.yml": "1.3.9",
-      "test-electrobun-release.yml": "1.3.11",
+      "test-electrobun-release.yml": "1.3.9",
     };
     for (const [f, expected] of Object.entries(expectedPins)) {
       const content = readWorkflow(f);
