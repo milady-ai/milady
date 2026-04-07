@@ -114,16 +114,58 @@ parts:
 
       # Strip workspace entries that reference git submodule directories
       # (plugins/*, eliza/*) which are not available inside the snap build.
+      # Also remove workspace:* dependency refs that point to those packages
+      # and bundleDependencies referencing them.
       node -e '
-        const pkg = require("./package.json");
-        pkg.workspaces = (pkg.workspaces || []).filter(w =>
-          !w.startsWith("plugins/") && !w.startsWith("eliza/")
-        );
-        require("fs").writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+        const fs = require("fs");
+        const path = require("path");
+
+        function stripSubmoduleRefs(pkgPath) {
+          if (!fs.existsSync(pkgPath)) return;
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+          // Strip workspace entries for submodule dirs
+          if (pkg.workspaces) {
+            pkg.workspaces = pkg.workspaces.filter(w =>
+              !w.startsWith("plugins/") && !w.startsWith("eliza/")
+            );
+          }
+          // Remove workspace:* deps that resolve to submodule packages
+          for (const section of ["dependencies", "devDependencies", "optionalDependencies"]) {
+            if (!pkg[section]) continue;
+            for (const [k, v] of Object.entries(pkg[section])) {
+              if (v === "workspace:*" && k === "@elizaos/plugin-agent-orchestrator") {
+                delete pkg[section][k];
+              }
+            }
+          }
+          // Clean bundleDependencies
+          if (Array.isArray(pkg.bundleDependencies)) {
+            pkg.bundleDependencies = pkg.bundleDependencies.filter(
+              d => d !== "@elizaos/plugin-agent-orchestrator"
+            );
+          }
+          fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+        }
+
+        stripSubmoduleRefs("package.json");
+        stripSubmoduleRefs("packages/agent/package.json");
+
+        // Remove plugin source directories so tsc/build does not attempt
+        // to compile them (their deps like coding-agent-adapters are absent).
+        for (const dir of fs.readdirSync("plugins").filter(d =>
+          fs.statSync(path.join("plugins", d)).isDirectory()
+        )) {
+          fs.rmSync(path.join("plugins", dir), { recursive: true, force: true });
+        }
       '
 
-      # Install dependencies using bun (project's native package manager)
-      bun install
+      # Install dependencies — skip postinstall to avoid ensure-bundled-workspaces
+      # trying to build the (now-removed) plugin-agent-orchestrator from source.
+      bun install --ignore-scripts
+
+      # Run only the safe postinstall steps (patch deps, link browser server)
+      node scripts/patch-deps.mjs || true
+      node scripts/link-browser-server.mjs || true
 
       # Build the project
       bun run build || true
