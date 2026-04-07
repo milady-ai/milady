@@ -113,7 +113,7 @@ describe("buildPluginListResponse", () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("treats connectors.discord.token as a configured Discord plugin token", () => {
+  it("hydrates Discord env vars from connectors.discord.token", () => {
     saveElizaConfig({
       logging: { level: "error" },
       connectors: {
@@ -127,16 +127,12 @@ describe("buildPluginListResponse", () => {
 
     expect(discord.configured).toBe(true);
     expect(discord.validationErrors).toEqual([]);
-    expect(
-      discord.parameters.find(
-        (parameter) => parameter.key === "DISCORD_API_TOKEN",
-      )?.isSet,
-    ).toBe(true);
+    expect(discord.parameters).toEqual([]);
     expect(process.env.DISCORD_API_TOKEN).toBe("discord-token-123");
     expect(process.env.DISCORD_BOT_TOKEN).toBe("discord-token-123");
   });
 
-  it("rehydrates connector tokens over empty or redacted Discord env placeholders", () => {
+  it("overrides placeholder Discord env values from connectors config", () => {
     process.env.DISCORD_API_TOKEN = "[REDACTED]";
     process.env.DISCORD_BOT_TOKEN = "";
 
@@ -153,6 +149,7 @@ describe("buildPluginListResponse", () => {
 
     expect(discord.configured).toBe(true);
     expect(discord.validationErrors).toEqual([]);
+    expect(discord.parameters).toEqual([]);
     expect(process.env.DISCORD_API_TOKEN).toBe("discord-token-456");
     expect(process.env.DISCORD_BOT_TOKEN).toBe("discord-token-456");
   });
@@ -244,19 +241,10 @@ describe("buildPluginListResponse", () => {
     expect(discord.configured).toBe(true);
   });
 
-  it("lists the bundled SelfControl plugin without setup fields", () => {
-    const selfControl = getPlugin("selfcontrol") as CompatPluginRecord & {
-      category: string;
-      configured: boolean;
-      enabled: boolean;
-      source: string;
-    };
-
-    expect(selfControl.enabled).toBe(false);
-    expect(selfControl.configured).toBe(true);
-    expect(selfControl.category).toBe("feature");
-    expect(selfControl.source).toBe("bundled");
-    expect(selfControl.parameters).toEqual([]);
-    expect(selfControl.validationErrors).toEqual([]);
+  it("does not include unknown bundled plugin ids", () => {
+    const ids = buildPluginListResponse(null).plugins.map(
+      (plugin) => plugin.id,
+    );
+    expect(ids).not.toContain("selfcontrol");
   });
 });

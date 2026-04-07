@@ -57,9 +57,7 @@ function resolveApiBase(): string {
   const injected = getElizaApiBase();
   if (injected) return injected;
   if (typeof window !== "undefined") {
-    const stored = window.sessionStorage
-      .getItem("milady_api_base")
-      ?.trim();
+    const stored = window.sessionStorage.getItem("milady_api_base")?.trim();
     if (stored) return stored;
   }
   return "";
