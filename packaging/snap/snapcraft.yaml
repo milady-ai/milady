@@ -112,9 +112,15 @@ parts:
       # Skip building upstream plugins from source — use npm-published packages
       export MILADY_SKIP_LOCAL_UPSTREAMS=1
 
-      # Initialize workspace submodules and disable local eliza workspace
-      node scripts/init-submodules.mjs || true
-      node scripts/disable-local-eliza-workspace.mjs || true
+      # Strip workspace entries that reference git submodule directories
+      # (plugins/*, eliza/*) which are not available inside the snap build.
+      node -e '
+        const pkg = require("./package.json");
+        pkg.workspaces = (pkg.workspaces || []).filter(w =>
+          !w.startsWith("plugins/") && !w.startsWith("eliza/")
+        );
+        require("fs").writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+      '
 
       # Install dependencies using bun (project's native package manager)
       bun install
