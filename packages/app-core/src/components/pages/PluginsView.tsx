@@ -510,14 +510,7 @@ function PluginListView({
   );
 
   const completePluginLifecycleRestart = useCallback(
-    async (
-      _pluginName: string,
-      messages: {
-        waiting: string;
-        success: string;
-        failure: string;
-      },
-    ) => {
+    async (messages: { waiting: string; success: string; failure: string }) => {
       setActionNotice(messages.waiting, "info", 120_000, false, true);
       const status = await client.restartAndWait(120_000);
       if (status.state !== "running") {
@@ -552,7 +545,7 @@ function PluginListView({
           await client.installRegistryPlugin(npmName, false, { stream }),
       )) as Awaited<ReturnType<typeof client.installRegistryPlugin>>;
       if (result.requiresRestart) {
-        await completePluginLifecycleRestart(npmName, {
+        await completePluginLifecycleRestart({
           waiting: t("pluginsview.PluginInstalledRestarting", {
             plugin: npmName,
             defaultValue:
@@ -628,7 +621,7 @@ function PluginListView({
           await client.updateRegistryPlugin(npmName, false, { stream }),
       )) as Awaited<ReturnType<typeof client.updateRegistryPlugin>>;
       if (result.requiresRestart) {
-        await completePluginLifecycleRestart(npmName, {
+        await completePluginLifecycleRestart({
           waiting: t("pluginsview.PluginUpdatedRestarting", {
             plugin: npmName,
             defaultValue:
@@ -699,7 +692,7 @@ function PluginListView({
         async () => await client.uninstallRegistryPlugin(npmName, false),
       )) as Awaited<ReturnType<typeof client.uninstallRegistryPlugin>>;
       if (result.requiresRestart) {
-        await completePluginLifecycleRestart(npmName, {
+        await completePluginLifecycleRestart({
           waiting: t("pluginsview.PluginUninstalledRestarting", {
             plugin: npmName,
             defaultValue:
