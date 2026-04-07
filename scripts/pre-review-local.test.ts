@@ -42,6 +42,12 @@ describe("isTestExempt", () => {
     expect(isTestExempt(".claude/hooks/check-node-path.sh")).toBe(true);
   });
 
+  it("exempts scripts/generated/ artifacts", () => {
+    expect(isTestExempt("scripts/generated/static-asset-manifest.json")).toBe(
+      true,
+    );
+  });
+
   it("does not exempt TypeScript source files", () => {
     expect(isTestExempt("packages/app-core/src/runtime/eliza.ts")).toBe(false);
     expect(isTestExempt("apps/web/src/router.tsx")).toBe(false);

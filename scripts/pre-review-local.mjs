@@ -26,6 +26,7 @@ export function isTestExempt(file) {
   if (file.startsWith(".claude/")) return true;
   if (file.startsWith(".github/")) return true;
   if (file.startsWith(".cursor/")) return true;
+  if (file.startsWith("scripts/generated/")) return true;
   if (/\.sh$/i.test(file)) return true;
   return false;
 }

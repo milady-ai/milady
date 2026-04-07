@@ -300,6 +300,11 @@ index 1234567..89abcde 100644
     // Editor rules
     expect(isTestExempt(".cursor/rules/elizaos-branding.mdc")).toBe(true);
 
+    // Generated artifacts
+    expect(isTestExempt("scripts/generated/static-asset-manifest.json")).toBe(
+      true,
+    );
+
     // Runtime source — NOT exempt
     expect(isTestExempt("packages/app-core/src/runtime/eliza.ts")).toBe(false);
     expect(isTestExempt("apps/app/src/main.tsx")).toBe(false);
