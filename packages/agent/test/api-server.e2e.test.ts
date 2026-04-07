@@ -1734,11 +1734,10 @@ describe("API Server E2E (no runtime)", () => {
         );
 
         const tokenEvents = events.filter((event) => event.type === "token");
-        const tokenTexts = tokenEvents.map((event) => event.text ?? "");
-        expect(tokenTexts[0]).toBe("Hello ");
-        expect(
-          tokenTexts.includes("world") || tokenTexts.includes("Hello world"),
-        ).toBe(true);
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello ",
+          "world",
+        ]);
 
         const doneEvent = events.find((event) => event.type === "done");
         expect(doneEvent?.fullText).toBe("Hello world");
@@ -1776,11 +1775,10 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         const tokenEvents = events.filter((event) => event.type === "token");
-        const tokenTexts = tokenEvents.map((event) => event.text ?? "");
-        expect(tokenTexts[0]).toBe("Hello ");
-        expect(
-          tokenTexts.includes("world") || tokenTexts.includes("Hello world"),
-        ).toBe(true);
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello ",
+          "world",
+        ]);
         expect(tokenEvents.map((event) => event.fullText)).toEqual([
           "Hello ",
           "Hello world",
@@ -1890,13 +1888,11 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         const tokenEvents = events.filter((event) => event.type === "token");
-        const tokenTexts = tokenEvents.map((event) => event.text ?? "");
-        expect(tokenTexts[0]).toBe("Hello wrld");
-        expect(tokenTexts[1]).toBe("Hello world");
-        expect(
-          tokenTexts[tokenTexts.length - 1] === "!" ||
-            tokenTexts[tokenTexts.length - 1] === "Hello world!",
-        ).toBe(true);
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello wrld",
+          "Hello world",
+          "!",
+        ]);
         expect(tokenEvents.map((event) => event.fullText)).toEqual([
           "Hello wrld",
           "Hello world",
@@ -1949,9 +1945,7 @@ describe("API Server E2E (no runtime)", () => {
           .filter((event) => event.type === "token")
           .map((event) => event.text ?? "")
           .join("");
-        expect(
-          tokenText === "Hello world" || tokenText === "Hello worldHello world",
-        ).toBe(true);
+        expect(tokenText).toBe("Hello world");
 
         const doneEvent = events.find((event) => event.type === "done");
         expect(doneEvent?.fullText).toBe("Hello world");
@@ -2107,11 +2101,10 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         const tokenEvents = events.filter((event) => event.type === "token");
-        const tokenTexts = tokenEvents.map((event) => event.text ?? "");
-        expect(tokenTexts[0]).toBe("Hello ");
-        expect(
-          tokenTexts.includes("world") || tokenTexts.includes("Hello world"),
-        ).toBe(true);
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello ",
+          "world",
+        ]);
         expect(tokenEvents.map((event) => event.fullText)).toEqual([
           "Hello ",
           "Hello world",
@@ -2198,13 +2191,11 @@ describe("API Server E2E (no runtime)", () => {
 
         expect(status).toBe(200);
         const tokenEvents = events.filter((event) => event.type === "token");
-        const tokenTexts = tokenEvents.map((event) => event.text ?? "");
-        expect(tokenTexts[0]).toBe("Hello wrld");
-        expect(tokenTexts[1]).toBe("Hello world");
-        expect(
-          tokenTexts[tokenTexts.length - 1] === "!" ||
-            tokenTexts[tokenTexts.length - 1] === "Hello world!",
-        ).toBe(true);
+        expect(tokenEvents.map((event) => event.text)).toEqual([
+          "Hello wrld",
+          "Hello world",
+          "!",
+        ]);
         expect(tokenEvents.map((event) => event.fullText)).toEqual([
           "Hello wrld",
           "Hello world",
@@ -5992,9 +5983,7 @@ describe("API Server E2E (compat endpoints)", () => {
         return typeof delta?.content === "string" ? delta.content : "";
       })
       .join("");
-    expect(["Compat reply", "Sorry, I'm having a provider issue"]).toContain(
-      content,
-    );
+    expect(content).toContain("Compat reply");
   });
 
   it("POST /v1/messages returns Anthropic-compatible message", async () => {
@@ -6011,9 +6000,7 @@ describe("API Server E2E (compat endpoints)", () => {
     expect(Array.isArray(content)).toBe(true);
     const first = content[0] as Record<string, unknown>;
     expect(first.type).toBe("text");
-    expect(["Compat reply", "Sorry, I'm having a provider issue"]).toContain(
-      String(first.text),
-    );
+    expect(first.text).toBe("Compat reply");
     expect(data.stop_reason).toBe("end_turn");
   });
 
@@ -6047,10 +6034,7 @@ describe("API Server E2E (compat endpoints)", () => {
         return typeof delta?.text === "string" ? delta.text : "";
       })
       .join("");
-    expect(
-      streamedText.includes("Compat reply") ||
-        streamedText.includes("Sorry, I'm having a provider issue"),
-    ).toBe(true);
+    expect(streamedText).toContain("Compat reply");
   });
 });
 
@@ -6097,13 +6081,13 @@ describe("API Server E2E (chat SSE)", () => {
         fullText: "Hello ",
       }),
     );
-    const hasSecondToken = events.some(
-      (event) =>
-        event.type === "token" &&
-        event.fullText === "Hello world" &&
-        (event.text === "world" || event.text === "Hello world"),
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        type: "token",
+        text: "world",
+        fullText: "Hello world",
+      }),
     );
-    expect(hasSecondToken).toBe(true);
     expect(events).toContainEqual(
       expect.objectContaining({
         type: "done",
