@@ -1,6 +1,8 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createDeferred } from "../../../../test/helpers/test-utils";
+import { PluginsView } from "../../src/components/pages/PluginsView";
 
 const mockUseApp = vi.fn();
 const mockOnWsEvent = vi.fn(() => () => {});
@@ -22,9 +24,6 @@ vi.mock("@miladyai/app-core/api", () => ({
     restartAndWait: vi.fn(),
   },
 }));
-
-import { PluginsView } from "../../src/components/pages/PluginsView";
-import { createDeferred } from "../../../../test/helpers/test-utils";
 
 function baseContext() {
   return {
@@ -97,7 +96,9 @@ describe("PluginsView restart-aware toggles", () => {
 
     expect(mockHandlePluginToggle).toHaveBeenCalledTimes(1);
     expect(getToggle().props.disabled).toBe(true);
-    expect(String(getToggle().props.children)).toContain("pluginsview.Applying");
+    expect(String(getToggle().props.children)).toContain(
+      "pluginsview.Applying",
+    );
     expect(
       tree?.root.findAll(
         (node) =>
