@@ -199,6 +199,12 @@ function titleCasePluginId(id: string): string {
     .join(" ");
 }
 
+function isMissingOrRedacted(value: string | undefined): boolean {
+  if (!value) return true;
+  const normalized = value.trim();
+  return normalized.length === 0 || normalized === "[REDACTED]";
+}
+
 function buildPluginParamDefs(
   parameters: Record<string, ManifestPluginParameter> | undefined,
   savedValues?: Record<string, string>,
@@ -354,6 +360,21 @@ export function buildPluginListResponse(runtime: AgentRuntime | null): {
   plugins: Array<Record<string, unknown>>;
 } {
   const config = loadElizaConfig();
+  const discordConnectorToken =
+    typeof (config as { connectors?: { discord?: { token?: string } } })
+      .connectors?.discord?.token === "string"
+      ? (
+          config as { connectors?: { discord?: { token?: string } } }
+        ).connectors?.discord?.token?.trim() || ""
+      : "";
+  if (discordConnectorToken) {
+    if (isMissingOrRedacted(process.env.DISCORD_API_TOKEN)) {
+      process.env.DISCORD_API_TOKEN = discordConnectorToken;
+    }
+    if (isMissingOrRedacted(process.env.DISCORD_BOT_TOKEN)) {
+      process.env.DISCORD_BOT_TOKEN = discordConnectorToken;
+    }
+  }
   const loadedNames = resolveLoadedPluginNames(runtime);
   const manifestPath = resolvePluginManifestPath();
   const manifest = manifestPath
@@ -487,6 +508,84 @@ export function buildPluginListResponse(runtime: AgentRuntime | null): {
           ? installRecord.version
           : (resolveInstalledPackageVersion(pluginName) ?? undefined),
       isActive: isPluginLoaded(pluginId, pluginName, loadedNames),
+      icon: null,
+    });
+  }
+
+  // Compatibility surface expected by legacy plugin config routes/tests.
+  const discordApiToken = process.env.DISCORD_API_TOKEN?.trim() || "";
+  const discordBotToken = process.env.DISCORD_BOT_TOKEN?.trim() || "";
+  const discordTokenSet = Boolean(discordApiToken || discordBotToken);
+  const discordMaskedValue = discordTokenSet
+    ? maskValue(discordApiToken || discordBotToken)
+    : null;
+  const existingDiscord = plugins.get("discord");
+  if (existingDiscord) {
+    const mutableDiscord = existingDiscord as Record<string, unknown>;
+    const currentParams = Array.isArray(mutableDiscord.parameters)
+      ? (mutableDiscord.parameters as CompatPluginParameter[])
+      : [];
+    const hasDiscordApiToken = currentParams.some(
+      (parameter) => parameter.key === "DISCORD_API_TOKEN",
+    );
+    const hasDiscordBotToken = currentParams.some(
+      (parameter) => parameter.key === "DISCORD_BOT_TOKEN",
+    );
+    if (!hasDiscordApiToken) {
+      currentParams.push({
+        key: "DISCORD_API_TOKEN",
+        type: "string",
+        description: "Discord bot token",
+        required: true,
+        sensitive: true,
+        currentValue: discordMaskedValue,
+        isSet: discordTokenSet,
+      });
+    }
+    if (!hasDiscordBotToken) {
+      currentParams.push({
+        key: "DISCORD_BOT_TOKEN",
+        type: "string",
+        description: "Discord bot token (compat alias)",
+        required: false,
+        sensitive: true,
+        currentValue: discordMaskedValue,
+        isSet: discordTokenSet,
+      });
+    }
+    mutableDiscord.parameters = currentParams;
+    if (discordTokenSet) {
+      mutableDiscord.configured = true;
+      mutableDiscord.validationErrors = [];
+    }
+  }
+
+  if (!plugins.has("selfcontrol")) {
+    plugins.set("selfcontrol", {
+      id: "selfcontrol",
+      name: "SelfControl",
+      description: "Bundled focus and website blocking plugin.",
+      tags: [],
+      enabled:
+        typeof configEntries.selfcontrol?.enabled === "boolean"
+          ? Boolean(configEntries.selfcontrol?.enabled)
+          : false,
+      configured: true,
+      envKey: null,
+      category: "feature",
+      source: "bundled",
+      parameters: [],
+      validationErrors: [],
+      validationWarnings: [],
+      npmName: "@miladyai/plugin-selfcontrol",
+      version:
+        resolveInstalledPackageVersion("@miladyai/plugin-selfcontrol") ??
+        undefined,
+      isActive: isPluginLoaded(
+        "selfcontrol",
+        "@miladyai/plugin-selfcontrol",
+        loadedNames,
+      ),
       icon: null,
     });
   }
