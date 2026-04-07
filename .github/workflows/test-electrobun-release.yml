@@ -44,11 +44,15 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: Materialize eliza workspace checkout
+        run: |
+          if [ ! -f eliza/package.json ]; then
+            rm -rf eliza
+            git clone --depth 1 https://github.com/elizaos/eliza.git eliza
+          fi
+
       - name: Initialize tracked workspace submodules
         run: node scripts/init-submodules.mjs
-
-      - name: Disable repo-local eliza workspace
-        run: node scripts/disable-local-eliza-workspace.mjs
 
       - name: Install root dependencies
         run: bun install --frozen-lockfile --ignore-scripts
