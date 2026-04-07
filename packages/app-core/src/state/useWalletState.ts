@@ -117,6 +117,9 @@ export function useWalletState({
 
   // ── Synchronous lock to prevent duplicate save clicks ──────────────
   const walletApiKeySavingRef = useRef(false);
+  const walletExportTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // ── Wallet callbacks ───────────────────────────────────────────────
 
@@ -198,6 +201,10 @@ export function useWalletState({
 
   const handleExportKeys = useCallback(async () => {
     if (walletExportVisible) {
+      if (walletExportTimerRef.current) {
+        clearTimeout(walletExportTimerRef.current);
+        walletExportTimerRef.current = null;
+      }
       setWalletExportVisible(false);
       setWalletExportData(null);
       return;
@@ -228,7 +235,11 @@ export function useWalletState({
       const data = await client.exportWalletKeys(exportToken.trim());
       setWalletExportData(data);
       setWalletExportVisible(true);
-      setTimeout(() => {
+      if (walletExportTimerRef.current) {
+        clearTimeout(walletExportTimerRef.current);
+      }
+      walletExportTimerRef.current = setTimeout(() => {
+        walletExportTimerRef.current = null;
         setWalletExportVisible(false);
         setWalletExportData(null);
       }, 60_000);

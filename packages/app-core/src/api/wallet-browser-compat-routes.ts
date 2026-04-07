@@ -5,6 +5,18 @@ import { resolveWalletRpcReadiness } from "@miladyai/agent/api/wallet-rpc";
 import { loadElizaConfig } from "@miladyai/agent/config/config";
 import type { StewardSignRequest } from "@miladyai/shared/contracts/wallet";
 import { ethers } from "ethers";
+
+/** @internal Exported for testing. Parse a transaction value string to BigInt. */
+export function safeParseBigInt(value: string): bigint {
+  try {
+    return BigInt(value);
+  } catch {
+    throw new Error(
+      `Invalid transaction value: expected an integer or hex string, got "${value}"`,
+    );
+  }
+}
+
 import { ensureCompatApiAuthorized } from "./auth";
 import {
   type CompatRuntimeState,
@@ -133,8 +145,18 @@ function resolveSolanaMessageBytes(body: Record<string, unknown>): Buffer {
   return Buffer.from(message, "utf8");
 }
 
+let cachedRpcReadiness: ReturnType<typeof resolveWalletRpcReadiness> | null =
+  null;
+let cachedRpcReadinessAt = 0;
+const RPC_CACHE_TTL_MS = 30_000;
+
 function resolvePreferredRpcUrl(chainId: number): string | null {
-  const readiness = resolveWalletRpcReadiness(loadElizaConfig());
+  const now = Date.now();
+  if (!cachedRpcReadiness || now - cachedRpcReadinessAt > RPC_CACHE_TTL_MS) {
+    cachedRpcReadiness = resolveWalletRpcReadiness(loadElizaConfig());
+    cachedRpcReadinessAt = now;
+  }
+  const readiness = cachedRpcReadiness;
   switch (chainId) {
     case 1:
       return readiness.ethereumRpcUrls[0] ?? null;
@@ -176,7 +198,7 @@ async function sendLocalBrowserWalletTransaction(
       chainId: request.chainId,
       data: request.data,
       to: request.to,
-      value: BigInt(request.value),
+      value: safeParseBigInt(request.value),
     });
     return {
       approved: true,
@@ -339,7 +361,11 @@ export async function handleWalletBrowserCompatRoutes(
     value: normalizeString(body.value) ?? "",
   };
 
-  if (!request.to || !request.value || !Number.isFinite(request.chainId)) {
+  if (
+    !request.to ||
+    request.value == null ||
+    !Number.isFinite(request.chainId)
+  ) {
     sendJsonErrorResponse(
       res,
       400,

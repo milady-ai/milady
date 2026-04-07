@@ -450,6 +450,12 @@ export function BrowserWorkspaceView(): JSX.Element {
         selectedTabId,
         url,
       );
+      // React won't re-navigate an existing iframe when only the src attribute
+      // changes (same key = same DOM element). Set the src directly via the ref.
+      const iframe = iframeRefs.current.get(selectedTabId);
+      if (iframe && iframe.src !== tab.url) {
+        iframe.src = tab.url;
+      }
       await loadWorkspace({ preferTabId: tab.id, silent: true });
       setLocationInput(tab.url);
       setLocationDirty(false);

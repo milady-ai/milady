@@ -28,8 +28,6 @@ const GENERIC_NO_RESPONSE_TEXT =
   "Sorry, I couldn't generate a response right now. Please try again.";
 const DEFAULT_FETCH_TIMEOUT_MS = 10_000;
 const LOCAL_STORAGE_API_BASE_KEY = "milady_api_base";
-/** @deprecated Read-only fallback — older sessions wrote to sessionStorage. */
-const SESSION_STORAGE_API_BASE_KEY = "milady_api_base";
 
 // ---------------------------------------------------------------------------
 // Client
@@ -82,8 +80,7 @@ export class MiladyClient {
     const injectedBase = getElizaApiBase();
     const storedBase =
       typeof window !== "undefined"
-        ? (window.localStorage.getItem(LOCAL_STORAGE_API_BASE_KEY) ??
-          window.sessionStorage.getItem(SESSION_STORAGE_API_BASE_KEY))
+        ? window.localStorage.getItem(LOCAL_STORAGE_API_BASE_KEY)
         : null;
 
     this._explicitBase =
@@ -163,8 +160,8 @@ export class MiladyClient {
       } else {
         window.localStorage.removeItem(LOCAL_STORAGE_API_BASE_KEY);
       }
-      // Clean up legacy sessionStorage entry
-      window.sessionStorage.removeItem(SESSION_STORAGE_API_BASE_KEY);
+      // Clean up legacy sessionStorage entry (same key was used historically)
+      window.sessionStorage.removeItem(LOCAL_STORAGE_API_BASE_KEY);
     }
   }
 
