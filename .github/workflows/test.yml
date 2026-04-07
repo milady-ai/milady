@@ -207,7 +207,15 @@ jobs:
         run: node scripts/disable-local-eliza-workspace.mjs
 
       - name: Install dependencies
-        run: bun install --ignore-scripts
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            bun install --ignore-scripts && exit 0
+            rm -rf node_modules
+            echo "Attempt $i failed, retrying in $((i * 15))s..."
+            sleep $((i * 15))
+          done
+          exit 1
 
       - name: Run repository postinstall patches
         run: bun run postinstall
