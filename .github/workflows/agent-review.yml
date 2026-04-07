@@ -589,6 +589,7 @@ jobs:
             };
 
             let latest = null;
+            let usedFallbackReview = false;
             let attemptUsed = 1;
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -650,9 +651,14 @@ jobs:
                 ...normalizedReviews.filter((r) => r.user?.type === 'Bot'),
               ];
 
-              latest = findLatest(allBotEntries, { requireRunMarker: false });
-              if (latest) {
-                core.warning('Falling back to latest parseable bot review because the exact run-marker comment was not visible before timeout.');
+              const fallbackLatest = findLatest(allBotEntries, { requireRunMarker: false });
+              const fallbackDecision = extractDecision(fallbackLatest?.body || '');
+              if (fallbackLatest && fallbackDecision && fallbackDecision !== 'APPROVE') {
+                latest = fallbackLatest;
+                usedFallbackReview = true;
+                core.warning(`Falling back to latest parseable bot review with non-approve decision (${fallbackDecision}) because the exact run-marker comment was not visible before timeout.`);
+              } else if (fallbackLatest && fallbackDecision === 'APPROVE') {
+                core.warning('Ignoring stale fallback APPROVE review because it does not carry the current run marker.');
               }
             }
 
@@ -670,6 +676,10 @@ jobs:
               }
             } else {
               core.warning(`No structured review decision comment found for current run marker after ${attemptUsed} attempts. Treating as reject.`);
+            }
+
+            if (usedFallbackReview) {
+              core.notice(`Using fallback non-approve decision from ${decisionCommentUrl || 'a bot review comment'} after run-marker timeout.`);
             }
 
             core.setOutput('verdict', verdict);

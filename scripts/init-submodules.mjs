@@ -28,9 +28,10 @@ const SUBMODULE_READINESS_MARKERS = {
 // typescript/ that Windows git rejects as invalid filenames. Skip checkout
 // until elizaos-plugins/plugin-openrouter#25 is merged; the package is
 // available via npm in the meantime.
+// TODO: remove once elizaos-plugins/plugin-openrouter#25 is merged.
 const SKIP_SUBMODULES = new Set(["plugins/plugin-openrouter"]);
 
-export function getSubmoduleSkipReason(
+function getSubmoduleSkipReason(
   submodulePath,
   { skipLocal = skipLocalUpstreams } = {},
 ) {
