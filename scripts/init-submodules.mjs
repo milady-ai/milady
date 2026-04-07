@@ -30,12 +30,24 @@ const SUBMODULE_READINESS_MARKERS = {
 // available via npm in the meantime.
 const SKIP_SUBMODULES = new Set(["plugins/plugin-openrouter"]);
 
+export function getSubmoduleSkipReason(
+  submodulePath,
+  { skipLocal = skipLocalUpstreams } = {},
+) {
+  if (SKIP_SUBMODULES.has(submodulePath)) {
+    return "it is in the explicit skip list";
+  }
+  if (skipLocal && submodulePath === "eliza") {
+    return "local upstreams are disabled";
+  }
+  return null;
+}
+
 export function shouldSkipSubmoduleInit(
   submodulePath,
   { skipLocal = skipLocalUpstreams } = {},
 ) {
-  if (SKIP_SUBMODULES.has(submodulePath)) return true;
-  return skipLocal && submodulePath === "eliza";
+  return getSubmoduleSkipReason(submodulePath, { skipLocal }) !== null;
 }
 
 export function parseTrackedSubmodules(configOutput) {
@@ -123,9 +135,10 @@ export function runInitSubmodules({
   let failed = 0;
 
   for (const submodule of submodules) {
+    const skipReason = getSubmoduleSkipReason(submodule.path);
     if (shouldSkipSubmodule(submodule.path)) {
       log(
-        `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because local upstreams are disabled`,
+        `[init-submodules] Skipping ${submodule.name} (${submodule.path}) because ${skipReason ?? "local upstreams are disabled"}`,
       );
       continue;
     }
