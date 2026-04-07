@@ -97,7 +97,11 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   OBSIDAN_VAULT_PATH: "@elizaos/plugin-obsidian",
   REPOPROMPT_CLI_PATH: "@elizaos/plugin-repoprompt",
   CLAUDE_CODE_WORKBENCH_ENABLED: "@elizaos/plugin-claude-code-workbench",
-  EVM_PRIVATE_KEY: "@elizaos/plugin-evm",
+  // EVM plugin gated behind explicit opt-in flag instead of EVM_PRIVATE_KEY.
+  // plugin-evm's CROSS_CHAIN_TRANSFER action has a 'BRIDGE' simile that
+  // crashes with 'Action spec not found: BRIDGE' during startup.
+  // Gate behind ENABLE_EVM_PLUGIN=1 until the spec registration is fixed.
+  ENABLE_EVM_PLUGIN: "@elizaos/plugin-evm",
   SOLANA_PRIVATE_KEY: "@elizaos/plugin-solana",
   LASTFM_API_KEY: "@elizaos/plugin-music-library",
   GENIUS_API_KEY: "@elizaos/plugin-music-library",

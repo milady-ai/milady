@@ -15,7 +15,14 @@ import type {
   ProviderResult,
   State,
 } from "@elizaos/core";
-import * as baseModule from "@elizaos/plugin-agent-orchestrator";
+// Dynamic import: plugin-agent-orchestrator is desktop-only and may be absent
+// in Docker, cloud, or headless environments.
+let baseModule: Record<string, unknown> = {};
+try {
+  baseModule = await import("@elizaos/plugin-agent-orchestrator");
+} catch {
+  // Package not available — orchestrator features gracefully disabled
+}
 
 type AdapterId = "claude" | "codex" | "gemini" | "aider";
 type FrameworkId = AdapterId | "pi";
@@ -191,7 +198,14 @@ function getBaseExport<T = unknown>(name: string): T | undefined {
 function resolveBasePlugin(): Plugin {
   const plugin = getBaseExport("default") ?? getBaseExport("codingAgentPlugin");
   if (!plugin || typeof plugin !== "object") {
-    throw new Error("plugin-agent-orchestrator did not export a plugin object");
+    // Return a no-op stub when orchestrator is unavailable
+    return {
+      name: "agent-orchestrator-stub",
+      description: "Stub: plugin-agent-orchestrator not available in this environment",
+      actions: [],
+      providers: [],
+      services: [],
+    } as unknown as Plugin;
   }
   return plugin as Plugin;
 }
