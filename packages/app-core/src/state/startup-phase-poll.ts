@@ -8,7 +8,7 @@
 
 import { client } from "../api";
 import { getBackendStartupTimeoutMs } from "../bridge";
-import { scanProviderCredentials } from "../bridge";
+import { isElectrobunRuntime, scanProviderCredentials } from "../bridge";
 import {
   asApiLikeError,
   clearPersistedOnboardingStep,
@@ -198,6 +198,7 @@ export async function runPollingBackend(
 
       if (
         sessionComplete &&
+        !complete &&
         !ctx?.persistedActiveServer &&
         !ctx?.hadPriorOnboarding
       ) {
@@ -271,6 +272,15 @@ export async function runPollingBackend(
           } catch (err) {
             const ae = asApiLikeError(err);
             if (ae?.status === 401 && client.hasToken()) {
+              // On desktop, 401 is transient (port not ready / port changed).
+              // Never clear the shell-injected token or show pairing.
+              if (isElectrobunRuntime()) {
+                optErr = err;
+                await new Promise<void>((r) => {
+                  tidRef.current = setTimeout(r, 500);
+                });
+                continue;
+              }
               client.setToken(null);
               deps.setAuthRequired(true);
               deps.setPairingEnabled(latestAuth.pairingEnabled);
@@ -298,13 +308,17 @@ export async function runPollingBackend(
     } catch (err) {
       const ae = asApiLikeError(err);
       if (ae?.status === 401 && client.hasToken()) {
-        client.setToken(null);
-        deps.setAuthRequired(true);
-        deps.setPairingEnabled(latestAuth.pairingEnabled);
-        deps.setPairingExpiresAt(latestAuth.expiresAt);
-        deps.setOnboardingLoading(false);
-        dispatch({ type: "BACKEND_AUTH_REQUIRED" });
-        return;
+        // On desktop, 401 is transient (port not ready / port changed).
+        // Never clear the shell-injected token or show pairing.
+        if (!isElectrobunRuntime()) {
+          client.setToken(null);
+          deps.setAuthRequired(true);
+          deps.setPairingEnabled(latestAuth.pairingEnabled);
+          deps.setPairingExpiresAt(latestAuth.expiresAt);
+          deps.setOnboardingLoading(false);
+          dispatch({ type: "BACKEND_AUTH_REQUIRED" });
+          return;
+        }
       }
       if (ae?.status === 404) {
         deps.setStartupError(describeBackendFailure(err, false));

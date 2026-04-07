@@ -6,6 +6,7 @@
  */
 
 import { type AgentStartupDiagnostics, client } from "../api";
+import { isElectrobunRuntime } from "../bridge";
 import {
   asApiLikeError,
   formatStartupErrorDetail,
@@ -150,11 +151,15 @@ export async function runStartingRuntime(
     } catch (err) {
       const ae = asApiLikeError(err);
       if (ae?.status === 401 && client.hasToken()) {
-        client.setToken(null);
-        deps.setAuthRequired(true);
-        deps.setOnboardingLoading(false);
-        dispatch({ type: "BACKEND_AUTH_REQUIRED" });
-        return;
+        // On desktop, 401 is transient (port not ready / port changed).
+        // Never clear the shell-injected token or show pairing.
+        if (!isElectrobunRuntime()) {
+          client.setToken(null);
+          deps.setAuthRequired(true);
+          deps.setOnboardingLoading(false);
+          dispatch({ type: "BACKEND_AUTH_REQUIRED" });
+          return;
+        }
       }
       lastErr = err;
       deps.setConnected(false);

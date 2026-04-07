@@ -36,6 +36,7 @@ const LOCAL_STORAGE_API_BASE_KEY = "milady_api_base";
 export class MiladyClient {
   private _baseUrl: string;
   private _explicitBase: boolean;
+  private _userSetBase: boolean;
   private _token: string | null;
   private readonly clientId: string;
   private ws: WebSocket | null = null;
@@ -85,6 +86,7 @@ export class MiladyClient {
 
     this._explicitBase =
       baseUrl != null || Boolean(bootBase?.trim() || storedBase?.trim());
+    this._userSetBase = baseUrl != null;
 
     // Priority: explicit arg > boot config > desktop injection > session storage > same origin.
     // `client.setBaseUrl()` updates the boot config, so it must beat the
@@ -98,10 +100,14 @@ export class MiladyClient {
    * In the desktop shell the main process injects the API base after the
    * page loads (once the agent runtime starts). Re-checking the boot config
    * on every call ensures we pick up the injected value even if it wasn't
-   * set at construction.
+   * set at construction, or if the port changed dynamically (e.g. 2138→2139).
    */
   protected get baseUrl(): string {
-    if (!this._explicitBase) {
+    // Always re-read boot config — the main process may push a port update
+    // via apiBaseUpdate RPC at any time (e.g. when the child runtime binds
+    // to a different port than initially injected in the HTML).
+    // Only skip if the user explicitly called setBaseUrl() themselves.
+    if (!this._userSetBase) {
       const bootBase = getBootConfig().apiBase;
       const injectedBase = getElizaApiBase();
       const preferredBase = bootBase ?? injectedBase;
@@ -149,6 +155,7 @@ export class MiladyClient {
   setBaseUrl(baseUrl: string | null): void {
     const normalized = baseUrl?.trim().replace(/\/+$/, "") || "";
     this._explicitBase = normalized.length > 0;
+    this._userSetBase = normalized.length > 0;
     this._baseUrl = normalized;
     this.disconnectWs();
     // Update boot config so other consumers (resolveApiUrl, etc.) see the new base.

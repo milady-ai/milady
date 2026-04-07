@@ -13,6 +13,10 @@
  */
 
 import { Electroview } from "electrobun/view";
+import {
+  getBootConfig,
+  setBootConfig,
+} from "@miladyai/app-core/config";
 import type { RpcMessageListener } from "../types.js";
 import { ensureElectrobunGlobal } from "./electrobun-stub.js";
 
@@ -41,6 +45,14 @@ function dispatchMessage(messageName: string, payload: unknown): void {
         enumerable: false,
       });
     }
+    // Propagate to boot config so MiladyClient picks up port changes.
+    // The client reads boot config (not window globals) after construction.
+    const config = getBootConfig();
+    setBootConfig({
+      ...config,
+      apiBase: apiBaseUpdate.base,
+      ...(apiBaseUpdate.token ? { apiToken: apiBaseUpdate.token } : {}),
+    });
   }
 
   const listeners = listenersByRpcMessage[messageName];
