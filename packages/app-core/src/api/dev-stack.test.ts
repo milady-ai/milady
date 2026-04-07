@@ -16,10 +16,10 @@ describe("resolveDevStackFromEnv", () => {
     expect(r.desktopDevLog).toEqual({ filePath: null, apiTailPath: null });
   });
 
-  it("falls back to ELIZA_PORT then 31337", () => {
+  it("falls back to ELIZA_PORT then 2138", () => {
     const r = resolveDevStackFromEnv({ ELIZA_PORT: "3001" });
     expect(r.api.listenPort).toBe(3001);
-    expect(resolveDevStackFromEnv({}).api.listenPort).toBe(31337);
+    expect(resolveDevStackFromEnv({}).api.listenPort).toBe(2138);
   });
 
   it("accepts ELIZA_API_PORT as the legacy dedicated API alias", () => {

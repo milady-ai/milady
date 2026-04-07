@@ -320,7 +320,7 @@ describe("TRANSFER_TOKEN action", () => {
     // Verify fetch was called with correct args
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, opts] = mockFetch.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("http://127.0.0.1:31337/api/wallet/transfer/execute");
+    expect(url).toBe("http://127.0.0.1:2138/api/wallet/transfer/execute");
     expect(opts.method).toBe("POST");
     expect(
       (opts.headers as Record<string, string>)["X-Eliza-Agent-Action"],

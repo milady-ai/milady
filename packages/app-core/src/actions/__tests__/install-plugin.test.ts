@@ -72,7 +72,7 @@ describe("installPluginAction", () => {
 
     expect(result.success).toBe(true);
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
-      "http://localhost:31337/api/plugins/install",
+      "http://localhost:2138/api/plugins/install",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -201,12 +201,12 @@ describe("installPluginAction", () => {
     expect(result.success).toBe(true);
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       1,
-      "http://localhost:31337/api/agent/restart",
+      "http://localhost:2138/api/agent/restart",
       expect.objectContaining({ method: "POST" }),
     );
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       2,
-      "http://localhost:31337/api/plugins/install",
+      "http://localhost:2138/api/plugins/install",
       expect.objectContaining({
         body: JSON.stringify({
           name: "@elizaos/plugin-telegram",
@@ -251,12 +251,12 @@ describe("installPluginAction", () => {
     expect(result.text).toBe("installed after restart");
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       2,
-      "http://localhost:31337/api/agent/restart",
+      "http://localhost:2138/api/agent/restart",
       expect.objectContaining({ method: "POST" }),
     );
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       3,
-      "http://localhost:31337/api/plugins/install",
+      "http://localhost:2138/api/plugins/install",
       expect.objectContaining({
         body: JSON.stringify({
           name: "@elizaos/plugin-telegram",
@@ -303,12 +303,12 @@ describe("installPluginAction", () => {
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(3);
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       1,
-      "http://localhost:31337/api/agent/restart",
+      "http://localhost:2138/api/agent/restart",
       expect.objectContaining({ method: "POST" }),
     );
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       2,
-      "http://localhost:31337/api/plugins/install",
+      "http://localhost:2138/api/plugins/install",
       expect.objectContaining({
         body: JSON.stringify({
           name: "@elizaos/plugin-telegram",
@@ -318,7 +318,7 @@ describe("installPluginAction", () => {
     );
     expect(vi.mocked(fetch)).toHaveBeenNthCalledWith(
       3,
-      "http://localhost:31337/api/plugins/install",
+      "http://localhost:2138/api/plugins/install",
       expect.objectContaining({
         body: JSON.stringify({
           name: "@elizaos/plugin-telegram",
