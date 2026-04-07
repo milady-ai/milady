@@ -31,7 +31,7 @@ inputs:
     required: false
     default: "false"
   disable-local-eliza-workspace:
-    description: "Disable repo-local eliza workspace in CI when local upstreams are skipped"
+    description: "Disable repo-local eliza workspace in CI when local upstreams are skipped (set to false only for jobs that must resolve @elizaos/* from local eliza source)"
     required: false
     default: "true"
 

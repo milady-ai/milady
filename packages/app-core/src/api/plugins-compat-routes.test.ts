@@ -127,6 +127,7 @@ describe("buildPluginListResponse", () => {
 
     expect(discord.configured).toBe(true);
     expect(discord.validationErrors).toEqual([]);
+    // Discord has no pluginParameters in packages/agent/src/plugins.json.
     expect(discord.parameters).toEqual([]);
     expect(process.env.DISCORD_API_TOKEN).toBe("discord-token-123");
     expect(process.env.DISCORD_BOT_TOKEN).toBe("discord-token-123");
@@ -149,6 +150,7 @@ describe("buildPluginListResponse", () => {
 
     expect(discord.configured).toBe(true);
     expect(discord.validationErrors).toEqual([]);
+    // Keep parity with manifest-backed metadata: no compat parameters for Discord.
     expect(discord.parameters).toEqual([]);
     expect(process.env.DISCORD_API_TOKEN).toBe("discord-token-456");
     expect(process.env.DISCORD_BOT_TOKEN).toBe("discord-token-456");
@@ -245,6 +247,7 @@ describe("buildPluginListResponse", () => {
     const ids = buildPluginListResponse(null).plugins.map(
       (plugin) => plugin.id,
     );
+    // "selfcontrol" is shipped via plugin-selfcontrol package, not bundled in plugins.json.
     expect(ids).not.toContain("selfcontrol");
   });
 });
