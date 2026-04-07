@@ -25,6 +25,14 @@ describe("parseTrackedSubmodules", () => {
 });
 
 describe("shouldSkipSubmoduleInit", () => {
+  it("skips plugin-openrouter until the upstream Windows-invalid paths are fixed", () => {
+    expect(
+      shouldSkipSubmoduleInit("plugins/plugin-openrouter", {
+        skipLocal: false,
+      }),
+    ).toBe(true);
+  });
+
   it("skips the repo-local eliza checkout when local upstreams are disabled", () => {
     expect(shouldSkipSubmoduleInit("eliza", { skipLocal: true })).toBe(true);
     expect(

@@ -711,7 +711,7 @@ describe("Electrobun release workflow drift", () => {
       "$stopProtectedProcessIds = [System.Collections.Generic.HashSet[int]]::new()",
     );
     expect(smokeScript).toContain(
-      'Get-CimInstance Win32_Process -Filter "ProcessId = $PID"',
+      'Get-CimInstance Win32_Process -Filter "ProcessId = $currentPid"',
     );
     expect(smokeScript).toContain(
       "-not $stopProtectedProcessIds.Contains([int]$_.Id)",
