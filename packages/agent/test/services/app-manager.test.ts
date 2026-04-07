@@ -1750,4 +1750,65 @@ describe("AppManager", () => {
       }
     });
   });
+
+  describe("getInfo", () => {
+    it("applies local app meta overrides so displayName and launchType are populated", async () => {
+      // Registry entry with NO appMeta — simulates a bare npm-published plugin
+      // that relies on LOCAL_APP_OVERRIDES in registry-client-app-meta.ts.
+      const bareRegistryEntry: RegistryPluginInfo = {
+        ...HYPERSCAPE_APP_INFO,
+        displayName: undefined,
+        launchType: undefined,
+        launchUrl: undefined,
+        category: undefined,
+        capabilities: undefined,
+        viewer: undefined,
+        session: undefined,
+        appMeta: undefined,
+      };
+
+      const manager = new AppManager();
+      const pluginManager = buildPluginManager([], bareRegistryEntry);
+
+      // getPluginInfo (registry-client mock) returns the same bare entry
+      // to simulate both pluginManager and local registry returning it.
+      registryClientMocks.getPluginInfo.mockResolvedValue(bareRegistryEntry);
+
+      const info = await manager.getInfo(
+        pluginManager,
+        "@elizaos/app-hyperscape",
+      );
+
+      expect(info).not.toBeNull();
+      // resolveAppOverride should supply these from LOCAL_APP_OVERRIDES
+      expect(typeof info!.displayName).toBe("string");
+      expect(info!.displayName!.length).toBeGreaterThan(0);
+      expect(typeof info!.launchType).toBe("string");
+      expect(info!.launchType!.length).toBeGreaterThan(0);
+    });
+
+    it("returns null for an unknown app", async () => {
+      const manager = new AppManager();
+      const pluginManager = buildPluginManager([], null);
+      registryClientMocks.getPluginInfo.mockResolvedValue(null);
+
+      const info = await manager.getInfo(pluginManager, "nonexistent-app");
+      expect(info).toBeNull();
+    });
+
+    it("preserves existing appMeta when registry already provides it", async () => {
+      const manager = new AppManager();
+      const pluginManager = buildPluginManager([], HYPERSCAPE_APP_INFO);
+      registryClientMocks.getPluginInfo.mockResolvedValue(HYPERSCAPE_APP_INFO);
+
+      const info = await manager.getInfo(
+        pluginManager,
+        "@elizaos/app-hyperscape",
+      );
+
+      expect(info).not.toBeNull();
+      expect(info!.displayName).toBe("Hyperscape");
+      expect(info!.launchType).toBe("connect");
+    });
+  });
 });
