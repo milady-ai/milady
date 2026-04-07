@@ -661,10 +661,11 @@ jobs:
           # server.listen() and the health endpoint never becomes reachable.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"
-          # Keep the installer smoke target on the same short root that the
-          # last all-green Windows release used; the longer runner temp path
-          # regressed into an Inno exit code 5 before launcher handoff.
-          MILADY_TEST_WINDOWS_INSTALL_DIR: C:\mi
+          # Use a short path under runner.temp to avoid MAX_PATH issues with
+          # deeply nested node_modules while staying in a user-writable location.
+          # Previous C:\mi (root of C:\) broke with exit code -1 on newer Windows
+          # Server 2025 runners that restrict non-elevated writes to the root.
+          MILADY_TEST_WINDOWS_INSTALL_DIR: ${{ runner.temp }}\mi
           MILADY_TEST_WINDOWS_LAUNCHER_DIR: ${{ runner.temp }}\milady-windows-ui-launcher
           MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE: ${{ runner.temp }}\milady-windows-ui-launcher.txt
         run: |
@@ -700,7 +701,7 @@ jobs:
           # fail waiting on local embedding model setup in CI.
           MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR: C:\mi-proof
+          MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR: ${{ runner.temp }}\mi-proof
         run: |
           Remove-Item $env:MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue
           pwsh -File apps/app/electrobun/scripts/verify-windows-installer-proof.ps1 `

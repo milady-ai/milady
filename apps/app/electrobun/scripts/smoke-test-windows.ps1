@@ -456,16 +456,26 @@ if (-not $launcher) {
   Remove-Item $installerRoot -Recurse -Force -ErrorAction SilentlyContinue
   New-Item -ItemType Directory -Force -Path $installerRoot | Out-Null
 
+  $installerLogPath = Join-Path $tempRoot "milady-inno-setup.log"
   $installerArgs = @(
     "/VERYSILENT",
     "/SUPPRESSMSGBOXES",
     "/NORESTART",
     "/SP-",
-    "/DIR=$installerRoot"
+    "/DIR=$installerRoot",
+    "/LOG=$installerLogPath"
   )
 
-  $installerProcess = Start-Process -FilePath $installer.FullName -ArgumentList $installerArgs -WorkingDirectory (Split-Path -Parent $installer.FullName) -PassThru -Wait
+  $installerProcess = Start-Process -FilePath $installer.FullName -ArgumentList $installerArgs -WorkingDirectory (Split-Path -Parent $installer.FullName) -PassThru -Wait -NoNewWindow
   if ($installerProcess.ExitCode -ne 0) {
+    Write-Host "Inno Setup installer failed with exit code $($installerProcess.ExitCode)."
+    if (Test-Path $installerLogPath) {
+      Write-Host "--- Inno Setup log ---"
+      Get-Content $installerLogPath -Tail 100 | ForEach-Object { Write-Host $_ }
+      Write-Host "--- end Inno Setup log ---"
+    } else {
+      Write-Host "Inno Setup log not found at $installerLogPath"
+    }
     throw "Windows installer exited with code $($installerProcess.ExitCode)"
   }
 
