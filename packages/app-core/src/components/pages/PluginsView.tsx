@@ -514,10 +514,16 @@ function PluginListView({
       setActionNotice(messages.waiting, "info", 120_000, false, true);
       const status = await client.restartAndWait(120_000);
       if (status.state !== "running") {
-        throw new Error(messages.failure.replace("{{status}}", status.state));
+        setActionNotice(
+          messages.failure.replace("{{status}}", status.state),
+          "error",
+          3800,
+        );
+        return false;
       }
       await loadPlugins();
       setActionNotice(messages.success, "success");
+      return true;
     },
     [loadPlugins, setActionNotice],
   );
@@ -545,7 +551,7 @@ function PluginListView({
           await client.installRegistryPlugin(npmName, false, { stream }),
       )) as Awaited<ReturnType<typeof client.installRegistryPlugin>>;
       if (result.requiresRestart) {
-        await completePluginLifecycleRestart({
+        const restarted = await completePluginLifecycleRestart({
           waiting: t("pluginsview.PluginInstalledRestarting", {
             plugin: npmName,
             defaultValue:
@@ -562,6 +568,7 @@ function PluginListView({
               "{{plugin}} installed, but the agent did not come back online (status: {{status}}).",
           }),
         });
+        if (!restarted) return;
       } else {
         await loadPlugins();
         setActionNotice(
@@ -621,7 +628,7 @@ function PluginListView({
           await client.updateRegistryPlugin(npmName, false, { stream }),
       )) as Awaited<ReturnType<typeof client.updateRegistryPlugin>>;
       if (result.requiresRestart) {
-        await completePluginLifecycleRestart({
+        const restarted = await completePluginLifecycleRestart({
           waiting: t("pluginsview.PluginUpdatedRestarting", {
             plugin: npmName,
             defaultValue:
@@ -638,6 +645,7 @@ function PluginListView({
               "{{plugin}} updated, but the agent did not come back online (status: {{status}}).",
           }),
         });
+        if (!restarted) return;
       } else {
         await loadPlugins();
         setActionNotice(
@@ -692,7 +700,7 @@ function PluginListView({
         async () => await client.uninstallRegistryPlugin(npmName, false),
       )) as Awaited<ReturnType<typeof client.uninstallRegistryPlugin>>;
       if (result.requiresRestart) {
-        await completePluginLifecycleRestart({
+        const restarted = await completePluginLifecycleRestart({
           waiting: t("pluginsview.PluginUninstalledRestarting", {
             plugin: npmName,
             defaultValue:
@@ -709,6 +717,7 @@ function PluginListView({
               "{{plugin}} uninstalled, but the agent did not come back online (status: {{status}}).",
           }),
         });
+        if (!restarted) return;
       } else {
         await loadPlugins();
         setActionNotice(

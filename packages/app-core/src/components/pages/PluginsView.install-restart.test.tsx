@@ -199,7 +199,7 @@ describe("PluginsView plugin install restart flow", () => {
       true,
     );
     expect(mockSetActionNotice).toHaveBeenCalledWith(
-      "pluginsview.PluginInstallFailed",
+      "pluginsview.PluginInstalledRestartFailed",
       "error",
       3800,
     );
