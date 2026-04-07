@@ -2161,7 +2161,19 @@ export class AppManager {
       }
     }
 
-    return appInfo ? flattenAppInfo(appInfo) : null;
+    if (!appInfo) return null;
+
+    // Apply local app overrides (viewer URL, sandbox, embed params, etc.)
+    // so displayName / launchType / viewer are populated even when the
+    // npm registry has no metadata for this app.
+    if (appInfo.appMeta) {
+      appInfo.appMeta =
+        resolveAppOverride(name, appInfo.appMeta) ?? appInfo.appMeta;
+    } else {
+      appInfo.appMeta = resolveAppOverride(name, undefined);
+    }
+
+    return flattenAppInfo(appInfo);
   }
 
   async listRuns(

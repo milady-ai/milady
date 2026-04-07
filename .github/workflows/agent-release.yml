@@ -299,8 +299,14 @@ jobs:
     needs: [version]
     runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
     continue-on-error: true
+    env:
+      MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
+      - name: Init non-eliza submodules
+        run: |
+          node scripts/init-submodules.mjs
+          node scripts/disable-local-eliza-workspace.mjs
       - name: Stage snapcraft.yaml
         run: |
           mkdir -p snap
