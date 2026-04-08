@@ -120,8 +120,46 @@ const rpc = Electroview.defineRPC({
 
 new Electroview({ rpc });
 
+function summarizeDiagnosticValue(value: unknown): unknown {
+  if (value instanceof Error) {
+    return {
+      name: value.name,
+      message: value.message,
+      stack: value.stack,
+    };
+  }
+  return value;
+}
+
+const instrumentedRequest = new Proxy(rpc.request, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    if (typeof value !== "function") {
+      return value;
+    }
+
+    return async (params: unknown) => {
+      try {
+        return await value(params);
+      } catch (error) {
+        void rpc.request
+          .rendererReportDiagnostic({
+            level: "error",
+            source: "rpc",
+            message: `Electrobun RPC request failed: ${String(prop)}`,
+            details: summarizeDiagnosticValue(error),
+          })
+          .catch(() => {
+            // Best effort only.
+          });
+        throw error;
+      }
+    };
+  },
+}) as RendererBridgeRpc["request"];
+
 const miladyElectrobunRpc = {
-  request: rpc.request,
+  request: instrumentedRequest,
   onMessage: (messageName: string, listener: RpcMessageListener): void => {
     if (!listenersByRpcMessage[messageName]) {
       listenersByRpcMessage[messageName] = new Set();
@@ -230,9 +268,112 @@ function installRendererLogMirror(): void {
       "error",
       "unhandledrejection",
       "Unhandled promise rejection",
-      event.reason,
+      summarizeDiagnosticValue(event.reason),
     );
   });
+
+  if (typeof window.fetch === "function") {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (...args: Parameters<typeof window.fetch>) => {
+      const startedAt = Date.now();
+      const input = args[0];
+      const init = args[1];
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof Request
+            ? input.url
+            : String(input);
+      const method =
+        init?.method ??
+        (input instanceof Request ? input.method : undefined) ??
+        "GET";
+
+      try {
+        const response = await originalFetch(...args);
+        if (!response.ok) {
+          reportDiagnostic(
+            response.status >= 500 ? "error" : "warn",
+            "fetch",
+            `HTTP ${response.status} ${response.statusText}`,
+            {
+              url,
+              method,
+              durationMs: Date.now() - startedAt,
+            },
+          );
+        }
+        return response;
+      } catch (error) {
+        reportDiagnostic("error", "fetch", "Fetch failed", {
+          url,
+          method,
+          durationMs: Date.now() - startedAt,
+          error: summarizeDiagnosticValue(error),
+        });
+        throw error;
+      }
+    };
+  }
+
+  if (typeof XMLHttpRequest !== "undefined") {
+    const open = XMLHttpRequest.prototype.open;
+    const send = XMLHttpRequest.prototype.send;
+
+    XMLHttpRequest.prototype.open = function (
+      method: string,
+      url: string | URL,
+      ...rest: unknown[]
+    ) {
+      (
+        this as XMLHttpRequest & {
+          __miladyDiag?: { method: string; url: string; startedAt: number };
+        }
+      ).__miladyDiag = {
+        method,
+        url: String(url),
+        startedAt: Date.now(),
+      };
+      return open.call(this, method, url, ...(rest as []));
+    };
+
+    XMLHttpRequest.prototype.send = function (...args: unknown[]) {
+      const xhr = this as XMLHttpRequest & {
+        __miladyDiag?: { method: string; url: string; startedAt: number };
+      };
+      const handleComplete = () => {
+        const diag = xhr.__miladyDiag;
+        if (!diag) {
+          return;
+        }
+        if (xhr.status >= 400) {
+          reportDiagnostic(
+            xhr.status >= 500 ? "error" : "warn",
+            "xhr",
+            `HTTP ${xhr.status}`,
+            {
+              url: diag.url,
+              method: diag.method,
+              durationMs: Date.now() - diag.startedAt,
+            },
+          );
+        }
+      };
+
+      const handleError = () => {
+        const diag = xhr.__miladyDiag;
+        reportDiagnostic("error", "xhr", "XMLHttpRequest failed", {
+          url: diag?.url,
+          method: diag?.method,
+          durationMs: diag ? Date.now() - diag.startedAt : undefined,
+        });
+      };
+
+      xhr.addEventListener("loadend", handleComplete, { once: true });
+      xhr.addEventListener("error", handleError, { once: true });
+      return send.call(this, ...(args as []));
+    };
+  }
 }
 
 installRendererLogMirror();

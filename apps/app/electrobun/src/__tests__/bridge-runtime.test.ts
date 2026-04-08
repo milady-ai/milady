@@ -41,15 +41,37 @@ describe("electrobun bridge runtime", () => {
     const request = {
       desktopGetVersion: vi.fn().mockResolvedValue({ version: "1.0.0" }),
       desktopOpenExternal: vi.fn(),
+      rendererReportDiagnostic: vi.fn().mockResolvedValue({ ok: true }),
     };
     defineRpc.mockReturnValue({ request });
 
     await import("../bridge/electrobun-direct-rpc");
 
-    expect(window.__MILADY_ELECTROBUN_RPC__.request).toBe(request);
+    expect(window.__MILADY_ELECTROBUN_RPC__.request).not.toBe(request);
     expect(typeof window.__MILADY_ELECTROBUN_RPC__.onMessage).toBe("function");
     expect(typeof window.__MILADY_ELECTROBUN_RPC__.offMessage).toBe("function");
     expect(electroviewInstances).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports failed desktop RPC requests to native diagnostics", async () => {
+    const request = {
+      desktopGetVersion: vi.fn().mockRejectedValue(new Error("boom")),
+      rendererReportDiagnostic: vi.fn().mockResolvedValue({ ok: true }),
+    };
+    defineRpc.mockReturnValue({ request });
+
+    await import("../bridge/electrobun-direct-rpc");
+
+    await expect(
+      window.__MILADY_ELECTROBUN_RPC__.request.desktopGetVersion(undefined),
+    ).rejects.toThrow("boom");
+    expect(request.rendererReportDiagnostic).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: "error",
+        source: "rpc",
+        message: expect.stringContaining("desktopGetVersion"),
+      }),
+    );
   });
 
   it("dispatches wildcard push messages to listeners and updates API globals", async () => {
