@@ -398,7 +398,7 @@ export class TalkModeManager {
       );
 
       // Emit transcript to renderer
-      this.sendToWebview?.("talkmode:transcript", {
+      this.sendToWebview?.("talkmodeTranscript", {
         text: result.text,
         segments: result.segments.map((s) => ({
           text: s.text,
@@ -411,7 +411,7 @@ export class TalkModeManager {
       talkmodeLog(
         `_processBuffer error ${err instanceof Error ? err.message : String(err)}`,
       );
-      this.sendToWebview?.("talkmode:error", {
+      this.sendToWebview?.("talkmodeError", {
         code: "transcription_failed",
         message: err instanceof Error ? err.message : String(err),
         recoverable: true,

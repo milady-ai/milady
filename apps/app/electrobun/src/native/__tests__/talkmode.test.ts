@@ -371,7 +371,7 @@ describe("TalkModeManager", () => {
       ).resolves.toBeUndefined();
     });
 
-    it("emits talkmode:transcript when whisper transcription succeeds", async () => {
+    it("emits talkmodeTranscript when whisper transcription succeeds", async () => {
       mockIsWhisperAvailable.mockReturnValue(true);
       mockTranscribeBunSpawn.mockResolvedValue({
         text: "hello world",
@@ -389,7 +389,7 @@ describe("TalkModeManager", () => {
 
       expect(mockWriteWavFile).toHaveBeenCalledTimes(1);
       expect(webviewMessages).toContainEqual({
-        message: "talkmode:transcript",
+        message: "talkmodeTranscript",
         payload: {
           text: "hello world",
           segments: [{ text: "hello world", start: 0, end: 1 }],
@@ -398,7 +398,7 @@ describe("TalkModeManager", () => {
       });
     });
 
-    it("emits talkmode:error when whisper transcription fails", async () => {
+    it("emits talkmodeError when whisper transcription fails", async () => {
       mockIsWhisperAvailable.mockReturnValue(true);
       mockTranscribeBunSpawn.mockRejectedValue(new Error("whisper crashed"));
       await manager.start();
@@ -412,7 +412,7 @@ describe("TalkModeManager", () => {
       ).resolves.toBeUndefined();
 
       expect(webviewMessages).toContainEqual({
-        message: "talkmode:error",
+        message: "talkmodeError",
         payload: {
           code: "transcription_failed",
           message: "whisper crashed",
@@ -435,7 +435,7 @@ describe("TalkModeManager", () => {
       await manager.stop();
 
       expect(webviewMessages).toContainEqual({
-        message: "talkmode:transcript",
+        message: "talkmodeTranscript",
         payload: {
           text: "final short phrase",
           segments: [{ text: "final short phrase", start: 0, end: 0.6 }],
