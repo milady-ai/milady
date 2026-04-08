@@ -19,6 +19,7 @@ import {
 import { invokeDesktopBridgeRequest, isElectrobunRuntime } from "../../bridge";
 import { useApp } from "../../state";
 import { copyTextToClipboard } from "../../utils/clipboard";
+import { resolveApiUrl } from "../../utils/asset-url";
 import {
   DESKTOP_WORKSPACE_SURFACES,
   type DesktopClickAuditItem,
@@ -250,6 +251,12 @@ export function DesktopWorkspaceSection({
   const [clipboardDraft, setClipboardDraft] = useState("");
   const [openPaths, setOpenPaths] = useState<string[]>([]);
   const [savePaths, setSavePaths] = useState<string[]>([]);
+  const [devStackText, setDevStackText] = useState(
+    "Loading desktop dev stack…",
+  );
+  const [devConsoleText, setDevConsoleText] = useState(
+    "Loading desktop console log…",
+  );
   const getSurfaceLabel = useCallback(
     (surfaceId: (typeof DESKTOP_WORKSPACE_SURFACES)[number]["id"]) =>
       t(`desktopworkspacesection.surface.${surfaceId}.label`),
@@ -276,6 +283,65 @@ export function DesktopWorkspaceSection({
   useEffect(() => {
     void refreshSnapshot();
   }, [refreshSnapshot]);
+
+  const refreshDevDiagnostics = useCallback(async () => {
+    if (!desktopRuntime || typeof fetch !== "function") {
+      setDevStackText("Desktop dev stack unavailable.");
+      setDevConsoleText("Desktop console log unavailable.");
+      return;
+    }
+
+    try {
+      const [stackResponse, consoleResponse] = await Promise.all([
+        fetch(resolveApiUrl("/api/dev/stack"), {
+          headers: { Accept: "application/json" },
+        }),
+        fetch(
+          resolveApiUrl("/api/dev/console-log?maxLines=250&maxBytes=200000"),
+          {
+            headers: { Accept: "text/plain" },
+          },
+        ),
+      ]);
+
+      if (stackResponse.ok) {
+        const stackJson = (await stackResponse.json()) as unknown;
+        setDevStackText(JSON.stringify(stackJson, null, 2));
+      } else {
+        setDevStackText(`GET /api/dev/stack → ${stackResponse.status}`);
+      }
+
+      if (consoleResponse.ok) {
+        const consoleText = await consoleResponse.text();
+        setDevConsoleText(
+          consoleText.trim() || "Desktop console log is currently empty.",
+        );
+      } else {
+        setDevConsoleText(
+          `GET /api/dev/console-log → ${consoleResponse.status}`,
+        );
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setDevStackText(`Desktop dev stack error: ${message}`);
+      setDevConsoleText(`Desktop console log error: ${message}`);
+    }
+  }, [desktopRuntime]);
+
+  useEffect(() => {
+    void refreshDevDiagnostics();
+    if (!desktopRuntime) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refreshDevDiagnostics();
+    }, 2000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [desktopRuntime, refreshDevDiagnostics]);
 
   const runAction = useCallback(
     async (
@@ -358,7 +424,10 @@ export function DesktopWorkspaceSection({
           variant="outline"
           size="sm"
           className={DESKTOP_ACTION_BUTTON_CLASSNAME}
-          onClick={() => void refreshSnapshot()}
+          onClick={() => {
+            void refreshSnapshot();
+            void refreshDevDiagnostics();
+          }}
           disabled={loading}
         >
           <RefreshCw
@@ -417,6 +486,38 @@ export function DesktopWorkspaceSection({
 
         <Card>
           <CardHeader>
+            <CardTitle className="text-sm">Desktop Dev Stack</CardTitle>
+            <CardDescription>
+              Live `/api/dev/stack` snapshot for the current desktop session.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
+                onClick={() => void refreshDevDiagnostics()}
+              >
+                Refresh Desktop Logs
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
+                onClick={() => void copyTextToClipboard(devStackText)}
+              >
+                Copy Dev Stack
+              </Button>
+            </div>
+            <pre className="max-h-72 overflow-auto break-all rounded-xl border border-border bg-bg px-3 py-3 text-[11px] leading-5 text-txt">
+              {devStackText}
+            </pre>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle className="text-sm">
               {t("desktopworkspacesection.DetachedSurfaces")}
             </CardTitle>
@@ -451,6 +552,41 @@ export function DesktopWorkspaceSection({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Desktop Console Log</CardTitle>
+          <CardDescription>
+            Live tail of `.milady/desktop-dev-console.log`, including renderer
+            console, network failures, RPC failures, and Electrobun/main logs.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className={DESKTOP_ACTION_BUTTON_CLASSNAME}
+              onClick={() => void refreshDevDiagnostics()}
+            >
+              Refresh Console Tail
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={DESKTOP_ACTION_BUTTON_CLASSNAME}
+              onClick={() => void copyTextToClipboard(devConsoleText)}
+            >
+              Copy Console Tail
+            </Button>
+          </div>
+          <Textarea
+            value={devConsoleText}
+            readOnly
+            className="min-h-[22rem] font-mono text-[11px] leading-5"
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
