@@ -306,16 +306,39 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
   // ── Init ──────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const SpeechRecognitionAPI = getSpeechRecognitionCtor();
-    void (
-      typeof navigator !== "undefined" &&
-      typeof navigator.mediaDevices?.getUserMedia === "function"
-    );
-    // On Electrobun/native platforms, always show the mic button — the
-    // native TalkMode (Whisper) plugin handles STT even when the browser
-    // doesn't expose SpeechRecognition or getUserMedia.
-    setSupported(shouldPreferNativeTalkMode() ? true : !!SpeechRecognitionAPI);
+    let cancelled = false;
+
+    const syncVoiceSupport = async () => {
+      const browserSpeechSupported = !!getSpeechRecognitionCtor();
+      if (!shouldPreferNativeTalkMode()) {
+        if (!cancelled) {
+          setSupported(browserSpeechSupported);
+        }
+        return;
+      }
+
+      try {
+        const permissions = await getTalkModePlugin().checkPermissions();
+        if (cancelled) {
+          return;
+        }
+        setSupported(
+          permissions.speechRecognition !== "not_supported" ||
+            browserSpeechSupported,
+        );
+      } catch {
+        if (!cancelled) {
+          setSupported(browserSpeechSupported);
+        }
+      }
+    };
+
+    void syncVoiceSupport();
     synthRef.current = window.speechSynthesis ?? null;
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // ── Mouth animation loop ──────────────────────────────────────────
@@ -560,11 +583,22 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
 
       try {
         const talkMode = getTalkModePlugin();
-        const permissions = await talkMode.checkPermissions().catch(() => null);
-        if (permissions?.microphone === "prompt") {
+        const browserSpeechSupported = !!getSpeechRecognitionCtor();
+        let permissions = await talkMode.checkPermissions().catch(() => null);
+        const nativeSpeechSupported =
+          permissions?.speechRecognition !== "not_supported";
+        if (!nativeSpeechSupported && !browserSpeechSupported) {
+          setSupported(false);
+          return false;
+        }
+
+        if (permissions?.microphone === "prompt" && nativeSpeechSupported) {
           await talkMode.requestPermissions().catch(() => {
             /* ignore */
           });
+          permissions = await talkMode
+            .checkPermissions()
+            .catch(() => permissions);
         }
 
         const directRpc = getElectrobunRendererRpc();
@@ -581,9 +615,13 @@ export function useVoiceChat(options: VoiceChatOptions): VoiceChatState {
           },
         });
         if (!result.started) {
+          if (!browserSpeechSupported) {
+            setSupported(false);
+          }
           return false;
         }
 
+        setSupported(true);
         enabledRef.current = true;
         listeningModeRef.current = mode;
         sttBackendRef.current = "talkmode";

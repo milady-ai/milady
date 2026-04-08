@@ -25,4 +25,13 @@ describe("dev-platform.mjs", () => {
     expect(script).toContain("...(skipApi");
     expect(script).toContain("? {}");
   });
+
+  it("bootstraps whisper assets for Electrobun voice input when desktop dev needs them", () => {
+    const script = fs.readFileSync(SCRIPT_PATH, "utf8");
+
+    expect(script).toContain("MILADY_DESKTOP_ENSURE_WHISPER");
+    expect(script).toContain("desktopWhisperAssetsMissing()");
+    expect(script).toContain('execSync("bun run build:whisper"');
+    expect(script).toContain("ensureDesktopWhisperAssets();");
+  });
 });

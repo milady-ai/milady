@@ -127,6 +127,53 @@ const desktopDevLogOptOut = (() => {
 const desktopDevLogPath = desktopDevLogOptOut
   ? null
   : path.resolve(repoRoot, ".milady", "desktop-dev-console.log");
+const desktopWhisperOptOut = (() => {
+  const v = process.env.MILADY_DESKTOP_ENSURE_WHISPER?.trim().toLowerCase();
+  return v === "0" || v === "false" || v === "no" || v === "off";
+})();
+
+function desktopWhisperAssetsMissing() {
+  if (process.platform === "win32") {
+    return false;
+  }
+  const whisperCppDir = path.join(
+    repoRoot,
+    "node_modules",
+    "whisper-node",
+    "lib",
+    "whisper.cpp",
+  );
+  const whisperBin = path.join(whisperCppDir, "main");
+  const whisperModel = path.join(whisperCppDir, "models", "ggml-base.en.bin");
+  return !existsSync(whisperBin) || !existsSync(whisperModel);
+}
+
+function ensureDesktopWhisperAssets() {
+  if (desktopWhisperOptOut || process.platform === "win32") {
+    return;
+  }
+  if (!desktopWhisperAssetsMissing()) {
+    return;
+  }
+
+  console.log(
+    "\n[eliza] Desktop voice input needs whisper.cpp assets — building them once for Electrobun dev…\n",
+  );
+  try {
+    execSync("bun run build:whisper", {
+      cwd: electrobunDir,
+      stdio: "inherit",
+    });
+  } catch (_error) {
+    console.warn(
+      "[eliza] Warning: failed to build whisper.cpp for desktop voice input. " +
+        "Electrobun mic/STT may stay unavailable until this succeeds.",
+    );
+    console.warn(
+      "[eliza] Retry manually with: (cd apps/app/electrobun && bun run build:whisper)",
+    );
+  }
+}
 
 const needRendererBuild =
   forceRenderer || viteRendererBuildNeeded(appDir, repoRoot);
@@ -154,6 +201,8 @@ if (!existsSync(rootDistEntry)) {
     writeFileSync(distPkg, `${JSON.stringify({ type: "module" })}\n`);
   }
 }
+
+ensureDesktopWhisperAssets();
 
 function waitForPort(port, { timeout = 120_000, interval = 400 } = {}) {
   return new Promise((resolve, reject) => {
