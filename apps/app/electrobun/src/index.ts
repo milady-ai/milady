@@ -99,9 +99,11 @@ const HEARTBEAT_MENU_REFRESH_MS = 30_000;
 const CONFIG_EXPORT_FILE_NAME = "milady-config.json";
 const STARTUP_CRASH_REPORT_FILE = "startup-crash-report-latest.md";
 const STARTUP_CRASH_PROMPT_MARKER_FILE = "startup-crash-last-prompted.txt";
+const DEBUG_WINDOW_OFFSET_PX = 48;
 let heartbeatMenuSnapshot: HeartbeatMenuSnapshot =
   EMPTY_HEARTBEAT_MENU_SNAPSHOT;
 let heartbeatMenuRefreshTimer: ReturnType<typeof setInterval> | null = null;
+let debugDevtoolsWindow: BrowserWindow | null = null;
 
 import {
   isAgentReady,
@@ -1159,6 +1161,75 @@ function trackFocusedWindow(window: ManagedWindowLike): void {
   });
 }
 
+async function openDetachedDevtoolsWindow(
+  targetWindow: BrowserWindow | null,
+): Promise<void> {
+  if (debugDevtoolsWindow) {
+    try {
+      debugDevtoolsWindow.show();
+      debugDevtoolsWindow.focus();
+      const debugWebview = debugDevtoolsWindow.webview as
+        | { openDevTools?: () => void }
+        | undefined;
+      debugWebview?.openDevTools?.();
+      return;
+    } catch {
+      debugDevtoolsWindow = null;
+    }
+  }
+
+  const currentUrl = (
+    targetWindow?.webview as { url?: string | null } | undefined
+  )?.url;
+  const rendererUrl = currentUrl?.trim() || (await resolveRendererUrl());
+
+  let preload = "// preload unavailable";
+  try {
+    preload = readResolvedPreloadScript(import.meta.dir);
+  } catch (err) {
+    console.error("[DevTools] Failed to read preload script:", err);
+  }
+
+  const baseFrame = targetWindow?.getFrame?.() ?? {
+    x: 120,
+    y: 120,
+    width: 1280,
+    height: 900,
+  };
+
+  const debugWindow = new BrowserWindow({
+    title: "Milady Debug Tools",
+    url: rendererUrl,
+    preload,
+    frame: {
+      x: baseFrame.x + DEBUG_WINDOW_OFFSET_PX,
+      y: baseFrame.y + DEBUG_WINDOW_OFFSET_PX,
+      width: Math.max(1100, baseFrame.width),
+      height: Math.max(780, baseFrame.height),
+    },
+    titleBarStyle: "default",
+    transparent: false,
+  });
+
+  debugDevtoolsWindow = debugWindow;
+  wireSettingsRpc(debugWindow);
+  trackFocusedWindow(debugWindow);
+  debugWindow.webview.on("dom-ready", () => {
+    injectApiBase(debugWindow);
+    const debugWebview = debugWindow.webview as
+      | { openDevTools?: () => void }
+      | undefined;
+    debugWebview?.openDevTools?.();
+  });
+  debugWindow.on("close", () => {
+    if (debugDevtoolsWindow?.id === debugWindow.id) {
+      debugDevtoolsWindow = null;
+    }
+  });
+  debugWindow.show();
+  debugWindow.focus();
+}
+
 function toggleFocusedWindowDevTools(): void {
   const targetWindow = lastFocusedWindow ?? currentWindow;
   const webview = targetWindow?.webview as
@@ -1173,29 +1244,9 @@ function toggleFocusedWindowDevTools(): void {
     return;
   }
 
-  // Electrobun's WKWebView native toggle can crash on macOS when invoked
-  // again after devtools are already open. Keep the shortcut open-only there.
-  if (process.platform === "darwin" && targetWindow) {
-    const windowId = (targetWindow as { id?: number }).id;
-    if (
-      typeof windowId === "number" &&
-      macOpenedDevtoolsWindowIds.has(windowId)
-    ) {
-      scheduleDevtoolsLayoutRefresh(targetWindow);
-      console.warn(
-        "[DevTools] Ignoring repeated toggle on macOS native renderer because Electrobun WKWebView toggleDevTools is unstable.",
-      );
-      return;
-    }
-
-    if (typeof webview?.openDevTools === "function") {
-      webview.openDevTools();
-      if (typeof windowId === "number") {
-        macOpenedDevtoolsWindowIds.add(windowId);
-      }
-      scheduleDevtoolsLayoutRefresh(targetWindow);
-      return;
-    }
+  if (process.platform === "darwin") {
+    void openDetachedDevtoolsWindow(targetWindow);
+    return;
   }
 
   if (typeof webview?.toggleDevTools === "function") {

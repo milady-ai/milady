@@ -7,7 +7,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const indexPath = path.resolve(here, "../index.ts");
 
 describe("devtools toggle guard", () => {
-  it("routes macOS devtools requests to a browser fallback by default", () => {
+  it("keeps the browser fallback path for guarded macOS devtools", () => {
     const source = fs.readFileSync(indexPath, "utf8");
     expect(source).toContain("async function openBrowserDevtoolsFallback(");
     expect(source).toContain("function shouldUseBrowserDevtoolsFallback()");
@@ -20,14 +20,21 @@ describe("devtools toggle guard", () => {
     expect(source).toContain("WKWebView crash/layout bug");
   });
 
+  it("opens a dedicated macOS debug window instead of docking devtools into the main window", () => {
+    const source = fs.readFileSync(indexPath, "utf8");
+    expect(source).toContain("async function openDetachedDevtoolsWindow(");
+    expect(source).toContain('title: "Milady Debug Tools"');
+    expect(source).toContain("wireSettingsRpc(debugWindow)");
+    expect(source).toContain("debugWebview?.openDevTools?.()");
+    expect(source).toContain("void openDetachedDevtoolsWindow(targetWindow)");
+  });
+
   it("keeps an escape hatch for unsafe native toggling", () => {
     const source = fs.readFileSync(indexPath, "utf8");
     expect(source).toContain(
       "const macOpenedDevtoolsWindowIds = new Set<number>()",
     );
-    expect(source).toContain("macOpenedDevtoolsWindowIds.has(windowId)");
-    expect(source).toContain(
-      "Ignoring repeated toggle on macOS native renderer",
-    );
+    expect(source).toContain("MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS");
+    expect(source).toContain("shouldUseBrowserDevtoolsFallback()");
   });
 });
