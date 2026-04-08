@@ -139,7 +139,7 @@ function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
     isMac,
-    browserEnabled: surfaceWindowManager?.isBrowserEnabled() ?? false,
+    browserEnabled: false,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
     agentReady: isAgentReady(),

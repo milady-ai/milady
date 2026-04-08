@@ -139,6 +139,18 @@ const desktopCefWorkaroundEnv = (() => {
 
   return "1";
 })();
+const desktopUnsafeDevtoolsEnv = (() => {
+  if (process.platform !== "darwin") {
+    return null;
+  }
+
+  const explicit = process.env.MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS?.trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  return "1";
+})();
 const desktopWhisperOptOut = (() => {
   const v = process.env.MILADY_DESKTOP_ENSURE_WHISPER?.trim().toLowerCase();
   return v === "0" || v === "false" || v === "no" || v === "off";
@@ -425,6 +437,11 @@ async function launch() {
     ELECTROBUN_SKIP_CODESIGN: "1",
     ...(desktopCefWorkaroundEnv
       ? { MILADY_DESKTOP_FORCE_CEF: desktopCefWorkaroundEnv }
+      : {}),
+    ...(desktopUnsafeDevtoolsEnv
+      ? {
+          MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS: desktopUnsafeDevtoolsEnv,
+        }
       : {}),
     ...(rendererUrlForShell
       ? { MILADY_RENDERER_URL: rendererUrlForShell }

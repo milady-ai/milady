@@ -45,4 +45,14 @@ describe("dev-platform.mjs", () => {
       "MILADY_DESKTOP_FORCE_CEF: desktopCefWorkaroundEnv",
     );
   });
+
+  it("reenables macOS native devtools in desktop dev unless explicitly overridden", () => {
+    const script = fs.readFileSync(SCRIPT_PATH, "utf8");
+
+    expect(script).toContain("const desktopUnsafeDevtoolsEnv");
+    expect(script).toContain(
+      "process.env.MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS?.trim()",
+    );
+    expect(script).toContain("MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS:");
+  });
 });
