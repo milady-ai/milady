@@ -354,7 +354,7 @@ export function TrajectoriesView({
                     {t("trajectoriesview.CSVSummaryOnly")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleExport("zip", true)}>
-                  {t("trajectoriesview.ZIPFolders")}
+                    {t("trajectoriesview.ZIPFolders")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

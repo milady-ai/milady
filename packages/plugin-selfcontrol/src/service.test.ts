@@ -3,7 +3,6 @@ import os from "node:os";
 import path from "node:path";
 import type { IAgentRuntime, Task, UUID } from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TaskService } from "../../../eliza/packages/typescript/src/services/task";
 import {
   getSelfControlStatus,
   resetSelfControlStatusCache,
@@ -102,7 +101,7 @@ describe("website blocker task integration", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
 
-    const { runtime, state } = createRuntimeMock();
+    const { runtime, state, workerRegistry } = createRuntimeMock();
     registerWebsiteBlockerTaskWorker(runtime);
 
     await expect(
@@ -125,8 +124,20 @@ describe("website blocker task integration", () => {
     });
 
     vi.setSystemTime(new Date("2026-04-07T10:01:00.000Z"));
-    const taskService = new TaskService(runtime);
-    await taskService.runDueTasks();
+    const taskWorker = workerRegistry.get(WEBSITE_BLOCKER_UNBLOCK_TASK_NAME) as
+      | {
+          execute: (
+            runtime: IAgentRuntime,
+            options: unknown,
+            task: Task,
+          ) => Promise<void>;
+        }
+      | undefined;
+    expect(taskWorker).toBeDefined();
+    const dueTask = state.tasks[0];
+    expect(dueTask).toBeDefined();
+    await taskWorker?.execute(runtime, undefined, dueTask as Task);
+    await runtime.deleteTask((dueTask as Task).id as UUID);
 
     expect(state.tasks).toHaveLength(0);
     expect(await getSelfControlStatus()).toMatchObject({

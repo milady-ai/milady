@@ -147,9 +147,8 @@ vi.mock("@miladyai/app-core/state", async () => {
 });
 
 vi.mock("../../src/state", async () => {
-  const actual = await vi.importActual<typeof import("../../src/state")>(
-    "../../src/state",
-  );
+  const actual =
+    await vi.importActual<typeof import("../../src/state")>("../../src/state");
   return {
     ...actual,
     useApp: () => mockUseApp(),
@@ -293,7 +292,11 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
     const state = mockUseApp();
     const phase = state?.startupCoordinator?.phase;
     if (phase === "error") {
-      return React.createElement("div", null, state.startupError?.message ?? "StartupFailureView");
+      return React.createElement(
+        "div",
+        null,
+        state.startupError?.message ?? "StartupFailureView",
+      );
     }
     if (phase === "pairing-required") {
       return React.createElement("div", null, "PairingView");
@@ -302,25 +305,68 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
       // Render the interactive OnboardingWizard by delegating to the mock below
       const s = mockUseApp();
       if (s.onboardingStep === "identity") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.chooseAgent");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "onboarding.chooseAgent",
+        );
       }
       if (s.onboardingStep === "connection") {
         if (!s.onboardingServerTarget) {
-          return React.createElement(React.Fragment, null,
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingServerTarget", "local"); }, type: "button" }, "onboarding.hostingLocal"),
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingMode", "advanced"); s.setState?.("onboardingActiveGuide", "provider"); }, type: "button" }, "advanced-configuration"),
-            s.onboardingMode === "advanced" ? React.createElement("div", null, "Flamina guidance") : null,
+          return React.createElement(
+            React.Fragment,
+            null,
+            React.createElement(
+              "button",
+              {
+                onClick: () => {
+                  s.setState?.("onboardingServerTarget", "local");
+                },
+                type: "button",
+              },
+              "onboarding.hostingLocal",
+            ),
+            React.createElement(
+              "button",
+              {
+                onClick: () => {
+                  s.setState?.("onboardingMode", "advanced");
+                  s.setState?.("onboardingActiveGuide", "provider");
+                },
+                type: "button",
+              },
+              "advanced-configuration",
+            ),
+            s.onboardingMode === "advanced"
+              ? React.createElement("div", null, "Flamina guidance")
+              : null,
           );
         }
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.confirm");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "onboarding.confirm",
+        );
       }
       if (s.onboardingStep === "rpc") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.rpcSkip");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "onboarding.rpcSkip",
+        );
       }
       if (s.onboardingStep === "senses") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "permissions-continue");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "permissions-continue",
+        );
       }
-      return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.enter");
+      return React.createElement(
+        "button",
+        { onClick: () => s.handleOnboardingNext(), type: "button" },
+        "onboarding.enter",
+      );
     }
     return null;
   },
@@ -335,6 +381,7 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
   CompanionView: () => React.createElement("div", null, "CompanionView"),
   ConnectionFailedBanner: () =>
     React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectionLostOverlay: () => null,
   ConnectorsPageView: () =>
     React.createElement("div", null, "ConnectorsPageView"),
   ConversationsSidebar: () =>
@@ -447,7 +494,11 @@ vi.mock("../../src/app-shell-components", () => ({
     const state = mockUseApp();
     const phase = state?.startupCoordinator?.phase;
     if (phase === "error") {
-      return React.createElement("div", null, state.startupError?.message ?? "StartupFailureView");
+      return React.createElement(
+        "div",
+        null,
+        state.startupError?.message ?? "StartupFailureView",
+      );
     }
     if (phase === "pairing-required") {
       return React.createElement("div", null, "PairingView");
@@ -455,25 +506,68 @@ vi.mock("../../src/app-shell-components", () => ({
     if (phase === "onboarding-required") {
       const s = mockUseApp();
       if (s.onboardingStep === "identity") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.chooseAgent");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "onboarding.chooseAgent",
+        );
       }
       if (s.onboardingStep === "connection") {
         if (!s.onboardingServerTarget) {
-          return React.createElement(React.Fragment, null,
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingServerTarget", "local"); }, type: "button" }, "onboarding.hostingLocal"),
-            React.createElement("button", { onClick: () => { s.setState?.("onboardingMode", "advanced"); s.setState?.("onboardingActiveGuide", "provider"); }, type: "button" }, "advanced-configuration"),
-            s.onboardingMode === "advanced" ? React.createElement("div", null, "Flamina guidance") : null,
+          return React.createElement(
+            React.Fragment,
+            null,
+            React.createElement(
+              "button",
+              {
+                onClick: () => {
+                  s.setState?.("onboardingServerTarget", "local");
+                },
+                type: "button",
+              },
+              "onboarding.hostingLocal",
+            ),
+            React.createElement(
+              "button",
+              {
+                onClick: () => {
+                  s.setState?.("onboardingMode", "advanced");
+                  s.setState?.("onboardingActiveGuide", "provider");
+                },
+                type: "button",
+              },
+              "advanced-configuration",
+            ),
+            s.onboardingMode === "advanced"
+              ? React.createElement("div", null, "Flamina guidance")
+              : null,
           );
         }
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.confirm");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "onboarding.confirm",
+        );
       }
       if (s.onboardingStep === "rpc") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.rpcSkip");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "onboarding.rpcSkip",
+        );
       }
       if (s.onboardingStep === "senses") {
-        return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "permissions-continue");
+        return React.createElement(
+          "button",
+          { onClick: () => s.handleOnboardingNext(), type: "button" },
+          "permissions-continue",
+        );
       }
-      return React.createElement("button", { onClick: () => s.handleOnboardingNext(), type: "button" }, "onboarding.enter");
+      return React.createElement(
+        "button",
+        { onClick: () => s.handleOnboardingNext(), type: "button" },
+        "onboarding.enter",
+      );
     }
     return null;
   },
@@ -488,6 +582,7 @@ vi.mock("../../src/app-shell-components", () => ({
   CompanionView: () => React.createElement("div", null, "CompanionView"),
   ConnectionFailedBanner: () =>
     React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectionLostOverlay: () => null,
   ConnectorsPageView: () =>
     React.createElement("div", null, "ConnectorsPageView"),
   ConversationsSidebar: () =>
@@ -615,18 +710,27 @@ vi.mock("@miladyai/app-core/src/components/onboarding/PermissionsStep", () => ({
       "permissions-continue",
     ),
 }));
-vi.mock("@miladyai/app-core/src/components/conversations/ConversationsSidebar", () => ({
-  ConversationsSidebar: () =>
-    React.createElement("div", null, "ConversationsSidebar"),
-}));
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionsPanel", () => ({
-  CustomActionsPanel: () =>
-    React.createElement("div", null, "CustomActionsPanel"),
-}));
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionEditor", () => ({
-  CustomActionEditor: () =>
-    React.createElement("div", null, "CustomActionEditor"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/conversations/ConversationsSidebar",
+  () => ({
+    ConversationsSidebar: () =>
+      React.createElement("div", null, "ConversationsSidebar"),
+  }),
+);
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionsPanel",
+  () => ({
+    CustomActionsPanel: () =>
+      React.createElement("div", null, "CustomActionsPanel"),
+  }),
+);
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionEditor",
+  () => ({
+    CustomActionEditor: () =>
+      React.createElement("div", null, "CustomActionEditor"),
+  }),
+);
 vi.mock("@miladyai/app-core/src/components/pages/AppsPageView", () => ({
   AppsPageView: () => React.createElement("div", null, "AppsPageView"),
 }));
@@ -820,7 +924,10 @@ function createHarnessState(): AppHarnessState {
     conversations: [],
     elizaCloudCredits: null,
     uiShellMode: "native",
-    startupCoordinator: { phase: "onboarding-required", serverReachable: false },
+    startupCoordinator: {
+      phase: "onboarding-required",
+      serverReachable: false,
+    },
     startupCoordinatorLegacyPhase: "starting-backend" as const,
   };
 }

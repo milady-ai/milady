@@ -33,6 +33,14 @@ type SpawnResult = {
   stderr: string;
 };
 
+type BunLike = { spawn: unknown };
+
+function bunGlobal(): BunLike {
+  const globalState = globalThis as typeof globalThis & { Bun?: BunLike };
+  globalState.Bun ??= { spawn: vi.fn() };
+  return globalState.Bun;
+}
+
 const mockExistsSync = vi.mocked(fs.existsSync);
 const mockReadFileSync = vi.mocked(fs.readFileSync);
 const mockHomedir = vi.mocked(os.homedir);
@@ -116,7 +124,7 @@ describe("scanProviderCredentials", () => {
     });
 
     // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-    (Bun as unknown as { spawn: unknown }).spawn = mockSpawn;
+    bunGlobal().spawn = mockSpawn;
     setPlatform(ORIGINAL_PLATFORM);
   });
 
@@ -431,7 +439,7 @@ describe("scanAndValidateProviderCredentials", () => {
       throw new Error(`unexpected spawn: ${cmd.join(" ")}`);
     });
     // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-    (Bun as unknown as { spawn: unknown }).spawn = mockSpawn;
+    bunGlobal().spawn = mockSpawn;
     mockFetch = vi.fn();
     vi.stubGlobal("fetch", mockFetch);
     setPlatform("linux");
@@ -550,7 +558,7 @@ describe("scanProviderCredentials — env var detection", () => {
       throw new Error(`unexpected spawn: ${cmd.join(" ")}`);
     });
     // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-    (Bun as unknown as { spawn: unknown }).spawn = mockSpawn;
+    bunGlobal().spawn = mockSpawn;
     setPlatform("linux");
   });
 
@@ -697,7 +705,7 @@ describe("scanAndValidateProviderCredentials — endpoint validation", () => {
       throw new Error(`unexpected spawn: ${cmd.join(" ")}`);
     });
     // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-    (Bun as unknown as { spawn: unknown }).spawn = mockSpawn;
+    bunGlobal().spawn = mockSpawn;
     mockFetch = vi.fn();
     vi.stubGlobal("fetch", mockFetch);
     setPlatform("linux");
@@ -798,7 +806,7 @@ describe("scanAndValidateProviderCredentials — integration", () => {
       throw new Error(`unexpected spawn: ${cmd.join(" ")}`);
     });
     // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-    (Bun as unknown as { spawn: unknown }).spawn = mockSpawn;
+    bunGlobal().spawn = mockSpawn;
     mockFetch = vi.fn();
     vi.stubGlobal("fetch", mockFetch);
     setPlatform("linux");

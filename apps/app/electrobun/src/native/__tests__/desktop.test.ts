@@ -14,6 +14,12 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const bunGlobal = globalThis as typeof globalThis & {
+  Bun?: { spawn: unknown };
+};
+bunGlobal.Bun ??= { spawn: vi.fn() };
+const bunRuntime = bunGlobal.Bun;
+
 // ---------------------------------------------------------------------------
 // Mocks — vi.fn() INSIDE factories to avoid hoisting issues.
 // ---------------------------------------------------------------------------
@@ -194,7 +200,7 @@ vi.mock("electrobun/bun", () => {
 
 // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
 // Bun.version is non-writable/non-configurable — the real version is used for tests that read it.
-(Bun as unknown as { spawn: unknown }).spawn = vi.fn(() => makeSpawnResult(""));
+bunRuntime.spawn = vi.fn(() => makeSpawnResult(""));
 
 // ---------------------------------------------------------------------------
 // Module under test (after mocks)

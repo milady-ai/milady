@@ -12,6 +12,12 @@
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const bunGlobal = globalThis as typeof globalThis & {
+  Bun?: { spawn: ReturnType<typeof vi.fn> };
+};
+bunGlobal.Bun ??= { spawn: vi.fn() };
+const bunRuntime = bunGlobal.Bun;
+
 // ---------------------------------------------------------------------------
 // vi.hoisted runs before ANY module import (earlier than vi.mock factories).
 // Set env vars here so resolveWhisperPath() uses them on module load and never
@@ -38,7 +44,7 @@ vi.mock("node:fs", () => {
 });
 
 // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-(Bun as unknown as { spawn: unknown }).spawn = vi.fn();
+bunRuntime.spawn = vi.fn();
 
 // ---------------------------------------------------------------------------
 // Module under test — imported after mocks so module-level code sees them.

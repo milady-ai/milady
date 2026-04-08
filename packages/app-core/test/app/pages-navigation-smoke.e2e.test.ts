@@ -150,6 +150,7 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
     React.createElement("section", null, "CompanionView Ready"),
   ConnectionFailedBanner: () =>
     React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectionLostOverlay: () => null,
   ConnectorsPageView: () =>
     React.createElement("section", null, "ConnectorsPageView Ready"),
   ConversationsSidebar: () =>
@@ -180,9 +181,12 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
     // Delegate to the correct sub-mock based on coordinator phase
     const app = mockUseApp();
     const phase = app?.startupCoordinator?.phase;
-    if (phase === "pairing-required") return React.createElement("div", null, "PairingView");
-    if (phase === "onboarding-required") return React.createElement("div", null, "OnboardingWizard");
-    if (phase === "error") return React.createElement("div", null, "StartupError");
+    if (phase === "pairing-required")
+      return React.createElement("div", null, "PairingView");
+    if (phase === "onboarding-required")
+      return React.createElement("div", null, "OnboardingWizard");
+    if (phase === "error")
+      return React.createElement("div", null, "StartupError");
     return React.createElement("div", null, "StartupLoading");
   },
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
@@ -206,6 +210,7 @@ vi.mock("../../src/app-shell-components", () => ({
     React.createElement("section", null, "CompanionView Ready"),
   ConnectionFailedBanner: () =>
     React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectionLostOverlay: () => null,
   ConnectorsPageView: () =>
     React.createElement("section", null, "ConnectorsPageView Ready"),
   ConversationsSidebar: () =>
@@ -236,9 +241,12 @@ vi.mock("../../src/app-shell-components", () => ({
     // Delegate to the correct sub-mock based on coordinator phase
     const app = mockUseApp();
     const phase = app?.startupCoordinator?.phase;
-    if (phase === "pairing-required") return React.createElement("div", null, "PairingView");
-    if (phase === "onboarding-required") return React.createElement("div", null, "OnboardingWizard");
-    if (phase === "error") return React.createElement("div", null, "StartupError");
+    if (phase === "pairing-required")
+      return React.createElement("div", null, "PairingView");
+    if (phase === "onboarding-required")
+      return React.createElement("div", null, "OnboardingWizard");
+    if (phase === "error")
+      return React.createElement("div", null, "StartupError");
     return React.createElement("div", null, "StartupLoading");
   },
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
@@ -262,9 +270,13 @@ vi.mock("@miladyai/app-core/src/components/shell/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/onboarding/OnboardingWizard", () => ({
-  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/onboarding/OnboardingWizard",
+  () => ({
+    OnboardingWizard: () =>
+      React.createElement("div", null, "OnboardingWizard"),
+  }),
+);
 
 vi.mock("@miladyai/app-core/src/components/pages/ChatView", () => ({
   ChatView: () => React.createElement("section", null, "ChatView Ready"),
@@ -274,20 +286,29 @@ vi.mock("@miladyai/app-core/src/components/pages/StreamView", () => ({
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/conversations/ConversationsSidebar", () => ({
-  ConversationsSidebar: () =>
-    React.createElement("aside", null, "ConversationsSidebar"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/conversations/ConversationsSidebar",
+  () => ({
+    ConversationsSidebar: () =>
+      React.createElement("aside", null, "ConversationsSidebar"),
+  }),
+);
 
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionsPanel", () => ({
-  CustomActionsPanel: () =>
-    React.createElement("aside", null, "CustomActionsPanel"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionsPanel",
+  () => ({
+    CustomActionsPanel: () =>
+      React.createElement("aside", null, "CustomActionsPanel"),
+  }),
+);
 
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionEditor", () => ({
-  CustomActionEditor: () =>
-    React.createElement("aside", null, "CustomActionEditor"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionEditor",
+  () => ({
+    CustomActionEditor: () =>
+      React.createElement("aside", null, "CustomActionEditor"),
+  }),
+);
 
 vi.mock("@miladyai/app-core/src/components/pages/AppsPageView", () => ({
   AppsPageView: () =>
@@ -360,10 +381,13 @@ vi.mock("@miladyai/app-core/src/components/pages/SkillsView", () => ({
   SkillsView: () => React.createElement("section", null, "SkillsView Ready"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionsView", () => ({
-  CustomActionsView: () =>
-    React.createElement("section", null, "CustomActionsView Ready"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionsView",
+  () => ({
+    CustomActionsView: () =>
+      React.createElement("section", null, "CustomActionsView Ready"),
+  }),
+);
 
 vi.mock("@miladyai/app-core/src/components/settings/FineTuningView", () => ({
   FineTuningView: () =>
@@ -558,7 +582,19 @@ describe("pages navigation smoke (e2e)", () => {
       startupPhase: "ready",
       startupStatus: "ready",
       startupError: null,
-      startupCoordinator: { phase: "ready", state: { phase: "ready" }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "ready", loading: false, terminal: true, target: null },
+      startupCoordinator: {
+        phase: "ready",
+        state: { phase: "ready" },
+        retry: vi.fn(),
+        pairingSuccess: vi.fn(),
+        onboardingComplete: vi.fn(),
+        dispatch: vi.fn(),
+        policy: {},
+        legacyPhase: "ready",
+        loading: false,
+        terminal: true,
+        target: null,
+      },
       retryStartup: vi.fn(),
       setActionNotice: vi.fn(),
       setTab: (tab: Tab) => {
@@ -691,7 +727,23 @@ describe("pages navigation smoke (e2e)", () => {
           onboardingLoading: true,
           onboardingComplete: false,
           startupStatus: "loading",
-          startupCoordinator: { phase: "polling-backend", state: { phase: "polling-backend", target: "embedded-local", attempts: 0 }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "starting-backend", loading: true, terminal: false, target: "embedded-local" },
+          startupCoordinator: {
+            phase: "polling-backend",
+            state: {
+              phase: "polling-backend",
+              target: "embedded-local",
+              attempts: 0,
+            },
+            retry: vi.fn(),
+            pairingSuccess: vi.fn(),
+            onboardingComplete: vi.fn(),
+            dispatch: vi.fn(),
+            policy: {},
+            legacyPhase: "starting-backend",
+            loading: true,
+            terminal: false,
+            target: "embedded-local",
+          },
         },
         token: "StartupLoading",
       },
@@ -702,7 +754,19 @@ describe("pages navigation smoke (e2e)", () => {
           onboardingComplete: true,
           authRequired: true,
           startupStatus: "auth-blocked",
-          startupCoordinator: { phase: "pairing-required", state: { phase: "pairing-required" }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "ready", loading: false, terminal: false, target: null },
+          startupCoordinator: {
+            phase: "pairing-required",
+            state: { phase: "pairing-required" },
+            retry: vi.fn(),
+            pairingSuccess: vi.fn(),
+            onboardingComplete: vi.fn(),
+            dispatch: vi.fn(),
+            policy: {},
+            legacyPhase: "ready",
+            loading: false,
+            terminal: false,
+            target: null,
+          },
         },
         token: "PairingView",
       },
@@ -713,7 +777,19 @@ describe("pages navigation smoke (e2e)", () => {
           authRequired: false,
           onboardingComplete: false,
           startupStatus: "onboarding",
-          startupCoordinator: { phase: "onboarding-required", state: { phase: "onboarding-required", serverReachable: true }, retry: vi.fn(), pairingSuccess: vi.fn(), onboardingComplete: vi.fn(), dispatch: vi.fn(), policy: {}, legacyPhase: "ready", loading: false, terminal: false, target: null },
+          startupCoordinator: {
+            phase: "onboarding-required",
+            state: { phase: "onboarding-required", serverReachable: true },
+            retry: vi.fn(),
+            pairingSuccess: vi.fn(),
+            onboardingComplete: vi.fn(),
+            dispatch: vi.fn(),
+            policy: {},
+            legacyPhase: "ready",
+            loading: false,
+            terminal: false,
+            target: null,
+          },
         },
         token: "OnboardingWizard",
       },
@@ -796,5 +872,4 @@ describe("pages navigation smoke (e2e)", () => {
     errorSpy.mockRestore();
     warnSpy.mockRestore();
   });
-
 });

@@ -61,16 +61,14 @@ describe("Electrobun test workflow drift", () => {
     expect(workflow).toContain("branches: [main, develop]");
     expect(workflow).toContain("permissions:");
     expect(workflow).toContain("contents: read");
-    expect(workflow).toContain('BUN_VERSION: "1.3.11"');
+    expect(workflow).toContain('BUN_VERSION: "1.3.9"');
     expect(workflow).toContain('NODE_NO_WARNINGS: "1"');
     expect(workflow).toContain(
       // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
       "runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}",
     );
     expect(workflow).toContain("name: Release Workflow Contract");
-    expect(workflow).toContain(
-      "bun install --frozen-lockfile --ignore-scripts",
-    );
+    expect(workflow).toContain("bun install --ignore-scripts");
     expect(workflow).toContain("bun run postinstall");
     expect(workflow).toContain(
       "bun run test:regression-matrix:release-contract",

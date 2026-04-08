@@ -162,6 +162,7 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
     React.createElement("section", null, "CompanionView Ready"),
   ConnectionFailedBanner: () =>
     React.createElement("div", null, "ConnectionFailedBanner"),
+  ConnectionLostOverlay: () => null,
   ConnectorsPageView: () =>
     React.createElement("section", null, "ConnectorsPageView Ready"),
   ConversationsSidebar: () =>
@@ -229,9 +230,13 @@ vi.mock("@miladyai/app-core/src/components/shell/PairingView", () => ({
   PairingView: () => React.createElement("div", null, "PairingView"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/onboarding/OnboardingWizard", () => ({
-  OnboardingWizard: () => React.createElement("div", null, "OnboardingWizard"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/onboarding/OnboardingWizard",
+  () => ({
+    OnboardingWizard: () =>
+      React.createElement("div", null, "OnboardingWizard"),
+  }),
+);
 
 vi.mock("@miladyai/app-core/src/components/pages/ChatView", () => ({
   ChatView: () => React.createElement("section", null, "ChatView Ready"),
@@ -241,20 +246,29 @@ vi.mock("@miladyai/app-core/src/components/pages/StreamView", () => ({
   StreamView: () => React.createElement("section", null, "StreamView Ready"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/conversations/ConversationsSidebar", () => ({
-  ConversationsSidebar: () =>
-    React.createElement("aside", null, "ConversationsSidebar"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/conversations/ConversationsSidebar",
+  () => ({
+    ConversationsSidebar: () =>
+      React.createElement("aside", null, "ConversationsSidebar"),
+  }),
+);
 
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionsPanel", () => ({
-  CustomActionsPanel: () =>
-    React.createElement("aside", null, "CustomActionsPanel"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionsPanel",
+  () => ({
+    CustomActionsPanel: () =>
+      React.createElement("aside", null, "CustomActionsPanel"),
+  }),
+);
 
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionEditor", () => ({
-  CustomActionEditor: () =>
-    React.createElement("aside", null, "CustomActionEditor"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionEditor",
+  () => ({
+    CustomActionEditor: () =>
+      React.createElement("aside", null, "CustomActionEditor"),
+  }),
+);
 
 vi.mock("@miladyai/app-core/src/components/pages/AppsPageView", () => ({
   AppsPageView: () =>
@@ -348,10 +362,13 @@ vi.mock("@miladyai/app-core/src/components/pages/SkillsView", () => ({
   SkillsView: () => React.createElement("section", null, "SkillsView Ready"),
 }));
 
-vi.mock("@miladyai/app-core/src/components/custom-actions/CustomActionsView", () => ({
-  CustomActionsView: () =>
-    React.createElement("section", null, "CustomActionsView Ready"),
-}));
+vi.mock(
+  "@miladyai/app-core/src/components/custom-actions/CustomActionsView",
+  () => ({
+    CustomActionsView: () =>
+      React.createElement("section", null, "CustomActionsView Ready"),
+  }),
+);
 
 vi.mock("@miladyai/app-core/src/components/settings/FineTuningView", () => ({
   FineTuningView: () =>

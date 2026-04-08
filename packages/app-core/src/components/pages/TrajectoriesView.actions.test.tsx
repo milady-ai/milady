@@ -93,7 +93,9 @@ vi.mock("@miladyai/ui", () => {
 
   return {
     Button,
-    DropdownMenu: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+    DropdownMenu: ({ children }: { children?: ReactNode }) => (
+      <div>{children}</div>
+    ),
     DropdownMenuContent: ({ children }: { children?: ReactNode }) => (
       <div>{children}</div>
     ),
@@ -150,7 +152,9 @@ vi.mock("@miladyai/ui", () => {
         }
       />
     ),
-    SidebarPanel: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+    SidebarPanel: ({ children }: { children?: ReactNode }) => (
+      <div>{children}</div>
+    ),
     SidebarScrollRegion: ({ children }: { children?: ReactNode }) => (
       <div>{children}</div>
     ),

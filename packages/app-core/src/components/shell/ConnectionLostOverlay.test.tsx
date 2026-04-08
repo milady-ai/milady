@@ -104,7 +104,7 @@ describe("ConnectionLostOverlay", () => {
       relaunchDesktop: relaunchDesktopMock,
       retryBackendConnection: retryBackendConnectionMock,
       t: (key: string, opts?: Record<string, unknown>) =>
-        (typeof opts?.defaultValue === "string" ? opts.defaultValue : key),
+        typeof opts?.defaultValue === "string" ? opts.defaultValue : key,
     });
 
     let tree: TestRenderer.ReactTestRenderer | undefined;

@@ -77,7 +77,7 @@ jobs:
 
       - name: Capacitor sync iOS
         working-directory: apps/app
-        run: npx capacitor sync ios
+        run: bunx cap sync ios
         env:
           LANG: en_US.UTF-8
 
@@ -145,7 +145,7 @@ jobs:
 
       - name: Capacitor sync Android
         working-directory: apps/app
-        run: npx capacitor sync android
+        run: bunx cap sync android
 
       - name: Build debug APK
         working-directory: apps/app/android

@@ -16,12 +16,8 @@ const OVERLAY_CARD_CLASS =
   "relative z-10 w-full max-w-[640px] overflow-hidden border border-border/60 bg-card/95 shadow-[0_30px_120px_rgba(0,0,0,0.36)] backdrop-blur-xl";
 
 export function ConnectionLostOverlay() {
-  const {
-    backendConnection,
-    relaunchDesktop,
-    retryBackendConnection,
-    t,
-  } = useApp();
+  const { backendConnection, relaunchDesktop, retryBackendConnection, t } =
+    useApp();
   const [busy, setBusy] = useState<"restart" | null>(null);
   const desktopRuntime = isElectrobunRuntime();
 

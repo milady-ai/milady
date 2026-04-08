@@ -9,7 +9,8 @@ vi.mock("../../src/app-shell-components", async () => {
   const { useApp } = await import("../../src/state");
 
   return {
-    AdvancedPageView: () => React.createElement("div", null, "AdvancedPageView"),
+    AdvancedPageView: () =>
+      React.createElement("div", null, "AdvancedPageView"),
     AppsPageView: () => React.createElement("div", null, "AppsPageView"),
     AvatarLoader: () => React.createElement("div", null, "AvatarLoader"),
     BugReportModal: () => React.createElement("div", null, "BugReportModal"),
@@ -19,6 +20,7 @@ vi.mock("../../src/app-shell-components", async () => {
     CompanionView: () => React.createElement("div", null, "CompanionView"),
     ConnectionFailedBanner: () =>
       React.createElement("div", null, "ConnectionFailedBanner"),
+    ConnectionLostOverlay: () => null,
     ConnectorsPageView: () =>
       React.createElement("div", null, "ConnectorsPageView"),
     ConversationsSidebar: () =>
@@ -35,7 +37,8 @@ vi.mock("../../src/app-shell-components", async () => {
     OnboardingWizard: () =>
       React.createElement("div", null, "OnboardingWizard"),
     PairingView: () => React.createElement("div", null, "PairingView"),
-    SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
+    SaveCommandModal: () =>
+      React.createElement("div", null, "SaveCommandModal"),
     SettingsView: () => React.createElement("div", null, "SettingsView"),
     SharedCompanionScene: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
@@ -46,8 +49,16 @@ vi.mock("../../src/app-shell-components", async () => {
       const { startupCoordinator, startupError, retryStartup } = useApp();
       const phase = startupCoordinator.phase;
       if (phase === "error") {
-        const err = startupError ?? { reason: "unknown", message: "Unknown error", phase: "starting-backend" as const };
-        return React.createElement("div", null, `StartupFailureView:${err.reason}:${err.message}`);
+        const err = startupError ?? {
+          reason: "unknown",
+          message: "Unknown error",
+          phase: "starting-backend" as const,
+        };
+        return React.createElement(
+          "div",
+          null,
+          `StartupFailureView:${err.reason}:${err.message}`,
+        );
       }
       if (phase === "pairing-required") {
         return React.createElement("div", null, "PairingView");

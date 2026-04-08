@@ -18,6 +18,12 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const bunGlobal = globalThis as typeof globalThis & {
+  Bun?: { spawn: unknown };
+};
+bunGlobal.Bun ??= { spawn: vi.fn() };
+const bunRuntime = bunGlobal.Bun;
+
 // ---------------------------------------------------------------------------
 // Mocks — vi.fn() defined INSIDE factories; shared references via local consts
 // so default-import and named-import both point to the same mock function.
@@ -69,7 +75,7 @@ vi.mock("electrobun/bun", () => ({
 }));
 
 // Bun global is non-configurable on globalThis but Bun.spawn is writable; assign directly.
-(Bun as unknown as { spawn: unknown }).spawn = vi.fn(() => ({
+bunRuntime.spawn = vi.fn(() => ({
   exited: Promise.resolve(0),
 }));
 

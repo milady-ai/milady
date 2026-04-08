@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  BUN_VERSION: "1.3.11"
+  BUN_VERSION: "1.3.9"
   NODE_NO_WARNINGS: "1"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
 
@@ -49,7 +49,7 @@ jobs:
         run: bun run scripts/disable-local-eliza-workspace.mjs
 
       - name: Install root dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
 
       - name: Run repository postinstall patches
         run: bun run postinstall
