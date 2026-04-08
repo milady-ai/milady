@@ -58,6 +58,7 @@ describe("Electrobun startup bootstrap", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 
     expect(source).toContain("resolveMainWindowPartition");
+    expect(source).toContain("const useIsolatedMainView =");
     expect(source).toContain(
       'process.platform === "win32" && mainWindowPartition',
     );
@@ -110,6 +111,7 @@ describe("Electrobun startup bootstrap", () => {
     const source = fs.readFileSync(INDEX_PATH, "utf8");
 
     expect(source).toContain("resolveMainWindowPartition(process.env)");
+    expect(source).toContain("shouldForceMainWindowCef(process.env)");
     expect(source).toContain("resolveBootstrapShellRenderer(buildInfo)");
     expect(source).toContain("resolveBootstrapViewRenderer(buildInfo)");
     expect(source).toContain("const mainView = new BrowserView({");

@@ -34,4 +34,15 @@ describe("dev-platform.mjs", () => {
     expect(script).toContain('execSync("bun run build:whisper"');
     expect(script).toContain("ensureDesktopWhisperAssets();");
   });
+
+  it("enables the macOS CEF workaround for desktop dev unless explicitly overridden", () => {
+    const script = fs.readFileSync(SCRIPT_PATH, "utf8");
+
+    expect(script).toContain("const desktopCefWorkaroundEnv");
+    expect(script).toContain("process.env.MILADY_DESKTOP_FORCE_CEF?.trim()");
+    expect(script).toContain('return "1";');
+    expect(script).toContain(
+      "MILADY_DESKTOP_FORCE_CEF: desktopCefWorkaroundEnv",
+    );
+  });
 });

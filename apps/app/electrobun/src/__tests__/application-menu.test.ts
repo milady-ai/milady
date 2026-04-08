@@ -22,12 +22,14 @@ function getMenu(
     singleton: boolean;
   }> = [],
   isMac = true,
+  useBrowserDebugFallback = isMac,
 ) {
   const menu = buildApplicationMenu({
     isMac,
     browserEnabled,
     heartbeatSnapshot: EMPTY_HEARTBEAT_MENU_SNAPSHOT,
     detachedWindows,
+    useBrowserDebugFallback,
   });
   return menu.find((item) => item.label === label);
 }
@@ -74,6 +76,17 @@ describe("buildApplicationMenu", () => {
     expect(macViewLabels).not.toContain("Show Heartbeats");
 
     expect(winViewLabels).toContain("Toggle Developer Tools");
+  });
+
+  it("keeps native devtools visible on macOS when the CEF workaround is enabled", () => {
+    const macViewLabels = (
+      getMenu("View", false, [], true, false)?.submenu ?? []
+    ).map((item) => item.label ?? item.type ?? "");
+
+    expect(macViewLabels).toContain("Toggle Developer Tools");
+    expect(macViewLabels).not.toContain(
+      "Open Renderer in Browser for Debugging",
+    );
   });
 
   it("renders heartbeat monitoring summary in the native menu", () => {

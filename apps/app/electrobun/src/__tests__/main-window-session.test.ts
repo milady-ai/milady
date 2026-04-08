@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAC_DESKTOP_CEF_PARTITION,
   PACKAGED_WINDOWS_BOOTSTRAP_PARTITION,
   resolveBootstrapShellRenderer,
   resolveBootstrapViewRenderer,
   resolveMainWindowPartition,
+  shouldForceMainWindowCef,
 } from "../main-window-session";
 
 describe("main-window-session", () => {
@@ -59,5 +61,25 @@ describe("main-window-session", () => {
         MILADY_DESKTOP_TEST_PARTITION: "   ",
       }),
     ).toBeNull();
+  });
+
+  it("opts into a persistent macOS CEF partition when the workaround env is enabled", () => {
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, "platform", {
+      value: "darwin",
+      configurable: true,
+    });
+
+    expect(shouldForceMainWindowCef({ MILADY_DESKTOP_FORCE_CEF: "1" })).toBe(
+      true,
+    );
+    expect(resolveMainWindowPartition({ MILADY_DESKTOP_FORCE_CEF: "1" })).toBe(
+      MAC_DESKTOP_CEF_PARTITION,
+    );
+
+    Object.defineProperty(process, "platform", {
+      value: originalPlatform,
+      configurable: true,
+    });
   });
 });

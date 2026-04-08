@@ -36,6 +36,7 @@ import {
   resolveBootstrapShellRenderer,
   resolveBootstrapViewRenderer,
   resolveMainWindowPartition,
+  shouldForceMainWindowCef,
 } from "./main-window-session";
 import {
   buildMainMenuResetApiCandidates,
@@ -126,13 +127,23 @@ function resolveDesktopAppIconPath(): string {
   );
 }
 
+function shouldUseBrowserDevtoolsFallback(): boolean {
+  return (
+    process.platform === "darwin" &&
+    process.env.MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS !== "1" &&
+    !shouldForceMainWindowCef(process.env)
+  );
+}
+
 function setupApplicationMenu(): void {
   const isMac = process.platform === "darwin";
   const menu = buildApplicationMenu({
     isMac,
+    browserEnabled: surfaceWindowManager?.isBrowserEnabled() ?? false,
     heartbeatSnapshot: heartbeatMenuSnapshot,
     detachedWindows: surfaceWindowManager?.listWindows() ?? [],
     agentReady: isAgentReady(),
+    useBrowserDebugFallback: shouldUseBrowserDevtoolsFallback(),
   });
   ApplicationMenu.setApplicationMenu(
     menu as unknown as Parameters<typeof ApplicationMenu.setApplicationMenu>[0],
@@ -809,10 +820,21 @@ async function createMainWindow(): Promise<BrowserWindow> {
   const titleBarStyle =
     process.platform === "darwin" ? "hiddenInset" : "default";
   const transparent = process.platform === "darwin";
+  const buildInfo = await BuildConfig.get();
+  const forceMainWindowCef = shouldForceMainWindowCef(process.env);
+  const canUseCefView = buildInfo.availableRenderers.includes("cef");
+  const useIsolatedMainView =
+    (process.platform === "win32" && mainWindowPartition) ||
+    (forceMainWindowCef && canUseCefView && !!mainWindowPartition);
+
+  if (forceMainWindowCef && !canUseCefView) {
+    console.warn(
+      "[Main] MILADY_DESKTOP_FORCE_CEF=1 requested, but this Electrobun build does not bundle the CEF renderer. Falling back to the native renderer.",
+    );
+  }
 
   let win: BrowserWindow;
-  if (process.platform === "win32" && mainWindowPartition) {
-    const buildInfo = await BuildConfig.get();
+  if (useIsolatedMainView) {
     win = new BrowserWindow({
       title: "Milady",
       // @ts-expect-error: Electrobun doesn't expose icon in JS typings yet
@@ -829,7 +851,9 @@ async function createMainWindow(): Promise<BrowserWindow> {
       url: rendererUrl,
       // @ts-expect-error: BrowserView preload exists at runtime but is not typed yet.
       preload,
-      renderer: resolveBootstrapViewRenderer(buildInfo),
+      renderer: forceMainWindowCef
+        ? "cef"
+        : resolveBootstrapViewRenderer(buildInfo),
       partition: mainWindowPartition,
       frame: {
         x: 0,
@@ -840,6 +864,11 @@ async function createMainWindow(): Promise<BrowserWindow> {
       windowId: win.id,
     });
     win.webviewId = mainView.id;
+    if (forceMainWindowCef) {
+      console.log(
+        `[Main] Using CEF main-window workaround with persistent partition ${mainWindowPartition}`,
+      );
+    }
   } else {
     win = new BrowserWindow({
       title: "Milady",
@@ -1139,10 +1168,7 @@ function toggleFocusedWindowDevTools(): void {
       }
     | undefined;
 
-  if (
-    process.platform === "darwin" &&
-    process.env.MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS !== "1"
-  ) {
+  if (shouldUseBrowserDevtoolsFallback()) {
     void openBrowserDevtoolsFallback(targetWindow);
     return;
   }

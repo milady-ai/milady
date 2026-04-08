@@ -1,5 +1,6 @@
 export const PACKAGED_WINDOWS_BOOTSTRAP_PARTITION =
   "persist:bootstrap-isolated";
+export const MAC_DESKTOP_CEF_PARTITION = "persist:milady-desktop-cef";
 
 type Renderer = "native" | "cef";
 
@@ -17,6 +18,32 @@ function normalizePersistentPartition(partition: string): string {
   return partition.includes(":") ? partition : `persist:${partition}`;
 }
 
+function parseEnabledFlag(value: string | null): boolean {
+  if (!value) {
+    return false;
+  }
+
+  switch (value.toLowerCase()) {
+    case "0":
+    case "false":
+    case "no":
+    case "off":
+      return false;
+    default:
+      return true;
+  }
+}
+
+export function shouldForceMainWindowCef(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (process.platform !== "darwin") {
+    return false;
+  }
+
+  return parseEnabledFlag(trimToNull(env.MILADY_DESKTOP_FORCE_CEF));
+}
+
 export function resolveMainWindowPartition(
   env: NodeJS.ProcessEnv = process.env,
 ): string | null {
@@ -29,6 +56,10 @@ export function resolveMainWindowPartition(
     // The Windows smoke harness redirects APPDATA/LOCALAPPDATA before launch,
     // so the bootstrap renderer can now use a persistent isolated partition.
     return PACKAGED_WINDOWS_BOOTSTRAP_PARTITION;
+  }
+
+  if (shouldForceMainWindowCef(env)) {
+    return MAC_DESKTOP_CEF_PARTITION;
   }
 
   return null;

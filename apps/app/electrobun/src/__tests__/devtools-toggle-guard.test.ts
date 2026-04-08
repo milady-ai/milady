@@ -10,9 +10,11 @@ describe("devtools toggle guard", () => {
   it("routes macOS devtools requests to a browser fallback by default", () => {
     const source = fs.readFileSync(indexPath, "utf8");
     expect(source).toContain("async function openBrowserDevtoolsFallback(");
+    expect(source).toContain("function shouldUseBrowserDevtoolsFallback()");
     expect(source).toContain(
       'process.env.MILADY_ALLOW_UNSAFE_NATIVE_DEVTOOLS !== "1"',
     );
+    expect(source).toContain("!shouldForceMainWindowCef(process.env)");
     expect(source).toContain("void openBrowserDevtoolsFallback(targetWindow)");
     expect(source).toContain("Opened Renderer in Browser");
     expect(source).toContain("WKWebView crash/layout bug");

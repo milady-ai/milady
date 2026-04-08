@@ -127,6 +127,18 @@ const desktopDevLogOptOut = (() => {
 const desktopDevLogPath = desktopDevLogOptOut
   ? null
   : path.resolve(repoRoot, ".milady", "desktop-dev-console.log");
+const desktopCefWorkaroundEnv = (() => {
+  if (process.platform !== "darwin") {
+    return null;
+  }
+
+  const explicit = process.env.MILADY_DESKTOP_FORCE_CEF?.trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  return "1";
+})();
 const desktopWhisperOptOut = (() => {
   const v = process.env.MILADY_DESKTOP_ENSURE_WHISPER?.trim().toLowerCase();
   return v === "0" || v === "false" || v === "no" || v === "off";
@@ -411,6 +423,9 @@ async function launch() {
   pushChild("electrobun", "bun", ["run", "dev"], electrobunDir, {
     NODE_ENV: "development",
     ELECTROBUN_SKIP_CODESIGN: "1",
+    ...(desktopCefWorkaroundEnv
+      ? { MILADY_DESKTOP_FORCE_CEF: desktopCefWorkaroundEnv }
+      : {}),
     ...(rendererUrlForShell
       ? { MILADY_RENDERER_URL: rendererUrlForShell }
       : {}),
