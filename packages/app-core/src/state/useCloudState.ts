@@ -37,6 +37,10 @@ const ELIZA_CLOUD_LOGIN_POLL_INTERVAL_MS = 1000;
 const ELIZA_CLOUD_LOGIN_TIMEOUT_MS = 300_000;
 const ELIZA_CLOUD_LOGIN_MAX_CONSECUTIVE_ERRORS = 3;
 
+export function shouldUseDirectCloudAuth(hasBackend: boolean): boolean {
+  return !hasBackend && !isElectrobunRuntime();
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 /** Publish server cloud snapshot for chat TTS (`useVoiceChat` + `loadVoiceConfig`). */
@@ -278,13 +282,15 @@ export function useCloudState({
     setElizaCloudLoginError(null);
     elizaCloudPreferDisconnectedUntilLoginRef.current = false;
 
-    // Determine if we should use direct cloud auth (no local backend) or
-    // go through the local agent's proxy. During sandbox onboarding there is
-    // no local backend, so we talk to Eliza Cloud directly.
     const hasBackend = Boolean(client.getBaseUrl());
     const cloudApiBase =
       getBootConfig().cloudApiBase ?? "https://www.elizacloud.ai";
-    const useDirectAuth = !hasBackend;
+    // Desktop should prefer Milady's local cloud routes even before the
+    // embedded API base is explicitly persisted. The client can still reach
+    // same-origin `/api/cloud/*` on desktop, while direct browser fetches to
+    // Eliza Cloud are brittle under packaged/dev shell CORS conditions.
+    // Keep direct auth only for non-desktop contexts that truly lack a backend.
+    const useDirectAuth = shouldUseDirectCloudAuth(hasBackend);
 
     try {
       let resp: {
@@ -441,7 +447,6 @@ export function useCloudState({
     elizaCloudConnected,
     elizaCloudLoginBusy,
     setActionNotice,
-    pollCloudCredits,
     loadWalletConfig,
   ]);
 

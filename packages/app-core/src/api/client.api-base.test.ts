@@ -171,4 +171,36 @@ describe("MiladyClient runtime API base/token fallback", () => {
       expect.any(Object),
     );
   });
+
+  it("keeps cloud login on the same-origin local route when desktop has no persisted base", async () => {
+    const { setBootConfig, DEFAULT_BOOT_CONFIG } = await import(
+      "../config/boot-config"
+    );
+    const { MiladyClient } = await import("./client");
+
+    const mockWindow = globalThis.window as MockWindow & {
+      __MILADY_API_BASE__?: string;
+      location: Window["location"] & { origin?: string };
+    };
+    delete mockWindow.__MILADY_API_BASE__;
+    mockWindow.location.origin = "http://127.0.0.1:2138";
+    setBootConfig(DEFAULT_BOOT_CONFIG);
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ ok: true, sessionId: "session-1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const client = new MiladyClient();
+    await client.cloudLogin();
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "http://127.0.0.1:2138/api/cloud/login",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+  });
 });
