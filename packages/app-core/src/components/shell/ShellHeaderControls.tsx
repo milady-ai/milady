@@ -13,7 +13,6 @@ import {
   Loader2,
   MessageCirclePlus,
   Monitor,
-  PencilLine,
   Save,
   Smartphone,
   UserRound,
@@ -52,6 +51,7 @@ interface ShellHeaderControlsProps {
   rightExtras?: ReactNode;
   rightTrailingExtras?: ReactNode;
   trailingExtras?: ReactNode;
+  companionActionExtras?: ReactNode;
   className?: string;
   controlsVariant?: "native" | "companion";
   languageDropdownClassName?: string;
@@ -82,6 +82,7 @@ export function ShellHeaderControls({
   rightExtras,
   rightTrailingExtras,
   trailingExtras,
+  companionActionExtras,
   className,
   controlsVariant = "native",
   languageDropdownClassName,
@@ -112,11 +113,6 @@ export function ShellHeaderControls({
       view: "companion",
       label: t("header.companionMode"),
       Icon: UserRound,
-    },
-    {
-      view: "character",
-      label: t("header.characterMode"),
-      Icon: PencilLine,
     },
     {
       view: "desktop",
@@ -295,6 +291,7 @@ export function ShellHeaderControls({
               <div className="inline-flex items-center gap-2">
                 {renderVoiceButton(isMobileViewport)}
                 {renderActionButton(isMobileViewport)}
+                {companionActionExtras}
               </div>
             </div>
           )

@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CloudStatusBadge } from "../cloud/CloudStatusBadge";
 import { InferenceCloudAlertButton } from "../companion/InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "../companion/resolve-companion-inference-notice";
+import { ProfilesDialog } from "./ProfilesDialog";
 import {
   HEADER_BUTTON_STYLE,
   HEADER_ICON_BUTTON_CLASSNAME,
@@ -130,16 +131,9 @@ export function Header({
     [tab, tabGroups],
   );
 
-  const shellMode =
-    tab === "character" || tab === "character-select"
-      ? "native"
-      : (uiShellMode ?? "companion");
+  const shellMode = uiShellMode ?? "companion";
   const activeShellView =
-    shellMode === "companion"
-      ? "companion"
-      : tab === "character" || tab === "character-select"
-        ? "character"
-        : "desktop";
+    shellMode === "companion" ? "companion" : "desktop";
   const isDesktopShell = activeShellView === "desktop";
   const showNavigationMenu = isDesktopShell;
   const showCloudStatus = isDesktopShell && !hideCloudCredits;
@@ -317,18 +311,14 @@ export function Header({
                 </>
               }
               showCompanionControls={
-                activeShellView === "companion" ||
-                activeShellView === "character"
+                activeShellView === "companion"
               }
               chatAgentVoiceMuted={chatAgentVoiceMuted}
               onToggleVoiceMute={() =>
                 setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
               }
-              onNewChat={
-                activeShellView === "character"
-                  ? undefined
-                  : () => void handleNewConversation()
-              }
+              onNewChat={() => void handleNewConversation()}
+              companionActionExtras={<ProfilesDialog />}
               trailingExtras={
                 showNavigationMenu ? (
                   <Button

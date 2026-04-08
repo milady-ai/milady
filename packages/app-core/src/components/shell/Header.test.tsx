@@ -73,10 +73,11 @@ vi.mock("lucide-react", () => ({
   CircleUserRound: () => React.createElement("span", null, "👤"),
   Bug: () => React.createElement("span", null, "🐛"),
   CircleDollarSign: () => React.createElement("span", null, "💰"),
+  Loader2: () => React.createElement("span", null, "⏳"),
   MessageCirclePlus: () => React.createElement("span", null, "💬"),
   Menu: () => React.createElement("span", null, "☰"),
   Monitor: () => React.createElement("span", null, "🖥"),
-  PencilLine: () => React.createElement("span", null, "✏"),
+  Sparkles: () => React.createElement("span", null, "✨"),
   Smartphone: () => React.createElement("span", null, "📱"),
   UserRound: () => React.createElement("span", null, "👤"),
   Users: () => React.createElement("span", null, "👥"),
@@ -114,6 +115,15 @@ describe("Header", () => {
       setUiTheme: vi.fn(),
       uiShellMode: "native",
       switchShellView: vi.fn(),
+      characterData: null,
+      characterDraft: {},
+      selectedVrmIndex: 1,
+      loadCharacter: vi.fn(),
+      chatAgentVoiceMuted: false,
+      handleNewConversation: vi.fn(),
+      conversationMessages: [],
+      chatLastUsage: null,
+      setActionNotice: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.
@@ -132,9 +142,6 @@ describe("Header", () => {
     const shellToggle = root.findByProps({ "data-testid": "ui-shell-toggle" });
     const _activeDesktopToggle = root.findByProps({
       "data-testid": "ui-shell-toggle-desktop",
-    });
-    const _inactiveCharacterToggle = root.findByProps({
-      "data-testid": "ui-shell-toggle-character",
     });
     const _inactiveCompanionToggle = root.findByProps({
       "data-testid": "ui-shell-toggle-companion",
@@ -177,6 +184,11 @@ describe("Header", () => {
       characterSaveSuccess: false,
       conversationMessages: [],
       chatLastUsage: null,
+      characterData: null,
+      characterDraft: {},
+      selectedVrmIndex: 1,
+      loadCharacter: vi.fn(),
+      setActionNotice: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.
@@ -214,7 +226,7 @@ describe("Header", () => {
     ).toBeDefined();
   });
 
-  it("uses minimal chrome for the character view and hides cloud pricing", async () => {
+  it("shows the Profiles trigger in companion mode", async () => {
     const mockUseApp = {
       t: (k: string) => k,
       agentStatus: { state: "running", agentName: "Eliza" },
@@ -231,7 +243,7 @@ describe("Header", () => {
       handleRestart: vi.fn(),
       handleStart: vi.fn(),
       loadDropStatus: vi.fn().mockResolvedValue(undefined),
-      tab: "character",
+      tab: "chat",
       setTab: vi.fn(),
       setState: vi.fn(),
       plugins: [],
@@ -239,8 +251,17 @@ describe("Header", () => {
       setUiLanguage: vi.fn(),
       uiTheme: "dark",
       setUiTheme: vi.fn(),
-      uiShellMode: "native",
+      uiShellMode: "companion",
       switchShellView: vi.fn(),
+      chatAgentVoiceMuted: false,
+      handleNewConversation: vi.fn(),
+      conversationMessages: [],
+      chatLastUsage: null,
+      characterData: null,
+      characterDraft: {},
+      selectedVrmIndex: 1,
+      loadCharacter: vi.fn(),
+      setActionNotice: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.
@@ -269,14 +290,9 @@ describe("Header", () => {
     ).toHaveLength(0);
     expect(
       (testRenderer as ReactTestRenderer).root.findAllByProps({
-        "data-testid": "header-cloud-status",
+        "data-testid": "profiles-dialog-trigger",
       }),
-    ).toHaveLength(0);
-    expect(
-      (testRenderer as ReactTestRenderer).root.findAll(
-        (node) => node.props["aria-label"] === "charactereditor.Save",
-      ),
-    ).toHaveLength(0);
+    ).toHaveLength(2);
   });
 
   it("uses minimal chrome in companion mode", async () => {
@@ -296,7 +312,7 @@ describe("Header", () => {
       handleRestart: vi.fn(),
       handleStart: vi.fn(),
       loadDropStatus: vi.fn().mockResolvedValue(undefined),
-      tab: "character",
+      tab: "chat",
       setTab: vi.fn(),
       setState: vi.fn(),
       plugins: [],
@@ -306,6 +322,15 @@ describe("Header", () => {
       setUiTheme: vi.fn(),
       uiShellMode: "companion",
       switchShellView: vi.fn(),
+      chatAgentVoiceMuted: false,
+      handleNewConversation: vi.fn(),
+      conversationMessages: [],
+      chatLastUsage: null,
+      characterData: null,
+      characterDraft: {},
+      selectedVrmIndex: 1,
+      loadCharacter: vi.fn(),
+      setActionNotice: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.

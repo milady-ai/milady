@@ -19,7 +19,6 @@ import {
   AppsPageView,
   BrowserWorkspaceView,
   BugReportModal,
-  CharacterEditor,
   ChatView,
   CompanionShell,
   CompanionView,
@@ -45,7 +44,6 @@ import {
 } from "./app-shell-components";
 import { TasksEventsPanel } from "./components/chat/TasksEventsPanel";
 import { DeferredSetupChecklist } from "./components/cloud/FlaminaGuide";
-import { CompanionHeader } from "./components/companion/CompanionHeader";
 import { MusicPlayerGlobal } from "./components/music/MusicPlayerGlobal";
 import {
   BugReportProvider,
@@ -136,11 +134,7 @@ function ViewRouter({
         );
       case "character":
       case "character-select":
-        return (
-          <TabScrollView>
-            <CharacterEditor sceneOverlay={characterSceneVisible} />
-          </TabScrollView>
-        );
+        return <ChatView />;
       case "wallets":
         return (
           <TabScrollView>
@@ -206,15 +200,8 @@ export function App() {
     startupCoordinator,
     tab,
     setTab,
-    setState,
     actionNotice,
     uiShellMode,
-    switchShellView,
-    uiLanguage,
-    setUiLanguage,
-    uiTheme,
-    setUiTheme,
-    chatAgentVoiceMuted,
     unreadConversations,
     activeGameViewerUrl,
     gameOverlayEnabled,
@@ -222,19 +209,14 @@ export function App() {
   } = useApp();
 
   const isPopout = useIsPopout();
-  const shellMode =
-    tab === "character" || tab === "character-select"
-      ? "native"
-      : (uiShellMode ?? "companion");
+  const shellMode = uiShellMode ?? "companion";
   const effectiveTab: Tab =
     shellMode === "companion"
       ? "companion"
-      : tab === "companion"
+      : tab === "companion" || isCharacterTab(tab)
         ? "chat"
         : tab;
-  const characterSceneVisible =
-    shellMode === "native" &&
-    (isCharacterTab(effectiveTab) || isCharacterTab(tab));
+  const characterSceneVisible = false;
   const companionShellVisible = shellMode === "companion";
   // Don't initialize the 3D scene while the system is still booting — this
   // prevents VrmEngine's Three.js setup from blocking the JS thread and
@@ -652,29 +634,6 @@ export function App() {
       <div className="flex flex-1 min-h-0 min-w-0">
         <AdvancedPageView />
       </div>
-    </div>
-  ) : characterSceneVisible ? (
-    <div
-      key="character-shell"
-      className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent"
-    >
-      <CompanionHeader
-        activeShellView="character"
-        onShellViewChange={(view) => switchShellView(view)}
-        uiLanguage={uiLanguage}
-        setUiLanguage={setUiLanguage}
-        uiTheme={uiTheme}
-        setUiTheme={setUiTheme}
-        t={t}
-        showCompanionControls
-        chatAgentVoiceMuted={chatAgentVoiceMuted}
-        onToggleVoiceMute={() =>
-          setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
-        }
-      />
-      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
-        <ViewRouter characterSceneVisible />
-      </main>
     </div>
   ) : (
     <div

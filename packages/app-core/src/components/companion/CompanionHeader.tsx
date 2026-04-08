@@ -22,6 +22,7 @@ export interface CompanionHeaderProps {
   /** Shown in the shell header right cluster (e.g. inference / cloud alert). */
   rightExtras?: ReactNode;
   rightTrailingExtras?: ReactNode;
+  companionActionExtras?: ReactNode;
 }
 
 export const CompanionHeader = memo(function CompanionHeader(
@@ -45,6 +46,7 @@ export const CompanionHeader = memo(function CompanionHeader(
     saveSuccess,
     rightExtras,
     rightTrailingExtras,
+    companionActionExtras,
   } = props;
 
   return (
@@ -82,6 +84,7 @@ export const CompanionHeader = memo(function CompanionHeader(
             saveSuccess={saveSuccess}
             rightExtras={rightExtras}
             rightTrailingExtras={rightTrailingExtras}
+            companionActionExtras={companionActionExtras}
           >
             {children}
           </ShellHeaderControls>

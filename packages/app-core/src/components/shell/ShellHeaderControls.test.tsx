@@ -5,9 +5,7 @@ import { act, create, type ReactTestRenderer } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
 import { ShellHeaderControls } from "./ShellHeaderControls";
 
-const { mockUseMediaQuery } = vi.hoisted(() => ({
-  mockUseMediaQuery: vi.fn(),
-}));
+const mockUseMediaQuery = vi.fn();
 
 vi.mock("@miladyai/app-core/hooks", () => ({
   useMediaQuery: (...args: unknown[]) => mockUseMediaQuery(...args),
@@ -34,7 +32,6 @@ vi.mock("lucide-react", () => ({
   Loader2: () => React.createElement("span", null, "loader"),
   MessageCirclePlus: () => React.createElement("span", null, "new"),
   Monitor: () => React.createElement("span", null, "desktop"),
-  PencilLine: () => React.createElement("span", null, "character"),
   Save: () => React.createElement("span", null, "save"),
   Smartphone: () => React.createElement("span", null, "phone"),
   UserRound: () => React.createElement("span", null, "companion"),
@@ -60,6 +57,9 @@ function renderControls(
         chatAgentVoiceMuted={false}
         onToggleVoiceMute={vi.fn()}
         onNewChat={vi.fn()}
+        companionActionExtras={React.createElement("div", {
+          "data-testid": "profiles-extra-stub",
+        })}
         rightExtras={React.createElement("div", {
           "data-testid": "right-extra-stub",
         })}
@@ -96,6 +96,9 @@ describe("ShellHeaderControls", () => {
     const newChatButton = buttons.find(
       (node) => node.props["aria-label"] === "companion.newChat",
     );
+    const profilesButton = root.findByProps({
+      "data-testid": "profiles-extra-stub",
+    });
 
     expect(String(headerRoot.props.className)).toContain("flex");
     expect(String(headerRoot.props.className)).not.toContain("grid");
@@ -113,6 +116,7 @@ describe("ShellHeaderControls", () => {
     expect(String(voiceButton?.props.className)).not.toContain("gap-1.5");
     expect(String(newChatButton?.props.className)).toContain("w-11");
     expect(String(newChatButton?.props.className)).not.toContain("gap-1.5");
+    expect(profilesButton).toBeDefined();
     expect(typeof voiceButton?.props.onPointerDown).toBe("function");
     expect(typeof newChatButton?.props.onPointerDown).toBe("function");
   });
@@ -135,6 +139,9 @@ describe("ShellHeaderControls", () => {
     expect(String(companionControls.children[0]?.props.className)).toContain(
       "inline-flex",
     );
+    expect(
+      root.findByProps({ "data-testid": "profiles-extra-stub" }),
+    ).toBeDefined();
     expect(String(rightControls.props.className)).toContain("shrink-0");
     expect(String(rightControls.props.className)).not.toContain("order-2");
   });
@@ -203,7 +210,7 @@ describe("ShellHeaderControls", () => {
     await act(async () => {
       tree = create(
         <ShellHeaderControls
-          activeShellView="character"
+          activeShellView="desktop"
           onShellViewChange={() => {}}
           uiLanguage="en"
           setUiLanguage={() => {}}

@@ -3,6 +3,7 @@ import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
 import { PanelLeftOpen } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChatModalView } from "./ChatModalView";
 import { useCompanionSceneStatus } from "../companion/companion-scene-status-context";
 import { CompanionHeader } from "../companion/CompanionHeader";
@@ -11,6 +12,7 @@ import { useSharedCompanionScene } from "../companion/shared-companion-scene-con
 import { InferenceCloudAlertButton } from "../companion/InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "../companion/resolve-companion-inference-notice";
 import { PtyConsoleSidePanel } from "../coding/PtyConsoleSidePanel";
+import { ProfilesDialog } from "../shell/ProfilesDialog";
 
 const COMPANION_UI_REVEAL_FALLBACK_MS = 1400;
 const COMPANION_DOCK_HEIGHT = "min(42vh, 24rem)";
@@ -158,6 +160,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
             setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
           }
           onNewChat={() => void handleNewConversation()}
+          companionActionExtras={<ProfilesDialog />}
           rightExtras={companionHeaderRightExtras}
         />
       </div>
