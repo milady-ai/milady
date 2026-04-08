@@ -198,6 +198,40 @@ export function registerRpcHandlers(
       }
     },
 
+    // ---- Renderer diagnostics ----
+    rendererReportDiagnostic: async (
+      params?: {
+        level?: "log" | "info" | "warn" | "error";
+        source?: string;
+        message?: string;
+        details?: unknown;
+      } | null,
+    ) => {
+      const level = params?.level ?? "log";
+      const source = params?.source ?? "renderer";
+      const message = params?.message?.trim() || "(no message)";
+      const details =
+        typeof params?.details === "undefined"
+          ? ""
+          : ` ${JSON.stringify(params.details)}`;
+      const line = `[Renderer:${source}] ${message}${details}`;
+      switch (level) {
+        case "error":
+          console.error(line);
+          break;
+        case "warn":
+          console.warn(line);
+          break;
+        case "info":
+          console.info(line);
+          break;
+        default:
+          console.log(line);
+          break;
+      }
+      return { ok: true };
+    },
+
     // ---- Desktop: Tray ----
     desktopCreateTray: async (
       params: Parameters<typeof desktop.createTray>[0],

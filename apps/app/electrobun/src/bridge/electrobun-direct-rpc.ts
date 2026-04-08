@@ -24,6 +24,7 @@ type RendererBridgeRpc = {
 const listenersByRpcMessage: Record<string, Set<RpcMessageListener>> = {};
 const BOOT_CONFIG_STORE_KEY = Symbol.for("milady.app.boot-config");
 const BOOT_CONFIG_WINDOW_KEY = "__MILADY_APP_BOOT_CONFIG__";
+const RENDERER_LOG_MIRROR_KEY = "__MILADY_ELECTROBUN_LOG_MIRROR__";
 
 type BootConfig = {
   apiBase?: string;
@@ -144,3 +145,94 @@ declare global {
 }
 
 window.__MILADY_ELECTROBUN_RPC__ = miladyElectrobunRpc;
+
+function installRendererLogMirror(): void {
+  const globalWindow = window as typeof window & {
+    [RENDERER_LOG_MIRROR_KEY]?: boolean;
+  };
+  if (globalWindow[RENDERER_LOG_MIRROR_KEY]) {
+    return;
+  }
+  globalWindow[RENDERER_LOG_MIRROR_KEY] = true;
+
+  const reportDiagnostic = (
+    level: "log" | "info" | "warn" | "error",
+    source: string,
+    message: string,
+    details?: unknown,
+  ) => {
+    void rpc.request
+      .rendererReportDiagnostic({
+        level,
+        source,
+        message,
+        details,
+      })
+      .catch(() => {
+        // Best effort only — never break the renderer because diagnostics failed.
+      });
+  };
+
+  const consoleMethods = ["log", "info", "warn", "error"] as const;
+  for (const level of consoleMethods) {
+    const original = console[level].bind(console);
+    console[level] = (...args: unknown[]) => {
+      original(...args);
+      reportDiagnostic(
+        level,
+        "console",
+        args
+          .map((value) => {
+            if (typeof value === "string") return value;
+            try {
+              return JSON.stringify(value);
+            } catch {
+              return String(value);
+            }
+          })
+          .join(" "),
+      );
+    };
+  }
+
+  window.addEventListener(
+    "error",
+    (event) => {
+      const target = event.target as
+        | { src?: string; href?: string; tagName?: string }
+        | null
+        | undefined;
+      if (target && (target.src || target.href)) {
+        reportDiagnostic("error", "resource", "Failed to load resource", {
+          tagName: target.tagName,
+          src: target.src,
+          href: target.href,
+        });
+        return;
+      }
+
+      reportDiagnostic(
+        "error",
+        "window.onerror",
+        event.message || "Unhandled window error",
+        {
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+        },
+      );
+    },
+    true,
+  );
+
+  window.addEventListener("unhandledrejection", (event) => {
+    reportDiagnostic(
+      "error",
+      "unhandledrejection",
+      "Unhandled promise rejection",
+      event.reason,
+    );
+  });
+}
+
+installRendererLogMirror();
