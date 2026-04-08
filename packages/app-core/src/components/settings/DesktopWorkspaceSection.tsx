@@ -211,6 +211,25 @@ export const DESKTOP_WORKSPACE_CLICK_AUDIT: readonly DesktopClickAuditItem[] = [
 const DESKTOP_ACTION_BUTTON_CLASSNAME =
   "min-h-9 justify-start whitespace-normal text-left sm:min-h-10";
 
+function buildDesktopDiagnosticsBundle(options: {
+  diagnosticsText: string;
+  devStackText: string;
+  devConsoleText: string;
+}): string {
+  return [
+    "Desktop Diagnostics",
+    "",
+    "== Runtime Snapshot ==",
+    options.diagnosticsText.trim(),
+    "",
+    "== Desktop Dev Stack ==",
+    options.devStackText.trim(),
+    "",
+    "== Desktop Console Log ==",
+    options.devConsoleText.trim(),
+  ].join("\n");
+}
+
 function renderPathList(
   paths: string[],
   t: (key: string, options?: Record<string, unknown>) => string,
@@ -257,6 +276,7 @@ export function DesktopWorkspaceSection({
   const [devConsoleText, setDevConsoleText] = useState(
     "Loading desktop console log…",
   );
+  const [devConsoleFilter, setDevConsoleFilter] = useState("");
   const getSurfaceLabel = useCallback(
     (surfaceId: (typeof DESKTOP_WORKSPACE_SURFACES)[number]["id"]) =>
       t(`desktopworkspacesection.surface.${surfaceId}.label`),
@@ -405,6 +425,55 @@ export function DesktopWorkspaceSection({
     ].join("\n");
   }, [snapshot, t]);
 
+  const devConsoleLines = useMemo(
+    () =>
+      devConsoleText
+        .split("\n")
+        .map((line) => line.trimEnd())
+        .filter((line) => line.length > 0),
+    [devConsoleText],
+  );
+
+  const filteredDevConsoleLines = useMemo(() => {
+    const needle = devConsoleFilter.trim().toLowerCase();
+    if (!needle) {
+      return devConsoleLines;
+    }
+    return devConsoleLines.filter((line) =>
+      line.toLowerCase().includes(needle),
+    );
+  }, [devConsoleFilter, devConsoleLines]);
+
+  const filteredDevConsoleText = useMemo(
+    () => filteredDevConsoleLines.join("\n"),
+    [filteredDevConsoleLines],
+  );
+
+  const devConsoleSummary = useMemo(() => {
+    const summarize = (matcher: (line: string) => boolean) =>
+      devConsoleLines.filter(matcher).length;
+    return {
+      total: devConsoleLines.length,
+      errors: summarize((line) => /\b(error|failed|fatal)\b/i.test(line)),
+      warnings: summarize((line) => /\bwarn\b/i.test(line)),
+      rpc: summarize((line) => line.includes("[Renderer:rpc]")),
+      fetch: summarize((line) => line.includes("[Renderer:fetch]")),
+      talkmode: summarize((line) => /talkmode/i.test(line)),
+    };
+  }, [devConsoleLines]);
+
+  const copyDesktopDiagnosticsBundle = useCallback(async () => {
+    await copyTextToClipboard(
+      buildDesktopDiagnosticsBundle({
+        diagnosticsText,
+        devStackText,
+        devConsoleText,
+      }),
+    );
+    setActionMessage("Copied desktop diagnostics bundle.");
+    setActionError(null);
+  }, [diagnosticsText, devConsoleText, devStackText]);
+
   if (!desktopRuntime) {
     return (
       <ContentLayout contentHeader={contentHeader}>
@@ -509,6 +578,14 @@ export function DesktopWorkspaceSection({
               >
                 Copy Dev Stack
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={DESKTOP_ACTION_BUTTON_CLASSNAME}
+                onClick={() => void copyDesktopDiagnosticsBundle()}
+              >
+                Copy Full Diagnostics Bundle
+              </Button>
             </div>
             <pre className="max-h-72 overflow-auto break-all rounded-xl border border-border bg-bg px-3 py-3 text-[11px] leading-5 text-txt">
               {devStackText}
@@ -575,13 +652,34 @@ export function DesktopWorkspaceSection({
               variant="outline"
               size="sm"
               className={DESKTOP_ACTION_BUTTON_CLASSNAME}
-              onClick={() => void copyTextToClipboard(devConsoleText)}
+              onClick={() =>
+                void copyTextToClipboard(
+                  filteredDevConsoleText || devConsoleText,
+                )
+              }
             >
-              Copy Console Tail
+              Copy Visible Console Tail
             </Button>
           </div>
+          <div className="flex flex-wrap gap-2 text-xs text-muted">
+            <span>Total: {devConsoleSummary.total}</span>
+            <span>Errors: {devConsoleSummary.errors}</span>
+            <span>Warnings: {devConsoleSummary.warnings}</span>
+            <span>RPC: {devConsoleSummary.rpc}</span>
+            <span>Fetch: {devConsoleSummary.fetch}</span>
+            <span>TalkMode: {devConsoleSummary.talkmode}</span>
+          </div>
           <Textarea
-            value={devConsoleText}
+            value={devConsoleFilter}
+            onChange={(event) => setDevConsoleFilter(event.target.value)}
+            placeholder="Filter console lines (e.g. rpc, fetch, talkmode, 404)"
+            className="min-h-[4rem] text-xs"
+          />
+          <Textarea
+            value={
+              filteredDevConsoleText ||
+              "No console lines match the current filter."
+            }
             readOnly
             className="min-h-[22rem] font-mono text-[11px] leading-5"
           />

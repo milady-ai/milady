@@ -12,6 +12,8 @@ const {
   openDesktopSurfaceWindowMock,
   loadDesktopWorkspaceSnapshotMock,
   isElectrobunRuntimeMock,
+  copyTextToClipboardMock,
+  fetchMock,
 } = vi.hoisted(() => ({
   invokeDesktopBridgeRequestMock: vi.fn(),
   useAppMock: vi.fn(),
@@ -19,6 +21,8 @@ const {
   openDesktopSurfaceWindowMock: vi.fn(),
   loadDesktopWorkspaceSnapshotMock: vi.fn(),
   isElectrobunRuntimeMock: vi.fn(),
+  copyTextToClipboardMock: vi.fn(),
+  fetchMock: vi.fn(),
 }));
 
 vi.mock("../../bridge", () => ({
@@ -31,7 +35,7 @@ vi.mock("../../state", () => ({
 }));
 
 vi.mock("../../utils/clipboard", () => ({
-  copyTextToClipboard: vi.fn(),
+  copyTextToClipboard: copyTextToClipboardMock,
 }));
 
 vi.mock("../../utils/desktop-workspace", async () => {
@@ -102,6 +106,22 @@ describe("DesktopWorkspaceSection", () => {
     isElectrobunRuntimeMock.mockReset();
 
     isElectrobunRuntimeMock.mockReturnValue(true);
+    copyTextToClipboardMock.mockReset();
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/dev/stack")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ schema: "milady.dev.stack/v1", desktop: {} }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        text: async () => "[Renderer:rpc] example failure",
+      });
+    });
     useAppMock.mockReturnValue({
       t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
       relaunchDesktop: vi.fn(),
@@ -172,6 +192,32 @@ describe("DesktopWorkspaceSection", () => {
         rpcMethod: "desktopSetAutoLaunch",
         params: { enabled: true, openAsHidden: false },
       }),
+    );
+  });
+
+  it("loads desktop dev diagnostics and copies the bundled report", async () => {
+    let renderer: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(
+        React.createElement(DesktopWorkspaceSection),
+      );
+    });
+    if (!renderer) {
+      throw new Error("Failed to render DesktopWorkspaceSection");
+    }
+    const root = renderer.root;
+
+    expect(fetchMock).toHaveBeenCalled();
+
+    await act(async () => {
+      findButtonByText(root, "Copy Full Diagnostics Bundle").props.onClick();
+    });
+
+    expect(copyTextToClipboardMock).toHaveBeenCalledWith(
+      expect.stringContaining("Desktop Diagnostics"),
+    );
+    expect(copyTextToClipboardMock).toHaveBeenCalledWith(
+      expect.stringContaining("Desktop Console Log"),
     );
   });
 });
