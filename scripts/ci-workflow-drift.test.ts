@@ -156,6 +156,12 @@ describe("CI workflow drift", () => {
     expect(read(WINDOWS_PRELOAD_SMOKE_WORKFLOW_PATH)).toContain(
       'MILADY_SKIP_LOCAL_UPSTREAMS: "1"',
     );
+    expect(read(WINDOWS_PRELOAD_SMOKE_WORKFLOW_PATH)).toContain(
+      'bun-version: "1.3.9"',
+    );
+    expect(read(TEST_WORKFLOW_PATH)).toContain(
+      "matrix.os == 'windows-latest' && '1.3.9' || env.BUN_VERSION",
+    );
     expect(read(BUILD_DOCKER_WORKFLOW_PATH)).toContain(
       "run: node scripts/init-submodules.mjs",
     );

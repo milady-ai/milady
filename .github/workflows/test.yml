@@ -254,7 +254,8 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          # pinned on Windows: Bun 1.3.11 reports false frozen-lockfile drift on root installs
+          bun-version: ${{ matrix.os == 'windows-latest' && '1.3.9' || env.BUN_VERSION }}
 
       - name: Cache Bun install
         uses: actions/cache@v4
