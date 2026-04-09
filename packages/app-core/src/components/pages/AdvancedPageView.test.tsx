@@ -206,9 +206,8 @@ describe("AdvancedPageView", () => {
       ).length,
     ).toBeGreaterThan(0);
     expect(
-      tree.root.findByProps({ "data-testid": "advanced-subtab-relationships" }).props[
-        "aria-pressed"
-      ],
+      tree.root.findByProps({ "data-testid": "advanced-subtab-relationships" })
+        .props["aria-pressed"],
     ).toBe(true);
   });
 });

@@ -194,9 +194,7 @@ export function buildManagedDiscordSettingsReturnUrl(
   return url.toString();
 }
 
-export function resolveManagedDiscordAgentChoice(
-  agents: CloudCompatAgent[],
-):
+export function resolveManagedDiscordAgentChoice(agents: CloudCompatAgent[]):
   | {
       mode: "none";
       agent: null;

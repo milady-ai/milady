@@ -86,8 +86,8 @@ export function RelationshipsGraphPanel({
           No identities match the current filters.
         </div>
         <p className="mt-2 max-w-lg text-sm leading-6 text-muted">
-          The graph will render once the relationships has people, identity links, and
-          relationships to visualize.
+          The graph will render once the relationships has people, identity
+          links, and relationships to visualize.
         </p>
       </div>
     );
@@ -117,7 +117,12 @@ export function RelationshipsGraphPanel({
           aria-label="Relationships relationship graph"
         >
           <defs>
-            <radialGradient id="relationships-node-fill" cx="50%" cy="35%" r="70%">
+            <radialGradient
+              id="relationships-node-fill"
+              cx="50%"
+              cy="35%"
+              r="70%"
+            >
               <stop offset="0%" stopColor="rgba(255,240,199,0.92)" />
               <stop offset="100%" stopColor="rgba(240,185,11,0.86)" />
             </radialGradient>

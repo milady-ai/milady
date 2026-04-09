@@ -533,7 +533,11 @@ describe("ProviderSwitcher subscription selection behavior", () => {
       await Promise.resolve();
     });
 
-    expect(mockSwitchProvider).toHaveBeenCalledWith("pi-ai", undefined, undefined);
+    expect(mockSwitchProvider).toHaveBeenCalledWith(
+      "pi-ai",
+      undefined,
+      undefined,
+    );
     expect(getSelectValue(tree)).toBe("openai-subscription");
     expect(mockSetActionNotice).toHaveBeenCalledWith(
       "Failed to enable pi.ai: pi failed",
@@ -696,7 +700,10 @@ describe("ProviderSwitcher subscription selection behavior", () => {
     });
 
     await act(async () => {
-      getButtonByText(tree, "providerswitcher.reportIssueWithTemplate").props.onClick();
+      getButtonByText(
+        tree,
+        "providerswitcher.reportIssueWithTemplate",
+      ).props.onClick();
       await Promise.resolve();
     });
 
@@ -705,7 +712,10 @@ describe("ProviderSwitcher subscription selection behavior", () => {
     );
 
     await act(async () => {
-      getButtonByText(tree, "providerswitcher.logInToElizaCloud").props.onClick();
+      getButtonByText(
+        tree,
+        "providerswitcher.logInToElizaCloud",
+      ).props.onClick();
       await Promise.resolve();
     });
 

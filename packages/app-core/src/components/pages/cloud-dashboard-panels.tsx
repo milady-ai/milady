@@ -585,9 +585,7 @@ function DiscordSettingsPanel({
                     </span>
                     <Switch
                       checked={config.intents?.guildMembers ?? false}
-                      onCheckedChange={(v) =>
-                        patchIntents({ guildMembers: v })
-                      }
+                      onCheckedChange={(v) => patchIntents({ guildMembers: v })}
                       className="scale-75"
                     />
                   </div>
@@ -616,9 +614,7 @@ function DiscordSettingsPanel({
                     </span>
                     <Switch
                       checked={config.pluralkit?.enabled ?? false}
-                      onCheckedChange={(v) =>
-                        patchFlagSetting("pluralkit", v)
-                      }
+                      onCheckedChange={(v) => patchFlagSetting("pluralkit", v)}
                       className="scale-75"
                     />
                   </div>

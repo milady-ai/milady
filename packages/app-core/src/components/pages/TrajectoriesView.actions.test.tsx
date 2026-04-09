@@ -382,7 +382,11 @@ describe("TrajectoriesView actions", () => {
 
     await waitFor(() => {
       expect(mockDeleteTrajectories).toHaveBeenCalledWith(["traj-1"]);
-      expect(setActionNotice).toHaveBeenCalledWith("delete failed", "error", 4200);
+      expect(setActionNotice).toHaveBeenCalledWith(
+        "delete failed",
+        "error",
+        4200,
+      );
     });
     expect(onSelectTrajectory).not.toHaveBeenCalled();
   });
@@ -460,7 +464,11 @@ describe("TrajectoriesView actions", () => {
 
     await waitFor(() => {
       expect(mockClearAllTrajectories).toHaveBeenCalledTimes(1);
-      expect(setActionNotice).toHaveBeenCalledWith("clear failed", "error", 4200);
+      expect(setActionNotice).toHaveBeenCalledWith(
+        "clear failed",
+        "error",
+        4200,
+      );
     });
     expect(onSelectTrajectory).not.toHaveBeenCalled();
   });

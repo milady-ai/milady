@@ -106,7 +106,9 @@ describe("MiladyClient relationships API", () => {
     const client = new MiladyClient("http://127.0.0.1:31337");
     const person = await client.getRelationshipsPerson("person 1");
 
-    expect(fetchSpy).toHaveBeenCalledWith("/api/relationships/people/person%201");
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "/api/relationships/people/person%201",
+    );
     expect(person.displayName).toBe("Chris");
   });
 });

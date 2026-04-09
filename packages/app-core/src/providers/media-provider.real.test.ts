@@ -13,7 +13,10 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { describeIf, itIf } from "../../../../test/helpers/conditional-tests.ts";
+import {
+  describeIf,
+  itIf,
+} from "../../../../test/helpers/conditional-tests.ts";
 import type { ImageConfig, VisionConfig } from "../config/types.eliza";
 import {
   createImageProvider,
@@ -273,34 +276,38 @@ describeFn("Ollama Local Vision Provider (Real API)", () => {
     }
   }, 60000);
 
-  itIf(REAL_API_MODE && process.env.MILADY_OLLAMA_DOWNLOAD_TEST === "1")("should auto-download vision model if not present (SLOW - downloads ~4GB model)", async () => {
-    if (!ollamaAvailable) {
-      console.log("[Ollama] Skipping - Ollama server not running");
-      return;
-    }
+  itIf(REAL_API_MODE && process.env.MILADY_OLLAMA_DOWNLOAD_TEST === "1")(
+    "should auto-download vision model if not present (SLOW - downloads ~4GB model)",
+    async () => {
+      if (!ollamaAvailable) {
+        console.log("[Ollama] Skipping - Ollama server not running");
+        return;
+      }
 
-    // This test verifies the auto-download feature
-    // The model should be downloaded on first use if autoDownload is true
-    // NOTE: Skipped by default because llava is ~4GB and takes a long time
-    console.log("[Ollama] Testing auto-download capability...");
+      // This test verifies the auto-download feature
+      // The model should be downloaded on first use if autoDownload is true
+      // NOTE: Skipped by default because llava is ~4GB and takes a long time
+      console.log("[Ollama] Testing auto-download capability...");
 
-    const imageResponse = await fetch(TEST_IMAGE_URL);
-    const buffer = await imageResponse.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
+      const imageResponse = await fetch(TEST_IMAGE_URL);
+      const buffer = await imageResponse.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
 
-    const result = await provider.analyze({
-      imageBase64: base64,
-      prompt: "Describe this image in one sentence.",
-    });
+      const result = await provider.analyze({
+        imageBase64: base64,
+        prompt: "Describe this image in one sentence.",
+      });
 
-    // Either succeeds (model available/downloaded) or fails with clear error
-    if (result.success) {
-      expect(result.data?.description).toBeDefined();
-    } else {
-      // If it fails, should be due to download failure or other clear reason
-      expect(result.error).toBeDefined();
-    }
-  }, 600000); // 10 minute timeout for model download
+      // Either succeeds (model available/downloaded) or fails with clear error
+      if (result.success) {
+        expect(result.data?.description).toBeDefined();
+      } else {
+        // If it fails, should be due to download failure or other clear reason
+        expect(result.error).toBeDefined();
+      }
+    },
+    600000,
+  ); // 10 minute timeout for model download
 });
 
 // ============================================================================

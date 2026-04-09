@@ -1,14 +1,16 @@
 // @vitest-environment jsdom
 
 import type React from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  mockClient,
-  mockUseApp,
-  mockOpenExternalUrl,
-} = vi.hoisted(() => ({
+const { mockClient, mockUseApp, mockOpenExternalUrl } = vi.hoisted(() => ({
   mockClient: {
     submitAnthropicSetupToken: vi.fn(async () => ({ success: true })),
     startAnthropicLogin: vi.fn(async () => ({
@@ -89,18 +91,19 @@ function t(
     "subscriptionstatus.ExpectedCallbackUrl":
       "Expected a localhost:1455/auth/callback URL.",
     "subscriptionstatus.ExchangeFailedError": "Exchange failed: {{message}}",
-    "subscriptionstatus.FailedToStartLogin": "Failed to start login: {{message}}",
+    "subscriptionstatus.FailedToStartLogin":
+      "Failed to start login: {{message}}",
     "subscriptionstatus.FailedToGetAuthUrl": "Failed to get auth URL",
     "subscriptionstatus.NoAuthUrlReturned": "No auth URL returned",
-    "subscriptionstatus.DisconnectFailedError": "Disconnect failed: {{message}}",
+    "subscriptionstatus.DisconnectFailedError":
+      "Disconnect failed: {{message}}",
     "subscriptionstatus.ExchangeFailed": "Exchange failed",
     "subscriptionstatus.SaveToken": "Save token",
     "subscriptionstatus.SavingAmpRestart": "Saving and restarting…",
     "subscriptionstatus.skAntOat01": "sk-ant-oat01-...",
     "subscriptionstatus.FailedToSaveTokenError":
       "Failed to save token: {{message}}",
-    "subscriptionstatus.FailedToSaveSetupToken":
-      "Failed to save setup token",
+    "subscriptionstatus.FailedToSaveSetupToken": "Failed to save setup token",
     "apikeyconfig.saved": "Saved",
     "apikeyconfig.saving": "Saving",
     "subscriptionstatus.ClaudeTosWarningShort":
@@ -223,9 +226,7 @@ describe("SubscriptionStatus", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save token" }));
 
-    expect(
-      await screen.findByText("Failed to save setup token"),
-    ).toBeTruthy();
+    expect(await screen.findByText("Failed to save setup token")).toBeTruthy();
   });
 
   it("blocks invalid OpenAI callback URLs before calling exchange", async () => {
@@ -310,9 +311,12 @@ describe("SubscriptionStatus", () => {
     fireEvent.click(screen.getByRole("button", { name: "OAuth login" }));
     fireEvent.click(screen.getByRole("button", { name: "Log in with Claude" }));
     await screen.findByPlaceholderText("Paste the authorization code");
-    fireEvent.change(screen.getByPlaceholderText("Paste the authorization code"), {
-      target: { value: "anthro-code-123" },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Paste the authorization code"),
+      {
+        target: { value: "anthro-code-123" },
+      },
+    );
     fireEvent.click(screen.getByRole("button", { name: "Connect" }));
 
     expect(await screen.findByText("Claude code rejected")).toBeTruthy();
@@ -347,9 +351,12 @@ describe("SubscriptionStatus", () => {
     fireEvent.click(screen.getByRole("button", { name: "OAuth login" }));
     fireEvent.click(screen.getByRole("button", { name: "Log in with Claude" }));
     await screen.findByPlaceholderText("Paste the authorization code");
-    fireEvent.change(screen.getByPlaceholderText("Paste the authorization code"), {
-      target: { value: "anthro-success-code" },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Paste the authorization code"),
+      {
+        target: { value: "anthro-success-code" },
+      },
+    );
     fireEvent.click(screen.getByRole("button", { name: "Connect" }));
 
     await waitFor(() => {
@@ -377,9 +384,12 @@ describe("SubscriptionStatus", () => {
     fireEvent.click(screen.getByRole("button", { name: "OAuth login" }));
     fireEvent.click(screen.getByRole("button", { name: "Log in with Claude" }));
     await screen.findByPlaceholderText("Paste the authorization code");
-    fireEvent.change(screen.getByPlaceholderText("Paste the authorization code"), {
-      target: { value: "anthro-code-123" },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Paste the authorization code"),
+      {
+        target: { value: "anthro-code-123" },
+      },
+    );
     fireEvent.click(screen.getByRole("button", { name: "Connect" }));
 
     expect(
@@ -388,7 +398,9 @@ describe("SubscriptionStatus", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
 
-    expect(screen.getByRole("button", { name: "Log in with Claude" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Log in with Claude" }),
+    ).toBeTruthy();
     expect(screen.queryByText("Exchange failed: bad claude code")).toBeNull();
   });
 
@@ -436,7 +448,9 @@ describe("SubscriptionStatus", () => {
       );
     });
     expect(setOpenaiConnected).toHaveBeenCalledWith(true);
-    expect(handleSelectSubscription).toHaveBeenCalledWith("openai-subscription");
+    expect(handleSelectSubscription).toHaveBeenCalledWith(
+      "openai-subscription",
+    );
     expect(loadSubscriptionStatus).toHaveBeenCalledTimes(1);
     expect(mockClient.restartAgent).toHaveBeenCalledTimes(1);
   });
@@ -493,8 +507,12 @@ describe("SubscriptionStatus", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
 
-    expect(screen.getByRole("button", { name: "Log in with OpenAI" })).toBeTruthy();
-    expect(screen.queryByText("Exchange failed: bad openai callback")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Log in with OpenAI" }),
+    ).toBeTruthy();
+    expect(
+      screen.queryByText("Exchange failed: bad openai callback"),
+    ).toBeNull();
   });
 
   it("surfaces missing OpenAI auth URLs before opening the browser flow", async () => {
@@ -602,6 +620,8 @@ describe("SubscriptionStatus", () => {
       ],
     });
 
-    expect(screen.getByText("subscriptionstatus.ChatGPTSubscription")).toBeTruthy();
+    expect(
+      screen.getByText("subscriptionstatus.ChatGPTSubscription"),
+    ).toBeTruthy();
   });
 });

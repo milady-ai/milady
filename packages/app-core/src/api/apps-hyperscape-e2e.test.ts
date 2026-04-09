@@ -205,26 +205,26 @@ function clonePluginInfo(plugin: RegistryPluginInfo): RegistryPluginInfo {
 function createMockPluginManager(
   plugins: RegistryPluginInfo[] = [HYPERSCAPE_LOCAL_PLUGIN],
 ): PluginManagerLike {
-  const pluginEntries = plugins.map((plugin) => [
-    plugin.name,
-    clonePluginInfo(plugin),
-  ] as const);
+  const pluginEntries = plugins.map(
+    (plugin) => [plugin.name, clonePluginInfo(plugin)] as const,
+  );
   const pluginMap = new Map(pluginEntries);
 
   return {
     refreshRegistry: vi.fn(
       async () =>
         new Map(
-          pluginEntries.map(([name, plugin]) => [name, clonePluginInfo(plugin)]),
+          pluginEntries.map(([name, plugin]) => [
+            name,
+            clonePluginInfo(plugin),
+          ]),
         ),
     ),
     listInstalledPlugins: vi.fn(async () => []),
-    getRegistryPlugin: vi.fn(
-      async (name: string) => {
-        const plugin = pluginMap.get(name);
-        return plugin ? clonePluginInfo(plugin) : null;
-      },
-    ),
+    getRegistryPlugin: vi.fn(async (name: string) => {
+      const plugin = pluginMap.get(name);
+      return plugin ? clonePluginInfo(plugin) : null;
+    }),
     searchRegistry: vi.fn(async (query: string) => {
       const lowerQuery = query.toLowerCase();
       return plugins
@@ -331,9 +331,9 @@ describeIf(hasLocalHyperscapePlugin)("Hyperscape E2E Integration", () => {
       const results = await appManager.search(pluginManager, "rpg");
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results.some((r) => r.name === "@hyperscape/plugin-hyperscape")).toBe(
-        true,
-      );
+      expect(
+        results.some((r) => r.name === "@hyperscape/plugin-hyperscape"),
+      ).toBe(true);
     });
   });
 
@@ -477,7 +477,9 @@ describeIf(hasLocalHyperscapePlugin)("Hyperscape E2E Integration", () => {
     test("complete discovery to launch flow", async () => {
       // Step 1: List apps
       const apps = await appManager.listAvailable(pluginManager);
-      expect(apps.some((a) => a.name === "@hyperscape/plugin-hyperscape")).toBe(true);
+      expect(apps.some((a) => a.name === "@hyperscape/plugin-hyperscape")).toBe(
+        true,
+      );
 
       // Step 2: Get app info
       const info = await appManager.getInfo(

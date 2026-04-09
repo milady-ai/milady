@@ -132,9 +132,6 @@ export function formatApiDevSettingsBannerText(
 
   return prependDevSubsystemFigletHeading(
     "api",
-    formatDevSettingsTable(
-      "API — effective settings (after listen)",
-      rows,
-    ),
+    formatDevSettingsTable("API — effective settings (after listen)", rows),
   );
 }

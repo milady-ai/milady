@@ -362,23 +362,23 @@ export function PluginCard({
         )}
         <div className="flex-1" />
         {isStoreInstallMissing && !isShowcase && !p.loadError && (
-            <Button
-              variant="default"
-              size="sm"
-              className="h-7 px-3 text-[10px] font-bold tracking-wide shadow-sm max-w-[140px] truncate"
-              disabled={isInstalling || isUpdating || isUninstalling}
-              onClick={(e) => {
-                e.stopPropagation();
-                onInstall(p.id, p.npmName ?? "");
-              }}
-            >
-              {isInstalling
-                ? installProgressLabel(
-                    installProgress.get(p.npmName ?? "")?.message,
-                  )
-                : installLabel}
-            </Button>
-          )}
+          <Button
+            variant="default"
+            size="sm"
+            className="h-7 px-3 text-[10px] font-bold tracking-wide shadow-sm max-w-[140px] truncate"
+            disabled={isInstalling || isUpdating || isUninstalling}
+            onClick={(e) => {
+              e.stopPropagation();
+              onInstall(p.id, p.npmName ?? "");
+            }}
+          >
+            {isInstalling
+              ? installProgressLabel(
+                  installProgress.get(p.npmName ?? "")?.message,
+                )
+              : installLabel}
+          </Button>
+        )}
         {canUpdate && (
           <Button
             variant="outline"

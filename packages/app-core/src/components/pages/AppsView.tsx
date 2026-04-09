@@ -12,10 +12,7 @@ import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
 import { AppDetailPane } from "../apps/AppDetailPane";
 import { AppsCatalogGrid } from "../apps/AppsCatalogGrid";
-import {
-  filterAppsForCatalog,
-  shouldShowAppInAppsView,
-} from "../apps/helpers";
+import { filterAppsForCatalog, shouldShowAppInAppsView } from "../apps/helpers";
 import {
   getRunAttentionReasons,
   RunningAppsPanel,

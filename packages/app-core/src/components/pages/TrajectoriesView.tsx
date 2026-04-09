@@ -341,7 +341,9 @@ export function TrajectoriesView({
                 disabled={loading}
                 title={t("common.refresh")}
               >
-                <RefreshCw className={`h-3 w-3${loading ? " animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`h-3 w-3${loading ? " animate-spin" : ""}`}
+                />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

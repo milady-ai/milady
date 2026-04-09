@@ -5,9 +5,6 @@ export function TwoThousandFourScapeDetailExtension({
   app,
 }: AppDetailExtensionProps) {
   return (
-    <TwoThousandFourScapeOperatorSurface
-      appName={app.name}
-      variant="detail"
-    />
+    <TwoThousandFourScapeOperatorSurface appName={app.name} variant="detail" />
   );
 }

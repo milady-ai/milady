@@ -40,10 +40,7 @@ export function AppDetailPane({
   const backLabel = t("appsview.Back", { defaultValue: "Back" });
   const sessionModeLabel = getAppSessionModeLabel(app);
   const sessionFeatures = getAppSessionFeatureLabels(app);
-  const allTags = [
-    ...sessionFeatures,
-    ...(app.capabilities ?? []),
-  ];
+  const allTags = [...sessionFeatures, ...(app.capabilities ?? [])];
   const launchLabel = busy
     ? t("appsview.Launching", { defaultValue: "Launching..." })
     : t("appsview.Launch", { defaultValue: "Launch" });
@@ -68,9 +65,7 @@ export function AppDetailPane({
               {app.displayName ?? app.name}
             </h2>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-strong">
-              {isActive ? (
-                <span className="text-ok">Active</span>
-              ) : null}
+              {isActive ? <span className="text-ok">Active</span> : null}
               {app.category ? (
                 <span>{CATEGORY_LABELS[app.category] ?? app.category}</span>
               ) : null}

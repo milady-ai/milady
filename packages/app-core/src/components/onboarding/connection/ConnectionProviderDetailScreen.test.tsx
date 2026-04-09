@@ -83,9 +83,13 @@ vi.mock("@miladyai/ui", async (importOriginal) => {
         {children}
       </select>
     ),
-    SelectTrigger: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    SelectTrigger: ({ children }: { children?: React.ReactNode }) => (
+      <>{children}</>
+    ),
     SelectValue: () => null,
-    SelectContent: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    SelectContent: ({ children }: { children?: React.ReactNode }) => (
+      <>{children}</>
+    ),
     SelectItem: ({
       value,
       children,
@@ -97,9 +101,10 @@ vi.mock("@miladyai/ui", async (importOriginal) => {
 });
 
 vi.mock("../../../providers", async () => {
-  const actual = await vi.importActual<typeof import("../../../providers")>(
-    "../../../providers",
-  );
+  const actual =
+    await vi.importActual<typeof import("../../../providers")>(
+      "../../../providers",
+    );
   return {
     ...actual,
     getProviderLogo: (...args: unknown[]) => mockGetProviderLogo(...args),
@@ -169,8 +174,7 @@ function t(
       "Powers task agents only (Claude Code CLI). For the main agent runtime, connect Eliza Cloud or a direct API key.",
   };
 
-  const template =
-    translations[key] ?? String(params?.defaultValue ?? key);
+  const template = translations[key] ?? String(params?.defaultValue ?? key);
   if (!params) {
     return template;
   }
@@ -340,7 +344,10 @@ describe("ConnectionProviderDetailScreen", () => {
       target: { value: "ec-test-key" },
     });
 
-    expect(setState).toHaveBeenCalledWith("onboardingCloudApiKey", "ec-test-key");
+    expect(setState).toHaveBeenCalledWith(
+      "onboardingCloudApiKey",
+      "ec-test-key",
+    );
   });
 
   it("switches Eliza Cloud tabs and starts the login flow from the login tab", () => {
@@ -438,7 +445,10 @@ describe("ConnectionProviderDetailScreen", () => {
 
     fireEvent.click(screen.getByRole("radio", { name: /Claude Sonnet/i }));
 
-    expect(setState).toHaveBeenCalledWith("onboardingOpenRouterModel", "sonnet");
+    expect(setState).toHaveBeenCalledWith(
+      "onboardingOpenRouterModel",
+      "sonnet",
+    );
   });
 
   it("trims Claude tokens and lets the user continue with limited setup after saving", async () => {
@@ -475,7 +485,9 @@ describe("ConnectionProviderDetailScreen", () => {
       "sk-ant-oat01-test-token",
     );
     expect(
-      await screen.findByRole("button", { name: "Continue with limited setup" }),
+      await screen.findByRole("button", {
+        name: "Continue with limited setup",
+      }),
     ).toBeTruthy();
     expect(
       screen.getByRole("button", { name: "Add another provider" }),
@@ -520,7 +532,9 @@ describe("ConnectionProviderDetailScreen", () => {
     );
 
     await screen.findByRole("button", { name: "Add another provider" });
-    fireEvent.click(screen.getByRole("button", { name: "Add another provider" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Add another provider" }),
+    );
 
     expect(dispatch).toHaveBeenCalledWith({ type: "clearProvider" });
   });
@@ -837,7 +851,9 @@ describe("ConnectionProviderDetailScreen", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
 
-    expect(screen.getByRole("button", { name: "Log in with OpenAI" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Log in with OpenAI" }),
+    ).toBeTruthy();
     expect(screen.queryByLabelText("Redirect URL")).toBeNull();
   });
 
@@ -976,7 +992,10 @@ describe("ConnectionProviderDetailScreen", () => {
       target: { value: "pi/creative" },
     });
 
-    expect(setState).toHaveBeenCalledWith("onboardingPrimaryModel", "pi/creative");
+    expect(setState).toHaveBeenCalledWith(
+      "onboardingPrimaryModel",
+      "pi/creative",
+    );
   });
 
   it("clears the pi.ai override when the user switches to a custom model", () => {

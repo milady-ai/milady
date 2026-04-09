@@ -2518,50 +2518,47 @@ describe("mergeDropInPlugins", () => {
 // resolveElizaPluginImportSpecifier depending on the resolved source)
 // ---------------------------------------------------------------------------
 
-describeIf(resolvePluginImportSpecifier)(
-  "resolvePluginImportSpecifier",
-  () => {
-    it("prefers a bundled local plugin wrapper when one exists", async () => {
-      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-plugin-"));
-      const runtimeDir = path.join(tmpDir, "runtime");
-      const pluginIndex = path.join(tmpDir, "plugins", "twitch", "index.js");
+describeIf(resolvePluginImportSpecifier)("resolvePluginImportSpecifier", () => {
+  it("prefers a bundled local plugin wrapper when one exists", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-plugin-"));
+    const runtimeDir = path.join(tmpDir, "runtime");
+    const pluginIndex = path.join(tmpDir, "plugins", "twitch", "index.js");
 
-      await fs.mkdir(runtimeDir, { recursive: true });
-      await fs.mkdir(path.dirname(pluginIndex), { recursive: true });
-      await fs.writeFile(pluginIndex, "export default {};\n");
+    await fs.mkdir(runtimeDir, { recursive: true });
+    await fs.mkdir(path.dirname(pluginIndex), { recursive: true });
+    await fs.writeFile(pluginIndex, "export default {};\n");
 
-      const specifier = resolvePluginImportSpecifier?.(
-        "@elizaos/plugin-twitch",
-        pathToFileURL(path.join(runtimeDir, "eliza.ts")).href,
-      );
+    const specifier = resolvePluginImportSpecifier?.(
+      "@elizaos/plugin-twitch",
+      pathToFileURL(path.join(runtimeDir, "eliza.ts")).href,
+    );
 
-      expect(specifier).toBe(pathToFileURL(pluginIndex).href);
+    expect(specifier).toBe(pathToFileURL(pluginIndex).href);
 
-      await fs.rm(tmpDir, { recursive: true, force: true });
-    });
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
 
-    it("falls back to the bundled package when no local wrapper exists", async () => {
-      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-plugin-"));
-      const runtimeDir = path.join(tmpDir, "runtime");
-      await fs.mkdir(runtimeDir, { recursive: true });
+  it("falls back to the bundled package when no local wrapper exists", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "eliza-plugin-"));
+    const runtimeDir = path.join(tmpDir, "runtime");
+    await fs.mkdir(runtimeDir, { recursive: true });
 
-      const specifier = resolvePluginImportSpecifier?.(
-        "@elizaos/plugin-x-streaming",
-        pathToFileURL(path.join(runtimeDir, "eliza.ts")).href,
-      );
+    const specifier = resolvePluginImportSpecifier?.(
+      "@elizaos/plugin-x-streaming",
+      pathToFileURL(path.join(runtimeDir, "eliza.ts")).href,
+    );
 
-      expect(specifier).toBe("@elizaos/plugin-x-streaming");
+    expect(specifier).toBe("@elizaos/plugin-x-streaming");
 
-      await fs.rm(tmpDir, { recursive: true, force: true });
-    });
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
 
-    it("leaves non-project plugins unchanged", () => {
-      expect(resolvePluginImportSpecifier?.("@elizaos/plugin-discord")).toBe(
-        "@elizaos/plugin-discord",
-      );
-    });
-  },
-);
+  it("leaves non-project plugins unchanged", () => {
+    expect(resolvePluginImportSpecifier?.("@elizaos/plugin-discord")).toBe(
+      "@elizaos/plugin-discord",
+    );
+  });
+});
 
 describe("shouldIgnoreMissingPluginExport", () => {
   it("ignores helper-only streaming-base package exports", () => {

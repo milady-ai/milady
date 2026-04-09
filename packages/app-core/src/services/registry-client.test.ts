@@ -17,7 +17,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // ---------------------------------------------------------------------------
 
 async function loadModule() {
-  return await import("@miladyai/agent/services/registry-client");
+  return await import("../../../agent/src/services/registry-client.ts");
 }
 
 // ---------------------------------------------------------------------------
@@ -376,8 +376,8 @@ describe("registry-client", () => {
       });
       vi.stubGlobal("fetch", mockFetch);
 
-      const { getRegistryPlugins } = await loadModule();
-      const registry = await getRegistryPlugins();
+      const { refreshRegistry } = await loadModule();
+      const registry = await refreshRegistry();
 
       expect(registry.size).toBe(2);
       // index.json has no descriptions — should be empty
@@ -397,8 +397,8 @@ describe("registry-client", () => {
       });
       vi.stubGlobal("fetch", mockFetch);
 
-      const { getRegistryPlugins } = await loadModule();
-      await expect(getRegistryPlugins()).rejects.toThrow("index.json");
+      const { refreshRegistry } = await loadModule();
+      await expect(refreshRegistry()).rejects.toThrow("index.json");
     });
 
     it("uses memory cache on second call", async () => {
@@ -408,7 +408,8 @@ describe("registry-client", () => {
       });
       vi.stubGlobal("fetch", mockFetch);
 
-      const { getRegistryPlugins } = await loadModule();
+      const { getRegistryPlugins, refreshRegistry } = await loadModule();
+      await refreshRegistry();
       const first = await getRegistryPlugins();
       const second = await getRegistryPlugins();
 
@@ -425,7 +426,7 @@ describe("registry-client", () => {
 
       // First: fetch from network, which writes file cache
       const mod1 = await loadModule();
-      await mod1.getRegistryPlugins();
+      await mod1.refreshRegistry();
       expect(mockFetch).toHaveBeenCalledTimes(1);
 
       // Wait for the fire-and-forget file cache write to complete
@@ -457,8 +458,8 @@ describe("registry-client", () => {
       });
       vi.stubGlobal("fetch", mockFetch);
 
-      const { getRegistryPlugins, refreshRegistry } = await loadModule();
-      await getRegistryPlugins();
+      const { refreshRegistry } = await loadModule();
+      await refreshRegistry();
       expect(mockFetch).toHaveBeenCalledTimes(1);
 
       // Let the fire-and-forget file cache write from getRegistryPlugins settle
@@ -719,7 +720,8 @@ describe("registry-client", () => {
         }),
       );
       vi.resetModules();
-      const { listApps } = await loadModule();
+      const { listApps, refreshRegistry } = await loadModule();
+      await refreshRegistry();
       const apps = await listApps();
       expect(apps[0]?.viewer?.sandbox).toBe(
         "allow-scripts allow-same-origin allow-popups",
@@ -743,7 +745,8 @@ describe("registry-client", () => {
         }),
       );
       vi.resetModules();
-      const { listApps } = await loadModule();
+      const { listApps, refreshRegistry } = await loadModule();
+      await refreshRegistry();
       const apps = await listApps();
       expect(apps).toEqual([]);
     });
@@ -758,6 +761,8 @@ describe("registry-client", () => {
           json: () => Promise.resolve(fakeGeneratedRegistry()),
         }),
       );
+      const { refreshRegistry } = await loadModule();
+      await refreshRegistry();
     });
 
     it("returns app info for an existing app", async () => {
@@ -803,6 +808,8 @@ describe("registry-client", () => {
           json: () => Promise.resolve(fakeGeneratedRegistry()),
         }),
       );
+      const { refreshRegistry } = await loadModule();
+      await refreshRegistry();
     });
 
     it("matches on app display name", async () => {
@@ -876,7 +883,8 @@ describe("registry-client", () => {
           json: () => Promise.resolve(fakeGeneratedRegistry()),
         }),
       );
-      const { getRegistryPlugins } = await loadModule();
+      const { getRegistryPlugins, refreshRegistry } = await loadModule();
+      await refreshRegistry();
       const registry = await getRegistryPlugins();
 
       const defense = registry.get("@elizaos/app-defense-of-the-agents");
@@ -898,7 +906,8 @@ describe("registry-client", () => {
           json: () => Promise.resolve(fakeGeneratedRegistry()),
         }),
       );
-      const { getRegistryPlugins } = await loadModule();
+      const { getRegistryPlugins, refreshRegistry } = await loadModule();
+      await refreshRegistry();
       const registry = await getRegistryPlugins();
 
       const solana = registry.get("@elizaos/plugin-solana");
@@ -915,7 +924,8 @@ describe("registry-client", () => {
           json: () => Promise.resolve(fakeGeneratedRegistry()),
         }),
       );
-      const { listApps } = await loadModule();
+      const { listApps, refreshRegistry } = await loadModule();
+      await refreshRegistry();
       const apps = await listApps();
 
       const defense = apps.find(
@@ -957,9 +967,9 @@ describe("registry-client", () => {
 
       const { listApps, getPluginInfo } = await loadModule();
       const apps = await listApps();
-      expect(apps.some((app) => app.name === "@hyperscape/plugin-hyperscape")).toBe(
-        true,
-      );
+      expect(
+        apps.some((app) => app.name === "@hyperscape/plugin-hyperscape"),
+      ).toBe(true);
 
       const hyperscape = apps.find(
         (app) => app.name === "@hyperscape/plugin-hyperscape",

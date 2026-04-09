@@ -4,13 +4,12 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockUseApp, mockGetRelationshipsGraph, mockGetRelationshipsPerson } = vi.hoisted(
-  () => ({
+const { mockUseApp, mockGetRelationshipsGraph, mockGetRelationshipsPerson } =
+  vi.hoisted(() => ({
     mockUseApp: vi.fn(),
     mockGetRelationshipsGraph: vi.fn(),
     mockGetRelationshipsPerson: vi.fn(),
-  }),
-);
+  }));
 
 vi.mock("../../state", () => ({
   useApp: () => mockUseApp(),
@@ -18,8 +17,10 @@ vi.mock("../../state", () => ({
 
 vi.mock("@miladyai/app-core/api", () => ({
   client: {
-    getRelationshipsGraph: (...args: unknown[]) => mockGetRelationshipsGraph(...args),
-    getRelationshipsPerson: (...args: unknown[]) => mockGetRelationshipsPerson(...args),
+    getRelationshipsGraph: (...args: unknown[]) =>
+      mockGetRelationshipsGraph(...args),
+    getRelationshipsPerson: (...args: unknown[]) =>
+      mockGetRelationshipsPerson(...args),
   },
 }));
 

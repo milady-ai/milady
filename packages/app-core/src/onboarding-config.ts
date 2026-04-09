@@ -119,30 +119,33 @@ export function buildOnboardingRuntimeConfig(
     !args.omitRuntimeProvider &&
     !requiresAdditionalRuntimeProvider(args.onboardingProvider);
 
-  if (args.onboardingProvider === "elizacloud" && shouldConfigureRuntimeProvider) {
+  if (
+    args.onboardingProvider === "elizacloud" &&
+    shouldConfigureRuntimeProvider
+  ) {
     llmTextRoute = buildElizaCloudServiceRoute({
       smallModel,
       largeModel,
     });
   } else if (shouldConfigureRuntimeProvider && localProviderId) {
-      const primaryModel = resolveOnboardingPrimaryModel({
-        providerId: localProviderId,
-        onboardingPrimaryModel: args.onboardingPrimaryModel,
-        onboardingOpenRouterModel: args.onboardingOpenRouterModel,
-      });
-      llmTextRoute =
-        serverTarget === "remote"
-          ? {
-              backend: localProviderId,
-              transport: "remote",
-              remoteApiBase: args.onboardingRemoteApiBase.trim(),
-              ...(primaryModel ? { primaryModel } : {}),
-            }
-          : {
-              backend: localProviderId,
-              transport: "direct",
-              ...(primaryModel ? { primaryModel } : {}),
-            };
+    const primaryModel = resolveOnboardingPrimaryModel({
+      providerId: localProviderId,
+      onboardingPrimaryModel: args.onboardingPrimaryModel,
+      onboardingOpenRouterModel: args.onboardingOpenRouterModel,
+    });
+    llmTextRoute =
+      serverTarget === "remote"
+        ? {
+            backend: localProviderId,
+            transport: "remote",
+            remoteApiBase: args.onboardingRemoteApiBase.trim(),
+            ...(primaryModel ? { primaryModel } : {}),
+          }
+        : {
+            backend: localProviderId,
+            transport: "direct",
+            ...(primaryModel ? { primaryModel } : {}),
+          };
   }
 
   if (llmTextRoute) {

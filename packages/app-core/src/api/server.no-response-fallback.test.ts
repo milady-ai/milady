@@ -341,9 +341,14 @@ describe("conversation no-response fallback", () => {
           }),
       );
 
-      const created = await req(isolatedServer.port, "POST", "/api/conversations", {
-        title: "Timed out fallback thread",
-      });
+      const created = await req(
+        isolatedServer.port,
+        "POST",
+        "/api/conversations",
+        {
+          title: "Timed out fallback thread",
+        },
+      );
       expect(created.status).toBe(200);
       const conversationId = String(
         (created.data.conversation as { id?: string } | undefined)?.id ?? "",

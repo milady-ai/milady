@@ -349,7 +349,9 @@ declare module "./client-base" {
       fromSeq?: number;
     }): Promise<AgentEventsResponse>;
     getExtensionStatus(): Promise<ExtensionStatus>;
-    getRelationshipsGraph(query?: RelationshipsGraphQuery): Promise<RelationshipsGraphSnapshot>;
+    getRelationshipsGraph(
+      query?: RelationshipsGraphQuery,
+    ): Promise<RelationshipsGraphSnapshot>;
     getRelationshipsPeople(query?: RelationshipsGraphQuery): Promise<{
       people: RelationshipsPersonSummary[];
       stats: RelationshipsGraphStats;

@@ -169,7 +169,10 @@ describe("managed Discord OAuth init", () => {
         new Response(
           JSON.stringify({
             success: true,
-            data: { authorizeUrl: "https://discord.com/oauth", applicationId: "app-1" },
+            data: {
+              authorizeUrl: "https://discord.com/oauth",
+              applicationId: "app-1",
+            },
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
         ),
@@ -191,7 +194,10 @@ describe("managed Discord OAuth init", () => {
       botNickname: "Chen",
     });
 
-    const [, init] = fetchMock.mock.calls[0] as [RequestInfo | URL, RequestInit];
+    const [, init] = fetchMock.mock.calls[0] as [
+      RequestInfo | URL,
+      RequestInit,
+    ];
     expect(init?.method).toBe("POST");
 
     const body = JSON.parse(init?.body as string);
@@ -207,7 +213,10 @@ describe("managed Discord OAuth init", () => {
 
     await client.createCloudCompatAgentManagedDiscordOauth("agent-1");
 
-    const [, init] = fetchMock.mock.calls[0] as [RequestInfo | URL, RequestInit];
+    const [, init] = fetchMock.mock.calls[0] as [
+      RequestInfo | URL,
+      RequestInit,
+    ];
     const body = JSON.parse(init?.body as string);
     expect(body).toEqual({});
   });

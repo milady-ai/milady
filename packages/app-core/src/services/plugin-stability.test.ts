@@ -12,11 +12,7 @@
  * Issue: #3 — Plugin & Provider Stability
  */
 
-import type {
-  Plugin,
-  Provider,
-  ProviderResult,
-} from "@elizaos/core";
+import type { Plugin, Provider, ProviderResult } from "@elizaos/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { validateRuntimeContext } from "../api/plugin-validation";
 import { CONNECTOR_PLUGINS } from "../config/plugin-auto-enable";

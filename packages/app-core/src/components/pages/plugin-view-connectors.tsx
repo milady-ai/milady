@@ -155,17 +155,13 @@ function ConnectorPluginCard({
   testResults,
   togglingPlugins,
 }: ConnectorPluginCardProps) {
-  const {
-    elizaCloudConnected,
-    setActionNotice,
-    setState,
-    setTab,
-  } = useApp();
+  const { elizaCloudConnected, setActionNotice, setState, setTab } = useApp();
   const [managedDiscordBusy, setManagedDiscordBusy] = useState(false);
   const [managedDiscordAgents, setManagedDiscordAgents] = useState<
     CloudCompatAgent[]
   >([]);
-  const [managedDiscordPickerOpen, setManagedDiscordPickerOpen] = useState(false);
+  const [managedDiscordPickerOpen, setManagedDiscordPickerOpen] =
+    useState(false);
   const [managedDiscordSelectedAgentId, setManagedDiscordSelectedAgentId] =
     useState<string | null>(null);
   const hasParams =
@@ -212,24 +208,21 @@ function ConnectorPluginCard({
     setTab("settings");
   };
   const startManagedDiscordOauth = async (agent: CloudCompatAgent) => {
-    const oauthResponse = await client.createCloudCompatAgentManagedDiscordOauth(
-      agent.agent_id,
-      {
+    const oauthResponse =
+      await client.createCloudCompatAgentManagedDiscordOauth(agent.agent_id, {
         returnUrl:
           typeof window !== "undefined"
-            ? buildManagedDiscordSettingsReturnUrl(window.location.href) ??
-              undefined
+            ? (buildManagedDiscordSettingsReturnUrl(window.location.href) ??
+              undefined)
             : undefined,
         botNickname: agent.agent_name?.trim() || undefined,
-      },
-    );
+      });
 
     await handleOpenPluginExternalUrl(oauthResponse.data.authorizeUrl);
     setManagedDiscordPickerOpen(false);
     setActionNotice(
       t("elizaclouddashboard.DiscordSetupContinuesInBrowser", {
-        defaultValue:
-          "Finish Discord setup in your browser, then return here.",
+        defaultValue: "Finish Discord setup in your browser, then return here.",
       }),
       "info",
       5000,
@@ -487,12 +480,12 @@ function ConnectorPluginCard({
                 {managedDiscordBusy
                   ? "..."
                   : elizaCloudConnected
-                  ? t("pluginsview.UseManagedDiscord", {
-                      defaultValue: "Use managed Discord",
-                    })
-                  : t("pluginsview.OpenElizaCloud", {
-                      defaultValue: "Open Eliza Cloud",
-                    })}
+                    ? t("pluginsview.UseManagedDiscord", {
+                        defaultValue: "Use managed Discord",
+                      })
+                    : t("pluginsview.OpenElizaCloud", {
+                        defaultValue: "Open Eliza Cloud",
+                      })}
               </Button>
             }
           >
@@ -572,30 +565,30 @@ function ConnectorPluginCard({
         )}
 
         {isStoreInstallMissing && !plugin.loadError && (
-            <PagePanel.Notice
-              tone="warning"
-              className="mb-4"
-              actions={
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="h-8 rounded-xl px-4 text-[11px] font-bold"
-                  disabled={installingPlugins.has(plugin.id)}
-                  onClick={() =>
-                    void handleInstallPlugin(plugin.id, plugin.npmName ?? "")
-                  }
-                >
-                  {installingPlugins.has(plugin.id)
-                    ? installProgressLabel(
-                        installProgress.get(plugin.npmName ?? "")?.message,
-                      )
-                    : installPluginLabel}
-                </Button>
-              }
-            >
-              {connectorInstallPrompt}
-            </PagePanel.Notice>
-          )}
+          <PagePanel.Notice
+            tone="warning"
+            className="mb-4"
+            actions={
+              <Button
+                variant="default"
+                size="sm"
+                className="h-8 rounded-xl px-4 text-[11px] font-bold"
+                disabled={installingPlugins.has(plugin.id)}
+                onClick={() =>
+                  void handleInstallPlugin(plugin.id, plugin.npmName ?? "")
+                }
+              >
+                {installingPlugins.has(plugin.id)
+                  ? installProgressLabel(
+                      installProgress.get(plugin.npmName ?? "")?.message,
+                    )
+                  : installPluginLabel}
+              </Button>
+            }
+          >
+            {connectorInstallPrompt}
+          </PagePanel.Notice>
+        )}
 
         {hasParams ? (
           <div className="space-y-4">

@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 
-const { mockInvokeDesktopBridgeRequest, mockCapacitorAgentStart } = vi.hoisted(() => ({
-  mockInvokeDesktopBridgeRequest: vi.fn(async () => undefined),
-  mockCapacitorAgentStart: vi.fn(async () => undefined),
-}));
+const { mockInvokeDesktopBridgeRequest, mockCapacitorAgentStart } = vi.hoisted(
+  () => ({
+    mockInvokeDesktopBridgeRequest: vi.fn(async () => undefined),
+    mockCapacitorAgentStart: vi.fn(async () => undefined),
+  }),
+);
 
 vi.mock("../bridge", () => ({
   invokeDesktopBridgeRequest: (...args: unknown[]) =>
@@ -988,7 +990,10 @@ describe("useOnboardingCallbacks", () => {
     });
 
     act(() => {
-      result.current.onboarding.setField("remoteApiBase", "ftp://ren.example.com");
+      result.current.onboarding.setField(
+        "remoteApiBase",
+        "ftp://ren.example.com",
+      );
     });
 
     await act(async () => {
@@ -1319,14 +1324,8 @@ describe("useOnboardingCallbacks", () => {
       });
       result.current.onboarding.setField("name", "Chen");
       result.current.onboarding.setField("serverTarget", "local");
-      result.current.onboarding.setField(
-        "provider",
-        "anthropic-subscription",
-      );
-      result.current.onboarding.setField(
-        "apiKey",
-        "sk-ant-oat01-test-token",
-      );
+      result.current.onboarding.setField("provider", "anthropic-subscription");
+      result.current.onboarding.setField("apiKey", "sk-ant-oat01-test-token");
     });
 
     await act(async () => {
@@ -1528,7 +1527,9 @@ describe("useOnboardingCallbacks", () => {
 
   it("warns and still completes onboarding when voice preset persistence fails", async () => {
     const submitOnboarding = vi.fn().mockResolvedValue(undefined);
-    const updateConfig = vi.fn().mockRejectedValue(new Error("tts save failed"));
+    const updateConfig = vi
+      .fn()
+      .mockRejectedValue(new Error("tts save failed"));
     const setOnboardingComplete = vi.fn();
     const setTab = vi.fn();
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});

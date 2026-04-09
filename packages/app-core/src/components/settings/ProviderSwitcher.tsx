@@ -190,8 +190,8 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
           (cfg.agents as { defaults?: { subscriptionProvider?: string } })
             .defaults?.subscriptionProvider ?? "",
         )
-          ? (cfg.agents as { defaults?: { subscriptionProvider?: string } })
-              .defaults?.subscriptionProvider ?? null
+          ? ((cfg.agents as { defaults?: { subscriptionProvider?: string } })
+              .defaults?.subscriptionProvider ?? null)
           : null;
       const nextSelectedId =
         llmText?.transport === "cloud-proxy" && providerId === "elizacloud"
@@ -414,7 +414,12 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         notifySelectionFailure("Failed to switch AI provider", err);
       }
     },
-    [allAiProviders, notifySelectionFailure, resolvedSelectedId, restoreSelection],
+    [
+      allAiProviders,
+      notifySelectionFailure,
+      resolvedSelectedId,
+      restoreSelection,
+    ],
   );
 
   const handleSelectSubscription = useCallback(
@@ -486,10 +491,9 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
   const hasKnownPiAiModel = (piAiModelOptions ?? []).some(
     (model) => model.id === normalizedPiAiModelSpec,
   );
-  const piAiModelSelectValue =
-    piAiCustomMode
-      ? "__custom__"
-      : normalizedPiAiModelSpec.length === 0
+  const piAiModelSelectValue = piAiCustomMode
+    ? "__custom__"
+    : normalizedPiAiModelSpec.length === 0
       ? "__default__"
       : hasKnownPiAiModel
         ? normalizedPiAiModelSpec

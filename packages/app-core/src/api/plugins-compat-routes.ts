@@ -629,7 +629,9 @@ export function buildPluginListResponse(runtime: AgentRuntime | null): {
   const configRecord = config as Record<string, unknown>;
   const loadedNames = resolveLoadedPluginNames(runtime);
   const manifestPath = resolvePluginManifestPath();
-  const manifestRoot = manifestPath ? path.dirname(manifestPath) : process.cwd();
+  const manifestRoot = manifestPath
+    ? path.dirname(manifestPath)
+    : process.cwd();
   const manifest = manifestPath
     ? (JSON.parse(fs.readFileSync(manifestPath, "utf8")) as PluginManifestFile)
     : null;
@@ -1044,7 +1046,8 @@ export async function handlePluginsCompatRoutes(
       }
 
       const refreshed = (
-        buildPluginListResponse(state.current).plugins as unknown as CompatPluginRecord[]
+        buildPluginListResponse(state.current)
+          .plugins as unknown as CompatPluginRecord[]
       ).find((candidate) => candidate.id === pluginId);
 
       result.payload.plugin = refreshed ?? result.payload.plugin ?? plugin;

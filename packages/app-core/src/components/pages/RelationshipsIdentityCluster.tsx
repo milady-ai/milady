@@ -9,7 +9,10 @@ function shortLabel(value: string, maxLength = 14): string {
   return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
 }
 
-function identityLabel(person: RelationshipsPersonDetail, index: number): string {
+function identityLabel(
+  person: RelationshipsPersonDetail,
+  index: number,
+): string {
   const identity = person.identities[index];
   if (!identity) {
     return `${index + 1}`;

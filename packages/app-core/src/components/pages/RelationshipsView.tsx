@@ -37,7 +37,9 @@ function toTimestamp(value?: string): number {
   return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
-function sortPeople(people: RelationshipsPersonSummary[]): RelationshipsPersonSummary[] {
+function sortPeople(
+  people: RelationshipsPersonSummary[],
+): RelationshipsPersonSummary[] {
   return [...people].sort((left, right) => {
     const timeDiff =
       toTimestamp(right.lastInteractionAt) -
@@ -56,7 +58,9 @@ function summarizeHandles(person: RelationshipsPersonSummary): string {
   return handles.slice(0, 3).join(", ");
 }
 
-function platformOptions(snapshot: RelationshipsGraphSnapshot | null): string[] {
+function platformOptions(
+  snapshot: RelationshipsGraphSnapshot | null,
+): string[] {
   if (!snapshot) return [];
   return [...new Set(snapshot.people.flatMap((person) => person.platforms))]
     .filter((platform) => platform.trim().length > 0)

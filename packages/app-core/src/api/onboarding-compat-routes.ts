@@ -175,7 +175,6 @@ export async function handleOnboardingCompatRoute(
         `[milady-api] Failed to persist onboarding state: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
-
   } catch {
     // JSON parse failed — let upstream handle the error
   }

@@ -666,7 +666,9 @@ describe("training routes", () => {
       pathname: "/api/training/trajectories/export",
       body: {
         splitByTask: true,
-        outputDir: await mkdtemp(join(tmpdir(), "training-route-trajectories-")),
+        outputDir: await mkdtemp(
+          join(tmpdir(), "training-route-trajectories-"),
+        ),
       },
     });
 
@@ -738,7 +740,12 @@ describe("training routes", () => {
     const exportedLines = (await readFile(outputPath, "utf-8"))
       .trim()
       .split("\n")
-      .map((line) => JSON.parse(line) as { messages: Array<{ role: string; content: string }> });
+      .map(
+        (line) =>
+          JSON.parse(line) as {
+            messages: Array<{ role: string; content: string }>;
+          },
+      );
 
     expect(result.status).toBe(201);
     expect(result.payload).toMatchObject({

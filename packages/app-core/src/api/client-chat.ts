@@ -92,7 +92,11 @@ declare module "./client-base" {
       text: string,
       channelType?: ConversationChannelType,
       conversationMode?: ConversationMode,
-    ): Promise<{ text: string; agentName: string; noResponseReason?: "ignored" }>;
+    ): Promise<{
+      text: string;
+      agentName: string;
+      noResponseReason?: "ignored";
+    }>;
     sendChatStream(
       text: string,
       onToken: (token: string, accumulatedText?: string) => void,
