@@ -18,6 +18,18 @@ const OPENZEPPELIN_MARKERS = getSubmoduleReadinessMarkerPaths(
   "test/contracts/lib/openzeppelin-contracts",
   { rootDir: ROOT },
 );
+const ORCHESTRATOR_MARKERS = getSubmoduleReadinessMarkerPaths(
+  "plugins/plugin-agent-orchestrator",
+  { rootDir: ROOT },
+);
+const PLUGIN_PDF_TS_PACKAGE = resolve(
+  ROOT,
+  "plugins/plugin-pdf/typescript/package.json",
+);
+const PLUGIN_PI_AI_ROOT_PACKAGE = resolve(
+  ROOT,
+  "plugins/plugin-pi-ai/package.json",
+);
 
 function createExistsStub(extraPaths: string[] = []) {
   return (filePath: string) =>
@@ -181,6 +193,137 @@ describe("init-submodules script", () => {
     expect(result.failed).toBe(0);
     expect(exec).toHaveBeenCalledWith(
       'git submodule update --init --recursive "eliza"',
+      expect.objectContaining({
+        cwd: ROOT,
+        stdio: "inherit",
+      }),
+    );
+  });
+
+  it("treats plugin checkouts as incomplete until a workspace manifest exists", () => {
+    expect(
+      isSubmoduleCheckoutReady("plugins/plugin-pdf", {
+        rootDir: ROOT,
+        exists: createExistsStub(),
+      }),
+    ).toBe(false);
+
+    expect(
+      isSubmoduleCheckoutReady("plugins/plugin-pdf", {
+        rootDir: ROOT,
+        exists: createExistsStub([PLUGIN_PDF_TS_PACKAGE]),
+      }),
+    ).toBe(true);
+
+    expect(
+      isSubmoduleCheckoutReady("plugins/plugin-pi-ai", {
+        rootDir: ROOT,
+        exists: createExistsStub([PLUGIN_PI_AI_ROOT_PACKAGE]),
+      }),
+    ).toBe(true);
+  });
+
+  it("prefers explicit readiness markers over generic plugin manifests", () => {
+    expect(
+      isSubmoduleCheckoutReady("plugins/plugin-agent-orchestrator", {
+        rootDir: ROOT,
+        exists: createExistsStub([ORCHESTRATOR_MARKERS[0]]),
+      }),
+    ).toBe(true);
+
+    expect(
+      isSubmoduleCheckoutReady("plugins/plugin-agent-orchestrator", {
+        rootDir: ROOT,
+        exists: createExistsStub([PLUGIN_PI_AI_ROOT_PACKAGE]),
+      }),
+    ).toBe(false);
+  });
+
+  it("reinitializes plugin submodules when git reports them present but workspace manifests are missing", () => {
+    const existingPaths = new Set<string>([GIT_DIR, GITMODULES]);
+    const exists = (filePath: string) => existingPaths.has(filePath);
+    const exec = vi.fn((command: string) => {
+      if (
+        command ===
+        'git config --file .gitmodules --get-regexp "^submodule\\..*\\.path$"'
+      ) {
+        return "submodule.plugins/plugin-pdf.path plugins/plugin-pdf";
+      }
+      if (command === 'git submodule status -- "plugins/plugin-pdf"') {
+        return " dc44c9f plugins/plugin-pdf";
+      }
+      if (
+        command ===
+        'git submodule update --init --recursive "plugins/plugin-pdf"'
+      ) {
+        existingPaths.add(PLUGIN_PDF_TS_PACKAGE);
+        return "";
+      }
+      throw new Error(`Unexpected command: ${command}`);
+    });
+
+    const result = runInitSubmodules({
+      rootDir: ROOT,
+      exists,
+      exec,
+      log: () => {},
+      logError: () => {},
+      shouldSkipSubmodule: () => false,
+    });
+
+    expect(result.initialized).toBe(1);
+    expect(result.alreadyInitialized).toBe(0);
+    expect(result.failed).toBe(0);
+    expect(exec).toHaveBeenCalledWith(
+      'git submodule update --init --recursive "plugins/plugin-pdf"',
+      expect.objectContaining({
+        cwd: ROOT,
+        stdio: "inherit",
+      }),
+    );
+  });
+
+  it("repairs empty submodule worktrees after git submodule update completes", () => {
+    const existingPaths = new Set<string>([GIT_DIR, GITMODULES]);
+    const exists = (filePath: string) => existingPaths.has(filePath);
+    const exec = vi.fn((command: string) => {
+      if (
+        command ===
+        'git config --file .gitmodules --get-regexp "^submodule\\..*\\.path$"'
+      ) {
+        return "submodule.plugins/plugin-solana.path plugins/plugin-solana";
+      }
+      if (command === 'git submodule status -- "plugins/plugin-solana"') {
+        return " dc44c9f plugins/plugin-solana";
+      }
+      if (
+        command ===
+        'git submodule update --init --recursive "plugins/plugin-solana"'
+      ) {
+        return "";
+      }
+      if (
+        command === 'git -C "plugins/plugin-solana" read-tree --reset -u HEAD'
+      ) {
+        existingPaths.add(resolve(ROOT, "plugins/plugin-solana/package.json"));
+        return "";
+      }
+      throw new Error(`Unexpected command: ${command}`);
+    });
+
+    const result = runInitSubmodules({
+      rootDir: ROOT,
+      exists,
+      exec,
+      log: () => {},
+      logError: () => {},
+      shouldSkipSubmodule: () => false,
+    });
+
+    expect(result.initialized).toBe(1);
+    expect(result.failed).toBe(0);
+    expect(exec).toHaveBeenCalledWith(
+      'git -C "plugins/plugin-solana" read-tree --reset -u HEAD',
       expect.objectContaining({
         cwd: ROOT,
         stdio: "inherit",

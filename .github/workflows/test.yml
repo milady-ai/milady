@@ -172,13 +172,7 @@ jobs:
           # Published-only CI restores the required non-eliza submodules explicitly.
           submodules: false
 
-      - name: Initialize Windows-safe workspace submodules
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: bash
-        run: git submodule update --init --depth 1 plugins/plugin-agent-orchestrator
-
       - name: Initialize tracked workspace submodules
-        if: ${{ matrix.os != 'windows-latest' }}
         run: node scripts/init-submodules.mjs
 
       - name: Setup Node.js
@@ -244,13 +238,7 @@ jobs:
           # Published-only CI restores the required non-eliza submodules explicitly.
           submodules: false
 
-      - name: Initialize Windows-safe workspace submodules
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: bash
-        run: git submodule update --init --depth 1 plugins/plugin-agent-orchestrator
-
       - name: Initialize tracked workspace submodules
-        if: ${{ matrix.os != 'windows-latest' }}
         run: node scripts/init-submodules.mjs
 
       - name: Setup Node.js

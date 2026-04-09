@@ -26,9 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Initialize Windows-safe workspace submodules
-        shell: bash
-        run: git submodule update --init --depth 1 plugins/plugin-agent-orchestrator
+      - name: Initialize tracked workspace submodules
+        run: node scripts/init-submodules.mjs
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

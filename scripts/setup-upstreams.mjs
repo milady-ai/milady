@@ -9,6 +9,7 @@ import {
   realpathSync,
   rmSync,
   symlinkSync,
+  writeFileSync,
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -381,6 +382,47 @@ function createBinLink(linkPath, targetPath) {
   return createLink(linkPath, targetPath, "file");
 }
 
+export function ensureWindowsCmdShim(
+  binLinkPath,
+  targetPath,
+  {
+    platform = process.platform,
+    runtime = "bun",
+    writeFile = writeFileSync,
+  } = {},
+) {
+  if (platform !== "win32") {
+    return false;
+  }
+
+  const cmdShimPath = `${binLinkPath}.cmd`;
+  const escapedTarget = targetPath.replace(/"/g, '""');
+  // Plugin CLIs are Bun-oriented; keep the Windows launcher on the Bun runtime
+  // instead of assuming the entrypoint is Node-compatible.
+  const contents = `@ECHO off\r\n${runtime} "${escapedTarget}" %*\r\n`;
+  writeFile(cmdShimPath, contents, "utf8");
+  return true;
+}
+
+function normalizeTsupVersionSpec(versionSpec) {
+  if (typeof versionSpec !== "string" || versionSpec.length === 0) {
+    return "latest";
+  }
+
+  if (versionSpec === "latest") {
+    return versionSpec;
+  }
+
+  const normalized = versionSpec.startsWith("workspace:")
+    ? versionSpec.slice("workspace:".length)
+    : versionSpec;
+  if (/^(?:[~^])?\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(normalized)) {
+    return normalized.replace(/^[~^]/, "");
+  }
+
+  return "latest";
+}
+
 function getPackageBinEntries(packageJson) {
   if (!packageJson) {
     return [];
@@ -405,6 +447,45 @@ function getPackageBinEntries(packageJson) {
       typeof binPath === "string" &&
       binPath.length > 0,
   );
+}
+
+function getBuildCommandFallback(packageJson) {
+  const buildScript =
+    packageJson?.scripts && typeof packageJson.scripts.build === "string"
+      ? packageJson.scripts.build.trim()
+      : "";
+  if (buildScript === "tsup" || buildScript.startsWith("tsup ")) {
+    const preferredVersionSpec =
+      packageJson?.devDependencies &&
+      typeof packageJson.devDependencies.tsup === "string"
+        ? packageJson.devDependencies.tsup
+        : "latest";
+    const preferredVersion = normalizeTsupVersionSpec(preferredVersionSpec);
+    const tsupArgs = buildScript.split(/\s+/).slice(1).filter(Boolean);
+    return {
+      command: "bunx",
+      args: [`tsup@${preferredVersion}`, ...tsupArgs],
+      label: `bunx tsup@${preferredVersion} (${packageJson.name})`,
+      requiredBinPath: ["node_modules", ".bin", "tsup"],
+    };
+  }
+  return null;
+}
+
+function hasPluginBuildOutputs(
+  packageDir,
+  packageJson,
+  pathExists = existsSync,
+) {
+  if (!pathExists(path.join(packageDir, "dist"))) {
+    return false;
+  }
+
+  if (typeof packageJson?.types === "string" && packageJson.types.length > 0) {
+    return pathExists(path.join(packageDir, packageJson.types));
+  }
+
+  return true;
 }
 
 function ensurePackageBinLinks(
@@ -433,6 +514,7 @@ function ensurePackageBinLinks(
     if (createBinLink(binLinkPath, binTargetPath)) {
       linkedBins += 1;
     }
+    ensureWindowsCmdShim(binLinkPath, targetFile);
   }
 
   return linkedBins;
@@ -732,7 +814,31 @@ export async function ensurePluginBuildOutputs(
 
     const hasBuildScript =
       packageJson.scripts && typeof packageJson.scripts.build === "string";
-    if (!hasBuildScript || pathExists(path.join(packageDir, "dist"))) {
+    if (
+      !hasBuildScript ||
+      hasPluginBuildOutputs(packageDir, packageJson, pathExists)
+    ) {
+      continue;
+    }
+
+    const buildCommandFallback = getBuildCommandFallback(packageJson);
+    if (
+      buildCommandFallback &&
+      !pathExists(
+        path.join(packageDir, ...buildCommandFallback.requiredBinPath),
+      )
+    ) {
+      console.log(
+        `[setup-upstreams] Building ${packageJson.name} via ${buildCommandFallback.command} fallback`,
+      );
+      await runCommandImpl(
+        buildCommandFallback.command,
+        buildCommandFallback.args,
+        {
+          cwd: packageDir,
+          label: buildCommandFallback.label,
+        },
+      );
       continue;
     }
 

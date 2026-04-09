@@ -35,6 +35,16 @@ const SUBMODULE_READINESS_MARKERS = {
 // available via npm in the meantime.
 const SKIP_SUBMODULES = new Set(["plugins/plugin-openrouter"]);
 
+function getPluginWorkspaceManifestPaths(submodulePath, rootDir = root) {
+  if (!submodulePath.startsWith("plugins/")) {
+    return [];
+  }
+
+  return ["package.json", "typescript/package.json"].map((relativePath) =>
+    resolve(rootDir, submodulePath, relativePath),
+  );
+}
+
 function getSubmoduleSkipReason(
   submodulePath,
   { skipLocal = skipLocalUpstreams } = {},
@@ -100,12 +110,24 @@ export function isSubmoduleCheckoutReady(
   const markerPaths = getSubmoduleReadinessMarkerPaths(submodulePath, {
     rootDir,
   });
+  if (markerPaths.length > 0) {
+    return markerPaths.every((markerPath) => exists(markerPath));
+  }
+
+  const pluginWorkspaceManifests = getPluginWorkspaceManifestPaths(
+    submodulePath,
+    rootDir,
+  );
+  if (pluginWorkspaceManifests.length > 0) {
+    return pluginWorkspaceManifests.some((manifestPath) =>
+      exists(manifestPath),
+    );
+  }
 
   if (markerPaths.length === 0) {
     return true;
   }
-
-  return markerPaths.every((markerPath) => exists(markerPath));
+  return true;
 }
 
 export function runInitSubmodules({
@@ -188,12 +210,13 @@ export function runInitSubmodules({
         cwd: rootDir,
         stdio: "inherit",
       });
-      if (
-        !isSubmoduleCheckoutReady(submodule.path, {
-          rootDir,
-          exists,
-        })
-      ) {
+      if (!isSubmoduleCheckoutReady(submodule.path, { rootDir, exists })) {
+        exec(`git -C "${submodule.path}" read-tree --reset -u HEAD`, {
+          cwd: rootDir,
+          stdio: "inherit",
+        });
+      }
+      if (!isSubmoduleCheckoutReady(submodule.path, { rootDir, exists })) {
         throw new Error(
           `submodule checkout is still incomplete after update: ${submodule.path}`,
         );

@@ -10,6 +10,14 @@ const SETUP_ACTION_PATH = path.join(
 const CI_WORKFLOW_PATH = path.join(ROOT, ".github/workflows/ci.yml");
 const CI_FORK_WORKFLOW_PATH = path.join(ROOT, ".github/workflows/ci-fork.yml");
 const TEST_WORKFLOW_PATH = path.join(ROOT, ".github/workflows/test.yml");
+const WINDOWS_DEV_SMOKE_WORKFLOW_PATH = path.join(
+  ROOT,
+  ".github/workflows/windows-dev-smoke.yml",
+);
+const WINDOWS_PRELOAD_SMOKE_WORKFLOW_PATH = path.join(
+  ROOT,
+  ".github/workflows/windows-desktop-preload-smoke.yml",
+);
 const BUILD_DOCKER_WORKFLOW_PATH = path.join(
   ROOT,
   ".github/workflows/build-docker.yml",
@@ -136,6 +144,12 @@ describe("CI workflow drift", () => {
         "run: node scripts/init-submodules.mjs",
       ),
     ).toBe(6);
+    expect(read(WINDOWS_DEV_SMOKE_WORKFLOW_PATH)).toContain(
+      "run: node scripts/init-submodules.mjs",
+    );
+    expect(read(WINDOWS_PRELOAD_SMOKE_WORKFLOW_PATH)).toContain(
+      "run: node scripts/init-submodules.mjs",
+    );
     expect(read(BUILD_DOCKER_WORKFLOW_PATH)).toContain(
       "run: node scripts/init-submodules.mjs",
     );

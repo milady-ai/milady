@@ -1,6 +1,8 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   realpathSync,
   rmSync,
   writeFileSync,
@@ -15,6 +17,7 @@ import {
   ensurePluginBuildOutputs,
   ensurePluginDependencyLinks,
   ensurePublishedElizaPackageLinks,
+  ensureWindowsCmdShim,
   getElizaPackageLinks,
   getElizaWorkspaceSkipReason,
   getPluginPackageLinks,
@@ -358,7 +361,220 @@ describe("ensurePluginDependencyLinks", () => {
   });
 });
 
+describe("ensureWindowsCmdShim", () => {
+  it("writes a Bun-backed cmd shim on Windows", () => {
+    const tempRoot = mkdtempSync(
+      path.join(os.tmpdir(), "milady-setup-upstreams-cmd-shim-"),
+    );
+
+    try {
+      const binLinkPath = path.join(tempRoot, "node_modules", ".bin", "tsup");
+      mkdirSync(path.dirname(binLinkPath), { recursive: true });
+
+      expect(
+        ensureWindowsCmdShim(
+          binLinkPath,
+          "C:\\repo\\node_modules\\tsup\\cli.js",
+          {
+            platform: "win32",
+          },
+        ),
+      ).toBe(true);
+
+      const cmdShimPath = `${binLinkPath}.cmd`;
+      expect(existsSync(cmdShimPath)).toBe(true);
+      expect(readFileSync(cmdShimPath, "utf8")).toBe(
+        '@ECHO off\r\nbun "C:\\repo\\node_modules\\tsup\\cli.js" %*\r\n',
+      );
+    } finally {
+      rmSync(tempRoot, { force: true, recursive: true });
+    }
+  });
+});
+
 describe("ensurePluginBuildOutputs", () => {
+  it("falls back to an exact-version bunx tsup command for tsup-based plugin packages", async () => {
+    const tempRoot = mkdtempSync(
+      path.join(os.tmpdir(), "milady-setup-plugin-build-deps-"),
+    );
+
+    try {
+      const pluginsRoot = path.join(tempRoot, "plugins");
+      const packageDir = path.join(
+        pluginsRoot,
+        "plugin-agent-skills",
+        "typescript",
+      );
+      mkdirSync(packageDir, { recursive: true });
+      writeFileSync(
+        path.join(packageDir, "package.json"),
+        JSON.stringify({
+          name: "@elizaos/plugin-agent-skills",
+          devDependencies: {
+            tsup: "^8.3.5",
+          },
+          scripts: {
+            build: "tsup",
+          },
+        }),
+        "utf8",
+      );
+
+      const calls: Array<{
+        command: string;
+        args: string[];
+        cwd?: string;
+        label?: string;
+      }> = [];
+
+      await ensurePluginBuildOutputs(pluginsRoot, {
+        pathExists: (candidate) =>
+          candidate !== path.join(packageDir, "dist") &&
+          candidate !== path.join(packageDir, "node_modules", ".bin", "tsup"),
+        runCommandImpl: async (command, args, options = {}) => {
+          calls.push({
+            command,
+            args,
+            cwd: options.cwd,
+            label: options.label,
+          });
+        },
+      });
+
+      expect(calls).toEqual([
+        {
+          command: "bunx",
+          args: ["tsup@8.3.5"],
+          cwd: packageDir,
+          label: "bunx tsup@8.3.5 (@elizaos/plugin-agent-skills)",
+        },
+      ]);
+    } finally {
+      rmSync(tempRoot, { force: true, recursive: true });
+    }
+  });
+
+  it("preserves tsup build-script arguments when using the bunx fallback", async () => {
+    const tempRoot = mkdtempSync(
+      path.join(os.tmpdir(), "milady-setup-plugin-build-tsup-args-"),
+    );
+
+    try {
+      const pluginsRoot = path.join(tempRoot, "plugins");
+      const packageDir = path.join(pluginsRoot, "plugin-cron");
+      mkdirSync(packageDir, { recursive: true });
+      writeFileSync(
+        path.join(packageDir, "package.json"),
+        JSON.stringify({
+          name: "@elizaos/plugin-cron",
+          devDependencies: {
+            tsup: "^8.4.0",
+          },
+          scripts: {
+            build: "tsup src/index.ts --format esm --dts --clean",
+          },
+        }),
+        "utf8",
+      );
+
+      const calls: Array<{
+        command: string;
+        args: string[];
+        cwd?: string;
+        label?: string;
+      }> = [];
+
+      await ensurePluginBuildOutputs(pluginsRoot, {
+        pathExists: (candidate) =>
+          candidate !== path.join(packageDir, "dist") &&
+          candidate !== path.join(packageDir, "node_modules", ".bin", "tsup"),
+        runCommandImpl: async (command, args, options = {}) => {
+          calls.push({
+            command,
+            args,
+            cwd: options.cwd,
+            label: options.label,
+          });
+        },
+      });
+
+      expect(calls).toEqual([
+        {
+          command: "bunx",
+          args: [
+            "tsup@8.4.0",
+            "src/index.ts",
+            "--format",
+            "esm",
+            "--dts",
+            "--clean",
+          ],
+          cwd: packageDir,
+          label: "bunx tsup@8.4.0 (@elizaos/plugin-cron)",
+        },
+      ]);
+    } finally {
+      rmSync(tempRoot, { force: true, recursive: true });
+    }
+  });
+
+  it("falls back to latest when tsup uses a non-exact version range", async () => {
+    const tempRoot = mkdtempSync(
+      path.join(os.tmpdir(), "milady-setup-plugin-build-tsup-version-"),
+    );
+
+    try {
+      const pluginsRoot = path.join(tempRoot, "plugins");
+      const packageDir = path.join(pluginsRoot, "plugin-shell");
+      mkdirSync(packageDir, { recursive: true });
+      writeFileSync(
+        path.join(packageDir, "package.json"),
+        JSON.stringify({
+          name: "@elizaos/plugin-shell",
+          devDependencies: {
+            tsup: "workspace:^8",
+          },
+          scripts: {
+            build: "tsup --dts",
+          },
+        }),
+        "utf8",
+      );
+
+      const calls: Array<{
+        command: string;
+        args: string[];
+        cwd?: string;
+        label?: string;
+      }> = [];
+
+      await ensurePluginBuildOutputs(pluginsRoot, {
+        pathExists: (candidate) =>
+          candidate !== path.join(packageDir, "dist") &&
+          candidate !== path.join(packageDir, "node_modules", ".bin", "tsup"),
+        runCommandImpl: async (command, args, options = {}) => {
+          calls.push({
+            command,
+            args,
+            cwd: options.cwd,
+            label: options.label,
+          });
+        },
+      });
+
+      expect(calls).toEqual([
+        {
+          command: "bunx",
+          args: ["tsup@latest", "--dts"],
+          cwd: packageDir,
+          label: "bunx tsup@latest (@elizaos/plugin-shell)",
+        },
+      ]);
+    } finally {
+      rmSync(tempRoot, { force: true, recursive: true });
+    }
+  });
+
   it("builds root-level plugin packages when they expose @elizaos names and lack dist", async () => {
     const tempRoot = mkdtempSync(
       path.join(os.tmpdir(), "milady-setup-plugin-builds-"),
@@ -404,6 +620,72 @@ describe("ensurePluginBuildOutputs", () => {
           args: ["run", "build"],
           cwd: packageDir,
           label: "bun run build (@elizaos/plugin-coding-agent)",
+        },
+      ]);
+    } finally {
+      rmSync(tempRoot, { force: true, recursive: true });
+    }
+  });
+
+  it("rebuilds plugin packages when dist exists but the declared types file is missing", async () => {
+    const tempRoot = mkdtempSync(
+      path.join(os.tmpdir(), "milady-setup-plugin-build-types-"),
+    );
+
+    try {
+      const pluginsRoot = path.join(tempRoot, "plugins");
+      const packageDir = path.join(
+        pluginsRoot,
+        "plugin-local-embedding",
+        "typescript",
+      );
+      mkdirSync(path.join(packageDir, "dist"), { recursive: true });
+      writeFileSync(
+        path.join(packageDir, "dist", "index.js"),
+        "export {};\n",
+        "utf8",
+      );
+      writeFileSync(
+        path.join(packageDir, "package.json"),
+        JSON.stringify({
+          name: "@elizaos/plugin-local-embedding",
+          types: "dist/index.d.ts",
+          scripts: {
+            build: "tsup",
+          },
+          devDependencies: {
+            tsup: "8.5.0",
+          },
+        }),
+        "utf8",
+      );
+
+      const calls: Array<{
+        command: string;
+        args: string[];
+        cwd?: string;
+        label?: string;
+      }> = [];
+
+      await ensurePluginBuildOutputs(pluginsRoot, {
+        pathExists: (candidate) =>
+          candidate !== path.join(packageDir, "dist", "index.d.ts"),
+        runCommandImpl: async (command, args, options = {}) => {
+          calls.push({
+            command,
+            args,
+            cwd: options.cwd,
+            label: options.label,
+          });
+        },
+      });
+
+      expect(calls).toEqual([
+        {
+          command: "bun",
+          args: ["run", "build"],
+          cwd: packageDir,
+          label: "bun run build (@elizaos/plugin-local-embedding)",
         },
       ]);
     } finally {

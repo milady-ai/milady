@@ -23,9 +23,8 @@ jobs:
         with:
           submodules: false
 
-      - name: Initialize Windows-safe workspace submodules
-        shell: bash
-        run: git submodule update --init --depth 1 plugins/plugin-agent-orchestrator
+      - name: Initialize tracked workspace submodules
+        run: node scripts/init-submodules.mjs
 
       - name: Enable long paths (Windows)
         run: git config --global core.longpaths true
