@@ -124,9 +124,6 @@ export function isSubmoduleCheckoutReady(
     );
   }
 
-  if (markerPaths.length === 0) {
-    return true;
-  }
   return true;
 }
 

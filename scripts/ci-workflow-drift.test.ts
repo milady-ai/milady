@@ -150,6 +150,12 @@ describe("CI workflow drift", () => {
     expect(read(WINDOWS_PRELOAD_SMOKE_WORKFLOW_PATH)).toContain(
       "run: node scripts/init-submodules.mjs",
     );
+    expect(read(WINDOWS_DEV_SMOKE_WORKFLOW_PATH)).toContain(
+      'MILADY_SKIP_LOCAL_UPSTREAMS: "1"',
+    );
+    expect(read(WINDOWS_PRELOAD_SMOKE_WORKFLOW_PATH)).toContain(
+      'MILADY_SKIP_LOCAL_UPSTREAMS: "1"',
+    );
     expect(read(BUILD_DOCKER_WORKFLOW_PATH)).toContain(
       "run: node scripts/init-submodules.mjs",
     );

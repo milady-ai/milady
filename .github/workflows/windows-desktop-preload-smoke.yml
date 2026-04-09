@@ -18,6 +18,8 @@ jobs:
   preload-smoke:
     name: desktop preload preflight (windows)
     runs-on: windows-latest
+    env:
+      MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
         with:

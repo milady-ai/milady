@@ -18,6 +18,8 @@ jobs:
   dev-smoke:
     name: Windows smoke (${{ matrix.bun-version }})
     runs-on: windows-latest
+    env:
+      MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     strategy:
       fail-fast: false
       matrix:
