@@ -616,3 +616,30 @@ function patchElizaCoreNodeTypes() {
   }
 }
 patchElizaCoreNodeTypes();
+
+/**
+ * Patch plugin-agent-orchestrator null guard for adapter readiness probes.
+ *
+ * The current submodule commit can fail strict declaration generation because
+ * adapter is nullable while Bun-worker probe logic calls adapter helpers
+ * directly. Keep this idempotent and remove once upstream submodule includes
+ * the guard.
+ */
+function patchAgentOrchestratorAdapterGuard() {
+  const target = resolve(
+    root,
+    "plugins/plugin-agent-orchestrator/src/services/pty-spawn.ts",
+  );
+  if (!existsSync(target)) return;
+
+  const needle = "if (ctx.usingBunWorker && isAdapterBackedAgent) {";
+  const replacement = "if (ctx.usingBunWorker && adapter) {";
+  let src = readFileSync(target, "utf8");
+  if (!src.includes(needle)) return;
+  src = src.replace(needle, replacement);
+  writeFileSync(target, src, "utf8");
+  console.log(
+    `[patch-deps] Patched plugin-agent-orchestrator adapter null-guard: ${target}`,
+  );
+}
+patchAgentOrchestratorAdapterGuard();
