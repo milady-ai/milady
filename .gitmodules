@@ -16,12 +16,12 @@
 	branch = develop
 [submodule "plugins/plugin-agent-skills"]
 	path = plugins/plugin-agent-skills
-	url = https://github.com/elizaos-plugins/plugin-agent-skills.git
+	url = https://github.com/dutchiono/plugin-agent-skills.git
 	branch = alpha
 [submodule "plugins/plugin-anthropic"]
 	path = plugins/plugin-anthropic
-	url = https://github.com/elizaos-plugins/plugin-anthropic.git
-	branch = alpha
+	url = https://github.com/dutchiono/plugin-anthropic.git
+	branch = fix/elizaos-core-api-compat
 [submodule "plugins/plugin-coding-agent"]
 	path = plugins/plugin-coding-agent
 	url = https://github.com/elizaos-plugins/plugin-coding-agent.git
@@ -56,8 +56,8 @@
 	branch = alpha
 [submodule "plugins/plugin-google-genai"]
 	path = plugins/plugin-google-genai
-	url = https://github.com/elizaos-plugins/plugin-google-genai.git
-	branch = alpha
+	url = https://github.com/dutchiono/plugin-google-genai.git
+	branch = fix/elizaos-core-api-compat
 [submodule "plugins/plugin-local-embedding"]
 	path = plugins/plugin-local-embedding
 	url = https://github.com/elizaos-plugins/plugin-local-embedding.git
@@ -80,8 +80,8 @@
 	branch = alpha
 [submodule "plugins/plugin-personality"]
 	path = plugins/plugin-personality
-	url = https://github.com/elizaos-plugins/plugin-personality.git
-	branch = alpha
+	url = https://github.com/dutchiono/plugin-personality.git
+	branch = fix/elizaos-core-api-compat
 [submodule "plugins/plugin-pi-ai"]
 	path = plugins/plugin-pi-ai
 	url = https://github.com/elizaos-plugins/plugin-pi-ai.git
