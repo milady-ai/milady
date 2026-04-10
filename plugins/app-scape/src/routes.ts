@@ -1,52 +1,76 @@
-import { decode, encode } from "@toon-format/toon";
+import type http from "node:http";
 import type { IAgentRuntime } from "@elizaos/core";
 import type {
-    AppLaunchDiagnostic,
-    AppLaunchResult,
-    AppSessionState,
+  AppLaunchDiagnostic,
+  AppLaunchResult,
+  AppSessionState,
 } from "@miladyai/shared/contracts/apps";
+import { decode, encode } from "@toon-format/toon";
 
 import type { ScapeGameService } from "./services/game-service.js";
 
 /**
  * HTTP route handlers for `@elizaos/app-scape`.
  *
- * PR 2 scope: serve the viewer iframe for the xRSPS React client and
- * provide the minimum `resolveLaunchSession` / `handleAppRoutes` exports
- * the milady host expects. No bot-SDK connection, no session commands,
- * no journal — those land in PR 3+.
+ * ## Routes
  *
- * The viewer route (`GET /api/apps/scape/viewer`) returns a tiny HTML
- * shell whose only content is a full-page iframe pointing at the
- * configured xRSPS client URL. We set the cross-origin isolation
- * headers the xRSPS client needs (it uses WebWorkers / wasm
- * SharedArrayBuffer for `threads.js` and the sharp / xxhash-wasm
- * pipelines), and we relax `frame-ancestors` so milady can embed the
- * viewer from electrobun, capacitor, and localhost dev hosts.
+ *   GET  /api/apps/scape/viewer                     — iframe wrapper for the
+ *                                                     xRSPS React client
+ *   POST /api/apps/scape/prompt                     — legacy operator-steering
+ *                                                     endpoint (pre-session)
+ *   GET  /api/apps/scape/journal                    — recent memories (TOON)
+ *   GET  /api/apps/scape/goals                      — current goals (TOON)
+ *   GET  /api/apps/scape/session/:sessionId         — session snapshot
+ *   POST /api/apps/scape/session/:sessionId/message — operator goal / verb
+ *   POST /api/apps/scape/session/:sessionId/control — pause|resume
  *
- * Why a wrapper HTML and not a direct `launchUrl` iframe? Two reasons:
+ * The session-scoped message/control routes are the path elizaOS uses
+ * when the operator types in the milady Apps UI. We alias the
+ * behaviour to the legacy `/prompt` handler so both paths share the
+ * same `ScapeGameService.applyOperatorMessage` plumbing.
+ *
+ * ## Bodies
+ *
+ * Requests may arrive as JSON (Content-Type `application/json`) or as
+ * TOON (Content-Type `text/toon`). The host's built-in `readJsonBody`
+ * is JSON-only, so for any non-JSON content type we read the raw
+ * request body ourselves, try to decode it as TOON, and fall back to
+ * treating it as a raw text directive.
+ *
+ * ## Responses
+ *
+ * Viewer → `text/html`
+ * Everything else → `text/toon; charset=utf-8` with a TOON-encoded
+ * payload. The milady host is fine with any content type as long as
+ * the status line is correct.
+ *
+ * ## Why a wrapper HTML and not a direct `launchUrl` iframe?
  *
  *   1. The xRSPS client is served by the craco dev server which sets
- *      its own CSP. We want our own CSP frame-ancestors controlling
+ *      its own CSP. We want our own CSP `frame-ancestors` controlling
  *      where milady hosts can embed us, without mutating the client.
  *   2. Serving the wrapper from the milady host gives us a single URL
- *      to point authenticated sessions at in PR 3+ (we'll inject a
- *      postMessage bridge for auto-login).
+ *      to point authenticated sessions at (we can inject a
+ *      postMessage bridge for auto-login later).
  */
 
 const APP_NAME = "@elizaos/app-scape";
 const APP_DISPLAY_NAME = "'scape";
 const VIEWER_ROUTE_PATH = "/api/apps/scape/viewer";
+const PROMPT_ROUTE_PATH = "/api/apps/scape/prompt";
+const JOURNAL_ROUTE_PATH = "/api/apps/scape/journal";
+const GOALS_ROUTE_PATH = "/api/apps/scape/goals";
+const SESSION_ROUTE_PREFIX = "/api/apps/scape/session/";
 const DEFAULT_CLIENT_URL = "http://localhost:3000";
 
 // Same hosts the defense plugin whitelists; covers every runtime that
 // might embed the milady apps grid (browser, Electrobun native window,
 // Capacitor mobile, Tauri, vscode webview, file://).
 const VIEWER_FRAME_ANCESTORS_DIRECTIVE =
-    "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* " +
-    "http://[::1]:* http://[0:0:0:0:0:0:0:1]:* https://localhost:* " +
-    "https://127.0.0.1:* https://[::1]:* https://[0:0:0:0:0:0:0:1]:* " +
-    "electrobun: capacitor: capacitor-electron: app: tauri: file:";
+  "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* " +
+  "http://[::1]:* http://[0:0:0:0:0:0:0:1]:* https://localhost:* " +
+  "https://127.0.0.1:* https://[::1]:* https://[0:0:0:0:0:0:0:1]:* " +
+  "electrobun: capacitor: capacitor-electron: app: tauri: file:";
 
 // ---------------------------------------------------------------------------
 // Context types (inlined from packages/agent to keep this plugin
@@ -54,15 +78,15 @@ const VIEWER_FRAME_ANCESTORS_DIRECTIVE =
 // ---------------------------------------------------------------------------
 
 interface AppLaunchSessionContext {
-    appName: string;
-    launchUrl: string | null;
-    runtime: IAgentRuntime | null;
-    viewer: AppLaunchResult["viewer"] | null;
+  appName: string;
+  launchUrl: string | null;
+  runtime: IAgentRuntime | null;
+  viewer: AppLaunchResult["viewer"] | null;
 }
 
 interface AppRunSessionContext extends AppLaunchSessionContext {
-    runId: string;
-    session: AppSessionState | null;
+  runId: string;
+  session: AppSessionState | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -70,16 +94,18 @@ interface AppRunSessionContext extends AppLaunchSessionContext {
 // ---------------------------------------------------------------------------
 
 interface RuntimeLike {
-    character?: {
-        settings?: { secrets?: Record<string, string> };
-        secrets?: Record<string, string>;
-    };
-    getSetting?: (key: string) => string | null | undefined;
+  character?: {
+    settings?: { secrets?: Record<string, string> };
+    secrets?: Record<string, string>;
+  };
+  getSetting?: (key: string) => string | null | undefined;
+  agentId?: string;
+  getService?: (name: string) => unknown;
 }
 
 function asRuntimeLike(runtime: unknown | null): RuntimeLike | null {
-    if (!runtime || typeof runtime !== "object") return null;
-    return runtime as RuntimeLike;
+  if (!runtime || typeof runtime !== "object") return null;
+  return runtime as RuntimeLike;
 }
 
 /**
@@ -88,30 +114,56 @@ function asRuntimeLike(runtime: unknown | null): RuntimeLike | null {
  * per-character in a deployed milady instance or globally via env.
  */
 function resolveSettingLike(
-    runtime: IAgentRuntime | null,
-    key: string,
+  runtime: IAgentRuntime | null,
+  key: string,
 ): string | undefined {
-    const rt = asRuntimeLike(runtime);
-    if (rt?.getSetting) {
-        const fromRuntime = rt.getSetting(key);
-        if (typeof fromRuntime === "string" && fromRuntime.trim().length > 0) {
-            return fromRuntime.trim();
-        }
+  const rt = asRuntimeLike(runtime);
+  if (rt?.getSetting) {
+    const fromRuntime = rt.getSetting(key);
+    if (typeof fromRuntime === "string" && fromRuntime.trim().length > 0) {
+      return fromRuntime.trim();
     }
-    const fromSecrets =
-        rt?.character?.settings?.secrets?.[key] ?? rt?.character?.secrets?.[key];
-    if (typeof fromSecrets === "string" && fromSecrets.trim().length > 0) {
-        return fromSecrets.trim();
-    }
-    const fromEnv = process.env[key];
-    if (typeof fromEnv === "string" && fromEnv.trim().length > 0) {
-        return fromEnv.trim();
-    }
-    return undefined;
+  }
+  const fromSecrets =
+    rt?.character?.settings?.secrets?.[key] ?? rt?.character?.secrets?.[key];
+  if (typeof fromSecrets === "string" && fromSecrets.trim().length > 0) {
+    return fromSecrets.trim();
+  }
+  const fromEnv = process.env[key];
+  if (typeof fromEnv === "string" && fromEnv.trim().length > 0) {
+    return fromEnv.trim();
+  }
+  return undefined;
 }
 
 function resolveClientUrl(runtime: IAgentRuntime | null): string {
-    return resolveSettingLike(runtime, "SCAPE_CLIENT_URL") ?? DEFAULT_CLIENT_URL;
+  return resolveSettingLike(runtime, "SCAPE_CLIENT_URL") ?? DEFAULT_CLIENT_URL;
+}
+
+/**
+ * Derive a stable session id for this runtime. We key on
+ * `runtime.agentId` — the canonical elizaOS identifier for the agent
+ * — so every refresh cycle resolves to the same session. Previously
+ * we used `Date.now()`, which meant every refresh pass (periodic,
+ * driven by `packages/agent/src/services/app-manager.ts`) minted a
+ * fresh id and invalidated the session-scoped message/control routes
+ * the Apps UI relies on.
+ *
+ * If the runtime is absent we fall back to a module-scoped constant
+ * so the session still validates on subsequent calls within the same
+ * process — that scenario only happens in tests and dev stubs.
+ */
+let fallbackSessionId: string | null = null;
+function resolveScapeSessionId(runtime: IAgentRuntime | null): string {
+  const rt = asRuntimeLike(runtime);
+  const agentId = rt?.agentId;
+  if (typeof agentId === "string" && agentId.length > 0) {
+    return `scape:${agentId}`;
+  }
+  if (!fallbackSessionId) {
+    fallbackSessionId = `scape:${Math.random().toString(36).slice(2, 10)}`;
+  }
+  return fallbackSessionId;
 }
 
 // ---------------------------------------------------------------------------
@@ -119,24 +171,24 @@ function resolveClientUrl(runtime: IAgentRuntime | null): string {
 // ---------------------------------------------------------------------------
 
 function buildViewerHtml(clientUrl: string): string {
-    // Escape the URL for use in an HTML attribute. URLs shouldn't contain
-    // these chars in normal use, but we prefer being safe over being lucky.
-    const escaped = clientUrl.replace(/[&<>"']/g, (ch) => {
-        switch (ch) {
-            case "&":
-                return "&amp;";
-            case "<":
-                return "&lt;";
-            case ">":
-                return "&gt;";
-            case '"':
-                return "&quot;";
-            default:
-                return "&#39;";
-        }
-    });
+  // Escape the URL for use in an HTML attribute. URLs shouldn't contain
+  // these chars in normal use, but we prefer being safe over being lucky.
+  const escaped = clientUrl.replace(/[&<>"']/g, (ch) => {
+    switch (ch) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -217,45 +269,264 @@ function buildViewerHtml(clientUrl: string): string {
 // ---------------------------------------------------------------------------
 
 interface MutableResponse {
-    statusCode: number;
-    setHeader: (name: string, value: string) => void;
-    removeHeader?: (name: string) => void;
-    getHeader?: (name: string) => number | string | string[] | undefined;
-    end: (body?: string) => void;
+  statusCode: number;
+  setHeader: (name: string, value: string) => void;
+  removeHeader?: (name: string) => void;
+  getHeader?: (name: string) => number | string | string[] | undefined;
+  end: (body?: string) => void;
 }
 
 function applyViewerEmbedHeaders(response: MutableResponse): void {
-    response.removeHeader?.("X-Frame-Options");
+  response.removeHeader?.("X-Frame-Options");
 
-    const existingCsp = response.getHeader?.("Content-Security-Policy");
-    const normalizedExisting =
-        typeof existingCsp === "string"
-            ? existingCsp.trim()
-            : Array.isArray(existingCsp)
-                ? existingCsp.join("; ").trim()
-                : "";
-    const nextCsp = /\bframe-ancestors\b/i.test(normalizedExisting)
-        ? normalizedExisting
-        : normalizedExisting.length > 0
-            ? `${normalizedExisting}; ${VIEWER_FRAME_ANCESTORS_DIRECTIVE}`
-            : VIEWER_FRAME_ANCESTORS_DIRECTIVE;
-    response.setHeader("Content-Security-Policy", nextCsp);
+  const existingCsp = response.getHeader?.("Content-Security-Policy");
+  const normalizedExisting =
+    typeof existingCsp === "string"
+      ? existingCsp.trim()
+      : Array.isArray(existingCsp)
+        ? existingCsp.join("; ").trim()
+        : "";
+  const nextCsp = /\bframe-ancestors\b/i.test(normalizedExisting)
+    ? normalizedExisting
+    : normalizedExisting.length > 0
+      ? `${normalizedExisting}; ${VIEWER_FRAME_ANCESTORS_DIRECTIVE}`
+      : VIEWER_FRAME_ANCESTORS_DIRECTIVE;
+  response.setHeader("Content-Security-Policy", nextCsp);
 
-    // xRSPS client uses wasm threads.js + SharedArrayBuffer; these
-    // headers opt the page into cross-origin isolation, which the
-    // iframe's WebWorkers need.
-    response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-    response.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-    response.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  // xRSPS client uses wasm threads.js + SharedArrayBuffer; these
+  // headers opt the page into cross-origin isolation, which the
+  // iframe's WebWorkers need.
+  response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  response.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  response.setHeader("Cross-Origin-Resource-Policy", "same-origin");
 }
 
 function sendHtmlResponse(res: unknown, html: string): void {
-    const response = res as MutableResponse;
-    response.statusCode = 200;
-    response.setHeader("Cache-Control", "no-store");
-    response.setHeader("Content-Type", "text/html; charset=utf-8");
-    applyViewerEmbedHeaders(response);
-    response.end(html);
+  const response = res as MutableResponse;
+  response.statusCode = 200;
+  response.setHeader("Cache-Control", "no-store");
+  response.setHeader("Content-Type", "text/html; charset=utf-8");
+  applyViewerEmbedHeaders(response);
+  response.end(html);
+}
+
+/**
+ * Send a TOON-encoded response. Mirrors `sendHtmlResponse` above but
+ * for the agent-facing endpoints; response body is the TOON-encoded
+ * version of `payload`. We set `text/toon` so clients that know the
+ * format can decode directly, but the milady host doesn't care.
+ */
+function sendToonResponse(
+  res: unknown,
+  status: number,
+  payload: unknown,
+): void {
+  const response = res as MutableResponse;
+  response.statusCode = status;
+  response.setHeader("Cache-Control", "no-store");
+  response.setHeader("Content-Type", "text/toon; charset=utf-8");
+  const body = encode(payload as Record<string, unknown>);
+  response.end(body);
+}
+
+// ---------------------------------------------------------------------------
+// Body reading
+// ---------------------------------------------------------------------------
+
+/**
+ * Read the request body as a Node Buffer and decode it. We need this
+ * because the host's `readJsonBody` helper rejects anything with a
+ * non-JSON Content-Type, and our routes accept TOON. Size-capped at
+ * 64KB so a pathological client can't OOM the milady host.
+ */
+async function readRawBody(
+  req: unknown,
+  maxBytes = 64 * 1024,
+): Promise<string | null> {
+  if (!req || typeof req !== "object") return null;
+  const incoming = req as NodeJS.ReadableStream & {
+    readable?: boolean;
+  };
+  if (typeof (incoming as { on?: unknown }).on !== "function") return null;
+
+  return new Promise<string | null>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let total = 0;
+    let settled = false;
+    const finish = (value: string | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    incoming.on("data", (chunk: Buffer | string) => {
+      if (settled) return;
+      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
+      total += buf.length;
+      if (total > maxBytes) {
+        settled = true;
+        reject(new Error(`request body exceeded ${maxBytes} bytes`));
+        return;
+      }
+      chunks.push(buf);
+    });
+    incoming.on("end", () => {
+      if (chunks.length === 0) {
+        finish(null);
+        return;
+      }
+      finish(Buffer.concat(chunks).toString("utf-8"));
+    });
+    incoming.on("error", (err: Error) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    });
+  });
+}
+
+/**
+ * Resolve an operator directive body to a plain string, regardless of
+ * whether the caller sent JSON, TOON, or raw text. Priority order:
+ *
+ *   1. If the host already parsed the body as JSON, check the known
+ *      keys (`text`, `prompt`, `directive`, `message`, `content`).
+ *   2. Otherwise read the raw body. If the Content-Type is JSON-ish
+ *      try JSON.parse first; otherwise try TOON decode; otherwise
+ *      fall back to treating the raw body as a plain text directive.
+ *
+ * Returns `null` if nothing usable was provided.
+ */
+async function readDirectiveBody(
+  ctx: ScapeRouteContext,
+): Promise<string | null> {
+  const contentType = readHeader(ctx.req, "content-type").toLowerCase();
+  const isJson = contentType.includes("application/json");
+
+  // JSON path: delegate to the host so errors propagate normally.
+  if (isJson) {
+    try {
+      const parsed = await ctx.readJsonBody();
+      return extractDirectiveText(parsed);
+    } catch {
+      return null;
+    }
+  }
+
+  // Anything else: read raw bytes and try to decode ourselves.
+  let raw: string | null;
+  try {
+    raw = await readRawBody(ctx.req);
+  } catch {
+    return null;
+  }
+  if (!raw) return null;
+
+  // TOON decode (covers text/toon and unlabeled body that happens
+  // to be TOON — the 2004scape app-manager proxy forwards with
+  // application/toon, elizaOS's run-steering uses text/toon).
+  try {
+    const decoded = decode(raw);
+    if (decoded && typeof decoded === "object") {
+      const fromToon = extractDirectiveText(decoded);
+      if (fromToon) return fromToon;
+    }
+  } catch {
+    // Not TOON — fall through.
+  }
+
+  // Final fallback: the body is a plain text directive.
+  return raw.trim() || null;
+}
+
+/**
+ * Check a parsed body (object form) for the conventional keys the
+ * Apps UI and the operator CLI use to carry the directive text. We
+ * accept a few aliases so the plugin works regardless of which
+ * convention the caller picked.
+ */
+function extractDirectiveText(body: unknown): string | null {
+  if (body && typeof body === "object" && !Array.isArray(body)) {
+    const obj = body as Record<string, unknown>;
+    for (const key of [
+      "text",
+      "prompt",
+      "directive",
+      "message",
+      "content",
+    ] as const) {
+      const value = obj[key];
+      if (typeof value === "string" && value.trim().length > 0) {
+        return value.trim();
+      }
+    }
+  }
+  if (typeof body === "string" && body.trim().length > 0) {
+    return body.trim();
+  }
+  return null;
+}
+
+/**
+ * Read a header off the request regardless of how Node / the host
+ * wrapper is exposing it. Always lowercased.
+ */
+function readHeader(req: unknown, name: string): string {
+  if (!req || typeof req !== "object") return "";
+  const headers = (
+    req as { headers?: Record<string, string | string[] | undefined> }
+  ).headers;
+  if (!headers) return "";
+  const value = headers[name.toLowerCase()];
+  if (Array.isArray(value)) return value[0] ?? "";
+  return typeof value === "string" ? value : "";
+}
+
+// ---------------------------------------------------------------------------
+// Session state helpers
+// ---------------------------------------------------------------------------
+
+function getScapeService(
+  runtime: IAgentRuntime | null,
+): ScapeGameService | null {
+  const rt = asRuntimeLike(runtime);
+  const service = rt?.getService?.("scape_game");
+  return (service as unknown as ScapeGameService | null) ?? null;
+}
+
+function buildScapeSessionState(
+  runtime: IAgentRuntime | null,
+): AppSessionState {
+  const clientUrl = resolveClientUrl(runtime);
+  const sessionId = resolveScapeSessionId(runtime);
+  const service = getScapeService(runtime);
+  const paused = service?.isPausedByOperator?.() === true;
+  const operatorGoal = service?.getOperatorGoal?.() ?? "";
+
+  return {
+    sessionId,
+    appName: APP_NAME,
+    mode: "spectate-and-steer",
+    status: paused ? "paused" : service ? "ready" : "ready",
+    displayName: APP_DISPLAY_NAME,
+    summary:
+      operatorGoal.length > 0
+        ? `Operator goal: "${operatorGoal}"`
+        : `Embedding xRSPS client at ${clientUrl}.`,
+    canSendCommands: true,
+    // The shared AppSessionState contract only allows the two
+    // stock verbs here ("pause" | "resume"); the milady Apps UI
+    // renders them as buttons and handles the label/disabled
+    // state itself based on `status`.
+    controls: paused ? ["resume"] : ["pause"],
+    suggestedPrompts: [
+      "Walk to the Lumbridge cows and train attack.",
+      "Pause and tell me what you see.",
+      "Head to the Varrock west bank and deposit everything.",
+    ],
+    recommendations: [],
+    activity: [],
+    telemetry: null,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -263,231 +534,305 @@ function sendHtmlResponse(res: unknown, html: string): void {
 // every curated app plugin.
 // ---------------------------------------------------------------------------
 
-/**
- * Build the session state returned by a launch. PR 2 returns a minimal
- * placeholder — the real agent lifecycle (connect, LLM loop, journal,
- * directed prompts) moves through this return type in PR 3–7.
- */
-function buildPlaceholderSession(
-    runtime: IAgentRuntime | null,
-): AppSessionState {
-    const clientUrl = resolveClientUrl(runtime);
-    return {
-        sessionId: `scape:${Date.now()}`,
-        appName: APP_NAME,
-        mode: "spectate-and-steer",
-        status: "ready",
-        displayName: APP_DISPLAY_NAME,
-        summary: `Embedding xRSPS client at ${clientUrl}. Agent loop lands in PR 3+.`,
-        canSendCommands: false,
-        controls: [],
-        suggestedPrompts: [
-            "Connect to xRSPS and introduce yourself.",
-            "Walk to the Lumbridge cows and train attack.",
-            "Check the inventory and bank what's there.",
-        ],
-        recommendations: [],
-        activity: [],
-        telemetry: null,
-    };
-}
-
 export async function resolveLaunchSession(
-    ctx: AppLaunchSessionContext,
+  ctx: AppLaunchSessionContext,
 ): Promise<AppLaunchResult["session"]> {
-    return buildPlaceholderSession(ctx.runtime);
+  return buildScapeSessionState(ctx.runtime);
 }
 
 export async function refreshRunSession(
-    ctx: AppRunSessionContext,
+  ctx: AppRunSessionContext,
 ): Promise<AppLaunchResult["session"]> {
-    return buildPlaceholderSession(ctx.runtime);
+  // IMPORTANT: `resolveScapeSessionId` is keyed on runtime.agentId,
+  // so this always returns the same sessionId for the same agent,
+  // no matter how many refresh cycles the app-manager runs.
+  return buildScapeSessionState(ctx.runtime);
 }
 
 export async function collectLaunchDiagnostics(_ctx: {
-    runtime: IAgentRuntime | null;
-    session: AppSessionState | null;
+  runtime: IAgentRuntime | null;
+  session: AppSessionState | null;
 }): Promise<AppLaunchDiagnostic[]> {
-    // No diagnostics in PR 2 — the plugin is purely a launcher wrapper.
-    return [];
+  // No diagnostics surfaced yet — the plugin surface area for
+  // operator warnings lives in the Apps UI status banner.
+  return [];
+}
+
+// ---------------------------------------------------------------------------
+// Route dispatcher
+// ---------------------------------------------------------------------------
+
+interface ScapeRouteContext {
+  method: string;
+  pathname: string;
+  url?: URL;
+  runtime: unknown | null;
+  error: (response: unknown, message: string, status?: number) => void;
+  json: (response: unknown, data: unknown, status?: number) => void;
+  readJsonBody: () => Promise<unknown>;
+  req: http.IncomingMessage;
+  res: unknown;
 }
 
 /**
  * Main HTTP entry point for `/api/apps/scape/*`. Returns true when the
  * plugin handled the request, false to let the host dispatch it
- * elsewhere (currently there's only the viewer route to handle).
+ * elsewhere.
  */
-export async function handleAppRoutes(ctx: {
-    method: string;
-    pathname: string;
-    url?: URL;
-    runtime: unknown | null;
-    error: (response: unknown, message: string, status?: number) => void;
-    json: (response: unknown, data: unknown, status?: number) => void;
-    readJsonBody: () => Promise<unknown>;
-    res: unknown;
-}): Promise<boolean> {
-    if (ctx.method === "GET" && ctx.pathname === VIEWER_ROUTE_PATH) {
-        try {
-            const runtime = (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
-            const clientUrl = resolveClientUrl(runtime);
-            sendHtmlResponse(ctx.res, buildViewerHtml(clientUrl));
-        } catch (error) {
-            ctx.error(
-                ctx.res,
-                error instanceof Error
-                    ? error.message
-                    : "Failed to render 'scape viewer.",
-                500,
-            );
-        }
+export async function handleAppRoutes(
+  ctx: ScapeRouteContext,
+): Promise<boolean> {
+  // ─── Viewer ────────────────────────────────────────────────────
+  if (ctx.method === "GET" && ctx.pathname === VIEWER_ROUTE_PATH) {
+    try {
+      const runtime =
+        (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
+      const clientUrl = resolveClientUrl(runtime);
+      sendHtmlResponse(ctx.res, buildViewerHtml(clientUrl));
+    } catch (error) {
+      ctx.error(
+        ctx.res,
+        error instanceof Error
+          ? error.message
+          : "Failed to render 'scape viewer.",
+        500,
+      );
+    }
+    return true;
+  }
+
+  // ─── Legacy /prompt route (pre-session Apps UI path) ───────────
+  if (ctx.method === "POST" && ctx.pathname === PROMPT_ROUTE_PATH) {
+    return handleOperatorDirective(ctx, /*sessionId*/ null);
+  }
+
+  // ─── Session-scoped routes (Apps UI run-steering) ──────────────
+  //
+  //   GET  /api/apps/scape/session/:id               — snapshot
+  //   POST /api/apps/scape/session/:id/message       — directive
+  //   POST /api/apps/scape/session/:id/control       — pause/resume
+  //
+  // See packages/agent/src/api/apps-routes.ts:232 for the caller —
+  // the host proxies operator messages here after looking up the
+  // run's sessionId in the session state we return from
+  // buildScapeSessionState.
+  if (ctx.pathname.startsWith(SESSION_ROUTE_PREFIX)) {
+    return handleSessionRoute(ctx);
+  }
+
+  // ─── Journal ───────────────────────────────────────────────────
+  if (ctx.method === "GET" && ctx.pathname === JOURNAL_ROUTE_PATH) {
+    try {
+      const runtime =
+        (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
+      const service = getScapeService(runtime);
+      const journal = service?.getJournalService?.();
+      if (!journal) {
+        sendToonResponse(ctx.res, 503, {
+          error: "journal not available",
+        });
         return true;
+      }
+      const state = journal.getState();
+      sendToonResponse(ctx.res, 200, {
+        agentId: state.agentId,
+        displayName: state.displayName,
+        sessionCount: state.sessionCount,
+        memories: state.memories,
+        updatedAt: state.updatedAt,
+      });
+    } catch (error) {
+      sendToonResponse(ctx.res, 500, {
+        error:
+          error instanceof Error ? error.message : "Failed to read journal",
+      });
     }
+    return true;
+  }
 
-    // POST /api/apps/scape/prompt — operator steering directive.
-    // Request body is TOON. Accepted shapes:
-    //   text: "go mine copper"
-    //     OR
-    //   prompt: "go mine copper"
-    //     OR
-    //   directive: "go mine copper"
-    if (ctx.method === "POST" && ctx.pathname === PROMPT_ROUTE_PATH) {
-        try {
-            const runtime = (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
-            const service = runtime?.getService?.("scape_game") as unknown as ScapeGameService | null;
-            if (!service) {
-                sendToonResponse(ctx.res, 503, { error: "scape_game service not available" });
-                return true;
-            }
-
-            const body = await ctx.readJsonBody();
-            const text = extractPromptText(body);
-            if (!text) {
-                sendToonResponse(ctx.res, 400, {
-                    error: "expected TOON body with `text`, `prompt`, or `directive`",
-                });
-                return true;
-            }
-
-            service.setOperatorGoal(text);
-            sendToonResponse(ctx.res, 200, {
-                accepted: true,
-                text,
-                note: "operator goal set; next LLM step will prioritize this directive",
-            });
-        } catch (error) {
-            sendToonResponse(ctx.res, 500, {
-                error: error instanceof Error ? error.message : "Failed to accept prompt",
-            });
-        }
+  // ─── Goals ─────────────────────────────────────────────────────
+  if (ctx.method === "GET" && ctx.pathname === GOALS_ROUTE_PATH) {
+    try {
+      const runtime =
+        (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
+      const service = getScapeService(runtime);
+      const journal = service?.getJournalService?.();
+      if (!journal) {
+        sendToonResponse(ctx.res, 503, {
+          error: "journal not available",
+        });
         return true;
+      }
+      const active = journal.getActiveGoal();
+      const all = journal.getGoals();
+      sendToonResponse(ctx.res, 200, {
+        active,
+        goals: all,
+      });
+    } catch (error) {
+      sendToonResponse(ctx.res, 500, {
+        error: error instanceof Error ? error.message : "Failed to read goals",
+      });
     }
+    return true;
+  }
 
-    // GET /api/apps/scape/journal — return recent memories as TOON.
-    if (ctx.method === "GET" && ctx.pathname === JOURNAL_ROUTE_PATH) {
-        try {
-            const runtime = (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
-            const service = runtime?.getService?.("scape_game") as unknown as ScapeGameService | null;
-            const journal = service?.getJournalService?.();
-            if (!journal) {
-                sendToonResponse(ctx.res, 503, { error: "journal not available" });
-                return true;
-            }
-            const state = journal.getState();
-            sendToonResponse(ctx.res, 200, {
-                agentId: state.agentId,
-                displayName: state.displayName,
-                sessionCount: state.sessionCount,
-                memories: state.memories,
-                updatedAt: state.updatedAt,
-            });
-        } catch (error) {
-            sendToonResponse(ctx.res, 500, {
-                error: error instanceof Error ? error.message : "Failed to read journal",
-            });
-        }
-        return true;
-    }
-
-    // GET /api/apps/scape/goals — return all known goals as TOON.
-    if (ctx.method === "GET" && ctx.pathname === GOALS_ROUTE_PATH) {
-        try {
-            const runtime = (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
-            const service = runtime?.getService?.("scape_game") as unknown as ScapeGameService | null;
-            const journal = service?.getJournalService?.();
-            if (!journal) {
-                sendToonResponse(ctx.res, 503, { error: "journal not available" });
-                return true;
-            }
-            const active = journal.getActiveGoal();
-            const all = journal.getGoals();
-            sendToonResponse(ctx.res, 200, {
-                active,
-                goals: all,
-            });
-        } catch (error) {
-            sendToonResponse(ctx.res, 500, {
-                error: error instanceof Error ? error.message : "Failed to read goals",
-            });
-        }
-        return true;
-    }
-
-    return false;
-}
-
-// ─── Prompt + journal route helpers ─────────────────────────────────────
-
-const PROMPT_ROUTE_PATH = "/api/apps/scape/prompt";
-const JOURNAL_ROUTE_PATH = "/api/apps/scape/journal";
-const GOALS_ROUTE_PATH = "/api/apps/scape/goals";
-
-/**
- * Accept several request shapes. `readJsonBody` is the milady host's
- * JSON parser; if we're strict about TOON-only the host's generic
- * middleware won't know how to help us, so we try both.
- *
- *   1. String body → assume TOON, decode, look for `text`/`prompt`/`directive`
- *   2. Already an object → same keys
- *   3. String body that doesn't decode as TOON → treat as raw directive
- */
-function extractPromptText(body: unknown): string | null {
-    // Host parsed as JSON — check the object directly.
-    if (body && typeof body === "object" && !Array.isArray(body)) {
-        const obj = body as Record<string, unknown>;
-        for (const key of ["text", "prompt", "directive", "message"] as const) {
-            const value = obj[key];
-            if (typeof value === "string" && value.trim().length > 0) {
-                return value.trim();
-            }
-        }
-    }
-    // Host passed a string — try TOON decode first, then fall back.
-    if (typeof body === "string" && body.trim().length > 0) {
-        try {
-            const decoded = decode(body);
-            if (decoded && typeof decoded === "object") {
-                const nested = extractPromptText(decoded);
-                if (nested) return nested;
-            }
-        } catch {
-            // Not TOON — treat as a raw text directive.
-        }
-        return body.trim();
-    }
-    return null;
+  return false;
 }
 
 /**
- * Send a TOON-encoded response. Mirrors `sendHtmlResponse` above but
- * for the agent-facing JSON/TOON endpoints; response body is the
- * TOON-encoded version of `payload`.
+ * Parse `/api/apps/scape/session/:id(/:subroute)?`. Returns null for
+ * anything that doesn't match so the dispatcher can fall through.
  */
-function sendToonResponse(res: unknown, status: number, payload: unknown): void {
-    const response = res as MutableResponse;
-    response.statusCode = status;
-    response.setHeader("Cache-Control", "no-store");
-    response.setHeader("Content-Type", "text/toon; charset=utf-8");
-    const body = encode(payload as Record<string, unknown>);
-    response.end(body);
+function parseSessionPath(pathname: string): {
+  sessionId: string;
+  subroute: "" | "message" | "control";
+} | null {
+  if (!pathname.startsWith(SESSION_ROUTE_PREFIX)) return null;
+  const tail = pathname.slice(SESSION_ROUTE_PREFIX.length);
+  const [rawId, rawSub = ""] = tail.split("/", 2);
+  if (!rawId) return null;
+  const subroute =
+    rawSub === "" || rawSub === "message" || rawSub === "control"
+      ? (rawSub as "" | "message" | "control")
+      : null;
+  if (subroute === null) return null;
+  return {
+    sessionId: decodeURIComponent(rawId),
+    subroute,
+  };
+}
+
+async function handleSessionRoute(ctx: ScapeRouteContext): Promise<boolean> {
+  const parsed = parseSessionPath(ctx.pathname);
+  if (!parsed) return false;
+
+  const runtime = (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
+  const expectedSessionId = resolveScapeSessionId(runtime);
+
+  // Reject cross-session operations. The host occasionally keeps a
+  // stale sessionId around after a hard refresh; rather than accept
+  // silently and act on the wrong run we return a structured error
+  // so the host can re-resolve and retry.
+  if (parsed.sessionId !== expectedSessionId) {
+    sendToonResponse(ctx.res, 404, {
+      error: "session id does not match current 'scape session",
+      expected: expectedSessionId,
+      received: parsed.sessionId,
+    });
+    return true;
+  }
+
+  // GET session snapshot
+  if (ctx.method === "GET" && parsed.subroute === "") {
+    sendToonResponse(ctx.res, 200, {
+      success: true,
+      session: buildScapeSessionState(runtime),
+    });
+    return true;
+  }
+
+  // POST operator message — forwarded to ScapeGameService
+  if (ctx.method === "POST" && parsed.subroute === "message") {
+    return handleOperatorDirective(ctx, parsed.sessionId);
+  }
+
+  // POST control — pause/resume
+  if (ctx.method === "POST" && parsed.subroute === "control") {
+    try {
+      const service = getScapeService(runtime);
+      if (!service) {
+        sendToonResponse(ctx.res, 503, {
+          success: false,
+          error: "scape_game service not available",
+          disposition: "unsupported",
+        });
+        return true;
+      }
+      const raw = await readDirectiveBody(ctx);
+      const action = (raw ?? "").toLowerCase();
+      if (action === "pause") {
+        service.pause();
+      } else if (action === "resume") {
+        service.resume();
+      } else {
+        sendToonResponse(ctx.res, 400, {
+          success: false,
+          error: "control action must be 'pause' or 'resume'",
+          disposition: "rejected",
+        });
+        return true;
+      }
+      sendToonResponse(ctx.res, 200, {
+        success: true,
+        disposition: "accepted",
+        message: action === "pause" ? "autoplay paused" : "autoplay resumed",
+        session: buildScapeSessionState(runtime),
+      });
+    } catch (error) {
+      sendToonResponse(ctx.res, 500, {
+        success: false,
+        error: error instanceof Error ? error.message : "control action failed",
+        disposition: "unsupported",
+      });
+    }
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Shared directive handler for `/prompt` and
+ * `/session/:id/message`. Reads the body (JSON or TOON or raw text),
+ * hands it to the service's `applyOperatorMessage`, and responds with
+ * a disposition the app-manager expects.
+ */
+async function handleOperatorDirective(
+  ctx: ScapeRouteContext,
+  sessionId: string | null,
+): Promise<boolean> {
+  try {
+    const runtime =
+      (asRuntimeLike(ctx.runtime) as IAgentRuntime | null) ?? null;
+    const service = getScapeService(runtime);
+    if (!service) {
+      sendToonResponse(ctx.res, 503, {
+        success: false,
+        error: "scape_game service not available",
+        disposition: "unsupported",
+      });
+      return true;
+    }
+
+    const text = await readDirectiveBody(ctx);
+    if (!text) {
+      sendToonResponse(ctx.res, 400, {
+        success: false,
+        error:
+          "expected body with `text`, `prompt`, `directive`, `message`, or `content`",
+        disposition: "rejected",
+      });
+      return true;
+    }
+
+    const outcome = service.applyOperatorMessage(text);
+    sendToonResponse(ctx.res, outcome.disposition === "queued" ? 202 : 200, {
+      success: true,
+      disposition: outcome.disposition,
+      message: outcome.note,
+      accepted: true,
+      text,
+      sessionId: sessionId ?? resolveScapeSessionId(runtime),
+      session: buildScapeSessionState(runtime),
+    });
+  } catch (error) {
+    sendToonResponse(ctx.res, 500, {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "failed to accept directive",
+      disposition: "unsupported",
+    });
+  }
+  return true;
 }

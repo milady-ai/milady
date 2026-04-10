@@ -9,67 +9,70 @@
  * doing" on every step.
  */
 
-import { encode } from "@toon-format/toon";
 import type {
-    IAgentRuntime,
-    Memory,
-    Provider,
-    State,
+  IAgentRuntime,
+  Memory,
+  Provider,
+  ProviderResult,
+  State,
 } from "@elizaos/core";
+import { encode } from "@toon-format/toon";
 
 import type { ScapeGameService } from "../services/game-service.js";
 
 const RECENT_ARCHIVED = 5;
 
 export const goalsProvider: Provider = {
-    name: "SCAPE_GOALS",
-    description:
-        "Current active goal (if any) plus the most recent completed / abandoned goals from the Scape Journal.",
-    get: async (
-        runtime: IAgentRuntime,
-        _message: Memory,
-        _state?: State,
-    ): Promise<string> => {
-        const service = runtime.getService("scape_game") as unknown as ScapeGameService | null;
-        if (!service) return "";
-        const journal = service.getJournalService?.();
-        if (!journal) return "";
+  name: "SCAPE_GOALS",
+  description:
+    "Current active goal (if any) plus the most recent completed / abandoned goals from the Scape Journal.",
+  get: async (
+    runtime: IAgentRuntime,
+    _message: Memory,
+    _state: State,
+  ): Promise<ProviderResult> => {
+    const service = runtime.getService(
+      "scape_game",
+    ) as unknown as ScapeGameService | null;
+    if (!service) return { text: "" };
+    const journal = service.getJournalService?.();
+    if (!journal) return { text: "" };
 
-        const active = journal.getActiveGoal();
-        const allGoals = journal.getGoals();
-        const archived = allGoals
-            .filter((g) => g.status === "completed" || g.status === "abandoned")
-            .sort((a, b) => b.updatedAt - a.updatedAt)
-            .slice(0, RECENT_ARCHIVED);
+    const active = journal.getActiveGoal();
+    const allGoals = journal.getGoals();
+    const archived = allGoals
+      .filter((g) => g.status === "completed" || g.status === "abandoned")
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, RECENT_ARCHIVED);
 
-        const parts: string[] = ["# GOALS"];
+    const parts: string[] = ["# GOALS"];
 
-        if (active) {
-            parts.push(
-                `## ACTIVE\n${encode({
-                    id: active.id,
-                    title: active.title,
-                    source: active.source,
-                    progress: active.progress ?? 0,
-                    notes: active.notes ?? "",
-                })}`,
-            );
-        } else {
-            parts.push("## ACTIVE\n(no active goal — pick one!)");
-        }
+    if (active) {
+      parts.push(
+        `## ACTIVE\n${encode({
+          id: active.id,
+          title: active.title,
+          source: active.source,
+          progress: active.progress ?? 0,
+          notes: active.notes ?? "",
+        })}`,
+      );
+    } else {
+      parts.push("## ACTIVE\n(no active goal — pick one!)");
+    }
 
-        if (archived.length > 0) {
-            parts.push(
-                `## RECENT\n${encode({
-                    recent: archived.map((g) => ({
-                        title: g.title,
-                        status: g.status,
-                        source: g.source,
-                    })),
-                })}`,
-            );
-        }
+    if (archived.length > 0) {
+      parts.push(
+        `## RECENT\n${encode({
+          recent: archived.map((g) => ({
+            title: g.title,
+            status: g.status,
+            source: g.source,
+          })),
+        })}`,
+      );
+    }
 
-        return parts.join("\n\n");
-    },
+    return { text: parts.join("\n\n") };
+  },
 };

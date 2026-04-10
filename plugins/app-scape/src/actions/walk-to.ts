@@ -17,66 +17,68 @@
  */
 
 import type {
-    Action,
-    HandlerCallback,
-    IAgentRuntime,
-    Memory,
-    State,
+  Action,
+  ActionResult,
+  HandlerCallback,
+  IAgentRuntime,
+  Memory,
+  State,
 } from "@elizaos/core";
-
-import { getCurrentLlmResponse } from "../shared-state.js";
 import type { ScapeGameService } from "../services/game-service.js";
-import {
-    extractParamBool,
-    extractParamInt,
-} from "./param-parser.js";
+import { hasActionTag, resolveActionText } from "../shared-state.js";
+import { extractParamBool, extractParamInt } from "./param-parser.js";
 
 export const walkTo: Action = {
-    name: "WALK_TO",
-    description:
-        "Walk the agent toward a specific world tile (x, z). Use this to move to banks, NPCs, resource nodes, or just to explore.",
-    similes: ["MOVE_TO", "GO_TO", "TRAVEL_TO", "HEAD_TO"],
-    examples: [],
-    validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
-        return runtime.getService("scape_game") != null;
-    },
-    handler: async (
-        runtime: IAgentRuntime,
-        _message: Memory,
-        _state: State | undefined,
-        _options: Record<string, unknown>,
-        callback?: HandlerCallback,
-    ): Promise<unknown> => {
-        const service = runtime.getService("scape_game") as unknown as ScapeGameService | null;
-        if (!service) {
-            const message = "'scape game service not available.";
-            callback?.({ text: message, action: "WALK_TO" });
-            return { success: false, message };
-        }
+  name: "WALK_TO",
+  description:
+    "Walk the agent toward a specific world tile (x, z). Use this to move to banks, NPCs, resource nodes, or just to explore.",
+  similes: ["MOVE_TO", "GO_TO", "TRAVEL_TO", "HEAD_TO"],
+  examples: [],
+  validate: async (
+    runtime: IAgentRuntime,
+    message: Memory,
+  ): Promise<boolean> => {
+    if (runtime.getService("scape_game") == null) return false;
+    return hasActionTag(message, "WALK_TO");
+  },
+  handler: async (
+    runtime: IAgentRuntime,
+    message: Memory,
+    _state?: State,
+    _options?: unknown,
+    callback?: HandlerCallback,
+  ): Promise<ActionResult> => {
+    const service = runtime.getService(
+      "scape_game",
+    ) as unknown as ScapeGameService | null;
+    if (!service) {
+      const errMsg = "'scape game service not available.";
+      callback?.({ text: errMsg, action: "WALK_TO" });
+      return { success: false, text: errMsg };
+    }
 
-        const text = getCurrentLlmResponse();
-        const x = extractParamInt(text, "x");
-        const z = extractParamInt(text, "z");
-        const run = extractParamBool(text, "run");
+    const text = resolveActionText(message);
+    const x = extractParamInt(text, "x");
+    const z = extractParamInt(text, "z");
+    const run = extractParamBool(text, "run");
 
-        if (x === null || z === null) {
-            const message =
-                "WALK_TO requires <x>N</x> and <z>N</z> params. Example: <x>3222</x><z>3218</z>";
-            callback?.({ text: message, action: "WALK_TO" });
-            return { success: false, message };
-        }
+    if (x === null || z === null) {
+      const errMsg =
+        "WALK_TO requires <x>N</x> and <z>N</z> params. Example: <x>3222</x><z>3218</z>";
+      callback?.({ text: errMsg, action: "WALK_TO" });
+      return { success: false, text: errMsg };
+    }
 
-        const result = await service.executeAction({
-            action: "walkTo",
-            x,
-            z,
-            run,
-        });
+    const result = await service.executeAction({
+      action: "walkTo",
+      x,
+      z,
+      run,
+    });
 
-        callback?.({
-            text: result.message ?? (result.success ? "walking…" : "walk failed"),
-            action: "WALK_TO",
-        });
-        return result;
-    },
+    const displayText =
+      result.message ?? (result.success ? "walking…" : "walk failed");
+    callback?.({ text: displayText, action: "WALK_TO" });
+    return { success: result.success, text: displayText };
+  },
 };

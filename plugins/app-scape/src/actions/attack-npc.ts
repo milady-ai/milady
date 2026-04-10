@@ -17,56 +17,61 @@
  */
 
 import type {
-    Action,
-    HandlerCallback,
-    IAgentRuntime,
-    Memory,
-    State,
+  Action,
+  ActionResult,
+  HandlerCallback,
+  IAgentRuntime,
+  Memory,
+  State,
 } from "@elizaos/core";
-
-import { getCurrentLlmResponse } from "../shared-state.js";
 import type { ScapeGameService } from "../services/game-service.js";
+import { hasActionTag, resolveActionText } from "../shared-state.js";
 import { extractParamInt } from "./param-parser.js";
 
 export const attackNpc: Action = {
-    name: "ATTACK_NPC",
-    description:
-        "Engage a nearby NPC in combat by its instance id. The server pathfinds the agent into attack range automatically.",
-    similes: ["FIGHT_NPC", "KILL_NPC", "ENGAGE"],
-    examples: [],
-    validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
-        return runtime.getService("scape_game") != null;
-    },
-    handler: async (
-        runtime: IAgentRuntime,
-        _message: Memory,
-        _state: State | undefined,
-        _options: Record<string, unknown>,
-        callback?: HandlerCallback,
-    ): Promise<unknown> => {
-        const service = runtime.getService("scape_game") as unknown as ScapeGameService | null;
-        if (!service) {
-            const err = "'scape game service not available.";
-            callback?.({ text: err, action: "ATTACK_NPC" });
-            return { success: false, message: err };
-        }
+  name: "ATTACK_NPC",
+  description:
+    "Engage a nearby NPC in combat by its instance id. The server pathfinds the agent into attack range automatically.",
+  similes: ["FIGHT_NPC", "KILL_NPC", "ENGAGE"],
+  examples: [],
+  validate: async (
+    runtime: IAgentRuntime,
+    message: Memory,
+  ): Promise<boolean> => {
+    if (runtime.getService("scape_game") == null) return false;
+    return hasActionTag(message, "ATTACK_NPC");
+  },
+  handler: async (
+    runtime: IAgentRuntime,
+    message: Memory,
+    _state?: State,
+    _options?: unknown,
+    callback?: HandlerCallback,
+  ): Promise<ActionResult> => {
+    const service = runtime.getService(
+      "scape_game",
+    ) as unknown as ScapeGameService | null;
+    if (!service) {
+      const err = "'scape game service not available.";
+      callback?.({ text: err, action: "ATTACK_NPC" });
+      return { success: false, text: err };
+    }
 
-        const text = getCurrentLlmResponse();
-        const npcId = extractParamInt(text, "npcId") ?? extractParamInt(text, "id");
-        if (npcId === null) {
-            const err = "ATTACK_NPC requires <npcId>N</npcId>.";
-            callback?.({ text: err, action: "ATTACK_NPC" });
-            return { success: false, message: err };
-        }
+    const text = resolveActionText(message);
+    const npcId = extractParamInt(text, "npcId") ?? extractParamInt(text, "id");
+    if (npcId === null) {
+      const err = "ATTACK_NPC requires <npcId>N</npcId>.";
+      callback?.({ text: err, action: "ATTACK_NPC" });
+      return { success: false, text: err };
+    }
 
-        const result = await service.executeAction({
-            action: "attackNpc",
-            npcId,
-        });
-        callback?.({
-            text: result.message ?? (result.success ? "engaging" : "attack failed"),
-            action: "ATTACK_NPC",
-        });
-        return result;
-    },
+    const result = await service.executeAction({
+      action: "attackNpc",
+      npcId,
+    });
+    const displayText =
+      result.message ?? (result.success ? "engaging" : "attack failed");
+    callback?.({ text: displayText, action: "ATTACK_NPC" });
+    return { success: result.success, text: displayText };
+  },
 };

@@ -16,50 +16,55 @@
  */
 
 import type {
-    Action,
-    HandlerCallback,
-    IAgentRuntime,
-    Memory,
-    State,
+  Action,
+  ActionResult,
+  HandlerCallback,
+  IAgentRuntime,
+  Memory,
+  State,
 } from "@elizaos/core";
-
-import { getCurrentLlmResponse } from "../shared-state.js";
 import type { ScapeGameService } from "../services/game-service.js";
+import { hasActionTag, resolveActionText } from "../shared-state.js";
 import { extractParamInt } from "./param-parser.js";
 
 export const eatFood: Action = {
-    name: "EAT_FOOD",
-    description:
-        "Eat a food item from an inventory slot to restore hitpoints. Prioritize this when HP is low.",
-    similes: ["CONSUME_FOOD", "HEAL", "EAT"],
-    examples: [],
-    validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
-        return runtime.getService("scape_game") != null;
-    },
-    handler: async (
-        runtime: IAgentRuntime,
-        _message: Memory,
-        _state: State | undefined,
-        _options: Record<string, unknown>,
-        callback?: HandlerCallback,
-    ): Promise<unknown> => {
-        const service = runtime.getService("scape_game") as unknown as ScapeGameService | null;
-        if (!service) {
-            const err = "'scape game service not available.";
-            callback?.({ text: err, action: "EAT_FOOD" });
-            return { success: false, message: err };
-        }
+  name: "EAT_FOOD",
+  description:
+    "Eat a food item from an inventory slot to restore hitpoints. Prioritize this when HP is low.",
+  similes: ["CONSUME_FOOD", "HEAL", "EAT"],
+  examples: [],
+  validate: async (
+    runtime: IAgentRuntime,
+    message: Memory,
+  ): Promise<boolean> => {
+    if (runtime.getService("scape_game") == null) return false;
+    return hasActionTag(message, "EAT_FOOD");
+  },
+  handler: async (
+    runtime: IAgentRuntime,
+    message: Memory,
+    _state?: State,
+    _options?: unknown,
+    callback?: HandlerCallback,
+  ): Promise<ActionResult> => {
+    const service = runtime.getService(
+      "scape_game",
+    ) as unknown as ScapeGameService | null;
+    if (!service) {
+      const err = "'scape game service not available.";
+      callback?.({ text: err, action: "EAT_FOOD" });
+      return { success: false, text: err };
+    }
 
-        const text = getCurrentLlmResponse();
-        const slot = extractParamInt(text, "slot");
-        const result = await service.executeAction({
-            action: "eatFood",
-            slot: slot ?? undefined,
-        });
-        callback?.({
-            text: result.message ?? (result.success ? "ate" : "eat failed"),
-            action: "EAT_FOOD",
-        });
-        return result;
-    },
+    const text = resolveActionText(message);
+    const slot = extractParamInt(text, "slot");
+    const result = await service.executeAction({
+      action: "eatFood",
+      slot: slot ?? undefined,
+    });
+    const displayText =
+      result.message ?? (result.success ? "ate" : "eat failed");
+    callback?.({ text: displayText, action: "EAT_FOOD" });
+    return { success: result.success, text: displayText };
+  },
 };
