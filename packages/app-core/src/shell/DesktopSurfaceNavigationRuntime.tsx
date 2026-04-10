@@ -14,6 +14,7 @@ const MAIN_NAVIGATION_TABS = new Set<Tab>([
   "plugins",
   "connectors",
   "triggers",
+  "lifeops",
   "settings",
 ]);
 

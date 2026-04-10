@@ -22,6 +22,8 @@ function makeSnapshot(count: number): RelationshipsGraphSnapshot {
     tags: [],
     factCount: 0,
     relationshipCount: index === 0 || index === count - 1 ? 1 : 2,
+    isOwner: index === 0,
+    profiles: [],
     lastInteractionAt: `2026-04-${String((index % 9) + 1).padStart(2, "0")}T12:00:00.000Z`,
   }));
 

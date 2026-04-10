@@ -12,9 +12,11 @@ export interface ApplyPluginAutoEnableParams {
 }
 
 export const CONNECTOR_PLUGINS: Record<string, string> = {
+  bluebubbles: "@elizaos/plugin-bluebubbles",
   telegram: "@elizaos/plugin-telegram",
   telegramAccount: "@elizaos-plugins/client-telegram-account",
   discord: "@elizaos/plugin-discord",
+  discordLocal: "@miladyai/plugin-discord-local",
   slack: "@elizaos/plugin-slack",
   twitter: "@elizaos/plugin-twitter",
   // Internal connector built from src/plugins/whatsapp (not an npm package).
@@ -216,6 +218,8 @@ export function isConnectorConfigured(
   }
 
   switch (connectorName) {
+    case "bluebubbles":
+      return Boolean(config.serverUrl && config.password);
     case "telegramAccount":
       return Boolean(
         config.phone &&
@@ -224,6 +228,8 @@ export function isConnectorConfigured(
           config.deviceModel &&
           config.systemVersion,
       );
+    case "discordLocal":
+      return Boolean(config.clientId && config.clientSecret);
     case "imessage":
       return Boolean(config.cliPath);
     case "signal":

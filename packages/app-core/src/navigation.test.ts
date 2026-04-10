@@ -125,11 +125,9 @@ describe("pathForTab", () => {
 });
 
 describe("tab groups", () => {
-  it("removes Character from the top-level navigation groups", () => {
-    expect(ALL_TAB_GROUPS.map((group) => group.label)).not.toContain(
-      "Character",
-    );
-    expect(getTabGroups(false).map((group) => group.label)).not.toContain(
+  it("includes Character as a top-level navigation group", () => {
+    expect(ALL_TAB_GROUPS.map((group) => group.label)).toContain("Character");
+    expect(getTabGroups(false).map((group) => group.label)).toContain(
       "Character",
     );
   });
@@ -151,6 +149,7 @@ describe("tab groups", () => {
       "fine-tuning",
       "trajectories",
       "relationships",
+      "memories",
       "rolodex",
       "runtime",
       "database",

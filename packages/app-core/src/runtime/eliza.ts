@@ -1,4 +1,6 @@
 import "../utils/namespace-defaults.js";
+import { existsSync } from "node:fs";
+import { rename } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import process from "node:process";
@@ -15,6 +17,9 @@ import {
 
 export * from "@miladyai/agent/runtime/eliza";
 
+import { loadElizaConfig } from "@miladyai/agent/config/config";
+import { resolveUserPath } from "@miladyai/agent/config/paths";
+import { resolveDefaultAgentWorkspaceDir } from "@miladyai/agent/providers/workspace";
 import {
   type BootElizaRuntimeOptions,
   type StartElizaOptions,
@@ -27,13 +32,7 @@ import {
   shutdownRuntime as upstreamShutdownRuntime,
   startEliza as upstreamStartEliza,
 } from "@miladyai/agent/runtime/eliza";
-import {
-  resolveServerOnlyPort,
-  syncResolvedApiPort,
-} from "@miladyai/shared/runtime-env";
-import { syncMiladyEnvToEliza, syncElizaEnvToMilady } from "../utils/env.js";
-
-import { loadElizaConfig } from "@miladyai/agent/config/config";
+import { getLastFailedPluginNames } from "@miladyai/agent/runtime/plugin-resolver";
 import {
   getDefaultStylePreset,
   normalizeCharacterLanguage,
@@ -41,7 +40,12 @@ import {
   resolveStylePresetById,
   resolveStylePresetByName,
 } from "@miladyai/shared/onboarding-presets";
+import {
+  resolveServerOnlyPort,
+  syncResolvedApiPort,
+} from "@miladyai/shared/runtime-env";
 import { normalizeCharacterMessageExamples } from "../utils/character-message-examples.js";
+import { syncElizaEnvToMilady, syncMiladyEnvToEliza } from "../utils/env.js";
 import { ensureRuntimeSqlCompatibility } from "../utils/sql-compat.js";
 import type { EmbeddingProgressCallback } from "./embedding-manager-support.js";
 import {
@@ -71,6 +75,23 @@ const EDGE_TTS_PLUGIN = "@elizaos/plugin-edge-tts";
 const require = createRequire(import.meta.url);
 const DIRECT_HELP_FLAGS = new Set(["-h", "--help", "help"]);
 const DIRECT_VERSION_FLAGS = new Set(["-v", "-V", "--version", "version"]);
+const PLUGIN_SQL_GLOBAL_SINGLETONS = Symbol.for(
+  "@elizaos/plugin-sql/global-singletons",
+);
+const MILADY_AUTO_RESET_PGLITE_ERROR_CODE =
+  "ELIZA_PGLITE_MANUAL_RESET_REQUIRED";
+
+interface PluginSqlGlobalSingletons {
+  pgLiteClientManager?: {
+    close?: () => Promise<unknown> | unknown;
+  };
+}
+
+type ErrorWithCause = Error & {
+  cause?: unknown;
+  code?: unknown;
+  dataDir?: unknown;
+};
 
 export function isMiladyEdgeTtsDisabled(
   config: Parameters<typeof upstreamCollectPluginNames>[0],
@@ -78,11 +99,10 @@ export function isMiladyEdgeTtsDisabled(
   if (config.plugins?.entries?.["edge-tts"]?.enabled === false) {
     return true;
   }
-  const raw =
-    typeof process !== "undefined" && process.env
-      ? (process.env.MILADY_DISABLE_EDGE_TTS ??
-        process.env.ELIZA_DISABLE_EDGE_TTS)
-      : undefined;
+  const raw = process?.env
+    ? (process.env.MILADY_DISABLE_EDGE_TTS ??
+      process.env.ELIZA_DISABLE_EDGE_TTS)
+    : undefined;
   if (!raw || typeof raw !== "string") return false;
   const n = raw.trim().toLowerCase();
   return n === "1" || n === "true" || n === "yes";
@@ -819,6 +839,213 @@ export async function bootElizaRuntime(
 export interface StartElizaOptionsExt extends StartElizaOptions {
   /** Optional callback for embedding model download/init progress. */
   onEmbeddingProgress?: EmbeddingProgressCallback;
+}
+
+function collectErrorObjects(err: unknown): ErrorWithCause[] {
+  const chain: ErrorWithCause[] = [];
+  const seen = new Set<unknown>();
+  let current: unknown = err;
+
+  while (current && !seen.has(current)) {
+    seen.add(current);
+    if (current instanceof Error) {
+      chain.push(current as ErrorWithCause);
+      current = (current as ErrorWithCause).cause;
+      continue;
+    }
+    if (typeof current === "object" && current !== null) {
+      const candidate = current as ErrorWithCause;
+      chain.push(candidate);
+      current = candidate.cause;
+      continue;
+    }
+    break;
+  }
+
+  return chain;
+}
+
+function getPgliteErrorCode(err: unknown): string | null {
+  for (const current of collectErrorObjects(err)) {
+    if (typeof current.code === "string" && current.code) {
+      return current.code;
+    }
+  }
+  return null;
+}
+
+function collectErrorMessages(err: unknown): string[] {
+  const messages: string[] = [];
+
+  for (const current of collectErrorObjects(err)) {
+    if (typeof current.message === "string" && current.message) {
+      messages.push(current.message);
+    }
+  }
+
+  return messages;
+}
+
+function isMiladyManualResetPgliteError(err: unknown): boolean {
+  if (getPgliteErrorCode(err) === MILADY_AUTO_RESET_PGLITE_ERROR_CODE) {
+    return true;
+  }
+
+  return collectErrorMessages(err).some((message) =>
+    message.includes("rename or delete only this directory before retrying"),
+  );
+}
+
+function getPgliteDataDirFromError(err: unknown): string | null {
+  for (const current of collectErrorObjects(err)) {
+    if (typeof current.dataDir === "string" && current.dataDir.trim()) {
+      return current.dataDir;
+    }
+  }
+
+  for (const message of collectErrorMessages(err)) {
+    const retryPathMatch = message.match(
+      /before retrying:\s*([^\n]+?)(?:\s*$|\.)/,
+    );
+    if (retryPathMatch?.[1]) {
+      return retryPathMatch[1].trim();
+    }
+
+    const initPathMatch = message.match(
+      /PGlite initialization failed for (.+?):/i,
+    );
+    if (initPathMatch?.[1]) {
+      return initPathMatch[1].trim();
+    }
+  }
+
+  return null;
+}
+
+function resolveMiladyManagedPgliteDataDir(): string | null {
+  const envDataDir = process.env.PGLITE_DATA_DIR?.trim();
+  if (envDataDir) {
+    return resolveUserPath(envDataDir);
+  }
+
+  const config = loadElizaConfig();
+  if ((config.database?.provider ?? "pglite") === "postgres") {
+    return null;
+  }
+
+  const configuredDataDir = config.database?.pglite?.dataDir?.trim();
+  if (configuredDataDir) {
+    return resolveUserPath(configuredDataDir);
+  }
+
+  const workspaceDir =
+    config.agents?.defaults?.workspace ?? resolveDefaultAgentWorkspaceDir();
+  return path.join(resolveUserPath(workspaceDir), ".eliza", ".elizadb");
+}
+
+function isMiladyAutoResettablePgliteDir(
+  dataDir: string | null,
+): dataDir is string {
+  return typeof dataDir === "string" && path.basename(dataDir) === ".elizadb";
+}
+
+async function resetPluginSqlPgliteSingleton(context: string): Promise<void> {
+  const globalSymbols = globalThis as typeof globalThis &
+    Record<symbol, PluginSqlGlobalSingletons | undefined>;
+  const singletons = globalSymbols[PLUGIN_SQL_GLOBAL_SINGLETONS];
+  const manager = singletons?.pgLiteClientManager;
+
+  if (manager && typeof manager.close === "function") {
+    let closeTimedOut = false;
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+
+    try {
+      await Promise.race([
+        Promise.resolve(manager.close()),
+        new Promise<void>((resolve) => {
+          timeoutHandle = setTimeout(() => {
+            closeTimedOut = true;
+            resolve();
+          }, 1_000);
+        }),
+      ]);
+    } catch (err) {
+      logger.warn(
+        `[milady] ${context}: failed to close plugin-sql PGlite singleton: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
+
+    if (closeTimedOut) {
+      logger.warn(
+        `[milady] ${context}: plugin-sql PGlite singleton close timed out; continuing with a forced reset`,
+      );
+    }
+  }
+
+  if (singletons?.pgLiteClientManager) {
+    delete singletons.pgLiteClientManager;
+  }
+}
+
+async function quarantinePgliteDataDir(
+  dataDir: string,
+): Promise<string | null> {
+  if (!existsSync(dataDir)) {
+    return null;
+  }
+
+  const parentDir = path.dirname(dataDir);
+  const baseName = path.basename(dataDir);
+  let attempt = 0;
+
+  while (attempt < 1000) {
+    const suffix = attempt === 0 ? `${Date.now()}` : `${Date.now()}-${attempt}`;
+    const backupDir = path.join(parentDir, `${baseName}.corrupt-${suffix}`);
+    if (existsSync(backupDir)) {
+      attempt += 1;
+      continue;
+    }
+    await rename(dataDir, backupDir);
+    return backupDir;
+  }
+
+  throw new Error(`Could not allocate a backup path for ${dataDir}`);
+}
+
+export async function attemptMiladyPgliteAutoReset(
+  err: unknown,
+): Promise<string | null> {
+  if (!isMiladyManualResetPgliteError(err)) {
+    return null;
+  }
+
+  const dataDir =
+    getPgliteDataDirFromError(err) ?? resolveMiladyManagedPgliteDataDir();
+  if (!isMiladyAutoResettablePgliteDir(dataDir)) {
+    return null;
+  }
+
+  logger.warn(
+    `[milady] PGlite startup failed for ${dataDir}. Quarantining the local database before retrying.`,
+  );
+
+  await resetPluginSqlPgliteSingleton("PGlite auto-reset");
+  const backupDir = await quarantinePgliteDataDir(dataDir);
+
+  if (backupDir) {
+    logger.warn(`[milady] Moved the previous PGlite data dir to ${backupDir}`);
+  }
+
+  await resetPluginSqlPgliteSingleton("PGlite auto-reset retry");
+  return backupDir;
+}
+
+export function getMiladyPgliteRecoveryRetrySkipPlugins(): string[] {
+  return getLastFailedPluginNames();
 }
 
 export async function startEliza(

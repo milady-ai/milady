@@ -43,38 +43,6 @@ describe("app vite config", () => {
     expect(pluginNames).toContain("desktop-cors");
   });
 
-  it("strips spark inline worker source map trailers for WKWebView", async () => {
-    const loaded = await loadConfigFromFile(
-      { command: "serve", mode: "development" },
-      CONFIG_PATH,
-      APP_DIR,
-    );
-    const plugins = (loaded?.config.plugins ?? []) as Array<{
-      name?: string;
-      transform?: (
-        code: string,
-        id: string,
-      ) => { code: string; map?: unknown } | string | null | undefined;
-    }>;
-    const sparkPatch = plugins.find((plugin) => plugin.name === "spark-patch");
-
-    expect(sparkPatch?.transform).toBeDefined();
-
-    const result = sparkPatch?.transform?.(
-      [
-        "const jsContent = 'hello\\n//# sourceMappingURL=worker-CaMzlx2k.js.map\\n';",
-        "function getShaders() { if (!shaders) { return 1; } }",
-      ].join("\n"),
-      "/tmp/@sparkjsdev/spark/dist/spark.module.js",
-    );
-
-    const transformed = typeof result === "string" ? result : result?.code;
-    expect(transformed).toBeDefined();
-    expect(transformed).not.toContain(
-      "sourceMappingURL=worker-CaMzlx2k.js.map",
-    );
-  });
-
   it("uses app-local Vite cache dir and ignores Electrobun native build output", async () => {
     const loaded = await loadConfigFromFile(
       { command: "serve", mode: "development" },

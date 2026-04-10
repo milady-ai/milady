@@ -46,6 +46,7 @@ import type {
   PluginInfo,
   PluginMutationResult,
   RawPtySession,
+  RelationshipsActivityResponse,
   RelationshipsGraphQuery,
   RelationshipsGraphSnapshot,
   RelationshipsGraphStats,
@@ -175,7 +176,10 @@ declare module "./client-base" {
     ): Promise<{ ok: boolean; tradePermissionMode: string }>;
     playEmote(emoteId: string): Promise<{ ok: boolean }>;
     runTerminalCommand(command: string): Promise<{ ok: boolean }>;
-    getOnboardingStatus(): Promise<{ complete: boolean; cloudProvisioned?: boolean }>;
+    getOnboardingStatus(): Promise<{
+      complete: boolean;
+      cloudProvisioned?: boolean;
+    }>;
     getWalletKeys(): Promise<{
       evmPrivateKey: string;
       evmAddress: string;
@@ -364,6 +368,9 @@ declare module "./client-base" {
       stats: RelationshipsGraphStats;
     }>;
     getRelationshipsPerson(id: string): Promise<RelationshipsPersonDetail>;
+    getRelationshipsActivity(
+      limit?: number,
+    ): Promise<RelationshipsActivityResponse>;
     getRolodexGraph(query?: RolodexGraphQuery): Promise<RolodexGraphSnapshot>;
     getRolodexPeople(query?: RolodexGraphQuery): Promise<{
       people: RolodexPersonSummary[];
@@ -1516,6 +1523,16 @@ MiladyClient.prototype.getRelationshipsPerson = async function (
     `/api/relationships/people/${encodeURIComponent(id)}`,
   );
   return response.data;
+};
+
+MiladyClient.prototype.getRelationshipsActivity = async function (
+  this: MiladyClient,
+  limit?,
+) {
+  const params = new URLSearchParams();
+  if (typeof limit === "number") params.set("limit", String(limit));
+  const qs = params.toString();
+  return this.fetch(`/api/relationships/activity${qs ? `?${qs}` : ""}`);
 };
 
 MiladyClient.prototype.getRolodexGraph = async function (

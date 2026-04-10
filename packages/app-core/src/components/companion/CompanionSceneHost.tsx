@@ -10,7 +10,7 @@ import {
   useTranslation,
   VRM_COUNT,
 } from "@miladyai/app-core/state";
-import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
+
 import {
   memo,
   type ReactNode,
@@ -406,11 +406,6 @@ function CompanionSceneSurface({
       ? getVrmPreviewUrl(safeSelectedVrmIndex)
       : getVrmPreviewUrl(1);
   const teleportKey = vrmPath;
-  const worldUrl = customWorldUrl
-    ? customWorldUrl
-    : uiTheme === "dark"
-      ? resolveAppAssetUrl("worlds/companion-night.spz")
-      : resolveAppAssetUrl("worlds/companion-day.spz");
   const [teleportCompletedKey, setTeleportCompletedKey] = useState<
     string | null
   >(null);
@@ -611,7 +606,7 @@ function CompanionSceneSurface({
       ref={rootRef}
       data-testid="companion-root"
       data-no-window-drag=""
-      className={`relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden text-white font-display ${interactive ? "cursor-grab" : ""}`}
+      className={`relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden text-[#1a1a2e] font-display ${interactive ? "cursor-grab" : ""}`}
       style={{
         overscrollBehavior: "none",
         touchAction: interactive ? "none" : undefined,
@@ -624,21 +619,27 @@ function CompanionSceneSurface({
     >
       <div
         aria-hidden={!active}
-        className={`fixed inset-0 z-0 overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_120%,#212942_0%,#12151e_80%)] transition-opacity duration-200 ${
-          active ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-0 overflow-hidden rounded-2xl transition-opacity duration-200 ${
+          uiTheme === "dark" ? "bg-[#08060e]" : "bg-[#f5f5f5]"
+        } ${active ? "opacity-100" : "pointer-events-none opacity-0"}`}
         style={{
           visibility: active ? "visible" : "hidden",
         }}
       >
-        <div className="absolute inset-0 z-0 bg-cover opacity-60 bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.03)_0%,transparent_40%),radial-gradient(circle_at_80%_80%,rgba(0,225,255,0.05)_0%,transparent_40%)] pointer-events-none" />
+        <div
+          className={`absolute inset-0 z-0 bg-cover opacity-40 pointer-events-none ${
+            uiTheme === "dark"
+              ? "bg-[radial-gradient(circle_at_50%_40%,rgba(80,20,140,0.2)_0%,transparent_60%)]"
+              : "bg-[radial-gradient(circle_at_50%_40%,rgba(180,200,220,0.15)_0%,transparent_60%)]"
+          }`}
+        />
 
         {shouldMountVrm && (
           <VrmStage
             active={active}
             vrmPath={vrmPath}
-            worldUrl={worldUrl}
             fallbackPreviewUrl={fallbackPreviewUrl}
+            environmentTheme={uiTheme === "dark" ? "dark" : "light"}
             cameraProfile="companion"
             companionVrmPowerMode={companionVrmPowerMode}
             companionHalfFramerateMode={companionHalfFramerateMode}

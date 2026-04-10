@@ -4076,7 +4076,7 @@ describe("Deep links and URL schemes (automated)", () => {
     expect(mainSource).toContain("handleDeepLink");
   });
 
-  it("handleDeepLink supports chat, settings, connect, share paths", async () => {
+  it("handleDeepLink supports chat, lifeops, settings, connect, share paths", async () => {
     const fs = await vi.importActual<typeof import("node:fs")>("node:fs");
     const path = await vi.importActual<typeof import("node:path")>("node:path");
     const mainSource = fs.readFileSync(
@@ -4084,6 +4084,7 @@ describe("Deep links and URL schemes (automated)", () => {
       "utf8",
     );
     expect(mainSource).toContain('"chat"');
+    expect(mainSource).toContain('"lifeops"');
     expect(mainSource).toContain('"settings"');
     expect(mainSource).toContain('"connect"');
     expect(mainSource).toContain('"share"');

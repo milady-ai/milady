@@ -36,6 +36,8 @@ export const ELIZA_CLOUD_STATUS_UPDATED_EVENT =
   "eliza:cloud-status-updated" as const;
 export const LIFEOPS_GOOGLE_CONNECTOR_REFRESH_EVENT =
   "eliza:lifeops-google-connector-refresh" as const;
+export const LIFEOPS_GITHUB_CALLBACK_EVENT =
+  "eliza:lifeops-github-callback" as const;
 
 export interface ElizaCloudStatusUpdatedDetail {
   /** Same as cloud status `connected` (auth or API key on server). */
@@ -61,6 +63,17 @@ export interface LifeOpsGoogleConnectorRefreshDetail {
     | "focus"
     | "visibility"
     | "resume";
+}
+
+export interface LifeOpsGithubCallbackDetail {
+  target: "owner" | "agent";
+  status: "connected" | "error";
+  connectionId?: string | null;
+  agentId?: string | null;
+  githubUsername?: string | null;
+  bindingMode?: "cloud-managed" | "shared-owner" | null;
+  message?: string | null;
+  restarted?: boolean;
 }
 
 // ── Avatar / VRM ─────────────────────────────────────────────────────────
@@ -104,6 +117,7 @@ export type ElizaWindowEventName =
   | typeof APP_EMOTE_EVENT
   | typeof ELIZA_CLOUD_STATUS_UPDATED_EVENT
   | typeof LIFEOPS_GOOGLE_CONNECTOR_REFRESH_EVENT
+  | typeof LIFEOPS_GITHUB_CALLBACK_EVENT
   | typeof VRM_TELEPORT_COMPLETE_EVENT
   | typeof ONBOARDING_VOICE_PREVIEW_AWAIT_TELEPORT_EVENT
   | typeof SELF_STATUS_SYNC_EVENT;
@@ -144,6 +158,12 @@ export function dispatchLifeOpsGoogleConnectorRefresh(
   detail?: LifeOpsGoogleConnectorRefreshDetail,
 ): void {
   dispatchWindowEvent(LIFEOPS_GOOGLE_CONNECTOR_REFRESH_EVENT, detail);
+}
+
+export function dispatchLifeOpsGithubCallback(
+  detail: LifeOpsGithubCallbackDetail,
+): void {
+  dispatchWindowEvent(LIFEOPS_GITHUB_CALLBACK_EVENT, detail);
 }
 
 // ── Generic app aliases (preferred) ──────────────────────────────────────

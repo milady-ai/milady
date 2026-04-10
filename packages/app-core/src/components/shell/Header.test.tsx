@@ -86,7 +86,7 @@ vi.mock("lucide-react", () => ({
 }));
 
 describe("Header", () => {
-  it("renders agent name and shell toggle", async () => {
+  it("hides the shell toggle pill outside the companion overlay", async () => {
     // Mock the useApp hook return value
     const mockUseApp = {
       t: (k: string) => k,
@@ -112,8 +112,6 @@ describe("Header", () => {
       setUiLanguage: vi.fn(),
       uiTheme: "dark",
       setUiTheme: vi.fn(),
-      uiShellMode: "native",
-      switchShellView: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.
@@ -128,18 +126,10 @@ describe("Header", () => {
     }
     const root = (testRenderer as ReactTestRenderer).root;
 
-    // Check shell toggle button
-    const shellToggle = root.findByProps({ "data-testid": "ui-shell-toggle" });
-    const _activeDesktopToggle = root.findByProps({
-      "data-testid": "ui-shell-toggle-desktop",
-    });
-    const _inactiveCharacterToggle = root.findByProps({
-      "data-testid": "ui-shell-toggle-character",
-    });
-    const _inactiveCompanionToggle = root.findByProps({
-      "data-testid": "ui-shell-toggle-companion",
-    });
-    expect(shellToggle).toBeDefined();
+    // Shell toggle pill should NOT be rendered — it only lives in the companion header
+    expect(
+      root.findAll((node) => node.props["data-testid"] === "ui-shell-toggle"),
+    ).toHaveLength(0);
     expect(mockUseApp.setState).toHaveBeenCalledWith("chatMode", "power");
   });
 
@@ -214,7 +204,7 @@ describe("Header", () => {
     ).toBeDefined();
   });
 
-  it("uses minimal chrome for the character view and hides cloud pricing", async () => {
+  it("shows nav tabs on the character view with cloud status visible", async () => {
     const mockUseApp = {
       t: (k: string) => k,
       agentStatus: { state: "running", agentName: "Eliza" },
@@ -239,8 +229,6 @@ describe("Header", () => {
       setUiLanguage: vi.fn(),
       uiTheme: "dark",
       setUiTheme: vi.fn(),
-      uiShellMode: "native",
-      switchShellView: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.
@@ -254,32 +242,16 @@ describe("Header", () => {
       throw new Error("Failed to render Header");
     }
 
-    const _header = (testRenderer as ReactTestRenderer).root.findByType(
-      "header",
-    );
+    // Header is always in desktop mode — nav tabs are always visible
+    const root = (testRenderer as ReactTestRenderer).root;
+    root.findByType("header");
+    // Cloud status is visible on character tab when connected
     expect(
-      (testRenderer as ReactTestRenderer).root.findAll(
-        (node) => node.props.title === "Chat",
-      ),
-    ).toHaveLength(0);
-    expect(
-      (testRenderer as ReactTestRenderer).root.findAll(
-        (node) => node.props["aria-label"] === "Open navigation menu",
-      ),
-    ).toHaveLength(0);
-    expect(
-      (testRenderer as ReactTestRenderer).root.findAllByProps({
-        "data-testid": "header-cloud-status",
-      }),
-    ).toHaveLength(0);
-    expect(
-      (testRenderer as ReactTestRenderer).root.findAll(
-        (node) => node.props["aria-label"] === "charactereditor.Save",
-      ),
-    ).toHaveLength(0);
+      root.findAllByProps({ "data-testid": "header-cloud-status" }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
-  it("uses minimal chrome in companion mode", async () => {
+  it("always shows navigation tabs (header is always desktop mode)", async () => {
     const mockUseApp = {
       t: (k: string) => k,
       agentStatus: { state: "running", agentName: "Eliza" },
@@ -296,7 +268,7 @@ describe("Header", () => {
       handleRestart: vi.fn(),
       handleStart: vi.fn(),
       loadDropStatus: vi.fn().mockResolvedValue(undefined),
-      tab: "character",
+      tab: "chat",
       setTab: vi.fn(),
       setState: vi.fn(),
       plugins: [],
@@ -304,8 +276,6 @@ describe("Header", () => {
       setUiLanguage: vi.fn(),
       uiTheme: "dark",
       setUiTheme: vi.fn(),
-      uiShellMode: "companion",
-      switchShellView: vi.fn(),
     };
 
     // @ts-expect-error - test uses a narrowed subset of the full app context type.
@@ -313,25 +283,18 @@ describe("Header", () => {
 
     let testRenderer: ReactTestRenderer | null = null;
     await act(async () => {
-      testRenderer = create(<Header transparent />);
+      testRenderer = create(<Header />);
     });
     if (!testRenderer) {
       throw new Error("Failed to render Header");
     }
 
-    const _header = (testRenderer as ReactTestRenderer).root.findByType(
-      "header",
-    );
+    // Nav tabs should always be visible — header is always in desktop mode
     expect(
       (testRenderer as ReactTestRenderer).root.findAll(
-        (node) => node.props.title === "Chat",
+        (node) => node.props["data-testid"] === "header-nav-button-chat",
       ),
-    ).toHaveLength(0);
-    expect(
-      (testRenderer as ReactTestRenderer).root.findAll(
-        (node) => node.props["aria-label"] === "Open navigation menu",
-      ),
-    ).toHaveLength(0);
+    ).not.toHaveLength(0);
   });
 
   it("keeps desktop shell transparent when the header is explicitly transparent", async () => {

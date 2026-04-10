@@ -12,11 +12,8 @@ import {
   VRMLoaderPlugin,
   VRMUtils,
 } from "@pixiv/three-vrm";
-import type {
-  SparkRenderer as SparkRendererType,
-  SplatMesh as SparkSplatMesh,
-} from "@sparkjsdev/spark";
 import * as THREE from "three";
+import { MathEnvironment } from "./MathEnvironment";
 import { SceneOverlayManager } from "./SceneOverlayManager";
 import type {
   TeleportSparkleParticle,
@@ -42,8 +39,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 // biome-ignore lint/suspicious/noExplicitAny: Three.js TSL shader nodes are opaque chainable objects with no exported types.
 type TslNode = any;
-type TslMathFn = (...args: TslNode[]) => TslNode;
-type TslMathLib = Record<string, TslMathFn | undefined>;
 
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
@@ -92,7 +87,6 @@ export type VrmEngineDebugInfo = {
   initialized: boolean;
   rendererBackend: RendererBackend;
   cameraProfile: CameraProfile;
-  worldUrl: string | null;
   sceneChildren: string[];
   camera: {
     parentName: string | null;
@@ -108,19 +102,6 @@ export type VrmEngineDebugInfo = {
     position: DebugVector3 | null;
     scale: DebugVector3 | null;
     bounds: DebugBounds | null;
-  };
-  world: {
-    loaded: boolean;
-    parentName: string | null;
-    position: DebugVector3 | null;
-    scale: DebugVector3 | null;
-    bounds: DebugBounds | null;
-    rawBounds: DebugBounds | null;
-  };
-  spark: {
-    attached: boolean;
-    parentName: string | null;
-    renderOrder: number | null;
   };
 };
 
@@ -159,23 +140,6 @@ type RendererLike = Pick<
   ) => void;
 };
 
-type WorldRevealController = {
-  mesh: SparkSplatMesh;
-  progressUniform: { value: number };
-  mode: "reveal" | "hide";
-  radius: number;
-};
-
-type WorldRevealState = {
-  controller: WorldRevealController;
-  incoming: WorldRevealController;
-  outgoing: WorldRevealController | null;
-  progress: number;
-  duration: number;
-  waitingForVrm: boolean;
-  syncToTeleport: boolean;
-};
-
 const DEFAULT_CAMERA_ANIMATION: CameraAnimationConfig = {
   enabled: false,
   swayAmplitude: 0.06,
@@ -185,34 +149,10 @@ const DEFAULT_CAMERA_ANIMATION: CameraAnimationConfig = {
 };
 const CAMERA_PROFILE_TRANSITION_DURATION_SECONDS = 0.8;
 const AVATAR_SWITCH_CAMERA_TRANSITION_DURATION_SECONDS = 3;
-const COMPANION_WORLD_SCALE = 2.5;
-const COMPANION_DARK_WORLD_FLOOR_OFFSET_Y = -0.85;
-const COMPANION_LIGHT_WORLD_FLOOR_OFFSET_Y = -0.3;
-const COMPANION_WORLD_REVEAL_DURATION = 5.4;
-const COMPANION_WORLD_REVEAL_EDGE = 0.28;
-const COMPANION_WORLD_REVEAL_EASE_EXPONENT = 2;
-const COMPANION_WORLD_REVEAL_START_OFFSET = 0.7;
 const TELEPORT_DISSOLVE_START_Y = -1.2;
 const TELEPORT_DISSOLVE_END_Y = 1.0;
-const COMPANION_DOF_APERTURE_SIZE = 0.028;
-const COMPANION_DOF_NEAR_ZOOM_APERTURE_FACTOR = 0.4;
 const COMPANION_ZOOM_NEAR_FACTOR = 0.25;
 const COMPANION_ZOOM_MIN_RADIUS = 1.2;
-const SPARK_CLIP_XY = 1.08;
-const SPARK_MAX_STD_DEV = 2.35;
-const SPARK_MAX_STD_DEV_NEAR = 1.9;
-const SPARK_MIN_ALPHA = 0.0016;
-const SPARK_MIN_ALPHA_NEAR = 0.0024;
-const SPARK_SORT_DISTANCE = 0.035;
-const SPARK_SORT_DISTANCE_NEAR = 0.05;
-const SPARK_MAX_PIXEL_RADIUS = 96;
-const SPARK_MAX_PIXEL_RADIUS_NEAR = 28;
-/** Extra clamp when `lowPowerRenderMode` (battery): cheaper splat sorting / coverage. */
-const SPARK_LOW_POWER_MAX_PIXEL_RADIUS = 44;
-const SPARK_LOW_POWER_MAX_STD_DEV = 1.45;
-const SPARK_LOW_POWER_MIN_ALPHA = 0.0028;
-const SPARK_LOW_POWER_CLIP_XY = 1.02;
-const SPARK_LOW_POWER_SORT_DISTANCE = 0.022;
 const MAX_RENDERER_PIXEL_RATIO = 2;
 const AVATAR_RENDERER_OVERRIDE_KEY = "eliza.avatarRenderer";
 const LOOKING_GLASS_ENABLED_KEY = "eliza.avatarLookingGlass";
@@ -233,9 +173,8 @@ function getDracoDecoderPath(): string {
   return _cachedDracoDecoderPath;
 }
 
-function getRendererPixelRatio(sparkOptimized = false): number {
+function getRendererPixelRatio(): number {
   if (typeof window === "undefined") return 1;
-  if (sparkOptimized) return 1;
   return Math.min(
     Math.max(window.devicePixelRatio || 1, 1),
     MAX_RENDERER_PIXEL_RATIO,
@@ -349,113 +288,6 @@ function getTeleportSparkleTexture(): THREE.CanvasTexture {
   teleportSparkleTexture = new THREE.CanvasTexture(canvas);
   teleportSparkleTexture.needsUpdate = true;
   return teleportSparkleTexture;
-}
-
-function quantileSorted(values: number[], percentile: number): number {
-  if (values.length === 0) return 0;
-  const index = Math.min(
-    values.length - 1,
-    Math.max(0, Math.floor((values.length - 1) * percentile)),
-  );
-  return values[index] ?? 0;
-}
-
-function getRobustPackedSplatAnchor(splatSource: {
-  numSplats?: number;
-  forEachSplat: SparkSplatMesh["forEachSplat"];
-}): THREE.Vector3 {
-  const maxSamples = 4096;
-  const xSamples: number[] = [];
-  const ySamples: number[] = [];
-  const zSamples: number[] = [];
-  const splatCount = splatSource.numSplats ?? maxSamples;
-  const sampleStep =
-    splatCount > maxSamples
-      ? Math.max(1, Math.floor(splatCount / maxSamples))
-      : 1;
-
-  splatSource.forEachSplat((index, center) => {
-    if (sampleStep > 1 && index % sampleStep !== 0) return;
-    xSamples.push(center.x);
-    ySamples.push(center.y);
-    zSamples.push(center.z);
-  });
-
-  if (xSamples.length === 0) {
-    return new THREE.Vector3(0, 0, 0);
-  }
-
-  xSamples.sort((a, b) => a - b);
-  ySamples.sort((a, b) => a - b);
-  zSamples.sort((a, b) => a - b);
-
-  return new THREE.Vector3(
-    quantileSorted(xSamples, 0.5),
-    quantileSorted(ySamples, 0.05),
-    quantileSorted(zSamples, 0.5),
-  );
-}
-
-/** SparkSplatMesh may have packedSplats; types not fully exported from @sparkjsdev/spark. */
-interface SparkSplatWithPacked {
-  packedSplats?: { numSplats?: number };
-}
-
-function getRobustSplatAnchor(splat: SparkSplatMesh): THREE.Vector3 {
-  return getRobustPackedSplatAnchor({
-    numSplats: (splat as SparkSplatWithPacked).packedSplats?.numSplats,
-    forEachSplat: splat.forEachSplat.bind(splat),
-  });
-}
-
-function getRobustPackedSplatRadialExtent(
-  splatSource: {
-    numSplats?: number;
-    forEachSplat: SparkSplatMesh["forEachSplat"];
-  },
-  anchor: THREE.Vector3,
-): number {
-  const maxSamples = 4096;
-  const radialSamples: number[] = [];
-  const splatCount = splatSource.numSplats ?? maxSamples;
-  const sampleStep =
-    splatCount > maxSamples
-      ? Math.max(1, Math.floor(splatCount / maxSamples))
-      : 1;
-
-  splatSource.forEachSplat((index, center) => {
-    if (sampleStep > 1 && index % sampleStep !== 0) return;
-    radialSamples.push(Math.hypot(center.x - anchor.x, center.z - anchor.z));
-  });
-
-  if (radialSamples.length === 0) {
-    return 1;
-  }
-
-  radialSamples.sort((a, b) => a - b);
-  return Math.max(1, quantileSorted(radialSamples, 0.985));
-}
-
-function getRobustSplatRadialExtent(
-  splat: SparkSplatMesh,
-  anchor: THREE.Vector3,
-): number {
-  return getRobustPackedSplatRadialExtent(
-    {
-      numSplats: (splat as SparkSplatWithPacked).packedSplats?.numSplats,
-      forEachSplat: splat.forEachSplat.bind(splat),
-    },
-    anchor,
-  );
-}
-
-function getCompanionWorldFloorOffsetY(url: string): number {
-  const normalizedUrl = url.toLowerCase();
-  return normalizedUrl.includes("night") ||
-    normalizedUrl.includes("dark") ||
-    normalizedUrl.includes("lunarpunk")
-    ? COMPANION_DARK_WORLD_FLOOR_OFFSET_Y
-    : COMPANION_LIGHT_WORLD_FLOOR_OFFSET_Y;
 }
 
 function isGzipBuffer(buffer: ArrayBuffer): boolean {
@@ -639,7 +471,6 @@ async function loadGltfAsset(
 async function createRenderer(
   canvas: HTMLCanvasElement,
   preference: RendererPreference = "auto",
-  sparkOptimized = false,
 ): Promise<{ backend: RendererBackend; renderer: RendererLike }> {
   if (
     preference !== "webgl" &&
@@ -652,7 +483,7 @@ async function createRenderer(
       const renderer = new WebGPURenderer({
         canvas,
         alpha: true,
-        antialias: !sparkOptimized,
+        antialias: true,
       }) as unknown as RendererLike & { init?: () => Promise<unknown> };
       await renderer.init?.();
       console.info("[VrmEngine] Using WebGPURenderer");
@@ -667,21 +498,18 @@ async function createRenderer(
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !sparkOptimized,
-    powerPreference: sparkOptimized ? "high-performance" : "default",
+    antialias: true,
   }) as RendererLike;
   console.info("[VrmEngine] Using WebGLRenderer");
   return { backend: "webgl", renderer };
 }
 
 export class VrmEngine {
-  private static sparkModulePromise: Promise<
-    typeof import("@sparkjsdev/spark")
-  > | null = null;
   private renderer: RendererLike | null = null;
   private rendererBackend: RendererBackend = "webgl";
   private rendererPreference: RendererPreference = "auto";
   private scene: THREE.Scene | null = null;
+  private mathEnvironment: MathEnvironment | null = null;
   private overlayManager: SceneOverlayManager | null = null;
   private avatarRoot: THREE.Group | null = null;
   private camera: THREE.PerspectiveCamera | null = null;
@@ -726,14 +554,6 @@ export class VrmEngine {
   private speakingStartTime = 0;
   private readonly blinkController = new VrmBlinkController();
 
-  private splatCache = new Map<
-    string,
-    {
-      mesh: SparkSplatMesh;
-      worldAnchor: THREE.Vector3;
-      worldRevealRadius: number;
-    }
-  >();
   private readonly cameraManager = new VrmCameraManager();
   private emoteAction: THREE.AnimationAction | null = null;
   private emoteTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -751,24 +571,14 @@ export class VrmEngine {
    */
   private halfFramerateMode = false;
   private halfFramerateSkipNext = false;
-  /** Mirrors `setup({ sparkOptimized })` — used when re-applying pixel ratio. */
-  private worldStageSparkOptimized = false;
   private paused = false;
   /**
-   * When true, splat world + Spark backdrop are hidden so the loop can keep
-   * driving VRM idle/physics only (document hidden + user opt-in).
+   * When true, only VRM idle/physics keep running (document hidden + user opt-in).
    */
   private minimalBackgroundMode = false;
-  private worldVisibleBeforeMinimalBackground = true;
-  private sparkVisibleBeforeMinimalBackground = true;
   private interactionEnabled = false;
   private interactionMode: InteractionMode = "free";
   private cameraProfile: CameraProfile = "chat";
-  private worldUrl: string | null = null;
-  private worldMesh: SparkSplatMesh | null = null;
-  private worldReveal: WorldRevealState | null = null;
-  private sparkRenderer: SparkRendererType | null = null;
-  private worldLoadRequestId = 0;
   private pointerParallaxEnabled = false;
   private pointerParallaxTarget = new THREE.Vector2();
   private pointerParallaxCurrent = new THREE.Vector2();
@@ -974,7 +784,7 @@ export class VrmEngine {
   }
 
   /**
-   * Re-applies `setPixelRatio` from DPR, spark mode, and battery policy, then
+   * Re-applies `setPixelRatio` from DPR and battery policy, then
    * resizes the drawing buffer to match the canvas CSS size.
    *
    * **WHY:** `setPixelRatio` alone does not always refit the buffer after
@@ -982,7 +792,7 @@ export class VrmEngine {
    */
   private applyRendererPixelRatio(): void {
     if (!this.renderer || !this.camera) return;
-    const base = getRendererPixelRatio(this.worldStageSparkOptimized);
+    const base = getRendererPixelRatio();
     const ratio = this.lowPowerRenderMode ? Math.min(base, 1) : base;
     this.renderer.setPixelRatio(ratio);
     const canvas = this.renderer.domElement as HTMLCanvasElement | undefined;
@@ -1014,464 +824,6 @@ export class VrmEngine {
     if (!this.initialized || this.paused) return;
     this.clock.start();
     this.scheduleNextFrame();
-  }
-
-  private async loadSparkModule(): Promise<typeof import("@sparkjsdev/spark")> {
-    if (!VrmEngine.sparkModulePromise) {
-      VrmEngine.sparkModulePromise = import("@sparkjsdev/spark");
-    }
-    return VrmEngine.sparkModulePromise;
-  }
-
-  /** After Spark init fails, skip world/splat work but keep VRM usable. */
-  private sparkRendererFailed = false;
-
-  private async ensureSparkRenderer(): Promise<void> {
-    if (this.sparkRenderer || this.sparkRendererFailed) return;
-    if (this.rendererBackend !== "webgl") return;
-    if (!this.scene || !this.renderer) return;
-
-    try {
-      const { SparkRenderer } = await this.loadSparkModule();
-      // Re-check after async import — the engine may have been disposed during
-      // the await (e.g. React StrictMode double-mount).
-      if (!this.scene || !this.renderer) return;
-      const sparkRenderer = new SparkRenderer({
-        renderer: this.renderer as THREE.WebGLRenderer,
-        apertureAngle: 0.0,
-        focalDistance: 5.0,
-        originDistance: 1,
-        clipXY: SPARK_CLIP_XY,
-        maxStdDev: SPARK_MAX_STD_DEV,
-        maxPixelRadius: SPARK_MAX_PIXEL_RADIUS,
-        minAlpha: SPARK_MIN_ALPHA,
-        view: {
-          depthBias: 1,
-          sortDistance: SPARK_SORT_DISTANCE,
-          sortRadial: true,
-          sort360: false,
-        },
-      });
-      // Render the Gaussian splat world behind everything else.
-      sparkRenderer.renderOrder = -100;
-      this.scene.add(sparkRenderer);
-      this.sparkRenderer = sparkRenderer;
-      if (this.minimalBackgroundMode) {
-        sparkRenderer.visible = false;
-      }
-
-      if (
-        sparkRenderer.material &&
-        typeof sparkRenderer.material.vertexShader === "string"
-      ) {
-        sparkRenderer.material.vertexShader =
-          sparkRenderer.material.vertexShader.replace(
-            "if (viewCenter.z >= 0.0) {",
-            "if (viewCenter.z > -6.0) {",
-          );
-        sparkRenderer.material.needsUpdate = true;
-      }
-    } catch (err) {
-      this.sparkRendererFailed = true;
-      console.warn(
-        "[VrmEngine] Spark renderer init failed (world background unavailable):",
-        err,
-      );
-    }
-  }
-
-  private updateSparkPerformanceProfile(): void {
-    const sparkRenderer = this.sparkRenderer;
-    if (!sparkRenderer) return;
-    if (!this.worldMesh) {
-      sparkRenderer.maxPixelRadius = SPARK_MAX_PIXEL_RADIUS;
-      sparkRenderer.maxStdDev = SPARK_MAX_STD_DEV;
-      sparkRenderer.minAlpha = SPARK_MIN_ALPHA;
-      sparkRenderer.clipXY = SPARK_CLIP_XY;
-      sparkRenderer.defaultView.sortDistance = SPARK_SORT_DISTANCE;
-    } else {
-      const isCompanionProfile = this.cameraProfile === "companion";
-      const closeZoomFactor = isCompanionProfile
-        ? THREE.MathUtils.smoothstep(this.companionZoomCurrent, 0.3, 1)
-        : 0;
-
-      sparkRenderer.maxPixelRadius = THREE.MathUtils.lerp(
-        SPARK_MAX_PIXEL_RADIUS,
-        SPARK_MAX_PIXEL_RADIUS_NEAR,
-        closeZoomFactor,
-      );
-      sparkRenderer.maxStdDev = THREE.MathUtils.lerp(
-        SPARK_MAX_STD_DEV,
-        SPARK_MAX_STD_DEV_NEAR,
-        closeZoomFactor,
-      );
-      sparkRenderer.minAlpha = THREE.MathUtils.lerp(
-        SPARK_MIN_ALPHA,
-        SPARK_MIN_ALPHA_NEAR,
-        closeZoomFactor,
-      );
-      sparkRenderer.clipXY = THREE.MathUtils.lerp(
-        SPARK_CLIP_XY,
-        1.03,
-        closeZoomFactor,
-      );
-      sparkRenderer.defaultView.sortDistance = THREE.MathUtils.lerp(
-        SPARK_SORT_DISTANCE,
-        SPARK_SORT_DISTANCE_NEAR,
-        closeZoomFactor,
-      );
-    }
-
-    if (this.lowPowerRenderMode) {
-      sparkRenderer.maxPixelRadius = Math.min(
-        sparkRenderer.maxPixelRadius,
-        SPARK_LOW_POWER_MAX_PIXEL_RADIUS,
-      );
-      sparkRenderer.maxStdDev = Math.min(
-        sparkRenderer.maxStdDev,
-        SPARK_LOW_POWER_MAX_STD_DEV,
-      );
-      sparkRenderer.minAlpha = Math.max(
-        sparkRenderer.minAlpha,
-        SPARK_LOW_POWER_MIN_ALPHA,
-      );
-      sparkRenderer.clipXY = Math.min(
-        sparkRenderer.clipXY,
-        SPARK_LOW_POWER_CLIP_XY,
-      );
-      sparkRenderer.defaultView.sortDistance = Math.min(
-        sparkRenderer.defaultView.sortDistance,
-        SPARK_LOW_POWER_SORT_DISTANCE,
-      );
-    }
-  }
-
-  private async createWorldRevealController(
-    spark: typeof import("@sparkjsdev/spark"),
-    mesh: SparkSplatMesh,
-    reveal: { origin: THREE.Vector3; radius: number },
-    mode: "reveal" | "hide",
-  ): Promise<WorldRevealController | null> {
-    const dyno = (
-      "dyno" in spark ? Reflect.get(spark as object, "dyno") : undefined
-    ) as TslMathLib | undefined;
-
-    const tsl = (await import("three/tsl").catch(
-      () => null,
-    )) as TslMathLib | null;
-
-    const math = {
-      add: dyno?.add || tsl?.add,
-      sub: dyno?.sub || tsl?.sub,
-      mul: dyno?.mul || tsl?.mul,
-      div: dyno?.div || tsl?.div,
-      abs: dyno?.abs || tsl?.abs,
-      clamp: dyno?.clamp || tsl?.clamp,
-      max: dyno?.max || tsl?.max,
-      mix: dyno?.mix || tsl?.mix,
-      smoothstep: dyno?.smoothstep || tsl?.smoothstep,
-      pow: dyno?.pow || tsl?.pow,
-      length: dyno?.length || tsl?.length,
-      swizzle:
-        dyno?.swizzle || ((a: Record<string, unknown>, s: string) => a[s] || a), // fallback to property access
-    };
-
-    if (
-      !dyno?.Gsplat ||
-      !dyno.dynoBlock ||
-      !dyno.dynoFloat ||
-      !dyno.dynoVec3 ||
-      !dyno.dynoConst ||
-      !dyno.splitGsplat ||
-      !dyno.combineGsplat ||
-      !math.add ||
-      !math.sub ||
-      !math.mul ||
-      !math.div ||
-      !math.abs ||
-      !math.clamp ||
-      !math.max ||
-      !math.mix ||
-      !math.smoothstep ||
-      !math.pow ||
-      !math.length ||
-      !math.swizzle
-    ) {
-      console.error(
-        "[VrmEngine] createWorldRevealController failed missing dyno/tsl props:",
-        {
-          Gsplat: !!dyno?.Gsplat,
-          dynoBlock: !!dyno?.dynoBlock,
-          dynoFloat: !!dyno?.dynoFloat,
-          dynoVec3: !!dyno?.dynoVec3,
-          dynoConst: !!dyno?.dynoConst,
-          splitGsplat: !!dyno?.splitGsplat,
-          combineGsplat: !!dyno?.combineGsplat,
-          add: !!math.add,
-          sub: !!math.sub,
-          mul: !!math.mul,
-          div: !!math.div,
-          abs: !!math.abs,
-          clamp: !!math.clamp,
-          max: !!math.max,
-          mix: !!math.mix,
-          smoothstep: !!math.smoothstep,
-          pow: !!math.pow,
-          length: !!math.length,
-          swizzle: !!math.swizzle,
-        },
-      );
-      return null;
-    }
-    console.log(
-      "[VrmEngine] createWorldRevealController SUCCESS, dyno/tsl checked ok",
-    );
-
-    const validatedMath = math as Record<keyof typeof math, TslMathFn>;
-
-    const originUniform = dyno.dynoVec3(reveal.origin, "uWorldRevealOrigin");
-    const resolvedRadius = Math.max(
-      reveal.radius,
-      COMPANION_WORLD_REVEAL_EDGE * 2,
-    );
-    const radiusUniform = dyno.dynoFloat(resolvedRadius, "uWorldRevealRadius");
-    const edgeUniform = dyno.dynoFloat(
-      COMPANION_WORLD_REVEAL_EDGE,
-      "uWorldRevealEdge",
-    );
-    const progressUniform = dyno.dynoFloat(0, "uWorldRevealProgress");
-    const wireScaleUniform = dyno.dynoVec3(
-      new THREE.Vector3(0.004, 0.004, 0.004),
-      "uWorldRevealWireScale",
-    );
-    const wireAlphaUniform = dyno.dynoFloat(0.42, "uWorldRevealWireAlpha");
-    const wireBoostUniform = dyno.dynoFloat(0.3, "uWorldRevealWireBoost");
-    const zero = dyno.dynoConst("float", 0);
-    const one = dyno.dynoConst("float", 1);
-    const two = dyno.dynoConst("float", 2);
-    const startOffset = dyno.dynoConst(
-      "float",
-      -COMPANION_WORLD_REVEAL_START_OFFSET,
-    );
-
-    const modifier = dyno.dynoBlock(
-      { gsplat: dyno.Gsplat },
-      { gsplat: dyno.Gsplat },
-      ({ gsplat }: { gsplat: unknown }) => {
-        if (!gsplat) {
-          throw new Error("Missing gsplat input for world reveal");
-        }
-        const splitResult = dyno?.splitGsplat?.(gsplat);
-        if (!splitResult) {
-          throw new Error("splitGsplat returned undefined");
-        }
-        const { center, scales, rgb, opacity } = splitResult.outputs;
-        const radialDistance = validatedMath.length(
-          validatedMath.swizzle(validatedMath.sub(center, originUniform), "xz"),
-        );
-        const currentRadius = validatedMath.add(
-          validatedMath.mul(radiusUniform, progressUniform),
-          startOffset,
-        );
-        const bodyMask = validatedMath.sub(
-          one,
-          validatedMath.smoothstep(
-            validatedMath.sub(currentRadius, edgeUniform),
-            validatedMath.add(currentRadius, edgeUniform),
-            radialDistance,
-          ),
-        );
-        const ringDistance = validatedMath.abs(
-          validatedMath.sub(radialDistance, currentRadius),
-        );
-        const ringMask = validatedMath.pow(
-          validatedMath.sub(
-            one,
-            validatedMath.smoothstep(
-              zero,
-              validatedMath.mul(edgeUniform, two),
-              ringDistance,
-            ),
-          ),
-          two,
-        );
-        const visibleMask =
-          mode === "hide" ? validatedMath.sub(one, bodyMask) : bodyMask;
-        const wireFactor = validatedMath.clamp(
-          validatedMath.max(
-            visibleMask,
-            validatedMath.mul(ringMask, wireAlphaUniform),
-          ),
-          zero,
-          one,
-        );
-        const brightenedRgb = validatedMath.mul(
-          rgb,
-          validatedMath.add(one, validatedMath.mul(ringMask, wireBoostUniform)),
-        );
-        return {
-          gsplat: dyno?.combineGsplat?.({
-            gsplat,
-            scales: validatedMath.mix(wireScaleUniform, scales, wireFactor),
-            rgb: validatedMath.mix(brightenedRgb, rgb, visibleMask),
-            opacity: validatedMath.mul(opacity, wireFactor),
-          }),
-        };
-      },
-    );
-
-    mesh.objectModifier = modifier as SparkSplatMesh["objectModifier"];
-    this.refreshSplatMesh(mesh);
-
-    return {
-      mesh,
-      progressUniform,
-      mode,
-      radius: resolvedRadius,
-    };
-  }
-
-  private refreshSplatMesh(mesh: SparkSplatMesh): void {
-    mesh.updateGenerator();
-    const refreshableMesh = mesh as SparkSplatMesh & {
-      updateVersion?: () => void;
-    };
-    refreshableMesh.updateVersion?.();
-  }
-
-  private setWorldRevealProgress(
-    controller: WorldRevealController,
-    progress: number,
-  ): void {
-    controller.progressUniform.value = THREE.MathUtils.clamp(progress, 0, 1);
-    const refreshableMesh = controller.mesh as SparkSplatMesh & {
-      updateVersion?: () => void;
-    };
-    refreshableMesh.updateVersion?.();
-  }
-
-  private queueWorldReveal(
-    incoming: WorldRevealController,
-    options: {
-      outgoing?: WorldRevealController | null;
-      duration?: number;
-      waitingForVrm?: boolean;
-      syncToTeleport?: boolean;
-      initialProgress?: number;
-    } = {},
-  ): void {
-    const reveal: WorldRevealState = {
-      controller: incoming,
-      incoming,
-      outgoing: options.outgoing ?? null,
-      progress: THREE.MathUtils.clamp(options.initialProgress ?? 0, 0, 1),
-      duration: options.duration ?? COMPANION_WORLD_REVEAL_DURATION,
-      waitingForVrm: options.waitingForVrm ?? false,
-      syncToTeleport: options.syncToTeleport ?? false,
-    };
-    incoming.mesh.opacity = 1;
-    if (reveal.outgoing) {
-      reveal.outgoing.mesh.opacity = 1;
-    }
-    this.worldReveal = reveal;
-    this.setWorldRevealProgress(incoming, reveal.progress);
-    if (reveal.outgoing) {
-      this.setWorldRevealProgress(reveal.outgoing, reveal.progress);
-    }
-  }
-
-  private disposeSplatMesh(mesh: SparkSplatMesh | null): void {
-    if (!mesh) return;
-    mesh.parent?.remove(mesh);
-    mesh.dispose();
-  }
-
-  private completeWorldReveal(reveal: WorldRevealState): void {
-    this.setWorldRevealProgress(reveal.incoming, 1);
-    reveal.incoming.mesh.opacity = 1;
-    reveal.incoming.mesh.objectModifier = undefined;
-    this.refreshSplatMesh(reveal.incoming.mesh);
-    if (reveal.outgoing) {
-      // Clear the modifier and refresh before hiding so the cached mesh is in a
-      // clean baseline state when it is next reused as the incoming world.
-      // Without this, stale dyno graph references on the modifier cause the
-      // second toggle to render as invisible.
-      reveal.outgoing.mesh.objectModifier = undefined;
-      this.refreshSplatMesh(reveal.outgoing.mesh);
-      reveal.outgoing.mesh.visible = false;
-    }
-    if (this.worldReveal === reveal) {
-      this.worldReveal = null;
-    }
-  }
-
-  private cancelWorldReveal(): void {
-    if (!this.worldReveal) return;
-    this.completeWorldReveal(this.worldReveal);
-  }
-
-  private startPendingWorldReveal(syncToTeleport: boolean): void {
-    const reveal = this.worldReveal;
-    if (!reveal || !reveal.waitingForVrm) return;
-    reveal.waitingForVrm = false;
-    reveal.syncToTeleport = syncToTeleport;
-    reveal.progress = syncToTeleport ? this.teleportProgress : 0;
-    this.setWorldRevealProgress(reveal.incoming, reveal.progress);
-    if (reveal.outgoing) {
-      this.setWorldRevealProgress(reveal.outgoing, reveal.progress);
-    }
-  }
-
-  private updateWorldReveal(stableDelta: number): void {
-    const reveal = this.worldReveal;
-    if (!reveal || reveal.waitingForVrm) return;
-    const avatarRevealActive =
-      this.revealStarted && this.teleportProgress < 0.999;
-
-    const nextProgress =
-      reveal.syncToTeleport && avatarRevealActive
-        ? this.teleportProgress
-        : Math.min(1, reveal.progress + stableDelta / reveal.duration);
-    const appliedProgress =
-      reveal.syncToTeleport && avatarRevealActive
-        ? nextProgress
-        : nextProgress ** COMPANION_WORLD_REVEAL_EASE_EXPONENT;
-
-    reveal.progress = nextProgress;
-    this.setWorldRevealProgress(reveal.incoming, appliedProgress);
-    if (reveal.outgoing) {
-      this.setWorldRevealProgress(reveal.outgoing, appliedProgress);
-    }
-
-    if (nextProgress >= 1) {
-      this.completeWorldReveal(reveal);
-    }
-  }
-
-  private updateSparkDepthOfField(camera: THREE.PerspectiveCamera): void {
-    const sparkRenderer = this.sparkRenderer;
-    if (!sparkRenderer) return;
-    if (!this.worldMesh) {
-      sparkRenderer.apertureAngle = 0;
-      return;
-    }
-
-    const focalDistance = Math.max(
-      0.5,
-      camera.position.distanceTo(this.pointerParallaxLookAt),
-    );
-    const isCompanionProfile = this.cameraProfile === "companion";
-    const closeZoomFactor = isCompanionProfile
-      ? THREE.MathUtils.smoothstep(this.companionZoomCurrent, 0.3, 1)
-      : 0;
-    const apertureSize = THREE.MathUtils.lerp(
-      COMPANION_DOF_APERTURE_SIZE,
-      COMPANION_DOF_APERTURE_SIZE * COMPANION_DOF_NEAR_ZOOM_APERTURE_FACTOR,
-      closeZoomFactor,
-    );
-    sparkRenderer.focalDistance = focalDistance;
-    sparkRenderer.apertureAngle =
-      2 * Math.atan((0.5 * apertureSize) / sparkRenderer.focalDistance);
   }
 
   private applyCompanionZoom(
@@ -1696,7 +1048,6 @@ export class VrmEngine {
   getDebugInfo(): VrmEngineDebugInfo {
     this.scene?.updateMatrixWorld(true);
     this.vrm?.scene.updateMatrixWorld(true);
-    this.worldMesh?.updateMatrixWorld(true);
 
     const cameraRotation = this.camera
       ? new THREE.Vector3(
@@ -1713,7 +1064,6 @@ export class VrmEngine {
       initialized: this.initialized,
       rendererBackend: this.rendererBackend,
       cameraProfile: this.cameraProfile,
-      worldUrl: this.worldUrl,
       sceneChildren:
         this.scene?.children.map((child) => child.name || child.type) ?? [],
       camera: {
@@ -1731,37 +1081,12 @@ export class VrmEngine {
         scale: this.toDebugVector3(this.vrm?.scene.scale ?? null),
         bounds: this.toDebugBounds(this.vrm?.scene ?? null),
       },
-      world: {
-        loaded: this.worldMesh !== null,
-        parentName: this.worldMesh?.parent?.name ?? null,
-        position: this.toDebugVector3(this.worldMesh?.position ?? null),
-        scale: this.toDebugVector3(this.worldMesh?.scale ?? null),
-        bounds: this.toDebugBounds(this.worldMesh ?? null),
-        rawBounds: this.worldMesh
-          ? this.toDebugBoundsFromBox(this.worldMesh.getBoundingBox(true))
-          : null,
-      },
-      spark: {
-        attached: this.sparkRenderer !== null,
-        parentName: this.sparkRenderer?.parent?.name ?? null,
-        renderOrder: this.sparkRenderer?.renderOrder ?? null,
-      },
     };
   }
 
   setDebugAvatarVisible(visible: boolean): void {
     if (!this.vrm) return;
     this.vrm.scene.visible = visible;
-  }
-
-  setDebugWorldPosition(x: number, y: number, z: number): void {
-    if (!this.worldMesh) return;
-    this.worldMesh.position.set(x, y, z);
-  }
-
-  setDebugWorldQuaternion(x: number, y: number, z: number, w: number): void {
-    if (!this.worldMesh) return;
-    this.worldMesh.quaternion.set(x, y, z, w);
   }
 
   setDebugCamera(position: THREE.Vector3, target: THREE.Vector3): void {
@@ -1879,7 +1204,6 @@ export class VrmEngine {
     onUpdate: UpdateCallback,
     options?: {
       rendererPreference?: RendererPreference;
-      sparkOptimized?: boolean;
     },
   ): void {
     if (this.initialized && this.renderer?.domElement === canvas) {
@@ -1890,7 +1214,6 @@ export class VrmEngine {
     this.onUpdate = onUpdate;
     this.loadingAborted = false;
     this.rendererPreference = options?.rendererPreference ?? "auto";
-    this.worldStageSparkOptimized = options?.sparkOptimized ?? false;
     this.resetReadyPromise();
     // Async renderer creation: tries WebGPU, falls back to WebGL.
     // setup() remains synchronous for callers; the loop starts after init resolves.
@@ -1899,7 +1222,6 @@ export class VrmEngine {
         const { backend, renderer } = await createRenderer(
           canvas,
           this.rendererPreference,
-          options?.sparkOptimized ?? false,
         );
         const releaseKnownWebGpuWarningFilter =
           backend === "webgpu" ? installKnownVrmWebGpuWarningFilter() : null;
@@ -1929,6 +1251,9 @@ export class VrmEngine {
         }
         const scene = new THREE.Scene();
         this.scene = scene;
+        // Build construct environment (white void, floating screens, fog)
+        this.mathEnvironment = new MathEnvironment();
+        this.mathEnvironment.build(scene, "light");
         const avatarRoot = new THREE.Group();
         avatarRoot.name = "AvatarRoot";
         scene.add(avatarRoot);
@@ -1964,15 +1289,15 @@ export class VrmEngine {
         );
         this.baseCameraPosition.copy(camera.position);
         this.lookAtTarget.copy(controls.target);
-        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+        const ambient = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(ambient);
-        const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        keyLight.position.set(1, 1, 1).normalize();
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        keyLight.position.set(1, 1.5, 1).normalize();
         keyLight.castShadow = true;
         keyLight.shadow.mapSize.setScalar(1024);
         scene.add(keyLight);
         this.keyDirectionalLight = keyLight;
-        const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
         fillLight.position.set(-1, 0.5, -1).normalize();
         scene.add(fillLight);
         this.applyRendererPixelRatio();
@@ -2012,16 +1337,13 @@ export class VrmEngine {
     return this.initialized && this.renderer !== null;
   }
   dispose(): void {
+    this.mathEnvironment?.dispose();
+    this.mathEnvironment = null;
     this.overlayManager?.dispose();
     this.overlayManager = null;
     this.loadingAborted = true;
     this.initialized = false;
     this.settleReady();
-    // Flush the world splat cache — dispose all meshes so GPU memory is freed.
-    for (const cached of this.splatCache.values()) {
-      this.disposeSplatMesh(cached.mesh);
-    }
-    this.splatCache.clear();
     this.releaseKnownWebGpuWarningFilter?.();
     this.releaseKnownWebGpuWarningFilter = null;
     if (this.animationFrameId !== null) {
@@ -2051,7 +1373,6 @@ export class VrmEngine {
     this.teleportProgress = 1.0;
     this.cleanupTeleportDissolve();
     this.cleanupTeleportSparkles();
-    this.disposeWorld();
     this.avatarLookTarget?.parent?.remove(this.avatarLookTarget);
     this.avatarLookTarget = null;
     this.avatarLookRig = {
@@ -2061,12 +1382,6 @@ export class VrmEngine {
     };
     this.headLookTarget.set(0, 0);
     this.headLookCurrent.set(0, 0);
-    if (this.sparkRenderer) {
-      this.sparkRenderer.apertureAngle = 0;
-      this.sparkRenderer.removeFromParent();
-      this.sparkRenderer = null;
-    }
-    this.sparkRendererFailed = false;
     if (this.renderer) {
       this.renderer.dispose();
     }
@@ -2227,39 +1542,17 @@ export class VrmEngine {
   }
 
   /**
-   * Hides the Gaussian world + Spark layer while keeping the animation/render
-   * loop alive so the avatar keeps idling. Restores prior mesh visibility when
-   * disabled.
+   * Keeps the animation/render loop alive so the avatar keeps idling while
+   * background is hidden. Restores prior state when disabled.
    */
   setMinimalBackgroundMode(enabled: boolean): void {
     if (this.minimalBackgroundMode === enabled) return;
-    if (enabled) {
-      this.worldVisibleBeforeMinimalBackground =
-        this.worldMesh?.visible ?? false;
-      this.sparkVisibleBeforeMinimalBackground =
-        this.sparkRenderer?.visible ?? true;
-      if (this.worldMesh) this.worldMesh.visible = false;
-      if (this.sparkRenderer) this.sparkRenderer.visible = false;
-    } else {
-      if (this.worldMesh) {
-        this.worldMesh.visible = this.worldVisibleBeforeMinimalBackground;
-      }
-      if (this.sparkRenderer) {
-        this.sparkRenderer.visible = this.sparkVisibleBeforeMinimalBackground;
-      }
-    }
     this.minimalBackgroundMode = enabled;
-  }
-
-  private applyMinimalBackgroundHidingToAttachedWorld(): void {
-    if (!this.minimalBackgroundMode) return;
-    if (this.worldMesh) this.worldMesh.visible = false;
-    if (this.sparkRenderer) this.sparkRenderer.visible = false;
   }
 
   /**
    * When true, caps the WebGL/WebGPU pixel ratio at **1** on top of the usual
-   * DPR clamp and applies cheaper shadows + Spark tuning — primarily for
+   * DPR clamp and applies cheaper shadows — primarily for
    * **battery** on Retina. Does **not** change frame cadence; use
    * {@link setHalfFramerateMode} for ~half refresh rate.
    *
@@ -2271,7 +1564,6 @@ export class VrmEngine {
     this.lowPowerRenderMode = enabled;
     this.applyRendererPixelRatio();
     this.applyLowPowerShadowPolicy();
-    this.updateSparkPerformanceProfile();
   }
 
   /**
@@ -2432,172 +1724,13 @@ export class VrmEngine {
     this.cameraYawOffsetTarget = -offset * 0.7;
   }
 
-  async setWorldUrl(url: string | null): Promise<void> {
-    await this.whenReady();
-    if (!this.scene) return;
-    const normalizedUrl = url?.trim() ? url : null;
-    if (this.worldUrl === normalizedUrl && this.worldMesh) return;
+  async setWorldUrl(_url: string | null): Promise<void> {
+    // World backgrounds removed — math environment managed separately.
+  }
 
-    const requestId = ++this.worldLoadRequestId;
-    this.worldUrl = normalizedUrl;
-    this.cancelWorldReveal();
-    const outgoingWorld = this.worldMesh;
-    if (!normalizedUrl) {
-      this.disposeWorld();
-      return;
-    }
-
-    await this.ensureSparkRenderer();
-    if (this.sparkRendererFailed) return;
-    // Re-check after async — the engine may have been disposed during the
-    // await (e.g. React StrictMode double-mount or rapid navigation).
-    if (
-      !this.scene ||
-      this.loadingAborted ||
-      requestId !== this.worldLoadRequestId
-    )
-      return;
-    const spark = await this.loadSparkModule();
-    if (
-      !this.scene ||
-      this.loadingAborted ||
-      requestId !== this.worldLoadRequestId
-    )
-      return;
-    const { SplatMesh } = spark;
-    const cached = this.splatCache.get(normalizedUrl);
-    let worldAnchor = new THREE.Vector3(0, 0, 0);
-    let worldRevealRadius = 1;
-    let splat: SparkSplatMesh;
-
-    if (cached) {
-      splat = cached.mesh;
-      worldAnchor = cached.worldAnchor;
-      worldRevealRadius = cached.worldRevealRadius;
-      splat.visible = false;
-    } else {
-      try {
-        splat = new SplatMesh({
-          url: normalizedUrl,
-          constructSplats: (packedSplats) => {
-            worldAnchor = getRobustPackedSplatAnchor(packedSplats);
-            worldRevealRadius = getRobustPackedSplatRadialExtent(
-              packedSplats,
-              worldAnchor,
-            );
-          },
-        });
-      } catch (splatErr) {
-        console.warn("[VrmEngine] SplatMesh construction failed:", splatErr);
-        return;
-      }
-      splat.frustumCulled = false;
-      splat.quaternion.identity();
-      splat.position.set(0, 0, 0);
-      splat.scale.setScalar(COMPANION_WORLD_SCALE);
-      splat.visible = false;
-      this.scene.add(splat);
-    }
-
-    if (!cached) {
-      try {
-        await splat.initialized;
-      } catch (initErr) {
-        console.warn("[VrmEngine] SplatMesh initialization failed:", initErr);
-        splat.parent?.remove(splat);
-        splat.dispose();
-        return;
-      }
-    }
-
-    if (
-      this.loadingAborted ||
-      !this.scene ||
-      requestId !== this.worldLoadRequestId
-    ) {
-      if (!cached) {
-        splat.parent?.remove(splat);
-        splat.dispose();
-      }
-      return;
-    }
-
-    const worldCenterBottom =
-      worldAnchor.lengthSq() > 0 ? worldAnchor : getRobustSplatAnchor(splat);
-    const worldFloorOffsetY = getCompanionWorldFloorOffsetY(normalizedUrl);
-    splat.position.set(
-      -worldCenterBottom.x * COMPANION_WORLD_SCALE,
-      -worldCenterBottom.y * COMPANION_WORLD_SCALE + worldFloorOffsetY,
-      -worldCenterBottom.z * COMPANION_WORLD_SCALE,
-    );
-
-    if (!cached) {
-      this.splatCache.set(normalizedUrl, {
-        mesh: splat,
-        worldAnchor,
-        worldRevealRadius,
-      });
-    }
-
-    const syncToTeleport = this.revealStarted && this.teleportProgress < 0.999;
-    const waitingForVrm = !outgoingWorld && !this.vrmReady;
-    const incomingRevealRadius = Math.max(
-      worldRevealRadius * COMPANION_WORLD_SCALE,
-      getRobustSplatRadialExtent(splat, worldCenterBottom) *
-        COMPANION_WORLD_SCALE,
-    );
-    let outgoingAnchor: THREE.Vector3 | null = null;
-    let sharedRevealRadius = incomingRevealRadius;
-    if (outgoingWorld && !waitingForVrm) {
-      outgoingAnchor = getRobustSplatAnchor(outgoingWorld);
-      sharedRevealRadius = Math.max(
-        sharedRevealRadius,
-        getRobustSplatRadialExtent(outgoingWorld, outgoingAnchor) *
-          COMPANION_WORLD_SCALE,
-      );
-    }
-
-    const worldReveal = await this.createWorldRevealController(
-      spark,
-      splat,
-      {
-        origin: worldCenterBottom,
-        radius: sharedRevealRadius,
-      },
-      "reveal",
-    );
-    this.worldMesh = splat;
-    if (worldReveal) {
-      let outgoingReveal: WorldRevealController | null = null;
-      if (outgoingWorld && outgoingAnchor && !waitingForVrm) {
-        outgoingReveal = await this.createWorldRevealController(
-          spark,
-          outgoingWorld,
-          {
-            origin: outgoingAnchor,
-            radius: sharedRevealRadius,
-          },
-          "hide",
-        );
-        if (!outgoingReveal) {
-          outgoingWorld.visible = false;
-        }
-      }
-      splat.visible = true;
-      this.queueWorldReveal(worldReveal, {
-        outgoing: outgoingReveal,
-        duration: COMPANION_WORLD_REVEAL_DURATION,
-        waitingForVrm,
-        syncToTeleport,
-        initialProgress: syncToTeleport ? this.teleportProgress : 0,
-      });
-    } else {
-      if (outgoingWorld) {
-        outgoingWorld.visible = false;
-      }
-      splat.visible = true;
-    }
-    this.applyMinimalBackgroundHidingToAttachedWorld();
+  /** Switch the mathematical environment theme. */
+  setEnvironmentTheme(theme: "light" | "dark"): void {
+    this.mathEnvironment?.setTheme(theme);
   }
   async playEmote(
     path: string,
@@ -2809,14 +1942,12 @@ export class VrmEngine {
         if (this.loadingAborted || this.vrm !== vrm) return;
         await this.playTeleportReveal(vrm);
         vrm.scene.visible = true;
-        this.startPendingWorldReveal(true);
         // Greeting animation is handled by CharacterEditor via vrm-teleport-complete event
       }
     } catch {
       if (!this.loadingAborted && this.vrm === vrm) {
         this.vrmReady = true;
         vrm.scene.visible = true;
-        this.startPendingWorldReveal(false);
         // Teleport animation failed (e.g. WebGPU unavailable) — still notify
         // the app so companion UI (header, chat) becomes visible.
         if (typeof window !== "undefined") {
@@ -3298,7 +2429,6 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
       const blinkValue = this.blinkController.update(rawDelta);
       this.vrm.expressionManager?.setValue("blink", blinkValue);
     }
-    this.updateWorldReveal(stableDelta);
 
     // Process camera transition
     if (this.isCameraTransitioning) {
@@ -3409,7 +2539,6 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
     if (Math.abs(scaledXOffset) > 1e-4) {
       camera.position.x += scaledXOffset;
     }
-    this.updateSparkPerformanceProfile();
     if (this.pointerParallaxEnabled) {
       const follow = Math.min(1, stableDelta * 7.5);
       this.pointerParallaxCurrent.lerp(this.pointerParallaxTarget, follow);
@@ -3454,24 +2583,10 @@ ${isOutgoing ? "if (teleportNoise >= teleportRatio) discard;" : "if (teleportNoi
       this.applyAvatarHeadTracking(camera, stableDelta);
       this.refreshAvatarEyeTracking();
     }
-    this.updateSparkDepthOfField(camera);
+    this.mathEnvironment?.update(stableDelta, camera);
     this.overlayManager?.update(camera, stableDelta);
     renderer.render(scene, camera);
     this.onUpdate?.();
-  }
-  private disposeWorld(): void {
-    if (this.sparkRenderer) {
-      this.sparkRenderer.apertureAngle = 0;
-    }
-    this.cancelWorldReveal();
-    // Don't permanently dispose the worldMesh here — it may be held in
-    // splatCache and reused on the next world switch. Just hide it so it
-    // doesn't render. The cache is flushed (and meshes truly disposed) only
-    // when the engine itself is torn down via dispose().
-    if (this.worldMesh) {
-      this.worldMesh.visible = false;
-    }
-    this.worldMesh = null;
   }
   private async loadAndPlayIdle(vrm: VRM): Promise<void> {
     if (this.loadingAborted) return;

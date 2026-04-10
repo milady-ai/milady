@@ -577,7 +577,7 @@ describe("CompanionView", () => {
     }
   });
 
-  it("renders centered companion header actions around the shell chrome", async () => {
+  it("renders companion header with voice toggle and shell chrome", async () => {
     const setState = vi.fn();
     const handleStartDraftConversation = vi.fn(async () => {});
     const handleNewConversation = vi.fn(async () => {});
@@ -594,9 +594,6 @@ describe("CompanionView", () => {
       tree = TestRenderer.create(React.createElement(CompanionView));
     });
 
-    const chatControls = tree?.root.findByProps({
-      "data-testid": "companion-header-chat-controls",
-    });
     const headerShell = tree?.root.findByProps({
       "data-testid": "companion-header-shell",
     });
@@ -607,7 +604,6 @@ describe("CompanionView", () => {
     );
 
     expect(String(headerShell.props.className)).toContain("w-full");
-    expect(String(chatControls.props.className)).toContain("justify-center");
     expect(voiceButton).toBeDefined();
 
     await act(async () => {

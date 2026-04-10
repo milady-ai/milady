@@ -1002,6 +1002,37 @@ function waitForPort(port, { timeout = 120_000, interval = 500 } = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Wait for the agent runtime to be ready (not just the TCP port).
+// Polls GET /api/health and resolves when { ready: true }.
+// Handles bun --watch restarts gracefully (connection resets → retry).
+// ---------------------------------------------------------------------------
+
+async function waitForAgentReady(
+  port,
+  { timeout = 120_000, interval = 1000 } = {},
+) {
+  const deadline = Date.now() + timeout;
+  const url = `http://127.0.0.1:${port}/api/health`;
+
+  while (Date.now() < deadline) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ready) return;
+      }
+    } catch {
+      // API not up yet or restarting — keep polling.
+    }
+    await new Promise((r) => setTimeout(r, interval));
+  }
+
+  throw new Error(
+    `Agent runtime not ready after ${timeout / 1000}s (port ${port} is up but /api/health never reported ready)`,
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Orphan cleanup (startup only) — never kills arbitrary Bun; PID/name-wide pkill is avoided.
 // Only processes whose command line ties them to this repo or Milady workspace dirs.
 // ---------------------------------------------------------------------------
@@ -1402,19 +1433,32 @@ if (uiOnly) {
   });
 
   const startTime = Date.now();
+  let phase = "port";
   const dots = setInterval(() => {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+    const msg =
+      phase === "port"
+        ? "Waiting for API server..."
+        : "Waiting for agent to be ready...";
     process.stdout.write(
-      `\r  ${green(logPrefix)} ${green(`Waiting for API server... ${dim(`${elapsed}s`)}`)}`,
+      `\r  ${green(logPrefix)} ${green(`${msg} ${dim(`${elapsed}s`)}`)}`,
     );
   }, 1000);
 
   waitForPort(API_PORT)
     .then(() => {
+      const portElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      process.stdout.write(
+        `\r  ${green(logPrefix)} ${green(`API port open`)} ${dim(`(${portElapsed}s)`)}          \n`,
+      );
+      phase = "agent";
+      return waitForAgentReady(API_PORT);
+    })
+    .then(() => {
       clearInterval(dots);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(
-        `\r  ${green(logPrefix)} ${green(`API server ready`)} ${dim(`(${elapsed}s)`)}          `,
+        `\r  ${green(logPrefix)} ${green(`Agent ready`)} ${dim(`(${elapsed}s)`)}          `,
       );
       startVite();
     })

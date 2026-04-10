@@ -59,6 +59,8 @@ interface ShellHeaderControlsProps {
   themeToggleClassName?: string;
   themeToggleWrapperClassName?: string;
   themeToggleWrapperTestId?: string;
+  /** Hide the segmented shell-view toggle (pill). Outside the companion overlay the pill is not shown. */
+  showShellViewToggle?: boolean;
   /** Show Voice + New Chat buttons (companion & character editor views). */
   showCompanionControls?: boolean;
   companionDesktopActionsLayout?: "centered" | "split";
@@ -83,6 +85,7 @@ export function ShellHeaderControls({
   rightTrailingExtras,
   trailingExtras,
   className,
+  showShellViewToggle = true,
   controlsVariant = "native",
   languageDropdownClassName,
   languageDropdownWrapperTestId,
@@ -233,45 +236,47 @@ export function ShellHeaderControls({
       className={`min-w-0 w-full overflow-visible flex items-center gap-2 ${className ?? ""}`}
       data-no-camera-drag="true"
     >
-      {/* Left: shell view toggle */}
+      {/* Left: shell view toggle (hidden outside companion overlay) */}
       <div className="flex shrink-0 items-center gap-2">
-        <fieldset
-          className={SHELL_SEGMENTED_CONTROL_CLASSNAME}
-          data-testid="ui-shell-toggle"
-          data-no-camera-drag="true"
-          aria-label={t("aria.switchShellView")}
-        >
-          <legend className="sr-only">{t("aria.switchShellView")}</legend>
-          {shellOptions.map(({ view, label, Icon }, index) => {
-            const selected = activeShellView === view;
-            const edgeClass =
-              index === 0
-                ? "rounded-l-xl rounded-r-none"
-                : index === shellOptions.length - 1
-                  ? "rounded-l-none rounded-r-xl"
-                  : "rounded-none";
-            return (
-              <Button
-                key={view}
-                size="icon"
-                onClick={() => onShellViewChange(view)}
-                onPointerDown={(event) => event.stopPropagation()}
-                className={`h-11 min-h-[44px] min-w-[44px] px-3 transition-all duration-200 ${edgeClass} ${
-                  selected
-                    ? SHELL_SEGMENT_ACTIVE_CLASSNAME
-                    : SHELL_SEGMENT_INACTIVE_CLASSNAME
-                }`}
-                style={HEADER_BUTTON_STYLE}
-                aria-label={label}
-                aria-pressed={selected}
-                title={label}
-                data-testid={`ui-shell-toggle-${view}`}
-              >
-                <Icon className="pointer-events-none h-4 w-4" />
-              </Button>
-            );
-          })}
-        </fieldset>
+        {showShellViewToggle && (
+          <fieldset
+            className={SHELL_SEGMENTED_CONTROL_CLASSNAME}
+            data-testid="ui-shell-toggle"
+            data-no-camera-drag="true"
+            aria-label={t("aria.switchShellView")}
+          >
+            <legend className="sr-only">{t("aria.switchShellView")}</legend>
+            {shellOptions.map(({ view, label, Icon }, index) => {
+              const selected = activeShellView === view;
+              const edgeClass =
+                index === 0
+                  ? "rounded-l-xl rounded-r-none"
+                  : index === shellOptions.length - 1
+                    ? "rounded-l-none rounded-r-xl"
+                    : "rounded-none";
+              return (
+                <Button
+                  key={view}
+                  size="icon"
+                  onClick={() => onShellViewChange(view)}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  className={`h-11 min-h-[44px] min-w-[44px] px-3 transition-all duration-200 ${edgeClass} ${
+                    selected
+                      ? SHELL_SEGMENT_ACTIVE_CLASSNAME
+                      : SHELL_SEGMENT_INACTIVE_CLASSNAME
+                  }`}
+                  style={HEADER_BUTTON_STYLE}
+                  aria-label={label}
+                  aria-pressed={selected}
+                  title={label}
+                  data-testid={`ui-shell-toggle-${view}`}
+                >
+                  <Icon className="pointer-events-none h-4 w-4" />
+                </Button>
+              );
+            })}
+          </fieldset>
+        )}
         {shouldSplitCompanionDesktopActions ? (
           <div
             className="flex shrink-0 items-center"

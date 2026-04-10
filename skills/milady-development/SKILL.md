@@ -1,190 +1,64 @@
 ---
 name: milady-development
-description: "Self-modify milady agent through plugins. Edit, build, restart runtime, upgrade from upstream, manage plugins. For agent self-improvement and development workflows."
-metadata:
-  otto:
-    emoji: "🔧"
-    requires:
-      bins: ["git", "bun"]
+description: "Use when editing, building, testing, or debugging the Milady monorepo itself. Covers repo-specific development workflow, where to make changes, Node+Bun constraints, local versus cloud paths, and shipped skill seeding."
 ---
 
-# Milady Development Skill
+# Milady Development
 
-You are a self-modifying agent. You can edit your own code through **plugins**, rebuild, and restart yourself. All agent capabilities live in plugins - this is where you make changes.
+Use this skill for implementation work in this checkout. It replaces the older `~/.milady/plugins` guidance and assumes you are editing the repository directly.
 
-**Important**: Do NOT modify eliza core (`~/.milady/eliza`). The core runtime is stable infrastructure. All customization happens through plugins.
+## Scope
 
-## Directory Structure
+- `packages/app-core/` for Milady runtime behavior, CLI, API, onboarding, config, and service routing
+- `packages/agent/` for Milady-specific providers, services, skills, and runtime glue around elizaOS
+- `apps/app/` for the React UI and Electrobun shell
+- `cloud/` for Eliza Cloud apps, billing, auth, containers, and app platform work
+- `scripts/` and `docs/` for build/dev/release tooling and documentation
+- `eliza/` only when the issue is clearly upstream or the user explicitly wants upstream changes
 
-```text
-~/.milady/
-├── eliza/                     # elizaOS core (DO NOT MODIFY)
-├── plugins/                   # Plugins - EDIT HERE
-│   ├── plugin-discord/
-│   ├── plugin-telegram/
-│   ├── plugin-agent-helpers/
-│   └── ...
-└── skills/                    # Skills like this one
-```
+## Core Rules
 
-## Plugin Architecture
+- Preserve the `NODE_PATH` setup in `packages/agent/src/runtime/eliza.ts`, `scripts/run-node.mjs`, and `apps/app/electrobun/src/native/agent.ts`.
+- Preserve the Bun exports patch in `scripts/patch-deps.mjs`.
+- Preserve Electrobun startup guards in `apps/app/electrobun/src/native/agent.ts`.
+- Keep Milady product naming as `Milady` and framework naming as `elizaOS`.
 
-Everything is a plugin. Want to add a new capability? Create or modify a plugin.
-
-### Plugin Structure
-
-```text
-plugin-name/
-├── typescript/
-│   ├── src/
-│   │   ├── index.ts       # Plugin entry point
-│   │   ├── actions/       # Actions the agent can take
-│   │   ├── providers/     # Context providers for LLM
-│   │   └── services/      # Background services
-│   ├── package.json
-│   └── tsconfig.json
-```
-
-### Key Plugin Concepts
-
-- **Actions**: Things you can do (RESTART_AGENT, SEND_MESSAGE, etc.)
-- **Providers**: Context injected into your prompts
-- **Evaluators**: Run after actions to assess results
-- **Services**: Background processes
-
-## Editing Plugins
-
-### Edit Local Plugins
-
-Plugins at `~/.milady/plugins/` are editable:
+## Repo Workflow
 
 ```bash
-# List available plugins
-ls ~/.milady/plugins/
-
-# Read a plugin's entry point
-cat ~/.milady/plugins/plugin-discord/typescript/src/index.ts
-```
-
-### Eject a Registry Plugin
-
-For plugins from the registry, eject them first:
-
-Tell yourself: "Eject plugin-twitter so I can modify it"
-
-This clones the plugin to `~/.milady/plugins/` for local editing.
-
-### Create a New Plugin
-
-```bash
-mkdir -p ~/.milady/plugins/plugin-my-feature/typescript/src/actions
-```
-
-## Making Changes
-
-1. **Identify the plugin** that handles what you want to change
-2. **Read the plugin's index.ts** to understand exports
-3. **Edit the relevant file** (action, provider, service)
-4. **Restart** to load changes
-
-Example - adding a new action:
-
-```typescript
-// ~/.milady/plugins/plugin-my-feature/typescript/src/actions/my-action.ts
-import type { Action } from "@elizaos/core";
-
-export const myAction: Action = {
-  name: "MY_ACTION",
-  similes: ["DO_MY_THING"],
-  description: "Does something useful",
-  validate: async () => true,
-  handler: async (runtime, message, state) => {
-    return { text: "Done!", success: true };
-  },
-};
-```
-
-Then export it from index.ts:
-
-```typescript
-import type { Plugin } from "@elizaos/core";
-import { myAction } from "./actions/my-action";
-
-export const myFeaturePlugin: Plugin = {
-  name: "plugin-my-feature",
-  description: "My custom feature",
-  actions: [myAction],
-};
-
-export default myFeaturePlugin;
-```
-
-## Restarting the Runtime
-
-After making changes, restart to load them.
-
-### Method 1: RESTART_AGENT Action (Preferred)
-
-Tell yourself: "Restart to apply changes"
-
-### Method 2: API Endpoint
-
-```bash
-curl -X POST http://localhost:3000/api/agent/restart
-```
-
-## Plugin Management
-
-You have the `plugin-plugin-manager` plugin:
-
-- **Install**: "Install @elizaos/plugin-twitter"
-- **Search**: "Search for blockchain plugins"
-- **Eject**: "Eject plugin-discord so I can modify it"
-- **Sync**: "Sync plugin-discord with upstream"
-- **Reinject**: "Reinject plugin-discord" (discard changes)
-- **List**: "List my ejected plugins"
-
-## Upgrading Plugins
-
-```bash
-cd ~/.milady/plugins
-git fetch origin next
-git merge --no-edit origin/next
 bun install
+bun run verify
+bun run test
 ```
 
-Or use the setup script:
+Use narrower commands when possible:
 
 ```bash
-bun run setup:upstreams
+bun run milady ...
+bun run dev
+bun run dev:desktop
+bun run test:e2e
 ```
 
-## Self-Modification Workflow
+## Where to Look First
 
-1. **Check if a plugin exists** that does something similar
-2. **Decide**: modify existing or create new
-3. **Make your changes** using Edit/Write tools
-4. **Restart to apply**: "Restart to apply my changes"
-5. **Test** the new functionality
-6. **Iterate** if needed
+- For product/runtime behavior: `packages/app-core/src/`
+- For prompt/provider/skill behavior: `packages/agent/src/`
+- For onboarding and routing between local, remote, and cloud: `packages/app-core/src/onboarding/` and `packages/app-core/src/runtime/`
+- For shipped default skills: `skills/` plus `scripts/ensure-skills.mjs`
+- For Eliza Cloud backend or monetization work: `cloud/` and the shipped `eliza-cloud` skill
 
-## Important Paths
+## Cloud Bias
 
-| What | Path |
-|------|------|
-| Plugins | `~/.milady/plugins/` |
-| Skills | `~/.milady/skills/` |
-| Eliza Core (read-only) | `~/.milady/eliza/` |
+If a task involves building an app and Eliza Cloud is enabled or requested, prefer the existing Cloud backend model before inventing custom auth, billing, or hosting. In this repo that usually means:
 
-## Shell Commands
+1. create or configure an app
+2. use its `appId`, API key, origins, and redirect URIs
+3. route backend capabilities through Cloud APIs
+4. use containers only when server-side code is required
 
-```bash
-# List plugins
-ls ~/.milady/plugins/
+## Related Skills
 
-# Update plugins
-cd ~/.milady/plugins && git pull origin next && bun install
-
-# Check upstream changes
-cd ~/.milady/plugins && git fetch origin next && git rev-list --count HEAD..origin/next
-```
+- Use the shipped `milady` skill for broader product architecture and repo orientation.
+- Use the shipped `elizaos` skill when the change touches core runtime abstractions or upstream plugin patterns.
+- Use the shipped `eliza-cloud` skill when the task touches apps, billing, monetization, auth, or containers.

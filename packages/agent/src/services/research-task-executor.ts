@@ -59,23 +59,38 @@ export class ResearchTaskExecutor implements TaskExecutor {
           "",
           spec.description,
           "",
-          "Return as a JSON array of strings.",
+          "Return each sub-question on its own line, one per line. No numbering, no bullets, no prose.",
         ].join("\n"),
       });
 
       let subQuestions: string[];
       try {
-        // useModel(TEXT_LARGE) returns string, but LLMs may wrap JSON in
-        // markdown fences like ```json\n[...]\n``` — strip them before parsing.
-        let raw = decomposition;
+        // Parse line-delimited questions from the response.
+        // Strip markdown fences and numbering if the model adds them.
+        let raw: string =
+          typeof decomposition === "string"
+            ? decomposition
+            : String(decomposition);
         const fenceMatch = raw.match(
-          /```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/,
+          /```(?:\w+)?\s*\n?([\s\S]*?)\n?\s*```/,
         );
         if (fenceMatch) raw = fenceMatch[1];
-        const parsed: unknown = JSON.parse(raw.trim());
-        subQuestions = Array.isArray(parsed)
-          ? (parsed.filter((q) => typeof q === "string") as string[])
-          : [spec.description];
+
+        // Try line-based parsing first (preferred)
+        const lines = raw
+          .split(/\r?\n/)
+          .map((line) => line.replace(/^\s*(?:\d+[.)]\s*|-\s*|\*\s*)/, "").trim())
+          .filter((line) => line.length > 0);
+
+        if (lines.length >= 2) {
+          subQuestions = lines;
+        } else {
+          // Fallback: try JSON array parse for backwards compat
+          const jsonParsed: unknown = JSON.parse(raw.trim());
+          subQuestions = Array.isArray(jsonParsed)
+            ? (jsonParsed.filter((q) => typeof q === "string") as string[])
+            : [spec.description];
+        }
         if (subQuestions.length === 0) subQuestions = [spec.description];
       } catch {
         subQuestions = [spec.description];

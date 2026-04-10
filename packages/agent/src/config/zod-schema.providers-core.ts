@@ -220,6 +220,31 @@ export const TelegramConfigSchema = TelegramAccountSchemaBase.extend({
   }
 });
 
+export const TelegramAccountConnectorSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    phone: z.string().optional(),
+    appId: z.union([z.string(), z.number().int()]).optional(),
+    appHash: z.string().optional(),
+    deviceModel: z.string().optional(),
+    systemVersion: z.string().optional(),
+  })
+  .strict();
+
+export const BlueBubblesConnectorConfigSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    serverUrl: z.string().url().optional(),
+    password: z.string().optional(),
+    webhookPath: z.string().optional(),
+    dmPolicy: DmPolicySchema.optional(),
+    groupPolicy: GroupPolicySchema.optional(),
+    allowFrom: z.array(z.string()).optional(),
+    groupAllowFrom: z.array(z.string()).optional(),
+    sendReadReceipts: z.boolean().optional(),
+  })
+  .strict();
+
 export const DiscordDmSchema = z
   .object({
     enabled: z.boolean().optional(),
@@ -348,6 +373,17 @@ export const DiscordAccountSchema = z
 export const DiscordConfigSchema = DiscordAccountSchema.extend({
   accounts: z.record(z.string(), DiscordAccountSchema.optional()).optional(),
 });
+
+export const DiscordLocalConfigSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    clientId: z.string().optional(),
+    clientSecret: z.string().optional(),
+    scopes: z.array(z.string()).optional(),
+    messageChannelIds: z.array(z.string()).optional(),
+    sendDelayMs: z.number().int().min(100).optional(),
+  })
+  .strict();
 
 export const GoogleChatDmSchema = z
   .object({

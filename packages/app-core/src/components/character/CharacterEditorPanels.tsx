@@ -267,9 +267,7 @@ export function CharacterIdentityPanel({
       </section>
 
       {/* Bio / About Me */}
-      <section
-        className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
-      >
+      <section className={CHARACTER_EDITOR_SECTION_CLASSNAME}>
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
             {t("charactereditor.AboutMe", {
@@ -294,21 +292,19 @@ export function CharacterIdentityPanel({
         </div>
         <Textarea
           value={bioText}
-          rows={4}
+          rows={6}
           placeholder={t("charactereditor.AboutMePlaceholder", {
             defaultValue: "Describe who your agent is...",
           })}
           onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
             handleFieldEdit("bio", e.target.value)
           }
-          className={CHARACTER_EDITOR_TEXTAREA_CLASSNAME}
+          className={`${CHARACTER_EDITOR_TEXTAREA_CLASSNAME} max-h-[400px]`}
         />
       </section>
 
       {/* System Prompt / Directions */}
-      <section
-        className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
-      >
+      <section className={CHARACTER_EDITOR_SECTION_CLASSNAME}>
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
             {t("charactereditor.SystemPrompt", {
@@ -329,7 +325,7 @@ export function CharacterIdentityPanel({
         </div>
         <Textarea
           value={d.system ?? ""}
-          rows={4}
+          rows={6}
           maxLength={10000}
           placeholder={t("charactereditor.SystemPromptPlaceholder", {
             defaultValue: "Write in first person...",
@@ -337,7 +333,7 @@ export function CharacterIdentityPanel({
           onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
             handleFieldEdit("system", e.target.value)
           }
-          className={CHARACTER_EDITOR_TEXTAREA_CLASSNAME}
+          className={`${CHARACTER_EDITOR_TEXTAREA_CLASSNAME} max-h-[400px]`}
         />
       </section>
     </>
@@ -362,7 +358,7 @@ export function CharacterStylePanel({
   const style = d.style;
 
   return (
-    <section className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}>
+    <section className={CHARACTER_EDITOR_SECTION_CLASSNAME}>
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -492,9 +488,7 @@ export function CharacterExamplesPanel({
   return (
     <>
       {/* Chat Examples */}
-      <section
-        className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
-      >
+      <section className={CHARACTER_EDITOR_SECTION_CLASSNAME}>
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
             {t("charactereditor.ChatExamples", {
@@ -585,9 +579,7 @@ export function CharacterExamplesPanel({
       </section>
 
       {/* Post Examples */}
-      <section
-        className={`${CHARACTER_EDITOR_SECTION_CLASSNAME} flex-1 min-h-0`}
-      >
+      <section className={CHARACTER_EDITOR_SECTION_CLASSNAME}>
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
             {t("charactereditor.PostExamples", {

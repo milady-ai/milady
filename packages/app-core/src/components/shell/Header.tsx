@@ -23,6 +23,7 @@ import {
 
 const NAV_LABEL_I18N_KEY: Record<string, string> = {
   Chat: "nav.chat",
+  LifeOps: "nav.lifeops",
   Browser: "nav.browser",
   Companion: "nav.companion",
   Stream: "nav.stream",
@@ -77,14 +78,10 @@ export function Header({
     setState,
     plugins,
     loadDropStatus,
-    uiShellMode,
-    switchShellView,
     uiLanguage,
     setUiLanguage,
     uiTheme,
     setUiTheme,
-    chatAgentVoiceMuted,
-    handleNewConversation,
     conversationMessages,
     chatLastUsage,
     t,
@@ -130,28 +127,15 @@ export function Header({
     [tab, tabGroups],
   );
 
-  const shellMode =
-    tab === "character" || tab === "character-select"
-      ? "native"
-      : (uiShellMode ?? "companion");
-  const activeShellView =
-    shellMode === "companion"
-      ? "companion"
-      : tab === "character" || tab === "character-select"
-        ? "character"
-        : "desktop";
-  const isDesktopShell = activeShellView === "desktop";
-  const showNavigationMenu = isDesktopShell;
-  const showCloudStatus = isDesktopShell && !hideCloudCredits;
+  // Outside the companion overlay the shell is always in desktop/native mode.
+  // The mode-selector pill only appears inside the companion overlay header.
+  const activeShellView = "desktop" as const;
+  const isDesktopShell = true;
+  const showNavigationMenu = true;
+  const showCloudStatus = !hideCloudCredits;
   const headerFrameClassName = "";
   const headerShellClassName =
     "border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none";
-
-  const handleShellViewChange = (
-    view: "companion" | "character" | "desktop",
-  ) => {
-    switchShellView(view);
-  };
 
   const openCloudBilling = () => {
     setState("cloudDashboardView", "billing");
@@ -219,9 +203,8 @@ export function Header({
   );
 
   useEffect(() => {
-    if (shellMode !== "native") return;
     setState("chatMode", "power");
-  }, [setState, shellMode]);
+  }, [setState]);
 
   useEffect(() => {
     if (showNavigationMenu) return;
@@ -254,26 +237,19 @@ export function Header({
           >
             <ShellHeaderControls
               activeShellView={activeShellView}
-              onShellViewChange={handleShellViewChange}
+              onShellViewChange={() => {
+                /* pill hidden — no-op */
+              }}
+              showShellViewToggle={false}
               uiLanguage={uiLanguage}
               setUiLanguage={setUiLanguage}
               uiTheme={uiTheme}
               setUiTheme={setUiTheme}
               t={t}
-              languageDropdownClassName={
-                showNavigationMenu ? "hidden sm:inline-flex" : undefined
-              }
-              languageDropdownWrapperTestId={
-                showNavigationMenu
-                  ? "header-language-dropdown-desktop"
-                  : undefined
-              }
-              themeToggleWrapperClassName={
-                showNavigationMenu ? "hidden sm:flex" : undefined
-              }
-              themeToggleWrapperTestId={
-                showNavigationMenu ? "header-theme-toggle-desktop" : undefined
-              }
+              languageDropdownClassName="hidden sm:inline-flex"
+              languageDropdownWrapperTestId="header-language-dropdown-desktop"
+              themeToggleWrapperClassName="hidden sm:flex"
+              themeToggleWrapperTestId="header-theme-toggle-desktop"
               rightExtras={
                 <>
                   {onToggleTasksPanel ? (
@@ -315,19 +291,6 @@ export function Header({
                     />
                   ) : null}
                 </>
-              }
-              showCompanionControls={
-                activeShellView === "companion" ||
-                activeShellView === "character"
-              }
-              chatAgentVoiceMuted={chatAgentVoiceMuted}
-              onToggleVoiceMute={() =>
-                setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
-              }
-              onNewChat={
-                activeShellView === "character"
-                  ? undefined
-                  : () => void handleNewConversation()
               }
               trailingExtras={
                 showNavigationMenu ? (

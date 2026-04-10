@@ -27,7 +27,9 @@ const DEFAULT_INTERVAL_MS = 60_000;
  * and local agents get the same health monitoring coverage.
  */
 export const CONNECTOR_PLUGIN_MAP: Record<string, string> = {
+  bluebubbles: "bluebubbles",
   discord: "discord",
+  discordLocal: "discord-local",
   telegram: "telegram",
   telegramAccount: "telegram-account",
   twitter: "twitter",

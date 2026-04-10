@@ -25,7 +25,7 @@
 [submodule "plugins/plugin-coding-agent"]
 	path = plugins/plugin-coding-agent
 	url = https://github.com/elizaos-plugins/plugin-coding-agent.git
-	branch = alpha
+	branch = main
 [submodule "plugins/plugin-commands"]
 	path = plugins/plugin-commands
 	url = https://github.com/elizaos-plugins/plugin-commands.git
@@ -89,7 +89,7 @@
 [submodule "plugins/plugin-pi-ai"]
 	path = plugins/plugin-pi-ai
 	url = https://github.com/elizaos-plugins/plugin-pi-ai.git
-	branch = alpha
+	branch = next
 [submodule "plugins/plugin-plugin-manager"]
 	path = plugins/plugin-plugin-manager
 	url = https://github.com/elizaos-plugins/plugin-plugin-manager.git
@@ -134,3 +134,6 @@
 	path = cloud
 	url = https://github.com/elizaOS/cloud.git
 	branch = dev
+[submodule "plugins/plugin-imessage"]
+	path = plugins/plugin-imessage
+	url = https://github.com/elizaOS-plugins/plugin-imessage.git

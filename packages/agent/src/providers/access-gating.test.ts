@@ -24,6 +24,7 @@ vi.mock("./workspace.js", () => ({
   filterInitFilesForSession: (files: unknown[]) => files,
   isDefaultBoilerplate: () => false,
   loadWorkspaceInitFiles: mockLoadWorkspaceInitFiles,
+  resolveDefaultAgentWorkspaceDir: () => "/tmp/workspace",
 }));
 
 vi.mock("@elizaos/core/roles", () => ({
@@ -56,9 +57,9 @@ describe("provider role gating", () => {
       isOwner: false,
       isAdmin: false,
     });
-    mockResolveCanonicalOwnerIdForMessage.mockReset().mockResolvedValue(
-      "owner-1",
-    );
+    mockResolveCanonicalOwnerIdForMessage
+      .mockReset()
+      .mockResolvedValue("owner-1");
   });
 
   afterEach(() => {
@@ -66,7 +67,9 @@ describe("provider role gating", () => {
   });
 
   it("gates workspace context to admins", async () => {
-    const provider = createWorkspaceProvider({ workspaceDir: "/tmp/workspace" });
+    const provider = createWorkspaceProvider({
+      workspaceDir: "/tmp/workspace",
+    });
     mockHasAdminAccess.mockResolvedValue(false);
 
     const denied = await provider.get(

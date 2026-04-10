@@ -31,6 +31,7 @@ import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { itIf } from "../../../test/helpers/conditional-tests.ts";
 import { withTimeout, sleep } from "../../../test/helpers/test-utils";
+import { USER_PREFS_TABLE } from "../../../plugins/plugin-personality/typescript/src/types";
 import { startApiServer } from "../src/api/server";
 import { ensureAgentWorkspace } from "../src/providers/workspace";
 import { configureLocalEmbeddingPlugin } from "../src/runtime/eliza";
@@ -701,6 +702,127 @@ describe("Agent Runtime E2E", () => {
           "DM should always get a response even with checkShouldRespond=true",
         ).toBeGreaterThan(0);
         logger.info(`[e2e] shouldRespond DM test: "${resp}"`);
+      },
+      120_000,
+    );
+  });
+
+  describe("personality update routing", () => {
+    itIf(hasModelProvider)(
+      "group-chat personality updates bypass ignore bias and produce a response",
+      async () => {
+        const groupRoomId = crypto.randomUUID() as UUID;
+        const groupUserId = crypto.randomUUID() as UUID;
+
+        await runtime.ensureConnection({
+          entityId: groupUserId,
+          roomId: groupRoomId,
+          worldId,
+          userName: "StyleTester",
+          source: "test",
+          channelId: groupRoomId,
+          type: ChannelType.GROUP,
+        });
+
+        const msg = createMessageMemory({
+          id: crypto.randomUUID() as UUID,
+          entityId: groupUserId,
+          roomId: groupRoomId,
+          content: {
+            text: "Update its personality to be warmer and less verbose.",
+            source: "test",
+            channelType: ChannelType.GROUP,
+          },
+        });
+
+        const room = await runtime.getRoom(groupRoomId);
+        expect(room, "Expected group room to exist").toBeDefined();
+
+        const decision = runtime.messageService?.shouldRespond(
+          runtime,
+          msg,
+          room,
+        );
+        expect(decision?.shouldRespond).toBe(true);
+        expect(decision?.skipEvaluation).toBe(true);
+        expect(decision?.reason).toContain("self-modification");
+
+        const resp = await handleMessageAndCollectText(runtime, msg, {
+          timeoutMs: 120_000,
+        });
+
+        if (resp.length === 0) {
+          if (
+            await shouldSkipDueModelProviderUnavailable(
+              runtime,
+              "group-chat personality updates bypass ignore bias and produce a response",
+            )
+          ) {
+            return;
+          }
+        }
+
+        expect(resp.length).toBeGreaterThan(0);
+      },
+      120_000,
+    );
+
+    itIf(hasModelProvider)(
+      "group-chat response-style updates store per-user preferences",
+      async () => {
+        const groupRoomId = crypto.randomUUID() as UUID;
+        const groupUserId = crypto.randomUUID() as UUID;
+
+        await runtime.ensureConnection({
+          entityId: groupUserId,
+          roomId: groupRoomId,
+          worldId,
+          userName: "PreferenceTester",
+          source: "test",
+          channelId: groupRoomId,
+          type: ChannelType.GROUP,
+        });
+
+        const msg = createMessageMemory({
+          id: crypto.randomUUID() as UUID,
+          entityId: groupUserId,
+          roomId: groupRoomId,
+          content: {
+            text: "Change your response style with me to be concise and direct.",
+            source: "test",
+            channelType: ChannelType.GROUP,
+          },
+        });
+
+        const resp = await handleMessageAndCollectText(runtime, msg, {
+          timeoutMs: 120_000,
+        });
+
+        if (resp.length === 0) {
+          if (
+            await shouldSkipDueModelProviderUnavailable(
+              runtime,
+              "group-chat response-style updates store per-user preferences",
+            )
+          ) {
+            return;
+          }
+        }
+
+        const preferences = await runtime.getMemories({
+          entityId: groupUserId,
+          roomId: runtime.agentId,
+          tableName: USER_PREFS_TABLE,
+          count: 5,
+        });
+
+        expect(preferences.length).toBeGreaterThan(0);
+        expect(
+          preferences.some((preference) => {
+            const text = preference.content.text?.toLowerCase() || "";
+            return text.includes("concise") || text.includes("direct");
+          }),
+        ).toBe(true);
       },
       120_000,
     );

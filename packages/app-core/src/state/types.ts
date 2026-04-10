@@ -250,11 +250,11 @@ export interface AppState {
   /** VRM quality vs GPU use: always full quality, battery-aware (default), or always efficient. */
   companionVrmPowerMode: CompanionVrmPowerMode;
   /**
-   * When true and the document is hidden, keep the VRM render loop alive and
-   * hide only the splat world + Spark backdrop (lower GPU than full scene).
+   * When true and the document is hidden, keep the VRM render loop alive
+   * but hide the 3D environment (lower GPU than full scene).
    */
   companionAnimateWhenHidden: boolean;
-  /** When to cap companion at ~half display Hz (independent of DPR/shadows/Spark). */
+  /** When to cap companion at ~half display Hz (independent of DPR/shadows). */
   companionHalfFramerateMode: CompanionHalfFramerateMode;
   connected: boolean;
   agentStatus: AgentStatus | null;
@@ -585,6 +585,11 @@ export interface AppState {
   /** When true, the game iframe persists as a floating overlay across all tabs. */
   gameOverlayEnabled: boolean;
 
+  /** When true, the companion app is actively running (full-screen VRM scene). */
+  companionAppRunning: boolean;
+  /** Name of the active full-screen overlay app, or null if none. */
+  activeOverlayApp: string | null;
+
   /**
    * Currently-selected connector chat in the unified messages sidebar.
    * When non-null, the Chat view swaps its main panel out for a
@@ -593,8 +598,10 @@ export interface AppState {
    */
   activeInboxChat: {
     avatarUrl?: string;
+    canSend?: boolean;
     id: string;
     source: string;
+    transportSource?: string;
     title: string;
     worldId?: string;
     worldLabel?: string;

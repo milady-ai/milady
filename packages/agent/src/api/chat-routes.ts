@@ -24,6 +24,7 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
+
 // Dynamic import: plugin-selfcontrol is optional and may not be present in all environments
 let getSelfControlStatus: (() => Promise<{ active: boolean }>) | undefined;
 let hasWebsiteBlockDeferralIntent: ((text: string) => boolean) | undefined;
@@ -36,15 +37,15 @@ try {
 } catch {
   // plugin-selfcontrol not available — website blocker features disabled
 }
+
 import type { ElizaConfig } from "../config/config.js";
 import { normalizeCharacterLanguage } from "../onboarding-presets.js";
-import {
-  startTrajectoryStepInDatabase,
-} from "../runtime/trajectory-storage.js";
 import {
   asRecord,
   resolveTrajectoryGrouping,
 } from "../runtime/trajectory-internals.js";
+import { startTrajectoryStepInDatabase } from "../runtime/trajectory-storage.js";
+import { syncCharacterIntoConfig } from "../services/character-persistence.js";
 import { detectRuntimeModel } from "./agent-model.js";
 import {
   isClientVisibleNoResponse,
@@ -105,6 +106,11 @@ export interface ChatGenerationResult {
   text: string;
   agentName: string;
   noResponseReason?: "ignored";
+  responseContent?: Content | null;
+  responseMessages?: Array<{
+    id?: string;
+    content?: Content;
+  }>;
   usage?: {
     promptTokens: number;
     completionTokens: number;
@@ -202,7 +208,11 @@ function getProviderIssueChatReply(): string {
 }
 
 function resolveChatGenerationTimeoutMs(explicit?: number): number {
-  if (typeof explicit === "number" && Number.isFinite(explicit) && explicit > 0) {
+  if (
+    typeof explicit === "number" &&
+    Number.isFinite(explicit) &&
+    explicit > 0
+  ) {
     return Math.max(1_000, Math.floor(explicit));
   }
 
@@ -302,12 +312,14 @@ function isIntentionalNoResponseResult(
 
   const actions = listResponseActions(result.responseContent);
   const hasSilentTerminalAction =
-    actions.length === 1 &&
-    (actions[0] === "IGNORE" || actions[0] === "STOP");
+    actions.length === 1 && (actions[0] === "IGNORE" || actions[0] === "STOP");
   const hasNoVisibleText =
-    candidateText.trim().length === 0 || isClientVisibleNoResponse(candidateText);
+    candidateText.trim().length === 0 ||
+    isClientVisibleNoResponse(candidateText);
 
-  return hasNoVisibleText && (result.didRespond === false || hasSilentTerminalAction);
+  return (
+    hasNoVisibleText && (result.didRespond === false || hasSilentTerminalAction)
+  );
 }
 
 function inferWebsiteBlockFallback(
@@ -442,6 +454,15 @@ export async function persistConversationMemory(
     if (isDuplicateMemoryError(err)) return;
     throw err;
   }
+
+  // Fire-and-forget: update relationship strength for co-participants
+  // based on conversation proximity (last N messages in the same room).
+  void import("../services/conversation-proximity.js").then(
+    ({ updateProximityRelationships }) =>
+      updateProximityRelationships(runtime, memory).catch(() => {
+        /* non-critical — don't fail the chat flow */
+      }),
+  );
 }
 
 async function hasRecentAssistantMemory(
@@ -477,11 +498,30 @@ async function hasRecentAssistantMemory(
 export async function persistAssistantConversationMemory(
   runtime: AgentRuntime,
   roomId: UUID,
-  text: string,
+  content: string | Content,
   channelType: ChannelType,
   dedupeSinceMs?: number,
 ): Promise<void> {
-  const trimmed = text.trim();
+  const persistedContent =
+    typeof content === "string"
+      ? ({
+          text: content,
+          source: "client_chat",
+          channelType,
+        } satisfies Content)
+      : ({
+          ...content,
+          text: extractCompatTextContent(content) ?? "",
+          source:
+            typeof content.source === "string"
+              ? content.source
+              : "client_chat",
+          channelType:
+            typeof content.channelType === "string"
+              ? content.channelType
+              : channelType,
+        } satisfies Content);
+  const trimmed = persistedContent.text.trim();
   if (!trimmed) return;
 
   if (typeof dedupeSinceMs === "number") {
@@ -501,11 +541,7 @@ export async function persistAssistantConversationMemory(
       entityId: runtime.agentId,
       agentId: runtime.agentId,
       roomId,
-      content: {
-        text: trimmed,
-        source: "client_chat",
-        channelType,
-      },
+      content: persistedContent,
     }),
   );
 }
@@ -805,12 +841,17 @@ export async function generateChatResponse(
 
     let result:
       | Awaited<
-          ReturnType<NonNullable<AgentRuntime["messageService"]>["handleMessage"]>
+          ReturnType<
+            NonNullable<AgentRuntime["messageService"]>["handleMessage"]
+          >
         >
       | undefined;
     let actionCallbacksSeen = 0;
     const seenActionTags = new Set<string>();
-    const recordActionCallback = (actionTag: string, hasText: boolean): void => {
+    const recordActionCallback = (
+      actionTag: string,
+      hasText: boolean,
+    ): void => {
       actionCallbacksSeen += 1;
       seenActionTags.add(actionTag.toUpperCase());
       runtime.logger?.info(
@@ -831,427 +872,456 @@ export async function generateChatResponse(
     await withTimeout(
       Promise.resolve(
         runWithTrajectoryContext(trajectoryContext, async () => {
-        try {
-          // Binance skill direct dispatch
-          const directSkillText = await maybeHandleDirectBinanceSkillRequest(
-            runtime,
-            message,
-            replaceCallbackText,
-            emitSnapshot,
-          );
-          if (directSkillText) {
-            const finalText = isClientVisibleNoResponse(directSkillText)
-              ? directSkillText || "(no response)"
-              : directSkillText;
-            result = {
-              didRespond: true,
-              responseContent: { text: finalText },
-              responseMessages: [],
-            } as typeof result;
-            responseText = finalText;
-            forcedWalletExecutionText = isClientVisibleNoResponse(directSkillText);
-            return;
-          }
-
-          // Direct dispatch for explicit task creation intent from UI
-          const contentMetadata = message.content.metadata as
-            | Record<string, unknown>
-            | undefined;
-          if (contentMetadata?.intent === "create_task") {
-            const coordinator = runtime.getService("SWARM_COORDINATOR");
-            if (coordinator) {
-              const createTaskAction = runtime.actions.find(
-                (a) => a?.name?.toUpperCase() === "CREATE_TASK",
-              );
-              if (createTaskAction) {
-                runtime.logger?.info(
-                  {
-                    src: "eliza-api",
-                    agentType: contentMetadata.agentType,
-                    intent: "create_task",
-                  },
-                  "[eliza-api] Direct dispatch CREATE_TASK from UI intent",
-                );
-                let actionResponseText = "";
-                await createTaskAction.handler(
-                  runtime,
-                  message,
-                  undefined,
-                  {},
-                  async (content: Content) => {
-                    if (generationTimedOut || opts?.isAborted?.()) {
-                      throw createChatGenerationTimeoutError(generationTimeoutMs);
-                    }
-
-                    const chunk = extractCompatTextContent(content);
-                    if (chunk) {
-                      replaceCallbackText(chunk);
-                      actionResponseText = responseText;
-                    }
-                    return [];
-                  },
-                );
-                const finalText =
-                  actionResponseText || responseText || "Task created.";
-                result = {
-                  didRespond: true,
-                  responseContent: { text: finalText },
-                  responseMessages: [],
-                } as typeof result;
-                responseText = finalText;
-                return;
-              }
+          try {
+            // Binance skill direct dispatch
+            const directSkillText = await maybeHandleDirectBinanceSkillRequest(
+              runtime,
+              message,
+              replaceCallbackText,
+              emitSnapshot,
+            );
+            if (directSkillText) {
+              const finalText = isClientVisibleNoResponse(directSkillText)
+                ? directSkillText || "(no response)"
+                : directSkillText;
+              result = {
+                didRespond: true,
+                responseContent: { text: finalText },
+                responseMessages: [],
+              } as typeof result;
+              responseText = finalText;
+              forcedWalletExecutionText =
+                isClientVisibleNoResponse(directSkillText);
+              return;
             }
-            // Fall through to normal LLM-based routing if coordinator not available
-          }
 
-          if (directWalletExecutionFallback?.errorText) {
-            forcedWalletExecutionText = true;
-            responseText = directWalletExecutionFallback.errorText;
-            result = {
-              didRespond: true,
-              responseContent: { text: directWalletExecutionFallback.errorText },
-              responseMessages: [],
-            };
-          } else if (directWalletExecutionFallback?.action) {
-            runtime.logger?.info(
-              {
-                src: "eliza-api",
-                action: directWalletExecutionFallback.action.name,
-                parameters: directWalletExecutionFallback.action.parameters,
-              },
-              "[eliza-api] Direct wallet execution dispatch from prompt intent",
-            );
-            await executeFallbackParsedActions(
-              runtime,
-              message,
-              [directWalletExecutionFallback.action],
-              appendIncomingText,
-              recordActionCallback,
-              {
-                getCurrentText: () => responseText,
-                onCallbackText: replaceCallbackText,
-              },
-            );
-            result = {
-              didRespond: true,
-              responseContent: { text: responseText },
-              responseMessages: [],
-            };
-          } else {
-            const languageAugmentedMessage = maybeAugmentChatMessageWithLanguage(
-              message,
-              opts?.preferredLanguage,
-            );
-            const walletAugmentedMessage = maybeAugmentChatMessageWithWalletContext(
-              runtime,
-              languageAugmentedMessage,
-            );
-            const generationMessage = await maybeAugmentChatMessageWithKnowledge(
-              runtime,
-              walletAugmentedMessage,
-            );
-            result = await runtime.messageService?.handleMessage(
-              runtime,
-              generationMessage,
-              async (content: Content) => {
-                if (generationTimedOut || opts?.isAborted?.()) {
-                  throw createChatGenerationTimeoutError(generationTimeoutMs);
-                }
-
-                const actionTag = (content as Record<string, unknown>)?.action;
-                if (typeof actionTag === "string" && actionTag.length > 0) {
-                  recordActionCallback(
-                    actionTag,
-                    Boolean(extractCompatTextContent(content)),
+            // Direct dispatch for explicit task creation intent from UI
+            const contentMetadata = message.content.metadata as
+              | Record<string, unknown>
+              | undefined;
+            if (contentMetadata?.intent === "create_task") {
+              const coordinator = runtime.getService("SWARM_COORDINATOR");
+              if (coordinator) {
+                const createTaskAction = runtime.actions.find(
+                  (a) => a?.name?.toUpperCase() === "CREATE_TASK",
+                );
+                if (createTaskAction) {
+                  runtime.logger?.info(
+                    {
+                      src: "eliza-api",
+                      agentType: contentMetadata.agentType,
+                      intent: "create_task",
+                    },
+                    "[eliza-api] Direct dispatch CREATE_TASK from UI intent",
                   );
-                }
-
-                const chunk = extractCompatTextContent(content);
-                if (!chunk) return [];
-                if (!claimStreamSource("callback")) return [];
-                replaceCallbackText(chunk);
-                return [];
-              },
-              {
-                timeoutDuration: generationTimeoutMs,
-                keepExistingResponses: true,
-                onStreamChunk: opts?.onChunk
-                  ? async (chunk: string) => {
+                  let actionResponseText = "";
+                  await createTaskAction.handler(
+                    runtime,
+                    message,
+                    undefined,
+                    {},
+                    async (content: Content) => {
                       if (generationTimedOut || opts?.isAborted?.()) {
                         throw createChatGenerationTimeoutError(
                           generationTimeoutMs,
                         );
                       }
-                      if (!chunk) return;
-                      if (!claimStreamSource("onStreamChunk")) return;
-                      appendIncomingText(chunk);
-                    }
-                  : undefined,
-              },
-            );
-          }
 
-          // Ensure MESSAGE_SENT hooks run for API chat flows.
-          try {
-            const responseMessages = Array.isArray(result?.responseMessages)
-              ? (result.responseMessages as Array<{ id?: string; content?: Content }>)
-              : [];
-            const fallbackResponseContent =
-              result?.responseContent && typeof result.responseContent === "object"
-                ? (result.responseContent as Content)
-                : responseText
-                  ? ({ text: responseText } as Content)
-                  : null;
-            const messagesToEmit =
-              responseMessages.length > 0
-                ? responseMessages
-                : fallbackResponseContent
-                  ? [{ id: crypto.randomUUID(), content: fallbackResponseContent }]
-                  : [];
-            if (
-              messagesToEmit.length > 0 &&
-              typeof runtime.emitEvent === "function"
-            ) {
-              for (const responseMessage of messagesToEmit) {
-                const memoryLike = {
-                  id: responseMessage.id ?? crypto.randomUUID(),
-                  roomId: message.roomId,
-                  entityId: runtime.agentId,
-                  content: responseMessage.content ?? { text: "" },
-                  metadata: message.metadata,
-                } as unknown as ReturnType<typeof createMessageMemory>;
-                await runtime.emitEvent("MESSAGE_SENT", {
-                  message: memoryLike,
-                  source: messageSource,
-                });
+                      const chunk = extractCompatTextContent(content);
+                      if (chunk) {
+                        replaceCallbackText(chunk);
+                        actionResponseText = responseText;
+                      }
+                      return [];
+                    },
+                  );
+                  const finalText =
+                    actionResponseText || responseText || "Task created.";
+                  result = {
+                    didRespond: true,
+                    responseContent: { text: finalText },
+                    responseMessages: [],
+                  } as typeof result;
+                  responseText = finalText;
+                  return;
+                }
               }
+              // Fall through to normal LLM-based routing if coordinator not available
+            }
+
+            if (directWalletExecutionFallback?.errorText) {
+              forcedWalletExecutionText = true;
+              responseText = directWalletExecutionFallback.errorText;
+              result = {
+                didRespond: true,
+                responseContent: {
+                  text: directWalletExecutionFallback.errorText,
+                },
+                responseMessages: [],
+              };
+            } else if (directWalletExecutionFallback?.action) {
+              runtime.logger?.info(
+                {
+                  src: "eliza-api",
+                  action: directWalletExecutionFallback.action.name,
+                  parameters: directWalletExecutionFallback.action.parameters,
+                },
+                "[eliza-api] Direct wallet execution dispatch from prompt intent",
+              );
+              await executeFallbackParsedActions(
+                runtime,
+                message,
+                [directWalletExecutionFallback.action],
+                appendIncomingText,
+                recordActionCallback,
+                {
+                  getCurrentText: () => responseText,
+                  onCallbackText: replaceCallbackText,
+                },
+              );
+              result = {
+                didRespond: true,
+                responseContent: { text: responseText },
+                responseMessages: [],
+              };
+            } else {
+              const languageAugmentedMessage =
+                maybeAugmentChatMessageWithLanguage(
+                  message,
+                  opts?.preferredLanguage,
+                );
+              const walletAugmentedMessage =
+                maybeAugmentChatMessageWithWalletContext(
+                  runtime,
+                  languageAugmentedMessage,
+                );
+              const generationMessage =
+                await maybeAugmentChatMessageWithKnowledge(
+                  runtime,
+                  walletAugmentedMessage,
+                );
+              result = await runtime.messageService?.handleMessage(
+                runtime,
+                generationMessage,
+                async (content: Content) => {
+                  if (generationTimedOut || opts?.isAborted?.()) {
+                    throw createChatGenerationTimeoutError(generationTimeoutMs);
+                  }
+
+                  const actionTag = (content as Record<string, unknown>)
+                    ?.action;
+                  if (typeof actionTag === "string" && actionTag.length > 0) {
+                    recordActionCallback(
+                      actionTag,
+                      Boolean(extractCompatTextContent(content)),
+                    );
+                  }
+
+                  const chunk = extractCompatTextContent(content);
+                  if (!chunk) return [];
+                  if (!claimStreamSource("callback")) return [];
+                  replaceCallbackText(chunk);
+                  return [];
+                },
+                {
+                  timeoutDuration: generationTimeoutMs,
+                  keepExistingResponses: true,
+                  onStreamChunk: opts?.onChunk
+                    ? async (chunk: string) => {
+                        if (generationTimedOut || opts?.isAborted?.()) {
+                          throw createChatGenerationTimeoutError(
+                            generationTimeoutMs,
+                          );
+                        }
+                        if (!chunk) return;
+                        if (!claimStreamSource("onStreamChunk")) return;
+                        appendIncomingText(chunk);
+                      }
+                    : undefined,
+                },
+              );
+            }
+
+            // Ensure MESSAGE_SENT hooks run for API chat flows.
+            try {
+              const responseMessages = Array.isArray(result?.responseMessages)
+                ? (result.responseMessages as Array<{
+                    id?: string;
+                    content?: Content;
+                  }>)
+                : [];
+              const fallbackResponseContent =
+                result?.responseContent &&
+                typeof result.responseContent === "object"
+                  ? (result.responseContent as Content)
+                  : responseText
+                    ? ({ text: responseText } as Content)
+                    : null;
+              const messagesToEmit =
+                responseMessages.length > 0
+                  ? responseMessages
+                  : fallbackResponseContent
+                    ? [
+                        {
+                          id: crypto.randomUUID(),
+                          content: fallbackResponseContent,
+                        },
+                      ]
+                    : [];
+              if (
+                messagesToEmit.length > 0 &&
+                typeof runtime.emitEvent === "function"
+              ) {
+                for (const responseMessage of messagesToEmit) {
+                  const memoryLike = {
+                    id: responseMessage.id ?? crypto.randomUUID(),
+                    roomId: message.roomId,
+                    entityId: runtime.agentId,
+                    content: responseMessage.content ?? { text: "" },
+                    metadata: message.metadata,
+                  } as unknown as ReturnType<typeof createMessageMemory>;
+                  await runtime.emitEvent("MESSAGE_SENT", {
+                    message: memoryLike,
+                    source: messageSource,
+                  });
+                }
+              }
+            } catch (err) {
+              runtime.logger?.warn(
+                {
+                  err,
+                  src: "eliza-api",
+                  messageId: message.id,
+                  roomId: message.roomId,
+                },
+                "Failed to emit MESSAGE_SENT event",
+              );
             }
           } catch (err) {
-            runtime.logger?.warn(
-              {
-                err,
-                src: "eliza-api",
-                messageId: message.id,
-                roomId: message.roomId,
-              },
-              "Failed to emit MESSAGE_SENT event",
-            );
+            throw err;
           }
-        } catch (err) {
-          throw err;
-        }
 
-        // Post-process fallback actions
-        if (result) {
-      const rc = result.responseContent as Record<string, unknown> | null;
-      const resultRecord = result as unknown as Record<string, unknown>;
-      runtime.logger?.info(
-        {
-          src: "eliza-api",
-          mode: resultRecord.mode,
-          actions: rc?.actions,
-          simple: rc?.simple,
-          hasText: Boolean(rc?.text),
-        },
-        "[eliza-api] Chat response metadata",
-      );
+          // Post-process fallback actions
+          if (result) {
+            const rc = result.responseContent as Record<string, unknown> | null;
+            const resultRecord = result as unknown as Record<string, unknown>;
+            runtime.logger?.info(
+              {
+                src: "eliza-api",
+                mode: resultRecord.mode,
+                actions: rc?.actions,
+                simple: rc?.simple,
+                hasText: Boolean(rc?.text),
+              },
+              "[eliza-api] Chat response metadata",
+            );
 
-      const rawActionsPayload = rc?.actions ?? resultRecord.actions;
-      const modelText = String(
-        extractCompatTextContent(result.responseContent) ?? "",
-      );
-      const parsedFallbackActions = parseFallbackActionBlocks(
-        rawActionsPayload,
-        modelText,
-      );
-      const userText = String(extractCompatTextContent(message.content) ?? "");
-      const fallbackActionsToRun = [...parsedFallbackActions];
-      const inferredBalanceChain = inferBalanceChainFromText(userText);
+            const rawActionsPayload = rc?.actions ?? resultRecord.actions;
+            const modelText = String(
+              extractCompatTextContent(result.responseContent) ?? "",
+            );
+            const parsedFallbackActions = parseFallbackActionBlocks(
+              rawActionsPayload,
+              modelText,
+            );
+            const userText = String(
+              extractCompatTextContent(message.content) ?? "",
+            );
+            const fallbackActionsToRun = [...parsedFallbackActions];
+            const inferredBalanceChain = inferBalanceChainFromText(userText);
 
-      if (
-        shouldForceCheckBalanceFallback(
-          fallbackActionsToRun,
-          userText,
-          modelText,
-        ) &&
-        !fallbackActionsToRun.some((a) => a.name === "CHECK_BALANCE")
-      ) {
-        fallbackActionsToRun.push({
-          name: "CHECK_BALANCE",
-          parameters: { chain: inferredBalanceChain },
-        });
-        runtime.logger?.warn(
-          {
-            src: "eliza-api",
-            inferredChain: inferredBalanceChain,
-          },
-          "[eliza-api] Injecting CHECK_BALANCE fallback for REPLY-only malformed action payload",
-        );
-      }
-
-      if (
-        actionCallbacksSeen === 0 &&
-        fallbackActionsToRun.length === 0 &&
-        isBalanceIntent(userText)
-      ) {
-        fallbackActionsToRun.push({
-          name: "CHECK_BALANCE",
-          parameters: { chain: inferredBalanceChain },
-        });
-        runtime.logger?.warn(
-          {
-            src: "eliza-api",
-            inferredChain: inferredBalanceChain,
-          },
-          "[eliza-api] Injecting CHECK_BALANCE fallback for balance intent without any action payload",
-        );
-      }
-
-      if (
-        actionCallbacksSeen === 0 &&
-        !fallbackActionsToRun.some((action) => action.name === "BLOCK_WEBSITES")
-      ) {
-        const inferredWebsiteBlockFallback = inferWebsiteBlockFallback(
-          userText,
-          modelText,
-        );
-        if (inferredWebsiteBlockFallback) {
-          fallbackActionsToRun.push(inferredWebsiteBlockFallback);
-          runtime.logger?.warn(
-            {
-              src: "eliza-api",
-              action: inferredWebsiteBlockFallback.name,
-            },
-            "[eliza-api] Injecting website blocker fallback from prompt intent",
-          );
-        }
-      }
-
-      if (
-        actionCallbacksSeen === 0 &&
-        !fallbackActionsToRun.some(
-          (action) => action.name === "REQUEST_WEBSITE_BLOCKING_PERMISSION",
-        )
-      ) {
-        const inferredWebsiteBlockingPermissionFallback =
-          inferWebsiteBlockingPermissionFallback(userText, modelText);
-        if (inferredWebsiteBlockingPermissionFallback) {
-          fallbackActionsToRun.push(inferredWebsiteBlockingPermissionFallback);
-          runtime.logger?.warn(
-            {
-              src: "eliza-api",
-              action: inferredWebsiteBlockingPermissionFallback.name,
-            },
-            "[eliza-api] Injecting website blocker permission fallback from prompt intent",
-          );
-        }
-      }
-
-      if (
-        actionCallbacksSeen === 0 &&
-        WALLET_EXECUTION_INTENT_RE.test(userText)
-      ) {
-        const inferredWalletFallback = inferWalletExecutionFallback(userText);
-        if (inferredWalletFallback?.action) {
-          const existingIndex = fallbackActionsToRun.findIndex(
-            (action) => action.name === inferredWalletFallback.action.name,
-          );
-          const existingAction =
-            existingIndex >= 0 ? fallbackActionsToRun[existingIndex] : undefined;
-          if (
-            existingIndex === -1 ||
-            !existingAction ||
-            !hasUsableWalletFallbackParams(existingAction)
-          ) {
-            if (existingIndex >= 0) {
-              fallbackActionsToRun.splice(existingIndex, 1);
+            if (
+              shouldForceCheckBalanceFallback(
+                fallbackActionsToRun,
+                userText,
+                modelText,
+              ) &&
+              !fallbackActionsToRun.some((a) => a.name === "CHECK_BALANCE")
+            ) {
+              fallbackActionsToRun.push({
+                name: "CHECK_BALANCE",
+                parameters: { chain: inferredBalanceChain },
+              });
+              runtime.logger?.warn(
+                {
+                  src: "eliza-api",
+                  inferredChain: inferredBalanceChain,
+                },
+                "[eliza-api] Injecting CHECK_BALANCE fallback for REPLY-only malformed action payload",
+              );
             }
-            fallbackActionsToRun.push(inferredWalletFallback.action);
-            runtime.logger?.warn(
-              {
-                src: "eliza-api",
-                action: inferredWalletFallback.action.name,
-                parameters: inferredWalletFallback.action.parameters,
-              },
-              "[eliza-api] Injecting wallet execution fallback from prompt intent",
+
+            if (
+              actionCallbacksSeen === 0 &&
+              fallbackActionsToRun.length === 0 &&
+              isBalanceIntent(userText)
+            ) {
+              fallbackActionsToRun.push({
+                name: "CHECK_BALANCE",
+                parameters: { chain: inferredBalanceChain },
+              });
+              runtime.logger?.warn(
+                {
+                  src: "eliza-api",
+                  inferredChain: inferredBalanceChain,
+                },
+                "[eliza-api] Injecting CHECK_BALANCE fallback for balance intent without any action payload",
+              );
+            }
+
+            if (
+              actionCallbacksSeen === 0 &&
+              !fallbackActionsToRun.some(
+                (action) => action.name === "BLOCK_WEBSITES",
+              )
+            ) {
+              const inferredWebsiteBlockFallback = inferWebsiteBlockFallback(
+                userText,
+                modelText,
+              );
+              if (inferredWebsiteBlockFallback) {
+                fallbackActionsToRun.push(inferredWebsiteBlockFallback);
+                runtime.logger?.warn(
+                  {
+                    src: "eliza-api",
+                    action: inferredWebsiteBlockFallback.name,
+                  },
+                  "[eliza-api] Injecting website blocker fallback from prompt intent",
+                );
+              }
+            }
+
+            if (
+              actionCallbacksSeen === 0 &&
+              !fallbackActionsToRun.some(
+                (action) =>
+                  action.name === "REQUEST_WEBSITE_BLOCKING_PERMISSION",
+              )
+            ) {
+              const inferredWebsiteBlockingPermissionFallback =
+                inferWebsiteBlockingPermissionFallback(userText, modelText);
+              if (inferredWebsiteBlockingPermissionFallback) {
+                fallbackActionsToRun.push(
+                  inferredWebsiteBlockingPermissionFallback,
+                );
+                runtime.logger?.warn(
+                  {
+                    src: "eliza-api",
+                    action: inferredWebsiteBlockingPermissionFallback.name,
+                  },
+                  "[eliza-api] Injecting website blocker permission fallback from prompt intent",
+                );
+              }
+            }
+
+            if (
+              actionCallbacksSeen === 0 &&
+              WALLET_EXECUTION_INTENT_RE.test(userText)
+            ) {
+              const inferredWalletFallback =
+                inferWalletExecutionFallback(userText);
+              if (inferredWalletFallback?.action) {
+                const existingIndex = fallbackActionsToRun.findIndex(
+                  (action) =>
+                    action.name === inferredWalletFallback.action.name,
+                );
+                const existingAction =
+                  existingIndex >= 0
+                    ? fallbackActionsToRun[existingIndex]
+                    : undefined;
+                if (
+                  existingIndex === -1 ||
+                  !existingAction ||
+                  !hasUsableWalletFallbackParams(existingAction)
+                ) {
+                  if (existingIndex >= 0) {
+                    fallbackActionsToRun.splice(existingIndex, 1);
+                  }
+                  fallbackActionsToRun.push(inferredWalletFallback.action);
+                  runtime.logger?.warn(
+                    {
+                      src: "eliza-api",
+                      action: inferredWalletFallback.action.name,
+                      parameters: inferredWalletFallback.action.parameters,
+                    },
+                    "[eliza-api] Injecting wallet execution fallback from prompt intent",
+                  );
+                }
+              } else if (inferredWalletFallback?.errorText) {
+                forcedWalletExecutionText = true;
+                if (opts?.onSnapshot) {
+                  emitSnapshot(inferredWalletFallback.errorText);
+                } else {
+                  responseText = inferredWalletFallback.errorText;
+                }
+              }
+            }
+
+            // Only run fallback execution when the core did NOT dispatch actions itself.
+            const coreHandledActions = resultRecord.mode === "actions";
+            const executableFallbackActions = fallbackActionsToRun.filter(
+              isExecutableFallbackAction,
             );
+            if (
+              actionCallbacksSeen === 0 &&
+              !coreHandledActions &&
+              executableFallbackActions.length > 0
+            ) {
+              runtime.logger?.warn(
+                {
+                  src: "eliza-api",
+                  parsedActions: executableFallbackActions.map((a) => a.name),
+                },
+                "[eliza-api] Recovering from unexecuted action payload",
+              );
+
+              await executeFallbackParsedActions(
+                runtime,
+                message,
+                executableFallbackActions,
+                appendIncomingText,
+                recordActionCallback,
+                {
+                  getCurrentText: () => responseText || modelText,
+                  onCallbackText: replaceCallbackText,
+                },
+              );
+            }
+
+            const inferredWebsiteBlockRecovery = inferWebsiteBlockFallback(
+              userText,
+              modelText,
+            );
+            if (
+              inferredWebsiteBlockRecovery &&
+              !seenActionTags.has("BLOCK_WEBSITES")
+            ) {
+              const websiteBlockStatus = getSelfControlStatus
+                ? await getSelfControlStatus()
+                : { active: false };
+              if (!websiteBlockStatus.active && getSelfControlStatus) {
+                runtime.logger?.warn(
+                  {
+                    src: "eliza-api",
+                    action: inferredWebsiteBlockRecovery.name,
+                  },
+                  "[eliza-api] Recovering missing website blocker side effect after model response",
+                );
+
+                await executeFallbackParsedActions(
+                  runtime,
+                  message,
+                  [inferredWebsiteBlockRecovery],
+                  appendIncomingText,
+                  recordActionCallback,
+                  {
+                    getCurrentText: () => responseText || modelText,
+                    onCallbackText: replaceCallbackText,
+                  },
+                );
+              }
+            }
           }
-        } else if (inferredWalletFallback?.errorText) {
-          forcedWalletExecutionText = true;
-          if (opts?.onSnapshot) {
-            emitSnapshot(inferredWalletFallback.errorText);
-          } else {
-            responseText = inferredWalletFallback.errorText;
-          }
-        }
-      }
-
-      // Only run fallback execution when the core did NOT dispatch actions itself.
-      const coreHandledActions = resultRecord.mode === "actions";
-      const executableFallbackActions = fallbackActionsToRun.filter(
-        isExecutableFallbackAction,
-      );
-      if (
-        actionCallbacksSeen === 0 &&
-        !coreHandledActions &&
-        executableFallbackActions.length > 0
-      ) {
-        runtime.logger?.warn(
-          {
-            src: "eliza-api",
-            parsedActions: executableFallbackActions.map((a) => a.name),
-          },
-          "[eliza-api] Recovering from unexecuted action payload",
-        );
-
-        await executeFallbackParsedActions(
-          runtime,
-          message,
-          executableFallbackActions,
-          appendIncomingText,
-          recordActionCallback,
-          {
-            getCurrentText: () => responseText || modelText,
-            onCallbackText: replaceCallbackText,
-          },
-        );
-      }
-
-      const inferredWebsiteBlockRecovery = inferWebsiteBlockFallback(
-        userText,
-        modelText,
-      );
-      if (
-        inferredWebsiteBlockRecovery &&
-        !seenActionTags.has("BLOCK_WEBSITES")
-      ) {
-        const websiteBlockStatus = getSelfControlStatus
-          ? await getSelfControlStatus()
-          : { active: false };
-        if (!websiteBlockStatus.active && getSelfControlStatus) {
-          runtime.logger?.warn(
-            {
-              src: "eliza-api",
-              action: inferredWebsiteBlockRecovery.name,
-            },
-            "[eliza-api] Recovering missing website blocker side effect after model response",
-          );
-
-          await executeFallbackParsedActions(
-            runtime,
-            message,
-            [inferredWebsiteBlockRecovery],
-            appendIncomingText,
-            recordActionCallback,
-            {
-              getCurrentText: () => responseText || modelText,
-              onCallbackText: replaceCallbackText,
-            },
-          );
-        }
-      }
-    }
         }),
       ),
       generationTimeoutMs,
@@ -1332,11 +1402,30 @@ export async function generateChatResponse(
     const promptText = extractCompatTextContent(message.content) ?? "";
     const estPromptTokens = Math.ceil(promptText.length / 4);
     const estCompletionTokens = Math.ceil(finalText.length / 4);
+    const responseMessages = Array.isArray(result?.responseMessages)
+      ? result.responseMessages.map((entry) => ({
+          ...(entry?.id ? { id: entry.id } : {}),
+          ...(entry?.content ? { content: entry.content } : {}),
+        }))
+      : [];
+    const responseContent =
+      result?.responseContent && typeof result.responseContent === "object"
+        ? ({
+            ...result.responseContent,
+            text: finalText,
+          } satisfies Content)
+        : finalText
+          ? ({ text: finalText } satisfies Content)
+          : null;
 
     return {
       text: finalText,
       agentName,
-      ...(intentionalNoResponse ? { noResponseReason: "ignored" as const } : {}),
+      ...(intentionalNoResponse
+        ? { noResponseReason: "ignored" as const }
+        : {}),
+      ...(responseContent ? { responseContent } : {}),
+      ...(responseMessages.length > 0 ? { responseMessages } : {}),
       usage: {
         promptTokens: estPromptTokens,
         completionTokens: estCompletionTokens,
@@ -1507,6 +1596,17 @@ function ensureAdminEntityIdForChat(state: ChatRouteState): UUID {
   state.adminEntityId = nextAdminEntityId;
   state.chatUserId = state.adminEntityId;
   return nextAdminEntityId;
+}
+
+function syncRuntimeCharacterToChatStateConfig(state: ChatRouteState): void {
+  if (!state.runtime || !state.config) {
+    return;
+  }
+
+  syncCharacterIntoConfig(
+    state.config,
+    state.runtime.character as Parameters<typeof syncCharacterIntoConfig>[1],
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1696,6 +1796,7 @@ export async function handleChatRoutes(
             resolveNoResponseText: () =>
               resolveNoResponseFallback(state.logBuffer, runtime),
           });
+          syncRuntimeCharacterToChatStateConfig(state);
         }
 
         const resolved = normalizeChatResponseText(
@@ -1777,6 +1878,7 @@ export async function handleChatRoutes(
               resolveNoResponseFallback(state.logBuffer, runtime),
           },
         );
+        syncRuntimeCharacterToChatStateConfig(state);
         responseText = result.text;
       }
 
@@ -1957,6 +2059,7 @@ export async function handleChatRoutes(
             resolveNoResponseText: () =>
               resolveNoResponseFallback(state.logBuffer, runtime),
           });
+          syncRuntimeCharacterToChatStateConfig(state);
         }
 
         const resolved = normalizeChatResponseText(
@@ -2049,6 +2152,7 @@ export async function handleChatRoutes(
               resolveNoResponseFallback(state.logBuffer, runtime),
           },
         );
+        syncRuntimeCharacterToChatStateConfig(state);
         responseText = result.text;
       }
 

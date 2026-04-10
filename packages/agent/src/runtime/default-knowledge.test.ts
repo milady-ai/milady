@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_KNOWLEDGE_DOCUMENTS,
   type DefaultKnowledgeDocumentDefinition,
+  ELIZA_CLOUD_BASICS_TEXT,
   ELIZA_HISTORY_TEXT,
   MILADY_OVERVIEW_TEXT,
   seedBundledKnowledge,
@@ -110,8 +111,8 @@ describe("seedBundledKnowledge", () => {
     const documents = harness.listMemories("documents");
     const fragments = harness.listMemories("knowledge");
 
-    expect(documents).toHaveLength(2);
-    expect(fragments).toHaveLength(2);
+    expect(documents).toHaveLength(3);
+    expect(fragments).toHaveLength(3);
 
     expect(documents[0].content.text).toContain(
       "Milady is an autonomous agent",
@@ -128,6 +129,15 @@ describe("seedBundledKnowledge", () => {
     expect(documents[1].metadata).toMatchObject({
       type: "document",
       filename: "eliza-history.txt",
+      source: "milady-default-knowledge",
+    });
+
+    expect(documents[2].content.text).toContain(
+      "Eliza Cloud is the managed backend and app platform",
+    );
+    expect(documents[2].metadata).toMatchObject({
+      type: "document",
+      filename: "eliza-cloud-basics.txt",
       source: "milady-default-knowledge",
     });
 
@@ -149,20 +159,29 @@ describe("seedBundledKnowledge", () => {
       source: "milady-default-knowledge",
     });
 
-    expect(harness.getAddEmbeddingCalls()).toBe(2);
+    expect(fragments[2].content.text).toContain(
+      "Eliza Cloud is the managed backend and app platform",
+    );
+    expect(fragments[2].metadata).toMatchObject({
+      type: "fragment",
+      position: 0,
+      source: "milady-default-knowledge",
+    });
+
+    expect(harness.getAddEmbeddingCalls()).toBe(3);
   });
 
   it("reuses persisted embeddings on subsequent startups", async () => {
     const harness = createRuntimeHarness({ embeddingDimensions: 3 });
 
     await seedBundledKnowledge(harness.runtime as unknown as AgentRuntime);
-    expect(harness.getAddEmbeddingCalls()).toBe(2);
+    expect(harness.getAddEmbeddingCalls()).toBe(3);
 
     await seedBundledKnowledge(harness.runtime as unknown as AgentRuntime);
 
-    expect(harness.listMemories("documents")).toHaveLength(2);
-    expect(harness.listMemories("knowledge")).toHaveLength(2);
-    expect(harness.getAddEmbeddingCalls()).toBe(2);
+    expect(harness.listMemories("documents")).toHaveLength(3);
+    expect(harness.listMemories("knowledge")).toHaveLength(3);
+    expect(harness.getAddEmbeddingCalls()).toBe(3);
   });
 
   it("accepts precomputed fragment embeddings when dimensions match", async () => {
@@ -214,6 +233,18 @@ describe("seedBundledKnowledge", () => {
         fragments: [
           {
             text: ELIZA_HISTORY_TEXT,
+          },
+        ],
+      },
+      {
+        key: "eliza-cloud-basics",
+        version: 1,
+        filename: "eliza-cloud-basics.txt",
+        contentType: "text/plain",
+        text: ELIZA_CLOUD_BASICS_TEXT,
+        fragments: [
+          {
+            text: ELIZA_CLOUD_BASICS_TEXT,
           },
         ],
       },

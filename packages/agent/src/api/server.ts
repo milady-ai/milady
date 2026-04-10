@@ -145,6 +145,7 @@ import { handleAppsRoutes } from "./apps-routes.js";
 import { handleAuthRoutes } from "./auth-routes.js";
 import { handleAvatarRoutes } from "./avatar-routes.js";
 import { handleBrowserWorkspaceRoutes } from "./browser-workspace-routes.js";
+import { handleBlueBubblesRoute, resolveBlueBubblesWebhookPath } from "./bluebubbles-routes.js";
 import {
   buildBscApproveUnsignedTx,
   buildBscBuyUnsignedTx,
@@ -183,6 +184,7 @@ import { wireCoordinatorBridgesWhenReady } from "./coordinator-wiring.js";
 import { handleDatabaseRoute } from "./database.js";
 import { handleDiagnosticsRoutes } from "./diagnostics-routes.js";
 import { handleDropRoutes } from "./drop-routes.js";
+import { handleDiscordLocalRoute } from "./discord-local-routes.js";
 import { DropService } from "./drop-service.js";
 import { handleHealthRoutes } from "./health-routes.js";
 import {
@@ -262,6 +264,8 @@ import {
   setSolanaWalletEnv,
   validatePrivateKey,
 } from "./wallet.js";
+import { handleCloudRelayRoute } from "./cloud-relay-routes.js";
+import { handleTelegramSetupRoute } from "./telegram-setup-routes.js";
 import {
   applyWhatsAppQrOverride,
   handleWhatsAppRoute,
@@ -4814,6 +4818,18 @@ async function handleRequest(
     pathname === "/api/onboarding/status" &&
     isCloudProvisioned;
   const isWhatsAppWebhookEndpoint = pathname === "/api/whatsapp/webhook";
+  const isBlueBubblesWebhookEndpoint =
+    pathname ===
+    resolveBlueBubblesWebhookPath({
+      runtime: state.runtime
+        ? {
+            getService: (type: string) =>
+              (
+                state.runtime as { getService: (t: string) => unknown }
+              ).getService(type),
+          }
+        : undefined,
+    });
   const isAuthProtectedPath = isAuthProtectedRoute(pathname);
   const registryService = state.registryService;
   const dropService = state.dropService;
@@ -4921,6 +4937,7 @@ async function handleRequest(
     !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
     !isWhatsAppWebhookEndpoint &&
+    !isBlueBubblesWebhookEndpoint &&
     !isAuthorized(req)
   ) {
     json(res, { error: "Unauthorized" }, 401);
@@ -4934,6 +4951,7 @@ async function handleRequest(
     !isHealthEndpoint &&
     !isCloudOnboardingStatusEndpoint &&
     !isWhatsAppWebhookEndpoint &&
+    !isBlueBubblesWebhookEndpoint &&
     !isAuthorized(req)
   ) {
     json(res, { error: "Unauthorized" }, 401);
@@ -5161,7 +5179,7 @@ async function handleRequest(
     if (knowledgeHandled) return;
   }
 
-  if (pathname.startsWith("/api/memory") || pathname === "/api/context/quick") {
+  if (pathname.startsWith("/api/memory") || pathname.startsWith("/api/memories") || pathname === "/api/context/quick") {
     const memoryHandled = await handleMemoryRoutes({
       req,
       res,
@@ -5567,6 +5585,25 @@ async function handleRequest(
   // Cross-channel read-only feed that merges connector messages
   // (imessage, telegram, discord, whatsapp, etc.) into a single
   // time-ordered view. See api/inbox-routes.ts for details.
+  const blueBubblesHandled = await handleBlueBubblesRoute(
+    req,
+    res,
+    pathname,
+    method,
+    {
+      runtime: state.runtime
+        ? {
+            getService: (type: string) =>
+              (
+                state.runtime as { getService: (t: string) => unknown }
+              ).getService(type),
+          }
+        : undefined,
+    },
+    { json, error, readJsonBody },
+  );
+  if (blueBubblesHandled) return;
+
   if (pathname.startsWith("/api/inbox")) {
     const handled = await handleInboxRoute(
       req,
@@ -5597,6 +5634,80 @@ async function handleRequest(
                 ).getService(type),
             }
           : undefined,
+      },
+      { json, error, readJsonBody },
+    );
+    if (handled) return;
+  }
+
+  // ── Cloud relay status (/api/cloud/relay-status) ──────────────────────
+  if (pathname === "/api/cloud/relay-status") {
+    const handled = await handleCloudRelayRoute(
+      req,
+      res,
+      pathname,
+      method,
+      {
+        runtime: state.runtime
+          ? {
+              getService: (type: string) =>
+                (
+                  state.runtime as { getService: (t: string) => unknown }
+                ).getService(type),
+            }
+          : undefined,
+      },
+      { json, error, readJsonBody },
+    );
+    if (handled) return;
+  }
+
+  // ── Telegram setup routes (/api/telegram-setup/*) ─────────────────────
+  if (pathname.startsWith("/api/telegram-setup")) {
+    const handled = await handleTelegramSetupRoute(
+      req,
+      res,
+      pathname,
+      method,
+      {
+        config: state.config,
+        saveConfig: () => saveElizaConfig(state.config),
+        runtime: state.runtime
+          ? {
+              getService: (type: string) =>
+                (
+                  state.runtime as { getService: (t: string) => unknown }
+                ).getService(type),
+              getSetting: (key: string) =>
+                (
+                  state.runtime as { getSetting: (k: string) => string | undefined }
+                ).getSetting(key),
+            }
+          : undefined,
+      },
+      { json, error, readJsonBody },
+    );
+    if (handled) return;
+  }
+
+  // ── Discord Local routes (/api/discord-local/*) ──────────────────────
+  if (pathname.startsWith("/api/discord-local")) {
+    const handled = await handleDiscordLocalRoute(
+      req,
+      res,
+      pathname,
+      method,
+      {
+        config: state.config,
+        runtime: state.runtime
+          ? {
+              getService: (type: string) =>
+                (
+                  state.runtime as { getService: (t: string) => unknown }
+                ).getService(type),
+            }
+          : undefined,
+        saveConfig: () => saveElizaConfig(state.config),
       },
       { json, error, readJsonBody },
     );

@@ -116,6 +116,32 @@ function resolveWorkspaceRoots(): string[] {
   return uniquePaths(roots);
 }
 
+function isMissingPathError(err: unknown): err is NodeJS.ErrnoException {
+  return (
+    err instanceof Error &&
+    "code" in err &&
+    (((err as NodeJS.ErrnoException).code ?? "") === "ENOENT" ||
+      ((err as NodeJS.ErrnoException).code ?? "") === "ENOTDIR")
+  );
+}
+
+async function readDirectoryEntries(
+  dirPath: string,
+  label: string,
+  options: {
+    suppressMissing?: boolean;
+  } = {},
+): Promise<Array<import("node:fs").Dirent>> {
+  try {
+    return await fs.readdir(dirPath, { withFileTypes: true });
+  } catch (err) {
+    if (!(options.suppressMissing && isMissingPathError(err))) {
+      logger.debug(`[registry] could not read ${label} ${dirPath}: ${err}`);
+    }
+    return [];
+  }
+}
+
 function repoString(
   repo: LocalPackageJson["repository"] | LocalPluginManifest["repository"],
 ): string | null {
@@ -227,16 +253,9 @@ async function collectWorkspacePackageCandidates(
   includeTypescriptChild = false,
 ): Promise<Array<{ packageDir: string; dirName: string }>> {
   const candidates = new Map<string, { packageDir: string; dirName: string }>();
-
-  let entries: Array<import("node:fs").Dirent>;
-  try {
-    entries = await fs.readdir(searchRoot, { withFileTypes: true });
-  } catch (err) {
-    logger.debug(
-      `[registry] could not read workspace dir ${searchRoot}: ${err}`,
-    );
-    return [];
-  }
+  const entries = await readDirectoryEntries(searchRoot, "workspace dir", {
+    suppressMissing: true,
+  });
 
   for (const entry of entries) {
     if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
@@ -359,62 +378,43 @@ async function discoverLocalWorkspaceApps(): Promise<
   >();
 
   for (const workspaceRoot of resolveWorkspaceRoots()) {
-    const discoveredRoots = [
-      {
-        root: path.join(workspaceRoot, "plugins"),
-        includeTypescriptChild: true,
-      },
-      {
-        root: path.join(workspaceRoot, "packages"),
-        includeTypescriptChild: false,
-      },
-      {
-        root: path.join(workspaceRoot, "eliza", "packages"),
-        includeTypescriptChild: false,
-      },
-      {
-        root: path.join(workspaceRoot, "eliza", "plugins"),
-        includeTypescriptChild: true,
-      },
-    ];
-
-    let workspaceEntries: Array<import("node:fs").Dirent> = [];
-    try {
-      workspaceEntries = await fs.readdir(workspaceRoot, {
-        withFileTypes: true,
-      });
-    } catch (err) {
-      logger.debug(
-        `[registry] could not read workspace root ${workspaceRoot}: ${err}`,
+    const discoveredRoots = new Map<string, boolean>();
+    const addDiscoveredRoot = (
+      root: string,
+      includeTypescriptChild: boolean,
+    ): void => {
+      const resolvedRoot = path.resolve(root);
+      discoveredRoots.set(
+        resolvedRoot,
+        (discoveredRoots.get(resolvedRoot) ?? false) || includeTypescriptChild,
       );
-    }
+    };
+
+    addDiscoveredRoot(path.join(workspaceRoot, "plugins"), true);
+    addDiscoveredRoot(path.join(workspaceRoot, "packages"), false);
+    addDiscoveredRoot(path.join(workspaceRoot, "eliza", "packages"), false);
+    addDiscoveredRoot(path.join(workspaceRoot, "eliza", "plugins"), true);
+
+    const workspaceEntries = await readDirectoryEntries(
+      workspaceRoot,
+      "workspace root",
+    );
 
     for (const entry of workspaceEntries) {
       if (!entry.isDirectory() || entry.name.startsWith(".")) {
         continue;
       }
       const repoRoot = path.join(workspaceRoot, entry.name);
-      discoveredRoots.push(
-        { root: path.join(repoRoot, "plugins"), includeTypescriptChild: true },
-        {
-          root: path.join(repoRoot, "packages"),
-          includeTypescriptChild: false,
-        },
-        {
-          root: path.join(repoRoot, "eliza", "packages"),
-          includeTypescriptChild: false,
-        },
-        {
-          root: path.join(repoRoot, "eliza", "plugins"),
-          includeTypescriptChild: true,
-        },
-      );
+      addDiscoveredRoot(path.join(repoRoot, "plugins"), true);
+      addDiscoveredRoot(path.join(repoRoot, "packages"), false);
+      addDiscoveredRoot(path.join(repoRoot, "eliza", "packages"), false);
+      addDiscoveredRoot(path.join(repoRoot, "eliza", "plugins"), true);
     }
 
-    for (const candidateRoot of discoveredRoots) {
+    for (const [root, includeTypescriptChild] of discoveredRoots) {
       const candidates = await collectWorkspacePackageCandidates(
-        candidateRoot.root,
-        candidateRoot.includeTypescriptChild,
+        root,
+        includeTypescriptChild,
       );
       for (const candidate of candidates) {
         packageCandidates.set(candidate.packageDir, candidate);
@@ -515,15 +515,9 @@ async function discoverNodeModulePlugins(): Promise<
 
   for (const workspaceRoot of resolveWorkspaceRoots()) {
     const elizaosDir = path.join(workspaceRoot, "node_modules", "@elizaos");
-    let entries: Array<import("node:fs").Dirent>;
-    try {
-      entries = await fs.readdir(elizaosDir, { withFileTypes: true });
-    } catch (err) {
-      logger.debug(
-        `[registry] could not read @elizaos dir ${elizaosDir}: ${err}`,
-      );
-      continue;
-    }
+    const entries = await readDirectoryEntries(elizaosDir, "@elizaos dir", {
+      suppressMissing: true,
+    });
 
     for (const entry of entries) {
       if (!entry.name.startsWith("plugin-")) continue;
@@ -596,15 +590,9 @@ async function discoverPackagesFolderPlugins(): Promise<
 
   for (const workspaceRoot of resolveWorkspaceRoots()) {
     const packagesDir = path.join(workspaceRoot, "packages");
-    let entries: Array<import("node:fs").Dirent>;
-    try {
-      entries = await fs.readdir(packagesDir, { withFileTypes: true });
-    } catch (err) {
-      logger.debug(
-        `[registry] could not read packages dir ${packagesDir}: ${err}`,
-      );
-      continue;
-    }
+    const entries = await readDirectoryEntries(packagesDir, "packages dir", {
+      suppressMissing: true,
+    });
 
     for (const entry of entries) {
       if (!entry.name.startsWith("plugin-")) continue;

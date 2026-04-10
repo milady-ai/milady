@@ -31,6 +31,7 @@ class MockVrmEngine {
   setPointerParallaxTarget = vi.fn();
   resetPointerParallax = vi.fn();
   setWorldUrl = vi.fn(async () => {});
+  setEnvironmentTheme = vi.fn();
   setMouthOpen = vi.fn();
   setSpeaking = vi.fn();
   resize = vi.fn();
@@ -162,14 +163,14 @@ describe("VrmViewer", () => {
     });
   });
 
-  it("waits for the world load before revealing the VRM on initial world stages", async () => {
+  it("loads VRM and applies environment theme after engine is ready", async () => {
     let renderer: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
       renderer = TestRenderer.create(
         <VrmViewer
           vrmPath="/vrms/eliza-1.vrm.gz"
-          worldUrl="/worlds/companion-day.spz"
+          environmentTheme="light"
           createEngine={() => new MockVrmEngine() as never}
         />,
         {
@@ -204,33 +205,24 @@ describe("VrmViewer", () => {
       await Promise.resolve();
     });
 
-    expect(instance?.setWorldUrl).toHaveBeenCalledWith(
-      "/worlds/companion-day.spz",
-    );
     expect(instance?.loadVrmFromUrl).toHaveBeenCalledWith(
       "/vrms/eliza-1.vrm.gz",
       "eliza-1.vrm.gz",
     );
-
-    const worldCallOrder =
-      instance?.setWorldUrl.mock.invocationCallOrder.at(-1) ?? 0;
-    const vrmCallOrder =
-      instance?.loadVrmFromUrl.mock.invocationCallOrder.at(-1) ?? 0;
-    expect(worldCallOrder).toBeLessThan(vrmCallOrder);
 
     await act(async () => {
       renderer?.unmount();
     });
   });
 
-  it("does not reload the VRM when only the world changes", async () => {
+  it("does not reload the VRM when the environment theme changes", async () => {
     let renderer: TestRenderer.ReactTestRenderer | null = null;
 
     await act(async () => {
       renderer = TestRenderer.create(
         <VrmViewer
           vrmPath="/vrms/eliza-1.vrm.gz"
-          worldUrl="/worlds/companion-day.spz"
+          environmentTheme="light"
           createEngine={() => new MockVrmEngine() as never}
         />,
         {
@@ -266,25 +258,20 @@ describe("VrmViewer", () => {
     });
 
     expect(instance?.loadVrmFromUrl).toHaveBeenCalledTimes(1);
-    expect(instance?.setWorldUrl).toHaveBeenCalledWith(
-      "/worlds/companion-day.spz",
-    );
 
     await act(async () => {
       renderer?.update(
         <VrmViewer
           vrmPath="/vrms/eliza-1.vrm.gz"
-          worldUrl="/worlds/companion-night.spz"
-                  />,
+          environmentTheme="dark"
+        />,
       );
       await Promise.resolve();
       await Promise.resolve();
     });
 
+    // Theme change does not reload VRM
     expect(instance?.loadVrmFromUrl).toHaveBeenCalledTimes(1);
-    expect(instance?.setWorldUrl).toHaveBeenLastCalledWith(
-      "/worlds/companion-night.spz",
-    );
 
     await act(async () => {
       renderer?.unmount();
@@ -300,7 +287,7 @@ describe("VrmViewer", () => {
       renderer = TestRenderer.create(
         <VrmViewer
           vrmPath="/vrms/eliza-1.vrm.gz"
-          worldUrl="/worlds/companion-day.spz"
+          environmentTheme="light"
           onEngineState={onEngineState}
           createEngine={() => new MockVrmEngine() as never}
         />,
@@ -347,7 +334,7 @@ describe("VrmViewer", () => {
     const warningLabels = warnSpy.mock.calls.map((call) => call[0]);
     expect(warningLabels).toContain("Failed to initialize VRM renderer:");
     expect(warningLabels).not.toContain("Failed to load VRM:");
-    expect(warningLabels).not.toContain("Failed to load splat world:");
+    expect(warningLabels).not.toContain("Failed to load environment:");
 
     warnSpy.mockRestore();
 

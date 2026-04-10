@@ -116,15 +116,15 @@ describe("OnboardingWizard", () => {
     });
 
     // CSS variables are now applied via Tailwind/CSS, not inline styles.
-    // Verify the VRM stage receives the correct world + camera props.
+    // Verify the VRM stage receives the correct theme + camera props.
     expect(mockVrmStage.mock.calls[0]?.[0]).toMatchObject({
-      worldUrl: "worlds/companion-day.spz",
+      environmentTheme: "light",
       cameraProfile: "companion",
       initialCompanionZoomNormalized: 1,
     });
   });
 
-  it("uses the night scene and dark tokens when the UI theme is dark", async () => {
+  it("always uses light environment theme in onboarding regardless of UI theme", async () => {
     mockUseApp.mockReturnValue({
       onboardingStep: "providers",
       selectedVrmIndex: 1,
@@ -143,11 +143,9 @@ describe("OnboardingWizard", () => {
       TestRenderer.create(<OnboardingWizard />);
     });
 
-    // CSS variables are now applied via Tailwind/CSS, not inline styles.
-    // Verify the VRM stage receives the night world for dark theme.
-    // World URL is always companion-day.spz regardless of theme
+    // Onboarding forces light chrome, so environment is always "light".
     expect(mockVrmStage.mock.calls[0]?.[0]).toMatchObject({
-      worldUrl: "worlds/companion-day.spz",
+      environmentTheme: "light",
       cameraProfile: "companion",
       initialCompanionZoomNormalized: 1,
     });

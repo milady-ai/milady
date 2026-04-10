@@ -20,6 +20,25 @@ vi.mock("@miladyai/app-core/state", () => ({
   useApp: () => useAppMock(),
 }));
 
+vi.mock("./onboarding-asset-preload", () => ({
+  getOnboardingAssetPreloadSnapshot: () => ({
+    started: true,
+    ready: true,
+    timedOut: false,
+    phase: "ready",
+    loaded: 1,
+    total: 1,
+    criticalLoaded: 1,
+    criticalTotal: 1,
+    loadedLabel: "1/1",
+    criticalLabel: "1/1",
+    connectionLabel: "fast",
+    rosterCount: 1,
+  }),
+  primeOnboardingCharacterAssets: () => Promise.resolve(),
+  subscribeOnboardingAssetPreload: () => () => {},
+}));
+
 import { WelcomeStep } from "./WelcomeStep";
 
 describe("WelcomeStep", () => {

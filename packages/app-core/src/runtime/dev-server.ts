@@ -33,7 +33,12 @@ import {
 } from "@miladyai/shared/runtime-env";
 import { startApiServer } from "../api/server";
 import { formatApiDevSettingsBannerText } from "./api-dev-settings-banner.js";
-import { shutdownRuntime, startEliza } from "./eliza";
+import {
+  attemptMiladyPgliteAutoReset,
+  getMiladyPgliteRecoveryRetrySkipPlugins,
+  shutdownRuntime,
+  startEliza,
+} from "./eliza";
 
 console.log(
   `${getLogPrefix()} Imports complete (${Date.now() - SCRIPT_START}ms)`,
@@ -89,6 +94,8 @@ let runtimeBootAttempt = 0;
 let runtimeBootInProgress = false;
 let runtimeBootTimer: ReturnType<typeof setTimeout> | null = null;
 let runtimeBootFirstFailureAt: number | null = null;
+let runtimeBootPgliteAutoResetAttempted = false;
+let runtimeBootPgliteRecoverySkipPlugins: string[] = [];
 
 function clearRuntimeBootTimer(): void {
   if (runtimeBootTimer) {
@@ -145,6 +152,9 @@ async function bootstrapRuntime(reason: string): Promise<void> {
     }
     runtimeBootAttempt = 0;
     runtimeBootFirstFailureAt = null;
+    runtimeBootPgliteAutoResetAttempted = false;
+    runtimeBootPgliteRecoverySkipPlugins = [];
+    delete process.env.ELIZA_SKIP_PLUGINS;
     apiUpdateStartup?.({
       phase: "running",
       attempt: 0,
@@ -157,6 +167,43 @@ async function bootstrapRuntime(reason: string): Promise<void> {
       `${getLogPrefix()} Runtime ready — agent: ${agentName} (total: ${Date.now() - bootstrapStart}ms)`,
     );
   } catch (err) {
+    if (!runtimeBootPgliteAutoResetAttempted) {
+      try {
+        const backupDir = await attemptMiladyPgliteAutoReset(err);
+        if (backupDir) {
+          runtimeBootPgliteAutoResetAttempted = true;
+          runtimeBootAttempt = 0;
+          runtimeBootFirstFailureAt = null;
+          runtimeBootPgliteRecoverySkipPlugins =
+            getMiladyPgliteRecoveryRetrySkipPlugins();
+          if (runtimeBootPgliteRecoverySkipPlugins.length > 0) {
+            process.env.ELIZA_SKIP_PLUGINS =
+              runtimeBootPgliteRecoverySkipPlugins.join(",");
+            logger.warn(
+              `${getLogPrefix()} Skipping previously failed plugins on the recovery retry: ${runtimeBootPgliteRecoverySkipPlugins.join(", ")}.`,
+            );
+          }
+          apiUpdateStartup?.({
+            phase: "runtime-bootstrap",
+            attempt: 1,
+            lastError: undefined,
+            lastErrorAt: undefined,
+            nextRetryAt: undefined,
+            state: "starting",
+          });
+          logger.warn(
+            `${getLogPrefix()} Quarantined corrupt PGlite data dir at ${backupDir}. Retrying runtime bootstrap once.`,
+          );
+          scheduleRuntimeBootstrap(0, "pglite-auto-reset");
+          return;
+        }
+      } catch (recoveryErr) {
+        logger.error(
+          `${getLogPrefix()} PGlite auto-reset failed (${recoveryErr instanceof Error ? recoveryErr.message : recoveryErr})`,
+        );
+      }
+    }
+
     const now = Date.now();
     runtimeBootAttempt += 1;
     if (!runtimeBootFirstFailureAt) {

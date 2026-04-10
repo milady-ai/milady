@@ -108,6 +108,108 @@ describe("relationships-routes", () => {
     });
   });
 
+  test("GET /api/relationships/activity returns sorted activity items", async () => {
+    const service = {
+      getGraphSnapshot: vi.fn(async () => ({
+        people: [
+          {
+            groupId: "group-1",
+            primaryEntityId: "person-1" as UUID,
+            memberEntityIds: ["person-1" as UUID],
+            displayName: "Chris",
+            aliases: [],
+            platforms: ["discord"],
+            identities: [],
+            emails: [],
+            phones: [],
+            websites: [],
+            preferredCommunicationChannel: null,
+            categories: [],
+            tags: [],
+            factCount: 3,
+            relationshipCount: 1,
+            lastInteractionAt: "2026-04-08T10:00:00.000Z",
+          },
+        ],
+        relationships: [
+          {
+            id: "rel-1",
+            sourcePersonId: "person-1" as UUID,
+            targetPersonId: "person-2" as UUID,
+            sourcePersonName: "Chris",
+            targetPersonName: "Alice",
+            relationshipTypes: ["friend"],
+            sentiment: "positive",
+            strength: 0.85,
+            interactionCount: 12,
+            lastInteractionAt: "2026-04-09T12:00:00.000Z",
+            rawRelationshipIds: [],
+          },
+        ],
+        stats: { totalPeople: 1, totalRelationships: 1, totalIdentities: 1 },
+      })),
+    };
+    const runtime = {
+      agentId: "agent-1" as UUID,
+      getService: vi.fn((serviceType: string) =>
+        serviceType === "relationships_graph" ? service : null,
+      ),
+      getMemories: vi.fn(async ({ tableName }: { tableName?: string }) =>
+        tableName === "facts"
+          ? [
+              {
+                id: "fact-1",
+                entityId: "person-1" as UUID,
+                content: { text: "Prefers async updates." },
+                metadata: { confidence: 0.9, base: { scope: "preference" } },
+                createdAt: Date.parse("2026-04-09T13:00:00.000Z"),
+              },
+            ]
+          : [],
+      ),
+    } as unknown as IAgentRuntime;
+    const ctx = buildCtx(
+      "GET",
+      "/api/relationships/activity",
+      "/api/relationships/activity?limit=10",
+      runtime,
+    );
+
+    const handled = await handleRelationshipsRoutes(ctx);
+
+    expect(handled).toBe(true);
+    const payload = (ctx.json as ReturnType<typeof vi.fn>).mock.calls[0][1] as {
+      activity: Array<{
+        type: string;
+        personName: string;
+        summary: string;
+        detail: string | null;
+        timestamp: string | null;
+      }>;
+      count: number;
+    };
+    expect(payload.activity.length).toBeGreaterThanOrEqual(1);
+    // relationship item comes first (newer timestamp)
+    const relItem = payload.activity.find((a) => a.type === "relationship");
+    expect(relItem).toBeDefined();
+    expect(relItem?.summary).toContain("Chris");
+    expect(relItem?.summary).toContain("Alice");
+    expect(relItem?.detail).toContain("friend");
+    expect(relItem?.detail).toContain("positive");
+
+    // identity item
+    const idItem = payload.activity.find((a) => a.type === "identity");
+    expect(idItem).toBeDefined();
+    expect(idItem?.summary).toBe("Chris");
+    expect(idItem?.detail).toContain("discord");
+
+    const factItem = payload.activity.find((a) => a.type === "fact");
+    expect(factItem).toBeDefined();
+    expect(factItem?.summary).toBe("Fact for Chris");
+    expect(factItem?.detail).toContain("Prefers async updates.");
+    expect(factItem?.detail).toContain("confidence 0.90");
+  });
+
   test("falls back to the native relationships service when no graph service is registered", async () => {
     const enableRelationships = vi.fn(async () => undefined);
     const relationshipsService = {

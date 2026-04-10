@@ -4,12 +4,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockUseApp, mockGetRelationshipsGraph, mockGetRelationshipsPerson } =
-  vi.hoisted(() => ({
-    mockUseApp: vi.fn(),
-    mockGetRelationshipsGraph: vi.fn(),
-    mockGetRelationshipsPerson: vi.fn(),
-  }));
+const {
+  mockUseApp,
+  mockGetRelationshipsGraph,
+  mockGetRelationshipsPerson,
+  mockGetRelationshipsActivity,
+} = vi.hoisted(() => ({
+  mockUseApp: vi.fn(),
+  mockGetRelationshipsGraph: vi.fn(),
+  mockGetRelationshipsPerson: vi.fn(),
+  mockGetRelationshipsActivity: vi.fn(),
+}));
 
 vi.mock("../../state", () => ({
   useApp: () => mockUseApp(),
@@ -21,6 +26,8 @@ vi.mock("@miladyai/app-core/api", () => ({
       mockGetRelationshipsGraph(...args),
     getRelationshipsPerson: (...args: unknown[]) =>
       mockGetRelationshipsPerson(...args),
+    getRelationshipsActivity: (...args: unknown[]) =>
+      mockGetRelationshipsActivity(...args),
   },
 }));
 
@@ -182,6 +189,10 @@ describe("RelationshipsView", () => {
       t: (key: string, options?: { defaultValue?: string }) =>
         options?.defaultValue ?? key,
     });
+    mockGetRelationshipsActivity.mockResolvedValue({
+      activity: [],
+      count: 0,
+    });
     mockGetRelationshipsGraph.mockResolvedValue({
       people: [
         {
@@ -200,6 +211,23 @@ describe("RelationshipsView", () => {
           tags: [],
           factCount: 2,
           relationshipCount: 3,
+          isOwner: true,
+          profiles: [
+            {
+              entityId: "person-1",
+              source: "client_chat",
+              userId: "person-1",
+              displayName: "Chris",
+              canonical: true,
+            },
+            {
+              entityId: "person-1",
+              source: "discord",
+              handle: "thatdog72",
+              userId: "discord-owner-111",
+              displayName: "Chris",
+            },
+          ],
           lastInteractionAt: "2026-04-08T12:00:00.000Z",
         },
         {
@@ -218,6 +246,8 @@ describe("RelationshipsView", () => {
           tags: [],
           factCount: 1,
           relationshipCount: 1,
+          isOwner: false,
+          profiles: [],
           lastInteractionAt: "2026-04-07T12:00:00.000Z",
         },
       ],
@@ -258,6 +288,26 @@ describe("RelationshipsView", () => {
       tags: [],
       factCount: 1,
       relationshipCount: 0,
+      isOwner: id === "person-1",
+      profiles:
+        id === "person-1"
+          ? [
+              {
+                entityId: "person-1",
+                source: "client_chat",
+                userId: "person-1",
+                displayName: "Chris",
+                canonical: true,
+              },
+              {
+                entityId: "person-1",
+                source: "discord",
+                handle: "thatdog72",
+                userId: "discord-owner-111",
+                displayName: "Chris",
+              },
+            ]
+          : [],
       lastInteractionAt: "2026-04-08T12:00:00.000Z",
       facts: [
         {
@@ -305,6 +355,9 @@ describe("RelationshipsView", () => {
     expect(await screen.findByText("chris@example.com")).toBeTruthy();
     expect(await screen.findByText("Prefers async updates.")).toBeTruthy();
     expect(screen.getByText("cluster:Chris:2")).toBeTruthy();
+    expect(await screen.findByText("Milady chat")).toBeTruthy();
+    expect(screen.getByText(/discord-owner-111/)).toBeTruthy();
+    expect(screen.getAllByText("Owner").length).toBeGreaterThan(0);
   });
 
   it("switches detail panes when a different person is selected", async () => {

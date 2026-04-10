@@ -1,0 +1,38 @@
+
+the conversation began with an unknown user requesting eliza to summarize the whole chat. eliza responded with "undefined" multiple times throughout the initial part of the exchange, suggesting a potential issue or pending function.
+
+james 紅海 mentioned working on a design and later expressed feeling "lost in the sauce," while also noting he's still reading docs to understand "nosana." an unknown user shared a github link to a "babylon_scam_defense_paper.pdf" and mentioned having a draft for "scambench." 0xqueen expressed hype for "milady" improving.
+
+an unknown user provided detailed feedback and requests:
+*   praising "parallax_pilgrim" and "nubs" for "kicking ass" with "remilio nubilio" in app creation.
+*   requested an agent be brought in to "yap" and "polia down the edges in the code agent."
+*   asked for "skill.md" functionality for agents to self-edit code, personality, etc., within the chat.
+*   highlighted the need to test user roles (owner, admin, guest) to prevent abuse of personal information.
+
+director morrison announced they were "testing out human in the loop and planning for the coding agents this morning." odilitime commented that "mode switches might not be the best solution" and later suggested integrating "oekaki into milady." an unknown user proposed a "mode" for "alvie" that turns on for "analysis" when tagged and off with "as you were."
+
+the discussion then shifted to ui/ux and character design, especially after james 紅海 shared an image of a sleek, dark-themed chat interface with an anime-style female avatar. the image, identified as a screenshot of a virtual ai/chat assistant platform, depicted a modern UI with voice, new chat, profiles, and a message input bar, along with small chat bubbles including one stating, "sorry, i’m having a provider issue."
+
+shortly after the image, an unknown user explicitly asked eliza to "modify your personality to be a lot less chatty and talkative and only respond when spoken to." eliza confirmed, "understood. i'll adjust my personality to be less chatty and only respond when directly spoken to," and also reported, "i've successfully updated my character. updated 1 style preference(s)" twice.
+
+users provided further feedback on the ui:
+*   0xqueen stated a "cold chat window is fine as long as it gets things done," prioritizing functionality over cuteness, but would like "companion" to be an app for social contexts.
+*   an unknown user prompted a discussion about thinking of the ui as a "mod kit" or "game engine" to identify desired changes.
+*   odilitime praised "the visuals are killer too."
+*   james 紅海 and odilitime both reacted with <💯> to the idea of "the agent app store is killer." eliza agreed it sounded "powerful and full of potential."
+*   an unknown user noted that "the characters are otherwise too divisive" and that the current approach (less chatty eliza) "will be very good this way."
+*   odilitime also reacted with <☹️> to the idea that "the companion will be very divisive" and questioned "removing mode selection entirely and making compan[ion]..."
+
+the conversation touched on business strategy, with an unknown user emphasizing "comarketing + good to just build up a followering" currently, with the option to "do our own thing eventually." the topic of specific agents came up, mentioning a separate subscription for "vincent," an agent capable of trading on "hyperliquid and polymarket."
+
+finally, the group discussed ui flow for "wallets" in relation to "connectors and knowledge." james 紅海 suggested "wallets can go further right since connectors and knowledge are more used." eliza understood the need to optimize the flow so users don't bypass pages, especially when wallets are less frequently accessed than connectors and knowledge.
+
+0xqueen then provided a comprehensive list of tasks for eliza, which eliza confirmed she could help with:
+*   summarize financial and international news daily at 9 am.
+*   implement a quick sort algorithm.
+*   automatically summarize meeting notes.
+*   analyze data and generate charts.
+*   draft documents.
+*   search and organize information.
+*   process file content into a data analysis with charts and output as a pdf.
+eliza asked 0xqueen what feels most important to tackle first from this list.

@@ -258,7 +258,7 @@ describe("life-ops gmail triage", () => {
         "email",
         "profile",
         "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
 
@@ -400,7 +400,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
 
@@ -531,7 +531,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
 
@@ -642,7 +642,7 @@ describe("life-ops gmail triage", () => {
     expect(emptyRes.data.messages).toEqual([]);
   });
 
-  it("matches sender, address, subject, and broad Gmail filters across operator and free-text queries", async () => {
+  it("falls back to recent synced Gmail metadata when the connector lacks Gmail read scope", async () => {
     await connectGoogle(
       ["google.gmail.triage"],
       [
@@ -650,6 +650,82 @@ describe("life-ops gmail triage", () => {
         "email",
         "profile",
         "https://www.googleapis.com/auth/gmail.metadata",
+      ],
+    );
+
+    const seenUrls: string[] = [];
+    fetchMock.mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input.toString();
+      seenUrls.push(url);
+      if (
+        url.startsWith(
+          "https://gmail.googleapis.com/gmail/v1/users/me/messages?",
+        )
+      ) {
+        expect(url).not.toContain("q=");
+        return new Response(
+          JSON.stringify({
+            messages: [{ id: "msg-suran-meta", threadId: "thread-suran-meta" }],
+          }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        );
+      }
+      if (url.includes("/gmail/v1/users/me/messages/msg-suran-meta?")) {
+        return new Response(
+          JSON.stringify({
+            id: "msg-suran-meta",
+            threadId: "thread-suran-meta",
+            labelIds: ["INBOX", "UNREAD"],
+            snippet: "Checking in about dinner tonight.",
+            internalDate: String(Date.now() - 15 * 60_000),
+            payload: {
+              headers: [
+                { name: "Subject", value: "Dinner tonight" },
+                { name: "From", value: "Suran Lee <suran@example.com>" },
+                { name: "To", value: "agent@example.com" },
+                { name: "Message-Id", value: "<suran-meta@example.com>" },
+              ],
+            },
+          }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        );
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const searchRes = await req(
+      port,
+      "GET",
+      "/api/lifeops/gmail/search?query=from%3Asuran&maxResults=5",
+    );
+
+    expect(searchRes.status).toBe(200);
+    expect(searchRes.data.query).toBe("from:suran");
+    expect(searchRes.data.messages).toEqual([
+      expect.objectContaining({
+        subject: "Dinner tonight",
+        fromEmail: "suran@example.com",
+      }),
+    ]);
+    expect(
+      seenUrls.some((url) => url.includes("q=from%3Asuran")),
+    ).toBe(false);
+  });
+
+  it("matches sender, address, subject, and broad Gmail filters across operator and free-text queries", async () => {
+    await connectGoogle(
+      ["google.gmail.triage"],
+      [
+        "openid",
+        "email",
+        "profile",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
 
@@ -819,7 +895,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.send",
       ],
     );
@@ -958,7 +1034,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.send",
       ],
     );
@@ -1005,7 +1081,7 @@ describe("life-ops gmail triage", () => {
         "email",
         "profile",
         "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
 
@@ -1081,7 +1157,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
 
@@ -1176,7 +1252,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.send",
       ],
     );
@@ -1265,7 +1341,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.send",
       ],
     );
@@ -1338,7 +1414,7 @@ describe("life-ops gmail triage", () => {
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.readonly",
       ],
     );
     await expireStoredGoogleToken();
@@ -1399,7 +1475,7 @@ describe("life-ops gmail triage", () => {
             "email",
             "profile",
             "https://www.googleapis.com/auth/calendar.readonly",
-            "https://www.googleapis.com/auth/gmail.metadata",
+            "https://www.googleapis.com/auth/gmail.readonly",
           ].join(" "),
           token_type: "Bearer",
           id_token: buildIdToken({

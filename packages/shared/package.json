@@ -19,6 +19,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./connectors": "./src/connectors.ts",
     "./env-utils": "./src/env-utils.ts",
     "./runtime-env": "./src/runtime-env.ts",
     "./contracts": "./src/contracts/index.ts",

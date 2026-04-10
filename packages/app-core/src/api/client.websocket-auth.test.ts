@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_BOOT_CONFIG, setBootConfig } from "../config/boot-config";
 
 class MockWebSocket {
+  static CONNECTING = 0;
   static OPEN = 1;
   static instances: MockWebSocket[] = [];
 
@@ -50,6 +51,7 @@ describe("MiladyClient WebSocket auth", () => {
           setItem: () => {},
           removeItem: () => {},
         },
+        WebSocket: MockWebSocket,
       },
     });
 

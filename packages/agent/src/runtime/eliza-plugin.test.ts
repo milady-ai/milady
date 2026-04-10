@@ -17,5 +17,10 @@ describe("createElizaPlugin", () => {
     expect(
       plugin.actions?.some((action) => action.name === "LIFE"),
     ).toBe(true);
+    expect(
+      plugin.services?.some(
+        (service) => service.serviceType === "milady_character_persistence",
+      ),
+    ).toBe(true);
   });
 });

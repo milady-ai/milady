@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -83,7 +84,20 @@ export function runCommandWithTimeout(
 export function resolveDefaultAgentWorkspaceDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = os.homedir,
+  cwd: () => string = process.cwd,
 ): string {
+  const explicitWorkspaceDir = readWorkspaceDirOverride(env);
+  if (explicitWorkspaceDir) {
+    return resolveUserPath(explicitWorkspaceDir);
+  }
+
+  if (!hasExplicitStateDirOverride(env)) {
+    const runtimeCwd = cwd()?.trim();
+    if (runtimeCwd && shouldUseRuntimeCwdWorkspace(runtimeCwd)) {
+      return resolveUserPath(runtimeCwd);
+    }
+  }
+
   const profile = env.ELIZA_PROFILE?.trim();
   const stateDir = resolveStateDir(env, homedir);
   if (profile && profile.toLowerCase() !== "default") {
@@ -92,6 +106,21 @@ export function resolveDefaultAgentWorkspaceDir(
   return path.join(stateDir, "workspace");
 }
 
+const EXPLICIT_WORKSPACE_DIR_KEYS = [
+  "MILADY_WORKSPACE_DIR",
+  "ELIZA_WORKSPACE_DIR",
+] as const;
+const EXPLICIT_STATE_DIR_KEYS = [
+  "MILADY_STATE_DIR",
+  "ELIZA_STATE_DIR",
+] as const;
+const PROJECT_WORKSPACE_MARKERS = [
+  "AGENTS.md",
+  "CLAUDE.md",
+  "package.json",
+  "skills",
+  ".git",
+] as const;
 export const DEFAULT_AGENT_WORKSPACE_DIR = resolveDefaultAgentWorkspaceDir();
 const DEFAULT_AGENTS_FILENAME = "AGENTS.md";
 const DEFAULT_TOOLS_FILENAME = "TOOLS.md";
@@ -199,6 +228,41 @@ configuration is required.
 `,
   ],
 };
+
+function readWorkspaceDirOverride(env: NodeJS.ProcessEnv): string | undefined {
+  for (const key of EXPLICIT_WORKSPACE_DIR_KEYS) {
+    const value = env[key]?.trim();
+    if (value) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function hasExplicitStateDirOverride(env: NodeJS.ProcessEnv): boolean {
+  return EXPLICIT_STATE_DIR_KEYS.some((key) => Boolean(env[key]?.trim()));
+}
+
+function isLikelyPackagedRuntimeDir(dir: string): boolean {
+  const normalized = dir.replace(/\\/g, "/").toLowerCase();
+  return (
+    normalized.includes("/milady-dist") ||
+    normalized.includes("/contents/resources/app/") ||
+    normalized.includes("/resources/app/") ||
+    normalized.includes("/self-extraction/")
+  );
+}
+
+function shouldUseRuntimeCwdWorkspace(candidateDir: string): boolean {
+  const resolvedDir = resolveUserPath(candidateDir);
+  if (!resolvedDir || isLikelyPackagedRuntimeDir(resolvedDir)) {
+    return false;
+  }
+
+  return PROJECT_WORKSPACE_MARKERS.some((marker) =>
+    existsSync(path.join(resolvedDir, marker)),
+  );
+}
 
 export type WorkspaceInitFileName =
   | typeof DEFAULT_AGENTS_FILENAME
@@ -323,9 +387,7 @@ async function ensureGitRepo(dir: string, isBrandNewWorkspace: boolean) {
       timeoutMs: 10_000,
     });
   } catch (err) {
-    logWarn(
-      `[workspace] git init failed: ${String(err)}`,
-    );
+    logWarn(`[workspace] git init failed: ${String(err)}`);
   }
 }
 
@@ -343,7 +405,7 @@ export async function ensureAgentWorkspace(params?: {
 }> {
   const rawDir = params?.dir?.trim()
     ? params.dir.trim()
-    : DEFAULT_AGENT_WORKSPACE_DIR;
+    : resolveDefaultAgentWorkspaceDir();
   const dir = resolveUserPath(rawDir);
   await fs.mkdir(dir, { recursive: true });
 

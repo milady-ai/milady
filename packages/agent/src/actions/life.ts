@@ -5,6 +5,7 @@ import type {
   IAgentRuntime,
   State,
 } from "@elizaos/core";
+import type { Memory } from "@elizaos/core";
 import {
   extractDurationMinutesFromText,
   extractWebsiteTargetsFromText,
@@ -46,27 +47,14 @@ import {
   toActionData,
   weekRange,
 } from "./lifeops-google-helpers.js";
+import {
+  extractLifeOperationWithLlm,
+  type ExtractedLifeOperation,
+} from "./life.extractor.js";
 
 // ── Types ─────────────────────────────────────────────
 
-type LifeOperation =
-  | "create_definition"
-  | "create_goal"
-  | "update_definition"
-  | "update_goal"
-  | "delete_definition"
-  | "delete_goal"
-  | "complete_occurrence"
-  | "skip_occurrence"
-  | "snooze_occurrence"
-  | "review_goal"
-  | "capture_phone"
-  | "configure_escalation"
-  | "set_reminder_preference"
-  | "query_calendar_today"
-  | "query_calendar_next"
-  | "query_email"
-  | "query_overview";
+type LifeOperation = ExtractedLifeOperation;
 
 type LifeAction =
   | "create"
@@ -374,6 +362,35 @@ export function classifyIntent(intent: string): LifeOperation {
   return "create_definition";
 }
 
+async function resolveLifeOperation(args: {
+  runtime: IAgentRuntime;
+  message: Memory;
+  state: State | undefined;
+  intent: string;
+  explicitOperation: LifeOperation | undefined;
+}): Promise<LifeOperation> {
+  const { runtime, message, state, intent, explicitOperation } = args;
+  if (explicitOperation) {
+    return explicitOperation;
+  }
+
+  const extracted = await extractLifeOperationWithLlm({
+    runtime,
+    message,
+    state,
+    intent,
+  });
+  if (extracted.operation) {
+    return extracted.operation;
+  }
+
+  runtime.logger?.warn?.(
+    { src: "action:life", intent },
+    "Life LLM extraction returned no operation; falling back to regex classifier",
+  );
+  return classifyIntent(intent);
+}
+
 function looksLikeDefinitionCreateIntent(lower: string): boolean {
   return hasCadenceHint(lower);
 }
@@ -618,6 +635,28 @@ function latestDeferredLifeDraft(state: State | undefined): DeferredLifeDraft | 
   return messageDrafts.length > 0 ? messageDrafts[messageDrafts.length - 1] : null;
 }
 
+function looksLikeDeferredLifeConfirmation(text: string): boolean {
+  const normalized = text.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  if (
+    /\b(no|nope|nah|don't|do not|wait|hold on|change|edit|update|rename|instead|actually)\b/.test(
+      normalized,
+    )
+  ) {
+    return false;
+  }
+
+  return /^(?:yes|yeah|yep|yup|ok|okay|sure|confirm|confirmed|go ahead|do it|please do|sounds good)\b/.test(
+    normalized,
+  )
+    || /\b(?:save|create)\s+(?:it|that|this|them|the goal|the habit|the routine|the task)\b/.test(
+      normalized,
+    );
+}
+
 function shouldReuseDeferredLifeDraft(args: {
   currentText: string;
   details: Record<string, unknown> | undefined;
@@ -635,11 +674,14 @@ function shouldReuseDeferredLifeDraft(args: {
     return true;
   }
 
-  if (!args.explicitAction || args.paramsIntent?.trim()) {
+  if (args.paramsIntent?.trim()) {
     return false;
   }
 
-  if (ACTION_TO_OPERATION[args.explicitAction] !== args.draft.operation) {
+  if (
+    args.explicitAction &&
+    ACTION_TO_OPERATION[args.explicitAction] !== args.draft.operation
+  ) {
     return false;
   }
 
@@ -648,7 +690,12 @@ function shouldReuseDeferredLifeDraft(args: {
   }
 
   const words = args.currentText.trim().split(/\s+/).filter(Boolean);
-  return words.length > 0 && words.length <= 4 && !hasCadenceHint(args.currentText.toLowerCase());
+  return (
+    words.length > 0 &&
+    words.length <= 6 &&
+    !hasCadenceHint(args.currentText.toLowerCase()) &&
+    looksLikeDeferredLifeConfirmation(args.currentText)
+  );
 }
 
 async function resolveGoal(
@@ -1515,7 +1562,14 @@ export const lifeAction: Action = {
     "SET_REMINDER_INTENSITY",
   ],
   description:
-    "Manage the user's personal routines, habits, goals, reminders, and escalation settings. Use this for: creating/editing/deleting tasks, habits, routines, and goals; completing, snoozing, or skipping items; reviewing goal progress; setting up phone/SMS escalation; and adjusting reminder intensity. Use CALENDAR_ACTION and GMAIL_ACTION for Google Calendar and Gmail workflows.",
+    "Manage the user's personal routines, habits, goals, reminders, and escalation settings through LifeOps. " +
+    "USE this action for: creating, editing, or deleting tasks, habits, routines, and goals; " +
+    "marking items as complete, skipping, or snoozing them; reviewing goal progress; " +
+    "setting up phone/SMS escalation channels; adjusting reminder frequency or intensity; " +
+    "querying an overview of active LifeOps items. " +
+    "DO NOT use this action for Gmail inbox triage, email search, drafting or sending emails — use GMAIL_ACTION instead. " +
+    "DO NOT use this action for calendar lookups, scheduling meetings, searching events, or travel itineraries — use CALENDAR_ACTION instead. " +
+    "This action provides the final grounded reply; do not pair it with a speculative REPLY action.",
   validate: async (runtime, message) => {
     return hasLifeOpsAccess(runtime, message);
   },
@@ -1552,7 +1606,13 @@ export const lifeAction: Action = {
     const operation =
       reuseDeferredDraft && deferredDraft
         ? deferredDraft.operation
-        : explicitOperation ?? classifyIntent(intent);
+        : await resolveLifeOperation({
+            runtime,
+            message,
+            state,
+            intent,
+            explicitOperation,
+          });
     const service = new LifeOpsService(runtime);
     const domain = detailString(details, "domain") as LifeOpsDomain | undefined;
     const ownership = requestedOwnership(domain);

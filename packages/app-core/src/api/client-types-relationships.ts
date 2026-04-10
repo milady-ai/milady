@@ -18,6 +18,16 @@ export interface RelationshipsIdentitySummary {
   handles: RelationshipsIdentityHandle[];
 }
 
+export interface RelationshipsProfile {
+  entityId: string;
+  source: string;
+  handle?: string | null;
+  userId?: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  canonical?: boolean | null;
+}
+
 export interface RelationshipsPersonSummary {
   groupId: string;
   primaryEntityId: string;
@@ -34,6 +44,8 @@ export interface RelationshipsPersonSummary {
   tags: string[];
   factCount: number;
   relationshipCount: number;
+  isOwner: boolean;
+  profiles: RelationshipsProfile[];
   lastInteractionAt?: string;
 }
 
@@ -102,4 +114,18 @@ export interface RelationshipsGraphSnapshot {
   people: RelationshipsPersonSummary[];
   relationships: RelationshipsGraphEdge[];
   stats: RelationshipsGraphStats;
+}
+
+export interface RelationshipsActivityItem {
+  type: "relationship" | "identity" | "fact";
+  personName: string;
+  personId: string;
+  summary: string;
+  detail: string | null;
+  timestamp: string | null;
+}
+
+export interface RelationshipsActivityResponse {
+  activity: RelationshipsActivityItem[];
+  count: number;
 }

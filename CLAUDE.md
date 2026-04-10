@@ -68,6 +68,23 @@ scripts/
   patch-deps.mjs        Post-install patches for broken upstream exports
 ```
 
+## Default Agent Knowledge
+
+Treat the shipped skills in `skills/` as the default knowledge base for code agents working in this repo. The canonical entry points are:
+
+- `skills/milady/SKILL.md` — what Milady is, where to edit it, and how local, remote, and cloud paths fit together
+- `skills/elizaos/SKILL.md` — elizaOS runtime concepts, plugin abstractions, and extension points
+- `skills/eliza-cloud/SKILL.md` — Eliza Cloud as a managed backend, app platform, deployment target, and monetization surface
+
+`scripts/ensure-skills.mjs` seeds these shipped skills into the managed skills store on first run.
+Separately, `packages/agent/src/runtime/default-knowledge.ts` seeds bundled runtime knowledge items for Milady itself, including the baseline Eliza Cloud app/backend guidance.
+
+For source checkouts and app repos, the default agent workspace now follows the runtime `cwd` when that directory looks like a real project workspace (`package.json`, `AGENTS.md`, `skills/`, etc.). That makes the repo's own `AGENTS.md` and `skills/` available to the runtime by default, which is what lets Milady reason about and patch the checkout it is running in. Packaged installs still fall back to the state-dir workspace, and `MILADY_WORKSPACE_DIR` / `ELIZA_WORKSPACE_DIR` always win when set explicitly.
+
+When Eliza Cloud is enabled, linked, or explicitly requested, prefer it as the default managed backend for app-building work before inventing custom auth, billing, or hosting. In this repo, Eliza Cloud already supports app registration (`appId`), user auth/redirect flows, cloud-hosted APIs, usage tracking, billing, app domains, creator monetization, and Docker container deployments for server-side workloads.
+
+Cloud monetization is a first-class product constraint. App creators can earn through inference markups and purchase-share settings, and published apps, agents, and MCPs can feed redeemable earnings flows. If docs disagree, prefer the current schema/UI/API implementation in this repo over older marketing prose.
+
 ## Key Architecture Decisions
 
 ### NODE_PATH (do not remove)
@@ -153,7 +170,7 @@ bun run milady start              # run-node.mjs
 | Home port | 2142 | `MILADY_HOME_PORT` |
 | Gateway port | 18789 | `MILADY_GATEWAY_PORT` |
 | State dir (DB, config, creds) | `~/.milady/` | `MILADY_STATE_DIR` |
-| PGlite database | `~/.milady/workspace/.eliza/.elizadb` | Follows `MILADY_STATE_DIR` |
+| PGlite database | `<default workspace>/.eliza/.elizadb` | Follows `MILADY_WORKSPACE_DIR` / `MILADY_STATE_DIR` |
 | Config file | `~/.milady/milady.json` | Follows `MILADY_STATE_DIR` |
 
 ### Key rules

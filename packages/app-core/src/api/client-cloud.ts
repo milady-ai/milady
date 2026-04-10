@@ -22,6 +22,9 @@ import type {
   CloudCompatLaunchResult,
   CloudCompatManagedDiscordStatus,
   CloudCompatManagedGithubStatus,
+  CloudOAuthConnection,
+  CloudOAuthConnectionRole,
+  CloudOAuthInitiateResponse,
   CloudCredits,
   CloudLoginPollResponse,
   CloudLoginResponse,
@@ -149,6 +152,8 @@ declare module "./client-base" {
       agentId: string,
       request?: {
         scopes?: string[];
+        postMessage?: boolean;
+        returnUrl?: string;
       },
     ): Promise<{
       success: boolean;
@@ -166,6 +171,25 @@ declare module "./client-base" {
     disconnectCloudCompatAgentManagedGithub(agentId: string): Promise<{
       success: boolean;
       data: CloudCompatManagedGithubStatus;
+    }>;
+    listCloudOauthConnections(args?: {
+      platform?: string;
+      connectionRole?: CloudOAuthConnectionRole;
+    }): Promise<{
+      connections: CloudOAuthConnection[];
+    }>;
+    initiateCloudOauth(
+      platform: string,
+      request?: {
+        redirectUrl?: string;
+        scopes?: string[];
+        connectionRole?: CloudOAuthConnectionRole;
+      },
+    ): Promise<CloudOAuthInitiateResponse>;
+    disconnectCloudOauthConnection(connectionId: string): Promise<{
+      success?: boolean;
+      error?: string;
+      [key: string]: unknown;
     }>;
     getCloudCompatAgentGithubToken(agentId: string): Promise<{
       success: boolean;
@@ -526,6 +550,49 @@ MiladyClient.prototype.disconnectCloudCompatAgentManagedGithub =
       },
     );
   };
+
+MiladyClient.prototype.listCloudOauthConnections = async function (
+  this: MiladyClient,
+  args,
+) {
+  const params = new URLSearchParams();
+  if (args?.platform) {
+    params.set("platform", args.platform);
+  }
+  if (args?.connectionRole) {
+    params.set("connectionRole", args.connectionRole);
+  }
+  const query = params.toString();
+  return this.fetch(
+    `/api/cloud/v1/oauth/connections${query ? `?${query}` : ""}`,
+  );
+};
+
+MiladyClient.prototype.initiateCloudOauth = async function (
+  this: MiladyClient,
+  platform,
+  request,
+) {
+  return this.fetch(
+    `/api/cloud/v1/oauth/${encodeURIComponent(platform)}/initiate`,
+    {
+      method: "POST",
+      body: JSON.stringify(request ?? {}),
+    },
+  );
+};
+
+MiladyClient.prototype.disconnectCloudOauthConnection = async function (
+  this: MiladyClient,
+  connectionId,
+) {
+  return this.fetch(
+    `/api/cloud/v1/oauth/connections/${encodeURIComponent(connectionId)}`,
+    {
+      method: "DELETE",
+    },
+  );
+};
 
 MiladyClient.prototype.getCloudCompatAgentGithubToken = async function (
   this: MiladyClient,

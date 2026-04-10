@@ -277,7 +277,9 @@ describe("CharacterEditor regressions", () => {
 
     let tree: TestRenderer.ReactTestRenderer | null = null;
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(CharacterEditor));
+      tree = TestRenderer.create(
+        React.createElement(CharacterEditor, { sceneOverlay: true }),
+      );
     });
 
     await flushEffects();
@@ -354,7 +356,9 @@ describe("CharacterEditor regressions", () => {
 
     let tree: TestRenderer.ReactTestRenderer | null = null;
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(CharacterEditor));
+      tree = TestRenderer.create(
+        React.createElement(CharacterEditor, { sceneOverlay: true }),
+      );
     });
 
     await flushEffects();
@@ -437,7 +441,9 @@ describe("CharacterEditor regressions", () => {
 
     let tree: TestRenderer.ReactTestRenderer | null = null;
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(CharacterEditor));
+      tree = TestRenderer.create(
+        React.createElement(CharacterEditor, { sceneOverlay: true }),
+      );
     });
 
     await flushEffects();

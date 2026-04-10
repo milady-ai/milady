@@ -19,10 +19,10 @@ import {
 import { hasAdminAccess } from "../security/access.js";
 import type { CodingAgentContext } from "../services/coding-agent-context.js";
 import {
-  DEFAULT_AGENT_WORKSPACE_DIR,
   filterInitFilesForSession,
   isDefaultBoilerplate,
   loadWorkspaceInitFiles,
+  resolveDefaultAgentWorkspaceDir,
   type WorkspaceInitFile,
 } from "./workspace.js";
 
@@ -159,7 +159,7 @@ export function createWorkspaceProvider(options?: {
   workspaceDir?: string;
   maxCharsPerFile?: number;
 }): Provider {
-  const dir = options?.workspaceDir ?? DEFAULT_AGENT_WORKSPACE_DIR;
+  const dir = options?.workspaceDir ?? resolveDefaultAgentWorkspaceDir();
   const maxChars = options?.maxCharsPerFile ?? DEFAULT_MAX_CHARS;
 
   return {

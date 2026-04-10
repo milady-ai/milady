@@ -28,12 +28,11 @@ import {
   type Tab,
 } from "../navigation";
 import { shouldStartAtCharacterSelectOnLaunch } from "./shell-routing";
-import { resolveApiUrl, resolveAppAssetUrl } from "../utils";
+import { resolveApiUrl } from "../utils";
 import type { StartupEvent } from "./startup-coordinator";
 import type { AgentStatus, WalletAddresses } from "../api";
 import type { OnboardingMode } from "./types";
 import { getVrmUrl, getVrmCount, VRM_COUNT } from "./vrm";
-import { loadUiTheme } from "./persistence";
 import { prefetchVrmToCache } from "../components/avatar/VrmEngine";
 
 export interface HydratingDeps {
@@ -131,7 +130,7 @@ function getNavigationPathFromWindow(): string {
   return window.location.pathname || "/";
 }
 
-const DEFAULT_LANDING_TAB: Tab = COMPANION_ENABLED ? "companion" : "chat";
+const DEFAULT_LANDING_TAB: Tab = "chat";
 
 /**
  * Runs the hydrating phase.
@@ -206,13 +205,12 @@ export async function runHydrating(
       );
   }
 
-  // ── Prefetch companion assets (VRM + gaussian splat world) ─────────
-  // Warm the in-memory VRM buffer cache and the browser HTTP cache for
-  // the splat world so that when the companion scene goes active after
-  // HYDRATION_COMPLETE, assets are already downloaded. This avoids a
-  // cold ~3-10 s blank screen on first companion render, especially
-  // noticeable in cloud containers where the CDN round-trip is the
-  // bottleneck.
+  // ── Prefetch companion VRM assets ──────────────────────────────────
+  // Warm the in-memory VRM buffer cache so that when the companion
+  // scene goes active after HYDRATION_COMPLETE, the avatar is already
+  // downloaded. This avoids a cold ~3-10 s blank screen on first
+  // companion render, especially noticeable in cloud containers where
+  // the CDN round-trip is the bottleneck.
   //
   // We await the active VRM prefetch (with a 15s timeout) rather than
   // firing and forgetting. This ensures the in-memory buffer cache is
@@ -224,28 +222,10 @@ export async function runHydrating(
   // re-download of every character model.
   if (COMPANION_ENABLED) {
     const vrmIdx = resolvedIdx > 0 ? resolvedIdx : 1;
-    const vrmPrefetch = prefetchVrmToCache(getVrmUrl(vrmIdx));
-    const theme = loadUiTheme();
-    const worldUrl =
-      theme === "dark"
-        ? resolveAppAssetUrl("worlds/companion-night.spz")
-        : resolveAppAssetUrl("worlds/companion-day.spz");
-    const worldPrefetch = fetch(worldUrl, { cache: "force-cache" }).catch(
-      () => {},
-    );
-    // Wait for both but cap at 15s so hydration isn't blocked forever on
-    // slow networks. Even if the timeout fires, the in-flight prefetch
-    // continues in the background and loadGltfAsset will join it via the
-    // inflight dedup map.
-    await Promise.race([
-      Promise.all([vrmPrefetch, worldPrefetch]),
-      new Promise((resolve) => setTimeout(resolve, 15_000)),
-    ]);
-
-    // Fire-and-forget: warm the cache for all other VRM assets so the
-    // customize page does not need to re-download them on first visit.
-    // Use getVrmCount() (dynamic roster) with VRM_COUNT as fallback when
-    // the boot config hasn't been populated yet.
+    // Fire-and-forget: warm the browser cache for all VRM assets so the
+    // Character tab and companion app don't need cold downloads.
+    // Companion is now on-demand, so we don't block hydration for VRM.
+    void prefetchVrmToCache(getVrmUrl(vrmIdx));
     const totalVrm = getVrmCount() || VRM_COUNT;
     for (let i = 1; i <= totalVrm; i++) {
       if (i !== vrmIdx) void prefetchVrmToCache(getVrmUrl(i));

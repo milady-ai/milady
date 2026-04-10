@@ -140,6 +140,100 @@ describeIfEliza("shouldRespond trajectory logging", () => {
     await cleanupTestRuntime(runtime);
   });
 
+  it("keeps shouldRespond classifier state on the fixed minimal provider set", async () => {
+    vi.spyOn(runtime, "useModel").mockImplementation(
+      async (
+        modelType: (typeof ModelType)[keyof typeof ModelType],
+        params: unknown,
+      ) => {
+        if (modelType === "RESPONSE_HANDLER" || modelType === ModelType.TEXT_SMALL) {
+          return [
+            "name: TestAgent",
+            "reasoning: Ambiguous group chat needs a decision",
+            "speak_up: 88",
+            "hold_back: 12",
+            "action: RESPOND",
+          ].join("\n");
+        }
+
+        const responseText =
+          "<response><thought>Processing message</thought><actions>REPLY</actions><providers></providers><text>Hello! How can I help you?</text></response>";
+        const text = (params as { stream?: boolean } | null | undefined)?.stream;
+        if (text) {
+          return {
+            textStream: (async function* () {
+              yield "<response><thought>Processing message</thought>";
+              yield "<actions>REPLY</actions><providers></providers>";
+              yield "<text>Hello! How can I help you?</text></response>";
+            })(),
+            text: Promise.resolve(responseText),
+          };
+        }
+        return responseText;
+      },
+    );
+
+    installPromptOptimizations(runtime as never);
+
+    const callback = vi.fn(async (content: Content) => [
+      {
+        id: "trajectory-response-memory-fixed-providers" as UUID,
+        content,
+        entityId: "trajectory-entity" as UUID,
+        agentId: runtime.agentId,
+        roomId: "trajectory-room" as UUID,
+        createdAt: Date.now(),
+      },
+    ]);
+
+    const message: Memory = {
+      id: "trajectory-message-fixed-providers" as UUID,
+      roomId: "trajectory-room" as UUID,
+      entityId: "trajectory-user" as UUID,
+      agentId: runtime.agentId,
+      createdAt: Date.now(),
+      content: {
+        text: "can anyone help with this?",
+        source: "discord",
+        channelType: ChannelType.GROUP,
+      },
+      metadata: {
+        type: "message",
+      },
+    };
+
+    await runtime.messageService!.handleMessage(runtime, message, callback);
+
+    expect(runtime.composeState).toHaveBeenCalled();
+    const firstComposeCall = vi.mocked(runtime.composeState).mock.calls[0];
+    const initialProviders = (firstComposeCall?.[1] as string[] | undefined) ?? [];
+    const allowedClassifierProviders = new Set([
+      "ANXIETY",
+      "ENTITIES",
+      "CHARACTER",
+      "RECENT_MESSAGES",
+      "ACTIONS",
+    ]);
+    expect(initialProviders).toEqual(
+      expect.arrayContaining([
+        "ENTITIES",
+        "CHARACTER",
+        "RECENT_MESSAGES",
+        "ACTIONS",
+      ]),
+    );
+    expect(initialProviders.every((provider) => allowedClassifierProviders.has(provider))).toBe(
+      true,
+    );
+    expect(firstComposeCall?.[2]).toBe(true);
+    expect(firstComposeCall?.[3]).toBe(false);
+
+    const initialProviderSet = new Set(initialProviders);
+    expect(initialProviderSet.has("recent-conversations")).toBe(false);
+    expect(initialProviderSet.has("relevant-conversations")).toBe(false);
+    expect(initialProviderSet.has("rolodex")).toBe(false);
+  });
+
   it("records shouldRespond and reply model calls under the same trajectory step", async () => {
     const loggedCalls: Array<Record<string, unknown>> = [];
     const stubLogger = {

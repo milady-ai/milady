@@ -11,6 +11,7 @@ export * from "./useLifeOpsActivitySignals";
 export * from "./useMediaQuery";
 export * from "./useMusicPlayer";
 export * from "./useRenderGuard";
+export * from "./useSignalPairing";
 export * from "./useStreamPopoutNavigation";
 export * from "./useTimeout";
 export * from "./useVoiceChat";

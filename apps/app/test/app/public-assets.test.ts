@@ -81,8 +81,6 @@ describe("app public bundle assets", () => {
       "vrm-decoders/draco/draco_decoder.js",
       "vrm-decoders/draco/draco_decoder.wasm",
       "vrm-decoders/draco/draco_wasm_wrapper.js",
-      "worlds/companion-day.spz",
-      "worlds/companion-night.spz",
       ...PROVIDER_LOGOS,
       ...getMiladyCharacterAssets().map((asset) =>
         asset.previewPath.replace(/^\//, ""),

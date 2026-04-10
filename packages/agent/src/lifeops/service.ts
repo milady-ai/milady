@@ -29,7 +29,13 @@ import type {
   LifeOpsAuditEvent,
   LifeOpsAuditEventType,
   LifeOpsBrowserAction,
+  LifeOpsBrowserCompanionStatus,
+  LifeOpsBrowserKind,
+  LifeOpsBrowserPageContext,
+  LifeOpsBrowserPermissionState,
   LifeOpsBrowserSession,
+  LifeOpsBrowserSettings,
+  LifeOpsBrowserTabSummary,
   LifeOpsCadence,
   LifeOpsCalendarEvent,
   LifeOpsCalendarFeed,
@@ -100,9 +106,12 @@ import type {
   SnoozeLifeOpsOccurrenceRequest,
   StartLifeOpsGoogleConnectorRequest,
   StartLifeOpsGoogleConnectorResponse,
+  SyncLifeOpsBrowserStateRequest,
+  UpdateLifeOpsBrowserSettingsRequest,
   UpdateLifeOpsDefinitionRequest,
   UpdateLifeOpsGoalRequest,
   UpdateLifeOpsWorkflowRequest,
+  UpsertLifeOpsBrowserCompanionRequest,
   UpsertLifeOpsChannelPolicyRequest,
   UpsertLifeOpsXConnectorRequest,
 } from "@miladyai/shared/contracts/lifeops";
@@ -110,6 +119,10 @@ import {
   LIFEOPS_ACTIVITY_SIGNAL_SOURCES,
   LIFEOPS_ACTIVITY_SIGNAL_STATES,
   LIFEOPS_BROWSER_ACTION_KINDS,
+  LIFEOPS_BROWSER_COMPANION_CONNECTION_STATES,
+  LIFEOPS_BROWSER_KINDS,
+  LIFEOPS_BROWSER_SITE_ACCESS_MODES,
+  LIFEOPS_BROWSER_TRACKING_MODES,
   LIFEOPS_CALENDAR_WINDOW_PRESETS,
   LIFEOPS_CHANNEL_TYPES,
   LIFEOPS_CONNECTOR_MODES,
@@ -201,7 +214,10 @@ import {
 import {
   createLifeOpsActivitySignal,
   createLifeOpsAuditEvent,
+  createLifeOpsBrowserCompanionStatus,
+  createLifeOpsBrowserPageContext,
   createLifeOpsBrowserSession,
+  createLifeOpsBrowserTabSummary,
   createLifeOpsCalendarSyncState,
   createLifeOpsChannelPolicy,
   createLifeOpsConnectorGrant,
@@ -298,6 +314,28 @@ const DEFAULT_WORKFLOW_PERMISSION_POLICY: LifeOpsWorkflowPermissionPolicy = {
   trustedXPosting: false,
   requireConfirmationForBrowserActions: true,
   requireConfirmationForXPosts: true,
+};
+const DEFAULT_BROWSER_PERMISSION_STATE: LifeOpsBrowserPermissionState = {
+  tabs: false,
+  scripting: false,
+  activeTab: false,
+  allOrigins: false,
+  grantedOrigins: [],
+  incognitoEnabled: false,
+};
+const DEFAULT_BROWSER_SETTINGS: LifeOpsBrowserSettings = {
+  enabled: false,
+  trackingMode: "current_tab",
+  allowBrowserControl: false,
+  requireConfirmationForAccountAffecting: true,
+  incognitoEnabled: false,
+  siteAccessMode: "current_site_only",
+  grantedOrigins: [],
+  blockedOrigins: [],
+  maxRememberedTabs: 10,
+  pauseUntil: null,
+  metadata: {},
+  updatedAt: null,
 };
 const REMINDER_INTENSITY_CANONICAL_ALIASES: Record<
   string,
@@ -799,7 +837,7 @@ function mergeMetadata(
   return merged;
 }
 
-function isReminderIntensity(
+function _isReminderIntensity(
   value: unknown,
 ): value is LifeOpsReminderIntensity {
   return (
@@ -2493,6 +2531,150 @@ function normalizeWorkflowPermissionPolicy(
   };
 }
 
+function normalizeOptionalBrowserKind(
+  value: unknown,
+  field: string,
+): LifeOpsBrowserKind | null {
+  const browser = normalizeOptionalString(value);
+  if (!browser) {
+    return null;
+  }
+  return normalizeEnumValue(browser, field, LIFEOPS_BROWSER_KINDS);
+}
+
+function normalizeBrowserPermissionStateInput(
+  value: unknown,
+  current: LifeOpsBrowserPermissionState = DEFAULT_BROWSER_PERMISSION_STATE,
+): LifeOpsBrowserPermissionState {
+  if (value === undefined) {
+    return { ...current, grantedOrigins: [...current.grantedOrigins] };
+  }
+  const input = requireRecord(value, "permissions");
+  const grantedOrigins = input.grantedOrigins;
+  return {
+    tabs:
+      normalizeOptionalBoolean(input.tabs, "permissions.tabs") ?? current.tabs,
+    scripting:
+      normalizeOptionalBoolean(input.scripting, "permissions.scripting") ??
+      current.scripting,
+    activeTab:
+      normalizeOptionalBoolean(input.activeTab, "permissions.activeTab") ??
+      current.activeTab,
+    allOrigins:
+      normalizeOptionalBoolean(input.allOrigins, "permissions.allOrigins") ??
+      current.allOrigins,
+    grantedOrigins:
+      grantedOrigins === undefined
+        ? [...current.grantedOrigins]
+        : normalizeOriginList(grantedOrigins, "permissions.grantedOrigins"),
+    incognitoEnabled:
+      normalizeOptionalBoolean(
+        input.incognitoEnabled,
+        "permissions.incognitoEnabled",
+      ) ?? current.incognitoEnabled,
+  };
+}
+
+function normalizeOrigin(value: unknown, field: string): string {
+  const text = requireNonEmptyString(value, field);
+  let parsed: URL;
+  try {
+    parsed = new URL(text);
+  } catch {
+    fail(400, `${field} must be a valid origin URL`);
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    fail(400, `${field} must use http or https`);
+  }
+  return parsed.origin;
+}
+
+function normalizeOriginList(value: unknown, field: string): string[] {
+  if (!Array.isArray(value)) {
+    fail(400, `${field} must be an array`);
+  }
+  return normalizedStringSet(
+    value.map((candidate, index) =>
+      normalizeOrigin(candidate, `${field}[${index}]`),
+    ),
+  );
+}
+
+function normalizeBrowserSettingsUpdate(
+  request: UpdateLifeOpsBrowserSettingsRequest,
+  current: LifeOpsBrowserSettings,
+): LifeOpsBrowserSettings {
+  return {
+    enabled:
+      normalizeOptionalBoolean(request.enabled, "enabled") ?? current.enabled,
+    trackingMode:
+      request.trackingMode === undefined
+        ? current.trackingMode
+        : normalizeEnumValue(
+            request.trackingMode,
+            "trackingMode",
+            LIFEOPS_BROWSER_TRACKING_MODES,
+          ),
+    allowBrowserControl:
+      normalizeOptionalBoolean(
+        request.allowBrowserControl,
+        "allowBrowserControl",
+      ) ?? current.allowBrowserControl,
+    requireConfirmationForAccountAffecting:
+      normalizeOptionalBoolean(
+        request.requireConfirmationForAccountAffecting,
+        "requireConfirmationForAccountAffecting",
+      ) ?? current.requireConfirmationForAccountAffecting,
+    incognitoEnabled:
+      normalizeOptionalBoolean(request.incognitoEnabled, "incognitoEnabled") ??
+      current.incognitoEnabled,
+    siteAccessMode:
+      request.siteAccessMode === undefined
+        ? current.siteAccessMode
+        : normalizeEnumValue(
+            request.siteAccessMode,
+            "siteAccessMode",
+            LIFEOPS_BROWSER_SITE_ACCESS_MODES,
+          ),
+    grantedOrigins:
+      request.grantedOrigins === undefined
+        ? [...current.grantedOrigins]
+        : normalizeOriginList(request.grantedOrigins, "grantedOrigins"),
+    blockedOrigins:
+      request.blockedOrigins === undefined
+        ? [...current.blockedOrigins]
+        : normalizeOriginList(request.blockedOrigins, "blockedOrigins"),
+    maxRememberedTabs:
+      request.maxRememberedTabs === undefined
+        ? current.maxRememberedTabs
+        : (() => {
+            const value = Math.trunc(
+              normalizeFiniteNumber(
+                request.maxRememberedTabs,
+                "maxRememberedTabs",
+              ),
+            );
+            if (value < 1 || value > 50) {
+              fail(400, "maxRememberedTabs must be between 1 and 50");
+            }
+            return value;
+          })(),
+    pauseUntil:
+      request.pauseUntil === undefined
+        ? current.pauseUntil
+        : (normalizeOptionalIsoString(request.pauseUntil, "pauseUntil") ??
+          null),
+    metadata:
+      request.metadata === undefined
+        ? current.metadata
+        : mergeMetadata(
+            current.metadata,
+            normalizeOptionalRecord(request.metadata, "metadata"),
+          ),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 function normalizeBrowserActionInput(
   value: unknown,
   field: string,
@@ -2504,13 +2686,22 @@ function normalizeBrowserActionInput(
     LIFEOPS_BROWSER_ACTION_KINDS,
   );
   const label = requireNonEmptyString(input.label, `${field}.label`);
+  const browser = normalizeOptionalBrowserKind(
+    input.browser,
+    `${field}.browser`,
+  );
+  const windowId = normalizeOptionalString(input.windowId) ?? null;
+  const tabId = normalizeOptionalString(input.tabId) ?? null;
   const url = normalizeOptionalString(input.url) ?? null;
   const selector = normalizeOptionalString(input.selector) ?? null;
   const text = normalizeOptionalString(input.text) ?? null;
-  if (kind === "navigate" && !url) {
-    fail(400, `${field}.url is required for navigate actions`);
+  if ((kind === "open" || kind === "navigate") && !url) {
+    fail(400, `${field}.url is required for ${kind} actions`);
   }
-  if (kind !== "navigate" && !selector) {
+  if (kind === "focus_tab" && !tabId) {
+    fail(400, `${field}.tabId is required for focus_tab actions`);
+  }
+  if ((kind === "click" || kind === "type" || kind === "submit") && !selector) {
     fail(400, `${field}.selector is required for ${kind} actions`);
   }
   if (kind === "type" && text === null) {
@@ -2519,6 +2710,9 @@ function normalizeBrowserActionInput(
   return {
     kind,
     label,
+    browser,
+    windowId,
+    tabId,
     url,
     selector,
     text,
@@ -3405,6 +3599,175 @@ function resolveAwaitingBrowserActionId(
   return next?.id ?? null;
 }
 
+function browserActionChangesState(
+  action: Pick<LifeOpsBrowserAction, "kind">,
+): boolean {
+  return (
+    action.kind === "open" ||
+    action.kind === "navigate" ||
+    action.kind === "focus_tab" ||
+    action.kind === "back" ||
+    action.kind === "forward" ||
+    action.kind === "reload" ||
+    action.kind === "click" ||
+    action.kind === "type" ||
+    action.kind === "submit"
+  );
+}
+
+function browserTabIdentityKey(
+  tab: Pick<
+    LifeOpsBrowserTabSummary,
+    "browser" | "profileId" | "windowId" | "tabId"
+  >,
+): string {
+  return `${tab.browser}:${tab.profileId}:${tab.windowId}:${tab.tabId}`;
+}
+
+function browserPageContextIdentityKey(
+  context: Pick<
+    LifeOpsBrowserPageContext,
+    "browser" | "profileId" | "windowId" | "tabId"
+  >,
+): string {
+  return `${context.browser}:${context.profileId}:${context.windowId}:${context.tabId}`;
+}
+
+function rankBrowserTab(tab: LifeOpsBrowserTabSummary): [number, number] {
+  const anchor = Date.parse(tab.lastFocusedAt ?? tab.lastSeenAt);
+  return [
+    tab.focusedActive ? 3 : tab.activeInWindow ? 2 : 1,
+    Number.isFinite(anchor) ? anchor : 0,
+  ];
+}
+
+function sortBrowserTabs(
+  tabs: readonly LifeOpsBrowserTabSummary[],
+): LifeOpsBrowserTabSummary[] {
+  return [...tabs].sort((left, right) => {
+    const [leftTier, leftAnchor] = rankBrowserTab(left);
+    const [rightTier, rightAnchor] = rankBrowserTab(right);
+    if (leftTier !== rightTier) {
+      return rightTier - leftTier;
+    }
+    if (leftAnchor !== rightAnchor) {
+      return rightAnchor - leftAnchor;
+    }
+    return left.title.localeCompare(right.title);
+  });
+}
+
+function selectRememberedBrowserTabs(
+  tabs: readonly LifeOpsBrowserTabSummary[],
+  limit: number,
+): LifeOpsBrowserTabSummary[] {
+  if (limit <= 0 || tabs.length === 0) {
+    return [];
+  }
+  const sorted = sortBrowserTabs(tabs);
+  const active = sorted.filter((tab) => tab.activeInWindow);
+  if (active.length >= limit) {
+    return active.slice(0, limit);
+  }
+  const seen = new Set(active.map((tab) => tab.id));
+  const extras = sorted.filter((tab) => !seen.has(tab.id));
+  return [...active, ...extras.slice(0, Math.max(0, limit - active.length))];
+}
+
+function redactSecretLikeText(value: unknown): string | null {
+  const text = normalizeOptionalString(value);
+  if (!text) {
+    return null;
+  }
+  const secretPattern =
+    /\b(?:sk|pk|rk|ghp|gho|ghu|xoxb|xoxp)_[A-Za-z0-9_-]{8,}\b/g;
+  return text.replace(secretPattern, "[redacted-secret]");
+}
+
+function browserOriginFromUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return parsed.origin;
+  } catch {
+    return null;
+  }
+}
+
+function browserUrlAllowedBySettings(
+  url: string,
+  settings: LifeOpsBrowserSettings,
+): boolean {
+  const origin = browserOriginFromUrl(url);
+  if (!origin) {
+    return false;
+  }
+  if (settings.blockedOrigins.includes(origin)) {
+    return false;
+  }
+  if (settings.siteAccessMode === "granted_sites") {
+    return settings.grantedOrigins.includes(origin);
+  }
+  return true;
+}
+
+function normalizePageLinks(
+  value: unknown,
+  field: string,
+): LifeOpsBrowserPageContext["links"] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    fail(400, `${field} must be an array`);
+  }
+  return value.map((candidate, index) => {
+    const record = requireRecord(candidate, `${field}[${index}]`);
+    return {
+      text: requireNonEmptyString(record.text, `${field}[${index}].text`),
+      href: requireNonEmptyString(record.href, `${field}[${index}].href`),
+    };
+  });
+}
+
+function normalizePageHeadings(
+  value: unknown,
+  field: string,
+): LifeOpsBrowserPageContext["headings"] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    fail(400, `${field} must be an array`);
+  }
+  return value.map((candidate, index) =>
+    requireNonEmptyString(candidate, `${field}[${index}]`),
+  );
+}
+
+function normalizePageForms(
+  value: unknown,
+  field: string,
+): LifeOpsBrowserPageContext["forms"] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    fail(400, `${field} must be an array`);
+  }
+  return value.map((candidate, index) => {
+    const record = requireRecord(candidate, `${field}[${index}]`);
+    if (!Array.isArray(record.fields)) {
+      fail(400, `${field}[${index}].fields must be an array`);
+    }
+    return {
+      action:
+        record.action === undefined || record.action === null
+          ? null
+          : requireNonEmptyString(record.action, `${field}[${index}].action`),
+      fields: record.fields.map((entry, fieldIndex) =>
+        requireNonEmptyString(
+          entry,
+          `${field}[${index}].fields[${fieldIndex}]`,
+        ),
+      ),
+    };
+  });
+}
+
 function summarizeWorkflowValue(value: unknown, prompt?: string): string {
   const prefix = prompt?.trim() ? `${prompt.trim()}: ` : "";
   if (isRecord(value) && Array.isArray(value.events)) {
@@ -3536,6 +3899,128 @@ export class LifeOpsService {
       this.ownerRoutingEntityIdPromise = resolveOwnerEntityId(this.runtime);
     }
     return await this.ownerRoutingEntityIdPromise;
+  }
+
+  private async getBrowserSettingsInternal(): Promise<LifeOpsBrowserSettings> {
+    const current = await this.repository.getBrowserSettings(this.agentId());
+    return current
+      ? {
+          ...current,
+          grantedOrigins: [...current.grantedOrigins],
+          blockedOrigins: [...current.blockedOrigins],
+        }
+      : {
+          ...DEFAULT_BROWSER_SETTINGS,
+          grantedOrigins: [...DEFAULT_BROWSER_SETTINGS.grantedOrigins],
+          blockedOrigins: [...DEFAULT_BROWSER_SETTINGS.blockedOrigins],
+          metadata: { ...DEFAULT_BROWSER_SETTINGS.metadata },
+        };
+  }
+
+  private isBrowserPaused(settings: LifeOpsBrowserSettings): boolean {
+    if (!settings.pauseUntil) {
+      return false;
+    }
+    const pauseUntilMs = Date.parse(settings.pauseUntil);
+    return Number.isFinite(pauseUntilMs) && pauseUntilMs > Date.now();
+  }
+
+  private async requireBrowserAvailableForActions(
+    actions: readonly LifeOpsBrowserAction[],
+  ): Promise<LifeOpsBrowserSettings> {
+    const settings = await this.getBrowserSettingsInternal();
+    if (!settings.enabled || settings.trackingMode === "off") {
+      fail(
+        409,
+        "LifeOps Browser is disabled. Enable it in settings before starting browser sessions.",
+      );
+    }
+    if (this.isBrowserPaused(settings)) {
+      fail(409, "LifeOps Browser is paused.");
+    }
+    if (
+      actions.some((action) => browserActionChangesState(action)) &&
+      !settings.allowBrowserControl
+    ) {
+      fail(
+        409,
+        "LifeOps Browser control is disabled. Enable browser control in settings before running control actions.",
+      );
+    }
+    return settings;
+  }
+
+  private buildBrowserCompanion(
+    request: UpsertLifeOpsBrowserCompanionRequest,
+    current: LifeOpsBrowserCompanionStatus | null,
+  ): LifeOpsBrowserCompanionStatus {
+    const browser = normalizeEnumValue(
+      request.browser,
+      "companion.browser",
+      LIFEOPS_BROWSER_KINDS,
+    );
+    const profileId = requireNonEmptyString(
+      request.profileId,
+      "companion.profileId",
+    );
+    const profileLabel =
+      normalizeOptionalString(request.profileLabel) ??
+      current?.profileLabel ??
+      "";
+    const extensionVersion =
+      normalizeOptionalString(request.extensionVersion) ?? null;
+    const connectionState =
+      request.connectionState === undefined
+        ? (current?.connectionState ?? "connected")
+        : normalizeEnumValue(
+            request.connectionState,
+            "companion.connectionState",
+            LIFEOPS_BROWSER_COMPANION_CONNECTION_STATES,
+          );
+    const permissions = normalizeBrowserPermissionStateInput(
+      request.permissions,
+      current?.permissions ?? DEFAULT_BROWSER_PERMISSION_STATE,
+    );
+    const metadata = mergeMetadata(
+      current?.metadata ?? {},
+      normalizeOptionalRecord(request.metadata, "companion.metadata"),
+    );
+    const lastSeenAt =
+      request.lastSeenAt === undefined
+        ? (current?.lastSeenAt ?? new Date().toISOString())
+        : (normalizeOptionalIsoString(
+            request.lastSeenAt,
+            "companion.lastSeenAt",
+          ) ?? null);
+
+    if (current) {
+      return {
+        ...current,
+        browser,
+        profileId,
+        profileLabel,
+        label: requireNonEmptyString(request.label, "companion.label"),
+        extensionVersion,
+        connectionState,
+        permissions,
+        lastSeenAt,
+        metadata,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    return createLifeOpsBrowserCompanionStatus({
+      agentId: this.agentId(),
+      browser,
+      profileId,
+      profileLabel,
+      label: requireNonEmptyString(request.label, "companion.label"),
+      extensionVersion,
+      connectionState,
+      permissions,
+      lastSeenAt,
+      metadata,
+    });
   }
 
   private normalizeOwnership(
@@ -6146,13 +6631,19 @@ export class LifeOpsService {
         normalizeBrowserActionInput(action, `actions[${index}]`),
       ),
     );
+    await this.requireBrowserAvailableForActions(actions);
     const awaitingActionId = resolveAwaitingBrowserActionId(actions);
     const session = createLifeOpsBrowserSession({
       agentId: this.agentId(),
       ...ownership,
       workflowId,
+      browser: normalizeOptionalBrowserKind(request.browser, "browser"),
+      companionId: normalizeOptionalString(request.companionId) ?? null,
+      profileId: normalizeOptionalString(request.profileId) ?? null,
+      windowId: normalizeOptionalString(request.windowId) ?? null,
+      tabId: normalizeOptionalString(request.tabId) ?? null,
       title: requireNonEmptyString(request.title, "title"),
-      status: awaitingActionId ? "awaiting_confirmation" : "navigating",
+      status: awaitingActionId ? "awaiting_confirmation" : "queued",
       actions,
       currentActionIndex: 0,
       awaitingConfirmationForActionId: awaitingActionId,
@@ -6168,6 +6659,10 @@ export class LifeOpsService {
       {
         workflowId: session.workflowId,
         title: session.title,
+        browser: session.browser,
+        profileId: session.profileId,
+        windowId: session.windowId,
+        tabId: session.tabId,
       },
       {
         status: session.status,
@@ -8271,12 +8766,6 @@ export class LifeOpsService {
               !definition.permissionPolicy.trustedBrowserActions &&
               !args.confirmBrowserActions
             ) {
-              // KNOWN LIMITATION: The workflow does NOT wait for user
-              // confirmation. It records requiresConfirmation and moves on.
-              // The browser session remains in "awaiting_confirmation" state
-              // but the workflow step completes immediately. A future
-              // implementation should suspend execution until confirmation
-              // is received via the browser session API.
               value = {
                 sessionId: session.id,
                 status: session.status,
@@ -8285,7 +8774,7 @@ export class LifeOpsService {
             } else {
               const updated: LifeOpsBrowserSession = {
                 ...session,
-                status: "navigating",
+                status: "queued",
                 awaitingConfirmationForActionId: null,
                 updatedAt: new Date().toISOString(),
               };
@@ -8414,6 +8903,419 @@ export class LifeOpsService {
     return result.run;
   }
 
+  async getBrowserSettings(): Promise<LifeOpsBrowserSettings> {
+    return this.getBrowserSettingsInternal();
+  }
+
+  async updateBrowserSettings(
+    request: UpdateLifeOpsBrowserSettingsRequest,
+  ): Promise<LifeOpsBrowserSettings> {
+    const current = await this.getBrowserSettingsInternal();
+    const next = normalizeBrowserSettingsUpdate(request, current);
+    await this.repository.upsertBrowserSettings(this.agentId(), next);
+    if (
+      !next.enabled ||
+      next.trackingMode === "off" ||
+      this.isBrowserPaused(next)
+    ) {
+      await this.repository.deleteAllBrowserTabs(this.agentId());
+      await this.repository.deleteAllBrowserPageContexts(this.agentId());
+    }
+    return this.getBrowserSettingsInternal();
+  }
+
+  async listBrowserCompanions(): Promise<LifeOpsBrowserCompanionStatus[]> {
+    return this.repository.listBrowserCompanions(this.agentId());
+  }
+
+  async listBrowserTabs(): Promise<LifeOpsBrowserTabSummary[]> {
+    const settings = await this.getBrowserSettingsInternal();
+    if (
+      !settings.enabled ||
+      settings.trackingMode === "off" ||
+      this.isBrowserPaused(settings)
+    ) {
+      return [];
+    }
+    const tabs = await this.repository.listBrowserTabs(this.agentId());
+    return selectRememberedBrowserTabs(
+      tabs.filter((tab) => browserUrlAllowedBySettings(tab.url, settings)),
+      settings.maxRememberedTabs,
+    );
+  }
+
+  async getCurrentBrowserPage(): Promise<LifeOpsBrowserPageContext | null> {
+    const settings = await this.getBrowserSettingsInternal();
+    if (
+      !settings.enabled ||
+      settings.trackingMode === "off" ||
+      this.isBrowserPaused(settings)
+    ) {
+      return null;
+    }
+    const tabs = await this.listBrowserTabs();
+    const focusedTab =
+      tabs.find((tab) => tab.focusedActive) ??
+      tabs.find((tab) => tab.activeInWindow) ??
+      tabs[0] ??
+      null;
+    if (!focusedTab) {
+      return null;
+    }
+    const contexts = await this.repository.listBrowserPageContexts(
+      this.agentId(),
+    );
+    return (
+      contexts.find(
+        (context) =>
+          browserPageContextIdentityKey(context) ===
+            browserTabIdentityKey(focusedTab) &&
+          browserUrlAllowedBySettings(context.url, settings),
+      ) ?? null
+    );
+  }
+
+  async syncBrowserState(request: SyncLifeOpsBrowserStateRequest): Promise<{
+    companion: LifeOpsBrowserCompanionStatus;
+    tabs: LifeOpsBrowserTabSummary[];
+    currentPage: LifeOpsBrowserPageContext | null;
+  }> {
+    const companionInput = requireRecord(request.companion, "companion");
+    const browser = normalizeEnumValue(
+      companionInput.browser,
+      "companion.browser",
+      LIFEOPS_BROWSER_KINDS,
+    );
+    const profileId = requireNonEmptyString(
+      companionInput.profileId,
+      "companion.profileId",
+    );
+    const currentCompanion = await this.repository.getBrowserCompanionByProfile(
+      this.agentId(),
+      browser,
+      profileId,
+    );
+    const companion = this.buildBrowserCompanion(
+      request.companion,
+      currentCompanion,
+    );
+    await this.repository.upsertBrowserCompanion(companion);
+
+    const settings = await this.getBrowserSettingsInternal();
+    if (
+      !settings.enabled ||
+      settings.trackingMode === "off" ||
+      this.isBrowserPaused(settings)
+    ) {
+      await this.repository.deleteAllBrowserTabs(this.agentId());
+      await this.repository.deleteAllBrowserPageContexts(this.agentId());
+      return {
+        companion,
+        tabs: [],
+        currentPage: null,
+      };
+    }
+
+    const nowIso = new Date().toISOString();
+    const existingTabs = await this.repository.listBrowserTabs(this.agentId());
+    const existingTabsByKey = new Map(
+      existingTabs.map((tab) => [browserTabIdentityKey(tab), tab]),
+    );
+    for (const [index, candidate] of request.tabs.entries()) {
+      const tabRecord = requireRecord(candidate, `tabs[${index}]`);
+      const tabBrowser = normalizeEnumValue(
+        tabRecord.browser,
+        `tabs[${index}].browser`,
+        LIFEOPS_BROWSER_KINDS,
+      );
+      const tabProfileId = requireNonEmptyString(
+        tabRecord.profileId,
+        `tabs[${index}].profileId`,
+      );
+      if (tabBrowser !== browser || tabProfileId !== profileId) {
+        fail(
+          400,
+          `tabs[${index}] must match companion.browser and companion.profileId`,
+        );
+      }
+      const url = requireNonEmptyString(tabRecord.url, `tabs[${index}].url`);
+      const existing =
+        existingTabsByKey.get(
+          `${tabBrowser}:${tabProfileId}:${requireNonEmptyString(tabRecord.windowId, `tabs[${index}].windowId`)}:${requireNonEmptyString(tabRecord.tabId, `tabs[${index}].tabId`)}`,
+        ) ?? null;
+      const lastSeenAt =
+        normalizeOptionalIsoString(
+          tabRecord.lastSeenAt,
+          `tabs[${index}].lastSeenAt`,
+        ) ?? nowIso;
+      const focusedActive =
+        normalizeOptionalBoolean(
+          tabRecord.focusedActive,
+          `tabs[${index}].focusedActive`,
+        ) ?? false;
+      const activeInWindow =
+        normalizeOptionalBoolean(
+          tabRecord.activeInWindow,
+          `tabs[${index}].activeInWindow`,
+        ) ?? focusedActive;
+      const lastFocusedAt =
+        normalizeOptionalIsoString(
+          tabRecord.lastFocusedAt,
+          `tabs[${index}].lastFocusedAt`,
+        ) ??
+        (focusedActive || activeInWindow
+          ? lastSeenAt
+          : (existing?.lastFocusedAt ?? null));
+      const nextTab = existing
+        ? {
+            ...existing,
+            companionId: companion.id,
+            url,
+            title: requireNonEmptyString(
+              tabRecord.title,
+              `tabs[${index}].title`,
+            ),
+            activeInWindow,
+            focusedWindow:
+              normalizeOptionalBoolean(
+                tabRecord.focusedWindow,
+                `tabs[${index}].focusedWindow`,
+              ) ?? focusedActive,
+            focusedActive,
+            incognito:
+              normalizeOptionalBoolean(
+                tabRecord.incognito,
+                `tabs[${index}].incognito`,
+              ) ?? false,
+            faviconUrl: normalizeOptionalString(tabRecord.faviconUrl) ?? null,
+            lastSeenAt,
+            lastFocusedAt,
+            metadata: mergeMetadata(
+              existing.metadata,
+              normalizeOptionalRecord(
+                tabRecord.metadata,
+                `tabs[${index}].metadata`,
+              ),
+            ),
+            updatedAt: nowIso,
+          }
+        : createLifeOpsBrowserTabSummary({
+            agentId: this.agentId(),
+            companionId: companion.id,
+            browser: tabBrowser,
+            profileId: tabProfileId,
+            windowId: requireNonEmptyString(
+              tabRecord.windowId,
+              `tabs[${index}].windowId`,
+            ),
+            tabId: requireNonEmptyString(
+              tabRecord.tabId,
+              `tabs[${index}].tabId`,
+            ),
+            url,
+            title: requireNonEmptyString(
+              tabRecord.title,
+              `tabs[${index}].title`,
+            ),
+            activeInWindow,
+            focusedWindow:
+              normalizeOptionalBoolean(
+                tabRecord.focusedWindow,
+                `tabs[${index}].focusedWindow`,
+              ) ?? focusedActive,
+            focusedActive,
+            incognito:
+              normalizeOptionalBoolean(
+                tabRecord.incognito,
+                `tabs[${index}].incognito`,
+              ) ?? false,
+            faviconUrl: normalizeOptionalString(tabRecord.faviconUrl) ?? null,
+            lastSeenAt,
+            lastFocusedAt,
+            metadata:
+              normalizeOptionalRecord(
+                tabRecord.metadata,
+                `tabs[${index}].metadata`,
+              ) ?? {},
+          });
+      if (!browserUrlAllowedBySettings(nextTab.url, settings)) {
+        continue;
+      }
+      await this.repository.upsertBrowserTab(nextTab);
+    }
+
+    const allTabs = await this.repository.listBrowserTabs(this.agentId());
+    const keptTabs = selectRememberedBrowserTabs(
+      allTabs.filter((tab) => browserUrlAllowedBySettings(tab.url, settings)),
+      settings.maxRememberedTabs,
+    );
+    const keptTabIds = new Set(keptTabs.map((tab) => tab.id));
+    await this.repository.deleteBrowserTabsByIds(
+      this.agentId(),
+      allTabs.filter((tab) => !keptTabIds.has(tab.id)).map((tab) => tab.id),
+    );
+
+    const focusedTab =
+      keptTabs.find((tab) => tab.focusedActive) ??
+      keptTabs.find((tab) => tab.activeInWindow) ??
+      keptTabs[0] ??
+      null;
+    const focusedKey = focusedTab ? browserTabIdentityKey(focusedTab) : null;
+    const existingContexts = await this.repository.listBrowserPageContexts(
+      this.agentId(),
+    );
+    const existingContextsByKey = new Map(
+      existingContexts.map((context) => [
+        browserPageContextIdentityKey(context),
+        context,
+      ]),
+    );
+    const syncedContextIds = new Set<string>();
+    for (const [index, candidate] of (request.pageContexts ?? []).entries()) {
+      const contextRecord = requireRecord(candidate, `pageContexts[${index}]`);
+      const contextBrowser = normalizeEnumValue(
+        contextRecord.browser,
+        `pageContexts[${index}].browser`,
+        LIFEOPS_BROWSER_KINDS,
+      );
+      const contextProfileId = requireNonEmptyString(
+        contextRecord.profileId,
+        `pageContexts[${index}].profileId`,
+      );
+      const windowId = requireNonEmptyString(
+        contextRecord.windowId,
+        `pageContexts[${index}].windowId`,
+      );
+      const tabId = requireNonEmptyString(
+        contextRecord.tabId,
+        `pageContexts[${index}].tabId`,
+      );
+      if (contextBrowser !== browser || contextProfileId !== profileId) {
+        fail(
+          400,
+          `pageContexts[${index}] must match companion.browser and companion.profileId`,
+        );
+      }
+      const key = `${contextBrowser}:${contextProfileId}:${windowId}:${tabId}`;
+      if (!focusedKey || key !== focusedKey) {
+        continue;
+      }
+      const url = requireNonEmptyString(
+        contextRecord.url,
+        `pageContexts[${index}].url`,
+      );
+      if (!browserUrlAllowedBySettings(url, settings)) {
+        continue;
+      }
+      const existing = existingContextsByKey.get(key) ?? null;
+      const nextContext = existing
+        ? {
+            ...existing,
+            url,
+            title: requireNonEmptyString(
+              contextRecord.title,
+              `pageContexts[${index}].title`,
+            ),
+            selectionText: redactSecretLikeText(contextRecord.selectionText),
+            mainText: redactSecretLikeText(contextRecord.mainText),
+            headings:
+              contextRecord.headings === undefined
+                ? existing.headings
+                : normalizePageHeadings(
+                    contextRecord.headings,
+                    `pageContexts[${index}].headings`,
+                  ),
+            links: normalizePageLinks(
+              contextRecord.links,
+              `pageContexts[${index}].links`,
+            ),
+            forms: normalizePageForms(
+              contextRecord.forms,
+              `pageContexts[${index}].forms`,
+            ),
+            capturedAt:
+              normalizeOptionalIsoString(
+                contextRecord.capturedAt,
+                `pageContexts[${index}].capturedAt`,
+              ) ?? nowIso,
+            metadata: mergeMetadata(
+              existing.metadata,
+              normalizeOptionalRecord(
+                contextRecord.metadata,
+                `pageContexts[${index}].metadata`,
+              ),
+            ),
+          }
+        : createLifeOpsBrowserPageContext({
+            agentId: this.agentId(),
+            browser: contextBrowser,
+            profileId: contextProfileId,
+            windowId,
+            tabId,
+            url,
+            title: requireNonEmptyString(
+              contextRecord.title,
+              `pageContexts[${index}].title`,
+            ),
+            selectionText: redactSecretLikeText(contextRecord.selectionText),
+            mainText: redactSecretLikeText(contextRecord.mainText),
+            headings: normalizePageHeadings(
+              contextRecord.headings,
+              `pageContexts[${index}].headings`,
+            ),
+            links: normalizePageLinks(
+              contextRecord.links,
+              `pageContexts[${index}].links`,
+            ),
+            forms: normalizePageForms(
+              contextRecord.forms,
+              `pageContexts[${index}].forms`,
+            ),
+            capturedAt:
+              normalizeOptionalIsoString(
+                contextRecord.capturedAt,
+                `pageContexts[${index}].capturedAt`,
+              ) ?? nowIso,
+            metadata:
+              normalizeOptionalRecord(
+                contextRecord.metadata,
+                `pageContexts[${index}].metadata`,
+              ) ?? {},
+          });
+      await this.repository.upsertBrowserPageContext(nextContext);
+      syncedContextIds.add(nextContext.id);
+    }
+
+    const keptKeys = new Set(keptTabs.map((tab) => browserTabIdentityKey(tab)));
+    await this.repository.deleteBrowserPageContextsByIds(
+      this.agentId(),
+      existingContexts
+        .filter((context) => {
+          const key = browserPageContextIdentityKey(context);
+          if (!keptKeys.has(key)) {
+            return true;
+          }
+          if (
+            context.browser === browser &&
+            context.profileId === profileId &&
+            !syncedContextIds.has(context.id) &&
+            key !== focusedKey
+          ) {
+            return true;
+          }
+          return false;
+        })
+        .map((context) => context.id),
+    );
+
+    const currentPage = await this.getCurrentBrowserPage();
+    return {
+      companion,
+      tabs: await this.listBrowserTabs(),
+      currentPage,
+    };
+  }
+
   async listBrowserSessions(): Promise<LifeOpsBrowserSession[]> {
     return this.repository.listBrowserSessions(this.agentId());
   }
@@ -8440,12 +9342,18 @@ export class LifeOpsService {
     request: ConfirmLifeOpsBrowserSessionRequest,
   ): Promise<LifeOpsBrowserSession> {
     const session = await this.getBrowserSession(sessionId);
+    if (
+      session.status !== "awaiting_confirmation" ||
+      !session.awaitingConfirmationForActionId
+    ) {
+      fail(409, "browser session is not awaiting confirmation");
+    }
     const confirmed =
       normalizeOptionalBoolean(request.confirmed, "confirmed") ?? false;
     const nextSession: LifeOpsBrowserSession = confirmed
       ? {
           ...session,
-          status: "navigating",
+          status: "queued",
           awaitingConfirmationForActionId: null,
           updatedAt: new Date().toISOString(),
         }
@@ -8477,6 +9385,16 @@ export class LifeOpsService {
   ): Promise<LifeOpsBrowserSession> {
     const session = await this.getBrowserSession(sessionId);
     if (
+      session.status === "done" ||
+      session.status === "failed" ||
+      session.status === "cancelled"
+    ) {
+      fail(
+        409,
+        `browser session cannot complete from status ${session.status}`,
+      );
+    }
+    if (
       session.status === "awaiting_confirmation" &&
       session.awaitingConfirmationForActionId
     ) {
@@ -8487,7 +9405,13 @@ export class LifeOpsService {
     }
     const nextSession: LifeOpsBrowserSession = {
       ...session,
-      status: "done",
+      status:
+        request.status === undefined
+          ? "done"
+          : normalizeEnumValue(request.status, "status", [
+              "done",
+              "failed",
+            ] as const),
       currentActionIndex: Math.max(0, session.actions.length - 1),
       result:
         request.result === undefined
@@ -8503,7 +9427,9 @@ export class LifeOpsService {
     await this.recordBrowserAudit(
       "browser_session_updated",
       nextSession.id,
-      "browser session completed",
+      nextSession.status === "failed"
+        ? "browser session failed"
+        : "browser session completed",
       {
         result: request.result ?? null,
       },
@@ -8802,7 +9728,7 @@ export class LifeOpsService {
         ? grant.identity.email.trim().toLowerCase()
         : null;
 
-    if (resolveGoogleExecutionTarget(grant) === "cloud") {
+    const searchRecentMessages = async (): Promise<LifeOpsGmailSearchFeed> => {
       const scanLimit = Math.max(maxResults, DEFAULT_GMAIL_SEARCH_SCAN_LIMIT);
       const preservedCachedMessages = forceSync
         ? await this.repository.listGmailMessages(
@@ -8846,13 +9772,88 @@ export class LifeOpsService {
           replyNeededOnly,
         });
       }
+      const limitedMessages = messages.slice(0, maxResults);
       return {
         query,
-        messages: messages.slice(0, maxResults),
+        messages: limitedMessages,
         source: triage.source,
         syncedAt: triage.syncedAt,
-        summary: summarizeGmailSearch(messages.slice(0, maxResults)),
+        summary: summarizeGmailSearch(limitedMessages),
       };
+    };
+
+    if (resolveGoogleExecutionTarget(grant) === "cloud") {
+      let managedError: ManagedGoogleClientError | null = null;
+      try {
+        const managedSearch = await this.googleManagedClient.getGmailSearch({
+          side: effectiveSide,
+          query,
+          maxResults,
+        });
+        const messages = filterGmailMessagesBySearch({
+          messages: managedSearch.messages.map((message) =>
+            materializeGmailMessageSummary({
+              agentId: this.agentId(),
+              side: effectiveSide,
+              message,
+              syncedAt: managedSearch.syncedAt,
+            }),
+          ),
+          query,
+          replyNeededOnly,
+        });
+        for (const message of messages) {
+          await this.repository.upsertGmailMessage(message, effectiveSide);
+        }
+        await this.repository.upsertGmailSyncState(
+          createLifeOpsGmailSyncState({
+            agentId: this.agentId(),
+            provider: "google",
+            side: effectiveSide,
+            mailbox: GOOGLE_GMAIL_MAILBOX,
+            maxResults,
+            syncedAt: managedSearch.syncedAt,
+          }),
+        );
+        if (messages.length > 0) {
+          return {
+            query,
+            messages,
+            source: "synced",
+            syncedAt: managedSearch.syncedAt,
+            summary: summarizeGmailSearch(messages),
+          };
+        }
+      } catch (error) {
+        if (error instanceof ManagedGoogleClientError) {
+          managedError = error;
+        } else {
+          throw error;
+        }
+      }
+
+      const fallback = await searchRecentMessages();
+      if (fallback.messages.length > 0) {
+        return fallback;
+      }
+      if (
+        managedError &&
+        (managedError.status === 401 || managedError.status === 409)
+      ) {
+        fail(managedError.status, managedError.message);
+      }
+      return fallback;
+    }
+
+    if (!hasGoogleGmailBodyReadScope(grant)) {
+      const fallback = await searchRecentMessages();
+      if (fallback.messages.length > 0) {
+        return fallback;
+      }
+      fail(
+        409,
+        "This Google connection only has Gmail metadata access. Reconnect Google to grant Gmail read access so Milady can search your full mailbox.",
+      );
     }
 
     const accessToken = (
@@ -8940,7 +9941,10 @@ export class LifeOpsService {
     }
 
     const grant = await this.requireGoogleGmailGrant(requestUrl, mode, side);
-    if (!hasGoogleGmailBodyReadScope(grant)) {
+    if (
+      resolveGoogleExecutionTarget(grant) !== "cloud" &&
+      !hasGoogleGmailBodyReadScope(grant)
+    ) {
       fail(
         409,
         "This Google connection only has Gmail metadata access. Reconnect Google to grant Gmail read access so Milady can read email bodies.",

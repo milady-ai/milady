@@ -270,16 +270,55 @@ export interface CloudCompatDiscordConfig {
 export interface CloudCompatManagedGithubStatus {
   configured: boolean;
   connected: boolean;
+  mode?: "cloud-managed" | "shared-owner" | null;
   connectionId: string | null;
+  connectionRole?: CloudOAuthConnectionRole | null;
   githubUserId: string | null;
   githubUsername: string | null;
   githubDisplayName: string | null;
   githubAvatarUrl: string | null;
   githubEmail: string | null;
   scopes: string[];
+  source?: CloudOAuthConnectionSource | null;
   adminElizaUserId: string | null;
   connectedAt: string | null;
   restarted?: boolean;
+}
+
+export type CloudOAuthConnectionRole = "owner" | "agent";
+export type CloudOAuthConnectionStatus =
+  | "pending"
+  | "active"
+  | "expired"
+  | "revoked"
+  | "error";
+export type CloudOAuthConnectionSource = "platform_credentials" | "secrets";
+
+export interface CloudOAuthConnection {
+  id: string;
+  userId?: string;
+  connectionRole?: CloudOAuthConnectionRole;
+  platform: string;
+  platformUserId: string;
+  email?: string;
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  status: CloudOAuthConnectionStatus;
+  scopes: string[];
+  linkedAt: string;
+  lastUsedAt?: string;
+  tokenExpired: boolean;
+  source: CloudOAuthConnectionSource;
+}
+
+export interface CloudOAuthInitiateResponse {
+  authUrl: string;
+  state?: string;
+  provider?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface CloudCompatJob {
@@ -962,7 +1001,8 @@ export function mapTaskThreadsToCodingAgentSessions(
             ? ("stopped" as const)
             : thread.status === "validating"
               ? ("tool_running" as const)
-              : thread.status === "blocked" || thread.status === "waiting_on_user"
+              : thread.status === "blocked" ||
+                  thread.status === "waiting_on_user"
                 ? ("blocked" as const)
                 : ("active" as const),
     decisionCount: thread.decisionCount,

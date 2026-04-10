@@ -17,7 +17,6 @@ import {
   type State,
   type UUID,
 } from "@elizaos/core";
-import { loadElizaConfig, saveElizaConfig } from "../../../config/config.js";
 import type { RoleName } from "./types";
 import {
   canModifyRole,
@@ -38,7 +37,6 @@ const MAX_USERNAME_LENGTH = 64;
 /** Role names accepted in commands. MEMBER/NONE map to GUEST for backwards compat. */
 const ROLE_PATTERN = "OWNER|ADMIN|USER|GUEST|MEMBER|NONE";
 const ROLE_ALIAS_PATTERN = "OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR";
-const CANONICAL_OWNER_SETTING_KEY = "ELIZA_ADMIN_ENTITY_ID";
 const RECENT_ROOM_MESSAGE_LIMIT = 100;
 const AMBIGUOUS_MATCH_SCORE_GAP = 10;
 const MIN_CONFIDENT_MATCH_SCORE = 70;
@@ -49,14 +47,46 @@ type ParsedRoleCommand =
       kind: "role";
       targetName: string;
       newRole: RoleName;
+      label?: string;
       confidence: "direct" | "confirm";
     }
   | {
-      kind: "boss";
+      kind: "revoke";
       targetName: string;
-      newRole: "OWNER";
+      label: string;
       confidence: "direct" | "confirm";
     };
+
+/**
+ * Natural language relationship labels → system role mapping.
+ * "boss"-family → ADMIN, "coworker"-family → USER.
+ */
+const NATURAL_ROLE_MAP: Record<string, RoleName> = {
+  boss: "ADMIN",
+  manager: "ADMIN",
+  supervisor: "ADMIN",
+  superior: "ADMIN",
+  lead: "ADMIN",
+
+  coworker: "USER",
+  "co-worker": "USER",
+  teammate: "USER",
+  colleague: "USER",
+  peer: "USER",
+  friend: "USER",
+  partner: "USER",
+};
+
+/** Regex fragment matching any natural role label (longest-first for correct alternation). */
+const NATURAL_ROLE_LABEL_RE = Object.keys(NATURAL_ROLE_MAP)
+  .sort((a, b) => b.length - a.length)
+  .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  .join("|");
+
+function resolveNaturalRole(label: string): RoleName | null {
+  const normalized = label.toLowerCase().trim();
+  return NATURAL_ROLE_MAP[normalized] ?? null;
+}
 
 type RelationshipsContactLike = {
   entityId: UUID;
@@ -219,17 +249,179 @@ function parseRoleCommand(
     };
   }
 
-  const bossMatch = trimmed.match(/^@?(.+?)\s+is\s+your\s+boss[.!?]*$/i);
-  if (bossMatch) {
-    const name = normalizeEntityLookupName(bossMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "boss",
-      targetName: name,
-      newRole: "OWNER",
-      confidence: "direct",
-    };
+  // --- Natural language negation (check BEFORE assignment to avoid false name capture) ---
+
+  // Tentative negation: "I think/guess X is not/isn't your LABEL"
+  {
+    const re = new RegExp(
+      `^i\\s+(?:think|guess|figure)\\s+@?(.+?)\\s+(?:is\\s+not|isn'?t|is\\s+no\\s+longer)\\s+(?:really\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})(?:\\s+any\\s*more)?[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      if (name) {
+        return {
+          kind: "revoke",
+          targetName: name,
+          label: match[2].toLowerCase(),
+          confidence: "confirm",
+        };
+      }
+    }
   }
+
+  // Direct negation: "X is not/isn't/no longer (your|my|a) LABEL (anymore)"
+  {
+    const re = new RegExp(
+      `^@?(.+?)\\s+(?:is\\s+not|isn'?t|is\\s+no\\s+longer)\\s+(?:really\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})(?:\\s+any\\s*more)?[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      if (name) {
+        return {
+          kind: "revoke",
+          targetName: name,
+          label: match[2].toLowerCase(),
+          confidence: "direct",
+        };
+      }
+    }
+  }
+
+  // Negation: "don't/do not treat/consider X (as/like) LABEL"
+  {
+    const re = new RegExp(
+      `^(?:don'?t|do\\s+not)\\s+(?:treat|consider)\\s+@?(.+?)\\s+(?:(?:as|like)\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      if (name) {
+        return {
+          kind: "revoke",
+          targetName: name,
+          label: match[2].toLowerCase(),
+          confidence: "direct",
+        };
+      }
+    }
+  }
+
+  // Negation: "remove X as LABEL"
+  {
+    const re = new RegExp(
+      `^remove\\s+@?(.+?)\\s+as\\s+(?:(?:your|my|our|ur|a|an)\\s+)?(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      if (name) {
+        return {
+          kind: "revoke",
+          targetName: name,
+          label: match[2].toLowerCase(),
+          confidence: "direct",
+        };
+      }
+    }
+  }
+
+  // --- Natural language assignment ---
+
+  // Tentative assignment: "I think/guess X is (your|my|a) LABEL"
+  {
+    const re = new RegExp(
+      `^i\\s+(?:think|guess|figure)\\s+@?(.+?)\\s+is\\s+(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      const role = resolveNaturalRole(match[2]);
+      if (name && role) {
+        return {
+          kind: "role",
+          targetName: name,
+          newRole: role,
+          label: match[2].toLowerCase(),
+          confidence: "confirm",
+        };
+      }
+    }
+  }
+
+  // Direct assignment: "X is (your|my|our|a|an) LABEL"
+  {
+    const re = new RegExp(
+      `^@?(.+?)\\s+is\\s+(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      const role = resolveNaturalRole(match[2]);
+      if (name && role) {
+        return {
+          kind: "role",
+          targetName: name,
+          newRole: role,
+          label: match[2].toLowerCase(),
+          confidence: "direct",
+        };
+      }
+    }
+  }
+
+  // Inverted assignment: "my/your LABEL is X"
+  {
+    const re = new RegExp(
+      `^(?:your|my|our|ur)\\s+(${NATURAL_ROLE_LABEL_RE})\\s+is\\s+@?(.+?)[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[2]);
+      const role = resolveNaturalRole(match[1]);
+      if (name && role) {
+        return {
+          kind: "role",
+          targetName: name,
+          newRole: role,
+          label: match[1].toLowerCase(),
+          confidence: "direct",
+        };
+      }
+    }
+  }
+
+  // Assignment: "treat/consider X (as/like) (your|my|a) LABEL"
+  {
+    const re = new RegExp(
+      `^(?:(?:please|pls|hey)\\s+)?(?:treat|consider)\\s+@?(.+?)\\s+(?:(?:as|like)\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
+      "i",
+    );
+    const match = trimmed.match(re);
+    if (match) {
+      const name = normalizeEntityLookupName(match[1]);
+      const role = resolveNaturalRole(match[2]);
+      if (name && role) {
+        return {
+          kind: "role",
+          targetName: name,
+          newRole: role,
+          label: match[2].toLowerCase(),
+          confidence: "direct",
+        };
+      }
+    }
+  }
+
+  // --- Soft/tentative explicit role name patterns ---
 
   const softAssignmentRe = new RegExp(
     `^(?:i\\s+(?:think|reckon|figure)\\s+)?@?(.+?)\\s+(?:should(?:\\s+(?:probably|prolly|probs))?\\s+be|needs\\s+to\\s+be|oughta?\\s+be|feels\\s+like\\s+they\\s+should\\s+be)\\s+(?:an?\\s+)?(${ROLE_ALIAS_PATTERN})[.!?]*$`,
@@ -259,20 +451,6 @@ function parseRoleCommand(
       kind: "role",
       targetName: name,
       newRole: normalizeInputRole(canGetRoleMatch[2]),
-      confidence: "confirm",
-    };
-  }
-
-  const tentativeBossMatch = trimmed.match(
-    /^(?:i\s+(?:think|guess|figure)\s+)?@?(.+?)\s+is\s+your\s+boss[.!?]*$/i,
-  );
-  if (tentativeBossMatch) {
-    const name = normalizeEntityLookupName(tentativeBossMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "boss",
-      targetName: name,
-      newRole: "OWNER",
       confidence: "confirm",
     };
   }
@@ -344,8 +522,12 @@ async function findPendingRoleIntent(
 }
 
 function buildRoleConfirmationPrompt(intent: ParsedRoleCommand): string {
-  if (intent.kind === "boss") {
-    return `Do you want me to make ${intent.targetName} the canonical boss/OWNER for the agent? Reply yes to confirm.`;
+  if (intent.kind === "revoke") {
+    return `Do you want me to remove ${intent.targetName} as your ${intent.label}? Reply yes to confirm.`;
+  }
+
+  if (intent.label) {
+    return `Do you want me to set ${intent.targetName} as your ${intent.label} (${intent.newRole})? Reply yes to confirm.`;
   }
 
   return `Do you want me to update ${intent.targetName} to **${intent.newRole}**? Reply yes to confirm.`;
@@ -703,90 +885,6 @@ async function resolveRoleTargetEntity(args: {
   return { entityId: best.candidate.entityId };
 }
 
-function persistCanonicalOwnerConfig(targetEntityId: string): void {
-  const config = loadElizaConfig();
-  if (!config.agents || typeof config.agents !== "object") {
-    (config as Record<string, unknown>).agents = {};
-  }
-  const agents = config.agents as Record<string, unknown>;
-  const defaults =
-    agents.defaults && typeof agents.defaults === "object"
-      ? (agents.defaults as Record<string, unknown>)
-      : {};
-  defaults.adminEntityId = targetEntityId;
-  agents.defaults = defaults;
-  saveElizaConfig(config);
-}
-
-async function transferCanonicalOwner(args: {
-  runtime: IAgentRuntime;
-  message: Memory;
-  newOwnerId: UUID;
-  currentOwnerId: string | null;
-  actingOwnerId: UUID;
-}): Promise<void> {
-  const { runtime, message, newOwnerId, currentOwnerId, actingOwnerId } = args;
-  if (typeof runtime.setSetting === "function") {
-    runtime.setSetting(CANONICAL_OWNER_SETTING_KEY, newOwnerId);
-  }
-  try {
-    persistCanonicalOwnerConfig(newOwnerId);
-  } catch (error) {
-    logger.warn(`[roles] Failed to persist canonical owner config: ${error}`);
-  }
-
-  const currentWorld = await resolveWorldForMessage(runtime, message);
-  let worlds =
-    currentWorld?.world
-      ? [currentWorld.world]
-      : [];
-  if (typeof runtime.getAllWorlds === "function") {
-    try {
-      worlds = await runtime.getAllWorlds();
-    } catch (error) {
-      logger.warn(`[roles] Failed to load all worlds for owner transfer: ${error}`);
-    }
-  }
-
-  for (const world of worlds) {
-    if (!world?.id) continue;
-    const metadata = ((world.metadata ?? {}) as Record<string, unknown>) as {
-      ownership?: { ownerId?: string };
-      roles?: Record<string, RoleName>;
-      roleSources?: Record<string, "owner" | "manual" | "connector_admin">;
-    };
-    metadata.ownership ??= {};
-    metadata.roles ??= {};
-    metadata.roleSources ??= {};
-    metadata.ownership.ownerId = newOwnerId;
-    metadata.roles[newOwnerId] = "OWNER";
-    metadata.roleSources[newOwnerId] = "owner";
-
-    for (const [entityId, role] of Object.entries(metadata.roles)) {
-      if (entityId === newOwnerId || normalizeRole(role) !== "OWNER") {
-        continue;
-      }
-
-      if (
-        entityId === currentOwnerId ||
-        entityId === actingOwnerId
-      ) {
-        metadata.roles[entityId] = "ADMIN";
-        metadata.roleSources[entityId] = "manual";
-        continue;
-      }
-
-      delete metadata.roles[entityId];
-      delete metadata.roleSources[entityId];
-    }
-
-    (world as { metadata: typeof metadata }).metadata = metadata;
-    await runtime.updateWorld(
-      world as Parameters<IAgentRuntime["updateWorld"]>[0],
-    );
-  }
-}
-
 export const updateRoleAction: Action = {
   name: "UPDATE_ROLE",
   similes: [
@@ -795,10 +893,13 @@ export const updateRoleAction: Action = {
     "ASSIGN_ROLE",
     "MAKE_ADMIN",
     "MAKE_OWNER",
+    "SET_BOSS",
+    "SET_COWORKER",
+    "REVOKE_ROLE",
   ],
   description:
-    "Assign a role (OWNER, ADMIN, USER, GUEST) to a user. " +
-    "Usage: /role @username ADMIN. Only OWNERs and ADMINs can assign roles.",
+    "Assign or revoke a role using commands (/role @name ADMIN) or natural language " +
+    '("alice is your boss", "bob is not your coworker"). Only OWNERs and ADMINs can manage roles.',
 
   validate: async (
     _runtime: IAgentRuntime,
@@ -829,7 +930,7 @@ export const updateRoleAction: Action = {
       return { success: false };
     }
 
-    const { targetName, newRole } = parsed;
+    const targetName = parsed.targetName;
 
     // Resolve world
     const resolved = await resolveWorldForMessage(runtime, message);
@@ -855,13 +956,6 @@ export const updateRoleAction: Action = {
     if (requesterRole !== "OWNER" && requesterRole !== "ADMIN") {
       await callback?.({
         text: "You don't have permission to manage roles. Only OWNERs and ADMINs can assign roles.",
-      });
-      return { success: false };
-    }
-
-    if (parsed.kind === "boss" && requesterRole !== "OWNER") {
-      await callback?.({
-        text: "Only the current OWNER can assign a new boss.",
       });
       return { success: false };
     }
@@ -898,36 +992,9 @@ export const updateRoleAction: Action = {
       targetEntityId,
     );
 
-    if (parsed.kind === "boss") {
-      const currentOwnerId = resolveCanonicalOwnerId(runtime, metadata);
-      await transferCanonicalOwner({
-        runtime,
-        message,
-        newOwnerId: targetEntityId,
-        currentOwnerId,
-        actingOwnerId: message.entityId,
-      });
-
-      logger.info(
-        `[roles] ${message.entityId} transferred canonical ownership to ${targetEntityId} (${targetName})`,
-      );
-
-      await callback?.({
-        text: `Updated boss to **${targetName}**.`,
-      });
-
-      return {
-        success: true,
-        data: {
-          targetEntityId,
-          targetName,
-          previousRole: targetCurrentRole,
-          newRole,
-          assignedBy: message.entityId,
-          transferKind: "boss",
-        },
-      };
-    }
+    // Determine the new role: revoke → GUEST, otherwise use the parsed role.
+    const newRole: RoleName =
+      parsed.kind === "revoke" ? "GUEST" : parsed.newRole;
 
     // Permission check
     if (newRole === "OWNER") {
@@ -972,9 +1039,17 @@ export const updateRoleAction: Action = {
       `[roles] ${message.entityId} set ${targetEntityId} (${targetName}) to ${newRole}`,
     );
 
-    await callback?.({
-      text: `Updated ${targetName}'s role to **${newRole}**.`,
-    });
+    // Build response message using natural language when a label is present.
+    let responseText: string;
+    if (parsed.kind === "revoke") {
+      responseText = `${targetName} is no longer your ${parsed.label}.`;
+    } else if (parsed.label) {
+      responseText = `${targetName} is now your ${parsed.label}.`;
+    } else {
+      responseText = `Updated ${targetName}'s role to **${newRole}**.`;
+    }
+
+    await callback?.({ text: responseText });
 
     return {
       success: true,
@@ -984,6 +1059,10 @@ export const updateRoleAction: Action = {
         previousRole: targetCurrentRole,
         newRole,
         assignedBy: message.entityId,
+        ...(parsed.kind === "revoke"
+          ? { revoked: true, revokedLabel: parsed.label }
+          : {}),
+        ...(parsed.label ? { label: parsed.label } : {}),
       },
     };
   },
@@ -1002,21 +1081,21 @@ export const updateRoleAction: Action = {
     [
       {
         name: "{{name1}}",
-        content: { text: "make @bob user" },
+        content: { text: "bob is your coworker" },
       },
       {
         name: "{{agentName}}",
-        content: { text: "Updated bob's role to **USER**." },
+        content: { text: "bob is now your coworker." },
       },
     ],
     [
       {
         name: "{{name1}}",
-        content: { text: "/role @charlie GUEST" },
+        content: { text: "charlie is not your boss" },
       },
       {
         name: "{{agentName}}",
-        content: { text: "Updated charlie's role to **GUEST**." },
+        content: { text: "charlie is no longer your boss." },
       },
     ],
   ] as ActionExample[][],

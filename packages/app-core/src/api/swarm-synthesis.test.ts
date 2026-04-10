@@ -29,7 +29,12 @@ describe("handleSwarmSynthesis", () => {
     const useModel = vi
       .fn()
       .mockResolvedValue("All tasks completed successfully!");
-    const st = { runtime: { useModel, getService: vi.fn().mockReturnValue(null) } as AgentRuntime };
+    const st = {
+      runtime: {
+        useModel,
+        getService: vi.fn().mockReturnValue(null),
+      } as AgentRuntime,
+    };
     const routeMessage = vi.fn();
 
     await handleSwarmSynthesis(st, makePayload(), routeMessage);
@@ -43,7 +48,12 @@ describe("handleSwarmSynthesis", () => {
 
   it("falls back to the original task text when completion summary is missing", async () => {
     const useModel = vi.fn().mockResolvedValue("   ");
-    const st = { runtime: { useModel, getService: vi.fn().mockReturnValue(null) } as AgentRuntime };
+    const st = {
+      runtime: {
+        useModel,
+        getService: vi.fn().mockReturnValue(null),
+      } as AgentRuntime,
+    };
     const routeMessage = vi.fn();
 
     await handleSwarmSynthesis(
@@ -64,12 +74,20 @@ describe("handleSwarmSynthesis", () => {
     );
 
     expect(useModel).not.toHaveBeenCalled();
-    expect(routeMessage).toHaveBeenCalledWith("done — Fix the bug", "swarm_synthesis");
+    expect(routeMessage).toHaveBeenCalledWith(
+      "done — Fix the bug",
+      "swarm_synthesis",
+    );
   });
 
   it("formats multi-task synthesis without using the LLM", async () => {
     const useModel = vi.fn().mockRejectedValue(new Error("LLM unavailable"));
-    const st = { runtime: { useModel, getService: vi.fn().mockReturnValue(null) } as AgentRuntime };
+    const st = {
+      runtime: {
+        useModel,
+        getService: vi.fn().mockReturnValue(null),
+      } as AgentRuntime,
+    };
     const routeMessage = vi.fn();
 
     const payload = makePayload({

@@ -1,4 +1,5 @@
 import { getChatSourceMeta } from "@miladyai/ui";
+import { normalizeConnectorSource } from "@miladyai/shared/connectors";
 
 import type { Conversation } from "../../api/client-types-chat";
 import {
@@ -19,9 +20,11 @@ type TranslateFn = (
 
 export interface InboxChatSidebarRow {
   avatarUrl?: string;
+  canSend?: boolean;
   id: string;
   lastMessageAt: number;
   source: string;
+  transportSource?: string;
   title: string;
   worldId?: string;
   worldLabel: string;
@@ -29,11 +32,13 @@ export interface InboxChatSidebarRow {
 
 export interface ConversationsSidebarRow {
   avatarUrl?: string;
+  canSend?: boolean;
   id: string;
   kind: "conversation" | "inbox";
   sortKey: number;
   source?: string;
   sourceKey: string;
+  transportSource?: string;
   title: string;
   updatedAtLabel: string;
   worldId?: string;
@@ -109,13 +114,16 @@ function buildInboxRows(
     .map((chat) => {
       const isoDate = new Date(chat.lastMessageAt).toISOString();
       const normalizedWorldLabel = normalizeWorldLabel(chat);
+      const normalizedSource = normalizeConnectorSource(chat.source);
       return {
         avatarUrl: chat.avatarUrl,
+        canSend: chat.canSend,
         id: chat.id,
         kind: "inbox" as const,
         sortKey: chat.lastMessageAt,
-        source: chat.source,
-        sourceKey: chat.source,
+        source: normalizedSource,
+        sourceKey: normalizedSource,
+        transportSource: chat.transportSource ?? chat.source,
         title: chat.title,
         updatedAtLabel: formatRelativeTime(isoDate, t),
         ...(chat.worldId ? { worldId: chat.worldId } : {}),

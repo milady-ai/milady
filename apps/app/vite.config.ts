@@ -175,10 +175,6 @@ function resolveManualChunk(id: string): string | undefined {
       return "vendor-vrm";
     }
 
-    if (normalizedId.includes("/@sparkjsdev/spark/")) {
-      return "vendor-spark";
-    }
-
     if (normalizedId.includes("/three/examples/")) {
       return "vendor-three-extras";
     }
@@ -734,20 +730,6 @@ function nativeModuleStubPlugin(): Plugin {
 }
 
 /**
- * Absolute path to the workspace-root three package directory.
- * Electrobun ships a nested three\@0.165 under its own node_modules; without
- * pinning resolution, some deps may pick up that copy, creating a second
- * THREE.ShaderChunk that never receives Spark's splatDefines registration.
- */
-const threeRootDir = path.resolve(miladyRoot, "node_modules/three");
-
-/**
- * Spark + VRM need exactly one physical `three` package in the bundle.
- * WHY resolveId (not only resolve.alias): a broad alias to an absolute
- * `node_modules/three` path broke Rollup’s production path handling; a
- * pre-hook re-resolve from non-root importers keeps dev + `vite build` stable.
- */
-/**
  * Patch the final bundle output to fix AsyncLocalStorage stubs.
  *
  * langsmith imports `{ AsyncLocalStorage } from "node:async_hooks"` at the
@@ -773,76 +755,6 @@ function asyncLocalStoragePatchPlugin(): Plugin {
         // anonymous class fails in older WebViews (Chrome 124 and below).
         return `var{AsyncLocalStorage:${id}}=(()=>{function A(){} A.prototype.getStore=function(){return undefined};A.prototype.run=function(s,fn){return fn.apply(void 0,[].slice.call(arguments,2))};A.prototype.enterWith=function(){};A.prototype.disable=function(){};return{AsyncLocalStorage:A}})()`;
       });
-      return { code: patched, map: null };
-    },
-  };
-}
-
-function sparkPatchPlugin(): Plugin {
-  return {
-    name: "spark-patch",
-    enforce: "pre",
-    resolveId: {
-      order: "pre",
-      async handler(source, importer, opts) {
-        if (opts.custom?.["spark-patch:skip"]) return null;
-        if (source !== "three" || !importer) return null;
-        // Only intercept imports from files outside the root three package
-        // (prevents infinite recursion and lets three's internal imports work).
-        if (importer.startsWith(threeRootDir)) return null;
-        const skipOpts = {
-          ...opts,
-          custom: { ...opts.custom, "spark-patch:skip": true },
-        };
-        const resolved = await this.resolve(source, importer, skipOpts);
-        if (!resolved) return null;
-        // If the resolved path is NOT under the root three dir (e.g. it
-        // resolved to electrobun's nested copy), redirect to the root copy.
-        if (!resolved.id.startsWith(threeRootDir)) {
-          return (
-            (await this.resolve(
-              source,
-              path.join(threeRootDir, "package.json"),
-              skipOpts,
-            )) ?? resolved
-          );
-        }
-        return null;
-      },
-    },
-    transform(code, id) {
-      if (!id.includes("@sparkjsdev/spark/dist/spark.module.js")) return null;
-      let patched = code;
-
-      // Inline data: WASM URLs that Vite can't handle.
-      patched = patched.replace(
-        /new URL\(("(?:data:application\/wasm;base64,[^"]+)"),\s*import\.meta\.url\)/g,
-        "$1",
-      );
-
-      // Spark lazily registers THREE.ShaderChunk.splatDefines inside
-      // getShaders(), which only runs in the SparkRenderer constructor.
-      // Compute shaders (Readback / PackedSplats) may be compiled earlier
-      // via SplatMesh init and reference #include <splatDefines>, causing
-      // "Can not resolve #include <splatDefines>" in Three.js.
-      // Patch: hoist the ShaderChunk registration to module load time.
-      patched = patched.replace(
-        /function getShaders\(\)\s*\{\s*if\s*\(!shaders\)\s*\{/,
-        "THREE.ShaderChunk.splatDefines = splatDefines_default;\nfunction getShaders() {\n  if (!shaders) {",
-      );
-
-      // Spark ships an inline blob worker string with a relative
-      // //# sourceMappingURL=worker-*.js.map trailer. In Electrobun's
-      // WKWebView/null-origin context Safari resolves that against the blob
-      // URL itself, producing malformed blob://nullhttp//... requests and
-      // noisy access-control errors in the console. Strip the worker map
-      // trailer from the inlined string; main bundle source maps still work.
-      patched = patched.replace(
-        /\\n\/\/# sourceMappingURL=worker-[A-Za-z0-9_-]+\.js\.map\\n(?=';)/g,
-        "",
-      );
-
-      if (patched === code) return null;
       return { code: patched, map: null };
     },
   };
@@ -895,7 +807,6 @@ export default defineConfig({
   },
   plugins: [
     nativeModuleStubPlugin(),
-    sparkPatchPlugin(),
     asyncLocalStoragePatchPlugin(),
     watchWorkspacePackagesPlugin(),
     tailwindcss(),
@@ -910,13 +821,7 @@ export default defineConfig({
     target: "es2022",
   },
   resolve: {
-    dedupe: [
-      "react",
-      "react-dom",
-      "three",
-      "@sparkjsdev/spark",
-      "@miladyai/app-core",
-    ],
+    dedupe: ["react", "react-dom", "three", "@miladyai/app-core"],
     alias: [
       // Bare Node built-in polyfills for browser — pathe provides ESM path,
       // events is pre-bundled via optimizeDeps.
@@ -1070,10 +975,7 @@ export default defineConfig({
       "react",
       "react-dom",
       // Three.js core + all subpath imports must be pre-bundled together so
-      // esbuild shares a single module identity. Without this, Spark (excluded
-      // from pre-bundling) and the pre-bundled examples/jsm/* addons end up
-      // with different THREE.ShaderChunk objects, causing "Can not resolve
-      // #include <splatDefines>" at render time.
+      // esbuild shares a single module identity.
       "three",
       "three/examples/jsm/controls/OrbitControls.js",
       "three/examples/jsm/libs/meshopt_decoder.module.js",
@@ -1140,7 +1042,6 @@ export default defineConfig({
       ],
     },
     exclude: [
-      "@sparkjsdev/spark",
       "node-llama-cpp",
       "@node-llama-cpp/mac-arm64-metal",
       // Contains native-only pty-state-capture import; skip pre-bundling.
@@ -1233,6 +1134,11 @@ export default defineConfig({
       "/ws": {
         target: `ws://127.0.0.1:${apiPort}`,
         ws: true,
+        configure: (proxy) => {
+          // Suppress noisy ECONNREFUSED errors during API restart.
+          // Clients reconnect automatically via the WS reconnect loop.
+          proxy.on("error", () => {});
+        },
       },
       // elizaOS plugin-music-player HTTP routes live outside /api (e.g. /music-player/stream).
       "/music-player": {

@@ -322,6 +322,61 @@ describe("gmailAction", () => {
     expect(result?.text).toContain("OneBlade receipt");
   });
 
+  it("uses LLM plan subaction when no explicit subaction is provided", async () => {
+    mockUseModel.mockResolvedValue(
+      '{"subaction":"search","queries":["from:suran"],"replyNeededOnly":false}',
+    );
+    mockGetGmailSearch.mockResolvedValue({
+      query: "from:suran",
+      messages: [
+        {
+          id: "msg-llm-plan-suran",
+          externalId: "ext-llm-plan-suran",
+          threadId: "thread-llm-plan-suran",
+          agentId: "agent-1",
+          provider: "google",
+          side: "owner",
+          subject: "Checking in",
+          from: "Suran Lee",
+          fromEmail: "suran@example.com",
+          replyTo: "suran@example.com",
+          to: ["shawmakesmagic@gmail.com"],
+          cc: [],
+          snippet: "Wanted to follow up",
+          receivedAt: "2026-04-08T16:00:00.000Z",
+          isUnread: true,
+          isImportant: false,
+          likelyReplyNeeded: true,
+          triageScore: 66,
+          triageReason: "search hit",
+          labels: ["INBOX", "UNREAD"],
+          htmlLink: "https://mail.google.com/mail/u/0/#all/thread-llm-plan-suran",
+          metadata: {},
+          syncedAt: "2026-04-08T16:00:00.000Z",
+          updatedAt: "2026-04-08T16:00:00.000Z",
+        },
+      ],
+      source: "cache",
+      syncedAt: "2026-04-09T16:00:00.000Z",
+      summary: {
+        totalCount: 1,
+        unreadCount: 1,
+        importantCount: 0,
+        replyNeededCount: 1,
+      },
+    });
+
+    const result = await invoke("i'm wondering whether suran emailed me");
+
+    expect(mockUseModel).toHaveBeenCalled();
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ query: "from:suran" }),
+    );
+    expect(result).toMatchObject({ success: true });
+    expect(result?.text).toContain("Suran Lee");
+  });
+
   it("sends grounded Gmail results through the action callback", async () => {
     const callback = vi.fn(async () => []);
     mockGetGmailSearch.mockResolvedValue({
@@ -810,5 +865,543 @@ describe("gmailAction", () => {
     expect(mockSendGmailReply).not.toHaveBeenCalled();
     expect(result?.success).toBe(false);
     expect(result?.text).toContain("send access is not granted");
+  });
+
+  // --- Natural language search flexibility ---
+
+  function searchResult(opts: {
+    query: string;
+    from?: string;
+    fromEmail?: string;
+    subject?: string;
+    snippet?: string;
+    empty?: boolean;
+  }) {
+    if (opts.empty) {
+      return {
+        query: opts.query,
+        messages: [],
+        source: "cache",
+        syncedAt: "2026-04-09T16:00:00.000Z",
+        summary: {
+          totalCount: 0,
+          unreadCount: 0,
+          importantCount: 0,
+          replyNeededCount: 0,
+        },
+      };
+    }
+    return {
+      query: opts.query,
+      messages: [
+        {
+          id: "msg-test",
+          externalId: "ext-test",
+          threadId: "thread-test",
+          agentId: "agent-1",
+          provider: "google",
+          side: "owner",
+          subject: opts.subject ?? "Test email",
+          from: opts.from ?? "Test Sender",
+          fromEmail: opts.fromEmail ?? "test@example.com",
+          replyTo: opts.fromEmail ?? "test@example.com",
+          to: ["shawmakesmagic@gmail.com"],
+          cc: [],
+          snippet: opts.snippet ?? "Test snippet",
+          receivedAt: "2026-04-08T16:00:00.000Z",
+          isUnread: false,
+          isImportant: false,
+          likelyReplyNeeded: false,
+          triageScore: 50,
+          triageReason: "search hit",
+          labels: ["INBOX"],
+          htmlLink: "https://mail.google.com/mail/u/0/#all/thread-test",
+          metadata: {},
+          syncedAt: "2026-04-08T16:00:00.000Z",
+          updatedAt: "2026-04-08T16:00:00.000Z",
+        },
+      ],
+      source: "cache",
+      syncedAt: "2026-04-09T16:00:00.000Z",
+      summary: {
+        totalCount: 1,
+        unreadCount: 0,
+        importantCount: 0,
+        replyNeededCount: 0,
+      },
+    };
+  }
+
+  function invokeWith(
+    messageText: string,
+    paramsIntent: string,
+    extra: Record<string, unknown> = {},
+  ) {
+    const { subaction, query, queries, messageId, bodyText, details, state } =
+      extra;
+    return gmailAction.handler?.(
+      runtime,
+      msg(messageText),
+      (state ?? {}) as never,
+      {
+        parameters: {
+          subaction,
+          intent: paramsIntent,
+          query,
+          queries,
+          messageId,
+          bodyText,
+          details,
+        },
+      } as never,
+    );
+  }
+
+  it("searches by bare name: 'just search suran'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "suran",
+        from: "Suran Goonatilake",
+        fromEmail: "suran@example.com",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invoke("just search suran");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ query: "suran" }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
+  it("extracts sender from 'can you search my email and tell me if anyone named suran emailed me'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        fromEmail: "suran@example.com",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invoke(
+      "can you search my email and tell me if anyone named suran emailed me",
+    );
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
+  it("extracts sender from 'find the last email suran sent me'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Project update",
+      }),
+    );
+
+    const result = await invoke("find the last email suran sent me");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Project update");
+  });
+
+  it("extracts sender from 'did suran email me'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Quick question",
+      }),
+    );
+
+    const result = await invoke("did suran email me");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Quick question");
+  });
+
+  it("extracts sender from 'can you search my email and tell me if anyone named suran emailed me'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invoke(
+      "can you search my email and tell me if anyone named suran emailed me",
+    );
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
+  it("extracts sender from 'has suran emailed me'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Follow-up note",
+      }),
+    );
+
+    const result = await invoke("has suran emailed me");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Follow-up note");
+  });
+
+  it("extracts sender from 'what did suran send me'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Meeting notes",
+      }),
+    );
+
+    const result = await invoke("what did suran send me");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Meeting notes");
+  });
+
+  it("handles 'any emails from suran?'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Hey",
+      }),
+    );
+
+    const result = await invoke("any emails from suran?");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: expect.stringContaining("from:suran"),
+      }),
+    );
+    expect(result?.success).toBe(true);
+  });
+
+  it("handles sender + topic: 'emails from suran about the meeting'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran meeting",
+        from: "Suran Goonatilake",
+        subject: "Re: Meeting agenda",
+      }),
+    );
+
+    const result = await invoke("emails from suran about the meeting");
+
+    const searchCall = mockGetGmailSearch.mock.calls[0];
+    const query = (searchCall[1] as { query: string }).query;
+    expect(query).toContain("from:suran");
+    expect(query).toMatch(/meeting/i);
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Meeting agenda");
+  });
+
+  it("handles topic-only search: 'find emails about the invoice'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "invoice",
+        from: "Accounting",
+        subject: "Invoice #4521",
+      }),
+    );
+
+    const result = await invoke("find emails about the invoice");
+
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ query: expect.stringContaining("invoice") }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Invoice #4521");
+  });
+
+  // --- Follow-up and retry handling ---
+
+  it("resolves prior intent on 'yeah try it' follow-up", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invokeWith("yeah try it", "yeah try it", {
+      state: {
+        values: {
+          recentMessages:
+            "user: find the last email suran sent me\nassistant: No Gmail message matched.",
+        },
+      },
+    });
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const searchCall = mockGetGmailSearch.mock.calls[0];
+    const query = (searchCall[1] as { query: string }).query;
+    expect(query).toMatch(/suran/i);
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
+  it("resolves prior intent on 'try again' follow-up", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Update",
+      }),
+    );
+
+    const result = await invokeWith("try again", "try again", {
+      state: {
+        values: {
+          recentMessages:
+            "user: search for emails from suran\nassistant: No email matched.",
+        },
+      },
+    });
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const searchCall = mockGetGmailSearch.mock.calls[0];
+    const query = (searchCall[1] as { query: string }).query;
+    expect(query).toMatch(/suran/i);
+    expect(result?.success).toBe(true);
+  });
+
+  it("follow-up adds useful constraints: 'what about unread ones?'", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran is:unread",
+        from: "Suran Goonatilake",
+        subject: "New proposal",
+      }),
+    );
+
+    const result = await invokeWith(
+      "what about unread ones?",
+      "what about unread ones?",
+      {
+        state: {
+          values: {
+            recentMessages:
+              "user: find emails from suran\nassistant: Found 3 emails for sender suran.",
+          },
+        },
+      },
+    );
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const searchCall = mockGetGmailSearch.mock.calls[0];
+    const query = (searchCall[1] as { query: string }).query;
+    expect(query).toMatch(/suran/i);
+    expect(query).toContain("is:unread");
+    expect(result?.success).toBe(true);
+  });
+
+  // --- Parameter documentation noise rejection ---
+
+  it("rejects LIFE action parameter doc noise in params.intent", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const noiseIntent =
+      'title?:string - Name or ID of an existing item (e.g., when renaming).; details?:object - Structured data when needed. May include: cadence (schedule object), kind (task/habit/routine), description, priority, progressionRule, reminderPlan, confirmed (boolean when the user explicitly approves a previewed create)';
+
+    const result = await invokeWith("yeah try it", noiseIntent, {
+      state: {
+        values: {
+          recentMessages:
+            "user: find the last email suran sent me\nassistant: I couldn't find an email matching that search.",
+        },
+      },
+    });
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const query = (mockGetGmailSearch.mock.calls[0][1] as { query: string })
+      .query;
+    expect(query).toMatch(/suran/i);
+    expect(query).not.toContain("title");
+    expect(query).not.toContain("cadence");
+    expect(query).not.toContain("progressionRule");
+    expect(result?.success).toBe(true);
+  });
+
+  it("prefers a generated structured Gmail query over a narrative params.query", async () => {
+    mockUseModel.mockResolvedValue(
+      "<response><query1>from:suran</query1></response>",
+    );
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invokeWith(
+      "can you search my email and tell me if anyone named suran emailed me",
+      "can you search my email and tell me if anyone named suran emailed me",
+      {
+        query: "my and tell me if anyone named suran emailed me",
+      },
+    );
+
+    expect(mockUseModel).toHaveBeenCalledTimes(1);
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: "from:suran",
+      }),
+    );
+    expect(result?.success).toBe(true);
+  });
+
+  it("falls back to an LLM-extracted Gmail query when a non-English params.query is just the echoed request", async () => {
+    mockUseModel.mockResolvedValue(
+      '{"subaction":"search","queries":["from:suran"]}',
+    );
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const request =
+      "puedes buscar en mi correo y decirme si suran me escribió";
+    const result = await invokeWith(request, request, {
+      subaction: "search",
+      query: request,
+    });
+
+    expect(mockUseModel).toHaveBeenCalled();
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        query: "from:suran",
+      }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
+  it("does not extract garbage sender names from noise text", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({ query: "suran", from: "Suran", subject: "Hey" }),
+    );
+
+    const noiseIntent =
+      "query?:string - Gmail search query; queries?:string[] - Multiple queries; details?:object - Structured data";
+
+    const result = await invokeWith("search suran", noiseIntent, {});
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const query = (mockGetGmailSearch.mock.calls[0][1] as { query: string })
+      .query;
+    expect(query).toMatch(/suran/i);
+    expect(query).not.toContain("details");
+  });
+
+  it("overrides malformed planner search text with an inferred sender query", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invoke(
+      "can you search my email and tell me if anyone named suran emailed me",
+      {
+        subaction: "search",
+        query: "my and tell me if anyone named suran emailed me",
+      },
+    );
+
+    const query = (mockGetGmailSearch.mock.calls[0][1] as { query: string })
+      .query;
+    expect(query).toContain("from:suran");
+    expect(query).not.toContain("tell me if");
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
+  it("rejects noise and falls back gracefully when no context exists", async () => {
+    mockGetGmailTriage.mockResolvedValue({
+      messages: [],
+      source: "cache",
+      syncedAt: "2026-04-09T16:00:00.000Z",
+      summary: {
+        unreadCount: 0,
+        importantNewCount: 0,
+        likelyReplyNeededCount: 0,
+      },
+    });
+
+    const noiseIntent =
+      "actions params parameters details?:object structured gmail arguments supported keys include";
+
+    const result = await invokeWith("yeah", noiseIntent, {});
+
+    expect(result?.success).toBe(true);
+    expect(mockGetGmailSearch).not.toHaveBeenCalled();
   });
 });

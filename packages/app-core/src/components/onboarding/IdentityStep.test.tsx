@@ -49,6 +49,8 @@ vi.mock("../../utils/api-request", () => ({
 
 vi.mock("../../utils/asset-url", () => ({
   resolveApiUrl: (url: string) => `http://localhost${url}`,
+  resolveAppAssetUrl: (url: string) =>
+    `http://localhost/${url.replace(/^\/+/, "")}`,
 }));
 
 vi.mock("../../voice/types", () => ({
@@ -108,6 +110,10 @@ vi.mock("../character/CharacterRoster", () => ({
 
 vi.mock("../character/character-greeting", () => ({
   resolveCharacterGreetingAnimation: () => null,
+}));
+
+vi.mock("./onboarding-asset-preload", () => ({
+  preloadOnboardingCharacterAssets: vi.fn(),
 }));
 
 vi.mock("@miladyai/ui", () => ({

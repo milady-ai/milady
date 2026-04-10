@@ -158,6 +158,9 @@ describe("init-submodules script", () => {
       if (command === 'git submodule status -- "eliza"') {
         return " dc44c9f eliza";
       }
+      if (command === "git status --porcelain") {
+        return "";
+      }
       if (command === 'git submodule update --init --recursive "eliza"') {
         for (const marker of ELIZA_MARKERS) {
           existingPaths.add(marker);
@@ -185,6 +188,87 @@ describe("init-submodules script", () => {
         cwd: ROOT,
         stdio: "inherit",
       }),
+    );
+  });
+
+  it("warns when a submodule has uncommitted local changes", () => {
+    const existingPaths = new Set<string>([
+      GIT_DIR,
+      GITMODULES,
+      ...ELIZA_MARKERS,
+    ]);
+    const exists = (filePath: string) => existingPaths.has(filePath);
+    const logs: string[] = [];
+    const exec = vi.fn((command: string) => {
+      if (
+        command ===
+        'git config --file .gitmodules --get-regexp "^submodule\\..*\\.path$"'
+      ) {
+        return "submodule.eliza.path eliza";
+      }
+      if (command === 'git submodule status -- "eliza"') {
+        return " dc44c9f eliza";
+      }
+      if (command === "git status --porcelain") {
+        return " M packages/core/src/index.ts";
+      }
+      throw new Error(`Unexpected command: ${command}`);
+    });
+
+    const result = runInitSubmodules({
+      rootDir: ROOT,
+      exists,
+      exec,
+      log: (msg: string) => logs.push(msg),
+      logError: () => {},
+      shouldSkipSubmodule: () => false,
+    });
+
+    // Checkout is ready so no re-init happens, but warning is emitted.
+    expect(result.initialized).toBe(0);
+    expect(result.alreadyInitialized).toBe(1);
+    expect(logs.some((m) => m.includes("uncommitted local changes"))).toBe(
+      true,
+    );
+  });
+
+  it("warns when a submodule has commits not recorded in parent", () => {
+    const existingPaths = new Set<string>([
+      GIT_DIR,
+      GITMODULES,
+      ...ELIZA_MARKERS,
+    ]);
+    const exists = (filePath: string) => existingPaths.has(filePath);
+    const logs: string[] = [];
+    const exec = vi.fn((command: string) => {
+      if (
+        command ===
+        'git config --file .gitmodules --get-regexp "^submodule\\..*\\.path$"'
+      ) {
+        return "submodule.eliza.path eliza";
+      }
+      if (command === 'git submodule status -- "eliza"') {
+        return "+dc44c9f eliza";
+      }
+      if (command === "git status --porcelain") {
+        return "";
+      }
+      throw new Error(`Unexpected command: ${command}`);
+    });
+
+    const result = runInitSubmodules({
+      rootDir: ROOT,
+      exists,
+      exec,
+      log: (msg: string) => logs.push(msg),
+      logError: () => {},
+      shouldSkipSubmodule: () => false,
+    });
+
+    expect(result.initialized).toBe(0);
+    expect(result.alreadyInitialized).toBe(1);
+    expect(logs.some((m) => m.includes("not recorded in the parent"))).toBe(
+      true,
     );
   });
 });

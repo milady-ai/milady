@@ -92,9 +92,9 @@ describe("navigation", () => {
     expect(apps?.tabs).toEqual(["apps"]);
   });
 
-  test("keeps wallets/knowledge/connectors as top-level groups, removes character from the nav, and adds heartbeats to the main nav", () => {
+  test("keeps wallets/knowledge/connectors/character as top-level groups and adds heartbeats to the main nav", () => {
     const labels = ALL_TAB_GROUPS.map((group) => group.label);
-    expect(labels).not.toContain("Character");
+    expect(labels).toContain("Character");
     expect(labels).toContain("Wallets");
     expect(labels).toContain("Knowledge");
     expect(labels).toContain("Connectors");

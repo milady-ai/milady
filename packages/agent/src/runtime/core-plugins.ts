@@ -28,7 +28,7 @@ export const CORE_PLUGINS: readonly string[] = [
   // knowledge, relationships/relationships, trajectories.
   // "@elizaos/plugin-secrets-manager", // secrets management — load early, other plugins depend on it
   // "@elizaos/plugin-trust", // trust scoring and policy signals
-  // "@elizaos/plugin-personality", // personality coherence
+  "@elizaos/plugin-personality", // personality coherence
   // "@elizaos/plugin-experience", // learning from interactions
 ];
 
@@ -49,8 +49,11 @@ export const OPTIONAL_CORE_PLUGINS: readonly string[] = [
   "@elizaos/plugin-vision", // vision/image understanding (feature-gated)
   "@elizaos/plugin-cli", // CLI interface
   "@elizaos/plugin-discord", // Discord bot integration
+  "@miladyai/plugin-discord-local", // Local Discord desktop integration for macOS
+  "@elizaos/plugin-bluebubbles", // BlueBubbles-backed iMessage integration for macOS
   "@elizaos/plugin-telegram", // Telegram bot integration
   "@elizaos-plugins/client-telegram-account", // Telegram user-account client integration
+  "@elizaos/plugin-signal", // Signal user-account integration
   "@elizaos/plugin-twitch", // Twitch integration
   "@elizaos/plugin-edge-tts", // text-to-speech (Microsoft Edge TTS)
   "@elizaos/plugin-elevenlabs", // ElevenLabs text-to-speech

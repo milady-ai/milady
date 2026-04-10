@@ -748,7 +748,6 @@ async function startRendererServer(): Promise<string> {
         ".aac",
         ".flac",
         ".glb",
-        ".spz",
       ].includes(mimeExt)
     ) {
       return "public, max-age=86400";

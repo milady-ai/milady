@@ -535,10 +535,47 @@ export interface LifeOpsWorkflowPermissionPolicy {
   requireConfirmationForXPosts: boolean;
 }
 
+export const LIFEOPS_BROWSER_KINDS = ["chrome", "safari"] as const;
+export type LifeOpsBrowserKind = (typeof LIFEOPS_BROWSER_KINDS)[number];
+
+export const LIFEOPS_BROWSER_TRACKING_MODES = [
+  "off",
+  "current_tab",
+  "active_tabs",
+] as const;
+export type LifeOpsBrowserTrackingMode =
+  (typeof LIFEOPS_BROWSER_TRACKING_MODES)[number];
+
+export const LIFEOPS_BROWSER_SITE_ACCESS_MODES = [
+  "current_site_only",
+  "granted_sites",
+  "all_sites",
+] as const;
+export type LifeOpsBrowserSiteAccessMode =
+  (typeof LIFEOPS_BROWSER_SITE_ACCESS_MODES)[number];
+
+export const LIFEOPS_BROWSER_COMPANION_CONNECTION_STATES = [
+  "disconnected",
+  "connected",
+  "paused",
+  "permission_blocked",
+] as const;
+export type LifeOpsBrowserCompanionConnectionState =
+  (typeof LIFEOPS_BROWSER_COMPANION_CONNECTION_STATES)[number];
+
 export const LIFEOPS_BROWSER_ACTION_KINDS = [
+  "open",
   "navigate",
+  "focus_tab",
+  "back",
+  "forward",
+  "reload",
   "click",
   "type",
+  "submit",
+  "read_page",
+  "extract_links",
+  "extract_forms",
 ] as const;
 export type LifeOpsBrowserActionKind =
   (typeof LIFEOPS_BROWSER_ACTION_KINDS)[number];
@@ -547,12 +584,157 @@ export interface LifeOpsBrowserAction {
   id: string;
   kind: LifeOpsBrowserActionKind;
   label: string;
+  browser?: LifeOpsBrowserKind | null;
+  windowId?: string | null;
+  tabId?: string | null;
   url: string | null;
   selector: string | null;
   text: string | null;
   accountAffecting: boolean;
   requiresConfirmation: boolean;
   metadata: Record<string, unknown>;
+}
+
+export interface LifeOpsBrowserPermissionState {
+  tabs: boolean;
+  scripting: boolean;
+  activeTab: boolean;
+  allOrigins: boolean;
+  grantedOrigins: string[];
+  incognitoEnabled: boolean;
+}
+
+export interface LifeOpsBrowserSettings {
+  enabled: boolean;
+  trackingMode: LifeOpsBrowserTrackingMode;
+  allowBrowserControl: boolean;
+  requireConfirmationForAccountAffecting: boolean;
+  incognitoEnabled: boolean;
+  siteAccessMode: LifeOpsBrowserSiteAccessMode;
+  grantedOrigins: string[];
+  blockedOrigins: string[];
+  maxRememberedTabs: number;
+  pauseUntil: string | null;
+  metadata: Record<string, unknown>;
+  updatedAt: string | null;
+}
+
+export interface UpdateLifeOpsBrowserSettingsRequest {
+  enabled?: boolean;
+  trackingMode?: LifeOpsBrowserTrackingMode;
+  allowBrowserControl?: boolean;
+  requireConfirmationForAccountAffecting?: boolean;
+  incognitoEnabled?: boolean;
+  siteAccessMode?: LifeOpsBrowserSiteAccessMode;
+  grantedOrigins?: string[];
+  blockedOrigins?: string[];
+  maxRememberedTabs?: number;
+  pauseUntil?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface LifeOpsBrowserCompanionStatus {
+  id: string;
+  agentId: string;
+  browser: LifeOpsBrowserKind;
+  profileId: string;
+  profileLabel: string;
+  label: string;
+  extensionVersion: string | null;
+  connectionState: LifeOpsBrowserCompanionConnectionState;
+  permissions: LifeOpsBrowserPermissionState;
+  lastSeenAt: string | null;
+  pairedAt: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LifeOpsBrowserTabSummary {
+  id: string;
+  agentId: string;
+  companionId: string | null;
+  browser: LifeOpsBrowserKind;
+  profileId: string;
+  windowId: string;
+  tabId: string;
+  url: string;
+  title: string;
+  activeInWindow: boolean;
+  focusedWindow: boolean;
+  focusedActive: boolean;
+  incognito: boolean;
+  faviconUrl: string | null;
+  lastSeenAt: string;
+  lastFocusedAt: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LifeOpsBrowserPageContext {
+  id: string;
+  agentId: string;
+  browser: LifeOpsBrowserKind;
+  profileId: string;
+  windowId: string;
+  tabId: string;
+  url: string;
+  title: string;
+  selectionText: string | null;
+  mainText: string | null;
+  headings: string[];
+  links: Array<{ text: string; href: string }>;
+  forms: Array<{ action: string | null; fields: string[] }>;
+  capturedAt: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface UpsertLifeOpsBrowserCompanionRequest {
+  browser: LifeOpsBrowserKind;
+  profileId: string;
+  profileLabel?: string | null;
+  label: string;
+  extensionVersion?: string | null;
+  connectionState?: LifeOpsBrowserCompanionConnectionState;
+  permissions?: Partial<LifeOpsBrowserPermissionState>;
+  lastSeenAt?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface SyncLifeOpsBrowserStateRequest {
+  companion: UpsertLifeOpsBrowserCompanionRequest;
+  tabs: Array<{
+    browser: LifeOpsBrowserKind;
+    profileId: string;
+    windowId: string;
+    tabId: string;
+    url: string;
+    title: string;
+    activeInWindow: boolean;
+    focusedWindow: boolean;
+    focusedActive: boolean;
+    incognito?: boolean;
+    faviconUrl?: string | null;
+    lastSeenAt?: string;
+    lastFocusedAt?: string | null;
+    metadata?: Record<string, unknown>;
+  }>;
+  pageContexts?: Array<{
+    browser: LifeOpsBrowserKind;
+    profileId: string;
+    windowId: string;
+    tabId: string;
+    url: string;
+    title: string;
+    selectionText?: string | null;
+    mainText?: string | null;
+    headings?: string[];
+    links?: Array<{ text: string; href: string }>;
+    forms?: Array<{ action: string | null; fields: string[] }>;
+    capturedAt?: string;
+    metadata?: Record<string, unknown>;
+  }>;
 }
 
 export interface LifeOpsWorkflowActionBase {
@@ -1439,9 +1621,11 @@ export interface LifeOpsWorkflowRecord {
 
 export const LIFEOPS_BROWSER_SESSION_STATUSES = [
   "awaiting_confirmation",
-  "navigating",
+  "queued",
+  "running",
   "done",
   "cancelled",
+  "failed",
 ] as const;
 export type LifeOpsBrowserSessionStatus =
   (typeof LIFEOPS_BROWSER_SESSION_STATUSES)[number];
@@ -1455,6 +1639,11 @@ export interface LifeOpsBrowserSession {
   visibilityScope: LifeOpsVisibilityScope;
   contextPolicy: LifeOpsContextPolicy;
   workflowId: string | null;
+  browser: LifeOpsBrowserKind | null;
+  companionId: string | null;
+  profileId: string | null;
+  windowId: string | null;
+  tabId: string | null;
   title: string;
   status: LifeOpsBrowserSessionStatus;
   actions: LifeOpsBrowserAction[];
@@ -1470,6 +1659,11 @@ export interface LifeOpsBrowserSession {
 export interface CreateLifeOpsBrowserSessionRequest {
   ownership?: LifeOpsOwnershipInput;
   workflowId?: string | null;
+  browser?: LifeOpsBrowserKind | null;
+  companionId?: string | null;
+  profileId?: string | null;
+  windowId?: string | null;
+  tabId?: string | null;
   title: string;
   actions: Array<Omit<LifeOpsBrowserAction, "id">>;
 }
@@ -1479,5 +1673,6 @@ export interface ConfirmLifeOpsBrowserSessionRequest {
 }
 
 export interface CompleteLifeOpsBrowserSessionRequest {
+  status?: Extract<LifeOpsBrowserSessionStatus, "done" | "failed">;
   result?: Record<string, unknown>;
 }

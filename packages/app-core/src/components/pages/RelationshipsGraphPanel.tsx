@@ -3,6 +3,7 @@ import type {
   RelationshipsGraphSnapshot,
   RelationshipsPersonSummary,
 } from "@miladyai/app-core/api";
+import { useMemo, useState } from "react";
 
 const GRAPH_WIDTH = 960;
 const GRAPH_HEIGHT = 540;
@@ -435,6 +436,10 @@ function GraphLegend() {
         People
       </div>
       <div className="flex items-center gap-1.5">
+        <span className="h-2.5 w-2.5 rounded-full border-2 border-[rgba(99,102,241,0.7)] bg-[rgba(99,102,241,0.15)]" />
+        Owner
+      </div>
+      <div className="flex items-center gap-1.5">
         <span className="h-[2px] w-6 bg-[rgba(73,197,122,0.48)]" />
         Positive
       </div>
@@ -450,6 +455,72 @@ function GraphLegend() {
   );
 }
 
+type TooltipState =
+  | { kind: "node"; person: RelationshipsPersonSummary; x: number; y: number }
+  | { kind: "edge"; edge: RelationshipsGraphEdge; x: number; y: number }
+  | null;
+
+function GraphTooltip({ state }: { state: TooltipState }) {
+  if (!state) return null;
+
+  const style: React.CSSProperties = {
+    position: "absolute",
+    left: state.x,
+    top: state.y,
+    transform: "translate(-50%, -100%) translateY(-12px)",
+    pointerEvents: "none",
+    zIndex: 50,
+  };
+
+  if (state.kind === "node") {
+    const { person } = state;
+    return (
+      <div
+        style={style}
+        className="rounded-[14px] border border-border/40 bg-card/95 px-3 py-2.5 shadow-lg backdrop-blur-md"
+      >
+        <div className="text-sm font-semibold text-txt">
+          {person.displayName}
+        </div>
+        <div className="mt-1 space-y-0.5 text-[11px] text-muted">
+          <div>
+            {person.memberEntityIds.length} identit
+            {person.memberEntityIds.length === 1 ? "y" : "ies"} ·{" "}
+            {person.relationshipCount} links · {person.factCount} facts
+          </div>
+          {person.platforms.length > 0 ? (
+            <div>{person.platforms.join(", ")}</div>
+          ) : null}
+          {person.isOwner ? (
+            <div className="font-semibold text-accent">Owner</div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  const { edge } = state;
+  return (
+    <div
+      style={style}
+      className="rounded-[14px] border border-border/40 bg-card/95 px-3 py-2.5 shadow-lg backdrop-blur-md"
+    >
+      <div className="text-sm font-semibold text-txt">
+        {edge.sourcePersonName} ↔ {edge.targetPersonName}
+      </div>
+      <div className="mt-1 space-y-0.5 text-[11px] text-muted">
+        <div>
+          Strength {edge.strength.toFixed(2)} · {edge.sentiment} ·{" "}
+          {edge.interactionCount} interactions
+        </div>
+        {edge.relationshipTypes.length > 0 ? (
+          <div>{edge.relationshipTypes.join(", ")}</div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function RelationshipsGraphPanel({
   snapshot,
   selectedGroupId,
@@ -459,7 +530,25 @@ export function RelationshipsGraphPanel({
   selectedGroupId: string | null;
   onSelectGroupId: (groupId: string) => void;
 }) {
-  if (!snapshot || snapshot.people.length === 0) {
+  const [tooltip, setTooltip] = useState<TooltipState>(null);
+
+  const visibleGraph = useMemo(
+    () =>
+      snapshot && snapshot.people.length > 0
+        ? selectVisibleGraph(snapshot, selectedGroupId)
+        : null,
+    [snapshot, selectedGroupId],
+  );
+
+  const positions = useMemo(
+    () =>
+      visibleGraph
+        ? buildNodePositions(visibleGraph.people, visibleGraph.relationships)
+        : new Map<string, GraphPosition>(),
+    [visibleGraph],
+  );
+
+  if (!snapshot || !visibleGraph || snapshot.people.length === 0) {
     return (
       <div className="flex min-h-[20rem] flex-col items-center justify-center rounded-[22px] border border-border/28 bg-card/35 px-6 py-10 text-center">
         <div className="text-sm font-semibold text-txt">
@@ -473,11 +562,39 @@ export function RelationshipsGraphPanel({
     );
   }
 
-  const visibleGraph = selectVisibleGraph(snapshot, selectedGroupId);
-  const positions = buildNodePositions(
-    visibleGraph.people,
-    visibleGraph.relationships,
-  );
+  const showTooltipForNode = (
+    person: RelationshipsPersonSummary,
+    event: React.MouseEvent,
+  ) => {
+    const rect = (
+      event.currentTarget.closest("[data-graph-container]") as HTMLElement
+    )?.getBoundingClientRect();
+    if (!rect) return;
+    setTooltip({
+      kind: "node",
+      person,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  };
+
+  const showTooltipForEdge = (
+    edge: RelationshipsGraphEdge,
+    event: React.MouseEvent,
+  ) => {
+    const rect = (
+      event.currentTarget.closest("[data-graph-container]") as HTMLElement
+    )?.getBoundingClientRect();
+    if (!rect) return;
+    setTooltip({
+      kind: "edge",
+      edge,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  };
+
+  const hideTooltip = () => setTooltip(null);
 
   return (
     <div className="space-y-4">
@@ -499,12 +616,18 @@ export function RelationshipsGraphPanel({
         <GraphLegend />
       </div>
 
-      <div className="overflow-hidden rounded-[24px] border border-border/26 bg-[radial-gradient(circle_at_top,rgba(240,185,11,0.12),transparent_42%),linear-gradient(180deg,color-mix(in_srgb,var(--card)_92%,transparent),color-mix(in_srgb,var(--bg)_97%,transparent))]">
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: graph container handles tooltip dismiss on mouse leave */}
+      <div
+        className="relative overflow-hidden rounded-[24px] border border-border/26 bg-[radial-gradient(circle_at_top,rgba(240,185,11,0.12),transparent_42%),linear-gradient(180deg,color-mix(in_srgb,var(--card)_92%,transparent),color-mix(in_srgb,var(--bg)_97%,transparent))]"
+        data-graph-container
+        onMouseLeave={hideTooltip}
+      >
+        <GraphTooltip state={tooltip} />
         <svg
           viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}
           className="h-[24rem] w-full"
           role="img"
-          aria-label="Relationships relationship graph"
+          aria-label="Relationships graph"
         >
           <defs>
             <radialGradient
@@ -516,6 +639,15 @@ export function RelationshipsGraphPanel({
               <stop offset="0%" stopColor="rgba(255,240,199,0.92)" />
               <stop offset="100%" stopColor="rgba(240,185,11,0.86)" />
             </radialGradient>
+            <radialGradient
+              id="relationships-owner-fill"
+              cx="50%"
+              cy="35%"
+              r="70%"
+            >
+              <stop offset="0%" stopColor="rgba(199,210,255,0.94)" />
+              <stop offset="100%" stopColor="rgba(99,102,241,0.82)" />
+            </radialGradient>
           </defs>
 
           {visibleGraph.relationships.map((edge) => {
@@ -524,18 +656,48 @@ export function RelationshipsGraphPanel({
             if (!source || !target) {
               return null;
             }
+            const midX = (source.x + target.x) / 2;
+            const midY = (source.y + target.y) / 2;
             return (
-              <line
-                key={edge.id}
-                x1={source.x}
-                y1={source.y}
-                x2={target.x}
-                y2={target.y}
-                stroke={edgeColor(edge)}
-                strokeWidth={Math.max(1.5, edge.strength * 7)}
-                strokeLinecap="round"
-                opacity={0.9}
-              />
+              <g key={edge.id}>
+                <line
+                  x1={source.x}
+                  y1={source.y}
+                  x2={target.x}
+                  y2={target.y}
+                  stroke={edgeColor(edge)}
+                  strokeWidth={Math.max(1.5, edge.strength * 7)}
+                  strokeLinecap="round"
+                  opacity={0.9}
+                />
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG edge hover for tooltip display only */}
+                <line
+                  x1={source.x}
+                  y1={source.y}
+                  x2={target.x}
+                  y2={target.y}
+                  stroke="transparent"
+                  strokeWidth={16}
+                  className="cursor-pointer"
+                  onMouseEnter={(e) => {
+                    const rect = (
+                      e.currentTarget.closest(
+                        "[data-graph-container]",
+                      ) as HTMLElement
+                    )?.getBoundingClientRect();
+                    if (rect) {
+                      setTooltip({
+                        kind: "edge",
+                        edge,
+                        x: (midX / GRAPH_WIDTH) * rect.width,
+                        y: (midY / GRAPH_HEIGHT) * rect.height,
+                      });
+                    }
+                  }}
+                  onMouseMove={(e) => showTooltipForEdge(edge, e)}
+                  onMouseLeave={hideTooltip}
+                />
+              </g>
             );
           })}
 
@@ -546,39 +708,58 @@ export function RelationshipsGraphPanel({
             }
             const radius = nodeRadius(person);
             const selected = selectedGroupId === person.groupId;
+            const isOwner = person.isOwner;
             return (
               <g key={person.groupId}>
                 <g
                   transform={`translate(${position.x}, ${position.y})`}
                   className="pointer-events-none"
                 >
+                  {/* Selection halo */}
                   <circle
                     r={radius + (selected ? 10 : 0)}
                     fill={selected ? "rgba(240,185,11,0.12)" : "transparent"}
                     stroke={selected ? "rgba(240,185,11,0.34)" : "transparent"}
                     strokeWidth={selected ? 2 : 0}
                   />
+                  {/* Owner outer ring */}
+                  {isOwner && !selected ? (
+                    <circle
+                      r={radius + 5}
+                      fill="transparent"
+                      stroke="rgba(99,102,241,0.4)"
+                      strokeWidth={2}
+                      strokeDasharray="4 3"
+                    />
+                  ) : null}
+                  {/* Main node */}
                   <circle
                     r={radius}
-                    fill="url(#relationships-node-fill)"
+                    fill={
+                      isOwner
+                        ? "url(#relationships-owner-fill)"
+                        : "url(#relationships-node-fill)"
+                    }
                     stroke={
                       selected
                         ? "rgba(255,255,255,0.92)"
-                        : "rgba(28,34,43,0.55)"
+                        : isOwner
+                          ? "rgba(99,102,241,0.7)"
+                          : "rgba(28,34,43,0.55)"
                     }
-                    strokeWidth={selected ? 3 : 1.5}
+                    strokeWidth={selected ? 3 : isOwner ? 2.5 : 1.5}
                   />
                   <text
                     textAnchor="middle"
                     y={-3}
-                    className="fill-black text-[12px] font-semibold"
+                    className={`text-[12px] font-semibold ${isOwner ? "fill-white" : "fill-black"}`}
                   >
                     {shortLabel(person.displayName, 15)}
                   </text>
                   <text
                     textAnchor="middle"
                     y={12}
-                    className="fill-black/70 text-[9px] font-medium"
+                    className={`text-[9px] font-medium ${isOwner ? "fill-white/70" : "fill-black/70"}`}
                   >
                     {shortLabel(
                       person.relationshipCount > 0
@@ -597,6 +778,9 @@ export function RelationshipsGraphPanel({
                   <button
                     type="button"
                     onClick={() => onSelectGroupId(person.groupId)}
+                    onMouseEnter={(e) => showTooltipForNode(person, e)}
+                    onMouseMove={(e) => showTooltipForNode(person, e)}
+                    onMouseLeave={hideTooltip}
                     className="h-full w-full rounded-full bg-transparent"
                     aria-label={`Select ${person.displayName}`}
                   />

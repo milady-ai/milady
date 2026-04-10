@@ -1,9 +1,10 @@
 /**
  * SceneOverlayManager — manages holographic floating panels in the three.js scene.
  *
- * Creates three billboard panels (chat, agent status, heartbeats) as textured
- * planes with emissive materials. Panels always face the camera and update
- * their canvas textures lazily when data changes.
+ * Creates billboard panels (chat, agent status, heartbeats) as textured
+ * planes with emissive materials, plus additional chat-mirror panels
+ * scattered around the scene to create the "floating screens with chat"
+ * effect in the Matrix Construct environment.
  */
 
 import * as THREE from "three";
@@ -16,7 +17,7 @@ import {
   type TriggerOverlay,
 } from "./scene-overlay-renderer";
 
-// ── Panel configuration ──────────────────────────────────────────────
+// -- Panel configuration ------------------------------------------------------
 
 /** Canvas resolution multiplier for crisp text. */
 const CANVAS_SCALE = 2;
@@ -48,7 +49,29 @@ const HEARTBEATS_PANEL: PanelConfig = {
   canvasSize: [360, 260],
 };
 
-// ── OverlayPanel helper ──────────────────────────────────────────────
+/** Extra chat-mirror panels positioned among the floating screens. */
+const CHAT_MIRROR_PANELS: PanelConfig[] = [
+  {
+    // Back-left screen
+    position: new THREE.Vector3(-3.0, 1.7, -5.2),
+    size: [1.6, 2.4],
+    canvasSize: [320, 480],
+  },
+  {
+    // Back-center screen
+    position: new THREE.Vector3(0.6, 2.1, -5.8),
+    size: [1.8, 2.6],
+    canvasSize: [340, 500],
+  },
+  {
+    // Right side screen
+    position: new THREE.Vector3(3.6, 1.4, -5.0),
+    size: [1.4, 2.0],
+    canvasSize: [300, 440],
+  },
+];
+
+// -- OverlayPanel helper ------------------------------------------------------
 
 interface OverlayPanel {
   group: THREE.Group;
@@ -75,7 +98,6 @@ function createPanel(config: PanelConfig): OverlayPanel {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Failed to get 2D context for overlay panel");
 
-  // Scale context so renderers draw in logical pixels
   ctx.scale(CANVAS_SCALE, CANVAS_SCALE);
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -85,9 +107,6 @@ function createPanel(config: PanelConfig): OverlayPanel {
 
   const [w, h] = config.size;
 
-  // Main panel mesh — standard depth, default render order.
-  // The Spark splat already has renderOrder 9998 to draw behind everything.
-  // Panels and VRM use default ordering (0) and rely on normal z-depth.
   const geometry = new THREE.PlaneGeometry(w, h);
   const material = new THREE.MeshBasicMaterial({
     map: texture,
@@ -98,10 +117,10 @@ function createPanel(config: PanelConfig): OverlayPanel {
   });
   const mesh = new THREE.Mesh(geometry, material);
 
-  // Subtle glow plane behind the panel
+  // Subtle glow plane behind the panel — soft blue for construct theme
   const glowGeometry = new THREE.PlaneGeometry(w * 1.08, h * 1.08);
   const glowMaterial = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(0xf0b90b),
+    color: new THREE.Color(0x6a9fd8),
     transparent: true,
     opacity: 0,
     depthWrite: false,
@@ -143,7 +162,7 @@ function disposePanel(panel: OverlayPanel): void {
   panel.group.removeFromParent();
 }
 
-// ── JSON-stable shallow comparison ───────────────────────────────────
+// -- JSON-stable shallow comparison -------------------------------------------
 
 function shallowArrayEquals<T>(a: T[], b: T[], keys: (keyof T)[]): boolean {
   if (a.length !== b.length) return false;
@@ -155,12 +174,13 @@ function shallowArrayEquals<T>(a: T[], b: T[], keys: (keyof T)[]): boolean {
   return true;
 }
 
-// ── SceneOverlayManager ─────────────────────────────────────────────
+// -- SceneOverlayManager -----------------------------------------------------
 
 export class SceneOverlayManager {
   private chatPanel: OverlayPanel;
   private statusPanel: OverlayPanel;
   private heartbeatsPanel: OverlayPanel;
+  private chatMirrorPanels: OverlayPanel[] = [];
   private attached = false;
   private disposed = false;
 
@@ -175,6 +195,11 @@ export class SceneOverlayManager {
     this.chatPanel = createPanel(CHAT_PANEL);
     this.statusPanel = createPanel(STATUS_PANEL);
     this.heartbeatsPanel = createPanel(HEARTBEATS_PANEL);
+
+    // Create chat-mirror panels that echo the conversation onto distant screens
+    for (const config of CHAT_MIRROR_PANELS) {
+      this.chatMirrorPanels.push(createPanel(config));
+    }
   }
 
   /** Add panel groups to the scene. Called once when the engine is ready. */
@@ -183,6 +208,9 @@ export class SceneOverlayManager {
     scene.add(this.chatPanel.group);
     scene.add(this.statusPanel.group);
     scene.add(this.heartbeatsPanel.group);
+    for (const mirror of this.chatMirrorPanels) {
+      scene.add(mirror.group);
+    }
     this.attached = true;
   }
 
@@ -193,7 +221,7 @@ export class SceneOverlayManager {
   update(camera: THREE.PerspectiveCamera, delta: number): void {
     if (this.disposed || !this.attached) return;
 
-    // Lazy font check — re-render all panels once web fonts load
+    // Lazy font check
     if (!this.fontsChecked) {
       this.fontsChecked = true;
       void document.fonts.ready.then(() => {
@@ -201,12 +229,18 @@ export class SceneOverlayManager {
         this.chatPanel.dirty = true;
         this.statusPanel.dirty = true;
         this.heartbeatsPanel.dirty = true;
+        for (const mirror of this.chatMirrorPanels) {
+          mirror.dirty = true;
+        }
       });
     }
 
     this.updatePanel(this.chatPanel, camera, delta);
     this.updatePanel(this.statusPanel, camera, delta);
     this.updatePanel(this.heartbeatsPanel, camera, delta);
+    for (const mirror of this.chatMirrorPanels) {
+      this.updatePanel(mirror, camera, delta);
+    }
 
     // Repaint dirty canvases
     if (this.chatPanel.dirty) {
@@ -257,9 +291,28 @@ export class SceneOverlayManager {
       this.heartbeatsPanel.ctx.restore();
       this.heartbeatsPanel.texture.needsUpdate = true;
     }
+
+    // Repaint chat-mirror panels
+    for (let i = 0; i < this.chatMirrorPanels.length; i++) {
+      const mirror = this.chatMirrorPanels[i];
+      if (mirror.dirty) {
+        mirror.dirty = false;
+        const config = CHAT_MIRROR_PANELS[i];
+        mirror.ctx.save();
+        mirror.ctx.setTransform(CANVAS_SCALE, 0, 0, CANVAS_SCALE, 0, 0);
+        renderChatPanel(
+          mirror.ctx,
+          config.canvasSize[0],
+          config.canvasSize[1],
+          this.chatData,
+        );
+        mirror.ctx.restore();
+        mirror.texture.needsUpdate = true;
+      }
+    }
   }
 
-  // ── Data setters ─────────────────────────────────────────────────
+  // -- Data setters -----------------------------------------------------------
 
   setChatMessages(messages: ChatOverlayMessage[]): void {
     if (this.disposed) return;
@@ -269,6 +322,12 @@ export class SceneOverlayManager {
     this.chatData = messages.map((m) => ({ ...m }));
     this.chatPanel.dirty = true;
     this.chatPanel.targetOpacity = 1;
+
+    // Mark all chat-mirror panels dirty too
+    for (const mirror of this.chatMirrorPanels) {
+      mirror.dirty = true;
+      mirror.targetOpacity = 1;
+    }
   }
 
   setAgentStatus(status: AgentStatusOverlay | null): void {
@@ -305,7 +364,7 @@ export class SceneOverlayManager {
     this.heartbeatsPanel.targetOpacity = triggers.length > 0 ? 1 : 0;
   }
 
-  // ── Cleanup ──────────────────────────────────────────────────────
+  // -- Cleanup ----------------------------------------------------------------
 
   dispose(): void {
     if (this.disposed) return;
@@ -313,9 +372,13 @@ export class SceneOverlayManager {
     disposePanel(this.chatPanel);
     disposePanel(this.statusPanel);
     disposePanel(this.heartbeatsPanel);
+    for (const mirror of this.chatMirrorPanels) {
+      disposePanel(mirror);
+    }
+    this.chatMirrorPanels = [];
   }
 
-  // ── Internal ─────────────────────────────────────────────────────
+  // -- Internal ---------------------------------------------------------------
 
   private updatePanel(
     panel: OverlayPanel,
@@ -326,7 +389,7 @@ export class SceneOverlayManager {
     panel.group.quaternion.copy(camera.quaternion);
 
     // Animate opacity
-    const fadeSpeed = 3.0; // units per second
+    const fadeSpeed = 3.0;
     if (Math.abs(panel.opacity - panel.targetOpacity) > 0.001) {
       if (panel.opacity < panel.targetOpacity) {
         panel.opacity = Math.min(
@@ -343,10 +406,9 @@ export class SceneOverlayManager {
       mat.opacity = panel.opacity * 0.92;
 
       const glowMat = panel.glowMesh.material as THREE.MeshBasicMaterial;
-      glowMat.opacity = panel.opacity * 0.04;
+      glowMat.opacity = panel.opacity * 0.03;
     }
 
-    // Hide group entirely when fully faded out
     panel.group.visible = panel.opacity > 0.001;
   }
 }

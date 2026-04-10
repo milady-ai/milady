@@ -3,7 +3,12 @@ import type { IAgentRuntime } from "@elizaos/core";
 import type {
   LifeOpsActivitySignal,
   LifeOpsAuditEvent,
+  LifeOpsBrowserCompanionStatus,
+  LifeOpsBrowserPageContext,
+  LifeOpsBrowserPermissionState,
   LifeOpsBrowserSession,
+  LifeOpsBrowserSettings,
+  LifeOpsBrowserTabSummary,
   LifeOpsCalendarEvent,
   LifeOpsChannelPolicy,
   LifeOpsConnectorGrant,
@@ -612,13 +617,24 @@ function parseReminderAttempt(
 function parseBrowserSession(
   row: Record<string, unknown>,
 ): LifeOpsBrowserSession {
+  const rawStatus = toText(row.status);
   return {
     id: toText(row.id),
     agentId: toText(row.agent_id),
     ...parseOwnershipFields(row),
     workflowId: row.workflow_id ? toText(row.workflow_id) : null,
+    browser: row.browser
+      ? (toText(row.browser) as LifeOpsBrowserSession["browser"])
+      : null,
+    companionId: row.companion_id ? toText(row.companion_id) : null,
+    profileId: row.profile_id ? toText(row.profile_id) : null,
+    windowId: row.window_id ? toText(row.window_id) : null,
+    tabId: row.tab_id ? toText(row.tab_id) : null,
     title: toText(row.title),
-    status: toText(row.status) as LifeOpsBrowserSession["status"],
+    status:
+      rawStatus === "navigating"
+        ? "running"
+        : (rawStatus as LifeOpsBrowserSession["status"]),
     actions: parseJsonArray(
       row.actions_json,
     ) as unknown as LifeOpsBrowserSession["actions"],
@@ -631,6 +647,160 @@ function parseBrowserSession(
     createdAt: toText(row.created_at),
     updatedAt: toText(row.updated_at),
     finishedAt: row.finished_at ? toText(row.finished_at) : null,
+  };
+}
+
+function parseBrowserPermissionState(
+  value: unknown,
+): LifeOpsBrowserPermissionState {
+  const input = parseJsonRecord(value);
+  return {
+    tabs: Boolean(input.tabs),
+    scripting: Boolean(input.scripting),
+    activeTab: Boolean(input.activeTab),
+    allOrigins: Boolean(input.allOrigins),
+    grantedOrigins: Array.isArray(input.grantedOrigins)
+      ? input.grantedOrigins
+          .filter(
+            (candidate): candidate is string => typeof candidate === "string",
+          )
+          .map((candidate) => candidate.trim())
+          .filter((candidate) => candidate.length > 0)
+      : [],
+    incognitoEnabled: Boolean(input.incognitoEnabled),
+  };
+}
+
+function parseBrowserSettings(
+  row: Record<string, unknown>,
+): LifeOpsBrowserSettings {
+  return {
+    enabled: toBoolean(row.enabled, false),
+    trackingMode: toText(
+      row.tracking_mode,
+      "current_tab",
+    ) as LifeOpsBrowserSettings["trackingMode"],
+    allowBrowserControl: toBoolean(row.allow_browser_control, false),
+    requireConfirmationForAccountAffecting: toBoolean(
+      row.require_confirmation_for_account_affecting,
+      true,
+    ),
+    incognitoEnabled: toBoolean(row.incognito_enabled, false),
+    siteAccessMode: toText(
+      row.site_access_mode,
+      "current_site_only",
+    ) as LifeOpsBrowserSettings["siteAccessMode"],
+    grantedOrigins: parseJsonArray(row.granted_origins_json).filter(
+      (candidate): candidate is string => typeof candidate === "string",
+    ),
+    blockedOrigins: parseJsonArray(row.blocked_origins_json).filter(
+      (candidate): candidate is string => typeof candidate === "string",
+    ),
+    maxRememberedTabs: toNumber(row.max_remembered_tabs, 10),
+    pauseUntil: row.pause_until ? toText(row.pause_until) : null,
+    metadata: parseJsonRecord(row.metadata_json),
+    updatedAt: row.updated_at ? toText(row.updated_at) : null,
+  };
+}
+
+function parseBrowserCompanion(
+  row: Record<string, unknown>,
+): LifeOpsBrowserCompanionStatus {
+  return {
+    id: toText(row.id),
+    agentId: toText(row.agent_id),
+    browser: toText(row.browser) as LifeOpsBrowserCompanionStatus["browser"],
+    profileId: toText(row.profile_id),
+    profileLabel: toText(row.profile_label),
+    label: toText(row.label),
+    extensionVersion: row.extension_version
+      ? toText(row.extension_version)
+      : null,
+    connectionState: toText(
+      row.connection_state,
+    ) as LifeOpsBrowserCompanionStatus["connectionState"],
+    permissions: parseBrowserPermissionState(row.permissions_json),
+    lastSeenAt: row.last_seen_at ? toText(row.last_seen_at) : null,
+    pairedAt: row.paired_at ? toText(row.paired_at) : null,
+    metadata: parseJsonRecord(row.metadata_json),
+    createdAt: toText(row.created_at),
+    updatedAt: toText(row.updated_at),
+  };
+}
+
+function parseBrowserTabSummary(
+  row: Record<string, unknown>,
+): LifeOpsBrowserTabSummary {
+  return {
+    id: toText(row.id),
+    agentId: toText(row.agent_id),
+    companionId: row.companion_id ? toText(row.companion_id) : null,
+    browser: toText(row.browser) as LifeOpsBrowserTabSummary["browser"],
+    profileId: toText(row.profile_id),
+    windowId: toText(row.window_id),
+    tabId: toText(row.tab_id),
+    url: toText(row.url),
+    title: toText(row.title),
+    activeInWindow: toBoolean(row.active_in_window, false),
+    focusedWindow: toBoolean(row.focused_window, false),
+    focusedActive: toBoolean(row.focused_active, false),
+    incognito: toBoolean(row.incognito, false),
+    faviconUrl: row.favicon_url ? toText(row.favicon_url) : null,
+    lastSeenAt: toText(row.last_seen_at),
+    lastFocusedAt: row.last_focused_at ? toText(row.last_focused_at) : null,
+    metadata: parseJsonRecord(row.metadata_json),
+    createdAt: toText(row.created_at),
+    updatedAt: toText(row.updated_at),
+  };
+}
+
+function parseBrowserPageContext(
+  row: Record<string, unknown>,
+): LifeOpsBrowserPageContext {
+  return {
+    id: toText(row.id),
+    agentId: toText(row.agent_id),
+    browser: toText(row.browser) as LifeOpsBrowserPageContext["browser"],
+    profileId: toText(row.profile_id),
+    windowId: toText(row.window_id),
+    tabId: toText(row.tab_id),
+    url: toText(row.url),
+    title: toText(row.title),
+    selectionText: row.selection_text ? toText(row.selection_text) : null,
+    mainText: row.main_text ? toText(row.main_text) : null,
+    headings: parseJsonArray(row.headings_json).filter(
+      (candidate): candidate is string => typeof candidate === "string",
+    ),
+    links: parseJsonArray(row.links_json).filter(
+      (candidate): candidate is LifeOpsBrowserPageContext["links"][number] =>
+        (() => {
+          if (!candidate || typeof candidate !== "object") {
+            return false;
+          }
+          const record = candidate as Record<string, unknown>;
+          return (
+            typeof record.href === "string" && typeof record.text === "string"
+          );
+        })(),
+    ),
+    forms: parseJsonArray(row.forms_json).filter(
+      (candidate): candidate is LifeOpsBrowserPageContext["forms"][number] =>
+        (() => {
+          if (!candidate || typeof candidate !== "object") {
+            return false;
+          }
+          const record = candidate as Record<string, unknown>;
+          return (
+            (record.action === null ||
+              record.action === undefined ||
+              typeof record.action === "string") &&
+            Array.isArray(record.fields) &&
+            record.fields.every((field) => typeof field === "string")
+          );
+        })(),
+    ),
+    capturedAt: toText(row.captured_at),
+    metadata: parseJsonRecord(row.metadata_json),
   };
 }
 
@@ -836,6 +1006,11 @@ async function runLifeOpsSchemaSetup(
       visibility_scope TEXT NOT NULL,
       context_policy TEXT NOT NULL,
       workflow_id TEXT,
+      browser TEXT,
+      companion_id TEXT,
+      profile_id TEXT,
+      window_id TEXT,
+      tab_id TEXT,
       title TEXT NOT NULL,
       status TEXT NOT NULL,
       actions_json TEXT NOT NULL DEFAULT '[]',
@@ -846,6 +1021,79 @@ async function runLifeOpsSchemaSetup(
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       finished_at TEXT
+    )`,
+    `CREATE TABLE IF NOT EXISTS life_browser_settings (
+      agent_id TEXT PRIMARY KEY,
+      enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      tracking_mode TEXT NOT NULL DEFAULT 'current_tab',
+      allow_browser_control BOOLEAN NOT NULL DEFAULT FALSE,
+      require_confirmation_for_account_affecting BOOLEAN NOT NULL DEFAULT TRUE,
+      incognito_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      site_access_mode TEXT NOT NULL DEFAULT 'current_site_only',
+      granted_origins_json TEXT NOT NULL DEFAULT '[]',
+      blocked_origins_json TEXT NOT NULL DEFAULT '[]',
+      max_remembered_tabs INTEGER NOT NULL DEFAULT 10,
+      pause_until TEXT,
+      metadata_json TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`,
+    `CREATE TABLE IF NOT EXISTS life_browser_companions (
+      id TEXT PRIMARY KEY,
+      agent_id TEXT NOT NULL,
+      browser TEXT NOT NULL,
+      profile_id TEXT NOT NULL,
+      profile_label TEXT NOT NULL DEFAULT '',
+      label TEXT NOT NULL,
+      extension_version TEXT,
+      connection_state TEXT NOT NULL DEFAULT 'disconnected',
+      permissions_json TEXT NOT NULL DEFAULT '{}',
+      last_seen_at TEXT,
+      paired_at TEXT,
+      metadata_json TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(agent_id, browser, profile_id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS life_browser_tabs (
+      id TEXT PRIMARY KEY,
+      agent_id TEXT NOT NULL,
+      companion_id TEXT,
+      browser TEXT NOT NULL,
+      profile_id TEXT NOT NULL,
+      window_id TEXT NOT NULL,
+      tab_id TEXT NOT NULL,
+      url TEXT NOT NULL,
+      title TEXT NOT NULL,
+      active_in_window BOOLEAN NOT NULL DEFAULT FALSE,
+      focused_window BOOLEAN NOT NULL DEFAULT FALSE,
+      focused_active BOOLEAN NOT NULL DEFAULT FALSE,
+      incognito BOOLEAN NOT NULL DEFAULT FALSE,
+      favicon_url TEXT,
+      last_seen_at TEXT NOT NULL,
+      last_focused_at TEXT,
+      metadata_json TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(agent_id, browser, profile_id, window_id, tab_id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS life_browser_page_contexts (
+      id TEXT PRIMARY KEY,
+      agent_id TEXT NOT NULL,
+      browser TEXT NOT NULL,
+      profile_id TEXT NOT NULL,
+      window_id TEXT NOT NULL,
+      tab_id TEXT NOT NULL,
+      url TEXT NOT NULL,
+      title TEXT NOT NULL,
+      selection_text TEXT,
+      main_text TEXT,
+      headings_json TEXT NOT NULL DEFAULT '[]',
+      links_json TEXT NOT NULL DEFAULT '[]',
+      forms_json TEXT NOT NULL DEFAULT '[]',
+      captured_at TEXT NOT NULL,
+      metadata_json TEXT NOT NULL DEFAULT '{}',
+      UNIQUE(agent_id, browser, profile_id, window_id, tab_id)
     )`,
     `CREATE TABLE IF NOT EXISTS life_reminder_plans (
       id TEXT PRIMARY KEY,
@@ -1058,6 +1306,12 @@ async function runLifeOpsSchemaSetup(
       ON life_browser_sessions(agent_id, status, updated_at)`,
     `CREATE INDEX IF NOT EXISTS idx_life_browser_sessions_subject
       ON life_browser_sessions(agent_id, domain, subject_type, subject_id, status, updated_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_life_browser_companions_agent
+      ON life_browser_companions(agent_id, browser, updated_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_life_browser_tabs_agent
+      ON life_browser_tabs(agent_id, focused_active, active_in_window, last_seen_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_life_browser_page_contexts_agent
+      ON life_browser_page_contexts(agent_id, captured_at)`,
     `CREATE INDEX IF NOT EXISTS idx_life_goal_links_goal
       ON life_goal_links(goal_id)`,
     `CREATE INDEX IF NOT EXISTS idx_life_goal_links_linked
@@ -1118,6 +1372,24 @@ async function runLifeOpsSchemaSetup(
       `UPDATE ${tableName}
           SET subject_id = agent_id
         WHERE subject_id = '' OR subject_id IS NULL`,
+    );
+  }
+
+  const browserSessionColumns = [
+    { name: "browser", definition: "TEXT" },
+    { name: "companion_id", definition: "TEXT" },
+    { name: "profile_id", definition: "TEXT" },
+    { name: "window_id", definition: "TEXT" },
+    { name: "tab_id", definition: "TEXT" },
+  ] as const;
+  const existingBrowserSessionColumns = new Set(
+    await listTableColumns(runtime, "life_browser_sessions"),
+  );
+  for (const column of browserSessionColumns) {
+    if (existingBrowserSessionColumns.has(column.name)) continue;
+    await executeRawSql(
+      runtime,
+      `ALTER TABLE life_browser_sessions ADD COLUMN ${column.name} ${column.definition}`,
     );
   }
 
@@ -3137,7 +3409,8 @@ export class LifeOpsRepository {
       this.runtime,
       `INSERT INTO life_browser_sessions (
         id, agent_id, domain, subject_type, subject_id, visibility_scope,
-        context_policy, workflow_id, title, status, actions_json,
+        context_policy, workflow_id, browser, companion_id, profile_id,
+        window_id, tab_id, title, status, actions_json,
         current_action_index, awaiting_confirmation_for_action_id,
         result_json, metadata_json, created_at, updated_at, finished_at
       ) VALUES (
@@ -3149,6 +3422,11 @@ export class LifeOpsRepository {
         ${sqlQuote(session.visibilityScope)},
         ${sqlQuote(session.contextPolicy)},
         ${sqlText(session.workflowId)},
+        ${sqlText(session.browser)},
+        ${sqlText(session.companionId)},
+        ${sqlText(session.profileId)},
+        ${sqlText(session.windowId)},
+        ${sqlText(session.tabId)},
         ${sqlQuote(session.title)},
         ${sqlQuote(session.status)},
         ${sqlJson(session.actions)},
@@ -3174,6 +3452,11 @@ export class LifeOpsRepository {
               visibility_scope = ${sqlQuote(session.visibilityScope)},
               context_policy = ${sqlQuote(session.contextPolicy)},
               workflow_id = ${sqlText(session.workflowId)},
+              browser = ${sqlText(session.browser)},
+              companion_id = ${sqlText(session.companionId)},
+              profile_id = ${sqlText(session.profileId)},
+              window_id = ${sqlText(session.windowId)},
+              tab_id = ${sqlText(session.tabId)},
               title = ${sqlQuote(session.title)},
               status = ${sqlQuote(session.status)},
               actions_json = ${sqlJson(session.actions)},
@@ -3215,6 +3498,298 @@ export class LifeOpsRepository {
         ORDER BY updated_at DESC, created_at DESC`,
     );
     return rows.map(parseBrowserSession);
+  }
+
+  async getBrowserSettings(
+    agentId: string,
+  ): Promise<LifeOpsBrowserSettings | null> {
+    await this.ensureReady();
+    const rows = await executeRawSql(
+      this.runtime,
+      `SELECT *
+         FROM life_browser_settings
+        WHERE agent_id = ${sqlQuote(agentId)}
+        LIMIT 1`,
+    );
+    const row = rows[0];
+    return row ? parseBrowserSettings(row) : null;
+  }
+
+  async upsertBrowserSettings(
+    agentId: string,
+    settings: LifeOpsBrowserSettings,
+  ): Promise<void> {
+    await this.ensureReady();
+    const createdAt = settings.updatedAt ?? isoNow();
+    await executeRawSql(
+      this.runtime,
+      `INSERT INTO life_browser_settings (
+        agent_id, enabled, tracking_mode, allow_browser_control,
+        require_confirmation_for_account_affecting, incognito_enabled,
+        site_access_mode, granted_origins_json, blocked_origins_json,
+        max_remembered_tabs, pause_until, metadata_json, created_at, updated_at
+      ) VALUES (
+        ${sqlQuote(agentId)},
+        ${sqlBoolean(settings.enabled)},
+        ${sqlQuote(settings.trackingMode)},
+        ${sqlBoolean(settings.allowBrowserControl)},
+        ${sqlBoolean(settings.requireConfirmationForAccountAffecting)},
+        ${sqlBoolean(settings.incognitoEnabled)},
+        ${sqlQuote(settings.siteAccessMode)},
+        ${sqlJson(settings.grantedOrigins)},
+        ${sqlJson(settings.blockedOrigins)},
+        ${sqlInteger(settings.maxRememberedTabs)},
+        ${sqlText(settings.pauseUntil)},
+        ${sqlJson(settings.metadata)},
+        ${sqlQuote(createdAt)},
+        ${sqlQuote(settings.updatedAt ?? createdAt)}
+      )
+      ON CONFLICT(agent_id) DO UPDATE SET
+        enabled = excluded.enabled,
+        tracking_mode = excluded.tracking_mode,
+        allow_browser_control = excluded.allow_browser_control,
+        require_confirmation_for_account_affecting = excluded.require_confirmation_for_account_affecting,
+        incognito_enabled = excluded.incognito_enabled,
+        site_access_mode = excluded.site_access_mode,
+        granted_origins_json = excluded.granted_origins_json,
+        blocked_origins_json = excluded.blocked_origins_json,
+        max_remembered_tabs = excluded.max_remembered_tabs,
+        pause_until = excluded.pause_until,
+        metadata_json = excluded.metadata_json,
+        updated_at = excluded.updated_at`,
+    );
+  }
+
+  async getBrowserCompanionByProfile(
+    agentId: string,
+    browser: LifeOpsBrowserCompanionStatus["browser"],
+    profileId: string,
+  ): Promise<LifeOpsBrowserCompanionStatus | null> {
+    await this.ensureReady();
+    const rows = await executeRawSql(
+      this.runtime,
+      `SELECT *
+         FROM life_browser_companions
+        WHERE agent_id = ${sqlQuote(agentId)}
+          AND browser = ${sqlQuote(browser)}
+          AND profile_id = ${sqlQuote(profileId)}
+        LIMIT 1`,
+    );
+    const row = rows[0];
+    return row ? parseBrowserCompanion(row) : null;
+  }
+
+  async upsertBrowserCompanion(
+    companion: LifeOpsBrowserCompanionStatus,
+  ): Promise<void> {
+    await this.ensureReady();
+    await executeRawSql(
+      this.runtime,
+      `INSERT INTO life_browser_companions (
+        id, agent_id, browser, profile_id, profile_label, label,
+        extension_version, connection_state, permissions_json, last_seen_at,
+        paired_at, metadata_json, created_at, updated_at
+      ) VALUES (
+        ${sqlQuote(companion.id)},
+        ${sqlQuote(companion.agentId)},
+        ${sqlQuote(companion.browser)},
+        ${sqlQuote(companion.profileId)},
+        ${sqlQuote(companion.profileLabel)},
+        ${sqlQuote(companion.label)},
+        ${sqlText(companion.extensionVersion)},
+        ${sqlQuote(companion.connectionState)},
+        ${sqlJson(companion.permissions)},
+        ${sqlText(companion.lastSeenAt)},
+        ${sqlText(companion.pairedAt)},
+        ${sqlJson(companion.metadata)},
+        ${sqlQuote(companion.createdAt)},
+        ${sqlQuote(companion.updatedAt)}
+      )
+      ON CONFLICT(agent_id, browser, profile_id) DO UPDATE SET
+        profile_label = excluded.profile_label,
+        label = excluded.label,
+        extension_version = excluded.extension_version,
+        connection_state = excluded.connection_state,
+        permissions_json = excluded.permissions_json,
+        last_seen_at = excluded.last_seen_at,
+        paired_at = COALESCE(life_browser_companions.paired_at, excluded.paired_at),
+        metadata_json = excluded.metadata_json,
+        updated_at = excluded.updated_at`,
+    );
+  }
+
+  async listBrowserCompanions(
+    agentId: string,
+  ): Promise<LifeOpsBrowserCompanionStatus[]> {
+    await this.ensureReady();
+    const rows = await executeRawSql(
+      this.runtime,
+      `SELECT *
+         FROM life_browser_companions
+        WHERE agent_id = ${sqlQuote(agentId)}
+        ORDER BY browser ASC, profile_label ASC, label ASC`,
+    );
+    return rows.map(parseBrowserCompanion);
+  }
+
+  async upsertBrowserTab(tab: LifeOpsBrowserTabSummary): Promise<void> {
+    await this.ensureReady();
+    await executeRawSql(
+      this.runtime,
+      `INSERT INTO life_browser_tabs (
+        id, agent_id, companion_id, browser, profile_id, window_id, tab_id,
+        url, title, active_in_window, focused_window, focused_active,
+        incognito, favicon_url, last_seen_at, last_focused_at, metadata_json,
+        created_at, updated_at
+      ) VALUES (
+        ${sqlQuote(tab.id)},
+        ${sqlQuote(tab.agentId)},
+        ${sqlText(tab.companionId)},
+        ${sqlQuote(tab.browser)},
+        ${sqlQuote(tab.profileId)},
+        ${sqlQuote(tab.windowId)},
+        ${sqlQuote(tab.tabId)},
+        ${sqlQuote(tab.url)},
+        ${sqlQuote(tab.title)},
+        ${sqlBoolean(tab.activeInWindow)},
+        ${sqlBoolean(tab.focusedWindow)},
+        ${sqlBoolean(tab.focusedActive)},
+        ${sqlBoolean(tab.incognito)},
+        ${sqlText(tab.faviconUrl)},
+        ${sqlQuote(tab.lastSeenAt)},
+        ${sqlText(tab.lastFocusedAt)},
+        ${sqlJson(tab.metadata)},
+        ${sqlQuote(tab.createdAt)},
+        ${sqlQuote(tab.updatedAt)}
+      )
+      ON CONFLICT(agent_id, browser, profile_id, window_id, tab_id) DO UPDATE SET
+        companion_id = excluded.companion_id,
+        url = excluded.url,
+        title = excluded.title,
+        active_in_window = excluded.active_in_window,
+        focused_window = excluded.focused_window,
+        focused_active = excluded.focused_active,
+        incognito = excluded.incognito,
+        favicon_url = excluded.favicon_url,
+        last_seen_at = excluded.last_seen_at,
+        last_focused_at = excluded.last_focused_at,
+        metadata_json = excluded.metadata_json,
+        updated_at = excluded.updated_at`,
+    );
+  }
+
+  async listBrowserTabs(agentId: string): Promise<LifeOpsBrowserTabSummary[]> {
+    await this.ensureReady();
+    const rows = await executeRawSql(
+      this.runtime,
+      `SELECT *
+         FROM life_browser_tabs
+        WHERE agent_id = ${sqlQuote(agentId)}
+        ORDER BY focused_active DESC,
+                 active_in_window DESC,
+                 COALESCE(last_focused_at, last_seen_at) DESC,
+                 updated_at DESC`,
+    );
+    return rows.map(parseBrowserTabSummary);
+  }
+
+  async deleteBrowserTabsByIds(agentId: string, ids: string[]): Promise<void> {
+    await this.ensureReady();
+    if (ids.length === 0) return;
+    const values = ids.map((id) => sqlQuote(id)).join(", ");
+    await executeRawSql(
+      this.runtime,
+      `DELETE FROM life_browser_tabs
+        WHERE agent_id = ${sqlQuote(agentId)}
+          AND id IN (${values})`,
+    );
+  }
+
+  async deleteAllBrowserTabs(agentId: string): Promise<void> {
+    await this.ensureReady();
+    await executeRawSql(
+      this.runtime,
+      `DELETE FROM life_browser_tabs
+        WHERE agent_id = ${sqlQuote(agentId)}`,
+    );
+  }
+
+  async upsertBrowserPageContext(
+    context: LifeOpsBrowserPageContext,
+  ): Promise<void> {
+    await this.ensureReady();
+    await executeRawSql(
+      this.runtime,
+      `INSERT INTO life_browser_page_contexts (
+        id, agent_id, browser, profile_id, window_id, tab_id, url, title,
+        selection_text, main_text, headings_json, links_json, forms_json,
+        captured_at, metadata_json
+      ) VALUES (
+        ${sqlQuote(context.id)},
+        ${sqlQuote(context.agentId)},
+        ${sqlQuote(context.browser)},
+        ${sqlQuote(context.profileId)},
+        ${sqlQuote(context.windowId)},
+        ${sqlQuote(context.tabId)},
+        ${sqlQuote(context.url)},
+        ${sqlQuote(context.title)},
+        ${sqlText(context.selectionText)},
+        ${sqlText(context.mainText)},
+        ${sqlJson(context.headings)},
+        ${sqlJson(context.links)},
+        ${sqlJson(context.forms)},
+        ${sqlQuote(context.capturedAt)},
+        ${sqlJson(context.metadata)}
+      )
+      ON CONFLICT(agent_id, browser, profile_id, window_id, tab_id) DO UPDATE SET
+        url = excluded.url,
+        title = excluded.title,
+        selection_text = excluded.selection_text,
+        main_text = excluded.main_text,
+        headings_json = excluded.headings_json,
+        links_json = excluded.links_json,
+        forms_json = excluded.forms_json,
+        captured_at = excluded.captured_at,
+        metadata_json = excluded.metadata_json`,
+    );
+  }
+
+  async listBrowserPageContexts(
+    agentId: string,
+  ): Promise<LifeOpsBrowserPageContext[]> {
+    await this.ensureReady();
+    const rows = await executeRawSql(
+      this.runtime,
+      `SELECT *
+         FROM life_browser_page_contexts
+        WHERE agent_id = ${sqlQuote(agentId)}
+        ORDER BY captured_at DESC`,
+    );
+    return rows.map(parseBrowserPageContext);
+  }
+
+  async deleteBrowserPageContextsByIds(
+    agentId: string,
+    ids: string[],
+  ): Promise<void> {
+    await this.ensureReady();
+    if (ids.length === 0) return;
+    const values = ids.map((id) => sqlQuote(id)).join(", ");
+    await executeRawSql(
+      this.runtime,
+      `DELETE FROM life_browser_page_contexts
+        WHERE agent_id = ${sqlQuote(agentId)}
+          AND id IN (${values})`,
+    );
+  }
+
+  async deleteAllBrowserPageContexts(agentId: string): Promise<void> {
+    await this.ensureReady();
+    await executeRawSql(
+      this.runtime,
+      `DELETE FROM life_browser_page_contexts
+        WHERE agent_id = ${sqlQuote(agentId)}`,
+    );
   }
 
   async deleteBrowserSession(
@@ -3407,5 +3982,42 @@ export function createLifeOpsBrowserSession(
     id: crypto.randomUUID(),
     createdAt: timestamp,
     updatedAt: timestamp,
+  };
+}
+
+export function createLifeOpsBrowserCompanionStatus(
+  params: Omit<
+    LifeOpsBrowserCompanionStatus,
+    "id" | "createdAt" | "updatedAt" | "pairedAt"
+  > & { pairedAt?: string | null },
+): LifeOpsBrowserCompanionStatus {
+  const timestamp = isoNow();
+  return {
+    ...params,
+    id: crypto.randomUUID(),
+    pairedAt: params.pairedAt ?? timestamp,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+export function createLifeOpsBrowserTabSummary(
+  params: Omit<LifeOpsBrowserTabSummary, "id" | "createdAt" | "updatedAt">,
+): LifeOpsBrowserTabSummary {
+  const timestamp = isoNow();
+  return {
+    ...params,
+    id: crypto.randomUUID(),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+export function createLifeOpsBrowserPageContext(
+  params: Omit<LifeOpsBrowserPageContext, "id">,
+): LifeOpsBrowserPageContext {
+  return {
+    ...params,
+    id: crypto.randomUUID(),
   };
 }

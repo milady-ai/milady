@@ -1,9 +1,5 @@
 import type http from "node:http";
-import {
-  type AgentRuntime,
-  logger,
-  type UUID,
-} from "@elizaos/core";
+import { type AgentRuntime, logger, type UUID } from "@elizaos/core";
 import type {
   AcknowledgeLifeOpsReminderRequest,
   CaptureLifeOpsActivitySignalRequest,
@@ -13,28 +9,30 @@ import type {
   ConfirmLifeOpsBrowserSessionRequest,
   CreateLifeOpsBrowserSessionRequest,
   CreateLifeOpsCalendarEventRequest,
-  CreateLifeOpsGmailBatchReplyDraftsRequest,
   CreateLifeOpsDefinitionRequest,
+  CreateLifeOpsGmailBatchReplyDraftsRequest,
   CreateLifeOpsGmailReplyDraftRequest,
   CreateLifeOpsGoalRequest,
   CreateLifeOpsWorkflowRequest,
   CreateLifeOpsXPostRequest,
   DisconnectLifeOpsGoogleConnectorRequest,
   GetLifeOpsCalendarFeedRequest,
-  GetLifeOpsGmailTriageRequest,
   GetLifeOpsGmailSearchRequest,
+  GetLifeOpsGmailTriageRequest,
   LifeOpsConnectorMode,
   LifeOpsConnectorSide,
   ProcessLifeOpsRemindersRequest,
   RelockLifeOpsWebsiteAccessRequest,
-  RunLifeOpsWorkflowRequest,
   ResolveLifeOpsWebsiteAccessCallbackRequest,
+  RunLifeOpsWorkflowRequest,
   SelectLifeOpsGoogleConnectorPreferenceRequest,
-  SendLifeOpsGmailReplyRequest,
   SendLifeOpsGmailBatchReplyRequest,
+  SendLifeOpsGmailReplyRequest,
   SetLifeOpsReminderPreferenceRequest,
   SnoozeLifeOpsOccurrenceRequest,
   StartLifeOpsGoogleConnectorRequest,
+  SyncLifeOpsBrowserStateRequest,
+  UpdateLifeOpsBrowserSettingsRequest,
   UpdateLifeOpsDefinitionRequest,
   UpdateLifeOpsGoalRequest,
   UpdateLifeOpsWorkflowRequest,
@@ -43,8 +41,8 @@ import type {
 } from "../contracts/lifeops.js";
 import { LIFEOPS_ACTIVITY_SIGNAL_STATES } from "../contracts/lifeops.js";
 import { createIntegrationTelemetrySpan } from "../diagnostics/integration-observability.js";
-import { isRetryableLifeOpsStorageError } from "../lifeops/sql.js";
 import { LifeOpsService, LifeOpsServiceError } from "../lifeops/service.js";
+import { isRetryableLifeOpsStorageError } from "../lifeops/sql.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 
 export interface LifeOpsRouteContext {
@@ -108,9 +106,7 @@ function parseActivitySignalStates(
 ): Array<(typeof LIFEOPS_ACTIVITY_SIGNAL_STATES)[number]> | null {
   const rawValues = [
     ...url.searchParams.getAll("state"),
-    ...url.searchParams
-      .getAll("states")
-      .flatMap((value) => value.split(",")),
+    ...url.searchParams.getAll("states").flatMap((value) => value.split(",")),
   ]
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
@@ -182,7 +178,8 @@ async function runRoute(
       return true;
     }
     if (isRetryableLifeOpsStorageError(error)) {
-      const message = "Life Ops storage is still initializing. Refresh in a moment.";
+      const message =
+        "Life Ops storage is still initializing. Refresh in a moment.";
       logger.info(
         {
           boundary: "lifeops",
@@ -540,10 +537,7 @@ export async function handleLifeOpsRoutes(
         rawReplyNeededOnly !== "1" &&
         rawReplyNeededOnly !== "0"
       ) {
-        throw new LifeOpsServiceError(
-          400,
-          "replyNeededOnly must be a boolean",
-        );
+        throw new LifeOpsServiceError(400, "replyNeededOnly must be a boolean");
       }
       const request: GetLifeOpsGmailSearchRequest = {
         mode: (rawMode ?? undefined) as
@@ -640,7 +634,10 @@ export async function handleLifeOpsRoutes(
     });
   }
 
-  if (method === "POST" && pathname === "/api/lifeops/gmail/batch-reply-drafts") {
+  if (
+    method === "POST" &&
+    pathname === "/api/lifeops/gmail/batch-reply-drafts"
+  ) {
     const body = await readJsonBody<CreateLifeOpsGmailBatchReplyDraftsRequest>(
       req,
       res,
@@ -848,7 +845,10 @@ export async function handleLifeOpsRoutes(
       json(res, {
         signals: await service.listActivitySignals({
           sinceAt: url.searchParams.get("sinceAt"),
-          limit: parsePositiveIntegerQuery(url.searchParams.get("limit"), "limit"),
+          limit: parsePositiveIntegerQuery(
+            url.searchParams.get("limit"),
+            "limit",
+          ),
           states: parseActivitySignalStates(url),
         }),
       });
@@ -908,8 +908,10 @@ export async function handleLifeOpsRoutes(
   }
 
   if (method === "POST" && pathname === "/api/lifeops/website-access/relock") {
-    const body =
-      await readJsonBody<RelockLifeOpsWebsiteAccessRequest>(req, res);
+    const body = await readJsonBody<RelockLifeOpsWebsiteAccessRequest>(
+      req,
+      res,
+    );
     if (!body) return true;
     return runRoute(ctx, async (service) => {
       json(res, await service.relockWebsiteAccessGroup(body.groupKey));
@@ -926,11 +928,10 @@ export async function handleLifeOpsRoutes(
       "website access callback key",
     );
     if (!callbackKey) return true;
-    const body =
-      await readJsonBody<ResolveLifeOpsWebsiteAccessCallbackRequest>(
-        req,
-        res,
-      );
+    const body = await readJsonBody<ResolveLifeOpsWebsiteAccessCallbackRequest>(
+      req,
+      res,
+    );
     if (body === null) return true;
     return runRoute(ctx, async (service) => {
       json(
@@ -976,6 +977,49 @@ export async function handleLifeOpsRoutes(
   if (method === "GET" && pathname === "/api/lifeops/browser/sessions") {
     return runRoute(ctx, async (service) => {
       json(res, { sessions: await service.listBrowserSessions() });
+    });
+  }
+
+  if (method === "GET" && pathname === "/api/lifeops/browser/settings") {
+    return runRoute(ctx, async (service) => {
+      json(res, { settings: await service.getBrowserSettings() });
+    });
+  }
+
+  if (method === "POST" && pathname === "/api/lifeops/browser/settings") {
+    const body = await readJsonBody<UpdateLifeOpsBrowserSettingsRequest>(
+      req,
+      res,
+    );
+    if (!body) return true;
+    return runRoute(ctx, async (service) => {
+      json(res, { settings: await service.updateBrowserSettings(body) });
+    });
+  }
+
+  if (method === "GET" && pathname === "/api/lifeops/browser/companions") {
+    return runRoute(ctx, async (service) => {
+      json(res, { companions: await service.listBrowserCompanions() });
+    });
+  }
+
+  if (method === "GET" && pathname === "/api/lifeops/browser/tabs") {
+    return runRoute(ctx, async (service) => {
+      json(res, { tabs: await service.listBrowserTabs() });
+    });
+  }
+
+  if (method === "GET" && pathname === "/api/lifeops/browser/current-page") {
+    return runRoute(ctx, async (service) => {
+      json(res, { page: await service.getCurrentBrowserPage() });
+    });
+  }
+
+  if (method === "POST" && pathname === "/api/lifeops/browser/sync") {
+    const body = await readJsonBody<SyncLifeOpsBrowserStateRequest>(req, res);
+    if (!body) return true;
+    return runRoute(ctx, async (service) => {
+      json(res, await service.syncBrowserState(body));
     });
   }
 

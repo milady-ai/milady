@@ -36,6 +36,10 @@
 
 import type http from "node:http";
 import type { AgentRuntime, Memory, Room, UUID, World } from "@elizaos/core";
+import {
+  expandConnectorSourceFilter,
+  normalizeConnectorSource,
+} from "@miladyai/shared/connectors";
 import { cacheDiscordAvatarUrl } from "./discord-avatar-cache.js";
 import type { RouteHelpers } from "./route-helpers.js";
 
@@ -49,7 +53,7 @@ import type { RouteHelpers } from "./route-helpers.js";
  * are already visible in the conversation view. The inbox is for
  * *inbound* messages from other humans via connector channels.
  */
-const DEFAULT_INBOX_SOURCES = new Set<string>([
+const DEFAULT_INBOX_SOURCE_FILTER = [
   "imessage",
   "telegram",
   "discord",
@@ -58,7 +62,11 @@ const DEFAULT_INBOX_SOURCES = new Set<string>([
   "slack",
   "signal",
   "sms",
-]);
+] as const;
+
+const DEFAULT_INBOX_SOURCES = expandConnectorSourceFilter(
+  DEFAULT_INBOX_SOURCE_FILTER,
+);
 
 /**
  * Hard ceiling on the number of rooms we scan per request. Large
@@ -165,7 +173,13 @@ function parseSourceFilter(raw: string | null): Set<string> | null {
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length > 0);
   if (tags.length === 0) return null;
-  return new Set(tags);
+  return expandConnectorSourceFilter(tags);
+}
+
+function runtimeHasSendHandler(runtime: AgentRuntime, source: string): boolean {
+  const sendHandlers = (runtime as unknown as { sendHandlers?: unknown })
+    .sendHandlers;
+  return sendHandlers instanceof Map && sendHandlers.has(source);
 }
 
 /**
@@ -1596,6 +1610,10 @@ interface InboxChat {
   id: string;
   /** Connector tag (imessage, telegram, …) for source badging. */
   source: string;
+  /** Raw runtime transport source used for replies and send routing. */
+  transportSource?: string;
+  /** Whether the active runtime currently has a send handler for this room. */
+  canSend?: boolean;
   /** Owning world/server id when this room belongs to one. */
   worldId?: string;
   /** User-facing world/server label for filters and grouped headers. */
@@ -1864,8 +1882,10 @@ async function loadInboxChats(
         entry.latestSenderAvatarUrl)
       : undefined;
     chats.push({
+      canSend: runtimeHasSendHandler(runtime, entry.source),
       id: roomIdKey,
-      source: entry.source,
+      source: normalizeConnectorSource(entry.source),
+      transportSource: entry.source,
       ...(worldId ? { worldId } : {}),
       worldLabel: resolveInboxWorldLabel(room, world),
       title,
@@ -1912,7 +1932,9 @@ async function loadInboxSources(runtime: AgentRuntime): Promise<string[]> {
     if (!source) continue;
     // We only care about inbox sources — skip client_chat / api / etc.
     if (!DEFAULT_INBOX_SOURCES.has(source.toLowerCase())) continue;
-    seen.add(source.toLowerCase());
+    const normalizedSource = normalizeConnectorSource(source);
+    if (!normalizedSource) continue;
+    seen.add(normalizedSource);
   }
   return Array.from(seen).sort();
 }
@@ -1969,6 +1991,86 @@ export async function handleInboxRoute(
       helpers.error(
         res,
         `failed to load inbox: ${err instanceof Error ? err.message : String(err)}`,
+        500,
+      );
+    }
+    return true;
+  }
+
+  // ── POST /api/inbox/messages ──────────────────────────────────────
+  if (method === "POST" && pathname === "/api/inbox/messages") {
+    const runtime = state.runtime;
+    if (!runtime) {
+      helpers.error(res, "runtime not ready", 503);
+      return true;
+    }
+
+    const body = await helpers.readJsonBody<{
+      replyToMessageId?: string;
+      roomId?: string;
+      source?: string;
+      text?: string;
+    }>(req, res, { maxBytes: 256 * 1024 });
+    if (!body) {
+      return true;
+    }
+
+    const roomId = body.roomId?.trim();
+    const source = body.source?.trim().toLowerCase();
+    const text = body.text?.trim();
+    const replyToMessageId = body.replyToMessageId?.trim();
+
+    if (!roomId || !source || !text) {
+      helpers.error(res, "roomId, source, and text are required", 400);
+      return true;
+    }
+
+    if (!runtimeHasSendHandler(runtime, source)) {
+      helpers.error(
+        res,
+        `no send handler registered for inbox source: ${source}`,
+        409,
+      );
+      return true;
+    }
+
+    const room = await runtime.getRoom(roomId as UUID);
+    if (!room) {
+      helpers.error(res, "inbox room not found", 404);
+      return true;
+    }
+
+    try {
+      await runtime.sendMessageToTarget(
+        ({
+          source,
+          roomId: room.id,
+          channelId: room.channelId ?? room.id,
+          serverId: room.serverId,
+        } as Parameters<typeof runtime.sendMessageToTarget>[0]),
+        {
+          ...(replyToMessageId ? { inReplyTo: replyToMessageId } : {}),
+          source,
+          text,
+        },
+      );
+
+      const [message] = await loadInboxMessages(
+        runtime,
+        1,
+        new Set([source]),
+        room.id as UUID,
+        source,
+      );
+
+      helpers.json(
+        res,
+        message ? { ok: true, message } : { ok: true },
+      );
+    } catch (err) {
+      helpers.error(
+        res,
+        `failed to send inbox reply: ${err instanceof Error ? err.message : String(err)}`,
         500,
       );
     }

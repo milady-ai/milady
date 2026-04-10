@@ -15,7 +15,6 @@ import {
   getVrmUrl,
   useApp,
 } from "@miladyai/app-core/state";
-import { resolveAppAssetUrl } from "@miladyai/app-core/utils";
 import { useEffect, useState } from "react";
 import { useBranding } from "../../config/branding";
 import { COMPANION_ENABLED } from "../../navigation";
@@ -72,8 +71,6 @@ export function OnboardingWizard() {
     selectedVrmIndex > 0
       ? getVrmPreviewUrl(safeSelectedVrmIndex)
       : getVrmPreviewUrl(1);
-  const worldUrl = resolveAppAssetUrl("worlds/companion-day.spz");
-
   useEffect(() => {
     // Onboarding keeps a fixed "light" chrome; companion mode owns day/night scenes.
     applyUiTheme("light");
@@ -162,7 +159,7 @@ export function OnboardingWizard() {
       ) : (
         <VrmStage
           vrmPath={vrmPath}
-          worldUrl={worldUrl}
+          environmentTheme="light"
           fallbackPreviewUrl={fallbackPreview}
           cameraProfile="companion"
           initialCompanionZoomNormalized={1}

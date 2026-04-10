@@ -54,7 +54,12 @@ describe("ensureShippedSkills", () => {
       assetsDir: SHIPPED_SKILLS_DIR,
     });
 
-    expect(created).toEqual(["milady-development"]);
+    expect(created).toEqual([
+      "eliza-cloud",
+      "elizaos",
+      "milady",
+      "milady-development",
+    ]);
     for (const skillId of created) {
       expect(existsSync(path.join(skillsDir, skillId, "SKILL.md"))).toBe(true);
     }
@@ -79,7 +84,7 @@ describe("ensureShippedSkills", () => {
       assetsDir: SHIPPED_SKILLS_DIR,
     });
 
-    expect(created).toEqual([]);
+    expect(created).toEqual(["eliza-cloud", "elizaos", "milady"]);
     expect(readFileSync(existingSkillPath, "utf8")).toBe(customContent);
   });
 });

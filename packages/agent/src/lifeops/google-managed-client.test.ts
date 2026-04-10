@@ -155,4 +155,37 @@ describe("GoogleManagedClient", () => {
       }),
     );
   });
+
+  it("calls the managed Gmail search endpoint with the encoded query", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ messages: [], syncedAt: "2026-04-10T00:00:00.000Z" }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+
+    const client = new GoogleManagedClient({
+      configured: true,
+      apiKey: "test-key",
+      apiBaseUrl: "https://cloud.example/api/v1",
+      siteUrl: "https://cloud.example",
+    });
+
+    await client.getGmailSearch({
+      side: "owner",
+      query: 'from:"suran lee"',
+      maxResults: 5,
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining(
+          "https://cloud.example/api/v1/milady/google/gmail/search?side=owner&query=from%3A%22suran+lee%22&maxResults=5",
+        ),
+      }),
+      expect.any(Object),
+    );
+  });
 });

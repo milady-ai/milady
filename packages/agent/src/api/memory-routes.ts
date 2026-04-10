@@ -20,6 +20,17 @@ const QUICK_CONTEXT_DEFAULT_LIMIT = 8;
 const QUICK_CONTEXT_MAX_LIMIT = 20;
 const QUICK_CONTEXT_KNOWLEDGE_THRESHOLD = 0.2;
 
+const MEMORY_BROWSE_DEFAULT_LIMIT = 50;
+const MEMORY_BROWSE_MAX_LIMIT = 200;
+const MEMORY_FEED_DEFAULT_LIMIT = 50;
+const MEMORY_FEED_MAX_LIMIT = 100;
+const MEMORY_TABLE_NAMES = [
+  "messages",
+  "memories",
+  "facts",
+  "documents",
+] as const;
+
 export interface MemoryRouteContext extends RouteRequestContext {
   url: URL;
   runtime: AgentRuntime | null;
@@ -217,6 +228,98 @@ function buildQuickContextPrompt(params: {
   ].join("\n");
 }
 
+type MemoryBrowseItem = {
+  id: string;
+  type: string;
+  text: string;
+  entityId: string | null;
+  roomId: string | null;
+  agentId: string | null;
+  createdAt: number;
+  metadata: Record<string, unknown> | null;
+  source: string | null;
+};
+
+type TaggedMemory = Memory & { _table: string };
+
+function memoryToBrowseItem(memory: TaggedMemory): MemoryBrowseItem {
+  const content = memory.content as Record<string, unknown> | undefined;
+  return {
+    id: memory.id ?? "",
+    type: memory._table,
+    text: (content?.text as string) ?? "",
+    entityId: (memory.entityId as string) ?? null,
+    roomId: (memory.roomId as string) ?? null,
+    agentId: (memory.agentId as string) ?? null,
+    createdAt: memory.createdAt ?? 0,
+    metadata: (memory.metadata as Record<string, unknown>) ?? null,
+    source: (content?.source as string) ?? null,
+  };
+}
+
+function hasBrowsableContent(memory: TaggedMemory): boolean {
+  const text = (memory.content as { text?: string } | undefined)?.text;
+  return typeof text === "string" && text.trim().length > 0;
+}
+
+async function fetchMemoriesFromTables(
+  runtime: AgentRuntime,
+  params: {
+    entityIds?: UUID[];
+    roomId?: UUID;
+    tables?: readonly string[];
+    limit?: number;
+    before?: number;
+  },
+): Promise<TaggedMemory[]> {
+  const tables = params.tables ?? MEMORY_TABLE_NAMES;
+  const perTableLimit = Math.max(
+    Math.ceil((params.limit ?? MEMORY_BROWSE_DEFAULT_LIMIT) * 2),
+    200,
+  );
+  const allMemories: TaggedMemory[] = [];
+
+  for (const tableName of tables) {
+    const memories = await runtime.getMemories({
+      agentId: runtime.agentId as UUID,
+      roomId: params.roomId,
+      tableName,
+      count: perTableLimit,
+    });
+    for (const m of memories) {
+      allMemories.push(Object.assign(m, { _table: tableName }));
+    }
+  }
+
+  // The DB adapter ignores entityId in getMemories (used only for RLS
+  // context). Post-filter here so person-centric views actually work.
+  const entitySet = params.entityIds;
+  let filtered = allMemories;
+  if (entitySet && entitySet.length > 0) {
+    const ids = new Set<string>(entitySet);
+    filtered = allMemories.filter((m) => m.entityId && ids.has(m.entityId));
+  }
+
+  filtered = filtered.filter(hasBrowsableContent);
+
+  const beforeTs = params.before;
+  if (beforeTs) {
+    return filtered.filter((m) => (m.createdAt ?? 0) < beforeTs);
+  }
+  return filtered;
+}
+
+function resolveTableFilter(
+  typeParam: string | null,
+): readonly string[] | undefined {
+  if (!typeParam) return undefined;
+  const t = typeParam.toLowerCase();
+  if (MEMORY_TABLE_NAMES.includes(t as (typeof MEMORY_TABLE_NAMES)[number])) {
+    return [t];
+  }
+  return undefined;
+}
+
 export async function handleMemoryRoutes(
   ctx: MemoryRouteContext,
 ): Promise<boolean> {
@@ -235,6 +338,7 @@ export async function handleMemoryRoutes(
 
   if (
     !pathname.startsWith("/api/memory") &&
+    !pathname.startsWith("/api/memories") &&
     pathname !== "/api/context/quick"
   ) {
     return false;
@@ -338,6 +442,160 @@ export async function handleMemoryRoutes(
       memories,
       knowledge,
     });
+    return true;
+  }
+
+  // ── Memory Viewer endpoints ───────────────────────────────────────────
+
+  if (method === "GET" && pathname === "/api/memories/feed") {
+    const requestedLimit = parsePositiveInteger(
+      url.searchParams.get("limit"),
+      MEMORY_FEED_DEFAULT_LIMIT,
+    );
+    const limit = Math.min(Math.max(requestedLimit, 1), MEMORY_FEED_MAX_LIMIT);
+    const beforeParam = url.searchParams.get("before");
+    const before = beforeParam ? Number(beforeParam) : undefined;
+    const tables = resolveTableFilter(url.searchParams.get("type"));
+
+    const allMemories = await fetchMemoriesFromTables(runtime, {
+      tables,
+      limit: limit * 2,
+      before,
+    });
+
+    allMemories.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+    const items = allMemories.slice(0, limit).map(memoryToBrowseItem);
+
+    json(res, {
+      memories: items,
+      count: items.length,
+      limit,
+      hasMore: allMemories.length > limit,
+    });
+    return true;
+  }
+
+  if (method === "GET" && pathname === "/api/memories/browse") {
+    const requestedLimit = parsePositiveInteger(
+      url.searchParams.get("limit"),
+      MEMORY_BROWSE_DEFAULT_LIMIT,
+    );
+    const limit = Math.min(
+      Math.max(requestedLimit, 1),
+      MEMORY_BROWSE_MAX_LIMIT,
+    );
+    const offset = parsePositiveInteger(url.searchParams.get("offset"), 0);
+    const tables = resolveTableFilter(url.searchParams.get("type"));
+    const entityIdParam = url.searchParams.get("entityId");
+    const entityIdsParam = url.searchParams.get("entityIds");
+    const roomIdParam = url.searchParams.get("roomId");
+    const searchQuery = url.searchParams.get("q")?.trim() ?? "";
+
+    const entityIds: UUID[] | undefined = entityIdsParam
+      ? (entityIdsParam
+          .split(",")
+          .map((id) => id.trim())
+          .filter(Boolean) as UUID[])
+      : entityIdParam
+        ? [entityIdParam as UUID]
+        : undefined;
+
+    const allMemories = await fetchMemoriesFromTables(runtime, {
+      tables,
+      entityIds,
+      roomId: roomIdParam ? (roomIdParam as UUID) : undefined,
+      limit: limit + offset + 100,
+    });
+
+    allMemories.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+
+    let filtered = allMemories;
+    if (searchQuery) {
+      filtered = allMemories.filter((m) => {
+        const text = (m.content as { text?: string } | undefined)?.text ?? "";
+        return scoreMemoryText(text, searchQuery) > 0;
+      });
+    }
+
+    const total = filtered.length;
+    const page = filtered.slice(offset, offset + limit).map(memoryToBrowseItem);
+
+    json(res, {
+      memories: page,
+      total,
+      limit,
+      offset,
+    });
+    return true;
+  }
+
+  if (method === "GET" && pathname.startsWith("/api/memories/by-entity/")) {
+    const primaryEntityId = decodeURIComponent(
+      pathname.slice("/api/memories/by-entity/".length),
+    );
+    if (!primaryEntityId) {
+      error(res, "Missing entity identifier.", 400);
+      return true;
+    }
+
+    // Support multi-identity people: ?entityIds=id1,id2,id3
+    // Falls back to the single path param if not provided.
+    const entityIdsParam = url.searchParams.get("entityIds");
+    const entityIds: UUID[] = entityIdsParam
+      ? (entityIdsParam
+          .split(",")
+          .map((id) => id.trim())
+          .filter(Boolean) as UUID[])
+      : [primaryEntityId as UUID];
+
+    const requestedLimit = parsePositiveInteger(
+      url.searchParams.get("limit"),
+      MEMORY_BROWSE_DEFAULT_LIMIT,
+    );
+    const limit = Math.min(
+      Math.max(requestedLimit, 1),
+      MEMORY_BROWSE_MAX_LIMIT,
+    );
+    const offset = parsePositiveInteger(url.searchParams.get("offset"), 0);
+    const tables = resolveTableFilter(url.searchParams.get("type"));
+
+    const allMemories = await fetchMemoriesFromTables(runtime, {
+      entityIds,
+      tables,
+      limit: limit + offset + 100,
+    });
+
+    allMemories.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+    const total = allMemories.length;
+    const page = allMemories
+      .slice(offset, offset + limit)
+      .map(memoryToBrowseItem);
+
+    json(res, {
+      entityId: primaryEntityId,
+      memories: page,
+      total,
+      limit,
+      offset,
+    });
+    return true;
+  }
+
+  if (method === "GET" && pathname === "/api/memories/stats") {
+    const counts: Record<string, number> = {};
+    let total = 0;
+
+    for (const tableName of MEMORY_TABLE_NAMES) {
+      const memories = await runtime.getMemories({
+        agentId: runtime.agentId as UUID,
+        tableName,
+        count: 10000,
+      });
+      counts[tableName] = memories.length;
+      total += memories.length;
+    }
+
+    json(res, { total, byType: counts });
     return true;
   }
 

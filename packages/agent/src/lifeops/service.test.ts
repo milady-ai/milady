@@ -1607,4 +1607,298 @@ describe("LifeOpsService", () => {
 
     expect(result.attempts).toHaveLength(expectedCount);
   });
+
+  it("updates browser settings and clears cached browser state when disabled", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    let settings = {
+      enabled: true,
+      trackingMode: "active_tabs" as const,
+      allowBrowserControl: true,
+      requireConfirmationForAccountAffecting: true,
+      incognitoEnabled: false,
+      siteAccessMode: "all_sites" as const,
+      grantedOrigins: ["https://example.com"],
+      blockedOrigins: [],
+      maxRememberedTabs: 10,
+      pauseUntil: null,
+      metadata: {},
+      updatedAt: "2026-04-10T00:00:00.000Z",
+    };
+    const deleteAllBrowserTabs = vi.fn().mockResolvedValue(undefined);
+    const deleteAllBrowserPageContexts = vi.fn().mockResolvedValue(undefined);
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+      }
+    ).repository = {
+      getBrowserSettings: vi.fn(async () => settings),
+      upsertBrowserSettings: vi.fn(
+        async (_agentId: string, next: typeof settings) => {
+          settings = next;
+        },
+      ),
+      deleteAllBrowserTabs,
+      deleteAllBrowserPageContexts,
+    };
+
+    const next = await service.updateBrowserSettings({
+      enabled: false,
+      trackingMode: "off",
+      allowBrowserControl: false,
+      blockedOrigins: ["https://secret.example.com"],
+    });
+
+    expect(next).toMatchObject({
+      enabled: false,
+      trackingMode: "off",
+      allowBrowserControl: false,
+      blockedOrigins: ["https://secret.example.com"],
+    });
+    expect(deleteAllBrowserTabs).toHaveBeenCalledTimes(1);
+    expect(deleteAllBrowserPageContexts).toHaveBeenCalledTimes(1);
+  });
+
+  it("syncs browser state, keeps remembered tabs, and redacts focused page text", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const settings = {
+      enabled: true,
+      trackingMode: "active_tabs" as const,
+      allowBrowserControl: true,
+      requireConfirmationForAccountAffecting: true,
+      incognitoEnabled: false,
+      siteAccessMode: "all_sites" as const,
+      grantedOrigins: [],
+      blockedOrigins: [],
+      maxRememberedTabs: 10,
+      pauseUntil: null,
+      metadata: {},
+      updatedAt: "2026-04-10T00:00:00.000Z",
+    };
+    const companions: Array<Record<string, unknown>> = [];
+    const tabs: Array<Record<string, unknown>> = [];
+    const pageContexts: Array<Record<string, unknown>> = [];
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+      }
+    ).repository = {
+      getBrowserSettings: vi.fn(async () => settings),
+      getBrowserCompanionByProfile: vi.fn(
+        async (_agentId: string, browser: string, profileId: string) =>
+          companions.find(
+            (candidate) =>
+              candidate.browser === browser &&
+              candidate.profileId === profileId,
+          ) ?? null,
+      ),
+      upsertBrowserCompanion: vi.fn(
+        async (companion: Record<string, unknown>) => {
+          const index = companions.findIndex(
+            (candidate) => candidate.id === companion.id,
+          );
+          if (index >= 0) {
+            companions[index] = companion;
+          } else {
+            companions.push(companion);
+          }
+        },
+      ),
+      listBrowserTabs: vi.fn(async () => tabs),
+      upsertBrowserTab: vi.fn(async (tab: Record<string, unknown>) => {
+        const index = tabs.findIndex((candidate) => candidate.id === tab.id);
+        if (index >= 0) {
+          tabs[index] = tab;
+        } else {
+          tabs.push(tab);
+        }
+      }),
+      deleteBrowserTabsByIds: vi.fn(async (_agentId: string, ids: string[]) => {
+        for (const id of ids) {
+          const index = tabs.findIndex((candidate) => candidate.id === id);
+          if (index >= 0) tabs.splice(index, 1);
+        }
+      }),
+      listBrowserPageContexts: vi.fn(async () => pageContexts),
+      upsertBrowserPageContext: vi.fn(
+        async (context: Record<string, unknown>) => {
+          const index = pageContexts.findIndex(
+            (candidate) => candidate.id === context.id,
+          );
+          if (index >= 0) {
+            pageContexts[index] = context;
+          } else {
+            pageContexts.push(context);
+          }
+        },
+      ),
+      deleteBrowserPageContextsByIds: vi.fn(
+        async (_agentId: string, ids: string[]) => {
+          for (const id of ids) {
+            const index = pageContexts.findIndex(
+              (candidate) => candidate.id === id,
+            );
+            if (index >= 0) pageContexts.splice(index, 1);
+          }
+        },
+      ),
+      deleteAllBrowserTabs: vi.fn().mockResolvedValue(undefined),
+      deleteAllBrowserPageContexts: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const result = await service.syncBrowserState({
+      companion: {
+        browser: "chrome",
+        profileId: "default",
+        label: "Personal Chrome",
+        profileLabel: "Default",
+        extensionVersion: "1.0.0",
+      },
+      tabs: [
+        {
+          browser: "chrome",
+          profileId: "default",
+          windowId: "window-1",
+          tabId: "tab-1",
+          url: "https://example.com/focused",
+          title: "Focused tab",
+          activeInWindow: true,
+          focusedWindow: true,
+          focusedActive: true,
+        },
+        {
+          browser: "chrome",
+          profileId: "default",
+          windowId: "window-2",
+          tabId: "tab-2",
+          url: "https://example.com/other",
+          title: "Other tab",
+          activeInWindow: true,
+          focusedWindow: false,
+          focusedActive: false,
+        },
+      ],
+      pageContexts: [
+        {
+          browser: "chrome",
+          profileId: "default",
+          windowId: "window-1",
+          tabId: "tab-1",
+          url: "https://example.com/focused",
+          title: "Focused tab",
+          selectionText: "token sk_live_secret12345 should redact",
+          mainText: "primary content with ghp_secret_token",
+          headings: ["Welcome"],
+          links: [{ text: "Docs", href: "https://example.com/docs" }],
+          forms: [{ action: "https://example.com/submit", fields: ["email"] }],
+        },
+        {
+          browser: "chrome",
+          profileId: "default",
+          windowId: "window-2",
+          tabId: "tab-2",
+          url: "https://example.com/other",
+          title: "Other tab",
+          selectionText: "should not persist",
+          mainText: "should not persist",
+        },
+      ],
+    });
+
+    expect(result.tabs).toHaveLength(2);
+    expect(result.currentPage).toMatchObject({
+      title: "Focused tab",
+      headings: ["Welcome"],
+    });
+    expect(result.currentPage?.selectionText).toContain("[redacted-secret]");
+    expect(result.currentPage?.mainText).toContain("[redacted-secret]");
+    expect(pageContexts).toHaveLength(1);
+    expect(companions).toHaveLength(1);
+  });
+
+  it("creates queued browser sessions and respects the confirmation lifecycle", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const createdSessions: Array<Record<string, unknown>> = [];
+    let storedSession: Record<string, unknown> | null = null;
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+        recordBrowserAudit: ReturnType<typeof vi.fn>;
+      }
+    ).repository = {
+      getBrowserSettings: vi.fn(async () => ({
+        enabled: true,
+        trackingMode: "current_tab",
+        allowBrowserControl: true,
+        requireConfirmationForAccountAffecting: true,
+        incognitoEnabled: false,
+        siteAccessMode: "all_sites",
+        grantedOrigins: [],
+        blockedOrigins: [],
+        maxRememberedTabs: 10,
+        pauseUntil: null,
+        metadata: {},
+        updatedAt: "2026-04-10T00:00:00.000Z",
+      })),
+      createBrowserSession: vi.fn(async (session: Record<string, unknown>) => {
+        createdSessions.push(session);
+        storedSession = session;
+      }),
+      getBrowserSession: vi.fn(async () => storedSession),
+      updateBrowserSession: vi.fn(async (session: Record<string, unknown>) => {
+        storedSession = session;
+      }),
+      createAuditEvent: vi.fn().mockResolvedValue(undefined),
+    };
+    (
+      service as unknown as {
+        recordBrowserAudit: ReturnType<typeof vi.fn>;
+      }
+    ).recordBrowserAudit = vi.fn().mockResolvedValue(undefined);
+
+    const created = await service.createBrowserSession({
+      title: "Review current tab",
+      browser: "chrome",
+      actions: [
+        {
+          kind: "read_page",
+          label: "Read page",
+          url: null,
+          selector: null,
+          text: null,
+          accountAffecting: false,
+          requiresConfirmation: false,
+          metadata: {},
+        },
+        {
+          kind: "click",
+          label: "Submit button",
+          selector: "button[type=submit]",
+          url: null,
+          text: null,
+          accountAffecting: true,
+          requiresConfirmation: true,
+          metadata: {},
+        },
+      ],
+    });
+
+    expect(created.status).toBe("awaiting_confirmation");
+    expect(created.browser).toBe("chrome");
+    expect(createdSessions).toHaveLength(1);
+
+    const confirmed = await service.confirmBrowserSession(created.id, {
+      confirmed: true,
+    });
+    expect(confirmed.status).toBe("queued");
+
+    const completed = await service.completeBrowserSession(created.id, {
+      status: "failed",
+      result: { reason: "selector missing" },
+    });
+    expect(completed.status).toBe("failed");
+    expect(completed.result).toMatchObject({ reason: "selector missing" });
+  });
 });

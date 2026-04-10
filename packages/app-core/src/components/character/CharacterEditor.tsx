@@ -71,6 +71,13 @@ const RotateCcw = ({ className }: { className?: string }) => (
   <Icon className={className} d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
 );
 
+const DownloadIcon = ({ className }: { className?: string }) => (
+  <Icon
+    className={className}
+    d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+  />
+);
+
 import {
   type ChangeEvent,
   useCallback,
@@ -115,7 +122,7 @@ const CHARACTER_EDITOR_PAGES = ["identity", "style", "examples"] as const;
 /* ── Component ─────────────────────────────────────────────────────── */
 
 export function CharacterEditor({
-  sceneOverlay: _sceneOverlay = false,
+  sceneOverlay = false,
   inModal: _inModal = false,
 }: {
   sceneOverlay?: boolean;
@@ -211,12 +218,6 @@ export function CharacterEditor({
     if (activePage === "style") setRightTab("style");
     else if (activePage === "examples") setRightTab("examples");
   }, [activePage]);
-
-  useEffect(() => {
-    if (!customizing) return;
-    leftPanelRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    rightPanelRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  }, [customizing]);
 
   /* ── Style entry state ──────────────────────────────────────────── */
   const [pendingStyleEntries, setPendingStyleEntries] = useState<
@@ -702,6 +703,7 @@ export function CharacterEditor({
   }, []);
 
   useEffect(() => {
+    if (!sceneOverlay) return;
     const handler = () => {
       const greeting = pendingGreetingRef.current;
       if (!greeting) return;
@@ -740,20 +742,15 @@ export function CharacterEditor({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voice.speak]);
-
-  /* ── Sync customizing state with tab ─────────────────────────────── */
-  /* Removed: previously auto-set customizing=true when tab==="character",
-     which prevented the roster from being the default view. Now the user
-     must explicitly click "Customize Character" to enter the editor. */
+  }, [voice.speak, sceneOverlay]);
 
   /* ── Dispatch camera offset for editor panel ─────────────────────── */
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!sceneOverlay || typeof window === "undefined") return;
     const mql = window.matchMedia("(max-width: 768px)");
     const isEditorTab = tab === "character" || tab === "character-select";
     const dispatch = () => {
-      const offset = customizing && isEditorTab && !mql.matches ? 0.85 : 0;
+      const offset = isEditorTab && !mql.matches ? 0.85 : 0;
       window.dispatchEvent(
         new CustomEvent("eliza:editor-camera-offset", {
           detail: { offset },
@@ -765,14 +762,13 @@ export function CharacterEditor({
     mql.addEventListener("change", onChange);
     return () => {
       mql.removeEventListener("change", onChange);
-      // Reset camera offset when leaving customize mode or switching tabs
       window.dispatchEvent(
         new CustomEvent("eliza:editor-camera-offset", {
           detail: { offset: 0 },
         }),
       );
     };
-  }, [customizing, tab]);
+  }, [tab, sceneOverlay]);
 
   /* ── Sync style entry drafts ────────────────────────────────────── */
   useEffect(() => {
@@ -872,6 +868,26 @@ export function CharacterEditor({
     applyCharacterDefaults,
     applyVoicePresetForEntry,
   ]);
+
+  /* ── Export character JSON ────────────────────────────────────────── */
+  const handleExportCharacter = useCallback(() => {
+    const data = currentCharacter;
+    if (!data) return;
+    const fileName =
+      (typeof data.name === "string" && data.name.trim()
+        ? data.name.trim().replace(/\s+/g, "-").toLowerCase()
+        : "character") + ".json";
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }, [currentCharacter]);
 
   /* ── Generate field ─────────────────────────────────────────────── */
   const getCharContext = useCallback(
@@ -1035,8 +1051,14 @@ export function CharacterEditor({
   /* ── Loading state ──────────────────────────────────────────────── */
   if (characterLoading && !characterData) {
     return (
-      <div className="relative flex flex-col justify-end w-full flex-1 gap-2 overflow-hidden select-none transition-[width,margin-left] duration-[400ms] ease-in-out [-webkit-tap-highlight-color:transparent] max-[600px]:overflow-visible">
-        <div className="flex items-center justify-center flex-1 text-muted text-[13px]">
+      <div
+        className={
+          sceneOverlay
+            ? "relative flex flex-col justify-end w-full flex-1 gap-2 overflow-hidden select-none transition-[width,margin-left] duration-[400ms] ease-in-out [-webkit-tap-highlight-color:transparent] max-[600px]:overflow-visible"
+            : "flex flex-col w-full flex-1 items-center justify-center"
+        }
+      >
+        <div className="text-muted text-[13px]">
           {t("charactereditor.LoadingCharacterData", {
             defaultValue: "Loading character data...",
           })}
@@ -1048,16 +1070,24 @@ export function CharacterEditor({
   /* ── Render ─────────────────────────────────────────────────────── */
   return (
     <div
-      className="absolute inset-0 z-10 flex flex-col pointer-events-none pt-[4.5rem] px-6 pb-3 max-md:px-3 max-md:pb-2 max-md:pt-[4.5rem] [&>*]:pointer-events-auto"
-      data-no-camera-zoom="true"
-      data-no-camera-drag="true"
-      onWheel={(e) => e.stopPropagation()}
+      className={
+        sceneOverlay
+          ? "absolute inset-0 z-10 flex flex-col pointer-events-none pt-[4.5rem] px-6 pb-3 max-md:px-3 max-md:pb-2 max-md:pt-[4.5rem] [&>*]:pointer-events-auto"
+          : "flex flex-col w-full flex-1 gap-4"
+      }
+      data-no-camera-zoom={sceneOverlay ? "true" : undefined}
+      data-no-camera-drag={sceneOverlay ? "true" : undefined}
+      onWheel={sceneOverlay ? (e) => e.stopPropagation() : undefined}
     >
       <div
-        className={`relative flex flex-col justify-end w-full flex-1 gap-2 overflow-hidden select-none transition-[width,margin-left] duration-[400ms] ease-in-out [-webkit-tap-highlight-color:transparent] max-[600px]:overflow-visible [&_input]:select-text [&_textarea]:select-text [&_*:focus-visible:not(input):not(textarea)]:outline-none [&_*:focus-visible:not(input):not(textarea)]:shadow-none [&_button:focus-visible]:outline-none [&_button:focus-visible]:shadow-none${customizing ? " md:w-[40%] md:ml-auto" : ""}`}
+        className={
+          sceneOverlay
+            ? `relative flex flex-col justify-end w-full flex-1 gap-2 overflow-hidden select-none transition-[width,margin-left] duration-[400ms] ease-in-out [-webkit-tap-highlight-color:transparent] max-[600px]:overflow-visible [&_input]:select-text [&_textarea]:select-text [&_*:focus-visible:not(input):not(textarea)]:outline-none [&_*:focus-visible:not(input):not(textarea)]:shadow-none [&_button:focus-visible]:outline-none [&_button:focus-visible]:shadow-none${customizing ? " md:w-[40%] md:ml-auto" : ""}`
+            : "relative flex flex-col w-full flex-1 gap-6 select-none [&_input]:select-text [&_textarea]:select-text max-w-6xl mx-auto px-4 lg:px-8"
+        }
       >
-        {/* ── Character Roster (when NOT customizing) ────────────────── */}
-        {!customizing && (
+        {/* ── Companion overlay: Character Roster ────────────────────── */}
+        {sceneOverlay && !customizing && (
           <div className="shrink min-h-0 overflow-hidden flex flex-col items-center justify-end w-full relative max-[600px]:!overflow-visible pointer-events-auto">
             <CharacterRoster
               entries={characterRoster}
@@ -1069,7 +1099,8 @@ export function CharacterEditor({
           </div>
         )}
 
-        {customizing && (
+        {/* ── Companion overlay: tabbed editor (identity | style | examples) */}
+        {sceneOverlay && customizing && (
           // biome-ignore lint/a11y/useSemanticElements: existing pattern
           <div
             className="flex flex-col flex-1 min-h-0 gap-2 overflow-hidden"
@@ -1178,7 +1209,6 @@ export function CharacterEditor({
               aria-labelledby={`character-editor-tab-${activePage}`}
               className="flex flex-col flex-1 min-h-0 overflow-hidden"
             >
-              {/* ── LEFT PANEL (Character identity) ───────────────────────── */}
               <div
                 ref={leftPanelRef}
                 className={`custom-scrollbar flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]${activePage !== "identity" ? " hidden" : ""}`}
@@ -1204,13 +1234,10 @@ export function CharacterEditor({
                   t={t}
                 />
               </div>
-
-              {/* ── RIGHT PANEL ───────────────────────────────────────────── */}
               <div
                 ref={rightPanelRef}
                 className={`custom-scrollbar flex flex-col flex-1 gap-3 min-h-0 overflow-y-auto pr-1 [scrollbar-gutter:stable]${activePage === "identity" ? " hidden" : ""}`}
               >
-                {/* Style Rules */}
                 <div
                   style={{ display: rightTab === "style" ? undefined : "none" }}
                 >
@@ -1230,8 +1257,6 @@ export function CharacterEditor({
                     t={t}
                   />
                 </div>
-
-                {/* Chat + Post Examples */}
                 <div
                   style={{
                     display: rightTab === "examples" ? undefined : "none",
@@ -1250,38 +1275,112 @@ export function CharacterEditor({
             </div>
           </div>
         )}
-      </div>
 
-      {/* ── Footer ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-2 pt-2 shrink-0 pointer-events-auto">
-        {/* Status messages */}
-        {(characterSaveSuccess || combinedSaveError || generateError) && (
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {characterSaveSuccess && (
-              <span className="rounded-lg border border-status-success/20 bg-status-success-bg px-3 py-1 text-xs font-bold text-status-success">
-                {characterSaveSuccess}
-              </span>
-            )}
-            {combinedSaveError && (
-              <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger">
-                {combinedSaveError}
-              </span>
-            )}
-            {generateError && (
-              <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger">
-                {generateError}
-              </span>
-            )}
-          </div>
-        )}
+        {/* ── Standalone page: all sections stacked + fixed action sidebar */}
+        {!sceneOverlay && (
+          <div className="flex gap-6 lg:gap-10">
+            {/* Scrollable form column */}
+            <div className="flex flex-col gap-5 flex-1 min-w-0">
+              <CharacterIdentityPanel
+                d={d}
+                bioText={bioText}
+                generating={generating}
+                voiceSelectValue={voiceSelectValue}
+                activeVoicePreset={activeVoicePreset}
+                voiceTesting={voiceTesting}
+                voiceLoading={voiceLoading}
+                useElevenLabs={useElevenLabs}
+                elevenLabsVoiceGroups={elevenLabsVoiceGroups}
+                edgeVoiceGroups={edgeVoiceGroups}
+                voiceTestAudio={voiceTestAudio}
+                handleFieldEdit={handleFieldEdit}
+                handleGenerate={handleGenerate}
+                handleSelectPreset={handleSelectPreset}
+                handleStopTest={handleStopTest}
+                setVoiceTesting={setVoiceTesting}
+                setVoiceTestAudio={setVoiceTestAudio}
+                t={t}
+              />
+              <CharacterStylePanel
+                d={d}
+                generating={generating}
+                pendingStyleEntries={pendingStyleEntries}
+                styleEntryDrafts={styleEntryDrafts}
+                handleGenerate={handleGenerate}
+                handlePendingStyleEntryChange={handlePendingStyleEntryChange}
+                handleAddStyleEntry={handleAddStyleEntry}
+                handleRemoveStyleEntry={handleRemoveStyleEntry}
+                handleStyleEntryDraftChange={handleStyleEntryDraftChange}
+                handleCommitStyleEntry={handleCommitStyleEntry}
+                t={t}
+              />
+              <CharacterExamplesPanel
+                d={d}
+                normalizedMessageExamples={normalizedMessageExamples}
+                generating={generating}
+                handleFieldEdit={handleFieldEdit}
+                handleGenerate={handleGenerate}
+                t={t}
+              />
+            </div>
 
-        <div className="relative flex items-center justify-center min-h-9 max-md:flex max-md:flex-wrap max-md:justify-center max-md:gap-2">
-          <div className="absolute left-0 flex items-center gap-2">
-            {customizing && (
-              <>
+            {/* Fixed action sidebar */}
+            <div className="hidden md:flex w-48 shrink-0">
+              <div className="sticky top-4 flex flex-col gap-3 w-full">
+                {(characterSaveSuccess ||
+                  combinedSaveError ||
+                  generateError) && (
+                  <div className="flex flex-col gap-1.5">
+                    {characterSaveSuccess && (
+                      <span className="rounded-lg border border-status-success/20 bg-status-success-bg px-3 py-1 text-xs font-bold text-status-success text-center">
+                        {characterSaveSuccess}
+                      </span>
+                    )}
+                    {combinedSaveError && (
+                      <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger text-center">
+                        {combinedSaveError}
+                      </span>
+                    )}
+                    {generateError && (
+                      <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger text-center">
+                        {generateError}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <Button
+                  size="sm"
+                  className={`${CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME} w-full`}
+                  style={
+                    hasPendingChanges ? accentGradientStyle : idleSaveBtnStyle
+                  }
+                  disabled={
+                    characterSaving || voiceSaving || !hasPendingChanges
+                  }
+                  onClick={() => void handleSaveAll()}
+                >
+                  {characterSaving || voiceSaving
+                    ? t("charactereditor.Saving", { defaultValue: "saving..." })
+                    : t("charactereditor.Save", { defaultValue: "Save" })}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={`${CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME} w-full`}
+                  style={idleSaveBtnStyle}
+                  onClick={handleResetToDefaults}
+                  disabled={!activeCharacterRosterEntry}
+                  title={t("charactereditor.ResetToDefaults", {
+                    defaultValue: "Reset to Defaults",
+                  })}
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                  {t("charactereditor.Reset", { defaultValue: "Reset" })}
+                </Button>
                 <input
                   type="file"
-                  id="ce-vrm-upload"
+                  id="ce-vrm-upload-standalone"
                   accept=".vrm"
                   className="hidden"
                   style={{ display: "none" }}
@@ -1297,63 +1396,184 @@ export function CharacterEditor({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+                  className={`${CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME} w-full`}
                   style={idleSaveBtnStyle}
                   onClick={() =>
-                    document.getElementById("ce-vrm-upload")?.click()
+                    document.getElementById("ce-vrm-upload-standalone")?.click()
                   }
                   title={t("charactereditor.UploadVRM", {
-                    defaultValue: "Upload",
+                    defaultValue: "Upload VRM",
                   })}
                 >
                   {t("charactereditor.UploadVRM", {
-                    defaultValue: "Upload",
+                    defaultValue: "Upload VRM",
                   })}
                 </Button>
-              </>
-            )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={`${CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME} w-full`}
+                  style={idleSaveBtnStyle}
+                  onClick={handleExportCharacter}
+                  disabled={!currentCharacter}
+                  title={t("charactereditor.ExportJSON", {
+                    defaultValue: "Export JSON",
+                  })}
+                >
+                  <DownloadIcon className="h-3.5 w-3.5 mr-1" />
+                  {t("charactereditor.ExportJSON", {
+                    defaultValue: "Export JSON",
+                  })}
+                </Button>
+              </div>
+            </div>
+
+            {/* Mobile: fixed bottom bar (no sticky sidebar on small screens) */}
+            <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-3 border-t border-border bg-bg/90 px-4 py-2.5 backdrop-blur-md md:hidden">
+              <Button
+                size="sm"
+                className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+                style={
+                  hasPendingChanges ? accentGradientStyle : idleSaveBtnStyle
+                }
+                disabled={characterSaving || voiceSaving || !hasPendingChanges}
+                onClick={() => void handleSaveAll()}
+              >
+                {characterSaving || voiceSaving
+                  ? t("charactereditor.Saving", { defaultValue: "saving..." })
+                  : t("charactereditor.Save", { defaultValue: "Save" })}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+                style={idleSaveBtnStyle}
+                onClick={handleResetToDefaults}
+                disabled={!activeCharacterRosterEntry}
+              >
+                <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                {t("charactereditor.Reset", { defaultValue: "Reset" })}
+              </Button>
+            </div>
           </div>
+        )}
+      </div>
 
-          {/* Save Character — centered; transparent when nothing to save */}
-          <Button
-            size="sm"
-            className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
-            style={hasPendingChanges ? accentGradientStyle : idleSaveBtnStyle}
-            disabled={characterSaving || voiceSaving || !hasPendingChanges}
-            onClick={() => void handleSaveAll()}
-          >
-            {characterSaving || voiceSaving
-              ? t("charactereditor.Saving", { defaultValue: "saving..." })
-              : t("charactereditor.Save", { defaultValue: "Save" })}
-          </Button>
+      {/* ── Footer (companion overlay only) ────────────────────────── */}
+      {sceneOverlay && (
+        <div className="flex flex-col gap-2 pt-2 shrink-0 pointer-events-auto">
+          {(characterSaveSuccess || combinedSaveError || generateError) && (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {characterSaveSuccess && (
+                <span className="rounded-lg border border-status-success/20 bg-status-success-bg px-3 py-1 text-xs font-bold text-status-success">
+                  {characterSaveSuccess}
+                </span>
+              )}
+              {combinedSaveError && (
+                <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger">
+                  {combinedSaveError}
+                </span>
+              )}
+              {generateError && (
+                <span className="rounded-lg border border-status-danger/20 bg-status-danger-bg px-3 py-1 text-xs font-medium text-status-danger">
+                  {generateError}
+                </span>
+              )}
+            </div>
+          )}
 
-          <div className="absolute right-0 flex items-center gap-2">
-            {/* Toggle between Customize and Select — always present, just text changes */}
+          <div className="relative flex items-center justify-center min-h-9 max-md:flex max-md:flex-wrap max-md:justify-center max-md:gap-2">
+            <div className="absolute left-0 flex items-center gap-2">
+              <input
+                type="file"
+                id="ce-vrm-upload"
+                accept=".vrm"
+                className="hidden"
+                style={{ display: "none" }}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setState("selectedVrmIndex", 0);
+                  }
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+                style={idleSaveBtnStyle}
+                onClick={() =>
+                  document.getElementById("ce-vrm-upload")?.click()
+                }
+                title={t("charactereditor.UploadVRM", {
+                  defaultValue: "Upload",
+                })}
+              >
+                {t("charactereditor.UploadVRM", {
+                  defaultValue: "Upload",
+                })}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+                style={idleSaveBtnStyle}
+                onClick={handleExportCharacter}
+                disabled={!currentCharacter}
+                title={t("charactereditor.ExportJSON", {
+                  defaultValue: "Export",
+                })}
+              >
+                {t("charactereditor.ExportJSON", {
+                  defaultValue: "Export",
+                })}
+              </Button>
+            </div>
+
             <Button
-              type="button"
-              variant="default"
               size="sm"
               className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
-              style={accentGradientStyle}
-              onClick={() => {
-                if (customizing) {
-                  setCustomizing(false);
-                  setTab("character-select");
-                } else {
-                  setCustomizing(true);
-                  setTab("character");
-                }
-              }}
+              style={hasPendingChanges ? accentGradientStyle : idleSaveBtnStyle}
+              disabled={characterSaving || voiceSaving || !hasPendingChanges}
+              onClick={() => void handleSaveAll()}
             >
-              {customizing
-                ? t("charactereditor.SelectBtn", { defaultValue: "Select" })
-                : t("charactereditor.CustomizeBtn", {
-                    defaultValue: "Customize",
-                  })}
+              {characterSaving || voiceSaving
+                ? t("charactereditor.Saving", { defaultValue: "saving..." })
+                : t("charactereditor.Save", { defaultValue: "Save" })}
             </Button>
+
+            <div className="absolute right-0 flex items-center gap-2">
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                className={CHARACTER_EDITOR_FOOTER_ACTION_CLASSNAME}
+                style={accentGradientStyle}
+                onClick={() => {
+                  if (customizing) {
+                    setCustomizing(false);
+                    setTab("character-select");
+                  } else {
+                    setCustomizing(true);
+                    setTab("character");
+                  }
+                }}
+              >
+                {customizing
+                  ? t("charactereditor.SelectBtn", { defaultValue: "Select" })
+                  : t("charactereditor.CustomizeBtn", {
+                      defaultValue: "Customize",
+                    })}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

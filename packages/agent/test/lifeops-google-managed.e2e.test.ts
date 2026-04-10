@@ -236,7 +236,7 @@ describe("life-ops managed Google connector", () => {
             "email",
             "profile",
             "https://www.googleapis.com/auth/calendar.readonly",
-            "https://www.googleapis.com/auth/gmail.metadata",
+            "https://www.googleapis.com/auth/gmail.readonly",
           ],
           expiresAt: "2026-04-05T00:00:00.000Z",
           hasRefreshToken: true,
@@ -561,7 +561,7 @@ describe("life-ops managed Google connector", () => {
                   "profile",
                   "https://www.googleapis.com/auth/calendar.readonly",
                   "https://www.googleapis.com/auth/calendar.events",
-                  "https://www.googleapis.com/auth/gmail.metadata",
+                  "https://www.googleapis.com/auth/gmail.readonly",
                   "https://www.googleapis.com/auth/gmail.send",
                 ],
                 expiresAt: "2026-04-05T00:00:00.000Z",
@@ -913,7 +913,100 @@ describe("life-ops managed Google connector", () => {
     ).toHaveLength(0);
   });
 
-  it("falls back to cached Gmail messages for cloud-managed sender search when triage has no live hit", async () => {
+  it("uses the cloud-managed Gmail search endpoint when a live hit exists", async () => {
+    fetchMock.mockImplementation(async (input, init) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const headers = new Headers(init?.headers);
+      expect(headers.get("x-api-key")).toBe("ck-managed-google-test");
+
+      if (
+        url === "https://cloud.example/api/v1/milady/google/status?side=owner"
+      ) {
+        return jsonResponse({
+          provider: "google",
+          side: "owner",
+          mode: "cloud_managed",
+          configured: true,
+          connected: true,
+          reason: "connected",
+          identity: {
+            id: "google-user-managed-search-live",
+            email: "founder@example.com",
+            name: "Founder Example",
+          },
+          grantedCapabilities: [
+            "google.basic_identity",
+            "google.gmail.triage",
+          ],
+          grantedScopes: [
+            "openid",
+            "email",
+            "profile",
+            "https://www.googleapis.com/auth/gmail.readonly",
+          ],
+          expiresAt: "2026-04-05T00:00:00.000Z",
+          hasRefreshToken: true,
+          connectionId: "managed-google-search-live-connection",
+          linkedAt: "2026-04-04T15:00:00.000Z",
+          lastUsedAt: "2026-04-04T16:00:00.000Z",
+        });
+      }
+
+      if (
+        url ===
+          "https://cloud.example/api/v1/milady/google/gmail/search?side=owner&query=from%3Asuran&maxResults=5" &&
+        (init?.method ?? "GET") === "GET"
+      ) {
+        return jsonResponse({
+          messages: [
+            {
+              externalId: "managed-live-suran-message",
+              threadId: "managed-live-suran-thread",
+              subject: "Dinner agenda",
+              from: "Suran Lee",
+              fromEmail: "suran@example.com",
+              replyTo: "suran@example.com",
+              to: ["founder@example.com"],
+              cc: [],
+              snippet: "Here is the agenda for tonight.",
+              receivedAt: "2026-04-04T17:30:00.000Z",
+              isUnread: true,
+              isImportant: false,
+              likelyReplyNeeded: true,
+              triageScore: 71,
+              triageReason: "direct cloud sender match",
+              labels: ["INBOX", "UNREAD"],
+              htmlLink:
+                "https://mail.google.com/mail/u/0/#all/managed-live-suran-thread",
+              metadata: {
+                messageIdHeader: "<managed-live-suran@example.com>",
+              },
+            },
+          ],
+          syncedAt: "2026-04-04T17:32:00.000Z",
+        });
+      }
+
+      throw new Error(`Unexpected fetch ${url}`);
+    });
+
+    const searchRes = await req(
+      port,
+      "GET",
+      "/api/lifeops/gmail/search?mode=cloud_managed&forceSync=true&query=from%3Asuran&maxResults=5",
+    );
+
+    expect(searchRes.status).toBe(200);
+    expect(searchRes.data.query).toBe("from:suran");
+    expect(searchRes.data.messages).toEqual([
+      expect.objectContaining({
+        subject: "Dinner agenda",
+        fromEmail: "suran@example.com",
+      }),
+    ]);
+  });
+
+  it("falls back to cached Gmail messages for cloud-managed sender search when live search has no hit", async () => {
     fetchMock.mockImplementation(async (input, init) => {
       const url = typeof input === "string" ? input : input.toString();
       const headers = new Headers(init?.headers);
@@ -942,13 +1035,24 @@ describe("life-ops managed Google connector", () => {
             "openid",
             "email",
             "profile",
-            "https://www.googleapis.com/auth/gmail.metadata",
+            "https://www.googleapis.com/auth/gmail.readonly",
           ],
           expiresAt: "2026-04-05T00:00:00.000Z",
           hasRefreshToken: true,
           connectionId: "managed-google-search-connection",
           linkedAt: "2026-04-04T15:00:00.000Z",
           lastUsedAt: "2026-04-04T16:00:00.000Z",
+        });
+      }
+
+      if (
+        url ===
+          "https://cloud.example/api/v1/milady/google/gmail/search?side=owner&query=from%3Asuran&maxResults=5" &&
+        (init?.method ?? "GET") === "GET"
+      ) {
+        return jsonResponse({
+          messages: [],
+          syncedAt: "2026-04-04T17:32:00.000Z",
         });
       }
 

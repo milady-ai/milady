@@ -9,7 +9,6 @@ export { GameViewOverlay } from "./components/apps/GameViewOverlay";
 export { AvatarLoader } from "./components/character/AvatarLoader";
 export { CharacterEditor } from "./components/character/CharacterEditor";
 export { SaveCommandModal } from "./components/chat/SaveCommandModal";
-export { SharedCompanionScene } from "./components/companion/CompanionSceneHost";
 export { ConversationsSidebar } from "./components/conversations/ConversationsSidebar";
 export { CustomActionEditor } from "./components/custom-actions/CustomActionEditor";
 export { CustomActionsPanel } from "./components/custom-actions/CustomActionsPanel";
@@ -18,6 +17,7 @@ export { AdvancedPageView } from "./components/pages/AdvancedPageView";
 export { AppsPageView } from "./components/pages/AppsPageView";
 export { BrowserWorkspaceView } from "./components/pages/BrowserWorkspaceView";
 export { ChatView } from "./components/pages/ChatView";
+export { CompanionShell } from "./components/shell/CompanionShell";
 export { CompanionView } from "./components/pages/CompanionView";
 export { ConnectorsPageView } from "./components/pages/ConnectorsPageView";
 export {
@@ -26,10 +26,10 @@ export {
 } from "./components/pages/HeartbeatsView";
 export { InventoryView } from "./components/pages/InventoryView";
 export { KnowledgeView } from "./components/pages/KnowledgeView";
+export { LifeOpsPageView } from "./components/pages/LifeOpsPageView";
 export { SettingsView } from "./components/pages/SettingsView";
 export { StreamView } from "./components/pages/StreamView";
 export { BugReportModal } from "./components/shell/BugReportModal";
-export { CompanionShell } from "./components/shell/CompanionShell";
 export { ConnectionFailedBanner } from "./components/shell/ConnectionFailedBanner";
 export { ConnectionLostOverlay } from "./components/shell/ConnectionLostOverlay";
 export { Header } from "./components/shell/Header";

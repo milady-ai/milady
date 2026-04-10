@@ -12,6 +12,7 @@ import { App } from "@miladyai/app-core/App";
 import { client } from "@miladyai/app-core/api";
 import {
   initializeCapacitorBridge,
+  subscribeDesktopBridgeEvent,
   initializeStorageBridge,
   isElectrobunRuntime,
 } from "@miladyai/app-core/bridge";
@@ -35,6 +36,7 @@ import {
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
+  dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -287,8 +289,13 @@ function handleDeepLink(url: string): void {
     case "chat":
       window.location.hash = "#chat";
       break;
+    case "lifeops":
+      window.location.hash = "#lifeops";
+      dispatchQueuedLifeOpsGithubCallbackFromUrl(url);
+      break;
     case "settings":
       window.location.hash = "#settings";
+      dispatchQueuedLifeOpsGithubCallbackFromUrl(url);
       break;
     case "connect": {
       const gatewayUrl = parsed.searchParams.get("url");
@@ -377,6 +384,18 @@ async function initializeDesktopShell(): Promise<void> {
       dispatchMiladyEvent(TRAY_ACTION_EVENT, event);
     },
   );
+
+  subscribeDesktopBridgeEvent({
+    rpcMessage: "shareTargetReceived",
+    ipcChannel: "desktop:shareTargetReceived",
+    listener: (payload) => {
+      const url = (payload as { url?: string } | null | undefined)?.url;
+      if (typeof url !== "string" || url.trim().length === 0) {
+        return;
+      }
+      handleDeepLink(url);
+    },
+  });
 }
 
 function setupPlatformStyles(): void {

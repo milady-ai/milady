@@ -45,9 +45,11 @@ const INBOX_CHATS_REFRESH_MS = 5_000;
 
 interface InboxChatRow {
   avatarUrl?: string;
+  canSend?: boolean;
   id: string;
   lastMessageAt: number;
   source: string;
+  transportSource?: string;
   title: string;
   worldId?: string;
   worldLabel: string;
@@ -136,9 +138,11 @@ export function ConversationsSidebar({
         setInboxChats(
           response.chats.map((chat) => ({
             avatarUrl: chat.avatarUrl,
+            canSend: chat.canSend,
             id: chat.id,
             lastMessageAt: chat.lastMessageAt,
             source: chat.source,
+            transportSource: chat.transportSource,
             title: chat.title,
             worldId: chat.worldId,
             worldLabel: chat.worldLabel,
@@ -228,8 +232,13 @@ export function ConversationsSidebar({
     if (row.kind === "inbox") {
       setState("activeInboxChat", {
         avatarUrl: row.avatarUrl,
+        canSend:
+          row.kind === "inbox" && typeof row.canSend === "boolean"
+            ? row.canSend
+            : undefined,
         id: row.id,
         source: row.source ?? "",
+        transportSource: row.transportSource,
         title: row.title,
         worldId: row.worldId,
         worldLabel: row.worldLabel,

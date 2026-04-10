@@ -19,35 +19,43 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { logger, type Plugin } from "@elizaos/core";
 
 import { type ElizaConfig, saveElizaConfig } from "../config/config.js";
+import { resolveStateDir, resolveUserPath } from "../config/paths.js";
 import {
   type ApplyPluginAutoEnableParams,
   applyPluginAutoEnable,
 } from "../config/plugin-auto-enable.js";
-import { resolveStateDir, resolveUserPath } from "../config/paths.js";
 import type { PluginInstallRecord } from "../config/types.eliza.js";
 import { diagnoseNoAIProvider } from "../services/version-compat.js";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins.js";
-import {
-  collectPluginNames,
-  CHANNEL_PLUGIN_MAP,
-  OPTIONAL_PLUGIN_MAP,
-  type PluginLoadReasons,
-} from "./plugin-collector.js";
 import {
   CUSTOM_PLUGINS_DIRNAME,
   EJECTED_PLUGINS_DIRNAME,
   ensureBrowserServerLink,
   findRuntimePluginExport,
   mergeDropInPlugins,
+  type PluginModuleShape,
+  type ResolvedPlugin,
   repairBrokenInstallRecord,
   resolveElizaPluginImportSpecifier,
   resolvePackageEntry,
+  STATIC_ELIZA_PLUGINS,
   scanDropInPlugins,
   shouldIgnoreMissingPluginExport,
-  STATIC_ELIZA_PLUGINS,
-  type PluginModuleShape,
-  type ResolvedPlugin,
 } from "./eliza.js";
+import {
+  CHANNEL_PLUGIN_MAP,
+  collectPluginNames,
+  OPTIONAL_PLUGIN_MAP,
+  type PluginLoadReasons,
+} from "./plugin-collector.js";
+
+const LAST_FAILED_PLUGIN_NAMES = Symbol.for(
+  "@elizaos/plugin-resolver/last-failed-plugin-names",
+);
+
+type GlobalWithLastFailedPluginNames = typeof globalThis & {
+  [LAST_FAILED_PLUGIN_NAMES]?: string[];
+};
 
 // ---------------------------------------------------------------------------
 // Helpers (private)
@@ -287,7 +295,23 @@ async function findNearestNodeModulesDir(
   }
 }
 
-async function findAncestorNodeModulesDirs(startDir: string): Promise<string[]> {
+function setLastFailedPluginNames(pluginNames: readonly string[]): void {
+  (globalThis as GlobalWithLastFailedPluginNames)[LAST_FAILED_PLUGIN_NAMES] = [
+    ...pluginNames,
+  ];
+}
+
+export function getLastFailedPluginNames(): string[] {
+  return [
+    ...((globalThis as GlobalWithLastFailedPluginNames)[
+      LAST_FAILED_PLUGIN_NAMES
+    ] ?? []),
+  ];
+}
+
+async function findAncestorNodeModulesDirs(
+  startDir: string,
+): Promise<string[]> {
   const dirs: string[] = [];
   let currentDir = path.resolve(startDir);
   while (true) {
@@ -363,7 +387,9 @@ async function linkMissingPackagesFromNodeModules(params: {
 
     if (entry.isDirectory() && entry.name.startsWith("@")) {
       await fs.mkdir(targetPath, { recursive: true });
-      const scopedEntries = await fs.readdir(sourcePath, { withFileTypes: true });
+      const scopedEntries = await fs.readdir(sourcePath, {
+        withFileTypes: true,
+      });
       for (const scopedEntry of scopedEntries) {
         if (scopedEntry.name.startsWith(".")) {
           continue;
@@ -373,10 +399,7 @@ async function linkMissingPackagesFromNodeModules(params: {
         if (existsSync(scopedTargetPath)) {
           continue;
         }
-        if (
-          !scopedEntry.isDirectory() &&
-          !scopedEntry.isSymbolicLink()
-        ) {
+        if (!scopedEntry.isDirectory() && !scopedEntry.isSymbolicLink()) {
           continue;
         }
         await fs.symlink(scopedSourcePath, scopedTargetPath, "dir");
@@ -415,7 +438,10 @@ async function linkHoistedNodeModulesPackages(params: {
   }
 
   const normalizedInstallRoot = path.resolve(params.installRoot);
-  const internalNodeModulesRoot = path.join(normalizedInstallRoot, "node_modules");
+  const internalNodeModulesRoot = path.join(
+    normalizedInstallRoot,
+    "node_modules",
+  );
   const ancestorNodeModulesDirs = await findAncestorNodeModulesDirs(
     path.dirname(params.packageRoot),
   );
@@ -546,6 +572,21 @@ export async function resolvePlugins(
   };
 
   const denyList = new Set<string>((config.plugins?.deny || []) as string[]);
+  const envSkipPlugins = (process.env.ELIZA_SKIP_PLUGINS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  for (const pluginName of envSkipPlugins) {
+    denyList.add(pluginName);
+  }
+  if (envSkipPlugins.length > 0) {
+    logger.info(
+      `[eliza] Skipping ${envSkipPlugins.length} plugin(s) via ELIZA_SKIP_PLUGINS: ${envSkipPlugins.join(", ")}`,
+    );
+  }
+  for (const pluginName of denyList) {
+    pluginsToLoad.delete(pluginName);
+  }
 
   // ── Auto-discover ejected plugins ───────────────────────────────────────
   // Ejected plugins override npm/core versions, so they are tracked
@@ -791,10 +832,24 @@ export async function resolvePlugins(
   // may race with each other. This is an accepted trade-off for startup
   // performance. Critical env vars (database, AI provider keys) are set
   // before this point in buildCharacterFromConfig / resolveDbEnv.
-  logger.info(`[eliza] Loading ${pluginsToLoad.size} plugins...`);
-  const pluginResults = await Promise.all(
-    Array.from(pluginsToLoad).map(loadSinglePlugin),
+  const serializePluginLoads = process.env.ELIZA_SERIALIZE_PLUGIN_LOADS === "1";
+  logger.info(
+    `[eliza] Loading ${pluginsToLoad.size} plugins${serializePluginLoads ? " sequentially" : ""}...`,
   );
+  const pluginResults = serializePluginLoads
+    ? await (async () => {
+        const results: Array<Awaited<ReturnType<typeof loadSinglePlugin>>> = [];
+        let index = 0;
+        for (const pluginName of pluginsToLoad) {
+          index += 1;
+          logger.info(
+            `[eliza] Loading plugin ${index}/${pluginsToLoad.size}: ${pluginName}`,
+          );
+          results.push(await loadSinglePlugin(pluginName));
+        }
+        return results;
+      })()
+    : await Promise.all(Array.from(pluginsToLoad).map(loadSinglePlugin));
 
   // Collect successful loads
   for (const result of pluginResults) {
@@ -844,6 +899,8 @@ export async function resolvePlugins(
       `[eliza] Optional plugins not installed: ${withReasons.join(", ")}`,
     );
   }
+
+  setLastFailedPluginNames(failedPlugins.map((plugin) => plugin.name));
 
   // Diagnose version-skew issues when AI providers failed to load (#10)
   const loadedNames = plugins.map((p) => p.name);

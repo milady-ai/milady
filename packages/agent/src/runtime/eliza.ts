@@ -128,6 +128,7 @@ import {
 } from "../services/sandbox-manager.js";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins.js";
 import { seedBundledKnowledge } from "./default-knowledge.js";
+import discordLocalPlugin from "./discord-local-plugin.js";
 import { createElizaPlugin } from "./eliza-plugin.js";
 import { detectEmbeddingPreset } from "./embedding-presets.js";
 import {
@@ -247,6 +248,7 @@ export const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   "@elizaos/plugin-elizacloud": pluginElizacloud,
   "@elizaos/plugin-trust": pluginTrust,
   "@miladyai/plugin-selfcontrol": pluginSelfControl,
+  "@miladyai/plugin-discord-local": discordLocalPlugin,
   "@elizaos/plugin-personality": pluginPersonality,
   "@elizaos/plugin-experience": pluginExperience,
 };
@@ -1801,8 +1803,8 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
  * When the provider is "postgres", we build a connection string from the
  * credentials (or use the explicit `connectionString` field) and set
  * `POSTGRES_URL`. When the provider is "pglite" (the default), we set
- * `PGLITE_DATA_DIR` to either the configured value or a stable workspace
- * default (`~/.eliza/workspace/.eliza/.elizadb`) and remove any stale
+ * `PGLITE_DATA_DIR` to either the configured value or the resolved default
+ * workspace (`<workspace>/.eliza/.elizadb`) and remove any stale
  * `POSTGRES_URL`.
  */
 /** @internal Exported for testing. */
@@ -3840,6 +3842,60 @@ export async function startEliza(
     assertPersistentDatabaseRequired(runtime);
     await runtime.initialize();
     await prepareRuntimeForTrajectoryCapture(runtime, "runtime.initialize()");
+
+    // 8a. Apply role gating to wallet plugins (EVM, Solana) — admin-only actions.
+    try {
+      const { applyPluginRoleGating } = await import(
+        "./plugin-role-gating.js"
+      );
+      applyPluginRoleGating(runtime.plugins ?? []);
+    } catch (err) {
+      logger.debug(
+        `[eliza] Plugin role gating skipped: ${formatError(err)}`,
+      );
+    }
+
+    // 8b. Register lightweight conversation-proximity evaluator.
+    // Updates relationship strength when people post near each other in a room.
+    // No LLM calls — deterministic, runs on every message.
+    try {
+      const { updateProximityRelationships } = await import(
+        "../services/conversation-proximity.js"
+      );
+      await runtime.registerPlugin({
+        name: "milady-conversation-proximity",
+        description:
+          "Lightweight relationship updates from conversation co-occurrence",
+        evaluators: [
+          {
+            name: "CONVERSATION_PROXIMITY",
+            description:
+              "Update relationship strength for co-participants in a room",
+            similes: [],
+            alwaysRun: true,
+            examples: [],
+            validate: async (_runtime, message) => {
+              // Run for any message with text from a real user (not the agent).
+              const text = (message.content as { text?: string })?.text;
+              return (
+                Boolean(text) && message.entityId !== _runtime.agentId
+              );
+            },
+            handler: async (_runtime, message) => {
+              await updateProximityRelationships(_runtime, message);
+              return undefined;
+            },
+          },
+        ],
+      });
+      logger.info(
+        "[eliza] ✓ conversation-proximity evaluator registered",
+      );
+    } catch (err) {
+      logger.debug(
+        `[eliza] Conversation-proximity evaluator skipped: ${formatError(err)}`,
+      );
+    }
 
     try {
       if (runtimeKnowledgeEnabled(runtime)) {

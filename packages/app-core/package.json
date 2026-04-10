@@ -85,7 +85,6 @@
     "@lookingglass/webxr": "^0.6.0",
     "@miladyai/ui": "workspace:*",
     "@miladyai/vrm-utils": "workspace:*",
-    "@sparkjsdev/spark": "^0.1.10",
     "@stwd/sdk": "^0.3.0",
     "lucide-react": "^0.575.0",
     "three": "^0.182.0",

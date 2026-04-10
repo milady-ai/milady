@@ -20,9 +20,7 @@ import {
   resolveRosterEntries,
 } from "../character/CharacterRoster";
 import { resolveCharacterGreetingAnimation } from "../character/character-greeting";
-import {
-  preloadOnboardingCharacterAssets,
-} from "./onboarding-asset-preload";
+import { preloadOnboardingCharacterAssets } from "./onboarding-asset-preload";
 import { buildPreviewTtsRequestPlans } from "./identity-preview-tts";
 import { PREMADE_VOICES } from "../../voice/types";
 

@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@miladyai/ui";
 import type { PluginInfo } from "../../api";
-import { WhatsAppQrOverlay } from "../connectors/WhatsAppQrOverlay";
+import { ConnectorSetupPanel } from "../connectors/ConnectorSetupPanel";
 import { PluginConfigForm, TelegramPluginConfig } from "./PluginConfigForm";
 import {
   iconImageSource,
@@ -191,9 +191,7 @@ export function PluginSettingsDialog({
                 onParamChange={onParamChange}
               />
             )}
-            {plugin.id === "whatsapp" && (
-              <WhatsAppQrOverlay accountId="default" />
-            )}
+            <ConnectorSetupPanel pluginId={plugin.id} />
           </div>
         </AdminDialog.BodyScroll>
         {!isShowcase && (

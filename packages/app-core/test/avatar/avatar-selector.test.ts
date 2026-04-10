@@ -114,20 +114,24 @@ describe("Avatar VRM Utilities", () => {
       expect(getVrmTitle(9)).toBe("Chen");
     });
 
-    it("hoisted test roster stays in sync with STYLE_PRESETS", async () => {
+    it("hoisted test roster covers every unique avatarIndex in STYLE_PRESETS", async () => {
       const { STYLE_PRESETS } = await import(
         "@miladyai/agent/onboarding-presets"
       );
-      const expected = STYLE_PRESETS.slice()
-        .sort(
-          (a: { avatarIndex: number }, b: { avatarIndex: number }) =>
-            a.avatarIndex - b.avatarIndex,
-        )
-        .map((p: { name: string; avatarIndex: number }) => ({
-          title: p.name,
-          slug: `milady-${p.avatarIndex}`,
-        }));
-      expect(TEST_VRM_ASSETS).toEqual(expected);
+      // Multiple characters can share the same VRM model (e.g. Eliza + Chen
+      // both use avatarIndex 1). The test roster keeps one entry per unique
+      // avatarIndex so VRM URL lookups are predictable.
+      const uniqueIndices = [
+        ...new Set(
+          STYLE_PRESETS.map(
+            (p: { avatarIndex: number }) => p.avatarIndex,
+          ),
+        ),
+      ].sort((a, b) => a - b);
+      const rosterIndices = TEST_VRM_ASSETS.map((a) =>
+        Number(a.slug.replace("milady-", "")),
+      );
+      expect(rosterIndices).toEqual(uniqueIndices);
     });
   });
 

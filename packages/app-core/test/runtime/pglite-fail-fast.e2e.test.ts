@@ -1,10 +1,5 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
@@ -31,7 +26,7 @@ const SERVER_ONLY_RUNTIME_SCRIPT = [
   'import { startEliza, shutdownRuntime } from "./packages/app-core/src/runtime/eliza.ts";',
   "const runtime = await startEliza({ serverOnly: true });",
   'console.log("RUNTIME_READY");',
-  "process.on(\"SIGTERM\", async () => {",
+  'process.on("SIGTERM", async () => {',
   '  await shutdownRuntime(runtime, "pglite-fail-fast-e2e");',
   "  process.exit(0);",
   "});",
@@ -90,7 +85,7 @@ async function waitForChildExit(
   });
 }
 
-async function waitForJsonPredicate<T>(
+async function _waitForJsonPredicate<T>(
   url: string,
   predicate: (value: T) => boolean,
   timeoutMs: number = READY_TIMEOUT_MS,
@@ -139,9 +134,7 @@ async function waitForOutput(
     await sleep(250);
   }
 
-  throw new Error(
-    `Timed out waiting for ${needle}.\n${proc.output.join("")}`,
-  );
+  throw new Error(`Timed out waiting for ${needle}.\n${proc.output.join("")}`);
 }
 
 function spawnBun(args: string[], env: NodeJS.ProcessEnv): SpawnedProcess {
@@ -164,6 +157,10 @@ function spawnBun(args: string[], env: NodeJS.ProcessEnv): SpawnedProcess {
 
 function spawnServerOnlyRuntime(env: NodeJS.ProcessEnv): SpawnedProcess {
   return spawnBun(["-e", SERVER_ONLY_RUNTIME_SCRIPT], env);
+}
+
+function spawnDevServer(env: NodeJS.ProcessEnv): SpawnedProcess {
+  return spawnBun(["packages/app-core/src/runtime/dev-server.ts"], env);
 }
 
 function buildEnv(
@@ -198,7 +195,10 @@ async function createTempHarness(): Promise<{
   const stateDir = path.join(rootDir, "state");
   const configPath = path.join(rootDir, "milady.json");
   await mkdir(stateDir, { recursive: true });
-  writeFileSync(configPath, JSON.stringify({ logging: { level: "error" } }) + "\n");
+  writeFileSync(
+    configPath,
+    `${JSON.stringify({ logging: { level: "error" } })}\n`,
+  );
   return {
     cleanup: async () => {
       await rm(rootDir, { recursive: true, force: true });
@@ -207,6 +207,14 @@ async function createTempHarness(): Promise<{
     rootDir,
     stateDir,
   };
+}
+
+async function waitForHealthReady(port: number): Promise<void> {
+  await _waitForJsonPredicate<{ ready?: boolean }>(
+    `http://127.0.0.1:${port}/api/health`,
+    (value) => value.ready === true,
+    90_000,
+  );
 }
 
 const cleanups: Array<() => Promise<void>> = [];
@@ -232,7 +240,12 @@ describe("PGlite fail-fast e2e", () => {
 
     const port = await getFreePort();
     const env = buildEnv(harness.stateDir, harness.configPath, port);
-    const dbDir = path.join(harness.stateDir, "workspace", ".eliza", ".elizadb");
+    const dbDir = path.join(
+      harness.stateDir,
+      "workspace",
+      ".eliza",
+      ".elizadb",
+    );
     const proc = spawnBun(
       ["packages/app-core/src/runtime/eliza.ts", "--help"],
       env,
@@ -251,7 +264,12 @@ describe("PGlite fail-fast e2e", () => {
 
     const port = await getFreePort();
     const env = buildEnv(harness.stateDir, harness.configPath, port);
-    const dbDir = path.join(harness.stateDir, "workspace", ".eliza", ".elizadb");
+    const dbDir = path.join(
+      harness.stateDir,
+      "workspace",
+      ".eliza",
+      ".elizadb",
+    );
     const proc = spawnBun(["run", "start:eliza", "--help"], env);
 
     const exited = await waitForChildExit(proc.child, 10_000);
@@ -273,7 +291,12 @@ describe("PGlite fail-fast e2e", () => {
     firstProc.child.kill("SIGTERM");
     await waitForChildExit(firstProc.child, 10_000);
 
-    const dbDir = path.join(harness.stateDir, "workspace", ".eliza", ".elizadb");
+    const dbDir = path.join(
+      harness.stateDir,
+      "workspace",
+      ".eliza",
+      ".elizadb",
+    );
     writeFileSync(
       path.join(dbDir, "postmaster.pid"),
       "-42\n/tmp/pglite/base\n1775818211\n5432\n\n\n938287249       666\n",
@@ -305,7 +328,12 @@ describe("PGlite fail-fast e2e", () => {
     setupProc.child.kill("SIGTERM");
     await waitForChildExit(setupProc.child, 10_000);
 
-    const dbDir = path.join(harness.stateDir, "workspace", ".eliza", ".elizadb");
+    const dbDir = path.join(
+      harness.stateDir,
+      "workspace",
+      ".eliza",
+      ".elizadb",
+    );
     writeFileSync(path.join(dbDir, "global", "1213"), "x");
 
     const runPort = await getFreePort();
@@ -315,10 +343,10 @@ describe("PGlite fail-fast e2e", () => {
         [
           'import { startEliza } from "./packages/app-core/src/runtime/eliza.ts";',
           "startEliza({ serverOnly: true })",
-          '  .then(() => process.exit(0))',
+          "  .then(() => process.exit(0))",
           "  .catch((err) => {",
-          '    console.error(`ERR_CODE=${String(err?.code ?? "")}`);',
-          '    console.error(`ERR_MESSAGE=${String(err?.message ?? "")}`);',
+          '    console.error("ERR_CODE=" + String(err?.code ?? ""));',
+          '    console.error("ERR_MESSAGE=" + String(err?.message ?? ""));',
           "    process.exit(1);",
           "  });",
         ].join("\n"),
@@ -339,5 +367,41 @@ describe("PGlite fail-fast e2e", () => {
     expect(output).toContain(dbDir);
     expect(siblings).toHaveLength(0);
     expect(readFileSync(path.join(dbDir, "global", "1213"), "utf8")).toBe("x");
+  });
+
+  it("dev-server quarantines a corrupted db dir and retries startup once", async () => {
+    const harness = await createTempHarness();
+    cleanups.push(harness.cleanup);
+
+    const firstPort = await getFreePort();
+    const firstProc = spawnDevServer(
+      buildEnv(harness.stateDir, harness.configPath, firstPort),
+    );
+    await waitForHealthReady(firstPort);
+    firstProc.child.kill("SIGTERM");
+    await waitForChildExit(firstProc.child, 20_000);
+
+    const dbDir = path.join(
+      harness.stateDir,
+      "workspace",
+      ".eliza",
+      ".elizadb",
+    );
+    writeFileSync(path.join(dbDir, "global", "1213"), "x");
+
+    const secondPort = await getFreePort();
+    const secondProc = spawnDevServer(
+      buildEnv(harness.stateDir, harness.configPath, secondPort),
+    );
+    await waitForHealthReady(secondPort);
+
+    const siblings = readdirSync(path.dirname(dbDir)).filter((entry) =>
+      entry.startsWith(".elizadb.corrupt-"),
+    );
+
+    expect(siblings).toHaveLength(1);
+
+    secondProc.child.kill("SIGTERM");
+    await waitForChildExit(secondProc.child, 20_000);
   });
 });

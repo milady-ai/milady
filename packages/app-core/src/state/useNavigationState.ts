@@ -94,9 +94,8 @@ export function useNavigationState(deps: NavigationStateDeps) {
   );
 
   useEffect(() => {
-    const shouldRememberTab =
-      tab !== "companion" && tab !== "character" && tab !== "character-select";
-    if (!shouldRememberTab) {
+    // Remember all tabs except companion (which is now an app overlay, not a nav tab).
+    if (tab === "companion") {
       return;
     }
     setLastNativeTabState((prev) => (prev === tab ? prev : tab));

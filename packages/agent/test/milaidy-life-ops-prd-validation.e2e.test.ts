@@ -1942,7 +1942,7 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
                       "openid",
                       "email",
                       "profile",
-                      "https://www.googleapis.com/auth/gmail.metadata",
+                      "https://www.googleapis.com/auth/gmail.readonly",
                     ].join(" "),
                     token_type: "Bearer",
                     id_token: buildIdToken({
@@ -2078,7 +2078,7 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
                       "openid",
                       "email",
                       "profile",
-                      "https://www.googleapis.com/auth/gmail.metadata",
+                      "https://www.googleapis.com/auth/gmail.readonly",
                     ].join(" "),
                     token_type: "Bearer",
                     id_token: buildIdToken({
@@ -2259,7 +2259,7 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
                       "email",
                       "profile",
                       "https://www.googleapis.com/auth/calendar.readonly",
-                      "https://www.googleapis.com/auth/gmail.metadata",
+                      "https://www.googleapis.com/auth/gmail.readonly",
                     ].join(" "),
                     token_type: "Bearer",
                     id_token: buildIdToken({
@@ -2744,7 +2744,7 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
                       "email",
                       "profile",
                       "https://www.googleapis.com/auth/calendar.readonly",
-                      "https://www.googleapis.com/auth/gmail.metadata",
+                      "https://www.googleapis.com/auth/gmail.readonly",
                     ].join(" "),
                     token_type: "Bearer",
                     id_token: buildIdToken({

@@ -1,5 +1,6 @@
 import {
   client,
+  type RelationshipsActivityItem,
   type RelationshipsGraphQuery,
   type RelationshipsGraphSnapshot,
   type RelationshipsPersonDetail,
@@ -21,6 +22,7 @@ import {
   useCallback,
   useDeferredValue,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useApp } from "../../state";
@@ -41,6 +43,9 @@ function sortPeople(
   people: RelationshipsPersonSummary[],
 ): RelationshipsPersonSummary[] {
   return [...people].sort((left, right) => {
+    if (left.isOwner !== right.isOwner) {
+      return left.isOwner ? -1 : 1;
+    }
     const timeDiff =
       toTimestamp(right.lastInteractionAt) -
       toTimestamp(left.lastInteractionAt);
@@ -85,8 +90,46 @@ function topContacts(person: RelationshipsPersonDetail): Array<{
   return rows;
 }
 
-function PersonSummaryCard({ person }: { person: RelationshipsPersonDetail }) {
+function profileSourceLabel(source: string): string {
+  switch (source) {
+    case "client_chat":
+      return "Milady chat";
+    case "elizacloud":
+      return "Eliza Cloud";
+    case "twitter":
+      return "X / Twitter";
+    default:
+      return source
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (match) => match.toUpperCase());
+  }
+}
+
+function profilePrimaryValue(
+  person: RelationshipsPersonDetail,
+  source: string,
+) {
+  const profile = person.profiles.find((entry) => entry.source === source);
+  if (!profile) {
+    return null;
+  }
+  return (
+    profile.displayName ??
+    profile.handle ??
+    profile.userId ??
+    person.displayName
+  );
+}
+
+function PersonSummaryCard({
+  person,
+  onViewMemories,
+}: {
+  person: RelationshipsPersonDetail;
+  onViewMemories?: (entityIds: string[]) => void;
+}) {
   const contacts = topContacts(person);
+  const hasProfiles = person.profiles.length > 0;
 
   return (
     <PagePanel variant="padded" className="space-y-4">
@@ -99,17 +142,31 @@ function PersonSummaryCard({ person }: { person: RelationshipsPersonDetail }) {
             {person.displayName}
           </div>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-            {person.aliases.length > 0
-              ? `Known as ${person.aliases.join(", ")}.`
-              : "No alternate aliases have been confirmed yet."}
+            {person.isOwner
+              ? "Canonical owner profile for Milady chat and linked connectors."
+              : person.aliases.length > 0
+                ? `Known as ${person.aliases.join(", ")}.`
+                : "No alternate aliases have been confirmed yet."}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {person.isOwner ? <MetaPill compact>Owner</MetaPill> : null}
           <MetaPill compact>
             {person.memberEntityIds.length} identities
           </MetaPill>
           <MetaPill compact>{person.factCount} facts</MetaPill>
           <MetaPill compact>{person.relationshipCount} links</MetaPill>
+          {onViewMemories ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="ml-1 h-7 rounded-full px-3 text-[10px] font-semibold tracking-[0.12em]"
+              onClick={() => onViewMemories(person.memberEntityIds)}
+            >
+              View memories
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -174,6 +231,43 @@ function PersonSummaryCard({ person }: { person: RelationshipsPersonDetail }) {
               </p>
             )}
           </PagePanel>
+
+          {hasProfiles ? (
+            <PagePanel variant="surface" className="sm:col-span-2 px-4 py-4">
+              <div className="text-[11px] uppercase tracking-[0.14em] text-muted/70">
+                Profiles
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {person.profiles.map((profile) => (
+                  <div
+                    key={`${profile.source}:${profile.entityId}`}
+                    className="rounded-[16px] border border-border/24 bg-card/35 px-3 py-3"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted/70">
+                        {profileSourceLabel(profile.source)}
+                      </div>
+                      {profile.canonical ? (
+                        <MetaPill compact>Canonical</MetaPill>
+                      ) : null}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-txt">
+                      {profilePrimaryValue(person, profile.source) ??
+                        "Unknown profile"}
+                    </div>
+                    <div className="mt-1 text-xs leading-5 text-muted">
+                      {profile.handle ? `Handle ${profile.handle}` : null}
+                      {profile.handle && profile.userId ? " · " : null}
+                      {profile.userId ? `ID ${profile.userId}` : null}
+                      {!profile.handle && !profile.userId
+                        ? `Entity ${profile.entityId}`
+                        : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </PagePanel>
+          ) : null}
         </div>
 
         <PagePanel variant="surface" className="px-4 py-4">
@@ -351,12 +445,95 @@ function ConversationsPanel({ person }: { person: RelationshipsPersonDetail }) {
   );
 }
 
+const ACTIVITY_TYPE_COLORS: Record<string, { bg: string; fg: string }> = {
+  relationship: { bg: "rgba(99, 102, 241, 0.15)", fg: "rgb(99, 102, 241)" },
+  fact: { bg: "rgba(34, 197, 94, 0.15)", fg: "rgb(34, 197, 94)" },
+  identity: { bg: "rgba(168, 85, 247, 0.15)", fg: "rgb(168, 85, 247)" },
+};
+
+function RelationshipsActivityFeed() {
+  const [activity, setActivity] = useState<RelationshipsActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    void client
+      .getRelationshipsActivity(50)
+      .then((resp) => setActivity(resp.activity))
+      .catch((err) =>
+        setError(
+          err instanceof Error ? err.message : "Failed to load activity feed.",
+        ),
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="px-4 py-3 text-sm text-muted">Loading activity…</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-[18px] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+        {error}
+      </div>
+    );
+  }
+
+  if (activity.length === 0) {
+    return (
+      <p className="px-4 py-3 text-sm text-muted">
+        No relationship activity yet. Events will appear as the agent extracts
+        relationships, identities, and facts from conversations.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {activity.map((item) => {
+        const color =
+          ACTIVITY_TYPE_COLORS[item.type] ?? ACTIVITY_TYPE_COLORS.relationship;
+        return (
+          <div
+            key={`${item.personId}-${item.type}-${item.timestamp ?? "none"}-${item.summary}`}
+            className="rounded-[14px] border border-border/24 bg-card/32 px-3 py-2.5"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                style={{ backgroundColor: color.bg, color: color.fg }}
+              >
+                {item.type}
+              </span>
+              {item.timestamp ? (
+                <span className="ml-auto text-[11px] text-muted">
+                  {formatDateTime(item.timestamp, { fallback: "" })}
+                </span>
+              ) : null}
+            </div>
+            <div className="mt-1.5 text-sm font-semibold text-txt">
+              {item.summary}
+            </div>
+            {item.detail ? (
+              <div className="mt-0.5 text-xs text-muted">{item.detail}</div>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function RelationshipsView({
   contentHeader,
 }: {
   contentHeader?: ReactNode;
 } = {}) {
-  const { t } = useApp();
+  const { t, setTab } = useApp();
   const [search, setSearch] = useState("");
   const [platform, setPlatform] = useState<string>("all");
   const [graphLoading, setGraphLoading] = useState(true);
@@ -366,6 +543,8 @@ export function RelationshipsView({
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detail, setDetail] = useState<RelationshipsPersonDetail | null>(null);
+  // Keep previous detail visible while loading a new person (optimistic transition).
+  const prevDetail = useRef<RelationshipsPersonDetail | null>(null);
   const deferredSearch = useDeferredValue(search);
 
   const loadGraph = useCallback(async (query: RelationshipsGraphQuery) => {
@@ -414,13 +593,23 @@ export function RelationshipsView({
     }
   }, [graph, selectedPersonId]);
 
+  // Keep a live ref to `detail` so the effect can snapshot it without
+  // adding it to the dependency array (which would re-trigger the fetch).
+  const detailRef = useRef(detail);
+  detailRef.current = detail;
+
   useEffect(() => {
     if (!selectedPersonId) {
+      prevDetail.current = null;
       setDetail(null);
       return;
     }
 
     let cancelled = false;
+    // Stash the current detail so we can keep showing it during load.
+    if (detailRef.current) {
+      prevDetail.current = detailRef.current;
+    }
     setDetailLoading(true);
     setDetailError(null);
 
@@ -429,14 +618,16 @@ export function RelationshipsView({
       .then((person) => {
         if (!cancelled) {
           setDetail(person);
+          prevDetail.current = null;
         }
       })
-      .catch((error) => {
+      .catch((err) => {
         if (!cancelled) {
           setDetail(null);
+          prevDetail.current = null;
           setDetailError(
-            error instanceof Error
-              ? error.message
+            err instanceof Error
+              ? err.message
               : "Failed to load the selected person.",
           );
         }
@@ -458,6 +649,9 @@ export function RelationshipsView({
       (person) => person.primaryEntityId === selectedPersonId,
     ) ?? null;
   const selectedGroupId = selectedSummary?.groupId ?? null;
+  // Show the previous person while the new one loads (optimistic transition).
+  const displayDetail = detail ?? (detailLoading ? prevDetail.current : null);
+  const isStaleDetail = detailLoading && !detail && prevDetail.current !== null;
 
   const sidebar = (
     <Sidebar testId="relationships-sidebar">
@@ -508,7 +702,7 @@ export function RelationshipsView({
                 type="button"
                 size="sm"
                 variant="outline"
-                className={TOOLBAR_BUTTON_BASE}
+                className={`${TOOLBAR_BUTTON_BASE} ${platform === "all" ? "border-accent/40 bg-accent/14 text-txt" : ""}`}
                 onClick={() => setPlatform("all")}
               >
                 All
@@ -519,7 +713,7 @@ export function RelationshipsView({
                   type="button"
                   size="sm"
                   variant="outline"
-                  className={TOOLBAR_BUTTON_BASE}
+                  className={`${TOOLBAR_BUTTON_BASE} ${platform === entry ? "border-accent/40 bg-accent/14 text-txt" : ""}`}
                   onClick={() => setPlatform(entry)}
                 >
                   {entry}
@@ -567,9 +761,11 @@ export function RelationshipsView({
                       {person.displayName}
                     </SidebarContent.ItemTitle>
                     <SidebarContent.ItemDescription>
-                      {summarizeHandles(person) ||
-                        person.platforms.join(" • ") ||
-                        "No handles yet"}
+                      {person.isOwner
+                        ? `Owner · ${summarizeHandles(person) || person.platforms.join(" • ") || "Canonical profile"}`
+                        : summarizeHandles(person) ||
+                          person.platforms.join(" • ") ||
+                          "No handles yet"}
                     </SidebarContent.ItemDescription>
                   </span>
                   <MetaPill compact>{person.memberEntityIds.length}</MetaPill>
@@ -629,8 +825,19 @@ export function RelationshipsView({
                 />
               </PagePanel>
 
-              {detail ? (
-                <PersonSummaryCard person={detail} />
+              {displayDetail ? (
+                <div
+                  className={
+                    isStaleDetail
+                      ? "pointer-events-none opacity-50 transition-opacity duration-200"
+                      : "transition-opacity duration-200"
+                  }
+                >
+                  <PersonSummaryCard
+                    person={displayDetail}
+                    onViewMemories={() => setTab("memories")}
+                  />
+                </div>
               ) : detailLoading ? (
                 <PagePanel.Loading heading="Loading person detail…" />
               ) : (
@@ -642,15 +849,34 @@ export function RelationshipsView({
               )}
             </div>
 
-            {detail ? (
-              <div className="grid gap-4 xl:grid-cols-2">
-                <FactsPanel person={detail} />
-                <RelationshipsPanel person={detail} />
+            {displayDetail ? (
+              <div
+                className={`grid gap-4 xl:grid-cols-2 ${isStaleDetail ? "pointer-events-none opacity-50 transition-opacity duration-200" : "transition-opacity duration-200"}`}
+              >
+                <FactsPanel person={displayDetail} />
+                <RelationshipsPanel person={displayDetail} />
                 <div className="xl:col-span-2">
-                  <ConversationsPanel person={detail} />
+                  <ConversationsPanel person={displayDetail} />
                 </div>
               </div>
             ) : null}
+
+            {/* Relationship activity feed */}
+            <PagePanel variant="surface" className="px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted/70">
+                    Activity feed
+                  </div>
+                  <div className="mt-2 text-lg font-semibold text-txt">
+                    Recent relationship, identity, and fact events
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <RelationshipsActivityFeed />
+              </div>
+            </PagePanel>
           </>
         )}
       </div>

@@ -625,9 +625,13 @@ describe("pages navigation smoke (e2e)", () => {
         renderedTree.update(renderApp(state));
       });
       const content = mainContent(renderedTree);
-      expect(content).toContain(
-        `CompanionShell Ready: ${expectedShellTab(nextTab)}`,
-      );
+      if (nextTab === "character" || nextTab === "character-select") {
+        expect(content).toContain("CharacterView Ready");
+      } else {
+        expect(content).toContain(
+          `CompanionShell Ready: ${expectedShellTab(nextTab)}`,
+        );
+      }
       expectValidContent(content);
     }
 

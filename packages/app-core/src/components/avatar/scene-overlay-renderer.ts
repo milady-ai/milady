@@ -2,29 +2,28 @@
  * Canvas2D rendering functions for the 3D scene overlay panels.
  *
  * Each function paints a panel onto a provided CanvasRenderingContext2D
- * using the project's glassmorphism design language: dark translucent
- * backgrounds, gold accent borders, DM Sans / JetBrains Mono typography.
+ * using a light construct aesthetic: translucent frosted-glass panels,
+ * subtle borders, dark text on light backgrounds.
  */
 
-// ── Design tokens ────────────────────────────────────────────────────
-const GOLD = "#f0b90b";
-const GOLD_BORDER = "rgba(240, 185, 11, 0.25)";
-const GOLD_DIM = "rgba(240, 185, 11, 0.12)";
-const BG_DARK = "rgba(10, 10, 12, 0.88)";
-const BG_CARD = "rgba(18, 20, 26, 0.72)";
-const TEXT_PRIMARY = "#eaecef";
-const TEXT_SECONDARY = "rgba(234, 236, 239, 0.6)";
-const TEXT_MUTED = "rgba(234, 236, 239, 0.38)";
-const STATUS_GREEN = "#03a66d";
-const STATUS_RED = "#f6465d";
-const STATUS_YELLOW = "#f0b90b";
-const STATUS_BLUE = "#1e88e5";
+// -- Design tokens ------------------------------------------------------------
+const ACCENT = "#3a7bd5";
+const ACCENT_BORDER = "rgba(58, 123, 213, 0.3)";
+const BG_PANEL = "rgba(255, 255, 255, 0.82)";
+const BG_CARD = "rgba(240, 243, 248, 0.75)";
+const TEXT_PRIMARY = "#1a1a2e";
+const TEXT_SECONDARY = "rgba(26, 26, 46, 0.6)";
+const TEXT_MUTED = "rgba(26, 26, 46, 0.35)";
+const STATUS_GREEN = "#10b981";
+const STATUS_RED = "#ef4444";
+const STATUS_YELLOW = "#f59e0b";
+const STATUS_BLUE = "#3b82f6";
 
 const FONT_SANS = '"DM Sans", "Inter", sans-serif';
 const FONT_MONO = '"JetBrains Mono", "Fira Code", monospace';
 const CORNER_RADIUS = 16;
 
-// ── Shared types ─────────────────────────────────────────────────────
+// -- Shared types -------------------------------------------------------------
 
 export interface ChatOverlayMessage {
   id: string;
@@ -53,7 +52,7 @@ export interface TriggerOverlay {
   intervalMs?: number;
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 function roundRect(
   ctx: CanvasRenderingContext2D,
@@ -80,26 +79,26 @@ function drawPanelBackground(
   ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
-  borderColor = GOLD_BORDER,
+  borderColor = ACCENT_BORDER,
 ): void {
-  // Outer glow
+  // Outer soft shadow
   ctx.save();
-  ctx.shadowColor = "rgba(240, 185, 11, 0.08)";
-  ctx.shadowBlur = 32;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.06)";
+  ctx.shadowBlur = 24;
   roundRect(ctx, 4, 4, w - 8, h - 8, CORNER_RADIUS);
-  ctx.fillStyle = BG_DARK;
+  ctx.fillStyle = BG_PANEL;
   ctx.fill();
   ctx.restore();
 
   // Border
   roundRect(ctx, 4, 4, w - 8, h - 8, CORNER_RADIUS);
   ctx.strokeStyle = borderColor;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // Inner highlight line at top
   ctx.save();
-  ctx.globalAlpha = 0.08;
+  ctx.globalAlpha = 0.15;
   ctx.beginPath();
   ctx.moveTo(4 + CORNER_RADIUS + 8, 6);
   ctx.lineTo(w - 4 - CORNER_RADIUS - 8, 6);
@@ -117,7 +116,7 @@ function drawTitle(
   fontSize = 24,
 ): void {
   ctx.font = `600 ${fontSize}px ${FONT_SANS}`;
-  ctx.fillStyle = GOLD;
+  ctx.fillStyle = ACCENT;
   ctx.fillText(text, x, y);
 }
 
@@ -150,10 +149,9 @@ function drawStatusDot(
   color: string,
   radius = 6,
 ): void {
-  // Glow
   ctx.save();
   ctx.shadowColor = color;
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 6;
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.fillStyle = color;
@@ -205,7 +203,7 @@ function triggerStatusColor(status: string | undefined): string {
   }
 }
 
-// ── Panel renderers ──────────────────────────────────────────────────
+// -- Panel renderers ----------------------------------------------------------
 
 export function renderChatPanel(
   ctx: CanvasRenderingContext2D,
@@ -213,7 +211,6 @@ export function renderChatPanel(
   h: number,
   messages: ChatOverlayMessage[],
 ): void {
-  // No panel background — transparent canvas, bubbles float freely
   ctx.clearRect(0, 0, w, h);
 
   const pad = 10;
@@ -225,7 +222,6 @@ export function renderChatPanel(
   const bubbleRadius = 10;
   const bubbleGap = 4;
 
-  // Render messages bottom-aligned: start from the bottom and work up
   const visibleMessages = messages.slice(-10);
   if (visibleMessages.length === 0) return;
 
@@ -244,10 +240,8 @@ export function renderChatPanel(
     bubbleInfos.push({ msg, lines, height });
   }
 
-  // Start from the bottom of the canvas
   let y = h - pad;
 
-  // Draw from last message upwards
   for (let i = bubbleInfos.length - 1; i >= 0; i--) {
     const { msg, lines, height } = bubbleInfos[i]!;
     const isUser = msg.role === "user";
@@ -261,53 +255,30 @@ export function renderChatPanel(
     y -= height;
     if (y < 0) break;
 
-    // Position: user bubbles right-aligned, assistant left-aligned
     const bubbleX = isUser ? w - pad - bubbleWidth : pad;
 
-    // Bubble background — matches the 2D companion chat style
     if (isUser) {
-      // Gold-tinted user bubble with subtle border
+      // User bubble — soft blue tint
       roundRect(ctx, bubbleX, y, bubbleWidth, height, bubbleRadius);
-      // Gradient fill
       const grad = ctx.createLinearGradient(bubbleX, y, bubbleX, y + height);
-      grad.addColorStop(0, "rgba(240, 185, 11, 0.16)");
-      grad.addColorStop(1, "rgba(240, 185, 11, 0.06)");
+      grad.addColorStop(0, "rgba(58, 123, 213, 0.14)");
+      grad.addColorStop(1, "rgba(58, 123, 213, 0.06)");
       ctx.fillStyle = grad;
       ctx.fill();
-      ctx.strokeStyle = "rgba(240, 185, 11, 0.28)";
+      ctx.strokeStyle = "rgba(58, 123, 213, 0.25)";
       ctx.lineWidth = 1;
       ctx.stroke();
-      // Inner top highlight
-      ctx.save();
-      ctx.globalAlpha = 0.12;
-      ctx.beginPath();
-      ctx.moveTo(bubbleX + bubbleRadius + 4, y + 1);
-      ctx.lineTo(bubbleX + bubbleWidth - bubbleRadius - 4, y + 1);
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
     } else {
-      // Gray assistant bubble — frosted card look
+      // Assistant bubble — frosted white card
       roundRect(ctx, bubbleX, y, bubbleWidth, height, bubbleRadius);
       const grad = ctx.createLinearGradient(bubbleX, y, bubbleX, y + height);
-      grad.addColorStop(0, "rgba(30, 33, 42, 0.88)");
-      grad.addColorStop(1, "rgba(18, 20, 26, 0.92)");
+      grad.addColorStop(0, "rgba(255, 255, 255, 0.85)");
+      grad.addColorStop(1, "rgba(240, 243, 248, 0.9)");
       ctx.fillStyle = grad;
       ctx.fill();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.10)";
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.08)";
       ctx.lineWidth = 1;
       ctx.stroke();
-      // Inner top highlight
-      ctx.save();
-      ctx.globalAlpha = 0.06;
-      ctx.beginPath();
-      ctx.moveTo(bubbleX + bubbleRadius + 4, y + 1);
-      ctx.lineTo(bubbleX + bubbleWidth - bubbleRadius - 4, y + 1);
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
     }
 
     // Text
@@ -335,11 +306,11 @@ export function renderStatusPanel(
   const fs = 12;
   const fsMono = 10;
 
-  // Thin sci-fi border frame — angled corner cuts
+  // Frosted panel frame
   ctx.save();
-  ctx.strokeStyle = "rgba(240, 185, 11, 0.18)";
+  ctx.strokeStyle = "rgba(58, 123, 213, 0.2)";
   ctx.lineWidth = 1;
-  const cx = 10; // corner cut size
+  const cx = 10;
   ctx.beginPath();
   ctx.moveTo(pad + cx, pad);
   ctx.lineTo(w - pad, pad);
@@ -348,13 +319,13 @@ export function renderStatusPanel(
   ctx.lineTo(pad, h - pad);
   ctx.lineTo(pad, pad + cx);
   ctx.closePath();
-  ctx.fillStyle = "rgba(6, 8, 14, 0.55)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
   ctx.fill();
   ctx.stroke();
   ctx.restore();
 
   // Top accent line
-  ctx.strokeStyle = GOLD;
+  ctx.strokeStyle = ACCENT;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad + cx, pad);
@@ -363,9 +334,8 @@ export function renderStatusPanel(
 
   let y = pad + 16;
 
-  // Header — small mono label
   ctx.font = `600 ${fsMono}px ${FONT_MONO}`;
-  ctx.fillStyle = GOLD;
+  ctx.fillStyle = ACCENT;
   ctx.fillText("SYS:STATUS", pad + 8, y);
   y += 14;
 
@@ -378,13 +348,11 @@ export function renderStatusPanel(
 
   const stateColor = agentStateColor(status.state);
 
-  // State indicator line
   drawStatusDot(ctx, pad + 14, y + 5, stateColor, 3);
   ctx.font = `500 ${fs}px ${FONT_SANS}`;
   ctx.fillStyle = TEXT_PRIMARY;
   ctx.fillText(status.state.toUpperCase(), pad + 24, y + 9);
 
-  // Uptime right-aligned
   ctx.font = `400 ${fsMono}px ${FONT_MONO}`;
   ctx.fillStyle = TEXT_SECONDARY;
   const uptimeStr = formatUptimeMs(status.uptime);
@@ -392,8 +360,7 @@ export function renderStatusPanel(
   ctx.fillText(uptimeStr, w - pad - uptimeW - 8, y + 9);
   y += 18;
 
-  // Thin separator
-  ctx.strokeStyle = "rgba(240, 185, 11, 0.08)";
+  ctx.strokeStyle = "rgba(58, 123, 213, 0.1)";
   ctx.lineWidth = 0.5;
   ctx.beginPath();
   ctx.moveTo(pad + 8, y);
@@ -401,13 +368,11 @@ export function renderStatusPanel(
   ctx.stroke();
   y += 8;
 
-  // Agent name
   ctx.font = `400 ${fsMono}px ${FONT_MONO}`;
   ctx.fillStyle = TEXT_MUTED;
   ctx.fillText((status.agentName || "agent").toUpperCase(), pad + 8, y + 8);
   y += 16;
 
-  // Sessions
   if (status.sessions.length > 0) {
     for (const session of status.sessions.slice(0, 3)) {
       if (y > h - pad - 8) break;
@@ -435,9 +400,9 @@ export function renderHeartbeatsPanel(
   const pad = 12;
   const fsMono = 10;
 
-  // Sci-fi border frame — matching status panel style
+  // Frosted panel frame
   ctx.save();
-  ctx.strokeStyle = "rgba(240, 185, 11, 0.18)";
+  ctx.strokeStyle = "rgba(58, 123, 213, 0.2)";
   ctx.lineWidth = 1;
   const cx = 10;
   ctx.beginPath();
@@ -448,13 +413,13 @@ export function renderHeartbeatsPanel(
   ctx.lineTo(pad, h - pad);
   ctx.lineTo(pad, pad + cx);
   ctx.closePath();
-  ctx.fillStyle = "rgba(6, 8, 14, 0.55)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
   ctx.fill();
   ctx.stroke();
   ctx.restore();
 
   // Top accent line
-  ctx.strokeStyle = GOLD;
+  ctx.strokeStyle = ACCENT;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad + cx, pad);
@@ -463,9 +428,8 @@ export function renderHeartbeatsPanel(
 
   let y = pad + 16;
 
-  // Header
   ctx.font = `600 ${fsMono}px ${FONT_MONO}`;
-  ctx.fillStyle = GOLD;
+  ctx.fillStyle = ACCENT;
   ctx.fillText("SYS:HEARTBEAT", pad + 8, y);
   y += 14;
 
@@ -479,7 +443,6 @@ export function renderHeartbeatsPanel(
   for (const trigger of triggers.slice(0, 6)) {
     if (y > h - pad - 8) break;
 
-    // Status dot + name
     drawStatusDot(
       ctx,
       pad + 14,
@@ -496,7 +459,6 @@ export function renderHeartbeatsPanel(
         : trigger.displayName;
     ctx.fillText(name, pad + 22, y + 8);
 
-    // Schedule right-aligned
     const scheduleText =
       trigger.triggerType === "cron"
         ? (trigger.cronExpression ?? "cron")
@@ -507,7 +469,6 @@ export function renderHeartbeatsPanel(
     const schedW = ctx.measureText(scheduleText).width;
     ctx.fillText(scheduleText, w - pad - schedW - 8, y + 8);
 
-    // Last status dot far right
     if (trigger.lastStatus) {
       drawStatusDot(
         ctx,

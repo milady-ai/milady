@@ -981,4 +981,56 @@ describe("handleInboxRoute", () => {
       ]),
     );
   });
+
+  it("sends inbox replies through the transport source handler", async () => {
+    const roomId = "room-bluebubbles";
+    const runtime = {
+      agentId: "agent-1",
+      sendHandlers: new Map([["bluebubbles", {}]]),
+      sendMessageToTarget: vi.fn().mockResolvedValue(undefined),
+      getRoom: vi.fn().mockResolvedValue({
+        id: roomId,
+        channelId: "chat-guid-1",
+        serverId: "world-1",
+      }),
+      getMemories: vi.fn().mockResolvedValue([]),
+      getService: vi.fn().mockReturnValue(undefined),
+    } as any;
+    const json = vi.fn() as JsonRouteHelperMock;
+    const helpers = createHelpers(json);
+    helpers.readJsonBody = vi.fn().mockResolvedValue({
+      roomId,
+      source: "bluebubbles",
+      text: "On it",
+    });
+
+    const handled = await handleInboxRoute(
+      {
+        url: "/api/inbox/messages",
+      } as http.IncomingMessage,
+      {} as http.ServerResponse,
+      "/api/inbox/messages",
+      "POST",
+      { runtime },
+      helpers,
+    );
+
+    expect(handled).toBe(true);
+    expect(runtime.sendMessageToTarget).toHaveBeenCalledWith(
+      {
+        source: "bluebubbles",
+        roomId,
+        channelId: "chat-guid-1",
+        serverId: "world-1",
+      },
+      {
+        source: "bluebubbles",
+        text: "On it",
+      },
+    );
+    expect(json).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ ok: true }),
+    );
+  });
 });

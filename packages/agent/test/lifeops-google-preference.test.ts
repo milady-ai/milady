@@ -116,7 +116,7 @@ async function seedManagedGoogleGrant(args: {
         email: `${args.side}@example.com`,
         name: args.side === "owner" ? "Owner Example" : "Agent Example",
       },
-      grantedScopes: ["calendar.readonly", "gmail.metadata"],
+      grantedScopes: ["calendar.readonly", "gmail.readonly"],
       capabilities: args.capabilities ?? [
         "google.calendar.read",
         "google.gmail.triage",
@@ -511,7 +511,7 @@ describeIf(hasSqlite)("life-ops Google mode preference", () => {
         name: side === "owner" ? "Owner Example" : "Agent Example",
       },
       grantedCapabilities: ["google.calendar.read", "google.gmail.triage"],
-      grantedScopes: ["calendar.readonly", "gmail.metadata"],
+      grantedScopes: ["calendar.readonly", "gmail.readonly"],
       expiresAt: null,
       hasRefreshToken: true,
       connectionId: `conn-${side}`,

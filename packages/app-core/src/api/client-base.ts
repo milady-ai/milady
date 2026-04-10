@@ -309,7 +309,7 @@ export class MiladyClient {
     return res;
   }
 
-  protected async fetch<T>(
+  async fetch<T>(
     path: string,
     init?: RequestInit,
     options?: { allowNonOk?: boolean; timeoutMs?: number },

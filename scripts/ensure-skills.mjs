@@ -3,9 +3,10 @@
  * Ensure required skills exist in the managed skills store.
  *
  * This script is run during startup to seed shipped skills into:
+ *   $MILADY_STATE_DIR/skills
  *   $ELIZA_STATE_DIR/skills
- * or, by default:
- *   ~/.eliza/skills
+ * or, by default for Milady:
+ *   ~/.milady/skills
  *
  * Run automatically during startup, or manually:
  *   node scripts/ensure-skills.mjs

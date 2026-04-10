@@ -1,16 +1,30 @@
 import { useRenderGuard } from "@miladyai/app-core/hooks";
 import { useApp, usePtySessions } from "@miladyai/app-core/state";
-import { Button } from "@miladyai/ui";
-import { PanelLeftOpen } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ChatModalView } from "./ChatModalView";
 import { useCompanionSceneStatus } from "../companion/companion-scene-status-context";
-import { CompanionHeader } from "../companion/CompanionHeader";
+import {
+  CompanionHeader,
+  type CompanionShellView,
+} from "../companion/CompanionHeader";
 import { CompanionSceneHost } from "../companion/CompanionSceneHost";
-import { useSharedCompanionScene } from "../companion/shared-companion-scene-context";
 import { InferenceCloudAlertButton } from "../companion/InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "../companion/resolve-companion-inference-notice";
 import { PtyConsoleSidePanel } from "../coding/PtyConsoleSidePanel";
+
+const CharacterEditor = lazy(() =>
+  import("../character/CharacterEditor").then((m) => ({
+    default: m.CharacterEditor,
+  })),
+);
 
 const COMPANION_UI_REVEAL_FALLBACK_MS = 1400;
 const COMPANION_DOCK_HEIGHT = "min(42vh, 24rem)";
@@ -63,9 +77,11 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     navigation,
     setState,
     setTab,
-    switchShellView,
     t,
   } = useApp();
+
+  const [companionView, setCompanionView] =
+    useState<CompanionShellView>("companion");
 
   const [ptySidePanelSessionId, setPtySidePanelSessionId] = useState<
     string | null
@@ -86,8 +102,6 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
 
   // Gate chat + header behind avatar load — don't show chat or play
   // greeting speech until the VRM finishes its teleport-in animation.
-  // When the shared scene is already ready (e.g. coming back from character
-  // edit without changing avatars), reveal immediately from scene context.
   const [avatarReadyFallback, setAvatarReadyFallback] = useState(false);
   useEffect(() => {
     if (sceneAvatarReady) {
@@ -104,12 +118,18 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
   }, [sceneAvatarReady, teleportKey]);
   const avatarReady = sceneAvatarReady || avatarReadyFallback;
 
-  const handleShellViewChange = useCallback(
-    (view: "companion" | "character" | "desktop") => {
-      switchShellView(view);
-    },
-    [switchShellView],
-  );
+  const handleExitToDesktop = useCallback(() => {
+    setState("activeOverlayApp", null);
+    setTab("chat");
+  }, [setState, setTab]);
+
+  const handleSwitchToCharacter = useCallback(() => {
+    setCompanionView("character");
+  }, []);
+
+  const handleSwitchToCompanion = useCallback(() => {
+    setCompanionView("companion");
+  }, []);
 
   useEffect(() => {
     setState(
@@ -148,14 +168,14 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
 
   const handleInferenceAlertClick = useCallback(() => {
     if (!inferenceNotice) return;
-    switchShellView("desktop");
+    setState("activeOverlayApp", null);
     navigation.scheduleAfterTabCommit(() => {
       setTab("settings");
       if (inferenceNotice.kind === "cloud") {
         setState("cloudDashboardView", "billing");
       }
     });
-  }, [inferenceNotice, navigation, setState, setTab, switchShellView]);
+  }, [inferenceNotice, navigation, setState, setTab]);
 
   const companionHeaderRightExtras = (
     <>
@@ -175,19 +195,19 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
         style={{
           opacity: avatarReady ? 1 : 0,
           transition: "opacity 0.35s ease-out",
-          // Explicit auto so header hit-testing is not ambiguous under a `pointer-events-none` ancestor.
           pointerEvents: avatarReady ? "auto" : "none",
         }}
       >
         <CompanionHeader
-          activeShellView="companion"
-          onShellViewChange={handleShellViewChange}
+          activeView={companionView}
+          onExitToDesktop={handleExitToDesktop}
+          onExitToCharacter={handleSwitchToCharacter}
+          onSwitchToCompanion={handleSwitchToCompanion}
           uiLanguage={uiLanguage}
           setUiLanguage={setUiLanguage}
           uiTheme={uiTheme}
           setUiTheme={setUiTheme}
           t={t}
-          showCompanionControls
           chatAgentVoiceMuted={chatAgentVoiceMuted}
           onToggleVoiceMute={() =>
             setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
@@ -197,7 +217,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
         />
       </div>
 
-      {avatarReady && (
+      {avatarReady && companionView === "companion" && (
         <div
           className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center px-1.5 sm:px-4"
           style={{
@@ -218,9 +238,14 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
         </div>
       )}
 
-      {/* PTY console side panel — rendered in a child so ptySessions subscription
-          doesn't live in CompanionViewOverlay and cause re-renders on every poll. */}
-      {ptySidePanelSessionId && (
+      {avatarReady && companionView === "character" && (
+        <Suspense fallback={null}>
+          <CharacterEditor sceneOverlay />
+        </Suspense>
+      )}
+
+      {/* PTY console side panel */}
+      {ptySidePanelSessionId && companionView === "companion" && (
         <div className="pointer-events-auto">
           <CompanionPtyPanel
             sessionId={ptySidePanelSessionId}
@@ -229,9 +254,8 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
         </div>
       )}
 
-      {/* Main Content Area */}
+      {/* Center (empty to show character) */}
       <div className="flex-1 grid grid-cols-[1fr_auto] gap-6 min-h-0 relative">
-        {/* Center (Empty to show character) */}
         <div className="w-full h-full" />
       </div>
     </div>
@@ -244,11 +268,7 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
  * children and avoids re-rendering the 3D scene on unrelated state changes.
  */
 export const CompanionView = memo(function CompanionView() {
-  const hasSharedCompanionScene = useSharedCompanionScene();
-
-  return hasSharedCompanionScene ? (
-    <CompanionViewOverlay />
-  ) : (
+  return (
     <CompanionSceneHost active>
       <CompanionViewOverlay />
     </CompanionSceneHost>

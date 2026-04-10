@@ -144,16 +144,16 @@ describe("header status", () => {
     mockUseApp.mockReturnValue(baseAppState);
   });
 
-  it("renders shell toggle button", async () => {
+  it("does not render shell toggle in header (toggle lives in companion overlay)", async () => {
     let tree: TestRenderer.ReactTestRenderer | undefined;
     await act(async () => {
       tree = TestRenderer.create(React.createElement(Header));
     });
     expect(tree).toBeDefined();
-    const shellToggle = tree?.root.findByProps({
+    const shellToggles = tree?.root.findAllByProps({
       "data-testid": "ui-shell-toggle",
     });
-    expect(shellToggle).toBeDefined();
+    expect(shellToggles).toHaveLength(0);
     expect(baseAppState.setState).toHaveBeenCalledWith("chatMode", "power");
   });
 

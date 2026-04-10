@@ -23,6 +23,7 @@ const {
   mockGetNextCalendarEventContext,
   mockGetGmailTriage,
   mockGetGoogleConnectorStatus,
+  mockUseModel,
 } = vi.hoisted(() => ({
   mockCheckSenderPrivateAccess: vi.fn(),
   mockResolveCanonicalOwnerIdForMessage: vi.fn(),
@@ -45,6 +46,7 @@ const {
   mockGetNextCalendarEventContext: vi.fn(),
   mockGetGmailTriage: vi.fn(),
   mockGetGoogleConnectorStatus: vi.fn(),
+  mockUseModel: vi.fn(),
 }));
 
 vi.mock("@elizaos/core/roles", () => ({
@@ -86,7 +88,7 @@ vi.mock("../lifeops/service.js", () => ({
 
 import { lifeAction } from "./life";
 
-const runtime = { agentId: "agent-1" } as never;
+const runtime = { agentId: "agent-1", useModel: mockUseModel } as never;
 
 function msg(text: string, source = "client_chat") {
   return { entityId: "owner-1", content: { source, text } } as never;
@@ -222,6 +224,7 @@ describe("classifyIntent edge cases", () => {
 describe("lifeAction", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockUseModel.mockResolvedValue("{}");
     mockCheckSenderPrivateAccess.mockResolvedValue({
       entityId: "owner-1", role: "OWNER", isOwner: true, isAdmin: true, canManageRoles: true,
       hasPrivateAccess: true, accessRole: "OWNER", accessSource: "owner",
@@ -301,6 +304,42 @@ describe("lifeAction", () => {
     // "test" classifies as create_definition and now fails on missing cadence first.
     const result = await lifeAction.handler?.(runtime, msg("test"), {} as never, { parameters: {} } as never);
     expect(result).toMatchObject({ success: false, text: expect.stringContaining("schedule") });
+  });
+
+  it("prefers LLM operation extraction over the regex fallback for broad status questions", async () => {
+    mockUseModel.mockResolvedValue(
+      '{"operation":"query_overview","confidence":0.91}',
+    );
+    mockGetOverview.mockResolvedValue({
+      owner: {
+        summary: {
+          activeOccurrenceCount: 1,
+          overdueOccurrenceCount: 0,
+          snoozedOccurrenceCount: 0,
+          activeGoalCount: 0,
+          activeReminderCount: 0,
+        },
+        occurrences: [],
+        goals: [],
+      },
+      agentOps: {
+        summary: {
+          activeOccurrenceCount: 0,
+          overdueOccurrenceCount: 0,
+          snoozedOccurrenceCount: 0,
+          activeGoalCount: 0,
+          activeReminderCount: 0,
+        },
+        occurrences: [],
+        goals: [],
+      },
+    });
+
+    const result = await invoke("zoom out and tell me what i'm juggling right now");
+
+    expect(mockUseModel).toHaveBeenCalled();
+    expect(mockGetOverview).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ success: true });
   });
 
   // ── create_definition ─────────────────────────────

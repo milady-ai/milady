@@ -273,6 +273,88 @@ declare module "./client-base" {
       ok: boolean;
       accountId: string;
     }>;
+    getSignalStatus(accountId?: string): Promise<{
+      accountId: string;
+      status: string;
+      authExists: boolean;
+      serviceConnected: boolean;
+    }>;
+    startSignalPairing(accountId?: string): Promise<{
+      ok: boolean;
+      accountId: string;
+      status: string;
+      error?: string;
+    }>;
+    stopSignalPairing(accountId?: string): Promise<{
+      ok: boolean;
+      accountId: string;
+      status: string;
+    }>;
+    disconnectSignal(accountId?: string): Promise<{
+      ok: boolean;
+      accountId: string;
+    }>;
+    getDiscordLocalStatus(): Promise<{
+      available: boolean;
+      connected: boolean;
+      authenticated: boolean;
+      currentUser?: {
+        id: string;
+        username: string;
+        global_name?: string | null;
+        avatar?: string | null;
+      } | null;
+      subscribedChannelIds: string[];
+      configuredChannelIds: string[];
+      scopes: string[];
+      lastError: string | null;
+      ipcPath: string | null;
+    }>;
+    authorizeDiscordLocal(): Promise<{
+      available: boolean;
+      connected: boolean;
+      authenticated: boolean;
+      currentUser?: {
+        id: string;
+        username: string;
+        global_name?: string | null;
+        avatar?: string | null;
+      } | null;
+      subscribedChannelIds: string[];
+      configuredChannelIds: string[];
+      scopes: string[];
+      lastError: string | null;
+      ipcPath: string | null;
+    }>;
+    disconnectDiscordLocal(): Promise<{ ok: boolean }>;
+    listDiscordLocalGuilds(): Promise<{
+      guilds: Array<{ id: string; name: string }>;
+      count: number;
+    }>;
+    listDiscordLocalChannels(guildId: string): Promise<{
+      channels: Array<{
+        id: string;
+        guild_id?: string | null;
+        type?: number;
+        name?: string | null;
+        recipients?: Array<{
+          id: string;
+          username: string;
+          global_name?: string | null;
+          avatar?: string | null;
+        }>;
+      }>;
+      count: number;
+    }>;
+    saveDiscordLocalSubscriptions(channelIds: string[]): Promise<{
+      subscribedChannelIds: string[];
+    }>;
+    getBlueBubblesStatus(): Promise<{
+      available: boolean;
+      connected: boolean;
+      webhookPath: string;
+      reason?: string;
+    }>;
 
     // Babylon terminal methods
     getBabylonAgentStatus(): Promise<BabylonAgentStatus>;
@@ -947,6 +1029,98 @@ MiladyClient.prototype.disconnectWhatsApp = async function (
     method: "POST",
     body: JSON.stringify({ accountId }),
   });
+};
+
+MiladyClient.prototype.getSignalStatus = async function (
+  this: MiladyClient,
+  accountId = "default",
+) {
+  return this.fetch(
+    `/api/signal/status?accountId=${encodeURIComponent(accountId)}`,
+  );
+};
+
+MiladyClient.prototype.startSignalPairing = async function (
+  this: MiladyClient,
+  accountId = "default",
+) {
+  return this.fetch("/api/signal/pair", {
+    method: "POST",
+    body: JSON.stringify({ accountId }),
+  });
+};
+
+MiladyClient.prototype.stopSignalPairing = async function (
+  this: MiladyClient,
+  accountId = "default",
+) {
+  return this.fetch("/api/signal/pair/stop", {
+    method: "POST",
+    body: JSON.stringify({ accountId }),
+  });
+};
+
+MiladyClient.prototype.disconnectSignal = async function (
+  this: MiladyClient,
+  accountId = "default",
+) {
+  return this.fetch("/api/signal/disconnect", {
+    method: "POST",
+    body: JSON.stringify({ accountId }),
+  });
+};
+
+MiladyClient.prototype.getDiscordLocalStatus = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/discord-local/status");
+};
+
+MiladyClient.prototype.authorizeDiscordLocal = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/discord-local/authorize", {
+    method: "POST",
+  });
+};
+
+MiladyClient.prototype.disconnectDiscordLocal = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/discord-local/disconnect", {
+    method: "POST",
+  });
+};
+
+MiladyClient.prototype.listDiscordLocalGuilds = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/discord-local/guilds");
+};
+
+MiladyClient.prototype.listDiscordLocalChannels = async function (
+  this: MiladyClient,
+  guildId,
+) {
+  return this.fetch(
+    `/api/discord-local/channels?guildId=${encodeURIComponent(guildId)}`,
+  );
+};
+
+MiladyClient.prototype.saveDiscordLocalSubscriptions = async function (
+  this: MiladyClient,
+  channelIds,
+) {
+  return this.fetch("/api/discord-local/subscriptions", {
+    method: "POST",
+    body: JSON.stringify({ channelIds }),
+  });
+};
+
+MiladyClient.prototype.getBlueBubblesStatus = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/bluebubbles/status");
 };
 
 // ---------------------------------------------------------------------------

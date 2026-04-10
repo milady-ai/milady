@@ -3,7 +3,7 @@
  *
  * Extracted into its own module so consumers can import
  * `useSharedCompanionScene` without pulling in the heavy 3D stack
- * (three / @pixiv/three-vrm / @sparkjsdev/spark) that lives in
+ * (three / @pixiv/three-vrm) that lives in
  * CompanionSceneHost.
  */
 import { createContext, useContext } from "react";

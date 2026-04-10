@@ -368,6 +368,18 @@ async function waitForConversationRestore(
   }
 }
 
+function buildPersistedAssistantContent(
+  text: string,
+  responseContent: Content | null | undefined,
+): Content {
+  return responseContent && typeof responseContent === "object"
+    ? {
+        ...responseContent,
+        text,
+      }
+    : { text };
+}
+
 async function getConversationWithRestore(
   state: ConversationRouteState,
   convId: string,
@@ -925,20 +937,23 @@ export async function handleConversationRoutes(
       if (!aborted) {
         conv.updatedAt = new Date().toISOString();
         if (result.noResponseReason !== "ignored") {
-          const resolvedText = normalizeChatResponseText(
-            result.text,
-            state.logBuffer,
-            runtime,
-          );
-          await persistAssistantConversationMemory(
-            runtime,
-            conv.roomId,
+        const resolvedText = normalizeChatResponseText(
+          result.text,
+          state.logBuffer,
+          runtime,
+        );
+        await persistAssistantConversationMemory(
+          runtime,
+          conv.roomId,
+          buildPersistedAssistantContent(
             resolvedText,
-            channelType,
-            turnStartedAt,
-          );
-          writeSseJson(res, {
-            type: "done",
+            result.responseContent,
+          ),
+          channelType,
+          turnStartedAt,
+        );
+        writeSseJson(res, {
+          type: "done",
             fullText: resolvedText,
             agentName: result.agentName,
             ...(result.usage ? { estimatedUsage: result.usage } : {}),
@@ -1089,7 +1104,10 @@ export async function handleConversationRoutes(
         await persistAssistantConversationMemory(
           runtime,
           conv.roomId,
-          resolvedText,
+          buildPersistedAssistantContent(
+            resolvedText,
+            result.responseContent,
+          ),
           channelType,
           turnStartedAt,
         );

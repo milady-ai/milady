@@ -29,7 +29,102 @@ export function RelationshipsIdentityCluster({
 }: {
   person: RelationshipsPersonDetail;
 }) {
-  const total = Math.max(person.identities.length, 1);
+  const total = person.identities.length;
+
+  // Single identity or zero identities — show a compact hub-only layout
+  // instead of the orbit, which looks awkward with one node dangling.
+  if (total <= 1) {
+    const singleIdentity = person.identities[0] ?? null;
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <svg
+          viewBox={`0 0 ${CLUSTER_SIZE} ${CLUSTER_SIZE}`}
+          className="h-72 w-72 max-w-full"
+          role="img"
+          aria-label={`${person.displayName} identity cluster`}
+        >
+          <defs>
+            <radialGradient
+              id="relationships-identity-cluster-fill"
+              cx="50%"
+              cy="38%"
+              r="68%"
+            >
+              <stop offset="0%" stopColor="rgba(255,244,214,0.96)" />
+              <stop offset="100%" stopColor="rgba(240,185,11,0.88)" />
+            </radialGradient>
+          </defs>
+          <circle
+            cx={CLUSTER_CENTER}
+            cy={CLUSTER_CENTER}
+            r={OUTER_RADIUS + 8}
+            fill="rgba(240,185,11,0.06)"
+            stroke="rgba(240,185,11,0.16)"
+            strokeWidth={2}
+          />
+          <circle
+            cx={CLUSTER_CENTER}
+            cy={CLUSTER_CENTER}
+            r={INNER_RADIUS + 16}
+            fill="url(#relationships-identity-cluster-fill)"
+            stroke="rgba(255,255,255,0.88)"
+            strokeWidth={3}
+          />
+          <text
+            x={CLUSTER_CENTER}
+            y={CLUSTER_CENTER - 10}
+            textAnchor="middle"
+            className="fill-black text-[14px] font-semibold"
+          >
+            {shortLabel(person.displayName, 18)}
+          </text>
+          <text
+            x={CLUSTER_CENTER}
+            y={CLUSTER_CENTER + 8}
+            textAnchor="middle"
+            className="fill-black/70 text-[10px] font-medium"
+          >
+            {singleIdentity
+              ? (singleIdentity.platforms[0] ?? "single identity")
+              : "No linked identities"}
+          </text>
+          <text
+            x={CLUSTER_CENTER}
+            y={CLUSTER_CENTER + 24}
+            textAnchor="middle"
+            className="fill-black/50 text-[9px]"
+          >
+            {singleIdentity
+              ? identityLabel(person, 0)
+              : person.memberEntityIds.length === 1
+                ? "1 entity"
+                : `${person.memberEntityIds.length} entities`}
+          </text>
+        </svg>
+
+        {singleIdentity ? (
+          <div className="w-full">
+            <div className="rounded-[18px] border border-border/24 bg-card/35 px-3 py-2.5">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">
+                {(singleIdentity.platforms[0] ?? "linked identity").replace(
+                  /_/g,
+                  " ",
+                )}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-txt">
+                {singleIdentity.names[0] ?? singleIdentity.entityId}
+              </div>
+              <div className="mt-1 text-xs leading-5 text-muted">
+                {singleIdentity.handles
+                  .map((handle) => handle.handle)
+                  .join(", ") || singleIdentity.entityId}
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-4">

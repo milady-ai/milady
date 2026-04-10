@@ -43,16 +43,13 @@ export type VrmViewerProps = {
   cameraProfile?: CameraProfile;
   /** Interaction behavior for camera controls */
   interactiveMode?: InteractionMode;
-  /** Optional Gaussian splat world behind the avatar */
-  worldUrl?: string;
+  /** Theme for the mathematical environment behind the avatar */
+  environmentTheme?: "light" | "dark";
   /** User Settings: quality / balanced / efficiency for VRM power policy. */
   companionVrmPowerMode?: CompanionVrmPowerMode;
-  /** When to apply ~half display FPS (independent of DPR/shadows/Spark). */
+  /** When to apply ~half display FPS. */
   companionHalfFramerateMode?: CompanionHalfFramerateMode;
-  /**
-   * When true and the document is hidden, keep the loop running and hide only
-   * the splat world + Spark backdrop (see `VrmEngine.setMinimalBackgroundMode`).
-   */
+  /** When true and the document is hidden, keep the loop running in minimal mode. */
   companionAnimateWhenHidden?: boolean;
   /** Enable springy drag/touch camera offset instead of orbit controls */
   pointerParallax?: boolean;
@@ -66,7 +63,6 @@ type VrmEngineDebugRegistryEntry = {
   id: string;
   role: "world-stage" | "chat-avatar";
   vrmPath: string;
-  worldUrl: string | null;
   engine: VrmEngine;
   getDebugInfo: () => VrmEngineDebugInfo;
 };
@@ -169,13 +165,9 @@ export function VrmViewer(props: VrmViewerProps) {
     props.interactiveMode ?? "free",
   );
   const pointerParallaxRef = useRef<boolean>(props.pointerParallax ?? false);
-  const worldUrlRef = useRef<string>(props.worldUrl ?? "");
-  const prefersWorldRendererRef = useRef<boolean>(Boolean(props.worldUrl));
   const lastStateEmitMsRef = useRef<number>(0);
   const mountedRef = useRef(true);
   const currentVrmPathRef = useRef<string>("");
-  const currentWorldPathRef = useRef<string>("");
-  const worldLoadPromiseRef = useRef<Promise<void> | null>(null);
   const rendererInitFailedRef = useRef(false);
   const pointerStateRef = useRef<{
     active: boolean;
@@ -210,8 +202,6 @@ export function VrmViewer(props: VrmViewerProps) {
   cameraProfileRef.current = props.cameraProfile ?? "chat";
   interactionModeRef.current = props.interactiveMode ?? "free";
   pointerParallaxRef.current = props.pointerParallax ?? false;
-  worldUrlRef.current = props.worldUrl ?? "";
-  prefersWorldRendererRef.current = Boolean(props.worldUrl);
   onEngineReadyRef.current = props.onEngineReady;
   onEngineStateRef.current = props.onEngineState;
   onRevealStartRef.current = props.onRevealStart;
@@ -243,8 +233,6 @@ export function VrmViewer(props: VrmViewerProps) {
   const reportRendererInitFailure = useEffectEvent((error: unknown) => {
     rendererInitFailedRef.current = true;
     currentVrmPathRef.current = "";
-    currentWorldPathRef.current = "";
-    worldLoadPromiseRef.current = null;
     revealStartedRef.current = false;
 
     const fallbackMessage =
@@ -282,9 +270,8 @@ export function VrmViewer(props: VrmViewerProps) {
     const nextEntry: VrmEngineDebugRegistryEntry | null = engine
       ? {
           id,
-          role: props.worldUrl ? "world-stage" : "chat-avatar",
+          role: props.environmentTheme ? "world-stage" : "chat-avatar",
           vrmPath: props.vrmPath ?? getDefaultVrmPath(),
-          worldUrl: props.worldUrl ?? null,
           engine,
           getDebugInfo: () => engine.getDebugInfo(),
         }
@@ -337,10 +324,7 @@ export function VrmViewer(props: VrmViewerProps) {
           onEngineStateRef.current?.(state);
         }
       },
-      {
-        rendererPreference: prefersWorldRendererRef.current ? "webgl" : "auto",
-        sparkOptimized: prefersWorldRendererRef.current,
-      },
+      {},
     );
     syncPauseForVisibilityAndActive();
 
@@ -482,34 +466,6 @@ export function VrmViewer(props: VrmViewerProps) {
       try {
         await engine.whenReady();
         if (!mountedRef.current || abortController.signal.aborted) return;
-        const worldUrl = worldUrlRef.current;
-        if (worldUrl) {
-          if (worldUrl !== currentWorldPathRef.current) {
-            currentWorldPathRef.current = worldUrl;
-            const worldLoadPromise = (async () => {
-              try {
-                await engine.setWorldUrl(worldUrl);
-              } catch (worldErr) {
-                // WHY: optional splat background must not block VRM (agent-visible avatar).
-                console.warn(
-                  "[VrmViewer] World load failed (avatar will still load):",
-                  worldErr,
-                );
-              }
-            })();
-            worldLoadPromiseRef.current = worldLoadPromise;
-            try {
-              await worldLoadPromise;
-            } finally {
-              if (worldLoadPromiseRef.current === worldLoadPromise) {
-                worldLoadPromiseRef.current = null;
-              }
-            }
-          } else if (worldLoadPromiseRef.current) {
-            await worldLoadPromiseRef.current;
-          }
-        }
-        if (!mountedRef.current || abortController.signal.aborted) return;
         await engine.loadVrmFromUrl(
           vrmUrl,
           vrmUrl.split("/").pop() ?? "avatar.vrm",
@@ -539,42 +495,11 @@ export function VrmViewer(props: VrmViewerProps) {
     };
   }, [props.vrmPath]);
 
+  // Forward environment theme changes to the engine
   useEffect(() => {
-    const engine = engineRef.current;
-    if (!engine || rendererInitFailedRef.current) return;
-
-    const worldUrl = props.worldUrl ?? "";
-    if (worldUrl === currentWorldPathRef.current) return;
-    currentWorldPathRef.current = worldUrl;
-    const abortController = new AbortController();
-
-    let worldLoadPromise: Promise<void> | null = null;
-    worldLoadPromise = (async () => {
-      try {
-        await engine.whenReady();
-        if (!mountedRef.current || abortController.signal.aborted) return;
-        await engine.setWorldUrl(worldUrl || null);
-      } catch (err) {
-        if (rendererInitFailedRef.current) return;
-        console.warn("Failed to load splat world:", err);
-      } finally {
-        if (worldLoadPromiseRef.current === worldLoadPromise) {
-          worldLoadPromiseRef.current = null;
-        }
-      }
-    })();
-    worldLoadPromiseRef.current = worldLoadPromise;
-
-    return () => {
-      abortController.abort();
-      if (currentWorldPathRef.current === worldUrl) {
-        currentWorldPathRef.current = "";
-      }
-      if (worldLoadPromiseRef.current === worldLoadPromise) {
-        worldLoadPromiseRef.current = null;
-      }
-    };
-  }, [props.worldUrl]);
+    if (!props.environmentTheme) return;
+    engineRef.current?.setEnvironmentTheme(props.environmentTheme);
+  }, [props.environmentTheme]);
 
   const updateParallaxFromPointer = (
     clientX: number,

@@ -16,19 +16,11 @@ import TestRenderer, { act } from "react-test-renderer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { textOf } from "../../../../test/helpers/react-test";
 
-const { mockKeyboardSetScroll, mockUseApp, noop, sceneHostState } = vi.hoisted(
-  () => ({
-    mockKeyboardSetScroll: vi.fn(async () => undefined),
-    mockUseApp: vi.fn(),
-    noop: vi.fn(),
-    sceneHostState: {
-      activeHistory: [] as boolean[],
-      interactiveHistory: [] as boolean[],
-      mounts: 0,
-      unmounts: 0,
-    },
-  }),
-);
+const { mockKeyboardSetScroll, mockUseApp, noop } = vi.hoisted(() => ({
+  mockKeyboardSetScroll: vi.fn(async () => undefined),
+  mockUseApp: vi.fn(),
+  noop: vi.fn(),
+}));
 
 vi.mock("@capacitor/keyboard", () => ({
   Keyboard: {
@@ -81,8 +73,6 @@ vi.mock("@miladyai/app-core/components", async () => {
     CloudDashboard: () =>
       React.createElement("section", null, "ElizaCloudDashboard Ready"),
     CommandPalette: () => React.createElement("div", null, "CommandPalette"),
-    CompanionShell: ({ tab }: { tab: string }) =>
-      React.createElement("main", null, `CompanionShell Ready: ${tab}`),
     CompanionView: () =>
       React.createElement("section", null, "CompanionView Ready"),
     ConnectionLostOverlay: () =>
@@ -120,26 +110,6 @@ vi.mock("@miladyai/app-core/components", async () => {
       React.createElement("div", null, "OnboardingWizard"),
     SettingsView: () =>
       React.createElement("section", null, "SettingsView Ready"),
-    SharedCompanionScene: ({
-      active,
-      interactive,
-      children,
-    }: {
-      active: boolean;
-      interactive?: boolean;
-      children: React.ReactNode;
-    }) => {
-      const { useEffect } = React;
-      useEffect(() => {
-        sceneHostState.mounts += 1;
-        return () => {
-          sceneHostState.unmounts += 1;
-        };
-      }, []);
-      sceneHostState.activeHistory.push(active);
-      sceneHostState.interactiveHistory.push(Boolean(interactive));
-      return React.createElement(React.Fragment, null, children);
-    },
     ShellOverlays: () => null,
     SkillsView: () => React.createElement("section", null, "SkillsView Ready"),
     StreamView: () => React.createElement("section", null, "StreamView Ready"),
@@ -188,26 +158,6 @@ vi.mock("@miladyai/app-core/src/app-shell-components", () => ({
   SaveCommandModal: () => React.createElement("div", null, "SaveCommandModal"),
   SettingsView: () =>
     React.createElement("section", null, "SettingsView Ready"),
-  SharedCompanionScene: ({
-    active,
-    interactive,
-    children,
-  }: {
-    active: boolean;
-    interactive?: boolean;
-    children: React.ReactNode;
-  }) => {
-    const { useEffect } = React;
-    useEffect(() => {
-      sceneHostState.mounts += 1;
-      return () => {
-        sceneHostState.unmounts += 1;
-      };
-    }, []);
-    sceneHostState.activeHistory.push(active);
-    sceneHostState.interactiveHistory.push(Boolean(interactive));
-    return React.createElement(React.Fragment, null, children);
-  },
   ShellOverlays: () => null,
   StartupFailureView: ({ error }: { error: { message: string } }) =>
     React.createElement("div", null, error.message),
@@ -292,35 +242,40 @@ vi.mock("@miladyai/app-core/src/components/pages/CompanionView", () => ({
     React.createElement("section", null, "CompanionView Ready"),
 }));
 
+// Side-effect import mock for companion app self-registration
+vi.mock("@miladyai/app-core/src/components/companion/companion-app", () => ({}));
+
 vi.mock(
-  "@miladyai/app-core/src/components/companion/CompanionSceneHost",
-  async () => {
-    const React = await vi.importActual<typeof import("react")>("react");
-    return {
-      SharedCompanionScene: ({
-        active,
-        interactive,
-        children,
-      }: {
-        active: boolean;
-        interactive?: boolean;
-        children: React.ReactNode;
-      }) => {
-        const { useEffect } = React;
-        useEffect(() => {
-          sceneHostState.mounts += 1;
-          return () => {
-            sceneHostState.unmounts += 1;
-          };
-        }, []);
-        sceneHostState.activeHistory.push(active);
-        sceneHostState.interactiveHistory.push(Boolean(interactive));
-        return React.createElement(React.Fragment, null, children);
+  "@miladyai/app-core/src/components/apps/overlay-app-registry",
+  () => ({
+    getOverlayApp: (name: string) =>
+      name === "@miladyai/app-companion"
+        ? {
+            name: "@miladyai/app-companion",
+            Component: ({
+              exitToApps,
+            }: {
+              exitToApps: () => void;
+              uiTheme: string;
+              t: (key: string) => string;
+            }) =>
+              React.createElement(
+                "main",
+                null,
+                "CompanionOverlay Ready",
+                React.createElement("button", { onClick: exitToApps }, "Exit"),
+              ),
+          }
+        : undefined,
+    isOverlayApp: (name: string) => name === "@miladyai/app-companion",
+    getAllOverlayApps: () => [
+      {
+        name: "@miladyai/app-companion",
+        Component: () =>
+          React.createElement("main", null, "CompanionOverlay Ready"),
       },
-      CompanionSceneHost: () => null,
-      useSharedCompanionScene: () => true,
-    };
-  },
+    ],
+  }),
 );
 
 vi.mock("@miladyai/app-core/src/components/companion/VrmStage", () => ({
@@ -412,6 +367,7 @@ type HarnessState = {
   onboardingComplete: boolean;
   tab: Tab;
   uiShellMode: "native" | "companion";
+  activeOverlayApp: string | null;
   actionNotice: null;
   setTab: (tab: Tab) => void;
   setUiShellMode: (mode: "native" | "companion") => void;
@@ -459,9 +415,12 @@ function makeState(overrides?: Partial<HarnessState>): HarnessState {
     conversations: [],
     elizaCloudCredits: null,
     uiShellMode: "native",
+    activeOverlayApp: null,
     setUiShellMode: vi.fn((mode: "native" | "companion") => {
       state.uiShellMode = mode;
       state.tab = mode === "companion" ? "companion" : "chat";
+      state.activeOverlayApp =
+        mode === "companion" ? "@miladyai/app-companion" : null;
     }),
     uiLanguage: "en",
     agentStatus: { state: "running", agentName: "Milady" },
@@ -479,6 +438,8 @@ function makeState(overrides?: Partial<HarnessState>): HarnessState {
     setTab: (tab: Tab) => {
       state.tab = tab;
       state.uiShellMode = shellModeForTab(tab);
+      state.activeOverlayApp =
+        tab === "companion" ? "@miladyai/app-companion" : null;
     },
     ...overrides,
   };
@@ -528,7 +489,7 @@ function expectShellForTab(text: string, tab: Tab): void {
       case "chat":
         return "ChatView Ready";
       case "companion":
-        return "CompanionShell Ready: companion";
+        return "CompanionOverlay Ready";
       case "character":
       case "character-select":
         return "CharacterView Ready";
@@ -589,10 +550,6 @@ describe("shell mode switching (e2e)", () => {
     mockKeyboardSetScroll.mockClear();
     mockUseApp.mockReset();
     mockUseApp.mockImplementation(() => state);
-    sceneHostState.activeHistory = [];
-    sceneHostState.interactiveHistory = [];
-    sceneHostState.mounts = 0;
-    sceneHostState.unmounts = 0;
   });
 
   it("renders every tab with the shell implied by its tab", async () => {
@@ -824,33 +781,32 @@ describe("shell mode switching (e2e)", () => {
     warnSpy.mockRestore();
   });
 
-  it("keeps the shared companion scene mounted while shell mode changes", async () => {
+  it("shows overlay app when companion is active and hides it on tab switch", async () => {
     let tree!: TestRenderer.ReactTestRenderer;
 
     state.setTab("chat");
     await act(async () => {
       tree = TestRenderer.create(React.createElement(App));
     });
+    let text = textOf(requireTree(tree).root);
+    expect(text).not.toContain("CompanionOverlay Ready");
+
     state.setTab("companion");
     await act(async () => {
       tree.update(React.createElement(App));
     });
+    text = textOf(requireTree(tree).root);
+    expect(text).toContain("CompanionOverlay Ready");
 
     state.setTab("chat");
     await act(async () => {
       tree.update(React.createElement(App));
     });
-
-    const activeTransitions = sceneHostState.activeHistory.filter(
-      (active, index, history) => index === 0 || active !== history[index - 1],
-    );
-
-    expect(sceneHostState.mounts).toBe(1);
-    expect(sceneHostState.unmounts).toBe(0);
-    expect(activeTransitions).toEqual([false, true, false]);
+    text = textOf(requireTree(tree).root);
+    expect(text).not.toContain("CompanionOverlay Ready");
   });
 
-  it("keeps character tabs in the native shell while the companion scene stays active", async () => {
+  it("keeps character tabs in the native shell without the overlay", async () => {
     let tree!: TestRenderer.ReactTestRenderer;
 
     state.setTab("chat");
@@ -864,8 +820,6 @@ describe("shell mode switching (e2e)", () => {
 
     let text = textOf(requireTree(tree).root);
     expectShellForTab(text, "companion");
-    expect(sceneHostState.activeHistory.at(-1)).toBe(true);
-    expect(sceneHostState.interactiveHistory.at(-1)).toBe(true);
 
     state.setTab("character");
     await act(async () => {
@@ -874,10 +828,7 @@ describe("shell mode switching (e2e)", () => {
 
     text = textOf(requireTree(tree).root);
     expectShellForTab(text, "character");
-    expect(sceneHostState.activeHistory.at(-1)).toBe(true);
-    // Character tabs use native shell with the scene overlay visible,
-    // so interactive is true (characterSceneVisible is true).
-    expect(sceneHostState.interactiveHistory.at(-1)).toBe(true);
+    expect(text).not.toContain("CompanionOverlay Ready");
   });
 
   it("disables iOS native scrolling only while the companion shell is visible", async () => {

@@ -1,15 +1,20 @@
+import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { findRuntimePluginExport, STATIC_ELIZA_PLUGINS } from "./eliza";
-import { importPluginModuleFromPath, resolvePlugins } from "./plugin-resolver";
+import {
+  getLastFailedPluginNames,
+  importPluginModuleFromPath,
+  resolvePlugins,
+} from "./plugin-resolver";
 
 const ENV_KEYS = [
   "MILADY_STATE_DIR",
   "ELIZA_STATE_DIR",
   "ELIZA_WORKSPACE_ROOT",
+  "ELIZA_SKIP_PLUGINS",
 ] as const;
 const envBackup = new Map<string, string | undefined>();
 
@@ -54,8 +59,13 @@ async function writePluginPackage(params: {
   dependencyValue: string;
   versionValue: string;
 }): Promise<void> {
-  const { packageRoot, packageName, dependencyName, dependencyValue, versionValue } =
-    params;
+  const {
+    packageRoot,
+    packageName,
+    dependencyName,
+    dependencyValue,
+    versionValue,
+  } = params;
   await writePackageJson(packageRoot, packageName);
   const dependencyImport = dependencyName
     ? `import { dependencyValue } from "${dependencyName}";\n`
@@ -98,16 +108,45 @@ async function loadPluginDescription(
   installPath: string,
   packageName: string,
 ): Promise<string> {
-  const moduleShape = await importPluginModuleFromPath(installPath, packageName);
+  const moduleShape = await importPluginModuleFromPath(
+    installPath,
+    packageName,
+  );
   const plugin = findRuntimePluginExport(moduleShape);
   expect(plugin).not.toBeNull();
   expect(plugin?.description).toEqual(expect.any(String));
   return plugin?.description ?? "";
 }
 
+describe("personality plugin wiring", () => {
+  it("exposes the expected runtime capabilities from the static plugin map", () => {
+    const personalityModule = STATIC_ELIZA_PLUGINS[
+      "@elizaos/plugin-personality"
+    ] as Parameters<typeof findRuntimePluginExport>[0];
+
+    const plugin = findRuntimePluginExport(personalityModule);
+
+    expect(plugin).toMatchObject({
+      name: "@elizaos/plugin-personality",
+      description: expect.any(String),
+    });
+    expect(plugin?.actions?.map((action) => action.name)).toContain(
+      "MODIFY_CHARACTER",
+    );
+    expect(plugin?.providers?.map((provider) => provider.name)).toContain(
+      "userPersonalityPreferences",
+    );
+    expect(plugin?.evaluators?.map((evaluator) => evaluator.name)).toContain(
+      "CHARACTER_EVOLUTION",
+    );
+  });
+});
+
 describe("importPluginModuleFromPath", () => {
   beforeEach(async () => {
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "milady-plugin-import-"));
+    tempRoot = await fs.mkdtemp(
+      path.join(os.tmpdir(), "milady-plugin-import-"),
+    );
     for (const key of ENV_KEYS) {
       envBackup.set(key, process.env[key]);
     }
@@ -201,8 +240,16 @@ describe("importPluginModuleFromPath", () => {
   it("preserves ancestor node_modules resolution for workspace-style packages", async () => {
     const packageName = "@acme/plugin-hot-reload";
     const workspaceRoot = path.join(tempRoot, "workspace");
-    const installPath = path.join(workspaceRoot, "packages", "plugin-hot-reload");
-    const dependencyRoot = path.join(workspaceRoot, "node_modules", "dep-helper");
+    const installPath = path.join(
+      workspaceRoot,
+      "packages",
+      "plugin-hot-reload",
+    );
+    const dependencyRoot = path.join(
+      workspaceRoot,
+      "node_modules",
+      "dep-helper",
+    );
 
     await writePluginPackage({
       packageRoot: installPath,
@@ -230,7 +277,11 @@ describe("importPluginModuleFromPath", () => {
   it("preserves hoisted transitive dependencies for workspace-style packages with local node_modules", async () => {
     const packageName = "@acme/plugin-hot-reload";
     const workspaceRoot = path.join(tempRoot, "workspace");
-    const installPath = path.join(workspaceRoot, "packages", "plugin-hot-reload");
+    const installPath = path.join(
+      workspaceRoot,
+      "packages",
+      "plugin-hot-reload",
+    );
     const hoistedDependencyRoot = path.join(
       workspaceRoot,
       "node_modules",
@@ -268,7 +319,9 @@ describe("importPluginModuleFromPath", () => {
 
 describe("resolvePlugins", () => {
   beforeEach(async () => {
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "milady-plugin-import-"));
+    tempRoot = await fs.mkdtemp(
+      path.join(os.tmpdir(), "milady-plugin-import-"),
+    );
     for (const key of ENV_KEYS) {
       envBackup.set(key, process.env[key]);
     }
@@ -298,7 +351,11 @@ describe("resolvePlugins", () => {
 
   it("prefers static official plugin modules over workspace overrides", async () => {
     const pluginName = "@elizaos/plugin-hot-reload";
-    const workspacePluginRoot = path.join(tempRoot, "plugins", "plugin-hot-reload");
+    const workspacePluginRoot = path.join(
+      tempRoot,
+      "plugins",
+      "plugin-hot-reload",
+    );
     STATIC_ELIZA_PLUGINS[pluginName] = {
       default: {
         name: "static-hot-reload",
@@ -322,9 +379,9 @@ describe("resolvePlugins", () => {
       { quiet: true },
     );
 
-    expect(resolved.find((plugin) => plugin.name === pluginName)?.plugin.name).toBe(
-      "static-hot-reload",
-    );
+    expect(
+      resolved.find((plugin) => plugin.name === pluginName)?.plugin.name,
+    ).toBe("static-hot-reload");
   });
 
   it("prefers repo node_modules over staged workspace imports for official plugins", async () => {
@@ -363,8 +420,37 @@ describe("resolvePlugins", () => {
       { quiet: true },
     );
 
-    expect(resolved.find((plugin) => plugin.name === pluginName)?.plugin.name).toBe(
-      "node-modules-hot-reload",
+    expect(
+      resolved.find((plugin) => plugin.name === pluginName)?.plugin.name,
+    ).toBe("node-modules-hot-reload");
+  });
+
+  it("tracks failed plugins and honors ELIZA_SKIP_PLUGINS", async () => {
+    const missingPlugin = "@acme/plugin-missing";
+
+    const failed = await resolvePlugins(
+      {
+        plugins: {
+          allow: [missingPlugin],
+        },
+      } as never,
+      { quiet: true },
     );
+
+    expect(failed.map((plugin) => plugin.name)).not.toContain(missingPlugin);
+    expect(getLastFailedPluginNames()).toContain(missingPlugin);
+
+    process.env.ELIZA_SKIP_PLUGINS = missingPlugin;
+    const skipped = await resolvePlugins(
+      {
+        plugins: {
+          allow: [missingPlugin],
+        },
+      } as never,
+      { quiet: true },
+    );
+
+    expect(skipped.map((plugin) => plugin.name)).not.toContain(missingPlugin);
+    expect(getLastFailedPluginNames()).toEqual([]);
   });
 });

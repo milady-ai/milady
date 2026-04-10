@@ -5,6 +5,7 @@ import type {
   Room,
   UUID,
 } from "@elizaos/core";
+import { resolveOwnerEntityId } from "../runtime/owner-entity.js";
 
 export type RelationshipsGraphQuery = {
   search?: string | null;
@@ -40,6 +41,16 @@ export type RelationshipsIdentitySummary = {
   handles: RelationshipsIdentityHandle[];
 };
 
+export type RelationshipsProfile = {
+  entityId: UUID;
+  source: string;
+  handle?: string | null;
+  userId?: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  canonical?: boolean | null;
+};
+
 export type RelationshipsPersonSummary = {
   groupId: UUID;
   primaryEntityId: UUID;
@@ -56,6 +67,8 @@ export type RelationshipsPersonSummary = {
   tags: string[];
   factCount: number;
   relationshipCount: number;
+  isOwner: boolean;
+  profiles: RelationshipsProfile[];
   lastInteractionAt?: string;
 };
 
@@ -151,6 +164,7 @@ type EntityContext = {
   entity: Entity | null;
   contact: RelationshipsContactLike | null;
   handles: RelationshipsIdentityHandle[];
+  profiles: RelationshipsProfile[];
   platforms: string[];
   emails: string[];
   phones: string[];
@@ -256,6 +270,17 @@ function normalizePlatform(platform: string): string {
     return "telegram";
   }
   return normalized;
+}
+
+function normalizeProfileSource(source: string): string {
+  const normalized = source.trim().toLowerCase();
+  if (normalized === "clientchat") {
+    return "client_chat";
+  }
+  if (normalized === "eliza-cloud") {
+    return "elizacloud";
+  }
+  return normalizePlatform(normalized);
 }
 
 function normalizeIdentityHandle(platform: string, handle: string): string {
@@ -571,6 +596,135 @@ function extractCustomFieldStrings(
   return values;
 }
 
+function preferredProfileHandle(profile: RelationshipsProfile): string {
+  return (
+    asString(profile.handle) ??
+    asString(profile.userId) ??
+    asString(profile.displayName) ??
+    profile.entityId
+  );
+}
+
+function upsertProfile(
+  profiles: Map<string, RelationshipsProfile>,
+  profile: RelationshipsProfile,
+): void {
+  const source = normalizeProfileSource(profile.source);
+  const normalizedProfile: RelationshipsProfile = {
+    entityId: profile.entityId,
+    source,
+    handle: asString(profile.handle),
+    userId: asString(profile.userId),
+    displayName: asString(profile.displayName),
+    avatarUrl: asString(profile.avatarUrl),
+    canonical:
+      typeof profile.canonical === "boolean" ? profile.canonical : undefined,
+  };
+  if (
+    !normalizedProfile.handle &&
+    !normalizedProfile.userId &&
+    !normalizedProfile.displayName &&
+    !normalizedProfile.avatarUrl
+  ) {
+    return;
+  }
+  const existing = profiles.get(source);
+  profiles.set(source, {
+    entityId: normalizedProfile.entityId,
+    source,
+    handle: normalizedProfile.handle ?? existing?.handle ?? null,
+    userId: normalizedProfile.userId ?? existing?.userId ?? null,
+    displayName: normalizedProfile.displayName ?? existing?.displayName ?? null,
+    avatarUrl: normalizedProfile.avatarUrl ?? existing?.avatarUrl ?? null,
+    canonical: normalizedProfile.canonical ?? existing?.canonical ?? undefined,
+  });
+}
+
+function profileValueFromRecord(
+  record: Record<string, unknown> | null,
+  keys: string[],
+): string | null {
+  if (!record) {
+    return null;
+  }
+  for (const key of keys) {
+    const value = asString(record[key]);
+    if (value) {
+      return value;
+    }
+  }
+  return null;
+}
+
+function collectEntityProfiles(
+  entityId: UUID,
+  entity: Entity | null,
+  handles: RelationshipsIdentityHandle[],
+): RelationshipsProfile[] {
+  const profiles = new Map<string, RelationshipsProfile>();
+  const metadata = asRecord(entity?.metadata);
+  const names = entityNames(entity);
+  const fallbackDisplayName =
+    profileValueFromRecord(metadata, ["displayName", "name", "username"]) ??
+    names[0] ??
+    null;
+  const fallbackAvatarUrl =
+    profileValueFromRecord(metadata, ["avatarUrl", "avatar"]) ?? null;
+
+  for (const handle of handles) {
+    if (CONTACT_PLATFORM_SET.has(handle.platform)) {
+      continue;
+    }
+    upsertProfile(profiles, {
+      entityId,
+      source: handle.platform,
+      handle: handle.handle,
+      displayName: fallbackDisplayName,
+      avatarUrl: fallbackAvatarUrl,
+    });
+  }
+
+  for (const platform of KNOWN_PLATFORM_KEYS) {
+    const platformMetadata = asRecord(metadata?.[platform]);
+    if (!platformMetadata) {
+      continue;
+    }
+    upsertProfile(profiles, {
+      entityId,
+      source: platform,
+      handle: profileValueFromRecord(platformMetadata, [
+        "handle",
+        "username",
+        "userName",
+        "screenName",
+        "email",
+        "phone",
+        "url",
+        "website",
+      ]),
+      userId: profileValueFromRecord(platformMetadata, [
+        "userId",
+        "id",
+        "accountId",
+        "originalId",
+      ]),
+      displayName:
+        profileValueFromRecord(platformMetadata, [
+          "displayName",
+          "globalName",
+          "name",
+        ]) ?? fallbackDisplayName,
+      avatarUrl:
+        profileValueFromRecord(platformMetadata, ["avatarUrl", "avatar"]) ??
+        fallbackAvatarUrl,
+    });
+  }
+
+  return Array.from(profiles.values()).sort((left, right) =>
+    left.source.localeCompare(right.source),
+  );
+}
+
 function buildEntityContext(
   entityId: UUID,
   entity: Entity | null,
@@ -620,11 +774,14 @@ function buildEntityContext(
     pushUnique(websites, website);
   }
 
+  const profiles = collectEntityProfiles(entityId, entity, handles);
+
   return {
     entityId,
     entity,
     contact,
     handles,
+    profiles,
     platforms: uniqueSorted(handles.map((handle) => handle.platform)),
     emails: uniqueSorted(emails),
     phones: uniqueSorted(phones),
@@ -694,6 +851,7 @@ function buildClusters(
   entityIds: UUID[],
   relationships: Relationship[],
   contexts: Map<UUID, EntityContext>,
+  ownerEntityId?: UUID | null,
 ): ClusterRecord[] {
   const parent = new Map<UUID, UUID>();
   for (const entityId of entityIds) {
@@ -783,6 +941,14 @@ function buildClusters(
 
   return Array.from(grouped.values()).map((memberEntityIds) => {
     const sortedMembers = [...memberEntityIds].sort((left, right) => {
+      if (ownerEntityId) {
+        if (left === ownerEntityId) {
+          return -1;
+        }
+        if (right === ownerEntityId) {
+          return 1;
+        }
+      }
       const scoreDiff = scoreEntity(right) - scoreEntity(left);
       if (scoreDiff !== 0) {
         return scoreDiff;
@@ -824,6 +990,10 @@ function buildSummaries(
   clusters: ClusterRecord[],
   contexts: Map<UUID, EntityContext>,
   factCounts: Map<UUID, number>,
+  ownerInfo: {
+    ownerEntityId: UUID | null;
+    cloudUserId: string | null;
+  },
 ): RelationshipsPersonSummary[] {
   return clusters.map((cluster) => {
     const identities: RelationshipsIdentitySummary[] = [];
@@ -834,9 +1004,13 @@ function buildSummaries(
     const websites = new Set<string>();
     const categories = new Set<string>();
     const tags = new Set<string>();
+    const profiles = new Map<string, RelationshipsProfile>();
     let preferredCommunicationChannel: string | null = null;
     let lastInteractionAt: string | undefined;
     let factCount = 0;
+    const isOwner =
+      typeof ownerInfo.ownerEntityId === "string" &&
+      cluster.memberEntityIds.includes(ownerInfo.ownerEntityId);
 
     for (const memberEntityId of cluster.memberEntityIds) {
       const context = contexts.get(memberEntityId);
@@ -870,6 +1044,9 @@ function buildSummaries(
       for (const tag of context.contact?.tags ?? []) {
         tags.add(tag);
       }
+      for (const profile of context.profiles) {
+        upsertProfile(profiles, profile);
+      }
       factCount += factCounts.get(memberEntityId) ?? 0;
       preferredCommunicationChannel =
         preferredCommunicationChannel ??
@@ -900,6 +1077,37 @@ function buildSummaries(
 
     aliases.delete(displayName);
 
+    if (isOwner && ownerInfo.ownerEntityId) {
+      upsertProfile(profiles, {
+        entityId: ownerInfo.ownerEntityId,
+        source: "client_chat",
+        userId: ownerInfo.ownerEntityId,
+        displayName,
+        canonical: true,
+      });
+      if (ownerInfo.cloudUserId) {
+        upsertProfile(profiles, {
+          entityId: ownerInfo.ownerEntityId,
+          source: "elizacloud",
+          userId: ownerInfo.cloudUserId,
+          displayName,
+          canonical: true,
+        });
+      }
+    }
+
+    const sortedProfiles = Array.from(profiles.values()).sort((left, right) => {
+      if ((left.canonical ?? false) !== (right.canonical ?? false)) {
+        return left.canonical ? -1 : 1;
+      }
+      return preferredProfileHandle(left).localeCompare(
+        preferredProfileHandle(right),
+      );
+    });
+    for (const profile of sortedProfiles) {
+      platforms.add(normalizeProfileSource(profile.source));
+    }
+
     return {
       groupId: cluster.groupId,
       primaryEntityId: cluster.primaryEntityId,
@@ -916,6 +1124,8 @@ function buildSummaries(
       tags: uniqueSorted(tags),
       factCount,
       relationshipCount: 0,
+      isOwner,
+      profiles: sortedProfiles,
       lastInteractionAt,
     };
   });
@@ -1276,6 +1486,11 @@ function filterGraphByRelevance(
   edges: RelationshipsGraphEdge[];
   visibleGroupIds: Set<UUID>;
 } {
+  const ownerGroupIds = new Set(
+    summaries
+      .filter((summary) => summary.isOwner)
+      .map((summary) => summary.groupId),
+  );
   const activePosterGroupIds = new Set(
     summaries
       .filter(
@@ -1284,6 +1499,16 @@ function filterGraphByRelevance(
       .map((summary) => summary.groupId),
   );
   if (activePosterGroupIds.size === 0) {
+    if (ownerGroupIds.size > 0) {
+      return {
+        summaries: summaries.filter((summary) =>
+          ownerGroupIds.has(summary.groupId),
+        ),
+        edges: [],
+        visibleGroupIds: ownerGroupIds,
+      };
+    }
+
     return {
       summaries: [],
       edges: [],
@@ -1307,8 +1532,9 @@ function filterGraphByRelevance(
     summaries
       .filter(
         (summary) =>
-          activePosterGroupIds.has(summary.groupId) &&
-          (relationshipIndicatorCounts.get(summary.groupId) ?? 0) > 0,
+          ownerGroupIds.has(summary.groupId) ||
+          (activePosterGroupIds.has(summary.groupId) &&
+            (relationshipIndicatorCounts.get(summary.groupId) ?? 0) > 0),
       )
       .map((summary) => summary.groupId),
   );
@@ -1349,9 +1575,16 @@ function matchesQuery(
     ...summary.emails,
     ...summary.phones,
     ...summary.websites,
+    ...(summary.isOwner ? ["owner", "canonical owner"] : []),
     ...summary.identities.flatMap((identity) =>
       identity.handles.map((handle) => handle.handle),
     ),
+    ...summary.profiles.flatMap((profile) => [
+      profile.source,
+      profile.handle ?? "",
+      profile.userId ?? "",
+      profile.displayName ?? "",
+    ]),
   ]
     .join("\n")
     .toLowerCase();
@@ -1567,6 +1800,11 @@ async function buildGraphModel(
     relationshipsService,
     rooms,
   );
+  const ownerEntityId = await resolveOwnerEntityId(runtime).catch(() => null);
+  const cloudAuth = runtime.getService("CLOUD_AUTH") as {
+    getUserId?: () => string | undefined;
+  } | null;
+  const cloudUserId = asString(cloudAuth?.getUserId?.()) ?? null;
   const entityContexts = new Map<UUID, EntityContext>();
 
   await Promise.all(
@@ -1589,7 +1827,12 @@ async function buildGraphModel(
       ? await runtime.getRelationships({ entityIds, limit: 10000 })
       : [];
   const factCounts = await countFacts(runtime, entityIds);
-  const clustersList = buildClusters(entityIds, relationships, entityContexts);
+  const clustersList = buildClusters(
+    entityIds,
+    relationships,
+    entityContexts,
+    ownerEntityId,
+  );
   const clusters = new Map(
     clustersList.map((cluster) => [cluster.groupId, cluster]),
   );
@@ -1600,7 +1843,10 @@ async function buildGraphModel(
     }
   }
 
-  const summaries = buildSummaries(clustersList, entityContexts, factCounts);
+  const summaries = buildSummaries(clustersList, entityContexts, factCounts, {
+    ownerEntityId,
+    cloudUserId,
+  });
   const peopleByGroupId = new Map(
     summaries.map((summary) => [summary.groupId, summary]),
   );
@@ -1644,13 +1890,43 @@ async function buildGraphModel(
   };
 }
 
+/** TTL cache for the expensive graph model build. */
+const MODEL_CACHE_TTL_MS = 30_000; // 30 seconds
+
+type CachedModel = Awaited<ReturnType<typeof buildGraphModel>>;
+type ModelCache = { model: CachedModel; timestamp: number };
+
 export function createNativeRelationshipsGraphService(
   runtime: IAgentRuntime,
   relationshipsService: RelationshipsServiceLike,
 ): RelationshipsGraphService {
+  let modelCache: ModelCache | null = null;
+  let modelBuildPromise: Promise<CachedModel> | null = null;
+
+  async function getCachedModel(): Promise<CachedModel> {
+    const now = Date.now();
+    if (modelCache && now - modelCache.timestamp < MODEL_CACHE_TTL_MS) {
+      return modelCache.model;
+    }
+    // Deduplicate concurrent builds.
+    if (!modelBuildPromise) {
+      modelBuildPromise = buildGraphModel(runtime, relationshipsService)
+        .then((model) => {
+          modelCache = { model, timestamp: Date.now() };
+          modelBuildPromise = null;
+          return model;
+        })
+        .catch((err) => {
+          modelBuildPromise = null;
+          throw err;
+        });
+    }
+    return modelBuildPromise;
+  }
+
   return {
     async getGraphSnapshot(query = {}): Promise<RelationshipsGraphSnapshot> {
-      const model = await buildGraphModel(runtime, relationshipsService);
+      const model = await getCachedModel();
       const relevantGraph = filterGraphByRelevance(
         model.summaries,
         model.edges,
@@ -1703,7 +1979,7 @@ export function createNativeRelationshipsGraphService(
     async getPersonDetail(
       primaryEntityId: UUID,
     ): Promise<RelationshipsPersonDetail | null> {
-      const model = await buildGraphModel(runtime, relationshipsService);
+      const model = await getCachedModel();
       const relevantGraph = filterGraphByRelevance(
         model.summaries,
         model.edges,

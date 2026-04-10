@@ -1,26 +1,6 @@
 import type { IAgentRuntime, Memory, UUID } from "@elizaos/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { loadElizaConfigMock, saveElizaConfigMock, configState } = vi.hoisted(
-  () => {
-    const configState: Record<string, unknown> = {};
-    return {
-      configState,
-      loadElizaConfigMock: vi.fn(() => configState),
-      saveElizaConfigMock: vi.fn((nextConfig: Record<string, unknown>) => {
-        const snapshot = structuredClone(nextConfig);
-        Object.keys(configState).forEach((key) => delete configState[key]);
-        Object.assign(configState, snapshot);
-      }),
-    };
-  },
-);
-
-vi.mock("../../../config/config.js", () => ({
-  loadElizaConfig: loadElizaConfigMock,
-  saveElizaConfig: saveElizaConfigMock,
-}));
-
 import { updateRoleAction } from "../src/action";
 import type { RoleName, RolesWorldMetadata } from "../src/types";
 import { setConnectorAdminWhitelist } from "../src/utils";
@@ -240,13 +220,126 @@ describe("updateRoleAction.validate", () => {
     });
   });
 
-  describe("boss format", () => {
-    it("accepts natural-language boss assignment", async () => {
+  describe("natural language assignment", () => {
+    // --- boss-family → ADMIN ---
+    it.each([
+      "nubs is your boss",
+      "alice is my boss",
+      "bob is our manager",
+      "charlie is a supervisor",
+      "dave is your superior",
+      "eve is an lead",
+      "@frank is your boss",
+      "nubs is your boss!",
+      "nubs is your boss.",
+      "nubs is your Boss",
+      "NUBS IS YOUR BOSS",
+    ])("accepts boss-family assignment: %s", async (text) => {
       expect(
-        await updateRoleAction.validate(
-          runtime,
-          createMessage("e1", "nubs is your boss"),
-        ),
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+
+    // --- coworker-family → USER ---
+    it.each([
+      "alice is your coworker",
+      "alice is my co-worker",
+      "bob is your teammate",
+      "charlie is a colleague",
+      "dave is your peer",
+      "eve is your friend",
+      "frank is a partner",
+      "@alice is your coworker",
+      "alice is ur coworker",
+    ])("accepts coworker-family assignment: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+
+    // --- inverted: "my LABEL is X" ---
+    it.each([
+      "my boss is alice",
+      "your coworker is bob",
+      "our manager is charlie",
+    ])("accepts inverted assignment: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+
+    // --- treat/consider ---
+    it.each([
+      "treat alice as your boss",
+      "consider bob your coworker",
+      "treat charlie like my teammate",
+      "please treat alice as your boss",
+      "hey treat bob like a friend",
+    ])("accepts treat/consider: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+  });
+
+  describe("natural language negation", () => {
+    it.each([
+      "alice is not your boss",
+      "alice isn't your boss",
+      "alice isnt your boss",
+      "bob is no longer your coworker",
+      "charlie is not my manager",
+      "dave isn't a friend",
+      "eve is not your boss anymore",
+      "frank is not your teammate any more",
+      "@alice is not your boss",
+      "alice is not ur boss",
+    ])("accepts negation: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+
+    it.each([
+      "don't treat alice as your boss",
+      "do not treat bob as your coworker",
+      "don't consider charlie your friend",
+      "do not consider dave like a teammate",
+    ])("accepts don't-treat negation: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+
+    it.each([
+      "remove alice as boss",
+      "remove bob as your coworker",
+      "remove charlie as a friend",
+    ])("accepts remove-as negation: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+  });
+
+  describe("tentative natural language", () => {
+    it.each([
+      "I think alice is your boss",
+      "i guess bob is my coworker",
+      "i figure charlie is a friend",
+    ])("accepts tentative assignment: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
+      ).toBe(true);
+    });
+
+    it.each([
+      "I think alice is not your boss",
+      "i guess bob isn't my coworker",
+      "i figure charlie is no longer a friend",
+    ])("accepts tentative negation: %s", async (text) => {
+      expect(
+        await updateRoleAction.validate(runtime, createMessage("e1", text)),
       ).toBe(true);
     });
   });
@@ -386,9 +479,6 @@ describe("updateRoleAction.handler", () => {
   let callback: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    Object.keys(configState).forEach((key) => delete configState[key]);
-    loadElizaConfigMock.mockClear();
-    saveElizaConfigMock.mockClear();
     world = createMockWorld("world-1", ownerId);
     runtime = createMockRuntime(world, {
       [ownerId]: { names: ["Shaw"] },
@@ -615,7 +705,7 @@ describe("updateRoleAction.handler", () => {
     expect(result).toEqual(expect.objectContaining({ success: true }));
   });
 
-  it("OWNER can transfer boss using a natural-language command", async () => {
+  it("'nubs is your boss' sets ADMIN role (not ownership transfer)", async () => {
     runtime = createMockRuntime(world, {
       [ownerId]: { names: ["Shaw"] },
       [targetId]: {
@@ -633,17 +723,10 @@ describe("updateRoleAction.handler", () => {
     );
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
-    expect(world.metadata.ownership?.ownerId).toBe(targetId);
-    expect(world.metadata.roles?.[targetId]).toBe("OWNER");
-    expect(world.metadata.roles?.[ownerId]).toBe("ADMIN");
-    expect(runtime.setSetting).toHaveBeenCalledWith(
-      "ELIZA_ADMIN_ENTITY_ID",
-      targetId,
-    );
-    expect(saveElizaConfigMock).toHaveBeenCalledTimes(1);
-    expect((configState.agents as Record<string, unknown>).defaults).toEqual(
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
+    expect(callback).toHaveBeenCalledWith(
       expect.objectContaining({
-        adminEntityId: targetId,
+        text: expect.stringContaining("nubs is now your boss"),
       }),
     );
   });
@@ -695,7 +778,7 @@ describe("updateRoleAction.handler", () => {
     );
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
-    expect(world.metadata.ownership?.ownerId).toBe(targetId);
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
   });
 
   it("uses rolodex strength to resolve a boss target outside the current room", async () => {
@@ -744,7 +827,7 @@ describe("updateRoleAction.handler", () => {
     );
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
-    expect(world.metadata.ownership?.ownerId).toBe(targetId);
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
   });
 
   it("returns previousRole and newRole in result data", async () => {
@@ -883,7 +966,7 @@ describe("updateRoleAction.handler", () => {
     expect(result).toEqual(expect.objectContaining({ success: false }));
   });
 
-  it("rejects ADMIN trying to assign a new boss", async () => {
+  it("ADMIN can say 'X is your boss' (sets ADMIN, not OWNER)", async () => {
     const adminId = "admin-uuid";
     setWorldRole(world, adminId, "ADMIN");
     runtime = createMockRuntime(world, {
@@ -898,12 +981,8 @@ describe("updateRoleAction.handler", () => {
       undefined,
       callback,
     );
-    expect(result).toEqual(expect.objectContaining({ success: false }));
-    expect(callback).toHaveBeenCalledWith(
-      expect.objectContaining({
-        text: expect.stringContaining("Only the current OWNER"),
-      }),
-    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
   });
 
   it("rejects ADMIN trying to demote another ADMIN", async () => {
@@ -959,6 +1038,257 @@ describe("updateRoleAction.handler", () => {
       callback,
     );
     expect(result).toEqual(expect.objectContaining({ success: true }));
+  });
+
+  // --- Natural language assignment handler ---
+
+  it("'alice is your coworker' sets USER role", async () => {
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice is your coworker"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("USER");
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "alice is now your coworker.",
+      }),
+    );
+  });
+
+  it("'alice is your manager' sets ADMIN role", async () => {
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice is your manager"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "alice is now your manager.",
+      }),
+    );
+  });
+
+  it("'treat alice as your friend' sets USER role", async () => {
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "treat alice as your friend"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("USER");
+  });
+
+  it("inverted 'my boss is alice' sets ADMIN", async () => {
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "my boss is alice"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
+  });
+
+  it("returns label in result data", async () => {
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice is your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({
+          label: "boss",
+          newRole: "ADMIN",
+        }),
+      }),
+    );
+  });
+
+  // --- Natural language revocation handler ---
+
+  it("'alice is not your boss' revokes to GUEST", async () => {
+    setWorldRole(world, targetId, "ADMIN");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice is not your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("GUEST");
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "alice is no longer your boss.",
+      }),
+    );
+  });
+
+  it("'alice isn't your coworker' revokes to GUEST", async () => {
+    setWorldRole(world, targetId, "USER");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice isn't your coworker"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("GUEST");
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "alice is no longer your coworker.",
+      }),
+    );
+  });
+
+  it("'alice is no longer your manager' revokes to GUEST", async () => {
+    setWorldRole(world, targetId, "ADMIN");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice is no longer your manager"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("GUEST");
+  });
+
+  it("'remove alice as boss' revokes to GUEST", async () => {
+    setWorldRole(world, targetId, "ADMIN");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "remove alice as boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("GUEST");
+  });
+
+  it("'don't treat alice as your boss' revokes to GUEST", async () => {
+    setWorldRole(world, targetId, "ADMIN");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "don't treat alice as your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("GUEST");
+  });
+
+  it("returns revoked flag in result data for negation", async () => {
+    setWorldRole(world, targetId, "ADMIN");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "alice is not your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({
+          revoked: true,
+          revokedLabel: "boss",
+          newRole: "GUEST",
+        }),
+      }),
+    );
+  });
+
+  it("ADMIN can revoke USER via natural language", async () => {
+    const adminId = "admin-uuid";
+    setWorldRole(world, adminId, "ADMIN");
+    setWorldRole(world, targetId, "USER");
+    runtime = createMockRuntime(world, {
+      [ownerId]: { names: ["Shaw"] },
+      [adminId]: { names: ["mod"] },
+      [targetId]: { names: ["alice"] },
+    });
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(adminId, "alice is not your coworker"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("GUEST");
+  });
+
+  it("ADMIN cannot revoke another ADMIN via natural language", async () => {
+    const adminId = "admin-uuid";
+    setWorldRole(world, adminId, "ADMIN");
+    setWorldRole(world, targetId, "ADMIN");
+    runtime = createMockRuntime(world, {
+      [ownerId]: { names: ["Shaw"] },
+      [adminId]: { names: ["mod"] },
+      [targetId]: { names: ["alice"] },
+    });
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(adminId, "alice is not your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: false }));
+  });
+
+  it("USER cannot assign natural language roles", async () => {
+    const userId = "user-uuid";
+    setWorldRole(world, userId, "USER");
+    runtime = createMockRuntime(world, {
+      [ownerId]: { names: ["Shaw"] },
+      [userId]: { names: ["regular"] },
+      [targetId]: { names: ["alice"] },
+    });
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(userId, "alice is your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: false }));
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining("permission"),
+      }),
+    );
+  });
+
+  it("GUEST cannot revoke natural language roles", async () => {
+    setWorldRole(world, targetId, "ADMIN");
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage("nobody" as UUID, "alice is not your boss"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+    expect(result).toEqual(expect.objectContaining({ success: false }));
   });
 
   // --- Callback handling ---

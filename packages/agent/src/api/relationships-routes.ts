@@ -72,6 +72,7 @@ export async function handleRelationshipsRoutes(
   if (
     pathname !== "/api/relationships/graph" &&
     pathname !== "/api/relationships/people" &&
+    pathname !== "/api/relationships/activity" &&
     !pathname.startsWith("/api/relationships/people/")
   ) {
     return false;
@@ -108,6 +109,145 @@ export async function handleRelationshipsRoutes(
       {
         data: snapshot.people,
         stats: snapshot.stats,
+      },
+      200,
+    );
+    return true;
+  }
+
+  if (pathname === "/api/relationships/activity") {
+    const snapshot = await relationshipsGraph.getGraphSnapshot({ limit: 200 });
+    type ActivityItem = {
+      type: "relationship" | "identity" | "fact";
+      personName: string;
+      personId: string;
+      summary: string;
+      detail: string | null;
+      timestamp: string | null;
+    };
+    const activity: ActivityItem[] = [];
+    const personByEntityId = new Map<
+      string,
+      { personId: string; personName: string }
+    >();
+
+    for (const person of snapshot.people) {
+      personByEntityId.set(person.primaryEntityId, {
+        personId: person.primaryEntityId,
+        personName: person.displayName,
+      });
+      for (const memberEntityId of person.memberEntityIds) {
+        personByEntityId.set(memberEntityId, {
+          personId: person.primaryEntityId,
+          personName: person.displayName,
+        });
+      }
+    }
+
+    for (const edge of snapshot.relationships) {
+      const types = edge.relationshipTypes.join(", ") || "connected";
+      activity.push({
+        type: "relationship",
+        personName: edge.sourcePersonName,
+        personId: edge.sourcePersonId,
+        summary: `${edge.sourcePersonName} ↔ ${edge.targetPersonName}`,
+        detail: `${types} · ${edge.sentiment} · strength ${edge.strength.toFixed(2)} · ${edge.interactionCount} interactions`,
+        timestamp: edge.lastInteractionAt ?? null,
+      });
+    }
+
+    for (const person of snapshot.people) {
+      const platforms = person.platforms.join(", ") || "no platform";
+      activity.push({
+        type: "identity",
+        personName: person.displayName,
+        personId: person.primaryEntityId,
+        summary: person.displayName,
+        detail: `${person.memberEntityIds.length} identit${person.memberEntityIds.length === 1 ? "y" : "ies"} on ${platforms} · ${person.factCount} facts`,
+        timestamp: person.lastInteractionAt ?? null,
+      });
+    }
+
+    if (runtime) {
+      const recentFacts = await runtime.getMemories({
+        agentId: runtime.agentId,
+        tableName: "facts",
+        count: 200,
+      });
+      for (const fact of recentFacts) {
+        const text =
+          typeof fact.content?.text === "string"
+            ? fact.content.text.trim()
+            : "";
+        if (!text) {
+          continue;
+        }
+        const person = fact.entityId
+          ? (personByEntityId.get(fact.entityId) ?? null)
+          : null;
+        const metadata =
+          fact.metadata && typeof fact.metadata === "object"
+            ? (fact.metadata as Record<string, unknown>)
+            : null;
+        const confidence =
+          typeof metadata?.confidence === "number" ? metadata.confidence : null;
+        const scopeBase =
+          metadata?.base && typeof metadata.base === "object"
+            ? (metadata.base as Record<string, unknown>)
+            : null;
+        const scope =
+          typeof scopeBase?.scope === "string" ? scopeBase.scope : null;
+        const detailParts = [text];
+        if (scope) {
+          detailParts.push(scope);
+        }
+        if (confidence !== null) {
+          detailParts.push(`confidence ${confidence.toFixed(2)}`);
+        }
+        activity.push({
+          type: "fact",
+          personName: person?.personName ?? "Unknown person",
+          personId: person?.personId ?? fact.entityId ?? "unknown",
+          summary: person?.personName
+            ? `Fact for ${person.personName}`
+            : "Fact extracted",
+          detail: detailParts.join(" · "),
+          timestamp:
+            typeof fact.createdAt === "number"
+              ? new Date(fact.createdAt).toISOString()
+              : null,
+        });
+      }
+    }
+
+    activity.sort((a, b) => {
+      const ta = a.timestamp ? Date.parse(a.timestamp) : 0;
+      const tb = b.timestamp ? Date.parse(b.timestamp) : 0;
+      return tb - ta;
+    });
+
+    const activityUrl = new URL(
+      req.url ?? "/api/relationships/activity",
+      "http://localhost",
+    );
+    const limitParam = activityUrl.searchParams.get("limit");
+    const limit = limitParam
+      ? Math.min(Number.parseInt(limitParam, 10), 100)
+      : 50;
+    const offsetParam = activityUrl.searchParams.get("offset");
+    const offset = offsetParam
+      ? Math.max(0, Number.parseInt(offsetParam, 10))
+      : 0;
+
+    json(
+      res,
+      {
+        activity: activity.slice(offset, offset + limit),
+        total: activity.length,
+        count: Math.min(limit, activity.length - offset),
+        offset,
+        limit,
+        hasMore: offset + limit < activity.length,
       },
       200,
     );

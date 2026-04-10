@@ -347,7 +347,7 @@ describe("character building parity", () => {
     ).toBe("Eliza");
 
     // Default fallback should resolve to the default bundled preset.
-    expect(buildCharacterFromConfig({} as ElizaConfig).name).toBe("Chen");
+    expect(buildCharacterFromConfig({} as ElizaConfig).name).toBe("Eliza");
   });
 
   it("secrets from env are included in character in all modes", () => {

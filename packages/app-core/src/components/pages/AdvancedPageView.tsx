@@ -7,6 +7,7 @@
  *   - Fine-Tuning: Dataset and model training workflows
  *   - Trajectories: LLM call viewer and analysis
  *   - Relationships: Cross-channel people, identity, and relationship graph
+ *   - Memories: Memory, fact, and extraction viewer
  *   - Runtime: Runtime object inspection
  *   - Databases: Tables/media/vector browser
  *   - Logs: Runtime log viewer
@@ -22,6 +23,7 @@ import { FineTuningView } from "../settings/FineTuningView";
 import { DatabasePageView } from "./DatabasePageView";
 import { LogsPageView } from "./LogsPageView";
 import { PluginsPageView } from "./PluginsPageView";
+import { MemoryViewerView } from "./MemoryViewerView";
 import { RelationshipsView } from "./RelationshipsView";
 import { RuntimeView } from "./RuntimeView";
 import { SkillsView } from "./SkillsView";
@@ -33,6 +35,7 @@ type SubTab =
   | "fine-tuning"
   | "trajectories"
   | "relationships"
+  | "memories"
   | "runtime"
   | "database"
   | "desktop"
@@ -72,6 +75,11 @@ const SUB_TABS: Array<{
     id: "relationships",
     labelKey: "advancedpageview.Relationships",
     descriptionKey: "advancedpageview.RelationshipsDescription",
+  },
+  {
+    id: "memories",
+    labelKey: "advancedpageview.Memories",
+    descriptionKey: "advancedpageview.MemoriesDescription",
   },
   {
     id: "runtime",
@@ -114,6 +122,8 @@ function mapTabToSubTab(tab: Tab): SubTab {
       return "trajectories";
     case "relationships":
       return "relationships";
+    case "memories":
+      return "memories";
     case "runtime":
       return "runtime";
     case "database":
@@ -213,6 +223,8 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
         );
       case "relationships":
         return <RelationshipsView contentHeader={advancedContentHeader} />;
+      case "memories":
+        return <MemoryViewerView contentHeader={advancedContentHeader} />;
       case "runtime":
         return <RuntimeView contentHeader={advancedContentHeader} />;
       case "database":

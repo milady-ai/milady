@@ -36,13 +36,13 @@ const AVATAR_CHANGE_WAVE_EMOTE: AppEmoteEventDetail = {
 
 /**
  * VrmStage — single persistent VRM engine that swaps only the character model
- * when `vrmPath` changes. The world background (Gaussian splat) stays
+ * when `vrmPath` changes. The mathematical environment stays
  * continuously rendered, completely decoupled from character selection.
  */
 export const VrmStage = memo(function VrmStage({
   active = true,
   vrmPath,
-  worldUrl,
+  environmentTheme,
   fallbackPreviewUrl,
   cameraProfile = "companion",
   initialCompanionZoomNormalized,
@@ -58,7 +58,7 @@ export const VrmStage = memo(function VrmStage({
 }: {
   active?: boolean;
   vrmPath: string;
-  worldUrl?: string;
+  environmentTheme?: "light" | "dark";
   fallbackPreviewUrl: string;
   cameraProfile?: CameraProfile;
   initialCompanionZoomNormalized?: number;
@@ -243,25 +243,30 @@ export const VrmStage = memo(function VrmStage({
   /* ── Render ─────────────────────────────────────────────────────── */
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-[var(--bg)]">
-      {/* Static CSS fallback background */}
+    <div
+      className={`fixed inset-0 z-0 overflow-hidden ${environmentTheme === "dark" ? "bg-[#08060e]" : "bg-[#f5f5f5]"}`}
+    >
+      {/* Static CSS fallback — themed construct with faint receding grid */}
       <div className="pointer-events-none absolute inset-0">
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at 50% 18%, rgba(44, 188, 255, 0.18) 0%, rgba(44, 188, 255, 0.04) 24%, rgba(3, 7, 17, 0) 52%), linear-gradient(180deg, #06101d 0%, #040913 48%, #02050c 100%)",
+              environmentTheme === "dark"
+                ? "radial-gradient(circle at 50% 40%, rgba(80, 20, 140, 0.18) 0%, transparent 60%), linear-gradient(180deg, #08060e 0%, #0c0a14 100%)"
+                : "radial-gradient(circle at 50% 40%, rgba(180, 200, 220, 0.12) 0%, transparent 60%), linear-gradient(180deg, #f5f5f5 0%, #efefef 100%)",
           }}
         />
         <div
-          className="absolute inset-x-[-14%] bottom-[-24%] h-[74%] opacity-70"
+          className={`absolute inset-x-[-14%] bottom-[-24%] h-[74%] ${environmentTheme === "dark" ? "opacity-50" : "opacity-30"}`}
           style={{
             transform: "perspective(1200px) rotateX(80deg)",
             transformOrigin: "center bottom",
             backgroundImage:
-              "linear-gradient(rgba(118, 232, 255, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(118, 232, 255, 0.18) 1px, transparent 1px)",
+              environmentTheme === "dark"
+                ? "linear-gradient(rgba(80, 20, 160, 0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(80, 20, 160, 0.4) 1px, transparent 1px)"
+                : "linear-gradient(rgba(160, 170, 180, 0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(160, 170, 180, 0.22) 1px, transparent 1px)",
             backgroundSize: "68px 68px",
-            boxShadow: "0 -24px 90px rgba(40, 184, 255, 0.14)",
           }}
         />
       </div>
@@ -271,7 +276,7 @@ export const VrmStage = memo(function VrmStage({
         <ViewerComponent
           active={active}
           vrmPath={vrmPath}
-          worldUrl={worldUrl}
+          environmentTheme={environmentTheme}
           cameraProfile={cameraProfile}
           companionVrmPowerMode={companionVrmPowerMode}
           companionHalfFramerateMode={companionHalfFramerateMode}
@@ -294,9 +299,9 @@ export const VrmStage = memo(function VrmStage({
       {/* Subtle loading indicator while VRM downloads on first load */}
       {!vrmLoaded && !showVrmFallback && !loaderHidden && (
         <div className="absolute inset-x-0 bottom-[18%] z-20 flex flex-col items-center gap-2 pointer-events-none">
-          <div className="h-1 w-32 overflow-hidden rounded-full bg-white/10">
+          <div className="h-1 w-32 overflow-hidden rounded-full bg-black/8">
             <div
-              className="h-full rounded-full bg-cyan-400/60 transition-all duration-300 ease-out"
+              className="h-full rounded-full bg-blue-400/50 transition-all duration-300 ease-out"
               style={{
                 width:
                   loadingProgress !== undefined

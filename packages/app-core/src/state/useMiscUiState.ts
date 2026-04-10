@@ -28,8 +28,10 @@ import type {
  */
 export interface ActiveInboxChat {
   avatarUrl?: string;
+  canSend?: boolean;
   id: string;
   source: string;
+  transportSource?: string;
   title: string;
   worldId?: string;
   worldLabel?: string;
@@ -74,6 +76,8 @@ export function useMiscUiState() {
   const [appRuns, setAppRuns] = useState<AppRunSummary[]>([]);
   const [activeGameRunId, setActiveGameRunId] = useState("");
   const [gameOverlayEnabled, setGameOverlayEnabled] = useState(false);
+  const [activeOverlayApp, setActiveOverlayApp] = useState<string | null>(null);
+  const companionAppRunning = activeOverlayApp !== null;
 
   const activeGameRun = useMemo(
     () => appRuns.find((run) => run.runId === activeGameRunId) ?? null,
@@ -147,6 +151,8 @@ export function useMiscUiState() {
       activeGamePostMessagePayload,
       activeGameSession,
       gameOverlayEnabled,
+      companionAppRunning,
+      activeOverlayApp,
       activeInboxChat,
     },
     setActiveInboxChat,
@@ -168,6 +174,7 @@ export function useMiscUiState() {
     setAppRuns,
     setActiveGameRunId,
     setGameOverlayEnabled,
+    setActiveOverlayApp,
     closeCommandPalette,
     openEmotePicker,
     closeEmotePicker,

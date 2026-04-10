@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import type { SignalPairingEvent } from "../services/signal-pairing.js";
 import { readJsonBody as parseJsonBody, sendJson } from "./http-helpers.js";
+import { setOwnerContact } from "./owner-contact-helpers.js";
 
 export type SignalPairingEventLike = SignalPairingEvent;
 
@@ -106,6 +107,18 @@ export async function handleSignalRoute(
             authDir,
             enabled: true,
           };
+          // Auto-populate owner contact so LifeOps can deliver reminders
+          const phoneNumber =
+            (event as unknown as Record<string, unknown>).phoneNumber as
+              | string
+              | undefined;
+          setOwnerContact(
+            state.config as Parameters<typeof setOwnerContact>[0],
+            {
+              source: "signal",
+              channelId: phoneNumber ?? undefined,
+            },
+          );
           try {
             state.saveConfig();
           } catch {

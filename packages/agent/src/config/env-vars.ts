@@ -56,10 +56,29 @@ const BLOCKED_STARTUP_ENV_KEYS = new Set([
 export const CONNECTOR_ENV_MAP: Readonly<
   Record<string, Readonly<Record<string, string>>>
 > = {
+  bluebubbles: {
+    enabled: "BLUEBUBBLES_ENABLED",
+    serverUrl: "BLUEBUBBLES_SERVER_URL",
+    password: "BLUEBUBBLES_PASSWORD",
+    webhookPath: "BLUEBUBBLES_WEBHOOK_PATH",
+    dmPolicy: "BLUEBUBBLES_DM_POLICY",
+    groupPolicy: "BLUEBUBBLES_GROUP_POLICY",
+    allowFrom: "BLUEBUBBLES_ALLOW_FROM",
+    groupAllowFrom: "BLUEBUBBLES_GROUP_ALLOW_FROM",
+    sendReadReceipts: "BLUEBUBBLES_SEND_READ_RECEIPTS",
+  },
   discord: {
     token: "DISCORD_API_TOKEN",
     botToken: "DISCORD_API_TOKEN",
     applicationId: "DISCORD_APPLICATION_ID",
+  },
+  discordLocal: {
+    enabled: "DISCORD_LOCAL_ENABLED",
+    clientId: "DISCORD_LOCAL_CLIENT_ID",
+    clientSecret: "DISCORD_LOCAL_CLIENT_SECRET",
+    scopes: "DISCORD_LOCAL_SCOPES",
+    messageChannelIds: "DISCORD_LOCAL_MESSAGE_CHANNEL_IDS",
+    sendDelayMs: "DISCORD_LOCAL_SEND_DELAY_MS",
   },
   telegram: {
     botToken: "TELEGRAM_BOT_TOKEN",
@@ -198,13 +217,33 @@ export function collectConnectorEnvVars(
         continue;
       }
       const value = configObj[configField];
-      if (typeof value !== "string" || !value.trim()) {
+      let normalized: string | null = null;
+      if (typeof value === "string") {
+        normalized = value.trim() ? value : null;
+      } else if (typeof value === "number" && Number.isFinite(value)) {
+        normalized = String(value);
+      } else if (typeof value === "boolean") {
+        normalized = value ? "true" : "false";
+      } else if (Array.isArray(value)) {
+        const serialized = value
+          .map((entry) => {
+            if (typeof entry === "string") return entry.trim();
+            if (typeof entry === "number" && Number.isFinite(entry)) {
+              return String(entry);
+            }
+            return "";
+          })
+          .filter((entry) => entry.length > 0)
+          .join(",");
+        normalized = serialized.length > 0 ? serialized : null;
+      }
+      if (!normalized) {
         continue;
       }
       if (BLOCKED_STARTUP_ENV_KEYS.has(envKey.toUpperCase())) {
         continue;
       }
-      entries[envKey] = value;
+      entries[envKey] = normalized;
     }
 
     if (connectorName === "whatsapp") {

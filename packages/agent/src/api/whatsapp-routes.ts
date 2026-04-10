@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import type { WhatsAppPairingEvent } from "../services/whatsapp-pairing.js";
 import { readJsonBody as parseJsonBody, sendJson } from "./http-helpers.js";
+import { setOwnerContact } from "./owner-contact-helpers.js";
 
 export type WhatsAppPairingEventLike = WhatsAppPairingEvent;
 
@@ -170,6 +171,18 @@ export async function handleWhatsAppRoute(
             authDir,
             enabled: true,
           };
+          // Auto-populate owner contact so LifeOps can deliver reminders
+          const phoneNumber =
+            (event as unknown as Record<string, unknown>).phoneNumber as
+              | string
+              | undefined;
+          setOwnerContact(
+            state.config as Parameters<typeof setOwnerContact>[0],
+            {
+              source: "whatsapp",
+              channelId: phoneNumber ?? undefined,
+            },
+          );
           try {
             state.saveConfig();
           } catch {

@@ -233,6 +233,55 @@ export interface QuickContextResponse {
   knowledge: KnowledgeSearchResult[];
 }
 
+// Memory Viewer types
+export interface MemoryBrowseItem {
+  id: string;
+  type: string;
+  text: string;
+  entityId: string | null;
+  roomId: string | null;
+  agentId: string | null;
+  createdAt: number;
+  metadata: Record<string, unknown> | null;
+  source: string | null;
+}
+
+export interface MemoryBrowseQuery {
+  type?: string;
+  entityId?: string;
+  /** Comma-joinable entity IDs for multi-identity people. */
+  entityIds?: string[];
+  roomId?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface MemoryBrowseResponse {
+  memories: MemoryBrowseItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface MemoryFeedQuery {
+  type?: string;
+  limit?: number;
+  before?: number;
+}
+
+export interface MemoryFeedResponse {
+  memories: MemoryBrowseItem[];
+  count: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+export interface MemoryStatsResponse {
+  total: number;
+  byType: Record<string, number>;
+}
+
 // MCP
 export interface McpServerConfig {
   type: "stdio" | "streamable-http" | "sse";

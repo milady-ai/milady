@@ -340,7 +340,10 @@ describe("Cloud-provisioned containers bypass local onboarding", () => {
   it("/api/onboarding/status reports complete without auth", async () => {
     const { status, data } = await req(port, "GET", "/api/onboarding/status");
     expect(status).toBe(200);
-    expect(data).toEqual({ complete: true });
+    expect(data).toEqual({
+      complete: true,
+      cloudProvisioned: true,
+    });
   });
 
   it("/api/auth/pair stays disabled", async () => {
@@ -415,7 +418,10 @@ describe("Cloud-provisioned onboarding survives non-loopback auto-token auth", (
   it("keeps /api/onboarding/status reachable", async () => {
     const { status, data } = await req(port, "GET", "/api/onboarding/status");
     expect(status).toBe(200);
-    expect(data).toEqual({ complete: true });
+    expect(data).toEqual({
+      complete: true,
+      cloudProvisioned: true,
+    });
   });
 
   it("still protects other endpoints with the generated token", async () => {

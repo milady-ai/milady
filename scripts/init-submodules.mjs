@@ -164,6 +164,30 @@ export function runInitSubmodules({
       if (status.startsWith("-")) {
         needsInit = true;
         initReason = "submodule is not initialized";
+      } else if (status.startsWith("+")) {
+        // Submodule HEAD differs from the commit recorded in the parent
+        // index — local commits or a branch checkout exist.
+        log(
+          `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has commits not recorded in the parent repo`,
+        );
+      }
+      // Warn about uncommitted changes in initialized submodules.
+      if (!status.startsWith("-")) {
+        try {
+          const smRoot = resolve(rootDir, submodule.path);
+          const dirty = exec("git status --porcelain", {
+            cwd: smRoot,
+            encoding: "utf8",
+            stdio: ["ignore", "pipe", "ignore"],
+          }).trim();
+          if (dirty) {
+            log(
+              `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has uncommitted local changes`,
+            );
+          }
+        } catch {
+          // Cannot check — not critical, just skip the warning.
+        }
       }
     } catch {
       // If status lookup fails, attempt initialization directly.

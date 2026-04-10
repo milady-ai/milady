@@ -87,8 +87,12 @@ export function buildOnboardingRuntimeConfig(
   const mediumModel = trimToUndefined(args.onboardingMediumModel);
   const largeModel = trimToUndefined(args.onboardingLargeModel);
   const megaModel = trimToUndefined(args.onboardingMegaModel);
-  const responseHandlerModel = trimToUndefined(args.onboardingResponseHandlerModel ?? "");
-  const actionPlannerModel = trimToUndefined(args.onboardingActionPlannerModel ?? "");
+  const responseHandlerModel = trimToUndefined(
+    args.onboardingResponseHandlerModel ?? "",
+  );
+  const actionPlannerModel = trimToUndefined(
+    args.onboardingActionPlannerModel ?? "",
+  );
   const linkedAccounts: LinkedAccountsConfig = {};
   const cloudApiKey = trimToUndefined(args.onboardingCloudApiKey);
   if (cloudApiKey) {

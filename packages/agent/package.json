@@ -64,6 +64,8 @@
     "./emotes/*": "./src/emotes/*.ts",
     "./hooks": "./src/hooks/index.ts",
     "./hooks/*": "./src/hooks/*.ts",
+    "./lifeops": "./src/lifeops/index.ts",
+    "./lifeops/*": "./src/lifeops/*.ts",
     "./onboarding-presets": "./src/onboarding-presets.ts",
     "./plugins/custom-rtmp": "./src/plugins/custom-rtmp/index.ts",
     "./plugins/*": "./src/plugins/*/index.ts",

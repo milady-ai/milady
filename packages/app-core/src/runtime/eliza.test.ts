@@ -61,6 +61,7 @@ import {
   applyConnectorSecretsToEnv,
   applyDatabaseConfigToEnv,
   applyX402ConfigToEnv,
+  attemptMiladyPgliteAutoReset,
   autoResolveDiscordAppId,
   buildCharacterFromConfig,
   CHANNEL_PLUGIN_MAP,
@@ -231,7 +232,7 @@ describe("collectPluginNames", () => {
 
   it("includes all core plugins for an empty config", () => {
     // Guard against accidental drift in the default runtime contract.
-    expect(CORE_PLUGINS).toHaveLength(9);
+    expect(CORE_PLUGINS).toHaveLength(10);
 
     const expectedCorePlugins = [
       "@elizaos/plugin-sql",
@@ -243,6 +244,7 @@ describe("collectPluginNames", () => {
       "@elizaos/plugin-agent-skills",
       "@elizaos/plugin-commands",
       "@elizaos/plugin-plugin-manager",
+      "@elizaos/plugin-personality",
     ];
     const names = collectPluginNames({} as ElizaConfig);
     for (const plugin of expectedCorePlugins) {
@@ -1447,11 +1449,8 @@ describe("applyDatabaseConfigToEnv", () => {
   it("defaults PGLITE_DATA_DIR to the agent workspace when database config is missing", () => {
     applyDatabaseConfigToEnv({} as ElizaConfig);
     expect(process.env.POSTGRES_URL).toBeUndefined();
-    // The state dir name depends on the runtime namespace. In this repo that is
-    // typically Milady's default state dir, but upstream elizaOS builds still
-    // resolve under ~/.eliza.
-    expect(process.env.PGLITE_DATA_DIR).toMatch(
-      /\.(milady|eliza)[/\\]workspace[/\\]\.eliza[/\\]\.elizadb$/,
+    expect(process.env.PGLITE_DATA_DIR).toBe(
+      path.resolve(process.cwd(), ".eliza", ".elizadb"),
     );
   });
 
@@ -1736,9 +1735,9 @@ describe("buildCharacterFromConfig", () => {
     expect(char.name).toBe("Eliza");
   });
 
-  it("defaults to 'Chen' when no name is configured", () => {
+  it("defaults to 'Eliza' when no name is configured", () => {
     const char = buildCharacterFromConfig({} as ElizaConfig);
-    expect(char.name).toBe("Chen");
+    expect(char.name).toBe("Eliza");
   });
 
   it("collects API keys from process.env as secrets", () => {
@@ -1808,7 +1807,7 @@ describe("buildCharacterFromConfig", () => {
   it("does not throw when agents.list is empty", () => {
     const config = { agents: { list: [] } } as ElizaConfig;
     expect(() => buildCharacterFromConfig(config)).not.toThrow();
-    expect(buildCharacterFromConfig(config).name).toBe("Chen");
+    expect(buildCharacterFromConfig(config).name).toBe("Eliza");
   });
 
   it("builds a character with name from agents.list and default personality", () => {
@@ -3463,6 +3462,75 @@ describe("getPgliteRecoveryAction", () => {
     );
 
     expect(action).toBe("none");
+  });
+});
+
+describe("attemptMiladyPgliteAutoReset", () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "milady-pglite-reset-"));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+    delete (globalThis as typeof globalThis & Record<symbol, unknown>)[
+      Symbol.for("@elizaos/plugin-sql/global-singletons")
+    ];
+  });
+
+  it("quarantines a corrupt .elizadb directory and clears the singleton", async () => {
+    const dataDir = path.join(tmpDir, ".elizadb");
+    await fs.mkdir(path.join(dataDir, "global"), { recursive: true });
+    await fs.writeFile(path.join(dataDir, "global", "1213"), "x");
+
+    const close = vi.fn().mockResolvedValue(undefined);
+    (globalThis as typeof globalThis & Record<symbol, unknown>)[
+      Symbol.for("@elizaos/plugin-sql/global-singletons")
+    ] = {
+      pgLiteClientManager: { close },
+    };
+
+    const backupDir = await attemptMiladyPgliteAutoReset(
+      Object.assign(
+        new Error(
+          `PGlite initialization failed for ${dataDir}: corrupt. Stop Milady, then rename or delete only this directory before retrying: ${dataDir}`,
+        ),
+        {
+          code: "ELIZA_PGLITE_MANUAL_RESET_REQUIRED",
+          dataDir,
+        },
+      ),
+    );
+
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(backupDir).toMatch(/\.elizadb\.corrupt-/);
+    expect(await fs.stat(backupDir as string)).toBeTruthy();
+    await expect(fs.stat(dataDir)).rejects.toThrow();
+    expect(
+      await fs.readFile(
+        path.join(backupDir as string, "global", "1213"),
+        "utf8",
+      ),
+    ).toBe("x");
+  });
+
+  it("ignores non-managed paths and non-manual-reset errors", async () => {
+    const otherDir = path.join(tmpDir, "custom-db");
+    await fs.mkdir(otherDir, { recursive: true });
+
+    await expect(
+      attemptMiladyPgliteAutoReset(
+        Object.assign(new Error("manual reset required"), {
+          code: "ELIZA_PGLITE_MANUAL_RESET_REQUIRED",
+          dataDir: otherDir,
+        }),
+      ),
+    ).resolves.toBeNull();
+
+    await expect(
+      attemptMiladyPgliteAutoReset(new Error("database is locked")),
+    ).resolves.toBeNull();
   });
 });
 

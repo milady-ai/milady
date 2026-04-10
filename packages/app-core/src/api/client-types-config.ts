@@ -3,57 +3,36 @@
 // Update*, Extension*, Workbench*, Character*, Voice*, Skill*
 // ---------------------------------------------------------------------------
 
+import type { ReleaseChannel } from "@miladyai/agent/contracts/config";
+import type {
+  LifeOpsOccurrenceView,
+  LifeOpsOverview,
+} from "@miladyai/shared/contracts/lifeops";
+import type { MessageExampleContent } from "@miladyai/shared/contracts/onboarding";
+import type { ConfigUiHint } from "../types";
 import type {
   TriggerLastStatus,
   TriggerType,
   TriggerWakeMode,
 } from "./client-types-core";
-import type { ReleaseChannel } from "@miladyai/agent/contracts/config";
-import type {
-  CompleteLifeOpsOccurrenceRequest,
-  CreateLifeOpsCalendarEventRequest,
-  CreateLifeOpsGmailReplyDraftRequest,
-  DisconnectLifeOpsGoogleConnectorRequest,
-  CreateLifeOpsDefinitionRequest,
-  CreateLifeOpsGoalRequest,
-  GetLifeOpsCalendarFeedRequest,
-  GetLifeOpsGmailTriageRequest,
-  LifeOpsCalendarEvent,
-  LifeOpsCalendarFeed,
-  LifeOpsDefinitionRecord,
-  LifeOpsGmailMessageSummary,
-  LifeOpsGmailReplyDraft,
-  LifeOpsGmailTriageFeed,
-  LifeOpsGoalRecord,
-  LifeOpsGoalReview,
-  LifeOpsNextCalendarEventContext,
-  LifeOpsGoogleConnectorStatus,
-  LifeOpsOccurrenceExplanation,
-  SelectLifeOpsGoogleConnectorPreferenceRequest,
-  SendLifeOpsGmailReplyRequest,
-  StartLifeOpsGoogleConnectorRequest,
-  StartLifeOpsGoogleConnectorResponse,
-  LifeOpsOccurrenceView,
-  LifeOpsOverview,
-  LifeOpsReminderPlan,
-  LifeOpsTaskDefinition,
-  LifeOpsReminderInspection,
-  SnoozeLifeOpsOccurrenceRequest,
-  UpdateLifeOpsDefinitionRequest,
-  UpdateLifeOpsGoalRequest,
-} from "@miladyai/shared/contracts/lifeops";
-import type { ConfigUiHint } from "../types";
-import type { MessageExampleContent } from "@miladyai/shared/contracts/onboarding";
 
 export type {
+  CompleteLifeOpsBrowserSessionRequest,
   CompleteLifeOpsOccurrenceRequest,
+  ConfirmLifeOpsBrowserSessionRequest,
+  CreateLifeOpsBrowserSessionRequest,
   CreateLifeOpsCalendarEventRequest,
-  CreateLifeOpsGmailReplyDraftRequest,
-  DisconnectLifeOpsGoogleConnectorRequest,
   CreateLifeOpsDefinitionRequest,
+  CreateLifeOpsGmailReplyDraftRequest,
   CreateLifeOpsGoalRequest,
+  DisconnectLifeOpsGoogleConnectorRequest,
   GetLifeOpsCalendarFeedRequest,
   GetLifeOpsGmailTriageRequest,
+  LifeOpsBrowserCompanionStatus,
+  LifeOpsBrowserPageContext,
+  LifeOpsBrowserSession,
+  LifeOpsBrowserSettings,
+  LifeOpsBrowserTabSummary,
   LifeOpsCalendarEvent,
   LifeOpsCalendarFeed,
   LifeOpsDefinitionRecord,
@@ -62,19 +41,21 @@ export type {
   LifeOpsGmailTriageFeed,
   LifeOpsGoalRecord,
   LifeOpsGoalReview,
-  LifeOpsNextCalendarEventContext,
   LifeOpsGoogleConnectorStatus,
+  LifeOpsNextCalendarEventContext,
   LifeOpsOccurrenceExplanation,
-  SelectLifeOpsGoogleConnectorPreferenceRequest,
-  SendLifeOpsGmailReplyRequest,
-  StartLifeOpsGoogleConnectorRequest,
-  StartLifeOpsGoogleConnectorResponse,
   LifeOpsOccurrenceView,
   LifeOpsOverview,
+  LifeOpsReminderInspection,
   LifeOpsReminderPlan,
   LifeOpsTaskDefinition,
-  LifeOpsReminderInspection,
+  SelectLifeOpsGoogleConnectorPreferenceRequest,
+  SendLifeOpsGmailReplyRequest,
   SnoozeLifeOpsOccurrenceRequest,
+  StartLifeOpsGoogleConnectorRequest,
+  StartLifeOpsGoogleConnectorResponse,
+  SyncLifeOpsBrowserStateRequest,
+  UpdateLifeOpsBrowserSettingsRequest,
   UpdateLifeOpsDefinitionRequest,
   UpdateLifeOpsGoalRequest,
 } from "@miladyai/shared/contracts/lifeops";

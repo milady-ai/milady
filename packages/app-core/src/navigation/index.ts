@@ -7,8 +7,10 @@ import {
   Brain,
   Clock3,
   Gamepad2,
+  ListTodo,
   MessageSquare,
   Monitor,
+  PencilLine,
   Radio,
   Settings,
   Share2,
@@ -30,6 +32,7 @@ export const COMPANION_ENABLED =
 
 export type Tab =
   | "chat"
+  | "lifeops"
   | "browser"
   | "companion"
   | "stream"
@@ -46,6 +49,7 @@ export type Tab =
   | "fine-tuning"
   | "trajectories"
   | "relationships"
+  | "memories"
   | "rolodex"
   | "voice"
   | "runtime"
@@ -68,6 +72,13 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
     icon: MessageSquare,
     description:
       "Conversations with your agent and inbound messages from every connector",
+  },
+  {
+    label: "LifeOps",
+    tabs: ["lifeops"],
+    icon: ListTodo,
+    description:
+      "Tasks, goals, reminders, calendar, inbox, and connected operational accounts",
   },
   {
     label: "Browser",
@@ -100,6 +111,12 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
     description: "Service and data source connections",
   },
   {
+    label: "Character",
+    tabs: ["character", "character-select"],
+    icon: PencilLine,
+    description: "Avatar identity and customization",
+  },
+  {
     label: "Apps",
     tabs: ["apps"],
     icon: Gamepad2,
@@ -127,6 +144,7 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
       "fine-tuning",
       "trajectories",
       "relationships",
+      "memories",
       "rolodex",
       "runtime",
       "database",
@@ -148,6 +166,7 @@ export function getTabGroups(streamEnabled = STREAM_ENABLED): TabGroup[] {
 
 const TAB_PATHS: Record<Tab, string> = {
   chat: "/chat",
+  lifeops: "/lifeops",
   browser: "/browser",
   companion: "/companion",
   stream: "/stream",
@@ -164,6 +183,7 @@ const TAB_PATHS: Record<Tab, string> = {
   "fine-tuning": "/fine-tuning",
   trajectories: "/trajectories",
   relationships: "/relationships",
+  memories: "/memories",
   rolodex: "/rolodex",
   voice: "/voice",
   runtime: "/runtime",
@@ -264,6 +284,8 @@ export function titleForTab(tab: Tab): string {
   switch (tab) {
     case "chat":
       return "Chat";
+    case "lifeops":
+      return "LifeOps";
     case "browser":
       return "Browser";
     case "companion":
@@ -294,6 +316,8 @@ export function titleForTab(tab: Tab): string {
       return "Trajectories";
     case "relationships":
       return "Relationships";
+    case "memories":
+      return "Memories";
     case "rolodex":
       return "Rolodex";
     case "voice":

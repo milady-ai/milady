@@ -46,7 +46,6 @@
     "@miladyai/capacitor-websiteblocker": "workspace:*",
     "@miladyai/ui": "workspace:*",
     "@pixiv/three-vrm": "^3.4.5",
-    "@sparkjsdev/spark": "^0.1.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.182.0",

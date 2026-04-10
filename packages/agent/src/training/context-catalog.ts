@@ -30,6 +30,7 @@ export const ACTION_CONTEXT_MAP: Record<string, AgentContext[]> = {
   MODELS: ["general"],
   CONFIGURE: ["general", "system"],
   SET_USER_NAME: ["social"],
+  MODIFY_CHARACTER: ["social", "system"],
   PLAY_EMOTE: ["social"],
   SHELL_COMMAND: ["code", "system"],
   RESTART_AGENT: ["system"],
@@ -69,6 +70,10 @@ export const ACTION_CONTEXT_MAP: Record<string, AgentContext[]> = {
   SEARCH_WEB: ["knowledge", "browser"],
   SUMMARIZE: ["knowledge"],
   ANALYZE: ["knowledge"],
+  READ_CHANNEL: ["knowledge", "social"],
+  SEARCH_CONVERSATIONS: ["knowledge", "social"],
+  SEARCH_ENTITY: ["social", "knowledge"],
+  READ_ENTITY: ["social", "knowledge"],
 
   // --- Browser ---
   BROWSE: ["browser"],
@@ -171,6 +176,10 @@ export const PROVIDER_CONTEXT_MAP: Record<string, AgentContext[]> = {
   adminPanel: ["social", "system"],
   elizaDynamicSkills: ["code", "general"],
   lifeops: ["automation"],
+  "recent-conversations": ["knowledge", "social"],
+  "relevant-conversations": ["knowledge", "social"],
+  rolodex: ["social", "knowledge"],
+  userPersonalityPreferences: ["social"],
 };
 
 /** All canonical contexts. */

@@ -14,6 +14,11 @@ import { AppDetailPane } from "../apps/AppDetailPane";
 import { AppsCatalogGrid } from "../apps/AppsCatalogGrid";
 import { filterAppsForCatalog, shouldShowAppInAppsView } from "../apps/helpers";
 import {
+  getAllOverlayApps,
+  isOverlayApp,
+  overlayAppToRegistryInfo,
+} from "../apps/overlay-app-registry";
+import {
   getRunAttentionReasons,
   RunningAppsPanel,
 } from "../apps/RunningAppsPanel";
@@ -104,13 +109,18 @@ export function AppsView() {
     setLoading(true);
     setError(null);
     try {
-      const [list] = await Promise.all([
+      const [serverApps] = await Promise.all([
         client.listApps(),
         refreshRuns().catch((err: unknown) => {
           console.warn("[AppsView] Failed to list app runs:", err);
           return [];
         }),
       ]);
+      // Inject registered overlay apps (e.g. companion) if not already from server
+      const overlayDescriptors = getAllOverlayApps()
+        .filter((oa) => !serverApps.some((a) => a.name === oa.name))
+        .map(overlayAppToRegistryInfo);
+      const list = [...overlayDescriptors, ...serverApps];
       setApps(list);
       setSelectedAppName((current) => {
         if (!current) return null;
@@ -180,6 +190,11 @@ export function AppsView() {
 
   const handleLaunch = useCallback(
     async (app: RegistryAppInfo) => {
+      // Overlay apps (e.g. companion) are local-only — launch without server round-trip
+      if (isOverlayApp(app.name)) {
+        setState("activeOverlayApp", app.name);
+        return;
+      }
       setBusyApp(app.name);
       try {
         const result = await client.launchApp(app.name);

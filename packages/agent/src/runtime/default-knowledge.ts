@@ -34,6 +34,9 @@ export const MILADY_OVERVIEW_TEXT =
 export const ELIZA_HISTORY_TEXT =
   "ELIZA was created by Joseph Weizenbaum at MIT in the mid-1960s and is widely regarded as one of the earliest chatbots. Its best-known script, DOCTOR, used pattern matching to imitate a Rogerian psychotherapist and showed how simple language rules could feel surprisingly conversational. ELIZA helped define the history of chatbots and influenced later work on conversational agents.";
 
+export const ELIZA_CLOUD_BASICS_TEXT =
+  "Eliza Cloud is the managed backend and app platform for Milady when cloud mode is enabled. Builders can create an app, keep its appId, use Cloud login and redirect flows so app users can authenticate against Cloud, route chat and media APIs through Cloud, monetize app usage with inference markup and purchase-share settings, and deploy Docker containers when an app needs server-side execution.";
+
 export const DEFAULT_KNOWLEDGE_DOCUMENTS: readonly DefaultKnowledgeDocumentDefinition[] =
   [
     {
@@ -57,6 +60,18 @@ export const DEFAULT_KNOWLEDGE_DOCUMENTS: readonly DefaultKnowledgeDocumentDefin
       fragments: [
         {
           text: ELIZA_HISTORY_TEXT,
+        },
+      ],
+    },
+    {
+      key: "eliza-cloud-basics",
+      version: 1,
+      filename: "eliza-cloud-basics.txt",
+      contentType: "text/plain",
+      text: ELIZA_CLOUD_BASICS_TEXT,
+      fragments: [
+        {
+          text: ELIZA_CLOUD_BASICS_TEXT,
         },
       ],
     },

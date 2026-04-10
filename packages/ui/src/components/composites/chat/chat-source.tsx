@@ -44,6 +44,20 @@ const SOURCE_META: Record<string, ChatSourceMeta> = {
     Icon: DiscordIcon,
     label: "Discord",
   },
+  "discord-local": {
+    badgeClassName: "border-[#5865F2]/30 bg-[#5865F2]/10 text-[#c7cdff]",
+    borderClassName: "border-[#5865F2]/60",
+    iconClassName: "text-[#8ea1ff]",
+    Icon: DiscordIcon,
+    label: "Discord",
+  },
+  bluebubbles: {
+    badgeClassName: "border-[#34c759]/30 bg-[#34c759]/10 text-[#b6f2c7]",
+    borderClassName: "border-[#34c759]/60",
+    iconClassName: "text-[#34c759]",
+    Icon: MessageCircleMore,
+    label: "iMessage",
+  },
   imessage: {
     badgeClassName: "border-[#34c759]/30 bg-[#34c759]/10 text-[#b6f2c7]",
     borderClassName: "border-[#34c759]/60",
@@ -73,6 +87,13 @@ const SOURCE_META: Record<string, ChatSourceMeta> = {
     label: "SMS",
   },
   telegram: {
+    badgeClassName: "border-[#229ED9]/30 bg-[#229ED9]/10 text-[#b3e6ff]",
+    borderClassName: "border-[#229ED9]/60",
+    iconClassName: "text-[#63c5ff]",
+    Icon: Send,
+    label: "Telegram",
+  },
+  "telegram-account": {
     badgeClassName: "border-[#229ED9]/30 bg-[#229ED9]/10 text-[#b3e6ff]",
     borderClassName: "border-[#229ED9]/60",
     iconClassName: "text-[#63c5ff]",

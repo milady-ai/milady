@@ -714,8 +714,8 @@ describe("CONNECTOR_PLUGINS", () => {
     expect(CONNECTOR_PLUGINS.discord).toBe("@elizaos/plugin-discord");
   });
 
-  it("contains 19 connector mappings", () => {
-    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(19);
+  it("contains 21 connector mappings", () => {
+    expect(Object.keys(CONNECTOR_PLUGINS)).toHaveLength(21);
   });
 
   it("has keys matching CONNECTOR_IDS from schema", () => {

@@ -2,9 +2,11 @@ import { VERSION } from "../runtime/version.js";
 
 /** Known connector IDs for config schema generation. Keep in sync with runtime/plugin maps. */
 export const CONNECTOR_IDS = [
+  "bluebubbles",
   "telegram",
   "telegramAccount",
   "discord",
+  "discordLocal",
   "slack",
   "twitter",
   "whatsapp",

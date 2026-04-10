@@ -93,10 +93,7 @@ function appendPreloadLink(
 }
 
 function warmImage(url: string): Promise<boolean> {
-  if (
-    typeof window === "undefined" ||
-    typeof globalThis.Image !== "function"
-  ) {
+  if (typeof window === "undefined" || typeof globalThis.Image !== "function") {
     return Promise.resolve(false);
   }
   const cached = imagePromiseCache.get(url);
@@ -435,13 +432,11 @@ function createSession(
     );
 
     const setTimeoutFn =
-      typeof window !== "undefined" &&
-      typeof window.setTimeout === "function"
+      typeof window !== "undefined" && typeof window.setTimeout === "function"
         ? window.setTimeout.bind(window)
         : globalThis.setTimeout.bind(globalThis);
     const clearTimeoutFn =
-      typeof window !== "undefined" &&
-      typeof window.clearTimeout === "function"
+      typeof window !== "undefined" && typeof window.clearTimeout === "function"
         ? window.clearTimeout.bind(window)
         : globalThis.clearTimeout.bind(globalThis);
 

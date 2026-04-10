@@ -27,7 +27,7 @@ vi.mock("../avatar/VrmViewer", () => ({
     return React.createElement("div", {
       "data-testid": "vrm-viewer",
       "data-vrm-path": props.vrmPath ?? "",
-      "data-world-url": props.worldUrl ?? "",
+      "data-environment-theme": props.environmentTheme ?? "",
       "data-active": String((props.active as boolean | undefined) ?? true),
     });
   },
@@ -43,7 +43,7 @@ function getViewerNode(renderer: ReactTestRenderer) {
 
 function renderStage(props: {
   vrmPath: string;
-  worldUrl?: string;
+  environmentTheme?: "light" | "dark";
   fallbackPreviewUrl: string;
 }): React.ReactElement {
   return React.createElement(VrmStage, {
@@ -74,12 +74,12 @@ describe("VrmStage", () => {
     vi.useRealTimers();
   });
 
-  it("renders a single VrmViewer with vrmPath and worldUrl", async () => {
+  it("renders a single VrmViewer with vrmPath and environmentTheme", async () => {
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
           vrmPath: "/vrms/eliza-1.vrm.gz",
-          worldUrl: "/worlds/companion-day.spz",
+          environmentTheme: "light",
           fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
         }),
       );
@@ -88,17 +88,15 @@ describe("VrmStage", () => {
     const viewers = getViewerNode(renderer!);
     expect(viewers).toHaveLength(1);
     expect(viewers[0]?.props["data-vrm-path"]).toBe("/vrms/eliza-1.vrm.gz");
-    expect(viewers[0]?.props["data-world-url"]).toBe(
-      "/worlds/companion-day.spz",
-    );
+    expect(viewers[0]?.props["data-environment-theme"]).toBe("light");
   });
 
-  it("keeps the same single VrmViewer when vrmPath changes (world stays stable)", async () => {
+  it("keeps the same single VrmViewer when vrmPath changes (theme stays stable)", async () => {
     await act(async () => {
       renderer = TestRenderer.create(
         renderStage({
           vrmPath: "/vrms/eliza-1.vrm.gz",
-          worldUrl: "/worlds/companion-day.spz",
+          environmentTheme: "light",
           fallbackPreviewUrl: "/vrms/previews/eliza-1.png",
         }),
       );
@@ -108,7 +106,7 @@ describe("VrmStage", () => {
       renderer?.update(
         renderStage({
           vrmPath: "/vrms/eliza-4.vrm.gz",
-          worldUrl: "/worlds/companion-day.spz",
+          environmentTheme: "light",
           fallbackPreviewUrl: "/vrms/previews/eliza-4.png",
         }),
       );
@@ -118,10 +116,8 @@ describe("VrmStage", () => {
     const viewers = getViewerNode(renderer!);
     expect(viewers).toHaveLength(1);
     expect(viewers[0]?.props["data-vrm-path"]).toBe("/vrms/eliza-4.vrm.gz");
-    // worldUrl stays the same — background is decoupled from character
-    expect(viewers[0]?.props["data-world-url"]).toBe(
-      "/worlds/companion-day.spz",
-    );
+    // environmentTheme stays the same — background is decoupled from character
+    expect(viewers[0]?.props["data-environment-theme"]).toBe("light");
   });
 
   it("does not show a loader overlay when avatar loading exceeds four seconds", async () => {

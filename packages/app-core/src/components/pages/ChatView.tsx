@@ -13,7 +13,12 @@ import type {
 import { client } from "@miladyai/app-core/api";
 import { isRoutineCodingAgentMessage } from "@miladyai/app-core/chat";
 import { useChatAvatarVoiceBridge } from "@miladyai/app-core/hooks";
-import { getVrmPreviewUrl, useApp, useChatComposer, usePtySessions } from "@miladyai/app-core/state";
+import {
+  getVrmPreviewUrl,
+  useApp,
+  useChatComposer,
+  usePtySessions,
+} from "@miladyai/app-core/state";
 import {
   ChatAttachmentStrip,
   ChatComposer,
@@ -615,15 +620,6 @@ export function ChatView({
   );
 
   // ── Inbox-chat branch ────────────────────────────────────────────
-  //
-  // When the sidebar has selected a connector chat (iMessage/Telegram/
-  // etc.), we swap the main panel out for a read-only view of that
-  // room. Responding still has to happen via the connector plugin's
-  // own send path (plugin-imessage's IMESSAGE_SEND_MESSAGE action,
-  // plugin-telegram's reply tool, etc.), so the composer is disabled
-  // with a short note explaining why. The transcript itself reuses
-  // ChatTranscript + MessageContent so source-colored bubble borders
-  // render automatically.
   if (activeInboxChat) {
     return (
       <InboxChatPanel
@@ -662,11 +658,11 @@ export function ChatView({
 }
 
 /**
- * Read-only panel shown when the unified messages sidebar has a
- * connector chat selected. Polls `/api/inbox/messages?roomId=...`
- * every 5 seconds, renders messages through the same ChatTranscript
- * the dashboard uses so source-colored bubble borders light up, and
- * disables the composer with a short note about how to reply.
+ * Connector chat panel shown when the unified messages sidebar has a
+ * room selected. Polls `/api/inbox/messages?roomId=...`, renders the
+ * transcript through the same ChatTranscript component the dashboard
+ * uses, and routes outbound replies back through the runtime's
+ * source-specific send handlers.
  */
 function InboxChatPanel({
   activeInboxChat,
@@ -674,8 +670,10 @@ function InboxChatPanel({
 }: {
   activeInboxChat: {
     avatarUrl?: string;
+    canSend?: boolean;
     id: string;
     source: string;
+    transportSource?: string;
     title: string;
     worldId?: string;
     worldLabel?: string;
@@ -685,8 +683,13 @@ function InboxChatPanel({
   const { t } = useApp();
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [replyText, setReplyText] = useState("");
+  const [replyError, setReplyError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastRenderedMessageKeyRef = useRef<string | null>(null);
+  const transportSource =
+    activeInboxChat.transportSource ?? activeInboxChat.source;
 
   useEffect(() => {
     let cancelled = false;
@@ -695,7 +698,7 @@ function InboxChatPanel({
         const response = await client.getInboxMessages({
           limit: 200,
           roomId: activeInboxChat.id,
-          roomSource: activeInboxChat.source,
+          roomSource: transportSource,
         });
         if (cancelled) return;
         // Server returns newest first; ChatTranscript expects
@@ -716,7 +719,7 @@ function InboxChatPanel({
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [activeInboxChat.id, activeInboxChat.source]);
+  }, [activeInboxChat.id, transportSource]);
 
   useLayoutEffect(() => {
     if (messages.length === 0) return;
@@ -745,6 +748,60 @@ function InboxChatPanel({
     ? activeInboxChat.source.charAt(0).toUpperCase() +
       activeInboxChat.source.slice(1)
     : "Channel";
+
+  const handleReplySend = useCallback(async () => {
+    const text = replyText.trim();
+    if (!text || sending || activeInboxChat.canSend === false) {
+      return;
+    }
+
+    setSending(true);
+    setReplyError(null);
+    try {
+      const response = await client.sendInboxMessage({
+        roomId: activeInboxChat.id,
+        source: transportSource,
+        text,
+      });
+
+      if (response.message) {
+        setMessages((current) => [
+          ...current,
+          response.message as unknown as ConversationMessage,
+        ]);
+      }
+
+      setReplyText("");
+    } catch (error) {
+      setReplyError(
+        error instanceof Error
+          ? error.message
+          : t("inboxview.SendFailed", {
+              defaultValue: "Failed to send message.",
+            }),
+      );
+    } finally {
+      setSending(false);
+    }
+  }, [
+    activeInboxChat.canSend,
+    activeInboxChat.id,
+    replyText,
+    sending,
+    t,
+    transportSource,
+  ]);
+
+  const handleReplyKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key !== "Enter" || event.shiftKey) {
+        return;
+      }
+      event.preventDefault();
+      void handleReplySend();
+    },
+    [handleReplySend],
+  );
 
   return (
     <div
@@ -800,12 +857,52 @@ function InboxChatPanel({
           />
         )}
       </div>
-      <div className="border-t border-border/40 bg-bg-hover/40 px-5 py-3 text-[11px] leading-5 text-muted">
-        {t("inboxview.ReadOnlyReplyHint", {
-          defaultValue:
-            "Read-only view. Reply from the {{source}} app — the connector plugin handles outbound messages.",
-          source: sourceLabel,
-        })}
+      <div className="border-t border-border/40 bg-bg-hover/40 px-5 py-3">
+        {activeInboxChat.canSend === false ? (
+          <div className="text-[11px] leading-5 text-muted">
+            {t("inboxview.ReadOnlyReplyHint", {
+              defaultValue:
+                "This {{source}} chat is readable, but outbound replies are not available for this connector yet.",
+              source: sourceLabel,
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={replyText}
+              onChange={(event) => setReplyText(event.target.value)}
+              onKeyDown={handleReplyKeyDown}
+              placeholder={t("inboxview.ReplyPlaceholder", {
+                defaultValue: "Reply in {{source}}",
+                source: sourceLabel,
+              })}
+              disabled={sending}
+              rows={2}
+              className="min-h-[72px] w-full resize-y rounded-xl border border-border/50 bg-bg px-3 py-2 text-sm text-txt outline-none transition focus:border-accent/55"
+            />
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-[11px] text-muted">
+                {replyError
+                  ? replyError
+                  : t("inboxview.ReplyHint", {
+                      defaultValue:
+                        "Sent through the connected {{source}} account on this Mac.",
+                      source: sourceLabel,
+                    })}
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleReplySend()}
+                disabled={sending || replyText.trim().length === 0}
+                className="inline-flex shrink-0 items-center justify-center rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {sending
+                  ? t("inboxview.Sending", { defaultValue: "Sending…" })
+                  : t("inboxview.Send", { defaultValue: "Send" })}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

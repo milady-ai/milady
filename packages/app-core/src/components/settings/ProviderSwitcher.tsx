@@ -280,14 +280,16 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
         // Fall back to SMALL_MODEL / LARGE_MODEL env vars when cfg.models
         // is empty.  Local providers (e.g. Ollama) store the active model
         // names as env vars rather than in cfg.models.
-        const envNano = typeof vars.NANO_MODEL === "string" ? vars.NANO_MODEL : "";
+        const envNano =
+          typeof vars.NANO_MODEL === "string" ? vars.NANO_MODEL : "";
         const envSmall =
           typeof vars.SMALL_MODEL === "string" ? vars.SMALL_MODEL : "";
         const envMedium =
           typeof vars.MEDIUM_MODEL === "string" ? vars.MEDIUM_MODEL : "";
         const envLarge =
           typeof vars.LARGE_MODEL === "string" ? vars.LARGE_MODEL : "";
-        const envMega = typeof vars.MEGA_MODEL === "string" ? vars.MEGA_MODEL : "";
+        const envMega =
+          typeof vars.MEGA_MODEL === "string" ? vars.MEGA_MODEL : "";
         setCurrentNanoModel(
           models?.nano ||
             llmText?.nanoModel ||
@@ -783,8 +785,7 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                           DEFAULT_ACTION_PLANNER_MODEL,
                           ...allModelChoices.map((m) => m.id),
                         ],
-                        description:
-                          "Planning override. Defaults to medium.",
+                        description: "Planning override. Defaults to medium.",
                       },
                     },
                     required: [] as string[],
@@ -842,7 +843,8 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                         {
                           value: DEFAULT_RESPONSE_HANDLER_MODEL,
                           label: "Default (Nano)",
-                          description: "Use the nano tier unless explicitly overridden.",
+                          description:
+                            "Use the nano tier unless explicitly overridden.",
                         },
                         ...allModelChoices.map((m) => ({
                           value: m.id,
@@ -983,7 +985,8 @@ export function ProviderSwitcher(props: ProviderSwitcherProps = {}) {
                                 : {}),
                               ...(existingRouting?.responseModel
                                 ? {
-                                    responseModel: existingRouting.responseModel,
+                                    responseModel:
+                                      existingRouting.responseModel,
                                   }
                                 : {}),
                               ...(existingRouting?.mediaDescriptionModel

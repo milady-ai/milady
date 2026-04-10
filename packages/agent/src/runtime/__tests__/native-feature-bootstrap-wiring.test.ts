@@ -21,6 +21,7 @@ const expectedCorePlugins = [
   "@elizaos/plugin-agent-skills",
   "@elizaos/plugin-commands",
   "@elizaos/plugin-plugin-manager",
+  "@elizaos/plugin-personality",
 ];
 
 describe("native feature bootstrap wiring", () => {

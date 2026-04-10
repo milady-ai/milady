@@ -13,7 +13,13 @@ import {
   DrawerSheetTitle,
   ErrorBoundary,
 } from "@miladyai/ui";
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   AdvancedPageView,
   AppsPageView,
@@ -22,7 +28,6 @@ import {
   CharacterEditor,
   ChatView,
   CompanionShell,
-  CompanionView,
   ConnectionFailedBanner,
   ConnectionLostOverlay,
   ConnectorsPageView,
@@ -35,17 +40,20 @@ import {
   HeartbeatsView,
   InventoryView,
   KnowledgeView,
+  LifeOpsPageView,
   SaveCommandModal,
   SettingsView,
-  SharedCompanionScene,
   ShellOverlays,
   StartupShell,
   StreamView,
   SystemWarningBanner,
 } from "./app-shell-components";
+// Register the companion overlay app (self-registers on import)
+import "./components/companion/companion-app";
+import { getOverlayApp } from "./components/apps/overlay-app-registry";
 import { TasksEventsPanel } from "./components/chat/TasksEventsPanel";
 import { DeferredSetupChecklist } from "./components/cloud/FlaminaGuide";
-import { CompanionHeader } from "./components/companion/CompanionHeader";
+
 import { MusicPlayerGlobal } from "./components/music/MusicPlayerGlobal";
 import {
   BugReportProvider,
@@ -56,7 +64,7 @@ import {
 } from "./hooks";
 import { useActivityEvents } from "./hooks/useActivityEvents";
 import type { Tab } from "./navigation";
-import { APPS_ENABLED, COMPANION_ENABLED } from "./navigation";
+import { APPS_ENABLED } from "./navigation";
 import { useApp } from "./state";
 import type { FlaminaGuideTopic } from "./state/types";
 
@@ -101,20 +109,18 @@ function TabContentView({ children }: { children: ReactNode }) {
   );
 }
 
-function isCharacterTab(tab: Tab): boolean {
-  return tab === "character" || tab === "character-select";
-}
-
-function ViewRouter({
-  characterSceneVisible = false,
-}: {
-  characterSceneVisible?: boolean;
-}) {
+function ViewRouter() {
   const { tab } = useApp();
   const view = (() => {
     switch (tab) {
       case "chat":
         return <ChatView />;
+      case "lifeops":
+        return (
+          <TabScrollView>
+            <LifeOpsPageView />
+          </TabScrollView>
+        );
       case "browser":
         return (
           <TabContentView>
@@ -122,7 +128,8 @@ function ViewRouter({
           </TabContentView>
         );
       case "companion":
-        return COMPANION_ENABLED ? <CompanionView /> : <ChatView />;
+        // Companion is now an app — redirect /companion URL to chat
+        return <ChatView />;
       case "stream":
         return <StreamView />;
       case "apps":
@@ -138,7 +145,7 @@ function ViewRouter({
       case "character-select":
         return (
           <TabScrollView>
-            <CharacterEditor sceneOverlay={characterSceneVisible} />
+            <CharacterEditor />
           </TabScrollView>
         );
       case "wallets":
@@ -183,6 +190,7 @@ function ViewRouter({
       case "fine-tuning":
       case "trajectories":
       case "relationships":
+      case "memories":
       case "runtime":
       case "database":
       case "desktop":
@@ -208,8 +216,7 @@ export function App() {
     setTab,
     setState,
     actionNotice,
-    uiShellMode,
-    switchShellView,
+    activeOverlayApp,
     uiLanguage,
     setUiLanguage,
     uiTheme,
@@ -220,31 +227,20 @@ export function App() {
     unreadConversations,
     activeGameViewerUrl,
     gameOverlayEnabled,
+    uiShellMode,
     t,
   } = useApp();
 
   const isPopout = useIsPopout();
-  const shellMode =
-    tab === "character" || tab === "character-select"
-      ? "native"
-      : (uiShellMode ?? "companion");
-  const effectiveTab: Tab =
-    shellMode === "companion"
-      ? "companion"
-      : tab === "companion"
-        ? "chat"
-        : tab;
-  const characterSceneVisible =
-    shellMode === "native" &&
-    (isCharacterTab(effectiveTab) || isCharacterTab(tab));
-  const companionShellVisible = shellMode === "companion";
+  const companionShellVisible = activeOverlayApp !== null;
   // Don't initialize the 3D scene while the system is still booting — this
   // prevents VrmEngine's Three.js setup from blocking the JS thread and
   // delaying WebSocket agent-status updates (which would freeze the loader).
-  const companionSceneActive =
-    COMPANION_ENABLED &&
-    startupCoordinator.phase === "ready" &&
-    (companionShellVisible || characterSceneVisible);
+  const overlayAppActive =
+    startupCoordinator.phase === "ready" && activeOverlayApp !== null;
+  const resolvedOverlayApp = overlayAppActive
+    ? getOverlayApp(activeOverlayApp!)
+    : undefined;
   const lifeOpsSignalsEnabled =
     startupCoordinator.phase === "ready" &&
     agentStatus?.state === "running" &&
@@ -273,6 +269,7 @@ export function App() {
   const [mobileConversationsOpen, setMobileConversationsOpen] = useState(false);
   const [desktopShuttingDown, setDesktopShuttingDown] = useState(false);
 
+  const isCompanionTab = tab === "companion";
   const isChat = tab === "chat";
   const isWallets = tab === "wallets";
   const isConnectors = tab === "connectors";
@@ -286,49 +283,61 @@ export function App() {
     tab === "fine-tuning" ||
     tab === "trajectories" ||
     tab === "relationships" ||
+    tab === "memories" ||
     tab === "runtime" ||
     tab === "database" ||
     tab === "desktop" ||
     tab === "logs";
+  const isCharacterPage = tab === "character" || tab === "character-select";
   const unreadCount = unreadConversations?.size ?? 0;
-  const mobileChatControls = useMemo(() => isChatMobileLayout ? (
-    <div className="flex items-center gap-2 w-max">
-      <Button
-        variant="outline"
-        size="sm"
-        className={`inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
-          mobileConversationsOpen
-            ? "border-accent bg-accent-subtle text-txt"
-            : "border-border bg-card text-txt hover:border-accent hover:text-txt"
-        }`}
-        onClick={() => {
-          setMobileConversationsOpen(true);
-        }}
-        aria-label={t("aria.openChatsPanel")}
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <title>{t("conversations.chats")}</title>
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        {t("conversations.chats")}
-        {unreadCount > 0 && (
-          <span className="inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-accent text-accent-fg text-[10px] font-bold px-1">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </Button>
-    </div>
-  ) : undefined, [isChatMobileLayout, mobileConversationsOpen, unreadCount, setMobileConversationsOpen, t]);
+  const mobileChatControls = useMemo(
+    () =>
+      isChatMobileLayout ? (
+        <div className="flex items-center gap-2 w-max">
+          <Button
+            variant="outline"
+            size="sm"
+            className={`inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
+              mobileConversationsOpen
+                ? "border-accent bg-accent-subtle text-txt"
+                : "border-border bg-card text-txt hover:border-accent hover:text-txt"
+            }`}
+            onClick={() => {
+              setMobileConversationsOpen(true);
+            }}
+            aria-label={t("aria.openChatsPanel")}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <title>{t("conversations.chats")}</title>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {t("conversations.chats")}
+            {unreadCount > 0 && (
+              <span className="inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-accent text-accent-fg text-[10px] font-bold px-1">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </Button>
+        </div>
+      ) : undefined,
+    [
+      isChatMobileLayout,
+      mobileConversationsOpen,
+      unreadCount,
+      setMobileConversationsOpen,
+      t,
+    ],
+  );
 
   // Keep hook order stable across onboarding/auth state transitions.
   // Otherwise React can throw when onboarding completes and the main shell mounts.
@@ -451,261 +460,261 @@ export function App() {
   // shellContent is memoized before early returns to satisfy the Rules of Hooks.
   // Deps are local state/callbacks — not high-frequency AppContext fields like
   // ptySessions/agentStatus — so CompanionSceneHost stays stable across polls.
-  const shellContent = useMemo(() => companionShellVisible ? (
-    <CompanionShell tab={effectiveTab} actionNotice={actionNotice} />
-  ) : tab === "stream" ? (
-    <div
-      key="stream-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <main className="flex-1 min-h-0 overflow-hidden">
-        <StreamView />
-      </main>
-    </div>
-  ) : isChat ? (
-    <div
-      key="chat-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header
-        mobileLeft={mobileChatControls}
-        tasksEventsPanelOpen={isChatMobileLayout ? tasksEventsPanelOpen : true}
-        onToggleTasksPanel={
-          isChatMobileLayout
-            ? () => setTasksEventsPanelOpen((o) => !o)
-            : undefined
-        }
-      />
-      <div className="flex flex-1 min-h-0 relative">
-        {!isChatMobileLayout ? (
-          <div
-            className={CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS}
-            data-chat-shell-composer-underlay
+  const shellContent = useMemo(
+    () =>
+      uiShellMode === "companion" && !isCharacterPage ? (
+        <CompanionShell tab="companion" actionNotice={actionNotice} />
+      ) : isCompanionTab ? (
+        // Native mode with companion tab: the overlay app renders the companion UI.
+        // Render an empty shell so the overlay app is unobstructed and no Header appears.
+        <div
+          key="companion-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        />
+      ) : tab === "stream" ? (
+        <div
+          key="stream-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <main className="flex-1 min-h-0 overflow-hidden">
+            <StreamView />
+          </main>
+        </div>
+      ) : isChat ? (
+        <div
+          key="chat-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header
+            mobileLeft={mobileChatControls}
+            tasksEventsPanelOpen={
+              isChatMobileLayout ? tasksEventsPanelOpen : true
+            }
+            onToggleTasksPanel={
+              isChatMobileLayout
+                ? () => setTasksEventsPanelOpen((o) => !o)
+                : undefined
+            }
           />
-        ) : null}
-        {isChatMobileLayout ? (
-          <>
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-2 px-2">
-              <DeferredSetupChecklist
-                className="mb-3"
-                onOpenTask={handleDeferredTaskOpen}
+          <div className="flex flex-1 min-h-0 relative">
+            {!isChatMobileLayout ? (
+              <div
+                className={CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS}
+                data-chat-shell-composer-underlay
               />
-              <ChatView />
-            </main>
-
-            {mobileConversationsOpen && (
-              <DrawerSheet
-                open={mobileConversationsOpen}
-                onOpenChange={setMobileConversationsOpen}
-              >
-                <DrawerSheetContent
-                  aria-describedby={undefined}
-                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
-                  showCloseButton
-                >
-                  <DrawerSheetHeader className="sr-only">
-                    <DrawerSheetTitle>
-                      {t("conversations.chats")}
-                    </DrawerSheetTitle>
-                  </DrawerSheetHeader>
-                  <ConversationsSidebar
-                    key="chat-sidebar-mobile"
-                    mobile
-                    onClose={() => setMobileConversationsOpen(false)}
+            ) : null}
+            {isChatMobileLayout ? (
+              <>
+                <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-2 px-2">
+                  <DeferredSetupChecklist
+                    className="mb-3"
+                    onOpenTask={handleDeferredTaskOpen}
                   />
-                </DrawerSheetContent>
-              </DrawerSheet>
-            )}
+                  <ChatView />
+                </main>
 
-            {tasksEventsPanelOpen && (
-              <DrawerSheet
-                open={tasksEventsPanelOpen}
-                onOpenChange={setTasksEventsPanelOpen}
-              >
-                <DrawerSheetContent
-                  aria-describedby={undefined}
-                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
-                  showCloseButton={false}
-                >
-                  <DrawerSheetHeader className="sr-only">
-                    <DrawerSheetTitle>
-                      {t("taskseventspanel.Title", {
-                        defaultValue: "Chat widgets",
-                      })}
-                    </DrawerSheetTitle>
-                  </DrawerSheetHeader>
-                  <TasksEventsPanel
-                    open
-                    events={activityEvents}
-                    clearEvents={clearActivityEvents}
-                    mobile
+                {mobileConversationsOpen && (
+                  <DrawerSheet
+                    open={mobileConversationsOpen}
+                    onOpenChange={setMobileConversationsOpen}
+                  >
+                    <DrawerSheetContent
+                      aria-describedby={undefined}
+                      className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                      showCloseButton
+                    >
+                      <DrawerSheetHeader className="sr-only">
+                        <DrawerSheetTitle>
+                          {t("conversations.chats")}
+                        </DrawerSheetTitle>
+                      </DrawerSheetHeader>
+                      <ConversationsSidebar
+                        key="chat-sidebar-mobile"
+                        mobile
+                        onClose={() => setMobileConversationsOpen(false)}
+                      />
+                    </DrawerSheetContent>
+                  </DrawerSheet>
+                )}
+
+                {tasksEventsPanelOpen && (
+                  <DrawerSheet
+                    open={tasksEventsPanelOpen}
+                    onOpenChange={setTasksEventsPanelOpen}
+                  >
+                    <DrawerSheetContent
+                      aria-describedby={undefined}
+                      className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                      showCloseButton={false}
+                    >
+                      <DrawerSheetHeader className="sr-only">
+                        <DrawerSheetTitle>
+                          {t("taskseventspanel.Title", {
+                            defaultValue: "Chat widgets",
+                          })}
+                        </DrawerSheetTitle>
+                      </DrawerSheetHeader>
+                      <TasksEventsPanel
+                        open
+                        events={activityEvents}
+                        clearEvents={clearActivityEvents}
+                        mobile
+                      />
+                    </DrawerSheetContent>
+                  </DrawerSheet>
+                )}
+              </>
+            ) : (
+              <>
+                <ConversationsSidebar key="chat-sidebar-desktop" />
+                <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
+                  <DeferredSetupChecklist
+                    className="mx-3 mb-3 mt-3 xl:mx-5"
+                    onOpenTask={handleDeferredTaskOpen}
                   />
-                </DrawerSheetContent>
-              </DrawerSheet>
+                  <ChatView key="chat-view-desktop" />
+                </main>
+                <TasksEventsPanel
+                  open
+                  events={activityEvents}
+                  clearEvents={clearActivityEvents}
+                />
+              </>
             )}
-          </>
-        ) : (
-          <>
-            <ConversationsSidebar key="chat-sidebar-desktop" />
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
-              <DeferredSetupChecklist
-                className="mx-3 mb-3 mt-3 xl:mx-5"
-                onOpenTask={handleDeferredTaskOpen}
-              />
-              <ChatView key="chat-view-desktop" />
-            </main>
-            <TasksEventsPanel
-              open
-              events={activityEvents}
-              clearEvents={clearActivityEvents}
+            <CustomActionsPanel
+              open={customActionsPanelOpen}
+              onClose={() => setCustomActionsPanelOpen(false)}
+              onOpenEditor={(action) => {
+                setEditingAction(action ?? null);
+                setCustomActionsEditorOpen(true);
+              }}
             />
-          </>
-        )}
-        <CustomActionsPanel
-          open={customActionsPanelOpen}
-          onClose={() => setCustomActionsPanelOpen(false)}
-          onOpenEditor={(action) => {
-            setEditingAction(action ?? null);
-            setCustomActionsEditorOpen(true);
-          }}
-        />
-      </div>
-    </div>
-  ) : isHeartbeats ? (
-    <div
-      key="heartbeats-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <HeartbeatsDesktopShell key="heartbeats-view-desktop" />
-      </div>
-    </div>
-  ) : isConnectors ? (
-    <div
-      key="connectors-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <ConnectorsPageView />
-      </div>
-    </div>
-  ) : isKnowledge ? (
-    <div
-      key="knowledge-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <KnowledgeView />
-      </div>
-    </div>
-  ) : isSettingsPage ? (
-    <div
-      key={`settings-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <SettingsView
-          key={tab === "voice" ? "settings-media" : "settings-root"}
-          initialSection={
-            tab === "voice" ? "media" : (settingsInitialSection ?? undefined)
-          }
-        />
-      </div>
-    </div>
-  ) : isWallets ? (
-    <div
-      key="wallets-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <InventoryView />
-      </div>
-    </div>
-  ) : isAdvancedPage ? (
-    <div
-      key={`advanced-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0">
-        <AdvancedPageView />
-      </div>
-    </div>
-  ) : characterSceneVisible ? (
-    <div
-      key="character-shell"
-      className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent"
-    >
-      <CompanionHeader
-        activeShellView="character"
-        onShellViewChange={(view) => switchShellView(view)}
-        uiLanguage={uiLanguage}
-        setUiLanguage={setUiLanguage}
-        uiTheme={uiTheme}
-        setUiTheme={setUiTheme}
-        t={t}
-        showCompanionControls
-        chatAgentVoiceMuted={chatAgentVoiceMuted}
-        onToggleVoiceMute={() =>
-          setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
-        }
-      />
-      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
-        <ViewRouter characterSceneVisible />
-      </main>
-    </div>
-  ) : (
-    <div
-      key={`tab-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
-        <ViewRouter />
-      </main>
-    </div>
-  ), [
-    companionShellVisible,
-    effectiveTab,
-    actionNotice,
-    tab,
-    isChat,
-    isHeartbeats,
-    isConnectors,
-    isKnowledge,
-    isSettingsPage,
-    isWallets,
-    isAdvancedPage,
-    characterSceneVisible,
-    isChatMobileLayout,
-    mobileConversationsOpen,
-    mobileChatControls,
-    tasksEventsPanelOpen,
-    handleDeferredTaskOpen,
-    activityEvents,
-    clearActivityEvents,
-    customActionsPanelOpen,
-    settingsInitialSection,
-    switchShellView,
-    uiLanguage,
-    setUiLanguage,
-    uiTheme,
-    setUiTheme,
-    chatAgentVoiceMuted,
-    setState,
-    t,
-    setMobileConversationsOpen,
-    setTasksEventsPanelOpen,
-    setCustomActionsPanelOpen,
-    setEditingAction,
-    setCustomActionsEditorOpen,
-  ]);
+          </div>
+        </div>
+      ) : isHeartbeats ? (
+        <div
+          key="heartbeats-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <HeartbeatsDesktopShell key="heartbeats-view-desktop" />
+          </div>
+        </div>
+      ) : isConnectors ? (
+        <div
+          key="connectors-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <ConnectorsPageView />
+          </div>
+        </div>
+      ) : isKnowledge ? (
+        <div
+          key="knowledge-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <KnowledgeView />
+          </div>
+        </div>
+      ) : isSettingsPage ? (
+        <div
+          key={`settings-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <SettingsView
+              key={tab === "voice" ? "settings-media" : "settings-root"}
+              initialSection={
+                tab === "voice"
+                  ? "media"
+                  : (settingsInitialSection ?? undefined)
+              }
+            />
+          </div>
+        </div>
+      ) : isWallets ? (
+        <div
+          key="wallets-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <InventoryView />
+          </div>
+        </div>
+      ) : isAdvancedPage ? (
+        <div
+          key={`advanced-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0">
+            <AdvancedPageView />
+          </div>
+        </div>
+      ) : isCharacterPage ? (
+        <div
+          key="character-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
+            <ViewRouter />
+          </main>
+        </div>
+      ) : (
+        <div
+          key={`tab-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
+            <ViewRouter />
+          </main>
+        </div>
+      ),
+    [
+      tab,
+      uiShellMode,
+      isCompanionTab,
+      actionNotice,
+      isChat,
+      isHeartbeats,
+      isConnectors,
+      isKnowledge,
+      isSettingsPage,
+      isWallets,
+      isAdvancedPage,
+      isCharacterPage,
+      isChatMobileLayout,
+      mobileConversationsOpen,
+      mobileChatControls,
+      tasksEventsPanelOpen,
+      handleDeferredTaskOpen,
+      activityEvents,
+      clearActivityEvents,
+      customActionsPanelOpen,
+      settingsInitialSection,
+      uiLanguage,
+      setUiLanguage,
+      uiTheme,
+      setUiTheme,
+      chatAgentVoiceMuted,
+      setState,
+      t,
+      setMobileConversationsOpen,
+      setTasksEventsPanelOpen,
+      setCustomActionsPanelOpen,
+      setEditingAction,
+      setCustomActionsEditorOpen,
+    ],
+  );
 
   // Pop-out mode — render only StreamView, skip startup gates.
   // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.
@@ -732,23 +741,20 @@ export function App() {
   // Coordinator is at "ready" — the app shell renders. No legacy onboarding
   // overlays — the coordinator handled all of that before reaching ready.
 
-  const appShell = COMPANION_ENABLED ? (
-    <SharedCompanionScene
-      active={companionSceneActive}
-      interactive={companionShellVisible || characterSceneVisible}
-    >
-      {shellContent}
-    </SharedCompanionScene>
-  ) : (
-    shellContent
-  );
-
   return (
     <BugReportProvider value={bugReport}>
-      {/*
-        If we are in the crossfade phase, mount the shell but cover it with the fading onboarding layer.
-      */}
-      {appShell}
+      {shellContent}
+      {/* Full-screen overlay app — renders whichever overlay app is active */}
+      {resolvedOverlayApp && (
+        <resolvedOverlayApp.Component
+          exitToApps={() => {
+            setState("activeOverlayApp", null);
+            setTab("apps");
+          }}
+          uiTheme={uiTheme === "dark" ? "dark" : "light"}
+          t={t}
+        />
+      )}
       <MusicPlayerGlobal />
 
       {/* Persistent game overlay — stays visible across all tabs */}

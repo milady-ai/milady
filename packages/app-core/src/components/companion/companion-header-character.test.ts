@@ -3,29 +3,35 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Contract test: character editor uses CompanionHeader (glassmorphic bar),
- * not the native Header.
+ * Contract test: CompanionHeader is a self-contained header for the
+ * companion overlay. The mode-selector pill (companion / character / desktop)
+ * lives here. Voice toggle and new chat controls sit in the center.
+ * Clicking the desktop/mobile icon exits the companion overlay.
  */
-describe("character editor header", () => {
-  it("App.tsx renders CompanionHeader when characterSceneVisible", () => {
-    const appPath = path.resolve(import.meta.dirname, "..", "..", "App.tsx");
-    expect(existsSync(appPath)).toBe(true);
-    const source = readFileSync(appPath, "utf-8");
+describe("companion header", () => {
+  it("CompanionHeader renders mode pill and voice controls", () => {
+    const headerPath = path.resolve(import.meta.dirname, "CompanionHeader.tsx");
+    expect(existsSync(headerPath)).toBe(true);
+    const source = readFileSync(headerPath, "utf-8");
 
-    // characterSceneVisible path should use CompanionHeader, not Header
-    const charBlock = source.indexOf("characterSceneVisible ?");
-    expect(charBlock).toBeGreaterThan(-1);
-    const after = source.slice(charBlock, charBlock + 800);
-    expect(after).toContain("CompanionHeader");
-    expect(after).toContain('activeShellView="character"');
-    expect(after).not.toContain("onSave");
+    expect(source).toContain("onExitToDesktop");
+    expect(source).toContain("onExitToCharacter");
+    expect(source).toContain("onToggleVoiceMute");
+    expect(source).toContain("onNewChat");
+    expect(source).toContain("companion-shell-toggle");
   });
 
-  it("CompanionHeader accepts onSave/isSaving/saveSuccess props", () => {
-    const headerPath = path.resolve(import.meta.dirname, "CompanionHeader.tsx");
-    const source = readFileSync(headerPath, "utf-8");
-    expect(source).toContain("onSave?:");
-    expect(source).toContain("isSaving?:");
-    expect(source).toContain("saveSuccess?:");
+  it("Character tab exists in main navigation", () => {
+    const navPath = path.resolve(
+      import.meta.dirname,
+      "..",
+      "..",
+      "navigation",
+      "index.ts",
+    );
+    expect(existsSync(navPath)).toBe(true);
+    const source = readFileSync(navPath, "utf-8");
+    expect(source).toContain('"Character"');
+    expect(source).toContain('"character"');
   });
 });

@@ -1,8 +1,7 @@
-import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { AgentRuntime, Content, State, Task, UUID } from "@elizaos/core";
+import type { AgentRuntime } from "@elizaos/core";
 import {
   afterAll,
   beforeAll,
@@ -17,6 +16,7 @@ import {
   postConversationMessage,
 } from "../../../test/helpers/http";
 import { saveEnv } from "../../../test/helpers/test-utils";
+import { createLifeOpsChatTestRuntime } from "./helpers/lifeops-chat-runtime";
 import { gmailAction } from "../src/actions/gmail";
 import { startApiServer } from "../src/api/server";
 import { resolveOAuthDir } from "../src/config/paths";
@@ -24,245 +24,10 @@ import {
   createLifeOpsConnectorGrant,
   LifeOpsRepository,
 } from "../src/lifeops/repository";
-import { DatabaseSync } from "../src/test-utils/sqlite-compat";
-
-type SqlQuery = {
-  queryChunks?: Array<{ value?: unknown }>;
-};
 
 const AGENT_ID = "lifeops-gmail-chat-agent";
 const GOOGLE_GMAIL_MESSAGES_ENDPOINT =
   "https://gmail.googleapis.com/gmail/v1/users/me/messages";
-
-function extractSqlText(query: SqlQuery): string {
-  if (!Array.isArray(query.queryChunks)) return "";
-  return query.queryChunks
-    .map((chunk) => {
-      const value = chunk?.value;
-      if (Array.isArray(value)) return value.join("");
-      return String(value ?? "");
-    })
-    .join("");
-}
-
-function createRuntimeForGmailChatTests(): AgentRuntime {
-  const sqlite = new DatabaseSync(":memory:");
-  let tasks: Task[] = [];
-  const memoriesByRoom = new Map<string, Array<Record<string, unknown>>>();
-  const roomsById = new Map<string, { id: UUID; worldId: UUID }>();
-  const worldsById = new Map<
-    string,
-    { id: UUID; metadata?: Record<string, unknown> | null }
-  >();
-
-  const runtimeSubset = {
-    agentId: AGENT_ID,
-    character: {
-      name: "Chen",
-      postExamples: ["Sure."],
-    } as AgentRuntime["character"],
-    logger: {
-      debug: () => {},
-      info: () => {},
-      warn: () => {},
-      error: () => {},
-    } as AgentRuntime["logger"],
-    useModel: async () => "<response></response>",
-    getSetting: () => undefined,
-    getService: () => null,
-    getRoomsByWorld: async () => [],
-    getRoom: async (roomId: UUID) => roomsById.get(String(roomId)) ?? null,
-    getWorld: async (worldId: UUID) => worldsById.get(String(worldId)) ?? null,
-    updateWorld: async (world: {
-      id: UUID;
-      metadata?: Record<string, unknown>;
-    }) => {
-      worldsById.set(String(world.id), world);
-    },
-    ensureConnection: async (args: {
-      roomId: UUID;
-      worldId: UUID;
-      metadata?: Record<string, unknown>;
-    }) => {
-      roomsById.set(String(args.roomId), {
-        id: args.roomId,
-        worldId: args.worldId,
-      });
-      if (!worldsById.has(String(args.worldId))) {
-        worldsById.set(String(args.worldId), {
-          id: args.worldId,
-          metadata: args.metadata ?? {},
-        });
-      }
-    },
-    createMemory: async (memory: Record<string, unknown>) => {
-      const roomId = String(memory.roomId ?? "");
-      if (!roomId) return;
-      const current = memoriesByRoom.get(roomId) ?? [];
-      current.push({
-        ...memory,
-        createdAt:
-          typeof memory.createdAt === "number" ? memory.createdAt : Date.now(),
-      });
-      memoriesByRoom.set(roomId, current);
-    },
-    getMemories: async (query: { roomId?: string; count?: number }) => {
-      const roomId = String(query.roomId ?? "");
-      const current = memoriesByRoom.get(roomId) ?? [];
-      const count = Math.max(1, query.count ?? current.length);
-      return current.slice(-count) as Awaited<
-        ReturnType<AgentRuntime["getMemories"]>
-      >;
-    },
-    getMemoriesByRoomIds: async (query: {
-      roomIds?: string[];
-      limit?: number;
-    }) => {
-      const roomIds = Array.isArray(query.roomIds) ? query.roomIds : [];
-      const merged: Array<Record<string, unknown>> = [];
-      for (const roomId of roomIds) {
-        merged.push(...(memoriesByRoom.get(String(roomId)) ?? []));
-      }
-      merged.sort(
-        (left, right) =>
-          Number(left.createdAt ?? 0) - Number(right.createdAt ?? 0),
-      );
-      return merged.slice(-(query.limit ?? merged.length)) as Awaited<
-        ReturnType<AgentRuntime["getMemoriesByRoomIds"]>
-      >;
-    },
-    getTasks: async (query?: { tags?: string[] }) => {
-      if (!query?.tags || query.tags.length === 0) return tasks;
-      return tasks.filter((task) =>
-        query.tags?.every((tag) => task.tags?.includes(tag)),
-      );
-    },
-    getTask: async (taskId: UUID) =>
-      tasks.find((task) => task.id === taskId) ?? null,
-    createTask: async (task: Task) => {
-      const id = (task.id as UUID | undefined) ?? (crypto.randomUUID() as UUID);
-      tasks.push({ ...task, id });
-      return id;
-    },
-    updateTask: async (taskId: UUID, update: Partial<Task>) => {
-      tasks = tasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              ...update,
-              metadata: {
-                ...((task.metadata as Record<string, unknown> | undefined) ??
-                  {}),
-                ...((update.metadata as Record<string, unknown> | undefined) ??
-                  {}),
-              } as Task["metadata"],
-            }
-          : task,
-      );
-    },
-    deleteTask: async (taskId: UUID) => {
-      tasks = tasks.filter((task) => task.id !== taskId);
-    },
-    adapter: {
-      db: {
-        execute: async (query: SqlQuery) => {
-          const sql = extractSqlText(query).trim();
-          if (sql.length === 0) return [];
-          if (/^(select|pragma)\b/i.test(sql)) {
-            return sqlite.prepare(sql).all() as Array<Record<string, unknown>>;
-          }
-          sqlite.exec(sql);
-          return [];
-        },
-      },
-    },
-  };
-
-  const runtime = runtimeSubset as unknown as AgentRuntime;
-  runtime.messageService = {
-    handleMessage: async (
-      runtimeArg: AgentRuntime,
-      message: Record<string, unknown>,
-      onResponse: (content: Content) => Promise<object[]>,
-    ) => {
-      const roomId = message.roomId as UUID;
-      const memories = await runtimeArg.getMemories({
-        roomId: String(roomId),
-        count: 12,
-      });
-      const recentMessages = memories
-        .flatMap((memory) => {
-          if (!memory || typeof memory !== "object") {
-            return [];
-          }
-          const content =
-            "content" in memory &&
-            memory.content &&
-            typeof memory.content === "object"
-              ? (memory.content as Record<string, unknown>)
-              : null;
-          const text =
-            typeof content?.text === "string" ? content.text.trim() : "";
-          if (!text) {
-            return [];
-          }
-          const role =
-            memory.entityId === runtimeArg.agentId ? "assistant" : "user";
-          return [`${role}: ${text}`];
-        })
-        .join("\n");
-
-      const enrichedMessage = {
-        ...message,
-        content: {
-          ...(((message.content as Record<string, unknown> | undefined) ??
-            {}) as Record<string, unknown>),
-          source:
-            typeof (message.content as Record<string, unknown> | undefined)
-              ?.source === "string"
-              ? (message.content as Record<string, unknown>).source
-              : "discord",
-        },
-      };
-      const state: State = {
-        values: {
-          recentMessages,
-        },
-        data: {},
-        text: recentMessages,
-      } as State;
-      const result = await gmailAction.handler?.(
-        runtimeArg,
-        enrichedMessage as never,
-        state,
-        {
-          parameters: {},
-        } as never,
-      );
-      const responseText =
-        typeof result?.text === "string" && result.text.trim().length > 0
-          ? result.text
-          : "I couldn't find anything in your email.";
-
-      await onResponse({ text: responseText } as Content);
-      return {
-        didRespond: true,
-        responseContent: { text: responseText },
-        responseMessages: [
-          {
-            id: crypto.randomUUID() as UUID,
-            entityId: runtimeArg.agentId,
-            roomId,
-            createdAt: Date.now(),
-            content: { text: responseText },
-          },
-        ],
-      };
-    },
-  } as AgentRuntime["messageService"];
-
-  return runtime;
-}
 
 function buildMetadataMessage(args: {
   id: string;
@@ -448,7 +213,40 @@ describe("life-ops gmail chat transcripts", () => {
     process.env.ELIZA_STATE_DIR = stateDir;
     process.env.MILADY_GOOGLE_OAUTH_DESKTOP_CLIENT_ID =
       "lifeops-gmail-chat-client";
-    runtime = createRuntimeForGmailChatTests();
+    runtime = createLifeOpsChatTestRuntime({
+      agentId: AGENT_ID,
+      useModel: async (_modelType: unknown, params?: { prompt?: string }) => {
+        const prompt = String(params?.prompt ?? "");
+        const promptLower = prompt.toLowerCase();
+        if (prompt.includes("Plan the Gmail action for this request.")) {
+          if (
+            promptLower.includes("suran me escribió") ||
+            promptLower.includes("suran me escribio")
+          ) {
+            return '{"subaction":"search","queries":["from:suran"]}';
+          }
+          return '{"subaction":null,"queries":[]}';
+        }
+        return "<response></response>";
+      },
+      handleTurn: async ({ runtime: runtimeArg, message, state }) => {
+        const result = await gmailAction.handler?.(
+          runtimeArg,
+          message as never,
+          state,
+          {
+            parameters: {},
+          } as never,
+        );
+        return {
+          text:
+            typeof result?.text === "string" && result.text.trim().length > 0
+              ? result.text
+              : "I couldn't find anything in your email.",
+          data: result?.data,
+        };
+      },
+    });
     await seedLocalGmail(runtime, stateDir);
 
     fetchMock.mockImplementation(async (input) => {
@@ -461,10 +259,18 @@ describe("life-ops gmail chat transcripts", () => {
           ids = query.includes("newer_than:21d")
             ? ["msg-suran-recent"]
             : ["msg-suran-recent", "msg-suran-old"];
+        } else if (/\bsuran\b/.test(query)) {
+          ids = ["msg-suran-recent", "msg-suran-old"];
         } else if (query.includes("alex@example.com")) {
           ids = ["msg-alex-unread"];
         } else if (query.includes("venue")) {
           ids = ["msg-venue-reply"];
+        }
+        if (query.includes("is:unread") && ids.length > 0) {
+          ids = ids.filter((id) => {
+            const labelIds = messageFixtures.get(id)?.labelIds;
+            return Array.isArray(labelIds) && labelIds.includes("UNREAD");
+          });
         }
         return new Response(
           JSON.stringify({
@@ -577,6 +383,141 @@ describe("life-ops gmail chat transcripts", () => {
     expect(replyNeeded.status).toBe(200);
     expect(String(replyNeeded.data.text ?? "")).toContain("Venue confirmation");
     expect(String(replyNeeded.data.text ?? "")).toContain("reply needed");
+  });
+
+  it("finds suran's email with 'find the last email suran sent me'", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Reverse sender phrasing",
+    });
+
+    const result = await postConversationMessage(port, conversationId, {
+      text: "find the last email suran sent me",
+      source: "discord",
+    });
+    expect(result.status).toBe(200);
+    const text = String(result.data.text ?? "");
+    expect(text).toContain("Suran");
+  });
+
+  it("finds suran's email with bare name 'just search suran'", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Bare name search",
+    });
+
+    const result = await postConversationMessage(port, conversationId, {
+      text: "just search suran",
+      source: "discord",
+    });
+    expect(result.status).toBe(200);
+    const text = String(result.data.text ?? "");
+    expect(text).toContain("Suran");
+  });
+
+  it("finds suran's email from the natural-language question about anyone named suran", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Narrative sender search",
+    });
+
+    const result = await postConversationMessage(port, conversationId, {
+      text: "can you search my email and tell me if anyone named suran emailed me",
+      source: "discord",
+    });
+    expect(result.status).toBe(200);
+    const text = String(result.data.text ?? "");
+    expect(text).toContain("Suran");
+  });
+
+  it("finds suran's email with question form 'did suran email me'", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Question-form sender search",
+    });
+
+    const result = await postConversationMessage(port, conversationId, {
+      text: "did suran email me",
+      source: "discord",
+    });
+    expect(result.status).toBe(200);
+    const text = String(result.data.text ?? "");
+    expect(text).toContain("Suran");
+  });
+
+  it("finds suran's email from a non-English Gmail question", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Non-English Gmail sender search",
+    });
+
+    const result = await postConversationMessage(port, conversationId, {
+      text: "puedes buscar en mi correo y decirme si suran me escribió",
+      source: "discord",
+    });
+    expect(result.status).toBe(200);
+    const text = String(result.data.text ?? "");
+    expect(text).toContain("Suran");
+  });
+
+  it("finds suran's email with narrative phrasing about anyone named suran", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Narrative sender search",
+    });
+
+    const result = await postConversationMessage(port, conversationId, {
+      text: "can you search my email and tell me if anyone named suran emailed me",
+      source: "discord",
+    });
+    expect(result.status).toBe(200);
+    const text = String(result.data.text ?? "");
+    expect(text).toContain("Suran");
+  });
+
+  it("retries search on 'yeah try it' follow-up after initial search", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Retry follow-up",
+    });
+
+    const initial = await postConversationMessage(port, conversationId, {
+      text: "find emails from suran",
+      source: "discord",
+    });
+    expect(initial.status).toBe(200);
+    expect(String(initial.data.text ?? "")).toContain("Suran");
+
+    const retry = await postConversationMessage(port, conversationId, {
+      text: "yeah try it",
+      source: "discord",
+    });
+    expect(retry.status).toBe(200);
+    const retryText = String(retry.data.text ?? "");
+    expect(retryText).toContain("Suran");
+  });
+
+  it("refines search on 'what about unread ones?' after initial search", async () => {
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "Unread refinement follow-up",
+    });
+
+    const initial = await postConversationMessage(port, conversationId, {
+      text: "find emails from suran",
+      source: "discord",
+    });
+    expect(initial.status).toBe(200);
+    expect(String(initial.data.text ?? "")).toContain("Suran");
+
+    const refined = await postConversationMessage(port, conversationId, {
+      text: "what about unread ones?",
+      source: "discord",
+    });
+    expect(refined.status).toBe(200);
+    const refinedText = String(refined.data.text ?? "");
+    expect(refinedText).toContain("Suran follow-up");
+    expect(refinedText).not.toContain("Older Suran note");
   });
 
   it("reads the body of a previously found Gmail message in follow-up chat", async () => {

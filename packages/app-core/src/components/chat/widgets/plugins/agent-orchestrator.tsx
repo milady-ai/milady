@@ -422,7 +422,9 @@ function ThreadDetailContent({
                   {getWorkspaceChangesSummary(session.metadata) ? (
                     <div className="text-muted">
                       {(() => {
-                        const summary = getWorkspaceChangesSummary(session.metadata);
+                        const summary = getWorkspaceChangesSummary(
+                          session.metadata,
+                        );
                         if (!summary) return null;
                         const preview = summary.files.slice(0, 3).join(", ");
                         return summary.total > 3
@@ -506,7 +508,6 @@ function ThreadDetailContent({
           </div>
         </DetailList>
       ) : null}
-
 
       {latestTranscripts.length > 0 ? (
         <DetailList title="Messages">
@@ -878,7 +879,8 @@ function OrchestratorTasksWidget(_props: ChatSidebarWidgetProps) {
           // If the user explicitly collapsed (null), keep it collapsed.
           // Only drop the selection if the selected thread no longer exists.
           if (current === null) return null;
-          if (nextThreads.some((thread) => thread.id === current)) return current;
+          if (nextThreads.some((thread) => thread.id === current))
+            return current;
           // Selected thread disappeared (deleted/filtered) — collapse.
           return null;
         });
@@ -1067,9 +1069,7 @@ function OrchestratorTasksWidget(_props: ChatSidebarWidgetProps) {
                 thread={thread}
                 selected={thread.id === selectedThreadId}
                 onSelect={(id) =>
-                  setSelectedThreadId((current) =>
-                    current === id ? null : id,
-                  )
+                  setSelectedThreadId((current) => (current === id ? null : id))
                 }
                 detail={thread.id === selectedThreadId ? selectedThread : null}
                 detailLoading={loading}

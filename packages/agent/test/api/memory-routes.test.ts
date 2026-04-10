@@ -65,6 +65,42 @@ describe("memory-routes", () => {
     });
   });
 
+  describe("GET /api/memories/feed", () => {
+    test("requires runtime", async () => {
+      const ctx = buildCtx("GET", "/api/memories/feed");
+      const handled = await handleMemoryRoutes(ctx);
+      expect(handled).toBe(true);
+      expect(ctx.error).toHaveBeenCalled();
+    });
+  });
+
+  describe("GET /api/memories/browse", () => {
+    test("requires runtime", async () => {
+      const ctx = buildCtx("GET", "/api/memories/browse");
+      const handled = await handleMemoryRoutes(ctx);
+      expect(handled).toBe(true);
+      expect(ctx.error).toHaveBeenCalled();
+    });
+  });
+
+  describe("GET /api/memories/stats", () => {
+    test("requires runtime", async () => {
+      const ctx = buildCtx("GET", "/api/memories/stats");
+      const handled = await handleMemoryRoutes(ctx);
+      expect(handled).toBe(true);
+      expect(ctx.error).toHaveBeenCalled();
+    });
+  });
+
+  describe("GET /api/memories/by-entity/:id", () => {
+    test("requires runtime", async () => {
+      const ctx = buildCtx("GET", "/api/memories/by-entity/some-id");
+      const handled = await handleMemoryRoutes(ctx);
+      expect(handled).toBe(true);
+      expect(ctx.error).toHaveBeenCalled();
+    });
+  });
+
   describe("routing", () => {
     test("unrelated path returns false", async () => {
       const ctx = buildCtx("GET", "/api/other");
