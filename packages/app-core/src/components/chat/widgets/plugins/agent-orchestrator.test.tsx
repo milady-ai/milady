@@ -20,9 +20,8 @@ vi.mock("../../../../api", () => ({
 vi.mock("../../../../state", () => ({
   useApp: vi.fn(),
   usePtySessions: () => ({
-    ptySessions:
-      ((mockUseApp() as { ptySessions?: unknown[] } | undefined)?.ptySessions ??
-        []) as unknown[],
+    ptySessions: ((mockUseApp() as { ptySessions?: unknown[] } | undefined)
+      ?.ptySessions ?? []) as unknown[],
   }),
 }));
 
@@ -419,7 +418,10 @@ describe("agent orchestrator tasks widget", () => {
     });
 
     await waitFor(
-      () => textOf(requireTree(tree).root).includes("Approve the production deploy?"),
+      () =>
+        textOf(requireTree(tree).root).includes(
+          "Approve the production deploy?",
+        ),
       "expected pending user input detail to render",
     );
 
@@ -462,8 +464,7 @@ describe("agent orchestrator tasks widget", () => {
     });
 
     await waitFor(
-      () =>
-        textOf(requireTree(tree).root).includes("Failed to delete task"),
+      () => textOf(requireTree(tree).root).includes("Failed to delete task"),
       "expected archive mutation error to render",
     );
 

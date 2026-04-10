@@ -294,9 +294,7 @@ describe("GoogleSidebarWidget", () => {
     });
     mockUseGoogleLifeOpsConnector.mockImplementation(
       (options?: { side?: LifeOpsConnectorSide }) =>
-        options?.side === "agent"
-          ? buildController("agent")
-          : ownerConnector,
+        options?.side === "agent" ? buildController("agent") : ownerConnector,
     );
     mockClient.getLifeOpsCalendarFeed.mockRejectedValue(
       new Error(
@@ -325,7 +323,9 @@ describe("GoogleSidebarWidget", () => {
     });
 
     const text = flattenText(renderer.root);
-    expect(text).toContain("Reconnect Google to refresh calendar and Gmail permissions.");
+    expect(text).toContain(
+      "Reconnect Google to refresh calendar and Gmail permissions.",
+    );
     expect(text).not.toContain("No upcoming events");
     expect(text).not.toContain("No priority mail");
   });

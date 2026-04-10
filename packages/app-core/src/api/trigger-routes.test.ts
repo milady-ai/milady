@@ -19,10 +19,7 @@ describe("trigger routes", () => {
           getTargetRoomId: () => "00000000-0000-0000-0000-000000000201" as UUID,
         }) as { getAutonomousRoomId: () => UUID; getTargetRoomId: () => UUID },
       createMemory: async () => undefined,
-      getTasks: async (filter?: {
-        tags?: string[];
-        agentIds?: UUID[];
-      }) =>
+      getTasks: async (filter?: { tags?: string[]; agentIds?: UUID[] }) =>
         tasks.filter((task) => {
           if (
             filter?.agentIds?.length &&

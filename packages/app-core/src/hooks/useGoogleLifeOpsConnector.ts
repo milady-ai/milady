@@ -91,12 +91,7 @@ function resolveConnectMode(
   ) {
     return "cloud_managed";
   }
-  return (
-    selectedMode ??
-    status?.mode ??
-    status?.defaultMode ??
-    "cloud_managed"
-  );
+  return selectedMode ?? status?.mode ?? status?.defaultMode ?? "cloud_managed";
 }
 
 function resolveSuccessRedirectUrl(
@@ -450,7 +445,10 @@ export function useGoogleLifeOpsConnector(
     try {
       setActionPending(true);
       const requestedCapabilities = [...LIFEOPS_GOOGLE_CAPABILITIES];
-      const connectMode = resolveConnectMode(status ?? null, selectedModeRef.current);
+      const connectMode = resolveConnectMode(
+        status ?? null,
+        selectedModeRef.current,
+      );
       const result = await client.startGoogleLifeOpsConnector({
         capabilities: requestedCapabilities,
         redirectUrl:

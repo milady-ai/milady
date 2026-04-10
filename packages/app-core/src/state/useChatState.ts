@@ -266,14 +266,11 @@ export function useChatState(): ChatStateHook {
 
   // ── Persistence-aware setters ──
 
-  const setChatInput = useCallback(
-    (v: string | ((prev: string) => string)) => {
-      const next = typeof v === "function" ? v(chatInputRef.current) : v;
-      chatInputRef.current = next;
-      dispatch({ type: "SET_CHAT_INPUT", value: next });
-    },
-    [],
-  );
+  const setChatInput = useCallback((v: string | ((prev: string) => string)) => {
+    const next = typeof v === "function" ? v(chatInputRef.current) : v;
+    chatInputRef.current = next;
+    dispatch({ type: "SET_CHAT_INPUT", value: next });
+  }, []);
   const setChatSending = useCallback(
     (v: boolean) => dispatch({ type: "SET_CHAT_SENDING", value: v }),
     [],

@@ -993,7 +993,11 @@ export function AgentDetailSidebar({
                     {managedDiscord?.adminDiscordAvatarUrl ? (
                       <img
                         src={managedDiscord.adminDiscordAvatarUrl}
-                        alt={discordAdminLabel ? `@${discordAdminLabel}` : "Discord owner"}
+                        alt={
+                          discordAdminLabel
+                            ? `@${discordAdminLabel}`
+                            : "Discord owner"
+                        }
                         className="h-5 w-5 rounded-full border border-border/40 object-cover"
                       />
                     ) : null}
@@ -1001,7 +1005,8 @@ export function AgentDetailSidebar({
                       {discordAdminLabel
                         ? `@${discordAdminLabel}`
                         : t("elizaclouddashboard.WhoeverLinksBecomesAdmin", {
-                            defaultValue: "Whoever completes setup becomes admin",
+                            defaultValue:
+                              "Whoever completes setup becomes admin",
                           })}
                     </span>
                   </span>

@@ -861,19 +861,22 @@ export function LifeOpsOverviewSidebarWidget(_props: ChatSidebarWidgetProps) {
     }
   }, [workbench?.lifeops]);
 
-  const loadOverview = useCallback(async (silent = false) => {
-    if (!runtimeReady) {
+  const loadOverview = useCallback(
+    async (silent = false) => {
+      if (!runtimeReady) {
+        setLoading(false);
+        return;
+      }
+      if (!silent) {
+        setLoading(true);
+      }
+      const nextOverview = await client.getLifeOpsOverview();
+      setOverview(nextOverview);
+      setError(null);
       setLoading(false);
-      return;
-    }
-    if (!silent) {
-      setLoading(true);
-    }
-    const nextOverview = await client.getLifeOpsOverview();
-    setOverview(nextOverview);
-    setError(null);
-    setLoading(false);
-  }, [runtimeReady]);
+    },
+    [runtimeReady],
+  );
 
   useEffect(() => {
     if (!runtimeReady) {

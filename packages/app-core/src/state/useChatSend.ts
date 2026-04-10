@@ -972,7 +972,7 @@ export function useChatSend(deps: UseChatSendDeps) {
     for (const session of ptySessionsRef.current) {
       client.stopCodingAgent(session.sessionId).catch(() => {});
     }
-  // ptySessionsRef is a stable ref object — only include the ref itself, not .current
+    // ptySessionsRef is a stable ref object — only include the ref itself, not .current
   }, [interruptActiveChatPipeline, ptySessionsRef]);
 
   const handleChatRetry = useCallback(

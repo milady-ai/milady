@@ -14,7 +14,9 @@ export interface PtySessionsValue {
   ptySessions: CodingAgentSession[];
 }
 
-export const PtySessionsCtx = createContext<PtySessionsValue>({ ptySessions: [] });
+export const PtySessionsCtx = createContext<PtySessionsValue>({
+  ptySessions: [],
+});
 
 export function usePtySessions(): PtySessionsValue {
   return useContext(PtySessionsCtx);

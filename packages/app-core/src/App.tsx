@@ -13,7 +13,13 @@ import {
   DrawerSheetTitle,
   ErrorBoundary,
 } from "@miladyai/ui";
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   AdvancedPageView,
   AppsPageView,
@@ -291,44 +297,54 @@ export function App() {
     tab === "desktop" ||
     tab === "logs";
   const unreadCount = unreadConversations?.size ?? 0;
-  const mobileChatControls = useMemo(() => isChatMobileLayout ? (
-    <div className="flex items-center gap-2 w-max">
-      <Button
-        variant="outline"
-        size="sm"
-        className={`inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
-          mobileConversationsOpen
-            ? "border-accent bg-accent-subtle text-txt"
-            : "border-border bg-card text-txt hover:border-accent hover:text-txt"
-        }`}
-        onClick={() => {
-          setMobileConversationsOpen(true);
-        }}
-        aria-label={t("aria.openChatsPanel")}
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <title>{t("conversations.chats")}</title>
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        {t("conversations.chats")}
-        {unreadCount > 0 && (
-          <span className="inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-accent text-accent-fg text-[10px] font-bold px-1">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </Button>
-    </div>
-  ) : undefined, [isChatMobileLayout, mobileConversationsOpen, unreadCount, setMobileConversationsOpen, t]);
+  const mobileChatControls = useMemo(
+    () =>
+      isChatMobileLayout ? (
+        <div className="flex items-center gap-2 w-max">
+          <Button
+            variant="outline"
+            size="sm"
+            className={`inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
+              mobileConversationsOpen
+                ? "border-accent bg-accent-subtle text-txt"
+                : "border-border bg-card text-txt hover:border-accent hover:text-txt"
+            }`}
+            onClick={() => {
+              setMobileConversationsOpen(true);
+            }}
+            aria-label={t("aria.openChatsPanel")}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <title>{t("conversations.chats")}</title>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {t("conversations.chats")}
+            {unreadCount > 0 && (
+              <span className="inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-accent text-accent-fg text-[10px] font-bold px-1">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </Button>
+        </div>
+      ) : undefined,
+    [
+      isChatMobileLayout,
+      mobileConversationsOpen,
+      unreadCount,
+      setMobileConversationsOpen,
+      t,
+    ],
+  );
 
   // Keep hook order stable across onboarding/auth state transitions.
   // Otherwise React can throw when onboarding completes and the main shell mounts.
@@ -451,261 +467,269 @@ export function App() {
   // shellContent is memoized before early returns to satisfy the Rules of Hooks.
   // Deps are local state/callbacks — not high-frequency AppContext fields like
   // ptySessions/agentStatus — so CompanionSceneHost stays stable across polls.
-  const shellContent = useMemo(() => companionShellVisible ? (
-    <CompanionShell tab={effectiveTab} actionNotice={actionNotice} />
-  ) : tab === "stream" ? (
-    <div
-      key="stream-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <main className="flex-1 min-h-0 overflow-hidden">
-        <StreamView />
-      </main>
-    </div>
-  ) : isChat ? (
-    <div
-      key="chat-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header
-        mobileLeft={mobileChatControls}
-        tasksEventsPanelOpen={isChatMobileLayout ? tasksEventsPanelOpen : true}
-        onToggleTasksPanel={
-          isChatMobileLayout
-            ? () => setTasksEventsPanelOpen((o) => !o)
-            : undefined
-        }
-      />
-      <div className="flex flex-1 min-h-0 relative">
-        {!isChatMobileLayout ? (
-          <div
-            className={CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS}
-            data-chat-shell-composer-underlay
+  const shellContent = useMemo(
+    () =>
+      companionShellVisible ? (
+        <CompanionShell tab={effectiveTab} actionNotice={actionNotice} />
+      ) : tab === "stream" ? (
+        <div
+          key="stream-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <main className="flex-1 min-h-0 overflow-hidden">
+            <StreamView />
+          </main>
+        </div>
+      ) : isChat ? (
+        <div
+          key="chat-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header
+            mobileLeft={mobileChatControls}
+            tasksEventsPanelOpen={
+              isChatMobileLayout ? tasksEventsPanelOpen : true
+            }
+            onToggleTasksPanel={
+              isChatMobileLayout
+                ? () => setTasksEventsPanelOpen((o) => !o)
+                : undefined
+            }
           />
-        ) : null}
-        {isChatMobileLayout ? (
-          <>
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-2 px-2">
-              <DeferredSetupChecklist
-                className="mb-3"
-                onOpenTask={handleDeferredTaskOpen}
+          <div className="flex flex-1 min-h-0 relative">
+            {!isChatMobileLayout ? (
+              <div
+                className={CHAT_DESKTOP_COMPOSER_UNDERLAY_CLASS}
+                data-chat-shell-composer-underlay
               />
-              <ChatView />
-            </main>
-
-            {mobileConversationsOpen && (
-              <DrawerSheet
-                open={mobileConversationsOpen}
-                onOpenChange={setMobileConversationsOpen}
-              >
-                <DrawerSheetContent
-                  aria-describedby={undefined}
-                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
-                  showCloseButton
-                >
-                  <DrawerSheetHeader className="sr-only">
-                    <DrawerSheetTitle>
-                      {t("conversations.chats")}
-                    </DrawerSheetTitle>
-                  </DrawerSheetHeader>
-                  <ConversationsSidebar
-                    key="chat-sidebar-mobile"
-                    mobile
-                    onClose={() => setMobileConversationsOpen(false)}
+            ) : null}
+            {isChatMobileLayout ? (
+              <>
+                <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden pt-2 px-2">
+                  <DeferredSetupChecklist
+                    className="mb-3"
+                    onOpenTask={handleDeferredTaskOpen}
                   />
-                </DrawerSheetContent>
-              </DrawerSheet>
-            )}
+                  <ChatView />
+                </main>
 
-            {tasksEventsPanelOpen && (
-              <DrawerSheet
-                open={tasksEventsPanelOpen}
-                onOpenChange={setTasksEventsPanelOpen}
-              >
-                <DrawerSheetContent
-                  aria-describedby={undefined}
-                  className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
-                  showCloseButton={false}
-                >
-                  <DrawerSheetHeader className="sr-only">
-                    <DrawerSheetTitle>
-                      {t("taskseventspanel.Title", {
-                        defaultValue: "Chat widgets",
-                      })}
-                    </DrawerSheetTitle>
-                  </DrawerSheetHeader>
-                  <TasksEventsPanel
-                    open
-                    events={activityEvents}
-                    clearEvents={clearActivityEvents}
-                    mobile
+                {mobileConversationsOpen && (
+                  <DrawerSheet
+                    open={mobileConversationsOpen}
+                    onOpenChange={setMobileConversationsOpen}
+                  >
+                    <DrawerSheetContent
+                      aria-describedby={undefined}
+                      className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                      showCloseButton
+                    >
+                      <DrawerSheetHeader className="sr-only">
+                        <DrawerSheetTitle>
+                          {t("conversations.chats")}
+                        </DrawerSheetTitle>
+                      </DrawerSheetHeader>
+                      <ConversationsSidebar
+                        key="chat-sidebar-mobile"
+                        mobile
+                        onClose={() => setMobileConversationsOpen(false)}
+                      />
+                    </DrawerSheetContent>
+                  </DrawerSheet>
+                )}
+
+                {tasksEventsPanelOpen && (
+                  <DrawerSheet
+                    open={tasksEventsPanelOpen}
+                    onOpenChange={setTasksEventsPanelOpen}
+                  >
+                    <DrawerSheetContent
+                      aria-describedby={undefined}
+                      className="h-[min(calc(100dvh-1rem-var(--safe-area-top,0px)-var(--safe-area-bottom,0px)),46rem)] p-0"
+                      showCloseButton={false}
+                    >
+                      <DrawerSheetHeader className="sr-only">
+                        <DrawerSheetTitle>
+                          {t("taskseventspanel.Title", {
+                            defaultValue: "Chat widgets",
+                          })}
+                        </DrawerSheetTitle>
+                      </DrawerSheetHeader>
+                      <TasksEventsPanel
+                        open
+                        events={activityEvents}
+                        clearEvents={clearActivityEvents}
+                        mobile
+                      />
+                    </DrawerSheetContent>
+                  </DrawerSheet>
+                )}
+              </>
+            ) : (
+              <>
+                <ConversationsSidebar key="chat-sidebar-desktop" />
+                <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
+                  <DeferredSetupChecklist
+                    className="mx-3 mb-3 mt-3 xl:mx-5"
+                    onOpenTask={handleDeferredTaskOpen}
                   />
-                </DrawerSheetContent>
-              </DrawerSheet>
+                  <ChatView key="chat-view-desktop" />
+                </main>
+                <TasksEventsPanel
+                  open
+                  events={activityEvents}
+                  clearEvents={clearActivityEvents}
+                />
+              </>
             )}
-          </>
-        ) : (
-          <>
-            <ConversationsSidebar key="chat-sidebar-desktop" />
-            <main className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden">
-              <DeferredSetupChecklist
-                className="mx-3 mb-3 mt-3 xl:mx-5"
-                onOpenTask={handleDeferredTaskOpen}
-              />
-              <ChatView key="chat-view-desktop" />
-            </main>
-            <TasksEventsPanel
-              open
-              events={activityEvents}
-              clearEvents={clearActivityEvents}
+            <CustomActionsPanel
+              open={customActionsPanelOpen}
+              onClose={() => setCustomActionsPanelOpen(false)}
+              onOpenEditor={(action) => {
+                setEditingAction(action ?? null);
+                setCustomActionsEditorOpen(true);
+              }}
             />
-          </>
-        )}
-        <CustomActionsPanel
-          open={customActionsPanelOpen}
-          onClose={() => setCustomActionsPanelOpen(false)}
-          onOpenEditor={(action) => {
-            setEditingAction(action ?? null);
-            setCustomActionsEditorOpen(true);
-          }}
-        />
-      </div>
-    </div>
-  ) : isHeartbeats ? (
-    <div
-      key="heartbeats-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <HeartbeatsDesktopShell key="heartbeats-view-desktop" />
-      </div>
-    </div>
-  ) : isConnectors ? (
-    <div
-      key="connectors-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <ConnectorsPageView />
-      </div>
-    </div>
-  ) : isKnowledge ? (
-    <div
-      key="knowledge-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <KnowledgeView />
-      </div>
-    </div>
-  ) : isSettingsPage ? (
-    <div
-      key={`settings-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <SettingsView
-          key={tab === "voice" ? "settings-media" : "settings-root"}
-          initialSection={
-            tab === "voice" ? "media" : (settingsInitialSection ?? undefined)
-          }
-        />
-      </div>
-    </div>
-  ) : isWallets ? (
-    <div
-      key="wallets-shell"
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-        <InventoryView />
-      </div>
-    </div>
-  ) : isAdvancedPage ? (
-    <div
-      key={`advanced-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <div className="flex flex-1 min-h-0 min-w-0">
-        <AdvancedPageView />
-      </div>
-    </div>
-  ) : characterSceneVisible ? (
-    <div
-      key="character-shell"
-      className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent"
-    >
-      <CompanionHeader
-        activeShellView="character"
-        onShellViewChange={(view) => switchShellView(view)}
-        uiLanguage={uiLanguage}
-        setUiLanguage={setUiLanguage}
-        uiTheme={uiTheme}
-        setUiTheme={setUiTheme}
-        t={t}
-        showCompanionControls
-        chatAgentVoiceMuted={chatAgentVoiceMuted}
-        onToggleVoiceMute={() =>
-          setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
-        }
-      />
-      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
-        <ViewRouter characterSceneVisible />
-      </main>
-    </div>
-  ) : (
-    <div
-      key={`tab-shell-${tab}`}
-      className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-    >
-      <Header />
-      <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
-        <ViewRouter />
-      </main>
-    </div>
-  ), [
-    companionShellVisible,
-    effectiveTab,
-    actionNotice,
-    tab,
-    isChat,
-    isHeartbeats,
-    isConnectors,
-    isKnowledge,
-    isSettingsPage,
-    isWallets,
-    isAdvancedPage,
-    characterSceneVisible,
-    isChatMobileLayout,
-    mobileConversationsOpen,
-    mobileChatControls,
-    tasksEventsPanelOpen,
-    handleDeferredTaskOpen,
-    activityEvents,
-    clearActivityEvents,
-    customActionsPanelOpen,
-    settingsInitialSection,
-    switchShellView,
-    uiLanguage,
-    setUiLanguage,
-    uiTheme,
-    setUiTheme,
-    chatAgentVoiceMuted,
-    setState,
-    t,
-    setMobileConversationsOpen,
-    setTasksEventsPanelOpen,
-    setCustomActionsPanelOpen,
-    setEditingAction,
-    setCustomActionsEditorOpen,
-  ]);
+          </div>
+        </div>
+      ) : isHeartbeats ? (
+        <div
+          key="heartbeats-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <HeartbeatsDesktopShell key="heartbeats-view-desktop" />
+          </div>
+        </div>
+      ) : isConnectors ? (
+        <div
+          key="connectors-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <ConnectorsPageView />
+          </div>
+        </div>
+      ) : isKnowledge ? (
+        <div
+          key="knowledge-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <KnowledgeView />
+          </div>
+        </div>
+      ) : isSettingsPage ? (
+        <div
+          key={`settings-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <SettingsView
+              key={tab === "voice" ? "settings-media" : "settings-root"}
+              initialSection={
+                tab === "voice"
+                  ? "media"
+                  : (settingsInitialSection ?? undefined)
+              }
+            />
+          </div>
+        </div>
+      ) : isWallets ? (
+        <div
+          key="wallets-shell"
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <InventoryView />
+          </div>
+        </div>
+      ) : isAdvancedPage ? (
+        <div
+          key={`advanced-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0">
+            <AdvancedPageView />
+          </div>
+        </div>
+      ) : characterSceneVisible ? (
+        <div
+          key="character-shell"
+          className="relative flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-transparent"
+        >
+          <CompanionHeader
+            activeShellView="character"
+            onShellViewChange={(view) => switchShellView(view)}
+            uiLanguage={uiLanguage}
+            setUiLanguage={setUiLanguage}
+            uiTheme={uiTheme}
+            setUiTheme={setUiTheme}
+            t={t}
+            showCompanionControls
+            chatAgentVoiceMuted={chatAgentVoiceMuted}
+            onToggleVoiceMute={() =>
+              setState("chatAgentVoiceMuted", !chatAgentVoiceMuted)
+            }
+          />
+          <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 pb-4 pt-2 xl:pb-6">
+            <ViewRouter characterSceneVisible />
+          </main>
+        </div>
+      ) : (
+        <div
+          key={`tab-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
+            <ViewRouter />
+          </main>
+        </div>
+      ),
+    [
+      companionShellVisible,
+      effectiveTab,
+      actionNotice,
+      tab,
+      isChat,
+      isHeartbeats,
+      isConnectors,
+      isKnowledge,
+      isSettingsPage,
+      isWallets,
+      isAdvancedPage,
+      characterSceneVisible,
+      isChatMobileLayout,
+      mobileConversationsOpen,
+      mobileChatControls,
+      tasksEventsPanelOpen,
+      handleDeferredTaskOpen,
+      activityEvents,
+      clearActivityEvents,
+      customActionsPanelOpen,
+      settingsInitialSection,
+      switchShellView,
+      uiLanguage,
+      setUiLanguage,
+      uiTheme,
+      setUiTheme,
+      chatAgentVoiceMuted,
+      setState,
+      t,
+      setMobileConversationsOpen,
+      setTasksEventsPanelOpen,
+      setCustomActionsPanelOpen,
+      setEditingAction,
+      setCustomActionsEditorOpen,
+    ],
+  );
 
   // Pop-out mode — render only StreamView, skip startup gates.
   // Platform init is skipped in main.tsx; AppProvider hydrates WS in background.

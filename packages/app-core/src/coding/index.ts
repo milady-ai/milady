@@ -3,7 +3,12 @@
 import type { CodingAgentSession } from "../api/client";
 
 /** Statuses that represent a finished session — excluded from hydration. */
-export const TERMINAL_STATUSES = new Set(["completed", "stopped", "error", "interrupted"]);
+export const TERMINAL_STATUSES = new Set([
+  "completed",
+  "stopped",
+  "error",
+  "interrupted",
+]);
 
 /** Shape of a task object returned by the /api/coding-agents/status endpoint. */
 export interface ServerTask {

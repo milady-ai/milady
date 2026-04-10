@@ -466,7 +466,6 @@ function ThreadDetailContent({
         </DetailList>
       ) : null}
 
-
       {latestTranscripts.length > 0 ? (
         <DetailList title="Messages">
           <div className="max-h-40 space-y-2 overflow-y-auto pr-1">
@@ -837,7 +836,8 @@ function OrchestratorTasksWidget(_props: ChatSidebarWidgetProps) {
           // If the user explicitly collapsed (null), keep it collapsed.
           // Only drop the selection if the selected thread no longer exists.
           if (current === null) return null;
-          if (nextThreads.some((thread) => thread.id === current)) return current;
+          if (nextThreads.some((thread) => thread.id === current))
+            return current;
           // Selected thread disappeared (deleted/filtered) — collapse.
           return null;
         });
@@ -1026,9 +1026,7 @@ function OrchestratorTasksWidget(_props: ChatSidebarWidgetProps) {
                 thread={thread}
                 selected={thread.id === selectedThreadId}
                 onSelect={(id) =>
-                  setSelectedThreadId((current) =>
-                    current === id ? null : id,
-                  )
+                  setSelectedThreadId((current) => (current === id ? null : id))
                 }
                 detail={thread.id === selectedThreadId ? selectedThread : null}
                 detailLoading={loading}
