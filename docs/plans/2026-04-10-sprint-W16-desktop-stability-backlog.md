@@ -324,7 +324,7 @@ Validate that OS permission requests and hardware state queries work correctly: 
 |----------|--------|--------|
 | P0 | 6 | 19 |
 | P1 | 4 | 11 |
-| P2 | 4 | 6 |
-| **Total** | **14** | **36** |
+| **Committed** | **10** | **30** |
+| P2 (stretch) | 4 | 6 |
 
-> Capacity is 33 points. P0 + P1 = 30 points (fits). P2 items are stretch goals if velocity allows.
+> **Capacity:** 33 points. Committed work (P0 + P1) = 30 points, leaving 3 points of buffer. P2 items are stretch goals if velocity allows.
