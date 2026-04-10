@@ -45,10 +45,10 @@
       },
       "SCAPE_CLIENT_URL": {
         "type": "string",
-        "description": "URL the /viewer iframe loads — the xRSPS React client. Default is the local craco dev server; override for a deployed build.",
+        "description": "URL the /viewer iframe loads — the xRSPS React client. Defaults to the production 'scape deployment at https://scape-client-2sqyc.kinsta.page (React client with WS URL, OSRS cache URL, and map tiles all baked in at build time, pointing at the deployed game server). Override to http://localhost:3000 for local dev against the craco server.",
         "required": false,
         "sensitive": false,
-        "default": "http://localhost:3000"
+        "default": "https://scape-client-2sqyc.kinsta.page"
       },
       "SCAPE_AGENT_NAME": {
         "type": "string",
@@ -92,7 +92,7 @@
       "displayName": "'scape",
       "category": "game",
       "launchType": "connect",
-      "launchUrl": "http://localhost:3000",
+      "launchUrl": "https://scape-client-2sqyc.kinsta.page",
       "capabilities": [
         "autonomous",
         "game",

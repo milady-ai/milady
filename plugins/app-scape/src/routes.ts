@@ -61,7 +61,22 @@ const PROMPT_ROUTE_PATH = "/api/apps/scape/prompt";
 const JOURNAL_ROUTE_PATH = "/api/apps/scape/journal";
 const GOALS_ROUTE_PATH = "/api/apps/scape/goals";
 const SESSION_ROUTE_PREFIX = "/api/apps/scape/session/";
-const DEFAULT_CLIENT_URL = "http://localhost:3000";
+
+/**
+ * Default URL the viewer iframe loads. Points at the production
+ * 'scape deployment at Dexploarer/scape on Sevalla — the React
+ * client (hosted as a Sevalla static site, with a CDN in front)
+ * connects to the game server at wss://scape-96cxt.sevalla.app and
+ * fetches the OSRS cache from
+ * https://scape-cache-skrm0.sevalla.storage. All configuration is
+ * baked into the client bundle at build time via REACT_APP_WS_URL /
+ * REACT_APP_CACHE_URL.
+ *
+ * Override with `SCAPE_CLIENT_URL` via character secrets, runtime
+ * settings, or the process env to point at a local dev client
+ * (usually `http://localhost:3000`) or a fork's deployment.
+ */
+const DEFAULT_CLIENT_URL = "https://scape-client-2sqyc.kinsta.page";
 
 // Same hosts the defense plugin whitelists; covers every runtime that
 // might embed the milady apps grid (browser, Electrobun native window,

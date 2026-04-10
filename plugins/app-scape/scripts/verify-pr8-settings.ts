@@ -142,8 +142,8 @@ function main(): void {
     );
     const clientParam = scape.parameters.find((p) => p.key === "SCAPE_CLIENT_URL");
     assertTrue(
-        `SCAPE_CLIENT_URL default = "http://localhost:3000" (got "${clientParam?.default}")`,
-        clientParam?.default === "http://localhost:3000",
+        `SCAPE_CLIENT_URL default = "https://scape-client-2sqyc.kinsta.page" (got "${clientParam?.default}")`,
+        clientParam?.default === "https://scape-client-2sqyc.kinsta.page",
     );
     const loopParam = scape.parameters.find((p) => p.key === "SCAPE_LOOP_INTERVAL_MS");
     assertTrue(

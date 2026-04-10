@@ -148,9 +148,9 @@ async function main(): Promise<void> {
         /\bframe-ancestors\b/i.test(res.getHeader("Content-Security-Policy") ?? ""),
     );
     assertTrue(
-        "body contains iframe pointing at localhost:3000",
+        "body contains iframe pointing at default deployed 'scape client",
         res.body.includes('id="scape-frame"') &&
-            res.body.includes("http://localhost:3000"),
+            res.body.includes("https://scape-client-2sqyc.kinsta.page"),
     );
     assertTrue(
         "body contains fallback block",

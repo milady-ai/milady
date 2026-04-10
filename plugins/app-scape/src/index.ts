@@ -51,12 +51,16 @@ export function createAppScapePlugin(): Plugin {
 /**
  * The launcher's `launchUrl` is a hint for clients that don't use the
  * embedded viewer route. We read `SCAPE_CLIENT_URL` at module load so
- * operators can override it for a deployed xRSPS instance without
- * editing the plugin. Falls back to the local dev URL.
+ * operators can override it for a local dev xRSPS instance or a
+ * fork's deployment. The default points at the live 'scape
+ * deployment on Sevalla — kept in sync with DEFAULT_CLIENT_URL in
+ * routes.ts and the SCAPE_CLIENT_URL plugin parameter in package.json.
  */
 function resolveLaunchUrl(): string {
   const fromEnv = process.env.SCAPE_CLIENT_URL?.trim();
-  return fromEnv && fromEnv.length > 0 ? fromEnv : "http://localhost:3000";
+  return fromEnv && fromEnv.length > 0
+    ? fromEnv
+    : "https://scape-client-2sqyc.kinsta.page";
 }
 
 export const appScapePlugin = createAppScapePlugin();

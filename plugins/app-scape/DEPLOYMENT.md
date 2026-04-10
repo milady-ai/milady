@@ -1,18 +1,48 @@
 # `@elizaos/app-scape` — Deployment Guide
 
-This document covers running the 'scape plugin end-to-end in both dev
-(localhost xRSPS + localhost milady) and production (hosted xRSPS +
-milady runtime somewhere else). For architecture and protocol
-reference, see `README.md` and the upstream xRSPS
-`docs/agent-endpoint.md`.
+This document covers running the 'scape plugin end-to-end. The
+**default configuration** already points at the live production
+deployment of 'scape — no extra setup needed to launch it from the
+milady apps grid. This document covers overriding those defaults
+for local dev or running against your own fork's deployment.
 
-## What you need
+## Default live deployment
 
-1. **xRSPS running somewhere**, with the bot-SDK endpoint enabled:
+When you click **'scape** in the milady apps grid, the viewer
+iframe loads:
+
+    https://scape-client-2sqyc.kinsta.page
+
+That's a React client hosted as a Sevalla static site with its
+WebSocket URL, OSRS cache URL, and map-tile URL all baked in at
+build time. It connects to:
+
+| Component      | URL                                                | Hosted on                        |
+|----------------|----------------------------------------------------|----------------------------------|
+| Game server    | `wss://scape-96cxt.sevalla.app`                   | Sevalla Application (s2 shape)   |
+| OSRS cache     | `https://scape-cache-skrm0.sevalla.storage/caches/` | Sevalla Object Storage (R2 + CDN) |
+| Map tiles      | `https://scape-cache-skrm0.sevalla.storage/map-images/` | Same bucket                   |
+
+**This works out of the box** — open the app, register an
+account on the login screen, play. No env vars required on the
+milady side.
+
+**Caveat — no bot-SDK on production yet.** The autonomous LLM loop
+(the agent that plays for you) requires the xRSPS server's
+bot-SDK endpoint, which the public deployment does NOT currently
+expose. The plugin's `ScapeGameService` will log
+`SCAPE_BOT_SDK_TOKEN not set` and skip the autonomous loop, but
+the viewer iframe still works so you (or anyone else) can log in
+and play manually. To run the autonomous loop, point the plugin
+at a local xRSPS dev stack — see the "Dev loop" section below.
+
+## What you need (dev loop only)
+
+1. **xRSPS running locally**, with the bot-SDK endpoint enabled:
    - `BOT_SDK_TOKEN` set in the environment
    - Port 43595 reachable from wherever the milady runtime runs
-2. **The React client running** (default `http://localhost:3000`),
-   reachable from wherever a human is going to watch the agent play
+2. **The React client running** locally (default
+   `http://localhost:3000`)
 3. **milady runtime** with this plugin installed (it already is if
    you're in this repo — `plugins/app-scape/` is a workspace package)
 
@@ -24,25 +54,41 @@ The plugin reads settings from:
 2. `process.env[KEY]` — via shell or systemd unit
 3. Hardcoded defaults (only for localhost dev)
 
-| Variable                   | Default                         | Purpose                                                                                              |
-|----------------------------|----------------------------------|------------------------------------------------------------------------------------------------------|
-| `SCAPE_CLIENT_URL`         | `http://localhost:3000`          | URL the viewer iframe points at. Change this to your hosted xRSPS client URL in production.        |
-| `SCAPE_BOT_SDK_URL`        | `ws://127.0.0.1:43595`           | WebSocket URL of the xRSPS bot-SDK endpoint. Must be reachable from the milady runtime host.        |
-| `SCAPE_BOT_SDK_TOKEN`      | *(unset → plugin disabled)*      | Must match the xRSPS server's `BOT_SDK_TOKEN`. Without it, ScapeGameService logs a warning and stops. |
-| `SCAPE_AGENT_NAME`         | `scape-agent`                    | In-game display name for the agent. Used as the account username (scrypt-auth).                    |
-| `SCAPE_AGENT_PASSWORD`     | *(unset → plugin disabled)*      | Plaintext password for the agent's account. Auto-registers on first spawn, verified on reconnects. |
-| `SCAPE_AGENT_ID`           | `scape-${SCAPE_AGENT_NAME}`      | Stable identifier for the agent across reconnects. Used as the journal filename.                   |
-| `SCAPE_AGENT_PERSONA`      | *(empty)*                        | Short persona string fed into the LLM's system prompt. Keep it under 200 chars.                    |
-| `SCAPE_LOOP_INTERVAL_MS`   | `15000`                          | How often the autonomous LLM loop fires. Lower = more expensive.                                    |
-| `SCAPE_MODEL_SIZE`         | `TEXT_SMALL`                     | Which elizaOS model tier to use. Try `TEXT_MINI` for cheaper, `TEXT_LARGE` for smarter.            |
+| Variable                   | Default                                           | Purpose                                                                                              |
+|----------------------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `SCAPE_CLIENT_URL`         | `https://scape-client-2sqyc.kinsta.page`         | URL the viewer iframe points at. Defaults to the live 'scape deployment; override to `http://localhost:3000` for local dev. |
+| `SCAPE_BOT_SDK_URL`        | `ws://127.0.0.1:43595`                           | WebSocket URL of the xRSPS bot-SDK endpoint. Local-dev only; no public bot-SDK endpoint yet.         |
+| `SCAPE_BOT_SDK_TOKEN`      | *(unset → autonomous loop disabled)*             | Must match the xRSPS server's `BOT_SDK_TOKEN`. Without it the viewer still works for manual play.   |
+| `SCAPE_AGENT_NAME`         | `scape-agent`                                     | In-game display name for the agent. Used as the account username (scrypt-auth).                    |
+| `SCAPE_AGENT_PASSWORD`     | *(unset → auto-generated + persisted to disk)*   | Plaintext password for the agent's account. Auto-registers on first spawn.                         |
+| `SCAPE_AGENT_ID`           | `scape-${SCAPE_AGENT_NAME}`                       | Stable identifier for the agent across reconnects. Used as the journal filename.                   |
+| `SCAPE_AGENT_PERSONA`      | *(empty)*                                         | Short persona string fed into the LLM's system prompt. Keep it under 200 chars.                    |
+| `SCAPE_LOOP_INTERVAL_MS`   | `15000`                                           | How often the autonomous LLM loop fires. Lower = more expensive.                                    |
+| `SCAPE_MODEL_SIZE`         | `TEXT_SMALL`                                      | Which elizaOS model tier to use. Try `TEXT_MINI` for cheaper, `TEXT_LARGE` for smarter.            |
 
-## Dev loop (single host)
+## Playing against the live deployment (no config)
 
-Assumes xRSPS and milady are both running on your laptop.
+If you just want to click **'scape** in the milady apps grid and
+land in the game, you don't need to set anything. The plugin
+defaults to the production deployment URL, so the viewer iframe
+will load the hosted client directly. Register an account on
+the login screen (xRSPS scrypts your password and stores it in
+an ephemeral file on the server — note that accounts are wiped
+on every server redeploy until Sevalla-backed Postgres persistence
+lands) and play.
+
+Skip the rest of this section unless you want to run a local
+dev stack.
+
+## Dev loop (single host, autonomous agent)
+
+Assumes xRSPS and milady are both running on your laptop and you
+want to run the autonomous LLM loop against a local xRSPS server
+with a bot-SDK endpoint enabled.
 
 ```bash
 # Terminal 1 — xRSPS
-cd ~/xrsps-typescript
+cd ~/xrsps-typescript   # or ~/scape
 export BOT_SDK_TOKEN=dev-secret
 bun run dev
 ```
@@ -54,6 +100,7 @@ watch all three tabs with `Ctrl-A` + arrow keys.
 ```bash
 # Terminal 2 — milady
 cd ~/milady
+export SCAPE_CLIENT_URL=http://localhost:3000
 export SCAPE_BOT_SDK_TOKEN=dev-secret
 export SCAPE_AGENT_PASSWORD=my-dev-password
 bun run dev  # or however you start milady
@@ -65,10 +112,11 @@ at `~/.milady/scape-journals/scape-scape-agent.toon` (TOON-encoded,
 not JSON).
 
 Click the 'scape tile in the milady apps grid and the viewer iframe
-loads the xRSPS React client at `http://localhost:3000`. Log in with
-any username + an 8+-character password; you're now in the same world
-as the agent and can watch it play. Type `::steer <directive>` in
-public chat to hand it a high-priority goal.
+loads the local xRSPS React client at `http://localhost:3000` (because
+of the `SCAPE_CLIENT_URL` override). Log in with any username + an
+8+-character password; you're now in the same world as the agent and
+can watch it play. Type `::steer <directive>` in public chat to hand
+it a high-priority goal.
 
 ## Production deployment
 
