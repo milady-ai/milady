@@ -444,6 +444,167 @@ export async function handleVincentRoute(
     return true;
   }
 
+  // ── GET /api/vincent/vault-status ──────────────────────────────
+  // Aggregated vault info for the Vincent app dashboard.
+  if (method === "GET" && pathname === "/api/vincent/vault-status") {
+    const vincent = getVincentTokens(state.config);
+    const connected = Boolean(vincent?.accessToken);
+    if (!connected) {
+      sendJson(res, 200, {
+        connected: false,
+        connectedAt: null,
+        vaultHealth: null,
+        evmAddress: null,
+        solanaAddress: null,
+        nativeBalance: null,
+        tokenBalance: null,
+        treasuryValueUsd: null,
+      });
+      return true;
+    }
+    // Return what we know from the config; the UI can enrich from
+    // steward-status and wallet-balances endpoints separately.
+    sendJson(res, 200, {
+      connected: true,
+      connectedAt: vincent?.connectedAt ?? null,
+      vaultHealth: null, // populated by steward-status on the client side
+      evmAddress: null,
+      solanaAddress: null,
+      nativeBalance: null,
+      tokenBalance: null,
+      treasuryValueUsd: null,
+    });
+    return true;
+  }
+
+  // ── GET /api/vincent/trading-profile ───────────────────────────
+  // P&L analytics stub — returns empty profile until the trading
+  // backend feeds real data.
+  if (method === "GET" && pathname === "/api/vincent/trading-profile") {
+    const vincent = getVincentTokens(state.config);
+    if (!vincent?.accessToken) {
+      sendJson(res, 200, { connected: false, profile: null });
+      return true;
+    }
+    sendJson(res, 200, {
+      connected: true,
+      profile: {
+        totalPnl: "0",
+        winRate: 0,
+        totalSwaps: 0,
+        volume24h: "0",
+        tokenBreakdown: [],
+      },
+    });
+    return true;
+  }
+
+  // ── GET /api/vincent/strategy ──────────────────────────────────
+  // Current trading strategy configuration.
+  if (method === "GET" && pathname === "/api/vincent/strategy") {
+    const vincent = getVincentTokens(state.config);
+    if (!vincent?.accessToken) {
+      sendJson(res, 200, { connected: false, strategy: null });
+      return true;
+    }
+    // Read strategy from config if available
+    const tradingConfig = (
+      state.config as unknown as {
+        trading?: {
+          strategy?: string;
+          params?: Record<string, unknown>;
+          intervalSeconds?: number;
+          dryRun?: boolean;
+          running?: boolean;
+        };
+      }
+    ).trading;
+    sendJson(res, 200, {
+      connected: true,
+      strategy: {
+        name: tradingConfig?.strategy ?? "manual",
+        params: tradingConfig?.params ?? {},
+        intervalSeconds: tradingConfig?.intervalSeconds ?? 60,
+        dryRun: tradingConfig?.dryRun ?? false,
+        running: tradingConfig?.running ?? false,
+      },
+    });
+    return true;
+  }
+
+  // ── POST /api/vincent/strategy ─────────────────────────────────
+  // Update trading strategy configuration.
+  if (method === "POST" && pathname === "/api/vincent/strategy") {
+    try {
+      const vincent = getVincentTokens(state.config);
+      if (!vincent?.accessToken) {
+        sendJsonError(res, 401, "Vincent not connected");
+        return true;
+      }
+      const body = await readBody(req);
+      const updates = JSON.parse(body) as {
+        strategy?: string;
+        params?: Record<string, unknown>;
+        intervalSeconds?: number;
+        dryRun?: boolean;
+      };
+      const config = state.config as unknown as {
+        trading?: Record<string, unknown>;
+      };
+      config.trading = {
+        ...(config.trading ?? {}),
+        ...(updates.strategy !== undefined && { strategy: updates.strategy }),
+        ...(updates.params !== undefined && { params: updates.params }),
+        ...(updates.intervalSeconds !== undefined && {
+          intervalSeconds: updates.intervalSeconds,
+        }),
+        ...(updates.dryRun !== undefined && { dryRun: updates.dryRun }),
+      };
+      await saveElizaConfig(state.config);
+      sendJson(res, 200, { ok: true, strategy: config.trading });
+    } catch (err) {
+      logger.error(
+        `[vincent/strategy] ${err instanceof Error ? err.message : String(err)}`,
+      );
+      sendJsonError(res, 500, "Strategy update failed");
+    }
+    return true;
+  }
+
+  // ── POST /api/vincent/trading/start ────────────────────────────
+  if (method === "POST" && pathname === "/api/vincent/trading/start") {
+    const vincent = getVincentTokens(state.config);
+    if (!vincent?.accessToken) {
+      sendJsonError(res, 401, "Vincent not connected");
+      return true;
+    }
+    const config = state.config as unknown as {
+      trading?: Record<string, unknown>;
+    };
+    config.trading = { ...(config.trading ?? {}), running: true };
+    await saveElizaConfig(state.config);
+    logger.info("[vincent/trading] Trading loop started");
+    sendJson(res, 200, { ok: true, running: true });
+    return true;
+  }
+
+  // ── POST /api/vincent/trading/stop ─────────────────────────────
+  if (method === "POST" && pathname === "/api/vincent/trading/stop") {
+    const vincent = getVincentTokens(state.config);
+    if (!vincent?.accessToken) {
+      sendJsonError(res, 401, "Vincent not connected");
+      return true;
+    }
+    const config = state.config as unknown as {
+      trading?: Record<string, unknown>;
+    };
+    config.trading = { ...(config.trading ?? {}), running: false };
+    await saveElizaConfig(state.config);
+    logger.info("[vincent/trading] Trading loop stopped");
+    sendJson(res, 200, { ok: true, running: false });
+    return true;
+  }
+
   return false;
 }
 

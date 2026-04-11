@@ -407,7 +407,7 @@ function normalizeLastNativeTab(tab: unknown): Tab {
     case "chat":
     case "stream":
     case "apps":
-    case "wallets":
+    case "inventory":
     case "knowledge":
     case "connectors":
     case "triggers":

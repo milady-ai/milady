@@ -1173,20 +1173,31 @@ export async function extractCalendarPlanWithLlm(
     parsed.tripLocation.trim().length > 0
       ? parsed.tripLocation.trim()
       : undefined;
+
+  // Extract queries from multiple possible shapes:
+  // - TOON string: "flight || dentist" (split on ||)
+  // - TOON single: "return flight" (no delimiter)
+  // - JSON array: ["flight", "dentist"]
+  // - Numbered fallbacks: query1, query2, query3
+  const rawQueries: Array<string | undefined> = [];
+  if (typeof parsed.queries === "string" && parsed.queries.trim().length > 0) {
+    for (const q of parsed.queries.split(/\s*\|\|\s*/)) {
+      if (q.trim().length > 0) rawQueries.push(q.trim());
+    }
+  } else if (Array.isArray(parsed.queries)) {
+    for (const value of parsed.queries) {
+      if (typeof value === "string") rawQueries.push(value);
+    }
+  }
+  if (typeof parsed.query === "string") rawQueries.push(parsed.query);
+  if (typeof parsed.query1 === "string") rawQueries.push(parsed.query1);
+  if (typeof parsed.query2 === "string") rawQueries.push(parsed.query2);
+  if (typeof parsed.query3 === "string") rawQueries.push(parsed.query3);
+  if (tripLocation) rawQueries.push(tripLocation);
+
   return {
     subaction: normalizeCalendarSubaction(parsed.subaction),
-    queries: dedupeCalendarQueries([
-      typeof parsed.query === "string" ? parsed.query : undefined,
-      ...(Array.isArray(parsed.queries)
-        ? parsed.queries.map((value) =>
-            typeof value === "string" ? value : undefined,
-          )
-        : []),
-      typeof parsed.query1 === "string" ? parsed.query1 : undefined,
-      typeof parsed.query2 === "string" ? parsed.query2 : undefined,
-      typeof parsed.query3 === "string" ? parsed.query3 : undefined,
-      tripLocation,
-    ]),
+    queries: dedupeCalendarQueries(rawQueries),
     title:
       typeof parsed.title === "string" && parsed.title.trim().length > 0
         ? parsed.title.trim()

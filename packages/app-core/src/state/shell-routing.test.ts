@@ -81,7 +81,7 @@ describe("deriveUiShellModeForTab", () => {
       "chat",
       "plugins",
       "knowledge",
-      "wallets",
+      "inventory",
       "stream",
     ] as const) {
       expect(deriveUiShellModeForTab(tab)).toBe("native");
@@ -121,7 +121,7 @@ describe("getTabForShellView", () => {
   it("returns the lastNativeTab for desktop view", () => {
     expect(getTabForShellView("desktop", "chat")).toBe("chat");
     expect(getTabForShellView("desktop", "plugins")).toBe("plugins");
-    expect(getTabForShellView("desktop", "wallets")).toBe("wallets");
+    expect(getTabForShellView("desktop", "inventory")).toBe("inventory");
   });
 
   it("uses whatever lastNativeTab is passed for desktop view", () => {

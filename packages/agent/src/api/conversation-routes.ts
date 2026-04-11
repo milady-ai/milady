@@ -970,25 +970,60 @@ export async function handleConversationRoutes(
       }
     } catch (err) {
       if (!aborted) {
-        const providerIssueReply = getChatFailureReply(err, state.logBuffer);
-        try {
-          await persistAssistantConversationMemory(
-            runtime,
-            conv.roomId,
-            providerIssueReply,
-            channelType,
+        // If text was already streamed to the client (e.g. the initial
+        // response succeeded but a post-action continuation failed), use the
+        // streamed text as the final reply instead of replacing it with a
+        // generic fallback.
+        if (streamedText) {
+          logger.warn(
+            { err: getErrorMessage(err), streamedTextLength: streamedText.length },
+            "Post-generation error after text was already streamed — using streamed text",
           );
-          conv.updatedAt = new Date().toISOString();
-          writeSse(res, {
-            type: "done",
-            fullText: providerIssueReply,
-            agentName: state.agentName,
-          });
-        } catch (persistErr) {
-          writeSse(res, {
-            type: "error",
-            message: getErrorMessage(persistErr),
-          });
+          try {
+            await persistAssistantConversationMemory(
+              runtime,
+              conv.roomId,
+              streamedText,
+              channelType,
+              turnStartedAt,
+            );
+            conv.updatedAt = new Date().toISOString();
+            writeSseJson(res, {
+              type: "done",
+              fullText: streamedText,
+              agentName: state.agentName,
+            });
+          } catch (persistErr) {
+            writeSse(res, {
+              type: "error",
+              message: getErrorMessage(persistErr),
+            });
+          }
+        } else {
+          logger.warn(
+            { err: getErrorMessage(err) },
+            "Chat generation failed with no streamed text",
+          );
+          const providerIssueReply = getChatFailureReply(err, state.logBuffer);
+          try {
+            await persistAssistantConversationMemory(
+              runtime,
+              conv.roomId,
+              providerIssueReply,
+              channelType,
+            );
+            conv.updatedAt = new Date().toISOString();
+            writeSse(res, {
+              type: "done",
+              fullText: providerIssueReply,
+              agentName: state.agentName,
+            });
+          } catch (persistErr) {
+            writeSse(res, {
+              type: "error",
+              message: getErrorMessage(persistErr),
+            });
+          }
         }
       }
     } finally {

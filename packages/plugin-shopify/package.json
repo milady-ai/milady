@@ -1,0 +1,41 @@
+{
+  "name": "@elizaos/plugin-shopify",
+  "version": "0.1.0",
+  "description": "Shopify Admin API plugin for elizaOS agents -- manage products, orders, inventory, and customers.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown src/index.ts --format esm --dts",
+    "dev": "tsdown src/index.ts --format esm --dts --watch"
+  },
+  "dependencies": {
+    "@elizaos/core": "workspace:*"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "SHOPIFY_STORE_DOMAIN": {
+        "type": "string",
+        "description": "Shopify store domain (e.g. mystore.myshopify.com)",
+        "required": true,
+        "sensitive": false
+      },
+      "SHOPIFY_ACCESS_TOKEN": {
+        "type": "string",
+        "description": "Shopify Admin API access token",
+        "required": true,
+        "sensitive": true
+      }
+    }
+  }
+}

@@ -377,6 +377,61 @@ describe("gmailAction", () => {
     expect(result?.text).toContain("Suran Lee");
   });
 
+  it("parses TOON response with || delimited queries from LLM plan", async () => {
+    mockUseModel.mockResolvedValue(
+      "subaction: search\nqueries: from:suran newer_than:21d || subject:report\nreplyNeededOnly: false",
+    );
+    mockGetGmailSearch.mockResolvedValue({
+      query: "from:suran newer_than:21d",
+      messages: [
+        {
+          id: "msg-toon",
+          externalId: "ext-toon",
+          threadId: "thread-toon",
+          agentId: "agent-1",
+          provider: "google",
+          side: "owner",
+          subject: "Report",
+          from: "Suran Lee",
+          fromEmail: "suran@example.com",
+          replyTo: "suran@example.com",
+          to: ["shawmakesmagic@gmail.com"],
+          cc: [],
+          snippet: "Here is the report",
+          receivedAt: "2026-04-08T16:00:00.000Z",
+          isUnread: false,
+          isImportant: false,
+          likelyReplyNeeded: false,
+          triageScore: 50,
+          triageReason: "search hit",
+          labels: ["INBOX"],
+          htmlLink: "https://mail.google.com/mail/u/0/#all/thread-toon",
+          metadata: {},
+          syncedAt: "2026-04-08T16:00:00.000Z",
+          updatedAt: "2026-04-08T16:00:00.000Z",
+        },
+      ],
+      source: "cache",
+      syncedAt: "2026-04-09T16:00:00.000Z",
+      summary: {
+        totalCount: 1,
+        unreadCount: 0,
+        importantCount: 0,
+        replyNeededCount: 0,
+      },
+    });
+
+    const result = await invoke("find emails from suran about the report");
+
+    expect(mockUseModel).toHaveBeenCalled();
+    // The || delimiter should produce two separate queries
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ query: expect.stringContaining("suran") }),
+    );
+    expect(result).toMatchObject({ success: true });
+  });
+
   it("sends grounded Gmail results through the action callback", async () => {
     const callback = vi.fn(async () => []);
     mockGetGmailSearch.mockResolvedValue({
@@ -1236,6 +1291,39 @@ describe("gmailAction", () => {
           values: {
             recentMessages:
               "user: find emails from suran\nassistant: Found 3 emails for sender suran.",
+          },
+        },
+      },
+    );
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const searchCall = mockGetGmailSearch.mock.calls[0];
+    const query = (searchCall[1] as { query: string }).query;
+    expect(query).toMatch(/suran/i);
+    expect(query).toContain("is:unread");
+    expect(result?.success).toBe(true);
+  });
+
+  it("follow-up resolves from timestamped runtime format", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran is:unread",
+        from: "Suran Goonatilake",
+        subject: "New proposal",
+      }),
+    );
+
+    const result = await invokeWith(
+      "what about unread ones?",
+      "what about unread ones?",
+      {
+        state: {
+          values: {
+            agentName: "Sakuya",
+            recentMessages: [
+              "14:23 (3 min ago) [entity-abc] Shaw: find emails from suran",
+              "14:24 (2 min ago) [entity-xyz] Sakuya: Found 3 emails for sender suran.",
+            ].join("\n"),
           },
         },
       },

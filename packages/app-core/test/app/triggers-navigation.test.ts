@@ -79,11 +79,11 @@ describe("navigation", () => {
     expect(titleForTab("connectors")).toBe("Connectors");
   });
 
-  test("routes /wallets and keeps legacy /inventory redirect", () => {
-    expect(pathForTab("wallets")).toBe("/wallets");
-    expect(tabFromPath("/wallets")).toBe("wallets");
-    expect(tabFromPath("/inventory")).toBe("wallets");
-    expect(titleForTab("wallets")).toBe("Wallets");
+  test("routes /inventory and keeps legacy /wallets redirect", () => {
+    expect(pathForTab("inventory")).toBe("/inventory");
+    expect(tabFromPath("/inventory")).toBe("inventory");
+    expect(tabFromPath("/wallets")).toBe("inventory");
+    expect(titleForTab("inventory")).toBe("Inventory");
   });
 
   test("does not expose game as a top-level apps tab", () => {
@@ -92,10 +92,10 @@ describe("navigation", () => {
     expect(apps?.tabs).toEqual(["apps"]);
   });
 
-  test("keeps wallets/knowledge/connectors/character as top-level groups and adds heartbeats to the main nav", () => {
+  test("keeps inventory/knowledge/connectors/character as top-level groups and adds heartbeats to the main nav", () => {
     const labels = ALL_TAB_GROUPS.map((group) => group.label);
     expect(labels).toContain("Character");
-    expect(labels).toContain("Wallets");
+    expect(labels).toContain("Inventory");
     expect(labels).toContain("Knowledge");
     expect(labels).toContain("Connectors");
     expect(labels).toContain("Heartbeats");

@@ -1,7 +1,7 @@
 {
   "$schema": "plugin-index-v1",
   "generatedAt": "2026-04-08T11:51:59.223Z",
-  "count": 92,
+  "count": 93,
   "plugins": [
     {
       "id": "acp",
@@ -4842,6 +4842,41 @@
       },
       "homepage": "https://github.com/elizaos/eliza#readme",
       "repository": "https://github.com/elizaos/eliza"
+    },
+    {
+      "id": "shopify",
+      "dirName": "plugin-shopify",
+      "name": "Shopify",
+      "npmName": "@elizaos/plugin-shopify",
+      "description": "Shopify Admin API integration -- manage products, orders, inventory, and customers.",
+      "tags": [
+        "ecommerce",
+        "shopify",
+        "products",
+        "orders",
+        "inventory"
+      ],
+      "category": "feature",
+      "envKey": "SHOPIFY_ACCESS_TOKEN",
+      "configKeys": [
+        "SHOPIFY_STORE_DOMAIN",
+        "SHOPIFY_ACCESS_TOKEN"
+      ],
+      "version": "0.1.0",
+      "pluginParameters": {
+        "SHOPIFY_STORE_DOMAIN": {
+          "type": "string",
+          "description": "Shopify store domain (e.g. mystore.myshopify.com)",
+          "required": true,
+          "sensitive": false
+        },
+        "SHOPIFY_ACCESS_TOKEN": {
+          "type": "string",
+          "description": "Shopify Admin API access token",
+          "required": true,
+          "sensitive": true
+        }
+      }
     },
     {
       "id": "signal",

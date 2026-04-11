@@ -257,6 +257,16 @@ export const MILADY_CURATED_APP_DEFINITIONS: readonly MiladyCuratedAppDefinition
       canonicalName: "@elizaos/app-defense-of-the-agents",
       aliases: [],
     },
+    {
+      slug: "vincent",
+      canonicalName: "@miladyai/app-vincent",
+      aliases: [],
+    },
+    {
+      slug: "shopify",
+      canonicalName: "@elizaos/app-shopify",
+      aliases: ["@elizaos/plugin-shopify"],
+    },
   ] as const;
 
 function getMiladyCuratedAppMatchKeys(

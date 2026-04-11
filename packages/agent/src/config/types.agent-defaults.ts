@@ -204,6 +204,8 @@ export type AgentDefaultsConfig = {
   ownerContacts?: OwnerContactsConfig;
   /** Escalation behavior config. */
   escalation?: EscalationConfig;
+  /** Inbox triage config (multi-channel message scanning, daily digest, auto-reply). */
+  inboxTriage?: import("../inbox/types.js").InboxTriageConfig;
   /** Optional repository root for system prompt runtime line (overrides auto-detect). */
   repoRoot?: string;
   /** Skip init (INIT.md creation, etc.) for pre-configured deployments. */

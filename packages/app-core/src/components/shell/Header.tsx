@@ -28,7 +28,7 @@ const NAV_LABEL_I18N_KEY: Record<string, string> = {
   Companion: "nav.companion",
   Stream: "nav.stream",
   Character: "nav.character",
-  Wallets: "nav.wallets",
+  Inventory: "nav.inventory",
   Knowledge: "nav.knowledge",
   Connectors: "nav.social",
   Apps: "nav.apps",

@@ -24,4 +24,16 @@ describe("resolveChatSidebarWidgets", () => {
       "agent-orchestrator.activity",
     ]);
   });
+
+  it("hides widgets whose plugin is absent from the loaded plugin list", () => {
+    expect(
+      resolveChatSidebarWidgets([
+        { id: "agent-orchestrator", enabled: true, isActive: true },
+      ]).map((widget) => widget.id),
+    ).toEqual([
+      "agent-orchestrator.apps",
+      "agent-orchestrator.tasks",
+      "agent-orchestrator.activity",
+    ]);
+  });
 });

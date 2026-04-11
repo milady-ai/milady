@@ -78,7 +78,13 @@ function hasContractAddress(
 }
 
 function hasVisibleBalance(row: TokenRow): boolean {
-  return Boolean(row.isTracked || row.balanceRaw > 0 || row.valueUsd > 0);
+  // Always show manually tracked tokens
+  if (row.isTracked) return true;
+  // Require at least $0.01 USD value to avoid dust rows (e.g. AVAX $0.00)
+  if (row.valueUsd >= 0.01) return true;
+  // Show native gas tokens with a meaningful raw balance even without USD pricing
+  if (row.isNative && row.balanceRaw >= 0.0001) return true;
+  return false;
 }
 
 function matchesSingleChainFocus(chainName: string, focus: ChainKey): boolean {

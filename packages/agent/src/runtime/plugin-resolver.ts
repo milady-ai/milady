@@ -134,6 +134,7 @@ function getWorkspacePluginOverridePath(pluginName: string): string | null {
       path.join(workspaceRoot, "eliza", "plugins", pluginSegment, "typescript"),
       path.join(workspaceRoot, "eliza", "plugins", pluginSegment),
       path.join(workspaceRoot, "eliza", "packages", pluginSegment),
+      path.join(workspaceRoot, "packages", pluginSegment),
     ]);
 
     for (const candidate of candidates) {

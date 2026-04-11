@@ -270,7 +270,7 @@ export async function runHydrating(
     }
     if (urlTab === "character" || urlTab === "character-select")
       void deps.loadCharacter();
-    if (urlTab === "wallets") void deps.loadInventory();
+    if (urlTab === "inventory") void deps.loadInventory();
   }
 
   if (!cancelled.current) dispatch({ type: "HYDRATION_COMPLETE" });

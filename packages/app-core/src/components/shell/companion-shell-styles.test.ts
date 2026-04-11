@@ -47,7 +47,7 @@ describe("tabFlags", () => {
     expect(tabFlags("chat").isAdvancedOverlay).toBe(false);
     expect(tabFlags("stream").isAdvancedOverlay).toBe(false);
     expect(tabFlags("triggers").isAdvancedOverlay).toBe(false);
-    expect(tabFlags("wallets").isAdvancedOverlay).toBe(false);
+    expect(tabFlags("inventory").isAdvancedOverlay).toBe(false);
     expect(tabFlags("settings").isAdvancedOverlay).toBe(false);
     expect(tabFlags("knowledge").isAdvancedOverlay).toBe(false);
   });
@@ -60,7 +60,7 @@ describe("tabFlags", () => {
   it("reports individual flags consistently", () => {
     expect(tabFlags("skills").isSkills).toBe(true);
     expect(tabFlags("stream").isStream).toBe(true);
-    expect(tabFlags("wallets").isWallets).toBe(true);
+    expect(tabFlags("inventory").isWallets).toBe(true);
     expect(tabFlags("character").isCharacter).toBe(true);
     expect(tabFlags("character-select").isCharacter).toBe(true);
     expect(tabFlags("advanced").isSkills).toBe(false);
@@ -98,7 +98,7 @@ describe("derived style helpers", () => {
 
   it("keeps special-case accents for stream and wallets", () => {
     expect(accentVar(tabFlags("stream"))).toBe("#ef4444");
-    expect(accentVar(tabFlags("wallets"))).toBe("#f0b90b");
+    expect(accentVar(tabFlags("inventory"))).toBe("#f0b90b");
   });
 
   it("keeps card surfaces non-transparent in base chat shell (with pack fallback)", () => {
@@ -107,7 +107,7 @@ describe("derived style helpers", () => {
   });
 
   it("uses dark accent foregrounds for yellow companion tabs", () => {
-    expect(accentForegroundVar(tabFlags("wallets"))).toBe("#1a1f26");
+    expect(accentForegroundVar(tabFlags("inventory"))).toBe("#1a1f26");
     expect(accentForegroundVar(tabFlags("skills"))).toBe("#1a1f26");
     expect(accentForegroundVar(tabFlags("knowledge"))).toBe("#ffffff");
   });

@@ -154,7 +154,7 @@ describe("i18n helpers", () => {
 
   it("creates stable translator for a target language", () => {
     const zh = createTranslator("zh-CN");
-    expect(zh("nav.wallets")).toBe("钱包");
+    expect(zh("nav.inventory")).toBe("资产");
   });
 
   it("keeps the image processing upload label short in every locale", () => {

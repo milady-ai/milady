@@ -39,7 +39,7 @@ export type Tab =
   | "apps"
   | "character"
   | "character-select"
-  | "wallets"
+  | "inventory"
   | "knowledge"
   | "connectors"
   | "triggers"
@@ -93,10 +93,10 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
     description: "Live streaming controls",
   },
   {
-    label: "Wallets",
-    tabs: ["wallets"],
+    label: "Inventory",
+    tabs: ["inventory"],
     icon: Wallet,
-    description: "Crypto wallets and inventory",
+    description: "Crypto wallets and token balances",
   },
   {
     label: "Knowledge",
@@ -174,7 +174,7 @@ const TAB_PATHS: Record<Tab, string> = {
   character: "/character",
   "character-select": "/character-select",
   triggers: "/triggers",
-  wallets: "/wallets",
+  inventory: "/inventory",
   knowledge: "/knowledge",
   connectors: "/connectors",
   plugins: "/plugins",
@@ -197,7 +197,7 @@ const TAB_PATHS: Record<Tab, string> = {
 const LEGACY_PATHS: Record<string, Tab> = {
   "/game": "apps",
   "/agent": "character",
-  "/inventory": "wallets",
+  "/wallets": "inventory",
   "/features": "plugins",
   "/admin": "advanced",
   "/config": "settings",
@@ -298,8 +298,8 @@ export function titleForTab(tab: Tab): string {
       return "Character Select";
     case "triggers":
       return "Heartbeats";
-    case "wallets":
-      return "Wallets";
+    case "inventory":
+      return "Inventory";
     case "knowledge":
       return "Knowledge";
     case "connectors":

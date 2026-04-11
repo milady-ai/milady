@@ -233,6 +233,7 @@ export function createLifeOpsChatTestRuntime(options: {
       };
       const state: State = {
         values: {
+          agentName: runtimeArg.character.name ?? "Agent",
           recentMessages,
         },
         data: {},

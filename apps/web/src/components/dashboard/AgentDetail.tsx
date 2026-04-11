@@ -15,7 +15,7 @@ import { WalletsPanel } from "./WalletsPanel";
 
 const TABS = [
   "Overview",
-  "Wallets",
+  "Inventory",
   "Policies",
   "Transactions",
   "Approvals",
@@ -245,7 +245,7 @@ export function AgentDetail({
             actionError={actionError}
           />
         )}
-        {tab === "Wallets" && <WalletsPanel managedAgent={managedAgent} />}
+        {tab === "Inventory" && <WalletsPanel managedAgent={managedAgent} />}
         {tab === "Policies" && stewardClient && (
           <PolicyControls client={stewardClient} />
         )}

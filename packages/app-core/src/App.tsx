@@ -48,8 +48,10 @@ import {
   StreamView,
   SystemWarningBanner,
 } from "./app-shell-components";
-// Register the companion overlay app (self-registers on import)
+// Register overlay apps (self-register on import)
 import "./components/companion/companion-app";
+import "./components/vincent/vincent-app";
+import "./components/shopify/shopify-app";
 import { getOverlayApp } from "./components/apps/overlay-app-registry";
 import { TasksEventsPanel } from "./components/chat/TasksEventsPanel";
 import { DeferredSetupChecklist } from "./components/cloud/FlaminaGuide";
@@ -148,7 +150,7 @@ function ViewRouter() {
             <CharacterEditor />
           </TabScrollView>
         );
-      case "wallets":
+      case "inventory":
         return (
           <TabScrollView>
             <InventoryView />
@@ -271,7 +273,7 @@ export function App() {
 
   const isCompanionTab = tab === "companion";
   const isChat = tab === "chat";
-  const isWallets = tab === "wallets";
+  const isWallets = tab === "inventory";
   const isConnectors = tab === "connectors";
   const isHeartbeats = tab === "triggers";
   const isKnowledge = tab === "knowledge";

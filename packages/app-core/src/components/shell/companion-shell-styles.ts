@@ -39,7 +39,7 @@ export function tabFlags(tab: Tab) {
   const isSettings = tab === "settings" || tab === "triggers";
   const isPlugins = tab === "plugins";
   const isStream = tab === "stream";
-  const isWallets = tab === "wallets";
+  const isWallets = tab === "inventory";
   const isApps = tab === "apps";
   const isConnectors = tab === "connectors";
   const isKnowledge = tab === "knowledge";

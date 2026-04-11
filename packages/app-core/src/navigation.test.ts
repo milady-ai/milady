@@ -20,7 +20,7 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/stream")).toBe("stream");
     expect(tabFromPath("/character")).toBe("character");
     expect(tabFromPath("/character-select")).toBe("character-select");
-    expect(tabFromPath("/wallets")).toBe("wallets");
+    expect(tabFromPath("/wallets")).toBe("inventory");
     expect(tabFromPath("/knowledge")).toBe("knowledge");
     expect(tabFromPath("/connectors")).toBe("connectors");
     expect(tabFromPath("/settings")).toBe("settings");
@@ -44,7 +44,7 @@ describe("tabFromPath", () => {
   it("maps legacy paths", () => {
     expect(tabFromPath("/game")).toBe(APPS_ENABLED ? "apps" : "chat");
     expect(tabFromPath("/agent")).toBe("character");
-    expect(tabFromPath("/inventory")).toBe("wallets");
+    expect(tabFromPath("/wallets")).toBe("inventory");
     expect(tabFromPath("/features")).toBe("plugins");
     expect(tabFromPath("/admin")).toBe("advanced");
     expect(tabFromPath("/config")).toBe("settings");
@@ -91,7 +91,7 @@ describe("pathForTab", () => {
     "stream",
     "character",
     "character-select",
-    "wallets",
+    "inventory",
     "knowledge",
     "connectors",
     "plugins",
@@ -164,7 +164,7 @@ describe("tab groups", () => {
       "browser",
       "stream",
       "apps",
-      "wallets",
+      "inventory",
       "knowledge",
       "connectors",
       "plugins",

@@ -17,6 +17,7 @@ import {
 import { gmailAction } from "../actions/gmail.js";
 import { lifeAction } from "../actions/life.js";
 import { readChannelAction } from "../actions/read-channel.js";
+import { launchAppAction, stopAppAction } from "../actions/app-control.js";
 import { restartAction } from "../actions/restart.js";
 import { searchConversationsAction } from "../actions/search-conversations.js";
 import { sendAdminMessageAction } from "../actions/send-admin-message.js";
@@ -58,6 +59,10 @@ import { createUserNameProvider } from "../providers/user-name.js";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace.js";
 import { createWorkspaceProvider } from "../providers/workspace-provider.js";
 import { MiladyCharacterPersistenceService } from "../services/character-persistence.js";
+import { inboxTriageAction } from "../actions/inbox-triage.js";
+import { inboxDigestAction } from "../actions/inbox-digest.js";
+import { inboxRespondAction } from "../actions/inbox-respond.js";
+import { inboxTriageProvider } from "../providers/inbox-triage.js";
 import { createTriggerTaskAction } from "../triggers/action.js";
 import { registerTriggerTaskWorker } from "../triggers/runtime.js";
 import { setCustomActionsRuntime } from "./custom-actions.js";
@@ -225,12 +230,15 @@ export function createElizaPlugin(config?: ElizaPluginConfig): Plugin {
       uiCatalogProvider,
       roleBackfillProvider,
       escalationTriggerProvider,
+      inboxTriageProvider,
     ],
 
     evaluators: [lateJoinWhitelistEvaluator],
 
     actions: [
       restartAction,
+      launchAppAction,
+      stopAppAction,
       sendAdminMessageAction,
       terminalAction,
       createTriggerTaskAction,
@@ -245,6 +253,9 @@ export function createElizaPlugin(config?: ElizaPluginConfig): Plugin {
       searchConversationsAction,
       searchEntityAction,
       readEntityAction,
+      inboxTriageAction,
+      inboxDigestAction,
+      inboxRespondAction,
     ],
   };
 

@@ -111,6 +111,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   SPOTIFY_CLIENT_ID: "@elizaos/plugin-music-library",
   SPOTIFY_CLIENT_SECRET: "@elizaos/plugin-music-library",
   RS_SDK_BOT_NAME: "@miladyai/plugin-2004scape",
+  SHOPIFY_ACCESS_TOKEN: "@elizaos/plugin-shopify",
 };
 
 function isTelegramAccountConfigured(env: NodeJS.ProcessEnv): boolean {

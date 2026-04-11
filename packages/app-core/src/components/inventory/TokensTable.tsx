@@ -166,7 +166,7 @@ export function TokensTable({
                   </td>
                   {/* Value */}
                   <td className="px-3 py-3 align-middle font-mono text-sm text-right text-muted whitespace-nowrap">
-                    {row.valueUsd > 0
+                    {row.valueUsd >= 0.01
                       ? `$${row.valueUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : "\u2014"}
                   </td>

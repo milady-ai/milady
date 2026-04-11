@@ -192,6 +192,53 @@ describe("calendarAction", () => {
     expect(result?.text).toContain("Dentist appointment");
   });
 
+  it("parses TOON response with || delimited queries from LLM plan", async () => {
+    mockUseModel.mockResolvedValue(
+      "subaction: search_events\nqueries: dentist || cleaning\ntitle:\ntripLocation:",
+    );
+    mockGetCalendarFeed.mockResolvedValue({
+      calendarId: "primary",
+      events: [
+        {
+          id: "evt-dentist-toon",
+          externalId: "ext-dentist-toon",
+          agentId: "agent-1",
+          provider: "google",
+          side: "owner",
+          calendarId: "primary",
+          title: "Dentist cleaning",
+          description: "Routine cleaning",
+          location: "Market Street Dental",
+          status: "confirmed",
+          startAt: "2026-04-12T17:00:00.000Z",
+          endAt: "2026-04-12T18:00:00.000Z",
+          isAllDay: false,
+          timezone: "UTC",
+          htmlLink: null,
+          conferenceLink: null,
+          organizer: null,
+          attendees: [],
+          metadata: {},
+          syncedAt: "2026-04-09T16:00:00.000Z",
+          updatedAt: "2026-04-09T16:00:00.000Z",
+        },
+      ],
+      source: "cache",
+      timeMin: "2026-04-09T00:00:00.000Z",
+      timeMax: "2026-05-09T00:00:00.000Z",
+      syncedAt: "2026-04-09T16:00:00.000Z",
+    });
+
+    const result = await invoke("when is my dentist cleaning", {
+      subaction: "feed",
+    });
+
+    expect(mockUseModel).toHaveBeenCalled();
+    expect(mockGetCalendarFeed).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ success: true });
+    expect(result?.text).toContain("Dentist cleaning");
+  });
+
   it("uses timezone-aware tomorrow windows and replies through the action callback", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-09T22:53:00-07:00"));

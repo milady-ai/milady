@@ -22,7 +22,7 @@ function isWidgetEnabled(
 
   const plugin = plugins.find((candidate) => candidate.id === widget.pluginId);
   if (!plugin) {
-    return widget.defaultEnabled;
+    return false;
   }
 
   return plugin.isActive === true || plugin.enabled !== false;

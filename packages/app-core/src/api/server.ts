@@ -136,6 +136,7 @@ import {
   getCorsAllowedPorts,
   isAllowedLocalOrigin,
 } from "./server-cors";
+import { handleShopifyRoute } from "./shopify-routes";
 import { handleVincentRoute } from "./vincent-routes";
 import {
   isAllowedDevConsoleLogPath,
@@ -886,6 +887,13 @@ async function handleMiladyCompatRoute(
     const handled = await handleVincentRoute(req, res, url.pathname, method, {
       config: vincentConfig,
     });
+    if (handled) return true;
+  }
+
+  // ── Shopify routes ────────────────────────────────────────────────
+  if (url.pathname.startsWith("/api/shopify")) {
+    if (!ensureCompatApiAuthorized(req, res)) return true;
+    const handled = await handleShopifyRoute(req, res, url.pathname, method);
     if (handled) return true;
   }
 
