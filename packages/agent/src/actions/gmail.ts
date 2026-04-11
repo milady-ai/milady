@@ -48,7 +48,8 @@ type GmailSubaction =
   | "draft_reply"
   | "draft_batch_replies"
   | "send_reply"
-  | "send_batch_replies";
+  | "send_batch_replies"
+  | "send_message";
 
 export type GmailLlmPlan = {
   subaction: GmailSubaction | null;
@@ -100,6 +101,7 @@ function normalizeGmailSubaction(value: unknown): GmailSubaction | null {
     case "draft_batch_replies":
     case "send_reply":
     case "send_batch_replies":
+    case "send_message":
       return normalized;
     default:
       return null;
@@ -750,6 +752,20 @@ function inferGmailSubaction(
   details: Record<string, unknown> | undefined,
   params: GmailActionParams,
 ): GmailSubaction {
+  // A bodyText + recipient list with no messageId means "compose new" rather
+  // than "reply to existing thread". Check this branch first so the LLM can
+  // dispatch a fresh outbound email when the user provides "to" but no
+  // pre-existing thread to reply against.
+  if (
+    (params.bodyText || detailString(details, "bodyText")) &&
+    !params.messageId &&
+    !detailString(details, "messageId") &&
+    !detailArray(details, "items") &&
+    Array.isArray(details?.to) &&
+    (details.to as unknown[]).length > 0
+  ) {
+    return "send_message";
+  }
   if (
     params.bodyText ||
     detailString(details, "bodyText") ||
@@ -1285,6 +1301,26 @@ export const gmailAction: Action = {
       );
       subaction = inferGmailSubaction(normalizedIntent, details, params);
     }
+    runtime.logger?.debug?.(
+      {
+        src: "action:gmail",
+        subaction,
+        rawMessage: messageText(message).slice(0, 200),
+        resolvedIntent: intent.slice(0, 200),
+        params: {
+          subaction: params.subaction,
+          query: params.query,
+          messageId: params.messageId,
+          bodyText: params.bodyText?.slice(0, 100),
+        },
+        detailKeys: details ? Object.keys(details) : [],
+        detailToType: typeof details?.to,
+        detailSubject: typeof details?.subject === "string"
+          ? details.subject
+          : undefined,
+      },
+      "gmail action dispatch",
+    );
     const explicitQueryArray = [
       ...(params.queries ?? []),
       ...(normalizeStringArray(details?.queries) ?? []),
@@ -1308,7 +1344,11 @@ export const gmailAction: Action = {
     try {
       const google = await getGoogleCapabilityStatus(service);
 
-      if (subaction === "send_reply" || subaction === "send_batch_replies") {
+      if (
+        subaction === "send_reply" ||
+        subaction === "send_batch_replies" ||
+        subaction === "send_message"
+      ) {
         if (!google.hasGmailSend) {
           return respond({
             success: false,
@@ -1653,6 +1693,69 @@ export const gmailAction: Action = {
         });
       }
 
+      if (subaction === "send_message") {
+        // Parse "email <addr> with subject "X" and body "Y"" patterns
+        // directly from the user message. The chat LLM almost never puts
+        // these into structured details.* fields — it just rewrites the
+        // intent. Without a literal-text parser the action would always
+        // fail validation for natural-language compose requests.
+        const rawText = messageText(message);
+        const emailRegex = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
+        const recipientsFromIntent = rawText.match(emailRegex) ?? [];
+        const subjectMatch =
+          rawText.match(
+            /\bsubject(?:\s+is|\s*[:=]|\s+of)?\s+["“]([^"”]+)["”]/i,
+          ) ?? rawText.match(/\bsubject\s+["“]([^"”]+)["”]/i);
+        const subjectFromIntent = subjectMatch?.[1]?.trim();
+        const bodyMatch =
+          rawText.match(
+            /\bbody(?:\s+is|\s*[:=]|\s+of)?\s+["“]([^"”]+)["”]/i,
+          ) ?? rawText.match(/\bbody\s+["“]([^"”]+)["”]/i);
+        const bodyFromIntent = bodyMatch?.[1]?.trim();
+
+        const to =
+          normalizeStringArray(details?.to) ??
+          (recipientsFromIntent.length > 0 ? recipientsFromIntent : []);
+        const subject =
+          detailString(details, "subject") ??
+          subjectFromIntent ??
+          undefined;
+        const bodyText =
+          params.bodyText ??
+          detailString(details, "bodyText") ??
+          bodyFromIntent;
+
+        if (to.length === 0 || !subject || !bodyText) {
+          const missing: string[] = [];
+          if (to.length === 0) missing.push("recipient address");
+          if (!subject) missing.push("subject");
+          if (!bodyText) missing.push("body text");
+          return respond({
+            success: false,
+            text: `i need ${missing.join(", ")} to compose that email. format: 'email <addr> with subject "X" and body "Y"'.`,
+          });
+        }
+        const result = await service.sendGmailMessage(INTERNAL_URL, {
+          mode: detailString(details, "mode") as
+            | "local"
+            | "remote"
+            | "cloud_managed"
+            | undefined,
+          side: detailString(details, "side") as "owner" | "agent" | undefined,
+          to,
+          cc: normalizeStringArray(details?.cc),
+          bcc: normalizeStringArray(details?.bcc),
+          subject,
+          bodyText,
+          confirmSend: detailBoolean(details, "confirmSend") ?? true,
+        });
+        return respond({
+          success: true,
+          text: `sent to ${to.join(", ")}.`,
+          data: toActionData(result),
+        });
+      }
+
       const items = normalizeBatchSendItems(details);
       if (!items) {
         return respond({
@@ -1692,7 +1795,7 @@ export const gmailAction: Action = {
     {
       name: "subaction",
       description:
-        "Gmail operation to run. Use triage, needs_response, search, read, draft_reply, draft_batch_replies, send_reply, or send_batch_replies.",
+        "Gmail operation to run. Use triage, needs_response, search, read, draft_reply, draft_batch_replies, send_reply, send_batch_replies, or send_message (compose a brand-new outbound email).",
       required: false,
       schema: {
         type: "string" as const,
@@ -1705,6 +1808,7 @@ export const gmailAction: Action = {
           "draft_batch_replies",
           "send_reply",
           "send_batch_replies",
+          "send_message",
         ],
       },
     },

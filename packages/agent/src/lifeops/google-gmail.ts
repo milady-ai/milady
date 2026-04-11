@@ -191,7 +191,13 @@ function normalizeReplySubject(subject: string): string {
 }
 
 function normalizeSnippet(value: string | undefined): string {
-  return value?.replace(/\s+/g, " ").trim() || "";
+  if (!value) {
+    return "";
+  }
+  // Gmail's snippet field arrives with raw HTML entities ("It&#39;s", "Tom
+  // &amp; Jerry", "&nbsp;"). Decode them so the discord/UI render is plain
+  // text instead of leaking entity codes to the user.
+  return decodeHtmlEntities(value).replace(/\s+/g, " ").trim();
 }
 
 function decodeGmailBodyData(value: string): string {
@@ -374,7 +380,11 @@ function normalizeGoogleGmailMessage(
   }
 
   const headers = message.payload?.headers ?? [];
-  const subject = readHeaderValue(headers, "Subject") || "(no subject)";
+  // Gmail subject headers can carry html entities (e.g. "Tom &amp; Jerry").
+  // Decode them so the rendered subject reads naturally in discord/UI.
+  const subject =
+    decodeHtmlEntities(readHeaderValue(headers, "Subject") || "") ||
+    "(no subject)";
   const fromHeader = readHeaderValue(headers, "From") || "Unknown sender";
   const fromMailbox = parseMailbox(fromHeader);
   const replyToHeader = readHeaderValue(headers, "Reply-To");
@@ -609,6 +619,31 @@ async function fetchGoogleGmailMessages(args: {
     });
 }
 
+async function postGoogleGmailRaw(
+  accessToken: string,
+  rawMessage: string,
+): Promise<void> {
+  const response = await fetch(`${GOOGLE_GMAIL_MESSAGES_ENDPOINT}/send`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ raw: rawMessage }),
+  });
+
+  if (!response.ok) {
+    throw new GoogleApiError(
+      response.status,
+      await readGoogleGmailError(response),
+    );
+  }
+}
+
+function encodeGmailRfc822(lines: string[]): string {
+  return Buffer.from(lines.join("\r\n"), "utf-8").toString("base64url");
+}
+
 export async function sendGoogleGmailReply(args: {
   accessToken: string;
   to: string[];
@@ -629,21 +664,27 @@ export async function sendGoogleGmailReply(args: {
     "",
     args.bodyText.replace(/\r?\n/g, "\r\n"),
   ];
-  const raw = Buffer.from(lines.join("\r\n"), "utf-8").toString("base64url");
+  await postGoogleGmailRaw(args.accessToken, encodeGmailRfc822(lines));
+}
 
-  const response = await fetch(`${GOOGLE_GMAIL_MESSAGES_ENDPOINT}/send`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${args.accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ raw }),
-  });
-
-  if (!response.ok) {
-    throw new GoogleApiError(
-      response.status,
-      await readGoogleGmailError(response),
-    );
-  }
+export async function sendGoogleGmailMessage(args: {
+  accessToken: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  bodyText: string;
+}): Promise<void> {
+  const subject = args.subject.trim() || "(no subject)";
+  const lines = [
+    `To: ${args.to.join(", ")}`,
+    ...(args.cc && args.cc.length > 0 ? [`Cc: ${args.cc.join(", ")}`] : []),
+    ...(args.bcc && args.bcc.length > 0 ? [`Bcc: ${args.bcc.join(", ")}`] : []),
+    `Subject: ${subject}`,
+    "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=UTF-8",
+    "",
+    args.bodyText.replace(/\r?\n/g, "\r\n"),
+  ];
+  await postGoogleGmailRaw(args.accessToken, encodeGmailRfc822(lines));
 }

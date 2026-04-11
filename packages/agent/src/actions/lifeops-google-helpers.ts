@@ -17,6 +17,32 @@ import { hasPrivateAccess } from "../security/access.js";
 
 export const INTERNAL_URL = new URL("http://127.0.0.1/");
 
+// Truncate snippet/preview text and append an ellipsis when we actually cut.
+// Without the marker the slice looks like a sentence the sender wrote, which
+// confuses readers when content gets clipped mid-word.
+function truncateForPreview(value: string, maxLength: number): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  return `${value.slice(0, maxLength).trimEnd()}…`;
+}
+
+// Build a "Display Name <email@host>" string when both are available, or
+// fall back to whichever field is set. Without explicit email rendering the
+// reader can't see who actually sent the message — only the display name,
+// which is often spoofable or generic ("Google", "Notifications").
+function formatEmailSender(
+  display: string | null | undefined,
+  email: string | null | undefined,
+): string {
+  const trimmedDisplay = typeof display === "string" ? display.trim() : "";
+  const trimmedEmail = typeof email === "string" ? email.trim() : "";
+  if (trimmedDisplay && trimmedEmail && trimmedDisplay !== trimmedEmail) {
+    return `${trimmedDisplay} <${trimmedEmail}>`;
+  }
+  return trimmedDisplay || trimmedEmail || "unknown";
+}
+
 export function toActionData<T extends object>(data: T): ProviderDataRecord {
   return data as unknown as ProviderDataRecord;
 }
@@ -117,11 +143,23 @@ function formatEventTime(event: LifeOpsCalendarEvent): string {
   if (event.isAllDay) {
     return "all day";
   }
-  const format: Intl.DateTimeFormatOptions = {
+  const start = new Date(event.startAt);
+  const end = new Date(event.endAt);
+  const timeFormat: Intl.DateTimeFormatOptions = {
     hour: "numeric",
     minute: "2-digit",
   };
-  return `${new Date(event.startAt).toLocaleTimeString(undefined, format)} – ${new Date(event.endAt).toLocaleTimeString(undefined, format)}`;
+  // Always include the date so a list of multiple events doesn't show
+  // identical-looking time-only entries with no way to tell which day
+  // they belong to. Year is included only when the event is in a year
+  // other than the current one to keep the common case readable.
+  const now = new Date();
+  const includeYear = start.getFullYear() !== now.getFullYear();
+  const dateFormat: Intl.DateTimeFormatOptions = includeYear
+    ? { month: "short", day: "numeric", year: "numeric" }
+    : { month: "short", day: "numeric" };
+  const datePart = start.toLocaleDateString(undefined, dateFormat);
+  return `${datePart}, ${start.toLocaleTimeString(undefined, timeFormat)} – ${end.toLocaleTimeString(undefined, timeFormat)}`;
 }
 
 export function formatRelativeMinutes(minutes: number): string {
@@ -217,9 +255,10 @@ export function formatNextEventContext(
   if (context.linkedMail.length > 0) {
     lines.push("Related emails:");
     for (const mail of context.linkedMail.slice(0, 3)) {
-      lines.push(
-        `- "${mail.subject}" from ${mail.from} (${mail.snippet?.slice(0, 60) ?? ""})`,
-      );
+      const snippet = mail.snippet
+        ? ` (${truncateForPreview(mail.snippet, 60)})`
+        : "";
+      lines.push(`- "${mail.subject}" from ${mail.from}${snippet}`);
     }
   }
   return lines.join("\n");
@@ -252,11 +291,13 @@ export function formatEmailTriage(feed: LifeOpsGmailTriageFeed): string {
       badges.push("reply needed");
     }
     const badgeText = badges.length > 0 ? ` [${badges.join(", ")}]` : "";
-    const from = message.from || message.fromEmail || "unknown";
+    const sender = formatEmailSender(message.from, message.fromEmail);
     lines.push(`- **${message.subject}**${badgeText}`);
-    lines.push(`  From: ${from} · ${formatRelativeTime(message.receivedAt)}`);
+    lines.push(
+      `  From: ${sender} · ${formatRelativeTime(message.receivedAt)}`,
+    );
     if (message.snippet) {
-      lines.push(`  ${message.snippet.slice(0, 100)}`);
+      lines.push(`  ${truncateForPreview(message.snippet, 100)}`);
     }
   }
   return lines.join("\n");
@@ -272,12 +313,12 @@ export function formatEmailNeedsResponse(
     `Emails that likely need a reply: ${feed.summary.totalCount}.`,
   ];
   for (const message of feed.messages.slice(0, 8)) {
-    const from = message.from || message.fromEmail || "unknown";
+    const sender = formatEmailSender(message.from, message.fromEmail);
     lines.push(
-      `- **${message.subject}** from ${from} · ${formatRelativeTime(message.receivedAt)}`,
+      `- **${message.subject}** from ${sender} · ${formatRelativeTime(message.receivedAt)}`,
     );
     if (message.snippet) {
-      lines.push(`  ${message.snippet.slice(0, 120)}`);
+      lines.push(`  ${truncateForPreview(message.snippet, 120)}`);
     }
   }
   return lines.join("\n");
@@ -377,19 +418,22 @@ export function formatEmailSearch(feed: LifeOpsGmailSearchFeed): string {
       badges.push("reply needed");
     }
     const badgeText = badges.length > 0 ? ` [${badges.join(", ")}]` : "";
-    const from = message.from || message.fromEmail || "unknown";
+    const sender = formatEmailSender(message.from, message.fromEmail);
     lines.push(
-      `- **${message.subject}**${badgeText} from ${from} · ${formatRelativeTime(message.receivedAt)}`,
+      `- **${message.subject}**${badgeText} from ${sender} · ${formatRelativeTime(message.receivedAt)}`,
     );
     if (message.snippet) {
-      lines.push(`  ${message.snippet.slice(0, 120)}`);
+      lines.push(`  ${truncateForPreview(message.snippet, 120)}`);
     }
   }
   return lines.join("\n");
 }
 
 export function formatEmailRead(result: LifeOpsGmailReadResultLike): string {
-  const from = result.message.from || result.message.fromEmail || "unknown";
+  const from = formatEmailSender(
+    result.message.from,
+    result.message.fromEmail,
+  );
   const bodyText = result.bodyText.trim();
   const maxChars = 2_500;
   const truncated = bodyText.length > maxChars;

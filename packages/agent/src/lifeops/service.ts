@@ -13,6 +13,7 @@ import type {
   CompleteLifeOpsOccurrenceRequest,
   ConfirmLifeOpsBrowserSessionRequest,
   CreateLifeOpsBrowserSessionRequest,
+  CreateLifeOpsCalendarEventAttendee,
   CreateLifeOpsCalendarEventRequest,
   CreateLifeOpsDefinitionRequest,
   CreateLifeOpsGmailBatchReplyDraftsRequest,
@@ -174,7 +175,9 @@ import {
 } from "./google-api-error.js";
 import {
   createGoogleCalendarEvent,
+  deleteGoogleCalendarEvent,
   fetchGoogleCalendarEvents,
+  updateGoogleCalendarEvent,
 } from "./google-calendar.js";
 import {
   resolveGoogleAvailableModes,
@@ -189,6 +192,7 @@ import {
   fetchGoogleGmailTriageMessages,
   type SyncedGoogleGmailMessageDetail,
   type SyncedGoogleGmailMessageSummary,
+  sendGoogleGmailMessage,
   sendGoogleGmailReply,
 } from "./google-gmail.js";
 import {
@@ -5001,8 +5005,9 @@ export class LifeOpsService {
     eventType:
       | "gmail_triage_synced"
       | "gmail_reply_drafted"
-      | "gmail_reply_sent",
-    ownerId: string,
+      | "gmail_reply_sent"
+      | "gmail_message_sent",
+    ownerId: string | null,
     reason: string,
     inputs: Record<string, unknown>,
     decision: Record<string, unknown>,
@@ -5012,8 +5017,11 @@ export class LifeOpsService {
         agentId: this.agentId(),
         eventType,
         ownerType:
-          eventType === "gmail_triage_synced" ? "connector" : "gmail_message",
-        ownerId,
+          eventType === "gmail_triage_synced" ||
+          eventType === "gmail_message_sent"
+            ? "connector"
+            : "gmail_message",
+        ownerId: ownerId ?? this.agentId(),
         reason,
         inputs,
         decision,
@@ -5121,11 +5129,15 @@ export class LifeOpsService {
     reason: string,
     inputs: Record<string, unknown>,
     decision: Record<string, unknown>,
+    eventType:
+      | "calendar_event_created"
+      | "calendar_event_updated"
+      | "calendar_event_deleted" = "calendar_event_created",
   ): Promise<void> {
     await this.repository.createAuditEvent(
       createLifeOpsAuditEvent({
         agentId: this.agentId(),
-        eventType: "calendar_event_created",
+        eventType,
         ownerType: "calendar_event",
         ownerId,
         reason,
@@ -10355,6 +10367,204 @@ export class LifeOpsService {
       : this.withGoogleGrantOperation(grant, createEvent);
   }
 
+  async updateCalendarEvent(
+    requestUrl: URL,
+    request: {
+      mode?: LifeOpsConnectorMode | null;
+      side?: LifeOpsConnectorSide | null;
+      calendarId?: string | null;
+      eventId: string;
+      title?: string;
+      description?: string;
+      location?: string;
+      startAt?: string;
+      endAt?: string;
+      timeZone?: string;
+      attendees?: CreateLifeOpsCalendarEventAttendee[] | null;
+    },
+  ): Promise<LifeOpsCalendarEvent> {
+    const mode = normalizeOptionalConnectorMode(request.mode, "mode");
+    const side = normalizeOptionalConnectorSide(request.side, "side");
+    const calendarId = normalizeCalendarId(request.calendarId);
+    const externalEventId = requireNonEmptyString(request.eventId, "eventId");
+
+    const grant = await this.requireGoogleCalendarWriteGrant(
+      requestUrl,
+      mode,
+      side,
+    );
+    const updateEvent = async () => {
+      if (resolveGoogleExecutionTarget(grant) === "cloud") {
+        fail(
+          501,
+          "Calendar update is not supported through the cloud-managed Google connector yet.",
+        );
+      }
+      const accessToken = (
+        await ensureFreshGoogleAccessToken(
+          grant.tokenRef ??
+            fail(409, "Google Calendar token reference is missing."),
+        )
+      ).accessToken;
+
+      // Google's PATCH semantics: if you send `start.dateTime` you must
+      // also send `end.dateTime`, otherwise the API rejects the call as
+      // "Bad Request" because the event would have inconsistent bounds.
+      // Auto-derive a one-hour endAt from startAt (or vice versa) so a
+      // caller that only knows the new start time still gets a successful
+      // patch instead of a confusing 400.
+      const ONE_HOUR_MS = 60 * 60 * 1000;
+      let normalizedStartAt = request.startAt;
+      let normalizedEndAt = request.endAt;
+      if (normalizedStartAt && !normalizedEndAt) {
+        normalizedEndAt = new Date(
+          new Date(normalizedStartAt).getTime() + ONE_HOUR_MS,
+        ).toISOString();
+      } else if (normalizedEndAt && !normalizedStartAt) {
+        normalizedStartAt = new Date(
+          new Date(normalizedEndAt).getTime() - ONE_HOUR_MS,
+        ).toISOString();
+      }
+
+      const updated = await updateGoogleCalendarEvent({
+        accessToken,
+        calendarId: calendarId ?? undefined,
+        eventId: externalEventId,
+        title: request.title,
+        description: request.description,
+        location: request.location,
+        startAt: normalizedStartAt,
+        endAt: normalizedEndAt,
+        timeZone: request.timeZone,
+        attendees: request.attendees
+          ? normalizeCalendarAttendees(request.attendees)
+          : undefined,
+      });
+      const syncedAt = new Date().toISOString();
+      const event: LifeOpsCalendarEvent = {
+        id: createCalendarEventId(
+          this.agentId(),
+          "google",
+          grant.side,
+          updated.calendarId,
+          updated.externalId,
+        ),
+        agentId: this.agentId(),
+        provider: "google",
+        side: grant.side,
+        ...updated,
+        syncedAt,
+        updatedAt: syncedAt,
+      };
+      await this.repository.upsertCalendarEvent(event, grant.side);
+      await this.syncCalendarReminderPlans([event]);
+      await this.clearGoogleGrantAuthFailure(grant);
+      await this.recordCalendarEventAudit(
+        event.id,
+        "calendar event updated",
+        {
+          calendarId: calendarId ?? "primary",
+          mode: grant.mode,
+          patched: Object.fromEntries(
+            Object.entries({
+              title: request.title,
+              description: request.description,
+              location: request.location,
+              startAt: request.startAt,
+              endAt: request.endAt,
+              timeZone: request.timeZone,
+            }).filter(([, value]) => value !== undefined),
+          ),
+        },
+        {
+          externalId: event.externalId,
+          htmlLink: event.htmlLink,
+        },
+        "calendar_event_updated",
+      );
+      return event;
+    };
+
+    return resolveGoogleExecutionTarget(grant) === "cloud"
+      ? this.runManagedGoogleOperation(grant, updateEvent)
+      : this.withGoogleGrantOperation(grant, updateEvent);
+  }
+
+  async deleteCalendarEvent(
+    requestUrl: URL,
+    request: {
+      mode?: LifeOpsConnectorMode | null;
+      side?: LifeOpsConnectorSide | null;
+      calendarId?: string | null;
+      eventId: string;
+    },
+  ): Promise<void> {
+    const mode = normalizeOptionalConnectorMode(request.mode, "mode");
+    const side = normalizeOptionalConnectorSide(request.side, "side");
+    const calendarId = normalizeCalendarId(request.calendarId);
+    const externalEventId = requireNonEmptyString(request.eventId, "eventId");
+
+    const grant = await this.requireGoogleCalendarWriteGrant(
+      requestUrl,
+      mode,
+      side,
+    );
+    const deleteEvent = async () => {
+      // Cloud-managed Google delete is not yet exposed by the managed client;
+      // local execution path is the only supported route here. Refuse loudly
+      // rather than silently no-op so the caller doesn't think the event was
+      // removed when it wasn't.
+      if (resolveGoogleExecutionTarget(grant) === "cloud") {
+        fail(
+          501,
+          "Calendar delete is not supported through the cloud-managed Google connector yet.",
+        );
+      }
+      const accessToken = (
+        await ensureFreshGoogleAccessToken(
+          grant.tokenRef ??
+            fail(409, "Google Calendar token reference is missing."),
+        )
+      ).accessToken;
+      await deleteGoogleCalendarEvent({
+        accessToken,
+        calendarId: calendarId ?? undefined,
+        eventId: externalEventId,
+      });
+      // Best-effort: drop the local cached row so subsequent feed reads
+      // don't show a phantom event. Ignore failures here — the source of
+      // truth (Google) has already accepted the delete.
+      try {
+        await this.repository.deleteCalendarEventByExternalId(
+          this.agentId(),
+          "google",
+          calendarId ?? "primary",
+          externalEventId,
+          grant.side,
+        );
+      } catch {
+        // intentionally swallowed: local cache mirror, not authoritative
+      }
+      await this.clearGoogleGrantAuthFailure(grant);
+      await this.recordCalendarEventAudit(
+        externalEventId,
+        "calendar event deleted",
+        {
+          calendarId: calendarId ?? "primary",
+          mode: grant.mode,
+        },
+        {
+          externalId: externalEventId,
+        },
+        "calendar_event_deleted",
+      );
+    };
+
+    return resolveGoogleExecutionTarget(grant) === "cloud"
+      ? this.runManagedGoogleOperation(grant, deleteEvent)
+      : this.withGoogleGrantOperation(grant, deleteEvent);
+  }
+
   async getNextCalendarEventContext(
     requestUrl: URL,
     request: GetLifeOpsCalendarFeedRequest = {},
@@ -10692,6 +10902,87 @@ export class LifeOpsService {
       },
       {
         subject: request.subject ?? message.subject,
+        sent: true,
+      },
+    );
+    return { ok: true };
+  }
+
+  async sendGmailMessage(
+    requestUrl: URL,
+    request: {
+      mode?: LifeOpsConnectorMode | null;
+      side?: LifeOpsConnectorSide | null;
+      to: string[];
+      cc?: string[] | null;
+      bcc?: string[] | null;
+      subject: string;
+      bodyText: string;
+      confirmSend?: boolean | null;
+    },
+  ): Promise<{ ok: true }> {
+    const mode = normalizeOptionalConnectorMode(request.mode, "mode");
+    const side = normalizeOptionalConnectorSide(request.side, "side");
+    const confirmSend =
+      normalizeOptionalBoolean(request.confirmSend, "confirmSend") ?? false;
+    if (!confirmSend) {
+      fail(409, "Gmail send requires explicit confirmation.");
+    }
+    const to = normalizeOptionalStringArray(request.to, "to") ?? [];
+    if (to.length === 0) {
+      fail(400, "to must include at least one recipient.");
+    }
+    const cc = normalizeOptionalStringArray(request.cc, "cc") ?? [];
+    const bcc = normalizeOptionalStringArray(request.bcc, "bcc") ?? [];
+    const subject = requireNonEmptyString(request.subject, "subject");
+    const bodyText = normalizeGmailReplyBody(request.bodyText);
+
+    const grant = await this.requireGoogleGmailSendGrant(
+      requestUrl,
+      mode,
+      side,
+    );
+    const sendMessage = async () => {
+      // Cloud-managed gmail send for new messages isn't exposed by the
+      // managed client yet — refuse loudly so callers don't think the
+      // message was sent when it wasn't.
+      if (resolveGoogleExecutionTarget(grant) === "cloud") {
+        fail(
+          501,
+          "Gmail compose-and-send is not supported through the cloud-managed connector yet.",
+        );
+      }
+      await sendGoogleGmailMessage({
+        accessToken: (
+          await ensureFreshGoogleAccessToken(
+            grant.tokenRef ??
+              fail(409, "Google Gmail token reference is missing."),
+          )
+        ).accessToken,
+        to,
+        cc,
+        bcc,
+        subject,
+        bodyText,
+      });
+    };
+
+    await (resolveGoogleExecutionTarget(grant) === "cloud"
+      ? this.runManagedGoogleOperation(grant, sendMessage)
+      : this.withGoogleGrantOperation(grant, sendMessage));
+
+    await this.recordGmailAudit(
+      "gmail_message_sent",
+      null,
+      "gmail compose-and-send completed",
+      {
+        to,
+        cc: cc.length > 0 ? cc : null,
+        bcc: bcc.length > 0 ? bcc : null,
+        confirmSend,
+      },
+      {
+        subject,
         sent: true,
       },
     );

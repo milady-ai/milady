@@ -52,11 +52,13 @@ interface GoogleCalendarCreateRequestBody {
   location?: string;
   start: {
     dateTime: string;
-    timeZone: string;
+    // Google accepts events without timeZone when dateTime carries an explicit
+    // offset, so leave it optional and let callers omit it on PATCH.
+    timeZone?: string;
   };
   end: {
     dateTime: string;
-    timeZone: string;
+    timeZone?: string;
   };
   attendees?: Array<{
     email: string;
@@ -288,4 +290,114 @@ export async function createGoogleCalendarEvent(args: {
     );
   }
   return normalized;
+}
+
+export async function updateGoogleCalendarEvent(args: {
+  accessToken: string;
+  calendarId?: string;
+  eventId: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  startAt?: string;
+  endAt?: string;
+  timeZone?: string;
+  attendees?: Array<{
+    email: string;
+    displayName?: string;
+    optional?: boolean;
+  }>;
+}): Promise<SyncedGoogleCalendarEvent> {
+  const calendarId = args.calendarId ?? "primary";
+  // Use PATCH semantics — only the fields the caller supplies are sent, so
+  // unrelated fields on the event keep their existing values.
+  const body: Partial<GoogleCalendarCreateRequestBody> = {};
+  if (args.title !== undefined) {
+    body.summary = args.title;
+  }
+  if (args.description !== undefined) {
+    body.description = args.description;
+  }
+  if (args.location !== undefined) {
+    body.location = args.location;
+  }
+  if (args.startAt !== undefined) {
+    body.start = {
+      dateTime: args.startAt,
+      ...(args.timeZone ? { timeZone: args.timeZone } : {}),
+    };
+  }
+  if (args.endAt !== undefined) {
+    body.end = {
+      dateTime: args.endAt,
+      ...(args.timeZone ? { timeZone: args.timeZone } : {}),
+    };
+  }
+  if (args.attendees) {
+    body.attendees = args.attendees.map((attendee) => ({
+      email: attendee.email,
+      ...(attendee.displayName?.trim()
+        ? { displayName: attendee.displayName.trim() }
+        : {}),
+      ...(attendee.optional ? { optional: true } : {}),
+    }));
+  }
+
+  const response = await fetch(
+    `${GOOGLE_CALENDAR_EVENTS_ENDPOINT}/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(args.eventId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${args.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (!response.ok) {
+    throw new GoogleApiError(
+      response.status,
+      await readGoogleCalendarError(response),
+    );
+  }
+
+  const parsed = (await response.json()) as GoogleCalendarApiEvent;
+  const normalized = normalizeGoogleCalendarEvent(calendarId, parsed);
+  if (!normalized) {
+    throw new Error(
+      "Google Calendar update event returned an invalid payload.",
+    );
+  }
+  return normalized;
+}
+
+export async function deleteGoogleCalendarEvent(args: {
+  accessToken: string;
+  calendarId?: string;
+  eventId: string;
+}): Promise<void> {
+  const calendarId = args.calendarId ?? "primary";
+  const response = await fetch(
+    `${GOOGLE_CALENDAR_EVENTS_ENDPOINT}/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(args.eventId)}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${args.accessToken}`,
+      },
+    },
+  );
+
+  // Google returns 204 on successful delete and 410 if the event was already
+  // gone. Treat both as success — the user's intent (the event no longer
+  // exists) is satisfied either way.
+  if (response.status === 204 || response.status === 410) {
+    return;
+  }
+  if (!response.ok) {
+    throw new GoogleApiError(
+      response.status,
+      await readGoogleCalendarError(response),
+    );
+  }
 }

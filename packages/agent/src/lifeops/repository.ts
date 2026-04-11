@@ -2852,6 +2852,26 @@ export class LifeOpsRepository {
     );
   }
 
+  async deleteCalendarEventByExternalId(
+    agentId: string,
+    provider: LifeOpsConnectorGrant["provider"],
+    calendarId: string,
+    externalEventId: string,
+    side?: LifeOpsConnectorSide,
+  ): Promise<void> {
+    await this.ensureReady();
+    const sideClause = side ? `AND side = ${sqlQuote(side)}` : "";
+    await executeRawSql(
+      this.runtime,
+      `DELETE FROM life_calendar_events
+        WHERE agent_id = ${sqlQuote(agentId)}
+          AND provider = ${sqlQuote(provider)}
+          AND calendar_id = ${sqlQuote(calendarId)}
+          AND external_event_id = ${sqlQuote(externalEventId)}
+          ${sideClause}`,
+    );
+  }
+
   async pruneCalendarEventsInWindow(
     agentId: string,
     provider: LifeOpsConnectorGrant["provider"],

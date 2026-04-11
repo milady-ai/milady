@@ -47,6 +47,8 @@ type CalendarSubaction =
   | "next_event"
   | "search_events"
   | "create_event"
+  | "update_event"
+  | "delete_event"
   | "trip_window";
 
 type TripWindowIntent = {
@@ -92,6 +94,17 @@ const CALENDAR_DETAIL_ALIASES = {
   endAt: ["endat", "end_at"],
   durationMinutes: ["durationminutes", "duration_minutes"],
   windowPreset: ["windowpreset", "window_preset"],
+  eventId: [
+    "eventid",
+    "event_id",
+    "externaleventid",
+    "external_event_id",
+    "googleeventid",
+    "google_event_id",
+  ],
+  newTitle: ["newtitle", "new_title", "renameto", "rename_to"],
+  description: ["desc", "summary", "body"],
+  location: ["place", "venue"],
 } as const;
 
 function normalizeCalendarSubaction(
@@ -106,6 +119,8 @@ function normalizeCalendarSubaction(
     case "next_event":
     case "search_events":
     case "create_event":
+    case "update_event":
+    case "delete_event":
     case "trip_window":
       return normalized;
     default:
@@ -500,6 +515,26 @@ function inferCalendarSubaction(
   details: Record<string, unknown> | undefined,
   query: string | undefined,
 ): CalendarSubaction {
+  // Delete intent is checked first because phrases like "delete the duplicate
+  // event" otherwise get swept up by the search_events branch via "duplicate"
+  // → "look for". Only the verb decides the subaction here.
+  if (
+    /\b(delete|remove|cancel|drop|get rid of|trash|kill)\b.*\b(event|meeting|appointment|calendar|reminder|invite)\b/.test(
+      intent,
+    ) ||
+    /\b(uncancel|unbook|unschedule)\b/.test(intent)
+  ) {
+    return "delete_event";
+  }
+  // Update intent — same eager-match treatment so "rename", "move", "reschedule"
+  // don't get pulled into search_events.
+  if (
+    /\b(rename|reschedule|move|push|change|update|edit|modify)\b.*\b(event|meeting|appointment|calendar|invite)\b/.test(
+      intent,
+    )
+  ) {
+    return "update_event";
+  }
   if (
     query ||
     detailString(details, "query") ||
@@ -677,6 +712,17 @@ function buildLocalDayRange(
       second: 0,
     }).toISOString(),
   };
+}
+
+// Wide window used by update_event / delete_event lookups when the user
+// gave no time hint. Reaches 1 year back and 5 years forward — far enough
+// to find a future birthday or a recent past meeting without scanning the
+// entire account.
+function buildWideLookupRange(timeZone: string): {
+  timeMin: string;
+  timeMax: string;
+} {
+  return buildLocalDayRange(timeZone, -365, 365 * 5);
 }
 
 function resolveCalendarWindow(
@@ -1272,6 +1318,12 @@ async function inferCreateEventDetails(
 ): Promise<Record<string, unknown>> {
   const recentConversation = stateTextCandidates(state).slice(-8).join("\n");
   const currentMessage = messageText(message).trim();
+  // Anchor the LLM in the present so relative phrases ("tomorrow", "next
+  // friday", "april 15") and explicit-but-yearless dates resolve to the
+  // correct ISO datetime instead of guessing or returning empty.
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const nowReadable = now.toUTCString();
   const prompt = [
     "Extract calendar event creation fields from the request.",
     "The user may speak in any language.",
@@ -1281,18 +1333,22 @@ async function inferCreateEventDetails(
     "Return XML only. Leave fields empty when unknown.",
     "If a start time or window is implied but duration is not explicit, infer a reasonable positive duration.",
     "For short prep or reminder blocks, use at least 15 minutes instead of 0.",
+    "When the user gives a concrete date (e.g. 'april 15 2027', 'next friday', '12/25', 'in two weeks'), resolve it to an ISO 8601 startAt using the current date as the anchor. Default to a reasonable hour (e.g. 09:00 local) if no time-of-day is given.",
+    "Only use windowPreset for explicit 'tomorrow morning|afternoon|evening' phrasing — never as a fallback for arbitrary dates.",
     "",
     "<response>",
     "  <title>event title</title>",
     "  <description>optional description</description>",
     "  <location>optional location</location>",
-    "  <startAt>ISO datetime if explicit</startAt>",
+    "  <startAt>ISO datetime if explicit or resolvable from a date phrase</startAt>",
     "  <endAt>ISO datetime if explicit</endAt>",
     "  <durationMinutes>number if implied</durationMinutes>",
     "  <windowPreset>tomorrow_morning|tomorrow_afternoon|tomorrow_evening</windowPreset>",
     "  <timeZone>IANA timezone if stated</timeZone>",
     "</response>",
     "",
+    `Current date (UTC): ${nowReadable}`,
+    `Current ISO datetime: ${nowIso}`,
     `Current request: ${JSON.stringify(currentMessage)}`,
     `Resolved intent: ${JSON.stringify(intent)}`,
     `Recent conversation: ${JSON.stringify(recentConversation)}`,
@@ -1567,6 +1623,7 @@ export const calendarAction: Action = {
     "DO NOT use this action for email inbox work, drafting or sending emails — use GMAIL_ACTION instead. " +
     "DO NOT use this action for personal habits, goals, routines, or reminders — use LIFE instead. " +
     "This action provides the final grounded reply; do not pair it with a speculative REPLY action.",
+  suppressPostActionContinuation: true,
   validate: async (runtime, message) => {
     return hasLifeOpsAccess(runtime, message);
   },
@@ -1624,9 +1681,77 @@ export const calendarAction: Action = {
       llmPlan.tripLocation && llmPlan.tripLocation.trim().length > 0
         ? { location: llmPlan.tripLocation.trim() }
         : inferTripWindowIntent(intent);
+    // Hard override: when the RAW user message contains an unambiguous
+    // verb ("create", "delete", "rename", "reschedule") or a "list
+    // everything" phrase, force the matching subaction even if the chat
+    // LLM picked something else.
+    //
+    // CRITICAL: we ONLY test the raw user message text — never the resolved
+    // intent. resolveCalendarIntent often returns the CALENDAR_ACTION
+    // system prompt fragment when the user message doesn't match the
+    // calendar subject pattern, and that fragment contains literal phrases
+    // like "creating events" / "view your schedule" which would falsely
+    // trigger every override branch. The user's raw text is the only
+    // trustworthy signal.
+    const forcedSubaction = ((): CalendarSubaction | null => {
+      const text = normalizeText(messageText(message));
+      // Strong rename/edit signal — "rename X to Y" is essentially always an
+      // update intent in a calendar action context, even without "event".
+      // The "move/change/reschedule X to Y" pattern allows X to be a
+      // quoted title ("move \"my birthday\" to april 16") because that's
+      // how users identify events they want to patch.
+      if (
+        /\b(?:rename|change|move|reschedule|push back)\b[^.?!]+\bto\b/.test(
+          text,
+        ) ||
+        /\b(rename|reschedule|update|edit|modify|change|move)\b.*\b(event|meeting|appointment|calendar|invite|reminder)\b/.test(
+          text,
+        )
+      ) {
+        return "update_event";
+      }
+      if (
+        /\b(delete|remove|cancel|drop|get rid of|trash|kill)\b.*\b(event|meeting|appointment|calendar|invite|reminder)\b/.test(
+          text,
+        ) ||
+        /\b(delete|remove|cancel)\b.+\b(today|tomorrow|tonight|this week|next week)\b/.test(
+          text,
+        )
+      ) {
+        return "delete_event";
+      }
+      // Match "create/add/book/schedule/make a/an event/meeting/appointment".
+      // The verb has to be paired with a calendar noun so we don't catch
+      // unrelated phrases like "create a file" or "add a column".
+      if (
+        /\b(create|add|book|schedule|make|put)\b[^.?!]*\b(event|meeting|appointment|invite|calendar|reminder)\b/.test(
+          text,
+        )
+      ) {
+        return "create_event";
+      }
+      // "Show me everything", "list all events", "every entry" — force a
+      // straight feed read with the wide-window logic below. The chat LLM
+      // tends to mis-pick search_events for these prompts, which then
+      // demands a search query and produces irrelevant results.
+      if (
+        /\b(show|list|tell|give|read)\b[^.?!]*\b(all|every|everything|entire|full|whole)\b[^.?!]*\b(event|events|calendar|schedule|meeting|meetings|appointment|appointments|entry|entries|agenda)\b/.test(
+          text,
+        ) ||
+        /\b(all|every|everything)\b\s+(?:my\s+)?(?:calendar|events?|meetings?|appointments?)\b/.test(
+          text,
+        )
+      ) {
+        return "feed";
+      }
+      return null;
+    })();
+
     let subaction: CalendarSubaction;
     if (tripWindowIntent) {
       subaction = "trip_window";
+    } else if (forcedSubaction) {
+      subaction = forcedSubaction;
     } else if (params.subaction) {
       subaction = params.subaction as CalendarSubaction;
     } else if (llmPlan.subaction) {
@@ -1642,6 +1767,22 @@ export const calendarAction: Action = {
         inferredQuery ?? heuristicQuery,
       );
     }
+    runtime.logger?.debug?.(
+      {
+        src: "action:calendar",
+        subaction,
+        forcedSubaction,
+        rawMessage: messageText(message).slice(0, 200),
+        resolvedIntent: intent.slice(0, 200),
+        params: {
+          subaction: params.subaction,
+          title: params.title,
+          intent: params.intent?.slice(0, 200),
+        },
+        detailKeys: details ? Object.keys(details) : [],
+      },
+      "calendar action dispatch",
+    );
     const service = new LifeOpsService(runtime);
     const respond = async <T extends Record<string, unknown> | undefined>(
       payload: { success: boolean; text: string; data?: T },
@@ -1740,6 +1881,28 @@ export const calendarAction: Action = {
             (typeof extractedDetails.startAt === "string" &&
               extractedDetails.startAt.trim().length > 0),
         });
+        const resolvedStartAt =
+          explicitStartAt ??
+          (typeof extractedDetails.startAt === "string"
+            ? extractedDetails.startAt.trim()
+            : undefined);
+        const resolvedWindowPreset = (explicitWindowPreset ??
+          extractedWindowPreset) as
+          | "tomorrow_morning"
+          | "tomorrow_afternoon"
+          | "tomorrow_evening"
+          | undefined;
+        // The LifeOps service throws a raw 400 when neither startAt nor a
+        // window preset is supplied. Catch that case here so the user gets a
+        // useful prompt instead of "startAt is required when windowPreset is
+        // not provided" — and so the failure path doesn't re-trigger the
+        // action via post-action continuation.
+        if (!resolvedStartAt && !resolvedWindowPreset) {
+          return respond({
+            success: false,
+            text: `i need a time for "${title}". try "tomorrow morning", "tomorrow afternoon", "tomorrow evening", or give me a specific date and time.`,
+          });
+        }
         const request: CreateLifeOpsCalendarEventRequest = {
           mode: (detailString(details, "mode") as
             | "local"
@@ -1759,11 +1922,7 @@ export const calendarAction: Action = {
             (typeof extractedDetails.location === "string"
               ? extractedDetails.location.trim()
               : undefined),
-          startAt:
-            explicitStartAt ??
-            (typeof extractedDetails.startAt === "string"
-              ? extractedDetails.startAt.trim()
-              : undefined),
+          startAt: resolvedStartAt,
           endAt:
             explicitEndAt ??
             (typeof extractedDetails.endAt === "string"
@@ -1771,11 +1930,7 @@ export const calendarAction: Action = {
               : undefined),
           timeZone: detailString(details, "timeZone") ?? extractedTimeZone,
           durationMinutes,
-          windowPreset: (explicitWindowPreset ?? extractedWindowPreset) as
-            | "tomorrow_morning"
-            | "tomorrow_afternoon"
-            | "tomorrow_evening"
-            | undefined,
+          windowPreset: resolvedWindowPreset,
           attendees: normalizeCalendarAttendees(details),
         };
         const event = await service.createCalendarEvent(INTERNAL_URL, request);
@@ -1783,6 +1938,335 @@ export const calendarAction: Action = {
           success: true,
           text: `Created calendar event "${event.title}" for ${new Date(event.startAt).toLocaleString()}.`,
           data: toActionData(event),
+        });
+      }
+
+      if (subaction === "update_event") {
+        if (!google.hasCalendarWrite) {
+          return respond({
+            success: false,
+            text: calendarWriteUnavailableMessage(google),
+          });
+        }
+        // Parse "rename X to Y" / "change X to Y" patterns directly from
+        // the user message. The chat LLM tends to put only the NEW title in
+        // params.title, but we need the OLD title to find the event we're
+        // patching. Pull both halves from the literal phrase if it's there.
+        // We try the raw message first because resolveCalendarIntent may
+        // have replaced the user's text with the LLM's rewritten version,
+        // which often drops "rename" entirely.
+        const rawMessageText = messageText(message);
+        const renamePattern =
+          /\b(?:rename|change|update|edit)\b\s+["“]?([^"”]+?)["”]?\s+(?:to|into|as)\s+["“]?([^"”]+?)["”]?(?:[.!?]|$)/i;
+        const renameMatch =
+          rawMessageText.match(renamePattern) ?? intent.match(renamePattern);
+        const oldTitleFromIntent = renameMatch?.[1]?.trim();
+        const newTitleFromIntent = renameMatch?.[2]?.trim();
+
+        const explicitEventId = detailString(details, "eventId");
+        let resolvedEventId = explicitEventId;
+        let resolvedCalendarId = detailString(details, "calendarId");
+        // Same lookup-by-title fallback as delete_event so the user can say
+        // "rename my dentist appointment to dentist follow-up" without first
+        // copying an opaque google id.
+        if (!resolvedEventId) {
+          // Use a wide lookup window — events can be far in the future
+          // (e.g. a birthday in 2027). The default narrow window would
+          // miss anything beyond the current day.
+          // forceSync: true is critical here — without it the feed query
+          // returns the local cache (life_calendar_events), which may not
+          // contain far-future events that have never been synced before
+          // (or any events at all if the cache was wiped). Forcing the
+          // sync makes the bot pull a fresh window from Google so the
+          // title-based lookup actually has events to filter against.
+          const wideLookup = buildWideLookupRange(
+            resolveCalendarTimeZone(details),
+          );
+          const feed = await service.getCalendarFeed(INTERNAL_URL, {
+            mode: (detailString(details, "mode") as
+              | "local"
+              | "remote"
+              | "cloud_managed"
+              | undefined),
+            side: (detailString(details, "side") as
+              | "owner"
+              | "agent"
+              | undefined),
+            calendarId: detailString(details, "calendarId"),
+            timeZone: resolveCalendarTimeZone(details),
+            forceSync: true,
+            ...wideLookup,
+          });
+          // Prefer the OLD title parsed from "rename X to Y" — explicit
+          // title from the chat LLM almost always carries the NEW name.
+          const titleHint =
+            oldTitleFromIntent ?? explicitTitle ?? inferredTitle;
+          const candidates = titleHint
+            ? feed.events.filter((e) =>
+                normalizeText(e.title).includes(normalizeText(titleHint)),
+              )
+            : feed.events;
+          if (candidates.length === 0) {
+            return respond({
+              success: false,
+              text: titleHint
+                ? `i couldn't find an event matching "${titleHint}" in that window.`
+                : "i couldn't find any events to update in that window. give me a title or a date.",
+            });
+          }
+          if (candidates.length > 1 && !titleHint) {
+            return respond({
+              success: false,
+              text: `i found ${candidates.length} events in that window — tell me which one (by title) so i don't update the wrong one.`,
+            });
+          }
+          const target = candidates[0];
+          resolvedEventId = target.externalId;
+          resolvedCalendarId = target.calendarId;
+        }
+        const newTitle =
+          newTitleFromIntent ??
+          detailString(details, "newTitle") ??
+          explicitTitle;
+
+        // Reuse the same LLM extractor that create_event uses to pull
+        // startAt / endAt / location / description out of the user's intent
+        // text. The chat LLM rarely populates `details.startAt` directly for
+        // an update — it just rewrites the intent and lets the action figure
+        // out the time. Without this we'd PATCH with no fields and the
+        // event wouldn't actually move.
+        //
+        // CRITICAL: only run the extractor when the user actually mentioned
+        // a time. For pure rename intents like "rename X to Y" the LLM will
+        // happily hallucinate a startAt from the year in the new title
+        // ("rename my party 2027 to ..." → startAt 2027-01-01), and a
+        // PATCH with start.dateTime but no matching end.dateTime triggers
+        // Google's "Bad Request" rejection. Detect time keywords in the
+        // raw message before invoking the extractor.
+        const explicitStartAtForUpdate = detailString(details, "startAt");
+        const explicitEndAtForUpdate = detailString(details, "endAt");
+        const rawForUpdate = normalizeText(messageText(message));
+        const hasTimeAnchor =
+          /\b(at|on|by|from|until)\s+\d/.test(rawForUpdate) ||
+          /\b(today|tomorrow|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|april|may|june|july|august|september|october|november|december)\b/.test(
+            rawForUpdate,
+          ) ||
+          /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/.test(rawForUpdate) ||
+          /\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/.test(rawForUpdate);
+        const needsTimeExtraction =
+          hasTimeAnchor &&
+          !(
+            explicitStartAtForUpdate ||
+            explicitEndAtForUpdate ||
+            detailNumber(details, "durationMinutes")
+          );
+        const extractedForUpdate = needsTimeExtraction
+          ? await inferCreateEventDetails(runtime, message, state, intent)
+          : ({} as Record<string, unknown>);
+        const extractedStartAt =
+          typeof extractedForUpdate.startAt === "string"
+            ? extractedForUpdate.startAt.trim()
+            : undefined;
+        const extractedEndAt =
+          typeof extractedForUpdate.endAt === "string"
+            ? extractedForUpdate.endAt.trim()
+            : undefined;
+        const extractedLocation =
+          typeof extractedForUpdate.location === "string"
+            ? extractedForUpdate.location.trim()
+            : undefined;
+        const extractedDescription =
+          typeof extractedForUpdate.description === "string"
+            ? extractedForUpdate.description.trim()
+            : undefined;
+        const extractedTimeZoneForUpdate =
+          typeof extractedForUpdate.timeZone === "string"
+            ? extractedForUpdate.timeZone.trim()
+            : undefined;
+
+        const event = await service.updateCalendarEvent(INTERNAL_URL, {
+          mode: (detailString(details, "mode") as
+            | "local"
+            | "remote"
+            | "cloud_managed"
+            | undefined),
+          side: (detailString(details, "side") as
+            | "owner"
+            | "agent"
+            | undefined),
+          calendarId: resolvedCalendarId,
+          eventId: resolvedEventId ?? "",
+          title: newTitle,
+          description: detailString(details, "description") ?? extractedDescription,
+          location: detailString(details, "location") ?? extractedLocation,
+          startAt: explicitStartAtForUpdate ?? extractedStartAt,
+          endAt: explicitEndAtForUpdate ?? extractedEndAt,
+          timeZone:
+            detailString(details, "timeZone") ?? extractedTimeZoneForUpdate,
+        });
+        return respond({
+          success: true,
+          text: `updated "${event.title}" — ${new Date(event.startAt).toLocaleString()}.`,
+          data: toActionData(event),
+        });
+      }
+
+      if (subaction === "delete_event") {
+        if (!google.hasCalendarWrite) {
+          return respond({
+            success: false,
+            text: calendarWriteUnavailableMessage(google),
+          });
+        }
+        const explicitEventId = detailString(details, "eventId");
+        const calendarIdForDelete = detailString(details, "calendarId");
+        // The LLM may not know the event id directly. Fall back to a feed
+        // lookup so phrases like "delete the duplicate test event tomorrow"
+        // can resolve to a concrete event without forcing the user to copy
+        // an opaque google id from the bot's previous reply.
+        let resolvedEventId = explicitEventId;
+        let resolvedEventTitle: string | undefined;
+        let resolvedCalendarId = calendarIdForDelete;
+        if (!resolvedEventId) {
+          // For delete-by-title we honor an explicit time window if the
+          // user gave one ("delete the test event tomorrow"); otherwise we
+          // search wide so far-future events are still findable.
+          // forceSync: true ensures the lookup actually queries Google
+          // instead of returning a stale (or empty) local cache.
+          const hasExplicitWindow =
+            /\b(today|tomorrow|tonight|this week|next week|the week after|this month|next month)\b/i.test(
+              intent,
+            );
+          const feedRequest = hasExplicitWindow
+            ? resolveCalendarWindow(intent, details, false).request
+            : {
+                calendarId: detailString(details, "calendarId"),
+                timeZone: resolveCalendarTimeZone(details),
+                ...buildWideLookupRange(resolveCalendarTimeZone(details)),
+              };
+          const feed = await service.getCalendarFeed(INTERNAL_URL, {
+            mode: (detailString(details, "mode") as
+              | "local"
+              | "remote"
+              | "cloud_managed"
+              | undefined),
+            side: (detailString(details, "side") as
+              | "owner"
+              | "agent"
+              | undefined),
+            forceSync: true,
+            ...feedRequest,
+          });
+          const titleHint = explicitTitle ?? inferredTitle;
+          const candidates = titleHint
+            ? feed.events.filter((e) =>
+                normalizeText(e.title).includes(normalizeText(titleHint)),
+              )
+            : feed.events;
+          if (candidates.length === 0) {
+            return respond({
+              success: false,
+              text: titleHint
+                ? `i couldn't find an event matching "${titleHint}" in that window.`
+                : "i couldn't find any events to delete in that window. give me a title or a date.",
+            });
+          }
+
+          // Detect "delete all / delete both / delete N" phrasing — when the
+          // user explicitly opts in to multi-delete, sweep every match.
+          const deleteAllMatch =
+            /\b(all|both|every|each)\b/i.test(intent) ||
+            /\b(remove|delete|cancel|kill|drop)\b\s+(?:both|all|every|the\s+(?:duplicates?|copies))\b/i.test(
+              intent,
+            );
+
+          // When multiple candidates have the SAME normalized title, treat
+          // them as duplicates of one logical event. The user almost
+          // certainly meant "any one of these" — picking the first is safer
+          // than asking them to disambiguate by title (which won't help).
+          const allSameTitle =
+            candidates.length > 1 &&
+            new Set(candidates.map((e) => normalizeText(e.title))).size === 1;
+
+          if (
+            candidates.length > 1 &&
+            !titleHint &&
+            !deleteAllMatch &&
+            !allSameTitle
+          ) {
+            return respond({
+              success: false,
+              text: `i found ${candidates.length} events in that window — tell me which one (by title) so i don't delete the wrong one.`,
+            });
+          }
+
+          const targets = deleteAllMatch ? candidates : [candidates[0]];
+          const deleteResults: Array<{ title: string; ok: boolean; error?: string }> = [];
+          for (const target of targets) {
+            try {
+              await service.deleteCalendarEvent(INTERNAL_URL, {
+                mode: (detailString(details, "mode") as
+                  | "local"
+                  | "remote"
+                  | "cloud_managed"
+                  | undefined),
+                side: (detailString(details, "side") as
+                  | "owner"
+                  | "agent"
+                  | undefined),
+                calendarId: target.calendarId,
+                eventId: target.externalId,
+              });
+              deleteResults.push({ title: target.title, ok: true });
+            } catch (err) {
+              deleteResults.push({
+                title: target.title,
+                ok: false,
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          }
+          const okCount = deleteResults.filter((r) => r.ok).length;
+          const failCount = deleteResults.length - okCount;
+          const summary =
+            failCount === 0
+              ? targets.length === 1
+                ? `deleted "${deleteResults[0].title}".`
+                : `deleted ${okCount} matching events.`
+              : `deleted ${okCount}, failed ${failCount}: ${deleteResults
+                  .filter((r) => !r.ok)
+                  .map((r) => r.error)
+                  .join("; ")}`;
+          return respond({
+            success: failCount === 0,
+            text: summary,
+          });
+        }
+        // Path: explicit eventId was given, no feed lookup needed
+        if (!resolvedEventId) {
+          return respond({
+            success: false,
+            text: "i need an event id or a title + date to delete an event.",
+          });
+        }
+        await service.deleteCalendarEvent(INTERNAL_URL, {
+          mode: (detailString(details, "mode") as
+            | "local"
+            | "remote"
+            | "cloud_managed"
+            | undefined),
+          side: (detailString(details, "side") as
+            | "owner"
+            | "agent"
+            | undefined),
+          calendarId: resolvedCalendarId,
+          eventId: resolvedEventId,
+        });
+        return respond({
+          success: true,
+          text: resolvedEventTitle
+            ? `deleted "${resolvedEventTitle}".`
+            : "deleted that calendar event.",
         });
       }
 
@@ -1829,11 +2313,38 @@ export const calendarAction: Action = {
         });
       }
 
-      const { request, label } = resolveCalendarWindow(
+      // When the user explicitly asks for "all events" / "everything" / a
+      // multi-year span, broaden the lookup window past the default
+      // "today only" feed window. resolveCalendarWindow's default is too
+      // narrow for these queries — without this branch, "show all my
+      // events" returns "no events today" even when the calendar has
+      // dozens of upcoming items. We apply this regardless of whether the
+      // chat LLM picked feed or search_events because both subactions go
+      // through this code path.
+      const rawMessageNorm = normalizeText(messageText(message));
+      const wantsWideWindow =
+        /\b(all|every|everything|entire|full|whole)\b[^.?!]*\b(event|events|calendar|schedule|meeting|meetings|appointment|appointments|entry|entries|agenda)\b/.test(
+          rawMessageNorm,
+        ) ||
+        /\b(next|past|last)\s+\d+\s*(year|years|month|months|weeks?)\b/.test(
+          rawMessageNorm,
+        ) ||
+        /\b(today\s+(?:until|through|to)\s+next\s+(?:year|month))\b/.test(
+          rawMessageNorm,
+        ) ||
+        /\bevery\s+calendar\s+entry\b/.test(rawMessageNorm);
+      const baseResolved = resolveCalendarWindow(
         intent,
         details,
-        subaction === "search_events",
+        subaction === "search_events" || wantsWideWindow,
       );
+      const request = wantsWideWindow
+        ? {
+            ...baseResolved.request,
+            ...buildWideLookupRange(resolveCalendarTimeZone(details)),
+          }
+        : baseResolved.request;
+      const label = wantsWideWindow ? "across the full window" : baseResolved.label;
       const feed = await service.getCalendarFeed(INTERNAL_URL, {
         mode: (detailString(details, "mode") as
           | "local"
@@ -1841,6 +2352,7 @@ export const calendarAction: Action = {
           | "cloud_managed"
           | undefined),
         side: (detailString(details, "side") as "owner" | "agent" | undefined),
+        forceSync: wantsWideWindow,
         ...request,
       });
 
@@ -1926,7 +2438,15 @@ export const calendarAction: Action = {
       required: false,
       schema: {
         type: "string" as const,
-        enum: ["feed", "next_event", "search_events", "create_event", "trip_window"],
+        enum: [
+          "feed",
+          "next_event",
+          "search_events",
+          "create_event",
+          "update_event",
+          "delete_event",
+          "trip_window",
+        ],
       },
     },
     {
