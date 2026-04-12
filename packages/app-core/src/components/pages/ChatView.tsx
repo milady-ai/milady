@@ -35,7 +35,9 @@ import {
   useState,
 } from "react";
 import { AgentActivityBox } from "../chat/AgentActivityBox";
+import { BouncingBall } from "../chat/BouncingBall";
 import { MessageContent } from "../chat/MessageContent";
+import { useCodeCanvas } from "../coding/CodeCanvasContext";
 import { PtyConsoleDrawer } from "../coding/PtyConsoleDrawer";
 import {
   useChatVoiceController,
@@ -122,6 +124,11 @@ export function ChatView({
   const [imageDragOver, setImageDragOver] = useState(false);
   const [ptyDrawerSessionId, setPtyDrawerSessionId] = useState<string | null>(
     null,
+  );
+  const { focusSession: focusCanvasSession, hiddenSessionIds } = useCodeCanvas();
+  const visiblePtySessions = useMemo(
+    () => ptySessions.filter((s) => !hiddenSessionIds.has(s.sessionId)),
+    [ptySessions, hiddenSessionIds],
   );
 
   // ── Coding agent preflight ──────────────────────────────────────
@@ -423,29 +430,25 @@ export function ChatView({
       />
     );
 
-  const activityNode = isGameModal ? (
-    <div className="pointer-events-auto">
-      <AgentActivityBox
-        sessions={ptySessions}
-        onSessionClick={(id) =>
-          setPtyDrawerSessionId((prev) => (prev === id ? null : id))
-        }
-      />
-    </div>
-  ) : (
+  const handleSessionClick = useCallback(
+    (id: string) => {
+      focusCanvasSession(id);
+    },
+    [focusCanvasSession],
+  );
+
+  const activityNode = isGameModal ? null : (
     <AgentActivityBox
-      sessions={ptySessions}
-      onSessionClick={(id) =>
-        setPtyDrawerSessionId((prev) => (prev === id ? null : id))
-      }
+      sessions={visiblePtySessions}
+      onSessionClick={handleSessionClick}
     />
   );
 
   const drawerNode =
-    ptyDrawerSessionId && ptySessions.length > 0 ? (
+    ptyDrawerSessionId && visiblePtySessions.length > 0 ? (
       <PtyConsoleDrawer
         activeSessionId={ptyDrawerSessionId}
-        sessions={ptySessions}
+        sessions={visiblePtySessions}
         onClose={() => setPtyDrawerSessionId(null)}
       />
     ) : null;
@@ -515,7 +518,7 @@ export function ChatView({
       shellRef={composerRef}
       before={
         <AgentActivityBox
-          sessions={ptySessions}
+          sessions={visiblePtySessions}
           onSessionClick={
             onPtySessionClick ??
             ((id) => setPtyDrawerSessionId((prev) => (prev === id ? null : id)))
@@ -618,29 +621,32 @@ export function ChatView({
   }
 
   return (
-    <ChatThreadLayout
-      aria-label={t("aria.chatWorkspace")}
-      variant={variant}
-      composerHeight={composerHeight}
-      imageDragOver={imageDragOver}
-      messagesRef={messagesRef}
-      footerStack={
-        <>
-          {activityNode}
-          {drawerNode}
-          {auxiliaryNode}
-        </>
-      }
-      composer={composerNode}
-      onDragOver={(event) => {
-        event.preventDefault();
-        setImageDragOver(true);
-      }}
-      onDragLeave={() => setImageDragOver(false)}
-      onDrop={handleImageDrop}
-    >
-      {messagesContent}
-    </ChatThreadLayout>
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <BouncingBall />
+      <ChatThreadLayout
+        aria-label={t("aria.chatWorkspace")}
+        variant={variant}
+        composerHeight={composerHeight}
+        imageDragOver={imageDragOver}
+        messagesRef={messagesRef}
+        footerStack={
+          <>
+            {activityNode}
+            {drawerNode}
+            {auxiliaryNode}
+          </>
+        }
+        composer={composerNode}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setImageDragOver(true);
+        }}
+        onDragLeave={() => setImageDragOver(false)}
+        onDrop={handleImageDrop}
+      >
+        {messagesContent}
+      </ChatThreadLayout>
+    </div>
   );
 }
 
