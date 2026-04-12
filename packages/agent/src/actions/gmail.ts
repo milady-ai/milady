@@ -1358,12 +1358,16 @@ export const gmailAction: Action = {
     "SEARCH_EMAIL",
     "DRAFT_EMAIL_REPLY",
     "SEND_EMAIL_REPLY",
+    "SEND_EMAIL",
+    "COMPOSE_EMAIL",
+    "EMAIL_SOMEONE",
   ],
   description:
     "Interact with Gmail through LifeOps. " +
     "USE this action for: inbox triage and unread summaries; searching emails by sender, subject, keyword, date, or label; " +
     "reading full email bodies by message ID; checking which emails need a reply; " +
-    "drafting reply text for one or more emails; sending confirmed replies. " +
+    "drafting reply text for one or more emails; sending confirmed replies; " +
+    "composing and sending brand-new outbound emails to any address (e.g. 'send an email to X', 'email X about Y'). " +
     "DO NOT use this action for calendar events, meetings, or scheduling — use CALENDAR_ACTION instead. " +
     "DO NOT use this action for personal habits, goals, routines, or reminders — use LIFE instead. " +
     "This action provides the final grounded reply; do not pair it with a speculative REPLY action.",
