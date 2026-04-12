@@ -1752,12 +1752,20 @@ export const gmailAction: Action = {
         const subjectMatch =
           rawText.match(
             /\bsubject(?:\s+is|\s*[:=]|\s+of)?\s+["“]([^"”]+)["”]/i,
-          ) ?? rawText.match(/\bsubject\s+["“]([^"”]+)["”]/i);
+          ) ??
+          rawText.match(/\bsubject\s+[“”]([^””]+)[“”]/i) ??
+          rawText.match(
+            /\bsubject\s+(?:should\s+(?:say|be|read)|says?)\s+(.+?)(?=\s+(?:and\s+)?(?:the\s+)?body\b|\s*$)/i,
+          );
         const subjectFromIntent = subjectMatch?.[1]?.trim();
         const bodyMatch =
           rawText.match(
-            /\bbody(?:\s+is|\s*[:=]|\s+of)?\s+["“]([^"”]+)["”]/i,
-          ) ?? rawText.match(/\bbody\s+["“]([^"”]+)["”]/i);
+            /\bbody(?:\s+is|\s*[:=]|\s+of)?\s+[“”]([^””]+)[“”]/i,
+          ) ??
+          rawText.match(/\bbody\s+[“”]([^””]+)[“”]/i) ??
+          rawText.match(
+            /\bbody\s+(?:should\s+(?:say|be|include|contain|have)|says?)\s+(.+?)$/i,
+          );
         const bodyFromIntent = bodyMatch?.[1]?.trim();
 
         const to =
@@ -1779,7 +1787,7 @@ export const gmailAction: Action = {
           if (!bodyText) missing.push("body text");
           return respond({
             success: false,
-            text: `i need ${missing.join(", ")} to compose that email. format: 'email <addr> with subject "X" and body "Y"'.`,
+            text: `can't send that yet — i'm missing the ${missing.join(" and ")}. try something like: "send an email to name@example.com, subject should say X and body should say Y"`,
           });
         }
         const result = await service.sendGmailMessage(INTERNAL_URL, {
