@@ -848,19 +848,170 @@ function sparkPatchPlugin(): Plugin {
   };
 }
 
+/**
+ * Serves /__gba__ with a minimal HTML page for the GBA emulator.
+ * The page itself has COOP + COEP require-corp headers to enable
+ * crossOriginIsolated / SharedArrayBuffer. Without SharedArrayBuffer the
+ * EmulatorJS 7zip WASM decompressor hangs at 99%.
+ *
+ * The ROM blob URL is passed via the URL hash so the iframe page can read
+ * it without postMessage (avoids COOP browsing-context-group issues).
+ */
+function gbaEmulatorIframePlugin(): Plugin {
+  return {
+    name: "gba-emulator-iframe",
+    configureServer(server) {
+      server.middlewares.use("/__gba__", (_req, res) => {
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+        res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+        res.setHeader("Cache-Control", "no-store");
+        res.end(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000}
+  #game{width:100%;height:100%}
+  .status{color:#888;font-family:monospace;font-size:13px;
+          position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div class="status" id="status">Loading ROM...</div>
+<script>
+(function(){
+  // ROM file bytes are received via a MessageChannel port from the parent.
+  // The parent sends the ROM ArrayBuffer directly — no blob URL cross-origin issues.
+  var framePort=null;
+  var streaming=false;
+  var rafId=null;
+
+  function streamFrames(){
+    if(!streaming)return;
+    rafId=requestAnimationFrame(streamFrames);
+    if(!framePort)return;
+    // Find the emulator game canvas
+    var emu=window.EJS_emulator;
+    var canvas=emu&&emu.elements&&emu.elements.game;
+    if(!canvas)canvas=document.querySelector("#game canvas");
+    if(!canvas||canvas.width===0||canvas.height===0)return;
+    try{
+      createImageBitmap(canvas).then(function(bmp){
+        if(!streaming||!framePort){bmp.close();return;}
+        framePort.postMessage(bmp,[bmp]);
+      }).catch(function(){});
+    }catch(e){}
+  }
+
+  window.addEventListener("message",function handler(e){
+    if(!e.data||e.data.type!=="gba-init"||!e.ports||!e.ports[0])return;
+    window.removeEventListener("message",handler);
+    var port=e.ports[0];
+    port.onmessage=function(me){
+      if(!me.data)return;
+      if(me.data.type==="gba-rom-data"){
+        var romBytes=me.data.romBytes; // ArrayBuffer
+        var blob=new Blob([romBytes],{type:"application/octet-stream"});
+        var url=URL.createObjectURL(blob);
+        document.getElementById("status").style.display="none";
+        window.EJS_player="#game";
+        window.EJS_core="mgba";
+        window.EJS_gameUrl=url;
+        window.EJS_pathtodata="https://cdn.emulatorjs.org/stable/data/";
+        window.EJS_startOnLoaded=true;
+        window.EJS_color="#6366f1";
+        window.EJS_threads=typeof SharedArrayBuffer!=="undefined";
+        var s=document.createElement("script");
+        s.src="https://cdn.emulatorjs.org/stable/data/loader.js";
+        s.crossOrigin="anonymous";
+        document.body.appendChild(s);
+      }else if(me.data.type==="gba-autosave"){
+        // Autosave: save emulator state to slot 15
+        try{
+          var emu=window.EJS_emulator;
+          if(emu&&emu.gameManager&&emu.gameManager.getState){
+            if(!window.__gba_autosave_slots)window.__gba_autosave_slots={};
+            window.__gba_autosave_slots[15]=emu.gameManager.getState();
+          }
+        }catch(e){}
+      }else if(me.data.type==="gba-load-autosave"){
+        // Load autosave from slot 15
+        try{
+          var emu2=window.EJS_emulator;
+          var saved=window.__gba_autosave_slots&&window.__gba_autosave_slots[15];
+          if(emu2&&emu2.gameManager&&emu2.gameManager.loadState&&saved){
+            emu2.gameManager.loadState(saved);
+          }
+        }catch(e){}
+      }else if(me.data.type==="gba-focus"){
+        window.focus();
+        var gc=document.querySelector("#game canvas");
+        if(gc)gc.focus();
+      }else if(me.data.type==="gba-start-frames"&&me.ports&&me.ports[0]){
+        framePort=me.ports[0];
+        streaming=true;
+        streamFrames();
+      }else if(me.data.type==="gba-stop-frames"){
+        streaming=false;
+        framePort=null;
+        if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+      }
+    };
+  });
+})();
+<\/script>
+</body>
+</html>`);
+      });
+    },
+  };
+}
+
 function watchWorkspacePackagesPlugin(): Plugin {
+  // Only watch packages that Vite actually serves (app-core, ui, shared).
+  // Watching ALL of packages/ caused full-reload storms when coding agents
+  // wrote files in packages/agent/ or other backend-only packages.
+  const watchedPackages = ["app-core", "ui", "shared"];
+  const watchedPaths = watchedPackages.map((p) =>
+    path.resolve(miladyRoot, "packages", p),
+  );
+
+  let reloadTimer: ReturnType<typeof setTimeout> | null = null;
+  const DEBOUNCE_MS = 300;
+
   return {
     name: "watch-workspace-packages",
     configureServer(server) {
-      server.watcher.add(path.resolve(miladyRoot, "packages"));
+      for (const p of watchedPaths) {
+        server.watcher.add(p);
+      }
       server.watcher.on("change", (file) => {
-        if (file.includes("/packages/")) {
-          if (file.endsWith("package.json")) {
-            server.restart();
-          } else {
-            // Force a full reload on any other package file change (e.g. ts/tsx files)
+        // Only react to files inside our watched packages
+        if (!watchedPaths.some((wp) => file.startsWith(wp))) return;
+        // Skip test files, dist, and node_modules
+        if (
+          file.includes("__tests__") ||
+          file.includes(".test.") ||
+          file.includes(".spec.") ||
+          file.includes("/dist/") ||
+          file.includes("/node_modules/")
+        ) {
+          return;
+        }
+
+        if (file.endsWith("package.json")) {
+          server.restart();
+        } else {
+          // Debounce full-reload to avoid storms when agents write multiple files
+          if (reloadTimer) clearTimeout(reloadTimer);
+          reloadTimer = setTimeout(() => {
+            reloadTimer = null;
             server.ws.send({ type: "full-reload" });
-          }
+          }, DEBOUNCE_MS);
         }
       });
     },
@@ -897,6 +1048,7 @@ export default defineConfig({
     nativeModuleStubPlugin(),
     sparkPatchPlugin(),
     asyncLocalStoragePatchPlugin(),
+    gbaEmulatorIframePlugin(),
     watchWorkspacePackagesPlugin(),
     tailwindcss(),
     react(),
@@ -1224,6 +1376,10 @@ export default defineConfig({
       host: process.env.MILADY_HMR_HOST || "127.0.0.1",
       port: uiPort,
     },
+    // Cross-origin isolation headers are served ONLY on the /__gba__ iframe
+    // route (via gbaEmulatorIframePlugin) to avoid breaking other cross-origin
+    // resources. The emulator iframe gets require-corp COEP which reliably
+    // enables SharedArrayBuffer in all browsers.
     cors: {
       origin: true,
       credentials: true,
