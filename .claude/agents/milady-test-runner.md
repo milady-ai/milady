@@ -23,7 +23,7 @@ Coverage floor: **25% lines, 15% branches.** If a change adds untested code path
 
 ## CI reality (align expectations)
 
-- **`ci.yml`** runs on PRs to `main`/`develop` and pushes to `codex/**`. Uses Bun 1.3.10 + Node 22 on `blacksmith-4vcpu-ubuntu-2404` (org) or `ubuntu-latest` (forks). `pre-review` job is the first gate.
+- **`ci.yml`** runs on PRs to `main`/`develop` and pushes to `codex/**`. Uses Bun 1.3.10 + Node 22 on GitHub-hosted `ubuntu-24.04` (overridable via `vars.RUNNER_UBUNTU`). `pre-review` job is the first gate.
 - **`agent-review.yml`** fires on PR open/synchronize/reopen and on new issues; classifies and reviews. Gates merge.
 - **`test.yml`**, **`benchmark-tests.yml`**, **`nightly.yml`** — additional suites you should mirror locally when touching those areas.
 - **Platform smoke workflows**: `windows-dev-smoke.yml`, `windows-desktop-preload-smoke.yml`, `docker-ci-smoke.yml`, `deploy-origin-smoke.yml`. If you touched platform code, run the analogous local smoke.

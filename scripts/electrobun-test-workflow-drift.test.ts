@@ -65,7 +65,7 @@ describe("Electrobun test workflow drift", () => {
     expect(workflow).toContain('NODE_NO_WARNINGS: "1"');
     expect(workflow).toContain(
       // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-      "runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}",
+      "runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}",
     );
     expect(workflow).toContain("name: Release Workflow Contract");
     expect(workflow).toContain("bun install --ignore-scripts");

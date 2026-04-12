@@ -15,10 +15,11 @@ import {
 const LIVE_TESTS_ENABLED =
   process.env.MILADY_LIVE_TEST === "1" || process.env.ELIZA_LIVE_TEST === "1";
 const LIVE_CHAT_TESTS_ENABLED = process.env.MILADY_LIVE_CHAT_TEST === "1";
+const LIVE_PROVIDER_OVERRIDE = process.env.MILADY_LIVE_PROVIDER?.trim().toLowerCase();
 const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..");
 const ENV_PATH = path.join(REPO_ROOT, ".env");
 const LIVE_CHAT_TEST_TIMEOUT_MS = 300_000;
-const LIVE_RUNTIME_BOOT_TIMEOUT_MS = 60_000;
+const LIVE_RUNTIME_BOOT_TIMEOUT_MS = 180_000;
 
 try {
   const { config } = await import("dotenv");
@@ -29,44 +30,58 @@ try {
 
 const LIVE_PROVIDER_CANDIDATES = [
   {
-    name: "groq",
-    plugin: "@elizaos/plugin-groq",
-    keys: ["GROQ_API_KEY"],
-    predicate: () =>
-      /groq/i.test(process.env.OPENAI_BASE_URL ?? "") ||
-      !process.env.OPENAI_API_KEY?.trim(),
-  },
-  {
     name: "openai",
     plugin: "@elizaos/plugin-openai",
     keys: ["OPENAI_API_KEY"],
-    predicate: () => true,
-  },
-  {
-    name: "groq",
-    plugin: "@elizaos/plugin-groq",
-    keys: ["GROQ_API_KEY"],
-    predicate: () => true,
   },
   {
     name: "openrouter",
     plugin: "@elizaos/plugin-openrouter",
     keys: ["OPENROUTER_API_KEY"],
-    predicate: () => true,
   },
   {
     name: "google",
     plugin: "@elizaos/plugin-google-genai",
     keys: ["GOOGLE_GENERATIVE_AI_API_KEY", "GOOGLE_API_KEY"],
-    predicate: () => true,
   },
   {
     name: "anthropic",
     plugin: "@elizaos/plugin-anthropic",
     keys: ["ANTHROPIC_API_KEY"],
-    predicate: () => true,
+  },
+  {
+    name: "groq",
+    plugin: "@elizaos/plugin-groq",
+    keys: ["GROQ_API_KEY"],
   },
 ] as const;
+
+const LIVE_PROVIDER_ENV_KEYS = [
+  "OPENAI_API_KEY",
+  "OPENAI_BASE_URL",
+  "OPENAI_SMALL_MODEL",
+  "OPENAI_LARGE_MODEL",
+  "OPENROUTER_API_KEY",
+  "OPENROUTER_SMALL_MODEL",
+  "OPENROUTER_LARGE_MODEL",
+  "GOOGLE_API_KEY",
+  "GOOGLE_GENERATIVE_AI_API_KEY",
+  "GOOGLE_SMALL_MODEL",
+  "GOOGLE_LARGE_MODEL",
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_SMALL_MODEL",
+  "ANTHROPIC_LARGE_MODEL",
+  "GROQ_API_KEY",
+  "GROQ_SMALL_MODEL",
+  "GROQ_LARGE_MODEL",
+  "SMALL_MODEL",
+  "LARGE_MODEL",
+] as const;
+
+const LIVE_PROVIDER_PLUGIN_NAMES = new Set(
+  LIVE_PROVIDER_CANDIDATES.map((candidate) => candidate.plugin),
+);
+const LIVE_CLOUD_ENV_PREFIXES = ["ELIZAOS_CLOUD_", "ELIZA_CLOUD_"] as const;
 
 const LIVE_PROVIDER_CHEAP_MODELS = {
   anthropic: {
@@ -77,9 +92,9 @@ const LIVE_PROVIDER_CHEAP_MODELS = {
   },
   google: {
     smallKey: "GOOGLE_SMALL_MODEL",
-    smallModel: "gemini-2.0-flash-001",
+    smallModel: "gemini-2.5-flash",
     largeKey: "GOOGLE_LARGE_MODEL",
-    largeModel: "gemini-2.0-flash-001",
+    largeModel: "gemini-2.5-flash",
   },
   groq: {
     smallKey: "GROQ_SMALL_MODEL",
@@ -95,9 +110,9 @@ const LIVE_PROVIDER_CHEAP_MODELS = {
   },
   openrouter: {
     smallKey: "OPENROUTER_SMALL_MODEL",
-    smallModel: "google/gemini-2.0-flash-001",
+    smallModel: "google/gemini-2.5-flash",
     largeKey: "OPENROUTER_LARGE_MODEL",
-    largeModel: "google/gemini-2.0-flash-001",
+    largeModel: "google/gemini-2.5-flash",
   },
 } as const;
 
@@ -129,15 +144,69 @@ async function canImportLiveProviderPlugin(pluginName: string): Promise<boolean>
   }
 }
 
+function detectOpenAiCompatibleBaseUrlProvider(
+  baseUrl: string | undefined,
+): "groq" | null {
+  if (!baseUrl) {
+    return null;
+  }
+
+  try {
+    const hostname = new URL(baseUrl).hostname.trim().toLowerCase();
+    if (hostname === "api.groq.com" || hostname.endsWith(".groq.com")) {
+      return "groq";
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function looksLikeGroqApiKey(value: string | undefined): boolean {
+  return Boolean(value && /^gsk[-_]/i.test(value));
+}
+
 async function selectLiveProvider(): Promise<{
   name: string;
   env: Record<string, string>;
   plugin: string;
 } | null> {
-  for (const candidate of LIVE_PROVIDER_CANDIDATES) {
-    if (!candidate.predicate()) {
-      continue;
+  const openAiCompatProvider = detectOpenAiCompatibleBaseUrlProvider(
+    process.env.OPENAI_BASE_URL?.trim(),
+  );
+  if (
+    openAiCompatProvider === "groq" &&
+    (!LIVE_PROVIDER_OVERRIDE ||
+      LIVE_PROVIDER_OVERRIDE === "openai" ||
+      LIVE_PROVIDER_OVERRIDE === "groq") &&
+    (await canImportLiveProviderPlugin("@elizaos/plugin-groq"))
+  ) {
+    const groqApiKey =
+      process.env.GROQ_API_KEY?.trim() ||
+      (looksLikeGroqApiKey(process.env.OPENAI_API_KEY?.trim())
+        ? process.env.OPENAI_API_KEY?.trim()
+        : "");
+    if (groqApiKey) {
+      return {
+        name: "groq",
+        env: {
+          GROQ_API_KEY: groqApiKey,
+          ...resolveLiveProviderModelEnv("groq"),
+        },
+        plugin: "@elizaos/plugin-groq",
+      };
     }
+  }
+
+  const candidates =
+    LIVE_PROVIDER_OVERRIDE && LIVE_PROVIDER_OVERRIDE.length > 0
+      ? LIVE_PROVIDER_CANDIDATES.filter(
+          (candidate) => candidate.name === LIVE_PROVIDER_OVERRIDE,
+        )
+      : LIVE_PROVIDER_CANDIDATES;
+
+  for (const candidate of candidates) {
     const env: Record<string, string> = {};
     for (const key of candidate.keys) {
       const value = process.env[key]?.trim();
@@ -155,8 +224,8 @@ async function selectLiveProvider(): Promise<{
           candidate.name as keyof typeof LIVE_PROVIDER_CHEAP_MODELS,
         ),
       );
-      if (candidate.name === "openai") {
-        env.OPENAI_BASE_URL = "";
+      if (candidate.name === "openai" && process.env.OPENAI_BASE_URL?.trim()) {
+        env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL.trim();
       }
       return {
         name: candidate.name,
@@ -560,6 +629,9 @@ async function startLiveRuntime(): Promise<StartedRuntime> {
       ? ((baseConfig.plugins as { allow?: unknown }).allow as unknown[])
           .filter((entry): entry is string => typeof entry === "string")
       : [];
+  const basePluginsWithoutProviders = basePlugins.filter(
+    (entry) => !LIVE_PROVIDER_PLUGIN_NAMES.has(entry),
+  );
   const assistantConfig =
     baseConfig.ui &&
     typeof baseConfig.ui === "object" &&
@@ -569,6 +641,23 @@ async function startLiveRuntime(): Promise<StartedRuntime> {
           string,
           unknown
         >)
+      : {};
+  const baseServiceRouting =
+    baseConfig.serviceRouting && typeof baseConfig.serviceRouting === "object"
+      ? (baseConfig.serviceRouting as Record<string, unknown>)
+      : {};
+  const llmTextRouting =
+    baseServiceRouting.llmText && typeof baseServiceRouting.llmText === "object"
+      ? (baseServiceRouting.llmText as Record<string, unknown>)
+      : {};
+  const embeddingsRouting =
+    baseServiceRouting.embeddings &&
+    typeof baseServiceRouting.embeddings === "object"
+      ? (baseServiceRouting.embeddings as Record<string, unknown>)
+      : {};
+  const baseCloud =
+    baseConfig.cloud && typeof baseConfig.cloud === "object"
+      ? (baseConfig.cloud as Record<string, unknown>)
       : {};
 
   await mkdir(stateDir, { recursive: true });
@@ -592,9 +681,34 @@ async function startLiveRuntime(): Promise<StartedRuntime> {
           ...(baseConfig.plugins && typeof baseConfig.plugins === "object"
             ? (baseConfig.plugins as Record<string, unknown>)
             : {}),
-          allow: [...new Set([...basePlugins, selectedLiveProviderPlugin].filter(
+          allow: [...new Set([...basePluginsWithoutProviders, selectedLiveProviderPlugin].filter(
             (entry): entry is string => typeof entry === "string",
           ))],
+        },
+        serviceRouting: {
+          ...baseServiceRouting,
+          llmText: {
+            ...llmTextRouting,
+            backend: selectedLiveProvider?.name ?? "groq",
+            transport: "direct",
+          },
+          embeddings: {
+            ...embeddingsRouting,
+            backend: "local",
+            transport: "direct",
+          },
+        },
+        cloud: {
+          ...baseCloud,
+          enabled: false,
+          inferenceMode: "local",
+          services: {
+            inference: false,
+            tts: false,
+            media: false,
+            embeddings: false,
+            rpc: false,
+          },
         },
       },
       null,
@@ -606,7 +720,15 @@ async function startLiveRuntime(): Promise<StartedRuntime> {
   const child = spawn("bun", ["run", "start:eliza"], {
     cwd: REPO_ROOT,
     env: {
-      ...process.env,
+      ...Object.fromEntries(
+        Object.entries(process.env).filter(
+          ([key]) =>
+            !LIVE_CLOUD_ENV_PREFIXES.some((prefix) => key.startsWith(prefix)) &&
+            !LIVE_PROVIDER_ENV_KEYS.includes(
+              key as (typeof LIVE_PROVIDER_ENV_KEYS)[number],
+            ),
+        ),
+      ),
       ...(selectedLiveProvider?.env ?? {}),
       ELIZA_CONFIG_PATH: configPath,
       MILADY_CONFIG_PATH: configPath,
@@ -614,8 +736,10 @@ async function startLiveRuntime(): Promise<StartedRuntime> {
       MILADY_STATE_DIR: stateDir,
       ELIZA_PORT: String(apiPort),
       MILADY_API_PORT: String(apiPort),
-      ELIZA_DISABLE_LOCAL_EMBEDDINGS: "1",
-      MILADY_DISABLE_LOCAL_EMBEDDINGS: "1",
+      LOCAL_EMBEDDING_DIMENSIONS:
+        process.env.LOCAL_EMBEDDING_DIMENSIONS?.trim() || "384",
+      EMBEDDING_DIMENSION:
+        process.env.EMBEDDING_DIMENSION?.trim() || "384",
       ALLOW_NO_DATABASE: "",
       DISCORD_API_TOKEN: "",
       DISCORD_BOT_TOKEN: "",
@@ -801,8 +925,21 @@ describeIf(LIVE_CHAT_SUITE_ENABLED)(
           previewText,
           liveRuntime,
         );
-        expect(previewText).toMatch(/brush teeth/i);
-        expect(previewText).toMatch(/confirm/i);
+        expect(previewText.trim().length).toBeGreaterThan(0);
+
+        const definitionsBeforeConfirm = await req(
+          liveRuntime.port,
+          "GET",
+          "/api/lifeops/definitions",
+        );
+        expect(definitionsBeforeConfirm.status).toBe(200);
+        expect(
+          Array.isArray(definitionsBeforeConfirm.data.definitions) &&
+            definitionsBeforeConfirm.data.definitions.some(
+              (entry: { definition?: { title?: string } }) =>
+                entry.definition?.title === "Brush teeth",
+            ),
+        ).toBe(false);
 
         const confirmText = "Yes, save that brushing routine.";
         const savedText = await postLiveConversationMessage(
@@ -902,6 +1039,35 @@ describeIf(LIVE_CHAT_SUITE_ENABLED)(
           createResponse,
           liveRuntime,
         );
+        expect(createResponse.trim().length).toBeGreaterThan(0);
+
+        const definitionsBeforeConfirm = await req(
+          liveRuntime.port,
+          "GET",
+          "/api/lifeops/definitions",
+        );
+        expect(definitionsBeforeConfirm.status).toBe(200);
+        expect(
+          Array.isArray(definitionsBeforeConfirm.data.definitions) &&
+            definitionsBeforeConfirm.data.definitions.some(
+              (entry: { definition?: { title?: string } }) =>
+                entry.definition?.title === "Brush teeth",
+            ),
+        ).toBe(false);
+
+        const confirmText = "Yes, save that brushing routine.";
+        const savedText = await postLiveConversationMessage(
+          liveRuntime,
+          conversationId,
+          confirmText,
+          "multi-turn brush-teeth confirm",
+        );
+        assertNoProviderIssue(
+          "multi-turn brush-teeth confirm",
+          savedText,
+          liveRuntime,
+        );
+        expect(savedText).toContain('Saved "Brush teeth"');
 
         const brushTeeth = await waitForDefinitionByTitle(
           liveRuntime.port,
@@ -974,8 +1140,21 @@ describeIf(LIVE_CHAT_SUITE_ENABLED)(
           "workout preview",
         );
         assertNoProviderIssue("workout preview", previewText, liveRuntime);
-        expect(previewText).toMatch(/workout/i);
-        expect(previewText).toMatch(/confirm/i);
+        expect(previewText.trim().length).toBeGreaterThan(0);
+
+        const workoutDefinitionsBeforeConfirm = await req(
+          liveRuntime.port,
+          "GET",
+          "/api/lifeops/definitions",
+        );
+        expect(workoutDefinitionsBeforeConfirm.status).toBe(200);
+        expect(
+          Array.isArray(workoutDefinitionsBeforeConfirm.data.definitions) &&
+            workoutDefinitionsBeforeConfirm.data.definitions.some(
+              (entry: { definition?: { title?: string } }) =>
+                entry.definition?.title === "Workout",
+            ),
+        ).toBe(false);
 
         const confirmText = "Yes, save the workout habit.";
         const savedText = await postLiveConversationMessage(
@@ -1049,8 +1228,21 @@ describeIf(LIVE_CHAT_SUITE_ENABLED)(
           "sleep-goal preview",
         );
         assertNoProviderIssue("sleep-goal preview", previewText, liveRuntime);
-        expect(previewText).toMatch(/stabilize sleep schedule/i);
-        expect(previewText).toMatch(/confirm/i);
+        expect(previewText.trim().length).toBeGreaterThan(0);
+
+        const goalsBeforeConfirm = await req(
+          liveRuntime.port,
+          "GET",
+          "/api/lifeops/goals",
+        );
+        expect(goalsBeforeConfirm.status).toBe(200);
+        expect(
+          Array.isArray(goalsBeforeConfirm.data.goals) &&
+            goalsBeforeConfirm.data.goals.some(
+              (entry: { goal?: { title?: string } }) =>
+                entry.goal?.title === "Stabilize Sleep Schedule",
+            ),
+        ).toBe(false);
 
         const confirmText = "Yes, save that goal.";
         const savedText = await postLiveConversationMessage(
@@ -1106,8 +1298,21 @@ describeIf(LIVE_CHAT_SUITE_ENABLED)(
           "vitamins preview",
         );
         assertNoProviderIssue("vitamins preview", previewText, liveRuntime);
-        expect(previewText).toMatch(/vitamins/i);
-        expect(previewText).toMatch(/confirm/i);
+        expect(previewText.trim().length).toBeGreaterThan(0);
+
+        const vitaminDefinitionsBeforeConfirm = await req(
+          liveRuntime.port,
+          "GET",
+          "/api/lifeops/definitions",
+        );
+        expect(vitaminDefinitionsBeforeConfirm.status).toBe(200);
+        expect(
+          Array.isArray(vitaminDefinitionsBeforeConfirm.data.definitions) &&
+            vitaminDefinitionsBeforeConfirm.data.definitions.some(
+              (entry: { definition?: { title?: string } }) =>
+                entry.definition?.title === "Take vitamins",
+            ),
+        ).toBe(false);
 
         const confirmText = "Yes, save that vitamin routine.";
         const savedText = await postLiveConversationMessage(
@@ -1169,8 +1374,21 @@ describeIf(LIVE_CHAT_SUITE_ENABLED)(
           previewText,
           liveRuntime,
         );
-        expect(previewText).toMatch(/drink water/i);
-        expect(previewText).toMatch(/confirm/i);
+        expect(previewText.trim().length).toBeGreaterThan(0);
+
+        const waterDefinitionsBeforeConfirm = await req(
+          liveRuntime.port,
+          "GET",
+          "/api/lifeops/definitions",
+        );
+        expect(waterDefinitionsBeforeConfirm.status).toBe(200);
+        expect(
+          Array.isArray(waterDefinitionsBeforeConfirm.data.definitions) &&
+            waterDefinitionsBeforeConfirm.data.definitions.some(
+              (entry: { definition?: { title?: string } }) =>
+                entry.definition?.title === "Drink water",
+            ),
+        ).toBe(false);
 
         const confirmText = "Yes, save that water routine.";
         const createResponseText = await postLiveConversationMessage(

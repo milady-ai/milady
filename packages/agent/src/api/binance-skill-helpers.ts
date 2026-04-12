@@ -6,6 +6,8 @@
  */
 
 import {
+  type Action,
+  type ActionParameters,
   type AgentRuntime,
   type Content,
   type createMessageMemory,
@@ -30,8 +32,42 @@ function shouldExposeBinanceSkillId(skillId: string): boolean {
 
 export type FallbackParsedAction = {
   name: string;
-  parameters?: Record<string, unknown>;
+  parameters?: ActionParameters;
 };
+
+type RuntimeActionLike = Pick<
+  Action,
+  "name" | "similes" | "validate" | "handler"
+>;
+
+let selfControlFallbackActionsPromise: Promise<{
+  BLOCK_WEBSITES?: RuntimeActionLike;
+  REQUEST_WEBSITE_BLOCKING_PERMISSION?: RuntimeActionLike;
+} | null> | null = null;
+
+async function resolveBuiltInFallbackAction(
+  actionName: string,
+): Promise<RuntimeActionLike | null> {
+  if (
+    actionName !== "BLOCK_WEBSITES" &&
+    actionName !== "REQUEST_WEBSITE_BLOCKING_PERMISSION"
+  ) {
+    return null;
+  }
+
+  if (!selfControlFallbackActionsPromise) {
+    selfControlFallbackActionsPromise = import("@miladyai/plugin-selfcontrol")
+      .then((mod) => ({
+        BLOCK_WEBSITES: mod.selfControlBlockWebsitesAction,
+        REQUEST_WEBSITE_BLOCKING_PERMISSION:
+          mod.selfControlRequestPermissionAction,
+      }))
+      .catch(() => null);
+  }
+
+  const actions = await selfControlFallbackActionsPromise;
+  return actions?.[actionName] ?? null;
+}
 
 export function inferBalanceChainFromText(
   input: string,
@@ -156,15 +192,10 @@ export async function executeFallbackParsedActions(
   const runtimeActions = Array.isArray(
     (runtime as { actions?: unknown[] }).actions,
   )
-    ? ((runtime as { actions: unknown[] }).actions as Array<{
-        name?: string;
-        similes?: string[];
-        validate?: (...args: unknown[]) => unknown;
-        handler?: (...args: unknown[]) => unknown;
-      }>)
+    ? ((runtime as { actions: unknown[] }).actions as RuntimeActionLike[])
     : [];
 
-  const lookup = new Map<string, (typeof runtimeActions)[number]>();
+  const lookup = new Map<string, RuntimeActionLike>();
   for (const action of runtimeActions) {
     if (typeof action.name === "string")
       lookup.set(action.name.toUpperCase(), action);
@@ -182,7 +213,9 @@ export async function executeFallbackParsedActions(
     ) {
       continue;
     }
-    const action = lookup.get(parsed.name);
+    const action =
+      lookup.get(parsed.name) ??
+      (await resolveBuiltInFallbackAction(parsed.name));
     if (!action || typeof action.handler !== "function") continue;
 
     if (typeof action.validate === "function") {
@@ -232,7 +265,9 @@ export async function executeFallbackParsedActions(
           : undefined;
       const fallbackText =
         actionResult && typeof actionResult === "object"
-          ? extractCompatTextContent(actionResult as Content)
+          ? typeof actionResult.text === "string"
+            ? actionResult.text
+            : ""
           : "";
       const shouldSuppressSuccessFallbackText =
         parsed.name === "BLOCK_WEBSITES" &&

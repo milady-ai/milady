@@ -39,7 +39,7 @@ jobs:
   # ── Prepare version info ───────────────────────────────────────────────
   prepare:
     name: Prepare
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.ver.outputs.version }}
       npm_version: ${{ steps.ver.outputs.npm_version }}
@@ -87,7 +87,7 @@ jobs:
     if: |
       (github.event_name == 'release') ||
       (github.event_name == 'workflow_dispatch' && inputs.pypi)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     permissions:
       id-token: write  # OIDC trusted publishing
     environment:
@@ -156,7 +156,7 @@ jobs:
     if: |
       (github.event_name == 'release') ||
       (github.event_name == 'workflow_dispatch' && inputs.snap)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -194,7 +194,7 @@ jobs:
     if: |
       (github.event_name == 'release') ||
       (github.event_name == 'workflow_dispatch' && inputs.apt)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     permissions:
       contents: write  # gh release upload
     steps:
@@ -304,7 +304,7 @@ jobs:
     if: |
       (github.event_name == 'release' && needs.prepare.outputs.is_prerelease == 'false') ||
       (github.event_name == 'workflow_dispatch' && inputs.flatpak)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     permissions:
       contents: write  # gh release upload
     steps:
@@ -351,7 +351,7 @@ jobs:
     name: Publish Summary
     needs: [prepare, publish-pypi, publish-snap, build-deb, build-flatpak]
     if: always()
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Summary
         run: |

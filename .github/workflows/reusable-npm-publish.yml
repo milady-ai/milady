@@ -27,7 +27,7 @@ env:
 jobs:
   publish:
     name: Publish to npm (${{ inputs.dist_tag }})
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout

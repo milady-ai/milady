@@ -31,28 +31,26 @@ function createHelpers(json: JsonRouteHelperMock): RouteHelpers {
 }
 
 let tempStateDir = "";
+const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
   tempStateDir = fs.mkdtempSync(
     path.join(os.tmpdir(), "milady-discord-avatar-cache-"),
   );
   process.env.MILADY_STATE_DIR = tempStateDir;
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () => ({
-      ok: true,
-      headers: {
-        get: (name: string) =>
-          name.toLowerCase() === "content-type" ? "image/png" : null,
-      },
-      arrayBuffer: async () => new Uint8Array([0x89, 0x50, 0x4e, 0x47]).buffer,
-    })),
-  );
+  globalThis.fetch = vi.fn(async () => ({
+    ok: true,
+    headers: {
+      get: (name: string) =>
+        name.toLowerCase() === "content-type" ? "image/png" : null,
+    },
+    arrayBuffer: async () => new Uint8Array([0x89, 0x50, 0x4e, 0x47]).buffer,
+  })) as typeof fetch;
 });
 
 afterEach(() => {
   delete process.env.MILADY_STATE_DIR;
-  vi.unstubAllGlobals();
+  globalThis.fetch = originalFetch;
   if (tempStateDir) {
     fs.rmSync(tempStateDir, { recursive: true, force: true });
     tempStateDir = "";
@@ -129,6 +127,68 @@ describe("handleInboxRoute", () => {
         replyToSenderName: "shaw",
         source: "discord",
         text: "of course",
+      }),
+    ]);
+  });
+
+  it("caches discord-local sender avatars using canonical Discord source handling", async () => {
+    const runtime = {
+      agentId: "agent-1",
+      getAllWorlds: vi.fn().mockResolvedValue([]),
+      getMemories: vi.fn().mockResolvedValue([
+        createMemory({
+          id: "discord-local-memory",
+          entityId: "user-1",
+          roomId: "room-1",
+          createdAt: 1_000,
+          content: {
+            text: "hello from local discord",
+            source: "discord-local",
+          },
+          metadata: {
+            entityName: "Shaw",
+            entityUserName: "shawmakesmagic",
+            entityAvatarUrl:
+              "https://cdn.discordapp.com/avatars/498273781589213185/avatar.png",
+            fromId: "498273781589213185",
+            discordChannelId: "channel-1",
+            discordMessageId: "message-1",
+          },
+        }),
+      ]),
+      getService: vi.fn().mockReturnValue(undefined),
+      getEntityById: vi.fn().mockResolvedValue(null),
+    } as any;
+    const json = vi.fn() as JsonRouteHelperMock;
+
+    const handled = await handleInboxRoute(
+      {
+        url: "/api/inbox/messages?roomId=room-1&roomSource=discord-local&sources=discord-local",
+      } as http.IncomingMessage,
+      {} as http.ServerResponse,
+      "/api/inbox/messages",
+      "GET",
+      { runtime },
+      createHelpers(json),
+    );
+
+    expect(handled).toBe(true);
+    const payload = json.mock.calls[0]?.[1] as {
+      count: number;
+      messages: Array<{
+        avatarUrl?: string;
+        from?: string;
+        fromUserName?: string;
+        source: string;
+      }>;
+    };
+    expect(payload.count).toBe(1);
+    expect(payload.messages).toEqual([
+      expect.objectContaining({
+        source: "discord-local",
+        from: "Shaw",
+        fromUserName: "shawmakesmagic",
+        avatarUrl: expect.stringMatching(/^\/api\/avatar\/discord\//),
       }),
     ]);
   });

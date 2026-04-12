@@ -32,7 +32,7 @@ env:
 jobs:
   build-aab:
     name: Build Signed AAB
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     outputs:
       version_name: ${{ steps.version.outputs.name }}
       version_code: ${{ steps.version.outputs.code }}
@@ -150,7 +150,7 @@ jobs:
     if: |
       (github.event_name == 'release') ||
       (github.event_name == 'workflow_dispatch')
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -202,7 +202,7 @@ jobs:
     name: Release Summary
     needs: [build-aab, publish-play-store]
     if: always()
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Summary
         run: |

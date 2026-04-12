@@ -1,10 +1,11 @@
+import { isTruthyEnvValue } from "./env-utils.js";
+
 const DEFAULT_API_BIND_HOST = "127.0.0.1";
 export const DEFAULT_SERVER_ONLY_PORT = 2138;
 // Dev mode splits the Milady API from the Vite UI: API on 31337, UI on 2138.
 export const DEFAULT_DESKTOP_API_PORT = 31337;
 export const DEFAULT_DESKTOP_UI_PORT = 2138;
 
-const ENABLED_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
 const LOOPBACK_BIND_RE =
   /^(localhost|127(?:\.\d{1,3}){3}|::1|\[::1\]|0:0:0:0:0:0:0:1|::ffff:127(?:\.\d{1,3}){3})$/i;
 const WILDCARD_BIND_RE = /^(0\.0\.0\.0|::|0:0:0:0:0:0:0:0)$/i;
@@ -173,8 +174,7 @@ function parseEnabledFlag(
   env: RuntimeEnvRecord,
   keys: readonly string[],
 ): boolean {
-  const raw = firstNonEmpty(env, keys);
-  return raw ? ENABLED_ENV_VALUES.has(raw.toLowerCase()) : false;
+  return isTruthyEnvValue(firstNonEmpty(env, keys) ?? undefined);
 }
 
 export function stripOptionalHostPort(value: string): string {

@@ -3,6 +3,7 @@ export * from "./ChatComposerContext";
 export * from "./PtySessionsContext";
 export * from "./CompanionSceneConfigContext";
 export * from "./parsers";
+export * from "./agent-profiles";
 export * from "./persistence";
 export * from "./types";
 export * from "./useApp";

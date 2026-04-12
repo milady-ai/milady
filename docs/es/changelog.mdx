@@ -3,6 +3,93 @@ title: Registro de cambios
 description: Novedades en Milady — funcionalidades, mejoras y correcciones.
 ---
 
+<Update label="2026-04-10" description="Semana del 10 de abril; Eliza Cloud para agentes de código, vista de contactos, selector de paquetes de contenido, ajustes de Discord en la nube, overlay de conexión" tags={["Feature", "Update", "Fix"]}>
+
+<div id="eliza-cloud-as-a-provider-for-coding-agents">
+## Eliza Cloud como proveedor para agentes de código
+</div>
+
+Los [agentes de código](/es/guides/coding-swarms) (Claude Code, Codex, Aider) ahora pueden usar Eliza Cloud como su proveedor LLM. Seleccione "Eliza Cloud" en la configuración de agentes de código, vincule su clave API de la nube y sus sesiones de código se enrutarán a través de la nube — sin necesidad de claves API por agente. La interfaz de configuración refleja la preparación de autenticación por agente para que pueda ver de un vistazo cuáles están listos. Una paleta de colores mejorada para la terminal también facilita la lectura de la salida de Codex.
+
+<div id="contacts-view">
+## Vista de contactos
+</div>
+
+Una nueva pestaña de Contactos en la sección Avanzado le ofrece un mapa visual de las relaciones de su agente. Explore contactos con búsqueda y filtrado, vea la fuerza de las relaciones y los niveles de confianza, y visualice un gráfico de clústeres de identidad que muestra cómo se relacionan las conexiones de su agente entre sí. El sistema de contactos ahora está integrado en el runtime principal — no se requiere un plugin separado.
+
+<div id="content-pack-picker">
+## Selector de paquetes de contenido
+</div>
+
+El paso de identidad del [onboarding](/es/guides/beginners-development-guide) y el editor de personaje ahora incluyen un explorador de paquetes de contenido. Elija entre los paquetes temáticos disponibles para personalizar la experiencia de inicio, fondos y marca de su agente directamente durante la configuración o desde el editor de personaje en cualquier momento.
+
+<div id="discord-cloud-settings">
+## Ajustes de Discord en la nube
+</div>
+
+Los agentes desplegados en la nube ahora exponen un panel completo de configuración de Discord en el [panel de control de la nube](/es/guides/cloud). Configure políticas de DM, comportamiento de gremios, opciones de acciones (reacciones, stickers, encuestas, hilos), formato de mensajes e intents privilegiados — todo sin editar archivos de configuración.
+
+<div id="connection-lost-overlay">
+## Overlay de conexión perdida
+</div>
+
+Cuando el backend de su agente se vuelve inalcanzable, el panel de control ahora muestra un overlay claro a pantalla completa en lugar de fallar silenciosamente. El overlay indica que la conexión se ha perdido y se actualiza automáticamente cuando el backend vuelve a estar disponible.
+
+<div id="updates">
+## Actualizaciones
+</div>
+
+- **Indicadores de origen del chat simplificados** — Las etiquetas de origen entre canales en la barra lateral y la bandeja de entrada ahora usan iconos compactos en lugar de badges de texto completo, reduciendo el desorden visual mientras siguen mostrando de qué plataforma proviene cada mensaje.
+- **Verificaciones de identidad y entrega de conectores** — Los mensajes de conectores ahora incluyen metadatos de identidad más ricos y estado de entrega, facilitando el seguimiento del enrutamiento de mensajes entre plataformas en la [bandeja de entrada](/es/guides/connectors).
+- **Agrupación de escenarios de trayectorias** — La [vista de trayectorias](/es/advanced/trajectories) ahora agrupa llamadas LLM relacionadas en escenarios con nombre y filtros de historial, facilitando la revisión y comparación del comportamiento del agente entre sesiones.
+- **Almacenamiento avanzado de memoria** — Su agente ahora puede persistir recuerdos estructurados más allá del historial de conversación predeterminado. Esto permite un recuerdo de contexto más rico entre sesiones y está disponible a través de la configuración del agente.
+- **Soporte de voz en la nube reforzado** — Los contenedores en la nube ahora incluyen dependencias nativas de codificación de audio, por lo que la voz de Discord y TTS funcionan de manera fiable sin configuración adicional. Cuando faltan dependencias de voz, el sistema degrada elegantemente con un error claro en lugar de fallar.
+- **Auto-configuración del plugin de conocimiento** — El plugin de conocimiento ahora se habilita automáticamente cuando hay claves API o un proveedor en la nube disponibles, y detecta automáticamente su proveedor de texto y modelo a partir de su configuración existente. No se necesita configuración manual para empezar a usar el [conocimiento](/es/guides/knowledge).
+
+<div id="bug-fixes">
+## Correcciones de errores
+</div>
+
+- Se corrigió que el catálogo de juegos en la [vista de apps](/es/dashboard/apps) mostrara apps eliminadas o no disponibles — el registro ahora las filtra
+- Se corrigió que las vistas de juegos causaran solicitudes de polling excesivas que podían ralentizar el panel de control
+- Se corrigió que los presets de personaje del onboarding no se cargaran correctamente después de una actualización de configuración
+- Se corrigió que el endpoint de estado del reproductor de música devolviera errores antes de que el runtime del agente terminara de iniciar
+- Se corrigió que los ajustes de agentes de código descartaran silenciosamente las claves API guardadas cuando la solicitud de guardado fallaba — los errores ahora se muestran en línea
+
+</Update>
+
+<Update label="2026-04-08" description="Semana del 8 de abril; reinicio automático tras instalar plugins, salto de onboarding, EVM opt-in, correcciones de estabilidad" tags={["Update", "Fix"]}>
+
+<div id="auto-restart-after-plugin-install">
+## Reinicio automático tras instalar plugins
+</div>
+
+Instalar un plugin en la app de escritorio ahora reinicia automáticamente el agente para que el nuevo plugin surta efecto de inmediato. Un indicador de progreso muestra el estado del reinicio, y si el reinicio falla, se obtiene un mensaje de error claro en lugar de quedarse colgado silenciosamente. No más reinicios manuales después de cada instalación de plugin.
+
+<div id="onboarding-skipped-when-already-configured">
+## Onboarding omitido cuando ya está configurado
+</div>
+
+Si su backend ya está configurado — por ejemplo, después de restaurar desde una copia de seguridad o reconectar un agente existente — el [asistente de onboarding](/es/guides/beginners-user-guide) ahora se omite automáticamente. Va directamente al chat en lugar de pasar por pantallas de configuración que ya completó.
+
+<div id="updates-1">
+## Actualizaciones
+</div>
+
+- **El plugin EVM ahora es opt-in** — El plugin de wallet EVM anteriormente se cargaba automáticamente cuando había una clave privada EVM presente, pero un problema de registro causaba fallos al iniciar. Ahora requiere `ENABLE_EVM_PLUGIN=1` en su entorno para activarse. Una vez que se resuelva el problema upstream, la habilitación automática volverá. Consulte la [configuración de wallet](/es/guides/wallet) para más detalles.
+- **Autenticación de escritorio más fluida** — Las breves interrupciones de red ya no activan solicitudes de re-autenticación innecesarias en la app de escritorio. Las respuestas 401 transitorias ahora se manejan de manera elegante para que su sesión permanezca conectada.
+
+<div id="bug-fixes-1">
+## Correcciones de errores
+</div>
+
+- Se corrigió que los plugins hicieran fallar al agente al iniciar en Docker, entornos headless y en la nube cuando faltaban paquetes opcionales solo para escritorio — estos plugins ahora degradan elegantemente
+- Se corrigió que las migraciones concurrentes de la base de datos corrompieran el estado al iniciar cuando múltiples componentes se inicializaban al mismo tiempo
+- Se corrigió que la app de escritorio no detectara los cambios de puerto después de un reinicio del runtime, requiriendo un relanzamiento completo de la app
+- Se corrigieron los tiempos de espera de las verificaciones de salud del escritorio en Windows durante el inicio debido a un intervalo de polling agresivo
+
+</Update>
+
 <Update label="2026-04-07" description="Diagnósticos para desarrolladores, migraciones PGlite de life-ops, scripts de workspace, banners de terminal en desarrollo" tags={["Fix", "Update"]}>
 
 <div id="life-ops-safer-migrations-on-pglite">

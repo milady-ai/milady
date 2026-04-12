@@ -154,11 +154,23 @@ export function useVincentDashboard(): VincentDashboardState {
       if (vaultStatusResult.status === "fulfilled") {
         setVaultStatus(vaultStatusResult.value);
       }
-      if (strategyResult.status === "fulfilled") {
-        setStrategy(strategyResult.value);
+      if (strategyResult.status === "fulfilled" && strategyResult.value) {
+        // API wraps in { connected, strategy: {...} }
+        const raw = strategyResult.value as
+          | VincentStrategy
+          | { strategy: VincentStrategy };
+        setStrategy(
+          "strategy" in raw && raw.strategy ? raw.strategy : raw as VincentStrategy,
+        );
       }
-      if (tradingProfileResult.status === "fulfilled") {
-        setTradingProfile(tradingProfileResult.value);
+      if (tradingProfileResult.status === "fulfilled" && tradingProfileResult.value) {
+        // API wraps in { connected, profile: {...} }
+        const raw = tradingProfileResult.value as
+          | VincentTradingProfile
+          | { profile: VincentTradingProfile };
+        setTradingProfile(
+          "profile" in raw && raw.profile ? raw.profile : raw as VincentTradingProfile,
+        );
       }
       if (historyResult.status === "fulfilled") {
         const h = historyResult.value;

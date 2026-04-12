@@ -1,6 +1,3 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import {
   ChannelType,
   type Content,
@@ -14,15 +11,27 @@ import {
   type UUID,
   stringToUuid,
 } from "@elizaos/core";
-import input from "input";
 import bigInt from "big-integer";
 import { Api, TelegramClient } from "telegram";
 import { NewMessage, type NewMessageEvent } from "telegram/events";
-import { StoreSession } from "telegram/sessions";
+import { StringSession } from "telegram/sessions";
 import { type TelegramAccountConfig, validateTelegramAccountConfig } from "./environment";
+import {
+  loadTelegramAccountSessionString,
+  saveTelegramAccountSessionString,
+} from "./session";
 import { escapeMarkdown, splitMessage } from "./utils";
 
 const TELEGRAM_ACCOUNT_SERVICE_NAME = "telegram-account";
+
+type TelegramAccountClientDeps = {
+  createTelegramClient?: (
+    config: TelegramAccountConfig,
+    session: string,
+  ) => TelegramClient;
+  loadSessionString?: () => string;
+  saveSessionString?: (session: string) => void;
+};
 
 type SupportedChat = Api.User | Api.Chat | Api.Channel;
 type MessageService = {
@@ -33,6 +42,26 @@ type MessageService = {
   ) => Promise<void>;
 };
 
+function serializeSession(client: TelegramClient): string {
+  return (client.session as StringSession).save();
+}
+
+function createTelegramClientFromSession(
+  config: TelegramAccountConfig,
+  session: string,
+): TelegramClient {
+  return new TelegramClient(
+    new StringSession(session),
+    config.TELEGRAM_ACCOUNT_APP_ID,
+    config.TELEGRAM_ACCOUNT_APP_HASH,
+    {
+      connectionRetries: 5,
+      deviceModel: config.TELEGRAM_ACCOUNT_DEVICE_MODEL,
+      systemVersion: config.TELEGRAM_ACCOUNT_SYSTEM_VERSION,
+    },
+  );
+}
+
 function getMessageService(runtime: IAgentRuntime): MessageService | null {
   if ("messageService" in runtime) {
     const withMessageService = runtime as IAgentRuntime & {
@@ -41,16 +70,6 @@ function getMessageService(runtime: IAgentRuntime): MessageService | null {
     return withMessageService.messageService ?? null;
   }
   return null;
-}
-
-function resolveSessionPath(): string {
-  const baseDir =
-    process.env.MILADY_STATE_DIR?.trim() ||
-    process.env.ELIZA_STATE_DIR?.trim() ||
-    path.join(os.homedir(), ".milady");
-  const sessionDir = path.join(baseDir, "telegram-account");
-  fs.mkdirSync(sessionDir, { recursive: true });
-  return path.join(sessionDir, "session");
 }
 
 function roomUuidFor(runtime: IAgentRuntime, chatId: string): UUID {
@@ -105,13 +124,14 @@ export class TelegramAccountClient extends Service {
 
   private readonly runtimeRef: IAgentRuntime;
   private readonly telegramAccountConfig: TelegramAccountConfig;
-  private readonly sessionPath: string;
+  private readonly deps: Required<TelegramAccountClientDeps>;
   private client: TelegramClient | null = null;
   private account: Api.User | null = null;
 
   constructor(
     runtime?: IAgentRuntime,
     telegramAccountConfig?: TelegramAccountConfig,
+    deps: TelegramAccountClientDeps = {},
   ) {
     super(runtime);
     if (!runtime || !telegramAccountConfig) {
@@ -120,7 +140,14 @@ export class TelegramAccountClient extends Service {
 
     this.runtimeRef = runtime;
     this.telegramAccountConfig = telegramAccountConfig;
-    this.sessionPath = resolveSessionPath();
+    this.deps = {
+      createTelegramClient:
+        deps.createTelegramClient ?? createTelegramClientFromSession,
+      loadSessionString:
+        deps.loadSessionString ?? loadTelegramAccountSessionString,
+      saveSessionString:
+        deps.saveSessionString ?? saveTelegramAccountSessionString,
+    };
   }
 
   static async start(runtime: IAgentRuntime): Promise<TelegramAccountClient> {
@@ -229,28 +256,26 @@ export class TelegramAccountClient extends Service {
   }
 
   private async initializeAccount(): Promise<void> {
-    const client = new TelegramClient(
-      new StoreSession(this.sessionPath),
-      this.telegramAccountConfig.TELEGRAM_ACCOUNT_APP_ID,
-      this.telegramAccountConfig.TELEGRAM_ACCOUNT_APP_HASH,
-      {
-        connectionRetries: 5,
-        deviceModel: this.telegramAccountConfig.TELEGRAM_ACCOUNT_DEVICE_MODEL,
-        systemVersion:
-          this.telegramAccountConfig.TELEGRAM_ACCOUNT_SYSTEM_VERSION,
-      },
+    const session = this.deps.loadSessionString().trim();
+    if (!session) {
+      throw new Error(
+        "Telegram account session is missing. Complete Telegram account login in connector setup first.",
+      );
+    }
+
+    const client = this.deps.createTelegramClient(
+      this.telegramAccountConfig,
+      session,
     );
+    await client.connect();
+    if (!(await client.checkAuthorization())) {
+      await client.disconnect();
+      throw new Error(
+        "Telegram account session is no longer authorized. Reconnect the Telegram account from connector setup.",
+      );
+    }
 
-    await client.start({
-      phoneNumber: this.telegramAccountConfig.TELEGRAM_ACCOUNT_PHONE,
-      password: async () => "",
-      phoneCode: async () => await input.text("Enter received Telegram code: "),
-      onError: (error) => {
-        throw error;
-      },
-    });
-
-    client.session.save();
+    this.deps.saveSessionString(serializeSession(client));
     this.client = client;
     this.account = (await client.getEntity("me")) as Api.User;
   }
@@ -466,7 +491,36 @@ export class TelegramAccountClient extends Service {
     return sentMessages;
   }
 
+  isConnected(): boolean {
+    return this.client !== null && this.account !== null;
+  }
+
+  getAccountSummary(): {
+    id: string;
+    username: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    phone: string | null;
+  } | null {
+    if (!this.account) {
+      return null;
+    }
+    return {
+      id: this.account.id.toString(),
+      username:
+        typeof this.account.username === "string" ? this.account.username : null,
+      firstName:
+        typeof this.account.firstName === "string" ? this.account.firstName : null,
+      lastName:
+        typeof this.account.lastName === "string" ? this.account.lastName : null,
+      phone: typeof this.account.phone === "string" ? this.account.phone : null,
+    };
+  }
+
   async stop(): Promise<void> {
+    if (this.client) {
+      this.deps.saveSessionString(serializeSession(this.client));
+    }
     await this.client?.disconnect();
     this.client = null;
   }

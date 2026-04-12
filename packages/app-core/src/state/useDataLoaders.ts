@@ -7,6 +7,7 @@
  * checkExtensionStatus.
  */
 
+import { resolveStylePresetByAvatarIndex } from "@miladyai/shared/onboarding-presets";
 import {
   type RefObject,
   useCallback,
@@ -25,9 +26,9 @@ import {
   type BscTransferExecuteRequest,
   type BscTransferExecuteResponse,
   type CharacterData,
-  client,
   type Conversation,
   type ConversationMessage,
+  client,
   type ExtensionStatus,
   type StreamEventEnvelope,
   type StylePreset,
@@ -45,7 +46,6 @@ import {
   mergeAutonomyEvents,
 } from "../autonomy";
 import type { UiLanguage } from "../i18n";
-import { resolveStylePresetByAvatarIndex } from "@miladyai/shared/onboarding-presets";
 import { normalizeOwnerName } from "../utils/owner-name";
 import type { LoadConversationMessagesResult } from "./internal";
 
@@ -540,6 +540,11 @@ export function useDataLoaders(deps: DataLoadersDeps) {
         relayReachable: false,
         relayPort: 18792,
         extensionPath: null,
+        chromeBuildPath: null,
+        chromePackagePath: null,
+        safariWebExtensionPath: null,
+        safariAppPath: null,
+        safariPackagePath: null,
       });
     }
     setExtensionChecking(false);

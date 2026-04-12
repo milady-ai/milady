@@ -332,13 +332,13 @@ describe("app startup routing (e2e)", () => {
     }
   });
 
-  it("renders wallets screen when wallets tab is active", async () => {
+  it("renders inventory screen when inventory tab is active", async () => {
     mockUseApp.mockReturnValue({
       t: (k: string) => TRANSLATIONS[k] ?? k,
       onboardingLoading: false,
       authRequired: false,
       onboardingComplete: true,
-      tab: "wallets",
+      tab: "inventory",
       actionNotice: null,
       setActionNotice: vi.fn(),
       plugins: [],
@@ -368,10 +368,10 @@ describe("app startup routing (e2e)", () => {
     expect(renderedText).not.toContain("ChatView");
   });
 
-  it("keeps legacy inventory path mapped to wallets", () => {
-    expect(pathForTab("wallets")).toBe("/wallets");
-    expect(tabFromPath("/wallets")).toBe("wallets");
-    expect(tabFromPath("/inventory")).toBe("wallets");
+  it("keeps legacy wallets path mapped to inventory", () => {
+    expect(pathForTab("inventory")).toBe("/inventory");
+    expect(tabFromPath("/wallets")).toBe("inventory");
+    expect(tabFromPath("/inventory")).toBe("inventory");
   });
 
   it("uses mobile chat drawers on narrow viewports", async () => {

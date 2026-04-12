@@ -549,6 +549,18 @@ describe("collectPluginNames", () => {
     expect(names.has("@elizaos/plugin-telegram")).toBe(false);
   });
 
+  it("does not add connector plugins when the connector is explicitly disabled", () => {
+    const config = {
+      connectors: {
+        imessage: { enabled: false, cliPath: "/Users/test/.local/bin/imsg" },
+        telegram: { enabled: false, botToken: "tok" },
+      },
+    } as Partial<ElizaConfig> as ElizaConfig;
+    const names = collectPluginNames(config);
+    expect(names.has("@elizaos/plugin-imessage")).toBe(false);
+    expect(names.has("@elizaos/plugin-telegram")).toBe(false);
+  });
+
   it("adds ElizaCloud plugin when cloud is enabled in config", () => {
     const config = { cloud: { enabled: true } } as ElizaConfig;
     const names = collectPluginNames(config);

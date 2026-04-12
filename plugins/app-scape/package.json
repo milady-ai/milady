@@ -20,7 +20,7 @@
   "dependencies": {
     "@elizaos/core": "workspace:*",
     "@miladyai/shared": "workspace:*",
-    "@toon-format/toon": "^2.1.0"
+    "@toon-format/toon": "2.1.0"
   },
   "agentConfig": {
     "pluginParameters": {
@@ -32,23 +32,23 @@
       },
       "SCAPE_AGENT_PASSWORD": {
         "type": "string",
-        "description": "Password for the agent's xRSPS account. Auto-registers on the first spawn, verified via scrypt on every reconnect. Treat like any other account password.",
-        "required": true,
+        "description": "Password for the agent's xRSPS account. Leave blank to auto-generate a 24-char random password on first launch (persisted to ~/.milady/scape-agent-identity.json and reused on every subsequent run). Only set this if you want to pin a specific existing account — and note that whatever value you set will be written to the identity file in plaintext, so do not reuse a production password.",
+        "required": false,
         "sensitive": true
       },
       "SCAPE_BOT_SDK_URL": {
         "type": "string",
-        "description": "WebSocket URL of the xRSPS bot-SDK endpoint. Default points at localhost for dev.",
+        "description": "WebSocket URL of the xRSPS bot-SDK endpoint. Defaults to the production 'scape deployment at wss://scape-96cxt.sevalla.app/botsdk (same host as the main game, path-routed, TLS-terminated by Sevalla's ingress). Override to ws://127.0.0.1:8080/botsdk for local dev against the shared-HTTP topology, or ws://127.0.0.1:43595 for legacy standalone BOT_SDK_PORT.",
         "required": false,
         "sensitive": false,
-        "default": "ws://127.0.0.1:43595"
+        "default": "wss://scape-96cxt.sevalla.app/botsdk"
       },
       "SCAPE_CLIENT_URL": {
         "type": "string",
-        "description": "URL the /viewer iframe loads — the xRSPS React client. Default is the local craco dev server; override for a deployed build.",
+        "description": "URL the /viewer iframe loads — the xRSPS React client. Defaults to the production 'scape deployment at https://scape-client-2sqyc.kinsta.page (React client with WS URL, OSRS cache URL, and map tiles all baked in at build time, pointing at the deployed game server). Override to http://localhost:3000 for local dev against the craco server.",
         "required": false,
         "sensitive": false,
-        "default": "http://localhost:3000"
+        "default": "https://scape-client-2sqyc.kinsta.page"
       },
       "SCAPE_AGENT_NAME": {
         "type": "string",
@@ -82,7 +82,7 @@
         "required": false,
         "sensitive": false,
         "default": "TEXT_SMALL",
-        "options": ["TEXT_NANO", "TEXT_SMALL", "TEXT_MEDIUM", "TEXT_LARGE", "TEXT_MEGA"]
+        "options": ["TEXT_NANO", "TEXT_SMALL", "TEXT_MEDIUM", "TEXT_LARGE"]
       }
     }
   },
@@ -92,7 +92,7 @@
       "displayName": "'scape",
       "category": "game",
       "launchType": "connect",
-      "launchUrl": "http://localhost:3000",
+      "launchUrl": "https://scape-client-2sqyc.kinsta.page",
       "capabilities": [
         "autonomous",
         "game",
@@ -102,7 +102,10 @@
       "runtimePlugin": "@elizaos/app-scape",
       "viewer": {
         "url": "/api/apps/scape/viewer",
-        "sandbox": "allow-scripts allow-same-origin allow-popups allow-forms"
+        "sandbox": "allow-scripts allow-same-origin allow-popups allow-forms",
+        "embedParams": {
+          "embedded": "true"
+        }
       },
       "session": {
         "mode": "spectate-and-steer",

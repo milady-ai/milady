@@ -343,6 +343,22 @@ describe("cloud discord env var parity", () => {
     expect(vars.DISCORD_APPLICATION_ID).toBe("app-id-789");
   });
 
+  it("collectConnectorEnvVars emits Discord profile sync settings", () => {
+    const vars = collectConnectorEnvVars({
+      connectors: {
+        discord: {
+          botToken: "tok",
+          syncProfile: false,
+          profileName: "MiladyBot",
+          profileAvatar: "/tmp/milady.png",
+        },
+      },
+    } as Record<string, unknown>);
+    expect(vars.DISCORD_SYNC_PROFILE).toBe("false");
+    expect(vars.DISCORD_PROFILE_NAME).toBe("MiladyBot");
+    expect(vars.DISCORD_PROFILE_AVATAR).toBe("/tmp/milady.png");
+  });
+
   it("collectConnectorEnvVars omits discord vars when no token is set", () => {
     const vars = collectConnectorEnvVars({
       connectors: { discord: { applicationId: "app-id-789" } },

@@ -22,7 +22,7 @@ env:
 jobs:
   regression-matrix:
     name: Regression Matrix Contract
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -42,7 +42,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -53,7 +53,7 @@ jobs:
 
       # WHY setup-node before bun install: optional deps like @discordjs/opus fall back to node-gyp; Node 22 + colocated cache avoids nodejs.org header download. Engines require >=22.
       - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -87,7 +87,7 @@ jobs:
 
   db-check:
     name: Database Security Check
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -97,7 +97,7 @@ jobs:
           submodules: false
 
       - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -124,7 +124,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Vitest)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -134,7 +134,7 @@ jobs:
           submodules: false
 
       - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -445,7 +445,7 @@ jobs:
 
   app-startup-e2e:
     name: App Startup E2E (Onboarding)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -453,9 +453,8 @@ jobs:
         with:
           submodules: false
 
-      # WHY useblacksmith: colocated cache avoids nodejs.org download timeouts on Blacksmith runners.
       - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -483,7 +482,7 @@ jobs:
 
   desktop-contract:
     name: Electrobun Desktop Contract
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -492,7 +491,7 @@ jobs:
           submodules: false
 
       - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -547,7 +546,7 @@ jobs:
 
   cloud-live-e2e:
     name: Cloud Live E2E (Eliza Cloud)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Check cloud secrets
@@ -588,7 +587,7 @@ jobs:
 
   validation-e2e:
     name: End-to-End Validation (Issue #6)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -614,7 +613,7 @@ jobs:
     name: All Tests Passed
     if: always()
     needs: [regression-matrix, unit-tests, db-check, e2e-tests, website-blocker-cross-platform, website-blocker-startup-smoke, website-blocker-desktop-smoke, website-blocker-mobile-android, website-blocker-mobile-ios, app-startup-e2e, desktop-contract, cloud-live-e2e, validation-e2e]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Check test results
         shell: bash

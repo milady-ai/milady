@@ -6,12 +6,12 @@
 import type { DatabaseProviderType } from "@miladyai/agent/contracts/config";
 
 export type { StreamEventType } from "@miladyai/agent/api/server";
+export type { TrajectoryExportFormat } from "@miladyai/agent/api/trajectory-routes";
 export type {
   TriggerLastStatus,
   TriggerType,
   TriggerWakeMode,
 } from "@miladyai/agent/triggers/types";
-export type { TrajectoryExportFormat } from "@miladyai/agent/api/trajectory-routes";
 
 export interface DatabaseStatus {
   provider: DatabaseProviderType;
@@ -344,6 +344,11 @@ export interface ExtensionStatus {
   relayReachable: boolean;
   relayPort: number;
   extensionPath: string | null;
+  chromeBuildPath?: string | null;
+  chromePackagePath?: string | null;
+  safariWebExtensionPath?: string | null;
+  safariAppPath?: string | null;
+  safariPackagePath?: string | null;
 }
 
 // WebSocket

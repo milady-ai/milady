@@ -69,12 +69,14 @@ export function installTaskProgressStreamer(
   >();
   const heartbeatSent = new Set<string>();
   const finalSent = new Set<string>();
+  const loginNoticeSent = new Set<string>();
 
   const forgetSession = (sessionId: string): void => {
     sessionStartedAt.delete(sessionId);
     sessionWorkdirs.delete(sessionId);
     sessionRooms.delete(sessionId);
     heartbeatSent.delete(sessionId);
+    loginNoticeSent.delete(sessionId);
     // NOTE: do NOT clear finalSent here. finalSent is a "we already posted the
     // final report for this session" gate and must survive the stopped event,
     // which can fire between task_complete and the 10s postFinalReport delay.
@@ -185,8 +187,8 @@ export function installTaskProgressStreamer(
       return;
     }
 
-    if (event === "login_required" && !finalSent.has(sessionId)) {
-      finalSent.add(sessionId);
+    if (event === "login_required" && !loginNoticeSent.has(sessionId)) {
+      loginNoticeSent.add(sessionId);
       const login = data as { instructions?: string; url?: string } | undefined;
       const message = [
         "task agent needs a provider login before it can continue",

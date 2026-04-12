@@ -32,7 +32,7 @@ jobs:
   # ── Check for new commits ───────────────────────────────────────────────
   check-commits:
     name: Check for new commits
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     outputs:
       has_new_commits: ${{ steps.check.outputs.has_new_commits }}
       short_sha: ${{ steps.check.outputs.short_sha }}
@@ -81,7 +81,7 @@ jobs:
     name: Build & Test
     needs: check-commits
     if: needs.check-commits.outputs.has_new_commits == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     outputs:
       nightly_version: ${{ steps.version.outputs.nightly_version }}
@@ -234,7 +234,7 @@ jobs:
     name: Publish to npm (nightly)
     needs: [check-commits, build-and-test, desktop-heavy-matrix]
     if: needs.check-commits.outputs.has_new_commits == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -285,7 +285,7 @@ jobs:
     name: Create GitHub pre-release
     needs: [check-commits, build-and-test, desktop-heavy-matrix, publish-npm]
     if: needs.check-commits.outputs.has_new_commits == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -340,7 +340,7 @@ jobs:
     name: Cleanup old nightly releases
     needs: create-release
     if: needs.create-release.result == 'success'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -376,7 +376,7 @@ jobs:
     name: Nightly Summary
     if: always()
     needs: [check-commits, build-and-test, publish-npm, create-release, cleanup]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Summary
         run: |

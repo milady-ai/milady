@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -76,11 +76,34 @@ function runCommand(command, args, { cwd, env = process.env, label } = {}) {
   });
 }
 
+/**
+ * Check if the source (package.json as proxy for "last submodule update")
+ * is newer than the built artifact. This catches the case where the
+ * submodule was updated with new source but the stale dist from a prior
+ * version still exists on disk.
+ */
+function isArtifactStale(
+  manifestPath,
+  artifactPath,
+  { pathExists = existsSync, stat = statSync } = {},
+) {
+  if (!pathExists(artifactPath)) return true;
+  try {
+    const srcMtime = stat(manifestPath).mtimeMs;
+    const artMtime = stat(artifactPath).mtimeMs;
+    return srcMtime > artMtime;
+  } catch {
+    // If stat fails, rebuild to be safe
+    return true;
+  }
+}
+
 export async function ensureBundledWorkspaceBuilds(
   repoRoot = DEFAULT_REPO_ROOT,
   {
     commandRunner = runCommand,
     pathExists = existsSync,
+    stat = statSync,
     log = console.log,
   } = {},
 ) {
@@ -88,12 +111,23 @@ export async function ensureBundledWorkspaceBuilds(
     const manifestPath = path.join(repoRoot, workspace.manifest);
     const artifactPath = path.join(repoRoot, workspace.artifact);
 
-    if (!pathExists(manifestPath) || pathExists(artifactPath)) {
+    if (!pathExists(manifestPath)) {
       continue;
     }
 
+    const stale = isArtifactStale(manifestPath, artifactPath, {
+      pathExists,
+      stat,
+    });
+    if (!stale) {
+      continue;
+    }
+
+    const reason = !pathExists(artifactPath)
+      ? `${workspace.artifact} is missing`
+      : `${workspace.artifact} is older than ${workspace.manifest}`;
     log(
-      `[ensure-bundled-workspaces] Building ${workspace.label} because ${workspace.artifact} is missing in this checkout`,
+      `[ensure-bundled-workspaces] Building ${workspace.label} because ${reason}`,
     );
     await commandRunner("bun", workspace.args, {
       cwd: path.join(repoRoot, workspace.cwd),

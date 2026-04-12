@@ -130,7 +130,7 @@ async function main(): Promise<void> {
             let liveStatus = "";
             const liveSdk = new BotSdk(
                 {
-                    url: process.env.BOT_SDK_URL ?? "ws://127.0.0.1:43595",
+                    url: process.env.BOT_SDK_URL ?? "ws://127.0.0.1:8080/botsdk",
                     token,
                     agentId: `verify-${liveName}`,
                     displayName: liveName,

@@ -1,3 +1,7 @@
+import { execFile, spawn, type ChildProcess } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { promisify } from "node:util";
 import {
   ChannelType,
   type Character,
@@ -14,6 +18,7 @@ import {
   stringToUuid,
   type UUID,
 } from "@elizaos/core";
+import { signalCheck } from "./rpc";
 
 type MessageService = {
   handleMessage: (
@@ -50,6 +55,57 @@ import {
   type SignalReactionInfo,
   type SignalSettings,
 } from "./types";
+
+const execFileAsync = promisify(execFile);
+const DEFAULT_SIGNAL_HTTP_HOST = "127.0.0.1";
+const DEFAULT_SIGNAL_HTTP_PORT = 8080;
+const DEFAULT_SIGNAL_DAEMON_STARTUP_TIMEOUT_MS = 30_000;
+const DEFAULT_SIGNAL_CLI_PATH = "signal-cli";
+const BREW_OPENJDK_HOME = "/opt/homebrew/opt/openjdk";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function normalizeBaseUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "");
+}
+
+async function resolveSignalCliPath(cliPath: string): Promise<string | null> {
+  const trimmed = cliPath.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed.includes("/") || trimmed.startsWith(".")) {
+    return fs.existsSync(trimmed) ? trimmed : null;
+  }
+
+  try {
+    const { stdout } = await execFileAsync("/usr/bin/which", [trimmed]);
+    const resolved = stdout.trim();
+    return resolved.length > 0 ? resolved : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildSignalCliEnv(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  const javaHome =
+    (fs.existsSync(BREW_OPENJDK_HOME) ? BREW_OPENJDK_HOME : null) ||
+    (typeof env.JAVA_HOME === "string" && env.JAVA_HOME.trim().length > 0
+      ? env.JAVA_HOME.trim()
+      : null);
+
+  if (javaHome) {
+    env.JAVA_HOME = javaHome;
+    const javaBin = path.join(javaHome, "bin");
+    env.PATH = env.PATH ? `${javaBin}:${env.PATH}` : javaBin;
+  }
+
+  return env;
+}
 
 /**
  * Signal API client for HTTP API mode
@@ -231,6 +287,7 @@ export class SignalService extends Service implements ISignalService {
   private groupCache: Map<string, SignalGroup> = new Map();
   private pollInterval: NodeJS.Timeout | null = null;
   private isPolling = false;
+  private daemonProcess: ChildProcess | null = null;
 
   constructor(runtime?: IAgentRuntime) {
     super(runtime);
@@ -262,6 +319,29 @@ export class SignalService extends Service implements ISignalService {
 
     const accountNumber = runtime.getSetting("SIGNAL_ACCOUNT_NUMBER") as string;
     const httpUrl = runtime.getSetting("SIGNAL_HTTP_URL") as string;
+    const authDir = runtime.getSetting("SIGNAL_AUTH_DIR") as string | undefined;
+    const configuredCliPath =
+      (runtime.getSetting("SIGNAL_CLI_PATH") as string | undefined) ||
+      DEFAULT_SIGNAL_CLI_PATH;
+    const httpHost =
+      (runtime.getSetting("SIGNAL_HTTP_HOST") as string | undefined)?.trim() ||
+      DEFAULT_SIGNAL_HTTP_HOST;
+    const parsedHttpPort = Number.parseInt(
+      String(runtime.getSetting("SIGNAL_HTTP_PORT") ?? ""),
+      10,
+    );
+    const httpPort =
+      Number.isFinite(parsedHttpPort) && parsedHttpPort > 0
+        ? parsedHttpPort
+        : DEFAULT_SIGNAL_HTTP_PORT;
+    const parsedStartupTimeout = Number.parseInt(
+      String(runtime.getSetting("SIGNAL_STARTUP_TIMEOUT_MS") ?? ""),
+      10,
+    );
+    const startupTimeoutMs =
+      Number.isFinite(parsedStartupTimeout) && parsedStartupTimeout > 0
+        ? Math.min(parsedStartupTimeout, 120_000)
+        : DEFAULT_SIGNAL_DAEMON_STARTUP_TIMEOUT_MS;
 
     if (!accountNumber) {
       runtime.logger.warn(
@@ -282,13 +362,53 @@ export class SignalService extends Service implements ISignalService {
 
     service.accountNumber = normalizedNumber;
 
-    if (httpUrl) {
-      service.client = new SignalApiClient(httpUrl, normalizedNumber);
+    const baseUrl = httpUrl?.trim()
+      ? normalizeBaseUrl(httpUrl)
+      : `http://${httpHost}:${httpPort}`;
+
+    if (!httpUrl) {
+      if (!authDir || authDir.trim().length === 0) {
+        runtime.logger.warn(
+          { src: "plugin:signal", agentId: runtime.agentId },
+          "SIGNAL_AUTH_DIR not provided, Signal service will not be able to communicate"
+        );
+        return service;
+      }
+
+      try {
+        await service.ensureDaemonRunning(
+          configuredCliPath,
+          authDir.trim(),
+          baseUrl,
+          startupTimeoutMs,
+        );
+      } catch (error) {
+        runtime.logger.error(
+          {
+            src: "plugin:signal",
+            agentId: runtime.agentId,
+            error: String(error),
+            authDir,
+            cliPath: configuredCliPath,
+          },
+          "Failed to start signal-cli daemon"
+        );
+        return service;
+      }
+    }
+
+    service.client = new SignalApiClient(baseUrl, normalizedNumber);
+    try {
       await service.initialize();
-    } else {
+    } catch (error) {
       runtime.logger.warn(
-        { src: "plugin:signal", agentId: runtime.agentId },
-        "SIGNAL_HTTP_URL not provided, Signal service will not be able to communicate"
+        {
+          src: "plugin:signal",
+          agentId: runtime.agentId,
+          error: String(error),
+          baseUrl,
+        },
+        "Signal service failed to initialize"
       );
     }
 
@@ -380,10 +500,104 @@ export class SignalService extends Service implements ISignalService {
     this.stopPolling();
     this.client = null;
     this.isConnected = false;
+    if (this.daemonProcess) {
+      this.daemonProcess.kill("SIGTERM");
+      this.daemonProcess = null;
+    }
 
     this.runtime.logger.info(
       { src: "plugin:signal", agentId: this.runtime.agentId },
       "Signal service stopped"
+    );
+  }
+
+  private async ensureDaemonRunning(
+    cliPath: string,
+    authDir: string,
+    baseUrl: string,
+    startupTimeoutMs: number,
+  ): Promise<void> {
+    const current = await signalCheck(baseUrl, 1_500);
+    if (current.ok) {
+      return;
+    }
+
+    const resolvedCliPath = await resolveSignalCliPath(cliPath);
+    if (!resolvedCliPath) {
+      throw new Error(`signal-cli executable not found for ${cliPath}`);
+    }
+
+    fs.mkdirSync(authDir, { recursive: true });
+    const httpTarget = new URL(baseUrl).host;
+    const daemonArgs = [
+      "--config",
+      authDir,
+      "daemon",
+      "--http",
+      httpTarget,
+      "--receive-mode",
+      "on-start",
+      "--no-receive-stdout",
+    ];
+    const child = spawn(resolvedCliPath, daemonArgs, {
+      env: buildSignalCliEnv(),
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    this.daemonProcess = child;
+
+    child.stdout.on("data", (chunk) => {
+      const text = chunk.toString().trim();
+      if (text.length > 0) {
+        this.runtime.logger.debug(
+          { src: "plugin:signal", agentId: this.runtime.agentId, output: text },
+          "signal-cli daemon stdout"
+        );
+      }
+    });
+
+    child.stderr.on("data", (chunk) => {
+      const text = chunk.toString().trim();
+      if (text.length > 0) {
+        this.runtime.logger.info(
+          { src: "plugin:signal", agentId: this.runtime.agentId, output: text },
+          "signal-cli daemon stderr"
+        );
+      }
+    });
+
+    child.once("exit", (code, signal) => {
+      if (this.daemonProcess === child) {
+        this.daemonProcess = null;
+      }
+      this.runtime.logger.warn(
+        {
+          src: "plugin:signal",
+          agentId: this.runtime.agentId,
+          code,
+          signal,
+        },
+        "signal-cli daemon exited"
+      );
+    });
+
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < startupTimeoutMs) {
+      if (child.exitCode !== null) {
+        throw new Error(
+          `signal-cli daemon exited before becoming ready (code ${child.exitCode})`
+        );
+      }
+
+      const ready = await signalCheck(baseUrl, 1_500);
+      if (ready.ok) {
+        return;
+      }
+
+      await sleep(500);
+    }
+
+    throw new Error(
+      `signal-cli daemon did not become ready at ${baseUrl} within ${startupTimeoutMs}ms`
     );
   }
 

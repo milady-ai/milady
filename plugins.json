@@ -1,7 +1,7 @@
 {
   "$schema": "plugin-index-v1",
-  "generatedAt": "2026-04-08T11:51:59.223Z",
-  "count": 93,
+  "generatedAt": "2026-04-11T01:55:50.795Z",
+  "count": 96,
   "plugins": [
     {
       "id": "acp",
@@ -2471,6 +2471,7 @@
         "messaging",
         "imessage",
         "apple",
+        "macos",
         "social",
         "social-chat"
       ],
@@ -3223,6 +3224,112 @@
       "homepage": "https://github.com/elizaos-plugins/plugin-mcp#readme",
       "repository": "https://github.com/elizaos-plugins/plugin-mcp",
       "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#mcp-model-context-protocol"
+    },
+    {
+      "id": "memory",
+      "dirName": "plugin-memory",
+      "name": "Memory",
+      "npmName": "@elizaos/plugin-memory",
+      "description": "Agent memory",
+      "tags": [
+        "memory",
+        "summarization"
+      ],
+      "category": "feature",
+      "envKey": null,
+      "configKeys": [
+        "MEMORY_ENABLE_BM25",
+        "MEMORY_TOKEN_BUDGET",
+        "MEMORY_MIN_CONFIDENCE",
+        "MEMORY_RETRIEVAL_LIMIT",
+        "MEMORY_SUMMARY_ENABLED",
+        "MEMORY_SUMMARY_MAX_DEPTH",
+        "MEMORY_SUMMARIES_PER_LEVEL",
+        "MEMORY_ENABLE_VECTOR_SEARCH",
+        "MEMORY_MESSAGES_PER_SUMMARY",
+        "MEMORY_SUMMARY_TOKEN_BUDGET",
+        "MEMORY_CONSOLIDATION_THRESHOLD"
+      ],
+      "version": "2.0.1",
+      "pluginParameters": {
+        "MEMORY_ENABLE_BM25": {
+          "type": "boolean",
+          "description": "Enable keyword-based search with stemming for exact term matching.",
+          "required": false,
+          "sensitive": false,
+          "default": "true"
+        },
+        "MEMORY_TOKEN_BUDGET": {
+          "type": "number",
+          "description": "Maximum tokens to use for memory context in prompts.",
+          "required": false,
+          "sensitive": true,
+          "default": "1000"
+        },
+        "MEMORY_MIN_CONFIDENCE": {
+          "type": "number",
+          "description": "Minimum confidence score (0-1) required to store extracted facts.",
+          "required": false,
+          "sensitive": false,
+          "default": "0.7"
+        },
+        "MEMORY_RETRIEVAL_LIMIT": {
+          "type": "number",
+          "description": "Maximum number of memories to retrieve per query.",
+          "required": false,
+          "sensitive": false,
+          "default": "5"
+        },
+        "MEMORY_SUMMARY_ENABLED": {
+          "type": "boolean",
+          "description": "Enable hierarchical conversation summarization to reduce token usage.",
+          "required": false,
+          "sensitive": false,
+          "default": "true"
+        },
+        "MEMORY_SUMMARY_MAX_DEPTH": {
+          "type": "number",
+          "description": "Maximum depth of the summary hierarchy (1=direct summaries, 2=summaries of summaries, etc).",
+          "required": false,
+          "sensitive": false,
+          "default": "3"
+        },
+        "MEMORY_SUMMARIES_PER_LEVEL": {
+          "type": "number",
+          "description": "How many summaries to accumulate before creating the next level.",
+          "required": false,
+          "sensitive": false,
+          "default": "5"
+        },
+        "MEMORY_ENABLE_VECTOR_SEARCH": {
+          "type": "boolean",
+          "description": "Enable semantic similarity search using embeddings.",
+          "required": false,
+          "sensitive": false,
+          "default": "true"
+        },
+        "MEMORY_MESSAGES_PER_SUMMARY": {
+          "type": "number",
+          "description": "How many messages to include in each Level 1 summary.",
+          "required": false,
+          "sensitive": false,
+          "default": "15"
+        },
+        "MEMORY_SUMMARY_TOKEN_BUDGET": {
+          "type": "number",
+          "description": "Maximum tokens to use for conversation summaries in context.",
+          "required": false,
+          "sensitive": true,
+          "default": "500"
+        },
+        "MEMORY_CONSOLIDATION_THRESHOLD": {
+          "type": "number",
+          "description": "Number of messages to buffer before triggering memory consolidation.",
+          "required": false,
+          "sensitive": false,
+          "default": "10"
+        }
+      }
     },
     {
       "id": "minecraft",
@@ -4526,6 +4633,20 @@
       "repository": "https://github.com/ai16z/eliza"
     },
     {
+      "id": "rolodex",
+      "dirName": "plugin-rolodex",
+      "name": "Rolodex",
+      "npmName": "@elizaos/plugin-rolodex",
+      "description": "Entities, relationships, contact management for agents",
+      "tags": [
+        "rolodex"
+      ],
+      "category": "feature",
+      "envKey": null,
+      "configKeys": [],
+      "version": "2.0.0-alpha.4"
+    },
+    {
       "id": "rss",
       "dirName": "plugin-rss",
       "name": "Rss",
@@ -4656,6 +4777,104 @@
       },
       "homepage": "https://github.com/elizaos-plugins/plugin-storage-s3#readme",
       "repository": "https://github.com/elizaos-plugins/plugin-storage-s3"
+    },
+    {
+      "id": "scape",
+      "dirName": "app-scape",
+      "name": "'scape",
+      "npmName": "@elizaos/app-scape",
+      "description": "'scape — first-class agent integration for xRSPS. Autonomous RuneScape-alike agent with TOON-encoded state, Scape Journal, and directed-prompt operator control.",
+      "tags": [
+        "game",
+        "runescape",
+        "xrsps",
+        "agents",
+        "autonomous",
+        "app",
+        "interactive",
+        "scape"
+      ],
+      "category": "app",
+      "envKey": "SCAPE_BOT_SDK_TOKEN",
+      "configKeys": [
+        "SCAPE_BOT_SDK_TOKEN",
+        "SCAPE_AGENT_PASSWORD",
+        "SCAPE_BOT_SDK_URL",
+        "SCAPE_CLIENT_URL",
+        "SCAPE_AGENT_NAME",
+        "SCAPE_AGENT_ID",
+        "SCAPE_AGENT_PERSONA",
+        "SCAPE_LOOP_INTERVAL_MS",
+        "SCAPE_MODEL_SIZE"
+      ],
+      "version": "0.1.0",
+      "pluginParameters": {
+        "SCAPE_BOT_SDK_TOKEN": {
+          "type": "string",
+          "description": "Shared secret for the xRSPS bot-SDK endpoint. Must match the server's BOT_SDK_TOKEN env var. Without this set, the plugin will not connect and the agent will not enter the world.",
+          "required": true,
+          "sensitive": true
+        },
+        "SCAPE_AGENT_PASSWORD": {
+          "type": "string",
+          "description": "Password for the agent's xRSPS account. Leave blank to auto-generate a 24-char random password on first launch (persisted to ~/.milady/scape-agent-identity.json and reused on every subsequent run). Only set this if you want to pin a specific existing account — and note that whatever value you set will be written to the identity file in plaintext, so do not reuse a production password.",
+          "required": false,
+          "sensitive": true
+        },
+        "SCAPE_BOT_SDK_URL": {
+          "type": "string",
+          "description": "WebSocket URL of the xRSPS bot-SDK endpoint. Defaults to the production 'scape deployment at wss://scape-96cxt.sevalla.app/botsdk (same host as the main game, path-routed, TLS-terminated by Sevalla's ingress). Override to ws://127.0.0.1:8080/botsdk for local dev against the shared-HTTP topology, or ws://127.0.0.1:43595 for legacy standalone BOT_SDK_PORT.",
+          "required": false,
+          "sensitive": false,
+          "default": "wss://scape-96cxt.sevalla.app/botsdk"
+        },
+        "SCAPE_CLIENT_URL": {
+          "type": "string",
+          "description": "URL the /viewer iframe loads — the xRSPS React client. Defaults to the production 'scape deployment at https://scape-client-2sqyc.kinsta.page. Override to http://localhost:3000 for local dev against the craco server.",
+          "required": false,
+          "sensitive": false,
+          "default": "https://scape-client-2sqyc.kinsta.page"
+        },
+        "SCAPE_AGENT_NAME": {
+          "type": "string",
+          "description": "In-game display name for the agent. Becomes the account username (normalized, max 12 chars). Must not conflict with any human player's name.",
+          "required": false,
+          "sensitive": false,
+          "default": "scape-agent"
+        },
+        "SCAPE_AGENT_ID": {
+          "type": "string",
+          "description": "Stable identifier across reconnects. Used as the journal filename. Defaults to 'scape-{SCAPE_AGENT_NAME}'.",
+          "required": false,
+          "sensitive": false
+        },
+        "SCAPE_AGENT_PERSONA": {
+          "type": "string",
+          "description": "Optional persona string fed into the LLM's system prompt so the agent keeps a consistent voice across sessions.",
+          "required": false,
+          "sensitive": false
+        },
+        "SCAPE_LOOP_INTERVAL_MS": {
+          "type": "string",
+          "description": "Autonomous LLM step interval in milliseconds. Lower = more expensive, more responsive. Minimum 1000.",
+          "required": false,
+          "sensitive": false,
+          "default": "15000"
+        },
+        "SCAPE_MODEL_SIZE": {
+          "type": "string",
+          "description": "Which model tier the autonomous loop uses. Smaller = cheaper, larger = smarter.",
+          "required": false,
+          "sensitive": false,
+          "default": "TEXT_SMALL",
+          "options": [
+            "TEXT_NANO",
+            "TEXT_SMALL",
+            "TEXT_MEDIUM",
+            "TEXT_LARGE"
+          ]
+        }
+      }
     },
     {
       "id": "scheduling",
@@ -4850,8 +5069,8 @@
       "npmName": "@elizaos/plugin-shopify",
       "description": "Shopify Admin API integration -- manage products, orders, inventory, and customers.",
       "tags": [
-        "ecommerce",
         "shopify",
+        "ecommerce",
         "products",
         "orders",
         "inventory"
@@ -5357,6 +5576,64 @@
         }
       },
       "setupGuideUrl": "https://docs.eliza.ai/plugin-setup-guide#tlon-urbit"
+    },
+    {
+      "id": "todo",
+      "dirName": "plugin-todo",
+      "name": "Todo",
+      "npmName": "@elizaos/plugin-todo",
+      "description": "A todo list. For humans and agents.",
+      "tags": [
+        "todo",
+        "task-management",
+        "multi-language"
+      ],
+      "category": "feature",
+      "envKey": null,
+      "configKeys": [
+        "ENABLE_REMINDERS",
+        "REMINDER_INTERVAL_MS"
+      ],
+      "version": "2.0.0-alpha.4",
+      "pluginParameters": {
+        "ENABLE_REMINDERS": {
+          "type": "boolean",
+          "description": "Enable reminder notifications for todos",
+          "required": false,
+          "sensitive": false,
+          "default": "true"
+        },
+        "REMINDER_INTERVAL_MS": {
+          "type": "number",
+          "description": "Interval in milliseconds between reminder checks",
+          "required": false,
+          "sensitive": false,
+          "default": "30000"
+        }
+      },
+      "homepage": "https://github.com/elizaos-plugins/plugin-todo#readme",
+      "repository": "https://github.com/elizaos-plugins/plugin-todo"
+    },
+    {
+      "id": "trajectory-logger",
+      "dirName": "plugin-trajectory-logger",
+      "name": "Trajectory Logger",
+      "npmName": "@elizaos/plugin-trajectory-logger",
+      "description": "Trajectory logging plugin for ElizaOS - capture agent interaction trajectories for RL training",
+      "tags": [
+        "trajectory",
+        "rl",
+        "training",
+        "logging",
+        "trajectory-logger",
+        "logger"
+      ],
+      "category": "feature",
+      "envKey": null,
+      "configKeys": [],
+      "version": "2.0.0-alpha.4",
+      "homepage": "https://elizaos.ai",
+      "repository": "https://github.com/elizaos/elizaos"
     },
     {
       "id": "trust",

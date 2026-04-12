@@ -86,12 +86,21 @@ vi.mock("./app-shell-components", () => {
     ConversationsSidebar: stub("ConversationsSidebar"),
     CustomActionEditor: stub("CustomActionEditor"),
     CustomActionsPanel: stub("CustomActionsPanel"),
+    DesktopWorkspaceSection: stub("DesktopWorkspaceSection"),
+    FineTuningView: stub("FineTuningView"),
     GameViewOverlay: stub("GameViewOverlay"),
     Header: stub("Header"),
     HeartbeatsView: stub("HeartbeatsView"),
     InventoryView: stub("InventoryView"),
+    DatabasePageView: stub("DatabasePageView"),
     KnowledgeView: stub("KnowledgeView"),
+    LifeOpsPageView: stub("LifeOpsPageView"),
     OnboardingWizard: stub("OnboardingWizard"),
+    LogsPageView: stub("LogsPageView"),
+    MemoryViewerView: stub("MemoryViewerView"),
+    PluginsPageView: stub("PluginsPageView"),
+    RelationshipsView: stub("RelationshipsView"),
+    RuntimeView: stub("RuntimeView"),
 
     PairingView: stub("PairingView"),
     SaveCommandModal: stub("SaveCommandModal"),
@@ -113,6 +122,7 @@ vi.mock("./app-shell-components", () => {
       ),
     SharedCompanionScene: passthrough,
     ShellOverlays: stub("ShellOverlays"),
+    SkillsView: stub("SkillsView"),
     StartupFailureView: ({ error }: { error: { message: string } }) =>
       React.createElement(
         "div",
@@ -138,6 +148,7 @@ vi.mock("./app-shell-components", () => {
     },
     StreamView: stub("StreamView"),
     SystemWarningBanner: stub("SystemWarningBanner"),
+    TrajectoriesView: stub("TrajectoriesView"),
   };
 });
 
@@ -253,7 +264,7 @@ describe("App", () => {
     ).toContain("backend died");
   });
 
-  it("mounts advanced-family tabs in the dedicated advanced shell instead of the padded default main shell", async () => {
+  it("mounts apps-owned tool tabs in the dedicated app shell instead of the padded default main shell", async () => {
     const makeState = (tab: string) => ({
       onboardingLoading: false,
       onboardingHandoffError: null,
@@ -287,12 +298,18 @@ describe("App", () => {
       t: (key: string) => key,
     });
 
-    for (const tab of [
-      "plugins",
-      "skills",
-      "trajectories",
-      "relationships",
-    ] as const) {
+    const expectedViewByTab = {
+      lifeops: "LifeOpsPageView",
+      plugins: "PluginsPageView",
+      skills: "SkillsView",
+      "fine-tuning": "FineTuningView",
+      trajectories: "TrajectoriesView",
+      relationships: "RelationshipsView",
+    } as const;
+
+    for (const tab of Object.keys(expectedViewByTab) as Array<
+      keyof typeof expectedViewByTab
+    >) {
       useAppMock.mockImplementation(() => makeState(tab));
 
       let renderer!: TestRenderer.ReactTestRenderer;
@@ -301,14 +318,16 @@ describe("App", () => {
       });
 
       renderer.root.findByProps({
-        "data-testid": "AdvancedPageView",
+        "data-testid": expectedViewByTab[tab],
       });
-      const advancedShells = renderer.root.findAll(
+      const appShells = renderer.root.findAll(
         (node) =>
           node.type === "div" &&
           typeof node.props.className === "string" &&
           node.props.className.includes("flex flex-1 min-h-0 min-w-0") &&
-          node.findAllByProps({ "data-testid": "AdvancedPageView" }).length > 0,
+          node.findAllByProps({
+            "data-testid": expectedViewByTab[tab],
+          }).length > 0,
       );
       const paddedMain = renderer.root.findAll(
         (node) =>
@@ -317,9 +336,111 @@ describe("App", () => {
           node.props.className.includes("px-3 xl:px-5 py-4 xl:py-6"),
       );
 
-      expect(advancedShells.length).toBeGreaterThan(0);
+      expect(appShells.length).toBeGreaterThan(0);
       expect(paddedMain.length).toBe(0);
+      expect(
+        renderer.root.findAllByProps({ "data-testid": "AdvancedPageView" }),
+      ).toHaveLength(0);
     }
+  });
+
+  it("renders the shared header on character tabs", async () => {
+    const makeState = (tab: "character" | "character-select") => ({
+      onboardingLoading: false,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
+      startupPhase: "ready",
+      startupError: null,
+      startupCoordinator: { phase: "ready" },
+      authRequired: false,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab,
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "native",
+      switchShellView: vi.fn(),
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "dark",
+      setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      cancelOnboardingHandoff: vi.fn(),
+      handleSaveCharacter: vi.fn(),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      agentStatus: { state: "running" },
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      retryOnboardingHandoff: vi.fn(),
+      t: (key: string) => key,
+    });
+
+    for (const tab of ["character", "character-select"] as const) {
+      useAppMock.mockImplementation(() => makeState(tab));
+
+      let renderer!: TestRenderer.ReactTestRenderer;
+      await act(async () => {
+        renderer = TestRenderer.create(React.createElement(App));
+      });
+
+      expect(
+        renderer.root.findAllByProps({ "data-testid": "Header" }),
+      ).toHaveLength(1);
+      expect(
+        renderer.root.findAllByProps({ "data-testid": "CharacterEditor" }),
+      ).toHaveLength(1);
+    }
+  });
+
+  it("routes the connectors tab alias into settings with the connectors section selected", async () => {
+    useAppMock.mockImplementation(() => ({
+      onboardingLoading: false,
+      onboardingHandoffError: null,
+      onboardingHandoffPhase: "idle",
+      startupPhase: "ready",
+      startupError: null,
+      startupCoordinator: { phase: "ready" },
+      authRequired: false,
+      onboardingComplete: true,
+      retryStartup: vi.fn(),
+      tab: "connectors",
+      setTab: vi.fn(),
+      setState: vi.fn(),
+      actionNotice: null,
+      uiShellMode: "native",
+      switchShellView: vi.fn(),
+      uiLanguage: "en",
+      setUiLanguage: vi.fn(),
+      uiTheme: "dark",
+      setUiTheme: vi.fn(),
+      chatAgentVoiceMuted: false,
+      cancelOnboardingHandoff: vi.fn(),
+      handleSaveCharacter: vi.fn(),
+      characterSaving: false,
+      characterSaveSuccess: false,
+      agentStatus: { state: "running" },
+      unreadConversations: new Set(),
+      activeGameViewerUrl: null,
+      gameOverlayEnabled: false,
+      retryOnboardingHandoff: vi.fn(),
+      t: (key: string) => key,
+    }));
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(React.createElement(App));
+    });
+
+    const settingsView = renderer.root.findByProps({
+      "data-testid": "SettingsView",
+    });
+    expect(settingsView.props["data-initial-section"]).toBe("connectors");
+    expect(
+      renderer.root.findAllByProps({ "data-testid": "Header" }),
+    ).toHaveLength(1);
   });
 
   it("renders the workspace widget rail by default on desktop chat", async () => {

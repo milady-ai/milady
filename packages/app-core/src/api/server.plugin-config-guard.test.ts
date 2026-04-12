@@ -31,7 +31,7 @@ describe("resolvePluginConfigMutationRejections", () => {
   it("accepts declared and non-blocked config keys", () => {
     const rejections = resolvePluginConfigMutationRejections(
       [{ key: "OPENAI_API_KEY" }, { key: "MODEL_NAME" }],
-      { OPENAI_API_KEY: "sk-test", MODEL_NAME: "gpt-4.1-mini" },
+      { OPENAI_API_KEY: "sk-test", MODEL_NAME: "gpt-5.4-mini" },
     );
     expect(rejections).toEqual([]);
   });

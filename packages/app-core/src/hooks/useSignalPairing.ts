@@ -12,28 +12,60 @@ interface SignalPairingState {
   error: string | null;
 }
 
+type SignalStatusResponse = Awaited<ReturnType<typeof client.getSignalStatus>>;
+
+const IDLE_SIGNAL_PAIRING_STATE: SignalPairingState = {
+  status: "idle",
+  qrDataUrl: null,
+  phoneNumber: null,
+  error: null,
+};
+
+function stateFromStatusResponse(
+  response: SignalStatusResponse,
+): SignalPairingState {
+  return {
+    status: response.status as SignalPairingStatus,
+    qrDataUrl: response.qrDataUrl,
+    phoneNumber: response.phoneNumber,
+    error: response.error,
+  };
+}
+
+function toSignalPairingErrorState(error: unknown): SignalPairingState {
+  return {
+    ...IDLE_SIGNAL_PAIRING_STATE,
+    status: "error",
+    error: error instanceof Error ? error.message : String(error),
+  };
+}
+
 export function useSignalPairing(accountId = "default") {
-  const [state, setState] = useState<SignalPairingState>({
-    status: "idle",
-    qrDataUrl: null,
-    phoneNumber: null,
-    error: null,
-  });
+  const [state, setState] = useState<SignalPairingState>(
+    IDLE_SIGNAL_PAIRING_STATE,
+  );
 
   useEffect(() => {
-    client
+    let cancelled = false;
+
+    void client
       .getSignalStatus(accountId)
-      .then((res) => {
-        if (res.authExists) {
-          setState((prev) => ({
-            ...prev,
-            status: "connected",
-          }));
+      .then((response) => {
+        if (cancelled) {
+          return;
         }
+        setState(stateFromStatusResponse(response));
       })
-      .catch(() => {
-        // Initial auth probe is best-effort.
+      .catch((error) => {
+        if (cancelled) {
+          return;
+        }
+        setState(toSignalPairingErrorState(error));
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [accountId]);
 
   useEffect(() => {
@@ -54,12 +86,18 @@ export function useSignalPairing(accountId = "default") {
       "signal-status",
       (data: Record<string, unknown>) => {
         if (data.accountId !== accountId) return;
+        const nextStatus = data.status as SignalPairingStatus;
+        const clearQrDataUrl =
+          nextStatus === "connected" ||
+          nextStatus === "disconnected" ||
+          nextStatus === "timeout" ||
+          nextStatus === "error";
         setState((prev) => ({
           ...prev,
-          status: data.status as SignalPairingStatus,
+          status: nextStatus,
           phoneNumber: (data.phoneNumber as string) ?? prev.phoneNumber,
           error: (data.error as string) ?? null,
-          qrDataUrl: data.status === "connected" ? null : prev.qrDataUrl,
+          qrDataUrl: clearQrDataUrl ? null : prev.qrDataUrl,
         }));
       },
     );
@@ -80,7 +118,13 @@ export function useSignalPairing(accountId = "default") {
 
     try {
       const result = await client.startSignalPairing(accountId);
-      if (!result.ok) {
+      if (result.ok) {
+        setState((prev) => ({
+          ...prev,
+          status: result.status as SignalPairingStatus,
+          error: null,
+        }));
+      } else {
         setState((prev) => ({
           ...prev,
           status: "error",
@@ -97,23 +141,21 @@ export function useSignalPairing(accountId = "default") {
   }, [accountId]);
 
   const stopPairing = useCallback(async () => {
-    await client.stopSignalPairing(accountId).catch(() => {});
-    setState({
-      status: "idle",
-      qrDataUrl: null,
-      phoneNumber: null,
-      error: null,
-    });
+    try {
+      await client.stopSignalPairing(accountId);
+      setState(IDLE_SIGNAL_PAIRING_STATE);
+    } catch (error) {
+      setState(toSignalPairingErrorState(error));
+    }
   }, [accountId]);
 
   const disconnect = useCallback(async () => {
-    await client.disconnectSignal(accountId).catch(() => {});
-    setState({
-      status: "idle",
-      qrDataUrl: null,
-      phoneNumber: null,
-      error: null,
-    });
+    try {
+      await client.disconnectSignal(accountId);
+      setState(IDLE_SIGNAL_PAIRING_STATE);
+    } catch (error) {
+      setState(toSignalPairingErrorState(error));
+    }
   }, [accountId]);
 
   return { ...state, startPairing, stopPairing, disconnect };

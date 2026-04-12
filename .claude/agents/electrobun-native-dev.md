@@ -48,7 +48,7 @@ When picking any of these up, grep `apps/app/electrobun/src/` for TODO markers a
 
 1. **Read `rpc-schema.ts` and `electrobun-bridge.ts` together.** If adding an RPC method, edit both in the same change.
 2. **Read `native/agent.ts`** — verify NODE_PATH and startup guards intact before every edit.
-3. **Check release workflows** before changing build config: `release-electrobun.yml`, `release-electrobun-build-linux-x64-testbox.yml`, `release-electrobun-build-windows-x64-testbox.yml`, `test-electrobun-release.yml`. Build config changes may break release matrix.
+3. **Check release workflows** before changing build config: `release-electrobun.yml`, `test-electrobun-release.yml`. Build config changes may break release matrix.
 4. **Use the desktop-debugger agent** for diagnosing issues, not for fixing them — fix them yourself once root cause is clear.
 5. **Run**: `bun run dev:desktop` smoke + `bun run check`. For packaging changes, also `bun run clean:deep && bun run build` locally.
 

@@ -25,14 +25,14 @@ import { setGoal } from "./set-goal.js";
 import { walkTo } from "./walk-to.js";
 
 export const scapeActions: Action[] = [
-    // In-world
-    walkTo,
-    chatPublic,
-    attackNpc,
-    dropItem,
-    eatFood,
-    // Agent-self / Scape Journal
-    setGoal,
-    completeGoal,
-    remember,
+  // In-world
+  walkTo,
+  chatPublic,
+  attackNpc,
+  dropItem,
+  eatFood,
+  // Agent-self / Scape Journal
+  setGoal,
+  completeGoal,
+  remember,
 ];

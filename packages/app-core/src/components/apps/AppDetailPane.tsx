@@ -3,7 +3,7 @@ import type { RegistryAppInfo } from "../../api";
 import { useApp } from "../../state";
 import { getAppDetailExtension } from "./extensions/registry";
 import {
-  CATEGORY_LABELS,
+  getAppCatalogSectionLabel,
   getAppEmoji,
   getAppSessionFeatureLabels,
   getAppSessionModeLabel,
@@ -67,7 +67,7 @@ export function AppDetailPane({
             <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-strong">
               {isActive ? <span className="text-ok">Active</span> : null}
               {app.category ? (
-                <span>{CATEGORY_LABELS[app.category] ?? app.category}</span>
+                <span>{getAppCatalogSectionLabel(app)}</span>
               ) : null}
               {sessionModeLabel ? (
                 <span className="text-accent">{sessionModeLabel}</span>

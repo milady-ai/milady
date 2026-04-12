@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
@@ -5,12 +6,13 @@ import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
   getElizaCoreEntry,
+  getInstalledPackageEntry,
   resolveModuleEntry,
 } from "./test/eliza-package-paths";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 const elizaCoreEntry = getElizaCoreEntry(repoRoot);
-const elizaCoreRolesEntry = path.join(
+const elizaCoreRolesSource = path.join(
   repoRoot,
   "eliza",
   "packages",
@@ -18,8 +20,52 @@ const elizaCoreRolesEntry = path.join(
   "src",
   "roles.ts",
 );
+const elizaCoreRolesEntry = fs.existsSync(elizaCoreRolesSource)
+  ? elizaCoreRolesSource
+  : path.join(repoRoot, "scripts", "lib", "elizaos-core-roles-shim.js");
 const autonomousSourceRoot = getAutonomousSourceRoot(repoRoot);
 const appCoreSourceRoot = getAppCoreSourceRoot(repoRoot);
+const pluginPersonalityEntry =
+  getInstalledPackageEntry("@elizaos/plugin-personality", repoRoot, "node") ??
+  resolveModuleEntry(
+    path.join(
+      repoRoot,
+      "plugins",
+      "plugin-personality",
+      "typescript",
+      "src",
+      "index",
+    ),
+  );
+const pluginSignalEntry =
+  getInstalledPackageEntry("@elizaos/plugin-signal", repoRoot) ??
+  resolveModuleEntry(
+    path.join(
+      repoRoot,
+      "plugins",
+      "plugin-signal",
+      "typescript",
+      "src",
+      "index",
+    ),
+  );
+const pluginSqlEntry =
+  getInstalledPackageEntry("@elizaos/plugin-sql", repoRoot, "node") ??
+  resolveModuleEntry(
+    path.join(repoRoot, "plugins", "plugin-sql", "typescript", "index.node"),
+  );
+const pluginWhatsappEntry =
+  getInstalledPackageEntry("@elizaos/plugin-whatsapp", repoRoot) ??
+  resolveModuleEntry(
+    path.join(
+      repoRoot,
+      "plugins",
+      "plugin-whatsapp",
+      "typescript",
+      "src",
+      "index",
+    ),
+  );
 
 const liveTest = process.env.MILADY_LIVE_TEST === "1";
 export default defineConfig({
@@ -29,12 +75,12 @@ export default defineConfig({
         find: "milady/plugin-sdk",
         replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
       },
+      {
+        find: "@elizaos/core/roles",
+        replacement: elizaCoreRolesEntry,
+      },
       ...(elizaCoreEntry
         ? [
-            {
-              find: "@elizaos/core/roles",
-              replacement: elizaCoreRolesEntry,
-            },
             {
               find: "@elizaos/core",
               replacement: elizaCoreEntry,
@@ -105,6 +151,14 @@ export default defineConfig({
         find: "@elizaos/skills",
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),
       },
+      ...(fs.existsSync(pluginPersonalityEntry)
+        ? [
+            {
+              find: "@elizaos/plugin-personality",
+              replacement: pluginPersonalityEntry,
+            },
+          ]
+        : []),
       {
         find: "@elizaos/plugin-repoprompt",
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),
@@ -139,6 +193,22 @@ export default defineConfig({
         find: "@elizaos/plugin-pi-ai",
         replacement: path.join(repoRoot, "test", "stubs", "pi-ai-module.ts"),
       },
+      ...(fs.existsSync(pluginSignalEntry)
+        ? [
+            {
+              find: "@elizaos/plugin-signal",
+              replacement: pluginSignalEntry,
+            },
+          ]
+        : []),
+      ...(fs.existsSync(pluginSqlEntry)
+        ? [
+            {
+              find: "@elizaos/plugin-sql",
+              replacement: pluginSqlEntry,
+            },
+          ]
+        : []),
       {
         find: "@elizaos/plugin-edge-tts",
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),
@@ -200,6 +270,14 @@ export default defineConfig({
         find: "electron",
         replacement: path.join(repoRoot, "test", "stubs", "electron-module.ts"),
       },
+      ...(fs.existsSync(pluginWhatsappEntry)
+        ? [
+            {
+              find: "@elizaos/plugin-whatsapp",
+              replacement: pluginWhatsappEntry,
+            },
+          ]
+        : []),
       {
         find: /^@lookingglass\/webxr/,
         replacement: path.join(repoRoot, "test", "stubs", "empty-module.mjs"),

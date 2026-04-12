@@ -187,6 +187,18 @@ The conversation title is auto-generated in the background if it is still `"New 
 Action callbacks (e.g. from music playback, wallet flows) use **replace** semantics: each successive callback replaces the callback portion of the message rather than appending. This matches the progressive-message pattern used on Discord and Telegram. See [Action callbacks and SSE streaming](/runtime/action-callback-streaming) for details.
 </Info>
 
+**Error recovery**
+
+If the model provider fails **after** tokens have already been streamed to the client, the server preserves the streamed text. The `done` event's `fullText` contains the text that was already delivered rather than a generic error message. This prevents the client from losing a partially complete reply.
+
+If the failure occurs **before** any text is streamed, the `done` event's `fullText` contains a fallback error description (e.g. provider connectivity issue) so the user still receives feedback.
+
+In both cases, an `error` SSE event may also be emitted if the reply cannot be persisted:
+
+```
+data: {"type":"error","message":"Failed to persist message"}
+```
+
 ---
 
 ### POST /api/conversations/:id/greeting

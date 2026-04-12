@@ -150,7 +150,7 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain("needs: [prepare, validate-release]");
     expect(workflow).toContain(
       // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-      "runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}",
+      "runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}",
     );
   });
 
@@ -176,6 +176,32 @@ describe("Electrobun release workflow drift", () => {
       "MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}",
     );
     expect(workflow).toContain('MILADY_VALIDATE_CDN: "1"');
+  });
+
+  it("builds LifeOps Browser companion release bundles from the same tag", () => {
+    const workflow = fs.readFileSync(WORKFLOW_PATH, "utf8");
+    const companionJobIndex = workflow.indexOf(
+      "name: Build LifeOps Browser companions",
+    );
+    const releaseJobIndex = workflow.indexOf("name: Create Release");
+
+    expect(companionJobIndex).toBeGreaterThan(-1);
+    expect(releaseJobIndex).toBeGreaterThan(companionJobIndex);
+    expect(workflow).toContain("build-browser-companions:");
+    expect(workflow).toContain("runs-on: macos-14");
+    expect(workflow).toContain(
+      "MILADY_RELEASE_TAG: $" + "{{ needs.prepare.outputs.tag }}",
+    );
+    expect(workflow).toContain("bun run lifeops:browser:package:release");
+    expect(workflow).toContain(
+      "name: Upload LifeOps Browser release artifacts",
+    );
+    expect(workflow).toContain("name: lifeops-browser-store-bundles");
+    expect(workflow).toContain(
+      "needs: [prepare, build, build-browser-companions]",
+    );
+    expect(workflow).toContain("name: Download LifeOps Browser artifacts");
+    expect(workflow).toContain("pattern: lifeops-browser-*");
   });
 
   it("requires an explicit tag for manual non-tag runs", () => {
@@ -301,7 +327,7 @@ describe("Electrobun release workflow drift", () => {
     );
     expect(workflow).toContain(
       // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-      "runner: ${{ vars.RUNNER_WINDOWS || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-windows-2025' || 'windows-2025') }}",
+      "runner: ${{ vars.RUNNER_WINDOWS || 'windows-2025' }}",
     );
     expect(workflow).not.toContain(
       'Join-Path $PWD "apps/app/electrobun/node_modules/electrobun"',
@@ -387,7 +413,15 @@ describe("Electrobun release workflow drift", () => {
     expect(workflow).toContain(' -name "Milady-Setup-*.exe" -o \\');
     expect(workflow).toContain(' -name "Milady-Setup-*.exe.zip" -o \\');
     expect(workflow).toContain(' -name "*Setup*.tar.gz" -o \\');
+    expect(workflow).toContain(' -name "lifeops-browser-chrome-v*.zip" -o \\');
+    expect(workflow).toContain(' -name "lifeops-browser-safari-v*.zip" -o \\');
+    expect(workflow).toContain(
+      ' -name "lifeops-browser-release-manifest-v*.json" -o \\',
+    );
     expect(workflow).toContain(' -name "*.msix" \\');
+    expect(workflow).not.toContain(
+      ' -name "lifeops-browser-safari-project-v*.zip" -o \\',
+    );
     expect(workflow).not.toContain(' -name "*.exe" -o \\');
 
     expect(workflow).toContain("name: Collect update channel files");

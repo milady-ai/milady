@@ -278,6 +278,9 @@ declare module "./client-base" {
       status: string;
       authExists: boolean;
       serviceConnected: boolean;
+      qrDataUrl: string | null;
+      phoneNumber: string | null;
+      error: string | null;
     }>;
     startSignalPairing(accountId?: string): Promise<{
       ok: boolean;
@@ -293,6 +296,87 @@ declare module "./client-base" {
     disconnectSignal(accountId?: string): Promise<{
       ok: boolean;
       accountId: string;
+    }>;
+    getTelegramAccountStatus(): Promise<{
+      available: boolean;
+      status: string;
+      configured: boolean;
+      sessionExists: boolean;
+      serviceConnected: boolean;
+      restartRequired: boolean;
+      hasAppCredentials: boolean;
+      phone: string | null;
+      isCodeViaApp: boolean;
+      account: {
+        id: string;
+        username: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+      } | null;
+      error: string | null;
+    }>;
+    startTelegramAccountAuth(phone?: string): Promise<{
+      available: boolean;
+      status: string;
+      configured: boolean;
+      sessionExists: boolean;
+      serviceConnected: boolean;
+      restartRequired: boolean;
+      hasAppCredentials: boolean;
+      phone: string | null;
+      isCodeViaApp: boolean;
+      account: {
+        id: string;
+        username: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+      } | null;
+      error: string | null;
+    }>;
+    submitTelegramAccountAuth(input: {
+      provisioningCode?: string;
+      telegramCode?: string;
+      password?: string;
+    }): Promise<{
+      available: boolean;
+      status: string;
+      configured: boolean;
+      sessionExists: boolean;
+      serviceConnected: boolean;
+      restartRequired: boolean;
+      hasAppCredentials: boolean;
+      phone: string | null;
+      isCodeViaApp: boolean;
+      account: {
+        id: string;
+        username: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+      } | null;
+      error: string | null;
+    }>;
+    disconnectTelegramAccount(): Promise<{
+      ok: boolean;
+      available: boolean;
+      status: string;
+      configured: boolean;
+      sessionExists: boolean;
+      serviceConnected: boolean;
+      restartRequired: boolean;
+      hasAppCredentials: boolean;
+      phone: string | null;
+      isCodeViaApp: boolean;
+      account: {
+        id: string;
+        username: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+      } | null;
+      error: string | null;
     }>;
     getDiscordLocalStatus(): Promise<{
       available: boolean;
@@ -1067,6 +1151,44 @@ MiladyClient.prototype.disconnectSignal = async function (
   return this.fetch("/api/signal/disconnect", {
     method: "POST",
     body: JSON.stringify({ accountId }),
+  });
+};
+
+MiladyClient.prototype.getTelegramAccountStatus = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/telegram-account/status");
+};
+
+MiladyClient.prototype.startTelegramAccountAuth = async function (
+  this: MiladyClient,
+  phone,
+) {
+  return this.fetch("/api/telegram-account/auth/start", {
+    method: "POST",
+    body: JSON.stringify(
+      typeof phone === "string" && phone.trim().length > 0
+        ? { phone: phone.trim() }
+        : {},
+    ),
+  });
+};
+
+MiladyClient.prototype.submitTelegramAccountAuth = async function (
+  this: MiladyClient,
+  input,
+) {
+  return this.fetch("/api/telegram-account/auth/submit", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+};
+
+MiladyClient.prototype.disconnectTelegramAccount = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/telegram-account/disconnect", {
+    method: "POST",
   });
 };
 

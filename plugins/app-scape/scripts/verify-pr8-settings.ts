@@ -100,9 +100,16 @@ function main(): void {
         "SCAPE_BOT_SDK_TOKEN is required",
         requiredKeys.has("SCAPE_BOT_SDK_TOKEN"),
     );
+    // SCAPE_AGENT_PASSWORD is intentionally optional now — the plugin
+    // auto-generates and persists a fresh identity at
+    // ~/.milady/scape-agent-identity.json on first launch. This field
+    // only needs to be set when pinning to a pre-existing account, and
+    // agent-identity.ts logs a loud WARN if the operator sets it (the
+    // value lands on disk in plaintext). Per the PR body: "The
+    // parameter is no longer `required: true`".
     assertTrue(
-        "SCAPE_AGENT_PASSWORD is required",
-        requiredKeys.has("SCAPE_AGENT_PASSWORD"),
+        "SCAPE_AGENT_PASSWORD is optional (auto-generated when unset)",
+        !requiredKeys.has("SCAPE_AGENT_PASSWORD"),
     );
     assertTrue(
         "SCAPE_CLIENT_URL is NOT required",
@@ -137,13 +144,13 @@ function main(): void {
     console.log("\n[6] defaults are preserved");
     const urlParam = scape.parameters.find((p) => p.key === "SCAPE_BOT_SDK_URL");
     assertTrue(
-        `SCAPE_BOT_SDK_URL default = "ws://127.0.0.1:43595" (got "${urlParam?.default}")`,
-        urlParam?.default === "ws://127.0.0.1:43595",
+        `SCAPE_BOT_SDK_URL default = "wss://scape-96cxt.sevalla.app/botsdk" (got "${urlParam?.default}")`,
+        urlParam?.default === "wss://scape-96cxt.sevalla.app/botsdk",
     );
     const clientParam = scape.parameters.find((p) => p.key === "SCAPE_CLIENT_URL");
     assertTrue(
-        `SCAPE_CLIENT_URL default = "http://localhost:3000" (got "${clientParam?.default}")`,
-        clientParam?.default === "http://localhost:3000",
+        `SCAPE_CLIENT_URL default = "https://scape-client-2sqyc.kinsta.page" (got "${clientParam?.default}")`,
+        clientParam?.default === "https://scape-client-2sqyc.kinsta.page",
     );
     const loopParam = scape.parameters.find((p) => p.key === "SCAPE_LOOP_INTERVAL_MS");
     assertTrue(

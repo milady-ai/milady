@@ -20,7 +20,7 @@ env:
 jobs:
   validate-release-workflow:
     name: Release Workflow Contract
-    runs-on: ${{ vars.RUNNER_UBUNTU || (github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest') }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     timeout-minutes: 20
     defaults:
       run:

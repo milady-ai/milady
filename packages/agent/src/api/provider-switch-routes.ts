@@ -1,13 +1,12 @@
 import type http from "node:http";
 import { logger } from "@elizaos/core";
 import type { ElizaConfig } from "../config/config.js";
-import { saveElizaConfig } from "../config/config.js";
 import { normalizeOnboardingProviderId } from "../contracts/onboarding.js";
+import type { ReadJsonBodyOptions } from "./http-helpers.js";
 import {
   applyOnboardingConnectionConfig,
   createProviderSwitchConnection,
 } from "./provider-switch-config.js";
-import type { ReadJsonBodyOptions } from "./http-helpers.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,7 +29,7 @@ export interface ProviderSwitchRouteContext {
   scheduleRuntimeRestart: (reason: string) => void;
   providerSwitchInProgress: boolean;
   setProviderSwitchInProgress: (value: boolean) => void;
-  onRestart?: () => Promise<unknown>;
+  restartRuntime?: (reason: string) => Promise<boolean>;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,19 +119,20 @@ export async function handleProviderSwitchRoutes(
       await applyOnboardingConnectionConfig(config, connection);
       ctx.saveElizaConfig(config);
 
-      ctx.scheduleRuntimeRestart(`provider switch to ${normalizedProvider}`);
-      if (ctx.onRestart) {
-        setTimeout(() => {
-          ctx.setProviderSwitchInProgress(false);
-        }, 250);
-      } else {
-        ctx.setProviderSwitchInProgress(false);
+      const restartReason = `provider switch to ${normalizedProvider}`;
+      const restarted = ctx.restartRuntime
+        ? await ctx.restartRuntime(restartReason)
+        : false;
+      if (!restarted) {
+        ctx.scheduleRuntimeRestart(restartReason);
       }
+
+      ctx.setProviderSwitchInProgress(false);
 
       json(res, {
         success: true,
         provider: normalizedProvider,
-        restarting: true,
+        restarting: restarted,
       });
     } catch (err) {
       ctx.setProviderSwitchInProgress(false);

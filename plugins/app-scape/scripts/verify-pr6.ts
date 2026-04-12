@@ -178,8 +178,12 @@ async function main(): Promise<void> {
             getPerception: () => samplePerception(),
         };
         const runtime = mockRuntimeWith(mockService);
-        const journalOutput = await journalProvider.get(runtime, dummyMemory());
-        const goalsOutput = await goalsProvider.get(runtime, dummyMemory());
+        // Provider.get now returns a ProviderResult ({ text }) instead
+        // of a raw string — unwrap `.text` before asserting on content.
+        const journalResult = await journalProvider.get(runtime, dummyMemory());
+        const goalsResult = await goalsProvider.get(runtime, dummyMemory());
+        const journalOutput = typeof journalResult === "string" ? journalResult : (journalResult?.text ?? "");
+        const goalsOutput = typeof goalsResult === "string" ? goalsResult : (goalsResult?.text ?? "");
 
         assertTrue("journal output has JOURNAL header", journalOutput.includes("# JOURNAL"));
         assertTrue(

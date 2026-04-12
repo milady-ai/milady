@@ -18,8 +18,6 @@ describe("CI workflow audit regressions", () => {
   it("electrobun workflows keep expected Bun pins", () => {
     const expectedPins: Record<string, string> = {
       "release-electrobun.yml": "1.3.9",
-      "release-electrobun-build-linux-x64-testbox.yml": "1.3.9",
-      "release-electrobun-build-windows-x64-testbox.yml": "1.3.9",
       "test-electrobun-release.yml": "1.3.9",
     };
     for (const [f, expected] of Object.entries(expectedPins)) {
@@ -31,17 +29,14 @@ describe("CI workflow audit regressions", () => {
   });
 
   it("android workflows pin Bun version", () => {
-    const files = [
-      "android-release.yml",
-      "android-release-build-aab-testbox.yml",
-    ];
+    const files = ["android-release.yml"];
     for (const f of files) {
       const content = readWorkflow(f);
       expect(content).toMatch(/bun-version:\s*["']?1\.3\.10/);
     }
   });
 
-  it("Docker build workflows use pinned Blacksmith runners", () => {
+  it("Docker build workflows pin to an explicit runner version (not ubuntu-latest)", () => {
     const files = [
       "build-docker.yml",
       "build-cloud-image.yml",

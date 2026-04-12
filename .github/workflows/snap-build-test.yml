@@ -24,10 +24,10 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: blacksmith-4vcpu-ubuntu-2404
+            runner: ubuntu-24.04
           # arm64 builds can be enabled when arm runners are available
           # - arch: arm64
-          #   runner: blacksmith-4vcpu-ubuntu-2404-arm
+          #   runner: ubuntu-24.04-arm
 
     steps:
       - name: Checkout

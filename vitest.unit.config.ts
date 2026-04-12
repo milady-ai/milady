@@ -30,6 +30,35 @@ export default mergeConfig(
   defineConfig({
     resolve: {
       alias: [
+        // Subpath exports must be aliased before the catch-all "@elizaos/core"
+        // entry, otherwise Vite's alias matching swallows the subpath.
+        ...(useLocalElizaCore
+          ? [
+              {
+                find: "@elizaos/core/roles",
+                replacement: path.join(
+                  repoRoot,
+                  "eliza",
+                  "packages",
+                  "typescript",
+                  "src",
+                  "roles.ts",
+                ),
+              },
+              {
+                find: "@elizaos/core/testing",
+                replacement: path.join(
+                  repoRoot,
+                  "eliza",
+                  "packages",
+                  "typescript",
+                  "src",
+                  "testing",
+                  "index.ts",
+                ),
+              },
+            ]
+          : []),
         ...((useLocalElizaCore
           ? elizaCoreSource
           : elizaCoreEntry) != null

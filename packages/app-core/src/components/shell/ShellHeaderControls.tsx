@@ -233,7 +233,7 @@ export function ShellHeaderControls({
 
   return (
     <div
-      className={`min-w-0 w-full overflow-visible flex items-center gap-2 ${className ?? ""}`}
+      className={`min-w-0 w-full overflow-visible flex items-center ${className ?? ""}`}
       data-no-camera-drag="true"
     >
       {/* Left: shell view toggle (hidden outside companion overlay) */}

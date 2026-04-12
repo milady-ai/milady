@@ -51,7 +51,7 @@ runs:
       if: ${{ inputs.install-native-deps == 'true' }}
       shell: bash
       run: |
-        # Blacksmith runners can intermittently fail reaching Ubuntu mirrors over IPv6.
+        # Some CI runners intermittently fail reaching Ubuntu mirrors over IPv6.
         # Force IPv4 and retry apt commands to make CI setup resilient.
         APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
         for attempt in 1 2 3; do

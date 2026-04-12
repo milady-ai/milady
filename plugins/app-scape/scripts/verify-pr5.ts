@@ -49,7 +49,7 @@ async function main(): Promise<void> {
 
     const sdk = new BotSdk(
         {
-            url: process.env.BOT_SDK_URL ?? "ws://127.0.0.1:43595",
+            url: process.env.BOT_SDK_URL ?? "ws://127.0.0.1:8080/botsdk",
             token: TOKEN!,
             agentId: `pr5-${displayName}`,
             displayName,

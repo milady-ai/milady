@@ -1,6 +1,7 @@
 import { BabylonOperatorSurface } from "./BabylonOperatorSurface";
 import { DefenseAgentsOperatorSurface } from "./DefenseAgentsOperatorSurface";
 import { HyperscapeOperatorSurface } from "./HyperscapeOperatorSurface";
+import { ScapeOperatorSurface } from "./ScapeOperatorSurface";
 import { TwoThousandFourScapeOperatorSurface } from "./TwoThousandFourScapeOperatorSurface";
 import type { AppOperatorSurfaceComponent } from "./types";
 
@@ -11,6 +12,7 @@ const OPERATOR_SURFACE_COMPONENTS: Record<string, AppOperatorSurfaceComponent> =
     "@elizaos/app-babylon": BabylonOperatorSurface,
     "@elizaos/app-2004scape": TwoThousandFourScapeOperatorSurface,
     "@elizaos/app-defense-of-the-agents": DefenseAgentsOperatorSurface,
+    "@elizaos/app-scape": ScapeOperatorSurface,
   };
 
 export function getAppOperatorSurface(

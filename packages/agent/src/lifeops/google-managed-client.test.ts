@@ -188,4 +188,65 @@ describe("GoogleManagedClient", () => {
       expect.any(Object),
     );
   });
+
+  it("starts managed Google auth through the generic cloud OAuth route", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          authUrl: "https://accounts.google.com/o/oauth2/v2/auth?state=test",
+          provider: { id: "google", name: "Google" },
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      ),
+    );
+
+    const client = new GoogleManagedClient({
+      configured: true,
+      apiKey: "test-key",
+      apiBaseUrl: "https://cloud.example/api/v1",
+      siteUrl: "https://cloud.example",
+    });
+
+    const result = await client.startConnector({
+      side: "agent",
+      capabilities: ["google.calendar.read", "google.gmail.send"],
+      redirectUrl: "https://milady.example/callback",
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://cloud.example/api/v1/oauth/google/initiate",
+      }),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          redirectUrl: "https://milady.example/callback",
+          scopes: [
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/calendar.readonly",
+            "https://www.googleapis.com/auth/gmail.send",
+          ],
+          connectionRole: "agent",
+        }),
+      }),
+    );
+    expect(result).toEqual({
+      provider: "google",
+      side: "agent",
+      mode: "cloud_managed",
+      requestedCapabilities: [
+        "google.basic_identity",
+        "google.calendar.read",
+        "google.gmail.send",
+      ],
+      redirectUri: "https://milady.example/callback",
+      authUrl: "https://accounts.google.com/o/oauth2/v2/auth?state=test",
+    });
+  });
 });

@@ -42,16 +42,16 @@ permissions:
 env:
   BUN_VERSION: "1.3.10"
   MILADY_SKIP_LOCAL_UPSTREAMS: "1"
-  # Runner selection: all jobs use ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}.
-  # To fall back to GitHub runners during Blacksmith outages, set the RUNNER_UBUNTU
-  # repo variable to "ubuntu-latest" in Settings → Variables → Actions.
+  # Runner selection: all jobs use ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}.
+  # To override (e.g. point at a self-hosted or large-runner pool), set the
+  # RUNNER_UBUNTU repo variable in Settings → Variables → Actions.
 
 jobs:
   # ── 1. Single decision gate — combines evaluation + trust check ────
   # No skipped ancestors — this job always runs and outputs proceed=true/false.
   decide:
     name: Evaluate & authorize
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     permissions:
       contents: read
       issues: write
@@ -149,7 +149,7 @@ jobs:
     name: Resolve version
     needs: [decide]
     if: needs.decide.outputs.proceed == 'true'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     permissions:
       contents: read
     outputs:
@@ -239,7 +239,7 @@ jobs:
   build-npm:
     name: npm package build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -260,7 +260,7 @@ jobs:
   build-android:
     name: Android AAB build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -305,7 +305,7 @@ jobs:
   build-snap:
     name: Snap build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     env:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
@@ -336,7 +336,7 @@ jobs:
   build-flatpak:
     name: Flatpak build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -361,7 +361,7 @@ jobs:
   build-pypi:
     name: PyPI package build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -384,7 +384,7 @@ jobs:
   build-debian:
     name: Debian package build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -483,7 +483,7 @@ jobs:
   build-homepage:
     name: Homepage build
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -500,7 +500,7 @@ jobs:
   build-docs:
     name: Docs validation
     needs: [version]
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -532,7 +532,7 @@ jobs:
     name: Tag & publish release
     needs: [version, build-electrobun, build-docker, build-cloud-image, build-npm]
     if: always() && needs.build-electrobun.result == 'success' && needs.build-docker.result == 'success' && needs.build-cloud-image.result == 'success'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     permissions:
       contents: write
       issues: write
@@ -732,7 +732,7 @@ jobs:
     name: Report build results
     needs: [version, build-electrobun, build-docker, build-cloud-image, build-npm, build-android, build-ios, build-macos-store, build-snap, build-flatpak, build-pypi, build-debian, build-homepage, build-docs, publish, push-cloud-image]
     if: always() && needs.version.result == 'success'
-    runs-on: ${{ vars.RUNNER_UBUNTU || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.RUNNER_UBUNTU || 'ubuntu-24.04' }}
     permissions:
       issues: write
     steps:

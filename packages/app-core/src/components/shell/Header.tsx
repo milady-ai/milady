@@ -28,13 +28,12 @@ const NAV_LABEL_I18N_KEY: Record<string, string> = {
   Companion: "nav.companion",
   Stream: "nav.stream",
   Character: "nav.character",
-  Inventory: "nav.inventory",
+  Wallet: "nav.wallet",
   Knowledge: "nav.knowledge",
   Connectors: "nav.social",
   Apps: "nav.apps",
   Settings: "nav.settings",
   Heartbeats: "nav.heartbeats",
-  Advanced: "nav.advanced",
 };
 
 interface HeaderProps {
@@ -77,6 +76,7 @@ export function Header({
     setTab,
     setState,
     plugins,
+    walletEnabled,
     loadDropStatus,
     uiLanguage,
     setUiLanguage,
@@ -116,8 +116,8 @@ export function Header({
     [plugins],
   );
   const tabGroups = useMemo(
-    () => getTabGroups(streamingEnabled),
-    [streamingEnabled],
+    () => getTabGroups(streamingEnabled, walletEnabled),
+    [streamingEnabled, walletEnabled],
   );
   const activeTabGroup = useMemo(
     () =>
@@ -219,17 +219,7 @@ export function Header({
         data-no-camera-drag="true"
       >
         <div
-          style={{
-            paddingTop: `calc(var(--safe-area-top, 0px) + var(--milady-macos-frame-top-inset, 0px) + ${
-              isDesktopShell ? "0.875rem" : "0.375rem"
-            })`,
-            paddingLeft: `calc(var(--safe-area-left, 0px) + ${
-              isDesktopShell ? "clamp(0.65rem, 1.3vw, 1.2rem)" : "0.375rem"
-            })`,
-            paddingRight: `calc(var(--safe-area-right, 0px) + ${
-              isDesktopShell ? "clamp(0.65rem, 1.3vw, 1.2rem)" : "0.375rem"
-            })`,
-          }}
+          className="px-2 py-1"
         >
           <div
             className={`pointer-events-auto relative mx-auto w-full rounded-[20px] border bg-clip-padding transition-all sm:rounded-[22px] ${headerFrameClassName} ${headerShellClassName}`}
@@ -309,7 +299,7 @@ export function Header({
               }
             >
               {showNavigationMenu ? (
-                <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap px-2 sm:flex sm:pl-4">
+                <nav className="scrollbar-hide hidden flex-1 items-center justify-start gap-1.5 overflow-x-auto whitespace-nowrap sm:flex">
                   {tabGroups.map((group: TabGroup) => {
                     const primaryTab = group.tabs[0];
                     const isActive = group.tabs.includes(tab);

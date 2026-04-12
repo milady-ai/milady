@@ -161,6 +161,8 @@ describe("buildCharacterFromConfig — cloud secret propagation", () => {
   it("enables advanced memory by default", () => {
     const char = buildCharacterFromConfig({} as ElizaConfig);
     expect(char.advancedMemory).toBe(true);
+    expect(char.settings?.MEMORY_SUMMARY_MODEL_TYPE).toBe("TEXT_SMALL");
+    expect(char.settings?.MEMORY_REFLECTION_MODEL_TYPE).toBe("TEXT_LARGE");
   });
 
   it("honors per-agent advanced memory disablement", () => {

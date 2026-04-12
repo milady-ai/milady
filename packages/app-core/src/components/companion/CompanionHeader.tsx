@@ -110,12 +110,7 @@ export const CompanionHeader = memo(function CompanionHeader(
       data-no-camera-drag="true"
     >
       <div
-        style={{
-          paddingTop:
-            "calc(var(--safe-area-top, 0px) + var(--milady-macos-frame-top-inset, 0px) + 0.375rem)",
-          paddingLeft: "calc(var(--safe-area-left, 0px) + 0.375rem)",
-          paddingRight: "calc(var(--safe-area-right, 0px) + 0.375rem)",
-        }}
+        className="px-2 py-1"
       >
         <div
           className="pointer-events-auto relative mx-auto w-full rounded-[20px] border border-transparent bg-transparent shadow-none ring-0 backdrop-blur-none bg-clip-padding transition-all sm:rounded-[22px] px-2.5 py-2 sm:px-4 sm:py-3"

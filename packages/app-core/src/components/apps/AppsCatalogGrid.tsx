@@ -1,11 +1,17 @@
 import { Button, Input } from "@miladyai/ui";
 import type { RegistryAppInfo } from "../../api";
 import { useApp } from "../../state";
-import { CATEGORY_LABELS, getAppEmoji, getAppShortName } from "./helpers";
+import {
+  getAppCatalogSectionLabel,
+  getAppEmoji,
+  getAppShortName,
+  groupAppsForCatalog,
+} from "./helpers";
 
 interface AppsCatalogGridProps {
   activeAppNames: Set<string>;
   error: string | null;
+  favoriteAppNames: Set<string>;
   loading: boolean;
   searchQuery: string;
   showActiveOnly: boolean;
@@ -13,13 +19,14 @@ interface AppsCatalogGridProps {
   onLaunch: (app: RegistryAppInfo) => void;
   onRefresh: () => void;
   onSearchQueryChange: (value: string) => void;
-  onSelectApp: (appName: string) => void;
   onToggleActiveOnly: () => void;
+  onToggleFavorite: (appName: string) => void;
 }
 
 export function AppsCatalogGrid({
   activeAppNames,
   error,
+  favoriteAppNames,
   loading,
   searchQuery,
   showActiveOnly,
@@ -27,11 +34,11 @@ export function AppsCatalogGrid({
   onLaunch,
   onRefresh,
   onSearchQueryChange,
-  onSelectApp,
   onToggleActiveOnly,
+  onToggleFavorite,
 }: AppsCatalogGridProps) {
   const { t } = useApp();
-  const launchLabel = t("appsview.Launch", { defaultValue: "Launch" });
+  const sections = groupAppsForCatalog(visibleApps, favoriteAppNames);
 
   return (
     <div data-testid="apps-catalog-grid">
@@ -81,65 +88,93 @@ export function AppsCatalogGrid({
           </div>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleApps.map((app) => {
-            const isActive = activeAppNames.has(app.name);
-            const displayName = app.displayName ?? getAppShortName(app);
+        <div className="space-y-6">
+          {sections.map((section) => (
+            <section
+              key={section.key}
+              data-testid={`apps-section-${section.key}`}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-3">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-strong">
+                  {section.label}
+                </h2>
+                <div className="h-px flex-1 bg-border/30" />
+                <span className="text-[10px] text-muted">
+                  {section.apps.length}
+                </span>
+              </div>
 
-            return (
-              <button
-                key={app.name}
-                type="button"
-                data-testid={`app-card-${app.name.replace(/[^a-z0-9]+/gi, "-")}`}
-                title={t("appsview.Open", {
-                  name: displayName,
-                  defaultValue: `Open ${displayName}`,
-                })}
-                aria-label={t("appsview.Open", {
-                  name: displayName,
-                  defaultValue: `Open ${displayName}`,
-                })}
-                className="group flex flex-col rounded-2xl border border-border/35 bg-card/72 p-4 text-left transition-all hover:border-accent/25 hover:bg-bg-hover/70"
-                onClick={() => onSelectApp(app.name)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/35 bg-bg/80 text-lg">
-                      {isActive ? (
-                        <span className="absolute -right-0.5 -top-0.5 z-10 h-2 w-2 rounded-full border-[1.5px] border-card bg-ok" />
-                      ) : null}
-                      <span>{getAppEmoji(app)}</span>
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-txt">
-                        {displayName}
-                      </div>
-                      {app.category ? (
-                        <div className="text-[11px] text-muted-strong">
-                          {CATEGORY_LABELS[app.category] ?? app.category}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {section.apps.map((app) => {
+                  const isActive = activeAppNames.has(app.name);
+                  const isFavorite = favoriteAppNames.has(app.name);
+                  const displayName = app.displayName ?? getAppShortName(app);
+
+                  return (
+                    <button
+                      key={app.name}
+                      type="button"
+                      data-testid={`app-card-${app.name.replace(/[^a-z0-9]+/gi, "-")}`}
+                      title={displayName}
+                      aria-label={displayName}
+                      className="group flex flex-col rounded-2xl border border-border/35 bg-card/72 p-4 text-left transition-all hover:border-accent/25 hover:bg-bg-hover/70"
+                      onClick={() => onLaunch(app)}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/35 bg-bg/80 text-lg">
+                            {isActive ? (
+                              <span className="absolute -right-0.5 -top-0.5 z-10 h-2 w-2 rounded-full border-[1.5px] border-card bg-ok" />
+                            ) : null}
+                            <span>{getAppEmoji(app)}</span>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-txt">
+                              {displayName}
+                            </div>
+                            <div className="text-[11px] text-muted-strong">
+                              {getAppCatalogSectionLabel(app)}
+                            </div>
+                          </div>
                         </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 rounded-lg px-3 text-[11px] opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      onLaunch(app);
-                    }}
-                  >
-                    {launchLabel}
-                  </Button>
-                </div>
-                <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-muted-strong">
-                  {app.description ||
-                    "Launch and manage this agent experience."}
-                </p>
-              </button>
-            );
-          })}
+                        <button
+                          type="button"
+                          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                          className={`shrink-0 p-1 transition-colors ${
+                            isFavorite
+                              ? "text-amber-400"
+                              : "text-muted/40 opacity-0 group-hover:opacity-100 hover:text-amber-400"
+                          }`}
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            onToggleFavorite(app.name);
+                          }}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill={isFavorite ? "currentColor" : "none"}
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        </button>
+                      </div>
+                      <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-muted-strong">
+                        {app.description ||
+                          "Launch and manage this agent experience."}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </div>

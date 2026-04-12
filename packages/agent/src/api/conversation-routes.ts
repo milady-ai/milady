@@ -38,6 +38,7 @@ import type {
 import {
   generateChatResponse,
   generateConversationTitle,
+  hasRecentVisibleAssistantMemorySince,
   getChatFailureReply,
   initSse,
   normalizeChatResponseText,
@@ -62,6 +63,13 @@ import {
   resolveConversationGreetingText,
   resolveWalletModeGuidanceReply,
 } from "./server.js";
+import {
+  cacheDiscordAvatarForRuntime,
+  isCanonicalDiscordSource,
+  resolveDiscordMessageAuthorProfile,
+  resolveDiscordUserProfile,
+  resolveStoredDiscordEntityProfile,
+} from "./discord-profiles.js";
 
 // ---------------------------------------------------------------------------
 // Deleted-conversations state persistence
@@ -200,6 +208,22 @@ async function ensureWorldOwnershipAndRoles(
   if (needsUpdate) {
     await runtime.updateWorld(world);
   }
+}
+
+async function shouldPersistFinalAssistantTurn(
+  runtime: AgentRuntime,
+  roomId: UUID,
+  turnStartedAt: number,
+  result: ChatGenerationResult,
+): Promise<boolean> {
+  if (!result.usedActionCallbacks) {
+    return true;
+  }
+
+  const alreadyPersistedVisibleAssistantTurn =
+    await hasRecentVisibleAssistantMemorySince(runtime, roomId, turnStartedAt);
+
+  return !alreadyPersistedVisibleAssistantTurn;
 }
 
 function markConversationDeleted(
@@ -389,6 +413,36 @@ async function getConversationWithRestore(
   await waitForConversationRestore(state);
   return state.conversations.get(convId);
 }
+
+function extractConversationMetaString(
+  memory: { metadata?: unknown },
+  key: string,
+): string | undefined {
+  const meta =
+    memory.metadata && typeof memory.metadata === "object"
+      ? (memory.metadata as Record<string, unknown>)
+      : undefined;
+  const value = meta?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+type ConversationRouteMessageRecord = {
+  id: string;
+  role: "assistant" | "user";
+  text: string;
+  timestamp: number;
+  source?: string;
+  from?: string;
+  fromUserName?: string;
+  avatarUrl?: string;
+  replyToMessageId?: string;
+  replyToSenderName?: string;
+  replyToSenderUserName?: string;
+  rawDiscordChannelId?: string;
+  rawDiscordMessageId?: string;
+  rawSenderId?: string;
+  senderEntityId?: string;
+};
 
 async function ensureConversationGreetingStored(
   state: ConversationRouteState,
@@ -720,13 +774,98 @@ export async function handleConversationRoutes(
                     replyToAuthor.username.length > 0
                   ? replyToAuthor.username
                   : undefined,
-          };
+            rawDiscordChannelId: extractConversationMetaString(
+              m,
+              "discordChannelId",
+            ),
+            rawDiscordMessageId: extractConversationMetaString(
+              m,
+              "discordMessageId",
+            ),
+            rawSenderId: extractConversationMetaString(m, "fromId"),
+            senderEntityId:
+              typeof m.entityId === "string" ? m.entityId : undefined,
+          } satisfies ConversationRouteMessageRecord;
         })
         // Drop action-log memories that have no visible text (e.g.
         // plugin action logs with only `thought` / `actions` fields).
         // Without this filter they appear as blank chat bubbles.
         .filter((m) => m.text.trim().length > 0);
-      json(res, { messages });
+      await Promise.all(
+        messages.map(async (message) => {
+          if (!isCanonicalDiscordSource(message.source)) {
+            return;
+          }
+
+          const storedSenderProfile = await resolveStoredDiscordEntityProfile(
+            runtime,
+            message.senderEntityId,
+          );
+          if (!message.from && storedSenderProfile?.displayName) {
+            message.from = storedSenderProfile.displayName;
+          }
+          if (!message.fromUserName && storedSenderProfile?.username) {
+            message.fromUserName = storedSenderProfile.username;
+          }
+          if (!message.avatarUrl && storedSenderProfile?.avatarUrl) {
+            message.avatarUrl = storedSenderProfile.avatarUrl;
+          }
+
+          const messageAuthorProfile =
+            message.rawDiscordChannelId && message.rawDiscordMessageId
+              ? await resolveDiscordMessageAuthorProfile(
+                  runtime,
+                  message.rawDiscordChannelId,
+                  message.rawDiscordMessageId,
+                )
+              : null;
+          if (!message.from && messageAuthorProfile?.displayName) {
+            message.from = messageAuthorProfile.displayName;
+          }
+          if (!message.fromUserName && messageAuthorProfile?.username) {
+            message.fromUserName = messageAuthorProfile.username;
+          }
+          if (!message.avatarUrl && messageAuthorProfile?.avatarUrl) {
+            message.avatarUrl = messageAuthorProfile.avatarUrl;
+          }
+
+          const rawSenderId =
+            message.rawSenderId ??
+            storedSenderProfile?.rawUserId ??
+            messageAuthorProfile?.rawUserId;
+          if (rawSenderId) {
+            const profile = await resolveDiscordUserProfile(runtime, rawSenderId);
+            if (profile) {
+              if (profile.displayName) {
+                message.from = profile.displayName;
+              }
+              if (profile.username) {
+                message.fromUserName = profile.username;
+              }
+              if (profile.avatarUrl) {
+                message.avatarUrl = profile.avatarUrl;
+              }
+            }
+          }
+
+          message.avatarUrl = await cacheDiscordAvatarForRuntime(
+            runtime,
+            message.avatarUrl,
+            rawSenderId,
+          );
+        }),
+      );
+      json(res, {
+        messages: messages.map(
+          ({
+            rawDiscordChannelId: _rawDiscordChannelId,
+            rawDiscordMessageId: _rawDiscordMessageId,
+            rawSenderId: _rawSenderId,
+            senderEntityId: _senderEntityId,
+            ...message
+          }) => message,
+        ),
+      });
     } catch (err) {
       logger.warn(
         `[conversations] Failed to fetch messages: ${err instanceof Error ? err.message : String(err)}`,
@@ -937,23 +1076,32 @@ export async function handleConversationRoutes(
       if (!aborted) {
         conv.updatedAt = new Date().toISOString();
         if (result.noResponseReason !== "ignored") {
-        const resolvedText = normalizeChatResponseText(
-          result.text,
-          state.logBuffer,
-          runtime,
-        );
-        await persistAssistantConversationMemory(
-          runtime,
-          conv.roomId,
-          buildPersistedAssistantContent(
-            resolvedText,
-            result.responseContent,
-          ),
-          channelType,
-          turnStartedAt,
-        );
-        writeSseJson(res, {
-          type: "done",
+          const resolvedText = normalizeChatResponseText(
+            result.text,
+            state.logBuffer,
+            runtime,
+          );
+          if (
+            await shouldPersistFinalAssistantTurn(
+              runtime,
+              conv.roomId,
+              turnStartedAt,
+              result,
+            )
+          ) {
+            await persistAssistantConversationMemory(
+              runtime,
+              conv.roomId,
+              buildPersistedAssistantContent(
+                resolvedText,
+                result.responseContent,
+              ),
+              channelType,
+              turnStartedAt,
+            );
+          }
+          writeSseJson(res, {
+            type: "done",
             fullText: resolvedText,
             agentName: result.agentName,
             ...(result.usage ? { estimatedUsage: result.usage } : {}),
@@ -1136,16 +1284,25 @@ export async function handleConversationRoutes(
           state.logBuffer,
           runtime,
         );
-        await persistAssistantConversationMemory(
-          runtime,
-          conv.roomId,
-          buildPersistedAssistantContent(
-            resolvedText,
-            result.responseContent,
-          ),
-          channelType,
-          turnStartedAt,
-        );
+        if (
+          await shouldPersistFinalAssistantTurn(
+            runtime,
+            conv.roomId,
+            turnStartedAt,
+            result,
+          )
+        ) {
+          await persistAssistantConversationMemory(
+            runtime,
+            conv.roomId,
+            buildPersistedAssistantContent(
+              resolvedText,
+              result.responseContent,
+            ),
+            channelType,
+            turnStartedAt,
+          );
+        }
         json(res, {
           text: resolvedText,
           agentName: result.agentName,

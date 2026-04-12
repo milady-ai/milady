@@ -246,6 +246,8 @@ export interface AppState {
   uiShellMode: UiShellMode;
   uiLanguage: UiLanguage;
   uiTheme: UiTheme;
+  /** Active visual theme ID (e.g. "bsc-gold", "neon-cyber") */
+  themeId: string;
   ownerName: string | null;
   /** VRM quality vs GPU use: always full quality, battery-aware (default), or always efficient. */
   companionVrmPowerMode: CompanionVrmPowerMode;
@@ -364,6 +366,7 @@ export interface AppState {
   logLoadError: string | null;
 
   // Wallet / Inventory
+  walletEnabled: boolean;
   walletAddresses: WalletAddresses | null;
   walletConfig: WalletConfigStatus | null;
   walletBalances: WalletBalancesResponse | null;
@@ -437,6 +440,9 @@ export interface AppState {
   elizaCloudLoginBusy: boolean;
   elizaCloudLoginError: string | null;
   elizaCloudDisconnecting: boolean;
+
+  // Multi-agent profiles
+  activeAgentProfile: import("./agent-profiles").AgentProfile | null;
 
   // Updates
   updateStatus: UpdateStatus | null;
@@ -613,6 +619,9 @@ export interface AppState {
   pluginsSubTab: "features" | "connectors" | "plugins";
   databaseSubTab: "tables" | "media" | "vectors";
 
+  // Favorite apps
+  favoriteApps: string[];
+
   // Config text
   configRaw: Record<string, unknown>;
   configText: string;
@@ -634,6 +643,7 @@ export interface AppActions {
   navigation: NavigationEventsApi;
   setUiLanguage: (language: UiLanguage) => void;
   setUiTheme: (theme: UiTheme) => void;
+  setThemeId: (themeId: string) => void;
   setCompanionVrmPowerMode: (mode: CompanionVrmPowerMode) => void;
   setCompanionAnimateWhenHidden: (enabled: boolean) => void;
   setCompanionHalfFramerateMode: (mode: CompanionHalfFramerateMode) => void;
@@ -806,6 +816,9 @@ export interface AppActions {
   // Cloud
   handleCloudLogin: () => Promise<void>;
   handleCloudDisconnect: () => Promise<void>;
+
+  // Multi-agent
+  switchAgentProfile: (profileId: string) => void;
   handleCloudOnboardingFinish: () => Promise<void>;
 
   // Vincent

@@ -1,16 +1,17 @@
 /**
- * UPDATE_ROLE action — simple, direct role assignment.
+ * UPDATE_ROLE action — role assignment backed by LLM extraction.
  *
- * Usage: `/role @username ADMIN` or `/role @username GUEST`
- *
- * No LLM extraction — parses the command directly from message text.
- * Only OWNER and ADMIN can assign roles (with hierarchy constraints).
+ * The action becomes available for messages that clearly mention role or
+ * authority language. The planner can extract structured parameters, and the
+ * handler falls back to a dedicated small-model extractor when parameters are
+ * missing or ambiguous.
  */
 
 import {
   type Action,
   type ActionExample,
   type HandlerCallback,
+  type HandlerOptions,
   type IAgentRuntime,
   logger,
   type Memory,
@@ -18,6 +19,11 @@ import {
   type UUID,
 } from "@elizaos/core";
 import type { RoleName } from "./types";
+import {
+  extractRoleIntentWithLlm,
+  looksLikeRoleIntent,
+  normalizeNaturalRoleLabel,
+} from "./intent";
 import {
   canModifyRole,
   getLiveEntityMetadataFromMessage,
@@ -28,19 +34,24 @@ import {
   setEntityRole,
 } from "./utils";
 
-/** Maximum length for message text we'll attempt to parse. */
-const MAX_COMMAND_LENGTH = 200;
-
 /** Maximum length for a target username. */
 const MAX_USERNAME_LENGTH = 64;
 
-/** Role names accepted in commands. MEMBER/NONE map to GUEST for backwards compat. */
-const ROLE_PATTERN = "OWNER|ADMIN|USER|GUEST|MEMBER|NONE";
-const ROLE_ALIAS_PATTERN = "OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR";
 const RECENT_ROOM_MESSAGE_LIMIT = 100;
 const AMBIGUOUS_MATCH_SCORE_GAP = 10;
 const MIN_CONFIDENT_MATCH_SCORE = 70;
-const ROLE_CONTEXT_MESSAGE_COUNT = 6;
+const ROLE_TARGET_PRONOUNS = new Set([
+  "he",
+  "him",
+  "his",
+  "she",
+  "her",
+  "hers",
+  "they",
+  "them",
+  "their",
+  "theirs",
+]);
 
 type ParsedRoleCommand =
   | {
@@ -48,45 +59,20 @@ type ParsedRoleCommand =
       targetName: string;
       newRole: RoleName;
       label?: string;
-      confidence: "direct" | "confirm";
     }
   | {
       kind: "revoke";
       targetName: string;
-      label: string;
-      confidence: "direct" | "confirm";
+      newRole: "GUEST";
+      label?: string;
     };
 
-/**
- * Natural language relationship labels → system role mapping.
- * "boss"-family → ADMIN, "coworker"-family → USER.
- */
-const NATURAL_ROLE_MAP: Record<string, RoleName> = {
-  boss: "ADMIN",
-  manager: "ADMIN",
-  supervisor: "ADMIN",
-  superior: "ADMIN",
-  lead: "ADMIN",
-
-  coworker: "USER",
-  "co-worker": "USER",
-  teammate: "USER",
-  colleague: "USER",
-  peer: "USER",
-  friend: "USER",
-  partner: "USER",
+type RoleActionParameters = {
+  target?: string;
+  role?: string;
+  mode?: string;
+  label?: string;
 };
-
-/** Regex fragment matching any natural role label (longest-first for correct alternation). */
-const NATURAL_ROLE_LABEL_RE = Object.keys(NATURAL_ROLE_MAP)
-  .sort((a, b) => b.length - a.length)
-  .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-  .join("|");
-
-function resolveNaturalRole(label: string): RoleName | null {
-  const normalized = label.toLowerCase().trim();
-  return NATURAL_ROLE_MAP[normalized] ?? null;
-}
 
 type RelationshipsContactLike = {
   entityId: UUID;
@@ -150,387 +136,157 @@ function normalizeEntityLookupName(raw: string): string | null {
   return normalized;
 }
 
+function isRoleTargetPronoun(raw: string): boolean {
+  return ROLE_TARGET_PRONOUNS.has(raw.trim().replace(/^@+/, "").toLowerCase());
+}
+
 /**
- * Normalize a role string from user input to a valid assignable RoleName.
- * MEMBER and NONE are legacy aliases for GUEST.
+ * Normalize a role string from planner or extractor output to a valid RoleName.
  */
-function normalizeInputRole(raw: string): RoleName {
+function normalizeInputRole(raw: string): RoleName | null {
   const upper = raw.toUpperCase();
   if (upper === "MEMBER" || upper === "NONE") return "GUEST";
   if (upper === "MOD" || upper === "MODERATOR") return "ADMIN";
-  return normalizeRole(upper);
+  const normalized = normalizeRole(upper);
+  return normalized === "GUEST" && upper !== "GUEST" ? null : normalized;
 }
 
-/**
- * Parse a role command from message text.
- *
- * Supports formats:
- *  - `/role @username ADMIN`
- *  - `role username USER`
- *  - `make @username admin`
- *  - `set @username role GUEST`
- *  - `nubs is your boss`
- *
- * Returns null if the message doesn't look like a role command.
- */
-function parseRoleCommand(
-  text: string,
+function normalizePlannerLabel(raw: unknown): string | undefined {
+  if (typeof raw !== "string") {
+    return undefined;
+  }
+
+  const trimmed = raw.trim().toLowerCase();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeRoleMode(raw: unknown): "role" | "revoke" | null {
+  if (typeof raw !== "string") {
+    return null;
+  }
+
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  if (
+    normalized === "revoke" ||
+    normalized === "remove" ||
+    normalized === "delete" ||
+    normalized === "unset" ||
+    normalized === "demote"
+  ) {
+    return "revoke";
+  }
+
+  if (
+    normalized === "role" ||
+    normalized === "assign" ||
+    normalized === "set" ||
+    normalized === "update" ||
+    normalized === "promote"
+  ) {
+    return "role";
+  }
+
+  return null;
+}
+
+function normalizeRoleActionParams(
+  raw: RoleActionParameters | Record<string, unknown> | undefined,
 ): ParsedRoleCommand | null {
-  if (!text) return null;
-  const trimmed = text.trim();
-
-  // Reject oversized input before regex processing.
-  if (trimmed.length > MAX_COMMAND_LENGTH) return null;
-
-  // Pattern: /role @name ROLE  or  role @name ROLE
-  const slashRe = new RegExp(
-    `^\\/?\\s*role\\s+@?(.+?)\\s+(${ROLE_ALIAS_PATTERN})\\s*$`,
-    "i",
+  const params = raw ?? {};
+  const target = normalizeEntityLookupName(
+    asString(params.target) ??
+      asString((params as Record<string, unknown>).user) ??
+      "",
   );
-  const slashMatch = trimmed.match(slashRe);
-  if (slashMatch) {
-    const name = normalizeEntityLookupName(slashMatch[1]);
-    if (!name) return null;
+  if (!target || isRoleTargetPronoun(target)) {
+    return null;
+  }
+
+  const label = normalizePlannerLabel(params.label);
+  const mode = normalizeRoleMode(params.mode);
+  const explicitRole = asString(params.role);
+  const role =
+    (explicitRole ? normalizeInputRole(explicitRole) : null) ??
+    (label ? normalizeNaturalRoleLabel(label) : null);
+
+  if (mode === "revoke") {
     return {
-      kind: "role",
-      targetName: name,
-      newRole: normalizeInputRole(slashMatch[2]),
-      confidence: "direct",
+      kind: "revoke",
+      targetName: target,
+      newRole: "GUEST",
+      ...(label ? { label } : {}),
     };
   }
 
-  // Pattern: make @name admin/owner/user/guest
-  const makeRe = new RegExp(
-    `^make\\s+@?(.+?)\\s+(?:an?\\s+)?(${ROLE_ALIAS_PATTERN})\\s*$`,
-    "i",
-  );
-  const makeMatch = trimmed.match(makeRe);
-  if (makeMatch) {
-    const name = normalizeEntityLookupName(makeMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "role",
-      targetName: name,
-      newRole: normalizeInputRole(makeMatch[2]),
-      confidence: "direct",
-    };
+  if (!role) {
+    return null;
   }
 
-  // Pattern: set @name role ADMIN
-  const setRe = new RegExp(
-    `^set\\s+@?(.+?)\\s+(?:role\\s+)?(${ROLE_ALIAS_PATTERN})\\s*$`,
-    "i",
-  );
-  const setMatch = trimmed.match(setRe);
-  if (setMatch) {
-    const name = normalizeEntityLookupName(setMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "role",
-      targetName: name,
-      newRole: normalizeInputRole(setMatch[2]),
-      confidence: "direct",
-    };
-  }
-
-  const directRequestRe = new RegExp(
-    `^(?:(?:can|could|would|will)\\s+you\\s+(?:please\\s+)?|(?:please|pls|plz|yo|hey)\\s+)?(?:make|set|give|promote|bump)\\s+@?(.+?)\\s+(?:to\\s+)?(?:an?\\s+)?(${ROLE_ALIAS_PATTERN})[.!?]*$`,
-    "i",
-  );
-  const directRequestMatch = trimmed.match(directRequestRe);
-  if (directRequestMatch) {
-    const name = normalizeEntityLookupName(directRequestMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "role",
-      targetName: name,
-      newRole: normalizeInputRole(directRequestMatch[2]),
-      confidence: "direct",
-    };
-  }
-
-  // --- Natural language negation (check BEFORE assignment to avoid false name capture) ---
-
-  // Tentative negation: "I think/guess X is not/isn't your LABEL"
-  {
-    const re = new RegExp(
-      `^i\\s+(?:think|guess|figure)\\s+@?(.+?)\\s+(?:is\\s+not|isn'?t|is\\s+no\\s+longer)\\s+(?:really\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})(?:\\s+any\\s*more)?[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      if (name) {
-        return {
-          kind: "revoke",
-          targetName: name,
-          label: match[2].toLowerCase(),
-          confidence: "confirm",
-        };
-      }
-    }
-  }
-
-  // Direct negation: "X is not/isn't/no longer (your|my|a) LABEL (anymore)"
-  {
-    const re = new RegExp(
-      `^@?(.+?)\\s+(?:is\\s+not|isn'?t|is\\s+no\\s+longer)\\s+(?:really\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})(?:\\s+any\\s*more)?[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      if (name) {
-        return {
-          kind: "revoke",
-          targetName: name,
-          label: match[2].toLowerCase(),
-          confidence: "direct",
-        };
-      }
-    }
-  }
-
-  // Negation: "don't/do not treat/consider X (as/like) LABEL"
-  {
-    const re = new RegExp(
-      `^(?:don'?t|do\\s+not)\\s+(?:treat|consider)\\s+@?(.+?)\\s+(?:(?:as|like)\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      if (name) {
-        return {
-          kind: "revoke",
-          targetName: name,
-          label: match[2].toLowerCase(),
-          confidence: "direct",
-        };
-      }
-    }
-  }
-
-  // Negation: "remove X as LABEL"
-  {
-    const re = new RegExp(
-      `^remove\\s+@?(.+?)\\s+as\\s+(?:(?:your|my|our|ur|a|an)\\s+)?(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      if (name) {
-        return {
-          kind: "revoke",
-          targetName: name,
-          label: match[2].toLowerCase(),
-          confidence: "direct",
-        };
-      }
-    }
-  }
-
-  // --- Natural language assignment ---
-
-  // Tentative assignment: "I think/guess X is (your|my|a) LABEL"
-  {
-    const re = new RegExp(
-      `^i\\s+(?:think|guess|figure)\\s+@?(.+?)\\s+is\\s+(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      const role = resolveNaturalRole(match[2]);
-      if (name && role) {
-        return {
-          kind: "role",
-          targetName: name,
-          newRole: role,
-          label: match[2].toLowerCase(),
-          confidence: "confirm",
-        };
-      }
-    }
-  }
-
-  // Direct assignment: "X is (your|my|our|a|an) LABEL"
-  {
-    const re = new RegExp(
-      `^@?(.+?)\\s+is\\s+(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      const role = resolveNaturalRole(match[2]);
-      if (name && role) {
-        return {
-          kind: "role",
-          targetName: name,
-          newRole: role,
-          label: match[2].toLowerCase(),
-          confidence: "direct",
-        };
-      }
-    }
-  }
-
-  // Inverted assignment: "my/your LABEL is X"
-  {
-    const re = new RegExp(
-      `^(?:your|my|our|ur)\\s+(${NATURAL_ROLE_LABEL_RE})\\s+is\\s+@?(.+?)[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[2]);
-      const role = resolveNaturalRole(match[1]);
-      if (name && role) {
-        return {
-          kind: "role",
-          targetName: name,
-          newRole: role,
-          label: match[1].toLowerCase(),
-          confidence: "direct",
-        };
-      }
-    }
-  }
-
-  // Assignment: "treat/consider X (as/like) (your|my|a) LABEL"
-  {
-    const re = new RegExp(
-      `^(?:(?:please|pls|hey)\\s+)?(?:treat|consider)\\s+@?(.+?)\\s+(?:(?:as|like)\\s+)?(?:your|my|our|ur|a|an)\\s+(${NATURAL_ROLE_LABEL_RE})[.!?]*$`,
-      "i",
-    );
-    const match = trimmed.match(re);
-    if (match) {
-      const name = normalizeEntityLookupName(match[1]);
-      const role = resolveNaturalRole(match[2]);
-      if (name && role) {
-        return {
-          kind: "role",
-          targetName: name,
-          newRole: role,
-          label: match[2].toLowerCase(),
-          confidence: "direct",
-        };
-      }
-    }
-  }
-
-  // --- Soft/tentative explicit role name patterns ---
-
-  const softAssignmentRe = new RegExp(
-    `^(?:i\\s+(?:think|reckon|figure)\\s+)?@?(.+?)\\s+(?:should(?:\\s+(?:probably|prolly|probs))?\\s+be|needs\\s+to\\s+be|oughta?\\s+be|feels\\s+like\\s+they\\s+should\\s+be)\\s+(?:an?\\s+)?(${ROLE_ALIAS_PATTERN})[.!?]*$`,
-    "i",
-  );
-  const softAssignmentMatch = trimmed.match(softAssignmentRe);
-  if (softAssignmentMatch) {
-    const name = normalizeEntityLookupName(softAssignmentMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "role",
-      targetName: name,
-      newRole: normalizeInputRole(softAssignmentMatch[2]),
-      confidence: "confirm",
-    };
-  }
-
-  const canGetRoleRe = new RegExp(
-    `^can\\s+@?(.+?)\\s+get\\s+(?:an?\\s+)?(${ROLE_ALIAS_PATTERN})[.!?]*$`,
-    "i",
-  );
-  const canGetRoleMatch = trimmed.match(canGetRoleRe);
-  if (canGetRoleMatch) {
-    const name = normalizeEntityLookupName(canGetRoleMatch[1]);
-    if (!name) return null;
-    return {
-      kind: "role",
-      targetName: name,
-      newRole: normalizeInputRole(canGetRoleMatch[2]),
-      confidence: "confirm",
-    };
-  }
-
-  return null;
+  return {
+    kind: "role",
+    targetName: target,
+    newRole: role,
+    ...(label ? { label } : {}),
+  };
 }
 
-function isAffirmativeRoleReply(text: string): boolean {
-  return /^(?:yes|yeah|yep|sure|ok(?:ay)?|do it|go ahead|please do|pls do|sounds good|that'?s right|correct|make it so)[.!?]*$/i.test(
-    text.trim(),
-  );
-}
+async function resolveParsedRoleCommand(args: {
+  runtime: IAgentRuntime;
+  message: Memory;
+  state: State | undefined;
+  options: HandlerOptions | Record<string, unknown> | undefined;
+}): Promise<ParsedRoleCommand | null> {
+  const { runtime, message, state, options } = args;
 
-function isNegativeRoleReply(text: string): boolean {
-  return /^(?:no|nah|nope|not yet|don'?t|do not|leave it|hold off|never mind|nvm|cancel that)[.!?]*$/i.test(
-    text.trim(),
-  );
-}
-
-async function getRecentConversationMessages(
-  runtime: IAgentRuntime,
-  roomId: UUID,
-): Promise<Memory[]> {
-  if (typeof runtime.getMemories === "function") {
-    try {
-      return await runtime.getMemories({
-        tableName: "messages",
-        roomId,
-        count: ROLE_CONTEXT_MESSAGE_COUNT,
-      });
-    } catch {
-      // Fall back below.
-    }
+  const params = (options as HandlerOptions | undefined)?.parameters as
+    | RoleActionParameters
+    | undefined;
+  const fromParams = normalizeRoleActionParams(params);
+  if (fromParams) {
+    return fromParams;
   }
 
-  if (typeof runtime.getMemoriesByRoomIds === "function") {
-    try {
-      return await runtime.getMemoriesByRoomIds({
-        tableName: "messages",
-        roomIds: [roomId],
-        limit: ROLE_CONTEXT_MESSAGE_COUNT,
-      });
-    } catch {
-      return [];
-    }
+  const extracted = await extractRoleIntentWithLlm({
+    runtime,
+    message,
+    state,
+  });
+  if (
+    !extracted.kind ||
+    !extracted.targetName ||
+    isRoleTargetPronoun(extracted.targetName)
+  ) {
+    return null;
   }
 
-  return [];
-}
-
-async function findPendingRoleIntent(
-  runtime: IAgentRuntime,
-  message: Memory,
-): Promise<ParsedRoleCommand | null> {
-  const recentMessages = await getRecentConversationMessages(runtime, message.roomId);
-  const sameUserMessages = recentMessages
-    .filter((memory) => memory?.entityId === message.entityId)
-    .reverse();
-
-  for (const memory of sameUserMessages) {
-    const text = typeof memory.content?.text === "string" ? memory.content.text : "";
-    const parsed = parseRoleCommand(text);
-    if (parsed?.confidence === "confirm") {
-      return parsed;
-    }
+  const targetName = normalizeEntityLookupName(extracted.targetName);
+  if (!targetName) {
+    return null;
   }
 
-  return null;
-}
-
-function buildRoleConfirmationPrompt(intent: ParsedRoleCommand): string {
-  if (intent.kind === "revoke") {
-    return `Do you want me to remove ${intent.targetName} as your ${intent.label}? Reply yes to confirm.`;
+  if (extracted.kind === "revoke") {
+    return {
+      kind: "revoke",
+      targetName,
+      newRole: "GUEST",
+      ...(extracted.label ? { label: extracted.label } : {}),
+    };
   }
 
-  if (intent.label) {
-    return `Do you want me to set ${intent.targetName} as your ${intent.label} (${intent.newRole})? Reply yes to confirm.`;
+  if (!extracted.newRole) {
+    return null;
   }
 
-  return `Do you want me to update ${intent.targetName} to **${intent.newRole}**? Reply yes to confirm.`;
+  return {
+    kind: "role",
+    targetName,
+    newRole: extracted.newRole,
+    ...(extracted.label ? { label: extracted.label } : {}),
+  };
 }
 
 function extractCustomFieldStrings(
@@ -908,24 +664,25 @@ export const updateRoleAction: Action = {
   ): Promise<boolean> => {
     const text =
       typeof message?.content?.text === "string" ? message.content.text : "";
-    // Only trigger on explicit role commands
-    return parseRoleCommand(text) !== null;
+    return looksLikeRoleIntent(text);
   },
 
   handler: async (
     runtime: IAgentRuntime,
     message: Memory,
-    _state?: State,
-    _options?: Record<string, unknown>,
+    state?: State,
+    options?: Record<string, unknown>,
     callback?: HandlerCallback,
   ) => {
-    const text =
-      typeof message?.content?.text === "string" ? message.content.text : "";
-
-    const parsed = parseRoleCommand(text);
+    const parsed = await resolveParsedRoleCommand({
+      runtime,
+      message,
+      state,
+      options,
+    });
     if (!parsed) {
       await callback?.({
-        text: "Could not parse role command. Usage: `/role @username ADMIN`",
+        text: "I couldn't determine whose role to change or which role/relationship you meant.",
       });
       return { success: false };
     }
@@ -1041,7 +798,7 @@ export const updateRoleAction: Action = {
 
     // Build response message using natural language when a label is present.
     let responseText: string;
-    if (parsed.kind === "revoke") {
+    if (parsed.kind === "revoke" && parsed.label) {
       responseText = `${targetName} is no longer your ${parsed.label}.`;
     } else if (parsed.label) {
       responseText = `${targetName} is now your ${parsed.label}.`;
@@ -1066,6 +823,44 @@ export const updateRoleAction: Action = {
       },
     };
   },
+
+  parameters: [
+    {
+      name: "target",
+      description:
+        "The person whose role should change. Resolve pronouns from recent conversation when possible.",
+      required: false,
+      schema: { type: "string" as const },
+    },
+    {
+      name: "mode",
+      description:
+        "Whether to assign a role or revoke/remove an existing role.",
+      required: false,
+      schema: {
+        type: "string" as const,
+        enum: ["assign", "revoke"],
+        default: "assign",
+      },
+    },
+    {
+      name: "role",
+      description:
+        "The normalized system role to apply. Map boss/manager/mod/admin to ADMIN, coworker/teammate/friend/member/user to USER, and explicit guest/none to GUEST.",
+      required: false,
+      schema: {
+        type: "string" as const,
+        enum: ["OWNER", "ADMIN", "USER", "GUEST"],
+      },
+    },
+    {
+      name: "label",
+      description:
+        "Optional natural-language relationship label from the user's wording, such as boss or coworker.",
+      required: false,
+      schema: { type: "string" as const },
+    },
+  ],
 
   examples: [
     [
@@ -1096,6 +891,38 @@ export const updateRoleAction: Action = {
       {
         name: "{{agentName}}",
         content: { text: "charlie is no longer your boss." },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "hey @{{agentName}}, odi is your boss now (@Odilitime)",
+        },
+      },
+      {
+        name: "{{agentName}}",
+        content: { text: "odi is now your boss." },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "hey @{{agentName}}, odi is your boss now (@Odilitime)",
+        },
+      },
+      {
+        name: "{{agentName}}",
+        content: { text: "odi is now your boss." },
+      },
+      {
+        name: "{{name1}}",
+        content: { text: "set his role to admin" },
+      },
+      {
+        name: "{{agentName}}",
+        content: { text: "Updated odi's role to **ADMIN**." },
       },
     ],
   ] as ActionExample[][],

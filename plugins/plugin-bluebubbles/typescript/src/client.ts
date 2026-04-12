@@ -219,7 +219,15 @@ export class BlueBubblesClient {
 	 */
 	async listChats(limit = 100, offset = 0): Promise<BlueBubblesChat[]> {
 		const response = await this.request<{ data: BlueBubblesChat[] }>(
-			`${API_ENDPOINTS.CHATS}?limit=${limit}&offset=${offset}&with=lastMessage,participants`,
+			API_ENDPOINTS.CHAT_QUERY,
+			{
+				method: "POST",
+				body: JSON.stringify({
+					limit,
+					offset,
+					with: ["lastMessage", "participants"],
+				}),
+			},
 		);
 		return response.data;
 	}
@@ -340,13 +348,14 @@ export class BlueBubblesClient {
 		message?: string,
 	): Promise<BlueBubblesChat> {
 		const response = await this.request<{ data: BlueBubblesChat }>(
-			API_ENDPOINTS.CHATS,
+			API_ENDPOINTS.CREATE_CHAT,
 			{
 				method: "POST",
 				body: JSON.stringify({
-					participants,
+					addresses: participants,
 					name,
 					message,
+					service: "iMessage",
 				}),
 			},
 		);
@@ -386,7 +395,7 @@ export class BlueBubblesClient {
 		await this.request(
 			`${API_ENDPOINTS.CHAT_INFO}/${encodeURIComponent(chatGuid)}`,
 			{
-				method: "PATCH",
+				method: "PUT",
 				body: JSON.stringify({ displayName: newName }),
 			},
 		);

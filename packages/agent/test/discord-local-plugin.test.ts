@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  DISCORD_LOCAL_SERVICE_NAME,
   DiscordLocalService,
 } from "../src/runtime/discord-local-plugin";
 
@@ -60,5 +61,77 @@ describe("DiscordLocalService.subscribeChannelMessages", () => {
       "MESSAGE_CREATE",
     );
     expect(subscribed).toEqual(["channel-keep", "channel-new"]);
+  });
+
+  it("registers outbound send handlers that drive UI automation and persist the sent memory", async () => {
+    const handlers = new Map<
+      string,
+      (
+        runtime: unknown,
+        target: { roomId?: string | null; channelId?: string | null },
+        content: { text?: string | null },
+      ) => Promise<void>
+    >();
+    const runtime = {
+      ...(createRuntime() as Record<string, unknown>),
+      registerSendHandler: vi.fn((source: string, handler: unknown) => {
+        handlers.set(
+          source,
+          handler as (
+            runtime: unknown,
+            target: { roomId?: string | null; channelId?: string | null },
+            content: { text?: string | null },
+          ) => Promise<void>,
+        );
+      }),
+      getRoom: vi.fn(async () => ({ channelId: "channel-1" })),
+      createMemory: vi.fn(async () => {}),
+    };
+    const service = new DiscordLocalService(runtime as never);
+    const sendUiMessage = vi.fn(async () => {});
+    const getChannel = vi.fn(async () => ({
+      id: "channel-1",
+      guild_id: "guild-1",
+    }));
+
+    (
+      service as unknown as {
+        sendUiMessage: typeof sendUiMessage;
+        getChannel: typeof getChannel;
+      }
+    ).sendUiMessage = sendUiMessage;
+    (
+      service as unknown as {
+        sendUiMessage: typeof sendUiMessage;
+        getChannel: typeof getChannel;
+      }
+    ).getChannel = getChannel;
+
+    DiscordLocalService.registerSendHandlers(runtime as never, service);
+
+    expect(handlers.has(DISCORD_LOCAL_SERVICE_NAME)).toBe(true);
+    expect(handlers.has("discord")).toBe(true);
+
+    await handlers.get(DISCORD_LOCAL_SERVICE_NAME)?.(
+      runtime,
+      { roomId: "room-1" },
+      { text: "Hello from Milady" },
+    );
+
+    expect(sendUiMessage).toHaveBeenCalledWith(
+      "channel-1",
+      "guild-1",
+      "Hello from Milady",
+    );
+    expect(runtime.createMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        roomId: "room-1",
+        content: expect.objectContaining({
+          text: "Hello from Milady",
+          source: DISCORD_LOCAL_SERVICE_NAME,
+        }),
+      }),
+      "messages",
+    );
   });
 });

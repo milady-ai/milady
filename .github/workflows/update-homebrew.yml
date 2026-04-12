@@ -26,7 +26,7 @@ concurrency:
 jobs:
   update-tap:
     name: Trigger Homebrew tap update
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Determine version
         id: meta

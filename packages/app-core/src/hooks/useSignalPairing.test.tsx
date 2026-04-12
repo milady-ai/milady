@@ -55,20 +55,44 @@ describe("useSignalPairing", () => {
       status: "idle",
       authExists: false,
       serviceConnected: false,
+      qrDataUrl: null,
+      phoneNumber: null,
+      error: null,
     });
   });
 
   it("marks the connector connected when saved auth already exists", async () => {
     mockClient.getSignalStatus.mockResolvedValue({
       accountId: "default",
-      status: "idle",
+      status: "connected",
       authExists: true,
       serviceConnected: false,
+      qrDataUrl: null,
+      phoneNumber: "+15551234567",
+      error: null,
     });
 
     const { result } = renderHook(() => useSignalPairing());
 
     await waitFor(() => expect(result.current.status).toBe("connected"));
+    expect(result.current.phoneNumber).toBe("+15551234567");
+  });
+
+  it("hydrates an in-progress QR session from the status endpoint", async () => {
+    mockClient.getSignalStatus.mockResolvedValue({
+      accountId: "default",
+      status: "waiting_for_qr",
+      authExists: false,
+      serviceConnected: false,
+      qrDataUrl: "data:image/png;base64,live",
+      phoneNumber: null,
+      error: null,
+    });
+
+    const { result } = renderHook(() => useSignalPairing());
+
+    await waitFor(() => expect(result.current.status).toBe("waiting_for_qr"));
+    expect(result.current.qrDataUrl).toBe("data:image/png;base64,live");
   });
 
   it("reacts to QR and status websocket events", async () => {
@@ -133,5 +157,44 @@ describe("useSignalPairing", () => {
     });
     expect(mockClient.disconnectSignal).toHaveBeenCalledWith("default");
     expect(result.current.status).toBe("idle");
+  });
+
+  it("surfaces stop and disconnect failures instead of resetting state", async () => {
+    mockClient.getSignalStatus.mockResolvedValue({
+      accountId: "default",
+      status: "waiting_for_qr",
+      authExists: false,
+      serviceConnected: false,
+      qrDataUrl: "data:image/png;base64,live",
+      phoneNumber: null,
+      error: null,
+    });
+    mockClient.stopSignalPairing.mockRejectedValue(new Error("stop failed"));
+    mockClient.disconnectSignal.mockRejectedValue(
+      new Error("disconnect failed"),
+    );
+
+    const { result } = renderHook(() => useSignalPairing());
+
+    await waitFor(() => expect(result.current.status).toBe("waiting_for_qr"));
+
+    await act(async () => {
+      await result.current.stopPairing();
+    });
+    expect(result.current.status).toBe("error");
+    expect(result.current.error).toBe("stop failed");
+
+    act(() => {
+      mockClient.emit("signal-qr", {
+        accountId: "default",
+        qrDataUrl: "data:image/png;base64,live",
+      });
+    });
+
+    await act(async () => {
+      await result.current.disconnect();
+    });
+    expect(result.current.status).toBe("error");
+    expect(result.current.error).toBe("disconnect failed");
   });
 });

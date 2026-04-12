@@ -12,9 +12,12 @@ describe("LifeOps navigation", () => {
     expect(pathForTab("lifeops")).toBe("/lifeops");
   });
 
-  it("exposes LifeOps as a top-level tab group", () => {
-    const group = ALL_TAB_GROUPS.find((entry) => entry.label === "LifeOps");
-    expect(group?.tabs).toEqual(["lifeops"]);
+  it("groups LifeOps under Apps instead of a dedicated top-level tab", () => {
+    expect(ALL_TAB_GROUPS.some((entry) => entry.label === "LifeOps")).toBe(
+      false,
+    );
+    const appsGroup = ALL_TAB_GROUPS.find((entry) => entry.label === "Apps");
+    expect(appsGroup?.tabs).toContain("lifeops");
   });
 
   it("returns a human-friendly LifeOps title", () => {

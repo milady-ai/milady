@@ -26,15 +26,15 @@ import type { AgentRuntime, Content, Task, UUID } from "@elizaos/core";
 import { Wallet } from "ethers";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
+import { req } from "../../../test/helpers/http";
+import { createDeferred } from "../../../test/helpers/test-utils";
 import { startApiServer } from "../src/api/server";
+import { agentAutoDailyTrades } from "../src/api/trade-safety";
 import {
   resolveStylePresetByAvatarIndex,
   resolveStylePresetById,
 } from "../src/onboarding-presets";
-import { agentAutoDailyTrades } from "../src/api/trade-safety";
 import { AGENT_NAME_POOL } from "../src/runtime/onboarding-names";
-import { req } from "../../../test/helpers/http";
-import { createDeferred } from "../../../test/helpers/test-utils";
 
 vi.mock("../src/services/mcp-marketplace", () => ({
   searchMcpMarketplace: vi
@@ -1664,9 +1664,7 @@ describe("API Server E2E (no runtime)", () => {
         getService: (serviceType) =>
           serviceType === "trajectories" ? coreLogger : null,
         getServicesByType: (serviceType) =>
-          serviceType === "trajectories"
-            ? [coreLogger, persistentLogger]
-            : [],
+          serviceType === "trajectories" ? [coreLogger, persistentLogger] : [],
         handleMessage: async (runtimeArg, message, onResponse) => {
           const trajectoryLogger = (
             runtimeArg as unknown as {
@@ -4309,9 +4307,13 @@ describe("API Server E2E (no runtime)", () => {
         expect(typeof p.description).toBe("string");
         expect(typeof p.enabled).toBe("boolean");
         expect(typeof p.configured).toBe("boolean");
-        expect(["ai-provider", "connector", "database", "feature"]).toContain(
-          p.category,
-        );
+        expect([
+          "ai-provider",
+          "app",
+          "connector",
+          "database",
+          "feature",
+        ]).toContain(p.category);
         expect(Array.isArray(p.configKeys)).toBe(true);
       }
     });

@@ -57,7 +57,7 @@ function selectProvider(): ProviderConfig | null {
       name: "openai",
       apiKey: openaiKey,
       baseUrl: process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1",
-      model: process.env.OPENAI_SMALL_MODEL?.trim() || "gpt-4.1-mini",
+      model: process.env.OPENAI_SMALL_MODEL?.trim() || "gpt-5.4-mini",
     };
   }
 

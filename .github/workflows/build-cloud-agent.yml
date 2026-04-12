@@ -1,5 +1,5 @@
 # =============================================================================
-# build-cloud-agent.yml — Build cloud agent image with Blacksmith Docker cache
+# build-cloud-agent.yml — Build cloud agent image with GitHub Actions Docker cache
 # =============================================================================
 #
 # Triggers:
@@ -10,7 +10,7 @@
 #   Tags (production): :cloud-v{version}         and :cloud-latest
 #   Tags (staging):    :cloud-staging-v{version} and :cloud-staging-latest
 #
-# Uses Blacksmith's persistent Docker layer cache for fast rebuilds.
+# Uses docker/build-push-action's GHA cache for fast rebuilds.
 # Typical warm build: ~2-4 min vs ~8-10 min without cache.
 # =============================================================================
 
@@ -55,7 +55,7 @@ permissions:
 jobs:
   build:
     name: Build cloud agent image
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
@@ -154,9 +154,9 @@ jobs:
         env:
           NODE_ENV: production
 
-      # ── 9. Set up Blacksmith Docker builder ────────────────────────────────
-      - name: Set up Blacksmith Docker
-        uses: useblacksmith/setup-docker-builder@v1
+      # ── 9. Set up Docker builder ────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       # ── 10. Login to GHCR ──────────────────────────────────────────────────
       - name: Login to GHCR
@@ -166,9 +166,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 11. Build and push with Blacksmith cache ────────────────────────────
+      # ── 11. Build and push with Docker layer cache ────────────────────────────
       - name: Build and push Docker image
-        uses: useblacksmith/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile.ci

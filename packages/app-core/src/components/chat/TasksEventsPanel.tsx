@@ -11,6 +11,7 @@
 import { useMemo } from "react";
 import type { ActivityEvent } from "../../hooks/useActivityEvents";
 import { useApp } from "../../state";
+import { FavoriteAppsBar } from "./FavoriteAppsBar";
 import { resolveChatSidebarWidgets } from "./widgets/registry";
 
 interface TasksEventsPanelProps {
@@ -43,6 +44,7 @@ export function TasksEventsPanel({
   return (
     <aside className={rootClassName} data-testid="chat-widgets-bar">
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-3">
+        <FavoriteAppsBar />
         {widgetDefinitions.length === 0 ? (
           <div className="py-3 text-xs text-muted">
             No plugin widgets are enabled for this chat view.

@@ -21,7 +21,6 @@ import {
   useState,
 } from "react";
 import {
-  AdvancedPageView,
   AppsPageView,
   BrowserWorkspaceView,
   BugReportModal,
@@ -30,10 +29,12 @@ import {
   CompanionShell,
   ConnectionFailedBanner,
   ConnectionLostOverlay,
-  ConnectorsPageView,
   ConversationsSidebar,
   CustomActionEditor,
   CustomActionsPanel,
+  DatabasePageView,
+  DesktopWorkspaceSection,
+  FineTuningView,
   GameViewOverlay,
   Header,
   HeartbeatsDesktopShell,
@@ -41,12 +42,19 @@ import {
   InventoryView,
   KnowledgeView,
   LifeOpsPageView,
+  LogsPageView,
+  MemoryViewerView,
+  PluginsPageView,
+  RelationshipsView,
+  RuntimeView,
   SaveCommandModal,
   SettingsView,
   ShellOverlays,
+  SkillsView,
   StartupShell,
   StreamView,
   SystemWarningBanner,
+  TrajectoriesView,
 } from "./app-shell-components";
 // Register overlay apps (self-register on import)
 import "./components/companion/companion-app";
@@ -65,8 +73,7 @@ import {
   useStreamPopoutNavigation,
 } from "./hooks";
 import { useActivityEvents } from "./hooks/useActivityEvents";
-import type { Tab } from "./navigation";
-import { APPS_ENABLED } from "./navigation";
+import { APPS_ENABLED, isAppsToolTab } from "./navigation";
 import { useApp } from "./state";
 import type { FlaminaGuideTopic } from "./state/types";
 
@@ -164,9 +171,12 @@ function ViewRouter() {
         );
       case "connectors":
         return (
-          <TabScrollView>
-            <ConnectorsPageView />
-          </TabScrollView>
+          <TabContentView>
+            <SettingsView
+              key="settings-connectors"
+              initialSection="connectors"
+            />
+          </TabContentView>
         );
       case "triggers":
         return (
@@ -186,20 +196,65 @@ function ViewRouter() {
             <SettingsView key="settings-root" />
           </TabContentView>
         );
-      case "advanced":
       case "plugins":
+        return (
+          <TabContentView>
+            <PluginsPageView />
+          </TabContentView>
+        );
       case "skills":
-      case "fine-tuning":
+        return (
+          <TabContentView>
+            <SkillsView />
+          </TabContentView>
+        );
       case "trajectories":
+        return (
+          <TabContentView>
+            <TrajectoriesView />
+          </TabContentView>
+        );
       case "relationships":
+        return (
+          <TabContentView>
+            <RelationshipsView />
+          </TabContentView>
+        );
       case "memories":
+        return (
+          <TabContentView>
+            <MemoryViewerView />
+          </TabContentView>
+        );
       case "runtime":
+        return (
+          <TabContentView>
+            <RuntimeView />
+          </TabContentView>
+        );
       case "database":
-      case "desktop":
+        return (
+          <TabContentView>
+            <DatabasePageView />
+          </TabContentView>
+        );
       case "logs":
         return (
           <TabContentView>
-            <AdvancedPageView />
+            <LogsPageView />
+          </TabContentView>
+        );
+      case "fine-tuning":
+      case "advanced":
+        return (
+          <TabContentView>
+            <FineTuningView />
+          </TabContentView>
+        );
+      case "desktop":
+        return (
+          <TabContentView>
+            <DesktopWorkspaceSection />
           </TabContentView>
         );
       default:
@@ -219,11 +274,7 @@ export function App() {
     setState,
     actionNotice,
     activeOverlayApp,
-    uiLanguage,
-    setUiLanguage,
     uiTheme,
-    setUiTheme,
-    chatAgentVoiceMuted,
     agentStatus,
     backendConnection,
     unreadConversations,
@@ -240,9 +291,10 @@ export function App() {
   // delaying WebSocket agent-status updates (which would freeze the loader).
   const overlayAppActive =
     startupCoordinator.phase === "ready" && activeOverlayApp !== null;
-  const resolvedOverlayApp = overlayAppActive
-    ? getOverlayApp(activeOverlayApp!)
-    : undefined;
+  const resolvedOverlayApp =
+    overlayAppActive && activeOverlayApp
+      ? getOverlayApp(activeOverlayApp)
+      : undefined;
   const lifeOpsSignalsEnabled =
     startupCoordinator.phase === "ready" &&
     agentStatus?.state === "running" &&
@@ -274,23 +326,12 @@ export function App() {
   const isCompanionTab = tab === "companion";
   const isChat = tab === "chat";
   const isWallets = tab === "inventory";
-  const isConnectors = tab === "connectors";
   const isHeartbeats = tab === "triggers";
   const isKnowledge = tab === "knowledge";
-  const isSettingsPage = tab === "settings" || tab === "voice";
-  const isAdvancedPage =
-    tab === "advanced" ||
-    tab === "plugins" ||
-    tab === "skills" ||
-    tab === "fine-tuning" ||
-    tab === "trajectories" ||
-    tab === "relationships" ||
-    tab === "memories" ||
-    tab === "runtime" ||
-    tab === "database" ||
-    tab === "desktop" ||
-    tab === "logs";
-  const isCharacterPage = tab === "character" || tab === "character-select";
+  const isSettingsPage =
+    tab === "settings" || tab === "voice" || tab === "connectors";
+  const isAppsToolPage = isAppsToolTab(tab);
+  const isDesktopWorkspacePage = tab === "desktop";
   const unreadCount = unreadConversations?.size ?? 0;
   const mobileChatControls = useMemo(
     () =>
@@ -332,13 +373,7 @@ export function App() {
           </Button>
         </div>
       ) : undefined,
-    [
-      isChatMobileLayout,
-      mobileConversationsOpen,
-      unreadCount,
-      setMobileConversationsOpen,
-      t,
-    ],
+    [isChatMobileLayout, mobileConversationsOpen, unreadCount, t],
   );
 
   // Keep hook order stable across onboarding/auth state transitions.
@@ -464,7 +499,9 @@ export function App() {
   // ptySessions/agentStatus — so CompanionSceneHost stays stable across polls.
   const shellContent = useMemo(
     () =>
-      uiShellMode === "companion" && !isCharacterPage ? (
+      uiShellMode === "companion" &&
+      tab !== "character" &&
+      tab !== "character-select" ? (
         <CompanionShell tab="companion" actionNotice={actionNotice} />
       ) : isCompanionTab ? (
         // Native mode with companion tab: the overlay app renders the companion UI.
@@ -604,16 +641,6 @@ export function App() {
             <HeartbeatsDesktopShell key="heartbeats-view-desktop" />
           </div>
         </div>
-      ) : isConnectors ? (
-        <div
-          key="connectors-shell"
-          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-        >
-          <Header />
-          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-            <ConnectorsPageView />
-          </div>
-        </div>
       ) : isKnowledge ? (
         <div
           key="knowledge-shell"
@@ -632,11 +659,19 @@ export function App() {
           <Header />
           <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
             <SettingsView
-              key={tab === "voice" ? "settings-media" : "settings-root"}
+              key={
+                tab === "voice"
+                  ? "settings-media"
+                  : tab === "connectors"
+                    ? "settings-connectors"
+                    : "settings-root"
+              }
               initialSection={
                 tab === "voice"
                   ? "media"
-                  : (settingsInitialSection ?? undefined)
+                  : tab === "connectors"
+                    ? "connectors"
+                    : (settingsInitialSection ?? undefined)
               }
             />
           </div>
@@ -651,24 +686,25 @@ export function App() {
             <InventoryView />
           </div>
         </div>
-      ) : isAdvancedPage ? (
+      ) : isAppsToolPage ? (
         <div
-          key={`advanced-shell-${tab}`}
+          key={`apps-tool-shell-${tab}`}
+          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
+        >
+          <Header />
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <ViewRouter />
+          </div>
+        </div>
+      ) : isDesktopWorkspacePage ? (
+        <div
+          key={`desktop-shell-${tab}`}
           className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
         >
           <Header />
           <div className="flex flex-1 min-h-0 min-w-0">
-            <AdvancedPageView />
+            <DesktopWorkspaceSection />
           </div>
-        </div>
-      ) : isCharacterPage ? (
-        <div
-          key="character-shell"
-          className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
-        >
-          <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden px-3 xl:px-5 py-4 xl:py-6">
-            <ViewRouter />
-          </main>
         </div>
       ) : (
         <div
@@ -688,12 +724,11 @@ export function App() {
       actionNotice,
       isChat,
       isHeartbeats,
-      isConnectors,
       isKnowledge,
       isSettingsPage,
       isWallets,
-      isAdvancedPage,
-      isCharacterPage,
+      isAppsToolPage,
+      isDesktopWorkspacePage,
       isChatMobileLayout,
       mobileConversationsOpen,
       mobileChatControls,
@@ -703,18 +738,7 @@ export function App() {
       clearActivityEvents,
       customActionsPanelOpen,
       settingsInitialSection,
-      uiLanguage,
-      setUiLanguage,
-      uiTheme,
-      setUiTheme,
-      chatAgentVoiceMuted,
-      setState,
       t,
-      setMobileConversationsOpen,
-      setTasksEventsPanelOpen,
-      setCustomActionsPanelOpen,
-      setEditingAction,
-      setCustomActionsEditorOpen,
     ],
   );
 
@@ -745,7 +769,11 @@ export function App() {
 
   return (
     <BugReportProvider value={bugReport}>
-      {shellContent}
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <ConnectionFailedBanner />
+        <SystemWarningBanner />
+        {shellContent}
+      </div>
       {/* Full-screen overlay app — renders whichever overlay app is active */}
       {resolvedOverlayApp && (
         <resolvedOverlayApp.Component
@@ -780,8 +808,6 @@ export function App() {
         }}
       />
       <ConnectionLostOverlay />
-      <ConnectionFailedBanner />
-      <SystemWarningBanner />
       {desktopShuttingDown ? (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-bg/80 backdrop-blur-sm"

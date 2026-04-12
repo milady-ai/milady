@@ -302,7 +302,9 @@ describe("CharacterEditor voice cloud fallback (e2e)", () => {
 
   it("speaks the character greeting through the Eliza Cloud proxy when only a masked key is present", async () => {
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(CharacterEditor));
+      tree = TestRenderer.create(
+        React.createElement(CharacterEditor, { sceneOverlay: true }),
+      );
     });
 
     await flushEffects();
@@ -329,7 +331,9 @@ describe("CharacterEditor voice cloud fallback (e2e)", () => {
 
   it("switches the active voice config when a different character is selected", async () => {
     await act(async () => {
-      tree = TestRenderer.create(React.createElement(CharacterEditor));
+      tree = TestRenderer.create(
+        React.createElement(CharacterEditor, { sceneOverlay: true }),
+      );
     });
 
     await flushEffects();

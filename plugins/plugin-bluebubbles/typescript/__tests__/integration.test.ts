@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	API_ENDPOINTS,
 	DEFAULT_WEBHOOK_PATH,
@@ -10,6 +10,7 @@ import {
 	GROUP_POLICY_DISABLED,
 	GROUP_POLICY_OPEN,
 } from "../src/constants";
+import { BlueBubblesClient } from "../src/client";
 
 import {
 	isHandleAllowed,
@@ -23,6 +24,10 @@ import blueBubblesPlugin, {
 	sendMessageAction,
 	sendReactionAction,
 } from "../src/index";
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
 
 // ----------------------------------------------------------------
 // Plugin exports
@@ -196,6 +201,103 @@ describe("validateConfig", () => {
 			webhookPath: "/custom/webhook",
 		});
 		expect(config.webhookPath).toBe("/custom/webhook");
+	});
+});
+
+describe("BlueBubblesClient", () => {
+	it("lists chats via the query endpoint", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						data: [{ guid: "chat-1", chatIdentifier: "chat-1", participants: [] }],
+					}),
+					{ status: 200, headers: { "Content-Type": "application/json" } },
+				),
+			);
+		const client = new BlueBubblesClient({
+			enabled: true,
+			serverUrl: "http://localhost:1234",
+			password: "secret",
+		});
+
+		await client.listChats(5, 2);
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+		const [url, init] = fetchMock.mock.calls[0] ?? [];
+		expect(url).toBe(
+			"http://localhost:1234/api/v1/chat/query?password=secret",
+		);
+		expect(init?.method).toBe("POST");
+		expect(init?.body).toBe(
+			JSON.stringify({
+				limit: 5,
+				offset: 2,
+				with: ["lastMessage", "participants"],
+			}),
+		);
+	});
+
+	it("creates group chats via the new-chat endpoint", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						data: { guid: "chat-1", chatIdentifier: "chat-1", participants: [] },
+					}),
+					{ status: 200, headers: { "Content-Type": "application/json" } },
+				),
+			);
+		const client = new BlueBubblesClient({
+			enabled: true,
+			serverUrl: "http://localhost:1234",
+			password: "secret",
+		});
+
+		await client.createGroupChat(["+15551234567"], "Test", "hello");
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+		const [url, init] = fetchMock.mock.calls[0] ?? [];
+		expect(url).toBe(
+			"http://localhost:1234/api/v1/chat/new?password=secret",
+		);
+		expect(init?.method).toBe("POST");
+		expect(init?.body).toBe(
+			JSON.stringify({
+				addresses: ["+15551234567"],
+				name: "Test",
+				message: "hello",
+				service: "iMessage",
+			}),
+		);
+	});
+
+	it("renames group chats with PUT", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(
+				new Response(JSON.stringify({ data: {} }), {
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				}),
+			);
+		const client = new BlueBubblesClient({
+			enabled: true,
+			serverUrl: "http://localhost:1234",
+			password: "secret",
+		});
+
+		await client.renameGroupChat("iMessage;-;+15551234567", "Renamed");
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+		const [url, init] = fetchMock.mock.calls[0] ?? [];
+		expect(url).toBe(
+			"http://localhost:1234/api/v1/chat/iMessage%3B-%3B%2B15551234567?password=secret",
+		);
+		expect(init?.method).toBe("PUT");
+		expect(init?.body).toBe(JSON.stringify({ displayName: "Renamed" }));
 	});
 });
 

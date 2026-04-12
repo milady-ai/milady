@@ -196,6 +196,10 @@ function extractSource(memory: Memory): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function isDiscordConnectorSource(source: string | null | undefined): boolean {
+  return normalizeConnectorSource(source) === "discord";
+}
+
 /**
  * Pull the visible text out of a Memory row. Same rationale as
  * extractSource — we're pulling fields off a loosely-typed Content
@@ -525,7 +529,7 @@ function extractDiscordReactionEvent(
   }
 
   const source = extractSource(memory);
-  if (source?.toLowerCase() !== "discord") {
+  if (!isDiscordConnectorSource(source)) {
     return null;
   }
 
@@ -1357,7 +1361,7 @@ async function loadInboxMessages(
 
   await Promise.all(
     ordered.map(async (message) => {
-      if (message.source.toLowerCase() !== "discord") return;
+      if (!isDiscordConnectorSource(message.source)) return;
       const storedSenderProfile = await resolveStoredDiscordEntityProfile(
         runtime,
         message.senderEntityId,
@@ -1464,7 +1468,7 @@ function isConnectorVisibleDiscordAssistantMessage(
   message: InboxMessageRecord,
 ): boolean {
   return (
-    message.source.toLowerCase() === "discord" &&
+    isDiscordConnectorSource(message.source) &&
     message.role === "assistant" &&
     (message.hasExplicitSource || message.hasExternalUrl)
   );
@@ -1474,7 +1478,7 @@ function isImplicitDiscordAssistantShadow(
   message: InboxMessageRecord,
 ): boolean {
   return (
-    message.source.toLowerCase() === "discord" &&
+    isDiscordConnectorSource(message.source) &&
     message.role === "assistant" &&
     !message.hasExplicitSource &&
     !message.hasExternalUrl
@@ -1781,7 +1785,7 @@ async function loadInboxChats(
     const worldId = readRoomWorldId(room);
     const world = worldId ? worldsById.get(worldId as UUID) : undefined;
     const liveDiscordProfile =
-      entry.source.toLowerCase() === "discord"
+      isDiscordConnectorSource(entry.source)
         ? await resolveDiscordRoomProfile(
             runtime,
             room,
@@ -1789,14 +1793,14 @@ async function loadInboxChats(
           )
         : null;
     const latestSenderEntityProfile =
-      entry.source.toLowerCase() === "discord"
+      isDiscordConnectorSource(entry.source)
         ? await resolveStoredDiscordEntityProfile(
             runtime,
             entry.latestSenderEntityId,
           )
         : null;
     const latestMessageAuthorProfile =
-      entry.source.toLowerCase() === "discord" &&
+      isDiscordConnectorSource(entry.source) &&
       entry.latestDiscordChannelId &&
       entry.latestDiscordMessageId
         ? await resolveDiscordMessageAuthorProfile(
@@ -1806,7 +1810,7 @@ async function loadInboxChats(
           )
         : null;
     const latestSenderProfile =
-      entry.source.toLowerCase() === "discord" &&
+      isDiscordConnectorSource(entry.source) &&
       (entry.latestSenderRawId ??
         latestSenderEntityProfile?.rawUserId ??
         latestMessageAuthorProfile?.rawUserId)
@@ -1871,7 +1875,7 @@ async function loadInboxChats(
       entry.latestSenderName.trim().length > 0 &&
       entry.latestSenderName.trim().toLowerCase() === title.toLowerCase();
     const shouldUsePersonAvatar =
-      entry.source.toLowerCase() === "discord"
+      isDiscordConnectorSource(entry.source)
         ? true
         : roomType === "DM" || titleMatchesLatestSender;
     const resolvedAvatarUrl = shouldUsePersonAvatar
@@ -1890,7 +1894,7 @@ async function loadInboxChats(
       worldLabel: resolveInboxWorldLabel(room, world),
       title,
       avatarUrl:
-        entry.source.toLowerCase() === "discord"
+        isDiscordConnectorSource(entry.source)
           ? await cacheInboxDiscordAvatar(
               runtime,
               resolvedAvatarUrl,

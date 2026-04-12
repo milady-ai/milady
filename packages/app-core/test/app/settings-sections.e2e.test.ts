@@ -287,6 +287,9 @@ describe("SettingsView Sections", () => {
 
       expect(sidebar).toBeDefined();
       expect(searchInput).toBeDefined();
+      expect(JSON.stringify(tree?.toJSON())).not.toContain(
+        "settings.sections.lifeops.label",
+      );
 
       await act(async () => {
         searchInput?.props.onChange({ target: { value: "media" } });

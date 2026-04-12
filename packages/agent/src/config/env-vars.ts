@@ -71,6 +71,9 @@ export const CONNECTOR_ENV_MAP: Readonly<
     token: "DISCORD_API_TOKEN",
     botToken: "DISCORD_API_TOKEN",
     applicationId: "DISCORD_APPLICATION_ID",
+    syncProfile: "DISCORD_SYNC_PROFILE",
+    profileName: "DISCORD_PROFILE_NAME",
+    profileAvatar: "DISCORD_PROFILE_AVATAR",
   },
   discordLocal: {
     enabled: "DISCORD_LOCAL_ENABLED",
@@ -100,6 +103,15 @@ export const CONNECTOR_ENV_MAP: Readonly<
     account: "SIGNAL_ACCOUNT_NUMBER",
     httpUrl: "SIGNAL_HTTP_URL",
     cliPath: "SIGNAL_CLI_PATH",
+  },
+  imessage: {
+    enabled: "IMESSAGE_ENABLED",
+    cliPath: "IMESSAGE_CLI_PATH",
+    dbPath: "IMESSAGE_DB_PATH",
+    dmPolicy: "IMESSAGE_DM_POLICY",
+    groupPolicy: "IMESSAGE_GROUP_POLICY",
+    allowFrom: "IMESSAGE_ALLOW_FROM",
+    pollIntervalMs: "IMESSAGE_POLL_INTERVAL_MS",
   },
   whatsapp: {
     authDir: "WHATSAPP_AUTH_DIR",

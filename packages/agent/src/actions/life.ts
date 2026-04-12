@@ -474,7 +474,14 @@ function requestedOwnership(domain?: LifeOpsDomain) {
 }
 
 function normalizeIntentText(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
+  return normalizeLifeInputText(value).toLowerCase();
+}
+
+function normalizeLifeInputText(value: string): string {
+  return value
+    .replace(/[\u00a0\u1680\u2000-\u200b\u202f\u205f\u3000]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function normalizeTitle(value: string): string {
@@ -581,9 +588,88 @@ function stateActionResults(state: State | undefined): ActionResult[] {
     stateRecord.data && typeof stateRecord.data === "object"
       ? (stateRecord.data as Record<string, unknown>)
       : undefined;
-  return Array.isArray(data?.actionResults)
-    ? (data.actionResults as ActionResult[])
-    : [];
+  const providerResults =
+    data?.providers && typeof data.providers === "object"
+      ? (data.providers as Record<string, unknown>)
+      : undefined;
+  const providerActionState =
+    providerResults?.ACTION_STATE &&
+    typeof providerResults.ACTION_STATE === "object"
+      ? (providerResults.ACTION_STATE as Record<string, unknown>)
+      : undefined;
+  const providerActionStateData =
+    providerActionState?.data && typeof providerActionState.data === "object"
+      ? (providerActionState.data as Record<string, unknown>)
+      : undefined;
+  const providerRecentMessages =
+    providerResults?.RECENT_MESSAGES &&
+    typeof providerResults.RECENT_MESSAGES === "object"
+      ? (providerResults.RECENT_MESSAGES as Record<string, unknown>)
+      : undefined;
+  const providerRecentMessagesData =
+    providerRecentMessages?.data &&
+    typeof providerRecentMessages.data === "object"
+      ? (providerRecentMessages.data as Record<string, unknown>)
+      : undefined;
+
+  const candidates = [
+    data?.actionResults,
+    providerActionStateData?.actionResults,
+    providerActionStateData?.recentActionMemories,
+    providerRecentMessagesData?.actionResults,
+  ].filter(Array.isArray) as unknown[][];
+
+  if (candidates.length === 0) {
+    return [];
+  }
+
+  return candidates.flatMap((entries) =>
+    entries.flatMap((entry): ActionResult[] => {
+    if (!entry || typeof entry !== "object") {
+      return [];
+    }
+
+    if ("content" in entry) {
+      const content =
+        (entry as { content?: unknown }).content &&
+        typeof (entry as { content?: unknown }).content === "object"
+          ? ((entry as { content: Record<string, unknown> }).content as Record<
+              string,
+              unknown
+            >)
+          : null;
+      if (!content) {
+        return [];
+      }
+
+      const contentData =
+        content.data && typeof content.data === "object"
+          ? ({ ...(content.data as Record<string, unknown>) } as Record<
+              string,
+              unknown
+            >)
+          : {};
+      if (
+        typeof content.actionName === "string" &&
+        typeof contentData.actionName !== "string"
+      ) {
+        contentData.actionName = content.actionName;
+      }
+
+      return [
+        {
+          success: content.actionStatus !== "failed",
+          text: typeof content.text === "string" ? content.text : undefined,
+          data: contentData as import("@elizaos/core").ProviderDataRecord,
+          error:
+            typeof content.error === "string" ? content.error : undefined,
+        },
+      ];
+    }
+
+    return [entry as ActionResult];
+    }),
+  );
 }
 
 function stateMessageDrafts(state: State | undefined): DeferredLifeDraft[] {
@@ -592,8 +678,31 @@ function stateMessageDrafts(state: State | undefined): DeferredLifeDraft[] {
   }
 
   const stateRecord = state as Record<string, unknown>;
-  const recentMessagesData =
-    stateRecord.recentMessagesData ?? stateRecord.recentMessages;
+  const data =
+    stateRecord.data && typeof stateRecord.data === "object"
+      ? (stateRecord.data as Record<string, unknown>)
+      : undefined;
+  const providerResults =
+    data?.providers && typeof data.providers === "object"
+      ? (data.providers as Record<string, unknown>)
+      : undefined;
+  const providerRecentMessages =
+    providerResults?.RECENT_MESSAGES &&
+    typeof providerResults.RECENT_MESSAGES === "object"
+      ? (providerResults.RECENT_MESSAGES as Record<string, unknown>)
+      : undefined;
+  const providerRecentMessagesData =
+    providerRecentMessages?.data &&
+    typeof providerRecentMessages.data === "object"
+      ? (providerRecentMessages.data as Record<string, unknown>)
+      : undefined;
+
+  const recentMessagesData = [
+    stateRecord.recentMessagesData,
+    stateRecord.recentMessages,
+    providerRecentMessagesData?.recentMessages,
+  ].find(Array.isArray);
+
   if (!Array.isArray(recentMessagesData)) {
     return [];
   }
@@ -625,6 +734,21 @@ function stateMessageDrafts(state: State | undefined): DeferredLifeDraft[] {
 
 function latestDeferredLifeDraft(state: State | undefined): DeferredLifeDraft | null {
   for (const result of [...stateActionResults(state)].reverse()) {
+    const resultData =
+      result.data && typeof result.data === "object"
+        ? (result.data as Record<string, unknown>)
+        : null;
+    const completedCreate =
+      result.success &&
+      resultData &&
+      !coerceDeferredLifeDraft(resultData.lifeDraft) &&
+      ((resultData.definition &&
+        typeof resultData.definition === "object") ||
+        (resultData.goal && typeof resultData.goal === "object"));
+    if (completedCreate) {
+      return null;
+    }
+
     const candidate = coerceDeferredLifeDraft(result.data?.lifeDraft);
     if (candidate) {
       return candidate;
@@ -674,7 +798,32 @@ function shouldReuseDeferredLifeDraft(args: {
     return true;
   }
 
-  if (args.paramsIntent?.trim()) {
+  const words = args.currentText.trim().split(/\s+/).filter(Boolean);
+  const isConfirmationFollowup =
+    words.length > 0 &&
+    words.length <= 6 &&
+    !hasCadenceHint(args.currentText.toLowerCase()) &&
+    looksLikeDeferredLifeConfirmation(args.currentText);
+  if (isConfirmationFollowup) {
+    if (
+      args.explicitAction &&
+      ACTION_TO_OPERATION[args.explicitAction] !== args.draft.operation
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  const normalizedCurrentText = normalizeIntentText(args.currentText);
+  const normalizedParamsIntent =
+    typeof args.paramsIntent === "string" && args.paramsIntent.trim().length > 0
+      ? normalizeIntentText(args.paramsIntent)
+      : "";
+  if (
+    normalizedParamsIntent &&
+    normalizedParamsIntent !== normalizedCurrentText &&
+    !looksLikeDeferredLifeConfirmation(args.paramsIntent ?? "")
+  ) {
     return false;
   }
 
@@ -688,14 +837,7 @@ function shouldReuseDeferredLifeDraft(args: {
   if (args.title || args.target) {
     return false;
   }
-
-  const words = args.currentText.trim().split(/\s+/).filter(Boolean);
-  return (
-    words.length > 0 &&
-    words.length <= 6 &&
-    !hasCadenceHint(args.currentText.toLowerCase()) &&
-    looksLikeDeferredLifeConfirmation(args.currentText)
-  );
+  return false;
 }
 
 async function resolveGoal(
@@ -1008,6 +1150,16 @@ function buildDistributedDailySlots(count: number): LifeOpsDailySlot[] {
   }));
 }
 
+function formatMinuteOfDayLabel(minuteOfDay: number): string {
+  const hour24 = Math.floor(minuteOfDay / 60);
+  const minute = minuteOfDay % 60;
+  const meridiem = hour24 >= 12 ? "pm" : "am";
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return minute === 0
+    ? `${hour12}${meridiem}`
+    : `${hour12}:${String(minute).padStart(2, "0")}${meridiem}`;
+}
+
 function parseClockToken(token: string): number | null {
   const normalized = token.trim().toLowerCase();
   if (normalized === "noon") {
@@ -1038,6 +1190,26 @@ function parseClockToken(token: string): number | null {
   return normalizedHour * 60 + minute;
 }
 
+function parseTimeOfDayToken(token: string): number | null {
+  const normalized = normalizeLifeInputText(token).toLowerCase();
+  const hhmmMatch = normalized.match(/^(\d{1,2}):(\d{2})$/);
+  if (hhmmMatch) {
+    const hour = Number(hhmmMatch[1]);
+    const minute = Number(hhmmMatch[2]);
+    if (
+      Number.isFinite(hour) &&
+      Number.isFinite(minute) &&
+      hour >= 0 &&
+      hour <= 23 &&
+      minute >= 0 &&
+      minute < 60
+    ) {
+      return hour * 60 + minute;
+    }
+  }
+  return parseClockToken(normalized);
+}
+
 function extractExplicitDailySlots(intent: string): LifeOpsDailySlot[] {
   const tokens = [
     ...intent.matchAll(/\b(\d{1,2}(?::\d{2})?\s*(?:am|pm)|noon|midnight)\b/gi),
@@ -1058,6 +1230,197 @@ function extractExplicitDailySlots(intent: string): LifeOpsDailySlot[] {
     });
   }
   return slots.sort((left, right) => left.minuteOfDay - right.minuteOfDay);
+}
+
+function normalizeLifeWindows(
+  value: unknown,
+): Array<"morning" | "afternoon" | "evening" | "night"> {
+  const values = Array.isArray(value) ? value : value == null ? [] : [value];
+  const normalized = values.flatMap((entry) => {
+    if (typeof entry !== "string") {
+      return [];
+    }
+    const lower = normalizeLifeInputText(entry).toLowerCase();
+    if (lower === "morning") return ["morning" as const];
+    if (lower === "afternoon") return ["afternoon" as const];
+    if (lower === "evening") return ["evening" as const];
+    if (lower === "night") return ["night" as const];
+    return [];
+  });
+  return [...new Set(normalized)];
+}
+
+function normalizeCadenceDetail(value: unknown): LifeOpsCadence | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  const cadenceKind =
+    typeof record.kind === "string"
+      ? normalizeLifeInputText(record.kind).toLowerCase()
+      : typeof record.type === "string"
+        ? normalizeLifeInputText(record.type).toLowerCase()
+        : "";
+
+  if (!cadenceKind) {
+    return undefined;
+  }
+
+  if (cadenceKind === "once" && typeof record.dueAt === "string") {
+    return {
+      kind: "once",
+      dueAt: record.dueAt,
+    };
+  }
+
+  if (cadenceKind === "interval") {
+    const everyMinutes =
+      typeof record.everyMinutes === "number"
+        ? record.everyMinutes
+        : typeof record.everyMinutes === "string"
+          ? Number(record.everyMinutes)
+          : typeof record.minutes === "number"
+            ? record.minutes
+            : typeof record.minutes === "string"
+              ? Number(record.minutes)
+              : NaN;
+    if (Number.isFinite(everyMinutes) && everyMinutes > 0) {
+      return {
+        kind: "interval",
+        everyMinutes,
+        windows: normalizeLifeWindows(record.windows),
+      };
+    }
+    return undefined;
+  }
+
+  if (cadenceKind === "weekly") {
+    const weekdays = Array.isArray(record.weekdays)
+      ? record.weekdays
+          .map((entry) =>
+            typeof entry === "number"
+              ? entry
+              : typeof entry === "string"
+                ? Number(entry)
+                : NaN,
+          )
+          .filter((entry) => Number.isFinite(entry))
+      : [];
+    if (weekdays.length > 0) {
+      return {
+        kind: "weekly",
+        weekdays,
+        windows: normalizeLifeWindows(record.windows),
+      };
+    }
+    return undefined;
+  }
+
+  const explicitTimes = Array.isArray(record.times)
+    ? record.times
+        .map((entry) =>
+          typeof entry === "string" ? parseTimeOfDayToken(entry) : null,
+        )
+        .filter((entry): entry is number => entry !== null)
+    : [];
+  if (explicitTimes.length > 0) {
+    return {
+      kind: "times_per_day",
+      slots: explicitTimes.map((minuteOfDay, index) => ({
+        key: `time-${index + 1}`,
+        label: formatMinuteOfDayLabel(minuteOfDay),
+        minuteOfDay,
+        durationMinutes: 45,
+      })),
+      visibilityLeadMinutes: 90,
+      visibilityLagMinutes: 180,
+    };
+  }
+
+  if (cadenceKind === "times_per_day") {
+    if (Array.isArray(record.slots)) {
+      const slots = record.slots
+        .map((entry, index) => {
+          if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+            return null;
+          }
+          const slot = entry as Record<string, unknown>;
+          const minuteOfDay =
+            typeof slot.minuteOfDay === "number"
+              ? slot.minuteOfDay
+              : typeof slot.minuteOfDay === "string"
+                ? Number(slot.minuteOfDay)
+                : null;
+          if (minuteOfDay === null || !Number.isFinite(minuteOfDay)) {
+            return null;
+          }
+          return {
+            key:
+              typeof slot.key === "string" && slot.key.trim().length > 0
+                ? slot.key
+                : `slot-${index + 1}`,
+            label:
+              typeof slot.label === "string" && slot.label.trim().length > 0
+                ? slot.label
+                : formatMinuteOfDayLabel(minuteOfDay),
+            minuteOfDay,
+            durationMinutes:
+              typeof slot.durationMinutes === "number" &&
+              Number.isFinite(slot.durationMinutes) &&
+              slot.durationMinutes > 0
+                ? slot.durationMinutes
+                : 45,
+          } satisfies LifeOpsDailySlot;
+        })
+        .filter((entry): entry is LifeOpsDailySlot => entry !== null);
+      if (slots.length > 0) {
+        return {
+          kind: "times_per_day",
+          slots,
+          visibilityLeadMinutes:
+            typeof record.visibilityLeadMinutes === "number"
+              ? record.visibilityLeadMinutes
+              : 90,
+          visibilityLagMinutes:
+            typeof record.visibilityLagMinutes === "number"
+              ? record.visibilityLagMinutes
+              : 180,
+        };
+      }
+    }
+
+    const count =
+      typeof record.count === "number"
+        ? record.count
+        : typeof record.count === "string"
+          ? Number(record.count)
+          : NaN;
+    if (Number.isFinite(count) && count > 0) {
+      return {
+        kind: "times_per_day",
+        slots: buildDistributedDailySlots(count),
+        visibilityLeadMinutes: 90,
+        visibilityLagMinutes: 180,
+      };
+    }
+  }
+
+  if (cadenceKind === "daily") {
+    const windows = normalizeLifeWindows(record.windows ?? record.window);
+    if (windows.length > 0) {
+      return {
+        kind: "daily",
+        windows,
+      };
+    }
+    return {
+      kind: "daily",
+      windows: ["morning"],
+    };
+  }
+
+  return undefined;
 }
 
 function buildDefaultReminderPlan(
@@ -1564,12 +1927,14 @@ export const lifeAction: Action = {
   description:
     "Manage the user's personal routines, habits, goals, reminders, and escalation settings through LifeOps. " +
     "USE this action for: creating, editing, or deleting tasks, habits, routines, and goals; " +
+    "helping the user actually set up follow-through when they say things like 'help me brush my teeth every day', 'i keep forgetting x', or 'help me actually do it'; " +
     "marking items as complete, skipping, or snoozing them; reviewing goal progress; " +
     "setting up phone/SMS escalation channels; adjusting reminder frequency or intensity; " +
     "querying an overview of active LifeOps items. " +
     "DO NOT use this action for Gmail inbox triage, email search, drafting or sending emails — use GMAIL_ACTION instead. " +
     "DO NOT use this action for calendar lookups, scheduling meetings, searching events, or travel itineraries — use CALENDAR_ACTION instead. " +
-    "This action provides the final grounded reply; do not pair it with a speculative REPLY action.",
+    "This action provides the final grounded reply; do not pair it with a speculative REPLY action or fall back to advice-only chat when the user wants real LifeOps follow-through.",
+  suppressPostActionContinuation: true,
   validate: async (runtime, message) => {
     return hasLifeOpsAccess(runtime, message);
   },
@@ -1583,7 +1948,7 @@ export const lifeAction: Action = {
 
     const rawParams = (options as HandlerOptions | undefined)?.parameters as LifeParams | undefined;
     const params = rawParams ?? {} as LifeParams;
-    const currentText = messageText(message).trim();
+    const currentText = normalizeLifeInputText(messageText(message));
     const details = params.details;
     const deferredDraft = latestDeferredLifeDraft(state);
     const reuseDeferredDraft = shouldReuseDeferredLifeDraft({
@@ -1596,8 +1961,8 @@ export const lifeAction: Action = {
       title: params.title,
     });
     const intent = reuseDeferredDraft
-      ? (deferredDraft?.intent ?? "")
-      : params.intent?.trim() ?? currentText;
+      ? normalizeLifeInputText(deferredDraft?.intent ?? "")
+      : normalizeLifeInputText(params.intent?.trim() ?? currentText);
     if (!intent) {
       return { success: false, text: "LIFE requires an intent describing what to do." };
     }
@@ -1641,7 +2006,7 @@ export const lifeAction: Action = {
         (preferDerivedDefinition ? derivedTitle : seed?.title ?? derivedTitle);
       const cadence =
         deferredDefinitionDraft?.request.cadence ??
-        (detailObject(details, "cadence") as LifeOpsCadence | undefined) ??
+        normalizeCadenceDetail(detailObject(details, "cadence")) ??
         (preferDerivedDefinition ? undefined : seed?.cadence) ??
         inferSeedCadenceFromIntent(intent, ["morning"]);
       if (!title) {
@@ -1811,7 +2176,7 @@ export const lifeAction: Action = {
           intent,
           operation: "create_goal",
           request: {
-            cadence: detailObject(details, "cadence"),
+            cadence: normalizeCadenceDetail(detailObject(details, "cadence")) as CreateLifeOpsGoalRequest["cadence"],
             description: detailString(details, "description"),
             successCriteria: detailObject(details, "successCriteria"),
             supportStrategy: detailObject(details, "supportStrategy"),
@@ -1862,7 +2227,7 @@ export const lifeAction: Action = {
         ownership,
         title: params.title !== target.definition.title ? params.title : undefined,
         description: detailString(details, "description"),
-        cadence: detailObject(details, "cadence") as LifeOpsCadence | undefined,
+        cadence: normalizeCadenceDetail(detailObject(details, "cadence")),
         priority: detailNumber(details, "priority"),
         reminderPlan: detailObject(details, "reminderPlan") as UpdateLifeOpsDefinitionRequest["reminderPlan"],
       };
@@ -2073,5 +2438,37 @@ export const lifeAction: Action = {
       required: false,
       schema: { type: "object" as const },
     },
+  ],
+  examples: [
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "help me brush my teeth at 8 am and 9 pm every day",
+        },
+      },
+      {
+        name: "{{agentName}}",
+        content: {
+          text: 'I can set up a habit named "Brush teeth" for 8 am and 9 pm daily. Confirm and I\'ll save it.',
+          actions: ["LIFE"],
+        },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "remind me less about brush teeth",
+        },
+      },
+      {
+        name: "{{agentName}}",
+        content: {
+          text: 'Reminder intensity for "Brush teeth" is now minimal.',
+          actions: ["LIFE"],
+        },
+      },
+    ],
   ],
 };

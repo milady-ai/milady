@@ -137,3 +137,7 @@
 [submodule "plugins/plugin-imessage"]
 	path = plugins/plugin-imessage
 	url = https://github.com/elizaOS-plugins/plugin-imessage.git
+[submodule "examples/clone-your-crush"]
+	path = examples/clone-your-crush
+	url = https://github.com/elizaOS/clone-your-crush.git
+	branch = main

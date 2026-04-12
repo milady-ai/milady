@@ -8,13 +8,25 @@ server at [xrsps-typescript](https://github.com/xrsps/xrsps-typescript).
 `'scape` turns a running xRSPS instance into an autonomous-agent playground
 for the milady runtime. When you click **'scape** in the apps launcher:
 
-1. The viewer iframe loads the xRSPS React client (default
-   `http://localhost:3000`, override with `SCAPE_CLIENT_URL`) so you can
-   watch what's happening in the game world in real time.
+1. The viewer iframe loads the xRSPS React client — by default the
+   production 'scape deployment at
+   [`https://scape-client-2sqyc.kinsta.page`](https://scape-client-2sqyc.kinsta.page),
+   a React/WebGL build hosted as a Sevalla static site. It's wired at
+   build time to a live game server at `wss://scape-96cxt.sevalla.app`
+   and an OSRS cache + map-tile bucket at
+   `https://scape-cache-skrm0.sevalla.storage`. Override
+   `SCAPE_CLIENT_URL` to point at a local `http://localhost:3000` dev
+   server or your own fork's deployment.
 2. The plugin's `ScapeGameService` connects to xRSPS's **bot-SDK**
-   endpoint — a TOON-encoded WebSocket at `ws://127.0.0.1:43595` — and
-   spawns a first-class agent-player account using the same scrypt auth
-   + save-file persistence that human logins use.
+   endpoint — a TOON-encoded WebSocket at
+   `wss://scape-96cxt.sevalla.app/botsdk` by default. That's the
+   production deployment: the bot-SDK shares the main game server's
+   HTTP port (8080) and is routed by URL path, so TLS is terminated by
+   Sevalla's ingress and everything flows over a single public
+   WebSocket endpoint. Spawning creates a first-class agent-player
+   account using the same scrypt auth + Postgres-backed persistence
+   human logins use. Override `SCAPE_BOT_SDK_URL` to
+   `ws://127.0.0.1:8080/botsdk` for a local dev stack.
 3. The milady LLM runtime drives the agent via the action list (walk,
    fight, chat, skill, bank, ...) every N seconds, with optional
    directed prompts from the operator UI.
@@ -27,8 +39,10 @@ attached — same tick loop, same combat rules, same autosave, same
 visibility to human players. Human and agent logins share the *exact*
 same account store, save file, and code path. The only differences are:
 
-- Agents talk over TOON frames on port 43595 instead of the binary
-  protocol on 43594.
+- Agents talk over TOON frames at path `/botsdk` on the shared HTTP
+  server (default port 8080) instead of the binary game protocol
+  on `/`. Both endpoints share a single port so TLS is terminated
+  once at the ingress.
 - Agents carry an `AgentComponent` on their `PlayerState` that holds
   perception snapshots, action queues, journal refs, and goals.
 
@@ -45,15 +59,15 @@ the xRSPS server at
 
 ## Env vars
 
-| Variable              | Default                     | Purpose                                          |
-|-----------------------|-----------------------------|--------------------------------------------------|
-| `SCAPE_CLIENT_URL`    | `http://localhost:3000`     | xRSPS client URL the viewer iframe points at.   |
-| `SCAPE_BOT_SDK_URL`   | `ws://127.0.0.1:43595`      | bot-SDK WebSocket endpoint on the xRSPS server. |
-| `SCAPE_BOT_SDK_TOKEN` | *(unset → plugin disabled)* | Shared secret matching xRSPS `BOT_SDK_TOKEN`.   |
-| `SCAPE_AGENT_NAME`    | `scape-agent`               | In-game display name for the agent.              |
-| `SCAPE_AGENT_PASSWORD`| *(unset → plugin disabled)* | Plaintext password for the agent's account.     |
-| `SCAPE_LOOP_INTERVAL_MS` | `15000`                  | Autonomous LLM step interval.                    |
-| `SCAPE_MODEL_SIZE`    | `TEXT_SMALL`                | milady model tier for the loop.                  |
+| Variable              | Default                                         | Purpose                                          |
+|-----------------------|-------------------------------------------------|--------------------------------------------------|
+| `SCAPE_CLIENT_URL`    | `https://scape-client-2sqyc.kinsta.page`        | xRSPS client URL the viewer iframe points at. Set to `http://localhost:3000` for local dev. |
+| `SCAPE_BOT_SDK_URL`   | `wss://scape-96cxt.sevalla.app/botsdk`          | bot-SDK WebSocket endpoint on the xRSPS server. Defaults to the live Sevalla deployment (shared HTTP server, path-routed, TLS by ingress). Override to `ws://127.0.0.1:8080/botsdk` for local dev. |
+| `SCAPE_BOT_SDK_TOKEN` | *(unset → autonomous loop disabled)*            | Shared secret matching xRSPS `BOT_SDK_TOKEN`.   |
+| `SCAPE_AGENT_NAME`    | `scape-agent`                                   | In-game display name for the agent.              |
+| `SCAPE_AGENT_PASSWORD`| *(unset → auto-generated + persisted to disk)*  | Plaintext password for the agent's account.    |
+| `SCAPE_LOOP_INTERVAL_MS` | `15000`                                      | Autonomous LLM step interval.                    |
+| `SCAPE_MODEL_SIZE`    | `TEXT_SMALL`                                    | milady model tier for the loop.                  |
 
 ## Scope by PR
 

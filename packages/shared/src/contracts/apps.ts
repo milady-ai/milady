@@ -253,6 +253,11 @@ export const MILADY_CURATED_APP_DEFINITIONS: readonly MiladyCuratedAppDefinition
       aliases: [],
     },
     {
+      slug: "scape",
+      canonicalName: "@elizaos/app-scape",
+      aliases: [],
+    },
+    {
       slug: "defense-of-the-agents",
       canonicalName: "@elizaos/app-defense-of-the-agents",
       aliases: [],
@@ -266,6 +271,11 @@ export const MILADY_CURATED_APP_DEFINITIONS: readonly MiladyCuratedAppDefinition
       slug: "shopify",
       canonicalName: "@elizaos/app-shopify",
       aliases: ["@elizaos/plugin-shopify"],
+    },
+    {
+      slug: "clawville",
+      canonicalName: "@clawville/app-clawville",
+      aliases: [],
     },
   ] as const;
 

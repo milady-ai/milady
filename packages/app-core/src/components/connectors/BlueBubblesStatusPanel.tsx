@@ -1,5 +1,5 @@
 import { Button, PagePanel } from "@miladyai/ui";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { client } from "../../api";
 import { useApp } from "../../state";
 
@@ -54,8 +54,7 @@ export function BlueBubblesStatusPanel() {
       void refresh();
     });
   }, [refresh]);
-
-  const webhookTarget = useMemo(() => resolveWebhookTarget(status), [status]);
+  const webhookTarget = resolveWebhookTarget(status);
 
   return (
     <PagePanel.Notice

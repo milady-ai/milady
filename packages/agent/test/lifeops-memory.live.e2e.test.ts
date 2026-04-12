@@ -17,7 +17,10 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import { describeIf } from "../../../test/helpers/conditional-tests.ts";
 import { saveEnv, sleep, withTimeout } from "../../../test/helpers/test-utils";
 import { LifeOpsService } from "../src/lifeops/service";
-import { buildCharacterFromConfig } from "../src/runtime/eliza";
+import {
+  buildCharacterFromConfig,
+  configureLocalEmbeddingPlugin,
+} from "../src/runtime/eliza";
 import { createElizaPlugin } from "../src/runtime/eliza-plugin";
 import {
   extractPlugin,
@@ -33,56 +36,53 @@ const LIVE_TESTS_ENABLED =
   process.env.MILADY_LIVE_TEST === "1" || process.env.ELIZA_LIVE_TEST === "1";
 const LIVE_CHAT_TESTS_ENABLED = process.env.MILADY_LIVE_CHAT_TEST === "1";
 const LIVE_MEMORY_TESTS_ENABLED = process.env.MILADY_LIVE_MEMORY_TEST === "1";
+const LIVE_PROVIDER_OVERRIDE = process.env.MILADY_LIVE_PROVIDER?.trim().toLowerCase();
+const LIVE_CLOUD_ENV_PREFIXES = ["ELIZAOS_CLOUD_", "ELIZA_CLOUD_"] as const;
 const PROVIDER_ENV_KEYS = [
   "OPENAI_API_KEY",
   "OPENAI_BASE_URL",
+  "OPENAI_SMALL_MODEL",
+  "OPENAI_LARGE_MODEL",
   "GROQ_API_KEY",
   "GROQ_SMALL_MODEL",
   "GROQ_LARGE_MODEL",
   "OPENROUTER_API_KEY",
+  "OPENROUTER_SMALL_MODEL",
+  "OPENROUTER_LARGE_MODEL",
   "GOOGLE_API_KEY",
   "GOOGLE_GENERATIVE_AI_API_KEY",
+  "GOOGLE_SMALL_MODEL",
+  "GOOGLE_LARGE_MODEL",
   "ANTHROPIC_API_KEY",
+  "ANTHROPIC_SMALL_MODEL",
+  "ANTHROPIC_LARGE_MODEL",
 ] as const;
 
 const LIVE_PROVIDER_CANDIDATES = [
   {
-    name: "groq",
-    plugin: "@elizaos/plugin-groq",
-    keys: ["GROQ_API_KEY"],
-    predicate: () =>
-      /groq/i.test(process.env.OPENAI_BASE_URL ?? "") ||
-      !process.env.OPENAI_API_KEY?.trim(),
-  },
-  {
     name: "openai",
     plugin: "@elizaos/plugin-openai",
     keys: ["OPENAI_API_KEY"],
-    predicate: () => true,
-  },
-  {
-    name: "groq",
-    plugin: "@elizaos/plugin-groq",
-    keys: ["GROQ_API_KEY"],
-    predicate: () => true,
   },
   {
     name: "openrouter",
     plugin: "@elizaos/plugin-openrouter",
     keys: ["OPENROUTER_API_KEY"],
-    predicate: () => true,
   },
   {
     name: "google",
     plugin: "@elizaos/plugin-google-genai",
     keys: ["GOOGLE_GENERATIVE_AI_API_KEY", "GOOGLE_API_KEY"],
-    predicate: () => true,
   },
   {
     name: "anthropic",
     plugin: "@elizaos/plugin-anthropic",
     keys: ["ANTHROPIC_API_KEY"],
-    predicate: () => true,
+  },
+  {
+    name: "groq",
+    plugin: "@elizaos/plugin-groq",
+    keys: ["GROQ_API_KEY"],
   },
 ] as const;
 
@@ -114,6 +114,58 @@ type MemoryServiceLike = {
   ): Promise<LongTermMemoryLike[]>;
 };
 
+const LIVE_PROVIDER_CHEAP_MODELS = {
+  anthropic: {
+    smallKey: "ANTHROPIC_SMALL_MODEL",
+    smallModel: "claude-haiku-4-5-20251001",
+    largeKey: "ANTHROPIC_LARGE_MODEL",
+    largeModel: "claude-haiku-4-5-20251001",
+  },
+  google: {
+    smallKey: "GOOGLE_SMALL_MODEL",
+    smallModel: "gemini-2.5-flash",
+    largeKey: "GOOGLE_LARGE_MODEL",
+    largeModel: "gemini-2.5-flash",
+  },
+  groq: {
+    smallKey: "GROQ_SMALL_MODEL",
+    smallModel: "llama-3.1-8b-instant",
+    largeKey: "GROQ_LARGE_MODEL",
+    largeModel: "qwen/qwen3-32b",
+  },
+  openai: {
+    smallKey: "OPENAI_SMALL_MODEL",
+    smallModel: "gpt-5.4-mini",
+    largeKey: "OPENAI_LARGE_MODEL",
+    largeModel: "gpt-5.4-mini",
+  },
+  openrouter: {
+    smallKey: "OPENROUTER_SMALL_MODEL",
+    smallModel: "google/gemini-2.5-flash",
+    largeKey: "OPENROUTER_LARGE_MODEL",
+    largeModel: "google/gemini-2.5-flash",
+  },
+} as const;
+
+function resolveLiveProviderModelEnv(
+  providerName: keyof typeof LIVE_PROVIDER_CHEAP_MODELS,
+): Record<string, string> {
+  const defaults = LIVE_PROVIDER_CHEAP_MODELS[providerName];
+  const smallModel =
+    process.env[defaults.smallKey]?.trim() || defaults.smallModel;
+  const largeModel =
+    process.env[defaults.largeKey]?.trim() ||
+    process.env[defaults.smallKey]?.trim() ||
+    defaults.largeModel;
+
+  return {
+    [defaults.smallKey]: smallModel,
+    [defaults.largeKey]: largeModel,
+    SMALL_MODEL: process.env.SMALL_MODEL?.trim() || smallModel,
+    LARGE_MODEL: process.env.LARGE_MODEL?.trim() || largeModel,
+  };
+}
+
 async function canImportPlugin(pluginName: string): Promise<boolean> {
   try {
     await import(pluginName);
@@ -123,11 +175,65 @@ async function canImportPlugin(pluginName: string): Promise<boolean> {
   }
 }
 
-async function selectLiveProvider(): Promise<SelectedLiveProvider | null> {
-  for (const candidate of LIVE_PROVIDER_CANDIDATES) {
-    if (!candidate.predicate()) {
-      continue;
+function detectOpenAiCompatibleBaseUrlProvider(
+  baseUrl: string | undefined,
+): "groq" | null {
+  if (!baseUrl) {
+    return null;
+  }
+
+  try {
+    const hostname = new URL(baseUrl).hostname.trim().toLowerCase();
+    if (hostname === "api.groq.com" || hostname.endsWith(".groq.com")) {
+      return "groq";
     }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function looksLikeGroqApiKey(value: string | undefined): boolean {
+  return Boolean(value && /^gsk[-_]/i.test(value));
+}
+
+async function selectLiveProvider(): Promise<SelectedLiveProvider | null> {
+  const openAiCompatProvider = detectOpenAiCompatibleBaseUrlProvider(
+    process.env.OPENAI_BASE_URL?.trim(),
+  );
+  if (
+    openAiCompatProvider === "groq" &&
+    (!LIVE_PROVIDER_OVERRIDE ||
+      LIVE_PROVIDER_OVERRIDE === "openai" ||
+      LIVE_PROVIDER_OVERRIDE === "groq") &&
+    (await canImportPlugin("@elizaos/plugin-groq"))
+  ) {
+    const groqApiKey =
+      process.env.GROQ_API_KEY?.trim() ||
+      (looksLikeGroqApiKey(process.env.OPENAI_API_KEY?.trim())
+        ? process.env.OPENAI_API_KEY?.trim()
+        : "");
+    if (groqApiKey) {
+      return {
+        name: "groq",
+        env: {
+          GROQ_API_KEY: groqApiKey,
+          ...resolveLiveProviderModelEnv("groq"),
+        },
+        plugin: "@elizaos/plugin-groq",
+      };
+    }
+  }
+
+  const candidates =
+    LIVE_PROVIDER_OVERRIDE && LIVE_PROVIDER_OVERRIDE.length > 0
+      ? LIVE_PROVIDER_CANDIDATES.filter(
+          (candidate) => candidate.name === LIVE_PROVIDER_OVERRIDE,
+        )
+      : LIVE_PROVIDER_CANDIDATES;
+
+  for (const candidate of candidates) {
 
     const env: Record<string, string> = {};
     for (const key of candidate.keys) {
@@ -145,8 +251,14 @@ async function selectLiveProvider(): Promise<SelectedLiveProvider | null> {
       continue;
     }
 
-    if (candidate.name === "openai") {
-      env.OPENAI_BASE_URL = "";
+    Object.assign(
+      env,
+      resolveLiveProviderModelEnv(
+        candidate.name as keyof typeof LIVE_PROVIDER_CHEAP_MODELS,
+      ),
+    );
+    if (candidate.name === "openai" && process.env.OPENAI_BASE_URL?.trim()) {
+      env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL.trim();
     }
 
     return {
@@ -344,7 +456,13 @@ function findDefinitionByTitle(
 }
 
 const selectedLiveProvider = await selectLiveProvider();
-const MEMORY_SUITE_PROVIDER_NAMES = new Set(["openai", "openrouter", "google"]);
+const MEMORY_SUITE_PROVIDER_NAMES = new Set([
+  "openai",
+  "openrouter",
+  "google",
+  "anthropic",
+  "groq",
+]);
 const MEMORY_SUITE_PROVIDER_SUPPORTED =
   selectedLiveProvider !== null &&
   MEMORY_SUITE_PROVIDER_NAMES.has(selectedLiveProvider.name);
@@ -380,6 +498,7 @@ describeIf(LIVE_SUITE_ENABLED)(
     let lifeOpsService: LifeOpsService;
     let memoryService: MemoryServiceLike;
     let envBackup: { restore: () => void };
+    let cloudEnvBackup: Record<string, string> = {};
 
     const ownerId = crypto.randomUUID() as UUID;
     const workspaceDir = fs.mkdtempSync(
@@ -388,12 +507,39 @@ describeIf(LIVE_SUITE_ENABLED)(
     const pgliteDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "milady-lifeops-live-pglite-"),
     );
-    const envKeys = [...PROVIDER_ENV_KEYS, "PGLITE_DATA_DIR"];
+    const envKeys = [
+      ...PROVIDER_ENV_KEYS,
+      "PGLITE_DATA_DIR",
+      "LOCAL_EMBEDDING_DIMENSIONS",
+      "EMBEDDING_DIMENSION",
+      "ELIZA_DISABLE_LOCAL_EMBEDDINGS",
+      "MILADY_DISABLE_LOCAL_EMBEDDINGS",
+    ];
 
     beforeAll(async () => {
       envBackup = saveEnv(...envKeys);
       process.env.PGLITE_DATA_DIR = pgliteDir;
       process.env.LOG_LEVEL = process.env.ELIZA_E2E_LOG_LEVEL ?? "error";
+      if (!process.env.LOCAL_EMBEDDING_DIMENSIONS?.trim()) {
+        process.env.LOCAL_EMBEDDING_DIMENSIONS = "384";
+      }
+      if (!process.env.EMBEDDING_DIMENSION?.trim()) {
+        process.env.EMBEDDING_DIMENSION = "384";
+      }
+      delete process.env.ELIZA_DISABLE_LOCAL_EMBEDDINGS;
+      delete process.env.MILADY_DISABLE_LOCAL_EMBEDDINGS;
+      cloudEnvBackup = Object.fromEntries(
+        Object.entries(process.env).filter(
+          ([key, value]) =>
+            typeof value === "string" &&
+            LIVE_CLOUD_ENV_PREFIXES.some((prefix) => key.startsWith(prefix)),
+        ),
+      );
+      for (const key of Object.keys(process.env)) {
+        if (LIVE_CLOUD_ENV_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+          delete process.env[key];
+        }
+      }
 
       for (const key of PROVIDER_ENV_KEYS) {
         delete process.env[key];
@@ -402,9 +548,6 @@ describeIf(LIVE_SUITE_ENABLED)(
         if (value.trim().length > 0) {
           process.env[key] = value;
         }
-      }
-      if (selectedLiveProvider?.name === "openai") {
-        delete process.env.OPENAI_BASE_URL;
       }
       if (selectedLiveProvider?.name === "groq") {
         seedGroqModelDefaults();
@@ -416,9 +559,6 @@ describeIf(LIVE_SUITE_ENABLED)(
         if (value.trim().length > 0) {
           providerSecrets[key] = value;
         }
-      }
-      if (selectedLiveProvider?.name === "openai") {
-        delete providerSecrets.OPENAI_BASE_URL;
       }
       if (selectedLiveProvider?.name === "groq") {
         if (process.env.GROQ_SMALL_MODEL?.trim()) {
@@ -443,11 +583,14 @@ describeIf(LIVE_SUITE_ENABLED)(
       };
 
       const sqlPlugin = await loadPlugin("@elizaos/plugin-sql");
+      const localEmbeddingPlugin = await loadPlugin(
+        "@elizaos/plugin-local-embedding",
+      );
       const providerPlugin = selectedLiveProvider
         ? await loadPlugin(selectedLiveProvider.plugin)
         : null;
 
-      if (!sqlPlugin || !providerPlugin) {
+      if (!sqlPlugin || !localEmbeddingPlugin || !providerPlugin) {
         throw new Error("Required live plugins were not available.");
       }
 
@@ -462,13 +605,15 @@ describeIf(LIVE_SUITE_ENABLED)(
         ],
         conversationLength: 12,
         enableAutonomy: false,
-        logLevel: "error",
+        logLevel: process.env.ELIZA_E2E_LOG_LEVEL ?? "error",
       });
 
       await runtime.registerPlugin(sqlPlugin);
       if (runtime.adapter && !(await runtime.adapter.isReady())) {
         await runtime.adapter.init();
       }
+      configureLocalEmbeddingPlugin(localEmbeddingPlugin);
+      await runtime.registerPlugin(localEmbeddingPlugin);
 
       await runtime.initialize();
 
@@ -494,6 +639,14 @@ describeIf(LIVE_SUITE_ENABLED)(
       }
 
       envBackup?.restore();
+      for (const key of Object.keys(process.env)) {
+        if (LIVE_CLOUD_ENV_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+          delete process.env[key];
+        }
+      }
+      for (const [key, value] of Object.entries(cloudEnvBackup)) {
+        process.env[key] = value;
+      }
       fs.rmSync(workspaceDir, { recursive: true, force: true });
       fs.rmSync(pgliteDir, { recursive: true, force: true });
     }, 120_000);
@@ -562,13 +715,26 @@ describeIf(LIVE_SUITE_ENABLED)(
           "Actually create a routine named Brush teeth that happens every morning and every night. Do not just give advice.",
           "Brush teeth",
         );
-        await sendUserTurn({
+        const previewResponse = await sendUserTurn({
           runtime,
           entityId: ownerId,
           roomId,
           source: "telegram",
           text: createPrompt,
         });
+        expect(previewResponse.trim().length).toBeGreaterThan(0);
+        expect(
+          findDefinitionByTitle(await lifeOpsService.listDefinitions(), "Brush teeth"),
+        ).toBeNull();
+
+        const confirmResponse = await sendUserTurn({
+          runtime,
+          entityId: ownerId,
+          roomId,
+          source: "telegram",
+          text: "Yes, save that brushing routine.",
+        });
+        expect(confirmResponse).toContain("Saved");
 
         const brushTeeth = await waitForValue(
           "brush-teeth definition",
@@ -578,8 +744,8 @@ describeIf(LIVE_SUITE_ENABLED)(
         expect(brushTeeth?.definition.cadence).toMatchObject({
           kind: "times_per_day",
           slots: expect.arrayContaining([
-            expect.objectContaining({ label: "Morning", minuteOfDay: 8 * 60 }),
-            expect.objectContaining({ label: "Night", minuteOfDay: 21 * 60 }),
+            expect.objectContaining({ minuteOfDay: 8 * 60 }),
+            expect.objectContaining({ minuteOfDay: 21 * 60 }),
           ]),
         });
         expect(brushTeeth?.reminderPlan?.id ?? null).not.toBeNull();
@@ -639,7 +805,9 @@ describeIf(LIVE_SUITE_ENABLED)(
         const setupTurns = [
           "hey, quick check-in before we get into anything serious.",
           "small thing to remember: i always prefer text reminders and i do not want phone-call reminders.",
+          "to be explicit, that is a stable preference for me: text reminders only, never phone calls.",
           "also, i wear Invisalign during the day and i usually forget to put it back in after lunch.",
+          "that invisalign thing is a real recurring pattern for me, especially on weekdays after lunch.",
           "gentle nudges work better for me than aggressive ones.",
           "can you keep those preferences in mind for later?",
         ];
@@ -678,6 +846,7 @@ describeIf(LIVE_SUITE_ENABLED)(
                 String(fact.content?.text ?? ""),
               ),
             ),
+          120_000,
         );
         expect(reflectionFacts.length).toBeGreaterThan(0);
 

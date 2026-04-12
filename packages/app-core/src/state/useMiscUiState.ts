@@ -74,7 +74,20 @@ export function useMiscUiState() {
 
   // ── Game ───────────────────────────────────────────────────────────
   const [appRuns, setAppRuns] = useState<AppRunSummary[]>([]);
-  const [activeGameRunId, setActiveGameRunId] = useState("");
+  const [activeGameRunId, setActiveGameRunIdRaw] = useState(() => {
+    try {
+      return sessionStorage.getItem("eliza:activeGameRunId") ?? "";
+    } catch {
+      return "";
+    }
+  });
+  const setActiveGameRunId = useCallback((id: string) => {
+    setActiveGameRunIdRaw(id);
+    try {
+      if (id) sessionStorage.setItem("eliza:activeGameRunId", id);
+      else sessionStorage.removeItem("eliza:activeGameRunId");
+    } catch { /* ignore */ }
+  }, []);
   const [gameOverlayEnabled, setGameOverlayEnabled] = useState(false);
   const [activeOverlayApp, setActiveOverlayApp] = useState<string | null>(null);
   const companionAppRunning = activeOverlayApp !== null;

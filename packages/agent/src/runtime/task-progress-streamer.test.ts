@@ -29,9 +29,7 @@ function createRuntime() {
   };
 }
 
-function createPtyService(
-  metadata: Record<string, unknown>,
-): {
+function createPtyService(metadata: Record<string, unknown>): {
   pty: {
     onSessionEvent: ReturnType<typeof vi.fn>;
     sessionMetadata: Map<string, Record<string, unknown>>;
@@ -64,14 +62,22 @@ describe("installTaskProgressStreamer", () => {
     vi.useRealTimers();
   });
 
+  async function flushFinalReportDelay() {
+    vi.advanceTimersByTime(10_000);
+    await Promise.resolve();
+    await Promise.resolve();
+  }
+
   it("routes delayed final reports back through the originating room", async () => {
     const runtime = createRuntime();
-    const { pty, emitSessionEvent } = createPtyService({ threadId: "thread-1" });
+    const { pty, emitSessionEvent } = createPtyService({
+      threadId: "thread-1",
+    });
 
     installTaskProgressStreamer(runtime as never, pty as never);
 
     emitSessionEvent("s-1", "task_complete", {});
-    await vi.advanceTimersByTimeAsync(10_000);
+    await flushFinalReportDelay();
 
     expect(runtime.getTaskThread).toHaveBeenCalledWith("thread-1");
     expect(runtime.sendMessageToTarget).toHaveBeenCalledWith(
@@ -108,8 +114,32 @@ describe("installTaskProgressStreamer", () => {
         serverId: "server-1",
       },
       expect.objectContaining({
-        text: expect.stringContaining("Login link: https://claude.example/login"),
+        text: expect.stringContaining(
+          "Login link: https://claude.example/login",
+        ),
       }),
+    );
+  });
+
+  it("still routes the final completion after a recoverable login notice", async () => {
+    const runtime = createRuntime();
+    const { pty, emitSessionEvent } = createPtyService({ roomId: "room-1" });
+
+    installTaskProgressStreamer(runtime as never, pty as never);
+
+    emitSessionEvent("s-1", "login_required", {
+      instructions: "Finish signing in",
+      url: "https://claude.example/login",
+    });
+    emitSessionEvent("s-1", "task_complete", {});
+    await flushFinalReportDelay();
+
+    expect(runtime.sendMessageToTarget).toHaveBeenCalledTimes(2);
+    expect(runtime.sendMessageToTarget.mock.calls[0]?.[1]?.text).toContain(
+      "provider login",
+    );
+    expect(runtime.sendMessageToTarget.mock.calls[1]?.[1]?.text).toContain(
+      "task finished",
     );
   });
 });

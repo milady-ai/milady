@@ -1,12 +1,27 @@
 #!/usr/bin/env bash
 # PostToolUse hook: runs actionlint on edited GitHub Actions workflows.
-# Blocking-with-acknowledgment on findings — exits with code 2 when actionlint
-# reports issues, which in the Claude Code hook system requires the agent to
-# see and acknowledge the stderr output before continuing. Workflow syntax
-# errors must not ship silently, so this is intentional.
+# Blocking-with-acknowledgment on real errors — exits with code 2 when
+# actionlint reports workflow-schema issues, which in the Claude Code hook
+# system requires the agent to see and acknowledge the stderr output before
+# continuing. Workflow syntax errors must not ship silently, so this is
+# intentional.
+#
+# We suppress shellcheck findings via `-ignore 'shellcheck reported issue'`
+# so pre-existing style/info nits (SC2086, SC2129, SC2162, etc.) in shell
+# scripts inside `run:` blocks do not block unrelated edits. actionlint
+# emits shellcheck findings with rc=1 otherwise, which would make every
+# edit of a workflow file alongside an old style nit block until the
+# unrelated shell script was cleaned up. Real workflow errors are still
+# surfaced; shellcheck wants a separate, non-blocking cleanup pass.
 #
 # Triggered on: Edit | Write | MultiEdit
-# Scope filter: only runs when the touched file is under .github/workflows/ or .github/actions/.
+# Scope filter: only runs when the touched file is a GitHub Actions workflow
+# under `.github/workflows/`. Composite actions (`.github/actions/*/action.yml`)
+# are explicitly skipped — actionlint parses files it's given as workflows,
+# and composite actions use a different top-level schema (`runs` / `description` /
+# `inputs` instead of `jobs` / `on`), so every composite action would trip a
+# handful of "unexpected key" errors. If we ever need to lint composite
+# actions, that needs a separate tool or a different actionlint invocation.
 # Gracefully skips if actionlint is not installed.
 
 set -u
@@ -24,8 +39,7 @@ except Exception:
 fi
 
 case "$file_path" in
-  */.github/workflows/*.yml|*/.github/workflows/*.yaml|\
-  */.github/actions/*.yml|*/.github/actions/*.yaml)
+  */.github/workflows/*.yml|*/.github/workflows/*.yaml)
     ;;
   *)
     exit 0
@@ -46,10 +60,13 @@ fi
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 config="$repo_root/.github/actionlint.yaml"
 
+# -ignore 'shellcheck reported issue' suppresses shellcheck findings so
+# only real actionlint workflow-schema errors remain. Any non-empty
+# output is therefore a real error worth blocking on.
 if [ -f "$config" ]; then
-  output="$(actionlint -config-file "$config" "$file_path" 2>&1 || true)"
+  output="$(actionlint -config-file "$config" -ignore 'shellcheck reported issue' "$file_path" 2>&1 || true)"
 else
-  output="$(actionlint "$file_path" 2>&1 || true)"
+  output="$(actionlint -ignore 'shellcheck reported issue' "$file_path" 2>&1 || true)"
 fi
 
 if [ -n "$output" ]; then

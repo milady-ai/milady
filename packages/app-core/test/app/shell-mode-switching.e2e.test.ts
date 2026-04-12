@@ -248,6 +248,7 @@ vi.mock("@miladyai/app-core/src/components/companion/companion-app", () => ({}))
 vi.mock(
   "@miladyai/app-core/src/components/apps/overlay-app-registry",
   () => ({
+    registerOverlayApp: () => undefined,
     getOverlayApp: (name: string) =>
       name === "@miladyai/app-companion"
         ? {
@@ -384,7 +385,7 @@ function tFn(k: string): string {
     "nav.companion": "Companion",
     "nav.stream": "Stream",
     "nav.character": "Character",
-    "nav.wallets": "Wallets",
+    "nav.inventory": "Inventory",
     "nav.knowledge": "Knowledge",
     "nav.social": "Connectors",
     "nav.apps": "Apps",
@@ -493,7 +494,7 @@ function expectShellForTab(text: string, tab: Tab): void {
       case "character":
       case "character-select":
         return "CharacterView Ready";
-      case "wallets":
+      case "inventory":
         return "InventoryView Ready";
       case "knowledge":
         return "KnowledgeView Ready";
@@ -560,7 +561,7 @@ describe("shell mode switching (e2e)", () => {
       "chat",
       "companion",
       "character",
-      "wallets",
+      "inventory",
       "knowledge",
       "connectors",
       "triggers",
@@ -616,7 +617,7 @@ describe("shell mode switching (e2e)", () => {
       "triggers",
       "skills",
       "character",
-      "wallets",
+      "inventory",
     ];
 
     for (const tab of nativeTabs) {
@@ -689,7 +690,7 @@ describe("shell mode switching (e2e)", () => {
 
     for (const nextTab of [
       "character",
-      "wallets",
+      "inventory",
       "plugins",
       "settings",
     ] as Tab[]) {

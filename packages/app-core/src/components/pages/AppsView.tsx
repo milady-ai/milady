@@ -2,6 +2,7 @@
  * Apps View — browse and launch agent games/experiences.
  *
  * Fetches apps from the registry API and shows them as cards.
+ * Clicking a card immediately launches the app (no detail pane).
  */
 
 import { PagePanel } from "@miladyai/ui";
@@ -10,9 +11,12 @@ import { type AppRunSummary, client, type RegistryAppInfo } from "../../api";
 
 import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
-import { AppDetailPane } from "../apps/AppDetailPane";
 import { AppsCatalogGrid } from "../apps/AppsCatalogGrid";
 import { filterAppsForCatalog, shouldShowAppInAppsView } from "../apps/helpers";
+import {
+  getInternalToolApps,
+  getInternalToolAppTargetTab,
+} from "../apps/internal-tool-apps";
 import {
   getAllOverlayApps,
   isOverlayApp,
@@ -31,6 +35,7 @@ export function AppsView() {
     activeGameRunId,
     activeGameViewerUrl,
     appsSubTab,
+    favoriteApps,
     setState,
     setActionNotice,
     t,
@@ -40,13 +45,15 @@ export function AppsView() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
-  const [selectedAppName, setSelectedAppName] = useState<string | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
-  const [busyApp, setBusyApp] = useState<string | null>(null);
   const [busyRunId, setBusyRunId] = useState<string | null>(null);
   const activeAppNames = useMemo(
     () => new Set(appRuns.map((run) => run.appName)),
     [appRuns],
+  );
+  const favoriteAppNames = useMemo(
+    () => new Set(favoriteApps),
+    [favoriteApps],
   );
   const activeGameRun = useMemo(
     () => appRuns.find((run) => run.runId === activeGameRunId) ?? null,
@@ -59,17 +66,6 @@ export function AppsView() {
     currentGameViewerUrl.length > 0 &&
     activeGameRun?.viewerAttachment === "attached";
 
-  const selectedApp = useMemo(
-    () => apps.find((app) => app.name === selectedAppName) ?? null,
-    [apps, selectedAppName],
-  );
-
-  const selectedAppHasActiveViewer =
-    !!selectedApp &&
-    hasCurrentGame &&
-    activeGameRun?.appName === selectedApp.name;
-  const selectedAppIsActive =
-    !!selectedApp && activeAppNames.has(selectedApp.name);
   const sortedRuns = useMemo(
     () => [...appRuns].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
     [appRuns],
@@ -116,20 +112,20 @@ export function AppsView() {
           return [];
         }),
       ]);
+      const internalToolApps = getInternalToolApps();
       // Inject registered overlay apps (e.g. companion) if not already from server
       const overlayDescriptors = getAllOverlayApps()
         .filter((oa) => !serverApps.some((a) => a.name === oa.name))
         .map(overlayAppToRegistryInfo);
-      const list = [...overlayDescriptors, ...serverApps];
+      const list = [
+        ...internalToolApps,
+        ...overlayDescriptors,
+        ...serverApps,
+      ].filter(
+        (app, index, items) =>
+          items.findIndex((candidate) => candidate.name === app.name) === index,
+      );
       setApps(list);
-      setSelectedAppName((current) => {
-        if (!current) return null;
-        return list.some(
-          (app) => app.name === current && shouldShowAppInAppsView(app),
-        )
-          ? current
-          : null;
-      });
     } catch (err) {
       setError(
         t("appsview.LoadError", {
@@ -190,12 +186,17 @@ export function AppsView() {
 
   const handleLaunch = useCallback(
     async (app: RegistryAppInfo) => {
+      const internalToolTab = getInternalToolAppTargetTab(app.name);
+      if (internalToolTab) {
+        setState("tab", internalToolTab);
+        return;
+      }
+
       // Overlay apps (e.g. companion) are local-only — launch without server round-trip
       if (isOverlayApp(app.name)) {
         setState("activeOverlayApp", app.name);
         return;
       }
-      setBusyApp(app.name);
       try {
         const result = await client.launchApp(app.name);
         const primaryLaunchDiagnostic =
@@ -282,8 +283,6 @@ export function AppsView() {
           "error",
           4000,
         );
-      } finally {
-        setBusyApp(null);
       }
     },
     [mergeRun, setActionNotice, setState, t],
@@ -294,16 +293,6 @@ export function AppsView() {
     setState("tab", "apps");
     setState("appsSubTab", "games");
   }, [hasActiveRun, setState]);
-
-  const handleOpenCurrentGameInNewTab = useCallback(async () => {
-    if (!hasCurrentGame) return;
-    try {
-      await openExternalUrl(currentGameViewerUrl);
-      setActionNotice(t("appsview.CurrentGameOpened"), "success", 2600);
-    } catch {
-      setActionNotice(t("appsview.PopupBlocked"), "error", 4200);
-    }
-  }, [currentGameViewerUrl, hasCurrentGame, setActionNotice, t]);
 
   const handleOpenRun = useCallback(
     async (run: AppRunSummary) => {
@@ -459,13 +448,16 @@ export function AppsView() {
     });
   }, [activeAppNames, apps, searchQuery, showActiveOnly]);
 
-  const handleSelectApp = useCallback((appName: string) => {
-    setSelectedAppName(appName);
-  }, []);
-
-  const handleBackToCatalog = useCallback(() => {
-    setSelectedAppName(null);
-  }, []);
+  const handleToggleFavorite = useCallback(
+    (appName: string) => {
+      const current = favoriteApps;
+      const next = current.includes(appName)
+        ? current.filter((name) => name !== appName)
+        : [...current, appName];
+      setState("favoriteApps", next);
+    },
+    [favoriteApps, setState],
+  );
 
   return (
     <div className="device-layout mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 lg:px-6">
@@ -483,7 +475,6 @@ export function AppsView() {
             }`}
             onClick={() => {
               setState("appsSubTab", "browse");
-              setSelectedAppName(null);
             }}
           >
             Browse
@@ -523,21 +514,11 @@ export function AppsView() {
             onStopRun={(run) => void handleStopRun(run)}
           />
         </PagePanel>
-      ) : selectedApp ? (
-        <AppDetailPane
-          app={selectedApp}
-          busy={busyApp === selectedApp.name}
-          hasActiveViewer={selectedAppHasActiveViewer}
-          isActive={selectedAppIsActive}
-          onBack={handleBackToCatalog}
-          onLaunch={() => void handleLaunch(selectedApp)}
-          onOpenCurrentGame={handleOpenCurrentGame}
-          onOpenCurrentGameInNewTab={() => void handleOpenCurrentGameInNewTab()}
-        />
       ) : (
         <AppsCatalogGrid
           activeAppNames={activeAppNames}
           error={error}
+          favoriteAppNames={favoriteAppNames}
           loading={loading}
           searchQuery={searchQuery}
           showActiveOnly={showActiveOnly}
@@ -545,8 +526,8 @@ export function AppsView() {
           onLaunch={(app) => void handleLaunch(app)}
           onRefresh={() => void loadApps()}
           onSearchQueryChange={setSearchQuery}
-          onSelectApp={handleSelectApp}
           onToggleActiveOnly={() => setShowActiveOnly((current) => !current)}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
     </div>

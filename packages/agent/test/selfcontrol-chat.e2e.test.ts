@@ -107,6 +107,7 @@ function createRuntimeForSelfControlChatTests(options: {
     mode?: string;
   }>;
   useModel: AgentRuntime["useModel"];
+  actions?: AgentRuntime["actions"];
 }): AgentRuntime {
   const memoriesByRoom = new Map<string, Array<Record<string, unknown>>>();
   const roomsById = new Map<string, { id: UUID; worldId: UUID }>();
@@ -242,7 +243,7 @@ function createRuntimeForSelfControlChatTests(options: {
     getCache: async () => null,
     setCache: async () => {},
     useModel: options.useModel,
-    actions: [
+    actions: options.actions ?? [
       selfControlBlockWebsitesAction,
       selfControlRequestPermissionAction,
     ],
@@ -412,6 +413,70 @@ describe("selfcontrol chat flows (e2e)", () => {
       const hostsFile = await fs.readFile(hostsFilePath, "utf8");
       expect(hostsFile).toContain("0.0.0.0 x.com");
       expect(hostsFile).toContain("0.0.0.0 twitter.com");
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("POST /api/conversations/:id/messages executes the website blocker fallback even when runtime.actions omits selfcontrol", async () => {
+    tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "milady-selfcontrol-e2e-"),
+    );
+    hostsFilePath = path.join(tempDir, "hosts");
+    await fs.writeFile(hostsFilePath, "127.0.0.1 localhost\n", "utf8");
+    setSelfControlPluginConfig({ hostsFilePath, statusCacheTtlMs: 0 });
+
+    const runtime = createRuntimeForSelfControlChatTests({
+      actions: [],
+      useModel: vi.fn() as AgentRuntime["useModel"],
+      handleMessage: async () => ({
+        responseContent: {
+          text: "got it, blocking them now",
+          actions: ["REPLY"],
+        },
+      }),
+    });
+
+    const server = await startApiServer({ port: 0, runtime });
+    try {
+      const { conversationId } = await createConversation(server.port, {
+        title: "SelfControl missing runtime actions",
+      });
+
+      const firstTurn = await postConversationMessage(
+        server.port,
+        conversationId,
+        {
+          text: "The websites distracting me are x.com and twitter.com. Do not block them yet.",
+        },
+      );
+      expect(firstTurn.status).toBe(200);
+      expect(await fs.readFile(hostsFilePath, "utf8")).toBe(
+        "127.0.0.1 localhost\n",
+      );
+
+      const secondTurn = await postConversationMessage(
+        server.port,
+        conversationId,
+        {
+          text: "Use self control now. Actually block the websites for 1 minute instead of giving advice.",
+        },
+      );
+      expect(secondTurn.status).toBe(200);
+      expect(String(secondTurn.data.text ?? "")).toContain(
+        "got it, blocking them now",
+      );
+
+      const hostsFile = await fs.readFile(hostsFilePath, "utf8");
+      expect(hostsFile).toContain("0.0.0.0 x.com");
+      expect(hostsFile).toContain("0.0.0.0 twitter.com");
+
+      const status = await req(server.port, "GET", "/api/website-blocker");
+      expect(status.status).toBe(200);
+      expect(status.data).toMatchObject({
+        active: true,
+        websites: expect.arrayContaining(["x.com", "twitter.com"]),
+      });
     } finally {
       await server.close();
     }

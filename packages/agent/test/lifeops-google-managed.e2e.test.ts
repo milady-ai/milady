@@ -494,38 +494,27 @@ describe("life-ops managed Google connector", () => {
       expect(headers.get("x-api-key")).toBe("ck-managed-google-test");
 
       if (
-        url === "https://cloud.example/api/v1/milady/google/connect/initiate" &&
+        url === "https://cloud.example/api/v1/oauth/google/initiate" &&
         method === "POST"
       ) {
         const body = JSON.parse(String(init?.body ?? "{}")) as Record<
           string,
           unknown
         >;
-        expect(body.side).toBe("owner");
-        expect(body.capabilities).toEqual([
-          "google.basic_identity",
-          "google.calendar.read",
-          "google.calendar.write",
-          "google.gmail.triage",
-          "google.gmail.send",
+        expect(body.connectionRole).toBe("owner");
+        expect(body.scopes).toEqual([
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events",
+          "https://www.googleapis.com/auth/gmail.readonly",
+          "https://www.googleapis.com/auth/gmail.send",
         ]);
         expect(body.redirectUrl).toBe(
           "http://127.0.0.1:3000/api/lifeops/connectors/google/success?side=owner&mode=cloud_managed",
         );
         connected = true;
         return jsonResponse({
-          provider: "google",
-          side: "owner",
-          mode: "cloud_managed",
-          requestedCapabilities: [
-            "google.basic_identity",
-            "google.calendar.read",
-            "google.calendar.write",
-            "google.gmail.triage",
-            "google.gmail.send",
-          ],
-          redirectUri:
-            "http://127.0.0.1:3000/api/lifeops/connectors/google/success?side=owner&mode=cloud_managed",
           authUrl:
             "https://accounts.google.com/o/oauth2/v2/auth?client_id=managed-google",
         });

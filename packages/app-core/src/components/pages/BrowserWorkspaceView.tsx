@@ -39,7 +39,6 @@ import {
   type BrowserWorkspaceWalletResponse,
   type BrowserWorkspaceWalletState,
   buildBrowserWorkspaceWalletState,
-  EMPTY_BROWSER_WORKSPACE_WALLET_STATE,
   isBrowserWorkspaceWalletRequest,
 } from "../../browser-workspace-wallet";
 import { useApp } from "../../state";
@@ -302,7 +301,14 @@ export function BrowserWorkspaceView(): JSX.Element {
     tabs: [],
   });
   const [browserWalletState, setBrowserWalletState] =
-    useState<BrowserWorkspaceWalletState>(EMPTY_BROWSER_WORKSPACE_WALLET_STATE);
+    useState<BrowserWorkspaceWalletState>(() =>
+      buildBrowserWorkspaceWalletState({
+        pendingApprovals: 0,
+        stewardStatus: null,
+        walletAddresses,
+        walletConfig,
+      }),
+    );
   const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
   const [locationInput, setLocationInput] = useState("");
   const [locationDirty, setLocationDirty] = useState(false);
@@ -312,6 +318,10 @@ export function BrowserWorkspaceView(): JSX.Element {
   const initialBrowseUrlRef = useRef<string | null | undefined>(undefined);
   const initialBrowseHandledRef = useRef(false);
   const iframeRefs = useRef(new Map<string, HTMLIFrameElement | null>());
+  const getStewardPendingRef = useRef(getStewardPending);
+  const getStewardStatusRef = useRef(getStewardStatus);
+  const setActionNoticeRef = useRef(setActionNotice);
+  const tRef = useRef(t);
   const walletAddressesRef = useRef(walletAddresses);
   const walletConfigRef = useRef(walletConfig);
   const browserWalletStateRef = useRef(browserWalletState);
@@ -335,25 +345,51 @@ export function BrowserWorkspaceView(): JSX.Element {
     () => workspace.tabs.find((tab) => tab.id === selectedTabId) ?? null,
     [selectedTabId, workspace.tabs],
   );
+  const walletStateRefreshKey = useMemo(
+    () =>
+      [
+        walletAddresses?.evmAddress ?? "",
+        walletAddresses?.solanaAddress ?? "",
+        walletConfig?.evmAddress ?? "",
+        walletConfig?.executionReady ? "1" : "0",
+        walletConfig?.executionBlockedReason ?? "",
+        walletConfig?.solanaAddress ?? "",
+        walletConfig?.solanaSigningAvailable ? "1" : "0",
+      ].join("|"),
+    [walletAddresses, walletConfig],
+  );
 
   useEffect(() => {
     browserWalletStateRef.current = browserWalletState;
   }, [browserWalletState]);
 
   useEffect(() => {
+    getStewardPendingRef.current = getStewardPending;
+    getStewardStatusRef.current = getStewardStatus;
+    setActionNoticeRef.current = setActionNotice;
+    tRef.current = t;
     walletAddressesRef.current = walletAddresses;
     walletConfigRef.current = walletConfig;
-  }, [walletAddresses, walletConfig]);
+  }, [
+    getStewardPending,
+    getStewardStatus,
+    setActionNotice,
+    t,
+    walletAddresses,
+    walletConfig,
+  ]);
 
   const loadBrowserWalletState = useCallback(async () => {
     try {
-      const stewardStatus = await getStewardStatus().catch(() => null);
+      const stewardStatus = await getStewardStatusRef
+        .current()
+        .catch(() => null);
       const resolvedWalletConfig =
         walletConfigRef.current ??
         (await client.getWalletConfig().catch(() => null));
       const pendingApprovals =
         stewardStatus?.connected === true
-          ? (await getStewardPending().catch(() => [])).length
+          ? (await getStewardPendingRef.current().catch(() => [])).length
           : 0;
       const nextState = buildBrowserWorkspaceWalletState({
         pendingApprovals,
@@ -379,7 +415,7 @@ export function BrowserWorkspaceView(): JSX.Element {
       setBrowserWalletState(nextState);
       return nextState;
     }
-  }, [getStewardPending, getStewardStatus]);
+  }, []);
 
   const loadWorkspace = useCallback(
     async (options?: { preferTabId?: string | null; silent?: boolean }) => {
@@ -400,7 +436,7 @@ export function BrowserWorkspaceView(): JSX.Element {
         const message =
           error instanceof Error
             ? error.message
-            : t("browserworkspace.LoadFailed", {
+            : tRef.current("browserworkspace.LoadFailed", {
                 defaultValue: "Failed to load browser workspace.",
               });
         setLoadError(message);
@@ -410,7 +446,7 @@ export function BrowserWorkspaceView(): JSX.Element {
         }
       }
     },
-    [t],
+    [],
   );
 
   const runBrowserWorkspaceAction = useCallback(
@@ -427,15 +463,15 @@ export function BrowserWorkspaceView(): JSX.Element {
           error instanceof Error
             ? error.message
             : (onErrorMessage ??
-              t("browserworkspace.ActionFailed", {
+              tRef.current("browserworkspace.ActionFailed", {
                 defaultValue: "Browser action failed.",
               }));
-        setActionNotice(message, "error", 4_000);
+        setActionNoticeRef.current(message, "error", 4_000);
       } finally {
         setBusyAction(null);
       }
     },
-    [setActionNotice, t],
+    [],
   );
 
   const openNewBrowserWorkspaceTab = useCallback(
@@ -543,7 +579,7 @@ export function BrowserWorkspaceView(): JSX.Element {
 
   useEffect(() => {
     void loadBrowserWalletState();
-  }, [loadBrowserWalletState]);
+  }, [loadBrowserWalletState, walletStateRefreshKey]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

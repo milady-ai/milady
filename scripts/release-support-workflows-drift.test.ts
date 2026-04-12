@@ -85,6 +85,16 @@ describe("release support workflow drift", () => {
     expect(pkg.scripts?.["build:web"]).toContain("apps/web");
   });
 
+  it("exposes a root release script for LifeOps Browser companion packaging", () => {
+    const pkg = JSON.parse(fs.readFileSync(ROOT_PACKAGE_JSON, "utf8")) as {
+      scripts?: Record<string, string>;
+    };
+
+    expect(pkg.scripts?.["lifeops:browser:package:release"]).toBe(
+      "cd apps/extensions/lifeops-browser && bun run package:release",
+    );
+  });
+
   it("keeps stable release publishing idempotent", () => {
     const workflow = fs.readFileSync(AGENT_RELEASE_WORKFLOW, "utf8");
 

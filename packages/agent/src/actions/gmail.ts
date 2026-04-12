@@ -20,6 +20,7 @@ import type {
   SendLifeOpsGmailReplyRequest,
 } from "@miladyai/shared/contracts/lifeops";
 import { LifeOpsService, LifeOpsServiceError } from "../lifeops/service.js";
+import { resolveDefaultTimeZone } from "../lifeops/defaults.js";
 import {
   detailArray,
   detailBoolean,
@@ -73,7 +74,7 @@ const WEAK_CONFIRMATION_PATTERN =
 const GMAIL_SUBJECT_PATTERN =
   /\b(email|emails|gmail|mail|inbox|reply|replies|respond|response|messages?|sender|subject|unread|important|starred|attach(?:ment|ed)|search|find)\b/;
 const FOLLOW_UP_PATTERN =
-  /\b(today|yesterday|this week|last week|last few weeks|past few weeks|next week|last month|recent|search again|check again|look again|try again|try it|retry|from them|from him|from her|unread|important|starred|with attachments?|reply needed|needs response|read it|read that|read them|what does it say|what's in it|show me the email)\b/i;
+  /\b(today|yesterday|this week|this month|last week|last few weeks|last few days|past few weeks|past few days|next week|last month|recent|search again|check again|look again|try again|try it|retry|from them|from him|from her|unread|important|starred|with attachments?|reply needed|needs response|read it|read that|read them|what does it say|what's in it|show me the email)\b/i;
 const PARAMETER_DOC_NOISE_PATTERN =
   /\b(?:actions?|params?|parameters?|required parameter|structured gmail arguments|supported keys include|may include:|structured data when needed|boolean when)\b|\b\w+\?:\w+\b/i;
 const WEAK_GMAIL_QUERY_PATTERN =
@@ -259,6 +260,33 @@ function stateTextCandidates(state: State | undefined): string[] {
   return [...new Set(candidates)];
 }
 
+function planningConversationLines(state: State | undefined): string[] {
+  if (!state || typeof state !== "object") {
+    return [];
+  }
+
+  const stateRecord = state as Record<string, unknown>;
+  const values =
+    stateRecord.values && typeof stateRecord.values === "object"
+      ? (stateRecord.values as Record<string, unknown>)
+      : undefined;
+  const raw =
+    typeof values?.recentMessages === "string"
+      ? values.recentMessages
+      : typeof stateRecord.text === "string"
+        ? stateRecord.text
+        : "";
+  if (!raw) {
+    return [];
+  }
+
+  return raw
+    .split(/\n+/)
+    .map((line) => parseStateLine(line))
+    .filter((line) => line.role.length > 0 && line.text.length > 0)
+    .map((line) => `${line.role}: ${line.text}`);
+}
+
 function scoreGmailIntentCandidate(value: string): number {
   const normalized = normalizeText(value);
   if (!normalized) {
@@ -431,6 +459,7 @@ function normalizeGmailSearchQueryValue(
       /\b(?:search|find|look(?:ing)? for|show me|check)\s+(?:my\s+)?(?:email|emails|gmail|mail|inbox)\s+for\b/g,
       "",
     )
+    .replace(/\b(?:my\s+)?(?:email|emails|gmail|mail|inbox)\s+for\b/g, "")
     .replace(/\b(?:search|find|look(?:ing)? for|show me|check)\b/g, "")
     .replace(/\b(?:all\s+)?emails?\s+(?:sent\s+to\s+me\s+)?from\b/g, "from ")
     .replace(/\b(?:email|emails|gmail|mail|inbox|messages?)\b/g, "")
@@ -877,6 +906,48 @@ function normalizeOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
 
+function shouldTrustExplicitGmailSubaction(
+  subaction: GmailSubaction | undefined,
+  params: GmailActionParams,
+  details: Record<string, unknown> | undefined,
+): boolean {
+  if (!subaction) {
+    return false;
+  }
+
+  switch (subaction) {
+    case "search":
+      return Boolean(
+        params.query ||
+          detailString(details, "query") ||
+          (params.queries?.length ?? 0) > 0 ||
+          (normalizeStringArray(details?.queries)?.length ?? 0) > 0,
+      );
+    case "read":
+      return Boolean(params.messageId || detailString(details, "messageId"));
+    case "draft_reply":
+    case "send_reply":
+      return Boolean(
+        params.messageId ||
+          detailString(details, "messageId") ||
+          params.bodyText ||
+          detailString(details, "bodyText"),
+      );
+    case "draft_batch_replies":
+    case "send_batch_replies":
+      return Boolean((detailArray(details, "items")?.length ?? 0) > 0);
+    case "send_message":
+      return Boolean(
+        normalizeStringArray(detailArray(details, "to"))?.length ||
+          detailString(details, "subject") ||
+          params.bodyText ||
+          detailString(details, "bodyText"),
+      );
+    default:
+      return false;
+  }
+}
+
 function inferGmailSearchQuery(intent: string): string | undefined {
   const sender = inferSenderSearchCandidate(intent);
   const keyword = inferKeywordSearchCandidate(intent);
@@ -1059,8 +1130,16 @@ export async function extractGmailPlanWithLlm(
   state: State | undefined,
   intent: string,
 ): Promise<GmailLlmPlan> {
-  const recentConversation = stateTextCandidates(state).slice(-8).join("\n");
+  const recentConversation = planningConversationLines(state).slice(-8).join("\n");
   const currentMessage = messageText(message).trim();
+  const timeZone = resolveDefaultTimeZone();
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const localNow = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(now);
   const prompt = [
     "Plan the Gmail action for this request.",
     "The user may speak in any language.",
@@ -1087,6 +1166,7 @@ export async function extractGmailPlanWithLlm(
     "  {term1 term2} for OR.  Combine operators: from:suran is:unread newer_than:21d",
     "",
     "Preserve sender names, email addresses, subject keywords, unread/starred/important status, attachment mentions, and time windows.",
+    "Use the current local datetime to convert relative time references like today, yesterday, this week, and this month into Gmail-compatible operators.",
     "Set replyNeededOnly to true only when the request is specifically about emails that need a reply.",
     "",
     "Examples:",
@@ -1104,6 +1184,9 @@ export async function extractGmailPlanWithLlm(
     "messageId:",
     "replyNeededOnly: false",
     "",
+    `Current timezone: ${timeZone}`,
+    `Current local datetime: ${localNow}`,
+    `Current ISO datetime: ${nowIso}`,
     `Current request: ${JSON.stringify(currentMessage)}`,
     `Resolved intent: ${JSON.stringify(intent)}`,
     `Recent conversation: ${JSON.stringify(recentConversation)}`,
@@ -1183,19 +1266,6 @@ async function resolveGmailSearchQueries(
   const providedQueries = dedupeQueries(
     explicitQueries.map((query) => sanitizeGmailQuery(query, intent)),
   );
-  if (
-    providedQueries.length > 0 &&
-    providedQueries.every(
-      (query) =>
-        !looksLikeNarrativeEmailQuery(query) &&
-        !looksLikeLiteralRequestEcho(query, intent) &&
-        !WEAK_GMAIL_QUERY_PATTERN.test(query) &&
-        !PARAMETER_DOC_NOISE_PATTERN.test(query),
-    )
-  ) {
-    return providedQueries;
-  }
-
   const llmQueries =
     llmPlan && llmPlan.queries.length > 0
       ? llmPlan.queries
@@ -1322,22 +1392,18 @@ export const gmailAction: Action = {
     const details = normalizeGmailDetails(params.details);
     const intent = resolveGmailIntent(params.intent?.trim(), message, state);
     const normalizedIntent = normalizeText(intent);
-    const shouldPlanWithLlm =
-      !params.subaction ||
-      (!params.query &&
-        !detailString(details, "query") &&
-        (params.queries?.length ?? 0) === 0 &&
-        (normalizeStringArray(details?.queries)?.length ?? 0) === 0);
-    const llmPlan = shouldPlanWithLlm
-      ? await extractGmailPlanWithLlm(runtime, message, state, intent)
-      : {
-          subaction: null,
-          queries: [],
-          replyNeededOnly: undefined,
-        };
+    const llmPlan = await extractGmailPlanWithLlm(runtime, message, state, intent);
     const llmSubaction = llmPlan.subaction;
+    const explicitSubaction = params.subaction;
+    const preferExplicitSubaction = shouldTrustExplicitGmailSubaction(
+      explicitSubaction,
+      params,
+      details,
+    );
     let subaction: GmailSubaction;
-    if (params.subaction) {
+    if (llmSubaction && !preferExplicitSubaction) {
+      subaction = llmSubaction;
+    } else if (params.subaction) {
       subaction = params.subaction;
     } else if (llmSubaction) {
       subaction = llmSubaction;

@@ -33,8 +33,6 @@ const ADDITIONAL_SUBMODULE_WORKFLOW_PATHS = [
   ".github/workflows/agent-release.yml",
   ".github/workflows/apple-store-release.yml",
   ".github/workflows/nightly.yml",
-  ".github/workflows/release-electrobun-build-linux-x64-testbox.yml",
-  ".github/workflows/release-electrobun-build-windows-x64-testbox.yml",
   ".github/workflows/release-electrobun.yml",
   ".github/workflows/reusable-npm-publish.yml",
   ".github/workflows/test-electrobun-release.yml",

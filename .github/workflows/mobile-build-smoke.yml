@@ -111,7 +111,7 @@ jobs:
 
   build-android:
     name: Android Debug Build
-    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +125,7 @@ jobs:
           java-version: 21
 
       - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 

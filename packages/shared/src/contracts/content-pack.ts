@@ -6,6 +6,8 @@
  * Packs are loaded from the splash page before onboarding begins.
  */
 
+import type { ThemeDefinition } from "./theme";
+
 // ── Manifest ────────────────────────────────────────────────────────
 
 export interface ContentPackManifest {
@@ -32,8 +34,13 @@ export interface ContentPackAssets {
   background?: string;
   /** Gaussian splat companion world scene filename */
   world?: string;
-  /** Color scheme overrides */
+  /** Color scheme overrides (narrow — 6 color fields) */
   colorScheme?: ContentPackColorScheme;
+  /**
+   * Full theme definition (light + dark palettes, fonts, radii, etc.).
+   * Takes precedence over colorScheme when present.
+   */
+  theme?: ThemeDefinition;
   /** Stream overlay directory (relative to pack root) */
   streamOverlay?: string;
   /** Personality definition (subset of StylePreset) */

@@ -7,14 +7,11 @@ import {
   Brain,
   Clock3,
   Gamepad2,
-  ListTodo,
   MessageSquare,
   Monitor,
   PencilLine,
   Radio,
   Settings,
-  Share2,
-  Sparkles,
   Wallet,
 } from "lucide-react";
 import { DEFAULT_BRANDING } from "../config/branding";
@@ -58,6 +55,27 @@ export type Tab =
   | "settings"
   | "logs";
 
+export const APPS_TOOL_TABS = [
+  "lifeops",
+  "plugins",
+  "skills",
+  "fine-tuning",
+  "trajectories",
+  "relationships",
+  "memories",
+  "runtime",
+  "database",
+  "logs",
+  // Legacy hidden alias for old /advanced routes.
+  "advanced",
+] as const satisfies readonly Tab[];
+
+const APPS_TOOL_TAB_SET = new Set<Tab>(APPS_TOOL_TABS);
+
+export function isAppsToolTab(tab: Tab): boolean {
+  return APPS_TOOL_TAB_SET.has(tab);
+}
+
 export interface TabGroup {
   label: string;
   tabs: Tab[];
@@ -74,11 +92,22 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
       "Conversations with your agent and inbound messages from every connector",
   },
   {
-    label: "LifeOps",
-    tabs: ["lifeops"],
-    icon: ListTodo,
-    description:
-      "Tasks, goals, reminders, calendar, inbox, and connected operational accounts",
+    label: "Apps",
+    tabs: ["apps", ...APPS_TOOL_TABS],
+    icon: Gamepad2,
+    description: "Games, LifeOps, integrations, and app tools",
+  },
+  {
+    label: "Character",
+    tabs: ["character", "character-select", "knowledge"],
+    icon: PencilLine,
+    description: "Avatar identity, style, examples, and knowledge",
+  },
+  {
+    label: "Wallet",
+    tabs: ["inventory"],
+    icon: Wallet,
+    description: "Crypto wallets and token balances",
   },
   {
     label: "Browser",
@@ -93,74 +122,29 @@ export const ALL_TAB_GROUPS: TabGroup[] = [
     description: "Live streaming controls",
   },
   {
-    label: "Inventory",
-    tabs: ["inventory"],
-    icon: Wallet,
-    description: "Crypto wallets and token balances",
-  },
-  {
-    label: "Knowledge",
-    tabs: ["knowledge"],
-    icon: Brain,
-    description: "Documents and memory",
-  },
-  {
-    label: "Connectors",
-    tabs: ["connectors"],
-    icon: Share2,
-    description: "Service and data source connections",
-  },
-  {
-    label: "Character",
-    tabs: ["character", "character-select"],
-    icon: PencilLine,
-    description: "Avatar identity and customization",
-  },
-  {
-    label: "Apps",
-    tabs: ["apps"],
-    icon: Gamepad2,
-    description: "Games and integrations",
-  },
-  {
-    label: "Settings",
-    tabs: ["settings"],
-    icon: Settings,
-    description: "Configuration and preferences",
-  },
-  {
     label: "Heartbeats",
     tabs: ["triggers"],
     icon: Clock3,
     description: "Scheduled autonomous automations",
   },
-
   {
-    label: "Advanced",
-    tabs: [
-      "advanced",
-      "plugins",
-      "skills",
-      "fine-tuning",
-      "trajectories",
-      "relationships",
-      "memories",
-      "rolodex",
-      "runtime",
-      "database",
-      "logs",
-    ],
-    icon: Sparkles,
-    description: "Developer and power user tools",
+    label: "Settings",
+    tabs: ["settings", "connectors"],
+    icon: Settings,
+    description: "Configuration and preferences",
   },
 ];
 
-/** Compute visible tab groups. Pass streamEnabled explicitly for React reactivity. */
-export function getTabGroups(streamEnabled = STREAM_ENABLED): TabGroup[] {
+/** Compute visible tab groups. Pass streamEnabled/walletEnabled explicitly for React reactivity. */
+export function getTabGroups(
+  streamEnabled = STREAM_ENABLED,
+  walletEnabled = true,
+): TabGroup[] {
   return ALL_TAB_GROUPS.filter(
     (g) =>
       (APPS_ENABLED || g.label !== "Apps") &&
-      (streamEnabled || g.label !== "Stream"),
+      (streamEnabled || g.label !== "Stream") &&
+      (walletEnabled || g.label !== "Wallet"),
   );
 }
 
@@ -199,7 +183,7 @@ const LEGACY_PATHS: Record<string, Tab> = {
   "/agent": "character",
   "/wallets": "inventory",
   "/features": "plugins",
-  "/admin": "advanced",
+  "/admin": "fine-tuning",
   "/config": "settings",
   "/triggers": "triggers",
 };
@@ -246,6 +230,9 @@ export function tabFromPath(pathname: string, basePath = ""): Tab | null {
   if (normalized === "/") return "chat";
   if (normalized === "/browser") return "browser";
   if (normalized === "/voice") return "settings";
+  if (normalized === "/advanced" || normalized === "/admin") {
+    return "fine-tuning";
+  }
   // Companion disabled unless explicitly feature-flagged
   if (
     !COMPANION_ENABLED &&
@@ -299,7 +286,7 @@ export function titleForTab(tab: Tab): string {
     case "triggers":
       return "Heartbeats";
     case "inventory":
-      return "Inventory";
+      return "Wallet";
     case "knowledge":
       return "Knowledge";
     case "connectors":
@@ -309,7 +296,7 @@ export function titleForTab(tab: Tab): string {
     case "skills":
       return "Skills";
     case "advanced":
-      return "Advanced";
+      return "Fine-Tuning";
     case "fine-tuning":
       return "Fine-Tuning";
     case "trajectories":

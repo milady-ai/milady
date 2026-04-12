@@ -192,6 +192,36 @@ describe("generateChatResponse fallback recovery", () => {
     );
   });
 
+  it("marks action-callback-driven turns so conversation routes can avoid mirroring them", async () => {
+    const runtime = createRuntimeForChatRouteTests({
+      handleMessage: async (_runtime, _message, onResponse) => {
+        await onResponse({
+          text: "I updated that preference.",
+          action: "MODIFY_CHARACTER",
+        } as Content);
+
+        return {
+          didRespond: true,
+          responseContent: {
+            text: "I updated that preference.",
+            actions: ["MODIFY_CHARACTER"],
+          },
+          responseMessages: [],
+          mode: "actions",
+        };
+      },
+    });
+
+    const result = await generateChatResponse(
+      runtime,
+      createUserMessage("change your personality"),
+      "ChatRouteAgent",
+    );
+
+    expect(result.text).toBe("I updated that preference.");
+    expect(result.usedActionCallbacks).toBe(true);
+  });
+
   it("fails fast when generation exceeds the configured timeout", async () => {
     const runtime = createRuntimeForChatRouteTests({
       handleMessage: async () =>

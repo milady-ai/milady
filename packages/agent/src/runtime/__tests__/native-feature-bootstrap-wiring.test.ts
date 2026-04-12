@@ -30,11 +30,88 @@ describe("native feature bootstrap wiring", () => {
   });
 
   it("bootstraps the internal roles capability outside the core plugin package list", () => {
-    expect(elizaSource).toContain('import rolesPlugin from "./roles/src/index.js"');
+    expect(elizaSource).toContain(
+      'import rolesPlugin from "./roles/src/index.js"',
+    );
     expect(elizaSource).toContain("Pre-registering internal roles capability");
     expect(elizaSource).not.toContain("pluginRoles");
   });
 
+  it("guards plugin-commands bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginCommands from "@elizaos/plugin-commands";',
+    );
+    expect(elizaSource).toContain(
+      'pluginCommands = require("@elizaos/plugin-commands");',
+    );
+    expect(elizaSource).toContain('"@elizaos/plugin-commands": pluginCommands');
+  });
+
+  it("guards plugin-cron bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginCron from "@elizaos/plugin-cron";',
+    );
+    expect(elizaSource).toContain(
+      'pluginCron = require("@elizaos/plugin-cron");',
+    );
+    expect(elizaSource).toContain('"@elizaos/plugin-cron": pluginCron');
+  });
+
+  it("guards plugin-elizacloud bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginElizacloud from "@elizaos/plugin-elizacloud";',
+    );
+    expect(elizaSource).toContain(
+      'pluginElizacloud = require("@elizaos/plugin-elizacloud");',
+    );
+    expect(elizaSource).toContain(
+      '"@elizaos/plugin-elizacloud": pluginElizacloud',
+    );
+  });
+
+  it("guards plugin-experience bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginExperience from "@elizaos/plugin-experience";',
+    );
+    expect(elizaSource).toContain(
+      'pluginExperience = require("@elizaos/plugin-experience");',
+    );
+    expect(elizaSource).toContain(
+      '"@elizaos/plugin-experience": pluginExperience',
+    );
+  });
+
+  it("guards plugin-ollama bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginOllama from "@elizaos/plugin-ollama";',
+    );
+    expect(elizaSource).toContain(
+      'pluginOllama = require("@elizaos/plugin-ollama");',
+    );
+    expect(elizaSource).toContain('"@elizaos/plugin-ollama": pluginOllama');
+  });
+
+  it("guards plugin-openai bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginOpenai from "@elizaos/plugin-openai";',
+    );
+    expect(elizaSource).toContain(
+      'pluginOpenai = require("@elizaos/plugin-openai");',
+    );
+    expect(elizaSource).toContain('"@elizaos/plugin-openai": pluginOpenai');
+  });
+
+  it("guards plugin-personality bootstrap behind a runtime require", () => {
+    expect(elizaSource).not.toContain(
+      'import * as pluginPersonality from "@elizaos/plugin-personality";',
+    );
+    expect(elizaSource).toContain(
+      'pluginPersonality = require("@elizaos/plugin-personality");',
+    );
+    expect(elizaSource).toContain(
+      '"@elizaos/plugin-personality": pluginPersonality',
+    );
+  });
   it("guards trajectory bootstrap behind the native trajectories toggle", () => {
     const waitBlock =
       elizaSource.match(
@@ -79,5 +156,10 @@ describe("native feature bootstrap wiring", () => {
     expect(knowledgeProbe).toContain("runtimeWithFlags.isKnowledgeEnabled()");
     expect(trajectoryProbe).not.toContain("const fn =");
     expect(knowledgeProbe).not.toContain("const fn =");
+  });
+
+  it("forwards connector env vars into runtime settings", () => {
+    expect(elizaSource).toContain("collectConnectorEnvVars");
+    expect(elizaSource).toContain("...collectConnectorEnvVars(config)");
   });
 });

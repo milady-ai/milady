@@ -57,7 +57,7 @@ async function delay(ms: number): Promise<void> {
 
 function makeRuntime(service: unknown): IAgentRuntime {
     const settings: Record<string, string> = {
-        SCAPE_BOT_SDK_URL: process.env.SCAPE_BOT_SDK_URL ?? "ws://127.0.0.1:43595",
+        SCAPE_BOT_SDK_URL: process.env.SCAPE_BOT_SDK_URL ?? "ws://127.0.0.1:8080/botsdk",
         SCAPE_BOT_SDK_TOKEN: TOKEN!,
         SCAPE_AGENT_NAME: displayName,
         SCAPE_AGENT_PASSWORD: "verify-pr7-password",

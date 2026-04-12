@@ -63,9 +63,15 @@ describe("CONNECTOR_ENV_MAP discord entries", () => {
     );
   });
 
-  it("has exactly 3 discord config fields", () => {
-    // Regression guard: adding a new field should trigger a conscious test update
-    expect(Object.keys(CONNECTOR_ENV_MAP.discord)).toHaveLength(3);
+  it("includes the expected discord config fields", () => {
+    expect(Object.keys(CONNECTOR_ENV_MAP.discord).sort()).toEqual([
+      "applicationId",
+      "botToken",
+      "profileAvatar",
+      "profileName",
+      "syncProfile",
+      "token",
+    ]);
   });
 
   it("all discord env var values are non-empty strings", () => {

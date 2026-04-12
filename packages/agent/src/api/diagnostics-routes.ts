@@ -40,6 +40,13 @@ export interface DiagnosticsRouteContext
   relayPort?: number;
   checkRelayReachable?: (relayPort: number) => Promise<boolean>;
   resolveExtensionPath?: () => string | null;
+  resolveExtensionArtifacts?: () => {
+    chromeBuildPath?: string | null;
+    chromePackagePath?: string | null;
+    safariWebExtensionPath?: string | null;
+    safariAppPath?: string | null;
+    safariPackagePath?: string | null;
+  };
   initSse?: DiagnosticsSseInit;
   writeSseJson?: DiagnosticsSseWriteJson;
   auditEventTypes: readonly string[];
@@ -70,6 +77,16 @@ async function defaultCheckRelayReachable(relayPort: number): Promise<boolean> {
 
 function defaultResolveExtensionPath(): string | null {
   return null;
+}
+
+function defaultResolveExtensionArtifacts(): {
+  chromeBuildPath?: string | null;
+  chromePackagePath?: string | null;
+  safariWebExtensionPath?: string | null;
+  safariAppPath?: string | null;
+  safariPackagePath?: string | null;
+} {
+  return {};
 }
 
 function isAutonomyEvent(event: StreamEventEnvelopeLike): boolean {
@@ -175,6 +192,7 @@ export async function handleDiagnosticsRoutes(
     relayPort: relayPortOverride,
     checkRelayReachable,
     resolveExtensionPath,
+    resolveExtensionArtifacts,
     initSse,
     writeSseJson,
     auditEventTypes,
@@ -376,11 +394,19 @@ export async function handleDiagnosticsRoutes(
     const extensionPath = (
       resolveExtensionPath ?? defaultResolveExtensionPath
     )();
+    const extensionArtifacts = (
+      resolveExtensionArtifacts ?? defaultResolveExtensionArtifacts
+    )();
 
     json(res, {
       relayReachable,
       relayPort,
       extensionPath,
+      chromeBuildPath: extensionArtifacts.chromeBuildPath ?? null,
+      chromePackagePath: extensionArtifacts.chromePackagePath ?? null,
+      safariWebExtensionPath: extensionArtifacts.safariWebExtensionPath ?? null,
+      safariAppPath: extensionArtifacts.safariAppPath ?? null,
+      safariPackagePath: extensionArtifacts.safariPackagePath ?? null,
     });
     return true;
   }

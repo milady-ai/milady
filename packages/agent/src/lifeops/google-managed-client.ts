@@ -84,6 +84,58 @@ export interface ManagedGoogleReplySendRequest {
   references?: string | null;
 }
 
+interface GenericOAuthInitiateResponse {
+  authUrl: string;
+  state?: string;
+  provider?: {
+    id?: string;
+    name?: string;
+  };
+}
+
+const DEFAULT_MANAGED_GOOGLE_CAPABILITIES: readonly LifeOpsGoogleCapability[] = [
+  "google.basic_identity",
+  "google.calendar.read",
+  "google.gmail.triage",
+  "google.gmail.send",
+] as const;
+
+function normalizeManagedGoogleCapabilities(
+  capabilities?: readonly LifeOpsGoogleCapability[],
+): LifeOpsGoogleCapability[] {
+  const source = capabilities ?? DEFAULT_MANAGED_GOOGLE_CAPABILITIES;
+  const normalized = [...new Set(source)];
+  return normalized.includes("google.basic_identity")
+    ? normalized
+    : ["google.basic_identity", ...normalized];
+}
+
+function managedGoogleCapabilitiesToScopes(
+  capabilities: readonly LifeOpsGoogleCapability[],
+): string[] {
+  const scopes = new Set<string>([
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+  ]);
+
+  for (const capability of normalizeManagedGoogleCapabilities(capabilities)) {
+    if (capability === "google.calendar.read") {
+      scopes.add("https://www.googleapis.com/auth/calendar.readonly");
+    }
+    if (capability === "google.calendar.write") {
+      scopes.add("https://www.googleapis.com/auth/calendar.events");
+    }
+    if (capability === "google.gmail.triage") {
+      scopes.add("https://www.googleapis.com/auth/gmail.readonly");
+    }
+    if (capability === "google.gmail.send") {
+      scopes.add("https://www.googleapis.com/auth/gmail.send");
+    }
+  }
+
+  return [...scopes];
+}
+
 function normalizeApiKey(value: string | undefined): string | null {
   const trimmed = value?.trim();
   if (!trimmed || trimmed.length === 0) {
@@ -247,17 +299,28 @@ export class GoogleManagedClient {
         "/auth/success?platform=google",
         `${this.requireConfig().siteUrl.replace(/\/+$/, "")}/`,
       ).toString();
-    return this.request<StartLifeOpsGoogleConnectorResponse>(
-      "milady/google/connect/initiate",
+    const requestedCapabilities = normalizeManagedGoogleCapabilities(
+      args.capabilities,
+    );
+    const auth = await this.request<GenericOAuthInitiateResponse>(
+      "oauth/google/initiate",
       {
         method: "POST",
         body: JSON.stringify({
-          side: args.side,
-          capabilities: args.capabilities,
           redirectUrl: redirectUri,
+          scopes: managedGoogleCapabilitiesToScopes(requestedCapabilities),
+          connectionRole: args.side,
         }),
       },
     );
+    return {
+      provider: "google",
+      side: args.side,
+      mode: "cloud_managed",
+      requestedCapabilities,
+      redirectUri,
+      authUrl: auth.authUrl,
+    };
   }
 
   async disconnectConnector(

@@ -6,6 +6,11 @@ import type {
   Memory,
   State,
 } from "@elizaos/core";
+import {
+  LifeOpsService,
+  LifeOpsServiceError,
+} from "@miladyai/agent/lifeops/service";
+import { hasAdminAccess } from "@miladyai/agent/security/access";
 import type {
   CompleteLifeOpsBrowserSessionRequest,
   ConfirmLifeOpsBrowserSessionRequest,
@@ -14,8 +19,6 @@ import type {
   LifeOpsBrowserKind,
   UpdateLifeOpsBrowserSettingsRequest,
 } from "@miladyai/shared/contracts/lifeops";
-import { LifeOpsService, LifeOpsServiceError } from "@miladyai/agent/lifeops/service";
-import { hasAdminAccess } from "@miladyai/agent/security/access";
 
 type BrowserCommand =
   | "get_settings"
@@ -105,13 +108,18 @@ function inferCommandFromMessage(text: string): BrowserCommand | null {
   if (/\bsubmit\b/.test(normalized)) {
     return "submit";
   }
-  if (URL_RE.test(normalized) && /\b(open|navigate|go to|goto)\b/.test(normalized)) {
+  if (
+    URL_RE.test(normalized) &&
+    /\b(open|navigate|go to|goto)\b/.test(normalized)
+  ) {
     return /\bopen\b/.test(normalized) ? "open" : "navigate";
   }
   return null;
 }
 
-function commandToActionKind(command: BrowserCommand): LifeOpsBrowserActionKind {
+function commandToActionKind(
+  command: BrowserCommand,
+): LifeOpsBrowserActionKind {
   switch (command) {
     case "open":
     case "navigate":
@@ -157,7 +165,9 @@ function sessionSummary(
   session: Awaited<ReturnType<LifeOpsService["createBrowserSession"]>>,
 ): string {
   const target = [session.browser, session.profileId, session.tabId]
-    .filter((value): value is string => typeof value === "string" && value.length > 0)
+    .filter(
+      (value): value is string => typeof value === "string" && value.length > 0,
+    )
     .join("/");
   return `Created LifeOps Browser session "${session.title}" (${session.status})${target ? ` for ${target}` : ""}.`;
 }
@@ -186,7 +196,9 @@ async function runCommand(
       };
     }
     case "update_settings": {
-      const settings = await service.updateBrowserSettings(params.settings ?? {});
+      const settings = await service.updateBrowserSettings(
+        params.settings ?? {},
+      );
       return {
         success: true,
         text: `Updated LifeOps Browser settings: ${settings.enabled ? settings.trackingMode : "off"}; control ${settings.allowBrowserControl ? "enabled" : "disabled"}.`,
@@ -241,7 +253,10 @@ async function runCommand(
             ? "No LifeOps Browser sessions exist."
             : `LifeOps Browser sessions:\n${sessions
                 .slice(0, 8)
-                .map((session) => `- ${session.id}: ${session.title} (${session.status})`)
+                .map(
+                  (session) =>
+                    `- ${session.id}: ${session.title} (${session.status})`,
+                )
                 .join("\n")}`,
         data: { sessions },
       };
@@ -272,7 +287,10 @@ async function runCommand(
       const request: ConfirmLifeOpsBrowserSessionRequest = {
         confirmed: params.confirmed ?? false,
       };
-      const session = await service.confirmBrowserSession(params.sessionId, request);
+      const session = await service.confirmBrowserSession(
+        params.sessionId,
+        request,
+      );
       return {
         success: true,
         text: `${session.title}: ${session.status}`,
@@ -291,7 +309,10 @@ async function runCommand(
         status: params.status,
         result: params.result,
       };
-      const session = await service.completeBrowserSession(params.sessionId, request);
+      const session = await service.completeBrowserSession(
+        params.sessionId,
+        request,
+      );
       return {
         success: true,
         text: `${session.title}: ${session.status}`,
@@ -317,10 +338,8 @@ async function runCommand(
             url: params.url ?? null,
             selector: params.selector ?? null,
             text: params.text ?? null,
-            accountAffecting:
-              params.accountAffecting ?? command === "submit",
-            requiresConfirmation:
-              params.requiresConfirmation ?? false,
+            accountAffecting: params.accountAffecting ?? command === "submit",
+            requiresConfirmation: params.requiresConfirmation ?? false,
             metadata: {},
           },
         ],
@@ -337,11 +356,7 @@ async function runCommand(
 
 export const manageLifeOpsBrowserAction: Action = {
   name: "MANAGE_LIFEOPS_BROWSER",
-  similes: [
-    "PERSONAL_BROWSER",
-    "LIFEOPS_BROWSER",
-    "MANAGE_PERSONAL_BROWSER",
-  ],
+  similes: ["PERSONAL_BROWSER", "LIFEOPS_BROWSER", "MANAGE_PERSONAL_BROWSER"],
   description:
     "Read and control the user's personal LifeOps Browser companions for Chrome and Safari. This is not the Milady browser workspace.",
   validate: async (runtime, message) => hasAdminAccess(runtime, message),
@@ -410,7 +425,8 @@ export const manageLifeOpsBrowserAction: Action = {
     },
     {
       name: "sessionId",
-      description: "Browser session id for get_session, confirm_session, or complete_session.",
+      description:
+        "Browser session id for get_session, confirm_session, or complete_session.",
       required: false,
       schema: { type: "string" as const },
     },

@@ -288,7 +288,23 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `DELETE` | `/api/conversations/:id` | Eliminar una conversación |
 
 <Info>
-Las conversaciones están limitadas a la interfaz de web-chat. Cada conversación se mapea a una sala de elizaOS con un ID de mundo determinista.
+Las conversaciones están limitadas a la interfaz de web-chat. Cada conversación se mapea a una sala de elizaOS con un ID de mundo determinista. Los mensajes de canales de conectores incluyen campos adicionales de identidad del remitente (`from`, `fromUserName`, `avatarUrl`) cuando el conector los proporciona.
+</Info>
+
+---
+
+<div id="inbox-unified-messages">
+## Bandeja de entrada (Mensajes unificados)
+</div>
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/inbox/messages` | Listar mensajes recientes de todos los canales de conectores en un feed unificado |
+| `GET` | `/api/inbox/chats` | Listar hilos de chat de conectores (una fila por sala de chat externa) |
+| `GET` | `/api/inbox/sources` | Listar las etiquetas de origen de conectores distintas para las que el agente tiene mensajes |
+
+<Info>
+La bandeja de entrada agrega mensajes de todas las plataformas conectadas (iMessage, Telegram, Discord, WhatsApp, WeChat, Slack, Signal, SMS) en un único feed ordenado por tiempo. Los mensajes del web-chat del dashboard están excluidos — estos son accesibles a través de la [API de conversaciones](/es/rest/conversations).
 </Info>
 
 ---

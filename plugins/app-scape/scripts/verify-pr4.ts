@@ -263,7 +263,7 @@ async function main(): Promise<void> {
             let gotPerception: PerceptionSnapshot | null = null;
             const mgr = new BotManager(
                 {
-                    url: process.env.BOT_SDK_URL ?? "ws://127.0.0.1:43595",
+                    url: process.env.BOT_SDK_URL ?? "ws://127.0.0.1:8080/botsdk",
                     token,
                     agentId: `verify-pr4-${displayName}`,
                     displayName,

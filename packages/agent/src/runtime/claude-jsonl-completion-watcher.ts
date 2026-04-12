@@ -220,11 +220,17 @@ class Poller {
  * for a given workdir. Returns null if the directory or any matching
  * file does not yet exist (e.g., the session has not produced output).
  *
+ * "Newest" means most recently modified. Claude Code names session files
+ * with UUIDs, which do NOT sort chronologically — a workspace that has
+ * had multiple sessions will have multiple jsonl files, and picking the
+ * lexicographically last name returns a stale file from an older session
+ * roughly at random. We stat each file and pick the one with the greatest
+ * mtime instead. Files that fail to stat (e.g., deleted between readdir
+ * and stat) are skipped.
+ *
  * Exported for tests.
  */
-export async function findLatestJsonl(
-  workdir: string,
-): Promise<string | null> {
+export async function findLatestJsonl(workdir: string): Promise<string | null> {
   const home = process.env.HOME ?? os.homedir();
   // Claude Code encodes project paths by replacing both `/` and `.` with
   // `-`. For example:
@@ -238,9 +244,25 @@ export async function findLatestJsonl(
   } catch {
     return null;
   }
-  const jsonls = entries.filter((f) => f.endsWith(".jsonl")).sort();
+  const jsonls = entries.filter((f) => f.endsWith(".jsonl"));
   if (jsonls.length === 0) return null;
-  return path.join(projectDir, jsonls[jsonls.length - 1]);
+  const stats = await Promise.all(
+    jsonls.map(async (name) => {
+      const full = path.join(projectDir, name);
+      try {
+        const st = await fs.stat(full);
+        return { full, mtimeMs: st.mtimeMs };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  let newest: { full: string; mtimeMs: number } | null = null;
+  for (const entry of stats) {
+    if (!entry) continue;
+    if (!newest || entry.mtimeMs > newest.mtimeMs) newest = entry;
+  }
+  return newest?.full ?? null;
 }
 
 /**

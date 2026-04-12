@@ -23,6 +23,7 @@ import { resolveDefaultTimeZone } from "../lifeops/defaults.js";
 import {
   addDaysToLocalDate,
   buildUtcDateFromLocalParts,
+  getWeekdayForLocalDate,
   getZonedDateParts,
 } from "../lifeops/time.js";
 import {
@@ -60,6 +61,9 @@ export type CalendarLlmPlan = {
   queries: string[];
   title?: string;
   tripLocation?: string;
+  timeMin?: string;
+  timeMax?: string;
+  windowLabel?: string;
 };
 
 const MIN_CREATE_EVENT_DURATION_MINUTES = 15;
@@ -78,7 +82,7 @@ const WEAK_CONFIRMATION_PATTERN =
 const CALENDAR_SUBJECT_PATTERN =
   /\b(calendar|schedule|event|events|flight|flights|fly|travel|trip|return|meeting|appointment)\b/;
 const FOLLOW_UP_PATTERN =
-  /\b(today|tomorrow|tonight|this week|next week|the week after|week after next|this month|next month|find it|look it up|check again|try to find|try again|retry)\b/i;
+  /\b(today|tomorrow|tonight|this week|next week|the week after|week after next|this weekend|next weekend|weekend|this month|next month|monday|tuesday|wednesday|thursday|friday|saturday|sunday|find it|look it up|check again|try to find|try again|retry)\b/i;
 const PARAMETER_DOC_NOISE_PATTERN =
   /\b(?:actions?|params?|parameters?|query\?:string|subaction\?:string|details\?:object|required parameter|supported keys include|may include:|match against titles|structured calendar arguments|structured data when needed|boolean when)\b|\b\w+\?:\w+\b/i;
 const WEAK_CALENDAR_QUERY_PATTERN =
@@ -256,15 +260,102 @@ function normalizeCalendarDetails(
   return normalized;
 }
 
+function parseStateLine(line: string): { role: string; text: string } {
+  const trimmed = line.trim();
+  const timestampedMatch = trimmed.match(
+    /^\d{1,2}:\d{2}\s+\([^)]+\)\s+\[[^\]]+\]\s+(\S+)\s*:\s*(.*)/,
+  );
+  if (timestampedMatch) {
+    return {
+      role: timestampedMatch[1].toLowerCase(),
+      text: timestampedMatch[2].trim(),
+    };
+  }
+
+  const simpleMatch = trimmed.match(
+    /^(user|assistant|system|owner|admin|\S+)\s*:\s*(.*)/i,
+  );
+  if (simpleMatch) {
+    return {
+      role: simpleMatch[1].toLowerCase(),
+      text: simpleMatch[2].trim(),
+    };
+  }
+
+  return { role: "", text: trimmed };
+}
+
+const SYSTEM_ROLE_NAMES = new Set(["assistant", "system"]);
+
 function splitStateTextCandidates(value: string): string[] {
   return value
     .split(/\n+/)
-    .map((line) =>
-      line
-        .replace(/^(?:user|assistant|system|owner|admin|shaw|chen|eliza)\s*:\s*/i, "")
-        .trim(),
-    )
-    .filter((line) => line.length > 0);
+    .map((line) => parseStateLine(line).text)
+    .filter((text) => text.length > 0);
+}
+
+function userIntentsFromState(state: State | undefined): string[] {
+  if (!state || typeof state !== "object") {
+    return [];
+  }
+
+  const stateRecord = state as Record<string, unknown>;
+  const values =
+    stateRecord.values && typeof stateRecord.values === "object"
+      ? (stateRecord.values as Record<string, unknown>)
+      : undefined;
+  const raw =
+    typeof values?.recentMessages === "string"
+      ? values.recentMessages
+      : typeof stateRecord.text === "string"
+        ? stateRecord.text
+        : "";
+  if (!raw) {
+    return [];
+  }
+
+  const agentName =
+    typeof values?.agentName === "string" ? values.agentName.toLowerCase() : "";
+  const excludedRoles = new Set(SYSTEM_ROLE_NAMES);
+  if (agentName) {
+    excludedRoles.add(agentName);
+  }
+
+  return raw
+    .split(/\n+/)
+    .filter((line) => {
+      const { role } = parseStateLine(line);
+      return role.length > 0 && !excludedRoles.has(role);
+    })
+    .map((line) => parseStateLine(line).text)
+    .filter((text) => text.length > 0);
+}
+
+function planningConversationLines(state: State | undefined): string[] {
+  if (!state || typeof state !== "object") {
+    return [];
+  }
+
+  const stateRecord = state as Record<string, unknown>;
+  const values =
+    stateRecord.values && typeof stateRecord.values === "object"
+      ? (stateRecord.values as Record<string, unknown>)
+      : undefined;
+  const raw =
+    typeof values?.recentMessages === "string"
+      ? values.recentMessages
+      : typeof stateRecord.text === "string"
+        ? stateRecord.text
+        : "";
+  if (!raw) {
+    return [];
+  }
+
+  return raw
+    .split(/\n+/)
+    .map((line) => parseStateLine(line))
+    .filter((line) => line.role.length > 0 && line.text.length > 0)
+    .map((line) => `${line.role}: ${line.text}`);
 }
 
 function stateTextCandidates(state: State | undefined): string[] {
@@ -442,10 +533,9 @@ function resolveCalendarIntent(
       FOLLOW_UP_PATTERN.test(normalizedCurrentMessage) ||
       isRefinement)
   ) {
-    const followUpCandidates = stateTextCandidates(state).filter(
+    const followUpCandidates = userIntentsFromState(state).filter(
       (candidate) =>
         CALENDAR_SUBJECT_PATTERN.test(normalizeText(candidate)) &&
-        !looksLikeCalendarResultSummary(candidate) &&
         normalizeText(candidate) !== normalizedCurrentMessage,
     );
     const recentRelevantIntent =
@@ -556,10 +646,57 @@ function inferCalendarSubaction(
   ) {
     return "create_event";
   }
-  if (/\b(next|upcoming|soon|about to|coming up)\b/.test(intent)) {
+  if (
+    /\b(next|upcoming|soon|about to|coming up)\b/.test(intent) &&
+    /\b(event|meeting|appointment|call|calendar item|thing)\b/.test(intent)
+  ) {
     return "next_event";
   }
   return "feed";
+}
+
+function shouldTrustExplicitCalendarSubaction(
+  subaction: CalendarSubaction | undefined,
+  params: CalendarActionParams,
+  details: Record<string, unknown> | undefined,
+): boolean {
+  if (!subaction) {
+    return false;
+  }
+
+  switch (subaction) {
+    case "create_event":
+      return Boolean(
+        params.title ||
+          detailString(details, "title") ||
+          detailString(details, "startAt") ||
+          detailString(details, "windowPreset") ||
+          detailNumber(details, "durationMinutes"),
+      );
+    case "update_event":
+      return Boolean(
+        detailString(details, "eventId") ||
+          detailString(details, "title") ||
+          detailString(details, "newTitle") ||
+          detailString(details, "startAt") ||
+          detailString(details, "endAt"),
+      );
+    case "delete_event":
+      return Boolean(
+        detailString(details, "eventId") ||
+          params.title ||
+          detailString(details, "title"),
+      );
+    case "search_events":
+      return Boolean(
+        params.query ||
+          detailString(details, "query") ||
+          (params.queries?.length ?? 0) > 0 ||
+          (detailArray(details, "queries")?.length ?? 0) > 0,
+      );
+    default:
+      return false;
+  }
 }
 
 function cleanTripLocation(value: string): string | undefined {
@@ -625,6 +762,25 @@ function parseExplicitLocalDate(
     december: 12,
     dec: 12,
   };
+  const weekdayMap: Record<string, number> = {
+    sunday: 0,
+    sun: 0,
+    monday: 1,
+    mon: 1,
+    tuesday: 2,
+    tues: 2,
+    tue: 2,
+    wednesday: 3,
+    wed: 3,
+    thursday: 4,
+    thurs: 4,
+    thur: 4,
+    thu: 4,
+    friday: 5,
+    fri: 5,
+    saturday: 6,
+    sat: 6,
+  };
 
   const isoMatch = normalized.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
   if (isoMatch) {
@@ -662,6 +818,32 @@ function parseExplicitLocalDate(
     };
   }
 
+  const weekdayMatch = normalized.match(
+    /\b(?:(this|next)\s+)?(sun(?:day)?|mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:r(?:s(?:day)?)?)?|fri(?:day)?|sat(?:urday)?)\b/i,
+  );
+  if (weekdayMatch) {
+    const qualifier = normalizeLookupKey(weekdayMatch[1] ?? "");
+    const weekdayKey = normalizeLookupKey(weekdayMatch[2] ?? "");
+    const targetWeekday = weekdayMap[weekdayKey];
+    if (targetWeekday !== undefined) {
+      const currentWeekday = new Date(
+        Date.UTC(localToday.year, Math.max(0, localToday.month - 1), localToday.day, 12, 0, 0),
+      ).getUTCDay();
+      let delta = (targetWeekday - currentWeekday + 7) % 7;
+      if (qualifier === "next") {
+        delta = delta === 0 ? 7 : delta + 7;
+      }
+      return addDaysToLocalDate(
+        {
+          year: localToday.year,
+          month: localToday.month,
+          day: localToday.day,
+        },
+        delta,
+      );
+    }
+  }
+
   return null;
 }
 
@@ -671,47 +853,178 @@ function resolveCalendarTimeZone(
   return detailString(details, "timeZone") ?? resolveDefaultTimeZone();
 }
 
+type LocalDateOnly = Pick<ReturnType<typeof getZonedDateParts>, "year" | "month" | "day">;
+
+function getLocalTodayDate(timeZone: string): LocalDateOnly {
+  const localNow = getZonedDateParts(new Date(), timeZone);
+  return {
+    year: localNow.year,
+    month: localNow.month,
+    day: localNow.day,
+  };
+}
+
+function addMonthsToLocalDate(
+  dateOnly: LocalDateOnly,
+  monthDelta: number,
+): LocalDateOnly {
+  const utcDate = new Date(
+    Date.UTC(dateOnly.year, dateOnly.month - 1 + monthDelta, dateOnly.day, 12, 0, 0),
+  );
+  return {
+    year: utcDate.getUTCFullYear(),
+    month: utcDate.getUTCMonth() + 1,
+    day: utcDate.getUTCDate(),
+  };
+}
+
+function buildLocalDateRange(
+  timeZone: string,
+  startDate: LocalDateOnly,
+  endDateExclusive: LocalDateOnly,
+  options?: {
+    startHour?: number;
+    startMinute?: number;
+    endHour?: number;
+    endMinute?: number;
+  },
+): { timeMin: string; timeMax: string } {
+  return {
+    timeMin: buildUtcDateFromLocalParts(timeZone, {
+      year: startDate.year,
+      month: startDate.month,
+      day: startDate.day,
+      hour: options?.startHour ?? 0,
+      minute: options?.startMinute ?? 0,
+      second: 0,
+    }).toISOString(),
+    timeMax: buildUtcDateFromLocalParts(timeZone, {
+      year: endDateExclusive.year,
+      month: endDateExclusive.month,
+      day: endDateExclusive.day,
+      hour: options?.endHour ?? 0,
+      minute: options?.endMinute ?? 0,
+      second: 0,
+    }).toISOString(),
+  };
+}
+
 function buildLocalDayRange(
   timeZone: string,
   startOffsetDays: number,
   endOffsetDaysExclusive: number,
 ): { timeMin: string; timeMax: string } {
-  const localToday = getZonedDateParts(new Date(), timeZone);
-  const startDay = addDaysToLocalDate(
-    {
-      year: localToday.year,
-      month: localToday.month,
-      day: localToday.day,
-    },
-    startOffsetDays,
+  const localToday = getLocalTodayDate(timeZone);
+  return buildLocalDateRange(
+    timeZone,
+    addDaysToLocalDate(localToday, startOffsetDays),
+    addDaysToLocalDate(localToday, endOffsetDaysExclusive),
   );
-  const endDay = addDaysToLocalDate(
-    {
-      year: localToday.year,
-      month: localToday.month,
-      day: localToday.day,
-    },
-    endOffsetDaysExclusive,
-  );
+}
+
+function normalizeIsoDateTime(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return undefined;
+  }
+  const parsed = Date.parse(value.trim());
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : undefined;
+}
+
+function normalizeWindowLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const cleaned = value.trim();
+  return cleaned.length > 0 && cleaned.length <= 80 ? cleaned : undefined;
+}
+
+function resolveCalendarLlmWindow(
+  llmPlan: CalendarLlmPlan | undefined,
+): { timeMin: string; timeMax: string; label: string } | null {
+  const timeMin = normalizeIsoDateTime(llmPlan?.timeMin);
+  const timeMax = normalizeIsoDateTime(llmPlan?.timeMax);
+  if (!timeMin || !timeMax) {
+    return null;
+  }
+
+  const minMs = Date.parse(timeMin);
+  const maxMs = Date.parse(timeMax);
+  const spanMs = maxMs - minMs;
+  if (!Number.isFinite(spanMs) || spanMs <= 0 || spanMs > 370 * 24 * 60 * 60 * 1000) {
+    return null;
+  }
 
   return {
-    timeMin: buildUtcDateFromLocalParts(timeZone, {
-      year: startDay.year,
-      month: startDay.month,
-      day: startDay.day,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    }).toISOString(),
-    timeMax: buildUtcDateFromLocalParts(timeZone, {
-      year: endDay.year,
-      month: endDay.month,
-      day: endDay.day,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    }).toISOString(),
+    timeMin,
+    timeMax,
+    label: normalizeWindowLabel(llmPlan?.windowLabel) ?? "for the requested window",
   };
+}
+
+function resolveWeekendWindow(
+  timeZone: string,
+  modifier: "this" | "next",
+): { timeMin: string; timeMax: string } {
+  const localToday = getLocalTodayDate(timeZone);
+  const currentWeekday = getWeekdayForLocalDate(localToday);
+  let startOffsetDays = (6 - currentWeekday + 7) % 7;
+  let endOffsetFromToday = startOffsetDays + 2;
+  if (modifier === "this" && (currentWeekday === 6 || currentWeekday === 0)) {
+    startOffsetDays = 0;
+    endOffsetFromToday = currentWeekday === 6 ? 2 : 1;
+  }
+  if (modifier === "next") {
+    startOffsetDays += 7;
+    endOffsetFromToday += 7;
+  }
+  const startDay = addDaysToLocalDate(localToday, startOffsetDays);
+  const endDay = addDaysToLocalDate(localToday, endOffsetFromToday);
+  return buildLocalDateRange(timeZone, startDay, endDay);
+}
+
+function resolveMonthWindow(
+  timeZone: string,
+  modifier: "this" | "next",
+): { timeMin: string; timeMax: string } {
+  const localToday = getLocalTodayDate(timeZone);
+  if (modifier === "this") {
+    const endOfWindow = addMonthsToLocalDate(
+      {
+        year: localToday.year,
+        month: localToday.month,
+        day: 1,
+      },
+      1,
+    );
+    return buildLocalDateRange(timeZone, localToday, endOfWindow);
+  }
+
+  const startOfNextMonth = addMonthsToLocalDate(
+    {
+      year: localToday.year,
+      month: localToday.month,
+      day: 1,
+    },
+    1,
+  );
+  const startOfFollowingMonth = addMonthsToLocalDate(startOfNextMonth, 1);
+  return buildLocalDateRange(timeZone, startOfNextMonth, startOfFollowingMonth);
+}
+
+function resolveTonightWindow(timeZone: string): { timeMin: string; timeMax: string } {
+  const localNow = getZonedDateParts(new Date(), timeZone);
+  const startHour = Math.max(localNow.hour, 17);
+  const startMinute = localNow.hour >= 17 ? localNow.minute : 0;
+  const startDay = {
+    year: localNow.year,
+    month: localNow.month,
+    day: localNow.day,
+  };
+  const endDay = addDaysToLocalDate(startDay, 1);
+  return buildLocalDateRange(timeZone, startDay, endDay, {
+    startHour,
+    startMinute,
+  });
 }
 
 // Wide window used by update_event / delete_event lookups when the user
@@ -729,6 +1042,7 @@ function resolveCalendarWindow(
   intent: string,
   details: Record<string, unknown> | undefined,
   forSearch: boolean,
+  llmPlan?: CalendarLlmPlan,
 ): {
   request: GetLifeOpsCalendarFeedRequest;
   label: string;
@@ -751,10 +1065,29 @@ function resolveCalendarWindow(
     };
   }
 
+  const llmWindow = resolveCalendarLlmWindow(llmPlan);
+  if (llmWindow) {
+    return {
+      request: {
+        calendarId,
+        timeZone,
+        forceSync,
+        timeMin: llmWindow.timeMin,
+        timeMax: llmWindow.timeMax,
+      },
+      label: llmWindow.label,
+    };
+  }
+
   const normalizedIntent = normalizeText(intent);
   const explicitDate = parseExplicitLocalDate(normalizedIntent, timeZone);
   if (explicitDate) {
     const nextDate = addDaysToLocalDate(explicitDate, 1);
+    const explicitDateLabel = (
+      normalizedIntent.match(/(?:on|for)\s+(.+)$/i)?.[1] ?? normalizedIntent
+    )
+      .replace(/^(?:on|for)\s+/i, "")
+      .trim();
     return {
       request: {
         calendarId,
@@ -777,7 +1110,18 @@ function resolveCalendarWindow(
           second: 0,
         }).toISOString(),
       },
-      label: `on ${normalizedIntent.match(/(?:on|for)\s+(.+)$/i)?.[1] ?? normalizedIntent}`,
+      label: `on ${explicitDateLabel}`,
+    };
+  }
+  if (/\btonight\b/.test(normalizedIntent)) {
+    return {
+      request: {
+        calendarId,
+        timeZone,
+        forceSync,
+        ...resolveTonightWindow(timeZone),
+      },
+      label: "tonight",
     };
   }
   if (
@@ -798,6 +1142,28 @@ function resolveCalendarWindow(
     return {
       request: { calendarId, timeZone, forceSync, ...buildLocalDayRange(timeZone, 1, 2) },
       label: "tomorrow",
+    };
+  }
+  if (/\bnext weekend\b/.test(normalizedIntent)) {
+    return {
+      request: {
+        calendarId,
+        timeZone,
+        forceSync,
+        ...resolveWeekendWindow(timeZone, "next"),
+      },
+      label: "next weekend",
+    };
+  }
+  if (/\b(?:this weekend|weekend)\b/.test(normalizedIntent)) {
+    return {
+      request: {
+        calendarId,
+        timeZone,
+        forceSync,
+        ...resolveWeekendWindow(timeZone, "this"),
+      },
+      label: "this weekend",
     };
   }
   if (/\b(?:week after next|the week after)\b/.test(normalizedIntent)) {
@@ -828,6 +1194,28 @@ function resolveCalendarWindow(
       label: "this week",
     };
   }
+  if (/\bnext month\b/.test(normalizedIntent)) {
+    return {
+      request: {
+        calendarId,
+        timeZone,
+        forceSync,
+        ...resolveMonthWindow(timeZone, "next"),
+      },
+      label: "next month",
+    };
+  }
+  if (/\bthis month\b/.test(normalizedIntent)) {
+    return {
+      request: {
+        calendarId,
+        timeZone,
+        forceSync,
+        ...resolveMonthWindow(timeZone, "this"),
+      },
+      label: "this month",
+    };
+  }
 
   const windowDays = detailNumber(details, "windowDays");
   if (forSearch) {
@@ -851,6 +1239,7 @@ function resolveCalendarWindow(
 
 function resolveTripWindowRequest(
   details: Record<string, unknown> | undefined,
+  llmPlan?: CalendarLlmPlan,
 ): GetLifeOpsCalendarFeedRequest {
   const timeMin = detailString(details, "timeMin");
   const timeMax = detailString(details, "timeMax");
@@ -865,6 +1254,17 @@ function resolveTripWindowRequest(
       timeMax: timeMax ?? undefined,
       timeZone,
       forceSync,
+    };
+  }
+
+  const llmWindow = resolveCalendarLlmWindow(llmPlan);
+  if (llmWindow) {
+    return {
+      calendarId,
+      timeZone,
+      forceSync,
+      timeMin: llmWindow.timeMin,
+      timeMax: llmWindow.timeMax,
     };
   }
 
@@ -904,11 +1304,11 @@ function inferCalendarSearchQuery(intent: string): string | undefined {
   }
 
   const patterns = [
-    /\b(?:find|search(?: for)?|look(?:ing)? for|show me)\s+(.+)$/i,
-    /\b(?:do i have|are there)\s+(?:any\s+)?(.+?)(?:\?|$)/i,
-    /\b(?:check|look|see)\s+(?:my\s+)?calendar\s+for\s+(.+?)(?:\?|$)/i,
-    /\bwhat\s+(?:event|events)\s+do\s+i\s+have\s+(?:on|for)\s+(.+?)(?:\?|$)/i,
-    /\bany\s+(.+?)(?:\?|$)/i,
+    /^(?:please\s+)?(?:find|search(?: for)?|look(?:ing)? for|show me)\s+(.+)$/i,
+    /^(?:please\s+)?(?:do i have|are there)\s+(?:any\s+)?(.+?)(?:\?|$)/i,
+    /^(?:please\s+)?(?:check|look|see)\s+(?:my\s+)?calendar\s+for\s+(.+?)(?:\?|$)/i,
+    /^what\s+(?:event|events)\s+do\s+i\s+have\s+(?:on|for)\s+(.+?)(?:\?|$)/i,
+    /^(?:please\s+)?any\s+(.+?)(?:\?|$)/i,
   ];
 
   for (const pattern of patterns) {
@@ -1085,8 +1485,11 @@ async function extractCalendarSearchQueriesWithLlm(
   message: Memory,
   state: State | undefined,
   intent: string,
+  timeZone?: string,
 ): Promise<string[]> {
-  return (await extractCalendarPlanWithLlm(runtime, message, state, intent)).queries;
+  return (
+    await extractCalendarPlanWithLlm(runtime, message, state, intent, timeZone)
+  ).queries;
 }
 
 export async function extractCalendarPlanWithLlm(
@@ -1094,9 +1497,17 @@ export async function extractCalendarPlanWithLlm(
   message: Memory,
   state: State | undefined,
   intent: string,
+  timeZone = resolveDefaultTimeZone(),
 ): Promise<CalendarLlmPlan> {
-  const recentConversation = stateTextCandidates(state).slice(-8).join("\n");
+  const recentConversation = planningConversationLines(state).slice(-8).join("\n");
   const currentMessage = messageText(message).trim();
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const localNow = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(now);
   const prompt = [
     "Plan the calendar action for this request.",
     "The user may speak in any language.",
@@ -1111,6 +1522,9 @@ export async function extractCalendarPlanWithLlm(
     "  create_event — schedule a new event (e.g. 'schedule a meeting tomorrow at 3pm', 'add lunch with Sarah on Friday')",
     "  trip_window — query what's happening during a trip or stay in a specific place (e.g. 'what's happening while I'm in Denver', 'my Tokyo itinerary')",
     "",
+    "For feed, search_events, or trip_window, infer an exact timeMin/timeMax window when the request names or implies a date or date range.",
+    "timeMin and timeMax must be ISO 8601 datetimes that the API can use directly.",
+    "windowLabel should be a short natural-language label like on monday, this weekend, next month, or tonight.",
     "For search_events or trip_window, extract up to 3 short search queries.",
     "Preserve names, places, and keywords in their original language or script when useful.",
     "Convert time constraints into concise searchable dates or windows even if the user phrases them in another language.",
@@ -1132,7 +1546,13 @@ export async function extractCalendarPlanWithLlm(
     "queries: denver return flight",
     "title:",
     "tripLocation:",
+    "timeMin:",
+    "timeMax:",
+    "windowLabel:",
     "",
+    `Current timezone: ${timeZone}`,
+    `Current local datetime: ${localNow}`,
+    `Current ISO datetime: ${nowIso}`,
     `Current request: ${JSON.stringify(currentMessage)}`,
     `Resolved intent: ${JSON.stringify(intent)}`,
     `Recent conversation: ${JSON.stringify(recentConversation)}`,
@@ -1203,6 +1623,9 @@ export async function extractCalendarPlanWithLlm(
         ? parsed.title.trim()
         : undefined,
     tripLocation,
+    timeMin: normalizeIsoDateTime(parsed.timeMin),
+    timeMax: normalizeIsoDateTime(parsed.timeMax),
+    windowLabel: normalizeWindowLabel(parsed.windowLabel ?? parsed.label),
   };
 }
 
@@ -1213,23 +1636,11 @@ async function resolveCalendarSearchQueries(
   explicitQueries: Array<string | undefined>,
   intent: string,
   llmPlan?: CalendarLlmPlan,
+  timeZone?: string,
 ): Promise<string[]> {
   const providedQueries = dedupeCalendarQueries(
     explicitQueries.map((query) => sanitizeCalendarQuery(query, intent)),
   );
-  if (
-    providedQueries.length > 0 &&
-    providedQueries.every(
-      (query) =>
-        !looksLikeNarrativeCalendarQuery(query) &&
-        !looksLikeLiteralRequestEcho(query, intent) &&
-        !WEAK_CALENDAR_QUERY_PATTERN.test(query) &&
-        !PARAMETER_DOC_NOISE_PATTERN.test(query),
-    )
-  ) {
-    return providedQueries;
-  }
-
   const heuristicQueries = inferCalendarSearchQueries(intent);
   const llmQueries =
     llmPlan && llmPlan.queries.length > 0
@@ -1239,6 +1650,7 @@ async function resolveCalendarSearchQueries(
           message,
           state,
           intent,
+          timeZone,
         );
   const stateQueries = stateTextCandidates(state)
     .reverse()
@@ -1327,14 +1739,19 @@ async function inferCreateEventDetails(
   state: State | undefined,
   intent: string,
 ): Promise<Record<string, unknown>> {
-  const recentConversation = stateTextCandidates(state).slice(-8).join("\n");
+  const recentConversation = planningConversationLines(state).slice(-8).join("\n");
   const currentMessage = messageText(message).trim();
   // Anchor the LLM in the present so relative phrases ("tomorrow", "next
   // friday", "april 15") and explicit-but-yearless dates resolve to the
   // correct ISO datetime instead of guessing or returning empty.
   const now = new Date();
   const nowIso = now.toISOString();
-  const nowReadable = now.toUTCString();
+  const timeZone = resolveDefaultTimeZone();
+  const nowReadable = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(now);
   const prompt = [
     "Extract calendar event creation fields from the request.",
     "The user may speak in any language.",
@@ -1358,7 +1775,8 @@ async function inferCreateEventDetails(
     "  <timeZone>IANA timezone if stated</timeZone>",
     "</response>",
     "",
-    `Current date (UTC): ${nowReadable}`,
+    `Current timezone: ${timeZone}`,
+    `Current local datetime: ${nowReadable}`,
     `Current ISO datetime: ${nowIso}`,
     `Current request: ${JSON.stringify(currentMessage)}`,
     `Resolved intent: ${JSON.stringify(intent)}`,
@@ -1654,20 +2072,14 @@ export const calendarAction: Action = {
     const params = rawParams ?? ({} as CalendarActionParams);
     const intent = resolveCalendarIntent(params.intent, message, state);
     const details = normalizeCalendarDetails(params.details);
-    const shouldPlanWithLlm =
-      !params.subaction ||
-      (!params.query &&
-        (params.queries?.length ?? 0) === 0 &&
-        !detailString(details, "query") &&
-        (detailArray(details, "queries")?.length ?? 0) === 0 &&
-        !params.title &&
-        !detailString(details, "title"));
-    const llmPlan = shouldPlanWithLlm
-      ? await extractCalendarPlanWithLlm(runtime, message, state, intent)
-      : {
-          subaction: null,
-          queries: [],
-        };
+    const planningTimeZone = resolveCalendarTimeZone(details);
+    const llmPlan = await extractCalendarPlanWithLlm(
+      runtime,
+      message,
+      state,
+      intent,
+      planningTimeZone,
+    );
     const heuristicQuery = inferCalendarSearchQuery(intent);
     const inferredQuery = sanitizeCalendarQuery(
       params.query ?? detailString(details, "query"),
@@ -1692,6 +2104,12 @@ export const calendarAction: Action = {
       llmPlan.tripLocation && llmPlan.tripLocation.trim().length > 0
         ? { location: llmPlan.tripLocation.trim() }
         : inferTripWindowIntent(intent);
+    const explicitSubaction = params.subaction as CalendarSubaction | undefined;
+    const preferExplicitSubaction = shouldTrustExplicitCalendarSubaction(
+      explicitSubaction,
+      params,
+      details,
+    );
     // Hard override: when the RAW user message contains an unambiguous
     // verb ("create", "delete", "rename", "reschedule") or a "list
     // everything" phrase, force the matching subaction even if the chat
@@ -1763,10 +2181,10 @@ export const calendarAction: Action = {
       subaction = "trip_window";
     } else if (forcedSubaction) {
       subaction = forcedSubaction;
+    } else if (llmPlan.subaction && !preferExplicitSubaction) {
+      subaction = llmPlan.subaction;
     } else if (params.subaction) {
       subaction = params.subaction as CalendarSubaction;
-    } else if (llmPlan.subaction) {
-      subaction = llmPlan.subaction;
     } else {
       runtime.logger?.warn?.(
         { src: "action:calendar", intent },
@@ -2145,11 +2563,11 @@ export const calendarAction: Action = {
           // forceSync: true ensures the lookup actually queries Google
           // instead of returning a stale (or empty) local cache.
           const hasExplicitWindow =
-            /\b(today|tomorrow|tonight|this week|next week|the week after|this month|next month)\b/i.test(
+            /\b(today|tomorrow|tonight|this week|next week|the week after|this weekend|next weekend|weekend|this month|next month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(
               intent,
             );
           const feedRequest = hasExplicitWindow
-            ? resolveCalendarWindow(intent, details, false).request
+            ? resolveCalendarWindow(intent, details, false, llmPlan).request
             : {
                 calendarId: detailString(details, "calendarId"),
                 timeZone: resolveCalendarTimeZone(details),
@@ -2296,7 +2714,7 @@ export const calendarAction: Action = {
             | "cloud_managed"
             | undefined),
           side: (detailString(details, "side") as "owner" | "agent" | undefined),
-          ...resolveTripWindowRequest(details),
+          ...resolveTripWindowRequest(details, llmPlan),
         });
         const itineraryEvents = resolveTripWindowEvents(
           feed.events,
@@ -2348,6 +2766,7 @@ export const calendarAction: Action = {
         intent,
         details,
         subaction === "search_events" || wantsWideWindow,
+        llmPlan,
       );
       const request = wantsWideWindow
         ? {
@@ -2377,6 +2796,7 @@ export const calendarAction: Action = {
           ],
           intent,
           llmPlan,
+          planningTimeZone,
         );
         const query = searchQueries[0];
         if (!query || searchQueries.length === 0) {

@@ -74,6 +74,16 @@ This document catalogs known failure modes across the Milady system, organized b
 | **Current mitigation** | SSE interruption detection with visual indicator and retry button in chat UI. |
 | **Gap / Risk** | No automatic retry with offset tracking. The user loses the partial response and must re-trigger the full generation. On long responses this is especially costly in both time and tokens. |
 
+### F-03b: Post-generation error replaces streamed text
+
+| Field | Detail |
+|---|---|
+| **Status** | **Fixed** (PR #1833) |
+| **Symptoms** | The LLM streams a full reply successfully, but a post-action continuation fails. The already-streamed text is discarded and replaced with a generic "provider issue" message, confusing the user. |
+| **Root cause** | The error handler did not distinguish between failures that occurred before any text was streamed and failures that occurred after. Both paths produced the same generic fallback reply. |
+| **Current mitigation** | The streaming error handler now checks whether text was already delivered. If so, the streamed text is preserved in the final `done` SSE event instead of being replaced. Errors are logged for diagnosis. |
+| **Gap / Risk** | None — the user retains the partial or complete reply that was already visible. |
+
 ### F-04: Insufficient credits fallback detection
 
 | Field | Detail |

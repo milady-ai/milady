@@ -143,6 +143,7 @@ type AppHarnessState = {
   elizaCloudUserId: string;
   uiShellMode: string;
   uiLanguage: string;
+  favoriteApps: string[];
   [key: string]: unknown;
 };
 
@@ -766,6 +767,7 @@ function createHarnessState(
     uiLanguage: "en",
     plugins: [],
     agentStatus: null,
+    favoriteApps: [],
     ...overrides,
   };
 }

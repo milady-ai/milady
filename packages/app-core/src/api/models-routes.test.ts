@@ -5,9 +5,9 @@ describe("models routes", () => {
   const providerCachePath = vi.fn(
     (provider: string) => `/cache/${provider}.json`,
   );
-  const getOrFetchProvider = vi.fn(async () => [{ id: "gpt-4.1-mini" }]);
+  const getOrFetchProvider = vi.fn(async () => [{ id: "gpt-5.4-mini" }]);
   const getOrFetchAllProviders = vi.fn(async () => ({
-    openai: [{ id: "gpt-4.1-mini" }],
+    openai: [{ id: "gpt-5.4-mini" }],
     anthropic: [{ id: "claude-sonnet-4" }],
   }));
   const resolveModelsCacheDir = vi.fn(() => "/cache");
@@ -70,7 +70,7 @@ describe("models routes", () => {
     expect(result.status).toBe(200);
     expect(result.payload).toMatchObject({
       provider: "openai",
-      models: [{ id: "gpt-4.1-mini" }],
+      models: [{ id: "gpt-5.4-mini" }],
     });
     expect(getOrFetchProvider).toHaveBeenCalledWith("openai", false);
     expect(unlinkFile).not.toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe("models routes", () => {
     expect(result.status).toBe(200);
     expect(result.payload).toMatchObject({
       providers: {
-        openai: [{ id: "gpt-4.1-mini" }],
+        openai: [{ id: "gpt-5.4-mini" }],
       },
     });
     expect(resolveModelsCacheDir).toHaveBeenCalledTimes(1);

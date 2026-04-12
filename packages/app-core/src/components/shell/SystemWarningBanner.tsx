@@ -9,7 +9,7 @@ const AUTO_DISMISS_MS = 20_000;
  * broadcast via WebSocket `system-warning` events.
  */
 export function SystemWarningBanner() {
-  const { systemWarnings, dismissSystemWarning, backendConnection } = useApp();
+  const { systemWarnings, dismissSystemWarning } = useApp();
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );
@@ -44,20 +44,14 @@ export function SystemWarningBanner() {
 
   if (!systemWarnings?.length) return null;
 
-  const connectionBannerVisible =
-    backendConnection?.state === "reconnecting" ||
-    backendConnection?.state === "failed";
-  const baseTop = connectionBannerVisible ? 36 : 0;
-
   return (
     <>
-      {systemWarnings.map((message, index) => (
+      {systemWarnings.map((message) => (
         <div
           key={message}
           role="alert"
           aria-live="assertive"
-          className={`fixed left-0 right-0 z-[${Z_SYSTEM_BANNER}] flex items-center justify-between gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg`}
-          style={{ top: `${baseTop + index * 36}px` }}
+          className={`shrink-0 z-[${Z_SYSTEM_BANNER}] flex items-center justify-between gap-3 bg-warn px-4 py-2 text-[13px] font-medium text-[color:var(--accent-foreground)] shadow-lg`}
         >
           <span className="truncate">{message}</span>
           <Button

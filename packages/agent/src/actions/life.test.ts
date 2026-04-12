@@ -240,6 +240,10 @@ describe("lifeAction", () => {
     });
   });
 
+  it("suppresses post-action continuation because LIFE returns the grounded reply directly", () => {
+    expect(lifeAction.suppressPostActionContinuation).toBe(true);
+  });
+
   // ── Access control ────────────────────────────────
 
   it("rejects non-admin callers", async () => {
@@ -359,6 +363,89 @@ describe("lifeAction", () => {
     expect(result).toMatchObject({ success: true, text: expect.stringContaining("Brush teeth") });
   });
 
+  it("parses cadence from planner intents that contain narrow unicode spaces around times", async () => {
+    mockListGoals.mockResolvedValue([]);
+    mockCreateDefinition.mockResolvedValue({
+      definition: {
+        id: "d-unicode-time",
+        title: "Brush teeth",
+        cadence: {
+          kind: "times_per_day",
+          slots: [
+            { label: "Morning", minuteOfDay: 8 * 60 },
+            { label: "Night", minuteOfDay: 21 * 60 },
+          ],
+        },
+      },
+      reminderPlan: null,
+    });
+
+    const result = await invoke("Yes, save that brushing routine.", {
+      action: "create",
+      intent: "brush teeth at 8 am and 9 pm every day",
+      title: "Brush teeth",
+      details: { confirmed: true },
+    });
+
+    expect(mockCreateDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Brush teeth",
+        cadence: expect.objectContaining({
+          kind: "times_per_day",
+          slots: expect.arrayContaining([
+            expect.objectContaining({ minuteOfDay: 8 * 60 }),
+            expect.objectContaining({ minuteOfDay: 21 * 60 }),
+          ]),
+        }),
+      }),
+    );
+    expect(result).toMatchObject({ success: true });
+  });
+
+  it("normalizes planner cadence details that use type+times shape", async () => {
+    mockListGoals.mockResolvedValue([]);
+    mockCreateDefinition.mockResolvedValue({
+      definition: {
+        id: "d-structured-cadence",
+        title: "Brush teeth",
+        cadence: {
+          kind: "times_per_day",
+          slots: [
+            { label: "8am", minuteOfDay: 8 * 60 },
+            { label: "9pm", minuteOfDay: 21 * 60 },
+          ],
+        },
+      },
+      reminderPlan: null,
+    });
+
+    const result = await invoke("Help me brush my teeth at 8 am and 9 pm every day.", {
+      action: "create",
+      title: "Brush teeth",
+      details: {
+        confirmed: true,
+        kind: "habit",
+        cadence: {
+          type: "daily",
+          times: ["08:00", "21:00"],
+        },
+      },
+    });
+
+    expect(mockCreateDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cadence: expect.objectContaining({
+          kind: "times_per_day",
+          slots: expect.arrayContaining([
+            expect.objectContaining({ minuteOfDay: 8 * 60 }),
+            expect.objectContaining({ minuteOfDay: 21 * 60 }),
+          ]),
+        }),
+      }),
+    );
+    expect(result).toMatchObject({ success: true });
+  });
+
   it("previews an ambiguous recurring habit request instead of saving immediately", async () => {
     mockListGoals.mockResolvedValue([]);
 
@@ -432,6 +519,255 @@ describe("lifeAction", () => {
     expect(result).toMatchObject({
       success: true,
       text: expect.stringContaining("Saved"),
+    });
+  });
+
+  it("reuses a preview draft from recent action-result memories on the next turn", async () => {
+    mockListGoals.mockResolvedValue([]);
+    mockCreateDefinition.mockResolvedValue({
+      definition: {
+        id: "d-follow-up-memory",
+        title: "Brush teeth",
+        cadence: { kind: "daily", windows: ["morning", "night"] },
+      },
+      reminderPlan: null,
+    });
+
+    const result = await lifeAction.handler?.(
+      runtime,
+      {
+        entityId: "owner-1",
+        content: { source: "telegram", text: "yes, save that routine" },
+      } as never,
+      {
+        data: {
+          actionResults: [
+            {
+              content: {
+                type: "action_result",
+                actionName: "LIFE",
+                actionStatus: "completed",
+                text: 'I can save this as a habit named "Brush teeth" that happens daily in morning, night. Confirm and I\'ll save it, or tell me what to change.',
+                data: {
+                  actionName: "LIFE",
+                  lifeDraft: {
+                    intent: "Help me brush my teeth every morning and night.",
+                    operation: "create_definition",
+                    request: {
+                      cadence: { kind: "daily", windows: ["morning", "night"] },
+                      kind: "habit",
+                      title: "Brush teeth",
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      } as never,
+      { parameters: { action: "create" } } as never,
+    );
+
+    expect(mockCreateDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Brush teeth",
+        cadence: expect.objectContaining({
+          kind: "daily",
+          windows: ["morning", "night"],
+        }),
+      }),
+    );
+    expect(result).toMatchObject({
+      success: true,
+      text: expect.stringContaining("Saved"),
+    });
+  });
+
+  it("reuses a preview draft when the planner echoes the same confirmation into intent", async () => {
+    mockListGoals.mockResolvedValue([]);
+    mockCreateDefinition.mockResolvedValue({
+      definition: {
+        id: "d-follow-up-echoed-intent",
+        title: "Brush teeth",
+        cadence: { kind: "daily", windows: ["morning", "night"] },
+      },
+      reminderPlan: null,
+    });
+
+    const result = await lifeAction.handler?.(
+      runtime,
+      {
+        entityId: "owner-1",
+        content: { source: "telegram", text: "Yes, save that brushing routine." },
+      } as never,
+      {
+        data: {
+          actionResults: [
+            {
+              content: {
+                type: "action_result",
+                actionName: "LIFE",
+                actionStatus: "completed",
+                text: 'I can save this as a habit named "Brush teeth" that happens daily in morning, night. Confirm and I\'ll save it, or tell me what to change.',
+                data: {
+                  actionName: "LIFE",
+                  lifeDraft: {
+                    intent: "Help me brush my teeth every morning and night.",
+                    operation: "create_definition",
+                    request: {
+                      cadence: { kind: "daily", windows: ["morning", "night"] },
+                      kind: "habit",
+                      title: "Brush teeth",
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      } as never,
+      {
+        parameters: {
+          action: "create",
+          intent: "Yes, save that brushing routine.",
+          title: "Brush Teeth",
+        },
+      } as never,
+    );
+
+    expect(mockCreateDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Brush teeth",
+      }),
+    );
+    expect(result).toMatchObject({
+      success: true,
+      text: expect.stringContaining("Saved"),
+    });
+  });
+
+  it("reuses a preview draft from provider-backed action history in real composeState shape", async () => {
+    mockListGoals.mockResolvedValue([]);
+    mockCreateDefinition.mockResolvedValue({
+      definition: {
+        id: "d-provider-state",
+        title: "Brush teeth",
+        cadence: { kind: "daily", windows: ["morning", "night"] },
+      },
+      reminderPlan: null,
+    });
+
+    const providerDraftMemory = {
+      content: {
+        type: "action_result",
+        actionName: "LIFE",
+        actionStatus: "completed",
+        text: 'I can save this as a habit named "Brush teeth" that happens daily in morning, night. Confirm and I\'ll save it, or tell me what to change.',
+        data: {
+          actionName: "LIFE",
+          lifeDraft: {
+            intent: "Help me brush my teeth every morning and night.",
+            operation: "create_definition",
+            request: {
+              cadence: { kind: "daily", windows: ["morning", "night"] },
+              kind: "habit",
+              title: "Brush teeth",
+            },
+          },
+        },
+      },
+    };
+
+    const result = await lifeAction.handler?.(
+      runtime,
+      {
+        entityId: "owner-1",
+        content: { source: "telegram", text: "Yes, save that brushing routine." },
+      } as never,
+      {
+        data: {
+          providers: {
+            ACTION_STATE: {
+              data: {
+                recentActionMemories: [providerDraftMemory],
+              },
+            },
+          },
+        },
+      } as never,
+      { parameters: { action: "create" } } as never,
+    );
+
+    expect(mockCreateDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Brush teeth",
+      }),
+    );
+    expect(result).toMatchObject({
+      success: true,
+      text: expect.stringContaining("Saved"),
+    });
+  });
+
+  it("does not reuse an older preview draft after a create action already succeeded", async () => {
+    mockListGoals.mockResolvedValue([]);
+
+    const result = await lifeAction.handler?.(
+      runtime,
+      {
+        entityId: "owner-1",
+        content: { source: "telegram", text: "Yes, that's the schedule. Save it." },
+      } as never,
+      {
+        data: {
+          actionResults: [
+            {
+              content: {
+                type: "action_result",
+                actionName: "LIFE",
+                actionStatus: "completed",
+                text: 'I can save this as a habit named "Brush teeth" that happens daily in morning, night. Confirm and I\'ll save it, or tell me what to change.',
+                data: {
+                  actionName: "LIFE",
+                  lifeDraft: {
+                    intent: "Help me brush my teeth every morning and night.",
+                    operation: "create_definition",
+                    request: {
+                      cadence: { kind: "daily", windows: ["morning", "night"] },
+                      kind: "habit",
+                      title: "Brush teeth",
+                    },
+                  },
+                },
+              },
+            },
+            {
+              content: {
+                type: "action_result",
+                actionName: "LIFE",
+                actionStatus: "completed",
+                text: 'Saved "Brush teeth" as daily in morning, night.',
+                data: {
+                  actionName: "LIFE",
+                  definition: {
+                    id: "d-saved",
+                    title: "Brush teeth",
+                    cadence: { kind: "daily", windows: ["morning", "night"] },
+                  },
+                  reminderPlan: null,
+                },
+              },
+            },
+          ],
+        },
+      } as never,
+      { parameters: { action: "create" } } as never,
+    );
+
+    expect(mockCreateDefinition).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      success: false,
+      text: expect.stringContaining("schedule"),
     });
   });
 

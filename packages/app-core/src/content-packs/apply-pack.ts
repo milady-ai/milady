@@ -9,6 +9,7 @@ import type {
   ContentPackColorScheme,
   ResolvedContentPack,
 } from "@miladyai/shared/contracts/content-pack";
+import { applyThemeToDocument } from "../themes/apply-theme";
 
 /** Minimal state setters needed to apply a content pack. */
 export interface ContentPackApplyDeps {
@@ -82,10 +83,24 @@ const COLOR_SCHEME_CSS_MAP: Record<
 /**
  * Apply a content pack's color scheme as CSS custom properties on the
  * document root. Returns a cleanup function that removes them.
+ *
+ * If the pack includes a full ThemeDefinition (via `theme` field),
+ * it takes precedence over the narrow colorScheme.
  */
 export function applyColorScheme(
   scheme: ContentPackColorScheme | undefined,
+  pack?: ResolvedContentPack,
 ): () => void {
+  // Full theme takes precedence
+  if (pack?.manifest.assets.theme) {
+    const mode =
+      typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-theme") === "light"
+        ? "light"
+        : "dark";
+    return applyThemeToDocument(pack.manifest.assets.theme, mode);
+  }
+
   if (!scheme || typeof document === "undefined") return () => {};
 
   const root = document.documentElement;

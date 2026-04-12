@@ -6,14 +6,12 @@ const MONO_FONT = "'Courier New', 'Courier', 'Monaco', monospace";
 interface SplashServerChooserProps {
   discoveryLoading: boolean;
   gateways: GatewayDiscoveryEndpoint[];
-  showElizaCloudEntry: boolean;
-  showCreateLocal?: boolean;
+  showCreateLocal: boolean;
   t: (key: string, values?: Record<string, unknown>) => string;
   onCreateLocal: () => void;
   onManualConnect: () => void;
-  onUseElizaCloud: () => void;
+  onManageCloudAgents: () => void;
   onConnectGateway: (gateway: GatewayDiscoveryEndpoint) => void;
-  onLoadContentPack?: () => void;
 }
 
 function gatewayLabel(
@@ -28,18 +26,16 @@ function gatewayLabel(
 export function SplashServerChooser({
   discoveryLoading,
   gateways,
-  showElizaCloudEntry,
-  showCreateLocal = true,
+  showCreateLocal,
   t,
   onCreateLocal,
   onManualConnect,
-  onUseElizaCloud,
+  onManageCloudAgents,
   onConnectGateway,
-  onLoadContentPack,
 }: SplashServerChooserProps) {
   return (
     <div className="mt-4 flex w-full flex-col gap-3 text-left">
-      {gateways.length > 0 ? (
+      {gateways.length > 0 && (
         <div className="flex flex-col gap-2">
           {gateways.map((gateway) => (
             <Card
@@ -74,45 +70,7 @@ export function SplashServerChooser({
             </Card>
           ))}
         </div>
-      ) : (
-        <p
-          style={{ fontFamily: MONO_FONT }}
-          className="text-[8px] uppercase text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-        >
-          {discoveryLoading
-            ? t("startupshell.ScanningNetwork", {
-                defaultValue: "Scanning your network...",
-              })
-            : t("startupshell.NoNetworkAgentsFound", {
-                defaultValue: "No LAN agents found yet.",
-              })}
-        </p>
       )}
-
-      {showElizaCloudEntry ? (
-        <Button
-          type="button"
-          variant="default"
-          className="justify-start border-2 border-black bg-white px-3 py-5 text-left text-black font-semibold shadow-md hover:bg-black hover:text-[#ffe600]"
-          onClick={onUseElizaCloud}
-        >
-          <span className="flex flex-col items-start gap-1">
-            <span
-              style={{ fontFamily: MONO_FONT }}
-              className="text-[9px] uppercase text-black/60"
-            >
-              {t("startupshell.ElizaCloudAgent", {
-                defaultValue: "Eliza Cloud",
-              })}
-            </span>
-            <span className="text-sm font-bold">
-              {t("startupshell.UseElizaCloud", {
-                defaultValue: "Use Eliza Cloud",
-              })}
-            </span>
-          </span>
-        </Button>
-      ) : null}
 
       {showCreateLocal ? (
         <Button
@@ -127,15 +85,40 @@ export function SplashServerChooser({
               className="text-[9px] uppercase text-[#ffe600]/80"
             >
               {t("startupshell.CreateAgentLabel", {
-                defaultValue: "New local agent",
+                defaultValue: "Desktop only",
               })}
             </span>
             <span className="text-sm font-bold">
-              {t("startupshell.CreateOne", { defaultValue: "Create one" })}
+              {t("startupshell.CreateLocalAgent", {
+                defaultValue: "Create Local Agent",
+              })}
             </span>
           </span>
         </Button>
       ) : null}
+
+      <Button
+        type="button"
+        variant="default"
+        className="justify-start border-2 border-black bg-white px-3 py-5 text-left text-black font-semibold shadow-md hover:bg-black hover:text-[#ffe600]"
+        onClick={onManageCloudAgents}
+      >
+        <span className="flex flex-col items-start gap-1">
+          <span
+            style={{ fontFamily: MONO_FONT }}
+            className="text-[9px] uppercase text-black/60"
+          >
+            {t("startupshell.ElizaCloudAgent", {
+              defaultValue: "Eliza Cloud",
+            })}
+          </span>
+          <span className="text-sm font-bold">
+            {t("startupshell.ManageCloudAgents", {
+              defaultValue: "Manage Cloud Agents",
+            })}
+          </span>
+        </span>
+      </Button>
 
       <Button
         type="button"
@@ -149,41 +132,16 @@ export function SplashServerChooser({
             className="text-[9px] uppercase text-black/60"
           >
             {t("startupshell.RemoteAgentLabel", {
-              defaultValue: "Existing server",
+              defaultValue: "Remote server",
             })}
           </span>
           <span className="text-sm font-bold">
-            {t("startupshell.ManuallyConnect", {
-              defaultValue: "Manually connect to one",
+            {t("startupshell.ConnectToRemote", {
+              defaultValue: "Connect to Remote Agent",
             })}
           </span>
         </span>
       </Button>
-
-      {onLoadContentPack ? (
-        <Button
-          type="button"
-          variant="default"
-          className="justify-start border-2 border-dashed border-black/60 bg-white/90 px-3 py-4 text-left text-black font-semibold shadow-sm hover:bg-black hover:text-[#ffe600] hover:border-solid"
-          onClick={onLoadContentPack}
-        >
-          <span className="flex flex-col items-start gap-0.5">
-            <span className="text-sm font-bold">
-              {t("startupshell.LoadPack", {
-                defaultValue: "Load content pack",
-              })}
-            </span>
-            <span
-              style={{ fontFamily: MONO_FONT }}
-              className="text-[8px] uppercase text-black/50"
-            >
-              {t("startupshell.LoadPackHint", {
-                defaultValue: "VRMs, backgrounds, themes",
-              })}
-            </span>
-          </span>
-        </Button>
-      ) : null}
     </div>
   );
 }

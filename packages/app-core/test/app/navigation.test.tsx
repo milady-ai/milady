@@ -9,8 +9,8 @@ import { describe, expect, it } from "vitest";
 describe("navigation", () => {
   it("maps advanced tab to path and title", () => {
     expect(pathForTab("advanced")).toBe("/advanced");
-    expect(tabFromPath("/advanced")).toBe("advanced");
-    expect(titleForTab("advanced")).toBe("Advanced");
+    expect(tabFromPath("/advanced")).toBe("fine-tuning");
+    expect(titleForTab("advanced")).toBe("Fine-Tuning");
   });
 
   it("maps database tab to path and title", () => {
@@ -19,12 +19,12 @@ describe("navigation", () => {
     expect(titleForTab("database")).toBe("Databases");
   });
 
-  it("includes database, plugins, and logs in the advanced tab group", () => {
-    const advancedGroup = ALL_TAB_GROUPS.find(
-      (group) => group.label === "Advanced",
+  it("includes database, plugins, and logs in the Apps tab group", () => {
+    const appsGroup = ALL_TAB_GROUPS.find(
+      (group) => group.label === "Apps",
     );
-    expect(advancedGroup?.tabs).toContain("database");
-    expect(advancedGroup?.tabs).toContain("plugins");
-    expect(advancedGroup?.tabs).toContain("logs");
+    expect(appsGroup?.tabs).toContain("database");
+    expect(appsGroup?.tabs).toContain("plugins");
+    expect(appsGroup?.tabs).toContain("logs");
   });
 });

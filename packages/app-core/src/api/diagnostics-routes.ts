@@ -5,6 +5,7 @@ import {
   AUDIT_EVENT_TYPES,
   AUDIT_SEVERITIES,
   getAuditFeedSize,
+  getLifeOpsBrowserCompanionPackageStatus,
   queryAuditFeed,
   subscribeAuditFeed,
 } from "@miladyai/agent";
@@ -23,6 +24,10 @@ type DiagnosticsRouteContext = Omit<
 >;
 
 function defaultResolveExtensionPath(): string | null {
+  return defaultResolveExtensionArtifacts().extensionPath ?? null;
+}
+
+function defaultResolveExtensionArtifacts() {
   try {
     const serverDir = path.dirname(fileURLToPath(import.meta.url));
     const extensionPath = path.resolve(
@@ -30,11 +35,19 @@ function defaultResolveExtensionPath(): string | null {
       "..",
       "..",
       "apps",
-      "chrome-extension",
+      "extensions",
+      "lifeops-browser",
     );
-    return fs.existsSync(extensionPath) ? extensionPath : null;
+    if (!fs.existsSync(extensionPath)) {
+      return getLifeOpsBrowserCompanionPackageStatus();
+    }
+    const status = getLifeOpsBrowserCompanionPackageStatus();
+    return {
+      ...status,
+      extensionPath,
+    };
   } catch {
-    return null;
+    return getLifeOpsBrowserCompanionPackageStatus();
   }
 }
 
@@ -45,6 +58,8 @@ export async function handleDiagnosticsRoutes(
     ...ctx,
     resolveExtensionPath:
       ctx.resolveExtensionPath ?? defaultResolveExtensionPath,
+    resolveExtensionArtifacts:
+      ctx.resolveExtensionArtifacts ?? defaultResolveExtensionArtifacts,
     auditEventTypes: AUDIT_EVENT_TYPES,
     auditSeverities: AUDIT_SEVERITIES,
     getAuditFeedSize,

@@ -18,6 +18,9 @@ type StreamableServerResponse = Pick<
 
 const MAX_BODY_BYTES = 1024 * 1024; // 1 MB
 
+import net from "node:net";
+import os from "node:os";
+import path from "node:path";
 import {
   type AgentRuntime,
   ChannelType,
@@ -27,24 +30,19 @@ import {
   logger,
   type Media,
   stringToUuid,
-  type UUID
+  type UUID,
 } from "@elizaos/core";
 import { ethers } from "ethers";
-import net from "node:net";
-import os from "node:os";
-import path from "node:path";
 import { type WebSocket, WebSocketServer } from "ws";
 import { getGlobalAwarenessRegistry } from "../awareness/registry.js";
 import { CharacterSchema } from "../config/character-schema.js";
 import {
   type ElizaConfig,
   loadElizaConfig,
-  saveElizaConfig
+  saveElizaConfig,
 } from "../config/config.js";
 import { resolveModelsCacheDir, resolveStateDir } from "../config/paths.js";
-import {
-  isStreamingDestinationConfigured
-} from "../config/plugin-auto-enable.js";
+import { isStreamingDestinationConfigured } from "../config/plugin-auto-enable.js";
 import {
   isNullOriginAllowed,
   resolveAllowedHosts,
@@ -58,7 +56,7 @@ import {
 } from "../config/runtime-env.js";
 import {
   ONBOARDING_CLOUD_PROVIDER_OPTIONS,
-  ONBOARDING_PROVIDER_CATALOG
+  ONBOARDING_PROVIDER_CATALOG,
 } from "../contracts/onboarding.js";
 import { createIntegrationTelemetrySpan } from "../diagnostics/integration-observability.js";
 import { resolveDefaultAgentWorkspaceDir } from "../providers/workspace.js";
@@ -68,9 +66,7 @@ import {
   getAgentEventService,
 } from "../runtime/agent-event-service.js";
 import * as agentOrchestratorCompat from "../runtime/agent-orchestrator-compat.js";
-import {
-  classifyRegistryPluginRelease
-} from "../runtime/release-plugin-policy.js";
+import { classifyRegistryPluginRelease } from "../runtime/release-plugin-policy.js";
 import {
   AUDIT_EVENT_TYPES,
   AUDIT_SEVERITIES,
@@ -96,7 +92,7 @@ import {
   type CoreManagerLike,
   isCoreManagerLike,
   isPluginManagerLike,
-  type PluginManagerLike
+  type PluginManagerLike,
 } from "../services/plugin-manager-types.js";
 import {
   ensurePrivyWalletsForCustomUser,
@@ -104,17 +100,24 @@ import {
 } from "../services/privy-wallets.js";
 import type { SandboxManager } from "../services/sandbox-manager.js";
 import {
+  SignalPairingSession,
   sanitizeAccountId as sanitizeSignalAccountId,
   signalAuthExists,
   signalLogout,
-  SignalPairingSession,
 } from "../services/signal-pairing.js";
 import { streamManager } from "../services/stream-manager.js";
 import {
+  clearTelegramAccountAuthState,
+  clearTelegramAccountSession,
+  TelegramAccountAuthSession,
+  telegramAccountAuthStateExists,
+  telegramAccountSessionExists,
+} from "../services/telegram-account-auth.js";
+import {
   sanitizeAccountId as sanitizeWhatsAppAccountId,
+  WhatsAppPairingSession,
   whatsappAuthExists,
   whatsappLogout,
-  WhatsAppPairingSession,
 } from "../services/whatsapp-pairing.js";
 import {
   executeTriggerTask,
@@ -123,9 +126,9 @@ import {
   listTriggerTasks,
   readTriggerConfig,
   readTriggerRuns,
-  taskToTriggerSummary,
   TRIGGER_TASK_NAME,
   TRIGGER_TASK_TAGS,
+  taskToTriggerSummary,
   triggersFeatureEnabled,
 } from "../triggers/runtime.js";
 import {
@@ -144,8 +147,11 @@ import { handleAppPackageRoutes } from "./app-package-routes.js";
 import { handleAppsRoutes } from "./apps-routes.js";
 import { handleAuthRoutes } from "./auth-routes.js";
 import { handleAvatarRoutes } from "./avatar-routes.js";
+import {
+  handleBlueBubblesRoute,
+  resolveBlueBubblesWebhookPath,
+} from "./bluebubbles-routes.js";
 import { handleBrowserWorkspaceRoutes } from "./browser-workspace-routes.js";
-import { handleBlueBubblesRoute, resolveBlueBubblesWebhookPath } from "./bluebubbles-routes.js";
 import {
   buildBscApproveUnsignedTx,
   buildBscBuyUnsignedTx,
@@ -166,11 +172,10 @@ import {
 import { handleCloudBillingRoute } from "./cloud-billing-routes.js";
 import { handleCloudCompatRoute } from "./cloud-compat-routes.js";
 import { isCloudProvisionedContainer } from "./cloud-provisioning.js";
+import { handleCloudRelayRoute } from "./cloud-relay-routes.js";
 import { type CloudRouteState, handleCloudRoute } from "./cloud-routes.js";
 import { handleCloudStatusRoutes } from "./cloud-status-routes.js";
-import {
-  extractCompatTextContent
-} from "./compat-utils.js";
+import { extractCompatTextContent } from "./compat-utils.js";
 import { handleConfigRoutes } from "./config-routes.js";
 import { ConnectorHealthMonitor } from "./connector-health.js";
 import { handleConnectorRoutes } from "./connector-routes.js";
@@ -183,8 +188,8 @@ import type {
 import { wireCoordinatorBridgesWhenReady } from "./coordinator-wiring.js";
 import { handleDatabaseRoute } from "./database.js";
 import { handleDiagnosticsRoutes } from "./diagnostics-routes.js";
-import { handleDropRoutes } from "./drop-routes.js";
 import { handleDiscordLocalRoute } from "./discord-local-routes.js";
+import { handleDropRoutes } from "./drop-routes.js";
 import { DropService } from "./drop-service.js";
 import { handleHealthRoutes } from "./health-routes.js";
 import {
@@ -192,7 +197,7 @@ import {
   type ReadJsonBodyOptions,
   readRequestBody,
   sendJson,
-  sendJsonError
+  sendJsonError,
 } from "./http-helpers.js";
 import { handleIMessageRoute } from "./imessage-routes.js";
 import { handleInboxRoute } from "./inbox-routes.js";
@@ -200,10 +205,7 @@ import { handleKnowledgeRoutes } from "./knowledge-routes.js";
 import { getKnowledgeService } from "./knowledge-service-loader.js";
 import { handleLifeOpsRoutes } from "./lifeops-routes.js";
 import { handleMcpRoutes } from "./mcp-routes.js";
-import {
-  pushWithBatchEvict,
-  sweepExpiredEntries
-} from "./memory-bounds.js";
+import { pushWithBatchEvict, sweepExpiredEntries } from "./memory-bounds.js";
 import { handleMemoryRoutes } from "./memory-routes.js";
 import { handleMiscRoutes } from "./misc-routes.js";
 import { handleModelsRoutes } from "./models-routes.js";
@@ -214,8 +216,8 @@ import type {
   CoordinationLLMResponse,
   PTYService,
 } from "./parse-action-block.js";
-import { handlePermissionsExtraRoutes } from "./permissions-routes-extra.js";
 import { handlePermissionRoutes } from "./permissions-routes.js";
+import { handlePermissionsExtraRoutes } from "./permissions-routes-extra.js";
 import { handlePluginRoutes } from "./plugin-routes.js";
 import { handleProviderSwitchRoutes } from "./provider-switch-routes.js";
 import { handleRegistryRoutes } from "./registry-routes.js";
@@ -228,30 +230,16 @@ import { applySignalQrOverride, handleSignalRoute } from "./signal-routes.js";
 import { discoverSkills } from "./skill-discovery-helpers.js";
 import { handleSkillsRoutes } from "./skills-routes.js";
 import { handleSubscriptionRoutes } from "./subscription-routes.js";
+import { routeTaskAgentTextToConnector } from "./task-agent-message-routing.js";
+import { handleTelegramAccountRoute } from "./telegram-account-routes.js";
+import { handleTelegramSetupRoute } from "./telegram-setup-routes.js";
 import { handleTrainingRoutes } from "./training-routes.js";
 import type { TrainingServiceWithRuntime } from "./training-service-like.js";
 import { handleTrajectoryRoute } from "./trajectory-routes.js";
 import { handleTriggerRoutes } from "./trigger-routes.js";
 import { handleTtsRoutes } from "./tts-routes.js";
 import { TxService } from "./tx-service.js";
-import { routeTaskAgentTextToConnector } from "./task-agent-message-routing.js";
 import { handleUpdateRoutes } from "./update-routes.js";
-import { handleWebsiteBlockerRoutes } from "./website-blocker-routes.js";
-import { handleWalletBscRoutes } from "./wallet-bsc-routes.js";
-import { handleWalletRoutes } from "./wallet-routes.js";
-import {
-  EVM_PLUGIN_PACKAGE,
-  resolvePluginEvmLoaded,
-  resolveWalletAutomationMode as resolveAgentAutomationModeFromConfig,
-  resolveWalletCapabilityStatus,
-} from "./wallet-capability.js";
-import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
-import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
-import {
-  loadWalletTradingProfile,
-  recordWalletTradeLedgerEntry,
-  updateWalletTradeLedgerEntryStatus,
-} from "./wallet-trading-profile.js";
 import {
   fetchEvmBalances,
   fetchSolanaBalances,
@@ -259,13 +247,27 @@ import {
   generateWalletForChain,
   generateWalletKeys,
   getWalletAddresses,
-  initStewardWalletCache,
   importWallet,
+  initStewardWalletCache,
   setSolanaWalletEnv,
   validatePrivateKey,
 } from "./wallet.js";
-import { handleCloudRelayRoute } from "./cloud-relay-routes.js";
-import { handleTelegramSetupRoute } from "./telegram-setup-routes.js";
+import { handleWalletBscRoutes } from "./wallet-bsc-routes.js";
+import {
+  EVM_PLUGIN_PACKAGE,
+  resolveWalletAutomationMode as resolveAgentAutomationModeFromConfig,
+  resolvePluginEvmLoaded,
+  resolveWalletCapabilityStatus,
+} from "./wallet-capability.js";
+import { handleWalletRoutes } from "./wallet-routes.js";
+import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
+import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
+import {
+  loadWalletTradingProfile,
+  recordWalletTradeLedgerEntry,
+  updateWalletTradeLedgerEntryStatus,
+} from "./wallet-trading-profile.js";
+import { handleWebsiteBlockerRoutes } from "./website-blocker-routes.js";
 import {
   applyWhatsAppQrOverride,
   handleWhatsAppRoute,
@@ -274,16 +276,18 @@ import { handleWorkbenchRoutes } from "./workbench-routes.js";
 
 export {
   executeFallbackParsedActions,
-  extractXmlParams, inferBalanceChainFromText,
+  extractXmlParams,
+  type FallbackParsedAction,
+  inferBalanceChainFromText,
   isBalanceIntent,
   maybeHandleDirectBinanceSkillRequest,
   parseFallbackActionBlocks,
-  shouldForceCheckBalanceFallback, type FallbackParsedAction
+  shouldForceCheckBalanceFallback,
 } from "./binance-skill-helpers.js";
 export {
   isClientVisibleNoResponse,
   isNoResponsePlaceholder,
-  stripAssistantStageDirections
+  stripAssistantStageDirections,
 } from "./chat-text-helpers.js";
 
 import type { FallbackParsedAction } from "./binance-skill-helpers.js";
@@ -294,7 +298,7 @@ import {
   getOrFetchProvider,
   paramKeyToCategory,
   providerCachePath,
-  readProviderCache
+  readProviderCache,
 } from "./model-provider-helpers.js";
 import {
   AGENT_EVENT_ALLOWED_STREAMS,
@@ -305,7 +309,7 @@ import {
   discoverPluginsFromManifest,
   getReleaseBundledPluginIds,
   maskValue,
-  type PluginEntry
+  type PluginEntry,
 } from "./plugin-discovery-helpers.js";
 
 // Re-export for downstream consumers (e.g. @miladyai/app-core)
@@ -315,7 +319,7 @@ export {
   discoverInstalledPlugins,
   discoverPluginsFromManifest,
   findPrimaryEnvKey,
-  readBundledPluginPackageMetadata
+  readBundledPluginPackageMetadata,
 } from "./plugin-discovery-helpers.js";
 
 type PiAiPluginModule = typeof import("@elizaos/plugin-pi-ai");
@@ -702,6 +706,13 @@ export interface ServerState {
     string,
     import("../services/signal-pairing.js").SignalPairingSession
   >;
+  /** Last known Signal pairing snapshots, including terminal failures. */
+  signalPairingSnapshots?: Map<
+    string,
+    import("../services/signal-pairing.js").SignalPairingSnapshot
+  >;
+  /** Active Telegram account auth session (user-account login flow). */
+  telegramAccountAuthSession?: import("../services/telegram-account-auth.js").TelegramAccountAuthSessionLike | null;
 }
 
 export interface ShareIngestItem {
@@ -2256,7 +2267,7 @@ export function resolveTradePermissionMode(
 import {
   assertQuoteFresh,
   canUseLocalTradeExecution,
-  type TradePermissionMode
+  type TradePermissionMode,
 } from "./trade-safety.js";
 
 export {
@@ -2267,7 +2278,7 @@ export {
   getAgentAutoTradeDate,
   QUOTE_MAX_AGE_MS,
   recordAgentAutoTrade,
-  type TradePermissionMode
+  type TradePermissionMode,
 } from "./trade-safety.js";
 
 // ---------------------------------------------------------------------------
@@ -3033,13 +3044,33 @@ export function resolveCorsOrigin(origin?: string): string | null {
   return null;
 }
 
+function isBrowserCompanionExtensionOrigin(
+  origin: string | undefined,
+): boolean {
+  if (!origin) {
+    return false;
+  }
+  const trimmed = origin.trim();
+  return (
+    /^chrome-extension:\/\/[a-z]{32}$/i.test(trimmed) ||
+    /^moz-extension:\/\/[0-9a-f-]+$/i.test(trimmed) ||
+    /^safari-web-extension:\/\/[A-Za-z0-9.-]+$/i.test(trimmed)
+  );
+}
+
 function applyCors(
   req: http.IncomingMessage,
   res: http.ServerResponse,
+  pathname: string,
 ): boolean {
   const origin =
     typeof req.headers.origin === "string" ? req.headers.origin : undefined;
-  const allowed = resolveCorsOrigin(origin);
+  const allowBrowserCompanionOrigin =
+    pathname.startsWith("/api/lifeops/browser/companions/") &&
+    isBrowserCompanionExtensionOrigin(origin);
+  const allowed = allowBrowserCompanionOrigin
+    ? (origin?.trim() ?? null)
+    : resolveCorsOrigin(origin);
 
   if (origin && !allowed) return false;
 
@@ -3052,7 +3083,7 @@ function applyCors(
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Eliza-Token, X-Api-Key, X-Eliza-Export-Token, X-Eliza-Client-Id, X-Eliza-Terminal-Token, X-Eliza-UI-Language",
+      "Content-Type, Authorization, X-Eliza-Token, X-Api-Key, X-Eliza-Export-Token, X-Eliza-Client-Id, X-Eliza-Terminal-Token, X-Eliza-UI-Language, X-Milady-Browser-Companion-Id",
     );
   }
 
@@ -3621,7 +3652,7 @@ import {
   toWorkbenchTask,
   toWorkbenchTodo,
   WORKBENCH_TASK_TAG,
-  WORKBENCH_TODO_TAG
+  WORKBENCH_TODO_TAG,
 } from "./workbench-helpers.js";
 
 const _WORKBENCH_TASK_TAG = WORKBENCH_TASK_TAG;
@@ -3786,9 +3817,9 @@ function wireCodingAgentChatBridge(st: ServerState): boolean {
     // In the real task-agent stack the PTY progress streamer + jsonl watcher
     // already deliver the success path. Keep generic coordinator chatter
     // suppressed, but still route task-specific issue messages when the
-    // coordinator includes per-task routing metadata.
+    // coordinator includes per-task routing metadata or when the text itself
+    // identifies a unique task thread.
     coordinator.setChatCallback(async (text, source, routing) => {
-      if (!routing) return;
       const delivered = await routeTaskAgentTextToConnector(
         st.runtime,
         text,
@@ -3955,12 +3986,12 @@ async function routeSynthesisToConnector(
     const room = await runtime.getRoom(sourceRoomId as UUID);
     if (!room?.source) return;
     await runtime.sendMessageToTarget(
-      ({
+      {
         source: room.source,
         roomId: room.id,
         channelId: room.channelId ?? room.id,
         serverId: room.serverId,
-      } as Parameters<typeof runtime.sendMessageToTarget>[0]),
+      } as Parameters<typeof runtime.sendMessageToTarget>[0],
       { text: resultText, source: "swarm_synthesis" },
     );
     logger.info(
@@ -4683,15 +4714,28 @@ async function handleCodingAgentsFallback(
       return true;
     }
     try {
-      const { createAdapter } = await import("coding-agent-adapters");
-      const adapter = createAdapter(
-        agentType as import("coding-agent-adapters").AdapterType,
-      );
-      const authAdapter = adapter as unknown as CodingAgentAdapterAuthHook;
-      const triggerAuthFn = authAdapter.triggerAuth;
-      if (typeof triggerAuthFn !== "function") {
-        error(res, `Auth trigger is unavailable for ${agentType}`, 501);
-        return true;
+      const ptyService = runtime.getService("PTY_SERVICE") as {
+        triggerAgentAuth?: (
+          agent: import("coding-agent-adapters").AdapterType,
+        ) => Promise<unknown>;
+      } | null;
+      const triggerAuthFn =
+        typeof ptyService?.triggerAgentAuth === "function"
+          ? () =>
+              ptyService.triggerAgentAuth?.(
+                agentType as import("coding-agent-adapters").AdapterType,
+              )
+          : null;
+      if (!triggerAuthFn) {
+        const { createAdapter } = await import("coding-agent-adapters");
+        const adapter = createAdapter(
+          agentType as import("coding-agent-adapters").AdapterType,
+        );
+        const authAdapter = adapter as unknown as CodingAgentAdapterAuthHook;
+        if (typeof authAdapter.triggerAuth !== "function") {
+          error(res, `Auth trigger is unavailable for ${agentType}`, 501);
+          return true;
+        }
       }
       // Server-side timeout: some CLI auth flows spawn an interactive
       // subprocess that can hang indefinitely in headless / Docker
@@ -4700,7 +4744,13 @@ async function handleCodingAgentsFallback(
       const AUTH_TIMEOUT_MS = 15_000;
       const timeoutError = new Error("auth trigger timeout");
       const triggered = await Promise.race([
-        triggerAuthFn.call(adapter),
+        triggerAuthFn
+          ? triggerAuthFn()
+          : (
+              (await import("coding-agent-adapters")).createAdapter(
+                agentType as import("coding-agent-adapters").AdapterType,
+              ) as unknown as CodingAgentAdapterAuthHook
+            ).triggerAuth?.(),
         new Promise((_, reject) =>
           setTimeout(() => reject(timeoutError), AUTH_TIMEOUT_MS),
         ),
@@ -4917,7 +4967,7 @@ async function handleRequest(
     return;
   }
 
-  if (!applyCors(req, res)) {
+  if (!applyCors(req, res, pathname)) {
     json(res, { error: "Origin not allowed" }, 403);
     return;
   }
@@ -4938,6 +4988,7 @@ async function handleRequest(
     !isCloudOnboardingStatusEndpoint &&
     !isWhatsAppWebhookEndpoint &&
     !isBlueBubblesWebhookEndpoint &&
+    !pathname.startsWith("/api/lifeops/browser/companions/") &&
     !isAuthorized(req)
   ) {
     json(res, { error: "Unauthorized" }, 401);
@@ -4952,6 +5003,7 @@ async function handleRequest(
     !isCloudOnboardingStatusEndpoint &&
     !isWhatsAppWebhookEndpoint &&
     !isBlueBubblesWebhookEndpoint &&
+    !pathname.startsWith("/api/lifeops/browser/companions/") &&
     !isAuthorized(req)
   ) {
     json(res, { error: "Unauthorized" }, 401);
@@ -4999,7 +5051,7 @@ async function handleRequest(
       setProviderSwitchInProgress: (v: boolean) => {
         providerSwitchInProgress = v;
       },
-      onRestart: ctx?.onRestart ?? undefined,
+      restartRuntime,
     })
   ) {
     return;
@@ -5179,7 +5231,11 @@ async function handleRequest(
     if (knowledgeHandled) return;
   }
 
-  if (pathname.startsWith("/api/memory") || pathname.startsWith("/api/memories") || pathname === "/api/context/quick") {
+  if (
+    pathname.startsWith("/api/memory") ||
+    pathname.startsWith("/api/memories") ||
+    pathname === "/api/context/quick"
+  ) {
     const memoryHandled = await handleMemoryRoutes({
       req,
       res,
@@ -5680,13 +5736,57 @@ async function handleRequest(
                 ).getService(type),
               getSetting: (key: string) =>
                 (
-                  state.runtime as { getSetting: (k: string) => string | undefined }
+                  state.runtime as {
+                    getSetting: (k: string) => string | undefined;
+                  }
                 ).getSetting(key),
             }
           : undefined,
       },
       { json, error, readJsonBody },
     );
+    if (handled) return;
+  }
+
+  // ── Telegram account routes (/api/telegram-account/*) ────────────────
+  if (pathname.startsWith("/api/telegram-account")) {
+    const routeState = {
+      config: state.config,
+      saveConfig: () => saveElizaConfig(state.config),
+      runtime: state.runtime
+        ? {
+            getService: (type: string) =>
+              (
+                state.runtime as { getService: (t: string) => unknown }
+              ).getService(type),
+            getSetting: (key: string) =>
+              (
+                state.runtime as {
+                  getSetting: (k: string) => string | undefined;
+                }
+              ).getSetting(key),
+          }
+        : undefined,
+      telegramAccountAuthSession: state.telegramAccountAuthSession,
+    };
+    const handled = await handleTelegramAccountRoute(
+      req,
+      res,
+      pathname,
+      method,
+      routeState,
+      { json, error, readJsonBody },
+      {
+        createAuthSession: (options) =>
+          new TelegramAccountAuthSession(options),
+        authStateExists: telegramAccountAuthStateExists,
+        sessionExists: telegramAccountSessionExists,
+        clearAuthState: clearTelegramAccountAuthState,
+        clearSession: clearTelegramAccountSession,
+      },
+    );
+    state.telegramAccountAuthSession =
+      routeState.telegramAccountAuthSession ?? null;
     if (handled) return;
   }
 
@@ -5719,6 +5819,9 @@ async function handleRequest(
     if (!state.signalPairingSessions) {
       state.signalPairingSessions = new Map();
     }
+    if (!state.signalPairingSnapshots) {
+      state.signalPairingSnapshots = new Map();
+    }
     for (const [id, session] of state.signalPairingSessions) {
       const status = session.getStatus();
       if (
@@ -5726,6 +5829,7 @@ async function handleRequest(
         status === "timeout" ||
         status === "error"
       ) {
+        state.signalPairingSnapshots.set(id, session.getSnapshot());
         session.stop();
         state.signalPairingSessions.delete(id);
       }
@@ -5737,6 +5841,7 @@ async function handleRequest(
       method,
       {
         signalPairingSessions: state.signalPairingSessions,
+        signalPairingSnapshots: state.signalPairingSnapshots,
         broadcastWs: state.broadcastWs ?? undefined,
         config: state.config,
         runtime: state.runtime ?? undefined,
@@ -7885,8 +7990,8 @@ export async function startApiServer(opts?: {
       startDeferredStartupWork();
       resolve({
         port: actualPort,
-        close: () =>
-          new Promise<void>((r) => {
+        close: async () =>
+          await new Promise<void>(async (r) => {
             const closeAllConnections = (
               server as { closeAllConnections?: () => void }
             ).closeAllConnections;
@@ -7934,6 +8039,14 @@ export async function startApiServer(opts?: {
                 }
               }
               state.signalPairingSessions.clear();
+            }
+            if (state.telegramAccountAuthSession) {
+              try {
+                await state.telegramAccountAuthSession.stop();
+              } catch {
+                /* non-fatal */
+              }
+              state.telegramAccountAuthSession = null;
             }
             wss.close();
             const closeTimeout = setTimeout(() => r(), 5_000);

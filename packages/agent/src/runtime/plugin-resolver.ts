@@ -147,6 +147,33 @@ function getWorkspacePluginOverridePath(pluginName: string): string | null {
   return null;
 }
 
+async function hasNonSymlinkWorkspaceNodeModulesPackage(
+  pluginName: string,
+): Promise<boolean> {
+  for (const workspaceRoot of uniquePaths([
+    process.cwd(),
+    ...resolveWorkspaceRoots(),
+  ])) {
+    const candidate = path.join(
+      workspaceRoot,
+      "node_modules",
+      ...pluginName.split("/"),
+    );
+    try {
+      const stat = await fs.lstat(candidate);
+      if (stat.isDirectory() && !stat.isSymbolicLink()) {
+        return true;
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 // Plugin error boundary wrapper
 // ---------------------------------------------------------------------------
@@ -419,6 +446,73 @@ async function linkMissingPackagesFromNodeModules(params: {
   }
 }
 
+async function stageNodeModulesEntries(params: {
+  sourceNodeModulesDir: string;
+  targetNodeModulesDir: string;
+}): Promise<void> {
+  const entries = await fs.readdir(params.sourceNodeModulesDir, {
+    withFileTypes: true,
+  });
+
+  for (const entry of entries) {
+    if (entry.name === ".bin" || entry.name.startsWith(".")) {
+      continue;
+    }
+
+    const sourcePath = path.join(params.sourceNodeModulesDir, entry.name);
+    const targetPath = path.join(params.targetNodeModulesDir, entry.name);
+
+    if (entry.isDirectory() && entry.name.startsWith("@")) {
+      await fs.mkdir(targetPath, { recursive: true });
+      const scopedEntries = await fs.readdir(sourcePath, {
+        withFileTypes: true,
+      });
+      for (const scopedEntry of scopedEntries) {
+        if (scopedEntry.name.startsWith(".")) {
+          continue;
+        }
+        const scopedSourcePath = path.join(sourcePath, scopedEntry.name);
+        const scopedTargetPath = path.join(targetPath, scopedEntry.name);
+        if (existsSync(scopedTargetPath)) {
+          continue;
+        }
+        if (scopedEntry.isSymbolicLink()) {
+          await fs.symlink(
+            await fs.realpath(scopedSourcePath),
+            scopedTargetPath,
+          );
+          continue;
+        }
+        if (!scopedEntry.isDirectory()) {
+          continue;
+        }
+        await fs.cp(scopedSourcePath, scopedTargetPath, {
+          recursive: true,
+          force: true,
+          dereference: true,
+        });
+      }
+      continue;
+    }
+
+    if (existsSync(targetPath)) {
+      continue;
+    }
+    if (entry.isSymbolicLink()) {
+      await fs.symlink(await fs.realpath(sourcePath), targetPath);
+      continue;
+    }
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    await fs.cp(sourcePath, targetPath, {
+      recursive: true,
+      force: true,
+      dereference: true,
+    });
+  }
+}
+
 async function linkHoistedNodeModulesPackages(params: {
   installRoot: string;
   packageRoot: string;
@@ -483,16 +577,63 @@ async function stagePluginImportRoot(params: {
     path.join(stagingBaseDir, `${Date.now()}-${crypto.randomUUID()}-`),
   );
   const stagedInstallRoot = path.join(stagingDir, "root");
-  await fs.cp(params.installRoot, stagedInstallRoot, {
-    recursive: true,
-    force: true,
-    dereference: true,
-  });
-
   const stagedPackageRoot =
     params.packageRelativePath.length > 0
       ? path.join(stagedInstallRoot, ...params.packageRelativePath)
       : stagedInstallRoot;
+  await fs.mkdir(path.dirname(stagedPackageRoot), { recursive: true });
+  await fs.cp(params.packageRoot, stagedPackageRoot, {
+    recursive: true,
+    force: true,
+    dereference: true,
+    // Staging the package itself is enough for hot reloads. Copying the
+    // dependency tree dereferenced turns workspace plugin reloads into a
+    // massive recursive copy for packages like plugin-discord.
+    filter: (src) => path.basename(src) !== "node_modules",
+  });
+
+  const installNodeModulesPath = path.join(params.installRoot, "node_modules");
+  try {
+    if ((await fs.stat(installNodeModulesPath)).isDirectory()) {
+      const stagedInstallNodeModulesPath = path.join(
+        stagedInstallRoot,
+        "node_modules",
+      );
+      await fs.mkdir(stagedInstallNodeModulesPath, { recursive: true });
+      await stageNodeModulesEntries({
+        sourceNodeModulesDir: installNodeModulesPath,
+        targetNodeModulesDir: stagedInstallNodeModulesPath,
+      });
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  if (params.packageRoot !== params.installRoot) {
+    const packageNodeModulesPath = path.join(
+      params.packageRoot,
+      "node_modules",
+    );
+    try {
+      if ((await fs.stat(packageNodeModulesPath)).isDirectory()) {
+        const stagedPackageNodeModulesPath = path.join(
+          stagedPackageRoot,
+          "node_modules",
+        );
+        await fs.mkdir(stagedPackageNodeModulesPath, { recursive: true });
+        await stageNodeModulesEntries({
+          sourceNodeModulesDir: packageNodeModulesPath,
+          targetNodeModulesDir: stagedPackageNodeModulesPath,
+        });
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
 
   await linkAncestorNodeModulesIfNeeded({
     installRoot: params.installRoot,
@@ -697,25 +838,22 @@ export async function resolvePlugins(
         // bugs in workspace packages with nested symlinked dependencies.
         mod = staticElizaPlugin as PluginModuleShape;
       } else if (workspaceOverridePath) {
-        logger.debug(
-          `[eliza] Loading workspace plugin override: ${pluginName} from ${workspaceOverridePath}`,
-        );
-        if (isOfficialElizaPlugin) {
-          // Prefer the repo-level package import for official workspace plugins.
-          // In local checkouts, root node_modules usually symlinks back to the
-          // workspace package while keeping dependency resolution intact.
-          try {
-            mod = await importOfficialPluginFromNodeModules();
-          } catch (npmErr) {
-            logger.info(
-              `[eliza] Node_modules resolution unavailable for workspace plugin ${pluginName} (${formatError(npmErr)}). Using staged workspace import at ${redactUserSegments(workspaceOverridePath)}.`,
-            );
-            mod = await importPluginModuleFromPath(
-              workspaceOverridePath,
-              pluginName,
-            );
-          }
+        const shouldPreferRepoNodeModules =
+          isOfficialElizaPlugin &&
+          (await hasNonSymlinkWorkspaceNodeModulesPackage(pluginName));
+        if (shouldPreferRepoNodeModules) {
+          logger.debug(
+            `[eliza] Loading repo node_modules plugin: ${pluginName}`,
+          );
+          mod = await importOfficialPluginFromNodeModules();
         } else {
+          logger.debug(
+            `[eliza] Loading workspace plugin override: ${pluginName} from ${workspaceOverridePath}`,
+          );
+          // Always stage workspace overrides instead of re-importing the bare
+          // package specifier from node_modules. Bun can wedge a subsequent
+          // restart when an earlier bare import of the same specifier failed
+          // during module evaluation. Staging also guarantees local edits reload.
           mod = await importPluginModuleFromPath(
             workspaceOverridePath,
             pluginName,

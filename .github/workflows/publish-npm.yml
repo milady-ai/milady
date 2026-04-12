@@ -38,7 +38,7 @@ env:
 jobs:
   detect-meta:
     name: Determine version and dist-tag
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.meta.outputs.version }}
       dist_tag: ${{ steps.meta.outputs.dist_tag }}
@@ -90,7 +90,7 @@ jobs:
   verify:
     name: Verify publish
     needs: [detect-meta, publish]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - name: Verify publish
         run: |

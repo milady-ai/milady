@@ -1,0 +1,70 @@
+{
+  "id": "brush-teeth-smalltalk-preference",
+  "title": "Brush teeth from smalltalk into preference update",
+  "domain": "tasks",
+  "rooms": [
+    {
+      "id": "main",
+      "source": "telegram",
+      "title": "LifeOps Brush Teeth Smalltalk"
+    }
+  ],
+  "turns": [
+    {
+      "name": "smalltalk warmup",
+      "text": "hey, mornings have been a little chaotic lately."
+    },
+    {
+      "name": "smalltalk context",
+      "text": "the main thing i keep forgetting is brushing my teeth before i start working."
+    },
+    {
+      "name": "brush-teeth create from context",
+      "lifeActionPrompt": {
+        "summary": "Continue the same conversation. The user already explained that mornings are chaotic and they keep forgetting to brush their teeth before work.",
+        "action": "create",
+        "intent": "Actually create a routine named Brush teeth that happens every morning and every night. Do not just give advice.",
+        "title": "Brush teeth"
+      },
+      "responseIncludesAny": [
+        "confirm",
+        "create it now",
+        "should i create it",
+        "does that sound good",
+        "can save a habit"
+      ]
+    },
+    {
+      "name": "brush-teeth confirm",
+      "text": "Yes, save that brushing routine.",
+      "responseIncludesAll": ["saved"]
+    },
+    {
+      "name": "brush-teeth reduce reminders",
+      "lifeActionPrompt": {
+        "summary": "Continue the same conversation.",
+        "action": "reminder_preference",
+        "intent": "Actually remind me less about Brush teeth. Do not just explain the setting.",
+        "title": "Brush teeth"
+      }
+    }
+  ],
+  "finalChecks": [
+    {
+      "type": "definitionCountDelta",
+      "title": "Brush teeth",
+      "delta": 1,
+      "cadenceKind": "times_per_day",
+      "requiredSlots": [
+        { "minuteOfDay": 480 },
+        { "minuteOfDay": 1260 }
+      ],
+      "requireReminderPlan": true
+    },
+    {
+      "type": "reminderIntensity",
+      "title": "Brush teeth",
+      "expected": "minimal"
+    }
+  ]
+}

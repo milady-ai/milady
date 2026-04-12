@@ -1,6 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import type { SignalPairingEvent } from "../services/signal-pairing.js";
+import type {
+  SignalPairingEvent,
+  SignalPairingSnapshot,
+  SignalPairingStatus,
+} from "../services/signal-pairing.js";
 import { readJsonBody as parseJsonBody, sendJson } from "./http-helpers.js";
 import { setOwnerContact } from "./owner-contact-helpers.js";
 
@@ -9,11 +13,13 @@ export type SignalPairingEventLike = SignalPairingEvent;
 export interface SignalPairingSessionLike {
   start(): Promise<void>;
   stop(): void;
-  getStatus(): string;
+  getStatus(): SignalPairingStatus;
+  getSnapshot(): SignalPairingSnapshot;
 }
 
 export interface SignalRouteState {
   signalPairingSessions: Map<string, SignalPairingSessionLike>;
+  signalPairingSnapshots?: Map<string, SignalPairingSnapshot>;
   broadcastWs?: (data: Record<string, unknown>) => void;
   config: {
     connectors?: Record<string, unknown>;
@@ -32,12 +38,19 @@ export interface SignalRouteDeps {
   createSignalPairingSession: (options: {
     authDir: string;
     accountId: string;
+    cliPath?: string;
     onEvent: (event: SignalPairingEventLike) => void;
   }) => SignalPairingSessionLike;
 }
 
 const MAX_BODY_BYTES = 1_048_576;
 export const MAX_PAIRING_SESSIONS = 10;
+const TERMINAL_SIGNAL_PAIRING_STATUSES = new Set<SignalPairingStatus>([
+  "connected",
+  "disconnected",
+  "timeout",
+  "error",
+]);
 
 async function readJsonBody<T = Record<string, unknown>>(
   req: IncomingMessage,
@@ -50,6 +63,28 @@ function json(res: ServerResponse, data: unknown, status = 200): void {
   sendJson(res, data, status);
 }
 
+function resolveSignalStatusResponse(
+  accountId: string,
+  session: SignalPairingSessionLike | undefined,
+  previousSnapshot: SignalPairingSnapshot | undefined,
+  authExists: boolean,
+  serviceConnected: boolean,
+) {
+  const snapshot = session?.getSnapshot() ?? previousSnapshot;
+  const status =
+    snapshot?.status ?? (authExists || serviceConnected ? "connected" : "idle");
+
+  return {
+    accountId,
+    status,
+    authExists,
+    serviceConnected,
+    qrDataUrl: snapshot?.qrDataUrl ?? null,
+    phoneNumber: snapshot?.phoneNumber ?? null,
+    error: snapshot?.error ?? null,
+  };
+}
+
 export async function handleSignalRoute(
   req: IncomingMessage,
   res: ServerResponse,
@@ -58,6 +93,9 @@ export async function handleSignalRoute(
   state: SignalRouteState,
   deps: SignalRouteDeps,
 ): Promise<boolean> {
+  const signalPairingSnapshots =
+    state.signalPairingSnapshots ?? (state.signalPairingSnapshots = new Map());
+
   if (!pathname.startsWith("/api/signal")) return false;
 
   if (method === "POST" && pathname === "/api/signal/pair") {
@@ -91,27 +129,41 @@ export async function handleSignalRoute(
 
     const authDir = path.join(state.workspaceDir, "signal-auth", accountId);
     state.signalPairingSessions.get(accountId)?.stop();
+    signalPairingSnapshots.delete(accountId);
+    const signalConfig =
+      (state.config.connectors?.signal as Record<string, unknown> | undefined) ??
+      {};
+    const configuredCliPath =
+      typeof signalConfig.cliPath === "string" && signalConfig.cliPath.trim()
+        ? signalConfig.cliPath.trim()
+        : undefined;
 
-    const session = deps.createSignalPairingSession({
+    let session: SignalPairingSessionLike;
+    session = deps.createSignalPairingSession({
       authDir,
       accountId,
+      cliPath: configuredCliPath,
       onEvent: (event) => {
         state.broadcastWs?.(event as unknown as Record<string, unknown>);
+        signalPairingSnapshots.set(accountId, session.getSnapshot());
 
         if (event.status === "connected") {
           if (!state.config.connectors) state.config.connectors = {};
-          state.config.connectors.signal = {
-            ...((state.config.connectors.signal as
+          const previousConfig =
+            (state.config.connectors.signal as
               | Record<string, unknown>
-              | undefined) ?? {}),
+              | undefined) ?? {};
+          const phoneNumber = (event as unknown as Record<string, unknown>)
+            .phoneNumber as string | undefined;
+          state.config.connectors.signal = {
+            ...previousConfig,
             authDir,
             enabled: true,
+            ...(phoneNumber && phoneNumber.trim().length > 0
+              ? { account: phoneNumber.trim() }
+              : {}),
           };
           // Auto-populate owner contact so LifeOps can deliver reminders
-          const phoneNumber =
-            (event as unknown as Record<string, unknown>).phoneNumber as
-              | string
-              | undefined;
           setOwnerContact(
             state.config as Parameters<typeof setOwnerContact>[0],
             {
@@ -121,24 +173,46 @@ export async function handleSignalRoute(
           );
           try {
             state.saveConfig();
-          } catch {
-            /* test envs */
+          } catch (error) {
+            console.error(
+              `[signal] Failed to persist connector config for ${accountId}:`,
+              String(error),
+            );
           }
+        }
+
+        if (
+          event.status &&
+          TERMINAL_SIGNAL_PAIRING_STATUSES.has(event.status) &&
+          state.signalPairingSessions.get(accountId) === session
+        ) {
+          state.signalPairingSessions.delete(accountId);
         }
       },
     });
 
     state.signalPairingSessions.set(accountId, session);
+    signalPairingSnapshots.set(accountId, session.getSnapshot());
 
     void session.start().catch((err) => {
       console.error(
         `[signal] Pairing session failed for ${accountId}:`,
         String(err),
       );
+      signalPairingSnapshots.set(accountId, session.getSnapshot());
       state.signalPairingSessions.delete(accountId);
     });
 
-    json(res, { ok: true, accountId, status: session.getStatus() });
+    json(res, {
+      ok: true,
+      ...resolveSignalStatusResponse(
+        accountId,
+        session,
+        signalPairingSnapshots.get(accountId),
+        false,
+        false,
+      ),
+    });
     return true;
   }
 
@@ -158,6 +232,8 @@ export async function handleSignalRoute(
     }
 
     const session = state.signalPairingSessions.get(accountId);
+    const previousSnapshot = signalPairingSnapshots.get(accountId);
+    const authExists = deps.signalAuthExists(state.workspaceDir, accountId);
     let serviceConnected = false;
     if (state.runtime) {
       try {
@@ -166,19 +242,31 @@ export async function handleSignalRoute(
           unknown
         > | null;
         if (sigService) {
-          serviceConnected = Boolean(sigService.connected);
+          serviceConnected =
+            Boolean(sigService.connected) ||
+            Boolean(sigService.isConnected) ||
+            (typeof sigService.isServiceConnected === "function" &&
+              Boolean(
+                (
+                  sigService.isServiceConnected as () => boolean
+                )(),
+              ));
         }
       } catch {
         /* service not yet registered */
       }
     }
 
-    json(res, {
-      accountId,
-      status: session?.getStatus() ?? "idle",
-      authExists: deps.signalAuthExists(state.workspaceDir, accountId),
-      serviceConnected,
-    });
+    json(
+      res,
+      resolveSignalStatusResponse(
+        accountId,
+        session,
+        previousSnapshot,
+        authExists,
+        serviceConnected,
+      ),
+    );
     return true;
   }
 
@@ -201,6 +289,7 @@ export async function handleSignalRoute(
       session.stop();
       state.signalPairingSessions.delete(accountId);
     }
+    signalPairingSnapshots.delete(accountId);
 
     json(res, { ok: true, accountId, status: "idle" });
     return true;
@@ -225,22 +314,36 @@ export async function handleSignalRoute(
       session.stop();
       state.signalPairingSessions.delete(accountId);
     }
+    signalPairingSnapshots.delete(accountId);
 
     try {
       deps.signalLogout(state.workspaceDir, accountId);
     } catch (err) {
-      console.warn(
-        `[signal] Logout failed for ${accountId}:`,
-        String(err),
+      json(
+        res,
+        {
+          error: `Failed to disconnect Signal: ${String(err)}`,
+        },
+        500,
       );
+      return true;
     }
 
     if (state.config.connectors) {
+      const previousSignalConfig = state.config.connectors.signal;
       delete state.config.connectors.signal;
       try {
         state.saveConfig();
-      } catch {
-        /* test envs */
+      } catch (error) {
+        state.config.connectors.signal = previousSignalConfig;
+        json(
+          res,
+          {
+            error: `Failed to persist Signal disconnect: ${String(error)}`,
+          },
+          500,
+        );
+        return true;
       }
     }
 
@@ -261,16 +364,12 @@ export function applySignalQrOverride(
   workspaceDir: string,
   signalAuthExists: (workspaceDir: string, accountId: string) => boolean,
 ): void {
-  try {
-    if (signalAuthExists(workspaceDir, "default")) {
-      const sigPlugin = plugins.find((plugin) => plugin.id === "signal");
-      if (sigPlugin) {
-        sigPlugin.validationErrors = [];
-        sigPlugin.configured = true;
-        sigPlugin.qrConnected = true;
-      }
+  if (signalAuthExists(workspaceDir, "default")) {
+    const sigPlugin = plugins.find((plugin) => plugin.id === "signal");
+    if (sigPlugin) {
+      sigPlugin.validationErrors = [];
+      sigPlugin.configured = true;
+      sigPlugin.qrConnected = true;
     }
-  } catch {
-    /* workspace dir may not exist */
   }
 }

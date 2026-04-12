@@ -34,9 +34,9 @@ import { nearbyProvider } from "./nearby.js";
  * prompt every step.
  */
 export const scapeProviders: Provider[] = [
-    botStateProvider,
-    inventoryProvider,
-    nearbyProvider,
-    journalProvider,
-    goalsProvider,
+  botStateProvider,
+  inventoryProvider,
+  nearbyProvider,
+  journalProvider,
+  goalsProvider,
 ];

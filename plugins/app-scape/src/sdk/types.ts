@@ -14,191 +14,208 @@
 // ─── Authentication / session frames (client → server) ───────────────────
 
 export interface AuthFrame {
-    kind: "auth";
-    token: string;
-    version?: number;
+  kind: "auth";
+  token: string;
+  version?: number;
 }
 
 export interface SpawnFrame {
-    kind: "spawn";
-    agentId: string;
-    displayName: string;
-    /**
-     * Plaintext password. Sent once over the bot-SDK WebSocket; the
-     * xRSPS server scrypt-verifies or auto-registers. Never log this.
-     */
-    password: string;
-    persona?: string;
-    controller?: "llm" | "user" | "hybrid";
+  kind: "spawn";
+  agentId: string;
+  displayName: string;
+  /**
+   * Plaintext password. Sent once over the bot-SDK WebSocket; the
+   * xRSPS server scrypt-verifies or auto-registers. Never log this.
+   */
+  password: string;
+  persona?: string;
+  controller?: "llm" | "user" | "hybrid";
 }
 
 export interface DisconnectFrame {
-    kind: "disconnect";
-    reason?: string;
+  kind: "disconnect";
+  reason?: string;
 }
 
 // ─── Action frames (client → server) ─────────────────────────────────────
 
 interface ActionEnvelope {
-    kind: "action";
-    action: string;
-    correlationId?: string;
+  kind: "action";
+  action: string;
+  correlationId?: string;
 }
 
 export interface WalkToAction extends ActionEnvelope {
-    action: "walkTo";
-    x: number;
-    z: number;
-    run?: boolean;
+  action: "walkTo";
+  x: number;
+  z: number;
+  run?: boolean;
 }
 
 export interface ChatPublicAction extends ActionEnvelope {
-    action: "chatPublic";
-    text: string;
+  action: "chatPublic";
+  text: string;
 }
 
 export interface AttackNpcAction extends ActionEnvelope {
-    action: "attackNpc";
-    npcId: number;
+  action: "attackNpc";
+  npcId: number;
 }
 
 export interface DropItemAction extends ActionEnvelope {
-    action: "dropItem";
-    slot: number;
+  action: "dropItem";
+  slot: number;
 }
 
 export interface EatFoodAction extends ActionEnvelope {
-    action: "eatFood";
-    slot?: number;
+  action: "eatFood";
+  slot?: number;
 }
 
 export type AnyActionFrame =
-    | WalkToAction
-    | ChatPublicAction
-    | AttackNpcAction
-    | DropItemAction
-    | EatFoodAction;
+  | WalkToAction
+  | ChatPublicAction
+  | AttackNpcAction
+  | DropItemAction
+  | EatFoodAction;
+
+/**
+ * Payload shape accepted by `BotManager.sendAction` /
+ * `ScapeGameService.executeAction`. A naive `Omit<AnyActionFrame, …>`
+ * collapses the discriminated union into a structural intersection,
+ * which drops every variant-specific field (`x`, `z`, `npcId`, …).
+ *
+ * The conditional `T extends AnyActionFrame ? Omit<T, …> : never`
+ * distributes the Omit across each member of the union, preserving
+ * each variant's shape, so callers can build `{ action: "walkTo", x,
+ * z }` without the compiler crying about unknown properties.
+ */
+export type ActionFramePayload = AnyActionFrame extends infer T
+  ? T extends AnyActionFrame
+    ? Omit<T, "kind" | "correlationId">
+    : never
+  : never;
 
 export type ClientFrame =
-    | AuthFrame
-    | SpawnFrame
-    | AnyActionFrame
-    | DisconnectFrame;
+  | AuthFrame
+  | SpawnFrame
+  | AnyActionFrame
+  | DisconnectFrame;
 
 // ─── Server frames (server → client) ─────────────────────────────────────
 
 export interface AuthOkFrame {
-    kind: "authOk";
-    server: string;
-    version: number;
+  kind: "authOk";
+  server: string;
+  version: number;
 }
 
 export interface ErrorFrame {
-    kind: "error";
-    code: string;
-    message: string;
+  kind: "error";
+  code: string;
+  message: string;
 }
 
 export interface SpawnOkFrame {
-    kind: "spawnOk";
-    playerId: number;
-    x: number;
-    z: number;
-    level: number;
+  kind: "spawnOk";
+  playerId: number;
+  x: number;
+  z: number;
+  level: number;
 }
 
 export interface ActionAckFrame {
-    kind: "ack";
-    correlationId: string;
-    success: boolean;
-    message?: string;
+  kind: "ack";
+  correlationId: string;
+  success: boolean;
+  message?: string;
 }
 
 // ─── Perception ──────────────────────────────────────────────────────────
 
 export interface PerceptionSelf {
-    id: number;
-    name: string;
-    combatLevel: number;
-    hp: number;
-    maxHp: number;
-    x: number;
-    z: number;
-    level: number;
-    runEnergy: number;
-    inCombat: boolean;
+  id: number;
+  name: string;
+  combatLevel: number;
+  hp: number;
+  maxHp: number;
+  x: number;
+  z: number;
+  level: number;
+  runEnergy: number;
+  inCombat: boolean;
 }
 
 export interface PerceptionInventoryItem {
-    slot: number;
-    itemId: number;
-    name: string;
-    count: number;
+  slot: number;
+  itemId: number;
+  name: string;
+  count: number;
 }
 
 export interface PerceptionSkill {
-    id: number;
-    name: string;
-    level: number;
-    baseLevel: number;
-    xp: number;
+  id: number;
+  name: string;
+  level: number;
+  baseLevel: number;
+  xp: number;
 }
 
 export interface PerceptionNpc {
-    id: number;
-    defId: number;
-    name: string;
-    x: number;
-    z: number;
-    hp?: number;
-    combatLevel?: number;
+  id: number;
+  defId: number;
+  name: string;
+  x: number;
+  z: number;
+  hp?: number;
+  combatLevel?: number;
 }
 
 export interface PerceptionPlayer {
-    id: number;
-    name: string;
-    x: number;
-    z: number;
-    combatLevel: number;
+  id: number;
+  name: string;
+  x: number;
+  z: number;
+  combatLevel: number;
 }
 
 export interface PerceptionGroundItem {
-    itemId: number;
-    name: string;
-    x: number;
-    z: number;
-    count: number;
+  itemId: number;
+  name: string;
+  x: number;
+  z: number;
+  count: number;
 }
 
 export interface PerceptionObject {
-    locId: number;
-    name: string;
-    x: number;
-    z: number;
+  locId: number;
+  name: string;
+  x: number;
+  z: number;
 }
 
 export interface PerceptionEvent {
-    timestamp: number;
-    kind: string;
-    message: string;
+  timestamp: number;
+  kind: string;
+  message: string;
 }
 
 export interface PerceptionSnapshot {
-    tick: number;
-    self: PerceptionSelf;
-    skills: PerceptionSkill[];
-    inventory: PerceptionInventoryItem[];
-    equipment: PerceptionInventoryItem[];
-    nearbyNpcs: PerceptionNpc[];
-    nearbyPlayers: PerceptionPlayer[];
-    nearbyGroundItems: PerceptionGroundItem[];
-    nearbyObjects: PerceptionObject[];
-    recentEvents: PerceptionEvent[];
+  tick: number;
+  self: PerceptionSelf;
+  skills: PerceptionSkill[];
+  inventory: PerceptionInventoryItem[];
+  equipment: PerceptionInventoryItem[];
+  nearbyNpcs: PerceptionNpc[];
+  nearbyPlayers: PerceptionPlayer[];
+  nearbyGroundItems: PerceptionGroundItem[];
+  nearbyObjects: PerceptionObject[];
+  recentEvents: PerceptionEvent[];
 }
 
 export interface PerceptionFrame {
-    kind: "perception";
-    snapshot: PerceptionSnapshot;
+  kind: "perception";
+  snapshot: PerceptionSnapshot;
 }
 
 /**
@@ -208,18 +225,18 @@ export interface PerceptionFrame {
  * game-service turns into `setOperatorGoal(text)`.
  */
 export interface OperatorCommandFrame {
-    kind: "operatorCommand";
-    source: "chat" | "admin";
-    text: string;
-    timestamp: number;
-    fromPlayerId?: number;
-    fromPlayerName?: string;
+  kind: "operatorCommand";
+  source: "chat" | "admin";
+  text: string;
+  timestamp: number;
+  fromPlayerId?: number;
+  fromPlayerName?: string;
 }
 
 export type ServerFrame =
-    | AuthOkFrame
-    | ErrorFrame
-    | SpawnOkFrame
-    | ActionAckFrame
-    | PerceptionFrame
-    | OperatorCommandFrame;
+  | AuthOkFrame
+  | ErrorFrame
+  | SpawnOkFrame
+  | ActionAckFrame
+  | PerceptionFrame
+  | OperatorCommandFrame;

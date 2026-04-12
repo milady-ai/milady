@@ -7,8 +7,6 @@
  */
 
 import {
-  type Dispatch,
-  type SetStateAction,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -36,7 +34,7 @@ export interface NavigationStateDeps {
   setTabRaw: (t: Tab) => void;
   uiShellMode: UiShellMode;
   hasActiveGameRun: boolean;
-  setAppsSubTab: Dispatch<SetStateAction<"browse" | "running" | "games">>;
+  setAppsSubTab: (value: "browse" | "running" | "games") => void;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────

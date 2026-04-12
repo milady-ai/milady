@@ -5,6 +5,11 @@ import {
   type UiLanguage,
 } from "../i18n";
 import type { Tab } from "../navigation";
+import {
+  applyThemeToDocument,
+  clearThemeOverrides,
+  resolveBuiltinTheme,
+} from "../themes/apply-theme";
 import type {
   CompanionHalfFramerateMode,
   CompanionVrmPowerMode,
@@ -30,6 +35,7 @@ export type { UiTheme } from "./ui-preferences";
 
 const UI_THEME_STORAGE_KEY = "eliza:ui-theme";
 const LEGACY_UI_THEME_STORAGE_KEY = "milady:ui-theme";
+const THEME_ID_STORAGE_KEY = "eliza:theme-id";
 const THEME_SWITCHING_ATTRIBUTE = "data-theme-switching";
 let themeSwitchResetFrameId: number | null = null;
 
@@ -66,6 +72,20 @@ export function saveUiTheme(theme: UiTheme): void {
     const normalized = normalizeUiTheme(theme);
     localStorage.setItem(UI_THEME_STORAGE_KEY, normalized);
     localStorage.setItem(LEGACY_UI_THEME_STORAGE_KEY, normalized);
+  }, undefined);
+}
+
+/* ── Theme ID persistence ────────────────────────────────────────────── */
+
+export function loadThemeId(): string {
+  return tryLocalStorage(() => {
+    return localStorage.getItem(THEME_ID_STORAGE_KEY) ?? "bsc-gold";
+  }, "bsc-gold");
+}
+
+export function saveThemeId(themeId: string): void {
+  tryLocalStorage(() => {
+    localStorage.setItem(THEME_ID_STORAGE_KEY, themeId);
   }, undefined);
 }
 
@@ -240,11 +260,24 @@ export function applyUiTheme(theme: UiTheme): void {
     root.style.colorScheme = normalizedTheme;
   }
 
-  if (!root.classList || classMatchesTheme) return;
-  if (shouldBeDark) {
-    root.classList.add("dark");
+  if (root.classList && !classMatchesTheme) {
+    if (shouldBeDark) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }
+
+  // Apply the active theme's color set for the new mode
+  const themeId = loadThemeId();
+  if (themeId && themeId !== "bsc-gold") {
+    const theme = resolveBuiltinTheme(themeId);
+    if (theme) {
+      applyThemeToDocument(theme, normalizedTheme);
+    }
   } else {
-    root.classList.remove("dark");
+    // BSC Gold is the base.css default — clear any overrides
+    clearThemeOverrides();
   }
 }
 
@@ -404,6 +437,8 @@ export function saveUiShellMode(mode: UiShellMode): void {
 
 function normalizeLastNativeTab(tab: unknown): Tab {
   switch (tab) {
+    case "advanced":
+      return "fine-tuning";
     case "chat":
     case "stream":
     case "apps":
@@ -413,7 +448,6 @@ function normalizeLastNativeTab(tab: unknown): Tab {
     case "triggers":
     case "plugins":
     case "skills":
-    case "advanced":
     case "fine-tuning":
     case "trajectories":
     case "relationships":
@@ -469,6 +503,46 @@ export function saveAvatarIndex(index: number): void {
 export function clearAvatarIndex(): void {
   tryLocalStorage(() => {
     localStorage.removeItem(AVATAR_INDEX_KEY);
+  }, undefined);
+}
+
+/* ── Favorite apps persistence ────────────────────────────────────────── */
+const FAVORITE_APPS_KEY = "eliza:favorite-apps";
+
+export function loadFavoriteApps(): string[] {
+  return tryLocalStorage(() => {
+    const stored = localStorage.getItem(FAVORITE_APPS_KEY);
+    if (!stored) return [];
+    try {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed)
+        ? parsed.filter((item): item is string => typeof item === "string")
+        : [];
+    } catch {
+      return [];
+    }
+  }, []);
+}
+
+export function saveFavoriteApps(apps: string[]): void {
+  tryLocalStorage(() => {
+    localStorage.setItem(FAVORITE_APPS_KEY, JSON.stringify(apps));
+  }, undefined);
+}
+
+/* ── Wallet enabled persistence ─────────────────────────────────────── */
+const WALLET_ENABLED_KEY = "eliza:wallet:enabled";
+
+export function loadWalletEnabled(): boolean {
+  return tryLocalStorage(() => {
+    const stored = localStorage.getItem(WALLET_ENABLED_KEY);
+    return stored === null ? true : stored === "true";
+  }, true);
+}
+
+export function saveWalletEnabled(value: boolean): void {
+  tryLocalStorage(() => {
+    localStorage.setItem(WALLET_ENABLED_KEY, String(value));
   }, undefined);
 }
 

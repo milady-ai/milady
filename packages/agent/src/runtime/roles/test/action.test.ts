@@ -23,6 +23,297 @@ function createMockWorld(
   };
 }
 
+type MockParsedRoleIntent =
+  | {
+      kind: "role";
+      targetName: string;
+      newRole: RoleName;
+      label?: string;
+    }
+  | {
+      kind: "revoke";
+      targetName: string;
+      newRole: "GUEST";
+      label?: string;
+    };
+
+const MOCK_NATURAL_ROLE_MAP: Record<string, RoleName> = {
+  boss: "ADMIN",
+  manager: "ADMIN",
+  supervisor: "ADMIN",
+  superior: "ADMIN",
+  lead: "ADMIN",
+  mod: "ADMIN",
+  moderator: "ADMIN",
+  coworker: "USER",
+  "co-worker": "USER",
+  teammate: "USER",
+  colleague: "USER",
+  peer: "USER",
+  friend: "USER",
+  partner: "USER",
+};
+
+const MOCK_ROLE_TARGET_PRONOUNS = new Set([
+  "he",
+  "him",
+  "his",
+  "she",
+  "her",
+  "hers",
+  "they",
+  "them",
+  "their",
+  "theirs",
+]);
+
+function mockNormalizeEntityLookupName(raw: string): string | null {
+  const normalized = raw
+    .trim()
+    .replace(/^@+/, "")
+    .replace(/^\(+/, "")
+    .replace(/\)+$/, "")
+    .replace(/[.!?,;:]+$/g, "")
+    .trim();
+
+  return normalized.length > 0 ? normalized : null;
+}
+
+function mockNormalizeInputRole(raw: string): RoleName | null {
+  const upper = raw.trim().toUpperCase();
+  if (!upper) return null;
+  if (upper === "MEMBER" || upper === "NONE") return "GUEST";
+  if (upper === "MOD" || upper === "MODERATOR") return "ADMIN";
+  if (
+    upper === "OWNER" ||
+    upper === "ADMIN" ||
+    upper === "USER" ||
+    upper === "GUEST"
+  ) {
+    return upper;
+  }
+  return MOCK_NATURAL_ROLE_MAP[raw.trim().toLowerCase()] ?? null;
+}
+
+function mockResolveRecentTarget(recentConversation: string): string | null {
+  for (const line of recentConversation.split(/\n+/).reverse()) {
+    const parsed = mockParseRoleIntent(line, "");
+    if (parsed?.targetName) {
+      return parsed.targetName;
+    }
+  }
+  return null;
+}
+
+function resolveMockTarget(
+  rawTarget: string,
+  recentConversation: string,
+): string | null {
+  const target = mockNormalizeEntityLookupName(rawTarget);
+  if (!target) {
+    return null;
+  }
+
+  return MOCK_ROLE_TARGET_PRONOUNS.has(target.toLowerCase())
+    ? mockResolveRecentTarget(recentConversation)
+    : target;
+}
+
+function mockParseRoleIntent(
+  text: string,
+  recentConversation = "",
+): MockParsedRoleIntent | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+
+  const directRolePatterns: Array<
+    [RegExp, (match: RegExpMatchArray) => MockParsedRoleIntent | null]
+  > = [
+    [
+      /^\/?\s*role\s+@?(.+?)\s+(OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR)\s*$/i,
+      (match) => {
+        const target = resolveMockTarget(match[1], recentConversation);
+        const newRole = mockNormalizeInputRole(match[2]);
+        return target && newRole
+          ? { kind: "role", targetName: target, newRole }
+          : null;
+      },
+    ],
+    [
+      /^make\s+@?(.+?)\s+(?:an?\s+)?(OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR)\s*$/i,
+      (match) => {
+        const target = resolveMockTarget(match[1], recentConversation);
+        const newRole = mockNormalizeInputRole(match[2]);
+        return target && newRole
+          ? { kind: "role", targetName: target, newRole }
+          : null;
+      },
+    ],
+    [
+      /^set\s+@?(.+?)\s+role\s+to\s+(?:an?\s+)?(OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR)\s*$/i,
+      (match) => {
+        const target = resolveMockTarget(match[1], recentConversation);
+        const newRole = mockNormalizeInputRole(match[2]);
+        return target && newRole
+          ? { kind: "role", targetName: target, newRole }
+          : null;
+      },
+    ],
+    [
+      /^set\s+@?(.+?)\s+to\s+(?:an?\s+)?(OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR)\s*$/i,
+      (match) => {
+        const target = resolveMockTarget(match[1], recentConversation);
+        const newRole = mockNormalizeInputRole(match[2]);
+        return target && newRole
+          ? { kind: "role", targetName: target, newRole }
+          : null;
+      },
+    ],
+    [
+      /^set\s+@?(.+?)\s+(?:role\s+)?(OWNER|ADMIN|USER|GUEST|MEMBER|NONE|MOD|MODERATOR)\s*$/i,
+      (match) => {
+        const target = resolveMockTarget(match[1], recentConversation);
+        const newRole = mockNormalizeInputRole(match[2]);
+        return target && newRole
+          ? { kind: "role", targetName: target, newRole }
+          : null;
+      },
+    ],
+  ];
+
+  for (const [pattern, build] of directRolePatterns) {
+    const match = trimmed.match(pattern);
+    if (match) {
+      return build(match);
+    }
+  }
+
+  const normalized = trimmed
+    .replace(/^(?:hey|hi|hello|yo)\b[^,]{0,80},\s*/i, "")
+    .trim();
+
+  const naturalPatterns: Array<{
+    regex: RegExp;
+    revoke: boolean;
+    inverted?: boolean;
+  }> = [
+    {
+      regex:
+        /^@?(.+?)\s+is\s+(?:your|my|our|ur|a|an)\s+(boss|manager|supervisor|superior|lead|coworker|co-worker|teammate|colleague|peer|friend|partner)(?:\s+now)?(?:\s+\(@?[^)]+\))?[.!?]*$/i,
+      revoke: false,
+    },
+    {
+      regex:
+        /^(?:your|my|our|ur)\s+(boss|manager|supervisor|superior|lead|coworker|co-worker|teammate|colleague|peer|friend|partner)\s+is\s+@?(.+?)[.!?]*$/i,
+      revoke: false,
+      inverted: true,
+    },
+    {
+      regex:
+        /^(?:treat|consider)\s+@?(.+?)\s+(?:(?:as|like)\s+)?(?:your|my|our|ur|a|an)\s+(boss|manager|supervisor|superior|lead|coworker|co-worker|teammate|colleague|peer|friend|partner)[.!?]*$/i,
+      revoke: false,
+    },
+    {
+      regex:
+        /^@?(.+?)\s+(?:is\s+not|isn't|isnt|is\s+no\s+longer)\s+(?:your|my|our|ur|a|an)\s+(boss|manager|supervisor|superior|lead|coworker|co-worker|teammate|colleague|peer|friend|partner)(?:\s+any\s*more)?[.!?]*$/i,
+      revoke: true,
+    },
+    {
+      regex:
+        /^(?:don'?t|do\s+not)\s+(?:treat|consider)\s+@?(.+?)\s+(?:(?:as|like)\s+)?(?:your|my|our|ur|a|an)\s+(boss|manager|supervisor|superior|lead|coworker|co-worker|teammate|colleague|peer|friend|partner)[.!?]*$/i,
+      revoke: true,
+    },
+    {
+      regex:
+        /^remove\s+@?(.+?)\s+as\s+(?:(?:your|my|our|ur|a|an)\s+)?(boss|manager|supervisor|superior|lead|coworker|co-worker|teammate|colleague|peer|friend|partner)[.!?]*$/i,
+      revoke: true,
+    },
+  ];
+
+  for (const pattern of naturalPatterns) {
+    const match = normalized.match(pattern.regex);
+    if (!match) {
+      continue;
+    }
+
+    const label = (pattern.inverted ? match[1] : match[2]).toLowerCase();
+    const target = mockNormalizeEntityLookupName(
+      pattern.inverted ? match[2] : match[1],
+    );
+    const resolvedTarget =
+      target && MOCK_ROLE_TARGET_PRONOUNS.has(target.toLowerCase())
+        ? mockResolveRecentTarget(recentConversation)
+        : target;
+    const role = mockNormalizeInputRole(label);
+
+    if (!resolvedTarget) {
+      return null;
+    }
+
+    if (pattern.revoke) {
+      return {
+        kind: "revoke",
+        targetName: resolvedTarget,
+        newRole: "GUEST",
+        label,
+      };
+    }
+
+    if (!role) {
+      return null;
+    }
+
+    return {
+      kind: "role",
+      targetName: resolvedTarget,
+      newRole: role,
+      label,
+    };
+  }
+
+  return null;
+}
+
+function extractPromptString(prompt: string, label: string): string {
+  const match = prompt.match(new RegExp(`${label}:\\s*(.+)$`, "m"));
+  if (!match) {
+    return "";
+  }
+
+  try {
+    return JSON.parse(match[1]) as string;
+  } catch {
+    return match[1].trim();
+  }
+}
+
+function mockRoleIntentResponse(prompt: string): string {
+  const currentRequest = extractPromptString(prompt, "Current request");
+  const recentConversation = extractPromptString(
+    prompt,
+    "Recent requester messages",
+  );
+  const parsed = mockParseRoleIntent(currentRequest, recentConversation);
+
+  if (!parsed) {
+    return [
+      "kind: none",
+      "targetName:",
+      "newRole:",
+      "label:",
+      "confidence: 0",
+    ].join("\n");
+  }
+
+  return [
+    `kind: ${parsed.kind}`,
+    `targetName: ${parsed.targetName}`,
+    `newRole: ${parsed.newRole}`,
+    `label: ${parsed.label ?? ""}`,
+    "confidence: 0.98",
+  ].join("\n");
+}
+
 function createMockRuntime(
   world: ReturnType<typeof createMockWorld>,
   entities: Record<
@@ -55,7 +346,9 @@ function createMockRuntime(
       if (!e) return null;
       return { id, names: e.names, metadata: e.metadata ?? {} };
     }),
-    getMemoriesByRoomIds: vi.fn().mockResolvedValue(options?.roomMemories ?? []),
+    getMemoriesByRoomIds: vi
+      .fn()
+      .mockResolvedValue(options?.roomMemories ?? []),
     getService: vi
       .fn()
       .mockImplementation((name: string) => options?.services?.[name] ?? null),
@@ -69,6 +362,13 @@ function createMockRuntime(
       }
       settingsStore[key] = value as string | boolean | number | null;
     }),
+    useModel: vi
+      .fn()
+      .mockImplementation(
+        async (_modelType: unknown, params: { prompt?: string }) => {
+          return mockRoleIntentResponse(params.prompt ?? "");
+        },
+      ),
   } as unknown as IAgentRuntime;
 }
 
@@ -218,12 +518,21 @@ describe("updateRoleAction.validate", () => {
         ),
       ).toBe(true);
     });
+    it("set his role to ADMIN", async () => {
+      expect(
+        await updateRoleAction.validate(
+          runtime,
+          createMessage("e1", "set his role to ADMIN"),
+        ),
+      ).toBe(true);
+    });
   });
 
   describe("natural language assignment", () => {
     // --- boss-family → ADMIN ---
     it.each([
       "nubs is your boss",
+      "hey @Eliza, nubs is your boss now (@nubs)",
       "alice is my boss",
       "bob is our manager",
       "charlie is a supervisor",
@@ -358,26 +667,26 @@ describe("updateRoleAction.validate", () => {
         ),
       ).toBe(false);
     });
-    it("rejects /role with no args", async () => {
+    it("keeps UPDATE_ROLE available for incomplete /role commands", async () => {
       expect(
         await updateRoleAction.validate(runtime, createMessage("e1", "/role")),
-      ).toBe(false);
+      ).toBe(true);
     });
-    it("rejects invalid role name", async () => {
+    it("keeps UPDATE_ROLE available for invalid explicit role names", async () => {
       expect(
         await updateRoleAction.validate(
           runtime,
           createMessage("e1", "/role @alice SUPERADMIN"),
         ),
-      ).toBe(false);
+      ).toBe(true);
     });
-    it("rejects multi-line messages", async () => {
+    it("keeps UPDATE_ROLE available when the role request has extra text", async () => {
       expect(
         await updateRoleAction.validate(
           runtime,
           createMessage("e1", "/role @alice ADMIN\nextra stuff"),
         ),
-      ).toBe(false);
+      ).toBe(true);
     });
     it("rejects nullish message", async () => {
       expect(
@@ -407,23 +716,23 @@ describe("updateRoleAction.validate", () => {
   });
 
   describe("input limits", () => {
-    it("rejects oversized input (>200 chars)", async () => {
+    it("keeps UPDATE_ROLE available for oversized explicit role requests", async () => {
       const longName = "a".repeat(180);
       expect(
         await updateRoleAction.validate(
           runtime,
           createMessage("e1", `/role @${longName} ADMIN`),
         ),
-      ).toBe(false);
+      ).toBe(true);
     });
-    it("rejects oversized username (>64 chars)", async () => {
+    it("keeps UPDATE_ROLE available for long usernames", async () => {
       const longName = "a".repeat(65);
       expect(
         await updateRoleAction.validate(
           runtime,
           createMessage("e1", `/role @${longName} ADMIN`),
         ),
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 
@@ -731,6 +1040,68 @@ describe("updateRoleAction.handler", () => {
     );
   });
 
+  it("supports a Discord-style greeting prefix and trailing handle when assigning a boss role", async () => {
+    runtime = createMockRuntime(world, {
+      [ownerId]: { names: ["Shaw"] },
+      [targetId]: {
+        names: ["Odilitime"],
+        metadata: { discord: { username: "Odilitime", name: "Odi" } },
+      },
+    });
+
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "hey @Eliza, odi is your boss now (@Odilitime)"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining("odi is now your boss"),
+      }),
+    );
+  });
+
+  it("resolves pronoun follow-ups from the requester's recent role intent", async () => {
+    runtime = createMockRuntime(
+      world,
+      {
+        [ownerId]: { names: ["Shaw"] },
+        [targetId]: {
+          names: ["Odi"],
+          metadata: { discord: { username: "Odilitime", name: "Odi" } },
+        },
+      },
+      undefined,
+      {
+        roomMemories: [
+          {
+            id: "prior-role-request" as UUID,
+            roomId: "room-1" as UUID,
+            entityId: ownerId as UUID,
+            createdAt: Date.now() - 1000,
+            content: { text: "odi is your boss" },
+          } as Memory,
+        ],
+      },
+    );
+
+    const result = await updateRoleAction.handler(
+      runtime,
+      createMessage(ownerId, "set his role to admin"),
+      EMPTY_STATE,
+      undefined,
+      callback,
+    );
+
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(world.metadata.roles?.[targetId]).toBe("ADMIN");
+  });
+
   it("uses recent room speakers to resolve a boss target not currently in the room entity list", async () => {
     const relationships = {
       analyzeRelationship: vi.fn().mockResolvedValue({
@@ -767,7 +1138,9 @@ describe("updateRoleAction.handler", () => {
     );
     (
       runtime.getEntitiesForRoom as unknown as ReturnType<typeof vi.fn>
-    ).mockResolvedValue([{ id: ownerId as UUID, names: ["Shaw"], metadata: {} }]);
+    ).mockResolvedValue([
+      { id: ownerId as UUID, names: ["Shaw"], metadata: {} },
+    ]);
 
     const result = await updateRoleAction.handler(
       runtime,
@@ -816,7 +1189,9 @@ describe("updateRoleAction.handler", () => {
     );
     (
       runtime.getEntitiesForRoom as unknown as ReturnType<typeof vi.fn>
-    ).mockResolvedValue([{ id: ownerId as UUID, names: ["Shaw"], metadata: {} }]);
+    ).mockResolvedValue([
+      { id: ownerId as UUID, names: ["Shaw"], metadata: {} },
+    ]);
 
     const result = await updateRoleAction.handler(
       runtime,

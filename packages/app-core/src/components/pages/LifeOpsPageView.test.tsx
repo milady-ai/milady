@@ -53,6 +53,15 @@ vi.mock("./LifeOpsWorkspaceView", () => ({
     ),
 }));
 
+vi.mock("../settings/LifeOpsSettingsSection", () => ({
+  LifeOpsSettingsSection: () =>
+    React.createElement(
+      "div",
+      { "data-testid": "lifeops-settings-stub" },
+      "lifeops-settings",
+    ),
+}));
+
 vi.mock("@miladyai/ui", () => {
   const passthrough = ({
     children,
@@ -435,6 +444,7 @@ describe("LifeOpsPageView", () => {
     expect(hasText(root, "Brush teeth")).toBe(true);
     expect(hasText(root, "LifeOps Owner")).toBe(true);
     expect(hasText(root, "Milady Cloud")).toBe(true);
+    expect(hasText(root, "lifeops-settings")).toBe(true);
     expect(hasText(root, "workspace")).toBe(true);
   });
 

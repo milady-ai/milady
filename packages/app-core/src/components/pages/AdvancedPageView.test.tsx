@@ -115,7 +115,7 @@ describe("AdvancedPageView", () => {
   it("injects the shared advanced sub-nav into the standard content pane", async () => {
     const setTab = vi.fn();
     mockUseApp.mockReturnValue({
-      tab: "skills",
+      tab: "fine-tuning",
       setTab,
       t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
     });
@@ -127,7 +127,7 @@ describe("AdvancedPageView", () => {
 
     const nav = tree.root.findByProps({ "data-testid": "advanced-subtab-nav" });
     const activeButton = tree.root.findByProps({
-      "data-testid": "advanced-subtab-skills",
+      "data-testid": "advanced-subtab-fine-tuning",
     });
 
     expect(nav).toBeDefined();
@@ -140,7 +140,7 @@ describe("AdvancedPageView", () => {
   it("renders compact advanced sub-nav buttons in the modal layout", async () => {
     const setTab = vi.fn();
     mockUseApp.mockReturnValue({
-      tab: "runtime",
+      tab: "fine-tuning",
       setTab,
       t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
     });
@@ -153,7 +153,7 @@ describe("AdvancedPageView", () => {
     });
 
     const runtimeButton = tree.root.findByProps({
-      "data-testid": "advanced-subtab-runtime",
+      "data-testid": "advanced-subtab-fine-tuning",
     });
 
     expect(String(runtimeButton.props.className)).toContain("inline-flex");
@@ -185,10 +185,10 @@ describe("AdvancedPageView", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("renders the relationships advanced workspace when the relationships tab is active", async () => {
+  it("keeps desktop hidden from the advanced sub-nav while preserving the route", async () => {
     const setTab = vi.fn();
     mockUseApp.mockReturnValue({
-      tab: "relationships",
+      tab: "desktop",
       setTab,
       t: (key: string, vars?: Record<string, unknown>) => testT(key, vars),
     });
@@ -201,13 +201,11 @@ describe("AdvancedPageView", () => {
     expect(
       tree.root.findAll(
         (node) =>
-          Array.isArray(node.children) &&
-          node.children.includes("relationships-view"),
+          Array.isArray(node.children) && node.children.includes("desktop"),
       ).length,
     ).toBeGreaterThan(0);
     expect(
-      tree.root.findByProps({ "data-testid": "advanced-subtab-relationships" })
-        .props["aria-pressed"],
-    ).toBe(true);
+      tree.root.findAllByProps({ "data-testid": "advanced-subtab-desktop" }),
+    ).toHaveLength(0);
   });
 });

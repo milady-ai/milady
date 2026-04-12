@@ -118,6 +118,28 @@ async function loadPluginDescription(
   return plugin?.description ?? "";
 }
 
+function sanitizePluginCacheSegment(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]+/g, "_");
+}
+
+async function findLatestStagedImportRoot(
+  packageName: string,
+): Promise<string> {
+  const stagingBaseDir = path.join(
+    process.env.MILADY_STATE_DIR ?? "",
+    "plugins",
+    ".runtime-imports",
+    sanitizePluginCacheSegment(packageName),
+  );
+  const entries = await fs.readdir(stagingBaseDir, { withFileTypes: true });
+  const dirs = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  expect(dirs.length).toBeGreaterThan(0);
+  return path.join(stagingBaseDir, dirs[dirs.length - 1], "root");
+}
+
 describe("personality plugin wiring", () => {
   it("exposes the expected runtime capabilities from the static plugin map", () => {
     const personalityModule = STATIC_ELIZA_PLUGINS[
@@ -314,6 +336,50 @@ describe("importPluginModuleFromPath", () => {
     await expect(loadPluginDescription(installPath, packageName)).resolves.toBe(
       "shared-dep:v1",
     );
+  });
+
+  it("symlinks staged node_modules entries instead of dereferencing workspace dependencies", async () => {
+    const packageName = "@acme/plugin-hot-reload";
+    const workspaceRoot = path.join(tempRoot, "workspace");
+    const installPath = path.join(
+      workspaceRoot,
+      "packages",
+      "plugin-hot-reload",
+    );
+    const dependencyRoot = path.join(
+      workspaceRoot,
+      "node_modules",
+      "dep-helper",
+    );
+
+    await writePluginPackage({
+      packageRoot: installPath,
+      packageName,
+      dependencyName: "dep-helper",
+      dependencyValue: "unused",
+      versionValue: "v1",
+    });
+    await writeDependencyPackage(dependencyRoot, "dep-helper", "shared-dep");
+    await fs.mkdir(path.join(installPath, "node_modules"), { recursive: true });
+    await fs.symlink(
+      dependencyRoot,
+      path.join(installPath, "node_modules", "dep-helper"),
+      "dir",
+    );
+
+    await expect(loadPluginDescription(installPath, packageName)).resolves.toBe(
+      "shared-dep:v1",
+    );
+
+    const stagedImportRoot = await findLatestStagedImportRoot(packageName);
+    const stagedDependencyPath = path.join(
+      stagedImportRoot,
+      "node_modules",
+      "dep-helper",
+    );
+    const stagedDependencyStat = await fs.lstat(stagedDependencyPath);
+
+    expect(stagedDependencyStat.isSymbolicLink()).toBe(true);
   });
 });
 

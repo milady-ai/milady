@@ -71,6 +71,14 @@ function localMonthDayLabel(daysFromToday: number): string {
   );
 }
 
+function daysUntilWeekday(targetWeekday: number): number {
+  const today = localDayAtOffset(0);
+  const currentWeekday = new Date(
+    Date.UTC(today.year, Math.max(0, today.month - 1), today.day, 12, 0, 0),
+  ).getUTCDay();
+  return (targetWeekday - currentWeekday + 7) % 7;
+}
+
 function allDayStart(daysFromToday: number): string {
   return localIso(daysFromToday, 0, 0);
 }
@@ -573,6 +581,50 @@ describe("life-ops calendar chat transcripts", () => {
     expect(text).not.toContain("Dentist appointment");
   });
 
+  it("resolves weekday-only questions like 'on monday' to the Monday window", async () => {
+    const repository = new LifeOpsRepository(runtime);
+    const mondayOffset = daysUntilWeekday(1);
+    const nowIso = new Date().toISOString();
+    await repository.upsertCalendarEvent({
+      id: "evt-monday-planning",
+      externalId: "monday-planning-ext",
+      agentId: AGENT_ID,
+      provider: "google",
+      side: "owner",
+      calendarId: "primary",
+      title: "Monday planning session",
+      description: "",
+      location: "Boulder Office",
+      status: "confirmed",
+      startAt: localIso(mondayOffset, 10, 0),
+      endAt: localIso(mondayOffset, 11, 0),
+      isAllDay: false,
+      timezone: TEST_TIME_ZONE,
+      htmlLink: null,
+      conferenceLink: null,
+      organizer: null,
+      attendees: [],
+      metadata: {},
+      syncedAt: nowIso,
+      updatedAt: nowIso,
+    });
+
+    const { conversationId } = await createConversation(port, {
+      includeGreeting: false,
+      title: "LifeOps calendar weekday transcript",
+    });
+
+    const response = await postConversationMessage(port, conversationId, {
+      text: "hey eliza, what do i have going on on monday?",
+      source: "discord",
+    });
+
+    expect(response.status).toBe(200);
+    expect(String(response.data.text ?? "")).toContain(
+      "Monday planning session",
+    );
+  });
+
   it("handles next-event and trip-window transcript questions end to end", async () => {
     const { conversationId } = await createConversation(port, {
       includeGreeting: false,
@@ -580,7 +632,7 @@ describe("life-ops calendar chat transcripts", () => {
     });
 
     const nextEvent = await postConversationMessage(port, conversationId, {
-      text: "what's my next meeting",
+      text: "what's my next event",
       source: "discord",
     });
     expect(nextEvent.status).toBe(200);

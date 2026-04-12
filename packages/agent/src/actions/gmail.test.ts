@@ -165,6 +165,29 @@ describe("gmailAction", () => {
     expect(result?.text).toContain("reply needed");
   });
 
+  it("repairs a bad requested subaction with an LLM gmail plan", async () => {
+    mockUseModel.mockResolvedValue(
+      '{"subaction":"search","queries":["from:suran"]}',
+    );
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran",
+        from: "Suran Goonatilake",
+        subject: "Checking in",
+      }),
+    );
+
+    const result = await invoke("did suran email me", { subaction: "triage" });
+
+    expect(mockUseModel).toHaveBeenCalled();
+    expect(mockGetGmailSearch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ query: "from:suran" }),
+    );
+    expect(result?.success).toBe(true);
+    expect(result?.text).toContain("Checking in");
+  });
+
   it("uses message text when intent param is omitted", async () => {
     mockGetGmailNeedsResponse.mockResolvedValue({
       messages: [],
@@ -1301,6 +1324,32 @@ describe("gmailAction", () => {
     const query = (searchCall[1] as { query: string }).query;
     expect(query).toMatch(/suran/i);
     expect(query).toContain("is:unread");
+    expect(result?.success).toBe(true);
+  });
+
+  it("follow-up adds a relative month constraint from recent context", async () => {
+    mockGetGmailSearch.mockResolvedValue(
+      searchResult({
+        query: "from:suran newer_than:30d",
+        from: "Suran Goonatilake",
+        subject: "Monthly update",
+      }),
+    );
+
+    const result = await invokeWith("what about this month?", "what about this month?", {
+      state: {
+        values: {
+          recentMessages:
+            "user: find emails from suran\nassistant: Found 3 emails for sender suran.",
+        },
+      },
+    });
+
+    expect(mockGetGmailSearch).toHaveBeenCalled();
+    const searchCall = mockGetGmailSearch.mock.calls[0];
+    const query = (searchCall[1] as { query: string }).query;
+    expect(query).toContain("from:suran");
+    expect(query).toContain("newer_than:30d");
     expect(result?.success).toBe(true);
   });
 

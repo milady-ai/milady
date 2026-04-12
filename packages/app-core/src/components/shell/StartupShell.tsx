@@ -9,38 +9,24 @@
  * Non-loading phases (error, pairing, onboarding) delegate to their views.
  */
 
-import type { ResolvedContentPack } from "@miladyai/shared/contracts/content-pack";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { client } from "../../api";
 import {
   discoverGatewayEndpoints,
   type GatewayDiscoveryEndpoint,
   gatewayEndpointToApiBase,
 } from "../../bridge/gateway-discovery";
+import { isDesktopPlatform } from "../../platform/init";
 import {
-  applyColorScheme,
-  applyContentPack,
-  releaseLoadedContentPack,
-} from "../../content-packs";
-import { isNative } from "../../platform/init";
-import {
+  addAgentProfile,
   clearPersistedActiveServer,
-  loadPersistedActivePackUrl,
-  savePersistedActivePackUrl,
   savePersistedActiveServer,
   useApp,
 } from "../../state";
 import type { StartupErrorState } from "../../state/types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { PairingView } from "./PairingView";
-import { SplashContentPacks } from "./SplashContentPacks";
+import { SplashCloudAgents } from "./SplashCloudAgents";
 import { SplashServerChooser } from "./SplashServerChooser";
 import { StartupFailureView } from "./StartupFailureView";
 
@@ -73,38 +59,6 @@ function phaseToStatusKey(phase: string): string {
   }
 }
 
-type PackBaselineState = {
-  selectedVrmIndex: number;
-  customVrmUrl: string;
-  customVrmPreviewUrl: string;
-  customBackgroundUrl: string;
-  customWorldUrl: string;
-  onboardingName: string;
-  onboardingStyle: string;
-};
-
-const DEFAULT_PACK_BASELINE: PackBaselineState = {
-  selectedVrmIndex: 1,
-  customVrmUrl: "",
-  customVrmPreviewUrl: "",
-  customBackgroundUrl: "",
-  customWorldUrl: "",
-  onboardingName: "Chen",
-  onboardingStyle: "chen",
-};
-
-function supportsDirectoryUpload(): boolean {
-  if (typeof document === "undefined") {
-    return false;
-  }
-
-  const input = document.createElement("input") as HTMLInputElement & {
-    webkitdirectory?: string | boolean;
-    directory?: string | boolean;
-  };
-  return "webkitdirectory" in input || "directory" in input;
-}
-
 export function StartupShell() {
   const {
     startupCoordinator,
@@ -112,16 +66,6 @@ export function StartupShell() {
     retryStartup,
     setState,
     goToOnboardingStep,
-    elizaCloudConnected,
-    onboardingCloudApiKey,
-    activePackId,
-    selectedVrmIndex,
-    customVrmUrl,
-    customVrmPreviewUrl,
-    customBackgroundUrl,
-    customWorldUrl,
-    onboardingName,
-    onboardingStyle,
     t,
   } = useApp();
   const phase = startupCoordinator.phase;
@@ -130,219 +74,25 @@ export function StartupShell() {
   const [discoveredGateways, setDiscoveredGateways] = useState<
     GatewayDiscoveryEndpoint[]
   >([]);
-  const [packLoadError, setPackLoadError] = useState<string | null>(null);
+  const [splashSubView, setSplashSubView] = useState<"chooser" | "cloud">(
+    () => {
+      if (typeof window === "undefined") return "chooser";
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("action") === "cloud-agents") {
+        params.delete("action");
+        const qs = params.toString();
+        const url = window.location.pathname + (qs ? `?${qs}` : "");
+        window.history.replaceState({}, "", url);
+        return "cloud";
+      }
+      return "chooser";
+    },
+  );
   const isSplash = phase === "splash";
   const splashLoaded = isSplash
     ? (startupCoordinator.state as { loaded?: boolean }).loaded
     : false;
   const progress = PHASE_PROGRESS[phase] ?? 50;
-
-  // ── Content packs ───────────────────────────────────────────────
-  // The 8 built-in characters are the default content — not packs.
-  // The pack browser only shows user-loaded external packs.
-  const [loadedPacks, setLoadedPacks] = useState<ResolvedContentPack[]>([]);
-  const colorSchemeCleanupRef = useRef<(() => void) | null>(null);
-  const packBaselineRef = useRef<PackBaselineState | null>(null);
-  const initialActivePackIdRef = useRef(activePackId);
-  const loadedPacksRef = useRef<ResolvedContentPack[]>([]);
-  const rehydratedInitialPackRef = useRef(false);
-  const canPickPackDirectory = useMemo(() => supportsDirectoryUpload(), []);
-
-  const restorePackBaseline = useCallback(() => {
-    const baseline = packBaselineRef.current ?? DEFAULT_PACK_BASELINE;
-    setState("selectedVrmIndex", baseline.selectedVrmIndex);
-    setState("customVrmUrl", baseline.customVrmUrl);
-    setState("customVrmPreviewUrl", baseline.customVrmPreviewUrl);
-    setState("customBackgroundUrl", baseline.customBackgroundUrl);
-    setState("customWorldUrl", baseline.customWorldUrl);
-    setState("onboardingName", baseline.onboardingName);
-    setState("onboardingStyle", baseline.onboardingStyle);
-    packBaselineRef.current = null;
-  }, [setState]);
-
-  const activatePack = useCallback(
-    (
-      pack: ResolvedContentPack,
-      options?: {
-        captureBaseline?: boolean;
-      },
-    ) => {
-      const captureBaseline = options?.captureBaseline ?? false;
-      if (captureBaseline && packBaselineRef.current == null) {
-        packBaselineRef.current = {
-          selectedVrmIndex,
-          customVrmUrl,
-          customVrmPreviewUrl,
-          customBackgroundUrl,
-          customWorldUrl,
-          onboardingName,
-          onboardingStyle,
-        };
-      }
-
-      setState("activePackId", pack.manifest.id);
-      savePersistedActivePackUrl(
-        pack.source.kind === "url" ? pack.source.url : null,
-      );
-      applyContentPack(pack, {
-        setCustomVrmUrl: (url) => setState("customVrmUrl", url),
-        setCustomVrmPreviewUrl: (url) => setState("customVrmPreviewUrl", url),
-        setCustomBackgroundUrl: (url) => setState("customBackgroundUrl", url),
-        setCustomWorldUrl: (url) => setState("customWorldUrl", url),
-        setSelectedVrmIndex: (idx) => setState("selectedVrmIndex", idx),
-        setOnboardingName: (name) => setState("onboardingName", name),
-        setOnboardingStyle: (style) => setState("onboardingStyle", style),
-        setCustomCatchphrase: (phrase) => setState("customCatchphrase", phrase),
-        setCustomVoicePresetId: (id) => setState("customVoicePresetId", id),
-      });
-      colorSchemeCleanupRef.current?.();
-      colorSchemeCleanupRef.current = applyColorScheme(pack.colorScheme);
-      setPackLoadError(null);
-    },
-    [
-      customBackgroundUrl,
-      customVrmUrl,
-      customVrmPreviewUrl,
-      customWorldUrl,
-      onboardingName,
-      onboardingStyle,
-      selectedVrmIndex,
-      setState,
-    ],
-  );
-
-  const deactivatePack = useCallback(() => {
-    const activePack = activePackId
-      ? loadedPacksRef.current.find((pack) => pack.manifest.id === activePackId)
-      : null;
-
-    if (activePack?.source.kind === "file") {
-      releaseLoadedContentPack(activePack);
-      setLoadedPacks((prev) =>
-        prev.filter((pack) => pack.manifest.id !== activePack.manifest.id),
-      );
-    }
-
-    setState("activePackId", null);
-    savePersistedActivePackUrl(null);
-    colorSchemeCleanupRef.current?.();
-    colorSchemeCleanupRef.current = null;
-    restorePackBaseline();
-    setPackLoadError(null);
-  }, [activePackId, restorePackBaseline, setState]);
-
-  const handleSelectPack = useCallback(
-    (pack: ResolvedContentPack) => {
-      if (activePackId === pack.manifest.id) {
-        deactivatePack();
-        return;
-      }
-      activatePack(pack, { captureBaseline: activePackId == null });
-    },
-    [activePackId, activatePack, deactivatePack],
-  );
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleLoadCustomPack = useCallback(async () => {
-    if (canPickPackDirectory) {
-      fileInputRef.current?.click();
-      return;
-    }
-
-    if (typeof window === "undefined" || typeof window.prompt !== "function") {
-      return;
-    }
-
-    const url = window.prompt(
-      t("startupshell.EnterPackUrl", {
-        defaultValue:
-          "Enter the URL of a content pack folder (must contain pack.json):",
-      }),
-      "https://example.com/packs/my-pack/",
-    );
-    if (!url?.trim()) return;
-
-    try {
-      const { loadContentPackFromUrl } = await import("../../content-packs");
-      const pack = await loadContentPackFromUrl(url.trim());
-      setLoadedPacks((prev) => {
-        if (
-          prev.some((candidate) => candidate.manifest.id === pack.manifest.id)
-        ) {
-          return prev;
-        }
-        return [...prev, pack];
-      });
-      activatePack(pack, { captureBaseline: activePackId == null });
-    } catch (err) {
-      console.error("[milady][content-packs] Failed to load custom pack:", err);
-      setPackLoadError(
-        t("startupshell.PackLoadFailed", {
-          defaultValue: `Failed to load pack: ${err instanceof Error ? err.message : "Unknown error"}`,
-        }),
-      );
-    }
-  }, [activePackId, activatePack, canPickPackDirectory, t]);
-
-  const handleFolderSelected = useCallback(
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files ?? []);
-      if (files.length === 0) return;
-
-      try {
-        const { loadContentPackFromFiles } = await import(
-          "../../content-packs"
-        );
-        const pack = await loadContentPackFromFiles(files);
-        setLoadedPacks((prev) => {
-          if (
-            prev.some((candidate) => candidate.manifest.id === pack.manifest.id)
-          ) {
-            releaseLoadedContentPack(pack);
-            return prev;
-          }
-          return [...prev, pack];
-        });
-        activatePack(pack, { captureBaseline: activePackId == null });
-      } catch (err) {
-        console.error(
-          "[milady][content-packs] Failed to load custom pack:",
-          err,
-        );
-        setPackLoadError(
-          t("startupshell.PackLoadFailed", {
-            defaultValue: `Failed to load pack: ${err instanceof Error ? err.message : "Unknown error"}`,
-          }),
-        );
-      }
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
-    [activePackId, activatePack, t],
-  );
-  const cloudApiKey = onboardingCloudApiKey ?? "";
-  const showElizaCloudEntry = useMemo(() => {
-    if (elizaCloudConnected) {
-      return true;
-    }
-    if (cloudApiKey.trim().length > 0) {
-      return true;
-    }
-    if (typeof window === "undefined") {
-      return false;
-    }
-    const token = (
-      (window as unknown as Record<string, unknown>)
-        .__ELIZA_CLOUD_AUTH_TOKEN__ ?? ""
-    )
-      .toString()
-      .trim();
-    return token.length > 0;
-  }, [cloudApiKey, elizaCloudConnected]);
-
   // ── Cloud onboarding skip ──────────────────────────────────────
   // Fallback: if a cloud-provisioned container still reaches onboarding-required
   // (e.g. splash probe didn't fire SPLASH_CLOUD_SKIP), re-check the server here
@@ -398,30 +148,6 @@ export function StartupShell() {
 
   // ── Gateway discovery ──────────────────────────────────────────
   useEffect(() => {
-    if (!canPickPackDirectory) {
-      return;
-    }
-    const fileInput = fileInputRef.current;
-    if (!fileInput) {
-      return;
-    }
-    fileInput.setAttribute("webkitdirectory", "");
-    fileInput.setAttribute("directory", "");
-  }, [canPickPackDirectory]);
-
-  useEffect(() => {
-    loadedPacksRef.current = loadedPacks;
-  }, [loadedPacks]);
-
-  useEffect(() => {
-    return () => {
-      for (const pack of loadedPacksRef.current) {
-        releaseLoadedContentPack(pack);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (!isSplash || !splashLoaded) {
       return;
     }
@@ -444,64 +170,6 @@ export function StartupShell() {
       cancelled = true;
     };
   }, [isSplash, splashLoaded]);
-
-  useEffect(() => {
-    if (rehydratedInitialPackRef.current) {
-      return;
-    }
-    rehydratedInitialPackRef.current = true;
-
-    const persistedPackId = initialActivePackIdRef.current;
-    if (!persistedPackId) {
-      return;
-    }
-
-    const loadedPack = loadedPacks.find(
-      (pack) => pack.manifest.id === persistedPackId,
-    );
-    if (loadedPack) {
-      activatePack(loadedPack);
-      return;
-    }
-
-    const persistedPackUrl = loadPersistedActivePackUrl();
-    if (!persistedPackUrl) {
-      setState("activePackId", null);
-      return;
-    }
-
-    let cancelled = false;
-    void import("../../content-packs")
-      .then(({ loadContentPackFromUrl }) =>
-        loadContentPackFromUrl(persistedPackUrl),
-      )
-      .then((pack) => {
-        if (cancelled) {
-          return;
-        }
-        activatePack(pack);
-      })
-      .catch((err) => {
-        if (cancelled) {
-          return;
-        }
-        console.error(
-          "[milady][content-packs] Failed to restore persisted pack:",
-          err,
-        );
-        savePersistedActivePackUrl(null);
-        setState("activePackId", null);
-        setPackLoadError(
-          t("startupshell.PackLoadFailed", {
-            defaultValue: `Failed to load pack: ${err instanceof Error ? err.message : "Unknown error"}`,
-          }),
-        );
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activatePack, loadedPacks, setState, t]);
 
   const continueToOnboarding = useCallback(() => {
     startupCoordinator.dispatch({ type: "SPLASH_CONTINUE" });
@@ -536,6 +204,7 @@ export function StartupShell() {
   );
 
   const handleCreateLocal = useCallback(() => {
+    addAgentProfile({ kind: "local", label: "Local Agent" });
     seedSplashTarget("local");
     continueToOnboarding();
   }, [continueToOnboarding, seedSplashTarget]);
@@ -545,21 +214,22 @@ export function StartupShell() {
     continueToOnboarding();
   }, [continueToOnboarding, seedSplashTarget]);
 
-  const handleUseElizaCloud = useCallback(() => {
-    seedSplashTarget("elizacloud");
-    continueToOnboarding();
-  }, [continueToOnboarding, seedSplashTarget]);
+  const handleManageCloudAgents = useCallback(() => {
+    setSplashSubView("cloud");
+  }, []);
 
   const handleConnectGateway = useCallback(
     (gateway: GatewayDiscoveryEndpoint) => {
       const remoteApiBase = gatewayEndpointToApiBase(gateway);
       clearClientConnectionIntent();
+      const label = gateway.name.trim() || remoteApiBase;
       savePersistedActiveServer({
         id: `remote:${gateway.stableId}`,
         kind: "remote",
-        label: gateway.name.trim() || remoteApiBase,
+        label,
         apiBase: remoteApiBase,
       });
+      addAgentProfile({ kind: "remote", label, apiBase: remoteApiBase });
       continueToOnboarding();
     },
     [clearClientConnectionIntent, continueToOnboarding],
@@ -631,7 +301,7 @@ export function StartupShell() {
           </div>
         )}
 
-        {/* Server chooser + content packs — only on splash phase */}
+        {/* Server chooser or cloud agent manager — only on splash phase */}
         {isSplash &&
           (!splashLoaded ? (
             <button
@@ -642,45 +312,25 @@ export function StartupShell() {
             >
               {t("startupshell.Loading", { defaultValue: "Loading..." })}
             </button>
+          ) : splashSubView === "cloud" ? (
+            <SplashCloudAgents
+              t={t}
+              onBack={() => setSplashSubView("chooser")}
+              dispatchStartup={startupCoordinator.dispatch}
+            />
           ) : (
-            <>
-              <SplashContentPacks
-                packs={loadedPacks}
-                activePackId={activePackId}
-                t={t}
-                onSelectPack={handleSelectPack}
-                onLoadCustomPack={handleLoadCustomPack}
-              />
-              {packLoadError ? (
-                <p
-                  style={{ fontFamily: FONT }}
-                  className="w-full text-[8px] text-black/55"
-                >
-                  {packLoadError}
-                </p>
-              ) : null}
-              <SplashServerChooser
-                discoveryLoading={discoveryLoading}
-                gateways={discoveredGateways}
-                showElizaCloudEntry={showElizaCloudEntry}
-                showCreateLocal={!isNative}
-                t={t}
-                onCreateLocal={handleCreateLocal}
-                onManualConnect={handleManualConnect}
-                onUseElizaCloud={handleUseElizaCloud}
-                onConnectGateway={handleConnectGateway}
-                onLoadContentPack={handleLoadCustomPack}
-              />
-            </>
+            <SplashServerChooser
+              discoveryLoading={discoveryLoading}
+              gateways={discoveredGateways}
+              showCreateLocal={isDesktopPlatform()}
+              t={t}
+              onCreateLocal={handleCreateLocal}
+              onManualConnect={handleManualConnect}
+              onManageCloudAgents={handleManageCloudAgents}
+              onConnectGateway={handleConnectGateway}
+            />
           ))}
       </div>
-      <input
-        type="file"
-        ref={fileInputRef}
-        multiple
-        className="hidden"
-        onChange={handleFolderSelected}
-      />
     </div>
   );
 }

@@ -9,12 +9,31 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type { AgentRuntime, UUID } from "@elizaos/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { req } from "../../../test/helpers/http";
 import { startApiServer } from "../src/api/server";
 
+type ProviderSwitchConfigSnapshot = {
+  connection?: unknown;
+  serviceRouting?: {
+    llmText?: {
+      backend?: string;
+      transport?: string;
+      primaryModel?: string;
+    };
+  };
+  agents?: {
+    defaults?: {
+      model?: {
+        primary?: string;
+      };
+    };
+  };
+};
+
 function expectCanonicalProviderSelection(
-  config: Record<string, any>,
+  config: ProviderSwitchConfigSnapshot,
   expectedProvider: string,
   primaryModel?: string,
 ) {
@@ -32,6 +51,35 @@ function expectCanonicalProviderSelection(
     transport: "direct",
     ...(primaryModel ? { primaryModel } : {}),
   });
+}
+
+function createRuntimeMock(name: string, model: string): AgentRuntime {
+  const agentEventService = {
+    subscribe: () => () => {},
+    subscribeHeartbeat: () => () => {},
+  };
+
+  return {
+    agentId: `provider-switch-${name}` as UUID,
+    character: {
+      name,
+      model,
+    },
+    logger: {
+      debug: () => {},
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    plugins: [],
+    getService: (serviceType: string) =>
+      serviceType === "AGENT_EVENT" ? agentEventService : null,
+    getServicesByType: () => [],
+    getRoomsByWorld: async () => [],
+    getAgent: async () => null,
+    emitEvent: async () => {},
+    registerSendHandler: () => {},
+  } as unknown as AgentRuntime;
 }
 
 describe("POST /api/provider/switch", () => {
@@ -314,5 +362,125 @@ describe("POST /api/provider/switch", () => {
         await slowServer.close();
       }
     }, 10_000);
+  });
+
+  describe("restart behavior", () => {
+    it("reports a real restart and swaps the running runtime when hot restart succeeds", async () => {
+      const initialRuntime = createRuntimeMock(
+        "ProviderSwitchBeforeRestart",
+        "before-restart-model",
+      );
+      const restartedRuntime = createRuntimeMock(
+        "ProviderSwitchAfterRestart",
+        "after-restart-model",
+      );
+      let restartCalls = 0;
+
+      const server = await startApiServer({
+        port: 0,
+        runtime: initialRuntime,
+        onRestart: async () => {
+          restartCalls += 1;
+          return restartedRuntime;
+        },
+      });
+
+      try {
+        const beforeStatus = await req(server.port, "GET", "/api/status");
+        expect(beforeStatus.status).toBe(200);
+        expect(beforeStatus.data.state).toBe("running");
+        expect(beforeStatus.data.agentName).toBe("ProviderSwitchBeforeRestart");
+        const beforeStartedAt = beforeStatus.data.startedAt as number;
+
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        const switchResponse = await req(
+          server.port,
+          "POST",
+          "/api/provider/switch",
+          {
+            provider: "openai",
+          },
+        );
+
+        expect(switchResponse.status).toBe(200);
+        expect(switchResponse.data).toMatchObject({
+          success: true,
+          provider: "openai",
+          restarting: true,
+        });
+        expect(restartCalls).toBe(1);
+
+        const afterStatus = await req(server.port, "GET", "/api/status");
+        expect(afterStatus.status).toBe(200);
+        expect(afterStatus.data.state).toBe("running");
+        expect(afterStatus.data.agentName).toBe("ProviderSwitchAfterRestart");
+        expect(afterStatus.data.model).toBe("after-restart-model");
+        expect(afterStatus.data.pendingRestart).toBe(false);
+        expect(afterStatus.data.pendingRestartReasons).toEqual([]);
+        expect(afterStatus.data.startedAt).toBeGreaterThan(beforeStartedAt);
+      } finally {
+        await server.close();
+      }
+    });
+
+    it("falls back to a pending restart when hot restart cannot reinitialize the runtime", async () => {
+      const initialRuntime = createRuntimeMock(
+        "ProviderSwitchFallbackRuntime",
+        "fallback-runtime-model",
+      );
+      let restartCalls = 0;
+
+      const server = await startApiServer({
+        port: 0,
+        runtime: initialRuntime,
+        onRestart: async () => {
+          restartCalls += 1;
+          return null;
+        },
+      });
+
+      try {
+        const beforeStatus = await req(server.port, "GET", "/api/status");
+        expect(beforeStatus.status).toBe(200);
+        expect(beforeStatus.data.state).toBe("running");
+        expect(beforeStatus.data.agentName).toBe(
+          "ProviderSwitchFallbackRuntime",
+        );
+        const beforeStartedAt = beforeStatus.data.startedAt;
+
+        const switchResponse = await req(
+          server.port,
+          "POST",
+          "/api/provider/switch",
+          {
+            provider: "anthropic",
+          },
+        );
+
+        expect(switchResponse.status).toBe(200);
+        expect(switchResponse.data).toMatchObject({
+          success: true,
+          provider: "anthropic",
+          restarting: false,
+        });
+        expect(restartCalls).toBe(1);
+
+        const afterStatus = await req(server.port, "GET", "/api/status");
+        expect(afterStatus.status).toBe(200);
+        expect(afterStatus.data.state).toBe("running");
+        expect(afterStatus.data.agentName).toBe(
+          "ProviderSwitchFallbackRuntime",
+        );
+        expect(afterStatus.data.model).toBe("fallback-runtime-model");
+        expect(afterStatus.data.startedAt).toBe(beforeStartedAt);
+        expect(afterStatus.data.pendingRestart).toBe(true);
+        expect(afterStatus.data.pendingRestartReasons).toContain(
+          "provider switch to anthropic",
+        );
+      } finally {
+        await server.close();
+      }
+    });
   });
 });

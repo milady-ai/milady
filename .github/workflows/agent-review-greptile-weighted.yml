@@ -31,7 +31,7 @@ jobs:
   detect:
     # Only run on PR comments (not plain issues)
     if: github.event.issue.pull_request != null
-    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ubuntu-24.04
     outputs:
       should_weight: ${{ steps.check.outputs.should_weight }}
       initial_review_id: ${{ steps.check.outputs.initial_review_id }}
@@ -163,7 +163,7 @@ jobs:
   weight:
     needs: detect
     if: needs.detect.outputs.should_weight == 'true'
-    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout at PR head
         uses: actions/checkout@v4

@@ -45,7 +45,7 @@ jobs:
     if: >
       (github.event_name == 'issue_comment' && github.event.issue.pull_request != null) ||
       github.event_name == 'pull_request_review'
-    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ubuntu-24.04
     outputs:
       should_apply: ${{ steps.check.outputs.should_apply }}
       pr_number: ${{ steps.check.outputs.pr_number }}
@@ -168,7 +168,7 @@ jobs:
   apply:
     needs: detect
     if: needs.detect.outputs.should_apply == 'true'
-    runs-on: ${{ github.repository_owner == 'milady-ai' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout PR head
         uses: actions/checkout@v4

@@ -6,7 +6,11 @@
 import type { DatabaseProviderType } from "@miladyai/agent/contracts/config";
 import type {
   CaptureLifeOpsActivitySignalRequest,
+  CreateLifeOpsBrowserCompanionPairingRequest,
   LifeOpsActivitySignal,
+  LifeOpsBrowserCompanionPackageStatus,
+  LifeOpsBrowserCompanionPairingResponse,
+  LifeOpsBrowserKind,
   LifeOpsConnectorMode,
   LifeOpsConnectorSide,
 } from "@miladyai/shared/contracts/lifeops";
@@ -329,6 +333,21 @@ declare module "./client-base" {
     ): Promise<{ settings: LifeOpsBrowserSettings }>;
     listLifeOpsBrowserCompanions(): Promise<{
       companions: LifeOpsBrowserCompanionStatus[];
+    }>;
+    getLifeOpsBrowserPackageStatus(): Promise<{
+      status: LifeOpsBrowserCompanionPackageStatus;
+    }>;
+    createLifeOpsBrowserCompanionPairing(
+      data: CreateLifeOpsBrowserCompanionPairingRequest,
+    ): Promise<LifeOpsBrowserCompanionPairingResponse>;
+    buildLifeOpsBrowserCompanionPackage(browser: LifeOpsBrowserKind): Promise<{
+      status: LifeOpsBrowserCompanionPackageStatus;
+    }>;
+    downloadLifeOpsBrowserCompanionPackage(
+      browser: LifeOpsBrowserKind,
+    ): Promise<{
+      blob: Blob;
+      filename: string;
     }>;
     listLifeOpsBrowserTabs(): Promise<{ tabs: LifeOpsBrowserTabSummary[] }>;
     getLifeOpsBrowserCurrentPage(): Promise<{
@@ -1169,6 +1188,54 @@ MiladyClient.prototype.listLifeOpsBrowserCompanions = async function (
   this: MiladyClient,
 ) {
   return this.fetch("/api/lifeops/browser/companions");
+};
+
+MiladyClient.prototype.getLifeOpsBrowserPackageStatus = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/lifeops/browser/packages");
+};
+
+MiladyClient.prototype.createLifeOpsBrowserCompanionPairing = async function (
+  this: MiladyClient,
+  data,
+) {
+  return this.fetch("/api/lifeops/browser/companions/pair", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+};
+
+MiladyClient.prototype.buildLifeOpsBrowserCompanionPackage = async function (
+  this: MiladyClient,
+  browser,
+) {
+  return this.fetch(
+    `/api/lifeops/browser/packages/${encodeURIComponent(browser)}/build`,
+    {
+      method: "POST",
+    },
+  );
+};
+
+MiladyClient.prototype.downloadLifeOpsBrowserCompanionPackage = async function (
+  this: MiladyClient,
+  browser,
+) {
+  const response = await this.rawRequest(
+    `/api/lifeops/browser/packages/${encodeURIComponent(browser)}/download`,
+    {
+      method: "GET",
+    },
+  );
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const filenameMatch = disposition.match(/filename="([^"]+)"/i);
+  return {
+    blob: await response.blob(),
+    filename:
+      filenameMatch?.[1] ??
+      `lifeops-browser-${browser === "safari" ? "safari" : "chrome"}.zip`,
+  };
 };
 
 MiladyClient.prototype.listLifeOpsBrowserTabs = async function (

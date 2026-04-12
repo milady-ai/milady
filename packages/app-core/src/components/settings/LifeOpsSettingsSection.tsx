@@ -22,6 +22,7 @@ import { useMemo } from "react";
 import { client } from "../../api";
 import { useGoogleLifeOpsConnector } from "../../hooks";
 import { useApp } from "../../state";
+import { LifeOpsBrowserSetupPanel } from "../connectors/LifeOpsBrowserSetupPanel";
 
 function modeLabel(mode: LifeOpsConnectorMode): string {
   switch (mode) {
@@ -408,7 +409,7 @@ function GoogleConnectorSideCard({
 }
 
 export function LifeOpsSettingsSection() {
-  const { setState, t: translate } = useApp();
+  const { t: translate } = useApp();
   const ownerConnector = useGoogleLifeOpsConnector({ side: "owner" });
   const agentConnector = useGoogleLifeOpsConnector({ side: "agent" });
   const apiBaseUrl = useMemo(() => resolveApiBaseUrl(), []);
@@ -419,24 +420,11 @@ export function LifeOpsSettingsSection() {
     <div className="space-y-4">
       <Card className="border-border/60">
         <CardHeader className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Plug2 className="h-4 w-4 text-muted" />
-              <CardTitle className="text-base font-semibold">
-                {t("settings.sections.lifeops.label")}
-              </CardTitle>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full px-4 text-[11px] font-semibold"
-              onClick={() => {
-                setState("tab", "apps");
-                setState("appsSubTab", "browse");
-              }}
-            >
-              Open workspace
-            </Button>
+          <div className="flex items-center gap-2">
+            <Plug2 className="h-4 w-4 text-muted" />
+            <CardTitle className="text-base font-semibold">
+              {t("settings.sections.lifeops.label")}
+            </CardTitle>
           </div>
           <p className="max-w-3xl text-sm text-muted">
             Keep separate Google setups for the owner and the agent. Each side
@@ -457,6 +445,7 @@ export function LifeOpsSettingsSection() {
           />
         </CardContent>
       </Card>
+      <LifeOpsBrowserSetupPanel />
     </div>
   );
 }

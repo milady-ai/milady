@@ -10,9 +10,22 @@ type BlueBubblesWebhookPayload = {
   data: Record<string, unknown>;
 };
 
+type BlueBubblesChat = Record<string, unknown>;
+type BlueBubblesMessage = Record<string, unknown>;
+
+interface BlueBubblesClientLike {
+  listChats(limit?: number, offset?: number): Promise<BlueBubblesChat[]>;
+  getMessages(
+    chatGuid: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<BlueBubblesMessage[]>;
+}
+
 interface BlueBubblesServiceLike {
   isConnected(): boolean;
   getWebhookPath(): string;
+  getClient(): BlueBubblesClientLike | null;
   handleWebhook(payload: BlueBubblesWebhookPayload): Promise<void>;
 }
 
@@ -74,8 +87,92 @@ export async function handleBlueBubblesRoute(
     helpers.json(res, {
       available: true,
       connected: service.isConnected(),
-      webhookPath: service.getWebhookPath(),
+      webhookPath,
     });
+    return true;
+  }
+
+  if (method === "GET" && pathname === "/api/bluebubbles/chats") {
+    const service = resolveService(state);
+    if (!service) {
+      helpers.error(res, "bluebubbles service not registered", 503);
+      return true;
+    }
+
+    const client = service.getClient();
+    if (!client) {
+      helpers.error(res, "bluebubbles client not available", 503);
+      return true;
+    }
+
+    const url = new URL(req.url ?? pathname, "http://localhost");
+    const limit = Math.min(
+      Math.max(1, Number.parseInt(url.searchParams.get("limit") ?? "100", 10) || 100),
+      500,
+    );
+    const offset = Math.max(
+      0,
+      Number.parseInt(url.searchParams.get("offset") ?? "0", 10) || 0,
+    );
+
+    try {
+      const chats = await client.listChats(limit, offset);
+      helpers.json(res, { chats, count: chats.length, limit, offset });
+    } catch (error) {
+      helpers.error(
+        res,
+        `failed to read bluebubbles chats: ${error instanceof Error ? error.message : String(error)}`,
+        500,
+      );
+    }
+    return true;
+  }
+
+  if (method === "GET" && pathname === "/api/bluebubbles/messages") {
+    const service = resolveService(state);
+    if (!service) {
+      helpers.error(res, "bluebubbles service not registered", 503);
+      return true;
+    }
+
+    const client = service.getClient();
+    if (!client) {
+      helpers.error(res, "bluebubbles client not available", 503);
+      return true;
+    }
+
+    const url = new URL(req.url ?? pathname, "http://localhost");
+    const chatGuid = (url.searchParams.get("chatGuid") ?? "").trim();
+    if (!chatGuid) {
+      helpers.error(res, "chatGuid query parameter is required", 400);
+      return true;
+    }
+
+    const limit = Math.min(
+      Math.max(1, Number.parseInt(url.searchParams.get("limit") ?? "50", 10) || 50),
+      500,
+    );
+    const offset = Math.max(
+      0,
+      Number.parseInt(url.searchParams.get("offset") ?? "0", 10) || 0,
+    );
+
+    try {
+      const messages = await client.getMessages(chatGuid, limit, offset);
+      helpers.json(res, {
+        chatGuid,
+        messages,
+        count: messages.length,
+        limit,
+        offset,
+      });
+    } catch (error) {
+      helpers.error(
+        res,
+        `failed to read bluebubbles messages: ${error instanceof Error ? error.message : String(error)}`,
+        500,
+      );
+    }
     return true;
   }
 

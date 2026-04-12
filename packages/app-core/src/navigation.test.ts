@@ -27,8 +27,8 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/voice")).toBe("settings");
   });
 
-  it("maps advanced sub-tabs", () => {
-    expect(tabFromPath("/advanced")).toBe("advanced");
+  it("maps app-tool sub-tabs", () => {
+    expect(tabFromPath("/advanced")).toBe("fine-tuning");
     expect(tabFromPath("/plugins")).toBe("plugins");
     expect(tabFromPath("/skills")).toBe("skills");
     expect(tabFromPath("/actions")).toBeNull();
@@ -46,12 +46,12 @@ describe("tabFromPath", () => {
     expect(tabFromPath("/agent")).toBe("character");
     expect(tabFromPath("/wallets")).toBe("inventory");
     expect(tabFromPath("/features")).toBe("plugins");
-    expect(tabFromPath("/admin")).toBe("advanced");
+    expect(tabFromPath("/admin")).toBe("fine-tuning");
     expect(tabFromPath("/config")).toBe("settings");
   });
 
   it("is case-insensitive for current paths", () => {
-    expect(tabFromPath("/ADVANCED")).toBe("advanced");
+    expect(tabFromPath("/ADVANCED")).toBe("fine-tuning");
     expect(tabFromPath("/Skills")).toBe("skills");
   });
 
@@ -97,7 +97,6 @@ describe("pathForTab", () => {
     "plugins",
     "skills",
     "triggers",
-    "advanced",
     "fine-tuning",
     "trajectories",
     "relationships",
@@ -120,7 +119,7 @@ describe("pathForTab", () => {
 
   it("applies basePath prefixes", () => {
     expect(pathForTab("chat", "/app")).toBe("/app/chat");
-    expect(pathForTab("advanced", "/app")).toBe("/app/advanced");
+    expect(pathForTab("fine-tuning", "/app")).toBe("/app/fine-tuning");
   });
 });
 
@@ -132,45 +131,48 @@ describe("tab groups", () => {
     );
   });
 
-  it("promotes heartbeats to a top-level group and keeps advanced tools grouped together", () => {
+  it("promotes heartbeats to a top-level group and keeps fine-tuning with apps", () => {
     const settings = ALL_TAB_GROUPS.find((group) => group.label === "Settings");
-    expect(settings?.tabs).toEqual(["settings"]);
+    expect(settings?.tabs).toEqual(["settings", "connectors"]);
 
-    const heartbeats = ALL_TAB_GROUPS.find(
-      (group) => group.label === "Heartbeats",
-    );
-    expect(heartbeats?.tabs).toEqual(["triggers"]);
-
-    const advanced = ALL_TAB_GROUPS.find((group) => group.label === "Advanced");
-    expect(advanced?.tabs).toEqual([
-      "advanced",
+    const apps = ALL_TAB_GROUPS.find((group) => group.label === "Apps");
+    expect(apps?.tabs).toEqual([
+      "apps",
+      "lifeops",
       "plugins",
       "skills",
       "fine-tuning",
       "trajectories",
       "relationships",
       "memories",
-      "rolodex",
       "runtime",
       "database",
       "logs",
+      "advanced",
     ]);
+
+    const heartbeats = ALL_TAB_GROUPS.find(
+      (group) => group.label === "Heartbeats",
+    );
+    expect(heartbeats?.tabs).toEqual(["triggers"]);
+    expect(ALL_TAB_GROUPS.map((group) => group.label)).not.toContain(
+      "Advanced",
+    );
   });
 
   it("keeps every supported tab in at least one group", () => {
     const groupedTabs = new Set(ALL_TAB_GROUPS.flatMap((group) => group.tabs));
     const expectedTabs: Tab[] = [
       "chat",
+      "lifeops",
       "browser",
       "stream",
       "apps",
       "inventory",
       "knowledge",
-      "connectors",
       "plugins",
       "skills",
       "triggers",
-      "advanced",
       "fine-tuning",
       "trajectories",
       "relationships",
@@ -178,6 +180,7 @@ describe("tab groups", () => {
       "database",
       "logs",
       "settings",
+      "connectors",
     ];
 
     for (const tab of expectedTabs) {
@@ -203,7 +206,7 @@ describe("titleForTab", () => {
   it("returns human-friendly titles for representative tabs", () => {
     expect(titleForTab("chat")).toBe("Chat");
     expect(titleForTab("browser")).toBe("Browser");
-    expect(titleForTab("advanced")).toBe("Advanced");
+    expect(titleForTab("advanced")).toBe("Fine-Tuning");
     expect(titleForTab("stream")).toBe("Stream");
     expect(titleForTab("database")).toBe("Databases");
     expect(titleForTab("relationships")).toBe("Relationships");

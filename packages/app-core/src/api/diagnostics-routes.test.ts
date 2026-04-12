@@ -32,6 +32,13 @@ async function invoke(args: {
   relayPort?: number;
   checkRelayReachable?: (relayPort: number) => Promise<boolean>;
   resolveExtensionPath?: () => string | null;
+  resolveExtensionArtifacts?: () => {
+    chromeBuildPath?: string | null;
+    chromePackagePath?: string | null;
+    safariWebExtensionPath?: string | null;
+    safariAppPath?: string | null;
+    safariPackagePath?: string | null;
+  };
   requestHeaders?: Record<string, string>;
   initSse?: (res: unknown) => void;
   writeSseJson?: (res: unknown, payload: object, event?: string) => void;
@@ -61,6 +68,7 @@ async function invoke(args: {
     relayPort: args.relayPort,
     checkRelayReachable: args.checkRelayReachable,
     resolveExtensionPath: args.resolveExtensionPath,
+    resolveExtensionArtifacts: args.resolveExtensionArtifacts,
     initSse: args.initSse as never,
     writeSseJson: args.writeSseJson as never,
     json: (_res, data, code = 200) => {
@@ -348,6 +356,17 @@ describe("diagnostics routes", () => {
     const resolveExtensionPath = vi.fn(
       () => "/tmp/eliza/apps/chrome-extension",
     );
+    const resolveExtensionArtifacts = vi.fn(() => ({
+      chromeBuildPath: "/tmp/eliza/apps/extensions/lifeops-browser/dist/chrome",
+      chromePackagePath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/artifacts/lifeops-browser-chrome.zip",
+      safariWebExtensionPath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/safari",
+      safariAppPath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/artifacts/LifeOps Browser.app",
+      safariPackagePath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/artifacts/lifeops-browser-safari.zip",
+    }));
 
     const result = await invoke({
       method: "GET",
@@ -355,16 +374,27 @@ describe("diagnostics routes", () => {
       relayPort: 19999,
       checkRelayReachable,
       resolveExtensionPath,
+      resolveExtensionArtifacts,
     });
 
     expect(result.handled).toBe(true);
     expect(result.status).toBe(200);
     expect(checkRelayReachable).toHaveBeenCalledWith(19999);
     expect(resolveExtensionPath).toHaveBeenCalled();
+    expect(resolveExtensionArtifacts).toHaveBeenCalled();
     expect(result.payload).toEqual({
       relayReachable: true,
       relayPort: 19999,
       extensionPath: "/tmp/eliza/apps/chrome-extension",
+      chromeBuildPath: "/tmp/eliza/apps/extensions/lifeops-browser/dist/chrome",
+      chromePackagePath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/artifacts/lifeops-browser-chrome.zip",
+      safariWebExtensionPath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/safari",
+      safariAppPath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/artifacts/LifeOps Browser.app",
+      safariPackagePath:
+        "/tmp/eliza/apps/extensions/lifeops-browser/dist/artifacts/lifeops-browser-safari.zip",
     });
   });
 });

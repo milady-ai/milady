@@ -106,6 +106,7 @@ export interface ChatGenerationResult {
   text: string;
   agentName: string;
   noResponseReason?: "ignored";
+  usedActionCallbacks?: boolean;
   responseContent?: Content | null;
   responseMessages?: Array<{
     id?: string;
@@ -487,6 +488,32 @@ async function hasRecentAssistantMemory(
       return (
         memory.entityId === runtime.agentId &&
         contentText === trimmed &&
+        createdAt >= sinceMs - 2000
+      );
+    });
+  } catch {
+    return false;
+  }
+}
+
+export async function hasRecentVisibleAssistantMemorySince(
+  runtime: AgentRuntime,
+  roomId: UUID,
+  sinceMs: number,
+): Promise<boolean> {
+  try {
+    const recent = await runtime.getMemories({
+      roomId,
+      tableName: "messages",
+      count: 12,
+    });
+
+    return recent.some((memory) => {
+      const contentText = (memory.content as { text?: string })?.text?.trim();
+      const createdAt = memory.createdAt ?? 0;
+      return (
+        memory.entityId === runtime.agentId &&
+        Boolean(contentText) &&
         createdAt >= sinceMs - 2000
       );
     });
@@ -1423,6 +1450,9 @@ export async function generateChatResponse(
       agentName,
       ...(intentionalNoResponse
         ? { noResponseReason: "ignored" as const }
+        : {}),
+      ...(actionCallbacksSeen > 0
+        ? { usedActionCallbacks: true }
         : {}),
       ...(responseContent ? { responseContent } : {}),
       ...(responseMessages.length > 0 ? { responseMessages } : {}),

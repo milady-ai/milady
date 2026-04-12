@@ -32,6 +32,7 @@ import {
 } from "../api";
 import type { PromptOptions } from "@miladyai/ui";
 import { confirmDesktopAction } from "../utils";
+import { loadWalletEnabled, saveWalletEnabled } from "./persistence";
 import type { InventoryChainFilters } from "./types";
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -60,6 +61,13 @@ export function useWalletState({
   agentName,
   characterName,
 }: WalletStateParams) {
+  // ── Wallet enabled toggle ──────────────────────────────────────────
+  const [walletEnabled, setWalletEnabledRaw] = useState(loadWalletEnabled);
+  const setWalletEnabled = useCallback((v: boolean) => {
+    setWalletEnabledRaw(v);
+    saveWalletEnabled(v);
+  }, []);
+
   // ── Wallet / Inventory ─────────────────────────────────────────────
   const [walletAddresses, setWalletAddresses] =
     useState<WalletAddresses | null>(null);
@@ -355,6 +363,7 @@ export function useWalletState({
 
   return {
     state: {
+      walletEnabled,
       walletAddresses,
       walletConfig,
       walletBalances,
@@ -383,6 +392,7 @@ export function useWalletState({
       whitelistLoading,
     },
     // Raw setters needed by AppContext for UI binding
+    setWalletEnabled,
     setWalletAddresses,
     setInventoryView,
     setInventorySort,

@@ -7,44 +7,49 @@
  * store's prune policy, not by this provider.
  */
 
-import { encode } from "@toon-format/toon";
 import type {
-    IAgentRuntime,
-    Memory,
-    Provider,
-    State,
+  IAgentRuntime,
+  Memory,
+  Provider,
+  ProviderResult,
+  State,
 } from "@elizaos/core";
+import { encode } from "@toon-format/toon";
 
 import type { ScapeGameService } from "../services/game-service.js";
 
 const RECENT_MEMORY_COUNT = 8;
 
 export const journalProvider: Provider = {
-    name: "SCAPE_JOURNAL",
-    description:
-        "Recent Scape Journal memories — observations, combat events, level-ups, and decisions from the last few steps or sessions.",
-    get: async (
-        runtime: IAgentRuntime,
-        _message: Memory,
-        _state?: State,
-    ): Promise<string> => {
-        const service = runtime.getService("scape_game") as unknown as ScapeGameService | null;
-        if (!service) return "";
-        const journal = service.getJournalService?.();
-        if (!journal) return "";
+  name: "SCAPE_JOURNAL",
+  description:
+    "Recent Scape Journal memories — observations, combat events, level-ups, and decisions from the last few steps or sessions.",
+  get: async (
+    runtime: IAgentRuntime,
+    _message: Memory,
+    _state: State,
+  ): Promise<ProviderResult> => {
+    const service = runtime.getService(
+      "scape_game",
+    ) as unknown as ScapeGameService | null;
+    if (!service) return { text: "" };
+    const journal = service.getJournalService?.();
+    if (!journal) return { text: "" };
 
-        const memories = journal.getMemories(RECENT_MEMORY_COUNT);
-        if (memories.length === 0) {
-            return "# JOURNAL\n(no memories yet — this is your first step)";
-        }
+    const memories = journal.getMemories(RECENT_MEMORY_COUNT);
+    if (memories.length === 0) {
+      return {
+        text: "# JOURNAL\n(no memories yet — this is your first step)",
+      };
+    }
 
-        const toon = encode({
-            memories: memories.map((m) => ({
-                kind: m.kind,
-                text: m.text,
-                weight: m.weight ?? 1,
-            })),
-        });
-        return `# JOURNAL (recent ${memories.length})\n${toon}`;
-    },
+    const toon = encode({
+      memories: memories.map((m) => ({
+        kind: m.kind,
+        text: m.text,
+        weight: m.weight ?? 1,
+      })),
+    });
+    return { text: `# JOURNAL (recent ${memories.length})\n${toon}` };
+  },
 };

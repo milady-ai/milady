@@ -24,6 +24,7 @@ import {
 } from "../../platform";
 import { useApp } from "../../state";
 import { openExternalUrl } from "../../utils";
+import { LifeOpsSettingsSection } from "../settings/LifeOpsSettingsSection";
 import {
   AgentGithubCard,
   GoalList,
@@ -489,14 +490,6 @@ export function LifeOpsPageView() {
                 <RefreshCw className="mr-2 h-3.5 w-3.5" />
                 Refresh
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full px-4 text-[11px] font-semibold"
-                onClick={() => setTab("settings")}
-              >
-                Settings
-              </Button>
             </div>
           }
         />
@@ -576,6 +569,8 @@ export function LifeOpsPageView() {
           </>
         ) : null}
       </PagePanel>
+
+      <LifeOpsSettingsSection />
 
       <PagePanel variant="section" className="p-4 lg:p-5">
         <PagePanel.Header

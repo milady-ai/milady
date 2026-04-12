@@ -110,7 +110,10 @@ export type StartupEvent =
   | { type: "SPLASH_LOADED" }
 
   // Cloud fast-path: skip splash + restoring-session entirely
-  | { type: "SPLASH_CLOUD_SKIP" };
+  | { type: "SPLASH_CLOUD_SKIP" }
+
+  // Agent switching from within the app (e.g. Settings profile switcher)
+  | { type: "SWITCH_AGENT"; target: RuntimeTarget };
 
 // ── Reducer ──────────────────────────────────────────────────────────
 
@@ -267,6 +270,13 @@ export function startupReducer(
         case "RESET":
           // Agent reset — return to splash so user can re-onboard
           return INITIAL_STARTUP_STATE;
+        case "SWITCH_AGENT":
+          // Switch to a different agent profile — re-enter polling
+          return {
+            phase: "polling-backend",
+            target: event.target,
+            attempts: 0,
+          };
         default:
           return state;
       }

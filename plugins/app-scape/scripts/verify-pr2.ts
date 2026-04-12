@@ -137,20 +137,27 @@ async function main(): Promise<void> {
         "response Content-Type is text/html",
         (res.getHeader("Content-Type") ?? "").includes("text/html"),
     );
+    // The viewer intentionally does NOT opt into cross-origin isolation.
+    // The xRSPS client *wants* SharedArrayBuffer, but require-corp blocks
+    // any iframe whose origin doesn't send Cross-Origin-Resource-Policy —
+    // and the live Sevalla deployment at scape-client-2sqyc.kinsta.page
+    // doesn't. With COEP on, WebKit silently blocks the iframe and the
+    // "xRSPS client is not reachable" fallback trips. Until infra adds
+    // CORP headers upstream, manual play requires no COOP/COEP/CORP here.
     assertTrue(
-        "response sets cross-origin isolation headers",
-        res.getHeader("Cross-Origin-Opener-Policy") === "same-origin" &&
-            res.getHeader("Cross-Origin-Embedder-Policy") === "require-corp" &&
-            res.getHeader("Cross-Origin-Resource-Policy") === "same-origin",
+        "response does NOT opt into cross-origin isolation",
+        res.getHeader("Cross-Origin-Opener-Policy") === undefined &&
+            res.getHeader("Cross-Origin-Embedder-Policy") === undefined &&
+            res.getHeader("Cross-Origin-Resource-Policy") === undefined,
     );
     assertTrue(
         "response CSP includes frame-ancestors",
         /\bframe-ancestors\b/i.test(res.getHeader("Content-Security-Policy") ?? ""),
     );
     assertTrue(
-        "body contains iframe pointing at localhost:3000",
+        "body contains iframe pointing at default deployed 'scape client",
         res.body.includes('id="scape-frame"') &&
-            res.body.includes("http://localhost:3000"),
+            res.body.includes("https://scape-client-2sqyc.kinsta.page"),
     );
     assertTrue(
         "body contains fallback block",
@@ -242,9 +249,13 @@ async function main(): Promise<void> {
     );
     const byDef = getMiladyCuratedAppDefinition("scape");
     assertTrue("getMiladyCuratedAppDefinition('scape')", byDef != null);
+    // The curated list grows over time as new apps land on develop. What
+    // this PR actually needs to prove is that `scape` is present — not
+    // that the list is exactly a particular length. Hardcoding a count
+    // here gave a false negative every time an unrelated app was added.
     assertTrue(
-        "curated list still has 5 entries (hyperscape, babylon, 2004scape, defense, scape)",
-        MILADY_CURATED_APP_DEFINITIONS.length === 5,
+        "curated list contains scape",
+        MILADY_CURATED_APP_DEFINITIONS.some((d) => d.slug === "scape"),
     );
 
     if (process.exitCode === 1) {

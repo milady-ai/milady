@@ -288,7 +288,23 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `DELETE` | `/api/conversations/:id` | 删除对话 |
 
 <Info>
-对话作用域限于网页聊天界面。每个对话映射到一个具有确定性世界 ID 的 elizaOS 房间。
+对话作用域限于网页聊天界面。每个对话映射到一个具有确定性世界 ID 的 elizaOS 房间。当连接器提供时，来自连接器通道的消息包含额外的发送者身份字段（`from`、`fromUserName`、`avatarUrl`）。
+</Info>
+
+---
+
+<div id="inbox-unified-messages">
+## 收件箱（统一消息）
+</div>
+
+| 方法 | 路径 | 描述 |
+|--------|------|-------------|
+| `GET` | `/api/inbox/messages` | 在统一信息流中列出所有连接器通道的近期消息 |
+| `GET` | `/api/inbox/chats` | 列出连接器聊天线程（每个外部聊天室一行） |
+| `GET` | `/api/inbox/sources` | 列出代理拥有消息的不同连接器来源标签 |
+
+<Info>
+收件箱将来自所有已连接平台（iMessage、Telegram、Discord、WhatsApp、微信、Slack、Signal、SMS）的消息聚合到单个按时间排序的信息流中。仪表盘网页聊天消息被排除 — 这些可通过[对话 API](/zh/rest/conversations)访问。
 </Info>
 
 ---

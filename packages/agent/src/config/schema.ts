@@ -468,6 +468,9 @@ const FIELD_LABELS: Record<string, string> = {
   "connectors.discord.intents.guildMembers": "Discord Guild Members Intent",
   "connectors.discord.pluralkit.enabled": "Discord PluralKit Enabled",
   "connectors.discord.pluralkit.token": "Discord PluralKit Token",
+  "connectors.discord.syncProfile": "Discord Sync Bot Profile",
+  "connectors.discord.profileName": "Discord Bot Username",
+  "connectors.discord.profileAvatar": "Discord Bot Avatar",
   "connectors.slack.dm.policy": "Slack DM Policy",
   "connectors.slack.allowBots": "Slack Allow Bot Messages",
   "connectors.discord.token": "Discord Bot Token",
@@ -940,6 +943,12 @@ const FIELD_HELP: Record<string, string> = {
     "Resolve PluralKit proxied messages and treat system members as distinct senders.",
   "connectors.discord.pluralkit.token":
     "Optional PluralKit token for resolving private systems or members.",
+  "connectors.discord.syncProfile":
+    "Synchronize the Discord bot username/avatar on startup from connector settings (default: true).",
+  "connectors.discord.profileName":
+    "Explicit Discord bot username override; falls back to the active character name when omitted.",
+  "connectors.discord.profileAvatar":
+    "Discord bot avatar source (https URL, data URI, or local file path).",
   "connectors.slack.dm.policy":
     'Direct message access control ("pairing" recommended). "open" requires connectors.slack.dm.allowFrom=["*"].',
 };

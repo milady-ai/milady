@@ -3,6 +3,8 @@ import type { RegistryAppInfo } from "../../api";
 import {
   filterAppsForCatalog,
   getDefaultAppsCatalogSelection,
+  getAppCatalogSectionKey,
+  groupAppsForCatalog,
   shouldShowAppInAppsView,
 } from "./helpers";
 
@@ -190,6 +192,114 @@ describe("apps catalog helpers", () => {
     expect(visibleApps.map((app) => app.name)).toEqual([
       "@elizaos/app-2004scape",
       "@elizaos/app-defense-of-the-agents",
+    ]);
+  });
+
+  it("maps apps into the new catalog sections", () => {
+    expect(
+      getAppCatalogSectionKey(
+        makeApp({
+          name: "@hyperscape/plugin-hyperscape",
+          category: "game",
+        }),
+      ),
+    ).toBe("games");
+    expect(
+      getAppCatalogSectionKey(
+        makeApp({
+          name: "@miladyai/app-plugin-viewer",
+          category: "utility",
+        }),
+      ),
+    ).toBe("developerUtilities");
+    expect(
+      getAppCatalogSectionKey(
+        makeApp({
+          name: "@miladyai/app-companion",
+          category: "world",
+        }),
+      ),
+    ).toBe("companions");
+    expect(
+      getAppCatalogSectionKey(
+        makeApp({
+          name: "@elizaos/app-babylon",
+          category: "platform",
+        }),
+      ),
+    ).toBe("business");
+    expect(
+      getAppCatalogSectionKey(
+        makeApp({
+          name: "@miladyai/app-lifeops",
+          category: "utility",
+        }),
+      ),
+    ).toBe("lifeManagement");
+  });
+
+  it("lets search match catalog section labels", () => {
+    const visibleApps = filterAppsForCatalog(
+      [
+        makeApp({
+          name: "@hyperscape/plugin-hyperscape",
+          displayName: "Hyperscape",
+          category: "game",
+        }),
+        makeApp({
+          name: "@miladyai/app-lifeops",
+          displayName: "LifeOps",
+          category: "utility",
+        }),
+      ],
+      {
+        isProd: false,
+        searchQuery: "life management",
+      },
+    );
+
+    expect(visibleApps.map((app) => app.name)).toEqual([
+      "@miladyai/app-lifeops",
+    ]);
+  });
+
+  it("groups visible apps into section buckets in display order", () => {
+    const sections = groupAppsForCatalog([
+      makeApp({
+        name: "@miladyai/app-plugin-viewer",
+        displayName: "Plugin Viewer",
+        category: "utility",
+      }),
+      makeApp({
+        name: "@hyperscape/plugin-hyperscape",
+        displayName: "Hyperscape",
+        category: "game",
+      }),
+      makeApp({
+        name: "@miladyai/app-lifeops",
+        displayName: "LifeOps",
+        category: "utility",
+      }),
+    ]);
+
+    expect(
+      sections.map((section) => ({
+        key: section.key,
+        apps: section.apps.map((app) => app.name),
+      })),
+    ).toEqual([
+      {
+        key: "games",
+        apps: ["@hyperscape/plugin-hyperscape"],
+      },
+      {
+        key: "developerUtilities",
+        apps: ["@miladyai/app-plugin-viewer"],
+      },
+      {
+        key: "lifeManagement",
+        apps: ["@miladyai/app-lifeops"],
+      },
     ]);
   });
 });

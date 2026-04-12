@@ -12,6 +12,12 @@ const mockSession = vi.hoisted(() => ({
   start: vi.fn().mockResolvedValue(undefined),
   stop: vi.fn(),
   getStatus: vi.fn().mockReturnValue("waiting_for_qr"),
+  getSnapshot: vi.fn().mockReturnValue({
+    status: "waiting_for_qr",
+    qrDataUrl: "data:image/png;base64,signal",
+    phoneNumber: null,
+    error: null,
+  }),
 }));
 
 const signalAuthExists = vi.hoisted(() => vi.fn().mockReturnValue(false));
@@ -48,6 +54,12 @@ describe("handleSignalRoute", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSession.getStatus.mockReturnValue("waiting_for_qr");
+    mockSession.getSnapshot.mockReturnValue({
+      status: "waiting_for_qr",
+      qrDataUrl: "data:image/png;base64,signal",
+      phoneNumber: null,
+      error: null,
+    });
     mockSession.start.mockResolvedValue(undefined);
     signalAuthExists.mockReturnValue(false);
   });

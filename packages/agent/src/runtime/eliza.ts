@@ -61,22 +61,14 @@ import {
 } from "@elizaos/core";
 import * as pluginAgentSkills from "@elizaos/plugin-agent-skills";
 import * as pluginAnthropic from "@elizaos/plugin-anthropic";
-import * as pluginCommands from "@elizaos/plugin-commands";
-import * as pluginCron from "@elizaos/plugin-cron";
-import * as pluginElizacloud from "@elizaos/plugin-elizacloud";
-import * as pluginExperience from "@elizaos/plugin-experience";
 import * as pluginForm from "@elizaos/plugin-form";
 import * as pluginLocalEmbedding from "@elizaos/plugin-local-embedding";
-import * as pluginOllama from "@elizaos/plugin-ollama";
-import * as pluginOpenai from "@elizaos/plugin-openai";
 import * as pluginPdf from "@elizaos/plugin-pdf";
-import * as pluginPersonality from "@elizaos/plugin-personality";
 import * as pluginPluginManager from "@elizaos/plugin-plugin-manager";
 import * as pluginSecretsManager from "@elizaos/plugin-secrets-manager";
 import * as pluginShell from "@elizaos/plugin-shell";
 import * as pluginSql from "@elizaos/plugin-sql";
 import * as pluginTrust from "@elizaos/plugin-trust";
-import rolesPlugin from "./roles/src/index.js";
 import * as pluginSelfControl from "@miladyai/plugin-selfcontrol";
 import {
   isMiladySettingsDebugEnabled,
@@ -100,7 +92,11 @@ import {
   type ElizaConfig,
   loadElizaConfig,
 } from "../config/config.js";
-import { CONNECTOR_ENV_MAP, collectConfigEnvVars } from "../config/env-vars.js";
+import {
+  CONNECTOR_ENV_MAP,
+  collectConfigEnvVars,
+  collectConnectorEnvVars,
+} from "../config/env-vars.js";
 import { resolveStateDir, resolveUserPath } from "../config/paths.js";
 import { resolveServerOnlyPort } from "../config/runtime-env.js";
 import type { PluginInstallRecord } from "../config/types.eliza.js";
@@ -136,6 +132,7 @@ import {
   runtimeTrajectoriesEnabled,
 } from "./native-runtime-features.js";
 import { installRuntimePluginLifecycle } from "./plugin-lifecycle.js";
+import rolesPlugin from "./roles/src/index.js";
 import { shouldEnableTrajectoryLoggingByDefault } from "./trajectory-persistence.js";
 
 const require = createRequire(import.meta.url);
@@ -148,6 +145,69 @@ try {
   pluginAgentOrchestrator = require("./agent-orchestrator-compat");
 } catch {
   pluginAgentOrchestrator = null;
+}
+// Keep plugin-commands behind a guarded runtime require. Some published alpha
+// builds advertise dist/index.js without actually shipping it, and a static
+// ESM import here makes the CLI fail before it can print --help/--version.
+let pluginCommands: unknown = null;
+try {
+  pluginCommands = require("@elizaos/plugin-commands");
+} catch {
+  pluginCommands = null;
+}
+// Keep plugin-cron behind a guarded runtime require for the same reason. Some
+// published alpha builds resolve through package.json but are missing the
+// shipped dist/index.js entry, which breaks CLI bootstrap before help/version.
+let pluginCron: unknown = null;
+try {
+  pluginCron = require("@elizaos/plugin-cron");
+} catch {
+  pluginCron = null;
+}
+// Keep plugin-elizacloud behind a guarded runtime require as well. Some
+// published alpha builds advertise dist/node/index.node.js but do not ship
+// that ESM entry, which breaks CLI bootstrap in published-only CI.
+let pluginElizacloud: unknown = null;
+try {
+  pluginElizacloud = require("@elizaos/plugin-elizacloud");
+} catch {
+  pluginElizacloud = null;
+}
+// Keep plugin-experience behind a guarded runtime require too. Some published
+// alpha builds advertise dist/node/index.node.js without shipping that entry,
+// which breaks CLI and runtime startup in published-only CI.
+let pluginExperience: unknown = null;
+try {
+  pluginExperience = require("@elizaos/plugin-experience");
+} catch {
+  pluginExperience = null;
+}
+// Keep plugin-ollama behind a guarded runtime require as well. Some published
+// alpha builds advertise dist/node/index.node.js but do not ship that ESM
+// entry, which breaks CLI bootstrap and startup smokes in published-only CI.
+let pluginOllama: unknown = null;
+try {
+  pluginOllama = require("@elizaos/plugin-ollama");
+} catch {
+  pluginOllama = null;
+}
+// Keep plugin-openai behind a guarded runtime require too. Some published
+// alpha builds advertise dist/node/index.node.js without shipping that entry,
+// which breaks CLI bootstrap and validation in published-only CI.
+let pluginOpenai: unknown = null;
+try {
+  pluginOpenai = require("@elizaos/plugin-openai");
+} catch {
+  pluginOpenai = null;
+}
+// Keep plugin-personality behind a guarded runtime require too. Some published
+// alpha builds resolve through package.json but do not ship the runtime entry,
+// which breaks live startup smokes before the API server is ready.
+let pluginPersonality: unknown = null;
+try {
+  pluginPersonality = require("@elizaos/plugin-personality");
+} catch {
+  pluginPersonality = null;
 }
 
 type SignalShutdownContext = {
@@ -236,21 +296,27 @@ export const STATIC_ELIZA_PLUGINS: Record<string, unknown> = {
   ...(pluginAgentOrchestrator
     ? { "@elizaos/plugin-agent-orchestrator": pluginAgentOrchestrator }
     : {}),
-  "@elizaos/plugin-cron": pluginCron,
+  ...(pluginCron ? { "@elizaos/plugin-cron": pluginCron } : {}),
   "@elizaos/plugin-shell": pluginShell,
   "@elizaos/plugin-plugin-manager": pluginPluginManager,
   "@elizaos/plugin-agent-skills": pluginAgentSkills,
-  "@elizaos/plugin-commands": pluginCommands,
+  ...(pluginCommands ? { "@elizaos/plugin-commands": pluginCommands } : {}),
   "@elizaos/plugin-pdf": pluginPdf,
-  "@elizaos/plugin-openai": pluginOpenai,
+  ...(pluginOpenai ? { "@elizaos/plugin-openai": pluginOpenai } : {}),
   "@elizaos/plugin-anthropic": pluginAnthropic,
-  "@elizaos/plugin-ollama": pluginOllama,
-  "@elizaos/plugin-elizacloud": pluginElizacloud,
+  ...(pluginOllama ? { "@elizaos/plugin-ollama": pluginOllama } : {}),
+  ...(pluginElizacloud
+    ? { "@elizaos/plugin-elizacloud": pluginElizacloud }
+    : {}),
   "@elizaos/plugin-trust": pluginTrust,
   "@miladyai/plugin-selfcontrol": pluginSelfControl,
   "@miladyai/plugin-discord-local": discordLocalPlugin,
-  "@elizaos/plugin-personality": pluginPersonality,
-  "@elizaos/plugin-experience": pluginExperience,
+  ...(pluginPersonality
+    ? { "@elizaos/plugin-personality": pluginPersonality }
+    : {}),
+  ...(pluginExperience
+    ? { "@elizaos/plugin-experience": pluginExperience }
+    : {}),
 };
 
 // NODE_PATH so dynamic plugin imports (e.g. @elizaos/plugin-agent-orchestrator) resolve.
@@ -1706,8 +1772,9 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
   // user's own keys handle models.
   // If the user chose a subscription provider, treat that as "byok" unless
   // they explicitly set inferenceMode to "cloud".
-  const llmText = resolveServiceRoutingInConfig(config as Record<string, unknown>)
-    ?.llmText;
+  const llmText = resolveServiceRoutingInConfig(
+    config as Record<string, unknown>,
+  )?.llmText;
   const models = (config as Record<string, unknown>).models as
     | {
         nano?: string;
@@ -1719,9 +1786,9 @@ export function applyCloudConfigToEnv(config: ElizaConfig): void {
     | undefined;
   if (effectivelyEnabled) {
     const nano = llmText?.nanoModel || models?.nano || "openai/gpt-5.4-nano";
-    const small = llmText?.smallModel || models?.small || "minimax/minimax-m2.7";
-    const medium =
-      llmText?.mediumModel || models?.medium || small;
+    const small =
+      llmText?.smallModel || models?.small || "minimax/minimax-m2.7";
+    const medium = llmText?.mediumModel || models?.medium || small;
     const large =
       llmText?.largeModel || models?.large || "anthropic/claude-sonnet-4.6";
     const mega = llmText?.megaModel || models?.mega || large;
@@ -2071,12 +2138,9 @@ export function getPgliteRecoveryAction(
   const treatPidAsActiveLock =
     code === pluginSql.PGLITE_ERROR_CODES.ACTIVE_LOCK || isPgliteLockError(err);
   if (
-    treatPidAsActiveLock &&
-    pidStatus === "active" ||
-    treatPidAsActiveLock &&
-    pidStatus === "active-unconfirmed" ||
-    treatPidAsActiveLock &&
-    pidStatus === "check-failed"
+    (treatPidAsActiveLock && pidStatus === "active") ||
+    (treatPidAsActiveLock && pidStatus === "active-unconfirmed") ||
+    (treatPidAsActiveLock && pidStatus === "check-failed")
   ) {
     return "fail-active-lock";
   }
@@ -2088,7 +2152,8 @@ export function getPgliteRecoveryAction(
 
 function createActivePgliteLockError(dataDir: string, err: unknown): Error {
   if (
-    pluginSql.getPgliteErrorCode(err) === pluginSql.PGLITE_ERROR_CODES.ACTIVE_LOCK &&
+    pluginSql.getPgliteErrorCode(err) ===
+      pluginSql.PGLITE_ERROR_CODES.ACTIVE_LOCK &&
     err instanceof Error
   ) {
     return err;
@@ -2118,7 +2183,8 @@ function createManualResetRequiredPgliteError(
 
   const errorText = formatPgliteFailure(err);
   const cause =
-    pluginSql.getPgliteErrorCode(err) === pluginSql.PGLITE_ERROR_CODES.CORRUPT_DATA
+    pluginSql.getPgliteErrorCode(err) ===
+    pluginSql.PGLITE_ERROR_CODES.CORRUPT_DATA
       ? err
       : pluginSql.createPgliteInitError(
           pluginSql.PGLITE_ERROR_CODES.CORRUPT_DATA,
@@ -2721,6 +2787,12 @@ export function buildCharacterFromConfig(config: ElizaConfig): Character {
     agentEntry?.advancedMemory ??
     config.agents?.defaults?.advancedMemory ??
     true;
+  const settings = {
+    MEMORY_SUMMARY_MODEL_TYPE:
+      process.env.MEMORY_SUMMARY_MODEL_TYPE?.trim() || "TEXT_SMALL",
+    MEMORY_REFLECTION_MODEL_TYPE:
+      process.env.MEMORY_REFLECTION_MODEL_TYPE?.trim() || "TEXT_LARGE",
+  };
 
   // Collect secrets from process.env (API keys the plugins need)
   const secretKeys = [
@@ -2841,6 +2913,7 @@ export function buildCharacterFromConfig(config: ElizaConfig): Character {
     ...(postExamples ? { postExamples } : {}),
     ...(mappedExamples ? { messageExamples: mappedExamples } : {}),
     advancedMemory,
+    settings,
     secrets,
   });
 }
@@ -3609,6 +3682,10 @@ export async function startEliza(
           isEnvKeyAllowedForForwarding(key),
         ),
       ),
+      // Forward connector config vars as-is. The connector env map is curated
+      // and plugins need access to secrets like passwords and tokens via
+      // runtime.getSetting() for real transports to boot.
+      ...collectConnectorEnvVars(config),
       // Forward Eliza config env vars as runtime settings
       ...(preferredProviderId ? { MODEL_PROVIDER: preferredProviderId } : {}),
       ...(visionModeSetting ? { VISION_MODE: visionModeSetting } : {}),
@@ -3833,9 +3910,7 @@ export async function startEliza(
       );
       await stewardEvmPreBoot(runtime);
     } catch (err) {
-      logger.debug(
-        `[eliza] Steward EVM pre-boot skipped: ${formatError(err)}`,
-      );
+      logger.debug(`[eliza] Steward EVM pre-boot skipped: ${formatError(err)}`);
     }
 
     // 8. Initialize the runtime (registers remaining plugins, starts services)
@@ -3845,14 +3920,10 @@ export async function startEliza(
 
     // 8a. Apply role gating to wallet plugins (EVM, Solana) — admin-only actions.
     try {
-      const { applyPluginRoleGating } = await import(
-        "./plugin-role-gating.js"
-      );
+      const { applyPluginRoleGating } = await import("./plugin-role-gating.js");
       applyPluginRoleGating(runtime.plugins ?? []);
     } catch (err) {
-      logger.debug(
-        `[eliza] Plugin role gating skipped: ${formatError(err)}`,
-      );
+      logger.debug(`[eliza] Plugin role gating skipped: ${formatError(err)}`);
     }
 
     // 8b. Register lightweight conversation-proximity evaluator.
@@ -3877,9 +3948,7 @@ export async function startEliza(
             validate: async (_runtime, message) => {
               // Run for any message with text from a real user (not the agent).
               const text = (message.content as { text?: string })?.text;
-              return (
-                Boolean(text) && message.entityId !== _runtime.agentId
-              );
+              return Boolean(text) && message.entityId !== _runtime.agentId;
             },
             handler: async (_runtime, message) => {
               await updateProximityRelationships(_runtime, message);
@@ -3888,9 +3957,7 @@ export async function startEliza(
           },
         ],
       });
-      logger.info(
-        "[eliza] ✓ conversation-proximity evaluator registered",
-      );
+      logger.info("[eliza] ✓ conversation-proximity evaluator registered");
     } catch (err) {
       logger.debug(
         `[eliza] Conversation-proximity evaluator skipped: ${formatError(err)}`,

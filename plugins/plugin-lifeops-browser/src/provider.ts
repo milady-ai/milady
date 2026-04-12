@@ -8,15 +8,21 @@ import type {
 import { LifeOpsService } from "@miladyai/agent/lifeops/service";
 import { hasAdminAccess } from "@miladyai/agent/security/access";
 
-function formatSettingsLine(settings: Awaited<ReturnType<LifeOpsService["getBrowserSettings"]>>): string {
+function formatSettingsLine(
+  settings: Awaited<ReturnType<LifeOpsService["getBrowserSettings"]>>,
+): string {
   const status = settings.enabled ? settings.trackingMode : "off";
   const control = settings.allowBrowserControl ? "control on" : "control off";
-  const paused = settings.pauseUntil ? `, paused until ${settings.pauseUntil}` : "";
+  const paused = settings.pauseUntil
+    ? `, paused until ${settings.pauseUntil}`
+    : "";
   return `LifeOps Browser: ${status}, ${control}${paused}.`;
 }
 
 function formatCompanionLine(
-  companion: Awaited<ReturnType<LifeOpsService["listBrowserCompanions"]>>[number],
+  companion: Awaited<
+    ReturnType<LifeOpsService["listBrowserCompanions"]>
+  >[number],
 ): string {
   return `- ${companion.browser}/${companion.profileLabel || companion.profileId}: ${companion.connectionState}${companion.lastSeenAt ? `, seen ${companion.lastSeenAt}` : ""}`;
 }
@@ -47,13 +53,14 @@ export const lifeOpsBrowserProvider: Provider = {
     }
 
     const service = new LifeOpsService(runtime);
-    const [settings, companions, tabs, currentPage, sessions] = await Promise.all([
-      service.getBrowserSettings(),
-      service.listBrowserCompanions(),
-      service.listBrowserTabs(),
-      service.getCurrentBrowserPage(),
-      service.listBrowserSessions(),
-    ]);
+    const [settings, companions, tabs, currentPage, sessions] =
+      await Promise.all([
+        service.getBrowserSettings(),
+        service.listBrowserCompanions(),
+        service.listBrowserTabs(),
+        service.getCurrentBrowserPage(),
+        service.listBrowserSessions(),
+      ]);
     const activeSessions = sessions.filter(
       (session) =>
         session.status === "awaiting_confirmation" ||

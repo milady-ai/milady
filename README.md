@@ -6,7 +6,7 @@
 
 **Milady** is a personal AI assistant that is **local-first by default** and can also connect to **Eliza Cloud** or a **remote self-hosted backend** when you want hosted runtime access. Built on [elizaOS](https://github.com/elizaOS)
 
-manages your sessions, tools, and vibes through a Gateway control plane. Connects to Telegram, Discord, whatever normie platform you use. Has a cute WebChat UI too.
+Manages your sessions, tools, and vibes through a Gateway control plane. Connects to Telegram, Discord, whatever normie platform you use. Has a cute WebChat UI too.
 
 tl;dr: local AI gf that's actually fast and doesn't phone home
 
@@ -597,7 +597,7 @@ See **[Architecture](docs/architecture.mdx)** for the full development guide inc
 
 - **[Developer diagnostics and workspace](docs/guides/developer-diagnostics-and-workspace.md)** — Why optional-plugin logs include **load provenance**, why stagehand path **walks parents**, why life-ops migrations use explicit **transactions** and **deferred indexes**, and why **workspace:** scripts / **gitignore** rules exist for local checkouts.
 - **[Plugin resolution and NODE_PATH](docs/plugin-resolution-and-node-path.md)** — Why we set `NODE_PATH` in three places so dynamic plugin imports resolve when building from source (CLI, desktop dev, Electrobun). Includes **pinned `@elizaos/plugin-openrouter`**, **why** `alpha.12` must not be resolved until upstream fixes the published bundle, and **optional plugin provenance** when a package is missing.
-- **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, setup-node v3/Blacksmith, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
+- **[Build and release](docs/build-and-release.md)** — Why the release pipeline uses strict shell, retries, `actions/setup-node@v4` + `check-latest: false`, Bun cache, timeouts; why size-report pipelines handle SIGPIPE; why Windows plugin build uses `npx -p typescript tsc`.
 - **[Desktop local development](docs/apps/desktop-local-development.md)** — Why `dev:desktop` / `dev:desktop:watch` orchestrate Vite, API, and Electrobun; HMR vs `vite build --watch`; Ctrl-C, Quit, and `detached` children; **IDE/agent observability** (`/api/dev/stack`, aggregated console, screenshot proxy, WHY loopback and opt-out).
 - **[Desktop main-process reset](docs/apps/desktop-main-process-reset.md)** — Why **Reset Milady…** runs HTTP in the Electrobun main process after native confirm, how the renderer syncs UI state, reachable API probing (`res.ok`), and where tests live.
 - **[Darwin vs macOS version (Electrobun WebGPU)](docs/apps/electrobun-darwin-macos-webgpu-version.md)** — Why **`uname -r` / `os.release()`** is not the macOS marketing major after Tahoe, how we map **Darwin 25 → macOS 26**, and why the WebGPU gate used to print “macOS 16.”

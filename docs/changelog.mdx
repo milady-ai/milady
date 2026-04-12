@@ -3,6 +3,90 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-12" description="Week of April 12; Shopify plugin, inbox actions, connector setup, companion overlay, provider switcher" tags={["Feature", "Update", "Fix"]}>
+
+## Shopify plugin
+
+Your agent can now manage a Shopify store through conversation. Ask your agent to look up products, check order status, manage inventory levels, or search customer records — all without leaving the chat. The plugin connects to your Shopify store and handles product, order, inventory, and customer operations with natural language. Enable it from the [plugins](/plugins/overview) view.
+
+## Inbox triage, digest, and respond
+
+The [unified inbox](/rest/inbox) now supports three new actions you can trigger through chat. Ask your agent to triage incoming messages and it classifies them by urgency and source. Request a digest and it summarizes what's come in across all your connected platforms. You can also ask your agent to draft and route a response back to the right channel — the reply deep-links to the originating platform automatically.
+
+## Connector setup panels
+
+Setting up connectors no longer requires editing config files. Discord, Telegram, iMessage, Signal, and WhatsApp now have dedicated setup panels directly in the dashboard. Each panel walks you through authentication, shows connection status, and lets you configure per-connector settings like chat permissions and mode selection. See [connectors](/guides/connectors) for details.
+
+## Companion overlay app
+
+Companion mode has been redesigned as a launchable overlay app instead of a shell toggle. Open it from the apps view and it floats above your dashboard. The 3D scene now uses a lighter procedural environment, and VRM avatar files are significantly smaller — reducing the initial download by roughly 70%. Avatars load lazily when you open the companion and are disposed when you close it.
+
+## Vincent trading panels
+
+The [Apps view](/dashboard/apps) now includes Vincent trading profile and strategy panels. View your vault status, connection state, and trading strategies without leaving the dashboard.
+
+## Updates
+
+- **Provider switcher** — A new provider switcher in [settings](/apps/dashboard/settings) lets you swap between local and cloud LLM providers in one click. Your routing preference is saved and applied immediately — no restart required.
+- **Character tab in navigation** — Character configuration is now accessible from the main navigation pill row, making it faster to reach your agent's personality and avatar settings.
+- **Life-ops LLM routing** — Calendar and Gmail actions now let the LLM drive subaction routing instead of using post-generation regex overrides, which means more accurate handling of complex requests like "reschedule my 3pm and reply to the invite."
+- **Relationships graph improvements** — The [contacts view](/rest/inbox) identity cluster graph now shows richer relationship data with improved layout and filtering in the graph panel.
+- **Plugin role gating** — Plugins can now declare required roles, and the runtime only loads them when the active user meets the role requirement. This keeps the action space focused and prevents accidental access to admin-only features.
+- **Life-ops widget visibility** — Sidebar widgets for life-ops features like Calendar and Gmail now hide automatically when the corresponding plugin isn't loaded, reducing clutter for users who haven't configured those integrations.
+- **Hyperscape live telemetry** — The [Hyperscape game](/dashboard/apps) now streams live session data including goals, quick-actions, and agent thoughts directly into the app panel.
+
+## Bug fixes
+
+- Fixed streamed chat responses being replaced with a generic error message when a post-action continuation failed — the successfully streamed text is now preserved
+- Fixed life-ops widgets polling the backend even when no Google connector was configured
+- Fixed a dev-mode startup crash caused by barrel file resolution in the Rollup bundler
+
+</Update>
+
+<Update label="2026-04-11" description="Week of April 11; 'Scape game app, Shopify plugin, Vincent trading, inbox actions, companion overlay, coding agent streaming" tags={["Feature", "Update", "Fix"]}>
+
+## 'Scape game app
+
+The xRSPS game is now playable directly in the [apps view](/dashboard/apps). Click the 'Scape tile and you land in a working game session — no configuration required. An operator surface shows your agent's live status, location, inventory, skills, and nearby entities. You can pause, resume, and steer the agent with natural-language prompts from the operator panel. The agent's autonomous loop journal and recent actions are visible alongside the game view.
+
+## Shopify plugin
+
+A new Shopify plugin lets your agent manage an online store through conversation. Connect your Shopify credentials and your agent can browse products, manage inventory levels, look up orders, search customers, and handle store operations — all from chat. A dedicated Shopify panel in the [apps view](/dashboard/apps) provides direct access to products, orders, inventory, and customer dashboards.
+
+## Vincent trading panels
+
+The [apps view](/dashboard/apps) now includes a Vincent section with trading profile and strategy panels. View your connected trading profile, review active strategies, and monitor trading activity without leaving the dashboard.
+
+## Inbox actions
+
+The [inbox](/rest/inbox) now supports triage, digest, and respond actions. Your agent can classify incoming messages by urgency, generate a digest summary across channels, and draft responses — with deep-link routing back to the originating platform. Ask your agent to triage your inbox or summarize recent messages and it handles the rest.
+
+## Companion overlay app
+
+Companion mode is now a launchable overlay app instead of a shell toggle. Open and close the companion view independently, and the VRM avatar loads lazily when you open the overlay and disposes when you close it — reducing idle memory usage. A new Character tab in the main navigation gives you quick access to your agent's persona and avatar settings.
+
+## Updates
+
+- **Life-ops routing improved** — The [life-ops](/rest/lifeops) Gmail and Calendar actions now use LLM-driven routing instead of regex-based overrides, producing more accurate subaction selection. Action descriptions include clearer guidance so the LLM picks the right tool on the first try.
+- **Coding agent progress streams to Discord** — When your agent spawns a [coding task](/guides/coding-swarms) from Discord, progress updates now stream back to the channel. You get a heartbeat after 45 seconds of silence and the final result is posted automatically when the task completes — no more staring at silence during long builds.
+- **Chat UI performance** — The chat composer and PTY session polling no longer trigger unnecessary re-renders across the dashboard. Typing in chat is noticeably smoother, especially with the companion view or coding terminals open.
+- **Sidebar widgets respect plugin state** — Dashboard sidebar widgets for unconfigured plugins (like life-ops without a Google connector) are now hidden automatically, reducing clutter and stopping unnecessary background polling.
+- **Connector setup on macOS** — Setup flows for connectors on macOS are now complete, with guided configuration panels for each supported platform.
+- **Inbox source labels** — Messages in the inbox chat header now display the originating platform label, making it easy to see which channel a conversation came from.
+- **SparkJS removed** — The SparkJS dependency and Gaussian splatting assets (~57 MB) have been replaced with a lighter procedural Three.js scene, reducing download size and improving VRM scene load times.
+
+## Bug fixes
+
+- Fixed streamed chat responses being replaced with a generic error message when a post-action continuation failed — the successfully streamed text is now preserved
+- Fixed coding agent tasks occasionally producing duplicate completion messages in Discord
+- Fixed long coding agent responses exceeding Discord's message limit — results are now split into sequential chunks at paragraph boundaries
+- Fixed coding agent settings showing "Eliza Cloud" as the provider after disconnecting from cloud
+- Fixed the cloud disconnect state not persisting correctly after unlinking
+- Fixed duplicate generic model keys appearing in plugin settings when provider-prefixed equivalents were already present
+- Fixed the orchestrator sidebar widget not stripping ANSI codes from task output
+
+</Update>
+
 <Update label="2026-04-10" description="Week of April 10; Eliza Cloud for coding agents, contacts view, content pack picker, Discord cloud settings, connection overlay" tags={["Feature", "Update", "Fix"]}>
 
 ## Eliza Cloud as a provider for coding agents

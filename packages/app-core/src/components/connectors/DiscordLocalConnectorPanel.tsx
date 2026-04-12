@@ -1,5 +1,5 @@
 import { Button, PagePanel } from "@miladyai/ui";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { client } from "../../api";
 import { useApp } from "../../state";
 
@@ -49,6 +49,12 @@ function currentUserLabel(status: DiscordLocalStatus | null): string | null {
   );
 }
 
+function selectedChannelIdsFromStatus(status: DiscordLocalStatus): string[] {
+  return status.subscribedChannelIds.length > 0
+    ? status.subscribedChannelIds
+    : status.configuredChannelIds;
+}
+
 export function DiscordLocalConnectorPanel() {
   const { t } = useApp();
   const [status, setStatus] = useState<DiscordLocalStatus | null>(null);
@@ -65,17 +71,16 @@ export function DiscordLocalConnectorPanel() {
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  const applyStatus = useCallback((nextStatus: DiscordLocalStatus) => {
+    setStatus(nextStatus);
+    setSelectedChannelIds(selectedChannelIdsFromStatus(nextStatus));
+  }, []);
+
   const refreshStatus = useCallback(async () => {
     setLoadingStatus(true);
     setError(null);
     try {
-      const nextStatus = await client.getDiscordLocalStatus();
-      setStatus(nextStatus);
-      setSelectedChannelIds(
-        nextStatus.subscribedChannelIds.length > 0
-          ? nextStatus.subscribedChannelIds
-          : nextStatus.configuredChannelIds,
-      );
+      applyStatus(await client.getDiscordLocalStatus());
     } catch (nextError) {
       setError(
         nextError instanceof Error ? nextError.message : String(nextError),
@@ -83,7 +88,7 @@ export function DiscordLocalConnectorPanel() {
     } finally {
       setLoadingStatus(false);
     }
-  }, []);
+  }, [applyStatus]);
 
   const loadGuilds = useCallback(async () => {
     setLoadingGuilds(true);
@@ -167,13 +172,7 @@ export function DiscordLocalConnectorPanel() {
     setError(null);
     setSaveMessage(null);
     try {
-      const nextStatus = await client.authorizeDiscordLocal();
-      setStatus(nextStatus);
-      setSelectedChannelIds(
-        nextStatus.subscribedChannelIds.length > 0
-          ? nextStatus.subscribedChannelIds
-          : nextStatus.configuredChannelIds,
-      );
+      applyStatus(await client.authorizeDiscordLocal());
     } catch (nextError) {
       setError(
         nextError instanceof Error ? nextError.message : String(nextError),
@@ -181,7 +180,7 @@ export function DiscordLocalConnectorPanel() {
     } finally {
       setAuthorizing(false);
     }
-  }, []);
+  }, [applyStatus]);
 
   const handleDisconnect = useCallback(async () => {
     setDisconnecting(true);
@@ -229,8 +228,7 @@ export function DiscordLocalConnectorPanel() {
       setSaving(false);
     }
   }, [selectedChannelIds, t]);
-
-  const connectedUser = useMemo(() => currentUserLabel(status), [status]);
+  const connectedUser = currentUserLabel(status);
 
   return (
     <PagePanel.Notice

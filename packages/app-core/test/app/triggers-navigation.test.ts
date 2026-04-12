@@ -1,6 +1,7 @@
 import {
   ALL_TAB_GROUPS,
   APPS_ENABLED,
+  APPS_TOOL_TABS,
   pathForTab,
   tabFromPath,
   titleForTab,
@@ -10,8 +11,9 @@ import { describe, expect, test } from "vitest";
 describe("navigation", () => {
   test("resolves path and title for advanced tabs and triggers", () => {
     expect(pathForTab("advanced")).toBe("/advanced");
-    expect(tabFromPath("/advanced")).toBe("advanced");
-    expect(titleForTab("advanced")).toBe("Advanced");
+    // /advanced is a legacy alias that now resolves to fine-tuning
+    expect(tabFromPath("/advanced")).toBe("fine-tuning");
+    expect(titleForTab("advanced")).toBe("Fine-Tuning");
 
     expect(pathForTab("trajectories")).toBe("/trajectories");
     expect(tabFromPath("/trajectories")).toBe("trajectories");
@@ -34,10 +36,11 @@ describe("navigation", () => {
     expect(titleForTab("triggers")).toBe("Heartbeats");
   });
 
-  test("promotes heartbeats to a top-level group and keeps other tools in Advanced", () => {
+  test("promotes heartbeats to a top-level group and keeps other tools in Apps", () => {
     const settings = ALL_TAB_GROUPS.find((group) => group.label === "Settings");
     expect(settings).toBeDefined();
-    expect(settings?.tabs).toEqual(["settings"]);
+    // Connectors merged into Settings group
+    expect(settings?.tabs).toEqual(["settings", "connectors"]);
 
     const heartbeats = ALL_TAB_GROUPS.find(
       (group) => group.label === "Heartbeats",
@@ -45,19 +48,21 @@ describe("navigation", () => {
     expect(heartbeats).toBeDefined();
     expect(heartbeats?.tabs).toEqual(["triggers"]);
 
-    const advanced = ALL_TAB_GROUPS.find((group) => group.label === "Advanced");
-    expect(advanced).toBeDefined();
-    expect(advanced?.tabs.includes("advanced")).toBe(true);
-    expect(advanced?.tabs.includes("plugins")).toBe(true);
-    expect(advanced?.tabs.includes("skills")).toBe(true);
-    // "actions" was removed (dead code — commented out in AdvancedPageView,
-    // no CustomActionsView component exists). See PR #1526 audit.
-    expect(advanced?.tabs.includes("triggers")).toBe(false);
-    expect(advanced?.tabs.includes("fine-tuning")).toBe(true);
-    expect(advanced?.tabs.includes("trajectories")).toBe(true);
-    expect(advanced?.tabs.includes("runtime")).toBe(true);
-    expect(advanced?.tabs.includes("database")).toBe(true);
-    expect(advanced?.tabs.includes("logs")).toBe(true);
+    // "Advanced" group was replaced by "Apps" which includes all tool tabs
+    const apps = ALL_TAB_GROUPS.find((group) => group.label === "Apps");
+    expect(apps).toBeDefined();
+    expect(apps?.tabs).toContain("apps");
+    expect(apps?.tabs).toContain("plugins");
+    expect(apps?.tabs).toContain("skills");
+    expect(apps?.tabs).toContain("fine-tuning");
+    expect(apps?.tabs).toContain("trajectories");
+    expect(apps?.tabs).toContain("runtime");
+    expect(apps?.tabs).toContain("database");
+    expect(apps?.tabs).toContain("logs");
+    // "advanced" is a legacy hidden alias within Apps
+    expect(apps?.tabs).toContain("advanced");
+    // triggers live in their own Heartbeats group, not in Apps
+    expect(apps?.tabs).not.toContain("triggers");
   });
 
   test("hides Voice from top-level header groups", () => {
@@ -86,29 +91,30 @@ describe("navigation", () => {
     expect(titleForTab("inventory")).toBe("Inventory");
   });
 
-  test("does not expose game as a top-level apps tab", () => {
+  test("Apps group includes apps entry plus all tool tabs", () => {
     const apps = ALL_TAB_GROUPS.find((group) => group.label === "Apps");
     expect(apps).toBeDefined();
-    expect(apps?.tabs).toEqual(["apps"]);
+    expect(apps?.tabs).toEqual(["apps", ...APPS_TOOL_TABS]);
   });
 
-  test("keeps inventory/knowledge/connectors/character as top-level groups and adds heartbeats to the main nav", () => {
+  test("keeps inventory/knowledge/character as top-level groups, connectors in settings, and heartbeats in the main nav", () => {
     const labels = ALL_TAB_GROUPS.map((group) => group.label);
     expect(labels).toContain("Character");
     expect(labels).toContain("Inventory");
     expect(labels).toContain("Knowledge");
-    expect(labels).toContain("Connectors");
+    // Connectors merged into Settings — no standalone group
+    expect(labels).not.toContain("Connectors");
     expect(labels).toContain("Heartbeats");
     expect(labels).not.toContain("Tasks");
     expect(labels).not.toContain("Triggers");
+    // No standalone Advanced group — tools now live under Apps
+    expect(labels).not.toContain("Advanced");
     const settings = ALL_TAB_GROUPS.find((group) => group.label === "Settings");
-    expect(settings?.tabs).toEqual(["settings"]);
+    expect(settings?.tabs).toEqual(["settings", "connectors"]);
     const heartbeats = ALL_TAB_GROUPS.find(
       (group) => group.label === "Heartbeats",
     );
     expect(heartbeats?.tabs).toEqual(["triggers"]);
-    const advanced = ALL_TAB_GROUPS.find((group) => group.label === "Advanced");
-    expect(advanced?.tabs.includes("triggers")).toBe(false);
     expect(labels).not.toContain("Agent");
   });
 });

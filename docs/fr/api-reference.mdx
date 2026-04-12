@@ -288,7 +288,23 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `DELETE` | `/api/conversations/:id` | Supprimer une conversation |
 
 <Info>
-Les conversations sont limitées à l'interface de chat web. Chaque conversation correspond à une salle elizaOS avec un identifiant de monde déterministe.
+Les conversations sont limitées à l'interface de chat web. Chaque conversation correspond à une salle elizaOS avec un identifiant de monde déterministe. Les messages provenant des canaux de connecteurs incluent des champs d'identité supplémentaires de l'expéditeur (`from`, `fromUserName`, `avatarUrl`) lorsque le connecteur les fournit.
+</Info>
+
+---
+
+<div id="inbox-unified-messages">
+## Boîte de réception (Messages unifiés)
+</div>
+
+| Méthode | Chemin | Description |
+|---------|--------|-------------|
+| `GET` | `/api/inbox/messages` | Lister les messages récents de tous les canaux de connecteurs dans un flux unifié |
+| `GET` | `/api/inbox/chats` | Lister les fils de discussion des connecteurs (une ligne par salon de chat externe) |
+| `GET` | `/api/inbox/sources` | Lister les tags de source de connecteurs distincts pour lesquels l'agent a des messages |
+
+<Info>
+La boîte de réception agrège les messages de toutes les plateformes connectées (iMessage, Telegram, Discord, WhatsApp, WeChat, Slack, Signal, SMS) dans un flux unique ordonné par le temps. Les messages du chat web du tableau de bord sont exclus — ceux-ci sont accessibles via l'[API de conversations](/fr/rest/conversations).
 </Info>
 
 ---

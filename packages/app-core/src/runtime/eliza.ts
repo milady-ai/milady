@@ -278,32 +278,34 @@ export async function ensureMiladyTextToSpeechHandler(
   };
 
   try {
+    // Prefer the CommonJS entry in local workspaces. Some workspace ESM builds
+    // throw during module evaluation, and Bun can hang a later hot-restart when
+    // the same broken specifier is imported again. The CJS export remains stable.
+    let handler: TtsModelHandler | undefined;
+    try {
+      const cjsMod = require("@elizaos/plugin-edge-tts") as EdgeTtsPluginModule;
+      handler = readHandler(cjsMod.edgeTTSPlugin);
+    } catch {
+      handler = undefined;
+    }
+
     // The package root export can resolve to the **browser stub** (`models: {}`)
     // under Bun / some bundlers. The `/node` subpath always loads `node-edge-tts`.
-    let plugin: EdgeTtsPluginModule["default"] | undefined;
-    try {
-      const nodeMod = (await import(
-        "@elizaos/plugin-edge-tts/node"
-      )) as EdgeTtsPluginModule;
-      plugin = nodeMod.default;
-    } catch {
-      plugin = undefined;
+    if (!handler) {
+      try {
+        const nodeMod = (await import(
+          "@elizaos/plugin-edge-tts/node"
+        )) as EdgeTtsPluginModule;
+        handler = readHandler(nodeMod.default);
+      } catch {
+        handler = undefined;
+      }
     }
-    let handler = readHandler(plugin);
     if (!handler) {
       const rootMod = (await import(
         "@elizaos/plugin-edge-tts"
       )) as EdgeTtsPluginModule;
       handler = readHandler(rootMod.default);
-    }
-    if (!handler) {
-      try {
-        const cjsMod =
-          require("@elizaos/plugin-edge-tts") as EdgeTtsPluginModule;
-        handler = readHandler(cjsMod.edgeTTSPlugin);
-      } catch {
-        handler = undefined;
-      }
     }
     if (!handler) {
       logger.warn(

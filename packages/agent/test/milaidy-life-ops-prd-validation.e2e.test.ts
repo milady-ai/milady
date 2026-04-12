@@ -6,20 +6,20 @@
  * stays in-repo without forcing external credentials in normal CI.
  */
 
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import crypto from "node:crypto";
 import type { AgentRuntime, Task, UUID } from "@elizaos/core";
 import { describe, expect, it, vi } from "vitest";
 import { describeIf, itIf } from "../../../test/helpers/conditional-tests.ts";
+import { req } from "../../../test/helpers/http";
+import { saveEnv, sleep } from "../../../test/helpers/test-utils";
 import { startApiServer } from "../src/api/server";
 import { resolveOAuthDir } from "../src/config/paths";
 import { LifeOpsRepository } from "../src/lifeops/repository";
 import { LifeOpsService } from "../src/lifeops/service";
 import { DatabaseSync } from "../src/test-utils/sqlite-compat";
-import { req } from "../../../test/helpers/http";
-import { saveEnv, sleep } from "../../../test/helpers/test-utils";
 
 const envPath = path.resolve(import.meta.dirname, "..", "..", "..", ".env");
 try {
@@ -232,7 +232,7 @@ const contractScenarios: Scenario[] = [
     phase: "P3",
     domain: "browser",
     title:
-      "agent-controlled browser sessions expose visible state including awaiting confirmation, navigating, and done",
+      "agent-controlled browser sessions expose visible state including awaiting confirmation, queued, and done",
   },
   {
     id: "P3-04",
@@ -2929,6 +2929,18 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
               );
               expect(workflowCreate.status).toBe(201);
 
+              const browserSettings = await req(
+                port,
+                "POST",
+                "/api/lifeops/browser/settings",
+                {
+                  allowBrowserControl: true,
+                  enabled: true,
+                  trackingMode: "current_tab",
+                },
+              );
+              expect(browserSettings.status).toBe(200);
+
               const runRes = await req(
                 port,
                 "POST",
@@ -3262,6 +3274,18 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
           });
 
           try {
+            const browserSettings = await req(
+              server.port,
+              "POST",
+              "/api/lifeops/browser/settings",
+              {
+                allowBrowserControl: true,
+                enabled: true,
+                trackingMode: "current_tab",
+              },
+            );
+            expect(browserSettings.status).toBe(200);
+
             const created = await req(
               server.port,
               "POST",
@@ -3292,7 +3316,7 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
               },
             );
             expect(confirmed.status).toBe(200);
-            expect(confirmed.data.session.status).toBe("navigating");
+            expect(confirmed.data.session.status).toBe("queued");
 
             const completed = await req(
               server.port,
@@ -3337,6 +3361,18 @@ for (const phase of ["P0", "P1", "P2", "P3"] as const) {
           });
 
           try {
+            const browserSettings = await req(
+              server.port,
+              "POST",
+              "/api/lifeops/browser/settings",
+              {
+                allowBrowserControl: true,
+                enabled: true,
+                trackingMode: "current_tab",
+              },
+            );
+            expect(browserSettings.status).toBe(200);
+
             const created = await req(
               server.port,
               "POST",
@@ -3835,9 +3871,9 @@ describeLive("Milaidy PRD live connector coverage", () => {
         },
       );
       expect(confirmed.status).toBe(200);
-      expect(confirmed.data.session.status).toBe("navigating");
+      expect(confirmed.data.session.status).toBe("queued");
 
-      await assertBrowserSessionListed(port, sessionId, "navigating");
+      await assertBrowserSessionListed(port, sessionId, "queued");
 
       const completed = await req(
         port,

@@ -114,6 +114,8 @@ export const OPTIONAL_PLUGIN_MAP: Readonly<Record<string, string>> = {
   browser: "@elizaos/plugin-browser",
   "milady-browser": "@miladyai/plugin-milady-browser",
   miladyBrowser: "@miladyai/plugin-milady-browser",
+  "lifeops-browser": "@miladyai/plugin-lifeops-browser",
+  lifeopsBrowser: "@miladyai/plugin-lifeops-browser",
   vision: "@elizaos/plugin-vision",
   elizacloud: "@elizaos/plugin-elizacloud",
   selfcontrol: "@miladyai/plugin-selfcontrol",
@@ -285,12 +287,20 @@ export function collectPluginNames(
     ((config as Record<string, unknown>).channels as Record<string, unknown>) ??
     {};
   for (const [channelName, channelConfig] of Object.entries(connectors)) {
-    if (channelConfig && typeof channelConfig === "object") {
-      const pluginName = CHANNEL_PLUGIN_MAP[channelName];
-      if (pluginName) {
-        pluginsToLoad.add(pluginName);
-        track(pluginName, `connectors.${channelName}`);
-      }
+    if (
+      !channelConfig ||
+      typeof channelConfig !== "object" ||
+      Array.isArray(channelConfig)
+    ) {
+      continue;
+    }
+    if ((channelConfig as Record<string, unknown>).enabled === false) {
+      continue;
+    }
+    const pluginName = CHANNEL_PLUGIN_MAP[channelName];
+    if (pluginName) {
+      pluginsToLoad.add(pluginName);
+      track(pluginName, `connectors.${channelName}`);
     }
   }
 

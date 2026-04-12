@@ -15,7 +15,7 @@ const REPO_ROOT = path.resolve(
   "..",
   "..",
 );
-const READY_TIMEOUT_MS = 30_000;
+const READY_TIMEOUT_MS = 60_000;
 
 type SpawnedProcess = {
   child: ChildProcessWithoutNullStreams;
@@ -354,7 +354,10 @@ describe("PGlite fail-fast e2e", () => {
       buildEnv(harness.stateDir, harness.configPath, runPort),
     );
 
-    const exited = await waitForChildExit(proc.child, 20_000);
+    // Under the full e2e matrix this direct Bun bootstrap can take noticeably
+    // longer than local single-file runs before it reaches the manual-reset
+    // failure and exits.
+    const exited = await waitForChildExit(proc.child, 60_000);
     const output = proc.output.join("");
     const siblings = readdirSync(path.dirname(dbDir)).filter((entry) =>
       entry.startsWith(".elizadb.corrupt-"),
@@ -393,7 +396,10 @@ describe("PGlite fail-fast e2e", () => {
     const secondProc = spawnDevServer(
       buildEnv(harness.stateDir, harness.configPath, secondPort),
     );
-    await waitForHealthReady(secondPort);
+    // The quarantine + retry path starts a fresh runtime after moving the
+    // corrupt data dir aside, which can take materially longer under the full
+    // parallel e2e load than it does in isolation.
+    await waitForHealthReady(secondPort, 180_000);
 
     const siblings = readdirSync(path.dirname(dbDir)).filter((entry) =>
       entry.startsWith(".elizadb.corrupt-"),

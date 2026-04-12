@@ -91,32 +91,31 @@ function serializeBrowserActionResponse(response: {
 async function startLocalSiteFixture(): Promise<LocalSiteFixture> {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
-	    const page =
-	      url.pathname === "/tasks"
-	        ? {
-	            title: "Tasks Fixture",
-	            body: "<h1>Tasks Fixture</h1><p>Agent task board</p>",
-	          }
-	        : url.pathname === "/welcome"
-	          ? {
-	              title: "Welcome Fixture",
-	              body: `<h1>Welcome, ${url.searchParams.get("name") || "Anonymous"}</h1><p>Agent browser workspace welcome page</p>`,
-	            }
-	          : url.pathname === "/form"
-	            ? {
-	                title: "Browser Form Fixture",
-	                body:
-	                  '<h1>Browser Form Fixture</h1><form action="/welcome" method="get"><label>Agent name<input name="name" value="" /></label><label>Plan<select name="plan"><option value="basic">Basic</option><option value="pro">Pro</option></select></label><label><input type="checkbox" name="terms" value="yes" />Accept terms</label><button type="submit">Continue</button></form>',
-	              }
-	        : url.pathname === "/notes"
-	          ? {
-	              title: "Notes Fixture",
-	              body: "<h1>Notes Fixture</h1><p>Agent notes page</p>",
+    const page =
+      url.pathname === "/tasks"
+        ? {
+            title: "Tasks Fixture",
+            body: "<h1>Tasks Fixture</h1><p>Agent task board</p>",
+          }
+        : url.pathname === "/welcome"
+          ? {
+              title: "Welcome Fixture",
+              body: `<h1>Welcome, ${url.searchParams.get("name") || "Anonymous"}</h1><p>Agent browser workspace welcome page</p>`,
             }
-          : {
-              title: "Counter Fixture",
-              body: "<h1>Counter Fixture</h1><p>Agent browser workspace counter</p>",
-            };
+          : url.pathname === "/form"
+            ? {
+                title: "Browser Form Fixture",
+                body: '<h1>Browser Form Fixture</h1><form action="/welcome" method="get"><label>Agent name<input name="name" value="" /></label><label>Plan<select name="plan"><option value="basic">Basic</option><option value="pro">Pro</option></select></label><label><input type="checkbox" name="terms" value="yes" />Accept terms</label><button type="submit">Continue</button></form>',
+              }
+            : url.pathname === "/notes"
+              ? {
+                  title: "Notes Fixture",
+                  body: "<h1>Notes Fixture</h1><p>Agent notes page</p>",
+                }
+              : {
+                  title: "Counter Fixture",
+                  body: "<h1>Counter Fixture</h1><p>Agent browser workspace counter</p>",
+                };
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(
@@ -131,13 +130,13 @@ async function startLocalSiteFixture(): Promise<LocalSiteFixture> {
   const address = server.address() as AddressInfo;
   const baseUrl = `http://127.0.0.1:${address.port}`;
 
-	  return {
-	    counterUrl: `${baseUrl}/counter`,
-	    formUrl: `${baseUrl}/form`,
-	    welcomeUrl: `${baseUrl}/welcome?name=Milady`,
-	    tasksUrl: `${baseUrl}/tasks`,
-	    notesUrl: `${baseUrl}/notes`,
-	    close: () =>
+  return {
+    counterUrl: `${baseUrl}/counter`,
+    formUrl: `${baseUrl}/form`,
+    welcomeUrl: `${baseUrl}/welcome?name=Milady`,
+    tasksUrl: `${baseUrl}/tasks`,
+    notesUrl: `${baseUrl}/notes`,
+    close: () =>
       new Promise<void>((resolve, reject) => {
         server.close((error) => {
           if (error) {
@@ -157,13 +156,46 @@ async function findTabByUrl(
   return tabs.find((tab) => tab.url === url);
 }
 
+function collectPromptStrings(
+  value: unknown,
+  seen = new WeakSet<object>(),
+  depth = 0,
+): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+  if (!value || typeof value !== "object" || depth > 5) {
+    return [];
+  }
+  if (seen.has(value)) {
+    return [];
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) =>
+      collectPromptStrings(entry, seen, depth + 1),
+    );
+  }
+
+  const record = value as Record<string, unknown>;
+  const keysToInspect = ["prompt", "text", "content", "parts", "messages"];
+
+  return keysToInspect.flatMap((key) =>
+    collectPromptStrings(record[key], seen, depth + 1),
+  );
+}
+
+function readModelPrompt(input: unknown): string {
+  return collectPromptStrings(input).join("\n");
+}
+
 describe("Browser workspace agent chat E2E", () => {
   let runtime: AgentRuntime;
   let apiServer: { port: number; close: () => Promise<void> };
   let siteFixture: LocalSiteFixture;
   let previousPgliteDataDir: string | undefined;
   let pgliteDir = "";
-  let plannerTurn = 0;
   let plannerScenario: "form" | "tabs" = "tabs";
 
   beforeAll(async () => {
@@ -192,120 +224,154 @@ describe("Browser workspace agent chat E2E", () => {
     runtime.setSetting("CONTINUE_AFTER_ACTIONS", "false");
     runtime.setSetting("USE_MULTI_STEP", "false");
     vi.spyOn(runtime, "isCheckShouldRespondEnabled").mockReturnValue(false);
+    const browserPlannerModel = async (
+      _runtime: AgentRuntime,
+      input?: unknown,
+    ) => {
+      if (plannerScenario === "form") {
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            operation: "batch",
+            stepsJson: JSON.stringify([
+              {
+                subaction: "open",
+                show: true,
+                url: siteFixture.formUrl,
+              },
+              {
+                subaction: "find",
+                findBy: "label",
+                action: "fill",
+                text: "Agent name",
+                value: "Milady",
+              },
+              {
+                subaction: "select",
+                findBy: "label",
+                text: "Plan",
+                value: "pro",
+              },
+              {
+                subaction: "check",
+                findBy: "label",
+                text: "Accept terms",
+              },
+              {
+                subaction: "find",
+                findBy: "role",
+                role: "button",
+                name: "Continue",
+                action: "click",
+              },
+              {
+                subaction: "get",
+                selector: "h1",
+                getMode: "text",
+              },
+            ]),
+          }),
+        );
+      }
+
+      const prompt = readModelPrompt(input).toLowerCase();
+
+      if (prompt.includes("close the counter tab")) {
+        const counterTab = await findTabByUrl(siteFixture.counterUrl);
+        if (!counterTab) {
+          throw new Error("Counter tab was not available for closing.");
+        }
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            id: counterTab.id,
+            operation: "close",
+          }),
+        );
+      }
+
+      if (prompt.includes("list the browser workspace tabs")) {
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            operation: "list",
+          }),
+        );
+      }
+
+      if (
+        prompt.includes("navigate the visible tab to the notes page") ||
+        prompt.includes("notes page")
+      ) {
+        const visibleTab = (await listBrowserWorkspaceTabs()).find(
+          (tab) => tab.visible,
+        );
+        if (!visibleTab) {
+          throw new Error("No visible tab was available for navigation.");
+        }
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            id: visibleTab.id,
+            operation: "navigate",
+            url: siteFixture.notesUrl,
+          }),
+        );
+      }
+
+      if (prompt.includes("bring the tasks board tab to the front")) {
+        const tasksTab = await findTabByUrl(siteFixture.tasksUrl);
+        if (!tasksTab) {
+          throw new Error("Tasks tab was not opened before the show step.");
+        }
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            id: tasksTab.id,
+            operation: "show",
+          }),
+        );
+      }
+
+      if (
+        prompt.includes("background tab") ||
+        prompt.includes("open the tasks board")
+      ) {
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            operation: "open",
+            show: false,
+            url: siteFixture.tasksUrl,
+          }),
+        );
+      }
+
+      if (
+        prompt.includes("keep it visible") ||
+        prompt.includes("counter fixture")
+      ) {
+        return serializeBrowserActionResponse(
+          buildBrowserActionResponse({
+            operation: "open",
+            show: true,
+            url: siteFixture.counterUrl,
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected browser planner prompt: ${prompt}`);
+    };
+
+    const textFallbackModel = async () => "ok";
+
+    runtime.registerModel(
+      ModelType.TEXT_LARGE,
+      textFallbackModel,
+      "browser-workspace-test",
+    );
+    runtime.registerModel(
+      ModelType.TEXT_SMALL,
+      textFallbackModel,
+      "browser-workspace-test",
+    );
     runtime.registerModel(
       ModelType.ACTION_PLANNER,
-      async () => {
-        if (plannerScenario === "form") {
-          return serializeBrowserActionResponse(
-            buildBrowserActionResponse({
-              operation: "batch",
-              stepsJson: JSON.stringify([
-                {
-                  subaction: "open",
-                  show: true,
-                  url: siteFixture.formUrl,
-                },
-                {
-                  subaction: "find",
-                  findBy: "label",
-                  action: "fill",
-                  text: "Agent name",
-                  value: "Milady",
-                },
-                {
-                  subaction: "select",
-                  findBy: "label",
-                  text: "Plan",
-                  value: "pro",
-                },
-                {
-                  subaction: "check",
-                  findBy: "label",
-                  text: "Accept terms",
-                },
-                {
-                  subaction: "find",
-                  findBy: "role",
-                  role: "button",
-                  name: "Continue",
-                  action: "click",
-                },
-                {
-                  subaction: "get",
-                  selector: "h1",
-                  getMode: "text",
-                },
-              ]),
-            }),
-          );
-        }
-
-        switch (plannerTurn++) {
-          case 0:
-            return serializeBrowserActionResponse(
-              buildBrowserActionResponse({
-                operation: "open",
-                show: true,
-                url: siteFixture.counterUrl,
-              }),
-            );
-          case 1:
-            return serializeBrowserActionResponse(
-              buildBrowserActionResponse({
-                operation: "open",
-                show: false,
-                url: siteFixture.tasksUrl,
-              }),
-            );
-          case 2: {
-            const tasksTab = await findTabByUrl(siteFixture.tasksUrl);
-            if (!tasksTab) {
-              throw new Error("Tasks tab was not opened before the show step.");
-            }
-            return serializeBrowserActionResponse(
-              buildBrowserActionResponse({
-                id: tasksTab.id,
-                operation: "show",
-              }),
-            );
-          }
-          case 3: {
-            const visibleTab = (await listBrowserWorkspaceTabs()).find(
-              (tab) => tab.visible,
-            );
-            if (!visibleTab) {
-              throw new Error("No visible tab was available for navigation.");
-            }
-            return serializeBrowserActionResponse(
-              buildBrowserActionResponse({
-                id: visibleTab.id,
-                operation: "navigate",
-                url: siteFixture.notesUrl,
-              }),
-            );
-          }
-          case 4:
-            return serializeBrowserActionResponse(
-              buildBrowserActionResponse({
-                operation: "list",
-              }),
-            );
-          case 5: {
-            const counterTab = await findTabByUrl(siteFixture.counterUrl);
-            if (!counterTab) {
-              throw new Error("Counter tab was not available for closing.");
-            }
-            return serializeBrowserActionResponse(
-              buildBrowserActionResponse({
-                id: counterTab.id,
-                operation: "close",
-              }),
-            );
-          }
-          default:
-            throw new Error(`Unexpected planner turn ${plannerTurn - 1}.`);
-        }
-      },
+      browserPlannerModel,
       "browser-workspace-test",
     );
 
@@ -313,7 +379,6 @@ describe("Browser workspace agent chat E2E", () => {
   }, 180_000);
 
   beforeEach(async () => {
-    plannerTurn = 0;
     plannerScenario = "tabs";
     const tabs = await listBrowserWorkspaceTabs();
     await Promise.all(tabs.map((tab) => closeBrowserWorkspaceTab(tab.id)));
@@ -455,9 +520,13 @@ describe("Browser workspace agent chat E2E", () => {
       title: "Browser agent form task",
     });
 
-    const response = await postConversationMessage(apiServer.port, conversationId, {
-      text: "Open the form, fill the name, choose the pro plan, accept terms, submit it, and tell me the heading.",
-    });
+    const response = await postConversationMessage(
+      apiServer.port,
+      conversationId,
+      {
+        text: "Open the form, fill the name, choose the pro plan, accept terms, submit it, and tell me the heading.",
+      },
+    );
 
     expect(response.status).toBe(200);
     expect(response.data.text).toEqual(

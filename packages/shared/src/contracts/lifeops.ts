@@ -740,6 +740,43 @@ export interface SyncLifeOpsBrowserStateRequest {
   }>;
 }
 
+export interface CreateLifeOpsBrowserCompanionPairingRequest {
+  browser: LifeOpsBrowserKind;
+  profileId: string;
+  profileLabel?: string | null;
+  label?: string | null;
+  extensionVersion?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface LifeOpsBrowserCompanionPairingResponse {
+  companion: LifeOpsBrowserCompanionStatus;
+  pairingToken: string;
+}
+
+export interface UpdateLifeOpsBrowserSessionProgressRequest {
+  currentActionIndex?: number;
+  result?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface LifeOpsBrowserCompanionSyncResponse {
+  companion: LifeOpsBrowserCompanionStatus;
+  tabs: LifeOpsBrowserTabSummary[];
+  currentPage: LifeOpsBrowserPageContext | null;
+  settings: LifeOpsBrowserSettings;
+  session: LifeOpsBrowserSession | null;
+}
+
+export interface LifeOpsBrowserCompanionPackageStatus {
+  extensionPath: string | null;
+  chromeBuildPath: string | null;
+  chromePackagePath: string | null;
+  safariWebExtensionPath: string | null;
+  safariAppPath: string | null;
+  safariPackagePath: string | null;
+}
+
 export interface LifeOpsWorkflowActionBase {
   id?: string;
   resultKey?: string;

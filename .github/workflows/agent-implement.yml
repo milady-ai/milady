@@ -38,7 +38,7 @@ jobs:
       github.event.label.name == 'agent-ready' &&
       !contains(github.event.issue.labels.*.name, 'agent-in-progress') &&
       github.event.issue.state == 'open'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       issues: write
@@ -152,7 +152,7 @@ jobs:
     name: Implement issue
     needs: gate
     if: needs.gate.outputs.allowed == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write

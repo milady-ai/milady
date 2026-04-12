@@ -118,6 +118,7 @@ export function SignalQrOverlay({
               "Pair Signal by generating a provisioning QR code and scanning it from Signal Desktop.",
           })}
         </div>
+        {error ? <div className="mb-2 text-xs text-danger">{error}</div> : null}
         <Button
           variant="outline"
           size="sm"

@@ -95,6 +95,33 @@ function createGmailMessage(
   };
 }
 
+function createCalendarEvent(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "cal-1",
+    externalId: "google-cal-1",
+    agentId: "agent-lifeops",
+    provider: "google",
+    side: "owner",
+    calendarId: "primary",
+    title: "Tomorrow standup",
+    description: "",
+    location: "",
+    status: "confirmed",
+    startAt: "2026-04-10T09:00:00.000Z",
+    endAt: "2026-04-10T09:30:00.000Z",
+    isAllDay: false,
+    timezone: "UTC",
+    htmlLink: null,
+    conferenceLink: null,
+    organizer: null,
+    attendees: [],
+    metadata: {},
+    syncedAt: "2026-04-09T23:00:00.000Z",
+    updatedAt: "2026-04-09T23:00:00.000Z",
+    ...overrides,
+  };
+}
+
 describe("LifeOpsService", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -232,6 +259,45 @@ describe("LifeOpsService", () => {
       outcome: "delivered",
       connectorRef: "runtime:discord:owner-discord-uuid",
     });
+  });
+
+  it("looks ahead beyond today when resolving the next calendar event", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const getCalendarFeedSpy = vi
+      .spyOn(service, "getCalendarFeed")
+      .mockResolvedValue({
+        calendarId: "primary",
+        events: [createCalendarEvent()],
+        source: "cache",
+        timeMin: "2026-04-09T00:00:00.000Z",
+        timeMax: "2026-05-09T00:00:00.000Z",
+        syncedAt: null,
+      } as never);
+    vi.spyOn(service, "getGoogleConnectorStatus").mockResolvedValue({
+      connected: false,
+      mode: "local",
+      grant: null,
+      grantedCapabilities: [],
+    } as never);
+
+    const now = new Date("2026-04-09T23:30:00.000Z");
+    const context = await service.getNextCalendarEventContext(
+      new URL("http://localhost"),
+      { timeZone: "UTC" },
+      now,
+    );
+
+    expect(getCalendarFeedSpy).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({
+        timeZone: "UTC",
+        timeMin: "2026-04-09T00:00:00.000Z",
+        timeMax: "2026-05-09T00:00:00.000Z",
+      }),
+      now,
+    );
+    expect(context.event?.title).toBe("Tomorrow standup");
   });
 
   it("falls back to the resolved owner entity when no explicit owner contact exists", async () => {
@@ -1900,5 +1966,465 @@ describe("LifeOpsService", () => {
     });
     expect(completed.status).toBe("failed");
     expect(completed.result).toMatchObject({ reason: "selector missing" });
+  });
+
+  it("creates browser companion pairing tokens with hashed storage", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    let storedCompanion: Record<string, unknown> | null = null;
+    let storedHash: string | null = null;
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+      }
+    ).repository = {
+      getBrowserCompanionByProfile: vi.fn(async () => null),
+      upsertBrowserCompanion: vi.fn(
+        async (companion: Record<string, unknown>) => {
+          storedCompanion = companion;
+        },
+      ),
+      getBrowserCompanionCredential: vi.fn(async () => ({
+        companion: storedCompanion,
+        pairingTokenHash: null,
+        pendingPairingTokenHashes: [],
+      })),
+      updateBrowserCompanionPairingToken: vi.fn(
+        async (
+          _agentId: string,
+          _companionId: string,
+          pairingTokenHash: string,
+        ) => {
+          storedHash = pairingTokenHash;
+        },
+      ),
+    };
+
+    const pairing = await service.createBrowserCompanionPairing({
+      browser: "chrome",
+      profileId: "default",
+    });
+
+    expect(pairing.pairingToken.startsWith("lobr_")).toBe(true);
+    expect(pairing.companion.browser).toBe("chrome");
+    expect(pairing.companion.profileId).toBe("default");
+    expect(storedCompanion).toMatchObject({
+      browser: "chrome",
+      profileId: "default",
+    });
+    expect(storedHash).toBe(
+      crypto.createHash("sha256").update(pairing.pairingToken).digest("hex"),
+    );
+  });
+
+  it("stages a pending pairing token when a companion is already paired", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const currentCompanion = {
+      id: "companion-1",
+      agentId: "agent-lifeops",
+      browser: "chrome" as const,
+      profileId: "default",
+      profileLabel: "Default",
+      label: "LifeOps Browser chrome Default",
+      extensionVersion: "1.0.0",
+      connectionState: "connected" as const,
+      permissions: {
+        tabs: true,
+        scripting: true,
+        activeTab: true,
+        allOrigins: true,
+        grantedOrigins: [],
+        incognitoEnabled: false,
+      },
+      lastSeenAt: "2026-04-11T00:00:00.000Z",
+      pairedAt: "2026-04-11T00:00:00.000Z",
+      metadata: {},
+      createdAt: "2026-04-11T00:00:00.000Z",
+      updatedAt: "2026-04-11T00:00:00.000Z",
+    };
+    const activePairingTokenHash = crypto
+      .createHash("sha256")
+      .update("lobr_existing_token")
+      .digest("hex");
+    let pendingHashes: string[] | null = null;
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+      }
+    ).repository = {
+      getBrowserCompanionByProfile: vi.fn(async () => currentCompanion),
+      upsertBrowserCompanion: vi.fn(async () => undefined),
+      getBrowserCompanionCredential: vi.fn(async () => ({
+        companion: currentCompanion,
+        pairingTokenHash: activePairingTokenHash,
+        pendingPairingTokenHashes: [],
+      })),
+      updateBrowserCompanionPairingToken: vi.fn(async () => undefined),
+      updateBrowserCompanionPendingPairingTokenHashes: vi.fn(
+        async (
+          _agentId: string,
+          _companionId: string,
+          nextPendingHashes: string[],
+        ) => {
+          pendingHashes = nextPendingHashes;
+        },
+      ),
+    };
+
+    const pairing = await service.createBrowserCompanionPairing({
+      browser: "chrome",
+      profileId: "default",
+    });
+
+    expect(
+      (
+        service as unknown as {
+          repository: {
+            updateBrowserCompanionPairingToken: ReturnType<typeof vi.fn>;
+          };
+        }
+      ).repository.updateBrowserCompanionPairingToken,
+    ).not.toHaveBeenCalled();
+    expect(pendingHashes).toEqual([
+      crypto.createHash("sha256").update(pairing.pairingToken).digest("hex"),
+    ]);
+  });
+
+  it("syncs authenticated companions and claims queued sessions", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const pairingToken = "lobr_test_token";
+    const pairingTokenHash = crypto
+      .createHash("sha256")
+      .update(pairingToken)
+      .digest("hex");
+    const companion = {
+      id: "companion-1",
+      agentId: "agent-lifeops",
+      browser: "chrome" as const,
+      profileId: "default",
+      profileLabel: "Default",
+      label: "LifeOps Browser chrome Default",
+      extensionVersion: "1.0.0",
+      connectionState: "connected" as const,
+      permissions: {
+        tabs: true,
+        scripting: true,
+        hostAccess: "all_sites" as const,
+        incognitoAccess: false,
+        nativeMessaging: false,
+      },
+      lastSeenAt: "2026-04-11T00:00:00.000Z",
+      pairedAt: "2026-04-11T00:00:00.000Z",
+      metadata: {},
+      createdAt: "2026-04-11T00:00:00.000Z",
+      updatedAt: "2026-04-11T00:00:00.000Z",
+    };
+    const queuedSession = {
+      id: "session-queued",
+      agentId: "agent-lifeops",
+      domain: "user_lifeops" as const,
+      subjectType: "owner" as const,
+      subjectId: "owner-entity",
+      visibilityScope: "private" as const,
+      contextPolicy: "scratchpad" as const,
+      workflowId: null,
+      browser: "chrome" as const,
+      companionId: companion.id,
+      profileId: companion.profileId,
+      windowId: "window-1",
+      tabId: "tab-1",
+      title: "Navigate current tab",
+      status: "queued" as const,
+      actions: [],
+      currentActionIndex: 0,
+      awaitingConfirmationForActionId: null,
+      result: {},
+      metadata: {},
+      createdAt: "2026-04-11T00:00:00.000Z",
+      updatedAt: "2026-04-11T00:00:00.000Z",
+      finishedAt: null,
+    };
+    let updatedSession: Record<string, unknown> | null = null;
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+        recordBrowserAudit: ReturnType<typeof vi.fn>;
+      }
+    ).repository = {
+      getBrowserCompanionCredential: vi.fn(async () => ({
+        companion,
+        pairingTokenHash,
+      })),
+      listBrowserSessions: vi.fn(async () => [queuedSession]),
+      updateBrowserSession: vi.fn(async (session: Record<string, unknown>) => {
+        updatedSession = session;
+      }),
+    };
+    (
+      service as unknown as {
+        recordBrowserAudit: ReturnType<typeof vi.fn>;
+      }
+    ).recordBrowserAudit = vi.fn().mockResolvedValue(undefined);
+    vi.spyOn(service, "syncBrowserState").mockResolvedValue({
+      companion,
+      tabs: [],
+      currentPage: null,
+    });
+    vi.spyOn(service, "getBrowserSettings").mockResolvedValue({
+      enabled: true,
+      trackingMode: "current_tab",
+      allowBrowserControl: true,
+      requireConfirmationForAccountAffecting: true,
+      incognitoEnabled: false,
+      siteAccessMode: "all_sites",
+      grantedOrigins: [],
+      blockedOrigins: [],
+      maxRememberedTabs: 10,
+      pauseUntil: null,
+      metadata: {},
+      updatedAt: "2026-04-11T00:00:00.000Z",
+    });
+
+    const result = await service.syncBrowserCompanion(
+      companion.id,
+      pairingToken,
+      {
+        companion: {
+          browser: "chrome",
+          profileId: "default",
+          label: "LifeOps Browser chrome Default",
+        },
+        tabs: [],
+      },
+    );
+
+    expect(result.session?.id).toBe("session-queued");
+    expect(result.session?.status).toBe("running");
+    expect(updatedSession).toMatchObject({
+      id: "session-queued",
+      status: "running",
+    });
+  });
+
+  it("promotes a pending pairing token on first companion sync", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const pairingToken = "lobr_pending_token";
+    const pairingTokenHash = crypto
+      .createHash("sha256")
+      .update(pairingToken)
+      .digest("hex");
+    const companion = {
+      id: "companion-1",
+      agentId: "agent-lifeops",
+      browser: "chrome" as const,
+      profileId: "default",
+      profileLabel: "Default",
+      label: "LifeOps Browser chrome Default",
+      extensionVersion: "1.0.0",
+      connectionState: "connected" as const,
+      permissions: {
+        tabs: true,
+        scripting: true,
+        hostAccess: "all_sites" as const,
+        incognitoAccess: false,
+        nativeMessaging: false,
+      },
+      lastSeenAt: "2026-04-11T00:00:00.000Z",
+      pairedAt: "2026-04-11T00:00:00.000Z",
+      metadata: {},
+      createdAt: "2026-04-11T00:00:00.000Z",
+      updatedAt: "2026-04-11T00:00:00.000Z",
+    };
+    let promotedTokenHash: string | null = null;
+    let promotedPendingHashes: string[] | null = null;
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+        recordBrowserAudit: ReturnType<typeof vi.fn>;
+      }
+    ).repository = {
+      getBrowserCompanionCredential: vi.fn(async () => ({
+        companion,
+        pairingTokenHash: null,
+        pendingPairingTokenHashes: [pairingTokenHash],
+      })),
+      promoteBrowserCompanionPendingPairingToken: vi.fn(
+        async (
+          _agentId: string,
+          _companionId: string,
+          nextPairingTokenHash: string,
+          nextPendingHashes: string[],
+        ) => {
+          promotedTokenHash = nextPairingTokenHash;
+          promotedPendingHashes = nextPendingHashes;
+        },
+      ),
+      listBrowserSessions: vi.fn(async () => []),
+    };
+    (
+      service as unknown as {
+        recordBrowserAudit: ReturnType<typeof vi.fn>;
+      }
+    ).recordBrowserAudit = vi.fn().mockResolvedValue(undefined);
+    vi.spyOn(service, "syncBrowserState").mockResolvedValue({
+      companion,
+      tabs: [],
+      currentPage: null,
+    });
+    vi.spyOn(service, "getBrowserSettings").mockResolvedValue({
+      enabled: true,
+      trackingMode: "current_tab",
+      allowBrowserControl: true,
+      requireConfirmationForAccountAffecting: true,
+      incognitoEnabled: false,
+      siteAccessMode: "all_sites",
+      grantedOrigins: [],
+      blockedOrigins: [],
+      maxRememberedTabs: 10,
+      pauseUntil: null,
+      metadata: {},
+      updatedAt: "2026-04-11T00:00:00.000Z",
+    });
+
+    await service.syncBrowserCompanion(companion.id, pairingToken, {
+      companion: {
+        browser: "chrome",
+        profileId: "default",
+        label: "LifeOps Browser chrome Default",
+      },
+      tabs: [],
+    });
+
+    expect(promotedTokenHash).toBe(pairingTokenHash);
+    expect(promotedPendingHashes).toEqual([]);
+  });
+
+  it("updates browser session progress from an authenticated companion", async () => {
+    const runtime = createRuntime();
+    const service = new LifeOpsService(runtime);
+    const pairingToken = "lobr_progress_token";
+    const pairingTokenHash = crypto
+      .createHash("sha256")
+      .update(pairingToken)
+      .digest("hex");
+    const companion = {
+      id: "companion-1",
+      agentId: "agent-lifeops",
+      browser: "chrome" as const,
+      profileId: "default",
+      profileLabel: "Default",
+      label: "LifeOps Browser chrome Default",
+      extensionVersion: "1.0.0",
+      connectionState: "connected" as const,
+      permissions: {
+        tabs: true,
+        scripting: true,
+        hostAccess: "all_sites" as const,
+        incognitoAccess: false,
+        nativeMessaging: false,
+      },
+      lastSeenAt: "2026-04-11T00:00:00.000Z",
+      pairedAt: "2026-04-11T00:00:00.000Z",
+      metadata: {},
+      createdAt: "2026-04-11T00:00:00.000Z",
+      updatedAt: "2026-04-11T00:00:00.000Z",
+    };
+    const session = {
+      id: "session-running",
+      agentId: "agent-lifeops",
+      domain: "user_lifeops" as const,
+      subjectType: "owner" as const,
+      subjectId: "owner-entity",
+      visibilityScope: "private" as const,
+      contextPolicy: "scratchpad" as const,
+      workflowId: null,
+      browser: "chrome" as const,
+      companionId: companion.id,
+      profileId: companion.profileId,
+      windowId: "window-1",
+      tabId: "tab-1",
+      title: "Form fill",
+      status: "running" as const,
+      actions: [
+        {
+          id: "action-1",
+          kind: "click" as const,
+          label: "Click button",
+          browser: "chrome" as const,
+          windowId: "window-1",
+          tabId: "tab-1",
+          url: null,
+          selector: "button",
+          text: null,
+          metadata: {},
+          accountAffecting: false,
+          requiresConfirmation: false,
+        },
+        {
+          id: "action-2",
+          kind: "type" as const,
+          label: "Type input",
+          browser: "chrome" as const,
+          windowId: "window-1",
+          tabId: "tab-1",
+          url: null,
+          selector: "input[name=email]",
+          text: "owner@example.com",
+          metadata: {},
+          accountAffecting: false,
+          requiresConfirmation: false,
+        },
+      ],
+      currentActionIndex: 0,
+      awaitingConfirmationForActionId: null,
+      result: {},
+      metadata: {},
+      createdAt: "2026-04-11T00:00:00.000Z",
+      updatedAt: "2026-04-11T00:00:00.000Z",
+      finishedAt: null,
+    };
+    let updatedSession: Record<string, unknown> | null = null;
+    (
+      service as unknown as {
+        repository: Record<string, unknown>;
+      }
+    ).repository = {
+      getBrowserCompanionCredential: vi.fn(async () => ({
+        companion,
+        pairingTokenHash,
+      })),
+      getBrowserSession: vi.fn(async () => session),
+      updateBrowserSession: vi.fn(
+        async (nextSession: Record<string, unknown>) => {
+          updatedSession = nextSession;
+        },
+      ),
+    };
+
+    const updated = await service.updateBrowserSessionProgressFromCompanion(
+      companion.id,
+      pairingToken,
+      session.id,
+      {
+        currentActionIndex: 1,
+        result: { lastAction: "action-2" },
+        metadata: { lastSelector: "input[name=email]" },
+      },
+    );
+
+    expect(updated.status).toBe("running");
+    expect(updated.currentActionIndex).toBe(1);
+    expect(updated.result).toMatchObject({ lastAction: "action-2" });
+    expect(updated.metadata).toMatchObject({
+      lastSelector: "input[name=email]",
+    });
+    expect(updatedSession).toMatchObject({
+      id: session.id,
+      currentActionIndex: 1,
+      status: "running",
+    });
   });
 });

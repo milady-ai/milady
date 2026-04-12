@@ -15,138 +15,47 @@
 
 import { Button, SegmentedControl } from "@miladyai/ui";
 import type React from "react";
-import { useState } from "react";
 import type { Tab } from "../../navigation";
 import { useApp } from "../../state";
 import { DesktopWorkspaceSection } from "../settings/DesktopWorkspaceSection";
 import { FineTuningView } from "../settings/FineTuningView";
-import { DatabasePageView } from "./DatabasePageView";
-import { LogsPageView } from "./LogsPageView";
-import { PluginsPageView } from "./PluginsPageView";
-import { MemoryViewerView } from "./MemoryViewerView";
-import { RelationshipsView } from "./RelationshipsView";
-import { RuntimeView } from "./RuntimeView";
-import { SkillsView } from "./SkillsView";
-import { TrajectoriesView } from "./TrajectoriesView";
 
-type SubTab =
-  | "plugins"
-  | "skills"
-  | "fine-tuning"
-  | "trajectories"
-  | "relationships"
-  | "memories"
-  | "runtime"
-  | "database"
-  | "desktop"
-  | "logs";
+type SubTab = "fine-tuning" | "desktop";
 
 const SUB_TABS: Array<{
   id: SubTab;
   labelKey: string;
   descriptionKey: string;
 }> = [
-  // {
-  //   id: "actions",
-  //   labelKey: "advancedpageview.Actions",
-  //   descriptionKey: "advancedpageview.ActionsDescription",
-  // },
   {
-    id: "plugins",
-    labelKey: "advancedpageview.Plugins",
-    descriptionKey: "advancedpageview.PluginsDescription",
-  },
-  {
-    id: "skills",
-    labelKey: "advancedpageview.Skills",
-    descriptionKey: "advancedpageview.SkillsDescription",
-  },
-  // {
-  //   id: "fine-tuning",
-  //   labelKey: "advancedpageview.FineTuning",
-  //   descriptionKey: "advancedpageview.FineTuningDescription",
-  // },
-  {
-    id: "trajectories",
-    labelKey: "advancedpageview.Trajectories",
-    descriptionKey: "advancedpageview.TrajectoriesDescription",
-  },
-  {
-    id: "relationships",
-    labelKey: "advancedpageview.Relationships",
-    descriptionKey: "advancedpageview.RelationshipsDescription",
-  },
-  {
-    id: "memories",
-    labelKey: "advancedpageview.Memories",
-    descriptionKey: "advancedpageview.MemoriesDescription",
-  },
-  {
-    id: "runtime",
-    labelKey: "advancedpageview.Runtime",
-    descriptionKey: "advancedpageview.RuntimeDescription",
-  },
-  {
-    id: "database",
-    labelKey: "advancedpageview.Database",
-    descriptionKey: "advancedpageview.DatabaseDescription",
-  },
-  {
-    id: "desktop",
-    labelKey: "advancedpageview.Desktop",
-    descriptionKey: "advancedpageview.DesktopDescription",
-  },
-  {
-    id: "logs",
-    labelKey: "advancedpageview.Logs",
-    descriptionKey: "advancedpageview.LogsDescription",
+    id: "fine-tuning",
+    labelKey: "finetuningview.FineTuning",
+    descriptionKey: "finetuningview.BuildDatasetsFrom",
   },
 ];
 
-const MODAL_SUB_TABS = SUB_TABS.filter(
-  (t) => t.id !== "plugins" && t.id !== "skills",
-);
+const MODAL_SUB_TABS = SUB_TABS;
 
 const ADVANCED_TAB_BUTTON_RESET_CLASSNAME =
   "select-none [&_*]:select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] focus:outline-none focus-visible:outline-none";
 
 function mapTabToSubTab(tab: Tab): SubTab {
   switch (tab) {
-    case "plugins":
-      return "plugins";
-    case "skills":
-      return "skills";
     case "fine-tuning":
       return "fine-tuning";
-    case "trajectories":
-      return "trajectories";
-    case "relationships":
-      return "relationships";
-    case "memories":
-      return "memories";
-    case "runtime":
-      return "runtime";
-    case "database":
-      return "database";
     case "desktop":
       return "desktop";
-    case "logs":
-      return "logs";
     default:
-      return "plugins";
+      return "fine-tuning";
   }
 }
 
 export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
   const { tab, setTab, t } = useApp();
-  const [selectedTrajectoryId, setSelectedTrajectoryId] = useState<
-    string | null
-  >(null);
 
   const currentSubTab = mapTabToSubTab(tab);
   const tabs = inModal ? MODAL_SUB_TABS : SUB_TABS;
   const handleSubTabChange = (subTab: SubTab) => {
-    setSelectedTrajectoryId(null);
     setTab(subTab as Tab);
   };
   const advancedSubTabItems = tabs.map((subTab) => ({
@@ -205,38 +114,14 @@ export function AdvancedPageView({ inModal }: { inModal?: boolean } = {}) {
 
   const renderContent = () => {
     switch (currentSubTab) {
-      // case "actions":
-      //   return <CustomActionsView />;
-      case "plugins":
-        return <PluginsPageView contentHeader={advancedContentHeader} />;
-      case "skills":
-        return <SkillsView contentHeader={advancedContentHeader} />;
       case "fine-tuning":
         return <FineTuningView contentHeader={advancedContentHeader} />;
-      case "trajectories":
-        return (
-          <TrajectoriesView
-            contentHeader={advancedContentHeader}
-            selectedTrajectoryId={selectedTrajectoryId}
-            onSelectTrajectory={setSelectedTrajectoryId}
-          />
-        );
-      case "relationships":
-        return <RelationshipsView contentHeader={advancedContentHeader} />;
-      case "memories":
-        return <MemoryViewerView contentHeader={advancedContentHeader} />;
-      case "runtime":
-        return <RuntimeView contentHeader={advancedContentHeader} />;
-      case "database":
-        return <DatabasePageView contentHeader={advancedContentHeader} />;
       case "desktop":
         return (
           <DesktopWorkspaceSection contentHeader={advancedContentHeader} />
         );
-      case "logs":
-        return <LogsPageView contentHeader={advancedContentHeader} />;
       default:
-        return <PluginsPageView contentHeader={advancedContentHeader} />;
+        return <FineTuningView contentHeader={advancedContentHeader} />;
     }
   };
 
