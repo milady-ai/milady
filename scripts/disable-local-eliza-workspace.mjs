@@ -309,6 +309,25 @@ export function disableLocalElizaWorkspace(
     }
   }
 
+  // Strip patchedDependencies whose patch files live inside eliza/ —
+  // the directory is gone after the rename so bun would fail to find them.
+  if (rootPkg.patchedDependencies && typeof rootPkg.patchedDependencies === "object") {
+    const removedPatches = [];
+    for (const [dep, patchPath] of Object.entries(rootPkg.patchedDependencies)) {
+      if (typeof patchPath === "string" && patchPath.startsWith("eliza/")) {
+        removedPatches.push(dep);
+      }
+    }
+    for (const dep of removedPatches) {
+      delete rootPkg.patchedDependencies[dep];
+    }
+    if (removedPatches.length > 0) {
+      log(
+        `[disable-local-eliza-workspace] Removed ${removedPatches.length} patchedDependencies referencing eliza/ (${removedPatches.join(", ")})`,
+      );
+    }
+  }
+
   writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
 
   const pinnedWorkspaceVersions = resolvePinnedWorkspaceVersions(repoRoot, {
