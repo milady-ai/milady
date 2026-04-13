@@ -24,7 +24,7 @@ import {
   getSharedSourceRoot,
   getUiSourceRoot,
   resolveModuleEntry,
-} from "../../eliza/packages/app-core/test/eliza-package-paths";
+} from "../eliza-package-paths";
 import { repoRoot } from "./repo-root";
 
 const elizaCoreEntry = getElizaCoreEntry(repoRoot);
