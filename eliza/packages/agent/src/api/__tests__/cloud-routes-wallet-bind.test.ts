@@ -304,4 +304,93 @@ describe("handleCloudRoute cloud wallet binding", () => {
     expect(lastSaved.cloud?.apiKey).toBe("cloud-api-key");
     expect(lastSaved.wallet).toBeUndefined();
   });
+
+  it("rolls back config.env and process.env when cloud-wallet provisioning fails", async () => {
+    // Seed pre-existing config.env so we can verify it's restored on rollback.
+    const configEnvPath = path.join(stateDir, "config.env");
+    await fs.writeFile(configEnvPath, "EXISTING_KEY=keep-me\n", "utf8");
+    process.env.EXISTING_KEY = "keep-me";
+
+    vi.mocked(getOrCreateClientAddressKey).mockResolvedValue({
+      privateKey: `0x${"aa".repeat(32)}`,
+      address: "0xrollbackaddr",
+      minted: true,
+    });
+    // Simulate a provisioning failure after the client key has been minted.
+    vi.mocked(provisionCloudWallets).mockRejectedValue(
+      new Error("Eliza Cloud provisioning unavailable"),
+    );
+
+    const savedConfigs: unknown[] = [];
+    const { res, readBody } = makeResponseCollector();
+    const restartRuntime = vi.fn().mockResolvedValue(false);
+    const state: CloudRouteState = {
+      config: {
+        cloud: { apiKey: "rollback-key", baseUrl: "https://cloud.test" },
+      } as CloudRouteState["config"],
+      runtime: { agentId: "agent-rollback" } as CloudRouteState["runtime"],
+      cloudManager: {
+        getClient: () =>
+          ({
+            executeRpc: vi.fn(),
+          }) as never,
+        init: vi.fn(),
+      } as CloudRouteState["cloudManager"],
+      saveConfig(config) {
+        savedConfigs.push(structuredClone(config));
+      },
+      restartRuntime,
+    };
+
+    // Drive the route — cloud-login poll returning authenticated
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "authenticated",
+        apiKey: "rollback-key",
+        user: { id: "u-rollback" },
+      }),
+    }) as typeof fetch;
+
+    await handleCloudRoute(
+      {
+        url: "/api/cloud/login/status?sessionId=session-rollback",
+        headers: { host: "localhost" },
+      } as http.IncomingMessage,
+      res,
+      "/api/cloud/login/status",
+      "GET",
+      state,
+    );
+    globalThis.fetch = originalFetch;
+
+    // The response should still succeed (cloud-login itself succeeded;
+    // wallet provisioning failure is non-fatal).
+    const body = readBody<{ status: string }>();
+    expect(body.status).toBe("authenticated");
+
+    // config.env should be restored to its pre-provisioning content.
+    const restoredEnv = await fs.readFile(configEnvPath, "utf8");
+    expect(restoredEnv).toBe("EXISTING_KEY=keep-me\n");
+
+    // process.env should NOT contain cloud-wallet env vars from the
+    // failed attempt.
+    expect(process.env.MILADY_CLOUD_EVM_ADDRESS).toBeUndefined();
+    expect(process.env.MILADY_CLOUD_SOLANA_ADDRESS).toBeUndefined();
+    expect(process.env.WALLET_SOURCE_EVM).toBeUndefined();
+    expect(process.env.WALLET_SOURCE_SOLANA).toBeUndefined();
+
+    // The config object should have the cloud apiKey (login succeeded)
+    // but NOT have wallet.cloud entries (provisioning rolled back).
+    const lastSaved = savedConfigs.at(-1) as {
+      cloud?: Record<string, unknown>;
+      wallet?: { cloud?: unknown };
+    };
+    expect(lastSaved.cloud?.apiKey).toBe("rollback-key");
+    expect(lastSaved.wallet?.cloud).toBeUndefined();
+
+    // restartRuntime should NOT have been called since provisioning failed.
+    expect(restartRuntime).not.toHaveBeenCalled();
+  });
 });
