@@ -45,9 +45,14 @@ import type {
   SkillMarketplaceResult,
   SkillScanReportSummary,
   StewardApprovalActionResponse,
+  StewardBalanceResponse,
   StewardHistoryResponse,
   StewardPendingResponse,
   StewardStatusResponse,
+  StewardTokenBalancesResponse,
+  StewardWalletAddressesResponse,
+  StewardWebhookEventsResponse,
+  StewardWebhookEventType,
   StreamEventEnvelope,
   SystemPermissionId,
   TriggerHealthSnapshot,
@@ -797,6 +802,13 @@ export interface AppActions {
   ) => Promise<BscTradeQuoteResponse>;
   getBscTradeTxStatus: (hash: string) => Promise<BscTradeTxStatusResponse>;
   getStewardStatus: () => Promise<StewardStatusResponse>;
+  getStewardAddresses: () => Promise<StewardWalletAddressesResponse>;
+  getStewardBalance: (chainId?: number) => Promise<StewardBalanceResponse>;
+  getStewardTokens: (chainId?: number) => Promise<StewardTokenBalancesResponse>;
+  getStewardWebhookEvents: (opts?: {
+    event?: StewardWebhookEventType;
+    since?: number;
+  }) => Promise<StewardWebhookEventsResponse>;
   getStewardHistory: (opts?: {
     status?: string;
     limit?: number;

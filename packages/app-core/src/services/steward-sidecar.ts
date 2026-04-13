@@ -21,10 +21,12 @@
 
 import { waitForHealthy } from "./steward-sidecar/health-check";
 import {
+  allocateFirstFreeLoopbackPort,
   generateMasterPassword,
   resolveDataDir,
 } from "./steward-sidecar/helpers";
 import {
+  ensureStewardWorkspaceReady,
   findStewardEntryPoint,
   pipeOutput,
 } from "./steward-sidecar/process-management";
@@ -242,6 +244,7 @@ export class StewardSidecar {
     const fs = await import("node:fs");
     const path = await import("node:path");
     const dir = this.config.dataDir;
+    const home = process.env.HOME || process.env.USERPROFILE || "";
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -252,6 +255,30 @@ export class StewardSidecar {
       if (!fs.existsSync(subDir)) {
         fs.mkdirSync(subDir, { recursive: true });
       }
+    }
+
+    // Steward's embedded runtime historically defaulted to ~/.steward/data.
+    // Migrate that legacy PGLite directory into Milady's state dir when the
+    // new target is still empty so upgrades keep the same wallet/agent data.
+    const legacyDataDir = path.join(home, ".steward", "data");
+    const targetDataDir = path.join(dir, "data");
+    const targetHasData =
+      fs.existsSync(path.join(targetDataDir, "PG_VERSION")) ||
+      (fs.existsSync(targetDataDir) &&
+        fs.readdirSync(targetDataDir).length > 0);
+
+    if (
+      legacyDataDir !== targetDataDir &&
+      fs.existsSync(legacyDataDir) &&
+      !targetHasData
+    ) {
+      console.log(
+        `[StewardSidecar] Migrating legacy steward data from ${legacyDataDir} to ${targetDataDir}`,
+      );
+      fs.cpSync(legacyDataDir, targetDataDir, {
+        recursive: true,
+        force: false,
+      });
     }
   }
 
@@ -299,6 +326,17 @@ export class StewardSidecar {
       );
     }
 
+    await ensureStewardWorkspaceReady(entryPoint, this.config.onLog);
+
+    const preferredPort = this.config.port;
+    const allocatedPort = await allocateFirstFreeLoopbackPort(preferredPort);
+    if (allocatedPort !== preferredPort) {
+      console.warn(
+        `[StewardSidecar] Port ${preferredPort} is busy; using ${allocatedPort} instead`,
+      );
+      this.config.port = allocatedPort;
+    }
+
     const env: Record<string, string> = {
       ...Object.fromEntries(
         Object.entries(process.env).filter(
@@ -322,6 +360,7 @@ export class StewardSidecar {
     }
 
     env.STEWARD_DATA_DIR = path.join(this.config.dataDir, "data");
+    env.STEWARD_PGLITE_PATH = env.STEWARD_DATA_DIR;
     env.STEWARD_REDIS_DISABLED = "true";
 
     console.log(

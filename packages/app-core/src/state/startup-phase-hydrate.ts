@@ -405,7 +405,6 @@ export function bindReadyPhase(
           data.reasons.filter((e): e is string => typeof e === "string"),
         );
         depsRef.current?.setPendingRestart(true);
-        depsRef.current?.showRestartBanner();
       }
     },
   );

@@ -7,6 +7,7 @@ import {
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
 import JSON5 from "json5";
+import { readConfigEnvSync } from "../api/config-env.js";
 import { syncSolanaPublicKeyEnv } from "../api/wallet.js";
 import { collectConfigEnvVars, collectConnectorEnvVars } from "./env-vars.js";
 import { resolveConfigIncludes } from "./includes.js";
@@ -26,6 +27,23 @@ function applyConfigEnvToProcessEnv(entries: Record<string, string>): void {
   for (const [key, value] of Object.entries(entries)) {
     process.env[key] = value;
   }
+}
+
+function mergePersistedEnvIntoConfig(
+  config: ElizaConfig,
+  entries: Record<string, string>,
+): void {
+  if (Object.keys(entries).length === 0) return;
+
+  const existing =
+    config.env && typeof config.env === "object" && !Array.isArray(config.env)
+      ? (config.env as Record<string, unknown>)
+      : {};
+
+  config.env = {
+    ...existing,
+    ...entries,
+  } as ElizaConfig["env"];
 }
 
 function getConfigEnvString(
@@ -163,6 +181,9 @@ export function loadElizaConfig(): ElizaConfig {
     resolved.logging.level = "error";
   }
 
+  const persistedConfigEnv = readConfigEnvSync(resolveStateDir());
+  mergePersistedEnvIntoConfig(resolved, persistedConfigEnv);
+
   const envVars = collectConfigEnvVars(resolved);
   const connectorEnvVars = collectConnectorEnvVars(resolved);
   // Saved config is the source of truth for settings edited in the app.
@@ -170,6 +191,7 @@ export function loadElizaConfig(): ElizaConfig {
   // arrived from .env or the parent shell.
   applyConfigEnvToProcessEnv(envVars);
   applyConfigEnvToProcessEnv(connectorEnvVars);
+  applyConfigEnvToProcessEnv(persistedConfigEnv);
 
   const discordToken =
     process.env.DISCORD_API_TOKEN?.trim() ||
@@ -190,6 +212,7 @@ export function loadElizaConfig(): ElizaConfig {
       topLevelKeys: Object.keys(resolved as object).sort(),
       cloud: settingsDebugCloudSummary(cloud),
       envVarKeysHydrated: Object.keys({
+        ...persistedConfigEnv,
         ...envVars,
         ...connectorEnvVars,
       }).sort(),

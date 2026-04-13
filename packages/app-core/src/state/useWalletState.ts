@@ -65,6 +65,75 @@ interface WalletStateParams {
   characterName: string | undefined;
 }
 
+function normalizeCloudImportFailureDetail(detail: string): string {
+  if (/Invalid Solana address \(base58, 32–44 chars\)/i.test(detail)) {
+    return "the connected Eliza Cloud backend is still using the legacy Solana wallet contract";
+  }
+  return detail;
+}
+
+function buildCloudImportNotice(args: {
+  warning?: string;
+  wallets?: WalletEntry[];
+}): { text: string; tone: "info" | "success" } {
+  const { warning } = args;
+  const hasCloudEvmWallet =
+    args.wallets?.some(
+      (wallet) => wallet.chain === "evm" && wallet.source === "cloud",
+    ) ?? false;
+  const hasCloudSolanaWallet =
+    args.wallets?.some(
+      (wallet) => wallet.chain === "solana" && wallet.source === "cloud",
+    ) ?? false;
+  if (!warning) {
+    if (hasCloudEvmWallet && hasCloudSolanaWallet) {
+      return {
+        text: "Cloud wallets connected.",
+        tone: "success",
+      };
+    }
+    if (hasCloudEvmWallet || hasCloudSolanaWallet) {
+      return {
+        text: "Cloud wallet connected.",
+        tone: "success",
+      };
+    }
+    return {
+      text: "Cloud wallet import queued.",
+      tone: "success",
+    };
+  }
+
+  const solanaFailure = warning.match(
+    /Cloud solana wallet import failed:\s*(.+)$/i,
+  );
+  if (hasCloudEvmWallet && hasCloudSolanaWallet && !solanaFailure) {
+    return {
+      text: "Cloud wallets connected.",
+      tone: "success",
+    };
+  }
+  if (hasCloudEvmWallet && solanaFailure) {
+    const detail = normalizeCloudImportFailureDetail(solanaFailure[1]);
+    return {
+      text: `EVM cloud wallet connected. Solana cloud wallet is unavailable because ${detail}.`,
+      tone: "info",
+    };
+  }
+  if (solanaFailure) {
+    const detail = normalizeCloudImportFailureDetail(solanaFailure[1]);
+    return {
+      text: `Solana cloud wallet is unavailable because ${detail}.`,
+      tone: "info",
+    };
+  }
+
+  return {
+    text: `Cloud wallet import partially applied. ${warning}`,
+    tone: "info",
+  };
+}
+
 // ── Hook ──────────────────────────────────────────────────────────────
 
 export function useWalletState({
@@ -172,10 +241,12 @@ export function useWalletState({
       else setWallets([]);
       setPrimaryMap(cfg.primary ?? null);
       setWalletError(null);
+      return cfg;
     } catch (err) {
       setWalletError(
         `Failed to load wallet config: ${err instanceof Error ? err.message : "network error"}`,
       );
+      return null;
     }
   }, []);
 
@@ -184,18 +255,51 @@ export function useWalletState({
       if (primaryPending[chain]) return;
       setPrimaryPending((prev) => ({ ...prev, [chain]: true }));
       setPrimaryRestarting((prev) => ({ ...prev, [chain]: true }));
-      // Optimistic local update for snappier UI.
-      setPrimaryMap((prev) =>
-        prev
-          ? { ...prev, [chain]: source }
-          : { evm: "local", solana: "local", [chain]: source },
-      );
-      setWallets((prev) =>
-        prev.map((w) =>
-          w.chain === chain ? { ...w, primary: w.source === source } : w,
-        ),
-      );
       try {
+        const hasRequestedSource = wallets.some(
+          (wallet) => wallet.chain === chain && wallet.source === source,
+        );
+
+        if (!hasRequestedSource) {
+          if (source === "cloud") {
+            const refreshResult = await client.refreshCloudWallets();
+            const refreshed = await loadWalletConfig();
+            const hasCloudWallet =
+              refreshed?.wallets?.some(
+                (wallet) => wallet.chain === chain && wallet.source === "cloud",
+              ) ?? false;
+            if (!hasCloudWallet) {
+              const warning = refreshResult.warnings?.find(
+                (value) => typeof value === "string" && value.trim().length > 0,
+              );
+              throw new Error(
+                warning ?? `Cloud ${chain} wallet is not available.`,
+              );
+            }
+          } else {
+            await client.generateWallet({ chain, source: "local" });
+            const refreshed = await loadWalletConfig();
+            const hasLocalWallet =
+              refreshed?.wallets?.some(
+                (wallet) => wallet.chain === chain && wallet.source === "local",
+              ) ?? false;
+            if (!hasLocalWallet) {
+              throw new Error(`Local ${chain} wallet is not available.`);
+            }
+          }
+        }
+
+        // Optimistic local update for snappier UI.
+        setPrimaryMap((prev) =>
+          prev
+            ? { ...prev, [chain]: source }
+            : { evm: "local", solana: "local", [chain]: source },
+        );
+        setWallets((prev) =>
+          prev.map((w) =>
+            w.chain === chain ? { ...w, primary: w.source === source } : w,
+          ),
+        );
         await client.setWalletPrimary({ chain, source });
         // Runtime restart is kicked off server-side. Poll the config a few times
         // so we pick up the new state without unmounting the view.
@@ -227,7 +331,7 @@ export function useWalletState({
         setPrimaryRestarting((prev) => ({ ...prev, [chain]: false }));
       }
     },
-    [loadWalletConfig, primaryPending],
+    [loadWalletConfig, primaryPending, wallets],
   );
 
   const refreshCloud = useCallback(async () => {
@@ -291,18 +395,29 @@ export function useWalletState({
           selections.evm === "eliza-cloud" &&
           selections.bsc === "eliza-cloud" &&
           selections.solana === "eliza-cloud";
+        let cloudImportWarning: string | undefined;
 
         await client.updateWalletConfig(config);
         if (shouldImportCloudWallet) {
-          await client.refreshCloudWallets();
+          const refreshResult = await client.refreshCloudWallets();
+          cloudImportWarning = Array.isArray(refreshResult.warnings)
+            ? refreshResult.warnings.find(
+                (warning) =>
+                  typeof warning === "string" && warning.trim().length > 0,
+              )
+            : undefined;
         }
-        await loadWalletConfig();
+        const loadedWalletConfig = await loadWalletConfig();
         await loadBalances();
+        const cloudNotice = buildCloudImportNotice({
+          warning: cloudImportWarning,
+          wallets: loadedWalletConfig?.wallets,
+        });
         setActionNotice(
           shouldImportCloudWallet
-            ? "Cloud wallet import queued. Restart required to apply."
-            : "Wallet RPC settings saved. Restart required to apply.",
-          "success",
+            ? cloudNotice.text
+            : "Wallet RPC settings saved.",
+          shouldImportCloudWallet ? cloudNotice.tone : "success",
         );
         return true;
       } catch (err) {

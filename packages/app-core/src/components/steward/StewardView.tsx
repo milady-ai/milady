@@ -5,25 +5,32 @@
 
 import type { StewardStatusResponse } from "@miladyai/shared/contracts/wallet";
 import {
-  Button,
   PageLayout,
   PagePanel,
   Sidebar,
   SidebarContent,
   SidebarPanel,
 } from "@miladyai/ui";
-import { FileText } from "lucide-react";
+import { FileText, Shield } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "../../state";
 import { ApprovalQueue } from "./ApprovalQueue";
 import { StewardLogo } from "./StewardLogo";
+import { StewardVaultOverview } from "./StewardVaultOverview";
+import { resolveStewardUiState } from "./steward-ui-state";
 import { TransactionHistory } from "./TransactionHistory";
 
-type StewardTab = "history" | "approvals";
+type StewardTab = "overview" | "history" | "approvals";
 
 export function StewardView() {
   const {
+    walletConfig,
+    wallets,
     getStewardStatus,
+    getStewardAddresses,
+    getStewardBalance,
+    getStewardTokens,
+    getStewardWebhookEvents,
     getStewardHistory,
     getStewardPending,
     approveStewardTx,
@@ -32,7 +39,7 @@ export function StewardView() {
     setActionNotice,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<StewardTab>("approvals");
+  const [activeTab, setActiveTab] = useState<StewardTab>("overview");
   const [stewardStatus, setStewardStatus] =
     useState<StewardStatusResponse | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
@@ -56,6 +63,12 @@ export function StewardView() {
     setPendingCount(count);
   }, []);
 
+  const stewardUi = resolveStewardUiState({
+    stewardStatus,
+    walletConfig,
+    wallets,
+  });
+
   // If steward isn't configured, show a placeholder
   if (stewardStatus && !stewardStatus.connected) {
     return (
@@ -66,11 +79,10 @@ export function StewardView() {
         >
           <StewardLogo size={40} className="mx-auto opacity-40" />
           <h2 className="mt-4 text-lg font-semibold text-txt-strong">
-            Steward Not Connected
+            {stewardUi.title}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted leading-relaxed">
-            Set STEWARD_API_URL and STEWARD_API_KEY in agent settings to enable
-            vault management.
+            {stewardUi.description}
           </p>
           {stewardStatus.error && (
             <p className="mt-3 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-xs text-danger">
@@ -91,6 +103,21 @@ export function StewardView() {
         </div>
 
         <nav className="mt-4 space-y-1.5">
+          <SidebarContent.Item
+            active={activeTab === "overview"}
+            onClick={() => setActiveTab("overview")}
+          >
+            <SidebarContent.ItemIcon active={activeTab === "overview"}>
+              <Shield className="h-4 w-4" />
+            </SidebarContent.ItemIcon>
+            <SidebarContent.ItemBody>
+              <SidebarContent.ItemTitle>Vault</SidebarContent.ItemTitle>
+              <SidebarContent.ItemDescription>
+                Addresses, balances, events
+              </SidebarContent.ItemDescription>
+            </SidebarContent.ItemBody>
+          </SidebarContent.Item>
+
           <SidebarContent.Item
             active={activeTab === "approvals"}
             onClick={() => setActiveTab("approvals")}
@@ -158,18 +185,34 @@ export function StewardView() {
             Steward
           </div>
           <h1 className="mt-1 text-2xl font-semibold text-txt-strong">
-            {activeTab === "approvals" ? "Approvals" : "Transaction History"}
+            {activeTab === "overview"
+              ? "Vault Overview"
+              : activeTab === "approvals"
+                ? "Approvals"
+                : "Transaction History"}
           </h1>
           <p className="mt-1.5 max-w-2xl text-sm text-muted">
-            {activeTab === "approvals"
-              ? "Transactions that need your sign-off."
-              : "All signed and broadcast transactions from the vault."}
+            {activeTab === "overview"
+              ? "Everything Steward is managing on this device, including addresses, balances, and recent vault activity."
+              : activeTab === "approvals"
+                ? "Transactions that need your sign-off."
+                : "All signed and broadcast transactions from the vault."}
           </p>
         </PagePanel>
 
         {/* Content */}
         <div className="mt-4">
-          {activeTab === "approvals" ? (
+          {activeTab === "overview" && stewardStatus ? (
+            <StewardVaultOverview
+              stewardStatus={stewardStatus}
+              getStewardAddresses={getStewardAddresses}
+              getStewardBalance={getStewardBalance}
+              getStewardTokens={getStewardTokens}
+              getStewardWebhookEvents={getStewardWebhookEvents}
+              copyToClipboard={copyToClipboard}
+              setActionNotice={setActionNotice}
+            />
+          ) : activeTab === "approvals" ? (
             <ApprovalQueue
               getStewardPending={getStewardPending}
               approveStewardTx={approveStewardTx}

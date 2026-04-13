@@ -24,15 +24,15 @@ vi.mock("../../cloud/cloud-wallet.js", async () => {
   return {
     ...actual,
     getOrCreateClientAddressKey: vi.fn(),
-    provisionCloudWallets: vi.fn(),
+    provisionCloudWalletsBestEffort: vi.fn(),
   };
 });
 
-import type { ElizaConfig } from "../../config/config.js";
 import {
   getOrCreateClientAddressKey,
-  provisionCloudWallets,
+  provisionCloudWalletsBestEffort,
 } from "../../cloud/cloud-wallet.js";
+import type { ElizaConfig } from "../../config/config.js";
 import {
   DEFAULT_WALLET_ROUTE_DEPENDENCIES,
   handleWalletRoutes,
@@ -52,10 +52,12 @@ function makeCtx(
   ctx: WalletRouteContext;
   sent: { status: number; body: unknown };
   restarts: string[];
+  immediateRestarts: string[];
   savedConfigs: ElizaConfig[];
 } {
   const sent = { status: 0, body: undefined as unknown };
   const restarts: string[] = [];
+  const immediateRestarts: string[] = [];
   const savedConfigs: ElizaConfig[] = [];
   const config = overrides.config ?? ({} as ElizaConfig);
 
@@ -70,6 +72,12 @@ function makeCtx(
     },
     ensureWalletKeysInEnvAndConfig: () => false,
     resolveWalletExportRejection: () => null,
+    restartRuntime: overrides.restartRuntime
+      ? async (reason: string) => {
+          immediateRestarts.push(reason);
+          return await overrides.restartRuntime?.(reason);
+        }
+      : undefined,
     scheduleRuntimeRestart: (reason: string) => {
       restarts.push(reason);
     },
@@ -90,16 +98,17 @@ function makeCtx(
       }),
       ...(overrides.depsOverrides ?? {}),
     },
-    runtime: null,
+    runtime: overrides.runtime ?? null,
   };
 
-  return { ctx, sent, restarts, savedConfigs };
+  return { ctx, sent, restarts, immediateRestarts, savedConfigs };
 }
 
 const ORIGINAL_ENV = { ...process.env };
 let tmpStateDir: string;
 
 beforeEach(async () => {
+  vi.clearAllMocks();
   tmpStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "wallet-routes-"));
   process.env.MILADY_STATE_DIR = tmpStateDir;
   delete process.env.ENABLE_CLOUD_WALLET;
@@ -258,12 +267,13 @@ describe("POST /api/wallet/primary", () => {
     expect(sent.status).toBe(404);
   });
 
-  it("persists primary selection + writes config.env + schedules restart", async () => {
+  it("persists primary selection + writes config.env + restarts immediately when available", async () => {
     process.env.ENABLE_CLOUD_WALLET = "1";
-    const { ctx, sent, restarts, savedConfigs } = makeCtx({
+    const { ctx, sent, restarts, immediateRestarts, savedConfigs } = makeCtx({
       pathname: "/api/wallet/primary",
       method: "POST",
       body: { chain: "evm", source: "cloud" },
+      restartRuntime: vi.fn(async () => true),
     });
     await handleWalletRoutes(ctx);
 
@@ -286,7 +296,8 @@ describe("POST /api/wallet/primary", () => {
     );
     expect(configEnv).toContain("WALLET_SOURCE_EVM=cloud");
 
-    expect(restarts).toEqual(["primary-changed"]);
+    expect(immediateRestarts).toEqual(["primary-changed"]);
+    expect(restarts).toEqual([]);
   });
 
   it("writes WALLET_SOURCE_SOLANA when chain === 'solana'", async () => {
@@ -373,25 +384,29 @@ describe("POST /api/wallet/refresh-cloud", () => {
       address: "0x1234567890abcdef1234567890abcdef12345678",
       minted: false,
     });
-    vi.mocked(provisionCloudWallets).mockResolvedValue({
-      evm: {
-        agentWalletId: "wallet-evm",
-        walletAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-        walletProvider: "privy",
-        chainType: "evm",
+    vi.mocked(provisionCloudWalletsBestEffort).mockResolvedValue({
+      descriptors: {
+        evm: {
+          agentWalletId: "wallet-evm",
+          walletAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          walletProvider: "privy",
+          chainType: "evm",
+        },
+        solana: {
+          agentWalletId: "wallet-sol",
+          walletAddress: "So11111111111111111111111111111111111111112",
+          walletProvider: "steward",
+          chainType: "solana",
+        },
       },
-      solana: {
-        agentWalletId: "wallet-sol",
-        walletAddress: "So11111111111111111111111111111111111111112",
-        walletProvider: "steward",
-        chainType: "solana",
-      },
+      failures: [],
+      warnings: [],
     });
 
     const config = {
       cloud: { baseUrl: "https://www.elizacloud.ai" },
     } as unknown as ElizaConfig;
-    const { ctx, sent, restarts, savedConfigs } = makeCtx({
+    const { ctx, sent, restarts, immediateRestarts, savedConfigs } = makeCtx({
       pathname: "/api/wallet/refresh-cloud",
       method: "POST",
       config,
@@ -400,19 +415,23 @@ describe("POST /api/wallet/refresh-cloud", () => {
         getSetting: (key: string) =>
           key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-saved-key" : undefined,
       } as never,
+      restartRuntime: vi.fn(async () => true),
     });
 
     await handleWalletRoutes(ctx);
 
     expect(sent.status).toBe(200);
-    expect(restarts).toEqual(["cloud-refreshed"]);
+    expect(immediateRestarts).toEqual(["cloud-refreshed"]);
+    expect(restarts).toEqual([]);
 
     const configEnv = await fs.readFile(
       path.join(tmpStateDir, "config.env"),
       "utf8",
     );
     expect(configEnv).toContain("ENABLE_CLOUD_WALLET=1");
-    expect(configEnv).toContain("MILADY_CLOUD_EVM_ADDRESS=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd");
+    expect(configEnv).toContain(
+      "MILADY_CLOUD_EVM_ADDRESS=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    );
     expect(configEnv).toContain(
       "MILADY_CLOUD_SOLANA_ADDRESS=So11111111111111111111111111111111111111112",
     );
@@ -441,11 +460,286 @@ describe("POST /api/wallet/refresh-cloud", () => {
       "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
     );
   });
+
+  it("returns partial success warnings without discarding imported EVM wallets", async () => {
+    process.env.ENABLE_CLOUD_WALLET = "1";
+    vi.mocked(getOrCreateClientAddressKey).mockResolvedValue({
+      privateKey: `0x${"44".repeat(32)}`,
+      address: "0x1234567890abcdef1234567890abcdef12345678",
+      minted: false,
+    });
+    vi.mocked(provisionCloudWalletsBestEffort).mockResolvedValue({
+      descriptors: {
+        evm: {
+          agentWalletId: "wallet-evm",
+          walletAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          walletProvider: "privy",
+          chainType: "evm",
+        },
+      },
+      failures: [
+        {
+          chain: "solana",
+          error: new Error("Validation error: Invalid Solana address"),
+        },
+      ],
+      warnings: [
+        "Cloud solana wallet import failed: Validation error: Invalid Solana address",
+      ],
+    });
+
+    const config = {
+      cloud: { baseUrl: "https://www.elizacloud.ai" },
+    } as unknown as ElizaConfig;
+    const { ctx, sent, savedConfigs } = makeCtx({
+      pathname: "/api/wallet/refresh-cloud",
+      method: "POST",
+      config,
+      runtime: {
+        agentId: "agent-123",
+        getSetting: (key: string) =>
+          key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-saved-key" : undefined,
+      } as never,
+    });
+
+    await handleWalletRoutes(ctx);
+
+    expect(sent.status).toBe(200);
+    expect((sent.body as { warnings?: string[] }).warnings).toEqual([
+      "Cloud solana wallet import failed: Validation error: Invalid Solana address",
+    ]);
+
+    const configEnv = await fs.readFile(
+      path.join(tmpStateDir, "config.env"),
+      "utf8",
+    );
+    expect(configEnv).toContain(
+      "MILADY_CLOUD_EVM_ADDRESS=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    );
+    expect(configEnv).not.toContain("MILADY_CLOUD_SOLANA_ADDRESS=");
+    expect(configEnv).toContain("WALLET_SOURCE_EVM=cloud");
+    expect(configEnv).not.toContain("WALLET_SOURCE_SOLANA=cloud");
+
+    const lastSaved = savedConfigs.at(-1) as {
+      wallet?: {
+        primary?: { evm?: string; solana?: string };
+        cloud?: {
+          evm?: { walletAddress?: string };
+          solana?: { walletAddress?: string };
+        };
+      };
+    };
+
+    expect(lastSaved.wallet?.primary).toEqual({
+      evm: "cloud",
+    });
+    expect(lastSaved.wallet?.cloud?.evm?.walletAddress).toBe(
+      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    );
+    expect(lastSaved.wallet?.cloud?.solana?.walletAddress).toBeUndefined();
+  });
+
+  it("keeps Solana on cloud when the backend returns the legacy provision error", async () => {
+    process.env.ENABLE_CLOUD_WALLET = "1";
+    vi.mocked(getOrCreateClientAddressKey).mockResolvedValue({
+      privateKey: `0x${"46".repeat(32)}`,
+      address: "0x1234567890abcdef1234567890abcdef12345678",
+      minted: false,
+    });
+    vi.mocked(provisionCloudWalletsBestEffort).mockResolvedValue({
+      descriptors: {
+        evm: {
+          agentWalletId: "wallet-evm",
+          walletAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          walletProvider: "privy",
+          chainType: "evm",
+        },
+      },
+      failures: [
+        {
+          chain: "solana",
+          error: new Error(
+            "Validation error: Invalid Solana address (base58, 32–44 chars)",
+          ),
+        },
+      ],
+      warnings: [
+        "Cloud solana wallet import failed: Validation error: Invalid Solana address (base58, 32–44 chars)",
+      ],
+    });
+
+    const config = {
+      cloud: { baseUrl: "https://www.elizacloud.ai" },
+    } as unknown as ElizaConfig;
+    const { ctx, sent, savedConfigs } = makeCtx({
+      pathname: "/api/wallet/refresh-cloud",
+      method: "POST",
+      config,
+      runtime: {
+        agentId: "agent-123",
+        getSetting: (key: string) =>
+          key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-saved-key" : undefined,
+      } as never,
+    });
+
+    await handleWalletRoutes(ctx);
+
+    expect(sent.status).toBe(200);
+    expect((sent.body as { warnings?: string[] }).warnings).toEqual([
+      "Cloud solana wallet import failed: Validation error: Invalid Solana address (base58, 32–44 chars)",
+    ]);
+
+    const configEnv = await fs.readFile(
+      path.join(tmpStateDir, "config.env"),
+      "utf8",
+    );
+    expect(configEnv).not.toContain("SOLANA_PRIVATE_KEY=");
+    expect(configEnv).not.toContain("WALLET_SOURCE_SOLANA=local");
+
+    const lastSaved = savedConfigs.at(-1) as {
+      wallet?: {
+        primary?: { evm?: string; solana?: string };
+        cloud?: {
+          evm?: { walletAddress?: string };
+          solana?: { walletAddress?: string };
+        };
+      };
+    };
+
+    expect(lastSaved.wallet?.primary).toEqual({
+      evm: "cloud",
+    });
+    expect(lastSaved.wallet?.cloud?.evm?.walletAddress).toBe(
+      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    );
+    expect(lastSaved.wallet?.cloud?.solana?.walletAddress).toBeUndefined();
+  });
+
+  it("only provisions missing cloud chains when one chain is already cached", async () => {
+    process.env.ENABLE_CLOUD_WALLET = "1";
+    vi.mocked(getOrCreateClientAddressKey).mockResolvedValue({
+      privateKey: `0x${"55".repeat(32)}`,
+      address: "0x1234567890abcdef1234567890abcdef12345678",
+      minted: false,
+    });
+    vi.mocked(provisionCloudWalletsBestEffort).mockResolvedValue({
+      descriptors: {
+        solana: {
+          agentWalletId: "wallet-sol",
+          walletAddress: "So11111111111111111111111111111111111111112",
+          walletProvider: "steward",
+          chainType: "solana",
+        },
+      },
+      failures: [],
+      warnings: [],
+    });
+
+    const config = {
+      cloud: { baseUrl: "https://www.elizacloud.ai" },
+      wallet: {
+        cloud: {
+          evm: {
+            agentWalletId: "wallet-evm",
+            walletAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            walletProvider: "privy",
+          },
+        },
+      },
+    } as unknown as ElizaConfig;
+    const { ctx, sent, savedConfigs } = makeCtx({
+      pathname: "/api/wallet/refresh-cloud",
+      method: "POST",
+      config,
+      runtime: {
+        agentId: "agent-123",
+        getSetting: (key: string) =>
+          key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-saved-key" : undefined,
+      } as never,
+    });
+
+    await handleWalletRoutes(ctx);
+
+    expect(sent.status).toBe(200);
+    expect(provisionCloudWalletsBestEffort).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        agentId: "agent-123",
+        clientAddress: "0x1234567890abcdef1234567890abcdef12345678",
+        chains: ["solana"],
+      }),
+    );
+    expect((sent.body as { warnings?: string[] }).warnings).toBeUndefined();
+
+    const lastSaved = savedConfigs.at(-1) as {
+      wallet?: {
+        primary?: { evm?: string; solana?: string };
+        cloud?: {
+          evm?: { walletAddress?: string };
+          solana?: { walletAddress?: string };
+        };
+      };
+    };
+
+    expect(lastSaved.wallet?.primary).toEqual({
+      evm: "cloud",
+      solana: "cloud",
+    });
+    expect(lastSaved.wallet?.cloud?.evm?.walletAddress).toBe(
+      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    );
+    expect(lastSaved.wallet?.cloud?.solana?.walletAddress).toBe(
+      "So11111111111111111111111111111111111111112",
+    );
+  });
+
+  it("returns cached cloud wallets without reprovisioning when both chains already exist", async () => {
+    process.env.ENABLE_CLOUD_WALLET = "1";
+    vi.mocked(getOrCreateClientAddressKey).mockResolvedValue({
+      privateKey: `0x${"56".repeat(32)}`,
+      address: "0x1234567890abcdef1234567890abcdef12345678",
+      minted: false,
+    });
+
+    const config = {
+      cloud: { baseUrl: "https://www.elizacloud.ai" },
+      wallet: {
+        cloud: {
+          evm: {
+            agentWalletId: "wallet-evm",
+            walletAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            walletProvider: "privy",
+          },
+          solana: {
+            agentWalletId: "wallet-sol",
+            walletAddress: "So11111111111111111111111111111111111111112",
+            walletProvider: "steward",
+          },
+        },
+      },
+    } as unknown as ElizaConfig;
+    const { ctx, sent } = makeCtx({
+      pathname: "/api/wallet/refresh-cloud",
+      method: "POST",
+      config,
+      runtime: {
+        agentId: "agent-123",
+        getSetting: (key: string) =>
+          key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-saved-key" : undefined,
+      } as never,
+    });
+
+    await handleWalletRoutes(ctx);
+
+    expect(sent.status).toBe(200);
+    expect(provisionCloudWalletsBestEffort).not.toHaveBeenCalled();
+    expect((sent.body as { warnings?: string[] }).warnings).toBeUndefined();
+  });
 });
 
 describe("PUT /api/wallet/config", () => {
   it("enables the cloud wallet feature flag when all rpc providers use Eliza Cloud", async () => {
-    const { ctx, sent } = makeCtx({
+    const { ctx, sent, restarts, immediateRestarts } = makeCtx({
       pathname: "/api/wallet/config",
       method: "PUT",
       body: {
@@ -462,6 +756,8 @@ describe("PUT /api/wallet/config", () => {
 
     expect(sent.status).toBe(200);
     expect(process.env.ENABLE_CLOUD_WALLET).toBe("1");
+    expect(immediateRestarts).toEqual([]);
+    expect(restarts).toEqual([]);
     const configEnv = await fs.readFile(
       path.join(tmpStateDir, "config.env"),
       "utf8",

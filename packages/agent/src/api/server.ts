@@ -4911,7 +4911,19 @@ async function handleRequest(
   const registryService = state.registryService;
   const dropService = state.dropService;
 
+  const canonicalizeRestartReason = (reason: string): string => {
+    if (
+      reason === "primary-changed" ||
+      reason === "cloud-refreshed" ||
+      reason === "Wallet configuration updated"
+    ) {
+      return "Wallet configuration updated";
+    }
+    return reason;
+  };
+
   const scheduleRuntimeRestart = (reason: string): void => {
+    const canonicalReason = canonicalizeRestartReason(reason);
     if (state.pendingRestartReasons.length >= 50) {
       // Prevent unbounded growth — keep only first entry + latest
       state.pendingRestartReasons.splice(
@@ -4919,11 +4931,11 @@ async function handleRequest(
         state.pendingRestartReasons.length - 1,
       );
     }
-    if (!state.pendingRestartReasons.includes(reason)) {
-      state.pendingRestartReasons.push(reason);
+    if (!state.pendingRestartReasons.includes(canonicalReason)) {
+      state.pendingRestartReasons.push(canonicalReason);
     }
     logger.info(
-      `[eliza-api] Restart required: ${reason} (${state.pendingRestartReasons.length} pending)`,
+      `[eliza-api] Restart required: ${canonicalReason} (${state.pendingRestartReasons.length} pending)`,
     );
     state.broadcastWs?.({
       type: "restart-required",
@@ -5512,6 +5524,7 @@ async function handleRequest(
       saveConfig: saveElizaConfig,
       ensureWalletKeysInEnvAndConfig,
       resolveWalletExportRejection,
+      restartRuntime,
       scheduleRuntimeRestart,
       deps: {
         getWalletAddresses,

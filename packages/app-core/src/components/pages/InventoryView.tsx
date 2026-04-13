@@ -60,6 +60,8 @@ import { TokensTable } from "../inventory/TokensTable";
 import { useInventoryData } from "../inventory/useInventoryData";
 import { PolicyControlsView } from "../settings/PolicyControlsView";
 import { ApprovalQueue } from "../steward/ApprovalQueue";
+import { StewardVaultOverview } from "../steward/StewardVaultOverview";
+import { resolveStewardUiState } from "../steward/steward-ui-state";
 import { TransactionHistory } from "../steward/TransactionHistory";
 import { ConfigPageView } from "./ConfigPageView";
 import { resolveInventoryWalletAddresses } from "./inventory-wallet-addresses";
@@ -233,7 +235,7 @@ function StewardWalletInfoPopup({
 }
 
 type InventorySortKey = "chain" | "symbol" | "value";
-type WalletSubTab = "balances" | "transactions" | "approvals";
+type WalletSubTab = "balances" | "vault" | "transactions" | "approvals";
 
 function countVisibleAssetsForFocus(
   focus: ChainKey,
@@ -280,6 +282,10 @@ export function InventoryView() {
     getBscTradeQuote,
     getBscTradeTxStatus,
     getStewardStatus,
+    getStewardAddresses,
+    getStewardBalance,
+    getStewardTokens,
+    getStewardWebhookEvents,
     getStewardHistory,
     getStewardPending,
     approveStewardTx,
@@ -665,6 +671,14 @@ export function InventoryView() {
     [copyToClipboard, setActionNotice, t],
   );
 
+  const stewardUi = resolveStewardUiState({
+    stewardStatus,
+    walletConfig,
+    wallets,
+  });
+  const stewardConnected = stewardUi.connected;
+  const stewardFeaturesAvailable = stewardUi.showFeatures;
+
   const walletSidebar = (
     <Sidebar
       testId="wallets-sidebar"
@@ -691,9 +705,6 @@ export function InventoryView() {
                 const chainLabel = chain === "evm" ? "EVM" : "Solana";
                 const chainWallets = wallets.filter((w) => w.chain === chain);
                 if (chainWallets.length === 0) return null;
-                const hasLocal = chainWallets.some((w) => w.source === "local");
-                const hasCloud = chainWallets.some((w) => w.source === "cloud");
-                if (!hasCloud && !hasLocal) return null;
                 const current = walletPrimary[chain] ?? "local";
                 const restarting = Boolean(walletPrimaryRestarting?.[chain]);
                 const pending = Boolean(walletPrimaryPending?.[chain]);
@@ -733,12 +744,12 @@ export function InventoryView() {
                         {
                           value: "local",
                           label: "Local",
-                          disabled: !hasLocal || pending,
+                          disabled: pending || restarting,
                         },
                         {
                           value: "cloud",
                           label: "Cloud",
-                          disabled: !hasCloud || pending,
+                          disabled: pending || restarting,
                         },
                       ]}
                       data-testid={`wallet-source-toggle-${chain}`}
@@ -790,18 +801,20 @@ export function InventoryView() {
                   defaultValue: "Wallet & RPC",
                 })}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="wallet-policies-popup"
-            className="h-11 w-full justify-start rounded-xl px-4 text-xs font-semibold shadow-sm"
-            onClick={() => setWalletPoliciesOpen(true)}
-          >
-            <Shield className="h-4 w-4" />
-            {t("settings.sections.walletpolicies.label", {
-              defaultValue: "Wallet Policies",
-            })}
-          </Button>
+          {stewardFeaturesAvailable ? (
+            <Button
+              variant="outline"
+              size="sm"
+              data-testid="wallet-policies-popup"
+              className="h-11 w-full justify-start rounded-xl px-4 text-xs font-semibold shadow-sm"
+              onClick={() => setWalletPoliciesOpen(true)}
+            >
+              <Shield className="h-4 w-4" />
+              {t("settings.sections.walletpolicies.label", {
+                defaultValue: "Wallet Policies",
+              })}
+            </Button>
+          ) : null}
 
           {/* Vincent moved to Apps → Vincent app */}
         </div>
@@ -933,7 +946,12 @@ export function InventoryView() {
     </Sidebar>
   );
 
-  const stewardConnected = stewardStatus?.connected === true;
+  useEffect(() => {
+    if (!stewardFeaturesAvailable && walletSubTab !== "balances") {
+      setWalletSubTab("balances");
+    }
+  }, [stewardFeaturesAvailable, walletSubTab]);
+
   const stewardEvmAddrPresent = Boolean(
     stewardConnected &&
       (stewardStatus?.walletAddresses?.evm || stewardStatus?.evmAddress),
@@ -946,17 +964,22 @@ export function InventoryView() {
   );
   const walletSubTabItems = [
     { value: "balances" as const, label: "Balances" },
-    { value: "transactions" as const, label: "Transactions" },
-    {
-      value: "approvals" as const,
-      label: "Approvals",
-      badge:
-        pendingApprovalCount > 0 ? (
-          <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-3xs font-bold text-white">
-            {pendingApprovalCount > 99 ? "99+" : pendingApprovalCount}
-          </span>
-        ) : undefined,
-    },
+    ...(stewardFeaturesAvailable
+      ? ([
+          { value: "vault" as const, label: "Vault" },
+          { value: "transactions" as const, label: "Transactions" },
+          {
+            value: "approvals" as const,
+            label: "Approvals",
+            badge:
+              pendingApprovalCount > 0 ? (
+                <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-3xs font-bold text-white">
+                  {pendingApprovalCount > 99 ? "99+" : pendingApprovalCount}
+                </span>
+              ) : undefined,
+          },
+        ] as const)
+      : []),
   ];
   const walletSubTabControls = (
     <div className="mb-4 flex justify-end">
@@ -1130,7 +1153,7 @@ export function InventoryView() {
             </PagePanel>
           ) : (
             <PagePanel variant="workspace">
-              {!stewardConnected ? (
+              {!stewardFeaturesAvailable ? (
                 <PagePanel.Empty
                   variant="workspace"
                   title={
@@ -1138,6 +1161,16 @@ export function InventoryView() {
                       ? "No pending approvals"
                       : "No transactions yet"
                   }
+                />
+              ) : walletSubTab === "vault" && stewardStatus ? (
+                <StewardVaultOverview
+                  stewardStatus={stewardStatus}
+                  getStewardAddresses={getStewardAddresses}
+                  getStewardBalance={getStewardBalance}
+                  getStewardTokens={getStewardTokens}
+                  getStewardWebhookEvents={getStewardWebhookEvents}
+                  copyToClipboard={copyToClipboard}
+                  setActionNotice={setActionNotice}
                 />
               ) : walletSubTab === "approvals" ? (
                 <ApprovalQueue

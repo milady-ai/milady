@@ -15,9 +15,14 @@ import type {
   BscTransferExecuteRequest,
   BscTransferExecuteResponse,
   StewardApprovalActionResponse,
+  StewardBalanceResponse,
   StewardHistoryResponse,
   StewardPendingResponse,
   StewardStatusResponse,
+  StewardTokenBalancesResponse,
+  StewardWalletAddressesResponse,
+  StewardWebhookEventsResponse,
+  StewardWebhookEventType,
   WalletAddresses,
   WalletBalancesResponse,
   WalletConfigStatus,
@@ -65,7 +70,22 @@ declare module "./client-base" {
     setWalletPrimary(
       request: WalletPrimaryUpdateRequest,
     ): Promise<WalletPrimaryUpdateResponse>;
-    refreshCloudWallets(): Promise<{ ok: boolean }>;
+    refreshCloudWallets(): Promise<{
+      ok: boolean;
+      warnings?: string[];
+    }>;
+    generateWallet(request: {
+      chain: "evm" | "solana" | "both";
+      source?: "local" | "steward";
+    }): Promise<{
+      ok: boolean;
+      wallets: Array<{
+        chain: "evm" | "solana";
+        address: string;
+      }>;
+      source?: "local" | "steward";
+      warnings?: string[];
+    }>;
     exportWalletKeys(exportToken: string): Promise<WalletExportResult>;
     getBscTradePreflight(
       tokenAddress?: string,
@@ -81,6 +101,13 @@ declare module "./client-base" {
     ): Promise<BscTransferExecuteResponse>;
     getBscTradeTxStatus(hash: string): Promise<BscTradeTxStatusResponse>;
     getStewardStatus(): Promise<StewardStatusResponse>;
+    getStewardAddresses(): Promise<StewardWalletAddressesResponse>;
+    getStewardBalance(chainId?: number): Promise<StewardBalanceResponse>;
+    getStewardTokens(chainId?: number): Promise<StewardTokenBalancesResponse>;
+    getStewardWebhookEvents(opts?: {
+      event?: StewardWebhookEventType;
+      since?: number;
+    }): Promise<StewardWebhookEventsResponse>;
     getStewardPolicies(): Promise<
       Array<{
         id: string;
@@ -211,6 +238,16 @@ MiladyClient.prototype.refreshCloudWallets = async function (
   });
 };
 
+MiladyClient.prototype.generateWallet = async function (
+  this: MiladyClient,
+  request,
+) {
+  return this.fetch("/api/wallet/generate", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+};
+
 MiladyClient.prototype.exportWalletKeys = async function (
   this: MiladyClient,
   exportToken,
@@ -274,6 +311,47 @@ MiladyClient.prototype.getBscTradeTxStatus = async function (
 
 MiladyClient.prototype.getStewardStatus = async function (this: MiladyClient) {
   return this.fetch("/api/wallet/steward-status");
+};
+
+MiladyClient.prototype.getStewardAddresses = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/wallet/steward-addresses");
+};
+
+MiladyClient.prototype.getStewardBalance = async function (
+  this: MiladyClient,
+  chainId?,
+) {
+  const qs =
+    typeof chainId === "number" && Number.isFinite(chainId)
+      ? `?chainId=${encodeURIComponent(String(chainId))}`
+      : "";
+  return this.fetch(`/api/wallet/steward-balances${qs}`);
+};
+
+MiladyClient.prototype.getStewardTokens = async function (
+  this: MiladyClient,
+  chainId?,
+) {
+  const qs =
+    typeof chainId === "number" && Number.isFinite(chainId)
+      ? `?chainId=${encodeURIComponent(String(chainId))}`
+      : "";
+  return this.fetch(`/api/wallet/steward-tokens${qs}`);
+};
+
+MiladyClient.prototype.getStewardWebhookEvents = async function (
+  this: MiladyClient,
+  opts?,
+) {
+  const params = new URLSearchParams();
+  if (opts?.event) params.set("event", opts.event);
+  if (typeof opts?.since === "number" && Number.isFinite(opts.since)) {
+    params.set("since", String(opts.since));
+  }
+  const qs = params.toString();
+  return this.fetch(`/api/wallet/steward-webhook-events${qs ? `?${qs}` : ""}`);
 };
 
 MiladyClient.prototype.getStewardPolicies = async function (

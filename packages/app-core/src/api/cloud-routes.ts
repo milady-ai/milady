@@ -1,15 +1,30 @@
+import fs from "node:fs/promises";
 import type http from "node:http";
+import path from "node:path";
 import { type AgentRuntime, logger } from "@elizaos/core";
 import {
   type CloudRouteState as AutonomousCloudRouteState,
   handleCloudRoute as handleAutonomousCloudRoute,
 } from "@miladyai/agent/api/cloud-routes";
+import { persistConfigEnv } from "@miladyai/agent/api/config-env";
 import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import { normalizeCloudSiteUrl } from "@miladyai/agent/cloud/base-url";
+import {
+  type CloudWalletDescriptor,
+  ElizaCloudClient,
+} from "@miladyai/agent/cloud/bridge-client";
 import type { CloudManager } from "@miladyai/agent/cloud/cloud-manager";
+import {
+  getOrCreateClientAddressKey,
+  MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV,
+  persistCloudWalletCache,
+  provisionCloudWallets,
+} from "@miladyai/agent/cloud/cloud-wallet";
 import { validateCloudBaseUrl } from "@miladyai/agent/cloud/validate-url";
 import type { ElizaConfig } from "@miladyai/agent/config/config";
 import { saveElizaConfig } from "@miladyai/agent/config/config";
+import { resolveStateDir } from "@miladyai/agent/config/paths";
+import { isCloudWalletEnabled } from "@miladyai/agent/config/feature-flags";
 import {
   isCloudInferenceSelectedInConfig,
   migrateLegacyRuntimeConfig,
@@ -28,9 +43,32 @@ export interface CloudRouteState {
   cloudManager: CloudManager | null;
   /** The running agent runtime — needed to persist cloud credentials to the DB. */
   runtime: AgentRuntime | null;
+  restartRuntime?: (reason: string) => Promise<boolean>;
 }
 
 type CloudRuntimeSecrets = Record<string, string | number | boolean>;
+type WalletChainKind = "evm" | "solana";
+
+const CONFIG_ENV_FILENAME = "config.env";
+const CONFIG_ENV_BAK_SUFFIX = ".bak";
+const CLOUD_WALLET_ROLLBACK_ENV_KEYS = [
+  MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV,
+  "MILADY_CLOUD_EVM_ADDRESS",
+  "MILADY_CLOUD_SOLANA_ADDRESS",
+  "ENABLE_EVM_PLUGIN",
+  "WALLET_SOURCE_EVM",
+  "WALLET_SOURCE_SOLANA",
+] as const;
+
+type CloudWalletRollbackEnvKey =
+  (typeof CLOUD_WALLET_ROLLBACK_ENV_KEYS)[number];
+
+interface ConfigEnvRollbackSnapshot {
+  bakPath: string;
+  filePath: string;
+  originalRaw: string | null;
+  previousEnv: Partial<Record<CloudWalletRollbackEnvKey, string>>;
+}
 
 const CLOUD_LOGIN_POLL_TIMEOUT_MS = 10_000;
 
@@ -67,6 +105,110 @@ function getTelemetrySpan(meta: {
   timeoutMs: number;
 }): TelemetrySpan {
   return createIntegrationTelemetrySpan(meta) ?? createNoopTelemetrySpan();
+}
+
+async function captureConfigEnvRollbackSnapshot(): Promise<ConfigEnvRollbackSnapshot> {
+  const filePath = path.join(resolveStateDir(), CONFIG_ENV_FILENAME);
+  const bakPath = `${filePath}${CONFIG_ENV_BAK_SUFFIX}`;
+
+  let originalRaw: string | null = null;
+  try {
+    originalRaw = await fs.readFile(filePath, "utf8");
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw err;
+    }
+  }
+
+  const previousEnv = Object.fromEntries(
+    CLOUD_WALLET_ROLLBACK_ENV_KEYS.flatMap((key) => {
+      const value = process.env[key];
+      return typeof value === "string" ? ([[key, value]] as const) : [];
+    }),
+  ) as Partial<Record<CloudWalletRollbackEnvKey, string>>;
+
+  return { bakPath, filePath, originalRaw, previousEnv };
+}
+
+async function restoreConfigEnvRollbackSnapshot(
+  snapshot: ConfigEnvRollbackSnapshot,
+): Promise<void> {
+  await fs.mkdir(path.dirname(snapshot.filePath), { recursive: true });
+
+  if (snapshot.originalRaw === null) {
+    await fs.rm(snapshot.filePath, { force: true });
+    await fs.rm(snapshot.bakPath, { force: true });
+  } else {
+    await fs.writeFile(snapshot.filePath, snapshot.originalRaw, {
+      encoding: "utf8",
+      mode: 0o600,
+    });
+    await fs.writeFile(snapshot.bakPath, snapshot.originalRaw, {
+      encoding: "utf8",
+      mode: 0o600,
+    });
+  }
+
+  for (const key of CLOUD_WALLET_ROLLBACK_ENV_KEYS) {
+    const previousValue = snapshot.previousEnv[key];
+    if (typeof previousValue === "string") {
+      process.env[key] = previousValue;
+    } else {
+      delete process.env[key];
+    }
+  }
+}
+
+function readCloudWalletAddress(
+  descriptor: Partial<CloudWalletDescriptor> | null | undefined,
+): string | null {
+  if (typeof descriptor?.walletAddress !== "string") return null;
+  const trimmed = descriptor.walletAddress.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function readPrimaryMap(config: ElizaConfig): {
+  evm: "local" | "cloud";
+  solana: "local" | "cloud";
+} {
+  const wallet =
+    config.wallet && typeof config.wallet === "object"
+      ? (config.wallet as Record<string, unknown>)
+      : null;
+  const primary =
+    wallet?.primary && typeof wallet.primary === "object"
+      ? (wallet.primary as Record<string, unknown>)
+      : null;
+
+  return {
+    evm: primary?.evm === "cloud" ? "cloud" : "local",
+    solana: primary?.solana === "cloud" ? "cloud" : "local",
+  };
+}
+
+function persistPrimarySelection(
+  config: ElizaConfig,
+  chain: WalletChainKind,
+  source: "local" | "cloud",
+): void {
+  const wallet = ((config.wallet ?? {}) as Record<string, unknown>);
+  const primary = {
+    ...(((wallet.primary ?? {}) as Record<string, unknown>)),
+  };
+  primary[chain] = source;
+  wallet.primary = primary;
+  config.wallet = wallet as ElizaConfig["wallet"];
+}
+
+function replaceMutableRoot<T extends object>(target: T, snapshot: T): void {
+  const targetRecord = target as Record<string, unknown>;
+  for (const key of Object.keys(targetRecord)) {
+    delete targetRecord[key];
+  }
+  Object.assign(
+    targetRecord,
+    structuredClone(snapshot as Record<string, unknown>),
+  );
 }
 
 async function fetchCloudLoginStatus(
@@ -154,8 +296,113 @@ async function persistCloudLoginStatus(args: {
     await args.state.cloudManager.init();
   }
 
+  let shouldRestartForCloudWalletBind = false;
+  if (isCloudWalletEnabled() && args.state.runtime?.agentId) {
+    const rollbackConfigSnapshot = structuredClone(
+      args.state.config as Record<string, unknown>,
+    ) as ElizaConfig;
+    const rollbackEnvSnapshot = await captureConfigEnvRollbackSnapshot();
+
+    try {
+      const { address: clientAddress } = await getOrCreateClientAddressKey();
+      const bridge = new ElizaCloudClient(
+        normalizeCloudSiteUrl(args.state.config.cloud?.baseUrl),
+        args.apiKey,
+      );
+      const previousPrimary = readPrimaryMap(args.state.config);
+      const previousCloud = (args.state.config.wallet?.cloud ?? {}) as Partial<
+        Record<WalletChainKind, Partial<CloudWalletDescriptor>>
+      >;
+      const previousEvmAddress = readCloudWalletAddress(previousCloud.evm);
+      const previousSolanaAddress = readCloudWalletAddress(previousCloud.solana);
+
+      const descriptors = await provisionCloudWallets(bridge, {
+        agentId: args.state.runtime.agentId,
+        clientAddress,
+      });
+
+      persistCloudWalletCache(
+        args.state.config as Record<string, unknown>,
+        descriptors,
+      );
+
+      const nextCloudConfig = {
+        ...(args.state.config.cloud ?? {}),
+        clientAddressPublicKey: clientAddress,
+      };
+      args.state.config.cloud = nextCloudConfig;
+      saveElizaConfig(args.state.config);
+
+      if (descriptors.evm?.walletAddress) {
+        process.env.MILADY_CLOUD_EVM_ADDRESS = descriptors.evm.walletAddress;
+        await persistConfigEnv(
+          "MILADY_CLOUD_EVM_ADDRESS",
+          descriptors.evm.walletAddress,
+        );
+      }
+      if (descriptors.solana?.walletAddress) {
+        process.env.MILADY_CLOUD_SOLANA_ADDRESS =
+          descriptors.solana.walletAddress;
+        await persistConfigEnv(
+          "MILADY_CLOUD_SOLANA_ADDRESS",
+          descriptors.solana.walletAddress,
+        );
+      }
+
+      await persistConfigEnv("ENABLE_EVM_PLUGIN", "1");
+      if (descriptors.evm) {
+        process.env.WALLET_SOURCE_EVM = "cloud";
+        await persistConfigEnv("WALLET_SOURCE_EVM", "cloud");
+        persistPrimarySelection(args.state.config, "evm", "cloud");
+      }
+      if (descriptors.solana) {
+        process.env.WALLET_SOURCE_SOLANA = "cloud";
+        await persistConfigEnv("WALLET_SOURCE_SOLANA", "cloud");
+        persistPrimarySelection(args.state.config, "solana", "cloud");
+      }
+
+      saveElizaConfig(args.state.config);
+
+      const nextPrimary = readPrimaryMap(args.state.config);
+      const walletBindingChanged =
+        previousPrimary.evm !== nextPrimary.evm ||
+        previousPrimary.solana !== nextPrimary.solana ||
+        previousEvmAddress !== descriptors.evm.walletAddress ||
+        previousSolanaAddress !== descriptors.solana.walletAddress;
+
+      shouldRestartForCloudWalletBind = walletBindingChanged;
+    } catch (err) {
+      await restoreConfigEnvRollbackSnapshot(rollbackEnvSnapshot).catch(
+        (rollbackErr) => {
+          logger.error(
+            `[cloud-login] cloud-wallet rollback failed: ${String(rollbackErr)}`,
+          );
+        },
+      );
+      replaceMutableRoot(args.state.config, rollbackConfigSnapshot);
+      try {
+        saveElizaConfig(args.state.config);
+      } catch (saveErr) {
+        logger.error(
+          `[cloud-login] cloud-wallet config rollback failed: ${String(saveErr)}`,
+        );
+      }
+      logger.error(
+        `[cloud-login] cloud-wallet provision failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
   const runtime = args.state.runtime as RuntimeCloudLike | null;
   if (!runtime || typeof runtime.updateAgent !== "function") {
+    if (shouldRestartForCloudWalletBind && args.state.restartRuntime) {
+      const restarted = await args.state.restartRuntime("cloud-wallet-bound");
+      if (!restarted) {
+        logger.warn(
+          "[cloud-login] cloud-wallet bind completed without immediate runtime restart",
+        );
+      }
+    }
     return;
   }
 
@@ -179,6 +426,15 @@ async function persistCloudLoginStatus(args: {
       `[cloud-routes] Failed to persist cloud secrets to agent DB: ${String(err)}`,
     );
   }
+
+  if (shouldRestartForCloudWalletBind && args.state.restartRuntime) {
+    const restarted = await args.state.restartRuntime("cloud-wallet-bound");
+    if (!restarted) {
+      logger.warn(
+        "[cloud-login] cloud-wallet bind completed without immediate runtime restart",
+      );
+    }
+  }
 }
 
 function toAutonomousState(state: CloudRouteState): AutonomousCloudRouteState {
@@ -186,6 +442,7 @@ function toAutonomousState(state: CloudRouteState): AutonomousCloudRouteState {
     ...state,
     saveConfig: saveElizaConfig,
     createTelemetrySpan: createIntegrationTelemetrySpan,
+    restartRuntime: state.restartRuntime,
   };
 }
 

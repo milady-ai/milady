@@ -18,6 +18,7 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { persistConfigEnv } from "../api/config-env.js";
 import { isCloudWalletEnabled } from "../config/feature-flags.js";
 import type {
+  CloudBridgeError,
   CloudChainType,
   CloudWalletDescriptor,
   ElizaCloudClient,
@@ -108,9 +109,18 @@ function inflightKey(agentId: string, chain: CloudChainType): string {
 
 async function provisionOne(
   bridge: ElizaCloudClient,
+  agentId: string,
   chain: CloudChainType,
   clientAddress: string,
 ): Promise<CloudWalletDescriptor> {
+  try {
+    return await bridge.getAgentWallet(agentId, chain);
+  } catch (error) {
+    if (!isMissingCloudWalletError(error, chain)) {
+      throw error;
+    }
+  }
+
   const provisioned = await bridge.provisionWallet({
     chainType: chain,
     clientAddress,
@@ -122,6 +132,27 @@ async function provisionOne(
     walletProvider: provisioned.provider,
     chainType: chain,
   };
+}
+
+function isMissingCloudWalletError(
+  error: unknown,
+  chain: CloudChainType,
+): boolean {
+  if (
+    error instanceof Error &&
+    new RegExp(`no cloud ${chain} wallet provisioned`, "i").test(error.message)
+  ) {
+    return true;
+  }
+
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    error.name === "CloudBridgeError" &&
+    typeof (error as CloudBridgeError).status === "number" &&
+    (error as CloudBridgeError).status === 404
+  );
 }
 
 export interface ProvisionOptions {
@@ -146,10 +177,7 @@ export interface CloudWalletProvisionResult {
   warnings: string[];
 }
 
-function formatProvisionWarning(
-  chain: CloudChainType,
-  error: unknown,
-): string {
+function formatProvisionWarning(chain: CloudChainType, error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   return `Cloud ${chain} wallet import failed: ${message}`;
 }
@@ -189,7 +217,12 @@ export async function provisionCloudWalletsBestEffort(
         );
       }
 
-      const p = provisionOne(bridge, chain, opts.clientAddress).finally(() => {
+      const p = provisionOne(
+        bridge,
+        opts.agentId,
+        chain,
+        opts.clientAddress,
+      ).finally(() => {
         inflight.delete(key);
       });
       inflight.set(key, p);

@@ -3,7 +3,6 @@ import type { ActionNotice } from "../../state/types";
 import { BugReportModal } from "./BugReportModal";
 import { CommandPalette } from "./CommandPalette";
 import { GlobalEmoteOverlay } from "../companion/GlobalEmoteOverlay";
-import { RestartBanner } from "./RestartBanner";
 import { ShortcutsOverlay } from "./ShortcutsOverlay";
 
 export function ShellOverlays({
@@ -14,7 +13,6 @@ export function ShellOverlays({
   return (
     <>
       <CommandPalette />
-      <RestartBanner />
       <BugReportModal />
       <ShortcutsOverlay />
       <GlobalEmoteOverlay />

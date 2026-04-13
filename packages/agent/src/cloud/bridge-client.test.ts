@@ -85,7 +85,7 @@ function envelope(
     payload: { method: "personal_sign", params: ["0xhello"] },
     nonce: "nonce-1",
     timestamp: Date.now(),
-    signature: "0x" + "11".repeat(65),
+    signature: `0x${"11".repeat(65)}`,
     ...overrides,
   };
 }
@@ -99,6 +99,10 @@ describe("getAgentWallet", () => {
           data: {
             agentId: "agent-42",
             walletAddress: "0xcafebabecafebabecafebabecafebabecafebabe",
+            walletAddresses: {
+              evm: "0xcafebabecafebabecafebabecafebabecafebabe",
+              solana: "So11111111111111111111111111111111111111112",
+            },
             walletProvider: "steward",
             walletStatus: "active",
             balance: "1.23",
@@ -119,7 +123,63 @@ describe("getAgentWallet", () => {
     });
     expect(lastRequest?.headers["x-api-key"]).toBe("test-api-key");
     expect(lastRequest?.method).toBe("GET");
-    expect(lastRequest?.url).toBe("/api/v1/milady/agents/agent-42/wallet");
+    expect(lastRequest?.url).toBe(
+      "/api/v1/milady/agents/agent-42/wallet?chain=evm",
+    );
+  });
+
+  it("selects the requested chain from walletAddresses", async () => {
+    nextHandler = (_req, res) => {
+      res.writeHead(200, { "Content-Type": "application/json" }).end(
+        JSON.stringify({
+          success: true,
+          data: {
+            agentId: "agent-42",
+            walletAddress: "0xcafebabecafebabecafebabecafebabecafebabe",
+            walletAddresses: {
+              evm: "0xcafebabecafebabecafebabecafebabecafebabe",
+              solana: "So11111111111111111111111111111111111111112",
+            },
+            walletProvider: "steward",
+            walletStatus: "active",
+            balance: "0.42",
+          },
+        }),
+      );
+    };
+
+    const d = await client().getAgentWallet("agent-42", "solana");
+
+    expect(d).toEqual({
+      agentWalletId: "agent-42",
+      walletAddress: "So11111111111111111111111111111111111111112",
+      walletProvider: "steward",
+      chainType: "solana",
+      balance: "0.42",
+    });
+    expect(lastRequest?.url).toBe(
+      "/api/v1/milady/agents/agent-42/wallet?chain=solana",
+    );
+  });
+
+  it("rejects a chain-mismatched flat wallet address", async () => {
+    nextHandler = (_req, res) => {
+      res.writeHead(200, { "Content-Type": "application/json" }).end(
+        JSON.stringify({
+          success: true,
+          data: {
+            agentId: "agent-42",
+            walletAddress: "0xcafebabecafebabecafebabecafebabecafebabe",
+            walletProvider: "steward",
+            walletStatus: "active",
+          },
+        }),
+      );
+    };
+
+    await expect(client().getAgentWallet("agent-42", "solana")).rejects.toThrow(
+      /no cloud solana wallet/i,
+    );
   });
 
   it("throws when no cloud wallet is provisioned", async () => {
@@ -140,7 +200,7 @@ describe("getAgentWallet", () => {
     };
 
     await expect(client().getAgentWallet("agent-42", "evm")).rejects.toThrow(
-      /no cloud wallet/i,
+      /no cloud evm wallet/i,
     );
   });
 });
@@ -176,7 +236,7 @@ describe("provisionWallet", () => {
     expect(lastRequest?.method).toBe("POST");
     expect(lastRequest?.url).toBe("/api/v1/user/wallets/provision");
     expect(lastRequest?.headers["x-api-key"]).toBe("test-api-key");
-    expect(JSON.parse(lastRequest!.body)).toEqual({
+    expect(JSON.parse(lastRequest?.body)).toEqual({
       chainType: "evm",
       clientAddress: "0xclient",
     });
@@ -204,6 +264,29 @@ describe("provisionWallet", () => {
 
     expect(r.provider).toBe("privy");
     expect(r.chainType).toBe("solana");
+  });
+
+  it("surfaces validation details from cloud error responses", async () => {
+    nextHandler = (_req, res) => {
+      res.writeHead(400, { "Content-Type": "application/json" }).end(
+        JSON.stringify({
+          success: false,
+          error: "Validation error",
+          details: [
+            { message: "Invalid Solana address (base58, 32–44 chars)" },
+          ],
+        }),
+      );
+    };
+
+    await expect(
+      client().provisionWallet({
+        chainType: "solana",
+        clientAddress: "0xclient",
+      }),
+    ).rejects.toThrow(
+      /Validation error: Invalid Solana address \(base58, 32–44 chars\)/,
+    );
   });
 
   it("normalizes canonical cloud URLs in the constructor", () => {
@@ -236,9 +319,9 @@ describe("executeRpc", () => {
     expect(lastRequest?.method).toBe("POST");
     expect(lastRequest?.url).toBe("/api/v1/user/wallets/rpc");
     // Critical: NO bearer, NO x-api-key — signature lives in body only.
-    expect(lastRequest?.headers["authorization"]).toBeUndefined();
+    expect(lastRequest?.headers.authorization).toBeUndefined();
     expect(lastRequest?.headers["x-api-key"]).toBeUndefined();
-    const parsed = JSON.parse(lastRequest!.body);
+    const parsed = JSON.parse(lastRequest?.body);
     expect(parsed).toEqual({
       clientAddress: env.clientAddress,
       payload: env.payload,
@@ -258,7 +341,7 @@ describe("executeRpc", () => {
     await client().executeRpc(envelope({ correlationId: "corr-123" }));
 
     expect(lastRequest?.headers["x-correlation-id"]).toBe("corr-123");
-    const parsed = JSON.parse(lastRequest!.body);
+    const parsed = JSON.parse(lastRequest?.body);
     expect(parsed.correlationId).toBeUndefined();
   });
 

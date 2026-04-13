@@ -29,7 +29,11 @@ import {
   startApiServer as upstreamStartApiServer,
   validateMcpServerConfig,
 } from "@miladyai/agent/api/server";
-import { resolveLinkedAccountsInConfig } from "@miladyai/shared/contracts/onboarding";
+import {
+  resolveLinkedAccountsInConfig,
+  shouldLoadElizaCloudPluginInConfig,
+} from "@miladyai/shared/contracts";
+import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
 import type { PolicyResult } from "@stwd/sdk";
 import {
   ensureCompatApiAuthorized,
@@ -672,26 +676,32 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
   const linkedAccounts = resolveLinkedAccountsInConfig(
     config as Record<string, unknown>,
   );
+  const runtimeBackfillKey =
+    getCloudSecret("ELIZAOS_CLOUD_API_KEY") ||
+    process.env.ELIZAOS_CLOUD_API_KEY ||
+    (
+      runtime as { getSetting?: (key: string) => unknown } | null
+    )?.getSetting?.("ELIZAOS_CLOUD_API_KEY") ||
+    (runtime as { character?: { secrets?: Record<string, string> } } | null)
+      ?.character?.secrets?.ELIZAOS_CLOUD_API_KEY;
+  const cloudServicesSelected = shouldLoadElizaCloudPluginInConfig(
+    config as Record<string, unknown>,
+  );
   if (linkedAccounts?.elizacloud?.status === "unlinked") {
-    // Respect explicit disconnect: never backfill a cloud key into config once
-    // the canonical linked-account state says the account is disconnected.
-    if (isMiladySettingsDebugEnabled()) {
-      logger.debug(
-        "[milady][settings][compat] resolveCloudConfig skip backfill (linkedAccounts.elizacloud.status===unlinked)",
-      );
+    // Keep respecting explicit disconnect for purely local setups, but recover
+    // stale unlinked snapshots when the runtime or selected cloud services
+    // prove the user is still authenticated.
+    if (!runtimeBackfillKey && !cloudServicesSelected) {
+      if (isMiladySettingsDebugEnabled()) {
+        logger.debug(
+          "[milady][settings][compat] resolveCloudConfig skip backfill (linkedAccounts.elizacloud.status===unlinked)",
+        );
+      }
+      return config;
     }
-    return config;
   }
   if (!config.cloud?.apiKey) {
-    // Try multiple sources: sealed secrets → process.env → runtime character secrets
-    const backfillKey =
-      getCloudSecret("ELIZAOS_CLOUD_API_KEY") ||
-      process.env.ELIZAOS_CLOUD_API_KEY ||
-      (
-        runtime as { getSetting?: (key: string) => unknown } | null
-      )?.getSetting?.("ELIZAOS_CLOUD_API_KEY") ||
-      (runtime as { character?: { secrets?: Record<string, string> } } | null)
-        ?.character?.secrets?.ELIZAOS_CLOUD_API_KEY;
+    const backfillKey = runtimeBackfillKey;
     if (backfillKey) {
       if (isMiladySettingsDebugEnabled()) {
         logger.debug(
@@ -702,6 +712,15 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
         (config as Record<string, unknown>).cloud = {};
       }
       (config.cloud as Record<string, unknown>).apiKey = backfillKey;
+      process.env.ELIZAOS_CLOUD_API_KEY = backfillKey;
+      applyCanonicalOnboardingConfig(config as Record<string, unknown>, {
+        linkedAccounts: {
+          elizacloud: {
+            status: "linked",
+            source: "api-key",
+          },
+        },
+      });
       // Persist the backfilled key so future reads find it on disk
       try {
         saveElizaConfig(config);
@@ -819,6 +838,21 @@ export async function handleMiladyCompatRoute(
       config,
       runtime: state.current,
       cloudManager: null,
+      restartRuntime: async (_reason: string) => {
+        try {
+          await compatLoopbackRequest(req, "/api/agent/restart", {
+            method: "POST",
+          });
+          return true;
+        } catch (err) {
+          logger.warn(
+            `[cloud] Failed to trigger agent restart after cloud login: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+          return false;
+        }
+      },
     });
 
     // After disconnect, sync the cloud disable into the upstream's in-memory

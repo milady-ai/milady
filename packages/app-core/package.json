@@ -58,6 +58,7 @@
     "./onboarding-config": "./src/onboarding-config.ts",
     "./providers": "./src/providers/index.ts",
     "./actions": "./src/actions/index.ts",
+    "./services/steward-credentials": "./src/services/steward-credentials.ts",
     "./services/steward-sidecar": "./src/services/steward-sidecar.ts",
     "./styles/base.css": "./src/styles/base.css",
     "./styles/xterm.css": "./src/styles/xterm.css",

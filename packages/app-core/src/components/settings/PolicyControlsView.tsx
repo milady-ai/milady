@@ -39,6 +39,10 @@ import {
   TIMEZONES,
 } from "../policy-controls";
 import { StewardLogo } from "../steward/StewardLogo";
+import {
+  resolveStewardUiState,
+  type StewardUiState,
+} from "../steward/steward-ui-state";
 
 const asRecord = (v: unknown) => v as unknown as Record<string, unknown>;
 
@@ -62,6 +66,9 @@ export function PolicyControlsView() {
   const [error, setError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [stewardConnected, setStewardConnected] = useState(false);
+  const [stewardUi, setStewardUi] = useState<StewardUiState>(() =>
+    resolveStewardUiState({}),
+  );
   const [dirty, setDirty] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -73,9 +80,19 @@ export function PolicyControlsView() {
     let cancelled = false;
     async function load() {
       try {
-        const status = await client.getStewardStatus();
+        const [status, walletConfig] = await Promise.all([
+          client.getStewardStatus(),
+          client.getWalletConfig().catch(() => null),
+        ]);
         if (cancelled) return;
         setStewardConnected(status.connected);
+        setStewardUi(
+          resolveStewardUiState({
+            stewardStatus: status,
+            walletConfig,
+            wallets: walletConfig?.wallets ?? [],
+          }),
+        );
         if (!status.connected) {
           setLoading(false);
           return;
@@ -214,10 +231,8 @@ export function PolicyControlsView() {
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
         <StewardLogo size={48} className="opacity-30" />
-        <p className="text-sm font-semibold text-txt">Steward Not Connected</p>
-        <p className="text-xs text-muted max-w-sm">
-          Connect your Steward instance to manage wallet policies.
-        </p>
+        <p className="text-sm font-semibold text-txt">{stewardUi.title}</p>
+        <p className="text-xs text-muted max-w-sm">{stewardUi.description}</p>
       </div>
     );
   }

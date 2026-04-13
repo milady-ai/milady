@@ -16,6 +16,7 @@
  *   4. Stops the sidecar on app shutdown
  */
 
+import { saveStewardCredentials } from "@miladyai/app-core/services/steward-credentials";
 import {
   createDesktopStewardSidecar,
   type StewardSidecar,
@@ -116,6 +117,18 @@ function configureStewardEnvFromCredentials(): void {
       process.env.STEWARD_AGENT_ID = credentials.agentId;
     }
 
+    saveStewardCredentials({
+      apiUrl: apiBase,
+      tenantId: credentials.tenantId,
+      agentId: credentials.agentId,
+      apiKey: credentials.tenantApiKey,
+      agentToken: credentials.agentToken,
+      walletAddresses: credentials.walletAddress
+        ? { evm: credentials.walletAddress }
+        : undefined,
+      agentName: credentials.agentId,
+    });
+
     console.log(
       `[Steward] Env configured: API=${apiBase} agent=${credentials.agentId} wallet=${credentials.walletAddress}`,
     );
@@ -213,6 +226,12 @@ export async function resetSteward(): Promise<StewardSidecarStatus> {
   const home = process.env.HOME || process.env.USERPROFILE || "";
   const dataDir =
     process.env.STEWARD_DATA_DIR || path.join(home, ".milady", "steward");
+  const compatCredentialsPath = path.join(
+    home,
+    ".milady",
+    "steward-credentials.json",
+  );
+  const legacyPgliteDir = path.join(home, ".steward", "data");
 
   // Safety: ensure dataDir resolves inside ~/.milady/ to prevent accidental
   // deletion of unrelated directories via env var manipulation.
@@ -230,6 +249,16 @@ export async function resetSteward(): Promise<StewardSidecarStatus> {
   if (fs.existsSync(resolvedDataDir)) {
     console.log(`[Steward] Removing data directory: ${resolvedDataDir}`);
     fs.rmSync(resolvedDataDir, { recursive: true, force: true });
+  }
+  if (fs.existsSync(compatCredentialsPath)) {
+    console.log(
+      `[Steward] Removing compat credentials: ${compatCredentialsPath}`,
+    );
+    fs.rmSync(compatCredentialsPath, { force: true });
+  }
+  if (fs.existsSync(legacyPgliteDir)) {
+    console.log(`[Steward] Removing legacy PGLite data: ${legacyPgliteDir}`);
+    fs.rmSync(legacyPgliteDir, { recursive: true, force: true });
   }
 
   // Clear env vars
@@ -295,5 +324,10 @@ export function getStewardApiBase(): string | null {
  * When false, Steward sidecar should not be started.
  */
 export function isStewardLocalEnabled(): boolean {
-  return process.env.STEWARD_LOCAL === "true";
+  const raw = process.env.STEWARD_LOCAL?.trim().toLowerCase();
+  if (!raw) {
+    return true;
+  }
+
+  return !["0", "false", "no", "off"].includes(raw);
 }

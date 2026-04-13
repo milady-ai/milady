@@ -27,6 +27,7 @@ vi.mock("./auth", () => ({
 }));
 
 import { handleMiladyCompatRoute } from "./server";
+import { loadElizaConfig } from "@miladyai/agent/config/config";
 
 function makeRes() {
   return {
@@ -40,6 +41,7 @@ describe("handleMiladyCompatRoute cloud proxy wrappers", () => {
   beforeEach(() => {
     billingRouteMock.mockClear();
     compatRouteMock.mockClear();
+    vi.mocked(loadElizaConfig).mockReturnValue({} as never);
   });
 
   it("passes runtime through to the billing proxy handler", async () => {
@@ -86,6 +88,55 @@ describe("handleMiladyCompatRoute cloud proxy wrappers", () => {
       "GET",
       expect.objectContaining({
         runtime,
+      }),
+    );
+  });
+
+  it("backfills the cloud api key even when linkedAccounts is stale-unlinked", async () => {
+    vi.mocked(loadElizaConfig).mockReturnValue({
+      linkedAccounts: {
+        elizacloud: {
+          status: "unlinked",
+        },
+      },
+      serviceRouting: {
+        rpc: {
+          transport: "cloud-proxy",
+          backend: "elizacloud",
+        },
+      },
+      cloud: {
+        apiKey: null,
+      },
+    } as never);
+
+    const runtime = {
+      agentId: "agent-123",
+      character: { secrets: {} },
+      getSetting: (key: string) =>
+        key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-setting-key" : undefined,
+    };
+
+    await handleMiladyCompatRoute(
+      {
+        method: "GET",
+        url: "/api/cloud/billing/summary",
+      } as http.IncomingMessage,
+      makeRes(),
+      { current: runtime } as never,
+    );
+
+    expect(billingRouteMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      "/api/cloud/billing/summary",
+      "GET",
+      expect.objectContaining({
+        config: expect.objectContaining({
+          cloud: expect.objectContaining({
+            apiKey: "runtime-setting-key",
+          }),
+        }),
       }),
     );
   });

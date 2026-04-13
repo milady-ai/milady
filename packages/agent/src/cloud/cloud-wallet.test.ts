@@ -7,16 +7,26 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { privateKeyToAccount } from "viem/accounts";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { ElizaCloudClient } from "./bridge-client";
 import {
-  CloudWalletFlagDisabledError,
   __resetCloudWalletModuleForTests,
+  CloudWalletFlagDisabledError,
   getOrCreateClientAddressKey,
   MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV,
   persistCloudWalletCache,
   provisionCloudWallets,
+  provisionCloudWalletsBestEffort,
 } from "./cloud-wallet";
 
 // ---------------------------------------------------------------------------
@@ -37,20 +47,23 @@ let existingSolanaAddress: string | null = null;
 
 beforeAll(async () => {
   server = http.createServer((req, res) => {
-    const url = req.url ?? "";
+    const requestUrl = new URL(req.url ?? "/", "http://127.0.0.1");
+    const chain = requestUrl.searchParams.get("chain") ?? "any";
 
     // GET /api/v1/milady/agents/:agentId/wallet
-    if (req.method === "GET" && url.includes("/milady/agents/") && url.endsWith("/wallet")) {
-      // infer chain from some query? Actual endpoint doesn't care about chain,
-      // but our test tracks call counts so we can verify single-flight.
-      // We only know the chain from the provision call downstream; count by "any".
-      getAgentCallsByChain["any"] = (getAgentCallsByChain["any"] ?? 0) + 1;
+    if (
+      req.method === "GET" &&
+      requestUrl.pathname.includes("/milady/agents/") &&
+      requestUrl.pathname.endsWith("/wallet")
+    ) {
+      getAgentCallsByChain[chain] = (getAgentCallsByChain[chain] ?? 0) + 1;
       if (simulateMissingWallet) {
         res.writeHead(200, { "Content-Type": "application/json" }).end(
           JSON.stringify({
             success: true,
             data: {
               walletAddress: null,
+              walletAddresses: {},
               walletProvider: null,
               walletStatus: "none",
               balance: null,
@@ -60,13 +73,23 @@ beforeAll(async () => {
         );
         return;
       }
-      // existing — return an evm-flavored response (client only cares about shape)
+      const walletAddresses = {
+        ...(existingEvmAddress ? { evm: existingEvmAddress } : {}),
+        ...(existingSolanaAddress ? { solana: existingSolanaAddress } : {}),
+      };
+      const walletAddress =
+        chain === "solana"
+          ? existingSolanaAddress
+          : (existingEvmAddress ??
+            existingSolanaAddress ??
+            "0xexisting0000000000000000000000000000000000");
       res.writeHead(200, { "Content-Type": "application/json" }).end(
         JSON.stringify({
           success: true,
           data: {
             agentId: "agent-1",
-            walletAddress: existingEvmAddress ?? existingSolanaAddress ?? "0xexisting",
+            walletAddress,
+            walletAddresses,
             walletProvider: "steward",
             walletStatus: "active",
             balance: "0",
@@ -77,7 +100,10 @@ beforeAll(async () => {
     }
 
     // POST /api/v1/user/wallets/provision
-    if (req.method === "POST" && url === "/api/v1/user/wallets/provision") {
+    if (
+      req.method === "POST" &&
+      requestUrl.pathname === "/api/v1/user/wallets/provision"
+    ) {
       let body = "";
       req.on("data", (c) => (body += c));
       req.on("end", () => {
@@ -107,7 +133,9 @@ beforeAll(async () => {
     res.writeHead(404).end();
   });
 
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
+  await new Promise<void>((resolve) =>
+    server.listen(0, "127.0.0.1", () => resolve()),
+  );
   serverPort = (server.address() as AddressInfo).port;
 });
 
@@ -156,15 +184,22 @@ describe("getOrCreateClientAddressKey", () => {
     expect(result.minted).toBe(true);
     expect(result.privateKey).toMatch(/^0x[0-9a-f]{64}$/);
     expect(result.address).toMatch(/^0x[0-9a-fA-F]{40}$/);
-    expect(process.env[MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV]).toBe(result.privateKey);
+    expect(process.env[MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV]).toBe(
+      result.privateKey,
+    );
 
     // Derived address matches
     const derived = privateKeyToAccount(result.privateKey).address;
     expect(result.address).toBe(derived);
 
     // Disk: config.env written with the key so it survives restart.
-    const contents = await fs.readFile(path.join(tmpStateDir, "config.env"), "utf8");
-    expect(contents).toContain(`${MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV}=${result.privateKey}`);
+    const contents = await fs.readFile(
+      path.join(tmpStateDir, "config.env"),
+      "utf8",
+    );
+    expect(contents).toContain(
+      `${MILADY_CLOUD_CLIENT_ADDRESS_KEY_ENV}=${result.privateKey}`,
+    );
   });
 
   it("short-circuits when a key already exists in env (no disk write)", async () => {
@@ -180,7 +215,9 @@ describe("getOrCreateClientAddressKey", () => {
     expect(second.address).toBe(first.address);
 
     // No disk write on the short-circuit path.
-    await expect(fs.stat(path.join(tmpStateDir, "config.env"))).rejects.toThrow();
+    await expect(
+      fs.stat(path.join(tmpStateDir, "config.env")),
+    ).rejects.toThrow();
   });
 
   it("throws when the flag is disabled", async () => {
@@ -211,21 +248,26 @@ describe("provisionCloudWallets", () => {
 
     expect(d.evm.chainType).toBe("evm");
     expect(d.solana.chainType).toBe("solana");
-    expect(provisionCalls.map((c) => c.chainType).sort()).toEqual(["evm", "solana"]);
+    expect(provisionCalls.map((c) => c.chainType).sort()).toEqual([
+      "evm",
+      "solana",
+    ]);
   });
 
-  it("short-circuits when the cloud already has a wallet (idempotent)", async () => {
+  it("reuses existing cloud wallets before attempting provision", async () => {
     simulateMissingWallet = false;
-    existingEvmAddress = "0xexistingEvm";
+    existingEvmAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+    existingSolanaAddress = "So11111111111111111111111111111111111111112";
 
     const d = await provisionCloudWallets(bridge(), {
       agentId: "agent-1",
       clientAddress: "0xclient",
-      chains: ["evm"],
     });
 
-    expect(d.evm.walletAddress).toBe("0xexistingEvm");
+    expect(d.evm.walletAddress).toBe(existingEvmAddress);
+    expect(d.solana.walletAddress).toBe(existingSolanaAddress);
     expect(provisionCalls).toHaveLength(0);
+    expect(getAgentCallsByChain).toEqual({ evm: 1, solana: 1 });
   });
 
   it("single-flight: concurrent calls for the same agent/chain share one provision", async () => {
@@ -245,6 +287,39 @@ describe("provisionCloudWallets", () => {
     expect(a.evm.walletAddress).toBe(b.evm.walletAddress);
     // Exactly one provision call for EVM despite two concurrent callers
     expect(provisionCalls.filter((c) => c.chainType === "evm")).toHaveLength(1);
+  });
+
+  it("returns partial results when one chain fails validation", async () => {
+    const partialBridge = {
+      getAgentWallet: vi.fn(async (_agentId: string, chain: string) => {
+        throw new Error(`Agent has no cloud ${chain} wallet provisioned`);
+      }),
+      provisionWallet: vi.fn(async (input: { chainType: string }) => {
+        if (input.chainType === "solana") {
+          throw new Error("Validation error: Invalid Solana address");
+        }
+
+        return {
+          walletId: "wallet-evm-1",
+          address: "0xcafecafecafecafecafecafecafecafecafecafe",
+          chainType: "evm" as const,
+          provider: "privy" as const,
+        };
+      }),
+    } as unknown as ElizaCloudClient;
+
+    const result = await provisionCloudWalletsBestEffort(partialBridge, {
+      agentId: "agent-1",
+      clientAddress: "0xclient",
+    });
+
+    expect(result.descriptors.evm?.walletAddress).toBe(
+      "0xcafecafecafecafecafecafecafecafecafecafe",
+    );
+    expect(result.descriptors.solana).toBeUndefined();
+    expect(result.warnings).toEqual([
+      "Cloud solana wallet import failed: Validation error: Invalid Solana address",
+    ]);
   });
 
   it("throws when the flag is disabled", async () => {
@@ -279,7 +354,10 @@ describe("persistCloudWalletCache", () => {
 
     const wallet = config.wallet as {
       primary: { evm: string };
-      cloud: { evm?: { walletAddress: string }; solana: { agentWalletId: string } };
+      cloud: {
+        evm?: { walletAddress: string };
+        solana: { agentWalletId: string };
+      };
     };
     expect(wallet.primary.evm).toBe("local");
     expect(wallet.cloud.evm?.walletAddress).toBe("0xaddr");
@@ -301,6 +379,8 @@ describe("persistCloudWalletCache", () => {
 
   it("throws when the flag is disabled", () => {
     delete process.env.ENABLE_CLOUD_WALLET;
-    expect(() => persistCloudWalletCache({}, {})).toThrow(CloudWalletFlagDisabledError);
+    expect(() => persistCloudWalletCache({}, {})).toThrow(
+      CloudWalletFlagDisabledError,
+    );
   });
 });

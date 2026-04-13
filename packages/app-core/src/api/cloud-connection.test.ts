@@ -14,6 +14,19 @@ describe("cloud-connection", () => {
       },
     },
   };
+  const cloudRpcConfig = {
+    serviceRouting: {
+      rpc: {
+        transport: "cloud-proxy" as const,
+        backend: "elizacloud",
+      },
+    },
+    linkedAccounts: {
+      elizacloud: {
+        status: "unlinked" as const,
+      },
+    },
+  };
 
   it("resolves the cloud api key from runtime settings", () => {
     const runtime = {
@@ -40,5 +53,16 @@ describe("cloud-connection", () => {
       hasApiKey: true,
       authConnected: false,
     });
+  });
+
+  it("accepts runtime cloud credentials when rpc cloud routing is selected", () => {
+    const runtime = {
+      getSetting: (key: string) =>
+        key === "ELIZAOS_CLOUD_API_KEY" ? "runtime-setting-key" : undefined,
+    };
+
+    expect(resolveCloudApiKey(cloudRpcConfig, runtime)).toBe(
+      "runtime-setting-key",
+    );
   });
 });

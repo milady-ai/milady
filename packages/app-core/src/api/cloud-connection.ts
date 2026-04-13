@@ -8,7 +8,10 @@ import {
   migrateLegacyRuntimeConfig,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
-import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
+import {
+  resolveLinkedAccountsInConfig,
+  shouldLoadElizaCloudPluginInConfig,
+} from "@miladyai/shared/contracts";
 import type { ElizaConfig } from "../config/config";
 import { normalizeEnvValue } from "../utils/env";
 import {
@@ -195,10 +198,15 @@ export function resolveCloudApiKey(
   );
   if (configApiKey) return configApiKey;
 
-  if (!isCloudInferenceSelectedInConfig(config as Record<string, unknown>)) {
-    // A linked cloud account is represented by the persisted disk key above.
-    // Do not resurrect cloud from sealed/env/runtime fallbacks when the
-    // canonical connection is local, remote, or unset.
+  const rootConfig = config as Record<string, unknown>;
+  const linkedAccounts = resolveLinkedAccountsInConfig(rootConfig);
+  const cloudSelected = shouldLoadElizaCloudPluginInConfig(rootConfig);
+  const cloudLinked = linkedAccounts?.elizacloud?.status === "linked";
+
+  if (!cloudSelected && !cloudLinked) {
+    // When no cloud service is selected and there is no linked-account state,
+    // ignore sealed/runtime fallbacks so a stale key does not silently
+    // resurrect cloud mode.
     return undefined;
   }
 
@@ -234,7 +242,7 @@ export function resolveCloudConnectionSnapshot(
     config.cloud && typeof config.cloud === "object"
       ? (config.cloud as Record<string, unknown>)
       : undefined;
-  const enabled = isCloudInferenceSelectedInConfig(
+  const enabled = shouldLoadElizaCloudPluginInConfig(
     config as Record<string, unknown>,
   );
   const apiKey = resolveCloudApiKey(config, runtime);

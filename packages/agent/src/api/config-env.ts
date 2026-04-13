@@ -26,6 +26,7 @@
  * one agent runtime owns a given state dir (the PGlite postmaster lock
  * already enforces this).
  */
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -190,6 +191,35 @@ export async function readConfigEnv(
     if (eq < 0) continue;
     const rawValue = line.slice(eq + 1);
     out[key] = decodeValue(rawValue);
+  }
+  return out;
+}
+
+/**
+ * Synchronous variant for early startup paths such as `loadElizaConfig()`.
+ * Missing file → empty record. Does NOT touch `process.env`.
+ */
+export function readConfigEnvSync(
+  stateDir?: string,
+): Record<string, string> {
+  const filePath = resolveConfigEnvPath(stateDir);
+  let raw: string;
+  try {
+    raw = fsSync.readFileSync(filePath, "utf8");
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return {};
+    }
+    throw err;
+  }
+
+  const parsed = parseConfigEnv(raw);
+  const out: Record<string, string> = {};
+  for (const [key, idx] of parsed.index) {
+    const line = parsed.lines[idx] ?? "";
+    const eq = line.indexOf("=");
+    if (eq < 0) continue;
+    out[key] = decodeValue(line.slice(eq + 1));
   }
   return out;
 }
