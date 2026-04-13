@@ -14,6 +14,9 @@ const _appDir = path.resolve(__dirname, "..");
 const pluginsDir = NATIVE_PLUGINS_ROOT;
 const pluginNames = CAPACITOR_PLUGIN_NAMES;
 
+// Skip plugin builds if explicitly disabled or if Capacitor core is missing
+const skipPlugins = process.env.SKIP_NATIVE_PLUGINS === "1" || process.env.CI === "true";
+
 function run(command, args, cwd) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
@@ -37,6 +40,11 @@ function run(command, args, cwd) {
 
 const npmCommand = "bun";
 const npmArgs = ["run", "build"];
+
+if (skipPlugins) {
+  console.log("[plugins] skipping native plugin builds (CI or explicitly disabled)");
+  process.exit(0);
+}
 
 // Plugins have no inter-dependencies — build in parallel
 await Promise.all(

@@ -122,9 +122,9 @@
   "dependencies": {
     "@clack/prompts": "^1.0.0",
     "@elizaos/core": "workspace:*",
-    "@elizaos/plugin-ollama": "workspace:*",
+    "@elizaos/plugin-ollama": "^2.0.0-alpha",
     "@elizaos/plugin-solana": "1.2.6",
-    "@elizaos/plugin-sql": "workspace:*",
+    "@elizaos/plugin-sql": "^2.0.0-alpha",
     "@hapi/boom": "^10.0.1",
     "@elizaos/plugin-wechat": "github:milady-ai/plugin-wechat",
     "@elizaos/shared": "workspace:*",
