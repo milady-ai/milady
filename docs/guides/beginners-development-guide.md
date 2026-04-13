@@ -284,15 +284,15 @@ Treat this as a curriculum. Finish each layer before moving deeper.
    - `/advanced/database`
    - `/advanced/logs`
 
-### Layer 5 — Advanced architecture and planning docs
+### Layer 5 — Advanced architecture
 
 Use these when designing non-trivial changes:
 
-- `/autonomous-loop-implementation/README`
-- `/triggers-system-implementation/README`
-- `/fast-mode-implementation-dossier/README`
+- `/architecture` — system shape and major subsystems
+- `/agents/runtime-and-lifecycle` — startup, restarts, and lifecycle
+- `/plugins/architecture` — plugin load order, providers, and extension points
 
-These documents are long-form design dossiers. Read only the sections relevant to your current change.
+Read only the sections relevant to your current change. Historical implementation write-ups may still exist in the repository under `docs/plans/` for contracts referenced from source code.
 
 ### Advanced contributor tracks (pick one)
 

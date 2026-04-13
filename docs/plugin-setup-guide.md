@@ -364,7 +364,7 @@ where to get the credentials, minimum required fields, and tips for optional fie
 1. Get API key from your WeChat proxy service
 2. Configure `connectors.wechat` in milady.json with `apiKey` and `proxyUrl`
 3. Start Milady — scan the QR code displayed in terminal with WeChat
-**Tips:** WeChat uses a third-party proxy service, not an official API. Only use a proxy you trust — it sees all message traffic. Multi-account supported via `accounts` map. Package: `@miladyai/plugin-wechat`.
+**Tips:** WeChat uses a third-party proxy service, not an official API. Only use a proxy you trust — it sees all message traffic. Multi-account supported via `accounts` map. Package: `@elizaos/plugin-wechat`.
 
 ### GitHub
 **Get credentials:** https://github.com/settings/tokens → Fine-grained or Classic

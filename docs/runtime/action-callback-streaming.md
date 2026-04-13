@@ -82,7 +82,7 @@ No extra fields, no Milady-specific APIs, no runtime attachment. Helpers like `P
 ## Related code and docs
 
 - **Implementation:** `packages/agent/src/api/chat-routes.ts` — `replaceCallbackText`, `preCallbackText`.
-- **Example helper:** `packages/plugin-music-player/src/utils/progressiveMessage.ts`.
+- **Example helper:** `plugins/plugin-music-player/src/utils/progressiveMessage.ts`.
 - **UI streaming:** [Dashboard — Chat](/dashboard/chat) (SSE / typing indicator).
 - **Changelog:** [Changelog](/changelog) — search for “action callback” or the ship date.
 
@@ -95,4 +95,4 @@ Possible follow-ups (not shipped as requirements here):
 - Optional **metadata** on callback content to distinguish “append” vs “replace” for exotic plugins (only if a real use case appears).
 - **Persistence** of intermediate statuses (today the final persisted turn text follows normal chat persistence rules).
 
-See `docs/ROADMAP.md` in the repository for high-level product direction.
+See `docs/roadmap.md` in the repository for high-level product direction.

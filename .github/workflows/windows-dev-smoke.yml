@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [develop]
     paths:
-      - "scripts/**"
+      - "eliza/packages/app-core/scripts/**"
       - "apps/app/electrobun/**"
       - "package.json"
       - "bun.lock"
@@ -54,6 +54,6 @@ jobs:
 
       - name: Verify bun-version-guard
         run: >
-          bun -e "import { getBunVersionAdvisory } from './scripts/lib/bun-version-guard.mjs';
+          bun -e "import { getBunVersionAdvisory } from './eliza/packages/app-core/scripts/lib/bun-version-guard.mjs';
           const result = getBunVersionAdvisory();
           console.log('bun-version-guard:', result ?? 'OK (no advisory)');"

@@ -750,7 +750,7 @@ Routes under `/api/cloud/v1/` are forwarded as `/api/v1/` on the cloud backend, 
 | `GET` | `/api/nfa/learnings` | Get parsed learning entries with Merkle root |
 
 <Info>
-NFA endpoints depend on the optional `@miladyai/plugin-bnb-identity` plugin. When the plugin is not installed, `/api/nfa/status` returns `null` for both `nfa` and `identity` fields, and `/api/nfa/learnings` returns an empty entries array with a default Merkle root.
+NFA endpoints depend on the optional `@elizaos/plugin-bnb-identity` plugin. When the plugin is not installed, `/api/nfa/status` returns `null` for both `nfa` and `identity` fields, and `/api/nfa/learnings` returns an empty entries array with a default Merkle root.
 </Info>
 
 ---

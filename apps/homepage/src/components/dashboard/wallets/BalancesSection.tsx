@@ -7,7 +7,7 @@ import type {
   SolanaTokenBalance,
   WalletAddresses as WalletAddressesResponse,
   WalletBalancesResponse,
-} from "@miladyai/shared/contracts/wallet";
+} from "@elizaos/shared/contracts/wallet";
 import {
   formatBalance,
   formatUsd,

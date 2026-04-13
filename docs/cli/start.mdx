@@ -1,0 +1,28 @@
+---
+title: "milady start"
+description: "Start the Milady API server (embedded elizaOS runtime, server-only mode)."
+---
+
+# `milady start`
+
+Starts the HTTP + WebSocket API without an interactive REPL. Use this for local development, desktop shells, and headless deployments.
+
+## Behavior
+
+- Loads the configured agent runtime and plugins.
+- Binds to the API port from environment (see [CLI environment](/cli/environment)).
+- May print a **connection key** when binding on a non-loopback address and no token is set.
+
+## Examples
+
+```bash
+milady start
+MILADY_API_PORT=31437 milady start
+```
+
+Run `milady start --help` for bind, token, and logging flags.
+
+## Related
+
+- [Desktop local development](/apps/desktop-local-development)
+- [REST API](/api-reference)

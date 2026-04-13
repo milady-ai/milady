@@ -67,14 +67,14 @@ jobs:
         run: bun run postinstall
 
       - name: Set version in package.json
-        run: node scripts/set-package-version.mjs
+        run: node eliza/packages/app-core/scripts/set-package-version.mjs
         env:
           RELEASE_VERSION: ${{ inputs.version }}
 
       - name: Build
         run: |
           bunx tsdown
-          node --import tsx scripts/write-build-info.ts
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts
           echo '{"type":"module"}' > dist/package.json
 
       - name: Validate package

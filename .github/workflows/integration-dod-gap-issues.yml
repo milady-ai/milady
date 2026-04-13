@@ -45,5 +45,5 @@ jobs:
           INTEGRATION_DOD_REPORT: INTEGRATION_DOD_MAP.md
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
           CLOSE_RESOLVED_GAPS: ${{ github.event_name == 'workflow_dispatch' && inputs.close_resolved_gaps || 'true' }}
-        run: node scripts/sync-dod-gap-issues.mjs
+        run: node eliza/packages/app-core/scripts/sync-dod-gap-issues.mjs
 

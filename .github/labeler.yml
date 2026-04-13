@@ -26,7 +26,7 @@ tests:
   - changed-files:
     - any-glob-to-any-file:
       - '**/*.test.ts'
-      - 'test/**'
+      - 'eliza/packages/app-core/test/**'
       - 'vitest*.config.*'
 
 ci:
@@ -46,7 +46,7 @@ build:
       - 'package.json'
       - 'tsconfig*.json'
       - 'tsdown.config.*'
-      - 'scripts/**'
+      - 'eliza/packages/app-core/scripts/**'
 
 plugins:
   - changed-files:

@@ -25,9 +25,6 @@
       "!skills",
       "!Swabble",
       "!vendor",
-      "!test/contracts/lib",
-      "!test/contracts/out",
-      "!test/contracts/cache",
       "!**/vrms/imported-avatars.json",
       "!collision-report.json",
       "!scripts/type-audit-report.json",
@@ -92,7 +89,7 @@
     {
       "includes": [
         "apps/app/src/main.tsx",
-        "packages/app-core/src/styles/styles.css"
+        "eliza/packages/app-core/src/styles/styles.css"
       ],
       "assist": {
         "actions": {

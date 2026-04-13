@@ -4,7 +4,7 @@
 import type {
   StewardStatusResponse,
   WalletAddresses as WalletAddressesResponse,
-} from "@miladyai/shared/contracts/wallet";
+} from "@elizaos/shared/contracts/wallet";
 import {
   getExplorerAddressUrl,
   getSolanaExplorerUrl,

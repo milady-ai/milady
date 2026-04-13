@@ -1,9 +1,9 @@
 /**
  * Cloud TransactionHistory — adapts CloudApiClient to the shared
- * TransactionHistory component from @miladyai/app-core.
+ * TransactionHistory component from @elizaos/app-core.
  */
 
-import { TransactionHistory as TransactionHistoryBase } from "@miladyai/app-core/components";
+import { TransactionHistory as TransactionHistoryBase } from "@elizaos/app-core/components";
 import { useCallback } from "react";
 import type { CloudApiClient } from "../../lib/cloud-api";
 

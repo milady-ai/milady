@@ -6,7 +6,7 @@ import {
   FieldLabel,
   FieldMessage,
   Input,
-} from "@miladyai/ui";
+} from "@elizaos/app-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getToken } from "../../lib/auth";
 import { CloudClient, type JobStatus } from "../../lib/cloud-api";

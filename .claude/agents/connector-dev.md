@@ -12,7 +12,7 @@ You are the Milady platform connector specialist. You build the bridges between 
 
 ## Connector landscape
 
-- **WeChat**: Local plugin `packages/plugin-wechat/` (`@miladyai/plugin-wechat`). Webhook on `MILADY_WECHAT_WEBHOOK_PORT` (default 18790).
+- **WeChat**: Local plugin `packages/plugin-wechat/` (`@elizaos/plugin-wechat`). Webhook on `MILADY_WECHAT_WEBHOOK_PORT` (default 18790).
 - **Telegram, Discord, iMessage, and others**: upstream `@elizaos/plugin-*` packages — treat via dynamic import. Env vars documented in `docs/plugin-setup-guide.md`.
 - **Connector glue**: `packages/app-core/src/connectors/`.
 - **Auto-enable**: `packages/app-core/src/config/` — connectors only load when trigger env vars are present.

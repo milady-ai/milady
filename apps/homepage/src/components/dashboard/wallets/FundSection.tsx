@@ -5,7 +5,7 @@
 import type {
   WalletAddresses as WalletAddressesResponse,
   WalletBalancesResponse,
-} from "@miladyai/shared/contracts/wallet";
+} from "@elizaos/shared/contracts/wallet";
 import { useEffect, useState } from "react";
 import {
   getExplorerAddressUrl,

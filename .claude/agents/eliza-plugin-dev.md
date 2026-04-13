@@ -1,6 +1,6 @@
 ---
 name: eliza-plugin-dev
-description: Builds and modifies @elizaos/* plugins and the local @miladyai/plugin-* packages. Handles dynamic import plumbing, bun-exports patches, NODE_PATH hazards, and plugin auto-enable config. Use when adding a connector, fixing a plugin load failure, or changing plugin registration logic.
+description: Builds and modifies @elizaos/* plugins and the local @elizaos/plugin-* packages. Handles dynamic import plumbing, bun-exports patches, NODE_PATH hazards, and plugin auto-enable config. Use when adding a connector, fixing a plugin load failure, or changing plugin registration logic.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: opus
 color: green
@@ -14,7 +14,7 @@ You are the Milady plugin development specialist. You live at the seam between u
 
 1. **Never remove NODE_PATH setup.** It's required in:
    - `packages/agent/src/runtime/eliza.ts` (module-level)
-   - `scripts/run-node.mjs`
+   - `eliza/packages/app-core/scripts/run-node.mjs`
    - `apps/app/electrobun/src/native/agent.ts`
 2. **Never drop `scripts/patch-deps.mjs` entries** — they delete dead `exports["."].bun` keys in `@elizaos/*` packages pointing to missing `src/` paths. If a new plugin fails to resolve under Bun, add an entry here.
 3. **Never inline-import `@elizaos/plugin-*`** in code that runs before NODE_PATH is set. Always use `await import(...)` after the guard.

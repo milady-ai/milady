@@ -11,7 +11,7 @@ Este documento explica **por qué** los imports dinámicos de plugins fallan sin
 El runtime (`src/runtime/eliza.ts`) carga plugins vía import dinámico:
 
 ```ts
-import("@elizaos/plugin-coding-agent")
+import("@elizaos/plugin-sql")
 ```
 
 Node resuelve esto recorriendo hacia arriba desde el **directorio del archivo que importa**. Cuando eliza se ejecuta desde diferentes ubicaciones, la resolución puede fallar:
@@ -86,11 +86,11 @@ En el `.app` empaquetado, `eliza.js` vive en `app.asar.unpacked/milady-dist/eliz
 ## Bun y exports de paquetes publicados
 </div>
 
-Algunos paquetes `@elizaos` (por ejemplo, `@elizaos/plugin-coding-agent`) publican un `package.json` con `exports["."].bun = "./src/index.ts"`. **Por qué lo hacen:** En el monorepo upstream, Bun puede ejecutar TypeScript directamente, por lo que apuntar a `src/` evita un paso de compilación. Sin embargo, el tarball npm publicado solo incluye `dist/` — `src/` no se envía. Cuando instalamos desde npm, la condición `"bun"` apunta a una ruta que no existe.
+Algunos paquetes `@elizaos` (por ejemplo, `@elizaos/plugin-sql`) publican un `package.json` con `exports["."].bun = "./src/index.ts"`. **Por qué lo hacen:** En el monorepo upstream, Bun puede ejecutar TypeScript directamente, por lo que apuntar a `src/` evita un paso de compilación. Sin embargo, el tarball npm publicado solo incluye `dist/` — `src/` no se envía. Cuando instalamos desde npm, la condición `"bun"` apunta a una ruta que no existe.
 
 **Qué sucede:** El resolver de Bun prefiere la condición de exportación `"bun"`. Intenta cargar `./src/index.ts`, el archivo no existe, y obtenemos "Cannot find module … from …/src/runtime/eliza.ts" aunque el paquete está en `node_modules`. Bun no retrocede a la condición `"import"` cuando el objetivo `"bun"` falta.
 
-**Nuestra solución:** `scripts/patch-deps.mjs` se ejecuta después de `bun install` vía `scripts/run-repo-setup.mjs` (usado por `postinstall` y el bootstrap de compilación de la app). Encuentra `@elizaos/plugin-coding-agent` (y cualquier otro paquete que añadamos) y, si `exports["."].bun` apunta a `./src/index.ts` y ese archivo no existe, elimina las condiciones `"bun"` y `"default"` que referencian `src/`. Después del parche, solo quedan `"import"` (y similares), así que Bun resuelve a `./dist/index.js`. **Por qué solo parcheamos cuando falta el archivo:** En un workspace de desarrollo donde el plugin está checkeado con `src/` presente, dejamos el paquete sin cambios para que los flujos de trabajo upstream sigan funcionando.
+**Nuestra solución:** `scripts/patch-deps.mjs` se ejecuta después de `bun install` vía `scripts/run-repo-setup.mjs` (usado por `postinstall` y el bootstrap de compilación de la app). Aplica el parche a los paquetes `@elizaos` instalados que lo necesitan y, si `exports["."].bun` apunta a `./src/index.ts` y ese archivo no existe, elimina las condiciones `"bun"` y `"default"` que referencian `src/`. Después del parche, solo quedan `"import"` (y similares), así que Bun resuelve a `./dist/index.js`. **Por qué solo parcheamos cuando falta el archivo:** En un workspace de desarrollo donde el plugin está checkeado con `src/` presente, dejamos el paquete sin cambios para que los flujos de trabajo upstream sigan funcionando.
 
 <div id="pinned-elizaosplugin-openrouter">
 ## Fijado: `@elizaos/plugin-openrouter`

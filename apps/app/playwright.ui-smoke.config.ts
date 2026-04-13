@@ -6,7 +6,11 @@ const appDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(appDir, "../..");
 const uiSmokeApiStub = path.join(
   repoRoot,
-  "scripts/playwright-ui-smoke-api-stub.mjs",
+  "eliza",
+  "packages",
+  "app-core",
+  "scripts",
+  "playwright-ui-smoke-api-stub.mjs",
 );
 const uiSmokeApiPort = Number(process.env.MILADY_UI_SMOKE_API_PORT || "31337");
 const uiSmokePort = Number(process.env.MILADY_UI_SMOKE_PORT || "2138");

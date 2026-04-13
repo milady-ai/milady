@@ -166,7 +166,7 @@ If our PR description includes a "Follow-up" or "Next Steps" section with bullet
 
 Max 12 items auto-converted to issues. Don't add follow-ups unless you mean them.
 
-### PR Body Structure for Milady
+### PR Body Structure for Eliza
 
 ```markdown
 ## Summary

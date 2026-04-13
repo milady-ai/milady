@@ -835,7 +835,7 @@ curl -X POST http://localhost:2138/api/agent/autonomy \
 | `GET` | `/api/nfa/learnings` | 获取解析的学习条目及 Merkle 根 |
 
 <Info>
-NFA 端点依赖可选的 `@miladyai/plugin-bnb-identity` 插件。当未安装该插件时，`/api/nfa/status` 对 `nfa` 和 `identity` 字段均返回 `null`，`/api/nfa/learnings` 返回空的条目数组和默认 Merkle 根。
+NFA 端点依赖可选的 `@elizaos/plugin-bnb-identity` 插件。当未安装该插件时，`/api/nfa/status` 对 `nfa` 和 `identity` 字段均返回 `null`，`/api/nfa/learnings` 返回空的条目数组和默认 Merkle 根。
 </Info>
 
 ---

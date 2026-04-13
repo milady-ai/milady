@@ -3,13 +3,13 @@ name: Test Packaging
 on:
   pull_request:
     paths:
-      - 'packaging/**'
+      - 'eliza/packages/app-core/packaging/**'
       - '.github/workflows/publish-packages.yml'
       - '.github/workflows/test-packaging.yml'
   push:
     branches: [main]
     paths:
-      - 'packaging/**'
+      - 'eliza/packages/app-core/packaging/**'
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +39,7 @@ jobs:
         run: pip install pyyaml build twine
 
       - name: Run packaging validation suite
-        run: bash packaging/test-packaging.sh
+        run: bash eliza/packages/app-core/packaging/test-packaging.sh
 
   build-pypi:
     name: Build & Test PyPI Package
@@ -60,19 +60,19 @@ jobs:
           check-latest: false
 
       - name: Build
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install build
           python -m build
 
       - name: Check dist
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install twine
           twine check dist/*
 
       - name: Install and test
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install dist/*.whl
 
@@ -145,7 +145,7 @@ jobs:
           check-latest: false
 
       - name: Build and test
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install build
           python -m build

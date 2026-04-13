@@ -13,7 +13,8 @@
 #
 # Build strategy: publish the complete Milady app image (UI + API + runtime)
 # for hosted cloud deployments. Subordinate per-agent runtimes use the internal
-# deploy/Dockerfile.cloud-agent contract instead of this user-facing image.
+# eliza/packages/app-core/deploy/Dockerfile.cloud-agent contract instead of this
+# user-facing image.
 # =============================================================================
 
 name: Build Cloud App Image
@@ -118,31 +119,21 @@ jobs:
           cd apps/app
           bun scripts/plugin-build.mjs
 
-      - name: Build shared workspace
-        run: |
-          cd packages/shared
-          bun run build
-
-      - name: Build selfcontrol workspace
-        run: |
-          cd packages/plugin-selfcontrol
-          bun run build
-
       - name: Build agent workspace
         run: |
-          cd packages/agent
+          cd eliza/packages/agent
           bun run build:docker-dist
 
-      - name: Build bundled orchestrator workspace
+      - name: Build @elizaos/core (includes agent-orchestrator)
         run: |
-          cd plugins/plugin-agent-orchestrator
-          bun run build
+          cd eliza/packages/typescript
+          bun run build:node
 
       - name: Build runtime (tsdown)
         run: |
           npx tsdown
           echo '{"type":"module"}' > dist/package.json
-          node --import tsx scripts/write-build-info.ts 2>/dev/null || true
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
 
       - name: Build UI (vite)
         run: |
@@ -171,8 +162,31 @@ jobs:
           echo "version_clean=${VERSION_CLEAN}" >> "$GITHUB_OUTPUT"
           echo "Source SHA: $(git rev-parse HEAD)"
 
+      - name: Load deploy config
+        run: |
+          set -a
+          source eliza/packages/app-core/deploy/deploy.defaults.env
+          source deploy/deploy.env
+          set +a
+          {
+            echo "APP_ENTRYPOINT=${APP_ENTRYPOINT}"
+            echo "APP_PORT=${APP_PORT}"
+            echo "APP_API_BIND=${APP_API_BIND}"
+            echo "OCI_SOURCE=${OCI_SOURCE}"
+            echo "OCI_LICENSES=${OCI_LICENSES}"
+            echo "APP_CMD_START<<EOF"
+            echo "${APP_CMD_START}"
+            echo "EOF"
+            echo "OCI_TITLE<<EOF"
+            echo "${OCI_TITLE}"
+            echo "EOF"
+            echo "OCI_DESCRIPTION<<EOF"
+            echo "${OCI_DESCRIPTION}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
       - name: Set up CI dockerignore
-        run: cp .dockerignore.ci .dockerignore
+        run: cp eliza/packages/app-core/deploy/Dockerfile.cloud.dockerignore .dockerignore
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -198,11 +212,23 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.ci
+          file: eliza/packages/app-core/deploy/Dockerfile.cloud
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' || inputs.push_image != false }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
+            APP_CMD_START=${{ env.APP_CMD_START }}
+            APP_PORT=${{ env.APP_PORT }}
+            APP_API_BIND=${{ env.APP_API_BIND }}
+            OCI_SOURCE=${{ env.OCI_SOURCE }}
+            OCI_TITLE=${{ env.OCI_TITLE }}
+            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
+            OCI_LICENSES=${{ env.OCI_LICENSES }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            REVISION=${{ github.sha }}
           cache-from: type=gha,scope=milady-cloud-app
           cache-to: type=gha,scope=milady-cloud-app,mode=max
           provenance: false

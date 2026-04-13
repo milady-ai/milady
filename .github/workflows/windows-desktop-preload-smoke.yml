@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - "scripts/**"
+      - "eliza/packages/app-core/scripts/**"
       - "apps/app/electrobun/**"
       - "package.json"
       - "bun.lock"
@@ -53,7 +53,7 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
 
       - name: Desktop preflight
-        run: bun scripts/desktop-build.mjs preflight --variant=base
+        run: bun eliza/packages/app-core/scripts/desktop-build.mjs preflight --variant=base
 
       - name: Build preload bridge
         working-directory: apps/app/electrobun

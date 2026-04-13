@@ -3,11 +3,11 @@ name: Snap Build & Test
 on:
   push:
     paths:
-      - 'packaging/snap/**'
+      - 'eliza/packages/app-core/packaging/snap/**'
       - '.github/workflows/snap-build-test.yml'
   pull_request:
     paths:
-      - 'packaging/snap/**'
+      - 'eliza/packages/app-core/packaging/snap/**'
       - '.github/workflows/snap-build-test.yml'
   workflow_dispatch:
 
@@ -35,7 +35,7 @@ jobs:
         with:
           # Snap build runs `bun install` inside the snapcraft
           # sandbox, which requires every `workspace:*` dependency
-          # under `plugins/plugin-*/typescript` to be present. Without
+          # under `eliza/plugins/plugin-*/typescript` to be present. Without
           # submodules, those directories are empty and `bun install`
           # fails with "Workspace dependency @elizaos/plugin-... not
           # found" for every plugin submodule.
@@ -47,7 +47,7 @@ jobs:
       - name: Prepare snapcraft.yaml
         run: |
           mkdir -p snap
-          cp packaging/snap/snapcraft.yaml snap/snapcraft.yaml
+          cp eliza/packages/app-core/packaging/snap/snapcraft.yaml snap/snapcraft.yaml
 
           # Use package.json version
           VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0-dev")

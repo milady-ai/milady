@@ -1,7 +1,7 @@
 ---
 title: WeChat Connector
 sidebarTitle: WeChat
-description: Connect your agent to WeChat using the @miladyai/plugin-wechat package.
+description: Connect your agent to WeChat using the @elizaos/plugin-wechat package.
 ---
 
 Connect your agent to WeChat for personal and group messaging via a third-party proxy service.
@@ -18,7 +18,7 @@ The WeChat connector sends your API key and message payloads through the configu
 
 | Field | Value |
 |-------|-------|
-| Package | `@miladyai/plugin-wechat` |
+| Package | `@elizaos/plugin-wechat` |
 | Config key | `connectors.wechat` |
 | Auto-enable trigger | `apiKey` is truthy at top level, or an `accounts` entry has a truthy `apiKey` |
 

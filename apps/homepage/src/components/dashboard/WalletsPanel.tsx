@@ -8,7 +8,7 @@ import type {
   StewardStatusResponse,
   WalletAddresses as WalletAddressesResponse,
   WalletBalancesResponse,
-} from "@miladyai/shared/contracts/wallet";
+} from "@elizaos/shared/contracts/wallet";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ManagedAgent } from "../../lib/AgentProvider";
 import { CloudApiClient } from "../../lib/cloud-api";

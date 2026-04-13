@@ -45,7 +45,7 @@ Milady uses a semantic token system instead of per-theme component overrides.
 
 - `packages/app-core/src/styles/base.css` defines the token values for the default light theme and the `[data-theme="dark"], .dark` overrides.
 - `packages/app-core/src/styles/styles.css` maps those CSS custom properties into the utility layer so shared components can stay theme-aware without hardcoding colors.
-- `@miladyai/ui` components consume semantic surface, border, text, accent, and state tokens rather than inventing local palettes.
+- `@elizaos/app-core` components consume semantic surface, border, text, accent, and state tokens rather than inventing local palettes.
 
 This is the contract new UI work should follow. If a surface needs a stronger brand treatment, it should extend the shared token system rather than introducing a third theme family.
 

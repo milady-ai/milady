@@ -100,7 +100,7 @@ jobs:
         run: bun run verify:typecheck
 
   test:
-    name: Unit Tests
+    name: Real tests (Vitest)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -119,8 +119,11 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
           install-command: bun install --frozen-lockfile --ignore-scripts
 
-      - name: Run unit tests
-        run: bunx vitest run --config vitest.unit.config.ts
+      - name: Build
+        run: bun run build
+
+      - name: Run real integration tests (live/real suite)
+        run: bun run test:ci:real
         env:
           NODE_NO_WARNINGS: "1"
 

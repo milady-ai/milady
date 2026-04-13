@@ -28,7 +28,7 @@ The packaged app runs the agent from `milady-dist/` (bundled JS + `node_modules`
 
 The packaging scripts derive that subset instead of keeping a hand-maintained allowlist:
 
-1. `scripts/copy-runtime-node-modules.ts` handles the Electrobun build and scans the built `dist/` output for bare package imports, unions that with the installed `@elizaos/*` and `@miladyai/plugin-*` packages from the repo root, then recursively copies their runtime deps into `dist/node_modules`.
+1. `scripts/copy-runtime-node-modules.ts` handles the Electrobun build and scans the built `dist/` output for bare package imports, unions that with the installed `@elizaos/*` and `@elizaos/plugin-*` packages from the repo root, then recursively copies their runtime deps into `dist/node_modules`.
 2. The packaging flow **walks package.json `dependencies` and `optionalDependencies` recursively**. **Why:** dynamic plugin loading and native optional deps change more often than the release workflow; deriving the closure from installed package metadata avoids shipping a stale allowlist.
 3. Known dev/renderer-only packages (for example `typescript`, `lucide-react`) are skipped to keep the packaged runtime smaller.
 

@@ -11,7 +11,7 @@
 运行时（`src/runtime/eliza.ts`）通过动态导入加载插件：
 
 ```ts
-import("@elizaos/plugin-coding-agent")
+import("@elizaos/plugin-sql")
 ```
 
 Node 通过从**导入文件的目录**向上遍历来解析。当 eliza 从不同位置运行时，解析可能失败：
@@ -86,11 +86,11 @@ env.NODE_PATH = ...;
 ## Bun 和已发布包的导出
 </div>
 
-一些 `@elizaos` 包（例如 `@elizaos/plugin-coding-agent`）发布的 `package.json` 中带有 `exports["."].bun = "./src/index.ts"`。**为什么这样做：** 在上游 monorepo 中，Bun 可以直接运行 TypeScript，因此指向 `src/` 避免了构建步骤。然而，发布的 npm tarball 只包含 `dist/` — `src/` 不会被发布。当我们从 npm 安装时，`"bun"` 条件指向一个不存在的路径。
+一些 `@elizaos` 包（例如 `@elizaos/plugin-sql`）发布的 `package.json` 中带有 `exports["."].bun = "./src/index.ts"`。**为什么这样做：** 在上游 monorepo 中，Bun 可以直接运行 TypeScript，因此指向 `src/` 避免了构建步骤。然而，发布的 npm tarball 只包含 `dist/` — `src/` 不会被发布。当我们从 npm 安装时，`"bun"` 条件指向一个不存在的路径。
 
 **会发生什么：** Bun 的解析器优先使用 `"bun"` 导出条件。它尝试加载 `./src/index.ts`，文件不存在，我们得到 "Cannot find module … from …/src/runtime/eliza.ts"，即使包在 `node_modules` 中。当 `"bun"` 目标缺失时，Bun 不会回退到 `"import"` 条件。
 
-**我们的修复：** `scripts/patch-deps.mjs` 在 `bun install` 之后通过 `scripts/run-repo-setup.mjs`（被 `postinstall` 和应用构建引导使用）运行。它找到 `@elizaos/plugin-coding-agent`（以及我们添加的任何其他包），如果 `exports["."].bun` 指向 `./src/index.ts` 且该文件不存在，则删除引用 `src/` 的 `"bun"` 和 `"default"` 条件。补丁后，只剩下 `"import"`（和类似条件），因此 Bun 解析到 `./dist/index.js`。**为什么只在文件缺失时打补丁：** 在插件以 `src/` 存在的方式签出的开发工作空间中，我们保持包不变，以便上游工作流继续正常工作。
+**我们的修复：** `scripts/patch-deps.mjs` 在 `bun install` 之后通过 `scripts/run-repo-setup.mjs`（被 `postinstall` 和应用构建引导使用）运行。它对需要修复的已安装 `@elizaos` 包运行补丁；如果 `exports["."].bun` 指向 `./src/index.ts` 且该文件不存在，则删除引用 `src/` 的 `"bun"` 和 `"default"` 条件。补丁后，只剩下 `"import"`（和类似条件），因此 Bun 解析到 `./dist/index.js`。**为什么只在文件缺失时打补丁：** 在插件以 `src/` 存在的方式签出的开发工作空间中，我们保持包不变，以便上游工作流继续正常工作。
 
 <div id="pinned-elizaosplugin-openrouter">
 ## 固定：`@elizaos/plugin-openrouter`

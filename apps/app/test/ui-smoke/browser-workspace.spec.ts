@@ -1,9 +1,5 @@
-import { expect, test, type Page, type Route } from "@playwright/test";
-import {
-  installDefaultAppMocks,
-  openAppPath,
-  seedAppStorage,
-} from "./helpers";
+import { expect, type Page, type Route, test } from "@playwright/test";
+import { installDefaultAppMocks, openAppPath, seedAppStorage } from "./helpers";
 
 type BrowserWorkspaceTab = {
   id: string;
@@ -16,7 +12,9 @@ type BrowserWorkspaceTab = {
   lastFocusedAt: string | null;
 };
 
-function buildTab(partial: Partial<BrowserWorkspaceTab> = {}): BrowserWorkspaceTab {
+function buildTab(
+  partial: Partial<BrowserWorkspaceTab> = {},
+): BrowserWorkspaceTab {
   const now = new Date().toISOString();
   return {
     id: partial.id ?? "tab-1",
@@ -78,22 +76,25 @@ async function installBrowserWorkspaceMocks(page: Page): Promise<void> {
     await fulfillJson(route, { tab });
   });
 
-  await page.route("**/api/browser-workspace/tabs/*/navigate", async (route) => {
-    const targetId = route.request().url().split("/tabs/")[1]?.split("/")[0];
-    const body = route.request().postDataJSON() as { url?: string };
-    const tab = tabs.find((entry) => entry.id === targetId);
-    if (!tab) {
-      await route.fulfill({
-        status: 404,
-        contentType: "application/json",
-        body: JSON.stringify({ error: "tab not found" }),
-      });
-      return;
-    }
-    tab.url = body.url ?? tab.url;
-    tab.updatedAt = new Date().toISOString();
-    await fulfillJson(route, { tab });
-  });
+  await page.route(
+    "**/api/browser-workspace/tabs/*/navigate",
+    async (route) => {
+      const targetId = route.request().url().split("/tabs/")[1]?.split("/")[0];
+      const body = route.request().postDataJSON() as { url?: string };
+      const tab = tabs.find((entry) => entry.id === targetId);
+      if (!tab) {
+        await route.fulfill({
+          status: 404,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "tab not found" }),
+        });
+        return;
+      }
+      tab.url = body.url ?? tab.url;
+      tab.updatedAt = new Date().toISOString();
+      await fulfillJson(route, { tab });
+    },
+  );
 
   await page.route("**/api/browser-workspace/tabs/*/show", async (route) => {
     const targetId = route.request().url().split("/tabs/")[1]?.split("/")[0];

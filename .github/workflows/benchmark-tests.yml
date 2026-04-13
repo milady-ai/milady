@@ -8,12 +8,12 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - "packages/app-core/src/benchmark/**"
+      - "eliza/packages/app-core/src/benchmark/**"
       - ".github/workflows/benchmark-tests.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - "packages/app-core/src/benchmark/**"
+      - "eliza/packages/app-core/src/benchmark/**"
       - ".github/workflows/benchmark-tests.yml"
   workflow_dispatch:
 
@@ -29,9 +29,9 @@ jobs:
       matrix:
         include:
           - lane: benchmark-tests
-            command: bunx vitest run packages/app-core/src/benchmark/*.test.ts
+            command: bunx vitest run eliza/packages/app-core/src/benchmark/*.test.ts
           - lane: benchmark-lint
-            command: bunx @biomejs/biome check packages/app-core/src/benchmark
+            command: bunx @biomejs/biome check eliza/packages/app-core/src/benchmark
 
     env:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
@@ -47,8 +47,9 @@ jobs:
       # eliza workspace disable, Bun install, and postinstall patches
       # happen in the same deterministic order as the rest of CI.
       # Without this the benchmark job was hitting
-      # "Workspace dependency @elizaos/plugin-agent-orchestrator not found"
-      # because nothing had initialized the `plugins/*` submodules.
+      # "Workspace dependency @elizaos/agent-orchestrator not found"
+      # because nothing had initialized the `eliza` submodule (including nested
+      # `eliza/plugins/*` checkouts).
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

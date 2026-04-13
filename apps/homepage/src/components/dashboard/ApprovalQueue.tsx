@@ -1,9 +1,9 @@
 /**
  * Cloud ApprovalQueue — adapts CloudApiClient to the shared
- * ApprovalQueue component from @miladyai/app-core.
+ * ApprovalQueue component from @elizaos/app-core.
  */
 
-import { ApprovalQueue as ApprovalQueueBase } from "@miladyai/app-core/components";
+import { ApprovalQueue as ApprovalQueueBase } from "@elizaos/app-core/components";
 import { useCallback } from "react";
 import type { CloudApiClient } from "../../lib/cloud-api";
 

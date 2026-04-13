@@ -250,7 +250,7 @@ jobs:
         run: |
           bunx tsdown
           printf '{"type":"module"}\n' > dist/package.json
-          node --import tsx scripts/write-build-info.ts
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts
       - name: Validate package
         run: |
           npm pack --dry-run 2>&1 | tee /tmp/pack-output.txt
@@ -318,7 +318,7 @@ jobs:
       - name: Stage snapcraft.yaml
         run: |
           mkdir -p snap
-          cp packaging/snap/snapcraft.yaml snap/snapcraft.yaml
+          cp eliza/packages/app-core/packaging/snap/snapcraft.yaml snap/snapcraft.yaml
       - uses: snapcore/action-build@v1
         id: snap
       - name: Verify snap
@@ -348,13 +348,13 @@ jobs:
           flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.node22//24.08
       - name: Build flatpak
         run: |
-          flatpak-builder --user --install-deps-from=flathub --force-clean build-dir packaging/flatpak/com.milady.Milady.yml || echo "::warning::Flatpak build failed (non-blocking)"
+          flatpak-builder --user --install-deps-from=flathub --force-clean build-dir eliza/packages/app-core/packaging/flatpak/com.milady.Milady.yml || echo "::warning::Flatpak build failed (non-blocking)"
       - name: Upload flatpak artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-bundle
-          path: packaging/flatpak/*.flatpak
+          path: eliza/packages/app-core/packaging/flatpak/*.flatpak
           retention-days: 30
           if-no-files-found: warn
 
@@ -371,13 +371,13 @@ jobs:
       - name: Build wheel
         run: |
           pip install build
-          python -m build packaging/pypi/ || echo "::warning::PyPI build failed (non-blocking)"
+          python -m build eliza/packages/app-core/packaging/pypi/ || echo "::warning::PyPI build failed (non-blocking)"
       - name: Upload PyPI artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: pypi-package
-          path: packaging/pypi/dist/
+          path: eliza/packages/app-core/packaging/pypi/dist/
           retention-days: 30
           if-no-files-found: warn
 
@@ -401,8 +401,8 @@ jobs:
           echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
       - name: Build deb
         run: |
-          if [ -f packaging/debian/Makefile ] || [ -f packaging/debian/rules ]; then
-            cd packaging/debian
+          if [ -f eliza/packages/app-core/packaging/debian/Makefile ] || [ -f eliza/packages/app-core/packaging/debian/rules ]; then
+            cd eliza/packages/app-core/packaging/debian
             dpkg-buildpackage -us -uc -b || echo "::warning::Debian package build failed (non-blocking)"
           elif [ -d debian ]; then
             dpkg-buildpackage -us -uc -b || echo "::warning::Debian package build failed (non-blocking)"
@@ -447,7 +447,7 @@ jobs:
           bun run postinstall
           bun run build
       - name: Prepare CocoaPods trunk repo
-        run: bash scripts/prepare-ios-cocoapods.sh
+        run: bash eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh
         env:
           LANG: en_US.UTF-8
 
@@ -498,7 +498,7 @@ jobs:
           submodules: false
       - uses: ./.github/actions/setup-bun-workspace
       - name: Generate release metadata
-        run: node scripts/write-homepage-release-data.mjs || echo "::warning::Release metadata gen failed"
+        run: node eliza/packages/app-core/scripts/write-homepage-release-data.mjs || echo "::warning::Release metadata gen failed"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build homepage

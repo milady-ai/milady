@@ -70,4 +70,4 @@ This guide is for **people building Milady from source** — editors, agents, an
 
 ---
 
-See [Changelog](../changelog.mdx) for shipped dates and [Roadmap](../ROADMAP.md) for follow-ups.
+See [Changelog](../changelog.mdx) for shipped dates and [Roadmap](../roadmap.md) for follow-ups.

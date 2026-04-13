@@ -1,6 +1,6 @@
-import { ErrorBoundary } from "@miladyai/app-core/components";
-import "@miladyai/app-core/styles/styles.css";
-import "@miladyai/app-core/styles/brand-gold.css";
+import { ErrorBoundary } from "@elizaos/app-core/components";
+import "@elizaos/app-core/styles/styles.css";
+import "@elizaos/app-core/styles/brand-gold.css";
 
 import "./native-plugin-entrypoints";
 
@@ -8,31 +8,31 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { StatusBar, Style } from "@capacitor/status-bar";
-import { App } from "@miladyai/app-core/App";
-import { client } from "@miladyai/app-core/api";
+import { App } from "@elizaos/app-core/App";
+import { client } from "@elizaos/app-core/api";
 import {
   initializeCapacitorBridge,
   subscribeDesktopBridgeEvent,
   initializeStorageBridge,
   isElectrobunRuntime,
-} from "@miladyai/app-core/bridge";
-import { CharacterEditor } from "@miladyai/app-core/components";
-import type { BrandingConfig } from "@miladyai/app-core/config";
+} from "@elizaos/app-core/bridge";
+import { CharacterEditor } from "@elizaos/app-core/components";
+import type { BrandingConfig } from "@elizaos/app-core/config";
 import {
   type AppBootConfig,
   getBootConfig,
   setBootConfig,
-} from "@miladyai/app-core/config";
+} from "@elizaos/app-core/config";
 import {
   AGENT_READY_EVENT,
   APP_PAUSE_EVENT,
   APP_RESUME_EVENT,
   COMMAND_PALETTE_EVENT,
   CONNECT_EVENT,
-  dispatchMiladyEvent,
+  dispatchAppEvent,
   SHARE_TARGET_EVENT,
   TRAY_ACTION_EVENT,
-} from "@miladyai/app-core/events";
+} from "@elizaos/app-core/events";
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
@@ -44,20 +44,29 @@ import {
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
-} from "@miladyai/app-core/platform";
+} from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
   DesktopOnboardingRuntime,
   DesktopSurfaceNavigationRuntime,
   DesktopTrayRuntime,
   DetachedShellRoot,
-} from "@miladyai/app-core/shell";
-import { AppProvider } from "@miladyai/app-core/state";
-import { applyUiTheme, loadUiTheme } from "@miladyai/app-core/state";
-import { Agent } from "@miladyai/capacitor-agent";
-import { Desktop } from "@miladyai/capacitor-desktop";
+} from "@elizaos/app-core/shell";
+import { AppProvider } from "@elizaos/app-core/state";
+import { applyUiTheme, loadUiTheme } from "@elizaos/app-core/state";
+import { Agent } from "@elizaos/capacitor-agent";
+import { Desktop } from "@elizaos/capacitor-desktop";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { CompanionShell } from "../../../eliza/apps/app-companion/src/ui";
+import "../../../eliza/apps/app-companion/src/register";
+import {
+  LifeOpsBrowserSetupPanel,
+  LifeOpsPageView,
+  WebsiteBlockerSettingsCard,
+} from "../../../eliza/apps/app-lifeops/src/ui";
+import "../../../eliza/apps/app-shopify/src/register";
+import "../../../eliza/apps/app-vincent/src/register";
 import { MILADY_ENV_ALIASES } from "./brand-env";
 import { MILADY_CHARACTER_CATALOG } from "./character-catalog";
 import { shouldUseCloudOnlyBranding } from "./cloud-only";
@@ -124,7 +133,7 @@ declare global {
 const windowShellRoute = resolveWindowShellRoute();
 
 /**
- * Adds `milady-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
+ * Adds `eliza-electrobun-frameless` for CSS `-webkit-app-region` (Chromium/CEF).
  * macOS WKWebView move/resize are still driven by native overlays in
  * window-effects.mm; this class mainly marks the shell and helps non-WK engines.
  */
@@ -137,7 +146,7 @@ function shouldEnableElectrobunMacWindowDrag(): boolean {
 }
 
 if (shouldEnableElectrobunMacWindowDrag()) {
-  document.documentElement.classList.add("milady-electrobun-frameless");
+  document.documentElement.classList.add("eliza-electrobun-frameless");
 }
 
 // Dev escape hatch: ?reset forces a truly fresh onboarding session by clearing
@@ -152,7 +161,7 @@ installDesktopPermissionsClientPatch(client as never);
 // Register custom character editor for app-core's ViewRouter to pick up
 window.__MILADY_CHARACTER_EDITOR__ = CharacterEditor;
 
-import { getStylePresets } from "@miladyai/shared/onboarding-presets";
+import { getStylePresets } from "@elizaos/shared/onboarding-presets";
 
 // Derive VRM roster from STYLE_PRESETS so character names stay in one place.
 const MILADY_STYLE_PRESETS = getStylePresets();
@@ -171,8 +180,12 @@ const miladyBootConfig: AppBootConfig = {
   vrmAssets: MILADY_VRM_ASSETS,
   onboardingStyles: MILADY_STYLE_PRESETS,
   characterEditor: CharacterEditor,
+  companionShell: CompanionShell,
   characterCatalog: MILADY_CHARACTER_CATALOG,
   envAliases: MILADY_ENV_ALIASES,
+  lifeOpsPageView: LifeOpsPageView,
+  lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
+  websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
     forceFreshOnboarding:
       shouldInstallMainWindowOnboardingPatches(windowShellRoute),
@@ -188,13 +201,13 @@ function dispatchShareTarget(payload: ShareTargetPayload): void {
     window.__MILADY_SHARE_QUEUE__ = [];
   }
   window.__MILADY_SHARE_QUEUE__.push(payload);
-  dispatchMiladyEvent(SHARE_TARGET_EVENT, payload);
+  dispatchAppEvent(SHARE_TARGET_EVENT, payload);
 }
 
 async function initializeAgent(): Promise<void> {
   try {
     const status = await Agent.getStatus();
-    dispatchMiladyEvent(AGENT_READY_EVENT, status);
+    dispatchAppEvent(AGENT_READY_EVENT, status);
   } catch (err) {
     console.warn(
       "[Milady] Agent not available:",
@@ -251,9 +264,9 @@ async function initializeKeyboard(): Promise<void> {
 function initializeAppLifecycle(): void {
   CapacitorApp.addListener("appStateChange", ({ isActive }) => {
     if (isActive) {
-      dispatchMiladyEvent(APP_RESUME_EVENT);
+      dispatchAppEvent(APP_RESUME_EVENT);
     } else {
-      dispatchMiladyEvent(APP_PAUSE_EVENT);
+      dispatchAppEvent(APP_PAUSE_EVENT);
     }
   });
 
@@ -312,7 +325,7 @@ function handleDeepLink(url: string): void {
             );
             break;
           }
-          dispatchMiladyEvent(CONNECT_EVENT, {
+          dispatchAppEvent(CONNECT_EVENT, {
             gatewayUrl: validatedUrl.href,
           });
         } catch {
@@ -370,7 +383,7 @@ async function initializeDesktopShell(): Promise<void> {
 
   await Desktop.addListener("shortcutPressed", (event: { id: string }) => {
     if (event.id === "command-palette") {
-      dispatchMiladyEvent(COMMAND_PALETTE_EVENT);
+      dispatchAppEvent(COMMAND_PALETTE_EVENT);
     }
   });
 
@@ -381,7 +394,7 @@ async function initializeDesktopShell(): Promise<void> {
   await Desktop.addListener(
     "trayMenuClick",
     (event: { itemId: string; checked?: boolean }) => {
-      dispatchMiladyEvent(TRAY_ACTION_EVENT, event);
+      dispatchAppEvent(TRAY_ACTION_EVENT, event);
     },
   );
 

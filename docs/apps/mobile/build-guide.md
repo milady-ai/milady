@@ -61,13 +61,13 @@ Live reload lets you see web-layer changes on a physical device or simulator wit
 
 1. Find your machine's local IP address (e.g., `192.168.1.42`). On macOS, check System Settings → Wi-Fi → Details → IP Address, or run `ipconfig getifaddr en0`.
 
-2. Edit `apps/app/capacitor.config.ts` and add a `server` block pointing at the Vite dev server:
+2. Edit `apps/app/capacitor.config.ts` and add a `server` block pointing at the Vite dev server. This repo's Vite UI defaults to port `2138` (or `MILADY_PORT` if you override it), not Vite's stock `5173`:
 
 ```typescript
 const config: CapacitorConfig = {
   // ...existing config
   server: {
-    url: "http://192.168.1.42:5173",
+    url: "http://192.168.1.42:2138",
     cleartext: true, // required for plain HTTP on Android
   },
 };

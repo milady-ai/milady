@@ -1,0 +1,39 @@
+---
+title: "CLI environment variables"
+description: "Environment variables that affect the milady CLI and embedded runtime."
+---
+
+# CLI environment variables
+
+These variables are read by the CLI wrapper (`run-node.mjs`) and the embedded runtime. They are **not** a complete list of every model or connector secret — see [Configuration](/configuration) and [Plugin setup](/plugin-setup-guide) for provider keys.
+
+## State and config
+
+| Variable | Purpose |
+|----------|---------|
+| `MILADY_STATE_DIR` | Override state directory (config, credentials, caches). |
+| `MILADY_CONFIG_PATH` | Explicit path to `milady.json`. |
+| `ELIZA_NAMESPACE` | Namespace segment for default paths (`milady` → `~/.milady/`). |
+| `MILADY_WORKSPACE_DIR` / `ELIZA_WORKSPACE_DIR` | Default agent workspace root. |
+
+## Ports and networking
+
+| Variable | Purpose |
+|----------|---------|
+| `MILADY_API_PORT` / `ELIZA_PORT` | HTTP API bind port. |
+| `MILADY_PORT` | Dashboard / Vite dev port in orchestrated dev flows. |
+| `MILADY_GATEWAY_PORT`, `MILADY_HOME_PORT`, … | Other local services — see **Ports** under [Environment setup](/installation). |
+
+## Development
+
+| Variable | Purpose |
+|----------|---------|
+| `MILADY_SKIP_LOCAL_UPSTREAMS` | Prefer npm `@elizaos/*` over repo-linked `./eliza` packages. |
+| `NODE_PATH` | Must include the repo `node_modules` root for dynamic plugin imports — set by supported launchers. |
+
+Run `milady doctor` after changing ports or state paths to catch mismatches before you start the server.
+
+## Related
+
+- [Installation](/installation)
+- [Plugin resolution and NODE_PATH](/plugin-resolution-and-node-path)

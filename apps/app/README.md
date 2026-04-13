@@ -126,7 +126,7 @@ If the embedded agent fails to load (e.g. missing native module), the app keeps 
 
 ### Plugin resolution
 
-Dynamic plugin imports (`import("@elizaos/plugin-*")`) resolve from the importing file's location. In dev mode and CLI, that can miss root `node_modules`. We set `NODE_PATH` to repo root in `src/runtime/eliza.ts`, `scripts/run-node.mjs`, and `electrobun/src/native/agent.ts` (dev path). **Why:** Without this, plugins like `@elizaos/plugin-coding-agent` fail with "Cannot find module" on boot. For Bun specifically, some published plugins have `exports["."].bun = "./src/index.ts"` (missing in the tarball); we patch those in `scripts/patch-deps.mjs` so Bun resolves via `dist/`. See [Plugin resolution and NODE_PATH](../../docs/plugin-resolution-and-node-path.md) (including "Bun and published package exports").
+Dynamic plugin imports (`import("@elizaos/plugin-*")`) resolve from the importing file's location. In dev mode and CLI, that can miss root `node_modules`. We set `NODE_PATH` to repo root in `src/runtime/eliza.ts`, `scripts/run-node.mjs`, and `electrobun/src/native/agent.ts` (dev path). **Why:** Without this, dynamically loaded plugins fail with "Cannot find module" on boot. For Bun specifically, some published plugins have `exports["."].bun = "./src/index.ts"` (missing in the tarball); we patch those in `scripts/patch-deps.mjs` so Bun resolves via `dist/`. See [Plugin resolution and NODE_PATH](../../docs/plugin-resolution-and-node-path.md) (including "Bun and published package exports").
 
 ### Build and release (desktop bundle, CI)
 

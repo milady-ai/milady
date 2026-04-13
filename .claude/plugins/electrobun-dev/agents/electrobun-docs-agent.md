@@ -213,7 +213,7 @@ import "./<feature-name>.regression.test";
 
 ## Part 3: Mark Implementation Plan Complete
 
-Update the implementation plan file (`docs/superpowers/plans/*.md`):
+Update the implementation plan file (`docs/plans/*.md`) when the feature has one:
 
 1. Check all unchecked task checkboxes: change `- [ ]` to `- [x]`
 2. Add a completion footer at the bottom of the file:
@@ -258,7 +258,7 @@ Produce a summary for the orchestrator:
 - Registered in index.ts: ✅
 
 ### Plan Marked Complete
-- File: `docs/superpowers/plans/<plan-filename>.md`
+- File: `docs/plans/<plan-filename>.md` (if applicable)
 - Tasks checked: N/N
 - Completion footer: ✅
 

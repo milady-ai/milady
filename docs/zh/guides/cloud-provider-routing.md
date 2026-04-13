@@ -42,4 +42,5 @@ description: "解释 Cloud 连接、推理路由、BYOK 切换与额度消耗之
 
 - [中文入门：安装、引导与支持](/zh/guides/onboarding-and-support)
 - [Eliza Cloud Integration](/guides/cloud)
+- English: [Cloud and provider routing](/guides/cloud-provider-routing)
 

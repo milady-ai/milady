@@ -50,7 +50,7 @@ jobs:
           MILADY_NO_VISION_DEPS: "1"
 
       - name: Run coordinator platform review
-        run: node scripts/coordinator-cross-platform-review.mjs
+        run: node eliza/packages/app-core/scripts/coordinator-cross-platform-review.mjs
 
       - name: Upload review artifacts
         uses: actions/upload-artifact@v4

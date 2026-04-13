@@ -1,1 +1,0 @@
-{"state":"running","agentName":"Dizzy","model":"@elizaos/plugin-anthropic","startedAt":1775609140820,"uptime":12849,"startup":{"phase":"running","attempt":0},"cloud":{"connectionStatus":"disconnected","activeAgentId":null},"pendingRestart":false,"pendingRestartReasons":[]}

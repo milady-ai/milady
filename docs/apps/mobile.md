@@ -151,7 +151,7 @@ The shared Capacitor configuration lives in `capacitor.config.ts`. Mobile target
 
 The mobile app uses 9 custom Milady Capacitor plugins plus the core Haptics plugin, each providing native capabilities with web fallbacks.
 
-### 1. Gateway (`@miladyai/capacitor-gateway`)
+### 1. Gateway (`@elizaos/capacitor-gateway`)
 
 Connects the mobile app to a Milady agent running elsewhere on the network.
 
@@ -161,7 +161,7 @@ Connects the mobile app to a Milady agent running elsewhere on the network.
 - **Events:** Streams `gatewayEvent`, `stateChange`, `error`, and `discovery` events.
 - On web, discovery falls back to manual connection; WebSocket works natively in the browser.
 
-### 2. Swabble (`@miladyai/capacitor-swabble`)
+### 2. Swabble (`@elizaos/capacitor-swabble`)
 
 Voice wake-word detection for hands-free activation.
 
@@ -171,7 +171,7 @@ Voice wake-word detection for hands-free activation.
 - **Transcript events:** Provides speech segments with timing information and confidence scores.
 - On web, falls back to the Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`) if available.
 
-### 3. Talk Mode (`@miladyai/capacitor-talkmode`)
+### 3. Talk Mode (`@elizaos/capacitor-talkmode`)
 
 Full speech pipeline: speech-to-text, chat with agent, text-to-speech response.
 
@@ -182,7 +182,7 @@ Full speech pipeline: speech-to-text, chat with agent, text-to-speech response.
 - **State machine:** Cycles through `idle` -> `listening` -> `processing` -> `speaking` with event listeners for each transition.
 - **Permissions:** Checks and requests microphone and speech recognition permissions.
 
-### 4. Camera (`@miladyai/capacitor-camera`)
+### 4. Camera (`@elizaos/capacitor-camera`)
 
 Full camera control with preview, photo capture, and video recording.
 
@@ -193,7 +193,7 @@ Full camera control with preview, photo capture, and video recording.
 - **Manual controls:** Zoom, focus point, exposure point, flash mode, white balance, and ISO.
 - On web, falls back to `navigator.mediaDevices.getUserMedia`.
 
-### 5. Location (`@miladyai/capacitor-location`)
+### 5. Location (`@elizaos/capacitor-location`)
 
 GPS and geolocation services.
 
@@ -203,7 +203,7 @@ GPS and geolocation services.
 - **Background location:** Available on iOS/Android only (not on Electrobun). Requires separate permission grant.
 - On web, uses the browser Geolocation API.
 
-### 6. Screen Capture (`@miladyai/capacitor-screencapture`)
+### 6. Screen Capture (`@elizaos/capacitor-screencapture`)
 
 Screenshot and screen recording.
 
@@ -212,7 +212,7 @@ Screenshot and screen recording.
 - **Pause/resume:** Recording can be paused and resumed.
 - Native platforms only for screenshots. Recording also available on web via `getDisplayMedia`.
 
-### 7. Canvas (`@miladyai/capacitor-canvas`)
+### 7. Canvas (`@elizaos/capacitor-canvas`)
 
 Canvas rendering and web view management. Available on all platforms (HTML Canvas API is universal).
 
@@ -223,7 +223,7 @@ Canvas rendering and web view management. Available on all platforms (HTML Canva
 - **Deep links:** Intercepts `milady://` URLs and fires `deepLink` events.
 - **Touch input:** Streams multi-touch events with force data.
 
-### 8. Agent (`@miladyai/capacitor-agent`)
+### 8. Agent (`@elizaos/capacitor-agent`)
 
 Agent lifecycle management.
 
@@ -231,7 +231,7 @@ Agent lifecycle management.
 - **Lifecycle:** Start, stop, and query agent status (`not_started`, `starting`, `running`, `stopped`, `error`).
 - **Chat:** Send text messages and receive agent responses.
 
-### 9. Desktop (`@miladyai/capacitor-desktop`)
+### 9. Desktop (`@elizaos/capacitor-desktop`)
 
 Desktop-specific features (macOS/Electrobun only):
 

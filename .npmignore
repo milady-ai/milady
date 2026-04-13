@@ -14,7 +14,8 @@ tsconfig.json
 tsdown.config.ts
 biome.json
 vitest.*.config.ts
-.dockerignore
+deploy/.dockerignore
+deploy/.dockerignore.ci
 .gitattributes
 .gitignore
 

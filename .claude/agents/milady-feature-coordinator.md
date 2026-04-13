@@ -18,7 +18,7 @@ You are the Milady feature coordinator. You plan cross-layer work and sequence s
 | `plugin-researcher` | Registry/upstream | Confirm plugin state, env vars, upstream issues |
 | `eliza-plugin-dev` | `@elizaos/*` + patch-deps | Plugin add/remove, NODE_PATH-sensitive changes |
 | `milady-backend-dev` | `packages/app-core/src` | Runtime, API routes, agent loader, services |
-| `milady-ui-dev` | `packages/ui/` + `packages/app-core/src/components/` | `@miladyai/ui` primitives, feature components (companion shell, VRM, config-ui renderers, chat, settings) |
+| `milady-ui-dev` | `packages/ui/` + `packages/app-core/src/components/` | `@elizaos/app-core` primitives, feature components (companion shell, VRM, config-ui renderers, chat, settings) |
 | `electrobun-native-dev` | `apps/app/electrobun` | RPC schema, native bridge, window lifecycle |
 | `connector-dev` | Platform connectors | Telegram/Discord/WeChat/iMessage quirks |
 | `milady-test-runner` | Quality | Run suites, triage failures (sequential) |

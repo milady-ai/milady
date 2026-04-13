@@ -9,6 +9,10 @@ import {
 } from "../../test/eliza-package-paths";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const nativePluginsRoot = path.join(
+  here,
+  "../../eliza/packages/native-plugins",
+);
 const appCorePackageRoot = getAppCoreSourceRoot(here);
 const agentSourceRoot = getAutonomousSourceRoot(here);
 
@@ -22,7 +26,7 @@ const bridgeStubPath = path.join(
 );
 
 /**
- * Custom Vite plugin that redirects @miladyai/app-core/bridge imports to
+ * Custom Vite plugin that redirects @elizaos/app-core/bridge imports to
  * the test shim before Vite's built-in resolver tries to resolve through
  * the package's exports map (which may reference native bindings that are
  * unavailable in the test environment).
@@ -33,9 +37,9 @@ function appCoreBridgeStubPlugin(): Plugin {
     enforce: "pre",
     resolveId(source) {
       if (
-        source === "@miladyai/app-core/bridge/electrobun-rpc" ||
-        source === "@miladyai/app-core/bridge/electrobun-runtime" ||
-        source === "@miladyai/app-core/bridge"
+        source === "@elizaos/app-core/bridge/electrobun-rpc" ||
+        source === "@elizaos/app-core/bridge/electrobun-runtime" ||
+        source === "@elizaos/app-core/bridge"
       ) {
         return bridgeStubPath;
       }
@@ -48,18 +52,6 @@ export default defineConfig({
   plugins: [appCoreBridgeStubPlugin()],
   resolve: {
     alias: [
-      {
-        // Redirect the broken @lookingglass/webxr ESM chain for tests
-        find: /^@lookingglass\/.*/,
-        replacement: path.join(
-          here,
-          "..",
-          "..",
-          "test",
-          "stubs",
-          "lookingglass-webxr-shim.ts",
-        ),
-      },
       {
         find: "react",
         replacement: path.join(here, "node_modules/react"),
@@ -85,8 +77,8 @@ export default defineConfig({
               if (typeof value === "string") {
                 const aliasKey =
                   key === "."
-                    ? "@miladyai/app-core"
-                    : `@miladyai/app-core/${key.replace(/^\.\//, "")}`;
+                    ? "@elizaos/app-core"
+                    : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
                 const targetPath = path.resolve(
                   appCorePackageRoot,
                   "..",
@@ -105,7 +97,7 @@ export default defineConfig({
                 }
               }
             }
-            // Catch-all: resolve any @miladyai/app-core sub-path imports
+            // Catch-all: resolve any @elizaos/app-core sub-path imports
             // not explicitly listed in the exports map directly to the
             // source tree (e.g. components/Header → src/components/Header).
             generatedAliases.push({
@@ -119,11 +111,11 @@ export default defineConfig({
             return generatedAliases;
           })()
         : []),
-      // Resolve @miladyai/agent sub-path imports to the source tree
+      // Resolve @elizaos/agent sub-path imports to the source tree
       ...(agentSourceRoot
         ? [
             {
-              find: /^@miladyai\/agent\/(.*)/,
+              find: /^@elizaos\/agent\/(.*)/,
               replacement: path.join(agentSourceRoot, "$1"),
             },
           ]
@@ -135,18 +127,18 @@ export default defineConfig({
     include: [
       "test/**/*.test.ts",
       "test/**/*.test.tsx",
-      "../../packages/app-core/test/**/*.test.ts",
-      "../../packages/app-core/test/**/*.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.test.ts",
+      "../../eliza/packages/app-core/test/**/*.test.tsx",
     ],
     // Live/real QA browser checks are opt-in and should not run as part of the
     // default app suite, even if the developer shell exports live-test env.
     exclude: [
-      "../../packages/app-core/test/**/*.e2e.test.ts",
-      "../../packages/app-core/test/**/*.e2e.test.tsx",
-      "../../packages/app-core/test/**/*.live.e2e.test.ts",
-      "../../packages/app-core/test/**/*.live.e2e.test.tsx",
-      "../../packages/app-core/test/**/*.real.e2e.test.ts",
-      "../../packages/app-core/test/**/*.real.e2e.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.e2e.test.ts",
+      "../../eliza/packages/app-core/test/**/*.e2e.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.live.e2e.test.ts",
+      "../../eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.real.e2e.test.ts",
+      "../../eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
       "test/**/*-live.test.ts",
       "test/**/*-live.test.tsx",
       "test/**/*.live.test.ts",
@@ -157,16 +149,16 @@ export default defineConfig({
       "test/**/*.live.e2e.test.tsx",
       "test/**/*.real.e2e.test.ts",
       "test/**/*.real.e2e.test.tsx",
-      "../../packages/app-core/test/**/*-live.test.ts",
-      "../../packages/app-core/test/**/*-live.test.tsx",
-      "../../packages/app-core/test/**/*.live.test.ts",
-      "../../packages/app-core/test/**/*.live.test.tsx",
-      "../../packages/app-core/test/**/*-live.e2e.test.ts",
-      "../../packages/app-core/test/**/*-live.e2e.test.tsx",
-      "../../packages/app-core/test/**/*.live.e2e.test.ts",
-      "../../packages/app-core/test/**/*.live.e2e.test.tsx",
-      "../../packages/app-core/test/**/*.real.e2e.test.ts",
-      "../../packages/app-core/test/**/*.real.e2e.test.tsx",
+      "../../eliza/packages/app-core/test/**/*-live.test.ts",
+      "../../eliza/packages/app-core/test/**/*-live.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.live.test.ts",
+      "../../eliza/packages/app-core/test/**/*.live.test.tsx",
+      "../../eliza/packages/app-core/test/**/*-live.e2e.test.ts",
+      "../../eliza/packages/app-core/test/**/*-live.e2e.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.live.e2e.test.ts",
+      "../../eliza/packages/app-core/test/**/*.live.e2e.test.tsx",
+      "../../eliza/packages/app-core/test/**/*.real.e2e.test.ts",
+      "../../eliza/packages/app-core/test/**/*.real.e2e.test.tsx",
     ],
     setupFiles: [path.join(here, "test/setup.ts")],
     environment: "node",
@@ -177,52 +169,52 @@ export default defineConfig({
         "doubles",
         "elizaos-skills.ts",
       ),
-      "@miladyai/capacitor-gateway": path.join(
-        here,
-        "plugins/gateway/src/index.ts",
+      "@elizaos/capacitor-gateway": path.join(
+        nativePluginsRoot,
+        "gateway/src/index.ts",
       ),
-      "@miladyai/capacitor-swabble": path.join(
-        here,
-        "plugins/swabble/src/index.ts",
+      "@elizaos/capacitor-swabble": path.join(
+        nativePluginsRoot,
+        "swabble/src/index.ts",
       ),
-      "@miladyai/capacitor-talkmode": path.join(
-        here,
-        "plugins/talkmode/src/index.ts",
+      "@elizaos/capacitor-talkmode": path.join(
+        nativePluginsRoot,
+        "talkmode/src/index.ts",
       ),
-      "@miladyai/capacitor-camera": path.join(
-        here,
-        "plugins/camera/src/index.ts",
+      "@elizaos/capacitor-camera": path.join(
+        nativePluginsRoot,
+        "camera/src/index.ts",
       ),
-      "@miladyai/capacitor-location": path.join(
-        here,
-        "plugins/location/src/index.ts",
+      "@elizaos/capacitor-location": path.join(
+        nativePluginsRoot,
+        "location/src/index.ts",
       ),
-      "@miladyai/capacitor-screencapture": path.join(
-        here,
-        "plugins/screencapture/src/index.ts",
+      "@elizaos/capacitor-screencapture": path.join(
+        nativePluginsRoot,
+        "screencapture/src/index.ts",
       ),
-      "@miladyai/capacitor-canvas": path.join(
-        here,
-        "plugins/canvas/src/index.ts",
+      "@elizaos/capacitor-canvas": path.join(
+        nativePluginsRoot,
+        "canvas/src/index.ts",
       ),
-      "@miladyai/capacitor-desktop": path.join(
-        here,
-        "plugins/desktop/src/index.ts",
+      "@elizaos/capacitor-desktop": path.join(
+        nativePluginsRoot,
+        "desktop/src/index.ts",
       ),
-      "@miladyai/capacitor-agent": path.join(
-        here,
-        "plugins/agent/src/index.ts",
+      "@elizaos/capacitor-agent": path.join(
+        nativePluginsRoot,
+        "agent/src/index.ts",
       ),
-      "@miladyai/capacitor-websiteblocker": path.join(
-        here,
-        "plugins/websiteblocker/src/index.ts",
+      "@elizaos/capacitor-websiteblocker": path.join(
+        nativePluginsRoot,
+        "websiteblocker/src/index.ts",
       ),
     },
     testTimeout: 30000,
     globals: true,
     server: {
       deps: {
-        inline: ["@miladyai/app-core"],
+        inline: ["@elizaos/app-core"],
       },
     },
   },

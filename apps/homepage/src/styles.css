@@ -1,15 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
-@import "@miladyai/app-core/styles/base.css";
+@import "@elizaos/app-core/styles/base.css";
 
 /* @tailwindcss/typography — provides prose utilities for long-form MDX content
    under /docs. Consumer docs use `prose prose-invert` with DM Sans body + JetBrains
    Mono code. */
 @plugin "@tailwindcss/typography";
 
-/* Scan @miladyai/ui source so Tailwind generates CSS for all UI package classes
+/* Scan @elizaos/app-core source so Tailwind generates CSS for all UI package classes
    (z-[160], z-[170], bg-black/80, bg-bg, text-muted, ring-ring, etc.) */
-@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../eliza/packages/ui/src/**/*.{ts,tsx}";
 /* Scan MDX doc content so Tailwind generates classes referenced inside .mdx files
    and the docs components. */
 @source "./src/docs/**/*.{ts,tsx,mdx}";
@@ -66,7 +66,7 @@ body {
 }
 
 /* ── Radix / tailwindcss-animate compatibility ────────────────────── */
-/* The @miladyai/ui Dialog uses data-[state=open]:animate-in, fade-in-0,
+/* The @elizaos/app-core Dialog uses data-[state=open]:animate-in, fade-in-0,
    zoom-in-95, etc. These come from tailwindcss-animate which isn't
    installed here, so we provide the keyframes and base classes manually. */
 

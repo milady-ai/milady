@@ -9,7 +9,8 @@ const repoRoot = path.resolve(appDir, "..", "..");
 const playwrightArgs = process.argv.slice(2);
 
 function resolvePlaywrightCommand() {
-  const binaryName = process.platform === "win32" ? "playwright.cmd" : "playwright";
+  const binaryName =
+    process.platform === "win32" ? "playwright.cmd" : "playwright";
   for (const candidate of [
     path.join(appDir, "node_modules", ".bin", binaryName),
     path.join(repoRoot, "node_modules", ".bin", binaryName),
@@ -50,7 +51,9 @@ delete env.CLICOLOR_FORCE;
 
 if (
   playwrightArgs.includes("--config") &&
-  playwrightArgs.some((value) => value.includes("playwright.ui-smoke.config.ts"))
+  playwrightArgs.some((value) =>
+    value.includes("playwright.ui-smoke.config.ts"),
+  )
 ) {
   if (!env.MILADY_UI_SMOKE_API_PORT) {
     const apiPort = await getFreePort();

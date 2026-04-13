@@ -5,7 +5,7 @@ description: REST API endpoints for Non-Fungible Agent (NFA) token status and le
 ---
 
 <Info>
-NFA endpoints depend on the optional `@miladyai/plugin-bnb-identity` plugin. When the plugin is not installed, these endpoints return graceful fallback responses instead of errors.
+NFA endpoints depend on the optional `@elizaos/plugin-bnb-identity` plugin. When the plugin is not installed, these endpoints return graceful fallback responses instead of errors.
 </Info>
 
 ## NFA status
@@ -96,4 +96,4 @@ Returns parsed learning entries from the agent's `LEARNINGS.md` file along with 
 
 The endpoint searches for `LEARNINGS.md` in two locations (in order): the Milady state directory (`~/.milady/LEARNINGS.md`) and the current working directory.
 
-**Fallback behavior:** When the learnings file is not found or the `@miladyai/plugin-bnb-identity` plugin is not installed, the response returns an empty `entries` array, `totalEntries: 0`, `source: null`, and a default `merkleRoot`.
+**Fallback behavior:** When the learnings file is not found or the `@elizaos/plugin-bnb-identity` plugin is not installed, the response returns an empty `entries` array, `totalEntries: 0`, `source: null`, and a default `merkleRoot`.

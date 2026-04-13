@@ -1,7 +1,7 @@
 import { clearToken } from "./auth";
 import { CLOUD_BASE } from "./runtime-config";
 
-// ── Wallet types (re-exported from @miladyai/shared/contracts/wallet) ────
+// ── Wallet types (re-exported from @elizaos/shared/contracts/wallet) ────
 export type {
   EvmChainBalance,
   EvmTokenBalance,
@@ -13,7 +13,7 @@ export type {
   StewardTxRecord,
   StewardTxStatus,
   WalletBalancesResponse,
-} from "@miladyai/shared/contracts/wallet";
+} from "@elizaos/shared/contracts/wallet";
 
 import type {
   StewardApprovalActionResponse,
@@ -21,12 +21,12 @@ import type {
   StewardStatusResponse,
   StewardTxRecord,
   WalletBalancesResponse,
-} from "@miladyai/shared/contracts/wallet";
+} from "@elizaos/shared/contracts/wallet";
 
 // Wallet addresses response (same shape as WalletAddresses but with Response suffix for API clarity)
-export type { WalletAddresses as WalletAddressesResponse } from "@miladyai/shared/contracts/wallet";
+export type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
 
-import type { WalletAddresses as WalletAddressesResponse } from "@miladyai/shared/contracts/wallet";
+import type { WalletAddresses as WalletAddressesResponse } from "@elizaos/shared/contracts/wallet";
 
 // Steward policy types (not in shared — these are UI-specific config shapes)
 export type StewardPolicyType =

@@ -4,7 +4,7 @@ sidebarTitle: "Capacitor Plugins"
 description: "Nine custom Capacitor plugins that give the Milady mobile app access to native iOS and Android capabilities."
 ---
 
-The Milady mobile app ships nine custom Capacitor plugins plus the core `@capacitor/haptics` plugin. Each plugin is an independent package under `apps/app/plugins/` and must be compiled before the web app can bundle it (`bun run plugin:build`). Plugins are wrapped by the plugin bridge (`src/bridge/plugin-bridge.ts`), which performs capability detection per platform and provides graceful degradation to web API fallbacks where possible.
+The Milady mobile app ships nine custom Capacitor plugins plus the core `@capacitor/haptics` plugin. Each plugin is an independent package under `eliza/packages/native-plugins/<name>/` and must be compiled before the web app can bundle it (`bun run plugin:build` from `apps/app`). Plugins are wrapped by the plugin bridge (`src/bridge/plugin-bridge.ts`), which performs capability detection per platform and provides graceful degradation to web API fallbacks where possible.
 
 All plugins follow the same structure: a TypeScript interface describing the web-facing API, a web implementation used in browser environments, and native implementations for iOS (Swift) and Android (Kotlin). On platforms where a feature is unavailable, plugin calls are silently caught and logged by the bridge's `Proxy` wrapper.
 
@@ -28,18 +28,18 @@ if (isFeatureAvailable("gateway")) {
 
 | Key | Plugin |
 |-----|--------|
-| `gateway` | `@miladyai/capacitor-gateway` |
-| `voiceWake` | `@miladyai/capacitor-swabble` |
-| `talkMode` | `@miladyai/capacitor-talkmode` |
-| `camera` | `@miladyai/capacitor-camera` |
-| `location` | `@miladyai/capacitor-location` |
-| `screenCapture` | `@miladyai/capacitor-screencapture` |
-| `canvas` | `@miladyai/capacitor-canvas` |
-| `desktop` | `@miladyai/capacitor-desktop` |
+| `gateway` | `@elizaos/capacitor-gateway` |
+| `voiceWake` | `@elizaos/capacitor-swabble` |
+| `talkMode` | `@elizaos/capacitor-talkmode` |
+| `camera` | `@elizaos/capacitor-camera` |
+| `location` | `@elizaos/capacitor-location` |
+| `screenCapture` | `@elizaos/capacitor-screencapture` |
+| `canvas` | `@elizaos/capacitor-canvas` |
+| `desktop` | `@elizaos/capacitor-desktop` |
 
 ---
 
-## @miladyai/capacitor-gateway
+## @elizaos/capacitor-gateway
 
 WebSocket RPC connection to a Milady gateway with mDNS/Bonjour discovery of local gateways on the same network. Handles token or password authentication, automatic reconnection, and session continuity via session keys.
 
@@ -67,7 +67,7 @@ WebSocket RPC connection to a Milady gateway with mDNS/Bonjour discovery of loca
 
 ---
 
-## @miladyai/capacitor-swabble
+## @elizaos/capacitor-swabble
 
 Continuous background wake-word detection. Uses the native Speech framework on iOS, `SpeechRecognizer` on Android, or Whisper.cpp on desktop. Falls back to the Web Speech API in browser environments.
 
@@ -97,7 +97,7 @@ Continuous background wake-word detection. Uses the native Speech framework on i
 
 ---
 
-## @miladyai/capacitor-talkmode
+## @elizaos/capacitor-talkmode
 
 Full speech pipeline integrating STT, chat relay to the agent, and TTS output. STT uses native recognition or Whisper; TTS uses ElevenLabs streaming or native speech synthesis. The pipeline is stateful — only one phase is active at a time.
 
@@ -128,7 +128,7 @@ Full speech pipeline integrating STT, chat relay to the agent, and TTS output. S
 
 ---
 
-## @miladyai/capacitor-camera
+## @elizaos/capacitor-camera
 
 Camera enumeration, live preview rendering into an HTML element, photo capture, video recording, and manual controls. On web, falls back to `getUserMedia`.
 
@@ -162,7 +162,7 @@ Camera enumeration, live preview rendering into an HTML element, photo capture, 
 
 ---
 
-## @miladyai/capacitor-location
+## @elizaos/capacitor-location
 
 GPS and network-based geolocation with configurable accuracy, position watching, and background location support on iOS and Android.
 
@@ -185,7 +185,7 @@ GPS and network-based geolocation with configurable accuracy, position watching,
 
 ---
 
-## @miladyai/capacitor-screencapture
+## @elizaos/capacitor-screencapture
 
 Screenshots and screen recording with pause/resume support. On web, falls back to `getDisplayMedia` for screen recording.
 
@@ -212,7 +212,7 @@ Screenshots and screen recording with pause/resume support. On web, falls back t
 
 ---
 
-## @miladyai/capacitor-canvas
+## @elizaos/capacitor-canvas
 
 Drawing primitives, layer management, embedded web view control, JavaScript evaluation, A2UI directive injection, and `milady://` deep link interception. The canvas layer renders natively on iOS and Android and sits above the Capacitor web view.
 
@@ -270,7 +270,7 @@ Drawing primitives, layer management, embedded web view control, JavaScript eval
 
 ---
 
-## @miladyai/capacitor-agent
+## @elizaos/capacitor-agent
 
 Agent lifecycle management. Communicates with the Milady agent process via IPC on Electrobun and via HTTP on iOS, Android, and web.
 
@@ -295,7 +295,7 @@ Agent lifecycle management. Communicates with the Milady agent process via IPC o
 
 ---
 
-## @miladyai/capacitor-desktop
+## @elizaos/capacitor-desktop
 
 Electrobun-only plugin for desktop integration. All methods are no-ops on iOS and Android. Check `isFeatureAvailable("desktop")` before calling any method.
 

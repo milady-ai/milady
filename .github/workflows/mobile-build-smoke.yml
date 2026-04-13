@@ -5,8 +5,7 @@ on:
     branches: [main, develop]
     paths:
       - "apps/app/**"
-      - "packages/ui/**"
-      - "packages/app-core/**"
+      - "eliza/packages/app-core/**"
       - ".github/workflows/mobile-build-smoke.yml"
   workflow_dispatch:
 
@@ -76,7 +75,7 @@ jobs:
         run: bun scripts/build.mjs
 
       - name: Prepare CocoaPods trunk repo
-        run: bash scripts/prepare-ios-cocoapods.sh
+        run: bash eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh
         env:
           LANG: en_US.UTF-8
 

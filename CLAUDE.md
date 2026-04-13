@@ -52,17 +52,16 @@ packages/
       connectors/       Connector integration code
       services/         Business logic
   agent/                Upstream elizaOS agent (core plugins, auto-enable maps)
-  plugin-wechat/        WeChat connector plugin (@miladyai/plugin-wechat)
+  plugin-wechat/        WeChat connector plugin (@elizaos/plugin-wechat)
   ui/                   Shared UI component library
   shared/               Shared utilities
-  vrm-utils/            VRM avatar utilities
 apps/
   app/                  Main web + desktop UI (Vite + React)
     electrobun/         Electrobun desktop shell
   homepage/             Marketing site
 scripts/
   dev-ui.mjs            Dev orchestrator (API + Vite)
-  run-node.mjs          CLI runner (spawns entry.js with NODE_PATH)
+  eliza/packages/app-core/scripts/run-node.mjs   CLI runner (spawns entry.js with NODE_PATH)
   run-repo-setup.mjs    Postinstall sequencer
   setup-upstreams.mjs   Initialize repo-local upstreams and link @elizaos packages
   patch-deps.mjs        Post-install patches for broken upstream exports
@@ -70,13 +69,13 @@ scripts/
 
 ## Default Agent Knowledge
 
-Treat the shipped skills in `skills/` as the default knowledge base for code agents working in this repo. The canonical entry points are:
+Treat bundled skills from `@elizaos/skills` as the default knowledge base for code agents working in this repo. The canonical entry points are:
 
-- `skills/milady/SKILL.md` — what Milady is, where to edit it, and how local, remote, and cloud paths fit together
-- `skills/elizaos/SKILL.md` — elizaOS runtime concepts, plugin abstractions, and extension points
-- `skills/eliza-cloud/SKILL.md` — Eliza Cloud as a managed backend, app platform, deployment target, and monetization surface
+- `eliza/packages/skills/skills/eliza-app-development/SKILL.md` — this repo as an elizaOS app (Milady is this checkout’s product name), layout, and how local, remote, and cloud paths fit together
+- `eliza/packages/skills/skills/elizaos/SKILL.md` — elizaOS runtime concepts, plugin abstractions, and extension points
+- `eliza/packages/skills/skills/eliza-cloud/SKILL.md` — Eliza Cloud as a managed backend, app platform, deployment target, and monetization surface
 
-`scripts/ensure-skills.mjs` seeds these shipped skills into the managed skills store on first run.
+`scripts/ensure-skills.mjs` seeds bundled skills from `@elizaos/skills` into the managed skills store on first run.
 Separately, `packages/agent/src/runtime/default-knowledge.ts` seeds bundled runtime knowledge items for Milady itself, including the baseline Eliza Cloud app/backend guidance.
 
 For source checkouts and app repos, the default agent workspace now follows the runtime `cwd` when that directory looks like a real project workspace (`package.json`, `AGENTS.md`, `skills/`, etc.). That makes the repo's own `AGENTS.md` and `skills/` available to the runtime by default, which is what lets Milady reason about and patch the checkout it is running in. Packaged installs still fall back to the state-dir workspace, and `MILADY_WORKSPACE_DIR` / `ELIZA_WORKSPACE_DIR` always win when set explicitly.
@@ -90,7 +89,7 @@ Cloud monetization is a first-class product constraint. App creators can earn th
 ### NODE_PATH (do not remove)
 Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need NODE_PATH set to the repo root's `node_modules`. This is set in three places — all three are required:
 1. `packages/agent/src/runtime/eliza.ts` — module-level, before dynamic imports
-2. `scripts/run-node.mjs` — child process env
+2. `eliza/packages/app-core/scripts/run-node.mjs` — child process env
 3. `apps/app/electrobun/src/native/agent.ts` — Electrobun main process
 
 See `docs/plugin-resolution-and-node-path.md`.
@@ -124,9 +123,9 @@ In `packages/agent/src/api/chat-routes.ts`, **`HandlerCallback`** text from acti
 
 All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bun run setup:upstreams` links packages from repo-local `./eliza` and `./plugins` so changes are picked up immediately. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to use only npm-published versions.
 
-**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `plugins/plugin-agent-orchestrator` submodule via `workspace:*`. That submodule tracks upstream `alpha`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
+**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `eliza/plugins/plugin-agent-orchestrator` submodule (nested under the `eliza/` submodule) via `workspace:*`. That submodule tracks upstream `alpha`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
 
-All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `plugins/` so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
+All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
 
 ## Ports
 

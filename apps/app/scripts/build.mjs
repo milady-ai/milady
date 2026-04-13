@@ -5,14 +5,24 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { resolveMiladyAssetBaseUrls } from "../../../scripts/lib/asset-cdn.mjs";
+import { resolveMiladyAssetBaseUrls } from "../../../eliza/packages/app-core/scripts/lib/asset-cdn.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appDir = path.resolve(__dirname, "..");
 const repoRoot = path.resolve(appDir, "..", "..");
-const repoSetupScript = path.join(repoRoot, "scripts", "run-repo-setup.mjs");
+const repoSetupScript = path.join(
+  repoRoot,
+  "eliza",
+  "packages",
+  "app-core",
+  "scripts",
+  "run-repo-setup.mjs",
+);
 const pruneCdnAssetsScript = path.join(
   repoRoot,
+  "eliza",
+  "packages",
+  "app-core",
   "scripts",
   "prune-cdn-local-assets.mjs",
 );

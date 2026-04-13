@@ -207,11 +207,11 @@ const CONNECTOR_PLUGINS = {
   nostr:       "@elizaos/plugin-nostr",
   blooio:      "@elizaos/plugin-blooio",
   twitch:      "@elizaos/plugin-twitch",
-  wechat:      "@miladyai/plugin-wechat",  // Milady-specific (added in app-core)
+  wechat:      "@elizaos/plugin-wechat",  // Milady-specific (added in app-core)
 };
 ```
 
-> **注意：** 上游 `packages/agent` 定义了所有 `@elizaos/*` 连接器。Milady 的 `packages/app-core` 扩展了此映射，添加了指向 `@miladyai/plugin-wechat` 的 `wechat` 条目。
+> **注意：** 上游 `packages/agent` 定义了所有 `@elizaos/*` 连接器。Milady 的 `packages/app-core` 扩展了此映射，添加了指向 `@elizaos/plugin-wechat` 的 `wechat` 条目。
 
 **功能标志** — `milady.json` 的 `features` 部分可自动启用功能插件。功能可以通过 `features.<name>: true` 或 `features.<name>.enabled: true` 启用：
 

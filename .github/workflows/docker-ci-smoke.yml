@@ -50,15 +50,15 @@ jobs:
             bun-${{ runner.os }}-
 
       - name: Run Docker CI smoke path
-        run: bash scripts/docker-ci-smoke.sh --tag gha-${{ github.run_id }}
+        run: bash eliza/packages/app-core/scripts/docker-ci-smoke.sh --tag gha-${{ github.run_id }}
 
       - name: Summarize Docker smoke result
         if: always()
         run: |
           echo "## Docker CI Smoke" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Production Dockerfile: \`Dockerfile.ci\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Script: \`scripts/docker-ci-smoke.sh\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Production Dockerfile: \`eliza/packages/app-core/deploy/Dockerfile.ci\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Script: \`eliza/packages/app-core/scripts/docker-ci-smoke.sh\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Trigger: \`${{ github.event_name }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Ref: \`${{ github.ref }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Smoke endpoints: \`/api/health\` then fallback \`/api/status\`" >> "$GITHUB_STEP_SUMMARY"

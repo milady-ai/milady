@@ -127,7 +127,7 @@ jobs:
           python-version: "3.12"
 
       - name: Update version in source
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           PYPI_VERSION="${{ needs.prepare.outputs.pypi_version }}"
           sed -i "s/^version = .*/version = \"$PYPI_VERSION\"/" pyproject.toml
@@ -137,7 +137,7 @@ jobs:
           grep "__version__" milady/__init__.py
 
       - name: Build package
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install build
           python -m build
@@ -145,13 +145,13 @@ jobs:
           ls -lh dist/
 
       - name: Validate package
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install twine
           twine check dist/*
 
       - name: Test package installs
-        working-directory: packaging/pypi
+        working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install dist/*.whl
           python -c "import milady; print(f'milady {milady.__version__} loaded OK')"
@@ -164,7 +164,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: packaging/pypi/dist/
+          packages-dir: eliza/packages/app-core/packaging/pypi/dist/
           # Falls back to API token when OIDC trusted publishing is not
           # configured (e.g. first publish before the project exists on PyPI).
           password: ${{ secrets.PYPI_API_TOKEN }}
@@ -186,7 +186,7 @@ jobs:
       - name: Prepare snapcraft.yaml
         run: |
           mkdir -p snap
-          cp packaging/snap/snapcraft.yaml snap/snapcraft.yaml
+          cp eliza/packages/app-core/packaging/snap/snapcraft.yaml snap/snapcraft.yaml
           VERSION="${{ needs.prepare.outputs.version }}"
           sed -i "s/^version: .*/version: '${VERSION}'/" snap/snapcraft.yaml
           echo "Snap version: $VERSION"
@@ -239,7 +239,7 @@ jobs:
       - name: Prepare debian packaging
         run: |
           # Copy debian directory into project root
-          cp -r packaging/debian .
+          cp -r eliza/packages/app-core/packaging/debian .
 
           # Update changelog version
           DEB_VERSION="${{ needs.prepare.outputs.deb_version }}"
@@ -338,13 +338,13 @@ jobs:
           flatpak install -y --user flathub org.freedesktop.Sdk//24.08
 
       - name: Build Flatpak
-        working-directory: packaging/flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
           flatpak-builder --repo=repo --force-clean build-dir ai.milady.Milady.yml
           flatpak build-bundle repo milady.flatpak ai.milady.Milady
 
       - name: Test Flatpak
-        working-directory: packaging/flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
           flatpak --user install -y milady.flatpak
           flatpak run ai.milady.Milady --version || echo "Version check completed"
@@ -353,7 +353,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-bundle
-          path: packaging/flatpak/milady.flatpak
+          path: eliza/packages/app-core/packaging/flatpak/milady.flatpak
           retention-days: 90
 
       - name: Attach Flatpak to GitHub Release
@@ -365,7 +365,7 @@ jobs:
             echo "No GitHub release found for $TAG; skipping Flatpak attachment."
             exit 0
           fi
-          gh release upload "$TAG" packaging/flatpak/milady.flatpak --clobber
+          gh release upload "$TAG" eliza/packages/app-core/packaging/flatpak/milady.flatpak --clobber
 
   # ── Summary ────────────────────────────────────────────────────────────
   publish-summary:

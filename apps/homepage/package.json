@@ -12,9 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@miladyai/shared": "workspace:*",
-    "@miladyai/ui": "workspace:*",
-    "@miladyai/vrm-utils": "workspace:*",
+    "@elizaos/shared": "workspace:*",
+    "@elizaos/app-core": "workspace:*",
     "@pixiv/three-vrm": "^3.5.0",
     "@react-three/fiber": "^9.5.0",
     "framer-motion": "^12.34.4",

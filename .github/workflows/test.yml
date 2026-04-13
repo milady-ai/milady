@@ -41,9 +41,9 @@ jobs:
         run: bun run test:regression-matrix:pr
 
   unit-tests:
-    name: Unit Tests
+    name: Real tests (Vitest, no mocks)
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,15 +75,14 @@ jobs:
             npx --yes @bufbuild/buf@1.67.0 generate
           fi
 
-      - name: Run unit tests with coverage
-        run: bun run test:coverage
+      - name: Build
+        run: bun run build
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 14
+      - name: Run real integration tests (live/real suite)
+        run: bun run test:ci:real
+
+      - name: Run startup script drift guard
+        run: bun run test:startup:contract
 
   db-check:
     name: Database Security Check
@@ -121,40 +120,6 @@ jobs:
 
       - name: Run database security and query-guard tests
         run: bun run db:check
-
-  e2e-tests:
-    name: Integration + E2E Tests (Vitest)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # Published-only CI restores required non-eliza submodules during setup.
-          submodules: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup workspace dependencies
-        uses: ./.github/actions/setup-bun-workspace
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-          install-command: bun install --frozen-lockfile --ignore-scripts
-
-      - name: Build
-        run: bun run build
-
-      - name: Run integration tests
-        run: bun run test:integration
-
-      - name: Run E2E tests
-        run: bun run test:e2e
-
-      - name: Run startup E2E contract guard
-        run: bun run test:startup:contract
 
   website-blocker-cross-platform:
     name: Website Blocker Cross-Platform (${{ matrix.os }})
@@ -377,7 +342,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('apps/app/android/**/*.gradle*', 'apps/app/android/**/gradle-wrapper.properties', 'apps/app/plugins/websiteblocker/android/**/*.kt') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('apps/app/android/**/*.gradle*', 'apps/app/android/**/gradle-wrapper.properties', 'eliza/packages/native-plugins/websiteblocker/android/**/*.kt') }}
           restore-keys: gradle-${{ runner.os }}-
 
       - name: Initialize tracked workspace submodules
@@ -580,7 +545,7 @@ jobs:
   test-status:
     name: All Tests Passed
     if: always()
-    needs: [regression-matrix, unit-tests, db-check, e2e-tests, website-blocker-cross-platform, website-blocker-startup-smoke, website-blocker-desktop-smoke, website-blocker-mobile-android, website-blocker-mobile-ios, desktop-contract, cloud-live-e2e, validation-e2e]
+    needs: [regression-matrix, unit-tests, db-check, website-blocker-cross-platform, website-blocker-startup-smoke, website-blocker-desktop-smoke, website-blocker-mobile-android, website-blocker-mobile-ios, desktop-contract, cloud-live-e2e, validation-e2e]
     runs-on: ubuntu-24.04
     steps:
       - name: Check test results
@@ -592,7 +557,6 @@ jobs:
           echo "regression-matrix:  ${{ needs.regression-matrix.result }}"
           echo "unit-tests:         ${{ needs.unit-tests.result }}"
           echo "db-check:           ${{ needs.db-check.result }}"
-          echo "e2e-tests:          ${{ needs.e2e-tests.result }}"
           echo "website-blocker-cross-platform: ${{ needs.website-blocker-cross-platform.result }}"
           echo "website-blocker-startup-smoke:  ${{ needs.website-blocker-startup-smoke.result }}"
           echo "website-blocker-desktop-smoke:  ${{ needs.website-blocker-desktop-smoke.result }}"
@@ -607,7 +571,6 @@ jobs:
             "regression-matrix:${{ needs.regression-matrix.result }}" \
             "unit-tests:${{ needs.unit-tests.result }}" \
             "db-check:${{ needs.db-check.result }}" \
-            "e2e-tests:${{ needs.e2e-tests.result }}" \
             "website-blocker-cross-platform:${{ needs.website-blocker-cross-platform.result }}" \
             "website-blocker-startup-smoke:${{ needs.website-blocker-startup-smoke.result }}" \
             "website-blocker-desktop-smoke:${{ needs.website-blocker-desktop-smoke.result }}" \

@@ -78,7 +78,7 @@ jobs:
           install-command: bun install --frozen-lockfile --ignore-scripts
 
       - name: Run onboarding voice regression tests
-        run: bunx vitest run packages/app-core/src/components/onboarding/identity-preview-tts.test.ts
+        run: bunx vitest run eliza/packages/app-core/src/components/onboarding/identity-preview-tts.test.ts
         env:
           NODE_NO_WARNINGS: "1"
 

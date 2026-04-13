@@ -4,7 +4,7 @@ sidebarTitle: Overview
 description: Milady's plugin system provides modular capabilities — model providers, platform connectors, DeFi integrations, and custom features.
 ---
 
-Plugins are the primary extension mechanism for Milady. Every capability beyond the core runtime — from LLM providers to blockchain interactions — is delivered as a plugin.
+Plugins are the primary extension mechanism for Eliza. Every capability beyond the core runtime — from LLM providers to blockchain interactions — is delivered as a plugin.
 
 ## What is a Plugin?
 

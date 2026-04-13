@@ -7,7 +7,7 @@ This doc explains **why** dynamic plugin imports fail without `NODE_PATH` and **
 The runtime (`src/runtime/eliza.ts`) loads plugins via dynamic import:
 
 ```ts
-import("@elizaos/plugin-coding-agent")
+import("@elizaos/plugin-sql")
 ```
 
 Node resolves this by walking up from the **importing file's directory**. When eliza runs from different locations, resolution can fail:
@@ -40,7 +40,7 @@ if (existsSync(_rootModules)) {
 
 **Note on `Module._initPaths()`:** It is a private Node.js API but widely used for exactly this purpose (runtime NODE_PATH mutation). Node caches resolution paths at startup; after we set `process.env.NODE_PATH` we must call it so the next `import()` sees the new paths.
 
-### 2. `scripts/run-node.mjs` (child process env)
+### 2. `eliza/packages/app-core/scripts/run-node.mjs` (child process env)
 
 ```js
 const rootModules = path.join(cwd, "node_modules");
@@ -68,11 +68,11 @@ In the packaged `.app`, `eliza.js` lives at `app.asar.unpacked/milady-dist/eliza
 
 ## Bun and published package exports
 
-Some `@elizaos` packages (e.g. `@elizaos/plugin-coding-agent`) publish a `package.json` with `exports["."].bun = "./src/index.ts"`. **Why they do that:** In the upstream monorepo, Bun can run TypeScript directly, so pointing to `src/` avoids a build step. The published npm tarball, however, only includes `dist/` — `src/` is not shipped. When we install from npm, the `"bun"` condition points to a path that does not exist.
+Some `@elizaos` packages (e.g. `@elizaos/plugin-sql`) publish a `package.json` with `exports["."].bun = "./src/index.ts"`. **Why they do that:** In the upstream monorepo, Bun can run TypeScript directly, so pointing to `src/` avoids a build step. The published npm tarball, however, only includes `dist/` — `src/` is not shipped. When we install from npm, the `"bun"` condition points to a path that does not exist.
 
 **What happens:** Bun's resolver prefers the `"bun"` export condition. It tries to load `./src/index.ts`, the file is missing, and we get "Cannot find module … from …/src/runtime/eliza.ts" even though the package is in `node_modules`. Bun does not fall back to the `"import"` condition when the `"bun"` target is missing.
 
-**Our fix:** `scripts/patch-deps.mjs` runs after `bun install` via `scripts/run-repo-setup.mjs` (used by `postinstall` and the app build bootstrap). It finds `@elizaos/plugin-coding-agent` (and any other package we add) and, if `exports["."].bun` points to `./src/index.ts` and that file does not exist, removes the `"bun"` and `"default"` conditions that reference `src/`. After the patch, only `"import"` (and similar) remain, so Bun resolves to `./dist/index.js`. **Why we only patch when the file is missing:** In a development workspace where the plugin is checked out with `src/` present, we leave the package unchanged so upstream workflows still work.
+**Our fix:** `scripts/patch-deps.mjs` runs after `bun install` via `scripts/run-repo-setup.mjs` (used by `postinstall` and the app build bootstrap). It finds affected `@elizaos` packages (including any we add to the allowlist) and, if `exports["."].bun` points to `./src/index.ts` and that file does not exist, removes the `"bun"` and `"default"` conditions that reference `src/`. After the patch, only `"import"` (and similar) remain, so Bun resolves to `./dist/index.js`. **Why we only patch when the file is missing:** In a development workspace where the plugin is checked out with `src/` present, we leave the package unchanged so upstream workflows still work.
 
 ## Pinned: `@elizaos/plugin-openrouter`
 

@@ -56,7 +56,7 @@ Electrobun may log **`[WebGPU Browser] macOS …`** using **`os.release()`** (Da
 
 ### Battery and energy use (macOS)
 
-**Product framing:** Milady targets **strong visuals when you are engaged** and **quiet hardware when you are not**—especially on battery—without pretending every workload beats a full IDE shell. See [Roadmap — Principles: energy and experience (desktop)](../ROADMAP.md#principles-energy-and-experience-desktop).
+**Product framing:** Milady targets **strong visuals when you are engaged** and **quiet hardware when you are not**—especially on battery—without pretending every workload beats a full IDE shell. See [Roadmap — Principles: energy and experience (desktop)](../roadmap.md#principles-energy-and-experience-desktop).
 
 **What drives usage**
 

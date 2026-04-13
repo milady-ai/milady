@@ -1,0 +1,36 @@
+---
+title: "CLI overview"
+description: "The milady command-line interface — runtime control, configuration, and maintenance."
+---
+
+# CLI overview
+
+The `milady` binary (also published as `milady-ai` / `miladyai`) is the primary way to start the API server, run setup wizards, and manage local configuration from a terminal.
+
+## Requirements
+
+- **Node.js 22+** or **Bun** as documented in [Installation](/installation).
+- Config and state live under the Milady state directory (by default `~/.milady/` when `ELIZA_NAMESPACE=milady`).
+
+## Command map
+
+| Command | Purpose |
+|---------|---------|
+| [`milady start`](/cli/start) | Run the API server (embedded runtime) |
+| [`milady setup`](/cli/setup) | First-time wizard (keys, basics) |
+| [`milady configure`](/cli/configure) | Interactive configuration |
+| [`milady config`](/cli/config) | Print or validate config |
+| [`milady dashboard`](/cli/dashboard) | Open the web dashboard |
+| [`milady models`](/cli/models) | Model / provider helpers |
+| [`milady plugins`](/cli/plugins) | Plugin listing and management |
+| [`milady update`](/cli/update) | Update tooling |
+| [`milady doctor`](/cli/doctor) | Health and environment checks |
+| [`milady db`](/cli/db) | Database utilities |
+
+## Help
+
+Run `milady --help` or `milady <command> --help` for the exact flags in your build. Implementation lives under `eliza/packages/app-core/src/cli/` in this repository.
+
+## Environment
+
+See [CLI environment](/cli/environment) for variables that affect bind addresses, ports, and state paths.

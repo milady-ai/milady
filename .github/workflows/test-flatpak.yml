@@ -3,7 +3,7 @@ name: Test Flatpak Build
 on:
   pull_request:
     paths:
-      - 'packaging/flatpak/**'
+      - 'eliza/packages/app-core/packaging/flatpak/**'
       - '.github/workflows/test-flatpak.yml'
   workflow_dispatch:
 
@@ -28,26 +28,26 @@ jobs:
           flatpak install -y --user flathub org.freedesktop.Sdk//24.08
 
       - name: Validate AppStream metadata
-        working-directory: packaging/flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
           appstream-util validate-relax ai.milady.Milady.metainfo.xml
 
       - name: Validate desktop entry
         run: |
-          desktop-file-validate packaging/flatpak/ai.milady.Milady.desktop
+          desktop-file-validate eliza/packages/app-core/packaging/flatpak/ai.milady.Milady.desktop
 
       - name: Build Flatpak
-        working-directory: packaging/flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
           flatpak-builder --repo=repo --force-clean build-dir ai.milady.Milady.yml
 
       - name: Create bundle
-        working-directory: packaging/flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
           flatpak build-bundle repo milady.flatpak ai.milady.Milady
 
       - name: Install and test
-        working-directory: packaging/flatpak
+        working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
           flatpak --user install -y milady.flatpak
           flatpak run ai.milady.Milady --version || echo "Version check completed"
@@ -57,5 +57,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-test-bundle
-          path: packaging/flatpak/milady.flatpak
+          path: eliza/packages/app-core/packaging/flatpak/milady.flatpak
           retention-days: 7

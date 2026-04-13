@@ -50,6 +50,10 @@
               "guides/developer-playbook",
               "guides/developer-diagnostics-and-workspace",
               "guides/onboarding-ui-flow",
+              "guides/beginners-user-guide",
+              "guides/onboarding-and-support",
+              "guides/cloud-provider-routing",
+              "guides/wallet-basics",
               "guides/electrobun-mac-window-chrome",
               "guides/first-extension-walkthrough",
               "guides/autonomous-mode",
@@ -94,8 +98,23 @@
             "pages": ["deployment", "self-updates", "guides/cloud"]
           },
           {
+            "group": "Repository & operations",
+            "pages": [
+              "roadmap",
+              "security",
+              "build-and-release",
+              "plugin-resolution-and-node-path",
+              "electrobun-startup",
+              "windows-signing",
+              "eliza-cloud-deployment",
+              "eliza-cloud-rollout",
+              "lifeops-production-runbook",
+              "apps/desktop-main-process-reset"
+            ]
+          },
+          {
             "group": "Contributing",
-            "pages": ["guides/contribution-guide"]
+            "pages": ["guides/contribution-guide", "guides/contributing"]
           }
         ]
       },

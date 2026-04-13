@@ -1,10 +1,10 @@
 ---
 title: "Plugin Development"
 sidebarTitle: "Plugin Development"
-description: "Create, test, and publish plugins for Milady/elizaOS."
+description: "Create, test, and publish plugins for Eliza/elizaOS."
 ---
 
-This guide walks you through creating, testing, and publishing plugins for Milady/elizaOS.
+This guide walks you through creating, testing, and publishing plugins for Eliza/elizaOS.
 
 ## Table of Contents
 

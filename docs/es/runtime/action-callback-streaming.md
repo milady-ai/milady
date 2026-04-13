@@ -94,7 +94,7 @@ Sin campos adicionales, sin APIs específicas de Milady, sin adjuntos al runtime
 </div>
 
 - **Implementación:** `packages/agent/src/api/chat-routes.ts` — `replaceCallbackText`, `preCallbackText`.
-- **Helper de ejemplo:** `packages/plugin-music-player/src/utils/progressiveMessage.ts`.
+- **Helper de ejemplo:** `plugins/plugin-music-player/src/utils/progressiveMessage.ts`.
 - **Transmisión en UI:** [Panel — Chat](/es/dashboard/chat) (SSE / indicador de escritura).
 - **Registro de cambios:** [Registro de cambios](/es/changelog) — busca "action callback" o la fecha de publicación.
 
@@ -109,4 +109,4 @@ Posibles seguimientos (no enviados como requisitos aquí):
 - **Metadatos** opcionales en el contenido del callback para distinguir "adición" vs "reemplazo" para plugins exóticos (solo si aparece un caso de uso real).
 - **Persistencia** de estados intermedios (hoy el texto del turno persistido sigue las reglas normales de persistencia del chat).
 
-Consulta `docs/ROADMAP.md` en el repositorio para la dirección general del producto.
+Consulta `docs/roadmap.md` en el repositorio para la dirección general del producto.

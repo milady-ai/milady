@@ -39,21 +39,21 @@ Write the framework name as **elizaOS** in prose, comments, user-facing strings,
 - **Build output:** `dist/` (via `tsdown`)
 - **Entry points:** `packages/app-core/src/entry.ts` (CLI), `packages/app-core/src/index.ts` (library), `packages/agent/src/runtime/eliza.ts` (elizaOS runtime)
 - **Apps:** `apps/app/` (Capacitor mobile/desktop, includes React UI). The browser relay extension is not part of this release checkout.
-- **Internal packages:** `packages/ui/`, `packages/shared/`, `packages/vrm-utils/`, `packages/plugin-wechat/`
+- **Internal packages:** `packages/ui/`, `packages/shared/`, `packages/plugin-wechat/`
 - **Deployment:** `deploy/` (Docker configs)
 - **Scripts:** `scripts/` (build, dev, release tooling)
 - **Tests:** `test/` (setup, helpers, mocks, e2e scripts)
-- **Skills:** `skills/` (cached skill catalog)
+- **Bundled skills package:** `eliza/packages/skills/` (`@elizaos/skills`; managed copy under state dir)
 
 ## Default Agent Knowledge
 
-Treat the shipped skills in `skills/` as the default knowledge base for code agents working in this repo. The canonical entry points are:
+Treat bundled skills from `@elizaos/skills` as the default knowledge base for code agents working in this repo. The canonical entry points are:
 
-- `skills/milady/SKILL.md` — what Milady is, where to edit it, and how local, remote, and cloud paths fit together
-- `skills/elizaos/SKILL.md` — elizaOS runtime concepts, plugin abstractions, and extension points
-- `skills/eliza-cloud/SKILL.md` — Eliza Cloud as a managed backend, app platform, deployment target, and monetization surface
+- `eliza/packages/skills/skills/eliza-app-development/SKILL.md` — this repo as an elizaOS app (Milady is this checkout’s product name), layout, and how local, remote, and cloud paths fit together
+- `eliza/packages/skills/skills/elizaos/SKILL.md` — elizaOS runtime concepts, plugin abstractions, and extension points
+- `eliza/packages/skills/skills/eliza-cloud/SKILL.md` — Eliza Cloud as a managed backend, app platform, deployment target, and monetization surface
 
-`scripts/ensure-skills.mjs` seeds these shipped skills into the managed skills store on first run.
+`scripts/ensure-skills.mjs` seeds bundled skills from `@elizaos/skills` into the managed skills store on first run.
 Separately, `packages/agent/src/runtime/default-knowledge.ts` seeds bundled runtime knowledge items for Milady itself, including the baseline Eliza Cloud app/backend guidance.
 
 For source checkouts and app repos, the default agent workspace now follows the runtime `cwd` when that directory looks like a real project workspace (`package.json`, `AGENTS.md`, `skills/`, etc.). That makes the repo's own `AGENTS.md` and `skills/` available to the runtime by default, which is what lets Milady reason about and patch the checkout it is running in. Packaged installs still fall back to the state-dir workspace, and `MILADY_WORKSPACE_DIR` / `ELIZA_WORKSPACE_DIR` always win when set explicitly.
@@ -86,7 +86,7 @@ bun run setup:upstreams   # initializes repo-local ./eliza and links local @eliz
 - Add brief code comments for tricky or non-obvious logic.
 - Aim to keep files under ~500 LOC; split/refactor when it improves clarity or testability.
 - **Do not remove exception-handling guards** in `apps/app/electrobun/src/native/agent.ts` as "excess" or during deslop/cleanup. The try/catch and `.catch()` there keep the desktop app usable when the runtime fails to load (API server stays up, UI can show error). See `docs/electrobun-startup.md`.
-- **Do not remove NODE_PATH setup code** in `packages/agent/src/runtime/eliza.ts`, `scripts/run-node.mjs`, or `apps/app/electrobun/src/native/agent.ts`. Without it, dynamic plugin imports fail with "Cannot find module". See `docs/plugin-resolution-and-node-path.md`.
+- **Do not remove NODE_PATH setup code** in `packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, or `apps/app/electrobun/src/native/agent.ts`. Without it, dynamic plugin imports fail with "Cannot find module". See `docs/plugin-resolution-and-node-path.md`.
 - **Do not remove the Bun exports patch** in `scripts/patch-deps.mjs` (patchBunExports). It fixes "Cannot find module" for plugins whose published package.json points `exports["."].bun` at missing `./src/index.ts`. See "Bun and published package exports" in `docs/plugin-resolution-and-node-path.md`.
 - Naming: use **Milady** for product/app/docs headings; use `milady` for CLI command, package/binary, paths, and config keys.
 
@@ -97,7 +97,7 @@ bun run setup:upstreams   # initializes repo-local ./eliza and links local @eliz
 Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need `NODE_PATH` set to the repo root's `node_modules`. This is set in three places — all three are required:
 
 1. `packages/agent/src/runtime/eliza.ts` — module-level, before dynamic imports
-2. `scripts/run-node.mjs` — child process env
+2. `eliza/packages/app-core/scripts/run-node.mjs` — child process env
 3. `apps/app/electrobun/src/native/agent.ts` — Electrobun main process
 
 See `docs/plugin-resolution-and-node-path.md`.
@@ -126,9 +126,9 @@ The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the deskt
 
 All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bun run setup:upstreams` links packages from repo-local `./eliza` and `./plugins` so changes are picked up immediately. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to use only npm-published versions.
 
-**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `plugins/plugin-agent-orchestrator` submodule via `workspace:*`. That submodule tracks upstream `alpha`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
+**`@elizaos/plugin-agent-orchestrator`:** Milady currently resolves this plugin from the repo-local `eliza/plugins/plugin-agent-orchestrator` submodule (nested under the `eliza/` submodule) via `workspace:*`. That submodule tracks upstream `alpha`, so updating the submodule updates the orchestrator used in local development checkouts. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to force npm-published packages instead.
 
-All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `plugins/` so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
+All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
 
 ## Ports
 

@@ -21,7 +21,7 @@ You are the Milady code reviewer. You enforce project invariants, security hygie
 
 1. **NODE_PATH** present in all three sites:
    - `packages/agent/src/runtime/eliza.ts`
-   - `scripts/run-node.mjs`
+   - `eliza/packages/app-core/scripts/run-node.mjs`
    - `apps/app/electrobun/src/native/agent.ts`
 2. **`scripts/patch-deps.mjs`** bun-exports patch intact.
 3. **Electrobun startup try/catch guards** in `apps/app/electrobun/src/native/agent.ts`.
@@ -41,7 +41,7 @@ You are the Milady code reviewer. You enforce project invariants, security hygie
 - **No secrets** in code, tests, or commits. Scan diff.
 - **Minimal deps** — new dependency must be directly imported in `src/`.
 - **Commit messages**: concise, action-oriented (e.g., `fix telegram reconnect on rate limit`). No co-author lines.
-- **UI reuse**: primitives from `@miladyai/ui` (`packages/ui/`), feature components from `packages/app-core/src/components/`. Don't hand-roll buttons/inputs/dialogs/popovers when `@miladyai/ui` already exports them. `apps/app/src/` is a thin Vite shell — new UI code does NOT go there.
+- **UI reuse**: primitives from `@elizaos/app-core` (`packages/ui/`), feature components from `packages/app-core/src/components/`. Don't hand-roll buttons/inputs/dialogs/popovers when `@elizaos/app-core` already exports them. `apps/app/src/` is a thin Vite shell — new UI code does NOT go there.
 
 ## Security review focus
 

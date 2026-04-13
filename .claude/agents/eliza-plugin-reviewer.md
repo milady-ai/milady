@@ -27,7 +27,7 @@ You are reviewing plugin integration in the milady repo. This repo wraps elizaOS
 
 ### 4. NODE_PATH invariant (critical)
 NODE_PATH must be set in exactly 3 files. Verify all 3 exist and point to repo root `node_modules`:
-1. `scripts/run-node.mjs` (~line 18-22)
+1. `eliza/packages/app-core/scripts/run-node.mjs` (~line 18-22)
 2. `packages/agent/src/runtime/eliza.ts` (~line 146-170)
 3. `apps/app/electrobun/src/native/agent.ts` (~line 841-879)
 
@@ -37,7 +37,7 @@ NODE_PATH must be set in exactly 3 files. Verify all 3 exist and point to repo r
 
 ### 6. Test coverage
 - Verify co-located `__tests__/` or `*.test.ts` exists for the plugin
-- Check if native module stubs are needed in `vitest.unit.config.ts` (like the existing stubs for `plugin-agent-orchestrator` and `plugin-coding-agent`)
+- Check if native module stubs are needed in `vitest.unit.config.ts` (like the existing stubs for `plugin-agent-orchestrator`)
 
 ## Output format
 Report findings as:

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["@elizaos/core#build", "^build"],
+      "env": ["LOG_LEVEL"],
+      "outputs": ["dist/**"]
+    },
+    "@elizaos/core#build": {
+      "dependsOn": [],
+      "env": ["LOG_LEVEL"],
+      "outputs": ["dist/**"],
+      "inputs": ["src/**", "build.ts", "tsconfig.declarations.json"]
+    },
+    "@elizaos/rust#build": {
+      "dependsOn": [],
+      "outputs": ["pkg/**", "target/release/**"],
+      "inputs": ["src/**", "Cargo.toml", "build.sh"]
+    },
+    "@elizaos/python#build": {
+      "dependsOn": [],
+      "outputs": ["elizaos.egg-info/**"],
+      "inputs": ["elizaos/**", "pyproject.toml"],
+      "cache": false
+    },
+    "@elizaos/client#build": {
+      "dependsOn": ["^build"],
+      "env": ["LOG_LEVEL"],
+      "outputs": ["dist/**"]
+    },
+    "@elizaos/server#build": {
+      "dependsOn": ["@elizaos/client#build", "^build"],
+      "env": ["LOG_LEVEL"],
+      "outputs": ["dist/**"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "@elizaos/interop#lint": {
+      "outputs": []
+    },
+    "lint:check": {
+      "outputs": []
+    },
+    "lint:rust": {
+      "outputs": []
+    },
+    "typecheck": {
+      "outputs": []
+    },
+    "typecheck:rust": {
+      "outputs": []
+    },
+    "lint:python": {
+      "outputs": []
+    },
+    "typecheck:python": {
+      "outputs": []
+    },
+    "format": {
+      "outputs": []
+    },
+    "format:check": {
+      "outputs": []
+    },
+    "start": {
+      "dependsOn": ["@elizaos/core#build"],
+      "env": ["LOG_LEVEL"],
+      "persistent": true
+    },
+    "dev": {
+      "dependsOn": ["@elizaos/core#build"],
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.ts", "src/**/*.js", "__tests__/**/*", "*.test.*", "package.json", "tests/**/*", "python/tests/**/*"],
+      "cache": false
+    },
+    "@elizaos/rust#test": {
+      "outputs": [],
+      "inputs": ["src/**", "tests/**"]
+    },
+    "@elizaos/python#test": {
+      "outputs": [],
+      "inputs": ["elizaos/**", "tests/**"]
+    },
+    "migrate": {
+      "dependsOn": ["@elizaos/core#build"],
+      "cache": false
+    },
+    "migrate:generate": {
+      "dependsOn": ["@elizaos/core#build"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

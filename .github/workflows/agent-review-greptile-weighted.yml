@@ -227,7 +227,7 @@ jobs:
                - If the disagreement is about judgment (better/worse, too complex, duplication), lean toward the more cautious verdict.
                - Call out the disagreement explicitly in your final comment.
             6. **Verify coverage of Milady universal invariants** — at least one reviewer should have checked each relevant invariant for the files touched:
-               1. NODE_PATH at all three sites (`packages/agent/src/runtime/eliza.ts`, `scripts/run-node.mjs`, `apps/app/electrobun/src/native/agent.ts`)
+               1. NODE_PATH at all three sites (`eliza/packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, `apps/app/electrobun/src/native/agent.ts`)
                2. `scripts/patch-deps.mjs` preserved
                3. Electrobun startup try/catch guards in `apps/app/electrobun/src/native/agent.ts`
                4. Namespace `milady` (state dir `~/.milady/`, config `milady.json`, `MILADY_*` env precedence)
@@ -240,7 +240,7 @@ jobs:
                11. Dev observability endpoints default-on, loopback-only
                12. Access control files (`imessage/access.json`, `discord/access.json`, `telegram/access.json`) not modified
                If an invariant is relevant to the diff and NEITHER reviewer covered it, flag that as a coverage gap and verify it yourself.
-            7. **Verify UI reuse** — if the PR touches React components, confirm no hand-rolled primitives that `@miladyai/ui` (at `packages/ui/`) already exports, and no feature components that duplicate `packages/app-core/src/components/`. New UI code must not land in `apps/app/src/` (thin Vite shell).
+            7. **Verify UI reuse** — if the PR touches React components, confirm no hand-rolled primitives that `@elizaos/app-core` (at `eliza/packages/app-core/src/ui/`) already exports, and no feature components that duplicate `eliza/packages/app-core/src/components/`. New UI code must not land in `apps/app/src/` (thin Vite shell).
             8. **Produce the FINAL verdict.** Post it as a NEW comment (do not edit the preliminary one — that will be marked superseded by a later step).
 
             ## Output format (post as a new PR comment)
@@ -260,7 +260,7 @@ jobs:
             <all 12 universal invariants covered by at least one reviewer? If any gaps, list them and your own verdict on each>
 
             ## UI reuse check
-            <N/A if not a UI PR, else: `@miladyai/ui` primitives respected? `packages/app-core/src/components/` feature components respected? New UI code out of `apps/app/src/`?>
+            <N/A if not a UI PR, else: `@elizaos/app-core` primitives respected? `eliza/packages/app-core/src/components/` feature components respected? New UI code out of `apps/app/src/`?>
 
             ## Final decision
             Decision: APPROVE | REQUEST CHANGES | CLOSE

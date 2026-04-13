@@ -1,4 +1,0 @@
-dist/* usr/lib/milady/dist/
-milady.mjs usr/lib/milady/
-package.json usr/lib/milady/
-plugins.json usr/lib/milady/

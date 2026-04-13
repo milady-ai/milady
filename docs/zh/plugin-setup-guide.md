@@ -489,7 +489,7 @@ description: Milady 连接器、AI 提供者和直播推流插件的完整设置
 1. 从微信代理服务获取 API 密钥
 2. 在 milady.json 中配置 `connectors.wechat`，设置 `apiKey` 和 `proxyUrl`
 3. 启动 Milady——用微信扫描终端中显示的二维码
-**提示：** 微信使用第三方代理服务，而非官方 API。只使用您信任的代理——它能看到所有消息流量。通过 `accounts` 映射支持多账户。插件包：`@miladyai/plugin-wechat`。
+**提示：** 微信使用第三方代理服务，而非官方 API。只使用您信任的代理——它能看到所有消息流量。通过 `accounts` 映射支持多账户。插件包：`@elizaos/plugin-wechat`。
 
 <div id="github">
 

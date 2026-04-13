@@ -190,7 +190,7 @@ jobs:
           fi
 
       - name: Prepare CocoaPods trunk repo
-        run: bash scripts/prepare-ios-cocoapods.sh
+        run: bash eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh
         env:
           LANG: en_US.UTF-8
 
@@ -300,7 +300,7 @@ jobs:
         run: |
           bunx tsdown || true
           echo '{"type":"module"}' > dist/package.json
-          node --import tsx scripts/write-build-info.ts
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts
 
       - name: Build renderer
         working-directory: apps/app
