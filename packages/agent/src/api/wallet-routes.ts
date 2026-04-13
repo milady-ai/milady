@@ -1,13 +1,22 @@
 import type http from "node:http";
 import type { AgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
+import { normalizeCloudSiteUrl } from "../cloud/base-url.js";
+import { ElizaCloudClient } from "../cloud/bridge-client.js";
+import {
+  getOrCreateClientAddressKey,
+  persistCloudWalletCache,
+  provisionCloudWallets,
+} from "../cloud/cloud-wallet.js";
 import type { ElizaConfig } from "../config/config.js";
+import { isCloudWalletEnabled } from "../config/feature-flags.js";
 import {
   normalizeWalletRpcSelections,
   type WalletConfigUpdateRequest,
   type WalletRpcSelections,
 } from "../contracts/wallet.js";
 import { createIntegrationTelemetrySpan } from "../diagnostics/integration-observability.js";
+import { persistConfigEnv } from "./config-env.js";
 import type { RouteHelpers, RouteRequestMeta } from "./route-helpers.js";
 import {
   fetchEvmBalances,
@@ -22,13 +31,14 @@ import {
   type WalletChain,
   type WalletConfigStatus,
 } from "./wallet.js";
+import { resolveWalletCapabilityStatus } from "./wallet-capability.js";
 import {
   applyWalletRpcConfigUpdate,
   getStoredWalletRpcSelections,
+  resolveCloudApiKey,
   resolveWalletNetworkMode,
   resolveWalletRpcReadiness,
 } from "./wallet-rpc.js";
-import { resolveWalletCapabilityStatus } from "./wallet-capability.js";
 
 interface WalletExportRequestBody {
   confirm?: boolean;
@@ -165,6 +175,152 @@ export const DEFAULT_WALLET_ROUTE_DEPENDENCIES: WalletRouteDependencies = {
   importWallet,
   generateWalletForChain,
 };
+
+// ── Dual-wallet response shape (Phase 6, gated by ENABLE_CLOUD_WALLET) ────
+
+export type WalletSource = "local" | "cloud";
+export type WalletChainKind = "evm" | "solana";
+export type WalletProviderKind = "local" | "privy" | "steward";
+
+export interface WalletEntry {
+  source: WalletSource;
+  chain: WalletChainKind;
+  address: string;
+  provider: WalletProviderKind;
+  primary: boolean;
+}
+
+export interface WalletPrimaryMap {
+  evm: WalletSource;
+  solana: WalletSource;
+}
+
+interface CachedCloudWalletDescriptor {
+  walletAddress?: string | null;
+  walletProvider?: string | null;
+}
+
+function readCloudWalletCache(
+  config: ElizaConfig,
+): Partial<Record<WalletChainKind, CachedCloudWalletDescriptor>> {
+  const wallet = (config as unknown as { wallet?: unknown }).wallet;
+  if (!wallet || typeof wallet !== "object") return {};
+  const cloud = (wallet as { cloud?: unknown }).cloud;
+  if (!cloud || typeof cloud !== "object") return {};
+  return cloud as Partial<Record<WalletChainKind, CachedCloudWalletDescriptor>>;
+}
+
+function readPrimaryMap(config: ElizaConfig): WalletPrimaryMap {
+  const wallet = (config as unknown as { wallet?: unknown }).wallet;
+  const raw =
+    wallet && typeof wallet === "object"
+      ? (wallet as { primary?: unknown }).primary
+      : undefined;
+  const out: WalletPrimaryMap = { evm: "local", solana: "local" };
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const record = raw as Record<string, unknown>;
+    if (record.evm === "cloud" || record.evm === "local") out.evm = record.evm;
+    if (record.solana === "cloud" || record.solana === "local") {
+      out.solana = record.solana;
+    }
+  }
+  return out;
+}
+
+function coerceCloudProvider(value: unknown): WalletProviderKind {
+  return value === "privy" || value === "steward" ? value : "privy";
+}
+
+/**
+ * Build the dual-wallet `{ wallets[], primary }` block. Returns `null`
+ * when the cloud-wallet flag is off so callers can omit both fields and
+ * preserve the pre-flag response shape exactly.
+ */
+function buildDualWalletShape(
+  config: ElizaConfig,
+  addresses: { evmAddress: string | null; solanaAddress: string | null },
+): { wallets: WalletEntry[]; primary: WalletPrimaryMap } | null {
+  if (!isCloudWalletEnabled()) return null;
+
+  const primary = readPrimaryMap(config);
+  const wallets: WalletEntry[] = [];
+
+  if (addresses.evmAddress) {
+    wallets.push({
+      source: "local",
+      chain: "evm",
+      address: addresses.evmAddress,
+      provider: "local",
+      primary: primary.evm === "local",
+    });
+  }
+  if (addresses.solanaAddress) {
+    wallets.push({
+      source: "local",
+      chain: "solana",
+      address: addresses.solanaAddress,
+      provider: "local",
+      primary: primary.solana === "local",
+    });
+  }
+
+  const cloud = readCloudWalletCache(config);
+  for (const chain of ["evm", "solana"] as const) {
+    const descriptor = cloud[chain];
+    const address = descriptor?.walletAddress;
+    if (typeof address === "string" && address.length > 0) {
+      wallets.push({
+        source: "cloud",
+        chain,
+        address,
+        provider: coerceCloudProvider(descriptor?.walletProvider),
+        primary: primary[chain] === "cloud",
+      });
+    }
+  }
+
+  return { wallets, primary };
+}
+
+function readCloudWalletAddress(
+  descriptor: CachedCloudWalletDescriptor | undefined,
+): string | null {
+  if (typeof descriptor?.walletAddress !== "string") return null;
+  const trimmed = descriptor.walletAddress.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function resolvePrimaryWalletAddresses(
+  config: ElizaConfig,
+  addresses: { evmAddress: string | null; solanaAddress: string | null },
+): { evmAddress: string | null; solanaAddress: string | null } {
+  const primary = readPrimaryMap(config);
+  const cloud = readCloudWalletCache(config);
+
+  return {
+    evmAddress:
+      primary.evm === "cloud"
+        ? readCloudWalletAddress(cloud.evm)
+        : addresses.evmAddress,
+    solanaAddress:
+      primary.solana === "cloud"
+        ? readCloudWalletAddress(cloud.solana)
+        : addresses.solanaAddress,
+  };
+}
+
+function persistPrimarySelection(
+  config: ElizaConfig,
+  chain: WalletChainKind,
+  source: WalletSource,
+): void {
+  const target = config as unknown as { wallet?: Record<string, unknown> };
+  const wallet = (target.wallet ?? {}) as Record<string, unknown>;
+  const primary = { ...((wallet.primary as Record<string, unknown>) ?? {}) };
+  primary[chain] = source;
+  wallet.primary = primary;
+  target.wallet = wallet;
+}
 
 export interface WalletRouteContext
   extends RouteRequestMeta,
@@ -525,6 +681,8 @@ export async function handleWalletRoutes(
   // GET /api/wallet/config
   if (method === "GET" && pathname === "/api/wallet/config") {
     const addresses = deps.getWalletAddresses();
+    const primary = readPrimaryMap(config);
+    const primaryAddresses = resolvePrimaryWalletAddresses(config, addresses);
     const rpcReadiness = resolveWalletRpcReadiness(config);
     const localSolanaSignerAvailable = Boolean(
       process.env.SOLANA_PRIVATE_KEY?.trim(),
@@ -532,7 +690,7 @@ export async function handleWalletRoutes(
     const capability = resolveWalletCapabilityStatus({
       config,
       runtime: ctx.runtime ?? null,
-      getWalletAddresses: deps.getWalletAddresses,
+      getWalletAddresses: () => primaryAddresses,
     });
     const alchemyKeySet = Boolean(process.env.ALCHEMY_API_KEY?.trim());
     const ankrKeySet = Boolean(process.env.ANKR_API_KEY?.trim());
@@ -568,18 +726,191 @@ export async function handleWalletRoutes(
         "BSC",
         "Avalanche",
       ],
-      evmAddress: addresses.evmAddress,
-      solanaAddress: addresses.solanaAddress,
+      evmAddress: primaryAddresses.evmAddress,
+      solanaAddress: primaryAddresses.solanaAddress,
       walletSource: capability.walletSource,
       automationMode: capability.automationMode,
       pluginEvmLoaded: capability.pluginEvmLoaded,
       pluginEvmRequired: capability.pluginEvmRequired,
       executionReady: capability.executionReady,
       executionBlockedReason: capability.executionBlockedReason,
-      solanaSigningAvailable:
-        localSolanaSignerAvailable && Boolean(addresses.solanaAddress),
+      solanaSigningAvailable: primaryAddresses.solanaAddress
+        ? localSolanaSignerAvailable || primary.solana === "cloud"
+        : false,
     };
-    json(res, configStatus);
+    const dual = buildDualWalletShape(config, addresses);
+    if (dual) {
+      json(res, {
+        ...configStatus,
+        wallets: dual.wallets,
+        primary: dual.primary,
+      });
+    } else {
+      json(res, configStatus);
+    }
+    return true;
+  }
+
+  // POST /api/wallet/primary — flag-gated (404 when ENABLE_CLOUD_WALLET is off).
+  // Body: { chain: "evm"|"solana", source: "local"|"cloud" }
+  if (method === "POST" && pathname === "/api/wallet/primary") {
+    if (!isCloudWalletEnabled()) {
+      error(res, "Not found", 404);
+      return true;
+    }
+    const body = await readJsonBody<Record<string, unknown>>(req, res);
+    if (!body) return true;
+
+    const chainRaw = typeof body.chain === "string" ? body.chain : "";
+    const sourceRaw = typeof body.source === "string" ? body.source : "";
+    if (chainRaw !== "evm" && chainRaw !== "solana") {
+      error(res, "chain must be 'evm' or 'solana'");
+      return true;
+    }
+    if (sourceRaw !== "local" && sourceRaw !== "cloud") {
+      error(res, "source must be 'local' or 'cloud'");
+      return true;
+    }
+
+    const chain = chainRaw as WalletChainKind;
+    const source = sourceRaw as WalletSource;
+
+    persistPrimarySelection(config, chain, source);
+
+    let configSaveWarning: string | undefined;
+    try {
+      saveConfig(config);
+    } catch (err) {
+      configSaveWarning = `Config save failed: ${String(err)}`;
+      logger.warn(`[api] ${configSaveWarning}`);
+    }
+
+    const envKey =
+      chain === "evm" ? "WALLET_SOURCE_EVM" : "WALLET_SOURCE_SOLANA";
+    try {
+      await persistConfigEnv(envKey, source);
+    } catch (err) {
+      error(res, `Failed to persist ${envKey}: ${String(err)}`, 500);
+      return true;
+    }
+
+    ctx.scheduleRuntimeRestart?.("primary-changed");
+
+    json(res, {
+      ok: true,
+      chain,
+      source,
+      ...(configSaveWarning ? { warnings: [configSaveWarning] } : {}),
+    });
+    return true;
+  }
+
+  // POST /api/wallet/refresh-cloud — flag-gated.
+  // Re-queries the Eliza Cloud bridge for per-chain wallet descriptors and
+  // refreshes `config.wallet.cloud.*`. Uses `provisionCloudWallets` which
+  // is idempotent (checks getAgentWallet first, only provisions on miss).
+  if (method === "POST" && pathname === "/api/wallet/refresh-cloud") {
+    if (!isCloudWalletEnabled()) {
+      error(res, "Not found", 404);
+      return true;
+    }
+
+    const cloud = (config as unknown as { cloud?: Record<string, unknown> })
+      .cloud;
+    const apiKey = resolveCloudApiKey(config, ctx.runtime) ?? "";
+    const baseUrl =
+      cloud && typeof cloud.baseUrl === "string" && cloud.baseUrl
+        ? normalizeCloudSiteUrl(cloud.baseUrl)
+        : "https://www.elizacloud.ai";
+    if (!apiKey) {
+      error(res, "Cloud not linked — sign in to Eliza Cloud first", 400);
+      return true;
+    }
+
+    const agentEntry = config.agents?.list?.[0];
+    const agentId =
+      agentEntry?.id ??
+      (ctx.runtime as { agentId?: string } | null)?.agentId ??
+      null;
+    if (!agentId) {
+      error(res, "No agent configured", 400);
+      return true;
+    }
+
+    try {
+      const { address: clientAddress } = await getOrCreateClientAddressKey();
+      const bridge = new ElizaCloudClient(baseUrl, apiKey);
+      const descriptors = await provisionCloudWallets(bridge, {
+        agentId,
+        clientAddress,
+      });
+      persistCloudWalletCache(config as never, descriptors);
+
+      process.env.ENABLE_CLOUD_WALLET = "1";
+      await persistConfigEnv("ENABLE_CLOUD_WALLET", "1");
+
+      const cloudConfig = { ...(cloud ?? {}) };
+      cloudConfig.clientAddressPublicKey = clientAddress;
+      (config as unknown as { cloud?: Record<string, unknown> }).cloud =
+        cloudConfig;
+
+      if (descriptors.evm?.walletAddress) {
+        process.env.MILADY_CLOUD_EVM_ADDRESS = descriptors.evm.walletAddress;
+        await persistConfigEnv(
+          "MILADY_CLOUD_EVM_ADDRESS",
+          descriptors.evm.walletAddress,
+        );
+        process.env.ENABLE_EVM_PLUGIN = "1";
+        await persistConfigEnv("ENABLE_EVM_PLUGIN", "1");
+        process.env.WALLET_SOURCE_EVM = "cloud";
+        await persistConfigEnv("WALLET_SOURCE_EVM", "cloud");
+        persistPrimarySelection(config, "evm", "cloud");
+      }
+
+      if (descriptors.solana?.walletAddress) {
+        process.env.MILADY_CLOUD_SOLANA_ADDRESS =
+          descriptors.solana.walletAddress;
+        await persistConfigEnv(
+          "MILADY_CLOUD_SOLANA_ADDRESS",
+          descriptors.solana.walletAddress,
+        );
+        process.env.WALLET_SOURCE_SOLANA = "cloud";
+        await persistConfigEnv("WALLET_SOURCE_SOLANA", "cloud");
+        persistPrimarySelection(config, "solana", "cloud");
+      }
+
+      let configSaveWarning: string | undefined;
+      try {
+        saveConfig(config);
+      } catch (err) {
+        configSaveWarning = `Config save failed: ${String(err)}`;
+        logger.warn(`[api] ${configSaveWarning}`);
+      }
+
+      ctx.scheduleRuntimeRestart?.("cloud-refreshed");
+
+      json(res, {
+        ok: true,
+        wallets: {
+          evm: descriptors.evm
+            ? {
+                address: descriptors.evm.walletAddress,
+                provider: descriptors.evm.walletProvider,
+              }
+            : null,
+          solana: descriptors.solana
+            ? {
+                address: descriptors.solana.walletAddress,
+                provider: descriptors.solana.walletProvider,
+              }
+            : null,
+        },
+        ...(configSaveWarning ? { warnings: [configSaveWarning] } : {}),
+      });
+    } catch (err) {
+      logger.warn(`[api] cloud wallet refresh failed: ${String(err)}`);
+      error(res, `Cloud wallet refresh failed: ${String(err)}`, 502);
+    }
     return true;
   }
 
@@ -598,6 +929,27 @@ export async function handleWalletRoutes(
     }
 
     applyWalletRpcConfigUpdate(config, updateRequest);
+
+    const selectedProviders = normalizeWalletRpcSelections(
+      updateRequest.selections,
+    );
+    const shouldEnableCloudWallet = Object.values(selectedProviders).every(
+      (provider) => provider === "eliza-cloud",
+    );
+
+    if (shouldEnableCloudWallet) {
+      process.env.ENABLE_CLOUD_WALLET = "1";
+      try {
+        await persistConfigEnv("ENABLE_CLOUD_WALLET", "1");
+      } catch (err) {
+        error(
+          res,
+          `Failed to persist ENABLE_CLOUD_WALLET: ${String(err)}`,
+          500,
+        );
+        return true;
+      }
+    }
 
     let configSaveWarning: string | undefined;
     try {

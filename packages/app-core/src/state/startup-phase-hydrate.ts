@@ -5,15 +5,24 @@
  * "ready" phase (WebSocket bindings, nav listener).
  */
 
+import type { AgentStatus, WalletAddresses } from "../api";
 import {
   type CodingAgentSession,
   type Conversation,
   type ConversationMessage,
-  type StreamEventEnvelope,
   client,
+  type StreamEventEnvelope,
 } from "../api";
 import { mapServerTasksToSessions } from "../coding";
+import { prefetchVrmToCache } from "../components/avatar/VrmEngine";
 import { type AppEmoteEventDetail, dispatchAppEmoteEvent } from "../events";
+import {
+  COMPANION_ENABLED,
+  isRouteRootPath,
+  type Tab,
+  tabFromPath,
+} from "../navigation";
+import { resolveApiUrl } from "../utils";
 import {
   loadAvatarIndex,
   normalizeAvatarIndex,
@@ -21,19 +30,10 @@ import {
   parseProactiveMessageEvent,
   parseStreamEventEnvelopeEvent,
 } from "./internal";
-import {
-  COMPANION_ENABLED,
-  isRouteRootPath,
-  tabFromPath,
-  type Tab,
-} from "../navigation";
 import { shouldStartAtCharacterSelectOnLaunch } from "./shell-routing";
-import { resolveApiUrl } from "../utils";
 import type { StartupEvent } from "./startup-coordinator";
-import type { AgentStatus, WalletAddresses } from "../api";
 import type { OnboardingMode } from "./types";
-import { getVrmUrl, getVrmCount, VRM_COUNT } from "./vrm";
-import { prefetchVrmToCache } from "../components/avatar/VrmEngine";
+import { getVrmCount, getVrmUrl, VRM_COUNT } from "./vrm";
 
 export interface HydratingDeps {
   setStartupError: (v: null) => void;
@@ -94,10 +94,17 @@ export interface ReadyPhaseDeps {
   notifyAssistantEvent: (event: StreamEventEnvelope) => void;
   notifyHeartbeatEvent: (event: StreamEventEnvelope) => void;
   loadPlugins: () => Promise<void>;
+  loadWalletConfig: () => Promise<void>;
   pollCloudCredits: () => void;
   activeConversationIdRef: React.RefObject<string | null>;
   elizaCloudPollInterval: React.MutableRefObject<number | null>;
   elizaCloudLoginPollTimer: React.MutableRefObject<number | null>;
+}
+
+function refreshRuntimeBoundUiState(deps: ReadyPhaseDeps | undefined): void {
+  if (!deps) return;
+  void deps.loadWalletConfig();
+  void deps.pollCloudCredits();
 }
 
 function normalizeAppEmoteEvent(
@@ -331,9 +338,10 @@ export function bindReadyPhase(
       if (e) dispatchAppEmoteEvent(e);
     },
   );
-  const unbindWsReconnect = client.onWsEvent("ws-reconnected", () =>
-    hydratePty(),
-  );
+  const unbindWsReconnect = client.onWsEvent("ws-reconnected", () => {
+    hydratePty();
+    refreshRuntimeBoundUiState(depsRef.current);
+  });
   const unbindSysWarn = client.onWsEvent(
     "system-warning",
     (data: Record<string, unknown>) => {
@@ -365,7 +373,7 @@ export function bindReadyPhase(
           d.setPendingRestart(false);
           d.setPendingRestartReasons([]);
           void d.loadPlugins();
-          void d.pollCloudCredits();
+          refreshRuntimeBoundUiState(d);
           hydratePty();
           ptyHydratedViaWs = true;
         }

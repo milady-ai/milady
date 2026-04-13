@@ -23,6 +23,8 @@ import type {
   WalletConfigStatus,
   WalletConfigUpdateRequest,
   WalletNftsResponse,
+  WalletPrimaryUpdateRequest,
+  WalletPrimaryUpdateResponse,
   WalletTradingProfileResponse,
   WalletTradingProfileSourceFilter,
   WalletTradingProfileWindow,
@@ -60,6 +62,10 @@ declare module "./client-base" {
     updateWalletConfig(
       config: WalletConfigUpdateRequest,
     ): Promise<{ ok: boolean }>;
+    setWalletPrimary(
+      request: WalletPrimaryUpdateRequest,
+    ): Promise<WalletPrimaryUpdateResponse>;
+    refreshCloudWallets(): Promise<{ ok: boolean }>;
     exportWalletKeys(exportToken: string): Promise<WalletExportResult>;
     getBscTradePreflight(
       tokenAddress?: string,
@@ -184,6 +190,24 @@ MiladyClient.prototype.updateWalletConfig = async function (
   return this.fetch("/api/wallet/config", {
     method: "PUT",
     body: JSON.stringify(config),
+  });
+};
+
+MiladyClient.prototype.setWalletPrimary = async function (
+  this: MiladyClient,
+  request,
+) {
+  return this.fetch("/api/wallet/primary", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+};
+
+MiladyClient.prototype.refreshCloudWallets = async function (
+  this: MiladyClient,
+) {
+  return this.fetch("/api/wallet/refresh-cloud", {
+    method: "POST",
   });
 };
 

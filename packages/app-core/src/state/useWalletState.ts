@@ -16,8 +16,17 @@
  * - `confirmAction`   — confirmDesktopAction utility, used by handleExportKeys
  */
 
+import type {
+  WalletChainKind,
+  WalletEntry,
+  WalletPrimaryMap,
+  WalletSource,
+} from "@miladyai/shared/contracts/wallet";
+import { normalizeWalletRpcSelections } from "@miladyai/shared/contracts/wallet";
+import type { PromptOptions } from "@miladyai/ui";
 import { useCallback, useRef, useState } from "react";
 import {
+  client,
   type DropStatus,
   type MintResult,
   type RegistryStatus,
@@ -28,9 +37,7 @@ import {
   type WalletExportResult,
   type WalletNftsResponse,
   type WhitelistStatus,
-  client,
 } from "../api";
-import type { PromptOptions } from "@miladyai/ui";
 import { confirmDesktopAction } from "../utils";
 import {
   loadBrowserEnabled,
@@ -113,6 +120,17 @@ export function useWalletState({
     });
   const [walletError, setWalletError] = useState<string | null>(null);
 
+  // ── Cloud/Local dual-wallet (gated server-side by ENABLE_CLOUD_WALLET) ──
+  const [wallets, setWallets] = useState<WalletEntry[]>([]);
+  const [primaryMap, setPrimaryMap] = useState<WalletPrimaryMap | null>(null);
+  const [primaryRestarting, setPrimaryRestarting] = useState<
+    Partial<Record<WalletChainKind, boolean>>
+  >({});
+  const [primaryPending, setPrimaryPending] = useState<
+    Partial<Record<WalletChainKind, boolean>>
+  >({});
+  const [cloudRefreshing, setCloudRefreshing] = useState(false);
+
   // ── ERC-8004 Registry ──────────────────────────────────────────────
   const [registryStatus, setRegistryStatus] = useState<RegistryStatus | null>(
     null,
@@ -150,6 +168,9 @@ export function useWalletState({
         evmAddress: cfg.evmAddress,
         solanaAddress: cfg.solanaAddress,
       });
+      if (Array.isArray(cfg.wallets)) setWallets(cfg.wallets);
+      else setWallets([]);
+      setPrimaryMap(cfg.primary ?? null);
       setWalletError(null);
     } catch (err) {
       setWalletError(
@@ -157,6 +178,72 @@ export function useWalletState({
       );
     }
   }, []);
+
+  const setPrimary = useCallback(
+    async (chain: WalletChainKind, source: WalletSource) => {
+      if (primaryPending[chain]) return;
+      setPrimaryPending((prev) => ({ ...prev, [chain]: true }));
+      setPrimaryRestarting((prev) => ({ ...prev, [chain]: true }));
+      // Optimistic local update for snappier UI.
+      setPrimaryMap((prev) =>
+        prev
+          ? { ...prev, [chain]: source }
+          : { evm: "local", solana: "local", [chain]: source },
+      );
+      setWallets((prev) =>
+        prev.map((w) =>
+          w.chain === chain ? { ...w, primary: w.source === source } : w,
+        ),
+      );
+      try {
+        await client.setWalletPrimary({ chain, source });
+        // Runtime restart is kicked off server-side. Poll the config a few times
+        // so we pick up the new state without unmounting the view.
+        const deadline = Date.now() + 15_000;
+        let lastErr: unknown = null;
+        while (Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 1_000));
+          try {
+            await loadWalletConfig();
+            lastErr = null;
+            break;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+        if (lastErr) {
+          setWalletError(
+            `Primary updated but reload failed: ${lastErr instanceof Error ? lastErr.message : "network error"}`,
+          );
+        }
+      } catch (err) {
+        setWalletError(
+          `Failed to set primary wallet: ${err instanceof Error ? err.message : "network error"}`,
+        );
+        // Roll back optimistic update.
+        await loadWalletConfig().catch(() => {});
+      } finally {
+        setPrimaryPending((prev) => ({ ...prev, [chain]: false }));
+        setPrimaryRestarting((prev) => ({ ...prev, [chain]: false }));
+      }
+    },
+    [loadWalletConfig, primaryPending],
+  );
+
+  const refreshCloud = useCallback(async () => {
+    if (cloudRefreshing) return;
+    setCloudRefreshing(true);
+    try {
+      await client.refreshCloudWallets();
+      await loadWalletConfig();
+    } catch (err) {
+      setWalletError(
+        `Failed to refresh cloud wallets: ${err instanceof Error ? err.message : "network error"}`,
+      );
+    } finally {
+      setCloudRefreshing(false);
+    }
+  }, [cloudRefreshing, loadWalletConfig]);
 
   const loadBalances = useCallback(async () => {
     setWalletLoading(true);
@@ -192,24 +279,37 @@ export function useWalletState({
         Object.keys(config.credentials ?? {}).length === 0 &&
         Object.keys(config.selections ?? {}).length === 0
       ) {
-        return;
+        return false;
       }
-      if (walletApiKeySavingRef.current || walletApiKeySaving) return;
+      if (walletApiKeySavingRef.current || walletApiKeySaving) return false;
       walletApiKeySavingRef.current = true;
       setWalletApiKeySaving(true);
       setWalletError(null);
       try {
+        const selections = normalizeWalletRpcSelections(config.selections);
+        const shouldImportCloudWallet =
+          selections.evm === "eliza-cloud" &&
+          selections.bsc === "eliza-cloud" &&
+          selections.solana === "eliza-cloud";
+
         await client.updateWalletConfig(config);
+        if (shouldImportCloudWallet) {
+          await client.refreshCloudWallets();
+        }
         await loadWalletConfig();
         await loadBalances();
         setActionNotice(
-          "Wallet RPC settings saved. Restart required to apply.",
+          shouldImportCloudWallet
+            ? "Cloud wallet import queued. Restart required to apply."
+            : "Wallet RPC settings saved. Restart required to apply.",
           "success",
         );
+        return true;
       } catch (err) {
         setWalletError(
           `Failed to save API keys: ${err instanceof Error ? err.message : "network error"}`,
         );
+        return false;
       } finally {
         walletApiKeySavingRef.current = false;
         setWalletApiKeySaving(false);
@@ -402,6 +502,11 @@ export function useWalletState({
       mintShiny,
       whitelistStatus,
       whitelistLoading,
+      wallets,
+      walletPrimary: primaryMap,
+      walletPrimaryRestarting: primaryRestarting,
+      walletPrimaryPending: primaryPending,
+      cloudRefreshing,
     },
     // Raw setters needed by AppContext for UI binding
     setBrowserEnabled,
@@ -427,5 +532,7 @@ export function useWalletState({
     loadDropStatus,
     mintFromDrop,
     loadWhitelistStatus,
+    setPrimary,
+    refreshCloud,
   };
 }

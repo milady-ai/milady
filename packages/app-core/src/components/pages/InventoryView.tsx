@@ -7,7 +7,6 @@
 
 import type { StewardStatusResponse } from "@miladyai/app-core/api";
 import { useApp } from "@miladyai/app-core/state";
-import { WidgetHost } from "../../widgets";
 import {
   Button,
   Dialog,
@@ -29,14 +28,12 @@ import {
   AlertTriangle,
   ChevronDown,
   Copy,
-  Link,
-  RefreshCw,
   Settings,
   Shield,
-  Unlink,
   Wallet,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { WidgetHost } from "../../widgets";
 import {
   BSC_GAS_READY_THRESHOLD,
   loadTrackedBscTokens,
@@ -65,6 +62,7 @@ import { PolicyControlsView } from "../settings/PolicyControlsView";
 import { ApprovalQueue } from "../steward/ApprovalQueue";
 import { TransactionHistory } from "../steward/TransactionHistory";
 import { ConfigPageView } from "./ConfigPageView";
+import { resolveInventoryWalletAddresses } from "./inventory-wallet-addresses";
 
 /* ── Component ─────────────────────────────────────────────────────── */
 
@@ -275,7 +273,6 @@ export function InventoryView() {
     loadBalances,
     loadNfts,
     elizaCloudConnected,
-    setTab,
     setState,
     setActionNotice,
     executeBscTrade,
@@ -288,11 +285,11 @@ export function InventoryView() {
     approveStewardTx,
     rejectStewardTx,
     copyToClipboard,
-    vincentConnected,
-    vincentLoginBusy,
-    vincentLoginError,
-    handleVincentLogin,
-    handleVincentDisconnect,
+    wallets,
+    walletPrimary,
+    walletPrimaryRestarting,
+    walletPrimaryPending,
+    setWalletPrimary,
     t,
   } = useApp();
 
@@ -424,8 +421,13 @@ export function InventoryView() {
     });
   }, [allNfts, walletSearchQuery]);
 
-  const evmAddr = walletAddresses?.evmAddress ?? walletConfig?.evmAddress;
-  const solAddr = walletAddresses?.solanaAddress ?? walletConfig?.solanaAddress;
+  const { evmAddress: evmAddr, solanaAddress: solAddr } =
+    resolveInventoryWalletAddresses({
+      walletAddresses,
+      walletConfig,
+      wallets,
+      walletPrimary,
+    });
   const loadedEvmChainKeys = new Set(
     (walletBalances?.evm?.chains ?? [])
       .filter((chain) => !chain.error)
@@ -680,6 +682,81 @@ export function InventoryView() {
       }
       footer={
         <div className="flex w-full flex-col gap-2">
+          {wallets && wallets.length > 0 && walletPrimary ? (
+            <div
+              className="flex w-full flex-col gap-2"
+              data-testid="wallet-dual-source"
+            >
+              {(["evm", "solana"] as const).map((chain) => {
+                const chainLabel = chain === "evm" ? "EVM" : "Solana";
+                const chainWallets = wallets.filter((w) => w.chain === chain);
+                if (chainWallets.length === 0) return null;
+                const hasLocal = chainWallets.some((w) => w.source === "local");
+                const hasCloud = chainWallets.some((w) => w.source === "cloud");
+                if (!hasCloud && !hasLocal) return null;
+                const current = walletPrimary[chain] ?? "local";
+                const restarting = Boolean(walletPrimaryRestarting?.[chain]);
+                const pending = Boolean(walletPrimaryPending?.[chain]);
+                const cloudEntry = chainWallets.find(
+                  (w) => w.source === "cloud",
+                );
+                return (
+                  <div
+                    key={chain}
+                    className="flex flex-col gap-1"
+                    data-testid={`wallet-source-${chain}`}
+                  >
+                    <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-muted-foreground">
+                      <span>{chainLabel}</span>
+                      {cloudEntry ? (
+                        <span
+                          className="rounded-full border border-border/60 px-2 py-0.5 text-[10px] uppercase tracking-wide"
+                          data-testid={`wallet-provider-badge-${chain}`}
+                        >
+                          {cloudEntry.provider === "steward"
+                            ? "Steward"
+                            : "Privy"}
+                        </span>
+                      ) : null}
+                    </div>
+                    <SegmentedControl
+                      className="grid w-full grid-cols-2"
+                      buttonClassName="h-8 justify-center text-[11px]"
+                      value={current}
+                      onValueChange={(next) => {
+                        if (next !== "local" && next !== "cloud") return;
+                        if (pending || restarting) return;
+                        if (next === current) return;
+                        void setWalletPrimary?.(chain, next);
+                      }}
+                      items={[
+                        {
+                          value: "local",
+                          label: "Local",
+                          disabled: !hasLocal || pending,
+                        },
+                        {
+                          value: "cloud",
+                          label: "Cloud",
+                          disabled: !hasCloud || pending,
+                        },
+                      ]}
+                      data-testid={`wallet-source-toggle-${chain}`}
+                    />
+                    {restarting ? (
+                      <span
+                        className="text-[11px] text-muted-foreground"
+                        data-testid={`wallet-source-restart-${chain}`}
+                      >
+                        Reloading runtime…
+                      </span>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
           {addresses.map((item) => (
             <Button
               key={`${item.label}-${item.address}`}
@@ -1108,7 +1185,12 @@ export function InventoryView() {
               }}
             />
           ) : (
-            <ConfigPageView embedded />
+            <ConfigPageView
+              embedded
+              onWalletSaveSuccess={() => {
+                setWalletRpcOpen(false);
+              }}
+            />
           )}
         </DialogContent>
       </Dialog>

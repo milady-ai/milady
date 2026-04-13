@@ -1,14 +1,14 @@
 import type { AgentRuntime } from "@elizaos/core";
 import { logger } from "@elizaos/core";
 import { applyCanonicalOnboardingConfig } from "@miladyai/agent/api/provider-switch-config";
+import { resolveCloudApiBaseUrl as resolveCanonicalCloudApiBaseUrl } from "@miladyai/agent/cloud/base-url";
+import { validateCloudBaseUrl } from "@miladyai/agent/cloud/validate-url";
 import {
   isMiladySettingsDebugEnabled,
   migrateLegacyRuntimeConfig,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
 import { isCloudInferenceSelectedInConfig } from "@miladyai/shared/contracts/onboarding";
-import { resolveCloudApiBaseUrl as resolveCanonicalCloudApiBaseUrl } from "@miladyai/agent/cloud/base-url";
-import { validateCloudBaseUrl } from "@miladyai/agent/cloud/validate-url";
 import type { ElizaConfig } from "../config/config";
 import { normalizeEnvValue } from "../utils/env";
 import {
@@ -183,7 +183,10 @@ export function resolveCloudApiBaseUrl(rawBaseUrl?: string): string {
 
 export function resolveCloudApiKey(
   config: Pick<ElizaConfig, "cloud"> | Record<string, unknown>,
-  runtime?: { character?: { secrets?: Record<string, unknown> } } | null,
+  runtime?: {
+    getSetting?: (key: string) => unknown;
+    character?: { secrets?: Record<string, unknown> };
+  } | null,
 ): string | undefined {
   migrateLegacyRuntimeConfig(config as Record<string, unknown>);
   // 1. Config file (disk)
@@ -207,7 +210,13 @@ export function resolveCloudApiKey(
   const envKey = normalizeSecret(process.env.ELIZAOS_CLOUD_API_KEY);
   if (envKey) return envKey;
 
-  // 4. Runtime character secrets (persisted in database, survives restarts)
+  // 4. Runtime setting cache (persisted in runtime/DB, survives restarts)
+  const runtimeSettingKey = normalizeSecret(
+    runtime?.getSetting?.("ELIZAOS_CLOUD_API_KEY") as string | undefined,
+  );
+  if (runtimeSettingKey) return runtimeSettingKey;
+
+  // 5. Runtime character secrets (persisted in database, survives restarts)
   const runtimeKey = normalizeSecret(
     runtime?.character?.secrets?.ELIZAOS_CLOUD_API_KEY as string | undefined,
   );

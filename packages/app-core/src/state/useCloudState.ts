@@ -151,22 +151,9 @@ export function useCloudState({
       return lastElizaCloudPollConnectedRef.current;
     }
     if (!cloudStatus) {
-      setElizaCloudConnected(false);
-      publishElizaCloudVoiceSnapshot(setElizaCloudHasPersistedKey, {
-        apiConnected: false,
-        enabled: false,
-        cloudVoiceProxyAvailable: false,
-        hasPersistedApiKey: false,
-      });
-      setElizaCloudVoiceProxyAvailable(false);
-      setElizaCloudCredits(null);
-      setElizaCloudCreditsLow(false);
-      setElizaCloudCreditsCritical(false);
-      setElizaCloudAuthRejected(false);
-      setElizaCloudCreditsError(null);
-      setElizaCloudStatusReason(null);
-      lastElizaCloudPollConnectedRef.current = false;
-      return false;
+      // Preserve the last applied cloud snapshot across transient backend
+      // restarts so the UI does not flap into a false "disconnected" state.
+      return lastElizaCloudPollConnectedRef.current;
     }
     const enabled = Boolean(cloudStatus.enabled ?? false);
     const cloudVoiceProxyAvailable = Boolean(
@@ -285,6 +272,18 @@ export function useCloudState({
     const cloudApiBase =
       getBootConfig().cloudApiBase ?? "https://www.elizacloud.ai";
     const useDirectAuth = !hasBackend;
+
+    if (hasBackend) {
+      const alreadyConnected = await pollCloudCredits();
+      if (alreadyConnected) {
+        await loadWalletConfig().catch(() => undefined);
+        setElizaCloudLoginError(null);
+        setActionNotice("Already connected to Eliza Cloud.", "info", 4000);
+        elizaCloudLoginBusyRef.current = false;
+        setElizaCloudLoginBusy(false);
+        return;
+      }
+    }
 
     try {
       let resp: {

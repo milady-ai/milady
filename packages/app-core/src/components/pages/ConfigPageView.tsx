@@ -33,7 +33,13 @@ import { SecretsView } from "./SecretsView";
 
 /* ── ConfigPageView ──────────────────────────────────────────────────── */
 
-export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
+export function ConfigPageView({
+  embedded = false,
+  onWalletSaveSuccess,
+}: {
+  embedded?: boolean;
+  onWalletSaveSuccess?: () => void;
+}) {
   const {
     t,
     elizaCloudConnected,
@@ -103,7 +109,7 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
     }
   }, []);
 
-  const handleWalletSaveAll = useCallback(() => {
+  const handleWalletSaveAll = useCallback(async () => {
     const config = buildWalletRpcUpdateRequest({
       walletConfig,
       rpcFieldValues,
@@ -114,9 +120,13 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
       },
       selectedNetwork: selectedWalletNetwork,
     });
-    void handleWalletApiKeySave(config);
+    const saved = await handleWalletApiKeySave(config);
+    if (saved) {
+      onWalletSaveSuccess?.();
+    }
   }, [
     handleWalletApiKeySave,
+    onWalletSaveSuccess,
     rpcFieldValues,
     selectedBscRpc,
     selectedEvmRpc,
@@ -529,7 +539,9 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
               variant="default"
               size="sm"
               className="text-xs-tight"
-              onClick={handleWalletSaveAll}
+              onClick={() => {
+                void handleWalletSaveAll();
+              }}
               disabled={walletApiKeySaving}
             >
               {walletApiKeySaving
@@ -652,7 +664,9 @@ export function ConfigPageView({ embedded = false }: { embedded?: boolean }) {
               variant="default"
               size="sm"
               className="text-xs-tight"
-              onClick={handleWalletSaveAll}
+              onClick={() => {
+                void handleWalletSaveAll();
+              }}
               disabled={walletApiKeySaving}
             >
               {walletApiKeySaving

@@ -37,19 +37,27 @@ import {
   getCompatApiToken,
 } from "./auth";
 import {
-  sendJsonError as sendJsonErrorResponse,
-  sendJson as sendJsonResponse,
-} from "./response";
-import {
-  DATABASE_UNAVAILABLE_MESSAGE,
+  type CompatRuntimeState,
   clearCompatRuntimeRestart,
+  DATABASE_UNAVAILABLE_MESSAGE,
   getConfiguredCompatAgentName,
   hasCompatPersistedOnboardingState,
   isLoopbackRemoteAddress,
   readCompatJsonBody,
-  type CompatRuntimeState,
 } from "./compat-route-shared";
+import {
+  sendJsonError as sendJsonErrorResponse,
+  sendJson as sendJsonResponse,
+} from "./response";
 
+export {
+  type CompatRuntimeState,
+  DATABASE_UNAVAILABLE_MESSAGE,
+  getConfiguredCompatAgentName,
+  hasCompatPersistedOnboardingState,
+  isLoopbackRemoteAddress,
+  readCompatJsonBody,
+} from "./compat-route-shared";
 export {
   __resetCloudBaseUrlCache,
   ensureCloudTtsApiKeyAlias,
@@ -60,12 +68,12 @@ export {
   filterConfigEnvForResponse,
   SENSITIVE_ENV_RESPONSE_KEYS,
 } from "./server-config-filter";
-export { injectApiBaseIntoHtml } from "./server-html";
 export {
   buildCorsAllowedPorts,
   invalidateCorsAllowedPorts,
   isAllowedLocalOrigin,
 } from "./server-cors";
+export { injectApiBaseIntoHtml } from "./server-html";
 // Re-export helpers from split-out modules so tests can import from "./server"
 export {
   ensureApiTokenForBindHost,
@@ -99,14 +107,6 @@ export {
   streamResponseBodyWithByteLimit,
   validateMcpServerConfig,
 };
-export {
-  DATABASE_UNAVAILABLE_MESSAGE,
-  getConfiguredCompatAgentName,
-  hasCompatPersistedOnboardingState,
-  isLoopbackRemoteAddress,
-  readCompatJsonBody,
-  type CompatRuntimeState,
-} from "./compat-route-shared";
 
 import { initStewardWalletCache } from "@miladyai/agent/api/wallet";
 import {
@@ -115,13 +115,13 @@ import {
   saveElizaConfig,
 } from "@miladyai/agent/config/config";
 import { resolveUserPath } from "@miladyai/agent/config/paths";
-import { buildCharacterFromConfig } from "../runtime/eliza";
 import { resolveDefaultAgentWorkspaceDir } from "@miladyai/agent/providers/workspace";
 import {
   isMiladySettingsDebugEnabled,
   sanitizeForSettingsDebug,
   settingsDebugCloudSummary,
 } from "@miladyai/shared";
+import { buildCharacterFromConfig } from "../runtime/eliza";
 import {
   ensureRuntimeSqlCompatibility,
   executeRawSql,
@@ -129,35 +129,35 @@ import {
   sanitizeIdentifier,
   sqlLiteral,
 } from "../utils/sql-compat";
+import { handleAuthPairingCompatRoutes } from "./auth-pairing-compat-routes";
 import { handleCloudRoute } from "./cloud-routes";
 import { handleCloudStatusRoutes } from "./cloud-status-routes";
+import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
+import { handleDevCompatRoutes } from "./dev-compat-routes";
+import {
+  isAllowedDevConsoleLogPath,
+  readDevConsoleLogTail,
+} from "./dev-console-log";
+import { resolveDevStackFromEnv } from "./dev-stack";
+import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
+import { handlePluginsCompatRoutes } from "./plugins-compat-routes";
 import {
   buildCorsAllowedPorts,
   getCorsAllowedPorts,
   isAllowedLocalOrigin,
 } from "./server-cors";
-import { handleShopifyRoute } from "./shopify-routes";
-import { handleVincentRoute } from "./vincent-routes";
-import {
-  isAllowedDevConsoleLogPath,
-  readDevConsoleLogTail,
-} from "./dev-console-log";
-import { handleAuthPairingCompatRoutes } from "./auth-pairing-compat-routes";
 import { isCloudProvisioned as _isCloudProvisioned } from "./server-onboarding-compat";
-import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
-import { handleDevCompatRoutes } from "./dev-compat-routes";
-import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
-import { handlePluginsCompatRoutes } from "./plugins-compat-routes";
-import { handleWalletBrowserCompatRoutes } from "./wallet-browser-compat-routes";
-import { handleWalletTradeCompatRoutes } from "./wallet-trade-compat-routes";
+import { handleShopifyRoute } from "./shopify-routes";
 import { handleStewardCompatRoutes } from "./steward-compat-routes";
-import { handleWorkbenchCompatRoutes } from "./workbench-compat-routes";
+import { handleVincentRoute } from "./vincent-routes";
+import { handleWalletBrowserCompatRoutes } from "./wallet-browser-compat-routes";
 import { handleWalletCompatRoutes } from "./wallet-compat-routes";
-import { resolveDevStackFromEnv } from "./dev-stack";
+import { handleWalletTradeCompatRoutes } from "./wallet-trade-compat-routes";
+import { handleWorkbenchCompatRoutes } from "./workbench-compat-routes";
 
 const require = createRequire(import.meta.url);
 
-import { syncMiladyEnvToEliza, syncElizaEnvToMilady } from "../utils/env.js";
+import { syncElizaEnvToMilady, syncMiladyEnvToEliza } from "../utils/env.js";
 
 // Lazy-imported to avoid circular dependency with runtime/eliza.ts
 const lazyEnsureTTS = () =>
@@ -179,6 +179,7 @@ import {
   mirrorCompatHeaders,
 } from "./server-cloud-tts";
 import { filterConfigEnvForResponse as _filterConfigEnvForResponse } from "./server-config-filter";
+
 // ---------------------------------------------------------------------------
 // Module-level constants and types that stay in server.ts
 // ---------------------------------------------------------------------------
@@ -686,6 +687,9 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
     const backfillKey =
       getCloudSecret("ELIZAOS_CLOUD_API_KEY") ||
       process.env.ELIZAOS_CLOUD_API_KEY ||
+      (
+        runtime as { getSetting?: (key: string) => unknown } | null
+      )?.getSetting?.("ELIZAOS_CLOUD_API_KEY") ||
       (runtime as { character?: { secrets?: Record<string, string> } } | null)
         ?.character?.secrets?.ELIZAOS_CLOUD_API_KEY;
     if (backfillKey) {
@@ -716,7 +720,7 @@ function resolveCloudConfig(runtime?: unknown): ElizaConfig {
   return config;
 }
 
-async function handleMiladyCompatRoute(
+export async function handleMiladyCompatRoute(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   state: CompatRuntimeState,
@@ -732,6 +736,7 @@ async function handleMiladyCompatRoute(
     }
     return handleCloudCompatRoute(req, res, url.pathname, method, {
       config: resolveCloudConfig(state.current),
+      runtime: state.current,
     });
   }
 
@@ -744,6 +749,7 @@ async function handleMiladyCompatRoute(
     }
     return handleCloudBillingRoute(req, res, url.pathname, method, {
       config: resolveCloudConfig(state.current),
+      runtime: state.current,
     });
   }
 

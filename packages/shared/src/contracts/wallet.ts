@@ -224,6 +224,39 @@ export interface WalletConfigStatus {
   executionReady?: boolean;
   executionBlockedReason?: string | null;
   solanaSigningAvailable?: boolean;
+  /** Present only when ENABLE_CLOUD_WALLET is on. */
+  wallets?: WalletEntry[];
+  /** Present only when ENABLE_CLOUD_WALLET is on. */
+  primary?: WalletPrimaryMap;
+}
+
+export type WalletSource = "local" | "cloud";
+export type WalletChainKind = "evm" | "solana";
+export type WalletProviderKind = "local" | "privy" | "steward";
+
+export interface WalletEntry {
+  source: WalletSource;
+  chain: WalletChainKind;
+  address: string;
+  provider: WalletProviderKind;
+  primary: boolean;
+}
+
+export interface WalletPrimaryMap {
+  evm: WalletSource;
+  solana: WalletSource;
+}
+
+export interface WalletPrimaryUpdateRequest {
+  chain: WalletChainKind;
+  source: WalletSource;
+}
+
+export interface WalletPrimaryUpdateResponse {
+  ok: boolean;
+  chain: WalletChainKind;
+  source: WalletSource;
+  warnings?: string[];
 }
 
 export type TradePermissionMode =

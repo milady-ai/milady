@@ -6137,7 +6137,7 @@ async function handleRequest(
       res,
       pathname,
       method,
-      { config: state.config },
+      { config: state.config, runtime: state.runtime },
     );
     if (billingHandled) return;
 
@@ -6147,7 +6147,7 @@ async function handleRequest(
       res,
       pathname,
       method,
-      { config: state.config },
+      { config: state.config, runtime: state.runtime },
     );
     if (compatHandled) return;
 
@@ -6157,6 +6157,7 @@ async function handleRequest(
       runtime: state.runtime,
       saveConfig: saveElizaConfig,
       createTelemetrySpan: createIntegrationTelemetrySpan,
+      restartRuntime,
     };
     const handled = await handleCloudRoute(
       req,

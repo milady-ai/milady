@@ -47,6 +47,7 @@
     "packages/plugin-music-library",
     "packages/plugin-music-player",
     "packages/plugin-shopify",
+    "packages/plugin-cloud-wallet",
     "deploy/cloud-agent-template"
   ],
   "type": "module",
