@@ -8,6 +8,7 @@ import {
 } from "@elizaos/shared";
 import JSON5 from "json5";
 import { readConfigEnvSync } from "../api/config-env.js";
+import { readConfigEnvSync } from "../api/config-env.js";
 import { syncSolanaPublicKeyEnv } from "../api/wallet.js";
 import { collectConfigEnvVars, collectConnectorEnvVars } from "./env-vars.js";
 import { resolveConfigIncludes } from "./includes.js";
@@ -27,23 +28,6 @@ function applyConfigEnvToProcessEnv(entries: Record<string, string>): void {
   for (const [key, value] of Object.entries(entries)) {
     process.env[key] = value;
   }
-}
-
-function mergePersistedEnvIntoConfig(
-  config: ElizaConfig,
-  entries: Record<string, string>,
-): void {
-  if (Object.keys(entries).length === 0) return;
-
-  const existing =
-    config.env && typeof config.env === "object" && !Array.isArray(config.env)
-      ? (config.env as Record<string, unknown>)
-      : {};
-
-  config.env = {
-    ...existing,
-    ...entries,
-  } as ElizaConfig["env"];
 }
 
 function getConfigEnvString(
@@ -182,7 +166,11 @@ export function loadElizaConfig(): ElizaConfig {
   }
 
   const persistedConfigEnv = readConfigEnvSync(resolveStateDir());
-  mergePersistedEnvIntoConfig(resolved, persistedConfigEnv);
+  // SECURITY: Do NOT merge persistedConfigEnv into resolved.env — config.env
+  // is the designated escape hatch for secrets that must NOT be serialized to
+  // milady.json (e.g. MILADY_CLOUD_CLIENT_ADDRESS_KEY, WALLET_SOURCE_*).
+  // Merging would create a sensitive-data boundary violation.
+  // Instead, apply directly to process.env (below).
 
   const envVars = collectConfigEnvVars(resolved);
   const connectorEnvVars = collectConnectorEnvVars(resolved);

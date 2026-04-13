@@ -879,7 +879,9 @@ export async function handleWalletRoutes(
   // POST /api/wallet/refresh-cloud — flag-gated.
   // Re-queries the Eliza Cloud bridge for per-chain wallet descriptors and
   // refreshes `config.wallet.cloud.*`. Provision is best-effort so one bad
-  // chain does not discard the other imported wallet(s).
+  // chain does not discard the other imported wallet(s). This is a refresh
+  // operation, so we re-fetch all chains to pick up any upstream changes
+  // (address rotation, migration, etc.), not just new chains.
   if (method === "POST" && pathname === "/api/wallet/refresh-cloud") {
     if (!isCloudWalletEnabled()) {
       error(res, "Not found", 404);
@@ -912,9 +914,10 @@ export async function handleWalletRoutes(
       const { address: clientAddress } = await getOrCreateClientAddressKey();
       const bridge = new ElizaCloudClient(baseUrl, apiKey);
       const cachedDescriptors = readCachedCloudWalletDescriptors(config);
-      const chainsToProvision = (["evm", "solana"] as const).filter(
-        (chain) => !cachedDescriptors[chain],
-      );
+      // During a refresh operation, re-fetch all chains (not just new ones)
+      // to pick up any upstream wallet address changes, rotations, or migrations.
+      // If refresh-cloud failed before persisting all chains, this helps recover.
+      const chainsToProvision = ["evm", "solana"] as const;
       const descriptors: Partial<
         Record<WalletChainKind, CloudWalletDescriptor>
       > = { ...cachedDescriptors };

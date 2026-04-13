@@ -186,12 +186,40 @@ function readCloudWalletAddress(
 }
 
 /**
+ * Read the user's saved primary wallet source selection from config.
+ * Returns { evm, solana } where each is either "local" or "cloud".
+ * Defaults to { evm: "local", solana: "local" } if not explicitly set.
+ */
+function readUserPrimarySelection(config: ElizaConfig): { evm: "local" | "cloud"; solana: "local" | "cloud" } {
+  const wallet = (config as unknown as { wallet?: unknown }).wallet;
+  const raw =
+    wallet && typeof wallet === "object"
+      ? (wallet as { primary?: unknown }).primary
+      : undefined;
+  const result = { evm: "local" as const, solana: "local" as const };
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const record = raw as Record<string, unknown>;
+    if (record.evm === "cloud" || record.evm === "local") {
+      result.evm = record.evm;
+    }
+    if (record.solana === "cloud" || record.solana === "local") {
+      result.solana = record.solana;
+    }
+  }
+  return result;
+}
+
+/**
  * When cloud mode + cloud wallet are both on and the cloud cache holds
  * descriptors, mark the runtime env so plugin-evm / plugin-solana bind
  * against the cloud signer rather than a local private key. Writes
  * `WALLET_SOURCE_EVM=cloud` / `WALLET_SOURCE_SOLANA=cloud` and the resolved
  * cloud wallet addresses to config.env (durable across restarts) and to
  * `process.env` (visible to the in-flight runtime).
+ *
+ * IMPORTANT: Only binds to cloud if the user has not explicitly selected
+ * local as primary for that chain. This preserves user-made primary selection
+ * changes across restarts.
  *
  * No-ops if `ENABLE_CLOUD_WALLET` is off or if the cache is empty.
  */
@@ -216,11 +244,23 @@ export async function bindCloudProvider(config: ElizaConfig): Promise<void> {
     await persistConfigEnv("MILADY_CLOUD_SOLANA_ADDRESS", solanaAddress);
   }
 
+  // Only bind WALLET_SOURCE_* to cloud if the user's saved primary for that
+  // chain is "cloud", or if no explicit primary choice has been saved yet.
+  // This preserves user selections across restarts: if they switched a chain
+  // back to "local" via the UI, restarting will not silently override that choice.
+  const userPrimary = readUserPrimarySelection(config);
+
   if (cloud.evm && process.env.WALLET_SOURCE_EVM !== "cloud") {
-    await persistConfigEnv("WALLET_SOURCE_EVM", "cloud");
+    // Only auto-bind EVM to cloud if user has not explicitly set it to "local"
+    if (userPrimary.evm === "cloud") {
+      await persistConfigEnv("WALLET_SOURCE_EVM", "cloud");
+    }
   }
   if (cloud.solana && process.env.WALLET_SOURCE_SOLANA !== "cloud") {
-    await persistConfigEnv("WALLET_SOURCE_SOLANA", "cloud");
+    // Only auto-bind Solana to cloud if user has not explicitly set it to "local"
+    if (userPrimary.solana === "cloud") {
+      await persistConfigEnv("WALLET_SOURCE_SOLANA", "cloud");
+    }
   }
 }
 
