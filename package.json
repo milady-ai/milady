@@ -300,7 +300,8 @@
   "overrides": {
     "@elizaos/plugin-elizacloud": "workspace:*",
     "@elizaos/plugin-anthropic": "workspace:*",
-    "@elizaos/plugin-cli": "workspace:*",
+    "@elizaos/plugin-cli": "2.0.0-alpha.9",
+    "@elizaos/plugin-rolodex": "2.0.0-alpha.10",
     "@elizaos/plugin-discord": "workspace:*",
     "@elizaos/plugin-knowledge": "workspace:*",
     "@elizaos/plugin-sql": "workspace:*",
