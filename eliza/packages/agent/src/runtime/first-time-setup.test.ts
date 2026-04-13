@@ -245,4 +245,21 @@ describe("bindCloudProvider", () => {
     const filePath = path.join(stateDir, "config.env");
     await expect(fs.stat(filePath)).rejects.toMatchObject({ code: "ENOENT" });
   });
+
+  it("respects user-selected local primary and does not override on restart", async () => {
+    process.env.ENABLE_CLOUD_WALLET = "1";
+    
+    // Config with cloud descriptors AND user's explicit choice to use local
+    const config = buildConfig({ evm: { walletAddress: "0xabc" } }) as any;
+    config.wallet = config.wallet || {};
+    config.wallet.primary = { evm: "local", solana: null };
+    
+    await bindCloudProvider(config);
+    
+    // Should NOT bind to cloud because user explicitly set it to local
+    expect(process.env.WALLET_SOURCE_EVM).toBeUndefined();
+    
+    const filePath = path.join(stateDir, "config.env");
+    await expect(fs.stat(filePath)).rejects.toMatchObject({ code: "ENOENT" });
+  });
 });

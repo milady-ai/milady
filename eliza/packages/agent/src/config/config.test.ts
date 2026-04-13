@@ -28,7 +28,7 @@ describe("loadElizaConfig", () => {
     await fs.rm(stateDir, { recursive: true, force: true }).catch(() => {});
   });
 
-  it("hydrates persisted config.env values into process.env and the resolved config", async () => {
+  it("hydrates persisted config.env values into process.env only, not the config object", async () => {
     await fs.writeFile(
       configPath,
       JSON.stringify({
@@ -50,16 +50,20 @@ describe("loadElizaConfig", () => {
 
     const config = loadElizaConfig();
 
+    // config.env values from file should be in process.env
     expect(process.env.WALLET_SOURCE_EVM).toBe("cloud");
     expect(process.env.MILADY_CLOUD_EVM_ADDRESS).toBe(
       "0x1234567890abcdef1234567890abcdef12345678",
     );
+
+    // Security: config.env secrets should NOT be merged into config.env
+    // (they're process-env-only to avoid serializing sensitive values to milady.json)
     expect(
       (config.env as Record<string, string | undefined>).WALLET_SOURCE_EVM,
-    ).toBe("cloud");
+    ).toBe("local"); // from config file, not overridden by config.env
     expect(
       (config.env as Record<string, string | undefined>)
         .MILADY_CLOUD_EVM_ADDRESS,
-    ).toBe("0x1234567890abcdef1234567890abcdef12345678");
+    ).toBeUndefined(); // NOT in config, only in process.env
   });
 });
