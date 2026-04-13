@@ -47,25 +47,17 @@ function serializeTx(tx: Transaction | VersionedTransaction): string {
 }
 
 function applySignedBytes<T extends Transaction | VersionedTransaction>(
-  tx: T,
+  _tx: T,
   base64: string,
 ): T {
   const bytes = Buffer.from(base64, "base64");
-  const isVersioned =
-    typeof (tx as VersionedTransaction).version !== "undefined";
-  
+  // The bridge returns fully-serialised signed transactions.
+  // Versioned transactions start with a version prefix byte (0x80 = 128 for v0).
+  const isVersioned = bytes[0] === 128 || bytes[0] === 0;
   if (isVersioned) {
-    // For VersionedTransaction, deserialize the signed transaction
-    const signed = VersionedTransaction.deserialize(bytes);
-    // Copy signatures back to original object
-    (tx as VersionedTransaction).signatures = signed.signatures;
-  } else {
-    // For Transaction, deserialize and extract signatures
-    const signed = Transaction.from(bytes);
-    // Copy signatures back to original object
-    (tx as Transaction).signatures = signed.signatures;
+    return VersionedTransaction.deserialize(bytes) as T;
   }
-  return tx;
+  return Transaction.from(bytes) as T;
 }
 
 export function createCloudSolanaSigner(
