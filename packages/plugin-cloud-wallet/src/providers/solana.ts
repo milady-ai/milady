@@ -1,7 +1,7 @@
 import {
   PublicKey,
-  type Transaction,
-  type VersionedTransaction,
+  Transaction,
+  VersionedTransaction,
 } from "@solana/web3.js";
 import { CloudRpcClient } from "../bridge/client.ts";
 import { getRuntimeSetting } from "../runtime.ts";
@@ -51,8 +51,20 @@ function applySignedBytes<T extends Transaction | VersionedTransaction>(
   base64: string,
 ): T {
   const bytes = Buffer.from(base64, "base64");
-  (tx as unknown as { __cloudSignedBytes: Uint8Array }).__cloudSignedBytes =
-    bytes;
+  const isVersioned =
+    typeof (tx as VersionedTransaction).version !== "undefined";
+  
+  if (isVersioned) {
+    // For VersionedTransaction, deserialize the signed transaction
+    const signed = VersionedTransaction.deserialize(bytes);
+    // Copy signatures back to original object
+    (tx as VersionedTransaction).signatures = signed.signatures;
+  } else {
+    // For Transaction, deserialize and extract signatures
+    const signed = Transaction.from(bytes);
+    // Copy signatures back to original object
+    (tx as Transaction).signatures = signed.signatures;
+  }
   return tx;
 }
 

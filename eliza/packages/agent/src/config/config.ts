@@ -8,7 +8,6 @@ import {
 } from "@elizaos/shared";
 import JSON5 from "json5";
 import { readConfigEnvSync } from "../api/config-env.js";
-import { readConfigEnvSync } from "../api/config-env.js";
 import { syncSolanaPublicKeyEnv } from "../api/wallet.js";
 import { collectConfigEnvVars, collectConnectorEnvVars } from "./env-vars.js";
 import { resolveConfigIncludes } from "./includes.js";
