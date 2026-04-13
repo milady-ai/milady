@@ -1,4 +1,5 @@
 export * from "./api/index.js";
+export * from "./autonomy/index.js";
 export * from "./auth/index.js";
 export type { RolesConfig } from "./config/index.js";
 export * from "./config/index.js";
@@ -17,3 +18,4 @@ export * from "./triggers/scheduling.js";
 export * from "./triggers/types.js";
 export * from "./utils/number-parsing.js";
 export * from "./utils/spoken-text.js";
+export * from "./autonomy";

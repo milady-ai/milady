@@ -1,4 +1,4 @@
-import { useApp } from "@elizaos/app-core/state";
+import { useApp } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import { useBranding } from "../../config/branding";
 import {

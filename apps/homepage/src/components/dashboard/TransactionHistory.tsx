@@ -3,7 +3,7 @@
  * TransactionHistory component from @elizaos/app-core.
  */
 
-import { TransactionHistory as TransactionHistoryBase } from "@elizaos/app-core/components";
+import { TransactionHistory as TransactionHistoryBase } from "@elizaos/app-core";
 import { useCallback } from "react";
 import type { CloudApiClient } from "../../lib/cloud-api";
 

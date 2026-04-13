@@ -5,24 +5,21 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, transformWithEsbuild, type Plugin } from "vite";
-import { colorizeDevSettingsStartupBanner } from "../../shared/src/dev-settings-banner-style.ts";
-import { prependDevSubsystemFigletHeading } from "../../shared/src/dev-settings-figlet-heading.ts";
+import { colorizeDevSettingsStartupBanner } from "@elizaos/shared/dev-settings-banner-style";
+import { prependDevSubsystemFigletHeading } from "@elizaos/shared/dev-settings-figlet-heading";
 import {
   type DevSettingsRow,
   formatDevSettingsTable,
-} from "../../shared/src/dev-settings-table.ts";
+} from "@elizaos/shared/dev-settings-table";
 import {
   resolveDesktopApiPort,
   resolveDesktopApiPortPreference,
   resolveDesktopUiPort,
   resolveDesktopUiPortPreference,
-} from "../../shared/src/runtime-env.ts";
+} from "@elizaos/shared/runtime-env";
 
 const _require = createRequire(import.meta.url);
 
-// Keep workspace-relative TS imports in this config so Vite transpiles them
-// while bundling the config instead of asking Node to load package-exported
-// .ts files directly in CI.
 const here = path.dirname(fileURLToPath(import.meta.url));
 const elizaRoot = path.resolve(here, "../../..");
 const nativePluginsRoot = path.join(elizaRoot, "packages", "native-plugins");

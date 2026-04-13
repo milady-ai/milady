@@ -256,6 +256,54 @@ export default defineConfig({
         find: "@elizaos/app-companion",
         replacement: path.join(appCompanionSourceRoot, "index.ts"),
       },
+      {
+        find: "@elizaos/app-training/routes/training",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "routes", "training-routes.ts"),
+      },
+      {
+        find: "@elizaos/app-training/routes/trajectory",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "routes", "trajectory-routes.ts"),
+      },
+      {
+        find: "@elizaos/app-training/services",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "services", "index.ts"),
+      },
+      {
+        find: /^@elizaos\/app-training\/core\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "core", "$1.ts"),
+      },
+      {
+        find: /^@elizaos\/app-training\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "$1"),
+      },
+      {
+        find: "@elizaos/app-training",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "index.ts"),
+      },
+      {
+        find: "@elizaos/app-knowledge/routes",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-knowledge", "src", "routes.ts"),
+      },
+      {
+        find: "@elizaos/app-knowledge/service-loader",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-knowledge", "src", "service-loader.ts"),
+      },
+      {
+        find: /^@elizaos\/app-knowledge\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-knowledge", "src", "$1"),
+      },
+      {
+        find: "@elizaos/app-knowledge",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-knowledge", "src", "index.ts"),
+      },
+      {
+        find: /^@elizaos\/app-form\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-form", "src", "$1"),
+      },
+      {
+        find: "@elizaos/app-form",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-form", "src", "index.ts"),
+      },
       ...(sharedSourceRoot
         ? [
             {

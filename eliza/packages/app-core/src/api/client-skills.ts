@@ -1318,7 +1318,7 @@ ElizaClient.prototype.toggleBabylonAgentAutonomy = async function (
   this: ElizaClient,
   opts,
 ) {
-  return this.fetch("/api/apps/babylon@elizaos/agent/autonomy", {
+  return this.fetch("/api/apps/babylon", {
     method: "POST",
     body: JSON.stringify(opts),
   });

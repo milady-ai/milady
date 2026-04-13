@@ -5,9 +5,9 @@
 import type {
   WalletBalancesResponse,
   WalletNftsResponse,
-} from "@elizaos/app-core/api";
-import type { createTranslator } from "@elizaos/app-core/i18n";
-import type { AppState } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import type { createTranslator } from "@elizaos/app-core";
+import type { AppState } from "@elizaos/app-core";
 import {
   Button,
   Select,

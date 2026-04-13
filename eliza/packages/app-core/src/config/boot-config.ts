@@ -7,7 +7,7 @@
  */
 import { createContext, useContext } from "react";
 import type { Tab } from "../navigation";
-import type { ActionNotice } from "../state";
+import type { ActionNotice } from "../state/action-notice";
 import type { WebsiteBlockerSettingsCardProps } from "../types";
 import type { BrandingConfig } from "./branding";
 

@@ -27,6 +27,10 @@
     "build:web": "vite build"
   },
   "dependencies": {
+    "@elizaos/app-companion": "workspace:*",
+    "@elizaos/app-lifeops": "workspace:*",
+    "@elizaos/app-shopify": "workspace:*",
+    "@elizaos/app-vincent": "workspace:*",
     "@capacitor/android": "^8.0.2",
     "@capacitor/app": "^8.0.1",
     "@capacitor/core": "^8.0.2",

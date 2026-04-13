@@ -5,7 +5,7 @@
  * `ClientLike` / `PatchState` pair captures the exact shape needed.
  */
 
-import type { client as appClient } from "@elizaos/app-core/api";
+import type { client as appClient } from "@elizaos/app-core";
 
 // ── desktop-permissions-client ──────────────────────────────────────────
 

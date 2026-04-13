@@ -6,5 +6,13 @@ export * from "./replay-validator.js";
 export * from "./roleplay-executor.js";
 export * from "./roleplay-trajectories.js";
 export * from "./scenario-blueprints.js";
-export * from "./trajectory-task-datasets.js";
+export {
+  type TrajectoryTrainingTask,
+  type TrajectoryTaskDatasetPaths,
+  type TrajectoryTaskDatasetExport,
+  type TrajectoryTaskDatasetTaskSummary,
+  type TrajectoryTaskDatasetSummary,
+  extractTrajectoryExamplesByTask,
+  exportTrajectoryTaskDatasets,
+} from "./trajectory-task-datasets.js";
 export * from "./vertex-tuning.js";

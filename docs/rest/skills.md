@@ -561,10 +561,10 @@ Acknowledges the security scan findings for a skill. Required before the skill c
 bunx vitest run src/services/plugin-installer.test.ts src/services/skill-marketplace.test.ts src/services/skill-catalog-client.test.ts
 
 # Skills marketplace API and services e2e
-bunx vitest run --config vitest.e2e.config.ts test/skills-marketplace-api.e2e.test.ts test/skills-marketplace-services.e2e.test.ts
+bunx vitest run --config test/vitest/e2e.config.ts test/skills-marketplace-api.e2e.test.ts test/skills-marketplace-services.e2e.test.ts
 
 # API server e2e (includes skills routes)
-bunx vitest run --config vitest.e2e.config.ts test/api-server.e2e.test.ts
+bunx vitest run --config test/vitest/e2e.config.ts test/api-server.e2e.test.ts
 
 bun run typecheck
 ```

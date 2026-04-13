@@ -100,9 +100,21 @@ export function resolvePinnedCoreVersion(
     "cloud-agent-template",
     "package.json",
   );
-  if (fs.existsSync(templatePath)) {
+  const disabledTemplatePath = path.join(
+    rootDir,
+    ".eliza.ci-disabled",
+    "packages",
+    "app-core",
+    "deploy",
+    "cloud-agent-template",
+    "package.json",
+  );
+  for (const candidatePath of [templatePath, disabledTemplatePath]) {
+    if (!fs.existsSync(candidatePath)) {
+      continue;
+    }
     try {
-      const templatePkg = readJson(templatePath);
+      const templatePkg = readJson(candidatePath);
       const fromTemplate = templatePkg?.dependencies?.[ELIZAOS_CORE_NAME];
       if (isExactRegistryVersion(fromTemplate)) {
         return fromTemplate;

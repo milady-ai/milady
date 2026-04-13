@@ -13,15 +13,15 @@
 import type {
   KnowledgeDocument,
   KnowledgeSearchResult,
-} from "@elizaos/app-core/api";
-import { client } from "@elizaos/app-core/api";
+} from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
 import {
   ConfirmDeleteControl,
   formatByteSize,
   formatShortDate,
-} from "@elizaos/app-core/components";
-import { useApp } from "@elizaos/app-core/state";
-import { confirmDesktopAction } from "@elizaos/app-core/utils";
+} from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
+import { confirmDesktopAction } from "@elizaos/app-core";
 import { Button, PagePanel } from "@elizaos/app-core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {

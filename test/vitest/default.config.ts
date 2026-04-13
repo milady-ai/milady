@@ -197,7 +197,7 @@ export default defineConfig({
       ...(appCoreSourceRoot
         ? [
             {
-              find: "@elizaos/app-core/bridge/electrobun-rpc.js",
+              find: "@elizaos/app-core/electrobun-rpc.js",
               replacement: path.join(
                 repoRoot,
                 "eliza",
@@ -209,7 +209,7 @@ export default defineConfig({
               ),
             },
             {
-              find: "@elizaos/app-core/bridge/electrobun-rpc",
+              find: "@elizaos/app-core/electrobun-rpc",
               replacement: path.join(
                 repoRoot,
                 "eliza",
@@ -221,7 +221,7 @@ export default defineConfig({
               ),
             },
             {
-              find: "@elizaos/app-core/bridge/electrobun-runtime",
+              find: "@elizaos/app-core/electrobun-runtime",
               replacement: path.join(
                 repoRoot,
                 "eliza",
@@ -233,7 +233,7 @@ export default defineConfig({
               ),
             },
             {
-              find: "@elizaos/app-core/bridge",
+              find: "@elizaos/app-core",
               replacement: path.join(
                 repoRoot,
                 "eliza",

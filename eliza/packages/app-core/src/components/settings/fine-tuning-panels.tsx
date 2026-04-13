@@ -11,8 +11,8 @@ import type {
   TrainingStreamEvent,
   TrainingTrajectoryDetail,
   TrainingTrajectoryList,
-} from "@elizaos/app-core/api";
-import { formatTime } from "@elizaos/app-core/components";
+} from "@elizaos/app-core";
+import { formatTime } from "@elizaos/app-core";
 import {
   Button,
   Select,

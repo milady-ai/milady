@@ -3,7 +3,7 @@ import { Z_GLOBAL_EMOTE } from "@elizaos/app-core";
 import {
   APP_EMOTE_EVENT,
   type AppEmoteEventDetail,
-} from "@elizaos/app-core/events";
+} from "@elizaos/app-core";
 
 const OVERLAY_LIFETIME_MS = 2400;
 

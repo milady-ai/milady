@@ -41,7 +41,7 @@ import {
   STATIC_ELIZA_PLUGINS,
   scanDropInPlugins,
   shouldIgnoreMissingPluginExport,
-} from "./eliza.js";
+} from "./plugin-types.js";
 import {
   CHANNEL_PLUGIN_MAP,
   collectPluginNames,

@@ -1,6 +1,6 @@
 /** PTY session hydration — maps server task data to CodingAgentSession objects. */
 
-import type { CodingAgentSession } from "@elizaos/app-core/api";
+import type { CodingAgentSession } from "@elizaos/app-core";
 
 /** Statuses that represent a finished session — excluded from hydration. */
 export const TERMINAL_STATUSES = new Set([

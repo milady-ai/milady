@@ -279,7 +279,7 @@ export async function handleTrainingRoutes(
 
   if (method === "GET" && pathname === "/api/training/blueprints") {
     const { ALL_BLUEPRINTS, BLUEPRINT_STATS } = await import(
-      "../training/scenario-blueprints.js"
+      "../core/scenario-blueprints.js"
     );
     json(res, {
       count: ALL_BLUEPRINTS.length,
@@ -297,7 +297,7 @@ export async function handleTrainingRoutes(
 
   if (method === "GET" && pathname === "/api/training/context-catalog") {
     const { ACTION_CONTEXT_MAP, PROVIDER_CONTEXT_MAP, ALL_CONTEXTS } =
-      await import("../training/context-catalog.js");
+      await import("../core/context-catalog.js");
     json(res, {
       contexts: ALL_CONTEXTS,
       actions: ACTION_CONTEXT_MAP,
@@ -320,7 +320,7 @@ export async function handleTrainingRoutes(
     }
 
     const { auditRuntimeContextCoverage, hasContextAuditGaps } = await import(
-      "../training/context-audit.js"
+      "../core/context-audit.js"
     );
     const audit = auditRuntimeContextCoverage(
       runtime as AgentRuntime & {
@@ -367,9 +367,9 @@ export async function handleTrainingRoutes(
       exportToGeminiJSONL,
       createAnthropicTeacher,
       createOpenAITeacher,
-    } = await import("../training/dataset-generator.js");
+    } = await import("../core/dataset-generator.js");
     const { buildRoleplayEpisodes, exportRoleplayEpisodes } = await import(
-      "../training/roleplay-trajectories.js"
+      "../core/roleplay-trajectories.js"
     );
 
     const teacher = anthropicKey
@@ -390,7 +390,7 @@ export async function handleTrainingRoutes(
       });
 
       const { validateDataset } = await import(
-        "../training/replay-validator.js"
+        "../core/replay-validator.js"
       );
       const report = validateDataset(samples);
 
@@ -448,9 +448,9 @@ export async function handleTrainingRoutes(
     }
 
     const { generateDataset, createAnthropicTeacher, createOpenAITeacher } =
-      await import("../training/dataset-generator.js");
+      await import("../core/dataset-generator.js");
     const { buildRoleplayEpisodes, exportRoleplayEpisodes } = await import(
-      "../training/roleplay-trajectories.js"
+      "../core/roleplay-trajectories.js"
     );
 
     const teacher = anthropicKey
@@ -513,7 +513,7 @@ export async function handleTrainingRoutes(
       executeRoleplayEpisodes,
       exportRoleplayExecutionResults,
       loadRoleplayEpisodesFromPath,
-    } = await import("../training/roleplay-executor.js");
+    } = await import("../core/roleplay-executor.js");
 
     try {
       const episodes = await loadRoleplayEpisodesFromPath(inputPath);
@@ -596,7 +596,7 @@ export async function handleTrainingRoutes(
 
       if (body.splitByTask || body.outputDir || body.tasks?.length) {
         const { exportTrajectoryTaskDatasets } = await import(
-          "../training/trajectory-task-datasets.js"
+          "../core/trajectory-task-datasets.js"
         );
         const dataset = await exportTrajectoryTaskDatasets(
           details as any,
@@ -616,7 +616,7 @@ export async function handleTrainingRoutes(
         };
       } else {
         const { exportTrajectoriesAsTraining } = await import(
-          "../training/dataset-generator.js"
+          "../core/dataset-generator.js"
         );
         exported = await exportTrajectoriesAsTraining(
           details as Array<{
@@ -676,7 +676,7 @@ export async function handleTrainingRoutes(
       return true;
     }
 
-    const { createTuningJob } = await import("../training/vertex-tuning.js");
+    const { createTuningJob } = await import("../core/vertex-tuning.js");
 
     try {
       const job = await createTuningJob({
@@ -709,7 +709,7 @@ export async function handleTrainingRoutes(
       return true;
     }
 
-    const { getTuningJobStatus } = await import("../training/vertex-tuning.js");
+    const { getTuningJobStatus } = await import("../core/vertex-tuning.js");
 
     try {
       const job = await getTuningJobStatus(jobName);
@@ -761,9 +761,9 @@ export async function handleTrainingRoutes(
       createOpenAITeacher,
       exportToGeminiJSONL,
       generateDataset,
-    } = await import("../training/dataset-generator.js");
+    } = await import("../core/dataset-generator.js");
     const { normalizeVertexBaseModel, orchestrateVertexTuning } = await import(
-      "../training/vertex-tuning.js"
+      "../core/vertex-tuning.js"
     );
 
     const slot = (body.slot ?? "should_respond") as
@@ -807,7 +807,7 @@ export async function handleTrainingRoutes(
             executeRoleplayEpisodes,
             exportRoleplayExecutionResults,
             loadRoleplayEpisodesFromPath,
-          } = await import("../training/roleplay-executor.js");
+          } = await import("../core/roleplay-executor.js");
           const episodes =
             await loadRoleplayEpisodesFromPath(roleplayInputPath);
           const roleplayOutputDir = `${datasetOutputDir}/roleplay-execution`;
@@ -930,7 +930,7 @@ export async function handleTrainingRoutes(
       return true;
     }
 
-    const { listTuningJobs } = await import("../training/vertex-tuning.js");
+    const { listTuningJobs } = await import("../core/vertex-tuning.js");
 
     try {
       const jobs = await listTuningJobs(projectId, region);

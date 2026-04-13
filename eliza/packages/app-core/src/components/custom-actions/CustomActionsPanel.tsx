@@ -1,6 +1,6 @@
-import { type CustomActionDef, client } from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
-import { confirmDesktopAction } from "@elizaos/app-core/utils";
+import { type CustomActionDef, client } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
+import { confirmDesktopAction } from "@elizaos/app-core";
 import { Button, Input, Switch } from "@elizaos/app-core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 

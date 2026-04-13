@@ -14,10 +14,10 @@ import {
   buildBscTradeQuote,
   resolveBscApprovalSpender,
   resolvePrimaryBscRpcUrl,
-} from "@elizaos/agent/api/bsc-trade";
-import { getWalletAddresses } from "@elizaos/agent/api/wallet";
-import { resolveWalletRpcReadiness } from "@elizaos/agent/api/wallet-rpc";
-import { recordWalletTradeLedgerEntry } from "@elizaos/agent/api/wallet-trading-profile";
+} from "../api/bsc-trade";
+import { getWalletAddresses } from "../api/wallet";
+import { resolveWalletRpcReadiness } from "../api/wallet-rpc";
+import { recordWalletTradeLedgerEntry } from "../api/wallet-trading-profile";
 import { type PolicyResult, StewardApiError } from "@stwd/sdk";
 import { ethers } from "ethers";
 import {
@@ -28,15 +28,15 @@ import {
   isStewardConfigured,
   signTransactionWithOptionalSteward,
 } from "./steward-bridge";
-import { ensureCompatApiAuthorized } from "@elizaos/app-core/api/auth";
+import { ensureCompatApiAuthorized } from "@elizaos/app-core";
 import {
   sendJson as sendJsonResponse,
   sendJsonError as sendJsonErrorResponse,
-} from "@elizaos/app-core/api/response";
+} from "@elizaos/app-core";
 import {
   readCompatJsonBody,
   type CompatRuntimeState,
-} from "@elizaos/app-core/api/compat-route-shared";
+} from "@elizaos/app-core";
 import { loadElizaConfig } from "@elizaos/agent/config/config";
 
 // ---------------------------------------------------------------------------

@@ -16,8 +16,8 @@ import {
   SettingsView,
   StartupFailureView,
   VoiceConfigView,
-} from "@elizaos/app-core/components";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import type { JSX } from "react";
 import {
   resolveDetachedShellTarget,

@@ -86,7 +86,6 @@
   "author": "elizaOS",
   "license": "MIT",
   "devDependencies": {
-    "@elizaos/plugin-elizacloud": "workspace:*",
     "@elizaos/plugin-sql": "workspace:*",
     "@elizaos/schemas": "workspace:*",
     "@playwright/test": "^1.52.0",

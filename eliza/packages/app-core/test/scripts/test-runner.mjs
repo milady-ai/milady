@@ -34,7 +34,7 @@ for (let shard = 1; shard <= unitShardCount; shard += 1) {
       "./node_modules/.bin/vitest",
       "run",
       "--config",
-      "vitest.config.ts",
+      "test/vitest/default.config.ts",
       `--shard=${shard}/${unitShardCount}`,
     ],
     cwd: repoRoot,

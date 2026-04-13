@@ -10,9 +10,9 @@
  *   3. Everything else → plain text
  */
 
-import type { ConversationMessage, PluginInfo } from "@elizaos/app-core/api";
-import { client } from "@elizaos/app-core/api";
-import { paramsToSchema } from "@elizaos/app-core/components";
+import type { ConversationMessage, PluginInfo } from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
+import { paramsToSchema } from "@elizaos/app-core";
 import {
   ConfigRenderer,
   defaultRegistry,
@@ -20,10 +20,10 @@ import {
   type PatchOp,
   UiRenderer,
   type UiSpec,
-} from "@elizaos/app-core/config";
-import { useApp } from "@elizaos/app-core/state";
-import type { ConfigUiHint } from "@elizaos/app-core/types";
-import { stripAssistantStageDirections } from "@elizaos/app-core/utils";
+} from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
+import type { ConfigUiHint } from "@elizaos/app-core";
+import { stripAssistantStageDirections } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 

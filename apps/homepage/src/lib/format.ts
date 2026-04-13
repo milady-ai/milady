@@ -1,1 +1,1 @@
-export { formatUptime } from "@elizaos/app-core/utils";
+export { formatUptime } from "@elizaos/app-core";

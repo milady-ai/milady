@@ -62,6 +62,10 @@ import {
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 import type { RouteRequestContext } from "./route-helpers.js";
 import {
+  maybeHandleDirectBinanceSkillRequest,
+  parseFallbackActionBlocks,
+} from "./binance-skill-helpers.js";
+import {
   buildWalletActionNotExecutedReply,
   cloneWithoutBlockedObjectKeys,
   decodePathComponent,
@@ -72,14 +76,11 @@ import {
   maybeAugmentChatMessageWithKnowledge,
   maybeAugmentChatMessageWithLanguage,
   maybeAugmentChatMessageWithWalletContext,
-  // Deep dependencies of generateChatResponse that stay in server.ts
-  maybeHandleDirectBinanceSkillRequest,
   normalizeIncomingChatPrompt,
-  parseFallbackActionBlocks,
   resolveAppUserName,
   trimWalletProgressPrefix,
   validateChatImages,
-} from "./server.js";
+} from "./server-helpers.js";
 import { resolveStreamingUpdate } from "./streaming-text.js";
 
 const CHAT_MAX_BODY_BYTES = 20 * 1024 * 1024; // 20 MB (image-capable)

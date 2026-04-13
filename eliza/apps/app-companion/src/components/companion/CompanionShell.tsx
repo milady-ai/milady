@@ -5,9 +5,9 @@
  * require switching to native (advanced) mode via the header toggle.
  */
 
-import { useRenderGuard } from "@elizaos/app-core/hooks";
-import type { Tab } from "@elizaos/app-core/navigation";
-import type { ActionNotice } from "@elizaos/app-core/state";
+import { useRenderGuard } from "@elizaos/app-core";
+import type { Tab } from "@elizaos/app-core";
+import type { ActionNotice } from "@elizaos/app-core";
 import { memo } from "react";
 import { CompanionView } from "./CompanionView";
 

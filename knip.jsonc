@@ -29,9 +29,6 @@
         "eliza/packages/app-core/scripts/rt.sh",
         "eliza/packages/app-core/scripts/*.mjs",
         "eliza/packages/app-core/scripts/lib/*.mjs",
-        "tsdown.electrobun.config.ts",
-        "tsdown.electrobun.config.test.ts",
-        "vitest.live.config.ts"
       ],
       "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs,js}"],
       "ignore": ["dist/**", "build/**", "coverage/**", "**/*.test.ts"]

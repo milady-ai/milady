@@ -26,7 +26,7 @@ const bridgeStubPath = path.join(
 );
 
 /**
- * Custom Vite plugin that redirects @elizaos/app-core/bridge imports to
+ * Custom Vite plugin that redirects @elizaos/app-core imports to
  * the test shim before Vite's built-in resolver tries to resolve through
  * the package's exports map (which may reference native bindings that are
  * unavailable in the test environment).
@@ -37,9 +37,9 @@ function appCoreBridgeStubPlugin(): Plugin {
     enforce: "pre",
     resolveId(source) {
       if (
-        source === "@elizaos/app-core/bridge/electrobun-rpc" ||
-        source === "@elizaos/app-core/bridge/electrobun-runtime" ||
-        source === "@elizaos/app-core/bridge"
+        source === "@elizaos/app-core/electrobun-rpc" ||
+        source === "@elizaos/app-core/electrobun-runtime" ||
+        source === "@elizaos/app-core"
       ) {
         return bridgeStubPath;
       }

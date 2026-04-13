@@ -11,8 +11,8 @@ import type {
   BscTradeQuoteResponse,
   BscTradeTxStatusResponse,
   StewardPolicyResult,
-} from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import { Button, Input } from "@elizaos/app-core";
 import { useCallback, useState } from "react";
 import { HEX_ADDRESS_RE } from "@elizaos/app-companion/ui";

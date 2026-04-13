@@ -5,7 +5,7 @@ import type {
   CodingAgentStatus,
   CodingAgentTaskThread,
   CodingAgentTaskThreadDetail,
-} from "@elizaos/app-core/api";
+} from "@elizaos/app-core";
 import { Badge, Button } from "@elizaos/app-core";
 import { Activity } from "lucide-react";
 import {

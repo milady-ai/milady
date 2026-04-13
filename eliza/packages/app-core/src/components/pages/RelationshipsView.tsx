@@ -5,7 +5,7 @@ import {
   type RelationshipsGraphSnapshot,
   type RelationshipsPersonDetail,
   type RelationshipsPersonSummary,
-} from "@elizaos/app-core/api";
+} from "@elizaos/app-core";
 import {
   Button,
   MetaPill,

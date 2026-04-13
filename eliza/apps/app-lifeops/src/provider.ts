@@ -5,7 +5,7 @@ import type {
   ProviderResult,
   State,
 } from "@elizaos/core";
-import { LifeOpsService } from "@elizaos/agent/lifeops/service";
+import { LifeOpsService } from "./lifeops/service.js";
 import { hasAdminAccess } from "@elizaos/agent/security/access";
 
 function formatSettingsLine(

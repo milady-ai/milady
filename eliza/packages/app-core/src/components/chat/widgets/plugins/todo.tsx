@@ -1,4 +1,4 @@
-import type { WorkbenchTodo } from "@elizaos/app-core/api";
+import type { WorkbenchTodo } from "@elizaos/app-core";
 import { Badge } from "@elizaos/app-core";
 import { ListTodo } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";

@@ -1,4 +1,3 @@
-import { names, uniqueNamesGenerator } from "unique-names-generator";
 import { requireProviderSpec } from "../../../generated/spec-helpers.ts";
 import type {
 	ActionExample,
@@ -9,6 +8,7 @@ import type {
 	State,
 } from "../../../types/index.ts";
 import { addHeader } from "../../../utils.ts";
+import { pickRandomExampleName } from "../../../utils/example-names.ts";
 
 // Get text content from centralized specs
 const spec = requireProviderSpec("EVALUATORS");
@@ -41,7 +41,7 @@ export function formatEvaluatorExamples(evaluators: Evaluator[]) {
 			return evaluator.examples
 				.map((example) => {
 					const exampleNames = Array.from({ length: 5 }, () =>
-						uniqueNamesGenerator({ dictionaries: [names] }),
+						pickRandomExampleName(),
 					);
 
 					let formattedPrompt = example.prompt;

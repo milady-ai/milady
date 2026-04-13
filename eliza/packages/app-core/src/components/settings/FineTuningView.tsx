@@ -9,10 +9,10 @@ import {
   type TrainingStreamEvent,
   type TrainingTrajectoryDetail,
   type TrainingTrajectoryList,
-} from "@elizaos/app-core/api";
-import { useIntervalWhenDocumentVisible } from "@elizaos/app-core/hooks";
-import { useApp } from "@elizaos/app-core/state";
-import { confirmDesktopAction } from "@elizaos/app-core/utils";
+} from "@elizaos/app-core";
+import { useIntervalWhenDocumentVisible } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
+import { confirmDesktopAction } from "@elizaos/app-core";
 import { Button, ContentLayout } from "@elizaos/app-core";
 import {
   type ReactNode,

@@ -911,8 +911,6 @@ async function startRealStack(): Promise<StartedStack> {
     env: {
       ...process.env,
       ALLOW_NO_DATABASE: "",
-      ELIZA_PORT: String(apiPort),
-      ELIZA_STATE_DIR: stateDir,
       FORCE_COLOR: "0",
       ELIZA_API_PORT: String(apiPort),
       ELIZA_PORT: String(apiPort),

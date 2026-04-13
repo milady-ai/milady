@@ -60,16 +60,16 @@ import {
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 import { evictOldestConversation } from "./memory-bounds.js";
 import type { RouteRequestContext } from "./route-helpers.js";
+import type { ConversationMeta } from "./server-types.js";
 import {
   buildUserMessages,
-  type ConversationMeta,
   getErrorMessage,
   isUuidLike,
   persistConversationRoomTitle,
   resolveAppUserName,
   resolveConversationGreetingText,
   resolveWalletModeGuidanceReply,
-} from "./server.js";
+} from "./server-helpers.js";
 
 // ---------------------------------------------------------------------------
 // Deleted-conversations state persistence

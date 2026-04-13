@@ -41,7 +41,7 @@ All 3 files must have NODE_PATH assignments.
 
 **Coverage floor**: If tests were modified, run them:
 ```bash
-bunx vitest run --config vitest.unit.config.ts --reporter=verbose 2>&1 | tail -20
+bunx vitest run --config test/vitest/unit.config.ts --reporter=verbose 2>&1 | tail -20
 ```
 Coverage must meet: 25% lines, 15% branches.
 

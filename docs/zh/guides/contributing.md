@@ -279,7 +279,7 @@ MILADY_RUNTIME=node bun run milady start
 - **`packages/app-core/src/**/*.test.ts`** 和 **`packages/app-core/src/**/*.test.tsx`** — 并置测试，包括 TSX，无需逐个列出。
 - **`packages/app-core/test/**/*.test.ts`** 和 **`.../test/**/*.test.tsx`** — 共享测试工具测试（例如 `test/state`、`test/runtime`）。
 
-**原因：** 这些目录之前被遗漏，因此新的测试套件从未在 CI 中运行。**`packages/app-core/test/**/*.e2e.test.ts(x)`** 从此任务中排除，以便 e2e 保持在 **`vitest.e2e.config.ts`** 上。**`vitest.unit.config.ts`** 仍然从以覆盖率为重点的单元测试中省略 **`packages/app-core/test/app/**`**（重量级渲染器工具） — **原因：** 这些在特定的 app 工作空间或单独的任务中运行。
+**原因：** 这些目录之前被遗漏，因此新的测试套件从未在 CI 中运行。**`packages/app-core/test/**/*.e2e.test.ts(x)`** 从此任务中排除，以便 e2e 保持在 **`test/vitest/e2e.config.ts`** 上。**`test/vitest/unit.config.ts`** 仍然从以覆盖率为重点的单元测试中省略 **`packages/app-core/test/app/**`**（重量级渲染器工具） — **原因：** 这些在特定的 app 工作空间或单独的任务中运行。
 
 ---
 

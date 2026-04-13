@@ -24,6 +24,9 @@ import os from "node:os";
 import path from "node:path";
 import { handleKnowledgeRoutes } from "@elizaos/app-knowledge/routes";
 import { getKnowledgeService } from "@elizaos/app-knowledge/service-loader";
+import { handleTrainingRoutes } from "@elizaos/app-training/routes/training";
+import { handleTrajectoryRoute } from "@elizaos/app-training/routes/trajectory";
+import type { TrainingServiceWithRuntime } from "@elizaos/app-training/services";
 import {
   type AgentRuntime,
   ChannelType,
@@ -101,26 +104,11 @@ import {
   isPrivyWalletProvisioningEnabled,
 } from "../services/privy-wallets.js";
 import type { SandboxManager } from "../services/sandbox-manager.js";
-import {
-  SignalPairingSession,
-  sanitizeAccountId as sanitizeSignalAccountId,
-  signalAuthExists,
-  signalLogout,
-} from "../services/signal-pairing.js";
+// signal-pairing: SignalPairingSession, sanitizeAccountId, signalLogout extracted to @elizaos/plugin-signal
+import { signalAuthExists } from "../services/signal-pairing.js";
 import { streamManager } from "../services/stream-manager.js";
-import {
-  clearTelegramAccountAuthState,
-  clearTelegramAccountSession,
-  TelegramAccountAuthSession,
-  telegramAccountAuthStateExists,
-  telegramAccountSessionExists,
-} from "../services/telegram-account-auth.js";
-import {
-  sanitizeAccountId as sanitizeWhatsAppAccountId,
-  WhatsAppPairingSession,
-  whatsappAuthExists,
-  whatsappLogout,
-} from "../services/whatsapp-pairing.js";
+// Telegram account auth: moved to @elizaos/plugin-telegram (account-setup-routes + account-auth-service).
+// WhatsApp pairing: route handlers moved to @elizaos/plugin-whatsapp.
 import {
   executeTriggerTask,
   getTriggerHealthSnapshot,
@@ -154,15 +142,8 @@ import {
   resolveBlueBubblesWebhookPath,
 } from "./bluebubbles-routes.js";
 import { handleBrowserWorkspaceRoutes } from "./browser-workspace-routes.js";
-import {
-  buildBscApproveUnsignedTx,
-  buildBscBuyUnsignedTx,
-  buildBscSellUnsignedTx,
-  buildBscTradePreflight,
-  buildBscTradeQuote,
-  resolveBscApprovalSpender,
-  resolvePrimaryBscRpcUrl,
-} from "./bsc-trade.js";
+// BSC trade helpers moved to @elizaos/app-steward. Kept for re-export only.
+// import { buildBscApproveUnsignedTx, ... } from "./bsc-trade.js";
 import { handleBugReportRoutes } from "./bug-report-routes.js";
 import { handleCharacterRoutes } from "./character-routes.js";
 import {
@@ -190,7 +171,7 @@ import type {
 import { wireCoordinatorBridgesWhenReady } from "./coordinator-wiring.js";
 import { handleDatabaseRoute } from "./database.js";
 import { handleDiagnosticsRoutes } from "./diagnostics-routes.js";
-import { handleDiscordLocalRoute } from "./discord-local-routes.js";
+// Discord local routes extracted to @elizaos/plugin-discord (setup-routes.ts)
 import { handleDropRoutes } from "./drop-routes.js";
 import { DropService } from "./drop-service.js";
 import { handleHealthRoutes } from "./health-routes.js";
@@ -201,9 +182,10 @@ import {
   sendJson,
   sendJsonError,
 } from "./http-helpers.js";
-import { handleIMessageRoute } from "./imessage-routes.js";
+// iMessage routes extracted to @elizaos/plugin-imessage setup-routes.ts (Plugin.routes)
+// import { handleIMessageRoute } from "./imessage-routes.js";
 import { handleInboxRoute } from "./inbox-routes.js";
-import { handleLifeOpsRoutes } from "./lifeops-routes.js";
+import { handleLifeOpsRoutes } from "@elizaos/app-lifeops/routes/lifeops-routes";
 import { handleMcpRoutes } from "./mcp-routes.js";
 import { pushWithBatchEvict, sweepExpiredEntries } from "./memory-bounds.js";
 import { handleMemoryRoutes } from "./memory-routes.js";
@@ -225,53 +207,71 @@ import { RegistryService } from "./registry-service.js";
 import { handleRelationshipsRoutes } from "./relationships-routes.js";
 import { tryHandleRuntimePluginRoute } from "./runtime-plugin-routes.js";
 import { handleSandboxRoute } from "./sandbox-routes.js";
-import { hasPersistedOnboardingState } from "./server-helpers.js";
-import { applySignalQrOverride, handleSignalRoute } from "./signal-routes.js";
+import {
+  hasPersistedOnboardingState,
+  isUuidLike,
+  resolveAppUserName,
+  resolveConversationGreetingText,
+  patchTouchesProviderSelection,
+  getErrorMessage,
+  maybeAugmentChatMessageWithLanguage,
+  maybeAugmentChatMessageWithWalletContext,
+  maybeAugmentChatMessageWithKnowledge,
+  buildChatAttachments,
+  buildUserMessages,
+  IMAGE_ONLY_CHAT_FALLBACK_PROMPT,
+  normalizeIncomingChatPrompt,
+  validateChatImages,
+  hasBlockedObjectKeyDeep,
+  cloneWithoutBlockedObjectKeys,
+  isWalletActionRequiredIntent,
+  WALLET_EXECUTION_INTENT_RE,
+  WALLET_PROGRESS_ONLY_RE,
+  resolveWalletModeGuidanceReply,
+  persistConversationRoomTitle,
+  decodePathComponent,
+} from "./server-helpers.js";
+// signal-routes: handleSignalRoute dispatch extracted to @elizaos/plugin-signal (setup-routes.ts)
+import { applySignalQrOverride } from "./signal-routes.js";
 import { discoverSkills } from "./skill-discovery-helpers.js";
 import { handleSkillsRoutes } from "./skills-routes.js";
 import { handleSubscriptionRoutes } from "./subscription-routes.js";
 import { routeTaskAgentTextToConnector } from "./task-agent-message-routing.js";
-import { handleTelegramAccountRoute } from "./telegram-account-routes.js";
+// Telegram account routes: moved to @elizaos/plugin-telegram (account-setup-routes).
 import { handleTelegramSetupRoute } from "./telegram-setup-routes.js";
-import { handleTrainingRoutes } from "@elizaos/app-training/routes/training";
-import type { TrainingServiceWithRuntime } from "@elizaos/app-training/services";
-import { handleTrajectoryRoute } from "@elizaos/app-training/routes/trajectory";
 import { handleTriggerRoutes } from "./trigger-routes.js";
 import { handleTtsRoutes } from "./tts-routes.js";
 import { TxService } from "./tx-service.js";
 import { handleUpdateRoutes } from "./update-routes.js";
 import {
-  fetchEvmBalances,
-  fetchSolanaBalances,
-  fetchSolanaNativeBalanceViaRpc,
-  generateWalletForChain,
+  // Balance/import/generate helpers moved to @elizaos/app-steward plugin routes.
+  // fetchEvmBalances, fetchSolanaBalances, fetchSolanaNativeBalanceViaRpc,
+  // generateWalletForChain, importWallet, validatePrivateKey,
   generateWalletKeys,
   getWalletAddresses,
-  importWallet,
   initStewardWalletCache,
   setSolanaWalletEnv,
-  validatePrivateKey,
 } from "./wallet.js";
-import { handleWalletBscRoutes } from "./wallet-bsc-routes.js";
+// Wallet dispatch moved to @elizaos/app-steward plugin routes.
+// import { handleWalletBscRoutes } from "./wallet-bsc-routes.js";
 import {
   EVM_PLUGIN_PACKAGE,
   resolveWalletAutomationMode as resolveAgentAutomationModeFromConfig,
   resolvePluginEvmLoaded,
   resolveWalletCapabilityStatus,
 } from "./wallet-capability.js";
-import { handleWalletRoutes } from "./wallet-routes.js";
+// import { handleWalletRoutes } from "./wallet-routes.js";
 import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
-import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
-import {
-  loadWalletTradingProfile,
-  recordWalletTradeLedgerEntry,
-  updateWalletTradeLedgerEntryStatus,
-} from "./wallet-trading-profile.js";
-import { handleWebsiteBlockerRoutes } from "./website-blocker-routes.js";
-import {
-  applyWhatsAppQrOverride,
-  handleWhatsAppRoute,
-} from "./whatsapp-routes.js";
+// import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
+// import {
+//   loadWalletTradingProfile,
+//   recordWalletTradeLedgerEntry,
+//   updateWalletTradeLedgerEntryStatus,
+// } from "./wallet-trading-profile.js";
+import { handleWebsiteBlockerRoutes } from "@elizaos/app-lifeops/routes/website-blocker-routes";
+// handleWhatsAppRoute moved to @elizaos/plugin-whatsapp setup-routes.
+// applyWhatsAppQrOverride is still used by plugin-status routes.
+import { applyWhatsAppQrOverride } from "./whatsapp-routes.js";
 import { handleWorkbenchRoutes } from "./workbench-routes.js";
 
 export {
@@ -289,6 +289,37 @@ export {
   isNoResponsePlaceholder,
   stripAssistantStageDirections,
 } from "./chat-text-helpers.js";
+
+// Re-export helper functions from server-helpers.ts for backwards compatibility
+export {
+  buildChatAttachments,
+  buildUserMessages,
+  buildWalletActionNotExecutedReply,
+  cloneWithoutBlockedObjectKeys,
+  decodePathComponent,
+  findOwnPackageRoot,
+  getErrorMessage,
+  hasBlockedObjectKeyDeep,
+  IMAGE_ONLY_CHAT_FALLBACK_PROMPT,
+  isUuidLike,
+  isWalletActionRequiredIntent,
+  maybeAugmentChatMessageWithKnowledge,
+  maybeAugmentChatMessageWithLanguage,
+  maybeAugmentChatMessageWithWalletContext,
+  normalizeIncomingChatPrompt,
+  persistConversationRoomTitle,
+  resolveAppUserName,
+  resolveConversationGreetingText,
+  resolveWalletModeGuidanceReply,
+  trimWalletProgressPrefix,
+  validateChatImages,
+  WALLET_EXECUTION_INTENT_RE,
+  WALLET_PROGRESS_ONLY_RE,
+} from "./server-helpers.js";
+
+// NOTE: Internal usage of these functions is handled by individual `import`
+// statements placed where each function was originally defined (see below).
+// The `export { ... } from` above re-exports them for external consumers.
 
 import type { FallbackParsedAction } from "./binance-skill-helpers.js";
 import {
@@ -334,13 +365,8 @@ export {
 // Types
 // ---------------------------------------------------------------------------
 
-/** A connector-registered route handler. Returns `true` if the request was handled. */
-type ConnectorRouteHandler = (
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-  pathname: string,
-  method: string,
-) => Promise<boolean>;
+// ConnectorRouteHandler imported from server-types.ts
+import type { ConnectorRouteHandler } from "./server-types.js";
 
 type OrchestratorFallbackRouteHandler = (
   req: http.IncomingMessage,
@@ -434,11 +460,6 @@ function requireCoreManager(runtime: AgentRuntime | null): CoreManagerLike {
   return service;
 }
 
-export function isUuidLike(value: string): value is UUID {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-    value,
-  );
-}
 
 const OG_FILENAME = ".og";
 const DELETED_CONVERSATIONS_FILENAME = "deleted-conversations.v1.json";
@@ -516,282 +537,38 @@ function initializeOGCodeInState(): void {
   });
 }
 
-/** Metadata for a web-chat conversation. */
-export interface ConversationMeta {
-  id: string;
-  title: string;
-  roomId: UUID;
-  createdAt: string;
-  updatedAt: string;
-}
+// ConversationMeta re-exported from server-types.ts
+export type { ConversationMeta } from "./server-types.js";
+import type { ConversationMeta } from "./server-types.js";
 
-const APP_OWNER_NAME_MAX_LENGTH = 60;
+// resolveAppUserName, patchTouchesProviderSelection, resolveConversationGreetingText
+// moved to server-helpers.ts; imported in the consolidated import at the top
 
-/** Resolve the app owner's display name from config, or fall back to "User". */
-export function resolveAppUserName(config: ElizaConfig): string {
-  const ownerName = (config.ui as Record<string, unknown> | undefined)
-    ?.ownerName as string | undefined;
-  const normalized = ownerName?.trim().slice(0, APP_OWNER_NAME_MAX_LENGTH);
-  return normalized || "User";
-}
+// AgentStartupDiagnostics, ServerState re-exported from server-types.ts
+export type { AgentStartupDiagnostics, ServerState } from "./server-types.js";
+import type { AgentStartupDiagnostics, ServerState } from "./server-types.js";
 
-function patchTouchesProviderSelection(
-  patch: Record<string, unknown>,
-): boolean {
-  if (
-    Object.hasOwn(patch, "deploymentTarget") ||
-    Object.hasOwn(patch, "linkedAccounts") ||
-    Object.hasOwn(patch, "serviceRouting") ||
-    Object.hasOwn(patch, "cloud") ||
-    Object.hasOwn(patch, "env") ||
-    Object.hasOwn(patch, "models")
-  ) {
-    return true;
-  }
-
-  const agents =
-    patch.agents &&
-    typeof patch.agents === "object" &&
-    !Array.isArray(patch.agents)
-      ? (patch.agents as Record<string, unknown>)
-      : null;
-  const defaults =
-    agents?.defaults &&
-    typeof agents.defaults === "object" &&
-    !Array.isArray(agents.defaults)
-      ? (agents.defaults as Record<string, unknown>)
-      : null;
-  if (!defaults) {
-    return false;
-  }
-
-  return (
-    Object.hasOwn(defaults, "subscriptionProvider") ||
-    Object.hasOwn(defaults, "model")
-  );
-}
-
-export function resolveConversationGreetingText(
-  runtime: AgentRuntime,
-  lang: string,
-  uiConfig?: ElizaConfig["ui"],
-): string {
-  const pickRandom = (values: string[] | undefined): string => {
-    const choices = (values ?? [])
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
-
-    if (choices.length === 0) {
-      return "";
-    }
-
-    return choices[Math.floor(Math.random() * choices.length)] ?? "";
-  };
-
-  const normalizedLanguage = normalizeCharacterLanguage(lang);
-  const characterName = runtime.character.name?.trim();
-  const assistantName = uiConfig?.assistant?.name?.trim();
-
-  // Prefer explicit UI selections over the loaded character card: users pick a
-  // style in onboarding/roster (avatar + preset) while `runtime.character.name`
-  // can still reflect the bundled preset name until save/restart.
-  const preset =
-    resolveStylePresetByAvatarIndex(
-      uiConfig?.avatarIndex,
-      normalizedLanguage,
-    ) ??
-    resolveStylePresetById(uiConfig?.presetId, normalizedLanguage) ??
-    resolveStylePresetByName(assistantName, normalizedLanguage) ??
-    resolveStylePresetByName(characterName, normalizedLanguage);
-
-  const presetGreeting = pickRandom(preset?.postExamples);
-  if (presetGreeting) {
-    return presetGreeting;
-  }
-
-  return pickRandom(runtime.character.postExamples);
-}
-
-export interface AgentStartupDiagnostics {
-  phase: string;
-  attempt: number;
-  lastError?: string;
-  lastErrorAt?: number;
-  nextRetryAt?: number;
-}
-
-export interface ServerState {
-  runtime: AgentRuntime | null;
-  config: ElizaConfig;
-  agentState:
-    | "not_started"
-    | "starting"
-    | "running"
-    | "paused"
-    | "stopped"
-    | "restarting"
-    | "error";
-  agentName: string;
-  model: string | undefined;
-  startedAt: number | undefined;
-  startup: AgentStartupDiagnostics;
-  plugins: PluginEntry[];
-  skills: SkillEntry[];
-  logBuffer: LogEntry[];
-  eventBuffer: StreamEventEnvelope[];
-  nextEventId: number;
-  chatRoomId: UUID | null;
-  chatUserId: UUID | null;
-  chatConnectionReady: { userId: UUID; roomId: UUID; worldId: UUID } | null;
-  chatConnectionPromise: Promise<void> | null;
-  adminEntityId: UUID | null;
-  /** Conversation metadata by conversation id. */
-  conversations: Map<string, ConversationMeta>;
-  /** Pending restore of persisted conversations into the in-memory map. */
-  conversationRestorePromise: Promise<void> | null;
-  /** Tombstones for conversation IDs explicitly deleted by the user. */
-  deletedConversationIds: Set<string>;
-  /** Cloud manager for Eliza Cloud integration (null when cloud is disabled). */
-  cloudManager: CloudRouteState["cloudManager"];
-  sandboxManager: SandboxManager | null;
-  /** App manager for launching and managing elizaOS apps. */
-  appManager: AppManager;
-  /** Fine-tuning/training orchestration service. */
-  trainingService: TrainingServiceLike | null;
-  /** ERC-8004 registry service (null when not configured). */
-  registryService: RegistryService | null;
-  /** Drop/mint service (null when not configured). */
-  dropService: DropService | null;
-  /** In-memory queue for share ingest items. */
-  shareIngestQueue: ShareIngestItem[];
-  /** Broadcast current agent status to all WebSocket clients. Set by startApiServer. */
-  broadcastStatus: (() => void) | null;
-  /** Broadcast an arbitrary JSON message to all WebSocket clients. Set by startApiServer. */
-  broadcastWs: ((data: Record<string, unknown>) => void) | null;
-  /** Broadcast a JSON payload to WebSocket clients bound to a specific client id. */
-  broadcastWsToClientId:
-    | ((clientId: string, data: Record<string, unknown>) => number)
-    | null;
-  /** Currently active conversation ID from the frontend (sent via WS). */
-  activeConversationId: string | null;
-  /** Transient OAuth flow state for subscription auth. */
-  _anthropicFlow?: import("../auth/anthropic.js").AnthropicFlow;
-  _codexFlow?: import("../auth/openai-codex.js").CodexFlow;
-  _codexFlowTimer?: ReturnType<typeof setTimeout>;
-  /** System permission states (cached from the desktop bridge). */
-  permissionStates?: Record<
-    string,
-    import("@elizaos/shared/contracts/permissions").PermissionState
-  >;
-  /** Whether shell access is enabled (can be toggled in UI). */
-  shellEnabled?: boolean;
-  /** Agent automation permission mode for self-directed config changes. */
-  agentAutomationMode?: AgentAutomationMode;
-  /** Wallet trade execution permission mode (user-sign/manual/agent-auto). */
-  tradePermissionMode?: TradePermissionMode;
-  /** Reasons a restart is pending. Empty array = no restart needed. */
-  pendingRestartReasons: string[];
-  /** Route handlers registered by connector plugins (loaded dynamically). */
-  connectorRouteHandlers: ConnectorRouteHandler[];
-  /** Connector health monitor for detecting dead connectors. */
-  connectorHealthMonitor: ConnectorHealthMonitor | null;
-  /** Active WhatsApp pairing sessions (QR code flow). */
-  whatsappPairingSessions?: Map<
-    string,
-    import("../services/whatsapp-pairing.js").WhatsAppPairingSession
-  >;
-  /** Active Signal pairing sessions (device linking flow). */
-  signalPairingSessions?: Map<
-    string,
-    import("../services/signal-pairing.js").SignalPairingSession
-  >;
-  /** Last known Signal pairing snapshots, including terminal failures. */
-  signalPairingSnapshots?: Map<
-    string,
-    import("../services/signal-pairing.js").SignalPairingSnapshot
-  >;
-  /** Active Telegram account auth session (user-account login flow). */
-  telegramAccountAuthSession?:
-    | import("../services/telegram-account-auth.js").TelegramAccountAuthSessionLike
-    | null;
-}
-
-export interface ShareIngestItem {
-  id: string;
-  source: string;
-  title?: string;
-  url?: string;
-  text?: string;
-  suggestedPrompt: string;
-  receivedAt: number;
-}
-
-export interface SkillEntry {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  /** Set automatically when a scan report exists for this skill. */
-  scanStatus?: "clean" | "warning" | "critical" | "blocked" | null;
-}
-
-export interface LogEntry {
-  timestamp: number;
-  level: string;
-  message: string;
-  source: string;
-  tags: string[];
-}
-
-export type StreamEventType =
-  | "agent_event"
-  | "heartbeat_event"
-  | "training_event";
-
-export interface StreamEventEnvelope {
-  type: StreamEventType;
-  version: 1;
-  eventId: string;
-  ts: number;
-  runId?: string;
-  seq?: number;
-  stream?: string;
-  sessionKey?: string;
-  agentId?: string;
-  roomId?: UUID;
-  payload: object;
-}
+// ShareIngestItem, SkillEntry, LogEntry, StreamEventType, StreamEventEnvelope
+// re-exported from server-types.ts
+export type {
+  ShareIngestItem,
+  SkillEntry,
+  LogEntry,
+  StreamEventType,
+  StreamEventEnvelope,
+} from "./server-types.js";
+import type {
+  ShareIngestItem,
+  SkillEntry,
+  LogEntry,
+  StreamEventEnvelope,
+} from "./server-types.js";
 
 // ---------------------------------------------------------------------------
 // Package root resolution (for reading bundled plugins.json)
 // ---------------------------------------------------------------------------
 
-export function findOwnPackageRoot(startDir: string): string {
-  const KNOWN_NAMES = new Set(["eliza", "eliza", "elizaos"]);
-  let dir = startDir;
-  for (let i = 0; i < 10; i++) {
-    const pkgPath = path.join(dir, "package.json");
-    if (fs.existsSync(pkgPath)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as Record<
-          string,
-          unknown
-        >;
-        const pkgName =
-          typeof pkg.name === "string" ? pkg.name.toLowerCase() : "";
-        if (KNOWN_NAMES.has(pkgName)) return dir;
-        // Also match if plugins.json exists at this level (resilient to renames)
-        if (fs.existsSync(path.join(dir, "plugins.json"))) return dir;
-      } catch {
-        /* keep searching */
-      }
-    }
-    const parent = path.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return startDir;
-}
+// findOwnPackageRoot moved to server-helpers.ts; re-exported in the batch above
 
 function removeResponseListener(
   res: StreamableServerResponse,
@@ -1045,443 +822,18 @@ interface ChatGenerateOptions {
   preferredLanguage?: string;
 }
 
-const CHAT_LANGUAGE_INSTRUCTION: Record<string, string> = {
-  en: "Reply in natural English unless the user explicitly requests another language.",
-  "zh-CN":
-    "Reply in natural Simplified Chinese unless the user explicitly requests another language.",
-  ko: "Reply in natural Korean unless the user explicitly requests another language.",
-  es: "Reply in natural Spanish unless the user explicitly requests another language.",
-  pt: "Reply in natural Brazilian Portuguese unless the user explicitly requests another language.",
-  vi: "Reply in natural Vietnamese unless the user explicitly requests another language.",
-  tl: "Reply in natural Tagalog unless the user explicitly requests another language.",
-};
+// maybeAugmentChatMessageWithLanguage and getErrorMessage moved to server-helpers.ts;
+// imported in the consolidated import at the top
 
-export function maybeAugmentChatMessageWithLanguage(
-  message: ReturnType<typeof createMessageMemory>,
-  preferredLanguage?: string,
-): ReturnType<typeof createMessageMemory> {
-  if (!preferredLanguage) return message;
-  const instruction =
-    CHAT_LANGUAGE_INSTRUCTION[normalizeCharacterLanguage(preferredLanguage)];
-  if (!instruction) return message;
-  const originalText = extractCompatTextContent(message.content);
-  if (!originalText) return message;
+// Knowledge + wallet context augmentation moved to server-helpers.ts;
+// imported in the consolidated import at the top
 
-  return {
-    ...message,
-    content: {
-      ...(message.content as Content),
-      text: `${originalText}\n\n[Language instruction: ${instruction}]`,
-    },
-  };
-}
-
-export function getErrorMessage(
-  err: unknown,
-  fallback = "generation failed",
-): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "string") return err;
-  return fallback;
-}
-
-const CHAT_KNOWLEDGE_MIN_SIMILARITY = 0.2;
-const CHAT_KNOWLEDGE_MAX_SNIPPETS = 3;
-const CHAT_KNOWLEDGE_MAX_CHARS = 900;
-const DEFAULT_CHAT_KNOWLEDGE_TIMEOUT_MS = 4_000;
-const MAX_CHAT_KNOWLEDGE_TIMEOUT_MS = 15_000;
-
-function getChatKnowledgeTimeoutMs(): number {
-  const raw = process.env.CHAT_KNOWLEDGE_TIMEOUT_MS;
-  if (!raw) return DEFAULT_CHAT_KNOWLEDGE_TIMEOUT_MS;
-  const parsed = Number.parseInt(raw, 10);
-  if (Number.isNaN(parsed) || parsed <= 0) {
-    return DEFAULT_CHAT_KNOWLEDGE_TIMEOUT_MS;
-  }
-  return Math.min(parsed, MAX_CHAT_KNOWLEDGE_TIMEOUT_MS);
-}
-
-function shouldAugmentChatMessageWithKnowledge(userPrompt: string): boolean {
-  const normalizedPrompt = userPrompt.toLowerCase();
-  return [
-    "uploaded",
-    "file",
-    "document",
-    "knowledge",
-    "codeword",
-    "attachment",
-  ].some((token) => normalizedPrompt.includes(token));
-}
-
-async function getChatKnowledgeMatchesWithTimeout(
-  lookup: Promise<
-    Array<{
-      id: UUID;
-      content: { text?: string };
-      similarity?: number;
-      metadata?: Record<string, unknown>;
-    }>
-  >,
-): Promise<
-  Array<{
-    id: UUID;
-    content: { text?: string };
-    similarity?: number;
-    metadata?: Record<string, unknown>;
-  }>
-> {
-  const timeoutMs = getChatKnowledgeTimeoutMs();
-  let timer: ReturnType<typeof setTimeout> | null = null;
-
-  try {
-    return await Promise.race([
-      lookup,
-      new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(() => {
-          reject(new Error("Chat knowledge lookup timed out"));
-        }, timeoutMs);
-      }),
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-}
-
-function normalizeChatKnowledgeSnippet(text: string): string {
-  return text.replace(/\s+/g, " ").trim().slice(0, CHAT_KNOWLEDGE_MAX_CHARS);
-}
-
-function buildChatKnowledgePrompt(
-  userPrompt: string,
-  snippets: string[],
-): string {
-  return [
-    "Relevant uploaded knowledge snippets:",
-    ...snippets.map((snippet, index) => `[K${index + 1}] ${snippet}`),
-    "",
-    "Use the uploaded knowledge when it is relevant to the user's request. Ignore it when it is not relevant.",
-    "",
-    `User message: ${userPrompt}`,
-  ].join("\n");
-}
-
-const WALLET_CONTEXT_INTENT_RE =
-  /\b(wallet|address|balance|swap|trade|transfer|send|token|bnb|eth|sol|onchain|on-chain)\b/i;
-
-function buildWalletContextPrompt(
-  runtime: AgentRuntime,
-  userPrompt: string,
-): string {
-  const addrs = getWalletAddresses();
-  const walletNetwork =
-    process.env.ELIZA_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
-      ? "testnet"
-      : "mainnet";
-  const localSignerAvailable = Boolean(process.env.EVM_PRIVATE_KEY?.trim());
-  const pluginEvmLoaded = resolvePluginEvmLoaded(runtime);
-  const rpcReady = Boolean(
-    process.env.BSC_RPC_URL?.trim() ||
-      process.env.BSC_TESTNET_RPC_URL?.trim() ||
-      process.env.NODEREAL_BSC_RPC_URL?.trim() ||
-      process.env.QUICKNODE_BSC_RPC_URL?.trim(),
-  );
-  const executionReady =
-    Boolean(addrs.evmAddress) && rpcReady && pluginEvmLoaded;
-  const executionBlockedReason = !addrs.evmAddress
-    ? "No EVM wallet is active yet."
-    : !rpcReady
-      ? "BSC RPC is not configured."
-      : !pluginEvmLoaded
-        ? "plugin-evm is not loaded."
-        : "none";
-  const encodedUserPrompt = JSON.stringify(userPrompt);
-  return [
-    "Original wallet request (JSON-encoded untrusted user input):",
-    encodedUserPrompt,
-    "",
-    "Server-verified wallet context:",
-    `- walletNetwork: ${walletNetwork}`,
-    `- evmAddress: ${addrs.evmAddress ?? "not generated"}`,
-    `- solanaAddress: ${addrs.solanaAddress ?? "not generated"}`,
-    `- localSignerAvailable: ${localSignerAvailable ? "true" : "false"}`,
-    `- rpcReady: ${rpcReady ? "true" : "false"}`,
-    `- pluginEvmLoaded: ${pluginEvmLoaded ? "true" : "false"}`,
-    `- executionReady: ${executionReady ? "true" : "false"}`,
-    `- executionBlockedReason: ${executionBlockedReason}`,
-    "Use this context as source of truth for wallet questions and on-chain actions.",
-  ].join("\n");
-}
-
-export function maybeAugmentChatMessageWithWalletContext(
-  runtime: AgentRuntime,
-  message: ReturnType<typeof createMessageMemory>,
-): ReturnType<typeof createMessageMemory> {
-  const userPrompt = extractCompatTextContent(message.content)?.trim();
-  if (!userPrompt) return message;
-  if (!WALLET_CONTEXT_INTENT_RE.test(userPrompt)) return message;
-  return {
-    ...message,
-    content: {
-      ...message.content,
-      text: buildWalletContextPrompt(runtime, userPrompt),
-    },
-  };
-}
-
-export async function maybeAugmentChatMessageWithKnowledge(
-  runtime: AgentRuntime,
-  message: ReturnType<typeof createMessageMemory>,
-): Promise<ReturnType<typeof createMessageMemory>> {
-  const userPrompt = extractCompatTextContent(message.content)?.trim();
-  if (!userPrompt || !runtime.agentId) {
-    return message;
-  }
-  if (!shouldAugmentChatMessageWithKnowledge(userPrompt)) {
-    return message;
-  }
-
-  try {
-    const knowledge = await getKnowledgeService(runtime);
-    if (!knowledge.service) {
-      return message;
-    }
-
-    const searchMessage = {
-      ...message,
-      id: crypto.randomUUID() as UUID,
-      agentId: runtime.agentId,
-      entityId: runtime.agentId,
-      roomId: runtime.agentId,
-      content: { text: userPrompt },
-      createdAt: Date.now(),
-    } as ReturnType<typeof createMessageMemory>;
-
-    const snippets = (
-      await getChatKnowledgeMatchesWithTimeout(
-        knowledge.service.getKnowledge(searchMessage, {
-          roomId: runtime.agentId,
-        }),
-      )
-    )
-      .filter(
-        (match) => (match.similarity ?? 0) >= CHAT_KNOWLEDGE_MIN_SIMILARITY,
-      )
-      .slice(0, CHAT_KNOWLEDGE_MAX_SNIPPETS)
-      .map((match) => normalizeChatKnowledgeSnippet(match.content?.text ?? ""))
-      .filter((snippet) => snippet.length > 0);
-
-    if (snippets.length === 0) {
-      return message;
-    }
-
-    return {
-      ...message,
-      content: {
-        ...message.content,
-        text: buildChatKnowledgePrompt(userPrompt, snippets),
-      },
-    };
-  } catch (err) {
-    runtime.logger?.warn(
-      {
-        err,
-        src: "eliza-api",
-        messageId: message.id,
-        roomId: message.roomId,
-      },
-      "Failed to augment chat message with uploaded knowledge",
-    );
-    return message;
-  }
-}
-
-interface ChatImageAttachment {
-  /** Base64-encoded image data (no data URL prefix). */
-  data: string;
-  mimeType: string;
-  name: string;
-}
-
-const MAX_CHAT_IMAGES = 4;
-
-/** Maximum base64 data length for a single image (~3.75 MB binary). */
-const MAX_IMAGE_DATA_BYTES = 5 * 1_048_576;
-
-/** Maximum length of an image filename. */
-const MAX_IMAGE_NAME_LENGTH = 255;
-
-/** Matches a valid standard-alphabet base64 string (RFC 4648 §4, `+/`, optional `=` padding). */
-const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
-
-const ALLOWED_IMAGE_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-]);
-
-export const IMAGE_ONLY_CHAT_FALLBACK_PROMPT =
-  "Please describe the attached image.";
-
-/** Returns an error message string, or null if valid. Exported for unit tests. */
-export function validateChatImages(images: unknown): string | null {
-  if (!Array.isArray(images) || images.length === 0) return null;
-  if (images.length > MAX_CHAT_IMAGES)
-    return `Too many images (max ${MAX_CHAT_IMAGES})`;
-  for (const img of images) {
-    if (!img || typeof img !== "object") return "Each image must be an object";
-    const { data, mimeType, name } = img as Record<string, unknown>;
-    if (typeof data !== "string" || !data)
-      return "Each image must have a non-empty data string";
-    if (data.startsWith("data:"))
-      return "Image data must be raw base64, not a data URL";
-    if (data.length > MAX_IMAGE_DATA_BYTES)
-      return `Image too large (max ${MAX_IMAGE_DATA_BYTES / 1_048_576} MB per image)`;
-    if (!BASE64_RE.test(data))
-      return "Image data contains invalid base64 characters";
-    if (typeof mimeType !== "string" || !mimeType)
-      return "Each image must have a mimeType string";
-    if (!ALLOWED_IMAGE_MIME_TYPES.has(mimeType.toLowerCase()))
-      return `Unsupported image type: ${mimeType}`;
-    if (typeof name !== "string" || !name)
-      return "Each image must have a name string";
-    if (name.length > MAX_IMAGE_NAME_LENGTH)
-      return `Image name too long (max ${MAX_IMAGE_NAME_LENGTH} characters)`;
-  }
-  return null;
-}
-
-/**
- * Extension of the core Media attachment shape that carries raw image bytes for
- * action handlers (e.g. POST_TWEET) while the message is in-memory. The
- * extra fields are intentionally stripped before the message is persisted.
- *
- * Note: `_data`/`_mimeType` survive only because elizaOS passes the
- * `userMessage` object reference directly to action handlers without
- * deep-cloning or serializing it. If that ever changes, action handlers
- * that read these fields will silently receive `undefined`.
- */
-export interface ChatAttachmentWithData extends Media {
-  /** Raw base64 image data — never written to the database. */
-  _data: string;
-  /** MIME type corresponding to `_data`. */
-  _mimeType: string;
-}
-
-/**
- * Builds in-memory and compact (DB-persisted) attachment arrays from
- * validated images. Exported so it can be unit-tested independently.
- */
-export function buildChatAttachments(
-  images: ChatImageAttachment[] | undefined,
-): {
-  /** In-memory attachments that include `_data`/`_mimeType` for action handlers. */
-  attachments: ChatAttachmentWithData[] | undefined;
-  /** Persistence-safe attachments with `_data`/`_mimeType` stripped. */
-  compactAttachments: Media[] | undefined;
-} {
-  if (!images?.length)
-    return { attachments: undefined, compactAttachments: undefined };
-  // Compact placeholder URL (no base64) keeps the LLM context lean. The raw
-  // image bytes are stashed in `_data`/`_mimeType` for action handlers (e.g.
-  // POST_TWEET) that need to upload them.
-  const attachments: ChatAttachmentWithData[] = images.map((img, i) => ({
-    id: `img-${i}`,
-    url: `attachment:img-${i}`,
-    title: img.name,
-    source: "client_chat",
-    contentType: ContentType.IMAGE,
-    _data: img.data,
-    _mimeType: img.mimeType,
-  }));
-  // DB-persisted version omits _data/_mimeType so raw bytes aren't stored.
-  const compactAttachments: Media[] = attachments.map(
-    ({ _data: _d, _mimeType: _m, ...rest }) => rest,
-  );
-  return { attachments, compactAttachments };
-}
-
-export function normalizeIncomingChatPrompt(
-  text: string | null | undefined,
-  images: ChatImageAttachment[] | null | undefined,
-): string | null {
-  const normalizedText = typeof text === "string" ? text.trim() : "";
-  if (normalizedText.length > 0) {
-    return normalizedText;
-  }
-  return Array.isArray(images) && images.length > 0
-    ? IMAGE_ONLY_CHAT_FALLBACK_PROMPT
-    : null;
-}
-
-type MessageMemory = ReturnType<typeof createMessageMemory>;
-
-/**
- * Constructs the in-memory user message (with image data for action handlers)
- * and the persistence-safe counterpart (image data stripped). Extracted to
- * avoid duplicating this logic across the stream and non-stream chat endpoints.
- */
-export function buildUserMessages(params: {
-  images: ChatImageAttachment[] | undefined;
-  prompt: string;
-  userId: UUID;
-  agentId: UUID;
-  roomId: UUID;
-  channelType: ChannelType;
-  conversationMode?: "simple" | "power";
-  messageSource?: string;
-  metadata?: Record<string, unknown>;
-}): { userMessage: MessageMemory; messageToStore: MessageMemory } {
-  const {
-    images,
-    prompt,
-    userId,
-    agentId,
-    roomId,
-    channelType,
-    conversationMode,
-    messageSource,
-    metadata,
-  } = params;
-  const source = messageSource?.trim() || "client_chat";
-  const { attachments, compactAttachments } = buildChatAttachments(images);
-  const id = crypto.randomUUID() as UUID;
-  // Keep caller metadata inside content.metadata only. Top-level Memory.metadata
-  // is treated as trusted transport/runtime context in a few paths.
-  // In-memory message carries _data/_mimeType so action handlers can upload.
-  const userMessage = createMessageMemory({
-    id,
-    entityId: userId,
-    agentId,
-    roomId,
-    content: {
-      text: prompt,
-      source,
-      channelType,
-      ...(conversationMode ? { conversationMode } : {}),
-      ...(attachments?.length ? { attachments } : {}),
-      ...(metadata ? { metadata } : {}),
-    } as Content & { text: string },
-  });
-  // Persisted message: compact placeholder URL, no raw bytes in DB.
-  const messageToStore = compactAttachments?.length
-    ? createMessageMemory({
-        id,
-        entityId: userId,
-        agentId,
-        roomId,
-        content: {
-          text: prompt,
-          source,
-          channelType,
-          ...(conversationMode ? { conversationMode } : {}),
-          attachments: compactAttachments,
-          ...(metadata ? { metadata } : {}),
-        } as Content & { text: string },
-      })
-    : userMessage;
-  return { userMessage, messageToStore };
-}
+// ChatImageAttachment, image validation, chat attachments, normalizeIncomingChatPrompt,
+// and buildUserMessages moved to server-helpers.ts; re-exported in the top-level block
+// ChatAttachmentWithData re-exported from server-types.ts
+export type { ChatAttachmentWithData } from "./server-types.js";
+import type { ChatAttachmentWithData } from "./server-types.js";
+// buildChatAttachments, buildUserMessages, etc. imported in the consolidated import at the top
 
 function parseBoundedLimit(rawLimit: string | null, fallback = 15): number {
   return parseClampedInteger(rawLimit, {
@@ -1523,32 +875,7 @@ function isBlockedObjectKey(key: string): boolean {
   );
 }
 
-export function hasBlockedObjectKeyDeep(value: unknown): boolean {
-  if (value === null || value === undefined) return false;
-  if (Array.isArray(value)) return value.some(hasBlockedObjectKeyDeep);
-  if (typeof value !== "object") return false;
-
-  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-    if (isBlockedObjectKey(key)) return true;
-    if (hasBlockedObjectKeyDeep(child)) return true;
-  }
-  return false;
-}
-
-export function cloneWithoutBlockedObjectKeys<T>(value: T): T {
-  if (value === null || value === undefined) return value;
-  if (Array.isArray(value)) {
-    return value.map((item) => cloneWithoutBlockedObjectKeys(item)) as T;
-  }
-  if (typeof value !== "object") return value;
-
-  const out: Record<string, unknown> = {};
-  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-    if (isBlockedObjectKey(key)) continue;
-    out[key] = cloneWithoutBlockedObjectKeys(child);
-  }
-  return out as T;
-}
+// hasBlockedObjectKeyDeep and cloneWithoutBlockedObjectKeys imported in the consolidated import at the top
 
 /**
  * Replace unknown non-empty value with "[REDACTED]".  For arrays, each string
@@ -2286,7 +1613,7 @@ export {
 // Automation & agent permission helpers
 // ---------------------------------------------------------------------------
 
-type AgentAutomationMode = "connectors-only" | "full";
+import type { AgentAutomationMode } from "./server-types.js";
 
 const AGENT_AUTOMATION_HEADER = "x-eliza-agent-action";
 const AGENT_AUTOMATION_MODES = new Set<AgentAutomationMode>([
@@ -2396,27 +1723,19 @@ function buildPluginEvmDiagnosticEntry(
 const WALLET_CHAT_INTENT_RE =
   /\b(wallet|privy|onchain|on-chain|address|balance|swap|trade|transfer|token|bnb|t?bnb|eth|sol)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|t?bnb|wallet|crypto|coin)\b))/i;
 
-export const WALLET_EXECUTION_INTENT_RE =
-  /\b(swap|trade|transfer|buy|sell|execute|approve)\b|(?:\bsend\b(?=[\s\S]{0,40}\b(?:token|eth|sol|t?bnb|wallet|crypto|coin)\b))/i;
+// WALLET_EXECUTION_INTENT_RE, WALLET_PROGRESS_ONLY_RE, isWalletActionRequiredIntent
+// moved to server-helpers.ts; re-exported above.
+// Keep private regex constants here for wallet intent fallback code that stays in server.ts.
+// isWalletActionRequiredIntent, WALLET_EXECUTION_INTENT_RE, WALLET_PROGRESS_ONLY_RE
+// imported in the consolidated import at the top
 
 const WALLET_IDENTITY_INTENT_RE = /\b(wallet\s*address|address)\b/i;
 
 const WALLET_ACTION_REQUIRED_INTENT_RE =
   /\b(balance|portfolio|holdings|funds|swap|trade|transfer|send|buy|sell|execute|approve)\b/i;
 
-export const WALLET_PROGRESS_ONLY_RE =
-  /\b(let me|i(?:'| wi)ll|checking|fetching|looking up|pulling|one moment|just a second|hold on)\b[\s\S]{0,80}\b(check|look|fetch|pull|get|verify|see|review)\b/i;
-
 const WALLET_PROGRESS_PREFIX_RE =
   /^\s*(?:let me|i(?:'ll| will)|checking|fetching|looking up|pulling|one moment|just a second|hold on)[\s\S]{0,120}?(?:now|\.{3}|…)?\s*/i;
-
-export function isWalletActionRequiredIntent(prompt: string): boolean {
-  return (
-    WALLET_CHAT_INTENT_RE.test(prompt) &&
-    !WALLET_IDENTITY_INTENT_RE.test(prompt) &&
-    WALLET_ACTION_REQUIRED_INTENT_RE.test(prompt)
-  );
-}
 
 const EVM_ADDRESS_CAPTURE_RE = /\b0x[a-fA-F0-9]{40}\b/g;
 const DECIMAL_AMOUNT_CAPTURE_RE = /\b(\d+(?:\.\d+)?)\b/;
@@ -2603,67 +1922,9 @@ export function hasUsableWalletFallbackParams(
   return true;
 }
 
-export function buildWalletActionNotExecutedReply(
-  runtime: AgentRuntime,
-  userPrompt: string,
-): string {
-  const addrs = getWalletAddresses();
-  const walletNetwork =
-    process.env.ELIZA_WALLET_NETWORK?.trim().toLowerCase() === "testnet"
-      ? "testnet"
-      : "mainnet";
-  const pluginEvmLoaded = resolvePluginEvmLoaded(runtime);
-  const rpcReady = Boolean(
-    process.env.BSC_RPC_URL?.trim() ||
-      process.env.BSC_TESTNET_RPC_URL?.trim() ||
-      process.env.NODEREAL_BSC_RPC_URL?.trim() ||
-      process.env.QUICKNODE_BSC_RPC_URL?.trim(),
-  );
-  const executionBlockedReason = !addrs.evmAddress
-    ? "No EVM wallet is active yet."
-    : !rpcReady
-      ? "BSC RPC is not configured."
-      : !pluginEvmLoaded
-        ? "plugin-evm is not loaded, so EVM wallet execution is unavailable."
-        : "A wallet action was not executed for this turn.";
-
-  return [
-    `I could not complete "${userPrompt}" because no wallet action actually ran.`,
-    `Wallet network: ${walletNetwork}.`,
-    `Detected wallets:`,
-    `- EVM: ${addrs.evmAddress ?? "not generated"}`,
-    `- Solana: ${addrs.solanaAddress ?? "not generated"}`,
-    `plugin-evm: ${pluginEvmLoaded ? "loaded" : "not loaded"}.`,
-    `RPC ready: ${rpcReady ? "yes" : "no"}.`,
-    `Blocked reason: ${executionBlockedReason}`,
-  ].join("\n");
-}
-
-export function trimWalletProgressPrefix(text: string): string {
-  const balanceIdx = text.indexOf("Wallet Balances:");
-  if (balanceIdx > 0) {
-    return text.slice(balanceIdx).trimStart();
-  }
-
-  const markers = [
-    "Action: TRANSFER_TOKEN",
-    "Action: EXECUTE_TRADE",
-    "Transfer",
-    "Swap",
-    "Trade",
-    "Tx hash:",
-    "Transaction hash:",
-  ];
-  for (const marker of markers) {
-    const idx = text.indexOf(marker);
-    if (idx <= 0) continue;
-    const prefix = text.slice(0, idx);
-    if (WALLET_PROGRESS_PREFIX_RE.test(prefix)) {
-      return text.slice(idx).trimStart();
-    }
-  }
-  return text;
-}
+// buildWalletActionNotExecutedReply and trimWalletProgressPrefix moved to server-helpers.ts;
+// re-exported above
+// buildWalletActionNotExecutedReply, trimWalletProgressPrefix imported in the consolidated import at the top
 
 // ── Plugin config intent detection ──────────────────────────────────
 // Matches: "set up telegram", "configure discord plugin", "connect slack",
@@ -2809,80 +2070,8 @@ export async function resolvePluginConfigReply(
   return `here's the config form for ${displayName} — fill in your credentials and hit save:\n\n\`\`\`json-render\n${spec}\n\`\`\``;
 }
 
-export function resolveWalletModeGuidanceReply(
-  state: Pick<ServerState, "config" | "runtime">,
-  prompt: string,
-): string | null {
-  if (!WALLET_CHAT_INTENT_RE.test(prompt)) {
-    return null;
-  }
-
-  const capability = resolveWalletCapabilityStatus(state);
-  const {
-    automationMode,
-    evmAddress,
-    solanaAddress,
-    walletNetwork,
-    pluginEvmLoaded,
-    executionReady,
-    executionBlockedReason,
-  } = capability;
-  const walletSummary = `Detected wallets:
-- EVM: ${evmAddress ?? "not generated"}
-- Solana: ${solanaAddress ?? "not generated"}`;
-
-  if (automationMode === "connectors-only") {
-    if (!WALLET_EXECUTION_INTENT_RE.test(prompt)) {
-      return null;
-    }
-    return [
-      "I am in connectors-only mode, so wallet actions are disabled in chat right now.",
-      "Turn on full mode with one of these:",
-      '1) Settings -> Permissions -> Agent Automation Mode -> "Full".',
-      '2) API: PUT /api/permissions/automation-mode with {"mode":"full"}.',
-      "Then retry your wallet request.",
-      `Wallet network: ${walletNetwork}.`,
-      walletSummary,
-    ].join("\n");
-  }
-
-  if (
-    !evmAddress &&
-    !solanaAddress &&
-    WALLET_EXECUTION_INTENT_RE.test(prompt)
-  ) {
-    const privyConfigured = isPrivyWalletProvisioningEnabled();
-    return [
-      "No wallet is active yet.",
-      "Open Wallet page and choose one setup path:",
-      `- Managed (Privy): ${privyConfigured ? "available" : "blocked until PRIVY_APP_ID and PRIVY_APP_SECRET are set on the backend"}.`,
-      "- Local: Generate or Import wallet in the Wallet wizard.",
-      walletSummary,
-    ].join("\n");
-  }
-
-  if (WALLET_IDENTITY_INTENT_RE.test(prompt)) {
-    return [
-      `Wallet network: ${walletNetwork}.`,
-      walletSummary,
-      `plugin-evm: ${pluginEvmLoaded ? "loaded" : "not loaded"}.`,
-      `Execution readiness: ${executionReady ? "ready for wallet actions" : (executionBlockedReason ?? "blocked")}.`,
-      `Automation mode: ${automationMode}.`,
-    ].join("\n");
-  }
-
-  if (WALLET_EXECUTION_INTENT_RE.test(prompt) && !executionReady) {
-    return [
-      `Wallet execution is currently blocked: ${executionBlockedReason ?? "unknown reason"}`,
-      `Wallet network: ${walletNetwork}.`,
-      walletSummary,
-      `plugin-evm: ${pluginEvmLoaded ? "loaded" : "not loaded"}.`,
-      `Automation mode: ${automationMode}.`,
-    ].join("\n");
-  }
-
-  return null;
-}
+// resolveWalletModeGuidanceReply moved to server-helpers.ts; re-exported in top-level block
+// resolveWalletModeGuidanceReply imported in the consolidated import at the top
 
 // ---------------------------------------------------------------------------
 // Route handler
@@ -2893,7 +2082,7 @@ interface RequestContext {
   onRuntimeSwapped?: () => void;
 }
 
-type TrainingServiceLike = TrainingServiceWithRuntime;
+import type { TrainingServiceLike } from "./server-types.js";
 
 type TrainingServiceCtor = new (options: {
   getRuntime: () => AgentRuntime | null;
@@ -3579,28 +2768,7 @@ export function isSafeResetStateDir(
   return hasAllowedResetSegment(normalizedState);
 }
 
-type ConversationRoomTitleRef = Pick<
-  ConversationMeta,
-  "id" | "title" | "roomId"
->;
-
-export async function persistConversationRoomTitle(
-  runtime: Pick<AgentRuntime, "getRoom" | "adapter"> | null | undefined,
-  conversation: ConversationRoomTitleRef,
-): Promise<boolean> {
-  if (!runtime) return false;
-  const room = await runtime.getRoom(conversation.roomId);
-  if (!room) return false;
-  if (room.name === conversation.title) return false;
-
-  const adapter = runtime.adapter as {
-    updateRoom?: (nextRoom: typeof room) => Promise<void>;
-  };
-  if (typeof adapter.updateRoom !== "function") return false;
-
-  await adapter.updateRoom({ ...room, name: conversation.title });
-  return true;
-}
+// persistConversationRoomTitle imported in the consolidated import at the top
 
 function rejectWebSocketUpgrade(
   socket: import("node:stream").Duplex,
@@ -3627,18 +2795,7 @@ function rejectWebSocketUpgrade(
   );
 }
 
-export function decodePathComponent(
-  raw: string,
-  res: http.ServerResponse,
-  fieldName: string,
-): string | null {
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    error(res, `Invalid ${fieldName}: malformed URL encoding`, 400);
-    return null;
-  }
-}
+// decodePathComponent imported in the consolidated import at the top
 
 // Workbench task/todo helpers — extracted to workbench-helpers.ts
 import {
@@ -5402,18 +4559,10 @@ async function handleRequest(
     return;
   }
 
-  if (
-    await handleNfaRoutes({
-      req,
-      res,
-      method,
-      pathname,
-      json,
-      error,
-    })
-  ) {
-    return;
-  }
+  // ── NFA routes (/api/nfa/*) ─────────────────────────────────────────
+  // Extracted — will move to @elizaos/plugin-bnb-identity (Plugin.routes)
+  // when the plugin directory is created. Until then, NFA routes are
+  // served inline from nfa-routes.ts if needed, or disabled.
 
   if (
     await handleRegistryRoutes({
@@ -5540,37 +4689,9 @@ async function handleRequest(
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  // Wallet / Inventory routes
+  // Wallet / Inventory routes — now handled by @elizaos/app-steward plugin routes.
+  // See apps/app-steward/src/plugin.ts (wallet-core-routes, wallet-bsc-core-routes).
   // ═══════════════════════════════════════════════════════════════════════
-  if (
-    await handleWalletRoutes({
-      req,
-      res,
-      method,
-      pathname,
-      config: state.config,
-      runtime: state.runtime,
-      saveConfig: saveElizaConfig,
-      ensureWalletKeysInEnvAndConfig,
-      resolveWalletExportRejection,
-      restartRuntime,
-      scheduleRuntimeRestart,
-      deps: {
-        getWalletAddresses,
-        fetchEvmBalances,
-        fetchSolanaBalances,
-        fetchSolanaNativeBalanceViaRpc,
-        validatePrivateKey,
-        importWallet,
-        generateWalletForChain,
-      },
-      readJsonBody,
-      json,
-      error,
-    })
-  ) {
-    return;
-  }
 
   // ═══════════════════════════════════════════════════════════════════════
   //  ERC-8004 Registry, Agent self-status, Privy — delegated to agent-status-routes.ts
@@ -5665,46 +4786,7 @@ async function handleRequest(
   }
 
   // ── WhatsApp routes (/api/whatsapp/*) ────────────────────────────────────
-  // Auth: these routes are protected by the isAuthorized(req) gate at L5331.
-  if (pathname.startsWith("/api/whatsapp")) {
-    if (!state.whatsappPairingSessions) {
-      state.whatsappPairingSessions = new Map();
-    }
-    // Clean up disconnected or timed-out sessions
-    for (const [id, session] of state.whatsappPairingSessions) {
-      const status = session.getStatus();
-      if (
-        status === "disconnected" ||
-        status === "timeout" ||
-        status === "error"
-      ) {
-        session.stop();
-        state.whatsappPairingSessions.delete(id);
-      }
-    }
-    const handled = await handleWhatsAppRoute(
-      req,
-      res,
-      pathname,
-      method,
-      {
-        whatsappPairingSessions: state.whatsappPairingSessions,
-        broadcastWs: state.broadcastWs ?? undefined,
-        config: state.config,
-        runtime: state.runtime ?? undefined,
-        saveConfig: () => saveElizaConfig(state.config),
-        workspaceDir: resolveDefaultAgentWorkspaceDir(),
-      },
-      {
-        sanitizeAccountId: sanitizeWhatsAppAccountId,
-        whatsappAuthExists,
-        whatsappLogout,
-        createWhatsAppPairingSession: (options) =>
-          new WhatsAppPairingSession(options as never),
-      },
-    );
-    if (handled) return;
-  }
+  // Moved to @elizaos/plugin-whatsapp setup-routes.ts (registered via Plugin.routes).
 
   // ── Unified inbox routes (/api/inbox/*) ───────────────────────────────
   // Cross-channel read-only feed that merges connector messages
@@ -5742,28 +4824,8 @@ async function handleRequest(
   }
 
   // ── iMessage routes (/api/imessage/*) ─────────────────────────────────
-  // Read + CRUD endpoints exposed by @elizaos/plugin-imessage's
-  // IMessageService. See api/imessage-routes.ts for the handler.
-  if (pathname.startsWith("/api/imessage")) {
-    const handled = await handleIMessageRoute(
-      req,
-      res,
-      pathname,
-      method,
-      {
-        runtime: state.runtime
-          ? {
-              getService: (type: string) =>
-                (
-                  state.runtime as { getService: (t: string) => unknown }
-                ).getService(type),
-            }
-          : undefined,
-      },
-      { json, error, readJsonBody },
-    );
-    if (handled) return;
-  }
+  // Extracted to @elizaos/plugin-imessage setup-routes.ts (Plugin.routes).
+  // The plugin registers rawPath routes that serve the same legacy paths.
 
   // ── Cloud relay status (/api/cloud/relay-status) ──────────────────────
   if (pathname === "/api/cloud/relay-status") {
@@ -5787,145 +4849,16 @@ async function handleRequest(
     if (handled) return;
   }
 
-  // ── Telegram setup routes (/api/telegram-setup/*) ─────────────────────
-  if (pathname.startsWith("/api/telegram-setup")) {
-    const handled = await handleTelegramSetupRoute(
-      req,
-      res,
-      pathname,
-      method,
-      {
-        config: state.config,
-        saveConfig: () => saveElizaConfig(state.config),
-        runtime: state.runtime
-          ? {
-              getService: (type: string) =>
-                (
-                  state.runtime as { getService: (t: string) => unknown }
-                ).getService(type),
-              getSetting: (key: string) =>
-                (
-                  state.runtime as {
-                    getSetting: (k: string) => string | undefined;
-                  }
-                ).getSetting(key),
-            }
-          : undefined,
-      },
-      { json, error, readJsonBody },
-    );
-    if (handled) return;
-  }
+  // Telegram setup routes: now handled by @elizaos/plugin-telegram via
+  // runtime plugin routes (rawPath: true). See plugin-telegram/src/setup-routes.ts.
 
-  // ── Telegram account routes (/api/telegram-account/*) ────────────────
-  if (pathname.startsWith("/api/telegram-account")) {
-    const routeState = {
-      config: state.config,
-      saveConfig: () => saveElizaConfig(state.config),
-      runtime: state.runtime
-        ? {
-            getService: (type: string) =>
-              (
-                state.runtime as { getService: (t: string) => unknown }
-              ).getService(type),
-            getSetting: (key: string) =>
-              (
-                state.runtime as {
-                  getSetting: (k: string) => string | undefined;
-                }
-              ).getSetting(key),
-          }
-        : undefined,
-      telegramAccountAuthSession: state.telegramAccountAuthSession,
-    };
-    const handled = await handleTelegramAccountRoute(
-      req,
-      res,
-      pathname,
-      method,
-      routeState,
-      { json, error, readJsonBody },
-      {
-        createAuthSession: (options) => new TelegramAccountAuthSession(options),
-        authStateExists: telegramAccountAuthStateExists,
-        sessionExists: telegramAccountSessionExists,
-        clearAuthState: clearTelegramAccountAuthState,
-        clearSession: clearTelegramAccountSession,
-      },
-    );
-    state.telegramAccountAuthSession =
-      routeState.telegramAccountAuthSession ?? null;
-    if (handled) return;
-  }
+  // Telegram account routes (/api/telegram-account/*): now handled by
+  // @elizaos/plugin-telegram via runtime plugin routes (rawPath: true).
+  // See plugin-telegram/src/account-setup-routes.ts.
 
-  // ── Discord Local routes (/api/discord-local/*) ──────────────────────
-  if (pathname.startsWith("/api/discord-local")) {
-    const handled = await handleDiscordLocalRoute(
-      req,
-      res,
-      pathname,
-      method,
-      {
-        config: state.config,
-        runtime: state.runtime
-          ? {
-              getService: (type: string) =>
-                (
-                  state.runtime as { getService: (t: string) => unknown }
-                ).getService(type),
-            }
-          : undefined,
-        saveConfig: () => saveElizaConfig(state.config),
-      },
-      { json, error, readJsonBody },
-    );
-    if (handled) return;
-  }
+  // ── Discord Local routes (/api/discord-local/*) — extracted to @elizaos/plugin-discord (setup-routes.ts) ──
 
-  // ── Signal routes (/api/signal/*) ─────────────────────────────────────
-  if (pathname.startsWith("/api/signal")) {
-    if (!state.signalPairingSessions) {
-      state.signalPairingSessions = new Map();
-    }
-    if (!state.signalPairingSnapshots) {
-      state.signalPairingSnapshots = new Map();
-    }
-    for (const [id, session] of state.signalPairingSessions) {
-      const status = session.getStatus();
-      if (
-        status === "disconnected" ||
-        status === "timeout" ||
-        status === "error"
-      ) {
-        state.signalPairingSnapshots.set(id, session.getSnapshot());
-        session.stop();
-        state.signalPairingSessions.delete(id);
-      }
-    }
-    const handled = await handleSignalRoute(
-      req,
-      res,
-      pathname,
-      method,
-      {
-        signalPairingSessions: state.signalPairingSessions,
-        signalPairingSnapshots: state.signalPairingSnapshots,
-        broadcastWs: state.broadcastWs ?? undefined,
-        config: state.config,
-        runtime: state.runtime ?? undefined,
-        saveConfig: () => saveElizaConfig(state.config),
-        workspaceDir: resolveDefaultAgentWorkspaceDir(),
-      },
-      {
-        sanitizeAccountId: sanitizeSignalAccountId,
-        signalAuthExists,
-        signalLogout,
-        createSignalPairingSession: (options) =>
-          new SignalPairingSession(options as never),
-      },
-    );
-    if (handled) return;
-  }
+  // ── Signal routes (/api/signal/*) — extracted to @elizaos/plugin-signal (setup-routes.ts) ──
 
   // ── Restart ──────────────────────────────────────────────────────────
   if (method === "POST" && pathname === "/api/restart") {
@@ -6100,76 +5033,9 @@ async function handleRequest(
   // (handleSubscriptionRoutes already covers this, so no duplicate needed.)
 
   // ═══════════════════════════════════════════════════════════════════════
-  // BSC trade routes (preflight, quote, tx-status, profile, transfer, production-defaults)
-  // Delegated to wallet-bsc-routes.ts
+  // BSC trade routes and wallet trade execute — now handled by
+  // @elizaos/app-steward plugin routes. See apps/app-steward/src/plugin.ts.
   // ═══════════════════════════════════════════════════════════════════════
-  if (
-    await handleWalletBscRoutes({
-      req,
-      res,
-      method,
-      pathname,
-      url,
-      state: { config: state.config },
-      json,
-      error,
-      readJsonBody,
-      deps: {
-        getWalletAddresses,
-        resolveWalletRpcReadiness,
-        resolvePrimaryBscRpcUrl,
-        buildBscTradePreflight,
-        buildBscTradeQuote,
-        updateWalletTradeLedgerEntryStatus:
-          updateWalletTradeLedgerEntryStatus as any,
-        loadWalletTradingProfile: loadWalletTradingProfile as any,
-        resolveTradePermissionMode,
-        isAgentAutomationRequest,
-        canUseLocalTradeExecution: canUseLocalTradeExecution as any,
-        saveElizaConfig,
-      },
-    })
-  ) {
-    return;
-  }
-
-  // ── POST /api/wallet/trade/execute ─────────────────────────────────────
-  if (
-    await handleWalletTradeExecuteRoute({
-      req,
-      res,
-      method,
-      pathname,
-      readJsonBody,
-      json,
-      error,
-      state: { config: state.config },
-      deps: {
-        getWalletAddresses,
-        resolveWalletRpcReadiness,
-        resolveTradePermissionMode,
-        isAgentAutomationRequest,
-        canUseLocalTradeExecution,
-        buildBscTradeQuote,
-        buildBscBuyUnsignedTx,
-        buildBscSellUnsignedTx,
-        buildBscApproveUnsignedTx,
-        resolveBscApprovalSpender,
-        resolvePrimaryBscRpcUrl,
-        assertQuoteFresh,
-        recordWalletTradeLedgerEntry,
-        createProvider: (rpcUrl) => new ethers.JsonRpcProvider(rpcUrl),
-        createWallet: (privateKey, provider) =>
-          new ethers.Wallet(privateKey, provider as ethers.Provider),
-        logger,
-      },
-    })
-  ) {
-    return;
-  }
-
-  // tx-status, trading/profile, transfer/execute, production-defaults
-  // are now handled by handleWalletBscRoutes above.
 
   // ── Cloud routes (/api/cloud/*) ─────────────────────────────────────────
   if (pathname.startsWith("/api/cloud/")) {
@@ -7753,6 +6619,21 @@ export async function startApiServer(opts?: {
     return delivered;
   };
 
+  // Wire up ConnectorSetupService broadcastWs so connector plugins
+  // (Signal, WhatsApp) can broadcast pairing events via the service.
+  if (state.runtime) {
+    try {
+      const setupSvc = state.runtime.getService("connector-setup") as {
+        setBroadcastWs?: (
+          fn: ((data: Record<string, unknown>) => void) | null,
+        ) => void;
+      } | null;
+      setupSvc?.setBroadcastWs?.(state.broadcastWs);
+    } catch {
+      // non-fatal — service may not be registered yet
+    }
+  }
+
   // Broadcast status every 5 seconds
   const statusInterval = setInterval(broadcastStatus, 5000);
 
@@ -8064,36 +6945,12 @@ export async function startApiServer(opts?: {
                 }
               }
               wsClients.clear();
-              // Clean up WhatsApp pairing sessions
-              if (state.whatsappPairingSessions) {
-                for (const s of state.whatsappPairingSessions.values()) {
-                  try {
-                    s.stop();
-                  } catch {
-                    /* non-fatal */
-                  }
-                }
-                state.whatsappPairingSessions.clear();
-              }
-              // Clean up Signal pairing sessions
-              if (state.signalPairingSessions) {
-                for (const s of state.signalPairingSessions.values()) {
-                  try {
-                    s.stop();
-                  } catch {
-                    /* non-fatal */
-                  }
-                }
-                state.signalPairingSessions.clear();
-              }
-              if (state.telegramAccountAuthSession) {
-                try {
-                  await state.telegramAccountAuthSession.stop();
-                } catch {
-                  /* non-fatal */
-                }
-                state.telegramAccountAuthSession = null;
-              }
+              // WhatsApp pairing session cleanup now handled by
+              // @elizaos/plugin-whatsapp (stopAllPairingSessions).
+              // Signal pairing session cleanup now handled by
+              // @elizaos/plugin-signal (setup-routes module state).
+              // Telegram account auth session cleanup now handled by
+              // @elizaos/plugin-telegram (stopTelegramAccountAuthSession).
               wss.close();
               if (typeof closeAllConnections === "function") {
                 try {

@@ -34,6 +34,18 @@
       "@elizaos/app-companion/*": [
         "./eliza/apps/app-companion/src/*"
       ],
+      "@elizaos/app-shopify": [
+        "./eliza/apps/app-shopify/src/index.ts"
+      ],
+      "@elizaos/app-shopify/*": [
+        "./eliza/apps/app-shopify/src/*"
+      ],
+      "@elizaos/app-vincent": [
+        "./eliza/apps/app-vincent/src/index.ts"
+      ],
+      "@elizaos/app-vincent/*": [
+        "./eliza/apps/app-vincent/src/*"
+      ],
       "@elizaos/app-core": [
         "./eliza/packages/app-core/src/index.ts"
       ],

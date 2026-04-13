@@ -631,8 +631,6 @@ export async function startLifeOpsLiveRuntime(options?: {
     env: createLiveRuntimeChildEnv({
       ...buildSelectedLiveProviderEnv(selectedProvider),
       ELIZA_CONFIG_PATH: configPath,
-      ELIZA_CONFIG_PATH: configPath,
-      ELIZA_STATE_DIR: stateDir,
       ELIZA_STATE_DIR: stateDir,
       PGLITE_DATA_DIR: pgliteDir,
       ELIZA_PORT: String(apiPort),

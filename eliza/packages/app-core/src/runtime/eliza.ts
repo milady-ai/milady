@@ -456,12 +456,41 @@ async function ensureAutonomyBootstrapContext(
   }
 }
 
+// ---------------------------------------------------------------------------
+// App route plugins — Vincent, Shopify, Steward
+// Phase 2 extraction: routes previously hardcoded in server.ts are now
+// registered as proper plugins with rawPath routes.
+// ---------------------------------------------------------------------------
+
+async function registerAppRoutePlugins(runtime: AgentRuntime): Promise<void> {
+  const { vincentPlugin } = await import("@elizaos/app-vincent/plugin");
+  const { shopifyPlugin } = await import("@elizaos/app-shopify/plugin");
+  const { stewardPlugin } = await import("@elizaos/app-steward/plugin");
+
+  for (const plugin of [vincentPlugin, shopifyPlugin, stewardPlugin]) {
+    try {
+      await runtime.registerPlugin(plugin);
+      logger.info(`[eliza] Registered app route plugin: ${plugin.name}`);
+    } catch (err) {
+      logger.warn(
+        `[eliza] Failed to register app route plugin ${plugin.name}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+}
+
 async function repairRuntimeAfterBoot(
   runtime: AgentRuntime,
 ): Promise<AgentRuntime> {
   await ensureRuntimeSqlCompatibility(runtime);
   await ensureTextToSpeechHandler(runtime);
   await ensureAutonomyBootstrapContext(runtime);
+
+  // ── Register app-specific route plugins (Phase 2 extraction) ────────
+  // These were previously hardcoded dispatch blocks in server.ts. Now they
+  // are proper plugins with rawPath routes served via the runtime plugin
+  // route system.
+  await registerAppRoutePlugins(runtime);
 
   if (!runtime.getService("AUTONOMY")) {
     try {

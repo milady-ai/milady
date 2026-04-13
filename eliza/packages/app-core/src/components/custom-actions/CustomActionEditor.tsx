@@ -2,8 +2,8 @@ import {
   type CustomActionDef,
   type CustomActionHandler,
   client,
-} from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import {
   Banner,
   Button,

@@ -3,13 +3,13 @@ import {
   invokeDesktopBridgeRequest,
   isElectrobunRuntime,
   subscribeDesktopBridgeEvent,
-} from "@elizaos/app-core/bridge";
-import { TRAY_ACTION_EVENT } from "@elizaos/app-core/events";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { TRAY_ACTION_EVENT } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import {
   type DesktopClickAuditItem,
   openDesktopSettingsWindow,
-} from "@elizaos/app-core/utils";
+} from "@elizaos/app-core";
 import { useEffect } from "react";
 
 interface DesktopTrayMenuItem {

@@ -7,8 +7,8 @@ import {
   client,
   type TrajectoryListResult,
   type TrajectoryRecord,
-} from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import {
   Button,
   DropdownMenu,

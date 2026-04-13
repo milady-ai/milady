@@ -12,8 +12,8 @@ import type {
   WalletBalancesResponse,
   WalletConfigStatus,
   WalletNftsResponse,
-} from "@elizaos/app-core/api";
-import type { InventoryChainFilters } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import type { InventoryChainFilters } from "@elizaos/app-core";
 import { useMemo } from "react";
 import {
   CHAIN_CONFIGS,

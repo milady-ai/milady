@@ -29,6 +29,61 @@ declare module "@elizaos/app-knowledge/service-loader" {
   export const getKnowledgeTimeoutMs: (...args: any[]) => number;
 }
 
+declare module "@elizaos/app-training/routes/trajectory" {
+  export const handleTrajectoryRoute: (
+    ...args: any[]
+  ) => Promise<boolean> | boolean;
+}
+
+declare module "@elizaos/app-training/services" {
+  export type BackendAvailability = any;
+  export type TrainingServiceLike = any;
+  export type TrainingServiceWithRuntime = any;
+  export const detectAvailableBackends: (...args: any[]) => Promise<any>;
+  export const clearBackendCache: (...args: any[]) => void;
+}
+
+declare module "@elizaos/app-training/routes/training" {
+  export type TrainingRouteHelpers = any;
+  export const handleTrainingRoutes: (
+    ...args: any[]
+  ) => Promise<boolean> | boolean;
+}
+
+declare module "@elizaos/app-training/core/context-types" {
+  export type AgentContext = string;
+  export const AGENT_CONTEXTS: AgentContext[];
+}
+
+declare module "@elizaos/app-training/core/context-catalog" {
+  import type { AgentContext } from "@elizaos/app-training/core/context-types";
+
+  export type ContextResolutionSource = string;
+  export const ACTION_CONTEXT_MAP: Record<string, AgentContext[]>;
+  export const PROVIDER_CONTEXT_MAP: Record<string, AgentContext[]>;
+  export const ALL_CONTEXTS: AgentContext[];
+  export const resolveActionContexts: (...args: any[]) => AgentContext[];
+  export const resolveProviderContexts: (...args: any[]) => AgentContext[];
+  export const resolveActionContextResolution: (...args: any[]) => {
+    contexts: AgentContext[];
+    source: ContextResolutionSource;
+  };
+  export const resolveProviderContextResolution: (...args: any[]) => {
+    contexts: AgentContext[];
+    source: ContextResolutionSource;
+  };
+}
+
+declare module "@elizaos/app-training/core/cli" {}
+declare module "@elizaos/app-training/core/context-audit" {}
+declare module "@elizaos/app-training/core/dataset-generator" {}
+declare module "@elizaos/app-training/core/replay-validator" {}
+declare module "@elizaos/app-training/core/roleplay-executor" {}
+declare module "@elizaos/app-training/core/roleplay-trajectories" {}
+declare module "@elizaos/app-training/core/scenario-blueprints" {}
+declare module "@elizaos/app-training/core/trajectory-task-datasets" {}
+declare module "@elizaos/app-training/core/vertex-tuning" {}
+
 declare module "abitype" {
   export type TypedData = Record<
     string,

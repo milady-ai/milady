@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type http from "node:http";
-import { deriveSolanaAddress } from "@elizaos/agent/api/wallet";
-import { resolveWalletRpcReadiness } from "@elizaos/agent/api/wallet-rpc";
+import { deriveSolanaAddress } from "../api/wallet";
+import { resolveWalletRpcReadiness } from "../api/wallet-rpc";
 import { loadElizaConfig } from "@elizaos/agent/config/config";
 import type { StewardSignRequest } from "@elizaos/shared/contracts/wallet";
 import { ethers } from "ethers";
@@ -17,15 +17,15 @@ export function safeParseBigInt(value: string): bigint {
   }
 }
 
-import { ensureCompatApiAuthorized } from "@elizaos/app-core/api/auth";
+import { ensureCompatApiAuthorized } from "@elizaos/app-core";
 import {
   type CompatRuntimeState,
   readCompatJsonBody,
-} from "@elizaos/app-core/api/compat-route-shared";
+} from "@elizaos/app-core";
 import {
   sendJsonError as sendJsonErrorResponse,
   sendJson as sendJsonResponse,
-} from "@elizaos/app-core/api/response";
+} from "@elizaos/app-core";
 import { isStewardConfigured, signViaSteward } from "./steward-bridge";
 
 function normalizeHexData(value: unknown): string | undefined {

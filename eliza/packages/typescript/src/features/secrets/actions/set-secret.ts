@@ -25,6 +25,7 @@ import {
 } from "../services/secrets.ts";
 import type { SecretContext, SecretType } from "../types.ts";
 import { inferValidationStrategy } from "../validation.ts";
+import { extractSecretsTemplate } from "../../../prompts.ts";
 
 /**
  * Type for extracted secrets from user message
@@ -40,27 +41,6 @@ interface ExtractedSecrets {
 	secrets: ExtractedSecret[];
 	level?: "global" | "world" | "user";
 }
-
-/**
- * Template for extracting secrets from user message
- */
-const extractSecretsTemplate = `You are extracting secret/configuration values from the user's message.
-
-The user wants to set one or more secrets. Extract:
-1. The secret key (should be UPPERCASE_WITH_UNDERSCORES format)
-2. The secret value
-3. Optional description
-4. Secret type (api_key, secret, credential, url, or config)
-
-Common patterns:
-- "Set my OpenAI key to sk-..." -> key: OPENAI_API_KEY, value: sk-...
-- "My Anthropic API key is sk-ant-..." -> key: ANTHROPIC_API_KEY, value: sk-ant-...
-- "Use this Discord token: ..." -> key: DISCORD_BOT_TOKEN, value: ...
-- "Set DATABASE_URL to postgres://..." -> key: DATABASE_URL, value: postgres://...
-
-{{recentMessages}}
-
-Extract the secrets from the user's message. If the key name isn't explicitly specified, infer an appropriate UPPERCASE_WITH_UNDERSCORES name based on the context.`;
 
 /**
  * Set Secret Action

@@ -1,4 +1,4 @@
-import type { CodingAgentSession } from "@elizaos/app-core/api";
+import type { CodingAgentSession } from "@elizaos/app-core";
 import { useApp } from "../../state";
 import { PULSE_STATUSES, STATUS_DOT } from "@elizaos/app-coding/pty-status-dots";
 

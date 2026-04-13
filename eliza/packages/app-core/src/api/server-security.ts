@@ -14,7 +14,7 @@ import { syncAppEnvToEliza, syncElizaEnvAliases } from "../utils/env.js";
 import {
   normalizeCompatRejection,
   runWithCompatAuthContext,
-} from "../../../../apps/app-steward/src/routes/server-wallet-trade";
+} from "@elizaos/app-steward/routes/server-wallet-trade";
 
 export function resolveMcpTerminalAuthorizationRejection(
   ...args: Parameters<typeof upstreamResolveMcpTerminalAuthorizationRejection>

@@ -2,9 +2,9 @@ import {
   APP_EMOTE_EVENT,
   type AppEmoteEventDetail,
   STOP_EMOTE_EVENT,
-} from "@elizaos/app-core/events";
-import { useRenderGuard } from "@elizaos/app-core/hooks";
-import { resolveAppAssetUrl } from "@elizaos/app-core/utils";
+} from "@elizaos/app-core";
+import { useRenderGuard } from "@elizaos/app-core";
+import { resolveAppAssetUrl } from "@elizaos/app-core";
 import {
   memo,
   type ReactElement,
@@ -16,8 +16,8 @@ import {
 import type {
   CompanionHalfFramerateMode,
   CompanionVrmPowerMode,
-} from "@elizaos/app-core/state";
-import type { TranslateFn } from "@elizaos/app-core/types";
+} from "@elizaos/app-core";
+import type { TranslateFn } from "@elizaos/app-core";
 import type {
   CameraProfile,
   VrmEngine,

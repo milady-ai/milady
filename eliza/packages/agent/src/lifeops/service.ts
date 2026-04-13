@@ -159,7 +159,7 @@ import {
   LIFEOPS_WORKFLOW_TRIGGER_TYPES,
   LIFEOPS_X_CAPABILITIES,
 } from "@elizaos/shared/contracts/lifeops";
-import { readProfileFromMetadata } from "../activity-profile/service.js";
+import { readProfileFromMetadata } from "../activity-profile/profile-metadata.js";
 import {
   loadOwnerContactRoutingHints,
   loadOwnerContactsConfig,

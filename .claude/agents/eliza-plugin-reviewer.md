@@ -37,7 +37,7 @@ NODE_PATH must be set in exactly 3 files. Verify all 3 exist and point to repo r
 
 ### 6. Test coverage
 - Verify co-located `__tests__/` or `*.test.ts` exists for the plugin
-- Check if native module stubs are needed in `vitest.unit.config.ts` (like the existing stubs for `plugin-agent-orchestrator`)
+- Check if native module stubs are needed in `test/vitest/unit.config.ts` (like the existing stubs for `plugin-agent-orchestrator`)
 
 ## Output format
 Report findings as:

@@ -726,7 +726,7 @@ Docs: [Environment variables](/cli/environment#runtime-behavior), [TTS plugin](/
 
 ## Vitest: `packages/app-core/test/**` and `*.test.tsx` under `src/`
 
-Root **`vitest.config.ts`** now includes **`packages/app-core/test/**/*.test.ts(x)`** and **`packages/app-core/src/**/*.test.tsx`**, and excludes **`packages/app-core/test/**/*.e2e.test.*`** from the default unit job (e2e still uses **`vitest.e2e.config.ts`**). **Why:** harness tests under `test/state`, `test/runtime`, etc. were skipped; a single explicit `OnboardingWizard.test.tsx` path was brittle for future colocated TSX tests.
+Root **`vitest.config.ts`** now includes **`packages/app-core/test/**/*.test.ts(x)`** and **`packages/app-core/src/**/*.test.tsx`**, and excludes **`packages/app-core/test/**/*.e2e.test.*`** from the default unit job (e2e still uses **`test/vitest/e2e.config.ts`**). **Why:** harness tests under `test/state`, `test/runtime`, etc. were skipped; a single explicit `OnboardingWizard.test.tsx` path was brittle for future colocated TSX tests.
 
 See [Contributing — Testing](/guides/contributing) (subsection *`packages/app-core` in the root Vitest config*).
 

@@ -9,14 +9,14 @@
  * apps can follow the same pattern.
  */
 
-import type { OverlayAppContext } from "@elizaos/app-core/components/apps/overlay-app-api";
+import type { OverlayAppContext } from "@elizaos/app-core";
 import { CompanionSceneHost } from "./CompanionSceneHost";
 import { CompanionSceneStatusContext } from "./companion-scene-status-context";
 import { CompanionHeader, type CompanionShellView } from "./CompanionHeader";
 import { InferenceCloudAlertButton } from "./InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "./resolve-companion-inference-notice";
-import { useRenderGuard } from "@elizaos/app-core/hooks";
-import { useApp, usePtySessions } from "@elizaos/app-core/state";
+import { useRenderGuard } from "@elizaos/app-core";
+import { useApp, usePtySessions } from "@elizaos/app-core";
 import {
   lazy,
   memo,
@@ -26,12 +26,12 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ChatModalView } from "@elizaos/app-core/components/pages/ChatModalView";
+import { ChatModalView } from "@elizaos/app-core";
 import { PtyConsoleSidePanel } from "@elizaos/app-coding";
 import { useCompanionSceneStatus } from "./companion-scene-status-context";
 
 const CharacterEditor = lazy(() =>
-  import("@elizaos/app-core/components/character/CharacterEditor").then((m) => ({
+  import("@elizaos/app-core").then((m) => ({
     default: m.CharacterEditor,
   })),
 );

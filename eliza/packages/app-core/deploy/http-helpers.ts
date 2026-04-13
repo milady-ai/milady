@@ -1,1 +1,1 @@
-export { readRequestBody } from "@elizaos/app-core/api";
+export { readRequestBody } from "@elizaos/agent/api/http-helpers.js";

@@ -241,7 +241,7 @@ The repo root **`vitest.config.ts`** (used by **`bun run test`** → unit shard)
 - **`packages/app-core/src/**/*.test.ts`** and **`packages/app-core/src/**/*.test.tsx`** — colocated tests, including TSX, without listing each file.
 - **`packages/app-core/test/**/*.test.ts`** and **`.../test/**/*.test.tsx`** — shared harness tests (e.g. `test/state`, `test/runtime`).
 
-**Why:** those directories were previously omitted, so new suites never ran in CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** is excluded from this job so e2e stays on **`vitest.e2e.config.ts`**. **`vitest.unit.config.ts`** still omits **`packages/app-core/test/app/**`** (heavy renderer harness) from the coverage-focused unit pass—**why:** those are run in targeted app workspaces or separate jobs.
+**Why:** those directories were previously omitted, so new suites never ran in CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** is excluded from this job so e2e stays on **`test/vitest/e2e.config.ts`**. **`test/vitest/unit.config.ts`** still omits **`packages/app-core/test/app/**`** (heavy renderer harness) from the coverage-focused unit pass—**why:** those are run in targeted app workspaces or separate jobs.
 
 ---
 

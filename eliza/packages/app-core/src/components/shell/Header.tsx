@@ -1,6 +1,6 @@
-import { LanguageDropdown, ThemeToggle } from "@elizaos/app-core/components";
-import { getTabGroups, type TabGroup } from "@elizaos/app-core/navigation";
-import { useApp } from "@elizaos/app-core/state";
+import { LanguageDropdown, ThemeToggle } from "@elizaos/app-core";
+import { getTabGroups, type TabGroup } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import {
   Button,
   Dialog,

@@ -14,23 +14,7 @@ import {
 	SECRETS_SERVICE_TYPE,
 	type SecretsService,
 } from "../services/secrets.ts";
-
-const extractRequestTemplate = `You are helping an AI agent request a missing secret.
-Determine what secret the agent needs and why based on the recent conversation.
-
-Common patterns:
-- "I need an API key for OpenAI" -> key: OPENAI_API_KEY
-- "Missing TWITTER_TOKEN" -> key: TWITTER_TOKEN
-- "I cannot proceed without a Discord token" -> key: DISCORD_TOKEN
-
-Recent Messages:
-{{recentMessages}}
-
-Output JSON with:
-- key: The name of the secret needed (e.g. OPENAI_API_KEY)
-- reason: Why it is needed (optional)
-
-If no specific secret is requested, return null json.`;
+import { extractSecretRequestTemplate as extractRequestTemplate } from "../../../prompts.ts";
 
 export const requestSecretAction: Action = {
 	name: "REQUEST_SECRET",

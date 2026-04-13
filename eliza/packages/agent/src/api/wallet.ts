@@ -6,6 +6,10 @@
  *
  * DEX price oracle logic lives in ./wallet-dex-prices.ts
  * EVM balance + NFT fetching lives in ./wallet-evm-balance.ts
+ *
+ * @deprecated This file is maintained for backward compatibility.
+ * The canonical source has moved to `@elizaos/app-steward/api/wallet`.
+ * New development should target the app-steward package.
  */
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -441,23 +445,11 @@ export function generateWalletForChain(
   };
 }
 
-export function syncSolanaPublicKeyEnv(
-  privateKey = process.env.SOLANA_PRIVATE_KEY,
-): string | null {
-  const trimmed = privateKey?.trim();
-  if (!trimmed || PLACEHOLDER_RE.test(trimmed)) {
-    return null;
-  }
-
-  try {
-    const publicKey = deriveSolanaAddress(trimmed);
-    process.env.SOLANA_PUBLIC_KEY = publicKey;
-    process.env.WALLET_PUBLIC_KEY = publicKey;
-    return publicKey;
-  } catch {
-    return null;
-  }
-}
+// Extracted to wallet-env-sync.ts to break circular dependency with config/config.ts.
+// Local import for internal use (setSolanaWalletEnv below), plus re-export for
+// backward compatibility so existing consumers of wallet.js keep working.
+import { syncSolanaPublicKeyEnv } from "./wallet-env-sync.js";
+export { syncSolanaPublicKeyEnv } from "./wallet-env-sync.js";
 
 export function setSolanaWalletEnv(privateKey: string): string | null {
   const trimmed = privateKey.trim();

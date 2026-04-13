@@ -1,4 +1,4 @@
-import { useRenderGuard } from "@elizaos/app-core/hooks";
+import { useRenderGuard } from "@elizaos/app-core";
 import {
   ChatPanelLayout,
   DrawerSheet,

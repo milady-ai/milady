@@ -74,7 +74,7 @@ function dispatchMessage(messageName: string, payload: unknown): void {
       });
     }
     // Propagate to boot config so the appClient picks up port changes.
-    // We modify it directly instead of importing @elizaos/app-core/config
+    // We modify it directly instead of importing @elizaos/app-core
     // to prevent bundling React and the entire UI layer into the preload script.
     updateBootConfig({
       apiBase: apiBaseUpdate.base,

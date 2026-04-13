@@ -1,6 +1,6 @@
-import type { UiLanguage } from "@elizaos/app-core/i18n";
-import type { UiTheme } from "@elizaos/app-core/state";
-import { useMediaQuery } from "@elizaos/app-core/hooks";
+import type { UiLanguage } from "@elizaos/app-core";
+import type { UiTheme } from "@elizaos/app-core";
+import { useMediaQuery } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import {
   MessageCirclePlus,
@@ -15,8 +15,8 @@ import { memo, type ReactNode } from "react";
 import {
   LanguageDropdown,
   LANGUAGE_DROPDOWN_TRIGGER_CLASSNAME,
-} from "@elizaos/app-core/components/shared/LanguageDropdown";
-import { ThemeToggle } from "@elizaos/app-core/components/shared/ThemeToggle";
+} from "@elizaos/app-core";
+import { ThemeToggle } from "@elizaos/app-core";
 import {
   HEADER_BUTTON_STYLE,
   SHELL_ICON_BUTTON_CLASSNAME,

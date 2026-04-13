@@ -26,7 +26,7 @@ fi
 
 # Normalize — we only care about the three NODE_PATH sites
 case "$file_path" in
-  */packages/agent/src/runtime/eliza.ts|\
+  */eliza/packages/agent/src/runtime/eliza.ts|\
   */eliza/packages/app-core/scripts/run-node.mjs|\
   */apps/app/electrobun/src/native/agent.ts)
     ;;
@@ -39,7 +39,7 @@ esac
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 
 sites=(
-  "packages/agent/src/runtime/eliza.ts"
+  "eliza/packages/agent/src/runtime/eliza.ts"
   "eliza/packages/app-core/scripts/run-node.mjs"
   "apps/app/electrobun/src/native/agent.ts"
 )

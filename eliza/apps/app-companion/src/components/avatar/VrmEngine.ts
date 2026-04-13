@@ -1,4 +1,4 @@
-import { resolveAppAssetUrl } from "@elizaos/app-core/utils";
+import { resolveAppAssetUrl } from "@elizaos/app-core";
 import {
   MToonMaterialLoaderPlugin,
   type VRM,

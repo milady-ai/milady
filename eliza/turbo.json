@@ -73,7 +73,7 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "outputs": ["coverage/**"],
       "inputs": ["src/**/*.ts", "src/**/*.js", "__tests__/**/*", "*.test.*", "package.json", "tests/**/*", "python/tests/**/*"],
       "cache": false

@@ -5,8 +5,8 @@
  * in the ./inventory/ directory.
  */
 
-import type { StewardStatusResponse } from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+import type { StewardStatusResponse } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import { WidgetHost } from "../../widgets";
 import {
   Button,

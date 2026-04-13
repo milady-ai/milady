@@ -9,12 +9,12 @@ import { useEffect, useEffectEvent, useRef } from "react";
 import {
   CHAT_AVATAR_VOICE_EVENT,
   type ChatAvatarVoiceEventDetail,
-} from "@elizaos/app-core/events";
+} from "@elizaos/app-core";
 import type {
   CompanionHalfFramerateMode,
   CompanionVrmPowerMode,
-} from "@elizaos/app-core/state";
-import { getVrmCount, getVrmUrl } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { getVrmCount, getVrmUrl } from "@elizaos/app-core";
 import {
   type CameraProfile,
   type InteractionMode,

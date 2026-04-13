@@ -1,17 +1,17 @@
 import http from "node:http";
 import { logger } from "@elizaos/core";
-import { getWalletAddresses } from "@elizaos/agent/api/wallet";
-import { ensureCompatApiAuthorized } from "@elizaos/app-core/api/auth";
+import { getWalletAddresses } from "../api/wallet";
+import { ensureCompatApiAuthorized } from "@elizaos/app-core";
 import {
   sendJsonError as sendJsonErrorResponse,
   sendJson as sendJsonResponse,
-} from "@elizaos/app-core/api/response";
+} from "@elizaos/app-core";
 import {
   getConfiguredCompatAgentName,
   isLoopbackRemoteAddress,
   readCompatJsonBody,
   type CompatRuntimeState,
-} from "@elizaos/app-core/api/compat-route-shared";
+} from "@elizaos/app-core";
 import {
   approveStewardTransaction,
   createStewardClient,

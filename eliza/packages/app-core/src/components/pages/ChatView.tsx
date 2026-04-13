@@ -9,16 +9,16 @@
 import type {
   ConversationMessage,
   ImageAttachment,
-} from "@elizaos/app-core/api";
-import { client } from "@elizaos/app-core/api";
-import { isRoutineCodingAgentMessage } from "@elizaos/app-core/chat";
-import { useChatAvatarVoiceBridge } from "@elizaos/app-core/hooks";
+} from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
+import { isRoutineCodingAgentMessage } from "@elizaos/app-core";
+import { useChatAvatarVoiceBridge } from "@elizaos/app-core";
 import {
   getVrmPreviewUrl,
   useApp,
   useChatComposer,
   usePtySessions,
-} from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
 import {
   ChatAttachmentStrip,
   ChatComposer,

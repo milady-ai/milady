@@ -3,7 +3,7 @@
  * onboarding (selection-only) and the character editor (with customization).
  */
 
-import { getVrmPreviewUrl } from "@elizaos/app-core/state";
+import { getVrmPreviewUrl } from "@elizaos/app-core";
 import type { StylePreset } from "@elizaos/shared/contracts/onboarding";
 import { Button } from "@elizaos/app-core";
 import { useEffect, useState } from "react";

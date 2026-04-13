@@ -19,6 +19,12 @@
       "@elizaos/app-form/*": ["../../apps/app-form/src/*"],
       "@elizaos/app-companion": ["../../apps/app-companion/src/index.ts"],
       "@elizaos/app-companion/*": ["../../apps/app-companion/src/*"],
+      "@elizaos/app-knowledge": ["../../apps/app-knowledge/src/index.ts"],
+      "@elizaos/app-knowledge/*": ["../../apps/app-knowledge/src/*"],
+      "@elizaos/app-training": ["../../apps/app-training/src/index.ts"],
+      "@elizaos/app-training/*": ["../../apps/app-training/src/*"],
+      "@elizaos/agent": ["./src/index.ts"],
+      "@elizaos/agent/*": ["./src/*"],
       "@elizaos/shared": ["../shared/src/index.ts"],
       "@elizaos/shared/*": ["../shared/src/*"]
     }

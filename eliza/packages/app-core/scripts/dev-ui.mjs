@@ -32,7 +32,7 @@ import {
 import {
   resolveDesktopApiPort,
   resolveDesktopUiPort,
-} from "../../shared/src/runtime-env.ts";
+} from "@elizaos/shared/runtime-env";
 import { getBunVersionAdvisory } from "./lib/bun-version-guard.mjs";
 import { capacitorPluginsBuildNeeded } from "./lib/capacitor-plugin-build-needed.mjs";
 import { coerceBoolean } from "./lib/dev-ui-onchain.mjs";

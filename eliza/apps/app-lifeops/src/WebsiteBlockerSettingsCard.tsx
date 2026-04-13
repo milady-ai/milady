@@ -1,18 +1,18 @@
 import { Button, StatusBadge } from "@elizaos/app-core";
 import { startTransition, useCallback, useEffect, useState } from "react";
-import { client } from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+import { client } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import type {
   WebsiteBlockerSettingsCardProps,
   WebsiteBlockerSettingsMode,
-} from "@elizaos/app-core/types";
+} from "@elizaos/app-core";
 import {
   getPermissionAction,
   SETTINGS_PANEL_ACTIONS_CLASSNAME,
   SETTINGS_PANEL_CLASSNAME,
   SETTINGS_PANEL_HEADER_CLASSNAME,
   translateWithFallback,
-} from "@elizaos/app-core/components/settings/permission-types";
+} from "@elizaos/app-core";
 
 type WebsiteBlockerStatus = Awaited<
   ReturnType<typeof client.getWebsiteBlockerStatus>

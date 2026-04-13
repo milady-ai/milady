@@ -1,14 +1,14 @@
 import { Button, Input, Z_SYSTEM_CRITICAL } from "@elizaos/app-core";
 import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { client } from "@elizaos/app-core/api";
+import { client } from "@elizaos/app-core";
 import {
   dispatchAppEvent,
   EMOTE_PICKER_EVENT,
   STOP_EMOTE_EVENT,
-} from "@elizaos/app-core/events";
-import { useTimeout } from "@elizaos/app-core/hooks";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { useTimeout } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 
 // Types
 interface EmoteItem {

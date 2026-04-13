@@ -4,7 +4,7 @@
  * Extracted from KnowledgeView.tsx to keep individual files under ~500 LOC.
  */
 
-import { useApp } from "@elizaos/app-core/state";
+import { useApp } from "@elizaos/app-core";
 import { Button, Checkbox, Input, PagePanel } from "@elizaos/app-core";
 import { useCallback, useRef, useState } from "react";
 

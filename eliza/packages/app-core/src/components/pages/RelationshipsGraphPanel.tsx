@@ -2,7 +2,7 @@ import type {
   RelationshipsGraphEdge,
   RelationshipsGraphSnapshot,
   RelationshipsPersonSummary,
-} from "@elizaos/app-core/api";
+} from "@elizaos/app-core";
 import { useMemo, useState } from "react";
 
 const GRAPH_WIDTH = 960;

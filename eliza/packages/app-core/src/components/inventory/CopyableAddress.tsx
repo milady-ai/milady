@@ -2,7 +2,7 @@
  * Truncated wallet address with a copy button.
  */
 
-import { useTimeout } from "@elizaos/app-core/hooks";
+import { useTimeout } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import { useState } from "react";
 

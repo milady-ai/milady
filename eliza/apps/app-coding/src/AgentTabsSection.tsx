@@ -14,8 +14,8 @@
  */
 
 import { Button, SettingsControls } from "@elizaos/app-core";
-import type { AgentPreflightResult } from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+import type { AgentPreflightResult } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import {
   AGENT_LABELS,
   AGENT_TABS,

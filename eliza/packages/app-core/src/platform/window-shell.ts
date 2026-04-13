@@ -1,4 +1,4 @@
-import { pathForTab } from "@elizaos/app-core/navigation";
+import { pathForTab } from "@elizaos/app-core";
 import type { HistoryLike } from "./types";
 
 export type DetachedSurfaceTab =

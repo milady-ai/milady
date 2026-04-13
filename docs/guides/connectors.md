@@ -1282,8 +1282,8 @@ bunx vitest run src/config/plugin-auto-enable.test.ts src/runtime/eliza.test.ts
 bunx vitest run src/connectors/discord-connector.test.ts
 
 # Connector e2e tests
-bunx vitest run --config vitest.live-e2e.config.ts packages/agent/test/discord-connector.live.e2e.test.ts
-bunx vitest run --config vitest.integration.config.ts packages/agent/test/signal-connector.integration.test.ts
+bunx vitest run --config test/vitest/live-e2e.config.ts packages/agent/test/discord-connector.live.e2e.test.ts
+bunx vitest run --config test/vitest/integration.config.ts packages/agent/test/signal-connector.integration.test.ts
 
 # WhatsApp pairing
 bunx vitest run src/services/__tests__/whatsapp-pairing.test.ts src/api/__tests__/whatsapp-routes.test.ts

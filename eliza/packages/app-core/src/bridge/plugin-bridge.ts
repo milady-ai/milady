@@ -340,13 +340,3 @@ export function isFeatureAvailable(
   }
 }
 
-// Export platform info
-export {
-  isAndroid,
-  isDesktopPlatform as isDesktop,
-  isIOS,
-  isMacOSPlatform as isMacOS,
-  isNative,
-  isWebPlatform as isWeb,
-  platform,
-};

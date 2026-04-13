@@ -6,23 +6,23 @@ import type {
   ConversationChannelType,
   ConversationMessage,
   VoiceConfig,
-} from "@elizaos/app-core/api";
-import { client } from "@elizaos/app-core/api";
+} from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
 import {
   ELIZA_CLOUD_STATUS_UPDATED_EVENT,
   type ElizaCloudStatusUpdatedDetail,
   VOICE_CONFIG_UPDATED_EVENT,
-} from "@elizaos/app-core/events";
+} from "@elizaos/app-core";
 import {
   useDocumentVisibility,
   useTimeout,
   useVoiceChat,
   type VoiceCaptureMode,
   type VoicePlaybackStartEvent,
-} from "@elizaos/app-core/hooks";
-import type { useApp } from "@elizaos/app-core/state";
-import { ttsDebug } from "@elizaos/app-core/utils";
-import { resolveCharacterVoiceConfigFromAppConfig } from "@elizaos/app-core/voice";
+} from "@elizaos/app-core";
+import type { useApp } from "@elizaos/app-core";
+import { ttsDebug } from "@elizaos/app-core";
+import { resolveCharacterVoiceConfigFromAppConfig } from "@elizaos/app-core";
 import {
   useCallback,
   useEffect,

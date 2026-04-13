@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@elizaos/app-core/components";
+import { ErrorBoundary } from "@elizaos/app-core";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
 
@@ -8,21 +8,21 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { StatusBar, Style } from "@capacitor/status-bar";
-import { App } from "@elizaos/app-core/App";
-import { client } from "@elizaos/app-core/api";
+import { App } from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
 import {
   initializeCapacitorBridge,
   subscribeDesktopBridgeEvent,
   initializeStorageBridge,
   isElectrobunRuntime,
-} from "@elizaos/app-core/bridge";
-import { CharacterEditor } from "@elizaos/app-core/components";
-import type { BrandingConfig } from "@elizaos/app-core/config";
+} from "@elizaos/app-core";
+import { CharacterEditor } from "@elizaos/app-core";
+import type { BrandingConfig } from "@elizaos/app-core";
 import {
   type AppBootConfig,
   getBootConfig,
   setBootConfig,
-} from "@elizaos/app-core/config";
+} from "@elizaos/app-core";
 import {
   AGENT_READY_EVENT,
   APP_PAUSE_EVENT,
@@ -32,7 +32,7 @@ import {
   dispatchAppEvent,
   SHARE_TARGET_EVENT,
   TRAY_ACTION_EVENT,
-} from "@elizaos/app-core/events";
+} from "@elizaos/app-core";
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
@@ -44,32 +44,32 @@ import {
   resolveWindowShellRoute,
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
-} from "@elizaos/app-core/platform";
+} from "@elizaos/app-core";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
   DesktopOnboardingRuntime,
   DesktopSurfaceNavigationRuntime,
   DesktopTrayRuntime,
   DetachedShellRoot,
-} from "@elizaos/app-core/shell";
-import { AppProvider } from "@elizaos/app-core/state";
-import { applyUiTheme, loadUiTheme } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { AppProvider } from "@elizaos/app-core";
+import { applyUiTheme, loadUiTheme } from "@elizaos/app-core";
 import { Agent } from "@elizaos/capacitor-agent";
 import { Desktop } from "@elizaos/capacitor-desktop";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { CompanionShell } from "../../../eliza/apps/app-companion/src/ui";
-import "../../../eliza/apps/app-companion/src/register";
+import { CompanionShell } from "@elizaos/app-companion/ui";
+import "@elizaos/app-companion/register";
 import {
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
-} from "../../../eliza/apps/app-lifeops/src/ui";
-import "../../../eliza/apps/app-shopify/src/register";
-import "../../../eliza/apps/app-vincent/src/register";
+} from "@elizaos/app-lifeops/ui";
+import "@elizaos/app-shopify/register";
+import "@elizaos/app-vincent/register";
 import { MILADY_ENV_ALIASES } from "./brand-env";
 import { MILADY_CHARACTER_CATALOG } from "./character-catalog";
-import { shouldUseCloudOnlyBranding } from "@elizaos/app-core/config";
+import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 
 const MILADY_BRANDING: Partial<BrandingConfig> = {
   appName: "Milady",

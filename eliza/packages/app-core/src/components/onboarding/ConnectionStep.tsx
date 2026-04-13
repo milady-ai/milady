@@ -9,9 +9,9 @@
  * @see ./connection/README.md
  */
 
-import type { ProviderOption } from "@elizaos/app-core/api";
-import { useBranding } from "@elizaos/app-core/config";
-import { isNative } from "@elizaos/app-core/platform";
+import type { ProviderOption } from "@elizaos/app-core";
+import { useBranding } from "@elizaos/app-core";
+import { isNative } from "@elizaos/app-core";
 import { ONBOARDING_PROVIDER_CATALOG } from "@elizaos/shared/contracts/onboarding";
 import { useCallback, useEffect, useMemo } from "react";
 import {

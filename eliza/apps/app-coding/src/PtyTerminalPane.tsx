@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { client } from "@elizaos/app-core/api";
+import { client } from "@elizaos/app-core";
 
 /**
  * Renders a single xterm.js terminal for a PTY session.

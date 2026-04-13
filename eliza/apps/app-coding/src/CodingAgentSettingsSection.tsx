@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AgentPreflightResult } from "@elizaos/app-core/api";
-import { client } from "@elizaos/app-core/api";
-import { useApp } from "@elizaos/app-core/state";
+import type { AgentPreflightResult } from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import { AgentTabsSection } from "./AgentTabsSection";
 import {
   ADAPTER_NAME_TO_TAB,

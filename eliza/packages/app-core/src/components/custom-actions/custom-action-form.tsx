@@ -3,7 +3,7 @@
  * Extracted from CustomActionEditor.tsx.
  */
 
-import type { CustomActionHandler } from "@elizaos/app-core/api";
+import type { CustomActionHandler } from "@elizaos/app-core";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 

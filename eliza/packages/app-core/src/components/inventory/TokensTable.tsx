@@ -2,8 +2,8 @@
  * Token balance table with per-chain error notices.
  */
 
-import type { EvmChainBalance } from "@elizaos/app-core/api";
-import type { createTranslator } from "@elizaos/app-core/i18n";
+import type { EvmChainBalance } from "@elizaos/app-core";
+import type { createTranslator } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import { chainIcon, formatBalance, type TokenRow } from "./constants";
 import { TokenLogo } from "./TokenLogo";

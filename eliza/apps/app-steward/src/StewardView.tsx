@@ -14,7 +14,7 @@ import {
 } from "@elizaos/app-core";
 import { FileText } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useApp } from "@elizaos/app-core/state";
+import { useApp } from "@elizaos/app-core";
 import { ApprovalQueue } from "./ApprovalQueue";
 import { StewardLogo } from "./StewardLogo";
 import { TransactionHistory } from "./TransactionHistory";

@@ -5,7 +5,7 @@
  * steps: backward-only jumps—forward jumps would bypass finish/login validation
  * (enforced in AppContext via canRevertOnboardingTo).
  */
-import { useApp } from "@elizaos/app-core/state";
+import { useApp } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import { useBranding } from "../../config/branding";
 import { getOnboardingNavMetas } from "../../onboarding/flow";

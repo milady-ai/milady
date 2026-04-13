@@ -3,8 +3,8 @@
  */
 
 import { Keyboard } from "@capacitor/keyboard";
-import { subscribeDesktopBridgeEvent } from "@elizaos/app-core/bridge";
-import { isIOS, isNative } from "@elizaos/app-core/platform";
+import { subscribeDesktopBridgeEvent } from "@elizaos/app-core";
+import { isIOS, isNative } from "@elizaos/app-core";
 import {
   Button,
   DrawerSheet,

@@ -42,8 +42,8 @@ import type {
   UiElement,
   UiRenderContext,
   UiSpec,
-  ValidationCheck,
-  VisibilityCondition,
+  UiSpecValidationCheck,
+  UiSpecVisibilityCondition,
 } from "../../config/ui-spec";
 
 const UiContext = createContext<UiRenderContext | null>(null);
@@ -149,7 +149,7 @@ function resolveProps(
 // ── Visibility evaluation ────────────────────────────────────────────
 
 export function evaluateUiVisibility(
-  condition: VisibilityCondition | undefined,
+  condition: UiSpecVisibilityCondition | undefined,
   state: Record<string, unknown>,
   auth?: AuthState,
 ): boolean {
@@ -194,9 +194,13 @@ export function evaluateUiVisibility(
 
   // Logic combinators
   if ("and" in condition)
-    return condition.and.every((c) => evaluateUiVisibility(c, state, auth));
+    return condition.and.every((c: UiSpecVisibilityCondition) =>
+      evaluateUiVisibility(c, state, auth),
+    );
   if ("or" in condition)
-    return condition.or.some((c) => evaluateUiVisibility(c, state, auth));
+    return condition.or.some((c: UiSpecVisibilityCondition) =>
+      evaluateUiVisibility(c, state, auth),
+    );
   if ("not" in condition)
     return !evaluateUiVisibility(condition.not, state, auth);
 
@@ -258,7 +262,7 @@ const BUILTIN_VALIDATORS: Record<
 // ── Validation runner ───────────────────────────────────────────────
 
 export function runValidation(
-  checks: ValidationCheck[],
+  checks: UiSpecValidationCheck[],
   value: unknown,
   customValidators?: Record<
     string,

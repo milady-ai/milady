@@ -5,11 +5,11 @@
  * The actual FFmpeg pipeline runs on the backend via stream-routes.
  */
 
-import { client, isApiError } from "@elizaos/app-core/api";
-import { isElectrobunRuntime } from "@elizaos/app-core/bridge";
-import { getBootConfig } from "@elizaos/app-core/config";
-import { useDocumentVisibility } from "@elizaos/app-core/hooks";
-import { useApp } from "@elizaos/app-core/state";
+import { client, isApiError } from "@elizaos/app-core";
+import { isElectrobunRuntime } from "@elizaos/app-core";
+import { getBootConfig } from "@elizaos/app-core";
+import { useDocumentVisibility } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatUptime } from "../../utils/format";
 import { IS_POPOUT } from "../stream/helpers";

@@ -2,7 +2,7 @@
  * Helpers for per-chain inventory visibility toggles (primary chains only).
  */
 
-import type { InventoryChainFilters } from "@elizaos/app-core/state";
+import type { InventoryChainFilters } from "@elizaos/app-core";
 import { PRIMARY_CHAIN_KEYS, resolveChainKey } from "./chainConfig";
 import type { ChainKey } from "./chainConfig";
 

@@ -1,4 +1,4 @@
-import { useApp } from "@elizaos/app-core/state";
+import { useApp } from "@elizaos/app-core";
 import { Button, Input } from "@elizaos/app-core";
 import {
   OnboardingField,

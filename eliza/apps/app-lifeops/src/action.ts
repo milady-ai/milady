@@ -9,7 +9,7 @@ import type {
 import {
   LifeOpsService,
   LifeOpsServiceError,
-} from "@elizaos/agent/lifeops/service";
+} from "./lifeops/service.js";
 import { hasAdminAccess } from "@elizaos/agent/security/access";
 import type {
   CompleteLifeOpsBrowserSessionRequest,

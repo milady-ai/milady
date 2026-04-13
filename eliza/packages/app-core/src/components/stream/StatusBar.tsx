@@ -2,9 +2,9 @@
  * StatusBar — Minimal stream control bar with go-live/offline button and status.
  */
 
-import { isElectrobunRuntime } from "@elizaos/app-core/bridge";
-import { getBootConfig } from "@elizaos/app-core/config";
-import { useApp } from "@elizaos/app-core/state";
+import { isElectrobunRuntime } from "@elizaos/app-core";
+import { getBootConfig } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import { Button } from "@elizaos/app-core";
 import { ExternalLink } from "lucide-react";
 import { type CSSProperties, useEffect, useRef } from "react";

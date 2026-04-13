@@ -79,7 +79,7 @@ export {
   isSafeResetStateDir,
   resolveCorsOrigin,
 } from "./server-startup";
-export { resolveWalletExportRejection } from "../../../../apps/app-steward/src/routes/server-wallet-trade";
+export { resolveWalletExportRejection } from "@elizaos/app-steward/routes/server-wallet-trade";
 export {
   AGENT_EVENT_ALLOWED_STREAMS,
   CONFIG_WRITE_ALLOWED_TOP_KEYS,
@@ -136,11 +136,8 @@ import {
   getCorsAllowedPorts,
   isAllowedLocalOrigin,
 } from "./server-cors";
-import { handleShopifyRoute } from "../../../../apps/app-shopify/src/routes";
-import {
-  handleVincentRoute,
-  type VincentRouteState,
-} from "../../../../apps/app-vincent/src/routes";
+// Phase 2 extraction: Vincent routes → app-vincent/src/plugin.ts (vincentPlugin)
+// Phase 2 extraction: Shopify routes → app-shopify/src/plugin.ts (shopifyPlugin)
 import {
   isAllowedDevConsoleLogPath,
   readDevConsoleLogTail,
@@ -151,11 +148,10 @@ import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
 import { handleDevCompatRoutes } from "./dev-compat-routes";
 import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
 import { handlePluginsCompatRoutes } from "./plugins-compat-routes";
-import { handleWalletBrowserCompatRoutes } from "../../../../apps/app-steward/src/routes/wallet-browser-compat-routes";
-import { handleWalletTradeCompatRoutes } from "../../../../apps/app-steward/src/routes/wallet-trade-compat-routes";
-import { handleStewardCompatRoutes } from "../../../../apps/app-steward/src/routes/steward-compat-routes";
+// Phase 2 extraction: Steward compat routes → app-steward/src/plugin.ts (stewardPlugin)
+// Includes: handleWalletBrowserCompatRoutes, handleWalletTradeCompatRoutes,
+//           handleStewardCompatRoutes, handleWalletCompatRoutes
 import { handleWorkbenchCompatRoutes } from "./workbench-compat-routes";
-import { handleWalletCompatRoutes } from "../../../../apps/app-steward/src/routes/wallet-compat-routes";
 import { resolveDevStackFromEnv } from "./dev-stack";
 
 const require = createRequire(import.meta.url);
@@ -167,8 +163,8 @@ const lazyEnsureTTS = () =>
   import("../runtime/eliza.js").then((m) => m.ensureTextToSpeechHandler);
 
 import { getStartupEmbeddingAugmentation } from "../runtime/startup-overlay.js";
-import { hydrateWalletKeysFromNodePlatformSecureStore } from "../../../../apps/app-steward/src/security/hydrate-wallet-keys-from-platform-store";
-import { deleteWalletSecretsFromOsStore } from "../../../../apps/app-steward/src/security/wallet-os-store-actions";
+import { hydrateWalletKeysFromNodePlatformSecureStore } from "@elizaos/app-steward/security/hydrate-wallet-keys-from-platform-store";
+import { deleteWalletSecretsFromOsStore } from "@elizaos/app-steward/security/wallet-os-store-actions";
 import { clearCloudSecrets, getCloudSecret } from "./cloud-secrets";
 import { clearPersistedOnboardingConfig } from "@elizaos/agent/api/provider-switch-config";
 
@@ -871,34 +867,13 @@ async function handleCompatRoute(
     return handled;
   }
 
-  // ── Vincent OAuth routes ────────────────────────────────────────
-  // /callback/vincent is the OAuth redirect target and is hit by the user's
-  // external system browser — it has no compat API token, so it must bypass
-  // ensureCompatApiAuthorized. The PKCE code_verifier stored server-side
-  // (keyed by the OAuth state param) is what actually authorizes the
-  // token exchange.
-  if (
-    url.pathname.startsWith("/api/vincent/") ||
-    url.pathname === "/callback/vincent"
-  ) {
-    if (
-      url.pathname !== "/callback/vincent" &&
-      !ensureCompatApiAuthorized(req, res)
-    )
-      return true;
-    const vincentConfig = loadElizaConfig();
-    const handled = await handleVincentRoute(req, res, url.pathname, method, {
-      config: vincentConfig,
-    });
-    if (handled) return true;
-  }
+  // ── Vincent OAuth routes — extracted to app-vincent/src/plugin.ts ──
+  // Now served via vincentPlugin.routes (rawPath) on the runtime plugin
+  // route system.  /callback/vincent is marked public: true.
 
-  // ── Shopify routes ────────────────────────────────────────────────
-  if (url.pathname.startsWith("/api/shopify")) {
-    if (!ensureCompatApiAuthorized(req, res)) return true;
-    const handled = await handleShopifyRoute(req, res, url.pathname, method);
-    if (handled) return true;
-  }
+  // ── Shopify routes — extracted to app-shopify/src/plugin.ts ───────
+  // Now served via shopifyPlugin.routes (rawPath) on the runtime plugin
+  // route system.
 
   if (method === "POST" && url.pathname === "/api/agent/reset") {
     if (!ensureCompatSensitiveRouteAuthorized(req, res)) {
@@ -941,17 +916,10 @@ async function handleCompatRoute(
     return true;
   }
 
-  // Wallet OS-store, keys, NFTs — extracted to wallet-compat-routes.ts
-  if (await handleWalletCompatRoutes(req, res, state)) return true;
-
-  // Browser wallet bridge transactions.
-  if (await handleWalletBrowserCompatRoutes(req, res, state)) return true;
-
-  // Steward wallet routes — extracted to steward-compat-routes.ts
-  if (await handleStewardCompatRoutes(req, res, state)) return true;
-
-  // Wallet trade / transfer routes — extracted to wallet-trade-compat-routes.ts
-  if (await handleWalletTradeCompatRoutes(req, res, state)) return true;
+  // ── Steward wallet compat routes — extracted to app-steward/src/plugin.ts ──
+  // All four handler groups (wallet-compat, wallet-browser-compat,
+  // steward-compat, wallet-trade-compat) are now served via
+  // stewardPlugin.routes (rawPath) on the runtime plugin route system.
 
   // Plugin routes — extracted to plugins-compat-routes.ts
   if (await handlePluginsCompatRoutes(req, res, state)) return true;

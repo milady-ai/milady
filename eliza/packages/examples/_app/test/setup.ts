@@ -154,9 +154,7 @@ function createBridgeMock(extraExports: Record<string, unknown> = {}) {
   };
 }
 
-vi.mock("@elizaos/app-core/bridge/electrobun-rpc.js", () => createBridgeMock());
-
-vi.mock("@elizaos/app-core/bridge", () =>
+vi.mock("@elizaos/app-core", () =>
   createBridgeMock({
     platform: "web",
     isWeb: () => true,

@@ -1,4 +1,4 @@
-import { useApp } from "@elizaos/app-core/state";
+import { useApp } from "@elizaos/app-core";
 import { Button, Spinner } from "@elizaos/app-core";
 import { useEffect, useRef } from "react";
 import { useBranding } from "../../config";

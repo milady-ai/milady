@@ -6,6 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, type Plugin, transformWithEsbuild } from "vite";
 import { syncElizaEnvAliases } from "../../eliza/packages/app-core/scripts/lib/sync-eliza-env-aliases.mjs";
+// Keep workspace-relative TS imports in this config so Vite transpiles them
+// while bundling the config instead of asking Node to load package-exported
+// .ts files directly in CI.
 import { colorizeDevSettingsStartupBanner } from "../../eliza/packages/shared/src/dev-settings-banner-style.ts";
 import { prependDevSubsystemFigletHeading } from "../../eliza/packages/shared/src/dev-settings-figlet-heading.ts";
 import {
@@ -22,9 +25,6 @@ import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
 
 const _require = createRequire(import.meta.url);
 
-// Keep workspace-relative TS imports in this config so Vite transpiles them
-// while bundling the config instead of asking Node to load package-exported
-// .ts files directly in CI.
 const here = path.dirname(fileURLToPath(import.meta.url));
 const miladyRoot = path.resolve(here, "../..");
 const nativePluginsRoot = path.join(

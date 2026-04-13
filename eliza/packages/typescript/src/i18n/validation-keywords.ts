@@ -11,12 +11,15 @@
  */
 
 import {
-	VALIDATION_KEYWORD_LOCALES as _LOCALES,
 	VALIDATION_KEYWORD_DOCS as _DOCS,
+	VALIDATION_KEYWORD_LOCALES as _LOCALES,
 } from "./generated/validation-keyword-data.ts";
 
-export { _LOCALES as VALIDATION_KEYWORD_LOCALES, _DOCS as VALIDATION_KEYWORD_DOCS };
 export type { ValidationKeywordLocale } from "./generated/validation-keyword-data.ts";
+export {
+	_DOCS as VALIDATION_KEYWORD_DOCS,
+	_LOCALES as VALIDATION_KEYWORD_LOCALES,
+};
 
 // --- Internal types ---
 
@@ -152,7 +155,9 @@ export function getValidationKeywordTerms(
 
 	return splitKeywordDoc(
 		`${doc.base ?? ""}\n${
-			options?.locale ? (doc.locales?.[options.locale as keyof typeof doc.locales] ?? "") : ""
+			options?.locale
+				? (doc.locales?.[options.locale as keyof typeof doc.locales] ?? "")
+				: ""
 		}`,
 	);
 }
@@ -162,5 +167,7 @@ export function getValidationKeywordLocaleTerms(
 	locale: string,
 ): string[] {
 	const doc = lookupValidationKeywordDoc(key);
-	return splitKeywordDoc(doc.locales?.[locale as keyof typeof doc.locales] ?? "");
+	return splitKeywordDoc(
+		doc.locales?.[locale as keyof typeof doc.locales] ?? "",
+	);
 }

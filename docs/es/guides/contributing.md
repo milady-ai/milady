@@ -279,7 +279,7 @@ El **`vitest.config.ts`** en la raíz del repositorio (usado por **`bun run test
 - **`packages/app-core/src/**/*.test.ts`** y **`packages/app-core/src/**/*.test.tsx`** — pruebas colocadas, incluyendo TSX, sin listar cada archivo.
 - **`packages/app-core/test/**/*.test.ts`** y **`.../test/**/*.test.tsx`** — pruebas de arnés compartido (por ejemplo, `test/state`, `test/runtime`).
 
-**Por qué:** esos directorios estaban previamente omitidos, por lo que las nuevas suites nunca se ejecutaban en CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** se excluye de este job para que e2e permanezca en **`vitest.e2e.config.ts`**. **`vitest.unit.config.ts`** aún omite **`packages/app-core/test/app/**`** (arnés de renderizador pesado) del pase unitario enfocado en cobertura — **por qué:** esos se ejecutan en workspaces de app específicos o jobs separados.
+**Por qué:** esos directorios estaban previamente omitidos, por lo que las nuevas suites nunca se ejecutaban en CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** se excluye de este job para que e2e permanezca en **`test/vitest/e2e.config.ts`**. **`test/vitest/unit.config.ts`** aún omite **`packages/app-core/test/app/**`** (arnés de renderizador pesado) del pase unitario enfocado en cobertura — **por qué:** esos se ejecutan en workspaces de app específicos o jobs separados.
 
 ---
 

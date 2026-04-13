@@ -104,8 +104,8 @@ describe("BatchProcessor", () => {
 		expect(onExhausted).toHaveBeenCalled();
 	});
 
-	it("uses per-item maxRetries", async () => {
-		type Item = { maxRetries: number };
+	it("uses per-item _batchMaxAttempts", async () => {
+		type Item = { _batchMaxAttempts: number };
 		let attempts = 0;
 		const processor = new BatchProcessor<Item>({
 			maxParallel: 1,
@@ -115,12 +115,12 @@ describe("BatchProcessor", () => {
 				throw new Error("x");
 			},
 		});
-		await processor.processBatch([{ maxRetries: 2 }]);
+		await processor.processBatch([{ _batchMaxAttempts: 3 }]);
 		expect(attempts).toBe(3);
 	});
 
-	it("maxAttemptsCap overrides per-item maxRetries", async () => {
-		type Item = { maxRetries: number };
+	it("maxAttemptsCap overrides per-item _batchMaxAttempts", async () => {
+		type Item = { _batchMaxAttempts: number };
 		let attempts = 0;
 		const processor = new BatchProcessor<Item>({
 			maxParallel: 1,
@@ -131,7 +131,7 @@ describe("BatchProcessor", () => {
 				throw new Error("x");
 			},
 		});
-		await processor.processBatch([{ maxRetries: 99 }]);
+		await processor.processBatch([{ _batchMaxAttempts: 99 }]);
 		expect(attempts).toBe(1);
 	});
 

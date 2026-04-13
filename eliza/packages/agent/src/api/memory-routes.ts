@@ -53,6 +53,13 @@ type KnowledgeSearchHit = {
   position?: number;
 };
 
+type KnowledgeSearchMatch = {
+  id: UUID;
+  content: { text?: string };
+  similarity?: number;
+  metadata?: Record<string, unknown>;
+};
+
 function resolveAgentName(runtime: AgentRuntime, fallbackName: string): string {
   return runtime.character.name?.trim() || fallbackName || "Eliza";
 }
@@ -161,9 +168,12 @@ async function searchKnowledge(
     createdAt: Date.now(),
   };
 
-  const matches = await knowledgeService.getKnowledge(searchMessage, {
-    roomId: agentId,
-  });
+  const matches: KnowledgeSearchMatch[] = await knowledgeService.getKnowledge(
+    searchMessage,
+    {
+      roomId: agentId,
+    },
+  );
 
   return matches
     .filter(

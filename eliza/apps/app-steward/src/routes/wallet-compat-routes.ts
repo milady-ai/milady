@@ -9,18 +9,18 @@
  */
 import http from "node:http";
 import { logger } from "@elizaos/core";
-import { getWalletAddresses } from "@elizaos/agent/api/wallet";
-import { fetchEvmNfts } from "@elizaos/agent/api/wallet-evm-balance";
-import { resolveWalletRpcReadiness } from "@elizaos/agent/api/wallet-rpc";
+import { getWalletAddresses } from "../api/wallet";
+import { fetchEvmNfts } from "../api/wallet-evm-balance";
+import { resolveWalletRpcReadiness } from "../api/wallet-rpc";
 import {
   type ElizaConfig,
   loadElizaConfig,
 } from "@elizaos/agent/config/config";
-import { deriveAgentVaultId } from "@elizaos/app-core/security/agent-vault-id";
+import { deriveAgentVaultId } from "@elizaos/app-core";
 import {
   createNodePlatformSecureStore,
   isWalletOsStoreReadEnabled,
-} from "@elizaos/app-core/security/platform-secure-store-node";
+} from "@elizaos/app-core";
 import {
   deleteWalletSecretsFromOsStore,
   migrateWalletPrivateKeysToOsStore,
@@ -30,16 +30,16 @@ import {
   ensureCompatSensitiveRouteAuthorized,
   getCompatApiToken,
   isDevEnvironment,
-} from "@elizaos/app-core/api/auth";
+} from "@elizaos/app-core";
 import {
   sendJsonError as sendJsonErrorResponse,
   sendJson as sendJsonResponse,
-} from "@elizaos/app-core/api/response";
+} from "@elizaos/app-core";
 import {
   isLoopbackRemoteAddress,
   readCompatJsonBody,
   type CompatRuntimeState,
-} from "@elizaos/app-core/api/compat-route-shared";
+} from "@elizaos/app-core";
 import { getStewardBridgeStatus, isStewardConfigured } from "./steward-bridge";
 
 export async function handleWalletCompatRoutes(

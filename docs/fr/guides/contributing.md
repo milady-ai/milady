@@ -279,7 +279,7 @@ Le **`vitest.config.ts`** racine du repo (utilisé par **`bun run test`** → sh
 - **`packages/app-core/src/**/*.test.ts`** et **`packages/app-core/src/**/*.test.tsx`** — tests colocalisés, y compris TSX, sans lister chaque fichier.
 - **`packages/app-core/test/**/*.test.ts`** et **`.../test/**/*.test.tsx`** — tests de harnais partagé (par ex. `test/state`, `test/runtime`).
 
-**Pourquoi :** ces répertoires étaient précédemment omis, donc les nouvelles suites ne s'exécutaient jamais en CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** est exclu de ce job pour que les e2e restent sur **`vitest.e2e.config.ts`**. **`vitest.unit.config.ts`** omet toujours **`packages/app-core/test/app/**`** (harnais de renderer lourd) du passe unitaire axé couverture — **pourquoi :** ceux-ci sont exécutés dans des workspaces app ciblés ou des jobs séparés.
+**Pourquoi :** ces répertoires étaient précédemment omis, donc les nouvelles suites ne s'exécutaient jamais en CI. **`packages/app-core/test/**/*.e2e.test.ts(x)`** est exclu de ce job pour que les e2e restent sur **`test/vitest/e2e.config.ts`**. **`test/vitest/unit.config.ts`** omet toujours **`packages/app-core/test/app/**`** (harnais de renderer lourd) du passe unitaire axé couverture — **pourquoi :** ceux-ci sont exécutés dans des workspaces app ciblés ou des jobs séparés.
 
 ---
 

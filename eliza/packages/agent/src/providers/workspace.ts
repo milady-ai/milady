@@ -92,8 +92,8 @@ export function resolveDefaultAgentWorkspaceDir(
   }
 
   if (!hasExplicitStateDirOverride(env)) {
-    const runtimeCwd = cwd()?.trim();
-    if (runtimeCwd && shouldUseRuntimeCwdWorkspace(runtimeCwd)) {
+    const runtimeCwd = typeof cwd === "function" ? cwd() : undefined;
+    if (typeof runtimeCwd === "string" && runtimeCwd.trim() && shouldUseRuntimeCwdWorkspace(runtimeCwd.trim())) {
       return resolveUserPath(runtimeCwd);
     }
   }

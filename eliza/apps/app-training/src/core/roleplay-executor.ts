@@ -603,7 +603,7 @@ async function resolveRuntime(runtime?: AgentRuntime): Promise<RuntimeLike> {
     return runtime as RuntimeLike;
   }
 
-  const { bootElizaRuntime } = await import("../runtime/eliza.js");
+  const { bootElizaRuntime } = await import("@elizaos/agent/runtime/eliza");
   return (await bootElizaRuntime()) as RuntimeLike;
 }
 

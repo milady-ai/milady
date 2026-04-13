@@ -7,10 +7,10 @@
 import type {
   KnowledgeDocument,
   KnowledgeFragment,
-} from "@elizaos/app-core/api";
-import { client } from "@elizaos/app-core/api";
-import { formatByteSize, formatShortDate } from "@elizaos/app-core/components";
-import { useApp } from "@elizaos/app-core/state";
+} from "@elizaos/app-core";
+import { client } from "@elizaos/app-core";
+import { formatByteSize, formatShortDate } from "@elizaos/app-core";
+import { useApp } from "@elizaos/app-core";
 import { PagePanel } from "@elizaos/app-core";
 import { useEffect, useState } from "react";
 

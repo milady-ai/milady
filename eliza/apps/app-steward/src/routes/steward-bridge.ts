@@ -16,7 +16,7 @@ import {
   resolveEffectiveStewardConfig,
   saveStewardCredentials,
 } from "../services/steward-credentials";
-import { normalizeEnvValueOrNull } from "@elizaos/app-core/utils/env";
+import { normalizeEnvValueOrNull } from "@elizaos/app-core";
 
 export interface StewardBridgeOptions {
   env?: NodeJS.ProcessEnv;

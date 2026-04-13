@@ -6,7 +6,7 @@
  * and feeds it data from React state.
  */
 
-import { useApp, usePtySessions } from "@elizaos/app-core/state";
+import { useApp, usePtySessions } from "@elizaos/app-core";
 import { useCallback, useEffect, useRef } from "react";
 import type { SceneOverlayManager } from "../avatar/SceneOverlayManager";
 import type {

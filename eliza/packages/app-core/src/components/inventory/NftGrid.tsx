@@ -2,7 +2,7 @@
  * NFT gallery grid with lazy-loaded images.
  */
 
-import type { createTranslator } from "@elizaos/app-core/i18n";
+import type { createTranslator } from "@elizaos/app-core";
 import { useState } from "react";
 import { chainIcon, type NftItem } from "./constants";
 import { normalizeInventoryImageUrl } from "./media-url";
