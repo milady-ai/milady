@@ -6,6 +6,7 @@
  */
 
 import { logger } from "../../../logger.ts";
+import { extractSecretOperationTemplate as extractOperationTemplate } from "../../../prompts.ts";
 import {
 	type Action,
 	type ActionExample,
@@ -24,7 +25,6 @@ import {
 	type SecretsService,
 } from "../services/secrets.ts";
 import type { SecretContext, SecretType } from "../types.ts";
-import { extractSecretOperationTemplate as extractOperationTemplate } from "../../../prompts.ts";
 
 /**
  * Type for secret management operation

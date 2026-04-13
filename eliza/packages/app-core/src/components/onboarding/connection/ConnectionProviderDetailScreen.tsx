@@ -386,7 +386,7 @@ export function ConnectionProviderDetailScreen({
       return;
     }
     const normalized = normalizeOpenAICallbackInput(openaiCallbackUrl);
-    if (!normalized.ok) {
+    if (normalized.ok === false) {
       setOpenaiError(t(normalized.error));
       return;
     }

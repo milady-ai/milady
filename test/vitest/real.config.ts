@@ -257,6 +257,22 @@ export default defineConfig({
         replacement: path.join(appCompanionSourceRoot, "index.ts"),
       },
       {
+        find: /^@elizaos\/app-steward\/routes\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-steward", "src", "routes", "$1.ts"),
+      },
+      {
+        find: /^@elizaos\/app-steward\/api\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-steward", "src", "api", "$1.ts"),
+      },
+      {
+        find: /^@elizaos\/app-steward\/(.*)/,
+        replacement: path.join(repoRoot, "eliza", "apps", "app-steward", "src", "$1"),
+      },
+      {
+        find: "@elizaos/app-steward",
+        replacement: path.join(repoRoot, "eliza", "apps", "app-steward", "src", "index.ts"),
+      },
+      {
         find: "@elizaos/app-training/routes/training",
         replacement: path.join(repoRoot, "eliza", "apps", "app-training", "src", "routes", "training-routes.ts"),
       },

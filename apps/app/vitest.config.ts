@@ -6,7 +6,7 @@ import { defineConfig } from "vitest/config";
 import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
-} from "../../test/eliza-package-paths";
+} from "../../eliza/packages/app-core/test/eliza-package-paths";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const nativePluginsRoot = path.join(
@@ -20,6 +20,9 @@ const bridgeStubPath = path.join(
   here,
   "..",
   "..",
+  "eliza",
+  "packages",
+  "app-core",
   "test",
   "stubs",
   "app-core-bridge.ts",

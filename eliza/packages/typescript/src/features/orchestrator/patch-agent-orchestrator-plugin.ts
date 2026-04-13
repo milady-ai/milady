@@ -759,16 +759,18 @@ function resolveCoordinator(
 	const fromRuntime = (runtime as RuntimeWithServices).getService(
 		"SWARM_COORDINATOR",
 	);
-	if (fromRuntime) return fromRuntime as CoordinatorLike;
+	if (fromRuntime) return fromRuntime as unknown as CoordinatorLike;
 
 	const ptyService = (runtime as RuntimeWithServices).getService(
 		"PTY_SERVICE",
 	) as unknown as PTYServiceLike | undefined;
 	if (ptyService?.coordinator) {
-		return ptyService.coordinator;
+		return ptyService.coordinator as unknown as CoordinatorLike;
 	}
 
-	return getCoordinatorFromPty(runtime) as CoordinatorLike | undefined;
+	return getCoordinatorFromPty(runtime) as unknown as
+		| CoordinatorLike
+		| undefined;
 }
 
 function getPtyService(runtime: IAgentRuntime): PTYServiceLike | undefined {

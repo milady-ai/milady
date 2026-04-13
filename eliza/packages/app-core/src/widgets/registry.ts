@@ -109,7 +109,7 @@ export const BUILTIN_WIDGET_DECLARATIONS: PluginWidgetDeclaration[] = [
     id: "agent-orchestrator.apps",
     pluginId: "agent-orchestrator",
     slot: "chat-sidebar",
-    label: "App Runs",
+    label: "Apps",
     icon: "Activity",
     order: 150,
     defaultEnabled: true,
@@ -146,16 +146,24 @@ interface ResolvedWidget {
   Component: React.ComponentType<WidgetProps> | null;
 }
 
+type WidgetDeclarationSource = "builtin" | "server";
+
 function isWidgetEnabled(
   declaration: PluginWidgetDeclaration,
   plugins: readonly WidgetPluginState[],
+  source: WidgetDeclarationSource,
 ): boolean {
   if (plugins.length === 0) {
     return declaration.defaultEnabled !== false;
   }
 
   const plugin = plugins.find((p) => p.id === declaration.pluginId);
-  if (!plugin) return false;
+  if (!plugin) {
+    // Bundled chat widgets should remain available even if the runtime plugin
+    // snapshot omits their feature IDs. This keeps the right rail populated
+    // from compat-backed surfaces instead of collapsing to an empty shell.
+    return source === "builtin" && declaration.defaultEnabled !== false;
+  }
 
   return plugin.isActive === true || plugin.enabled !== false;
 }
@@ -172,26 +180,38 @@ export function resolveWidgetsForSlot(
   serverDeclarations?: readonly PluginWidgetDeclaration[],
 ): ResolvedWidget[] {
   // Merge: server declarations override built-in by id
-  const declarationMap = new Map<string, PluginWidgetDeclaration>();
+  const declarationMap = new Map<
+    string,
+    {
+      declaration: PluginWidgetDeclaration;
+      source: WidgetDeclarationSource;
+    }
+  >();
 
   for (const decl of BUILTIN_WIDGET_DECLARATIONS) {
     if (decl.slot === slot) {
-      declarationMap.set(`${decl.pluginId}/${decl.id}`, decl);
+      declarationMap.set(`${decl.pluginId}/${decl.id}`, {
+        declaration: decl,
+        source: "builtin",
+      });
     }
   }
 
   if (serverDeclarations) {
     for (const decl of serverDeclarations) {
       if (decl.slot === slot) {
-        declarationMap.set(`${decl.pluginId}/${decl.id}`, decl);
+        declarationMap.set(`${decl.pluginId}/${decl.id}`, {
+          declaration: decl,
+          source: "server",
+        });
       }
     }
   }
 
   const results: ResolvedWidget[] = [];
 
-  for (const declaration of declarationMap.values()) {
-    if (!isWidgetEnabled(declaration, plugins)) continue;
+  for (const { declaration, source } of declarationMap.values()) {
+    if (!isWidgetEnabled(declaration, plugins, source)) continue;
 
     const Component = getWidgetComponent(declaration.pluginId, declaration.id);
 

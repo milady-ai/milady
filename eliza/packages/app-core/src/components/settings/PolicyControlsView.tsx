@@ -193,8 +193,10 @@ export function PolicyControlsView() {
   const normalizedAddresses = useMemo(
     () =>
       (addressConfig.addresses ?? []).map((addr) => {
-        if (typeof addr === "object" && addr !== null && "address" in addr) {
-          return (addr as unknown as { address: string }).address;
+        const addressEntry =
+          typeof addr === "object" && addr !== null ? addr : null;
+        if (addressEntry && "address" in addressEntry) {
+          return (addressEntry as unknown as { address: string }).address;
         }
         return String(addr);
       }),

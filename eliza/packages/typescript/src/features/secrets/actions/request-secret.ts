@@ -1,4 +1,5 @@
 import { logger } from "../../../logger.ts";
+import { extractSecretRequestTemplate as extractRequestTemplate } from "../../../prompts.ts";
 import {
 	type Action,
 	type ActionExample,
@@ -14,7 +15,6 @@ import {
 	SECRETS_SERVICE_TYPE,
 	type SecretsService,
 } from "../services/secrets.ts";
-import { extractSecretRequestTemplate as extractRequestTemplate } from "../../../prompts.ts";
 
 export const requestSecretAction: Action = {
 	name: "REQUEST_SECRET",

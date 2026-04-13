@@ -140,6 +140,36 @@ e2e-screenshots/
 data/
 .avatar-clone-tmp
 
+# Plugin repos owned by the embedded eliza checkout. These are registered in
+# eliza/.gitmodules and should not be added to the outer milady index.
+eliza/plugins/plugin-agent-skills/
+eliza/plugins/plugin-anthropic/
+eliza/plugins/plugin-cli/
+eliza/plugins/plugin-commands/
+eliza/plugins/plugin-cron/
+eliza/plugins/plugin-discord/
+eliza/plugins/plugin-edge-tts/
+eliza/plugins/plugin-elizacloud/
+eliza/plugins/plugin-evm/
+eliza/plugins/plugin-google-genai/
+eliza/plugins/plugin-groq/
+eliza/plugins/plugin-imessage/
+eliza/plugins/plugin-local-ai/
+eliza/plugins/plugin-local-embedding/
+eliza/plugins/plugin-music-library/
+eliza/plugins/plugin-music-player/
+eliza/plugins/plugin-ollama/
+eliza/plugins/plugin-openai/
+eliza/plugins/plugin-openrouter/
+eliza/plugins/plugin-pdf/
+eliza/plugins/plugin-pi-ai/
+eliza/plugins/plugin-shell/
+eliza/plugins/plugin-shopify/
+eliza/plugins/plugin-solana/
+eliza/plugins/plugin-sql/
+eliza/plugins/plugin-telegram/
+eliza/plugins/plugin-whatsapp/
+
 # Debug PTY captures from plugin-agent-orchestrator (PARALLAX_DEBUG_CAPTURE=1)
 .parallax/
 .worktrees/

@@ -53,8 +53,9 @@ function findPluginsManifestRoot(startDir: string): string {
   return manifestRoot ?? findOwnPackageRoot(startDir);
 }
 
-export type { PluginParamDef, PluginEntry } from "./server-types.js";
-import type { PluginParamDef, PluginEntry } from "./server-types.js";
+export type { PluginEntry, PluginParamDef } from "./server-types.js";
+
+import type { PluginEntry, PluginParamDef } from "./server-types.js";
 
 export interface SkillEntry {
   id: string;

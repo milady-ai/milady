@@ -848,7 +848,7 @@ describe("Farcaster Connector - Integration", () => {
   it("Farcaster is mapped in CONNECTOR_PLUGINS", async () => {
     const mod = await tryWorkspaceImport<{
       CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@elizaos/app-core/config/plugin-auto-enable");
+    }>("@elizaos/app-core");
     if (!mod) {
       logger.warn("[farcaster-connector] Workspace not built — skipping");
       return;
@@ -859,7 +859,7 @@ describe("Farcaster Connector - Integration", () => {
   it("Farcaster is mapped in CHANNEL_PLUGIN_MAP", async () => {
     const mod = await tryWorkspaceImport<{
       CHANNEL_PLUGIN_MAP: Record<string, string>;
-    }>("@elizaos/app-core/runtime/eliza");
+    }>("@elizaos/app-core");
     if (!mod) {
       logger.warn("[farcaster-connector] Workspace not built — skipping");
       return;

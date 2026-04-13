@@ -226,7 +226,7 @@ export function SubscriptionStatus({
   const handleOpenAIExchange = useCallback(async () => {
     if (openaiExchangeBusyRef.current) return;
     const normalized = normalizeOpenAICallbackInput(openaiCallbackRef.current);
-    if (!normalized.ok) {
+    if (normalized.ok === false) {
       setOpenaiError(t(normalized.error));
       return;
     }

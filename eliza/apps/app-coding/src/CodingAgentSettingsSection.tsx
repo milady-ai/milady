@@ -229,7 +229,11 @@ export function CodingAgentSettingsSection() {
     const envPatch: Record<string, string> = {};
     for (const [k, v] of Object.entries(prefs)) {
       if (k.startsWith("_")) continue;
-      if (v != null) envPatch[k] = v;
+      if (typeof v === "string") {
+        envPatch[k] = v;
+      } else if (typeof v === "number" || typeof v === "boolean") {
+        envPatch[k] = String(v);
+      }
     }
     const timer = setTimeout(() => {
       client

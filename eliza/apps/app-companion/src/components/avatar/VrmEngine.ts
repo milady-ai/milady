@@ -897,7 +897,7 @@ export class VrmEngine {
     ) {
       return;
     }
-    const lookAtState = vrm.lookAt as
+    const lookAtState = vrm.lookAt as unknown as
       | ({ _yaw?: number; _pitch?: number } & object)
       | null
       | undefined;

@@ -449,6 +449,7 @@ export function generateWalletForChain(
 // Local import for internal use (setSolanaWalletEnv below), plus re-export for
 // backward compatibility so existing consumers of wallet.js keep working.
 import { syncSolanaPublicKeyEnv } from "./wallet-env-sync.js";
+
 export { syncSolanaPublicKeyEnv } from "./wallet-env-sync.js";
 
 export function setSolanaWalletEnv(privateKey: string): string | null {

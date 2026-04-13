@@ -6,6 +6,7 @@
  */
 
 import { logger } from "../../../logger.ts";
+import { extractSecretsTemplate } from "../../../prompts.ts";
 import {
 	type Action,
 	type ActionExample,
@@ -25,7 +26,6 @@ import {
 } from "../services/secrets.ts";
 import type { SecretContext, SecretType } from "../types.ts";
 import { inferValidationStrategy } from "../validation.ts";
-import { extractSecretsTemplate } from "../../../prompts.ts";
 
 /**
  * Type for extracted secrets from user message

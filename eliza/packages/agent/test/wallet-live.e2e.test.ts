@@ -4,9 +4,9 @@
  * These tests exercise the real wallet API surface against the currently
  * configured RPC providers, including the repo's cloud-managed path.
  *
- * Wallet routes live in @elizaos/app-steward. If the steward plugin is
- * not registered (routes return 404), the wallet-specific tests skip
- * gracefully — the API server itself still starts and is verified.
+ * Wallet routes live in @elizaos/app-steward and are wired into the API
+ * server for this suite, so these tests should exercise the real route
+ * surface directly.
  */
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -29,7 +29,6 @@ describeIf(CAN_RUN)("Wallet live E2E — real RPCs and real wallets", () => {
   let port: number;
   let close: (() => Promise<void>) | null = null;
   let savedExportToken: string | undefined;
-  let walletRoutesAvailable = true;
 
   beforeAll(async () => {
     savedExportToken = process.env.ELIZA_WALLET_EXPORT_TOKEN;
@@ -45,9 +44,8 @@ describeIf(CAN_RUN)("Wallet live E2E — real RPCs and real wallets", () => {
 
     const evmGen = await req(port, "POST", "/api/wallet/generate", { chain: "evm" });
     const solGen = await req(port, "POST", "/api/wallet/generate", { chain: "solana" });
-    if (evmGen.status === 404 || solGen.status === 404) {
-      walletRoutesAvailable = false;
-    }
+    expect(evmGen.status).toBe(200);
+    expect(solGen.status).toBe(200);
   }, 60_000);
 
   afterAll(async () => {
@@ -59,8 +57,7 @@ describeIf(CAN_RUN)("Wallet live E2E — real RPCs and real wallets", () => {
     }
   });
 
-  it("reports real wallet RPC readiness", async ({ skip }) => {
-    if (!walletRoutesAvailable) skip();
+  it("reports real wallet RPC readiness", async () => {
     const { status, data } = await req(port, "GET", "/api/wallet/config");
     expect(status).toBe(200);
     expect(typeof data.walletNetwork).toBe("string");
@@ -72,8 +69,7 @@ describeIf(CAN_RUN)("Wallet live E2E — real RPCs and real wallets", () => {
     expect(data.evmChains.length).toBeGreaterThan(0);
   });
 
-  it("derives real EVM and Solana addresses from generated wallets", async ({ skip }) => {
-    if (!walletRoutesAvailable) skip();
+  it("derives real EVM and Solana addresses from generated wallets", async () => {
     const { status, data } = await req(port, "GET", "/api/wallet/addresses");
     expect(status).toBe(200);
 
@@ -88,8 +84,7 @@ describeIf(CAN_RUN)("Wallet live E2E — real RPCs and real wallets", () => {
     expect(solanaAddress).toMatch(/^[1-9A-HJ-NP-Za-km-z]+$/);
   });
 
-  it("fetches real wallet balances from the configured providers", async ({ skip }) => {
-    if (!walletRoutesAvailable) skip();
+  it("fetches real wallet balances from the configured providers", async () => {
     const { status, data } = await req(
       port,
       "GET",
@@ -136,12 +131,47 @@ describeIf(CAN_RUN)("Wallet live E2E — real RPCs and real wallets", () => {
     expect(Array.isArray(solana?.tokens)).toBe(true);
   }, 120_000);
 
-  it("exports keys that round-trip back to the derived addresses", async ({ skip }) => {
-    if (!walletRoutesAvailable) skip();
+  it("exports keys that round-trip back to the derived addresses", async () => {
     const { data: addrs } = await req(port, "GET", "/api/wallet/addresses");
+
+    // Steward export guard requires a two-phase nonce flow:
+    // 1. Request nonce with { confirm: true, requestNonce: true, exportToken }
+    //    → 403 response with nonce embedded in error/reason JSON
+    // 2. Wait the required delay
+    // 3. Submit with { confirm: true, exportToken, exportNonce }
+    const nonceRes = await req(port, "POST", "/api/wallet/export", {
+      confirm: true,
+      requestNonce: true,
+      exportToken: WALLET_EXPORT_TOKEN,
+    });
+
+    // Parse nonce from 403 response — the reason field is a JSON string
+    let nonce: string | undefined;
+    let delaySeconds = 10;
+    const rawReason =
+      (nonceRes.data as Record<string, unknown>).reason ??
+      (nonceRes.data as Record<string, unknown>).error;
+    if (typeof rawReason === "string") {
+      try {
+        const parsed = JSON.parse(rawReason) as Record<string, unknown>;
+        nonce = parsed.nonce as string | undefined;
+        delaySeconds = (parsed.delaySeconds as number) ?? 10;
+      } catch {
+        // reason might be a plain string — check data directly
+        nonce = (nonceRes.data as Record<string, unknown>).nonce as string | undefined;
+      }
+    } else {
+      nonce = (nonceRes.data as Record<string, unknown>).nonce as string | undefined;
+    }
+
+    if (nonce) {
+      await new Promise((resolve) => setTimeout(resolve, (delaySeconds + 0.5) * 1000));
+    }
+
     const { data: exported } = await req(port, "POST", "/api/wallet/export", {
       confirm: true,
       exportToken: WALLET_EXPORT_TOKEN,
+      ...(nonce ? { exportNonce: nonce } : {}),
     });
 
     const evm = exported.evm as {

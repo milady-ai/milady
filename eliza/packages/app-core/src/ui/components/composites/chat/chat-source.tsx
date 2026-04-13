@@ -38,12 +38,19 @@ function DiscordIcon({ className }: SourceIconProps) {
 }
 
 const SOURCE_META: Record<string, ChatSourceMeta> = {
+  eliza: {
+    badgeClassName: "border-accent/30 bg-accent/10 text-accent",
+    borderClassName: "border-accent/60",
+    iconClassName: "text-accent",
+    Icon: TerminalSquare,
+    label: "Terminal",
+  },
   app: {
     badgeClassName: "border-accent/30 bg-accent/10 text-accent",
     borderClassName: "border-accent/60",
     iconClassName: "text-accent",
     Icon: TerminalSquare,
-    label: "App",
+    label: "Terminal",
   },
   discord: {
     badgeClassName: "border-[#5865F2]/30 bg-[#5865F2]/10 text-[#c7cdff]",

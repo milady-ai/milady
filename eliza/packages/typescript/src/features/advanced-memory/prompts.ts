@@ -1,5 +1,5 @@
 export {
 	initialSummarizationTemplate,
-	updateSummarizationTemplate,
 	longTermExtractionTemplate,
+	updateSummarizationTemplate,
 } from "../../prompts.ts";

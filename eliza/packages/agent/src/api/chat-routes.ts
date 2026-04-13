@@ -46,6 +46,10 @@ import { startTrajectoryStepInDatabase } from "../runtime/trajectory-storage.js"
 import { syncCharacterIntoConfig } from "../services/character-persistence.js";
 import { detectRuntimeModel } from "./agent-model.js";
 import {
+  maybeHandleDirectBinanceSkillRequest,
+  parseFallbackActionBlocks,
+} from "./binance-skill-helpers.js";
+import {
   isClientVisibleNoResponse,
   isNoResponsePlaceholder,
 } from "./chat-text-helpers.js";
@@ -61,10 +65,6 @@ import {
 } from "./credit-detection.js";
 import type { ReadJsonBodyOptions } from "./http-helpers.js";
 import type { RouteRequestContext } from "./route-helpers.js";
-import {
-  maybeHandleDirectBinanceSkillRequest,
-  parseFallbackActionBlocks,
-} from "./binance-skill-helpers.js";
 import {
   buildWalletActionNotExecutedReply,
   cloneWithoutBlockedObjectKeys,

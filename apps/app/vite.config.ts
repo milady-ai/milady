@@ -560,6 +560,9 @@ function nativeModuleStubPlugin(): Plugin {
     "pty-state-capture",
     "electron",
     "undici",
+    // Image native bindings — never load in the renderer; if a server-only
+    // import leaks into the client graph, stub instead of bundling sharp.js.
+    "sharp",
     // Browser automation is server-only. If a mixed entrypoint leaks one of
     // these packages into the renderer graph, stub it instead of letting Vite
     // prebundle proxy-agent and other Node-only HTTP deps for the browser.
@@ -617,6 +620,12 @@ function nativeModuleStubPlugin(): Plugin {
         : id.split("/")[0];
       // Scoped: @node-llama-cpp/*
       if (nativeScopeRe.test(id)) return VIRTUAL_PREFIX + id;
+      // sharp's optional platform packages (@img/sharp-wasm32, etc.)
+      if (
+        id.startsWith("@img/sharp") ||
+        id.replace(/\\/g, "/").includes("/@img/sharp")
+      )
+        return VIRTUAL_PREFIX + id;
       // Exact or sub-path match against native packages
       if (nativePackages.has(bare)) return VIRTUAL_PREFIX + id;
       return null;
@@ -624,7 +633,8 @@ function nativeModuleStubPlugin(): Plugin {
     load(id) {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null;
 
-      const modName = id.slice(VIRTUAL_PREFIX.length).split("/")[0];
+      const strippedId = id.slice(VIRTUAL_PREFIX.length);
+      const modName = strippedId.split("/")[0];
       // node-llama-cpp is the most import-heavy native module — its consumers
       // use many named exports (LlamaLogLevel, getLlama, etc.).  Return a
       // module whose default export is a Proxy that returns no-op stubs for
@@ -749,6 +759,29 @@ function nativeModuleStubPlugin(): Plugin {
         // Dynamic: read the real Node module's export names at config time
         // and generate matching no-op stubs so esbuild's static analysis passes.
         return generateNodeBuiltinStub(id.slice(VIRTUAL_PREFIX.length));
+      }
+
+      // libvips native / wasm bindings — only used server-side for LifeOps screen sampling
+      if (
+        strippedId === "sharp" ||
+        strippedId.startsWith("sharp/") ||
+        strippedId.startsWith("@img/sharp")
+      ) {
+        return [
+          "function mk() {",
+          "  const c = {",
+          "    rotate() { return c; },",
+          "    resize() { return c; },",
+          "    greyscale() { return c; },",
+          "    png() { return c; },",
+          "    jpeg() { return c; },",
+          "    async toBuffer() { return new Uint8Array(0); },",
+          "    async raw() { return { data: new Uint8Array(0), info: { width: 1, height: 1, channels: 1 } }; },",
+          "  };",
+          "  return c;",
+          "}",
+          "export default function sharp() { return mk(); }",
+        ].join("\n");
       }
 
       // Generic fallback for other native modules
@@ -1108,6 +1141,10 @@ export default defineConfig({
           "eliza/packages/app-core/package.json",
         );
         const appCorePkgDir = path.dirname(appCorePkgPath);
+        const appCoreBrowserEntry = path.resolve(
+          appCorePkgDir,
+          "src/browser.ts",
+        );
         const appCorePkg = JSON.parse(fs.readFileSync(appCorePkgPath, "utf8"));
 
         const generatedAliases = [];
@@ -1118,9 +1155,13 @@ export default defineConfig({
               key === "."
                 ? "@elizaos/app-core"
                 : `@elizaos/app-core/${key.replace(/^\.\//, "")}`;
-            // If the package exports something ending with .js instead of .ts, we check for .ts locally
-            // But the exports in app-core point directly to .ts, .tsx, .css, so we can just resolve it
-            const targetPath = path.resolve(appCorePkgDir, value);
+            // Keep the renderer on a browser-safe entry. The package root barrel
+            // re-exports server modules that pull Node-only code like sharp into
+            // the Vite client graph.
+            const targetPath =
+              key === "."
+                ? appCoreBrowserEntry
+                : path.resolve(appCorePkgDir, value);
 
             generatedAliases.push({
               find: new RegExp(`^${aliasKey}$`),

@@ -667,9 +667,7 @@ export function applyPluginSelfDeclaredAutoEnable(
     // e.g. "@elizaos/plugin-telegram" → "telegram", "shopify" → "shopify"
     const pluginName = plugin.name;
     const shortId = pluginName.includes("/plugin-")
-      ? pluginName.slice(
-          pluginName.lastIndexOf("/plugin-") + "/plugin-".length,
-        )
+      ? pluginName.slice(pluginName.lastIndexOf("/plugin-") + "/plugin-".length)
       : pluginName;
 
     // Skip if explicitly disabled in config entries
@@ -700,7 +698,10 @@ export function applyPluginSelfDeclaredAutoEnable(
     if (!enableReason && connectorKeys?.length) {
       for (const connectorName of connectorKeys) {
         const connectorConfig = connectors[connectorName];
-        if (connectorConfig && isConnectorConfigured(connectorName, connectorConfig)) {
+        if (
+          connectorConfig &&
+          isConnectorConfigured(connectorName, connectorConfig)
+        ) {
           enableReason = `self-declared connector: ${connectorName}`;
           break;
         }
@@ -709,7 +710,12 @@ export function applyPluginSelfDeclaredAutoEnable(
 
     // Check custom predicate
     if (!enableReason && shouldEnable) {
-      if (shouldEnable(env as Record<string, string | undefined>, config as Record<string, unknown>)) {
+      if (
+        shouldEnable(
+          env as Record<string, string | undefined>,
+          config as Record<string, unknown>,
+        )
+      ) {
         enableReason = "self-declared shouldEnable predicate";
       }
     }

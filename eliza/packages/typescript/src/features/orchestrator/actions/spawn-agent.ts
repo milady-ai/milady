@@ -115,7 +115,7 @@ export const spawnAgentAction: Action = {
 		callback?: HandlerCallback,
 	): Promise<ActionResult | undefined> => {
 		const access = await requireTaskAgentAccess(runtime, message, "create");
-		if (!access.allowed) {
+		if (access.allowed === false) {
 			if (callback) {
 				await callback({
 					text: access.reason,

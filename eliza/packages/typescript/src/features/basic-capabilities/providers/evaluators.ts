@@ -7,8 +7,8 @@ import type {
 	Provider,
 	State,
 } from "../../../types/index.ts";
-import { addHeader } from "../../../utils.ts";
 import { pickRandomExampleName } from "../../../utils/example-names.ts";
+import { addHeader } from "../../../utils.ts";
 
 // Get text content from centralized specs
 const spec = requireProviderSpec("EVALUATORS");

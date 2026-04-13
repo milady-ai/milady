@@ -9,9 +9,10 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import type http from "node:http";
 import path from "node:path";
+import { getKnowledgeService } from "@elizaos/app-knowledge/service-loader";
 import {
   type AgentRuntime,
-  ChannelType,
+  type ChannelType,
   type Content,
   ContentType,
   createMessageMemory,
@@ -19,12 +20,8 @@ import {
   type Media,
   type UUID,
 } from "@elizaos/core";
-import { getKnowledgeService } from "@elizaos/app-knowledge/service-loader";
 import type { ElizaConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
-import {
-  isPrivyWalletProvisioningEnabled,
-} from "../services/privy-wallets.js";
 import {
   normalizeOnboardingProviderId,
   resolveDeploymentTargetInConfig,
@@ -40,22 +37,21 @@ import {
   type AgentEventServiceLike,
   getAgentEventService,
 } from "../runtime/agent-event-service.js";
-import { extractCompatTextContent } from "./compat-utils.js";
-import { sendJsonError } from "./http-helpers.js";
-import type { ChatAttachmentWithData, ServerState } from "./server-types.js";
-import {
-  getWalletAddresses,
-} from "./wallet.js";
-import {
-  resolvePluginEvmLoaded,
-  resolveWalletCapabilityStatus,
-} from "./wallet-capability.js";
 import {
   type CoreManagerLike,
   isCoreManagerLike,
   isPluginManagerLike,
   type PluginManagerLike,
 } from "../services/plugin-manager-types.js";
+import { isPrivyWalletProvisioningEnabled } from "../services/privy-wallets.js";
+import { extractCompatTextContent } from "./compat-utils.js";
+import { sendJsonError } from "./http-helpers.js";
+import type { ChatAttachmentWithData, ServerState } from "./server-types.js";
+import { getWalletAddresses } from "./wallet.js";
+import {
+  resolvePluginEvmLoaded,
+  resolveWalletCapabilityStatus,
+} from "./wallet-capability.js";
 
 // ---------------------------------------------------------------------------
 // Pi AI plugin lazy loader

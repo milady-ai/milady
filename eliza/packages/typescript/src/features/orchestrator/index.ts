@@ -8,6 +8,48 @@
  * @module orchestrator
  */
 
+import { finalizeWorkspaceAction } from "./actions/finalize-workspace.ts";
+import {
+	listAgentsAction,
+	listTaskAgentsAction,
+} from "./actions/list-agents.ts";
+import { manageIssuesAction } from "./actions/manage-issues.ts";
+import { provisionWorkspaceAction } from "./actions/provision-workspace.ts";
+import {
+	sendToAgentAction,
+	sendToTaskAgentAction,
+} from "./actions/send-to-agent.ts";
+import {
+	spawnAgentAction,
+	spawnTaskAgentAction,
+} from "./actions/spawn-agent.ts";
+import {
+	createTaskAction,
+	startCodingTaskAction,
+} from "./actions/start-coding-task.ts";
+import { stopAgentAction, stopTaskAgentAction } from "./actions/stop-agent.ts";
+import { taskControlAction } from "./actions/task-control.ts";
+import { taskHistoryAction } from "./actions/task-history.ts";
+import { taskShareAction } from "./actions/task-share.ts";
+import {
+	createTaskAgentRouteHandler,
+	handleCodingAgentRoutes,
+} from "./api/routes.ts";
+import orchestratorPluginDefault, {
+	codingAgentPlugin,
+	createAgentOrchestratorPlugin,
+	createCodingAgentRouteHandler,
+	getCoordinator,
+	taskAgentPlugin,
+} from "./patch-agent-orchestrator-plugin.ts";
+import { cleanForChat } from "./services/ansi-utils.ts";
+import { PTYService } from "./services/pty-service.ts";
+import { SwarmCoordinator } from "./services/swarm-coordinator.ts";
+import {
+	buildBlockedEventMessage,
+	buildTurnCompleteEventMessage,
+} from "./services/swarm-coordinator-prompts.ts";
+
 export type {
 	AdapterType,
 	AgentCredentials,
@@ -20,42 +62,6 @@ export type {
 	ToolCategory,
 	WriteMemoryOptions,
 } from "coding-agent-adapters";
-export { finalizeWorkspaceAction } from "./actions/finalize-workspace.ts";
-export {
-	listAgentsAction,
-	listTaskAgentsAction,
-} from "./actions/list-agents.ts";
-export { manageIssuesAction } from "./actions/manage-issues.ts";
-export { provisionWorkspaceAction } from "./actions/provision-workspace.ts";
-export {
-	sendToAgentAction,
-	sendToTaskAgentAction,
-} from "./actions/send-to-agent.ts";
-export {
-	spawnAgentAction,
-	spawnTaskAgentAction,
-} from "./actions/spawn-agent.ts";
-export {
-	createTaskAction,
-	startCodingTaskAction,
-} from "./actions/start-coding-task.ts";
-export { stopAgentAction, stopTaskAgentAction } from "./actions/stop-agent.ts";
-export { taskControlAction } from "./actions/task-control.ts";
-export { taskHistoryAction } from "./actions/task-history.ts";
-export { taskShareAction } from "./actions/task-share.ts";
-export {
-	createTaskAgentRouteHandler,
-	handleCodingAgentRoutes,
-} from "./api/routes.ts";
-export {
-	codingAgentPlugin,
-	createAgentOrchestratorPlugin,
-	createCodingAgentRouteHandler,
-	default,
-	getCoordinator,
-	taskAgentPlugin,
-} from "./patch-agent-orchestrator-plugin.ts";
-export { cleanForChat } from "./services/ansi-utils.ts";
 export type {
 	CodingAgentType,
 	PTYServiceConfig,
@@ -63,7 +69,6 @@ export type {
 	SessionInfo,
 	SpawnSessionOptions,
 } from "./services/pty-service.ts";
-export { PTYService } from "./services/pty-service.ts";
 export type {
 	AgentDecisionCallback,
 	ChatMessageCallback,
@@ -76,14 +81,9 @@ export type {
 	TaskContext,
 	WsBroadcastCallback,
 } from "./services/swarm-coordinator.ts";
-export { SwarmCoordinator } from "./services/swarm-coordinator.ts";
 export type {
 	CoordinationLLMResponse,
 	SharedDecision,
-} from "./services/swarm-coordinator-prompts.ts";
-export {
-	buildBlockedEventMessage,
-	buildTurnCompleteEventMessage,
 } from "./services/swarm-coordinator-prompts.ts";
 export type {
 	AuthPromptCallback,
@@ -93,3 +93,38 @@ export type {
 	PushOptions,
 	WorkspaceResult,
 } from "./services/workspace-service.ts";
+
+// Keep live runtime bindings in this entrypoint. Bun has produced an empty
+// subpath bundle for pure re-export-only files here, which breaks the public
+// `@elizaos/core/orchestrator` surface at runtime.
+export {
+	buildBlockedEventMessage,
+	buildTurnCompleteEventMessage,
+	cleanForChat,
+	codingAgentPlugin,
+	createAgentOrchestratorPlugin,
+	createCodingAgentRouteHandler,
+	createTaskAction,
+	createTaskAgentRouteHandler,
+	finalizeWorkspaceAction,
+	getCoordinator,
+	handleCodingAgentRoutes,
+	listAgentsAction,
+	listTaskAgentsAction,
+	manageIssuesAction,
+	orchestratorPluginDefault as default,
+	PTYService,
+	provisionWorkspaceAction,
+	SwarmCoordinator,
+	sendToAgentAction,
+	sendToTaskAgentAction,
+	spawnAgentAction,
+	spawnTaskAgentAction,
+	startCodingTaskAction,
+	stopAgentAction,
+	stopTaskAgentAction,
+	taskAgentPlugin,
+	taskControlAction,
+	taskHistoryAction,
+	taskShareAction,
+};

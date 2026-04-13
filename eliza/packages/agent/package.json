@@ -127,6 +127,7 @@
     "@elizaos/app-companion": "workspace:*",
     "@elizaos/app-knowledge": "workspace:*",
     "@elizaos/app-lifeops": "workspace:*",
+    "@elizaos/app-steward": "workspace:*",
     "@elizaos/app-training": "workspace:*",
     "@elizaos/core": "workspace:*",
     "@elizaos/plugin-ollama": "workspace:*",

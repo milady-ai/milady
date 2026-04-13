@@ -885,7 +885,7 @@ export function InventoryView() {
     <div className="mb-4 flex justify-end">
       <SegmentedControl
         value={walletSubTab}
-        onValueChange={setWalletSubTab}
+        onValueChange={(value: WalletSubTab) => setWalletSubTab(value)}
         items={walletSubTabItems}
       />
     </div>

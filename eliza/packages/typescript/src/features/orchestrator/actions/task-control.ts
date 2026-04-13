@@ -105,7 +105,7 @@ export const taskControlAction: Action = {
 		callback?: HandlerCallback,
 	): Promise<ActionResult | undefined> => {
 		const access = await requireTaskAgentAccess(runtime, message, "interact");
-		if (!access.allowed) {
+		if (access.allowed === false) {
 			if (callback) {
 				await callback({ text: access.reason });
 			}

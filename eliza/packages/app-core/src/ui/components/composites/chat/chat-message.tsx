@@ -70,15 +70,6 @@ function resolveSenderHandle(
   return handle;
 }
 
-function senderInitials(label: string): string {
-  const parts = label.trim().split(/\s+/).filter(Boolean);
-  const initials = parts
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-  return (initials || label.slice(0, 1).toUpperCase() || "?").slice(0, 2);
-}
-
 function resolveReplySenderDisplayName(
   message: ChatMessageData,
   replyTarget?: ChatMessageData | null,
@@ -187,33 +178,6 @@ function ReactionStrip({
   );
 }
 
-function SenderAvatar({
-  avatarUrl,
-  label,
-}: {
-  avatarUrl?: string;
-  label: string;
-}) {
-  if (avatarUrl) {
-    return (
-      <img
-        src={avatarUrl}
-        alt={`${label} avatar`}
-        className="h-7 w-7 shrink-0 rounded-full border border-border/25 object-cover shadow-[0_10px_18px_-16px_rgba(15,23,42,0.5)]"
-      />
-    );
-  }
-
-  return (
-    <div
-      aria-hidden="true"
-      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-accent/18 bg-[linear-gradient(180deg,rgba(var(--accent-rgb),0.18),rgba(var(--accent-rgb),0.08))] text-2xs font-semibold uppercase tracking-[0.08em] text-txt-strong shadow-[0_10px_18px_-16px_rgba(var(--accent-rgb),0.45)]"
-    >
-      {senderInitials(label)}
-    </div>
-  );
-}
-
 export const ChatMessage = memo(function ChatMessage({
   message,
   isGrouped = false,
@@ -272,9 +236,7 @@ export const ChatMessage = memo(function ChatMessage({
     !isEditing && replyTargetId && normalizedSource,
   );
   const showSenderHeader =
-    isUser &&
-    !isGrouped &&
-    Boolean(senderDisplayName || senderHandle || message.avatarUrl);
+    isUser && !isGrouped && Boolean(senderDisplayName || senderHandle);
   const visibleReactions = normalizeMessageReactions(message.reactions);
 
   const handleCopy = useCallback(() => {
@@ -473,41 +435,21 @@ export const ChatMessage = memo(function ChatMessage({
               isRightAligned ? "justify-end" : "justify-start",
             )}
           >
-            {isRightAligned ? (
-              <>
-                <div className="min-w-0 text-right">
-                  <div className="truncate text-xs font-semibold text-txt-strong">
-                    {senderPrimaryLabel}
-                  </div>
-                  {senderHandle ? (
-                    <div className="truncate text-xs-tight text-muted">
-                      {senderHandle}
-                    </div>
-                  ) : null}
+            <div
+              className={cn(
+                "min-w-0",
+                isRightAligned ? "text-right" : "text-left",
+              )}
+            >
+              <div className="truncate text-xs font-semibold text-txt-strong">
+                {senderPrimaryLabel}
+              </div>
+              {senderHandle ? (
+                <div className="truncate text-xs-tight text-muted">
+                  {senderHandle}
                 </div>
-                <SenderAvatar
-                  avatarUrl={message.avatarUrl}
-                  label={senderPrimaryLabel}
-                />
-              </>
-            ) : (
-              <>
-                <SenderAvatar
-                  avatarUrl={message.avatarUrl}
-                  label={senderPrimaryLabel}
-                />
-                <div className="min-w-0 text-left">
-                  <div className="truncate text-xs font-semibold text-txt-strong">
-                    {senderPrimaryLabel}
-                  </div>
-                  {senderHandle ? (
-                    <div className="truncate text-xs-tight text-muted">
-                      {senderHandle}
-                    </div>
-                  ) : null}
-                </div>
-              </>
-            )}
+              ) : null}
+            </div>
           </div>
         ) : null}
         <ChatBubble

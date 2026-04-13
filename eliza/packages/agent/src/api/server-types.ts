@@ -5,17 +5,17 @@
  */
 
 import type http from "node:http";
-import type { AgentRuntime, Media, UUID } from "@elizaos/core";
 import type { TrainingServiceWithRuntime } from "@elizaos/app-training/services";
+import type { AgentRuntime, Media, UUID } from "@elizaos/core";
 import type { ElizaConfig } from "../config/config.js";
+import type { AppManager } from "../services/app-manager.js";
+import type { SandboxManager } from "../services/sandbox-manager.js";
 import type { CloudRouteState } from "./cloud-routes.js";
 import type { ConnectorHealthMonitor } from "./connector-health.js";
 import type { DropService } from "./drop-service.js";
 // PluginEntry and PluginParamDef are defined here to avoid a circular dependency
 // with plugin-discovery-helpers.ts (which imports from server-helpers.ts).
 import type { RegistryService } from "./registry-service.js";
-import type { AppManager } from "../services/app-manager.js";
-import type { SandboxManager } from "../services/sandbox-manager.js";
 
 // ---------------------------------------------------------------------------
 // Conversation metadata
@@ -102,7 +102,8 @@ export type ConnectorRouteHandler = (
 
 export type AgentAutomationMode = "connectors-only" | "full";
 
-export type TradePermissionMode = import("./trade-safety.js").TradePermissionMode;
+export type TradePermissionMode =
+  import("./trade-safety.js").TradePermissionMode;
 
 export type TrainingServiceLike = TrainingServiceWithRuntime;
 

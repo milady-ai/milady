@@ -24,6 +24,14 @@ import os from "node:os";
 import path from "node:path";
 import { handleKnowledgeRoutes } from "@elizaos/app-knowledge/routes";
 import { getKnowledgeService } from "@elizaos/app-knowledge/service-loader";
+import { handleLifeOpsRoutes } from "@elizaos/app-lifeops/routes/lifeops-routes";
+// import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
+// import {
+//   loadWalletTradingProfile,
+//   recordWalletTradeLedgerEntry,
+//   updateWalletTradeLedgerEntryStatus,
+// } from "./wallet-trading-profile.js";
+import { handleWebsiteBlockerRoutes } from "@elizaos/app-lifeops/routes/website-blocker-routes";
 import { handleTrainingRoutes } from "@elizaos/app-training/routes/training";
 import { handleTrajectoryRoute } from "@elizaos/app-training/routes/trajectory";
 import type { TrainingServiceWithRuntime } from "@elizaos/app-training/services";
@@ -185,7 +193,6 @@ import {
 // iMessage routes extracted to @elizaos/plugin-imessage setup-routes.ts (Plugin.routes)
 // import { handleIMessageRoute } from "./imessage-routes.js";
 import { handleInboxRoute } from "./inbox-routes.js";
-import { handleLifeOpsRoutes } from "@elizaos/app-lifeops/routes/lifeops-routes";
 import { handleMcpRoutes } from "./mcp-routes.js";
 import { pushWithBatchEvict, sweepExpiredEntries } from "./memory-bounds.js";
 import { handleMemoryRoutes } from "./memory-routes.js";
@@ -208,28 +215,28 @@ import { handleRelationshipsRoutes } from "./relationships-routes.js";
 import { tryHandleRuntimePluginRoute } from "./runtime-plugin-routes.js";
 import { handleSandboxRoute } from "./sandbox-routes.js";
 import {
-  hasPersistedOnboardingState,
-  isUuidLike,
-  resolveAppUserName,
-  resolveConversationGreetingText,
-  patchTouchesProviderSelection,
-  getErrorMessage,
-  maybeAugmentChatMessageWithLanguage,
-  maybeAugmentChatMessageWithWalletContext,
-  maybeAugmentChatMessageWithKnowledge,
   buildChatAttachments,
   buildUserMessages,
-  IMAGE_ONLY_CHAT_FALLBACK_PROMPT,
-  normalizeIncomingChatPrompt,
-  validateChatImages,
-  hasBlockedObjectKeyDeep,
   cloneWithoutBlockedObjectKeys,
+  decodePathComponent,
+  getErrorMessage,
+  hasBlockedObjectKeyDeep,
+  hasPersistedOnboardingState,
+  IMAGE_ONLY_CHAT_FALLBACK_PROMPT,
+  isUuidLike,
   isWalletActionRequiredIntent,
+  maybeAugmentChatMessageWithKnowledge,
+  maybeAugmentChatMessageWithLanguage,
+  maybeAugmentChatMessageWithWalletContext,
+  normalizeIncomingChatPrompt,
+  patchTouchesProviderSelection,
+  persistConversationRoomTitle,
+  resolveAppUserName,
+  resolveConversationGreetingText,
+  resolveWalletModeGuidanceReply,
+  validateChatImages,
   WALLET_EXECUTION_INTENT_RE,
   WALLET_PROGRESS_ONLY_RE,
-  resolveWalletModeGuidanceReply,
-  persistConversationRoomTitle,
-  decodePathComponent,
 } from "./server-helpers.js";
 // signal-routes: handleSignalRoute dispatch extracted to @elizaos/plugin-signal (setup-routes.ts)
 import { applySignalQrOverride } from "./signal-routes.js";
@@ -262,13 +269,6 @@ import {
 } from "./wallet-capability.js";
 // import { handleWalletRoutes } from "./wallet-routes.js";
 import { resolveWalletRpcReadiness } from "./wallet-rpc.js";
-// import { handleWalletTradeExecuteRoute } from "./wallet-trade-routes.js";
-// import {
-//   loadWalletTradingProfile,
-//   recordWalletTradeLedgerEntry,
-//   updateWalletTradeLedgerEntryStatus,
-// } from "./wallet-trading-profile.js";
-import { handleWebsiteBlockerRoutes } from "@elizaos/app-lifeops/routes/website-blocker-routes";
 // handleWhatsAppRoute moved to @elizaos/plugin-whatsapp setup-routes.
 // applyWhatsAppQrOverride is still used by plugin-status routes.
 import { applyWhatsAppQrOverride } from "./whatsapp-routes.js";
@@ -460,7 +460,6 @@ function requireCoreManager(runtime: AgentRuntime | null): CoreManagerLike {
   return service;
 }
 
-
 const OG_FILENAME = ".og";
 const DELETED_CONVERSATIONS_FILENAME = "deleted-conversations.v1.json";
 const MAX_DELETED_CONVERSATION_IDS = 5000;
@@ -539,6 +538,7 @@ function initializeOGCodeInState(): void {
 
 // ConversationMeta re-exported from server-types.ts
 export type { ConversationMeta } from "./server-types.js";
+
 import type { ConversationMeta } from "./server-types.js";
 
 // resolveAppUserName, patchTouchesProviderSelection, resolveConversationGreetingText
@@ -546,21 +546,23 @@ import type { ConversationMeta } from "./server-types.js";
 
 // AgentStartupDiagnostics, ServerState re-exported from server-types.ts
 export type { AgentStartupDiagnostics, ServerState } from "./server-types.js";
+
 import type { AgentStartupDiagnostics, ServerState } from "./server-types.js";
 
 // ShareIngestItem, SkillEntry, LogEntry, StreamEventType, StreamEventEnvelope
 // re-exported from server-types.ts
 export type {
+  LogEntry,
   ShareIngestItem,
   SkillEntry,
-  LogEntry,
-  StreamEventType,
   StreamEventEnvelope,
+  StreamEventType,
 } from "./server-types.js";
+
 import type {
+  LogEntry,
   ShareIngestItem,
   SkillEntry,
-  LogEntry,
   StreamEventEnvelope,
 } from "./server-types.js";
 
@@ -787,6 +789,24 @@ function error(res: http.ServerResponse, message: string, status = 400): void {
   sendJsonError(res, message, status);
 }
 
+function isModuleResolutionFailure(err: unknown): boolean {
+  if (typeof err !== "object" || err === null) {
+    return false;
+  }
+  const code = "code" in err ? (err as NodeJS.ErrnoException).code : undefined;
+  if (code === "MODULE_NOT_FOUND" || code === "ERR_MODULE_NOT_FOUND") {
+    return true;
+  }
+  if (!("message" in err) || typeof err.message !== "string") {
+    return false;
+  }
+  return (
+    err.message.includes("Cannot find module") ||
+    err.message.includes("Cannot find package") ||
+    err.message.includes("ERR_MODULE_NOT_FOUND")
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Static UI serving — extracted to static-file-server.ts
 // ---------------------------------------------------------------------------
@@ -832,7 +852,9 @@ interface ChatGenerateOptions {
 // and buildUserMessages moved to server-helpers.ts; re-exported in the top-level block
 // ChatAttachmentWithData re-exported from server-types.ts
 export type { ChatAttachmentWithData } from "./server-types.js";
+
 import type { ChatAttachmentWithData } from "./server-types.js";
+
 // buildChatAttachments, buildUserMessages, etc. imported in the consolidated import at the top
 
 function parseBoundedLimit(rawLimit: string | null, fallback = 15): number {
@@ -4689,9 +4711,31 @@ async function handleRequest(
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  // Wallet / Inventory routes — now handled by @elizaos/app-steward plugin routes.
-  // See apps/app-steward/src/plugin.ts (wallet-core-routes, wallet-bsc-core-routes).
+  // Wallet core routes (addresses, balances, generate, config, export)
+  // Canonical implementation lives in @elizaos/app-steward; wired here
+  // so the API server exposes them without requiring plugin registration.
   // ═══════════════════════════════════════════════════════════════════════
+  if (pathname.startsWith("/api/wallet/")) {
+    try {
+      const { handleWalletCoreRoutes } = await import(
+        "@elizaos/app-steward/routes/wallet-core-routes"
+      );
+      if (await handleWalletCoreRoutes(req, res, state)) {
+        return;
+      }
+    } catch (err) {
+      if (isModuleResolutionFailure(err)) {
+        logger.debug(
+          { err },
+          "[eliza-api] Wallet core routes unavailable from @elizaos/app-steward",
+        );
+      } else {
+        logger.error({ err }, "[eliza-api] Wallet core route bridge failed");
+        error(res, getErrorMessage(err), 500);
+        return;
+      }
+    }
+  }
 
   // ═══════════════════════════════════════════════════════════════════════
   //  ERC-8004 Registry, Agent self-status, Privy — delegated to agent-status-routes.ts

@@ -99,26 +99,6 @@ function TruncatingConversationTitle({
   );
 }
 
-function ConversationAvatar({
-  avatarUrl,
-  title,
-}: {
-  avatarUrl?: string;
-  title: string;
-}) {
-  if (!avatarUrl) {
-    return null;
-  }
-
-  return (
-    <img
-      src={avatarUrl}
-      alt={`${title} avatar`}
-      className="mt-0.5 h-8 w-8 shrink-0 rounded-full border border-border/35 object-cover shadow-[0_10px_18px_-16px_rgba(15,23,42,0.45)]"
-    />
-  );
-}
-
 export interface ChatConversationItemProps {
   conversation: ChatConversationSummary;
   deleting?: boolean;
@@ -267,11 +247,6 @@ export function ChatConversationItem({
             }
           />
         ) : null}
-
-        <ConversationAvatar
-          avatarUrl={conversation.avatarUrl}
-          title={renderedTitle}
-        />
 
         <div className="min-w-0 flex-1">
           <TruncatingConversationTitle

@@ -816,7 +816,7 @@ export function readOnboardingEnvSecret(
 }
 
 /** Alias to keep call-sites unchanged. */
-const isTruthyEnvFlag = isTruthyEnvValue;
+const _isTruthyEnvFlag = isTruthyEnvValue;
 
 export function getOnboardingProviderSignalEnvKeys(
   providerId: OnboardingLocalProviderId,

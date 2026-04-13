@@ -269,7 +269,7 @@ async function isWorkspaceAvailable(): Promise<boolean> {
   if (_workspaceAvailable === null) {
     _workspaceAvailable =
       (await tryWorkspaceImport(
-        "@elizaos/app-core/config/plugin-auto-enable",
+        "@elizaos/app-core",
       )) !== null;
     if (!_workspaceAvailable) {
       logger.warn(
@@ -289,7 +289,7 @@ describeIfWorkspace("Feishu Connector - Integration", () => {
   it("Feishu is mapped in CONNECTOR_PLUGINS", async () => {
     const mod = (await tryWorkspaceImport<{
       CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@elizaos/app-core/config/plugin-auto-enable"))!;
+    }>("@elizaos/app-core"))!;
     expect(mod.CONNECTOR_PLUGINS.feishu).toBe("@elizaos/plugin-feishu");
   });
 });

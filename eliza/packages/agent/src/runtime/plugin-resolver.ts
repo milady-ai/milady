@@ -28,6 +28,13 @@ import type { PluginInstallRecord } from "../config/types.eliza.js";
 import { diagnoseNoAIProvider } from "../services/version-compat.js";
 import { CORE_PLUGINS, OPTIONAL_CORE_PLUGINS } from "./core-plugins.js";
 import {
+  CHANNEL_PLUGIN_MAP,
+  collectPluginNames,
+  OPTIONAL_PLUGIN_MAP,
+  type PluginLoadReasons,
+  resolvePluginPackageAlias,
+} from "./plugin-collector.js";
+import {
   CUSTOM_PLUGINS_DIRNAME,
   EJECTED_PLUGINS_DIRNAME,
   ensureBrowserServerLink,
@@ -42,13 +49,6 @@ import {
   scanDropInPlugins,
   shouldIgnoreMissingPluginExport,
 } from "./plugin-types.js";
-import {
-  CHANNEL_PLUGIN_MAP,
-  collectPluginNames,
-  OPTIONAL_PLUGIN_MAP,
-  type PluginLoadReasons,
-  resolvePluginPackageAlias,
-} from "./plugin-collector.js";
 
 const LAST_FAILED_PLUGIN_NAMES = Symbol.for(
   "@elizaos/plugin-resolver/last-failed-plugin-names",

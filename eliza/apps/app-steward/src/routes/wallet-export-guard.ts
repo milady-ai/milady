@@ -289,7 +289,7 @@ export function createHardenedExportGuard(
     }
 
     const nonceResult = validateExportNonce(body.exportNonce, ip);
-    if (!nonceResult.valid) {
+    if (nonceResult.valid === false) {
       recordAudit({
         timestamp: new Date().toISOString(),
         ip,

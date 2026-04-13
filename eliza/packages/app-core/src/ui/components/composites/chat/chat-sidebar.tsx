@@ -13,6 +13,7 @@ import {
 } from "../sidebar";
 import { ChatConversationItem } from "./chat-conversation-item";
 import { ChatConversationRenameDialog } from "./chat-conversation-rename-dialog";
+import { ChatSourceIcon } from "./chat-source";
 import type {
   ChatConversationLabels,
   ChatConversationSummary,
@@ -29,14 +30,11 @@ function railMonogram(label: string): string {
 }
 
 function renderRailIdentity(conversation: ChatConversationSummary) {
-  if (conversation.avatarUrl) {
-    return (
-      <img
-        src={conversation.avatarUrl}
-        alt={`${conversation.title} avatar`}
-        className="h-8 w-8 rounded-full object-cover"
-      />
-    );
+  if (
+    typeof conversation.source === "string" &&
+    conversation.source.trim().length > 0
+  ) {
+    return <ChatSourceIcon source={conversation.source} className="h-4 w-4" />;
   }
 
   return railMonogram(conversation.title);

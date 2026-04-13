@@ -25,7 +25,7 @@ import { handleWalletCompatRoutes } from "./routes/wallet-compat-routes";
 import { handleWalletBrowserCompatRoutes } from "./routes/wallet-browser-compat-routes";
 import { handleStewardCompatRoutes } from "./routes/steward-compat-routes";
 import { handleWalletTradeCompatRoutes } from "./routes/wallet-trade-compat-routes";
-import type { CompatRuntimeState } from "@elizaos/app-core/api/compat-route-shared";
+import type { CompatRuntimeState } from "@elizaos/app-core";
 
 // ---------------------------------------------------------------------------
 // Helper: build a CompatRuntimeState stub.  The compat handlers need a `state`

@@ -13,6 +13,8 @@ export * from "./database";
 export * from "./database/inMemoryAdapter";
 export * from "./entities";
 export * from "./features/advanced-memory";
+export { AutonomyService } from "./features/autonomy/index";
+export { createBasicCapabilitiesPlugin } from "./features/basic-capabilities/index";
 export * from "./logger";
 export * from "./memory";
 export * from "./prompts";
@@ -24,6 +26,10 @@ export { type BaseTables, buildBaseTables } from "./schemas/index";
 export * from "./search";
 export * from "./services";
 export * from "./services/agentEvent";
+// Server/runtime entry points also register these; the browser bundle must
+// expose the same symbols so Vite/esbuild can statically resolve plugins that
+// list them in `services` (see @elizaos/agent runtime).
+export { AgentEventService } from "./services/agentEvent";
 export * from "./services/message";
 export * from "./services/trajectories";
 export * from "./settings";
@@ -39,13 +45,6 @@ export { Semaphore } from "./utils/batch-queue/semaphore.js";
 export * from "./utils/buffer";
 // Export browser-compatible utilities
 export * from "./utils/environment";
-
-// Server/runtime entry points also register these; the browser bundle must
-// expose the same symbols so Vite/esbuild can statically resolve plugins that
-// list them in `services` (see @elizaos/agent runtime).
-export { AgentEventService } from "./services/agentEvent";
-export { AutonomyService } from "./features/autonomy/index";
-export { createBasicCapabilitiesPlugin } from "./features/basic-capabilities/index";
 
 // Browser-specific exports or stubs for Node-only features
 export const isBrowser = true;

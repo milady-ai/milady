@@ -242,7 +242,9 @@ export function resolvePinnedWorkspaceVersions(
       try {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
         if (typeof pkg?.name === "string") localOnlyPackages.add(pkg.name);
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
   }
   // Also mark @elizaos/shared as local-only (not published to npm)
@@ -303,7 +305,9 @@ export function disableLocalElizaWorkspace(
           `[disable-local-eliza-workspace] Pre-resolved ${earlyPinnedVersions.size} pinned version(s) before disabling workspace`,
         );
       }
-    } catch { /* continue — will be read again below */ }
+    } catch {
+      /* continue — will be read again below */
+    }
   }
 
   if (fs.existsSync(elizaRoot)) {
@@ -371,9 +375,14 @@ export function disableLocalElizaWorkspace(
 
   // Strip patchedDependencies whose patch files live inside eliza/ —
   // the directory is gone after the rename so bun would fail to find them.
-  if (rootPkg.patchedDependencies && typeof rootPkg.patchedDependencies === "object") {
+  if (
+    rootPkg.patchedDependencies &&
+    typeof rootPkg.patchedDependencies === "object"
+  ) {
     const removedPatches = [];
-    for (const [dep, patchPath] of Object.entries(rootPkg.patchedDependencies)) {
+    for (const [dep, patchPath] of Object.entries(
+      rootPkg.patchedDependencies,
+    )) {
       if (typeof patchPath === "string" && patchPath.startsWith("eliza/")) {
         removedPatches.push(dep);
       }
@@ -395,7 +404,8 @@ export function disableLocalElizaWorkspace(
     for (const [name, cmd] of Object.entries(rootPkg.scripts)) {
       if (typeof cmd === "string" && cmd.includes("eliza/")) {
         stubbedScripts.push(name);
-        rootPkg.scripts[name] = "echo '[CI] script disabled — eliza/ workspace not present'";
+        rootPkg.scripts[name] =
+          "echo '[CI] script disabled — eliza/ workspace not present'";
       }
     }
     if (stubbedScripts.length > 0) {
@@ -409,9 +419,10 @@ export function disableLocalElizaWorkspace(
 
   // Use early-resolved versions (captured before eliza/ was renamed away).
   // Fall back to a post-rename resolution attempt for robustness.
-  let pinnedWorkspaceVersions = earlyPinnedVersions.size > 0
-    ? earlyPinnedVersions
-    : resolvePinnedWorkspaceVersions(repoRoot, { rootPackage: rootPkg });
+  const pinnedWorkspaceVersions =
+    earlyPinnedVersions.size > 0
+      ? earlyPinnedVersions
+      : resolvePinnedWorkspaceVersions(repoRoot, { rootPackage: rootPkg });
 
   if (!pinnedWorkspaceVersions.has(ELIZAOS_CORE_NAME)) {
     warn(

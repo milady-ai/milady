@@ -967,7 +967,7 @@ describe("Lens Connector - Integration", () => {
   it("Lens is mapped in CONNECTOR_PLUGINS", async () => {
     const mod = await tryWorkspaceImport<{
       CONNECTOR_PLUGINS: Record<string, string>;
-    }>("@elizaos/app-core/config/plugin-auto-enable");
+    }>("@elizaos/app-core");
     if (!mod) {
       logger.warn("[lens-connector] Workspace not built — skipping");
       return;
@@ -980,7 +980,7 @@ describe("Lens Connector - Integration", () => {
     try {
       mod = await tryWorkspaceImport<{
         CHANNEL_PLUGIN_MAP: Record<string, string>;
-      }>("@elizaos/app-core/runtime/eliza");
+      }>("@elizaos/app-core");
     } catch {
       mod = null;
     }

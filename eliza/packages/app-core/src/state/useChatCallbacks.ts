@@ -918,9 +918,10 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
         return next;
       });
       const loaded = await loadConversationMessages(id);
-      if (loaded.ok) return;
+      if (loaded.ok === true) return;
+      const loadedMessage = loaded.message;
 
-      if (loaded.status === 404) {
+      if (loaded.ok === false && loaded.status === 404) {
         const refreshed = await loadConversations();
         const fallbackId = refreshed?.[0]?.id ?? null;
         if (fallbackId) {
@@ -931,7 +932,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
             conversationId: fallbackId,
           });
           const fallbackLoaded = await loadConversationMessages(fallbackId);
-          if (!fallbackLoaded.ok) {
+          if (fallbackLoaded.ok === false) {
             setActionNotice(
               `Failed to load fallback conversation: ${fallbackLoaded.message}`,
               "error",
@@ -959,7 +960,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
           conversationId: previousActive,
         });
         const restored = await loadConversationMessages(previousActive);
-        if (!restored.ok) {
+        if (restored.ok === false) {
           setActionNotice(
             `Failed to restore previous conversation: ${restored.message}`,
             "error",
@@ -970,7 +971,7 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
         setConversationMessages([]);
       }
       setActionNotice(
-        `Failed to load conversation: ${loaded.message}`,
+        `Failed to load conversation: ${loadedMessage}`,
         "error",
         4200,
       );
@@ -1023,9 +1024,9 @@ export function useChatCallbacks(deps: UseChatCallbacksDeps) {
               conversationId: fallbackId,
             });
             const fallbackLoaded = await loadConversationMessages(fallbackId);
-            if (!fallbackLoaded.ok) {
-              setActionNotice(
-                `Failed to load fallback conversation: ${fallbackLoaded.message}`,
+        if (fallbackLoaded.ok === false) {
+          setActionNotice(
+            `Failed to load fallback conversation: ${fallbackLoaded.message}`,
                 "error",
                 4200,
               );

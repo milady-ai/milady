@@ -8,12 +8,7 @@
  * @module eliza
  */
 import crypto from "node:crypto";
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  unlinkSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync } from "node:fs";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import os from "node:os";
@@ -34,28 +29,27 @@ import {
 } from "./plugin-types.js";
 
 export {
-  type ResolvedPlugin,
-  type PluginModuleShape,
-  STATIC_ELIZA_PLUGINS,
+  CHANNEL_PLUGIN_MAP,
+  collectPluginNames,
+  OPTIONAL_PLUGIN_MAP,
+  PROVIDER_PLUGIN_MAP,
+} from "./plugin-collector.js";
+export {
   CUSTOM_PLUGINS_DIRNAME,
   EJECTED_PLUGINS_DIRNAME,
   ensureBrowserServerLink,
   findPluginBrowserStagehandDir,
   findRuntimePluginExport,
   mergeDropInPlugins,
+  type PluginModuleShape,
+  type ResolvedPlugin,
   repairBrokenInstallRecord,
   resolveElizaPluginImportSpecifier,
   resolvePackageEntry,
+  STATIC_ELIZA_PLUGINS,
   scanDropInPlugins,
   shouldIgnoreMissingPluginExport,
 } from "./plugin-types.js";
-
-export {
-  CHANNEL_PLUGIN_MAP,
-  collectPluginNames,
-  OPTIONAL_PLUGIN_MAP,
-  PROVIDER_PLUGIN_MAP,
-} from "./plugin-collector.js";
 
 // resolvePlugins is re-exported via index.ts from ./plugin-resolver
 
@@ -2973,12 +2967,9 @@ export async function startEliza(
   await ensureAgentWorkspace({ dir: workspaceDir, ensureInitFiles: true });
 
   // 4b. Ensure custom plugins directory exists for drop-in plugins
-  await fs.mkdir(
-    path.join(resolveStateDir(), CUSTOM_RUNTIME_PLUGINS_DIRNAME),
-    {
-      recursive: true,
-    },
-  );
+  await fs.mkdir(path.join(resolveStateDir(), CUSTOM_RUNTIME_PLUGINS_DIRNAME), {
+    recursive: true,
+  });
 
   // 5. Create the Eliza bridge plugin (workspace context + session keys + compaction)
   const agentId = character.name?.toLowerCase().replace(/\s+/g, "-") ?? "main";
