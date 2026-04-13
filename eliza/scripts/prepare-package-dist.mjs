@@ -88,7 +88,11 @@ writeFileSync(
 );
 
 function collectWorkspaceVersions(rootDir) {
-  const packageRoots = [path.join(rootDir, "packages"), path.join(rootDir, "plugins")];
+  const packageRoots = [
+    path.join(rootDir, "packages"),
+    path.join(rootDir, "plugins"),
+    path.join(rootDir, "apps"),
+  ];
   const versions = new Map();
 
   for (const packageRoot of packageRoots) {

@@ -978,11 +978,17 @@ export default defineConfig({
       ...["util/types", "stream/promises", "stream/web"].flatMap((sub) => [
         {
           find: `node:${sub}`,
-          replacement: path.resolve(here, "src/stubs/empty-node-module.ts"),
+          replacement: path.join(
+            appCoreSrcRoot,
+            "platform/empty-node-module.ts",
+          ),
         },
         {
           find: sub,
-          replacement: path.resolve(here, "src/stubs/empty-node-module.ts"),
+          replacement: path.join(
+            appCoreSrcRoot,
+            "platform/empty-node-module.ts",
+          ),
         },
       ]),
       // Capacitor plugins — resolve to local plugin sources
@@ -1156,7 +1162,10 @@ export default defineConfig({
           // to an empty module so Vite never traverses the server-side tree.
           {
             find: /^@elizaos\/agent$/,
-            replacement: path.resolve(here, "src/stubs/empty-node-module.ts"),
+            replacement: path.join(
+              appCoreSrcRoot,
+              "platform/empty-node-module.ts",
+            ),
           },
           // @elizaos/core — force ALL copies (including nested ones in plugins
           // like plugin-secrets-manager that ship their own older core) to the
@@ -1259,7 +1268,7 @@ export default defineConfig({
       "@node-llama-cpp/mac-arm64-metal",
       // Contains native-only pty-state-capture import; skip pre-bundling.
       "@elizaos/core/agent-orchestrator",
-      // @elizaos/plugin-secrets-manager is now built into @elizaos/core core-capabilities
+      // @elizaos/plugin-secrets-manager is now built into @elizaos/core features
       // Node-only HTTP client — crashes in browser, stub via nativeModuleStubPlugin
       "undici",
       // Browser automation is server-only and pulls in proxy-agent/httpUtil.

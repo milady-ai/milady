@@ -94,7 +94,7 @@ const STUB_PATTERNS = [
 ];
 
 const HARNESS_BLOCKER_PATTERNS = [
-  { id: "MILADY_LIVE_TEST=0", regex: /MILADY_LIVE_TEST\s*=\s*["']0["']/g },
+  { id: "ELIZA_LIVE_TEST=0", regex: /ELIZA_LIVE_TEST\s*=\s*["']0["']/g },
   { id: "ELIZA_LIVE_TEST=0", regex: /ELIZA_LIVE_TEST\s*=\s*["']0["']/g },
 ];
 

@@ -109,9 +109,9 @@ const result = spawnSync(
     stdio: "inherit",
     env: {
       ...process.env,
-      MILADY_LIVE_TEST: "1",
       ELIZA_LIVE_TEST: "1",
-      MILADY_PLUGIN_LIFECYCLE_FILTER: pluginId,
+      ELIZA_LIVE_TEST: "1",
+      ELIZA_PLUGIN_LIFECYCLE_FILTER: pluginId,
     },
   },
 );

@@ -5,8 +5,8 @@ import random
 import time
 from typing import List
 
-from elizaos.advanced_memory.memory_service import MemoryService
-from elizaos.advanced_memory.types import LongTermMemoryCategory, LongTermMemory
+from elizaos.features.advanced_memory.memory_service import MemoryService
+from elizaos.features.advanced_memory.types import LongTermMemoryCategory, LongTermMemory
 from elizaos.types.primitives import as_uuid
 
 async def run_benchmark():

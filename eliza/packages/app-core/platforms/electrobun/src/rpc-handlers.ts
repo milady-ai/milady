@@ -1,7 +1,7 @@
 /**
  * RPC Handler Registration for Electrobun
  *
- * Maps each RPC request method from MiladyRPCSchema.bun.requests
+ * Maps each RPC request method from ElizaDesktopRPCSchema.bun.requests
  * to the corresponding native module method. This is the Bun-side
  * equivalent of main-process request handler registration.
  *
@@ -94,7 +94,7 @@ type ElectrobunRpcWithHandlers = {
  * Register all RPC request handlers on the given rpc instance.
  *
  * Each handler receives typed params and must return the typed response
- * matching MiladyRPCSchema.bun.requests[method].
+ * matching ElizaDesktopRPCSchema.bun.requests[method].
  */
 export function registerRpcHandlers(
   rpc: ElectrobunRpcWithHandlers | null | undefined,

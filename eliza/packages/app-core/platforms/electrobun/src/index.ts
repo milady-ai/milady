@@ -196,7 +196,7 @@ function resolveHeartbeatMenuApiBase(): string | null {
  * Picks a loopback API base the main process can actually reach.
  *
  * **WHY:** `resolveHeartbeatMenuApiBase()` falls back to `resolveInitialApiBase`,
- * which in **external** mode is `MILADY_DESKTOP_API_BASE` (often :31337). If that
+ * which in **external** mode is `ELIZA_DESKTOP_API_BASE` (often :31337). If that
  * dev server is down but the **embedded** agent is still running on a dynamic
  * port, menu Reset must not blindly POST to the dead env URL.
  */
@@ -227,17 +227,17 @@ async function resolveReachableApiBaseForMainReset(): Promise<string | null> {
 }
 
 /**
- * App menu "Reset Milady…" — confirm + HTTP reset + restart in the **main process**.
+ * App menu "Reset the app…" — confirm + HTTP reset + restart in the **main process**.
  *
  * **WHY not renderer `fetch`:** after native `showMessageBox`, WKWebView may not run
  * network/bridge work on the same turn, so reset appeared hung. **WHY push
- * `menu-reset-milady-applied`:** renderer must still run the same local wipe as
+ * `menu-reset-app-applied`:** renderer must still run the same local wipe as
  * Settings (`completeResetLocalStateAfterServerWipe`); main only supplies a fresh
  * `/api/status` snapshot as `agentStatus`. Orchestration core: `menu-reset-from-main.ts`.
  *
  * @see `docs/apps/desktop-main-process-reset.md`
  */
-async function resetMiladyFromApplicationMenu(): Promise<void> {
+async function resetthe appFromApplicationMenu(): Promise<void> {
   console.info(
     `[Main][reset] App menu: Reset ${BRAND.appName} — confirm + POST /api/agent/reset + restart (main process)`,
   );
@@ -330,7 +330,7 @@ async function resetMiladyFromApplicationMenu(): Promise<void> {
       },
     });
     console.info(
-      "[Main][reset] Pushed menu-reset-milady-applied to renderer with /api/status snapshot",
+      "[Main][reset] Pushed menu-reset-app-applied to renderer with /api/status snapshot",
     );
   } catch (err) {
     console.error("[Main][reset] Main-process reset failed:", err);
@@ -701,7 +701,7 @@ async function startRendererServer(): Promise<string> {
   // HTML before the renderer JS runs. This prevents a 404 fatal-error loop
   // where the renderer fetches /api/auth/status relative to the static server.
   // If the agent falls back to a dynamic port, apiBaseUpdate messages will
-  // update window.__MILADY_API_BASE__ and the client will pick it up lazily.
+  // update window.__ELIZA_API_BASE__ and the client will pick it up lazily.
   const initialApiBase = resolveInitialApiBase(
     process.env as Record<string, string | undefined>,
   );
@@ -716,7 +716,7 @@ async function startRendererServer(): Promise<string> {
     if (!initialApiBase) {
       return html;
     }
-    const script = `<script>window.__MILADY_API_BASE__=${JSON.stringify(initialApiBase)};${initialApiToken ? `Object.defineProperty(window,"__MILADY_API_TOKEN__",{value:${JSON.stringify(initialApiToken)},configurable:true,writable:true,enumerable:false});` : ""}</script>`;
+    const script = `<script>window.__ELIZA_API_BASE__=${JSON.stringify(initialApiBase)};${initialApiToken ? `Object.defineProperty(window,"__ELIZA_API_TOKEN__",{value:${JSON.stringify(initialApiToken)},configurable:true,writable:true,enumerable:false});` : ""}</script>`;
     // Inject before </head> if present, otherwise before <body>
     if (html.includes("</head>")) {
       return html.replace("</head>", `${script}</head>`);
@@ -811,11 +811,11 @@ async function startRendererServer(): Promise<string> {
 }
 
 async function resolveRendererUrl(): Promise<string> {
-  // Prefer MILADY_RENDERER_URL / VITE_DEV_SERVER_URL when set (e.g. dev-platform.mjs watch mode).
+  // Prefer ELIZA_RENDERER_URL / VITE_DEV_SERVER_URL when set (e.g. dev-platform.mjs watch mode).
   // Why: Vite HMR only works against the dev server; serving pre-built dist from this static
   // server would force a full rebuild for every UI change.
   let rendererUrl =
-    process.env.MILADY_RENDERER_URL ?? process.env.VITE_DEV_SERVER_URL ?? "";
+    process.env.ELIZA_RENDERER_URL ?? process.env.VITE_DEV_SERVER_URL ?? "";
 
   if (!rendererUrl) {
     rendererUrlPromise ??= startRendererServer();
@@ -871,7 +871,7 @@ async function createMainWindow(): Promise<BrowserWindow> {
 
   if (forceMainWindowCef && !canUseCefView) {
     console.warn(
-      "[Main] MILADY_DESKTOP_FORCE_CEF=1 requested, but this Electrobun build does not bundle the CEF renderer. Falling back to the native renderer.",
+      "[Main] ELIZA_DESKTOP_FORCE_CEF=1 requested, but this Electrobun build does not bundle the CEF renderer. Falling back to the native renderer.",
     );
   }
 
@@ -1515,8 +1515,8 @@ async function setupUpdater(): Promise<void> {
           void refreshHeartbeatMenuSnapshot();
         } else if (action === "relaunch") {
           void getDesktopManager().relaunch();
-        } else if (action === "reset-milady") {
-          void resetMiladyFromApplicationMenu();
+        } else if (action === "reset-app") {
+          void resetthe appFromApplicationMenu();
         } else if (
           action === "open-settings" ||
           action?.startsWith("open-settings-")
@@ -1631,16 +1631,16 @@ function setupShutdown(): void {
 
 /**
  * Load repo-root and ~/.eliza/.env into `process.env` (non-destructive) so the
- * main process can send the same `MILADY_API_TOKEN` as `dev-server.ts` when
+ * main process can send the same `ELIZA_API_TOKEN` as `dev-server.ts` when
  * calling loopback APIs (app menu reset, export, etc.). The dev API child
  * already loads dotenv; Electrobun did not until this ran.
  *
  * Packaged desktop builds must not load these files. On machines that also
- * have a Milady/Eliza dev checkout, ~/.eliza/.env can contain
- * MILADY_DESKTOP_API_BASE and related overrides that switch the packaged app
+ * have a the app/Eliza dev checkout, ~/.eliza/.env can contain
+ * ELIZA_DESKTOP_API_BASE and related overrides that switch the packaged app
  * into external mode and make launcher startup appear dead.
  */
-async function loadMiladyEnvFilesForMain(): Promise<void> {
+async function loadthe appEnvFilesForMain(): Promise<void> {
   const normalizedModuleDir = import.meta.dir.replaceAll("\\", "/");
   const isPackagedBuild = !normalizedModuleDir.includes("/src/");
   if (isPackagedBuild) {
@@ -1720,13 +1720,13 @@ async function main(): Promise<void> {
     exec_path: process.execPath,
     bundle_path: resolveStartupBundlePath(process.execPath),
   });
-  await loadMiladyEnvFilesForMain();
+  await loadthe appEnvFilesForMain();
   console.log(`[Main] Starting ${BRAND.appName} (Electrobun)`);
   const normalizedModuleDir = import.meta.dir.replaceAll("\\", "/");
   const runtimeResolution = resolveDesktopRuntimeMode(
     process.env as Record<string, string | undefined>,
   );
-  // Structured startup environment block — visible in CI logs and milady-startup.log
+  // Structured startup environment block — visible in CI logs and eliza-startup.log
   console.log(
     `[Env] platform=${process.platform} arch=${process.arch} bun=${Bun.version} ` +
       `execPath=${process.execPath} cwd=${process.cwd()} moduleDir=${import.meta.dir} ` +
@@ -1800,7 +1800,7 @@ async function main(): Promise<void> {
 
   // WHY push API base on every status tick with a port: embedded startup can
   // settle on a different loopback port than env/static HTML (allocation + stdout).
-  // Detached surfaces must not keep a stale __MILADY_API_BASE__ while the main
+  // Detached surfaces must not keep a stale __ELIZA_API_BASE__ while the main
   // window was already updated—menu reset, chat, and settings each own a webview.
   cleanupFns.push(
     getAgentManager().onStatusChange((status) => {
@@ -1951,7 +1951,7 @@ async function main(): Promise<void> {
 
   // ── Steward sidecar startup (must happen BEFORE agent) ────────────
   // When STEWARD_LOCAL=true, start the steward sidecar first so it can
-  // set STEWARD_API_URL / STEWARD_AGENT_TOKEN env vars. The Milady agent's
+  // set STEWARD_API_URL / STEWARD_AGENT_TOKEN env vars. The the app agent's
   // steward-bridge.ts reads these on boot to discover local steward.
   if (isStewardLocalEnabled()) {
     console.log("[Main] STEWARD_LOCAL=true — starting steward sidecar...");
@@ -1993,7 +1993,7 @@ async function main(): Promise<void> {
   // Agent startup: in external mode, push the API base via injectApiBase
   // (the agent is already running externally). In local mode, start the
   // embedded agent first — injectApiBaseIntoHtml already set the initial
-  // window.__MILADY_API_BASE__ but _startAgent will push the actual port
+  // window.__ELIZA_API_BASE__ but _startAgent will push the actual port
   // once the agent reports it.
   if (currentWindow) {
     const rt = resolveDesktopRuntimeMode(

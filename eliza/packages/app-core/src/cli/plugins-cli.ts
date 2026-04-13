@@ -124,9 +124,9 @@ function displayPluginConfig(
 }
 
 async function getPluginManager(): Promise<PluginManagerLike> {
-  // plugin-manager is now built into @elizaos/core core-capabilities
+  // plugin-manager is now built into @elizaos/core features
   const { PluginManagerService } = await import(
-    "@elizaos/core/core-capabilities/plugin-manager/index"
+    "@elizaos/core/features/plugin-manager/index"
   );
   const PluginManagerServiceCtor = PluginManagerService as unknown as new (
     runtime: IAgentRuntime,

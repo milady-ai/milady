@@ -46,9 +46,7 @@ export function readNativeAppleReminderMetadata(
   }
   const record = value as Record<string, unknown>;
   const kind =
-    record.kind === "alarm" || record.kind === "reminder"
-      ? record.kind
-      : null;
+    record.kind === "alarm" || record.kind === "reminder" ? record.kind : null;
   const source =
     record.source === "llm" || record.source === "heuristic"
       ? record.source
@@ -96,7 +94,9 @@ function buildReminderNotes(args: {
 }): string {
   const parts = [
     args.notes?.trim() ?? "",
-    args.originalIntent?.trim() ? `Eliza request: ${args.originalIntent.trim()}` : "",
+    args.originalIntent?.trim()
+      ? `Eliza request: ${args.originalIntent.trim()}`
+      : "",
   ].filter((value) => value.length > 0);
   if (parts.length > 0) {
     return parts.join("\n\n");
@@ -264,14 +264,14 @@ export async function createNativeAppleReminderLikeItem(args: {
 
   try {
     const reminderId = await execAppleReminderScript(APPLE_REMINDER_SCRIPT, [
-        title,
-        buildReminderNotes(args),
-        String(parts.year),
-        String(parts.month),
-        String(parts.day),
-        String(parts.secondsSinceMidnight),
-        String(appleReminderPriority(args.kind)),
-      ]);
+      title,
+      buildReminderNotes(args),
+      String(parts.year),
+      String(parts.month),
+      String(parts.day),
+      String(parts.secondsSinceMidnight),
+      String(appleReminderPriority(args.kind)),
+    ]);
     return {
       ok: true,
       provider: "apple_reminders",

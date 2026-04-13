@@ -620,7 +620,7 @@ async function launch() {
       appDir,
       {
         NODE_ENV: "development",
-        MILADY_VITE_LOOPBACK_ORIGIN: "1",
+        ELIZA_VITE_LOOPBACK_ORIGIN: "1",
         ELIZA_PORT: String(uiDevPort),
         ELIZA_API_PORT: apiPort,
         ELIZA_API_PORT: apiPort,

@@ -2,7 +2,7 @@ import { ErrorBoundary } from "@elizaos/app-core/components";
 import "@elizaos/app-core/styles/styles.css";
 import "@elizaos/app-core/styles/brand-gold.css";
 
-import "./native-plugin-entrypoints";
+import "@elizaos/app-core/platform/native-plugin-entrypoints";
 
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -60,7 +60,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ELIZA_ENV_ALIASES } from "./brand-env";
 import { ELIZA_CHARACTER_CATALOG } from "./character-catalog";
-import { shouldUseCloudOnlyBranding } from "./cloud-only";
+import { shouldUseCloudOnlyBranding } from "@elizaos/app-core/config";
 
 const ELIZA_BRANDING: Partial<BrandingConfig> = {
   appName: "Eliza",

@@ -9,7 +9,7 @@ import type { AwarenessContributor } from "@elizaos/agent/contracts";
 import {
   canUseLocalTradeExecution,
   resolveTradePermissionMode,
-} from "../../api/server-wallet-trade.js";
+} from "../../../../../apps/app-steward/src/routes/server-wallet-trade.js";
 import { loadElizaConfig } from "../../config/config.js";
 
 function shorten(address: string | null): string | null {

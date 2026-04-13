@@ -22,7 +22,7 @@
     "clean": "rm -rf dist",
     "build": "bun run build:dist",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:dist": "rm -rf dist && tsc -p tsconfig.build.json && node ../../scripts/copy-package-assets.mjs packages/app-core src/styles src/i18n/locales && node ../../scripts/prepare-package-dist.mjs packages/app-core",
+    "build:dist": "rm -rf dist && tsc -p tsconfig.build.json && node ../../scripts/copy-package-assets.mjs packages/app-core src/styles src/i18n/locales && node ../../scripts/prepare-package-dist.mjs packages/app-core --compiled-prefix=packages/app-core/src",
     "pack:dry-run": "cd dist && npm pack --dry-run"
   },
   "exports": {
@@ -63,6 +63,8 @@
     "./autonomy": "./src/autonomy/index.ts",
     "./chat": "./src/chat/index.ts",
     "./platform": "./src/platform/index.ts",
+    "./platform/native-plugin-entrypoints": "./src/platform/native-plugin-entrypoints.ts",
+    "./platform/empty-node-module": "./src/platform/empty-node-module.ts",
 
     "./onboarding/flow": "./src/onboarding/flow.ts",
     "./onboarding/types": "./src/onboarding/types.ts",

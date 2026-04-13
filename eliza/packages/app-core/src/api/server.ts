@@ -79,7 +79,7 @@ export {
   isSafeResetStateDir,
   resolveCorsOrigin,
 } from "./server-startup";
-export { resolveWalletExportRejection } from "./server-wallet-trade";
+export { resolveWalletExportRejection } from "../../../../apps/app-steward/src/routes/server-wallet-trade";
 export {
   AGENT_EVENT_ALLOWED_STREAMS,
   CONFIG_WRITE_ALLOWED_TOP_KEYS,
@@ -136,8 +136,11 @@ import {
   getCorsAllowedPorts,
   isAllowedLocalOrigin,
 } from "./server-cors";
-import { handleShopifyRoute } from "./shopify-routes";
-import { handleVincentRoute } from "./vincent-routes";
+import { handleShopifyRoute } from "../../../../apps/app-shopify/src/routes";
+import {
+  handleVincentRoute,
+  type VincentRouteState,
+} from "../../../../apps/app-vincent/src/routes";
 import {
   isAllowedDevConsoleLogPath,
   readDevConsoleLogTail,
@@ -148,11 +151,11 @@ import { handleDatabaseRowsCompatRoute } from "./database-rows-compat-routes";
 import { handleDevCompatRoutes } from "./dev-compat-routes";
 import { handleOnboardingCompatRoute } from "./onboarding-compat-routes";
 import { handlePluginsCompatRoutes } from "./plugins-compat-routes";
-import { handleWalletBrowserCompatRoutes } from "./wallet-browser-compat-routes";
-import { handleWalletTradeCompatRoutes } from "./wallet-trade-compat-routes";
-import { handleStewardCompatRoutes } from "./steward-compat-routes";
+import { handleWalletBrowserCompatRoutes } from "../../../../apps/app-steward/src/routes/wallet-browser-compat-routes";
+import { handleWalletTradeCompatRoutes } from "../../../../apps/app-steward/src/routes/wallet-trade-compat-routes";
+import { handleStewardCompatRoutes } from "../../../../apps/app-steward/src/routes/steward-compat-routes";
 import { handleWorkbenchCompatRoutes } from "./workbench-compat-routes";
-import { handleWalletCompatRoutes } from "./wallet-compat-routes";
+import { handleWalletCompatRoutes } from "../../../../apps/app-steward/src/routes/wallet-compat-routes";
 import { resolveDevStackFromEnv } from "./dev-stack";
 
 const require = createRequire(import.meta.url);
@@ -164,8 +167,8 @@ const lazyEnsureTTS = () =>
   import("../runtime/eliza.js").then((m) => m.ensureTextToSpeechHandler);
 
 import { getStartupEmbeddingAugmentation } from "../runtime/startup-overlay.js";
-import { hydrateWalletKeysFromNodePlatformSecureStore } from "../security/hydrate-wallet-keys-from-platform-store";
-import { deleteWalletSecretsFromOsStore } from "../security/wallet-os-store-actions";
+import { hydrateWalletKeysFromNodePlatformSecureStore } from "../../../../apps/app-steward/src/security/hydrate-wallet-keys-from-platform-store";
+import { deleteWalletSecretsFromOsStore } from "../../../../apps/app-steward/src/security/wallet-os-store-actions";
 import { clearCloudSecrets, getCloudSecret } from "./cloud-secrets";
 import { clearPersistedOnboardingConfig } from "@elizaos/agent/api/provider-switch-config";
 

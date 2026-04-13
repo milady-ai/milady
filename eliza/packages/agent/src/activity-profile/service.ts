@@ -8,7 +8,9 @@ import {
 } from "../lifeops/screen-context.js";
 import { LifeOpsService } from "../lifeops/service.js";
 import { resolveOwnerEntityId } from "../runtime/owner-entity.js";
+
 export { resolveOwnerEntityId } from "../runtime/owner-entity.js";
+
 import {
   analyzeMessages,
   type CalendarEventRecord,

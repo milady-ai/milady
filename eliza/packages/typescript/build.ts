@@ -650,7 +650,8 @@ async function buildNode() {
 			entrypoints: [
 				`${TS_SRC}/index.node.ts`,
 				`${TS_SRC}/roles.ts`,
-				`${TS_SRC}/orchestrator/index.ts`,
+				`${TS_SRC}/features/orchestrator/index.ts`,
+				`${TS_SRC}/features/advanced-capabilities/clipboard/index.ts`,
 			],
 			outdir: "dist/node",
 			target: "node",
@@ -684,13 +685,14 @@ async function buildBrowser() {
 				`${TS_SRC}/roles.ts`,
 			],
 			outdir: "dist/browser",
-			target: "browser",
+			// Use the Node target so `node:*` imports bundle without broken browser polyfills.
+			// The dashboard/Vite shell still aliases `node:*` where the bundle runs in the browser.
+			target: "node",
 			format: "esm",
 			external: browserExternals,
 			sourcemap: true,
 			minify: true, // Minify for browser to reduce bundle size
 			generateDts: false, // Use the same .d.ts files from Node build
-			// No additional browser resolver plugins; avoid pulling large node-polyfill trees
 			plugins: [],
 			selfPackageName: "@elizaos/core", // Exclude self from externals to avoid self-referential imports
 		},
@@ -714,7 +716,7 @@ async function buildEdge() {
 		buildOptions: {
 			entrypoints: [`${TS_SRC}/index.edge.ts`],
 			outdir: "dist/edge",
-			target: "browser",
+			target: "node",
 			format: "esm",
 			external: browserExternals,
 			sourcemap: true,

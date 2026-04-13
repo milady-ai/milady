@@ -8,17 +8,16 @@
 
 // Export core modules (all browser-compatible after refactoring)
 export * from "./actions";
-export * from "./advanced-memory";
 export * from "./character";
 export * from "./database";
 export * from "./database/inMemoryAdapter";
 export * from "./entities";
+export * from "./features/advanced-memory";
 export * from "./logger";
 export * from "./memory";
 export * from "./prompts";
 export * from "./roles";
 export * from "./runtime";
-export { Semaphore } from "./utils/batch-queue/semaphore.js";
 // Export schemas (including buildBaseTables for plugin-sql browser/PGLite builds)
 export * from "./schemas/character";
 export { type BaseTables, buildBaseTables } from "./schemas/index";
@@ -34,6 +33,7 @@ export * from "./types";
 export * from "./types/message-service";
 // Export utils first to avoid circular dependency issues
 export * from "./utils";
+export { Semaphore } from "./utils/batch-queue/semaphore.js";
 export * from "./utils/buffer";
 // Export browser-compatible utilities
 export * from "./utils/environment";

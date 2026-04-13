@@ -1,15 +1,15 @@
 import crypto from "node:crypto";
 import {
+  getSelfControlStatus,
+  startSelfControlBlock,
+  stopSelfControlBlock,
+} from "@elizaos/app-lifeops/selfcontrol";
+import {
   type IAgentRuntime,
   logger,
   ModelType,
   stringToUuid,
 } from "@elizaos/core";
-import {
-  getSelfControlStatus,
-  startSelfControlBlock,
-  stopSelfControlBlock,
-} from "@elizaos/app-lifeops/selfcontrol";
 import type {
   AcknowledgeLifeOpsReminderRequest,
   CaptureLifeOpsActivitySignalRequest,
@@ -190,6 +190,13 @@ import {
 } from "./defaults.js";
 import { materializeDefinitionOccurrences } from "./engine.js";
 import {
+  type buildGoalSemanticReviewMetadata,
+  mergeGoalSemanticReviewMetadata,
+  readGoalGroundingMetadata,
+  readGoalSemanticReviewMetadata,
+} from "./goal-grounding.js";
+import { evaluateGoalProgressWithLlm } from "./goal-semantic-evaluator.js";
+import {
   GoogleApiError,
   googleErrorLooksLikeAdminPolicyBlock,
   googleErrorRequiresReauth,
@@ -258,13 +265,6 @@ import {
   LifeOpsRepository,
   type LifeOpsWebsiteAccessGrant,
 } from "./repository.js";
-import {
-  buildGoalSemanticReviewMetadata,
-  mergeGoalSemanticReviewMetadata,
-  readGoalGroundingMetadata,
-  readGoalSemanticReviewMetadata,
-} from "./goal-grounding.js";
-import { evaluateGoalProgressWithLlm } from "./goal-semantic-evaluator.js";
 import {
   ROUTINE_SEED_TEMPLATES,
   type RoutineSeedTemplate,

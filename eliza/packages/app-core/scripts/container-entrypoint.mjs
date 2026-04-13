@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
 const CLOUD_MODES = new Set(["cloud", "cloud-agent", "cloud_agent"]);
-const AGENT_MODES = new Set(["agent", "default", "milady"]);
+const AGENT_MODES = new Set(["agent", "default", "eliza"]);
 const TSX_LOADER_PATH = "./node_modules/tsx/dist/loader.mjs";
 const CLOUD_AGENT_ENTRYPOINT =
   "eliza/packages/app-core/deploy/cloud-agent-entrypoint.ts";
@@ -18,9 +18,9 @@ export function normalizeContainerMode(rawMode, env = process.env) {
   if (
     env.BRIDGE_PORT ||
     env.APP_BRIDGE_PORT ||
-    env.MILADY_BRIDGE_PORT ||
+    env.ELIZA_BRIDGE_PORT ||
     env.BRIDGE_SECRET ||
-    env.MILADY_CONTAINER_CLOUD === "1"
+    env.ELIZA_CONTAINER_CLOUD === "1"
   ) {
     return "cloud-agent";
   }
@@ -32,23 +32,23 @@ export function resolveContainerLaunch(env = process.env) {
   const mode = normalizeContainerMode(
     env.APP_CONTAINER_MODE ??
       env.APP_AGENT_IMAGE_MODE ??
-      env.MILADY_CONTAINER_MODE ??
-      env.MILADY_AGENT_IMAGE_MODE,
+      env.ELIZA_CONTAINER_MODE ??
+      env.ELIZA_AGENT_IMAGE_MODE,
     env,
   );
   const launchEnv = { ...env };
   const appEntrypoint =
-    env.APP_ENTRYPOINT ?? env.MILADY_ENTRYPOINT ?? "app.mjs";
+    env.APP_ENTRYPOINT ?? env.ELIZA_ENTRYPOINT ?? "app.mjs";
 
   if (mode === "cloud-agent") {
     if (!launchEnv.PORT) {
       launchEnv.PORT =
-        launchEnv.APP_PORT ?? launchEnv.MILADY_PORT ?? launchEnv.ELIZA_PORT ?? "2138";
+        launchEnv.APP_PORT ?? launchEnv.ELIZA_PORT ?? launchEnv.ELIZA_PORT ?? "2138";
     }
     if (!launchEnv.BRIDGE_PORT) {
       launchEnv.BRIDGE_PORT =
         launchEnv.APP_BRIDGE_PORT ??
-        launchEnv.MILADY_BRIDGE_PORT ??
+        launchEnv.ELIZA_BRIDGE_PORT ??
         launchEnv.ELIZA_BRIDGE_PORT ??
         "18790";
     }

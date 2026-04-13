@@ -48,7 +48,9 @@ function resolveLagMinutes(cadence: LifeOpsCadence): number {
     return cadence.visibilityLagMinutes ?? 4 * 60;
   }
   if (cadence.kind === "interval") {
-    return cadence.visibilityLagMinutes ?? Math.min(cadence.everyMinutes, 4 * 60);
+    return (
+      cadence.visibilityLagMinutes ?? Math.min(cadence.everyMinutes, 4 * 60)
+    );
   }
   return cadence.visibilityLagMinutes ?? 0;
 }
@@ -85,7 +87,8 @@ function deriveTarget(
   if (progressionRule.kind === "none") {
     return null;
   }
-  const target = progressionRule.start + completedCountBefore * progressionRule.step;
+  const target =
+    progressionRule.start + completedCountBefore * progressionRule.step;
   return {
     kind: progressionRule.kind,
     metric: progressionRule.metric,
@@ -97,7 +100,11 @@ function deriveTarget(
   };
 }
 
-function buildOccurrenceKey(prefix: string, localDateKey: string, suffix: string): string {
+function buildOccurrenceKey(
+  prefix: string,
+  localDateKey: string,
+  suffix: string,
+): string {
   return `${prefix}:${localDateKey}:${suffix}`;
 }
 
@@ -132,11 +139,18 @@ function buildWindowOccurrence(
     minute: endMinuteOfDay % 60,
     second: 0,
   } satisfies ZonedDateParts;
-  const scheduledAt = buildUtcDateFromLocalParts(definition.timezone, startLocal);
+  const scheduledAt = buildUtcDateFromLocalParts(
+    definition.timezone,
+    startLocal,
+  );
   const dueAt = buildUtcDateFromLocalParts(definition.timezone, endLocal);
   const relevanceStartAt = addMinutes(scheduledAt, -leadMinutes);
   const relevanceEndAt = addMinutes(dueAt, lagMinutes);
-  const occurrenceKey = buildOccurrenceKey(cadencePrefix, localDateKey, window.name);
+  const occurrenceKey = buildOccurrenceKey(
+    cadencePrefix,
+    localDateKey,
+    window.name,
+  );
   return {
     id: existing?.id ?? crypto.randomUUID(),
     agentId: definition.agentId,
@@ -161,7 +175,10 @@ function buildWindowOccurrence(
     ),
     snoozedUntil: existing?.snoozedUntil ?? null,
     completionPayload: existing?.completionPayload ?? null,
-    derivedTarget: deriveTarget(definition.progressionRule, completedCountBefore),
+    derivedTarget: deriveTarget(
+      definition.progressionRule,
+      completedCountBefore,
+    ),
     metadata: {
       ...(existing?.metadata ?? {}),
       localDateKey,
@@ -175,7 +192,9 @@ function buildWindowOccurrence(
 function buildSlotOccurrence(
   definition: LifeOpsTaskDefinition,
   existing: LifeOpsOccurrence | undefined,
-  slot: NonNullable<Extract<LifeOpsCadence, { kind: "times_per_day" }>["slots"]>[number],
+  slot: NonNullable<
+    Extract<LifeOpsCadence, { kind: "times_per_day" }>["slots"]
+  >[number],
   localDate: Pick<ZonedDateParts, "year" | "month" | "day">,
   localDateKey: string,
   completedCountBefore: number,
@@ -190,7 +209,10 @@ function buildSlotOccurrence(
     minute: slot.minuteOfDay % 60,
     second: 0,
   } satisfies ZonedDateParts;
-  const scheduledAt = buildUtcDateFromLocalParts(definition.timezone, scheduledLocal);
+  const scheduledAt = buildUtcDateFromLocalParts(
+    definition.timezone,
+    scheduledLocal,
+  );
   const dueAt = scheduledAt;
   const relevanceStartAt = addMinutes(scheduledAt, -leadMinutes);
   const relevanceEndAt = addMinutes(scheduledAt, lagMinutes);
@@ -219,7 +241,10 @@ function buildSlotOccurrence(
     ),
     snoozedUntil: existing?.snoozedUntil ?? null,
     completionPayload: existing?.completionPayload ?? null,
-    derivedTarget: deriveTarget(definition.progressionRule, completedCountBefore),
+    derivedTarget: deriveTarget(
+      definition.progressionRule,
+      completedCountBefore,
+    ),
     metadata: {
       ...(existing?.metadata ?? {}),
       localDateKey,
@@ -257,7 +282,10 @@ function buildIntervalOccurrence(
     minute: scheduledMinuteOfDay % 60,
     second: 0,
   } satisfies ZonedDateParts;
-  const scheduledAt = buildUtcDateFromLocalParts(definition.timezone, scheduledLocal);
+  const scheduledAt = buildUtcDateFromLocalParts(
+    definition.timezone,
+    scheduledLocal,
+  );
   const dueAt = scheduledAt;
   const leadMinutes = resolveLeadMinutes(cadence);
   const durationMinutes = Math.max(
@@ -267,7 +295,11 @@ function buildIntervalOccurrence(
   const lagMinutes = Math.max(resolveLagMinutes(cadence), durationMinutes);
   const relevanceStartAt = addMinutes(scheduledAt, -leadMinutes);
   const relevanceEndAt = addMinutes(scheduledAt, lagMinutes);
-  const occurrenceKey = buildOccurrenceKey("interval", args.localDateKey, args.intervalKey);
+  const occurrenceKey = buildOccurrenceKey(
+    "interval",
+    args.localDateKey,
+    args.intervalKey,
+  );
   return {
     id: existing?.id ?? crypto.randomUUID(),
     agentId: definition.agentId,
@@ -292,7 +324,10 @@ function buildIntervalOccurrence(
     ),
     snoozedUntil: existing?.snoozedUntil ?? null,
     completionPayload: existing?.completionPayload ?? null,
-    derivedTarget: deriveTarget(definition.progressionRule, args.completedCountBefore),
+    derivedTarget: deriveTarget(
+      definition.progressionRule,
+      args.completedCountBefore,
+    ),
     metadata: {
       ...(existing?.metadata ?? {}),
       localDateKey: args.localDateKey,
@@ -343,7 +378,10 @@ function buildOnceOccurrence(
     ),
     snoozedUntil: existing?.snoozedUntil ?? null,
     completionPayload: existing?.completionPayload ?? null,
-    derivedTarget: deriveTarget(definition.progressionRule, completedCountBefore),
+    derivedTarget: deriveTarget(
+      definition.progressionRule,
+      completedCountBefore,
+    ),
     metadata: {
       ...(existing?.metadata ?? {}),
       localDateKey,
@@ -360,7 +398,10 @@ function countCompletedBefore(
 ): number {
   return existingOccurrences.filter((occurrence) => {
     if (occurrence.state !== "completed") return false;
-    return new Date(occurrence.relevanceStartAt).getTime() < occurrenceStartAt.getTime();
+    return (
+      new Date(occurrence.relevanceStartAt).getTime() <
+      occurrenceStartAt.getTime()
+    );
   }).length;
 }
 
@@ -372,21 +413,32 @@ export function materializeDefinitionOccurrences(
   const now = options.now ?? new Date();
   const lookbackDays = options.lookbackDays ?? DEFAULT_LOOKBACK_DAYS;
   const lookaheadDays = options.lookaheadDays ?? DEFAULT_LOOKAHEAD_DAYS;
-  const windowPolicy = normalizeWindowPolicy(definition.windowPolicy, definition.timezone);
+  const windowPolicy = normalizeWindowPolicy(
+    definition.windowPolicy,
+    definition.timezone,
+  );
   const windowMap = new Map<string, LifeOpsTimeWindowDefinition>();
   for (const window of windowPolicy.windows) {
     windowMap.set(window.name, window);
   }
   const existingByKey = new Map(
-    existingOccurrences.map((occurrence) => [occurrence.occurrenceKey, occurrence]),
+    existingOccurrences.map((occurrence) => [
+      occurrence.occurrenceKey,
+      occurrence,
+    ]),
   );
   const materialized: LifeOpsOccurrence[] = [];
 
   if (definition.cadence.kind === "once") {
     const occurrence = buildOnceOccurrence(
       definition,
-      existingByKey.get(`once:${new Date(definition.cadence.dueAt).toISOString()}`),
-      countCompletedBefore(existingOccurrences, new Date(definition.cadence.dueAt)),
+      existingByKey.get(
+        `once:${new Date(definition.cadence.dueAt).toISOString()}`,
+      ),
+      countCompletedBefore(
+        existingOccurrences,
+        new Date(definition.cadence.dueAt),
+      ),
       now,
     );
     materialized.push(occurrence);
@@ -418,12 +470,20 @@ export function materializeDefinitionOccurrences(
           minute: window.startMinute % 60,
           second: 0,
         } satisfies ZonedDateParts;
-        const scheduledAt = buildUtcDateFromLocalParts(definition.timezone, scheduledLocal);
-        const completedCountBefore = countCompletedBefore(existingOccurrences, scheduledAt);
+        const scheduledAt = buildUtcDateFromLocalParts(
+          definition.timezone,
+          scheduledLocal,
+        );
+        const completedCountBefore = countCompletedBefore(
+          existingOccurrences,
+          scheduledAt,
+        );
         materialized.push(
           buildWindowOccurrence(
             definition,
-            existingByKey.get(buildOccurrenceKey("weekly", localDateKey, window.name)),
+            existingByKey.get(
+              buildOccurrenceKey("weekly", localDateKey, window.name),
+            ),
             window,
             localDate,
             localDateKey,
@@ -444,12 +504,20 @@ export function materializeDefinitionOccurrences(
           minute: slot.minuteOfDay % 60,
           second: 0,
         } satisfies ZonedDateParts;
-        const scheduledAt = buildUtcDateFromLocalParts(definition.timezone, scheduledLocal);
-        const completedCountBefore = countCompletedBefore(existingOccurrences, scheduledAt);
+        const scheduledAt = buildUtcDateFromLocalParts(
+          definition.timezone,
+          scheduledLocal,
+        );
+        const completedCountBefore = countCompletedBefore(
+          existingOccurrences,
+          scheduledAt,
+        );
         materialized.push(
           buildSlotOccurrence(
             definition,
-            existingByKey.get(buildOccurrenceKey("slot", localDateKey, slot.key)),
+            existingByKey.get(
+              buildOccurrenceKey("slot", localDateKey, slot.key),
+            ),
             slot,
             localDate,
             localDateKey,
@@ -464,7 +532,9 @@ export function materializeDefinitionOccurrences(
     if (definition.cadence.kind === "interval") {
       const windows = definition.cadence.windows
         .map((windowName) => windowMap.get(windowName))
-        .filter((window): window is LifeOpsTimeWindowDefinition => Boolean(window))
+        .filter((window): window is LifeOpsTimeWindowDefinition =>
+          Boolean(window),
+        )
         .sort((left, right) => left.startMinute - right.startMinute);
       let occurrencesGenerated = 0;
       for (const window of windows) {
@@ -490,7 +560,10 @@ export function materializeDefinitionOccurrences(
           }
           const scheduledDayOffset = Math.floor(minuteCursor / (24 * 60));
           const scheduledMinuteOfDay = minuteCursor % (24 * 60);
-          const scheduledDate = addDaysToLocalDate(localDate, scheduledDayOffset);
+          const scheduledDate = addDaysToLocalDate(
+            localDate,
+            scheduledDayOffset,
+          );
           const scheduledLocal = {
             ...scheduledDate,
             hour: Math.floor(scheduledMinuteOfDay / 60),
@@ -544,12 +617,20 @@ export function materializeDefinitionOccurrences(
         minute: window.startMinute % 60,
         second: 0,
       } satisfies ZonedDateParts;
-      const scheduledAt = buildUtcDateFromLocalParts(definition.timezone, scheduledLocal);
-      const completedCountBefore = countCompletedBefore(existingOccurrences, scheduledAt);
+      const scheduledAt = buildUtcDateFromLocalParts(
+        definition.timezone,
+        scheduledLocal,
+      );
+      const completedCountBefore = countCompletedBefore(
+        existingOccurrences,
+        scheduledAt,
+      );
       materialized.push(
         buildWindowOccurrence(
           definition,
-          existingByKey.get(buildOccurrenceKey("daily", localDateKey, window.name)),
+          existingByKey.get(
+            buildOccurrenceKey("daily", localDateKey, window.name),
+          ),
           window,
           localDate,
           localDateKey,

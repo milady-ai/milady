@@ -411,11 +411,11 @@ export function registerTriggerTaskWorker(runtime: IAgentRuntime): void {
     execute: async (rt, options, task) => {
       // Return the full result so callers (tests, dashboards) can inspect
       // trigger-specific fields like taskDeleted and runRecord.
-      return await executeTriggerTask(rt, task, {
+      return (await executeTriggerTask(rt, task, {
         source: options.source === "manual" ? "manual" : "scheduler",
         force: options.force === true,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any;
+      })) as any;
     },
   });
 }

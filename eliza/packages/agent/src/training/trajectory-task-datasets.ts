@@ -1,9 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type {
-  Trajectory,
-  TrajectoryLlmCall,
-} from "../types/trajectory.js";
+import type { Trajectory, TrajectoryLlmCall } from "../types/trajectory.js";
 
 export interface GeminiTuningExample {
   messages: Array<{
@@ -134,7 +131,10 @@ function collectCallHints(call: TrajectoryCallLike): string[] {
 
   return values
     .map(normalizeToken)
-    .filter((value, index, items) => value.length > 0 && items.indexOf(value) === index);
+    .filter(
+      (value, index, items) =>
+        value.length > 0 && items.indexOf(value) === index,
+    );
 }
 
 function hasContextRoutingFields(text: string): boolean {
@@ -228,7 +228,11 @@ function inferTasksForCall(call: TrajectoryCallLike): TrajectoryTrainingTask[] {
     tasks.add("response");
   }
 
-  if (tasks.size === 0 && typeof call.response === "string" && call.response.trim()) {
+  if (
+    tasks.size === 0 &&
+    typeof call.response === "string" &&
+    call.response.trim()
+  ) {
     tasks.add("response");
   }
 
@@ -360,7 +364,9 @@ export async function exportTrajectoryTaskDatasets(
       "action_planner",
       "response",
       "media_description",
-    ].filter((task) => tasks?.includes(task as TrajectoryTrainingTask) ?? true) as TrajectoryTrainingTask[],
+    ].filter(
+      (task) => tasks?.includes(task as TrajectoryTrainingTask) ?? true,
+    ) as TrajectoryTrainingTask[],
     taskMetrics: {
       should_respond: {
         exampleCount: counts.should_respond,
@@ -415,10 +421,7 @@ export async function exportTrajectoryTaskDatasets(
     `${examples.media_description.map((example) => JSON.stringify(example)).join("\n")}${examples.media_description.length > 0 ? "\n" : ""}`,
   );
 
-  await writeFile(
-    paths.summaryPath,
-    JSON.stringify(summary, null, 2),
-  );
+  await writeFile(paths.summaryPath, JSON.stringify(summary, null, 2));
 
   return {
     counts,

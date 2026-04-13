@@ -413,7 +413,7 @@ class AgentRuntime(IAgentRuntime):
             None,
         )
         if basic_capabilities_plugin is None:
-            from elizaos.basic_capabilities_compat import (
+            from elizaos.features.basic_capabilities_compat import (
                 basic_capabilities_plugin as default_basic_capabilities_plugin,
             )
 
@@ -434,13 +434,13 @@ class AgentRuntime(IAgentRuntime):
 
         # Advanced planning is built into core, but only loaded when enabled on the character.
         if getattr(self._character, "advanced_planning", None) is True:
-            from elizaos.advanced_planning import advanced_planning_plugin
+            from elizaos.features.advanced_planning import advanced_planning_plugin
 
             await self.register_plugin(advanced_planning_plugin)
 
         # Advanced memory is built into core, but only loaded when enabled on the character.
         if getattr(self._character, "advanced_memory", None) is True:
-            from elizaos.advanced_memory import advanced_memory_plugin
+            from elizaos.features.advanced_memory import advanced_memory_plugin
 
             await self.register_plugin(advanced_memory_plugin)
 
@@ -490,7 +490,7 @@ class AgentRuntime(IAgentRuntime):
             )
 
             if disable_basic or enable_extended or skip_character_provider or enable_autonomy:
-                from elizaos.basic_capabilities_compat import (
+                from elizaos.features.basic_capabilities_compat import (
                     CapabilityConfig,
                     create_basic_capabilities_plugin,
                 )

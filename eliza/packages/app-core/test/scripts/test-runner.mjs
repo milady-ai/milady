@@ -71,7 +71,7 @@ await runManagedTestCommand({
   cwd: repoRoot,
   env: {
     ...buildTestEnv(repoRoot),
-    MILADY_LIVE_TEST: "1",
+    ELIZA_LIVE_TEST: "1",
     ELIZA_LIVE_TEST: "1",
   },
 });

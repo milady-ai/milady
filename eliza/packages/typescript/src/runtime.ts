@@ -12,12 +12,12 @@ import {
 	withCanonicalEvaluatorDocs,
 } from "./action-docs";
 import { parseActionParams, validateActionParams } from "./actions";
+import { ensureConnection as ensureConnectionStandalone } from "./connection";
+import { InMemoryDatabaseAdapter } from "./database/inMemoryAdapter";
 import {
 	type CapabilityConfig,
 	createBasicCapabilitiesPlugin,
-} from "./basic-capabilities/index";
-import { ensureConnection as ensureConnectionStandalone } from "./connection";
-import { InMemoryDatabaseAdapter } from "./database/inMemoryAdapter";
+} from "./features/basic-capabilities/index";
 import { createLogger } from "./logger";
 import { installRuntimePluginLifecycle } from "./plugin-lifecycle";
 import {
@@ -676,8 +676,7 @@ export class AgentRuntime implements IAgentRuntime {
 					settings?.ENABLE_AUTONOMY === "true");
 			const enableTrust =
 				this.capabilityOptions.enableTrust ??
-				(settings?.ENABLE_TRUST === true ||
-					settings?.ENABLE_TRUST === "true");
+				(settings?.ENABLE_TRUST === true || settings?.ENABLE_TRUST === "true");
 			const enableSecretsManager =
 				this.capabilityOptions.enableSecretsManager ??
 				(settings?.ENABLE_SECRETS_MANAGER === true ||
@@ -993,7 +992,7 @@ export class AgentRuntime implements IAgentRuntime {
 
 		if (this.character.advancedPlanning === true) {
 			const { createAdvancedPlanningPlugin } = await import(
-				"./advanced-planning/index.ts"
+				"./features/advanced-planning/index.ts"
 			);
 			pluginRegistrationPromises.push(
 				this.registerPlugin(createAdvancedPlanningPlugin()),
@@ -1002,7 +1001,7 @@ export class AgentRuntime implements IAgentRuntime {
 
 		if (this.character.advancedMemory === true) {
 			const { createAdvancedMemoryPlugin } = await import(
-				"./advanced-memory/index.ts"
+				"./features/advanced-memory/index.ts"
 			);
 			pluginRegistrationPromises.push(
 				this.registerPlugin(createAdvancedMemoryPlugin()),

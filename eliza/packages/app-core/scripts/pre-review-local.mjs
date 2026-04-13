@@ -111,7 +111,7 @@ function runCommandArgs(command, args, options = {}) {
 
 export function getBaseRef() {
   const explicitBase =
-    process.env.MILADY_PRE_REVIEW_BASE ?? process.env.PRE_REVIEW_BASE_REF;
+    process.env.ELIZA_PRE_REVIEW_BASE ?? process.env.PRE_REVIEW_BASE_REF;
   if (explicitBase) {
     const explicitResult = runCommandArgs("git", [
       "rev-parse",

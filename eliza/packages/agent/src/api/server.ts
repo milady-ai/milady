@@ -22,6 +22,8 @@ const MAX_BODY_BYTES = 1024 * 1024; // 1 MB
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { handleKnowledgeRoutes } from "@elizaos/app-knowledge/routes";
+import { getKnowledgeService } from "@elizaos/app-knowledge/service-loader";
 import {
   type AgentRuntime,
   ChannelType,
@@ -201,8 +203,6 @@ import {
 } from "./http-helpers.js";
 import { handleIMessageRoute } from "./imessage-routes.js";
 import { handleInboxRoute } from "./inbox-routes.js";
-import { handleKnowledgeRoutes } from "./knowledge-routes.js";
-import { getKnowledgeService } from "./knowledge-service-loader.js";
 import { handleLifeOpsRoutes } from "./lifeops-routes.js";
 import { handleMcpRoutes } from "./mcp-routes.js";
 import { pushWithBatchEvict, sweepExpiredEntries } from "./memory-bounds.js";
@@ -233,9 +233,9 @@ import { handleSubscriptionRoutes } from "./subscription-routes.js";
 import { routeTaskAgentTextToConnector } from "./task-agent-message-routing.js";
 import { handleTelegramAccountRoute } from "./telegram-account-routes.js";
 import { handleTelegramSetupRoute } from "./telegram-setup-routes.js";
-import { handleTrainingRoutes } from "./training-routes.js";
-import type { TrainingServiceWithRuntime } from "./training-service-like.js";
-import { handleTrajectoryRoute } from "./trajectory-routes.js";
+import { handleTrainingRoutes } from "@elizaos/app-training/routes/training";
+import type { TrainingServiceWithRuntime } from "@elizaos/app-training/services";
+import { handleTrajectoryRoute } from "@elizaos/app-training/routes/trajectory";
 import { handleTriggerRoutes } from "./trigger-routes.js";
 import { handleTtsRoutes } from "./tts-routes.js";
 import { TxService } from "./tx-service.js";
@@ -711,7 +711,9 @@ export interface ServerState {
     import("../services/signal-pairing.js").SignalPairingSnapshot
   >;
   /** Active Telegram account auth session (user-account login flow). */
-  telegramAccountAuthSession?: import("../services/telegram-account-auth.js").TelegramAccountAuthSessionLike | null;
+  telegramAccountAuthSession?:
+    | import("../services/telegram-account-auth.js").TelegramAccountAuthSessionLike
+    | null;
 }
 
 export interface ShareIngestItem {
@@ -4844,11 +4846,11 @@ async function maybeRouteAutonomyEventToConversation(
   const text = typeof payload?.text === "string" ? payload.text.trim() : "";
   if (!text) return;
 
+  const explicitSource =
+    typeof payload?.source === "string" ? payload.source : null;
   const hasExplicitSource =
-    typeof payload?.source === "string" && payload.source.trim().length > 0;
-  const source = hasExplicitSource
-    ? (payload?.source as string).trim()
-    : "autonomy";
+    explicitSource !== null && explicitSource.trim().length > 0;
+  const source = hasExplicitSource ? explicitSource.trim() : "autonomy";
 
   // Regular user conversation turns should never be re-routed as proactive.
   // Some AGENT_EVENT payloads may omit roomId metadata, so rely on source too.
@@ -5844,8 +5846,7 @@ async function handleRequest(
       routeState,
       { json, error, readJsonBody },
       {
-        createAuthSession: (options) =>
-          new TelegramAccountAuthSession(options),
+        createAuthSession: (options) => new TelegramAccountAuthSession(options),
         authStateExists: telegramAccountAuthStateExists,
         sessionExists: telegramAccountSessionExists,
         clearAuthState: clearTelegramAccountAuthState,
@@ -6343,7 +6344,8 @@ async function handleRequest(
     ) as PTYService | null;
     const coordinator = getCoordinatorFromRuntime(state.runtime);
     const codeTaskService = state.runtime.getService("CODE_TASK");
-    const isTaskRoute = method === "GET" && pathname === "/api/coding-agents/tasks";
+    const isTaskRoute =
+      method === "GET" && pathname === "/api/coding-agents/tasks";
     const isTaskDetailRoute =
       method === "GET" && /^\/api\/coding-agents\/tasks\/[^/]+$/.test(pathname);
     const isSessionsRoute =
@@ -6362,7 +6364,10 @@ async function handleRequest(
     if (
       (isCoordinatorStatusRoute && !coordinator) ||
       (isPreflightRoute && !ptyService) ||
-      ((isTaskRoute || isTaskDetailRoute || isScratchRoute || isAgentListRoute) &&
+      ((isTaskRoute ||
+        isTaskDetailRoute ||
+        isScratchRoute ||
+        isAgentListRoute) &&
         !codeTaskService) ||
       ((isSessionsRoute || isSessionDetailRoute) && !ptyService)
     ) {
@@ -8021,88 +8026,91 @@ export async function startApiServer(opts?: {
       resolve({
         port: actualPort,
         close: async () =>
-          await new Promise<void>(async (r) => {
+          await new Promise<void>((r) => {
             const closeAllConnections = (
               server as { closeAllConnections?: () => void }
             ).closeAllConnections;
             const closeIdleConnections = (
               server as { closeIdleConnections?: () => void }
             ).closeIdleConnections;
-
-            clearInterval(statusInterval);
-            if (state.connectorHealthMonitor) {
-              state.connectorHealthMonitor.stop();
-              state.connectorHealthMonitor = null;
-            }
-            if (detachRuntimeStreams) {
-              detachRuntimeStreams();
-              detachRuntimeStreams = null;
-            }
-            if (detachTrainingStream) {
-              detachTrainingStream();
-              detachTrainingStream = null;
-            }
-            for (const ws of wsClients) {
-              if (ws.readyState === 1 || ws.readyState === 0) {
-                ws.terminate();
-              }
-            }
-            wsClients.clear();
-            // Clean up WhatsApp pairing sessions
-            if (state.whatsappPairingSessions) {
-              for (const s of state.whatsappPairingSessions.values()) {
-                try {
-                  s.stop();
-                } catch {
-                  /* non-fatal */
-                }
-              }
-              state.whatsappPairingSessions.clear();
-            }
-            // Clean up Signal pairing sessions
-            if (state.signalPairingSessions) {
-              for (const s of state.signalPairingSessions.values()) {
-                try {
-                  s.stop();
-                } catch {
-                  /* non-fatal */
-                }
-              }
-              state.signalPairingSessions.clear();
-            }
-            if (state.telegramAccountAuthSession) {
-              try {
-                await state.telegramAccountAuthSession.stop();
-              } catch {
-                /* non-fatal */
-              }
-              state.telegramAccountAuthSession = null;
-            }
-            wss.close();
-            const closeTimeout = setTimeout(() => r(), 5_000);
             const resolved = { done: false };
             const finalize = () => {
               if (!resolved.done) {
                 resolved.done = true;
-                clearTimeout(closeTimeout);
                 r();
               }
             };
-            if (typeof closeAllConnections === "function") {
-              try {
-                closeAllConnections();
-              } catch {
-                // Bun/Node server internals vary by runtime; non-fatal on shutdown.
+            const closeTimeout = setTimeout(() => {
+              clearTimeout(closeTimeout);
+              finalize();
+            }, 5_000);
+            void (async () => {
+              clearInterval(statusInterval);
+              if (state.connectorHealthMonitor) {
+                state.connectorHealthMonitor.stop();
+                state.connectorHealthMonitor = null;
               }
-            }
-            if (typeof closeIdleConnections === "function") {
-              try {
-                closeIdleConnections();
-              } catch {
-                // Bun/Node server internals vary by runtime; non-fatal on shutdown.
+              if (detachRuntimeStreams) {
+                detachRuntimeStreams();
+                detachRuntimeStreams = null;
               }
-            }
-            server.close(finalize);
+              if (detachTrainingStream) {
+                detachTrainingStream();
+                detachTrainingStream = null;
+              }
+              for (const ws of wsClients) {
+                if (ws.readyState === 1 || ws.readyState === 0) {
+                  ws.terminate();
+                }
+              }
+              wsClients.clear();
+              // Clean up WhatsApp pairing sessions
+              if (state.whatsappPairingSessions) {
+                for (const s of state.whatsappPairingSessions.values()) {
+                  try {
+                    s.stop();
+                  } catch {
+                    /* non-fatal */
+                  }
+                }
+                state.whatsappPairingSessions.clear();
+              }
+              // Clean up Signal pairing sessions
+              if (state.signalPairingSessions) {
+                for (const s of state.signalPairingSessions.values()) {
+                  try {
+                    s.stop();
+                  } catch {
+                    /* non-fatal */
+                  }
+                }
+                state.signalPairingSessions.clear();
+              }
+              if (state.telegramAccountAuthSession) {
+                try {
+                  await state.telegramAccountAuthSession.stop();
+                } catch {
+                  /* non-fatal */
+                }
+                state.telegramAccountAuthSession = null;
+              }
+              wss.close();
+              if (typeof closeAllConnections === "function") {
+                try {
+                  closeAllConnections();
+                } catch {
+                  // Bun/Node server internals vary by runtime; non-fatal on shutdown.
+                }
+              }
+              if (typeof closeIdleConnections === "function") {
+                try {
+                  closeIdleConnections();
+                } catch {
+                  // Bun/Node server internals vary by runtime; non-fatal on shutdown.
+                }
+              }
+              server.close(finalize);
+            })().catch(() => finalize());
           }),
         updateRuntime,
         updateStartup,

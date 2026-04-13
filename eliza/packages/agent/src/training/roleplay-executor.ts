@@ -106,7 +106,10 @@ export interface RoleplayExecutionReport {
   selectedActionAccuracy: number;
   executedActionAccuracy: number;
   trajectoryCaptureRate: number;
-  decisionConfusionMatrix: Record<RoleplayDecision, Record<RoleplayDecision, number>>;
+  decisionConfusionMatrix: Record<
+    RoleplayDecision,
+    Record<RoleplayDecision, number>
+  >;
   warningCounts: Record<string, number>;
   byPrimaryContext: Record<string, RoleplayBucketReport>;
   byPattern: Record<string, RoleplayBucketReport>;
@@ -153,7 +156,9 @@ type RuntimeLike = AgentRuntime & {
   }) => Promise<void>;
   createMemory: (memory: Memory, tableName?: string) => Promise<unknown>;
   messageService: NonNullable<AgentRuntime["messageService"]>;
-  getActionResults: (messageId: UUID) => Array<{ actionName?: string } | string>;
+  getActionResults: (
+    messageId: UUID,
+  ) => Array<{ actionName?: string } | string>;
   getServicesByType?: (serviceType: string) => unknown;
   getService?: (serviceType: string) => unknown;
 };
@@ -183,19 +188,25 @@ function parseDelimitedList(value: string): string[] {
   return value
     .split(",")
     .map((entry) => entry.trim())
-    .filter((entry, index, entries) => entry.length > 0 && entries.indexOf(entry) === index);
+    .filter(
+      (entry, index, entries) =>
+        entry.length > 0 && entries.indexOf(entry) === index,
+    );
 }
 
 function readTag(response: string, tagName: string): string | undefined {
-  const xmlMatch = new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, "i").exec(
-    response,
-  );
+  const xmlMatch = new RegExp(
+    `<${tagName}>([\\s\\S]*?)<\\/${tagName}>`,
+    "i",
+  ).exec(response);
   if (xmlMatch?.[1]) {
     const value = xmlMatch[1].trim();
     return value.length > 0 ? value : undefined;
   }
 
-  const lineMatch = new RegExp(`(^|\\n)${tagName}:\\s*([^\\n]+)`, "i").exec(response);
+  const lineMatch = new RegExp(`(^|\\n)${tagName}:\\s*([^\\n]+)`, "i").exec(
+    response,
+  );
   if (lineMatch?.[2]) {
     const value = lineMatch[2].trim();
     return value.length > 0 ? value : undefined;
@@ -255,12 +266,15 @@ function collectRuntimeCandidates(runtime: RuntimeLike): unknown[] {
   return candidates;
 }
 
-function getTrajectoryLogger(runtime: RuntimeLike): TrajectoryLoggerLike | null {
+function getTrajectoryLogger(
+  runtime: RuntimeLike,
+): TrajectoryLoggerLike | null {
   for (const candidate of collectRuntimeCandidates(runtime)) {
     if (
       candidate &&
       typeof candidate === "object" &&
-      typeof (candidate as TrajectoryLoggerLike).getTrajectoryDetail === "function"
+      typeof (candidate as TrajectoryLoggerLike).getTrajectoryDetail ===
+        "function"
     ) {
       return candidate as TrajectoryLoggerLike;
     }
@@ -296,14 +310,19 @@ function normalizeActionName(value: unknown): string {
   return value.trim().toUpperCase();
 }
 
-function collectActionNamesFromContent(content: Content | null | undefined): string[] {
+function collectActionNamesFromContent(
+  content: Content | null | undefined,
+): string[] {
   if (!content?.actions) {
     return [];
   }
 
   return content.actions
     .map((action) => normalizeActionName(action))
-    .filter((action, index, actions) => action.length > 0 && actions.indexOf(action) === index);
+    .filter(
+      (action, index, actions) =>
+        action.length > 0 && actions.indexOf(action) === index,
+    );
 }
 
 function collectExecutedActionNames(
@@ -330,7 +349,10 @@ function collectExecutedActionNames(
       return typeof data?.actionName === "string" ? data.actionName : "";
     })
     .map((action) => normalizeActionName(action))
-    .filter((action, index, actions) => action.length > 0 && actions.indexOf(action) === index);
+    .filter(
+      (action, index, actions) =>
+        action.length > 0 && actions.indexOf(action) === index,
+    );
 }
 
 function resolveActualDecision(args: {
@@ -365,14 +387,20 @@ function resolveActualDecision(args: {
 }
 
 function secondaryContextsEqual(expected: string[], actual: string[]): boolean {
-  const normalizedExpected = [...new Set(expected.map((value) => value.trim().toLowerCase()))]
+  const normalizedExpected = [
+    ...new Set(expected.map((value) => value.trim().toLowerCase())),
+  ]
     .filter(Boolean)
     .sort();
-  const normalizedActual = [...new Set(actual.map((value) => value.trim().toLowerCase()))]
+  const normalizedActual = [
+    ...new Set(actual.map((value) => value.trim().toLowerCase())),
+  ]
     .filter(Boolean)
     .sort();
 
-  return JSON.stringify(normalizedExpected) === JSON.stringify(normalizedActual);
+  return (
+    JSON.stringify(normalizedExpected) === JSON.stringify(normalizedActual)
+  );
 }
 
 function buildEmptyBucketReport(): RoleplayBucketReport {
@@ -396,7 +424,9 @@ function buildEmptyBucketReport(): RoleplayBucketReport {
   };
 }
 
-function finalizeBucketReport(bucket: RoleplayBucketReport): RoleplayBucketReport {
+function finalizeBucketReport(
+  bucket: RoleplayBucketReport,
+): RoleplayBucketReport {
   return {
     ...bucket,
     decisionAccuracy: bucket.decisionMatches / (bucket.totalEpisodes || 1),
@@ -460,19 +490,19 @@ function resolveMessageRoutingFallback(message: Memory): {
   secondaryContexts: string[];
 } {
   const metadata =
-    message.content?.metadata &&
-    typeof message.content.metadata === "object"
+    message.content?.metadata && typeof message.content.metadata === "object"
       ? (message.content.metadata as Record<string, unknown>)
       : {};
   const responseContext =
-    metadata.__responseContext &&
-    typeof metadata.__responseContext === "object"
+    metadata.__responseContext && typeof metadata.__responseContext === "object"
       ? (metadata.__responseContext as Record<string, unknown>)
       : {};
 
   const secondaryContexts = Array.isArray(responseContext.secondaryContexts)
-    ? responseContext.secondaryContexts
-        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    ? responseContext.secondaryContexts.filter(
+        (value): value is string =>
+          typeof value === "string" && value.trim().length > 0,
+      )
     : parseDelimitedList(String(responseContext.secondaryContexts ?? ""));
 
   return {
@@ -623,7 +653,9 @@ export async function executeRoleplayEpisode(
       continue;
     }
 
-    const trajectoryId = deterministicUuid(`roleplay-trajectory-${episode.id}-${turn.id}`);
+    const trajectoryId = deterministicUuid(
+      `roleplay-trajectory-${episode.id}-${turn.id}`,
+    );
     const message: Memory = {
       id: deterministicUuid(`roleplay-message-${episode.id}-${turn.id}`),
       entityId: buildParticipantId(episode.id, turn.speaker),
@@ -677,7 +709,9 @@ export async function executeRoleplayEpisode(
     const selectedActions = [
       ...new Set([
         ...collectActionNamesFromContent(result.responseContent ?? null),
-        ...callbackContents.flatMap((content) => collectActionNamesFromContent(content)),
+        ...callbackContents.flatMap((content) =>
+          collectActionNamesFromContent(content),
+        ),
       ]),
     ];
     if (!message.id) {
@@ -696,7 +730,11 @@ export async function executeRoleplayEpisode(
     if (!trajectory) {
       warnings.push("trajectory_capture_missing");
     }
-    if (turn.isEvaluationTarget && !routingFromModel.primaryContext && !routingFallback.primaryContext) {
+    if (
+      turn.isEvaluationTarget &&
+      !routingFromModel.primaryContext &&
+      !routingFallback.primaryContext
+    ) {
       warnings.push("context_routing_missing");
     }
 
@@ -719,11 +757,19 @@ export async function executeRoleplayEpisode(
 
   const evaluationTurn = turnExecutions.find((turn) => turn.isEvaluationTarget);
   if (!evaluationTurn) {
-    throw new Error(`Roleplay episode ${episode.id} has no evaluation target turn`);
+    throw new Error(
+      `Roleplay episode ${episode.id} has no evaluation target turn`,
+    );
   }
 
-  const actualActions = [...new Set([...evaluationTurn.selectedActions, ...evaluationTurn.executedActions])];
-  const decisionMatch = evaluationTurn.actualDecision === episode.expectedDecision;
+  const actualActions = [
+    ...new Set([
+      ...evaluationTurn.selectedActions,
+      ...evaluationTurn.executedActions,
+    ]),
+  ];
+  const decisionMatch =
+    evaluationTurn.actualDecision === episode.expectedDecision;
   const primaryContextMatch =
     (evaluationTurn.actualPrimaryContext ?? "").toLowerCase() ===
     episode.primaryContext.toLowerCase();
@@ -808,8 +854,12 @@ export function buildRoleplayExecutionReport(
   trajectoryDatasetSummary?: TrajectoryTaskDatasetSummary | null,
 ): RoleplayExecutionReport {
   const totalEpisodes = executions.length;
-  const decisionMatches = executions.filter((execution) => execution.decisionMatch).length;
-  const routingMatches = executions.filter((execution) => execution.routingMatch).length;
+  const decisionMatches = executions.filter(
+    (execution) => execution.decisionMatch,
+  ).length;
+  const routingMatches = executions.filter(
+    (execution) => execution.routingMatch,
+  ).length;
   const primaryContextMatches = executions.filter(
     (execution) => execution.primaryContextMatch,
   ).length;
@@ -837,7 +887,9 @@ export function buildRoleplayExecutionReport(
   const byPattern: Record<string, RoleplayBucketReport> = {};
 
   for (const execution of executions) {
-    decisionConfusionMatrix[execution.expectedDecision][execution.actualDecision] += 1;
+    decisionConfusionMatrix[execution.expectedDecision][
+      execution.actualDecision
+    ] += 1;
 
     for (const warning of execution.warnings) {
       warningCounts[warning] = (warningCounts[warning] ?? 0) + 1;

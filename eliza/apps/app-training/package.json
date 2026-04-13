@@ -1,0 +1,25 @@
+{
+  "name": "@elizaos/app-training",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./routes": "./src/routes/index.ts",
+    "./routes/training": "./src/routes/training-routes.ts",
+    "./routes/trajectory": "./src/routes/trajectory-routes.ts",
+    "./services": "./src/services/index.ts",
+    "./core": "./src/core/index.ts",
+    "./core/*": "./src/core/*.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@elizaos/agent": "workspace:*"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {}
+  }
+}

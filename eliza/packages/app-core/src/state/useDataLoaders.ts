@@ -45,7 +45,7 @@ import {
   hasPendingAutonomyGaps,
   markPendingAutonomyGapsPartial,
   mergeAutonomyEvents,
-} from "../autonomy";
+} from "@elizaos/agent/autonomy";
 import type { UiLanguage } from "../i18n";
 import { normalizeOwnerName } from "../utils/owner-name";
 import type { LoadConversationMessagesResult } from "./internal";

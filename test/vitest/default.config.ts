@@ -134,7 +134,7 @@ export default defineConfig({
         replacement: elizaCoreRolesEntry,
       },
       {
-        // plugin-plugin-manager is now built into @elizaos/core core-capabilities.
+        // plugin-plugin-manager is now built into @elizaos/core features.
         // Alias kept for backward compat with tests that still import the old package name.
         find: "@elizaos/plugin-plugin-manager",
         replacement: path.join(
@@ -143,7 +143,7 @@ export default defineConfig({
           "packages",
           "typescript",
           "src",
-          "core-capabilities",
+          "features",
           "plugin-manager",
           "index.ts",
         ),

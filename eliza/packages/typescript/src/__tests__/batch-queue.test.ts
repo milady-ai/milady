@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { logger } from "../logger.js";
 import type { IAgentRuntime } from "../types/runtime";
-import { BatchQueue } from "../utils/batch-queue/index";
 import { BatchProcessor } from "../utils/batch-queue/batch-processor";
+import { BatchQueue } from "../utils/batch-queue/index";
 import type { QueuePriority } from "../utils/batch-queue/priority-queue";
 import { PriorityQueue } from "../utils/batch-queue/priority-queue";
 import { Semaphore } from "../utils/batch-queue/semaphore";

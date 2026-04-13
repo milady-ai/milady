@@ -12,21 +12,21 @@ const libMacWindowEffectsDylib = path.join(
 
 export function createElectrobunConfig(): ElectrobunConfig {
   const appName =
-    (process.env.ELIZA_APP_NAME ?? process.env.MILADY_APP_NAME ?? "").trim() ||
+    (process.env.ELIZA_APP_NAME ?? process.env.ELIZA_APP_NAME ?? "").trim() ||
     "elizaOS";
   const appId =
-    (process.env.ELIZA_APP_ID ?? process.env.MILADY_APP_ID ?? "").trim() ||
+    (process.env.ELIZA_APP_ID ?? process.env.ELIZA_APP_ID ?? "").trim() ||
     "ai.elizaos.app";
   const urlScheme =
     (
       process.env.ELIZA_URL_SCHEME ??
-      process.env.MILADY_URL_SCHEME ??
+      process.env.ELIZA_URL_SCHEME ??
       ""
     ).trim() || "elizaos";
   const releaseUrl =
     (
       process.env.ELIZA_RELEASE_URL ??
-      process.env.MILADY_RELEASE_URL ??
+      process.env.ELIZA_RELEASE_URL ??
       ""
     ).trim() || "";
   const runtimeDistDir =
@@ -88,7 +88,7 @@ export function createElectrobunConfig(): ElectrobunConfig {
         notarize:
           process.env.ELECTROBUN_SKIP_CODESIGN !== "1" &&
           (process.env.ELIZA_ELECTROBUN_NOTARIZE ??
-            process.env.MILADY_ELECTROBUN_NOTARIZE) !== "0",
+            process.env.ELIZA_ELECTROBUN_NOTARIZE) !== "0",
         defaultRenderer: "native",
         icons: "assets/appIcon.iconset",
         entitlements: {

@@ -93,7 +93,7 @@ cd "$REPO_ROOT"
 load_env_file "eliza/packages/app-core/deploy/deploy.defaults.env"
 load_env_file "deploy/deploy.env"
 
-APP_IMAGE="${APP_IMAGE:-milady/agent}"
+APP_IMAGE="${APP_IMAGE:-eliza/agent}"
 APP_ENTRYPOINT="${APP_ENTRYPOINT:-app.mjs}"
 APP_CMD_START="${APP_CMD_START:-node --import ./node_modules/tsx/dist/loader.mjs ${APP_ENTRYPOINT} start}"
 APP_PORT="${APP_PORT:-2138}"
@@ -109,7 +109,7 @@ fi
 VERSION_CLEAN="${VERSION#v}"
 SOURCE_SHA="$(git rev-parse HEAD)"
 DOCKER_IMAGE="${DOCKER_IMAGE:-${APP_IMAGE}:${TAG}}"
-CONTAINER_NAME="milady-docker-smoke-${TAG//[^a-zA-Z0-9_.-]/-}"
+CONTAINER_NAME="eliza-docker-smoke-${TAG//[^a-zA-Z0-9_.-]/-}"
 mkdir -p "$REPO_ROOT/.tmp/qa"
 SMOKE_ARTIFACT_DIR="$(mktemp -d "$REPO_ROOT/.tmp/qa/docker-ci-smoke-XXXXXX")"
 
@@ -159,7 +159,7 @@ node scripts/disable-local-eliza-workspace.mjs
 bun install --ignore-scripts
 
 log "Running repository postinstall"
-SKIP_AVATAR_CLONE=1 MILADY_NO_VISION_DEPS=1 bun run postinstall
+SKIP_AVATAR_CLONE=1 ELIZA_NO_VISION_DEPS=1 bun run postinstall
 
 log "Building Capacitor plugins"
 pushd apps/app >/dev/null
@@ -218,8 +218,8 @@ log "Starting container smoke boot"
   --name "$CONTAINER_NAME" \
   -e PORT="$CONTAINER_PORT" \
   -e APP_API_BIND=0.0.0.0 \
-  -e MILADY_DISABLE_LOCAL_EMBEDDINGS=1 \
-  -e MILADY_API_BIND=0.0.0.0 \
+  -e ELIZA_DISABLE_LOCAL_EMBEDDINGS=1 \
+  -e ELIZA_API_BIND=0.0.0.0 \
   -p "${SMOKE_PORT}:${CONTAINER_PORT}" \
   "$DOCKER_IMAGE" >/dev/null
 
@@ -252,15 +252,15 @@ while (( SECONDS < deadline )); do
     fail "Container exited before smoke probe succeeded"
   fi
 
-  if probe_ok "$health_url" /tmp/milady-docker-health.txt; then
+  if probe_ok "$health_url" /tmp/eliza-docker-health.txt; then
     log "Health probe succeeded: $health_url"
-    cat /tmp/milady-docker-health.txt
+    cat /tmp/eliza-docker-health.txt
     exit 0
   fi
 
-  if probe_ok "$status_url" /tmp/milady-docker-status.txt; then
+  if probe_ok "$status_url" /tmp/eliza-docker-status.txt; then
     log "Status probe succeeded: $status_url"
-    cat /tmp/milady-docker-status.txt
+    cat /tmp/eliza-docker-status.txt
     exit 0
   fi
 

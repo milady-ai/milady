@@ -2,7 +2,7 @@
 /**
  * Post-install patches for remaining third-party/runtime packaging issues.
  *
- * First-party @elizaos and @miladyai source fixes should land in their own
+ * First-party @elizaos and @elizaos source fixes should land in their own
  * packages and releases instead of being maintained here.
  *
  * Current responsibilities:
@@ -35,7 +35,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveRepoRootFromImportMeta } from "./lib/repo-root.mjs";
 import {
-  patchAutonomousMiladyOnboardingPresets,
+  patchAutonomousElizaOnboardingPresets,
   patchBrokenElizaCoreRuntimeDists,
   patchCodexFolderApprovalPromptCompat,
   patchElizaCoreRolesSubpath,
@@ -64,7 +64,7 @@ patchBrokenElizaCoreRuntimeDists(root);
 patchElizaCoreRolesSubpath(root);
 pruneNestedElizaPluginCoreCopies(root);
 try {
-  patchAutonomousMiladyOnboardingPresets(root);
+  patchAutonomousElizaOnboardingPresets(root);
 } catch {
   // Source file may not exist (moved to @elizaos/shared).
 }
@@ -189,7 +189,7 @@ function patchBigintBufferNativeFallbackNoise() {
   const oldSnippet =
     "console.warn('bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');";
   const newSnippet =
-    "if (process.env.MILADY_DEBUG_BIGINT_BINDINGS === \"1\") {\n        console.warn('bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');\n    }";
+    "if (process.env.ELIZA_DEBUG_BIGINT_BINDINGS === \"1\") {\n        console.warn('bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');\n    }";
 
   let patched = 0;
   for (const dir of uniqueResolvedPaths(searchDirs)) {
@@ -314,7 +314,7 @@ patchLegacySharpStoreAliases();
 /**
  * Keep jsdom from eagerly requiring node-canvas on startup.
  *
- * Browser-workspace code uses jsdom for DOM parsing, but Milady does not need
+ * Browser-workspace code uses jsdom for DOM parsing, but Eliza does not need
  * canvas-backed rendering in normal runtime boot. jsdom's eager `require("canvas")`
  * pulls in a second libvips/gio stack on macOS, which collides with sharp.
  * Make canvas opt-in for the rare cases that genuinely need it.
@@ -329,7 +329,7 @@ function patchJsdomCanvasAutoload() {
 } catch {
   exports.Canvas = null;
 }`;
-  const newSnippet = `if (process.env.MILADY_ENABLE_JSDOM_CANVAS === "1") {
+  const newSnippet = `if (process.env.ELIZA_ENABLE_JSDOM_CANVAS === "1") {
   try {
     exports.Canvas = require("canvas");
   } catch {
@@ -521,7 +521,7 @@ function patchCssstyleColorCompat() {
 patchCssstyleColorCompat();
 
 // ---------------------------------------------------------------------------
-// RETIRED MILADY FORK PATCHES
+// RETIRED FORK PATCHES
 //
 // The following patches have been retired because the workspace submodule
 // source (@elizaos/core, @elizaos/plugin-sql) already includes these fixes

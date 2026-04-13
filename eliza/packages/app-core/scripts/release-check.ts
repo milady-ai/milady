@@ -17,7 +17,7 @@ const requiredPaths = [
   "scripts/setup-upstreams.mjs",
   "scripts/ensure-vision-deps.mjs",
 ];
-const forbiddenPrefixes = ["dist/Milady.app/"];
+const forbiddenPrefixes = ["dist/Eliza.app/"];
 const orchestratorBrokenLifecycleTarget = "./scripts/ensure-node-pty.mjs";
 const coreTypescriptPackageJsonPath = resolve(
   "eliza",
@@ -51,8 +51,8 @@ const requiredWorkflowSnippets = [
   "name: Restore build metadata after test rebuilds",
   "name: Release readiness checks",
   // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions expression
-  "MILADY_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}",
-  'MILADY_VALIDATE_CDN: "1"',
+  "ELIZA_RELEASE_TAG: ${{ needs.prepare.outputs.tag }}",
+  'ELIZA_VALIDATE_CDN: "1"',
   "run: bun run release:check",
   "build-browser-companions:",
   "name: Build LifeOps Browser companions",
@@ -86,7 +86,7 @@ const requiredWorkflowSnippets = [
   "node eliza/packages/app-core/scripts/desktop-build.mjs stage --variant=base --build-whisper",
   "Inject version.json into bundle (Windows)",
   "Inject version.json into bundle (macOS / Linux)",
-  '"identifier":"com.miladyai.milady"',
+  '"identifier":"com.elizaai.eliza"',
   "Stage standard macOS release app",
   "apps/app/electrobun/scripts/stage-macos-release-artifacts.sh",
   "retry_stapler_validate()",
@@ -102,29 +102,29 @@ const requiredWorkflowSnippets = [
   "Start-Process -FilePath $installer",
   "Extract Windows app bundle for Inno Setup",
   '$extractDir = "C:\\m"',
-  "milady-dist/entry.js found",
+  "eliza-dist/entry.js found",
   "Build Inno Setup installer",
   "packaging/inno/build-inno.ps1",
   '-BuildDir "C:\\m"',
   "Verify Windows public installer looks complete",
-  'Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Milady-Setup-*.exe"',
+  'Get-ChildItem -Path "apps/app/electrobun/artifacts" -File -Filter "Eliza-Setup-*.exe"',
   "$minimumBytes = 50MB",
   "apps/app/electrobun/artifacts/*.exe",
   "name: Prepare public canary Windows installer artifact",
   "needs.prepare.outputs.env == 'canary'",
   '$publicCanaryDir = Join-Path $artifactsDir "public-canary-installer"',
-  '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe"',
+  '$canonicalInstallers = Get-ChildItem -Path $artifactsDir -File -Filter "Eliza-Setup-*.exe"',
   "Copy-Item $canonicalInstaller.FullName -Destination $publicCanaryDir -Force",
-  '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Milady-Setup-*.exe.zip"',
+  '$canonicalInstallerZips = Get-ChildItem -Path $artifactsDir -File -Filter "Eliza-Setup-*.exe.zip"',
   "No canonical Windows installer (or zip fallback) found for canary artifact publishing.",
   "Expand-Archive -Path $canonicalInstallerZip.FullName -DestinationPath $publicCanaryDir -Force",
   "Prepared public canary installer artifact:",
   "name: Upload public canary installer artifact",
   "name: electrobun-$" + "{{ matrix.platform.artifact-name }}-public-installer",
-  "path: apps/app/electrobun/artifacts/public-canary-installer/Milady-Setup-*.exe",
+  "path: apps/app/electrobun/artifacts/public-canary-installer/Eliza-Setup-*.exe",
   "name: Collect public release files",
-  '-name "Milady-Setup-*.exe" -o \\',
-  '-name "Milady-Setup-*.exe.zip" -o \\',
+  '-name "Eliza-Setup-*.exe" -o \\',
+  '-name "Eliza-Setup-*.exe.zip" -o \\',
   '-name "*Setup*.tar.gz" -o \\',
   "name: Collect update channel files",
   "pattern: lifeops-browser-*",
@@ -145,13 +145,13 @@ const requiredWorkflowSnippets = [
     '{{ steps.resolve-electrobun.outputs.package-dir }}"',
   "node eliza/packages/app-core/scripts/desktop-build.mjs package --env=$" +
     "{{ needs.prepare.outputs.env }}",
-  "MILADY_ELECTROBUN_NOTARIZE: 0",
-  'MILADY_DISABLE_LOCAL_EMBEDDINGS: "1"',
-  'MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"',
-  "MILADY_TEST_WINDOWS_INSTALL_DIR: $" + "{{ runner.temp }}\\mi",
+  "ELIZA_ELECTROBUN_NOTARIZE: 0",
+  'ELIZA_DISABLE_LOCAL_EMBEDDINGS: "1"',
+  'ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER: "1"',
+  "ELIZA_TEST_WINDOWS_INSTALL_DIR: $" + "{{ runner.temp }}\\mi",
   "name: Run Windows clean installer proof",
   "verify-windows-installer-proof.ps1",
-  "MILADY_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\mi-proof",
+  "ELIZA_TEST_WINDOWS_PROOF_INSTALL_DIR: $" + "{{ runner.temp }}\\mi-proof",
   "name: Upload Windows installer proof artifact",
   "path: apps/app/electrobun/artifacts/windows-installer-proof/**",
   "if: always() && matrix.platform.os == 'windows'",
@@ -234,9 +234,9 @@ const forbiddenElectrobunPrWorkflowSnippets = [
 const requiredElectrobunConfigSnippets = [
   'postBuild: "scripts/postwrap-sign-runtime-macos.ts"',
   'postWrap: "scripts/postwrap-diagnostics.ts"',
-  'process.env.MILADY_ELECTROBUN_NOTARIZE !== "0"',
-  '"../../../plugins.json": "milady-dist/plugins.json"',
-  '"../../../package.json": "milady-dist/package.json"',
+  'process.env.ELIZA_ELECTROBUN_NOTARIZE !== "0"',
+  '"../../../plugins.json": "eliza-dist/plugins.json"',
+  '"../../../package.json": "eliza-dist/package.json"',
 ];
 const localPackHotspotPaths = [
   "dist/node_modules",
@@ -352,7 +352,7 @@ export function sanitizeNpmOverridesForPack(pkg: RootPackageJson): {
  * result.
  *
  * Why: `npm pack --dry-run` validates `overrides` using npm's resolution rules.
- * That trips on two Milady patterns:
+ * That trips on two Eliza patterns:
  * - override entries that still use Bun's `workspace:*` protocol
  * - override entries for direct dependencies that themselves remain
  *   `workspace:*` in the root package
@@ -470,7 +470,7 @@ export function shouldSkipExactPackDryRun(
     return false;
   }
 
-  if (env.MILADY_FORCE_PACK_DRY_RUN === "1") {
+  if (env.ELIZA_FORCE_PACK_DRY_RUN === "1") {
     return false;
   }
 
@@ -601,7 +601,7 @@ function runFastLocalPackCheck(hotspots: string[]) {
     console.warn(`  - ${hotspot}`);
   }
   console.warn(
-    "release-check: package.json files includes 'dist' and 'apps/app/dist', so a local pack dry-run has to walk those trees. Set MILADY_FORCE_PACK_DRY_RUN=1 to run the exact pack check anyway.",
+    "release-check: package.json files includes 'dist' and 'apps/app/dist', so a local pack dry-run has to walk those trees. Set ELIZA_FORCE_PACK_DRY_RUN=1 to run the exact pack check anyway.",
   );
 
   const rootPackage = JSON.parse(
@@ -649,7 +649,7 @@ function assertBundledAgentOrchestratorInstallFix() {
   ) as RootPackageJson;
   if (!bundlesDependency(rootPackage, "@elizaos/core")) {
     console.error(
-      "release-check: package.json must bundle @elizaos/core so packaged Milady includes the embedded agent-orchestrator implementation.",
+      "release-check: package.json must bundle @elizaos/core so packaged Eliza includes the embedded agent-orchestrator implementation.",
     );
     process.exit(1);
   }
@@ -938,18 +938,18 @@ function assertWindowsSmokeScriptHasLeadingParamBlock() {
   const requiredSnippets = [
     "Find-Launcher $resolvedBuildDir",
     'Get-ChildItem -Path $resolvedArtifactsDir -File -Filter "*.tar.zst"',
-    'Join-Path $env:APPDATA "Milady\\\\milady-startup.log"',
-    '$requireInstaller = $env:MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER -eq "1"',
+    'Join-Path $env:APPDATA "Eliza\\\\eliza-startup.log"',
+    '$requireInstaller = $env:ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER -eq "1"',
     "Installing via Inno Setup:",
     "/VERYSILENT",
     "installed Inno package",
-    "$persistLauncherPathFile = $env:MILADY_TEST_WINDOWS_LAUNCHER_PATH_FILE",
+    "$persistLauncherPathFile = $env:ELIZA_TEST_WINDOWS_LAUNCHER_PATH_FILE",
     "Installer-required runs skip build/tarball reuse and validate the installed package directly.",
     "Using $launcherSource launcher:",
     "Using packaged tarball:",
     "Find-Launcher $selfExtractionRoot",
     "Started extracted launcher:",
-    '$startupSessionId = "milady-windows-smoke-"',
+    '$startupSessionId = "eliza-windows-smoke-"',
     "$tempRoot = if ($env:RUNNER_TEMP)",
     "$startupStateFile = Join-Path $tempRoot",
     '$startupBootstrapFile = Join-Path $startupBundleRoot "startup-session.json"',
@@ -994,9 +994,9 @@ function assertWindowsInstallerProofScript() {
   );
 
   const requiredSnippets = [
-    "Milady-Setup-*.exe",
+    "Eliza-Setup-*.exe",
     "smoke-test-windows.ps1",
-    "MILADY_WINDOWS_SMOKE_REQUIRE_INSTALLER",
+    "ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER",
     "Start Menu",
     "unins*.exe",
     "proof-summary.json",
@@ -1043,10 +1043,10 @@ function assertInnoBuildScriptHasTimeoutAndHeartbeat() {
 }
 
 function assertInnoTemplateTargetsBundledLauncher() {
-  const template = readFileSync("packaging/inno/Milady.iss", "utf8");
+  const template = readFileSync("packaging/inno/Eliza.iss", "utf8");
   const requiredSnippets = [
     '#define MyAppExeName "bin\\launcher.exe"',
-    '#define MyAppIconFile "Milady.ico"',
+    '#define MyAppIconFile "Eliza.ico"',
     'Source: "{#MySetupIconFile}"; DestDir: "{app}"; DestName: "{#MyAppIconFile}"; Flags: ignoreversion',
     "UninstallDisplayIcon={app}\\{#MyAppIconFile}",
     'Name: "{autoprograms}\\{#MyDefaultGroupName}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; IconFilename: "{app}\\{#MyAppIconFile}"',
@@ -1058,7 +1058,7 @@ function assertInnoTemplateTargetsBundledLauncher() {
 
   if (missingSnippets.length > 0) {
     console.error(
-      "release-check: Milady.iss must point Windows shortcuts at bin\\launcher.exe and use Milady.ico for uninstall and shortcut icons.",
+      "release-check: Eliza.iss must point Windows shortcuts at bin\\launcher.exe and use Eliza.ico for uninstall and shortcut icons.",
     );
     for (const snippet of missingSnippets) {
       console.error(`  - ${snippet}`);
@@ -1068,7 +1068,7 @@ function assertInnoTemplateTargetsBundledLauncher() {
 
   if (template.includes('#define MyAppExeName "launcher.exe"')) {
     console.error(
-      "release-check: Milady.iss must not point Windows shortcuts at {app}\\launcher.exe; the bundled launcher lives under bin\\.",
+      "release-check: Eliza.iss must not point Windows shortcuts at {app}\\launcher.exe; the bundled launcher lives under bin\\.",
     );
     process.exit(1);
   }
@@ -1204,7 +1204,7 @@ function assertStartApiServerCatchBlockSafety() {
 }
 
 function maybeValidateCdnAssets() {
-  if (process.env.MILADY_VALIDATE_CDN !== "1") {
+  if (process.env.ELIZA_VALIDATE_CDN !== "1") {
     return;
   }
 
