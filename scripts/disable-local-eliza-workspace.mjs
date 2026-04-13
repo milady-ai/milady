@@ -376,6 +376,23 @@ export function disableLocalElizaWorkspace(
     }
   }
 
+  // Stub scripts that reference eliza/ paths (e.g. postinstall) since the
+  // directory has been renamed away and the scripts would crash.
+  if (rootPkg.scripts && typeof rootPkg.scripts === "object") {
+    const stubbedScripts = [];
+    for (const [name, cmd] of Object.entries(rootPkg.scripts)) {
+      if (typeof cmd === "string" && cmd.includes("eliza/")) {
+        stubbedScripts.push(name);
+        rootPkg.scripts[name] = "echo '[CI] script disabled — eliza/ workspace not present'";
+      }
+    }
+    if (stubbedScripts.length > 0) {
+      log(
+        `[disable-local-eliza-workspace] Stubbed ${stubbedScripts.length} scripts referencing eliza/ (${stubbedScripts.slice(0, 5).join(", ")}${stubbedScripts.length > 5 ? ", ..." : ""})`,
+      );
+    }
+  }
+
   writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
 
   // Use early-resolved versions (captured before eliza/ was renamed away).
