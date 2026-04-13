@@ -55,6 +55,8 @@ export const DISABLED_WORKSPACE_GLOBS = [
   ELIZA_WORKSPACE_GLOB,
   PLUGIN_ROOT_WORKSPACE_GLOB,
   PLUGIN_TYPESCRIPT_WORKSPACE_GLOB,
+  "eliza/packages/native-plugins/*",
+  "eliza/apps/*",
 ];
 export const DEPENDENCY_FIELDS = [
   "dependencies",
@@ -217,6 +219,28 @@ export function resolvePinnedWorkspaceVersions(
     }
   }
 
+  // Collect names of packages from workspace paths known to be local-only
+  // (not published to npm). These deps must be removed, not pinned.
+  const localOnlyPackages = new Set();
+  const localOnlyGlobs = ["eliza/packages/native-plugins/*", "eliza/apps/*"];
+  for (const glob of localOnlyGlobs) {
+    for (const wsRel of expandGlob(glob, { rootDir })) {
+      const pkgPath = path.join(rootDir, wsRel, "package.json");
+      if (!fs.existsSync(pkgPath)) continue;
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+        if (typeof pkg?.name === "string") localOnlyPackages.add(pkg.name);
+      } catch { /* skip */ }
+    }
+  }
+  // Also mark @elizaos/shared as local-only (not published to npm)
+  localOnlyPackages.add("@elizaos/shared");
+
+  // Remove local-only packages from pinned map so they get deleted instead of pinned
+  for (const name of localOnlyPackages) {
+    pinnedVersions.delete(name);
+  }
+
   return pinnedVersions;
 }
 
@@ -226,11 +250,17 @@ export function rewriteWorkspaceDependencySpecifiers(pkg, pinnedVersions) {
     const deps = pkg?.[field];
     if (!deps || typeof deps !== "object") continue;
     for (const [dependencyName, specifier] of Object.entries(deps)) {
-      const pinnedVersion = pinnedVersions.get(dependencyName);
-      if (!pinnedVersion || !isWorkspaceProtocolSpecifier(specifier)) {
+      if (!isWorkspaceProtocolSpecifier(specifier)) {
         continue;
       }
-      deps[dependencyName] = pinnedVersion;
+      const pinnedVersion = pinnedVersions.get(dependencyName);
+      if (pinnedVersion) {
+        deps[dependencyName] = pinnedVersion;
+      } else {
+        // No published version available — remove the dependency entirely
+        // to avoid unresolvable workspace:* references after the rename.
+        delete deps[dependencyName];
+      }
       mutated = true;
     }
   }
@@ -245,6 +275,24 @@ export function disableLocalElizaWorkspace(
   const disabledElizaRoot = path.join(repoRoot, ".eliza.ci-disabled");
   const packageJsonPath = path.join(repoRoot, "package.json");
   const removedLockfiles = [];
+
+  // Resolve pinned versions BEFORE renaming eliza/ away, since the
+  // cloud-agent-template and local package.json files live inside it.
+  let earlyRootPkg = null;
+  let earlyPinnedVersions = new Map();
+  if (fs.existsSync(packageJsonPath)) {
+    try {
+      earlyRootPkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      earlyPinnedVersions = resolvePinnedWorkspaceVersions(repoRoot, {
+        rootPackage: earlyRootPkg,
+      });
+      if (earlyPinnedVersions.size > 0) {
+        log(
+          `[disable-local-eliza-workspace] Pre-resolved ${earlyPinnedVersions.size} pinned version(s) before disabling workspace`,
+        );
+      }
+    } catch { /* continue — will be read again below */ }
+  }
 
   if (fs.existsSync(elizaRoot)) {
     fs.rmSync(disabledElizaRoot, { recursive: true, force: true });
@@ -330,9 +378,11 @@ export function disableLocalElizaWorkspace(
 
   writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
 
-  const pinnedWorkspaceVersions = resolvePinnedWorkspaceVersions(repoRoot, {
-    rootPackage: rootPkg,
-  });
+  // Use early-resolved versions (captured before eliza/ was renamed away).
+  // Fall back to a post-rename resolution attempt for robustness.
+  let pinnedWorkspaceVersions = earlyPinnedVersions.size > 0
+    ? earlyPinnedVersions
+    : resolvePinnedWorkspaceVersions(repoRoot, { rootPackage: rootPkg });
 
   if (!pinnedWorkspaceVersions.has(ELIZAOS_CORE_NAME)) {
     warn(
