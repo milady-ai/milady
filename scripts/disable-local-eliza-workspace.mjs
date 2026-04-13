@@ -288,6 +288,12 @@ export function disableLocalElizaWorkspace(
         removedWorkspaceGlobs.push(entry);
         return false;
       }
+      // Also strip any explicit eliza/ paths (e.g. electrobun, cloud-agent-template)
+      // that would vanish when eliza/ is renamed to .eliza.ci-disabled/
+      if (typeof entry === "string" && entry.startsWith("eliza/")) {
+        removedWorkspaceGlobs.push(entry);
+        return false;
+      }
       return true;
     });
 
