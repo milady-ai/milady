@@ -185,10 +185,14 @@ pushd eliza/packages/agent >/dev/null
 bun run build:docker-dist
 popd >/dev/null
 
-log "Building @elizaos/core (includes agent-orchestrator)"
-pushd eliza/packages/typescript >/dev/null
-bun run build:node
-popd >/dev/null
+if [[ "${MILADY_SKIP_LOCAL_UPSTREAMS:-0}" == "1" ]]; then
+  log "Skipping @elizaos/core source build in published-only mode"
+else
+  log "Building @elizaos/core (includes agent-orchestrator)"
+  pushd eliza/packages/typescript >/dev/null
+  bun run build:node
+  popd >/dev/null
+fi
 
 log "Building runtime dist"
 npx tsdown

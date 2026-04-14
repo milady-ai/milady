@@ -27,7 +27,12 @@ const nativeExternals = [
 // transitively includes eliza.ts needs the plugin regex so rolldown treats them
 // as external and doesn't emit UNRESOLVED_IMPORT warnings.
 const pluginExternal = /^@elizaos\/plugin-/;
-const allExternals = [...nativeExternals, pluginExternal];
+const optionalAppExternal = /^@elizaos\/app-/;
+const allExternals = [
+  ...nativeExternals,
+  pluginExternal,
+  optionalAppExternal,
+];
 
 export default [
   {
@@ -35,7 +40,8 @@ export default [
     env,
     fixedExtension: false,
     platform: "node",
-    external: nativeExternals,
+    inlineOnly: false,
+    external: allExternals,
   },
   {
     entry: "eliza/packages/app-core/src/entry.ts",

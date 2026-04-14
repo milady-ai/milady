@@ -29,7 +29,8 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "false"
+          disable-local-eliza-workspace: "true"
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
         run: |
@@ -59,7 +60,8 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "false"
+          disable-local-eliza-workspace: "true"
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
         run: |
@@ -86,7 +88,8 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "false"
+          disable-local-eliza-workspace: "true"
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
         run: |
@@ -115,7 +118,8 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "false"
+          disable-local-eliza-workspace: "true"
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
         run: |
