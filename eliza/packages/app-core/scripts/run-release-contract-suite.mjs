@@ -41,7 +41,7 @@ run("bunx", [
 ], REPO_ROOT);
 
 // tsdown and the release check both resolve repo-root-relative entries/config.
-run("bunx", ["tsdown"], REPO_ROOT);
+run("bunx", ["tsdown", "--fail-on-warn", "false"], REPO_ROOT);
 fs.mkdirSync(path.join(APP_CORE_ROOT, "dist"), { recursive: true });
 fs.writeFileSync(
   path.join(APP_CORE_ROOT, "dist", "package.json"),

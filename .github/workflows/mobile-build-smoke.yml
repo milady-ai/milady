@@ -21,8 +21,6 @@ jobs:
     name: iOS Simulator Build
     runs-on: macos-14
     timeout-minutes: 30
-    env:
-      MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,8 +36,7 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
           install-native-deps: "false"
-          disable-local-eliza-workspace: "true"
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          disable-local-eliza-workspace: "false"
           run-postinstall: "false"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
@@ -49,9 +46,6 @@ jobs:
           if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
             mv .eliza.ci-disabled eliza
           fi
-
-      - name: Install app-core package dependencies
-        run: bun install --cwd eliza/packages/app-core --ignore-scripts
 
       - name: Run repository postinstall patches
         run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
@@ -125,8 +119,6 @@ jobs:
     name: Android Debug Build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    env:
-      MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -147,8 +139,7 @@ jobs:
         uses: ./.github/actions/setup-bun-workspace
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          disable-local-eliza-workspace: "true"
-          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          disable-local-eliza-workspace: "false"
           install-native-deps: "false"
           run-postinstall: "false"
           skip-avatar-clone: "true"
@@ -159,9 +150,6 @@ jobs:
           if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
             mv .eliza.ci-disabled eliza
           fi
-
-      - name: Install app-core package dependencies
-        run: bun install --cwd eliza/packages/app-core --ignore-scripts
 
       - name: Run repository postinstall patches
         run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
