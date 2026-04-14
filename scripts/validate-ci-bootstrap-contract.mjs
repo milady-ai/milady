@@ -24,7 +24,7 @@ const workflows = [
 ];
 
 const requiredWorkflowSnippets = [
-  'name: Regression Matrix Contract',
+  "name: Regression Matrix Contract",
   "run: node scripts/validate-ci-bootstrap-contract.mjs",
   "uses: ./.github/actions/setup-bun-workspace",
   'disable-local-eliza-workspace: "true"',
@@ -82,7 +82,8 @@ assertContainsAll(
 );
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 
-const regressionMatrixCommand = packageJson?.scripts?.["test:regression-matrix:pr"];
+const regressionMatrixCommand =
+  packageJson?.scripts?.["test:regression-matrix:pr"];
 if (
   typeof regressionMatrixCommand !== "string" ||
   !regressionMatrixCommand.includes(files.regressionMatrixScript)
