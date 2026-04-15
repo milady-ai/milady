@@ -157,21 +157,25 @@ function writePackageJson(packagePath, raw, nextPackageJson) {
 
 export function applyMiladyCopyPatches(elizaRoot) {
   let patchedFiles = 0;
-  let existingFiles = 0;
+  let staleFiles = 0;
 
   for (const relativePath of MILADY_COPY_PATCH_RELATIVE_PATHS) {
     const filePath = path.join(elizaRoot, relativePath);
     if (!existsSync(filePath)) {
       continue;
     }
-    existingFiles += 1;
 
     const raw = readFileSync(filePath, "utf8");
+    if (raw.includes(INBOX_REPLY_HINT_PLATFORM_NEUTRAL)) {
+      continue;
+    }
+
     const next = raw
       .split(INBOX_REPLY_HINT_LEGACY)
       .join(INBOX_REPLY_HINT_PLATFORM_NEUTRAL);
 
     if (next === raw) {
+      staleFiles += 1;
       continue;
     }
 
@@ -183,7 +187,7 @@ export function applyMiladyCopyPatches(elizaRoot) {
     console.log(
       `[setup-upstreams] Applied ${patchedFiles} Milady copy patch(es) for inbox reply hint`,
     );
-  } else if (existingFiles > 0) {
+  } else if (staleFiles > 0) {
     console.warn(
       "[setup-upstreams] WARNING: inbox reply hint legacy string not found — patch may need updating",
     );

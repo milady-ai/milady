@@ -24,9 +24,9 @@ if (fs.existsSync(platformDir)) {
   process.exit(0);
 }
 
-const bunxCommand = process.platform === "win32" ? "bunx.cmd" : "bunx";
-const result = spawnSync(bunxCommand, ["cap", "add", platform], {
+const result = spawnSync("bunx", ["cap", "add", platform], {
   cwd: appRoot,
+  shell: process.platform === "win32",
   stdio: "inherit",
 });
 

@@ -141,15 +141,19 @@ describe("applyMiladyCopyPatches", () => {
       "pages",
       "ChatView.tsx",
     );
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     writeFile(chatViewPath, DEVICE_COPY);
 
     expect(applyMiladyCopyPatches(elizaRoot)).toBe(0);
     expect(applyMiladyCopyPatches(elizaRoot)).toBe(0);
     expect(fs.readFileSync(chatViewPath, "utf8")).toBe(DEVICE_COPY);
+    expect(warnSpy).not.toHaveBeenCalled();
+
+    warnSpy.mockRestore();
   });
 
-  it("warns when target files exist but legacy string is missing", () => {
+  it("warns when target files exist but patch targets no longer match", () => {
     const elizaRoot = makeTempDir();
     const localePath = path.join(
       elizaRoot,
@@ -162,7 +166,7 @@ describe("applyMiladyCopyPatches", () => {
     );
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    writeFile(localePath, `{"reply_hint":"${DEVICE_COPY}"}`);
+    writeFile(localePath, '{"reply_hint":"unexpected copy"}');
 
     expect(applyMiladyCopyPatches(elizaRoot)).toBe(0);
     expect(warnSpy).toHaveBeenCalledWith(
