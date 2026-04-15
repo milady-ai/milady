@@ -1,23 +1,35 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
-const rootDir = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
+const rootDir = resolveRepoRoot(import.meta.url);
 const distDir = path.join(rootDir, "dist");
 const pkgPath = path.join(rootDir, "package.json");
 
+interface PackageManifest {
+  version: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPackageManifest(value: unknown): value is PackageManifest {
+  return (
+    isRecord(value) &&
+    typeof value.version === "string" &&
+    value.version.length > 0
+  );
+}
+
 const readPackageVersion = () => {
-  try {
-    const raw = fs.readFileSync(pkgPath, "utf8");
-    const parsed = JSON.parse(raw) as { version?: string };
-    return parsed.version ?? null;
-  } catch {
-    return null;
+  const raw = fs.readFileSync(pkgPath, "utf8");
+  const parsed: unknown = JSON.parse(raw);
+  if (!isPackageManifest(parsed)) {
+    throw new Error(`package.json is missing a version: ${pkgPath}`);
   }
+  return parsed.version;
 };
 
 const resolveCommit = () => {
@@ -26,20 +38,15 @@ const resolveCommit = () => {
   if (envCommit) {
     return envCommit;
   }
-  try {
-    return execSync("git rev-parse HEAD", {
-      cwd: rootDir,
-      stdio: ["ignore", "pipe", "ignore"],
-    })
-      .toString()
-      .trim();
-  } catch {
-    return null;
-  }
+  return execSync("git rev-parse HEAD", {
+    cwd: rootDir,
+    stdio: ["ignore", "pipe", "ignore"],
+  })
+    .toString()
+    .trim();
 };
 
-const detectChannel = (version: string | null): string => {
-  if (!version) return "unknown";
+const detectChannel = (version: string): string => {
   if (version.includes("-nightly")) return "nightly";
   if (version.includes("-beta")) return "beta";
   if (version.includes("-alpha")) return "alpha";

@@ -1,12 +1,8 @@
-// tsdown config — no import needed, defineConfig is a type-only identity fn
-
 const env = {
   NODE_ENV: "production",
 };
 
-// Packages with native .node binaries must be externalized — rolldown cannot
-// bundle Mach-O/ELF shared libraries and will error trying to read them as
-// UTF-8.  This list covers direct + transitive native deps.
+// Native .node packages must stay external; rolldown cannot bundle shared libraries.
 const nativeExternals = [
   "node-llama-cpp",
   "@reflink/reflink",
@@ -15,17 +11,12 @@ const nativeExternals = [
   "@reflink/reflink-linux-arm64-gnu",
   "@reflink/reflink-linux-x64-gnu",
   "fsevents",
-  // React is a browser-only dependency pulled in transitively through
-  // boot-config.ts (createContext/useContext).  Bundling it into Node
-  // server builds creates CJS/ESM interop wrappers (require_react) that
-  // fail at runtime in Docker where only the ESM entry is available.
+  // Keep React external for Node server builds; bundling it introduces incompatible wrappers.
   "react",
   "react-dom",
 ];
 
-// @elizaos/plugin-* are loaded at runtime via dynamic import(); every entry that
-// transitively includes eliza.ts needs the plugin regex so rolldown treats them
-// as external and doesn't emit UNRESOLVED_IMPORT warnings.
+// Runtime-loaded @elizaos/plugin-* packages must stay external.
 const pluginExternal = /^@elizaos\/plugin-/;
 const optionalAppExternal = /^@elizaos\/app-/;
 const allExternals = [...nativeExternals, pluginExternal, optionalAppExternal];
@@ -64,10 +55,7 @@ export default [
     platform: "node",
     inlineOnly: false,
     external: allExternals,
-    // Disable code splitting to prevent circular chunk dependencies.
-    // Without this, rolldown places the __exportAll runtime helper in the
-    // entry chunk and shared chunks import it back, creating a circular
-    // import that fails when the desktop runtime loads server.js via dynamic import().
+    // Disable code splitting to avoid circular imports in server.js.
     outputOptions: { codeSplitting: false },
   },
 ];

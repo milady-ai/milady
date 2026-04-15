@@ -86,41 +86,6 @@ When Eliza Cloud is enabled, linked, or explicitly requested, prefer it as the d
 
 Cloud monetization is a first-class product constraint. App creators can earn through inference markups and purchase-share settings, and published apps, agents, and MCPs can feed redeemable earnings flows. If docs disagree, prefer the current schema/UI/API implementation in this repo over older marketing prose.
 
-## Key Architecture Decisions
-
-### NODE_PATH (do not remove)
-Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need NODE_PATH set to the repo root's `node_modules`. This is set in three places — all three are required:
-1. `packages/agent/src/runtime/eliza.ts` — module-level, before dynamic imports
-2. `eliza/packages/app-core/scripts/run-node.mjs` — child process env
-3. `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` — Electrobun main process
-
-See `docs/plugin-resolution-and-node-path.md`.
-
-### Bun exports patch (do not remove)
-`scripts/patch-deps.mjs` removes dead `exports["."].bun` entries from `@elizaos` packages that point to missing `src/` paths. Without this, Bun fails to resolve plugins at runtime.
-
-### Electrobun startup guards (do not remove)
-The try/catch blocks in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
-
-### Dashboard SSE: action callbacks replace in place
-In `packages/agent/src/api/chat-routes.ts`, **`HandlerCallback`** text from actions uses **`replaceCallbackText`**: each new callback replaces the previous callback’s segment after a frozen **`preCallbackText`** (the LLM stream so far). **Why:** Matches Discord-style progressive messages; the old path concatenated unrelated status strings in one bubble. The elizaOS callback contract is unchanged. See **`docs/runtime/action-callback-streaming.md`**.
-
-## Config
-
-- **Runtime config**: `~/.milady/milady.json` (override with `MILADY_CONFIG_PATH` or `MILADY_STATE_DIR`; falls back to `ELIZA_CONFIG_PATH` / `ELIZA_STATE_DIR`)
-- **Env secrets**: `~/.milady/.env` or project `.env`
-- **Namespace**: The CLI sets `ELIZA_NAMESPACE=milady` (via `run-node.mjs` and `dev-ui.mjs`), so the state dir is `~/.milady/` and the config file is `milady.json`
-
-## Code Standards
-
-- TypeScript strict mode. No `any` without explanation.
-- Biome for lint + format: `bun run verify:lint:fix && bun run verify:format:fix` (aliases: `lint:fix`, `format:fix`)
-- Tests required for bug fixes and features. Coverage floor: 25% lines, 15% branches.
-- Files under ~500 LOC. Split when it improves clarity.
-- No secrets in code. No real credentials.
-- Minimal dependencies — only add if `src/` directly imports them.
-- Commit messages: concise, action-oriented (e.g., `fix telegram reconnect on rate limit`)
-
 ## Dependencies on elizaOS
 
 All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bun run setup:upstreams` links packages from repo-local `./eliza` and `./plugins` so changes are picked up immediately. Set `MILADY_SKIP_LOCAL_UPSTREAMS=1` to use only npm-published versions.
@@ -129,84 +94,378 @@ All `@elizaos/*` packages use the `alpha` dist-tag. When developing locally, `bu
 
 All official elizaOS plugin repos live under [https://github.com/elizaOS-plugins](https://github.com/elizaOS-plugins). For plugin work, prefer adding the relevant plugin repo as a git submodule under `eliza/plugins/` (tracked in `eliza/.gitmodules`) so we keep a local checkout we can patch when needed, and depend on it via `workspace:*` so Milady resolves the local package directly during development. Publish new versions to npm when ready.
 
-## Ports
+# AGENTS.md
 
-| Service | Dev Port | Env Override |
-|---------|----------|--------------|
-| API + WebSocket | 31337 | `MILADY_API_PORT` |
-| Dashboard UI | 2138 | `MILADY_PORT` |
-| Gateway | 18789 | `MILADY_GATEWAY_PORT` |
-| Home Dashboard | 2142 | `MILADY_HOME_PORT` |
-| WeChat Webhook | 18790 | `MILADY_WECHAT_WEBHOOK_PORT` |
+## Mission
 
-## Git Workflow
+Clean up the codebase aggressively and raise code quality without drifting from the real architecture. This work is not cosmetic. The goal is to remove duplication, dead code, weak typing, fallback sludge, and AI-generated nonsense while preserving correctness and simplifying the system.
 
-- **Never stash, switch branches, or create worktrees** unless the user explicitly asks for it.
-- When asked to merge, merge **onto the current branch** (e.g., `git merge <source>` while staying on the current branch).
-- Do not create worktrees unless the user specifically requests one.
+This is a complex task. Use **8 focused subagents** working in parallel where possible, each with a clear scope, concrete deliverables, and authority to make **high-confidence** changes.
 
-## Worktree / Multi-Instance Development
+Every subagent must:
 
-Each worktree (or parallel dev session) needs **isolated ports and state** to avoid conflicts.
+1. **Research first.** Inspect the codebase, dependencies, package structure, build/test/lint/typecheck configuration, and relevant external package types/docs when needed.
+2. **Write a critical assessment** of the current state in its area.
+3. **Produce recommendations** ranked by confidence and expected impact.
+4. **Implement all high-confidence recommendations.**
+5. **Avoid speculative rewrites.** Prefer targeted, verifiable simplification.
+6. **Verify results** with available tests, typechecks, linting, import graph tools, and direct codepath inspection.
 
-### Quick setup
+---
 
-```bash
-# In your worktree, generate isolated env (slot 1 = +100 port offset):
-bash scripts/worktree-env.sh 1    # .env.worktree: API=31437, UI=2238, state=~/.milady-wt-1
-bash scripts/worktree-env.sh 2    # second worktree: API=31537, UI=2338, state=~/.milady-wt-2
+## Non-Negotiable Architecture Rules
 
-# All dev entry points auto-load .env.worktree when present:
-bun run dev                       # dev-ui.mjs
-bun run dev:desktop               # dev-platform.mjs
-bun run milady start              # run-node.mjs
-```
+These rules govern all changes. If existing code conflicts with them, fix the code.
 
-### What gets isolated
+### 10 Clean Architecture Commandments
 
-| Resource | Default (shared) | Worktree override |
-|----------|------------------|-------------------|
-| API port | 31337 | `MILADY_API_PORT` |
-| UI port | 2138 | `MILADY_PORT` |
-| Home port | 2142 | `MILADY_HOME_PORT` |
-| Gateway port | 18789 | `MILADY_GATEWAY_PORT` |
-| State dir (DB, config, creds) | `~/.milady/` | `MILADY_STATE_DIR` |
-| PGlite database | `<default workspace>/.eliza/.elizadb` | Follows `MILADY_WORKSPACE_DIR` / `MILADY_STATE_DIR` |
-| Config file | `~/.milady/milady.json` | Follows `MILADY_STATE_DIR` |
+1. **Dependencies point inward only.** Presentation → Application → Domain → Infrastructure. Never import from an outer layer.
+   - Violation: broken architecture boundary.
 
-### Key rules
+2. **Use Cases are the only computation layer.** All derived values (multipliers, percentages, totals, fee breakdowns) are computed in use cases and returned as named DTO fields.
+   - Violation: client-side drift, stale calculations.
 
-- **Always isolate `MILADY_STATE_DIR`** — the PGlite database uses a process lock (`postmaster.pid`). Two instances hitting the same DB will fail.
-- **Port auto-allocation still works** — even without `.env.worktree`, the orchestrator probes for free ports. But explicit offsets are more predictable.
-- **`bun install`** — run in the main worktree first. Git worktrees share `node_modules` via the repo root. The `.eliza-repo-setup.lock` prevents concurrent postinstall runs.
-- **`.env.worktree` is gitignored** — each worktree generates its own.
-- **Scripts that load `.env.worktree`**: `dev-ui.mjs`, `dev-platform.mjs`, `run-node.mjs`. Values never override already-set env vars.
+3. **Client displays, never computes.** Zero financial math (`*`, `/`, `%`), zero business logic, zero aggregation in presentation code. Read DTO fields and format for display only.
+   - Violation: conflicting definitions between client and server.
 
-## Common Pitfalls
+4. **BFF is auth + proxy. Nothing else.** Validate JWT, inject `userId`, forward request, `unwrapServerResponse()`. No field additions, no calculations, no transformations.
+   - Violation: shadow API contract divergence.
 
-- **`bun install` fails on native deps**: TensorFlow, canvas, whisper-node require native build tools. On macOS install Xcode CLI tools (`xcode-select --install`). On Linux install `build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev`. Set `MILADY_NO_VISION_DEPS=1` to skip optional vision deps (camera, etc.).
-- **Avatar assets missing**: `bun install` clones VRM models from GitHub. On restricted networks set `SKIP_AVATAR_CLONE=1` and manually copy avatars to `apps/app/public/vrms/`.
-- **Plugin not found at runtime**: Ensure NODE_PATH is set. Run `bun run setup:sync` to re-run postinstall (`bun run repair` aliases this).
-- **Stale Vite cache after patching deps**: run `MILADY_VITE_FORCE=1 bun run dev` (or delete `apps/app/.vite/`). Dev no longer passes `--force` by default so dependency pre-bundling can cache between runs.
-- **Cold rebuild / stuck artifacts**: `bun run clean` removes root `dist`, UI + Capacitor plugin `dist`, `apps/app/.vite`, Turbo, Foundry test `out/`/`cache`, Playwright output, and `node_modules/.cache` under main workspaces. `bun run clean:deep` also removes Electrobun `build/`/`artifacts/` and generated `preload.js`, plus Electron pack dirs. For a global Bun store wipe (affects all projects): `MILADY_CLEAN_GLOBAL_TOOL_CACHE=1 bun run clean`.
-- **Config file not found**: The actual path is `~/.milady/milady.json` (because `ELIZA_NAMESPACE=milady`). The generic eliza default `~/.eliza/eliza.json` does not apply when running as Milady.
-- **Lock file blocking install**: If postinstall times out with a lock error, delete `.eliza-repo-setup.lock` in the repo root.
+5. **Zero polymorphism for runtime game/content type branching.** Separate classes, methods, and routes per type. No `if (gameType === ...)`, no union parameters, no union return types where separate flows should exist.
+   - Violation: runtime type checks, hidden branches.
 
-## Setup Environment Variables
+6. **CQRS: readers read, writers write.** Separate classes. Readers return domain objects. Writers return `void` or ID only. Mappers handle all DB-to-domain translation.
+   - Violation: mixed concerns, untraceable mutations.
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `MILADY_NO_VISION_DEPS` | Skip vision dep install (camera/fswebcam) | `0` |
-| `SKIP_AVATAR_CLONE` | Skip VRM avatar download during install | `0` |
-| `MILADY_SKIP_LOCAL_UPSTREAMS` | Use npm packages instead of repo-local `./eliza` and `./plugins` sources | `0` |
-| `MILADY_PROMPT_TRACE` | Log prompt compaction stats to console | `0` |
-| `MILADY_TTS_DEBUG` | Log TTS pipeline traces (`[milady][tts]`): queue/proxy plus **playback** (`play:web-audio:*`, `play:browser:*`, `play:talkmode:*`) with a short `preview` of spoken text. When `/api/tts/cloud` is used, debug also adds `x-milady-tts-*` request headers for clip/full-line correlation, and those headers may include spoken-text previews. UI picks this up via Vite `define` in dev/build; for client-only, `VITE_MILADY_TTS_DEBUG` also works | `0` |
-| `MILADY_CAPTURE_PROMPTS` | Dump raw prompts to `.tmp/prompt-captures/` (dev-only, contains user messages) | `0` |
-| `MILADY_ACTION_COMPACTION` | Context-aware action param stripping | `1` (enabled) |
-| `MILADY_PROMPT_OPT_MODE` | Prompt optimization mode (`baseline` or `compact`) | `baseline` |
-| `PARALLAX_LLM_PROVIDER` | Coding-agent LLM provider mode: `subscription` (each CLI's built-in login), `api_keys` (user-provided per-provider keys), or `cloud` (route through Eliza Cloud). Set via the Coding Agents settings UI; consumed by `packages/agent/src/runtime/agent-orchestrator-compat.ts`. | `subscription` |
-| `STEWARD_API_URL` | Steward vault API base URL. Auto-provisioned on Eliza Cloud login; set manually for self-hosted Steward. | — |
-| `STEWARD_TENANT_ID` | Steward tenant identifier. Auto-provisioned on cloud login. Persisted to `config.env`. | — |
-| `STEWARD_API_KEY` | Steward tenant API key. Auto-provisioned on cloud login. Persisted to `config.env`. | — |
-| `STEWARD_AGENT_TOKEN` | Steward agent bearer token. Generated during agent provisioning, persisted to `~/.milady/steward-credentials.json`. | — |
-| `STEWARD_AGENT_ID` | Steward agent identifier. Defaults to the runtime `agentId`. | — |
+7. **Single source of truth for validation.** Route-layer schemas validate and transform input. Use cases trust pre-validated input and perform presence/invariant checks only. No duplicate inline regex validation.
+   - Violation: dual validation paths, inconsistent acceptance criteria.
+
+8. **DTO fields are required by default.** Optional only when genuinely nullable. No `as` casts to skip missing fields. No `?? 0` or similar fallbacks that hide broken pipelines. If TypeScript says a field is missing, fix the pipeline.
+   - Violation: silent data loss, conflating “not loaded” with “zero”.
+
+9. **Logger only, never console.** Server logging uses the structured logger only (for example `Logger.info/warn/error/debug`). Prefix messages with `[ClassName]` and include structured context objects on errors.
+   - Violation: uncontrollable log output, missing levels.
+
+10. **Every endpoint needs a client trigger.** Every POST/PUT/DELETE must have a button/form/invocation path. Every GET must have a consuming component/hook. `N/A` requires written justification. A server endpoint without a UI or real caller is a broken pipeline.
+   - Violation: shipped features users cannot access.
+
+---
+
+## Global Standards for All Subagents
+
+### What good changes look like
+
+- Fewer codepaths.
+- Fewer special cases.
+- Fewer fallback branches.
+- Stronger types.
+- Shared definitions only where sharing reduces complexity.
+- Cleaner layer boundaries.
+- Easier traceability from input → use case → DTO → UI.
+- No dead abstractions.
+- No defensive code that obscures failures.
+
+### What to remove on sight
+
+- Unused code.
+- Duplicate types and near-duplicate types.
+- Legacy branches and migration leftovers.
+- AI slop, stubs, placeholders, fake TODO implementations.
+- Comments describing churn instead of helping understanding.
+- “Temporary” fallback behavior that became permanent.
+- Broad `try/catch` blocks that just swallow, log-and-continue, or replace errors with defaults.
+- `any`, `unknown`, unsafe casts, and weak unions used to avoid thinking.
+
+### Constraints
+
+- Do not preserve bad patterns for compatibility unless there is a documented, verified reason.
+- Do not add new abstractions unless they reduce total complexity.
+- Do not DRY code that should remain separate because the domains differ.
+- Do not centralize unlike concepts into giant shared utility files.
+- Do not hide uncertainty with fallback values.
+- Do not keep both old and new paths unless a live migration explicitly requires it.
+
+---
+
+## Subagent Plan
+
+Spawn one subagent for each of the following tasks.
+
+### 1) Deduplication and Consolidation Agent
+
+**Goal:** Deduplicate and consolidate code, and apply DRY only where it reduces complexity.
+
+**Responsibilities:**
+- Find duplicated logic, duplicate utilities, repeated query/build patterns, repeated DTO mapping, repeated validation glue, repeated UI state handling, and repeated infrastructure wrappers.
+- Distinguish between:
+  - true duplication that should be unified,
+  - parallel domain logic that only looks similar and should remain separate.
+- Consolidate only when the resulting abstraction is simpler than the duplicates.
+- Prefer deleting duplicate branches over introducing configuration-heavy helpers.
+
+**Deliverables:**
+- Inventory of duplicated code.
+- Critical assessment of why duplication exists.
+- Recommended consolidations with rationale.
+- Implementation of high-confidence deduplication.
+
+**Guardrails:**
+- No premature utility extraction.
+- No “god helper” files.
+- Respect the architecture layers.
+
+### 2) Shared Types Consolidation Agent
+
+**Goal:** Find all type definitions and consolidate any that should be shared.
+
+**Responsibilities:**
+- Audit interfaces, types, enums, DTOs, schema-inferred types, API contracts, and domain models.
+- Identify duplicate or divergent definitions representing the same real concept.
+- Consolidate canonical shared types where appropriate.
+- Separate domain models from transport DTOs when they should not be conflated.
+- Ensure route schemas, DTOs, and consuming code agree exactly.
+
+**Deliverables:**
+- Map of duplicated/conflicting type definitions.
+- Critical assessment of type fragmentation and contract drift.
+- Canonical ownership plan for shared types.
+- Implementation of high-confidence consolidations.
+
+**Guardrails:**
+- Do not create giant shared “types” dumps.
+- Do not merge types that exist at different boundaries for good reason.
+- Prefer schema-derived types where possible.
+
+### 3) Unused Code Removal Agent
+
+**Goal:** Use tools like `knip` to find all unused code and remove it, ensuring it is truly unreferenced.
+
+**Responsibilities:**
+- Run and interpret unused-code tooling such as `knip`.
+- Manually verify reported files, exports, dependencies, scripts, components, hooks, routes, tests, fixtures, and types before deletion.
+- Check dynamic imports, generated references, config-driven references, framework conventions, and CLI/script usage.
+- Remove code only after confirming it is not used anywhere meaningful.
+
+**Deliverables:**
+- Verified unused-code report.
+- Critical assessment of why dead code accumulated.
+- Safe deletion plan.
+- Implementation of high-confidence removals.
+
+**Guardrails:**
+- Never trust tooling blindly.
+- Validate framework-specific entrypoints and implicit references.
+- Prefer deletion over deprecation.
+
+### 4) Circular Dependency Untangler Agent
+
+**Goal:** Untangle circular dependencies using tools like `madge` and direct graph analysis.
+
+**Responsibilities:**
+- Generate and inspect dependency graphs.
+- Identify all cycles across layers, modules, barrels, and utility folders.
+- Break cycles by moving ownership inward, splitting modules, removing barrel misuse, or extracting the right internal seam.
+- Fix boundary violations, not just the symptom.
+
+**Deliverables:**
+- Circular dependency graph and root-cause assessment.
+- Critical assessment of architectural coupling.
+- Recommendations for cycle removal.
+- Implementation of high-confidence fixes.
+
+**Guardrails:**
+- Do not “solve” cycles with lazy imports unless that is the correct architectural answer.
+- Prefer removing the wrong dependency edge.
+- Ensure final dependency direction points inward only.
+
+### 5) Strong Typing Agent
+
+**Goal:** Remove all weak types such as `unknown` and `any` (and equivalents in other languages), then replace them with researched, strong types.
+
+**Responsibilities:**
+- Find all `any`, `unknown`, unsafe casts, loose generics, nullable abuse, and weak externally sourced types.
+- Research the real types by inspecting calling code, callee expectations, schemas, package definitions, generated clients, and external library docs/types.
+- Replace weak types with strong, explicit types.
+- Resolve resulting type errors properly rather than suppressing them.
+
+**Deliverables:**
+- Weak-type inventory.
+- Critical assessment of type debt and its causes.
+- Strong replacement plan with evidence.
+- Implementation of high-confidence type strengthening.
+
+**Guardrails:**
+- No replacement with fake precision.
+- No `as unknown as X` escapes.
+- No widened unions to avoid fixing callsites.
+- If a runtime boundary is uncertain, validate at the boundary and type the validated result.
+
+### 6) Error-Handling Simplification Agent
+
+**Goal:** Remove unnecessary `try/catch` and equivalent defensive programming unless it has a specific justified role.
+
+**Responsibilities:**
+- Audit all `try/catch`, broad rescue patterns, silent fallbacks, default-return error handling, swallowed promise rejections, and “best effort” code.
+- Keep only error handling that has a clear purpose, such as:
+  - handling unknown or unsanitized input,
+  - translating infrastructure errors at a boundary,
+  - adding meaningful context before rethrowing,
+  - enforcing user-facing behavior explicitly.
+- Remove error hiding and fallback patterns that mask real failures.
+- Ensure failures surface clearly and observably.
+
+**Deliverables:**
+- Error-handling audit.
+- Critical assessment of defensive-programming misuse.
+- Recommendations for removal vs retention.
+- Implementation of high-confidence simplifications.
+
+**Guardrails:**
+- Never catch an error only to log and continue unless that behavior is intentionally required.
+- Never replace missing or failed data with silent defaults.
+- Prefer explicit failure over ambiguous success.
+
+### 7) Legacy and Fallback Code Removal Agent
+
+**Goal:** Find deprecated, legacy, or fallback code, remove it, and make codepaths singular, clean, and concise.
+
+**Responsibilities:**
+- Identify deprecated APIs, old adapters, compatibility shims, “v1/v2” bridges, migration leftovers, fallback branches, duplicate implementations, and disabled-but-kept code.
+- Verify whether each legacy path is still live.
+- Remove obsolete branches and collapse to one canonical codepath.
+- Update references, tests, and docs accordingly.
+
+**Deliverables:**
+- Legacy/fallback inventory.
+- Critical assessment of historical cruft and path divergence.
+- Removal plan.
+- Implementation of high-confidence cleanup.
+
+**Guardrails:**
+- Keep only what is actually required now.
+- No “just in case” retention.
+- Prefer one obvious path through the system.
+
+### 8) Slop and Comment Cleanup Agent
+
+**Goal:** Remove AI slop, stubs, larp, unnecessary comments, and unhelpful narrative churn.
+
+**Responsibilities:**
+- Find placeholder code, pseudo-implementations, generated sludge, fake abstraction layers, noisy comments, status-update comments, migration-story comments, and comments that narrate obvious code.
+- Remove comments that describe in-motion work, prior replacements, or internal drama.
+- Replace only when a concise explanatory comment would genuinely help a new engineer understand the codebase.
+- Remove stubbed helpers and speculative extension points that are not real.
+
+**Deliverables:**
+- Slop inventory.
+- Critical assessment of readability and trust issues.
+- Cleanup plan.
+- Implementation of high-confidence cleanup.
+
+**Guardrails:**
+- Comments must earn their keep.
+- Prefer self-explanatory code over commentary.
+- If a short comment is needed, make it factual and durable.
+
+---
+
+## Required Research and Verification
+
+Each subagent must use the relevant tools for its job. Examples:
+
+- **Unused code:** `knip`, package manager scripts, framework entrypoints, import search, route discovery.
+- **Circular dependencies:** `madge`, import graph inspection, barrel analysis.
+- **Type research:** schema definitions, generated code, external package type declarations, usage traces, test fixtures.
+- **Architecture verification:** import direction checks, route-to-use-case tracing, DTO origin tracing, client usage inspection.
+- **Behavior verification:** tests, typecheck, lint, build, and targeted runtime inspection where available.
+
+Do not stop at tool output. Tooling is a lead, not proof.
+
+---
+
+## Execution Order
+
+Use this order unless the codebase suggests a better dependency-aware sequence:
+
+1. Map architecture, layers, package boundaries, build/test/lint/typecheck setup.
+2. Run dead-code, cycle, and type-analysis tools.
+3. Fix architecture boundary violations and circular dependencies.
+4. Consolidate duplicated and conflicting types.
+5. Remove dead code and legacy/fallback paths.
+6. Strengthen types and remove unsafe escapes.
+7. Simplify error handling and defensive patterns.
+8. Remove slop and fix comments.
+9. Re-run all verification.
+10. Summarize changes, risks, and any remaining low-confidence findings.
+
+---
+
+## Output Format
+
+Each subagent should produce:
+
+### A. Critical Assessment
+- What is wrong.
+- Why it exists.
+- How it violates architecture or maintainability.
+- What risk it creates.
+
+### B. Recommendations
+- High confidence.
+- Medium confidence.
+- Low confidence / needs human decision.
+
+### C. Implemented Changes
+- Exact files/modules changed.
+- What was removed, consolidated, or rewritten.
+- Why the resulting design is simpler.
+
+### D. Verification
+- Commands run.
+- Results.
+- Any residual issues.
+
+---
+
+## Hard Rules for Implementation
+
+- **Implement all high-confidence recommendations.**
+- Do not leave obvious cleanup undone.
+- Do not keep duplicate paths to avoid making a decision.
+- Do not introduce broad abstractions to “support future flexibility.”
+- Do not preserve weak typing behind helper wrappers.
+- Do not add fallbacks to make broken flows appear healthy.
+- Do not perform business logic in presentation or proxy layers.
+- Do not merge unlike concepts just because names are similar.
+
+When in doubt, choose the option that yields:
+- fewer moving parts,
+- stronger guarantees,
+- cleaner boundaries,
+- more direct code.
+
+---
+
+## Definition of Done
+
+The task is complete when:
+
+- Dead code is removed.
+- Circular dependencies are removed or reduced to only justified, documented exceptions.
+- Type definitions are canonical and consistent.
+- Weak types are replaced with researched strong types.
+- Unnecessary `try/catch`, fallback logic, and defensive sludge are removed.
+- Deprecated and legacy paths are gone.
+- AI slop and unhelpful comments are gone.
+- Architecture rules are enforced in the resulting code.
+- The codebase is smaller, clearer, and easier to reason about.
+- Verification passes, or remaining failures are explicitly documented with root cause.
+
+---
+
+## Tone and Standard
+
+Be ruthless about quality and honest in assessment. The current state may be messy. Call that out clearly. But every code change must still be precise, justified, and verifiable.
+
+This is not a refactor for style points.
+This is a cleanup for correctness, maintainability, and architectural integrity.

@@ -1,10 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(scriptDir, "..");
+const repoRoot = resolveRepoRoot(import.meta.url);
 const workflowPath = path.join(
   repoRoot,
   ".github",

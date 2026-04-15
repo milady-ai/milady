@@ -1,16 +1,8 @@
 #!/usr/bin/env node
 
-/**
- * scripts/check-upstream-drift.mjs
- *
- * Verifies that any explicitly pinned `@elizaos/*` dependency specs in the root package.json
- * match the actual version present in the vendored upstream checkouts.
- * Fails with an error if there is drift.
- */
-
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildVendoredPackageMap } from "./lib/read-package-json.mjs";
 import {
   getElizaPackageLinks,
   getPluginPackageLinks,
@@ -21,18 +13,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..");
 
-function readPackageJson(dir) {
-  try {
-    return JSON.parse(readFileSync(path.join(dir, "package.json"), "utf8"));
-  } catch {
-    return null;
-  }
-}
-
 function checkUpstreamDrift() {
   let hasDrift = false;
 
-  // Get all explicitly pinned (non-workspace:*) @elizaos/* deps from root
   const pinnedDeps = getPublishedElizaPackageSpecs(ROOT);
 
   if (pinnedDeps.length === 0) {
@@ -46,23 +29,10 @@ function checkUpstreamDrift() {
     `[check-upstream-drift] Found ${pinnedDeps.length} pinned @elizaos/* dependency spec(s). Verifying against vendored sources...`,
   );
 
-  // Build a map of packageName -> local vendored directory
-  const vendoredPackages = new Map();
-  const elizaLinks = getElizaPackageLinks(ROOT);
-  const pluginLinks = getPluginPackageLinks(ROOT);
-
-  for (const link of [...elizaLinks, ...pluginLinks]) {
-    // targetPath is the path to the actual package dir (e.g. ROOT/eliza/packages/core)
-    // linkPath is where it gets symlinked (e.g. ROOT/node_modules/@elizaos/core)
-    // We read from targetPath to get the truth.
-    const pkg = readPackageJson(link.targetPath);
-    if (pkg?.name) {
-      vendoredPackages.set(pkg.name, {
-        dir: link.targetPath,
-        version: pkg.version,
-      });
-    }
-  }
+  const vendoredPackages = buildVendoredPackageMap([
+    ...getElizaPackageLinks(ROOT),
+    ...getPluginPackageLinks(ROOT),
+  ]);
 
   for (const [packageName, specVersion] of pinnedDeps) {
     const localSource = vendoredPackages.get(packageName);

@@ -1,35 +1,55 @@
-/**
- * Milady ↔ Eliza environment variable aliasing.
- *
- * This is Milady-specific and lives in apps/app, NOT in packages/app-core.
- * The alias table is passed to the boot config so that app-core's generic
- * syncBrandEnvToEliza/syncElizaEnvToBrand functions can use it.
- */
+import { APP_CONFIG } from "./app-config";
 
-export const MILADY_ENV_ALIASES = [
+const ENV_ALIAS_SUFFIXES = [
   // API & auth
-  ["MILADY_API_TOKEN", "ELIZA_API_TOKEN"],
-  ["MILADY_API_BIND", "ELIZA_API_BIND"],
-  ["MILADY_PAIRING_DISABLED", "ELIZA_PAIRING_DISABLED"],
-  ["MILADY_ALLOWED_ORIGINS", "ELIZA_ALLOWED_ORIGINS"],
-  ["MILADY_ALLOW_NULL_ORIGIN", "ELIZA_ALLOW_NULL_ORIGIN"],
-  ["MILADY_ALLOW_WS_QUERY_TOKEN", "ELIZA_ALLOW_WS_QUERY_TOKEN"],
-  ["MILADY_WALLET_EXPORT_TOKEN", "ELIZA_WALLET_EXPORT_TOKEN"],
-  ["MILADY_TERMINAL_RUN_TOKEN", "ELIZA_TERMINAL_RUN_TOKEN"],
-  ["MILADY_NAMESPACE", "ELIZA_NAMESPACE"],
-  ["MILADY_STATE_DIR", "ELIZA_STATE_DIR"],
-  ["MILADY_CONFIG_PATH", "ELIZA_CONFIG_PATH"],
+  ["API_TOKEN", "API_TOKEN"],
+  ["API_BIND", "API_BIND"],
+  ["PAIRING_DISABLED", "PAIRING_DISABLED"],
+  ["ALLOWED_ORIGINS", "ALLOWED_ORIGINS"],
+  ["ALLOW_NULL_ORIGIN", "ALLOW_NULL_ORIGIN"],
+  ["ALLOW_WS_QUERY_TOKEN", "ALLOW_WS_QUERY_TOKEN"],
+  ["WALLET_EXPORT_TOKEN", "WALLET_EXPORT_TOKEN"],
+  ["TERMINAL_RUN_TOKEN", "TERMINAL_RUN_TOKEN"],
+  ["NAMESPACE", "NAMESPACE"],
+  ["STATE_DIR", "STATE_DIR"],
+  ["CONFIG_PATH", "CONFIG_PATH"],
   // Cloud services
-  ["MILADY_CLOUD_TTS_DISABLED", "ELIZA_CLOUD_TTS_DISABLED"],
-  ["MILADY_CLOUD_MEDIA_DISABLED", "ELIZA_CLOUD_MEDIA_DISABLED"],
-  ["MILADY_CLOUD_EMBEDDINGS_DISABLED", "ELIZA_CLOUD_EMBEDDINGS_DISABLED"],
-  ["MILADY_CLOUD_RPC_DISABLED", "ELIZA_CLOUD_RPC_DISABLED"],
-  ["MILADY_DISABLE_LOCAL_EMBEDDINGS", "ELIZA_DISABLE_LOCAL_EMBEDDINGS"],
-  ["MILADY_DISABLE_EDGE_TTS", "ELIZA_DISABLE_EDGE_TTS"],
+  ["CLOUD_TTS_DISABLED", "CLOUD_TTS_DISABLED"],
+  ["CLOUD_MEDIA_DISABLED", "CLOUD_MEDIA_DISABLED"],
+  ["CLOUD_EMBEDDINGS_DISABLED", "CLOUD_EMBEDDINGS_DISABLED"],
+  ["CLOUD_RPC_DISABLED", "CLOUD_RPC_DISABLED"],
+  ["DISABLE_LOCAL_EMBEDDINGS", "DISABLE_LOCAL_EMBEDDINGS"],
+  ["DISABLE_EDGE_TTS", "DISABLE_EDGE_TTS"],
   // Ports
-  ["MILADY_PORT", "ELIZA_PORT"],
-  ["MILADY_API_PORT", "ELIZA_API_PORT"],
-  ["MILADY_HOME_PORT", "ELIZA_HOME_PORT"],
-  ["MILADY_GATEWAY_PORT", "ELIZA_GATEWAY_PORT"],
-  ["MILADY_BRIDGE_PORT", "ELIZA_BRIDGE_PORT"],
+  ["PORT", "PORT"],
+  ["API_PORT", "API_PORT"],
+  ["HOME_PORT", "HOME_PORT"],
+  ["GATEWAY_PORT", "GATEWAY_PORT"],
+  ["BRIDGE_PORT", "BRIDGE_PORT"],
 ] as const;
+
+function normalizeEnvPrefix(value: string): string {
+  const normalized = value
+    .trim()
+    .replace(/[^A-Za-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toUpperCase();
+  if (!normalized) {
+    throw new Error("App envPrefix must resolve to a non-empty identifier");
+  }
+  return normalized;
+}
+
+export function buildBrandEnvAliases(prefix: string) {
+  const normalizedPrefix = normalizeEnvPrefix(prefix);
+  return ENV_ALIAS_SUFFIXES.map(
+    ([brandSuffix, elizaSuffix]) =>
+      [`${normalizedPrefix}_${brandSuffix}`, `ELIZA_${elizaSuffix}`] as const,
+  );
+}
+
+export const APP_ENV_PREFIX = normalizeEnvPrefix(
+  APP_CONFIG.envPrefix ?? APP_CONFIG.cliName,
+);
+
+export const APP_ENV_ALIASES = buildBrandEnvAliases(APP_ENV_PREFIX);

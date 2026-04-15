@@ -16,10 +16,10 @@ import {
   resolveRepoBundledSkillsAssetsDir,
   resolveShippedSkillsAssetsDir,
 } from "../eliza/packages/app-core/scripts/ensure-skills.mjs";
+import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DEFAULT_REPO_ROOT = path.resolve(__dirname, "..");
+const DEFAULT_REPO_ROOT = resolveRepoRoot(import.meta.url);
 
 export function listBundledSkillIds(sourceDir) {
   return readdirSync(sourceDir)

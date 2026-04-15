@@ -1,3 +1,19 @@
+/**
+ * Test naming convention:
+ *
+ * *.test.ts            — Unit tests (run by this config / turbo test)
+ * *.integration.test.ts — Integration tests (run by integration.config)
+ * *.e2e.test.ts        — E2E tests (run by e2e.config)
+ * *.real.test.ts       — Real infra tests (run by real.config, needs env vars)
+ * *.live.test.ts       — Live tests (run by real.config, needs running services)
+ * *.live.e2e.test.ts   — Live E2E (run by live-e2e.config, needs services + env)
+ * *.real.e2e.test.ts   — Real E2E (run by e2e.config, needs env vars)
+ * *.spec.ts            — Playwright specs (run by playwright configs)
+ *
+ * Test locations: src/, __tests__/, test/ — all are auto-discovered.
+ * Subsystems with their own runners: eliza/cloud, eliza/steward-fi,
+ * eliza/packages/examples, eliza/packages/templates, eliza/packages/benchmarks.
+ */
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -10,7 +26,6 @@ import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
   getElizaCoreEntry,
-  getInstalledPackageEntry,
   getSharedSourceRoot,
   getUiSourceRoot,
 } from "../eliza-package-paths";
@@ -22,11 +37,17 @@ import {
   getAppCorePluginFallbackPath,
   getAppCoreSourceAliases,
   getElizaCoreRolesEntry,
+  getOptionalInstalledPackageAliases,
   getOptionalPluginSdkAliases,
   getSharedSourceAliases,
   getUiSourceAliases,
   getWorkspaceAppAliases,
 } from "./workspace-aliases";
+
+interface RootPackageManifest {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
 
 const elizaCoreEntry = getElizaCoreEntry(repoRoot);
 const elizaCoreRolesEntry = getElizaCoreRolesEntry(repoRoot);
@@ -34,12 +55,9 @@ const autonomousSourceRoot = getAutonomousSourceRoot(repoRoot);
 const appCoreSourceRoot = getAppCoreSourceRoot(repoRoot);
 const sharedSourceRoot = getSharedSourceRoot(repoRoot);
 const uiSourceRoot = getUiSourceRoot(repoRoot);
-const packageManifest = JSON.parse(
+const packageManifest: RootPackageManifest = JSON.parse(
   fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
-) as {
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-};
+);
 const elizaWorkspaceRequire = createRequire(
   path.join(repoRoot, "eliza", "package.json"),
 );
@@ -56,30 +74,28 @@ const workspacePluginPackageNames = Object.keys({
 const resolvedPluginNames = new Set<string>();
 const elizaPluginAliases = workspacePluginPackageNames.flatMap(
   (packageName) => {
-    const aliases: Array<{ find: string; replacement: string }> = [];
-    const nodeEntry = getInstalledPackageEntry(packageName, repoRoot, "node");
-    if (nodeEntry) {
-      aliases.push({
+    const aliases = getOptionalInstalledPackageAliases(repoRoot, [
+      {
         find: `${packageName}/node`,
-        replacement: nodeEntry,
-      });
-    }
-
-    const defaultEntry = getInstalledPackageEntry(packageName, repoRoot);
-    if (defaultEntry) {
-      resolvedPluginNames.add(packageName);
-      aliases.push({
+        packageName,
+        options: {
+          entryKind: "node",
+        },
+      },
+      {
         find: packageName,
-        replacement: defaultEntry,
-      });
+        packageName,
+      },
+    ]);
+
+    if (aliases.some((alias) => alias.find === packageName)) {
+      resolvedPluginNames.add(packageName);
     }
 
     return aliases;
   },
 );
-// Fallback for @elizaos/plugin-* packages whose npm tarball has a broken or missing
-// entry point (e.g. dist/index.js absent). Without this, vi.mock() factory
-// calls still fail because vitest cannot resolve the module specifier.
+// Fall back to a stub when an optional plugin tarball has a broken entry point.
 const unresolvedPluginStubs = workspacePluginPackageNames
   .filter((name) => !resolvedPluginNames.has(name))
   .map((name) => ({
@@ -101,14 +117,26 @@ const ciWorkers = isWindows ? 2 : 3;
 const appCoreModuleFallbackPath = getAppCoreModuleFallbackPath(repoRoot);
 const appCoreBridgeStubPath = getAppCoreBridgeStubPath(repoRoot);
 const appCorePluginFallbackPath = getAppCorePluginFallbackPath(repoRoot);
+const vitestInlineDeps = [
+  "@testing-library/react",
+  "@elizaos/core",
+  "@elizaos/agent",
+  "@elizaos/app-core",
+  "react",
+  "react-dom",
+  "react-test-renderer",
+  /^@miladyai\/shared/,
+  /^@elizaos\/plugin-/,
+  /^@elizaos\/shared/,
+  "zod",
+];
 
 export default defineConfig({
   resolve: {
     dedupe: ["react", "react-dom", "ethers", "@elizaos/core"],
     alias: [
       {
-        // Pin React to one installed copy so jsdom tests don't mix the root
-        // package with Bun's hoisted peer copies under nested workspaces.
+        // Keep React pinned to one installed copy so jsdom does not mix workspace and hoisted peers.
         find: /^react$/,
         replacement: elizaReactEntry,
       },
@@ -125,26 +153,18 @@ export default defineConfig({
         replacement: path.join(elizaReactDomDir, "$1"),
       },
       {
-        // App-core unit tests mock this plugin, but the specifier still has to
-        // resolve during module graph construction under the root Vitest config.
+        // App-core tests mock this plugin, but Vitest still has to resolve the specifier.
         find: "@elizaos/capacitor-agent",
         replacement: appCoreModuleFallbackPath,
       },
       ...getOptionalPluginSdkAliases(repoRoot),
-      // The `@elizaos/core/roles` alias is always applied — the shim
-      // fallback in `scripts/lib/elizaos-core-roles-shim.js` is always
-      // present, even when the local eliza checkout is absent (CI
-      // published-only mode). Without this, vitest tries to resolve
-      // the subpath via Node's normal package.json `exports` lookup
-      // and fails with `ERR_MODULE_NOT_FOUND` because the published
-      // `@elizaos/core@alpha` does not declare a `./roles` subpath.
+      // Keep the roles shim here so Vitest resolves it when the local eliza checkout is absent.
       {
         find: "@elizaos/core/roles",
         replacement: elizaCoreRolesEntry,
       },
       {
-        // plugin-plugin-manager is now built into @elizaos/core features.
-        // Alias kept for backward compat with tests that still import the old package name.
+        // Preserve the old package name for tests that still import it.
         find: "@elizaos/plugin-plugin-manager",
         replacement: path.join(
           repoRoot,
@@ -157,9 +177,6 @@ export default defineConfig({
           "index.ts",
         ),
       },
-      // Resolve key @elizaos packages to the installed npm tarball files so
-      // Vitest does not depend on sibling workspace checkouts or package
-      // export quirks.
       ...(elizaCoreEntry
         ? [
             {
@@ -177,8 +194,7 @@ export default defineConfig({
       ...(autonomousSourceRoot
         ? getAgentSourceAliases(autonomousSourceRoot)
         : getAgentSourceAliases(undefined, {
-            // Stub @elizaos/agent sub-path imports when the package is absent
-            // so transitive imports (e.g. contracts/wallet) don't break tests.
+            // Stub missing @elizaos/agent subpaths so transitive imports keep resolving.
             fallbackReplacement: appCoreModuleFallbackPath,
           })),
       ...getAppCoreSourceAliases(appCoreSourceRoot, {
@@ -207,8 +223,7 @@ export default defineConfig({
     pool: "forks",
     maxWorkers: isCI ? ciWorkers : localWorkers,
     restoreMocks: true,
-    // Increase V8 heap for worker forks to prevent OOM during GC
-    // teardown, especially for jsdom-heavy test files.
+    // Give worker forks more heap to survive jsdom-heavy suites.
     execArgv: ["--max-old-space-size=4096"],
     include: [
       "eliza/packages/agent/src/**/*.test.ts",
@@ -253,20 +268,30 @@ export default defineConfig({
     exclude: [
       "dist/**",
       "**/node_modules/**",
-      "**/*-live.test.ts",
-      "**/*-live.test.tsx",
-      "**/*.live.test.ts",
-      "**/*.live.test.tsx",
-      "**/*-real.test.ts",
-      "**/*-real.test.tsx",
-      "**/*.real.test.ts",
-      "**/*.real.test.tsx",
-      "**/*.integration.test.ts",
-      "**/*.integration.test.tsx",
-      // E2E lives under test/ too; run it via test/vitest/e2e.config.ts, not unit.
-      "**/*.e2e.test.ts",
-      "**/*.e2e.test.tsx",
-      // Requires plugin-training built dist which only exists after `bun run build`.
+      // --- live/real/integration/e2e tests have their own configs ---
+      "**/*-live.test.{ts,tsx}",
+      "**/*.live.test.{ts,tsx}",
+      "**/*-real.test.{ts,tsx}",
+      "**/*.real.test.{ts,tsx}",
+      "**/*.integration.test.{ts,tsx}",
+      "**/*.e2e.test.{ts,tsx}",
+      "**/*.e2e.spec.{ts,tsx}",
+      "**/*.live.e2e.test.{ts,tsx}",
+      "**/*.real.e2e.test.{ts,tsx}",
+      // --- subsystems with their own test runners ---
+      "eliza/cloud/**",
+      "eliza/steward-fi/**",
+      // --- wired via turbo, not root vitest ---
+      "eliza/packages/examples/**",
+      "eliza/packages/templates/**",
+      "eliza/packages/benchmarks/**",
+      // Template plugin tests need a scaffolded environment to run.
+      "eliza/packages/elizaos/templates/**",
+      // Skills tests use their own package-level runner.
+      "eliza/packages/skills/test/**",
+      // Homepage tests need jsdom environment (run via apps/homepage vitest config).
+      "apps/homepage/**",
+      // Requires the built plugin-training dist from `bun run build`.
       "**/training-service.import-ollama.test.ts",
     ],
     coverage: {
@@ -276,47 +301,22 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       exclude: [
         "src/**/*.test.ts",
-        // Entrypoints and wiring (covered by CI smoke + manual/e2e flows).
+        // Entrypoints and wiring are covered by CI smoke and e2e flows.
         "src/entry.ts",
         "src/index.ts",
         "src/cli/**",
         "src/hooks/**",
-        // Large files with inline TypeScript `type` imports that rolldown
-        // (used by @vitest/coverage-v8) cannot parse. Covered by e2e tests.
+        // Rolldown coverage still struggles with these inline type-import files.
         "eliza/packages/agent/src/api/server.ts",
         "eliza/packages/agent/src/runtime/eliza.ts",
       ],
     },
     deps: {
-      inline: [
-        "@testing-library/react",
-        "@elizaos/core",
-        "@elizaos/agent",
-        "@elizaos/app-core",
-        "react",
-        "react-dom",
-        "react-test-renderer",
-        /^@miladyai\/shared/,
-        /^@elizaos\/plugin-/,
-        /^@elizaos\/shared/,
-        "zod",
-      ],
+      inline: vitestInlineDeps,
     },
     server: {
       deps: {
-        inline: [
-          "@testing-library/react",
-          "@elizaos/core",
-          "@elizaos/agent",
-          "@elizaos/app-core",
-          "react",
-          "react-dom",
-          "react-test-renderer",
-          /^@miladyai\/shared/,
-          /^@elizaos\/plugin-/,
-          /^@elizaos\/shared/,
-          "zod",
-        ],
+        inline: vitestInlineDeps,
       },
     },
   },

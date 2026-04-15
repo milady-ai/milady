@@ -1,19 +1,17 @@
-import fs from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vitest/config";
 import {
   getAppCoreSourceRoot,
   getAutonomousSourceRoot,
   getElizaCoreEntry,
-  getInstalledPackageEntry,
   getSharedSourceRoot,
-  resolveModuleEntry,
 } from "../eliza-package-paths";
 import { repoRoot } from "./repo-root";
 import {
   getAgentSourceAliases,
   getAppCoreSourceAliases,
   getElizaCoreRolesEntry,
+  getOptionalInstalledPackageAliases,
   getOptionalPluginSdkAliases,
   getSharedSourceAliases,
   getWorkspaceAppAliases,
@@ -24,48 +22,6 @@ const elizaCoreRolesEntry = getElizaCoreRolesEntry(repoRoot);
 const autonomousSourceRoot = getAutonomousSourceRoot(repoRoot);
 const appCoreSourceRoot = getAppCoreSourceRoot(repoRoot);
 const sharedSourceRoot = getSharedSourceRoot(repoRoot);
-const pluginPersonalityEntry =
-  getInstalledPackageEntry("@elizaos/plugin-personality", repoRoot, "node") ??
-  resolveModuleEntry(
-    path.join(
-      repoRoot,
-      "plugins",
-      "plugin-personality",
-      "typescript",
-      "src",
-      "index",
-    ),
-  );
-const pluginSignalEntry =
-  getInstalledPackageEntry("@elizaos/plugin-signal", repoRoot) ??
-  resolveModuleEntry(
-    path.join(
-      repoRoot,
-      "plugins",
-      "plugin-signal",
-      "typescript",
-      "src",
-      "index",
-    ),
-  );
-const pluginSqlEntry =
-  getInstalledPackageEntry("@elizaos/plugin-sql", repoRoot, "node") ??
-  resolveModuleEntry(
-    path.join(repoRoot, "plugins", "plugin-sql", "typescript", "index.node"),
-  );
-const pluginWhatsappEntry =
-  getInstalledPackageEntry("@elizaos/plugin-whatsapp", repoRoot) ??
-  resolveModuleEntry(
-    path.join(
-      repoRoot,
-      "plugins",
-      "plugin-whatsapp",
-      "typescript",
-      "src",
-      "index",
-    ),
-  );
-
 export default defineConfig({
   resolve: {
     alias: [
@@ -93,38 +49,65 @@ export default defineConfig({
         "app-steward",
       ]),
       ...getSharedSourceAliases(sharedSourceRoot),
-      ...(fs.existsSync(pluginPersonalityEntry)
-        ? [
-            {
-              find: "@elizaos/plugin-personality",
-              replacement: pluginPersonalityEntry,
-            },
-          ]
-        : []),
-      ...(fs.existsSync(pluginSignalEntry)
-        ? [
-            {
-              find: "@elizaos/plugin-signal",
-              replacement: pluginSignalEntry,
-            },
-          ]
-        : []),
-      ...(fs.existsSync(pluginSqlEntry)
-        ? [
-            {
-              find: "@elizaos/plugin-sql",
-              replacement: pluginSqlEntry,
-            },
-          ]
-        : []),
-      ...(fs.existsSync(pluginWhatsappEntry)
-        ? [
-            {
-              find: "@elizaos/plugin-whatsapp",
-              replacement: pluginWhatsappEntry,
-            },
-          ]
-        : []),
+      ...getOptionalInstalledPackageAliases(repoRoot, [
+        {
+          find: "@elizaos/plugin-personality",
+          packageName: "@elizaos/plugin-personality",
+          options: {
+            entryKind: "node",
+            fallbackPath: path.join(
+              repoRoot,
+              "plugins",
+              "plugin-personality",
+              "typescript",
+              "src",
+              "index",
+            ),
+          },
+        },
+        {
+          find: "@elizaos/plugin-signal",
+          packageName: "@elizaos/plugin-signal",
+          options: {
+            fallbackPath: path.join(
+              repoRoot,
+              "plugins",
+              "plugin-signal",
+              "typescript",
+              "src",
+              "index",
+            ),
+          },
+        },
+        {
+          find: "@elizaos/plugin-sql",
+          packageName: "@elizaos/plugin-sql",
+          options: {
+            entryKind: "node",
+            fallbackPath: path.join(
+              repoRoot,
+              "plugins",
+              "plugin-sql",
+              "typescript",
+              "index.node",
+            ),
+          },
+        },
+        {
+          find: "@elizaos/plugin-whatsapp",
+          packageName: "@elizaos/plugin-whatsapp",
+          options: {
+            fallbackPath: path.join(
+              repoRoot,
+              "plugins",
+              "plugin-whatsapp",
+              "typescript",
+              "src",
+              "index",
+            ),
+          },
+        },
+      ]),
     ],
   },
   test: {

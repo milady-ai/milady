@@ -138,6 +138,10 @@ function getPackageSourceAliases(
             find: new RegExp(`^@miladyai/${escapeRegExp(packageName)}/(.*)`),
             replacement: path.join(sourceRoot, "$1"),
           },
+          {
+            find: `@miladyai/${packageName}`,
+            replacement: rootReplacement,
+          },
         ]
       : []),
     {
@@ -369,6 +373,7 @@ export function getUiSourceAliases(
   }
 
   return getPackageSourceAliases("ui", sourceRoot, {
+    includeMiladyAlias: true,
     rootReplacement: resolveModuleEntry(path.join(sourceRoot, "index")),
   });
 }

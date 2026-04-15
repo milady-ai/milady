@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, type Plugin, transformWithEsbuild } from "vite";
+import { resolveAppBranding } from "../../eliza/packages/app-core/src/config/app-config.ts";
 // Keep workspace-relative TS imports in this config so Vite transpiles them
 // while bundling the config instead of asking Node to load package-exported
 // .ts files directly in CI.
@@ -21,6 +22,7 @@ import {
   resolveDesktopUiPortPreference,
 } from "../../eliza/packages/shared/src/runtime-env.ts";
 import { syncElizaEnvAliases } from "../../scripts/lib/sync-eliza-env-aliases.mjs";
+import appConfig from "./app.config";
 import { resolveViteDevServerRuntime } from "./vite-dev-origin.ts";
 
 const _require = createRequire(import.meta.url);
@@ -33,9 +35,103 @@ const nativePluginsRoot = path.join(
 );
 const appCoreSrcRoot = path.join(miladyRoot, "eliza/packages/app-core/src");
 const uiPkgRoot = path.join(miladyRoot, "eliza/packages/ui");
+const capacitorCoreEntry = _require.resolve("@capacitor/core");
 
 // Mirror MILADY_* env into ELIZA_* before the shared runtime helpers resolve ports.
 syncElizaEnvAliases();
+
+function ensureTrailingSlash(value: string): string {
+  return value.endsWith("/") ? value : `${value}/`;
+}
+
+function resolveAppShellMetadata() {
+  const branding = resolveAppBranding(appConfig);
+  const themeColor = appConfig.web?.themeColor?.trim() || "#08080a";
+  const backgroundColor = appConfig.web?.backgroundColor?.trim() || "#0a0a0a";
+  const shareImagePath =
+    appConfig.web?.shareImagePath?.trim() || "/og-image.png";
+  const appUrl = ensureTrailingSlash(branding.appUrl.trim());
+
+  return {
+    appName: appConfig.appName.trim(),
+    shortName: appConfig.web?.shortName?.trim() || appConfig.appName.trim(),
+    description: appConfig.description.trim(),
+    appUrl,
+    themeColor,
+    backgroundColor,
+    shareImagePath,
+    shareImageUrl: new URL(shareImagePath, appUrl).toString(),
+  };
+}
+
+const APP_SHELL_METADATA = resolveAppShellMetadata();
+
+function appShellMetadataPlugin(): Plugin {
+  const manifest = `${JSON.stringify(
+    {
+      name: APP_SHELL_METADATA.appName,
+      short_name: APP_SHELL_METADATA.shortName,
+      icons: [
+        {
+          src: "./android-chrome-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+        {
+          src: "./android-chrome-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
+      theme_color: APP_SHELL_METADATA.themeColor,
+      background_color: APP_SHELL_METADATA.backgroundColor,
+      display: "standalone",
+    },
+    null,
+    2,
+  )}\n`;
+
+  const replacements = new Map<string, string>([
+    ["__APP_NAME__", APP_SHELL_METADATA.appName],
+    ["__APP_DESCRIPTION__", APP_SHELL_METADATA.description],
+    ["__APP_URL__", APP_SHELL_METADATA.appUrl],
+    ["__APP_SHARE_IMAGE__", APP_SHELL_METADATA.shareImageUrl],
+    ["__APP_THEME_COLOR__", APP_SHELL_METADATA.themeColor],
+  ]);
+
+  return {
+    name: "app-shell-metadata",
+    transformIndexHtml(html) {
+      let next = html;
+      for (const [token, value] of replacements) {
+        next = next.replaceAll(token, value);
+      }
+      return next;
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const pathname = req.url?.split("?")[0];
+        if (pathname !== "/site.webmanifest") {
+          next();
+          return;
+        }
+
+        res.setHeader(
+          "Content-Type",
+          "application/manifest+json; charset=utf-8",
+        );
+        res.end(manifest);
+      });
+    },
+    generateBundle() {
+      this.emitFile({
+        type: "asset",
+        fileName: "site.webmanifest",
+        source: manifest,
+      });
+    },
+  };
+}
 
 /**
  * Pinned @elizaos/core from the repo root (must match the agent/runtime lock).
@@ -1002,6 +1098,7 @@ export default defineConfig({
     ),
   },
   plugins: [
+    appShellMetadataPlugin(),
     companionAssetsPlugin(),
     elizaCoreBrowserEntryFallbackPlugin(),
     nativeModuleStubPlugin(),
@@ -1020,11 +1117,18 @@ export default defineConfig({
     target: "es2022",
   },
   resolve: {
-    dedupe: ["react", "react-dom", "three", "@elizaos/app-core"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "three",
+      "@capacitor/core",
+      "@elizaos/app-core",
+    ],
     alias: [
       // Bare Node built-in polyfills for browser — pathe provides ESM path,
       // events is pre-bundled via optimizeDeps.
       { find: /^path$/, replacement: "pathe" },
+      { find: /^@capacitor\/core$/, replacement: capacitorCoreEntry },
       // Node built-in subpaths that browser polyfills don't provide.
       // Server-only code imports these but they're never executed in-browser.
       ...["util/types", "stream/promises", "stream/web"].flatMap((sub) => [
@@ -1055,6 +1159,10 @@ export default defineConfig({
       {
         find: /^@elizaos\/capacitor-canvas$/,
         replacement: path.join(nativePluginsRoot, "canvas/src/index.ts"),
+      },
+      {
+        find: /^@elizaos\/capacitor-appblocker$/,
+        replacement: path.join(nativePluginsRoot, "appblocker/src/index.ts"),
       },
       {
         find: /^@elizaos\/capacitor-desktop$/,
@@ -1249,10 +1357,6 @@ export default defineConfig({
           miladyRoot,
           "eliza/packages/app-core/src/ui",
         );
-        const _autonomousSource = path.resolve(
-          miladyRoot,
-          "node_modules/@elizaos/agent/packages/agent/src",
-        );
 
         return [
           ...generatedAliases,
@@ -1272,11 +1376,10 @@ export default defineConfig({
             find: /^@miladyai\/ui\/(.*)$/,
             replacement: `${uiSource}/$1/index.ts`, // assumes subpaths are directories
           },
-          // NOTE: @elizaos/agent barrel re-exports server-only code (eliza.ts,
-          // server.ts) that imports native modules (node-llama-cpp, node:module).
-          // Nothing in the browser needs the barrel — only subpath imports like
-          // @elizaos/agent/contracts/onboarding are used.  Map the bare import
-          // to an empty module so Vite never traverses the server-side tree.
+          // NOTE: App and UI code should import `@elizaos/agent/<subpath>` only.
+          // The package root still resolves to `./src/index.ts`, which pulls in
+          // server-only modules. Map the bare specifier to a no-op so the client
+          // bundle never traverses that graph.
           {
             find: /^@elizaos\/agent$/,
             replacement: path.join(

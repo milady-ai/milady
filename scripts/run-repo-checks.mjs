@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(scriptDir, "..");
+const repoRoot = resolveRepoRoot(import.meta.url);
 
 const suites = {
   lint: [
@@ -69,7 +67,8 @@ const suites = {
     {
       label: "eliza TypeScript typecheck",
       command: "bun",
-      args: ["run", "--cwd", "eliza", "typecheck"],
+      args: ["x", "turbo", "run", "typecheck", "--force", "--concurrency=1"],
+      cwd: `${repoRoot}/eliza`,
     },
     {
       label: "eliza Rust typecheck",
@@ -133,7 +132,7 @@ if (!suiteName || !(suiteName in suites)) {
 for (const step of suites[suiteName]) {
   console.log(`\n[repo-checks] ${step.label}`);
   const result = spawnSync(step.command, step.args, {
-    cwd: repoRoot,
+    cwd: step.cwd ?? repoRoot,
     stdio: "inherit",
     env: process.env,
     shell: process.platform === "win32",

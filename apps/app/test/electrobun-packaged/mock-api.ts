@@ -607,11 +607,7 @@ export async function startMockApiServer(
       json(res, 200, { status: statusPayload() });
       return;
     }
-    if (
-      method === "POST" &&
-      (pathname === "/api/agent/restart" ||
-        pathname === "/api@elizaos/agent/restart")
-    ) {
+    if (method === "POST" && pathname === "/api/agent/restart") {
       agentState = "running";
       json(res, 200, { status: statusPayload() });
       return;
@@ -679,11 +675,7 @@ export async function startMockApiServer(
       });
       return;
     }
-    if (
-      method === "POST" &&
-      (pathname === "/api/agent/reset" ||
-        pathname === "/api@elizaos/agent/reset")
-    ) {
+    if (method === "POST" && pathname === "/api/agent/reset") {
       onboardingComplete = false;
       agentState = "not_started";
       json(res, 200, { ok: true });
@@ -1430,7 +1422,7 @@ export async function startMockApiServer(
       // Catch-all for any unmatched API route (GET, POST, PUT, DELETE).
       // Returning 200 prevents the startup coordinator from seeing a 404
       // on routes that the upstream runtime adds but this mock doesn't
-      // explicitly handle (e.g. /api@elizaos/* scoped routes, /api/vincent/*).
+      // explicitly handle (e.g. /api/agent/* lifecycle routes, /api/vincent/*).
       json(res, 200, { ok: true });
       return;
     }

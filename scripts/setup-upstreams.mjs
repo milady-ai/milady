@@ -13,6 +13,7 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readPackageJson } from "./lib/read-package-json.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -131,16 +132,6 @@ function commandExists(command) {
   return result.status === 0;
 }
 
-function readPackageJson(packageDir) {
-  try {
-    return JSON.parse(
-      readFileSync(path.join(packageDir, "package.json"), "utf8"),
-    );
-  } catch {
-    return null;
-  }
-}
-
 function writePackageJson(packagePath, raw, nextPackageJson) {
   const indent = raw.match(/^(\s+)"/m)?.[1] ?? "  ";
   writeFileSync(
@@ -228,8 +219,11 @@ async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
   let pkg;
   try {
     pkg = JSON.parse(raw);
-  } catch {
-    return callback();
+  } catch (error) {
+    throw new Error(
+      `Failed to parse ${packageJsonPath} while staging optional eliza plugin workspaces`,
+      { cause: error },
+    );
   }
 
   if (!Array.isArray(pkg.workspaces)) {
@@ -311,8 +305,11 @@ function applyOptionalElizaPluginFallback(elizaRoot, missingPlugins) {
     let pkg;
     try {
       pkg = JSON.parse(raw);
-    } catch {
-      continue;
+    } catch (error) {
+      throw new Error(
+        `Failed to parse ${packageJsonPath} while applying optional eliza plugin fallback`,
+        { cause: error },
+      );
     }
 
     let changed = false;

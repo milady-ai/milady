@@ -1,8 +1,4 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-/** Directory containing this file (`test/vitest/`). */
-export const vitestConfigDir = path.dirname(fileURLToPath(import.meta.url));
+import { resolveRepoRoot } from "../../scripts/lib/repo-root.mjs";
 
 /** Repository root (parent of `test/`). */
-export const repoRoot = path.resolve(vitestConfigDir, "..", "..");
+export const repoRoot = resolveRepoRoot(import.meta.url, 2);

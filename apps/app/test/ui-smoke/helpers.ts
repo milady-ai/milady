@@ -13,7 +13,7 @@ type EvaluatedReadyCheck = {
   passed: boolean;
 };
 
-export const DEFAULT_APP_STORAGE: Record<string, string> = {
+const DEFAULT_APP_STORAGE: Record<string, string> = {
   "eliza:onboarding-complete": "1",
   "eliza:onboarding:step": "activate",
   "eliza:ui-shell-mode": "native",
@@ -36,11 +36,11 @@ export async function seedAppStorage(
   }, storage);
 }
 
-export async function expectRootReady(page: Page): Promise<void> {
+async function expectRootReady(page: Page): Promise<void> {
   await expect(page.locator("#root")).toBeVisible({ timeout: ROOT_TIMEOUT_MS });
 }
 
-export async function expectNoOnboardingRedirect(page: Page): Promise<void> {
+async function expectNoOnboardingRedirect(page: Page): Promise<void> {
   await expect(page).not.toHaveURL(/onboarding/, { timeout: NAV_TIMEOUT_MS });
 }
 

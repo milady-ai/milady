@@ -29,7 +29,7 @@ jobs:
       matrix:
         include:
           - lane: benchmark-tests
-            command: cd eliza && bunx vitest run packages/app-core/src/benchmark/*.test.ts --passWithNoTests
+            command: cd eliza && bunx vitest run packages/app-core/src/benchmark/*.test.ts
           - lane: benchmark-lint
             command: cd eliza && bunx @biomejs/biome check packages/app-core/src/benchmark
 

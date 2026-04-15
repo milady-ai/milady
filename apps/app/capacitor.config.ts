@@ -1,8 +1,9 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import appConfig from "./app.config";
 
 const config: CapacitorConfig = {
-  appId: "com.miladyai.milady",
-  appName: "Milady",
+  appId: appConfig.appId,
+  appName: appConfig.appName,
   webDir: "dist",
   server: {
     androidScheme: "https",

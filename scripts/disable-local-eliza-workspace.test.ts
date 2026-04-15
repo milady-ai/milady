@@ -1,7 +1,7 @@
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createTempDirManager } from "../test/helpers/temp-dir";
 import {
   CI_OVERRIDE_SPECIFIERS,
   collectWorkspaceProtocolDependencyNames,
@@ -13,23 +13,41 @@ import {
   resolvePublishSafePinnedVersions,
 } from "./disable-local-eliza-workspace.mjs";
 
-const tempDirs: string[] = [];
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
-function makeTempDir() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "milady-disable-eliza-"));
-  tempDirs.push(dir);
-  return dir;
+type PackageWithDependencies = {
+  dependencies?: Record<string, string>;
+};
+
+function isPackageWithDependencies(
+  value: unknown,
+): value is PackageWithDependencies {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    (value.dependencies === undefined ||
+      (typeof value.dependencies === "object" &&
+        value.dependencies !== null &&
+        !Array.isArray(value.dependencies) &&
+        Object.values(value.dependencies).every(
+          (dependency) => typeof dependency === "string",
+        )))
+  );
 }
 
-function writeJson(filePath: string, value: unknown) {
+function writeJson(filePath: string, value: JsonValue) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
+const { makeTempDir, cleanupTempDirs } = createTempDirManager(
+  "milady-disable-eliza-",
+);
+
 afterEach(() => {
-  for (const dir of tempDirs.splice(0)) {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
+  cleanupTempDirs();
 });
 
 describe("disable-local-eliza-workspace", () => {
@@ -163,12 +181,16 @@ describe("disable-local-eliza-workspace", () => {
       errorLog: () => {},
     });
 
-    const agentPackage = JSON.parse(
+    const agentPackageRaw: unknown = JSON.parse(
       fs.readFileSync(
         path.join(repoRoot, "eliza", "packages", "agent", "package.json"),
         "utf8",
       ),
     );
+    if (!isPackageWithDependencies(agentPackageRaw)) {
+      throw new Error("agent package.json fixture is missing dependencies");
+    }
+    const agentPackage = agentPackageRaw;
     expect(agentPackage.dependencies).toMatchObject({
       "@elizaos/core": "2.0.0-alpha.163",
       "@elizaos/plugin-agent-orchestrator": "0.6.2-alpha.0",

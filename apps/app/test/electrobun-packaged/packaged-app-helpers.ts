@@ -65,7 +65,7 @@ function appendLog(target: string[], chunk: Buffer | string): void {
   }
 }
 
-export function collectProcessLogs(child: ChildProcess): PackagedProcessLogs {
+function collectProcessLogs(child: ChildProcess): PackagedProcessLogs {
   const stdout: string[] = [];
   const stderr: string[] = [];
   child.stdout?.on("data", (chunk: Buffer) => appendLog(stdout, chunk));
@@ -243,7 +243,7 @@ function buildMinimalMacEnv(baseEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   };
 }
 
-export function createPackagedDesktopEnv(args: {
+function createPackagedDesktopEnv(args: {
   baseEnv: NodeJS.ProcessEnv;
   apiBase: string;
   stateDir: string;

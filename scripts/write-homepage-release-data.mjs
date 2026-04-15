@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
 const REPOSITORY = "milady-ai/milady";
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(SCRIPT_DIR, "..");
+const REPO_ROOT = resolveRepoRoot(import.meta.url);
 const OUTPUT_PATH = path.resolve(
   REPO_ROOT,
   "apps/homepage/src/generated/release-data.ts",
@@ -366,35 +364,21 @@ async function writePayload(payload) {
 }
 
 async function main() {
-  try {
-    const releases = await fetchReleases();
-    const stableReleases = sortReleasesByRecency(releases).filter(
-      (release) => !release.prerelease,
-    );
-    const stableRelease = await resolveStableRelease(stableReleases);
-    const releasePool =
-      stableRelease &&
-      !stableReleases.some(
-        (release) => release.tag_name === stableRelease.tag_name,
-      )
-        ? [stableRelease, ...stableReleases]
-        : stableReleases;
-    await writePayload(buildPayload(stableRelease, releasePool));
-    const tag = stableRelease?.tag_name ?? "no published stable release";
-    console.log(`homepage release data: stable=${tag}`);
-  } catch (error) {
-    if (existsSync(OUTPUT_PATH)) {
-      console.warn(
-        `homepage release data refresh failed, keeping existing file: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return;
-    }
-
-    await writePayload(buildPayload(null));
-    console.warn(
-      `homepage release data refresh failed, wrote fallback file: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+  const releases = await fetchReleases();
+  const stableReleases = sortReleasesByRecency(releases).filter(
+    (release) => !release.prerelease,
+  );
+  const stableRelease = await resolveStableRelease(stableReleases);
+  const releasePool =
+    stableRelease &&
+    !stableReleases.some(
+      (release) => release.tag_name === stableRelease.tag_name,
+    )
+      ? [stableRelease, ...stableReleases]
+      : stableReleases;
+  await writePayload(buildPayload(stableRelease, releasePool));
+  const tag = stableRelease?.tag_name ?? "no published stable release";
+  console.log(`homepage release data: stable=${tag}`);
 }
 
 await main();

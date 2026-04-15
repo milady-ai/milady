@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/**
- * Post-install script to initialize git submodules if they haven't been.
- * This ensures tracked submodules from .gitmodules are initialized when
- * cloning the repo or installing dependencies.
- *
- * Run automatically via the `postinstall` hook, or manually:
- *   node scripts/init-submodules.mjs
- */
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -22,16 +14,12 @@ const SUBMODULE_READINESS_MARKERS = {
   eliza: ["package.json", "packages/typescript/package.json"],
 };
 
-// plugin-openrouter contains PGlite :memory:<UUID> paths committed under
-// typescript/ that Windows git rejects as invalid filenames. Skip checkout
-// until elizaos-plugins/plugin-openrouter#25 is merged; the package is
-// available via npm in the meantime.
+// plugin-openrouter contains Windows-incompatible PGlite fixture paths; skip
+// checkout until elizaos-plugins/plugin-openrouter#25 is merged.
 const SKIP_SUBMODULES = new Set(["eliza/plugins/plugin-openrouter"]);
 
-// Submodules whose own nested submodules should NOT be recursively initialized.
 const NO_RECURSE_SUBMODULES = new Set([]);
 
-/** Top-level paths that moved under `eliza/`; drop stale gitlinks after migration. */
 const LEGACY_ROOT_SUBMODULE_PATHS = ["cloud", "steward-fi"];
 
 function getSubmoduleSkipReason(
@@ -94,12 +82,6 @@ export function loadTrackedSubmodules({ exec = execSync, cwd = root } = {}) {
   }
 }
 
-/**
- * After moving `cloud` and `steward-fi` under `eliza/`, older clones may still
- * have gitlinks at the repo root. If `.gitmodules` no longer lists those paths
- * but the index still does, remove them so postinstall does not clone into
- * `./cloud` or `./steward-fi`.
- */
 export function pruneLegacyRootSubmodulesMovedUnderEliza(
   rootDir,
   { exec = execSync, log = console.log, logError = console.error } = {},
@@ -140,9 +122,7 @@ export function pruneLegacyRootSubmodulesMovedUnderEliza(
         cwd: rootDir,
         stdio: "inherit",
       });
-    } catch {
-      // Best effort — worktree may already be missing.
-    }
+    } catch {}
     try {
       exec(`git rm -f -- "${rel}"`, {
         cwd: rootDir,
@@ -215,7 +195,6 @@ export function runInitSubmodules({
   logError = console.error,
   shouldSkipSubmodule = shouldSkipSubmoduleInit,
 } = {}) {
-  // Check if we're in a git repository
   const gitDir = resolve(rootDir, ".git");
   if (!exists(gitDir)) {
     log("[init-submodules] Not a git repository — skipping");
@@ -287,13 +266,10 @@ export function runInitSubmodules({
         needsInit = true;
         initReason = "submodule is not initialized";
       } else if (status.startsWith("+")) {
-        // Submodule HEAD differs from the commit recorded in the parent
-        // index — local commits or a branch checkout exist.
         log(
           `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has commits not recorded in the parent repo`,
         );
       }
-      // Warn about uncommitted changes in initialized submodules.
       if (!status.startsWith("-")) {
         try {
           const smRoot = resolve(rootDir, submodule.path);
@@ -307,12 +283,9 @@ export function runInitSubmodules({
               `[init-submodules] ⚠ ${submodule.name} (${submodule.path}) has uncommitted local changes`,
             );
           }
-        } catch {
-          // Cannot check — not critical, just skip the warning.
-        }
+        } catch {}
       }
     } catch {
-      // If status lookup fails, attempt initialization directly.
       needsInit = true;
       if (!initReason) {
         initReason = "status check failed";
@@ -339,8 +312,6 @@ export function runInitSubmodules({
           stdio: "inherit",
         });
       } catch (_shallowErr) {
-        // Shallow clones (common in CI) may fail to fetch the pinned SHA.
-        // Retry: register the submodule, fetch all refs deeply, then update.
         log(
           `[init-submodules] Shallow init failed for ${submodule.name}, retrying with full fetch...`,
         );
@@ -349,9 +320,7 @@ export function runInitSubmodules({
             cwd: rootDir,
             stdio: "inherit",
           });
-        } catch {
-          // init may already have been done by the first attempt
-        }
+        } catch {}
         const smRoot = resolve(rootDir, submodule.path);
         if (exists(smRoot) && exists(resolve(smRoot, ".git"))) {
           exec("git fetch --unshallow || git fetch --all", {
@@ -395,11 +364,6 @@ export function runInitSubmodules({
     );
     try {
       const nestedSkipArgs = getNestedElizaSubmoduleSkipArgs();
-      // Run from inside eliza/ so git reads eliza/.gitmodules directly.
-      // Running `git submodule update --init --recursive -- eliza` from the
-      // parent can fail when git tries to resolve nested submodule paths
-      // (e.g. eliza/cloud) against the parent's .gitmodules instead of
-      // eliza's own .gitmodules.
       exec(`git ${nestedSkipArgs} submodule update --init --recursive`.trim(), {
         cwd: resolve(rootDir, "eliza"),
         stdio: "inherit",

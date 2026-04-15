@@ -1,19 +1,11 @@
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { createTempDirManager } from "../test/helpers/temp-dir";
 import {
   resolveWorkspaceDefaultSkillsSourceDir,
   syncWorkspaceDefaultSkills,
 } from "./sync-workspace-default-skills.mjs";
-
-const tempDirs: string[] = [];
-
-function makeTempDir() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "milady-skills-"));
-  tempDirs.push(dir);
-  return dir;
-}
 
 function writeSkill(
   repoRoot: string,
@@ -37,10 +29,10 @@ function writeSkill(
   fs.writeFileSync(path.join(skillDir, "notes.md"), "notes", "utf8");
 }
 
+const { makeTempDir, cleanupTempDirs } = createTempDirManager("milady-skills-");
+
 afterEach(() => {
-  for (const dir of tempDirs.splice(0)) {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
+  cleanupTempDirs();
 });
 
 describe("sync-workspace-default-skills", () => {
