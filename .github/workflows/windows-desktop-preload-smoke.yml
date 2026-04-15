@@ -34,6 +34,7 @@ jobs:
             /tsconfig.json
             /.github/actions/setup-bun-workspace/**
             apps/
+            apps/app/electrobun/**
             packages/
             scripts/
             eliza/apps/
@@ -67,21 +68,20 @@ jobs:
           no-vision-deps: "true"
 
       - name: Restore eliza workspace paths for build scripts
-        run: |
-          if ((Test-Path ".eliza.ci-disabled") -and -not (Test-Path "eliza")) {
-            Move-Item -LiteralPath ".eliza.ci-disabled" -Destination "eliza"
-          }
+        run: node scripts/restore-local-eliza-workspace.mjs
 
-      - name: Install desktop package dependencies
-        run: |
-          bun install --cwd eliza/packages/app-core --ignore-scripts
-          bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts
+      - name: Install electrobun platform dependencies
+        run: bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts
 
-      - name: Run repository postinstall patches
-        run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+      - name: Run lightweight desktop bootstrap patches
+        run: |
+          # prepare-local-eliza-runtime already installs the repo-local eliza
+          # workspace needed by this published-only lane. Desktop preflight only
+          # needs dependency/workspace patching, not the full repo setup flow
+          # that rebuilds upstream packages like @elizaos/core on Windows.
+          node eliza/packages/app-core/scripts/patch-workspace-plugins.mjs
+          node eliza/packages/app-core/scripts/patch-deps.mjs
+          node eliza/packages/app-core/scripts/ensure-type-package-aliases.mjs
 
       - name: Desktop preflight
         run: bun eliza/packages/app-core/scripts/desktop-build.mjs preflight --variant=base

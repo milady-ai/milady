@@ -38,20 +38,21 @@ jobs:
           install-native-deps: "false"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           run-postinstall: "false"
+          disable-local-eliza-workspace: "true"
+          prepare-local-eliza-runtime: "true"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 
       - name: Restore eliza workspace paths for build scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
-      - name: Run repository postinstall patches
-        run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+      - name: Generate protobuf types
+        run: |
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            bunx @bufbuild/buf@1.67.0 generate
+          fi
 
       - name: Build iOS simulator app
         working-directory: apps/app
@@ -101,20 +102,21 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           run-postinstall: "false"
+          disable-local-eliza-workspace: "true"
+          prepare-local-eliza-runtime: "true"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 
       - name: Restore eliza workspace paths for build scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
-      - name: Run repository postinstall patches
-        run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
-        env:
-          SKIP_AVATAR_CLONE: "1"
-          MILADY_NO_VISION_DEPS: "1"
+      - name: Generate protobuf types
+        run: |
+          if [ -d eliza/packages/schemas ] && [ -f eliza/packages/schemas/buf.gen.yaml ] && [ ! -d eliza/packages/typescript/src/types/generated ]; then
+            cd eliza/packages/schemas
+            node node_modules/@bufbuild/buf/install.js 2>/dev/null || true
+            bunx @bufbuild/buf@1.67.0 generate
+          fi
 
       - name: Build Android debug app
         working-directory: apps/app
