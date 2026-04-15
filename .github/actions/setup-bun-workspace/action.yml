@@ -62,7 +62,7 @@ runs:
           if sudo apt-get "${APT_ARGS[@]}" update && \
              sudo apt-get "${APT_ARGS[@]}" install -y --fix-missing \
                build-essential libcairo2-dev libpango1.0-dev libjpeg-dev \
-               libgif-dev libpixman-1-dev librsvg2-dev; then
+               libgif-dev libpixman-1-dev librsvg2-dev protobuf-compiler; then
             break
           fi
           if [ "$attempt" -eq 3 ]; then

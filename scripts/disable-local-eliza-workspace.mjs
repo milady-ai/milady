@@ -66,6 +66,10 @@ export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
   "@elizaos/ui": "file:./eliza/packages/ui",
 };
+export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
+  "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
+  "@elizaos/ui": "file:./packages/ui",
+};
 export const DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -476,13 +480,15 @@ export function rewriteWorkspaceDependencySpecifiers(
   return mutated;
 }
 
-export function applyCiOnlyOverrides(pkg, { log = console.log } = {}) {
+export function applyOverrideSpecifiers(
+  pkg,
+  overrideSpecifiers,
+  { log = console.log, label = "CI-only override" } = {},
+) {
   const overrides = pkg.overrides ?? {};
   const injected = [];
 
-  for (const [dependencyName, specifier] of Object.entries(
-    CI_OVERRIDE_SPECIFIERS,
-  )) {
+  for (const [dependencyName, specifier] of Object.entries(overrideSpecifiers)) {
     if (overrides[dependencyName] === specifier) {
       continue;
     }
@@ -496,9 +502,16 @@ export function applyCiOnlyOverrides(pkg, { log = console.log } = {}) {
 
   pkg.overrides = overrides;
   log(
-    `[disable-local-eliza-workspace] Added ${injected.length} CI-only override(s) (${injected.join(", ")})`,
+    `[disable-local-eliza-workspace] Added ${injected.length} ${label}(s) (${injected.join(", ")})`,
   );
   return true;
+}
+
+export function applyCiOnlyOverrides(pkg, { log = console.log } = {}) {
+  return applyOverrideSpecifiers(pkg, CI_OVERRIDE_SPECIFIERS, {
+    log,
+    label: "CI-only override",
+  });
 }
 
 export function disableLocalElizaWorkspace(
@@ -510,6 +523,7 @@ export function disableLocalElizaWorkspace(
   const shouldRenameElizaWorkspace =
     process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_RENAME === "1";
   const packageJsonPath = path.join(repoRoot, "package.json");
+  const elizaPackageJsonPath = path.join(elizaRoot, "package.json");
   const removedLockfiles = [];
   const localOnlyPackages = resolveLocalOnlyWorkspacePackageNames(repoRoot);
 
@@ -710,6 +724,25 @@ export function disableLocalElizaWorkspace(
   applyCiOnlyOverrides(rootPkg, { log });
 
   writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
+
+  if (fs.existsSync(elizaPackageJsonPath)) {
+    try {
+      const rawElizaPkg = fs.readFileSync(elizaPackageJsonPath, "utf8");
+      const elizaPkg = JSON.parse(rawElizaPkg);
+      if (
+        applyOverrideSpecifiers(elizaPkg, ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS, {
+          log,
+          label: "local eliza runtime override",
+        })
+      ) {
+        writePackageJson(elizaPackageJsonPath, rawElizaPkg, elizaPkg);
+      }
+    } catch (error) {
+      warn(
+        `[disable-local-eliza-workspace] Failed to patch ${elizaPackageJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
   // Use early-resolved versions (captured before eliza/ was renamed away).
   // Fall back to a post-rename resolution attempt for robustness.
