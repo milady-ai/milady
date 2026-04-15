@@ -33,6 +33,7 @@ packages=(
   react
   react-dom
   vite
+  electrobun
   @types/react
   @types/react-dom
   @types/three
