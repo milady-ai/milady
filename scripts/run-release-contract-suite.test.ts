@@ -59,9 +59,9 @@ describe("run release contract suite", () => {
       "Write-Host 'proof'\n",
     );
 
-    expect(
-      ensureLegacyElectrobunCompatDir({ legacyDir, canonicalDir }),
-    ).toBe(true);
+    expect(ensureLegacyElectrobunCompatDir({ legacyDir, canonicalDir })).toBe(
+      true,
+    );
 
     const wrapper = fs.readFileSync(
       path.join(legacyDir, "electrobun.config.ts"),
@@ -101,9 +101,9 @@ describe("run release contract suite", () => {
     );
     const legacyDir = path.join(repoRoot, "apps", "app", "electrobun");
 
-    expect(
-      ensureLegacyElectrobunCompatDir({ legacyDir, canonicalDir }),
-    ).toBe(false);
+    expect(ensureLegacyElectrobunCompatDir({ legacyDir, canonicalDir })).toBe(
+      false,
+    );
     expect(fs.existsSync(legacyDir)).toBe(false);
   });
 });

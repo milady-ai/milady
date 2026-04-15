@@ -134,9 +134,7 @@ const patchedLocalPackHotspotPathsBlock = `const localPackHotspotPaths = [
 ];`;
 
 function getLocalPackHotspotPathsBlock(source) {
-  return source.match(
-    /const localPackHotspotPaths = \[[\s\S]*?\];/,
-  )?.[0];
+  return source.match(/const localPackHotspotPaths = \[[\s\S]*?\];/)?.[0];
 }
 
 function hasRequiredLocalPackHotspots(source) {

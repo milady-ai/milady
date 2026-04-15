@@ -62,9 +62,7 @@ describe("patch-release-check-pack-fallback", () => {
     const patched = applyReleaseCheckPackFallback(source);
 
     expect(patched).toContain("function runBunPackDry(): PackResult[]");
-    expect(patched).toContain(
-      "retrying with bun pm pack --dry-run.",
-    );
+    expect(patched).toContain("retrying with bun pm pack --dry-run.");
     expect(patched).not.toContain("throw error;");
     expect(patched).toContain('  "dist",');
     expect(patched).toContain('  "apps/app/dist",');

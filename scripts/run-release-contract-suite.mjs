@@ -79,10 +79,7 @@ export function writeLegacyWindowsSmokeScript(sourcePath, targetPath) {
 
 export function writeLegacyWindowsInstallerProofScript(sourcePath, targetPath) {
   const source = fs.readFileSync(sourcePath, "utf8");
-  const markers = [
-    "Eliza-Setup-*.exe",
-    "ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER",
-  ]
+  const markers = ["Eliza-Setup-*.exe", "ELIZA_WINDOWS_SMOKE_REQUIRE_INSTALLER"]
     .map((line) => `# release-check legacy marker: ${line}`)
     .join("\n");
 
@@ -173,7 +170,12 @@ export function main() {
   try {
     createdCompatDir = ensureLegacyElectrobunCompatDir();
 
-    run("bunx", ["vitest", "run", "--passWithNoTests", ...releaseContractTests]);
+    run("bunx", [
+      "vitest",
+      "run",
+      "--passWithNoTests",
+      ...releaseContractTests,
+    ]);
     run("bunx", [
       "vitest",
       "run",
