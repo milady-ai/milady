@@ -53,7 +53,7 @@ jobs:
           fi
 
       - name: Install plugin-commands lint dependencies
-        run: bun install --cwd eliza/plugins/plugin-commands/typescript --no-frozen-lockfile --ignore-scripts
+        run: bun install --cwd eliza/plugins/plugin-commands --no-frozen-lockfile --ignore-scripts
 
       - name: Fetch upstream develop for pre-review base
         run: |
