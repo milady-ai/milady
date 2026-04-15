@@ -22,8 +22,8 @@
     "baseUrl": "../..",
     "paths": {
       "@elizaos/app-core": ["./eliza/packages/app-core/src/index.ts"],
-      "@elizaos/app-core/capacitor-shell": [
-        "./eliza/packages/app-core/src/capacitor-shell.ts"
+      "@elizaos/app-core/platform/native-plugin-entrypoints": [
+        "./eliza/packages/app-core/src/platform/native-plugin-entrypoints.ts"
       ],
       "@elizaos/app-core/*": ["./eliza/packages/app-core/src/*"],
       "@elizaos/app-task-coordinator": [
