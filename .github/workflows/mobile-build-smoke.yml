@@ -61,6 +61,15 @@ jobs:
         env:
           LANG: en_US.UTF-8
 
+      - name: Add iOS platform if missing
+        working-directory: apps/app
+        run: |
+          if [ ! -d "ios/App" ]; then
+            bun x capacitor add ios
+          fi
+        env:
+          LANG: en_US.UTF-8
+
       - name: Capacitor sync iOS
         working-directory: apps/app
         run: bun run cap:sync:ios
@@ -150,6 +159,13 @@ jobs:
         run: |
           bun scripts/plugin-build.mjs
           bun run build:web
+
+      - name: Add Android platform if missing
+        working-directory: apps/app
+        run: |
+          if [ ! -d "android/app" ]; then
+            bun x capacitor add android
+          fi
 
       - name: Capacitor sync Android
         working-directory: apps/app
