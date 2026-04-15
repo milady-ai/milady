@@ -91,7 +91,7 @@ function readyChecksPassed(
 
 async function evaluateReadyChecks(
   page: Page,
-  checks: ReadyCheck[],
+  checks: readonly ReadyCheck[],
   mode: "any" | "all" = "any",
   timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<{
@@ -123,7 +123,7 @@ async function evaluateReadyChecks(
 export async function assertReadyChecks(
   page: Page,
   label: string,
-  checks: ReadyCheck[],
+  checks: readonly ReadyCheck[],
   mode: "any" | "all" = "any",
   timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<void> {
