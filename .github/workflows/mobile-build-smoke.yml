@@ -165,7 +165,7 @@ jobs:
 
       - name: Capacitor sync Android
         working-directory: apps/app
-        run: bunx cap sync android
+        run: bun run cap:sync:android
 
       - name: Build debug APK
         working-directory: apps/app/android

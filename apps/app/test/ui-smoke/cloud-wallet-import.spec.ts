@@ -5,9 +5,7 @@ test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
 });
 
-test("inventory cloud import uses the live wallet API", async ({
-  page,
-}) => {
+test("inventory cloud import uses the live wallet API", async ({ page }) => {
   let walletConfigGetCount = 0;
   let refreshCloudCount = 0;
 
@@ -52,7 +50,8 @@ test("inventory cloud import uses the live wallet API", async ({
 
   const walletConfigPutRequestPromise = page.waitForRequest(
     (request) =>
-      request.method() === "PUT" && request.url().endsWith("/api/wallet/config"),
+      request.method() === "PUT" &&
+      request.url().endsWith("/api/wallet/config"),
     { timeout: 15_000 },
   );
   const walletConfigPutResponsePromise = page.waitForResponse(
