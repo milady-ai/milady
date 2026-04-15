@@ -488,7 +488,9 @@ export function applyOverrideSpecifiers(
   const overrides = pkg.overrides ?? {};
   const injected = [];
 
-  for (const [dependencyName, specifier] of Object.entries(overrideSpecifiers)) {
+  for (const [dependencyName, specifier] of Object.entries(
+    overrideSpecifiers,
+  )) {
     if (overrides[dependencyName] === specifier) {
       continue;
     }
@@ -730,10 +732,14 @@ export function disableLocalElizaWorkspace(
       const rawElizaPkg = fs.readFileSync(elizaPackageJsonPath, "utf8");
       const elizaPkg = JSON.parse(rawElizaPkg);
       if (
-        applyOverrideSpecifiers(elizaPkg, ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS, {
-          log,
-          label: "local eliza runtime override",
-        })
+        applyOverrideSpecifiers(
+          elizaPkg,
+          ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS,
+          {
+            log,
+            label: "local eliza runtime override",
+          },
+        )
       ) {
         writePackageJson(elizaPackageJsonPath, rawElizaPkg, elizaPkg);
       }

@@ -110,13 +110,14 @@ export function writeLegacyElectrobunWrapper(
   wrapperPath,
   canonicalConfigImportPath = "../../../eliza/packages/app-core/platforms/electrobun/electrobun.config.ts",
 ) {
+  const runtimeDistDirPlaceholder = "$" + "{runtimeDistDir}";
   const wrapperSource = `import canonicalConfig from "${canonicalConfigImportPath}";
 
 // release-check legacy marker: "postBuild: "scripts/postwrap-sign-runtime-macos.ts""
 // release-check legacy marker: "postWrap: "scripts/postwrap-diagnostics.ts""
 // release-check legacy marker: "process.env.ELIZA_ELECTROBUN_NOTARIZE ??"
-// release-check legacy marker: ""../../../plugins.json": \`${"${runtimeDistDir}"}/plugins.json\`"
-// release-check legacy marker: ""../../../package.json": \`${"${runtimeDistDir}"}/package.json\`"
+// release-check legacy marker: ""../../../plugins.json": \`${runtimeDistDirPlaceholder}/plugins.json\`"
+// release-check legacy marker: ""../../../package.json": \`${runtimeDistDirPlaceholder}/package.json\`"
 export default canonicalConfig;
 `;
   fs.writeFileSync(wrapperPath, wrapperSource);

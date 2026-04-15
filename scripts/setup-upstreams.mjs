@@ -948,19 +948,57 @@ async function ensureElizaDependencies(elizaRoot) {
   console.log(
     `[setup-upstreams] Installing eliza workspace dependencies in ${toDisplayPath(elizaRoot)}`,
   );
-  const installArgs = getElizaInstallArgs();
-  await withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, () =>
-    runCommand("bun", installArgs, {
+  await withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, async () => {
+    const installArgs = getElizaInstallArgs();
+    await runCommand("bun", installArgs, {
       cwd: elizaRoot,
       label: "bun install (eliza)",
-    }),
-  );
+    });
+    await bootstrapBundledBunInstall(elizaRoot);
+  });
 }
 
 export function getElizaInstallArgs(env = process.env) {
   return env.MILADY_NO_VISION_DEPS === "1"
     ? ["install", "--ignore-scripts"]
     : ["install"];
+}
+
+export async function bootstrapBundledBunInstall(
+  workspaceRoot,
+  {
+    env = process.env,
+    pathExists = existsSync,
+    runCommandImpl = runCommand,
+  } = {},
+) {
+  if (env.MILADY_NO_VISION_DEPS !== "1") {
+    return false;
+  }
+
+  const bunInstallScriptRelativePath = path.join(
+    "node_modules",
+    "bun",
+    "install.js",
+  );
+  const bunInstallScriptPath = path.join(
+    workspaceRoot,
+    bunInstallScriptRelativePath,
+  );
+
+  if (!pathExists(bunInstallScriptPath)) {
+    throw new Error(
+      `[setup-upstreams] Expected ${bunInstallScriptRelativePath} after bun install --ignore-scripts in ${toDisplayPath(
+        workspaceRoot,
+      )}, but it was missing.`,
+    );
+  }
+
+  await runCommandImpl("node", [bunInstallScriptRelativePath], {
+    cwd: workspaceRoot,
+    label: "node node_modules/bun/install.js (eliza bun bootstrap)",
+  });
+  return true;
 }
 
 async function ensureElizaGeneratedKeywordData(elizaRoot) {
