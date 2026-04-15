@@ -61,6 +61,8 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           run-postinstall: "false"
+          disable-local-eliza-workspace: "true"
+          prepare-local-eliza-runtime: "true"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 
@@ -69,6 +71,11 @@ jobs:
           if ((Test-Path ".eliza.ci-disabled") -and -not (Test-Path "eliza")) {
             Move-Item -LiteralPath ".eliza.ci-disabled" -Destination "eliza"
           }
+
+      - name: Install desktop package dependencies
+        run: |
+          bun install --cwd eliza/packages/app-core --ignore-scripts
+          bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts
 
       - name: Run repository postinstall patches
         run: node eliza/packages/app-core/scripts/run-repo-setup.mjs

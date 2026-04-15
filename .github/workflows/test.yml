@@ -196,6 +196,12 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
 
+      - name: Disable local eliza workspace for Windows install
+        if: runner.os == 'Windows'
+        run: node scripts/disable-local-eliza-workspace.mjs
+        env:
+          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+
       - name: Install dependencies
         shell: bash
         run: |
@@ -206,6 +212,10 @@ jobs:
             sleep $((i * 15))
           done
           exit 1
+
+      - name: Restore eliza workspace paths for repo scripts
+        if: runner.os == 'Windows'
+        run: node -e "const fs=require('node:fs');if(fs.existsSync('.eliza.ci-disabled')&&!fs.existsSync('eliza'))fs.renameSync('.eliza.ci-disabled','eliza');"
 
       - name: Run repository postinstall patches
         run: bun run postinstall
@@ -268,8 +278,18 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
 
+      - name: Disable local eliza workspace for Windows install
+        if: runner.os == 'Windows'
+        run: node scripts/disable-local-eliza-workspace.mjs
+        env:
+          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+
       - name: Install dependencies
         run: bun install --ignore-scripts
+
+      - name: Restore eliza workspace paths for repo scripts
+        if: runner.os == 'Windows'
+        run: node -e "const fs=require('node:fs');if(fs.existsSync('.eliza.ci-disabled')&&!fs.existsSync('eliza'))fs.renameSync('.eliza.ci-disabled','eliza');"
 
       - name: Run repository postinstall patches
         run: bun run postinstall
