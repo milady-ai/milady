@@ -1,14 +1,14 @@
 import { expect, test } from "@playwright/test";
 import {
   installCloudWalletImportApiOverrides,
-  installDefaultAppMocks,
+  installDefaultAppRoutes,
   openAppPath,
   seedAppStorage,
 } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await seedAppStorage(page);
-  await installDefaultAppMocks(page);
+  await installDefaultAppRoutes(page);
 });
 
 test("inventory Import from Eliza Cloud sends eliza-cloud RPC and hits steward-status", async ({

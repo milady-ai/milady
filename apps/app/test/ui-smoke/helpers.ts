@@ -2,7 +2,6 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 export const ROOT_TIMEOUT_MS = 20_000;
 export const NAV_TIMEOUT_MS = 12_000;
-export const READY_CHECK_TIMEOUT_MS = 10_000;
 
 type ReadyCheck =
   | { selector: string; text?: never }
@@ -60,15 +59,9 @@ export async function readLocalStorage(
   return page.evaluate((storageKey) => localStorage.getItem(storageKey), key);
 }
 
-async function locatorVisible(
-  locator: Locator,
-  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
-): Promise<boolean> {
+async function locatorVisible(locator: Locator): Promise<boolean> {
   try {
-    await locator.first().waitFor({
-      state: "visible",
-      timeout: timeoutMs,
-    });
+    await locator.first().waitFor({ state: "visible", timeout: 5_000 });
     return true;
   } catch {
     return false;
@@ -96,7 +89,6 @@ async function evaluateReadyChecks(
   page: Page,
   checks: ReadyCheck[],
   mode: "any" | "all" = "any",
-  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<{
   passed: boolean;
   results: EvaluatedReadyCheck[];
@@ -107,13 +99,13 @@ async function evaluateReadyChecks(
     if ("selector" in check) {
       results.push({
         check,
-        passed: await locatorVisible(page.locator(check.selector), timeoutMs),
+        passed: await locatorVisible(page.locator(check.selector)),
       });
       continue;
     }
     results.push({
       check,
-      passed: await locatorVisible(page.getByText(check.text), timeoutMs),
+      passed: await locatorVisible(page.getByText(check.text)),
     });
   }
 
@@ -128,9 +120,8 @@ export async function assertReadyChecks(
   label: string,
   checks: ReadyCheck[],
   mode: "any" | "all" = "any",
-  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<void> {
-  const evaluation = await evaluateReadyChecks(page, checks, mode, timeoutMs);
+  const evaluation = await evaluateReadyChecks(page, checks, mode);
   const summary = evaluation.results
     .map(
       (result) =>
@@ -144,6 +135,50 @@ export async function assertReadyChecks(
   ).toBe(true);
 }
 
+/**
+ * Baseline API stubs every smoke test that touches the network should install.
+ * Call in `beforeEach` before any flow-specific overrides so those can
+ * `route.fallback()` through to these defaults for URLs they don't care about.
+ */
+export async function installDefaultAppRoutes(page: Page): Promise<void> {
+  await page.route("**/api/health", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true }),
+    });
+  });
+
+  await page.route("**/api/agents", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ agents: [] }),
+    });
+  });
+
+  await page.route("**/api/cloud/status", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        connected: false,
+        enabled: false,
+        cloudVoiceProxyAvailable: false,
+        hasApiKey: false,
+      }),
+    });
+  });
+}
+
 /** Handles returned by {@link installCloudWalletImportApiOverrides}. */
 export type CloudWalletImportMockApi = {
   lastWalletConfigPut: () => Record<string, unknown> | null;
@@ -151,15 +186,12 @@ export type CloudWalletImportMockApi = {
 };
 
 /**
- * Playwright routes that override the ui-smoke API stub for the cloud wallet
- * import flow. This installs the default app mocks first so surface tests do
- * not need to reference the helper directly.
+ * Playwright routes that override the ui-smoke API stub for the cloud wallet import flow.
+ * Register **after** {@link installDefaultAppRoutes} so these take precedence for matching URLs.
  */
 export async function installCloudWalletImportApiOverrides(
   page: Page,
 ): Promise<CloudWalletImportMockApi> {
-  await installDefaultAppMocks(page);
-
   let lastWalletPut: Record<string, unknown> | null = null;
   let stewardStatusHits = 0;
 
@@ -321,60 +353,13 @@ export async function installCloudWalletImportApiOverrides(
   };
 }
 
-/**
- * Install default API mocks that prevent the app from hitting real endpoints.
- * Call in `beforeEach` before any page navigation so Playwright route handlers
- * are registered before the first network request.
- */
-export async function installDefaultAppMocks(page: Page): Promise<void> {
-  // Stub the runtime /api endpoints the app shell fetches on mount so the
-  // UI renders without a live backend.
-  await page.route("**/api/health", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ ok: true }),
-    });
-  });
-
-  await page.route("**/api/agents", async (route) => {
-    if (route.request().method() !== "GET") {
-      await route.fallback();
-      return;
-    }
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ agents: [] }),
-    });
-  });
-
-  await page.route("**/api/cloud/status", async (route) => {
-    if (route.request().method() !== "GET") {
-      await route.fallback();
-      return;
-    }
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        connected: false,
-        enabled: false,
-        cloudVoiceProxyAvailable: false,
-        hasApiKey: false,
-      }),
-    });
-  });
-}
-
 export async function runSoftReadyChecks(
   page: Page,
   label: string,
   checks: ReadyCheck[],
   mode: "any" | "all" = "any",
-  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<void> {
-  const evaluation = await evaluateReadyChecks(page, checks, mode, timeoutMs);
+  const evaluation = await evaluateReadyChecks(page, checks, mode);
   if (evaluation.passed) {
     return;
   }
