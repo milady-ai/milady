@@ -34,6 +34,7 @@ jobs:
             /tsconfig.json
             /.github/actions/setup-bun-workspace/**
             apps/
+            apps/app/electrobun/**
             packages/
             scripts/
             eliza/apps/
