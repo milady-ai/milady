@@ -53,7 +53,7 @@ describe("bootstrapBundledBunInstall", () => {
 
     expect(runCommandImpl).toHaveBeenCalledWith(
       "node",
-      ["node_modules/bun/install.js"],
+      [path.join("node_modules", "bun", "install.js")],
       {
         cwd: workspaceRoot,
         label: "node node_modules/bun/install.js (eliza bun bootstrap)",
