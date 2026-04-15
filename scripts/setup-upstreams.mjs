@@ -972,6 +972,7 @@ async function ensureRepoLocalEliza(repoRoot) {
 
 async function ensureElizaDependencies(elizaRoot) {
   if (hasInstalledElizaDependencies(elizaRoot)) {
+    await bootstrapBundledBunInstall(elizaRoot);
     return;
   }
 
