@@ -79,9 +79,15 @@ jobs:
       - name: Build for iOS Simulator
         run: |
           set -o pipefail
+          BUILD_TARGET_FLAG="-project"
+          BUILD_TARGET_PATH="apps/app/ios/App/App.xcodeproj"
+          if [ -d "apps/app/ios/App/App.xcworkspace" ]; then
+            BUILD_TARGET_FLAG="-workspace"
+            BUILD_TARGET_PATH="apps/app/ios/App/App.xcworkspace"
+          fi
           if command -v xcbeautify >/dev/null 2>&1; then
             xcodebuild \
-              -workspace apps/app/ios/App/App.xcworkspace \
+              "$BUILD_TARGET_FLAG" "$BUILD_TARGET_PATH" \
               -scheme App \
               -configuration Debug \
               -destination "generic/platform=iOS Simulator" \
@@ -90,7 +96,7 @@ jobs:
               build 2>&1 | xcbeautify --renderer github-actions
           else
             xcodebuild \
-              -workspace apps/app/ios/App/App.xcworkspace \
+              "$BUILD_TARGET_FLAG" "$BUILD_TARGET_PATH" \
               -scheme App \
               -configuration Debug \
               -destination "generic/platform=iOS Simulator" \
@@ -170,6 +176,11 @@ jobs:
       - name: Capacitor sync Android
         working-directory: apps/app
         run: bunx cap sync android
+
+      - name: Restore Android build templates for native plugins
+        run: |
+          cp eliza/packages/app-core/platforms/android/build.gradle apps/app/android/build.gradle
+          cp eliza/packages/app-core/platforms/android/variables.gradle apps/app/android/variables.gradle
 
       - name: Build debug APK
         working-directory: apps/app/android
