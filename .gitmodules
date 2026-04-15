@@ -1,7 +1,7 @@
 [submodule "eliza"]
 	path = eliza
-	url = https://github.com/elizaos/eliza.git
-	branch = develop
+	url = https://github.com/dutchiono/eliza.git
+	branch = dutchs-new-windows-runtime
 [submodule "eliza/cloud"]
 	path = eliza/cloud
 	url = https://github.com/elizaOS/cloud.git
