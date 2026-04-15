@@ -70,6 +70,12 @@ jobs:
         env:
           LANG: en_US.UTF-8
 
+      - name: Install CocoaPods
+        working-directory: apps/app/ios/App
+        run: pod install
+        env:
+          LANG: en_US.UTF-8
+
       - name: Build for iOS Simulator
         # No `| tail -20` on the xcodebuild output: swallowing the tail
         # hides the real Swift compile errors (we had a TalkModePlugin
@@ -77,11 +83,12 @@ jobs:
         # because the tailed output cut before the error lines). Pipe
         # to `xcbeautify` if it's available for a tidier view, but let
         # the full log through on failure.
+        working-directory: apps/app/ios/App
         run: |
           set -o pipefail
           if command -v xcbeautify >/dev/null 2>&1; then
             xcodebuild \
-              -workspace apps/app/ios/App/App.xcworkspace \
+              -workspace App.xcworkspace \
               -scheme App \
               -configuration Debug \
               -destination "generic/platform=iOS Simulator" \
@@ -90,7 +97,7 @@ jobs:
               build 2>&1 | xcbeautify --renderer github-actions
           else
             xcodebuild \
-              -workspace apps/app/ios/App/App.xcworkspace \
+              -workspace App.xcworkspace \
               -scheme App \
               -configuration Debug \
               -destination "generic/platform=iOS Simulator" \
