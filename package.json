@@ -308,6 +308,14 @@
     "vitest": "^4.1.0"
   },
   "overrides": {
+    "@capacitor/android": "8.0.2",
+    "@capacitor/app": "8.1.0",
+    "@capacitor/core": "8.0.2",
+    "@capacitor/haptics": "8.0.0",
+    "@capacitor/ios": "8.0.2",
+    "@capacitor/keyboard": "8.0.0",
+    "@capacitor/preferences": "8.0.1",
+    "@capacitor/status-bar": "8.0.2",
     "@elizaos/plugin-elizacloud": "workspace:*",
     "@elizaos/plugin-anthropic": "workspace:*",
     "@elizaos/plugin-cli": "2.0.0-alpha.9",
