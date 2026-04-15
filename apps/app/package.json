@@ -43,7 +43,6 @@
     "@elizaos/app-core": "workspace:*",
     "@elizaos/shared": "workspace:*",
     "@elizaos/capacitor-agent": "workspace:*",
-    "@elizaos/capacitor-appblocker": "workspace:*",
     "@elizaos/capacitor-camera": "workspace:*",
     "@elizaos/capacitor-canvas": "workspace:*",
     "@elizaos/capacitor-desktop": "workspace:*",

@@ -1161,10 +1161,6 @@ export default defineConfig({
         replacement: path.join(nativePluginsRoot, "canvas/src/index.ts"),
       },
       {
-        find: /^@elizaos\/capacitor-appblocker$/,
-        replacement: path.join(nativePluginsRoot, "appblocker/src/index.ts"),
-      },
-      {
         find: /^@elizaos\/capacitor-desktop$/,
         replacement: path.join(nativePluginsRoot, "desktop/src/index.ts"),
       },

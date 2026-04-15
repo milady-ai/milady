@@ -45,7 +45,7 @@ const capacitorPreferencesPodLine = `  pod 'CapacitorPreferences', :path => '${c
 const anchorLine =
   "  pod 'ElizaosCapacitorAgent', :path => '../../../../eliza/packages/native-plugins/agent'";
 const appBlockerLine =
-  "  pod 'ElizaosCapacitorAppblocker', :path => '../../../../eliza/packages/native-plugins/appblocker'";
+  "  pod 'ElizaosCapacitorWebsiteblocker', :path => '../../../../eliza/packages/native-plugins/websiteblocker'";
 const familyControlsKey = "\t<key>com.apple.developer.family-controls</key>";
 const familyControlsValue = "\t<true/>";
 const compileAssetCatalogPhaseId = "ELIZA0001COMPILEASSETS001";

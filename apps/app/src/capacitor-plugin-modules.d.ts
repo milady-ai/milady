@@ -3,10 +3,6 @@ declare module "@elizaos/capacitor-agent" {
   export type * from "../../../eliza/packages/native-plugins/agent/src/index";
 }
 
-declare module "@elizaos/capacitor-appblocker" {
-  export * from "../../../eliza/packages/native-plugins/appblocker/src/index";
-}
-
 declare module "@elizaos/capacitor-camera" {
   export * from "../../../eliza/packages/native-plugins/camera/src/index";
 }
