@@ -1,8 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  DIRECT_ROUTE_CASES,
-  escapeRegExp,
-} from "./apps-session-route-cases";
+import { DIRECT_ROUTE_CASES, escapeRegExp } from "./apps-session-route-cases";
 import { assertReadyChecks, openAppPath, seedAppStorage } from "./helpers";
 
 const ROUTE_CASES = DIRECT_ROUTE_CASES.slice(7);
