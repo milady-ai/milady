@@ -190,6 +190,9 @@ export function main() {
     );
     run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
     run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
+    // Published-only CI runs against an upstream eliza checkout whose pack
+    // fallback path still needs the generic npm->bun retry patch.
+    run("node", ["scripts/patch-release-check-pack-fallback.mjs"]);
     run("bun", ["run", "release:check"]);
   } catch (err) {
     console.error(err.message ?? err);

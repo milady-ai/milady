@@ -1,0 +1,71 @@
+import { describe, expect, it } from "vitest";
+
+import { applyReleaseCheckPackFallback } from "./patch-release-check-pack-fallback.mjs";
+
+const upstreamRunPackDryBlock = `function runPackDry(): PackResult[] {
+  return withSanitizedNpmOverrides(() => {
+    try {
+      const raw = execSync("npm pack --dry-run --json --ignore-scripts", {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        maxBuffer: 1024 * 1024 * 100,
+      });
+      return JSON.parse(raw) as PackResult[];
+    } catch (error) {
+      if (!isNpmOverrideConflictError(error)) {
+        throw error;
+      }
+
+      // Last-resort fallback if sanitizing didn't resolve the
+      // EOVERRIDE (e.g. npm found a different override conflict).
+      // \`bun pm pack --dry-run\` trips over the Bun 1.3.11 lockfile
+      // parser bug (Duplicate package path at bun.lock:2034:5) under
+      // SKIP_LOCAL_UPSTREAMS, so we try it last and tolerate the
+      // parser failure by treating it as a soft-skip — the
+      // snapshot's file/dependency assertions still run against the
+      // cached PackResult from a normal local/CI build.
+      try {
+        const raw = execSync("bun pm pack --dry-run --ignore-scripts", {
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "pipe"],
+          maxBuffer: 1024 * 1024 * 100,
+        });
+        return parseBunPackDryRunOutput(raw);
+      } catch (bunError) {
+        const bunOutput =
+          (bunError as { stderr?: string; stdout?: string }).stderr ?? "";
+        if (
+          bunOutput.includes("Duplicate package path") ||
+          bunOutput.includes("InvalidPackageKey")
+        ) {
+          console.warn(
+            "release-check: bun pm pack --dry-run failed with a known Bun 1.3.11 lockfile parser error; returning empty file list (CI contract suite will still validate workflow snippets).",
+          );
+          return [{ files: [] }];
+        }
+        throw bunError;
+      }
+    }
+  });
+}`;
+
+describe("patch-release-check-pack-fallback", () => {
+  it("patches the upstream runPackDry block once", () => {
+    const source = `before\n${upstreamRunPackDryBlock}\nafter\n`;
+
+    const patched = applyReleaseCheckPackFallback(source);
+
+    expect(patched).toContain("function runBunPackDry(): PackResult[]");
+    expect(patched).toContain(
+      "retrying with bun pm pack --dry-run.",
+    );
+    expect(patched).not.toContain("throw error;");
+  });
+
+  it("is idempotent once the helper exists", () => {
+    const alreadyPatched =
+      "function runBunPackDry(): PackResult[] { return []; }\nfunction runPackDry(): PackResult[] { return []; }\n";
+
+    expect(applyReleaseCheckPackFallback(alreadyPatched)).toBe(alreadyPatched);
+  });
+});
