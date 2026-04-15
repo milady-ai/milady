@@ -2,7 +2,7 @@
 # Aplicación de escritorio Electrobun: inicio y manejo de excepciones
 </div>
 
-Este documento explica cómo se inicia el agente embebido en la aplicación de escritorio empaquetada y **por qué** las protecciones de manejo de excepciones en `apps/app/electrobun/src/native/agent.ts` no deben eliminarse.
+Este documento explica cómo se inicia el agente embebido en la aplicación de escritorio empaquetada y **por qué** las protecciones de manejo de excepciones en `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` no deben eliminarse.
 
 <div id="startup-sequence">
 ## Secuencia de inicio

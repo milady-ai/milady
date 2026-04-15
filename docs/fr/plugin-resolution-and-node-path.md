@@ -60,7 +60,7 @@ env.NODE_PATH = ...;
 **Pourquoi ici :** L'exécuteur CLI lance un processus enfant qui exécute `milady.mjs` → `dist/entry.js` → `dist/eliza.js`. Définir `NODE_PATH` dans l'env de l'enfant assure que l'enfant résout depuis la racine même si `dist/` n'a pas son propre `node_modules`.
 
 <div id="3-appsappelectrobunscrnativeagentts-electrobun-native-runtime">
-### 3. `apps/app/electrobun/src/native/agent.ts` (runtime natif Electrobun)
+### 3. `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` (runtime natif Electrobun)
 </div>
 
 ```ts

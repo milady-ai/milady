@@ -2,7 +2,7 @@
 # Electrobun 桌面应用：启动和异常处理
 </div>
 
-本文档说明了嵌入式代理如何在打包的桌面应用中启动，以及**为什么** `apps/app/electrobun/src/native/agent.ts` 中的异常处理保护不能被移除。
+本文档说明了嵌入式代理如何在打包的桌面应用中启动，以及**为什么** `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` 中的异常处理保护不能被移除。
 
 <div id="startup-sequence">
 ## 启动序列

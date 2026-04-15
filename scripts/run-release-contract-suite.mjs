@@ -3,7 +3,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
@@ -27,9 +27,7 @@ const releaseContractTests = [
   "eliza/packages/app-core/scripts/static-asset-manifest.test.ts",
 ];
 
-let createdCompatDir = false;
-
-function run(command, args, cwd = repoRoot) {
+export function run(command, args, cwd = repoRoot) {
   const result = spawnSync(command, args, {
     cwd,
     stdio: "inherit",
@@ -51,7 +49,7 @@ function run(command, args, cwd = repoRoot) {
   }
 }
 
-function symlinkOrCopy(sourcePath, targetPath) {
+export function symlinkOrCopy(sourcePath, targetPath) {
   const sourceStat = fs.lstatSync(sourcePath);
   if (sourceStat.isDirectory()) {
     fs.symlinkSync(
@@ -65,7 +63,7 @@ function symlinkOrCopy(sourcePath, targetPath) {
   fs.copyFileSync(sourcePath, targetPath);
 }
 
-function writeLegacyWindowsSmokeScript(sourcePath, targetPath) {
+export function writeLegacyWindowsSmokeScript(sourcePath, targetPath) {
   const source = fs.readFileSync(sourcePath, "utf8");
   const markers = [
     'Join-Path $env:APPDATA "Eliza\\\\eliza-startup.log"',
@@ -79,7 +77,7 @@ function writeLegacyWindowsSmokeScript(sourcePath, targetPath) {
   fs.writeFileSync(targetPath, `${markers}\n${source}`);
 }
 
-function writeLegacyWindowsInstallerProofScript(sourcePath, targetPath) {
+export function writeLegacyWindowsInstallerProofScript(sourcePath, targetPath) {
   const source = fs.readFileSync(sourcePath, "utf8");
   const markers = [
     "Eliza-Setup-*.exe",
@@ -91,7 +89,7 @@ function writeLegacyWindowsInstallerProofScript(sourcePath, targetPath) {
   fs.writeFileSync(targetPath, `${markers}\n${source}`);
 }
 
-function copyLegacyScriptsCompatDir(sourceDir, targetDir) {
+export function copyLegacyScriptsCompatDir(sourceDir, targetDir) {
   fs.mkdirSync(targetDir, { recursive: true });
   for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
     const sourcePath = path.join(sourceDir, entry.name);
@@ -111,8 +109,11 @@ function copyLegacyScriptsCompatDir(sourceDir, targetDir) {
   }
 }
 
-function writeLegacyElectrobunWrapper(wrapperPath) {
-  const wrapperSource = `import canonicalConfig from "../../../eliza/packages/app-core/platforms/electrobun/electrobun.config.ts";
+export function writeLegacyElectrobunWrapper(
+  wrapperPath,
+  canonicalConfigImportPath = "../../../eliza/packages/app-core/platforms/electrobun/electrobun.config.ts",
+) {
+  const wrapperSource = `import canonicalConfig from "${canonicalConfigImportPath}";
 
 // release-check legacy marker: "postBuild: "scripts/postwrap-sign-runtime-macos.ts""
 // release-check legacy marker: "postWrap: "scripts/postwrap-diagnostics.ts""
@@ -124,18 +125,19 @@ export default canonicalConfig;
   fs.writeFileSync(wrapperPath, wrapperSource);
 }
 
-function ensureLegacyElectrobunCompatDir() {
-  if (
-    fs.existsSync(legacyElectrobunDir) ||
-    !fs.existsSync(canonicalElectrobunDir)
-  ) {
+export function ensureLegacyElectrobunCompatDir({
+  legacyDir = legacyElectrobunDir,
+  canonicalDir = canonicalElectrobunDir,
+  canonicalConfigImportPath = "../../../eliza/packages/app-core/platforms/electrobun/electrobun.config.ts",
+} = {}) {
+  if (fs.existsSync(legacyDir) || !fs.existsSync(canonicalDir)) {
     return false;
   }
 
-  fs.mkdirSync(legacyElectrobunDir, { recursive: true });
-  for (const entry of fs.readdirSync(canonicalElectrobunDir, { withFileTypes: true })) {
-    const sourcePath = path.join(canonicalElectrobunDir, entry.name);
-    const targetPath = path.join(legacyElectrobunDir, entry.name);
+  fs.mkdirSync(legacyDir, { recursive: true });
+  for (const entry of fs.readdirSync(canonicalDir, { withFileTypes: true })) {
+    const sourcePath = path.join(canonicalDir, entry.name);
+    const targetPath = path.join(legacyDir, entry.name);
 
     if (entry.name === "electrobun.config.ts") {
       continue;
@@ -150,40 +152,59 @@ function ensureLegacyElectrobunCompatDir() {
   }
 
   writeLegacyElectrobunWrapper(
-    path.join(legacyElectrobunDir, "electrobun.config.ts"),
+    path.join(legacyDir, "electrobun.config.ts"),
+    canonicalConfigImportPath,
   );
   return true;
 }
 
-let exitCode = 0;
-try {
-  createdCompatDir = ensureLegacyElectrobunCompatDir();
-
-  run("bunx", ["vitest", "run", "--passWithNoTests", ...releaseContractTests]);
-  run("bunx", [
-    "vitest",
-    "run",
-    "--passWithNoTests",
-    "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
-  ]);
-
-  // tsdown and release:check resolve repo-root-relative entries/config.
-  run("bunx", ["tsdown", "--fail-on-warn", "false"]);
-  fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
-  fs.writeFileSync(
-    path.join(repoRoot, "dist", "package.json"),
-    '{"type":"module"}\n',
-  );
-  run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
-  run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
-  run("bun", ["run", "release:check"]);
-} catch (err) {
-  console.error(err.message ?? err);
-  exitCode = 1;
-} finally {
-  if (createdCompatDir && fs.existsSync(legacyElectrobunDir)) {
-    fs.rmSync(legacyElectrobunDir, { force: true, recursive: true });
+export function cleanupLegacyElectrobunCompatDir(
+  shouldCleanup,
+  legacyDir = legacyElectrobunDir,
+) {
+  if (shouldCleanup && fs.existsSync(legacyDir)) {
+    fs.rmSync(legacyDir, { force: true, recursive: true });
   }
 }
 
-process.exit(exitCode);
+export function main() {
+  let exitCode = 0;
+  let createdCompatDir = false;
+  try {
+    createdCompatDir = ensureLegacyElectrobunCompatDir();
+
+    run("bunx", ["vitest", "run", "--passWithNoTests", ...releaseContractTests]);
+    run("bunx", [
+      "vitest",
+      "run",
+      "--passWithNoTests",
+      "eliza/packages/app-core/scripts/startup-integration-script-drift.test.ts",
+    ]);
+
+    // tsdown and release:check resolve repo-root-relative entries/config.
+    run("bunx", ["tsdown", "--fail-on-warn", "false"]);
+    fs.mkdirSync(path.join(repoRoot, "dist"), { recursive: true });
+    fs.writeFileSync(
+      path.join(repoRoot, "dist", "package.json"),
+      '{"type":"module"}\n',
+    );
+    run("node", ["--import", "tsx", "scripts/write-build-info.ts"]);
+    run("node", ["scripts/generate-static-asset-manifest.mjs"], appCoreRoot);
+    run("bun", ["run", "release:check"]);
+  } catch (err) {
+    console.error(err.message ?? err);
+    exitCode = 1;
+  } finally {
+    cleanupLegacyElectrobunCompatDir(createdCompatDir);
+  }
+
+  return exitCode;
+}
+
+const isDirectRun =
+  typeof process.argv[1] === "string" &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isDirectRun) {
+  process.exit(main());
+}

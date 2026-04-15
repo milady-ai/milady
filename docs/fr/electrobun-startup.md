@@ -2,7 +2,7 @@
 # Application bureau Electrobun : démarrage et gestion des exceptions
 </div>
 
-Ce document explique comment l'agent embarqué démarre dans l'application bureau empaquetée et **pourquoi** les gardes de gestion d'exceptions dans `apps/app/electrobun/src/native/agent.ts` ne doivent pas être supprimées.
+Ce document explique comment l'agent embarqué démarre dans l'application bureau empaquetée et **pourquoi** les gardes de gestion d'exceptions dans `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` ne doivent pas être supprimées.
 
 <div id="startup-sequence">
 ## Séquence de démarrage

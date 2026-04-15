@@ -1,6 +1,6 @@
 # Electrobun desktop app: startup and exception handling
 
-This doc explains how the embedded agent starts in the packaged desktop app and **why** the exception-handling guards in `apps/app/electrobun/src/native/agent.ts` must not be removed.
+This doc explains how the embedded agent starts in the packaged desktop app and **why** the exception-handling guards in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` must not be removed.
 
 ## Startup sequence
 

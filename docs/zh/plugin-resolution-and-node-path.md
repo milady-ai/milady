@@ -60,7 +60,7 @@ env.NODE_PATH = ...;
 **为什么在这里：** CLI 执行器生成一个运行 `milady.mjs` → `dist/entry.js` → `dist/eliza.js` 的子进程。在子进程的 env 中设置 `NODE_PATH` 确保子进程从根目录解析，即使 `dist/` 没有自己的 `node_modules`。
 
 <div id="3-appsappelectrobunscrnativeagentts-electrobun-native-runtime">
-### 3. `apps/app/electrobun/src/native/agent.ts`（Electrobun 原生运行时）
+### 3. `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts`（Electrobun 原生运行时）
 </div>
 
 ```ts

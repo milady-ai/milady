@@ -49,7 +49,7 @@ env.NODE_PATH = ...;
 
 **Why here:** The CLI runner spawns a child process that runs `milady.mjs` → `dist/entry.js` → `dist/eliza.js`. Setting `NODE_PATH` in the child's env ensures the child resolves from root even though `dist/` doesn't have its own `node_modules`.
 
-### 3. `apps/app/electrobun/src/native/agent.ts` (Electrobun native runtime)
+### 3. `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` (Electrobun native runtime)
 
 ```ts
 // Dev: walk up from __dirname to find node_modules
