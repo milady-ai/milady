@@ -1,11 +1,35 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
 import { resolveRepoRoot } from "./lib/repo-root.mjs";
 
 const repoRoot = resolveRepoRoot(import.meta.url);
 
-const suites = {
+export const miladyElizaTypecheckSteps = [
+  {
+    label: "eliza agent typecheck",
+    command: "bun",
+    args: ["run", "--cwd", "eliza/packages/agent", "typecheck"],
+  },
+  {
+    label: "eliza cloud plugin typecheck",
+    command: "bun",
+    args: [
+      "run",
+      "--cwd",
+      "eliza/plugins/plugin-elizacloud/typescript",
+      "typecheck",
+    ],
+  },
+];
+
+// Keep repo-wide checks focused on the upstream packages Milady actually ships
+// against; the full eliza workspace includes unrelated plugin packages that can
+// fail independently and should not block this repo's CI.
+export const suites = {
   lint: [
     {
       label: "Repo Biome",
@@ -21,11 +45,6 @@ const suites = {
       label: "apps/homepage lint",
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "lint"],
-    },
-    {
-      label: "eliza TypeScript lint",
-      command: "bun",
-      args: ["run", "--cwd", "eliza", "lint:check"],
     },
     {
       label: "cloud lint",
@@ -64,12 +83,7 @@ const suites = {
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "typecheck"],
     },
-    {
-      label: "eliza TypeScript typecheck",
-      command: "bun",
-      args: ["x", "turbo", "run", "typecheck", "--force", "--concurrency=1"],
-      cwd: `${repoRoot}/eliza`,
-    },
+    ...miladyElizaTypecheckSteps,
     {
       label: "eliza Rust typecheck",
       command: "bun",
@@ -123,22 +137,41 @@ function usage() {
   console.error(`Usage: node scripts/run-repo-checks.mjs <${suiteList}>`);
 }
 
-const suiteName = process.argv[2];
-if (!suiteName || !(suiteName in suites)) {
-  usage();
-  process.exit(1);
+export function isDirectRun(
+  importMetaUrl = import.meta.url,
+  argv1 = process.argv[1],
+  pathResolve = path.resolve,
+  toFileUrl = pathToFileURL,
+) {
+  return (
+    typeof argv1 === "string" &&
+    importMetaUrl === toFileUrl(pathResolve(argv1)).href
+  );
 }
 
-for (const step of suites[suiteName]) {
-  console.log(`\n[repo-checks] ${step.label}`);
-  const result = spawnSync(step.command, step.args, {
-    cwd: step.cwd ?? repoRoot,
-    stdio: "inherit",
-    env: process.env,
-    shell: process.platform === "win32",
-  });
-
-  if ((result.status ?? 1) !== 0) {
-    process.exit(result.status ?? 1);
+export function runSuite(suiteName = process.argv[2]) {
+  if (!suiteName || !(suiteName in suites)) {
+    usage();
+    return 1;
   }
+
+  for (const step of suites[suiteName]) {
+    console.log(`\n[repo-checks] ${step.label}`);
+    const result = spawnSync(step.command, step.args, {
+      cwd: step.cwd ?? repoRoot,
+      stdio: "inherit",
+      env: process.env,
+      shell: process.platform === "win32",
+    });
+
+    if ((result.status ?? 1) !== 0) {
+      return result.status ?? 1;
+    }
+  }
+
+  return 0;
+}
+
+if (isDirectRun()) {
+  process.exit(runSuite());
 }
