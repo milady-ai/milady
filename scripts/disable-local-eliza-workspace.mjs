@@ -65,6 +65,10 @@ export const LOCAL_ONLY_WORKSPACE_PATHS = ["eliza/packages/shared"];
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
 };
+export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
+  "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
+  "@elizaos/ui": "file:./packages/ui",
+};
 export const DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -79,6 +83,29 @@ export const PINNED_VERSION_SOURCE_WORKSPACE = "workspace";
 const ELIZAOS_CORE_NAME = "@elizaos/core";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const DEFAULT_REPO_ROOT = process.cwd();
+
+export function resolveRootUiOverrideSpecifier(repoRoot = DEFAULT_REPO_ROOT) {
+  const disabledUiPackageJsonPath = path.join(
+    repoRoot,
+    ".eliza.ci-disabled",
+    "packages",
+    "ui",
+    "package.json",
+  );
+
+  if (fs.existsSync(disabledUiPackageJsonPath)) {
+    return "file:./.eliza.ci-disabled/packages/ui";
+  }
+
+  return "file:./eliza/packages/ui";
+}
+
+export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
+  return {
+    ...CI_OVERRIDE_SPECIFIERS,
+    "@elizaos/ui": resolveRootUiOverrideSpecifier(repoRoot),
+  };
+}
 
 /**
  * @typedef {import("./lib/package-types.d.ts").PackageJsonRecord} PackageJsonRecord
@@ -644,17 +671,16 @@ export function rewriteWorkspaceDependencySpecifiers(
   return mutated;
 }
 
-/**
- * @param {PackageJsonRecord} pkg
- * @param {{ log?: typeof console.log }} [options]
- * @returns {boolean}
- */
-export function applyCiOnlyOverrides(pkg, { log = console.log } = {}) {
+export function applyOverrideSpecifiers(
+  pkg,
+  overrideSpecifiers,
+  { log = console.log, label = "CI-only override" } = {},
+) {
   const overrides = isStringRecord(pkg.overrides) ? pkg.overrides : {};
   const injected = [];
 
   for (const [dependencyName, specifier] of Object.entries(
-    CI_OVERRIDE_SPECIFIERS,
+    overrideSpecifiers,
   )) {
     if (overrides[dependencyName] === specifier) {
       continue;
@@ -669,9 +695,24 @@ export function applyCiOnlyOverrides(pkg, { log = console.log } = {}) {
 
   pkg.overrides = overrides;
   log(
-    `[disable-local-eliza-workspace] Added ${injected.length} CI-only override(s) (${injected.join(", ")})`,
+    `[disable-local-eliza-workspace] Added ${injected.length} ${label}(s) (${injected.join(", ")})`,
   );
   return true;
+}
+
+/**
+ * @param {PackageJsonRecord} pkg
+ * @param {{ log?: typeof console.log, repoRoot?: string }} [options]
+ * @returns {boolean}
+ */
+export function applyCiOnlyOverrides(
+  pkg,
+  { log = console.log, repoRoot = DEFAULT_REPO_ROOT } = {},
+) {
+  return applyOverrideSpecifiers(pkg, resolveCiOverrideSpecifiers(repoRoot), {
+    log,
+    label: "CI-only override",
+  });
 }
 
 export function disableLocalElizaWorkspace(
@@ -683,6 +724,7 @@ export function disableLocalElizaWorkspace(
   const shouldRenameElizaWorkspace =
     process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_RENAME === "1";
   const packageJsonPath = path.join(repoRoot, "package.json");
+  const elizaPackageJsonPath = path.join(elizaRoot, "package.json");
   const removedLockfiles = [];
   const localOnlyPackages = resolveLocalOnlyWorkspacePackageNames(repoRoot);
 
@@ -880,9 +922,32 @@ export function disableLocalElizaWorkspace(
     }
   }
 
-  applyCiOnlyOverrides(rootPkg, { log });
+  applyCiOnlyOverrides(rootPkg, { log, repoRoot });
 
   writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
+
+  if (fs.existsSync(elizaPackageJsonPath)) {
+    try {
+      const rawElizaPkg = fs.readFileSync(elizaPackageJsonPath, "utf8");
+      const elizaPkg = JSON.parse(rawElizaPkg);
+      if (
+        applyOverrideSpecifiers(
+          elizaPkg,
+          ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS,
+          {
+            log,
+            label: "local eliza runtime override",
+          },
+        )
+      ) {
+        writePackageJson(elizaPackageJsonPath, rawElizaPkg, elizaPkg);
+      }
+    } catch (error) {
+      warn(
+        `[disable-local-eliza-workspace] Failed to patch ${elizaPackageJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
   // Use early-resolved versions (captured before eliza/ was renamed away).
   // Fall back to a post-rename resolution attempt for robustness.
