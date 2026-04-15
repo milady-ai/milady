@@ -19,7 +19,7 @@ describe("docker CI smoke contract", () => {
     const script = fs.readFileSync(dockerSmokeScriptPath, "utf8");
 
     expect(script).toContain(
-      "bash scripts/install-published-workspace-fallback-deps.sh",
+      'bash "$REPO_ROOT/scripts/install-published-workspace-fallback-deps.sh"',
     );
     expect(script).not.toContain("bun add --no-save --dev");
   });
