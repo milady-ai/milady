@@ -3,6 +3,36 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-15" description="Week of April 15; Steward Vault managed wallets, agent training, character catalog, coding agent sessions, companion emotes" tags={["Feature", "Update", "Fix"]}>
+
+## Steward Vault managed wallets
+
+Your agent now supports a dual-wallet architecture with [Steward Vault](/guides/wallet) integration. When connected, transactions route through a managed vault that evaluates spending policies — including per-transaction, daily, and weekly USD-denominated caps — before signing. You can switch between local and cloud wallets at any time, and your primary wallet selection persists across restarts. Both EVM and Solana chains are supported, with automatic RPC fallbacks when balance lookups fail.
+
+## Agent training
+
+A new [training system](/guides/training) lets you shape your agent's behavior with custom examples and feedback. Provide training data through the dashboard and the training engine processes it into actionable patterns your agent applies in conversation. Training runs are visible in the dashboard so you can track progress and refine results over time.
+
+## Character catalog in desktop
+
+The desktop app now includes an expanded character catalog for browsing and selecting agent personalities. Character previews load faster and the selection flow integrates directly with the [onboarding wizard](/guides/beginners-user-guide) and character editor, so you can explore available characters without leaving the setup process.
+
+## Updates
+
+- **Coding agent session hydration** — [Coding agent](/guides/coding-swarms) sessions now persist their state and restore it when you return, so you pick up where you left off instead of starting a fresh session. The coding agent settings and model configuration panels have also been refreshed.
+- **Companion emote picker** — The [companion](/dashboard/apps) overlay now includes an emote picker, letting you trigger VRM avatar expressions and gestures on demand. The emote system is integrated with the companion chat and shell.
+- **Homepage approval queue and transaction history** — The cloud [dashboard](/guides/cloud) now shows a cleaner approval queue and formatted transaction history, making it easier to review pending actions and past activity at a glance.
+- **Life-ops sidebar cleanup** — The stale todo sidebar widget has been removed from the life-ops section, reducing clutter for users who manage tasks through conversation instead.
+- **Plugin config reconciliation** — Plugin enabled states are now reconciled automatically on startup. If your config file was edited externally or a migration only updated one location, the runtime detects the drift and corrects it — so plugins stay in sync without manual intervention.
+- **Desktop diagnostic redaction** — Bug reports submitted from the desktop app now automatically redact API keys, tokens, and secrets from URLs before they leave your machine, preventing accidental credential exposure in diagnostic logs.
+
+## Bug fixes
+
+- Fixed shell header buttons (voice toggle, new chat, save) appearing as unresponsive when their handlers were unavailable — they are now hidden until functional
+- Fixed Windows desktop builds failing under heavy native plugin compilation by limiting spawn concurrency and terminating stalled child processes
+
+</Update>
+
 <Update label="2026-04-15" description="Week of April 15; Steward wallet follow-ups and CI hardening" tags={["Update", "Fix", "Docs"]}>
 
 ## Steward wallet plugin 0.3.0

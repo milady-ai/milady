@@ -37,7 +37,7 @@ export function syncElizaEnvAliases() {
     ["MILADY_PORT", "ELIZA_UI_PORT"],
   ];
   for (const [from, to] of pairs) {
-    if (!process.env[to] && process.env[from]) {
+    if (process.env[to] === undefined && process.env[from] !== undefined) {
       process.env[to] = process.env[from];
     }
   }

@@ -2,6 +2,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 export const ROOT_TIMEOUT_MS = 20_000;
 export const NAV_TIMEOUT_MS = 12_000;
+const READY_CHECK_TIMEOUT_MS = 5_000;
 
 type ReadyCheck =
   | { selector: string; text?: never }
@@ -59,9 +60,12 @@ export async function readLocalStorage(
   return page.evaluate((storageKey) => localStorage.getItem(storageKey), key);
 }
 
-async function locatorVisible(locator: Locator): Promise<boolean> {
+async function locatorVisible(
+  locator: Locator,
+  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
+): Promise<boolean> {
   try {
-    await locator.first().waitFor({ state: "visible", timeout: 5_000 });
+    await locator.first().waitFor({ state: "visible", timeout: timeoutMs });
     return true;
   } catch {
     return false;
@@ -89,6 +93,7 @@ async function evaluateReadyChecks(
   page: Page,
   checks: ReadyCheck[],
   mode: "any" | "all" = "any",
+  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<{
   passed: boolean;
   results: EvaluatedReadyCheck[];
@@ -99,13 +104,13 @@ async function evaluateReadyChecks(
     if ("selector" in check) {
       results.push({
         check,
-        passed: await locatorVisible(page.locator(check.selector)),
+        passed: await locatorVisible(page.locator(check.selector), timeoutMs),
       });
       continue;
     }
     results.push({
       check,
-      passed: await locatorVisible(page.getByText(check.text)),
+      passed: await locatorVisible(page.getByText(check.text), timeoutMs),
     });
   }
 
@@ -120,8 +125,9 @@ export async function assertReadyChecks(
   label: string,
   checks: ReadyCheck[],
   mode: "any" | "all" = "any",
+  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<void> {
-  const evaluation = await evaluateReadyChecks(page, checks, mode);
+  const evaluation = await evaluateReadyChecks(page, checks, mode, timeoutMs);
   const summary = evaluation.results
     .map(
       (result) =>
@@ -358,8 +364,9 @@ export async function runSoftReadyChecks(
   label: string,
   checks: ReadyCheck[],
   mode: "any" | "all" = "any",
+  timeoutMs: number = READY_CHECK_TIMEOUT_MS,
 ): Promise<void> {
-  const evaluation = await evaluateReadyChecks(page, checks, mode);
+  const evaluation = await evaluateReadyChecks(page, checks, mode, timeoutMs);
   if (evaluation.passed) {
     return;
   }

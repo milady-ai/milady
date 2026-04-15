@@ -56,6 +56,15 @@ describe("syncElizaEnvAliases", () => {
     expect(process.env.ELIZA_NAMESPACE).toBe("eliza-original");
   });
 
+  it("treats an empty ELIZA_* value as intentional and does not overwrite it", () => {
+    process.env.MILADY_API_TOKEN = "milady-token";
+    process.env.ELIZA_API_TOKEN = "";
+
+    syncElizaEnvAliases();
+
+    expect(process.env.ELIZA_API_TOKEN).toBe("");
+  });
+
   it("maps MILADY_PORT to ELIZA_UI_PORT (asymmetric alias)", () => {
     process.env.MILADY_PORT = "2138";
 
