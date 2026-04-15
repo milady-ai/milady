@@ -69,10 +69,7 @@ jobs:
           disable-local-eliza-workspace: "true"
 
       - name: Restore eliza workspace paths for script checks
-        run: |
-          if ((Test-Path ".eliza.ci-disabled") -and -not (Test-Path "eliza")) {
-            Move-Item -LiteralPath ".eliza.ci-disabled" -Destination "eliza"
-          }
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Verify json5 interop
         run: >

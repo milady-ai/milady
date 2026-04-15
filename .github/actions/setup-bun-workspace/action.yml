@@ -47,9 +47,9 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Install Python CI tooling
+    - name: Install setuptools for distutils (Python 3.12+)
       shell: bash
-      run: python -m pip install --upgrade pip setuptools ruff mypy
+      run: pip install setuptools
 
     - name: Install native dependencies
       if: ${{ inputs.install-native-deps == 'true' }}
@@ -119,26 +119,24 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: |
-        for attempt in 1 2 3; do
-          if ${{ inputs.install-command }}; then
-            exit 0
-          fi
-          if [ "$attempt" -eq 3 ]; then
-            echo "Dependency install failed after ${attempt} attempts"
-            exit 1
-          fi
-          rm -rf node_modules
-          echo "Dependency install failed on attempt ${attempt}; retrying in 15 seconds"
-          sleep 15
-        done
+      run: ${{ inputs.install-command }}
       env:
         npm_config_python: ${{ env.pythonLocation }}/bin/python3
 
     - name: Install published-workspace fallback dependencies
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
-      run: bash scripts/install-published-workspace-fallback-deps.sh
+      run: >
+        bun add --no-save --dev --ignore-scripts
+        @elizaos/ui@file:./eliza/packages/ui
+        react react-dom vite
+        @types/react @types/react-dom
+        tailwindcss three clsx class-variance-authority tailwind-merge sonner
+        @radix-ui/react-checkbox @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label
+        @radix-ui/react-popover @radix-ui/react-select @radix-ui/react-separator @radix-ui/react-slider
+        @radix-ui/react-slot @radix-ui/react-switch @radix-ui/react-tabs @radix-ui/react-tooltip
+        @capacitor/core @capacitor/haptics @capacitor/keyboard @capacitor/preferences
+        @xterm/xterm @xterm/addon-fit
 
     - name: Run repository postinstall patches
       if: ${{ inputs.run-postinstall == 'true' }}

@@ -64,6 +64,7 @@ export const LOCAL_ONLY_WORKSPACE_GLOBS = [
 export const LOCAL_ONLY_WORKSPACE_PATHS = ["eliza/packages/shared"];
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
+  "@elizaos/ui": "file:./eliza/packages/ui",
 };
 export const DEPENDENCY_FIELDS = [
   "dependencies",

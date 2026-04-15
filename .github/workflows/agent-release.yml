@@ -250,10 +250,7 @@ jobs:
           disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
       - name: Restore eliza workspace paths for release scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
       - name: Build
         run: |
           bunx tsdown
@@ -509,10 +506,7 @@ jobs:
           disable-local-eliza-workspace: "true"
           install-command: bun install --ignore-scripts --no-frozen-lockfile
       - name: Restore eliza workspace paths for homepage scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
       - name: Generate release metadata
         run: node scripts/write-homepage-release-data.mjs || echo "::warning::Release metadata gen failed"
         env:

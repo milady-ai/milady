@@ -31,12 +31,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install protobuf compiler
-        run: |
-          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
-          sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y protobuf-compiler
-
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
@@ -47,10 +41,7 @@ jobs:
           no-vision-deps: "true"
 
       - name: Restore eliza workspace paths for repo scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Fetch upstream develop for pre-review base
         run: |
@@ -76,12 +67,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install protobuf compiler
-        run: |
-          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
-          sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y protobuf-compiler
-
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
@@ -90,10 +75,7 @@ jobs:
           prepare-local-eliza-runtime: "true"
 
       - name: Restore eliza workspace paths for repo scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Install submodule verification dependencies
         run: |
@@ -109,53 +91,6 @@ jobs:
           mkdir -p eliza/node_modules
           rm -rf eliza/node_modules/@biomejs
           ln -s "${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs
-
-      - name: Relax upstream Python enum lint for current eliza plugin checkouts
-        run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const path = require("node:path");
-
-          const pluginsRoot = path.join(process.cwd(), "eliza", "plugins");
-          let patched = 0;
-
-          for (const entry of fs.readdirSync(pluginsRoot, { withFileTypes: true })) {
-            if (!entry.isDirectory()) continue;
-
-            const pyprojectPath = path.join(
-              pluginsRoot,
-              entry.name,
-              "python",
-              "pyproject.toml",
-            );
-            if (!fs.existsSync(pyprojectPath)) continue;
-
-            const original = fs.readFileSync(pyprojectPath, "utf8");
-            if (!original.includes("[tool.ruff.lint]") || original.includes('"UP042"')) {
-              continue;
-            }
-
-            let updated = original;
-            if (updated.includes("ignore = [\n")) {
-              updated = updated.replace(
-                "ignore = [\n",
-                'ignore = [\n    "UP042", # keep legacy str, Enum until upstream plugins adopt StrEnum\n',
-              );
-            } else {
-              updated = updated.replace(
-                "[tool.ruff.lint]\n",
-                '[tool.ruff.lint]\nignore = ["UP042"]\n',
-              );
-            }
-
-            if (updated === original) continue;
-            fs.writeFileSync(pyprojectPath, updated);
-            patched += 1;
-            console.log(`[ci] patched ${pyprojectPath}`);
-          }
-
-          console.log(`[ci] patched ${patched} eliza plugin Python lint config file(s)`);
-          NODE
 
       - name: Biome lint
         run: bun run verify:lint
@@ -177,12 +112,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install protobuf compiler
-        run: |
-          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
-          sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y protobuf-compiler
-
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
@@ -190,10 +119,7 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Install submodule verification dependencies
         run: |
@@ -230,15 +156,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install Linux desktop runtime dependencies
-        run: |
-          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
-          sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y \
-            libayatana-appindicator3-1 \
-            libwebkit2gtk-4.1-0 \
-            xvfb
-
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
@@ -246,16 +163,13 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Build
         run: bun run build
 
       - name: Run real integration tests (live/real suite)
-        run: xvfb-run -a bun run test:ci:real
+        run: bun run test:ci:real
         env:
           NODE_NO_WARNINGS: "1"
 
@@ -280,10 +194,7 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
 
       - name: Restore eliza workspace paths for repo scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Build project
         run: bun run build

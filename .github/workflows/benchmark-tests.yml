@@ -61,10 +61,7 @@ jobs:
           install-native-deps: "false"
 
       - name: Restore eliza workspace paths for benchmark scripts
-        run: |
-          if [ -d ".eliza.ci-disabled" ] && [ ! -d "eliza" ]; then
-            mv .eliza.ci-disabled eliza
-          fi
+        run: node scripts/restore-local-eliza-workspace.mjs
 
       - name: Run ${{ matrix.lane }} lane
         env:

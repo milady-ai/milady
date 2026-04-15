@@ -12,6 +12,7 @@ const files = {
   action: ".github/actions/setup-bun-workspace/action.yml",
   packageJson: "package.json",
   disableScript: "scripts/disable-local-eliza-workspace.mjs",
+  restoreScript: "scripts/restore-local-eliza-workspace.mjs",
   regressionMatrixScript:
     "eliza/packages/app-core/scripts/validate-regression-matrix.mjs",
 };
@@ -29,7 +30,7 @@ const requiredWorkflowSnippets = [
   "uses: ./.github/actions/setup-bun-workspace",
   'disable-local-eliza-workspace: "true"',
   "install-command: bun install --ignore-scripts --no-frozen-lockfile",
-  `run: node -e "const fs=require('node:fs');if(fs.existsSync('.eliza.ci-disabled')&&!fs.existsSync('eliza'))fs.renameSync('.eliza.ci-disabled','eliza');"`,
+  "run: node scripts/restore-local-eliza-workspace.mjs",
   "run: bun run test:regression-matrix:pr",
 ];
 

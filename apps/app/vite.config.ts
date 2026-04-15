@@ -71,6 +71,24 @@ function elizaCoreAlphaPrerelease(dir: string): number {
   return m?.[1] ? parseInt(m[1], 10) : -1;
 }
 
+function resolveExistingUiSourceModule(id: string) {
+  if (fs.existsSync(id)) {
+    return id;
+  }
+
+  const alternate = id.endsWith(".tsx")
+    ? `${id.slice(0, -4)}.ts`
+    : id.endsWith(".ts")
+      ? `${id.slice(0, -3)}.tsx`
+      : null;
+
+  if (alternate && fs.existsSync(alternate)) {
+    return alternate;
+  }
+
+  return id;
+}
+
 /**
  * Bun stores a full npm tarball under node_modules/.bun even when the workspace
  * symlink for @elizaos/core points at an unbuilt local eliza checkout.
@@ -1085,6 +1103,7 @@ export default defineConfig({
       {
         find: /^@elizaos\/ui\/components\/ui\/(.*)$/,
         replacement: `${uiPkgRoot}/src/components/ui/$1.tsx`,
+        customResolver: resolveExistingUiSourceModule,
       },
       {
         find: /^@elizaos\/ui\/components\/composites\/([^/]+)$/,
@@ -1093,10 +1112,12 @@ export default defineConfig({
       {
         find: /^@elizaos\/ui\/components\/composites\/(.+)\/([^/]+)$/,
         replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
+        customResolver: resolveExistingUiSourceModule,
       },
       {
         find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
         replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
+        customResolver: resolveExistingUiSourceModule,
       },
       {
         find: /^@elizaos\/ui\/hooks$/,

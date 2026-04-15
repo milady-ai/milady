@@ -3,6 +3,18 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-15" description="Week of April 15; Steward wallet follow-ups and CI hardening" tags={["Update", "Fix", "Docs"]}>
+
+## Steward wallet plugin 0.3.0
+
+Milady now targets `@stwd/eliza-plugin` 0.3.0 instead of 0.2.0. The published 0.3.0 package upgrades its Steward SDK dependency from `@stwd/sdk` 0.3.0 to 0.4.0, adds explicit spend-summary and approval-queue actions (`STEWARD_CHECK_SPEND`, `STEWARD_LIST_APPROVALS`), and updates signing flows so pending approvals and signed-but-not-broadcast transactions are surfaced as distinct outcomes.
+
+## Updates
+
+- **Published-only CI restore flow** — CI jobs that temporarily rename `eliza/` now restore it through a shared Node script with an explicit rename failure path, so Windows and cross-platform follow-on failures stop collapsing into vague downstream build errors.
+
+</Update>
+
 <Update label="2026-04-13" description="Week of April 13; life-ops goal grounding, Gmail compose, calendar editing, cloud Docker improvements" tags={["Feature", "Update", "Fix"]}>
 
 ## Life-ops goal grounding

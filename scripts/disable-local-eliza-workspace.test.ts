@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  CI_OVERRIDE_SPECIFIERS,
   collectWorkspaceProtocolDependencyNames,
   disableLocalElizaWorkspace,
   PINNED_VERSION_SOURCE_OVERRIDE,
@@ -171,6 +172,39 @@ describe("disable-local-eliza-workspace", () => {
       "@elizaos/core": "2.0.0-alpha.163",
       "@elizaos/plugin-agent-orchestrator": "0.6.2-alpha.0",
       "@elizaos/skills": "2.0.0-alpha.163",
+    });
+  });
+
+  it("injects the published-workspace @elizaos/ui override for CI rewrites", () => {
+    const repoRoot = makeTempDir();
+    writeJson(path.join(repoRoot, "package.json"), {
+      name: "milady-test",
+      workspaces: ["eliza/packages/*"],
+      overrides: {
+        "@elizaos/core": "2.0.0-alpha.163",
+      },
+    });
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "typescript", "package.json"),
+      {
+        name: "@elizaos/typescript",
+        version: "2.0.0-alpha.163",
+      },
+    );
+
+    disableLocalElizaWorkspace(repoRoot, {
+      log: () => {},
+      warn: () => {},
+      errorLog: () => {},
+    });
+
+    const rootPackage = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+    );
+    expect(rootPackage.overrides).toMatchObject({
+      "@elizaos/ui": CI_OVERRIDE_SPECIFIERS["@elizaos/ui"],
+      "@elizaos/plugin-wechat":
+        CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-wechat"],
     });
   });
 });
