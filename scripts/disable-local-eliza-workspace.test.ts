@@ -327,4 +327,38 @@ describe("disable-local-eliza-workspace", () => {
         ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS["@elizaos/plugin-wechat"],
     });
   });
+
+  it("skips malformed eliza/package.json when injecting runtime overrides", () => {
+    const repoRoot = makeTempDir();
+    const warnings: string[] = [];
+    writeJson(path.join(repoRoot, "package.json"), {
+      name: "milady-test",
+      workspaces: ["eliza/packages/*"],
+      overrides: {
+        "@elizaos/core": "2.0.0-alpha.163",
+      },
+    });
+    fs.mkdirSync(path.join(repoRoot, "eliza"), { recursive: true });
+    fs.writeFileSync(path.join(repoRoot, "eliza", "package.json"), "null\n");
+    writeJson(
+      path.join(repoRoot, "eliza", "packages", "typescript", "package.json"),
+      {
+        name: "@elizaos/typescript",
+        version: "2.0.0-alpha.163",
+      },
+    );
+
+    disableLocalElizaWorkspace(repoRoot, {
+      log: () => {},
+      warn: (message) => warnings.push(message),
+      errorLog: () => {},
+    });
+
+    expect(
+      fs.readFileSync(path.join(repoRoot, "eliza", "package.json"), "utf8"),
+    ).toBe("null\n");
+    expect(warnings).toContain(
+      `[disable-local-eliza-workspace] Skipping ${path.join(repoRoot, "eliza", "package.json")}: package.json is malformed`,
+    );
+  });
 });

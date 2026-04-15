@@ -929,8 +929,12 @@ export function disableLocalElizaWorkspace(
   if (fs.existsSync(elizaPackageJsonPath)) {
     try {
       const rawElizaPkg = fs.readFileSync(elizaPackageJsonPath, "utf8");
-      const elizaPkg = JSON.parse(rawElizaPkg);
-      if (
+      const elizaPkg = parseJsonObject(rawElizaPkg);
+      if (!isPackageJsonRecord(elizaPkg)) {
+        warn(
+          `[disable-local-eliza-workspace] Skipping ${elizaPackageJsonPath}: package.json is malformed`,
+        );
+      } else if (
         applyOverrideSpecifiers(
           elizaPkg,
           ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS,
