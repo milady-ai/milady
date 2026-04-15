@@ -50,55 +50,10 @@ jobs:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
 
-      - name: Build web assets
-        working-directory: apps/app
-        run: |
-          bun scripts/plugin-build.mjs
-          bun run build:web
-
-      - name: Prepare CocoaPods trunk repo
-        run: bash eliza/packages/app-core/scripts/prepare-ios-cocoapods.sh
+      - name: Build iOS simulator app
+        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios
         env:
           LANG: en_US.UTF-8
-
-      - name: Add iOS platform if missing
-        working-directory: apps/app
-        run: |
-          if [ ! -d "ios/App" ]; then
-            bun x capacitor add ios
-          fi
-        env:
-          LANG: en_US.UTF-8
-
-      - name: Capacitor sync iOS
-        working-directory: apps/app
-        run: bun run cap:sync:ios
-        env:
-          LANG: en_US.UTF-8
-
-      - name: Build for iOS Simulator
-        run: |
-          set -o pipefail
-          if command -v xcbeautify >/dev/null 2>&1; then
-            xcodebuild \
-              -workspace apps/app/ios/App/App.xcworkspace \
-              -scheme App \
-              -configuration Debug \
-              -destination "generic/platform=iOS Simulator" \
-              -sdk iphonesimulator \
-              CODE_SIGNING_ALLOWED=NO \
-              build 2>&1 | xcbeautify --renderer github-actions
-          else
-            xcodebuild \
-              -workspace apps/app/ios/App/App.xcworkspace \
-              -scheme App \
-              -configuration Debug \
-              -destination "generic/platform=iOS Simulator" \
-              -sdk iphonesimulator \
-              CODE_SIGNING_ALLOWED=NO \
-              build
-          fi
-          echo "iOS simulator build succeeded"
 
       - name: Verify .app exists
         run: |
@@ -154,26 +109,8 @@ jobs:
           SKIP_AVATAR_CLONE: "1"
           MILADY_NO_VISION_DEPS: "1"
 
-      - name: Build web assets
-        working-directory: apps/app
-        run: |
-          bun scripts/plugin-build.mjs
-          bun run build:web
-
-      - name: Add Android platform if missing
-        working-directory: apps/app
-        run: |
-          if [ ! -d "android/app" ]; then
-            bun x capacitor add android
-          fi
-
-      - name: Capacitor sync Android
-        working-directory: apps/app
-        run: bunx cap sync android
-
       - name: Build debug APK
-        working-directory: apps/app/android
-        run: ./gradlew assembleDebug
+        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs android
 
       - name: Verify APK exists
         run: |
