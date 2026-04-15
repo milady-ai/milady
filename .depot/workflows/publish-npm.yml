@@ -1,0 +1,118 @@
+# Depot CI Migration
+# Source: .github/workflows/publish-npm.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+name: Publish npm
+# Publishes milady to npm with the correct dist-tag based on the version.
+#
+# Channel mapping:
+#   - Stable releases (v2.0.0)           → dist-tag "latest"
+#   - Beta releases (v2.0.0-beta.1)      → dist-tag "beta"
+#   - Nightly builds are handled by nightly.yml
+#
+# Triggers:
+#   - After a GitHub Release is published (from release.yml)
+#   - Manual dispatch for ad-hoc publishes
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 2.0.0, 2.0.0-beta.1)"
+        required: true
+        type: string
+      dist_tag:
+        description: "npm dist-tag override"
+        required: true
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 2.0.0, 2.0.0-beta.1)"
+        required: true
+        type: string
+      dist_tag:
+        description: "npm dist-tag override (leave empty for auto-detection)"
+        required: false
+        type: string
+concurrency:
+  group: publish-npm-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+env:
+  CI: "true"
+jobs:
+  detect-meta:
+    name: Determine version and dist-tag
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      dist_tag: ${{ steps.meta.outputs.dist_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Determine version and dist-tag
+        id: meta
+        run: |
+          VERSION="${{ inputs.version }}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          DIST_TAG="${{ inputs.dist_tag }}"
+          if [[ -z "$DIST_TAG" ]] && echo "$VERSION" | grep -qE 'nightly'; then
+            DIST_TAG="nightly"
+          elif [[ -z "$DIST_TAG" ]] && echo "$VERSION" | grep -qE 'beta'; then
+            DIST_TAG="beta"
+          elif [[ -z "$DIST_TAG" ]] && echo "$VERSION" | grep -qE 'alpha|rc'; then
+            DIST_TAG="next"
+          elif [[ -z "$DIST_TAG" ]]; then
+            DIST_TAG="latest"
+          fi
+          echo "dist_tag=$DIST_TAG" >> "$GITHUB_OUTPUT"
+
+          echo "Version: $VERSION"
+          echo "Dist-tag: $DIST_TAG"
+  publish:
+    name: Publish
+    needs: detect-meta
+    uses: ./.depot/workflows/reusable-npm-publish.yml
+    with:
+      version: ${{ needs.detect-meta.outputs.version }}
+      dist_tag: ${{ needs.detect-meta.outputs.dist_tag }}
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  verify:
+    name: Verify publish
+    needs: [detect-meta, publish]
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    steps:
+      - name: Verify publish
+        run: |
+          sleep 5  # Give the registry a moment to propagate
+          PUBLISHED=$(npm view miladyai@${{ needs.detect-meta.outputs.dist_tag }} version 2>/dev/null || echo "")
+          EXPECTED="${{ needs.detect-meta.outputs.version }}"
+
+          if [[ "$PUBLISHED" == "$EXPECTED" ]]; then
+            echo "Verified: miladyai@${{ needs.detect-meta.outputs.dist_tag }} → $PUBLISHED"
+          else
+            echo "::warning::Published version ($PUBLISHED) does not match expected ($EXPECTED). Registry may still be propagating."
+          fi
+      - name: Summary
+        run: |
+          echo "## npm Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | milady |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | \`${{ needs.detect-meta.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dist-tag | \`${{ needs.detect-meta.outputs.dist_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Install" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "npm install -g miladyai@${{ needs.detect-meta.outputs.dist_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

@@ -271,7 +271,6 @@ describe("disable-local-eliza-workspace", () => {
       "@elizaos/shared": "file:../../../shared",
     });
   });
-
   it("injects the renamed-workspace @elizaos/ui override for CI rewrites", () => {
     const repoRoot = makeTempDir();
     const originalRenameSetting =
@@ -290,13 +289,10 @@ describe("disable-local-eliza-workspace", () => {
         version: "2.0.0-alpha.163",
       },
     );
-    writeJson(
-      path.join(repoRoot, "eliza", "packages", "ui", "package.json"),
-      {
-        name: "@elizaos/ui",
-        version: "2.0.0-alpha.163",
-      },
-    );
+    writeJson(path.join(repoRoot, "eliza", "packages", "ui", "package.json"), {
+      name: "@elizaos/ui",
+      version: "2.0.0-alpha.163",
+    });
 
     try {
       process.env.MILADY_DISABLE_LOCAL_UPSTREAMS_RENAME = "1";
@@ -340,13 +336,10 @@ describe("disable-local-eliza-workspace", () => {
         version: "2.0.0-alpha.163",
       },
     );
-    writeJson(
-      path.join(repoRoot, "eliza", "packages", "ui", "package.json"),
-      {
-        name: "@elizaos/ui",
-        version: "2.0.0-alpha.163",
-      },
-    );
+    writeJson(path.join(repoRoot, "eliza", "packages", "ui", "package.json"), {
+      name: "@elizaos/ui",
+      version: "2.0.0-alpha.163",
+    });
 
     disableLocalElizaWorkspace(repoRoot, {
       log: () => {},

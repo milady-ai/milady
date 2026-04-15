@@ -1,0 +1,281 @@
+# Depot CI Migration
+# Source: .github/workflows/build-cloud-agent.yml
+#
+# Changes made:
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+# =============================================================================
+# build-cloud-agent.yml — Build cloud agent image with GitHub Actions Docker cache
+# =============================================================================
+#
+# Triggers:
+#   - Push to cloud/main or cloud/staging branch
+#   - Manual dispatch with version override
+#
+# Published to: ghcr.io/milady-ai/agent
+#   Tags (production): :cloud-v{version}         and :cloud-latest
+#   Tags (staging):    :cloud-staging-v{version} and :cloud-staging-latest
+#
+# Uses docker/build-push-action's GHA cache for fast rebuilds.
+# Typical warm build: ~2-4 min vs ~8-10 min without cache.
+# =============================================================================
+
+name: Build Cloud Agent
+on:
+  push:
+    branches:
+      - cloud/main
+      - cloud/staging
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Cloud version tag (e.g. 2.0.3). Defaults to auto-increment."
+        required: false
+        type: string
+      push_image:
+        description: "Push image to GHCR"
+        required: false
+        type: boolean
+        default: true
+      skip_rollout:
+        description: "Skip auto-rollout to nodes (build + push only)"
+        required: false
+        type: boolean
+        default: false
+concurrency:
+  group: build-cloud-agent-${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
+  cancel-in-progress: true
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: milady-ai/agent
+  SOURCE_REF: ${{ github.event_name == 'push' && github.ref_name || (github.ref_name == 'cloud/staging' && 'cloud/staging' || 'cloud/main') }}
+  CLOUD_DEPLOY_WEBHOOK_URL: http://89.167.63.246:9876/deploy
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    name: Build cloud agent image
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    timeout-minutes: 30
+    steps:
+      # ── 1. Checkout ─────────────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_REF }}
+          fetch-depth: 0
+      # ── 2. Set up Node + Bun ────────────────────────────────────────────────
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+      # ── 3. Cache bun store ──────────────────────────────────────────────────
+      - name: Cache bun store
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-store-cloud-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-store-cloud-${{ runner.os }}-
+      # ── 3.5. Init submodules (skip eliza workspace) ─────────────────────────
+      - name: Init non-eliza submodules
+        run: |
+          node scripts/init-submodules.mjs
+          node scripts/disable-local-eliza-workspace.mjs
+        env:
+          MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+      # ── 4. Install dependencies ─────────────────────────────────────────────
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+      - name: Run postinstall patches
+        run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
+      # ── 5. Build Capacitor plugins ──────────────────────────────────────────
+      - name: Build Capacitor plugins
+        run: |
+          cd apps/app
+          bun scripts/plugin-build.mjs
+      - name: Build agent workspace
+        run: |
+          cd eliza/packages/agent
+          bun run build:docker-dist
+      - name: Build @elizaos/core (includes agent-orchestrator)
+        run: |
+          cd eliza/packages/typescript
+          bun run build:node
+      # ── 6. Build runtime (tsdown) ───────────────────────────────────────────
+      - name: Build runtime (tsdown)
+        run: |
+          npx tsdown
+          echo '{"type":"module"}' > dist/package.json
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
+      # ── 7. Determine version ────────────────────────────────────────────────
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${SOURCE_REF}" = "cloud/staging" ]; then
+            VERSION_PREFIX="cloud-staging-v"
+            LATEST_TAG="cloud-staging-latest"
+            BUILD_ENVIRONMENT="staging"
+          else
+            VERSION_PREFIX="cloud-v"
+            LATEST_TAG="cloud-latest"
+            BUILD_ENVIRONMENT="production"
+          fi
+
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${VERSION_PREFIX}${{ inputs.version }}"
+          else
+            VERSION="${VERSION_PREFIX}2.0.${{ github.run_number }}"
+          fi
+
+          if [ "${BUILD_ENVIRONMENT}" = "staging" ]; then
+            VERSION_CLEAN="${VERSION#cloud-staging-v}"
+          else
+            VERSION_CLEAN="${VERSION#cloud-v}"
+          fi
+
+          echo "version=${VERSION}"             >> $GITHUB_OUTPUT
+          echo "version_clean=${VERSION_CLEAN}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${LATEST_TAG}"       >> $GITHUB_OUTPUT
+          echo "build_environment=${BUILD_ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "Cloud version: ${VERSION}"
+          echo "Build environment: ${BUILD_ENVIRONMENT}"
+          echo "Source branch: ${SOURCE_REF}"
+          echo "Source SHA: $(git rev-parse --short HEAD)"
+      - name: Load deploy config
+        run: |
+          set -a
+          source eliza/packages/app-core/deploy/deploy.defaults.env
+          source deploy/deploy.env
+          set +a
+          {
+            echo "APP_ENTRYPOINT=${APP_ENTRYPOINT}"
+            echo "APP_PORT=${APP_PORT}"
+            echo "APP_API_BIND=${APP_API_BIND}"
+            echo "OCI_SOURCE=${OCI_SOURCE}"
+            echo "OCI_LICENSES=${OCI_LICENSES}"
+            echo "APP_CMD_START<<EOF"
+            echo "${APP_CMD_START}"
+            echo "EOF"
+            echo "OCI_TITLE<<EOF"
+            echo "${OCI_TITLE}"
+            echo "EOF"
+            echo "OCI_DESCRIPTION<<EOF"
+            echo "${OCI_DESCRIPTION}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+      # ── 8. Build UI (vite) ──────────────────────────────────────────────────
+      - name: Build UI (vite)
+        run: |
+          cd apps/app
+          npx vite build
+        env:
+          NODE_ENV: production
+      # ── 9. Docker ignore (context root must have .dockerignore; source: deploy/)
+      - name: Set up CI dockerignore
+        run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
+      # ── 10. Set up Docker builder ────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      # ── 11. Login to GHCR ──────────────────────────────────────────────────
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # ── 12. Build and push with Docker layer cache ────────────────────────────
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: eliza/packages/app-core/deploy/Dockerfile.ci
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}
+          build-args: |
+            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
+            APP_CMD_START=${{ env.APP_CMD_START }}
+            APP_PORT=${{ env.APP_PORT }}
+            APP_API_BIND=${{ env.APP_API_BIND }}
+            OCI_SOURCE=${{ env.OCI_SOURCE }}
+            OCI_TITLE=${{ env.OCI_TITLE }}
+            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
+            OCI_LICENSES=${{ env.OCI_LICENSES }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            REVISION=${{ github.sha }}
+          provenance: false
+      # ── 13. Trigger production deploy webhook ──────────────────────────────
+      - name: Trigger cloud fleet deploy webhook
+        if: success() && steps.version.outputs.build_environment == 'production' && (github.event_name == 'push' || inputs.push_image != false) && (github.event_name == 'push' || inputs.skip_rollout != true)
+        env:
+          WEBHOOK_SECRET: ${{ secrets.CLOUD_DEPLOY_WEBHOOK_SECRET }}
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+          IMAGE_TAG: ${{ steps.version.outputs.version }}
+          GIT_SHA: ${{ github.sha }}
+          GIT_REF: ${{ github.ref_name }}
+          DELIVERY_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          if [ -z "$WEBHOOK_SECRET" ]; then
+            echo "CLOUD_DEPLOY_WEBHOOK_SECRET is required" >&2
+            exit 1
+          fi
+
+          PAYLOAD=$(python3 -c 'import json, os; print(json.dumps({"image": os.environ["IMAGE"], "tag": os.environ["IMAGE_TAG"], "sha": os.environ["GIT_SHA"], "ref": os.environ["GIT_REF"], "run_id": os.environ["DELIVERY_ID"], "skip_rollout": False}, separators=(",", ":")))')
+          SIGNATURE="sha256=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | awk '{print $2}')"
+
+          curl --fail --show-error --silent \
+            -X POST "${{ env.CLOUD_DEPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: cloud_deploy" \
+            -H "X-GitHub-Delivery: ${DELIVERY_ID}" \
+            -H "X-Hub-Signature-256: ${SIGNATURE}" \
+            --data "$PAYLOAD"
+      # ── 13. Build summary ──────────────────────────────────────────────────
+      - name: Build summary
+        if: always()
+        run: |
+          if [ "${{ steps.version.outputs.build_environment }}" = "staging" ]; then
+            BUILD_LABEL="Staging"
+          else
+            BUILD_LABEL="Production"
+          fi
+
+          if [ "${SOURCE_REF}" = "cloud/main" ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_rollout }}" = "true" ]; then
+              ROLLOUT_STATUS="skipped (workflow_dispatch skip_rollout=true)"
+            else
+              ROLLOUT_STATUS="enabled via webhook"
+            fi
+          else
+            ROLLOUT_STATUS="not applicable (staging)"
+          fi
+
+          echo "## ☁️ Cloud Agent Image (${BUILD_LABEL})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> ${BUILD_LABEL} build for branch \`${SOURCE_REF}\`." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | \`${{ steps.version.outputs.build_environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | \`${SOURCE_REF}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`$(git rev-parse --short HEAD)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Auto-deploy | ${ROLLOUT_STATUS} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.latest_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

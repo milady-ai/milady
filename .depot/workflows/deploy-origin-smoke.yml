@@ -1,0 +1,81 @@
+# Depot CI Migration
+# Source: .github/workflows/deploy-origin-smoke.yml
+#
+# Changes made:
+# - Removed unsupported trigger "repository_dispatch"
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+name: Deploy Origin Smoke
+# Removed unsupported trigger: repository_dispatch. Repository dispatch events are not supported.
+on:
+  workflow_dispatch:
+    inputs:
+      marketing_origin:
+        description: "Marketing origin to verify"
+        required: false
+        default: "https://milady.ai"
+        type: string
+      app_origin:
+        description: "App origin to verify"
+        required: false
+        default: "https://app.milady.ai"
+        type: string
+      expect_google_connected:
+        description: "Require Google to be connected on the app origin"
+        required: false
+        default: false
+        type: boolean
+      expect_gmail_triage:
+        description: "Require Gmail triage to succeed on the app origin"
+        required: false
+        default: false
+        type: boolean
+concurrency:
+  group: deploy-origin-smoke-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  deploy-origin-smoke:
+    name: Smoke deploy origins
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    timeout-minutes: 10
+    env:
+      MARKETING_ORIGIN: ${{ github.event.inputs.marketing_origin || github.event.client_payload.marketing_origin || 'https://milady.ai' }}
+      APP_ORIGIN: ${{ github.event.inputs.app_origin || github.event.client_payload.app_origin || 'https://app.milady.ai' }}
+      EXPECT_GOOGLE_CONNECTED: ${{ github.event.inputs.expect_google_connected || github.event.client_payload.expect_google_connected || 'false' }}
+      EXPECT_GMAIL_TRIAGE: ${{ github.event.inputs.expect_gmail_triage || github.event.client_payload.expect_gmail_triage || 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          check-latest: false
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+      - name: Run deploy smoke checks
+        env:
+          MILADY_DEPLOY_BASE_URLS: ${{ env.MARKETING_ORIGIN }},${{ env.APP_ORIGIN }}
+        run: bun run smoke:api-status
+      - name: Run Life Ops smoke checks
+        env:
+          MILADY_LIFEOPS_BASE_URLS: ${{ env.APP_ORIGIN }}
+          MILADY_SMOKE_API_TOKEN: ${{ secrets.MILADY_API_TOKEN }}
+          ELIZA_SMOKE_API_TOKEN: ${{ secrets.ELIZA_API_TOKEN }}
+          MILADY_LIFEOPS_EXPECT_GOOGLE_CONNECTED: ${{ env.EXPECT_GOOGLE_CONNECTED }}
+          MILADY_LIFEOPS_EXPECT_GMAIL_TRIAGE: ${{ env.EXPECT_GMAIL_TRIAGE }}
+        run: bun run smoke:lifeops
+      - name: Summarize checked origins
+        if: always()
+        run: |
+          echo "## Deploy Origin Smoke" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Marketing origin: \`$MARKETING_ORIGIN\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- App origin: \`$APP_ORIGIN\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Expect Google connected: \`$EXPECT_GOOGLE_CONNECTED\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Expect Gmail triage: \`$EXPECT_GMAIL_TRIAGE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Runbooks: \`docs/DEPLOY_ORIGIN_SMOKE.md\`, \`docs/lifeops-production-runbook.md\`" >> "$GITHUB_STEP_SUMMARY"

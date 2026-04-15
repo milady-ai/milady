@@ -1,0 +1,223 @@
+# Depot CI Migration
+# Source: .github/workflows/release-orchestrator.yml
+#
+# Changes made:
+# - Removed unsupported trigger "release"
+# - Rewrote .github/ path references to .depot/
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+name: Release Orchestrator
+# Removed unsupported trigger: release. Release events are not supported.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to distribute (e.g. 2.0.0-alpha.87)"
+        required: true
+        type: string
+      publish_npm:
+        description: "Publish npm package"
+        required: false
+        type: boolean
+        default: true
+      publish_packages:
+        description: "Publish PyPI / Snap / Debian / Flatpak"
+        required: false
+        type: boolean
+        default: true
+      publish_android:
+        description: "Publish Android build"
+        required: false
+        type: boolean
+        default: true
+      publish_apple:
+        description: "Publish Apple builds"
+        required: false
+        type: boolean
+        default: true
+      update_homebrew:
+        description: "Update Homebrew tap"
+        required: false
+        type: boolean
+        default: true
+      deploy_homepage:
+        description: "Deploy homepage"
+        required: false
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  prepare:
+    name: Resolve release metadata
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      is_prerelease: ${{ steps.meta.outputs.is_prerelease }}
+      npm_dist_tag: ${{ steps.meta.outputs.npm_dist_tag }}
+      android_track: ${{ steps.meta.outputs.android_track }}
+      apple_track: ${{ steps.meta.outputs.apple_track }}
+      publish_npm: ${{ steps.meta.outputs.publish_npm }}
+      publish_packages: ${{ steps.meta.outputs.publish_packages }}
+      publish_flatpak: ${{ steps.meta.outputs.publish_flatpak }}
+      publish_android: ${{ steps.meta.outputs.publish_android }}
+      publish_apple: ${{ steps.meta.outputs.publish_apple }}
+      update_homebrew: ${{ steps.meta.outputs.update_homebrew }}
+      deploy_homepage: ${{ steps.meta.outputs.deploy_homepage }}
+    steps:
+      - name: Determine routing policy
+        id: meta
+        shell: bash -euo pipefail {0}
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          TAG_NAME: ${{ github.event.release.tag_name || '' }}
+        run: |
+          if [[ -n "$INPUT_VERSION" ]]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="${TAG_NAME#v}"
+          fi
+
+          TAG="v${VERSION}"
+          IS_PRERELEASE="false"
+          NPM_DIST_TAG="latest"
+          ANDROID_TRACK="production"
+          APPLE_TRACK="app-store"
+
+          if echo "$VERSION" | grep -qiE '(alpha|beta|rc|nightly)'; then
+            IS_PRERELEASE="true"
+            ANDROID_TRACK="internal"
+            APPLE_TRACK="testflight"
+            if echo "$VERSION" | grep -qi 'nightly'; then
+              NPM_DIST_TAG="nightly"
+            elif echo "$VERSION" | grep -qi 'beta'; then
+              NPM_DIST_TAG="beta"
+            else
+              NPM_DIST_TAG="next"
+            fi
+          fi
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            PUBLISH_NPM="${{ inputs.publish_npm }}"
+            PUBLISH_PACKAGES="${{ inputs.publish_packages }}"
+            PUBLISH_ANDROID="${{ inputs.publish_android }}"
+            PUBLISH_APPLE="${{ inputs.publish_apple }}"
+            UPDATE_HOMEBREW="${{ inputs.update_homebrew }}"
+            DEPLOY_HOMEPAGE="${{ inputs.deploy_homepage }}"
+          else
+            PUBLISH_NPM="true"
+            PUBLISH_PACKAGES="true"
+            PUBLISH_ANDROID="true"
+            PUBLISH_APPLE="true"
+            UPDATE_HOMEBREW="true"
+            DEPLOY_HOMEPAGE="true"
+          fi
+
+          PUBLISH_FLATPAK="$PUBLISH_PACKAGES"
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            PUBLISH_FLATPAK="false"
+            UPDATE_HOMEBREW="false"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "npm_dist_tag=$NPM_DIST_TAG" >> "$GITHUB_OUTPUT"
+          echo "android_track=$ANDROID_TRACK" >> "$GITHUB_OUTPUT"
+          echo "apple_track=$APPLE_TRACK" >> "$GITHUB_OUTPUT"
+          echo "publish_npm=$PUBLISH_NPM" >> "$GITHUB_OUTPUT"
+          echo "publish_packages=$PUBLISH_PACKAGES" >> "$GITHUB_OUTPUT"
+          echo "publish_flatpak=$PUBLISH_FLATPAK" >> "$GITHUB_OUTPUT"
+          echo "publish_android=$PUBLISH_ANDROID" >> "$GITHUB_OUTPUT"
+          echo "publish_apple=$PUBLISH_APPLE" >> "$GITHUB_OUTPUT"
+          echo "update_homebrew=$UPDATE_HOMEBREW" >> "$GITHUB_OUTPUT"
+          echo "deploy_homepage=$DEPLOY_HOMEPAGE" >> "$GITHUB_OUTPUT"
+      - name: Summary
+        run: |
+          echo "## Release distribution plan" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Version | \`${{ steps.meta.outputs.version }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tag | \`${{ steps.meta.outputs.tag }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Pre-release | \`${{ steps.meta.outputs.is_prerelease }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| npm dist-tag | \`${{ steps.meta.outputs.npm_dist_tag }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Android track | \`${{ steps.meta.outputs.android_track }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Apple track | \`${{ steps.meta.outputs.apple_track }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Homebrew enabled | \`${{ steps.meta.outputs.update_homebrew }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Flatpak enabled | \`${{ steps.meta.outputs.publish_flatpak }}\` |" >> "$GITHUB_STEP_SUMMARY"
+  publish-npm:
+    name: npm
+    needs: prepare
+    if: needs.prepare.outputs.publish_npm == 'true'
+    uses: ./.depot/workflows/publish-npm.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      dist_tag: ${{ needs.prepare.outputs.npm_dist_tag }}
+    secrets: inherit
+  publish-packages:
+    name: Package registries
+    needs: prepare
+    if: needs.prepare.outputs.publish_packages == 'true'
+    uses: ./.depot/workflows/publish-packages.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      pypi: true
+      snap: true
+      flatpak: ${{ needs.prepare.outputs.publish_flatpak == 'true' }}
+      apt: true
+    secrets: inherit
+  publish-android:
+    name: Android
+    needs: prepare
+    if: needs.prepare.outputs.publish_android == 'true'
+    uses: ./.depot/workflows/android-release.yml
+    with:
+      version_name: ${{ needs.prepare.outputs.version }}
+      track: ${{ needs.prepare.outputs.android_track }}
+    secrets: inherit
+  publish-apple:
+    name: Apple Stores
+    needs: prepare
+    if: needs.prepare.outputs.publish_apple == 'true'
+    uses: ./.depot/workflows/apple-store-release.yml
+    with:
+      platform: both
+      track: ${{ needs.prepare.outputs.apple_track }}
+      version: ${{ needs.prepare.outputs.version }}
+    secrets: inherit
+  update-homebrew:
+    name: Homebrew
+    needs: prepare
+    if: needs.prepare.outputs.update_homebrew == 'true'
+    uses: ./.depot/workflows/update-homebrew.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+    secrets: inherit
+  deploy-homepage:
+    name: Homepage
+    needs: prepare
+    if: needs.prepare.outputs.deploy_homepage == 'true'
+    uses: ./.depot/workflows/deploy-web.yml
+    with:
+      release_version: ${{ needs.prepare.outputs.tag }}
+    secrets: inherit
+  summary:
+    name: Distribution summary
+    needs: [prepare, publish-npm, publish-packages, publish-android, publish-apple, update-homebrew, deploy-homepage]
+    if: always()
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    steps:
+      - name: Summary
+        run: |
+          echo "## Release Orchestrator" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Target | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| npm | ${{ needs.publish-npm.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Package registries | ${{ needs.publish-packages.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Android | ${{ needs.publish-android.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Apple Stores | ${{ needs.publish-apple.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Homebrew | ${{ needs.update-homebrew.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Homepage | ${{ needs.deploy-homepage.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,293 @@
+# Depot CI Migration
+# Source: .github/workflows/build-docker.yml
+#
+# Changes made:
+# - Removed unsupported trigger "release"
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+# =============================================================================
+# build-docker.yml — Build the canonical Milady agent image and push to GHCR
+# =============================================================================
+#
+# Triggers:
+#   - Push of release tags: v2.0.0-alpha.*, v2.0.*
+#   - GitHub Release published (covers tags created via API/UI)
+#   - Reusable workflow call from agent-release.yml for validated releases
+#   - Manual dispatch (workflow_dispatch) with optional override
+#   - Push to develop branch (produces :dev tag, no :latest)
+#
+# Published to: ghcr.io/milady-ai/agent
+#   Tags: :v{version}  (e.g. :v2.0.0-alpha.91)
+#         :latest      (when tag_latest is enabled)
+#         :dev         (on develop pushes / manual non-release builds)
+#
+# Build strategy: GHA pre-builds the app (bun install + tsdown + vite build),
+# then Dockerfile.ci copies the pre-built artifacts and applies size pruning.
+# This produces a ~1.8GB image (vs 4GB baseline) via TIER 1+2 pruning.
+# =============================================================================
+
+name: Build Agent Image
+# Removed unsupported trigger: release. Release events are not supported.
+on:
+  push:
+    tags:
+      - 'v2.0.0-alpha.*'
+      - 'v2.0.*'
+    branches:
+      - develop
+  workflow_call:
+    inputs:
+      version:
+        description: "Version tag to publish (e.g. v2.0.0-alpha.91)"
+        required: true
+        type: string
+      push_image:
+        description: "Push image to GHCR"
+        required: false
+        type: boolean
+        default: true
+      tag_latest:
+        description: "Also tag as :latest"
+        required: false
+        type: boolean
+        default: true
+      source_sha:
+        description: "Exact git commit to build"
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override version tag (e.g. v2.0.0-alpha.91). Defaults to package.json version."
+        required: false
+        type: string
+      push_image:
+        description: "Push image to GHCR (uncheck for dry-run)"
+        required: false
+        type: boolean
+        default: true
+      tag_latest:
+        description: "Also tag as :latest"
+        required: false
+        type: boolean
+        default: true
+      source_sha:
+        description: "Optional exact git commit to build instead of the dispatched ref"
+        required: false
+        type: string
+concurrency:
+  group: build-docker-${{ inputs.version || github.ref }}
+  cancel-in-progress: false
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: milady-ai/agent
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    name: Build agent image
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    timeout-minutes: 90
+    steps:
+      # ── 1. Checkout ─────────────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.source_sha || github.event.release.tag_name || github.sha }}
+          submodules: false
+      # ── 2. Set up Node 22 ───────────────────────────────────────────────────
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # ── 3. Set up Bun ───────────────────────────────────────────────────────
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+      # ── 4. Restore cached bun store ─────────────────────────────────────────
+      - name: Cache bun store
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-store-${{ runner.os }}-
+      # ── 4.5. Init eliza submodule ──────────────────────────────────────────
+      # Prime the eliza checkout before init-submodules.mjs recurses into the
+      # nested cloud/steward/plugin submodules that the root workspace expects.
+      - name: Initialize eliza submodule
+        run: git submodule update --init --depth=1 eliza
+      - name: Initialize tracked workspace submodules
+        run: node scripts/init-submodules.mjs
+      # ── 5. Install dependencies ─────────────────────────────────────────────
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+      # ── 5b. Run postinstall patches ────────────────────────────────────────
+      - name: Run postinstall patches
+        run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
+      # ── 5c. Install build fallback dependencies ────────────────────────────
+      # Keep a small set of UI/runtime packages available at the repo root for
+      # nested Vite and Docker build steps.
+      - name: Install published-workspace fallback dependencies
+        run: |
+          bun add --no-save --dev \
+            react react-dom vite \
+            @types/react @types/react-dom @types/three \
+            three clsx class-variance-authority tailwind-merge sonner \
+            @radix-ui/react-checkbox @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label \
+            @radix-ui/react-popover @radix-ui/react-select @radix-ui/react-separator @radix-ui/react-slider \
+            @radix-ui/react-slot @radix-ui/react-switch @radix-ui/react-tabs @radix-ui/react-tooltip \
+            @capacitor/core @capacitor/haptics @capacitor/keyboard @capacitor/preferences \
+            @xterm/xterm @xterm/addon-fit
+      # ── 6. Build Capacitor plugins ──────────────────────────────────────────
+      # The Vite UI imports @elizaos/capacitor-* workspace packages which need
+      # their dist/ built before vite can resolve them.
+      - name: Build Capacitor plugins
+        run: |
+          cd apps/app
+          bun scripts/plugin-build.mjs
+      # ── 7. Build runtime workspace packages with source exports ─────────────
+      - name: Build agent workspace
+        run: |
+          cd eliza/packages/agent
+          bun run build:docker-dist
+      # ── 9. Build runtime (tsdown) ───────────────────────────────────────────
+      - name: Build runtime (tsdown)
+        run: |
+          npx tsdown
+          echo '{"type":"module"}' > dist/package.json
+          # write-build-info.ts may not exist on all branches — soft fail
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
+      # ── 10. Determine version ───────────────────────────────────────────────
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            # Triggered by release event — use the release tag
+            VERSION="${{ github.event.release.tag_name }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            # Branch push (develop) — use package.json version with dev suffix
+            VERSION="v$(node -p "require('./package.json').version")-dev"
+          fi
+
+          VERSION_CLEAN="${VERSION#v}"
+
+          # Only treat explicit versioned builds as releases.
+          IS_RELEASE="false"
+          TAG_LATEST="false"
+          if [[ -n "${{ inputs.version }}" ]] || [[ -n "${{ github.event.release.tag_name }}" ]] || [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            IS_RELEASE="true"
+            if [[ "${{ inputs.tag_latest }}" != "false" ]]; then
+              TAG_LATEST="true"
+            fi
+          fi
+
+          echo "version=${VERSION}"             >> $GITHUB_OUTPUT
+          echo "version_clean=${VERSION_CLEAN}" >> $GITHUB_OUTPUT
+          echo "is_release=${IS_RELEASE}"       >> $GITHUB_OUTPUT
+          echo "tag_latest=${TAG_LATEST}"       >> $GITHUB_OUTPUT
+
+          echo "Version:    ${VERSION}"
+          echo "Clean:      ${VERSION_CLEAN}"
+          echo "Is release: ${IS_RELEASE}"
+          echo "Tag latest: ${TAG_LATEST}"
+          echo "Source SHA: $(git rev-parse HEAD)"
+      - name: Load deploy config
+        run: |
+          set -a
+          source eliza/packages/app-core/deploy/deploy.defaults.env
+          source deploy/deploy.env
+          set +a
+          {
+            echo "APP_ENTRYPOINT=${APP_ENTRYPOINT}"
+            echo "APP_PORT=${APP_PORT}"
+            echo "APP_API_BIND=${APP_API_BIND}"
+            echo "OCI_SOURCE=${OCI_SOURCE}"
+            echo "OCI_LICENSES=${OCI_LICENSES}"
+            echo "APP_CMD_START<<EOF"
+            echo "${APP_CMD_START}"
+            echo "EOF"
+            echo "OCI_TITLE<<EOF"
+            echo "${OCI_TITLE}"
+            echo "EOF"
+            echo "OCI_DESCRIPTION<<EOF"
+            echo "${OCI_DESCRIPTION}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+      # ── 11. Build UI (vite) ─────────────────────────────────────────────────
+      - name: Build UI (vite)
+        run: |
+          cd apps/app
+          npx vite build
+        env:
+          MILADY_RELEASE_TAG: ${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
+          VITE_ASSET_BASE_URL: ${{ steps.version.outputs.is_release == 'true' && format('https://raw.githubusercontent.com/milady-ai/milady/{0}/apps/app/public/', steps.version.outputs.version) || '' }}
+          NODE_ENV: production
+      # ── 12. Override dockerignore to include pre-built dist/ ────────────────
+      # The repo's .dockerignore excludes dist/ to keep developer Docker builds clean.
+      # For CI, dist/ is pre-built by GHA so we need it in the build context.
+      # We use eliza/packages/app-core/deploy/.dockerignore.ci (tracked in the
+      # repo) instead of the default.
+      - name: Set up CI dockerignore
+        run: cp eliza/packages/app-core/deploy/.dockerignore.ci .dockerignore
+      # ── 13. Set up Docker Buildx ────────────────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      # ── 14. Login to GHCR ───────────────────────────────────────────────────
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        if: ${{ github.event_name == 'push' || inputs.push_image != false }}
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # ── 13. Docker image metadata ───────────────────────────────────────────
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest,enable=${{ steps.version.outputs.tag_latest == 'true' }}
+            type=raw,value=dev,enable=${{ steps.version.outputs.is_release == 'false' }}
+      # ── 14. Build and push ──────────────────────────────────────────────────
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: eliza/packages/app-core/deploy/Dockerfile.ci
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
+            APP_CMD_START=${{ env.APP_CMD_START }}
+            APP_PORT=${{ env.APP_PORT }}
+            APP_API_BIND=${{ env.APP_API_BIND }}
+            OCI_SOURCE=${{ env.OCI_SOURCE }}
+            OCI_TITLE=${{ env.OCI_TITLE }}
+            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
+            OCI_LICENSES=${{ env.OCI_LICENSES }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            REVISION=${{ github.sha }}
+            MILADY_RELEASE_TAG=${{ steps.version.outputs.is_release == 'true' && steps.version.outputs.version || '' }}
+          cache-from: type=gha,scope=milady-docker
+          cache-to: type=gha,scope=milady-docker,mode=max,ignore-error=true
+          provenance: false
+      # ── 15. Build summary ───────────────────────────────────────────────────
+      - name: Build summary
+        if: always()
+        run: "echo \"## \U0001F433 Milady Docker Image\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"| Property | Value |\" >> $GITHUB_STEP_SUMMARY\necho \"|----------|-------|\" >> $GITHUB_STEP_SUMMARY\necho \"| Registry | \\`${{ env.REGISTRY }}\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"| Image | \\`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"| Version | \\`${{ steps.version.outputs.version }}\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"| Tagged latest | \\`${{ steps.version.outputs.tag_latest }}\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"| Trigger | \\`${{ github.event_name }}\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"| Requested SHA | \\`${{ inputs.source_sha || github.sha }}\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"| Built SHA | \\`$(git rev-parse HEAD)\\` |\" >> $GITHUB_STEP_SUMMARY\necho \"\" >> $GITHUB_STEP_SUMMARY\necho \"### Pull commands\" >> $GITHUB_STEP_SUMMARY\necho '```bash' >> $GITHUB_STEP_SUMMARY\necho \"docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}\" >> $GITHUB_STEP_SUMMARY\nif [ \"${{ steps.version.outputs.tag_latest }}\" = \"true\" ]; then\n  echo \"docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\" >> $GITHUB_STEP_SUMMARY\nfi\necho '```' >> $GITHUB_STEP_SUMMARY\n"

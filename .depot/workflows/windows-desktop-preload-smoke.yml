@@ -1,0 +1,84 @@
+# Depot CI Migration
+# Source: .github/workflows/windows-desktop-preload-smoke.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+# - Changed runs-on from "windows-latest" to "depot-ubuntu-latest" in job "preload-smoke"
+
+name: Windows Desktop Preload Smoke
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "eliza/packages/app-core/scripts/**"
+      - "apps/app/electrobun/**"
+      - "eliza/packages/app-core/platforms/electrobun/**"
+      - "package.json"
+      - "bun.lock"
+  workflow_dispatch:
+concurrency:
+  group: windows-desktop-preload-smoke-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preload-smoke:
+    name: desktop preload preflight (windows)
+    runs-on: depot-ubuntu-latest # was: windows-latest. Nonstandard GitHub runner label detected, changed to default Depot runner.
+    steps:
+      - name: Enable long paths (Windows)
+        run: git config --system core.longpaths true
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+          sparse-checkout: |
+            /.gitmodules
+            /package.json
+            /bun.lock
+            /bunfig.toml
+            /tsconfig.json
+            /.depot/actions/setup-bun-workspace/**
+            apps/
+            packages/
+            scripts/
+            eliza/apps/
+            eliza/packages/app-core/
+            eliza/packages/native-plugins/
+            eliza/packages/typescript/
+            eliza/packages/shared/
+            eliza/packages/agent/
+            eliza/packages/server/
+            eliza/plugins/
+          sparse-checkout-cone-mode: false
+      - name: Initialize workspace submodules
+        run: node scripts/init-submodules.mjs
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Setup Bun workspace
+        uses: ./.depot/actions/setup-bun-workspace
+        with:
+          bun-version: "1.3.11"
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
+          install-native-deps: "false"
+          run-postinstall: "false"
+          disable-local-eliza-workspace: "true"
+          prepare-local-eliza-runtime: "true"
+          skip-avatar-clone: "true"
+          no-vision-deps: "true"
+      - name: Restore eliza workspace paths for build scripts
+        run: node scripts/restore-local-eliza-workspace.mjs
+      - name: Restore legacy electrobun compatibility path
+        run: node scripts/ensure-legacy-electrobun-compat.mjs
+      - name: Install desktop package dependencies
+        run: |
+          bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts
+      - name: Run repository postinstall patches
+        run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
+      - name: Desktop preflight
+        run: bun eliza/packages/app-core/scripts/desktop-build.mjs preflight --variant=base
+      - name: Build preload bridge
+        working-directory: eliza/packages/app-core/platforms/electrobun
+        run: bun run build:preload

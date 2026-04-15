@@ -1,0 +1,259 @@
+# Depot CI Migration
+# Source: .github/workflows/agent-fix-ci.yml
+#
+# Changes made:
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+# Auto-fixer: when CI fails on a PR, dispatch Claude to read the failure and push a fix.
+# Inspired by CX's "fixer agent" pattern — CI fails → agent reads logs → pushes fix → repeat.
+#
+# Trust-gated: uses contributor-trust.json to decide whether to auto-fix.
+#   - legendary/trusted/established: auto-fix enabled (proven contributors)
+#   - contributing: auto-fix only if `agent-fix-eligible` label is present
+#   - probationary/untested/restricted: never auto-fix (too risky)
+#   - agent-authored PRs: always eligible regardless of trust tier
+#
+# Safety:
+# - Only runs on PRs from the same repo (no forks)
+# - Max 3 fix attempts per PR (prevents infinite loops)
+# - Skips if PR is a draft
+# - Skips if PR targets main (only develop and feature branches)
+name: Agent CI Fixer
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+concurrency:
+  group: agent-fix-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+env:
+  BUN_VERSION: "1.3.10"
+  MAX_FIX_ATTEMPTS: "3"
+  MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+jobs:
+  should-fix:
+    name: Check eligibility
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      pull-requests: read
+      actions: read
+    outputs:
+      eligible: ${{ steps.check.outputs.eligible }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+      attempt: ${{ steps.check.outputs.attempt }}
+    steps:
+      - name: Checkout (for trust-scoring.cjs)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github
+          fetch-depth: 1
+      - name: Check PR eligibility
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { computeTrustScore, DEFAULT_CONFIG, createContributorState, expandState } = require('./.github/trust-scoring.cjs');
+            const branch = context.payload.workflow_run.head_branch;
+
+            // ── Find the PR for this branch ─────────────────────────────────
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open',
+              per_page: 1,
+            });
+
+            if (prs.length === 0) {
+              core.info('No open PR found for this branch');
+              core.setOutput('eligible', 'false');
+              return;
+            }
+
+            const pr = prs[0];
+            const author = pr.user.login;
+            core.setOutput('pr_number', pr.number);
+
+            // ── Basic eligibility gates ─────────────────────────────────────
+            if (pr.draft) {
+              core.info('PR is a draft — skipping');
+              core.setOutput('eligible', 'false');
+              return;
+            }
+
+            if (pr.base.ref === 'main') {
+              core.info('PR targets main — skipping (too risky for auto-fix)');
+              core.setOutput('eligible', 'false');
+              return;
+            }
+
+            const labels = pr.labels.map(l => l.name);
+            const isAgentAuthored = labels.includes('agent-authored');
+
+            // ── Trust tier check ────────────────────────────────────────────
+            // Load contributor trust score from committed JSON
+            let trustTier = 'untested';
+            let trustScore = DEFAULT_CONFIG.initialScore;
+            try {
+              const { data: fileData } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/contributor-trust.json',
+                ref: pr.base.ref,
+              });
+              const allStates = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
+              if (allStates[author]) {
+                const state = expandState(allStates[author]);
+                const result = computeTrustScore(state, DEFAULT_CONFIG);
+                trustTier = result.tier;
+                trustScore = result.score;
+              }
+            } catch (e) {
+              core.info(`Trust data unavailable for ${author}: ${e.message}`);
+            }
+            core.info(`Author ${author}: trust ${trustScore}/100 (${trustTier})`);
+
+            // Trust-gated eligibility:
+            //   agent-authored PRs: always eligible
+            //   legendary/trusted/established (60+): auto-eligible
+            //   contributing (45-59): only if agent-fix-eligible label present
+            //   probationary/untested/restricted (<45): never eligible
+            const AUTO_FIX_TIERS = ['legendary', 'trusted', 'established'];
+            const MANUAL_OPT_IN_TIERS = ['contributing'];
+
+            let eligible = false;
+            if (isAgentAuthored) {
+              eligible = true;
+              core.info('PR is agent-authored — auto-fix eligible regardless of trust');
+            } else if (AUTO_FIX_TIERS.includes(trustTier)) {
+              eligible = true;
+              core.info(`Trust tier ${trustTier} — auto-fix eligible`);
+            } else if (MANUAL_OPT_IN_TIERS.includes(trustTier) && labels.includes('agent-fix-eligible')) {
+              eligible = true;
+              core.info(`Trust tier ${trustTier} with agent-fix-eligible label — eligible`);
+            } else {
+              core.info(`Trust tier ${trustTier} — not eligible for auto-fix`);
+              core.setOutput('eligible', 'false');
+              return;
+            }
+
+            // ── Fix attempt cap ─────────────────────────────────────────────
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+
+            const fixAttempts = comments.filter(c =>
+              c.body?.includes('<!-- agent-ci-fix-attempt -->')
+            ).length;
+
+            // Trust tier determines max attempts
+            const maxByTier = { legendary: 5, trusted: 4, established: 3 };
+            const baseMax = parseInt(process.env.MAX_FIX_ATTEMPTS || '3', 10);
+            const maxAttempts = isAgentAuthored ? baseMax : (maxByTier[trustTier] || baseMax);
+
+            if (fixAttempts >= maxAttempts) {
+              core.info(`PR #${pr.number} has ${fixAttempts} fix attempts (max ${maxAttempts}) — giving up`);
+              core.setOutput('eligible', 'false');
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['needs-human-fix'],
+              });
+              return;
+            }
+
+            core.info(`PR #${pr.number} eligible for auto-fix (attempt ${fixAttempts + 1}/${maxAttempts}, trust: ${trustTier})`);
+            core.setOutput('eligible', 'true');
+            core.setOutput('attempt', String(fixAttempts + 1));
+  fix-ci:
+    name: Fix CI failure
+    needs: should-fix
+    if: needs.should-fix.outputs.eligible == 'true'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: read
+      checks: read
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+          submodules: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Init non-eliza submodules
+        run: |
+          node scripts/init-submodules.mjs
+          node scripts/disable-local-eliza-workspace.mjs
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+        env:
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+      - name: Run repository postinstall patches
+        run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
+      - name: Post fix-attempt marker
+        uses: actions/github-script@v7
+        with:
+          script: "await github.rest.issues.createComment({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  issue_number: ${{ needs.should-fix.outputs.pr_number }},\n  body: `<!-- agent-ci-fix-attempt -->\\n\U0001F527 **Auto-fix attempt ${{ needs.should-fix.outputs.attempt }}** — CI failed, dispatching agent to diagnose and fix.\\n\\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,\n});\n"
+      - name: Run Claude to fix CI
+        uses: anthropics/claude-code-action@094bd24d575e7b30ac1576024817bf1a97c81262 # v1
+        env:
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+          PR_NUMBER: ${{ needs.should-fix.outputs.pr_number }}
+          FIX_ATTEMPT: ${{ needs.should-fix.outputs.attempt }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          additional_permissions: |
+            actions: read
+            checks: read
+          claude_args: |
+            --allowedTools "Bash(*),Read,Write,Edit,Glob,Grep,LS"
+          prompt: |
+            You are the CI fixer agent for the Milady project. CI has failed on PR #${{ needs.should-fix.outputs.pr_number }}.
+            This is fix attempt ${{ needs.should-fix.outputs.attempt }} of ${{ env.MAX_FIX_ATTEMPTS }}.
+
+            ## Your task
+
+            1. Read the CI failure logs using: `gh run view ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} --log-failed 2>&1 | tail -200`
+            2. Understand what failed (typecheck, lint, test, build)
+            3. Fix the issue in the code
+            4. Run the relevant check locally to verify:
+               - Typecheck + lint: `bun run verify` (`check` aliases this)
+               - Tests: `bun run test`
+               - Lint: `bun run lint:fix && bun run format:fix`
+               - If the failure involves Electrobun desktop files (eliza/packages/app-core/platforms/electrobun/**):
+                 also run `bunx vitest run scripts/electrobun-release-workflow-drift.test.ts`
+                 and `bun run release:check` after building dist prerequisites:
+                 `bunx tsdown && printf '{"type":"module"}\n' > dist/package.json && node --import tsx scripts/write-build-info.ts`
+            5. Commit and push the fix
+
+            ## Rules
+            - Only fix what CI is complaining about. Do not refactor or improve other code.
+            - If the fix requires a test, add or update the test.
+            - Commit message format: `fix(ci): <description of what was fixed>`
+            - If you cannot determine the fix, or the failure is infrastructure-related (runner OOM, network timeout), comment on the PR explaining why and do NOT push any changes.
+            - Do not modify .github/workflows/ files.
+            - Push directly to the PR branch: `git push origin HEAD:${{ github.event.workflow_run.head_branch }}`

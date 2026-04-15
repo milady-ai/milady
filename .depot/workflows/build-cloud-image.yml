@@ -1,0 +1,233 @@
+# Depot CI Migration
+# Source: .github/workflows/build-cloud-image.yml
+#
+# Changes made:
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+# =============================================================================
+# build-cloud-image.yml — Build the full Milady app image for cloud deploys
+# =============================================================================
+#
+# Triggers:
+#   - Push of release tags: v2.0.0-alpha.*, v2.0.*
+#   - Reusable workflow call from agent-release.yml for validated releases
+#   - Manual dispatch (workflow_dispatch) with optional override
+#
+# Published to: ghcr.io/milady-ai/milady/agent
+#   Tags: :cloud-app
+#         :cloud-app-{version}
+#
+# Build strategy: publish the complete Milady app image (UI + API + runtime)
+# for hosted cloud deployments. Subordinate per-agent runtimes use the internal
+# eliza/packages/app-core/deploy/Dockerfile.cloud-agent contract instead of this
+# user-facing image.
+# =============================================================================
+
+name: Build Cloud App Image
+on:
+  push:
+    tags:
+      - "v2.0.0-alpha.*"
+      - "v2.0.*"
+  workflow_call:
+    inputs:
+      version:
+        description: "Version tag to publish (e.g. v2.0.0-alpha.91)"
+        required: true
+        type: string
+      push_image:
+        description: "Push image to GHCR"
+        required: false
+        type: boolean
+        default: true
+      source_sha:
+        description: "Exact git commit to build"
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override version tag (e.g. v2.0.0-alpha.91). Defaults to latest tag."
+        required: false
+        type: string
+      push_image:
+        description: "Push image to GHCR (uncheck for dry-run)"
+        required: false
+        type: boolean
+        default: true
+      source_sha:
+        description: "Optional exact git commit to build instead of the dispatched ref"
+        required: false
+        type: string
+concurrency:
+  group: build-cloud-image-${{ inputs.version || github.ref }}
+  cancel-in-progress: false
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: milady-ai/milady/agent
+  MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    name: Build cloud app image
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.source_sha || github.sha }}
+          submodules: false
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+      - name: Cache bun store
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-store-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-store-${{ runner.os }}-
+      - name: Init non-eliza submodules
+        run: |
+          node scripts/init-submodules.mjs
+          node scripts/disable-local-eliza-workspace.mjs
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+      - name: Run postinstall patches
+        run: bun run postinstall
+        env:
+          SKIP_AVATAR_CLONE: "1"
+          MILADY_NO_VISION_DEPS: "1"
+      - name: Build Capacitor plugins
+        run: |
+          cd apps/app
+          bun scripts/plugin-build.mjs
+      - name: Build agent workspace
+        run: |
+          cd eliza/packages/agent
+          bun run build:docker-dist
+      - name: Build @elizaos/core (includes agent-orchestrator)
+        run: |
+          cd eliza/packages/typescript
+          bun run build:node
+      - name: Build runtime (tsdown)
+        run: |
+          npx tsdown
+          echo '{"type":"module"}' > dist/package.json
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts 2>/dev/null || true
+      - name: Build UI (vite)
+        run: |
+          cd apps/app
+          npx vite build
+        env:
+          NODE_ENV: production
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            # Only match release tags (v2.0.5, v2.0.0-alpha.132) — skip dev/experimental tags
+            VERSION="$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-alpha\.[0-9]+)?$' | head -1)"
+            if [ -z "$VERSION" ]; then
+              VERSION="$(git tag --sort=-creatordate | grep '^v' | head -1)"
+            fi
+          fi
+
+          VERSION_CLEAN="${VERSION#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version_clean=${VERSION_CLEAN}" >> "$GITHUB_OUTPUT"
+          echo "Source SHA: $(git rev-parse HEAD)"
+      - name: Load deploy config
+        run: |
+          set -a
+          source eliza/packages/app-core/deploy/deploy.defaults.env
+          source deploy/deploy.env
+          set +a
+          {
+            echo "APP_ENTRYPOINT=${APP_ENTRYPOINT}"
+            echo "APP_PORT=${APP_PORT}"
+            echo "APP_API_BIND=${APP_API_BIND}"
+            echo "OCI_SOURCE=${OCI_SOURCE}"
+            echo "OCI_LICENSES=${OCI_LICENSES}"
+            echo "APP_CMD_START<<EOF"
+            echo "${APP_CMD_START}"
+            echo "EOF"
+            echo "OCI_TITLE<<EOF"
+            echo "${OCI_TITLE}"
+            echo "EOF"
+            echo "OCI_DESCRIPTION<<EOF"
+            echo "${OCI_DESCRIPTION}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+      - name: Set up CI dockerignore
+        run: cp eliza/packages/app-core/deploy/Dockerfile.cloud.dockerignore .dockerignore
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        if: ${{ github.event_name == 'push' || inputs.push_image != false }}
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=cloud-app
+            type=raw,value=cloud-app-${{ steps.version.outputs.version_clean }}
+      - name: Build and push cloud app image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: eliza/packages/app-core/deploy/Dockerfile.cloud
+          platforms: linux/amd64
+          push: ${{ github.event_name == 'push' || inputs.push_image != false }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_ENTRYPOINT=${{ env.APP_ENTRYPOINT }}
+            APP_CMD_START=${{ env.APP_CMD_START }}
+            APP_PORT=${{ env.APP_PORT }}
+            APP_API_BIND=${{ env.APP_API_BIND }}
+            OCI_SOURCE=${{ env.OCI_SOURCE }}
+            OCI_TITLE=${{ env.OCI_TITLE }}
+            OCI_DESCRIPTION=${{ env.OCI_DESCRIPTION }}
+            OCI_LICENSES=${{ env.OCI_LICENSES }}
+            VERSION=${{ steps.version.outputs.version }}
+            VERSION_CLEAN=${{ steps.version.outputs.version_clean }}
+            REVISION=${{ github.sha }}
+          cache-from: type=gha,scope=milady-cloud-app
+          cache-to: type=gha,scope=milady-cloud-app,mode=max
+          provenance: false
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## ☁️ Milady Cloud App Image" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | \`${{ env.REGISTRY }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Built SHA | \`$(git rev-parse HEAD)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull commands" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cloud-app" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cloud-app-${{ steps.version.outputs.version_clean }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

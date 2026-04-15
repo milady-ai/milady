@@ -752,13 +752,12 @@ export function rewriteNestedLocalFileDependencySpecifiers(
   }
   return mutated;
 }
-
 export function applyOverrideSpecifiers(
   pkg,
   overrideSpecifiers,
   { log = console.log, label = "CI-only override" } = {},
 ) {
-  const overrides = pkg.overrides ?? {};
+  const overrides = isStringRecord(pkg.overrides) ? pkg.overrides : {};
   const injected = [];
 
   for (const [dependencyName, specifier] of Object.entries(
@@ -782,6 +781,11 @@ export function applyOverrideSpecifiers(
   return true;
 }
 
+/**
+ * @param {PackageJsonRecord} pkg
+ * @param {{ log?: typeof console.log, repoRoot?: string }} [options]
+ * @returns {boolean}
+ */
 export function applyCiOnlyOverrides(
   pkg,
   { log = console.log, repoRoot = DEFAULT_REPO_ROOT } = {},
@@ -803,8 +807,6 @@ export function disableLocalElizaWorkspace(
   const packageJsonPath = path.join(repoRoot, "package.json");
   const elizaPackageJsonPath = path.join(elizaRoot, "package.json");
   const removedLockfiles = [];
-  const localOnlyPackagePaths = resolveLocalOnlyWorkspacePackagePaths(repoRoot);
-  const localOnlyPackages = new Set(localOnlyPackagePaths.keys());
 
   // Version resolution needs package.json files inside eliza/. When
   // MILADY_SKIP_LOCAL_UPSTREAMS=1, init-submodules.mjs intentionally
@@ -834,6 +836,9 @@ export function disableLocalElizaWorkspace(
       );
     }
   }
+
+  const localOnlyPackagePaths = resolveLocalOnlyWorkspacePackagePaths(repoRoot);
+  const localOnlyPackages = new Set(localOnlyPackagePaths.keys());
 
   // Resolve pinned versions BEFORE renaming eliza/ away, since the
   // cloud-agent-template and local package.json files live inside it.

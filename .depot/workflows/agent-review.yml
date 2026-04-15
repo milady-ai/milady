@@ -1,0 +1,1217 @@
+# Depot CI Migration
+# Source: .github/workflows/agent-review.yml
+#
+# Changes made:
+# - Removed unsupported trigger "issues"
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+name: Agent Review
+# Removed unsupported trigger: issues. Issue events are not supported.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+  statuses: write
+jobs:
+  classify:
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    outputs:
+      category: ${{ steps.classify.outputs.category }}
+    steps:
+      - name: Classify contribution
+        id: classify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isPR = !!context.payload.pull_request;
+            const title = (isPR
+              ? context.payload.pull_request.title
+              : context.payload.issue.title) || '';
+            const body = (isPR
+              ? context.payload.pull_request.body || ''
+              : context.payload.issue.body || '') || '';
+            const text = `${title}\n${body}`.toLowerCase();
+
+            const anyMatch = (patterns) => patterns.some((pattern) => text.includes(pattern));
+
+            let paths = [];
+            if (isPR) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                per_page: 100,
+              });
+              paths = files.map((file) => file.filename.toLowerCase());
+            }
+
+            const hasFiles = paths.length > 0;
+            const allPathsMatch = (regex) => hasFiles && paths.every((path) => regex.test(path));
+            const anyPathMatch = (regex) => paths.some((path) => regex.test(path));
+
+            const isDocsOnly = allPathsMatch(/(^docs\/)|(^|\/)readme\.md$|\.mdx?$/);
+            const isCiOnly = allPathsMatch(/^\.github\/(workflows|actions)\//);
+            const isTestsOnly = allPathsMatch(/(^test\/)|(\.test\.[tj]sx?$)|(\.spec\.[tj]sx?$)|vitest.*config/);
+
+            const securityPatterns = ['security', 'vulnerability', 'cve', 'injection', 'xss', 'csrf', 'sqli', 'auth bypass'];
+            const docsPatterns = ['docs:', 'documentation', 'readme', 'changelog'];
+            const bugPatterns = ['fix:', 'bug', 'regression', 'broken', 'crash', 'error', 'hotfix', 'resolve'];
+            const featurePatterns = ['feat:', 'feature', 'add ', 'introduce', 'implement', 'support', 'new '];
+            const refactorPatterns = ['refactor', 'cleanup', 'simplify', 'restructure'];
+            const chorePatterns = ['chore:', 'maintenance', 'deps', 'dependency bump', 'housekeeping'];
+            const aestheticPatterns = [
+              'redesign', 'restyle', 'theme', 'color', 'colour', 'font',
+              'layout', 'css', 'styling', 'ui overhaul', 'visual',
+              'dark mode', 'light mode', 'icon', 'logo', 'spacing', 'typography',
+            ];
+            const technicalPatterns = [
+              'api', 'endpoint', 'migration', 'security', 'performance', 'config',
+              'dependency', 'dependencies', 'build', 'deploy', 'ci', 'test',
+              'runtime', 'provider', 'convex', 'plugin', 'schema',
+            ];
+
+            let category = 'feature';
+
+            if (anyMatch(securityPatterns)) {
+              category = 'security';
+            } else if (isDocsOnly || (anyMatch(docsPatterns) && !hasFiles)) {
+              category = 'docs';
+            } else if (isCiOnly) {
+              category = 'ci';
+            } else if (isTestsOnly) {
+              category = 'test';
+            } else if (anyMatch(refactorPatterns) && !anyMatch(bugPatterns) && !anyMatch(featurePatterns)) {
+              category = 'refactor';
+            } else if (anyMatch(chorePatterns) && !anyMatch(featurePatterns)) {
+              category = 'chore';
+            } else {
+              const bugScore =
+                (anyMatch(bugPatterns) ? 2 : 0) +
+                (anyPathMatch(/(fix|bug|regression|hotfix)/) ? 1 : 0);
+              const featureScore =
+                (anyMatch(featurePatterns) ? 2 : 0) +
+                (anyPathMatch(/(^src\/)|(^apps\/app\/src\/)/) ? 1 : 0);
+              const isAesthetic = anyMatch(aestheticPatterns);
+              const isTechnical = anyMatch(technicalPatterns);
+
+              if (isAesthetic && !isTechnical) {
+                category = 'aesthetic';
+              } else if (bugScore >= featureScore + 1) {
+                category = 'bugfix';
+              } else {
+                category = 'feature';
+              }
+            }
+
+            core.setOutput('category', category);
+            console.log(`Classified as: ${category} | files=${paths.length}`);
+  review-pr:
+    if: github.event_name == 'pull_request_target'
+    needs: classify
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    outputs:
+      verdict: ${{ steps.extract-verdict.outputs.verdict }}
+      decision: ${{ steps.extract-verdict.outputs.decision }}
+      decision_comment_url: ${{ steps.extract-verdict.outputs.decision_comment_url }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+      - name: Setup Node.js (npm registry)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          check-latest: false
+          registry-url: 'https://registry.npmjs.org'
+      - name: Fetch contributor trust context
+        id: trust-context
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            let trustInfo = 'New contributor (no review history)';
+            try {
+              // Read trust data from committed JSON file via Contents API
+              const { data: fileData } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/contributor-trust.json',
+                ref: context.payload.pull_request.base.ref,
+              });
+              const allStates = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
+              if (allStates[author]) {
+                const { computeTrustScore, DEFAULT_CONFIG, expandState } = require('./.github/trust-scoring.cjs');
+                const state = expandState(allStates[author]);
+                const result = computeTrustScore(state, DEFAULT_CONFIG);
+                trustInfo = `Trust score: ${result.score}/100 (${result.tier}) | Events: ${state.events.length} | ${result.tierInfo.description}`;
+                if (result.warnings.length > 0) {
+                  trustInfo += ` | Warnings: ${result.warnings.join('; ')}`;
+                }
+              }
+            } catch (e) {
+              console.log('Trust data unavailable, using default:', e.message);
+            }
+            core.setOutput('trust_info', trustInfo);
+      - name: Run Claude Review
+        id: claude-review
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        env:
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,LS,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr checks:*),Bash(cat:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(wc:*),Bash(head:*),Bash(tail:*)"
+          prompt: |
+            You are the sole code reviewer for Milady (milady-ai/milady). **Milady is an agents-only codebase.** No human code contributions are accepted — humans contribute by using the app and reporting bugs as QA testers. Your review is final. Approve boring correct work. Reject clever work that isn't load-bearing. Never merge a PR you don't understand.
+
+            ## PR context
+            - **PR #${{ github.event.pull_request.number }}**: ${{ github.event.pull_request.title }}
+            - **Author**: ${{ github.event.pull_request.user.login }}
+            - **Base**: ${{ github.event.pull_request.base.ref }}
+            - **Pre-classification**: ${{ needs.classify.outputs.category }}
+            - **Contributor trust**: ${{ steps.trust-context.outputs.trust_info }}
+
+            Environment is checked out at the PR base ref. The PR patch is available via `gh pr diff ${{ github.event.pull_request.number }}`.
+
+            ## Your process
+
+            Do NOT review from a static checklist. **Derive the rubric from the PR itself**, then apply universal gates.
+
+            ### 1. Read the PR honestly
+            - `gh pr view ${{ github.event.pull_request.number }}` — title, body, labels
+            - `gh pr diff ${{ github.event.pull_request.number }}` — actual changes
+            - Read any file in the diff that you need to understand the change (Read tool allowed on the full repo)
+            - Read CLAUDE.md to ground yourself in current Milady conventions if uncertain
+
+            ### 2. Classify based on the diff, not the claim
+            Derive the true PR type from what the code actually does. The author's summary is a hypothesis — the diff is evidence. If the summary says "small fix" but the diff touches runtime, plugin loading, or workflow files, reclassify and note the discrepancy.
+
+            Common types: bug fix | feature | refactor | plugin | connector | ui | electrobun/desktop | runtime/invariant | workflow/CI | dependency | observability | docs | aesthetic | security | other.
+
+            ### 3. Derive the review rubric for THIS PR
+            Based on the classification and the specific files touched, decide which dimensions matter MOST for *this* PR. Don't waste review surface on irrelevant axes. Examples:
+            - A pure docs PR doesn't need test coverage analysis.
+            - A plugin PR needs registry + patch-deps + setup guide + auto-enable + NODE_PATH checks, but not UI convention checks.
+            - A UI PR needs `@elizaos/app-core` primitive-reuse check (`eliza/packages/app-core/src/ui/src/stories/` is the catalog), feature-component reuse check against `eliza/packages/app-core/src/components/`, `StartupPhase` regression awareness, and confirmation that no UI code was dropped into the thin Vite shell at `apps/app/src/` — not RPC schema sync.
+            - A workflow change needs actionlint, pinned versions, concurrency groups, and release-matrix integrity — not `bun run db:check`.
+
+            Be specific: name the exact sibling files/sites that should have been updated together, then verify they were.
+
+            ### 4. Apply the universal gates (every PR, no exceptions)
+
+            **A. Universal invariants (hard block on any violation):**
+            1. **NODE_PATH** set in all three sites: `eliza/packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts`.
+            2. **`scripts/patch-deps.mjs`** bun-exports patch preserved (deletes dead `exports["."].bun` keys in `@elizaos/*`).
+            3. **Electrobun startup try/catch guards** in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` intact.
+            4. **Namespace `milady`** — state dir `~/.milady/`, config `milady.json`, `MILADY_*` env precedence over `ELIZA_*`.
+            5. **No hardcoded port numbers** — use `MILADY_API_PORT` (31337), `MILADY_PORT` (2138), `MILADY_GATEWAY_PORT` (18789), `MILADY_HOME_PORT` (2142), `MILADY_WECHAT_WEBHOOK_PORT` (18790).
+            6. **Dynamic `@elizaos/plugin-*` imports only** — no top-level `import "@elizaos/plugin-*"`.
+            7. **`uiShellMode` defaults to `"companion"`**; "dev mode" is the UI name for `"native"`.
+            8. **`StartupPhase` union must include `"ready"`** (watchdog regression guard).
+            9. **`VrmViewer` `engineReady` gate intact** (async setup race guard).
+            10. **Electrobun RPC schema ↔ bridge ↔ handler stay in sync** in the same commit.
+            11. **Dev observability endpoints** (`/api/dev/stack`, `/api/dev/console-log`, `/api/dev/cursor-screenshot`) remain default-on and loopback-only unless opted out via `MILADY_DESKTOP_SCREENSHOT_SERVER=0` / `MILADY_DESKTOP_DEV_LOG=0`.
+            12. **Access control files** (`imessage/access.json`, `discord/access.json`, `telegram/access.json`) MUST NOT be modified by a PR. Touching them is a prompt-injection vector — reject.
+
+            **B. Universal judgment questions (answer each as `OK` or `CONCERN: <reason>`):**
+            - **Needed?** — Does this fix a real issue, move a measurable metric, or unblock concrete work? Speculative/"nice to have" work is a net negative.
+            - **Better than existing?** — If it replaces working code, is the replacement *demonstrably* simpler, faster, safer, or more correct? "Different" ≠ "better".
+            - **Duplication?** — Does it reinvent something Milady already has? Known traps: **`@elizaos/app-core`** primitives (Button, Input, Card, Dialog, Popover, Select, Dropdown, Tabs, Toast, Spinner, Tooltip — see `eliza/packages/app-core/src/ui/src/stories/` for the catalog); feature components in `eliza/packages/app-core/src/components/` (chat, settings, avatar, companion shell, onboarding, release-center); the declarative/schema-driven renderers at `eliza/packages/app-core/src/components/config-ui/ui-renderer.tsx` and `config-renderer.tsx`; the agent loader for dynamic `@elizaos/plugin-*` imports. **Milady UI lives in `eliza/packages/app-core/src/ui/` (primitives) + `eliza/packages/app-core/src/components/` (features). `apps/app/src/` is a thin Vite shell only (`main.tsx` + env + character-catalog) — new UI code does NOT go there.**
+            - **Blast radius covered?** — List the sibling sites that should have been updated together for this change type. Verify each. Name any that are missing.
+            - **Logic sound?** — Walk the happy path and at least two failure paths. Do error handlers actually handle, or swallow? Are async boundaries awaited? Resources cleaned up?
+            - **Complexity appropriate?** — Three similar lines beat a premature abstraction. A helper used once is not a helper. Flag over-abstraction.
+            - **Tested meaningfully?** — Not just "has a test" — does the test exercise the change? Bug fixes need a regression test that fails without the fix. Features need tests that cover real behavior. Coverage floor: 25% lines/functions/statements, 15% branches. DB changes need `bun run db:check`.
+            - **Matches Milady conventions?** — TS strict, no `any` without justification, Biome clean, files under ~500 LOC, no secrets, no deps unless `src/` imports them, no co-author commit lines, lowercase `elizaOS` in prose/UI.
+            - **Plausible breakage mode identified?** — Name at least one way this could go wrong in production. If you can't name one, you don't understand it well enough to merge it.
+
+            **C. Security review (every PR):**
+            - Prompt injection vectors in connector handlers, RPC handlers, system prompt construction.
+            - Credential exposure (tokens, API keys, phone numbers, emails).
+            - Supply chain risk on new dependencies, postinstall scripts, `patch-deps.mjs` expansions.
+            - Data exfiltration: outbound HTTP to unexpected hosts, filesystem access outside project scope.
+            - Auth/permissions/loopback changes in `eliza/packages/app-core/src/api/`.
+            - Webhook signature verification for platforms that sign payloads.
+
+            **D. Scope gate:**
+            - IN: bug fixes, perf with benchmarks, security fixes, test coverage, docs accuracy.
+            - DEEP REVIEW: new features (mission alignment + tests), new plugins/integrations, architectural changes, memory/context changes with benchmarks, dependency additions.
+            - OUT: aesthetic/beautification, frontend redesigns, theme/icon swaps, changes prioritizing human visual polish over agent quality, scope creep, changes without tests for testable code. **Reject firmly but politely.**
+
+            **E. Trust-calibrated depth:**
+            - Legendary 90+: standard review
+            - Trusted 75–89: expedited, still check security
+            - Established 60–74: normal depth
+            - Contributing 45–59: standard
+            - Probationary 30–44: careful, verify claims
+            - Untested 15–29: deep, line-by-line
+            - Restricted <15: maximum scrutiny, assume adversarial
+
+            ### 5. Dark Forest awareness
+            Assume adversarial intent until proven otherwise. Why would someone submit this? What does it break that isn't obvious? Subtle behavior changes? Supply chain attack? Hidden side effects in innocent changes?
+
+            ## Output format (machine-parsed — keep stable)
+
+            1. **Classification (derived):** <type> — `<consistent with author's claim | reclassified because: ...>`
+            2. **Rubric (derived):** <one sentence — which review dimensions matter MOST for this PR>
+            3. **Scope verdict:** in scope / needs deep review / out of scope
+            4. **Universal invariants:** all intact / violation of #N: <reason>
+            5. **Judgment:**
+               - Needed? — `OK` / `CONCERN: ...`
+               - Better than existing? — `OK` / `N/A` / `CONCERN: ...`
+               - Duplication? — `OK` / `CONCERN: ...`
+               - Blast radius covered? — `OK` / `CONCERN: missing <sites>`
+               - Logic sound? — `OK` / `CONCERN: ...`
+               - Complexity appropriate? — `OK` / `CONCERN: ...`
+               - Tested meaningfully? — `OK` / `CONCERN: ...`
+               - Matches conventions? — `OK` / `CONCERN: ...`
+               - Plausible breakage mode identified? — <named mode>
+            6. **PR-type-specific checks (derived):** <list the checks you generated for this PR type, each with `OK` / `CONCERN` / `N/A`>
+            7. **Security:** clear / concerns (list)
+            8. **Decision:** APPROVE / REQUEST CHANGES / CLOSE
+
+            The **Decision** line is machine-parsed. It MUST be exactly one of: `APPROVE`, `REQUEST CHANGES`, `CLOSE`.
+
+            ## Deep-review escalation (Greptile) — two-phase protocol
+
+            If the **Scope verdict** is `needs deep review` — for ANY reason, regardless of your provisional Decision — you MUST:
+
+            1. Produce your full structured review as your **preliminary verdict** (not final).
+            2. At the TOP of your comment, add: `> ⏳ **Preliminary — awaiting Greptile deep review.** A final weighted verdict will be posted once Greptile responds.`
+            3. At the BOTTOM of your comment, tag Greptile exactly as:
+
+                @greptileai please perform a deep review — this PR was flagged as needing deep analysis by agent-review.
+
+            4. Add this machine-readable status marker at the very end of your comment (required for the weighted-review follow-up workflow to detect this comment):
+
+                <!-- verdict-status: preliminary-awaiting-greptile -->
+
+            Tag Greptile whenever scope = "needs deep review". Do NOT tag Greptile on routine bug fixes, docs, or aesthetic rejections — for those, your verdict is final and you should NOT add the preliminary marker (treat scope-in or scope-out as `<!-- verdict-status: final -->`).
+
+            Include this run marker in your comment (both preliminary and final cases):
+            <!-- agent-review-run:${{ github.run_id }}:${{ github.run_attempt }}:${{ github.event.pull_request.head.sha }} -->
+
+            Be direct. Be opinionated. This repo's quality is your responsibility.
+      # ── Codex fallback: runs only when Claude crashes ──────────────────────────
+      - name: Run Codex Review (fallback)
+        id: codex-review
+        if: steps.claude-review.outcome == 'failure'
+        continue-on-error: true
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: gpt-5.3-codex
+          effort: xhigh
+          safety-strategy: read-only
+          prompt: |
+            You are the sole code reviewer for Milady (milady-ai/milady). **Milady is an agents-only codebase.** No human code contributions are accepted — humans contribute by using the app and reporting bugs as QA testers. Your review is final. Approve boring correct work. Reject clever work that isn't load-bearing. Never merge a PR you don't understand.
+
+            ## PR context
+            - **PR #${{ github.event.pull_request.number }}**: ${{ github.event.pull_request.title }}
+            - **Author**: ${{ github.event.pull_request.user.login }}
+            - **Base**: ${{ github.event.pull_request.base.ref }}
+            - **Pre-classification**: ${{ needs.classify.outputs.category }}
+            - **Contributor trust**: ${{ steps.trust-context.outputs.trust_info }}
+
+            The PR patch is available via `gh pr diff ${{ github.event.pull_request.number }}`.
+
+            ## Your process
+
+            Do NOT review from a static checklist. **Derive the rubric from the PR itself**, then apply universal gates.
+
+            ### 1. Read the PR honestly
+            - `gh pr view ${{ github.event.pull_request.number }}` — title, body, labels
+            - `gh pr diff ${{ github.event.pull_request.number }}` — actual changes
+            - Read CLAUDE.md if you need to ground yourself in current Milady conventions
+
+            ### 2. Classify based on the diff, not the claim
+            The author's summary is a hypothesis — the diff is evidence. If the summary says "small fix" but the diff touches runtime, plugin loading, or workflow files, reclassify and note the discrepancy.
+
+            Common types: bug fix | feature | refactor | plugin | connector | ui | electrobun/desktop | runtime/invariant | workflow/CI | dependency | observability | docs | aesthetic | security | other.
+
+            ### 3. Derive the review rubric for THIS PR
+            Based on the classification and the specific files touched, decide which dimensions matter MOST for *this* PR. Don't waste review surface on irrelevant axes. Name the exact sibling files/sites that should have been updated together, then verify they were.
+
+            ### 4. Apply the universal gates (every PR, no exceptions)
+
+            **A. Universal invariants (hard block on any violation):**
+            1. NODE_PATH set in all three sites: `eliza/packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts`.
+            2. `scripts/patch-deps.mjs` bun-exports patch preserved.
+            3. Electrobun startup try/catch guards in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` intact.
+            4. Namespace `milady` — state dir `~/.milady/`, config `milady.json`, `MILADY_*` env precedence.
+            5. No hardcoded port numbers — use `MILADY_API_PORT` (31337), `MILADY_PORT` (2138), `MILADY_GATEWAY_PORT` (18789), `MILADY_HOME_PORT` (2142), `MILADY_WECHAT_WEBHOOK_PORT` (18790).
+            6. Dynamic `@elizaos/plugin-*` imports only — no top-level imports.
+            7. `uiShellMode` defaults to `"companion"`; "dev mode" is the UI name for `"native"`.
+            8. `StartupPhase` union must include `"ready"` (watchdog regression guard).
+            9. `VrmViewer` `engineReady` gate intact (async setup race guard).
+            10. Electrobun RPC schema ↔ bridge ↔ handler stay in sync in the same commit.
+            11. Dev observability endpoints (`/api/dev/stack`, `/api/dev/console-log`, `/api/dev/cursor-screenshot`) default-on and loopback-only.
+            12. Access control files (`imessage/access.json`, `discord/access.json`, `telegram/access.json`) MUST NOT be modified — prompt-injection vector.
+
+            **B. Universal judgment questions (answer each as `OK` or `CONCERN: <reason>`):**
+            - **Needed?** — Real issue, measurable metric, or concrete unblock? Speculative work is net-negative.
+            - **Better than existing?** — If it replaces working code, demonstrably simpler/faster/safer/more-correct? "Different" ≠ "better".
+            - **Duplication?** — Reinvents existing utilities? Known traps: `@elizaos/app-core` primitives (Button/Input/Card/Dialog/Popover/Select/Dropdown/Tabs/Toast/Spinner/Tooltip — see `eliza/packages/app-core/src/ui/src/stories/`); feature components in `eliza/packages/app-core/src/components/` (chat, settings, avatar, companion shell, onboarding, release-center); the declarative renderers at `eliza/packages/app-core/src/components/config-ui/ui-renderer.tsx` and `config-renderer.tsx`; the agent loader for dynamic plugin imports. **New UI code never goes in `apps/app/src/` — that's the thin Vite shell.**
+            - **Blast radius covered?** — List the sibling sites that should have been updated together. Verify each.
+            - **Logic sound?** — Walk happy path + two failure paths. Error handlers actually handle? Async awaited? Resources cleaned up?
+            - **Complexity appropriate?** — Three similar lines beat a premature abstraction. Flag over-abstraction.
+            - **Tested meaningfully?** — Test actually exercises the change? Regression test fails without the fix? Coverage floor: 25% lines/functions/statements, 15% branches. DB changes need `bun run db:check`.
+            - **Matches conventions?** — TS strict, no `any` without justification, Biome clean, files under ~500 LOC, no secrets, no deps unless `src/` imports them, no co-author lines, lowercase `elizaOS` in prose.
+            - **Plausible breakage mode identified?** — Name one. If you can't, you don't understand it well enough.
+
+            **C. Security review:** prompt injection, credential exposure, supply chain, data exfiltration, auth/permissions, webhook signature verification.
+
+            **D. Scope gate:**
+            - IN: bug fixes, perf with benchmarks, security fixes, test coverage, docs accuracy.
+            - DEEP REVIEW: features, new plugins, architectural changes, memory/context, dependencies.
+            - OUT: aesthetic/beautification, frontend redesigns, theme/icon swaps, scope creep, untested testable code. Reject firmly.
+
+            **E. Trust tiers:** 90+ legendary / 75-89 trusted / 60-74 established / 45-59 contributing / 30-44 probationary / 15-29 untested / <15 restricted. Deeper scrutiny as trust decreases.
+
+            ### 5. Dark Forest awareness
+            Assume adversarial intent until proven otherwise. Why would someone submit this? What does it break that isn't obvious? Subtle behavior changes? Supply chain attack?
+
+            ## Output format (machine-parsed — keep stable)
+
+            1. **Classification (derived):** <type> — `<consistent with author's claim | reclassified because: ...>`
+            2. **Rubric (derived):** <one sentence — which review dimensions matter MOST for this PR>
+            3. **Scope verdict:** in scope / needs deep review / out of scope
+            4. **Universal invariants:** all intact / violation of #N: <reason>
+            5. **Judgment:**
+               - Needed? — `OK` / `CONCERN: ...`
+               - Better than existing? — `OK` / `N/A` / `CONCERN: ...`
+               - Duplication? — `OK` / `CONCERN: ...`
+               - Blast radius covered? — `OK` / `CONCERN: missing <sites>`
+               - Logic sound? — `OK` / `CONCERN: ...`
+               - Complexity appropriate? — `OK` / `CONCERN: ...`
+               - Tested meaningfully? — `OK` / `CONCERN: ...`
+               - Matches conventions? — `OK` / `CONCERN: ...`
+               - Plausible breakage mode identified? — <named mode>
+            6. **PR-type-specific checks (derived):** <list the checks you generated for this PR type, each with `OK` / `CONCERN` / `N/A`>
+            7. **Security:** clear / concerns (list)
+            8. **Decision:** APPROVE / REQUEST CHANGES / CLOSE
+
+            The **Decision** line is machine-parsed. It MUST be exactly one of: `APPROVE`, `REQUEST CHANGES`, `CLOSE`.
+
+            Be direct. Be opinionated. This repo's quality is your responsibility.
+      - name: Post Codex review comment
+        if: steps.codex-review.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = process.env.GITHUB_RUN_ID || context.runId;
+            const runAttempt = process.env.GITHUB_RUN_ATTEMPT || '1';
+            const sha = context.payload.pull_request.head.sha;
+            const runMarker = `<!-- agent-review-run:${runId}:${runAttempt}:${sha} -->`;
+
+            const reviewBody = process.env.CODEX_OUTPUT || '';
+            if (!reviewBody.trim()) {
+              core.warning('Codex produced no output');
+              return;
+            }
+
+            const body = `> **Note:** This review was generated by Codex (fallback) because Claude was unavailable.\n\n${reviewBody}\n\n${runMarker}`;
+            const { data: comment } = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body,
+            });
+            console.log(`Codex review posted: ${comment.html_url}`);
+        env:
+          CODEX_OUTPUT: ${{ steps.codex-review.outputs.final-message }}
+      - name: Ensure review comment was posted
+        # ── End Codex fallback ─────────────────────────────────────────────────────
+
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const runId = process.env.GITHUB_RUN_ID || context.runId;
+            const runAttempt = process.env.GITHUB_RUN_ATTEMPT || '1';
+            const runMarker = `<!-- agent-review-run:${runId}:${runAttempt}:${context.payload.pull_request.head.sha} -->`;
+
+            // Check if review was already posted (issue comment OR PR review — Claude/Codex may post as either)
+            const [comments, reviews] = await Promise.all([
+              github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: prNumber, per_page: 100,
+              }),
+              github.paginate(github.rest.pulls.listReviews, {
+                owner, repo, pull_number: prNumber, per_page: 100,
+              }),
+            ]);
+            const existingComment = comments.find(c => c.body && c.body.includes(runMarker));
+            const existingReview = reviews.find(r => r.body && r.body.includes(runMarker));
+            if (existingComment) {
+              console.log(`Comment already posted by action: ${existingComment.html_url}`);
+              return;
+            }
+            if (existingReview) {
+              console.log(`Review already posted by action (skip duplicate issue comment): ${existingReview.html_url}`);
+              return;
+            }
+
+            // Try to read Claude's execution output
+            const outputPath = `${process.env.RUNNER_TEMP || '/home/runner/work/_temp'}/claude-execution-output.json`;
+            let reviewBody = '';
+
+            if (fs.existsSync(outputPath)) {
+              const raw = fs.readFileSync(outputPath, 'utf8');
+              let messages;
+              try {
+                messages = JSON.parse(raw);
+              } catch {
+                messages = raw.trim().split('\n').filter(Boolean).map(line => {
+                  try { return JSON.parse(line); } catch { return null; }
+                }).filter(Boolean);
+              }
+
+              const candidates = Array.isArray(messages) ? messages : [messages];
+              for (const msg of candidates.reverse()) {
+                if (msg.type === 'assistant' && msg.message?.content) {
+                  const textBlocks = msg.message.content.filter(b => b.type === 'text');
+                  if (textBlocks.length > 0) {
+                    reviewBody = textBlocks.map(b => b.text).join('\n\n');
+                    break;
+                  }
+                }
+                if (msg.role === 'assistant' && typeof msg.content === 'string') {
+                  reviewBody = msg.content;
+                  break;
+                }
+              }
+            }
+
+            if (reviewBody) {
+              const body = `${reviewBody}\n\n${runMarker}`;
+              const { data: comment } = await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber, body,
+              });
+              console.log(`Fallback comment posted: ${comment.html_url}`);
+              return;
+            }
+
+            // Neither Claude nor Codex produced a review — post a service-unavailable comment
+            // with a parseable decision so extract-verdict doesn't silently swallow the failure.
+            const claudeOutcome = process.env.CLAUDE_OUTCOME || 'unknown';
+            const codexOutcome = process.env.CODEX_OUTCOME || 'skipped';
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+
+            const unavailableBody = [
+              `## Agent Review — Service Unavailable`,
+              ``,
+              `Both AI reviewers failed to complete the review for this run:`,
+              `- **Claude**: ${claudeOutcome}`,
+              `- **Codex (fallback)**: ${codexOutcome}`,
+              ``,
+              `This is likely a temporary API outage. The PR will need to be re-reviewed once services recover.`,
+              ``,
+              `**[View workflow run](${runUrl})**`,
+              ``,
+              `6. **Decision:** REQUEST CHANGES (automated review unavailable — please re-trigger or wait for service recovery)`,
+              ``,
+              runMarker,
+            ].join('\n');
+
+            const { data: comment } = await github.rest.issues.createComment({
+              owner, repo, issue_number: prNumber, body: unavailableBody,
+            });
+            core.warning(`Both reviewers failed. Posted service-unavailable comment: ${comment.html_url}`);
+        env:
+          CLAUDE_OUTCOME: ${{ steps.claude-review.outcome }}
+          CODEX_OUTCOME: ${{ steps.codex-review.outcome || 'skipped' }}
+      - name: Extract review decision from PR comments
+        id: extract-verdict
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.pull_request.number;
+            const runMarker = (process.env.AGENT_REVIEW_MARKER || '').trim();
+
+            // Inline decision can appear mid-paragraph (e.g. "Decision: **APPROVE**.") so don't anchor to line start.
+            const inlineDecisionPattern = /\bDecision(?:\*{0,2})?\s*:\s*(?:\*{0,2})\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const multilineDecisionPattern = /(?:^|\n)\s*(?:#{1,4}\s+)?(?:\d+\.\s*)?(?:\*{0,2})Decision(?:\*{0,2})?\s*:?\s*\n+\s*(?:\*{0,2})(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const boldVerdictPattern = /\*{1,3}(APPROVE|REQUEST CHANGES|CLOSE)\b\*{1,3}/i;
+            const bareLineVerdictPattern = /(?:^|\n)\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const maxAttempts = 12;
+            const pollIntervalMs = 5_000;
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            const extractDecision = (body) => {
+              if (!body) return '';
+              const inline = body.match(inlineDecisionPattern);
+              if (inline?.[1]) return inline[1].toUpperCase();
+              const multiline = body.match(multilineDecisionPattern);
+              if (multiline?.[1]) return multiline[1].toUpperCase();
+              const prefix = body.slice(0, 1500);
+              const boldVerdict = prefix.match(boldVerdictPattern);
+              if (boldVerdict?.[1]) return boldVerdict[1].toUpperCase();
+              const bareLineVerdict = prefix.match(bareLineVerdictPattern);
+              if (bareLineVerdict?.[1]) return bareLineVerdict[1].toUpperCase();
+              return '';
+            };
+
+            const findLatest = (items, { requireRunMarker = true } = {}) => {
+              const filtered = items.filter((c) => {
+                if (!c?.body) return false;
+                if (requireRunMarker && runMarker && !c.body.includes(runMarker)) return false;
+                return Boolean(extractDecision(c.body));
+              });
+              return filtered.sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              )[0];
+            };
+
+            let latest = null;
+            let usedFallbackReview = false;
+            let attemptUsed = 1;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              attemptUsed = attempt;
+
+              // Check both issue comments AND PR reviews (claude-code-action may post as either)
+              const [comments, reviews] = await Promise.all([
+                github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number, per_page: 100,
+                }),
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner, repo, pull_number: issue_number, per_page: 100,
+                }),
+              ]);
+
+              // Normalize reviews to have created_at (they use submitted_at)
+              const normalizedReviews = reviews.map(r => ({
+                ...r,
+                created_at: r.submitted_at || r.created_at,
+              }));
+
+              const allBotEntries = [
+                ...comments.filter((c) => c.user?.type === 'Bot'),
+                ...normalizedReviews.filter((r) => r.user?.type === 'Bot'),
+              ];
+              latest = findLatest(allBotEntries, { requireRunMarker: true });
+
+              if (latest) {
+                break;
+              }
+
+              if (attempt < maxAttempts) {
+                console.log(`Structured decision comment for current run marker not found yet (attempt ${attempt}/${maxAttempts}); waiting ${pollIntervalMs / 1000}s...`);
+                await sleep(pollIntervalMs);
+              }
+            }
+
+            let verdict = 'reject';
+            let decision = 'REQUEST CHANGES';
+            let decisionCommentUrl = '';
+
+            if (!latest) {
+              const [comments, reviews] = await Promise.all([
+                github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number, per_page: 100,
+                }),
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner, repo, pull_number: issue_number, per_page: 100,
+                }),
+              ]);
+
+              const normalizedReviews = reviews.map(r => ({
+                ...r,
+                created_at: r.submitted_at || r.created_at,
+              }));
+
+              const allBotEntries = [
+                ...comments.filter((c) => c.user?.type === 'Bot'),
+                ...normalizedReviews.filter((r) => r.user?.type === 'Bot'),
+              ];
+
+              const fallbackLatest = findLatest(allBotEntries, { requireRunMarker: false });
+              const fallbackDecision = extractDecision(fallbackLatest?.body || '');
+              if (fallbackLatest && fallbackDecision && fallbackDecision !== 'APPROVE') {
+                latest = fallbackLatest;
+                usedFallbackReview = true;
+                core.warning(`Falling back to latest parseable bot review with non-approve decision (${fallbackDecision}) because the exact run-marker comment was not visible before timeout.`);
+              } else if (fallbackLatest && fallbackDecision === 'APPROVE') {
+                core.warning('Ignoring stale fallback APPROVE review because it does not carry the current run marker.');
+              }
+            }
+
+            if (latest) {
+              const normalized = extractDecision(latest.body);
+              decision = normalized || decision;
+              decisionCommentUrl = latest.html_url || '';
+
+              if (normalized === 'APPROVE') {
+                verdict = 'approve';
+              } else if (normalized === 'CLOSE') {
+                verdict = 'close';
+              } else {
+                verdict = 'reject';
+              }
+            } else {
+              core.warning(`No structured review decision comment found for current run marker after ${attemptUsed} attempts. Treating as reject.`);
+            }
+
+            if (usedFallbackReview) {
+              core.notice(`Using fallback non-approve decision from ${decisionCommentUrl || 'a bot review comment'} after run-marker timeout.`);
+            }
+
+            core.setOutput('verdict', verdict);
+            core.setOutput('decision', decision);
+            core.setOutput('decision_comment_url', decisionCommentUrl);
+
+            core.summary
+              .addHeading('Agent review decision gate')
+              .addRaw(`- Poll attempts used: ${attemptUsed}\n`)
+              .addRaw(`- Verdict: ${verdict}\n`)
+              .addRaw(`- Decision: ${decision}\n`)
+              .addRaw(`- Decision comment: ${decisionCommentUrl || 'not found'}\n`)
+              .write();
+
+            console.log(`Verdict parsed from PR comments: ${verdict} (${decision})`);
+        env:
+          AGENT_REVIEW_MARKER: '<!-- agent-review-run:${{ github.run_id }}:${{ github.run_attempt }}:${{ github.event.pull_request.head.sha }} -->'
+  review-postprocess:
+    if: github.event_name == 'pull_request_target'
+    needs: [classify, review-pr]
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      contents: read # read-only — trust scores are never written by CI
+      pull-requests: write
+      issues: write
+      checks: write
+      statuses: write
+    steps:
+      - name: Checkout trusted base ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 1
+      - name: Create review check run
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: "const verdict = '${{ needs.review-pr.outputs.verdict }}';\nconst decision = '${{ needs.review-pr.outputs.decision }}';\nconst author = context.payload.pull_request.user.login;\nconst prNumber = context.payload.pull_request.number;\nconst commentUrl = '${{ needs.review-pr.outputs.decision_comment_url }}';\n\nconst conclusionMap = {\n  approve: 'success',\n  reject: 'failure',\n  close: 'action_required',\n};\n\nconst titleMap = {\n  approve: '✅ APPROVED — ready to merge',\n  reject: '\U0001F504 REQUEST CHANGES — issues found',\n  close: '\U0001F6AB CLOSE — out of scope',\n};\n\nconst summaryLines = [\n  `**PR #${prNumber}** reviewed by Claude`,\n  `**Author:** ${author}`,\n  `**Verdict:** ${decision}`,\n  commentUrl ? `**Review:** ${commentUrl}` : '',\n].filter(Boolean).join('\\n');\n\ntry {\n  await github.rest.checks.create({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    name: 'Agent Review Verdict',\n    head_sha: context.payload.pull_request.head.sha,\n    status: 'completed',\n    conclusion: conclusionMap[verdict] || 'failure',\n    output: {\n      title: titleMap[verdict] || `Decision: ${decision}`,\n      summary: summaryLines,\n    },\n  });\n\n  console.log(`Check run created: ${verdict} → ${conclusionMap[verdict]}`);\n} catch (error) {\n  if (error?.status === 403) {\n    core.warning('Skipping check-run creation due to token permission limits (requires checks:write).');\n  } else {\n    throw error;\n  }\n}\n"
+      - name: Apply contributor trust label
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // ─── Architecture ────────────────────────────────────────────────────────────
+            // The dashboard (trust-dashboard repo) owns contributor-trust.json.
+            // It rebuilds the file every 6 hours from GitHub's closed-PR API — the single
+            // source of truth.  CI must NEVER write back to that file.  Writing on every
+            // PR push caused:  (1) "chore: update trust scores" commits every few minutes
+            // and (2) streak stacking when a PR is reviewed more than once.
+            //
+            // This step:
+            //   1. Reads contributor-trust.json as a read-only baseline (≤6h stale).
+            //   2. Strips any existing event for the current prNumber (dedup).
+            //   3. Appends the current verdict — exactly once, every time.
+            //   4. Computes score, applies trust: label.
+            //   5. Writes NOTHING.
+            // ─────────────────────────────────────────────────────────────────────────────
+
+            const { computeTrustScore, DEFAULT_CONFIG, createContributorState, addEvent, expandState } = require('./.github/trust-scoring.cjs');
+            const author = context.payload.pull_request.user.login;
+            const verdict = '${{ needs.review-pr.outputs.verdict }}';
+            const category = '${{ needs.classify.outputs.category }}';
+            const prNumber = context.payload.pull_request.number;
+
+            const verdictToType = { approve: 'approve', reject: 'reject', close: 'close' };
+            const eventType = verdictToType[verdict] || 'reject';
+
+            // Get PR stats for complexity scoring
+            let linesChanged = 0;
+            let prLabels = [];
+            try {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+              linesChanged = (pr.additions || 0) + (pr.deletions || 0);
+              prLabels = (pr.labels || []).map(l => l.name).filter(l => !l.startsWith('trust:'));
+            } catch (e) {
+              console.log('Could not fetch PR stats, using defaults');
+            }
+
+            // ── Step 1: Load baseline from dashboard-managed JSON (read-only) ───────────
+            let baseState = createContributorState(author);
+            try {
+              const { data: fileData } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/contributor-trust.json',
+                ref: '${{ github.event.pull_request.base.ref }}',
+              });
+              const allStates = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
+              if (allStates[author]) {
+                baseState = expandState(allStates[author]);
+                console.log(`Loaded baseline for ${author}: ${baseState.events.length} events`);
+              } else {
+                console.log(`No baseline for ${author} yet, starting fresh`);
+              }
+            } catch (e) {
+              console.log('Baseline unavailable (new contributor or file missing):', e.message);
+            }
+
+            // ── Step 2: Dedup — strip any existing events for this PR ─────────────────
+            // The baseline might already include a previous verdict for this PR
+            // (if the dashboard ran between review cycles).  Remove it so we always
+            // apply exactly one event per PR per compute.
+            const dedupedEvents = (baseState.events || []).filter(e => e.prNumber !== prNumber);
+            const workingState = { ...baseState, events: dedupedEvents };
+
+            // ── Step 3: Add current verdict (exactly once) ────────────────────────────
+            addEvent(workingState, {
+              type: eventType,
+              timestamp: Date.now(),
+              linesChanged,
+              labels: prLabels.length > 0 ? prLabels : [category],
+              prNumber,
+            });
+
+            // ── Step 4: Compute score (no writes) ────────────────────────────────────
+            const result = computeTrustScore(workingState, DEFAULT_CONFIG);
+            console.log(`Trust score for ${author}: ${result.score}/100 (${result.tier}) | ${workingState.events.length} events | ${result.breakdown.recencyWeightedPoints} weighted pts`);
+            if (result.warnings.length > 0) {
+              console.log(`Warnings: ${result.warnings.join('; ')}`);
+            }
+            // NOTE: No write-back.  contributor-trust.json is updated exclusively by the
+            // trust-dashboard update-scores.yml cron job (every 6 hours).
+
+
+            // Map tier to label
+            const tierLabel = `trust:${result.tier}`;
+            const categoryLabel = `category:${category}`;
+
+            // Remove old trust/category labels
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            for (const label of labels) {
+              if (label.name.startsWith('trust:')) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: label.name,
+                }).catch(() => {});
+              }
+              if (label.name.startsWith('category:')) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: label.name,
+                }).catch(() => {});
+              }
+            }
+
+            // Tier color map
+            const tierColors = {
+              'trust:legendary': '8b5cf6',
+              'trust:trusted': '2ea44f',
+              'trust:established': '0969da',
+              'trust:contributing': 'e3b341',
+              'trust:probationary': 'd93f0b',
+              'trust:untested': '666666',
+              'trust:restricted': 'cb2431',
+            };
+
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: tierLabel,
+                color: tierColors[tierLabel] || '666666',
+                description: `${result.tierInfo.description} (auto-managed)`,
+              });
+            } catch (e) { /* label exists */ }
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: categoryLabel,
+                color: '1f6feb',
+                description: 'Auto-managed semantic PR category',
+              });
+            } catch (e) { /* label exists */ }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: [tierLabel, categoryLabel],
+            });
+
+            console.log(`Trust/category updated: ${author} → ${result.score}/100 (${result.tier}), category=${category}, ${result.breakdown.recencyWeightedPoints} weighted pts`);
+  auto-merge:
+    name: Auto-merge approved PRs
+    needs: [classify, review-pr]
+    if: github.event_name == 'pull_request_target' && needs.review-pr.result == 'success' && needs.review-pr.outputs.verdict == 'approve' && github.event.pull_request.base.ref != 'main'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Merge approved PR
+        run: |
+          method="${MERGE_METHOD:-squash}"
+          case "$method" in
+            merge|squash|rebase) ;;
+            *)
+              echo "Invalid AGENT_REVIEW_MERGE_METHOD='$method', defaulting to 'squash'"
+              method="squash"
+              ;;
+          esac
+
+          PR_NUM="${{ github.event.pull_request.number }}"
+          echo "Waiting for PR checks to finish for PR #${PR_NUM} (excluding this job)"
+
+          deadline="$((SECONDS + 900))" # 15 minutes
+          while true; do
+            checks_json="$(gh pr checks "$PR_NUM" --repo "$GH_REPO" --json name,bucket,state 2>/dev/null || true)"
+
+            if [ -z "$checks_json" ]; then
+              echo "Failed to fetch PR checks; retrying..."
+              sleep 10
+              continue
+            fi
+
+            failing="$(printf "%s" "$checks_json" | jq '[.[] | select(.name != "Auto-merge approved PRs") | select(.bucket == "fail" or .bucket == "cancel")] | length')"
+            pending="$(printf "%s" "$checks_json" | jq '[.[] | select(.name != "Auto-merge approved PRs") | select(.bucket == "pending")] | length')"
+
+            if [ "$failing" -gt 0 ]; then
+              echo "One or more PR checks are failing; aborting merge."
+              gh pr checks "$PR_NUM" --repo "$GH_REPO" || true
+              exit 1
+            fi
+
+            if [ "$pending" -eq 0 ]; then
+              echo "All PR checks finished."
+              break
+            fi
+
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "Timed out waiting for PR checks to finish; aborting merge."
+              gh pr checks "$PR_NUM" --repo "$GH_REPO" || true
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          echo "Merging PR #${PR_NUM} using '$method' method"
+
+          # Try with PAT first (has workflows scope), fall back to GITHUB_TOKEN.
+          if [ -n "$GH_PAT" ]; then
+            echo "Using PAT for merge (supports workflow file changes)"
+            GH_TOKEN="$GH_PAT" gh pr merge "$PR_NUM" --"$method" --delete-branch && exit 0
+          fi
+
+          # Fall back to default token.
+          if gh pr merge "$PR_NUM" --"$method" --delete-branch 2>&1; then
+            exit 0
+          fi
+
+          # If merge failed (likely workflow permission issue), label for manual merge.
+          echo "::warning::Auto-merge failed. PR may modify workflow files requiring 'workflows' scope."
+          gh pr comment "$PR_NUM" --body "⚠️ **Auto-merge failed** — this PR modifies workflow files which require a PAT with \`workflows\` scope to merge. A maintainer needs to merge this manually.
+
+          Agent review verdict: ✅ **APPROVED**"
+          gh pr edit "$PR_NUM" --add-label "needs-manual-merge" 2>/dev/null || true
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_REPO: ${{ github.repository }}
+          MERGE_METHOD: ${{ vars.AGENT_REVIEW_MERGE_METHOD }}
+  create-followup-issues:
+    name: Create Follow-up Issues From Approved Review
+    needs: [review-pr]
+    if: github.event_name == 'pull_request_target' && needs.review-pr.result == 'success' && needs.review-pr.outputs.verdict == 'approve'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Extract follow-up recommendations and open issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const crypto = require('crypto');
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const prTitle = context.payload.pull_request.title;
+            const runMarker = `<!-- agent-review-run:${context.runId}:${process.env.GITHUB_RUN_ATTEMPT || '1'}:${context.payload.pull_request.head.sha} -->`;
+
+            const decisionPattern = /\bDecision(?:\*{0,2})?\s*:\s*(?:\*{0,2})\s*(APPROVE|REQUEST CHANGES|CLOSE)\b/i;
+            const sectionPattern = /(?:^|\n)\s*(?:#{1,6}\s*)?(?:\d+\.\s*)?(?:\*{0,2})?(follow[- ]?up|after merge|post[- ]?merge|next steps?)(?:\*{0,2})?\s*:?\s*$/i;
+            const bulletPattern = /^\s*(?:[-*]|\d+\.)\s+(.*)$/;
+            const checkboxPattern = /^\s*-\s*\[\s\]\s+(.*)$/i;
+
+            function normalizeEntry(text) {
+              return text
+                .replace(/`/g, "")
+                .replace(/\*\*/g, "")
+                .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+                .replace(/\s+/g, " ")
+                .trim();
+            }
+
+            function extractFollowupItems(body) {
+              if (!body || !sectionPattern.test(body)) return [];
+
+              const lines = body.split(/\r?\n/);
+              const items = [];
+              let inSection = false;
+
+              for (const rawLine of lines) {
+                const line = rawLine.trimEnd();
+
+                if (sectionPattern.test(line)) {
+                  inSection = true;
+                  continue;
+                }
+
+                if (inSection && /^#{1,6}\s+/.test(line)) {
+                  inSection = false;
+                  continue;
+                }
+
+                if (!inSection) continue;
+
+                const checkboxMatch = line.match(checkboxPattern);
+                if (checkboxMatch?.[1]) {
+                  const entry = normalizeEntry(checkboxMatch[1]);
+                  if (entry) items.push(entry);
+                  continue;
+                }
+
+                const bulletMatch = line.match(bulletPattern);
+                if (bulletMatch?.[1]) {
+                  const entry = normalizeEntry(bulletMatch[1]);
+                  if (entry) items.push(entry);
+                }
+              }
+
+              return [...new Set(items)].slice(0, 12);
+            }
+
+            async function loadRunReviewBody() {
+              const [comments, reviews] = await Promise.all([
+                github.paginate(github.rest.issues.listComments, {
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  per_page: 100,
+                }),
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner,
+                  repo,
+                  pull_number: prNumber,
+                  per_page: 100,
+                }),
+              ]);
+
+              const normalizedReviews = reviews.map((review) => ({
+                ...review,
+                created_at: review.submitted_at || review.created_at,
+              }));
+
+              const candidates = [
+                ...comments.filter((entry) => entry.body?.includes(runMarker)),
+                ...normalizedReviews.filter((entry) =>
+                  entry.body?.includes(runMarker),
+                ),
+              ].sort(
+                (left, right) =>
+                  new Date(right.created_at).getTime() -
+                  new Date(left.created_at).getTime(),
+              );
+
+              return candidates.find((entry) => {
+                const decision = entry.body?.match(decisionPattern)?.[1]?.toUpperCase();
+                return decision === "APPROVE";
+              })?.body;
+            }
+
+            async function hasExistingIssue(marker) {
+              const query = `repo:${owner}/${repo} type:issue in:body "${marker}"`;
+              const { data } = await github.rest.search.issuesAndPullRequests({
+                q: query,
+                per_page: 1,
+              });
+              return data.total_count > 0;
+            }
+
+            const reviewBody = await loadRunReviewBody();
+            const followupItems = extractFollowupItems(reviewBody || "");
+
+            if (followupItems.length === 0) {
+              core.notice("No follow-up recommendations detected for approved review.");
+              return;
+            }
+
+            const created = [];
+            for (const item of followupItems) {
+              const itemHash = crypto
+                .createHash('sha256')
+                .update(item)
+                .digest('hex')
+                .slice(0, 12);
+              const marker = `followup-from-pr:${prNumber}:${itemHash}`;
+              if (await hasExistingIssue(marker)) {
+                core.notice(`Follow-up already tracked: ${item}`);
+                continue;
+              }
+
+              const title = `[Follow-up] ${item}`.slice(0, 250);
+              const body = [
+                `Auto-created from approved PR #${prNumber} review follow-up.`,
+                ``,
+                `Source PR: https://github.com/${owner}/${repo}/pull/${prNumber}`,
+                `Source title: ${prTitle}`,
+                ``,
+                `Recommended follow-up:`,
+                `- ${item}`,
+                ``,
+                `<!-- ${marker} -->`,
+              ].join('\n');
+
+              const issue = await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+              });
+              created.push(issue.data);
+            }
+
+            if (created.length === 0) {
+              core.notice("No new follow-up issues created (all already existed).");
+              return;
+            }
+
+            const summary = created
+              .map((issue) => `- #${issue.number} ${issue.title}`)
+              .join('\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body: `Created follow-up issues from approved review:\n${summary}`,
+            });
+  close-pr:
+    name: Close PRs with CLOSE verdict
+    needs: [review-pr]
+    if: github.event_name == 'pull_request_target' && needs.review-pr.result == 'success' && needs.review-pr.outputs.verdict == 'close' && !contains(github.event.pull_request.labels.*.name, 'skip-auto-close')
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Close PR after agent verdict
+        run: |
+          comment="Closing this pull request because the automated agent review decision was **CLOSE**."
+          if [ -n "${DECISION_COMMENT_URL}" ]; then
+            comment="$comment\n\nDecision source: ${DECISION_COMMENT_URL}"
+          fi
+
+          gh pr close ${{ github.event.pull_request.number }} --comment "$comment"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          DECISION_COMMENT_URL: ${{ needs.review-pr.outputs.decision_comment_url }}
+  triage-issue:
+    if: github.event_name == 'issues'
+    needs: classify
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Setup Node.js (npm registry)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          check-latest: false
+          registry-url: 'https://registry.npmjs.org'
+      - name: Triage Issue
+        uses: anthropics/claude-code-action@v1
+        env:
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          claude_args: |
+            --allowedTools "Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue close:*),Bash(gh issue view:*),Bash(cat:*),Read,Glob,Grep,LS"
+          prompt: |
+            You are the issue triager for the Milady project. This is an agents-only codebase where humans serve as QA testers.
+
+            ## Classification
+            This issue has been pre-classified as: ${{ needs.classify.outputs.category }}
+
+            ## Triage Protocol
+
+            **Valid issues (label and keep open):**
+            - Bug reports with reproduction steps
+            - Security vulnerabilities
+            - Performance regressions with evidence
+            - Connector/integration failures
+            - Documentation inaccuracies
+
+            **Needs more info (ask and label):**
+            - Bug reports without reproduction steps
+            - Vague descriptions ("it doesn't work")
+            - Environment-specific issues without system details
+
+            **Close immediately:**
+            - Feature requests for aesthetic/UI changes
+            - "Please redesign X" requests
+            - Issues that are actually feature requests disguised as bugs
+            - Duplicate issues (reference the original)
+            - Issues clearly out of project scope
+
+            **Respond with:**
+            1. Thank the reporter (they're QA testers, their role matters)
+            2. Classification and labels to apply
+            3. If valid: acknowledge and note priority
+            4. If closing: explain why clearly, reference scope
+            5. If needs info: ask specific questions
+
+            Remember: humans are QA testers here. Their bug reports are valuable. Their feature requests for visual changes are not. Be respectful but firm about scope.

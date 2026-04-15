@@ -1,0 +1,382 @@
+# Depot CI Migration
+# Source: .github/workflows/nightly.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+name: Nightly Build
+# Automated nightly builds from the main branch.
+# Publishes to npm with the "nightly" dist-tag and creates a GitHub pre-release.
+# Skips if no new commits since the last nightly.
+on:
+  schedule:
+    # Run at 4:00 AM UTC daily
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force nightly build even if no new commits"
+        required: false
+        type: boolean
+        default: false
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+env:
+  CI: "true"
+  NODE_NO_WARNINGS: "1"
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  MILADY_SKIP_LOCAL_UPSTREAMS: "1"
+permissions:
+  contents: write
+jobs:
+  # ── Check for new commits ───────────────────────────────────────────────
+  check-commits:
+    name: Check for new commits
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    outputs:
+      has_new_commits: ${{ steps.check.outputs.has_new_commits }}
+      short_sha: ${{ steps.check.outputs.short_sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: false
+          fetch-depth: 0
+      - name: Check for new commits since last nightly
+        id: check
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force }}" == "true" ]]; then
+            echo "has_new_commits=true" >> "$GITHUB_OUTPUT"
+            echo "Forced build — skipping commit check"
+            exit 0
+          fi
+
+          # Find the latest nightly tag
+          LAST_NIGHTLY=$(git tag -l 'v*-nightly.*' --sort=-v:refname | head -1)
+
+          if [[ -z "$LAST_NIGHTLY" ]]; then
+            echo "has_new_commits=true" >> "$GITHUB_OUTPUT"
+            echo "No previous nightly tag found — building"
+            exit 0
+          fi
+
+          # Check if there are commits between last nightly and HEAD
+          COMMIT_COUNT=$(git rev-list "${LAST_NIGHTLY}..HEAD" --count)
+
+          if [[ "$COMMIT_COUNT" -eq 0 ]]; then
+            echo "has_new_commits=false" >> "$GITHUB_OUTPUT"
+            echo "No new commits since $LAST_NIGHTLY — skipping"
+          else
+            echo "has_new_commits=true" >> "$GITHUB_OUTPUT"
+            echo "$COMMIT_COUNT new commits since $LAST_NIGHTLY"
+          fi
+  # ── Build & Test ────────────────────────────────────────────────────────
+  build-and-test:
+    name: Build & Test
+    needs: check-commits
+    if: needs.check-commits.outputs.has_new_commits == 'true'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    timeout-minutes: 60
+    outputs:
+      nightly_version: ${{ steps.version.outputs.nightly_version }}
+      nightly_tag: ${{ steps.version.outputs.nightly_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          check-latest: false
+      - name: Setup Python (for node-gyp when native prebuilds missing)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install setuptools for distutils (Python 3.12+)
+        run: pip install setuptools
+      - name: Install canvas native dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev libpixman-1-dev librsvg2-dev
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+      - name: Cache Bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - name: Init non-eliza submodules
+        run: |
+          node scripts/init-submodules.mjs
+          node scripts/disable-local-eliza-workspace.mjs
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+        env:
+          npm_config_python: ${{ env.pythonLocation }}/bin/python3
+      - name: Run repository postinstall patches
+        run: bun run postinstall
+      - name: Validate regression matrix contract
+        run: bun run test:regression-matrix:nightly
+      - name: Compute nightly version
+        id: version
+        run: |
+          BASE_VERSION=$(node -p "require('./package.json').version.replace(/-.*/, '')")
+          DATE=$(date -u +%Y%m%d)
+          NIGHTLY_VERSION="${BASE_VERSION}-nightly.${DATE}"
+          NIGHTLY_TAG="v${NIGHTLY_VERSION}"
+
+          echo "nightly_version=$NIGHTLY_VERSION" >> "$GITHUB_OUTPUT"
+          echo "nightly_tag=$NIGHTLY_TAG" >> "$GITHUB_OUTPUT"
+          echo "Nightly version: $NIGHTLY_VERSION"
+      - name: Set package version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${{ steps.version.outputs.nightly_version }}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          echo "Updated package.json version:"
+          node -p "require('./package.json').version"
+      - name: Build
+        run: |
+          bunx tsdown
+          node --import tsx eliza/packages/app-core/scripts/write-build-info.ts
+          echo '{"type":"module"}' > dist/package.json
+      - name: Run unit tests with coverage
+        run: bun run test:coverage
+      - name: Run database security checks
+        run: bun run db:check
+      - name: Build app surfaces for E2E and desktop contract tests
+        run: bun run build
+      - name: Run deterministic E2E tests
+        run: bun run test:integration
+      - name: Run real local E2E tests
+        run: bun run test:e2e
+      - name: Run startup E2E contract guard
+        run: bun run test:startup:contract
+      - name: Run desktop contract tests
+        run: bun run test:desktop:contract
+      - name: Run validation E2E tests
+        run: bun run test:e2e:validation
+      - name: Run live surface audit
+        run: bun run test:audit:live:strict
+      - name: Install Playwright browser
+        run: bunx playwright install --with-deps chromium
+      - name: Check live provider secrets
+        run: |
+          if [ -z "${{ secrets.ELIZAOS_CLOUD_API_KEY }}" ]; then
+            echo "::error::UI Playwright smoke requires ELIZAOS_CLOUD_API_KEY so the suite can complete real onboarding."
+            exit 1
+          fi
+      - name: Run UI Playwright smoke tests
+        run: bun run test:ui:playwright
+        env:
+          MILADY_LIVE_TEST: "1"
+          ELIZA_LIVE_TEST: "1"
+          ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}
+          ELIZAOS_CLOUD_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_BASE_URL }}
+      - name: Upload build artifacts for publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-dist
+          path: |
+            dist/
+            package.json
+          retention-days: 1
+      - name: Validate package
+        run: |
+          PACK_OUTPUT=$(npm pack --dry-run 2>&1)
+          echo "$PACK_OUTPUT"
+
+          # Verify critical files are included in the package
+          for required in "milady.mjs" "dist/index.js" "package.json"; do
+            if ! echo "$PACK_OUTPUT" | grep -q "$required"; then
+              echo "::error::Required file '$required' missing from package contents"
+              exit 1
+            fi
+          done
+
+          # Verify package size is reasonable (not empty, not bloated)
+          SIZE_LINE=$(echo "$PACK_OUTPUT" | grep "total files:" || echo "$PACK_OUTPUT" | tail -1)
+          echo "Pack summary: $SIZE_LINE"
+  desktop-heavy-matrix:
+    name: Desktop Heavy Release Matrix
+    needs: [check-commits, build-and-test]
+    if: needs.check-commits.outputs.has_new_commits == 'true'
+    uses: ./.depot/workflows/release-electrobun.yml
+    with:
+      tag: ${{ needs.build-and-test.outputs.nightly_tag }}
+      draft: false
+      publish_docker: false
+      publish_release: false
+    secrets: inherit
+  # ── Publish to npm ──────────────────────────────────────────────────────
+  # Reuses build artifacts from build-and-test to avoid redundant rebuilds.
+  publish-npm:
+    name: Publish to npm (nightly)
+    needs: [check-commits, build-and-test, desktop-heavy-matrix]
+    if: needs.check-commits.outputs.has_new_commits == 'true'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          check-latest: false
+          registry-url: "https://registry.npmjs.org"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.10"
+      - name: Cache Bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nightly-dist
+      - name: Init non-eliza submodules
+        run: |
+          node scripts/init-submodules.mjs
+          node scripts/disable-local-eliza-workspace.mjs
+      - name: Install dependencies (for npm publish file resolution)
+        run: bun install --ignore-scripts
+      - name: Publish with nightly dist-tag
+        run: npm publish --tag nightly --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  # ── Create GitHub pre-release ──────────────────────────────────────────
+  create-release:
+    name: Create GitHub pre-release
+    needs: [check-commits, build-and-test, desktop-heavy-matrix, publish-npm]
+    if: needs.check-commits.outputs.has_new_commits == 'true'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: false
+          fetch-depth: 0
+      - name: Create nightly tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TAG="${{ needs.build-and-test.outputs.nightly_tag }}"
+
+          # Delete existing tag if it exists (nightly dates can repeat on re-runs)
+          git tag -d "$TAG" 2>/dev/null || true
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+
+          git tag -a "$TAG" -m "Nightly build $TAG"
+          git push origin "$TAG"
+      - name: Create GitHub pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build-and-test.outputs.nightly_tag }}
+          name: "Nightly ${{ needs.build-and-test.outputs.nightly_version }}"
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            ## Nightly Build
+
+            **Version:** `${{ needs.build-and-test.outputs.nightly_version }}`
+            **Commit:** `${{ needs.check-commits.outputs.short_sha }}`
+            **Channel:** nightly
+
+            ### Install
+            ```bash
+            npm install -g miladyai@nightly
+            # or
+            milady update --channel nightly
+            ```
+
+            > This is an automated nightly build from the `main` branch.
+            > It may contain experimental features and known issues.
+            > For stable releases, use `npm install -g miladyai@latest`.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # ── Cleanup old nightlies ──────────────────────────────────────────────
+  cleanup:
+    name: Cleanup old nightly releases
+    needs: create-release
+    if: needs.create-release.result == 'success'
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Delete old nightly releases (keep last 14)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # List nightly releases sorted by date (oldest first)
+          RELEASES=$(gh release list --json tagName,isPrerelease --limit 100 \
+            | jq -r '.[] | select(.isPrerelease == true and (.tagName | test("nightly"))) | .tagName')
+
+          COUNT=$(echo "$RELEASES" | grep -c . || true)
+          KEEP=14
+
+          if [[ "$COUNT" -le "$KEEP" ]]; then
+            echo "Only $COUNT nightly releases — nothing to clean up"
+            exit 0
+          fi
+
+          DELETE_COUNT=$((COUNT - KEEP))
+          echo "Cleaning up $DELETE_COUNT old nightly releases (keeping $KEEP)"
+
+          echo "$RELEASES" | tail -n "$DELETE_COUNT" | while IFS= read -r TAG; do
+            echo "Deleting release: $TAG"
+            gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          done
+  # ── Summary ─────────────────────────────────────────────────────────────
+  nightly-summary:
+    name: Nightly Summary
+    if: always()
+    needs: [check-commits, build-and-test, publish-npm, create-release, cleanup]
+    runs-on: depot-ubuntu-24.04 # was: ubuntu-24.04. Mapped standard GitHub runner to Depot equivalent.
+    steps:
+      - name: Summary
+        run: |
+          echo "## Nightly Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.check-commits.outputs.has_new_commits }}" != "true" ]]; then
+            echo "No new commits — build skipped." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          echo "**Version:** \`${{ needs.build-and-test.outputs.nightly_version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build & Test | ${{ needs.build-and-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm Publish | ${{ needs.publish-npm.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Release | ${{ needs.create-release.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cleanup | ${{ needs.cleanup.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "npm install -g miladyai@nightly" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
