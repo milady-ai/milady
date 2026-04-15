@@ -42,4 +42,13 @@ describe("electrobun PR workflow contract", () => {
       "git -C eliza submodule update --init plugins/plugin-agent-orchestrator",
     );
   });
+
+  it("reuses the shared published-workspace fallback dependency installer", () => {
+    const workflow = workflowText();
+
+    expect(workflow).toContain(
+      "run: bash scripts/install-published-workspace-fallback-deps.sh",
+    );
+    expect(workflow).not.toContain("bun add --no-save --dev");
+  });
 });
