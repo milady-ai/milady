@@ -308,6 +308,12 @@ export function runInitSubmodules({
         ? ""
         : " --recursive";
       try {
+        exec(`git submodule sync -- "${submodule.path}"`, {
+          cwd: rootDir,
+          stdio: "inherit",
+        });
+      } catch {}
+      try {
         exec(`git submodule update --init${recurseFlag} "${submodule.path}"`, {
           cwd: rootDir,
           stdio: "inherit",

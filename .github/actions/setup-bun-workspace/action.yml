@@ -105,7 +105,9 @@ runs:
     - name: Shallow-init eliza submodule for version resolution
       if: ${{ inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
-      run: git submodule update --init --depth=1 eliza
+      run: |
+        git submodule sync -- eliza
+        git submodule update --init --depth=1 eliza
 
     # IMPORTANT: This mode is for published-only CI jobs. Do not enable it for
     # jobs that execute repo-local paths under eliza/ after dependency setup.
