@@ -112,18 +112,47 @@ function runPackDry(): PackResult[] {
   });
 }`;
 
+const oldLocalPackHotspotPathsBlock = `const localPackHotspotPaths = [
+  "dist/node_modules",
+  "apps/app/dist/vrms",
+  "apps/app/dist/animations",
+];`;
+
+const patchedLocalPackHotspotPathsBlock = `const localPackHotspotPaths = [
+  "dist",
+  "apps/app/dist",
+  "dist/node_modules",
+  "apps/app/dist/vrms",
+  "apps/app/dist/animations",
+];`;
+
 export function applyReleaseCheckPackFallback(source) {
-  if (source.includes("function runBunPackDry(): PackResult[]")) {
-    return source;
+  let patched = source;
+
+  if (!patched.includes("function runBunPackDry(): PackResult[]")) {
+    if (!patched.includes(oldRunPackDryBlock)) {
+      throw new Error(
+        "patch-release-check-pack-fallback: upstream runPackDry block not found",
+      );
+    }
+
+    patched = patched.replace(oldRunPackDryBlock, patchedRunPackDryBlock);
   }
 
-  if (!source.includes(oldRunPackDryBlock)) {
-    throw new Error(
-      "patch-release-check-pack-fallback: upstream runPackDry block not found",
+  if (!patched.includes(patchedLocalPackHotspotPathsBlock)) {
+    if (!patched.includes(oldLocalPackHotspotPathsBlock)) {
+      throw new Error(
+        "patch-release-check-pack-fallback: upstream localPackHotspotPaths block not found",
+      );
+    }
+
+    patched = patched.replace(
+      oldLocalPackHotspotPathsBlock,
+      patchedLocalPackHotspotPathsBlock,
     );
   }
 
-  return source.replace(oldRunPackDryBlock, patchedRunPackDryBlock);
+  return patched;
 }
 
 export function patchReleaseCheckFile(filePath) {

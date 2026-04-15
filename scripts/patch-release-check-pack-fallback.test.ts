@@ -49,9 +49,15 @@ const upstreamRunPackDryBlock = `function runPackDry(): PackResult[] {
   });
 }`;
 
+const upstreamLocalPackHotspotPathsBlock = `const localPackHotspotPaths = [
+  "dist/node_modules",
+  "apps/app/dist/vrms",
+  "apps/app/dist/animations",
+];`;
+
 describe("patch-release-check-pack-fallback", () => {
-  it("patches the upstream runPackDry block once", () => {
-    const source = `before\n${upstreamRunPackDryBlock}\nafter\n`;
+  it("patches the upstream release-check pack fallback and hotspot blocks", () => {
+    const source = `before\n${upstreamRunPackDryBlock}\n${upstreamLocalPackHotspotPathsBlock}\nafter\n`;
 
     const patched = applyReleaseCheckPackFallback(source);
 
@@ -60,11 +66,23 @@ describe("patch-release-check-pack-fallback", () => {
       "retrying with bun pm pack --dry-run.",
     );
     expect(patched).not.toContain("throw error;");
+    expect(patched).toContain('  "dist",');
+    expect(patched).toContain('  "apps/app/dist",');
   });
 
-  it("is idempotent once the helper exists", () => {
-    const alreadyPatched =
-      "function runBunPackDry(): PackResult[] { return []; }\nfunction runPackDry(): PackResult[] { return []; }\n";
+  it("patches hotspot detection even when the pack helper is already patched", () => {
+    const source = `function runBunPackDry(): PackResult[] { return []; }\nfunction runPackDry(): PackResult[] { return []; }\n${upstreamLocalPackHotspotPathsBlock}\n`;
+
+    const patched = applyReleaseCheckPackFallback(source);
+
+    expect(patched).toContain('  "dist",');
+    expect(patched).toContain('  "apps/app/dist",');
+  });
+
+  it("is idempotent once both patches are present", () => {
+    const alreadyPatched = applyReleaseCheckPackFallback(
+      `before\n${upstreamRunPackDryBlock}\n${upstreamLocalPackHotspotPathsBlock}\nafter\n`,
+    );
 
     expect(applyReleaseCheckPackFallback(alreadyPatched)).toBe(alreadyPatched);
   });
