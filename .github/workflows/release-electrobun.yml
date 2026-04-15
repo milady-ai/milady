@@ -138,6 +138,9 @@ jobs:
       - name: Install root dependencies
         run: bun install --ignore-scripts
 
+      - name: Install published-workspace fallback dependencies
+        run: bash scripts/install-published-workspace-fallback-deps.sh
+
       - name: Run repository postinstall patches
         run: bun run postinstall
 
@@ -241,6 +244,9 @@ jobs:
             echo "bun install failed on attempt ${attempt}; retrying in 15 seconds" >&2
             sleep 15
           done
+
+      - name: Install published-workspace fallback dependencies
+        run: bash scripts/install-published-workspace-fallback-deps.sh
 
       - name: Run repository postinstall patches
         run: bun run postinstall
@@ -346,6 +352,9 @@ jobs:
             echo "bun install failed on attempt ${attempt}; retrying in 15 seconds" >&2
             sleep 15
           done
+
+      - name: Install published-workspace fallback dependencies
+        run: bash scripts/install-published-workspace-fallback-deps.sh
 
       - name: Run repository postinstall patches
         run: bun run postinstall
