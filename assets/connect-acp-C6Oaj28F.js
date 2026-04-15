@@ -1,0 +1,37 @@
+import{u as o,j as e}from"./index-BfT5spx2.js";function r(s){const n={a:"a",code:"code",h1:"h1",h2:"h2",li:"li",p:"p",strong:"strong",ul:"ul",...o(),...s.components},{Steps:t}=n;return t||i("Steps"),e.jsxs(e.Fragment,{children:[e.jsx(n.h1,{id:"connect-to-acp-agent-communication-protocol",children:e.jsx(n.a,{className:"anchor",href:"#connect-to-acp-agent-communication-protocol",children:"Connect to ACP (Agent Communication Protocol)"})}),`
+`,e.jsxs(n.p,{children:["ACP is an experimental agent-to-agent communication protocol — a way for your Milady agent to talk to ",e.jsx(n.strong,{children:"other agents"}),` (your own or other people's) over a shared gateway. This is different from every other connector on the list: the "users" on the other end aren't humans, they're other AI agents with their own tools, memory, and goals.`]}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Who this is for:"})," developers and researchers running multi-agent setups. If you're not deliberately building a system where agents delegate work to each other, this connector isn't for you."]}),`
+`,e.jsx(n.h2,{id:"what-acp-is-in-one-paragraph",children:e.jsx(n.a,{className:"anchor",href:"#what-acp-is-in-one-paragraph",children:"What ACP is, in one paragraph"})}),`
+`,e.jsx(n.p,{children:'Most connectors bridge a human-facing platform (Discord, Slack, etc.) to your agent. ACP bridges two or more agents to each other. A gateway relays messages between agents, each of which has its own client name, session, and persistence. The practical use case is "hand off a subtask to a specialist agent" — your main agent sends a request through ACP, a specialist agent on another machine or process picks it up, does the work, and sends a response back.'}),`
+`,e.jsx(n.h2,{id:"what-you-need-before-you-start",children:e.jsx(n.a,{className:"anchor",href:"#what-you-need-before-you-start",children:"What you need before you start"})}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Access to an ACP gateway"})," — this is the hub that routes messages between agents. Either run your own or use one someone else is hosting."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"A client identity"})," for this Milady instance — a name and ID that distinguishes it from other agents on the gateway."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Milady running"})," with a working provider."]}),`
+`]}),`
+`,e.jsx(n.h2,{id:"step-1--get-acp-gateway-credentials",children:e.jsx(n.a,{className:"anchor",href:"#step-1--get-acp-gateway-credentials",children:"Step 1 — Get ACP gateway credentials"})}),`
+`,e.jsx(n.p,{children:"From the gateway operator (which may be you):"}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Gateway URL"})," — e.g. ",e.jsx(n.code,{children:"wss://acp.yourhost.com/gateway"})," or ",e.jsx(n.code,{children:"ws://localhost:4000"}),"."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Gateway token"})," or ",e.jsx(n.strong,{children:"Gateway password"})," — the credential that authorizes your agent to connect."]}),`
+`]}),`
+`,e.jsx(n.p,{children:"If you're running your own gateway, refer to the ACP reference implementation's docs for how to provision these."}),`
+`,e.jsx(n.h2,{id:"step-2--pick-a-client-identity",children:e.jsx(n.a,{className:"anchor",href:"#step-2--pick-a-client-identity",children:"Step 2 — Pick a client identity"})}),`
+`,e.jsxs(t,{children:[e.jsxs("li",{children:["Pick a client name — a short machine-friendly string like ",e.jsx("code",{children:"milady-main"})," or ",e.jsx("code",{children:"research-agent-1"}),"."]}),e.jsx("li",{children:`Pick a display name — what other agents see, e.g. "Alice's main assistant".`}),e.jsx("li",{children:"Pick an agent ID — a stable unique identifier (UUID is fine)."})]}),`
+`,e.jsx(n.h2,{id:"step-3--configure-milady",children:e.jsx(n.a,{className:"anchor",href:"#step-3--configure-milady",children:"Step 3 — Configure Milady"})}),`
+`,e.jsxs(t,{children:[e.jsxs("li",{children:["Open Milady. Go to ",e.jsx("strong",{children:"Settings → Plugins → ACP → Configure"}),"."]}),e.jsxs("li",{children:["Set ",e.jsx("strong",{children:"Gateway URL"}),"."]}),e.jsxs("li",{children:["Paste the ",e.jsx("strong",{children:"Gateway token"})," (or password) from Step 1."]}),e.jsxs("li",{children:["Set ",e.jsx("strong",{children:"Client name"}),", ",e.jsx("strong",{children:"Client display name"}),", and ",e.jsx("strong",{children:"Agent ID"})," from Step 2."]}),e.jsxs("li",{children:["(Optional) Set ",e.jsx("strong",{children:"Default session key"})," and ",e.jsx("strong",{children:"Default session label"})," if your gateway uses session-scoped routing."]}),e.jsxs("li",{children:["Turn on ",e.jsx("strong",{children:"Persist sessions"})," if you want session state to survive restarts. Set ",e.jsx("strong",{children:"Session store path"})," to a writable directory."]}),e.jsxs("li",{children:["Click ",e.jsx("strong",{children:"Save"}),"."]})]}),`
+`,e.jsx(n.h2,{id:"step-4--test",children:e.jsx(n.a,{className:"anchor",href:"#step-4--test",children:"Step 4 — Test"})}),`
+`,e.jsx(n.p,{children:`ACP doesn't have a "send a test message" button. The right way to verify: have another agent connected to the same gateway initiate a conversation with yours. Both sides need to agree on session keys and labels for routing to work.`}),`
+`,e.jsx(n.h2,{id:"troubleshooting",children:e.jsx(n.a,{className:"anchor",href:"#troubleshooting",children:"Troubleshooting"})}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:'"Connection refused" on the gateway URL.'}),`
+Gateway isn't running, or the URL is wrong. ACP uses WebSockets — confirm the scheme is `,e.jsx(n.code,{children:"ws://"})," or ",e.jsx(n.code,{children:"wss://"}),", not ",e.jsx(n.code,{children:"http://"}),"."]}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Agent connects but never receives messages."}),`
+Session key or label mismatch. Both sides of a conversation need matching session identifiers — coordinate with whoever's running the other agent.`]}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Sessions don't persist across restarts."}),`
+Turn on `,e.jsx(n.code,{children:"Persist sessions"})," and make sure the session store path is writable."]}),`
+`,e.jsx(n.h2,{id:"this-connector-is-for-developers",children:e.jsx(n.a,{className:"anchor",href:"#this-connector-is-for-developers",children:"This connector is for developers"})}),`
+`,e.jsx(n.p,{children:`If you're reading this page hoping to "talk to your agent from another place," you probably want one of the regular connectors (Discord, Telegram, etc.) — those bridge humans to the agent. ACP is specifically for wiring agents together, and if that's not what you're building, it'll feel like the wrong abstraction.`}),`
+`,e.jsx(n.h2,{id:"whats-next",children:e.jsx(n.a,{className:"anchor",href:"#whats-next",children:"What's next"})}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.a,{href:"/docs/advanced/connect-mcp",children:"Connect MCP servers"})," — another way to extend agent capabilities, but more mature and with a bigger ecosystem."]}),`
+`]})]})}function c(s={}){const{wrapper:n}={...o(),...s.components};return n?e.jsx(n,{...s,children:e.jsx(r,{...s})}):r(s)}function i(s,n){throw new Error("Expected component `"+s+"` to be defined: you likely forgot to import, pass, or provide it.")}export{c as default};

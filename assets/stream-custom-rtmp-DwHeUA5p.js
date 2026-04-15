@@ -1,0 +1,39 @@
+import{u as r,j as e}from"./index-BfT5spx2.js";function i(t){const n={a:"a",code:"code",h1:"h1",h2:"h2",li:"li",p:"p",strong:"strong",table:"table",tbody:"tbody",td:"td",th:"th",thead:"thead",tr:"tr",ul:"ul",...r(),...t.components},{Steps:s}=n;return s||o("Steps"),e.jsxs(e.Fragment,{children:[e.jsx(n.h1,{id:"stream-to-a-custom-rtmp-destination",children:e.jsx(n.a,{className:"anchor",href:"#stream-to-a-custom-rtmp-destination",children:"Stream to a custom RTMP destination"})}),`
+`,e.jsx(n.p,{children:"Any streaming platform that accepts RTMP ingest — Facebook Live, TikTok, Kick, a self-hosted RTMP server, or your own media server — works with the Custom RTMP plugin. You give Milady a URL and a stream key, Milady sends video there."}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"What you'll learn:"})," find the RTMP URL and key for your destination, paste them into Milady."]}),`
+`,e.jsx(n.h2,{id:"what-you-need-before-you-start",children:e.jsx(n.a,{className:"anchor",href:"#what-you-need-before-you-start",children:"What you need before you start"})}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"A destination that accepts RTMP ingest."})," Most streaming platforms do; a few use alternative protocols (SRT, WebRTC) that aren't supported here."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"The URL and stream key"}),' for that destination — see "Finding RTMP credentials" below.']}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Milady running"})," with the Enable Streaming plugin active."]}),`
+`]}),`
+`,e.jsx(n.h2,{id:"common-rtmp-urls",children:e.jsx(n.a,{className:"anchor",href:"#common-rtmp-urls",children:"Common RTMP URLs"})}),`
+`,e.jsxs(n.table,{children:[e.jsx(n.thead,{children:e.jsxs(n.tr,{children:[e.jsx(n.th,{children:"Platform"}),e.jsx(n.th,{children:"RTMP URL"})]})}),e.jsxs(n.tbody,{children:[e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"Facebook Live"})}),e.jsx(n.td,{children:e.jsx(n.code,{children:"rtmps://live-api-s.facebook.com:443/rtmp/"})})]}),e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"TikTok Live"})}),e.jsxs(n.td,{children:[e.jsx(n.code,{children:"rtmp://push.tiktokcdn.com/third/"})," — requires TikTok Live Studio access"]})]}),e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"Kick"})}),e.jsx(n.td,{children:e.jsx(n.code,{children:"rtmps://fa723fc1b171.global-contribute.live-video.net:443/app/"})})]}),e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"Twitch"})}),e.jsxs(n.td,{children:["Use the ",e.jsx(n.a,{href:"/docs/advanced/stream-twitch",children:"Twitch streaming plugin"})," instead — it handles Twitch's per-region routing automatically"]})]}),e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"YouTube"})}),e.jsxs(n.td,{children:["Use the ",e.jsx(n.a,{href:"/docs/advanced/stream-youtube",children:"YouTube streaming plugin"})]})]}),e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"Self-hosted (Nginx + RTMP module)"})}),e.jsx(n.td,{children:e.jsx(n.code,{children:"rtmp://yourserver.com/live"})})]})]})]}),`
+`,e.jsx(n.p,{children:"These URLs occasionally change. Always prefer the exact URL your destination's dashboard gives you over this table."}),`
+`,e.jsx(n.h2,{id:"finding-rtmp-credentials",children:e.jsx(n.a,{className:"anchor",href:"#finding-rtmp-credentials",children:"Finding RTMP credentials"})}),`
+`,e.jsx(n.p,{children:'Every streaming platform has a "Stream settings" or "Go Live" area that exposes the RTMP URL and stream key to you. Look for:'}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Facebook Live:"}),' Creator Studio → Live → Go Live → pick "Streaming Software" → Stream key shown.']}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"TikTok Live:"})," TikTok Live Studio (desktop app) → Go Live → Streaming software → Server URL + Stream Key."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Kick:"})," kick.com → Settings → Stream Key → copy URL + key."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Self-hosted Nginx:"})," whatever URL you configured in your nginx.conf ",e.jsx(n.code,{children:"application"})," block. The stream key is usually the stream name segment at the end of the URL."]}),`
+`]}),`
+`,e.jsx(n.h2,{id:"step-1--hand-credentials-to-milady",children:e.jsx(n.a,{className:"anchor",href:"#step-1--hand-credentials-to-milady",children:"Step 1 — Hand credentials to Milady"})}),`
+`,e.jsxs(s,{children:[e.jsxs("li",{children:["Open Milady. Go to ",e.jsx("strong",{children:"Settings → Plugins → Custom RTMP → Configure"}),"."]}),e.jsxs("li",{children:["Paste the ",e.jsx("strong",{children:"RTMP URL"}),"."]}),e.jsxs("li",{children:["Paste the ",e.jsx("strong",{children:"Stream key"}),"."]}),e.jsxs("li",{children:["Click ",e.jsx("strong",{children:"Save"}),"."]})]}),`
+`,e.jsx(n.h2,{id:"step-2--go-live",children:e.jsx(n.a,{className:"anchor",href:"#step-2--go-live",children:"Step 2 — Go live"})}),`
+`,e.jsxs(s,{children:[e.jsxs("li",{children:["Open the ",e.jsx("strong",{children:"Stream"})," tab in Milady."]}),e.jsx("li",{children:"Pick Custom RTMP as the destination."}),e.jsxs("li",{children:["Click ",e.jsx("strong",{children:"Go Live"}),"."]}),e.jsx("li",{children:"Open your destination platform's live dashboard to confirm the stream is arriving."})]}),`
+`,e.jsx(n.h2,{id:"running-multiple-destinations-at-once",children:e.jsx(n.a,{className:"anchor",href:"#running-multiple-destinations-at-once",children:"Running multiple destinations at once"})}),`
+`,e.jsx(n.p,{children:'You can run multiple streaming plugins side by side — Twitch Streaming, YouTube Streaming, and Custom RTMP all configured simultaneously, each pushing the same video to different destinations. This is called "multi-streaming" or "simulcasting."'}),`
+`,e.jsx(n.p,{children:"The catch: each destination uses its own uplink bandwidth. If you're streaming at 6 Mbps and multi-streaming to 3 destinations, you need 18 Mbps of upload capacity. If your internet can't handle it, use a third-party multi-streaming relay (Restream, Castr, etc.) — configure that relay as a single Custom RTMP destination here, and let the relay fan out."}),`
+`,e.jsx(n.h2,{id:"troubleshooting",children:e.jsx(n.a,{className:"anchor",href:"#troubleshooting",children:"Troubleshooting"})}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Stream starts in Milady but destination doesn't show anything."}),`
+URL or key is wrong for that platform. RTMP URLs can be very picky about trailing slashes — paste exactly what the destination shows you.`]}),`
+`,e.jsxs(n.p,{children:[e.jsxs(n.strong,{children:['"TLS handshake failed" on ',e.jsx(n.code,{children:"rtmps://"})," URLs."]}),`
+Your destination requires TLS but something in the path doesn't support it. Some self-hosted RTMP servers don't support RTMPS — use plain `,e.jsx(n.code,{children:"rtmp://"})," if you control the destination and security isn't a concern."]}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Stream works for a few seconds then drops."}),`
+Destination is rejecting your bitrate. Many platforms cap ingest bitrate — lower yours in Milady's Stream tab.`]}),`
+`,e.jsx(n.h2,{id:"whats-next",children:e.jsx(n.a,{className:"anchor",href:"#whats-next",children:"What's next"})}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsx(n.li,{children:e.jsx(n.a,{href:"/docs/advanced/stream-twitch",children:"Stream to Twitch"})}),`
+`,e.jsx(n.li,{children:e.jsx(n.a,{href:"/docs/advanced/stream-youtube",children:"Stream to YouTube"})}),`
+`]})]})}function d(t={}){const{wrapper:n}={...r(),...t.components};return n?e.jsx(n,{...t,children:e.jsx(i,{...t})}):i(t)}function o(t,n){throw new Error("Expected component `"+t+"` to be defined: you likely forgot to import, pass, or provide it.")}export{d as default};

@@ -1,0 +1,33 @@
+import{u as h,j as e}from"./index-BfT5spx2.js";function i(s){const n={a:"a",code:"code",h1:"h1",h2:"h2",li:"li",p:"p",strong:"strong",table:"table",tbody:"tbody",td:"td",th:"th",thead:"thead",tr:"tr",ul:"ul",...h(),...s.components},{Callout:r,Steps:t}=n;return r||o("Callout"),t||o("Steps"),e.jsxs(e.Fragment,{children:[e.jsx(n.h1,{id:"connect-to-tlon-urbit",children:e.jsx(n.a,{className:"anchor",href:"#connect-to-tlon-urbit",children:"Connect to Tlon (Urbit)"})}),`
+`,e.jsx(n.p,{children:"Tlon is the chat and groups product built on Urbit — the P2P personal server platform. If you run an Urbit ship, your Milady agent can participate in Tlon channels and group conversations. This is a niche connector; most users don't need it."}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"What you'll learn:"})," get your ship's access code, point Milady at the running ship."]}),`
+`,e.jsx(n.h2,{id:"what-you-need-before-you-start",children:e.jsx(n.a,{className:"anchor",href:"#what-you-need-before-you-start",children:"What you need before you start"})}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"An Urbit ship"})," you control — can be a comet (free throwaway), a moon (hosted under a planet), or a planet (a real permanent identity you own). If you don't have one, set one up first via ",e.jsx("a",{href:"https://urbit.org/getting-started",children:"urbit.org/getting-started"}),"."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"The ship running"})," and accessible at an HTTP URL, either on localhost or remote."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Milady running"})," with a working provider."]}),`
+`]}),`
+`,e.jsx(n.h2,{id:"step-1--get-your-ships-access-code",children:e.jsx(n.a,{className:"anchor",href:"#step-1--get-your-ships-access-code",children:"Step 1 — Get your ship's access code"})}),`
+`,e.jsxs(t,{children:[e.jsx("li",{children:"Open Dojo (Urbit's command prompt) on your ship."}),e.jsxs("li",{children:["Type ",e.jsx("code",{children:"+code"})," and press enter."]}),e.jsx("li",{children:"The ship prints a password-like string. Copy it."})]}),`
+`,e.jsx(r,{kind:"warning",children:e.jsxs(n.p,{children:["The access code is the ship owner's master credential. It grants full access to everything on the ship — files, chats, apps, identity. Treat it like a password and revoke + regenerate (",e.jsx("code",{children:"|code"}),") if it leaks."]})}),`
+`,e.jsx(n.h2,{id:"step-2--find-your-ship-url",children:e.jsx(n.a,{className:"anchor",href:"#step-2--find-your-ship-url",children:"Step 2 — Find your ship URL"})}),`
+`,e.jsxs(n.ul,{children:[`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Local ship:"})," usually ",e.jsx("code",{children:e.jsx(n.a,{href:"http://localhost:8080",children:"http://localhost:8080"})})," (Urbit picks the next free port starting from 8080)."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Hosted ship (Tlon.io, Red Horizon, etc.):"})," your hosting provider gave you a URL."]}),`
+`,e.jsxs(n.li,{children:[e.jsx(n.strong,{children:"Self-hosted remote:"})," whatever URL your reverse proxy exposes."]}),`
+`]}),`
+`,e.jsx(n.h2,{id:"step-3--configure-milady",children:e.jsx(n.a,{className:"anchor",href:"#step-3--configure-milady",children:"Step 3 — Configure Milady"})}),`
+`,e.jsxs(t,{children:[e.jsxs("li",{children:["Open Milady. Go to ",e.jsx("strong",{children:"Settings → Plugins → Tlon → Configure"}),"."]}),e.jsxs("li",{children:["Set ",e.jsx("strong",{children:"Ship"})," to your ship name including the tilde (e.g. ",e.jsx("code",{children:"~sampel-palnet"}),")."]}),e.jsxs("li",{children:["Set ",e.jsx("strong",{children:"URL"})," to the ship's HTTP URL from Step 2."]}),e.jsxs("li",{children:["Paste the ",e.jsx("strong",{children:"Code"})," from Step 1."]}),e.jsxs("li",{children:["(Optional) Set ",e.jsx("strong",{children:"Group channels"})," to a list of group channel paths the agent should listen in (format: ",e.jsx("code",{children:"~ship/group/channel"}),")."]}),e.jsxs("li",{children:["Click ",e.jsx("strong",{children:"Save"}),"."]})]}),`
+`,e.jsx(n.h2,{id:"step-4--test-it",children:e.jsx(n.a,{className:"anchor",href:"#step-4--test-it",children:"Step 4 — Test it"})}),`
+`,e.jsx(n.p,{children:"In a Tlon channel the agent is subscribed to, send a message. The agent should reply through the same channel."}),`
+`,e.jsx(n.h2,{id:"useful-options",children:e.jsx(n.a,{className:"anchor",href:"#useful-options",children:"Useful options"})}),`
+`,e.jsxs(n.table,{children:[e.jsx(n.thead,{children:e.jsxs(n.tr,{children:[e.jsx(n.th,{children:"Option"}),e.jsx(n.th,{children:"What it does"})]})}),e.jsxs(n.tbody,{children:[e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"DM allowlist"})}),e.jsx(n.td,{children:"Comma-separated list of ship names allowed to DM the agent."})]}),e.jsxs(n.tr,{children:[e.jsx(n.td,{children:e.jsx(n.strong,{children:"Auto-discover channels"})}),e.jsx(n.td,{children:"When on, the agent subscribes to new channels as they appear. When off, it only uses the channels listed explicitly."})]})]})]}),`
+`,e.jsx(n.h2,{id:"troubleshooting",children:e.jsx(n.a,{className:"anchor",href:"#troubleshooting",children:"Troubleshooting"})}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:'"Authentication failed."'}),`
+Access code is wrong. Re-run `,e.jsx(n.code,{children:"+code"})," in Dojo and copy fresh — codes can rotate."]}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Agent connects but doesn't see any messages."}),`
+Group channel paths aren't right. Tlon channel paths use the format `,e.jsx(n.code,{children:"~host-ship/group-slug/channel-slug"}),". Double-check in the Tlon app's channel settings."]}),`
+`,e.jsxs(n.p,{children:[e.jsx(n.strong,{children:"Ship URL times out."}),`
+Most commonly: the ship isn't running, or you're pointing at the wrong port. Urbit ships log their port on startup — check the terminal or Dojo.`]}),`
+`,e.jsx(n.h2,{id:"whats-next",children:e.jsx(n.a,{className:"anchor",href:"#whats-next",children:"What's next"})}),`
+`,e.jsxs(n.p,{children:["Tlon's a small ecosystem — if this connector doesn't meet your needs, ",e.jsx(n.a,{href:"/docs/intermediate/connect-matrix",children:"Matrix"})," or ",e.jsx(n.a,{href:"/docs/intermediate/connect-nostr",children:"Nostr"})," are similar-spirited federated alternatives with more active networks."]})]})}function c(s={}){const{wrapper:n}={...h(),...s.components};return n?e.jsx(n,{...s,children:e.jsx(i,{...s})}):i(s)}function o(s,n){throw new Error("Expected component `"+s+"` to be defined: you likely forgot to import, pass, or provide it.")}export{c as default};
