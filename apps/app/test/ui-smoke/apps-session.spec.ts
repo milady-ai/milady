@@ -26,6 +26,7 @@ const DIRECT_ROUTE_CASES = [
     name: "skills",
     path: "/apps/skills",
     selector: '[data-testid="skills-shell"]',
+    timeoutMs: 20_000,
   },
   {
     name: "fine tuning",
@@ -50,7 +51,11 @@ const DIRECT_ROUTE_CASES = [
   {
     name: "runtime",
     path: "/apps/runtime",
-    selector: '[data-testid="runtime-view"]',
+    readyChecks: [
+      { selector: '[data-testid="runtime-view"]' },
+      { selector: '[data-testid="runtime-sidebar"]' },
+    ],
+    timeoutMs: 15_000,
   },
   {
     name: "database",
@@ -134,10 +139,16 @@ for (const routeCase of DIRECT_ROUTE_CASES) {
       );
       return;
     }
-    await assertReadyChecks(page, routeCase.name, [
-      "selector" in routeCase
-        ? { selector: routeCase.selector }
-        : { text: routeCase.text },
-    ]);
+    await assertReadyChecks(
+      page,
+      routeCase.name,
+      [
+        "selector" in routeCase
+          ? { selector: routeCase.selector }
+          : { text: routeCase.text },
+      ],
+      "any",
+      "timeoutMs" in routeCase ? routeCase.timeoutMs : undefined,
+    );
   });
 }

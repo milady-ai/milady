@@ -1,6 +1,187 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { resolveModuleEntry } from "../eliza-package-paths";
+import {
+  getInstalledPackageEntry,
+  resolveModuleEntry,
+} from "../eliza-package-paths";
+
+export type ModuleAlias = {
+  find: string | RegExp;
+  replacement: string;
+};
+
+export type AgentSourceAliasOptions = {
+  fallbackReplacement?: string;
+  includeMiladyAlias?: boolean;
+};
+
+export type AppCoreSourceAliasOptions = {
+  bridgeReplacement?: string;
+  fallbackReplacement?: string;
+  stubRootSpecifier?: boolean;
+};
+
+export type SharedSourceAliasOptions = {
+  includeConfigAlias?: boolean;
+  includeMiladyAlias?: boolean;
+};
+
+export type InstalledPackageAliasOptions = {
+  entryKind?: "node";
+  fallbackPath?: string;
+};
+
+type WorkspacePackageManifest = {
+  exports?: Record<string, unknown>;
+};
+
+function escapeRegExp(value: string): string {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function readWorkspacePackageManifest(
+  packageRoot: string,
+): WorkspacePackageManifest | null {
+  const packageJsonPath = path.join(packageRoot, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(
+      readFileSync(packageJsonPath, "utf8"),
+    ) as WorkspacePackageManifest;
+  } catch {
+    return null;
+  }
+}
+
+function resolveExportTarget(exportTarget: unknown): string | undefined {
+  if (typeof exportTarget === "string") {
+    return exportTarget;
+  }
+
+  if (!exportTarget || typeof exportTarget !== "object") {
+    return undefined;
+  }
+
+  const record = exportTarget as Record<string, unknown>;
+  for (const key of ["bun", "import", "default", "types"]) {
+    const candidate = record[key];
+    if (typeof candidate === "string") {
+      return candidate;
+    }
+  }
+
+  return undefined;
+}
+
+function getWorkspacePackageExportAliases(
+  packageName: string,
+  packageRoot: string,
+): ModuleAlias[] {
+  const manifest = readWorkspacePackageManifest(packageRoot);
+  const exportsMap = manifest?.exports;
+  if (!exportsMap) {
+    return [];
+  }
+
+  return Object.entries(exportsMap).flatMap(([subpath, exportTarget]) => {
+    if (
+      subpath === "." ||
+      subpath === "./package.json" ||
+      subpath.includes("*")
+    ) {
+      return [];
+    }
+
+    const target = resolveExportTarget(exportTarget);
+    if (!target) {
+      return [];
+    }
+
+    const replacement = path.join(packageRoot, target);
+    if (!existsSync(replacement)) {
+      return [];
+    }
+
+    return [
+      {
+        find: new RegExp(
+          `^@elizaos/${escapeRegExp(packageName)}/${escapeRegExp(subpath.slice(2))}$`,
+        ),
+        replacement,
+      },
+    ];
+  });
+}
+
+function getPackageSourceAliases(
+  packageName: string,
+  sourceRoot: string,
+  {
+    includeMiladyAlias = false,
+    rootReplacement,
+  }: {
+    includeMiladyAlias?: boolean;
+    rootReplacement: string;
+  },
+): ModuleAlias[] {
+  return [
+    {
+      find: new RegExp(`^@elizaos/${escapeRegExp(packageName)}/(.*)`),
+      replacement: path.join(sourceRoot, "$1"),
+    },
+    ...(includeMiladyAlias
+      ? [
+          {
+            find: new RegExp(`^@miladyai/${escapeRegExp(packageName)}/(.*)`),
+            replacement: path.join(sourceRoot, "$1"),
+          },
+        ]
+      : []),
+    {
+      find: `@elizaos/${packageName}`,
+      replacement: rootReplacement,
+    },
+  ];
+}
+
+export function getOptionalResolvedAliases(
+  aliases: ReadonlyArray<{
+    find: ModuleAlias["find"];
+    replacement?: string | null;
+  }>,
+): ModuleAlias[] {
+  return aliases.flatMap(({ find, replacement }) =>
+    replacement && existsSync(replacement) ? [{ find, replacement }] : [],
+  );
+}
+
+export function getOptionalInstalledPackageAliases(
+  repoRoot: string,
+  aliases: ReadonlyArray<{
+    find: ModuleAlias["find"];
+    packageName: string;
+    options?: InstalledPackageAliasOptions;
+  }>,
+): ModuleAlias[] {
+  return aliases.flatMap(({ find, packageName, options }) => {
+    const installedEntry = getInstalledPackageEntry(
+      packageName,
+      repoRoot,
+      options?.entryKind,
+    );
+
+    if (installedEntry) {
+      return [{ find, replacement: installedEntry }];
+    }
+
+    return options?.fallbackPath
+      ? [{ find, replacement: resolveModuleEntry(options.fallbackPath) }]
+      : [];
+  });
+}
 
 export function getElizaCoreRolesEntry(repoRoot: string): string {
   const elizaCoreRolesSource = path.join(
@@ -61,7 +242,7 @@ export function getAppCoreModuleFallbackPath(repoRoot: string): string {
   );
 }
 
-export function getOptionalPluginSdkAliases(repoRoot: string) {
+export function getOptionalPluginSdkAliases(repoRoot: string): ModuleAlias[] {
   const pluginSdkEntry = path.join(repoRoot, "src", "plugin-sdk", "index.ts");
 
   return existsSync(pluginSdkEntry)
@@ -71,30 +252,13 @@ export function getOptionalPluginSdkAliases(repoRoot: string) {
 
 export function getAgentSourceAliases(
   sourceRoot: string | undefined,
-  options: {
-    fallbackReplacement?: string;
-    includeMiladyAlias?: boolean;
-  } = {},
-) {
+  options: AgentSourceAliasOptions = {},
+): ModuleAlias[] {
   if (sourceRoot) {
-    return [
-      {
-        find: /^@elizaos\/agent\/(.*)/,
-        replacement: path.join(sourceRoot, "$1"),
-      },
-      ...(options.includeMiladyAlias
-        ? [
-            {
-              find: /^@miladyai\/agent\/(.*)/,
-              replacement: path.join(sourceRoot, "$1"),
-            },
-          ]
-        : []),
-      {
-        find: "@elizaos/agent",
-        replacement: resolveModuleEntry(path.join(sourceRoot, "index")),
-      },
-    ];
+    return getPackageSourceAliases("agent", sourceRoot, {
+      includeMiladyAlias: options.includeMiladyAlias,
+      rootReplacement: resolveModuleEntry(path.join(sourceRoot, "index")),
+    });
   }
 
   return options.fallbackReplacement
@@ -109,33 +273,32 @@ export function getAgentSourceAliases(
 
 export function getAppCoreSourceAliases(
   sourceRoot: string | undefined,
-  options: {
-    bridgeReplacement?: string;
-    fallbackReplacement?: string;
-    stubRootSpecifier?: boolean;
-  } = {},
-) {
+  options: AppCoreSourceAliasOptions = {},
+): ModuleAlias[] {
   if (sourceRoot) {
+    const bridgeSpecifiers = [
+      "@elizaos/app-core/bridge/electrobun-rpc.js",
+      "@elizaos/app-core/bridge/electrobun-rpc",
+      "@elizaos/app-core/bridge/electrobun-runtime",
+      "@elizaos/app-core/bridge",
+      "@elizaos/app-core/electrobun-rpc.js",
+      "@elizaos/app-core/electrobun-rpc",
+      "@elizaos/app-core/electrobun-runtime",
+    ] as const;
+    const bridgeReplacement = options.bridgeReplacement;
+
     return [
-      ...(options.bridgeReplacement
+      ...(bridgeReplacement
         ? [
-            {
-              find: "@elizaos/app-core/electrobun-rpc.js",
-              replacement: options.bridgeReplacement,
-            },
-            {
-              find: "@elizaos/app-core/electrobun-rpc",
-              replacement: options.bridgeReplacement,
-            },
-            {
-              find: "@elizaos/app-core/electrobun-runtime",
-              replacement: options.bridgeReplacement,
-            },
+            ...bridgeSpecifiers.map((find) => ({
+              find,
+              replacement: bridgeReplacement,
+            })),
             ...(options.stubRootSpecifier
               ? [
                   {
                     find: /^@elizaos\/app-core$/,
-                    replacement: options.bridgeReplacement,
+                    replacement: bridgeReplacement,
                   },
                 ]
               : []),
@@ -176,11 +339,8 @@ export function getAppCoreSourceAliases(
 
 export function getSharedSourceAliases(
   sourceRoot: string | undefined,
-  options: {
-    includeConfigAlias?: boolean;
-    includeMiladyAlias?: boolean;
-  } = {},
-) {
+  options: SharedSourceAliasOptions = {},
+): ModuleAlias[] {
   if (!sourceRoot) {
     return [];
   }
@@ -194,62 +354,43 @@ export function getSharedSourceAliases(
           },
         ]
       : []),
-    {
-      find: /^@elizaos\/shared\/(.*)/,
-      replacement: path.join(sourceRoot, "$1"),
-    },
-    {
-      find: "@elizaos/shared",
-      replacement: path.join(sourceRoot, "index.ts"),
-    },
-    ...(options.includeMiladyAlias
-      ? [
-          {
-            find: /^@miladyai\/shared\/(.*)/,
-            replacement: path.join(sourceRoot, "$1"),
-          },
-        ]
-      : []),
+    ...getPackageSourceAliases("shared", sourceRoot, {
+      includeMiladyAlias: options.includeMiladyAlias,
+      rootReplacement: path.join(sourceRoot, "index.ts"),
+    }),
   ];
 }
 
-export function getUiSourceAliases(sourceRoot: string | undefined) {
+export function getUiSourceAliases(
+  sourceRoot: string | undefined,
+): ModuleAlias[] {
   if (!sourceRoot) {
     return [];
   }
 
-  return [
-    {
-      find: /^@elizaos\/ui\/(.*)/,
-      replacement: path.join(sourceRoot, "$1"),
-    },
-    {
-      find: "@elizaos/ui",
-      replacement: resolveModuleEntry(path.join(sourceRoot, "index")),
-    },
-  ];
+  return getPackageSourceAliases("ui", sourceRoot, {
+    rootReplacement: resolveModuleEntry(path.join(sourceRoot, "index")),
+  });
 }
 
-export function getWorkspaceAppAliases(repoRoot: string, appNames: string[]) {
+export function getWorkspaceAppAliases(
+  repoRoot: string,
+  appNames: string[],
+): ModuleAlias[] {
   return appNames.flatMap((appName) => {
-    const appSourceRoot = path.join(repoRoot, "eliza", "apps", appName, "src");
+    const appRoot = path.join(repoRoot, "eliza", "apps", appName);
+    const appSourceRoot = path.join(appRoot, "src");
     const appEntry = path.join(appSourceRoot, "index.ts");
 
     if (!existsSync(appEntry)) {
       return [];
     }
 
-    const packageName = `@elizaos/${appName}`;
-
     return [
-      {
-        find: new RegExp(`^${packageName}/(.*)`),
-        replacement: path.join(appSourceRoot, "$1"),
-      },
-      {
-        find: packageName,
-        replacement: appEntry,
-      },
+      ...getWorkspacePackageExportAliases(appName, appRoot),
+      ...getPackageSourceAliases(appName, appSourceRoot, {
+        rootReplacement: appEntry,
+      }),
     ];
   });
 }

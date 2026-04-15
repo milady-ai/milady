@@ -1,6 +1,6 @@
 [submodule "eliza"]
 	path = eliza
-	url = https://github.com/Dexploarer/eliza.git
+	url = https://github.com/elizaos/eliza.git
 	branch = develop
 [submodule "eliza/cloud"]
 	path = eliza/cloud

@@ -68,6 +68,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Install Linux desktop runtime dependencies
+        run: |
+          APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
+          sudo apt-get "${APT_ARGS[@]}" update
+          sudo apt-get "${APT_ARGS[@]}" install -y \
+            libayatana-appindicator3-1 \
+            libwebkit2gtk-4.1-0 \
+            xvfb
+
       - name: Setup workspace dependencies
         uses: ./.github/actions/setup-bun-workspace
         with:
@@ -91,7 +100,7 @@ jobs:
         run: bun run build
 
       - name: Run real integration tests (live/real suite)
-        run: bun run test:ci:real
+        run: xvfb-run -a bun run test:ci:real
 
       - name: Run startup script drift guard
         run: bun run test:startup:contract
