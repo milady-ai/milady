@@ -79,6 +79,21 @@ describe("patch-release-check-pack-fallback", () => {
     expect(patched).toContain('  "apps/app/dist",');
   });
 
+  it("treats hotspot blocks with the new entries in a different order as already patched", () => {
+    const reorderedHotspotBlock = `const localPackHotspotPaths = [
+  "dist",
+  "dist/node_modules",
+  "apps/app/dist",
+  "apps/app/dist/vrms",
+  "apps/app/dist/animations",
+];`;
+
+    const alreadyPatchedPackHelper = `function runBunPackDry(): PackResult[] { return []; }\nfunction runPackDry(): PackResult[] { return []; }`;
+    const source = `before\n${alreadyPatchedPackHelper}\n${reorderedHotspotBlock}\nafter\n`;
+
+    expect(applyReleaseCheckPackFallback(source)).toBe(source);
+  });
+
   it("is idempotent once both patches are present", () => {
     const alreadyPatched = applyReleaseCheckPackFallback(
       `before\n${upstreamRunPackDryBlock}\n${upstreamLocalPackHotspotPathsBlock}\nafter\n`,

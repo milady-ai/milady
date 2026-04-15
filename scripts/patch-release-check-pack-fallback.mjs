@@ -5,7 +5,14 @@ import path from "node:path";
 
 const repoRoot = process.cwd();
 const releaseCheckCandidates = [
-  path.join(repoRoot, "eliza", "packages", "app-core", "scripts", "release-check.ts"),
+  path.join(
+    repoRoot,
+    "eliza",
+    "packages",
+    "app-core",
+    "scripts",
+    "release-check.ts",
+  ),
   path.join(
     repoRoot,
     ".eliza.ci-disabled",
@@ -126,6 +133,21 @@ const patchedLocalPackHotspotPathsBlock = `const localPackHotspotPaths = [
   "apps/app/dist/animations",
 ];`;
 
+function getLocalPackHotspotPathsBlock(source) {
+  return source.match(
+    /const localPackHotspotPaths = \[[\s\S]*?\];/,
+  )?.[0];
+}
+
+function hasRequiredLocalPackHotspots(source) {
+  const block = getLocalPackHotspotPathsBlock(source);
+  if (!block) {
+    return false;
+  }
+
+  return block.includes('"dist"') && block.includes('"apps/app/dist"');
+}
+
 export function applyReleaseCheckPackFallback(source) {
   let patched = source;
 
@@ -139,7 +161,7 @@ export function applyReleaseCheckPackFallback(source) {
     patched = patched.replace(oldRunPackDryBlock, patchedRunPackDryBlock);
   }
 
-  if (!patched.includes(patchedLocalPackHotspotPathsBlock)) {
+  if (!hasRequiredLocalPackHotspots(patched)) {
     if (!patched.includes(oldLocalPackHotspotPathsBlock)) {
       throw new Error(
         "patch-release-check-pack-fallback: upstream localPackHotspotPaths block not found",
