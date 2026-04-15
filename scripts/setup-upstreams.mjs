@@ -948,12 +948,19 @@ async function ensureElizaDependencies(elizaRoot) {
   console.log(
     `[setup-upstreams] Installing eliza workspace dependencies in ${toDisplayPath(elizaRoot)}`,
   );
+  const installArgs = getElizaInstallArgs();
   await withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, () =>
-    runCommand("bun", ["install"], {
+    runCommand("bun", installArgs, {
       cwd: elizaRoot,
       label: "bun install (eliza)",
     }),
   );
+}
+
+export function getElizaInstallArgs(env = process.env) {
+  return env.MILADY_NO_VISION_DEPS === "1"
+    ? ["install", "--ignore-scripts"]
+    : ["install"];
 }
 
 async function ensureElizaGeneratedKeywordData(elizaRoot) {
