@@ -1095,6 +1095,10 @@ export default defineConfig({
         replacement: `${uiPkgRoot}/src/components/composites/$1/$2.tsx`,
       },
       {
+        find: /^@elizaos\/ui\/components\/(.+)\/([^/]+)$/,
+        replacement: `${uiPkgRoot}/src/components/$1/$2.tsx`,
+      },
+      {
         find: /^@elizaos\/ui\/hooks$/,
         replacement: path.join(uiPkgRoot, "src/hooks/index.ts"),
       },
