@@ -106,4 +106,34 @@ describe("run release contract suite", () => {
     );
     expect(fs.existsSync(legacyDir)).toBe(false);
   });
+
+  it("cleans the legacy compat dir if setup throws midway", () => {
+    const repoRoot = makeTempRoot();
+    const canonicalDir = path.join(
+      repoRoot,
+      "eliza",
+      "packages",
+      "app-core",
+      "platforms",
+      "electrobun",
+    );
+    const legacyDir = path.join(repoRoot, "apps", "app", "electrobun");
+
+    fs.mkdirSync(path.join(canonicalDir, "scripts"), { recursive: true });
+    fs.writeFileSync(
+      path.join(canonicalDir, "README.md"),
+      "legacy compat smoke asset\n",
+    );
+
+    expect(() =>
+      ensureLegacyElectrobunCompatDir({
+        legacyDir,
+        canonicalDir,
+        copyEntry: () => {
+          throw new Error("boom");
+        },
+      }),
+    ).toThrow("boom");
+    expect(fs.existsSync(legacyDir)).toBe(false);
+  });
 });

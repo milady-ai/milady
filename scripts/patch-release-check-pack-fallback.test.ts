@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { applyReleaseCheckPackFallback } from "./patch-release-check-pack-fallback.mjs";
+import {
+  applyReleaseCheckPackFallback,
+  isDirectRun,
+} from "./patch-release-check-pack-fallback.mjs";
 
 const upstreamRunPackDryBlock = `function runPackDry(): PackResult[] {
   return withSanitizedNpmOverrides(() => {
@@ -98,5 +101,29 @@ describe("patch-release-check-pack-fallback", () => {
     );
 
     expect(applyReleaseCheckPackFallback(alreadyPatched)).toBe(alreadyPatched);
+  });
+
+  it("matches direct-run detection with injected path/url helpers", () => {
+    const windowsScriptPath =
+      "C:\\repo\\scripts\\patch-release-check-pack-fallback.mjs";
+    const toWindowsFileUrl = (value) =>
+      new URL(`file:///${value.replace(/\\\\/g, "/")}`);
+
+    expect(
+      isDirectRun(
+        "file:///C:/repo/scripts/patch-release-check-pack-fallback.mjs",
+        windowsScriptPath,
+        () => windowsScriptPath,
+        toWindowsFileUrl,
+      ),
+    ).toBe(true);
+    expect(
+      isDirectRun(
+        "file:///C:/repo/scripts/other-script.mjs",
+        windowsScriptPath,
+        () => windowsScriptPath,
+        toWindowsFileUrl,
+      ),
+    ).toBe(false);
   });
 });

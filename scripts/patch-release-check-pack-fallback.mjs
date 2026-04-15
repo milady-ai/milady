@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const repoRoot = process.cwd();
 const releaseCheckCandidates = [
@@ -189,6 +190,18 @@ export function findReleaseCheckFile(candidates = releaseCheckCandidates) {
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? null;
 }
 
+export function isDirectRun(
+  moduleUrl = import.meta.url,
+  argv1 = process.argv[1],
+  resolvePath = path.resolve,
+  toFileUrl = pathToFileURL,
+) {
+  return (
+    typeof argv1 === "string" &&
+    moduleUrl === toFileUrl(resolvePath(argv1)).href
+  );
+}
+
 function main() {
   const filePath = findReleaseCheckFile();
   if (!filePath) {
@@ -205,6 +218,6 @@ function main() {
   );
 }
 
-if (import.meta.url === new URL(`file://${process.argv[1]}`).href) {
+if (isDirectRun()) {
   main();
 }
