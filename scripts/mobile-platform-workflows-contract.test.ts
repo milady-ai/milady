@@ -44,7 +44,7 @@ describe("mobile platform workflow contract", () => {
     expect(workflow).not.toContain(
       "bun install --cwd eliza/packages/app-core --ignore-scripts",
     );
-    expect(workflow).toContain(
+    expect(workflow).not.toContain(
       "bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts",
     );
     expect(workflow).toContain('prepare-local-eliza-runtime: "true"');
