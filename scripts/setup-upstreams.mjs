@@ -86,6 +86,21 @@ const PACKAGE_LINK_ROOTS = [
   ["apps", "app", "node_modules"],
   ["apps", "home", "node_modules"],
 ];
+const INBOX_REPLY_HINT_LEGACY =
+  "Sent through the connected {{source}} account on this Mac.";
+const INBOX_REPLY_HINT_PLATFORM_NEUTRAL =
+  "Sent through the connected {{source}} account on this device.";
+const MILADY_COPY_PATCH_RELATIVE_PATHS = [
+  path.join(
+    "packages",
+    "app-core",
+    "src",
+    "components",
+    "pages",
+    "ChatView.tsx",
+  ),
+  path.join("packages", "app-core", "src", "i18n", "locales", "en.json"),
+];
 
 function toDisplayPath(targetPath) {
   return path.normalize(targetPath);
@@ -138,6 +153,43 @@ function writePackageJson(packagePath, raw, nextPackageJson) {
     packagePath,
     `${JSON.stringify(nextPackageJson, null, indent)}\n`,
   );
+}
+
+export function applyMiladyCopyPatches(elizaRoot) {
+  let patchedFiles = 0;
+  let existingFiles = 0;
+
+  for (const relativePath of MILADY_COPY_PATCH_RELATIVE_PATHS) {
+    const filePath = path.join(elizaRoot, relativePath);
+    if (!existsSync(filePath)) {
+      continue;
+    }
+    existingFiles += 1;
+
+    const raw = readFileSync(filePath, "utf8");
+    const next = raw
+      .split(INBOX_REPLY_HINT_LEGACY)
+      .join(INBOX_REPLY_HINT_PLATFORM_NEUTRAL);
+
+    if (next === raw) {
+      continue;
+    }
+
+    writeFileSync(filePath, next);
+    patchedFiles += 1;
+  }
+
+  if (patchedFiles > 0) {
+    console.log(
+      `[setup-upstreams] Applied ${patchedFiles} Milady copy patch(es) for inbox reply hint`,
+    );
+  } else if (existingFiles > 0) {
+    console.warn(
+      "[setup-upstreams] WARNING: inbox reply hint legacy string not found — patch may need updating",
+    );
+  }
+
+  return patchedFiles;
 }
 
 function uniqueLinks(links) {
@@ -1061,6 +1113,7 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
             );
           }
         }
+        applyMiladyCopyPatches(elizaRoot);
       }
     }
     console.log(`[setup-upstreams] Skipping: ${skipReason}`);
@@ -1080,6 +1133,7 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
   }
 
   const elizaRoot = await ensureRepoLocalEliza(repoRoot);
+  applyMiladyCopyPatches(elizaRoot);
   await ensureElizaDependencies(elizaRoot);
   await ensureElizaBuildOutputs(elizaRoot);
 
