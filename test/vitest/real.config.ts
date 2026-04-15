@@ -42,6 +42,15 @@ const hiddenElizaWorkspaceGlob =
   fs.existsSync(elizaWorkspaceRoot) && fs.existsSync(disabledElizaWorkspaceRoot)
     ? ".eliza.ci-disabled/**"
     : undefined;
+const ciOnlyExcludedTests =
+  process.env.MILADY_CI_REAL === "1"
+    ? [
+        // The CI real lane is intentionally browserless and does not provision
+        // the Python benchmark evaluator extras.
+        "eliza/packages/app-core/test/app/onboarding-companion.live.e2e.test.ts",
+        "eliza/packages/benchmarks/app-eval/evaluate.real.test.ts",
+      ]
+    : [];
 const liveSetupFile = [
   path.join(
     elizaWorkspaceRoot,
@@ -570,6 +579,7 @@ export default defineConfig({
       "eliza/packages/app-core/platforms/electrobun/**",
       "apps/chrome-extension/**",
       "eliza/cloud/**",
+      ...ciOnlyExcludedTests,
     ],
     server: {
       deps: {

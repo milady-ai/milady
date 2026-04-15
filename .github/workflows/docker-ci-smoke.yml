@@ -51,6 +51,9 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
 
+      - name: Patch Docker smoke helper for CI retries
+        run: node scripts/patch-docker-ci-smoke-ci.mjs
+
       - name: Run Docker CI smoke path
         run: bash eliza/packages/app-core/scripts/docker-ci-smoke.sh --tag gha-${{ github.run_id }}
 

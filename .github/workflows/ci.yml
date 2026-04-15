@@ -46,6 +46,9 @@ jobs:
             mv .eliza.ci-disabled eliza
           fi
 
+      - name: Install plugin-commands lint dependencies
+        run: bun install --cwd eliza/plugins/plugin-commands/typescript --no-frozen-lockfile --ignore-scripts
+
       - name: Fetch upstream develop for pre-review base
         run: |
           git remote add upstream https://github.com/milady-ai/milady.git || true
@@ -88,6 +91,7 @@ jobs:
           bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
           bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
           bun install --cwd eliza/steward-fi --no-frozen-lockfile --ignore-scripts
+          bun install --cwd eliza/plugins/plugin-commands/typescript --no-frozen-lockfile --ignore-scripts
 
       - name: Ensure biome uses correct architecture
         run: |

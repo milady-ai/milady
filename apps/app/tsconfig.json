@@ -45,6 +45,12 @@
       "@elizaos/core/*": ["./eliza/packages/typescript/src/*"],
       "@elizaos/shared": ["./eliza/packages/shared/src/index.ts"],
       "@elizaos/shared/*": ["./eliza/packages/shared/src/*"],
+      "@elizaos/capacitor-agent": [
+        "./eliza/packages/native-plugins/agent/src/index.ts"
+      ],
+      "@elizaos/capacitor-desktop": [
+        "./eliza/packages/native-plugins/desktop/src/index.ts"
+      ],
       "@elizaos/ui": ["./eliza/packages/ui/src/index.ts"],
       "@elizaos/ui/*": ["./eliza/packages/ui/src/*"],
       "react": ["./eliza/node_modules/@types/react/index.d.ts"],

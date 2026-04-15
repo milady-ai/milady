@@ -92,7 +92,7 @@ Cloud monetization is a first-class product constraint. App creators can earn th
 Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need NODE_PATH set to the repo root's `node_modules`. This is set in three places — all three are required:
 1. `packages/agent/src/runtime/eliza.ts` — module-level, before dynamic imports
 2. `eliza/packages/app-core/scripts/run-node.mjs` — child process env
-3. `apps/app/electrobun/src/native/agent.ts` — Electrobun main process
+3. `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` — Electrobun main process
 
 See `docs/plugin-resolution-and-node-path.md`.
 
@@ -100,7 +100,7 @@ See `docs/plugin-resolution-and-node-path.md`.
 `scripts/patch-deps.mjs` removes dead `exports["."].bun` entries from `@elizaos` packages that point to missing `src/` paths. Without this, Bun fails to resolve plugins at runtime.
 
 ### Electrobun startup guards (do not remove)
-The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
+The try/catch blocks in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
 
 ### Dashboard SSE: action callbacks replace in place
 In `packages/agent/src/api/chat-routes.ts`, **`HandlerCallback`** text from actions uses **`replaceCallbackText`**: each new callback replaces the previous callback’s segment after a frozen **`preCallbackText`** (the LLM stream so far). **Why:** Matches Discord-style progressive messages; the old path concatenated unrelated status strings in one bubble. The elizaOS callback contract is unchanged. See **`docs/runtime/action-callback-streaming.md`**.

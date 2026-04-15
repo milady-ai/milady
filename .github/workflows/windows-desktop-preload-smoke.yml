@@ -61,8 +61,6 @@ jobs:
           install-command: bun install --ignore-scripts --no-frozen-lockfile
           install-native-deps: "false"
           run-postinstall: "false"
-          disable-local-eliza-workspace: "true"
-          prepare-local-eliza-runtime: "true"
           skip-avatar-clone: "true"
           no-vision-deps: "true"
 

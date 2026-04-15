@@ -151,12 +151,15 @@ export type CloudWalletImportMockApi = {
 };
 
 /**
- * Playwright routes that override the ui-smoke API stub for the cloud wallet import flow.
- * Register **after** {@link installDefaultAppMocks} so these take precedence for matching URLs.
+ * Playwright routes that override the ui-smoke API stub for the cloud wallet
+ * import flow. This installs the default app mocks first so surface tests do
+ * not need to reference the helper directly.
  */
 export async function installCloudWalletImportApiOverrides(
   page: Page,
 ): Promise<CloudWalletImportMockApi> {
+  await installDefaultAppMocks(page);
+
   let lastWalletPut: Record<string, unknown> | null = null;
   let stewardStatusHits = 0;
 
@@ -326,6 +329,14 @@ export async function installCloudWalletImportApiOverrides(
 export async function installDefaultAppMocks(page: Page): Promise<void> {
   // Stub the runtime /api endpoints the app shell fetches on mount so the
   // UI renders without a live backend.
+  await page.route("**/api/health", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true }),
+    });
+  });
+
   await page.route("**/api/agents", async (route) => {
     if (route.request().method() !== "GET") {
       await route.fallback();

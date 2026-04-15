@@ -87,8 +87,8 @@ bun run setup:upstreams   # initializes repo-local ./eliza and links local @eliz
 - Formatting/linting via Biome; run `bun run verify` before commits (`bun run check` is an alias).
 - Add brief code comments for tricky or non-obvious logic.
 - Aim to keep files under ~500 LOC; split/refactor when it improves clarity or testability.
-- **Do not remove exception-handling guards** in `apps/app/electrobun/src/native/agent.ts` as "excess" or during deslop/cleanup. The try/catch and `.catch()` there keep the desktop app usable when the runtime fails to load (API server stays up, UI can show error). See `docs/electrobun-startup.md`.
-- **Do not remove NODE_PATH setup code** in `packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, or `apps/app/electrobun/src/native/agent.ts`. Without it, dynamic plugin imports fail with "Cannot find module". See `docs/plugin-resolution-and-node-path.md`.
+- **Do not remove exception-handling guards** in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` as "excess" or during deslop/cleanup. The try/catch and `.catch()` there keep the desktop app usable when the runtime fails to load (API server stays up, UI can show error). See `docs/electrobun-startup.md`.
+- **Do not remove NODE_PATH setup code** in `packages/agent/src/runtime/eliza.ts`, `eliza/packages/app-core/scripts/run-node.mjs`, or `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts`. Without it, dynamic plugin imports fail with "Cannot find module". See `docs/plugin-resolution-and-node-path.md`.
 - **Do not remove the Bun exports patch** in `scripts/patch-deps.mjs` (patchBunExports). It fixes "Cannot find module" for plugins whose published package.json points `exports["."].bun` at missing `./src/index.ts`. See "Bun and published package exports" in `docs/plugin-resolution-and-node-path.md`.
 - Naming: use **Milady** for product/app/docs headings; use `milady` for CLI command, package/binary, paths, and config keys.
 
@@ -100,7 +100,7 @@ Dynamic plugin imports (`import("@elizaos/plugin-foo")`) need `NODE_PATH` set to
 
 1. `packages/agent/src/runtime/eliza.ts` — module-level, before dynamic imports
 2. `eliza/packages/app-core/scripts/run-node.mjs` — child process env
-3. `apps/app/electrobun/src/native/agent.ts` — Electrobun main process
+3. `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` — Electrobun main process
 
 See `docs/plugin-resolution-and-node-path.md`.
 
@@ -110,7 +110,7 @@ See `docs/plugin-resolution-and-node-path.md`.
 
 ### Electrobun startup guards (do not remove)
 
-The try/catch blocks in `apps/app/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
+The try/catch blocks in `eliza/packages/app-core/platforms/electrobun/src/native/agent.ts` keep the desktop window usable when the runtime fails.
 
 ## Dependencies
 
