@@ -10,6 +10,21 @@ const repoRoot = resolveRepoRoot(import.meta.url);
 
 export const miladyElizaTypecheckSteps = [
   {
+    // Milady's root workspace typecheck is anchored on app-core's tsconfig and
+    // resolves the shipped @elizaos/ui sources through the same path aliases.
+    label: "eliza app-core workspace typecheck",
+    command: "bun",
+    args: ["run", "verify:typecheck:workspace"],
+  },
+  {
+    // @elizaos/ui does not currently typecheck as a leaf package in this fork
+    // because optional native/app-companion imports are resolved at the app
+    // layer. Keep an explicit UI gate by typechecking the shipped consumer app.
+    label: "eliza ui consumer typecheck",
+    command: "bun",
+    args: ["run", "--cwd", "apps/app", "typecheck"],
+  },
+  {
     label: "eliza agent typecheck",
     command: "bun",
     args: ["run", "--cwd", "eliza/packages/agent", "typecheck"],
@@ -68,22 +83,12 @@ export const suites = {
     },
   ],
   typecheck: [
-    {
-      label: "Root workspace typecheck",
-      command: "bun",
-      args: ["run", "verify:typecheck:workspace"],
-    },
-    {
-      label: "apps/app typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "apps/app", "typecheck"],
-    },
+    ...miladyElizaTypecheckSteps,
     {
       label: "apps/homepage typecheck",
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "typecheck"],
     },
-    ...miladyElizaTypecheckSteps,
     {
       label: "eliza Rust typecheck",
       command: "bun",

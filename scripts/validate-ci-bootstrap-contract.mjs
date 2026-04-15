@@ -42,7 +42,10 @@ const requiredWorkflowSnippets = [
 const requiredActionSnippets = [
   "disable-local-eliza-workspace:",
   "run: node scripts/disable-local-eliza-workspace.mjs",
+  "run: bash scripts/install-published-workspace-fallback-deps.sh",
 ];
+
+const forbiddenActionSnippets = ["bun add --no-save --dev"];
 
 const disableMarkers = [
   "scripts/disable-local-eliza-workspace.mjs",
@@ -89,6 +92,7 @@ assertContainsAll(
   failures,
 );
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
+assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
 
 const regressionMatrixCommand =
   packageJson?.scripts?.["test:regression-matrix:pr"];
@@ -197,6 +201,16 @@ function assertContainsAll(text, relativePath, snippets, targetFailures) {
     if (!text.includes(snippet)) {
       targetFailures.push(
         `${relativePath} is missing required bootstrap snippet: ${snippet}`,
+      );
+    }
+  }
+}
+
+function assertContainsNone(text, relativePath, snippets, targetFailures) {
+  for (const snippet of snippets) {
+    if (text.includes(snippet)) {
+      targetFailures.push(
+        `${relativePath} still contains forbidden bootstrap snippet: ${snippet}`,
       );
     }
   }

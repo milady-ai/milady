@@ -2,6 +2,8 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 export const ROOT_TIMEOUT_MS = 20_000;
 export const NAV_TIMEOUT_MS = 12_000;
+// These "ready" checks only look for mocked/static UI markers after navigation.
+// Full backend/bootstrap waits use the longer per-test and Playwright defaults.
 const READY_CHECK_TIMEOUT_MS = 5_000;
 
 type ReadyCheck =

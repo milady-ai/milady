@@ -141,6 +141,8 @@ export default defineConfig({
     ],
   },
   test: {
+    // apps/app test/vite/** alias/bridge regressions live here; the root
+    // default Vitest config intentionally does not glob apps/app/**.
     // Use POSIX-style relative globs so test discovery works on Windows too.
     include: [
       "test/**/*.test.ts",

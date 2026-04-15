@@ -175,7 +175,7 @@ jobs:
         run: |
           APT_ARGS=(-o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30)
           sudo apt-get "${APT_ARGS[@]}" update
-          sudo apt-get "${APT_ARGS[@]}" install -y libwebkit2gtk-4.1-0 libayatana-appindicator3-1
+          sudo apt-get "${APT_ARGS[@]}" install -y libwebkit2gtk-4.1-0 libayatana-appindicator3-1 xvfb
 
       - name: Cache Bun install
         uses: actions/cache@v4
@@ -204,7 +204,17 @@ jobs:
       - name: Run website blocker unit suites
         run: bun run test:selfcontrol:unit
 
+      - name: Run website blocker E2E suites (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          # test:selfcontrol:e2e includes selfcontrol-desktop.live.e2e.test.ts,
+          # which boots the Electrobun desktop shell. Keep a virtual display on
+          # Linux even though the test assertions themselves are HTTP-driven.
+          xvfb-run -a bun run test:selfcontrol:e2e
+
       - name: Run website blocker E2E suites
+        if: runner.os != 'Linux'
         run: bun run test:selfcontrol:e2e
 
   website-blocker-startup-smoke:

@@ -7,6 +7,16 @@ describe("run-repo-checks", () => {
   it("scopes eliza typecheck to Milady-relevant packages", () => {
     expect(miladyElizaTypecheckSteps).toEqual([
       {
+        label: "eliza app-core workspace typecheck",
+        command: "bun",
+        args: ["run", "verify:typecheck:workspace"],
+      },
+      {
+        label: "eliza ui consumer typecheck",
+        command: "bun",
+        args: ["run", "--cwd", "apps/app", "typecheck"],
+      },
+      {
         label: "eliza agent typecheck",
         command: "bun",
         args: ["run", "--cwd", "eliza/packages/agent", "typecheck"],

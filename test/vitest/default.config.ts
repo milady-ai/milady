@@ -226,6 +226,10 @@ export default defineConfig({
     // Give worker forks more heap to survive jsdom-heavy suites.
     execArgv: ["--max-old-space-size=4096"],
     include: [
+      // Keep this list explicit. New root/eliza package tests do not auto-join
+      // the default suite; add them here when that package is meant to run in
+      // the shared root Vitest job. apps/app test/vite/** lives under
+      // apps/app/vitest.config.ts instead of this root config.
       "eliza/packages/agent/src/**/*.test.ts",
       "eliza/packages/agent/src/**/*.test.tsx",
       "eliza/packages/agent/test/**/*.test.ts",

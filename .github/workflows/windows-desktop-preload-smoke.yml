@@ -69,11 +69,6 @@ jobs:
       - name: Restore eliza workspace paths for build scripts
         run: node scripts/restore-local-eliza-workspace.mjs
 
-      - name: Install desktop package dependencies
-        run: |
-          bun install --cwd eliza/packages/app-core --ignore-scripts
-          bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts
-
       - name: Run repository postinstall patches
         run: node eliza/packages/app-core/scripts/run-repo-setup.mjs
         env:
