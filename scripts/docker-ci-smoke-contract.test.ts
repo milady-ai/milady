@@ -15,14 +15,12 @@ const dockerSmokeScriptPath = path.join(
 );
 
 describe("docker CI smoke contract", () => {
-  it("installs published-workspace fallback dependencies", () => {
+  it("delegates published-workspace fallback dependencies to the shared helper", () => {
     const script = fs.readFileSync(dockerSmokeScriptPath, "utf8");
 
-    const installsViaHelper = script.includes(
+    expect(script).toContain(
       "bash scripts/install-published-workspace-fallback-deps.sh",
     );
-    const installsInline = script.includes("bun add --no-save --dev");
-
-    expect(installsViaHelper || installsInline).toBe(true);
+    expect(script).not.toContain("bun add --no-save --dev");
   });
 });

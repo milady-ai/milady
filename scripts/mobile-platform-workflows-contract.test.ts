@@ -38,13 +38,13 @@ describe("mobile platform workflow contract", () => {
     );
   });
 
-  it("avoids package-local bun installs in the Windows preload smoke job", () => {
+  it("avoids broad package-local bun installs in the Windows preload smoke job", () => {
     const workflow = readWorkflow(windowsPreloadWorkflowPath);
 
     expect(workflow).not.toContain(
       "bun install --cwd eliza/packages/app-core --ignore-scripts",
     );
-    expect(workflow).not.toContain(
+    expect(workflow).toContain(
       "bun install --cwd eliza/packages/app-core/platforms/electrobun --ignore-scripts",
     );
     expect(workflow).toContain('prepare-local-eliza-runtime: "true"');

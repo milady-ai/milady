@@ -69,7 +69,7 @@ export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
 ];
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
-  "@elizaos/ui": "file:./eliza/packages/ui",
+  "@elizaos/ui": "file:./.eliza.ci-disabled/packages/ui",
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
