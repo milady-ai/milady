@@ -107,7 +107,6 @@
         "@elizaos/app-shopify": "workspace:*",
         "@elizaos/app-vincent": "workspace:*",
         "@elizaos/capacitor-agent": "workspace:*",
-        "@elizaos/capacitor-appblocker": "workspace:*",
         "@elizaos/capacitor-camera": "workspace:*",
         "@elizaos/capacitor-canvas": "workspace:*",
         "@elizaos/capacitor-desktop": "workspace:*",
@@ -540,20 +539,6 @@
         "@capacitor/core": "^8.0.0",
         "rimraf": "^5.0.0",
         "rollup": "^4.59.0",
-        "typescript": "^5.0.0",
-      },
-      "peerDependencies": {
-        "@capacitor/core": "^8.0.0",
-      },
-    },
-    "eliza/packages/native-plugins/appblocker": {
-      "name": "@elizaos/capacitor-appblocker",
-      "version": "1.0.0",
-      "devDependencies": {
-        "@capacitor/cli": "^8.0.0",
-        "@capacitor/core": "^8.0.0",
-        "rimraf": "^5.0.0",
-        "rollup": "^4.0.0",
         "typescript": "^5.0.0",
       },
       "peerDependencies": {
@@ -2081,8 +2066,6 @@
     "@elizaos/app-vincent": ["@elizaos/app-vincent@workspace:eliza/apps/app-vincent"],
 
     "@elizaos/capacitor-agent": ["@elizaos/capacitor-agent@workspace:eliza/packages/native-plugins/agent"],
-
-    "@elizaos/capacitor-appblocker": ["@elizaos/capacitor-appblocker@workspace:eliza/packages/native-plugins/appblocker"],
 
     "@elizaos/capacitor-camera": ["@elizaos/capacitor-camera@workspace:eliza/packages/native-plugins/camera"],
 

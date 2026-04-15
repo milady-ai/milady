@@ -24,6 +24,5 @@ export const CAPACITOR_PLUGIN_NAMES = [
   "mobile-signals",
   "talkmode",
   "agent",
-  "appblocker",
   "websiteblocker",
 ];

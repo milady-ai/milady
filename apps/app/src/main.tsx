@@ -62,7 +62,6 @@ import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
 import "@elizaos/app-companion/register";
 import {
-  AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
@@ -183,7 +182,6 @@ const appBootConfig: AppBootConfig = {
   envAliases: APP_ENV_ALIASES,
   lifeOpsPageView: LifeOpsPageView,
   lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
-  appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
     forceFreshOnboarding:
