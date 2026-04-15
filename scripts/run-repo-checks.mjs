@@ -41,6 +41,15 @@ export const miladyElizaTypecheckSteps = [
   },
 ];
 
+// The repo-local eliza checkout includes a much larger upstream Rust/Python
+// surface than Milady actually ships against. Running the root language-wide
+// turbo sweeps in this repo fans out into dozens of unrelated plugin packages
+// and can exhaust GitHub-hosted runners. Keep Milady CI focused on the
+// TypeScript/app packages it directly validates here.
+export const miladyElizaCrossLanguageChecks = [];
+export const miladyCloudTypecheckSteps = [];
+export const miladySidecarTypecheckSteps = [];
+
 // Keep repo-wide checks focused on the upstream packages Milady actually ships
 // against; the full eliza workspace includes unrelated plugin packages that can
 // fail independently and should not block this repo's CI.
@@ -62,25 +71,11 @@ export const suites = {
       args: ["run", "--cwd", "apps/homepage", "lint"],
     },
     {
-      label: "cloud lint",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "lint"],
-    },
-    {
       label: "steward-fi lint",
       command: "bun",
       args: ["run", "--cwd", "eliza/steward-fi", "lint"],
     },
-    {
-      label: "eliza Rust lint",
-      command: "bun",
-      args: ["run", "--cwd", "eliza", "lint:rust"],
-    },
-    {
-      label: "eliza Python lint",
-      command: "bun",
-      args: ["run", "--cwd", "eliza", "lint:python"],
-    },
+    ...miladyElizaCrossLanguageChecks,
   ],
   typecheck: [
     ...miladyElizaTypecheckSteps,
@@ -89,51 +84,9 @@ export const suites = {
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "typecheck"],
     },
-    {
-      label: "eliza Rust typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza", "typecheck:rust"],
-    },
-    {
-      label: "eliza Python typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza", "typecheck:python"],
-    },
-    {
-      label: "cloud app typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "check-types"],
-    },
-    {
-      label: "cloud tests typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "check-types:tests"],
-    },
-    {
-      label: "cloud UI typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "check-types:ui"],
-    },
-    {
-      label: "cloud agent-server typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "check-types:agent-server"],
-    },
-    {
-      label: "cloud gateway-discord typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "check-types:gateway-discord"],
-    },
-    {
-      label: "cloud gateway-webhook typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/cloud", "check-types:gateway-webhook"],
-    },
-    {
-      label: "steward-fi typecheck",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/steward-fi", "typecheck"],
-    },
+    ...miladyCloudTypecheckSteps,
+    ...miladySidecarTypecheckSteps,
+    ...miladyElizaCrossLanguageChecks,
   ],
 };
 
