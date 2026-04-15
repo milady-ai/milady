@@ -69,7 +69,6 @@ export const NESTED_INSTALLABLE_PACKAGE_GLOBS = [
 ];
 export const CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:./scripts/ci-stubs/elizaos-plugin-wechat",
-  "@elizaos/ui": "file:./.eliza.ci-disabled/packages/ui",
 };
 export const ELIZA_RUNTIME_CI_OVERRIDE_SPECIFIERS = {
   "@elizaos/plugin-wechat": "file:../scripts/ci-stubs/elizaos-plugin-wechat",
@@ -89,6 +88,29 @@ export const PINNED_VERSION_SOURCE_WORKSPACE = "workspace";
 const ELIZAOS_CORE_NAME = "@elizaos/core";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const DEFAULT_REPO_ROOT = process.cwd();
+
+export function resolveRootUiOverrideSpecifier(repoRoot = DEFAULT_REPO_ROOT) {
+  const disabledUiPackageJsonPath = path.join(
+    repoRoot,
+    ".eliza.ci-disabled",
+    "packages",
+    "ui",
+    "package.json",
+  );
+
+  if (fs.existsSync(disabledUiPackageJsonPath)) {
+    return "file:./.eliza.ci-disabled/packages/ui";
+  }
+
+  return "file:./eliza/packages/ui";
+}
+
+export function resolveCiOverrideSpecifiers(repoRoot = DEFAULT_REPO_ROOT) {
+  return {
+    ...CI_OVERRIDE_SPECIFIERS,
+    "@elizaos/ui": resolveRootUiOverrideSpecifier(repoRoot),
+  };
+}
 
 /**
  * @typedef {import("./lib/package-types.d.ts").PackageJsonRecord} PackageJsonRecord
@@ -760,8 +782,11 @@ export function applyOverrideSpecifiers(
   return true;
 }
 
-export function applyCiOnlyOverrides(pkg, { log = console.log } = {}) {
-  return applyOverrideSpecifiers(pkg, CI_OVERRIDE_SPECIFIERS, {
+export function applyCiOnlyOverrides(
+  pkg,
+  { log = console.log, repoRoot = DEFAULT_REPO_ROOT } = {},
+) {
+  return applyOverrideSpecifiers(pkg, resolveCiOverrideSpecifiers(repoRoot), {
     log,
     label: "CI-only override",
   });
@@ -975,7 +1000,7 @@ export function disableLocalElizaWorkspace(
     }
   }
 
-  applyCiOnlyOverrides(rootPkg, { log });
+  applyCiOnlyOverrides(rootPkg, { log, repoRoot });
 
   writePackageJson(packageJsonPath, rawRootPkg, rootPkg);
 
