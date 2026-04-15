@@ -61,16 +61,7 @@ jobs:
         run: bun install --ignore-scripts
 
       - name: Install published-workspace fallback dependencies
-        run: >
-          bun add --no-save --dev
-          @elizaos/plugin-agent-orchestrator
-          react react-dom vite
-          @types/react @types/react-dom
-          tailwindcss three clsx class-variance-authority tailwind-merge sonner
-          @radix-ui/react-checkbox @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label
-          @radix-ui/react-popover @radix-ui/react-select @radix-ui/react-separator @radix-ui/react-slider
-          @radix-ui/react-slot @radix-ui/react-switch @radix-ui/react-tabs @radix-ui/react-tooltip
-          @capacitor/core @capacitor/haptics @capacitor/keyboard @capacitor/preferences
+        run: bash scripts/install-published-workspace-fallback-deps.sh
 
       - name: Run repository postinstall patches
         run: bun run postinstall
