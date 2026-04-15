@@ -7,7 +7,6 @@ import "@elizaos/app-core/platform/native-plugin-entrypoints";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
-import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@elizaos/app-core";
 import { client } from "@elizaos/app-core";
 import {
@@ -221,7 +220,6 @@ async function initializePlatform(): Promise<void> {
   initializeCapacitorBridge();
 
   if (isIOS || isAndroid) {
-    await initializeStatusBar();
     await initializeKeyboard();
     initializeAppLifecycle();
   }
@@ -230,15 +228,6 @@ async function initializePlatform(): Promise<void> {
     await initializeDesktopShell();
   } else {
     await initializeAgent();
-  }
-}
-
-async function initializeStatusBar(): Promise<void> {
-  await StatusBar.setStyle({ style: Style.Dark });
-
-  if (isAndroid) {
-    await StatusBar.setOverlaysWebView({ overlay: true });
-    await StatusBar.setBackgroundColor({ color: "#0a0a0a" });
   }
 }
 

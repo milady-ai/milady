@@ -23,10 +23,6 @@ const config: CapacitorConfig = {
       resize: "body",
       resizeOnFullScreen: true,
     },
-    StatusBar: {
-      style: "dark",
-      backgroundColor: "#0a0a0a",
-    },
   },
   ios: {
     contentInset: "automatic",

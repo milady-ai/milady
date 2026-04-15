@@ -52,9 +52,6 @@ jobs:
             mv .eliza.ci-disabled eliza
           fi
 
-      - name: Install plugin-commands lint dependencies
-        run: bun install --cwd eliza/plugins/plugin-commands --no-frozen-lockfile --ignore-scripts
-
       - name: Fetch upstream develop for pre-review base
         run: |
           git remote add upstream https://github.com/milady-ai/milady.git || true
