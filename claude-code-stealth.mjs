@@ -94,13 +94,20 @@ if (!globalThis[STEALTH_GUARD]) {
     }
 
     if (request && !init) {
-      return originalFetch(
-        new Request(url.toString(), {
-          method: request.method,
-          headers,
-          body: typeof body === "string" ? body : undefined,
-        }),
-      );
+      return originalFetch(url.toString(), {
+        method: request.method,
+        headers,
+        body: typeof body === "string" ? body : undefined,
+        signal: request.signal,
+        credentials: request.credentials,
+        mode: request.mode,
+        cache: request.cache,
+        redirect: request.redirect,
+        referrer: request.referrer,
+        referrerPolicy: request.referrerPolicy,
+        integrity: request.integrity,
+        keepalive: request.keepalive,
+      });
     }
     return originalFetch(url.toString(), {
       ...init,
