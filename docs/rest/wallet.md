@@ -82,35 +82,78 @@ Get NFTs held by the agent across EVM chains and Solana. Requires `ALCHEMY_API_K
 
 ### GET /api/wallet/config
 
-Get the wallet API key configuration status and current wallet addresses. Key values are not returned — only their set/unset status.
+Get the wallet API key configuration status, RPC provider selections, and current wallet addresses. Key values are not returned — only their set/unset status.
 
 **Response**
 
 ```json
 {
+  "selectedRpcProviders": {
+    "evm": "alchemy",
+    "bsc": "alchemy",
+    "solana": "helius-birdeye"
+  },
+  "walletNetwork": "mainnet",
+  "legacyCustomChains": [],
   "alchemyKeySet": true,
   "infuraKeySet": false,
   "ankrKeySet": false,
+  "nodeRealBscRpcSet": false,
+  "quickNodeBscRpcSet": false,
+  "managedBscRpcReady": false,
+  "cloudManagedAccess": false,
   "heliusKeySet": true,
   "birdeyeKeySet": false,
-  "evmChains": ["Ethereum", "Base", "Arbitrum", "Optimism", "Polygon"],
+  "evmChains": ["ethereum", "base"],
   "evmAddress": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   "solanaAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU"
 }
 ```
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `selectedRpcProviders` | object | Currently selected RPC provider for each chain (`evm`, `bsc`, `solana`) |
+| `walletNetwork` | string | Active wallet network (`"mainnet"` or `"testnet"`) |
+| `legacyCustomChains` | array | Legacy custom chain configurations (may be empty) |
+| `alchemyKeySet` | boolean | Whether an Alchemy API key is configured |
+| `infuraKeySet` | boolean | Whether an Infura API key is configured |
+| `ankrKeySet` | boolean | Whether an Ankr API key is configured |
+| `nodeRealBscRpcSet` | boolean | Whether a NodeReal BSC RPC endpoint is configured |
+| `quickNodeBscRpcSet` | boolean | Whether a QuickNode BSC RPC endpoint is configured |
+| `managedBscRpcReady` | boolean | Whether a managed BSC RPC endpoint is available |
+| `cloudManagedAccess` | boolean | Whether wallet access is managed through Eliza Cloud |
+| `heliusKeySet` | boolean | Whether a Helius API key is configured |
+| `birdeyeKeySet` | boolean | Whether a Birdeye API key is configured |
+| `evmChains` | string[] | List of active EVM chains |
+| `evmAddress` | string \| null | Current EVM wallet address |
+| `solanaAddress` | string \| null | Current Solana wallet address |
+
 ---
 
 ### PUT /api/wallet/config
 
-Update wallet API keys. Accepted keys: `ALCHEMY_API_KEY`, `INFURA_API_KEY`, `ANKR_API_KEY`, `HELIUS_API_KEY`, `BIRDEYE_API_KEY`. Setting `HELIUS_API_KEY` also automatically configures `SOLANA_RPC_URL`. Triggers a runtime restart to apply changes.
+Update wallet API keys and RPC provider selections. You can set API keys, switch RPC providers per chain, or both in a single request. Setting `HELIUS_API_KEY` also automatically configures `SOLANA_RPC_URL`. Triggers a runtime restart to apply changes.
 
-**Request**
+**Request (API keys)**
 
 ```json
 {
   "ALCHEMY_API_KEY": "alchemy-key-here",
   "HELIUS_API_KEY": "helius-key-here"
+}
+```
+
+**Request (RPC provider selections)**
+
+Use the `selections` field to switch RPC providers for one or more chains. For example, setting a chain to `"eliza-cloud"` delegates RPC access to Eliza Cloud.
+
+```json
+{
+  "selections": {
+    "evm": "eliza-cloud",
+    "bsc": "eliza-cloud",
+    "solana": "eliza-cloud"
+  }
 }
 ```
 
@@ -121,6 +164,7 @@ Update wallet API keys. Accepted keys: `ALCHEMY_API_KEY`, `INFURA_API_KEY`, `ANK
 | `ANKR_API_KEY` | string | No | Ankr API key |
 | `HELIUS_API_KEY` | string | No | Helius API key for Solana lookups — also sets `SOLANA_RPC_URL` |
 | `BIRDEYE_API_KEY` | string | No | Birdeye API key for Solana token prices |
+| `selections` | object | No | Map of chain identifiers (`evm`, `bsc`, `solana`) to RPC provider names (e.g. `"alchemy"`, `"eliza-cloud"`) |
 
 **Response**
 

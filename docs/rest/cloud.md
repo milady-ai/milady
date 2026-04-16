@@ -74,6 +74,7 @@ Get cloud connection status, authentication state, and billing URL.
 {
   "connected": true,
   "enabled": true,
+  "cloudVoiceProxyAvailable": true,
   "hasApiKey": true,
   "userId": "user-123",
   "organizationId": "org-456",
@@ -87,6 +88,7 @@ Get cloud connection status, authentication state, and billing URL.
 {
   "connected": false,
   "enabled": false,
+  "cloudVoiceProxyAvailable": false,
   "hasApiKey": false,
   "reason": "not_authenticated"
 }
@@ -96,6 +98,7 @@ Get cloud connection status, authentication state, and billing URL.
 |-------|------|-------------|
 | `connected` | boolean | Whether the cloud auth service is authenticated |
 | `enabled` | boolean | Whether cloud mode is enabled in config |
+| `cloudVoiceProxyAvailable` | boolean | Whether cloud voice proxy is available for the current session |
 | `hasApiKey` | boolean | Whether an API key is present in config |
 | `userId` | string | Authenticated user ID (when connected) |
 | `organizationId` | string | Authenticated organization ID (when connected) |
@@ -116,6 +119,7 @@ Get the cloud credit balance. Returns `null` balance when not connected.
   "balance": 15.50,
   "low": false,
   "critical": false,
+  "authRejected": false,
   "topUpUrl": "https://elizacloud.ai/dashboard/settings?tab=billing"
 }
 ```
@@ -125,6 +129,7 @@ Get the cloud credit balance. Returns `null` balance when not connected.
 | `balance` | number \| null | Credit balance in dollars |
 | `low` | boolean | `true` when balance is below $2.00 |
 | `critical` | boolean | `true` when balance is below $0.50 |
+| `authRejected` | boolean | `true` when the cloud API key was rejected during the credit check |
 
 ---
 
