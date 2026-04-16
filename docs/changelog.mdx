@@ -3,6 +3,23 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-16" description="Week of April 16; desktop cloud login, onboarding polish, connector icons, cross-platform fixes" tags={["Update", "Fix"]}>
+
+## Updates
+
+- **Desktop cloud login reliability** — OAuth login popups on the desktop app now open and complete reliably across all platforms. A series of fixes resolved cross-origin popup handling, pre-opened window routing, and Electrobun RPC bridge mismatches that could cause the cloud login flow to hang or fail silently.
+- **Onboarding flow polish** — The desktop [onboarding wizard](/guides/beginners-user-guide) now skips the hosting selection screen automatically, since the desktop app always runs locally. Back navigation properly resets provider and model choices so you see consistent UI when revisiting steps. Provider auto-detection has been expanded to cover more configurations out of the box.
+- **Real connector icons** — The [connector](/guides/connectors) setup panels now display official Telegram and Discord brand icons instead of generic placeholders, making it easier to identify each platform at a glance.
+- **Steward wallet cloud provisioning** — When you log in to [Eliza Cloud](/guides/cloud), your agent can now automatically provision Steward wallet credentials for EVM and Solana — no manual environment variable setup required.
+
+## Bug fixes
+
+- Fixed inbox reply hints displaying "on this Mac" on Windows and Linux — the text now reads "on this device" across all platforms
+- Fixed onboarding showing inconsistent UI when navigating back to the providers step — tab state and cloud selection are now properly cleared on back navigation
+- Fixed the desktop app window briefly maximizing on launch before settling to its configured size
+
+</Update>
+
 <Update label="2026-04-15" description="Week of April 15; Steward Vault managed wallets, agent training, character catalog, coding agent sessions, companion emotes" tags={["Feature", "Update", "Fix"]}>
 
 ## Steward Vault managed wallets
