@@ -20,6 +20,20 @@ Pick this if you run **one bot on one VPS** against a personal Max
 subscription. Pick Docker for multi-bot hosts, managed cloud, or
 API-key-first auth.
 
+## Claude Max OAuth (stealth preload)
+
+Set `ELIZA_ENABLE_CLAUDE_STEALTH=1` in `~/.config/milady/env` (it's
+already the default in `milady.env.example`) to route the runtime's
+Anthropic requests through the same gateway the `claude` CLI uses. This
+lets the bot authenticate with a Max-plan subscription token
+(`sk-ant-oat*`) from `~/.claude/.credentials.json` — the same file
+`claude auth login` writes — instead of requiring a separate API key.
+
+The preload is `claude-code-stealth.mjs` at the repo root. Eliza's
+`dev-ui.mjs` picks it up automatically when the env var is set and the
+file exists. Leave `ELIZA_ENABLE_CLAUDE_STEALTH=0` and set
+`ANTHROPIC_API_KEY` directly if you prefer pay-as-you-go API billing.
+
 ## What you get
 
 - `milady.service` — `Restart=always`, capped burst (10/10min), OAuth refresh before launch, logs appended to a single file.
