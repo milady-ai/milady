@@ -31,8 +31,7 @@
     "eliza/apps/*",
     "eliza/plugins/*",
     "eliza/plugins/plugin-*/typescript",
-    "eliza/packages/*",
-    "scripts/ci-stubs/*"
+    "eliza/packages/*"
   ],
   "type": "module",
   "main": "build/eliza/packages/app-core/src/index.js",

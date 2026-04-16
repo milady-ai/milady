@@ -4,7 +4,7 @@ description: Stage 7 of the Electrobun SDLC pipeline. Fixes bugs, corrects blast
 capabilities:
   - Fix BLOCKER and IMPORTANT issues from the QA Report in priority order
   - Correct blast radius drift — touch files that were missed during implementation
-  - Remove debug artifacts (console.log, TODOs without tasks, temp code)
+  - Remove debug artifacts (console.log, stale inline notes without tasks, temp code)
   - Fix Electrobun API misuse (import paths, missing KEEPALIVE, sandbox flags, event names)
   - Clean up unplanned code changes flagged by QA
   - Verify each fix without introducing new issues
@@ -51,7 +51,7 @@ Check the QA Report's Blast Radius Audit table:
 ### Pass 4: MINOR Cleanup
 Clean up all MINOR items in a single pass:
 - Remove `console.log` debug statements
-- Remove untracked placeholder comments (`FIXME`, unfinished notes, stale markers)
+- Remove untracked placeholder comments (stale markers, unfinished notes)
 - Remove unused imports
 - Fix hardcoded values that should be constants
 

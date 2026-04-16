@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   applyMiladyCopyPatches,
   bootstrapBundledBunInstall,
+  ensurePluginAnthropicBunTypes,
   getElizaInstallArgs,
 } from "./setup-upstreams.mjs";
 
@@ -174,5 +175,84 @@ describe("applyMiladyCopyPatches", () => {
     );
 
     warnSpy.mockRestore();
+  });
+});
+
+describe("ensurePluginAnthropicBunTypes", () => {
+  function writeBuildConfig(
+    pluginsRoot: string,
+    config: Record<string, unknown>,
+  ) {
+    const buildConfigPath = path.join(
+      pluginsRoot,
+      "plugin-anthropic",
+      "typescript",
+      "tsconfig.build.json",
+    );
+    writeFile(buildConfigPath, `${JSON.stringify(config, null, "\t")}\n`);
+    return buildConfigPath;
+  }
+
+  it("adds 'bun' to compilerOptions.types when missing", () => {
+    const pluginsRoot = makeTempDir();
+    const buildConfigPath = writeBuildConfig(pluginsRoot, {
+      extends: "./tsconfig.json",
+      compilerOptions: {
+        rootDir: ".",
+        outDir: "../dist",
+      },
+      include: ["**/*.ts"],
+    });
+
+    expect(ensurePluginAnthropicBunTypes(pluginsRoot)).toBe(true);
+
+    const parsed = JSON.parse(fs.readFileSync(buildConfigPath, "utf8")) as {
+      compilerOptions: { types?: string[] };
+    };
+    expect(parsed.compilerOptions.types).toContain("bun");
+    expect(parsed.compilerOptions.types).toContain("node");
+  });
+
+  it("is a no-op when 'bun' is already present", () => {
+    const pluginsRoot = makeTempDir();
+    const initialConfig = {
+      extends: "./tsconfig.json",
+      compilerOptions: {
+        rootDir: ".",
+        outDir: "../dist",
+        types: ["node", "bun"],
+      },
+      include: ["**/*.ts"],
+    };
+    const buildConfigPath = writeBuildConfig(pluginsRoot, initialConfig);
+    const originalContents = fs.readFileSync(buildConfigPath, "utf8");
+
+    expect(ensurePluginAnthropicBunTypes(pluginsRoot)).toBe(false);
+    expect(fs.readFileSync(buildConfigPath, "utf8")).toBe(originalContents);
+  });
+
+  it("extends an existing types array without duplicating 'bun'", () => {
+    const pluginsRoot = makeTempDir();
+    const buildConfigPath = writeBuildConfig(pluginsRoot, {
+      extends: "./tsconfig.json",
+      compilerOptions: {
+        rootDir: ".",
+        outDir: "../dist",
+        types: ["node"],
+      },
+      include: ["**/*.ts"],
+    });
+
+    expect(ensurePluginAnthropicBunTypes(pluginsRoot)).toBe(true);
+
+    const parsed = JSON.parse(fs.readFileSync(buildConfigPath, "utf8")) as {
+      compilerOptions: { types?: string[] };
+    };
+    expect(parsed.compilerOptions.types).toEqual(["node", "bun"]);
+  });
+
+  it("is a no-op when plugin-anthropic is not present", () => {
+    const pluginsRoot = makeTempDir();
+    expect(ensurePluginAnthropicBunTypes(pluginsRoot)).toBe(false);
   });
 });

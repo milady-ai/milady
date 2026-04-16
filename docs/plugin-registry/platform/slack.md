@@ -64,8 +64,8 @@ Navigate to **OAuth & Permissions** and click **Install to Workspace**. Copy the
 {
   "connectors": {
     "slack": {
-      "botToken": "xoxb-...",
-      "appToken": "xapp-..."
+      "botToken": "<SLACK_BOT_TOKEN>",
+      "appToken": "<SLACK_APP_TOKEN>"
     }
   }
 }
@@ -120,7 +120,7 @@ By default, responses are posted as thread replies to keep channels clean. To po
 {
   "connectors": {
     "slack": {
-      "botToken": "xoxb-...",
+      "botToken": "<SLACK_BOT_TOKEN>",
       "replyInThread": false
     }
   }

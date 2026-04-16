@@ -125,6 +125,7 @@ describe("init-submodules", () => {
       exists: fs.existsSync,
       log: () => {},
       logError: () => {},
+      shouldSkipSubmodule: () => false,
     });
 
     expect(result.failed).toBe(0);
@@ -208,15 +209,17 @@ describe("init-submodules", () => {
       }
 
       if (
-        command ===
-          'git submodule update --init --recursive -- "plugins/plugin-shell"' &&
+        command.includes(
+          'submodule update --init --recursive -- "plugins/plugin-shell"',
+        ) &&
         cwd === elizaRoot
       ) {
         return "";
       }
       if (
-        command ===
-          'git submodule update --init --recursive -- "plugins/plugin-sql"' &&
+        command.includes(
+          'submodule update --init --recursive -- "plugins/plugin-sql"',
+        ) &&
         cwd === elizaRoot
       ) {
         return "";
@@ -231,6 +234,7 @@ describe("init-submodules", () => {
       exists: (targetPath) => existingPaths.has(targetPath),
       log: vi.fn(),
       logError: vi.fn(),
+      shouldSkipSubmodule: () => false,
     });
 
     const issuedCommands = exec.mock.calls.map(

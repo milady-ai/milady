@@ -1175,10 +1175,88 @@ async function ensureElizaBuildOutputs(elizaRoot) {
   }
 }
 
+/**
+ * Ensure plugin-anthropic's tsconfig.build.json explicitly loads @types/bun.
+ *
+ * When tsc runs `bun run build` for plugin-anthropic on fresh CI checkouts,
+ * it reports TS2868 "Cannot find name 'Bun'" on init.ts / utils/claude-cli.ts
+ * because the build config extends tsconfig.json but does not carry the
+ * `compilerOptions.types` array forward deterministically. We force the
+ * setting in-place so every CI/dev checkout sees a build config that
+ * resolves @types/bun without relying on extends inheritance.
+ *
+ * Idempotent: only writes when the desired types list is not already present.
+ */
+export function ensurePluginAnthropicBunTypes(
+  pluginsRoot,
+  { pathExists = existsSync } = {},
+) {
+  const buildConfigPath = path.join(
+    pluginsRoot,
+    "plugin-anthropic",
+    "typescript",
+    "tsconfig.build.json",
+  );
+
+  if (!pathExists(buildConfigPath)) {
+    return false;
+  }
+
+  const raw = readFileSync(buildConfigPath, "utf8");
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    console.warn(
+      `[setup-upstreams] Could not parse ${toDisplayPath(buildConfigPath)}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return false;
+  }
+
+  const compilerOptions =
+    parsed && typeof parsed === "object" && parsed.compilerOptions
+      ? parsed.compilerOptions
+      : {};
+  const existingTypes = Array.isArray(compilerOptions.types)
+    ? compilerOptions.types
+    : null;
+
+  if (existingTypes && existingTypes.includes("bun")) {
+    return false;
+  }
+
+  const nextTypes = existingTypes ? [...existingTypes] : ["node"];
+  if (!nextTypes.includes("bun")) {
+    nextTypes.push("bun");
+  }
+
+  const nextCompilerOptions = {
+    ...compilerOptions,
+    types: nextTypes,
+  };
+  const nextParsed = {
+    ...parsed,
+    compilerOptions: nextCompilerOptions,
+  };
+
+  const indent = raw.match(/^(\s+)"/m)?.[1] ?? "\t";
+  writeFileSync(
+    buildConfigPath,
+    `${JSON.stringify(nextParsed, null, indent)}\n`,
+  );
+  console.log(
+    `[setup-upstreams] Patched ${toDisplayPath(buildConfigPath)} to load @types/bun`,
+  );
+  return true;
+}
+
 export async function ensurePluginBuildOutputs(
   pluginsRoot,
   { pathExists = existsSync, runCommandImpl = runCommand } = {},
 ) {
+  ensurePluginAnthropicBunTypes(pluginsRoot, { pathExists });
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
     if (!packageJson?.name?.startsWith("@elizaos/")) {

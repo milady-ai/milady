@@ -428,17 +428,25 @@ export function runInitSubmodules({
         }
 
         const nestedSkipArgs = getNestedElizaSubmoduleSkipArgs();
-        exec(
-          `git ${nestedSkipArgs} submodule update --init --recursive -- "${nestedSubmodule.path}"`.trim(),
-          {
-            cwd: elizaRoot,
-            stdio: "inherit",
-          },
-        );
+        try {
+          exec(
+            `git ${nestedSkipArgs} submodule update --init --recursive -- "${nestedSubmodule.path}"`.trim(),
+            {
+              cwd: elizaRoot,
+              stdio: "inherit",
+            },
+          );
+        } catch (subErr) {
+          logError(
+            `[init-submodules] Nested eliza submodule update failed (fix broken plugin submodules under eliza/ if needed): ${
+              subErr instanceof Error ? subErr.message : String(subErr)
+            }`,
+          );
+        }
       }
     } catch (err) {
       logError(
-        `[init-submodules] Nested eliza submodule update failed (fix broken plugin submodules under eliza/ if needed): ${
+        `[init-submodules] Unexpected error initializing nested eliza submodules: ${
           err instanceof Error ? err.message : String(err)
         }`,
       );

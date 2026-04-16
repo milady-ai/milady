@@ -331,6 +331,8 @@ if (typeof globalThis.window !== "undefined") {
     typeof originalEmit === "function" &&
     !originalEmit[JSDOM_EMIT_PATCH_MARK]
   ) {
+    // Installed as a side-effect into jsdom's window; not imported
+    // elsewhere. CodeFlow's unused-function heuristic mis-flags this.
     const patchedEmit = function patchedEmit(eventName, ...args) {
       const [firstArg] = args;
       if (

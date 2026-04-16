@@ -1,0 +1,47 @@
+# CodeFlow ignore — documentation & generated artifacts
+# Doc prose frequently contains illustrative placeholder values (e.g.
+# "sk-ant-...") that static scanners misidentify as secrets. These are
+# compile-time constants in MDX, not runtime code.
+
+# Docs (all locales)
+docs/**/*.md
+docs/**/*.mdx
+
+# README & agent-facing prose
+README.md
+AGENTS.md
+CLAUDE.md
+.claude/**/*.md
+.claude/**/*.mdx
+
+# CI / build-system prose (YAML ${{ }} is GitHub Actions syntax, not SQL)
+.github/**/*.yml
+.github/**/*.yaml
+.depot/**/*.yml
+.depot/**/*.yaml
+
+# Lockfiles
+bun.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build & generated output
+apps/**/dist/**
+packages/**/dist/**
+**/*.min.js
+**/*.min.css
+
+# Submodule (tracked upstream; not our code)
+eliza/**
+plugins/**
+
+# Test runners and design-review drivers — intentional console output
+# and `new Function` usage for controlled script evaluation.
+apps/app/test/design-review/**
+apps/app/test/electrobun-packaged/**
+apps/app/test/setup.ts
+
+# Trust-scoring sidecar (self-contained CommonJS CLI with intentional logs)
+.github/trust-scoring.js
+.github/trust-scoring.cjs

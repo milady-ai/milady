@@ -265,7 +265,7 @@ Create a new cloud agent. Requires an active cloud connection.
 {
   "agentName": "My Cloud Agent",
   "agentConfig": { "character": "milady" },
-  "environmentVars": { "OPENAI_API_KEY": "sk-..." }
+  "environmentVars": { "OPENAI_API_KEY": "<OPENAI_API_KEY>" }
 }
 ```
 

@@ -639,10 +639,4 @@ if (document.readyState === "loading") {
   main();
 }
 
-export {
-  isAndroid,
-  isDesktopPlatform as isDesktop,
-  isIOS,
-  isNative,
-  platform,
-};
+export { isAndroid, isDesktopPlatform as isDesktop, isIOS, isNative, platform };
