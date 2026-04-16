@@ -39,7 +39,7 @@ contract MockMiladyAgentRegistry is ERC721URIStorage, Ownable {
         bytes32 capabilitiesHash
     );
 
-    constructor() ERC721("Milady Agent Registry", "MILAIDY") {
+    constructor() ERC721("Milady Agent Registry", "MILAIDY") Ownable(msg.sender) {
         _tokenIdCounter = 1; // Start at 1, 0 means unregistered
     }
 

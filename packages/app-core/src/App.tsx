@@ -21,6 +21,8 @@ import {
   BugReportModal,
   CharacterEditor,
   ChatView,
+  CodeCanvas,
+  CodeCanvasProvider,
   CompanionShell,
   CompanionView,
   ConnectionFailedBanner,
@@ -43,6 +45,7 @@ import {
   StreamView,
   SystemWarningBanner,
 } from "./app-shell-components";
+import { GbaEmulatorPanel } from "./components/chat/GbaEmulatorPanel";
 import { TasksEventsPanel } from "./components/chat/TasksEventsPanel";
 import { DeferredSetupChecklist } from "./components/cloud/FlaminaGuide";
 import { CompanionHeader } from "./components/companion/CompanionHeader";
@@ -254,6 +257,7 @@ export function App() {
     string | null
   >(null);
   const [tasksEventsPanelOpen, setTasksEventsPanelOpen] = useState(false);
+  const [gbaEmulatorOpen, setGbaEmulatorOpen] = useState(false);
   const { events: activityEvents, clearEvents: clearActivityEvents } =
     useActivityEvents();
   const [editingAction, setEditingAction] = useState<
@@ -492,6 +496,8 @@ export function App() {
             ? () => setTasksEventsPanelOpen((o) => !o)
             : undefined
         }
+        gbaEmulatorOpen={gbaEmulatorOpen}
+        onToggleGbaEmulator={() => setGbaEmulatorOpen((o) => !o)}
       />
       <div className="flex flex-1 min-h-0 relative">
         {!isChatMobileLayout ? (
@@ -649,7 +655,7 @@ export function App() {
       className="flex flex-col flex-1 min-h-0 w-full font-body text-txt bg-bg"
     >
       <Header />
-      <div className="flex flex-1 min-h-0 min-w-0">
+      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
         <AdvancedPageView />
       </div>
     </div>
@@ -700,11 +706,21 @@ export function App() {
   );
 
   return (
+    <CodeCanvasProvider>
     <BugReportProvider value={bugReport}>
       {/*
         If we are in the crossfade phase, mount the shell but cover it with the fading onboarding layer.
       */}
       {appShell}
+      {/* GbaEmulatorPanel must be always-mounted so its file input and
+          __GBA_TRIGGER_ROM_UPLOAD__ global are available in companion mode
+          (where the 3D monitor lives) — not just in the chat shell. */}
+      <GbaEmulatorPanel
+        open={gbaEmulatorOpen}
+        onClose={() => setGbaEmulatorOpen(false)}
+        onOpen={() => setGbaEmulatorOpen(true)}
+      />
+      <CodeCanvas />
       <MusicPlayerGlobal />
 
       {/* Persistent game overlay — stays visible across all tabs */}
@@ -747,5 +763,6 @@ export function App() {
         </div>
       ) : null}
     </BugReportProvider>
+    </CodeCanvasProvider>
   );
 }

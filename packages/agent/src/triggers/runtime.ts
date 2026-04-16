@@ -283,8 +283,26 @@ export async function executeTriggerTask(
   try {
     await dispatchInstruction(runtime, task.id, trigger);
   } catch (error) {
+    const msg = String(error);
+    // Autonomy service unavailable is a transient startup condition —
+    // treat as a skip (will retry next cycle) rather than a hard error.
+    if (
+      msg.includes("Autonomy service unavailable") &&
+      options.source !== "manual"
+    ) {
+      runtime.logger.warn?.(
+        {
+          src: "trigger-runtime",
+          taskId: task.id,
+          triggerId: trigger.triggerId,
+        },
+        "Autonomy service unavailable during dispatch — skipping (will retry next cycle)",
+      );
+      recordExecutionMetric(runtime.agentId, "skipped", Date.now());
+      return { status: "skipped", taskDeleted: false };
+    }
     status = "error";
-    errorMessage = String(error);
+    errorMessage = msg;
     runtime.logger.error(
       {
         src: "trigger-runtime",

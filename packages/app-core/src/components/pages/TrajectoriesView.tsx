@@ -503,9 +503,10 @@ export function TrajectoriesView({
 
   return (
     <PageLayout
+      className="h-full"
       sidebar={trajectoriesSidebar}
       contentHeader={contentHeader}
-      contentInnerClassName="mx-auto w-full max-w-[76rem]"
+      contentInnerClassName="mx-auto w-full min-h-0 max-w-[76rem]"
       data-testid="trajectories-view"
     >
       {error ? (

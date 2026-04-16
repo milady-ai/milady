@@ -235,10 +235,34 @@ function CompanionSceneSurface({
     [],
   );
 
+  // Track overlay pointer capture so move/up can be routed to the overlay
+  const overlayGestureRef = useRef<{
+    engine: VrmEngine;
+    pointerId: number;
+  } | null>(null);
+
   const handlePointerDownCapture = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (!active || !interactive || shouldIgnoreCameraDrag(event.target)) {
         return;
+      }
+      // Test if the pointer hits a scene overlay (GBA monitor) by raycasting
+      // directly — the canvas is behind the UI so its native listeners won't
+      // fire. If the overlay consumes the event, capture pointer for drag/resize
+      // and suppress both camera drag and child propagation.
+      for (const engine of stageEnginesRef.current) {
+        if (engine.isOverlayHovered()) return;
+        if (engine.handleOverlayPointerDown(event.clientX, event.clientY)) {
+          overlayGestureRef.current = {
+            engine,
+            pointerId: event.pointerId,
+          };
+          event.currentTarget.setPointerCapture(event.pointerId);
+          event.stopPropagation();
+          // Do NOT call preventDefault() — that would suppress the subsequent
+          // native click event, which we need for input.click() user gesture.
+          return;
+        }
       }
       /* Stop event from reaching children — this is a camera drag */
       event.stopPropagation();
@@ -284,7 +308,30 @@ function CompanionSceneSurface({
 
   const handlePointerMoveCapture = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
+      // Route move events to the overlay if it captured the pointer
+      const overlayGesture = overlayGestureRef.current;
+      if (overlayGesture && event.pointerId === overlayGesture.pointerId) {
+        overlayGesture.engine.handleOverlayPointerMove(
+          event.clientX,
+          event.clientY,
+        );
+        // Update cursor based on current interaction mode
+        const cursor = overlayGesture.engine.getOverlayCursor(event.clientX, event.clientY);
+        event.currentTarget.style.cursor = cursor ?? "grabbing";
+        event.stopPropagation();
+        event.preventDefault();
+        return;
+      }
       if (!active || !interactive) return;
+      // Update cursor for overlay hover (resize corner, drag, or default)
+      if (!dragStateRef.current.active) {
+        let overlayCursor: string | null = null;
+        for (const engine of stageEnginesRef.current) {
+          overlayCursor = engine.getOverlayCursor(event.clientX, event.clientY);
+          if (overlayCursor) break;
+        }
+        event.currentTarget.style.cursor = overlayCursor ?? (interactive ? "grab" : "");
+      }
       if (
         event.pointerType === "touch" &&
         touchPointsRef.current.has(event.pointerId)
@@ -366,6 +413,26 @@ function CompanionSceneSurface({
 
   const releaseCameraDrag = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
+      // The native capture-phase pointerup listener already fired the ROM
+      // upload trigger (if it was a tap). This React handler does cleanup.
+      const overlayGesture = overlayGestureRef.current;
+      if (overlayGesture && event.pointerId === overlayGesture.pointerId) {
+        overlayGesture.engine.handleOverlayPointerUp();
+        overlayGestureRef.current = null;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+        // Refocus the emulator iframe after overlay interactions (resize/drag)
+        // steal focus. The iframe is cross-origin-isolated so it must focus
+        // itself via the MessageChannel command port.
+        const refocus = (
+          window as { __GBA_REFOCUS__?: () => void }
+        ).__GBA_REFOCUS__;
+        if (refocus) refocus();
+        event.stopPropagation();
+        return;
+      }
+
       if (event.pointerType === "touch") {
         touchPointsRef.current.delete(event.pointerId);
         if (touchPointsRef.current.size < 2) {
@@ -590,6 +657,31 @@ function CompanionSceneSurface({
       img.src = entry.previewUrl;
     }
   }, [preloadPreviews]);
+
+  // Native CAPTURE-phase pointerup on **document** for GBA monitor tap →
+  // ROM file dialog. Must be on document (not the root div) because React 18
+  // attaches its listeners to the React fiber root (an ancestor of this div)
+  // and releaseCameraDrag calls stopPropagation — a handler on a descendant
+  // div would never fire. Document capture fires before everything else.
+  // input.click() must run synchronously inside a native user-gesture handler
+  // to open the file picker — React synthetic events lose that context.
+  useEffect(() => {
+    const onNativePointerUp = (event: PointerEvent) => {
+      const gesture = overlayGestureRef.current;
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+      const wasDragged = gesture.engine.isOverlayDragging();
+
+      if (!wasDragged) {
+        const trigger = (
+          window as { __GBA_TRIGGER_ROM_UPLOAD__?: () => void }
+        ).__GBA_TRIGGER_ROM_UPLOAD__;
+        if (trigger) trigger();
+      }
+    };
+    document.addEventListener("pointerup", onNativePointerUp, { capture: true });
+    return () => document.removeEventListener("pointerup", onNativePointerUp, { capture: true });
+  }, []);
 
   return (
     <div

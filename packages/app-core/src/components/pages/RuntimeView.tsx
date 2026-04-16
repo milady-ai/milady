@@ -615,6 +615,7 @@ export function RuntimeView({
 
   return (
     <PageLayout
+      className="h-full"
       sidebar={runtimeSidebar}
       contentHeader={contentHeader}
       data-testid="runtime-view"

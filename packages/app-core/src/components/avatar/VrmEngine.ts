@@ -715,6 +715,8 @@ export class VrmEngine {
   private worldVisibleBeforeMinimalBackground = true;
   private sparkVisibleBeforeMinimalBackground = true;
   private interactionEnabled = false;
+  /** True when the pointer is hovering over an interactive scene overlay (e.g. GBA monitor). */
+  private overlayHovered = false;
   private interactionMode: InteractionMode = "free";
   private cameraProfile: CameraProfile = "chat";
   private worldUrl: string | null = null;
@@ -2347,6 +2349,112 @@ export class VrmEngine {
   getOverlayManager(): SceneOverlayManager | null {
     return this.overlayManager;
   }
+
+  /**
+   * Forward a pointerDown to the overlay manager for GBA monitor interaction.
+   * Returns true if the event was consumed (hit the monitor), in which case
+   * the caller should suppress orbit controls and parallax.
+   */
+  handleOverlayPointerDown(clientX: number, clientY: number): boolean {
+    if (!this.overlayManager || !this.camera || !this.renderer) return false;
+    const consumed = this.overlayManager.handlePointerDown(
+      clientX,
+      clientY,
+      this.camera,
+      this.renderer.domElement,
+    );
+    if (consumed && this.controls) {
+      this.controls.enabled = false;
+    }
+    return consumed;
+  }
+
+  /** Forward pointerMove for GBA monitor drag/resize. */
+  handleOverlayPointerMove(clientX: number, clientY: number): boolean {
+    if (!this.overlayManager || !this.camera || !this.renderer) return false;
+    return this.overlayManager.handlePointerMove(
+      clientX,
+      clientY,
+      this.camera,
+      this.renderer.domElement,
+    );
+  }
+
+  /** Forward pointerUp — re-enables orbit controls if they were suppressed. */
+  handleOverlayPointerUp(): void {
+    if (this.overlayManager) {
+      this.overlayManager.handlePointerUp();
+    }
+    if (this.controls) {
+      this.controls.enabled = this.interactionEnabled;
+    }
+  }
+
+  /**
+   * Check if the GBA monitor was clicked (tap without drag).
+   * Returns true if the click should trigger ROM upload.
+   */
+  handleOverlayClick(clientX: number, clientY: number): boolean {
+    if (!this.overlayManager || !this.camera || !this.renderer) return false;
+    return this.overlayManager.handleClick(
+      clientX,
+      clientY,
+      this.camera,
+      this.renderer.domElement,
+    );
+  }
+
+  /** Whether the overlay had significant drag movement (suppresses tap-to-upload). */
+  isOverlayDragging(): boolean {
+    if (!this.overlayManager) return false;
+    return this.overlayManager.wasDragged();
+  }
+
+  /** Get the screen-space top-center of the GBA monitor for UI overlay positioning. */
+  getGbaScreenTopCenter(): { x: number; y: number; visible: boolean } {
+    if (!this.overlayManager || !this.camera || !this.renderer) {
+      return { x: 0, y: 0, visible: false };
+    }
+    return this.overlayManager.getGbaScreenTopCenter(
+      this.camera,
+      this.renderer.domElement,
+    );
+  }
+
+  /** Get cursor hint for overlay hover state. */
+  getOverlayCursor(clientX: number, clientY: number): string | null {
+    if (!this.overlayManager || !this.camera || !this.renderer) return null;
+    return this.overlayManager.getGbaCursor(
+      clientX,
+      clientY,
+      this.camera,
+      this.renderer.domElement,
+    );
+  }
+
+  /**
+   * Suppress or restore OrbitControls based on whether the pointer is hovering
+   * over an interactive overlay (e.g. the GBA monitor). This must be called on
+   * every pointermove so that controls are already disabled when a click lands,
+   * avoiding the race where OrbitControls' bubble-phase listener fires before
+   * the capture-phase interceptor on the same target element.
+   */
+  setOverlayHover(hovering: boolean): void {
+    this.overlayHovered = hovering;
+    if (!this.controls) return;
+    if (hovering) {
+      this.controls.enabled = false;
+    } else if (!this.overlayManager?.isInteracting()) {
+      // Only re-enable if the overlay isn't mid-drag/resize
+      this.controls.enabled = this.interactionEnabled;
+    }
+  }
+
+  /** Whether an interactive scene overlay is currently hovered. */
+  isOverlayHovered(): boolean {
+    return this.overlayHovered;
+  }
+
   setCameraAnimation(config: Partial<CameraAnimationConfig>): void {
     this.cameraAnimation = { ...this.cameraAnimation, ...config };
   }

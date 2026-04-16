@@ -2584,8 +2584,11 @@ export class AppManager {
       ? normalizeSafeAppUrl(resolvedLaunchUrl)
       : null;
     if (resolvedLaunchUrl && !launchUrl) {
+      logger.error(
+        `[app-manager] unsafe launch URL debug: appInfo.launchUrl=${JSON.stringify(appInfo.launchUrl)}, resolvedLaunchUrl=${JSON.stringify(resolvedLaunchUrl)}`,
+      );
       throw new Error(
-        `Refusing to launch app "${appInfo.name}": unsafe launch URL`,
+        `Refusing to launch app "${appInfo.name}": unsafe launch URL "${resolvedLaunchUrl}"`,
       );
     }
 

@@ -25,6 +25,121 @@ interface GbaEmulatorPanelProps {
   onOpen?: () => void;
 }
 
+// ── Floating toolbar above 3D GBA monitor ─────────────────────────
+
+function findFirstEngine(): VrmEngine | null {
+  const registry = (
+    window as {
+      __ELIZA_VRM_ENGINES__?: Array<{ engine: VrmEngine }>;
+    }
+  ).__ELIZA_VRM_ENGINES__;
+  if (!registry) return null;
+  for (const entry of registry) return entry.engine;
+  return null;
+}
+
+/**
+ * Tiny toolbar that floats above the 3D GBA monitor in companion mode.
+ * Provides Refocus, Save, and Load buttons so users don't have to open
+ * the full emulator panel for common actions.
+ */
+function GbaMonitorToolbar({
+  hasRom,
+  proxyActive,
+  onFocus,
+  onSave,
+  onLoad,
+}: {
+  hasRom: boolean;
+  proxyActive: boolean;
+  onFocus: () => void;
+  onSave: () => void;
+  onLoad: () => void;
+}) {
+  const [pos, setPos] = useState<{ x: number; y: number; visible: boolean }>({
+    x: 0,
+    y: 0,
+    visible: false,
+  });
+  const rafRef = useRef(0);
+
+  const prevRef = useRef({ x: 0, y: 0, visible: false });
+
+  useEffect(() => {
+    function tick() {
+      const engine = findFirstEngine();
+      if (engine) {
+        const p = engine.getGbaScreenTopCenter();
+        const prev = prevRef.current;
+        // Only update state when position changes by >1px or visibility toggles
+        if (
+          p.visible !== prev.visible ||
+          Math.abs(p.x - prev.x) > 1 ||
+          Math.abs(p.y - prev.y) > 1
+        ) {
+          prevRef.current = p;
+          setPos(p);
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  if (!pos.visible) return null;
+
+  return (
+    <div
+      className="fixed z-[52] flex items-center gap-1 pointer-events-auto"
+      style={{
+        left: pos.x,
+        top: pos.y - 8,
+        transform: "translate(-50%, -100%)",
+      }}
+      data-no-camera-drag="true"
+      data-no-camera-zoom="true"
+      data-gba-toolbar="true"
+    >
+      {hasRom ? (
+        <>
+          <button
+            type="button"
+            onClick={onFocus}
+            className={`px-2 py-1 rounded-md backdrop-blur text-[11px] transition-colors cursor-pointer ${
+              proxyActive
+                ? "bg-green-600/80 text-white"
+                : "bg-black/70 text-white/80 hover:text-white hover:bg-black/90"
+            }`}
+            title={proxyActive ? "Keyboard controls active" : "Activate keyboard controls"}
+          >
+            <Gamepad2 className="w-3.5 h-3.5 inline-block mr-1" />
+            {proxyActive ? "Playing" : "Focus"}
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            className="px-2 py-1 rounded-md bg-black/70 backdrop-blur text-[11px] text-white/80 hover:text-white hover:bg-black/90 transition-colors cursor-pointer"
+            title="Save state"
+          >
+            <Save className="w-3.5 h-3.5 inline-block mr-1" />
+            Save
+          </button>
+        </>
+      ) : null}
+      <button
+        type="button"
+        onClick={onLoad}
+        className="px-2 py-1 rounded-md bg-black/70 backdrop-blur text-[11px] text-white/80 hover:text-white hover:bg-black/90 transition-colors cursor-pointer"
+        title="Load a ROM"
+      >
+        <Upload className="w-3.5 h-3.5 inline-block mr-1" />
+        {hasRom ? "New" : "Load ROM"}
+      </button>
+    </div>
+  );
+}
+
 /** Find the overlay manager from the VRM engine debug registry. */
 function findOverlayManager(): SceneOverlayManager | null {
   const registry = (
@@ -279,14 +394,62 @@ export function GbaEmulatorPanel({ open, onClose, onOpen }: GbaEmulatorPanelProp
     }, 3000);
   }, [romBytes, startFrameStreaming]);
 
-  // Send a focus command to the cross-origin-isolated iframe via the
-  // MessageChannel port. Direct iframe.focus() doesn't work across COOP
-  // browsing-context-group boundaries — the iframe must focus itself.
+  // ── Keyboard proxy ──────────────────────────────────────────────
+  // The iframe is off-screen when the panel is closed (streaming frames to
+  // the 3D monitor). It can't receive keyboard focus. Instead, when the
+  // user clicks "Focus", we intercept all keyboard events on the parent
+  // document and forward them to the iframe via the command port.
+  const [keyProxyActive, setKeyProxyActive] = useState(false);
+
+  useEffect(() => {
+    if (!keyProxyActive) return;
+    // Only proxy GBA-relevant keys — let browser shortcuts through
+    const GBA_KEYS = new Set([
+      "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+      "KeyZ", "KeyX", "KeyA", "KeyS",        // A, B, L, R
+      "Enter", "ShiftRight",                  // Start, Select
+      "Space", "Backspace",
+    ]);
+    const handler = (e: KeyboardEvent) => {
+      // Let all modifier combos through (Cmd+R, Ctrl+Tab, etc.)
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const port = commandPortRef.current;
+      if (!port) return;
+      // Stop proxying if user focused an input
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+        setKeyProxyActive(false);
+        return;
+      }
+      if (!GBA_KEYS.has(e.code)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      port.postMessage({
+        type: "gba-key",
+        eventType: e.type,
+        code: e.code,
+        key: e.key,
+        keyCode: e.keyCode,
+        which: e.which,
+      });
+    };
+    // Deactivate on any click outside the toolbar
+    const onPointerDown = (e: PointerEvent) => {
+      if ((e.target as HTMLElement)?.closest?.("[data-gba-toolbar]")) return;
+      setKeyProxyActive(false);
+    };
+    window.addEventListener("keydown", handler, true);
+    window.addEventListener("keyup", handler, true);
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      window.removeEventListener("keydown", handler, true);
+      window.removeEventListener("keyup", handler, true);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, [keyProxyActive]);
+
   const focusEmulator = useCallback(() => {
-    const port = commandPortRef.current;
-    if (port) {
-      port.postMessage({ type: "gba-focus" });
-    }
+    setKeyProxyActive(true);
   }, []);
 
   // Expose a global trigger so the 3D scene click can open the file picker
@@ -390,6 +553,23 @@ export function GbaEmulatorPanel({ open, onClose, onOpen }: GbaEmulatorPanelProp
         />
       ) : null}
 
+      {/* Floating toolbar above the 3D monitor — visible when panel is closed */}
+      {!open && (
+        <GbaMonitorToolbar
+          hasRom={!!romBytes}
+          proxyActive={keyProxyActive}
+          onFocus={focusEmulator}
+          onSave={() => {
+            const port = commandPortRef.current;
+            if (port) {
+              port.postMessage({ type: "gba-autosave" });
+              setLastAutosave(Date.now());
+            }
+          }}
+          onLoad={() => fileInputRef.current?.click()}
+        />
+      )}
+
       {!open ? null : (
     <div
       className="fixed right-4 top-14 bottom-4 z-50 flex flex-col rounded-xl border border-border bg-bg shadow-2xl w-[420px] xl:w-[480px] 2xl:w-[540px]"
@@ -397,8 +577,9 @@ export function GbaEmulatorPanel({ open, onClose, onOpen }: GbaEmulatorPanelProp
       data-no-camera-zoom="true"
       onClick={() => {
         // Re-focus the iframe when clicking the panel so keyboard
-        // controls work again after clicking elsewhere (e.g. chat input)
-        iframeRef.current?.focus();
+        // controls work again after clicking elsewhere (e.g. chat input).
+        // Must use postMessage — direct .focus() doesn't cross COOP boundaries.
+        focusEmulator();
       }}
     >
       {/* Header */}

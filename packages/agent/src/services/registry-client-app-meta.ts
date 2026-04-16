@@ -39,8 +39,18 @@ interface LocalAppOverride {
 
 const LOCAL_APP_OVERRIDES: Readonly<Record<string, LocalAppOverride>> = {
   "@hyperscape/plugin-hyperscape": {
+    displayName: "Hyperscape",
+    category: "game",
+    launchType: "url",
+    launchUrl: "{HYPERSCAPE_CLIENT_URL}",
+    capabilities: ["mmorpg", "combat", "skills", "social", "autonomous"],
+    runtimePlugin: "@hyperscape/plugin-hyperscape",
     uiExtension: {
       detailPanelId: "hyperscape-embedded-agents",
+    },
+    viewer: {
+      url: "{HYPERSCAPE_CLIENT_URL}",
+      postMessageAuth: false,
     },
     session: {
       mode: "spectate-and-steer",

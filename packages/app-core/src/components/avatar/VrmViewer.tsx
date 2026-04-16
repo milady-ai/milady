@@ -597,6 +597,93 @@ export function VrmViewer(props: VrmViewerProps) {
     engine.setPointerParallaxTarget(normalizedX * 2.2, -normalizedY * 2.2);
   };
 
+  // ── Native capture-phase overlay interceptor ──────────────────────
+  // OrbitControls registers native pointerdown on the canvas (bubble phase).
+  // React synthetic events also fire after native bubble. To intercept
+  // BEFORE OrbitControls, we use a capture-phase native listener that
+  // disables controls when the pointer hits the GBA monitor.
+  const overlayCapturingRef = useRef(false);
+  const overlayPointerIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const onNativePointerDown = (e: PointerEvent) => {
+      const engine = engineRef.current;
+      if (!engine) return;
+      if (engine.handleOverlayPointerDown(e.clientX, e.clientY)) {
+        overlayCapturingRef.current = true;
+        overlayPointerIdRef.current = e.pointerId;
+        canvas.setPointerCapture(e.pointerId);
+        // Prevent OrbitControls and React from seeing this as a camera drag
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    };
+
+    const onNativePointerMove = (e: PointerEvent) => {
+      if (!overlayCapturingRef.current) {
+        // Update cursor on hover and toggle OrbitControls so they are already
+        // disabled when a subsequent pointerdown lands on the monitor.
+        const engine = engineRef.current;
+        if (engine) {
+          const cursor = engine.getOverlayCursor(e.clientX, e.clientY);
+          engine.setOverlayHover(cursor !== null);
+          canvas.style.cursor =
+            cursor ?? (interactiveRef.current || pointerParallaxRef.current ? "grab" : "default");
+        }
+        return;
+      }
+      if (e.pointerId !== overlayPointerIdRef.current) return;
+      engineRef.current?.handleOverlayPointerMove(e.clientX, e.clientY);
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    };
+
+    const onNativePointerUp = (e: PointerEvent) => {
+      if (!overlayCapturingRef.current) return;
+      if (e.pointerId !== overlayPointerIdRef.current) return;
+      const engine = engineRef.current;
+      const wasDragged = engine?.isOverlayDragging() ?? false;
+      overlayCapturingRef.current = false;
+      overlayPointerIdRef.current = null;
+      engine?.handleOverlayPointerUp();
+      canvas.releasePointerCapture(e.pointerId);
+      e.stopImmediatePropagation();
+
+      // Tap without drag = trigger ROM upload.
+      // Call synchronously so the browser still considers this a user gesture
+      // (required for input.click() to open the file dialog).
+      if (!wasDragged) {
+        const trigger = (
+          window as { __GBA_TRIGGER_ROM_UPLOAD__?: () => void }
+        ).__GBA_TRIGGER_ROM_UPLOAD__;
+        if (trigger) trigger();
+      }
+    };
+
+    // Restore OrbitControls when the pointer leaves the canvas entirely
+    const onPointerLeave = () => {
+      engineRef.current?.setOverlayHover(false);
+    };
+
+    // Capture phase = fires before OrbitControls' bubble listeners
+    canvas.addEventListener("pointerdown", onNativePointerDown, true);
+    canvas.addEventListener("pointermove", onNativePointerMove, true);
+    canvas.addEventListener("pointerup", onNativePointerUp, true);
+    canvas.addEventListener("pointercancel", onNativePointerUp, true);
+    canvas.addEventListener("pointerleave", onPointerLeave);
+
+    return () => {
+      canvas.removeEventListener("pointerdown", onNativePointerDown, true);
+      canvas.removeEventListener("pointermove", onNativePointerMove, true);
+      canvas.removeEventListener("pointerup", onNativePointerUp, true);
+      canvas.removeEventListener("pointercancel", onNativePointerUp, true);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
+    };
+  }, []);
+
   return (
     <canvas
       ref={canvasRef}

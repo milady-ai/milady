@@ -22,7 +22,18 @@ import {
   Spinner,
   useLinkedSidebarSelection,
 } from "@miladyai/ui";
-import { AlertTriangle, Download, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  Bot,
+  Cloud,
+  Cog,
+  Download,
+  Image,
+  RefreshCw,
+  Shield,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import {
   type ComponentPropsWithoutRef,
   forwardRef,
@@ -44,6 +55,7 @@ import { ReleaseCenterView } from "./ReleaseCenterView";
 interface SettingsSectionDef {
   id: string;
   label: string;
+  icon: React.ComponentType<{ className?: string }>;
   description?: string;
   keywords?: string[];
 }
@@ -57,12 +69,14 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "cloud",
     label: "providerswitcher.elizaCloud",
+    icon: Cloud,
     description: "settings.sections.cloud.desc",
     keywords: ["cloud", "billing", "credits", "auth", "subscription"],
   },
   {
     id: "life-ops",
     label: "settings.sections.lifeops.label",
+    icon: Sparkles,
     description: "settings.sections.lifeops.desc",
     keywords: [
       "life ops",
@@ -78,6 +92,7 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "ai-model",
     label: "settings.sections.aimodel.label",
+    icon: Bot,
     description: "settings.sections.aimodel.desc",
     keywords: [
       "model",
@@ -94,12 +109,14 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "coding-agents",
     label: "settings.sections.codingagents.label",
+    icon: Cog,
     description: "settings.sections.codingagents.desc",
     keywords: ["codex", "agent", "reasoning", "parallel", "approval"],
   },
   {
     id: "media",
     label: "settings.sections.media.label",
+    icon: Image,
     description: "settings.sections.media.desc",
     keywords: [
       "audio",
@@ -115,6 +132,7 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "permissions",
     label: "settings.sections.permissions.label",
+    icon: Shield,
     description: "settings.sections.permissions.desc",
     keywords: [
       "permissions",
@@ -129,12 +147,14 @@ const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   {
     id: "updates",
     label: "settings.sections.updates.label",
+    icon: RefreshCw,
     description: "settings.sections.updates.desc",
     keywords: ["updates", "release", "version", "download"],
   },
   {
     id: "advanced",
     label: "nav.advanced",
+    icon: AlertTriangle,
     description: "settings.sections.advanced.desc",
     keywords: [
       "advanced",
@@ -705,6 +725,9 @@ export function SettingsView({
                       onClick={() => handleSectionChange(section.id)}
                       aria-current={isActive ? "page" : undefined}
                     >
+                      <SidebarContent.ItemIcon active={isActive}>
+                        <section.icon className="h-4 w-4" />
+                      </SidebarContent.ItemIcon>
                       <SidebarContent.ItemBody>
                         <SidebarContent.ItemTitle
                           className={isActive ? "font-semibold" : "font-medium"}

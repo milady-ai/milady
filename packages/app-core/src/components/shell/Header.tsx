@@ -9,10 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@miladyai/ui";
-import { ListTodo, Menu, X } from "lucide-react";
+import { Code2, Gamepad2, ListTodo, Menu, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CloudStatusBadge } from "../cloud/CloudStatusBadge";
+import { useCodeCanvas } from "../coding/CodeCanvasContext";
 import { InferenceCloudAlertButton } from "../companion/InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "../companion/resolve-companion-inference-notice";
 import {
@@ -42,6 +43,8 @@ interface HeaderProps {
   hideCloudCredits?: boolean;
   tasksEventsPanelOpen?: boolean;
   onToggleTasksPanel?: () => void;
+  gbaEmulatorOpen?: boolean;
+  onToggleGbaEmulator?: () => void;
 }
 
 const HEADER_NAV_BUTTON_BASE_CLASSNAME =
@@ -63,6 +66,8 @@ export function Header({
   hideCloudCredits = false,
   tasksEventsPanelOpen = false,
   onToggleTasksPanel,
+  gbaEmulatorOpen = false,
+  onToggleGbaEmulator,
 }: HeaderProps) {
   const {
     elizaCloudEnabled,
@@ -90,6 +95,7 @@ export function Header({
     t,
   } = useApp();
 
+  const { open: codeCanvasOpen, toggleCanvas: toggleCodeCanvas, } = useCodeCanvas();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuPortalContainer =
     typeof document !== "undefined" ? document.body : undefined;
@@ -276,6 +282,32 @@ export function Header({
               }
               rightExtras={
                 <>
+                  {onToggleGbaEmulator ? (
+                    <Button
+                      size="icon"
+                      variant={gbaEmulatorOpen ? "default" : "outline"}
+                      className={HEADER_ICON_BUTTON_CLASSNAME}
+                      onClick={onToggleGbaEmulator}
+                      aria-label="GBA Emulator"
+                      aria-pressed={gbaEmulatorOpen}
+                      style={HEADER_BUTTON_STYLE}
+                      data-testid="header-gba-emulator-toggle"
+                    >
+                      <Gamepad2 className="pointer-events-none w-4 h-4" />
+                    </Button>
+                  ) : null}
+                  <Button
+                    size="icon"
+                    variant={codeCanvasOpen ? "default" : "outline"}
+                    className={HEADER_ICON_BUTTON_CLASSNAME}
+                    onClick={toggleCodeCanvas}
+                    aria-label="Code Canvas"
+                    aria-pressed={codeCanvasOpen}
+                    style={HEADER_BUTTON_STYLE}
+                    data-testid="header-code-canvas-toggle"
+                  >
+                    <Code2 className="pointer-events-none w-4 h-4" />
+                  </Button>
                   {onToggleTasksPanel ? (
                     <Button
                       size="icon"

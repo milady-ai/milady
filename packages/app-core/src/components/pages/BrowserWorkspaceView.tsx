@@ -92,6 +92,24 @@ function readBrowserWorkspaceQueryParam(name: string): string | null {
   return value ? value : null;
 }
 
+/**
+ * Route external URLs through the server-side proxy so that sites with
+ * X-Frame-Options restrictions can be rendered inside the iframe.
+ */
+function toBrowserWorkspaceProxyUrl(url: string): string {
+  if (!url || url === "about:blank") return url;
+  try {
+    const parsed = new URL(url);
+    // Only proxy http(s) — skip data:, blob:, etc.
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return url;
+    // Don't double-proxy URLs already pointing at our API
+    if (parsed.pathname.startsWith("/api/")) return url;
+    return `/api/browser-workspace/proxy?url=${encodeURIComponent(url)}`;
+  } catch {
+    return url;
+  }
+}
+
 function inferBrowserWorkspaceTitle(url: string): string {
   if (url === "about:blank") {
     return "New Tab";
@@ -136,8 +154,16 @@ function formatBrowserWorkspaceWalletAddress(address: string): string {
 
 function resolveBrowserWorkspaceTargetOrigin(url: string): string {
   try {
-    return new URL(url).origin;
+    const origin = new URL(url).origin;
+    // about:blank and data: URLs resolve to the string "null" which is
+    // an invalid postMessage targetOrigin. Skip messaging for these.
+    if (!origin || origin === "null") return "";
+    return origin;
   } catch {
+    // Proxied URLs are relative paths (/api/...) — use window origin.
+    if (url.startsWith("/api/")) {
+      return typeof window !== "undefined" ? window.location.origin : "*";
+    }
     return "*";
   }
 }
@@ -484,8 +510,9 @@ export function BrowserWorkspaceView(): JSX.Element {
       // React won't re-navigate an existing iframe when only the src attribute
       // changes (same key = same DOM element). Set the src directly via the ref.
       const iframe = iframeRefs.current.get(selectedTabId);
-      if (iframe && iframe.src !== tab.url) {
-        iframe.src = tab.url;
+      const proxiedUrl = toBrowserWorkspaceProxyUrl(tab.url);
+      if (iframe && iframe.src !== proxiedUrl) {
+        iframe.src = proxiedUrl;
       }
       await loadWorkspace({ preferTabId: tab.id, silent: true });
       setLocationInput(tab.url);
@@ -522,6 +549,8 @@ export function BrowserWorkspaceView(): JSX.Element {
 
   const postBrowserWalletReady = useCallback(
     (tab: BrowserWorkspaceTab, state: BrowserWorkspaceWalletState) => {
+      const targetOrigin = resolveBrowserWorkspaceTargetOrigin(tab.url);
+      if (!targetOrigin) return; // about:blank / data: — no valid origin
       const iframeWindow = iframeRefs.current.get(tab.id)?.contentWindow;
       if (!iframeWindow) {
         return;
@@ -531,7 +560,7 @@ export function BrowserWorkspaceView(): JSX.Element {
           type: BROWSER_WALLET_READY_TYPE,
           state,
         },
-        resolveBrowserWorkspaceTargetOrigin(tab.url),
+        targetOrigin,
       );
     },
     [],
@@ -1339,7 +1368,7 @@ export function BrowserWorkspaceView(): JSX.Element {
                         registerBrowserWorkspaceIframe(tab.id, iframe)
                       }
                       title={getBrowserWorkspaceTabLabel(tab)}
-                      src={tab.url}
+                      src={toBrowserWorkspaceProxyUrl(tab.url)}
                       loading="eager"
                       sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
                       allow="clipboard-read; clipboard-write"

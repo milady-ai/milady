@@ -691,6 +691,8 @@ export interface ServerState {
     string,
     import("../services/signal-pairing.js").SignalPairingSession
   >;
+  /** GBA emulator WebSocket bridge (relays commands between HTTP API and browser). */
+  emulatorBridge: import("@elizaos/plugin-coding-agent").EmulatorBridgeServer | null;
 }
 
 export interface ShareIngestItem {
@@ -3551,7 +3553,7 @@ export function resolveWebSocketUpgradeRejection(
   req: http.IncomingMessage,
   wsUrl: URL,
 ): WebSocketUpgradeRejection | null {
-  if (wsUrl.pathname !== "/ws") {
+  if (wsUrl.pathname !== "/ws" && wsUrl.pathname !== "/ws/emulator") {
     return { status: 404, reason: "Not found" };
   }
 
@@ -3834,9 +3836,79 @@ function wireCodingAgentChatBridge(st: ServerState): boolean {
   const coordinator = getCoordinatorFromRuntime(st.runtime);
   if (!coordinator?.setChatCallback) return false;
   coordinator.setChatCallback(async (text: string, source?: string) => {
-    await routeAutonomyTextToUser(st, text, source ?? "coding-agent");
+    const effectiveSource = source ?? "coding-agent";
+
+    // Per-task completion messages: trigger a full LLM conversation turn so
+    // the main agent can process the results and continue (report findings,
+    // spawn follow-ups, etc.) instead of passively notifying.
+    // Matches both swarm decision loop completions ('Finished "label"') and
+    // scratch lifecycle notifications ('Task "label" finished').
+    const isTaskCompletion =
+      (effectiveSource === "coding-agent" && text.startsWith('Finished "')) ||
+      (effectiveSource === "task-agent" && /^Task ".*" finished\b/.test(text));
+    if (isTaskCompletion) {
+      // Always persist the notification first so it shows in chat history
+      await routeAutonomyTextToUser(st, text, effectiveSource);
+      try {
+        await triggerChatContinuation(
+          st,
+          `[System: A coding agent task completed]\n${text}\n\nContinue the conversation: report what this agent accomplished to the user. If all dispatched agents have finished, synthesize the overall results. If there are outstanding tasks still running, note that.`,
+          "task_complete",
+        );
+        return;
+      } catch (err) {
+        logger.warn(
+          `[chat-bridge] Failed to trigger continuation for task completion: ${err}`,
+        );
+      }
+      return; // Already persisted above, don't double-persist
+    }
+
+    await routeAutonomyTextToUser(st, text, effectiveSource);
   });
   return true;
+}
+
+/**
+ * Trigger an LLM continuation in response to a system event (e.g. a coding
+ * agent task completing).  Uses `runtime.useModel` directly so the system
+ * event itself is NOT persisted as a visible message — only the LLM's
+ * response is broadcast to the UI and persisted.
+ */
+async function triggerChatContinuation(
+  st: ServerState,
+  eventText: string,
+  source: string,
+): Promise<void> {
+  const runtime = st.runtime;
+  if (!runtime) {
+    return;
+  }
+
+  const agentName = runtime.character.name ?? "Eliza";
+
+  // Use the LLM directly to generate a follow-up based on the event,
+  // without injecting a fake "user" message into the conversation.
+  try {
+    const response = await runtime.useModel(ModelType.TEXT_SMALL, {
+      prompt:
+        `You are ${agentName}. A system event just occurred:\n\n` +
+        `${eventText}\n\n` +
+        `Write a brief, conversational message to the user about this event. ` +
+        `Report what happened concisely. Stay in character.`,
+      maxTokens: 1024,
+      temperature: 0.7,
+    });
+
+    const text = response?.trim();
+    if (text && text.length > 2) {
+      await routeAutonomyTextToUser(st, text, source);
+    }
+  } catch (err) {
+    logger.warn(
+      `[triggerChatContinuation] LLM call failed: ${err}`,
+    );
+  }
 }
 
 /**
@@ -3874,12 +3946,12 @@ function wireCodingAgentSwarmSynthesis(st: ServerState): boolean {
 }
 
 /**
- * Handle swarm completion by synthesizing a summary via the LLM.
- * Extracted from wireCodingAgentSwarmSynthesis for testability.
+ * Handle swarm completion by injecting the task results into the conversation
+ * and triggering a full LLM turn so the agent can continue reasoning (report
+ * findings, spawn follow-up tasks, ask the user, etc.).
  *
- * Paths: (A) LLM returns synthesis → route to user,
- *        (B) LLM returns empty → warn,
- *        (C) LLM throws → fallback generic message.
+ * Paths: (A) Full LLM turn processes results → response broadcast to user,
+ *        (B) LLM unavailable → fallback generic message.
  */
 export async function handleSwarmSynthesis(
   st: { runtime: AgentRuntime | null },
@@ -3919,17 +3991,71 @@ export async function handleSwarmSynthesis(
     )
     .join("\n\n");
 
-  const prompt =
-    `You are summarizing the results of a task-agent swarm for the user. ` +
-    `${payload.total} agents were dispatched. ${payload.completed} completed, ` +
+  // Build event description that will enter the conversation as context for
+  // the main LLM to process and respond to, continuing the conversation.
+  const eventDescription =
+    `[System: Task agents completed]\n` +
+    `${payload.total} coding agents finished. ${payload.completed} completed, ` +
     `${payload.stopped} stopped, ${payload.errored} errored.\n\n` +
-    `Here are the individual task results:\n\n${taskLines}\n\n` +
-    `Write a concise, conversational summary of what was accomplished. ` +
-    `Highlight key outcomes (PRs created, issues found, research results). ` +
-    `If any tasks failed or stopped, mention what went wrong. ` +
-    `Keep your personality — be warm and helpful but brief.`;
+    `Results:\n${taskLines}\n\n` +
+    `Continue the conversation: summarize what was accomplished, report key ` +
+    `findings to the user, and decide if any follow-up actions are needed.`;
 
+  // Try to trigger a full LLM conversation turn so the agent continues.
+  const fullSt = st as ServerState;
   try {
+    if (fullSt.chatRoomId && fullSt.chatUserId) {
+      const agentName = runtime.character.name ?? "Eliza";
+
+      // Persist the event as a message so it enters conversation history
+      const message = createMessageMemory({
+        id: crypto.randomUUID() as UUID,
+        entityId: fullSt.chatUserId,
+        agentId: runtime.agentId,
+        roomId: fullSt.chatRoomId,
+        content: {
+          text: eventDescription,
+          source: "swarm_synthesis",
+          channelType: "DM",
+        },
+      });
+
+      const result = await generateChatResponseFromChatRoutes(
+        runtime,
+        message,
+        agentName,
+        {
+          resolveNoResponseText: () =>
+            "The task agents have finished — let me review what they found.",
+        },
+      );
+
+      if (result.text?.trim() && result.text !== "(no response)") {
+        const displayText = stripActionBlockFromDisplay(result.text);
+        if (displayText && displayText.length > 2) {
+          await routeMessage(displayText, "swarm_synthesis");
+        }
+      }
+      return;
+    }
+  } catch (err) {
+    logger.warn(
+      `[swarm-synthesis] Full LLM turn failed, falling back to simple synthesis: ${err}`,
+    );
+  }
+
+  // Fallback: simple LLM summary without conversation context
+  try {
+    const prompt =
+      `You are summarizing the results of a task-agent swarm for the user. ` +
+      `${payload.total} agents were dispatched. ${payload.completed} completed, ` +
+      `${payload.stopped} stopped, ${payload.errored} errored.\n\n` +
+      `Here are the individual task results:\n\n${taskLines}\n\n` +
+      `Write a concise, conversational summary of what was accomplished. ` +
+      `Highlight key outcomes (PRs created, issues found, research results). ` +
+      `If any tasks failed or stopped, mention what went wrong. ` +
+      `Keep your personality — be warm and helpful but brief.`;
+
     const synthesis = await runtime.useModel(ModelType.TEXT_SMALL, {
       prompt,
       maxTokens: 2048,
@@ -3937,7 +4063,6 @@ export async function handleSwarmSynthesis(
     });
 
     if (synthesis?.trim()) {
-      logger.info("[swarm-synthesis] Synthesis generated, routing to user");
       await routeMessage(synthesis.trim(), "swarm_synthesis");
     } else {
       logger.warn("[swarm-synthesis] LLM returned empty synthesis");

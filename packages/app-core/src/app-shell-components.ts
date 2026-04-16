@@ -6,6 +6,8 @@
  */
 
 export { GameViewOverlay } from "./components/apps/GameViewOverlay";
+export { CodeCanvas } from "./components/coding/CodeCanvas";
+export { CodeCanvasProvider } from "./components/coding/CodeCanvasContext";
 export { AvatarLoader } from "./components/character/AvatarLoader";
 export { CharacterEditor } from "./components/character/CharacterEditor";
 export { SaveCommandModal } from "./components/chat/SaveCommandModal";

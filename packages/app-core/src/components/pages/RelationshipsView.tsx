@@ -569,6 +569,7 @@ export function RelationshipsView({
 
   return (
     <PageLayout
+      className="h-full"
       sidebar={sidebar}
       contentHeader={contentHeader}
       data-testid="relationships-view"

@@ -684,10 +684,14 @@ MiladyClient.prototype.getAppInfo = async function (this: MiladyClient, name) {
 };
 
 MiladyClient.prototype.launchApp = async function (this: MiladyClient, name) {
-  return this.fetch("/api/apps/launch", {
-    method: "POST",
-    body: JSON.stringify({ name }),
-  });
+  return this.fetch(
+    "/api/apps/launch",
+    {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    },
+    { timeoutMs: 60_000 },
+  );
 };
 
 MiladyClient.prototype.sendAppRunMessage = async function (

@@ -779,7 +779,7 @@ export function KnowledgeView({ inModal }: { inModal?: boolean } = {}) {
 
   return (
     <PageLayout
-      className={inModal ? "min-h-0" : undefined}
+      className={inModal ? "min-h-0" : "h-full"}
       sidebar={
         <Sidebar
           testId="knowledge-sidebar"

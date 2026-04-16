@@ -192,6 +192,48 @@ export function stripAssistantStageDirections(input: string): string {
   return tidyAssistantTextSpacing(normalized);
 }
 
+/**
+ * Strip leaked structured-output fields from model responses.
+ *
+ * Some models (e.g. Gemini Flash via OpenRouter) don't follow the XML
+ * `<response>` format and instead output raw `thought:` / `text:` / `actions:`
+ * key-value pairs. When these leak into the visible response, strip everything
+ * from the first `thought:` line onwards to prevent the raw structured fields
+ * from being shown to the user.
+ */
+export function stripLeakedStructuredFields(input: string): string {
+  // Detect leaked structured-output fields. Models sometimes emit the raw
+  // structured response (thought:/text:/actions: key-value pairs) AFTER
+  // the actual response text, either on a new line or concatenated directly.
+  //
+  // Strategy: find the FIRST occurrence of "thought:" that is either:
+  //   (a) at a line boundary, OR
+  //   (b) directly after sentence-ending punctuation (e.g. "...out?thought:")
+  // This avoids false positives on natural uses like "I thought: maybe..."
+  const patterns = [
+    /(?:^|\n)\s*thought:\s/i,           // line-boundary
+    /[.!?)"']\s*thought:\s/i,           // after sentence-ending punctuation
+  ];
+  let earliestIndex: number | undefined;
+  for (const pattern of patterns) {
+    const match = input.match(pattern);
+    if (match?.index !== undefined) {
+      // For the punctuation pattern, keep the punctuation character
+      const stripStart = pattern === patterns[1]
+        ? match.index + 1  // keep the punctuation char
+        : match.index;
+      if (earliestIndex === undefined || stripStart < earliestIndex) {
+        earliestIndex = stripStart;
+      }
+    }
+  }
+  if (earliestIndex === undefined) return input;
+
+  // Keep only the text before the leaked structured fields
+  const cleaned = input.slice(0, earliestIndex).trim();
+  return cleaned || input; // fallback to original if stripping yields empty
+}
+
 export function isClientVisibleNoResponse(text: string): boolean {
   if (isNoResponsePlaceholder(text)) return true;
   return isNoResponsePlaceholder(stripAssistantStageDirections(text));

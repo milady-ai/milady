@@ -109,6 +109,7 @@ export const AUTH_PROVIDER_PLUGINS: Record<string, string> = {
   SPOTIFY_CLIENT_ID: "@elizaos/plugin-music-library",
   SPOTIFY_CLIENT_SECRET: "@elizaos/plugin-music-library",
   RS_SDK_BOT_NAME: "@miladyai/plugin-2004scape",
+  HYPERSCAPE_SERVER_URL: "@hyperscape/plugin-hyperscape",
 };
 
 function isTelegramAccountConfigured(env: NodeJS.ProcessEnv): boolean {
@@ -150,6 +151,7 @@ const FEATURE_PLUGINS: Record<string, string> = {
   repoprompt: "@elizaos/plugin-repoprompt",
   claudeCodeWorkbench: "@elizaos/plugin-claude-code-workbench",
   rs2004scape: "@miladyai/plugin-2004scape",
+  hyperscape: "@hyperscape/plugin-hyperscape",
 };
 
 export function isConnectorConfigured(

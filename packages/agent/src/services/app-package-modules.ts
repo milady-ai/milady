@@ -79,12 +79,27 @@ async function importBuiltIn2004ScapeRouteModule(): Promise<AppRouteModule> {
   return module;
 }
 
+async function importBuiltInHyperscapeRouteModule(): Promise<AppRouteModule> {
+  const candidatePaths = [
+    path.join(MODULE_DIR, "built-in-app-routes", "hyperscape.js"),
+    path.join(MODULE_DIR, "built-in-app-routes", "hyperscape.ts"),
+  ];
+  const module =
+    await importFirstExistingModule<AppRouteModule>(candidatePaths);
+  if (!module) {
+    throw new Error("hyperscape built-in route module is unavailable");
+  }
+  return module;
+}
+
 const BUILT_IN_APP_ROUTE_MODULE_IMPORTERS = new Map<
   string,
   () => Promise<AppRouteModule>
 >([
   ["@elizaos/app-2004scape", importBuiltIn2004ScapeRouteModule],
   ["2004scape", importBuiltIn2004ScapeRouteModule],
+  ["@hyperscape/plugin-hyperscape", importBuiltInHyperscapeRouteModule],
+  ["hyperscape", importBuiltInHyperscapeRouteModule],
 ]);
 
 function uniquePaths(paths: string[]): string[] {

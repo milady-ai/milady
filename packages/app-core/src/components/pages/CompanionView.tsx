@@ -1,7 +1,7 @@
 import { useRenderGuard } from "@miladyai/app-core/hooks";
 import { useApp } from "@miladyai/app-core/state";
 import { Button } from "@miladyai/ui";
-import { PanelLeftOpen } from "lucide-react";
+import { Code2, PanelLeftOpen } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ChatModalView } from "./ChatModalView";
 import { useCompanionSceneStatus } from "../companion/companion-scene-status-context";
@@ -11,6 +11,7 @@ import { useSharedCompanionScene } from "../companion/shared-companion-scene-con
 import { InferenceCloudAlertButton } from "../companion/InferenceCloudAlertButton";
 import { resolveCompanionInferenceNotice } from "../companion/resolve-companion-inference-notice";
 import { PtyConsoleSidePanel } from "../coding/PtyConsoleSidePanel";
+import { useCodeCanvas } from "../coding/CodeCanvasContext";
 
 const COMPANION_UI_REVEAL_FALLBACK_MS = 1400;
 const COMPANION_DOCK_HEIGHT = "min(42vh, 24rem)";
@@ -44,6 +45,8 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
     switchShellView,
     t,
   } = useApp();
+
+  const { open: codeCanvasOpen, toggleCanvas: toggleCodeCanvas } = useCodeCanvas();
 
   const [ptySidePanelSessionId, setPtySidePanelSessionId] = useState<
     string | null
@@ -124,6 +127,17 @@ const CompanionViewOverlay = memo(function CompanionViewOverlay() {
 
   const companionHeaderRightExtras = (
     <>
+      <Button
+        size="icon"
+        variant={codeCanvasOpen ? "default" : "ghost"}
+        className="h-8 w-8 rounded-full"
+        onClick={toggleCodeCanvas}
+        onPointerDown={(e) => e.stopPropagation()}
+        aria-label="Code Canvas"
+        aria-pressed={codeCanvasOpen}
+      >
+        <Code2 className="pointer-events-none w-4 h-4" />
+      </Button>
       {inferenceNotice ? (
         <InferenceCloudAlertButton
           notice={inferenceNotice}

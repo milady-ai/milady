@@ -1241,6 +1241,7 @@ function PluginListView({
     if (desktopConnectorLayout && desktopSidebar) {
       return (
         <PageLayout
+          className="h-full"
           sidebar={desktopSidebar}
           contentHeader={contentHeader}
           contentRef={connectorContentRef}

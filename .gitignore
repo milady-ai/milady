@@ -185,3 +185,13 @@ scripts/bin/yt-dlp_*
 # because it's a developer tool, not product code.
 scripts/codex-sniff.ts
 .tmp-live/
+
+# orchestrator-injected (do not commit agent config/memory files)
+CLAUDE.md
+.claude/
+GEMINI.md
+.gemini/
+.aider*
+
+# Local hyperscape checkout
+hyperscape/

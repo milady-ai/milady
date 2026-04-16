@@ -575,7 +575,12 @@ export function useChatSend(deps: UseChatSendDeps) {
         // Action callbacks can persist additional assistant turns that are not
         // mirrored by the optimistic streaming placeholder in local state.
         if (activeConversationIdRef.current === convId) {
-          await loadConversationMessages(convId);
+          // Guard against loadConversationMessages hanging indefinitely which
+          // would keep chatSendBusyRef stuck and block all future sends.
+          await Promise.race([
+            loadConversationMessages(convId),
+            new Promise<void>((resolve) => setTimeout(resolve, 10_000)),
+          ]);
         }
 
         const userMessageCount = conversationMessagesRef.current.filter(
@@ -659,7 +664,10 @@ export function useChatSend(deps: UseChatSendDeps) {
             );
           }
         } else {
-          await loadConversationMessages(convId);
+          await Promise.race([
+            loadConversationMessages(convId),
+            new Promise<void>((resolve) => setTimeout(resolve, 10_000)),
+          ]);
         }
       } finally {
         if (chatAbortRef.current === controller) {
@@ -913,7 +921,10 @@ export function useChatSend(deps: UseChatSendDeps) {
           // Keep the visible thread authoritative when the server stores
           // additional action-generated messages during a successful send.
           if (activeConversationIdRef.current === convId) {
-            await loadConversationMessages(convId);
+            await Promise.race([
+              loadConversationMessages(convId),
+              new Promise<void>((resolve) => setTimeout(resolve, 10_000)),
+            ]);
           }
 
           void loadConversations();
@@ -931,7 +942,10 @@ export function useChatSend(deps: UseChatSendDeps) {
             );
             return;
           }
-          await loadConversationMessages(convId);
+          await Promise.race([
+            loadConversationMessages(convId),
+            new Promise<void>((resolve) => setTimeout(resolve, 10_000)),
+          ]);
         } finally {
           if (chatAbortRef.current === controller) {
             chatAbortRef.current = null;

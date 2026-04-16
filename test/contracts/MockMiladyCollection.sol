@@ -41,7 +41,7 @@ contract MockMiladyCollection is ERC721URIStorage, Ownable {
         bool whitelistOpen
     );
 
-    constructor() ERC721("Milady Maker", "MILAIDYMAKER") {
+    constructor() ERC721("Milady Maker", "MILAIDYMAKER") Ownable(msg.sender) {
         publicMintOpen = true;
         whitelistMintOpen = false;
     }

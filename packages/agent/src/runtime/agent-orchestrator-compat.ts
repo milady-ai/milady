@@ -3,18 +3,24 @@ import fs from "node:fs";
 import type http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import type {
-  Action,
-  ActionResult,
-  HandlerCallback,
-  HandlerOptions,
-  IAgentRuntime,
-  Memory,
-  Plugin,
-  Provider,
-  ProviderResult,
-  State,
+import {
+  logger,
+  type Action,
+  type ActionResult,
+  type HandlerCallback,
+  type HandlerOptions,
+  type IAgentRuntime,
+  type Memory,
+  type Plugin,
+  type Provider,
+  type ProviderResult,
+  type State,
 } from "@elizaos/core";
+import { decideSubAgentWorkspace } from "./coding-workspace-intelligence.js";
+import {
+  setActiveSessionChecker,
+  startSelfRebuildWatcher,
+} from "./self-rebuild-watcher.js";
 
 // Dynamic import: plugin-agent-orchestrator is desktop-only and may be absent
 // in Docker, cloud, or headless environments.
@@ -1164,6 +1170,122 @@ function renameTaskAgentText(text: string): string {
     .replace(/\bcoding session\b/gi, "task-agent session");
 }
 
+function injectIntelligentWorkspace(action: Action | undefined): void {
+  if (!action?.handler) {
+    logger?.info(
+      "[intelligent-workspace] skipped patch: action or handler missing",
+    );
+    return;
+  }
+  logger?.info(
+    `[intelligent-workspace] patched action=${action.name ?? "(unnamed)"}`,
+  );
+  const originalHandler = action.handler.bind(action);
+  action.handler = async (
+    runtime: IAgentRuntime,
+    message: Memory,
+    state?: State,
+    options?: HandlerOptions,
+    callback?: HandlerCallback,
+  ): Promise<ActionResult | undefined> => {
+    logger?.info(
+      `[intelligent-workspace] handler invoked for action=${action.name ?? "(unnamed)"}`,
+    );
+    const parameters =
+      (options?.parameters as Record<string, unknown> | undefined) ?? {};
+    const content =
+      message.content && typeof message.content === "object"
+        ? (message.content as Record<string, unknown>)
+        : {};
+
+    const rawWorkdir =
+      (typeof parameters.workdir === "string" && parameters.workdir.trim()) ||
+      (typeof content.workdir === "string" &&
+        (content.workdir as string).trim()) ||
+      (state?.codingWorkspace &&
+      typeof (state.codingWorkspace as { path?: unknown }).path === "string"
+        ? ((state.codingWorkspace as { path: string }).path as string)
+        : "");
+
+    const isValidAbsWorkdir = (() => {
+      if (!rawWorkdir) return false;
+      if (!path.isAbsolute(rawWorkdir)) return false;
+      try {
+        return fs.existsSync(rawWorkdir);
+      } catch {
+        return false;
+      }
+    })();
+
+    if (isValidAbsWorkdir) {
+      logger?.info(
+        `[intelligent-workspace] workdir already set to valid abs path "${rawWorkdir}" — deferring to base handler`,
+      );
+      return originalHandler(runtime, message, state, options, callback);
+    }
+
+    if (rawWorkdir) {
+      logger?.info(
+        `[intelligent-workspace] ignoring invalid/relative workdir "${rawWorkdir}" — running intelligent decision`,
+      );
+    }
+
+    const sanitizedParameters: Record<string, unknown> = { ...parameters };
+    if (!isValidAbsWorkdir && "workdir" in sanitizedParameters) {
+      delete sanitizedParameters.workdir;
+    }
+    const sanitizedContent: Record<string, unknown> = { ...content };
+    if (!isValidAbsWorkdir && "workdir" in sanitizedContent) {
+      delete sanitizedContent.workdir;
+    }
+    const sanitizedMessage =
+      sanitizedContent === content
+        ? message
+        : ({ ...message, content: sanitizedContent } as Memory);
+
+    try {
+      const decision = await decideSubAgentWorkspace(
+        runtime,
+        sanitizedMessage,
+        sanitizedParameters,
+      );
+      if (!decision) {
+        logger?.info("[intelligent-workspace] no decision — passthrough");
+        return originalHandler(runtime, message, state, options, callback);
+      }
+
+      logger?.info(
+        `[intelligent-workspace] decision=${decision.created ? "new" : "reuse"} path=${decision.path} reason=${decision.reason}`,
+      );
+
+      const nextMessage = {
+        ...sanitizedMessage,
+        content: { ...sanitizedContent, workdir: decision.path },
+      } as Memory;
+      const nextOptions = {
+        ...(options ?? {}),
+        parameters: { ...sanitizedParameters, workdir: decision.path },
+      } as HandlerOptions;
+
+      if (callback) {
+        await callback({
+          text: decision.created
+            ? `Creating fresh workspace at ${decision.path} — ${decision.reason}`
+            : `Continuing in workspace ${decision.path} — ${decision.reason}`,
+        });
+      }
+
+      return originalHandler(runtime, nextMessage, state, nextOptions, callback);
+    } catch (err) {
+      logger?.warn(
+        { err },
+        "[intelligent-workspace] wrapper failed, falling back to base handler",
+      );
+      return originalHandler(runtime, message, state, options, callback);
+    }
+  };
+}
+
 function injectPreferredAgentType(action: Action | undefined): void {
   if (!action?.handler) return;
   const originalHandler = action.handler.bind(action);
@@ -1438,6 +1560,10 @@ function patchPluginSurface(): void {
     wrapActionHandler(baseActionMap.get(actionName), renameTaskAgentText);
   }
 
+  // Resolve workspace intelligently BEFORE picking the agent type, so later
+  // wrappers and the base handler both see an explicit workdir.
+  injectIntelligentWorkspace(baseActionMap.get("SPAWN_AGENT"));
+  injectIntelligentWorkspace(baseActionMap.get("CREATE_TASK"));
   injectPreferredAgentType(baseActionMap.get("SPAWN_AGENT"));
   installListAgentsHandler(baseActionMap.get("LIST_AGENTS"));
 
@@ -1817,6 +1943,25 @@ function patchPtyServiceClass(): void {
           }
         ).capabilityDescription =
           "Manages asynchronous PTY task-agent sessions for open-ended background work";
+
+        const coordinator = (
+          service as { coordinator?: { tasks?: Map<string, { status: string }> } }
+        ).coordinator;
+        if (coordinator?.tasks) {
+          const tasks = coordinator.tasks;
+          setActiveSessionChecker(() => {
+            for (const task of tasks.values()) {
+              if (
+                task.status === "active" ||
+                task.status === "tool_running" ||
+                task.status === "blocked"
+              ) {
+                return true;
+              }
+            }
+            return false;
+          });
+        }
       }
       return service;
     };
@@ -1825,6 +1970,7 @@ function patchPtyServiceClass(): void {
 
 patchPluginSurface();
 patchPtyServiceClass();
+startSelfRebuildWatcher();
 
 export function createCodingAgentRouteHandler(
   runtime: IAgentRuntime,

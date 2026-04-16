@@ -78,6 +78,7 @@ import * as pluginSql from "@elizaos/plugin-sql";
 import * as pluginTrust from "@elizaos/plugin-trust";
 import * as pluginRoles from "@miladyai/plugin-roles";
 import * as pluginSelfControl from "@miladyai/plugin-selfcontrol";
+import voiceAssistantPlugin from "../plugins/voice-assistant/index.js";
 import {
   isMiladySettingsDebugEnabled,
   settingsDebugCloudSummary,
@@ -3166,6 +3167,12 @@ export async function startEliza(
     quiet: preOnboarding,
   });
 
+  // Inject the Fisbat voice assistant plugin
+  resolvedPlugins.push({
+    name: 'voice-assistant',
+    plugin: voiceAssistantPlugin,
+  } as any);
+
   if (resolvedPlugins.length === 0) {
     if (preOnboarding) {
       logger.info(
@@ -3445,6 +3452,15 @@ export async function startEliza(
       : {}),
     settings: {
       VALIDATION_LEVEL: "fast",
+      // One user message → one agent reply by default. Upstream eliza defaults
+      // `CONTINUE_AFTER_ACTIONS=true` + `MAX_MULTISTEP_ITERATIONS=6`, which
+      // causes REPLY to loop and persist a fresh bubble on every iteration
+      // (observed: one turn producing ~11 creative variations ending in a
+      // provider error). The user-visible contract is "single reply unless
+      // the situation explicitly warrants otherwise" — multi-step flows must
+      // opt in via character/config overrides rather than firing by default.
+      CONTINUE_AFTER_ACTIONS: "false",
+      MAX_MULTISTEP_ITERATIONS: "1",
       // Forward non-sensitive Eliza config.env vars as runtime settings so
       // plugins can access them via runtime.getSetting(). This fixes a bug where
       // plugins (e.g. @elizaos/plugin-google-genai) call runtime.getSetting()

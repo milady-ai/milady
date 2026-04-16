@@ -62,6 +62,7 @@ import {
   resolveWalletModeGuidanceReply,
   resolveConversationGreetingText,
 } from "./server.js";
+import { stripLeakedStructuredFields } from "./chat-text-helpers.js";
 
 import fs from "node:fs";
 import path from "node:path";
@@ -684,7 +685,22 @@ export async function handleConversationRoutes(
         // plugin action logs with only `thought` / `actions` fields).
         // Without this filter they appear as blank chat bubbles.
         .filter((m) => m.text.trim().length > 0);
-      json(res, { messages });
+
+      // Deduplicate: elizaOS runtime and conversation-routes both persist
+      // messages to the "messages" table, producing duplicates with different
+      // IDs but identical role + text + similar timestamps.  Keep the earliest
+      // occurrence of each (role, trimmed-text) pair within a 5-second window.
+      const deduped: typeof messages = [];
+      for (const msg of messages) {
+        const dominated = deduped.some(
+          (existing) =>
+            existing.role === msg.role &&
+            existing.text.trim() === msg.text.trim() &&
+            Math.abs(existing.timestamp - msg.timestamp) < 5000,
+        );
+        if (!dominated) deduped.push(msg);
+      }
+      json(res, { messages: deduped });
     } catch (err) {
       logger.warn(
         `[conversations] Failed to fetch messages: ${err instanceof Error ? err.message : String(err)}`,
@@ -868,6 +884,10 @@ export async function handleConversationRoutes(
     }, 5000);
 
     let streamedText = "";
+    // Track whether we've hit leaked structured fields (e.g. "thought:" from
+    // models that don't output proper XML). Once detected, suppress further
+    // streaming to avoid showing raw structured output to the user.
+    let structuredLeakDetected = false;
 
     try {
       const result = await generateChatResponse(
@@ -877,12 +897,32 @@ export async function handleConversationRoutes(
         {
           isAborted: () => aborted,
           onChunk: (chunk) => {
-            if (!chunk) return;
-            streamedText += chunk;
+            if (!chunk || structuredLeakDetected) return;
+            const candidateText = streamedText + chunk;
+            const cleaned = stripLeakedStructuredFields(candidateText);
+            if (cleaned.length < candidateText.length) {
+              // Structured fields detected — emit only the clean portion
+              // that hasn't been streamed yet, then suppress further chunks.
+              structuredLeakDetected = true;
+              const remaining = cleaned.slice(streamedText.length);
+              if (remaining) {
+                streamedText = cleaned;
+                writeChatTokenSse(res, remaining, streamedText);
+              }
+              return;
+            }
+            streamedText = candidateText;
             writeChatTokenSse(res, chunk, streamedText);
           },
           onSnapshot: (text) => {
-            if (!text) return;
+            if (!text || structuredLeakDetected) return;
+            const cleaned = stripLeakedStructuredFields(text);
+            if (cleaned.length < text.length) {
+              structuredLeakDetected = true;
+              streamedText = cleaned;
+              writeChatTokenSse(res, cleaned, streamedText);
+              return;
+            }
             streamedText = text;
             writeChatTokenSse(res, text, streamedText);
           },

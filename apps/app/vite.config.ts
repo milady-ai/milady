@@ -947,10 +947,24 @@ function gbaEmulatorIframePlugin(): Plugin {
             emu2.gameManager.loadState(saved);
           }
         }catch(e){}
-      }else if(me.data.type==="gba-focus"){
-        window.focus();
-        var gc=document.querySelector("#game canvas");
-        if(gc)gc.focus();
+      }else if(me.data.type==="gba-key"){
+        // Keyboard proxy from parent — the iframe is off-screen so it can't
+        // receive focus. The parent intercepts keydown/keyup and forwards here.
+        var kc=me.data.keyCode||0;
+        var wh=me.data.which||0;
+        function fireKey(target){
+          var ev=new KeyboardEvent(me.data.eventType,{
+            code:me.data.code,key:me.data.key,keyCode:kc,which:wh,
+            bubbles:true,cancelable:true
+          });
+          try{Object.defineProperty(ev,"keyCode",{value:kc})}catch(x){}
+          try{Object.defineProperty(ev,"which",{value:wh})}catch(x){}
+          target.dispatchEvent(ev);
+        }
+        fireKey(document);
+        fireKey(window);
+        var gc3=document.querySelector("#game canvas");
+        if(gc3)fireKey(gc3);
       }else if(me.data.type==="gba-start-frames"&&me.ports&&me.ports[0]){
         framePort=me.ports[0];
         streaming=true;

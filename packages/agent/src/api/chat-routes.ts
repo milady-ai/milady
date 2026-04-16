@@ -50,6 +50,7 @@ import {
   isClientVisibleNoResponse,
   isNoResponsePlaceholder,
   stripAssistantStageDirections,
+  stripLeakedStructuredFields,
 } from "./chat-text-helpers.js";
 import {
   extractAnthropicSystemAndLastUser,
@@ -271,7 +272,10 @@ export function normalizeChatResponseText(
   ) {
     return pickInsufficientCreditsChatReply();
   }
-  if (!isClientVisibleNoResponse(text)) return text;
+  // Strip leaked structured-output fields (thought:/text:/actions: pairs)
+  // that some models (e.g. Gemini Flash) emit as raw text instead of XML.
+  const cleaned = stripLeakedStructuredFields(text);
+  if (!isClientVisibleNoResponse(cleaned)) return cleaned;
   return resolveNoResponseFallback(logBuffer, runtime);
 }
 

@@ -293,9 +293,10 @@ function SkillsFullView({ contentHeader }: { contentHeader?: ReactNode } = {}) {
     <>
       <PageLayout
         data-testid="skills-shell"
+        className="h-full"
         sidebar={skillsSidebar}
         contentHeader={contentHeader}
-        contentInnerClassName="mx-auto w-full max-w-[76rem]"
+        contentInnerClassName="mx-auto w-full min-h-0 max-w-[76rem]"
       >
         <div data-testid="skills-detail">
           <PagePanel variant="section">
