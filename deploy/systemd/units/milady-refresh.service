@@ -3,4 +3,5 @@ Description=Milady — refresh Anthropic OAuth (zero-token; only calls auth endp
 
 [Service]
 Type=oneshot
+EnvironmentFile=%h/.config/milady/env
 ExecStart=%h/bin/milady-refresh-oauth.sh
