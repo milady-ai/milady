@@ -1,0 +1,561 @@
+{
+  "runId": "b9d4c110-f55b-4d57-8ed8-2f0ebb4e9bb4",
+  "startedAtIso": "2026-04-17T00:15:55.577Z",
+  "completedAtIso": "2026-04-17T00:16:14.055Z",
+  "providerName": "none",
+  "scenarios": [
+    {
+      "id": "todo.cross-device.create-and-query",
+      "title": "Create a todo on the dashboard, query it from mobile",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "cross-platform-inconsistency"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:15:55.578Z",
+      "completedAtIso": "2026-04-17T00:15:57.345Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.cross-device.global-alarm",
+      "title": "Setting an alarm fires on both Mac and iOS",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "cross-platform-inconsistency"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:15:57.385Z",
+      "completedAtIso": "2026-04-17T00:15:58.591Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.weekly-weekday",
+      "title": "Create a weekday morning recurring stretch todo",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "time-of-day-edge"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:15:58.599Z",
+      "completedAtIso": "2026-04-17T00:15:59.394Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.every-10-days",
+      "title": "Create an every-10-days Invisalign tray swap todo",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "ambiguous-parameter"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:15:59.402Z",
+      "completedAtIso": "2026-04-17T00:16:00.128Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.forceful-reminder.undone",
+      "title": "Undone overdue todo prompts forceful reminder on greeting",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "retry-after-failure"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:00.136Z",
+      "completedAtIso": "2026-04-17T00:16:00.903Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.list.upcoming",
+      "title": "List upcoming todos for the week",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:00.912Z",
+      "completedAtIso": "2026-04-17T00:16:01.686Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.list.today",
+      "title": "List todos for today",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:01.700Z",
+      "completedAtIso": "2026-04-17T00:16:02.552Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.forceful-reminder.morning-routine",
+      "title": "Morning routine pushes several overdue todos forcefully",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:02.561Z",
+      "completedAtIso": "2026-04-17T00:16:03.322Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.delete",
+      "title": "Delete a seeded todo with confirmation",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "confirms-destructive-action"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:03.331Z",
+      "completedAtIso": "2026-04-17T00:16:04.124Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.update.due",
+      "title": "Push a seeded todo's due date to tomorrow",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "multi-turn-memory"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:04.134Z",
+      "completedAtIso": "2026-04-17T00:16:04.974Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.one-off",
+      "title": "Create a single one-off todo",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:04.979Z",
+      "completedAtIso": "2026-04-17T00:16:05.894Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.deprioritize",
+      "title": "Move a seeded todo to low priority",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "multi-turn-memory"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:05.900Z",
+      "completedAtIso": "2026-04-17T00:16:07.307Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.routine.morning-checkin",
+      "title": "Morning check-in surfaces today's todos",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:07.319Z",
+      "completedAtIso": "2026-04-17T00:16:08.108Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.list.overdue",
+      "title": "List overdue todos",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "time-of-day-edge"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:08.112Z",
+      "completedAtIso": "2026-04-17T00:16:08.915Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.complete",
+      "title": "Mark a seeded todo as done",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:08.920Z",
+      "completedAtIso": "2026-04-17T00:16:09.853Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.recurring-daily",
+      "title": "Create a daily recurring todo with preview + confirm",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:09.864Z",
+      "completedAtIso": "2026-04-17T00:16:10.644Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.routine.night-checkin",
+      "title": "Night check-in reviews today's todos",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:10.648Z",
+      "completedAtIso": "2026-04-17T00:16:11.513Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.prioritize",
+      "title": "Ask which todo is most important",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "ambiguous-parameter"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:11.519Z",
+      "completedAtIso": "2026-04-17T00:16:12.411Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.update.priority",
+      "title": "Raise a seeded todo to high priority",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "multi-turn-memory"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:12.419Z",
+      "completedAtIso": "2026-04-17T00:16:13.246Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.forceful-reminder.persistent",
+      "title": "Persistent forceful reminder escalates tone when user dodges",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "long-utterance"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:16:13.254Z",
+      "completedAtIso": "2026-04-17T00:16:14.048Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    }
+  ],
+  "totalCount": 20,
+  "passedCount": 0,
+  "failedCount": 0,
+  "flakyPassedCount": 0,
+  "skippedCount": 20,
+  "totalCostUsd": 0
+}

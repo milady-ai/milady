@@ -25,6 +25,8 @@
       "@elizaos/app-shopify/*": ["./eliza/apps/app-shopify/src/*"],
       "@elizaos/app-vincent": ["./eliza/apps/app-vincent/src/index.ts"],
       "@elizaos/app-vincent/*": ["./eliza/apps/app-vincent/src/*"],
+      "@elizaos/app-elizamaker": ["./eliza/apps/app-elizamaker/src/index.ts"],
+      "@elizaos/app-elizamaker/*": ["./eliza/apps/app-elizamaker/src/*"],
       "@elizaos/app-core": ["./eliza/packages/app-core/src/index.ts"],
       "@elizaos/app-core/*": ["./eliza/packages/app-core/src/*"],
       "@elizaos/shared": ["./eliza/packages/shared/src/index.ts"],

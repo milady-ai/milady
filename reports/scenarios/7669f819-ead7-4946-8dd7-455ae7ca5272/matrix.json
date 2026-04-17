@@ -1,0 +1,95 @@
+{
+  "runId": "7669f819-ead7-4946-8dd7-455ae7ca5272",
+  "startedAtIso": "2026-04-17T00:08:39.862Z",
+  "completedAtIso": "2026-04-17T00:08:43.834Z",
+  "providerName": "none",
+  "scenarios": [
+    {
+      "id": "convo.echo-self-test",
+      "title": "Convo framework self-test: ECHO_TEST action is captured",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "self-test"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:08:39.863Z",
+      "completedAtIso": "2026-04-17T00:08:41.969Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "convo.greeting-dynamic",
+      "title": "Convo framework: greeting triggers non-empty response (scripted port)",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "greeting"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:08:41.974Z",
+      "completedAtIso": "2026-04-17T00:08:42.957Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-basic",
+      "title": "Brush teeth basic save flow",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:08:42.965Z",
+      "completedAtIso": "2026-04-17T00:08:43.826Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    }
+  ],
+  "totalCount": 3,
+  "passedCount": 0,
+  "failedCount": 0,
+  "flakyPassedCount": 0,
+  "skippedCount": 3,
+  "totalCostUsd": 0
+}

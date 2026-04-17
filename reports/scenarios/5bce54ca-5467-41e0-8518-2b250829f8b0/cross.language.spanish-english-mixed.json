@@ -1,0 +1,27 @@
+{
+  "id": "cross.language.spanish-english-mixed",
+  "title": "Spanish-language task-creation request routes correctly",
+  "domain": "cross-cutting",
+  "tags": [
+    "cross-cutting",
+    "i18n",
+    "critical"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:18:03.295Z",
+  "completedAtIso": "2026-04-17T00:18:03.987Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

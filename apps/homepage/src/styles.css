@@ -21,9 +21,6 @@
   --font-mono: "JetBrains Mono", "Cascadia Code", "Courier New", monospace;
   --font-display: "DM Sans", "Helvetica Neue", Arial, sans-serif;
 
-  /* ── Dashboard redesign (2026-04-16): Binance gold, one accent ──
-     All gold tints derive from --accent (#f0b90b, already in base.css).
-     No competing indigo/sky/violet accents. */
   --color-gold-300: #f7cf4a;
   --color-gold-500: #f0b90b;
   --color-gold-600: #d8a000;
@@ -55,8 +52,6 @@
   --color-status-provisioning: var(--warn);
 }
 
-/* ── Dashboard gold gradients & glows ───────────────────────────────
-   Used sparingly: primary CTA, Milady APP tile, brand seal. */
 :root {
   --gold-gradient-primary: linear-gradient(
     135deg,
@@ -222,16 +217,13 @@ body {
   }
 }
 
-/* Skeleton placeholder shimmer — taste-skill §8 (Skeleton Shimmer).
-   Linear sheen moving across a low-contrast neutral. Hardware-accelerated
-   via background-position translation, respects prefers-reduced-motion. */
 .skeleton-shimmer {
   background-image: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.04) 0%,
-    rgba(255, 255, 255, 0.10) 40%,
+    rgba(255, 255, 255, 0.1) 40%,
     rgba(240, 185, 11, 0.06) 50%,
-    rgba(255, 255, 255, 0.10) 60%,
+    rgba(255, 255, 255, 0.1) 60%,
     rgba(255, 255, 255, 0.04) 100%
   );
   background-size: 200% 100%;

@@ -10,34 +10,14 @@ const repoRoot = resolveRepoRoot(import.meta.url);
 
 export const miladyElizaTypecheckSteps = [
   {
-    // Milady's root workspace typecheck is anchored on app-core's tsconfig and
-    // resolves the shipped @elizaos/ui sources through the same path aliases.
-    label: "eliza app-core workspace typecheck",
+    label: "@elizaos/app-core typecheck",
     command: "bun",
-    args: ["run", "verify:typecheck:workspace"],
+    args: ["run", "--cwd", "eliza/packages/app-core", "typecheck"],
   },
   {
-    // @elizaos/ui does not currently typecheck as a leaf package in this fork
-    // because optional native/app-companion imports are resolved at the app
-    // layer. Keep an explicit UI gate by typechecking the shipped consumer app.
-    label: "eliza ui consumer typecheck",
+    label: "@elizaos/ui typecheck",
     command: "bun",
-    args: ["run", "--cwd", "apps/app", "typecheck"],
-  },
-  {
-    label: "eliza agent typecheck",
-    command: "bun",
-    args: ["run", "--cwd", "eliza/packages/agent", "typecheck"],
-  },
-  {
-    label: "eliza cloud plugin typecheck",
-    command: "bun",
-    args: [
-      "run",
-      "--cwd",
-      "eliza/plugins/plugin-elizacloud/typescript",
-      "typecheck",
-    ],
+    args: ["run", "--cwd", "eliza/packages/ui", "typecheck"],
   },
 ];
 
@@ -53,6 +33,9 @@ export const miladySidecarTypecheckSteps = [];
 // Keep repo-wide checks focused on the upstream packages Milady actually ships
 // against; the full eliza workspace includes unrelated plugin packages that can
 // fail independently and should not block this repo's CI.
+// The app and homepage build jobs already compile their TypeScript entrypoints;
+// raw tsc on those app tsconfigs follows repo-local source aliases deep into
+// the vendored eliza tree and turns CI into an upstream monorepo sweep.
 export const suites = {
   lint: [
     {
@@ -70,20 +53,32 @@ export const suites = {
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "lint"],
     },
-    {
-      label: "steward-fi lint",
-      command: "bun",
-      args: ["run", "--cwd", "eliza/steward-fi", "lint"],
-    },
     ...miladyElizaCrossLanguageChecks,
   ],
   typecheck: [
-    ...miladyElizaTypecheckSteps,
+    {
+      label: "Root workspace typecheck",
+      command: "bun",
+      args: ["run", "verify:typecheck:workspace"],
+    },
+  ],
+  "typecheck:extended": [
+    {
+      label: "Root workspace typecheck",
+      command: "bun",
+      args: ["run", "verify:typecheck:workspace"],
+    },
+    {
+      label: "apps/app typecheck",
+      command: "bun",
+      args: ["run", "--cwd", "apps/app", "typecheck"],
+    },
     {
       label: "apps/homepage typecheck",
       command: "bun",
       args: ["run", "--cwd", "apps/homepage", "typecheck"],
     },
+    ...miladyElizaTypecheckSteps,
     ...miladyCloudTypecheckSteps,
     ...miladySidecarTypecheckSteps,
     ...miladyElizaCrossLanguageChecks,

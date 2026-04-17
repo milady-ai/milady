@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BrandHero } from "./components/dashboard/BrandHero";
 import { ConnectionModal } from "./components/dashboard/ConnectionModal";
 import { InstanceGrid } from "./components/dashboard/InstanceGrid";
@@ -33,19 +33,6 @@ async function copyToClipboard(text: string): Promise<void> {
   await navigator.clipboard.writeText(text);
 }
 
-/**
- * MiladyControlHub — composition root for /dashboard.
- *
- * All business logic (discovery, auth, remote management) lives in AgentProvider.
- * This component just wires the UI layout together:
- *   DashboardShell (sidebar + canvas)
- *     BrandHero           — narrative, primary CTAs
- *     InstanceGrid        — unified runtime grid + filter chips
- *     QuickOpsStrip       — install / downloads / docs
- *     ConnectionModal     — attach-remote dialog (overlay)
- *
- * See docs/milady-dashboard-redesign.md for the full spec.
- */
 function MiladyControlHub() {
   const { isAuthenticated } = useAuth();
   const {
@@ -78,16 +65,10 @@ function MiladyControlHub() {
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
-  const localAgent = useMemo(
-    () => agents.find((a) => a.source === "local") ?? null,
-    [agents],
-  );
+  const localAgent = agents.find((agent) => agent.source === "local") ?? null;
   const launchUrl =
     localAgent?.webUiUrl ?? localAgent?.sourceUrl ?? LOCAL_AGENT_BASE;
 
-  // Local runtime readiness: ready if a local agent was discovered AND its
-  // status isn't "stopped" / "unknown". During the initial probe window
-  // (loading) we surface a "probing…" state instead of a hard "install" CTA.
   const isLocalReady =
     !!localAgent &&
     localAgent.status !== "stopped" &&
@@ -189,10 +170,6 @@ function MiladyControlHub() {
     }
   };
 
-  // Single smart dispatcher for every "open local" entry point in the
-  // app (hero CTA, sidebar row, empty-state CTA). Behavior branches on
-  // the current probe state so users never get a blind navigate to a
-  // dead port. See wave-h5.
   const handleOpenLocal = () => {
     if (isLocalReady) {
       openWebUIDirect(launchUrl);
@@ -205,7 +182,6 @@ function MiladyControlHub() {
       });
       return;
     }
-    // Offline — scroll to install block and tell the user what to do.
     scrollToInstall();
     setNotice({
       tone: "info",

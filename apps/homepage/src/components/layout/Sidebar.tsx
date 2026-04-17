@@ -9,20 +9,12 @@ const GITHUB_URL = "https://github.com/milady-ai/milady";
 export type LocalRuntimeState = "ready" | "probing" | "offline";
 
 export interface SidebarProps {
-  /** All known agents (used for counts). */
   agents: ManagedAgent[];
-  /** Current state of the local Milady runtime probe. */
   localState: LocalRuntimeState;
-  /** Called when user activates the open-local row. Smart dispatcher
-   * decides whether to launch, warn, or guide to install. */
   onOpenLocal: () => void;
-  /** Called when user clicks "Attach remote". */
   onAttachRemote: () => void;
-  /** Called when user clicks "Sign in to cloud" in session tile. */
   onSignIn: () => void;
-  /** Current sign-in poll state (drives session tile dot animation). */
   isSigningIn?: boolean;
-  /** Optional close handler — present on mobile drawer to dismiss. */
   onClose?: () => void;
 }
 
@@ -42,7 +34,6 @@ export function Sidebar({
       aria-label="Primary"
       className="flex h-full w-full flex-col gap-5 border-r border-border bg-[#08090d] px-4 py-5 text-white"
     >
-      {/* Brand mark */}
       <div className="flex items-center justify-between">
         <a
           href="/dashboard"
@@ -82,9 +73,6 @@ export function Sidebar({
         ) : null}
       </div>
 
-      {/* Nav groups. Kept intentionally thin — items earn their spot by
-          doing something. Former dashboard self-link + SOON placeholders
-          are gone (see wave-h5). */}
       <nav className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
         <div className="flex flex-col gap-0.5">
           <OpenLocalRow
@@ -115,7 +103,6 @@ export function Sidebar({
         </NavGroup>
       </nav>
 
-      {/* Session tile (bottom) */}
       <SessionTile onSignIn={onSignIn} isSigningIn={isSigningIn} />
     </aside>
   );
@@ -171,7 +158,6 @@ function NavItemExternal({
 }: {
   href: string;
   label: string;
-  /** Same-origin link — no target="_blank", no arrow glyph. */
   internal?: boolean;
 }) {
   return (
@@ -191,18 +177,6 @@ function NavItemExternal({
   );
 }
 
-/**
- * OpenLocalRow — state-aware launch row. All three states route through
- * the same click handler; the smart dispatcher upstream decides whether
- * to launch the runtime, ack the probe, or guide the user to install.
- *
- * - ready   → gold dot, crisp affordance, opens local ui
- * - probing → pulsing dot, "looking…" copy, disabled while we wait
- * - offline → dim dot, "start local" copy, click triggers install guidance
- *
- * Before: offline state was an inert div reading "no local runtime". Now
- * it's a helpful button — see wave-h5.
- */
 function OpenLocalRow({
   state,
   onClick,

@@ -34,7 +34,6 @@ import {
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
-  dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -43,6 +42,7 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
+import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
@@ -68,17 +68,26 @@ import {
   useCompanionSceneStatus,
 } from "@elizaos/app-companion";
 import "@elizaos/app-companion/register";
+// Side-effect: register LifeOps sidebar widgets + client methods on ElizaClient.
+import "@elizaos/app-lifeops/widgets";
+// Side-effect: register game operator surfaces + detail extensions.
+import "@elizaos/app-babylon/ui";
+import "@elizaos/app-scape/ui";
+import "@elizaos/app-hyperscape/ui";
+import "@elizaos/app-2004scape/ui";
+import "@elizaos/app-defense-of-the-agents/ui";
 import {
   AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
 } from "@elizaos/app-lifeops/ui";
+import { LifeOpsActivitySignalsEffect } from "@elizaos/app-lifeops/components/LifeOpsActivitySignalsEffect";
 import {
   ApprovalQueue,
   StewardLogo,
   TransactionHistory,
-} from "@elizaos/app-steward";
+} from "@elizaos/app-steward/ui";
 import {
   CodingAgentControlChip,
   CodingAgentSettingsSection,
@@ -527,6 +536,7 @@ function mountReactApp(): void {
               <DesktopOnboardingRuntime />
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
+              <LifeOpsActivitySignalsEffect />
               <App />
             </>
           )}

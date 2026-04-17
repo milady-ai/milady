@@ -22,12 +22,23 @@ test("settings exposes computer use capability controls", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("onboarding exposes computer use feature and permissions step", async ({
-  page,
-}) => {
+test("onboarding exposes the computer use feature toggle", async ({ page }) => {
   await seedAppStorage(page, {
+    "eliza:onboarding-complete": "0",
     "elizaos:onboarding:force-fresh": "1",
     "eliza:onboarding:step": "features",
+    "elizaos:active-server": "",
+  });
+  await page.route("**/api/onboarding/status", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ complete: false }),
+    });
   });
 
   await page.goto("/chat", { waitUntil: "domcontentloaded" });
@@ -37,23 +48,10 @@ test("onboarding exposes computer use feature and permissions step", async ({
   await expect(
     onboarding.getByText("Computer Use", { exact: true }),
   ).toBeVisible();
-
-  const featureCard = onboarding
-    .locator("div")
-    .filter({ has: onboarding.getByText("Computer Use", { exact: true }) })
-    .first();
-
-  await featureCard.getByRole("button", { name: "Enable" }).click();
   await expect(
-    featureCard.getByRole("button", { name: "Disable" }),
-  ).toBeVisible();
-
-  await onboarding.getByRole("button", { name: "Continue" }).click();
-
-  await expect(
-    onboarding.getByText("System Permissions", { exact: true }),
+    onboarding.getByText(/Accessibility and Screen Recording permissions\./),
   ).toBeVisible();
   await expect(
-    onboarding.getByText("Computer Use", { exact: true }),
+    onboarding.getByRole("button", { name: "Continue without features" }),
   ).toBeVisible();
 });

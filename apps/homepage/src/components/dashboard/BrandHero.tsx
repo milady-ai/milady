@@ -1,26 +1,10 @@
 export interface BrandHeroProps {
-  /** Whether a local Milady runtime responded to the last health probe. */
   isLocalReady: boolean;
-  /** True during the first few probes, before we give up on local. */
   isLocalProbing: boolean;
-  /**
-   * Single smart handler for the primary CTA regardless of state.
-   * App.tsx routes "ready" to launch, "probing" to a soft toast,
-   * and "offline" to install guidance. Keeps the click behavior
-   * coherent with the sidebar open-local row and the empty-state CTA.
-   */
   onOpenLocal: () => void;
   onAttachRemote: () => void;
 }
 
-/**
- * Zone 1 — narrative hero. Typography-dominant, full-width. No image slot
- * (agents don't have profile assets in the data model). A single soft gold
- * gradient accent sits behind the headline as atmosphere, never as content.
- *
- * Two CTAs only: the primary gold "Open Milady" and a ghost "Attach remote".
- * Cloud sign-in lives in the sidebar SessionTile — no need to nag here.
- */
 export function BrandHero({
   isLocalReady,
   isLocalProbing,
@@ -40,9 +24,6 @@ export function BrandHero({
 
   return (
     <section className="relative isolate overflow-hidden">
-      {/* Ambient gold wash — further off-screen, lower opacity, wider
-          falloff. Reads as weather, not as a glow. Clipped by parent so
-          it never drives horizontal scroll on narrow viewports. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -right-20 -top-24 h-[320px] w-[320px] opacity-[0.16] blur-3xl sm:-right-32 sm:-top-28 sm:h-[420px] sm:w-[420px] sm:opacity-[0.18] md:-right-40 md:h-[520px] md:w-[520px] md:opacity-[0.22]"
@@ -63,8 +44,6 @@ export function BrandHero({
               type="button"
               onClick={onOpenLocal}
               aria-label="Open local Milady runtime"
-              // Press feedback per taste-skill rule 5 (tactile: -1px on
-              // active). Softer tinted shadow replaces the neon outer glow.
               className="group inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-10px_rgba(240,185,11,0.55)] transition duration-200 active:translate-y-0 active:scale-[0.98] sm:px-5 sm:py-3 [@media(hover:hover)]:hover:-translate-y-0.5"
               style={{ background: "var(--gold-gradient-primary)" }}
             >

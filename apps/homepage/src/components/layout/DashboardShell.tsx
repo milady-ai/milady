@@ -13,11 +13,6 @@ export interface DashboardShellProps {
   isSigningIn?: boolean;
 }
 
-/**
- * DashboardShell owns the two-column layout: Sidebar (left rail, pinned) +
- * scrollable main canvas. On viewports below lg, the sidebar collapses
- * behind a menu button and slides in as a drawer.
- */
 export function DashboardShell({
   children,
   agents,
@@ -44,13 +39,11 @@ export function DashboardShell({
 
   return (
     <div className="relative min-h-[100dvh] bg-[#050507] text-white selection:bg-brand selection:text-black">
-      {/* Subtle ambient gradient behind everything (one gold tint only) */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_10%_0%,rgba(240,185,11,0.10),transparent_45%),linear-gradient(180deg,#050507_0%,#07070b_70%,#050507_100%)]"
       />
 
-      {/* Desktop sidebar */}
       <div className="fixed inset-y-0 left-0 z-30 hidden w-[240px] lg:block">
         <Sidebar
           agents={agents}
@@ -62,7 +55,6 @@ export function DashboardShell({
         />
       </div>
 
-      {/* Mobile drawer */}
       {drawerOpen ? (
         <>
           <div
@@ -84,9 +76,7 @@ export function DashboardShell({
         </>
       ) : null}
 
-      {/* Main canvas */}
       <div className="relative z-10 lg:pl-[240px]">
-        {/* Mobile topbar — sticky so drawer button stays reachable on long scrolls */}
         <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-[#08090d]/85 px-4 py-3 backdrop-blur-md lg:hidden">
           <button
             type="button"

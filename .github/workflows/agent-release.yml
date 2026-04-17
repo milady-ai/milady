@@ -317,6 +317,8 @@ jobs:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Init non-eliza submodules
         run: |
           node scripts/init-submodules.mjs
@@ -330,11 +332,16 @@ jobs:
           set -euo pipefail
           ROOT_OWNER="$(stat -c '%u:%g' /)"
           echo "Runner root owner: ${ROOT_OWNER}"
-          if [ "${ROOT_OWNER}" != "0:0" ]; then
-            echo "Repairing / ownership so snapd/systemd path canonicalization accepts this runner"
-            sudo chown root:root /
+          if [ "${ROOT_OWNER}" = "0:0" ]; then
+            echo "Root is already 0:0 — snapd canonicalization OK"
+            exit 0
           fi
-          test "$(stat -c '%u:%g' /)" = "0:0"
+          echo "Attempting to repair / ownership so snapd/systemd path canonicalization accepts this runner"
+          if sudo -n chown root:root / 2>/dev/null; then
+            echo "Chown succeeded; new owner: $(stat -c '%u:%g' /)"
+          else
+            echo "::warning::Unable to chown / to root:root (sudo unavailable or passwordless sudo disabled). snapd may fail downstream. Remediation: run this job on a standard ubuntu-latest / ubuntu-24.04 GitHub-hosted runner, or configure the container image so / is owned by 0:0."
+          fi
       - uses: snapcore/action-build@v1
         id: snap
       - name: Verify snap
@@ -356,6 +363,8 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install flatpak tools
         run: |
           sudo apt-get update
@@ -381,6 +390,8 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -405,7 +416,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: 22

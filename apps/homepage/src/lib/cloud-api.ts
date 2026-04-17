@@ -753,7 +753,7 @@ export class CloudApiClient {
           };
         }
       } catch {
-        // Invalid JSON, fall through to legacy endpoint
+        // Invalid JSON from /api/status; fall through to the throw below.
       }
     } else if (primary.status === 401 || primary.status === 403) {
       // If /api/status is auth-gated and we don't have a token, the agent is

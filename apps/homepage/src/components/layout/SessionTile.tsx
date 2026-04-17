@@ -1,11 +1,5 @@
 import { useAuth } from "../../lib/useAuth";
 
-/**
- * SessionTile — sidebar footer. De-carded per taste-skill Rule 4
- * (anti-card overuse): a status line doesn't need a container to earn
- * its hierarchy, a border-top is enough. Steady-state is a single quiet
- * row; the sign-in CTA only shows when unauthenticated.
- */
 export function SessionTile({
   onSignIn,
   isSigningIn = false,

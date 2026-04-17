@@ -6,7 +6,7 @@
       "runtimeExecutable": "/bin/zsh",
       "runtimeArgs": ["-l", "-c", "ELIZA_DEV_ONCHAIN=0 bun run dev"],
       "port": 2138,
-      "autoPort": true
+      "autoPort": false
     },
     {
       "name": "dev-ui-only",

@@ -5,13 +5,11 @@ import type { CloudClient, JobStatus } from "../../lib/cloud-api";
 export interface ProvisionAgentModalProps {
   cloudClient: CloudClient | null;
   onClose: () => void;
-  /** Fired after the provision job resolves (success or known error). */
   onProvisioned: (result: {
     id: string;
     name: string;
     jobStatus: JobStatus["status"] | "no-job";
   }) => void;
-  /** Fires on success only, so the shell can drop a toast + refresh the grid. */
   onRefreshList?: () => void;
 }
 
@@ -20,16 +18,6 @@ type Phase = "form" | "creating" | "provisioning" | "done" | "error";
 const MAX_POLL_ATTEMPTS = 48; // ~120s at 2.5s intervals
 const POLL_INTERVAL_MS = 2500;
 
-/**
- * ProvisionAgentModal
- *
- * Restores the "spin up an agent from the dashboard" flow that used to live
- * under CreateAgent.tsx. Slimmer form (name + optional system prompt), same
- * backend contract: POST /api/v1/milady/agents → POST /provision → poll job.
- *
- * Visual target: minimalist-ui (tight borders, generous padding, single gold
- * accent on the primary CTA). No secondary color.
- */
 export function ProvisionAgentModal({
   cloudClient,
   onClose,
@@ -49,7 +37,6 @@ export function ProvisionAgentModal({
   const isDone = phase === "done";
   const canSubmit = isAuthed && name.trim().length > 0 && !isWorking && !isDone;
 
-  // Cleanup polling + auto-close timers on unmount
   useEffect(() => {
     return () => {
       if (pollTimerRef.current !== null) {
@@ -63,9 +50,6 @@ export function ProvisionAgentModal({
     };
   }, []);
 
-  // After success, auto-close the modal. The agent is already in the grid
-  // (onRefreshList fired) and the shell toasted success — no need to
-  // keep the user parked on an empty form.
   useEffect(() => {
     if (phase !== "done") return;
     autoCloseTimerRef.current = setTimeout(() => {
@@ -79,7 +63,6 @@ export function ProvisionAgentModal({
     };
   }, [phase, onClose]);
 
-  // Close on Escape (unless mid-flight). After success, Esc closes immediately.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !isWorking) onClose();
@@ -119,7 +102,6 @@ export function ProvisionAgentModal({
           );
         }
       } catch {
-        // Transient: back off once, keep polling
         pollTimerRef.current = setTimeout(
           () => pollJob(jobId, finalName, finalId, attempt + 1),
           POLL_INTERVAL_MS * 2,
@@ -132,8 +114,6 @@ export function ProvisionAgentModal({
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      // Hard gate: if a job already resolved, never submit again. Prevents
-      // Enter-key and stray-click double provisions.
       if (!canSubmit || !cloudClient || isDone || isWorking) return;
       setError(null);
       setPhase("creating");
@@ -202,7 +182,6 @@ export function ProvisionAgentModal({
       className="fixed inset-0 z-[200] flex items-center justify-center"
       role="presentation"
     >
-      {/* Overlay */}
       <button
         type="button"
         aria-label="Close provision dialog"
@@ -212,7 +191,6 @@ export function ProvisionAgentModal({
         }}
       />
 
-      {/* Dialog */}
       <div
         role="dialog"
         aria-modal="true"
@@ -242,7 +220,6 @@ export function ProvisionAgentModal({
             </div>
           ) : null}
 
-          {/* Name */}
           <div className="space-y-1.5">
             <label
               htmlFor="provision-name"
@@ -265,7 +242,6 @@ export function ProvisionAgentModal({
             </p>
           </div>
 
-          {/* Optional system prompt */}
           <div className="space-y-1.5">
             <label
               htmlFor="provision-prompt"
@@ -285,7 +261,6 @@ export function ProvisionAgentModal({
             />
           </div>
 
-          {/* Status line (inline, never blocks the UI) */}
           {phase !== "form" ? (
             <div
               aria-live="polite"
@@ -303,7 +278,6 @@ export function ProvisionAgentModal({
             </div>
           ) : null}
 
-          {/* Actions */}
           <div className="flex items-center gap-3 pt-1">
             <button
               type="submit"

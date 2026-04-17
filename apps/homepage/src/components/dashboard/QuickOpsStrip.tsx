@@ -5,11 +5,6 @@ export interface QuickOpsStripProps {
   onCopy: (command: string, label: string) => void;
 }
 
-/**
- * Zone 3 — height-constrained strip. First-time user sees install + docs
- * links once, returning user ignores it. Three cards, collapses to stack
- * on mobile.
- */
 export function QuickOpsStrip({ onCopy }: QuickOpsStripProps) {
   const [platform, setPlatform] = useState<"shell" | "powershell">("shell");
   const command =
@@ -34,7 +29,6 @@ export function QuickOpsStrip({ onCopy }: QuickOpsStripProps) {
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        {/* Install command */}
         <div className="min-w-0 rounded-lg border border-border bg-[#0a0a0d] p-3.5 sm:p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="font-mono text-[11px] lowercase tracking-[0.12em] text-white/45">
@@ -68,7 +62,6 @@ export function QuickOpsStrip({ onCopy }: QuickOpsStripProps) {
           </div>
         </div>
 
-        {/* Downloads */}
         <div className="min-w-0 rounded-lg border border-border bg-[#0a0a0d] p-3.5 sm:p-4">
           <div className="mb-3 font-mono text-[11px] lowercase tracking-[0.12em] text-white/45">
             desktop
@@ -98,7 +91,6 @@ export function QuickOpsStrip({ onCopy }: QuickOpsStripProps) {
             )}
           </div>
         </div>
-
       </div>
     </section>
   );

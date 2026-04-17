@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { ManagedAgent } from "../../lib/AgentProvider";
 import { FilterChips } from "../ui/FilterChips";
 import { InstanceCard } from "./InstanceCard";
@@ -18,16 +18,10 @@ export interface InstanceGridProps {
   onDeleteCloud: (agent: ManagedAgent) => Promise<void>;
   onAttachRemote: () => void;
   onOpenLocal: () => void;
-  /** Opens the ProvisionAgentModal. Only rendered when signed in to cloud. */
   onProvisionAgent?: () => void;
-  /** True when the user has an authenticated cloud client. */
   canProvision: boolean;
 }
 
-/**
- * Zone 2 — unified instance grid. Replaces the three duplicated
- * InstanceGroup sections with a single grid + filter chips.
- */
 export function InstanceGrid({
   agents,
   loading,
@@ -44,26 +38,16 @@ export function InstanceGrid({
 }: InstanceGridProps) {
   const [filter, setFilter] = useState<GridFilter>("all");
 
-  const counts = useMemo(
-    () => ({
-      all: agents.length,
-      local: agents.filter((a) => a.source === "local").length,
-      cloud: agents.filter((a) => a.source === "cloud").length,
-      remote: agents.filter((a) => a.source === "remote").length,
-    }),
-    [agents],
-  );
-
-  const filtered = useMemo(
-    () =>
-      filter === "all" ? agents : agents.filter((a) => a.source === filter),
-    [filter, agents],
-  );
-
-  // When there are no runtimes yet, hide the filter/refresh/new-agent
-  // cluster entirely — those controls are irrelevant before the first
-  // runtime appears, and showing them adds a second row of visual noise
-  // above an already-quiet empty banner.
+  const counts = {
+    all: agents.length,
+    local: agents.filter((agent) => agent.source === "local").length,
+    cloud: agents.filter((agent) => agent.source === "cloud").length,
+    remote: agents.filter((agent) => agent.source === "remote").length,
+  };
+  const filtered =
+    filter === "all"
+      ? agents
+      : agents.filter((agent) => agent.source === filter);
   const showControls = agents.length > 0 || loading;
 
   return (
@@ -183,12 +167,6 @@ export function InstanceGrid({
   );
 }
 
-/**
- * GridSkeleton — taste-skill §5 (Skeletal loaders matching layout sizes).
- * The card shape/spacing mirrors `InstanceCard` exactly so the layout
- * doesn't jump when real data resolves. Shimmer sweep replaces generic
- * opacity pulse per taste-skill §8 (Skeleton Shimmer).
- */
 function GridSkeleton() {
   return (
     <div

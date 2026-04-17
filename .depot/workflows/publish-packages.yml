@@ -117,10 +117,12 @@ jobs:
       id-token: write # OIDC trusted publishing
     environment:
       name: pypi
-      url: https://pypi.org/project/milady/${{ needs.prepare.outputs.pypi_version }}/
+      url: https://pypi.org/project/elizaos-app/${{ needs.prepare.outputs.pypi_version }}/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -130,10 +132,10 @@ jobs:
         run: |
           PYPI_VERSION="${{ needs.prepare.outputs.pypi_version }}"
           sed -i "s/^version = .*/version = \"$PYPI_VERSION\"/" pyproject.toml
-          sed -i "s/^__version__ = .*/__version__ = \"$PYPI_VERSION\"/" milady/__init__.py
+          sed -i "s/^__version__ = .*/__version__ = \"$PYPI_VERSION\"/" elizaos_app/__init__.py
           echo "Updated to version: $PYPI_VERSION"
           grep "version" pyproject.toml | head -1
-          grep "__version__" milady/__init__.py
+          grep "__version__" elizaos_app/__init__.py
       - name: Build package
         working-directory: eliza/packages/app-core/packaging/pypi
         run: |
@@ -150,9 +152,9 @@ jobs:
         working-directory: eliza/packages/app-core/packaging/pypi
         run: |
           pip install dist/*.whl
-          python -c "import milady; print(f'milady {milady.__version__} loaded OK')"
+          python -c "import elizaos_app; print(f'elizaos_app {elizaos_app.__version__} loaded OK')"
           python -c "
-          from milady.loader import _parse_version
+          from elizaos_app.loader import _parse_version
           assert _parse_version('v22.12.0') == (22, 12, 0)
           print('Loader tests passed')
           "
@@ -176,6 +178,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Prepare snapcraft.yaml
         run: |
           mkdir -p snap
@@ -199,7 +203,7 @@ jobs:
       - name: Test snap
         run: |
           sudo snap install ${{ steps.snapcraft.outputs.snap }} --classic --dangerous
-          milady --version || echo "Version check completed"
+          elizaos-app --version || echo "Version check completed"
       - name: Publish to Snap Store
         if: success()
         uses: snapcore/action-publish@v1
@@ -219,6 +223,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Setup Node.js (system-wide for dpkg)
         run: |
           # Install Node.js 22 via NodeSource so dpkg-checkbuilddeps can find it
@@ -263,8 +269,8 @@ jobs:
       - name: Test .deb package
         run: |
           sudo dpkg -i deb-output/*.deb || sudo apt-get -f install -y
-          which milady
-          milady --version || echo "Version check completed"
+          which elizaos-app
+          elizaos-app --version || echo "Version check completed"
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
         with:
@@ -317,6 +323,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install Flatpak tools
         run: |
           sudo apt-get update
@@ -327,18 +335,18 @@ jobs:
       - name: Build Flatpak
         working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
-          flatpak-builder --repo=repo --force-clean build-dir ai.milady.Milady.yml
-          flatpak build-bundle repo milady.flatpak ai.milady.Milady
+          flatpak-builder --repo=repo --force-clean build-dir ai.elizaos.App.yml
+          flatpak build-bundle repo elizaos-app.flatpak ai.elizaos.App
       - name: Test Flatpak
         working-directory: eliza/packages/app-core/packaging/flatpak
         run: |
-          flatpak --user install -y milady.flatpak
-          flatpak run ai.milady.Milady --version || echo "Version check completed"
+          flatpak --user install -y elizaos-app.flatpak
+          flatpak run ai.elizaos.App --version || echo "Version check completed"
       - name: Upload Flatpak bundle
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-bundle
-          path: eliza/packages/app-core/packaging/flatpak/milady.flatpak
+          path: eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak
           retention-days: 90
       - name: Attach Flatpak to GitHub Release
         env:
@@ -349,7 +357,7 @@ jobs:
             echo "No GitHub release found for $TAG; skipping Flatpak attachment."
             exit 0
           fi
-          gh release upload "$TAG" eliza/packages/app-core/packaging/flatpak/milady.flatpak --clobber
+          gh release upload "$TAG" eliza/packages/app-core/packaging/flatpak/elizaos-app.flatpak --clobber
   # ── Summary ────────────────────────────────────────────────────────────
   publish-summary:
     name: Publish Summary
@@ -365,7 +373,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| PyPI (milady ${{ needs.prepare.outputs.pypi_version }}) | ${{ needs.publish-pypi.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PyPI (elizaos-app ${{ needs.prepare.outputs.pypi_version }}) | ${{ needs.publish-pypi.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Homebrew | handled by update-homebrew.yml |" >> $GITHUB_STEP_SUMMARY
           echo "| Snap | ${{ needs.publish-snap.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Debian (.deb) | ${{ needs.build-deb.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
@@ -373,7 +381,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Install commands" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "pip install milady==${{ needs.prepare.outputs.pypi_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "brew install milady-ai/tap/milady" >> $GITHUB_STEP_SUMMARY
-          echo "sudo snap install milady --classic" >> $GITHUB_STEP_SUMMARY
+          echo "pip install elizaos-app==${{ needs.prepare.outputs.pypi_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "brew install elizaos-app" >> $GITHUB_STEP_SUMMARY
+          echo "sudo snap install elizaos-app --classic" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

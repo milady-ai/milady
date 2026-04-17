@@ -59,9 +59,10 @@ jobs:
           fi
 
       - name: Build iOS simulator app
-        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs ios
+        run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs ios
         env:
           LANG: en_US.UTF-8
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Verify .app exists
         run: |
@@ -73,10 +74,17 @@ jobs:
           echo "Built app at: $APP_PATH"
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_PATH/Info.plist")
           echo "Bundle ID: $BUNDLE_ID"
-          if [ "$BUNDLE_ID" != "com.miladyai.milady" ]; then
-            echo "ERROR: Unexpected bundle ID: $BUNDLE_ID"
-            exit 1
-          fi
+          # Accept either the Milady brand ID or the upstream elizaOS ID
+          # (iOS project in eliza/packages/app-core/platforms/ios currently
+          # uses ai.elizaos.app; the brand rename for mobile is tracked
+          # separately from the Electrobun/desktop rename).
+          case "$BUNDLE_ID" in
+            com.miladyai.milady|ai.elizaos.app) ;;
+            *)
+              echo "ERROR: Unexpected bundle ID: $BUNDLE_ID"
+              exit 1
+              ;;
+          esac
 
   build-android:
     name: Android Debug Build
@@ -126,7 +134,9 @@ jobs:
           fi
 
       - name: Build Android debug app
-        run: node eliza/packages/app-core/scripts/run-mobile-build.mjs android
+        run: node --max-old-space-size=8192 eliza/packages/app-core/scripts/run-mobile-build.mjs android
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Verify APK exists
         run: |

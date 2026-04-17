@@ -1,8 +1,7 @@
 /**
- * Test setup — mocks browser APIs for Node.js vitest environment.
+ * Shared jsdom setup for app tests.
  *
- * All navigator sub-objects (mediaDevices, geolocation, permissions, clipboard)
- * are created here with vi.fn() stubs so tests can vi.spyOn() them freely.
+ * Navigator sub-objects are installed as `vi.fn()` stubs so tests can spy on them.
  */
 
 import React from "react";
@@ -331,8 +330,8 @@ if (typeof globalThis.window !== "undefined") {
     typeof originalEmit === "function" &&
     !originalEmit[JSDOM_EMIT_PATCH_MARK]
   ) {
-    // Installed as a side-effect into jsdom's window; not imported
-    // elsewhere. CodeFlow's unused-function heuristic mis-flags this.
+    // Patched through jsdom's window side effects, so static analysis may not
+    // see a direct import site.
     const patchedEmit = function patchedEmit(eventName, ...args) {
       const [firstArg] = args;
       if (
@@ -416,9 +415,15 @@ if (typeof globalThis.window === "undefined") {
   Object.defineProperty(globalThis, "window", {
     value: {
       close: vi.fn(),
+      encodeURIComponent,
       focus: vi.fn(),
       open: vi.fn(),
-      location: { reload: vi.fn() },
+      location: {
+        href: "http://localhost/",
+        origin: "http://localhost",
+        pathname: "/",
+        reload: vi.fn(),
+      },
       screenX: 0,
       screenY: 0,
       outerWidth: 1920,

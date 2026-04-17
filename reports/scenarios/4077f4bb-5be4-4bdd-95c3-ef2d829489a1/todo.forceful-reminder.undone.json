@@ -1,0 +1,28 @@
+{
+  "id": "todo.forceful-reminder.undone",
+  "title": "Undone overdue todo prompts forceful reminder on greeting",
+  "domain": "todos",
+  "tags": [
+    "lifeops",
+    "todos",
+    "smoke",
+    "retry-after-failure"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:17:47.482Z",
+  "completedAtIso": "2026-04-17T00:17:48.218Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

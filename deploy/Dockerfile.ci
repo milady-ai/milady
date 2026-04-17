@@ -1,0 +1,543 @@
+# syntax=docker/dockerfile:1.7
+# elizaOS Agent — CI Docker Image
+# Pre-built artifacts come from GHA (bun install + tsdown + vite build done before docker)
+ARG NODE_VERSION=22
+ARG BUN_VERSION=1.3.10
+ARG ESBUILD_VERSION=0.28.0
+ARG APP_ENTRYPOINT=app.mjs
+ARG APP_CMD_START=""
+ARG APP_PORT=2138
+ARG APP_API_BIND=127.0.0.1
+ARG OCI_SOURCE=""
+ARG OCI_TITLE="elizaOS Agent"
+ARG OCI_DESCRIPTION="elizaOS agent runtime"
+ARG OCI_LICENSES="MIT"
+ARG VERSION=""
+ARG VERSION_CLEAN=""
+ARG REVISION=""
+
+FROM node:${NODE_VERSION}-slim AS pruner
+WORKDIR /app
+COPY . .
+
+# ===== Replace workspace symlinks with actual compiled packages =====
+# Bun workspace symlinks break in Docker. Delete the symlinks entirely
+# and replace with the actual package contents + CI-compiled dist/.
+RUN set -x; \
+    # @elizaos/core: delete symlink, copy package + compiled dist
+    rm -rf node_modules/@elizaos/core; \
+    mkdir -p node_modules/@elizaos/core; \
+    cp eliza/packages/typescript/package.json node_modules/@elizaos/core/; \
+    cp -a eliza/packages/typescript/dist node_modules/@elizaos/core/dist 2>/dev/null || true; \
+    # NOTE: Do NOT copy src/ - tsx will prefer raw .ts over compiled dist/
+    # cp -a eliza/packages/typescript/src node_modules/@elizaos/core/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/core/dist/node/index.node.js 2>/dev/null && echo "@elizaos/core dist OK" || echo "WARN: core dist/node missing"; \
+    # @elizaos/agent: delete symlink, copy package + compiled dist
+    rm -rf node_modules/@elizaos/agent; \
+    mkdir -p node_modules/@elizaos/agent; \
+    cp eliza/packages/agent/package.json node_modules/@elizaos/agent/; \
+    cp -a eliza/packages/agent/dist node_modules/@elizaos/agent/dist 2>/dev/null || true; \
+    # NOTE: Do NOT copy src/ - tsx will prefer raw .ts over compiled dist/
+    # cp -a eliza/packages/agent/src node_modules/@elizaos/agent/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/agent/dist/ 2>/dev/null | head -3 && echo "@elizaos/agent dist OK" || echo "WARN: agent dist missing"; \
+    # @elizaos/shared: DON'T replace — the npm version or resolved workspace symlink works.
+    # Workspace package.json exports point to ./src/*.ts (tsx handles this).
+    # Replacing with dist-only breaks resolution since exports don't match dist layout.
+    # @elizaos/app-companion: copy real package contents instead of relying on a workspace symlink
+    # The runtime executes agent/src under tsx, and static imports like
+    # @elizaos/app-companion/plugin must resolve through node_modules at runtime.
+    rm -rf node_modules/@elizaos/app-companion; \
+    mkdir -p node_modules/@elizaos/app-companion; \
+    cp eliza/apps/app-companion/package.json node_modules/@elizaos/app-companion/; \
+    cp -a eliza/apps/app-companion/src node_modules/@elizaos/app-companion/src 2>/dev/null || true; \
+    cp eliza/apps/app-companion/assets.json node_modules/@elizaos/app-companion/assets.json 2>/dev/null || true; \
+    ls node_modules/@elizaos/app-companion/src/plugin.ts 2>/dev/null && echo "@elizaos/app-companion src OK" || echo "WARN: app-companion src missing"; \
+    # @elizaos/app-lifeops: runtime statically imports /plugin, so ship real package contents
+    rm -rf node_modules/@elizaos/app-lifeops; \
+    mkdir -p node_modules/@elizaos/app-lifeops; \
+    cp eliza/apps/app-lifeops/package.json node_modules/@elizaos/app-lifeops/; \
+    cp -a eliza/apps/app-lifeops/src node_modules/@elizaos/app-lifeops/src 2>/dev/null || true; \
+    ls node_modules/@elizaos/app-lifeops/src/plugin.ts 2>/dev/null && echo "@elizaos/app-lifeops src OK" || echo "WARN: app-lifeops src missing"
+# Link any remaining missing workspace app packages to node_modules
+RUN for app_dir in eliza/apps/app-coding eliza/apps/app-shopify; do \
+      if [ -d "$app_dir" ]; then \
+        PKG_NAME=$(node -p "require('./${app_dir}/package.json').name" 2>/dev/null); \
+        if [ -n "$PKG_NAME" ] && [ ! -e "node_modules/$PKG_NAME" ]; then \
+          mkdir -p "node_modules/$(dirname $PKG_NAME)"; \
+          ln -s "../../$app_dir" "node_modules/$PKG_NAME"; \
+          echo "Linked: $PKG_NAME -> $app_dir"; \
+        fi; \
+      fi; \
+    done
+# Remove broken nested @elizaos/core entries in eliza subdirs.
+# bun creates workspace symlinks like eliza/apps/app-lifeops/node_modules/@elizaos/core
+# that resolve correctly in CI but point nowhere in Docker. Removing them forces
+# Node's module resolution to walk up to root node_modules/@elizaos/core instead.
+RUN find eliza -path '*/node_modules/@elizaos/core' -not -path '*/node_modules/.bun/*' \
+    | while read p; do rm -rf "$p" && echo "Removed nested: $p"; done; true
+
+# ===== End symlink replacement =====
+
+# Delete raw TypeScript source from eliza workspace packages.
+# tsx prefers .ts over compiled .js, causing cascading dep resolution failures.
+# eliza/packages/typescript/src is kept because tsx resolves @elizaos/core imports via
+# tsconfig paths that point here (e.g. @elizaos/core/utils/context-catalog). Removing it
+# breaks agent startup even though the compiled dist is also present.
+
+# Patch @noble/ciphers: add extensionless export aliases (./aes, ./chacha, etc.)
+# crypto-compat.ts imports '@noble/ciphers/aes' but the package only exports './aes.js'.
+# Same pattern as the @noble/hashes patch in patch-deps.mjs.
+RUN node - <<'__NOBLE_PATCH__'
+const fs = require('fs');
+const path = require('path');
+function patchExtensionlessExports(dir) {
+  const pkgPath = path.join(dir, 'package.json');
+  if (!fs.existsSync(pkgPath)) return;
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  if (!pkg.exports) return;
+  let changed = false;
+  const entries = Object.entries(pkg.exports);
+  for (const [key, val] of entries) {
+    if (key.endsWith('.js')) {
+      const stripped = key.slice(0, -3);
+      if (!pkg.exports[stripped]) {
+        pkg.exports[stripped] = val;
+        changed = true;
+      }
+    }
+  }
+  if (changed) {
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+    console.log('[patch-deps] Patched ' + pkg.name + ' exports: added extensionless aliases.');
+  }
+}
+patchExtensionlessExports('node_modules/@noble/ciphers');
+patchExtensionlessExports('node_modules/@noble/curves');
+__NOBLE_PATCH__
+
+# Fix dist layout: package.json says dist/index.node.js but build creates dist/node/index.node.js
+RUN CORE_DIR="node_modules/@elizaos/core"; \
+    if [ -f "$CORE_DIR/dist/node/index.node.js" ] && [ ! -f "$CORE_DIR/dist/index.node.js" ]; then \
+      ln -s node/index.node.js "$CORE_DIR/dist/index.node.js"; \
+      echo "Linked dist/index.node.js -> dist/node/index.node.js"; \
+    fi; \
+    if [ -f "$CORE_DIR/dist/browser/index.browser.js" ] && [ ! -f "$CORE_DIR/dist/index.browser.js" ]; then \
+      ln -s browser/index.browser.js "$CORE_DIR/dist/index.browser.js"; \
+    fi
+
+# Hoist missing deps from workspace packages to top-level node_modules
+# tsx resolves raw .ts source which imports packages not hoisted by bun
+RUN for pkg_dir in eliza/packages/typescript eliza/packages/shared eliza/packages/agent eliza/apps/app-companion eliza/apps/app-lifeops; do \
+      if [ -d "$pkg_dir/node_modules" ]; then \
+        for dep in $(ls "$pkg_dir/node_modules/" 2>/dev/null | grep -v '^\.'); do \
+          if [ ! -e "node_modules/$dep" ] && [ -d "$pkg_dir/node_modules/$dep" ]; then \
+            cp -a "$pkg_dir/node_modules/$dep" "node_modules/$dep"; \
+            echo "Hoisted: $dep"; \
+          fi; \
+        done; \
+        for scope in $(ls "$pkg_dir/node_modules/@"* 2>/dev/null -d | xargs -I{} basename {}); do \
+          if [ -d "$pkg_dir/node_modules/@$scope" ]; then \
+            mkdir -p "node_modules/@$scope"; \
+            for dep in $(ls "$pkg_dir/node_modules/@$scope/" 2>/dev/null); do \
+              if [ ! -e "node_modules/@$scope/$dep" ]; then \
+                cp -a "$pkg_dir/node_modules/@$scope/$dep" "node_modules/@$scope/$dep"; \
+                echo "Hoisted: @$scope/$dep"; \
+              fi; \
+            done; \
+          fi; \
+        done; \
+      fi; \
+    done
+
+# Two-phase fix for missing workspace plugins and their deps:
+#
+# Phase 1: Hoist packages from node_modules/.bun/ to node_modules/.
+# bun resolves packages and stores them in .bun/ but when workspace:* entries
+# have empty plugin dirs, the hoisting symlinks are never created. Copy them.
+#
+# Phase 2: Tarball-install packages NOT in .bun/ at all (published to npm with
+# workspace:* in their own deps, so npm install fails for them too).
+RUN node - <<'__HOIST__'
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const https = require('https');
+
+// isAccessible: follows symlinks, returns false for broken symlinks
+function isAccessible(p) { return fs.existsSync(p); }
+// symlinkExists: uses lstatSync, returns true even for broken symlinks
+function symlinkExists(p) { try { fs.lstatSync(p); return true; } catch(e) { return false; } }
+// ensureDst: removes broken symlinks so cp -r can proceed cleanly
+function ensureDst(dst) {
+  if (isAccessible(dst)) return false; // real dir/file exists, skip
+  if (symlinkExists(dst)) fs.unlinkSync(dst); // delete broken symlink
+  return true; // proceed with copy
+}
+
+// --- Phase 1: Hoist .bun/ -> node_modules/ ---
+// bun stores packages in .bun/<name@ver>/node_modules/<scope>/<pkg>/ but
+// doesn't create root-level node_modules symlinks when workspace:* entries
+// have empty plugin dirs. Also, bun may create broken relative symlinks for
+// packages in the CI workspace that don't resolve inside Docker. Replace both.
+const bunDir = 'node_modules/.bun';
+let hoisted = 0;
+if (fs.existsSync(bunDir)) {
+  for (const entry of fs.readdirSync(bunDir)) {
+    const nmPath = path.join(bunDir, entry, 'node_modules');
+    if (!fs.existsSync(nmPath)) continue;
+    for (const pkg of fs.readdirSync(nmPath)) {
+      if (pkg.startsWith('@')) {
+        const scopeDir = path.join(nmPath, pkg);
+        try { if (!fs.statSync(scopeDir).isDirectory()) continue; } catch(e) { continue; }
+        fs.mkdirSync(path.join('node_modules', pkg), {recursive:true});
+        for (const sub of fs.readdirSync(scopeDir)) {
+          const src = path.join(scopeDir, sub);
+          const dst = path.join('node_modules', pkg, sub);
+          try {
+            if (ensureDst(dst) && fs.statSync(src).isDirectory()) {
+              execSync('cp -r "' + src + '" "' + dst + '"');
+              hoisted++;
+            }
+          } catch(e) { /* skip broken .bun entries */ }
+        }
+      } else {
+        const src = path.join(nmPath, pkg);
+        const dst = path.join('node_modules', pkg);
+        try {
+          if (ensureDst(dst) && fs.statSync(src).isDirectory()) {
+            execSync('cp -r "' + src + '" "' + dst + '"');
+            hoisted++;
+          }
+        } catch(e) { /* skip */ }
+      }
+    }
+  }
+}
+console.log('Phase 1: hoisted ' + hoisted + ' packages from .bun/');
+
+// --- Phase 2: Tarball-install packages not in .bun/ ---
+// These plugins publish to npm with workspace:* deps so npm install fails.
+// We only need the package itself; @elizaos/core and other @elizaos/* are
+// already in the image from the main bun install.
+function installTarball(name, cb) {
+  const pkgDir = 'node_modules/' + name;
+  if (fs.existsSync(pkgDir + '/package.json')) {
+    console.log('Phase 2: already present: ' + name);
+    return cb && cb();
+  }
+  const url = execSync('npm view ' + name + ' dist.tarball 2>/dev/null', {encoding:'utf8'}).trim();
+  if (!url) { console.log('Phase 2 WARN: no tarball for ' + name); return cb && cb(); }
+  const tmp = '/tmp/tb_' + name.replace(/[^a-z0-9]/gi,'_');
+  https.get(url, res => {
+    const chunks = [];
+    res.on('data', c => chunks.push(c));
+    res.on('end', () => {
+      try {
+        fs.mkdirSync(tmp, {recursive:true});
+        fs.writeFileSync(tmp + '.tgz', Buffer.concat(chunks));
+        execSync('tar xz -C ' + tmp + ' -f ' + tmp + '.tgz');
+        const scope = name.startsWith('@') ? name.split('/')[0] : null;
+        if (scope) fs.mkdirSync('node_modules/' + scope, {recursive:true});
+        execSync('rm -rf ' + pkgDir);
+        execSync('mv ' + tmp + '/package ' + pkgDir);
+        const v = JSON.parse(fs.readFileSync(pkgDir + '/package.json','utf8')).version;
+        console.log('Phase 2: installed ' + name + '@' + v);
+      } catch(e) { console.error('Phase 2 WARN ' + name + ': ' + e.message); }
+      cb && cb();
+    });
+  }).on('error', e => { console.error('Phase 2 WARN ' + name + ': ' + e.message); cb && cb(); });
+}
+const phase2 = [
+  '@elizaos/plugin-agent-skills',
+  '@elizaos/plugin-anthropic',
+  '@elizaos/plugin-local-embedding',
+  'jsonrepair',
+];
+(function next(i) { if (i >= phase2.length) return; installTarball(phase2[i], () => next(i+1)); })(0);
+__HOIST__
+
+# Patch plugin-agent-skills getCatalogStats crash (alpha.11 vs alpha.66 interface mismatch)
+RUN sed -i 's/const stats = service.getCatalogStats();/const stats = typeof service.getCatalogStats === "function" ? service.getCatalogStats() : { loaded: 0, total: 0, storageType: "unknown" };/g' node_modules/@elizaos/plugin-agent-skills/dist/index.js 2>/dev/null || true
+ARG VERSION_CLEAN
+
+# Patch autonomous version
+RUN if [ -n "${VERSION_CLEAN}" ]; then \
+  node -e " \
+  const fs = require('fs'); \
+  const v = '${VERSION_CLEAN}'; \
+  try { \
+  const p = JSON.parse(fs.readFileSync('node_modules/@elizaos/agent/package.json', 'utf8')); \
+  p.version = v; \
+  fs.writeFileSync('node_modules/@elizaos/agent/package.json', JSON.stringify(p, null, 2)); \
+  console.log('Patched autonomous to', v); \
+  } catch(e) { console.log('skip:', e.message); } \
+  "; \
+  fi
+
+# Stub heavy native ML deps that plugin-local-embedding imports at boot.
+# onnxruntime-node is a large native binary (~100MB) not needed in cloud.
+# Create no-op stubs so the import succeeds without crashing the agent.
+RUN node - <<'__STUBS__'
+const fs = require('fs');
+// ESM stub: exports a Proxy default + common named exports so both
+// `import pkg` and `import { AutoTokenizer }` resolve without crashing.
+const esmStub = `
+const handler = { get: () => new Proxy(() => {}, { get: () => new Proxy(() => {}, { apply: () => Promise.resolve({}), get: () => () => {} }) }) };
+const stub = new Proxy({}, handler);
+export default stub;
+export const AutoTokenizer = stub;
+export const PreTrainedTokenizer = stub;
+export const env = stub;
+`;
+// CJS stub for packages that don't need named ESM exports
+const cjsNoop = 'const stub = new Proxy({}, { get: () => new Proxy(()=>{},{get:()=>new Proxy(()=>{},{apply:()=>Promise.resolve({}),get:()=>()=>{}})}) }); module.exports = stub; module.exports.default = stub;';
+const pkgs = [
+  ['@huggingface/transformers', esmStub, true],
+  ['@huggingface/tokenizers', esmStub, true],
+  ['onnxruntime-node', cjsNoop, false],
+  ['onnxruntime-web', cjsNoop, false],
+];
+for (const [name, code, esm] of pkgs) {
+  const dir = 'node_modules/' + name;
+  if (!fs.existsSync(dir + '/package.json')) {
+    const scope = name.startsWith('@') ? name.split('/')[0] : null;
+    if (scope) fs.mkdirSync('node_modules/' + scope, {recursive:true});
+    fs.mkdirSync(dir, {recursive:true});
+    const pkg = {name, version:'0.0.0-cloud-stub'};
+    if (esm) {
+      pkg.type = 'module';
+      pkg.main = 'index.mjs';
+      fs.writeFileSync(dir + '/index.mjs', code);
+    } else {
+      pkg.main = 'index.js';
+      fs.writeFileSync(dir + '/index.js', code);
+    }
+    fs.writeFileSync(dir + '/package.json', JSON.stringify(pkg));
+    console.log('stubbed: ' + name + (esm ? ' (esm)' : ' (cjs)'));
+  } else {
+    console.log('present: ' + name);
+  }
+}
+__STUBS__
+
+# Stub missing @elizaos/app-* packages used by registerAppRoutePlugins.
+# They are dynamically imported for optional route registration; empty plugin stubs
+# prevent the import from throwing.
+RUN node - <<'__APP_STUBS__'
+const fs = require('fs');
+const emptyPlugin = `export const vincentPlugin = { name: 'vincent-stub', routes: [] };
+export const shopifyPlugin = { name: 'shopify-stub', routes: [] };
+export const stewardPlugin = { name: 'steward-stub', routes: [] };
+export default { routes: [] };
+`;
+// app-knowledge: stub for routes + service-loader subpaths
+const knowledgeRoutes = `export async function handleKnowledgeRoutes() { return false; }
+export default { handleKnowledgeRoutes };
+`;
+const knowledgeServiceLoader = `export function getKnowledgeService() { return null; }
+export function getKnowledgeTimeoutMs() { return 30000; }
+export default { getKnowledgeService, getKnowledgeTimeoutMs };
+`;
+// Generic plugin-style apps (vincent/shopify/steward)
+const apps = [
+  '@elizaos/app-vincent',
+  '@elizaos/app-shopify',
+  '@elizaos/app-steward',
+];
+for (const name of apps) {
+  const dir = 'node_modules/' + name;
+  if (fs.existsSync(dir + '/package.json')) { console.log('present: ' + name); continue; }
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(dir + '/plugin.mjs', emptyPlugin);
+  // app-steward has extra subpath imports from dist/api/server.js
+  if (name === '@elizaos/app-steward') {
+    const routeStub = `export async function resolveWalletExportRejection() { return null; }\nexport default {};`;
+    const secStub = `export async function hydrateWalletKeysFromNodePlatformSecureStore() { return null; }\nexport async function deleteWalletSecretsFromOsStore() { return null; }\nexport default {};`;
+    fs.writeFileSync(dir + '/routes-stub.mjs', routeStub);
+    fs.writeFileSync(dir + '/security-stub.mjs', secStub);
+    fs.writeFileSync(dir + '/package.json', JSON.stringify({
+      name, version: '0.0.0-cloud-stub', type: 'module',
+      exports: {
+        './plugin': './plugin.mjs', '.': './plugin.mjs',
+        './routes/server-wallet-trade': './routes-stub.mjs',
+        './security/hydrate-wallet-keys-from-platform-store': './security-stub.mjs',
+        './security/wallet-os-store-actions': './security-stub.mjs',
+      }
+    }));
+  } else {
+    fs.writeFileSync(dir + '/package.json', JSON.stringify({
+      name, version: '0.0.0-cloud-stub', type: 'module',
+      exports: { './plugin': './plugin.mjs', '.': './plugin.mjs' }
+    }));
+  }
+  console.log('stubbed: ' + name);
+}
+// app-knowledge with subpath exports
+const knDir = 'node_modules/@elizaos/app-knowledge';
+if (!fs.existsSync(knDir + '/package.json')) {
+  fs.mkdirSync(knDir, { recursive: true });
+  fs.writeFileSync(knDir + '/routes.mjs', knowledgeRoutes);
+  fs.writeFileSync(knDir + '/service-loader.mjs', knowledgeServiceLoader);
+  fs.writeFileSync(knDir + '/index.mjs', 'export * from "./routes.mjs"; export * from "./service-loader.mjs";');
+  fs.writeFileSync(knDir + '/package.json', JSON.stringify({
+    name: '@elizaos/app-knowledge', version: '0.0.0-cloud-stub', type: 'module',
+    exports: {
+      '.': './index.mjs',
+      './routes': './routes.mjs',
+      './service-loader': './service-loader.mjs'
+    }
+  }));
+  console.log('stubbed: @elizaos/app-knowledge');
+}
+// app-task-coordinator: 9 subpaths imported across agent/src/api/*
+const tcDir = 'node_modules/@elizaos/app-task-coordinator';
+if (!fs.existsSync(tcDir + '/package.json')) {
+  fs.mkdirSync(tcDir + '/api', { recursive: true });
+  fs.mkdirSync(tcDir + '/evals', { recursive: true });
+  const noopStub = `export default {};`;
+  // All subpaths get a no-op stub exporting the known named exports
+  // Known named exports per the real @elizaos/app-task-coordinator src.
+  // All functions are no-ops; classes/types get empty Proxies.
+  const stubs = {
+    'api/coordinator-types': `export const coordinatorTypes = {};\nexport default {};`,
+    'api/coordinator-wiring': `export async function wireCoordinatorBridgesWhenReady() { return { disposed: true, dispose: () => {} }; }\nexport default {};`,
+    'api/task-agent-message-routing': `export async function routeTaskAgentTextToConnector() { return false; }\nexport async function routeTaskAgentMessage() { return null; }\nexport default {};`,
+    'api/coding-agents-auth-sanitize': `export function sanitizeAuthResult(input) { return { ok: false, redacted: null }; }\nexport default {};`,
+    'api/coding-agents-preflight-normalize': `export function normalizePreflightAuth() { return { status: 'unknown' }; }\nexport default {};`,
+    'evals/coordinator-eval-client': `export function resolveCoordinatorEvalBaseUrl() { return ''; }\nexport class CoordinatorEvalClient {}\nexport default {};`,
+    'evals/coordinator-live-runner': `export async function runCoordinatorLiveScenarios() { return { checks: [] }; }\nexport default {};`,
+    'evals/coordinator-preflight': `export async function runCoordinatorPreflight() { return { checks: [], channels: [] }; }\nexport default {};`,
+    'evals/coordinator-scenarios': `export const coordinatorScenarios = [];\nexport const coordinatorScenarioById = new Map();\nexport function listCoordinatorScenarios() { return []; }\nexport function countCoordinatorScenariosByFamily() { return {}; }\nexport default {};`,
+  };
+  const exportsMap = { '.': './index.mjs' };
+  for (const [subpath, code] of Object.entries(stubs)) {
+    fs.writeFileSync(tcDir + '/' + subpath + '.mjs', code);
+    exportsMap['./' + subpath] = './' + subpath + '.mjs';
+  }
+  fs.writeFileSync(tcDir + '/index.mjs', 'export * from "./api/coordinator-types.mjs";');
+  fs.writeFileSync(tcDir + '/package.json', JSON.stringify({
+    name: '@elizaos/app-task-coordinator', version: '0.0.0-cloud-stub', type: 'module',
+    exports: exportsMap
+  }));
+  console.log('stubbed: @elizaos/app-task-coordinator (9 subpaths)');
+}
+// app-training: imported by agent/src/api/server.ts for training/trajectory routes
+const trDir = 'node_modules/@elizaos/app-training';
+if (!fs.existsSync(trDir + '/package.json')) {
+  fs.mkdirSync(trDir + '/routes', { recursive: true });
+  const trainingStub = `export function handleTrainingRoutes() { return null; }\nexport default {};`;
+  const trajectoryStub = `export function handleTrajectoryRoute() { return null; }\nexport default {};`;
+  fs.writeFileSync(trDir + '/routes/training.mjs', trainingStub);
+  fs.writeFileSync(trDir + '/routes/trajectory.mjs', trajectoryStub);
+  fs.writeFileSync(trDir + '/index.mjs', 'export default {};');
+  fs.writeFileSync(trDir + '/package.json', JSON.stringify({
+    name: '@elizaos/app-training', version: '0.0.0-cloud-stub', type: 'module',
+    exports: {
+      '.': './index.mjs',
+      './routes/training': './routes/training.mjs',
+      './routes/trajectory': './routes/trajectory.mjs',
+    }
+  }));
+  console.log('stubbed: @elizaos/app-training');
+}
+__APP_STUBS__
+
+# Fix @ai-sdk/provider-utils version conflict:
+# @ai-sdk/google@3.x needs provider-utils@4.x (exports convertToBase64),
+# but bun hoisted provider-utils@2.x to top-level. Replace with the 4.x copy.
+RUN node - <<'__AISDK_FIX__'
+const fs = require('fs');
+const path = require('path');
+const bunDir = 'node_modules/.bun';
+const target = 'node_modules/@ai-sdk/provider-utils';
+if (fs.existsSync(bunDir)) {
+  const entries = fs.readdirSync(bunDir).filter(e => e.startsWith('@ai-sdk+provider-utils@4.'));
+  if (entries.length > 0) {
+    // Pick the latest 4.x
+    entries.sort();
+    const src = path.join(bunDir, entries[entries.length - 1], 'node_modules/@ai-sdk/provider-utils');
+    if (fs.existsSync(src)) {
+      fs.rmSync(target, { recursive: true, force: true });
+      fs.cpSync(src, target, { recursive: true });
+      const ver = JSON.parse(fs.readFileSync(path.join(target, 'package.json'), 'utf8')).version;
+      console.log('Upgraded @ai-sdk/provider-utils to ' + ver);
+    }
+  }
+}
+__AISDK_FIX__
+
+# Remove unbuilt orchestrator (desktop-only, crashes tsx if dist/ missing)
+RUN rm -rf \
+  node_modules/@elizaos/plugin-agent-orchestrator \
+  node_modules/.bun/@elizaos+plugin-agent-orchestrator@* \
+  eliza/packages/agent/node_modules/@elizaos/plugin-agent-orchestrator \
+  plugins/plugin-agent-orchestrator \
+  2>/dev/null || true
+
+# Safe pruning only (GPU binaries + obvious dead weight)
+RUN rm -rf \
+  node_modules/.bun/@node-llama-cpp+linux-x64-cuda-ext@* \
+  node_modules/.bun/@node-llama-cpp+linux-x64-cuda@* \
+  node_modules/.bun/@node-llama-cpp+linux-x64-vulkan@* \
+  node_modules/.bun/@node-llama-cpp+linux-arm64@* \
+  node_modules/.bun/@node-llama-cpp+linux-armv7l@* \
+  node_modules/@storybook \
+  node_modules/storybook \
+  apps/app/public \
+  2>/dev/null || true
+
+# Remove source maps and test dirs
+RUN find node_modules -name '*.map' -delete 2>/dev/null; \
+  find node_modules -type d -name '__tests__' -exec rm -rf {} + 2>/dev/null; \
+  find node_modules -type d -name 'test' -maxdepth 3 -exec rm -rf {} + 2>/dev/null; \
+  true
+
+FROM node:${NODE_VERSION}-slim
+ARG BUN_VERSION
+ARG ESBUILD_VERSION
+ARG APP_ENTRYPOINT
+ARG APP_CMD_START
+ARG APP_PORT
+ARG APP_API_BIND
+ARG OCI_SOURCE
+ARG OCI_TITLE
+ARG OCI_DESCRIPTION
+ARG OCI_LICENSES
+ARG VERSION
+ARG VERSION_CLEAN
+ARG REVISION
+LABEL org.opencontainers.image.title="${OCI_TITLE}" \
+      org.opencontainers.image.description="${OCI_DESCRIPTION}" \
+      org.opencontainers.image.source="${OCI_SOURCE}" \
+      org.opencontainers.image.url="${OCI_SOURCE}" \
+      org.opencontainers.image.version="${VERSION_CLEAN}" \
+      org.opencontainers.image.revision="${REVISION}" \
+      org.opencontainers.image.licenses="${OCI_LICENSES}"
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl ffmpeg libopus-dev \
+  && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=pruner /app /app
+
+# NOTE: Do NOT install esbuild globally. tsx bundles its own esbuild.
+# A global esbuild binary causes a recursive fork bomb (8000+ processes)
+# when tsx's loader spawns esbuild service processes.
+
+ENV NODE_ENV=production
+ENV ELIZA_DISABLE_EDGE_TTS=1
+ENV APP_ENTRYPOINT=${APP_ENTRYPOINT}
+ENV APP_CMD_START=${APP_CMD_START}
+ENV APP_PORT=${APP_PORT}
+ENV APP_API_BIND=${APP_API_BIND}
+ENV ELIZA_PORT=${APP_PORT}
+ENV ELIZA_API_BIND=${APP_API_BIND}
+# Bake the cloud image version so the version-resolver picks it up at runtime
+# (takes priority over package.json patching which can be fragile)
+ENV ELIZA_BUNDLED_VERSION=${VERSION_CLEAN}
+ENV ELIZA_ALLOWED_HOSTS=*
+EXPOSE ${APP_PORT}
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+  CMD sh -lc 'port="${PORT:-${APP_PORT:-${ELIZA_PORT:-2138}}}"; code="$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${port}/api/health")" && [ "$code" = "200" -o "$code" = "401" ]'
+
+ENTRYPOINT ["sh", "./eliza/packages/app-core/scripts/docker-entrypoint.sh"]
+CMD ["sh", "-lc", "exec ${APP_CMD_START:-node --import ./node_modules/tsx/dist/loader.mjs ${APP_ENTRYPOINT} start}"]
