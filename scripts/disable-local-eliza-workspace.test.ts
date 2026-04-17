@@ -271,6 +271,7 @@ describe("disable-local-eliza-workspace", () => {
       "@elizaos/shared": "file:../../../shared",
     });
   });
+
   it("injects the renamed-workspace @elizaos/ui override for CI rewrites", () => {
     const repoRoot = makeTempDir();
     const originalRenameSetting =

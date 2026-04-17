@@ -74,7 +74,24 @@ jobs:
     steps:
       - name: Enable Git long paths (Windows)
         if: runner.os == 'Windows'
-        run: git config --system core.longpaths true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          function Set-GitLongPaths([string]$Scope) {
+            & git config $Scope core.longpaths true
+            if ($LASTEXITCODE -ne 0) {
+              throw "git config $Scope core.longpaths true failed with exit code $LASTEXITCODE"
+            }
+          }
+
+          try {
+            Set-GitLongPaths "--system"
+            Write-Host "Enabled Git long paths in system config."
+          } catch {
+            Write-Warning "System git config failed; falling back to --global. $($_.Exception.Message)"
+            Set-GitLongPaths "--global"
+            Write-Host "Enabled Git long paths in global config."
+          }
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,6 +157,12 @@ jobs:
 
       - name: Install published-workspace fallback dependencies
         run: bash scripts/install-published-workspace-fallback-deps.sh
+
+      - name: Restore eliza workspace paths for release scripts
+        run: node scripts/restore-local-eliza-workspace.mjs
+
+      - name: Restore legacy electrobun compatibility path
+        run: node scripts/ensure-legacy-electrobun-compat.mjs
 
       - name: Run repository postinstall patches
         run: bun run postinstall
@@ -358,6 +381,12 @@ jobs:
 
       - name: Install published-workspace fallback dependencies
         run: bash scripts/install-published-workspace-fallback-deps.sh
+
+      - name: Restore eliza workspace paths for desktop release scripts
+        run: node scripts/restore-local-eliza-workspace.mjs
+
+      - name: Restore legacy electrobun compatibility path
+        run: node scripts/ensure-legacy-electrobun-compat.mjs
 
       - name: Run repository postinstall patches
         run: bun run postinstall

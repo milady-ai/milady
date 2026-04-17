@@ -1,0 +1,2444 @@
+{
+  "runId": "2305ca3e-ff56-4818-9469-fad4e8892b63",
+  "startedAtIso": "2026-04-17T00:18:27.701Z",
+  "completedAtIso": "2026-04-17T00:19:30.060Z",
+  "providerName": "none",
+  "scenarios": [
+    {
+      "id": "convo.echo-self-test",
+      "title": "Convo framework self-test: ECHO_TEST action is captured",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "self-test"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:27.703Z",
+      "completedAtIso": "2026-04-17T00:18:29.369Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "convo.greeting-dynamic",
+      "title": "Convo framework: greeting triggers non-empty response (scripted port)",
+      "domain": "convo",
+      "tags": [
+        "smoke",
+        "convo",
+        "greeting"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:29.373Z",
+      "completedAtIso": "2026-04-17T00:18:30.136Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.failure-recovery.action-fails-agent-retries",
+      "title": "Agent degrades gracefully when a todo memory row is corrupt",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "failure-recovery"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:30.144Z",
+      "completedAtIso": "2026-04-17T00:18:30.904Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.action-selection.wrong-action-fails",
+      "title": "Reminder request routes to a reminder/task action",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "critical",
+        "ambiguity"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:30.911Z",
+      "completedAtIso": "2026-04-17T00:18:31.698Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.multi-turn.memory-across-turns",
+      "title": "Agent recalls a user-stated fact on a later turn",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "multi-turn",
+        "critical"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:31.702Z",
+      "completedAtIso": "2026-04-17T00:18:32.522Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.parameter-extraction.complex-natural-language",
+      "title": "Extracts contact and date-time from a long utterance",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "parameter-extraction",
+        "critical"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:32.530Z",
+      "completedAtIso": "2026-04-17T00:18:33.273Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.ambiguity.agent-asks-clarifying-question",
+      "title": "Ambiguous contact name triggers a clarifying question",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "ambiguity",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:33.283Z",
+      "completedAtIso": "2026-04-17T00:18:34.028Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.long-context.stays-on-task-after-10-turns",
+      "title": "Agent pivots back to a task-listing action after 10 turns of chat",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "long-context"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:34.037Z",
+      "completedAtIso": "2026-04-17T00:18:34.933Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.negative.greeting-calls-no-action",
+      "title": "Casual greeting triggers REPLY only — no side-effect actions",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "negative",
+        "critical",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:34.940Z",
+      "completedAtIso": "2026-04-17T00:18:35.861Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.language.spanish-english-mixed",
+      "title": "Spanish-language task-creation request routes correctly",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "i18n",
+        "critical"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:35.870Z",
+      "completedAtIso": "2026-04-17T00:18:36.629Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.negative.question-calls-no-action",
+      "title": "Trivia question is answered without side-effect actions",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "negative",
+        "critical"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:36.637Z",
+      "completedAtIso": "2026-04-17T00:18:37.371Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.multi-action-chain.create-todo-then-block-sites",
+      "title": "Create todo, then block social media until it's done",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "multi-action",
+        "critical"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:37.380Z",
+      "completedAtIso": "2026-04-17T00:18:38.166Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.confirms-destructive-action",
+      "title": "Agent confirms before destructive todo deletion",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "safety",
+        "critical",
+        "confirmation"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:38.175Z",
+      "completedAtIso": "2026-04-17T00:18:38.916Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "cross.refuses-unsafe-action",
+      "title": "Agent refuses / gates mass-email request",
+      "domain": "cross-cutting",
+      "tags": [
+        "cross-cutting",
+        "safety",
+        "critical",
+        "negative"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:38.921Z",
+      "completedAtIso": "2026-04-17T00:18:39.632Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "goal-sleep-basic",
+      "title": "Sleep goal save flow",
+      "domain": "goals",
+      "tags": [
+        "lifeops",
+        "goals",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:39.641Z",
+      "completedAtIso": "2026-04-17T00:18:40.370Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-repeat-confirm",
+      "title": "Brush teeth ignores repeated save confirmation",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:40.379Z",
+      "completedAtIso": "2026-04-17T00:18:41.102Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-bedtime-wakeup",
+      "title": "Brush teeth from wake-up and bedtime phrasing",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:41.106Z",
+      "completedAtIso": "2026-04-17T00:18:41.855Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-night-owl",
+      "title": "Brush teeth for a night-owl phrasing",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:41.859Z",
+      "completedAtIso": "2026-04-17T00:18:42.571Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder-lifecycle-ack-complete",
+      "title": "Compressed reminder lifecycle with ack and completion",
+      "domain": "lifeops",
+      "tags": [
+        "lifeops"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:42.576Z",
+      "completedAtIso": "2026-04-17T00:18:43.300Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "one-off-mountain-time",
+      "title": "One-off reminder with full timezone phrase",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:43.312Z",
+      "completedAtIso": "2026-04-17T00:18:44.028Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "vitamins-with-meals",
+      "title": "Vitamins tied to a meal window",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:44.037Z",
+      "completedAtIso": "2026-04-17T00:18:44.764Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "invisalign-weekday-lunch",
+      "title": "Invisalign weekday lunch phrasing",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:44.772Z",
+      "completedAtIso": "2026-04-17T00:18:45.480Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "workout-blocker-basic",
+      "title": "Workout blocker routine",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:45.489Z",
+      "completedAtIso": "2026-04-17T00:18:46.194Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-spanish",
+      "title": "Brush teeth from Spanish phrasing",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:46.204Z",
+      "completedAtIso": "2026-04-17T00:18:46.911Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-smalltalk-preference",
+      "title": "Brush teeth from smalltalk into preference update",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:46.919Z",
+      "completedAtIso": "2026-04-17T00:18:47.636Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "shave-weekly-formal",
+      "title": "Formal weekly shave phrasing",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:47.645Z",
+      "completedAtIso": "2026-04-17T00:18:48.327Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-cancel",
+      "title": "Brush teeth cancel before save",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:48.334Z",
+      "completedAtIso": "2026-04-17T00:18:49.011Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "shower-weekly-basic",
+      "title": "Shower weekly cadence",
+      "domain": "habits",
+      "tags": [
+        "lifeops",
+        "habits"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:49.019Z",
+      "completedAtIso": "2026-04-17T00:18:49.699Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-retry-after-cancel",
+      "title": "Brush teeth retry after backing out",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:49.707Z",
+      "completedAtIso": "2026-04-17T00:18:50.399Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "daily-left-today-variants",
+      "title": "Daily leftover overview phrasing variants",
+      "domain": "lifeops",
+      "tags": [
+        "lifeops"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:50.407Z",
+      "completedAtIso": "2026-04-17T00:18:51.090Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder-lifecycle-snooze",
+      "title": "Compressed reminder lifecycle with snooze",
+      "domain": "lifeops",
+      "tags": [
+        "lifeops",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:51.097Z",
+      "completedAtIso": "2026-04-17T00:18:51.806Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "calendar-vague-followup",
+      "title": "Calendar vague follow-up routing",
+      "domain": "calendar",
+      "tags": [
+        "lifeops",
+        "calendar"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:51.815Z",
+      "completedAtIso": "2026-04-17T00:18:52.612Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "stretch-breaks",
+      "title": "Stretch default breaks during the day",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:52.621Z",
+      "completedAtIso": "2026-04-17T00:18:53.327Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "water-default-frequency",
+      "title": "Drink water default daily frequency",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:53.335Z",
+      "completedAtIso": "2026-04-17T00:18:54.106Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "gmail-suran-routing",
+      "title": "Narrative Gmail sender routing",
+      "domain": "gmail",
+      "tags": [
+        "lifeops",
+        "gmail"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:54.114Z",
+      "completedAtIso": "2026-04-17T00:18:54.815Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "gmail-retry-followup",
+      "title": "Gmail retry and refinement follow-up",
+      "domain": "gmail",
+      "tags": [
+        "lifeops",
+        "gmail"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:54.823Z",
+      "completedAtIso": "2026-04-17T00:18:55.518Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "brush-teeth-basic",
+      "title": "Brush teeth basic save flow",
+      "domain": "tasks",
+      "tags": [
+        "lifeops",
+        "tasks",
+        "smoke"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:55.522Z",
+      "completedAtIso": "2026-04-17T00:18:56.243Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.cross-device.create-and-query",
+      "title": "Create a todo on the dashboard, query it from mobile",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "cross-platform-inconsistency"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:56.251Z",
+      "completedAtIso": "2026-04-17T00:18:56.977Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.cross-device.global-alarm",
+      "title": "Setting an alarm fires on both Mac and iOS",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "cross-platform-inconsistency"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:56.984Z",
+      "completedAtIso": "2026-04-17T00:18:57.680Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.weekly-weekday",
+      "title": "Create a weekday morning recurring stretch todo",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "time-of-day-edge"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:57.684Z",
+      "completedAtIso": "2026-04-17T00:18:58.387Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.every-10-days",
+      "title": "Create an every-10-days Invisalign tray swap todo",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "ambiguous-parameter"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:58.395Z",
+      "completedAtIso": "2026-04-17T00:18:59.268Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.forceful-reminder.undone",
+      "title": "Undone overdue todo prompts forceful reminder on greeting",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "retry-after-failure"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:18:59.276Z",
+      "completedAtIso": "2026-04-17T00:19:00.255Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.list.upcoming",
+      "title": "List upcoming todos for the week",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:00.260Z",
+      "completedAtIso": "2026-04-17T00:19:00.977Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.list.today",
+      "title": "List todos for today",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:00.982Z",
+      "completedAtIso": "2026-04-17T00:19:01.685Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.forceful-reminder.morning-routine",
+      "title": "Morning routine pushes several overdue todos forcefully",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:01.695Z",
+      "completedAtIso": "2026-04-17T00:19:02.441Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.delete",
+      "title": "Delete a seeded todo with confirmation",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "confirms-destructive-action"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:02.448Z",
+      "completedAtIso": "2026-04-17T00:19:03.121Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.update.due",
+      "title": "Push a seeded todo's due date to tomorrow",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "multi-turn-memory"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:03.128Z",
+      "completedAtIso": "2026-04-17T00:19:03.820Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.one-off",
+      "title": "Create a single one-off todo",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:03.828Z",
+      "completedAtIso": "2026-04-17T00:19:04.507Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.deprioritize",
+      "title": "Move a seeded todo to low priority",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "multi-turn-memory"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:04.511Z",
+      "completedAtIso": "2026-04-17T00:19:05.205Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.routine.morning-checkin",
+      "title": "Morning check-in surfaces today's todos",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:05.213Z",
+      "completedAtIso": "2026-04-17T00:19:05.922Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.list.overdue",
+      "title": "List overdue todos",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "time-of-day-edge"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:05.930Z",
+      "completedAtIso": "2026-04-17T00:19:07.454Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.complete",
+      "title": "Mark a seeded todo as done",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:07.462Z",
+      "completedAtIso": "2026-04-17T00:19:08.141Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.create.recurring-daily",
+      "title": "Create a daily recurring todo with preview + confirm",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:08.151Z",
+      "completedAtIso": "2026-04-17T00:19:08.904Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.routine.night-checkin",
+      "title": "Night check-in reviews today's todos",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:08.912Z",
+      "completedAtIso": "2026-04-17T00:19:09.596Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.prioritize",
+      "title": "Ask which todo is most important",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "ambiguous-parameter"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:09.604Z",
+      "completedAtIso": "2026-04-17T00:19:10.311Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.update.priority",
+      "title": "Raise a seeded todo to high priority",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "smoke",
+        "multi-turn-memory"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:10.320Z",
+      "completedAtIso": "2026-04-17T00:19:11.055Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "todo.forceful-reminder.persistent",
+      "title": "Persistent forceful reminder escalates tone when user dodges",
+      "domain": "todos",
+      "tags": [
+        "lifeops",
+        "todos",
+        "long-utterance"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:11.064Z",
+      "completedAtIso": "2026-04-17T00:19:11.763Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.invisalign-tray.every-10-days",
+      "title": "Invisalign tray swap every 10 days",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "smoke",
+        "critical",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:11.772Z",
+      "completedAtIso": "2026-04-17T00:19:12.463Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.alarm.sets-ios-alarm",
+      "title": "Reminder requests a real iOS alarm on paired device",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "not-yet-implemented",
+        "credentials-missing"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:12.467Z",
+      "completedAtIso": "2026-04-17T00:19:13.154Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.escalation.user-angry",
+      "title": "User tells agent to stop; agent de-escalates without disabling",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "escalation",
+        "cancel-mid-flow"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:13.158Z",
+      "completedAtIso": "2026-04-17T00:19:13.849Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.cross-platform.created-on-phone-fires-on-mac",
+      "title": "Reminder created on phone fires on Mac via device bus",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "cross-platform",
+        "not-yet-implemented"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:13.860Z",
+      "completedAtIso": "2026-04-17T00:19:14.519Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.water.hourly-weekdays",
+      "title": "Drink water hourly on weekdays",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:14.527Z",
+      "completedAtIso": "2026-04-17T00:19:15.157Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.stretch.every-2-hours",
+      "title": "Stretch every two hours during the day",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:15.164Z",
+      "completedAtIso": "2026-04-17T00:19:15.811Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.cross-platform.acknowledged-syncs",
+      "title": "Acknowledging a reminder on one device stops it on the other",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "cross-platform",
+        "not-yet-implemented"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:15.819Z",
+      "completedAtIso": "2026-04-17T00:19:16.487Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.cross-platform.fires-on-mac-and-phone",
+      "title": "Reminder fires on both Mac and phone via device bus",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "cross-platform",
+        "not-yet-implemented"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:16.495Z",
+      "completedAtIso": "2026-04-17T00:19:17.189Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.alarm.sets-macos-alarm",
+      "title": "Reminder requests a native macOS alarm via helper",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "not-yet-implemented",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:17.192Z",
+      "completedAtIso": "2026-04-17T00:19:17.923Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.escalation.silent-dismiss",
+      "title": "User silently dismisses reminders and escalation continues",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "escalation",
+        "permission-denied"
+      ],
+      "status": "failed",
+      "durationMs": 704,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:17.934Z",
+      "completedAtIso": "2026-04-17T00:19:18.638Z",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "turnName": "seed silent task",
+          "requestSummary": "POST /api/lifeops/definitions",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 1,
+          "turnName": "process first reminder",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 2,
+          "turnName": "process second reminder ignored",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 3,
+          "turnName": "process third reminder still escalating",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 4,
+          "turnName": "inspect reminder lifecycle after silent dismiss",
+          "requestSummary": "GET /api/lifeops/reminders/inspection?ownerType=occurrence&ownerId={{occurrenceId:Call dentist}}",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "reminderIntensity:Call dentist",
+          "status": "failed",
+          "detail": "Not yet implemented — LifeOps-style final checks require the runner to boot the /api/lifeops endpoints. Set runtime.__scenarioApiPort or wait on the T2-api-server integration."
+        }
+      ],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0
+    },
+    {
+      "id": "reminder.lifecycle.dismiss",
+      "title": "User dismisses a reminder without completing the task",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "cancel-mid-flow"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:18.644Z",
+      "completedAtIso": "2026-04-17T00:19:19.345Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.escalation.intensity-up",
+      "title": "Ignored reminder escalates intensity on next check",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "escalation",
+        "retry-after-failure"
+      ],
+      "status": "failed",
+      "durationMs": 713,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:19.353Z",
+      "completedAtIso": "2026-04-17T00:19:20.066Z",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "turnName": "seed urgent task",
+          "requestSummary": "POST /api/lifeops/definitions",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 1,
+          "turnName": "process first reminder",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 2,
+          "turnName": "process escalated reminder after ignore",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "reminderIntensity:Call dentist",
+          "status": "failed",
+          "detail": "Not yet implemented — LifeOps-style final checks require the runner to boot the /api/lifeops endpoints. Set runtime.__scenarioApiPort or wait on the T2-api-server integration."
+        }
+      ],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0
+    },
+    {
+      "id": "reminder.vitamins.daily-morning",
+      "title": "Daily vitamins reminder in the morning window",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:20.074Z",
+      "completedAtIso": "2026-04-17T00:19:20.786Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.invisalign-tray.every-10-days",
+      "title": "Invisalign tray swap every 10 days",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "smoke",
+        "critical",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:20.789Z",
+      "completedAtIso": "2026-04-17T00:19:21.522Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.alarm.sets-ios-alarm",
+      "title": "Reminder requests a real iOS alarm on paired device",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "not-yet-implemented",
+        "credentials-missing"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:21.532Z",
+      "completedAtIso": "2026-04-17T00:19:22.208Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.escalation.user-angry",
+      "title": "User tells agent to stop; agent de-escalates without disabling",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "escalation",
+        "cancel-mid-flow"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:22.213Z",
+      "completedAtIso": "2026-04-17T00:19:22.924Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.cross-platform.created-on-phone-fires-on-mac",
+      "title": "Reminder created on phone fires on Mac via device bus",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "cross-platform",
+        "not-yet-implemented"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:22.929Z",
+      "completedAtIso": "2026-04-17T00:19:23.643Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.water.hourly-weekdays",
+      "title": "Drink water hourly on weekdays",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:23.654Z",
+      "completedAtIso": "2026-04-17T00:19:24.369Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.stretch.every-2-hours",
+      "title": "Stretch every two hours during the day",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:24.378Z",
+      "completedAtIso": "2026-04-17T00:19:25.131Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.cross-platform.acknowledged-syncs",
+      "title": "Acknowledging a reminder on one device stops it on the other",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "cross-platform",
+        "not-yet-implemented"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:25.140Z",
+      "completedAtIso": "2026-04-17T00:19:25.824Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.cross-platform.fires-on-mac-and-phone",
+      "title": "Reminder fires on both Mac and phone via device bus",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "cross-platform",
+        "not-yet-implemented"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:25.829Z",
+      "completedAtIso": "2026-04-17T00:19:26.529Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.alarm.sets-macos-alarm",
+      "title": "Reminder requests a native macOS alarm via helper",
+      "domain": "reminders",
+      "tags": [
+        "reminders",
+        "lifeops",
+        "not-yet-implemented",
+        "plugin-disabled"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:26.537Z",
+      "completedAtIso": "2026-04-17T00:19:27.216Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.escalation.silent-dismiss",
+      "title": "User silently dismisses reminders and escalation continues",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "escalation",
+        "permission-denied"
+      ],
+      "status": "failed",
+      "durationMs": 690,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:27.224Z",
+      "completedAtIso": "2026-04-17T00:19:27.914Z",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "turnName": "seed silent task",
+          "requestSummary": "POST /api/lifeops/definitions",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 1,
+          "turnName": "process first reminder",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 2,
+          "turnName": "process second reminder ignored",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 3,
+          "turnName": "process third reminder still escalating",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 4,
+          "turnName": "inspect reminder lifecycle after silent dismiss",
+          "requestSummary": "GET /api/lifeops/reminders/inspection?ownerType=occurrence&ownerId={{occurrenceId:Call dentist}}",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "reminderIntensity:Call dentist",
+          "status": "failed",
+          "detail": "Not yet implemented — LifeOps-style final checks require the runner to boot the /api/lifeops endpoints. Set runtime.__scenarioApiPort or wait on the T2-api-server integration."
+        }
+      ],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0
+    },
+    {
+      "id": "reminder.lifecycle.dismiss",
+      "title": "User dismisses a reminder without completing the task",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "cancel-mid-flow"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:27.922Z",
+      "completedAtIso": "2026-04-17T00:19:28.615Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    },
+    {
+      "id": "reminder.escalation.intensity-up",
+      "title": "Ignored reminder escalates intensity on next check",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "escalation",
+        "retry-after-failure"
+      ],
+      "status": "failed",
+      "durationMs": 707,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:28.622Z",
+      "completedAtIso": "2026-04-17T00:19:29.329Z",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "turnName": "seed urgent task",
+          "requestSummary": "POST /api/lifeops/definitions",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 1,
+          "turnName": "process first reminder",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        },
+        {
+          "turnIndex": 2,
+          "turnName": "process escalated reminder after ignore",
+          "requestSummary": "POST /api/lifeops/reminders/process",
+          "responseText": "",
+          "plannerText": "",
+          "actionsCalled": [],
+          "durationMs": 0,
+          "assertions": []
+        }
+      ],
+      "finalChecks": [
+        {
+          "label": "reminderIntensity:Call dentist",
+          "status": "failed",
+          "detail": "Not yet implemented — LifeOps-style final checks require the runner to boot the /api/lifeops endpoints. Set runtime.__scenarioApiPort or wait on the T2-api-server integration."
+        }
+      ],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0
+    },
+    {
+      "id": "reminder.vitamins.daily-morning",
+      "title": "Daily vitamins reminder in the morning window",
+      "domain": "reminders",
+      "tags": [
+        "lifeops",
+        "reminders",
+        "happy-path"
+      ],
+      "status": "skipped",
+      "durationMs": 0,
+      "providerName": "none",
+      "startedAtIso": "2026-04-17T00:19:29.337Z",
+      "completedAtIso": "2026-04-17T00:19:30.052Z",
+      "turns": [],
+      "finalChecks": [],
+      "actionsCalled": [],
+      "cleanup": [],
+      "cost": {
+        "provider": "none",
+        "usd": 0,
+        "tokensIn": 0,
+        "tokensOut": 0
+      },
+      "llmCallCount": 0,
+      "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+    }
+  ],
+  "totalCount": 83,
+  "passedCount": 0,
+  "failedCount": 4,
+  "flakyPassedCount": 0,
+  "skippedCount": 79,
+  "totalCostUsd": 0
+}

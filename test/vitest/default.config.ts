@@ -157,6 +157,29 @@ export default defineConfig({
         find: "@elizaos/capacitor-agent",
         replacement: appCoreModuleFallbackPath,
       },
+      {
+        // Transitively imported via app-lifeops; resolve to source so subpath imports work.
+        find: "@elizaos/plugin-telegram/account-auth-service",
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-telegram",
+          "src",
+          "account-auth-service.ts",
+        ),
+      },
+      {
+        find: "@elizaos/plugin-telegram",
+        replacement: path.join(
+          repoRoot,
+          "eliza",
+          "plugins",
+          "plugin-telegram",
+          "src",
+          "index.ts",
+        ),
+      },
       ...getOptionalPluginSdkAliases(repoRoot),
       // Keep the roles shim here so Vitest resolves it when the local eliza checkout is absent.
       {
@@ -250,6 +273,7 @@ export default defineConfig({
       "eliza/packages/app-core/platforms/electrobun/src/menu-reset-from-main.test.ts",
       "eliza/packages/app-core/platforms/electrobun/src/diagnostic-format.test.ts",
       "eliza/packages/app-core/platforms/electrobun/src/native/steward.test.ts",
+      "eliza/packages/app-core/platforms/electrobun/src/application-menu.test.ts",
       "eliza/packages/app-core/scripts/**/*.test.ts",
       "eliza/packages/shared/src/**/*.test.ts",
       "eliza/packages/app-core/src/**/*.test.tsx",
@@ -267,6 +291,7 @@ export default defineConfig({
       "scripts/**/*.test.{ts,tsx}",
       "apps/chrome-extension/**/*.test.ts",
       "apps/chrome-extension/**/*.test.tsx",
+      "test/helpers/**/*.test.ts",
     ],
     setupFiles: ["eliza/packages/app-core/test/setup.ts"],
     exclude: [
@@ -282,6 +307,11 @@ export default defineConfig({
       "**/*.e2e.spec.{ts,tsx}",
       "**/*.live.e2e.test.{ts,tsx}",
       "**/*.real.e2e.test.{ts,tsx}",
+      // --- server/runtime route tests must live in the live/real lane ---
+      "eliza/packages/app-core/src/api/**/*.test.{ts,tsx}",
+      "eliza/packages/app-core/src/services/**/*.test.{ts,tsx}",
+      "eliza/apps/*/src/**/*routes.test.{ts,tsx}",
+      "eliza/apps/*/src/services/**/*.test.{ts,tsx}",
       // --- subsystems with their own test runners ---
       "eliza/cloud/**",
       "eliza/steward-fi/**",

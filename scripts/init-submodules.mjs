@@ -367,18 +367,87 @@ export function runInitSubmodules({
     !shouldSkipSubmodule("eliza") &&
     exists(resolve(rootDir, "eliza", ".gitmodules"))
   ) {
+    const elizaRoot = resolve(rootDir, "eliza");
     log(
       "[init-submodules] Ensuring nested checkouts under eliza/ (cloud, steward-fi, plugins, …)…",
     );
     try {
-      const nestedSkipArgs = getNestedElizaSubmoduleSkipArgs();
-      exec(`git ${nestedSkipArgs} submodule update --init --recursive`.trim(), {
-        cwd: resolve(rootDir, "eliza"),
+      // Sync nested config first so git does not keep stale URLs from older
+      // eliza merges around in .git/config.
+      exec("git submodule sync --recursive", {
+        cwd: elizaRoot,
         stdio: "inherit",
       });
+
+      const nestedSubmodules = loadTrackedSubmodules({
+        exec,
+        cwd: elizaRoot,
+      });
+
+      for (const nestedSubmodule of nestedSubmodules) {
+        const rootRelativePath = `eliza/${nestedSubmodule.path}`;
+        const skipReason = getSubmoduleSkipReason(rootRelativePath, {
+          skipLocal: false,
+        });
+        if (skipReason) {
+          log(
+            `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because ${skipReason}`,
+          );
+          continue;
+        }
+
+        if (
+          !isTrackedAsGitlink(nestedSubmodule.path, {
+            exec,
+            cwd: elizaRoot,
+          })
+        ) {
+          log(
+            `[init-submodules] Skipping nested ${nestedSubmodule.name} (${rootRelativePath}) because eliza tracks that path as regular files, not a gitlink`,
+          );
+          continue;
+        }
+
+        let needsInit = true;
+        try {
+          const status = exec(
+            `git submodule status -- "${nestedSubmodule.path}"`,
+            {
+              cwd: elizaRoot,
+              encoding: "utf8",
+              stdio: ["ignore", "pipe", "ignore"],
+            },
+          ).trim();
+          needsInit = status.startsWith("-");
+        } catch {
+          needsInit = true;
+        }
+
+        if (!needsInit) {
+          continue;
+        }
+
+        const nestedSkipArgs = getNestedElizaSubmoduleSkipArgs();
+        try {
+          exec(
+            `git ${nestedSkipArgs} submodule update --init --recursive -- "${nestedSubmodule.path}"`.trim(),
+            {
+              cwd: elizaRoot,
+              stdio: "inherit",
+            },
+          );
+        } catch (err) {
+          failed++;
+          logError(
+            `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+        }
+      }
     } catch (err) {
       logError(
-        `[init-submodules] Nested eliza submodule update failed (fix broken plugin submodules under eliza/ if needed): ${
+        `[init-submodules] Unexpected error initializing nested eliza submodules: ${
           err instanceof Error ? err.message : String(err)
         }`,
       );

@@ -34,7 +34,6 @@ import {
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
-  dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -43,11 +42,8 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
-import type {
-  CloudPreferenceClientLike,
-  OnboardingClientLike,
-  PermissionsClientLike,
-} from "@elizaos/app-core";
+import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
+import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
   DesktopOnboardingRuntime,
@@ -62,13 +58,46 @@ import { Desktop } from "@elizaos/capacitor-desktop";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { CompanionShell } from "@elizaos/app-companion/ui";
-import "@elizaos/app-companion/register";
 import {
+  createVectorBrowserRenderer,
+  GlobalEmoteOverlay,
+  InferenceCloudAlertButton,
+  prefetchVrmToCache,
+  resolveCompanionInferenceNotice,
+  THREE,
+  useCompanionSceneStatus,
+} from "@elizaos/app-companion";
+import "@elizaos/app-companion/register";
+// Side-effect: register LifeOps sidebar widgets + client methods on ElizaClient.
+import "@elizaos/app-lifeops/widgets";
+// Side-effect: register game operator surfaces + detail extensions.
+import "@elizaos/app-babylon/ui";
+import "@elizaos/app-scape/ui";
+import "@elizaos/app-hyperscape/ui";
+import "@elizaos/app-2004scape/ui";
+import "@elizaos/app-defense-of-the-agents/ui";
+import {
+  AppBlockerSettingsCard,
   LifeOpsBrowserSetupPanel,
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
 } from "@elizaos/app-lifeops/ui";
+import { LifeOpsActivitySignalsEffect } from "@elizaos/app-lifeops/components/LifeOpsActivitySignalsEffect";
+import {
+  ApprovalQueue,
+  StewardLogo,
+  TransactionHistory,
+} from "@elizaos/app-steward/ui";
+import {
+  CodingAgentControlChip,
+  CodingAgentSettingsSection,
+  CodingAgentTasksPanel,
+  PtyConsoleDrawer,
+} from "@elizaos/app-task-coordinator";
+import { FineTuningView } from "@elizaos/app-training/ui";
 import "@elizaos/app-shopify/register";
+import "@elizaos/app-vincent/client";
+import { useVincentState } from "@elizaos/app-vincent/ui";
 import "@elizaos/app-vincent/register";
 import { shouldUseCloudOnlyBranding } from "@elizaos/app-core";
 import {
@@ -77,8 +106,42 @@ import {
   APP_NAMESPACE,
   APP_URL_SCHEME,
 } from "./app-config";
-import { APP_ENV_ALIASES } from "./brand-env";
+import { APP_ENV_ALIASES, APP_ENV_PREFIX } from "./brand-env";
 import { APP_CHARACTER_CATALOG } from "./character-catalog";
+
+declare global {
+  interface Window {
+    __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
+    __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
+    __ELIZA_APP_API_BASE__?: string;
+  }
+}
+
+const BRANDED_WINDOW_KEYS = {
+  apiBase: `__${APP_ENV_PREFIX}_API_BASE__`,
+  characterEditor: `__${APP_ENV_PREFIX}_CHARACTER_EDITOR__`,
+  shareQueue: `__${APP_ENV_PREFIX}_SHARE_QUEUE__`,
+} as const;
+
+type AppCompatWindow = Window &
+  Record<string, unknown> & {
+    __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
+    __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
+    __ELIZA_APP_API_BASE__?: string;
+  };
+
+function getAppWindow(): AppCompatWindow {
+  return window as unknown as AppCompatWindow;
+}
+
+function getInjectedAppApiBase(): string | undefined {
+  const appWindow = getAppWindow();
+  const brandedApiBase = appWindow[BRANDED_WINDOW_KEYS.apiBase];
+  return (
+    appWindow.__ELIZA_APP_API_BASE__ ??
+    (typeof brandedApiBase === "string" ? brandedApiBase : undefined)
+  );
+}
 
 const APP_BRANDING: Partial<BrandingConfig> = {
   ...APP_BRANDING_BASE,
@@ -105,23 +168,6 @@ function isDesktopPlatform(): boolean {
   return isElectrobunRuntime();
 }
 
-function isWebPlatform(): boolean {
-  return platform === "web" && !isElectrobunRuntime();
-}
-
-import type { ShareTargetPayload } from "@elizaos/app-core/platform";
-
-declare global {
-  interface Window {
-    __ELIZA_APP_SHARE_QUEUE__?: ShareTargetPayload[];
-    __ELIZA_APP_CHARACTER_EDITOR__?: typeof CharacterEditor;
-    __ELIZA_APP_API_BASE__?: string;
-    __MILADY_SHARE_QUEUE__?: ShareTargetPayload[];
-    __MILADY_CHARACTER_EDITOR__?: typeof CharacterEditor;
-    __MILADY_API_BASE__?: string;
-  }
-}
-
 const windowShellRoute = resolveWindowShellRoute();
 
 /**
@@ -145,20 +191,14 @@ if (shouldEnableElectrobunMacWindowDrag()) {
 // persisted state and temporarily suppressing stale backend resume config.
 if (shouldInstallMainWindowOnboardingPatches(windowShellRoute)) {
   applyForceFreshOnboardingReset();
-  installForceFreshOnboardingClientPatch(
-    client as unknown as OnboardingClientLike,
-  );
+  installForceFreshOnboardingClientPatch(client);
 }
-installLocalProviderCloudPreferencePatch(
-  client as unknown as CloudPreferenceClientLike,
-);
-installDesktopPermissionsClientPatch(
-  client as unknown as PermissionsClientLike,
-);
+installLocalProviderCloudPreferencePatch(client);
+installDesktopPermissionsClientPatch(client);
 
 // Register custom character editor for app-core's ViewRouter to pick up
 window.__ELIZA_APP_CHARACTER_EDITOR__ = CharacterEditor;
-window.__MILADY_CHARACTER_EDITOR__ = CharacterEditor;
+getAppWindow()[BRANDED_WINDOW_KEYS.characterEditor] = CharacterEditor;
 
 import { getStylePresets } from "@elizaos/shared/onboarding-presets";
 
@@ -180,10 +220,29 @@ const appBootConfig: AppBootConfig = {
   onboardingStyles: APP_STYLE_PRESETS,
   characterEditor: CharacterEditor,
   companionShell: CompanionShell,
+  resolveCompanionInferenceNotice,
+  companionInferenceAlertButton: InferenceCloudAlertButton,
+  companionGlobalOverlay: GlobalEmoteOverlay,
+  useCompanionSceneStatus,
+  prefetchVrmToCache,
+  companionVectorBrowser: {
+    THREE,
+    createVectorBrowserRenderer,
+  },
+  codingAgentTasksPanel: CodingAgentTasksPanel,
+  codingAgentSettingsSection: CodingAgentSettingsSection,
+  codingAgentControlChip: CodingAgentControlChip,
+  ptyConsoleDrawer: PtyConsoleDrawer,
+  fineTuningView: FineTuningView,
+  useVincentState,
+  stewardLogo: StewardLogo,
+  stewardApprovalQueue: ApprovalQueue,
+  stewardTransactionHistory: TransactionHistory,
   characterCatalog: APP_CHARACTER_CATALOG,
   envAliases: APP_ENV_ALIASES,
   lifeOpsPageView: LifeOpsPageView,
   lifeOpsBrowserSetupPanel: LifeOpsBrowserSetupPanel,
+  appBlockerSettingsCard: AppBlockerSettingsCard,
   websiteBlockerSettingsCard: WebsiteBlockerSettingsCard,
   clientMiddleware: {
     forceFreshOnboarding:
@@ -195,21 +254,22 @@ const appBootConfig: AppBootConfig = {
 
 setBootConfig(appBootConfig);
 
-function getInjectedAppApiBase(): string | undefined {
-  return window.__ELIZA_APP_API_BASE__ ?? window.__MILADY_API_BASE__;
-}
-
 function getShareQueue(): ShareTargetPayload[] {
+  const appWindow = getAppWindow();
+  const brandedQueue = appWindow[BRANDED_WINDOW_KEYS.shareQueue];
   const existing =
-    window.__ELIZA_APP_SHARE_QUEUE__ ?? window.__MILADY_SHARE_QUEUE__;
+    appWindow.__ELIZA_APP_SHARE_QUEUE__ ??
+    (Array.isArray(brandedQueue)
+      ? (brandedQueue as ShareTargetPayload[])
+      : undefined);
   if (existing) {
-    window.__ELIZA_APP_SHARE_QUEUE__ = existing;
-    window.__MILADY_SHARE_QUEUE__ = existing;
+    appWindow.__ELIZA_APP_SHARE_QUEUE__ = existing;
+    appWindow[BRANDED_WINDOW_KEYS.shareQueue] = existing;
     return existing;
   }
   const queue: ShareTargetPayload[] = [];
-  window.__ELIZA_APP_SHARE_QUEUE__ = queue;
-  window.__MILADY_SHARE_QUEUE__ = queue;
+  appWindow.__ELIZA_APP_SHARE_QUEUE__ = queue;
+  appWindow[BRANDED_WINDOW_KEYS.shareQueue] = queue;
   return queue;
 }
 
@@ -476,6 +536,7 @@ function mountReactApp(): void {
               <DesktopOnboardingRuntime />
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
+              <LifeOpsActivitySignalsEffect />
               <App />
             </>
           )}
@@ -588,11 +649,4 @@ if (document.readyState === "loading") {
   main();
 }
 
-export {
-  isAndroid,
-  isDesktopPlatform as isDesktop,
-  isIOS,
-  isNative,
-  isWebPlatform as isWeb,
-  platform,
-};
+export { isAndroid, isDesktopPlatform as isDesktop, isIOS, isNative, platform };

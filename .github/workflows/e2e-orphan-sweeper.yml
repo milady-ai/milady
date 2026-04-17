@@ -1,0 +1,110 @@
+name: E2E Orphan Sweeper
+
+# Nightly cleanup of scenario-matrix artifacts left behind by crashed or
+# force-terminated scenario runs. Each integration gets its own sweeper
+# script under `scripts/sweeper/<service>.ts`; this workflow runs them all
+# sequentially and reports counts to the GitHub Step Summary.
+#
+# Fails (exits non-zero) if ANY individual sweeper fails — this produces a
+# real alert via the standard GitHub notification chain so operators know
+# a provider is in a bad state.
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # daily at 04:00 UTC
+  workflow_dispatch:
+    inputs:
+      services:
+        description: "Comma-separated services to sweep (empty = all)"
+        required: false
+        default: ""
+
+concurrency:
+  group: e2e-orphan-sweeper
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: "1.3.11"
+
+jobs:
+  sweep:
+    name: Sweep ${{ matrix.service }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - gmail
+          - calendar
+          - discord
+          - telegram
+          - twitter
+          - signal
+          - imessage
+          - github
+          - twilio
+          - selfcontrol
+    runs-on: ${{ matrix.service == 'imessage' && fromJson('["self-hosted","milady-e2e-macos"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 15
+    env:
+      # Shared LLM creds (judge may need them for dry-run verification)
+      MILADY_E2E_GROQ_API_KEY: ${{ secrets.MILADY_E2E_GROQ_API_KEY }}
+
+      # Gmail
+      MILADY_E2E_GMAIL_TESTOWNER_CLIENT_ID: ${{ secrets.MILADY_E2E_GMAIL_TESTOWNER_CLIENT_ID }}
+      MILADY_E2E_GMAIL_TESTOWNER_CLIENT_SECRET: ${{ secrets.MILADY_E2E_GMAIL_TESTOWNER_CLIENT_SECRET }}
+      MILADY_E2E_GMAIL_TESTOWNER_REFRESH_TOKEN: ${{ secrets.MILADY_E2E_GMAIL_TESTOWNER_REFRESH_TOKEN }}
+      MILADY_E2E_GMAIL_TESTAGENT_CLIENT_ID: ${{ secrets.MILADY_E2E_GMAIL_TESTAGENT_CLIENT_ID }}
+      MILADY_E2E_GMAIL_TESTAGENT_CLIENT_SECRET: ${{ secrets.MILADY_E2E_GMAIL_TESTAGENT_CLIENT_SECRET }}
+      MILADY_E2E_GMAIL_TESTAGENT_REFRESH_TOKEN: ${{ secrets.MILADY_E2E_GMAIL_TESTAGENT_REFRESH_TOKEN }}
+
+      # Discord
+      MILADY_E2E_DISCORD_BOT_TOKEN: ${{ secrets.MILADY_E2E_DISCORD_BOT_TOKEN }}
+      MILADY_E2E_DISCORD_QA_GUILD_ID: ${{ secrets.MILADY_E2E_DISCORD_QA_GUILD_ID }}
+
+      # Telegram
+      MILADY_E2E_TELEGRAM_BOT_TOKEN: ${{ secrets.MILADY_E2E_TELEGRAM_BOT_TOKEN }}
+      MILADY_E2E_TELEGRAM_CHAT_ID: ${{ secrets.MILADY_E2E_TELEGRAM_CHAT_ID }}
+
+      # Twitter
+      MILADY_E2E_TWITTER_CLIENT_ID: ${{ secrets.MILADY_E2E_TWITTER_CLIENT_ID }}
+      MILADY_E2E_TWITTER_CLIENT_SECRET: ${{ secrets.MILADY_E2E_TWITTER_CLIENT_SECRET }}
+      MILADY_E2E_TWITTER_USER_REFRESH_TOKEN: ${{ secrets.MILADY_E2E_TWITTER_USER_REFRESH_TOKEN }}
+
+      # Signal
+      MILADY_E2E_SIGNAL_DATA_DIR: ${{ secrets.MILADY_E2E_SIGNAL_DATA_DIR }}
+
+      # iMessage
+      MILADY_E2E_BLUEBUBBLES_SERVER_URL: ${{ secrets.MILADY_E2E_BLUEBUBBLES_SERVER_URL }}
+      MILADY_E2E_BLUEBUBBLES_PASSWORD: ${{ secrets.MILADY_E2E_BLUEBUBBLES_PASSWORD }}
+
+      # GitHub
+      MILADY_E2E_GITHUB_USER_PAT: ${{ secrets.MILADY_E2E_GITHUB_USER_PAT }}
+      MILADY_E2E_GITHUB_ORG: ${{ secrets.MILADY_E2E_GITHUB_ORG }}
+
+      # Twilio
+      MILADY_E2E_TWILIO_ACCOUNT_SID: ${{ secrets.MILADY_E2E_TWILIO_ACCOUNT_SID }}
+      MILADY_E2E_TWILIO_API_KEY_SID: ${{ secrets.MILADY_E2E_TWILIO_API_KEY_SID }}
+      MILADY_E2E_TWILIO_API_KEY_SECRET: ${{ secrets.MILADY_E2E_TWILIO_API_KEY_SECRET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup workspace dependencies
+        uses: ./.github/actions/setup-bun-workspace
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          install-command: bun install --ignore-scripts --no-frozen-lockfile
+
+      - name: Run sweeper
+        run: bun run scripts/sweeper/run.mjs --service ${{ matrix.service }} --max-age-hours 24 >> "$GITHUB_STEP_SUMMARY"

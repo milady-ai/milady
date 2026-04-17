@@ -1,0 +1,13 @@
+[Unit]
+Description=Milady — OAuth refresh check every 6 hours
+
+[Timer]
+# First check 2 minutes after boot so a reboot triggers a refresh
+# (without delaying the main service start).
+OnBootSec=2min
+OnUnitActiveSec=6h
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

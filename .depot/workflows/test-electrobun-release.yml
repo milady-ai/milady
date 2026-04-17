@@ -39,10 +39,10 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
-      - name: Initialize tracked workspace submodules
-        run: bun run scripts/init-submodules.mjs
       - name: Initialize eliza submodule for version resolution
         run: git submodule update --init --depth=1 eliza
+      - name: Initialize tracked workspace submodules
+        run: node scripts/init-submodules.mjs
       - name: Initialize release-check plugin version source
         run: |
           if [ -f eliza/.gitmodules ]; then

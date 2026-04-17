@@ -38,7 +38,7 @@ Secrets can be included in `milady.json` (not recommended for production — use
 ```json
 {
   "secrets": {
-    "OPENAI_API_KEY": "sk-...",
+    "OPENAI_API_KEY": "<OPENAI_API_KEY>",
     "TELEGRAM_BOT_TOKEN": "123456:ABC..."
   }
 }

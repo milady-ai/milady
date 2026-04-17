@@ -42,7 +42,7 @@ Tracked against the Electrobun migration (`feat/electrobun-migration-v2`):
 3. Swabble / wake word
 4. Auto-launch
 
-When picking any of these up, grep `apps/app/electrobun/src/` for TODO markers and confirm the current state in the branch's most recent commit before designing — the list above drifts as work lands.
+When picking any of these up, grep `apps/app/electrobun/src/` for stale placeholder markers and confirm the current state in the branch's most recent commit before designing — the list above drifts as work lands.
 
 ## When invoked
 

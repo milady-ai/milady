@@ -969,30 +969,55 @@
       "category": "feature",
       "envKey": null,
       "configKeys": [
-        "COMPUTERUSE_MODE",
-        "COMPUTERUSE_ENABLED",
-        "COMPUTERUSE_MCP_SERVER"
+      "COMPUTER_USE_ENABLED",
+      "COMPUTER_USE_SCREENSHOT_AFTER_ACTION",
+      "COMPUTER_USE_ACTION_TIMEOUT_MS",
+      "COMPUTER_USE_APPROVAL_MODE",
+      "COMPUTER_USE_BROWSER_HEADLESS"
       ],
       "version": "2.0.0-alpha.6",
       "pluginParameters": {
-        "COMPUTERUSE_MODE": {
-          "type": "string",
-          "description": "Execution mode: auto | local | mcp (default: auto)",
-          "required": false,
-          "sensitive": false
-        },
-        "COMPUTERUSE_ENABLED": {
-          "type": "boolean",
-          "description": "Enable ComputerUse actions/providers (default: false)",
-          "required": false,
-          "sensitive": false
-        },
-        "COMPUTERUSE_MCP_SERVER": {
-          "type": "string",
-          "description": "MCP server name to use for remote control (default: computeruse)",
-          "required": false,
-          "sensitive": false
-        }
+      "COMPUTER_USE_ENABLED": {
+        "type": "boolean",
+        "description": "Enable computer use capabilities (desktop automation, screenshots, browser control)",
+        "required": false,
+        "default": false,
+        "sensitive": false
+      },
+      "COMPUTER_USE_SCREENSHOT_AFTER_ACTION": {
+        "type": "boolean",
+        "description": "Automatically capture a screenshot after each desktop action",
+        "required": false,
+        "default": true,
+        "sensitive": false
+      },
+      "COMPUTER_USE_ACTION_TIMEOUT_MS": {
+        "type": "number",
+        "description": "Maximum action execution timeout in milliseconds",
+        "required": false,
+        "default": 10000,
+        "sensitive": false
+      },
+      "COMPUTER_USE_APPROVAL_MODE": {
+        "type": "string",
+        "description": "Approval mode for computer-use commands: full_control auto-approves everything, smart_approve auto-approves safe read-only commands, approve_all requires approval for every command, off denies all commands.",
+        "required": false,
+        "default": "full_control",
+        "enum": [
+          "full_control",
+          "smart_approve",
+          "approve_all",
+          "off"
+        ],
+        "sensitive": false
+      },
+      "COMPUTER_USE_BROWSER_HEADLESS": {
+        "type": "boolean",
+        "description": "Run browser automation headlessly. Useful for CI and test environments without a visible desktop session.",
+        "required": false,
+        "default": false,
+        "sensitive": false
+      }
       },
       "homepage": "https://elizaos.ai",
       "repository": "https://github.com/elizaos/eliza"

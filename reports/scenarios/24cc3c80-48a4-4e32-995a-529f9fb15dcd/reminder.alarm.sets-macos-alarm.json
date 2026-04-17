@@ -1,0 +1,28 @@
+{
+  "id": "reminder.alarm.sets-macos-alarm",
+  "title": "Reminder requests a native macOS alarm via helper",
+  "domain": "reminders",
+  "tags": [
+    "reminders",
+    "lifeops",
+    "not-yet-implemented",
+    "plugin-disabled"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:22:11.976Z",
+  "completedAtIso": "2026-04-17T00:22:12.657Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

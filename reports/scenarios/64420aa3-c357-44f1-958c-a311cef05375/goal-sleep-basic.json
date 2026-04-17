@@ -1,0 +1,27 @@
+{
+  "id": "goal-sleep-basic",
+  "title": "Sleep goal save flow",
+  "domain": "goals",
+  "tags": [
+    "lifeops",
+    "goals",
+    "smoke"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:20:32.564Z",
+  "completedAtIso": "2026-04-17T00:20:33.249Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

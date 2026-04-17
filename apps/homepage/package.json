@@ -16,6 +16,7 @@
   "dependencies": {
     "@elizaos/shared": "workspace:*",
     "@elizaos/app-core": "workspace:*",
+    "dompurify": "^3.4.0",
     "mermaid": "^11.14.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -41,7 +42,7 @@
     "shiki": "^4.0.2",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21",
+    "vite": "^6.4.2",
     "vitest": "^4.1.0"
   }
 }

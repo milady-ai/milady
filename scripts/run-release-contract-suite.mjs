@@ -130,10 +130,17 @@ export function ensureLegacyElectrobunCompatDir({
   copyScriptsDir = copyLegacyScriptsCompatDir,
   writeWrapper = writeLegacyElectrobunWrapper,
 } = {}) {
-  if (fs.existsSync(legacyDir) || !fs.existsSync(canonicalDir)) {
+  if (!fs.existsSync(canonicalDir)) {
     return false;
   }
 
+  const wrapperPath = path.join(legacyDir, "electrobun.config.ts");
+  const legacyDirExists = fs.existsSync(legacyDir);
+  if (legacyDirExists && fs.existsSync(wrapperPath)) {
+    return false;
+  }
+
+  const dirWasCreated = !legacyDirExists;
   fs.mkdirSync(legacyDir, { recursive: true });
   try {
     for (const entry of fs.readdirSync(canonicalDir, { withFileTypes: true })) {
@@ -141,6 +148,10 @@ export function ensureLegacyElectrobunCompatDir({
       const targetPath = path.join(legacyDir, entry.name);
 
       if (entry.name === "electrobun.config.ts") {
+        continue;
+      }
+
+      if (fs.existsSync(targetPath)) {
         continue;
       }
 
@@ -158,7 +169,9 @@ export function ensureLegacyElectrobunCompatDir({
     );
     return true;
   } catch (error) {
-    fs.rmSync(legacyDir, { force: true, recursive: true });
+    if (dirWasCreated) {
+      fs.rmSync(legacyDir, { force: true, recursive: true });
+    }
     throw error;
   }
 }
