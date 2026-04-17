@@ -34,6 +34,7 @@ import {
 import {
   applyForceFreshOnboardingReset,
   applyLaunchConnectionFromUrl,
+  dispatchQueuedLifeOpsGithubCallbackFromUrl,
   installDesktopPermissionsClientPatch,
   installForceFreshOnboardingClientPatch,
   installLocalProviderCloudPreferencePatch,
@@ -42,7 +43,6 @@ import {
   shouldInstallMainWindowOnboardingPatches,
   syncDetachedShellLocation,
 } from "@elizaos/app-core";
-import { dispatchQueuedLifeOpsGithubCallbackFromUrl } from "@elizaos/app-lifeops/platform";
 import type { ShareTargetPayload } from "@elizaos/app-core/platform";
 import {
   DESKTOP_TRAY_MENU_ITEMS,
