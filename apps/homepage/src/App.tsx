@@ -44,6 +44,7 @@ function MiladyControlHub() {
     refresh,
     addRemoteUrl,
     removeRemote,
+    deleteCloudAgent,
     cloudClient,
   } = useAgents();
   const {
@@ -120,24 +121,35 @@ function MiladyControlHub() {
     }
   };
 
-  const handleOpenRaw = (agent: ManagedAgent) => {
-    const url = agent.webUiUrl ?? agent.sourceUrl;
-    if (!url) {
-      setNotice({
-        tone: "error",
-        text: `${agent.name} does not expose a URL yet.`,
-      });
-      return;
-    }
-    openExternal(url);
-  };
-
-  const handleDisconnect = (agent: ManagedAgent) => {
+  const handleForgetRemote = (agent: ManagedAgent) => {
     removeRemote(agent.id);
     setNotice({
       tone: "info",
       text: `${agent.name} removed from saved remote connections.`,
     });
+  };
+
+  const handleDeleteCloud = async (agent: ManagedAgent) => {
+    if (!agent.cloudAgentId) {
+      setNotice({
+        tone: "error",
+        text: `${agent.name} has no cloud id — cannot delete.`,
+      });
+      throw new Error("missing cloudAgentId");
+    }
+    try {
+      await deleteCloudAgent(agent.cloudAgentId);
+      setNotice({ tone: "success", text: `${agent.name} deleted.` });
+    } catch (err) {
+      setNotice({
+        tone: "error",
+        text:
+          err instanceof Error
+            ? `delete failed: ${err.message}`
+            : "delete failed.",
+      });
+      throw err;
+    }
   };
 
   const handleCopyCommand = async (command: string, label: string) => {
@@ -215,8 +227,8 @@ function MiladyControlHub() {
           onRefresh={() => void refresh()}
           onOpen={handleOpenAgent}
           onCopyUrl={(agent) => void handleCopyUrl(agent)}
-          onOpenRaw={handleOpenRaw}
-          onDisconnect={handleDisconnect}
+          onForgetRemote={handleForgetRemote}
+          onDeleteCloud={handleDeleteCloud}
           onAttachRemote={() => setShowConnectModal(true)}
           onOpenLocal={handleOpenLocal}
           onProvisionAgent={() => setShowProvisionModal(true)}

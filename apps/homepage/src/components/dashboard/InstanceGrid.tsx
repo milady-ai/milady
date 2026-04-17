@@ -12,8 +12,10 @@ export interface InstanceGridProps {
   onRefresh: () => void;
   onOpen: (agent: ManagedAgent) => void;
   onCopyUrl: (agent: ManagedAgent) => void;
-  onOpenRaw: (agent: ManagedAgent) => void;
-  onDisconnect: (agent: ManagedAgent) => void;
+  /** Forget a remote connection (local state only). */
+  onForgetRemote: (agent: ManagedAgent) => void;
+  /** Delete a cloud agent (real resource). Returns a promise for in-card state. */
+  onDeleteCloud: (agent: ManagedAgent) => Promise<void>;
   onAttachRemote: () => void;
   onOpenLocal: () => void;
   onProvisionAgent?: () => void;
@@ -27,8 +29,8 @@ export function InstanceGrid({
   onRefresh,
   onOpen,
   onCopyUrl,
-  onOpenRaw,
-  onDisconnect,
+  onForgetRemote,
+  onDeleteCloud,
   onAttachRemote,
   onOpenLocal,
   onProvisionAgent,
@@ -147,10 +149,14 @@ export function InstanceGrid({
               agent={agent}
               onOpen={() => onOpen(agent)}
               onCopyUrl={() => onCopyUrl(agent)}
-              onOpenRaw={() => onOpenRaw(agent)}
-              onDisconnect={
+              onForget={
                 agent.source === "remote"
-                  ? () => onDisconnect(agent)
+                  ? () => onForgetRemote(agent)
+                  : undefined
+              }
+              onDelete={
+                agent.source === "cloud"
+                  ? () => onDeleteCloud(agent)
                   : undefined
               }
             />
