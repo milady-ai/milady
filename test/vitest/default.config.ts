@@ -354,7 +354,9 @@ export default defineConfig({
       "apps/chrome-extension/**/*.test.tsx",
       "test/helpers/**/*.test.ts",
     ],
-    setupFiles: ["eliza/packages/app-core/test/setup.ts"],
+    setupFiles: [
+      path.join(repoRoot, "eliza/packages/app-core/test/setup.ts"),
+    ],
     exclude: [
       "dist/**",
       "**/node_modules/**",
