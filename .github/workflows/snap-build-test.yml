@@ -31,6 +31,11 @@ jobs:
 
     steps:
       - name: Free disk space on runner
+        # Snapcraft multipass + bun install of every workspace dependency
+        # inside the sandbox consistently exhausts the default 14GB GHA
+        # runner disk, producing `System.IO.IOException: No space left on
+        # device` halfway through the build. Reclaim ~30GB up front by
+        # dropping unused toolchains.
         run: |
           set -euo pipefail
           echo "=== before ==="
