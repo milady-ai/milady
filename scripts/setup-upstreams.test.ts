@@ -4,9 +4,15 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   applyMiladyCopyPatches,
+  applyPluginAnthropicBunRuntimePatch,
+  applyPluginAnthropicCliUsagePatch,
+  applyUnpublishedPluginStubOverrides,
   bootstrapBundledBunInstall,
   ensurePluginAnthropicBunTypes,
+  findInstalledPackageDir,
   getElizaInstallArgs,
+  getTemporaryElizaWorkspaceEntries,
+  runElizaInstallWithRetry,
 } from "./setup-upstreams.mjs";
 
 const tempDirs: string[] = [];
@@ -42,6 +48,152 @@ describe("getElizaInstallArgs", () => {
       "install",
       "--ignore-scripts",
     ]);
+  });
+});
+
+describe("getTemporaryElizaWorkspaceEntries", () => {
+  it("includes the root CI stub workspace for unpublished eliza plugins", () => {
+    const elizaRoot = "/repo/eliza";
+    const existingPaths = new Set([
+      path.join(
+        elizaRoot,
+        "plugins",
+        "plugin-sql",
+        "typescript",
+        "package.json",
+      ),
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
+        "elizaos-plugin-wechat",
+        "package.json",
+      ),
+    ]);
+
+    expect(
+      getTemporaryElizaWorkspaceEntries(elizaRoot, {
+        pathExists: (targetPath) => existingPaths.has(targetPath),
+      }),
+    ).toEqual([
+      "plugins/plugin-sql/typescript",
+      "../scripts/ci-stubs/elizaos-plugin-wechat",
+    ]);
+  });
+
+  it("skips the wechat CI stub when the real plugin workspace exists", () => {
+    const elizaRoot = "/repo/eliza";
+    const existingPaths = new Set([
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
+        "elizaos-plugin-wechat",
+        "package.json",
+      ),
+      path.join(elizaRoot, "plugins", "plugin-wechat", "package.json"),
+    ]);
+
+    expect(
+      getTemporaryElizaWorkspaceEntries(elizaRoot, {
+        pathExists: (targetPath) => existingPaths.has(targetPath),
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe("applyUnpublishedPluginStubOverrides", () => {
+  it("removes stale CI stub overrides when the real plugin workspace exists", () => {
+    const elizaRoot = makeTempDir();
+    writeFile(
+      path.join(elizaRoot, "package.json"),
+      JSON.stringify(
+        {
+          name: "eliza",
+          overrides: {
+            "@elizaos/plugin-wechat":
+              "file:../scripts/ci-stubs/elizaos-plugin-wechat",
+          },
+        },
+        null,
+        2,
+      ),
+    );
+    writeFile(
+      path.join(
+        elizaRoot,
+        "..",
+        "scripts",
+        "ci-stubs",
+        "elizaos-plugin-wechat",
+        "package.json",
+      ),
+      '{"name":"@elizaos/plugin-wechat"}\n',
+    );
+    writeFile(
+      path.join(elizaRoot, "plugins", "plugin-wechat", "package.json"),
+      '{"name":"@elizaos/plugin-wechat"}\n',
+    );
+
+    expect(applyUnpublishedPluginStubOverrides(elizaRoot)).toBe(1);
+    expect(
+      JSON.parse(fs.readFileSync(path.join(elizaRoot, "package.json"), "utf8")),
+    ).not.toHaveProperty("overrides");
+  });
+
+  it("keeps the real wechat plugin package name aligned with the CI stub", () => {
+    const stubPackage = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "scripts",
+          "ci-stubs",
+          "elizaos-plugin-wechat",
+          "package.json",
+        ),
+        "utf8",
+      ),
+    ) as { name?: string };
+    const realPackage = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "eliza",
+          "plugins",
+          "plugin-wechat",
+          "package.json",
+        ),
+        "utf8",
+      ),
+    ) as { name?: string };
+
+    expect(realPackage.name).toBe("@elizaos/plugin-wechat");
+    expect(realPackage.name).toBe(stubPackage.name);
+  });
+});
+
+describe("findInstalledPackageDir", () => {
+  it("falls back to eliza workspace installs for nested plugin dependencies", () => {
+    const repoRoot = makeTempDir();
+    const elizaRoot = path.join(repoRoot, "eliza");
+    const elizaInstall = path.join(
+      elizaRoot,
+      "node_modules",
+      "@types",
+      "bun",
+      "package.json",
+    );
+
+    writeFile(elizaInstall, '{"name":"@types/bun"}');
+
+    expect(findInstalledPackageDir(repoRoot, "@types/bun")).toBeNull();
+    expect(
+      findInstalledPackageDir(repoRoot, "@types/bun", undefined, null, {
+        searchRoots: [repoRoot, elizaRoot],
+      }),
+    ).toBe(path.dirname(elizaInstall));
   });
 });
 
@@ -96,6 +248,76 @@ describe("bootstrapBundledBunInstall", () => {
         runCommandImpl: vi.fn(),
       }),
     ).rejects.toThrow("node_modules/bun/install.js");
+  });
+});
+
+describe("runElizaInstallWithRetry", () => {
+  it("retries bun install once after a transient failure", async () => {
+    const runCommandImpl = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new Error("bun install (eliza) exited with code 1"),
+      )
+      .mockResolvedValueOnce(undefined);
+    const wait = vi.fn().mockResolvedValue(undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await expect(
+      runElizaInstallWithRetry("/repo/eliza", {
+        env: { MILADY_NO_VISION_DEPS: "1" },
+        runCommandImpl,
+        wait,
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(runCommandImpl).toHaveBeenNthCalledWith(
+      1,
+      "bun",
+      ["install", "--ignore-scripts"],
+      {
+        cwd: "/repo/eliza",
+        label: "bun install (eliza)",
+      },
+    );
+    expect(runCommandImpl).toHaveBeenNthCalledWith(
+      2,
+      "bun",
+      ["install", "--ignore-scripts"],
+      {
+        cwd: "/repo/eliza",
+        label: "bun install (eliza)",
+      },
+    );
+    expect(wait).toHaveBeenCalledWith(3000);
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[setup-upstreams] bun install (eliza) failed on attempt 1; retrying once after 3000ms to recover from transient dependency fetch errors",
+    );
+
+    warnSpy.mockRestore();
+  });
+
+  it("rethrows the final install failure after the retry", async () => {
+    const secondError = new Error("bun install (eliza) exited with code 1");
+    const runCommandImpl = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new Error("bun install (eliza) exited with code 1"),
+      )
+      .mockRejectedValueOnce(secondError);
+    const wait = vi.fn().mockResolvedValue(undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await expect(
+      runElizaInstallWithRetry("/repo/eliza", {
+        runCommandImpl,
+        wait,
+      }),
+    ).rejects.toBe(secondError);
+
+    expect(runCommandImpl).toHaveBeenCalledTimes(2);
+    expect(wait).toHaveBeenCalledTimes(1);
+
+    warnSpy.mockRestore();
   });
 });
 
@@ -175,6 +397,168 @@ describe("applyMiladyCopyPatches", () => {
     );
 
     warnSpy.mockRestore();
+  });
+});
+
+describe("applyPluginAnthropicCliUsagePatch", () => {
+  it("normalizes Claude CLI usage fields to prompt/completion tokens", () => {
+    const elizaRoot = makeTempDir();
+    const claudeCliPath = path.join(
+      elizaRoot,
+      "plugins",
+      "plugin-anthropic",
+      "typescript",
+      "utils",
+      "claude-cli.ts",
+    );
+
+    writeFile(
+      claudeCliPath,
+      [
+        "const usage = {",
+        "    inputTokens: number;",
+        "    outputTokens: number;",
+        "};",
+        "const mapped = {",
+        "    inputTokens: entry.inputTokens,",
+        "    outputTokens: entry.outputTokens,",
+        "};",
+        "emitModelUsageEvent(runtime, modelType, prompt, {",
+        "      promptTokens: usage.inputTokens,",
+        "      completionTokens: usage.outputTokens,",
+        "});",
+        "emitModelUsageEvent(runtime, modelType, prompt, {",
+        "                promptTokens: usage.inputTokens,",
+        "                completionTokens: usage.outputTokens,",
+        "});",
+      ].join("\n"),
+    );
+
+    expect(applyPluginAnthropicCliUsagePatch(elizaRoot)).toBe(4);
+    const patched = fs.readFileSync(claudeCliPath, "utf8");
+    expect(patched).toContain("promptTokens: number;");
+    expect(patched).toContain("completionTokens: number;");
+    expect(patched).toContain("promptTokens: entry.inputTokens,");
+    expect(patched).toContain("completionTokens: entry.outputTokens,");
+    expect(patched).toContain("promptTokens: usage.promptTokens,");
+    expect(patched).toContain("completionTokens: usage.completionTokens,");
+    expect(patched).not.toContain("usage.inputTokens");
+    expect(patched).not.toContain("usage.outputTokens");
+  });
+});
+
+describe("applyPluginAnthropicBunRuntimePatch", () => {
+  it("rewrites plugin-anthropic Bun globals to a typed globalThis fallback", () => {
+    const elizaRoot = makeTempDir();
+    const initPath = path.join(
+      elizaRoot,
+      "plugins",
+      "plugin-anthropic",
+      "typescript",
+      "init.ts",
+    );
+    const claudeCliPath = path.join(
+      elizaRoot,
+      "plugins",
+      "plugin-anthropic",
+      "typescript",
+      "utils",
+      "claude-cli.ts",
+    );
+
+    writeFile(
+      initPath,
+      [
+        'if (authMode === "cli") {',
+        "  try {",
+        '        const result = Bun.spawnSync(["claude", "--version"], {',
+        '          stdout: "pipe",',
+        '          stderr: "pipe",',
+        "        });",
+        '        if (result.exitCode !== 0) throw new Error("claude not found");',
+        "  } catch {}",
+        "}",
+      ].join("\n"),
+    );
+    writeFile(
+      claudeCliPath,
+      [
+        "function parseUsage(",
+        "  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,",
+        '): CliGenerateResult["usage"] {',
+        "  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;",
+        "  if (!entry) return null;",
+        "  return {",
+        "    promptTokens: entry.inputTokens,",
+        "    completionTokens: entry.outputTokens,",
+        "    totalTokens: entry.inputTokens + entry.outputTokens,",
+        "  };",
+        "}",
+        "",
+        "/**",
+        " * Run a prompt through `claude -p` (non-streaming).",
+        " */",
+        'const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });',
+        'const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });',
+      ].join("\n"),
+    );
+
+    expect(applyPluginAnthropicBunRuntimePatch(elizaRoot)).toBe(4);
+    const patchedInit = fs.readFileSync(initPath, "utf8");
+    const patchedCli = fs.readFileSync(claudeCliPath, "utf8");
+
+    expect(patchedInit).toContain(
+      "const bunRuntime = (globalThis as typeof globalThis",
+    );
+    expect(patchedInit).toContain("if (!result || result.exitCode !== 0)");
+    expect(patchedCli).toContain("function getBunRuntime()");
+    expect(patchedCli).toContain("const proc = getBunRuntime().spawn");
+    expect(patchedCli).not.toContain("Bun.spawn(");
+  });
+
+  it("patches the original upstream Claude CLI source before the usage rewrite runs", () => {
+    const elizaRoot = makeTempDir();
+    const claudeCliPath = path.join(
+      elizaRoot,
+      "plugins",
+      "plugin-anthropic",
+      "typescript",
+      "utils",
+      "claude-cli.ts",
+    );
+
+    writeFile(
+      claudeCliPath,
+      [
+        "function parseUsage(",
+        "  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,",
+        '): CliGenerateResult["usage"] {',
+        "  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;",
+        "  if (!entry) return null;",
+        "  return {",
+        "    inputTokens: entry.inputTokens,",
+        "    outputTokens: entry.outputTokens,",
+        "    totalTokens: entry.inputTokens + entry.outputTokens,",
+        "  };",
+        "}",
+        "",
+        "/**",
+        " * Run a prompt through `claude -p` (non-streaming).",
+        " */",
+        'const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });',
+      ].join("\n"),
+    );
+
+    expect(applyPluginAnthropicBunRuntimePatch(elizaRoot)).toBe(2);
+    expect(applyPluginAnthropicCliUsagePatch(elizaRoot)).toBe(0);
+
+    const patchedCli = fs.readFileSync(claudeCliPath, "utf8");
+    expect(patchedCli).toContain("function getBunRuntime()");
+    expect(patchedCli).toContain("promptTokens: entry.inputTokens");
+    expect(patchedCli).toContain("completionTokens: entry.outputTokens");
+    expect(patchedCli).toContain("const proc = getBunRuntime().spawn");
+    expect(patchedCli).not.toContain("inputTokens: entry.inputTokens,");
+    expect(patchedCli).not.toContain("outputTokens: entry.outputTokens,");
   });
 });
 

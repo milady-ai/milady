@@ -63,6 +63,7 @@ export const ELIZA_BUILD_STEPS = [
 ];
 
 const OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG = "alpha";
+const ELIZA_INSTALL_RETRY_DELAY_MS = 3_000;
 
 // Plugins referenced as @elizaos/* workspace:* inside the eliza workspace but
 // provided by a CI stub in the root repo rather than published on npm. Before
@@ -71,6 +72,7 @@ const OPTIONAL_ELIZA_PLUGIN_FALLBACK_TAG = "alpha";
 const UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS = [
   {
     packageName: "@elizaos/plugin-wechat",
+    workspaceEntry: "plugins/plugin-wechat",
     /** Relative from eliza/ to the CI stub directory. */
     stubRelativePath: "../scripts/ci-stubs/elizaos-plugin-wechat",
   },
@@ -113,6 +115,57 @@ const MILADY_COPY_PATCH_RELATIVE_PATHS = [
     "ChatView.tsx",
   ),
   path.join("packages", "app-core", "src", "i18n", "locales", "en.json"),
+];
+const PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH = path.join(
+  "plugins",
+  "plugin-anthropic",
+  "typescript",
+  "utils",
+  "claude-cli.ts",
+);
+const PLUGIN_ANTHROPIC_INIT_RELATIVE_PATH = path.join(
+  "plugins",
+  "plugin-anthropic",
+  "typescript",
+  "init.ts",
+);
+const PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS = [
+  [
+    "    inputTokens: number;\n    outputTokens: number;\n",
+    "    promptTokens: number;\n    completionTokens: number;\n",
+  ],
+  [
+    "    inputTokens: entry.inputTokens,\n    outputTokens: entry.outputTokens,\n",
+    "    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n",
+  ],
+  [
+    "      promptTokens: usage.inputTokens,\n      completionTokens: usage.outputTokens,\n",
+    "      promptTokens: usage.promptTokens,\n      completionTokens: usage.completionTokens,\n",
+  ],
+  [
+    "                promptTokens: usage.inputTokens,\n                completionTokens: usage.outputTokens,\n",
+    "                promptTokens: usage.promptTokens,\n                completionTokens: usage.completionTokens,\n",
+  ],
+];
+const PLUGIN_ANTHROPIC_INIT_BUN_REPLACEMENTS = [
+  [
+    `        const result = Bun.spawnSync(["claude", "--version"], {\n          stdout: "pipe",\n          stderr: "pipe",\n        });\n        if (result.exitCode !== 0) throw new Error("claude not found");\n`,
+    `        const bunRuntime = (globalThis as typeof globalThis & {\n          Bun?: {\n            spawnSync(\n              args: string[],\n              options: { stdout: "pipe"; stderr: "pipe" },\n            ): { exitCode: number };\n          };\n        }).Bun;\n        const result = bunRuntime?.spawnSync(["claude", "--version"], {\n          stdout: "pipe",\n          stderr: "pipe",\n        });\n        if (!result || result.exitCode !== 0) throw new Error("claude not found");\n`,
+  ],
+];
+const PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS = [
+  [
+    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    inputTokens: entry.inputTokens,\n    outputTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
+    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\nfunction getBunRuntime() {\n  const bunRuntime = (globalThis as typeof globalThis & {\n    Bun?: {\n      spawn(\n        args: string[],\n        options: { stdout: "pipe"; stderr: "pipe" },\n      ): {\n        stdout: ReadableStream<Uint8Array>;\n        stderr: ReadableStream<Uint8Array>;\n        exited: Promise<number>;\n      };\n    };\n  }).Bun;\n\n  if (!bunRuntime) {\n    throw new Error("[Anthropic CLI] Bun runtime is required for CLI mode");\n  }\n\n  return bunRuntime;\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
+  ],
+  [
+    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
+    `function parseUsage(\n  modelUsage: Record<string, ClaudeCliModelUsage> | undefined,\n): CliGenerateResult["usage"] {\n  const entry = modelUsage ? Object.values(modelUsage)[0] : undefined;\n  if (!entry) return null;\n  return {\n    promptTokens: entry.inputTokens,\n    completionTokens: entry.outputTokens,\n    totalTokens: entry.inputTokens + entry.outputTokens,\n  };\n}\n\nfunction getBunRuntime() {\n  const bunRuntime = (globalThis as typeof globalThis & {\n    Bun?: {\n      spawn(\n        args: string[],\n        options: { stdout: "pipe"; stderr: "pipe" },\n      ): {\n        stdout: ReadableStream<Uint8Array>;\n        stderr: ReadableStream<Uint8Array>;\n        exited: Promise<number>;\n      };\n    };\n  }).Bun;\n\n  if (!bunRuntime) {\n    throw new Error("[Anthropic CLI] Bun runtime is required for CLI mode");\n  }\n\n  return bunRuntime;\n}\n\n/**\n * Run a prompt through \`claude -p\` (non-streaming).\n */\n`,
+  ],
+  [
+    `const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });`,
+    `const proc = getBunRuntime().spawn(args, { stdout: "pipe", stderr: "pipe" });`,
+  ],
 ];
 
 function toDisplayPath(targetPath) {
@@ -209,6 +262,66 @@ export function applyMiladyCopyPatches(elizaRoot) {
   return patchedFiles;
 }
 
+function applyTextReplacements(filePath, replacements, { label }) {
+  if (!existsSync(filePath)) {
+    return 0;
+  }
+
+  const raw = readFileSync(filePath, "utf8");
+  let next = raw;
+  let patchedReplacements = 0;
+  let staleReplacements = 0;
+
+  for (const [from, to] of replacements) {
+    if (next.includes(to)) {
+      continue;
+    }
+    if (!next.includes(from)) {
+      staleReplacements += 1;
+      continue;
+    }
+    const replacementsApplied = next.split(from).length - 1;
+    next = next.split(from).join(to);
+    patchedReplacements += replacementsApplied;
+  }
+
+  if (next !== raw) {
+    writeFileSync(filePath, next);
+    console.log(
+      `[setup-upstreams] Applied ${label} (${patchedReplacements} replacement${patchedReplacements === 1 ? "" : "s"})`,
+    );
+  } else if (staleReplacements > 0) {
+    console.warn(
+      `[setup-upstreams] WARNING: ${label} no longer matches upstream source`,
+    );
+  }
+
+  return patchedReplacements;
+}
+
+export function applyPluginAnthropicBunRuntimePatch(elizaRoot) {
+  let patchedReplacements = 0;
+  patchedReplacements += applyTextReplacements(
+    path.join(elizaRoot, PLUGIN_ANTHROPIC_INIT_RELATIVE_PATH),
+    PLUGIN_ANTHROPIC_INIT_BUN_REPLACEMENTS,
+    { label: "plugin-anthropic Bun runtime init patch" },
+  );
+  patchedReplacements += applyTextReplacements(
+    path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
+    PLUGIN_ANTHROPIC_CLAUDE_CLI_BUN_REPLACEMENTS,
+    { label: "plugin-anthropic Bun runtime CLI patch" },
+  );
+  return patchedReplacements;
+}
+
+export function applyPluginAnthropicCliUsagePatch(elizaRoot) {
+  return applyTextReplacements(
+    path.join(elizaRoot, PLUGIN_ANTHROPIC_CLAUDE_CLI_RELATIVE_PATH),
+    PLUGIN_ANTHROPIC_CLAUDE_CLI_REPLACEMENTS,
+    { label: "plugin-anthropic Claude CLI usage patch" },
+  );
+}
+
 function uniqueLinks(links) {
   const deduped = new Map();
   for (const link of links) {
@@ -282,6 +395,31 @@ function getPresentOptionalElizaPlugins(
   });
 }
 
+export function getTemporaryElizaWorkspaceEntries(
+  elizaRoot,
+  { pathExists = existsSync } = {},
+) {
+  const optionalPluginWorkspaceEntries = getPresentOptionalElizaPlugins(
+    elizaRoot,
+    { pathExists },
+  ).map(({ workspaceEntry }) => workspaceEntry);
+
+  const unpublishedStubWorkspaceEntries =
+    UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS.filter(
+      ({ stubRelativePath, workspaceEntry }) => {
+        return (
+          pathExists(path.join(elizaRoot, stubRelativePath, "package.json")) &&
+          !pathExists(path.join(elizaRoot, workspaceEntry, "package.json"))
+        );
+      },
+    ).map(({ stubRelativePath }) => stubRelativePath);
+
+  return [
+    ...optionalPluginWorkspaceEntries,
+    ...unpublishedStubWorkspaceEntries,
+  ];
+}
+
 async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
   const packageJsonPath = path.join(elizaRoot, "package.json");
   const raw = readFileSync(packageJsonPath, "utf8");
@@ -299,9 +437,9 @@ async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
     return callback();
   }
 
-  const missingWorkspaceEntries = getPresentOptionalElizaPlugins(elizaRoot)
-    .map(({ workspaceEntry }) => workspaceEntry)
-    .filter((workspaceEntry) => !pkg.workspaces.includes(workspaceEntry));
+  const missingWorkspaceEntries = getTemporaryElizaWorkspaceEntries(
+    elizaRoot,
+  ).filter((workspaceEntry) => !pkg.workspaces.includes(workspaceEntry));
 
   if (missingWorkspaceEntries.length === 0) {
     return callback();
@@ -310,7 +448,7 @@ async function withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, callback) {
   pkg.workspaces = [...pkg.workspaces, ...missingWorkspaceEntries];
   writePackageJson(packageJsonPath, raw, pkg);
   console.log(
-    `[setup-upstreams] Temporarily enabling optional eliza plugin workspaces (${missingWorkspaceEntries.join(", ")})`,
+    `[setup-upstreams] Temporarily enabling eliza workspace entries (${missingWorkspaceEntries.join(", ")})`,
   );
 
   try {
@@ -433,9 +571,12 @@ function applyOptionalElizaPluginFallback(elizaRoot, missingPlugins) {
  *
  * The overrides are idempotent: re-running is safe if they are already present.
  */
-function applyUnpublishedPluginStubOverrides(elizaRoot) {
+export function applyUnpublishedPluginStubOverrides(
+  elizaRoot,
+  { pathExists = existsSync } = {},
+) {
   const packageJsonPath = path.join(elizaRoot, "package.json");
-  if (!existsSync(packageJsonPath)) {
+  if (!pathExists(packageJsonPath)) {
     return 0;
   }
 
@@ -460,12 +601,28 @@ function applyUnpublishedPluginStubOverrides(elizaRoot) {
   for (const {
     packageName,
     stubRelativePath,
+    workspaceEntry,
   } of UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS) {
     const stubAbsolutePath = path.resolve(elizaRoot, stubRelativePath);
-    if (!existsSync(path.join(stubAbsolutePath, "package.json"))) {
+    const stubPackageJsonPath = path.join(stubAbsolutePath, "package.json");
+    const realWorkspacePackageJsonPath = path.join(
+      elizaRoot,
+      workspaceEntry,
+      "package.json",
+    );
+    const specifier = `file:${stubRelativePath}`;
+    const shouldUseStub =
+      pathExists(stubPackageJsonPath) &&
+      !pathExists(realWorkspacePackageJsonPath);
+
+    if (!shouldUseStub) {
+      if (overrides[packageName] === specifier) {
+        delete overrides[packageName];
+        changed = true;
+      }
       continue;
     }
-    const specifier = `file:${stubRelativePath}`;
+
     if (overrides[packageName] === specifier) {
       continue;
     }
@@ -477,7 +634,11 @@ function applyUnpublishedPluginStubOverrides(elizaRoot) {
     return 0;
   }
 
-  pkg.overrides = overrides;
+  if (Object.keys(overrides).length === 0) {
+    delete pkg.overrides;
+  } else {
+    pkg.overrides = overrides;
+  }
   writePackageJson(packageJsonPath, raw, pkg);
   return UNPUBLISHED_ELIZA_PLUGIN_CI_STUBS.length;
 }
@@ -791,31 +952,33 @@ function ensurePackageBinLinks(
   return linkedBins;
 }
 
-function findInstalledPackageDir(
+export function findInstalledPackageDir(
   repoRoot,
   packageName,
   preferredVersion,
   localTargetPath = null,
+  { searchRoots = [repoRoot] } = {},
 ) {
-  const directPackagePath = path.join(
-    repoRoot,
-    "node_modules",
-    ...packageName.split("/"),
-  );
-  try {
-    const resolved = realpathSync(directPackagePath);
-    const resolvedLocalTarget =
-      localTargetPath && existsSync(localTargetPath)
-        ? realpathSync(localTargetPath)
-        : null;
-    if (existsSync(resolved) && resolved !== resolvedLocalTarget) {
-      return directPackagePath;
-    }
-  } catch {}
+  const resolvedLocalTarget =
+    localTargetPath && existsSync(localTargetPath)
+      ? realpathSync(localTargetPath)
+      : null;
+  const uniqueSearchRoots = [
+    ...new Set(searchRoots.map((root) => path.resolve(root))),
+  ];
 
-  const bunCacheRoot = path.join(repoRoot, "node_modules", ".bun");
-  if (!existsSync(bunCacheRoot)) {
-    return null;
+  for (const searchRoot of uniqueSearchRoots) {
+    const directPackagePath = path.join(
+      searchRoot,
+      "node_modules",
+      ...packageName.split("/"),
+    );
+    try {
+      const resolved = realpathSync(directPackagePath);
+      if (existsSync(resolved) && resolved !== resolvedLocalTarget) {
+        return directPackagePath;
+      }
+    } catch {}
   }
 
   const packagePrefix = `${packageName.replace("/", "+")}@`;
@@ -823,34 +986,46 @@ function findInstalledPackageDir(
     preferredVersion === undefined
       ? null
       : `${packageName.replace("/", "+")}@${preferredVersion}+`;
-  const matches = [];
 
-  for (const entry of readdirSync(bunCacheRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith(packagePrefix)) {
+  for (const searchRoot of uniqueSearchRoots) {
+    const bunCacheRoot = path.join(searchRoot, "node_modules", ".bun");
+    if (!existsSync(bunCacheRoot)) {
       continue;
     }
 
-    const candidate = path.join(
-      bunCacheRoot,
-      entry.name,
-      "node_modules",
-      ...packageName.split("/"),
+    const matches = [];
+
+    for (const entry of readdirSync(bunCacheRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !entry.name.startsWith(packagePrefix)) {
+        continue;
+      }
+
+      const candidate = path.join(
+        bunCacheRoot,
+        entry.name,
+        "node_modules",
+        ...packageName.split("/"),
+      );
+      if (!existsSync(candidate)) {
+        continue;
+      }
+
+      matches.push({
+        candidate,
+        preferred:
+          preferredPrefix !== null && entry.name.startsWith(preferredPrefix),
+      });
+    }
+
+    matches.sort(
+      (left, right) => Number(right.preferred) - Number(left.preferred),
     );
-    if (!existsSync(candidate)) {
-      continue;
+    if (matches[0]?.candidate) {
+      return matches[0].candidate;
     }
-
-    matches.push({
-      candidate,
-      preferred:
-        preferredPrefix !== null && entry.name.startsWith(preferredPrefix),
-    });
   }
 
-  matches.sort(
-    (left, right) => Number(right.preferred) - Number(left.preferred),
-  );
-  return matches[0]?.candidate ?? null;
+  return null;
 }
 
 export function ensurePluginDependencyLinks(
@@ -858,6 +1033,7 @@ export function ensurePluginDependencyLinks(
   pluginsRoot = getRepoPluginsRoot(repoRoot),
 ) {
   let linkedDependencies = 0;
+  const searchRoots = [repoRoot, getRepoElizaRoot(repoRoot)];
 
   for (const packageDir of discoverPluginPackageDirs(pluginsRoot)) {
     const packageJson = readPackageJson(packageDir);
@@ -886,6 +1062,9 @@ export function ensurePluginDependencyLinks(
       const installedDependencyDir = findInstalledPackageDir(
         repoRoot,
         dependencyName,
+        undefined,
+        null,
+        { searchRoots },
       );
       if (!installedDependencyDir) {
         continue;
@@ -1081,11 +1260,7 @@ async function ensureElizaDependencies(elizaRoot) {
     `[setup-upstreams] Installing eliza workspace dependencies in ${toDisplayPath(elizaRoot)}`,
   );
   await withTemporaryOptionalElizaPluginWorkspaces(elizaRoot, async () => {
-    const installArgs = getElizaInstallArgs();
-    await runCommand("bun", installArgs, {
-      cwd: elizaRoot,
-      label: "bun install (eliza)",
-    });
+    await runElizaInstallWithRetry(elizaRoot);
     await bootstrapBundledBunInstall(elizaRoot);
   });
 }
@@ -1094,6 +1269,37 @@ export function getElizaInstallArgs(env = process.env) {
   return env.MILADY_NO_VISION_DEPS === "1"
     ? ["install", "--ignore-scripts"]
     : ["install"];
+}
+
+export async function runElizaInstallWithRetry(
+  elizaRoot,
+  {
+    env = process.env,
+    retryDelayMs = ELIZA_INSTALL_RETRY_DELAY_MS,
+    runCommandImpl = runCommand,
+    wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  } = {},
+) {
+  const installArgs = getElizaInstallArgs(env);
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      await runCommandImpl("bun", installArgs, {
+        cwd: elizaRoot,
+        label: "bun install (eliza)",
+      });
+      return;
+    } catch (error) {
+      if (attempt >= 2) {
+        throw error;
+      }
+
+      console.warn(
+        `[setup-upstreams] bun install (eliza) failed on attempt ${attempt}; retrying once after ${retryDelayMs}ms to recover from transient dependency fetch errors`,
+      );
+      await wait(retryDelayMs);
+    }
+  }
 }
 
 export async function bootstrapBundledBunInstall(
@@ -1223,7 +1429,7 @@ export function ensurePluginAnthropicBunTypes(
     ? compilerOptions.types
     : null;
 
-  if (existingTypes && existingTypes.includes("bun")) {
+  if (existingTypes?.includes("bun")) {
     return false;
   }
 
@@ -1351,6 +1557,8 @@ export async function setupUpstreams(repoRoot = DEFAULT_REPO_ROOT) {
 
   const pluginsRoot = getRepoPluginsRoot(repoRoot);
   ensurePluginDependencyLinks(repoRoot, pluginsRoot);
+  applyPluginAnthropicBunRuntimePatch(elizaRoot);
+  applyPluginAnthropicCliUsagePatch(elizaRoot);
   await ensurePluginBuildOutputs(pluginsRoot);
   const updatedLinks = linkUpstreamPackages(repoRoot, {
     elizaRoot,

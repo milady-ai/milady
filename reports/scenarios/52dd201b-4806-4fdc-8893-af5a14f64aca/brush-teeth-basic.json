@@ -1,0 +1,27 @@
+{
+  "id": "brush-teeth-basic",
+  "title": "Brush teeth basic save flow",
+  "domain": "tasks",
+  "tags": [
+    "lifeops",
+    "tasks",
+    "smoke"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:11:07.441Z",
+  "completedAtIso": "2026-04-17T00:11:08.124Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

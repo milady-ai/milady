@@ -1,0 +1,28 @@
+{
+  "id": "todo.update.priority",
+  "title": "Raise a seeded todo to high priority",
+  "domain": "todos",
+  "tags": [
+    "lifeops",
+    "todos",
+    "smoke",
+    "multi-turn-memory"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:20:10.258Z",
+  "completedAtIso": "2026-04-17T00:20:10.995Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

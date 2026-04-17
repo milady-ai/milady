@@ -1,0 +1,27 @@
+{
+  "id": "todo.forceful-reminder.persistent",
+  "title": "Persistent forceful reminder escalates tone when user dodges",
+  "domain": "todos",
+  "tags": [
+    "lifeops",
+    "todos",
+    "long-utterance"
+  ],
+  "status": "skipped",
+  "durationMs": 0,
+  "providerName": "none",
+  "startedAtIso": "2026-04-17T00:16:57.852Z",
+  "completedAtIso": "2026-04-17T00:16:58.598Z",
+  "turns": [],
+  "finalChecks": [],
+  "actionsCalled": [],
+  "cleanup": [],
+  "cost": {
+    "provider": "none",
+    "usd": 0,
+    "tokensIn": 0,
+    "tokensOut": 0
+  },
+  "llmCallCount": 0,
+  "skipReason": "no live LLM provider available (missing API key or plugin failed to register)"
+}

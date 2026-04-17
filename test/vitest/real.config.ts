@@ -44,6 +44,14 @@ const hiddenElizaWorkspaceGlob =
     : undefined;
 const isCiReal = process.env.MILADY_CI_REAL === "1";
 const ciExcludedRealPaths = [
+  // ComputerUseService.loadConfig unconditionally calls setBrowserRuntimeOptions({
+  // headless: false}), overriding the module-level CI headless detection from
+  // browser.ts. This causes browser_connect to fail on headless CI runners when
+  // Chrome is installed but there is no display. Fix requires an update to
+  // eliza/plugins/plugin-computeruse/src/services/computer-use-service.ts to
+  // only call setBrowserRuntimeOptions when COMPUTER_USE_BROWSER_HEADLESS is
+  // explicitly set.
+  "eliza/plugins/plugin-computeruse/src/__tests__/computeruse.real.test.ts",
   // These surfaces are covered by dedicated workflows or upstream package
   // suites instead of Milady's required PR real-test lane.
   "eliza/packages/app-core/test/app/onboarding-companion.live.e2e.test.ts",
@@ -430,6 +438,20 @@ export default defineConfig({
               "typescript",
               "src",
               "index",
+            ),
+          },
+        },
+        {
+          find: "@elizaos/plugin-telegram/account-auth-service",
+          packageName: "@elizaos/plugin-telegram",
+          options: {
+            fallbackPath: path.join(
+              repoRoot,
+              "eliza",
+              "plugins",
+              "plugin-telegram",
+              "src",
+              "account-auth-service",
             ),
           },
         },

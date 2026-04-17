@@ -3,6 +3,36 @@ title: Changelog
 description: What's new in Milady — features, improvements, and fixes.
 ---
 
+<Update label="2026-04-17" description="Week of April 17; life-ops personal account connectors, multi-account Google, Steward cloud wallet provisioning" tags={["Feature", "Update", "Fix"]}>
+
+## Life-ops personal account connectors
+
+Your agent can now connect to your personal Signal, Discord, and Telegram accounts — not just bot accounts — to aggregate messages into the [life-ops](/rest/lifeops) system. Signal uses linked-device QR pairing, Discord uses OAuth2, and Telegram supports phone/code/2FA authentication. Once connected, messages from these platforms flow into your agent's unified inbox alongside Gmail and Calendar, giving your agent a fuller picture of your communications.
+
+## Multi-account Google connector
+
+The [life-ops](/rest/lifeops) Google integration now supports multiple Google accounts per side — both for you (the owner) and for your agent. Calendar events and Gmail messages are aggregated across all connected accounts, so you get a single unified view even if you use separate Google accounts for work and personal. A new accounts management panel in settings lets you add, remove, and configure each account individually. Existing single-account setups continue to work without any changes.
+
+## Steward wallet auto-provisioning on cloud login
+
+When you log into [Eliza Cloud](/guides/cloud) from the desktop app, a [Steward](/guides/wallet)-managed wallet is now provisioned automatically. You no longer need to configure Steward credentials manually after connecting to the cloud — the wallet page, spending policies, and transaction signing all work out of the box as soon as you log in.
+
+## Updates
+
+- **Pipeline hooks** — A new hooks system lets the runtime execute custom logic at key points in the agent pipeline, giving plugin authors and advanced users more control over how requests are processed.
+- **Life-ops UI cleanup** — Redundant descriptions and filler text have been removed from the life-ops settings panels, making connector configuration cleaner and easier to scan.
+- **Cross-platform locale labels** — References to "on this Mac" throughout the interface have been updated to "on this device" so the wording is accurate on Windows, Linux, and mobile.
+- **OAuth auth URL improvements** — The Google OAuth flow in life-ops now surfaces the authorization URL more reliably, fixing cases where the link wasn't displayed when connecting a new account.
+- **Mobile app build improvements** — iOS builds now compile all four official Capacitor plugins from source via CocoaPods with Xcode 16 compatibility, and Android builds handle app identity dynamically from configuration.
+
+## Bug fixes
+
+- Fixed the desktop app stalling after a packaged build relaunch due to a false-positive readiness check that matched loading text in the chat view
+- Fixed iOS builds failing under Swift Package Manager binary stripping with Xcode 16
+- Security: upgraded Vite to 6.4.2 and DOMPurify to 3.4.0 to address path traversal and XSS vulnerabilities in transitive dependencies
+
+</Update>
+
 <Update label="2026-04-15" description="Week of April 15; Steward Vault managed wallets, agent training, character catalog, coding agent sessions, companion emotes" tags={["Feature", "Update", "Fix"]}>
 
 ## Steward Vault managed wallets

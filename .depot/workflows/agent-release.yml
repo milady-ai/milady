@@ -311,6 +311,8 @@ jobs:
       MILADY_SKIP_LOCAL_UPSTREAMS: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Init non-eliza submodules
         run: |
           node scripts/init-submodules.mjs
@@ -349,6 +351,8 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install flatpak tools
         run: |
           sudo apt-get update
@@ -373,6 +377,8 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -396,7 +402,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: 22

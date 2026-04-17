@@ -1,7 +1,7 @@
 {
   "$schema": "plugin-index-v1",
   "generatedAt": "2026-04-11T01:55:50.795Z",
-  "count": 96,
+  "count": 97,
   "plugins": [
     {
       "id": "acp",
@@ -3779,13 +3779,16 @@
       "dirName": "plugin-n8n",
       "name": "N8n",
       "npmName": "@elizaos/plugin-n8n",
-      "description": "N8n workflow integration plugin with AI-powered plugin creation for ElizaOS",
+      "description": "DEPRECATED: replaced by @elizaos/plugin-n8n-workflow. N8n workflow integration plugin with AI-powered plugin creation for ElizaOS.",
+      "disabled": true,
+      "deprecatedBy": "@elizaos/plugin-n8n-workflow",
       "tags": [
         "n8n",
         "llm",
         "plugin-creation",
         "anthropic",
-        "claude"
+        "claude",
+        "deprecated"
       ],
       "category": "feature",
       "envKey": "N8N_API_KEY",
@@ -3828,6 +3831,41 @@
           "type": "string",
           "description": "API key for Anthropic Claude models",
           "required": true,
+          "sensitive": true
+        }
+      },
+      "homepage": "https://elizaos.ai",
+      "repository": "https://github.com/elizaos/eliza"
+    },
+    {
+      "id": "n8n-workflow",
+      "dirName": "plugin-n8n-workflow",
+      "name": "N8n Workflow",
+      "npmName": "@elizaos/plugin-n8n-workflow",
+      "description": "Natural-language n8n workflow actions (create, activate, deactivate, delete). Milady auto-resolves N8N_HOST and N8N_API_KEY from the Eliza Cloud gateway or from the local n8n sidecar — explicit env/config values override both.",
+      "tags": [
+        "n8n",
+        "workflow",
+        "automation"
+      ],
+      "category": "feature",
+      "envKey": "N8N_API_KEY",
+      "configKeys": [
+        "N8N_HOST",
+        "N8N_API_KEY"
+      ],
+      "version": "1.2.10",
+      "pluginParameters": {
+        "N8N_HOST": {
+          "type": "string",
+          "description": "n8n instance URL. Leave blank — Milady auto-resolves this via the Eliza Cloud n8n gateway when cloud is authenticated, or via the local n8n sidecar when it is running.",
+          "required": false,
+          "sensitive": false
+        },
+        "N8N_API_KEY": {
+          "type": "string",
+          "description": "n8n API key. Leave blank — Milady auto-resolves this (cloud gateway token or sidecar token). Only set this to override the auto-resolved credential.",
+          "required": false,
           "sensitive": true
         }
       },

@@ -436,10 +436,11 @@ export function runInitSubmodules({
               stdio: "inherit",
             },
           );
-        } catch (subErr) {
+        } catch (err) {
+          failed++;
           logError(
-            `[init-submodules] Nested eliza submodule update failed (fix broken plugin submodules under eliza/ if needed): ${
-              subErr instanceof Error ? subErr.message : String(subErr)
+            `[init-submodules] Failed to initialize nested ${nestedSubmodule.name} (${rootRelativePath}): ${
+              err instanceof Error ? err.message : String(err)
             }`,
           );
         }

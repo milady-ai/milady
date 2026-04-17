@@ -140,7 +140,8 @@ runs:
     - name: Install local eliza runtime dependencies
       if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}
       shell: bash
-      run: bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
+      run: |
+        bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
 
     - name: Generate local eliza keyword data
       if: ${{ inputs.prepare-local-eliza-runtime == 'true' && inputs.disable-local-eliza-workspace == 'true' }}

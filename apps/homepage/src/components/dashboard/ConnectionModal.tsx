@@ -32,11 +32,11 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
       role="presentation"
     >
       {/* Overlay — click outside to close */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        role="none"
+      <button
+        type="button"
+        aria-label="Close attach runtime dialog"
+        className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
         onClick={onClose}
-        onKeyDown={() => {}}
       />
 
       {/* Modal */}
@@ -44,7 +44,7 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="connect-modal-title"
-        className="relative z-10 w-[min(100%-2rem,28rem)] border border-border bg-[#0c0c0e] shadow-2xl"
+        className="relative z-10 w-[min(100%-2rem,28rem)] rounded-xl border border-border bg-[#0c0c0e] shadow-2xl"
       >
         <form
           className="space-y-5 p-6"
@@ -60,15 +60,17 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
         >
           {/* Header */}
           <div className="space-y-1">
+            <div className="font-mono text-[10px] lowercase tracking-[0.18em] text-white/45">
+              attach runtime
+            </div>
             <h2
               id="connect-modal-title"
-              className="font-mono text-sm font-medium text-text-light tracking-wide"
+              className="text-[17px] font-semibold tracking-tight text-white/95"
             >
-              CONNECT INSTANCE
+              paste any milady, elizaOS, or agent runtime url.
             </h2>
-            <p className="font-mono text-xs text-text-muted">
-              Attach an existing Milady or elizaOS runtime by URL and optional
-              access key.
+            <p className="text-[12px] text-text-muted">
+              attach an existing runtime by url and an optional access key.
             </p>
           </div>
 
@@ -76,15 +78,15 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
           <div className="space-y-1.5">
             <label
               htmlFor="connect-name"
-              className="font-mono text-[10px] tracking-wider text-text-subtle"
+              className="font-mono text-[10px] lowercase tracking-wider text-text-subtle"
             >
-              NAME
+              name
             </label>
             <input
               id="connect-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="My Remote Agent"
+              placeholder="my remote agent"
               autoComplete="off"
               className="w-full h-10 px-3 font-mono text-sm bg-dark border border-border text-text-light placeholder:text-text-muted/50 focus:outline-none focus:border-brand/50"
             />
@@ -94,9 +96,9 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
           <div className="space-y-1.5">
             <label
               htmlFor="connect-url"
-              className="font-mono text-[10px] tracking-wider text-text-subtle"
+              className="font-mono text-[10px] lowercase tracking-wider text-text-subtle"
             >
-              URL
+              url
             </label>
             <input
               id="connect-url"
@@ -113,9 +115,9 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
           <div className="space-y-1.5">
             <label
               htmlFor="connect-token"
-              className="font-mono text-[10px] tracking-wider text-text-subtle"
+              className="font-mono text-[10px] lowercase tracking-wider text-text-subtle"
             >
-              ACCESS KEY <span className="text-text-muted/50">(optional)</span>
+              access key <span className="text-text-muted/50">(optional)</span>
             </label>
             <input
               id="connect-token"
@@ -133,17 +135,21 @@ export function ConnectionModal({ onSubmit, onClose }: ConnectionModalProps) {
             <button
               type="submit"
               disabled={connectDisabled}
-              className="px-5 py-2.5 font-mono text-xs tracking-wider bg-brand text-dark font-medium
-                hover:bg-brand/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md px-5 py-2.5 text-[12px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_20px_-10px_rgba(240,185,11,0.45)] transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:translate-y-0 disabled:shadow-none disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand/60"
+              style={{
+                background: connectDisabled
+                  ? "var(--accent-muted)"
+                  : "var(--gold-gradient-primary)",
+              }}
             >
-              CONNECT
+              attach
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 font-mono text-xs tracking-wider text-text-muted hover:text-text-light transition-colors"
+              className="rounded-md px-5 py-2.5 text-[12px] text-text-muted transition hover:text-text-light focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/30"
             >
-              CANCEL
+              cancel
             </button>
           </div>
         </form>
