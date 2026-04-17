@@ -86,6 +86,7 @@ for (const relativePath of Object.values(files).filter((value) =>
 const workflowText = readText(files.workflow, failures);
 const actionText = readText(files.action, failures);
 const packageJson = readJson(files.packageJson, failures);
+const ciWorkflowText = readText(".github/workflows/ci.yml", failures);
 
 assertContainsAll(
   workflowText,
@@ -93,6 +94,7 @@ assertContainsAll(
   requiredWorkflowSnippets,
   failures,
 );
+assertCiPreReviewBootstrap(ciWorkflowText, failures);
 assertContainsAll(actionText, files.action, requiredActionSnippets, failures);
 assertContainsNone(actionText, files.action, forbiddenActionSnippets, failures);
 
@@ -216,4 +218,36 @@ function assertContainsNone(text, relativePath, snippets, targetFailures) {
       );
     }
   }
+}
+
+function assertCiPreReviewBootstrap(workflowText, targetFailures) {
+  const preReviewBlockMatch = /\n {2}pre-review:\n([\s\S]*?)\n {2}lint:\n/.exec(
+    workflowText,
+  );
+
+  if (!preReviewBlockMatch) {
+    targetFailures.push(
+      '.github/workflows/ci.yml is missing the "pre-review" job block',
+    );
+    return;
+  }
+
+  const preReviewBlock = preReviewBlockMatch[1];
+  const requiredSnippets = [
+    "- name: Install submodule verification dependencies",
+    "bun install --cwd eliza --no-frozen-lockfile --ignore-scripts",
+    "bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts",
+    "bun install --cwd eliza/steward-fi --no-frozen-lockfile --ignore-scripts",
+    "- name: Ensure biome uses correct architecture",
+    `ln -s "\${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs`,
+    "- name: Run local pre-review gate",
+    "run: bun run pre-review:local",
+  ];
+
+  assertContainsAll(
+    preReviewBlock,
+    ".github/workflows/ci.yml pre-review job",
+    requiredSnippets,
+    targetFailures,
+  );
 }

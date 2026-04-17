@@ -43,6 +43,18 @@ jobs:
       - name: Restore eliza workspace paths for repo scripts
         run: node scripts/restore-local-eliza-workspace.mjs
 
+      - name: Install submodule verification dependencies
+        run: |
+          bun install --cwd eliza --no-frozen-lockfile --ignore-scripts
+          bun install --cwd eliza/cloud --no-frozen-lockfile --ignore-scripts
+          bun install --cwd eliza/steward-fi --no-frozen-lockfile --ignore-scripts
+
+      - name: Ensure biome uses correct architecture
+        run: |
+          mkdir -p eliza/node_modules
+          rm -rf eliza/node_modules/@biomejs
+          ln -s "${{ github.workspace }}/node_modules/@biomejs" eliza/node_modules/@biomejs
+
       - name: Fetch upstream develop for pre-review base
         run: |
           git remote add upstream https://github.com/milady-ai/milady.git || true

@@ -85,9 +85,38 @@ describe("release workflow path contract", () => {
 
     for (const workflow of [snapBuild, publishPackages, agentRelease]) {
       expect(workflow).toContain("Normalize runner root ownership for snapd");
-      expect(workflow).toContain("sudo chown root:root /");
-      expect(workflow).toContain('test "$(stat -c \'%u:%g\' /)" = "0:0"');
+      expect(workflow).toContain("ROOT_OWNER=\"$(stat -c '%u:%g' /)\"");
+      expect(workflow).toContain(`if [ "\${ROOT_OWNER}" = "0:0" ]; then`);
+      expect(workflow).toContain(
+        "if sudo -n chown root:root / 2>/dev/null; then",
+      );
     }
+  });
+
+  it("bootstraps generated data before the snap recipe runs the production build", () => {
+    const snapcraft = readElizaScript(
+      path.join("packages", "app-core", "packaging", "snap", "snapcraft.yaml"),
+    );
+
+    expect(snapcraft).toContain(
+      "node eliza/packages/app-core/scripts/ensure-shared-i18n-data.mjs",
+    );
+    expect(snapcraft).toContain(
+      "node eliza/packages/app-core/scripts/patch-deps.mjs || true",
+    );
+    expect(snapcraft).toContain(
+      "node eliza/packages/app-core/scripts/link-browser-server.mjs || true",
+    );
+  });
+
+  it("tests the snap using the milady command name", () => {
+    const snapBuild = readWorkflow("snap-build-test.yml");
+
+    expect(snapBuild).toContain("snap list milady");
+    expect(snapBuild).toContain("milady --version");
+    expect(snapBuild).toContain("milady --help");
+    expect(snapBuild).not.toContain("snap list elizaos-app");
+    expect(snapBuild).not.toContain("elizaos-app --version");
   });
 
   it("checks out the eliza submodule before packaging workflows use submodule paths", () => {

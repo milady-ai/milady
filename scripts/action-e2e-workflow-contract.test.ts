@@ -16,19 +16,19 @@ describe("action e2e workflow contract", () => {
 
     expect(workflow).toContain('name: "Action Invocation E2E"');
     expect(workflow).toContain(
-      "GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}",
+      `GOOGLE_GENERATIVE_AI_API_KEY: \${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}`,
     );
     expect(workflow).toContain(
-      "OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}",
+      `OPENROUTER_API_KEY: \${{ secrets.OPENROUTER_API_KEY }}`,
     );
     expect(workflow).toContain(
-      "ELIZAOS_CLOUD_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY }}",
+      `ELIZAOS_CLOUD_API_KEY: \${{ secrets.ELIZAOS_CLOUD_API_KEY }}`,
     );
     expect(workflow).toContain(
-      "OPENAI_API_KEY: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.OPENAI_API_KEY }}",
+      `OPENAI_API_KEY: \${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && secrets.ELIZAOS_CLOUD_API_KEY || secrets.OPENAI_API_KEY }}`,
     );
     expect(workflow).toContain(
-      "OPENAI_BASE_URL: ${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && 'https://elizacloud.ai/api/v1' || 'https://api.openai.com/v1' }}",
+      `OPENAI_BASE_URL: \${{ secrets.ELIZAOS_CLOUD_API_KEY != '' && 'https://elizacloud.ai/api/v1' || 'https://api.openai.com/v1' }}`,
     );
     expect(workflow).toContain(
       "Action Invocation E2E skipped because the configured live provider is unavailable.",
