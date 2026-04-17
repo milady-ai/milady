@@ -7,8 +7,17 @@ export interface InstanceCardProps {
   agent: ManagedAgent;
   onOpen: () => void;
   onCopyUrl: () => void;
-  onOpenRaw: () => void;
-  onDisconnect?: () => void;
+  /**
+   * Destructive action for cloud agents — deletes the real resource.
+   * Returns a promise so the card can show a "deleting…" state.
+   * Card handles the two-step inline confirm itself.
+   */
+  onDelete?: () => Promise<void>;
+  /**
+   * Destructive action for remote connections — drops local state only.
+   * Single click (no confirm) since it's forgetting a URL, not destroying data.
+   */
+  onForget?: () => void;
 }
 
 const SOURCE_LABEL: Record<ManagedAgent["source"], string> = {
@@ -17,27 +26,32 @@ const SOURCE_LABEL: Record<ManagedAgent["source"], string> = {
   remote: "remote",
 };
 
+type DeleteState = "idle" | "confirm" | "deleting";
+
 /**
  * Runtime card — typography + data, no image.
  *
- * Anatomy (Linear/terminal influence, Binance market-row rhythm):
- *   row 1: status dot + label · source · uptime   (all inline meta)
- *   row 2: name (weight-dominant), model/runtime line (muted)
- *   row 3: primary "Open" + copy + overflow (icon-first)
- *
- * Auto height. One gold accent (the primary Open button). Subtle gold edge
- * glow on hover per `polish` skill. No aspect-ratio wrapper, no image slot.
+ * Action model (post-H7):
+ *   Primary:   "open"  — gold, opens web UI (every source)
+ *   Secondary: copy    — icon button, copies URL   (every source)
+ *   Menu ⋯:    destructive only, per-source:
+ *                cloud  → "delete agent"      (two-step inline confirm)
+ *                remote → "forget connection" (single click)
+ *                local  → no menu rendered
  */
 export function InstanceCard({
   agent,
   onOpen,
   onCopyUrl,
-  onOpenRaw,
-  onDisconnect,
+  onDelete,
+  onForget,
 }: InstanceCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [deleteState, setDeleteState] = useState<DeleteState>("idle");
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const confirmTimerRef = useRef<number | null>(null);
 
+  // Close menu on outside click / escape; also reset any pending confirm state.
   useEffect(() => {
     if (!menuOpen) return;
     const onDown = (e: MouseEvent) => {
@@ -56,8 +70,69 @@ export function InstanceCard({
     };
   }, [menuOpen]);
 
+  // When the menu closes, any pending "confirm?" should reset so it doesn't
+  // persist silently into the next open.
+  useEffect(() => {
+    if (!menuOpen && deleteState === "confirm") {
+      setDeleteState("idle");
+      if (confirmTimerRef.current !== null) {
+        window.clearTimeout(confirmTimerRef.current);
+        confirmTimerRef.current = null;
+      }
+    }
+  }, [menuOpen, deleteState]);
+
+  useEffect(() => {
+    return () => {
+      if (confirmTimerRef.current !== null) {
+        window.clearTimeout(confirmTimerRef.current);
+      }
+    };
+  }, []);
+
   const uptimeLabel = agent.uptime ? formatUptime(agent.uptime) : null;
   const runtimeLabel = agent.model ?? "milady runtime";
+
+  const hasMenu = !!onDelete || !!onForget;
+
+  const handleDeleteClick = async () => {
+    if (!onDelete) return;
+    if (deleteState === "idle") {
+      setDeleteState("confirm");
+      if (confirmTimerRef.current !== null) {
+        window.clearTimeout(confirmTimerRef.current);
+      }
+      // Auto-revert confirm state after 4s so a half-intended click doesn't
+      // stay armed forever.
+      confirmTimerRef.current = window.setTimeout(() => {
+        setDeleteState("idle");
+      }, 4000);
+      return;
+    }
+    if (deleteState === "confirm") {
+      if (confirmTimerRef.current !== null) {
+        window.clearTimeout(confirmTimerRef.current);
+        confirmTimerRef.current = null;
+      }
+      setDeleteState("deleting");
+      try {
+        await onDelete();
+        // On success the agent vanishes from the list, so this component
+        // will unmount. If it doesn't (parent decided to keep it), reset.
+        setDeleteState("idle");
+        setMenuOpen(false);
+      } catch {
+        // Parent shows the toast; we just reset so user can retry.
+        setDeleteState("idle");
+      }
+    }
+  };
+
+  const handleForgetClick = () => {
+    if (!onForget) return;
+    setMenuOpen(false);
+    onForget();
+  };
 
   return (
     <article className="group relative flex flex-col gap-4 rounded-lg border border-border bg-[#0b0b10] p-4 transition hover:border-brand/35 hover:shadow-[0_0_0_1px_rgba(240,185,11,0.08),0_12px_30px_-18px_rgba(240,185,11,0.18)] sm:p-5 [@media(hover:hover)]:hover:-translate-y-0.5">
@@ -135,70 +210,66 @@ export function InstanceCard({
             <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
           </svg>
         </button>
-        <div ref={menuRef} className="relative">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="More actions"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            className="rounded-md border border-border bg-transparent p-2 text-white/60 transition hover:border-white/25 hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/30"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="currentColor"
-              aria-hidden="true"
+        {hasMenu ? (
+          <div ref={menuRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="More actions"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              className="rounded-md border border-border bg-transparent p-2 text-white/60 transition hover:border-white/25 hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/30"
             >
-              <circle cx="5" cy="12" r="1.75" />
-              <circle cx="12" cy="12" r="1.75" />
-              <circle cx="19" cy="12" r="1.75" />
-            </svg>
-          </button>
-          {menuOpen ? (
-            <div
-              role="menu"
-              className="absolute bottom-full right-0 mb-2 w-48 overflow-hidden rounded-md border border-border bg-[#0d0d13] shadow-2xl"
-            >
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenRaw();
-                }}
-                className="block w-full px-3 py-2 text-left text-[12px] text-white/80 transition hover:bg-white/[0.04] hover:text-white"
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="currentColor"
+                aria-hidden="true"
               >
-                Open raw URL
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onCopyUrl();
-                }}
-                className="block w-full px-3 py-2 text-left text-[12px] text-white/80 transition hover:bg-white/[0.04] hover:text-white"
+                <circle cx="5" cy="12" r="1.75" />
+                <circle cx="12" cy="12" r="1.75" />
+                <circle cx="19" cy="12" r="1.75" />
+              </svg>
+            </button>
+            {menuOpen ? (
+              <div
+                role="menu"
+                className="absolute bottom-full right-0 mb-2 w-52 overflow-hidden rounded-md border border-border bg-[#0d0d13] shadow-2xl"
               >
-                Copy URL
-              </button>
-              {onDisconnect ? (
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onDisconnect();
-                  }}
-                  className="block w-full border-t border-border px-3 py-2 text-left text-[12px] text-rose-300 transition hover:bg-rose-500/10"
-                >
-                  Remove connection
-                </button>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
+                {onDelete ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => void handleDeleteClick()}
+                    disabled={deleteState === "deleting"}
+                    className={`block w-full px-3 py-2 text-left text-[12px] transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      deleteState === "confirm"
+                        ? "bg-rose-500/10 font-medium text-rose-200"
+                        : "text-rose-300 hover:bg-rose-500/10"
+                    }`}
+                  >
+                    {deleteState === "idle"
+                      ? "delete agent"
+                      : deleteState === "confirm"
+                        ? "confirm delete?"
+                        : "deleting…"}
+                  </button>
+                ) : null}
+                {onForget ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleForgetClick}
+                    className="block w-full px-3 py-2 text-left text-[12px] text-rose-300 transition hover:bg-rose-500/10"
+                  >
+                    forget connection
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );

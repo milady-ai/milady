@@ -108,6 +108,8 @@ interface AgentContextValue {
   refresh: () => Promise<void>;
   addRemoteUrl: (name: string, url: string, token?: string) => void;
   removeRemote: (id: string) => void;
+  /** Delete a cloud agent (real destructive operation). Returns on success. */
+  deleteCloudAgent: (cloudAgentId: string) => Promise<void>;
 }
 
 interface DiscoveredSandbox {
@@ -648,6 +650,18 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     [fetchAll],
   );
 
+  const deleteCloudAgent = useCallback(
+    async (cloudAgentId: string) => {
+      const client = cloudClientRef.current;
+      if (!client) {
+        throw new Error("Not signed in to cloud.");
+      }
+      await client.deleteAgent(cloudAgentId);
+      await fetchAll();
+    },
+    [fetchAll],
+  );
+
   const contextValue = useMemo<AgentContextValue>(
     () => ({
       agents: sortedAgents,
@@ -662,6 +676,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
       refresh: fetchAll,
       addRemoteUrl,
       removeRemote,
+      deleteCloudAgent,
     }),
     [
       sortedAgents,
@@ -674,6 +689,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
       fetchAll,
       addRemoteUrl,
       removeRemote,
+      deleteCloudAgent,
     ],
   );
 
