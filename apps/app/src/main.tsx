@@ -68,8 +68,6 @@ import {
   useCompanionSceneStatus,
 } from "@elizaos/app-companion";
 import "@elizaos/app-companion/register";
-// Side-effect: register LifeOps sidebar widgets + client methods on ElizaClient.
-import "@elizaos/app-lifeops/widgets";
 // Side-effect: register game operator surfaces + detail extensions.
 import "@elizaos/app-babylon/ui";
 import "@elizaos/app-scape/ui";
@@ -82,7 +80,6 @@ import {
   LifeOpsPageView,
   WebsiteBlockerSettingsCard,
 } from "@elizaos/app-lifeops/ui";
-import { LifeOpsActivitySignalsEffect } from "@elizaos/app-lifeops/components/LifeOpsActivitySignalsEffect";
 import {
   ApprovalQueue,
   StewardLogo,
@@ -536,7 +533,6 @@ function mountReactApp(): void {
               <DesktopOnboardingRuntime />
               <DesktopSurfaceNavigationRuntime />
               <DesktopTrayRuntime />
-              <LifeOpsActivitySignalsEffect />
               <App />
             </>
           )}
